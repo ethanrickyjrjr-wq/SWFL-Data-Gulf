@@ -13,6 +13,7 @@ import type { EmailDoc } from "./doc/types";
 import type { MarketFigure } from "@/lib/email/market-context";
 import * as anthropicModule from "@/refinery/agents/anthropic.mts";
 import * as chartForQuestionModule from "@/lib/assistant/chart-for-question";
+import * as defaultGridModule from "@/lib/deliverable/recipes/default-grid";
 import { SEED_DOCS } from "./doc/default-docs";
 
 // mock.module is process-global (no per-file isolation) — snapshot + restore, same
@@ -25,10 +26,12 @@ import { SEED_DOCS } from "./doc/default-docs";
 // own `!scope?.value` guards — no DB access needed there.
 const anthropicOrig = { ...anthropicModule };
 const chartForQuestionOrig = { ...chartForQuestionModule };
+const defaultGridOrig = { ...defaultGridModule };
 const fetchOrig = globalThis.fetch;
 afterAll(() => {
   mock.module("@/refinery/agents/anthropic.mts", () => anthropicOrig);
   mock.module("@/lib/assistant/chart-for-question", () => chartForQuestionOrig);
+  mock.module("@/lib/deliverable/recipes/default-grid", () => defaultGridOrig);
   globalThis.fetch = fetchOrig;
 });
 globalThis.fetch = (async () => {
@@ -61,18 +64,39 @@ mock.module("@/refinery/agents/anthropic.mts", () => ({
 
 const { authorDoc } = await import("./build-doc");
 
-test("authorDoc voice-cleans subject variants the same way it cleans body prose", async () => {
+// ── ONE LANE (spec 2026-08-02): the free author is DELETED ───────────────────
+// Every keyless/organic ask lands on the default-grid recipe; a key with no
+// builder lands there too. `authored: true` was the free author's signature
+// payload key — a successful build WITHOUT it is the proof the collapse held.
+
+test("FM5: an organic typed ask lands on the default grid, not a free-authored doc", async () => {
   const current = SEED_DOCS.find((s) => s.id === "market-spotlight")!.build();
   const result = await authorDoc({
     prompt: "Write a friendly market update email with a strong subject line.",
     rawDoc: current,
   });
   expect(result.payload.applied).toBe(true);
-  const doc = result.payload.doc as { subjectVariants?: string[] };
-  expect(doc.subjectVariants?.length).toBeGreaterThan(0);
-  expect(doc.subjectVariants?.[0]).not.toMatch(/don.t hesitate/i);
-  expect(doc.subjectVariants?.[0]).toBe("See your new report");
-  expect(doc.subjectVariants?.[1]).toBe("Your market update");
+  expect(result.payload.authored).toBeUndefined();
+  expect(result.payload.replacedLayout).toBe(true);
+});
+
+test("FM5b: a key with NO registered builder falls back to the default grid, through the live seam", async () => {
+  let calls = 0;
+  mock.module("@/lib/deliverable/recipes/default-grid", () => ({
+    buildDefaultGrid: async (ctx: { currentDoc: unknown }) => {
+      calls += 1;
+      return ctx.currentDoc; // schema-valid by construction — the canvas doc
+    },
+  }));
+  const current = SEED_DOCS.find((s) => s.id === "market-spotlight")!.build();
+  const result = await authorDoc({
+    prompt: "a plain note with no keywords",
+    rawDoc: current,
+    recipeKey: "social-pack", // a real RecipeKey with no entry in RECIPE_BUILDERS
+  });
+  expect(calls).toBe(1);
+  expect(result.payload.applied).toBe(true);
+  expect(result.payload.authored).toBeUndefined();
 });
 
 // CHOKEPOINT GUARD: an unfilled recipe [[blank]] must NEVER reach the model. Every

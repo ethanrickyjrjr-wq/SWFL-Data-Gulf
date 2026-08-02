@@ -9,31 +9,16 @@
 
 import type Anthropic from "@anthropic-ai/sdk";
 import { getAnthropic } from "@/refinery/agents/anthropic.mts";
-import {
-  EmailDocSchema,
-  BlockContentPatchSchema,
-  AuthorDocSchema,
-  type ContentPatch,
-  type AuthoredDoc,
-} from "@/lib/email/doc/schema";
+import { EmailDocSchema, BlockContentPatchSchema, type ContentPatch } from "@/lib/email/doc/schema";
 import type { EmailDoc } from "@/lib/email/doc/types";
-import { AUTHORABLE_TYPES } from "@/lib/email/doc/block-contract";
 import { applySavedLayout, addedBlockIds } from "@/lib/email/doc/saved-layout";
-import { resolveRecipe, recipeSection } from "@/lib/email/author-recipes";
-import { resolveConcoction, datasetsSection } from "@/lib/concoctions/author-section";
-import { seedResolvedDataset } from "@/lib/concoctions/seed-authored";
 import {
   loadMarketFigures,
   loadLifecycleDigest,
   figuresToPromptBlock,
   type MarketFigure,
 } from "@/lib/email/market-context";
-import {
-  resolveEmailModel,
-  EMAIL_MODEL_OPUS,
-  EMAIL_MODEL_SONNET,
-  EMAIL_MODEL_HAIKU,
-} from "@/lib/email/model-router";
+import { resolveEmailModel, EMAIL_MODEL_SONNET } from "@/lib/email/model-router";
 import { chartImageBlock, upsertChartBlock } from "@/lib/email/inject-chart";
 import { extractUrls, fetchOgImage, type OgImageResult } from "@/lib/email/og-image";
 import { brandWebsiteUrl, heroPhotoBlock, upsertHeroPhoto } from "@/lib/email/inject-photo";
@@ -47,8 +32,10 @@ import {
   listingDescriptionFromPrompt,
 } from "@/lib/email/listing-intent";
 import { resolveSubjectListing } from "@/lib/listings/resolve-subject";
-import { recipeByKey, recipeFromPrompt } from "@/lib/deliverable/recipes";
+import { recipeByKey, recipeFromPrompt, RECIPES, type Recipe } from "@/lib/deliverable/recipes";
 import { builderFor } from "@/lib/deliverable/recipes/index";
+import { buildDefaultGrid } from "@/lib/deliverable/recipes/default-grid";
+import { seedById } from "@/lib/email/doc/default-docs";
 import { resolveSubject } from "@/lib/deliverable/recipes/shared";
 import { resolveDocBio } from "@/lib/brand/bio-tokens";
 import { fetchListingFacts, type ListingFacts } from "@/lib/email/listing-scrape";
@@ -75,23 +62,7 @@ import {
   looksLikeFigureAsk,
   type WebFallbackResult,
 } from "@/lib/assistant/web-fallback";
-import {
-  AUTHOR_TOOL,
-  authorSystem,
-  assembleAuthoredDoc,
-  assetMenuById,
-  buildAssetMenu,
-  buildFigureMenu,
-  figureMenuById,
-  collectAnchorNumbers,
-  collectRecordedAnchors,
-  fillEmptySourcesBlock,
-  lintAuthoredProse,
-  promptAnchors,
-  type LibraryAsset,
-} from "@/lib/email/author-doc";
-import { voiceGuard, cleanTellText } from "@/lib/email/voice-guard";
-import { extractNumbers } from "@/lib/deliverable/narrative-lint";
+import { fillEmptySourcesBlock, type LibraryAsset } from "@/lib/email/author-doc";
 import { loadAddressCompContext, type AddressCompContext } from "@/lib/email/address-context";
 import { zipFromPromptPlace } from "@/lib/email/place-from-prompt";
 import { findPlaceholder } from "@/lib/showcase/recipe";
@@ -985,75 +956,15 @@ async function fillSkeletonResult({
   };
 }
 
-// ── The AUTHOR path (paid tier — build 03) ───────────────────────────────────
-// Beside buildContentDoc (which only re-fills a FIXED skeleton), authorDoc lets the
-// model compose the WHOLE document — which blocks, in what order, grouped into rows,
-// with content — from the data MENU. The engine then derives the grid layout, gates
-// the prose against invention, and returns a positioned EmailDoc. Brand is never
-// authored (the incoming globalStyle carries through; applyBrand still overlays
-// after); the content-patch + per-block fill paths above are untouched.
-//
-// MENU vs DOSSIER: the figures menu is the ONLY number source (id-selection); the
-// master dossier rides along as QUALITATIVE context ("what's worth saying"), and
-// the prose lint anchors on menu + chart figures — so a number lifted out of the
-// dossier text is stripped, never silently shipped.
-//
-// FOLLOW-UPS (documented, not regressions — the free content-patch path keeps all
-// of these): the author does not yet run the stale-figure web refresh or the
-// model-driven external/upload/user gap-fill lanes; those join the menu + anchor
-// set in a later increment.
-
-/** Author quality defaults to Sonnet (the "connect it better" baseline); `max`/
- *  `opus` lifts to Opus, `interactive`/`haiku` drops to Haiku. Reuses the router ids. */
-function resolveAuthorModel(mode?: string): string {
-  const m = (mode ?? "").trim().toLowerCase();
-  if (m === "max" || m === "opus") return EMAIL_MODEL_OPUS;
-  if (m === "interactive" || m === "haiku") return EMAIL_MODEL_HAIKU;
-  return EMAIL_MODEL_SONNET;
-}
-
-/** One forced-tool author call → a validated AuthoredDoc, or null on a miss. */
-// Authoring a full multi-block doc (tool call) needs more headroom than a content
-// patch — too small truncates the tool_use and the safeParse misses. 8192 covers a
-// ~20-block email comfortably.
-const AUTHOR_MAX_TOKENS = 8192;
-
-async function callAuthor(
-  model: string,
-  system: string,
-  user: string,
-): Promise<AuthoredDoc | null> {
-  try {
-    const msg = await getAnthropic("email_build").messages.create({
-      model,
-      max_tokens: AUTHOR_MAX_TOKENS,
-      system,
-      tools: [AUTHOR_TOOL as unknown as Anthropic.Tool],
-      tool_choice: { type: "tool", name: AUTHOR_TOOL.name },
-      messages: [{ role: "user", content: user }],
-    });
-    const tool = msg.content.find((b) => b.type === "tool_use") as
-      Anthropic.ToolUseBlock | undefined;
-    if (!tool) {
-      console.error("[email-lab/ai] callAuthor: model returned no tool_use block");
-      return null;
-    }
-    const parsed = AuthorDocSchema.safeParse(tool.input);
-    if (!parsed.success) {
-      console.error("[email-lab/ai] callAuthor: tool input failed AuthorDocSchema:", parsed.error);
-      return null;
-    }
-    return parsed.data;
-  } catch (err) {
-    // Previously a bare `catch { return null }` — every failure (network, rate
-    // limit, API error) surfaced as the same "try rephrasing" message regardless
-    // of cause, so a transient miss read as a permanent one. Log the real error;
-    // the caller's message to the user stays generic (never leak internals),
-    // but the log now tells us WHY instead of nothing.
-    console.error("[email-lab/ai] callAuthor: request failed:", err);
-    return null;
-  }
-}
+// ── The AUTHOR path — ONE LANE (spec 2026-08-02) ─────────────────────────────
+// The free author (model-composed layout via authorSystem/assembleAuthoredDoc)
+// is DELETED. authorDoc now dispatches every build onto a coded-grid recipe:
+// a keyed build runs its registered builder; a keyless/organic ask — and any
+// builder miss — lands on the default-grid recipe, which fills the blank
+// skeleton's open slots through the SAME fillSkeletonFromSources machinery the
+// content-patch path uses. Every email leaves on a coded grid; an unfillable
+// slot stays open, never invented. Brand is never authored (the incoming
+// globalStyle carries through; applyBrand still overlays after).
 
 // ── Listing-flyer slot fillers (the coded grid; only the blanks get filled) ───
 /** Drop the empty chart slot when no chart resolved — never ship an empty box. */
@@ -1158,17 +1069,14 @@ async function authorListingNarrative(
   }
 }
 
-/** Run the full Email Lab AUTHOR build. Returns a positioned (chart/photo-filled,
- *  brand-overlaid-later) EmailDoc, or the current doc + a message on a miss. */
+/** Run the full Email Lab AUTHOR build. Every build lands on a coded-grid recipe
+ *  (one lane, spec 2026-08-02). Returns a positioned (brand-overlaid-later)
+ *  EmailDoc, or the current doc + a message on a miss. */
 export async function authorDoc({
   prompt,
   rawDoc,
   scope,
   mode,
-  chartType,
-  assets,
-  replyEmail,
-  recipeId: recipeOverride,
   recipeKey,
   savedLayout,
 }: BuildArgs): Promise<BuildResult> {
@@ -1179,6 +1087,92 @@ export async function authorDoc({
   const placeholderMiss = unfilledPlaceholderMiss(prompt);
   if (placeholderMiss) return placeholderMiss;
   const currentDoc = docParsed.data;
+
+  // The shared post-build tail — the user's-own-grid pour-through, added-slot
+  // authoring, and late bio resolution — for BOTH the keyed-recipe branch and
+  // the one-lane terminal fallback below (one seam, never duplicated).
+  const finish = async (
+    recipe: Recipe,
+    builtDoc: EmailDoc,
+    resolvedSubject: Awaited<ReturnType<typeof resolveSubject>> | null,
+    subject: string | null,
+  ): Promise<BuildResult> => {
+    // ── THE USER'S OWN GRID ────────────────────────────────────────────────
+    // "IF IT IS 123 STREET, WE BUILD 12345 STREET THE SAME WAY WITH EVERY GRID
+    // THE SAME — BUT WITH DATA AND COMMENTARY FOR 12345 STREET" (operator,
+    // 07/13/2026). The builder above already did the honest work: it resolved the
+    // NEW subject, sourced every cell, mirrored the real photo and authored the
+    // commentary. All this does is pour that fresh, correct build into the shape
+    // the user already chose — their block order, their spans, their style, the
+    // blocks they deleted stay deleted.
+    //
+    // WHY IT SITS HERE, IN THE DISPATCHER, AND NOT IN EACH BUILDER: one seam
+    // serves all thirteen recipes (RULE C2 — extend an existing seam, never erect
+    // a new gate per builder). And it runs AFTER the build, never instead of it,
+    // so the no-invention gate, the chart policy and the sourced cells are all
+    // untouched. A saved layout can change what an email LOOKS like. It can never
+    // change what an email KNOWS.
+    const shaped = savedLayout ? applySavedLayout(builtDoc, savedLayout) : builtDoc;
+    // The reshape is pure, but a layout saved against an older block schema could
+    // still produce a doc the schema rejects. Degrade to the standard grid — the
+    // user gets their deliverable, just not their shape. Never a blocked build.
+    const shapedParsed = savedLayout ? EmailDocSchema.safeParse(shaped) : null;
+    if (savedLayout && shapedParsed && !shapedParsed.success) {
+      console.error(
+        `[recipe:${recipe.key}] saved layout produced an INVALID doc — falling back to the standard grid. ` +
+          `Issues: ${JSON.stringify(shapedParsed.error.issues.slice(0, 5))}`,
+      );
+    }
+    const reshaped = shapedParsed?.success ? shapedParsed.data : builtDoc;
+
+    // THE BLOCKS THEY ADDED. A Callout a user put in their own grid came back EMPTY
+    // on the next build — the coded builder emits no such block, so nothing filled
+    // it. A hole where their Callout was is not "the same way I built the last one"
+    // (operator: "WHY DOES IT NOT PRODUCE THE SAME THING"). Write them, from the
+    // SAME sourced facts the builder used, and only them.
+    //
+    // Figure-bearing additions (a second hero, a stats strip) are deliberately NOT
+    // authored — see ADDED_SLOT_FIELDS. A number needs a source; an open slot is
+    // the honest answer, and inventing one is the single thing this product forbids.
+    const finalDoc =
+      savedLayout && shapedParsed?.success
+        ? await authorAddedSlots(reshaped, addedBlockIds(builtDoc, savedLayout), {
+            prompt,
+            context: resolvedSubject
+              ? subjectFactsContext(resolvedSubject.facts)
+              : await fetchLakeContext(scope).catch(() => ""),
+            mode,
+          }).catch(() => reshaped)
+        : reshaped;
+
+    // THE AGENT'S BIO, RESOLVED LATE. The saved bio is a TEMPLATE — the agent's own
+    // words plus live {{farm.*}} tokens — because a market figure frozen into saved
+    // text is a lie with a delay: it rots inside the signature block of every email
+    // they send, under their name, and they will never go back and edit it. Resolving
+    // HERE means the figure is true the day it is sent, and it re-resolves forever.
+    // A bio with no tokens is untouched; an unresolvable one collapses to the agent's
+    // own words. Never a stray "{{...}}" to a recipient.
+    const withBio = await resolveDocBio(
+      finalDoc,
+      scope?.kind === "zip" ? { kind: "zip", value: scope.value } : undefined,
+    ).catch(() => ({ doc: finalDoc, citations: [] }));
+
+    return {
+      payload: {
+        doc: withBio.doc,
+        applied: true,
+        replacedLayout: true,
+        ...(resolvedSubject
+          ? {
+              listing: {
+                subject: resolvedSubject.facts.address ?? subject!,
+                resolved: resolvedSubject.resolved,
+              },
+            }
+          : {}),
+      },
+    };
+  };
 
   // ── Subject-listing flyer lane (address spine) ─────────────────────────────
   // The New Listing recipe carries the subject ADDRESS but no URL. Resolve THAT
@@ -1205,23 +1199,23 @@ export async function authorDoc({
   // carry a real address in their prompt and every one of them missed that regex, so
   // they resolved no subject and fell into the free author's photo-less grab-bag.
   // Fifteen of seventeen recipes died on that one `if`.
-  const activeRecipe = recipeByKey(recipeKey) ?? recipeFromPrompt(prompt);
-  const recipeBuilder = activeRecipe ? builderFor(activeRecipe.key) : null;
+  const keyedRecipe = recipeByKey(recipeKey) ?? recipeFromPrompt(prompt);
+  const keyedBuilder = keyedRecipe ? builderFor(keyedRecipe.key) : null;
 
-  if (activeRecipe && recipeBuilder) {
+  if (keyedRecipe && keyedBuilder) {
     // Resolve the SUBJECT once, from a real record, before any layout happens. The
     // address reaches us by EITHER door — a field (homepage hero) or the prompt text
     // (the Lab's campaign button seeds only the recipe TEXT, so the address the user
     // types over the [[blank]] exists nowhere else). This lane is the ONE authority
     // on which; never re-gate a lane on how a door happens to pass something.
     const subject =
-      activeRecipe.subject === "address"
+      keyedRecipe.subject === "address"
         ? (scope?.address ?? subjectAddressFromPrompt(prompt))
         : null;
     const resolvedSubject = subject ? await resolveSubject(subject, prompt) : null;
 
-    const built = await recipeBuilder({
-      recipe: activeRecipe,
+    const built = await keyedBuilder({
+      recipe: keyedRecipe,
       prompt,
       currentDoc,
       facts: resolvedSubject?.facts ?? null,
@@ -1246,97 +1240,25 @@ export async function authorDoc({
       // discoverable instead of camouflaged.
       if (!parsed.success) {
         console.error(
-          `[recipe:${activeRecipe.key}] builder produced an INVALID doc — falling back to the generic author. ` +
-            `The user asked for "${activeRecipe.label}" and will NOT get it. Issues: ` +
+          `[recipe:${keyedRecipe.key}] builder produced an INVALID doc — falling back to the generic author. ` +
+            `The user asked for "${keyedRecipe.label}" and will NOT get it. Issues: ` +
             JSON.stringify(parsed.error.issues.slice(0, 5)),
         );
       }
       if (parsed.success) {
-        // ── THE USER'S OWN GRID ────────────────────────────────────────────────
-        // "IF IT IS 123 STREET, WE BUILD 12345 STREET THE SAME WAY WITH EVERY GRID
-        // THE SAME — BUT WITH DATA AND COMMENTARY FOR 12345 STREET" (operator,
-        // 07/13/2026). The builder above already did the honest work: it resolved the
-        // NEW subject, sourced every cell, mirrored the real photo and authored the
-        // commentary. All this does is pour that fresh, correct build into the shape
-        // the user already chose — their block order, their spans, their style, the
-        // blocks they deleted stay deleted.
-        //
-        // WHY IT SITS HERE, IN THE DISPATCHER, AND NOT IN EACH BUILDER: one seam
-        // serves all thirteen recipes (RULE C2 — extend an existing seam, never erect
-        // a new gate per builder). And it runs AFTER the build, never instead of it,
-        // so the no-invention gate, the chart policy and the sourced cells are all
-        // untouched. A saved layout can change what an email LOOKS like. It can never
-        // change what an email KNOWS.
-        const shaped = savedLayout ? applySavedLayout(parsed.data, savedLayout) : parsed.data;
-        // The reshape is pure, but a layout saved against an older block schema could
-        // still produce a doc the schema rejects. Degrade to the standard grid — the
-        // user gets their deliverable, just not their shape. Never a blocked build.
-        const shapedParsed = savedLayout ? EmailDocSchema.safeParse(shaped) : parsed;
-        if (savedLayout && !shapedParsed.success) {
-          console.error(
-            `[recipe:${activeRecipe.key}] saved layout produced an INVALID doc — falling back to the standard grid. ` +
-              `Issues: ${JSON.stringify(shapedParsed.error.issues.slice(0, 5))}`,
-          );
-        }
-        const reshaped = shapedParsed.success ? shapedParsed.data : parsed.data;
-
-        // THE BLOCKS THEY ADDED. A Callout a user put in their own grid came back EMPTY
-        // on the next build — the coded builder emits no such block, so nothing filled
-        // it. A hole where their Callout was is not "the same way I built the last one"
-        // (operator: "WHY DOES IT NOT PRODUCE THE SAME THING"). Write them, from the
-        // SAME sourced facts the builder used, and only them.
-        //
-        // Figure-bearing additions (a second hero, a stats strip) are deliberately NOT
-        // authored — see ADDED_SLOT_FIELDS. A number needs a source; an open slot is
-        // the honest answer, and inventing one is the single thing this product forbids.
-        const finalDoc =
-          savedLayout && shapedParsed.success
-            ? await authorAddedSlots(reshaped, addedBlockIds(parsed.data, savedLayout), {
-                prompt,
-                context: resolvedSubject
-                  ? subjectFactsContext(resolvedSubject.facts)
-                  : await fetchLakeContext(scope).catch(() => ""),
-                mode,
-              }).catch(() => reshaped)
-            : reshaped;
-
-        // THE AGENT'S BIO, RESOLVED LATE. The saved bio is a TEMPLATE — the agent's own
-        // words plus live {{farm.*}} tokens — because a market figure frozen into saved
-        // text is a lie with a delay: it rots inside the signature block of every email
-        // they send, under their name, and they will never go back and edit it. Resolving
-        // HERE means the figure is true the day it is sent, and it re-resolves forever.
-        // A bio with no tokens is untouched; an unresolvable one collapses to the agent's
-        // own words. Never a stray "{{...}}" to a recipient.
-        const withBio = await resolveDocBio(
-          finalDoc,
-          scope?.kind === "zip" ? { kind: "zip", value: scope.value } : undefined,
-        ).catch(() => ({ doc: finalDoc, citations: [] }));
-
-        return {
-          payload: {
-            doc: withBio.doc,
-            applied: true,
-            replacedLayout: true,
-            ...(resolvedSubject
-              ? {
-                  listing: {
-                    subject: resolvedSubject.facts.address ?? subject!,
-                    resolved: resolvedSubject.resolved,
-                  },
-                }
-              : {}),
-          },
-        };
+        return finish(keyedRecipe, parsed.data, resolvedSubject, subject);
       }
-      // Defensive only: a malformed doc falls through to the generic author below.
+      // Invalid builder output falls out to the ONE-LANE terminal fallback below —
+      // the default grid, never a free-authored doc (spec 2026-08-02).
     }
+    // A builder that returned null (or threw) falls out the same way.
   }
 
   // ── LEGACY subject-listing lane ────────────────────────────────────────────
   // Still reachable for a prompt that names a listing but resolves to no recipe key
   // and no builder. Deleting it would REGRESS those asks to the free author.
   const subjectAddress =
-    !recipeBuilder && isNewListingRecipePrompt(prompt)
+    !keyedBuilder && isNewListingRecipePrompt(prompt)
       ? (scope?.address ?? subjectAddressFromPrompt(prompt))
       : null;
   if (subjectAddress) {
@@ -1414,245 +1336,60 @@ export async function authorDoc({
     // Defensive only: a malformed flyer falls through to the generic author below.
   }
 
-  const globalStyle = currentDoc.globalStyle; // brand is canonical — never authored
-  const model = resolveAuthorModel(mode);
-
-  // A place named IN THE PROMPT ("...for Cape Coral") resolves to its real ZIP
-  // scope when the caller didn't already pass one — a ZIP inside a place's
-  // boundary IS that place's data; the user should never have to supply a raw
-  // ZIP by hand. Never overrides an explicit caller-supplied scope.
-  const promptPlace = !scope?.value ? zipFromPromptPlace(prompt) : undefined;
-  const effectiveScope: BuildScope | undefined = promptPlace
-    ? { kind: "zip", value: promptPlace.zip }
-    : scope;
-
-  // Data feed + best-effort chart/photo, in parallel — the SAME producers the
-  // content-patch path uses (each never throws; a chart/photo is a bonus). For an
-  // allowlisted multi-ZIP city the chart is scoped to that city's ZIPs (a real
-  // ZIP-by-ZIP chart) instead of the SWFL-wide top-12; every other place is undefined
-  // here and takes the existing single-scope chart.
-  const chartZips = cityZipsFor(promptPlace);
-  // A single-listing ask ("New listing announcement for <address>...") must never get
-  // an areawide market chart glued on — that rule already existed in the legacy
-  // subject-listing lane above (dropEmptyChartSlot) but was missing here, in the
-  // generic-author fallback this lane runs whenever subject resolution misses.
-  // Confirmed live 07/20/2026: a "new listing" ask that fell through to this lane still
-  // got a cross-ZIP price-ranking bar chart bolted on, unrelated to the named property.
-  const isListingAsk = isNewListingRecipePrompt(prompt) || isListingIntent(prompt);
-  const [lakeParts, chartRes, photoRes] = await Promise.all([
-    fetchLakeParts(effectiveScope),
-    isListingAsk
-      ? Promise.resolve(null)
-      : buildPromptChart(prompt, currentDoc, effectiveScope, chartType, chartZips),
-    resolveHeroPhoto(prompt, currentDoc),
-  ]);
-
-  // A multi-ZIP place (Cape Coral is six ZIPs, not one) needs figures from
-  // EVERY ZIP it spans — the fetch above only covers the primary ZIP, which is
-  // real Cape Coral data but a fraction of the city. Pull the rest in parallel
-  // and merge (each figure's own label already carries its ZIP, so a straight
-  // concat never blends two ZIPs into one falsely-averaged number). The chart,
-  // photo, and dossier above stay primary-ZIP-only for now — those producers
-  // take one scope value each; multi-ZIP dossier/chart aggregation is a
-  // separate, bigger piece of work, not silently faked here.
-  let figures = lakeParts.figures;
-  if (promptPlace && promptPlace.zips.length > 1) {
-    const otherZips = promptPlace.zips.filter((z) => z !== promptPlace.zip);
-    const otherParts = await Promise.all(
-      otherZips.map((z) => fetchLakeParts({ kind: "zip", value: z })),
-    );
-    figures = [...figures, ...otherParts.flatMap((p) => p.figures)];
-  }
-
-  const menu = buildFigureMenu(figures);
-  const figuresById = figureMenuById(menu);
-  const chartGroundingNumbers = chartRes?.groundingNote
-    ? extractNumbers(chartRes.groundingNote)
-    : [];
-  // Lane 4: figures the USER typed (street number, an asking figure) join the
-  // GENERAL anchors only — never recordedStrings, so "sold for $X" still
-  // requires a recorded menu figure.
-  const anchorStrings = collectAnchorNumbers(figures, [
-    ...chartGroundingNumbers,
-    ...promptAnchors(prompt),
-  ]);
-  const recordedStrings = collectRecordedAnchors(figures);
-
-  // The deliverable-type recipe: an explicit lab pick / saved preferred_recipe wins,
-  // else deterministic keyword routing; no match leaves the generic prompt
-  // byte-identical (advisory only — RULE C2, no new gate).
-  const resolvedRecipe = resolveRecipe(recipeOverride, prompt);
-
-  // The agent-intro letter carries ONE clipping figure and no chart (recipe rule)
-  // — without this, assembleAuthoredDoc force-reserves any offered chart above the
-  // footer and a cross-SWFL ranking lands in a personal letter (seen live 07/05/2026).
-  const chartSlot =
-    chartRes && resolvedRecipe !== "agent-intro" && !isListingAsk
-      ? { url: chartRes.image.url, alt: chartRes.image.alt, linkUrl: brandWebsiteUrl(currentDoc) }
-      : null;
-  const photoSlot = photoRes
-    ? { url: photoRes.image, alt: photoRes.title ?? "Featured property", linkUrl: photoRes.source }
-    : null;
-
-  const assetMenu = buildAssetMenu(assets ?? []);
-  const system = authorSystem({
-    menu,
-    dossier: lakeParts.dossier,
-    // Block vocabulary comes from the ONE supply contract (block-contract.ts):
-    // `authorable` is false only for `metric-card`, which is DATA-SEEDED (its held
-    // value is `metricValue`, sourced from the ranked-candidate pool — see
-    // lib/email/zip-seed.ts). The author writes `value_figure`, not `metricValue`,
-    // so an authored metric-card would ship its placeholder number.
-    vocabulary: AUTHORABLE_TYPES,
-    hasChart: !!chartRes,
-    chartGrounding: chartRes?.groundingNote,
-    hasPhoto: !!photoRes,
-    assetMenu,
-    recipe: resolvedRecipe ? recipeSection(resolvedRecipe) : undefined,
-    // Datasets awareness rides only when the prompt resolves one (advisory,
-    // digit-free) — a non-matching build stays byte-identical.
-    datasets: resolveConcoction(null, prompt) ? datasetsSection() : undefined,
-  });
-  const baseUser = effectiveScope?.value
-    ? `User request: ${prompt}\nScope: ${effectiveScope.kind ?? "area"} ${effectiveScope.value}`
-    : `User request: ${prompt}`;
-
-  const authored = await callAuthor(model, system, baseUser);
-  if (!authored) {
-    return {
-      payload: {
-        doc: currentDoc,
-        applied: false,
-        message: "The AI couldn't author this — try rephrasing.",
-      },
-    };
-  }
-
-  const assemble = (a: AuthoredDoc): EmailDoc =>
-    assembleAuthoredDoc({
-      authored: a,
-      figuresById,
-      globalStyle,
-      anchorNumbers: anchorStrings,
-      chart: chartSlot,
-      photo: photoSlot,
-      defaultLinkUrl: brandWebsiteUrl(currentDoc),
-      assetsById: assetMenuById(assetMenu),
-      // Reply CTA: only when the prompt asks for a reply AND we know the
-      // caller's address. The model writes the label; the engine owns the URL.
-      buttonMailto: /\breply\b/i.test(prompt) && replyEmail ? `mailto:${replyEmail}` : undefined,
-    });
-
-  const firstParse = EmailDocSchema.safeParse(assemble(authored));
-  if (!firstParse.success) {
-    return {
-      payload: {
-        doc: currentDoc,
-        applied: false,
-        message: "The authored layout didn't validate — try rephrasing.",
-      },
-    };
-  }
-  let doc: EmailDoc = firstParse.data;
-
-  // No-invention gate (gateNarrative philosophy) + voiceGuard (banned-phrase lint,
-  // spec 2026-07-08): lint prose → on a number-violation OR a robotic corporate-AI
-  // "tell", regenerate ONCE naming BOTH → then number-strip (sentence-level) and
-  // voice-strip (phrase-surgical, number-safe) whatever survives. One repair round;
-  // voiceGuard detection is pure/local, so it adds no extra model call.
-  const lint = lintAuthoredProse(doc, anchorStrings, recordedStrings);
-  const voice = voiceGuard(doc);
-  let regenerations = 0;
-  let stripped = false;
-  let voiceStripped = false;
-  if (!lint.ok || !voice.ok) {
-    regenerations = 1;
-    const problems: string[] = [];
-    if (!lint.ok) {
-      problems.push(
-        "Your previous draft used numbers that are NOT in the DATA MENU. Re-author so every " +
-          "number in prose is quoted verbatim from a [fN] figure, or removed:\n" +
-          lint.offending.map((s) => `- "${s}"`).join("\n"),
-      );
+  // ── ONE LANE — the terminal fallback (spec 2026-08-02) ─────────────────────
+  // The free author that used to live here is DELETED. A keyless/organic ask —
+  // and any keyed build whose builder missed or returned an invalid doc — lands
+  // on the default-grid recipe: the blank skeleton (or the user's own saved
+  // default-grid shape), filled through the SAME sourced machinery every
+  // fixed-skeleton fill uses. An unfillable slot STAYS OPEN — never invented,
+  // never refused (RULE 0.7).
+  //
+  // Seat the grid the way a door arrival does (doors seat the skeleton
+  // client-side): the user's saved default-grid layout when they have one, else
+  // the blank skeleton — carrying the canvas doc's sticky brand.
+  let baseDoc = currentDoc;
+  {
+    let savedDefault: EmailDoc | null = null;
+    try {
+      // Dynamic import: layout-store pulls the cookie-bound Supabase client,
+      // which only exists inside a Next request — outside one (tests, sims)
+      // this degrades to the skeleton instead of crashing the build.
+      const { loadUserLayout } = await import("@/lib/email/doc/layout-store");
+      savedDefault = await loadUserLayout("default-grid");
+    } catch {
+      savedDefault = null;
     }
-    if (!voice.ok) {
-      problems.push(
-        "These phrases read as robotic corporate-AI filler — rewrite the copy in a natural, " +
-          "human voice without them (keep every real figure):\n" +
-          voice.tells.map((s) => `- "${s}"`).join("\n"),
-      );
-    }
-    const retryUser = `${baseUser}\n\n${problems.join("\n\n")}`;
-    const authored2 = await callAuthor(model, system, retryUser);
-    const reparse2 = authored2 ? EmailDocSchema.safeParse(assemble(authored2)) : null;
-    // Number gate first (sentence-level), then voiceGuard (phrase-surgical) on the
-    // result — a number sharing a tell's sentence is never lost.
-    let candidate: EmailDoc;
-    if (reparse2?.success) {
-      const lint2 = lintAuthoredProse(reparse2.data, anchorStrings, recordedStrings);
-      if (lint2.ok) {
-        candidate = reparse2.data;
-      } else {
-        candidate = lint2.stripped; // hard-strip the second draft's number offenders
-        stripped = true;
-      }
-    } else if (!lint.ok) {
-      candidate = lint.stripped; // no usable second draft — strip the first draft's numbers
-      stripped = true;
-    } else {
-      candidate = doc; // regenerated for voice only, no usable retry — strip voice off the first draft
-    }
-    const voice2 = voiceGuard(candidate);
-    if (!voice2.ok) {
-      candidate = voice2.stripped;
-      voiceStripped = true;
-    }
-    doc = candidate;
+    const seat = savedDefault ?? seedById("skeleton-clean-white")?.build() ?? null;
+    if (seat) baseDoc = { ...seat, globalStyle: currentDoc.globalStyle };
   }
 
-  // Variants aren't walked by lintAuthoredProse/voiceGuard (they're top-level
-  // EmailDoc fields, not block prose) — clean them here, once, unconditionally
-  // (variants need cleaning even when the repair loop above never triggered).
-  if (doc.subjectVariants?.length || doc.ctaVariants?.length) {
-    doc = {
-      ...doc,
-      ...(doc.subjectVariants ? { subjectVariants: doc.subjectVariants.map(cleanTellText) } : {}),
-      ...(doc.ctaVariants ? { ctaVariants: doc.ctaVariants.map(cleanTellText) } : {}),
-    };
+  const fallbackRecipe = keyedRecipe ?? RECIPES["default-grid"];
+  const fallbackBuilt = await buildDefaultGrid({
+    recipe: fallbackRecipe,
+    prompt,
+    currentDoc: baseDoc,
+    facts: null,
+    resolved: false,
+    // A place named IN THE PROMPT ("...for Cape Coral") resolves to its real ZIP
+    // scope when the caller didn't pass one — the user should never have to
+    // supply a raw ZIP by hand. Never overrides an explicit caller scope.
+    zip:
+      scope?.kind === "zip" && scope.value
+        ? scope.value
+        : (zipFromPromptPlace(prompt)?.zip ?? undefined),
+  }).catch(() => null);
+  const fallbackParsed = fallbackBuilt ? EmailDocSchema.safeParse(fallbackBuilt) : null;
+  if (fallbackParsed?.success) {
+    return finish(fallbackRecipe, fallbackParsed.data, null, null);
   }
 
-  // Stripping only shortens strings, so the doc still validates; parse once more
-  // defensively and fall back to the current doc on the (unexpected) miss.
-  const finalParse = EmailDocSchema.safeParse(doc);
-  let finalDoc = finalParse.success ? finalParse.data : currentDoc;
-
-  // Dataset seeding (lib/concoctions/seed-authored.ts): prompt resolved a
-  // dataset + params derivable from scope → append its engine-baked blocks
-  // under the authored layout. Additive + fail-soft; re-parse defensively.
-  if (finalParse.success) {
-    const seeded = await seedResolvedDataset(finalDoc, prompt, effectiveScope ?? null);
-    if (seeded.seededLabel) {
-      const seededParse = EmailDocSchema.safeParse(seeded.doc);
-      if (seededParse.success) finalDoc = seededParse.data;
-    }
-  }
-
+  // Defensive tail — buildDefaultGrid is total over a valid canvas doc (the doc
+  // already parsed at entry), so this is unreachable in practice. Degrade honestly.
   return {
     payload: {
-      doc: finalDoc,
-      applied: true,
-      authored: true,
-      chart: Boolean(chartRes),
-      chartNote: chartRes?.note,
-      photo: Boolean(photoRes),
-      regenerations,
-      stripped,
-      voiceStripped,
-      scheduleSuggestion: authored.schedule_suggestion ?? null,
-      // Same completeness gate as the fill path: an authored doc carrying an
-      // empty hero value / stats cell must not read as a clean "built it" —
-      // that silence is how the "$0" hero got called good (07/16/2026).
-      ...unfilledHeadsUp(unfilledFigureSlots(finalDoc, finalDoc)),
+      doc: currentDoc,
+      applied: false,
+      message: "The build didn't produce a valid document — try again.",
     },
   };
 }
