@@ -34,6 +34,15 @@ export interface BklitTrendOpts {
   height?: number;
   source?: string;
   asOf?: string;
+  /** Plot background. Default keeps the historical white; pass a light grey
+   *  (e.g. "#F4F6F5") when the accent needs a surface to show up against. */
+  background?: string;
+  /** Area fill opacity. The 0.18 default measured too faint in a delivered
+   *  email (operator finding 08/02/2026); ~0.35 survives Gmail rendering. */
+  fillOpacity?: number;
+  /** Gridline stroke. Default #EAECEF is tuned for white; go a step darker
+   *  on a grey background so the grid stays visible. */
+  gridStroke?: string;
 }
 
 /** A time-series trend as a real bklit `AreaChart` (gradient fill + line),
@@ -51,12 +60,12 @@ export async function bklitTrendSvg(
 
   const svg = await renderBklitStaticSvg(
     <AreaChart data={data} staticSize={{ width: W, height: H }} xDataKey="date">
-      <Grid horizontal stroke="#EAECEF" />
+      <Grid horizontal stroke={opts.gridStroke ?? "#EAECEF"} />
       <Area
         curve={undefined}
         dataKey="value"
         fill={opts.accent}
-        fillOpacity={0.18}
+        fillOpacity={opts.fillOpacity ?? 0.18}
         stroke={opts.accent}
         strokeWidth={2.5}
       />
@@ -81,7 +90,7 @@ export async function bklitTrendSvg(
 
   return svg.replace(
     /<svg([^>]*)>/,
-    `<svg$1><rect width="${W}" height="${H}" fill="#ffffff"/>${chrome}`,
+    `<svg$1><rect width="${W}" height="${H}" fill="${opts.background ?? "#ffffff"}"/>${chrome}`,
   );
 }
 
@@ -118,7 +127,7 @@ export async function bklitComposedSvg(
 
   const svg = await renderBklitStaticSvg(
     <ComposedChart data={data} staticSize={{ width: W, height: H }} xDataKey="date">
-      <Grid horizontal stroke="#EAECEF" />
+      <Grid horizontal stroke={opts.gridStroke ?? "#EAECEF"} />
       <SeriesBar dataKey="value" fill={opts.accent} />
       <Line dataKey="average" stroke={AXIS_TEXT} strokeWidth={2} />
     </ComposedChart>,
@@ -139,7 +148,7 @@ export async function bklitComposedSvg(
 
   return svg.replace(
     /<svg([^>]*)>/,
-    `<svg$1><rect width="${W}" height="${H}" fill="#ffffff"/>${chrome}`,
+    `<svg$1><rect width="${W}" height="${H}" fill="${opts.background ?? "#ffffff"}"/>${chrome}`,
   );
 }
 

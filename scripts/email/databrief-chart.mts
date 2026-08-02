@@ -53,6 +53,9 @@ interface ChartSpec {
   asOf: string;
   width?: number;
   height?: number;
+  background?: string;
+  fillOpacity?: number;
+  gridStroke?: string;
 }
 
 interface Spec {
@@ -151,6 +154,9 @@ for (const c of spec.charts) {
     height: c.height,
     source: c.source,
     asOf: c.asOf,
+    background: c.background,
+    fillOpacity: c.fillOpacity,
+    gridStroke: c.gridStroke,
   };
   const svg =
     c.kind === "composed"

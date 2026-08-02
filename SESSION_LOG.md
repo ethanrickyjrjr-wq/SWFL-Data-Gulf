@@ -1,3 +1,19 @@
+## 2026-08-02 (Fable 5) — databrief v4–v6: chart styling + image hosting in the bridge; showcase rebuilt to the design bar, re-sent ON-BRAND, then de-jargoned + widened
+
+Operator: v3 "PRETTY BLAND" vs 5 reference senders; then "HOW DO WE NOT HAVE A FUCKING LOGO" /
+"WE HAVE A FUCKING BRANDIND SECITION"; then from the real inbox: "WHY THE FUCK ARE YOU SAYING
+BRAINS" + "IT LOOKS SO DUMB ON SCREEN". THIS REPO: (1) bklit email-svg + databrief-chart.mts
+gain optional background/fillOpacity/gridStroke (defaults byte-identical; v3's 0.18-on-white
+fill read as blank). (2) NEW scripts/email/host-image.mts — fetch/read/rasterize-svg →
+email-media; used for the Mapbox satellite hero (server-side Referer'd fetch, token never in
+the email) and the wave logo. (3) Re-ran the lib/brand/tokens.ts postmortem the hard way:
+v1–v4 used a from-memory teal; v5 mirrors BRAND.* + its contrast law; v6 killed a "brains"
+system noun in the footer and widened the card to 680px. Sends delivered + API-verified
+(66f92dff 17:57, ed5eaad5 18:03, a67c0835 18:08 UTC; RESEND_AUDIENCES_KEY reads status — the
+send key is send-only). Prior "no email" gripe: v3 was DELIVERED (spam/Promotions), never
+bounced. Gmail's "⋯ closed" footer = trimmed repeat content across the same-subject thread —
+resend artifact only. Check opened: databrief_design_bar_playbook_sync. NOT pushed.
+
 ## 2026-08-02 (Sonnet) — SteadyAPI raw-landing Step 1 SHIPPED: table + code live, 167/167 green, Step 2 awaits operator quota confirm
 
 Executed Step 1 of `docs/superpowers/plans/2026-08-02-steadyapi-raw-landing-playbook.md` end to end.
