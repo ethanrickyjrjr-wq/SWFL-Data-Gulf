@@ -11,6 +11,17 @@ census amended 08/02 (§4 per-listing-DOM ceiling CORRECTED — days_after_liste
 cadence_registry source_ceiling rewritten with all 4 unread families, as_of 08/02/2026. Sonnet's
 entry point = the playbook, nothing else needed.
 
+## 2026-08-02 (later session) — "WHAT THE FUCK IS THIS" — Gmail trimmed the ENTIRE email above the CTA panel
+
+v6 in the operator's Gmail rendered starting at the CTA panel — masthead, hero, headline,
+sections, chart ALL collapsed behind ⋯ trimmed-content markers. Cause: 4 sends, one subject →
+one thread; body content identical across sends (same data) → Gmail's quoted-text detection
+hides everything repeated and shows only what changed. Not a rendering bug — a THREADING bug
+that any daily brief would hit in production the moment two editions share a subject. FIX (v7):
+the subject now carries the edition date (" · MM/DD/YYYY" from generatedOn — computed, not
+invented), so every edition is its own thread and nothing ever trims. STANDING RULE for every
+recurring send surface: recurring emails carry an edition marker (date) in the subject.
+
 ## 2026-08-02 (later session) — "WHY THE FUCK ARE YOU SAYING BRAINS" + "IT LOOKS SO DUMB ON SCREEN" + "why is this closed"
 
 Three v5 defects, all operator-caught from the real inbox: (1) footer said "two deterministic
