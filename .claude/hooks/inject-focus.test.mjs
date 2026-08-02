@@ -6,9 +6,11 @@ import {
   loadRules,
   buildAdditionalContext,
   buildHookOutput,
+  fourLaneBanner,
   DEFAULT_RULES,
   AREA_DIRS,
 } from "./inject-focus.mjs";
+import { isDataTurn, LANES } from "./check-four-searches.mjs";
 
 let pass = 0;
 let fail = 0;
@@ -109,6 +111,76 @@ check("hook output serializes to valid JSON under the 10k cap", () => {
   const json = JSON.stringify(out);
   assert.ok(json.length < 10000, `output exceeds 10k char cap (${json.length})`);
   assert.deepEqual(JSON.parse(json), out);
+});
+
+// --- fourLaneBanner: upfront compliance for the four-lane gate (08/02/2026) ---
+// FAILURE MODE this exists to stop: the Stop-hook gate can only force a redo AFTER
+// an answer exists, so every violation costs the operator a duplicated reply
+// (documented 08/02/2026, "Why the fuck are you writing things twice"). The banner
+// arms the gate BEFORE the first word, using the SAME classifier — warning and
+// enforcement cannot drift.
+check("banner fires on a data question (FM: gate armed but Claude not told)", () => {
+  const b = fourLaneBanner("dont we already have this data somewhere else?");
+  assert.match(b, /FOUR-LANE/, "data question must arm the banner");
+});
+
+check("banner stays silent on a non-data prompt (FM: habit tax → gate ignored)", () => {
+  assert.equal(fourLaneBanner("make the button blue"), "");
+  assert.equal(fourLaneBanner("thanks, looks good"), "");
+});
+
+check("banner names all four lanes verbatim from LANES (FM: lane drift)", () => {
+  const b = fourLaneBanner("what fields do we pull from the api?");
+  for (const [k, v] of Object.entries(LANES)) {
+    assert.ok(b.includes(k.toUpperCase()), `missing lane key ${k}`);
+    assert.ok(b.includes(v), `missing lane description for ${k}`);
+  }
+});
+
+check("banner is fail-open on missing/undefined prompt (FM: stdin shape drift)", () => {
+  assert.equal(fourLaneBanner(undefined), "");
+  assert.equal(fourLaneBanner(""), "");
+  assert.equal(fourLaneBanner(null), "");
+});
+
+check("banner PARITY with the stop gate's classifier on real operator phrasings", () => {
+  const samples = [
+    "dont we already have this data somewhere else?",
+    "what data can we get from steadyapi?",
+    "make sure we have beds and baths",
+    "make the button blue",
+    "run the tests",
+    "no search - just tell me what you think",
+  ];
+  for (const s of samples) {
+    assert.equal(fourLaneBanner(s).length > 0, isDataTurn(s), `banner/gate disagree on: ${s}`);
+  }
+});
+
+check("context carries the banner FIRST on a data prompt, never on a plain one", () => {
+  const withBanner = buildAdditionalContext({
+    rulesText: "RULES",
+    todayExists: false,
+    prompt: "which columns do we store from the endpoint?",
+  });
+  assert.ok(withBanner.indexOf("FOUR-LANE") === 0, "banner must lead the context");
+  assert.match(withBanner, /RULES/, "rules must still follow the banner");
+  const plain = buildAdditionalContext({ rulesText: "RULES", todayExists: false, prompt: "hi" });
+  assert.doesNotMatch(plain, /FOUR-LANE/, "banner leaked onto a non-data prompt");
+});
+
+check("hook output stays under 10k WITH the banner and LIVE rules (FM: cap breach)", () => {
+  const rulesText = loadRules({
+    read: () => readFileSync(new URL("../../_ASSISTANT/RULES.md", import.meta.url), "utf8"),
+  });
+  const json = JSON.stringify(
+    buildHookOutput({
+      rulesText,
+      todayExists: true,
+      prompt: "dont we already have this data somewhere else?",
+    }),
+  );
+  assert.ok(json.length < 10000, `banner pushed LIVE output over 10k (${json.length})`);
 });
 
 // --- the LIVE rules file, not the fallback constant, is what actually ships ---

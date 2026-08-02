@@ -1,3 +1,19 @@
+## 2026-08-02 (Fable 5) — four-lane gate gains its UPFRONT half: inject-focus arms the gate BEFORE the first word
+
+Operator: "Make new Claude's comply upfront" — after the Stop-hook gate correctly blocked a
+one-lane answer and the forced redo shipped him a near-duplicate reply. Mechanism, not a promise:
+`inject-focus.mjs` (UserPromptSubmit) now imports `isDataTurn`+`LANES` from
+`check-four-searches.mjs`; a data-question prompt gets a "FOUR-LANE GATE — ARMED" banner at the
+TOP of additionalContext naming all four lanes. Same classifier both ends → warning/enforcement
+parity by construction (asserted by a new test). 21/21 inject-focus tests green (7 new
+failure-mode tests: silent on non-data prompts, lane drift, stdin shape drift, 10k cap w/ LIVE
+rules, classifier parity); four-searches + hook-registration suites green; live-ran the binary
+both ways (banner on data prompt, none on "make the button blue"). Also this session: answered
+"what changed with SteadyAPI data" from all four lanes (nothing changed — 7+ audits all found the
+data; the one-line body-discard in extract_api.py kept every finding unshippable; live SQL
+confirms zero raw tables, one enriched column). NEXT: SteadyAPI Step 1 (raw JSONB landing) awaits
+operator go; `ENGINE_ENABLED=false` still owed from operator terminal.
+
 ## 2026-08-02 (Fable 5) — databrief v3 "Underwriter's Brief" SENT with a real bklit chart; chart bridge shipped; PLAYBOOK gains §4.17
 
 Operator: "make a showcase email in a different industry from a pipeline and brain … WHERE IS A

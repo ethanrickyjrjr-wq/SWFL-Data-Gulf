@@ -31,6 +31,11 @@
 import { readFileSync, existsSync } from "node:fs";
 import { resolve } from "node:path";
 import { fileURLToPath } from "node:url";
+// The four-lane stop gate's OWN classifier + lane list. Deliberate coupling: the
+// upfront banner and the after-the-fact block must fire on the SAME prompts or the
+// warning becomes noise. Import is safe — check-four-searches.mjs only runs main()
+// when it is argv[1] itself. Both files ship and test together.
+import { isDataTurn, LANES } from "./check-four-searches.mjs";
 
 /** Directories that carry a location-scoped CLAUDE.md (Class-B conventions). */
 export const AREA_DIRS = [
@@ -84,15 +89,47 @@ export function loadRules({ read }) {
   return text.trim();
 }
 
-/** Build the additionalContext string: the rules + a one-line pointer to the area
- *  CLAUDE.md files + (only when present) a pointer to TODAY.md. POINTERS, never
- *  paste — keeps it small and static so resume-replay never goes stale. */
-export function buildAdditionalContext({ rulesText, todayExists }) {
+/** The upfront half of the four-lane gate (added 08/02/2026 by operator decree
+ *  "Make new Claude's comply upfront"). The Stop hook can only force a redo AFTER
+ *  an answer exists, which bills the operator a duplicated reply on every
+ *  violation. This banner arms the gate BEFORE the first word, on exactly the
+ *  prompts the Stop hook would block — same classifier, so warning and
+ *  enforcement cannot drift. Returns "" for everything else: the no-router rule
+ *  above stays true for topics; this is the one principled exception, keyed to an
+ *  enforcement gate that already exists. Fail-open: any classifier error → "". */
+export function fourLaneBanner(prompt) {
+  let armed = false;
+  try {
+    armed = isDataTurn(prompt);
+  } catch {
+    return "";
+  }
+  if (!armed) return "";
+  return (
+    "FOUR-LANE GATE — ARMED FOR THIS PROMPT. It classifies as a data question (the same " +
+    "classifier as the four-lane Stop gate, which blocks the turn when lanes are missing).\n" +
+    "The four searches are real tool calls made BEFORE the first word of the answer, any " +
+    "order — the gate reads the transcript, not narration:\n" +
+    Object.entries(LANES)
+      .map(([k, v]) => `  ${k.toUpperCase()} — ${v}`)
+      .join("\n") +
+    "\nAnswering first and searching on the forced redo doubles the reply the operator " +
+    "reads (documented 08/02/2026). Search first; the answer comes once."
+  );
+}
+
+/** Build the additionalContext string: (on data prompts) the armed-gate banner,
+ *  then the rules + a one-line pointer to the area CLAUDE.md files + (only when
+ *  present) a pointer to TODAY.md. POINTERS, never paste — keeps it small and
+ *  static so resume-replay never goes stale (the banner is a pure function of the
+ *  prompt, so replay reproduces it exactly). */
+export function buildAdditionalContext({ rulesText, todayExists, prompt }) {
   const areaPointer =
     "Area conventions load by location — when editing one of these, read its CLAUDE.md: " +
     AREA_DIRS.map((d) => `${d}CLAUDE.md`).join(", ") +
     ".";
-  const lines = [rulesText, "", areaPointer];
+  const banner = fourLaneBanner(prompt);
+  const lines = banner ? [banner, "", rulesText, "", areaPointer] : [rulesText, "", areaPointer];
   if (todayExists) {
     lines.push("What's in flight this session: see _ASSISTANT/TODAY.md (open checks, last ship).");
   }
@@ -101,30 +138,38 @@ export function buildAdditionalContext({ rulesText, todayExists }) {
 
 /** The exact UserPromptSubmit JSON output. Exit 0 with this on stdout → the
  *  additionalContext is added to context. No `decision` → the prompt proceeds. */
-export function buildHookOutput({ rulesText, todayExists }) {
+export function buildHookOutput({ rulesText, todayExists, prompt }) {
   return {
     hookSpecificOutput: {
       hookEventName: "UserPromptSubmit",
-      additionalContext: buildAdditionalContext({ rulesText, todayExists }),
+      additionalContext: buildAdditionalContext({ rulesText, todayExists, prompt }),
     },
   };
 }
 
 /** Drain stdin (the harness pipes the event JSON in) then emit the focus context.
- *  We don't route on the prompt, so the content is static; draining stdin avoids a
- *  broken pipe. Fail-open on any error. */
+ *  The ONLY prompt-dependent piece is the four-lane banner (see fourLaneBanner);
+ *  everything else stays static. A malformed/absent stdin payload degrades to the
+ *  bannerless output, never to a wedged prompt. Fail-open on any error. */
 function main() {
   let raw = "";
   process.stdin.setEncoding("utf8");
   process.stdin.on("data", (c) => (raw += c));
   process.stdin.on("end", () => {
     try {
+      let prompt = "";
+      try {
+        const payload = JSON.parse(raw || "{}");
+        if (typeof payload.prompt === "string") prompt = payload.prompt;
+      } catch {
+        // stdin shape drift → no banner, FOCUS still ships.
+      }
       const root = process.cwd();
       const rulesText = loadRules({
         read: () => readFileSync(resolve(root, "_ASSISTANT", "RULES.md"), "utf8"),
       });
       const todayExists = existsSync(resolve(root, "_ASSISTANT", "TODAY.md"));
-      process.stdout.write(JSON.stringify(buildHookOutput({ rulesText, todayExists })));
+      process.stdout.write(JSON.stringify(buildHookOutput({ rulesText, todayExists, prompt })));
     } catch {
       // fail-open: never wedge a prompt.
     }
