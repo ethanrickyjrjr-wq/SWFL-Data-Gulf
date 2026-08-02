@@ -1,3 +1,15 @@
+## 2026-08-02 — DIRECTIVE: greenfield proof — new industry, 4 sources → lake → brain(s) → email, built clean from day 0
+
+Operator direction, verbatim intent: "prove we can build a pipeline from new data, from a new
+industry and show we can build an email... We don't need a bunch of data. Just a little bit from 4
+different places, into the lake, into a brain or two and route it to email builder... Then we will
+code an email layout and produce it. We need a fresh run at this and check all the boxes along the
+way. Don't use our current setup as 'the way'." Open question he raised: new folder vs side folder
+here "so no one runs into it." Wants crawl4ai research on better/more-consistent patterns that
+differ from our current thinking, Sonnet fan-out to find the data, and THE ENTIRE PLAYBOOK WRITTEN
+DOWN. Not real estate. `docs/standards/new-project-playbook.md` is the day-0 spine (it was written
+to be copy-pasted into a new repo as PLAYBOOK.md).
+
 ## 2026-08-01 — "No fucking clue how this creates a green suite" — 2596 tests pass while the voice picker is wired to NOTHING
 
 Raised on reviewing the one-lane collapse: the suite is fully green (2596 pass, 0 fail) yet the
