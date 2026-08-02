@@ -1,3 +1,10 @@
+## 2026-08-02 — SECOND CORRECTION on greenfield sources: "it doesn't have to be SWFL AT ALL — DATA WE CAN GET EASILY"
+
+The SWFL/local framing was MINE, not his — dropped entirely. The proof's only source criteria:
+easy to get, solid, enough rows. Locked to the reliability scout's no-key top four (BLS, Treasury
+FiscalData, NOAA tides, OpenFEMA disaster declarations), FRED as optional 5th (key). Stop asking;
+build. Two AskUserQuestion attempts interrupted = the questions WERE the friction.
+
 ## 2026-08-02 — CORRECTION on greenfield sources: RELIABILITY over cleverness — "you just stated plenty that always fail"
 
 Operator rejected the first scout picks (scraped portals, PDFs, mirrors, state SFTP = the classes

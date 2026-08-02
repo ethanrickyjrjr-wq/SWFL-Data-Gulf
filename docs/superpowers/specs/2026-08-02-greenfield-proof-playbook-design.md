@@ -123,13 +123,14 @@ chosen industry would want, every number traceable to a live public source.
 
 ## 7. Open decisions for the operator
 
-1. **Sources — RECOMMENDED four (reliability round, §9b):** FRED (key we already hold; Lee/Collier
-   county-grain series confirmed in our own registry ceiling; operator-named) · BLS Public Data API
-   (no key; Lee County unemployment fetched live) · NOAA CO-OPS tides (no key; Fort Myers fetched
-   live) · OpenFEMA Disaster Declarations v2 (no key; real record fetched). Alternate/5th: Treasury
-   FiscalData (verified, national grain only). Theme: a weekly SWFL economy-and-risk brief — buyer:
-   a SWFL insurance agent or local business audience — one dated, cited line per source.
-2. **Repo name** — proposed: `gulf-brief`.
+1. **Sources — LOCKED (operator corrections 08/02: not SWFL at all; data we can get EASILY):**
+   the reliability scout's no-key top four, every one verified with a real fetch this session —
+   **BLS Public Data API** (unemployment and prices series) · **Treasury FiscalData** (debt,
+   rates, spending) · **NOAA CO-OPS** (tides/water, any station) · **OpenFEMA Disaster
+   Declarations v2** (national declarations feed). Optional 5th: FRED (free key; we already hold
+   one). Theme: a weekly "the week in numbers" economy-and-conditions brief — one dated, cited
+   line per source. No geography constraint; each brain picks whatever series makes the best email.
+2. **Repo name** — `databrief` (rename any time; nothing binds to it).
 3. **Send or produce** — v1 produces the email (HTML + screenshot); actually sending via Resend is
    a later, separate decision.
 
