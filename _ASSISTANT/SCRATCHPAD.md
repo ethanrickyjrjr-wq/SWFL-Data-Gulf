@@ -1,3 +1,16 @@
+## 2026-08-02 — THIRD gripe on the greenfield showcase email: v2 is still "shit" — no chart, no bklit, weak commentary, freshness-date spam
+
+Verbatim: "WHERE IS A FUCKING CHART!!!!! WHEERE THE FUCK IS BCKLIT???????" · "commentary that
+fucking people would want to read in that industry" · "NOT fucking dates every fucking line of
+'freshness'" · "IS THE NEW BUILD BETTER THAN WHAT WE WERE DOING???????" The chart system (bklit,
+vendored in brain-platform with a PROVEN static email PNG path — renderBklitStaticSvg → resvg,
+components/charts/vendor/bklit/NOTICE.md) never traveled to databrief. Same failure class as the
+v1 postmortem: the factory carried data guards but not the house CAPABILITY bar (charts) or the
+house READER bar (commentary someone in the industry would forward, one as-of line not per-line
+stamps). Deliverables this session: v3 showcase email from the databrief pipeline+brain with a
+bklit chart, industry-grade commentary, professional layout; send to ethanrickyjrjr@gmail.com;
+update PLAYBOOK.md with the named lesson; honest verdict on new-build vs house-build.
+
 ## 2026-08-02 — RESOLVED same session — lean-verifier handoff caution: stale ATTOM breadcrumb in memory
 
 The cross-session paste flagged memory `reference_leepa-no-sale-price.md` line 28 ("repeat-sales
