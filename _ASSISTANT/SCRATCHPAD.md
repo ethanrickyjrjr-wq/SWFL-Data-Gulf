@@ -1,4 +1,4 @@
-## 2026-08-02 — THIRD gripe on the greenfield showcase email: v2 is still "shit" — no chart, no bklit, weak commentary, freshness-date spam
+## 2026-08-02 — RESOLVED same session — THIRD gripe on the greenfield showcase email: v3 sent with bklit chart, industry commentary, pro layout (Resend 56659da5, HTTP 200); lesson encoded as PLAYBOOK §4.17 both repos; FEMA hero chart pending source recovery (databrief LEDGER: fema-window-pull)
 
 Verbatim: "WHERE IS A FUCKING CHART!!!!! WHEERE THE FUCK IS BCKLIT???????" · "commentary that
 fucking people would want to read in that industry" · "NOT fucking dates every fucking line of

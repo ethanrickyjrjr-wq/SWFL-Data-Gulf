@@ -506,6 +506,55 @@ cannot be derived (a vendor's field list, a portal's access posture), it is not 
 observation: label it unverified-since and re-probe on a cadence. **Never let a hand-typed claim
 about an external world sit undated and unbound.**
 
+### 4.17 The quality bar doesn't travel with the factory — capability and reader rules ship as a checklist, not adjectives
+
+**Shape:** a new project copies the parent's DATA guards (provenance types, no-invention lint,
+registries) and believes quality traveled with them. It didn't — the parent's quality lives in
+three layers, and only what was written down as MECHANISM made the trip. **Proven three sends in a
+row on the greenfield proof (databrief), all 08/02/2026:**
+
+- **v1 — the reader bar didn't travel.** Every data guard green; the delivered email carried raw
+  ISO timestamps with timezone offsets, "1 declarations", internal freshness tokens, a station id,
+  datum names, method debug-speak, a serif font, and zero commentary. Operator: *"font sucks, no
+  fucking commentary, backwards fucking date."* The parent held every one of these rules — as prose
+  conventions in CLAUDE.md files the new repo never saw.
+- **v2 — the reader bar was encoded, the CAPABILITY bar didn't travel.** Dates humanized, tokens
+  scrubbed, computed commentary added — and the email still shipped with **no chart**, while the
+  parent held a PROVEN chart→email pipeline (real chart components server-rendered to SVG,
+  rasterized to PNG, hosted on an immutable public bucket). Operator: *"WHERE IS A FUCKING
+  CHART!!!!! WHEERE THE FUCK IS BCKLIT???"* The clean-room framing ("don't use our current setup
+  as the way") silently dropped the flagship capability along with the setup.
+- **v3 — what held.** The capability traveled as a **bridge, not a rebuild**: the greenfield repo
+  emits a small chart-spec JSON contract; the parent's proven renderer consumes it and returns
+  hosted PNG URLs. Plus two adversarial reviewers on the rendered artifact before send (below).
+
+**The named lessons, each a mechanism:**
+1. **"Different market" means different data and framing — never a fresh quality floor.** The
+   floor travels as a LIST the new repo is reviewed against: MM/DD/YYYY stated once per fact; no
+   internal tokens; computed commentary a domain reader would forward; ≥1 chart from real series;
+   ONE consolidated sources block (never per-line freshness stamps); homepage citation URLs (never
+   API endpoints — a click that lands on raw JSON burns trust); singular/plural handling;
+   mobile-fluid images (width attr for Outlook + `width:100%;height:auto` style).
+2. **Proven factories travel as bridges; rebuilding them to stay "clean" is the v2 failure by
+   omission.** The bridge cost one script and a spec contract; a rebuild would have been a second
+   unproven renderer.
+3. **Email charts have their own physics** (all hit the hard way, same day): Gmail strips SVG and
+   data-URIs — a HOSTED PNG is the only universal render; an immutable-cache bucket + upsert means
+   a same-key regeneration serves the OLD chart for a year — **content-hash every key**; a bar
+   chart with no drawn axis renders a negative as a short *positive* bar — refuse negatives; a
+   time-series x-accessor parses labels as dates — `"33921"` becomes year 33921 with no error.
+4. **Two reviewer personas are part of the factory, not garnish:** a rendering-QA pass against the
+   parent's real defect catalog, and a domain-reader + numeral-auditor pass. On v3 they returned
+   four BLOCKERS a fully green suite passed: a fixed-width image breaking mobile reflow; headline
+   CPI conflated with "claims inflation"; weather meaning asserted onto astronomical tide
+   predictions; a Pacific-territory storm framed as an Atlantic-season signal. **Domain conflation
+   is invisible to every lint; only a domain-reader persona catches it.**
+5. **A source outage is not a build failure.** The loader holds the lake's prior rows and says so
+   loudly; each brain carries a COVERAGE GATE deciding what held data may claim — a month with no
+   rows is a true zero only if the window was actually pulled; zero-filling a partial pull is
+   inventing numbers. (§4.12's floor, applied at ingest; OpenFEMA spent this exact day 503-flapping
+   to prove it.)
+
 ## 5. DAY-0 SETUP — the minimum viable guard set, in install order
 
 Do these before the first feature. Each is small; the order matters because each verifies the next.

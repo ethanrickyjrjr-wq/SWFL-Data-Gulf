@@ -26,7 +26,12 @@ const DEV_ROOT = path.dirname(REPO_ROOT); // the dev workspace (parent of repo)
 const WIN = process.platform === "win32";
 
 // Sibling repos explicitly permitted from this session (operator-approved).
-const ALLOWED_SIBLINGS = [path.join(DEV_ROOT, "swfldatagulf-ops")];
+// databrief approved by operator 08/02/2026 (ran the allowlist sed himself):
+// the greenfield-proof factory is driven from brain-platform sessions.
+const ALLOWED_SIBLINGS = [
+  path.join(DEV_ROOT, "swfldatagulf-ops"),
+  path.join(DEV_ROOT, "databrief"),
+];
 
 let raw = "";
 process.stdin.setEncoding("utf8");

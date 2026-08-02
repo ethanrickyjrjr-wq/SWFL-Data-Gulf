@@ -1,3 +1,22 @@
+## 2026-08-02 (Fable 5) — databrief v3 "Underwriter's Brief" SENT with a real bklit chart; chart bridge shipped; PLAYBOOK gains §4.17
+
+Operator: "make a showcase email in a different industry from a pipeline and brain … WHERE IS A
+CHART … WHERE THE FUCK IS BCKLIT". Shipped IN THIS REPO: (1) scripts/email/databrief-chart.mts —
+the bridge that lets the greenfield factory reuse our PROVEN chart lane (bklit AreaChart/
+ComposedChart → renderBklitStaticSvg → svgToPng → email-media hosted URL) over a JSON spec
+contract; proven on real renders (PNGs visually verified; hosted URL HTTP 200 image/png).
+(2) docs/standards/new-project-playbook.md §4.17 — "the quality bar doesn't travel with the
+factory": v1 dropped the reader bar, v2 dropped the CAPABILITY bar (no chart while we held a
+proven chart pipeline); floor now travels as a checklist + factories travel as bridges + two
+reviewer personas (rendering QA + domain reader) are part of the factory — on v3 they caught 4
+blockers a green suite passed. (3) .claude/hooks/check-project-path.mjs — databrief added to
+ALLOWED_SIBLINGS by operator decree (he ran the sed himself; his `!` command didn't land, applied
+verbatim). databrief side (its own SESSION_LOG has the full entry): rates.py pipeline (26 rows
+landed), fema.py 25-month window (pull blocked by an OpenFEMA 503 outage ALL session — coverage
+gate correctly withheld the cat-tempo chart; databrief LEDGER tracks fema-window-pull), brains
+reframed for a P&C reader, underwriter-brief.tsx recipe. SENT: Resend id
+56659da5-6fd8-4506-a9d6-ce66ff0d6c0b, HTTP 200, to the operator's test inbox.
+
 ## 2026-08-02 (Sonnet 5) — leepa_fdor closed on a REAL scheduled-path run + realtor⇆redfin is the second AGREEMENT family
 
 Two-part operator directive. (1) Manually dispatched `freshness-probe-daily.yml`
