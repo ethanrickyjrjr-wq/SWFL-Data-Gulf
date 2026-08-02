@@ -231,3 +231,14 @@ test("positioning matches the design doc's recipe table", () => {
 test("price-reduced's chart policy reflects its new sourced chart", () => {
   expect(RECIPES["price-reduced"].chart).toBe("price-vs-area-dot");
 });
+
+describe("default-grid — the terminal fallback recipe (one-lane collapse)", () => {
+  test("exists in the registry with the fallback contract", () => {
+    const r = RECIPES["default-grid"];
+    expect(r).toBeDefined();
+    expect(r.subject).toBe("area");
+    expect(r.positioning).toBe("story-side");
+    expect(r.chart).toBe("none"); // ask-driven charts ride the fill path, not the policy
+    expect(r.target ?? "email").toBe("email");
+  });
+});

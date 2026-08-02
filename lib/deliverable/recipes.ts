@@ -65,6 +65,9 @@ export const RECIPE_KEYS = [
   "sphere-weekly",
   "review-reply",
   "market-pulse",
+  // The terminal fallback — every keyless/typed ask lands here (one-lane collapse,
+  // spec 2026-08-02). A coded grid with open slots; NEVER free-form layout.
+  "default-grid",
   // Social — a different renderer. Confirm which social system is live before
   // building; do not assume the email path applies.
   "social-pack",
@@ -352,6 +355,22 @@ export const RECIPES: Record<RecipeKey, Recipe> = {
     chart: "zip-mom-move",
     prompt:
       "Build a monthly market-pulse email for [[your city or ZIP]] — every ZIP's month-over-month home-value move, one snapshot chart, and one honest read of the trend.",
+    needs: ["agent_name", "brokerage", "business_address"],
+  },
+
+  "default-grid": {
+    key: "default-grid",
+    positioning: "story-side",
+    label: "Market Email",
+    // The blank skeleton every recipe arrival already opens (emails.md §2 step 1).
+    skeleton: "skeleton-clean-white",
+    prose: null,
+    subject: "area",
+    // Policy "none" = no FORCED chart. An ask that is about a number still gets its
+    // chart from the fill path's buildChartForQuestion — ask-driven, not policy-driven.
+    chart: "none",
+    prompt:
+      "Build a market email for [[your city or ZIP]] — real figures with named sources, and open slots for anything we can't source.",
     needs: ["agent_name", "brokerage", "business_address"],
   },
 
