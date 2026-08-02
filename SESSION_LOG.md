@@ -1,3 +1,21 @@
+## 2026-08-02 (Fable 5) — Runner brief lands: the "working swfl-local runner" was never real; checks reconciled 2 closed / 6 opened
+
+Fifth Sonnet brief (crexi/dbpr-sirs) invalidates the restore-the-runner framing: the 06/22
+"runner MYNAMEJEFF working" SESSION_LOG narrative cites 3 run IDs that ALL 404 at the GitHub
+API, C:\Users\ethan\actions-runner\ is EMPTY (LastWriteTime 06/22), and both runner venvs the
+workflows reference don't exist — the runner never completed one verifiable GHA job; the 06/22
+SIRS rows came from the operator's LOCAL pipeline run. Recommendations: dbpr-sirs =
+park-with-date + monthly local pull (non-critical master input, vendor ceiling confirmed,
+operator already blessed local-run on 06/22); crexi = RESTORE (CRITICAL master input via
+cre-swfl; brevitas interim floor is 1 thin row) but NOT on ubuntu-latest + the existing Webshare
+proxy — that path already failed 07/12 (Cloudflare JS challenge with proxy active, log-verified);
+real options = build the runner for the first time, or research a dedicated non-pool proxy
+(RULE 0.4 first). Also found: crexi stale-available rows never expire (24 rows frozen 07/05
+feeding critical input). Ledger: closed usgs_tier2_registry_entry_retirement (commit 2650a4aa
+pushed) + leepa_comp_sales_broken_on_main (stale — fix 7c0aec5e on main since 07/22, 108,848
+rows live); opened desk_raw_listing_state_price_floor_bypass, marco_condo_price_cluster_unverified,
+timeout_raises_live_verify, crexi_registry_not_yet_activated_stale,
+cre_active_listings_no_expiry_stale_available, dbpr_sirs_data_roots_status_drift.
 ## 2026-08-02 (Fable 5) — Daily probe red (30753405899) run to ground: 5 direct fixes + 5 Sonnet fix-or-drop briefs
 
 Operator: "WHY IS EVERYTHING NOT FUCKING GREEN… take care of what you can… fanning out sonnets."
