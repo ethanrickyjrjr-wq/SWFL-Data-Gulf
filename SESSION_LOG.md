@@ -1,3 +1,20 @@
+## 2026-08-02 (Fable 5) — TDD plans doc + parked-items ops visibility + verification dispatches
+
+Operator: TDD plans for each remaining item; baths MUST reach the email builder (folio/property-id
+join where SteadyAPI lacks them); proxies deferred; parked items need findable reasons on the ops
+page. Shipped: docs/superpowers/plans/2026-08-02-probe-red-burndown-tdd-plans.md — P1 baths
+(3 lanes: re-run backfill_baths.py, dry-run live 08/02 = targets 20,682 / clusters 616 / one run
+covers all, SEQUENCED after the in-flight DOM backfill on the shared 1 req/s limit; LeePA
+layer-23 folio join for Lee behind the commercial-contamination ceiling; comp-rank scoring rides
+it), P2 desk floor bypass + Marco cluster probe-first, P3 fgcu range parser, P4 leepa_comp_sales
+freshness-ledger artifact, P5 timeout verification. KEY RESEARCH FIND driving P1: baths were
+34,139/34,478 on 07/26 and were WIPED by the sweep upsert (dom-full-scope handoff §5); COALESCE
+guard 51fc9950 now holds; live coverage today Lee 13% / Collier 18% of active-sale rows.
+Ops visibility: opened parked_crexi_restore_pending_proxy_research +
+parked_dbpr_sirs_monthly_local_pull (reason inline, plan-doc pointer); closed superseded
+swfl_local_runner_offline_dark_sources with the runner-was-never-real evidence. Dispatched P5
+verification NOW (workflow_dispatch bypasses ENGINE_ENABLED): fema 30766166374 (90m ceiling),
+dbpr-re-licensees 30766167329 (45m) — timeout_raises_live_verify closes on their evidence.
 ## 2026-08-02 (Fable 5) — Runner brief lands: the "working swfl-local runner" was never real; checks reconciled 2 closed / 6 opened
 
 Fifth Sonnet brief (crexi/dbpr-sirs) invalidates the restore-the-runner framing: the 06/22
