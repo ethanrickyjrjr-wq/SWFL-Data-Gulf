@@ -1,0 +1,53 @@
+name: neighborhood-amenities-daily
+
+# SteadyAPI /neighborhood-amenities -> data_lake.steadyapi_neighborhoods /
+# steadyapi_neighborhood_amenities / steadyapi_property_neighborhood.
+# One call per UNKNOWN vendor neighborhood (boundary-polygon dedupe assigns every
+# property already inside a stored polygon at zero vendor cost) — see
+# ingest/pipelines/neighborhood_amenities/pipeline.py. Bounded at 500 calls/run
+# (~9 min at the shared ~1 req/s throttle); once the active book is drained the
+# daily run only assigns new listings locally and costs ~0 calls.
+# First manual chunked run executed 08/03/2026 (session, 250-call batch).
+
+on:
+  schedule:
+    - cron: "30 9 * * *"   # daily 09:30 UTC, after the listing-lifecycle daily lands new property_ids
+  workflow_dispatch:
+    inputs:
+      dry_run:
+        description: "Dry-run (max 5 probe calls, zero DB write)"
+        type: boolean
+        default: true
+      max_calls:
+        description: "Vendor-call ceiling for this run"
+        type: string
+        default: "500"
+
+jobs:
+  ingest:
+    if: ${{ vars.ENGINE_ENABLED != 'false' || github.event_name == 'workflow_dispatch' }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    env:
+      DATABASE_URL: ${{ secrets.DESTINATION__POSTGRES__CREDENTIALS }}
+      PHOTOS_API: ${{ secrets.PHOTOS_API }}
+
+    steps:
+      - uses: actions/checkout@v6
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+
+      - name: Install dependencies
+        run: pip install -r ingest/requirements.txt
+
+      - name: Run neighborhood amenities sweep
+        env:
+          DRY_INPUT: ${{ inputs.dry_run }}
+          MAX_CALLS: ${{ inputs.max_calls || '500' }}
+        run: |
+          ARGS=(--max-calls "$MAX_CALLS")
+          if [ "$DRY_INPUT" = "true" ]; then ARGS+=(--dry-run); fi
+          python -m ingest.pipelines.neighborhood_amenities.pipeline "${ARGS[@]}"

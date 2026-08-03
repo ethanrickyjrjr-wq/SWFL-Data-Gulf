@@ -1,0 +1,1009 @@
+{
+ "meta": {
+  "version": "v1.0",
+  "status": 200,
+  "copywrite": "https://steadyapi.com",
+  "property_id": "6588181567",
+  "neighborhood_count": 1,
+  "amenities_count": 19,
+  "schools_count": 9,
+  "score_groups": [
+   "nearby",
+   "transportation",
+   "lifestyle"
+  ],
+  "search_radius": 5,
+  "categories": [
+   "LOCAL_ACTIVE_AND_OUTDOOR",
+   "LOCAL_GROCERIES",
+   "LOCAL_SHOPPING",
+   "LOCAL_ENTERTAINMENT",
+   "LOCAL_FOOD_AND_DRINK",
+   "LOCAL_CAFES",
+   "LOCAL_PRESCHOOLS"
+  ]
+ },
+ "body": {
+  "neighborhoods": [
+   {
+    "id": "4cfecb2f-2a0a-5fae-9d8b-4fce7e14845d",
+    "name": "Rural Estates",
+    "city": "Naples",
+    "state_code": "FL",
+    "slug_id": "Rural-Estates_Naples_FL",
+    "geo_type": "neighborhood",
+    "level": "macro_neighborhood",
+    "centroid": {
+     "lat": 26.239559,
+     "lon": -81.584749
+    },
+    "boundary": {
+     "type": "Polygon",
+     "coordinates": [
+      [
+       [
+        -81.67069,
+        26.16996
+       ],
+       [
+        -81.67174,
+        26.24388
+       ],
+       [
+        -81.68787,
+        26.24381
+       ],
+       [
+        -81.68811,
+        26.24424
+       ],
+       [
+        -81.68946,
+        26.27309
+       ]
+      ]
+     ]
+    }
+   }
+  ],
+  "location_scores": [
+   {
+    "label": "Walking",
+    "value": 1.6,
+    "text": "Other transportation modes are needed to reach day-to-day needs",
+    "icon_url": "https://static.rdc.moveaws.com/images/local/neighbourhood-score/walk_solid.svg",
+    "groups": [
+     "transportation"
+    ]
+   },
+   {
+    "label": "Cycling",
+    "value": 4.4,
+    "text": "Somewhat suitable for bicycle commuting and/or recreational cycling",
+    "icon_url": "https://static.rdc.moveaws.com/images/local/neighbourhood-score/bike.svg",
+    "groups": [
+     "transportation"
+    ]
+   },
+   {
+    "label": "Transit",
+    "value": 0,
+    "text": "Few transit options",
+    "icon_url": "https://static.rdc.moveaws.com/images/local/neighbourhood-score/train_solid.svg",
+    "groups": [
+     "transportation"
+    ]
+   },
+   {
+    "label": "Driving",
+    "value": 9.7,
+    "text": "Excellent access to freeways and/or major arteries, with almost no chance of parking problems",
+    "icon_url": "https://static.rdc.moveaws.com/images/local/neighbourhood-score/car_solid.svg",
+    "groups": [
+     "transportation"
+    ]
+   },
+   {
+    "label": "Groceries",
+    "value": 1.7,
+    "text": "Few or no groceries within a short drive",
+    "icon_url": "https://static.rdc.moveaws.com/images/local/neighbourhood-score/groceries.svg",
+    "groups": [
+     "nearby"
+    ]
+   },
+   {
+    "label": "Shopping",
+    "value": 1.3,
+    "text": "Few or no shops within a short drive",
+    "icon_url": "https://static.rdc.moveaws.com/images/local/neighbourhood-score/shopping.svg",
+    "groups": [
+     "nearby"
+    ]
+   },
+   {
+    "label": "Nightlife",
+    "value": 1.7,
+    "text": "Few or no bars within a short drive",
+    "icon_url": "https://static.rdc.moveaws.com/images/local/neighbourhood-score/entertainment.svg",
+    "groups": [
+     "nearby"
+    ]
+   },
+   {
+    "label": "Restaurants",
+    "value": 3,
+    "text": "Some restaurants within a short drive",
+    "icon_url": "https://static.rdc.moveaws.com/images/local/neighbourhood-score/restaurant_solid.svg",
+    "groups": [
+     "nearby"
+    ]
+   },
+   {
+    "label": "Cafes",
+    "value": 1.6,
+    "text": "Few or no caf\u00e9s within a short drive",
+    "icon_url": "https://static.rdc.moveaws.com/images/local/neighbourhood-score/cafe_solid.svg",
+    "groups": [
+     "nearby"
+    ]
+   },
+   {
+    "label": "Daycares",
+    "value": 1.9,
+    "text": "Closest daycare is a long drive away",
+    "icon_url": "https://static.rdc.moveaws.com/images/local/neighbourhood-score/child_care.svg",
+    "groups": [
+     "nearby"
+    ]
+   },
+   {
+    "label": "Quiet",
+    "value": 9.1,
+    "text": "Virtually no sources of noise nearby",
+    "icon_url": "https://static.rdc.moveaws.com/images/local/neighbourhood-score/noise.svg",
+    "groups": [
+     "lifestyle"
+    ]
+   },
+   {
+    "label": "Vibrant",
+    "value": 0.6,
+    "text": "Calm atmosphere at all hours",
+    "icon_url": "https://static.rdc.moveaws.com/images/local/neighbourhood-score/city.svg",
+    "groups": [
+     "lifestyle"
+    ]
+   }
+  ],
+  "schools": {
+   "summary": {
+    "total": 9,
+    "public": 6,
+    "private": 3,
+    "elementary": 6,
+    "middle": 4,
+    "high": 3,
+    "avg_rating": 7,
+    "assigned_schools": [
+     "Oakridge Middle School",
+     "Gulf Coast High School"
+    ]
+   },
+   "list": [
+    {
+     "id": "0717150561",
+     "name": "Oakridge Middle School",
+     "slug_id": "Oakridge-Middle-School-0717150561",
+     "education_levels": [
+      "middle"
+     ],
+     "grades": [
+      "6",
+      "7",
+      "8"
+     ],
+     "funding_type": "public",
+     "rating": 10,
+     "parent_rating": 2,
+     "student_count": 1148,
+     "student_teacher_ratio": 18.6,
+     "review_count": 17,
+     "distance_in_miles": 2.7,
+     "assigned": true,
+     "coordinate": {
+      "lat": 26.265222,
+      "lon": -81.690582
+     }
+    },
+    {
+     "id": "0717150861",
+     "name": "Gulf Coast High School",
+     "slug_id": "Gulf-Coast-High-School-0717150861",
+     "education_levels": [
+      "high"
+     ],
+     "grades": [
+      "9",
+      "10",
+      "11",
+      "12"
+     ],
+     "funding_type": "public",
+     "rating": 6,
+     "parent_rating": 4,
+     "student_count": 1578,
+     "student_teacher_ratio": 25.1,
+     "review_count": 14,
+     "distance_in_miles": 3.8,
+     "assigned": true,
+     "coordinate": {
+      "lat": 26.271095,
+      "lon": -81.707277
+     }
+    }
+   ]
+  },
+  "amenities": {
+   "by_category": {
+    "golf": [
+     {
+      "name": "Olde Florida Golf Club",
+      "phone": "+12393534441",
+      "rating": 5,
+      "reviews_count": 1,
+      "categories": [
+       "golf",
+       "local_active_and_outdoor"
+      ],
+      "display_tags": [
+       "Golf"
+      ],
+      "icon_url": "https://static.rdc.moveaws.com/images/map/amenity-2023-1/40x40/outdoor.svg",
+      "photo_url": null,
+      "yelp_url": "https://www.yelp.com/biz/olde-florida-golf-club-naples?adjust_creative=realtor&utm_campaign=yelp_feed&utm_medium=feed_v2&utm_source=realtor",
+      "business_url": null,
+      "reviews_url": "https://www.yelp.com/biz/olde-florida-golf-club-naples?adjust_creative=realtor&hrid=KXRRvyLB0DvB3CKR7sNrxQ&utm_campaign=yelp_feed&utm_medium=feed_v2&utm_source=realtor",
+      "address": {
+       "line_one": "9393 Vanderbilt Beach Rd Ext",
+       "line_two": "",
+       "city": "Naples",
+       "state_code": "FL",
+       "postal_code": "34120",
+       "lat": 26.24687955949277,
+       "lon": -81.65005259694594,
+       "distance_from_property": 0.24
+      }
+     },
+     {
+      "name": "Golf Club of the Everglades",
+      "phone": "+12393544727",
+      "rating": 2.5,
+      "reviews_count": 3,
+      "categories": [
+       "golf",
+       "venues",
+       "countryclubs",
+       "local_active_and_outdoor"
+      ],
+      "display_tags": [
+       "Golf",
+       "Venues & Event Spaces",
+       "Country Clubs"
+      ],
+      "icon_url": "https://static.rdc.moveaws.com/images/map/amenity-2023-1/40x40/outdoor.svg",
+      "photo_url": "https://s3-media0.fl.yelpcdn.com/bphoto/V40NooTXj7GafL_JtiFJbw/o.jpg",
+      "yelp_url": "https://www.yelp.com/biz/golf-club-of-the-everglades-naples?adjust_creative=realtor&utm_campaign=yelp_feed&utm_medium=feed_v2&utm_source=realtor",
+      "business_url": "http://gcegolf.net",
+      "reviews_url": "https://www.yelp.com/biz/golf-club-of-the-everglades-naples?adjust_creative=realtor&hrid=P8XYawE-pg7pzJjHk1WyWQ&utm_campaign=yelp_feed&utm_medium=feed_v2&utm_source=realtor",
+      "address": {
+       "line_one": "8835 Vanderbilt Beach Rd",
+       "line_two": "",
+       "city": "Naples",
+       "state_code": "FL",
+       "postal_code": "34120",
+       "lat": 26.244924841107128,
+       "lon": -81.6624227485526,
+       "distance_from_property": 0.8
+      }
+     }
+    ],
+    "local_active_and_outdoor": [
+     {
+      "name": "Olde Florida Golf Club",
+      "phone": "+12393534441",
+      "rating": 5,
+      "reviews_count": 1,
+      "categories": [
+       "golf",
+       "local_active_and_outdoor"
+      ],
+      "display_tags": [
+       "Golf"
+      ],
+      "icon_url": "https://static.rdc.moveaws.com/images/map/amenity-2023-1/40x40/outdoor.svg",
+      "photo_url": null,
+      "yelp_url": "https://www.yelp.com/biz/olde-florida-golf-club-naples?adjust_creative=realtor&utm_campaign=yelp_feed&utm_medium=feed_v2&utm_source=realtor",
+      "business_url": null,
+      "reviews_url": "https://www.yelp.com/biz/olde-florida-golf-club-naples?adjust_creative=realtor&hrid=KXRRvyLB0DvB3CKR7sNrxQ&utm_campaign=yelp_feed&utm_medium=feed_v2&utm_source=realtor",
+      "address": {
+       "line_one": "9393 Vanderbilt Beach Rd Ext",
+       "line_two": "",
+       "city": "Naples",
+       "state_code": "FL",
+       "postal_code": "34120",
+       "lat": 26.24687955949277,
+       "lon": -81.65005259694594,
+       "distance_from_property": 0.24
+      }
+     },
+     {
+      "name": "Golf Club of the Everglades",
+      "phone": "+12393544727",
+      "rating": 2.5,
+      "reviews_count": 3,
+      "categories": [
+       "golf",
+       "venues",
+       "countryclubs",
+       "local_active_and_outdoor"
+      ],
+      "display_tags": [
+       "Golf",
+       "Venues & Event Spaces",
+       "Country Clubs"
+      ],
+      "icon_url": "https://static.rdc.moveaws.com/images/map/amenity-2023-1/40x40/outdoor.svg",
+      "photo_url": "https://s3-media0.fl.yelpcdn.com/bphoto/V40NooTXj7GafL_JtiFJbw/o.jpg",
+      "yelp_url": "https://www.yelp.com/biz/golf-club-of-the-everglades-naples?adjust_creative=realtor&utm_campaign=yelp_feed&utm_medium=feed_v2&utm_source=realtor",
+      "business_url": "http://gcegolf.net",
+      "reviews_url": "https://www.yelp.com/biz/golf-club-of-the-everglades-naples?adjust_creative=realtor&hrid=P8XYawE-pg7pzJjHk1WyWQ&utm_campaign=yelp_feed&utm_medium=feed_v2&utm_source=realtor",
+      "address": {
+       "line_one": "8835 Vanderbilt Beach Rd",
+       "line_two": "",
+       "city": "Naples",
+       "state_code": "FL",
+       "postal_code": "34120",
+       "lat": 26.244924841107128,
+       "lon": -81.6624227485526,
+       "distance_from_property": 0.8
+      }
+     }
+    ],
+    "venues": [
+     {
+      "name": "Golf Club of the Everglades",
+      "phone": "+12393544727",
+      "rating": 2.5,
+      "reviews_count": 3,
+      "categories": [
+       "golf",
+       "venues",
+       "countryclubs",
+       "local_active_and_outdoor"
+      ],
+      "display_tags": [
+       "Golf",
+       "Venues & Event Spaces",
+       "Country Clubs"
+      ],
+      "icon_url": "https://static.rdc.moveaws.com/images/map/amenity-2023-1/40x40/outdoor.svg",
+      "photo_url": "https://s3-media0.fl.yelpcdn.com/bphoto/V40NooTXj7GafL_JtiFJbw/o.jpg",
+      "yelp_url": "https://www.yelp.com/biz/golf-club-of-the-everglades-naples?adjust_creative=realtor&utm_campaign=yelp_feed&utm_medium=feed_v2&utm_source=realtor",
+      "business_url": "http://gcegolf.net",
+      "reviews_url": "https://www.yelp.com/biz/golf-club-of-the-everglades-naples?adjust_creative=realtor&hrid=P8XYawE-pg7pzJjHk1WyWQ&utm_campaign=yelp_feed&utm_medium=feed_v2&utm_source=realtor",
+      "address": {
+       "line_one": "8835 Vanderbilt Beach Rd",
+       "line_two": "",
+       "city": "Naples",
+       "state_code": "FL",
+       "postal_code": "34120",
+       "lat": 26.244924841107128,
+       "lon": -81.6624227485526,
+       "distance_from_property": 0.8
+      }
+     }
+    ],
+    "countryclubs": [
+     {
+      "name": "Golf Club of the Everglades",
+      "phone": "+12393544727",
+      "rating": 2.5,
+      "reviews_count": 3,
+      "categories": [
+       "golf",
+       "venues",
+       "countryclubs",
+       "local_active_and_outdoor"
+      ],
+      "display_tags": [
+       "Golf",
+       "Venues & Event Spaces",
+       "Country Clubs"
+      ],
+      "icon_url": "https://static.rdc.moveaws.com/images/map/amenity-2023-1/40x40/outdoor.svg",
+      "photo_url": "https://s3-media0.fl.yelpcdn.com/bphoto/V40NooTXj7GafL_JtiFJbw/o.jpg",
+      "yelp_url": "https://www.yelp.com/biz/golf-club-of-the-everglades-naples?adjust_creative=realtor&utm_campaign=yelp_feed&utm_medium=feed_v2&utm_source=realtor",
+      "business_url": "http://gcegolf.net",
+      "reviews_url": "https://www.yelp.com/biz/golf-club-of-the-everglades-naples?adjust_creative=realtor&hrid=P8XYawE-pg7pzJjHk1WyWQ&utm_campaign=yelp_feed&utm_medium=feed_v2&utm_source=realtor",
+      "address": {
+       "line_one": "8835 Vanderbilt Beach Rd",
+       "line_two": "",
+       "city": "Naples",
+       "state_code": "FL",
+       "postal_code": "34120",
+       "lat": 26.244924841107128,
+       "lon": -81.6624227485526,
+       "distance_from_property": 0.8
+      }
+     }
+    ]
+   },
+   "all": [
+    {
+     "name": "Olde Florida Golf Club",
+     "phone": "+12393534441",
+     "rating": 5,
+     "reviews_count": 1,
+     "categories": [
+      "golf",
+      "local_active_and_outdoor"
+     ],
+     "display_tags": [
+      "Golf"
+     ],
+     "icon_url": "https://static.rdc.moveaws.com/images/map/amenity-2023-1/40x40/outdoor.svg",
+     "photo_url": null,
+     "yelp_url": "https://www.yelp.com/biz/olde-florida-golf-club-naples?adjust_creative=realtor&utm_campaign=yelp_feed&utm_medium=feed_v2&utm_source=realtor",
+     "business_url": null,
+     "reviews_url": "https://www.yelp.com/biz/olde-florida-golf-club-naples?adjust_creative=realtor&hrid=KXRRvyLB0DvB3CKR7sNrxQ&utm_campaign=yelp_feed&utm_medium=feed_v2&utm_source=realtor",
+     "address": {
+      "line_one": "9393 Vanderbilt Beach Rd Ext",
+      "line_two": "",
+      "city": "Naples",
+      "state_code": "FL",
+      "postal_code": "34120",
+      "lat": 26.24687955949277,
+      "lon": -81.65005259694594,
+      "distance_from_property": 0.24
+     }
+    },
+    {
+     "name": "Golf Club of the Everglades",
+     "phone": "+12393544727",
+     "rating": 2.5,
+     "reviews_count": 3,
+     "categories": [
+      "golf",
+      "venues",
+      "countryclubs",
+      "local_active_and_outdoor"
+     ],
+     "display_tags": [
+      "Golf",
+      "Venues & Event Spaces",
+      "Country Clubs"
+     ],
+     "icon_url": "https://static.rdc.moveaws.com/images/map/amenity-2023-1/40x40/outdoor.svg",
+     "photo_url": "https://s3-media0.fl.yelpcdn.com/bphoto/V40NooTXj7GafL_JtiFJbw/o.jpg",
+     "yelp_url": "https://www.yelp.com/biz/golf-club-of-the-everglades-naples?adjust_creative=realtor&utm_campaign=yelp_feed&utm_medium=feed_v2&utm_source=realtor",
+     "business_url": "http://gcegolf.net",
+     "reviews_url": "https://www.yelp.com/biz/golf-club-of-the-everglades-naples?adjust_creative=realtor&hrid=P8XYawE-pg7pzJjHk1WyWQ&utm_campaign=yelp_feed&utm_medium=feed_v2&utm_source=realtor",
+     "address": {
+      "line_one": "8835 Vanderbilt Beach Rd",
+      "line_two": "",
+      "city": "Naples",
+      "state_code": "FL",
+      "postal_code": "34120",
+      "lat": 26.244924841107128,
+      "lon": -81.6624227485526,
+      "distance_from_property": 0.8
+     }
+    },
+    {
+     "name": "Calusa Pines Golf Club",
+     "phone": "+12393482220",
+     "rating": 0,
+     "reviews_count": 0,
+     "categories": [
+      "golf",
+      "local_active_and_outdoor"
+     ],
+     "display_tags": [
+      "Golf"
+     ],
+     "icon_url": "https://static.rdc.moveaws.com/images/map/amenity-2023-1/40x40/outdoor.svg",
+     "photo_url": null,
+     "yelp_url": "https://www.yelp.com/biz/calusa-pines-golf-club-naples-3?adjust_creative=realtor&utm_campaign=yelp_feed&utm_medium=feed_v2&utm_source=realtor",
+     "business_url": "http://calusapinesgolfclub.com/web/pages/northstar",
+     "reviews_url": null,
+     "address": {
+      "line_one": "2250 Ridge Rd",
+      "line_two": "",
+      "city": "Naples",
+      "state_code": "FL",
+      "postal_code": "34120",
+      "lat": 26.2586577370647,
+      "lon": -81.6717644819412,
+      "distance_from_property": 1.42
+     }
+    },
+    {
+     "name": "Winn-Dixie",
+     "phone": "+12393043345",
+     "rating": 3,
+     "reviews_count": 26,
+     "categories": [
+      "grocery",
+      "local_groceries"
+     ],
+     "display_tags": [
+      "Grocery"
+     ],
+     "icon_url": "https://static.rdc.moveaws.com/images/map/amenity-2023-1/40x40/grocery.svg",
+     "photo_url": "https://s3-media0.fl.yelpcdn.com/bphoto/fXens7PilYb-MFvCQVjQIQ/o.jpg",
+     "yelp_url": "https://www.yelp.com/biz/winn-dixie-naples-7?adjust_creative=realtor&utm_campaign=yelp_feed&utm_medium=feed_v2&utm_source=realtor",
+     "business_url": "https://www.winndixie.com",
+     "reviews_url": "https://www.yelp.com/biz/winn-dixie-naples-7?adjust_creative=realtor&hrid=-yFw379pN6mgz18A13gBfQ&utm_campaign=yelp_feed&utm_medium=feed_v2&utm_source=realtor",
+     "address": {
+      "line_one": "7550 Mission Hills Dr",
+      "line_two": "",
+      "city": "Naples",
+      "state_code": "FL",
+      "postal_code": "34119",
+      "lat": 26.2459167845323,
+      "lon": -81.6904007873445,
+      "distance_from_property": 2.47
+     }
+    },
+    {
+     "name": "Blue Fish 66",
+     "phone": "+12392593666",
+     "rating": 0,
+     "reviews_count": 0,
+     "categories": [
+      "seafoodmarkets",
+      "meats",
+      "local_groceries"
+     ],
+     "display_tags": [
+      "Seafood Markets",
+      "Meat Shops"
+     ],
+     "icon_url": "https://static.rdc.moveaws.com/images/map/amenity-2023-1/40x40/grocery.svg",
+     "photo_url": "https://s3-media0.fl.yelpcdn.com/bphoto/rdqajPmHzsYmYaKi7NP_pg/o.jpg",
+     "yelp_url": "https://www.yelp.com/biz/blue-fish-66-naples?adjust_creative=realtor&utm_campaign=yelp_feed&utm_medium=feed_v2&utm_source=realtor",
+     "business_url": "https://bluefish66usa.square.site",
+     "reviews_url": null,
+     "address": {
+      "line_one": null,
+      "line_two": null,
+      "city": "Naples",
+      "state_code": "FL",
+      "postal_code": "34120",
+      "lat": 26.27886,
+      "lon": -81.6761,
+      "distance_from_property": 2.52
+     }
+    },
+    {
+     "name": "Publix Super Markets",
+     "phone": "+12393482931",
+     "rating": 3,
+     "reviews_count": 35,
+     "categories": [
+      "grocery",
+      "local_groceries"
+     ],
+     "display_tags": [
+      "Grocery"
+     ],
+     "icon_url": "https://static.rdc.moveaws.com/images/map/amenity-2023-1/40x40/grocery.svg",
+     "photo_url": "https://s3-media0.fl.yelpcdn.com/bphoto/bkWx8LZHvrzSU0gxxXglsQ/o.jpg",
+     "yelp_url": "https://www.yelp.com/biz/publix-super-markets-naples-10?adjust_creative=realtor&utm_campaign=yelp_feed&utm_medium=feed_v2&utm_source=realtor",
+     "business_url": "http://www.publix.com",
+     "reviews_url": "https://www.yelp.com/biz/publix-super-markets-naples-10?adjust_creative=realtor&hrid=4dnJ8yN_MqSBxaVidYWqWQ&utm_campaign=yelp_feed&utm_medium=feed_v2&utm_source=realtor",
+     "address": {
+      "line_one": "15265 Collier Blvd",
+      "line_two": "",
+      "city": "Naples",
+      "state_code": "FL",
+      "postal_code": "34119",
+      "lat": 26.27136629389882,
+      "lon": -81.69111389842357,
+      "distance_from_property": 2.89
+     }
+    },
+    {
+     "name": "Blackwater Nursery",
+     "phone": null,
+     "rating": 0,
+     "reviews_count": 0,
+     "categories": [
+      "gardening",
+      "local_shopping"
+     ],
+     "display_tags": [
+      "Nurseries & Gardening"
+     ],
+     "icon_url": "https://static.rdc.moveaws.com/images/map/amenity-2023-1/40x40/shopping.svg",
+     "photo_url": "https://s3-media0.fl.yelpcdn.com/bphoto/alMLaIsZxo0ZZc54gdmErw/o.jpg",
+     "yelp_url": "https://www.yelp.com/biz/blackwater-nursery-naples?adjust_creative=realtor&utm_campaign=yelp_feed&utm_medium=feed_v2&utm_source=realtor",
+     "business_url": "http://blackwaterplants.com",
+     "reviews_url": null,
+     "address": {
+      "line_one": "710 27th St NW",
+      "line_two": null,
+      "city": "Naples",
+      "state_code": "FL",
+      "postal_code": "34120",
+      "lat": 26.241816691479684,
+      "lon": -81.66131894500464,
+      "distance_from_property": 0.87
+     }
+    },
+    {
+     "name": "Samantha's Flowers",
+     "phone": "+12393481586",
+     "rating": 0,
+     "reviews_count": 0,
+     "categories": [
+      "florists",
+      "local_shopping"
+     ],
+     "display_tags": [
+      "Florists"
+     ],
+     "icon_url": "https://static.rdc.moveaws.com/images/map/amenity-2023-1/40x40/shopping.svg",
+     "photo_url": null,
+     "yelp_url": "https://www.yelp.com/biz/samanthas-flowers-naples?adjust_creative=realtor&utm_campaign=yelp_feed&utm_medium=feed_v2&utm_source=realtor",
+     "business_url": null,
+     "reviews_url": null,
+     "address": {
+      "line_one": "440 27th St NW",
+      "line_two": null,
+      "city": "Naples",
+      "state_code": "FL",
+      "postal_code": "34120",
+      "lat": 26.2373104,
+      "lon": -81.6602173,
+      "distance_from_property": 1.07
+     }
+    },
+    {
+     "name": "Collier Flowers",
+     "phone": "+12393540155",
+     "rating": 2,
+     "reviews_count": 11,
+     "categories": [
+      "florists",
+      "floraldesigners",
+      "local_shopping"
+     ],
+     "display_tags": [
+      "Florists",
+      "Floral Designers"
+     ],
+     "icon_url": "https://static.rdc.moveaws.com/images/map/amenity-2023-1/40x40/shopping.svg",
+     "photo_url": "https://s3-media0.fl.yelpcdn.com/bphoto/-aK0yuz1JHzH3gqAXuPaiQ/o.jpg",
+     "yelp_url": "https://www.yelp.com/biz/collier-flowers-naples?adjust_creative=realtor&utm_campaign=yelp_feed&utm_medium=feed_v2&utm_source=realtor",
+     "business_url": "http://www.collierflowersnaples.com",
+     "reviews_url": "https://www.yelp.com/biz/collier-flowers-naples?adjust_creative=realtor&hrid=OARlJcy1DldnayGJ6wy_Xg&utm_campaign=yelp_feed&utm_medium=feed_v2&utm_source=realtor",
+     "address": {
+      "line_one": "440 27th St NW",
+      "line_two": "",
+      "city": "Naples",
+      "state_code": "FL",
+      "postal_code": "34120",
+      "lat": 26.23731,
+      "lon": -81.66022,
+      "distance_from_property": 1.07
+     }
+    },
+    {
+     "name": "Studio Carvetta",
+     "phone": "+12393045950",
+     "rating": 0,
+     "reviews_count": 0,
+     "categories": [
+      "weightlosscenters",
+      "artclasses",
+      "specialtyschools",
+      "local_entertainment"
+     ],
+     "display_tags": [
+      "Weight Loss Centers",
+      "Art Classes",
+      "Specialty Schools"
+     ],
+     "icon_url": "https://static.rdc.moveaws.com/images/map/amenity-2023-1/40x40/entertainment.svg",
+     "photo_url": null,
+     "yelp_url": "https://www.yelp.com/biz/studio-carvetta-naples?adjust_creative=realtor&utm_campaign=yelp_feed&utm_medium=feed_v2&utm_source=realtor",
+     "business_url": "http://www.carvetta.com",
+     "reviews_url": null,
+     "address": {
+      "line_one": "161 17th St SW",
+      "line_two": "",
+      "city": "Naples",
+      "state_code": "FL",
+      "postal_code": "34117",
+      "lat": 26.2264519078276,
+      "lon": -81.6416086610375,
+      "distance_from_property": 1.74
+     }
+    },
+    {
+     "name": "Foreman Productions",
+     "phone": "+12392174400",
+     "rating": 0,
+     "reviews_count": 0,
+     "categories": [
+      "theater",
+      "djs",
+      "local_entertainment"
+     ],
+     "display_tags": [
+      "Performing Arts",
+      "DJs"
+     ],
+     "icon_url": "https://static.rdc.moveaws.com/images/map/amenity-2023-1/40x40/entertainment.svg",
+     "photo_url": null,
+     "yelp_url": "https://www.yelp.com/biz/foreman-productions-naples?adjust_creative=realtor&utm_campaign=yelp_feed&utm_medium=feed_v2&utm_source=realtor",
+     "business_url": "https://foreman-productions.com",
+     "reviews_url": null,
+     "address": {
+      "line_one": "400 12th Ave NW",
+      "line_two": null,
+      "city": "Naples",
+      "state_code": "FL",
+      "postal_code": "34120",
+      "lat": 26.25078,
+      "lon": -81.61561,
+      "distance_from_property": 2.19
+     }
+    },
+    {
+     "name": "The Sewing Bar",
+     "phone": "+18152101656",
+     "rating": 5,
+     "reviews_count": 1,
+     "categories": [
+      "artclasses",
+      "sewingalterations",
+      "local_entertainment"
+     ],
+     "display_tags": [
+      "Art Classes",
+      "Sewing & Alterations"
+     ],
+     "icon_url": "https://static.rdc.moveaws.com/images/map/amenity-2023-1/40x40/entertainment.svg",
+     "photo_url": "https://s3-media0.fl.yelpcdn.com/bphoto/UCT9ZPSmDzxdQ8flITgPDQ/o.jpg",
+     "yelp_url": "https://www.yelp.com/biz/the-sewing-bar-naples?adjust_creative=realtor&utm_campaign=yelp_feed&utm_medium=feed_v2&utm_source=realtor",
+     "business_url": "https://thesewingbar.com",
+     "reviews_url": "https://www.yelp.com/biz/the-sewing-bar-naples?adjust_creative=realtor&hrid=BrMXGENZlg-5UwTuslS9ZA&utm_campaign=yelp_feed&utm_medium=feed_v2&utm_source=realtor",
+     "address": {
+      "line_one": "3805 Helmsman Dr",
+      "line_two": null,
+      "city": "Naples",
+      "state_code": "FL",
+      "postal_code": "34120",
+      "lat": 26.25913942542924,
+      "lon": -81.6851562,
+      "distance_from_property": 2.21
+     }
+    },
+    {
+     "name": "Greyhawk at Golf Club Of The Everglades",
+     "phone": null,
+     "rating": 0,
+     "reviews_count": 0,
+     "categories": [
+      "tradamerican",
+      "local_food_and_drink"
+     ],
+     "display_tags": [
+      "American"
+     ],
+     "icon_url": "https://static.rdc.moveaws.com/images/map/amenity-2023-1/40x40/restaurants_desserts_breakfast.svg",
+     "photo_url": "https://s3-media0.fl.yelpcdn.com/bphoto/nvowoyy1ffDtYAIwYBw6ag/o.jpg",
+     "yelp_url": "https://www.yelp.com/biz/greyhawk-at-golf-club-of-the-everglades-naples?adjust_creative=realtor&utm_campaign=yelp_feed&utm_medium=feed_v2&utm_source=realtor",
+     "business_url": "https://www.greyhawkhoa.com",
+     "reviews_url": null,
+     "address": {
+      "line_one": "9275 Horned Lark Dr",
+      "line_two": "",
+      "city": "Naples",
+      "state_code": "FL",
+      "postal_code": "34120",
+      "lat": 26.250795,
+      "lon": -81.654727,
+      "distance_from_property": 0.24
+     }
+    },
+    {
+     "name": "Terrace Cafe",
+     "phone": "+12396929144",
+     "rating": 0,
+     "reviews_count": 0,
+     "categories": [
+      "cafes",
+      "restaurants",
+      "local_food_and_drink",
+      "local_cafes"
+     ],
+     "display_tags": [
+      "Cafes"
+     ],
+     "icon_url": "https://static.rdc.moveaws.com/images/map/amenity-2023-1/40x40/restaurants_desserts_breakfast.svg",
+     "photo_url": null,
+     "yelp_url": "https://www.yelp.com/biz/terrace-cafe-naples?adjust_creative=realtor&utm_campaign=yelp_feed&utm_medium=feed_v2&utm_source=realtor",
+     "business_url": null,
+     "reviews_url": null,
+     "address": {
+      "line_one": "8250 Danbury Blvd",
+      "line_two": null,
+      "city": "Naples",
+      "state_code": "FL",
+      "postal_code": "34120",
+      "lat": 26.2495441436768,
+      "lon": -81.6761474609375,
+      "distance_from_property": 1.56
+     }
+    },
+    {
+     "name": "7-Eleven",
+     "phone": "+12394555219",
+     "rating": 3,
+     "reviews_count": 3,
+     "categories": [
+      "convenience",
+      "coffee",
+      "local_food_and_drink",
+      "local_cafes"
+     ],
+     "display_tags": [
+      "Convenience Stores",
+      "Coffee & Tea"
+     ],
+     "icon_url": "https://static.rdc.moveaws.com/images/map/amenity-2023-1/40x40/coffee_tea.svg",
+     "photo_url": "https://s3-media0.fl.yelpcdn.com/bphoto/Gb91wByQVMthRV7-CuAHkw/o.jpg",
+     "yelp_url": "https://www.yelp.com/biz/7-eleven-naples-16?adjust_creative=realtor&utm_campaign=yelp_feed&utm_medium=feed_v2&utm_source=realtor",
+     "business_url": "http://www.7-eleven.com",
+     "reviews_url": "https://www.yelp.com/biz/7-eleven-naples-16?adjust_creative=realtor&hrid=3jj7ZWhPwKr0KMoaU9gGwg&utm_campaign=yelp_feed&utm_medium=feed_v2&utm_source=realtor",
+     "address": {
+      "line_one": "14267 Collier Blvd",
+      "line_two": null,
+      "city": "Naples",
+      "state_code": "FL",
+      "postal_code": "34119",
+      "lat": 26.2462853275919,
+      "lon": -81.6890761256217,
+      "distance_from_property": 2.38
+     }
+    },
+    {
+     "name": "Dunkin'",
+     "phone": "+12393520667",
+     "rating": 2,
+     "reviews_count": 29,
+     "categories": [
+      "donuts",
+      "coffee",
+      "local_food_and_drink",
+      "local_cafes"
+     ],
+     "display_tags": [
+      "Donuts",
+      "Coffee & Tea"
+     ],
+     "icon_url": "https://static.rdc.moveaws.com/images/map/amenity-2023-1/40x40/coffee_tea.svg",
+     "photo_url": "https://s3-media0.fl.yelpcdn.com/bphoto/gkUL34-GD9pNynXau2ziog/o.jpg",
+     "yelp_url": "https://www.yelp.com/biz/dunkin-naples-10?adjust_creative=realtor&utm_campaign=yelp_feed&utm_medium=feed_v2&utm_source=realtor",
+     "business_url": "https://locations.dunkindonuts.com/en/fl/naples/14259-collier-blvd/352128",
+     "reviews_url": "https://www.yelp.com/biz/dunkin-naples-10?adjust_creative=realtor&hrid=wNX2M8zARgXZKdcO0PX6_g&utm_campaign=yelp_feed&utm_medium=feed_v2&utm_source=realtor",
+     "address": {
+      "line_one": "14259 Collier Blvd",
+      "line_two": "",
+      "city": "Naples",
+      "state_code": "FL",
+      "postal_code": "34119",
+      "lat": 26.24556671120342,
+      "lon": -81.68898267961237,
+      "distance_from_property": 2.38
+     }
+    },
+    {
+     "name": "Creative World School - North Naples",
+     "phone": "+12394553628",
+     "rating": 0,
+     "reviews_count": 0,
+     "categories": [
+      "preschools",
+      "childcare",
+      "summer_camps",
+      "local_active_and_outdoor",
+      "local_preschools"
+     ],
+     "display_tags": [
+      "Preschools",
+      "Child Care & Day Care",
+      "Summer Camps"
+     ],
+     "icon_url": "https://static.rdc.moveaws.com/images/map/amenity-2023-1/40x40/outdoor.svg",
+     "photo_url": "https://s3-media0.fl.yelpcdn.com/bphoto/3fPfxNtd-J-kicRqKAWIIA/o.jpg",
+     "yelp_url": "https://www.yelp.com/biz/creative-world-school-coming-soon-naples?adjust_creative=realtor&utm_campaign=yelp_feed&utm_medium=feed_v2&utm_source=realtor",
+     "business_url": "https://creativeworldschool.com",
+     "reviews_url": null,
+     "address": {
+      "line_one": "10266 Immokalee Rd",
+      "line_two": null,
+      "city": "Naples",
+      "state_code": "FL",
+      "postal_code": "34120",
+      "lat": 26.27262615567596,
+      "lon": -81.65041649999999,
+      "distance_from_property": 1.54
+     }
+    },
+    {
+     "name": "Peace Early Learning Center",
+     "phone": "+12393549140",
+     "rating": 4,
+     "reviews_count": 4,
+     "categories": [
+      "preschools",
+      "childcare",
+      "local_preschools"
+     ],
+     "display_tags": [
+      "Preschools",
+      "Child Care & Day Care"
+     ],
+     "icon_url": "https://static.rdc.moveaws.com/images/map/amenity-2023-1/40x40/preschools.svg",
+     "photo_url": "https://s3-media0.fl.yelpcdn.com/bphoto/_adx25ayYcknivSDN4AJKA/o.jpg",
+     "yelp_url": "https://www.yelp.com/biz/peace-early-learning-center-naples?adjust_creative=realtor&utm_campaign=yelp_feed&utm_medium=feed_v2&utm_source=realtor",
+     "business_url": "http://www.peacekidsnaples.org",
+     "reviews_url": "https://www.yelp.com/biz/peace-early-learning-center-naples?adjust_creative=realtor&hrid=s2VdZPoIRRGmoMsb5qetjQ&utm_campaign=yelp_feed&utm_medium=feed_v2&utm_source=realtor",
+     "address": {
+      "line_one": "9850 Immokalee Rd",
+      "line_two": "",
+      "city": "Naples",
+      "state_code": "FL",
+      "postal_code": "34120",
+      "lat": 26.2730396,
+      "lon": -81.6686366,
+      "distance_from_property": 1.92
+     }
+    },
+    {
+     "name": "DNV Sunshine Home Daycare",
+     "phone": "+17864054180",
+     "rating": 0,
+     "reviews_count": 0,
+     "categories": [
+      "childcare",
+      "local_preschools"
+     ],
+     "display_tags": [
+      "Child Care & Day Care"
+     ],
+     "icon_url": "https://static.rdc.moveaws.com/images/map/amenity-2023-1/40x40/preschools.svg",
+     "photo_url": "https://s3-media0.fl.yelpcdn.com/bphoto/A8Vv7mmhvoPp1VWwaRBwcg/o.jpg",
+     "yelp_url": "https://www.yelp.com/biz/dnv-sunshine-home-daycare-naples?adjust_creative=realtor&utm_campaign=yelp_feed&utm_medium=feed_v2&utm_source=realtor",
+     "business_url": null,
+     "reviews_url": null,
+     "address": {
+      "line_one": "1130 Golden Gate Blvd W",
+      "line_two": null,
+      "city": "Naples",
+      "state_code": "FL",
+      "postal_code": "34120",
+      "lat": 26.2289583,
+      "lon": -81.6295605,
+      "distance_from_property": 1.98
+     }
+    }
+   ]
+  }
+ }
+}
