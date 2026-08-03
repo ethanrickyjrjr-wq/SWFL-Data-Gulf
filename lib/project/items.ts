@@ -124,6 +124,20 @@ const kinds = z.discriminatedUnion("kind", [
     table_id: z.string().optional(),
     title: z.string(),
   }),
+  z.object({
+    // A figure the USER stated (four-lane sourcing lane 4). NOT lake data:
+    // no freshness_token, no report_id. It renders ONLY with its "as stated
+    // by you" provenance (spec 2026-08-03 §5); the build-side no-invention
+    // lint remains the output enforcement point.
+    kind: z.literal("user_figure"),
+    label: z.string().min(1),
+    /** The value exactly as the user stated it — string, never re-typed. */
+    value: z.string().min(1),
+    unit: z.string().optional(),
+    /** MM/DD/YYYY, per the as-of convention. */
+    as_of: z.string().optional(),
+    stated_by: z.literal("user"),
+  }),
 ]);
 
 export const projectItemSchema = z.intersection(base, kinds);
