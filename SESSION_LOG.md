@@ -1,3 +1,44 @@
+## 2026-08-02 (Sonnet) — SteadyAPI raw-landing Step 2 COMPLETE: 17,863/17,880 backfilled, wipe-guard verified live before logging safe
+
+Step 2 of `docs/superpowers/plans/2026-08-02-steadyapi-raw-landing-playbook.md` (the paid ~17,880-call
+backfill) finished. Operator go: dashboard screenshot confirmed 1,430/50,000 monthly requests used
+before launch (massive headroom vs the stale ~13-16k/mo estimate). Canary (`--limit 15`) verified both
+writes live before the full run.
+
+Two real incidents mid-run, both root-caused with live evidence, not guessed:
+1. **Log went stale under `nohup` stdout buffering while the pipeline kept writing correctly.** First
+   run (`--batch 200`) showed zero new log lines for 2+ hours; OS-level checks (CPU-time delta, live
+   TCP connection to the vendor) proved the process was still working, but I killed it anyway on the
+   operator's call that 2 hours of silence was unacceptable regardless of cause — then discovered via a
+   direct DB query (not the log) that 10,188 of 17,865 were ALREADY safely committed, far past what the
+   log showed (3,195). Restarted with `python -u` (unbuffered) + `--batch 50` for real visibility.
+2. **Second run's log went stale too near the end** (same OS/redirection-layer issue survives `-u` —
+   root cause still open, not just a Python buffering bug). Diagnosed by DB query again, not log
+   re-reading: `backfill_reachable` was 17 and the process had already exited clean.
+
+**Final: 17,863 of 17,880 written (99.9%). 17 permanent gaps** — verified individually (real addresses,
+spread across Lee/Collier/Hendry, no clustering pattern) — the vendor's `property_history` genuinely
+carries no 'Listed' event for these; the code correctly declined to fabricate a value.
+`data_lake.steadyapi_property_history_raw` holds 17,875 raw bodies. Closed `dom_backfill_repull_17k`
+with this evidence.
+
+**Wipe-guard verified live before calling this safe** — operator's explicit ask, since this exact class
+of data has been nightly-sweep-wiped twice before (`listed_date` 07/18, `baths` 07/26/2026).
+Four-lane-confirmed, not assumed: CODE — `distill.py` `_ENRICH_ONLY_COLS = ("listed_date", "baths")`
+with `COALESCE(EXCLUDED.listed_date, listing_state.listed_date)` is live right now (pre-existing guard
+from 07/18, not something added today); CATALOG — `cadence_registry.yaml`'s `listing_lifecycle` entry
+documents the same design; RESEARCH — the playbook's own "twice-fired gun" failure-modes table; LIVE —
+`SELECT count(*) ... listed_date IS NOT NULL` → 30,338 active-sale rows hold a real value right now. The
+raw-landing table is architecturally immune to this failure class too: it's a separate table, never part
+of the `/search` sweep's blanket-overwrite MERGE, only ever written from real (non-null) probe bodies.
+
+Crons (`ingest-listing-lifecycle`, `Nightly Chain`) remain `disabled_manually`, `ENGINE_ENABLED=false` —
+re-enabling (playbook Step 5) is still an explicit operator/agent-with-approval action, not yet taken.
+
+NOT done: Step 3 (typed tables parsed from the 17,875 raw JSONB bodies — tax_history[],
+building_permits[], property_history[] — zero more paid calls) is next and not started. Step 5
+(re-enable crons) waits on Step 3 per the playbook's chosen build order.
+
 ## 2026-08-02 (Fable 5) — "wire!!!" decree: LeePA beds/baths into the comp path + email baths lane, home-values-swfl into master
 
 Operator decreed WIRE on the unwired inventory (four-lane answer first: community info IS wired —
