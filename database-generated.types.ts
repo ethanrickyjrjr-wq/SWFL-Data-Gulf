@@ -3885,6 +3885,33 @@ export interface Database {
         };
         Relationships: [];
       };
+      user_api_tokens: {
+        Row: {
+          id: string;
+          user_id: string;
+          token_hash: string;
+          label: string | null;
+          created_at: string;
+          last_used_at: string | null;
+        };
+        Insert: {
+          id?: string;
+          user_id: string;
+          token_hash: string;
+          label?: string | null;
+          created_at?: string;
+          last_used_at?: string | null;
+        };
+        Update: {
+          id?: string;
+          user_id?: string;
+          token_hash?: string;
+          label?: string | null;
+          created_at?: string;
+          last_used_at?: string | null;
+        };
+        Relationships: [];
+      };
       user_brand_profiles: {
         Row: {
           id: string;
@@ -4014,6 +4041,63 @@ export interface Database {
           preferred_recipe?: string | null;
           default_photo_ratio?: string | null;
           agent_bio?: string | null;
+        };
+        Relationships: [];
+      };
+      user_listings: {
+        Row: {
+          id: string;
+          user_id: string;
+          address: string;
+          address_key: string;
+          price: number | null;
+          beds: number | null;
+          baths: number | null;
+          sqft: number | null;
+          status: string | null;
+          url: string | null;
+          attribs: Json;
+          zip_code: string | null;
+          county: string | null;
+          parcel_id: string | null;
+          created_at: string;
+          updated_at: string;
+        };
+        Insert: {
+          id?: string;
+          user_id: string;
+          address: string;
+          address_key: string;
+          price?: number | null;
+          beds?: number | null;
+          baths?: number | null;
+          sqft?: number | null;
+          status?: string | null;
+          url?: string | null;
+          attribs?: Json;
+          zip_code?: string | null;
+          county?: string | null;
+          parcel_id?: string | null;
+          created_at?: string;
+          updated_at?: string;
+        };
+        Update: {
+          id?: string;
+          user_id?: string;
+          address?: string;
+          address_key?: string;
+          price?: number | null;
+          beds?: number | null;
+          baths?: number | null;
+          sqft?: number | null;
+          status?: string | null;
+          url?: string | null;
+          attribs?: Json;
+          zip_code?: string | null;
+          county?: string | null;
+          parcel_id?: string | null;
+          created_at?: string;
+          updated_at?: string;
         };
         Relationships: [];
       };
