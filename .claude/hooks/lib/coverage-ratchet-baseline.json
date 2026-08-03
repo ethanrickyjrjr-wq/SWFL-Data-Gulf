@@ -44,7 +44,6 @@
   "lee_permits": ["raw_landing_class"],
   "leepa": ["raw_landing_class"],
   "leepa_comp_sales": ["raw_landing_class"],
-  "listing_lifecycle": ["raw_landing_class"],
   "listing_week": ["raw_landing_class"],
   "live_search_daily_median_asking": ["raw_landing_class"],
   "live_search_daily_mortgage": ["raw_landing_class"],

@@ -2168,6 +2168,9 @@ not_yet_running:
     workflow: neighborhood-amenities-daily.yml
     consuming_pack: communities-swfl
     lane: tier-2
+    raw_landing_class: paid_landed # 08/03/2026 — SteadyAPI neighborhood bodies land via the paid
+      # per-property call (500/run cap, 1 req/s). Same class + same vendor as listing_lifecycle
+      # above; filled here because Gate 11 flagged it as a gap absent from the baseline.
     cadence_days: 1
     tolerance_multiplier: 2.0
     # Parked while its cron is ALREADY LIVE — the deliberate graduation window the
