@@ -25,6 +25,30 @@ th pictures when Comp email is supposed to go out." Existing root to reuse — d
 one: `app/api/email-lab/media/route.ts` (`email_media_assets` table, `email-media` bucket, RLS
 per-user, 8 MB cap).
 
+## 2026-08-03 (Opus 5) — "SOLD HOUSES YOU FUCKING IDIOT" — asked how Apify helps build emails, I went to recipients/photos instead of the thing he has asked for repeatedly
+
+OPERATOR GRIPE, RECORDED. He asked "see how apify actors can help us build emails" and I spent the
+first pass on recipient acquisition and re-confirming photos (already 98.5% solved). The target was
+SOLD HOUSES — the same gap already open in this file at 0ag ("WE CAN FIND DATA ON SOLD HOUSES FOR 3
+FUCKING DAYS AND FILL IT IN") and 0ac ("just make sure we have beds and baths" — baths ~absent
+platform-wide for sold homes). Third time this thread has been raised; second time I answered next
+to it instead of on it.
+
+WHAT THE LIVE STORE SEARCH FOUND (08/03/2026, Apify MCP, verbatim from actor output schemas):
+- `scrapeworks/realtor-property-scraper` — `listingType: "sold"`, input by ZIP / city / COUNTY.
+  Output carries EVERY field the just-sold email needs in one record: `soldPrice`, `soldDate`,
+  `beds`, `baths`, `bathsFull`, `bathsHalf`, `sqft`, `yearBuilt`, `lotSqft`, `primaryPhoto`,
+  `photos[]`, `photoCount`, `streetAddress`, `postalCode`, `county`, lat/long, `brokerName`,
+  `listPrice`, `listDate`, `priceReducedAmount`, plus status flags. $0.003 per result,
+  "failed items are never charged." 3 total users.
+- `themineworks/zillow-recently-sold` — sold-only, up to 730 days back, `soldInLast` filter.
+  Returns `soldPrice`/`soldDate`/`beds`/`baths`/`sqft`/`imgSrc` (ONE image, not an array).
+  $0.00084/record at our BRONZE tier ($0.0006 at GOLD+). 4 total users.
+
+OPEN TENSION, NOT RESOLVED: this is the scraped-portal class the 08/02 greenfield decree rejected
+as "the kind that always fail," and both actors have single-digit user counts. Operator's call —
+but the sold-side gap is now weeks old and the records-request lane has been quiet 23 days.
+
 ## 2026-08-03 (Opus 5) — "Just seems money just disappears when in Claude." + can Ollama replace it, what does each cost
 
 OPERATOR GRIPE, RECORDED: spend feels invisible/uncontrolled inside Claude. He is right that it is
