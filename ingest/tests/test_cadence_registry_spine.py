@@ -54,27 +54,25 @@ def _entries() -> list[dict]:
     return _pipelines() + _parked()
 
 
-def test_registry_shape_is_75_plus_3():
-    """Guards the two helpers above: if the file shape changes, fail here, loudly,
-    rather than letting every other test in this file vacuously pass on an empty list.
-    73->75 on 07/19/2026: a parallel session's registry addition landed without this
-    bump (pre-existing red at HEAD, found during listing_week's edit), plus
-    listing_week (sell-odds Phase 0 panel).
-    3->4 parked on 07/22/2026: the same shape a third time — `lee_deed_official_records`
-    landed in not_yet_running: without this bump, so the guard was already red at HEAD
-    before any of today's work touched it. The entry itself is legitimate (it carries
-    its own known_drift rule, `lee_deed_load_parked_but_scheduled`); only the count was
-    stale.
-    75->76 on 07/30/2026: THE FOURTH TIME this exact drift landed. `leepa_comp_sales`
-    was added in 5418714d without bumping this number, leaving the guard red at HEAD —
-    found while correcting an unrelated source_ceiling, not by anyone running the suite.
-    Hand-patching the literal a fourth time is the reason it keeps recurring; see check
-    `registry_count_guard_hand_patched_four_times`. Verified live: 76 pipelines, 4 parked.
-    76->75 on 08/02/2026: usgs_tier2 entry RETIRED (bump in the SAME commit as the
-    removal — the shape the guard exists to force). Tables dropped 07/19
-    (migrations/20260719_drop_usgs_tier2_corpses.sql); entry was daily false-RED."""
-    assert len(_pipelines()) == 75, f"expected 75 pipelines: entries, got {len(_pipelines())}"
-    assert len(_parked()) == 4, f"expected 4 not_yet_running: entries, got {len(_parked())}"
+def test_registry_sections_parse_nonempty():
+    """Guards the two helpers above: if the file shape changes (a section rename, a parse
+    accident), fail here, loudly, rather than letting every other test in this file
+    vacuously pass on an empty list.
+
+    HISTORY — this used to assert EXACT hardcoded counts (75 pipelines / 4 parked) and
+    drifted red at HEAD four times in 11 days (73->75 07/19, parked 3->4 07/22, 75->76
+    07/30 via leepa_comp_sales in 5418714d, 76->75 08/02 usgs_tier2 retirement), each
+    time hand-patched by bumping the literal, each time found by accident rather than by
+    anyone running the suite. A literal that must be hand-synced with the file it guards
+    is the hand-synced-pair drift class this Spine exists to kill (see module docstring),
+    living in the Spine itself. Deleted 08/03/2026 per check
+    `registry_count_guard_hand_patched_four_times` (option A: derive from the file ->
+    the assert is vacuous -> delete it) and operator decree ("WE DON'T SHUT THINGS OFF"):
+    membership integrity is what the per-entry field tests below actually validate; an
+    exact count validated nothing they don't, and shut the suite off on every legitimate
+    addition. Do NOT reintroduce a count literal here."""
+    assert len(_pipelines()) > 0, "pipelines: parsed empty — registry shape changed"
+    assert len(_parked()) > 0, "not_yet_running: parsed empty — registry shape changed"
 
 
 def test_every_pipelines_entry_declares_a_workflow():

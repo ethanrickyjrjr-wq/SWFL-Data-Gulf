@@ -1668,6 +1668,40 @@ pipelines:
         source_url: "https://www.mhsappraisal.com/market-trends-2026/"
         source_label: "MHS Appraisal 2026 Data Book"
 
+  - name: cre_figures
+    workflow: none
+    consuming_pack: none # STATED FACT (08/03/2026): zero consumers read cre_figures /
+      # cre_figures_confidence today — the consumer decision (cre-swfl reading the
+      # confidence layer) is the open half of the 08/02 wire decree.
+    dispatch_only: true # MANUAL BUILD: `bun scripts/build-cre-figures.mjs` — full refresh of
+      # both tables, refuses to wipe on an empty build. Derived layer over
+      # data_lake.marketbeat_swfl (all four firms), normalized to canonical_submarket x
+      # sector x quarter x metric x firm + corroboration confidence tiers.
+      # GHA cron wrapper still owed: check cre_figures_build_cron_cadence.
+    lane: tier-2
+    cadence_days: 92 # quarterly — every upstream marketbeat_swfl lane is a quarterly firm report
+    tolerance_multiplier: 1.5
+    freshness_table: data_lake.cre_figures
+    freshness_column: built_at
+    # NO source_name: cre_figures has no source_name column (per-firm provenance lives in
+    # source_firm); check_freshness falls through to unscoped MAX(built_at), which is correct
+    # for a full-refresh derived table.
+    expected_rows_min: 970 # 90% of 1,078 live rows (SQL count 08/03/2026; confidence layer 985)
+    # Secondary table data_lake.cre_figures_confidence is materialized by the same build —
+    # both tables share this one freshness target since one script writes both atomically.
+    # Table DDL: migrations/20260718_cre_figures.sql. Corroboration engine:
+    # refinery/lib/derived/cre-figures.mts + cre-corroboration.mts.
+    source_scope:
+      confirmed_total:
+        value: 1078
+        as_of: "2026-08-03"
+        source: "our build (live SQL count; grain canonical_submarket x sector x quarter x metric x source_firm, 6 metrics from all marketbeat_swfl firms)"
+      source_ceiling:
+        summary: "Derived table — the ceiling is data_lake.marketbeat_swfl itself (every firm row, no verified filter, per the 07/18 operator decree). Grows only when upstream marketbeat lanes land new quarters; no external vendor surface beyond those already-registered lanes."
+        as_of: "08/03/2026"
+        source_url: "https://www.swfldatagulf.com"
+        source_label: "SWFL Data Gulf derived layer (upstream: cw_marketbeat / colliers / mhs_databook / lee_associates entries)"
+
   - name: swfl_search_demand
     workflow: swfl-search-demand-monthly.yml
     consuming_pack: none

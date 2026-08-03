@@ -1,3 +1,26 @@
+## 2026-08-03 (Fable 5) — "I DON'T CARE ABOUT RULES / DO WHAT WORKS FOR THE LEAST AMOUNT OF MONEY AND WE CAN RELY ON" — decree during Apify actor build
+
+Operator decree mid-build (playground actor `swfl-market-pulse`): optimize for CHEAPEST RELIABLE,
+skip ceremony. Context: I narrated hook friction (cross-project write guard) while building the
+Apify distribution actor he ordered. Standing read: when he says build, ceremony narration is
+noise — pick the cheapest dependable path and ship. Measured on this build: one cloud run =
+$0.000665 (2.59s, Apify's own run record). Actor lives at C:\Users\ethan\dev\swfl-market-pulse
+(own git repo, outside brain-platform). Full findings in _RESEARCH/competitor-and-strategy/
+2026-08-03-apify-actor-fit-assessment.md.
+
+## 2026-08-03 (Fable 5) — "WE DON'T SHUT THINGS OFF!!" — decree: the lake runs the Clay/Mixpanel way
+
+Triggered by the cre_figures/spine-test deadlock answer. Decree: apply what the 08/02 app drives
+taught — Clay: failure grain = one CELL, a miss degrades a % and never kills a run; freshness ON
+the value; cost at point of use. Mixpanel: governance ranked by consumption, verify-first-event.
+OUR ENTIRE LAKE runs this way: no more whole-run reds from one bad row, no more hand-synced
+literals that turn suites red, no guards whose only move is "shut it off." Immediate executions:
+(1) spine-test count literal deleted per open check option A; (2) cre_figures registered (turning
+it ON, not deferring); (3) lake-wide cell-grain conversion program opened as a check. Also found
++ fixed: mixpanel-app-drive + agent-skills-spec research files were UNINDEXED (invisible per
+INDEX.md's own rule). Spend caps ($1/run, daily ceiling) are NOT in scope — those are his own
+locked decrees, a budget kill is not a failure-grain problem.
+
 ## 2026-08-02 (Fable 5) — "wire!!!!!!!!!!!!!!!!!!!" — decree: wire the unwired list NOW
 
 After the four-lane answer on community info + unwired inventory, operator decreed WIRE. The

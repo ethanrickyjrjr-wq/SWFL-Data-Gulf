@@ -1,3 +1,21 @@
+## 2026-08-03 (Fable 5) — "WE DON'T SHUT THINGS OFF" decree: spine count-guard mechanism fixed, cre_figures registered, lake cell-grain program opened
+
+Operator decree (Clay/Mixpanel app-drive lessons, 08/02 research): the lake runs the Clay way —
+failure grain = one cell, a miss degrades a %, never kills a run. Executed 5 of 6: (1) scratchpad
+decree entry; (2) spine test's hand-synced 75/4 count literals DELETED per check
+registry_count_guard_hand_patched_four_times option A — replaced by parse-shape non-empty guard
+(the literal was itself the hand-synced-pair drift class the Spine says it kills; redded HEAD 4x
+in 11 days); (3) cre_figures + cre_figures_confidence registered in cadence_registry (workflow
+none + dispatch_only, mhs precedent; quarterly, freshness on built_at unscoped — check_freshness
+fallthrough verified at :255; floor 970 = 90% of live 1,078); suite evidence: 16 passed in 0.16s
+WITH the new entry — the operation that broke it four times now lands green; (4) checks closed
+w/ evidence: registry_count_guard_hand_patched_four_times, cre_figures_unregistered
+(cre_figures_build_cron_cadence stays open — cron wrapper owed); (5) opened
+lake_cell_grain_failure_semantics (the ENTIRE-LAKE conversion program: row-grain ingest, freshness
+on the value, cost-at-point-of-use, usage-ranked governance; needs RULE 3.5 brainstorm before
+code). NOT done (6): _RESEARCH/INDEX.md lines for mixpanel-app-drive + agent-skills-spec —
+blocked by live parallel session's repolith claim; check research_index_mixpanel_lines opened.
+
 ## 2026-08-02 (Sonnet) — SteadyAPI raw-landing Step 2 COMPLETE: 17,863/17,880 backfilled, wipe-guard verified live before logging safe
 
 Step 2 of `docs/superpowers/plans/2026-08-02-steadyapi-raw-landing-playbook.md` (the paid ~17,880-call
