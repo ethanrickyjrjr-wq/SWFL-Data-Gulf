@@ -1,3 +1,21 @@
+## 2026-08-03 (Fable 5) — paid CSV export SHIPPED (subagent-driven, 5/5 tasks + adversarial final review)
+
+Clay-research twin of the share loop (operator: "pay only can download"; spec
+`2026-08-03-csv-export-paid-design.md`, plan `2026-08-03-csv-export-paid.md`). Shipped on main:
+`f23c2374` surface registry (the export-view whitelist — contacts + listings, banned-column test
+generic over every entry), `b67328ee`+`faa0bc82` pure CSV builder (BOM shipped as invisible literal
+in round 1 — caught by byte-level review, fixed to explicit `\uFEFF`), `7eadf42f`+`d9160bb3` gated
+`GET /api/export/[surface]` (reviewer caught `__proto__` bypassing the 404 gate → `Object.hasOwn`
+guard + failing-first test), `a2b122ec` contacts Download button (tier finally read off GET
+/api/contacts), `e4cf1474` final-review wave (standalone FM4 test, null-tier button state so paid
+users never see the lock flash, shared `PAID_TIERS` export, no-store, maxDuration 30, read-error
+logging). All 9 spec failure modes have named passing tests; FM5 runs 1001 rows through the REAL
+selectAllPaged (two pages). Evidence: `bun test lib/export lib/billing route.test.ts` 49 pass/0
+fail · `bunx next build` ✓ 102 pages · final reviewer verdict "ship it". Check
+`csv_export_paid_live_verify` stays OPEN (needs paid-session Excel evidence: `=2+2` arrives as
+text, free session 402/locked). Listings button deliberately absent — follows the user-data lane's
+list UI. Ops route-map snapshot now stale (`/api/export/[surface]` new).
+
 ## 2026-08-03 (Fable 5) — share-by-link growth loop SHIPPED (subagent-driven, 4/4 tasks + final review)
 
 Clay-research spinoff (operator: "pay only can download… create a collaborate button or share by
