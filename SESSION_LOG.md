@@ -1,3 +1,26 @@
+## 2026-08-03 (Sonnet 5) — real baths on listings-showcase cards: FREE property_id-keyed lake lane, no vendor spend
+
+Resolved `_ASSISTANT/2026-08-03-listings-baths-HANDOFF.md`'s 3 investigation questions from our
+own code + a live query (no crawl4ai needed): `data_lake.listing_state.baths` is already filled by
+the nightly ingest's lat/lon-CLUSTERED `/nearby-home-values` batch enrich — property_id-keyed, NOT
+address-matched — so it resolves streetless new-construction/spec-home listings too, at ZERO live
+vendor calls per email build. Live fill rate measured: 20.1% addressed / 15.2% streetless (a
+backlog-completeness gap, not the address-availability problem the handoff hypothesized). Findings
+filed `_RESEARCH/data-and-ingest/2026-08-03-listings-baths-fill-rate-and-lake-lane.md`, indexed.
+
+Shipped (TDD, RULE 3.5): `lib/listings/select.ts fetchLakeBathsByPropertyId()` + `lib/deliverable/
+recipes/listings-showcase.ts enrichBaths()`, wired into `buildListingsShowcase` right after the
+final ≤3 picks are chosen. Additive only — `resolve-subject.ts withBaths()`'s existing
+single-address callers untouched; `comp-helper.ts`/`under-contract.ts` (the other two
+`fetchPhotoListings` consumers) intentionally NOT touched per the handoff. Opened check
+`listing_state_baths_backfill_completeness` for the real gap (re-running `backfill_baths.py` at
+scale needs operator go-ahead — real vendor quota, not spent in the dev loop).
+
+**Process note:** started this in a worktree (`select.ts` was claimed by a parallel session) but
+`_RESEARCH/` is gitignored so the worktree never had `INDEX.md` — had to exit, write research
+directly in the main tree, then patch the code changes back in once the claim cleared. Should have
+just checked the claim status before reaching for isolation.
+
 ## 2026-08-03 (Opus 5) — SPEC ONLY, no code: realtor.com-style multi-category listings digest + a ZIP→city defect found while confirming scope
 
 Operator: *"We need to create the recipe to produce emails like realtor.com. Categories. No dupes

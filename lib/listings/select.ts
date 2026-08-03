@@ -330,6 +330,44 @@ export async function healFlooredRows(
   );
 }
 
+/** FREE, address-independent baths lane (08/03/2026 handoff — `_ASSISTANT/2026-08-03-
+ *  listings-baths-HANDOFF.md`): `data_lake.listing_state.baths` by `property_id`. This is
+ *  the SAME column the nightly ingest fills via a lat/lon-CLUSTERED `/nearby-home-values`
+ *  batch enrich (`ingest/pipelines/listing_lifecycle/extract_api.py enrich_baths_batched`)
+ *  — never an address match — so it resolves for streetless new-construction/spec-home
+ *  listings too (`fetchPhotoListings`'s `bathrooms: null` rows), at ZERO live vendor calls
+ *  per request: a plain SELECT against already-paid-for ingest, ahead of the paid
+ *  `/nearby-home-values` fallback in `resolve-subject.ts withBaths()` in provenance order.
+ *  Live fill-rate measured 08/03/2026 (Cape Coral/Fort Myers/Naples, active for-sale,
+ *  non-land): ~20% — real but partial, so callers still need a fallback for the rest.
+ *  Absent from the returned Map = unresolved (never a fabricated 0). Empty-tolerant: no
+ *  creds, no ids, any query error → empty Map, never throws. */
+export async function fetchLakeBathsByPropertyId(
+  propertyIds: readonly string[],
+): Promise<Map<string, number>> {
+  const ids = propertyIds.filter(Boolean);
+  const out = new Map<string, number>();
+  if (ids.length === 0) return out;
+  try {
+    const db = createServiceRoleClientUntyped();
+    const { data } = await db
+      .schema("data_lake")
+      .from("listing_state")
+      .select("property_id, baths")
+      .in("property_id", ids)
+      .not("baths", "is", null);
+    if (!Array.isArray(data)) return out;
+    for (const row of data as { property_id: string | null; baths: number | null }[]) {
+      if (row.property_id != null && row.baths != null && !out.has(row.property_id)) {
+        out.set(row.property_id, row.baths);
+      }
+    }
+    return out;
+  } catch {
+    return out;
+  }
+}
+
 /** Fetch active for-sale listings for one city straight from the lake (populated daily by
  *  ingest/pipelines/listing_lifecycle — no live vendor call, no per-request cost). Empty-tolerant:
  *  no creds, no rows, any query error → `[]`, never throws (four-lane/ODD contract). */

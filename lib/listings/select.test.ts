@@ -31,6 +31,8 @@ interface FakeRow {
 function makeChain(rows: FakeRow[]) {
   const chain: Record<string, unknown> = {};
   chain.eq = () => chain;
+  chain.in = () => chain;
+  chain.not = () => chain;
   chain.limit = () => chain;
   chain.then = (resolve: (r: { data: FakeRow[]; error: null }) => void) =>
     resolve({ data: rows, error: null });
@@ -150,6 +152,29 @@ test("healFlooredRows: probe failure keeps the floor — degraded, never broken"
   });
   expect(rows[0].dom_is_floor).toBe(true);
   expect(rows[0].dom_days).toBe(15);
+});
+
+// ── FREE, address-independent baths lane (08/03/2026 handoff): data_lake.listing_state
+// .baths by property_id — the same column the nightly /nearby-home-values batch-enrich
+// fills via lat/lon clustering (never address-keyed), so it resolves for streetless
+// new-construction/spec-home listings too, at zero live vendor cost per request. ──
+const { fetchLakeBathsByPropertyId } = await import("./select");
+
+test("fetchLakeBathsByPropertyId maps property_id -> baths, skips nulls and unknown ids", async () => {
+  rowsForNextCall = [
+    { ...SAMPLE_ROW, property_id: "P1", baths: 2.5 },
+    { ...SAMPLE_ROW, property_id: "P2", baths: null }, // enrichment never reached this one
+  ];
+  const out = await fetchLakeBathsByPropertyId(["P1", "P2", "P3"]);
+  expect(out.get("P1")).toBe(2.5);
+  expect(out.has("P2")).toBe(false); // never a fabricated 0 — absent means unresolved
+  expect(out.has("P3")).toBe(false); // not in the lake at all
+});
+
+test("fetchLakeBathsByPropertyId returns an empty Map for an empty id list — never queries", async () => {
+  rowsForNextCall = [{ ...SAMPLE_ROW, property_id: "P1", baths: 3 }];
+  const out = await fetchLakeBathsByPropertyId([]);
+  expect(out.size).toBe(0);
 });
 
 // ── wave 1.5: photo enrichment (derived watermark-crop, one root) ────────────

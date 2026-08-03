@@ -56,7 +56,7 @@
 import { createBlock } from "@/lib/email/doc/default-docs";
 import { finalizeDoc, type PlanEntry } from "@/lib/email/doc/finalize-doc";
 import { GRID_COLS } from "@/lib/email/grid-schema";
-import { scopeCity, rankListings } from "@/lib/listings/select";
+import { scopeCity, rankListings, fetchLakeBathsByPropertyId } from "@/lib/listings/select";
 import { fetchPhotoListings } from "@/lib/listings/steadyapi";
 import { brandWebsiteUrl } from "@/lib/email/inject-photo";
 import type { Listing } from "@/lib/listings/rentcast";
@@ -220,6 +220,37 @@ function keepOrDefault(current: EmailDoc, type: EmailBlock["type"]): EmailBlock 
 
 export interface ListingsShowcaseDeps {
   loadListings?: (zip: string) => Promise<{ listings: Listing[]; city: string }>;
+  /** Baths-handoff lane (`_ASSISTANT/2026-08-03-listings-baths-HANDOFF.md`): FREE,
+   *  address-independent lake lookup by property_id. Injectable so tests never touch
+   *  the DB. Defaults to the real `data_lake.listing_state` lane. */
+  fetchBaths?: (propertyIds: readonly string[]) => Promise<Map<string, number>>;
+}
+
+/** Extract the SteadyAPI property_id embedded in fetchPhotoListings' `sa_<id>` listing
+ *  id (steadyapi.ts normalizeResult). Null for anything not sourced that way — the
+ *  enrichment lane simply skips it, same as an unresolved lookup. Pure. */
+function steadyPropertyId(l: Listing): string | null {
+  const m = /^sa_(.+)$/.exec(l.id);
+  return m ? m[1] : null;
+}
+
+/** Fill `bathrooms` from the free lake lane wherever fetchPhotoListings left it null
+ *  (it always does — /search carries no bath count, steadyapi.ts). Address-independent:
+ *  keyed on property_id, so it resolves for streetless new-construction/spec-home
+ *  listings too, which the OLDER address-match `withBaths()` lane structurally cannot
+ *  reach. A listing not in the map, or with no extractable property_id, keeps its
+ *  original (possibly null) value — never a fabricated bath count. Pure, testable
+ *  without a DB call. */
+export function enrichBaths(
+  listings: readonly Listing[],
+  baths: ReadonlyMap<string, number>,
+): Listing[] {
+  return listings.map((l) => {
+    if (l.bathrooms != null) return l;
+    const pid = steadyPropertyId(l);
+    const found = pid ? baths.get(pid) : undefined;
+    return found != null ? { ...l, bathrooms: found } : l;
+  });
 }
 
 /** Live SteadyAPI /search, the one path that resolves a real listing-detail URL
@@ -256,7 +287,20 @@ export async function buildListingsShowcase(
   });
   if (withLinks.length === 0) return null;
 
-  const picks = withLinks.slice(0, MAX_HOMES);
+  const rawPicks = withLinks.slice(0, MAX_HOMES);
+
+  // Baths handoff: enrich the FINAL picks only (≤MAX_HOMES) — free, address-independent,
+  // zero live vendor calls (data_lake.listing_state, already paid for by the nightly
+  // ingest). Real fill rate measured 08/03/2026: ~20% — partial, so a miss just keeps
+  // the listing's original null bathrooms; fallbackHighlight already drops the field
+  // honestly rather than render a blank slot.
+  const fetchBaths = deps.fetchBaths ?? fetchLakeBathsByPropertyId;
+  const propertyIds = rawPicks.map(steadyPropertyId).filter((id): id is string => id != null);
+  const baths = propertyIds.length
+    ? await fetchBaths(propertyIds).catch(() => new Map())
+    : new Map();
+  const picks = enrichBaths(rawPicks, baths);
+
   const highlights = assignHighlights(picks);
 
   const entries: PlanEntry[] = [];

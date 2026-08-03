@@ -1,3 +1,17 @@
+**RESOLVED 08/03/2026 (Sonnet 5).** All 3 investigation questions answered from our own code +
+a live query (no 3-6 listing sample needed): the property_id-keyed FREE lane (§ below, question 2)
+already exists as `data_lake.listing_state.baths` — filled by the nightly ingest's lat/lon-clustered
+`/nearby-home-values` batch enrich, never address-matched, so it resolves streetless listings too.
+Live fill rate: 20.1% addressed / 15.2% streetless (a backlog-completeness gap, not an
+address-availability one). Shipped `fetchLakeBathsByPropertyId()` (`select.ts`) +
+`enrichBaths()` (`listings-showcase.ts`), TDD, additive only. Full writeup:
+`_RESEARCH/data-and-ingest/2026-08-03-listings-baths-fill-rate-and-lake-lane.md`. Backfill
+completeness gap tracked as check `listing_state_baths_backfill_completeness`, not fixed here
+(real vendor quota, needs operator go-ahead). `comp-helper.ts`/`under-contract.ts` NOT touched,
+per this doc's own instruction — same lane would likely help them too, separate PR.
+
+---
+
 # Real baths on every listing card — handoff for Opus
 
 **Written:** 08/03/2026, Sonnet 5 session (listings-showcase build).

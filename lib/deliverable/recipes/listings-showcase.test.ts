@@ -186,6 +186,54 @@ describe("buildListingsShowcase", () => {
     expect(types).not.toContain("listing");
   });
 
+  it("baths handoff: a vendor row with no baths gets enriched from the free lake lane by property_id, even address-less", async () => {
+    const doc = await buildListingsShowcase(ctxFor("listings-showcase for 33914", "33914"), {
+      loadListings: async () => ({
+        listings: [
+          listing({
+            id: "sa_9010042", // steadyapi.ts: `sa_${property_id}`
+            addressLine1: "", // spec home — no resolvable street address
+            bathrooms: null, // fetchPhotoListings always sets this null
+            lotSize: 0.1,
+            isNewConstruction: undefined,
+            isPriceReduced: undefined,
+            daysOnMarket: 45,
+            squareFootage: 1600,
+          }),
+        ],
+        city: "Cape Coral",
+      }),
+      fetchBaths: async (ids) => new Map(ids.map((id) => [id, 2.5])),
+    });
+    const signal = doc!.blocks.find((b) => b.type === "signal")!;
+    expect((signal.props as Record<string, unknown>).title).toContain("2.5 Bath");
+  });
+
+  it("baths handoff: no resolution from the lake lane -> the spec line drops the field, never a blank slot", async () => {
+    const doc = await buildListingsShowcase(ctxFor("listings-showcase for 33914", "33914"), {
+      loadListings: async () => ({
+        listings: [
+          listing({
+            id: "sa_9010043",
+            addressLine1: "",
+            bathrooms: null,
+            lotSize: 0.1,
+            isNewConstruction: undefined,
+            isPriceReduced: undefined,
+            daysOnMarket: 45,
+            squareFootage: 1600,
+          }),
+        ],
+        city: "Cape Coral",
+      }),
+      fetchBaths: async () => new Map(), // unresolved — the honest gap
+    });
+    const signal = doc!.blocks.find((b) => b.type === "signal")!;
+    const title = (signal.props as Record<string, unknown>).title as string;
+    expect(title).not.toContain("Bath");
+    expect(title).toContain("Bed");
+  });
+
   it("every photo AND every per-card button links to the real listing URL", async () => {
     const doc = await buildListingsShowcase(ctxFor("listings-showcase for 33914", "33914"), {
       loadListings: async () => ({
