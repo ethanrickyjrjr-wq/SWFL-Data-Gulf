@@ -65,7 +65,7 @@ test("the live sample fixture normalizes cleanly", () => {
 // NOTE: `lib/listings/aerial.ts` (the Mapbox satellite-thumbnail builder) is DELETED.
 // Operator decree 08/03/2026 — a property visual is a real photo of that listing or it
 // is nothing. The regression guard lives in `attachFeaturedPhoto` below and in
-// `lib/email/no-aerial.test.ts`.
+// `lib/deliverable/no-aerial.test.ts`.
 
 // ── scopeCity ────────────────────────────────────────────────────────────────
 test("scopeCity maps county and zip to the city we query", () => {
