@@ -68,7 +68,9 @@ const MAX_HOMES = 3;
 export interface Highlight {
   category: string;
   title: string;
-  body: string;
+  /** Absent when the title already IS the real information (the spec-based
+   *  fallback) — no filler sentence underneath to risk repeating verbatim. */
+  body?: string;
 }
 
 const usd = (n: number): string => `$${Math.round(n).toLocaleString("en-US")}`;
@@ -139,19 +141,34 @@ const CANDIDATES: ReadonlyArray<{
 ];
 
 /** Universal fallback — always eligible, built ONLY from fields the listing
- *  actually holds. Never a made-up feature. */
+ *  actually holds. Never a made-up feature.
+ *
+ *  THE TITLE, not just the body, must vary per home (caught live 08/03/2026 —
+ *  two cards both headlined "Worth a Look" in bold, and a reader's eye catches
+ *  the bold headline first, so an identical body underneath a repeated title
+ *  still reads as the same card twice). The fix is to make the real specs
+ *  themselves the headline when no other feature qualifies — beds/baths/sqft
+ *  already vary across distinct real homes in almost every case.
+ *
+ *  NO FILLER BODY when the title already carries the real information (caught
+ *  live 08/03/2026, second time: even with distinct titles, "A real listing
+ *  in Cape Coral — worth a second look." repeated verbatim underneath two of
+ *  them — a boilerplate sentence with nothing real in it is exactly the kind
+ *  of line that WILL repeat, because it says nothing home-specific). The specs
+ *  ARE the content; no sentence under them is needed to risk duplicating. */
 function fallbackHighlight(l: Listing): Highlight {
   const specParts = [
-    l.bedrooms != null ? `${l.bedrooms} bed` : null,
-    l.bathrooms != null ? `${l.bathrooms} bath` : null,
-    l.squareFootage != null ? `${l.squareFootage.toLocaleString("en-US")} sq ft` : null,
+    l.bedrooms != null ? `${l.bedrooms} Bed` : null,
+    l.bathrooms != null ? `${l.bathrooms} Bath` : null,
+    l.squareFootage != null ? `${l.squareFootage.toLocaleString("en-US")} Sq Ft` : null,
   ].filter((s): s is string => Boolean(s));
+  if (specParts.length) {
+    return { category: "generic", title: specParts.join(", ") };
+  }
   return {
     category: "generic",
-    title: "Worth a look",
-    body: specParts.length
-      ? `${specParts.join(", ")} — a real listing in ${l.city || "the area"}.`
-      : `A real listing in ${l.city || "the area"}, worth a look.`,
+    title: "Worth a Look",
+    body: `A real listing in ${l.city || "the area"}, worth a look.`,
   };
 }
 
@@ -175,16 +192,24 @@ export function assignHighlights(listings: readonly Listing[]): Highlight[] {
     return highlight;
   });
 
-  const seenText = new Set<string>();
+  // Final safety net: if two homes are genuinely spec-identical (same beds/
+  // baths/sqft), the spec-based title collides. A unique title guarantees the
+  // whole card reads as distinct (every category's title is a fixed, unique
+  // string, so only two same-category fallback titles can ever collide) —
+  // disambiguate with something REAL and unique to the listing. A new-
+  // construction spec home can carry no confirmed street address (its vendor
+  // permalink names a model, not an address — see steadyapi.ts); fall back to
+  // the listing's own id (still real, never invented) rather than an empty tag.
+  const seenTitle = new Set<string>();
   return picked.map((h, i) => {
-    const sig = `${h.title} ${h.body}`;
-    if (!seenText.has(sig)) {
-      seenText.add(sig);
+    if (!seenTitle.has(h.title)) {
+      seenTitle.add(h.title);
       return h;
     }
     const l = listings[i]!;
-    const disambiguated: Highlight = { ...h, body: `${h.body} (${l.addressLine1})` };
-    seenText.add(`${disambiguated.title} ${disambiguated.body}`);
+    const tag = l.addressLine1 || l.id;
+    const disambiguated: Highlight = { ...h, title: `${h.title} — ${tag}` };
+    seenTitle.add(disambiguated.title);
     return disambiguated;
   });
 }
@@ -216,13 +241,17 @@ export async function buildListingsShowcase(
   const loadListings = deps.loadListings ?? loadFromVendor;
   const { listings, city } = await loadListings(zip).catch(() => ({ listings: [], city: "" }));
 
-  // Distinct addresses, a REAL photo AND a REAL listing link — a listing
+  // Distinct listings, a REAL photo AND a REAL listing link — a listing
   // missing either is skipped, never rendered as a dead card (RULE 0.7: never
-  // an invented or link-less card).
+  // an invented or link-less card). Dedup key falls back to the listing's own
+  // id when addressLine1 is empty (a new-construction spec home's vendor
+  // permalink can carry no confirmed street address — see steadyapi.ts) so two
+  // DIFFERENT address-less listings never get mistaken for the same one.
   const seen = new Set<string>();
   const withLinks = listings.filter((l) => {
-    if (!l.photoUrl || !l.listingUrl || seen.has(l.addressLine1)) return false;
-    seen.add(l.addressLine1);
+    const key = l.addressLine1 || l.id;
+    if (!l.photoUrl || !l.listingUrl || seen.has(key)) return false;
+    seen.add(key);
     return true;
   });
   if (withLinks.length === 0) return null;
@@ -301,7 +330,7 @@ export async function buildListingsShowcase(
         props: {
           kicker: "What we love",
           title: highlights[i]!.title,
-          body: highlights[i]!.body,
+          ...(highlights[i]!.body ? { body: highlights[i]!.body } : {}),
         },
       },
       3,

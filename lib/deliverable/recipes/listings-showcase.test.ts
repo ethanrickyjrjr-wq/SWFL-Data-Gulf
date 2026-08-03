@@ -82,7 +82,7 @@ describe("assignHighlights (pure)", () => {
     // Second home's only real qualifying category is already used -> falls to
     // the generic fallback, NEVER a repeat of "new-construction".
     expect(h2!.category).not.toBe("new-construction");
-    expect(`${h1!.title} ${h1!.body}`).not.toBe(`${h2!.title} ${h2!.body}`);
+    expect(h1!.title).not.toBe(h2!.title);
   });
 
   it("HARD RULE: even an identical fallback (same specs) is disambiguated by the real address", () => {
@@ -93,9 +93,14 @@ describe("assignHighlights (pure)", () => {
     const [, h2, h3] = assignHighlights([a, b, c]);
     expect(h2!.category).toBe("generic");
     expect(h3!.category).toBe("generic");
-    // Both fall to the identical generic line by spec — must still render distinct text.
-    expect(`${h2!.title} ${h2!.body}`).not.toBe(`${h3!.title} ${h3!.body}`);
-    expect(h3!.body).toContain("3 Same Spec Ct");
+    // Same real specs -> the spec-based title collides too. The BOLD TITLE
+    // must still end up distinct (caught live 08/03/2026 — a repeated bold
+    // headline reads as a duplicate card regardless of the fine print
+    // underneath, and caught AGAIN when a boilerplate body sentence also
+    // repeated verbatim under two distinct titles — the fallback body is now
+    // omitted entirely when the title already carries real information).
+    expect(h2!.title).not.toBe(h3!.title);
+    expect(h3!.title).toContain("3 Same Spec Ct");
   });
 
   it("a listing with no qualifying real field gets the generic fallback, never an invented feature", () => {
@@ -111,7 +116,8 @@ describe("assignHighlights (pure)", () => {
     });
     const [h] = assignHighlights([plain]);
     expect(h!.category).toBe("generic");
-    expect(h!.body).toContain("bed");
+    // The real specs are now the HEADLINE, not buried in the fine print.
+    expect(h!.title).toContain("Bed");
   });
 
   it("a real price cut is stated with the real cut amount, never invented", () => {

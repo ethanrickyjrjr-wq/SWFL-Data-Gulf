@@ -187,10 +187,22 @@ export function normalizeResult(raw: RawResult, city: string, state: string): Li
   const photoUrl = typeof raw.photo_url === "string" && raw.photo_url ? raw.photo_url : undefined;
   const permalink = typeof raw.permalink === "string" ? raw.permalink : "";
   const listingUrl = canonicalRealtorUrl(permalink);
-  // last path segment: "1403-NE-19th-Ter_Cape-Coral_FL_33909_M54931-01642"
+  // last path segment: "1403-NE-19th-Ter_Cape-Coral_FL_33909_M54931-01642" for a
+  // RESALE listing — the first segment is a real street address, house-number first.
+  //
+  // NEW-CONSTRUCTION / builder spec homes use a DIFFERENT real permalink shape from
+  // the SAME vendor: e.g. "Sage_Cape-Coral-Spot-Tradition_Call-for-more-information_
+  // CAPE-CORAL_FL_33914_..." or "Venice_Cape-Coral_1524-SW-43rd-Ln_Cape-Coral_FL_..."
+  // — the first segment there is the MODEL/PLAN NAME ("Sage", "Venice"), not an
+  // address. Caught live 08/03/2026: a consumer rendered "Sage, Cape Coral" as if
+  // Sage were a place. A real street address always starts with a house number; a
+  // model-name slug never does. Never claim a non-numeric first segment as the
+  // street address — leave it honestly empty rather than mislabel a real vendor
+  // string as something it isn't.
   const lastSegment = permalink.split("/").pop() ?? "";
   const slugParts = lastSegment.split("_");
-  const addressLine1 = (slugParts[0] ?? "").replace(/-/g, " ");
+  const firstSegment = (slugParts[0] ?? "").replace(/-/g, " ").trim();
+  const addressLine1 = /^\d/.test(firstSegment) ? firstSegment : "";
   const zipCode = slugParts.find((p) => /^\d{5}$/.test(p)) ?? "";
   const beds =
     typeof raw.description?.beds === "number"

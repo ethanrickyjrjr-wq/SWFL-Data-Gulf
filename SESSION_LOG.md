@@ -1,3 +1,60 @@
+## 2026-08-03 (Sonnet 5) — listings-showcase round 2: found + fixed a real vendor-parsing bug (model names shown as addresses) and a still-repeating body sentence
+
+Operator caught two more real defects in the third proof send (screenshots): the bold headline
+"Worth a Look" was fixed last round, but the sentence underneath it ("A real listing in Cape
+Coral — worth a second look.") still repeated verbatim on two cards. Far more serious: the image
+captions read "Sage, Cape Coral" and "Venice, Cape Coral" — operator: "THOSE ARE NOT IN CAPE
+CORAL. THOSE ARE THE NAMES OF THE HOMES."
+
+**Root cause, traced and fixed at the source (`lib/listings/steadyapi.ts`, `normalizeResult`):**
+`fetchPhotoListings` derives `addressLine1` by taking the first `_`-delimited segment of the
+realtor.com permalink slug, on the assumption every slug looks like a RESALE listing's
+("1403-NE-19th-Ter_Cape-Coral_FL_33909_..." — street address first). New-construction / builder
+spec-home permalinks use a DIFFERENT real slug shape from the SAME vendor: the real URLs sent were
+".../Sage_Cape-Coral-Spot-Tradition_Call-for-more-information_CAPE-CORAL_FL_33914_..." and
+".../Venice_Cape-Coral_1524-SW-43rd-Ln_Cape-Coral_FL_33914_..." — the first segment is the
+MODEL/PLAN NAME, not an address. The existing code blindly took it as one. Fix: a real street
+address always starts with a house number (`/^\d/`); a non-numeric first segment now yields an
+HONEST EMPTY `addressLine1` instead of a fabricated place name. This is a SHARED function — the
+bug (and fix) reaches every consumer of `fetchPhotoListings`
+(`comp-helper.ts`, `under-contract.ts`, this recipe), not just this one build.
+
+**Second fix — the still-repeating body sentence:** `fallbackHighlight`'s boilerplate line ("A
+real listing in {city} — worth a second look.") carries no home-specific information, so it WILL
+repeat whenever two homes share the spec-based fallback — a generic sentence is exactly the kind
+of text that duplicates. Fixed: when the title already carries real information (the spec-based
+headline), the body is OMITTED entirely rather than filled with filler prose. `Highlight.body` is
+now optional; `SignalBlock.tsx` already skips rendering an absent body (verified in its own
+source before relying on it).
+
+**Downstream fixes in listings-showcase.ts:** the dedup key and the final title-disambiguation
+safety net both used to key on `addressLine1` directly — now fall back to the listing's own `id`
+when the address is honestly empty, so two DIFFERENT address-less new-construction listings never
+get mistaken for the same one, and the disambiguator never appends an empty string. Simplified the
+disambiguation pass to fix the TITLE only (a unique title structurally guarantees the whole card
+reads as distinct — the separate body-touching logic was redundant and produced an ugly doubled
+address).
+
+**Verified live, pasted evidence:**
+- New regression suite `lib/listings/steadyapi.test.ts` — `normalizeResult` tests proving a resale
+  slug still yields a real address, and BOTH real builder slugs observed live (Sage, Venice) now
+  yield an honest empty address, never the model name.
+- `bun test lib/listings/steadyapi.test.ts lib/deliverable/recipes/listings-showcase.test.ts` —
+  23/23 pass. `bun test lib/listings lib/email lib/deliverable` — 2827/2827 pass. `bun test
+  lib/assistant` (the other steadyapi.ts consumer, comp-helper) — 269/269 pass, unaffected.
+- Fourth real send, resend id `1cca4b8e-65c3-4e5c-ab26-8c80c654d01b` — image captions now read
+  plain "Cape Coral" (no fabricated place name) for the two new-construction listings; only ONE
+  card (the real new-construction one) carries a body sentence, the other two show ONLY their
+  distinct spec-based titles with no body at all — nothing left to repeat.
+
+**NOTE — `bunx next build` currently fails**, unrelated to this work: `lib/email/blocks/
+ListBlock.tsx` (+ `market-comps.ts`, `types.ts`, `email-doc-pdf.tsx`, a small `schema.ts` addition)
+are UNCOMMITTED, live changes from a different concurrent session (verified via `git log`/`git
+status` timestamps — ListBlock.tsx's last real commit was 07/14/2026, the working copy is modified
+right now). Left entirely untouched per parallel-session isolation; verified my own 4 files via
+targeted `bun test` instead since the whole-repo build is blocked by someone else's in-progress
+edit, not mine.
+
 ## 2026-08-03 (Sonnet 5) — listings-showcase operator review round: real links, closing CTA, hard no-repeat rule, subject-line fix
 
 Follow-up to the listings-showcase build (commit 2c8c75c6, this session). Operator reviewed the

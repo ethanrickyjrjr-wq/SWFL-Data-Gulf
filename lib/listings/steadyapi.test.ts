@@ -58,3 +58,62 @@ describe("normalizeResult — lot_sqft capture", () => {
     expect(l?.lotSize).toBeNull();
   });
 });
+
+// Caught live 08/03/2026: a consumer rendered "Sage, Cape Coral" as if "Sage" were a
+// place — it is the MODEL/PLAN NAME of a new-construction spec home. A resale permalink
+// slug's first segment is a real street address (starts with a house number); a
+// builder-listing permalink's first segment is the model name instead. Real URLs
+// observed live: realtor.com/realestateandhomes-detail/Sage_Cape-Coral-Spot-Tradition_
+// Call-for-more-information_CAPE-CORAL_FL_33914_P417000603379 and .../Venice_Cape-Coral_
+// 1524-SW-43rd-Ln_Cape-Coral_FL_33914_P417000619533.
+describe("normalizeResult — never claims a model name as a street address", () => {
+  const base = {
+    property_id: "123",
+    price: { amount: 400000 },
+    status: "for_sale",
+    photo_url: "https://ap.rdcpix.com/x.webp",
+    location: { lat: 26.6, lon: -81.9, county_fips: "12071" },
+  };
+
+  test("a resale slug (house-number first) → addressLine1 is the real street address", () => {
+    const l = normalizeResult(
+      { ...base, permalink: "https://www.realtor.com/x/1403-NE-19th-Ter_Cape-Coral_FL_33909_M1" },
+      "Cape Coral",
+      "FL",
+    );
+    expect(l?.addressLine1).toBe("1403 NE 19th Ter");
+  });
+
+  test("a new-construction slug (model name first, no house number) → addressLine1 is EMPTY, never the model name", () => {
+    const l = normalizeResult(
+      {
+        ...base,
+        permalink:
+          "https://www.realtor.com/realestateandhomes-detail/Sage_Cape-Coral-Spot-Tradition_" +
+          "Call-for-more-information_CAPE-CORAL_FL_33914_P417000603379",
+      },
+      "Cape Coral",
+      "FL",
+    );
+    expect(l?.addressLine1).toBe("");
+    expect(l?.addressLine1).not.toContain("Sage");
+    // formattedAddress still degrades gracefully — no dangling comma from the empty part.
+    expect(l?.formattedAddress).not.toMatch(/^,/);
+    expect(l?.formattedAddress).not.toContain("Sage");
+  });
+
+  test("another real builder slug (Venice) → same honest empty address, not the model name", () => {
+    const l = normalizeResult(
+      {
+        ...base,
+        permalink:
+          "https://www.realtor.com/realestateandhomes-detail/Venice_Cape-Coral_1524-SW-43rd-Ln_" +
+          "Cape-Coral_FL_33914_P417000619533",
+      },
+      "Cape Coral",
+      "FL",
+    );
+    expect(l?.addressLine1).toBe("");
+    expect(l?.addressLine1).not.toContain("Venice");
+  });
+});
