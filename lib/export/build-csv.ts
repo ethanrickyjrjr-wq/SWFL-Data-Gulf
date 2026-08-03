@@ -5,7 +5,7 @@
 import { toCsvLine } from "@/lib/email/csv-escape";
 import { attribsUnionColumns, type ExportColumn, type ExportSurfaceDef } from "./surfaces";
 
-const BOM = "﻿"; // explicit escape — an invisible literal gets lost in copy-paste
+const BOM = "\uFEFF"; // explicit escape — an invisible literal gets lost in copy-paste
 
 function cellValue(row: Record<string, unknown>, col: ExportColumn): string | null {
   const raw = col.key.startsWith("attribs.")
