@@ -161,6 +161,22 @@ optional ~13.4k-call top-up sweep (operator decision — with the 17,880 run tha
 
 ## STEP 3 — typed tables from stored bytes (ZERO paid calls; AUTHORITY + VALIDATION DESIGN LOCKED 08/02/2026)
 
+**LIVE VERIFIED 08/03/2026 (read-only SQL against prod — Steps 1+2 are DONE, the bytes are home):**
+- `steadyapi_property_history_raw`: **17,875 bodies**, newest `fetched_at` 08/03 01:11 UTC.
+- `undated_active_sale` (api_feed, active+sale, `listed_date IS NULL`): **0** — the DOM backfill fully de-floored.
+- **⚠️ JSON PATH LANDMINE:** the stored jsonb is the FULL response envelope `{meta, body}` — every
+  family array lives at `body -> 'body' -> '<family>'`, NOT top-level. `body->'property_history'`
+  returns NULL on all 17,875 rows and a naive parser reads the whole table as empty. Correct paths:
+  `body->'body'->'property_history'` · `body->'body'->'tax_history'` · `body->'body'->'building_permits'`.
+  Bonus: `body->'body'->'statistics'` carries vendor-computed rollups (tax totals, transaction counts) —
+  validation-only, never a root. `meta.property_id` duplicates the PK.
+- **Family coverage (denominator 17,875):**
+  - A `property_history[]`: 17,859 bodies non-empty (99.9%) · **235,383 event rows**.
+  - B `tax_history[]`: 16,514 bodies non-empty (92.4%) · **273,051 year-rows**.
+  - C `building_permits[]`: 12,946 bodies non-empty (72.4%) · **79,281 permit rows** (vs county spines: Lee 303 + Collier 4,975).
+- Typed tables `steadyapi_listing_events` / `steadyapi_tax_history` / `steadyapi_property_permits`:
+  `to_regclass` NULL for all three — nothing built yet; this step starts clean.
+
 **Operator decree 08/02/2026 (this section's binding law):** "USE ALL THE DATA TO CONFIRM A SMALL
 AMOUNT OF THE DATA WE ALREADY HAVE AND MAKE THE SYSTEM RUN EFFICENTLY BY USING THE DATA FROM THE
 BEST SOURCE. IF WE RUN FASTER BY USING ALL STEADY DATA, HAVE IT WIRED THAT WAY. BUT WE ARE ONLY
