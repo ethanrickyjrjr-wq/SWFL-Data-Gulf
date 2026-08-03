@@ -1,3 +1,60 @@
+## 2026-08-03 (Opus 5) — emails.md §0 "BEFORE YOU CODE A RECIPE": the rules card, and the dead research pointer that caused it
+
+Operator decree: *"I'M TIRED OF GETTING DIFFERENT TYPES OF EMAILS BUILT ... ALL LOGO, CAN SPAM RULES
+EVERYHING IN ONE PLACE THAT BUILDER SEES BEFORE CODING RECIPES."* Root cause found, not just the
+symptom: **`emails.md` §10's research shelf pointed six files at `_ASSISTANT/research/`, a directory
+deleted in the 07/20 `_RESEARCH/` consolidation** — the one pointer meant to lead a builder to the
+email research had been a 404 for two weeks, and `_RESEARCH/` is gitignored so Grep can't find it
+either. The 08/03 real-estate-email research (one day old — 5-part skeleton, one-CTA, subject length,
+market-report order, Outlook/dark-mode/102KB constraints) had never reached a builder.
+
+Shipped `emails.md` **§0** above the 60-second version: copy rules (~200-word target — **operator
+decree, explicitly NOT laundered as a research finding**; the research beside it measured 95 words
+beating 170 by +17% CTR), 5-part skeleton, one CTA, 30–40-char subjects, the seven type roles +
+weights/leading/tracking + 8px token grid + 600px 12-col canvas + WCAG floors (mirroring `scale.ts`,
+which WINS on conflict), the render constraints (table skeleton — Outlook Windows has zero flex/grid;
+fluid-hybrid + MSO ghost table for stat grids; HTML `width` + mandatory ALT; dark-mode meta pair and
+never pure #FFF/#000; ~102KB Gmail clip, target <80KB), logo (incl. surviving uncontrolled full
+inversion), CAN-SPAM's 4 requirements, and the 8-step market-report content order. §0.4/§0.5 carry
+the live caveat that `applybrand_no_server_side_caller` makes both FALSE on non-Lab send paths today.
+
+Deliberately NOT a new standards doc — a fourth sibling is the drift shape being complained about.
+Wired into the surfaces that actually load: `lib/email/CLAUDE.md` + `lib/deliverable/CLAUDE.md` (both
+in `inject-focus.mjs` `AREA_DIRS` — verified; a nested `recipes/CLAUDE.md` would NOT fire, that list
+is hard-coded), the `deliverable-builder` agent's first-action block, and a new root CLAUDE.md
+reference-index row (emails.md was absent from it entirely). §10 paths re-verified by `ls` — my first
+guess at the 07/15 trio was wrong and corrected before commit.
+
+**SAME-SESSION CORRECTION — the operator threw out his own number.** Verbatim: *"don't use my
+numbers. if it says 95 word is best, use that / crawl4ai the numbers for the types of emails and
+update the file."* Four sources crawled live (Boomerang, GetResponse 2024, Campaign Monitor 2022,
+Mailchimp), filed + indexed as
+`_RESEARCH/email-and-social/2026-08-03-email-length-and-per-type-benchmarks.md`.
+
+**Neither 200 nor 95 was right.** Boomerang measures a **50–125-word band** on RESPONSE rate (so
+MPP can't distort it) — and the floor bites harder than the ceiling: a 25-word email performs like
+a 2000-word one, subject-only gets 11%. 95 sits inside the band, so the old datapoint holds. §0.1
+also gained: ask **1–3 questions** (+50% response), **3rd-grade reading level** (+36% vs college),
+**never neutral sentiment** (+10–15%). New §0.1b carries the per-TYPE numbers the operator asked
+for (GetResponse, 4.4B messages): newsletter 40.08% open/3.84% CTR · triggered 45.38%/5.02% ·
+**welcome 83.63% open** · newsletter cadence peaks at **1/week** · drip CTR **halves after the 2nd
+message** · real-estate row shows high open but LOW CTOR (8.23%) and **4.86% bounce** with the
+lowest double-opt-in of any industry. Subject-line rule SPLIT by job — 3–4 words when the email
+wants a reply, 30–40 chars when it wants an open; the old card gave one rule for two jobs.
+**Hard new rule: never promise an absolute open/click rate** — GetResponse and Campaign Monitor
+disagree ~2× on the same industry in both directions. The "~200-word" phrase had already
+propagated into four pointer files; all four corrected in the same pass.
+
+**7 of 7 shipped** — §0 card · §10 dead-path fix + 08/03 shelf entry · `lib/email/CLAUDE.md` pointer
+· `lib/deliverable/CLAUDE.md` pointer · `deliverable-builder` first-action block · root CLAUDE.md
+reference-index row · scratchpad entry. **ONE omission, deliberate: enforcement.** No lint checks
+the word target, one-CTA, table skeleton, ALT text, or the 80KB ceiling — the ask was to post the
+rules, not gate them. Opened `email_rules_card_enforcement` rather than leave it as prose (RULE 2.4).
+
+**Honest ceiling of a docs-only fix:** the two area `CLAUDE.md` files auto-inject a POINTER to §0,
+not the card itself. Only `deliverable-builder` carries an imperative first-action. A builder now
+sees "read §0 first" — that is not the same as seeing the rules.
+
 ## 2026-08-03 (Sonnet 5) — real baths on listings-showcase cards: FREE property_id-keyed lake lane, no vendor spend
 
 Resolved `_ASSISTANT/2026-08-03-listings-baths-HANDOFF.md`'s 3 investigation questions from our

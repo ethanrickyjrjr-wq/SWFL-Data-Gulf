@@ -1,3 +1,60 @@
+## 2026-08-03 (Opus 5) — "don't use my numbers. if it says 95 word is best, use that"
+
+OPERATOR CORRECTION, same session, verbatim: *"don't use my numbers. if it says 95 word is best, use
+that / crawl4ai the numbers for the types of emails and update the file. update with any info yu
+come across that makes us better"*
+
+I had just written his ~200-word target into `emails.md` §0.1 as an operator decree and made a point
+of NOT laundering it as research. He does not want his number in there at all — **the evidence wins
+over the operator's own figure.** This is the inverse of the usual failure and worth remembering:
+he is not asking to be deferred to, he is asking to be overruled by a real source. Standing lesson —
+when a researched number exists, do not preserve his estimate beside it out of deference.
+
+ACTION: §0.1 rewritten off crawl4ai evidence, per email TYPE. Research filed + indexed.
+
+## 2026-08-03 (Opus 5) — "I'M TIRED OF GETTING DIFFERENT TYPES OF EMAILS BUILT" — the email rules existed, in gitignored research nothing reads
+
+OPERATOR DECREE, verbatim: *"MAKE SURE THE EMAIL BUILDING RULES FROM THE GITIGNORED RESEARCH IS
+POSTED SOMEWHERE A SHOWCASE BUILDER OR ANY EMAIL BUILDER CAN SEE THE RULES ON FONTS, LAYOUT GRIDS,
+SIZES OF EVERTHING WE RESEARCHED AND 200 WORD GOAL FOR MOST EMAILS. ... ALL LOGO, CAN SPAM RULES
+EVERYHING IN ONE PLACE THAT BUILDER SEES BEFORE CODING RECIPES FOR EMAIL LAB"*
+
+He is describing the SAME failure `emails.md` §4 already documents about `app/_design/` — research
+written, committed, and read by zero code. This time it was worse: the research was in `_RESEARCH/`,
+which is **gitignored, so Grep cannot see it at all**. Two files carried nearly every rule he listed
+and neither had ever reached a builder:
+- `_RESEARCH/email-and-social/2026-08-03-strongest-real-estate-email-concepts-structure.md` (ONE DAY
+  OLD) — 10-platform template anatomy, the universal 5-part skeleton, one-CTA rule, 30–40-char
+  subjects, the market-report content order, and ALL the Outlook/dark-mode/102KB render constraints.
+- `_RESEARCH/deliverable-and-design/2026-07-01-ai-deliverable-design-quality-research.md` — 8pt grid,
+  internal≤external spacing, type-scale ratios, WCAG math.
+
+ROOT CAUSE FOUND, not just the symptom: **`emails.md` §10 (the research shelf) pointed six research
+files at `_ASSISTANT/research/` — a directory that has not existed since the 07/20/2026 `_RESEARCH/`
+consolidation.** The one pointer meant to lead a builder to this research led to a 404 for two weeks.
+Fixed 08/03; every path re-verified by `ls`, and my first guess at the 07/15 trio's location was
+wrong (they are in `voice-and-positioning/` + `agent-behavior/`, not `deliverable-and-design/`).
+
+SHIPPED: `emails.md` **§0 "BEFORE YOU CODE A RECIPE"** — the rules card, placed ABOVE the 60-second
+version so it is the first thing read. Deliberately NOT a new standards doc: a fourth sibling next to
+emails.md / deliverable-playbook / email-images is the exact shape that produces the drift he is
+angry about. Pointed at from the three surfaces that actually load — `lib/email/CLAUDE.md` and
+`lib/deliverable/CLAUDE.md` (both in `inject-focus.mjs` `AREA_DIRS`, verified — a nested
+`lib/deliverable/recipes/CLAUDE.md` would NOT have fired, that list is hard-coded) and the
+`deliverable-builder` agent's first-action block.
+
+**The 200-word target is HIS number, dated 08/03/2026, written as an operator decree — not
+laundered into a research finding.** The research beside it measured 95 words beating 170 by +17%
+CTR; it does not say 200. Card says so explicitly so nobody "corrects" it later.
+
+STILL A LIE IF YOU READ §0 CARELESSLY, caveat written into §0.4/§0.5: `applyBrand` is browser-only,
+so every non-Lab send path ships unbranded TODAY — no logo, no colors, empty CAN-SPAM address
+(`applybrand_no_server_side_caller`, open since 07/26).
+
+NOT DONE, deliberately — he asked to POST the rules, not enforce them. No word-count lint, no
+template linter, no ~200-word gate in `authorDoc`. Opened `email_rules_card_enforcement` so it does
+not become another prose-only deferral (RULE 2.4).
+
 ## 2026-08-03 (Opus 5) — "see if scrapping a photo for comps is possible until we have more solds. if not, just make the user able to upload a picture."
 
 OPERATOR DIRECTIVE + the answer, measured live 08/03/2026. **Scraping a comp photo is NOT

@@ -1,5 +1,13 @@
 # lib/deliverable/ — sell-side vs story-side conventions (loads when you edit here)
 
+> **CODING A RECIPE? → `docs/standards/emails.md` §0 "BEFORE YOU CODE A RECIPE" FIRST.** The
+> rules card: body **50–125 words** (the floor bites harder than the ceiling), 1–3 questions,
+> 3rd-grade reading level, never neutral; per-TYPE numbers (triggered beats newsletter, drip CTR
+> halves after msg 2); subject **3–4 words for a reply, 30–40 chars for an open**; the 5-part
+> skeleton, one CTA, type scale + 8px grid + canvas, Outlook/dark-mode/102KB render constraints,
+> logo, CAN-SPAM, and the market-report content order — one place, each number pointed at the code
+> root that owns it. Recipes are exactly what §0 was written for.
+
 > **READ FIRST → `docs/standards/emails.md` — the ONE email map** (pipeline, recipe dispatch,
 > truth gates, render engines, send lanes, failure catalog). Doctrine detail stays in
 > `docs/standards/deliverable-playbook.md`; this file is the in-context digest.

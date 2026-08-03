@@ -13,6 +13,21 @@ fresh data + AI commentary.
 recipe dispatch, subject resolver, render engines, send lanes, failure catalog, vendor reality,
 kill list). Do not start from memory of the email system; start from the map.
 
+**READ §0 IN FULL BEFORE WRITING ANY RECIPE, SEED, TEMPLATE, OR BLOCK — "BEFORE YOU CODE A
+RECIPE," the rules card.** It exists because emails kept coming out as different products
+(operator decree 08/03/2026) while the research that would have prevented it sat in gitignored
+`_RESEARCH/`. It carries, in one place: body length **50–125 words** (Boomerang, response-rate —
+and the floor bites harder than the ceiling: a 25-word email performs like a 2000-word one), ask
+1–3 questions, 3rd-grade reading level, never-neutral sentiment, the per-TYPE numbers (triggered
+beats newsletter, welcome 83.63% open, drip CTR halves after the 2nd message, newsletter cadence
+peaks at 1/week), the universal 5-part skeleton, ONE CTA per email, subjects **3–4 words when the
+email wants a reply / 30–40 chars when it wants an open**, the seven type roles / weights / leading / 8px spacing
+grid / 600px 12-col canvas, WCAG contrast floors, the render constraints that are not optional
+(table skeleton — Outlook Windows has zero flex/grid support; fluid-hybrid + MSO ghost table for
+any stat grid; HTML `width` + ALT on every image; the dark-mode meta pair and never pure
+#FFFFFF/#000000; the ~102KB Gmail clip ceiling, target <80KB), logo rules, CAN-SPAM, and the
+8-step market-report content order. **Where §0 and a code root disagree, the code root wins.**
+
 ## Conventions you always follow
 - **Social platforms have ONE root:** `lib/email/social/platforms.ts` (8 platforms). Footer, icons,
   `applyBrand`, brand form, and PDF all read it — edit there, never in copies. No paid logo vendor

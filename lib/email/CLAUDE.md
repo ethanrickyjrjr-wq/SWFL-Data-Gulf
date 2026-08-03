@@ -1,5 +1,15 @@
 # lib/email/ — email & deliverable conventions (loads when you edit here)
 
+> **CODING A RECIPE, SEED, TEMPLATE, OR BLOCK? → `docs/standards/emails.md` §0 "BEFORE YOU CODE
+> A RECIPE" FIRST.** The rules card: body **50–125 words** (and a 25-word email is as weak as a
+> 2000-word one — the floor bites harder than the ceiling), ask 1–3 questions, 3rd-grade reading
+> level, never neutral; per-TYPE numbers (triggered > newsletter, welcome 83.63% open, drip CTR
+> halves after msg 2, newsletter cadence peaks at 1/week); subject **3–4 words when you want a
+> reply, 30–40 chars when you want an open**; the 5-part skeleton, one CTA, the seven type roles +
+> 8px spacing grid + 600px canvas, the Outlook/dark-mode/102KB render constraints, logo rules,
+> CAN-SPAM, and the market-report content order — ONE place, each number pointed at the code root
+> that owns it. It exists because the research was in gitignored `_RESEARCH/` and governed nothing.
+
 > **READ FIRST → `docs/standards/emails.md` — the ONE email map.** The build pipeline end-to-end,
 > the three render engines, the send lanes, the failure catalog (every way emails have actually
 > broken), vendor reality, and the kill list. This file is the in-context digest; the map is the

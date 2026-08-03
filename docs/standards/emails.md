@@ -25,6 +25,227 @@ session ships the same bug again.
 
 ---
 
+## 0. BEFORE YOU CODE A RECIPE — the rules card
+
+**Read this section before writing or editing any recipe, seed, template, or block.** Written
+08/03/2026 by operator decree — verbatim: *"I'M TIRED OF GETTING DIFFERENT TYPES OF EMAILS BUILT.
+ALL LOGO, CAN SPAM RULES EVERYTHING IN ONE PLACE THAT BUILDER SEES BEFORE CODING RECIPES."* Every
+number below either states its source inline or names the executable root that owns it. **Where this
+card and a code root disagree, the CODE ROOT WINS** — this card mirrors, it does not define.
+
+Most of §0.1–§0.3 came out of `_RESEARCH/` (gitignored, invisible to Grep) and governed nothing
+until it landed here. That is the same failure §4 documents about `app/_design/`.
+
+### 0.1 Copy — how much, and shaped how
+
+**Every number here is measured and cited. An earlier draft of this card carried a ~200-word target
+from the operator; he threw it out himself (08/03/2026: *"don't use my numbers. if it says 95 word
+is best, use that"*) and had the real figures crawled. Evidence beats the operator's own estimate —
+do not reinstate a house number beside a sourced one.** Full evidence + the conflicts:
+`_RESEARCH/email-and-social/2026-08-03-email-length-and-per-type-benchmarks.md`.
+
+- **BODY LENGTH: 50–125 words.** Boomerang, measured on their own users' real sent mail — every
+  length in that band returned a **response rate above 50%**. Their eyeball rule: 50 words is two
+  short paragraphs; 125 words is two normal paragraphs plus a short one.
+- **The floor matters more than the ceiling, and it is the one people miss.** Going long is
+  forgiving — 125 words → 500 words only drops ~50% to ~44%, and it stays flat out to ~2000 words.
+  Going short is NOT: a **25-word email performs about as badly as a 2000-word one**, and a
+  subject-only email with no body gets a response just **11%** of the time. Do not "tighten" a
+  build below 50 words thinking shorter is always safer. It isn't.
+- This band is why the 95-word datapoint already on the shelf holds: a 95-word email beat a
+  170-word version by **+17% CTR** (Placester citing Marketing Experiments, single A/B test) — 95
+  sits inside 50–125 and 170 sits outside it. Consistent, not contradictory.
+- **≤3 images and ≤20 lines of text** produced the highest CTR across a 2M+-email sample (Placester
+  citing Constant Contact). Mobile paragraphs run 3–6 lines.
+- **ASK 1–3 QUESTIONS.** Emails asking one to three questions are **50% more likely to get a
+  response** than emails asking none (Boomerang). Zero questions is the failure case; four-plus
+  gives the gain back. This is the mechanism behind Real Geeks' "end with an open-ended question."
+- **Write at a 3rd-grade reading level** — a **36% lift** in response over college-level prose and
+  **17%** over high-school level (Boomerang). Shorter words, shorter sentences. This is a hard
+  constraint on the fill model's register, not a stylistic preference.
+- **Never write neutral.** Slightly-to-moderately positive OR slightly-to-moderately negative
+  copy both drew **10–15% more responses** than fully neutral email (Boomerang). A flat recitation
+  of figures is the worst-performing register available — which is exactly what an unguided data
+  email defaults to.
+- **ONE CTA per email. Never three.** Cross-platform finding, and the single most-repeated craft
+  rule in the research.
+- **The close pushes to a conversation, never ends on a number** (Rev Real Estate School asks for a
+  call; Tom Ferry flips every stat back to the client; KCM closes on "start conversations").
+- **Agent identity block sits at the TOP** — non-negotiable, confirmed independently at Zillow,
+  Compass, and BoldTrail.
+- **Universal 5-part skeleton** every platform converges on regardless of visual style:
+  header/branding or greeting → context/value block → optional property/market data block → one
+  explicit CTA → agent sign-off (name, phone, team/brokerage).
+- **SUBJECT LINES — two different rules for two different jobs. Pick by what the email wants back.**
+  An earlier draft gave one rule for both, which was wrong.
+  - **Wants a REPLY** (agent-to-person: follow-up, check-in, CMA ask, anything inviting a
+    conversation) → **3–4 words.** Measured on response rate, so MPP can't distort it (Boomerang).
+    No subject line at all drops response to 14%.
+  - **Wants an OPEN** (broadcast: market update, listing digest, newsletter) → **30–40 characters,
+    clarity over cleverness** ("May Market Update" beats cute). Three independent sources agree.
+  - Either way, the literal word **"Newsletter" correlates with WORSE open rates**; "Special,"
+    "Update," "Bulletin" outperform it (Placester citing Adestra).
+- **Open rate is directional only** post-2021 Apple Mail Privacy Protection (it pre-loads tracking
+  pixels ecosystem-wide) — flagged by 3 independent sources. Weight CTR / reply / booked
+  appointment. Never tune an email against open rate alone.
+
+### 0.1b Campaign TYPE and cadence — what actually moves the numbers
+
+GetResponse 2024 benchmarks, **4.4 billion messages sent in 2023** — the largest sample we hold.
+Read these as RELATIVE comparisons within one panel (see the warning at the end of this block).
+
+- **Triggered beats broadcast, and welcome beats everything.** Newsletter 40.08% open / 3.84% CTR ·
+  triggered-automated 45.38% / 5.02% · **welcome email 83.63% open.** Direct product implication: a
+  lifecycle send fired by a real event (just listed, price cut, just sold) should outperform the
+  same content on a schedule, and **the first email after a signup is the single highest-value
+  message we ever send** — treat it that way.
+- **Newsletter cadence: 1 per week is the peak on every engagement axis** — 48.31% open / 5.71% CTR
+  / 11.82% CTOR. Two per week: 43.2% / 4.73% / 10.95%. Three: 41.34% / 3.73% / 9.03%. The drop is
+  steepest between 1 and 3.
+- **Do not read unsubscribe rate as a cadence signal — it moves the WRONG way.** Unsub FALLS as
+  frequency rises (0.25% at 1/week → 0.15% at 4/week) purely because intolerant subscribers have
+  already left. Set cadence on CTR.
+- **Drip/autoresponder cycles: engagement halves after the 2nd message.** CTR by cycle length —
+  1 msg 29.39% · 2 msgs 26.69% · **3 msgs 12.98%** · 4 msgs 9.79% · 19+ 3.95%. A short sequence is
+  not a lesser version of a long one; it is the better-performing one.
+- **Real-estate industry row (2023): 42.71% open · 3.51% CTR · 8.23% CTOR · 4.86% bounce.** Two
+  things to act on. The bounce rate is among the highest of any industry (all-industry average
+  2.33%) — real-estate lists rot fast, so list hygiene is a real cost, and the same report shows
+  the industry has the LOWEST double-opt-in adoption of any measured (3.46%). And the CTOR is
+  LOW while the open rate is HIGH: real-estate email gets opened and then fails to earn the click.
+  **That is a content problem, and closing it is the entire point of a sourced, locally-grounded
+  email.**
+- ⚠️ **NEVER promise a client an open or click rate, and never set an internal target from one.**
+  Two reputable ESPs disagree ~2× on this same industry in both directions — GetResponse 42.71%
+  open / 8.23% CTOR vs Campaign Monitor 21.7% open / 17.2% CTOR. Different panels, years, and
+  bucketing. Relative comparisons inside one source survive; absolute levels do not. This is the
+  no-invention gate applied to borrowed benchmarks.
+- Send-day is a weak lever, not a strong one: best-to-worst open spans ~1.7 points (Monday 22.0%
+  best, Sunday 20.3% worst; best CTR Tuesday). Don't build scheduling doctrine on it.
+
+### 0.2 Type, spacing, grid — mirror of §4, `lib/email/blocks/scale.ts` is authority
+
+**These numbers are RESTATED from §4 for reading order — this is a deliberate duplicate inside one
+file, so it can rot.** §4 carries the provenance chain (doc → code root → enforced API); `scale.ts`
+carries the truth. Changing any value below is a THREE-PLACE edit in one commit: `scale.ts` first,
+then §4, then this list. All three or none — never patch this list alone.
+
+- **Type scale (px), seven roles, there is no eighth:** hero 64 · h1 44 · metric 36 · h2 28 ·
+  body 16 · caption 14 · mono 12. Density is `compact(role)` — ONE STEP DOWN the same ladder,
+  never a second scale, never a new number.
+- **Weights:** 600 display · 500 section-headers/emphasis/mono · 400 body. **Never 700/800.**
+- **Leading:** display (28px+) 1.1 · body 1.55 · caption 1.4 — always unitless, never absolute.
+- **Tracking:** −0.015em at display sizes · +0.06em on uppercase labels.
+- **Spacing: 8px base grid**, tokens `0/4/8/12/16/24/32/48/64/96`, typed as a union so an off-grid
+  literal is a COMPILE error. Card padding 24 · metric row 12 · table row 8. The 8pt-grid rule and
+  its companion **internal ≤ external** (the space around an element ≥ the space inside it —
+  Gestalt proximity) come from the 07/01 design-quality research (cieden.com, crawl4ai-verified).
+- **`tabular-nums` on every figure** — `text(role, {numeric: true})`.
+- **Never hand-type a px value in an email block.** Call `text(role)` — it returns size + leading +
+  weight together, which is what makes the injected-24px line-height bug unreachable. A hand-typed
+  size is the bug, not a style choice.
+- **Canvas:** react-grid-layout · 12 columns · 600px email canvas · rowHeight 30 (advisory) ·
+  margin [8,8]. Users pick width PRESETS (Full/⅔/½/⅓ = 12/8/6/4 cols).
+- **Contrast (WCAG AA):** 4.5:1 functional text · 3:1 large text (18pt+, or 14pt+ bold) and icons ·
+  3:1 between adjacent chart elements (1.4.11). Decoration exempt. `legibleInk()` guards every raw
+  brand-ink site at render.
+- **Scope limit (operator ruling 07/14):** the scale unifies RHYTHM, not appearance. Color, block
+  order, and what a given template looks like stay per-template choices. "Consistent" does not mean
+  "identical."
+
+### 0.3 Render constraints — the base skeleton is not a free choice
+
+From the 08/03 research, Part D (Litmus / Email on Acid / caniemail.com, 19 pages fetched live).
+None of this was written down here before 08/03/2026.
+
+- **Build the base layout in nested tables. Not div, not flexbox, not grid.** Outlook Windows
+  (2007–2019) renders through the **Word engine** and shows NO support cell at all for
+  `display:flex` / `display:grid` on caniemail. Ecosystem support is ~83% and the entire gap is
+  Outlook Windows desktop — disproportionately what brokers on corporate email actually use.
+  Flex/grid MAY layer on top as progressive enhancement; the skeleton underneath stays tables.
+- **Any stat grid or property-card row uses fluid-hybrid**, not media queries alone: table at
+  `width="100%"` + `style="max-width:600px"` + an MSO-conditional **ghost table** giving Outlook a
+  fixed-pixel fallback. Plain side-by-side `<td>` stacking misaligns on Android with unequal column
+  heights — that is exactly a 3–4-column stat row's failure mode.
+- `role="presentation"` on **layout** tables only — leave it OFF a table presenting real tabular
+  data. `cellpadding="0" cellspacing="0"` explicitly on every layout table. Cap nesting depth 4–6.
+- **Set the HTML `width` attribute AND CSS width/max-width on every `<img>`** — Outlook ignores CSS
+  image sizing. **ALT text is mandatory, not optional**: Outlook has images off by default, so ALT
+  is the only pre-click signal.
+- **Never size a `<div>` with CSS width/height and expect Outlook to honor it** — divs collapse to
+  text-height/100%-width regardless. This is the entire reason ghost tables exist.
+- **Dark mode is three different behaviors, not one.** Apple Mail: no change. Gmail mobile /
+  Outlook Web / Outlook mobile: partial invert, addressable with `[data-ogsc]` / `[data-ogsb]`
+  (repeat the attribute on EVERY comma-separated selector). **Outlook desktop Windows and Gmail
+  desktop webmail: FULL invert with no coding workaround at all.** Ship both meta tags together
+  (`color-scheme` + `supported-color-schemes`) plus a `prefers-color-scheme` block. **Never pure
+  `#FFFFFF` or `#000000`** — multiple clients force-invert these even with `!important`; use
+  near-white/near-black (`#FEFEFE` / `#0E0E0E`).
+- **Gmail clips any message whose HTML/CSS source exceeds ~102KB.** Images don't count. The clip
+  lands wherever the byte limit hits — it can sever an open `<table>` tag and break visible layout,
+  not just truncate. **Target under 80KB**; ESP-injected tracking/footer markup adds bytes after
+  your authoring is "done." Measure the ACTUAL sent HTML, not the source. Email-safe minifiers only
+  (a generic one strips MSO conditionals and breaks Outlook).
+- **SVG icons render as text in Outlook** — use the established fallback, never raw SVG.
+- **Gmail does not support `<details>`/`<summary>`** — no client-side accordions. Compact by
+  construction (count + link out).
+- Charts ship as a **static image, one chart, not a dashboard** — never an HTML data table.
+
+### 0.4 Logo
+
+- **No paid logo vendor.** Logo.dev is on the kill list (§9). Custom social icons = keyless favicon
+  → globe fallback.
+- The brand logo enters through `applyBrand` (`lib/email/brand/apply-brand.ts`, `LOGO_URL` token)
+  and renders in `HeaderBlock`. **A branded doc with a `COMPANY_NAME` but no `LOGO_URL` deletes the
+  logo rather than falling back** — never ship SWFL Data Gulf imagery under someone else's brand.
+- **A logo must survive uncontrolled full inversion** — Outlook desktop and Gmail desktop webmail
+  invert with no workaround available. Give it a midtone color, a stroke, or a background shape.
+  A pure-black wordmark on transparent becomes invisible in half the ecosystem.
+- ⚠️ **LIVE CAVEAT, do not write this rule as if it holds today:** `applyBrand` is browser-only, so
+  **any non-Lab send path currently ships unbranded** — no logo, no colors, no agent identity, and
+  an empty CAN-SPAM footer address. Open defect: `applybrand_no_server_side_caller`.
+
+### 0.5 CAN-SPAM — 4 requirements, not 3
+
+A working opt-out · accurate headers · no misleading subject · **AND a valid physical postal
+address** (business address, PO box, or mailbox service) in every commercial email. Corrected
+07/02/2026 against Shopify's FTC-sourced guide; older docs said "3." The footer `address` field is
+its home, populated from the brand profile's `business_address`; the lab nudges non-blocking when
+empty. **No compliance lecture in product copy.** Same live caveat as §0.4 — the non-Lab send paths
+ship that footer empty today (`applybrand_no_server_side_caller`).
+
+### 0.6 Market-report / market-update emails — the content order
+
+The most universal recurring email type across every platform scanned. Use this order (08/03
+research, Part C synthesis — NAR, Keeping Current Matters, Rev Real Estate School, EmerickTech):
+
+1. **One headline number, alone, first** — before any sentence (NAR leads with a bare `-2.4%`).
+2. **One plain-English sentence translating it** — direction + why, no jargon.
+3. **An authority interpretation line** — direct, not hedged into mush, never beyond the audited
+   figure (the no-invention gate applies here exactly).
+4. **Local grounding, one comparable-level cut** — new/sold/reduced comps with a link OUT to the
+   properties, not a full inline data table. Cite the source.
+5. **One static chart image** — not a dashboard, not an HTML table.
+6. **A "what this means for you" line, segmented by recipient type** (buyer / seller / past
+   client). EmerickTech's central complaint is exactly the generic unsegmented market email:
+   *"It should not simply repeat market statistics."*
+7. **A close that pushes to conversation** — never end on a number.
+8. **A reporting-period stamp + the next-update date, stated plainly** — provenance and cadence in
+   one line. Matches our as-of convention (MM/DD/YYYY, stated once).
+
+Cadence follows the JOB, not a best-practice number: NAR's monthly mirrors a data drop (education);
+Rev's weekly "Market Monday" is paced to seller anxiety during an active listing (maintenance).
+
+### 0.7 The rules that are already code — do not restate, call them
+
+`scale.ts` (type/spacing) · `lib/brand/fonts.ts` (6 families, all engines) · `capabilities.ts`
+(`FEATURE_ROUTING`/`FONT_ROUTING`, the tier dial) · `claims.ts` (the claim gate) ·
+`assertHeroChartCoherence` (headline within ~3× the chart's plotted range) · `legibleInk` (contrast)
+· `csv-escape.ts` (escape at EXIT) · `url-lint` · the SEED slot rule (§4 / `lib/email/CLAUDE.md`).
+If a rule has a code root, the root is the answer — this card is the index, not a second copy.
+
+---
+
 ## 1. THE 60-SECOND VERSION
 
 1. **One build path — and since 08/02/2026 ONE LANE.** Every door carries a **recipe key** into
@@ -476,16 +697,32 @@ Before re-deriving, re-crawling, or re-evaluating ANYTHING email, check this she
 - `docs/superpowers/specs/2026-06-28-email-lab-ai-design-research.md` — the render-stack
   research (grid canvas, Photopea, react-email, Graphite, Inkscape + the full rejected list).
   Header says it: "Do NOT re-crawl these topics. Build from here."
-- `_ASSISTANT/research/2026-07-01-ai-deliverable-design-quality-research.md` (+
-  `design-quality-BCD-handoff`, `taskB-wcag-contrast-verification`,
-  `taskC-charttype-verification`, `social-safezone-meta-firstparty-verification`,
-  `email-social-ai-pipeline-report`) — the design-QUALITY research: 8pt grid +
+**Gitignored but ON THIS MACHINE — `_RESEARCH/` (paths corrected 08/03/2026).** These moved out
+of `_ASSISTANT/research/` in the 07/20/2026 consolidation and this shelf pointed at the dead
+directory for two weeks. `_RESEARCH/` is invisible to Grep — a search returning nothing is NOT
+evidence the research is absent. Read by path, and start at `_RESEARCH/INDEX.md`.
+- `_RESEARCH/deliverable-and-design/2026-07-01-ai-deliverable-design-quality-research.md` (+
+  `2026-07-01-design-quality-BCD-handoff.md`, `2026-07-01-taskB-wcag-contrast-verification.md`,
+  `2026-07-01-taskC-charttype-verification.md`) — the design-QUALITY research: 8pt grid +
   internal≤external spacing, M3 grouping/rhythm, type-scale ratios, WCAG contrast math,
-  chart-type selection — all crawl4ai-verified with sources.
-- `_ASSISTANT/research/2026-07-01-listing-lifecycle-marketing-research.md` — the lifecycle
-  recipes' marketing research.
-- `_ASSISTANT/research/2026-07-15-*` — sell-side copywriting / anti-drift / authority trio
-  behind `FAVORABLE_FRAMING_POLICY`.
+  chart-type selection — all crawl4ai-verified with sources. **Distilled into §0.2.**
+- `_RESEARCH/email-and-social/2026-08-03-email-length-and-per-type-benchmarks.md` — the measured
+  numbers behind §0.1/§0.1b: the 50–125-word band and its floor, questions/reading-level/sentiment
+  mechanics (Boomerang, response-rate so MPP-proof), per-TYPE and cadence figures (GetResponse
+  2024, 4.4B messages), the real-estate industry row, and the ~2× conflict between two ESPs that
+  forbids ever promising an absolute open/click rate. **Distilled into §0.1 + §0.1b.**
+- `_RESEARCH/email-and-social/2026-08-03-strongest-real-estate-email-concepts-structure.md` —
+  10-platform template anatomy, copy/subject-line craft, market-report structure, and the
+  email-client rendering constraints (Outlook Word engine, fluid-hybrid, dark mode, the 102KB
+  Gmail clip). **Distilled into §0.1, §0.3, §0.6.**
+- `_RESEARCH/email-and-social/2026-07-01-social-safezone-meta-firstparty-verification.md` +
+  `2026-07-01-email-social-ai-pipeline-report.md` — social safe zones + the pipeline report.
+- `_RESEARCH/real-estate-market/2026-07-01-listing-lifecycle-marketing-research.md` — the
+  lifecycle recipes' marketing research (stage sequence + drip cadence).
+- The trio behind `FAVORABLE_FRAMING_POLICY`, split across two categories (verified 08/03/2026):
+  `_RESEARCH/voice-and-positioning/2026-07-15-sell-side-copywriting-research.md` +
+  `2026-07-15-authority-reasoning-not-hype-research.md`, and
+  `_RESEARCH/agent-behavior/2026-07-15-ai-steering-anti-drift-research.md`.
 - `docs/superpowers/plans/2026-07-08-ai-design-and-email-marketing-hacks-sweep.md`,
   `2026-07-09-email-ink-fence-and-palette-gate.md`, `2026-06-29-email-lab-text-styling.md`,
   `2026-07-06-email-grid-gridstack-*` (NOT executed — §4) — the design/build plan trail.
