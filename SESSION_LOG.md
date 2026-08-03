@@ -1,3 +1,29 @@
+## 2026-08-03 (Fable 5) — showcase-complete SHIPPED with an operator design round mid-flight (4/4 tasks + 5-gripe fix wave)
+
+Plan docs/superpowers/plans/2026-08-03-showcase-complete.md executed in-session (operator decree:
+no fan-out, build directly, take notes — then "bring sonnet in" for the design wave, which ran as
+ONE Sonnet subagent against the gitignored deliverable-design research). Commits: `82e8201e`
+open-house + price-improved join listing-to-close via the REAL pipeline (Task 1 discovery: the
+original five were hand-authored, no coded producer ever existed; the coded path is
+resolveSubjectListing -> builderFor -> renderEmailDocHtml, documented in
+scripts/email/build-showcase-lifecycle-extras.mts) · `271404cd` back-on-market promoted into
+RECIPE_KEYS/RECIPES/RECIPE_BUILDERS (closure; /r flow untouched) · `2d308c1d` the operator review
+round: number-ONCE per email (the local rate rendered 4x), back-on-market PROPERTY mode (real
+relist 3233 NW 21st St Cape Coral, $330,000, 16 days off market from listing_transitions, baths
+via the records lane), open-house Date/Time cells de-shouted, committed wordmark logos
+(build-showcase-brand-logos.mts) + Montserrat/Lato webfonts, the word "ZIP" banned from user copy,
+AND the NEW community-info recipe — first consumer of the 08/03 neighborhood lane
+(steadyapi_neighborhoods 245 / amenities 16,304), TDD'd against its named failure modes, North
+Naples showcase story. Data facts on record: Gordonia has NO price cut (vendor history: one
+Listed event) so price-improved uses 142 Eugenia Dr ($755,000 real cut); no realtor property
+descriptions exist anywhere in the lake (live probe — vendor sells none). Evidence: bun test
+lib/showcase lib/deliverable lib/email 2649 pass 0 fail; bunx next build clean; captures
+eyeballed. OPEN: `anthropic_credits_exhausted_narratives` — the product API account is OUT OF
+CREDITS (400 on every call), so every LLM narrative (open-house commentary included) fails
+closed to an open slot; after top-up run `bun scripts/email/build-showcase-lifecycle-extras.mts`
++ `node scripts/capture-showcase.mjs`. `community_info_email_live_verify` open pending deploy.
+NOT PUSHED — awaiting operator.
+
 ## 2026-08-03 (Fable 5) — paid CSV export SHIPPED (subagent-driven, 5/5 tasks + adversarial final review)
 
 Clay-research twin of the share loop (operator: "pay only can download"; spec
