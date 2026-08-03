@@ -1,3 +1,19 @@
+## 2026-08-03 (Fable 5) — share-by-link growth loop SHIPPED (subagent-driven, 4/4 tasks + final review)
+
+Clay-research spinoff (operator: "pay only can download… create a collaborate button or share by
+link"). Two builds registered + specced (`csv-export-paid` → other session; `share-growth-loop` →
+this one). Shipped on main: `630d0ce1` share-link helpers, `87189008` Share button in both
+MaterialRow layouts (ready-only, clipboard w/ inline fallback), `c3b1ed57` non-owner signup CTA on
+all 5 public /p/[id] branches, `eacc1687` contract-guard tests (write-only `ref` scan — caught +
+allowlisted the pre-existing welcome-page reader; owner-gated CTA count). Evidence: `bun test
+lib/share/` 9 pass/0 fail; `bunx next build` green (102 routes). NOTE: 630d0ce1..c3b1ed57 reached
+origin via a parallel session's rebase-push (known safe-push landmine) — this entry documents them
+post-hoc; eacc1687 + this entry ride the next approved push. Checks: opened `ref_share_counter`
+(no analytics seam in repo), `share_guard_followups` (ThisWeek lane gap + guard scope),
+`claim_watcher_false_positive_readonly_bash` (hook misfired 3x on read-only commands);
+`share_growth_loop_live_verify` OPEN pending prod pass. OWASP CSV-injection guidance re-verified
+in-session (matches csv-escape.ts verbatim) — evidence in both specs.
+
 ## 2026-08-03 (Fable 5) — community amenity coverage: 3 new lanes LIVE (vendor neighborhoods + Maps ground truth + profile scale-out)
 
 Operator decree: "coverage on all communities HOA, golf, amenities... make sure they pair with
