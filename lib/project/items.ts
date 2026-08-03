@@ -95,6 +95,12 @@ const kinds = z.discriminatedUnion("kind", [
     extraction_status: z.enum(["processing", "done", "failed"]).optional(),
     // Page-1 PNG preview captured at upload time (lib/pdf/PdfCapture → thumbnail route).
     thumbnail_url: z.string().optional(),
+    // File-door census (spec 2026-08-03 §4): a dropped CSV records its header
+    // census; one matching NO shape parks visibly instead of silently blobbing.
+    // All optional + non-breaking — items filed before this lift omit them.
+    csv_headers: z.array(z.string()).optional(),
+    csv_row_count: z.number().optional(),
+    parked: z.boolean().optional(),
   }),
   z.object({
     kind: z.literal("table_slice"),

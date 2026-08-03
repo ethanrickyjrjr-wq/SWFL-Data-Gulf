@@ -63,8 +63,23 @@ await sql.unsafe(`
   EXCEPTION WHEN duplicate_object THEN NULL; END $$;
 `);
 
+// File-door park (spec §4): the project-uploads bucket must accept CSVs so a
+// shapeless CSV can be STORED with its census instead of rejected. Idempotent
+// (fixed array). text/csv + the two mimes Windows/Excel actually report.
+await sql.unsafe(`
+  UPDATE storage.buckets
+  SET allowed_mime_types = ARRAY[
+    'image/jpeg','image/png','image/webp','application/pdf',
+    'text/csv','application/vnd.ms-excel','application/csv'
+  ]
+  WHERE id = 'project-uploads'`);
+
 const t = await sql.unsafe(`
   SELECT table_name FROM information_schema.tables
   WHERE table_schema='public' AND table_name IN ('user_listings','user_api_tokens') ORDER BY 1`);
 console.log("tables now present:", JSON.stringify(t));
+const bucket = await sql.unsafe(
+  `SELECT allowed_mime_types FROM storage.buckets WHERE id='project-uploads'`,
+);
+console.log("project-uploads mimes:", JSON.stringify(bucket));
 process.exit(0);
