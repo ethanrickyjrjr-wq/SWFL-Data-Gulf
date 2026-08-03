@@ -55,6 +55,13 @@ export type FetchNearbyFn = (opts: {
   limit?: number;
 }) => Promise<{ addressLine: string; baths: number | null }[]>;
 
+/** The FREE bath lane — LeePA layer-23 counts served through lee_comp_sales_v
+ *  (wired 08/02/2026), keyed by house number + ZIP. Injectable for offline tests. */
+export type FetchLeePaBathsFn = (q: {
+  houseNumber: string;
+  zip: string | null;
+}) => Promise<{ addressLine: string; baths: number | null }[]>;
+
 /** Lane-1 candidate fetcher — our own lake, keyed by house number + ZIP (or city).
  *  Returns CANDIDATES; the resolver applies the one canonical street match. */
 export type FetchLakeSubjectFn = (q: {
@@ -64,8 +71,10 @@ export type FetchLakeSubjectFn = (q: {
 }) => Promise<Listing[]>;
 
 export interface ResolveSubjectDeps {
-  /** Nearby-values fetcher (the ONLY source of a bath count — /search carries none). */
+  /** Nearby-values fetcher — the PAID bath fallback (/search carries no bath count). */
   fetchNearby?: FetchNearbyFn;
+  /** Free bath fallback — LeePA via lee_comp_sales_v; tried BEFORE fetchNearby. */
+  fetchLeePaBaths?: FetchLeePaBathsFn;
   /** Injectable geocoder — tests never touch Mapbox/Census. */
   geocode?: GeocodeFn;
   /** Injectable lake candidates feed — tests never touch Supabase. */
@@ -104,6 +113,33 @@ async function fetchLakeSubjectCandidates(q: {
     // DOM cell is real. Capped inside healFlooredRows; failures keep the floor.
     await healFlooredRows(rows);
     return rows.map(lakeRowToListing).filter((l): l is Listing => l !== null);
+  } catch {
+    return [];
+  }
+}
+
+/** Default free-bath-lane impl: LeePA layer-23 counts through lee_comp_sales_v
+ *  (beds/baths landed 08/02/2026 behind the view's 1-10 sanity ceiling), narrowed
+ *  to house number + ZIP so the fetch stays tiny. Empty-tolerant: no creds, no
+ *  rows, any query error → `[]`, never throws (four-lane/ODD contract). */
+async function fetchLeePaBathsFromLake(q: {
+  houseNumber: string;
+  zip: string | null;
+}): Promise<{ addressLine: string; baths: number | null }[]> {
+  if (!q.houseNumber || !q.zip) return [];
+  try {
+    const db = createServiceRoleClientUntyped();
+    const { data } = await db
+      .schema("data_lake")
+      .from("lee_comp_sales_v")
+      .select("address_line, baths")
+      .eq("zip_code", q.zip)
+      .ilike("address_line", `${q.houseNumber} %`)
+      .limit(25);
+    if (!Array.isArray(data)) return [];
+    return (data as { address_line: string | null; baths: number | null }[])
+      .filter((r) => r.address_line)
+      .map((r) => ({ addressLine: r.address_line as string, baths: r.baths }));
   } catch {
     return [];
   }
@@ -276,6 +312,7 @@ export async function resolveSubjectListing(
   // Default to the real endpoint in prod; the offline test injects a stub so resolving a
   // subject still makes ZERO live calls (the contract this file has always held).
   const fetchNearby: FetchNearbyFn = deps.fetchNearby ?? fetchNearbyValues;
+  const fetchLeePa: FetchLeePaBathsFn = deps.fetchLeePaBaths ?? fetchLeePaBathsFromLake;
   const maxPages = Math.max(1, deps.maxPages ?? 4);
   const PAGE = 200;
 
@@ -327,7 +364,7 @@ export async function resolveSubjectListing(
       ) {
         facts.daysOnMarket = lakeHit.daysOnMarket;
       }
-      return withBaths(facts, target, fetchNearby);
+      return withBaths(facts, target, fetchLeePa, fetchNearby);
     }
   }
 
@@ -344,7 +381,7 @@ export async function resolveSubjectListing(
     try {
       const direct = await fetchListings({ city, state: "FL", location: slug, limit: PAGE });
       const hit = direct.find(matches);
-      if (hit) return withBaths(toFacts(hit, geo.zip, subject), target, fetchNearby);
+      if (hit) return withBaths(toFacts(hit, geo.zip, subject), target, fetchLeePa, fetchNearby);
     } catch {
       /* fall through to the city scan */
     }
@@ -361,7 +398,7 @@ export async function resolveSubjectListing(
     }
     if (!rows.length) break;
     const hit = rows.find(matches);
-    if (hit) return withBaths(toFacts(hit, geo.zip, subject), target, fetchNearby);
+    if (hit) return withBaths(toFacts(hit, geo.zip, subject), target, fetchLeePa, fetchNearby);
     if (rows.length < PAGE) break; // last (short) page — no more to scan
   }
   return null;
@@ -369,20 +406,42 @@ export async function resolveSubjectListing(
 
 /**
  * BATHS. The /search row carries beds, sqft and lot — and no bath count at all, which
- * is why every listing in the product shipped a blank "Baths" cell. It isn't missing
- * from the vendor, only from that endpoint: /nearby-home-values returns beds/baths/sqft,
- * and a property is always the nearest property to its OWN coordinates, so the subject
- * comes back as its own first row (verified live 07/13/2026 — 326 Shore Dr → baths 3.5).
+ * is why every listing in the product shipped a blank "Baths" cell. Two fallback
+ * lanes, in provenance order (P1b Step 2, 08/02/2026):
  *
- * One extra call, keyed by the lat/lon we already hold. Best-effort by contract: any
- * miss leaves baths undefined and the cell simply doesn't render. Never invents a count.
+ *   1. FREE — LeePA layer-23 counts through lee_comp_sales_v, matched on the
+ *      canonical street key. Fills ONLY on exactly one matching parcel: two folios
+ *      sharing a key is an ambiguity, and an ambiguous bath count is a guess.
+ *   2. PAID — /nearby-home-values: a property is always the nearest property to its
+ *      OWN coordinates, so the subject returns as its own first row (verified live
+ *      07/13/2026 — 326 Shore Dr → baths 3.5). One vendor call, only when LeePA missed.
+ *
+ * A count the record already carries is never overwritten. Any miss leaves baths
+ * undefined and the cell simply doesn't render. Never invents a count.
  */
 async function withBaths(
   facts: ListingFacts,
   target: string,
+  fetchLeePa: FetchLeePaBathsFn,
   fetchNearby: FetchNearbyFn,
 ): Promise<ListingFacts> {
-  if (facts.baths || facts.lat == null || facts.lon == null) return facts;
+  if (facts.baths) return facts;
+
+  const houseNumber = /^\d+$/.test(target.split(" ")[0] ?? "") ? target.split(" ")[0]! : "";
+  if (houseNumber) {
+    try {
+      const parcels = await fetchLeePa({ houseNumber, zip: facts.zip ?? null });
+      const hits = parcels.filter((p) => canonStreet(p.addressLine) === target);
+      if (hits.length === 1 && hits[0]!.baths != null) {
+        facts.baths = String(hits[0]!.baths);
+        return facts;
+      }
+    } catch {
+      /* free lane failed — fall through to the paid lane */
+    }
+  }
+
+  if (facts.lat == null || facts.lon == null) return facts;
   try {
     const nearby = await fetchNearby({ lat: facts.lat, lon: facts.lon, limit: 25 });
     const self = nearby.find((c) => canonStreet(c.addressLine) === target);

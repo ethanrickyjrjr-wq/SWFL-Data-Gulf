@@ -18,12 +18,12 @@
 //   1. `sale_month` is MONTH GRAIN. Every `last_sale_date` is day-of-month 1 (all 31,632
 //      rows in the trailing 12 months). Candidates are tagged `dateGrain: "month"` so the
 //      renderer says "May 2026" and never a fabricated "05/01/2026".
-//   2. NEITHER TABLE WE PULLED has bedroom or bathroom columns. Beds/baths are null here;
-//      living area is the home test (land has none), per Fannie B4-1.3-08's ban on mixing
-//      vacant-land sales into a home comp set.
-//      NOT a source limit — CORRECTED 07/22/2026. LeePA MapServer layer 23 ("Comparable
-//      Sales") carries BedRooms + Bathrooms + SHAPE over 108,881 rows and joins on a
-//      FOLIOID `leepa_parcels` already has. Unpulled, not absent (data-roots T10).
+//   2. Beds/baths arrive from LeePA layer 23 ("Comparable Sales") — WIRED 08/02/2026:
+//      `leepa_comparable_sales` joins the view on folioid (99.6% of rows with
+//      bedrooms>0), latest sale per parcel, behind a BETWEEN 1 AND 10 sanity ceiling
+//      (commercial building totals like 800/800 read as absent — check
+//      comps_commercial_contamination). Living area remains the home test (land has
+//      none), per Fannie B4-1.3-08's ban on mixing vacant-land sales into a home comp set.
 //
 // LEE ONLY. Collier's parcel table carries FDOR month-grain sale fields with no
 // exact-date equivalent, so Collier needs its own source before it can be served.
@@ -46,11 +46,15 @@ export interface LeeCompSaleRow {
   /** MONTH GRAIN. Always day-of-month 1; never render as an exact date. */
   sale_month: string | null;
   sale_price: number | null;
+  /** From LeePA layer 23 ("Comparable Sales") via folioid, latest sale per parcel.
+   *  Null when the join found no row or the count failed the view's sanity ceiling. */
+  beds: number | null;
+  baths: number | null;
 }
 
 export const LEE_COMP_VIEW = "lee_comp_sales_v";
 export const LEE_COMP_COLUMNS =
-  "parcel_strap, address_line, city, zip_code, living_area_sqft, year_built, dor_use_code, sale_month, sale_price";
+  "parcel_strap, address_line, city, zip_code, living_area_sqft, year_built, dor_use_code, sale_month, sale_price, beds, baths";
 
 /** Row cap. The bounded-read guard (failure mode F6) — a comp lookup must never
  *  approach a scan of a 387k-row view. Comfortably above any real ZIP's 6-month
@@ -99,6 +103,14 @@ export function lakeCompFilters(
   };
 }
 
+/** Sanity ceiling for a per-home bed/bath count. Layer-23 carries building
+ *  totals on commercial parcels (live 08/02/2026: 800/800, 56/516, 412/512);
+ *  anything outside 1–10 is not a home feature and reads as absent. */
+function saneHomeCount(n: number | null | undefined): number | null {
+  if (n == null) return null;
+  return n >= 1 && n <= 10 ? n : null;
+}
+
 /**
  * PURE. One view row -> a rankable candidate, or null when the row cannot honestly
  * serve as a comp. Dropped rather than defaulted: a missing sale date, a missing
@@ -113,11 +125,13 @@ export function lakeRowToCandidate(row: LeeCompSaleRow): CompCandidate | null {
     addressLine: row.address_line,
     city: row.city ?? "",
     zip: row.zip_code ?? null,
-    // Neither leepa_parcels nor lee_parcels has a bedroom or bathroom column.
-    // Null is the honest value; the ranker skips absent features rather than
-    // scoring them as zero.
-    beds: null,
-    baths: null,
+    // From the LeePA layer-23 folioid join (wired 08/02/2026). The view's
+    // BETWEEN 1 AND 10 ceiling already drops commercial building totals
+    // (the 800-bath rows of check comps_commercial_contamination); this guard
+    // is its belt-and-suspenders twin. Absent stays null — the ranker skips
+    // absent features rather than scoring them as zero.
+    beds: saneHomeCount(row.beds),
+    baths: saneHomeCount(row.baths),
     sqft: row.living_area_sqft,
     price: row.sale_price ?? null,
     priceDate: row.sale_month,

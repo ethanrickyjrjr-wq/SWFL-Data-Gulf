@@ -295,6 +295,80 @@ describe("resolveSubjectListing", () => {
   });
 });
 
+describe("withBaths — free LeePA lane before the paid vendor call (P1b Step 2)", () => {
+  // The subject's own record with NO bath count, but WITH coordinates, so the paid
+  // vendor lane is genuinely reachable — proving LeePA runs FIRST is the point.
+  const BATHLESS = mkListing({
+    addressLine1: "16447 Rainbow Meadows Ct",
+    formattedAddress: "16447 Rainbow Meadows Ct, Fort Myers, FL 33908",
+    price: 500000,
+    bedrooms: 3,
+    bathrooms: null,
+    latitude: 26.5,
+    longitude: -81.9,
+    photoUrl: "https://ap.rdcpix.com/abc/x.jpg",
+  });
+  const ADDRESS = "16447 Rainbow Meadows Court, Fort Myers, Florida 33908";
+
+  test("baths fill from LeePA on a unique address match — paid vendor never called", async () => {
+    let nearbyCalls = 0;
+    const facts = await resolveSubjectListing(ADDRESS, {
+      geocode: geocodeReturning("33908"),
+      fetchLakeCandidates: async () => [BATHLESS],
+      fetchListings: noLake,
+      fetchLeePaBaths: async () => [{ addressLine: "16447 RAINBOW MEADOWS CT", baths: 3 }],
+      fetchNearby: async () => {
+        nearbyCalls++;
+        return [];
+      },
+    });
+    expect(facts!.baths).toBe("3");
+    expect(nearbyCalls).toBe(0);
+  });
+
+  test("baths stay absent on an ambiguous LeePA match — two parcels, one key, NEVER guess", async () => {
+    const facts = await resolveSubjectListing(ADDRESS, {
+      geocode: geocodeReturning("33908"),
+      fetchLakeCandidates: async () => [BATHLESS],
+      fetchListings: noLake,
+      fetchLeePaBaths: async () => [
+        { addressLine: "16447 RAINBOW MEADOWS CT", baths: 2 },
+        { addressLine: "16447 Rainbow Meadows Court", baths: 4 },
+      ],
+      fetchNearby: noNearby,
+    });
+    expect(facts!.baths).toBeUndefined();
+  });
+
+  test("LeePA never overwrites a bath count the record already carries", async () => {
+    let leepaCalls = 0;
+    const facts = await resolveSubjectListing(ADDRESS, {
+      geocode: geocodeReturning("33908"),
+      fetchLakeCandidates: async () => [SUBJECT], // carries bathrooms: 4
+      fetchListings: noLake,
+      fetchLeePaBaths: async () => {
+        leepaCalls++;
+        return [{ addressLine: "16447 RAINBOW MEADOWS CT", baths: 1 }];
+      },
+      fetchNearby: noNearby,
+    });
+    expect(facts!.baths).toBe("4");
+    expect(leepaCalls).toBe(0);
+  });
+
+  test("missing baths renders NO cell — undefined, never a zero", async () => {
+    const facts = await resolveSubjectListing(ADDRESS, {
+      geocode: geocodeReturning("33908"),
+      fetchLakeCandidates: async () => [BATHLESS],
+      fetchListings: noLake,
+      fetchLeePaBaths: async () => [],
+      fetchNearby: noNearby,
+    });
+    expect(facts!.baths).toBeUndefined();
+    expect(facts!.baths).not.toBe("0");
+  });
+});
+
 describe("canonStreet", () => {
   test("folds suffix + punctuation so Court and Ct match", () => {
     expect(canonStreet("16447 Rainbow Meadows Court")).toBe(

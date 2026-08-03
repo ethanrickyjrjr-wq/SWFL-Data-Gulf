@@ -852,8 +852,12 @@ pipelines:
       error_after_days: 730
     # LeePA ParcelInfo layer 23 "Comparable Sales" — the ONLY LeePA surface carrying
     # BedRooms/Bathrooms. Neither leepa_parcels nor lee_parcels (FDOR) has a bed or bath
-    # column at all, which is why lee_comp_sales_v falls back to living_area_sqft as its
-    # only home test (docs/sql/20260722_lee_comp_sales_view.sql).
+    # column at all. WIRED 08/02/2026: lee_comp_sales_v lateral-joins this table on
+    # folioid (latest sale per parcel, 1-10 sanity ceiling) and serves beds/baths to the
+    # answer-engine comp path (lib/assistant/comp-source-lake.ts) — that live consumer,
+    # not the aspirational consuming_pack above, is what satisfies the brain-first gate
+    # (docs/sql/20260802_lee_comp_sales_v_beds_baths.sql; checks
+    # comps_commercial_contamination + leepa_comp_sales_no_consumer closed on it).
     # GRAIN: SaleYear + SaleMonth are separate integers = MONTH grain. This does NOT fix
     # sale-date recency (data-roots T10) and no consumer may render a day-of-month.
     # KNOWN GHA LIMITATION: LeePA HTTP fetch does not land on GitHub runners — see the

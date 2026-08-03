@@ -1,3 +1,26 @@
+## 2026-08-02 (Fable 5) — "wire!!!" decree: LeePA beds/baths into the comp path + email baths lane, home-values-swfl into master
+
+Operator decreed WIRE on the unwired inventory (four-lane answer first: community info IS wired —
+neighborhood_stats 20,400 rows + community_profiles 69 rows live + drill pages; stale
+community_profiles_zero_coverage check swapped for community_profiles_phase2_coverage). Shipped, 5 of
+6 parts: (1) P1b Steps 0–2 + P1c per the 08/02 TDD plan — lee_comp_sales_v rebuilt live
+(docs/sql/20260802_lee_comp_sales_v_beds_baths.sql): residential dor_uc filter kills the commercial
+contamination, beds/baths lateral-joined from leepa_comparable_sales (folioid, 99.6% join, 1–10
+sanity ceiling); verified live — fixture folio 10109534 serves 3/3.0, consumer slice (33991/6mo/band)
+54 rows ALL with baths, max 2. comp-source-lake carries beds/baths into comp-rank W_BEDS (saneHomeCount
+twin guard); resolve-subject withBaths gains the FREE LeePA lane BEFORE the paid vendor call
+(unique-address-match only, never overwrites, ambiguous = absent) — 4 failure-mode tests red→green,
+suites 955+23 pass. Checks closed w/ evidence: comps_commercial_contamination,
+leepa_comp_sales_no_consumer. (2) home-values-swfl wired into master sources[]+input_brains[]
+(the last non-deliberate 07/22 wire-map gap; tier-divergence already landed 07/23) — local
+deterministic rebuild green, 39 fragments, master.md v125. (3) property-tax-history fields: found
+ALREADY covered by the parallel session's raw-landing commits (54a94313/b50092bf) — not duplicated.
+NOT done: cre_figures registry entry — blocked on the spine-test count-literal mechanism fix
+(registry_count_guard_hand_patched_four_times forbids a fifth hand-patch); stays on its two open
+checks (cre_figures_unregistered, cre_figures_build_cron_cadence). listing_week stays parked
+(sell-odds model unbuilt). LIVE caveat: view + master.md are live-verified locally; the deployed
+answer engine picks up beds/baths on next deploy.
+
 ## 2026-08-02 (Fable 5) — Clay.com mapped INSIDE the app (logged-in drive + operator tour): one primitive, bought send engine, MCP governance to steal
 
 Operator logged into app.clay.com and had me drive Chrome through the real product (rounds 3–3d;

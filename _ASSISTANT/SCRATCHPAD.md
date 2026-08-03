@@ -1,3 +1,14 @@
+## 2026-08-02 (Fable 5) — "wire!!!!!!!!!!!!!!!!!!!" — decree: wire the unwired list NOW
+
+After the four-lane answer on community info + unwired inventory, operator decreed WIRE. The
+enumerated parts (RULE 0.8 count, N=6): (1) leepa_comparable_sales (108,848 rows, beds/baths,
+folio-joinable) into the product per the 2026-08-02 probe-red TDD plan P1 LeePA lane;
+(2) property-tax-history extra fields persisted (research 2026-08-02, ~50 fields/call, we keep 1);
+(3) home-values-swfl → master (07/22 wire map: non-deliberate gap); (4) tier-divergence-swfl →
+master (same); (5) cre_figures registered + consumer decision; (6) stale check swap
+(community_profiles_zero_coverage says 0 rows — live count 69). listing_week stays parked (needs
+the unbuilt sell-odds model). Report n of N at end; unfinished parts open checks same session.
+
 ## 2026-08-02 (Fable 5) — "don't open another!!!!!!!!!!!! go to were you werer" — browser driving rule
 
 While driving Clay in his logged-in Chrome: do NOT keep opening new tabs/pages — he's working

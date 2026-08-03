@@ -17,6 +17,8 @@ function row(over: Partial<LeeCompSaleRow> = {}): LeeCompSaleRow {
     dor_use_code: "001",
     sale_month: "2026-05-01",
     sale_price: 425000,
+    beds: null,
+    baths: null,
     ...over,
   };
 }
@@ -64,8 +66,33 @@ describe("mapping — a row becomes a rankable candidate", () => {
     expect(c.priceDate).toBe("2026-05-01");
   });
 
-  test("beds and baths are NULL — neither source has them", () => {
-    const c = lakeRowToCandidate(row())!;
+  test("carries beds and baths through from the LeePA layer-23 join", () => {
+    // Live-verified fixture 08/02/2026: folioid 10109534 = 3 bed / 3.0 bath
+    // (data_lake.leepa_comparable_sales, joined on folioid at 99.6%).
+    const c = lakeRowToCandidate(row({ beds: 3, baths: 3 }))!;
+    expect(c.beds).toBe(3);
+    expect(c.baths).toBe(3);
+  });
+
+  test("commercial bath counts never survive to a candidate (sanity ceiling)", () => {
+    // The real contamination that opened check comps_commercial_contamination:
+    // layer-23 rows carrying 800/800, 56/516, 412/512 "bedrooms/bathrooms" —
+    // building totals for commercial parcels, not home features. The view's
+    // BETWEEN 1 AND 10 ceiling drops them in SQL; this is the belt-and-suspenders
+    // twin so a future view regression cannot push an insane count into scoring.
+    const c = lakeRowToCandidate(row({ beds: 56, baths: 516 }))!;
+    expect(c.beds).toBeNull();
+    expect(c.baths).toBeNull();
+  });
+
+  test("a zero bath count is treated as absent, never scored as zero", () => {
+    const c = lakeRowToCandidate(row({ beds: 0, baths: 0 }))!;
+    expect(c.beds).toBeNull();
+    expect(c.baths).toBeNull();
+  });
+
+  test("beds and baths stay null when the layer-23 join found no row", () => {
+    const c = lakeRowToCandidate(row({ beds: null, baths: null }))!;
     expect(c.beds).toBeNull();
     expect(c.baths).toBeNull();
   });

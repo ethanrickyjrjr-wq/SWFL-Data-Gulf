@@ -269,6 +269,7 @@ export const master: PackDefinition = {
     makeBrainInputSource("active-rentals-swfl"),
     makeBrainInputSource("communities-swfl"),
     makeBrainInputSource("tier-divergence-swfl"),
+    makeBrainInputSource("home-values-swfl"),
   ],
   // Typed edges (P5 + Group C 2026-05-20): every leaf feeds master as `input`
   // data EXCEPT env-swfl, which is wired as a `modifier`. Group B made env-swfl
@@ -379,6 +380,14 @@ export const master: PackDefinition = {
     // synthesis, not a no-op. Plain `input`, non-critical: a stale run adds a
     // caveat but never holds master, same as the other per-ZIP value brains.
     { id: "tier-divergence-swfl", edge_type: "input" },
+    // 2026-08-02: home-values-swfl — the last non-deliberate master gap from the
+    // 07/22 lake wire map (fgcu-reri + corridor-pulse-swfl stay out by design;
+    // lee-deed-records-swfl is moot while its table is empty). ZHVI is demoted
+    // from VALUE serving (data-roots T2) but YoY growth is its legitimate index
+    // work, and this pack computes a real bullish/bearish verdict off exactly
+    // that — deterministic, no LLM. Same shape as tier-divergence-swfl above:
+    // plain `input`, non-critical — a stale run adds a caveat, never holds master.
+    { id: "home-values-swfl", edge_type: "input" },
   ],
   // Every upstream fragment belongs by construction; the DAG resolver already
   // gates whether the upstream is fresh enough to even reach this pack.
