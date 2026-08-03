@@ -25,6 +25,10 @@ import { buildSourceCitationUrl } from "../lib/citation-url.mts";
 const SOURCE_ID = "active_listings_residential";
 const SCHEMA = "data_lake";
 const VIEW = "listing_active_stats";
+// 08/03/2026 — SteadyAPI Step 3 family A (steadyapi_listing_events, see data-roots.md): recent
+// price-cut depth, aggregate-at-source over the last 90 days. Listing-scope only (probed/listed
+// properties, not the full book) — see the caveat this feeds in the pack's key_metrics.
+const PRICE_CUTS_VIEW = "listing_recent_price_cuts_stats";
 
 const FIXTURE_PATH = path.join(
   process.cwd(),
@@ -43,6 +47,13 @@ export interface ResidentialStatRow {
   latest_scraped_at: string | null;
 }
 
+export interface PriceCutStatRow {
+  county: string | null;
+  properties_with_recent_cut: number;
+  cut_events: number;
+  median_price_change: number | null;
+}
+
 export interface ActiveListingsResidentialSummary {
   kind: "active-listings-residential-summary";
   region: ResidentialStatRow | null;
@@ -50,6 +61,9 @@ export interface ActiveListingsResidentialSummary {
   by_zip: ResidentialStatRow[];
   latest_scraped_at: string | null;
   source_url: string;
+  // Nullable: family A (steadyapi_listing_events) is a separate table from listing_active_stats —
+  // a fetch failure here must never fail the whole active-listings fragment (ODD-tolerant).
+  recent_price_cuts_region: PriceCutStatRow | null;
 }
 
 interface FixtureShape {
@@ -75,10 +89,28 @@ async function fetchLiveRows(): Promise<ResidentialStatRow[]> {
   return (data ?? []) as ResidentialStatRow[];
 }
 
+/** ODD-tolerant: a fetch error or missing region row reads as "no price-cut data", never a crash —
+ * this is a supporting metric on a separate table, not the primary listing-count fact. */
+async function fetchPriceCutsRegion(): Promise<PriceCutStatRow | null> {
+  try {
+    const { data, error } = await getSupabase()
+      .schema(SCHEMA)
+      .from(PRICE_CUTS_VIEW)
+      .select("county, properties_with_recent_cut, cut_events, median_price_change")
+      .is("county", null)
+      .maybeSingle();
+    if (error || !data) return null;
+    return data as PriceCutStatRow;
+  } catch {
+    return null;
+  }
+}
+
 /** Split the GROUPING SETS rows into the three grains by null-ness. */
 function summarize(
   rows: ResidentialStatRow[],
   source_url: string,
+  recentPriceCutsRegion: PriceCutStatRow | null,
 ): ActiveListingsResidentialSummary {
   const region = rows.find((r) => r.county == null && r.zip_code == null) ?? null;
   const by_county = rows
@@ -100,6 +132,7 @@ function summarize(
     by_zip,
     latest_scraped_at: latest,
     source_url,
+    recent_price_cuts_region: recentPriceCutsRegion,
   };
 }
 
@@ -108,6 +141,7 @@ export const activeListingsResidentialSource: SourceConnector = {
   trust_tier: 2,
   async fetch(): Promise<RawFragment[]> {
     const rows = env.source === "fixture" ? await loadFixtureRows() : await fetchLiveRows();
+    const recentPriceCutsRegion = env.source === "fixture" ? null : await fetchPriceCutsRegion();
     const fetched_at = isoTimestamp();
     const source_url =
       env.source === "fixture"
@@ -118,7 +152,7 @@ export const activeListingsResidentialSource: SourceConnector = {
             brain: "active-listings-swfl",
             date_col: "scraped_at",
           });
-    const summary = summarize(rows, source_url);
+    const summary = summarize(rows, source_url, recentPriceCutsRegion);
     const fragment: RawFragment<ActiveListingsResidentialSummary> = {
       fragment_id: fragmentId(SOURCE_ID, "summary"),
       source_id: SOURCE_ID,

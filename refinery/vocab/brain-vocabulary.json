@@ -5,7 +5,7 @@
     "description": "SWFL Intelligence Lake — canonical metric vocabulary. Maps every raw metric slug to a stable SKOS concept. Category-qualified keys are the stable IDs; raw_slugs are the legacy strings still written into brain .md files today.",
     "next_review": "2026-08-15",
     "audit_doc": "docs/vocab-audit.md",
-    "concept_count": 297
+    "concept_count": 298
   },
   "concepts": {
     "active_listings_count_swfl": {
@@ -57,6 +57,24 @@
       "scope_note": "Average days on market across active SWFL residential listings . Higher = slower market.",
       "raw_slugs": [
         "avg_days_on_market_swfl"
+      ]
+    },
+    "recent_price_cuts_count_swfl": {
+      "id": "recent_price_cuts_count_swfl",
+      "category": "real-estate",
+      "value_type": "count",
+      "grade": {
+        "direction_polarity": "lower_is_bullish"
+      },
+      "prefLabel": "SWFL Listings With A Recent Price Cut (90-Day Count)",
+      "altLabels": [
+        "price cuts",
+        "recent price reductions",
+        "listings with a price drop"
+      ],
+      "scope_note": "Count of SWFL residential listings with at least one price-cut event in the trailing 90 days, from per-listing event history (data_lake.steadyapi_listing_events). Listing-scope only — covers properties we have probed (listed/sold history), not the full active-listing book.",
+      "raw_slugs": [
+        "recent_price_cuts_count_swfl"
       ]
     },
     "sba_overall_survival_rate": {

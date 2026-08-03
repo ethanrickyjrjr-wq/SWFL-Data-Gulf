@@ -103,6 +103,30 @@ function activeListingsOutputProducer(_out: PackOutput): BrainOutputProducerResu
     });
   }
 
+  // 08/03/2026 — SteadyAPI Step 3 family A (data_lake.steadyapi_listing_events, via
+  // listing_recent_price_cuts_stats). Listing-scope only (probed/listed properties, not the full
+  // book — THE COVERAGE LAW, playbook §STEP 3); caveat carries this explicitly.
+  const cuts = summary.recent_price_cuts_region;
+  if (cuts != null && cuts.properties_with_recent_cut > 0) {
+    key_metrics.push({
+      metric: "recent_price_cuts_count_swfl",
+      label: "SWFL listings with a price cut in the last 90 days",
+      value: cuts.properties_with_recent_cut,
+      direction: "stable",
+      variable_type: "extensive",
+      units: "listings",
+      display_format: "count",
+      source: makeSource(
+        `${fmtK(cuts.properties_with_recent_cut)} SWFL listings took at least one price cut in the trailing 90 days` +
+          (cuts.median_price_change != null
+            ? `, median cut ${fmtUsd(Math.abs(cuts.median_price_change))}`
+            : ""),
+        fetchedAt,
+        url,
+      ),
+    });
+  }
+
   if (region.avg_days_on_market != null) {
     key_metrics.push({
       metric: "avg_days_on_market_swfl",
@@ -202,6 +226,11 @@ function activeListingsOutputProducer(_out: PackOutput): BrainOutputProducerResu
       "Median asking price spans ALL active listings INCLUDING vacant land/lots — in lot-heavy areas this pulls the median well below typical home prices. Use the property_type field or the per-county/ZIP detail to separate homes from land.",
       "Daily snapshot — broad SWFL coverage but not comprehensive. Direction is neutral on any one day; the day-over-day diff is what reads the inventory trend.",
       "Source is realtor.com for-sale listings; a direct licensed MLS/IDX feed can swap into the same table when credentialed.",
+      ...(cuts != null && cuts.properties_with_recent_cut > 0
+        ? [
+            "Price-cut counts cover only listings we have probed (listed/sold history), not every active listing region-wide — a per-property depth signal, not a full-book statistic.",
+          ]
+        : []),
     ],
     direction: "neutral",
     magnitude: 0,
