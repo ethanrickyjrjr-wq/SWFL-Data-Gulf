@@ -1,3 +1,30 @@
+## 2026-08-03 (Opus 5) — "see if scrapping a photo for comps is possible until we have more solds. if not, just make the user able to upload a picture."
+
+OPERATOR DIRECTIVE + the answer, measured live 08/03/2026. **Scraping a comp photo is NOT
+possible.** Four lanes probed, all dead — do not re-derive this:
+
+1. `/nearby-home-values` (the comp source) — RAW response carries exactly 9 keys: address,
+   description, estimates, href, list_price, listing_id, permalink, property_id, status.
+   **No photo field exists to drop.** We are not discarding one; the vendor never sends one.
+2. `/property-tax-history` (a call market-comps ALREADY makes per comp — a photo here would have
+   been FREE) — 200, 4808 bytes, body keys: status, property_history, tax_history,
+   building_permits, statistics. **Zero photo/image/media keys.**
+3. `/similar-homes` keyed by a SOLD property_id — 200 but **empty body (180 bytes, 0 results)**.
+   It only answers for live for-sale inventory, so it can never photograph a sold comp.
+4. **realtor.com direct scrape — WALLED.** Plain server fetch of the comp's own detail URL →
+   **HTTP 429** bot page, no og:image. crawl4ai (real Chromium, not a bare fetch) → the same wall,
+   which literally prints `unblockrequest@realtor.com`. This is a deliberate, maintained block, not
+   a rate blip. Going around it is not on the table.
+
+CONCLUSION: a sold comp outside our own nightly sweep window has NO photo obtainable by any
+automated lane. The lake lane (`lib/listings/comp-photos.ts`) stays exactly as built — it is right,
+it just returns nothing for pre-sweep sales (measured 0 of 6 on the 326 Shore Dr build).
+
+OPERATOR'S CALL: build the upload path instead. "for e campaign, the user would just have to upload
+th pictures when Comp email is supposed to go out." Existing root to reuse — do NOT build a second
+one: `app/api/email-lab/media/route.ts` (`email_media_assets` table, `email-media` bucket, RLS
+per-user, 8 MB cap).
+
 ## 2026-08-03 (Opus 5) — "Just seems money just disappears when in Claude." + can Ollama replace it, what does each cost
 
 OPERATOR GRIPE, RECORDED: spend feels invisible/uncontrolled inside Claude. He is right that it is
