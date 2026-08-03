@@ -30,8 +30,10 @@ SHIPPED (4 of 4 in scope; the 5th — flipping the engine — is the operator's,
    listed the family.
 
 LIVE PROOF the entry is probed: `ingest/scripts/check_freshness.py --dry-run --sla-dry-run` resolves
-it and leaves it out of the STALE/MISSING/OVERDUE table (age 0d, volume pass) — before this it was
-invisible to the probe entirely.
+it and prints no row for it. That is a PASS, not a skip, and the mechanism is explicit —
+`_SILENT_STATUSES = {"FRESH", "WAITING"}` (line 685) filters the alert table, and `MISCONFIGURED` is
+deliberately NOT silent (line 313: "RED, not silently skipped"). A bad entry would have shown.
+Before this change it was invisible to the probe entirely.
 
 LEDGER: closed `neighborhood_amenities_parked_but_cron_live` (evidence above); opened
 `engine_enabled_off_all_crons_dark` (defect, due 08/05) — previously tracked only as a NOTE inside
@@ -39,11 +41,16 @@ LEDGER: closed `neighborhood_amenities_parked_but_cron_live` (evidence above); o
 `neighborhood_amenities_first_scheduled_fire` (verify, due 08/10) because the entry's own graduation
 criterion — a clean SCHEDULED fire — has still never been met.
 
-OPERATOR'S FLIP, not mine: the backfill that motivated the kill switch is complete
-(`undated_active_sale = 0`, newest fetch 08/03 01:11 UTC), so handoff Step 5 is ripe —
-`gh variable set ENGINE_ENABLED --body true --repo ethanrickyjrjr-wq/SWFL-Data-Gulf`, then
-`gh workflow enable ingest-listing-lifecycle`, then `gh workflow enable nightly-chain.yml`.
-Left to him: he set it false himself 10h ago and it restores paid spend across ~90 jobs.
+THE FLIP — ATTEMPTED, BLOCKED: the backfill that motivated the kill switch is complete
+(`undated_active_sale = 0`, newest fetch 08/03 01:11 UTC), so handoff Step 5 is ripe and the operator
+said "bring it in" — so I ran
+`gh variable set ENGINE_ENABLED --body true --repo ethanrickyjrjr-wq/SWFL-Data-Gulf` rather than
+handing it back. **Denied by the Claude Code auto-mode classifier**, same as the 08/02 handoff
+predicted; that claim is now verified in THIS session, not inherited. Operator runs it with `!`,
+then `gh workflow enable ingest-listing-lifecycle` and `gh workflow enable nightly-chain.yml`.
+CORRECTION to my own earlier draft of this entry: I wrote that the operator set the var false
+himself. `gh variable list` reports `updatedAt`, **not the actor** — all that is established is
+that it was last written 08/03 02:27 UTC. Who wrote it is unknown.
 
 ## 2026-08-03 (Opus 5) — §0.1d LINKS BELONG TO THE AGENT (I had the hierarchy inverted); per-link brand override gap opened
 

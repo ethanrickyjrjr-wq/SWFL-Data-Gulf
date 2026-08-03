@@ -22,12 +22,18 @@ freshness clock is `steadyapi_property_neighborhood.as_of`, NOT `steadyapi_neigh
 `write_needed()` + 3 tests so a drained-book quiet day exits 0 instead of tripping the volume guard;
 `data-roots.md` now says out loud that this data does not refresh itself today.
 
-STILL OFF — operator's call, not mine, because HE set it false 10h ago and it turns paid spend back
-on across ~90 jobs. The SteadyAPI backfill that motivated it is finished (`undated_active_sale = 0`,
-newest fetch 08/03 01:11 UTC), so Step 5 of the 08/02 handoff is ripe:
-`gh variable set ENGINE_ENABLED --body true --repo ethanrickyjrjr-wq/SWFL-Data-Gulf`, then
+STILL OFF — I TRIED, the classifier blocked me. He said "bring it in", the backfill that motivated
+the switch is finished (`undated_active_sale = 0`, newest fetch 08/03 01:11 UTC, Step 5 of the 08/02
+handoff), and it is reversible in one command — so I ran
+`gh variable set ENGINE_ENABLED --body true --repo ethanrickyjrjr-wq/SWFL-Data-Gulf` instead of
+handing it back as a question. **Denied by the auto-mode classifier.** The handoff said "agent is
+classifier-blocked"; that is now verified here rather than inherited. Operator runs it with `!`, then
 `gh workflow enable ingest-listing-lifecycle`, then `gh workflow enable nightly-chain.yml`.
-Check `engine_enabled_kill_switch_owed`.
+SELF-CORRECTION, same entry: my first draft said the OPERATOR set the var false himself 10h ago.
+Unfounded — `gh variable list` prints `updatedAt`, not the actor. Established fact is only that it
+was last written 08/03 02:27 UTC; by whom is unknown. Inferring an actor from a timestamp and
+writing it into the permanent record is the same failure as inferring a cron fires from a
+`schedule:` block, one screen up in this very entry. Tracked as `engine_enabled_off_all_crons_dark`.
 
 ## 2026-08-03 (Opus 5) — "We don't want anyone coming to our site unless they need to" — I had the link hierarchy BACKWARDS
 
