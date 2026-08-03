@@ -1,3 +1,21 @@
+## 2026-08-03 (Fable 5) — /api/b edge-cache shipped (Apify Actor lane); rate cap proven live; playground Actor deployed
+
+Apify session (operator: "PLAY AROUND... BUILD" → "get it done so we cache and have a rate cap").
+(1) Playground Actor `swfl-market-pulse` LIVE on Apify (ID 7XwiUmlTzzxvWMbsr, private, account
+rectangular_horn; code C:\Users\ethan\dev\swfl-market-pulse own repo): thin wrapper on
+/api/b/<report>?view=speak, parses headline+metric table into dataset rows w/ as_of+source,
+tier capped ≤2 in code. Cloud run SUCCEEDED: 7 items, $0.000665/run (run record). CLI 1.7.1
+installed+keyring-auth'd. Findings: _RESEARCH/competitor-and-strategy/2026-08-03-apify-actor-
+fit-assessment.md. (2) RATE CAP: middleware RATE_LIMITED_PREFIXES already covers /api/b/+/api/mcp
+(60/min/IP, lib/rate-limit.ts) — PROVEN live: 70-burst → 32×200 + 38×429 w/ X-Ratelimit-*+
+Retry-After. June WAF dashboard rule (check api_b_open_rate_limit, 26d) remains OPEN — operator
+5-min action, still the authoritative ceiling. (3) CACHE: app/api/b/[slug]/route.ts success
+responses now public, s-maxage=3600, swr=86400 (errors stay no-store) — unparks the 06/06
+clone-protection parked option (trigger arrived: external Actor consumers). Freshness-safe:
+brains ship in deploy bundle → rebuild=redeploy=CDN purge. ua= added to [brain-url] log line.
+repo-inventory-audit #precompute-candidates updated same commit. NEXT: live x-vercel-cache
+HIT verification after this deploy (pending below).
+
 ## 2026-08-03 (Fable 5) — "WE DON'T SHUT THINGS OFF" decree: spine count-guard mechanism fixed, cre_figures registered, lake cell-grain program opened
 
 Operator decree (Clay/Mixpanel app-drive lessons, 08/02 research): the lake runs the Clay way —

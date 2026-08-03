@@ -14,25 +14,31 @@ import { GEOGRAPHY_GAZETTEER } from "@/refinery/lib/geography-gazetteer.mts";
 // is a fetch-reliability test, not a latency test. Move to Edge in v2.
 export const runtime = "nodejs";
 
-// Never cache: Phase 0 tests cache-invalidation behavior explicitly.
 export const dynamic = "force-dynamic";
+
+// Success responses edge-cache (operator decree 08/03/2026, unparking the
+// s-maxage option from the 2026-06-06 clone-protection record: external Actor
+// consumers arrived). Safe for freshness: brains ship in the deploy bundle, so
+// every rebuild redeploys and purges the CDN cache; 1h is the worst-case lag.
+// Errors stay no-store so a transient 404/500 is never pinned at the edge.
+const CACHE_HEADERS = {
+  "Access-Control-Allow-Origin": "*",
+  "Cache-Control": "public, s-maxage=3600, stale-while-revalidate=86400",
+};
 
 const COMMON_HEADERS = {
   "Access-Control-Allow-Origin": "*",
   "Cache-Control": "no-store",
 };
 
-export async function GET(
-  request: Request,
-  { params }: { params: Promise<{ slug: string }> },
-) {
+export async function GET(request: Request, { params }: { params: Promise<{ slug: string }> }) {
   const { slug } = await params;
   const url = new URL(request.url);
   const view = url.searchParams.get("view");
   const tierParam = url.searchParams.get("tier");
   const zip = url.searchParams.get("zip");
   console.log(
-    `[brain-url] ${new Date().toISOString()} slug=${slug} view=${view ?? "raw"} tier=${tierParam ?? "-"} zip=${zip ?? "-"}`,
+    `[brain-url] ${new Date().toISOString()} slug=${slug} view=${view ?? "raw"} tier=${tierParam ?? "-"} zip=${zip ?? "-"} ua=${request.headers.get("user-agent") ?? "-"}`,
   );
 
   try {
@@ -45,13 +51,13 @@ export async function GET(
       if (url.searchParams.get("format") === "json") {
         return Response.json(
           { text, freshness_token, found },
-          { status: 200, headers: COMMON_HEADERS },
+          { status: 200, headers: CACHE_HEADERS },
         );
       }
       return new Response(text, {
         status: 200,
         headers: {
-          ...COMMON_HEADERS,
+          ...CACHE_HEADERS,
           "Content-Type": "text/plain; charset=utf-8",
         },
       });
@@ -74,13 +80,13 @@ export async function GET(
             geography: GEOGRAPHY_GAZETTEER,
             dossier: buildDossier(output, freshness_token),
           },
-          { status: 200, headers: COMMON_HEADERS },
+          { status: 200, headers: CACHE_HEADERS },
         );
       }
       return new Response(text, {
         status: 200,
         headers: {
-          ...COMMON_HEADERS,
+          ...CACHE_HEADERS,
           "Content-Type": "text/plain; charset=utf-8",
         },
       });
@@ -90,16 +96,13 @@ export async function GET(
     return new Response(content, {
       status: 200,
       headers: {
-        ...COMMON_HEADERS,
+        ...CACHE_HEADERS,
         "Content-Type": "text/plain; charset=utf-8",
       },
     });
   } catch (err) {
     if (err instanceof BrainNotFoundError) {
-      return Response.json(
-        { error: "brain not found" },
-        { status: 404, headers: COMMON_HEADERS },
-      );
+      return Response.json({ error: "brain not found" }, { status: 404, headers: COMMON_HEADERS });
     }
     if (err instanceof BrainBadTierError) {
       return Response.json(
