@@ -1,3 +1,51 @@
+## 2026-08-03 (Sonnet 5) — listings-showcase operator review round: real links, closing CTA, hard no-repeat rule, subject-line fix
+
+Follow-up to the listings-showcase build (commit 2c8c75c6, this session). Operator reviewed the
+real sent proof and found four real defects — fixed all four, verified live with a third real send.
+
+1. **No links anywhere.** Root cause, verified live against the actual table: `data_lake.
+   listing_state` (the lake-only feed the recipe originally used, `loadListingContext`) has 44
+   real columns and NO `listing_url` — the field genuinely doesn't exist there. Switched the data
+   source to `fetchPhotoListings` (`lib/listings/steadyapi.ts`) — a live SteadyAPI `/search` call
+   that resolves a real `listingUrl` via `canonicalRealtorUrl(permalink)` and already filters to
+   photo-bearing rows. Every picked listing now requires BOTH a real photo AND a real listing URL
+   (a listing missing either is skipped, never rendered dead); every photo AND every per-card
+   button links straight to the real realtor.com detail page.
+2. **No closing CTA.** Added one final button ("See more listings like these" -> the agent's own
+   site) after the three per-card cards, same convention as community-info's closing button.
+3. **Same highlight repeated verbatim ("Brand-new construction" twice in one 3-home email).**
+   `assignHighlights` used to fall back to REPEATING a used category when a listing had no other
+   real qualifying feature. Changed to a hard rule: a used category never repeats — the listing
+   falls straight to the generic per-home spec fallback instead (which varies by real beds/baths/
+   sqft). A final dedupe pass appends the listing's own real address if two fallbacks would still
+   read identically (real disambiguator, still zero invention). Operator's own words: "we can not
+   have these on any email that goes out" — treated as an absolute, code-enforced rule, not a
+   best-effort preference.
+4. **"The email shouldn't be able to be compressed" + a screenshot of Gmail's tiny "..." trimmed-
+   content toggle.** Root cause: my own one-off proof script hardcoded ONE static subject line and
+   sent it TWICE — Gmail groups messages with an identical subject into one thread and collapses
+   the older one behind "Show trimmed content" (verified via WebSearch: this is a subject-based
+   conversation-grouping behavior, not a size-based clip — Gmail's 102KB clip is a different,
+   unrelated mechanism). The real product already has a root fix for this (`deriveEmailDocSubject`,
+   `lib/email/emaildoc-subject.ts`, prefers `doc.subjectVariants[0]`) — my recipe just didn't set
+   one yet. Added a real, varying `subjectVariants` (home count + real city, e.g. "3 homes worth a
+   second look in Cape Coral") and fixed the proof script to derive the subject the same way any
+   real send does, instead of a hardcoded constant.
+
+**Verified live, pasted evidence:**
+- `bun test lib/deliverable/recipes/listings-showcase.test.ts` — 15/15 pass (new hard-rule tests:
+  same-category collision, identical-fallback collision, end-to-end 3-home no-repeat guard, real
+  link assertions, closing-CTA assertion, subject-line assertion).
+- `bun test lib/email lib/deliverable lib/listings` — 2824/2824 pass.
+- `bunx next build` — exit 0, clean.
+- Third real send via the actual product path, resend id `bd3badfe-f4a1-4e61-971d-59787da7f5d1` —
+  subject "3 homes worth a second look in Cape Coral" (real, distinct from the prior two sends'
+  subject). Confirmed by grepping the rendered HTML: each of the 3 real realtor.com listing URLs
+  appears exactly TWICE (photo wrap + button) — every link real, every link present. Closing CTA
+  present. Two of three cards fell to the generic fallback (both real listings had no other
+  qualifying feature) but render genuinely distinct text ("4 bed, 2,675 sq ft…" vs "3 bed,
+  1,816 sq ft…") — no repeat.
+
 ## 2026-08-03 (Sonnet 5) — neighborhood-amenities pipeline wired into the cadence registry; stale-catalog gap closed
 
 Operator: "can you take care of the tracking of the new pipes and make sure ops is up to date,"
