@@ -6,7 +6,7 @@ import { PageShell } from "@/components/PageShell";
 
 export default function ContactsPage() {
   const [contacts, setContacts] = useState<Contact[]>([]);
-  const [tier, setTier] = useState<string>("free");
+  const [tier, setTier] = useState<string | null>(null);
   const [search, setSearch] = useState("");
   const [activeTag, setActiveTag] = useState<string | null>(null);
   const [showAdd, setShowAdd] = useState(false);
@@ -113,10 +113,24 @@ export default function ContactsPage() {
         </h1>
         <div className="flex gap-2">
           {(() => {
+            if (tier === null) {
+              // Tier not resolved yet — neutral, non-navigating state so a
+              // fast click can't send a paying customer to /billing before
+              // we know they're paid (I1).
+              return (
+                <span
+                  aria-disabled="true"
+                  className="rounded-lg border border-white/10 bg-white/5 px-3 py-1.5 text-sm text-gray-500"
+                >
+                  Download CSV
+                </span>
+              );
+            }
             const paid = tier !== "free";
             return (
               <a
                 href={paid ? "/api/export/contacts" : "/billing"}
+                {...(paid ? { target: "_blank", rel: "noopener" } : {})}
                 title={
                   paid
                     ? "Download your contacts as a CSV file"

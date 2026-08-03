@@ -18,7 +18,8 @@
 import type { SupabaseClient } from "@supabase/supabase-js";
 import type { Database } from "@/database.types";
 
-const PAID = new Set(["starter", "growth", "pro"]);
+export const PAID_TIERS: ReadonlySet<string> = new Set(["starter", "growth", "pro"]);
+const PAID = PAID_TIERS;
 
 export function pickEffectiveTier(
   subTier: string | null,

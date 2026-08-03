@@ -6,15 +6,14 @@ import { cookies } from "next/headers";
 import { NextResponse } from "next/server";
 import { createClient } from "@/utils/supabase/server";
 import { createServiceRoleClient } from "@/utils/supabase/service-role";
-import { resolveEffectiveTier } from "@/lib/billing/effective-tier";
+import { resolveEffectiveTier, PAID_TIERS } from "@/lib/billing/effective-tier";
 import { selectAllPaged, type PagedQuery } from "@/refinery/lib/paginate.mts";
 import { EXPORT_SURFACES } from "@/lib/export/surfaces";
 import { buildCsv } from "@/lib/export/build-csv";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
-
-const PAID = new Set(["starter", "growth", "pro"]);
+export const maxDuration = 30;
 
 export async function GET(_req: Request, { params }: { params: Promise<{ surface: string }> }) {
   const { surface } = await params;
@@ -35,7 +34,7 @@ export async function GET(_req: Request, { params }: { params: Promise<{ surface
   let allowed: boolean;
   try {
     const { tier, degraded } = await resolveEffectiveTier(createServiceRoleClient(), user.id);
-    allowed = degraded || PAID.has(tier);
+    allowed = degraded || PAID_TIERS.has(tier);
   } catch {
     allowed = true;
   }
@@ -55,8 +54,9 @@ export async function GET(_req: Request, { params }: { params: Promise<{ surface
       () => supabase.from(def.table).select("*") as unknown as PagedQuery<Record<string, unknown>>,
       def.orderCols,
     );
-  } catch {
+  } catch (err) {
     // NEVER a valid-looking empty file on a failed read.
+    console.error("[export] read failed:", err);
     return NextResponse.json({ error: "read failed" }, { status: 500 });
   }
 
@@ -66,6 +66,7 @@ export async function GET(_req: Request, { params }: { params: Promise<{ surface
     headers: {
       "Content-Type": "text/csv; charset=utf-8",
       "Content-Disposition": `attachment; filename="${def.filenameBase}-${date}.csv"`,
+      "Cache-Control": "no-store",
     },
   });
 }

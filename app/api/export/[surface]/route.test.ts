@@ -47,6 +47,7 @@ mock.module("@/lib/billing/effective-tier", () => ({
     if (tierThrows) throw new Error("billing outage");
     return tierResult;
   },
+  PAID_TIERS: new Set(["starter", "growth", "pro"]),
 }));
 
 const { GET } = await import("./route");
@@ -153,9 +154,16 @@ describe("GET /api/export/[surface]", () => {
   });
 
   test("FM4: the data read happened on the cookie RLS client", async () => {
-    // The service-role fake throws on .from() — reaching this line at all
-    // proves no test above routed a data read through service role.
-    expect(cookieReads).toContain("contacts");
+    // Self-contained: reset shared state so this test passes standalone
+    // (`bun test -t "FM4"`), not just as a beneficiary of tests run before
+    // it in file order. The service-role fake still throws on .from() —
+    // reaching the assertion at all proves this run's data read never
+    // touched service role.
+    cookieReads.length = 0;
+    tierResult = { tier: "pro", degraded: false };
+    dataRows = [contactRow(1)];
+    await get("contacts");
+    expect(cookieReads).toEqual(["contacts"]);
   });
 
   test("zero rows → 200 header-only CSV (a true answer, not an error)", async () => {

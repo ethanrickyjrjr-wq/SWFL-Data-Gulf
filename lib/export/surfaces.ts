@@ -61,6 +61,10 @@ export const EXPORT_SURFACES: Record<string, ExportSurfaceDef> = {
 /** FM9 guard: a user with 60 brought columns gets 50, deterministically. */
 export const ATTRIBS_UNION_CAP = 50;
 
+// Invariant: attribs keys are user-brought CSV headers only (import caps at
+// ATTRIBS_UNION_CAP, enrichment writes typed columns, never attribs) — if an
+// enrichment path ever writes into attribs, this needs the BANNED_EXPORT_KEYS
+// / BANNED_KEY_PATTERN filter applied here too, not just to the fixed columns.
 export function attribsUnionColumns(rows: ReadonlyArray<Record<string, unknown>>): ExportColumn[] {
   const keys = new Set<string>();
   for (const row of rows) {
