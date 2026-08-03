@@ -195,6 +195,12 @@ source's own publish cadence, not our run cadence — both given.
 19 metered call types (11 TS `CallType` + 8 Python ingest), grouped by when they actually fire.
 Root: `refinery/agents/anthropic.mts` (`CallType` union, `getAnthropic(callType)`, `RATES` table).
 
+**08/02/2026 — user-data typed-lane routes added, ZERO LLM calls in any of them** (so this audit
+needn't re-check): `app/api/listings/import` (CSV parse + upsert + read-back echo),
+`app/api/tokens` (per-user token mint), `app/api/connect/skill` (static skill markdown),
+`app/api/uploads/parked` (checks-entry insert). All deterministic; the only LLM touching
+user-brought data remains `extract-pdf` above (blob lane, unchanged).
+
 ### Chat/answer surfaces (per user request) {#llm-call-sites-chat}
 - `lib/assistant/stream.ts:103` — chat streaming response — `assistant_stream`, Sonnet
 - `lib/assistant/compose-chart.ts:552` — chat chart composition/selection — `assistant_chart`, Haiku (TRIAGE_MODEL)

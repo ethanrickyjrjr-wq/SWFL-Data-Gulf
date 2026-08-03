@@ -1,3 +1,59 @@
+## 2026-08-02 (Fable 5) — user-data typed lane BUILT: 11 of 12 plan tasks, TDD throughout
+
+Spec + plan + inline execution of `docs/superpowers/plans/2026-08-03-user-data-typed-lane.md`
+(spec `2026-08-03-user-data-typed-lane-design.md`, brainstormed from the Mixpanel/Clay app-drive
+research + live DB probes). Shipped, each task test-first with the test named for its failure
+mode: `user_listings` + `user_api_tokens` tables (idempotent migration, run twice, RLS);
+address dedupe key; listings CSV parser (row-grain failure, capped attribs); zip/county join
+from SITE address via the crosswalk fixture (real shape verified — entries[]/FIPS, not the
+plan's flat-map guess); canonical upsert (in-batch dedupe, onConflict user_id,address_key);
+`POST /api/listings/import` with post-write READ-BACK echo (test proves echo ≠ payload via
+marker); `user_figure` item kind + all 8 exhaustive ProjectItem consumers (build caught each:
+describeItem, itemTitle, renderItem w/ stated-by provenance, derive-name, identity-key,
+summarize, board order+labels, digest); typed user-data build feed (origin on every block)
+wired into social generate; per-user API tokens (sdg_ prefix, sha256 at rest, Bearer door on
+BOTH import routes w/ explicit user scoping on service-role, contacts route gains echo + its
+FIRST test file); hosted skill file at `GET /api/connect/skill` (agentskills.io contract,
+live-crawled 08/02, test-enforced frontmatter); file-door park (UploadDrop accepts CSVs —
+bucket allowlist widened live + verified; listings-shaped CSVs import inline w/ counts,
+contacts-shaped route to /contacts, shapeless PARK w/ census + `user-data` checks entry).
+`bunx next build` green; 460+ tests green across touched areas. NOT done: data-roots
+user-data section (file claimed by live parallel session — background claim-wait running);
+`_RESEARCH/INDEX.md` line for the agent-skills-spec research (same reason, check
+`research_index_line_agent_skills_spec` open). Check `user_data_typed_lane_live_verify`
+stays open pending the spec's prod evidence. NOT pushed — commits local, per-push approval.
+
+## 2026-08-03 (Sonnet) — SteadyAPI Step 3 family A SHIPPED: data_lake.steadyapi_listing_events (235,383 rows, live, idempotent)
+
+Executing the handoff (`docs/superpowers/handoffs/2026-08-03-steadyapi-step3-sonnet-handoff.md`).
+Brainstormed schema live against prod (measured, not guessed): dedupe key
+`(property_id, date, event_name, price, listing_id)` has ZERO collisions across all 235,383 events;
+NULL-listing_id rows (13.3%) handled via a sentinel in a plain `dedupe_key` column (a GENERATED
+STORED column failed — Postgres rejects date/numeric->text casts as "not immutable"). TWO NEW
+LANDMINES found live, not in the original 64-field census: `days_after_listed` is a vendor STRING
+("111 days"/"1 day"), never a raw integer — extracted via leading-digit regex; `price_change_percentage`
+mixes real percentages ("-9.09%") with dollar amounts ("+$1,000", "$0") under one field name — kept
+as raw text, never cast numeric (would have silently corrupted the dollar rows). Migration
+`migrations/20260803_steadyapi_listing_events.sql` run live; parser
+`ingest/pipelines/listing_lifecycle/parse_listing_events.py` (idempotent TRUNCATE+re-derive, floor-
+guarded against the {meta,body} envelope regression) run TWICE live — byte-identical 235,383 both
+times, floor 235,383 matches exactly. 11 TDD tests green (`test_parse_listing_events.py`), full
+178-test listing_lifecycle suite still green. Wired into the EXISTING `active-listings-swfl` pack
+(not a new brain — same call as the 08/01 listing-status-wire precedent): new view
+`data_lake.listing_recent_price_cuts_stats` (`migrations/20260803_listing_recent_price_cuts_stats.sql`)
++ new metric `recent_price_cuts_count_swfl` (vocab-registered, Gate 2 + Gate 5 both pass, pack tests
+green). `docs/standards/data-roots.md` flipped 🟡→🟢 for the raw landing table and 🔴→🟢 for family A
+(B/C stay 🔴). Design spec: `docs/superpowers/specs/2026-08-03-steadyapi-listing-events-design.md`.
+Ship discipline: 7 of 8 — quality-registry contract N/A (A has no county twin, playbook-locked,
+documented explicitly) — and the `cadence_registry.yaml` entry (raw_landing_class + table comment)
+is BLOCKED, not skipped: session c5314e25 held an active claim on that exact file for the whole
+session; check `steadyapi_listing_events_cadence_registry_entry_owed` opened rather than force-
+releasing another session's in-progress edit. Also opened+will-close on ship:
+`steadyapi_listing_events_live_verify`. NOT PUSHED — awaiting operator confirmation (brain-pack
+edit changing OUTPUT shape, per RULE 1 "ask first"). Families B (`tax_history`) and C
+(`building_permits`) intentionally NOT started this session — "NOT A RUSH" per the playbook decree;
+A finished end-to-end with live evidence before touching B.
+
 ## 2026-08-03 (Fable 5) — Step 3 readiness verified live; JSON-path landmine written into playbook; DOM verify check closed
 
 Operator: "make sure sonnet is ready to get this all done since all DOM has come in." Four-lane pass
