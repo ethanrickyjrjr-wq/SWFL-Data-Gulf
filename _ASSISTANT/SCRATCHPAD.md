@@ -1,3 +1,11 @@
+## 2026-08-02 (Fable 5) — "don't open another!!!!!!!!!!!! go to were you werer" — browser driving rule
+
+While driving Clay in his logged-in Chrome: do NOT keep opening new tabs/pages — he's working
+in the same app simultaneously and tab sprawl in his window is disruptive. Stay in the ONE tab
+already being driven, navigate within it, and prefer his current page as the anchor. (I had
+opened a fresh tab to route around a frozen renderer + unsaved-changes dialog; the fix he wants
+is: go back to the original tab and work there.)
+
 ## 2026-08-02 (Fable 5) — "did you try the create email campaign????????????????" — Clay app drive round 3 skipped the campaign flow
 
 During the logged-in Clay drive I mapped the table/column/AI mechanics but never opened

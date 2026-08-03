@@ -1,3 +1,26 @@
+## 2026-08-02 (Fable 5) — Clay.com mapped INSIDE the app (logged-in drive + operator tour): one primitive, bought send engine, MCP governance to steal
+
+Operator logged into app.clay.com and had me drive Chrome through the real product (rounds 3–3d;
+prior scans were marketing-site only). Full findings in _RESEARCH/competitor-and-strategy/
+2026-08-02-claydotcom-app-drive.md (gitignored; indexed). Headlines: (1) ONE runtime primitive —
+the table column — with declared inputs (navigable DAG), run conditions, per-row price shown
+pre-save (0.5 enrichment / 3 AI), per-cell Last Refresh + Charged; failure grain is a CELL, not a
+pipeline. (2) AI caged: system-written prompts, forced typed Fields/JSON-Schema outputs (our
+BrainOutput/spec-validator shape). (3) Campaign flow: campaign = workbook tab; launch gated on
+lead-email column; events land as a sibling table via an auto-created api.clay.com webhook (9
+Smartlead event types); send engine is SMARTLEAD.AI white-labeled (twice verbatim in their UI);
+their Gmail OAuth client is deliberately UNVERIFIED (Google testing wall — Workspace admin-trust
+is the only door; personal Gmail can never connect; hello@swfldatagulf.com ruled out live: MX =
+Cloudflare forwarding, no mailbox, and it's our product sender via Resend). (4) MCP page ships
+per-user credit budgets, functions "refused if invoked" at the MCP boundary, client allowlist
+that kills token refreshes — our /api/mcp has none of the four; best steal of the day.
+(5) Operator's 15-screenshot tour (all read + filed): 3 send modes (cold vs transactional split),
+warm-up as account status, per-source credit prices in the new-table catalog, generic HTTP-API
+import (their catch-all intake — mirrors our API-first user-data intake thread), Share-as-template
+(config-only workbook links = their community flywheel). Checks: clay_app_drive_index_line opened
+(INDEX held by parallel session ~35min) then closed with evidence once the claim freed. Pushed:
+SESSION_LOG + SCRATCHPAD (incl. no-new-tabs browser rule + campaign-flow thread).
+
 ## 2026-08-02 (Fable 5) — TDD plans doc + parked-items ops visibility + verification dispatches
 
 Operator: TDD plans for each remaining item; baths MUST reach the email builder (folio/property-id
