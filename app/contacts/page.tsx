@@ -6,6 +6,7 @@ import { PageShell } from "@/components/PageShell";
 
 export default function ContactsPage() {
   const [contacts, setContacts] = useState<Contact[]>([]);
+  const [tier, setTier] = useState<string>("free");
   const [search, setSearch] = useState("");
   const [activeTag, setActiveTag] = useState<string | null>(null);
   const [showAdd, setShowAdd] = useState(false);
@@ -17,10 +18,10 @@ export default function ContactsPage() {
   async function load() {
     const res = await fetch("/api/contacts");
     if (res.ok) {
-      // GET /api/contacts now returns { contacts, tier } (was a bare array) —
-      // this page only needs the list, so it drops tier on the floor.
+      // GET /api/contacts returns { contacts, tier }.
       const body = await res.json();
       setContacts(body.contacts ?? []);
+      setTier(body.tier ?? "free");
     }
   }
   useEffect(() => {
@@ -28,7 +29,10 @@ export default function ContactsPage() {
     // setState happens in a .then callback, never synchronously in the effect.
     fetch("/api/contacts")
       .then((r) => (r.ok ? r.json() : { contacts: [] }))
-      .then((body) => setContacts(body.contacts ?? []))
+      .then((body) => {
+        setContacts(body.contacts ?? []);
+        setTier(body.tier ?? "free");
+      })
       .catch(() => {});
   }, []);
 
@@ -108,6 +112,22 @@ export default function ContactsPage() {
           </span>
         </h1>
         <div className="flex gap-2">
+          {(() => {
+            const paid = tier !== "free";
+            return (
+              <a
+                href={paid ? "/api/export/contacts" : "/billing"}
+                title={
+                  paid
+                    ? "Download your contacts as a CSV file"
+                    : "Downloads are a paid feature — upgrade to export your data"
+                }
+                className="rounded-lg border border-white/10 bg-white/5 px-3 py-1.5 text-sm text-gray-300 hover:bg-white/10"
+              >
+                {paid ? "Download CSV" : "Download CSV 🔒"}
+              </a>
+            );
+          })()}
           <button
             onClick={() => fileRef.current?.click()}
             disabled={busy}
