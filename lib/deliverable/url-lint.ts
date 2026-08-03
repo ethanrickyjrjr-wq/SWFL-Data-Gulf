@@ -56,6 +56,22 @@ const ENGINE_URLS: ReadonlySet<string> = new Set(
     .filter((u): u is string => Boolean(u)),
 );
 
+/**
+ * BANNED OUTRIGHT — denied even when the URL IS in the doc, which is exactly how the
+ * aerials kept getting through: they were engine-set, so they were always "allowed".
+ *
+ * Operator decree 08/03/2026, second time raised: "WE CAN'T HAVE FUCKING ARIEL
+ * VIEWS....AGAIN!!!! PHOTOS OF THE FUCKING LISTING. THAT'S IT". A property visual is a
+ * real photo of that listing or there is no image. `lib/listings/aerial.ts` is deleted;
+ * this rule is what makes it stay deleted — a satellite tile cannot reach a customer
+ * even if some future code path builds one.
+ *
+ * SCOPE, deliberately narrow: only Mapbox SATELLITE styles. The streets-v12 pin map in
+ * the showing-prep packet (`lib/listings/listings-map.ts`) is a MAP — a different object,
+ * never a stand-in for a photo — and stays legal.
+ */
+const BANNED_IMAGE_RE = /api\.mapbox\.com\/styles\/[^\s"']*satellite/i;
+
 /** Schemes that carry no fetchable claim to mint. */
 const SAFE_SCHEME_RE = /^(?:mailto:|tel:|data:)/i;
 
@@ -98,6 +114,7 @@ export function collectAllowedUrls(...roots: unknown[]): Set<string> {
 
 function isAllowedUrl(url: string, allowed: ReadonlySet<string>): boolean {
   const u = url.trim();
+  if (BANNED_IMAGE_RE.test(u)) return false; // satellite aerial — banned before every allowance
   if (u === "" || u.startsWith("/") || u.startsWith("#")) return true; // ours by construction
   if (SAFE_SCHEME_RE.test(u)) return true;
   if (allowed.has(u)) return true;

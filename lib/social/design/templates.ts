@@ -302,7 +302,7 @@ const listingFeature: SocialTemplate = {
   id: "listing-feature",
   label: "Listing feature",
   description:
-    "A real current listing: a photo/aerial on top, a price-and-beds stat, and a CTA. Pick this only to feature a specific home.",
+    "A real current listing: the listing's own photo on top, a price-and-beds stat, and a CTA. Pick this only to feature a specific home.",
   formats: ["square", "portrait", "landscape"],
   build: (tk, format) => {
     const { H, base, m, cw, gap } = dims(format);

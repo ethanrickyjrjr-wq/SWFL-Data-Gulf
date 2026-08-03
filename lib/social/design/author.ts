@@ -19,7 +19,6 @@ import { brandingToTokens } from "@/lib/email/brand/branding-to-tokens";
 import { fetchLakeParts, refreshStaleLakeContext, type BuildScope } from "@/lib/email/build-doc";
 import { loadListingContext, renderListingsBlock, pickFeatured } from "@/lib/listings/select";
 import { deriveListingPhoto } from "@/lib/media/listing-photo";
-import { aerialUrl } from "@/lib/listings/aerial";
 import type { Listing } from "@/lib/listings/rentcast";
 import {
   SOCIAL_SOURCING_RULES,
@@ -158,14 +157,11 @@ export function pickFormat(
   return template.formats[0];
 }
 
-/** Set a real photo into the listing template's image slot — the MLS photo if we have
- *  one, else the satellite aerial of the lot. Code-set, never authored by the model. */
+/** Set the listing's OWN photo into the template's image slot. Code-set, never authored
+ *  by the model. Operator decree 08/03/2026: a real photo of that listing or NO image —
+ *  the satellite-aerial fallback is deleted and no stand-in may replace it. */
 export function attachListingPhoto(design: SocialDesign, listing: Listing): SocialDesign {
-  const src =
-    listing.photoUrl ??
-    (listing.latitude != null && listing.longitude != null
-      ? aerialUrl({ lat: listing.latitude, lon: listing.longitude })
-      : null);
+  const src = listing.photoUrl ?? null;
   if (!src) return design;
   return {
     ...design,

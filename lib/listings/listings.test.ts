@@ -1,6 +1,5 @@
-import { test, expect, describe, afterEach } from "bun:test";
+import { test, expect, describe } from "bun:test";
 import { normalizeListing, type Listing } from "./rentcast";
-import { aerialUrl } from "./aerial";
 import {
   scopeCity,
   rankListings,
@@ -9,7 +8,7 @@ import {
   listingsToFigures,
   renderListingsBlock,
   featuredContextLine,
-  attachFeaturedAerial,
+  attachFeaturedPhoto,
 } from "./select";
 import { DEFAULT_GLOBAL_STYLE, createBlock } from "@/lib/email/doc/default-docs";
 import { EmailDocSchema } from "@/lib/email/doc/schema";
@@ -63,39 +62,10 @@ test("the live sample fixture normalizes cleanly", () => {
   expect(LISTINGS.every((l) => l.id && (l.formattedAddress || l.addressLine1))).toBe(true);
 });
 
-// ── aerialUrl (Mapbox Static Images) ─────────────────────────────────────────
-describe("aerialUrl", () => {
-  const ORIG = process.env.MAPBOX_TOKEN;
-  afterEach(() => {
-    if (ORIG === undefined) delete process.env.MAPBOX_TOKEN;
-    else process.env.MAPBOX_TOKEN = ORIG;
-  });
-
-  test("builds a satellite URL with lon-first, a pin, and @2x", () => {
-    process.env.MAPBOX_TOKEN = "pk.test_token";
-    const url = aerialUrl({ lat: 26.695748, lon: -81.983045 });
-    expect(url).toContain("/styles/v1/mapbox/satellite-streets-v12/static/");
-    expect(url).toContain("pin-l+e11d48(-81.983045,26.695748)"); // lon,lat
-    expect(url).toContain("/-81.983045,26.695748,16/"); // center lon,lat,zoom
-    expect(url).toContain("600x360@2x");
-    expect(url).toContain("access_token=pk.test_token");
-  });
-
-  test("returns null with no token or out-of-range coords", () => {
-    delete process.env.MAPBOX_TOKEN;
-    expect(aerialUrl({ lat: 26.6, lon: -81.9 })).toBeNull();
-    process.env.MAPBOX_TOKEN = "pk.test_token";
-    expect(aerialUrl({ lat: 999, lon: -81.9 })).toBeNull();
-    expect(aerialUrl({ lat: NaN, lon: -81.9 })).toBeNull();
-  });
-
-  test("marker:false omits the pin overlay", () => {
-    process.env.MAPBOX_TOKEN = "pk.test_token";
-    const url = aerialUrl({ lat: 26.6, lon: -81.9, marker: false })!;
-    expect(url).not.toContain("pin-l");
-    expect(url).toContain("/static/-81.9,26.6,16/");
-  });
-});
+// NOTE: `lib/listings/aerial.ts` (the Mapbox satellite-thumbnail builder) is DELETED.
+// Operator decree 08/03/2026 — a property visual is a real photo of that listing or it
+// is nothing. The regression guard lives in `attachFeaturedPhoto` below and in
+// `lib/email/no-aerial.test.ts`.
 
 // ── scopeCity ────────────────────────────────────────────────────────────────
 test("scopeCity maps county and zip to the city we query", () => {
@@ -169,46 +139,45 @@ test("featuredContextLine names the home and cites SWFL Data Gulf (no vendor / M
   expect(line).not.toMatch(/RentCast|SteadyAPI|MLS/i);
 });
 
-// ── attachFeaturedAerial (code-set photo) ────────────────────────────────────
-describe("attachFeaturedAerial", () => {
-  const ORIG = process.env.MAPBOX_TOKEN;
-  afterEach(() => {
-    if (ORIG === undefined) delete process.env.MAPBOX_TOKEN;
-    else process.env.MAPBOX_TOKEN = ORIG;
-  });
+// ── attachFeaturedPhoto (code-set REAL listing photo, never an aerial) ───────
+describe("attachFeaturedPhoto", () => {
   const baseDoc = (): EmailDoc => ({
     globalStyle: { ...DEFAULT_GLOBAL_STYLE },
     blocks: [createBlock("hero")],
   });
+  const withPhoto = (): Listing => ({
+    ...LISTINGS[0],
+    photoUrl: "https://ap.rdcpix.com/real-listing-photo.webp",
+  });
 
-  test("drops a kind:photo aerial at the top and stays a valid doc", () => {
-    process.env.MAPBOX_TOKEN = "pk.test_token";
-    const out = attachFeaturedAerial(baseDoc(), LISTINGS[0]);
+  test("drops the listing's OWN photo at the top and stays a valid doc", () => {
+    const out = attachFeaturedPhoto(baseDoc(), withPhoto());
     expect(EmailDocSchema.safeParse(out).success).toBe(true);
     const hero = out.blocks.find((b) => b.type === "image" && b.props.kind === "photo");
     expect(hero).toBeDefined();
     const props = hero!.props as Record<string, unknown>;
-    expect(String(props.url)).toContain("satellite-streets-v12");
-    expect(String(props.caption)).toContain("Aerial view");
+    expect(String(props.url)).toBe("https://ap.rdcpix.com/real-listing-photo.webp");
+    expect(String(props.alt)).toContain("Listing photo of");
     expect(out.blocks[0].type).toBe("image"); // leads the card
   });
 
-  test("no token or no coords → card unchanged", () => {
-    delete process.env.MAPBOX_TOKEN;
-    const d = baseDoc();
-    expect(attachFeaturedAerial(d, LISTINGS[0])).toBe(d);
+  // THE REGRESSION THIS FILE EXISTS FOR: a listing with coordinates but no photo used to
+  // get a Mapbox satellite aerial. It now gets NOTHING — no image, no substitute.
+  test("coords but no photo → card unchanged, and never a satellite aerial", () => {
     process.env.MAPBOX_TOKEN = "pk.test_token";
-    const noCoords: Listing = { ...LISTINGS[0], latitude: null, longitude: null };
-    expect(attachFeaturedAerial(d, noCoords)).toBe(d);
+    const noPhoto: Listing = {
+      ...LISTINGS[0],
+      photoUrl: undefined,
+      latitude: 26.6,
+      longitude: -81.9,
+    };
+    const d = baseDoc();
+    expect(attachFeaturedPhoto(d, noPhoto)).toBe(d);
+    expect(JSON.stringify(attachFeaturedPhoto(d, noPhoto))).not.toContain("api.mapbox.com");
   });
 
   test("threads a resolved artifact link into the hero photo block", () => {
-    process.env.MAPBOX_TOKEN = "pk.test_token";
-    const out = attachFeaturedAerial(
-      baseDoc(),
-      LISTINGS[0],
-      "https://broker.example.com/listing/1",
-    );
+    const out = attachFeaturedPhoto(baseDoc(), withPhoto(), "https://broker.example.com/listing/1");
     const hero = out.blocks.find((b) => b.type === "image" && b.props.kind === "photo");
     expect((hero!.props as Record<string, unknown>).linkUrl).toBe(
       "https://broker.example.com/listing/1",
@@ -216,15 +185,14 @@ describe("attachFeaturedAerial", () => {
   });
 
   test("no link resolved → hero photo renders unlinked (no linkUrl prop)", () => {
-    process.env.MAPBOX_TOKEN = "pk.test_token";
-    const out = attachFeaturedAerial(baseDoc(), LISTINGS[0], null);
+    const out = attachFeaturedPhoto(baseDoc(), withPhoto(), null);
     const hero = out.blocks.find((b) => b.type === "image" && b.props.kind === "photo");
     expect((hero!.props as Record<string, unknown>).linkUrl).toBeUndefined();
   });
 
   test("a real MLS photo also carries the resolved link", () => {
-    const withPhoto: Listing = { ...LISTINGS[0], photoUrl: "https://cdn.example.com/p.jpg" };
-    const out = attachFeaturedAerial(baseDoc(), withPhoto, "https://myagentsite.com/homes/1");
+    const l: Listing = { ...LISTINGS[0], photoUrl: "https://cdn.example.com/p.jpg" };
+    const out = attachFeaturedPhoto(baseDoc(), l, "https://myagentsite.com/homes/1");
     const hero = out.blocks.find((b) => b.type === "image" && b.props.kind === "photo");
     expect((hero!.props as Record<string, unknown>).url).toBe("https://cdn.example.com/p.jpg");
     expect((hero!.props as Record<string, unknown>).linkUrl).toBe(

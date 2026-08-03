@@ -84,8 +84,7 @@
 // slot — the code-authored verdict still ships, because it is true by construction.
 
 import { compSources, compsForAddress, type RenderComp } from "@/lib/assistant/comp-helper";
-import { geocodeAddress } from "@/lib/geo/geocode-address";
-import { aerialUrl } from "@/lib/listings/aerial";
+import { resolveCompPhotos } from "@/lib/listings/comp-photos";
 import { formatSoldSpell } from "@/lib/listings/dom";
 import {
   auditClaims,
@@ -205,35 +204,17 @@ function priceKindPhrase(c: RenderComp): string {
  *  This one is the evidence table: $/sq ft is the whole argument, so it must be on the
  *  row. Two different rows for two different jobs. If R5 (Just Sold) ends up needing
  *  THIS row too, that is copy #2 and it should be extracted into sold-comp-blocks.ts. */
-/** Geocode every comp's address and build a REAL Mapbox aerial thumbnail per comp —
- *  the licensed-NOW visual `lib/listings/aerial.ts` already uses as the property-photo
- *  fallback elsewhere in the product (never invented; a satellite image of the actual
- *  parcel, captioned as an aerial). Best-effort per comp: a geocode miss or a missing
- *  MAPBOX_TOKEN just means that ONE row ships with no thumbnail (open-slot pattern,
- *  RULE 0.7) — it never blocks or degrades the rest of the build. Keyed on addressLine
- *  since RenderComp carries no stable id. */
+/** A REAL photo of each comparable home, from our own lake (`lib/listings/comp-photos`).
+ *  Operator decree 08/03/2026: a property visual is a PHOTO OF THAT LISTING or it is
+ *  NOTHING — the satellite-aerial thumbnail that used to fill this slot is deleted, and
+ *  no substitute image (aerial, street view, map tile, placeholder) may take its place.
+ *  A comp we hold no photo for ships with no image and keeps its realtor.com link. */
 export async function resolveCompThumbnails(comps: RenderComp[]): Promise<Map<string, string>> {
-  const out = new Map<string, string>();
-  await Promise.all(
-    comps.map(async (c) => {
-      try {
-        const geo = await geocodeAddress(`${c.addressLine}, ${c.city}`);
-        if (!geo) return;
-        const url = aerialUrl({
-          lat: geo.lat,
-          lon: geo.lon,
-          zoom: 17,
-          width: 112,
-          height: 112,
-          marker: false,
-        });
-        if (url) out.set(c.addressLine, url);
-      } catch {
-        // Best-effort — a thumbnail miss is an open slot, never a build failure.
-      }
-    }),
-  );
-  return out;
+  try {
+    return await resolveCompPhotos(comps);
+  } catch {
+    return new Map(); // a photo miss is an empty slot, never a build failure
+  }
 }
 
 function compRow(c: RenderComp, thumbUrl?: string): ListItem {
@@ -253,7 +234,7 @@ function compRow(c: RenderComp, thumbUrl?: string): ListItem {
     lead: lead.slice(0, 40),
     text: text.slice(0, 200),
     ...(c.sourceUrl ? { linkUrl: c.sourceUrl } : {}),
-    ...(thumbUrl ? { imageUrl: thumbUrl, imageAlt: `Aerial view of ${c.addressLine}` } : {}),
+    ...(thumbUrl ? { imageUrl: thumbUrl, imageAlt: `Listing photo of ${c.addressLine}` } : {}),
   };
 }
 
@@ -384,6 +365,10 @@ function compsMiddle(
     ),
   ];
   if (comps.length) {
+    // ALL-OR-NOTHING photos: a table where two rows have a picture and four are blank
+    // reads as broken. Either every comparable home shows its OWN real listing photo,
+    // or the table is text + link only. Never a stand-in image for the missing ones.
+    const everyRowHasAPhoto = comps.every((c) => thumbnails.get(c.addressLine));
     blocks.push(
       sized(
         {
@@ -391,7 +376,9 @@ function compsMiddle(
           type: "list",
           props: {
             title: mixTitle(comps),
-            items: comps.map((c) => compRow(c, thumbnails.get(c.addressLine))),
+            items: comps.map((c) =>
+              compRow(c, everyRowHasAPhoto ? thumbnails.get(c.addressLine) : undefined),
+            ),
           },
         },
         Math.max(4, comps.length + 2),
@@ -1151,9 +1138,9 @@ export async function buildMarketComps(ctx: RecipeBuildContext): Promise<EmailDo
     .filter((c) => isFreshSale(c, now))
     .slice(0, MAX_COMPS);
 
-  // A REAL Mapbox aerial thumbnail per comp — the same licensed-NOW visual the platform
-  // already uses as a listing-photo fallback (lib/listings/aerial.ts), never invented.
-  // Best-effort: a geocode miss just leaves that one row without a thumbnail.
+  // A REAL PHOTO of each comparable home, from our own lake — never a satellite aerial,
+  // never any other stand-in image (operator decree 08/03/2026). Photos render only when
+  // EVERY row has one; otherwise the table ships text + realtor.com link.
   const thumbnails = await resolveCompThumbnails(comps);
   let doc = buildCompsGrid(facts, comps, currentDoc, thumbnails);
 

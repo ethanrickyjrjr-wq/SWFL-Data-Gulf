@@ -1,3 +1,48 @@
+## 2026-08-03 (Opus 5) — AERIALS DELETED PLATFORM-WIDE (operator decree, 2nd time raised) + the comp-photo gap measured, not hand-waved
+
+Operator, on a screenshot of the market-comps evidence table rendering six broken slots reading
+"Aerial view of 330…": **"WE CAN'T HAVE FUCKING ARIEL VIEWS....AGAIN!!!! PHOTOS OF THE FUCKING
+LISTING. THAT'S IT AND LINK TO REALTOR.COM LISTING OR SOLD LISTING OF THE PROPERTY."** The
+satellite thumbnails had landed 20 minutes earlier in a parallel session's `4e9d5a47`.
+
+**Deleted, 4 call sites + the builder:** `lib/listings/aerial.ts` is GONE.
+`market-comps.ts` (`resolveCompThumbnails` — was geocode → satellite tile per comp),
+`select.ts` (`attachFeaturedAerial` → renamed `attachFeaturedPhoto`, aerial branch deleted),
+`social/design/author.ts` (`attachListingPhoto` fallback), `social-calendar/build-week.ts`
+(the "aerial-able" featurable filter now requires `photoUrl`). `listings-map.ts` (streets-v12 pin
+map, showing-prep) is deliberately untouched — a route map is not a stand-in for a photo.
+
+**The guard, not a promise (RULE 0.8 §3).** The aerials were never *rejected* because they were
+ENGINE-SET — the URL was in the doc, so `collectAllowedUrls` allowlisted it. `url-lint.ts` now
+denies `api.mapbox.com/styles/**satellite**` BEFORE every allowance, so a satellite tile cannot
+reach a customer even if some future path builds one. `lib/deliverable/no-aerial.test.ts` locks it
+(incl. "the module is gone and stays gone" + "the street map is not collateral damage").
+
+**Photo lane, measured live (not designed around).** `data_lake.listing_state` retains real
+`photo_url` after a listing leaves the market: 34,673/35,202 sale rows (98.5%), 743/745 in
+`state='sold'` (99.7%). New `lib/listings/comp-photos.ts` resolves a comp → its OWN lake photo
+(bounded `.in(street_address)` read, `addressKey` core + city so no cross-city borrow).
+Photos render ALL-OR-NOTHING per table — a half-photographed table reads as broken.
+
+**Vendor contracts re-verified in-session via crawl4ai (RULE 0.4), docs.steadyapi.com 08/03/2026:**
+`/v1/nearby-home-values` (our comp source) returns `href` + `permalink` — the realtor.com detail
+URL — and **no photo field at all**. `/v1/gallery-similar-homes` and `/v1/similar-homes` DO carry
+`primary_photo.href` + `photos[]`, but they return *similar* homes (mostly `for_sale`), not the
+recorded sales the comps table is built from. `/v2/search` carries `photo_url` + a full `permalink`.
+
+**PROOF SEND (real inbox, not a test assertion)** — `hello@swfldatagulf.com`, Resend id
+`ef487401-4ac1-43dc-be9f-5a4e5b2bda68`, subject "Market comps — 2010 SE 13th Ter, Cape Coral, FL
+33990" (a real active listing). Doc audit: **AERIALS: 0**, subject hero = a real hosted listing
+photo, **6 of 6 comp rows carry a realtor.com detail link**. `url lint: clean`.
+
+**WHAT IS NOT DONE, stated plainly (RULE 0.8 §2): comp ROWS still ship with no picture — 0 of 6.**
+Not a matching bug: the lake holds 6,886 Cape Coral rows in the identical address format
+(`2010 SE 13th Ter` matched exactly), but those six comps are recorded sales that closed before our
+sweep window ever saw them. No lane we hold today carries a photo for an arbitrary sold address.
+Opened check `comp_row_photos_no_source`. The one real lever is a source decision only the operator
+can make: switch/enrich the comps set from `/v1/gallery-similar-homes` (photo + permalink in one
+response) and accept that its set is for-sale similars rather than recorded sales.
+
 ## 2026-08-03 (Opus 5) — GitHub was red for THREE unrelated reasons; two fixed in code, one is billing
 
 **CI typecheck (from today's push).** `lib/email/blocks/ListBlock.tsx:59` passed `10` to `space()`;

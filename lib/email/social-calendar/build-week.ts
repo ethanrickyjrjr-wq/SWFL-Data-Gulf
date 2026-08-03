@@ -31,7 +31,7 @@ import {
   loadListingContext,
   renderListingsBlock,
   featuredContextLine,
-  attachFeaturedAerial,
+  attachFeaturedPhoto,
 } from "@/lib/listings/select";
 import type { Listing } from "@/lib/listings/rentcast";
 import { resolveArtifactLink } from "@/lib/listings/artifact-link";
@@ -240,8 +240,8 @@ export async function buildSocialPost(
   opts?: { platforms?: Platform[]; goalTone?: GoalTone; featured?: Listing },
 ): Promise<SocialDraft | null> {
   const card = seedSocialCard(theme);
-  // A featured RentCast listing lets the post write about a SPECIFIC current home (still
-  // cited, never invented); its lot aerial is code-set onto the card AFTER the fill (the
+  // A featured listing lets the post write about a SPECIFIC current home (still cited,
+  // never invented); its OWN listing photo is code-set onto the card AFTER the fill (the
   // social prompt forbids the model from setting photos — same rule as the email path).
   const addendum = opts?.featured
     ? `${theme.systemAddendum}\n\n${featuredContextLine(opts.featured)}`
@@ -263,7 +263,7 @@ export async function buildSocialPost(
     if (!parsed) return null;
     const draft = assembleDraft(theme, card, parsed, opts?.platforms);
     if (draft && opts?.featured)
-      draft.card = attachFeaturedAerial(
+      draft.card = attachFeaturedPhoto(
         draft.card,
         opts.featured,
         resolveArtifactLink({ listing: opts.featured }),
@@ -307,9 +307,10 @@ export async function buildWeek(
   const lakeContext = listingsBlock
     ? `${fresh.lakeContext}\n\n${listingsBlock}`
     : fresh.lakeContext;
-  // Rotate a featured (aerial-able) listing across the weekday posts — each card gets a
-  // real local lot's satellite view; days repeat only if fewer listings than days.
-  const featurable = listingCtx.ranked.filter((l) => l.latitude != null && l.longitude != null);
+  // Rotate a featured listing across the weekday posts — a listing is featurable only if
+  // it has its OWN photo (operator decree 08/03/2026: real listing photo or no image, and
+  // never a satellite aerial). Days repeat only if fewer listings than days.
+  const featurable = listingCtx.ranked.filter((l) => !!l.photoUrl);
   // New Listing Socials campaign: run the launch arc and PIN one listing (the
   // named one, else the top-ranked) onto every card instead of rotating.
   const arc = opts?.campaign ? LISTING_LAUNCH_ARC : null;

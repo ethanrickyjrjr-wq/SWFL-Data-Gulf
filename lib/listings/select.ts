@@ -13,7 +13,6 @@ import { figuresToPromptBlock } from "@/lib/email/market-context";
 import { heroPhotoBlock, upsertHeroPhoto } from "@/lib/email/inject-photo";
 import type { EmailDoc } from "@/lib/email/doc/types";
 import type { BuildScope } from "@/lib/email/build-doc";
-import { aerialUrl } from "./aerial";
 import { type Listing } from "./rentcast";
 // TYPE-ONLY on purpose: lib/media/listing-photo imports sharp (native, server-only).
 // The derive function arrives via loadListingContext's opts so sharp never enters
@@ -79,7 +78,7 @@ const RESIDENTIAL = new Set([
   "Residential",
 ]);
 
-/** Best-first: priced listings, preferring those with coordinates (aerial-able) and a
+/** Best-first: priced listings, preferring those with coordinates and a
  *  residential type, then newest-listed. Deterministic (stable tiebreak on id). */
 export function rankListings(listings: Listing[]): Listing[] {
   const score = (l: Listing): number =>
@@ -175,35 +174,23 @@ export function featuredContextLine(l: Listing): string {
   return `FEATURED LISTING (you MAY write this post about this specific home; cite its facts verbatim, never invent): ${f.label} — ${f.value} (${f.source}${f.as_of ? `, ${f.as_of}` : ""}).`;
 }
 
-/** Pure: attach the best available photo to the top of the card.
- *  Prefers a real MLS listing photo (photoUrl) over the satellite aerial fallback.
- *  No usable photo and no coords → card unchanged. */
-export function attachFeaturedAerial(
+/** Pure: attach the listing's OWN photo to the top of the card.
+ *  Operator decree 08/03/2026: a property visual is a real photo of that listing or it is
+ *  NOTHING — the satellite-aerial fallback that used to sit here is deleted, and no other
+ *  stand-in image may replace it. No photo → card unchanged (open slot), link intact. */
+export function attachFeaturedPhoto(
   card: EmailDoc,
   listing: Listing,
   linkUrl?: string | null,
 ): EmailDoc {
+  if (!listing.photoUrl) return card;
   const where = [listing.addressLine1, listing.city].filter(Boolean).join(", ") || "this property";
-  if (listing.photoUrl) {
-    return upsertHeroPhoto(
-      card,
-      heroPhotoBlock({
-        url: listing.photoUrl,
-        alt: `Listing photo of ${where}`,
-        caption: `${where}`,
-        ...(linkUrl ? { linkUrl } : {}),
-      }),
-    );
-  }
-  if (listing.latitude == null || listing.longitude == null) return card;
-  const url = aerialUrl({ lat: listing.latitude, lon: listing.longitude });
-  if (!url) return card;
   return upsertHeroPhoto(
     card,
     heroPhotoBlock({
-      url,
-      alt: `Aerial satellite view of ${where}`,
-      caption: `Aerial view · ${where}`,
+      url: listing.photoUrl,
+      alt: `Listing photo of ${where}`,
+      caption: `${where}`,
       ...(linkUrl ? { linkUrl } : {}),
     }),
   );
