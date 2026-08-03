@@ -4,6 +4,8 @@
 import { cookies } from "next/headers";
 import { NextResponse, type NextRequest } from "next/server";
 import { createClient } from "@/utils/supabase/server";
+import { createServiceRoleClient } from "@/utils/supabase/service-role";
+import { resolveTokenUser } from "@/lib/api-tokens/token";
 import { parseContactsCsv } from "@/lib/email/parse-contacts-csv";
 import { parseVcards } from "@/lib/contacts/parse-vcard";
 import { upsertCanonicalContacts } from "@/lib/contacts/upsert";
@@ -13,13 +15,25 @@ export const runtime = "nodejs";
 
 const MAX_BYTES = 5 * 1024 * 1024; // 5 MB
 const MAX_ROWS = 5000;
+const ECHO_LIMIT = 3;
 
 export async function POST(req: NextRequest) {
   const supabase = createClient(await cookies());
   const {
     data: { user },
   } = await supabase.auth.getUser();
-  if (!user) return NextResponse.json({ error: "unauthorized" }, { status: 401 });
+  // Two doors, one contract (spec 2026-08-03 §2): cookie session or per-user
+  // Bearer token. Token path = service-role client (bypasses RLS) — every
+  // query below carries explicit user scoping.
+  let userId = user?.id ?? null;
+  let db = supabase;
+  if (!userId) {
+    const admin = createServiceRoleClient();
+    const tokenUser = await resolveTokenUser(admin, req.headers.get("authorization"));
+    if (!tokenUser) return NextResponse.json({ error: "unauthorized" }, { status: 401 });
+    userId = tokenUser;
+    db = admin;
+  }
 
   const formData = await req.formData().catch(() => null);
   if (!formData) {
@@ -65,11 +79,21 @@ export async function POST(req: NextRequest) {
     return NextResponse.json(result);
   }
 
-  const { added, error } = await upsertCanonicalContacts(supabase, user.id, rows);
+  const { added, error } = await upsertCanonicalContacts(db, userId, rows);
   if (error) {
     return NextResponse.json({ error: "import failed", detail: error }, { status: 500 });
   }
   result.added = added;
 
-  return NextResponse.json(result);
+  // Verify-first-record (spec 2026-08-03 §3): echo rows read back AFTER the
+  // write — "connected" means a real row round-tripped, never "a file parsed".
+  const echoEmails = rows.slice(0, ECHO_LIMIT).map((r) => r.email);
+  const { data: echoRows } = await db
+    .from("contacts")
+    .select("email, name, tags")
+    .eq("user_id", userId)
+    .in("email", echoEmails)
+    .limit(ECHO_LIMIT);
+
+  return NextResponse.json({ ...result, echo: echoRows ?? [] });
 }

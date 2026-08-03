@@ -6,6 +6,8 @@
 import { cookies } from "next/headers";
 import { NextResponse, type NextRequest } from "next/server";
 import { createClient } from "@/utils/supabase/server";
+import { createServiceRoleClient } from "@/utils/supabase/service-role";
+import { resolveTokenUser } from "@/lib/api-tokens/token";
 import { parseListingsCsv } from "@/lib/listings-user/parse-listings-csv";
 import { upsertUserListings } from "@/lib/listings-user/upsert";
 
@@ -20,7 +22,18 @@ export async function POST(req: NextRequest) {
   const {
     data: { user },
   } = await supabase.auth.getUser();
-  if (!user) return NextResponse.json({ error: "unauthorized" }, { status: 401 });
+  // Two doors, one contract: cookie session (web UI) or per-user Bearer token
+  // (REST/skill). Token path uses the service-role client, which bypasses RLS —
+  // every query below MUST carry explicit user scoping (userId stamp / .eq).
+  let userId = user?.id ?? null;
+  let db = supabase;
+  if (!userId) {
+    const admin = createServiceRoleClient();
+    const tokenUser = await resolveTokenUser(admin, req.headers.get("authorization"));
+    if (!tokenUser) return NextResponse.json({ error: "unauthorized" }, { status: 401 });
+    userId = tokenUser;
+    db = admin;
+  }
 
   const formData = await req.formData().catch(() => null);
   if (!formData) {
@@ -49,17 +62,17 @@ export async function POST(req: NextRequest) {
     });
   }
 
-  const { added, matchedToCounty, error } = await upsertUserListings(supabase, user.id, rows);
+  const { added, matchedToCounty, error } = await upsertUserListings(db, userId, rows);
   if (error) {
     return NextResponse.json({ error: "import failed", detail: error }, { status: 500 });
   }
 
   // Verify-first-record: read back what actually landed (never echo the payload).
   const keys = rows.slice(0, ECHO_LIMIT).map((r) => r.address_key);
-  const { data: echoRows } = await supabase
+  const { data: echoRows } = await db
     .from("user_listings")
     .select("address, price, beds, county")
-    .eq("user_id", user.id)
+    .eq("user_id", userId)
     .in("address_key", keys)
     .limit(ECHO_LIMIT);
 
