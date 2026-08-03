@@ -126,7 +126,7 @@ carrying "stated by the user" / "from the user's upload" provenance. Client data
 |---|---|---|---|
 | User contacts | `public.contacts` 🟢 | none | user-scoped, RLS. Import: Contacts page + `POST /api/contacts/import` (session or Bearer token); response echoes a post-write read-back, not the parsed payload |
 | User listings | `public.user_listings` 🟢 | none | user-scoped, RLS. Import: `POST /api/listings/import` (session or Bearer) or CSV through the file door; address-key dedupe, county from `fixtures/swfl-zip-county.json` crosswalk; echo = post-write read-back |
-| User-stated figures | `projects.items` kind `user_figure` 🟢 | none | mandatory provenance on every figure; enters the deliverable build's source list as "stated by the user" (lane 4 of RULE 0.7) |
+| User-stated figures | `public.projects.items[]` (jsonb array on the projects row) kind `user_figure` 🟢 | none | live-probed 08/03/2026: no separate items table — figures are jsonb elements on `public.projects` (user-scoped via `user_id`); mandatory provenance on every figure; enters the deliverable build's source list as "stated by the user" (lane 4 of RULE 0.7) |
 | Parked (shapeless) uploads | filed upload item + `public.checks` `parked_upload_*` entry 🟢 | none | a CSV matching neither contacts nor listings shape parks visibly with its header census (`POST /api/uploads/parked`) — never silently dropped, never force-fitted into a typed root |
 
 ---
