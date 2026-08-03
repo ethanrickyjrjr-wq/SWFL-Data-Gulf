@@ -75,6 +75,13 @@ describe("GET /api/export/[surface]", () => {
     expect(res.status).toBe(404);
   });
 
+  test("404 on prototype-key surface names (__proto__, constructor)", async () => {
+    const protoRes = await get("__proto__");
+    expect(protoRes.status).toBe(404);
+    const ctorRes = await get("constructor");
+    expect(ctorRes.status).toBe(404);
+  });
+
   test("401 when unauthenticated", async () => {
     fakeUser = null;
     const res = await get("contacts");

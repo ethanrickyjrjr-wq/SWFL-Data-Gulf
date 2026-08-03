@@ -18,7 +18,7 @@ const PAID = new Set(["starter", "growth", "pro"]);
 
 export async function GET(_req: Request, { params }: { params: Promise<{ surface: string }> }) {
   const { surface } = await params;
-  const def = EXPORT_SURFACES[surface];
+  const def = Object.hasOwn(EXPORT_SURFACES, surface) ? EXPORT_SURFACES[surface] : undefined;
   if (!def) return NextResponse.json({ error: "unknown export" }, { status: 404 });
 
   const supabase = createClient(await cookies());
