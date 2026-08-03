@@ -30,6 +30,7 @@ import { EmailDocSchema } from "@/lib/email/doc/schema";
 import { GlobalDigestFallback } from "@/components/GlobalDigestFallback";
 import { TemplateSwitcher } from "./TemplateSwitcher";
 import { StatCard } from "./StatCard";
+import { ShareCta } from "./ShareCta";
 import { PrintButton } from "@/components/PrintButton";
 import { DeliveryButtons } from "./DeliveryButtons";
 import { EmailPreviewFrame } from "./EmailPreviewFrame";
@@ -449,6 +450,7 @@ export default async function DeliverablePage({ params }: { params: Promise<{ id
       return (
         <main className="deliverable-page w-full px-4 py-10">
           <GlobalDigestFallback narrative={data.narrative} />
+          {!isOwner && <ShareCta />}
         </main>
       );
     }
@@ -486,6 +488,7 @@ export default async function DeliverablePage({ params }: { params: Promise<{ id
           )}
         </div>
         <EmailPreviewFrame srcDoc={emailHtml} />
+        {!isOwner && <ShareCta />}
       </main>
     );
   }
@@ -502,6 +505,7 @@ export default async function DeliverablePage({ params }: { params: Promise<{ id
       return (
         <main className="deliverable-page w-full px-4 py-10">
           <GlobalDigestFallback narrative={data.narrative} />
+          {!isOwner && <ShareCta />}
         </main>
       );
     }
@@ -528,6 +532,7 @@ export default async function DeliverablePage({ params }: { params: Promise<{ id
           </div>
         )}
         <EmailPreviewFrame srcDoc={docHtml} />
+        {!isOwner && <ShareCta />}
       </main>
     );
   }
@@ -621,6 +626,7 @@ export default async function DeliverablePage({ params }: { params: Promise<{ id
 
       {/* Render every slot in model order */}
       {model.slots.map((slot, i) => renderSlot(slot, i, id))}
+      {!isOwner && <ShareCta />}
     </PageShell>
   );
 }
