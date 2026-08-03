@@ -1691,6 +1691,10 @@ pipelines:
     # both tables share this one freshness target since one script writes both atomically.
     # Table DDL: migrations/20260718_cre_figures.sql. Corroboration engine:
     # refinery/lib/derived/cre-figures.mts + cre-corroboration.mts.
+    raw_landing_class: free_refetchable # 08/03/2026: DERIVED table — the "raw store" is our own
+      # data_lake.marketbeat_swfl (rebuild any time via build-cre-figures.mjs); nothing external
+      # to land. Closest fit in the 08/02 taxonomy ("archive IS the raw store, do not copy it");
+      # the handoff predates derived tables — reclassify if a derived class is ever added.
     source_scope:
       confirmed_total:
         value: 1078
