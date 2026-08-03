@@ -116,6 +116,19 @@ doc summarize only what we serve.
 
 - **ONE-ROOT TARGET — EXECUTED 07/19/2026:** one canonical FDOR parcel pair (Lee+Collier, shared 104-col schema). The LeePA keep-vs-retire question is **RESOLVED — operator ratified KEEP BOTH** (leepa stays as the appraiser cross-check, never dropped; `docs/handoff/2026-07-18-parcel-consolidation.md`). The greenlit dedup is DONE: `parcel_subdivision` (table + pipeline + cron) retired for the `parcel_subdivision_v` VIEW after full-join verification (604,362 = 604,362, zip/type/just_value 0 diffs) + all 3 readers repointed + `neighborhood_stats` rebuilt. Checks: `lee_parcels_leepa_redundant_into_properties_lee`, `collier_parcels_parcel_subdivision_redundant_scrape`, `data_authority_single_source_registry`.
 
+## USER-BROUGHT DATA — user-scoped, beside the lake (landed 08/03/2026)
+
+Lane 2 of RULE 0.7 (the user's own upload/figure). These roots are **user-scoped with RLS, NEVER
+`data_lake.*`, and no brain reads them** — they feed only that user's projects and deliverables,
+carrying "stated by the user" / "from the user's upload" provenance. Client data stays client-only.
+
+| Concept | Root | Brain | Note |
+|---|---|---|---|
+| User contacts | `public.contacts` 🟢 | none | user-scoped, RLS. Import: Contacts page + `POST /api/contacts/import` (session or Bearer token); response echoes a post-write read-back, not the parsed payload |
+| User listings | `public.user_listings` 🟢 | none | user-scoped, RLS. Import: `POST /api/listings/import` (session or Bearer) or CSV through the file door; address-key dedupe, county from `fixtures/swfl-zip-county.json` crosswalk; echo = post-write read-back |
+| User-stated figures | `projects.items` kind `user_figure` 🟢 | none | mandatory provenance on every figure; enters the deliverable build's source list as "stated by the user" (lane 4 of RULE 0.7) |
+| Parked (shapeless) uploads | filed upload item + `public.checks` `parked_upload_*` entry 🟢 | none | a CSV matching neither contacts nor listings shape parks visibly with its header census (`POST /api/uploads/parked`) — never silently dropped, never force-fitted into a typed root |
+
 ---
 
 # Data Roots — THE one place
