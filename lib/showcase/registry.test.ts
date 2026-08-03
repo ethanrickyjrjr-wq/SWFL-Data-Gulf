@@ -9,10 +9,10 @@ import { NEED_LABELS, findPlaceholder } from "./recipe";
  * asset must be a red test here, never a broken slide in prod.
  */
 describe("showcase registry", () => {
-  it("ships exactly 5 showcases with unique ids", () => {
-    // 5th = back-on-market (promoted into the recipe set 08/03/2026).
-    expect(SHOWCASES).toHaveLength(5);
-    expect(new Set(SHOWCASES.map((s) => s.id)).size).toBe(5);
+  it("ships exactly 6 showcases with unique ids", () => {
+    // 5th/6th = back-on-market + community-info (recipe-set expansion 08/03/2026).
+    expect(SHOWCASES).toHaveLength(6);
+    expect(new Set(SHOWCASES.map((s) => s.id)).size).toBe(6);
   });
 
   it("every asset path exists under public/", () => {

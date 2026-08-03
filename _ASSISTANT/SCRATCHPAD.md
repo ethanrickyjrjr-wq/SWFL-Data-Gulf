@@ -1,3 +1,35 @@
+## 2026-08-03 (Fable 5) — open-house/price-improved slides: "How have they become worse????? Why is PM so fucking big!?? Where is the commentary???? Why use the same house????? Where is the logo?????"
+
+1. PM HUGE: open-house date/time cells carry emphasis "primary" (accent + larger) and the long
+   values wrap — reads as shouting. Fix: normal emphasis, short values.
+2. COMMENTARY MISSING: the Anthropic API account is OUT OF CREDITS (400 on every call) — every
+   AI paragraph in the product silently fails right now (check anthropic_credits_exhausted_narratives).
+   After top-up, one command rebuilds the demos with prose.
+3. SAME HOUSE: 6 of 7 lifecycle slides = 465 Gordonia. The one-listing campaign was the July
+   design (one listing teaser→sold); price-improved borrowed a sibling estate only because
+   Gordonia has never cut its price. Operator wants variety — decide per-slide, note the choice.
+4. LOGO (2nd time): demo brands ship no logo asset so headers are bare text. Build committed
+   monogram/wordmark assets for the fictional brands and wire logo_url in the demo build script.
+5. Standing rule from tonight: a showcase email that looks WORSE than the hand-authored one it
+   sits beside is a regression even if it is "more honest" — design bar comes from
+   _RESEARCH/deliverable-and-design/, not from whatever the engine happens to emit.
+
+## 2026-08-03 (Fable 5) — back-on-market showcase: "How many times are you going to fucking write 14.82... Usually back on market is a fucking property... Where is a logo?? Why does the font suck?? Are you using the research?????"
+
+Five gripes on the first back-on-market slide, all raised at once:
+1. SAME NUMBER 3×: hero 14.82% + strip cell 14.82% + comparison table 14.82% (and the narrative
+   restates it a 4th time). Number-ONCE discipline: each figure appears exactly once per email.
+2. BACK ON MARKET = A PROPERTY, not an area lecture. The email must lead with the relisted HOME —
+   photo, address, price, days off market from the relist detector — with the area rates as ONE
+   supporting row. The area-only variant reads as a stats page, not an agent's email.
+3. NO LOGO: demo brands have no committed logo asset, so the header text masthead ships bare.
+   Real-user brands flow logo_url via applyBrand; demo brands need either a committed logo asset
+   or a deliberately styled text masthead.
+4. FONT SUCKS: default sans mapping reads as bare Arial in the render. Pick fonts per the
+   deliverable-design research, don't default.
+5. USE THE RESEARCH: _RESEARCH/deliverable-and-design/* (07/01 design-quality set) must be read
+   before styling any showcase email — that is what it was paid for.
+
 ## 2026-08-03 (Fable 5) — "why are you fucking fanning out???? fucking maek sure you build them and take fucking notes!!!"
 
 Raised the moment I dispatched a subagent to implement showcase Task 2. The plan file said "use

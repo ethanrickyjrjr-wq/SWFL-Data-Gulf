@@ -27,15 +27,24 @@
 // So they are never invented, never a placeholder date, never "TBD". They are the first two
 // cells of the SPEC STRIP, with empty values:
 //
-//   Canvas  → two dashed "+ Add" cells reading OPEN HOUSE DATE / OPEN HOUSE TIME.
+//   Canvas  → two dashed "+ Add" cells reading DATE / TIME.
 //   Email   → StatsBlock drops an empty cell (`emailRender`), so an un-dated invitation says
 //             nothing at all about a date. No zero, no naked label.
-//   Filled  → they render in the accent colour (`emphasis: "primary"`) at the top of the
-//             strip, directly under the address — the two numbers that win this email.
+//   Filled  → they lead the strip, directly under the address — the two things this
+//             email is actually about.
 //
-// The labels are written to read as CAPTIONS once filled ("Open House Date"), never as
-// canvas-only imperatives ("Add the date here") — because the moment the agent fills the
-// cell, the label ships under the value to the recipient (lib/email/CLAUDE.md, THE SLOT RULE).
+// LABELS ARE SHORT ON PURPOSE (fixed 08/03/2026 — operator, reading a real render: the old
+// "OPEN HOUSE DATE" / "OPEN HOUSE TIME" labels wrapped over three lines in a 94px cell and
+// made the whole strip ragged). The RIBBON directly above already says "Open House" — a
+// reader does not need the words "Open House" repeated inside the strip to know what a
+// date or a time on THIS email means. Same reasoning drops the `"primary"` emphasis: that
+// accent weight is for the HERO's impactful contrast (the researched rule is size/weight
+// contrast at the headline, not shouting inside a hairline strip) — every cell in this
+// strip now reads at the same normal weight.
+//
+// The labels are written to read as CAPTIONS once filled ("Date"), never as canvas-only
+// imperatives ("Add the date here") — because the moment the agent fills the cell, the
+// label ships under the value to the recipient (lib/email/CLAUDE.md, THE SLOT RULE).
 //
 // The strip is the ONLY place in the document model where an unsourceable fact can be BOTH an
 // instruction the agent sees AND nothing at all in the email: it is the one block type that
@@ -47,7 +56,7 @@
 //   1. SUBJECT — the resolved house, handed to us by the dispatcher (ctx.facts). Never a
 //      second resolver.
 //   2. SKELETON — `buildLifecycleEmail`. The campaign chrome, not a grid of our own.
-//   3. CELLS — date · time (open slots, primary) · beds · baths · sq ft. NOT $/sq ft, not lot,
+//   3. CELLS — date · time (open slots) · beds · baths · sq ft. NOT $/sq ft, not lot,
 //      not type: those are the price argument, and this email is an invitation. Each cell
 //      renders only if sourced; unsourced is an open slot, never a zero.
 //   4. CHART — NONE (declared on the key). A house and a moment are not a number. Two dates
@@ -82,16 +91,23 @@ function withCommas(n?: string): string | undefined {
 /**
  * THE STRIP THIS EMAIL WEARS — the campaign's hairline row, with the MOMENT in front.
  *
- * The two cells that matter most here are the two we cannot source, so they lead and they
- * carry `emphasis: "primary"` (accent colour, larger). Beds/baths/sq ft follow as the campaign
- * strip's own reading order. `$/Sq Ft`, `Lot` and `Type` are deliberately absent: they are the
- * argument New Listing and Price Improved make, and an invitation does not argue price.
+ * The two cells that matter most here are the two we cannot source, so they lead. They are
+ * NOT `emphasis: "primary"` (fixed 08/03/2026 — the ribbon above already announces "Open
+ * House", and impactful size/weight contrast belongs at the HERO; shouting every cell in a
+ * hairline strip just makes the strip louder, not clearer). Beds/baths/sq ft follow as the
+ * campaign strip's own reading order. `$/Sq Ft`, `Lot` and `Type` are deliberately absent:
+ * they are the argument New Listing and Price Improved make, and an invitation does not
+ * argue price.
+ *
+ * Labels are "Date"/"Time", not "Open House Date"/"Open House Time" (fixed 08/03/2026 —
+ * the longer label wrapped over three lines in a 94px cell (568÷6), making the strip
+ * ragged). The ribbon already says which email this is.
  */
 export function openHouseSpecs(facts: ListingFacts): StatItem[] {
   return [
     // NO VENDOR HOLDS THESE. Empty = an open slot, and the LABEL is the instruction.
-    spec(undefined, "Open House Date", "primary"),
-    spec(undefined, "Open House Time", "primary"),
+    spec(undefined, "Date"),
+    spec(undefined, "Time"),
     spec(facts.beds, "Beds"),
     spec(facts.baths, "Baths"),
     spec(withCommas(facts.sqft), "Sq Ft"),

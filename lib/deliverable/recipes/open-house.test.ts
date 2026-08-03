@@ -116,8 +116,8 @@ describe("THE OPEN-SLOT CONTRACT — the date and time are never invented", () =
   test("the moment is TWO OPEN SLOTS on the canvas, and the label is the instruction", async () => {
     const doc = await build(SHORE_DR);
 
-    const date = labelled(doc, "Open House Date");
-    const time = labelled(doc, "Open House Time");
+    const date = labelled(doc, "Date");
+    const time = labelled(doc, "Time");
     // The cells EXIST — the canvas renders each as an editable "+ Add" affordance
     // (StatsBlock: empty + scope → the dashed open-slot outline).
     expect(date).toBeDefined();
@@ -131,8 +131,8 @@ describe("THE OPEN-SLOT CONTRACT — the date and time are never invented", () =
     const html = await renderEmailDocHtml(await build(SHORE_DR));
 
     // The instruction is a canvas affordance. It must not reach a recipient.
-    expect(html).not.toContain("Open House Date");
-    expect(html).not.toContain("Open House Time");
+    expect(html).not.toContain(">Date<");
+    expect(html).not.toContain(">Time<");
     // And nothing invented a moment in its place.
     expect(html).not.toMatch(/\b(Saturday|Sunday|Monday|Tuesday|Wednesday|Thursday|Friday)\b/i);
     expect(html).not.toMatch(/\bTBD\b|\bTBA\b/i);
@@ -146,8 +146,8 @@ describe("THE OPEN-SLOT CONTRACT — the date and time are never invented", () =
     // Simulate the canvas edit: the agent types into the open cells. A real edit patches
     // `stats.<i>.value` — it does NOT replace props — so variant and emphasis survive.
     const fill: Record<string, string> = {
-      "Open House Date": "Sat, Jul 19",
-      "Open House Time": "1–4 PM",
+      Date: "Sat, Jul 19",
+      Time: "1–4 PM",
     };
     const filled: EmailDoc = {
       ...doc,
@@ -168,7 +168,7 @@ describe("THE OPEN-SLOT CONTRACT — the date and time are never invented", () =
     expect(html).toContain("1–4 PM");
     // The label now reads as a CAPTION under the value — which is why it was never
     // written as a canvas-only imperative ("Add the date here").
-    expect(html).toContain("Open House Date");
+    expect(html).toContain(">Date<");
 
     // UP FRONT — as far up as the open-slot contract allows. The campaign chrome puts the
     // ADDRESS over the PRICE in the hero (that is the shape all seven emails share, and
@@ -208,16 +208,18 @@ describe("the cells — each renders only if sourced", () => {
     expect(rows).toHaveLength(1);
     if (rows[0].type !== "stats") throw new Error("no strip");
     expect(rows[0].props.variant).toBe("strip");
-    // The moment LEADS it, and it is the cell the eye should land on.
+    // The moment LEADS it, and it is the cell the eye should land on — via ORDER, not
+    // shouted emphasis (fixed 08/03/2026: the ribbon already says "Open House", so
+    // shouting the date/time cells too just made the strip louder, not clearer).
     expect(rows[0].props.stats.map((s) => s.label)).toEqual([
-      "Open House Date",
-      "Open House Time",
+      "Date",
+      "Time",
       "Beds",
       "Baths",
       "Sq Ft",
     ]);
-    expect(rows[0].props.stats[0].emphasis).toBe("primary");
-    expect(rows[0].props.stats[1].emphasis).toBe("primary");
+    expect(rows[0].props.stats[0].emphasis).toBeUndefined();
+    expect(rows[0].props.stats[1].emphasis).toBeUndefined();
   });
 
   test("the campaign chrome: RIBBON('Open House') then the ADDRESS over the PRICE", async () => {
@@ -288,7 +290,7 @@ describe("the cells — each renders only if sourced", () => {
     // Nothing unsourced reaches the recipient: no stat rows, no photo, no zeros.
     expect(html).not.toContain("Asking Price");
     expect(html).not.toContain("Beds / Baths");
-    expect(html).not.toContain("Open House Date");
+    expect(html).not.toContain(">Date<");
     // The photo slot is a canvas dropzone. The gray "Image" box used to ship — it
     // must not. (The only <img> left is the brand logo in the sticky header.)
     expect(html).not.toContain('alt="326 Shore Dr, Fort Myers, FL 33905"');
@@ -405,12 +407,12 @@ describe("THE REAL PATH — authorDoc, from the prompt alone, with NO scope", ()
     const hero = doc.blocks.filter((b) => b.type === "hero")[1];
     expect(hero?.type === "hero" && hero.props.value).toBe("$595,000");
     expect(labelled(doc, "Sq Ft")?.value).toBe("2,847");
-    expect(labelled(doc, "Open House Date")?.value).toBe("");
+    expect(labelled(doc, "Date")?.value).toBe("");
 
     const html = await renderEmailDocHtml(doc);
     expect(html).toContain("326 Shore Dr");
     expect(html).toContain("$595,000");
     expect(html).toContain("RSVP for the Open House");
-    expect(html).not.toContain("Open House Date");
+    expect(html).not.toContain(">Date<");
   });
 });

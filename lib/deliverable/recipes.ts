@@ -69,6 +69,9 @@ export const RECIPE_KEYS = [
   // Area-spined like review-reply (the builder reads ctx.zip, never a house) —
   // promoted from the /r/back-on-market "send it" flow 08/03/2026.
   "back-on-market",
+  // The first recipe over the neighborhood lane (steadyapi_* + google_maps_amenities
+  // roots, landed 08/03/2026) — a named vendor neighborhood, not a ZIP.
+  "community-info",
   // The terminal fallback — every keyless/typed ask lands here (one-lane collapse,
   // spec 2026-08-02). A coded grid with open slots; NEVER free-form layout.
   "default-grid",
@@ -355,6 +358,23 @@ export const RECIPES: Record<RecipeKey, Recipe> = {
     chart: "area-value-trend",
     prompt:
       "Build a one-area home-value snapshot email for [[your city or ZIP]] — the current home-value level and trend, days on market, and active inventory, each cited, with one honest read.",
+    needs: ["agent_name", "brokerage", "business_address"],
+  },
+  "community-info": {
+    key: "community-info",
+    positioning: "story-side",
+    label: "Community Info",
+    // The builder composes its own grid (review-reply precedent) — the plan sketched
+    // "skeleton-clean-white", but that seed is a generic canvas, not this structure.
+    skeleton: null,
+    prose: null,
+    subject: "area",
+    // Facts-first at launch: an amenity-count bar is a tomorrow upgrade, not this build.
+    chart: "none",
+    prompt:
+      "Build a community-info email for [[your neighborhood or community]] — where it sits, " +
+      "how it scores for walking, parks and quiet, what's nearby to eat and do, and typical " +
+      "home values, every figure cited.",
     needs: ["agent_name", "brokerage", "business_address"],
   },
   "back-on-market": {

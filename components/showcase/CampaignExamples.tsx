@@ -16,7 +16,9 @@ const SECTION_INTRO: Record<string, string> = {
   "listing-to-close":
     "Every stage a listing goes through, end to end — seven emails, real data at every step.",
   "back-on-market":
-    "A listing returns to market and the email hands out the real local odds — fall-through, relist, delist — against the national frame.",
+    "A real listing returns to market — the home first, its time off stated from the record, the local odds beside the national frame.",
+  "community-info":
+    "One named neighborhood, end to end — scores, what's nearby, and typical values, every figure cited.",
   "launch-blitz":
     "One listing launch, cut for email and every social format at once — same real numbers everywhere.",
   "agent-launch":

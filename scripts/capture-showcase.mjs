@@ -38,6 +38,7 @@ const SHOWCASES = [
     files: ["01-letter.html", "02-headlines-vs-here.html", "03-review-snapshot.html"],
   },
   { id: "back-on-market", width: 700, files: ["01-back-on-market.html"] },
+  { id: "community-info", width: 700, files: ["01-community-info.html"] },
   { id: "launch-blitz", width: 700, files: ["agent-intro.html"] },
   { id: "launch-blitz", width: 1440, files: ["social-pack.html"], startAt: 2 },
   { id: "market-pulse", width: 1100, files: ["ask.html"] },

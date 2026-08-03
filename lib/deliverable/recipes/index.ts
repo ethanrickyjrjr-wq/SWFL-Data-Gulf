@@ -50,6 +50,7 @@ import { buildSphereWeekly } from "./sphere-weekly";
 import { buildReviewReply } from "./review-reply";
 import { buildMarketPulse } from "./market-pulse";
 import { buildBackOnMarket } from "./back-on-market";
+import { buildCommunityInfo } from "./community-info";
 import { buildDefaultGrid } from "./default-grid";
 
 /** What every builder is handed. The subject is ALREADY resolved — do not re-resolve. */
@@ -102,6 +103,8 @@ export const RECIPE_BUILDERS: Partial<Record<RecipeKey, RecipeBuilder>> = {
   // so the /r/back-on-market "send it" flow (which calls buildBackOnMarket directly with
   // its own deps) is unaffected by this registration.
   "back-on-market": (ctx) => buildBackOnMarket(ctx), // ZIP fallthrough/relist rates vs the national frame
+  // Closure supplies the injectable-deps default (same shape as back-on-market above).
+  "community-info": (ctx) => buildCommunityInfo(ctx), // named vendor neighborhood: scores, nearby, values
   "default-grid": buildDefaultGrid, // the terminal fallback — open-slot grid over the fill seam
   // ── Social — a DIFFERENT renderer, and a DIFFERENT contract ────────────────
   // NOT RecipeBuilder-shaped, and deliberately not registered here. Recon (07/13/2026)
