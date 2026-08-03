@@ -16,6 +16,7 @@
   "collier_parcels": ["raw_landing_class"],
   "collier_permits": ["raw_landing_class"],
   "colliers_industrial": ["raw_landing_class"],
+  "cre_figures": ["raw_landing_class"],
   "crexi_listings": ["raw_landing_class"],
   "dbpr_press_releases": ["raw_landing_class"],
   "dbpr_public_notices": ["raw_landing_class"],
