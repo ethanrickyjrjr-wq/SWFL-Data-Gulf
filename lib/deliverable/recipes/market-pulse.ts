@@ -132,6 +132,7 @@ import { formatDisplayDate } from "@/lib/format-date";
 import { getAnthropic } from "@/refinery/agents/anthropic.mts";
 import { EMAIL_MODEL_SONNET } from "@/lib/email/model-router";
 import { clearNarrativeSlots, dropEmptyChartSlot, fillNarrative } from "./shared";
+import { marketPulseSubject } from "./subject-lines";
 import type { RecipeBuildContext } from "./index";
 import type { EmailDoc, EmailBlock, StatItem } from "@/lib/email/doc/types";
 import type { BrainOutput, BrainOutputDetailTable } from "@/refinery/types/brain-output.mts";
@@ -770,6 +771,8 @@ export async function buildMarketPulse(ctx: RecipeBuildContext): Promise<EmailDo
   const seed = seedById("trend-snapshot");
   if (!seed) return null;
   let doc = markChartSlot(withStickyBrand(seed.build(), currentDoc));
+  // THE SUBJECT LINE — deterministic, never model-authored (subject-lines.ts).
+  doc = { ...doc, subjectVariants: [marketPulseSubject(area.place)] };
 
   // 4 · CELLS — three stats, each a value copied out of ONE ZIP row. Nothing blended.
   //     The mover's ZIP and the top ZIP are named in the label so the number is never

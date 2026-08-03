@@ -115,6 +115,7 @@ import {
   median,
   perSqft,
 } from "./shared";
+import { marketCompsSubject } from "./subject-lines";
 import type { RecipeBuildContext } from "./index";
 import type { EmailBlock, EmailDoc, ListItem, StatItem } from "@/lib/email/doc/types";
 import type { ListingFacts } from "@/lib/email/listing-scrape";
@@ -362,7 +363,7 @@ export function buildCompsGrid(
   comps: RenderComp[],
   current: EmailDoc,
 ): EmailDoc {
-  return buildLifecycleEmail(current, {
+  const doc = buildLifecycleEmail(current, {
     ribbon: "Market Comps",
     // The subject's photo — it identifies the house whose price is on trial. No photo →
     // a canvas dropzone, absent from the sent email (the open-slot contract).
@@ -387,6 +388,14 @@ export function buildCompsGrid(
     ctaLabel: "Talk Through These Numbers",
     ctaUrl: facts.sourceUrl,
   });
+  return {
+    ...doc,
+    // THE SUBJECT LINE — deterministic, never model-authored (subject-lines.ts). Without
+    // this, `deriveEmailDocSubject` falls back to the hero label (bare price+address),
+    // which loses the one thing that makes an evidence email worth opening: the question
+    // it answers. Written from the same `facts.address` the hero already carries.
+    subjectVariants: [marketCompsSubject(facts.address)],
+  };
 }
 
 // ─────────────────────────────────────────────────────────────────────────────

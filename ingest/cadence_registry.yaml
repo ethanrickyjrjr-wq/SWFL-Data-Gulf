@@ -2152,6 +2152,33 @@ pipelines:
 # completely silent (no probe coverage at all).
 
 not_yet_running:
+  # ── SteadyAPI /neighborhood-amenities — neighborhoods + nearby amenities + pairing ──
+  # Tables: data_lake.steadyapi_neighborhoods (slug_id PK, boundary polygon + centroid +
+  #   12 location scores) · steadyapi_neighborhood_amenities (Yelp-derived businesses w/
+  #   category/rating/lat-lon/distance) · steadyapi_property_neighborhood (property_id ->
+  #   slug_id — the listings↔community pairing edge; api_feed rows carry no subdivision).
+  # Pipeline: ingest/pipelines/neighborhood_amenities/pipeline.py (boundary-polygon dedupe:
+  #   one call per UNKNOWN neighborhood, followers assigned locally at zero vendor cost —
+  #   live dry-run 08/03/2026: 5 calls -> 2 neighborhoods + 984 assignments).
+  # GHA cron: .github/workflows/neighborhood-amenities-daily.yml (09:30 UTC, 500-call cap).
+  # Migration: migrations/20260803_steadyapi_neighborhoods.sql (run 08/03/2026).
+  # Graduation: move to `pipelines:` with freshness_table + expected_rows_min after the
+  #   first clean scheduled fire (rentals precedent).
+  - name: neighborhood_amenities
+    workflow: neighborhood-amenities-daily.yml
+    consuming_pack: communities-swfl
+    lane: tier-2
+    cadence_days: 1
+    tolerance_multiplier: 2.0
+    source_scope:
+      confirmed_total:
+        summary: "Per vendor call (propertyId is the ONLY input; radius vendor-fixed 5mi): named neighborhood w/ slug_id + centroid + GeoJSON boundary polygon; 12 location scores (Walking/Cycling/Transit/Driving/Groceries/Shopping/Nightlife/Restaurants/Cafes/Daycares/Quiet/Vibrant); nearby businesses across up-to-31 categories (golf, countryclubs, grocery, cafes, preschools, ...) each w/ name/phone/rating/reviews_count/lat-lon/distance. Property->neighborhood assignment persisted for every resolved property."
+        source: "our ingest"
+      source_ceiling:
+        summary: "schools family (summary + per-school rating/parent_rating/student_count/student_teacher_ratio/distance/assigned flag, w/ coordinates) is returned on the SAME call and NOT yet persisted — zero extra calls to add a steadyapi_neighborhood_schools table. HOA/condo fees confirmed ABSENT vendor-wide (re-verified on this endpoint 08/03/2026 — capability census §4 stands)."
+        as_of: "08/03/2026"
+        source_url: "https://docs.steadyapi.com/collection.json"
+        source_label: "realtor.com (via SteadyAPI)"
   # ── SBA FOIA franchise outcomes — Tier-1 DuckDB pipeline ────────────────────
   # Writes two Parquet files to Tier-1 Storage:
   #   lake-tier1/franchise/sba_foia_franchise_county.parquet  (county-grain, primary)
@@ -2531,6 +2558,12 @@ jobs:
   - name: graphify-republish
     workflow: graphify-republish.yml
     purpose: Republishes the graphify code graph.
+  - name: neighborhood-amenities-daily
+    workflow: neighborhood-amenities-daily.yml
+    purpose: >-
+      SteadyAPI /neighborhood-amenities sweep -> data_lake.steadyapi_neighborhoods /
+      steadyapi_neighborhood_amenities / steadyapi_property_neighborhood. One call per unknown
+      vendor neighborhood polygon; bounded 500 calls/run, ~9 min at the shared 1 req/s throttle.
   - name: home-values-investor-monthly
     workflow: home-values-investor-monthly.yml
     purpose: Home-Values + Investor Composite build (ingest-flavored; promotion to pipelines with freshness fields tracked in checks).

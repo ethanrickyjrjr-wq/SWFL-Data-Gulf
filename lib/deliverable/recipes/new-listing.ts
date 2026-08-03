@@ -40,6 +40,7 @@ import {
   dropEmptyChartSlot,
   fillNarrative,
 } from "./shared";
+import { newListingSubject } from "./subject-lines";
 import type { RecipeBuildContext } from "./index";
 import type { EmailDoc } from "@/lib/email/doc/types";
 
@@ -66,6 +67,8 @@ export async function buildNewListing(ctx: RecipeBuildContext): Promise<EmailDoc
   // The coded flyer grid. Brand (globalStyle, header, footer, agent card) is sticky
   // and lifted from whatever is on the canvas — we never author a brand.
   let doc = buildListingFlyer(facts, currentDoc, daysOnMarket);
+  // THE SUBJECT LINE — deterministic, never model-authored (subject-lines.ts).
+  doc = { ...doc, subjectVariants: [newListingSubject(facts.address)] };
 
   // NO CHART ON A NEW LISTING. The slot exists in the grid; drop it rather than
   // fill it with filler. An empty chart box is worse than no chart.

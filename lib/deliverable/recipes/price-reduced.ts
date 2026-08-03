@@ -79,6 +79,7 @@ import {
   median,
   perSqft,
 } from "./shared";
+import { priceReducedSubject } from "./subject-lines";
 import { compsForAddress, type RenderComp } from "@/lib/assistant/comp-helper";
 import { chartSpecToEmailImage } from "@/lib/email/spec-to-png";
 import { createBlock } from "@/lib/email/doc/default-docs";
@@ -386,6 +387,10 @@ export async function buildPriceReduced(ctx: RecipeBuildContext): Promise<EmailD
     ctaLabel: "Schedule a Showing",
     ctaUrl: facts.sourceUrl,
   });
+  // THE SUBJECT LINE — deterministic, never model-authored (subject-lines.ts). Set here,
+  // before every early-return path below, so it applies whether or not the narrative or
+  // chart resolve. `newPrice` is the SOURCED verbatim facts.price — never derived.
+  doc = { ...doc, subjectVariants: [priceReducedSubject(facts.address, facts.price)] };
 
   // ── THE CHART: where the new price sits against real nearby comps. Comps are used
   // ONLY to compute this chart — NEVER handed to the narrator below, which stays
