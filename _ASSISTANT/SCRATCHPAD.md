@@ -1,3 +1,20 @@
+## 2026-08-03 (Opus 5) — "Just seems money just disappears when in Claude." + can Ollama replace it, what does each cost
+
+OPERATOR GRIPE, RECORDED: spend feels invisible/uncontrolled inside Claude. He is right that it is
+invisible, and the reason is structural: we measure ONE of the two buckets.
+
+- MEASURED: product API spend (`public.api_usage_log`, written by the `getAnthropic()` seam) —
+  $50.12 over 30 days as of 07/30/2026, $27.71 of it jobs already ruled out on quality
+  (`_RESEARCH/agent-behavior/2026-07-30-omnigent-meta-harness-and-local-ollama-agents.md`).
+- UNMEASURED: INTERACTIVE Claude Code spend — the coding sessions. Our own 07/30 research says in
+  as many words that "the real bucket (interactive coding spend) is unmeasured." THIS session's
+  hook printed ~$63.51 in one sitting — i.e. one coding session can exceed a full month of product
+  API spend. That is the money he is watching disappear, and nothing in our stack logs it.
+
+So "route the factuality gate to Ollama to save money" optimizes the SMALL, MEASURED bucket while
+the LARGE, UNMEASURED one has no meter at all. Getting a meter on interactive spend is worth more
+than any routing change.
+
 ## 2026-08-03 (Opus 5) — "WHY THE FUCK IS GITHUB RED?" + "Don't fix it back to being broke. Change it so it works."
 
 THREE separate reds, only one from today's push:
