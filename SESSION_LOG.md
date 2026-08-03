@@ -1,3 +1,16 @@
+## 2026-08-03 (Fable 5) — Step 3 readiness verified live; JSON-path landmine written into playbook; DOM verify check closed
+
+Operator: "make sure sonnet is ready to get this all done since all DOM has come in." Four-lane pass
+(playbook + data-roots + tree grep + read-only Bun.SQL): Steps 1+2 CONFIRMED DONE — raw table holds
+17,875 bodies (newest 08/03 01:11 UTC), undated_active_sale = 0, all three typed tables to_regclass
+NULL (Step 3 starts clean). FOUND + DEFUSED: stored jsonb is the `{meta, body}` envelope — families
+live at body->'body'->'<family>', NOT top-level; a naive parser reads the table as EMPTY (my own
+first probe did exactly that). Landmine + live family coverage written into playbook §STEP 3
+(A 17,859 bodies/235,383 events · B 16,514/273,051 · C 12,946/79,281 vs county 303+4,975).
+Closed dom_backfill_listed_date_live_verify w/ evidence. steadyapi_step3_typed_families_spec stays
+open for Sonnet — build order A→B→C, one PR each, brainstorm+TDD+pack+contract+registry+data-roots.
+Blocker for Step 2's twin NOT touched: engine_enabled_kill_switch_owed still operator-owed.
+
 ## 2026-08-03 (Fable 5) — /api/b edge-cache shipped (Apify Actor lane); rate cap proven live; playground Actor deployed
 
 Apify session (operator: "PLAY AROUND... BUILD" → "get it done so we cache and have a rate cap").
