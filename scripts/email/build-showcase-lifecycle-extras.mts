@@ -43,13 +43,10 @@ import { resolveSubjectListing } from "@/lib/listings/resolve-subject";
 import { mirrorHeroPhoto } from "@/lib/media/hero-photo";
 import type { EmailDoc, StatItem } from "@/lib/email/doc/types";
 
-const OUT = "public/showcase/listing-to-close/live";
-mkdirSync(OUT, { recursive: true });
-
 // ── Latitude 26 Estates / Mara Ellison — the showcase's established fictional brand.
 // Identity strings match the committed 01–05 artifacts (footer of 02-new-listing.html);
 // palette = the same values hardcoded in those files (#0A2A2C/#B98F45/#23302F/#EFE9DD).
-const TOKENS = brandingToTokens({
+const LATITUDE_TOKENS = brandingToTokens({
   agent_name: "Mara Ellison",
   agent_title: "Estate Advisor · Latitude 26 Estates",
   brokerage: "Latitude 26 Estates",
@@ -64,12 +61,29 @@ const TOKENS = brandingToTokens({
   font_body: "BOOK_SERIF",
 });
 
+// ── Cast & Coast Realty / Dani Vero — the Cape Coral fictional brand (launch-blitz
+// showcase; portrait committed + AI-generated per its disclosure). Palette from the
+// committed agent-intro artifact (#12343B/#0E7C86/#2E4A50/#F2FAFB).
+const CAST_COAST_TOKENS = brandingToTokens({
+  agent_name: "Dani Vero",
+  agent_title: "Cast & Coast Realty · Cape Coral",
+  brokerage: "Cast & Coast Realty",
+  business_address: "Cape Coral, FL",
+  contact_email: "dani@castandcoast.example",
+  photo_url: "assets/dani-vero.jpg",
+  primary_color: "#12343B",
+  accent_color: "#0E7C86",
+  text_color: "#2E4A50",
+  backdrop_color: "#F2FAFB",
+  font_display: "GEOMETRIC_SANS",
+  font_body: "MODERN_SANS",
+});
+
 // Mirror of applyBrand's block branches (EmailLabShell.tsx) — client-component internals a
-// bun script can't import; same precedent as the agent-launch demo builds. Mara has NO
-// portrait asset and NO bio: those agent-card fields are cleared, never left to a seed
+// bun script can't import; same precedent as the agent-launch demo builds. A brand with NO
+// portrait asset and NO bio gets those agent-card fields cleared, never left to a seed
 // default (the July agent-card stale-bio bug class).
-function applyLatitudeBrand(doc: EmailDoc): EmailDoc {
-  const t = TOKENS;
+function applyBrandTokens(doc: EmailDoc, t: Record<string, string>): EmailDoc {
   const cta = t.CTA_URL || t.WEBSITE_URL;
   const globalStyle = brandGlobalStyle(doc.globalStyle, t);
   const blocks = doc.blocks.map((b) => {
@@ -149,10 +163,14 @@ function fillOpenHouseMoment(doc: EmailDoc, date: string, time: string): EmailDo
 }
 
 async function buildDemo(opts: {
-  key: "open-house" | "price-reduced";
-  address: string;
+  key: "open-house" | "price-reduced" | "back-on-market";
+  /** Address-spined demos resolve a real house; area-spined ones (back-on-market)
+   *  pass no address — the builder reads only the ZIP. */
+  address?: string;
   zip: string;
   file: string;
+  outDir: string;
+  tokens: Record<string, string>;
   /** Lane-2 agent-supplied description (the operator's own campaign copy for Gordonia,
    *  already committed in 02-new-listing.html). Absent → the prose slot stays OPEN. */
   remarks?: string;
@@ -160,38 +178,45 @@ async function buildDemo(opts: {
    *  committed artifacts). Used only if the live mirror upload misses. */
   mirroredPhotoFallback?: string;
 }): Promise<void> {
-  console.log(`\n── ${opts.key} · ${opts.address}`);
+  console.log(`\n── ${opts.key} · ${opts.address ?? `ZIP ${opts.zip}`}`);
+  mkdirSync(opts.outDir, { recursive: true });
 
-  const facts = await resolveSubjectListing(opts.address);
-  if (!facts) {
-    console.error(`   RESOLVER MISS for ${opts.address} — cannot build without real facts.`);
-    process.exitCode = 1;
-    return;
-  }
-  if (opts.remarks) facts.remarks = opts.remarks;
+  let facts = null as Awaited<ReturnType<typeof resolveSubjectListing>>;
+  if (opts.address) {
+    facts = await resolveSubjectListing(opts.address);
+    if (!facts) {
+      console.error(`   RESOLVER MISS for ${opts.address} — cannot build without real facts.`);
+      process.exitCode = 1;
+      return;
+    }
+    if (opts.remarks) facts.remarks = opts.remarks;
 
-  // Committed artifacts never hotlink the vendor CDN — mirror into our storage.
-  const raw = facts.photos[0];
-  if (raw) {
-    const mirrored = await mirrorHeroPhoto(raw).catch(() => null);
-    const durable = mirrored ?? opts.mirroredPhotoFallback ?? null;
-    if (durable) facts.photos = [durable];
-    else {
-      console.warn(`   photo mirror MISS — dropping photo rather than hotlinking vendor CDN`);
-      facts.photos = [];
+    // Committed artifacts never hotlink the vendor CDN — mirror into our storage.
+    const raw = facts.photos[0];
+    if (raw) {
+      const mirrored = await mirrorHeroPhoto(raw).catch(() => null);
+      const durable = mirrored ?? opts.mirroredPhotoFallback ?? null;
+      if (durable) facts.photos = [durable];
+      else {
+        console.warn(`   photo mirror MISS — dropping photo rather than hotlinking vendor CDN`);
+        facts.photos = [];
+      }
     }
   }
 
   const recipe = RECIPES[opts.key];
-  const currentDoc = applyLatitudeBrand(
+  const currentDoc = applyBrandTokens(
     (seedById("luxury-market-report") ?? SEED_DOCS[0]!).build(),
+    opts.tokens,
   );
   const ctx: RecipeBuildContext = {
     recipe,
-    prompt: recipe.prompt.replace("[[your listing address]]", opts.address),
+    prompt: recipe.prompt
+      .replace("[[your listing address]]", opts.address ?? "")
+      .replace("[[your ZIP or city]]", opts.zip),
     currentDoc,
     facts,
-    resolved: true,
+    resolved: facts !== null,
     zip: opts.zip,
   };
 
@@ -224,15 +249,19 @@ async function buildDemo(opts: {
   }
 
   const html = await renderEmailDocHtml(parsed.data);
-  writeFileSync(`${OUT}/${opts.file}`, html);
+  writeFileSync(`${opts.outDir}/${opts.file}`, html);
   console.log(
     "   blocks:",
     parsed.data.blocks.map((b) => b.type).join(" · "),
-    `\n   facts: price=${facts.price} beds=${facts.beds} baths=${facts.baths} sqft=${facts.sqft}` +
-      ` dom=${facts.daysOnMarket ?? "—"} cut=${facts.priceReduction ?? "—"}`,
-    `\n   wrote ${OUT}/${opts.file} (${html.length} bytes)`,
+    facts
+      ? `\n   facts: price=${facts.price} beds=${facts.beds} baths=${facts.baths} sqft=${facts.sqft}` +
+          ` dom=${facts.daysOnMarket ?? "—"} cut=${facts.priceReduction ?? "—"}`
+      : `\n   area build — ZIP ${opts.zip}`,
+    `\n   wrote ${opts.outDir}/${opts.file} (${html.length} bytes)`,
   );
 }
+
+const LIFECYCLE_OUT = "public/showcase/listing-to-close/live";
 
 // Gordonia's lane-2 description — the demo agent's own campaign copy, verbatim from the
 // committed 02-new-listing.html narrative (operator-supplied 07/02/2026).
@@ -247,6 +276,8 @@ await buildDemo({
   address: "465 Gordonia Road, Naples, FL 34108",
   zip: "34108",
   file: "06-open-house.html",
+  outDir: LIFECYCLE_OUT,
+  tokens: LATITUDE_TOKENS,
   remarks: GORDONIA_REMARKS,
   mirroredPhotoFallback:
     "https://jtkdowmrjaxfvwmemxso.supabase.co/storage/v1/object/public/email-media/hero-photos/107979fc62aaa2ef3002fbbb.webp",
@@ -257,8 +288,21 @@ await buildDemo({
   address: "142 Eugenia Drive, Naples, FL 34108",
   zip: "34108",
   file: "07-price-reduced.html",
+  outDir: LIFECYCLE_OUT,
+  tokens: LATITUDE_TOKENS,
   // No lane-2 description exists for this listing — the prose slot stays OPEN (the
   // builder's own contract: never invent a paragraph, the strip/photo/cut carry it).
+});
+
+// Back on the Market — AREA build (the builder reads the ZIP's real fallthrough/relist
+// rates; deterministic narrative, no LLM). 33914 = SW Cape, Cast & Coast's home ZIP per
+// the launch-blitz artifact.
+await buildDemo({
+  key: "back-on-market",
+  zip: "33914",
+  file: "01-back-on-market.html",
+  outDir: "public/showcase/back-on-market/live",
+  tokens: CAST_COAST_TOKENS,
 });
 
 console.log("\ndone");

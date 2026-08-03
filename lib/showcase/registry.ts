@@ -190,6 +190,29 @@ export const SHOWCASES: Showcase[] = [
     ],
   },
   {
+    id: "back-on-market",
+    company: "Cast & Coast Realty · Cape Coral",
+    title: "Back on the Market: The Second Chance",
+    hook: "A returned listing explained straight — the ZIP's real fall-through rate against the national one, no spin.",
+    accent: "#0E7C86",
+    thumb: "/showcase/back-on-market/thumb.webp",
+    surfaces: ["email"],
+    disclosure:
+      "Demonstration campaign — Cast & Coast Realty and Dani Vero are fictional (her portrait is AI-generated). The contract fall-through, relist, and delist rates are real — SWFL Data Gulf (08/03/2026), national frame cited to Redfin.",
+    slides: [
+      {
+        image: "/showcase/back-on-market/step-1.webp",
+        title: "Back on the Market",
+        whatsHappening:
+          "A listing comes back and the email says what that usually means: the ZIP's real fall-through, relist, and delist rates, set against the national number, with the sources dated under the strip.",
+        howAiHandled:
+          "Read the ZIP's own rates — 14.8% of pending deals fall through here, against 13.6% nationally — and composed the both-sides read in code: no reason invented for any one deal, not a word about the seller.",
+        liveHref: "/showcase/back-on-market/live/01-back-on-market.html",
+        recipe: RECIPES["back-on-market"],
+      },
+    ],
+  },
+  {
     id: "launch-blitz",
     company: "Cast & Coast Realty · Cape Coral",
     title: "Launch Weekend: Listing + Social Blitz",

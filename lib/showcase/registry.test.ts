@@ -9,9 +9,10 @@ import { NEED_LABELS, findPlaceholder } from "./recipe";
  * asset must be a red test here, never a broken slide in prod.
  */
 describe("showcase registry", () => {
-  it("ships exactly 4 showcases with unique ids", () => {
-    expect(SHOWCASES).toHaveLength(4);
-    expect(new Set(SHOWCASES.map((s) => s.id)).size).toBe(4);
+  it("ships exactly 5 showcases with unique ids", () => {
+    // 5th = back-on-market (promoted into the recipe set 08/03/2026).
+    expect(SHOWCASES).toHaveLength(5);
+    expect(new Set(SHOWCASES.map((s) => s.id)).size).toBe(5);
   });
 
   it("every asset path exists under public/", () => {
@@ -26,9 +27,10 @@ describe("showcase registry", () => {
     }
   });
 
-  it("2-7 content slides, non-empty captions, disclosure present", () => {
+  it("1-7 content slides, non-empty captions, disclosure present", () => {
     for (const s of SHOWCASES) {
-      expect(s.slides.length).toBeGreaterThanOrEqual(2);
+      // 1 is legitimate: back-on-market is a single-email story (08/03/2026).
+      expect(s.slides.length).toBeGreaterThanOrEqual(1);
       // 7 = the full listing lifecycle (open-house + price-improved joined 08/03/2026).
       expect(s.slides.length).toBeLessThanOrEqual(7);
       expect(s.disclosure.length).toBeGreaterThan(20);

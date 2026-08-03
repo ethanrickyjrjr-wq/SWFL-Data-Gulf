@@ -66,6 +66,9 @@ export const RECIPE_KEYS = [
   "sphere-weekly",
   "review-reply",
   "market-pulse",
+  // Area-spined like review-reply (the builder reads ctx.zip, never a house) —
+  // promoted from the /r/back-on-market "send it" flow 08/03/2026.
+  "back-on-market",
   // The terminal fallback — every keyless/typed ask lands here (one-lane collapse,
   // spec 2026-08-02). A coded grid with open slots; NEVER free-form layout.
   "default-grid",
@@ -352,6 +355,24 @@ export const RECIPES: Record<RecipeKey, Recipe> = {
     chart: "area-value-trend",
     prompt:
       "Build a one-area home-value snapshot email for [[your city or ZIP]] — the current home-value level and trend, days on market, and active inventory, each cited, with one honest read.",
+    needs: ["agent_name", "brokerage", "business_address"],
+  },
+  "back-on-market": {
+    key: "back-on-market",
+    positioning: "story-side",
+    label: "Back on the Market",
+    // The builder composes on the lifecycle chrome directly (like the other coded
+    // area builds); there is no committed grid to name.
+    skeleton: null,
+    prose: null,
+    subject: "area",
+    // The rates ARE the argument, but they ship as the strip + the local-vs-national
+    // table the builder already lays down — a chart would restate its own cells.
+    chart: "none",
+    prompt:
+      "Build a back-on-market email for [[your ZIP or city]] — how often deals fall out of " +
+      "contract locally versus nationally, each rate cited, and the straight both-sides read " +
+      "on why a returned listing is common, not a red flag.",
     needs: ["agent_name", "brokerage", "business_address"],
   },
   "market-pulse": {

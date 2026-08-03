@@ -49,6 +49,7 @@ import { buildAgentLaunch } from "./agent-launch";
 import { buildSphereWeekly } from "./sphere-weekly";
 import { buildReviewReply } from "./review-reply";
 import { buildMarketPulse } from "./market-pulse";
+import { buildBackOnMarket } from "./back-on-market";
 import { buildDefaultGrid } from "./default-grid";
 
 /** What every builder is handed. The subject is ALREADY resolved — do not re-resolve. */
@@ -97,6 +98,10 @@ export const RECIPE_BUILDERS: Partial<Record<RecipeKey, RecipeBuilder>> = {
   "sphere-weekly": buildSphereWeekly, // headline number is a LANE-3 web fact, cited
   "review-reply": buildReviewReply, // pure lake data; genuinely about numbers, so it charts
   "market-pulse": buildMarketPulse, // every ZIP's month-over-month move
+  // Closure supplies the deps default — the second parameter's signature is untouched,
+  // so the /r/back-on-market "send it" flow (which calls buildBackOnMarket directly with
+  // its own deps) is unaffected by this registration.
+  "back-on-market": (ctx) => buildBackOnMarket(ctx), // ZIP fallthrough/relist rates vs the national frame
   "default-grid": buildDefaultGrid, // the terminal fallback — open-slot grid over the fill seam
   // ── Social — a DIFFERENT renderer, and a DIFFERENT contract ────────────────
   // NOT RecipeBuilder-shaped, and deliberately not registered here. Recon (07/13/2026)
@@ -115,10 +120,8 @@ export function builderFor(key: RecipeKey): RecipeBuilder | null {
   return RECIPE_BUILDERS[key] ?? null;
 }
 
-// ── Back on the Market — the "send it" deliverable for /r/back-on-market ────────────
-// Registered as a direct export, NOT in RECIPE_BUILDERS above: `back-on-market` is not a
-// `RecipeKey` (the closed key set lives in lib/deliverable/recipes.ts), and the "send it"
-// flow originates from the read page, not the email-lab `authorDoc(key)` dispatch. To wire
-// it into the lab dispatch, an operator must first add "back-on-market" to RECIPE_KEYS +
-// RECIPES in recipes.ts (out of this build's scope) — then it can join the table above.
+// ── Back on the Market — PROMOTED into the key set 08/03/2026 ───────────────────────
+// Now a real `RecipeKey` (RECIPE_KEYS + RECIPES in recipes.ts) registered in the table
+// above via a closure. The direct export stays: the /r/back-on-market "send it" flow
+// calls buildBackOnMarket(ctx, deps) with its own injected loader and must keep doing so.
 export { buildBackOnMarket } from "./back-on-market";

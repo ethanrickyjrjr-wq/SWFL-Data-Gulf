@@ -15,6 +15,8 @@ import { ShowcaseOverlay } from "@/components/showcase/ShowcaseOverlay";
 const SECTION_INTRO: Record<string, string> = {
   "listing-to-close":
     "Every stage a listing goes through, end to end — seven emails, real data at every step.",
+  "back-on-market":
+    "A listing returns to market and the email hands out the real local odds — fall-through, relist, delist — against the national frame.",
   "launch-blitz":
     "One listing launch, cut for email and every social format at once — same real numbers everywhere.",
   "agent-launch":
