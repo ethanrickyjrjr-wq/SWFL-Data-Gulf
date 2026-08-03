@@ -1,3 +1,119 @@
+## 2026-08-03 (Opus 5) — "what is going on with all of this?" (GitHub Dependabot page, SWFL-Data-Gulf)
+
+NINE OPEN ALERTS, ONE PACKAGE, ONE VERSION BUMP — AND THE ROBOT THAT WAS SUPPOSED TO FIX IT
+STRUCTURALLY CANNOT. Verified live 08/03/2026 via `gh api`:
+  All 9 alerts = `next`, npm ecosystem, package.json. 4 high / 5 medium.
+  Vulnerable range `>= 16.0.0, < 16.2.11`; we are pinned `next: 16.2.9` (package.json:92, bun.lock:2805).
+  Whole batch published 07/22/2026 — 12 days open, zero PRs.
+  npm registry live: 16.2.11 patches all nine; `latest` = 16.2.12.
+ROOT CAUSE OF THE SILENCE — **Dependabot does NOT support security updates for the `bun` ecosystem.**
+Verified in-session off GitHub's own support matrix (docs.github.com .../supported-ecosystems-and-
+repositories, parsed 08/03/2026): Bun row = Version updates YES, **Security updates NO**. npm row =
+both YES. Repo toggles are ON and NOT paused (`automated-security-fixes` → {"enabled":true,
+"paused":false}; `vulnerability-alerts` → 204). So the green toggle is meaningless here: our
+`.github/dependabot.yml` declares `package-ecosystem: "bun"` (committed 06/28/2026) and that
+ecosystem has no security updater. **The config comment in that file asserts security updates are
+"the separate repo toggle ... enabled out-of-band" — that comment is WRONG for bun, and is the exact
+"existence as evidence of function" law from new-project-playbook.md §1.** Recording half present,
+acting half absent.
+SECOND, UNEXPLAINED DEFECT: **ZERO Dependabot PRs have EVER been opened** — `gh pr list --author
+"app/dependabot" --state all` returns empty, five weeks after the config landed. Version updates
+ARE supported for all three declared ecosystems (bun, github-actions, pip), weekly schedule, so
+~5 grouped PRs should exist. Nothing. No public API for Dependabot job logs; needs a human eye on
+https://github.com/ethanrickyjrjr-wq/SWFL-Data-Gulf/network/updates to read the last-run error.
+EXPOSURE IS NARROWER THAN "9" SOUNDS (probed the code, not guessed): no `use server` anywhere in
+app/lib/components, no `runtime = "edge"`, no custom server, no `rewrites()` (only redirects +
+headers), no `images` config so `dangerouslyAllowSVG` is off, no i18n locale config. That rules out
+the custom-server SSRF, the rewrites SSRF, the Edge payload advisory, and the SVG image DoS. The
+cache-confusion pair is the one with real bite behind a CDN.
+Resolves when: next bumped to 16.2.12 with package.json + bun.lock in the SAME commit (pre-push
+Gate 1), `bunx next build` green, alerts auto-close; AND the bun/security-update gap is written
+into dependabot.yml as a comment that says the truth, with whatever compensating mechanism we pick.
+
+## 2026-08-03 (Opus 5) — "what is the point of the ops page if no one fucking updates anything anywhere? how do we track shit because Claude sure as hell can't do it."
+
+OPERATOR IS RIGHT AND THE PROOF IS A ONE-LINE EXIT CODE. The detector for this exact class of
+miss ALREADY EXISTS, is ALREADY CORRECT, and NOTHING RUNS IT:
+  node scripts/schedule-catalog.mjs --check   →  exit 1   (verified live 08/03/2026)
+  grep -rln "schedule-catalog" .github/workflows/  →  ZERO hits — never runs in CI.
+Pre-push Gate 10 (`.claude/hooks/check-prepush-gate.mjs:900`) only inspects files touched in the
+current push and reads them from `git show HEAD:` — it did NOT stop neighborhood-amenities-daily.yml
+shipping unregistered on 08/03/2026. The full-repo sweep that DOES catch it lives only in
+`scripts/schedule-catalog.test.mjs` ("REPO SWEEP"), which no workflow invokes.
+ALSO: this is a REPEAT, not a discovery. `_RESEARCH/INDEX.md:179` — the 07/22/2026 lake-wire-map
+research (16-agent fan-out) already found `community_profiles` and `cre_figures` unregistered.
+TWELVE DAYS LATER community_profiles is still unregistered. Research found it, nobody was forced
+to act, it rotted. That is the whole complaint in one line.
+CORRECTION TO MY OWN PRIOR ANSWER: I proposed RETIRING ops /data-inventory. Wrong framing —
+the answer is GENERATE it from the registry, not hand-type it and not delete it. The registry
+already declares itself "the single source of config truth" (registry header L39, 07/11/2026).
+LIVE 08/03/2026: /census returns 200 (346KB) and correctly renders registered entries
+(cre_figures, marketbeat_swfl present) but shows NOTHING for neighborhood_amenities,
+community_profiles, corridor_grounded — because the registry is the gate and they aren't in it.
+/census is also SLOW: 17s warm, exceeded 25s cold; /data-inventory serves stale data in 2s.
+The fast page is wrong and the correct page is too slow to use — that is why nobody trusts either.
+THE ANSWER WAS ALREADY WRITTEN: `docs/standards/new-project-playbook.md` §1, written 07/25/2026
+from this repo's own incident record. THE ONE LAW: *"We accept existence as evidence of function."*
+Operational form: *"Every artifact needs a RECORDING half and an ACTING half. Two halves or it
+doesn't ship."* Its own worked example is the identical shape to today's finding —
+`scripts/ceilings-to-checks.mjs` was "built and committed, then appeared in 6 files repo-wide...
+Zero workflows, zero hooks, zero package.json. Built, never plugged in." `schedule-catalog.mjs`
+is that same sentence with a different filename. The playbook's ten-second test — *"what reads
+this, and what acts on it? If either answer is 'a human is supposed to remember to,' you have
+built half a mechanism"* — would have caught this at design time. NOTHING RUNS THE TEN-SECOND
+TEST. The playbook itself has a recording half and no acting half; that is the recursion to break.
+Resolves when the sweep runs on every push AND /data-inventory is generated from the registry.
+
+## 2026-08-03 (Opus 5) — "how does the ops page look on updates? is graphify and nodes being marked so we can get around easier?"
+
+Probed. The republish cron is HEALTHY — `graphify-republish.yml` is 8-for-8 green through
+08/02 (the workflow's own header comment still says "This workflow has NEVER succeeded: 0-for-2",
+stale since the 07/16 PAT re-mint). The staleness is NOT the cron. Two real causes found:
+1. **The ops /graph page is only as rich as `cadence_registry.yaml`.** Pipeline nodes are read
+   from the registry's `pipelines:` list, not from `ingest/pipelines/` on disk. `neighborhood_amenities`
+   shipped 08/03 with a daily GHA cron and was NEVER added to the registry — `node scripts/schedule-catalog.mjs`
+   reports it verbatim under `"unregistered"`. So it has no graph node, no /ops/census row, no
+   source_scope block. Same for `county_planning_swfl`, `corridor_grounded`, `community_profiles`.
+2. **Publish drops 98% of the graph.** CI builds 42,725 nodes; `graphify-publish.mjs` emits 668
+   (RENDERABLE_TYPES filter). `lib_module` (663), `slug` (275) and `app_component` (105) are
+   dropped entirely — so the ops graph cannot navigate to a lib module or a slug at all. That is
+   a deliberate "don't dump 19.5k nodes on the page" filter, not a bug, but it IS the answer to
+   "can we get around easier": today, no — the navigable surface is 668 nodes.
+3. **ops /data-inventory should be RETIRED, not backfilled.** Hand-authored `_data.ts`, last
+   touched 06/15/2026; no generator exists in either repo. Exact-name diff vs the registry:
+   76 registry entries, 62 page entries, 35 matched, 41 missing, 27 stale-or-renamed (arithmetic
+   cross-checked both directions by the audit). Backfilling is NOT cheap — 4 of its 10 required
+   fields (`label`, `grain`, `zipStatus`, `pipelineStatus`) have NO counterpart anywhere in the
+   registry schema, so 41 rows = 196 hand-authored values that would immediately re-drift. The
+   07/07/2026 design doc `docs/superpowers/specs/2026-07-07-pipeline-data-census-design.md:15`
+   already ruled on this: *"a hand-copied static catalog... Already drifting from the registry.
+   New work does not touch it and does not use it as a source of truth."* /census computes the
+   same thing live from the registry on every load. Decision owed: redirect /data-inventory at
+   /census and delete `_data.ts`, or keep a knowingly-stale page.
+Also `swfldatagulf-ops/scripts/validate-wire-map.mjs` resolves its path off CWD, so it crashes
+when run from brain-platform.
+Resolves when the registry gaps are closed AND /data-inventory is retired or explicitly kept.
+
+## 2026-08-03 (Fable 5) — "sonnet says we have problems with permits" — family C design review
+
+Operator forwarded Sonnet's family C (`building_permits` → `steadyapi_property_permits`) design,
+which reports vendor-data problems: 880 rows collapse under any semantic key (field-identical
+permit lines, groups up to 10 — likely per-unit HOA filings) and a vendor typo date 2282-02-14.
+All three of Sonnet's measurements re-verified live this session (floor 79,281 · 12,946/17,875
+non-empty · 0 date-pattern misses · 671 dup groups / 880 collapsed / max 10). Verdict given:
+approve the (property_id, permit_seq) ordinal key (safe under TRUNCATE+re-derive), with two
+amendments — date-window guard on any served aggregate, and a permit_seq "parse-local, never a
+durable identity" table comment. Resolves when family C ships with both amendments.
+
+## 2026-08-03 (Fable 5) — "Just get everything solid in showcase" — decree: showcase must carry every coded email
+
+Operator asked why open-house, price-reduced, back-on-market are missing from /showcase, whether
+community-trends/community-info emails are missing or waiting on the SteadyAPI runs, and decreed:
+get everything solid in showcase NOW, polish tomorrow. Known context: showcase slides are committed
+static .webp captures (capture-showcase.mjs) — adding a slide needs a built demo email + capture
+(staleness audit: _ASSISTANT/investigations/email-build-fix/28-showcase-staleness-recheck.md).
+Open until every coded builder is represented on /showcase or explicitly ruled out.
+
 ## 2026-08-03 (Fable 5) — "I DON'T CARE ABOUT RULES / DO WHAT WORKS FOR THE LEAST AMOUNT OF MONEY AND WE CAN RELY ON" — decree during Apify actor build
 
 Operator decree mid-build (playground actor `swfl-market-pulse`): optimize for CHEAPEST RELIABLE,

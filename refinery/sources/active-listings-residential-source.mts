@@ -29,6 +29,11 @@ const VIEW = "listing_active_stats";
 // price-cut depth, aggregate-at-source over the last 90 days. Listing-scope only (probed/listed
 // properties, not the full book) — see the caveat this feeds in the pack's key_metrics.
 const PRICE_CUTS_VIEW = "listing_recent_price_cuts_stats";
+// 08/03/2026 — SteadyAPI Step 3 family B (steadyapi_tax_history, see data-roots.md): vendor-
+// reported annual tax paid, NOT validated against a county tax bill yet (deferred quality
+// contract — see design spec). NEVER a valuation root; leepa_parcels/collier_parcels stay
+// assessed/market-value authority.
+const TAX_PAID_VIEW = "listing_recent_tax_paid_stats";
 
 const FIXTURE_PATH = path.join(
   process.cwd(),
@@ -54,6 +59,13 @@ export interface PriceCutStatRow {
   median_price_change: number | null;
 }
 
+export interface TaxPaidStatRow {
+  county: string | null;
+  properties_with_tax_history: number;
+  median_annual_tax: number | null;
+  max_annual_tax: number | null;
+}
+
 export interface ActiveListingsResidentialSummary {
   kind: "active-listings-residential-summary";
   region: ResidentialStatRow | null;
@@ -64,6 +76,8 @@ export interface ActiveListingsResidentialSummary {
   // Nullable: family A (steadyapi_listing_events) is a separate table from listing_active_stats —
   // a fetch failure here must never fail the whole active-listings fragment (ODD-tolerant).
   recent_price_cuts_region: PriceCutStatRow | null;
+  // Nullable: family B (steadyapi_tax_history) is likewise a separate table — ODD-tolerant.
+  recent_tax_paid_region: TaxPaidStatRow | null;
 }
 
 interface FixtureShape {
@@ -106,11 +120,27 @@ async function fetchPriceCutsRegion(): Promise<PriceCutStatRow | null> {
   }
 }
 
+async function fetchTaxPaidRegion(): Promise<TaxPaidStatRow | null> {
+  try {
+    const { data, error } = await getSupabase()
+      .schema(SCHEMA)
+      .from(TAX_PAID_VIEW)
+      .select("county, properties_with_tax_history, median_annual_tax, max_annual_tax")
+      .is("county", null)
+      .maybeSingle();
+    if (error || !data) return null;
+    return data as TaxPaidStatRow;
+  } catch {
+    return null;
+  }
+}
+
 /** Split the GROUPING SETS rows into the three grains by null-ness. */
 function summarize(
   rows: ResidentialStatRow[],
   source_url: string,
   recentPriceCutsRegion: PriceCutStatRow | null,
+  recentTaxPaidRegion: TaxPaidStatRow | null,
 ): ActiveListingsResidentialSummary {
   const region = rows.find((r) => r.county == null && r.zip_code == null) ?? null;
   const by_county = rows
@@ -133,6 +163,7 @@ function summarize(
     latest_scraped_at: latest,
     source_url,
     recent_price_cuts_region: recentPriceCutsRegion,
+    recent_tax_paid_region: recentTaxPaidRegion,
   };
 }
 
@@ -142,6 +173,7 @@ export const activeListingsResidentialSource: SourceConnector = {
   async fetch(): Promise<RawFragment[]> {
     const rows = env.source === "fixture" ? await loadFixtureRows() : await fetchLiveRows();
     const recentPriceCutsRegion = env.source === "fixture" ? null : await fetchPriceCutsRegion();
+    const recentTaxPaidRegion = env.source === "fixture" ? null : await fetchTaxPaidRegion();
     const fetched_at = isoTimestamp();
     const source_url =
       env.source === "fixture"
@@ -152,7 +184,7 @@ export const activeListingsResidentialSource: SourceConnector = {
             brain: "active-listings-swfl",
             date_col: "scraped_at",
           });
-    const summary = summarize(rows, source_url, recentPriceCutsRegion);
+    const summary = summarize(rows, source_url, recentPriceCutsRegion, recentTaxPaidRegion);
     const fragment: RawFragment<ActiveListingsResidentialSummary> = {
       fragment_id: fragmentId(SOURCE_ID, "summary"),
       source_id: SOURCE_ID,

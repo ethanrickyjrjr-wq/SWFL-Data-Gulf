@@ -127,6 +127,27 @@ function activeListingsOutputProducer(_out: PackOutput): BrainOutputProducerResu
     });
   }
 
+  // 08/03/2026 — SteadyAPI Step 3 family B (data_lake.steadyapi_tax_history, via
+  // listing_recent_tax_paid_stats). Vendor-reported, NOT validated against a county tax bill
+  // (deferred quality contract) — caveat states this explicitly, never implied as verified.
+  const taxPaid = summary.recent_tax_paid_region;
+  if (taxPaid != null && taxPaid.median_annual_tax != null) {
+    key_metrics.push({
+      metric: "median_annual_tax_swfl",
+      label: "SWFL median vendor-reported annual property tax",
+      value: taxPaid.median_annual_tax,
+      direction: "stable",
+      variable_type: "intensive",
+      units: "USD",
+      display_format: "currency",
+      source: makeSource(
+        `Median vendor-reported annual property tax across ${fmtK(taxPaid.properties_with_tax_history)} SWFL properties with tax history: ${fmtUsd(taxPaid.median_annual_tax)}`,
+        fetchedAt,
+        url,
+      ),
+    });
+  }
+
   if (region.avg_days_on_market != null) {
     key_metrics.push({
       metric: "avg_days_on_market_swfl",
@@ -229,6 +250,11 @@ function activeListingsOutputProducer(_out: PackOutput): BrainOutputProducerResu
       ...(cuts != null && cuts.properties_with_recent_cut > 0
         ? [
             "Price-cut counts cover only listings we have probed (listed/sold history), not every active listing region-wide — a per-property depth signal, not a full-book statistic.",
+          ]
+        : []),
+      ...(taxPaid != null && taxPaid.median_annual_tax != null
+        ? [
+            "Annual property tax is vendor-reported (not a county tax bill) and not yet validated against county appraiser records — treat as directional, not authoritative. Covers only properties we have probed, not the full tax roll.",
           ]
         : []),
     ],

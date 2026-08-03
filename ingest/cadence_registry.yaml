@@ -1961,6 +1961,9 @@ pipelines:
     consuming_pack: active-listings-swfl
     nightly: true
     lane: tier-2
+    raw_landing_class: paid_landed # 08/03/2026 — SteadyAPI bodies land via paid /search + /property-tax-history
+      # probes (one of the ~80 entries missing this field per the 08/02 coverage-contracts handoff;
+      # fixed here in-scope while this exact block was already being edited).
     cadence_days: 1
     tolerance_multiplier: 3.0
     freshness_table: data_lake.listing_state
@@ -2004,6 +2007,23 @@ pipelines:
     # (property_id PK, county, body jsonb, fetched_at) — latest-wins landing of the FULL vendor
     # /search item for every listing the nightly sweep returns (scan_county_api raw_items ->
     # ingest.lib.raw_landing.write_isolated). Migration: migrations/20260802_steadyapi_raw_landings.sql.
+    # FOURTH TABLE (Step 3 family A, 08/03/2026): data_lake.steadyapi_listing_events — typed
+    # per-listing event history parsed OUT of steadyapi_property_history_raw's property_history[],
+    # ZERO paid calls. 235,383 rows live 08/03/2026. Migration:
+    # migrations/20260803_steadyapi_listing_events.sql. Parser:
+    # ingest/pipelines/listing_lifecycle/parse_listing_events.py (idempotent TRUNCATE+re-derive,
+    # floor-guarded). Consumer: active-listings-swfl pack (recent_price_cuts_count_swfl metric, via
+    # data_lake.listing_recent_price_cuts_stats). Design: docs/superpowers/specs/2026-08-03-steadyapi-listing-events-design.md.
+    # FIFTH TABLE (Step 3 family B, 08/03/2026): data_lake.steadyapi_tax_history — typed per-property
+    # tax/assessment/market-value history parsed OUT of tax_history[], ZERO paid calls. 273,051 rows
+    # live 08/03/2026. NOT a valuation root, ever (leepa_parcels/collier_parcels stay authority).
+    # Migration: migrations/20260803_steadyapi_tax_history.sql. Parser:
+    # ingest/pipelines/listing_lifecycle/parse_tax_history.py. Consumer: active-listings-swfl pack
+    # (median_annual_tax_swfl metric, via data_lake.listing_recent_tax_paid_stats). Quality-registry
+    # contract (steady_tax <-> county valuation) DEFERRED — check
+    # steadyapi_tax_history_quality_contract_address_join_owed (leepa_parcels has no address column;
+    # no FDOR-side address_key normalizer exists yet). Design:
+    # docs/superpowers/specs/2026-08-03-steadyapi-tax-history-design.md.
 
   # ── Market aggregates (SteadyAPI Layer-B, realtor.com origin) ──────────────
   # RAW LANDINGS (08/02/2026 decree, all three resources): steadyapi_price_histogram_raw

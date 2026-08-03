@@ -59,6 +59,10 @@
     "label": "Fiddlesticks Country Club",
     "patterns": ["FIDDLESTICKS"]
   },
+  "forest-country-club": {
+    "label": "Forest Country Club",
+    "patterns": ["FOREST"]
+  },
   "forest-glen-golf-country-club": {
     "label": "Forest Glen Golf Country Club",
     "patterns": ["FOREST GLEN"]
@@ -131,6 +135,10 @@
     "label": "Kensington Golf Country Club",
     "patterns": ["KENSINGTON"]
   },
+  "lakewood-country-club": {
+    "label": "Lakewood Country Club",
+    "patterns": ["LAKEWOOD"]
+  },
   "legends-golf": {
     "label": "Legends Golf",
     "patterns": ["LEGENDS GOLF"]
@@ -139,9 +147,21 @@
     "label": "Lely Resort",
     "patterns": ["LELY RESORT"]
   },
+  "lexington-country-club": {
+    "label": "Lexington Country Club",
+    "patterns": ["LEXINGTON"]
+  },
+  "mediterra-golf-club": {
+    "label": "Mediterra Golf Club",
+    "patterns": ["MEDITERRA"]
+  },
   "miromar-lakes-golf-club": {
     "label": "Miromar Lakes Golf Club",
     "patterns": ["MIROMAR LAKES"]
+  },
+  "moorings-golf-and-country-club": {
+    "label": "Moorings Golf And Country Club",
+    "patterns": ["MOORINGS"]
   },
   "myerlee-country-club": {
     "label": "Myerlee Country Club",
@@ -167,6 +187,10 @@
     "label": "Palmira Golf Club",
     "patterns": ["PALMIRA"]
   },
+  "pelican-bay": {
+    "label": "Pelican Bay",
+    "patterns": ["PELICAN BAY"]
+  },
   "pelican-marsh-golf-club": {
     "label": "Pelican Marsh Golf Club",
     "patterns": ["PELICAN MARSH"]
@@ -179,6 +203,10 @@
     "label": "Pelican Sound",
     "patterns": ["PELICAN SOUND"]
   },
+  "plantation-golf-club": {
+    "label": "Plantation Golf Club",
+    "patterns": ["PLANTATION"]
+  },
   "river-hall-country-club": {
     "label": "River Hall Country Club",
     "patterns": ["RIVER HALL"]
@@ -186,6 +214,10 @@
   "rookery-golf-club": {
     "label": "Rookery Golf Club",
     "patterns": ["ROOKERY"]
+  },
+  "royal-palm-golf-club": {
+    "label": "Royal Palm Golf Club",
+    "patterns": ["ROYAL PALM"]
   },
   "royal-poinciana-golf-club": {
     "label": "Royal Poinciana Golf Club",
@@ -215,6 +247,14 @@
     "label": "Spring Run",
     "patterns": ["SPRING RUN"]
   },
+  "stonebridge-country-club": {
+    "label": "Stonebridge Country Club",
+    "patterns": ["STONEBRIDGE"]
+  },
+  "stoneybrook-golf-country-club": {
+    "label": "Stoneybrook Golf Country Club",
+    "patterns": ["STONEYBROOK"]
+  },
   "talis-park": {
     "label": "Talis Park",
     "patterns": ["TALIS PARK"]
@@ -234,6 +274,14 @@
   "treviso-bay": {
     "label": "Treviso Bay",
     "patterns": ["TREVISO BAY"]
+  },
+  "valencia-golf-and-country-club": {
+    "label": "Valencia Golf And Country Club",
+    "patterns": ["VALENCIA"]
+  },
+  "vanderbilt-country-club": {
+    "label": "Vanderbilt Country Club",
+    "patterns": ["VANDERBILT"]
   },
   "vasari-country-club": {
     "label": "Vasari Country Club",
