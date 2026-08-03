@@ -14,7 +14,7 @@ import { ShowcaseOverlay } from "@/components/showcase/ShowcaseOverlay";
 /** One-line explainer per campaign, shown above its card on the /showcase page. */
 const SECTION_INTRO: Record<string, string> = {
   "listing-to-close":
-    "Every stage a listing goes through, end to end — five emails, one property, real data at every step.",
+    "Every stage a listing goes through, end to end — seven emails, real data at every step.",
   "launch-blitz":
     "One listing launch, cut for email and every social format at once — same real numbers everywhere.",
   "agent-launch":

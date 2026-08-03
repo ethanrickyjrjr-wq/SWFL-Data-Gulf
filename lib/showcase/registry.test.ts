@@ -26,10 +26,11 @@ describe("showcase registry", () => {
     }
   });
 
-  it("2-6 content slides, non-empty captions, disclosure present", () => {
+  it("2-7 content slides, non-empty captions, disclosure present", () => {
     for (const s of SHOWCASES) {
       expect(s.slides.length).toBeGreaterThanOrEqual(2);
-      expect(s.slides.length).toBeLessThanOrEqual(6);
+      // 7 = the full listing lifecycle (open-house + price-improved joined 08/03/2026).
+      expect(s.slides.length).toBeLessThanOrEqual(7);
       expect(s.disclosure.length).toBeGreaterThan(20);
       for (const sl of s.slides) {
         expect(sl.title.length).toBeGreaterThan(0);

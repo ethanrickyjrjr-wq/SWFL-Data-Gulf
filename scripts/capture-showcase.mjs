@@ -26,6 +26,10 @@ const SHOWCASES = [
       "03-comps.html",
       "04-pending.html",
       "05-sold.html",
+      // Appended (08/03/2026) — file→step mapping is positional, so new files go LAST to
+      // keep committed step-1..5 assets stable. NARRATIVE order lives in registry.ts only.
+      "06-open-house.html",
+      "07-price-reduced.html",
     ],
   },
   {

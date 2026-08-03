@@ -1,3 +1,13 @@
+## 2026-08-03 (Fable 5) — "why are you fucking fanning out???? fucking maek sure you build them and take fucking notes!!!"
+
+Raised the moment I dispatched a subagent to implement showcase Task 2. The plan file said "use
+subagent-driven-development" — the operator's live decree overrides it: BUILD IT YOURSELF, IN
+SESSION, and TAKE NOTES as you go (ledger + investigations files). Fanning out plan execution to
+implementer subagents reads as evasion, not efficiency (RULE 0.6 already said this: do bounded
+work yourself). Subagents stay reserved for scale one context genuinely can't hold — not for
+"the plan template recommends it." Notes discipline: append findings/decisions to
+.superpowers/sdd/<plan>/progress.md + _ASSISTANT/investigations/ as the work happens, not after.
+
 ## 2026-08-03 (Opus 5) — "what is going on with all of this?" (GitHub Dependabot page, SWFL-Data-Gulf)
 
 NINE OPEN ALERTS, ONE PACKAGE, ONE VERSION BUMP — AND THE ROBOT THAT WAS SUPPOSED TO FIX IT

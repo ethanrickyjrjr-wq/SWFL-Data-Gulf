@@ -96,7 +96,7 @@ export const SHOWCASES: Showcase[] = [
     id: "listing-to-close",
     company: "Latitude 26 Estates · Naples",
     title: "Listing → Close: The Auto Email Plan",
-    hook: "Five emails carry one $14.8M listing from teaser to sold — every number sourced.",
+    hook: "Seven emails carry a $14.8M listing from teaser to sold — every number sourced.",
     campaign: {
       key: "new-listing",
       label: "New Listing Campaign",
@@ -114,7 +114,7 @@ export const SHOWCASES: Showcase[] = [
     thumb: "/showcase/listing-to-close/thumb.webp",
     surfaces: ["email"],
     disclosure:
-      "Demonstration campaign — Latitude 26 Estates and its agent are fictional. The property, comp, and market data are real — SWFL Data Gulf (07/01/2026).",
+      "Demonstration campaign — Latitude 26 Estates and its agent are fictional. The property, comp, and market data are real — SWFL Data Gulf (07/01/2026; Open House and Price Improved built 08/03/2026, the latter on a second real Naples listing with a price cut on record).",
     slides: [
       {
         image: "/showcase/listing-to-close/step-1.webp",
@@ -137,6 +137,16 @@ export const SHOWCASES: Showcase[] = [
         recipe: RECIPES["new-listing"],
       },
       {
+        image: "/showcase/listing-to-close/step-6.webp",
+        title: "Open House",
+        whatsHappening:
+          "The in-person moment: the date and time the agent declares sit up front, the home's key specs beside them, one RSVP ask.",
+        howAiHandled:
+          "Kept the invitation about the house and the moment — specs straight from the live listing record, the bath count filled from a second property-records lane, no chart, a single CTA.",
+        liveHref: "/showcase/listing-to-close/live/06-open-house.html",
+        recipe: RECIPES["open-house"],
+      },
+      {
         image: "/showcase/listing-to-close/step-3.webp",
         title: "Market Comps",
         whatsHappening:
@@ -146,6 +156,16 @@ export const SHOWCASES: Showcase[] = [
         liveHref: "/showcase/listing-to-close/live/03-comps.html",
         receipt: "Numbers, not adjectives — every figure traces to the listing feed snapshot.",
         recipe: RECIPES["market-comps"],
+      },
+      {
+        image: "/showcase/listing-to-close/step-7.webp",
+        title: "Price Improved",
+        whatsHappening:
+          "The reset, stated honestly — on a second real Naples estate with a cut on record: the cut above the new price, and the previous price anchored so a reader can check the math.",
+        howAiHandled:
+          "Read the $755,000 cut from the listing record, derived the previous price from the vendor's own two numbers, and plotted the new price per square foot against real nearby comparable homes — no invented reason the price moved.",
+        liveHref: "/showcase/listing-to-close/live/07-price-reduced.html",
+        recipe: RECIPES["price-reduced"],
       },
       {
         image: "/showcase/listing-to-close/step-4.webp",
