@@ -1,3 +1,32 @@
+## 2026-08-03 (Sonnet 5) — market-comps quality pass: real comp thumbnails, subject-not-its-own-comp fix, stale-sale filter
+
+crawl4ai research (4-agent fan-out) on real-estate email best practices filed at
+`_RESEARCH/email-and-social/2026-08-03-strongest-real-estate-email-concepts-structure.md`. Built
+`lib/deliverable/recipes/subject-lines.ts` (deterministic, no LLM, distilled from that research) and
+wired it into new-listing/market-comps/price-reduced/market-pulse — a parallel session committed
+that half already (`d0f55e5b`). Proved a real market-comps build+send end to end via Resend
+(hello@swfldatagulf.com and ethanrickyjrjr@gmail.com — hello@'s inbound routing is unconfirmed;
+Cloudflare Email Routing MX records need a per-address rule or catch-all, never independently
+verified this session).
+
+Operator caught it looking bad in the actual sent email and two real data bugs in the comps
+themselves: (1) the subject's OWN address was appearing as its own "comparable" (16447 Rainbow
+Meadows Ct citing its own 2017 sale) — fixed with `isNotSubjectAddress()`, normalized street-line
+exclusion; (2) a comp sale 14 months old was being used as evidence — fixed with `isFreshSale()`,
+365-day cutoff on `priceKind === "sold"` rows only (valuations/AVM `estimateDate` never touched,
+per `docs/standards/data-roots.md` T9's rule against treating a vendor AVM date as a sale date).
+Also shipped: real Mapbox aerial thumbnails per comp row (`ListItem.imageUrl`/`imageAlt`, new
+optional schema fields, threaded through all three render engines — `ListBlock.tsx` shared by both
+email engines, `email-doc-pdf.tsx` separately) — geocoded off each comp's real address, never
+invented. Real subject photo now resolves too (switched off a photo-less test address).
+
+**Still open, not fixed:** brand accent color doesn't carry through a branded seed doc into the
+authored result (ships the recipe's `#B98F45` fallback instead of the operator's real `#3DC9C0`) —
+traced partway, not root-caused. Full handoff with everything already ruled out:
+`docs/superpowers/specs/2026-08-03-market-comps-thumbnail-brand-handoff.md`. Also flagged, not
+decided: `lee_comp_sales_v` (data-roots.md T9/T10) is a separate, more rigorous comp root with real
+measured recency stats that `market-comps.ts` does not currently use.
+
 ## 2026-08-03 (Sonnet 5) — listings-showcase round 2: found + fixed a real vendor-parsing bug (model names shown as addresses) and a still-repeating body sentence
 
 Operator caught two more real defects in the third proof send (screenshots): the bold headline

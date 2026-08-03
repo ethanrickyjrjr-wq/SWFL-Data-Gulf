@@ -84,6 +84,8 @@
 // slot — the code-authored verdict still ships, because it is true by construction.
 
 import { compSources, compsForAddress, type RenderComp } from "@/lib/assistant/comp-helper";
+import { geocodeAddress } from "@/lib/geo/geocode-address";
+import { aerialUrl } from "@/lib/listings/aerial";
 import { formatSoldSpell } from "@/lib/listings/dom";
 import {
   auditClaims,
@@ -139,6 +141,38 @@ function num(s?: string): number | null {
 
 const usd = (n: number) => "$" + Math.round(n).toLocaleString("en-US");
 
+/** THE SUBJECT IS NOT ITS OWN COMP. Normalized street-line exact match only (house
+ *  number + street name, city/state/zip stripped) — never a fuzzy/partial match that
+ *  could wrongly drop a real, different nearby home (e.g. two houses sharing a
+ *  street name in different cities). A miss on `subjectAddress` never excludes
+ *  anything — the caller decides what to do with an unresolved subject. */
+export function isNotSubjectAddress(c: RenderComp, subjectAddress: string | undefined): boolean {
+  const norm = (s: string) =>
+    s
+      .toLowerCase()
+      .replace(/[^a-z0-9]+/g, " ")
+      .trim();
+  const subj = norm((subjectAddress ?? "").split(",")[0] ?? "");
+  if (!subj) return true;
+  return norm(c.addressLine) !== subj;
+}
+
+/** THE MAX AGE for a recorded sale to still count as evidence for TODAY's asking
+ *  price. Operator decree, 08/03/2026: "comps can't be from more than 6 months to a
+ *  year ago." Only touches `priceKind === "sold"` rows with a real date — a
+ *  valuation/estimate carries no sale to go stale on, and a sale with no date on
+ *  record can't be judged, so neither is dropped by this filter. */
+const MAX_SOLD_AGE_DAYS = 365;
+
+export function isFreshSale(c: RenderComp, now: Date): boolean {
+  if (c.priceKind !== "sold") return true;
+  if (!c.priceDate) return true;
+  const soldMs = Date.parse(c.priceDate);
+  if (!Number.isFinite(soldMs)) return true;
+  const ageDays = (now.getTime() - soldMs) / 86_400_000;
+  return ageDays <= MAX_SOLD_AGE_DAYS;
+}
+
 /** "2026-06-08" → "06/08/2026" (house rule: MM/DD/YYYY, never the raw token). */
 function mdy(iso: string | null): string | undefined {
   const m = /^(\d{4})-(\d{2})-(\d{2})/.exec(iso ?? "");
@@ -171,7 +205,38 @@ function priceKindPhrase(c: RenderComp): string {
  *  This one is the evidence table: $/sq ft is the whole argument, so it must be on the
  *  row. Two different rows for two different jobs. If R5 (Just Sold) ends up needing
  *  THIS row too, that is copy #2 and it should be extracted into sold-comp-blocks.ts. */
-function compRow(c: RenderComp): ListItem {
+/** Geocode every comp's address and build a REAL Mapbox aerial thumbnail per comp —
+ *  the licensed-NOW visual `lib/listings/aerial.ts` already uses as the property-photo
+ *  fallback elsewhere in the product (never invented; a satellite image of the actual
+ *  parcel, captioned as an aerial). Best-effort per comp: a geocode miss or a missing
+ *  MAPBOX_TOKEN just means that ONE row ships with no thumbnail (open-slot pattern,
+ *  RULE 0.7) — it never blocks or degrades the rest of the build. Keyed on addressLine
+ *  since RenderComp carries no stable id. */
+export async function resolveCompThumbnails(comps: RenderComp[]): Promise<Map<string, string>> {
+  const out = new Map<string, string>();
+  await Promise.all(
+    comps.map(async (c) => {
+      try {
+        const geo = await geocodeAddress(`${c.addressLine}, ${c.city}`);
+        if (!geo) return;
+        const url = aerialUrl({
+          lat: geo.lat,
+          lon: geo.lon,
+          zoom: 17,
+          width: 112,
+          height: 112,
+          marker: false,
+        });
+        if (url) out.set(c.addressLine, url);
+      } catch {
+        // Best-effort — a thumbnail miss is an open slot, never a build failure.
+      }
+    }),
+  );
+  return out;
+}
+
+function compRow(c: RenderComp, thumbUrl?: string): ListItem {
   const ppsf = perSqft(c.price, c.sqft);
   const lead = [usd(c.price as number), ppsf ? `${usd(ppsf)}/sq ft` : ""]
     .filter(Boolean)
@@ -188,6 +253,7 @@ function compRow(c: RenderComp): ListItem {
     lead: lead.slice(0, 40),
     text: text.slice(0, 200),
     ...(c.sourceUrl ? { linkUrl: c.sourceUrl } : {}),
+    ...(thumbUrl ? { imageUrl: thumbUrl, imageAlt: `Aerial view of ${c.addressLine}` } : {}),
   };
 }
 
@@ -298,7 +364,10 @@ function sized(block: Omit<EmailBlock, "layout">, h: number): ChromeBlock {
  * box is worse than no chart). The table is omitted entirely when there is nothing real to
  * list: a `list` needs >= 1 row, and an empty shell is not a slot, it is a lie.
  */
-function compsMiddle(comps: RenderComp[]): ChromeBlock[] {
+function compsMiddle(
+  comps: RenderComp[],
+  thumbnails: Map<string, string> = new Map(),
+): ChromeBlock[] {
   const blocks: ChromeBlock[] = [
     sized(
       {
@@ -320,7 +389,10 @@ function compsMiddle(comps: RenderComp[]): ChromeBlock[] {
         {
           id: createBlock("list").id,
           type: "list",
-          props: { title: mixTitle(comps), items: comps.map(compRow) },
+          props: {
+            title: mixTitle(comps),
+            items: comps.map((c) => compRow(c, thumbnails.get(c.addressLine))),
+          },
         },
         Math.max(4, comps.length + 2),
       ),
@@ -362,6 +434,7 @@ export function buildCompsGrid(
   facts: ListingFacts,
   comps: RenderComp[],
   current: EmailDoc,
+  thumbnails: Map<string, string> = new Map(),
 ): EmailDoc {
   const doc = buildLifecycleEmail(current, {
     ribbon: "Market Comps",
@@ -379,7 +452,7 @@ export function buildCompsGrid(
     heroLabel: addressLineOf(facts),
     specs: compsSpecs(facts, comps),
     specFootnote: compsFootnote(facts, comps),
-    middle: compsMiddle(comps),
+    middle: compsMiddle(comps, thumbnails),
     // EMPTY — the narrator fills it (fillNarrative). Unwritten → an open slot.
     narrative: "",
     tail: compsTail(comps),
@@ -1062,9 +1135,27 @@ export async function buildMarketComps(ctx: RecipeBuildContext): Promise<EmailDo
 
   // *** THE LAND FILTER. *** By DATA, never by name. Nearest-first order is the
   // vendor's own; we keep it and take the first MAX_COMPS real homes.
-  const comps = (result?.comps ?? []).filter(isComparableHome).slice(0, MAX_COMPS);
+  //
+  // *** THE SUBJECT-IS-NOT-ITS-OWN-COMP FILTER *** and *** THE STALE-SALE FILTER ***
+  // (both operator-flagged live, 08/03/2026): the vendor's nearby-values feed can
+  // return the subject house itself in the candidate set (16447 Rainbow Meadows Ct
+  // shipped as a "comparable" of itself, citing its own 2017 sale) — normalized
+  // street-line exact match only, never fuzzy. And a recorded sale used to defend
+  // TODAY's asking price has to actually be recent: "can't be from more than 6
+  // months to a year ago" — a sale carrying no date, or a valuation (no sale date to
+  // go stale on), is never dropped by this filter; only an OLD RECORDED SALE is.
+  const now = new Date();
+  const comps = (result?.comps ?? [])
+    .filter(isComparableHome)
+    .filter((c) => isNotSubjectAddress(c, facts.address))
+    .filter((c) => isFreshSale(c, now))
+    .slice(0, MAX_COMPS);
 
-  let doc = buildCompsGrid(facts, comps, currentDoc);
+  // A REAL Mapbox aerial thumbnail per comp — the same licensed-NOW visual the platform
+  // already uses as a listing-photo fallback (lib/listings/aerial.ts), never invented.
+  // Best-effort: a geocode miss just leaves that one row without a thumbnail.
+  const thumbnails = await resolveCompThumbnails(comps);
+  let doc = buildCompsGrid(facts, comps, currentDoc, thumbnails);
 
   // ── THE CHART. This deliverable IS about a number, so it earns one — and the
   // SUBJECT IS ITS OWN BAR (we hold its list price). buildSoldCompsSpec already puts

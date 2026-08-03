@@ -3,7 +3,7 @@
 // Email-safe: rows are a real <table> (no <ul> — bullet spacing is uneven across
 // clients). `lead` is a short bold prefix cell (a date tag, a rank); rows with no
 // lead span the full width. Renders nothing when items is empty.
-import { Section, Text, Link } from "@react-email/components";
+import { Section, Text, Link, Img } from "@react-email/components";
 import type { EmailGlobalStyle, ListProps } from "../doc/types";
 import { fontStack, sectionPad, CARD_BG, BORDER } from "./styles";
 import { isDarkBg, legibleAccent, legibleInk, ON_DARK_BODY, ON_DARK_TITLE } from "./on-dark";
@@ -52,6 +52,32 @@ export function ListBlock({
         <tbody>
           {items.map((item, i) => (
             <tr key={i}>
+              {item.imageUrl ? (
+                <td
+                  style={{
+                    width: 56,
+                    padding: space(TABLE_ROW_PAD, 10, TABLE_ROW_PAD, 0),
+                    verticalAlign: "top",
+                  }}
+                >
+                  {/* Fixed HTML width/height (not CSS-only) — Outlook desktop ignores
+                      CSS-only image sizing and renders at native pixel dimensions
+                      (docs/standards/emails.md render-constraints research, 08/03/2026). */}
+                  <Img
+                    src={item.imageUrl}
+                    alt={item.imageAlt ?? ""}
+                    width={56}
+                    height={56}
+                    style={{
+                      width: 56,
+                      height: 56,
+                      borderRadius: 4,
+                      display: "block",
+                      objectFit: "cover",
+                    }}
+                  />
+                </td>
+              ) : null}
               {item.lead ? (
                 <td
                   style={{

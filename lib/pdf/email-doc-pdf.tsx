@@ -722,7 +722,16 @@ function PdfBlock({ block, gs }: { block: EmailBlock; gs: EmailGlobalStyle }) {
             </Text>
           ) : null}
           {items.map((item, i) => (
-            <View key={i} style={{ flexDirection: "row", marginBottom: 4 }}>
+            <View
+              key={i}
+              style={{ flexDirection: "row", marginBottom: 4, alignItems: "flex-start" }}
+            >
+              {item.imageUrl ? (
+                <Image
+                  src={item.imageUrl}
+                  style={{ width: 28, height: 28, borderRadius: 2, marginRight: 8 }}
+                />
+              ) : null}
               {item.lead ? (
                 <Text
                   style={{

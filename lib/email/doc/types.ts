@@ -234,6 +234,12 @@ export interface ListItem {
   /** Optional row click-through ("View →"). USER/ENGINE-owned like every link
    *  field — no AI patch path exists for list items' linkUrl. */
   linkUrl?: string;
+  /** Optional row thumbnail, rendered to the LEFT of lead/text (e.g. a comp's
+   *  Mapbox aerial — a REAL, sourced image of the parcel, never invented).
+   *  ENGINE-owned like linkUrl — no AI patch path. Absent → no image cell, the
+   *  row falls back to its lead/text-only layout. */
+  imageUrl?: string;
+  imageAlt?: string;
 }
 
 /** A titled row list — events, tips, links-as-text. Renders as email-safe table

@@ -192,6 +192,8 @@ const ListItemSchema = z.object({
   lead: z.string().max(40).optional(),
   text: z.string().max(200),
   linkUrl: z.string().optional(),
+  imageUrl: z.string().optional(),
+  imageAlt: z.string().max(120).optional(),
 });
 
 const ListPropsSchema = z.object({
