@@ -1,3 +1,65 @@
+## 2026-08-03 (Sonnet 5) — new recipe "listings-showcase" distilled from a real Zillow email, built + sent live twice; a real hero-value schema bug found and fixed mid-flight
+
+Operator: crawl4ai a real estate email that looks great and is genuinely different from ours,
+bring it in-house as a coded recipe, prove the builder can build AND send it to
+hello@swfldatagulf.com. Live operator correction mid-session: "why are you fucking fanning
+out???? ... BUILD IT YOURSELF" (SCRATCHPAD.md) — built entirely in-session, no subagent dispatch
+for the implementation.
+
+**Found:** crawl4ai + WebSearch → reallygoodemails.com's real-estate category → Zillow's live send
+"3 applause-worthy homes" (reallygoodemails.com/emails/3-applause-worthy-homes). RGE serves the
+capture as a screenshot, not raw HTML — read directly via vision (no paid API). Structure
+distilled (deliverable-distiller skill, Step 3 — arrangement only, never source copy/images/
+brand): a repeating PHOTO -> one bold editorial hook -> one CTA card, ×3, with **no price/beds/
+baths/sqft spec sheet anywhere** — genuinely different from every existing recipe (all seven
+lifecycle recipes + market-comps/price-reduced lead with a spec strip or a chart).
+
+**Built:** new `RecipeKey` "listings-showcase" (`lib/deliverable/recipes.ts` + `index.ts`) and its
+builder `lib/deliverable/recipes/listings-showcase.ts`. Reuses `loadListingContext`
+(`lib/listings/select.ts`) — the same lake-first active-listing feed agent-brand-intro/coming-soon
+already trust — for real Cape Coral (33914) listings with real MLS photos. Every "why" hook is
+CODE-COMPUTED from real per-listing fields (new-construction flag, lot size ≥0.5ac, condo/
+townhouse type, a real price cut, days-on-market ≤7), priority-ordered with a distinct-category
+preference across the picks, never an LLM-invented vibe; a listing with no qualifying field gets
+an honest generic fallback built only from its own beds/baths/sqft. No ZIP named -> null (falls to
+default-grid, back-on-market's own precedent); zero listings with a real photo -> null too
+(RULE 0.7, never an invented or photo-less card).
+
+**Real bug found + fixed:** first live build attempt SILENTLY fell back to the generic author —
+the recipe's hero `value` ("Homes worth a second look", 26 chars) overflowed `HeroPropsSchema`'s
+flat 24-char cap (`lib/email/doc/schema.ts`), exactly the "recipe fails validation -> falls back
+invisibly" class already documented in `docs/standards/emails.md` §7. Operator decree on the fix:
+"Change the cap" -> "Or make a numbers cap and a word cap that is larger" — replaced the flat cap
+with `heroValue()`: a numeric-looking hero value (`$495,000`, `3.2%`) still holds to 24 chars
+(keeps the biggest figure on the page punchy); a words headline gets 40. Applied to both
+`HeroPropsSchema.value` and the AI-fill `BlockContentPatchSchema.value` (the same field, two entry
+points) — `StatItemSchema`/`StatPatchSchema`'s own separate `value` fields (stat cells, a different
+use case) are untouched.
+
+**Verified live, pasted evidence:**
+- `bun test lib/deliverable/recipes/listings-showcase.test.ts` — 8/8 pass (pure `assignHighlights`
+  distinct-category + fallback + real-price-cut cases; builder FM1–FM4 null/photo/dedup guards).
+- `bun test lib/email lib/deliverable lib/listings` — 2817/2817 pass (no regression from the
+  schema-cap change).
+- `bunx next build` — exit 0, clean, both before and after the schema fix.
+- **Two real sends via the actual product path** (`authorDoc({recipeKey:"listings-showcase"})` ->
+  `EmailDocSchema` -> `renderEmailDocHtml` -> `collectAllowedUrls`/`lintCompiledHtml` url-lint ->
+  Resend), both to `hello@swfldatagulf.com`: first send (pre-fix, short "Worth a Look" hero copy)
+  resend id `74378496-1fe2-47a1-9a09-e7d7f0bb3e6f`; final send (post-fix, full "Homes Worth a
+  Second Look" hero) resend id `9bd03fa6-b993-4a9f-bd8f-1a31fdccff6a` — 13 real blocks: header,
+  hero, intro text, then 3× (image w/ real realtor.com CDN photo -> signal "What we love" hook ->
+  button), footer. Zero `stats`/`listing` blocks in either send — confirmed no spec sheet shipped.
+
+**Local-only, never committed** (`.gitignore:135` `scripts/email/tmp-*.mts`):
+`scripts/email/tmp-listings-showcase-send.mts` — the proof-send script, mirrors
+`tmp-rainbow-recipe-send.mts`'s blast-route parity (url-lint, house-brand tokens); supports
+`NO_SEND=1` to dump rendered HTML without sending.
+
+**Not yet done:** no showcase-page story for this recipe (community-info/back-on-market got one
+same-day; this recipe didn't — operator didn't ask for it this round). Lake data quality aside,
+not mine to fix here: one real listing's `street_address` renders as "Kismetpkwyw" (a real
+un-spaced vendor string) — cosmetic, visible in the sent proof, not introduced by this build.
+
 ## 2026-08-03 (Fable 5) — showcase-complete SHIPPED with an operator design round mid-flight (4/4 tasks + 5-gripe fix wave)
 
 Plan docs/superpowers/plans/2026-08-03-showcase-complete.md executed in-session (operator decree:

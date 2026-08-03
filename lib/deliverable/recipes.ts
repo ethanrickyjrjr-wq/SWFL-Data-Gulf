@@ -72,6 +72,10 @@ export const RECIPE_KEYS = [
   // The first recipe over the neighborhood lane (steadyapi_* + google_maps_amenities
   // roots, landed 08/03/2026) — a named vendor neighborhood, not a ZIP.
   "community-info",
+  // Distilled from a real Zillow send ("3 applause-worthy homes", reallygoodemails.com,
+  // found 08/03/2026) — a repeating photo→one-real-reason→CTA card, NO price/spec sheet.
+  // Genuinely different structure from the lifecycle 7: multiple real homes, not one.
+  "listings-showcase",
   // The terminal fallback — every keyless/typed ask lands here (one-lane collapse,
   // spec 2026-08-02). A coded grid with open slots; NEVER free-form layout.
   "default-grid",
@@ -375,6 +379,23 @@ export const RECIPES: Record<RecipeKey, Recipe> = {
       "Build a community-info email for [[your neighborhood or community]] — where it sits, " +
       "how it scores for walking, parks and quiet, what's nearby to eat and do, and typical " +
       "home values, every figure cited.",
+    needs: ["agent_name", "brokerage", "business_address"],
+  },
+  "listings-showcase": {
+    key: "listings-showcase",
+    positioning: "story-side",
+    label: "Listings Showcase",
+    // The builder composes its own repeating card row directly (back-on-market /
+    // community-info precedent) — a variable-length real-listing set has no fixed grid.
+    skeleton: null,
+    prose: null,
+    subject: "area",
+    // The photo IS the argument; no chart replaces a real home you can look at.
+    chart: "none",
+    prompt:
+      "Build a listings-showcase email for [[your city or ZIP]] — a few real homes " +
+      "currently for sale nearby, each with a photo and one honest reason it stands " +
+      "out, no price or spec sheet, just a real reason to look twice.",
     needs: ["agent_name", "brokerage", "business_address"],
   },
   "back-on-market": {

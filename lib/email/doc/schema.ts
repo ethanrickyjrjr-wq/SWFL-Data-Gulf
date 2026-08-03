@@ -58,6 +58,25 @@ const sectionBg = () => z.string().optional();
  *  writes message content; the code decides how the document LOOKS. */
 const align = () => z.enum(["left", "center", "right"]).optional();
 
+// Hero `value` renders at the biggest type on the page (64px, scale.ts) — a
+// punchy NUMBER ("$495,000", "3.2%") stays short by design; a WORDS headline
+// ("Worth a Look") earns more room since it's still one short phrase, never a
+// sentence. Two caps, not one flat number (operator decree 08/03/2026, after a
+// 26-char words headline overflowed the old flat 24 and silently fell back to
+// the generic author instead of failing loudly).
+const HERO_VALUE_MAX_NUMERIC = 24;
+const HERO_VALUE_MAX_WORDS = 40;
+const HERO_VALUE_NUMERIC_RE = /^[\s$0-9,.%+\-–]+$/;
+const heroValue = () =>
+  z
+    .string()
+    .max(HERO_VALUE_MAX_WORDS)
+    .refine(
+      (v) => !HERO_VALUE_NUMERIC_RE.test(v) || v.length <= HERO_VALUE_MAX_NUMERIC,
+      `A numeric hero value must be ${HERO_VALUE_MAX_NUMERIC} characters or fewer — keep the biggest figure on the page punchy.`,
+    )
+    .optional();
+
 // ── Per-block prop schemas ──────────────────────────────────────────────────
 // `satisfies z.ZodType<…>` ties each schema to its interface in ./types.ts so a
 // renamed/dropped field is caught at build time. Field lists are kept in lock-
@@ -73,7 +92,7 @@ const HeaderPropsSchema = z.object({
 
 const HeroPropsSchema = z.object({
   kicker: z.string().max(60).optional(),
-  value: z.string().max(24).optional(),
+  value: heroValue(),
   label: z.string().max(80).optional(),
   prose: z.string().max(500).optional(),
   linkUrl: z.string().optional(),
@@ -400,7 +419,7 @@ const StatPatchSchema = z.object({
 
 export const BlockContentPatchSchema = z.object({
   kicker: z.string().max(60).optional(),
-  value: z.string().max(24).optional(),
+  value: heroValue(),
   label: z.string().max(80).optional(),
   prose: z.string().max(500).optional(),
   title: z.string().max(120).optional(),
