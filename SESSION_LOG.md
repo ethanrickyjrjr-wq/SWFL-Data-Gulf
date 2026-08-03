@@ -46,8 +46,25 @@ photo URL and drops any card whose photo host is `api.mapbox.com` — a guard ag
 today's aerial-views complaint through the same field. v1 cuts stated explicitly: baths, a `sold`
 category (needs the deed/LEEPA lanes per data-roots), the ZIP stats header.
 
-Checks this push: 2 opened (`listings_digest_grid_live_verify` via `scripts/new-build.mjs`,
-`zip_scope_resolves_to_county_anchor_city`), **0 closed** — nothing was implemented to close.
+**PUSH GATE UNBLOCKED (not my drift, recorded not silenced).** Gate 7 blocked the push on ONE red:
+`neighborhood_amenities` sits in `not_yet_running:`/parked while
+`.github/workflows/neighborhood-amenities-daily.yml` fires daily at 09:30 UTC — so
+`check_freshness.py` never probes a LIVE cron and a silent failure of it is invisible
+(ZERO_COVERAGE). Gate 7 only fired at all because a parallel session's commit ahead of upstream
+touched a workflow file. The entry's own comment shows the parked state is deliberate ("move to
+`pipelines:` after the first clean scheduled fire"), so this took the gate's sanctioned third
+path: opened check `neighborhood_amenities_parked_but_cron_live` and added
+`known_drift: [{rule: parked_but_scheduled, check: …}]` to the entry. **Nothing about what runs
+changed** — `cadence_days`/`workflow` untouched; `applyKnownDrift` already consumes that field.
+Checker went 1 → 0. Close it by graduating the entry, not by deleting the check.
+
+Checks this push: **3 opened** (`listings_digest_grid_live_verify` via `scripts/new-build.mjs`,
+`zip_scope_resolves_to_county_anchor_city`, `neighborhood_amenities_parked_but_cron_live`),
+**0 closed** — nothing was implemented to close.
+
+**Carried, not mine:** this push also carries 3 commits a parallel session left ahead of upstream
+(`80079040`, `8c66854a`, `c1305145` — the aerial-views deletion + three CI reds). Flagged to the
+operator before pushing; he said push all.
 
 ## 2026-08-03 (Opus 5) — AERIALS DELETED PLATFORM-WIDE (operator decree, 2nd time raised) + the comp-photo gap measured, not hand-waved
 

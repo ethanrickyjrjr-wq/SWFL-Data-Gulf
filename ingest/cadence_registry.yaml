@@ -2170,6 +2170,15 @@ not_yet_running:
     lane: tier-2
     cadence_days: 1
     tolerance_multiplier: 2.0
+    # Parked while its cron is ALREADY LIVE — the deliberate graduation window the
+    # comment above describes ("move to pipelines: after the first clean scheduled
+    # fire"). Recorded rather than silenced: check_freshness.py does not probe a
+    # parked entry, so a failure of this live daily cron is currently invisible.
+    # Close the check by graduating the entry to `pipelines:` (freshness_table +
+    # expected_rows_min) and deleting this block. Nothing here changes what runs.
+    known_drift:
+      - rule: parked_but_scheduled
+        check: neighborhood_amenities_parked_but_cron_live
     source_scope:
       confirmed_total:
         summary: "Per vendor call (propertyId is the ONLY input; radius vendor-fixed 5mi): named neighborhood w/ slug_id + centroid + GeoJSON boundary polygon; 12 location scores (Walking/Cycling/Transit/Driving/Groceries/Shopping/Nightlife/Restaurants/Cafes/Daycares/Quiet/Vibrant); nearby businesses across up-to-31 categories (golf, countryclubs, grocery, cafes, preschools, ...) each w/ name/phone/rating/reviews_count/lat-lon/distance. Property->neighborhood assignment persisted for every resolved property."
