@@ -14,6 +14,14 @@ Handoff written for the executing session: docs/superpowers/handoffs/2026-08-03-
 (live state, both traps — {meta,body} envelope + permits human-date — field inventory, locked
 authority design, per-PR ship discipline, first-hour plan for family A).
 
+## 2026-08-03 (Fable 5) — Gate 11 cleanup: cre_figures raw_landing_class filled (free_refetchable, derived-table reasoning inline)
+
+The parallel session's cre_figures registration (1b9d3281) predated Gate 11's raw_landing_class
+requirement and blocked this session's push. Filled it honestly (derived table → raw store is our
+own lake → free_refetchable, dated comment inline; baseline add attempted then reverted — the
+ratchet only shrinks, correct behavior). Handoff taxonomy predates derived tables — reclassify if
+a derived class is added. NEXT: still pending live x-vercel-cache HIT proof post-deploy.
+
 ## 2026-08-03 (Fable 5) — /api/b edge-cache shipped (Apify Actor lane); rate cap proven live; playground Actor deployed
 
 Apify session (operator: "PLAY AROUND... BUILD" → "get it done so we cache and have a rate cap").
