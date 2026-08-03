@@ -87,6 +87,8 @@ function itemText(item: ProjectItem): string {
     case "address":
       // A known listing address is scope-bearing — the place/ZIP inference reads it.
       return item.address;
+    case "user_figure":
+      return `${item.label} ${item.value}`;
   }
 }
 

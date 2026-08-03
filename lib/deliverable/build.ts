@@ -298,6 +298,10 @@ export function renderItem(item: SnapshotItem, n: number): string {
       return `[${n}] FILE — ${item.caption ?? item.storage_path} (pdf, content not available)`;
     case "address":
       return `[${n}] ADDRESS — ${item.address}`;
+    case "user_figure":
+      // Lane-4 provenance travels with the binding (spec 2026-08-03 §5): the
+      // narrative may quote this ONLY as a figure the user stated.
+      return `[${n}] USER FIGURE (stated by the user${item.as_of ? `, as of ${item.as_of}` : ""}) — ${item.label}: ${item.value}${item.unit ? ` ${item.unit}` : ""}`;
   }
 }
 

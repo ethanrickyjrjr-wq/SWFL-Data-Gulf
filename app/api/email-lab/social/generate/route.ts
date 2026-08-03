@@ -8,6 +8,7 @@ import { NextResponse, type NextRequest } from "next/server";
 import { buildSocialCanvasFill } from "@/lib/email/social-calendar/build-canvas-fill";
 import { authorSocialPost } from "@/lib/social/design/author";
 import { loadProjectUploadsText } from "@/lib/project/uploads-text";
+import { loadUserDataText } from "@/lib/project/user-data-feed";
 import { isSocialFormat } from "@/lib/social/formats";
 import type { BuildScope } from "@/lib/email/build-doc";
 import type { Platform } from "@/lib/social/types";
@@ -34,7 +35,11 @@ export async function POST(req: NextRequest) {
         ? (body.branding as Record<string, string>)
         : undefined;
     // Equal-source: the project's uploaded files ride alongside the lake + web feed.
-    const filesText = projectId ? await loadProjectUploadsText(projectId) : undefined;
+    // Typed lane (spec 2026-08-03): user listings + stated figures join the blob
+    // lane's text, each block carrying its origin.
+    const uploadsText = projectId ? await loadProjectUploadsText(projectId) : undefined;
+    const userDataText = projectId ? await loadUserDataText(projectId) : undefined;
+    const filesText = [uploadsText, userDataText].filter(Boolean).join("\n\n") || undefined;
     const result = await authorSocialPost(scope, prompt, {
       branding,
       format,

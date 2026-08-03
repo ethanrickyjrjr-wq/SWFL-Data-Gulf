@@ -16,6 +16,7 @@ const KIND_LABEL: Record<ProjectItem["kind"], string> = {
   file: "Files",
   frame: "Live frames",
   address: "Addresses",
+  user_figure: "Your figures",
 };
 
 /**

@@ -312,6 +312,8 @@ function describeItem(it: ProjectItem): string {
       return it.caption ?? "attachment";
     case "address":
       return it.address;
+    case "user_figure":
+      return `${it.label}: ${it.value}${it.unit ? ` ${it.unit}` : ""} (stated by you)`;
   }
 }
 

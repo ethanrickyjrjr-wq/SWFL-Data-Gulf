@@ -40,6 +40,10 @@ export function identityKeyForItem(item: ProjectItem): string {
       return `note:${item.text}`;
     case "address":
       return `address:${item.address.toLowerCase().replace(/\s+/g, " ").trim()}`;
+    case "user_figure":
+      // Same label = same figure: re-stating it updates the value instead of
+      // stacking duplicates.
+      return `user_figure:${item.label.toLowerCase().trim()}`;
   }
 }
 
@@ -70,5 +74,7 @@ export function titleForItem(item: ProjectItem): string {
       return `Note: ${item.text.slice(0, 120)}`;
     case "address":
       return `Address: ${item.address}`;
+    case "user_figure":
+      return `Your figure: ${item.label}`;
   }
 }

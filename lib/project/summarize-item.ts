@@ -41,5 +41,9 @@ export function summarizeItem(item: ProjectItem): string {
     }
     case "address":
       return clip(item.address);
+    case "user_figure":
+      return clip(
+        `${item.label}: ${item.value}${item.unit ? ` ${item.unit}` : ""} (stated by you)`,
+      );
   }
 }

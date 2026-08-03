@@ -14,6 +14,7 @@ const KIND_ORDER: Kind[] = [
   "qa",
   "chart",
   "metric",
+  "user_figure",
   "report",
   "source",
   "note",

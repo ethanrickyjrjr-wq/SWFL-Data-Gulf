@@ -25,5 +25,7 @@ export function itemTitle(item: ProjectItem): string {
       return item.caption ?? "Attachment";
     case "address":
       return item.address;
+    case "user_figure":
+      return `${item.label}: ${item.value}${item.unit ? ` ${item.unit}` : ""}`;
   }
 }
