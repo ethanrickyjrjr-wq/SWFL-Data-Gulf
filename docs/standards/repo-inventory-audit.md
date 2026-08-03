@@ -109,6 +109,7 @@ is read from the actual pipeline code, not the registry.
 | market_aggregates_details | API (SteadyAPI) | data_lake.market_details_swfl |
 | realtor_geo_trends | API (SteadyAPI) | data_lake.realtor_geo_medians |
 | rentals_swfl | API (SteadyAPI) | data_lake.rental_listings_swfl |
+| neighborhood_amenities | API (SteadyAPI) | data_lake.steadyapi_neighborhoods + steadyapi_neighborhood_amenities + steadyapi_property_neighborhood (pairing edge) |
 | land_manufactured_swfl *(parked)* | not determinable — no pipeline code exists | none |
 | lee_deed_official_records *(parked)* | DuckDB | data_lake.lee_deed_official_records — 0 rows (Akamai blocks unattended fetch) |
 

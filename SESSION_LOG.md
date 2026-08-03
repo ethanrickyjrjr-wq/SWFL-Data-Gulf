@@ -1,3 +1,85 @@
+## 2026-08-03 (Fable 5) — community amenity coverage: 3 new lanes LIVE (vendor neighborhoods + Maps ground truth + profile scale-out)
+
+Operator decree: "coverage on all communities HOA, golf, amenities... make sure they pair with
+their properties." Four-lane + full-scope-first honored; probe doc
+`_RESEARCH/data-and-ingest/2026-08-03-neighborhood-amenities-full-scope.md` (+ INDEX line).
+1) **SteadyAPI /neighborhood-amenities pipeline** (`ingest/pipelines/neighborhood_amenities/`,
+   TDD 12 tests green, migration `20260803_steadyapi_neighborhoods.sql`, GHA
+   `neighborhood-amenities-daily.yml`): vendor neighborhood w/ BOUNDARY POLYGON + centroid +
+   12 location scores + nearby businesses; `steadyapi_property_neighborhood` = the
+   listings↔community PAIRING edge (api_feed 34,904 rows had property_id but 0% subdivision —
+   verified live). Boundary-polygon dedupe: one call per UNKNOWN neighborhood; proven live —
+   final state after the 400-call drain (verified live post-write): **245 neighborhoods /
+   16,304 businesses (110 golf+country-club) / 19,805 paired properties = 57% of the 34,904
+   active book, in ~430 calls (~0.9% of monthly quota)**; ~14.9k remain — the daily cron
+   (500-call cap) drains them in ~2-3 days. Three real failures fixed en route, each now a named
+   test/guard: dlt varchar-vs-jsonb/date (native types via `to_load_rows`), staging-clone PK
+   (INCLUDING DEFAULTS, not ALL), same-name chain branches (PK gained `address_line`).
+2) **Google Maps county ground truth** (Apify compass/crawler-google-places, ~$5.72 total):
+   974 Lee + 935 Collier places (golf/country club/clubhouse/pool/marina) →
+   `data_lake.google_maps_amenities` via migration `20260803_google_maps_amenities.sql` +
+   `scripts/load-google-maps-amenities.mts`; 1,909 rows verified post-write.
+3) **community_profiles scale-out**: 12 of the 89 county-less merged rows resolved via our OWN
+   `neighborhood_stats` county map (no guessing; 4 ambiguous + 73 out-of-scope left unshipped) →
+   ship_live rerun: 69 → 81 profiled communities, alias fixture 69 → 81 entries.
+DEFERRED (parallel-session file claims, session 3a830430): cadence_registry entry + data-roots
+amenity-root note — exact edits staged in `_ASSISTANT/pending-amenity-catalog-edits.md`, check
+`amenities_registry_docs_hygiene`. Checks opened: amenities_listing_detail_hoa_lift,
+amenities_apify_maps_ground_truth (Maps→lake DONE, spatial join pending),
+amenities_profiles_scale_out, amenities_pairing_surface, amenities_registry_docs_hygiene.
+HOA fees re-confirmed ABSENT from SteadyAPI vendor-wide — listing-detail + scrape lanes are the
+only HOA sources; ranges-with-source only.
+
+## 2026-08-03 (Fable 5) — data-roots USER-BROUGHT DATA section landed (deferred Task 12 close-out)
+
+Commit `29071d48` (13 insertions, docs-only). The section deferred 08/02 by a parallel claim is now
+in `docs/standards/data-roots.md` after the PARCELS block: 4 user-scoped roots — contacts
+(`public.contacts`), listings (`public.user_listings`), figures (`projects.items` kind
+`user_figure`), parked shapeless uploads (filed item + `parked_upload_*` checks entry) — all RLS,
+never `data_lake.*`, no brain. Hunk-staged via `git apply --cached` so the parallel session's
+uncommitted tax-history status flip in the same file stayed OUT of the commit. Check
+`data_roots_user_data_section` closed with evidence. LIVE-probed after (four-lane gate caught the
+missing lane): contacts/user_listings/user_api_tokens all exist in prod; `projects.items` does NOT
+exist as a table — figures are jsonb elements on `public.projects.items[]` — corrected in
+`c354549f`; 0 user_figure items and 0 parked_upload_* checks live yet (nothing user-visible until
+deploy). Local only — push remains operator-gated; `user_data_typed_lane_live_verify` stays open
+pending production evidence post-deploy.
+
+## 2026-08-03 (Sonnet) — SteadyAPI Step 3 family B SHIPPED: data_lake.steadyapi_tax_history (273,051 rows, live, idempotent)
+
+Continuing the handoff after family A shipped/pushed (`acb2610f`). Measured live before designing
+(RULE 0.5): dedupe key `(property_id, tax_year)` — ZERO collisions across all 273,051 rows, zero
+NULL years. Field shapes all clean JSON numbers (`year`, `tax_amount`, `assessment.{total,building,
+land}`, `market_value.{total,building,land}`) — unlike family A, NO cast-failure landmines found.
+Migration `migrations/20260803_steadyapi_tax_history.sql` run live; parser
+`ingest/pipelines/listing_lifecycle/parse_tax_history.py` (same idempotent TRUNCATE+re-derive +
+floor-guard shape as family A) run TWICE live — byte-identical 273,051 both times, floor matches
+exactly. 9 TDD tests green, full 187-test listing_lifecycle suite green (up from 178 after family
+A). One property (1107697661, 19 years 2007–2025) traced raw→typed field-by-field.
+
+JOIN-LANE INVESTIGATION (playbook-mandated gate before any quality contract): `leepa_parcels` (Lee)
+has NO site-address column at all — only strap/folioid/zip_code; no pipeline has ever built a
+FDOR-side address_key normalizer to join county parcels against SteadyAPI data. Rather than rush an
+address-match implementation and risk a silent match-rate collapse (the Marco Island 0/360 failure
+shape), the steady_tax↔county-valuation quality-registry contract is DEFERRED and tracked — check
+`steadyapi_tax_history_quality_contract_address_join_owed` — not silently skipped.
+
+Wired into `active-listings-swfl` pack (same precedent as family A): new view
+`data_lake.listing_recent_tax_paid_stats` + new metric `median_annual_tax_swfl`, explicitly caveated
+"vendor-reported, NOT a county tax bill, not yet validated" since the address-join validation is the
+deferred piece. Vocab-registered, Gate 2 + Gate 5 both pass. `data-roots.md` flipped 🔴→🟢.
+
+ALSO: closed out family A's deferred `cadence_registry.yaml` entry in the same pass — the parallel
+session's claim on that file freed up, so both family A's FOURTH TABLE block + `raw_landing_class:
+paid_landed` and family B's FIFTH TABLE block went in together. Check
+`steadyapi_listing_events_cadence_registry_entry_owed` closed.
+
+Ship discipline: 7 of 8 — quality-registry contract deferred+tracked (named above), not skipped.
+Design: `docs/superpowers/specs/2026-08-03-steadyapi-tax-history-design.md`. NOT PUSHED — awaiting
+operator confirmation (pack OUTPUT-shape edit, RULE 1 ask-first). Family C (`building_permits`) NOT
+started — "NOT A RUSH" per the playbook; two families shipped end-to-end with live evidence each,
+one PR at a time.
+
 ## 2026-08-02 (Fable 5) — user-data typed lane BUILT: 11 of 12 plan tasks, TDD throughout
 
 Spec + plan + inline execution of `docs/superpowers/plans/2026-08-03-user-data-typed-lane.md`
