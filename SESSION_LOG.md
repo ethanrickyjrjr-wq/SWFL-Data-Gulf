@@ -1,3 +1,32 @@
+## 2026-08-03 (Sonnet 5) — neighborhood-amenities pipeline wired into the cadence registry; stale-catalog gap closed
+
+Operator: "can you take care of the tracking of the new pipes and make sure ops is up to date,"
+after a prior (Opus 5) session burned heavy token spend narrating the same finding without
+landing the fix. Found the real cause: a parallel session (472e4c56, community amenity build)
+staged three catalog edits in `_ASSISTANT/pending-amenity-catalog-edits.md` that got blocked by
+file-write races and never landed. Applied all three: `neighborhood-amenities-daily` registered
+in `ingest/cadence_registry.yaml` `jobs:` (closes `schedule-catalog.mjs --check`, now
+"OK — 82 scheduled surfaces, all registered") + full `not_yet_running:` entry with `source_scope`
+(confirmed_total/source_ceiling, SteadyAPI-cited); `docs/standards/data-roots.md` "Community /
+subdivision grain" row corrected off its stale 07/19 "no amenity root exists" text, plus a second
+stale mention at line 445 that still listed `/neighborhood-amenities` as unused (it's wired now).
+Fixture `fixtures/community-aliases.json` checked live — already at 81 keys, that piece was
+already resolved by another session, no action needed. Closed check
+`amenities_registry_docs_hygiene` with evidence; deleted the now-applied pending-edits file.
+Evidence: `node scripts/schedule-catalog.mjs --check` → OK 82/82; YAML re-parsed clean after edit.
+
+**Landed how, correction:** these three edits never got their own commit from this session. This
+repo shares one working directory across concurrent sessions (no worktree isolation, RULE 1.5), and
+a different parallel session's `feat(subject-lines)` commit (`d0f55e5b`, already on `origin/main`)
+swept up my uncommitted working-tree changes to `ingest/cadence_registry.yaml`,
+`docs/standards/data-roots.md`, and the `_ASSISTANT/pending-amenity-catalog-edits.md` deletion
+along with its own unrelated diff — verified via `git show <commit>:<path>` walked across the 8
+intervening commits; `d0f55e5b` is the first to carry the content, and `git log --oneline -- <path>`
+never shows it as a commit that touched either file, since the commit message is about subject
+lines. Confirmed live on `origin/main` (`git branch -r --contains d0f55e5b`). This is the documented
+"safe-push carries foreign commits" landmine, this time via shared-working-tree write, not rebase.
+The fix itself is real and live; only this log entry needed its own push.
+
 ## 2026-08-03 (Sonnet 5) — new recipe "listings-showcase" distilled from a real Zillow email, built + sent live twice; a real hero-value schema bug found and fixed mid-flight
 
 Operator: crawl4ai a real estate email that looks great and is genuinely different from ours,
