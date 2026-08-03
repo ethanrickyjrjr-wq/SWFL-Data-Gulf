@@ -10,6 +10,9 @@ first probe did exactly that). Landmine + live family coverage written into play
 Closed dom_backfill_listed_date_live_verify w/ evidence. steadyapi_step3_typed_families_spec stays
 open for Sonnet — build order A→B→C, one PR each, brainstorm+TDD+pack+contract+registry+data-roots.
 Blocker for Step 2's twin NOT touched: engine_enabled_kill_switch_owed still operator-owed.
+Handoff written for the executing session: docs/superpowers/handoffs/2026-08-03-steadyapi-step3-sonnet-handoff.md
+(live state, both traps — {meta,body} envelope + permits human-date — field inventory, locked
+authority design, per-PR ship discipline, first-hour plan for family A).
 
 ## 2026-08-03 (Fable 5) — /api/b edge-cache shipped (Apify Actor lane); rate cap proven live; playground Actor deployed
 
