@@ -1,3 +1,54 @@
+## 2026-08-03 (Opus 5) — SPEC ONLY, no code: realtor.com-style multi-category listings digest + a ZIP→city defect found while confirming scope
+
+Operator: *"We need to create the recipe to produce emails like realtor.com. Categories. No dupes
+on homes in different categories. 4-6 thumbnails. Not sure if they are all zip or city connected.
+Take a look, spec it out."* Ran `superpowers:brainstorming` per RULE 3.5. Deliverable is the spec,
+`docs/superpowers/specs/2026-08-03-listings-digest-grid-design.md`. **No implementation code was
+written this session** — the block it specs touches four files a parallel session was holding.
+
+**The structural finding that decided the design.** `EmailDoc` is capped at 20 blocks
+(`schema.ts:399`, enforced by `capBlocks`, `finalize-doc.ts:151`). One `listing` block per home at
+`span: 6` costs 6 blocks per category (4 cards + title + CTA), so the existing vocabulary tops out
+at **3 categories × 4 cards and nothing else** — no hero, no closing CTA. Presented that
+arithmetic to the operator with the cheap alternative; he chose a new `listing-grid` block (one
+block = one whole category), which drops a 5-category digest to ~9 blocks AND makes the grid
+palette-addable — his stated reason: *"Go each category as a grid so we can add any to any email
+easily."*
+
+**Rejected and recorded so it isn't re-proposed:** reusing the `list` block (its `ListItem` already
+carries `imageUrl`, landed hours earlier). Its thumbnail is hardcoded **56×56**
+(`ListBlock.tsx`) — an avatar, not a home photo — and widening it would retune the market-comps
+rows sharing that block.
+
+**DEFECT FOUND, check opened `zip_scope_resolves_to_county_anchor_city`:** `scopeCity()`
+(`select.ts:53-64`) does not resolve a ZIP to its city — it maps ZIP → county → the county's
+ANCHOR city (`COUNTY_ANCHOR_CITY`, line 33). **ZIP 33919 (Fort Myers) resolves to "Cape Coral."**
+`listings-showcase.ts` calls it on its ZIP today, so a user naming a Fort Myers ZIP gets Cape
+Coral homes. Not fixed this session (spec-only); the new recipe is specced never to call it.
+
+**Both halves of the operator's "focus on zip then add a city filter based on zip polygons" already
+exist in-repo** (found via a read-only Explore fan-out, nothing re-derived): ZIP→city via the
+USPS-sourced `fixtures/swfl-place-zip-crosswalk.json` (33919 is an `alt_zip` of Fort Myers) with
+`cityForZip()` (`lib/swfl-zip-city.ts:140`) as the unsourced fallback; and real 2020 TIGERweb ZCTA
+polygons at `fixtures/swfl-zip-polygons.json` (tracked, 58 ZIPs). Missing piece is small and
+unshared: no TS point-in-polygon helper exists (only Python, `ingest/lib/zcta_assign.py`) — spec
+calls for `lib/geo/point-in-zip.ts`.
+
+**Vendor facts confirmed, not assumed:** SteadyAPI `/search` is **city-slug scoped**
+(`cityToSlug` → `Fort-Myers_FL`); ZIP exists only per-listing, parsed from the permalink
+(`steadyapi.ts:206`). It returns **no bath count** — `bathrooms: null` unconditionally
+(`steadyapi.ts:245`) — so the spec's rule is beds+baths+sqft or NO spec line at all, never the
+two-field line the operator already rejected. Every v1 card therefore ships spec-less until the
+baths handoff lands. Stated in the spec, not buried.
+
+12 named failure modes each with a test (RULE 3.5), incl. F1: the builder never *constructs* a
+photo URL and drops any card whose photo host is `api.mapbox.com` — a guard against re-committing
+today's aerial-views complaint through the same field. v1 cuts stated explicitly: baths, a `sold`
+category (needs the deed/LEEPA lanes per data-roots), the ZIP stats header.
+
+Checks this push: 2 opened (`listings_digest_grid_live_verify` via `scripts/new-build.mjs`,
+`zip_scope_resolves_to_county_anchor_city`), **0 closed** — nothing was implemented to close.
+
 ## 2026-08-03 (Opus 5) — AERIALS DELETED PLATFORM-WIDE (operator decree, 2nd time raised) + the comp-photo gap measured, not hand-waved
 
 Operator, on a screenshot of the market-comps evidence table rendering six broken slots reading
