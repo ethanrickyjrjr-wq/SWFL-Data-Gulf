@@ -49,6 +49,24 @@ OPEN TENSION, NOT RESOLVED: this is the scraped-portal class the 08/02 greenfiel
 as "the kind that always fail," and both actors have single-digit user counts. Operator's call —
 but the sold-side gap is now weeks old and the records-request lane has been quiet 23 days.
 
+FOLLOW-UP SAME SESSION — operator: "WE ALSO NEED PHOTOS FOR COMP HOMES THAT RECENTLY SOLD THAT WE
+DON'T HAVE YET!! SINCE WE RECENTLY STARTED COLLECTING." He is right and I mis-sold the coverage
+number. The 34,673/35,202 (98.5%) I quoted is coverage INSIDE the sweep window only —
+`comp-photos.ts` says in as many words that rows outside it "simply do not resolve." Photo capture
+first shipped **06/30/2026** (`7c66a774` feat(listing-lake): API extractor parsers — SteadyAPI
+photos; pipeline itself first committed 06/27/2026). So as of 08/03/2026 we hold roughly FIVE WEEKS
+of photo history, while a comp set routinely reaches back 6–12 months. Every comp that sold before
+06/30/2026 has NO photo from us, and 98.5% reads like a solved problem when the comp-side hole is
+most of a comp set. QUOTE COVERAGE AGAINST THE COMP LOOKBACK WINDOW, NEVER AGAINST THE SWEPT ROWS.
+The advisor flagged this exact risk before I answered and I under-weighted it.
+
+PROPERTY DESCRIPTION — asked, NOT confirmed. Neither realtor.com actor's output schema names a
+description/remarks field: `scrapeworks` has none, `one-api/realtor-property-scraper` ($0.007/result)
+has none as a first-class column but ships a `Raw` field its README describes as "the complete
+upstream JSON for nested/large fields." The only actor that names "MLS description" outright is
+`grimnir/real-estate-aggregator` (Redfin-based), on its "Detail Page Fetched" event at $0.003 extra.
+Settle it with a real record, not a schema — do not claim description works until one is in hand.
+
 ## 2026-08-03 (Opus 5) — "Just seems money just disappears when in Claude." + can Ollama replace it, what does each cost
 
 OPERATOR GRIPE, RECORDED: spend feels invisible/uncontrolled inside Claude. He is right that it is
