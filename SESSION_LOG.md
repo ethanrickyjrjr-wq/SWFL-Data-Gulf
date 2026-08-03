@@ -1,3 +1,94 @@
+## 2026-08-03 (Opus 5) — "bring it in": neighborhood_amenities graduated to probed — and the real reason nothing lands is ENGINE_ENABLED=false, ~90 crons dark
+
+Operator: *"why is this not coming in?"* → *"bring it in!!!!"* My prior answer described
+`neighborhood_amenities` as parked-while-its-cron-fires-daily. **The cron does not fire.**
+`gh run list --workflow=neighborhood-amenities-daily.yml` → run **30814628398, 08/03 12:41 UTC,
+`skipped`**; `gh variable list` → `ENGINE_ENABLED  false  2026-08-03T02:27:25Z`. That var fails the
+job-level guard on **~90 scheduled workflows** (`grep -l ENGINE_ENABLED .github/workflows` = 90
+files), so nothing scheduled has run repo-wide since the flip. The lake rows that exist
+(245 neighborhoods / 16,304 amenities / 19,805 pairings, live SQL) came from the manual 06:00 UTC
+run, not a cron. I had asserted a schedule executes from reading the file that declares it.
+
+SHIPPED (4 of 4 in scope; the 5th — flipping the engine — is the operator's, below):
+1. **Registry graduated** — entry moved `not_yet_running:` → `pipelines:`, `known_drift` deleted.
+   Clock = `data_lake.steadyapi_property_neighborhood.as_of`, deliberately NOT
+   `steadyapi_neighborhoods.as_of`: merge-on-PK means the neighborhoods table only advances when a
+   never-seen polygon appears, which stops for weeks on a perfectly healthy run.
+2. **Tolerance measured, not chosen** — live SQL on 21d of new `api_feed` `property_id` arrivals:
+   101–1,140/day on active days, worst no-arrival gap **3 days** (07/19→07/23), plus a 1-day gap
+   (07/30→08/01). `tolerance_multiplier: 4.0` × 1-day cadence = 4 days, one day of headroom.
+   `expected_rows_min: 15000` against a live 19,805. Entry comment names the coupling: this is a
+   DOWNSTREAM detector — it reddens when `listing_lifecycle` breaks upstream.
+3. **Quiet-day crash fixed (TDD)** — the spine query selects only UNASSIGNED properties, so once the
+   book drains a normal day yields zero rows and `_write`'s `assert_min_rows(minimum=1)` would fail a
+   healthy daily cron. Added pure predicate `write_needed(spine_size, result)` + 3 tests written red
+   first (`ImportError` × 3 confirmed), then green: **15 passed in 0.06s**. Empty spine → exit 0 with
+   a message; spine WITH work that produced nothing (all vendor gaps) still trips the guard loud.
+4. **Docs synced same session** — `data-roots.md` community row now states the counts, that they came
+   from a manual run, and that the data does not refresh itself today. `repo-inventory-audit.md`
+   `#refresh-cadence` correctly needs no row (free-text tables only); its ingest-sources row already
+   listed the family.
+
+LIVE PROOF the entry is probed: `ingest/scripts/check_freshness.py --dry-run --sla-dry-run` resolves
+it and leaves it out of the STALE/MISSING/OVERDUE table (age 0d, volume pass) — before this it was
+invisible to the probe entirely.
+
+LEDGER: closed `neighborhood_amenities_parked_but_cron_live` (evidence above); opened
+`engine_enabled_off_all_crons_dark` (defect, due 08/05) — previously tracked only as a NOTE inside
+`timeout_raises_live_verify`, which is the RULE 2.4 prose-instead-of-a-check failure; opened
+`neighborhood_amenities_first_scheduled_fire` (verify, due 08/10) because the entry's own graduation
+criterion — a clean SCHEDULED fire — has still never been met.
+
+OPERATOR'S FLIP, not mine: the backfill that motivated the kill switch is complete
+(`undated_active_sale = 0`, newest fetch 08/03 01:11 UTC), so handoff Step 5 is ripe —
+`gh variable set ENGINE_ENABLED --body true --repo ethanrickyjrjr-wq/SWFL-Data-Gulf`, then
+`gh workflow enable ingest-listing-lifecycle`, then `gh workflow enable nightly-chain.yml`.
+Left to him: he set it false himself 10h ago and it restores paid spend across ~90 jobs.
+
+## 2026-08-03 (Opus 5) — §0.1d LINKS BELONG TO THE AGENT (I had the hierarchy inverted); per-link brand override gap opened
+
+Operator decree: *"the agent can change all links and should be able to save that in their brand. We
+don't want anyone coming to our site unless they need to or we are activly marketing to."* My §0.1c
+from an hour earlier made OUR community page the "strongly preferred" button target with the agent's
+own destination as fallback — **exactly backwards**. We are white-label infrastructure, not a traffic
+destination; routing the agent's audience to swfldatagulf.com is a leak that competes with the person
+we sell to. §0.1c inverted and new **§0.1d** generalizes it to EVERY link: agent's destination is the
+default, ours is the fallback, our traffic is legitimate only when the agent chose it or we're
+actively marketing. Never hard-code a swfldatagulf.com URL as a block's default.
+
+Probed rather than assumed — `apply-brand.ts`'s button branch already states the principle
+(*"Brand owns ordinary link destinations"*, rewriting any non-`mailto:` button to the brand CTA;
+the engine's `mailto:` reply CTA deliberately survives) and `branding-to-tokens.ts:83-86` maps
+`website_url` → `WEBSITE_URL` + `CTA_URL`. **But that is ONE GLOBAL override, not the per-link
+control the decree asks for** — every ordinary button gets the same URL, so a community button is
+silently clobbered to the agent's homepage the moment they set `website_url`. Right direction, wrong
+granularity. Opened `brand_per_link_destination_overrides`. Compounding and already open:
+`applybrand_no_server_side_caller` — the overlay is browser-only, so on non-Lab sends no brand link
+applies at all and the links stay ours, which is the leak at its worst.
+
+## 2026-08-03 (Opus 5) — §0.1 word-count carve-outs + §0.1c the community block; and a parallel session pushed my last entry's work
+
+Operator decree: the property description and the community block **do not count** toward the
+50–125-word band — that band governs the agent's own copy (framing, argument, CTA) only. §0.1 states
+both carve-outs verbatim plus the anti-abuse line: you may not push the agent's argument past 125
+words by relabeling it "description" or "community."
+
+New **§0.1c**: a short community paragraph plus a "Find Out More About This Community" button.
+Link target is OUR existing page — `/r/communities-swfl/[community]` or `/n/[neighborhood]`, the 245
+named vendor neighborhoods already behind `community-info.ts` — because it carries the agent and
+keeps the click ours; the community's own external site is fallback only. Written with the one-CTA
+reconciliation spelled out (primary CTA stays one; this is a click-tracked door back to the agent,
+not a competing ask) so a future builder neither deletes it as a violation nor treats it as licence
+for a third button. Community claims stay under the no-invention gate — `community-info.ts` composes
+in code from the source's own sentences on purpose.
+
+**INCIDENT, same session:** commit `1a5fa075` ("feat(email): add image support to ListBlock and PDF
+rendering") broad-added and **pushed all seven of my doc files** under that unrelated message — and
+contains no ListBlock or PDF file at all. The operator was explicitly waiting to approve that push.
+RULE 1.5 (never `git add -A`) and the `commit-only-owned-files` memory both exist to stop it. Not
+retroactively fixable (pushed; no force-push on main). Lesson recorded in the scratchpad: with a
+parallel session live and uncommitted work in hand, use a worktree — the shared index is not safe.
+
 ## 2026-08-03 (Opus 5) — emails.md §0 "BEFORE YOU CODE A RECIPE": the rules card, and the dead research pointer that caused it
 
 Operator decree: *"I'M TIRED OF GETTING DIFFERENT TYPES OF EMAILS BUILT ... ALL LOGO, CAN SPAM RULES

@@ -1,3 +1,105 @@
+## 2026-08-03 (Opus 5) — "why is this not coming in?" — I answered with the registry. The real answer is the engine is OFF and I never checked.
+
+OPERATOR, verbatim: *"why is this not coming in?"* then *"bring it in!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!"*
+
+I had just written him a paragraph about `neighborhood_amenities` sitting parked in the cadence
+registry while its cron fires daily. **That paragraph asserted the cron fires. I never verified it.**
+It does not. `gh run list --workflow=neighborhood-amenities-daily.yml` — run 30814628398, 08/03
+12:41 UTC, status **`skipped`**. Repo var `ENGINE_ENABLED=false` (last set 08/03 02:27 UTC) fails the
+job-level guard `if: ${{ vars.ENGINE_ENABLED != 'false' || github.event_name == 'workflow_dispatch' }}`
+on **~90 scheduled workflows**. Nothing scheduled has run in this repo since that flip. The 245
+neighborhoods / 16,304 amenities / 19,805 pairings that ARE in the lake came from a manual run at
+06:00 UTC, not the cron.
+
+Same shape as the incidents already in this file: I described a mechanism from the file that
+configures it instead of from the system that runs it. A workflow file containing a `schedule:`
+block is not evidence that the schedule executes.
+
+DONE this session (registry side, 4 of 4): entry graduated out of `not_yet_running:` into probed
+`pipelines:` with a MEASURED tolerance (4.0 — worst observed no-arrival gap in 21d is 3 days);
+freshness clock is `steadyapi_property_neighborhood.as_of`, NOT `steadyapi_neighborhoods.as_of`
+(that one only moves when a never-seen polygon appears and would go stale on a healthy run);
+`write_needed()` + 3 tests so a drained-book quiet day exits 0 instead of tripping the volume guard;
+`data-roots.md` now says out loud that this data does not refresh itself today.
+
+STILL OFF — operator's call, not mine, because HE set it false 10h ago and it turns paid spend back
+on across ~90 jobs. The SteadyAPI backfill that motivated it is finished (`undated_active_sale = 0`,
+newest fetch 08/03 01:11 UTC), so Step 5 of the 08/02 handoff is ripe:
+`gh variable set ENGINE_ENABLED --body true --repo ethanrickyjrjr-wq/SWFL-Data-Gulf`, then
+`gh workflow enable ingest-listing-lifecycle`, then `gh workflow enable nightly-chain.yml`.
+Check `engine_enabled_kill_switch_owed`.
+
+## 2026-08-03 (Opus 5) — "We don't want anyone coming to our site unless they need to" — I had the link hierarchy BACKWARDS
+
+OPERATOR DECREE, verbatim: *"the agent can change all links and should be able to save that in their
+brand. We don't want anyone coming to our site unless they need to or we are activly marketing to"*
+
+I wrote §0.1c an hour earlier saying OUR community page was the "strongly preferred" button target
+and the agent's own destination was the fallback. **Exactly inverted.** We are white-label
+infrastructure the agent puts their name on — not a traffic destination. Sending the agent's
+audience to swfldatagulf.com is a leak, not a win, and it competes with the agent we're selling to.
+Corrected in §0.1c: the AGENT'S destination is the default, ours is the fallback, and traffic to our
+site is legitimate only when the agent chose it or we are actively marketing.
+
+WHAT THE CODE ACTUALLY DOES (probed, don't re-derive):
+- `branding-to-tokens.ts:83-86` — brand `website_url` sets BOTH `WEBSITE_URL` and `CTA_URL`.
+- `apply-brand.ts` button branch — *"Brand owns ordinary link destinations"*:
+  `if (cta && !props.url.startsWith("mailto:")) props.url = cta`. So brand already beats the
+  engine's link on every button, and an engine-set `mailto:` reply CTA survives.
+
+THE REAL GAP — that is ONE GLOBAL OVERRIDE, not per-link control. Every ordinary button in a doc is
+rewritten to the same `website_url`. An agent cannot today set a DIFFERENT destination for a
+community button vs. a listing button vs. a booking button and save those in brand, which is
+literally what he asked for. Worse, a community "Find Out More" button pointed at our community page
+gets silently clobbered to the agent's homepage the moment they set `website_url`.
+Opened `brand_per_link_destination_overrides`.
+
+COMPOUNDING, already open: `applybrand_no_server_side_caller` — `applyBrand` is browser-only, so on
+every non-Lab send path NONE of this overlay runs and the links stay whatever the engine set, i.e.
+OURS. The leak he is describing is worst exactly where nobody is watching.
+
+## 2026-08-03 (Opus 5) — INCIDENT: a parallel session broad-added and PUSHED all 7 of my doc files under its own unrelated commit message
+
+Not a gripe he raised — recording it because he was waiting to approve a push that then happened
+without him. Commit `1a5fa075` *"feat(email): add image support to ListBlock and PDF rendering;
+include aerial thumbnails for comps"* is **already on origin/main** and contains 8 files: my seven
+(`docs/standards/emails.md` +255, `CLAUDE.md`, `SESSION_LOG.md`, `_ASSISTANT/SCRATCHPAD.md`,
+`lib/email/CLAUDE.md`, `lib/deliverable/CLAUDE.md`, `.claude/agents/deliverable-builder.md`) plus
+their own `_ASSISTANT/2026-08-03-apify-comp-email-HANDOFF.md`. **It contains NO ListBlock.tsx and no
+PDF file** — the message describes work that is not in the commit, while the work that IS in it goes
+undescribed.
+
+Two standing rules were in place to stop exactly this and neither did: RULE 1.5 "Never `git add -A`.
+Always `git add <explicit paths>`" and the memory `commit-only-owned-files`. The failure is not mine
+to fix retroactively (it is pushed; no force-push on main), but the operator lost his per-push
+approval on the email-rules work and the git history now misattributes it. If a session is running
+in parallel and I have uncommitted work, WORKTREE IT (RULE 1.5) rather than trusting the shared
+index — that is the only mechanism that would have held.
+
+## 2026-08-03 (Opus 5) — word count EXCLUDES the property description and the community block; community CTA back to the agent
+
+OPERATOR DECREE, verbatim: *"if a home has a description of it, that does not count towards the word
+count. Also, if we talk about the community, that should not count toward the total. we build with
+these as guidelines for everything but those two areas. but we can also put a little about the
+community and a Find Out More about this community button that leads to our page of that community
+or the actual community page. A good call to action that shows clicks back to the agent."*
+
+The 50–125-word band now governs the AGENT'S OWN copy only — framing, argument, CTA. Two carve-outs:
+the sourced property description, and the community block. Reason it holds up: both are REFERENCE
+material the reader chose to look at, not persuasion the reader has to wade through, so the
+response-rate mechanic Boomerang measured doesn't apply to them.
+
+CTA tension, resolved rather than ignored: §0.1 says ONE CTA per email, and this adds a second
+button. It is NOT a competing CTA — it is a click-tracked door that lands the reader BACK on the
+agent. Primary CTA (contact the agent) stays exactly one. Written into §0.1c so a future builder
+neither deletes the community button as a "violation" nor reads it as licence for three buttons.
+
+Link target — WE HAVE THESE PAGES ALREADY, don't build a new one:
+`/r/communities-swfl/[community]` and `/r/communities-swfl/n/[neighborhood]` (index at
+`/r/communities-swfl`), fed by the 245 named vendor neighborhoods behind
+`lib/deliverable/recipes/community-info.ts`. Prefer OUR page — it carries the agent. The community's
+own external site is the fallback only when we have no page, because it sends the reader away.
+
 ## 2026-08-03 (Opus 5) — "don't use my numbers. if it says 95 word is best, use that"
 
 OPERATOR CORRECTION, same session, verbatim: *"don't use my numbers. if it says 95 word is best, use

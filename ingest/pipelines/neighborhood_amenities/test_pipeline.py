@@ -112,6 +112,39 @@ def test_to_load_rows_keeps_native_types_for_dlt():
     assert isinstance(assignments[0]["as_of"], date)
 
 
+def test_write_needed_empty_spine_is_a_clean_no_op():
+    """Failure mode this guards: the spine query selects only UNASSIGNED api_feed
+    properties, so once the book is drained a quiet day yields zero rows — and
+    _write's assert_min_rows(minimum=1) would fail the daily cron on a run that
+    did exactly what it should. An empty spine must skip the write, exit 0."""
+    from ingest.pipelines.neighborhood_amenities.pipeline import write_needed
+
+    empty = {"neighborhoods": [], "amenities": [], "assignments": [], "gaps": []}
+    assert write_needed(0, empty) is False
+
+
+def test_write_needed_true_when_the_batch_produced_rows():
+    from ingest.pipelines.neighborhood_amenities.pipeline import write_needed
+
+    result = {
+        "neighborhoods": [],
+        "amenities": [],
+        "assignments": [{"property_id": "1", "slug_id": "X_Naples_FL", "as_of": "2026-08-03"}],
+        "gaps": [],
+    }
+    assert write_needed(1, result) is True
+
+
+def test_write_needed_stays_loud_when_work_existed_but_nothing_landed():
+    """The volume guard must still fire when the spine HAD properties and every
+    one of them gapped (vendor 500s / unparseable bodies) — that is a real
+    failure, not a quiet day, and it must not be silenced by the fix above."""
+    from ingest.pipelines.neighborhood_amenities.pipeline import write_needed
+
+    all_gapped = {"neighborhoods": [], "amenities": [], "assignments": [], "gaps": ["9", "10"]}
+    assert write_needed(2, all_gapped) is True
+
+
 def test_run_batch_records_gap_on_non_200_never_fabricates():
     def fake_fetch(property_id: str):
         return 500, None

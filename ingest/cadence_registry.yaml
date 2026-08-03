@@ -2146,24 +2146,22 @@ pipelines:
         as_of: "07/07/2026"
         source_label: "realtor.com (via SteadyAPI)"
 
-# ── Pipelines that have never run — excluded from active probe ────────────────
-# (All former entries graduated to pipelines: above with probe_mode: odd_window.)
-# Add here only for pipelines with no known expected date that should be
-# completely silent (no probe coverage at all).
-
-not_yet_running:
   # ── SteadyAPI /neighborhood-amenities — neighborhoods + nearby amenities + pairing ──
+  # GRADUATED 08/03/2026 out of not_yet_running: — operator decree ("bring it in"), on a
+  # MANUAL-run basis, NOT the "first clean scheduled fire" the entry originally required.
+  # Recorded honestly because the scheduled fire has never happened: run 30814628398
+  # (08/03 12:41 UTC) reports `skipped` — repo var ENGINE_ENABLED=false (set 08/03 02:27 UTC
+  # for the SteadyAPI DOM backfill, Step 5 re-enable still owed) short-circuits the job guard
+  # on all ~90 scheduled workflows. Probing it while the engine is off is the POINT: an
+  # entry that goes red on a structurally-dead cron is the correct alarm, not a false one.
   # Tables: data_lake.steadyapi_neighborhoods (slug_id PK, boundary polygon + centroid +
   #   12 location scores) · steadyapi_neighborhood_amenities (Yelp-derived businesses w/
   #   category/rating/lat-lon/distance) · steadyapi_property_neighborhood (property_id ->
   #   slug_id — the listings↔community pairing edge; api_feed rows carry no subdivision).
   # Pipeline: ingest/pipelines/neighborhood_amenities/pipeline.py (boundary-polygon dedupe:
-  #   one call per UNKNOWN neighborhood, followers assigned locally at zero vendor cost —
-  #   live dry-run 08/03/2026: 5 calls -> 2 neighborhoods + 984 assignments).
+  #   one call per UNKNOWN neighborhood, followers assigned locally at zero vendor cost).
   # GHA cron: .github/workflows/neighborhood-amenities-daily.yml (09:30 UTC, 500-call cap).
   # Migration: migrations/20260803_steadyapi_neighborhoods.sql (run 08/03/2026).
-  # Graduation: move to `pipelines:` with freshness_table + expected_rows_min after the
-  #   first clean scheduled fire (rentals precedent).
   - name: neighborhood_amenities
     workflow: neighborhood-amenities-daily.yml
     consuming_pack: communities-swfl
@@ -2172,25 +2170,40 @@ not_yet_running:
       # per-property call (500/run cap, 1 req/s). Same class + same vendor as listing_lifecycle
       # above; filled here because Gate 11 flagged it as a gap absent from the baseline.
     cadence_days: 1
-    tolerance_multiplier: 2.0
-    # Parked while its cron is ALREADY LIVE — the deliberate graduation window the
-    # comment above describes ("move to pipelines: after the first clean scheduled
-    # fire"). Recorded rather than silenced: check_freshness.py does not probe a
-    # parked entry, so a failure of this live daily cron is currently invisible.
-    # Close the check by graduating the entry to `pipelines:` (freshness_table +
-    # expected_rows_min) and deleting this block. Nothing here changes what runs.
-    known_drift:
-      - rule: parked_but_scheduled
-        check: neighborhood_amenities_parked_but_cron_live
+    # WHY THE ASSIGNMENTS TABLE IS THE CLOCK (and not steadyapi_neighborhoods): merge-on-PK
+    # means neighborhoods.as_of only advances when a NEVER-SEEN polygon is discovered — once
+    # the region's polygons are known that stops for weeks on a perfectly healthy run.
+    # property_neighborhood.as_of advances whenever a NEW api_feed property gets paired,
+    # which is this pipeline's actual daily work.
+    freshness_table: data_lake.steadyapi_property_neighborhood
+    freshness_column: as_of
+    # tolerance MEASURED, not chosen (live SQL 08/03/2026 — new api_feed property_ids per day
+    # over 21d): arrivals land 101-1,140/day on active days, with observed no-arrival gaps of
+    # 1 day (07/30->08/01) and 3 days (07/19->07/23). 4.0 x 1-day cadence = 4 days, one day of
+    # headroom over the worst observed gap.
+    tolerance_multiplier: 4.0
+    # DOWNSTREAM DETECTOR — read this before chasing the wrong pipeline: no new property_ids
+    # arrive if listing_lifecycle breaks upstream, so this entry reddens for an upstream
+    # failure it did not cause. Check listing_lifecycle first when both are red.
+    expected_rows_min: 15000 # live count 19,805 assignments 08/03/2026; floor catches a wipe,
+      # not day-to-day movement (merge-only table, never shrinks).
     source_scope:
       confirmed_total:
-        summary: "Per vendor call (propertyId is the ONLY input; radius vendor-fixed 5mi): named neighborhood w/ slug_id + centroid + GeoJSON boundary polygon; 12 location scores (Walking/Cycling/Transit/Driving/Groceries/Shopping/Nightlife/Restaurants/Cafes/Daycares/Quiet/Vibrant); nearby businesses across up-to-31 categories (golf, countryclubs, grocery, cafes, preschools, ...) each w/ name/phone/rating/reviews_count/lat-lon/distance. Property->neighborhood assignment persisted for every resolved property."
+        summary: "Per vendor call (propertyId is the ONLY input; radius vendor-fixed 5mi): named neighborhood w/ slug_id + centroid + GeoJSON boundary polygon; 12 location scores (Walking/Cycling/Transit/Driving/Groceries/Shopping/Nightlife/Restaurants/Cafes/Daycares/Quiet/Vibrant); nearby businesses across up-to-31 categories (golf, countryclubs, grocery, cafes, preschools, ...) each w/ name/phone/rating/reviews_count/lat-lon/distance. Property->neighborhood assignment persisted for every resolved property. Landed 08/03/2026: 245 neighborhoods, 16,304 amenities, 19,805 property assignments."
+        as_of: "08/03/2026"
         source: "our ingest"
       source_ceiling:
         summary: "schools family (summary + per-school rating/parent_rating/student_count/student_teacher_ratio/distance/assigned flag, w/ coordinates) is returned on the SAME call and NOT yet persisted — zero extra calls to add a steadyapi_neighborhood_schools table. HOA/condo fees confirmed ABSENT vendor-wide (re-verified on this endpoint 08/03/2026 — capability census §4 stands)."
         as_of: "08/03/2026"
         source_url: "https://docs.steadyapi.com/collection.json"
         source_label: "realtor.com (via SteadyAPI)"
+
+# ── Pipelines that have never run — excluded from active probe ────────────────
+# (All former entries graduated to pipelines: above with probe_mode: odd_window.)
+# Add here only for pipelines with no known expected date that should be
+# completely silent (no probe coverage at all).
+
+not_yet_running:
   # ── SBA FOIA franchise outcomes — Tier-1 DuckDB pipeline ────────────────────
   # Writes two Parquet files to Tier-1 Storage:
   #   lake-tier1/franchise/sba_foia_franchise_county.parquet  (county-grain, primary)

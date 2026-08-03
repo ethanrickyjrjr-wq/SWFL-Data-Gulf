@@ -178,6 +178,22 @@ def to_load_rows(result: dict) -> tuple[list[dict], list[dict], list[dict]]:
     return nbhds, amenities, assignments
 
 
+def write_needed(spine_size: int, result: dict) -> bool:
+    """Should this run write at all?
+
+    An EMPTY spine means every active api_feed property is already paired — a
+    normal quiet day once the book is drained, and the workflow header says so
+    ("once the active book is drained the daily run only assigns new listings
+    locally and costs ~0 calls"). Writing nothing there would trip _write's
+    assert_min_rows(minimum=1) and fail a healthy daily cron.
+
+    A spine WITH work that produced nothing (every property gapped on a vendor
+    non-200 or an unparseable body) is a real failure and must stay loud — so
+    this returns True and lets the volume guard fire.
+    """
+    return spine_size > 0
+
+
 def _write(result: dict) -> None:
     import dlt
 
@@ -246,6 +262,9 @@ def main(argv: list[str] | None = None) -> int:
     )
     if args.dry_run:
         print("dry-run: write skipped")
+        return 0
+    if not write_needed(len(spine), result):
+        print("spine empty: every active property already paired — nothing to write")
         return 0
     _write(result)
     return 0
