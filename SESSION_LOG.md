@@ -1,3 +1,45 @@
+## 2026-08-03 (Opus 5) — GitHub was red for THREE unrelated reasons; two fixed in code, one is billing
+
+**CI typecheck (from today's push).** `lib/email/blocks/ListBlock.tsx:59` passed `10` to `space()`;
+`10` is not on the `Space` scale (`scale.ts:102` — `0|4|8|12|16|24|32|48|64|96`). Snapped to `12`.
+`bun` strips types, so the thumbnail code ran fine in the real sends — but `tsc --noEmit` and
+`next build` were broken, so the prod deploy was broken from commit `4e9d5a47` onward.
+`bunx tsc --noEmit` → exit 0.
+
+**deptry (red on 8 consecutive runs since 07/22, undetected).** `.github/workflows/deptry.yml`
+hardcoded `--requirements-files ingest/requirements.txt`. That CLI flag OVERRIDES pyproject.toml's
+`requirements_files = [requirements.txt, requirements-analysis.txt]`, so the analysis file added
+07/22 (numpy/scikit-learn/pandas for `ingest/analysis/`) was never read and deptry reported 16
+phantom DEP001s. Flag removed — `[tool.deptry]` in pyproject.toml is the one root for that list.
+
+**factuality-gate — NOT fixable in code.** 0 pass / 14 fail, every failure
+`400 "Your credit balance is too low to access the Anthropic API"` (org `2d4e5ab3`). Already open
+as `anthropic_credits_nightly_red`, `nightly_chain_dark_anthropic_credits`, `billing_deadman_alarm`
+— 8 days untouched. Operator billing top-up. Worth noting this gate spends real API money on every
+push to main (14 live graded fixtures).
+
+**THE BRAND BUG — the thing the operator was actually asking about.** `lib/email/lifecycle-chrome.ts`
+decided "has the user set a brand?" via `current.globalStyle.accentColor ===
+DEFAULT_GLOBAL_STYLE.accentColor`. `DEFAULT_GLOBAL_STYLE.accentColor` IS `#3DC9C0` (the SWFL house
+teal, `default-docs.ts:22`) — so the operator's own deliberately-picked teal was read as "blank
+brand" and `EDITORIAL_STYLE` overwrote it with gold `#B98F45` and BOOK_SERIF/PLAYFAIR_SERIF. That is
+precisely his 08/03 complaint, "fonts suck not our brand colors", and it is the "ONE OPEN BUG" the
+prior session's handoff flagged as priority #1
+(`docs/superpowers/specs/2026-08-03-market-comps-thumbnail-brand-handoff.md`). Root cause: a colour
+cannot answer "did the user choose this?" when the default is itself a legitimate choice.
+Fix: `docIsBlankBrand()` — house accent AND a blank-or-house `companyName` on the header block.
+Strictly narrower than the old predicate, so the editorial palette still applies to genuinely blank
+seeds; `listing-flyer.test.ts:169` and `agent-launch.test.ts:464` (both pin the editorial gold)
+stayed green untouched. Two regression tests added to `lifecycle-chrome.test.ts`, proven by
+reverting the predicate: 9 pass/1 fail with the old line, 10 pass/0 fail with the new one.
+
+Verification: `bun test lib/deliverable/recipes/ lib/email/` → **2177 pass / 0 fail** across 202
+files; `bunx tsc --noEmit` → exit 0.
+
+Flagged, NOT touched: the aerial-thumbnail ban logged in SCRATCHPAD by a concurrent session hits the
+same `ListBlock` thumbnail path — the block mechanism is fine, the SOURCE (`resolveCompThumbnails()`
+→ Mapbox satellite) is what the decree bans. That work appears to belong to another live session.
+
 ## 2026-08-03 (Sonnet 5) — market-comps quality pass: real comp thumbnails, subject-not-its-own-comp fix, stale-sale filter
 
 crawl4ai research (4-agent fan-out) on real-estate email best practices filed at

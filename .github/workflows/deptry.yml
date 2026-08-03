@@ -25,5 +25,10 @@ jobs:
       - name: Install deptry
         run: pip install deptry
 
+      # No --requirements-files flag: the CLI flag OVERRIDES pyproject.toml's
+      # `requirements_files` list, and hardcoding requirements.txt here is what made
+      # this workflow red on every run since 07/22/2026 — ingest/analysis/ imports
+      # numpy/sklearn/pandas, which live in ingest/requirements-analysis.txt.
+      # pyproject.toml [tool.deptry] is the ONE root for that list.
       - name: Check for missing dependencies
-        run: deptry ingest --requirements-files ingest/requirements.txt
+        run: deptry ingest

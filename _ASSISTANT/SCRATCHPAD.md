@@ -1,3 +1,54 @@
+## 2026-08-03 (Opus 5) — "WHY THE FUCK IS GITHUB RED?" + "Don't fix it back to being broke. Change it so it works."
+
+THREE separate reds, only one from today's push:
+
+1. CI typecheck — `ListBlock.tsx:59` passed `10` to `space()`, and `10` is not on the `Space`
+   scale (`0|4|8|12|16|24|32|48|64|96`). Snapped to `12`. NOTE: `bun` strips types, so the
+   thumbnail code RAN in the real sends; only `tsc --noEmit` / `next build` were broken —
+   which means prod deploy was broken since that commit.
+2. deptry — RED ON 8 CONSECUTIVE RUNS since 07/22, nobody noticed. `.github/workflows/deptry.yml`
+   hardcoded `--requirements-files ingest/requirements.txt`, and the CLI flag OVERRIDES
+   pyproject.toml's two-file list — so `ingest/requirements-analysis.txt` (numpy/sklearn/pandas)
+   was never read and `ingest/analysis/` looked like 16 missing deps. Flag removed; pyproject is
+   the one root.
+3. factuality-gate — 0 pass / 14 fail, ALL of them `"Your credit balance is too low to access the
+   Anthropic API"`. NOT a code bug. Same root cause already open as `anthropic_credits_nightly_red`,
+   `nightly_chain_dark_anthropic_credits`, `billing_deadman_alarm` — 8 days untouched. Operator
+   billing action; every push to main burns real API money on 14 live graded fixtures.
+
+THE REAL BUG HE WAS ASKING ABOUT — brand colors, fixed:
+`lifecycle-chrome.ts` decided "did the user set a brand?" with `accentColor ===
+DEFAULT_GLOBAL_STYLE.accentColor`. But DEFAULT_GLOBAL_STYLE.accentColor IS `#3DC9C0`, the house
+teal — so HIS OWN deliberately-picked teal read as "blank brand" and EDITORIAL_STYLE overwrote it
+with gold `#B98F45` + BOOK_SERIF/PLAYFAIR_SERIF. That is exactly "fonts suck not our brand colors."
+A colour can never answer "did the user choose this?", because the default is itself a legitimate
+choice. Fix: identity votes too (`docIsBlankBrand` — house accent AND blank/house `companyName`).
+Strictly narrower than before; the editorial palette still lands on genuinely blank seeds. Regression
+test proven red-then-green by reverting the predicate.
+
+STILL OPEN / NOT MINE: the aerial-thumbnail ban (entry above this one) hits the SAME code path I
+just padded — `ListBlock` thumbnails are fed by `resolveCompThumbnails()` (Mapbox satellite), which
+is BANNED. The block mechanism (`ListItem.imageUrl`) is fine and should stay; what must change is
+the SOURCE — real listing photos (`data_lake.listing_state.photo_url`, SteadyAPI `photo_url`), or an
+empty slot + realtor.com link. A concurrent session appears to own that; I did NOT touch it.
+
+## 2026-08-03 (Opus 5) — "WE CAN'T HAVE FUCKING ARIEL VIEWS....AGAIN!!!! PHOTOS OF THE FUCKING LISTING. THAT'S IT AND LINK TO REALTOR.COM LISTING OR SOLD LISTING"
+
+Screenshot: the market-comps evidence table rendered six broken image slots reading
+"Aerial view of 330…", "Aerial view of 141…" — Mapbox satellite thumbnails, and not even
+loading. AGAIN = at least the second time aerials have been called out.
+
+STANDING RULE (locked by operator decree 08/03/2026): a property visual in ANY deliverable is
+a REAL PHOTO OF THAT LISTING, or it is NOTHING. Satellite/aerial/map imagery is BANNED as a
+property visual — not a fallback, not a degradation path, not "the licensed-NOW visual."
+Every property row/card links to the realtor.com detail page (for-sale or sold). No photo →
+empty slot + link, never a substitute image.
+
+Where it was wired: `lib/listings/aerial.ts` (the builder), `lib/deliverable/recipes/market-comps.ts`
+(`resolveCompThumbnails` → per-comp satellite thumb), `lib/listings/select.ts`
+(`attachFeaturedAerial` hero fallback). Real photo lanes that exist and should be used instead:
+`data_lake.listing_state.photo_url` (our lake) and SteadyAPI `photo_url` / `primary_photo`.
+
 ## 2026-08-03 (Fable 5) — open-house/price-improved slides: "How have they become worse????? Why is PM so fucking big!?? Where is the commentary???? Why use the same house????? Where is the logo?????"
 
 1. PM HUGE: open-house date/time cells carry emphasis "primary" (accent + larger) and the long

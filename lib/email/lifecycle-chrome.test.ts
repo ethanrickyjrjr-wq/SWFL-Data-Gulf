@@ -56,6 +56,48 @@ function build(): EmailDoc {
 
 const find = (doc: EmailDoc, type: EmailBlock["type"]) => doc.blocks.find((b) => b.type === type)!;
 
+describe("BRAND IS STICKY — the editorial palette must not stomp a real brand", () => {
+  /** Minimal chrome; these tests care about globalStyle, not the spine. */
+  const chrome = {
+    ribbon: "Market Comps",
+    photo: null,
+    heroValue: "$1",
+    heroLabel: "x",
+    specs: [],
+  } as const;
+
+  it("keeps a real brand whose accent HAPPENS to be the house teal (regression, 08/03/2026)", () => {
+    // THE BUG: the blank-brand test was `accentColor === DEFAULT_GLOBAL_STYLE.accentColor`,
+    // and the house default IS #3DC9C0 — so the operator's own deliberately-picked teal read
+    // as "never set a brand" and the editorial palette overwrote it with gold #B98F45 and
+    // serif fonts. He saw it in a real inbox: "fonts suck not our brand colors."
+    const built = buildLifecycleEmail(
+      {
+        globalStyle: { ...DEFAULT_GLOBAL_STYLE, accentColor: "#3DC9C0" },
+        blocks: [
+          { id: "h1", type: "header", props: { companyName: "Ricky Cooper" } } as EmailBlock,
+        ],
+      },
+      chrome,
+    );
+    expect(built.globalStyle.accentColor).toBe("#3DC9C0");
+    expect(built.globalStyle.fontFamily).toBe(DEFAULT_GLOBAL_STYLE.fontFamily);
+  });
+
+  it("still applies the editorial palette to a genuinely blank seed", () => {
+    // The palette was built for this case and KEEPS working — the fix narrowed the
+    // predicate, it did not delete the fallback.
+    const built = buildLifecycleEmail(
+      {
+        globalStyle: DEFAULT_GLOBAL_STYLE,
+        blocks: [{ id: "h1", type: "header", props: { companyName: "" } } as EmailBlock],
+      },
+      chrome,
+    );
+    expect(built.globalStyle.accentColor).toBe("#B98F45");
+  });
+});
+
 describe("the agent and the ask — ONE row", () => {
   it("puts the CTA BESIDE the agent card, not under it", () => {
     const doc = build();

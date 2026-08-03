@@ -56,7 +56,7 @@ export function ListBlock({
                 <td
                   style={{
                     width: 56,
-                    padding: space(TABLE_ROW_PAD, 10, TABLE_ROW_PAD, 0),
+                    padding: space(TABLE_ROW_PAD, 12, TABLE_ROW_PAD, 0),
                     verticalAlign: "top",
                   }}
                 >

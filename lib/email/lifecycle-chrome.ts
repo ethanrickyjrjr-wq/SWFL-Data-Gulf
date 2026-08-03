@@ -57,7 +57,7 @@
 //
 // Enforced by lifecycle-chrome.test.ts — a recipe that drifts fails the suite.
 
-import { createBlock, DEFAULT_GLOBAL_STYLE } from "./doc/default-docs";
+import { createBlock, DEFAULT_GLOBAL_STYLE, HOUSE_BRAND } from "./doc/default-docs";
 import { finalizeDoc } from "./doc/finalize-doc";
 import type { PlanEntry } from "./doc/finalize-doc";
 import { GRID_COLS } from "./grid-schema";
@@ -131,6 +131,34 @@ function keepOrDefault(current: EmailDoc, type: EmailBlock["type"]): EmailBlock 
   return current.blocks.find((b) => b.type === type) ?? createBlock(type);
 }
 
+/**
+ * IS THIS DOC CARRYING A REAL USER BRAND, OR IS IT STILL A BLANK SEED?
+ *
+ * This used to be `accentColor === DEFAULT_GLOBAL_STYLE.accentColor` alone, and that is a
+ * FALSE POSITIVE on the one brand that matters most: DEFAULT_GLOBAL_STYLE.accentColor IS
+ * `#3DC9C0`, the SWFL house teal — so an operator who deliberately picked the teal was read
+ * as "never set a brand", and EDITORIAL_STYLE overwrote his real colours with gold `#B98F45`
+ * and his fonts with BOOK_SERIF/PLAYFAIR_SERIF. Caught 08/03/2026 off a real send; the
+ * operator's words were "fonts suck not our brand colors". A colour cannot answer the
+ * question "did the user choose this?", because the default is itself a legitimate choice.
+ *
+ * So identity has to vote too. A blank seed's header carries `companyName: ""` (the open-slot
+ * rule in `SEED_DOCS`) or the `HOUSE_BRAND` fallback; a doc that has been through a brand
+ * picker carries the user's own name. Requiring BOTH signals makes this strictly NARROWER
+ * than it was — the editorial palette still lands on genuinely blank docs (what it was built
+ * for), and it can no longer stomp a real brand that happens to share our teal.
+ *
+ * Contract this restores, stated at the top of this file: BRAND IS STICKY AND UNTOUCHED.
+ */
+function docIsBlankBrand(current: EmailDoc): boolean {
+  if (current.globalStyle.accentColor !== DEFAULT_GLOBAL_STYLE.accentColor) return false;
+  const header = current.blocks.find((b) => b.type === "header");
+  const companyName = (header?.props as { companyName?: unknown } | undefined)?.companyName;
+  if (typeof companyName !== "string") return true;
+  const named = companyName.trim();
+  return named === "" || named === HOUSE_BRAND.companyName;
+}
+
 /** One thing the chrome says: WHAT, HOW TALL, HOW WIDE, and whether it opens a new row.
  *  It still cannot write an x or a y — `finalizeDoc` alone decides WHERE. `newRow: false`
  *  is the entire vocabulary for "put me beside the last block"; `groupIntoRows` breaks on
@@ -167,8 +195,8 @@ function row(block: Omit<EmailBlock, "layout">, height: number, isStatic?: true)
  */
 export function buildLifecycleEmail(current: EmailDoc, chrome: LifecycleChrome): EmailDoc {
   // BRAND-OR-OURS: keep a real user brand; fall back to the editorial palette only when the
-  // incoming style is still the house default (a blank brand).
-  const brandIsHouse = current.globalStyle.accentColor === DEFAULT_GLOBAL_STYLE.accentColor;
+  // incoming doc is still a blank seed — colour AND identity both unset (see docIsBlankBrand).
+  const brandIsHouse = docIsBlankBrand(current);
   const globalStyle = brandIsHouse
     ? { ...current.globalStyle, ...EDITORIAL_STYLE }
     : { ...current.globalStyle };
