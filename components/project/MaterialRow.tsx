@@ -6,6 +6,7 @@ import type { EmailBlock } from "@/lib/email/doc/types";
 import { getMaterialStatus, getFormatBadge } from "@/lib/deliverable/material-status";
 import { ContactPickerModal } from "@/components/contacts/ContactPickerModal";
 import { openDoc } from "@/lib/lab-entry/destination";
+import { ShareLinkButton } from "./ShareLinkButton";
 
 /** Derive a human-readable title from the material's doc or fallback fields. */
 export function deriveTitle(d: DeliverableRow): string {
@@ -148,6 +149,11 @@ export function MaterialRow({ d, projectId, onRefresh, onTrash }: Props) {
             >
               Schedule
             </button>
+            <ShareLinkButton
+              deliverableId={d.id}
+              status={d.status}
+              className="text-xs text-gray-500 transition-colors hover:text-black"
+            />
             {status === "needs_update" && (
               <button
                 onClick={handleRefresh}
@@ -220,6 +226,11 @@ export function MaterialRow({ d, projectId, onRefresh, onTrash }: Props) {
           >
             Send
           </button>
+          <ShareLinkButton
+            deliverableId={d.id}
+            status={d.status}
+            className="shrink-0 text-xs text-white/40 hover:text-white/70 transition-colors"
+          />
         </div>
       )}
 
