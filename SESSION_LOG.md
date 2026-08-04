@@ -1,3 +1,43 @@
+## 2026-08-03 (Opus 5) — social photo carousel BUILT and LIVE on Bluesky; post-now route still single-image
+
+Operator: *"code this so the social builder can build correctly when asked. send the results to our
+bluesky account."* against `_ASSISTANT/2026-08-03-social-carousel-apify-HANDOFF.md`.
+
+LIVE POST (read-back verified, not the return value):
+https://bsky.app/profile/swfldatagulf.com/post/3ms7pytoefj23 — 2601 SW 37th Ter, Cape Coral, FL
+33914, FOR_SALE $385,000, 3 bd / 2 ba / 1,983 sqft / built 1992. Apify run `lxiDH7wcIbMRIGwWK`
+(dataset `j2OaXgf9J5xkTsh3K`), $0.05, 5 records for 33914 `for_sale`.
+
+Verified from `public.api.bsky.app/xrpc/app.bsky.feed.getPostThread` AFTER posting:
+`record embed: app.bsky.embed.images` · `view embed: app.bsky.embed.images#view` · `images: 4` ·
+`external: none` · `facets: 1`. The absence of an external embed is what makes a photo tap open the
+image viewer instead of navigating to realtor.com — the operator's actual ask. The realtor.com url
+rides in the post TEXT as the one link facet.
+
+SHIPPED — 4 of 5 parts:
+1. `lib/social/listing-carousel.ts` — PURE record → cards/caption. Deliberately owns no Apify fetch:
+   `lib/listings/apify-comps.ts` is a PARALLEL session's file (claim `31badd91`), so `parsePhotoList`
+   is a knowing 8-line duplicate of its `parseAltPhotos` rather than a contended import.
+2. `lib/social/listing-carousel.test.ts` — 24 tests, each named for a handoff §5 failure mode.
+   `bun test` → **24 pass, 0 fail, 57 expect()**.
+3. `lib/social/listing-card-render.ts` — sharp (decode rdcpix WEBP, cover-crop) → resvg (scrim +
+   text) → sharp (JPEG). Styled off `design/system.ts` `type()`/`ink()`/`accent()`, NOT
+   render-social-image.ts's private multipliers (`social_render_engine_off_system`). Text sits on an
+   opaque BRAND.deep scrim so contrast is a property of the scrim, not of whatever the photo is.
+4. `scripts/social/post-listing-carousel.ts` — dry-run + `--post`, with the appview read-back as the
+   acceptance gate. Rendered bytes: 116,434 / 195,918 / 183,586 / 62,009.
+5. **NOT DONE — `/api/social/post-now` still takes ONE `imageDataUrl`.** The UI "Post to Bluesky"
+   bar therefore cannot post a carousel; only the script can. Check opened:
+   `social_post_now_multi_image`.
+
+VENDOR FACTS (crawled in-session, docs.bsky.app/docs/advanced-guides/posts): "Each post contains up
+to four images. Individual images are limited to 1,000,000 bytes." Note the repo's
+`post-now-validate.ts` cites the LEXICON at 2,000,000 ("formerly limited to 1 MB") — the two vendor
+surfaces disagree. Rendered cards target 950,000 bytes, which is safe under either.
+
+Vendor shape confirmed on the real record: `alt_photos` is comma-space-joined STRING and REPEATS a
+url (dedupe is load-bearing, or the carousel shows one room twice); `half_baths` is the literal
+string `"<NA>"`, so baths is our arithmetic and a missing field OMITS its chip — never "0 ba".
 ## 2026-08-03 (Opus 5) — "bring it in": neighborhood_amenities graduated to probed — and the real reason nothing lands is ENGINE_ENABLED=false, ~90 crons dark
 
 Operator: *"why is this not coming in?"* → *"bring it in!!!!"* My prior answer described
