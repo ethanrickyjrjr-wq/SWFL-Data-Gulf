@@ -1,3 +1,14 @@
+## 2026-08-04 (Sonnet 5) — Pushed the comps-email overhaul + Gate 14; caught a stale-test gap the commit itself missed
+
+Landed `cc753834` (comps email: photos recovered, no-photo comps dropped, baths, fonts/grid, chart
+killed, one recipe; Gate 14 duplicate-root guard) and `67b499b8` (fixup). The Gate 9 ledger check
+on push caught two `market-comps.test.ts` assertions still pinned to the pre-conform labels ("Days
+listed" / "Comp median") that a prior commit had already renamed to "DOM" / "Median" — `bun test`
+was run before staging but not re-run against the merged HEAD after a genuinely live parallel
+session (confirmed, not assumed — it landed `9cc81da8` mid-commit) moved main under this work.
+Fixed the two assertions, no code change; `bunx tsc --noEmit` clean, full touched-file suite
+143/143 green before this push.
+
 ## 2026-08-04 (Opus 5) — CI, layer 2: the alarm that watches main shipped without its own test updated
 
 Second red behind the first. With Typecheck unblocked, `bun test` ran for the first time in five
