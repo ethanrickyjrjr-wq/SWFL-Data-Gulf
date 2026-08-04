@@ -309,6 +309,34 @@ the lake roots below. Everything "how the market looks right now" descends from 
   `<NA>` for **sold** ones; a sold subject's description needs the separate detail actor (deferred,
   check `apify_sold_comp_backfill_wire`).
 
+### A listing's BATH COUNT — three lanes, free before paid (added 08/03/2026)
+
+One concept, one provenance order. A consumer walks the lanes in order and stops at the first hit;
+a miss at every lane leaves `bathrooms` null and the surface **omits the whole spec line** rather
+than shipping "3 bed · — bath · 1,295 sqft" (operator: *"WE CAN'T HAVE BED AND SQ FT WITHOUT
+BATHS."*).
+
+- **LANE 1 — the vendor row itself** 🔴 *(structurally empty, do not wait on it)*. SteadyAPI
+  `/search` sets `bathrooms: null` **unconditionally** (`lib/listings/steadyapi.ts`); the raw
+  `description` it parses declares only `beds`, `sqft`, `lot_sqft`. This is not a bug to fix — the
+  endpoint does not carry the field.
+- **LANE 2 — `data_lake.listing_state.baths`** 🟢 — root: **the free bath count**. Fetch root:
+  `fetchLakeBathsByPropertyId` (`lib/listings/select.ts`), keyed on **`property_id`**, filled by the
+  nightly `enrich_baths_batched` lat/lon-clustered batch. Address-INDEPENDENT, so it reaches
+  streetless new-construction rows an address match structurally cannot. Zero live vendor calls.
+  ⚠️ **Measured fill rate 08/03/2026: ~20%** (Cape Coral / Fort Myers / Naples, active for-sale,
+  non-land) — real but partial, so a consumer still needs lane 3 or an honest omission.
+- **LANE 3 — Apify realtor.com, by ADDRESS** 🟡 (paid, $0.01/result). Fetch root:
+  `lib/listings/apify-baths.ts` — the SAME actor and wrapper as the comp-photo lane above
+  (`fetchApifyComps`), never a second vendor client. Keyed `street + city` so one street name in two
+  cities cannot swap bath counts. Consulted **only** for homes lane 2 missed that could otherwise
+  carry a full spec line, always capped (`MAX_RESULTS = 60`), **build-time only — never in a cron or
+  scheduled ingest**. Deliberately absent from `cadence_registry.yaml`: it has no cadence, and a
+  registry entry would make the freshness prober expect a schedule that does not exist.
+- **Consumer today:** `lib/deliverable/recipes/listings-digest.ts`. Its spec line is
+  **all-three-or-omitted per CARD, and all-cards-or-none per GRID** — a section where two cards show
+  a spec line and two are blank reads as broken.
+
 ## WEEKLY (cadence_days = 7)
 
 - **`market_aggregates_histogram`** 🟡 — root: **price distribution / bands** (list-side, weekly). → price-distribution-swfl. *(Was missing from v1 of this catalog.)*

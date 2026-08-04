@@ -52,6 +52,7 @@ import { buildMarketPulse } from "./market-pulse";
 import { buildBackOnMarket } from "./back-on-market";
 import { buildCommunityInfo } from "./community-info";
 import { buildListingsShowcase } from "./listings-showcase";
+import { buildListingsDigest } from "./listings-digest";
 import { buildDefaultGrid } from "./default-grid";
 
 /** What every builder is handed. The subject is ALREADY resolved — do not re-resolve. */
@@ -107,6 +108,7 @@ export const RECIPE_BUILDERS: Partial<Record<RecipeKey, RecipeBuilder>> = {
   // Closure supplies the injectable-deps default (same shape as back-on-market above).
   "community-info": (ctx) => buildCommunityInfo(ctx), // named vendor neighborhood: scores, nearby, values
   "listings-showcase": (ctx) => buildListingsShowcase(ctx), // photo -> one real reason -> CTA, ×3; no spec sheet
+  "listings-digest": (ctx) => buildListingsDigest(ctx), // one grid block per category, 4-6 real homes each, no home twice
   "default-grid": buildDefaultGrid, // the terminal fallback — open-slot grid over the fill seam
   // ── Social — a DIFFERENT renderer, and a DIFFERENT contract ────────────────
   // NOT RecipeBuilder-shaped, and deliberately not registered here. Recon (07/13/2026)

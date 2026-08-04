@@ -76,6 +76,7 @@ export const RECIPE_KEYS = [
   // found 08/03/2026) — a repeating photo→one-real-reason→CTA card, NO price/spec sheet.
   // Genuinely different structure from the lifecycle 7: multiple real homes, not one.
   "listings-showcase",
+  "listings-digest",
   // The terminal fallback — every keyless/typed ask lands here (one-lane collapse,
   // spec 2026-08-02). A coded grid with open slots; NEVER free-form layout.
   "default-grid",
@@ -396,6 +397,26 @@ export const RECIPES: Record<RecipeKey, Recipe> = {
       "Build a listings-showcase email for [[your city or ZIP]] — a few real homes " +
       "currently for sale nearby, each with a photo and one honest reason it stands " +
       "out, no price or spec sheet, just a real reason to look twice.",
+    needs: ["agent_name", "brokerage", "business_address"],
+  },
+  "listings-digest": {
+    key: "listings-digest",
+    // Pitches no specific property and no agent brand — recurring discovery content
+    // for a saved-search audience, the same job listings-showcase does.
+    // FAVORABLE_FRAMING_POLICY is NOT used here; this recipe has no LLM prompt at all.
+    positioning: "story-side",
+    label: "Listings Digest",
+    // The builder composes its own category sections — a variable category count has
+    // no fixed grid (listings-showcase precedent).
+    skeleton: null,
+    prose: null,
+    subject: "area",
+    // Real home photos ARE the content; no chart replaces them.
+    chart: "none",
+    prompt:
+      "Build a listings digest for [[your city or ZIP]] — several categories of real " +
+      "homes for sale right now (new construction, price drops, just listed), each " +
+      "category showing four real homes with photos, prices and links.",
     needs: ["agent_name", "brokerage", "business_address"],
   },
   "back-on-market": {
