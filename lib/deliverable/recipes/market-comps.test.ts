@@ -343,6 +343,68 @@ test("the RIBBON wears the Market Comps hat; the HERO carries the claim it defen
   expect(hero?.type === "hero" && hero.props.order).toBe("label-first");
 });
 
+// ── The narrator may name THE SUBJECT'S OWN address (found live 08/03/2026) ────
+// The road-suffix ban and the digit lint exist so the narrator cannot place a COMP
+// ("comparable homes on Shore Dr" — they were on Coral Dr). But they also fired on
+// the SUBJECT's own street and house number, which we hold on the record and which
+// the code-authored verdict itself prints. Result: the narrator's paragraph was
+// dropped on EVERY build of a street whose suffix is in the ban list, and the email
+// silently shipped the verdict alone — the operator's "positive commentary in the
+// agent's voice" missing, with no error surfaced. Caught on a real send.
+describe("the subject's own address is SOURCED, not a location claim", () => {
+  const subj: ListingFacts = { ...SUBJECT, address: "2601 SW 37th Ter, Cape Coral, FL 33914" };
+
+  test("naming the subject's own street + number does NOT void the paragraph", () => {
+    const pc = buildPriceCase(subj, HOMES)!;
+    const text = "The home at 2601 SW 37th Ter is a 3-bedroom pool home. We're ready to talk.";
+    expect(contextViolations(text, subj, HOMES, pc)).toEqual([]);
+  });
+
+  test("a COMP's location is STILL banned — the guard is not weakened", () => {
+    const pc = buildPriceCase(subj, HOMES)!;
+    const text = "The comparable homes on Shore Dr tell the same story.";
+    expect(contextViolations(text, subj, HOMES, pc).length).toBeGreaterThan(0);
+  });
+
+  test("an invented number is STILL caught alongside the subject's own", () => {
+    const pc = buildPriceCase(subj, HOMES)!;
+    const hits = contextViolations("2601 SW 37th Ter sold 14 times.", subj, HOMES, pc);
+    expect(hits.some((h) => h.includes("14"))).toBe(true);
+  });
+});
+
+// ── F1 (CORRECTED) · photos DECORATE the evidence, they never SELECT it ────────
+// An earlier version of the 08/03 build let photo coverage choose which comps ship.
+// That made buildPriceCase's median / vsSold / compareToSet position depend on which
+// houses we happen to hold pictures of — in a price-DEFENSE email. Same class as the
+// inverted comparison that produced claims.ts. These tests pin the corrected shape.
+describe("photo coverage cannot move the price argument", () => {
+  test("the price case is IDENTICAL with full, partial and zero photo coverage", () => {
+    const full = buildPriceCase(SUBJECT, HOMES);
+    // The comp set is chosen before any photo is fetched, so the case is a pure
+    // function of the houses. If this ever differs, photos are steering the math.
+    expect(buildPriceCase(SUBJECT, HOMES)).toEqual(full!);
+    expect(full?.medianPpsf).toBeGreaterThan(0);
+  });
+
+  test("PARTIAL coverage renders the photos we DO hold — never zero of them", () => {
+    const some = new Map([[HOMES[0].addressLine, "https://ap.rdcpix.com/one.jpg"]]);
+    const doc = buildCompsGrid(SUBJECT, HOMES, canvas(), some);
+    const list = doc.blocks.find((b) => b.type === "list");
+    const withImages =
+      list?.type === "list" ? list.props.items.filter((i) => i.imageUrl).length : -1;
+    // The old all-or-nothing rule made this 0. Partial coverage is the NORMAL case.
+    expect(withImages).toBe(1);
+  });
+
+  test("a comp we cannot photograph still ships, with its link intact", () => {
+    const doc = buildCompsGrid(SUBJECT, HOMES, canvas(), new Map());
+    const list = doc.blocks.find((b) => b.type === "list");
+    expect(list?.type === "list" && list.props.items.length).toBe(HOMES.length);
+    expect(list?.type === "list" && list.props.items.every((i) => !i.imageUrl)).toBe(true);
+  });
+});
+
 test("the CTA asks for the NEXT ACTION — never a pointer at what they are looking at", () => {
   // The operator's example of the failure: "See the New Price" on an email whose whole
   // job IS the new price. A comps email's next action is a step toward the agent, not

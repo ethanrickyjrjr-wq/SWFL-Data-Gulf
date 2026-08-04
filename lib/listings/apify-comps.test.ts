@@ -11,7 +11,6 @@ import {
   buildActorInput,
   fetchApifyComps,
   apifyPhotoIndex,
-  selectPhotographedComps,
   DESCRIPTION_CHAR_CAP,
   type ApifyRecord,
 } from "./apify-comps";
@@ -271,47 +270,5 @@ describe("F10 · a comp never borrows another house's photo", () => {
   test("a row with no photo never enters the index", () => {
     const idx = apifyPhotoIndex([{ street: "1 Nowhere Ln", city: "Naples", primary_photo: null }]);
     expect(idx.size).toBe(0);
-  });
-});
-
-// ── F1 — THE SILENT ONE. Partial coverage must not ship a photo-less table. ───
-describe("F1 · photo coverage gates comp SELECTION, not rendering", () => {
-  const comps = [1, 2, 3, 4, 5, 6].map((n) => ({
-    addressLine: `${n}00 Test St`,
-    city: "Cape Coral",
-  }));
-
-  test("4 of 6 photographed → ships 4 comps that ALL have photos, never 6 with none", () => {
-    const photos = new Map(
-      comps.slice(0, 4).map((c) => [c.addressLine, "https://ap.rdcpix.com/x.jpg"]),
-    );
-    const picked = selectPhotographedComps(comps, photos, 6);
-    expect(picked).toHaveLength(4);
-    expect(picked.every((c) => photos.has(c.addressLine))).toBe(true);
-  });
-
-  test("full coverage keeps the whole set, capped at max", () => {
-    const photos = new Map(comps.map((c) => [c.addressLine, "https://ap.rdcpix.com/x.jpg"]));
-    expect(selectPhotographedComps(comps, photos, 6)).toHaveLength(6);
-    expect(selectPhotographedComps(comps, photos, 3)).toHaveLength(3);
-  });
-
-  test("ZERO coverage falls back to the text+link table rather than shipping nothing", () => {
-    const picked = selectPhotographedComps(comps, new Map(), 6);
-    expect(picked).toHaveLength(6);
-  });
-
-  test("below the informative floor, coverage does NOT get to shrink the set", () => {
-    // 1 photographed comp is not a comps email — a 1-row table is worse than 6 unphotographed.
-    const photos = new Map([[comps[0].addressLine, "https://ap.rdcpix.com/x.jpg"]]);
-    expect(selectPhotographedComps(comps, photos, 6)).toHaveLength(6);
-  });
-
-  test("vendor order (nearest-first) is preserved among the photographed set", () => {
-    const photos = new Map(
-      [comps[1], comps[3], comps[5]].map((c) => [c.addressLine, "https://ap.rdcpix.com/x.jpg"]),
-    );
-    const picked = selectPhotographedComps(comps, photos, 6);
-    expect(picked.map((c) => c.addressLine)).toEqual(["200 Test St", "400 Test St", "600 Test St"]);
   });
 });

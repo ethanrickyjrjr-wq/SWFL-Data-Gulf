@@ -85,7 +85,7 @@
 
 import { compSources, compsForAddress, type RenderComp } from "@/lib/assistant/comp-helper";
 import { resolveCompPhotos } from "@/lib/listings/comp-photos";
-import { fetchApifyComps, selectPhotographedComps } from "@/lib/listings/apify-comps";
+import { fetchApifyComps } from "@/lib/listings/apify-comps";
 import {
   buildDescriptionBlock,
   upsertDescriptionBlock,
@@ -393,10 +393,17 @@ function compsMiddle(
     ),
   ];
   if (comps.length) {
-    // ALL-OR-NOTHING photos: a table where two rows have a picture and four are blank
-    // reads as broken. Either every comparable home shows its OWN real listing photo,
-    // or the table is text + link only. Never a stand-in image for the missing ones.
-    const everyRowHasAPhoto = comps.every((c) => thumbnails.get(c.addressLine));
+    // PER-ROW photos. This used to be ALL-OR-NOTHING — every row shows its photo or
+    // none do — on the reasoning that a table with two pictures and four blanks reads
+    // as broken. That rule is a rendering AESTHETIC, and it collided with reality: our
+    // photo window opened 06/30/2026 while a comp set reaches back 6-12 months, so
+    // PARTIAL coverage is the normal case, and all-or-nothing turned "we have 4 of 6
+    // photos" into SIX rows with ZERO photos — silently, with no error anywhere, in an
+    // email whose brief explicitly asked for comp thumbnails.
+    //
+    // The per-row contract is the one comp-photos.ts already states in its own header:
+    // "A comp we cannot photograph ships without a picture and keeps its realtor.com
+    // link." That is the truth constraint; the even-looking table was never one.
     blocks.push(
       sized(
         {
@@ -404,9 +411,7 @@ function compsMiddle(
           type: "list",
           props: {
             title: mixTitle(comps),
-            items: comps.map((c) =>
-              compRow(c, everyRowHasAPhoto ? thumbnails.get(c.addressLine) : undefined),
-            ),
+            items: comps.map((c) => compRow(c, thumbnails.get(c.addressLine))),
           },
         },
         Math.max(4, comps.length + 2),
@@ -959,7 +964,27 @@ export function contextViolations(
   pc: PriceCase,
 ): string[] {
   const hits: string[] = [];
-  const lower = text.toLowerCase();
+
+  // ── THE SUBJECT'S OWN ADDRESS IS A SOURCED FACT, NOT A LOCATION CLAIM. ──────
+  // The road-suffix ban below exists for ONE reason: the narrator once called
+  // 141/143 Coral Dr "comparable homes on Shore Dr". That is a claim about where a
+  // COMP is, and we hold no comp location beyond "nearby".
+  //
+  // But it also fired on the SUBJECT's own street — which we read straight off the
+  // record and which the code-authored verdict PRINTS one sentence earlier. Found
+  // live 08/03/2026 on 2601 SW 37th Ter: "ter" tripped the suffix ban and "2601"
+  // and "37" tripped the digit lint, so the narrator's paragraph was dropped on
+  // EVERY build of that listing and the email shipped the verdict alone. The
+  // operator's "commentary in the agent's voice" vanished, silently.
+  //
+  // So the subject's own street line is lifted out BEFORE the scans. Only the exact
+  // subject address is removed — every other road name, and every other number,
+  // still faces the full lint. The guard is narrowed to its real target, not weakened.
+  const subjectLine = (facts.address ?? "").split(",")[0]?.trim() ?? "";
+  const scanned = subjectLine
+    ? text.replace(new RegExp(subjectLine.replace(/[.*+?^${}()|[\]\\]/g, "\\$&"), "gi"), " ")
+    : text;
+  const lower = scanned.toLowerCase();
 
   for (const phrase of BANNED_CONTEXT_PHRASES) {
     // Word-boundary match, so "over" does not fire on "discover" and "block" does not
@@ -977,14 +1002,14 @@ export function contextViolations(
     comps.map((c) => mdy(c.priceDate)).filter((d): d is string => Boolean(d)),
   );
   const DATE = /\b\d{2}\/\d{2}\/\d{4}\b/g;
-  for (const d of text.match(DATE) ?? []) {
+  for (const d of scanned.match(DATE) ?? []) {
     if (!sourcedDates.has(d)) hits.push(`unsourced date: "${d}"`);
   }
 
   // A numeric token is `$595,000` / `2,847` / `0.26` — a trailing sentence period is NOT
   // part of it (`[\d,.]*` greedily ate the full stop and reported `"$450,000."`).
   const allowed = sourcedDigits(facts, comps, pc);
-  for (const tok of text.replace(DATE, " ").match(/\$?\d[\d,]*(?:\.\d+)?/g) ?? []) {
+  for (const tok of scanned.replace(DATE, " ").match(/\$?\d[\d,]*(?:\.\d+)?/g) ?? []) {
     const digits = tok.replace(/\D/g, "");
     if (digits && !allowed.has(digits)) hits.push(`unsourced number: "${tok}"`);
   }
@@ -1163,22 +1188,28 @@ export async function buildMarketComps(ctx: RecipeBuildContext): Promise<EmailDo
   // months to a year ago" — a sale carrying no date, or a valuation (no sale date to
   // go stale on), is never dropped by this filter; only an OLD RECORDED SALE is.
   const now = new Date();
-  const eligible = (result?.comps ?? [])
+  const comps = (result?.comps ?? [])
     .filter(isComparableHome)
     .filter((c) => isNotSubjectAddress(c, facts.address))
-    .filter((c) => isFreshSale(c, now));
+    .filter((c) => isFreshSale(c, now))
+    .slice(0, MAX_COMPS);
 
-  // A REAL PHOTO of each comparable home — our own lake first, then the paid Apify
-  // lane for the ones that predate our sweep. Never a satellite aerial, never any
-  // other stand-in image (operator decree 08/03/2026).
+  // *** WHICH COMPS DEFEND THE PRICE IS DECIDED BEFORE ANY PHOTO IS FETCHED, AND
+  //     IT MUST STAY THAT WAY. ***
+  // Nearest-first is the vendor's own order and we keep it. An earlier version of
+  // this build let PHOTO COVERAGE choose the set (take the photographed ones) — which
+  // silently made `buildPriceCase`'s median, `vsSold` and `compareToSet` position
+  // depend on which houses we happen to hold pictures of. In a price-DEFENSE email
+  // that is the exact class of error `claims.ts` exists to prevent: the comparison
+  // moving for a reason that has nothing to do with the houses. Photos decorate the
+  // evidence; they never select it.
   //
-  // *** ORDER IS THE GUARD. *** Photos are resolved over the FULL eligible pool and
-  // only THEN does the set get chosen, because `compsMiddle` renders thumbnails
-  // all-or-nothing (`comps.every(...)`). Slice first and a 4-of-6 photo hit rate
-  // ships SIX rows with ZERO photos — the operator's "comps with thumbnails"
-  // requirement vanishing with no error anywhere. Design §4 F1.
-  const thumbnails = await resolveCompThumbnails(eligible, facts.zip);
-  const comps = selectPhotographedComps(eligible, thumbnails, MAX_COMPS);
+  // A REAL PHOTO of each comparable home — our own lake first, then the paid Apify
+  // lane for the ones that predate our sweep (its window opened 06/30/2026). Never a
+  // satellite aerial, never any other stand-in image (operator decree 08/03/2026).
+  // A comp we cannot photograph ships without a picture and keeps its realtor.com
+  // link — the PER-ROW contract stated in comp-photos.ts's own header.
+  const thumbnails = await resolveCompThumbnails(comps, facts.zip);
   let doc = buildCompsGrid(facts, comps, currentDoc, thumbnails);
 
   // ── THE CHART. This deliverable IS about a number, so it earns one — and the

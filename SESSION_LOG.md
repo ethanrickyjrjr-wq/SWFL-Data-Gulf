@@ -1,3 +1,42 @@
+## 2026-08-03 (Opus 5) — CORRECTION to the entry below: my own F1 fix was wrong, and "5 of 6" was really 4 of 6
+
+Three corrections to the commit below (`aa76de66`), all found in review, all now fixed and green
+(2,872 tests pass, `bunx next build` clean). Final send: **`7ff50f23-2c84-4c58-b42d-5ae7b75b29fc`.**
+
+**1. My F1 fix introduced a correctness bug in a price-defense email.** I made photo coverage gate
+comp SELECTION. That means the comps defending the asking price would have been chosen by *which
+houses we happen to hold pictures of* — and `buildPriceCase`'s median, `vsSold` and position claim
+are computed over whatever ships. The argument would move for a reason unrelated to the houses:
+precisely the class of error `claims.ts` was built to stop. It was latent only because coverage is
+currently 0; it would have fired on the first run after the credential lands.
+**The real fault was the all-or-nothing RENDER rule, not the selection.** `compsMiddle` is now
+per-row — which is what `comp-photos.ts` promised all along ("a comp we cannot photograph ships
+without a picture and keeps its realtor.com link"). Selection is back to nearest-first, decided
+before any photo is fetched. `selectPhotographedComps` is deleted, with a comment where it stood
+saying why it must not come back. Pinned: the price case is identical under full/partial/zero
+coverage.
+
+**2. "5 of 6" was wrong — it was 4 of 6.** My audit counted requirement #5 (agent commentary) as
+landed whenever a non-empty text block existed. But when the narrator trips the claim gate its
+paragraph is DROPPED and the email ships the code-authored verdict alone — which is still a text
+block. The audit now measures the AI tail separately (last send: 156 chars).
+
+**3. And the narrator WAS being dropped, on every single build — a real pre-existing defect.**
+`contextViolations`' road-suffix ban and digit lint fired on the SUBJECT'S OWN street and house
+number: "ter" from "2601 SW 37th Ter", plus "2601" and "37". Those bans exist so the narrator cannot
+place a COMP (it once called Coral Dr homes "on Shore Dr"); the subject's own address is a sourced
+fact the verdict itself prints one sentence earlier. The exact subject street-line is now lifted out
+before the scans — every other road name and number still faces the full lint, and a test pins that
+a comp's location is still banned. **Any listing whose street suffix is in the ban list has been
+silently shipping without its agent commentary.**
+
+Also corrected two spec claims that asserted mechanisms which do not exist: the enrichment is NOT
+persisted (every build re-buys — check `apify_enrichment_not_persisted_rebuys`), and the description
+block carries a `linkUrl` + the sources tail, not an inline attribution line.
+
+Still blocked, unchanged: no Apify credential in the local dotenv, so the description and all comp
+photos remain absent. Verified it is not in the shell env or `.mcp.json` either.
+
 ## 2026-08-03 (Opus 5) — comp email coded to the handoff and SENT; 5 of 6 — no Apify credential, so the two new features are dark
 
 Operator: *"i want to see this coded correctly for builder to make and sent to hello@swfldatagulf.com

@@ -296,38 +296,21 @@ export function apifyPhotoIndex(records: ApifyRecord[]): Map<string, string> {
   return out;
 }
 
-// ── F1 · COVERAGE GATES SELECTION, NOT RENDERING ─────────────────────────────
-
-/** Below this many photographed comps, a photo-gated set stops being a comps
- *  table and becomes a stub. Six unphotographed rows beat two photographed ones —
- *  the argument is the evidence, and the photos are how it reads. */
-const MIN_PHOTOGRAPHED = 3;
-
-/**
- * *** THE SILENT FAILURE THIS EXISTS TO KILL. ***
- *
- * `compsMiddle` renders thumbnails only when `comps.every(c => thumbnails.get(c))`
- * — an all-or-nothing rule that is right on its own terms (a table where two rows
- * have a picture and four are blank reads as broken). But combined with partial
- * coverage it fails SILENTLY and in the worst direction: fill 4 of 6 and the
- * reader gets SIX rows and ZERO photos. The operator asked for photos on the
- * comps; that requirement would vanish with no error anywhere.
- *
- * The fix is ordering, not rendering: resolve photos FIRST, then let coverage
- * choose the SET. Four photographed comps is a better comps email than six
- * unphotographed ones.
- *
- * Vendor order (nearest-first) is preserved — this filters, it never re-ranks.
- */
-export function selectPhotographedComps<T extends { addressLine: string }>(
-  comps: T[],
-  photos: Map<string, string>,
-  max: number,
-): T[] {
-  const withPhoto = comps.filter((c) => photos.has(c.addressLine));
-  // Enough real photos to carry a table -> the photographed set wins.
-  if (withPhoto.length >= MIN_PHOTOGRAPHED) return withPhoto.slice(0, max);
-  // Otherwise keep the full evidence set and ship it text + link, which is the
-  // documented no-photo behavior: a comp we cannot photograph keeps its link.
-  return comps.slice(0, max);
-}
+// ── WHY THERE IS NO `selectPhotographedComps` HERE ───────────────────────────
+//
+// One existed, briefly, on 08/03/2026. It let PHOTO COVERAGE choose which comps
+// shipped — take the photographed ones, fall back to the full set below a floor —
+// as the fix for `compsMiddle` rendering thumbnails all-or-nothing.
+//
+// It was WRONG, and quietly so. `market-comps` computes its median $/sq ft, its
+// vs-recorded-sales relation and its position-in-set claim over whichever comps
+// ship. Letting photo availability pick that set makes the central argument of a
+// price-DEFENSE email depend on which houses we happen to hold pictures of — the
+// same class of error as the inverted comparison that produced `claims.ts`.
+//
+// The real fault was the all-or-nothing RENDER rule, not the selection. That rule
+// is now per-row (market-comps.ts `compsMiddle`), which is what `comp-photos.ts`
+// promised all along: "A comp we cannot photograph ships without a picture and
+// keeps its realtor.com link."
+//
+// *** Photos decorate the evidence. They never select it. Do not re-add this. ***
