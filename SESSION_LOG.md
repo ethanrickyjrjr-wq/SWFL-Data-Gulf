@@ -1,3 +1,44 @@
+## 2026-08-03 (Opus 5) — CORRECTION: the "carousel" I shipped was a 2x2 GRID. Real carousel = app.bsky.embed.video + presentation:"gif"
+
+Operator, on seeing the post: *"WHY THE FUCK ISN'T IT A CAROUSEL"* + screenshot of a 2x2 grid.
+He was right. Correcting the entry below it.
+
+WHAT I GOT WRONG: I read the post back from the appview, saw `app.bsky.embed.images` / `images: 4` /
+`external: none`, and reported "verified live: 4-image carousel." That JSON proves a DATA SHAPE. It
+says NOTHING about how a client draws it. **A data-shape read-back cannot verify a rendering.** The
+handoff asserted the same thing ("the carousel behaves like a carousel") and I inherited the claim
+instead of testing it.
+
+THE VENDOR FACT, fetched 08/03/2026: **Bluesky has no swipeable multi-image carousel.** The lexicon
+has three visual embeds — images, video, external. `app.bsky.embed.images` renders 2-4 photos as a
+static MOSAIC GRID. The docs never promise swipe; I assumed it.
+
+THE FIX — `app.bsky.embed.video` (lexicons/app/bsky/embed/video.json, fetched verbatim):
+`"presentation": { "knownValues": ["default", "gif"] }` — "gif" autoplays, loops, drops the player
+chrome. A looping slideshow mp4 IS the auto-advancing carousel. `maxSize 100000000` (100 MB).
+PROBED LIVE: `com.atproto.repo.uploadBlob` accepts `Content-Type: video/mp4` directly and returns a
+normal blob (200) — the separate video-service upload + job-polling flow is NOT needed for this path.
+
+SHIPPED:
+- `lib/social/channels/bluesky.ts` — additive `video?: BlueskyVideo` on `BlueskyPostInput`; video
+  wins the single-embed slot outright. Existing tests: **10 pass, 0 fail**.
+- `scripts/social/post-listing-carousel.ts` — `--video` encodes the 4 rendered slides into a
+  looping mp4 via local ffmpeg (`xfade=slideleft`, 2.5s slides, 0.5s crossfades, 8.53s,
+  835,774 bytes, h264 1080x1080) and posts it with `presentation:"gif"`.
+- The success line no longer says "carousel" off a JSON read-back. It states the embed facts and
+  explicitly names what it did NOT verify.
+
+LIVE: https://bsky.app/profile/swfldatagulf.com/post/3msa2byjyuz23
+VERIFIED BY LOOKING AT IT (browser, not JSON): renders as ONE full-width video card, GIF badge
+bottom-right, address/price/specs fully visible and uncropped.
+NOT VERIFIED: autoplay + loop in a SIGNED-IN feed — logged-out web shows a play button. Operator
+confirms that.
+
+SECOND DEFECT the grid exposed: the 2x2 tiles CROPPED the 1080x1080 cards ("$385,000" clipped,
+Bluesky's ALT badge over the address). Moot for the video path (full width), but it is why a card
+composed for one surface must not be assumed to survive another.
+
+Dead post left up for the record: https://bsky.app/profile/swfldatagulf.com/post/3ms7pytoefj23 (grid).
 ## 2026-08-03 (Opus 5) — CORRECTION to the entry below: my own F1 fix was wrong, and "5 of 6" was really 4 of 6
 
 Three corrections to the commit below (`aa76de66`), all found in review, all now fixed and green

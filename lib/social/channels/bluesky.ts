@@ -41,12 +41,46 @@ export interface BlueskyImage {
   aspectRatio?: { width: number; height: number };
 }
 
+/**
+ * A video embed (`app.bsky.embed.video`).
+ *
+ * VENDOR-VERIFIED 08/03/2026 against the live lexicon
+ * (github.com/bluesky-social/atproto, lexicons/app/bsky/embed/video.json):
+ * `video` is a plain `blob` accepting ONLY `video/mp4`, maxSize 100,000,000
+ * ("May be up to 100mb, formerly limited to 50mb"). Probed live the same day:
+ * `com.atproto.repo.uploadBlob` accepts `Content-Type: video/mp4` directly and
+ * returns a normal blob (200) — the separate video-service upload + job-polling
+ * flow is NOT required for this path.
+ *
+ * `presentation` is the field that matters for a carousel: its knownValues are
+ * ["default", "gif"], and "gif" tells the client to autoplay, loop, and drop
+ * the player chrome. A looping slideshow mp4 posted with presentation:"gif" is
+ * the only thing on this platform that reads as an auto-advancing carousel —
+ * `app.bsky.embed.images` renders 2-4 photos as a static MOSAIC GRID, never a
+ * swipeable one. That was proven the hard way: post 3ms7pytoefj23 shipped as a
+ * 2x2 grid while its read-back JSON said "4 images", because a data-shape
+ * read-back cannot verify a client rendering.
+ */
+export interface BlueskyVideo {
+  bytes: Uint8Array;
+  /** Must be "video/mp4" — the lexicon accepts nothing else. */
+  mime: string;
+  alt: string;
+  aspectRatio?: { width: number; height: number };
+  /** "gif" → autoplay + loop + no controls. Omit for a normal player. */
+  presentation?: "default" | "gif";
+}
+
 export interface BlueskyPostInput {
   caption: string;
   /** Single-image convenience (the post-now route's shape). */
   image?: BlueskyImage;
-  /** Multi-image post (lexicon cap: 4). Takes precedence over `image`. */
+  /** Multi-image post (lexicon cap: 4). Takes precedence over `image`.
+   *  NOTE: this renders as a mosaic GRID in the official client, not a carousel. */
   images?: BlueskyImage[];
+  /** Video embed. A post carries ONE embed, so this takes precedence over
+   *  both `images` and `image` when set. */
+  video?: BlueskyVideo;
 }
 
 export interface BlueskyPostResult extends PublishResult {
@@ -114,8 +148,13 @@ export async function postToBluesky(
   input: BlueskyPostInput,
   cred: BlueskyCredential,
 ): Promise<BlueskyPostResult> {
+  // A post carries exactly ONE embed. Video wins outright when present, so an
+  // images embed is never built alongside it.
+  const video = input.video;
   // Normalized image list — `images` wins; the lexicon caps a post at 4.
-  const imageList: BlueskyImage[] = input.images ?? (input.image ? [input.image] : []);
+  const imageList: BlueskyImage[] = video
+    ? []
+    : (input.images ?? (input.image ? [input.image] : []));
   if (imageList.length > 4) {
     return {
       ok: false,
@@ -132,7 +171,22 @@ export async function postToBluesky(
     if (!sessionRes.ok) return xrpcFailure("createSession", sessionRes);
     const session = (await sessionRes.json()) as CreateSessionResponse;
 
-    // 2. uploadBlob — one per attached image, in post order
+    // 2a. uploadBlob — the video, when this is a video post.
+    let videoBlob: unknown = null;
+    if (video) {
+      const vRes = await fetch(`${PDS_BASE}/xrpc/com.atproto.repo.uploadBlob`, {
+        method: "POST",
+        headers: {
+          Authorization: `Bearer ${session.accessJwt}`,
+          "Content-Type": video.mime,
+        },
+        body: video.bytes as BodyInit,
+      });
+      if (!vRes.ok) return xrpcFailure("uploadBlob(video)", vRes);
+      videoBlob = ((await vRes.json()) as UploadBlobResponse).blob;
+    }
+
+    // 2b. uploadBlob — one per attached image, in post order
     const blobs: unknown[] = [];
     for (const img of imageList) {
       const uploadRes = await fetch(`${PDS_BASE}/xrpc/com.atproto.repo.uploadBlob`, {
@@ -160,7 +214,15 @@ export async function postToBluesky(
     };
     const facets = detectLinkFacets(input.caption);
     if (facets.length > 0) record.facets = facets;
-    if (imageList.length > 0) {
+    if (video && videoBlob) {
+      record.embed = {
+        $type: "app.bsky.embed.video",
+        video: videoBlob, // embedded verbatim — never reshaped
+        alt: video.alt,
+        ...(video.aspectRatio ? { aspectRatio: video.aspectRatio } : {}),
+        ...(video.presentation ? { presentation: video.presentation } : {}),
+      };
+    } else if (imageList.length > 0) {
       record.embed = {
         $type: "app.bsky.embed.images",
         images: imageList.map((img, i) => ({
