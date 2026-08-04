@@ -73,6 +73,52 @@ describe("matchNeighborhoodByPoint", () => {
     expect(hit?.slug_id).toBe("Twin-Eagles_Naples_FL");
   });
 
+  // FAILURE MODE (measured live 08/04/2026, and the reason these tests exist):
+  // LEVEL_SPECIFICITY shipped with an INVENTED level, "subdivision", which the
+  // vendor never emits, and it omitted the two levels that carry the actual
+  // community names. Live level census over all 429 stored areas:
+  //   neighborhood 78 · macro_neighborhood 7 · residential_neighborhood 341 · sub_neighborhood 3
+  // "residential_neighborhood" is the community grain ("Bella Vida", "Sanibel
+  // Bayous", "Bonita Beachwalk Condominiums"); the bare "neighborhood" level is a
+  // ROAD-CORRIDOR sector ("Jacaranda", "West End"). Both unmapped levels scored 0,
+  // so a corridor at specificity 1 BEAT the real community — over 6,000 real
+  // listing coordinates, 40 of the 102 multi-boundary hits named the corridor
+  // instead of the community, and the wrong one would have shipped as a stated
+  // fact in an email. Not a null; an actively wrong answer.
+  it("prefers a residential_neighborhood over the road-corridor neighborhood containing it", () => {
+    const corridor = square("Jacaranda_Cape-Coral_FL", -81.8, 26.1, 0.1, {
+      level: "neighborhood",
+    });
+    const community = square("Bella-Vida_Cape-Coral_FL", -81.78, 26.12, 0.1, {
+      level: "residential_neighborhood",
+    });
+    const hit = matchNeighborhoodByPoint(26.15, -81.75, [corridor, community]);
+    expect(hit?.slug_id).toBe("Bella-Vida_Cape-Coral_FL");
+  });
+
+  it("prefers a sub_neighborhood over the neighborhood containing it", () => {
+    const outer = square("Jacaranda_Cape-Coral_FL", -81.8, 26.1, 0.1, {
+      level: "neighborhood",
+    });
+    const inner = square("Magnolia-Landing_North-Fort-Myers_FL", -81.78, 26.12, 0.1, {
+      level: "sub_neighborhood",
+    });
+    const hit = matchNeighborhoodByPoint(26.15, -81.75, [outer, inner]);
+    expect(hit?.slug_id).toBe("Magnolia-Landing_North-Fort-Myers_FL");
+  });
+
+  // The ordering must be the VENDOR's four real levels, so an unrecognized level
+  // stays broad-by-default and can never outrank a known specific one.
+  it("treats an unknown level as broadest, never beating a known specific level", () => {
+    const unknown = square("Mystery_FL", -81.8, 26.1, 0.1, { level: "county_thing" });
+    const community = square("Bella-Vida_Cape-Coral_FL", -81.78, 26.12, 0.1, {
+      level: "residential_neighborhood",
+    });
+    expect(matchNeighborhoodByPoint(26.15, -81.75, [unknown, community])?.slug_id).toBe(
+      "Bella-Vida_Cape-Coral_FL",
+    );
+  });
+
   it("returns null on absent or non-finite coordinates", () => {
     expect(matchNeighborhoodByPoint(Number.NaN, -81.75, [RURAL])).toBeNull();
     expect(matchNeighborhoodByPoint(26.15, Number.NaN, [RURAL])).toBeNull();
@@ -158,11 +204,76 @@ describe("neighborhoodAmenitiesSourceLine", () => {
     expect(line).toContain("on-site");
   });
 
-  it("names the community, the count, and the real nearest distance", () => {
+  it("states the count and the real nearest distance", () => {
     const line = neighborhoodAmenitiesSourceLine(resolved)!;
-    expect(line).toContain("Rural Estates");
     expect(line).toContain("golf");
     expect(line).toContain("0.24");
+  });
+
+  // FAILURE MODE — A ROAD STATED AS A PLACE. Measured live 08/04/2026 over all
+  // 21,008 rows of the pairing edge: 18,013 of them (86%) resolve to a vendor area
+  // at `neighborhood` or `macro_neighborhood` grain, and at those two levels this
+  // vendor's "neighborhood" names are ROADS AND CITY SECTORS, not communities —
+  // Lehigh Acres boulevards (Eisenhower 2,074 listings, Joel 1,182, Richmond 1,048,
+  // Harris 795) and Cape Coral parkways (Burnt Store 1,493, Mariner 1,335, Diplomat
+  // 1,204, Pelican 1,124, Hancock 981). "The vendor places it in Eisenhower, Lehigh
+  // Acres" asserts a street as a neighborhood in 86% of listing emails. It is
+  // vendor-sourced, so no no-invention lint catches it — the guard has to be here.
+  //
+  // The AMENITY COUNTS are unaffected and stay: they are measured from the property,
+  // not from the area name. So the placement clause is dropped and the counts are
+  // kept, rather than going silent and losing a real sourced fact.
+  it("does NOT state a placement for a road-corridor area (macro_neighborhood)", () => {
+    const line = neighborhoodAmenitiesSourceLine({ ...resolved, level: "macro_neighborhood" })!;
+    expect(line).not.toContain("Rural Estates");
+    expect(line.toLowerCase()).not.toContain("places it in");
+    // the sourced facts survive
+    expect(line).toContain("golf");
+    expect(line).toContain("0.24");
+    expect(line).toContain("5 miles");
+  });
+
+  it("does NOT state a placement at the bare neighborhood level either", () => {
+    const line = neighborhoodAmenitiesSourceLine({
+      ...resolved,
+      level: "neighborhood",
+      name: "Eisenhower",
+      city: "Lehigh Acres",
+    })!;
+    expect(line).not.toContain("Eisenhower");
+    expect(line).toContain("golf");
+  });
+
+  // At community grain the name IS what a buyer would call the place, so it is stated.
+  it("states the placement at community grain (residential_neighborhood)", () => {
+    const line = neighborhoodAmenitiesSourceLine({
+      ...resolved,
+      level: "residential_neighborhood",
+      name: "Bella Vida",
+      city: "Cape Coral",
+    })!;
+    expect(line).toContain("Bella Vida");
+    expect(line).toContain("Cape Coral");
+  });
+
+  it("states the placement for a sub_neighborhood", () => {
+    const line = neighborhoodAmenitiesSourceLine({
+      ...resolved,
+      level: "sub_neighborhood",
+      name: "Magnolia Landing",
+    })!;
+    expect(line).toContain("Magnolia Landing");
+  });
+
+  // An unrecognized level is NOT assumed to be a community — same broad-by-default
+  // posture as the specificity table, for the same reason.
+  it("withholds the placement for an unknown level", () => {
+    const line = neighborhoodAmenitiesSourceLine({
+      ...resolved,
+      level: "county_thing",
+      name: "Mystery Area",
+    })!;
+    expect(line).not.toContain("Mystery Area");
   });
 
   // FAILURE MODE — false feature licensing. shared.ts's authorListingNarrative turns

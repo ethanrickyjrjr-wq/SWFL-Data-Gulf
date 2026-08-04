@@ -25,7 +25,21 @@ on:
 
 jobs:
   ingest:
-    if: ${{ vars.ENGINE_ENABLED != 'false' || github.event_name == 'workflow_dispatch' }}
+    # FAIL-CLOSED, and on its OWN flag (corrected 08/04/2026 — this is Gate 13's
+    # founding incident). It previously read `vars.ENGINE_ENABLED != 'false'`: a
+    # NOT-EQUALS, so an unset variable still ran it, and ENGINE_ENABLED is 'true'
+    # repo-wide anyway. The result was a 500-call/day SteadyAPI sweep running
+    # unattended on a schedule nobody approved, described to the operator as
+    # "blocked on an operator-only ENGINE_ENABLED flip". It was not blocked.
+    #
+    # AMENITIES_DRAIN_ENABLED is deliberately a DEDICATED variable, not the shared
+    # engine switch: flipping ENGINE_ENABLED is how ~86 other workflows get turned
+    # on, so hanging a paid drain off it means any unrelated engine change silently
+    # restarts the spend. The variable is unset today, so a `gh workflow enable`
+    # alone does NOT resume spending — turning this back on takes two deliberate
+    # acts. Before either, read the open check: only 14% of pairings land at a
+    # grain the product is allowed to name (see lib/listings/neighborhood-amenities.ts).
+    if: ${{ vars.AMENITIES_DRAIN_ENABLED == 'true' || github.event_name == 'workflow_dispatch' }}
     runs-on: ubuntu-latest
     timeout-minutes: 15
     env:

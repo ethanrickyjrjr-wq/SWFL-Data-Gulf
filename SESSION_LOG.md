@@ -1,3 +1,66 @@
+## 2026-08-04 (Opus 5) — Gate 13: a paid cron can no longer ship running-by-default
+
+Operator: *"WOULDN'T I WANT MORE GUARDS INSTEAD OF WATCHING YOU CHASE YOUR FUCKING DICK FOR AN
+HOUR??????????"* — yes. Built.
+
+**THE INCIDENT (mine, 08/03–08/04).** `neighborhood-amenities-daily.yml` shipped with
+`cron: "30 9 * * *"` and `if: ${{ vars.ENGINE_ENABLED != 'false' || ... }}`. A NOT-EQUALS: an unset
+variable is not the string `'false'`, so the job RUNS — up to 500 SteadyAPI calls/day, unattended.
+`ENGINE_ENABLED` is `'true'` repo-wide (set 08/04 00:13 UTC), so the only reason it had not spent yet
+is that the single tick in its history landed on 08/03 while the flag was still `false`. I reported
+this to the operator as *"needs an operator-only ENGINE_ENABLED flip"* having never opened the
+condition. `!=` and `==` are opposite defaults for an unset var and I assumed the reassuring one.
+
+**Why the existing money guard missed it:** `check-no-paid-dispatch.mjs` defines paid as
+`/ANTHROPIC_API_KEY/` — model credits only. SteadyAPI quota was in nobody's definition of money.
+
+**FOUR THINGS SHIPPED (4 of 4):**
+1. **`.claude/hooks/lib/cron-failclosed.mjs`** — pure rules. `METERED_SECRETS` derived from a live
+   census of `.github/workflows/*.yml`, with the exclusions reasoned in-file (Supabase/Postgres = our
+   infra; FRED/Census/BLS = free, keyed for rate limits; the OAuth pairs publish rather than meter and
+   deserve their own gate). `isFailClosed` judges polarity: every `vars/env/inputs` comparison must be
+   `==`; one `!=` poisons it.
+2. **Gate 13 in `check-prepush-gate.mjs`** — blocks an ADDED workflow that is SCHEDULED + METERED +
+   FAIL-OPEN. Fail-OPEN on its own internal error, fail-CLOSED on a real violation. Escape:
+   `ALLOW_UNGATED_PAID_CRON=1`. Added-files-only, so editing an old cron never re-litigates it.
+3. **The real workflow repaired** — now `vars.AMENITIES_DRAIN_ENABLED == 'true'`, a DEDICATED flag,
+   deliberately not the shared engine switch (flipping `ENGINE_ENABLED` for any of ~86 other
+   workflows would otherwise silently restart the drain). The variable is unset, so a `gh workflow
+   enable` alone does not resume spending — two deliberate acts now required. Also disabled at the
+   GitHub level (`state=disabled_manually`, verified via the Actions workflows API).
+4. **22 tests** (`node:test` — `bun test` skips dot-dirs, `node --test` can't load the `bun:` scheme).
+
+**EVIDENCE, end-to-end, not just unit-green.** Proved in a throwaway worktree: committed a workflow
+carrying the incident's exact condition → the hook exits **2** with the Gate 13 banner naming
+`spends: PHOTOS_API`; flipped that one operator to `== 'true'` → exits **0**, zero Gate 13 hits. So it
+blocks the bad shape and passes the good one. Gate 10 (schedule catalog) fires FIRST on an
+unregistered cron, which is also why Gate 13 is not a duplicate of it: the real workflow WAS
+registered, so Gate 10 passed it and nothing else ever looked at the polarity. Junction removed before
+the worktree was deleted; real `node_modules` verified intact (1,173 entries).
+
+**ALSO FIXED, same session, both mine, both found by the operator asking what the pairing does:**
+- `LEVEL_SPECIFICITY` contained `subdivision`, **a level this vendor never emits**. Live census of all
+  429 stored areas: `neighborhood` 78 · `macro_neighborhood` 7 · `residential_neighborhood` 341 ·
+  `sub_neighborhood` 3. The two community-grain levels were unmapped, scored broadest, and LOST to the
+  corridor level — over 6,000 real listing coordinates, 40 of the 102 multi-boundary hits named a road
+  instead of the community ("Jacaranda" for "Bella Vida"). A wrong stated fact, not a blank one.
+- **The area name is now spoken ONLY at community grain.** 18,013 of 21,008 paired listings (86%) sit
+  at corridor grain, where this vendor's "neighborhood" names are streets — Lehigh Acres boulevards
+  (Eisenhower 2,074 · Joel 1,182 · Richmond 1,048 · Harris 795) and Cape Coral parkways (Burnt Store
+  1,493 · Mariner 1,335 · Diplomat 1,204 · Pelican 1,124 · Hancock 981). I had ticketed this and left
+  it emitting; it was already wired into every listing recipe. Now withheld at corridor grain and at
+  any unrecognized level, amenity counts kept in both branches (they are measured from the property,
+  not the area, so nothing sourced is lost).
+
+**THE PATTERN BEHIND BOTH:** I asserted someone else's contract without opening it — a vendor's enum,
+a workflow's condition. RULE 0.4 was being applied to response *shapes* and not to the *enumerated
+values inside them*. An enum's members and a CI condition's operator are vendor/infra contracts
+exactly like a MIME type is.
+
+Tests: 22/22 Gate 13 · 76/76 all hook libs · 29/29 amenities · 3112/3112 `lib/listings lib/geo
+lib/deliverable lib/email`. Checks: closed `amenities_area_name_is_road_corridor_not_community`,
+opened `neighborhood_amenities_cron_disabled_pending_operator`. NOT PUSHED — awaiting approval.
+
 ## 2026-08-04 (Opus 5) — main is now wired to the alarm that already existed
 
 Operator: *"how do we not have that already?"* **We did.** `log-cron-incident.yml` has watched 79

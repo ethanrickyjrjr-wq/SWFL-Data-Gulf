@@ -107,11 +107,27 @@ export interface ResolvedNeighborhood {
 // ── Matching (pure) ──────────────────────────────────────────────────────────────
 
 /** Vendor levels ordered broad -> specific. Anything unrecognized (including null)
- *  is treated as broad, so an unknown level can never beat a known specific one. */
+ *  is treated as broad, so an unknown level can never beat a known specific one.
+ *
+ *  MEASURED, NOT ASSUMED (live census of all 429 stored areas, 08/04/2026):
+ *    neighborhood 78 · macro_neighborhood 7 · residential_neighborhood 341 · sub_neighborhood 3
+ *  Those four are the complete set the vendor actually emits. This table first
+ *  shipped with "subdivision", a level the vendor NEVER returns, and without
+ *  `residential_neighborhood`/`sub_neighborhood` — the two that carry the real
+ *  community names. Both unmapped levels fell to 0, so the bare `neighborhood`
+ *  level (specificity 1) outranked them; but in this vendor's data `neighborhood`
+ *  is a ROAD-CORRIDOR sector ("Jacaranda", "West End", "Eisenhower") while
+ *  `residential_neighborhood` is the community a buyer would name ("Bella Vida",
+ *  "Sanibel Bayous"). Over 6,000 real listing coordinates, 40 of the 102
+ *  multi-boundary hits therefore resolved to the corridor instead of the
+ *  community — an actively WRONG stated fact, not a silent null. Re-measure
+ *  before adding a level:
+ *    SELECT level, count(*) FROM data_lake.steadyapi_neighborhoods GROUP BY 1; */
 const LEVEL_SPECIFICITY: Record<string, number> = {
   macro_neighborhood: 0,
   neighborhood: 1,
-  subdivision: 2,
+  sub_neighborhood: 2,
+  residential_neighborhood: 3,
 };
 
 function specificity(level: string | null | undefined): number {
@@ -218,7 +234,6 @@ export function neighborhoodAmenitiesSourceLine(
 ): string | null {
   if (!n || n.amenities.length === 0) return null;
 
-  const where = n.city ? `${n.name}, ${n.city}` : n.name;
   const asOf = n.asOf ? ` as of ${toMmDdYyyy(n.asOf)}` : "";
   const radius =
     n.searchRadiusMiles != null && Number.isFinite(n.searchRadiusMiles)
@@ -241,9 +256,29 @@ export function neighborhoodAmenitiesSourceLine(
   });
 
   const scope = radius ? `within ${radius}` : "nearby";
+
+  // THE AREA NAME IS ONLY SPOKEN AT COMMUNITY GRAIN. Measured live 08/04/2026 across
+  // all 21,008 rows of the pairing edge: 18,013 (86%) sit at `neighborhood` or
+  // `macro_neighborhood`, and at those levels this vendor's area names are ROADS AND
+  // CITY SECTORS — Lehigh Acres boulevards (Eisenhower 2,074 listings, Joel 1,182,
+  // Richmond 1,048, Harris 795), Cape Coral parkways (Burnt Store 1,493, Mariner
+  // 1,335, Diplomat 1,204, Pelican 1,124, Hancock 981). Naming one would tell a buyer
+  // the home is in a neighborhood called "Eisenhower", which is a street. The value is
+  // vendor-sourced so no no-invention lint would ever catch it; this is the only guard.
+  // Only 2,995 edges (14%) sit at `residential_neighborhood`/`sub_neighborhood`, where
+  // the name IS what a buyer would say (Bella Vida, Sanibel Bayous, Magnolia Landing).
+  // An unrecognized level withholds the name, same broad-by-default posture as
+  // LEVEL_SPECIFICITY. The COUNTS are unaffected either way — they are measured from
+  // the property, not from the area — so the placement clause drops and the sourced
+  // facts stay. Test-enforced; re-measure the grain split before loosening this.
+  const COMMUNITY_GRAIN = new Set(["residential_neighborhood", "sub_neighborhood"]);
+  const placement = COMMUNITY_GRAIN.has(String(n.level ?? ""))
+    ? ` the vendor places it in ${n.city ? `${n.name}, ${n.city}` : n.name}${asOf}, and`
+    : "";
+
   return (
-    `AROUND THIS HOME — the vendor places it in ${where}${asOf}. Counted ${scope} of ` +
-    `the property: ${items.join("; ")}. ` +
+    `AROUND THIS HOME —${placement} counted ${scope} of ` +
+    `the property${asOf && !placement ? ` (${asOf.trim()})` : ""}: ${items.join("; ")}. ` +
     `THESE ARE NEARBY BUSINESSES ${scope.toUpperCase()} — NOT amenities inside the ` +
     `community. Never write that the community "has", "includes", "features", or ` +
     `"offers" any of them; never "on-site"; never "resident-only"; never imply a ` +

@@ -55,6 +55,7 @@ import {
   tablesCreatedInSql,
   tablesDeclaredInPipeline,
 } from "./lib/table-consumer.mjs";
+import { cronViolations } from "./lib/cron-failclosed.mjs";
 import {
   computeGaps,
   invalidClasses,
@@ -376,6 +377,13 @@ process.stdin.on("end", () => {
   // doctrine is not a gate; this is. Rules + positive controls against that exact
   // migration: lib/table-consumer{,.test}.mjs. Escape: ALLOW_TABLE_WITHOUT_CONSUMER=1.
   tableConsumerGate(base);
+
+  // ---- Gate 13: a new SCHEDULED workflow that spends metered quota by default --
+  // Born 08/04/2026: a `!= 'false'` job condition made a 500-call/day SteadyAPI
+  // cron run whenever its flag was unset, and it was reported to the operator as
+  // gated behind his approval. Rules + tests: lib/cron-failclosed{,.test}.mjs.
+  // Escape: ALLOW_UNGATED_PAID_CRON=1.
+  cronFailClosedGate(base);
 
   // ---- Gate 8: ZIP scope root (Lee + Collier, 57) ---------------------------
   // Coverage has ONE root (isCoreScope, refinery/lib/core-scope.mts) and the leak
@@ -1064,6 +1072,81 @@ function tableConsumerGate(base) {
         `  2. If the table is deliberately landing ahead of its consumer, say so out\n` +
         `     loud: ALLOW_TABLE_WITHOUT_CONSUMER=1 and open a check for the wiring in\n` +
         `     the same session (RULE 2.4 — no silent deferrals).`,
+    );
+  } catch {
+    return; // never wedge a push on this gate's own bug
+  }
+}
+
+// Gate 13 body — an UNATTENDED cron that spends metered vendor quota and runs by
+// DEFAULT (08/04/2026).
+//
+// The incident: neighborhood-amenities-daily.yml landed with cron "30 9 * * *" and
+//   if: ${{ vars.ENGINE_ENABLED != 'false' || github.event_name == 'workflow_dispatch' }}
+// A NOT-EQUALS. An unset variable is not the string 'false', so the job runs — up to
+// 500 SteadyAPI calls per day, unattended, on a schedule nobody approved. The session
+// that wrote it then told the operator the drain was "blocked on an operator-only
+// ENGINE_ENABLED flip", having never read the condition. Found a day later, by asking.
+//
+// check-no-paid-dispatch.mjs did not catch it because that guard defines paid as
+// /ANTHROPIC_API_KEY/ — model credits only. SteadyAPI quota was in nobody's
+// definition of money. lib/cron-failclosed.mjs names every metered key instead.
+//
+// Fires on ADDED workflow files only: retrofitting the 100+ existing workflows is a
+// separate decision, and editing an old cron must not re-litigate it.
+// Fail-OPEN on any internal error. Escape: ALLOW_UNGATED_PAID_CRON=1.
+function cronFailClosedGate(base) {
+  try {
+    if (process.env.ALLOW_UNGATED_PAID_CRON === "1") {
+      process.stdout.write(
+        `\n[pre-push gate] OVERRIDE: ALLOW_UNGATED_PAID_CRON=1 — shipping a scheduled\n` +
+          `workflow that spends metered quota by default (logged).\n`,
+      );
+      return;
+    }
+
+    let added = [];
+    try {
+      added = sh(`git diff --name-only --diff-filter=A ${base}..HEAD`)
+        .split("\n")
+        .map((s) => s.trim())
+        .filter(Boolean)
+        .filter(isSafeTestFilePath) // path-shape guard before any sh()
+        .filter((f) => /^\.github\/workflows\/[^/]+\.ya?ml$/i.test(f));
+    } catch {
+      return; // fail open
+    }
+    if (added.length === 0) return;
+
+    const files = [];
+    for (const f of added) {
+      try {
+        files.push({ path: f, text: sh(`git show HEAD:${f}`) });
+      } catch {
+        continue;
+      }
+    }
+
+    const violations = cronViolations(files);
+    if (violations.length === 0) return;
+
+    block(
+      `UNGATED PAID CRON — ${violations.length} new scheduled workflow(s) that spend by default`,
+      `${violations
+        .map((v) => `  ${v.path}\n    spends: ${v.metered.join(", ")}\n    ${v.reason}`)
+        .join("\n\n")}\n\n` +
+        `Each workflow above runs on a CRON (no human present), spends METERED vendor\n` +
+        `quota, and RUNS WHEN ITS ENABLING VARIABLE IS UNSET.\n\n` +
+        `\`!= 'false'\` and \`== 'true'\` are OPPOSITE defaults for an unset variable.\n` +
+        `On 08/03/2026 the not-equals form shipped on a 500-call/day SteadyAPI sweep and\n` +
+        `was reported to the operator as gated behind his own approval. It was not.\n\n` +
+        `Fix (either is legitimate):\n` +
+        `  1. Make it fail-CLOSED — \`if: \${{ vars.YOUR_FLAG == 'true' }}\`, so the\n` +
+        `     workflow cannot start spending until someone deliberately turns it on.\n` +
+        `  2. If it is MEANT to run unattended from the moment it lands, say so out\n` +
+        `     loud: ALLOW_UNGATED_PAID_CRON=1, and tell the operator the per-run call\n` +
+        `     ceiling and the schedule in the same message — not the header comment's\n` +
+        `     description of intent, the condition's actual behavior.`,
     );
   } catch {
     return; // never wedge a push on this gate's own bug
