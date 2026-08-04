@@ -46,41 +46,42 @@
 -- 2007-2025 with ZERO future years, so no year guard is needed beyond rejecting a
 -- non-numeric or future year defensively.
 --
--- A VIEW, not a table — same reasoning as the permits view: data-roots rule 4, the bytes
--- are already persisted and immutable, and a second copy buys only a staleness window.
+-- A READ LAYER over `data_lake.steadyapi_tax_history` — NOT a root, NOT a second parse.
+-- Same shape as the permits view: the TABLE is the root, this types and guards it. Never
+-- re-parse `steadyapi_property_history_raw` here; a missing field goes in the PARSER.
+
+-- ══ CORRECTION 08/04/2026 — THIS VIEW USED TO BE A SECOND PARSE ════════════
+-- It parsed `steadyapi_property_history_raw`'s `tax_history[]` array itself, alongside
+-- `data_lake.steadyapi_tax_history` — the typed table built from the SAME array, at an
+-- identical 273,051 rows. Two parses of one array is the "one root per concept" violation,
+-- and `docs/standards/data-consolidation-plan.md` — the source of data-roots rule 4 —
+-- settles the shape: "only ingest writes base tables; only root views read them; only
+-- consumers read root views." The TABLE is the root. This is the read layer over it.
+--
+-- The per-field `jsonb_typeof` guards that used to live here did their work at PARSE time
+-- and belong to the parser now, not the reader. What survives is the one guard that is a
+-- READ concern: a defensive future-year rejection, kept because `tax_year` is the column a
+-- caller is most likely to render straight onto a series axis.
 
 create or replace view data_lake.steadyapi_tax_history_v as
 select
-  r.property_id,
-  (h->>'year')::int                                                as tax_year,
-  -- Numeric ONLY when the vendor really sent a number. `->>` on a JSON null yields SQL
-  -- NULL, but a defensive typeof keeps a future string payload from casting to garbage.
-  case when jsonb_typeof(h->'tax_amount') = 'number'
-       then (h->>'tax_amount')::numeric end                        as tax_amount,
-  case when jsonb_typeof(h->'assessment'->'total') = 'number'
-       then (h->'assessment'->>'total')::numeric end               as assessment_total,
-  case when jsonb_typeof(h->'assessment'->'building') = 'number'
-       then (h->'assessment'->>'building')::numeric end            as assessment_building,
-  case when jsonb_typeof(h->'assessment'->'land') = 'number'
-       then (h->'assessment'->>'land')::numeric end                as assessment_land,
-  case when jsonb_typeof(h->'market_value'->'total') = 'number'
-       then (h->'market_value'->>'total')::numeric end             as market_value_total,
-  case when jsonb_typeof(h->'market_value'->'building') = 'number'
-       then (h->'market_value'->>'building')::numeric end          as market_value_building,
-  case when jsonb_typeof(h->'market_value'->'land') = 'number'
-       then (h->'market_value'->>'land')::numeric end              as market_value_land,
-  r.address_key,
-  r.county,
-  r.fetched_at
-from data_lake.steadyapi_property_history_raw r
-cross join lateral jsonb_array_elements(
-  coalesce(r.body->'body'->'tax_history', '[]'::jsonb)
-) as h
-where h->>'year' ~ '^[0-9]{4}$'
-  and (h->>'year')::int <= extract(year from current_date)::int;
+  e.property_id,
+  e.tax_year,
+  e.tax_amount,
+  e.assessment_total,
+  e.assessment_building,
+  e.assessment_land,
+  e.market_value_total,
+  e.market_value_building,
+  e.market_value_land,
+  e.address_key,
+  e.county,
+  e.fetched_at
+from data_lake.steadyapi_tax_history e
+where e.tax_year <= extract(year from current_date)::int;
 
 comment on view data_lake.steadyapi_tax_history_v is
-  'Per-property per-YEAR tax + valuation series, parsed with ZERO paid calls from data_lake.steadyapi_property_history_raw. 273,051 year-rows / 16,514 properties / 2007-2025, avg 16.5 years per property (measured 08/04/2026). NOT A VALUATION AUTHORITY - full-book assessed/market value stays leepa_parcels (Lee) and collier_parcels (Collier, which IS the FDOR pull and IS covered). LISTING-SCOPED: a row exists only for a probed listed/sold property, so never serve an aggregate here as a county or ZIP statistic. Two jobs: (1) the third cross-source agreement family vs county valuation; (2) the intended home for annual tax paid, where no root exists today (fetchPropertyTaxAnnual is a stub). tax_amount IS NOT CLEARED FOR USER-FACING SERVING until validated against a real county tax bill - check steadyapi_tax_amount_validation_owed - and a vendor annual tax figure is not the county bill. VALUE SPARSITY IS THE TRAP: assessment_total 99.99% but assessment_building 22.0% and assessment_land 19.0%; market_value_total 99.9%, building 77.7%, land 67.3% - key presence is not value presence, never render an absent split as zero. 4 rows carry tax_amount=0 and those are real tiny parcels (assessment total 100-103), not sentinels. Playbook: docs/superpowers/plans/2026-08-02-steadyapi-raw-landing-playbook.md STEP 3 family B.';
+  'READ LAYER over data_lake.steadyapi_tax_history - NOT a root and NOT a second parse. The ROOT is the TABLE; this view only types and guards it (data-consolidation-plan.md: only ingest writes base tables, only root views read them, only consumers read root views). CORRECTION 08/04/2026: an earlier cut re-parsed property_history_raw tax_history[] itself, alongside the table built from the same array at the identical row count - two parses of one array. Per-property per-YEAR tax + valuation series, ZERO paid calls. 273,051 year-rows / 16,514 properties / 2007-2025, avg 16.5 years per property (measured 08/04/2026). NOT A VALUATION AUTHORITY - full-book assessed/market value stays leepa_parcels (Lee) and collier_parcels (Collier, which IS the FDOR pull and IS covered). LISTING-SCOPED: a row exists only for a probed listed/sold property, so never serve an aggregate here as a county or ZIP statistic. Two jobs: (1) the third cross-source agreement family vs county valuation; (2) the intended home for annual tax paid, where no root exists today (fetchPropertyTaxAnnual is a stub). tax_amount IS NOT CLEARED FOR USER-FACING SERVING until validated against a real county tax bill - check steadyapi_tax_amount_validation_owed - and a vendor annual tax figure is not the county bill. VALUE SPARSITY IS THE TRAP: assessment_total 99.99% but assessment_building 22.0% and assessment_land 19.0%; market_value_total 99.9%, building 77.7%, land 67.3% - key presence is not value presence, never render an absent split as zero. 4 rows carry tax_amount=0 and those are real tiny parcels (assessment total 100-103), not sentinels. Playbook: docs/superpowers/plans/2026-08-02-steadyapi-raw-landing-playbook.md STEP 3 family B.';
 
 grant select on data_lake.steadyapi_tax_history_v to service_role;
 

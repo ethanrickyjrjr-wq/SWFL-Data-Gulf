@@ -35,8 +35,14 @@ export interface PropertyPermitRow {
   project_type_1: string | null;
   project_type_2: string | null;
   project_type_3: string | null;
-  /** The vendor string, ALWAYS preserved. Universally 'Mon D, YYYY' — 79,281 of
-   *  79,281 measured 08/04/2026, zero ISO. */
+  /** The stored date UNGUARDED, as ISO text — so the 4 absurd futures stay inspectable
+   *  after `effective_date` NULLs them.
+   *
+   *  ⚠️ NOT the vendor literal. The vendor ships 'Mon D, YYYY' universally (79,281 of
+   *  79,281 measured 08/04/2026, zero ISO), but the root TABLE does not store that string,
+   *  and since 08/04 this view reads the table instead of re-parsing the raw JSON. Restore
+   *  the literal in the PARSER if it is ever needed — never by re-parsing in a view.
+   *  Check: `steadyapi_permits_vendor_date_string_not_stored`. */
   effective_date_raw: string | null;
   /** ISO date, or NULL when the view's sanity guard rejected it (4 rows carry absurd
    *  futures: 'Feb 14, 2282' and 'Aug 1, 2269' x3). */
@@ -92,8 +98,9 @@ export function permitDateLabel(p: PropertyPermitRow): string | null {
 /** Identity for duplicate detection — everything the vendor actually varies, EXCLUDING
  *  `permit_ordinal` (which is what makes duplicates distinct rows in the first place).
  *
- *  BOTH date forms are in the key, deliberately. In the live view they are 1:1 (parsed
- *  is derived from raw), so including both is free — but keying on raw ALONE means any
+ *  BOTH date forms are in the key, deliberately. In the live view they are 1:1 (raw is
+ *  the unguarded form of the same stored date), so including both is free — but keying
+ *  on raw ALONE means any
  *  future feed where the parsed date differs while the string collides would silently
  *  merge two real permits into one. A dedupe that over-merges destroys history, which is
  *  strictly worse than the double-count it was written to prevent. */

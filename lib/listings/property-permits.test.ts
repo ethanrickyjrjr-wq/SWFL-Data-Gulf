@@ -26,7 +26,7 @@ function permit(over: Partial<PropertyPermitRow> = {}): PropertyPermitRow {
     project_type_1: "Roofing",
     project_type_2: null,
     project_type_3: null,
-    effective_date_raw: "Jun 1, 2022",
+    effective_date_raw: "2022-06-01",
     effective_date: "2022-06-01",
     ...over,
   };
@@ -58,7 +58,10 @@ describe("DATES — 4 source rows carry an absurd future the view already NULLed
   test("a null parsed date renders NO date — never the raw garbage string", () => {
     // 'Aug 1, 2269' must never reach a reader, and must never be silently turned into
     // today either. The permit itself is still real, so it is kept.
-    const p = permit({ effective_date: null, effective_date_raw: "Aug 1, 2269" });
+    // effective_date_raw is the UNGUARDED stored date as ISO text, not the vendor's
+    // literal "Aug 1, 2269" — the root table does not keep the vendor string (check
+    // steadyapi_permits_vendor_date_string_not_stored). Either shape must stay unreadable.
+    const p = permit({ effective_date: null, effective_date_raw: "2269-08-01" });
     expect(permitDateLabel(p)).toBeNull();
 
     const out = summarizePropertyPermits([p]);

@@ -122,7 +122,17 @@ export function laneFor(name, input) {
     return "research";
 
   // LIVE — a real DB shell counts too.
-  if (/^(Bash|PowerShell)$/.test(n) && /\b(psql|execute_sql|supabase\s+db)\b/.test(cmd))
+  //
+  // FIXED 08/04/2026. `psql` IS NOT INSTALLED ON THIS BOX — every live Postgres read in this
+  // repo goes through `new Bun.SQL(...)` (scripts/run-migration.ts, scripts/check-schema-drift.ts,
+  // scripts/gen-supabase-types.ts, and every ad-hoc `bun -e` probe). The matcher below recognized
+  // only psql / execute_sql / supabase db, so the repo's OWN canonical DB path scored zero and the
+  // gate blocked turns that had already queried prod. Measured the day this was fixed: five live
+  // SQL queries in one session, all credited as nothing, two forced re-answers.
+  if (
+    /^(Bash|PowerShell)$/.test(n) &&
+    /\b(psql|execute_sql|supabase\s+db)\b|Bun\.SQL|sql\.unsafe\(|run-migration\.ts/.test(cmd)
+  )
     return "live";
 
   // CODE — a SEARCH across the tree.
