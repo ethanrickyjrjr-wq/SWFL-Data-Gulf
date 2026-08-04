@@ -52,6 +52,26 @@ CORRECTION to my own earlier draft of this entry: I wrote that the operator set 
 himself. `gh variable list` reports `updatedAt`, **not the actor** — all that is established is
 that it was last written 08/03 02:27 UTC. Who wrote it is unknown.
 
+## 2026-08-03 (Opus 5) — button-links HANDOFF written (spec only, no code)
+
+`_ASSISTANT/2026-08-03-button-links-HANDOFF.md` for a fresh Opus session, per operator request.
+Check opened: `button_links_agent_owned_build`. Six behaviors spec'd from the decree — fill-in popup
+unless the destination is already saved in brand · fail-confirm (NOT a block) on any
+swfldatagulf.com button in a branded user's doc · rename carries the saved URL · edit by
+double-click or in brand · a per-listing CTA that rides with each new listing's landing address ·
+per-link destinations saved in brand.
+
+Probed rather than spec'd from memory. **The blocker is a schema gap: `ButtonProps` is
+`{label?, url?, bgColor?}` — there is no stable identity on a button**, so nothing exists to bind a
+saved destination to. Adding a required `role` is task 1 and everything waits on it. Also captured:
+`apply-brand.ts` already says "Brand owns ordinary link destinations" and deliberately lets an
+engine-set `mailto:` reply CTA survive — a regression test must protect that through the refactor.
+
+Handoff §6 names the trap that would make this look finished when it isn't: `applyBrand` is
+browser-only, so all six behaviors can pass in the lab while every scheduled/blast send still ships
+our links (`applybrand_no_server_side_caller`). §3.5 flags a genuine ambiguity in "the saved website
+follows it" — role-keyed vs name-keyed — with instructions to ASK the operator, not guess.
+
 ## 2026-08-03 (Opus 5) — §0.1d LINKS BELONG TO THE AGENT (I had the hierarchy inverted); per-link brand override gap opened
 
 Operator decree: *"the agent can change all links and should be able to save that in their brand. We

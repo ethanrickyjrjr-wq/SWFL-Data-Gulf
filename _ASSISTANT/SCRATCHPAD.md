@@ -35,6 +35,25 @@ was last written 08/03 02:27 UTC; by whom is unknown. Inferring an actor from a 
 writing it into the permanent record is the same failure as inferring a cron fires from a
 `schedule:` block, one screen up in this very entry. Tracked as `engine_enabled_off_all_crons_dark`.
 
+## 2026-08-03 (Opus 5) — button-links build SPEC'd, not built — handoff written for a fresh Opus session
+
+Operator asked for a handoff, not an implementation. Written:
+`_ASSISTANT/2026-08-03-button-links-HANDOFF.md`. Check opened: `button_links_agent_owned_build`.
+
+Six behaviors from his decree: fill-in popup unless already saved in brand · fail-confirm on any
+swfldatagulf.com button built by a branded user (confirm, NOT a block — he's allowed to choose us) ·
+rename carries the saved URL · edit by double-click OR in brand · per-listing CTA that rides with
+each new listing (new landing address every time) · all of it saved per-link in brand.
+
+THE BLOCKER THE NEXT SESSION HITS IMMEDIATELY: `ButtonProps` is `{label?, url?, bgColor?}` —
+**no stable identity on a button at all.** Nothing to bind a saved destination to. That type-lift
+is task 1 and everything else waits on it.
+
+ONE QUESTION I DID NOT GUESS ON, flagged in the handoff §3.5 — *"if a user changes the name of a
+button, the saved website follows it"* reads two ways: the URL stays bound through a rename
+(role-keyed), or destinations are keyed by NAME so renaming re-points the button. I spec'd the first
+and told the next session to ASK rather than ship a guess.
+
 ## 2026-08-03 (Opus 5) — "We don't want anyone coming to our site unless they need to" — I had the link hierarchy BACKWARDS
 
 OPERATOR DECREE, verbatim: *"the agent can change all links and should be able to save that in their
