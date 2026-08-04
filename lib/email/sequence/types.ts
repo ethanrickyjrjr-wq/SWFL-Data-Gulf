@@ -96,6 +96,7 @@ const BLOCK_LABELS: Record<BlockType, string> = {
   text: "Text",
   image: "Image",
   listing: "Listing card",
+  "listing-grid": "Listing grid",
   "multi-column": "Columns",
   list: "List",
   "metric-card": "Live metric",

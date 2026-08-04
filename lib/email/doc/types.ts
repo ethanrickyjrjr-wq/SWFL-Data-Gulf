@@ -18,6 +18,7 @@ export type BlockType =
   | "text"
   | "image"
   | "listing"
+  | "listing-grid"
   | "multi-column"
   | "list"
   | "metric-card"

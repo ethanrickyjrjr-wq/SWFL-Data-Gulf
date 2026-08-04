@@ -9,6 +9,7 @@ import { SignalBlock } from "./SignalBlock";
 import { TextBlock } from "./TextBlock";
 import { ImageBlock } from "./ImageBlock";
 import { ListingBlock } from "./ListingBlock";
+import { ListingGridBlock } from "./ListingGridBlock";
 import { MultiColumnBlock } from "./MultiColumnBlock";
 import { ListBlock } from "./ListBlock";
 import { MetricCardBlock } from "./MetricCardBlock";
@@ -86,6 +87,13 @@ export function BlockRenderer({
       );
     case "listing":
       return <ListingBlock props={block.props} globalStyle={globalStyle} scope={scope} />;
+    // Serves BOTH HTML engines — EmailDocRenderer (free tier) and compile-grid
+    // (grid tier) dispatch through this one switch. The PDF has its own; a block
+    // wired here and not there is emails.md §5's recurring failure (F9).
+    // No `scope`: every field is data-seeded from a real listing, so there is
+    // nothing on this block a canvas editor may rewrite.
+    case "listing-grid":
+      return <ListingGridBlock props={block.props} globalStyle={globalStyle} />;
     case "multi-column":
       return <MultiColumnBlock props={block.props} globalStyle={globalStyle} scope={scope} />;
     case "list":

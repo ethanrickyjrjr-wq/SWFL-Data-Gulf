@@ -651,6 +651,118 @@ function PdfBlock({ block, gs }: { block: EmailBlock; gs: EmailGlobalStyle }) {
       );
     }
 
+    // The PDF's OWN arm for listing-grid. BlockRenderer covers both HTML engines;
+    // this switch is independent, and its `default:` below means an omission here
+    // renders silently as nothing (emails.md §5 / F9). Two-across via flexWrap so a
+    // 4- or 6-card category lays out like the email, not as one long column.
+    case "listing-grid": {
+      const p = block.props;
+      const cards = p.cards ?? [];
+      if (cards.length === 0) return null;
+      return (
+        <View style={s.section}>
+          {p.title ? (
+            <Text
+              style={{
+                fontFamily: font,
+                fontSize: 15,
+                fontWeight: "bold",
+                color: gs.primaryColor,
+                marginBottom: 2,
+              }}
+            >
+              {p.title}
+            </Text>
+          ) : null}
+          {p.subtitle ? (
+            <Text style={{ fontFamily: font, fontSize: 11, color: MUTED, marginBottom: 8 }}>
+              {p.subtitle}
+            </Text>
+          ) : null}
+          <View style={{ flexDirection: "row", flexWrap: "wrap" }}>
+            {cards.map((c, i) => (
+              <View key={i} style={{ width: "50%", paddingHorizontal: 6, marginBottom: 10 }}>
+                {/* photoUrl is schema-REQUIRED and passed through verbatim. */}
+                <Image
+                  src={c.photoUrl}
+                  style={{ width: "100%", borderRadius: 6, marginBottom: 5 }}
+                />
+                {c.statusLabel ? (
+                  <Text
+                    style={{
+                      fontFamily: font,
+                      fontSize: 9,
+                      color: c.statusTone === "sold" ? "#c0272d" : "#1c8a4a",
+                      marginBottom: 2,
+                    }}
+                  >
+                    {`● ${c.statusLabel}`}
+                  </Text>
+                ) : null}
+                {c.price ? (
+                  <Text
+                    style={{
+                      fontFamily: font,
+                      fontSize: 15,
+                      fontWeight: "bold",
+                      color: gs.primaryColor,
+                    }}
+                  >
+                    {c.priceCut ? `${c.price}  ↓ ${c.priceCut}` : c.price}
+                  </Text>
+                ) : null}
+                {/* ALL THREE specs or nothing — never a partial line (F8). */}
+                {c.specs ? (
+                  <Text style={{ fontFamily: font, fontSize: 10, color: MUTED, marginTop: 3 }}>
+                    {c.specs}
+                  </Text>
+                ) : null}
+                {c.addressLine1 ? (
+                  <Text
+                    style={{ fontFamily: font, fontSize: 10, color: gs.textColor, marginTop: 3 }}
+                  >
+                    {c.addressLine1}
+                  </Text>
+                ) : null}
+                {/* The card's OWN city/state/ZIP (F6). */}
+                {c.addressLine2 ? (
+                  <Text style={{ fontFamily: font, fontSize: 10, color: MUTED }}>
+                    {c.addressLine2}
+                  </Text>
+                ) : null}
+                <Link
+                  src={c.linkUrl}
+                  style={{
+                    fontFamily: font,
+                    fontSize: 10,
+                    fontWeight: "bold",
+                    color: gs.accentColor,
+                    marginTop: 4,
+                  }}
+                >
+                  View listing →
+                </Link>
+              </View>
+            ))}
+          </View>
+          {p.ctaLabel && p.ctaUrl ? (
+            <Link
+              src={p.ctaUrl}
+              style={{
+                fontFamily: font,
+                fontSize: 11,
+                fontWeight: "bold",
+                color: gs.accentColor,
+                marginTop: 6,
+              }}
+            >
+              {p.ctaLabel}
+            </Link>
+          ) : null}
+        </View>
+      );
+    }
+
     case "multi-column": {
       const cols = block.props.columns ?? [];
       return (

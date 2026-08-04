@@ -60,6 +60,10 @@ export const DEFAULT_H: Record<BlockType, number> = {
   text: 5,
   image: 8,
   listing: 9,
+  // Taller than `listing` (9): a full grid is up to 3 rows of 2 cards, each row a
+  // 160px photo plus price/specs/address/link. First-paint placeholder only — the
+  // ResizeObserver replaces it with the measured height.
+  "listing-grid": 16,
   "multi-column": 5,
   list: 5,
   "metric-card": 4,
