@@ -1,5 +1,69 @@
 # lib/social/ — social conventions (loads when you edit here)
 
+# §0 — BEFORE YOU BUILD OR POST ANYTHING SOCIAL. READ THIS WHOLE SECTION.
+
+**Locked 08/04/2026 by operator decree, verbatim: *"MAKE SURE IT IS IN THE PLAYBOOK AT THE
+BEGINNING OF SOCIAL BUILDS!!!! WE DON'T WANT TO LOSE THE RECIPE."*** It is here because it was
+learned by shipping the wrong thing to the live feed.
+
+## 0.1 — THE CAROUSEL RECIPE (Bluesky). Do not re-derive this.
+
+**BLUESKY HAS NO SWIPEABLE MULTI-IMAGE CAROUSEL.** The lexicon has exactly three visual embeds —
+`images`, `video`, `external` — and a post carries **ONE** of them.
+
+| You want | Use | What actually renders |
+|---|---|---|
+| a carousel (auto-advancing) | `app.bsky.embed.video` + **`presentation: "gif"`** | full-width card, autoplays, loops, no player chrome |
+| 2–4 photos | `app.bsky.embed.images` | a static **MOSAIC GRID** — and it **CROPS** your cards |
+| a link preview | `app.bsky.embed.external` | a link card — and tapping it **leaves the app** |
+
+**The working recipe, proven live 08/03/2026** (`scripts/social/post-listing-carousel.ts --video`):
+
+1. Render N square cards (`lib/social/listing-card-render.ts`).
+2. `ffmpeg` → ONE looping mp4: `xfade=transition=slideleft`, 2.5s slides, 0.5s crossfades.
+   `slideleft` is what reads as a swipe. Measured: 4 slides → 8.53s, 835,774 bytes, h264 1080×1080.
+3. `postToBluesky({ caption, video: { …, presentation: "gif" } })`.
+4. The link rides in the post **TEXT** as a `detectLinkFacets` facet — NEVER as an external embed,
+   or tapping the card navigates away instead of playing.
+
+**Vendor numbers, fetched verbatim — never assert these from memory:**
+- `app.bsky.embed.video`: `accept: ["video/mp4"]`, `maxSize: 100000000` (100 MB),
+  `presentation.knownValues: ["default", "gif"]`.
+- `app.bsky.embed.images`: **4 images max**; docs.bsky.app says an individual image is limited to
+  **1,000,000 bytes**, while the lexicon says `maxSize: 2000000`. **The two vendor surfaces
+  disagree.** Target <950,000 and you are safe under either.
+- `com.atproto.repo.uploadBlob` accepts `Content-Type: video/mp4` **directly** (probed live,
+  200 + normal blob). The separate video-service upload + job-polling flow is NOT required.
+- The returned `blob` is embedded **VERBATIM**. Reshape it and the post silently renders empty.
+
+## 0.2 — A JSON READ-BACK CANNOT VERIFY A RENDERING. LOOK AT THE POST.
+
+**The incident this rule is made of (08/03/2026):** shipped a 4-image post, read it back from the
+appview, saw `app.bsky.embed.images` / `images: 4` / `external: none`, and reported *"verified live:
+4-image carousel."* It was a **2×2 grid**. The operator had to open the app and look. The read-back
+was correct about every field it returned — it simply **has no field that answers "is this a
+carousel."** Right answer, wrong instrument, and the claim shipped anyway.
+
+**So, before you call any social post done:**
+1. Read the record back (proves the embed shape, no external embed, facet count). Necessary.
+2. **OPEN THE POST IN A BROWSER AND LOOK AT IT.** Sufficient. `claude-in-chrome` does this.
+3. State ONLY what each instrument proved, and **name what you did NOT verify.** Logged-out web
+   shows a play button instead of autoplaying — you cannot confirm autoplay from a signed-out
+   screenshot, so say so instead of implying it.
+
+This is rule 12's *evidence class* failure shape. It is also why the grid's second defect went
+unseen: the 2×2 tiles cropped the cards — `$385,000` clipped by the tile edge, Bluesky's own ALT
+badge sitting on the address. **A card composed for one surface does not survive another.**
+
+## 0.3 — INHERITED PLANS ARE HYPOTHESES
+
+The handoff that drove this build asserted *"the carousel behaves like a carousel."* It was wrong,
+and it was wrong in the repo, in writing, from a prior session. Committed plans can still be
+hallucinated (`feedback_inherited-plan-skepticism`). A vendor-surface claim in a plan gets verified
+in-session or it does not get built on.
+
+---
+
 ## THE ONE ROOT RULE — read this before you type a color or a font size
 
 Social had the same disease email had, and for the same reason. Measured 07/14/2026:

@@ -1,3 +1,96 @@
+## 2026-08-04 (Opus 5) — carousel recipe locked into lib/social/CLAUDE.md §0; Sonnet research handoff written for social COPY + graphics
+
+Operator: *"MAKE SURE IT IS IN THE PLAYBOOK AT THE BEGINNING OF SOCIAL BUILDS!!!! WE DON'T WANT TO
+LOSE THE RECIPE"* + *"WRITE A HANDOFF TO SONNET TO FIND HOW TO ACTUALLY WRITE ON SOCIAL MEDIA AND
+HOW TO MAKE BETTER LOOKING POSTS AND CLICK GENERATING GRAPHICS."*
+
+SHIPPED — 2 of 2:
+1. **`lib/social/CLAUDE.md` gained a `§0` at the TOP** (above the ONE ROOT RULE), so it loads on any
+   `lib/social/` edit. Three subsections:
+   - §0.1 THE CAROUSEL RECIPE — the embed table (video + `presentation:"gif"` = carousel · images =
+     mosaic GRID that CROPS cards · external = leaves the app), the 4-step working recipe with the
+     measured ffmpeg settings, and the vendor numbers verbatim incl. the documented DISAGREEMENT
+     between docs.bsky.app (1,000,000 bytes) and the lexicon (2,000,000) — target <950,000.
+   - §0.2 A JSON READ-BACK CANNOT VERIFY A RENDERING — the 08/03 incident as the rule's evidence,
+     and the 3-step close-out: read back, then OPEN IT IN A BROWSER, then state only what each
+     instrument proved and name what you did NOT verify.
+   - §0.3 INHERITED PLANS ARE HYPOTHESES — the handoff that drove the build asserted the wrong
+     thing in writing, from a prior session.
+2. **`_ASSISTANT/2026-08-04-social-copy-and-graphics-RESEARCH-HANDOFF.md`** — three separate
+   questions (copy / graphics / clicks), pointed FIRST at `_RESEARCH/` + the two 07/11 socials
+   briefs + `lib/social-pulse/` (we already track format performance; our own numbers outrank any
+   blog), crawl4ai only. Names two things we chose by TASTE with no evidence and asks for the real
+   answer: the 2.5s/0.5s slide pacing, and the `[INFERENCE]`-tagged 32px type floor that ships with
+   its own falsifier. Done = research doc + INDEX line + a §0.4 rules card + a log entry, n of N.
+
+Docs only — nothing shipped to the live feed in this entry.
+## 2026-08-03 (Opus 5) — button links: the resolver is now WIRED, and the real bug was that a user's typed URL never survived
+
+**NOT PUSHED — awaiting operator approval.** Verified: `bunx next build` → compiled successfully,
+TypeScript OK. `bun test lib/email lib/deliverable app/api/user` → **2,765 pass / 0 fail**.
+
+**One claim in the first draft of this entry was reasoning, not evidence, and is now tested.** I had
+argued §3.3 (the fill-in popup) was satisfied because the lab runs `applyBrand` before
+`auditDocLinks`, so a saved destination fills the URL and no prompt fires. That is TRUE, but I had
+not run it. Now pinned on the function pair, not the shell: brand HAS the role destination → zero
+link asks · brand does not → exactly one · a website ALONE does not silence a `community` button
+(the role a homepage cannot honestly answer) but `primary-cta` IS satisfied by it.
+
+**The operator's instruction mid-build:** *"make sure all words on a button are editable by the user
+and all urls can be changed by the user for each button."* Probed instead of assuming, and it was
+HALF true in a way that made the other half a lie:
+
+- **Label:** already editable two ways (inline `EditableText` on canvas, inspector). No gap.
+- **URL:** the per-button field has existed in `BlockInspector.tsx` all along — but
+  `apply-brand.ts:72` was `if (cta && !mailto) props.url = cta`, an **unconditional rewrite of every
+  non-mailto button to the single brand website**. Type a URL, run the overlay, it's gone. So "all
+  urls can be changed by the user" was FALSE at the ROUND-TRIP while the input box sat right there.
+
+**The fix — provenance, not host-sniffing.** `ButtonProps` gains `role` (which saved destination
+this button uses) and `urlSource` (`"user"` = a human typed it; brand must not touch it). Both
+OPTIONAL, deliberately deviating from the handoff's "make it REQUIRED": the schema parses PERSISTED
+docs, so a required `role` would fail `safeParse` across the whole back catalogue. **`urlSource`
+absent means ENGINE** — pinned by a named test, because reading absent as "user" would freeze every
+saved doc and silently switch the brand overlay off for it. The forcing function moved to a test
+that DERIVES the emitter list from `git grep -l --untracked` — the first cut hardcoded the list and
+missed a real emitter within the hour, because a brand-new recipe is untracked while it's written.
+
+**Corrections to the handoff, both found by probing:**
+1. **It says 6 button emitters. There are 7.** `lib/email/lifecycle-chrome.ts:317` is the
+   highest-traffic one in the repo — all 7 listing lifecycle recipes ship their ask through that one
+   cell — and the handoff missed it because it only enumerated `lib/deliverable/recipes/`.
+2. **§6 is wrong that `applyBrand` is browser-only** (already corrected by the prior session):
+   `blast/route.ts` calls it server-side, deliberately.
+
+**Landed:** role + urlSource on `ButtonProps`/schema · 7 emitters backfilled · `apply-brand` swapped
+to `resolveButtonDestination` with the `mailto:` reply-CTA guard kept as an EXPLICIT early return
+(not an emergent property of rung ordering — `sphere-weekly` emits exactly that button) ·
+`link-audit` gained a `saved-role` rung that never stamps `urlSource:user` on its own send-time
+guess · `branding-to-tokens` emits `BUTTON_DEST_*` · `BrandingBlock` per-role editor ·
+`/api/user/brand` handles the nested object (the existing string loops would have coerced it to
+`null` and wiped every saved link on the next save) · prod migration
+`docs/sql/20260803_button_destinations.sql` applied, verified via `information_schema`
+(`button_destinations` / `jsonb` / nullable YES).
+
+**Re-counted against the handoff's six behaviors (§3.1–§3.6): 4 DONE, 1 PARTIAL, 1 NOT STARTED.**
+Done — §3.1 button identity/role · §3.2 per-role destinations saved in brand · §3.3 fill-in popup
+gating (now tested) · §3.6 per-listing CTA (role `listing`, never defaults to our page).
+Partial — §3.5: the rename-carries-the-URL half is done (role-keyed, so a relabel keeps the link)
+and the brand-editor half is done, but the canvas double-click is not, so it is 1 of 2 change paths.
+Not started — §3.4 the swfldatagulf fail-confirm. **NOT done, each with a check open:**
+`button_links_house_fail_confirm_ui` (the swfldatagulf fail-confirm has a tested predicate and NO
+caller — nothing confirms yet), `button_links_double_click_edit` (1 of 2 change paths — inspector
+yes, canvas double-click no; and `auditDocLinks` only flags buttons with NO url, so the modal can
+never CHANGE an existing destination), `button_links_scheduled_lanes_no_brand_source` (the rung
+exists on all four send paths but only blast + claim-and-send actually PASS `savedDestinations`;
+the two scheduled lanes never load a brand row, so it is inert there — adjacent to
+`applybrand_no_server_side_caller`, deliberately not bundled).
+
+**Outside evidence (unchanged, filed 08/03):** Gmail's *"Recipients should know what to expect when
+they click a link"* is why `usesWebsiteDefault: false` for `community` and `listing` — a homepage
+standing in for "Find Out More About This Community" is a deliverability violation, not taste.
+`_RESEARCH/INDEX.md` line written (email-and-social 6 → 7).
+
 ## 2026-08-03 (Opus 5) — listings-digest SHIPPED: 5 categories × 6 real homes, no home twice, baths on 24 of 30 cards
 
 Built the plan `docs/superpowers/plans/2026-08-03-listings-digest-grid.md` as 5 TDD tasks, 5 commits:
