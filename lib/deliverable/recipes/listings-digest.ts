@@ -33,13 +33,18 @@ import { brandWebsiteUrl } from "@/lib/email/inject-photo";
 import { rankListings, fetchLakeBathsByPropertyId } from "@/lib/listings/select";
 import { fetchPhotoListings } from "@/lib/listings/steadyapi";
 import { cityForZipSourced, zipForPoint } from "@/lib/geo/point-in-zip";
-import { fetchApifyBathsByAddress, listingAddressKey } from "@/lib/listings/apify-baths";
+import { fetchApifyBathsForHomes, listingAddressKey } from "@/lib/listings/apify-baths";
 import type { Listing } from "@/lib/listings/rentcast";
 import type { EmailBlock, EmailDoc, ListingGridCard } from "@/lib/email/doc/types";
 import type { RecipeBuildContext } from "./index";
 
 const MAX_CARDS = 6;
 const MIN_CARDS = 4;
+
+/** Living-area floor for the "Room to spread out" section, in square feet.
+ *  Operator-set 08/04/2026 — see the `big-lot` category note for why a lot-size
+ *  test alone put a 752 sqft apartment in a section about having space. */
+const BIG_LOT_MIN_SQFT = 3000;
 
 /** F1 — a map tile is not a home photo. Top of the scratchpad 08/03/2026:
  *  "WE CAN'T HAVE FUCKING ARIEL VIEWS....AGAIN!!!! PHOTOS OF THE FUCKING LIS…".
@@ -62,6 +67,34 @@ const CATEGORIES: ReadonlyArray<{
   eligible: (l: Listing) => boolean;
 }> = [
   {
+    category: "big-lot",
+    // FIRST because it is now the SCARCEST — that ordering is the whole no-empty-
+    // section guarantee, not a cosmetic choice. Under the 3,000 sqft floor this
+    // category has ~4 eligible homes where the others have 6+, and it sat 4th.
+    // Caught live 08/04/2026: filling bath counts made one estate full-spec, an
+    // earlier category ranked it up and took it, big-lot fell under MIN_CARDS and the
+    // section VANISHED. Enriching data changed selection — the second-order effect,
+    // not the enrichment, is what broke it.
+    //
+    // TWO dimensions, not one — the lot AND the house (F14). A lot-only predicate
+    // shipped `3704 Broadway Apt 100` here: verbatim vendor row
+    // {"beds":1,"sqft":752,"lot_sqft":25857}, a 752 sqft apartment on its BUILDING's
+    // 0.59-acre parcel. On any condo row `lot_sqft` is the whole complex, so every
+    // unit in it read as "room to spread out."
+    //
+    // We cannot exclude condos by TYPE: the vendor's /search `description` carries
+    // exactly six keys — beds, sqft, lot_sqft and their _display twins — and no type
+    // (probed live 08/04/2026, matching steadyapi.ts's 07/07/2026 finding that
+    // property_type is request-side only). A living-area floor is the only lever, and
+    // it is the one the operator named: "make sure these are over 3k sq ft."
+    title: () => "Room to spread out",
+    eligible: (l) =>
+      l.lotSize != null &&
+      l.lotSize >= 0.5 &&
+      l.squareFootage != null &&
+      l.squareFootage >= BIG_LOT_MIN_SQFT,
+  },
+  {
     category: "new-construction",
     title: () => "New construction homes",
     eligible: (l) => l.isNewConstruction === true,
@@ -72,11 +105,6 @@ const CATEGORIES: ReadonlyArray<{
     eligible: (l) => l.isPriceReduced === true && (l.priceReduction ?? 0) > 0,
   },
   { category: "just-listed", title: () => "Just listed", eligible: (l) => l.isNewListing === true },
-  {
-    category: "big-lot",
-    title: () => "Room to spread out",
-    eligible: (l) => l.lotSize != null && l.lotSize >= 0.5,
-  },
   { category: "more-homes", title: (city) => `More homes in ${city}`, eligible: () => true },
 ];
 
@@ -238,6 +266,12 @@ export async function buildListingsDigest(
           title: s.title,
           ...(city ? { subtitle: city } : {}),
           cards: s.listings.map((l) => toCard(l, s.listings)),
+          // A light card behind every section, the SAME colour on each — operator,
+          // 08/04/2026: "put a nice light color card behind each section. same color
+          // for each, but just to seperate the sections." No surfaceBg here on
+          // purpose: one colour for the whole digest means one place it is decided
+          // (SECTION_SURFACE_BG), not five props that can drift apart.
+          surface: "card" as const,
           // NO ctaLabel/ctaUrl — ONE CTA per email (emails.md §0.1). See header.
         },
       },
@@ -303,13 +337,43 @@ async function withBaths(
 
   // Only the homes that could still BECOME a full spec line are worth paying for:
   // a row with no beds or no sqft stays spec-less regardless of its bath count.
-  const stillMissing = out.filter(
+  // PAY FOR THE HOMES THAT WILL BECOME CARDS, NOT THE FIRST 30 IN THE POOL. A
+  // provisional pass tells us which ~28 homes the email would actually show; the
+  // pool behind them is ~200, so a cap applied to the pool spends the whole budget
+  // on homes that never render. Measured live 08/04/2026: the four "Room to spread
+  // out" estates rank far down the pool and fell outside a pool-order cap entirely,
+  // so the section stayed spec-less even after the lookup was made exact.
+  //
+  // Cheap: assignCategories is pure single-pass greedy over an in-memory array (no
+  // I/O), and the real pass below re-runs it on the enriched pool.
+  const provisional = assignCategories(out, "").flatMap((s) => s.listings);
+  const stillMissing = provisional.filter(
     (l) => l.bathrooms == null && l.bedrooms != null && l.squareFootage != null,
   );
   if (stillMissing.length === 0) return out;
 
-  const fetchApify = deps.fetchApifyBaths ?? fetchApifyBathsByAddress;
-  const apify = await fetchApify(zip).catch(() => new Map<string, number>());
+  // ── ASK FOR THE HOMES WE HOLD, DON'T FISH IN A ZIP (F17) ──────────────────
+  // This used to sweep the REQUESTED zip and hope the homes it needed were among the
+  // 60 rows that came back. The pool is deliberately WIDER than that zip — zip-local
+  // homes first, then a city-wide backfill — so every backfilled home was
+  // structurally unreachable. Caught live 08/04/2026 on a 33919 digest: the four
+  // "Room to spread out" estates sit in 33905/33901/33908/33912, the sweep searched
+  // 33919, returned 57 addresses and matched ZERO of the four. A CITY-wide sweep is
+  // no fix — it also returns one 60-row page (10 zips, live-verified) and those same
+  // four were still absent. It samples; it does not look up.
+  //
+  // The class, worth naming: WIDEN A POOL AND EVERY ENRICHMENT KEYED TO THE OLD
+  // SCOPE SILENTLY MISSES THE NEW ROWS. Nothing errors; the column is just null. It
+  // bit this category hardest because big-lot estates cluster OUTSIDE the dense inner
+  // zip by definition — the failure was correlated with the section, not random.
+  //
+  // Now each home is looked up by its OWN address, which is exact and CHEAPER than
+  // the sweep it replaces: 1 result per call, capped, instead of 60 strangers.
+  const apify = deps.fetchApifyBaths
+    ? await deps.fetchApifyBaths(zip).catch(() => new Map<string, number>())
+    : await fetchApifyBathsForHomes(
+        stillMissing.map((l) => ({ street: l.addressLine1 ?? "", city: l.city ?? "" })),
+      ).catch(() => new Map<string, number>());
   if (apify.size === 0) return out;
 
   out = out.map((l) => {

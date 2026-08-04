@@ -309,6 +309,40 @@ the lake roots below. Everything "how the market looks right now" descends from 
   `<NA>` for **sold** ones; a sold subject's description needs the separate detail actor (deferred,
   check `apify_sold_comp_backfill_wire`).
 
+### EVERY Apify property record — one root, all 69 fields (added 08/04/2026)
+
+- **`data_lake.apify_property_records`** 🟢 — root: **the full realtor.com record for one address**,
+  keyed `address_key` (normalised `street + city`). Write root: `lib/listings/apify-record-store.ts`
+  `saveApifyRecords`, called from INSIDE the one fetch root (`apify-comps.ts fetchApifyComps`), so
+  every lane — baths, comp photos, descriptions — persists without opting in. Read root:
+  `fetchCachedRecords(keys, maxAgeDays)`.
+  · **WHY IT EXISTS:** the actor returns **69 fields** per record (live-counted 08/04/2026); the
+  pipeline read **two** (`full_baths`, `half_baths`) and dropped the rest at process exit, so the
+  next build re-bought the same house. Operator: *"we want all of that!!!!!"*
+  · **What we were discarding, all verified live in the first 4 rows:** `hoa_fee` (Brynwood Ln $200),
+  `last_sold_price`/`last_sold_date` (Muddy Ln $455,000 on 02/02/2021), `style`, `year_built`,
+  `stories`, `days_on_mls`, `estimated_value`, `assessed_value`, `tax`/`tax_history`,
+  `nearby_schools`, **50 `alt_photos` per home**, 2,000–3,000-char MLS `text`, and the listing
+  agent/broker contact block.
+  · ⚠️ **`hoa_fee` CONTRADICTS our own research.** `_RESEARCH/data-and-ingest/2026-08-03-neighborhood-
+  amenities-full-scope.md` records HOA fees as "ABSENT vendor-wide" — that finding is about the OTHER
+  vendor and must not be generalised. This lane has them.
+  · ⚠️ **`style` is the field the comp-comparability decree needs** (operator 08/04/2026: *"WE WANT
+  SIMILAR SQ FT, STYLE, BEDS AND BATHS SAME OR CLOSE AND POOL OR NO POOL"*) — it was being paid for
+  and discarded. Wiring it into comp ranking is NOT yet done.
+  · **SUPERSEDES the planned `listing_photo_enrichment`** 🔴 entry above: photos arrive on this same
+  record, so a photo-only table would be a second root for one concept.
+  · **Deliberately NOT `listing_state`** — same reason recorded for the photo lane: that table's
+  upsert/transition machinery is keyed on a vendor `property_id` an Apify record does not reliably
+  carry.
+  · **GRANTS ARE PART OF THE MIGRATION.** Creating the table over a direct Postgres connection is
+  half the job; the app reaches it through PostgREST as `service_role`. Without
+  `GRANT USAGE ON SCHEMA` + `GRANT SELECT, INSERT, UPDATE` **and** `NOTIFY pgrst, 'reload schema'`,
+  every write returns an error the caller swallows and the table sits at ZERO rows while every call
+  still bills. Measured exactly that on the first run.
+  · **The write is AWAITED, never fire-and-forget** — an unawaited write in a CLI/serverless build
+  never lands, which is the other way this table stayed empty while costing money.
+
 ### A listing's BATH COUNT — three lanes, free before paid (added 08/03/2026)
 
 One concept, one provenance order. A consumer walks the lanes in order and stops at the first hit;

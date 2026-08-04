@@ -9,6 +9,7 @@ import type {
   EmailBlock,
   FooterProps,
   KnownPlatform,
+  ListingGridProps,
   ListItem,
   MultiColumnColumn,
   PaddingSize,
@@ -18,6 +19,7 @@ import type {
   StatItem,
   TextAlign,
 } from "@/lib/email/doc/types";
+import { SECTION_SURFACE_BG } from "@/lib/email/doc/types";
 import { KNOWN_PLATFORMS, PLATFORMS, platformMeta } from "@/lib/email/social/platforms";
 import { PHOTO_RATIOS, DEFAULT_PHOTO_RATIO } from "@/lib/email/doc/block-contract";
 import { flipBlockSide } from "@/lib/email/doc/flip";
@@ -42,6 +44,17 @@ const LABELS: Record<EmailBlock["type"], string> = {
   footer: "Footer",
   sources: "Sources",
 };
+
+/** The three section-surface states, in plain words rather than prop values — the
+ *  inspector is the operator's surface, not the schema's. */
+type SectionSurface = NonNullable<ListingGridProps["surface"]>;
+const SURFACE_LABELS: Record<SectionSurface, string> = {
+  none: "None (full width)",
+  card: "Card",
+  outline: "Border only",
+};
+/** Absent → "none", which is what every doc saved before 08/04/2026 carries. */
+const surfaceOf = (v: unknown): SectionSurface => (v === "card" || v === "outline" ? v : "none");
 
 export function BlockInspector({
   block,
@@ -72,6 +85,10 @@ export function BlockInspector({
   const props = block.props as Record<string, unknown>;
   const set = (key: string, value: unknown) =>
     onChange({ ...block, props: { ...props, [key]: value } } as EmailBlock);
+  /** Patch several props in ONE onChange — two `set` calls would each clone the same
+   *  stale block, so the second would clobber the first. */
+  const setMany = (patch: Record<string, unknown>) =>
+    onChange({ ...block, props: { ...props, ...patch } } as EmailBlock);
   const str = (key: string) => (typeof props[key] === "string" ? (props[key] as string) : "");
 
   return (
@@ -338,6 +355,53 @@ export function BlockInspector({
           </>
         )}
 
+        {/* A listing grid's CARDS are data-seeded from real listings and deliberately
+            not hand-editable here (no-invention moat) — what the operator asked for is
+            control of the SECTION's own look: "make sure email lab can put boarder
+            around or no color, as well" (08/04/2026). */}
+        {block.type === "listing-grid" && (
+          <>
+            <TextField
+              label="Section title"
+              value={str("title")}
+              onChange={(v) => set("title", v)}
+              placeholder="Room to spread out"
+            />
+            <TextField
+              label="Subtitle"
+              value={str("subtitle")}
+              onChange={(v) => set("subtitle", v)}
+              placeholder="Fort Myers"
+            />
+            <SelectField
+              label="Section background"
+              value={SURFACE_LABELS[surfaceOf(props.surface)]}
+              options={Object.values(SURFACE_LABELS)}
+              onChange={(v) => {
+                const next = (Object.keys(SURFACE_LABELS) as SectionSurface[]).find(
+                  (k) => SURFACE_LABELS[k] === v,
+                );
+                if (next) set("surface", next);
+              }}
+            />
+            {/* Only meaningful for the filled state — an outline is unfilled by
+                definition, and "none" has nothing to colour. */}
+            {surfaceOf(props.surface) === "card" && (
+              <ColorField
+                label="Card colour"
+                value={str("surfaceBg") || SECTION_SURFACE_BG}
+                onChange={(v) => set("surfaceBg", v)}
+              />
+            )}
+            <BlockBaseControls
+              paddingY={props.paddingY as PaddingSize | undefined}
+              sectionBg={props.sectionBg as string | undefined}
+              onPaddingY={(v) => set("paddingY", v)}
+              onSectionBg={(v) => set("sectionBg", v)}
+            />
+          </>
+        )}
+
         {block.type === "multi-column" && (
           <>
             <MultiColumnEditor
@@ -470,7 +534,16 @@ export function BlockInspector({
             <TextField
               label="URL"
               value={str("url")}
-              onChange={(v) => set("url", v)}
+              // STAMP THE URL AS THE USER'S. The field itself has always been here —
+              // what was missing is that `applyBrand` rewrote every non-mailto button
+              // to the brand website on the next pass, so the edit never survived.
+              // Marking it `user` is what makes "all urls can be changed by the user
+              // for each button" true at the ROUND-TRIP (operator, 08/03/2026).
+              // Clearing the box hands the button BACK to brand rather than leaving a
+              // frozen empty URL that nothing can ever fill.
+              onChange={(v) =>
+                setMany(v.trim() ? { url: v, urlSource: "user" } : { url: v, urlSource: undefined })
+              }
               placeholder="https://…"
             />
             <ColorField

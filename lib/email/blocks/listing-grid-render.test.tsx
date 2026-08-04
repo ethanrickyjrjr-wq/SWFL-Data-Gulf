@@ -11,7 +11,9 @@ import { describe, expect, test } from "bun:test";
 import { render } from "@react-email/render";
 import { ListingGridBlock } from "./ListingGridBlock";
 import { DEFAULT_GLOBAL_STYLE } from "../doc/default-docs";
-import type { ListingGridProps } from "../doc/types";
+import { BORDER } from "./styles";
+import { ON_DARK_MUTED } from "./on-dark";
+import { SECTION_SURFACE_BG, type ListingGridProps } from "../doc/types";
 
 const card = (n: number) => ({
   photoUrl: `https://ap.rdcpix.com/photo${n}.jpg`,
@@ -77,5 +79,66 @@ describe("ListingGridBlock", () => {
     // Label alone is not a CTA — a button with no destination is a dead end.
     const labelOnly = await html({ cards: [card(1), card(2)], ctaLabel: "View price drops" });
     expect(labelOnly).not.toContain("View price drops");
+  });
+});
+
+// ── The section surface (operator, 08/04/2026) ──────────────────────────────────
+// "put a nice light color card behind each section. same color for each, but just to
+// seperate the sections. make sure email lab can put boarder around or no color, as
+// well. don't fuck up the original, i just want to see it with a card behind."
+//
+// Three states, and the DEFAULT IS THE ORIGINAL. "don't fuck up the original" is not
+// a style note, it is a testable guarantee: every doc saved before today carries no
+// `surface`, and its markup must not move by one byte. That is F15 below, and it is
+// the reason `surface` defaults to "none" rather than to the new look.
+describe("ListingGridBlock — section surface", () => {
+  const two = [card(1), card(2)];
+
+  test("F15 — no surface prop renders EXACTLY today's markup (the original is untouched)", async () => {
+    expect(await html({ title: "Price drops", cards: two })).toBe(
+      await html({ title: "Price drops", cards: two, surface: "none" }),
+    );
+  });
+
+  test("surface:card paints the card colour behind the whole section", async () => {
+    const out = await html({ title: "Price drops", cards: two, surface: "card" });
+    expect(out.toLowerCase()).toContain(SECTION_SURFACE_BG.toLowerCase());
+  });
+
+  test("surface:card honours an explicit colour from the Lab", async () => {
+    const out = await html({ title: "x", cards: two, surface: "card", surfaceBg: "#EAF2FF" });
+    expect(out.toLowerCase()).toContain("#eaf2ff");
+  });
+
+  test("surface:outline draws a border and paints NO fill", async () => {
+    const out = await html({ title: "x", cards: two, surface: "outline" });
+    expect(out).toContain(`1px solid ${BORDER}`);
+    expect(out.toLowerCase()).not.toContain(SECTION_SURFACE_BG.toLowerCase());
+  });
+
+  test("a card or an outline replaces the divider rule — never both at once", async () => {
+    // The section's bottom rule exists to separate sections. A card already does that;
+    // shipping the rule too reads as a mistake, not as emphasis.
+    expect(await html({ cards: two, surface: "none" })).toContain(
+      `border-bottom:1px solid ${BORDER}`,
+    );
+    for (const surface of ["card", "outline"] as const) {
+      expect(await html({ cards: two, surface })).not.toContain(
+        `border-bottom:1px solid ${BORDER}`,
+      );
+    }
+  });
+
+  // The silent one. Every ink colour in this block is computed against `bg`. Once the
+  // text sits on the CARD instead of the section, a contrast base still pointing at
+  // the section is wrong — and with two pale colours it stays invisible to any visual
+  // check, which is exactly how it would ship.
+  test("F16 — ink contrast is measured against the CARD colour, not the section colour", async () => {
+    const out = await html({
+      cards: [{ ...card(1), specs: "3 bed · 2 bath · 1,295 sqft" }, card(2)],
+      surface: "card",
+      surfaceBg: "#10233F", // a dark card on the default white section
+    });
+    expect(out).toContain(ON_DARK_MUTED);
   });
 });

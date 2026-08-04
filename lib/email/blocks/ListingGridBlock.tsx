@@ -22,6 +22,7 @@
 // Every field is listing-sourced. The AI content-patch never writes a price or a
 // photo (no-invention moat) — same fence as ListingBlock.
 import { Section, Img, Text, Link } from "@react-email/components";
+import { SECTION_SURFACE_BG } from "../doc/types";
 import type { EmailGlobalStyle, ListingGridCard, ListingGridProps } from "../doc/types";
 import { fontStack, sectionPad, MUTED, BORDER, CARD_BG } from "./styles";
 import { text, pad, space, WEIGHT } from "./scale";
@@ -39,9 +40,20 @@ export function ListingGridBlock({
   globalStyle: EmailGlobalStyle;
 }) {
   const font = fontStack(globalStyle.fontFamily);
-  const bg = props.sectionBg ?? CARD_BG;
-  const onDark = isDarkBg(bg);
   const cards: ListingGridCard[] = props.cards ?? [];
+
+  // ── The section surface ────────────────────────────────────────────────────
+  // "none" (default) is the ORIGINAL, byte for byte — pinned by a named test,
+  // because every doc saved before 08/04/2026 carries no `surface` and must not
+  // move. "card" floats the section on a light panel; "outline" rings it instead.
+  const surface = props.surface ?? "none";
+  const sectionBg = props.sectionBg ?? CARD_BG;
+  // THE CONTRAST BASE IS WHATEVER IS ACTUALLY BEHIND THE TEXT. Every ink colour
+  // below is computed from `bg`; once the text sits on the card, a `bg` still
+  // pointing at the section is wrong. Two pale colours hide that completely from a
+  // visual check, which is exactly how it would have shipped.
+  const bg = surface === "card" ? (props.surfaceBg ?? SECTION_SURFACE_BG) : sectionBg;
+  const onDark = isDarkBg(bg);
 
   // An empty grid renders NOTHING — a palette-added block is an open slot, never a
   // hollow card. Returning null here is what makes `cards: []` safe as a default.
@@ -52,14 +64,18 @@ export function ListingGridBlock({
   const maxW = 260;
   const minW = 200;
 
-  return (
-    <Section
-      style={{
-        backgroundColor: bg,
-        padding: sectionPad(props.paddingY),
-        borderBottom: `1px solid ${BORDER}`,
-      }}
-    >
+  // THE CARD MUST NOT NARROW THE GRID. A flat section spends 24px of gutter per side
+  // (scale.ts CARD_PAD), and the 2-across row is built to exactly fill what's left:
+  // 600 − 48 = 552 = 2 × (260 max-width + 8 + 8). So the surfaced layout SPLITS that
+  // same 24px — 8px of outer gutter outside the card, 16px of inset inside it — and
+  // the cards keep their width instead of wrapping to one column.
+  const OUTER_GUTTER = 8;
+  const CARD_INSET = 16;
+  // Read the vertical token off the one root rather than re-declaring the scale.
+  const padY = sectionPad(props.paddingY).split(" ")[0]!;
+
+  const body = (
+    <>
       {props.title ? (
         <Text
           style={{
@@ -232,6 +248,37 @@ export function ListingGridBlock({
           </Link>
         </Text>
       ) : null}
+    </>
+  );
+
+  return (
+    <Section
+      style={{
+        backgroundColor: sectionBg,
+        padding: surface === "none" ? sectionPad(props.paddingY) : `${padY} ${OUTER_GUTTER}px`,
+        // The hairline rule exists to separate one section from the next. A card or an
+        // outline already does that job — shipping both reads as a mistake.
+        ...(surface === "none" ? { borderBottom: `1px solid ${BORDER}` } : {}),
+      }}
+    >
+      {surface === "none" ? (
+        body
+      ) : (
+        // A nested <Section>, not a styled <div>: react-email renders Section as a
+        // table, and Outlook's Word engine is unreliable on div backgrounds. The
+        // border-radius degrades to square corners there — the same accepted Outlook
+        // degrade this file already takes on inline-block.
+        <Section
+          style={{
+            ...(surface === "card" ? { backgroundColor: bg } : {}),
+            ...(surface === "outline" ? { border: `1px solid ${BORDER}` } : {}),
+            borderRadius: "10px",
+            padding: `${CARD_INSET}px`,
+          }}
+        >
+          {body}
+        </Section>
+      )}
     </Section>
   );
 }

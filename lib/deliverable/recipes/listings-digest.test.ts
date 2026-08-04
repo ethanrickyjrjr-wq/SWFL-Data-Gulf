@@ -95,6 +95,34 @@ describe("assignCategories", () => {
     }
   });
 
+  // ── F14 — "Room to spread out" measured the LOT and nothing else ─────────────
+  // Operator, 08/04/2026: "I just don't understand apartments in Room To Spread Out
+  // section- this one has about 800 sq ft listed… 800 sq ft is not room to spread
+  // out." The row he saw is verbatim vendor data, live-verified this session:
+  // 3704 Broadway Apt 100 → {"beds":1,"sqft":752,"lot_sqft":25857} = 0.59 acres. On a
+  // condo/apartment row `lot_sqft` is the WHOLE BUILDING's parcel, so every unit in
+  // the complex passed a lot-only predicate. The vendor's /search `description` gives
+  // us six keys and no property type (checked live — beds/sqft/lot_sqft + their
+  // _display twins), so we cannot filter condos out by type. A living-area floor is
+  // the only lever this endpoint offers.
+  test("F14 — a small home on a big lot is NOT room to spread out (the 752 sqft condo)", () => {
+    const pool = [
+      ...rekey(many(4, { lotSize: 0.59, squareFootage: 752 }), "condo", 600),
+      ...rekey(many(6, { lotSize: 2.1, squareFootage: 3663 }), "estate", 700),
+    ];
+    const bigLot = assignCategories(pool, "Fort Myers").find((s) => s.category === "big-lot");
+    expect(bigLot).toBeDefined();
+    for (const l of bigLot!.listings) expect(l.squareFootage).toBeGreaterThanOrEqual(3000);
+  });
+
+  test("F14 — big lots that are ALL small homes emit no section at all, never a filler", () => {
+    const pool = [
+      ...rekey(many(6, { lotSize: 0.95, squareFootage: 1314 }), "small", 800),
+      ...rekey(many(6), "other", 900),
+    ];
+    expect(assignCategories(pool, "Fort Myers").some((s) => s.category === "big-lot")).toBe(false);
+  });
+
   test("the catch-all title names the real city, never a hardcoded one", () => {
     const sections = assignCategories(many(6), "Naples");
     expect(sections.at(-1)!.title).toContain("Naples");

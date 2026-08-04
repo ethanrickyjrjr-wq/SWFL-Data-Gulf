@@ -23,6 +23,7 @@
 import { Document, Page, View, Text, Image, Link, StyleSheet } from "@react-pdf/renderer";
 import { cleanCitations } from "@/lib/citations/clean-url";
 import { groupRows } from "@/lib/email/doc/row-grouping";
+import { SECTION_SURFACE_BG } from "@/lib/email/doc/types";
 import type { EmailBlock, EmailDoc, EmailGlobalStyle, FontFamily } from "@/lib/email/doc/types";
 import { PLATFORMS, platformMeta, domainFromUrl } from "@/lib/email/social/platforms";
 import { AGENT_HERO_PHOTO_ASPECT_RATIO } from "@/lib/email/blocks/agent-hero-dimensions";
@@ -659,106 +660,125 @@ function PdfBlock({ block, gs }: { block: EmailBlock; gs: EmailGlobalStyle }) {
       const p = block.props;
       const cards = p.cards ?? [];
       if (cards.length === 0) return null;
+      // The section surface, mirrored from ListingGridBlock (operator, 08/04/2026).
+      // Wired HERE as well as in the HTML switch on purpose: a prop honoured in one
+      // engine and ignored in the other is F9, the failure emails.md §5 names as this
+      // repo's recurring one — and both switches end in `default:`, so nothing throws.
+      // `surface: "none"` leaves an unstyled View, which react-pdf lays out as a plain
+      // block box — the existing PDF is unchanged.
+      const surface = p.surface ?? "none";
+      const surfaceStyle =
+        surface === "none"
+          ? {}
+          : {
+              ...(surface === "card"
+                ? { backgroundColor: p.surfaceBg ?? SECTION_SURFACE_BG }
+                : { borderWidth: 1, borderColor: BORDER, borderStyle: "solid" as const }),
+              borderRadius: 8,
+              padding: 12,
+            };
       return (
         <View style={s.section}>
-          {p.title ? (
-            <Text
-              style={{
-                fontFamily: font,
-                fontSize: 15,
-                fontWeight: "bold",
-                color: gs.primaryColor,
-                marginBottom: 2,
-              }}
-            >
-              {p.title}
-            </Text>
-          ) : null}
-          {p.subtitle ? (
-            <Text style={{ fontFamily: font, fontSize: 11, color: MUTED, marginBottom: 8 }}>
-              {p.subtitle}
-            </Text>
-          ) : null}
-          <View style={{ flexDirection: "row", flexWrap: "wrap" }}>
-            {cards.map((c, i) => (
-              <View key={i} style={{ width: "50%", paddingHorizontal: 6, marginBottom: 10 }}>
-                {/* photoUrl is schema-REQUIRED and passed through verbatim. */}
-                <Image
-                  src={c.photoUrl}
-                  style={{ width: "100%", borderRadius: 6, marginBottom: 5 }}
-                />
-                {c.statusLabel ? (
-                  <Text
+          <View style={surfaceStyle}>
+            {p.title ? (
+              <Text
+                style={{
+                  fontFamily: font,
+                  fontSize: 15,
+                  fontWeight: "bold",
+                  color: gs.primaryColor,
+                  marginBottom: 2,
+                }}
+              >
+                {p.title}
+              </Text>
+            ) : null}
+            {p.subtitle ? (
+              <Text style={{ fontFamily: font, fontSize: 11, color: MUTED, marginBottom: 8 }}>
+                {p.subtitle}
+              </Text>
+            ) : null}
+            <View style={{ flexDirection: "row", flexWrap: "wrap" }}>
+              {cards.map((c, i) => (
+                <View key={i} style={{ width: "50%", paddingHorizontal: 6, marginBottom: 10 }}>
+                  {/* photoUrl is schema-REQUIRED and passed through verbatim. */}
+                  <Image
+                    src={c.photoUrl}
+                    style={{ width: "100%", borderRadius: 6, marginBottom: 5 }}
+                  />
+                  {c.statusLabel ? (
+                    <Text
+                      style={{
+                        fontFamily: font,
+                        fontSize: 9,
+                        color: c.statusTone === "sold" ? "#c0272d" : "#1c8a4a",
+                        marginBottom: 2,
+                      }}
+                    >
+                      {`● ${c.statusLabel}`}
+                    </Text>
+                  ) : null}
+                  {c.price ? (
+                    <Text
+                      style={{
+                        fontFamily: font,
+                        fontSize: 15,
+                        fontWeight: "bold",
+                        color: gs.primaryColor,
+                      }}
+                    >
+                      {c.priceCut ? `${c.price}  ↓ ${c.priceCut}` : c.price}
+                    </Text>
+                  ) : null}
+                  {/* ALL THREE specs or nothing — never a partial line (F8). */}
+                  {c.specs ? (
+                    <Text style={{ fontFamily: font, fontSize: 10, color: MUTED, marginTop: 3 }}>
+                      {c.specs}
+                    </Text>
+                  ) : null}
+                  {c.addressLine1 ? (
+                    <Text
+                      style={{ fontFamily: font, fontSize: 10, color: gs.textColor, marginTop: 3 }}
+                    >
+                      {c.addressLine1}
+                    </Text>
+                  ) : null}
+                  {/* The card's OWN city/state/ZIP (F6). */}
+                  {c.addressLine2 ? (
+                    <Text style={{ fontFamily: font, fontSize: 10, color: MUTED }}>
+                      {c.addressLine2}
+                    </Text>
+                  ) : null}
+                  <Link
+                    src={c.linkUrl}
                     style={{
                       fontFamily: font,
-                      fontSize: 9,
-                      color: c.statusTone === "sold" ? "#c0272d" : "#1c8a4a",
-                      marginBottom: 2,
-                    }}
-                  >
-                    {`● ${c.statusLabel}`}
-                  </Text>
-                ) : null}
-                {c.price ? (
-                  <Text
-                    style={{
-                      fontFamily: font,
-                      fontSize: 15,
+                      fontSize: 10,
                       fontWeight: "bold",
-                      color: gs.primaryColor,
+                      color: gs.accentColor,
+                      marginTop: 4,
                     }}
                   >
-                    {c.priceCut ? `${c.price}  ↓ ${c.priceCut}` : c.price}
-                  </Text>
-                ) : null}
-                {/* ALL THREE specs or nothing — never a partial line (F8). */}
-                {c.specs ? (
-                  <Text style={{ fontFamily: font, fontSize: 10, color: MUTED, marginTop: 3 }}>
-                    {c.specs}
-                  </Text>
-                ) : null}
-                {c.addressLine1 ? (
-                  <Text
-                    style={{ fontFamily: font, fontSize: 10, color: gs.textColor, marginTop: 3 }}
-                  >
-                    {c.addressLine1}
-                  </Text>
-                ) : null}
-                {/* The card's OWN city/state/ZIP (F6). */}
-                {c.addressLine2 ? (
-                  <Text style={{ fontFamily: font, fontSize: 10, color: MUTED }}>
-                    {c.addressLine2}
-                  </Text>
-                ) : null}
-                <Link
-                  src={c.linkUrl}
-                  style={{
-                    fontFamily: font,
-                    fontSize: 10,
-                    fontWeight: "bold",
-                    color: gs.accentColor,
-                    marginTop: 4,
-                  }}
-                >
-                  View listing →
-                </Link>
-              </View>
-            ))}
+                    View listing →
+                  </Link>
+                </View>
+              ))}
+            </View>
+            {p.ctaLabel && p.ctaUrl ? (
+              <Link
+                src={p.ctaUrl}
+                style={{
+                  fontFamily: font,
+                  fontSize: 11,
+                  fontWeight: "bold",
+                  color: gs.accentColor,
+                  marginTop: 6,
+                }}
+              >
+                {p.ctaLabel}
+              </Link>
+            ) : null}
           </View>
-          {p.ctaLabel && p.ctaUrl ? (
-            <Link
-              src={p.ctaUrl}
-              style={{
-                fontFamily: font,
-                fontSize: 11,
-                fontWeight: "bold",
-                color: gs.accentColor,
-                marginTop: 6,
-              }}
-            >
-              {p.ctaLabel}
-            </Link>
-          ) : null}
         </View>
       );
     }

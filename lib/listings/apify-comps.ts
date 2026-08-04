@@ -32,6 +32,7 @@
 // Every path here returns [] on any failure and never throws.
 
 import { compPhotoKey } from "./comp-photos";
+import { saveApifyRecords } from "./apify-record-store";
 
 /** The subset of the vendor record we read. The FULL ceiling is catalogued in the
  *  design doc §5 and cadence_registry `source_scope` — this is what we consume. */
@@ -251,7 +252,23 @@ export async function fetchApifyComps(
   const run = deps.runActor ?? runApifyActor;
   try {
     const items = await run(buildActorInput(q));
-    return Array.isArray(items) ? items.filter(isUsableRecord) : [];
+    const records = Array.isArray(items) ? items.filter(isUsableRecord) : [];
+    // KEEP WHAT WE PAID FOR. Every record carries 69 fields (live-counted 08/04/2026)
+    // and this pipeline used to read two, then drop the rest when the process exited —
+    // so the next build re-bought the same house. Persisting HERE, inside the ONE
+    // fetch root, means every lane (baths, comp photos, descriptions) saves without
+    // opting in and no future caller can forget to.
+    //
+    // AWAITED, and that is not an oversight. The first cut fired this off unawaited
+    // to keep builds fast; the build process then exited before the write landed and
+    // the table stayed at ZERO rows while every call still billed. A fire-and-forget
+    // write is only "fast" in a process that outlives it — email builds run in CLI
+    // scripts and serverless invocations that do not. saveApifyRecords swallows its
+    // own errors and returns 0, so awaiting it cannot fail a build (RULE 0.7).
+    if (records.length > 0 && !deps.runActor) {
+      await saveApifyRecords(records).catch(() => 0);
+    }
+    return records;
   } catch {
     return [];
   }

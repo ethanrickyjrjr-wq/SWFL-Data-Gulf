@@ -1,3 +1,54 @@
+## 2026-08-04 (Opus 5) — KEEP WHAT WE PAID FOR: 69 fields per Apify record now persisted, plus section cards and a living-area floor
+
+Operator, on being shown the field list: *"we want all of that!!!!!!!!!!!!!!!!!!!"* — preceded by
+*"DO WE SAVE THE FUCKING HOUSES WE GET DATA BACK ON??????????????"* Answer was no, and it is now yes.
+
+**BUILT — `data_lake.apify_property_records`** (46 promoted columns + `raw` jsonb, keyed on
+normalised `street + city`). Write root `saveApifyRecords` fires from INSIDE `fetchApifyComps`, the
+ONE Apify fetch root, so baths / comp photos / descriptions all persist without opting in.
+**LIVE PROOF: `ROWS SAVED: 4`, `distinct RAW fields preserved: 69`.** Values now held that were
+discarded on every prior build: `hoa_fee` 200 (13630 Brynwood Ln) · `last_sold_price` 455000 /
+`last_sold_date` 02/02/2021 (5121 Muddy Ln) · `style` SINGLE_FAMILY · `year_built` · `days_on_mls` ·
+**50 `alt_photos` per home** · descriptions 2,081–2,983 chars.
+
+**TWO SILENT FAILURES HIT AND FIXED BEFORE IT COUNTED AS DONE.** (1) The write was fire-and-forget;
+CLI/serverless build processes exit before it lands, so the table sat at ZERO rows while every call
+still billed — it is `await`ed now. (2) Even awaited it stayed at zero: a new table is invisible to
+PostgREST without `GRANT USAGE ON SCHEMA` + `GRANT SELECT, INSERT, UPDATE` and
+`NOTIFY pgrst, 'reload schema'`, and the error was swallowed by the caller. Both now live in the
+migration with the reason written down.
+
+**THE BATH LANE WAS FISHING, NOT LOOKING UP.** It swept the REQUESTED zip for 60 rows and hoped. A
+33919 digest's four big-lot estates sit in 33905/33901/33908/33912 — the sweep returned 57 addresses
+and matched ZERO. A CITY sweep is no better (also one 60-row page, same four absent). The vendor
+honours a specific street address: 1 call, 1 record, and it bills LESS than the sweep. Now
+`fetchApifyBathsForHomes`, driven off a provisional selection pass so we only buy homes that will
+become cards. **Result: 28 of 28 cards carry a full spec line** (was 24 of 30).
+
+**AND THEN WHAT — enriching data CHANGED SELECTION.** Filling baths made one estate full-spec, an
+earlier category ranked it up and took it, and "Room to spread out" fell under MIN_CARDS and
+VANISHED. Fixed by moving `big-lot` FIRST in `CATEGORIES` — it is now the scarcest under the floor.
+
+**SECTION CARDS.** `listing-grid` gained `surface: "none"|"card"|"outline"` + `surfaceBg`, wired in
+BOTH render switches and the Lab inspector. Default `"none"` proven byte-identical to the committed
+original (10,311 bytes both ways) and pinned by a named test. Operator picked warm sand
+`#EFE6D8` — two earlier proofs at 3–6% off white were present in the markup five times per email and
+INVISIBLE; presence in a grep is not visibility.
+
+**LIVING-AREA FLOOR.** `big-lot` now needs `lot >= 0.5 ac AND sqft >= 3000` — a lot-only predicate
+had shipped a 752 sqft apartment (`3704 Broadway Apt 100`, vendor row
+`{"beds":1,"sqft":752,"lot_sqft":25857}`) because on a condo row `lot_sqft` is the whole BUILDING's
+parcel. Measured margin: 3,000 leaves EXACTLY 4 eligible (= MIN_CARDS, no slack); 2,500 leaves 6 —
+check `big_lot_sqft_floor_margin`, operator's knob.
+
+**⚠️ TWO FINDINGS THAT CORRECT OUR OWN RECORD.** `hoa_fee` comes back populated — our research file
+records HOA as "absent vendor-wide", which was about the OTHER vendor and must not be generalised.
+And `style` — the field the 08/04 comp-comparability decree needs — was being paid for and discarded.
+
+**NOT DONE:** `fetchCachedRecords` exists and NOTHING CALLS IT, so builds still re-buy houses already
+in the table (`apify_cached_records_unread`). `style` is stored but not wired into comp ranking.
+Handoff: `_ASSISTANT/2026-08-04-apify-record-cache-HANDOFF.md`.
+
 ## 2026-08-04 (Sonnet 5) — SteadyAPI↔LeePA close-out: 3 checks closed, 1 opened, all findings verified live
 
 Operator handed `docs/superpowers/handoffs/2026-08-04-steadyapi-leepa-close-out-handoff.md` and said

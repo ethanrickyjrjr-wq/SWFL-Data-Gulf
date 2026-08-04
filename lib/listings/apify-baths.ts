@@ -79,6 +79,79 @@ export function bathsFromRecord(r: ApifyRecord): number | null {
   return full + half / 2;
 }
 
+/** Per-build ceiling on ADDRESS lookups. A digest renders at most 5 sections × 6
+ *  cards; 30 covers every card that could exist. At 1 result per call this is
+ *  ~$0.30 worst case — CHEAPER than a single 60-result ZIP sweep. */
+const MAX_ADDRESS_LOOKUPS = 30;
+/** Address calls run in small parallel batches: 30 sequential round-trips would
+ *  dominate build time, and the vendor is fine with a handful at once. */
+const ADDRESS_BATCH = 5;
+
+/**
+ * address-key -> bath count, looked up for THE HOMES WE ACTUALLY HAVE.
+ *
+ * ── WHY THIS EXISTS AND THE ZIP SWEEP BELOW DOES NOT SUFFICE ─────────────────
+ * The ZIP sweep asks "give me 60 for-sale homes in 33919" and hopes the homes we
+ * care about are among them. Measured live 08/04/2026, they were not: a 33919
+ * digest's four big-lot estates sit in 33905/33901/33908/33912, the sweep returned
+ * 57 addresses and matched ZERO. Widening it to a CITY location is no better — the
+ * city call also returns a 60-row page (10 ZIPs, live-verified) and the same four
+ * homes were absent. It samples; it does not look up.
+ *
+ * The vendor DOES honour a specific street address as the location — one call, one
+ * record, the right house (verified live: "5121 Muddy Ln, Fort Myers, FL" → 1 record,
+ * beds 3 / full_baths 3 / half_baths 1 / sqft 3663). So we ask for the homes we hold
+ * instead of fishing for them.
+ *
+ * It is also CHEAPER: 30 address calls at 1 result each bill less than one 60-result
+ * sweep, and every result is a home that can become a card rather than a stranger.
+ *
+ * NEVER THROWS — a per-address failure is skipped, and an empty Map is the normal
+ * miss shape (the caller then honestly omits the spec line).
+ */
+export async function fetchApifyBathsForHomes(
+  homes: readonly { street: string; city: string }[],
+  deps: ApifyCompDeps = {},
+): Promise<Map<string, number>> {
+  const out = new Map<string, number>();
+  const seen = new Set<string>();
+  const wanted = homes
+    .filter((h) => h.street.trim() && h.city.trim())
+    .filter((h) => {
+      const k = listingAddressKey(h.street, h.city);
+      if (seen.has(k)) return false; // never pay twice for one address
+      seen.add(k);
+      return true;
+    })
+    .slice(0, MAX_ADDRESS_LOOKUPS);
+
+  for (let i = 0; i < wanted.length; i += ADDRESS_BATCH) {
+    const batch = wanted.slice(i, i + ADDRESS_BATCH);
+    const results = await Promise.all(
+      batch.map((h) =>
+        fetchApifyComps(
+          { location: `${h.street}, ${h.city}, FL`, listingType: "for_sale", maxResults: 1 },
+          deps,
+        ).catch(() => [] as ApifyRecord[]),
+      ),
+    );
+    for (const records of results) {
+      for (const r of records) {
+        const street = typeof r.street === "string" ? r.street.trim() : "";
+        if (!street) continue;
+        const baths = bathsFromRecord(r);
+        if (baths == null) continue;
+        // Key off the RETURNED street + city, never the requested one — a vendor
+        // that answers with a different house must not have its baths filed under
+        // the address we asked about.
+        const key = listingAddressKey(street, r.city ?? "");
+        if (!out.has(key)) out.set(key, baths);
+      }
+    }
+  }
+  return out;
+}
+
 /**
  * address-key -> bath count for one ZIP's active for-sale inventory.
  *
