@@ -1158,6 +1158,9 @@ export async function buildAgentBrandIntro(ctx: RecipeBuildContext): Promise<Ema
       id: createBlock("button").id,
       type: "button",
       props: {
+        // role `primary-cta`: the agent's own site is the honest destination for a
+        // generic "see what's for sale" ask, so the website default applies here.
+        role: "primary-cta",
         label: area ? `See what's for sale in ${area.place}` : "See what's for sale",
         url: siteUrl,
       },

@@ -1163,7 +1163,14 @@ export function buildGrid(input: GridInput): EmailDoc {
     {
       id: createBlock("button").id,
       type: "button",
-      props: { label: "Reply with REVIEW", ...(mailto ? { url: mailto } : {}) },
+      // role `primary-cta`, but the `mailto:` guard in apply-brand.ts is what
+      // actually protects this one: an engine-set reply CTA must survive the brand
+      // overlay, so no saved destination may ever out-rank the reply address.
+      props: {
+        role: "primary-cta",
+        label: "Reply with REVIEW",
+        ...(mailto ? { url: mailto } : {}),
+      },
     },
     2,
   );

@@ -4,6 +4,7 @@ import { NextResponse, type NextRequest } from "next/server";
 import { createClient } from "@/utils/supabase/server";
 import { logActivity } from "@/lib/project/activity";
 import { sanitizePalettes } from "@/lib/brand/palette";
+import { BRAND_DESTINATIONS_KEY, roleDestinationsFromBrand } from "@/lib/email/button-destinations";
 
 export const runtime = "nodejs";
 
@@ -91,6 +92,9 @@ const BASE_SELECT = [
   SOCIAL_FIELDS.join(", "),
   CONTACT_FIELDS.join(", "),
   PREFERENCE_FIELDS.join(", "),
+  // Read back too — a field the GET does not return is a field the brand editor
+  // shows as empty and then overwrites with blank on the next save.
+  BRAND_DESTINATIONS_KEY,
 ].join(", ");
 
 async function authed() {
@@ -184,6 +188,14 @@ export async function PATCH(req: NextRequest) {
       const v = body[key as FontField];
       update[key] = typeof v === "string" && v.trim() ? v : null;
     }
+  }
+  // Per-role button destinations — an OBJECT, so it must NOT ride the string loops
+  // above: they coerce a non-string to null, which would silently discard every
+  // saved link on the next brand save. Sanitized through the same reader the email
+  // pipeline uses, so an unknown role or a blank value can never persist.
+  if (BRAND_DESTINATIONS_KEY in body) {
+    const clean = roleDestinationsFromBrand(body);
+    update[BRAND_DESTINATIONS_KEY] = Object.keys(clean).length > 0 ? clean : null;
   }
   for (const key of PREFERENCE_FIELDS) {
     if (key in body) {

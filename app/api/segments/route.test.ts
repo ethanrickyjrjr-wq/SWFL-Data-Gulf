@@ -7,6 +7,16 @@ import { describe, expect, it, mock } from "bun:test";
 // supabase `createClient` mock below ignores the arg anyway.
 mock.module("next/headers", () => ({ cookies: async () => ({}) }));
 
+// Declared here for the same reason as app/api/segments/preview/route.test.ts:
+// bun's `mock.module` is process-global and last-writer-wins, so relying on the
+// service-role fake to feed the REAL resolveEffectiveTier makes this file's
+// result depend on which test ran before it. This file happened to run before
+// the export-route test that hijacks the module; that was luck, not a guard.
+mock.module("@/lib/billing/effective-tier", () => ({
+  resolveEffectiveTier: async () => ({ tier: "free", degraded: false }),
+  PAID_TIERS: new Set(["starter", "growth", "pro"]),
+}));
+
 function mockSupabase(user: { id: string } | null, insertResult: unknown) {
   mock.module("@/utils/supabase/server", () => ({
     createClient: () => ({

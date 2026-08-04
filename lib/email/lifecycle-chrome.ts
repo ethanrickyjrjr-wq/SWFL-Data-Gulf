@@ -315,7 +315,18 @@ export function buildLifecycleEmail(current: EmailDoc, chrome: LifecycleChrome):
       {
         id: createBlock("button").id,
         type: "button",
-        props: { label: chrome.ctaLabel, ...(chrome.ctaUrl ? { url: chrome.ctaUrl } : {}) },
+        // role `listing`. THE HIGHEST-TRAFFIC BUTTON EMITTER IN THE REPO — all 7
+        // listing lifecycle recipes ship their ask through this one cell, and the
+        // button-links handoff missed it entirely (it enumerated 6 emitters under
+        // lib/deliverable/recipes/ and never looked here). A lifecycle flyer is about
+        // ONE house, so its ask must never silently degrade to a homepage or to our
+        // own page: role `listing` sets usesWebsiteDefault AND usesHouseFallback
+        // false, and an unresolved slot keeps whatever the chrome set — never blanked.
+        props: {
+          role: "listing",
+          label: chrome.ctaLabel,
+          ...(chrome.ctaUrl ? { url: chrome.ctaUrl } : {}),
+        },
       },
       2,
       5,

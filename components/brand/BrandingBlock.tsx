@@ -15,6 +15,13 @@ import {
   schemeHasColor,
   schemesEqual,
 } from "@/lib/brand/palette";
+import {
+  BRAND_DESTINATIONS_KEY,
+  BUTTON_ROLES,
+  BUTTON_ROLE_KEYS,
+  roleDestinationsFromBrand,
+  type ButtonRole,
+} from "@/lib/email/button-destinations";
 
 const AGENT_FIELDS: { key: string; label: string; span?: "full" }[] = [
   { key: "agent_name", label: "Name" },
@@ -140,6 +147,20 @@ export function BrandingBlock({
     onChange({ ...branding, [key]: draft });
   }
 
+  // Per-role button destinations. The blob is typed `Record<string, string>` here but
+  // this ONE field is a nested map — a jsonb column, deliberately, so adding a role to
+  // BUTTON_ROLES never costs a migration. Hence the localized cast; the reader
+  // (`roleDestinationsFromBrand`) is tolerant of every malformed shape.
+  const destinations = roleDestinationsFromBrand(branding);
+  const setDestination = (role: ButtonRole, raw: string) => {
+    const next: Record<string, string> = { ...destinations };
+    // Clearing the box REMOVES the key rather than saving "" — an empty string would
+    // read as "saved, but blank" and permanently out-rank the website default.
+    if (raw.trim()) next[role] = raw.trim();
+    else delete next[role];
+    onChange({ ...branding, [BRAND_DESTINATIONS_KEY]: next } as unknown as Record<string, string>);
+  };
+
   // Apply a saved palette's three colors to this project's slots.
   function applyPalette(p: BrandPalette) {
     const next = { ...branding };
@@ -236,6 +257,38 @@ export function BrandingBlock({
             />
           </label>
         ))}
+      </div>
+
+      {/* ── Button destinations (08/03/2026) ────────────────────────────────
+          "The agent can change all links and should be able to save that in their
+          brand." Saved per ROLE, not per label, so renaming a button keeps its link.
+          `unsubscribe` is deliberately absent — it already has its own brand field,
+          and two inputs writing one destination is how they drift apart. */}
+      <div className="mt-4">
+        <div className="text-xs font-medium text-gray-300">Where your buttons send readers</div>
+        <p className="mt-0.5 text-[11px] text-gray-500">
+          Saved by button type, so renaming a button keeps its link. Leave blank and we use your
+          website where that makes sense.
+        </p>
+        <div className="mt-2 grid grid-cols-1 gap-3">
+          {BUTTON_ROLE_KEYS.filter((r) => r !== "unsubscribe").map((role) => (
+            <label key={role} className="flex flex-col gap-1 text-xs text-gray-400">
+              {BUTTON_ROLES[role].label}
+              <input
+                value={destinations[role] ?? ""}
+                onChange={(e) => setDestination(role, e.target.value)}
+                placeholder={
+                  role === "listing"
+                    ? "Usually set per listing — this is the fallback"
+                    : BUTTON_ROLES[role].usesWebsiteDefault
+                      ? "Blank = your website"
+                      : "https://…"
+                }
+                className={INPUT_CLS}
+              />
+            </label>
+          ))}
+        </div>
       </div>
 
       {/* ── Media URLs ── */}

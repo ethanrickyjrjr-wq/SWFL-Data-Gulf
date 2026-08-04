@@ -237,6 +237,13 @@ const ListingGridPropsSchema = z.object({
   ctaUrl: z.string().optional(),
   paddingY: paddingY(),
   sectionBg: sectionBg(),
+  // DECLARED HERE OR IT DOES NOT EXIST. `z.object` STRIPS unknown keys, so a prop the
+  // renderer reads and this schema omits is deleted on the way through every save and
+  // send path — the block renders in the Lab preview and arrives in the inbox with the
+  // card gone, and nothing anywhere throws. Same silent class as a missing `case` in a
+  // switch that ends in `default:`.
+  surface: z.enum(["none", "card", "outline"]).optional(),
+  surfaceBg: color().optional(),
 }) satisfies z.ZodType<ListingGridProps>;
 
 // metricValue/metricLabel are named OUTSIDE the AI content-patch allowlist
@@ -306,10 +313,20 @@ const SocialIconsPropsSchema = z.object({
   customIconColor: color().optional(),
 }) satisfies z.ZodType<SocialIconsProps>;
 
+// `role` + `urlSource` are OPTIONAL because this schema parses PERSISTED docs — see
+// the long note on ButtonProps in doc/types.ts. A REQUIRED role would reject every
+// deliverable saved before 08/03/2026. They must be declared here regardless: Zod
+// z.object STRIPS unknown keys, so without these two lines every safeParse on the
+// four send paths would silently delete the role and the user's url ownership, and
+// the whole feature would be inert everywhere it matters.
+// `role` is a free `string` rather than a z.enum so a doc saved under a role we later
+// rename still parses; it is coerced by `buttonRoleOf` at the point of use.
 const ButtonPropsSchema = z.object({
   label: z.string().max(40).optional(),
   url: z.string().optional(),
   bgColor: color().optional(),
+  role: z.string().max(40).optional(),
+  urlSource: z.enum(["user", "engine"]).optional(),
 }) satisfies z.ZodType<ButtonProps>;
 
 const DividerPropsSchema = z.object({

@@ -10,6 +10,11 @@
 // new doc; a nullish token map is a no-op passthrough.
 import { PLATFORMS, platformMeta } from "@/lib/email/social/platforms";
 import { brandGlobalStyle } from "@/lib/email/brand/apply-brand-style";
+import {
+  buttonRoleOf,
+  resolveButtonDestination,
+  savedDestinationsFromTokens,
+} from "@/lib/email/button-destinations";
 import type { EmailBlock, EmailDoc, SocialPlatformEntry } from "@/lib/email/doc/types";
 
 /** The one generic hero label a scope token may still replace (token-defaults.ts
@@ -67,9 +72,41 @@ export function applyBrand(doc: EmailDoc, t?: Record<string, string>): EmailDoc 
       }
       props.platforms = next;
     } else if (b.type === "button") {
-      // Brand owns ordinary link destinations — but an engine-set reply CTA
-      // (mailto:, agent-launch L2) survives the overlay.
-      if (cta && !String(props.url ?? "").startsWith("mailto:")) props.url = cta;
+      // WAS: `if (cta && !mailto) props.url = cta` — ONE blanket rewrite of every
+      // button to the single brand website. Two defects, both operator-reported
+      // 08/03/2026: an agent could not give the community button one destination and
+      // a booking button another; and a URL the user typed in the inspector was
+      // silently clobbered on the next overlay, so "all urls can be changed by the
+      // user for each button" was false at the ROUND-TRIP even though the field
+      // existed. Destinations are keyed by ROLE now (button-destinations.ts).
+      const url = String(props.url ?? "");
+
+      // GUARD 1 — an engine-set reply CTA (mailto:, agent-launch L2, review-reply)
+      // survives untouched. EXPLICIT, not an emergent property of rung ordering:
+      // these buttons are engine-owned, so without this line a saved brand
+      // destination would out-rank and clobber the reply address.
+      // GUARD 2 — a URL a human typed is theirs, full stop. Absent `urlSource` means
+      // ENGINE, so every pre-existing saved doc keeps taking the overlay exactly as
+      // it does today; reading absent as "user" would freeze the whole back
+      // catalogue and switch the overlay off for it. Both pinned by test.
+      if (!url.startsWith("mailto:") && props.urlSource !== "user") {
+        const resolved = resolveButtonDestination({
+          role: buttonRoleOf(props.role),
+          // An engine-set URL is NOT "authored" — it is precisely the thing brand
+          // is allowed to replace. Only a human edit reaches rung 1.
+          authoredUrl: null,
+          saved: savedDestinationsFromTokens(t),
+          websiteUrl: cta,
+          // No subject page is in scope here; the house rung belongs to the
+          // send-time ladder (link-audit.ts), the one path all four send lanes share.
+          housePage: null,
+        });
+        // `open-slot` — nothing saved, and a role whose promise a homepage cannot
+        // honestly answer (community/listing, per Gmail's "recipients should know
+        // what to expect when they click a link") — leaves whatever the engine set.
+        // Never blank a live button.
+        if (resolved.url) props.url = resolved.url;
+      }
     } else if (b.type === "hero") {
       // Scope dressing (HERO_LABEL = the project's place/ZIP, added by the project
       // page) fills a hero label ONLY when it is blank or still the house default.

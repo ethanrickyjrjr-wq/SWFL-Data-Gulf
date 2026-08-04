@@ -21,6 +21,7 @@ import { resolvePostalAddress } from "@/lib/email/postal-address";
 import { checkUsageLimit, recordEmailSent } from "@/lib/email/usage";
 import { lintCompiledHtml, collectAllowedUrls } from "@/lib/deliverable/url-lint";
 import { applyLinkFallbacks, subjectListingUrl } from "@/lib/email/link-audit";
+import { roleDestinationsFromBrand } from "@/lib/email/button-destinations";
 import { brandWebsiteUrl } from "@/lib/email/inject-photo";
 import { deriveProjectName } from "@/lib/project/derive-name";
 import { applyUserBrandToProject } from "@/lib/project/apply-brand";
@@ -140,7 +141,10 @@ export async function POST(req: NextRequest) {
   // than fabricate a compliance-critical field.
   const { data: brandProfile } = await supabase
     .from("user_brand_profiles")
-    .select("business_address")
+    // `*` (not a named column list) so the agent's per-role `button_destinations`
+    // rides along: this lane never calls applyBrand, so their saved links can only
+    // reach the doc through the link ladder below. Matches the blast route's select.
+    .select("*")
     .eq("user_id", user.id)
     .maybeSingle();
   const postalAddress = resolvePostalAddress(null, brandProfile?.business_address ?? null);
@@ -156,6 +160,7 @@ export async function POST(req: NextRequest) {
       brandWebsiteUrl: brandWebsiteUrl(parsed.data),
       replyMailto: null,
       hostedUrl: webUrl,
+      savedDestinations: roleDestinationsFromBrand(brandProfile),
     });
     let html = await renderEmailDocHtml(ladder.doc);
     html = withSelfSendFooter(html, webUrl, postalAddress);

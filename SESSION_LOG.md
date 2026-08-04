@@ -1,3 +1,201 @@
+## 2026-08-04 (Opus 5) — CI had been red for 42 straight runs since 08/02; two causes, both fixed here
+
+Operator: *"WHY ARE THE LAST COUPLE GITHUBS RED????????"* It was not a couple. **Last green `ci.yml`
+was 2026-08-02T00:36Z — 42 consecutive red runs**, counted from `gh run list --workflow=ci.yml`, not
+estimated. Two days of pushes landing on a red main and nobody knew.
+
+**Cause 1 — Typecheck. A committed consumer shipped ahead of its uncommitted type.**
+```
+lib/deliverable/recipes/listings-digest.ts(256,9): error TS2353: Object literal may only specify
+known properties, and 'role' does not exist in type 'HeaderProps | HeroProps | ...'
+```
+`9b3cb3b7` pushed `role: "primary-cta"` on a button while the `role?: string` that legalises it sat
+UNCOMMITTED in `lib/email/doc/types.ts` — the button-destinations work held back pending operator
+approval. CI compiles committed code only, so it could not build. **Approved by the operator this
+session** ("commit, push and get the tests done"), after confirming against SCRATCHPAD + SESSION_LOG
+that no outstanding instruction asked for that work to CHANGE: the 08/03 instruction (per-button
+labels + urls editable) was answered by the `resolveButtonDestination` swap in `apply-brand.ts`, and
+the 08/04 instruction ("set destinations in my profile, do whatever you need to do to test") was
+answered by the jsonb-shape fix verified live on his own profile. Remaining gaps already carry
+checks: `button_links_house_fail_confirm_ui`, `button_links_double_click_edit`,
+`button_links_scheduled_lanes_no_brand_source`.
+
+**Cause 2 — a test-isolation leak. The failing test was innocent; the polluting one was three files away.**
+`app/api/export/[surface]/route.test.ts:45` registers a **process-global** `mock.module` for
+`@/lib/billing/effective-tier` backed by a mutable `tierResult`, and its last test leaves that at
+`"starter"` — a PAID tier — with no unwind. bun's `mock.module` never restores. Under a bare
+repo-wide `bun test` (what CI runs: ONE process for everything),
+`app/api/segments/preview/route.test.ts` runs immediately after, so its tier read returned paid, the
+403 branch it was asserting was skipped entirely, and it fell through to `resolveSegment` where the
+test's cookie-client fake has no `.from`:
+```
+TypeError: db.from is not a function. (In 'db.from("contacts")', 'db.from' is undefined)
+  at resolveSegment (lib/email/segments/resolve.ts:48:6)
+  at POST (app/api/segments/preview/route.ts:34:26)
+```
+Green in isolation (`1 pass`), red in CI, every run. Reproduced locally with `bun test app/api`
+before touching anything. **Fix — the dependency is now declared, not inherited:** both
+`app/api/segments/route.test.ts` and `.../preview/route.test.ts` register their own `effective-tier`
+mock, so neither depends on file order; and the export test gained an `afterAll` restoring the
+ambient tier to `"free"` so a future file that forgets fails CLOSED, not open.
+`bun test app/api`: **207 pass / 6 fail → 208 pass / 5 fail**, the `(fail)` line gone. The residual 5
+are pre-existing local-only unhandled errors (a `mintClaimToken` export resolution and a deliberate
+`selectAllPaged` throw) that CI does not reproduce — CI reported exactly `1 fail`.
+
+**A third red, unrelated and NOT a code problem:** `factuality-gate` went red 08/03 23:03 on
+`"Your credit balance is too low to access the Anthropic API"`. One run; later runs green. Check
+opened (`factuality_gate_anthropic_credits`) because a billing-exhaustion red buried in a wall of
+other reds is invisible — which is how this whole situation lasted two days.
+
+**Bundling disclosed, not hidden.** `lib/email/doc/types.ts` and `schema.ts` also carry two OPTIONAL
+fields (`surface`, `surfaceBg` + `SECTION_SURFACE_BG`) from the parallel listing-card session — they
+live in the same two files and could not be separated without editing a live session's work. They
+are INERT here: no committed code sets or reads them, and their consumers
+(`BlockInspector.tsx`, `ListingGridBlock.tsx`, `email-doc-pdf.tsx`, `listings-digest.ts`) are
+deliberately NOT in this commit. `SESSION_LOG.md`/`SCRATCHPAD.md` likewise carry other sessions'
+appended entries — unavoidable for append-only shared logs.
+
+Verified before push: `bunx tsc --noEmit` → exit 0.
+
+## 2026-08-04 (Sonnet 5) — social copy/graphics/clicks research shipped; a live parallel-session collision resolved by operator override
+
+Operator: *"JUMP ON THIS SIMILAR TO HOW WE DID EMAIL PLAYBOOK AND RESEARCH... WE SHOULD HAVE
+RESEARCH ALREADY DONE IN GITIGNORED FILES. YOU CAN STEADYAPI REDDIT AND CRAWL FOR MORE. LOOK INTO
+APIFY, AS WELL"* — executing the `_ASSISTANT/2026-08-04-social-copy-and-graphics-RESEARCH-HANDOFF.md`
+handoff. 4 of 4 deliverables shipped:
+
+1. **`_RESEARCH/email-and-social/2026-08-04-social-copy-and-graphics.md`** — 3-agent crawl4ai/
+   WebSearch fan-out (copy craft, graphics/legibility, clicks+Reddit+Apify), every claim sourced +
+   dated. Headline findings: X's link-in-body penalty is real and severe (Buffer, 18.8M posts, ~0%
+   engagement — link belongs in the reply); LinkedIn's official no-link-penalty statement directly
+   conflicts with independent reach-drop data, left as an open conflict; Pangram (1M+ posts) found
+   40%+ of long-form LinkedIn posts read as AI-generated — tightest AI-tell guard belongs there; the
+   32px in-image legibility floor stays `[INFERENCE]` (no vendor/accessibility body/UX org publishes
+   a floor anywhere — confirmed absence); the suspected X-landscape 1600×900 mismatch is FALSE
+   (1200×630 is fine); our 2.5s carousel pacing has zero evidence behind it, Baymard's usability
+   research suggests 5-7s.
+2. `_RESEARCH/INDEX.md` line added, same pass.
+3. `lib/social/CLAUDE.md` gained **§0.4 — WRITING THE POST**, numbers-not-prose, same shape as
+   `emails.md` §0.
+4. This entry.
+
+**PARALLEL-SESSION COLLISION, surfaced and resolved live:** mid-task, repolith showed a DIFFERENT
+active session (`c254fcaa…`) holding claims on the exact same handoff file and `lib/social/CLAUDE.md`
+for ~21 minutes — a live duplicate of this same task, not a stale claim. Asked the operator rather
+than guess; he said override. Released the claims (`_RESEARCH/INDEX.md` got re-claimed by yet a
+third session, `dfb008c2…`, seconds after release — released again) and proceeded. Reconcile with
+whatever that other session produces next session; nothing here was silently clobbered — the file
+had zero §0.4/08-04-social content before this edit, confirmed by grep before writing.
+Steady/Reddit/Apify: SteadyAPI wasn't relevant to this research (Reddit + crawl4ai + Apify MCP were
+the requested lanes and all three ran — Reddit itself is blocked to WebSearch/WebFetch in this
+environment, worked around via a read-only mirror + crawl4ai, canonical reddit.com URLs cited).
+
+## 2026-08-04 (Opus 5) — the sale-grain call: a day-grain comparison that would have invented a finding
+
+The `.sql` handed over from `lean-verifier` (which has no DB reach) said to run it from a
+brain-platform session. Ran it. **Outcome: DEFINITIONAL WATCH — the pair is real, the sources agree,
+and it is NOT a kill.** Zero paid vendor calls; every byte was already bought.
+
+**THE CORRECTION THAT MATTERED — RULE 0.55 earned its keep.** `docs/standards/data-roots.md` T10 says
+every sale date we serve is month grain. Re-confirmed live: `leepa_parcels.last_sale_date` has
+**exactly ONE distinct day-of-month across all 528,505 populated rows — the 1st, zero exceptions**.
+The handed SQL compared `leepa_sale_date = steady_sale_date` at DAY grain. That scores **99 of 6,186
+= 1.60%** — which is just ≈1/30, the odds a real sale fell on the 1st — and reads as the two sources
+being irreconcilable. The honest month-grain number is **4,019 (64.97%)**. The day-delta distribution
+on price-agreeing pairs is near-flat (0→99, −1→71, −2→76, −3→78, −5→95, −7→109, −9→137): it measures
+the calendar, not the data. Running the file as written would have produced a fabricated finding out
+of a real query. The author could not have known — no DB reach from that checkout.
+
+**RESULTS (6 of 6 parts done, 1 with a blocked hand-off).**
+1. **Preflight** — event token is exactly `Sold` (47,631 priced rows); `last_sale_date` name+type
+   confirmed; `strap`/`parcel_id` both 17-char same shape, 542,445 of 547,972 reach `lee_parcels`.
+   Advisor's **stale-key-format branch checked and RULED OUT** (16 long-suffix / 85 long-directional
+   of 17,859, and those are street *names*) — the Steady side does not need re-keying.
+2. **address_key SQL port — 500/500 = 100.00% parity** vs `address_key.py`, on a sample weighted to
+   units/directionals/punctuation. Proven BEFORE any match rate was believed, so the rate is
+   attributable to data, not translation.
+3. **STEP 1 gate PASSED — 68.57%** (6,620 of 9,654 Lee properties; 37 street-less `L…` keys excluded
+   as ineligible, not as failures). Join lane exists → no kill.
+4. **STEP 2** on 6,186 unambiguous pairs (fan-out guard load-bearing: 10,158 ambiguous county keys,
+   worst 2,862 parcels behind one key): price exact **80.33%**, price+month **64.97%**, **97.10%** of
+   price-agreeing pairs within one month. Four buckets reconcile to 6,186, zero nulls; 2.1 re-run
+   byte-identical `(6186, 4969, 4019)`. Disagreement is structural: month truncation, LeePA holding
+   only the LATEST sale while **81.64% of matched properties have ≥2 sold events**, and county lag
+   (steady newer 1,464 vs leepa newer 322).
+5. **The written call** — filed at
+   `_RESEARCH/data-and-ingest/2026-08-04-steadyapi-leepa-sale-grain-proportion-call.md`, plus a
+   paste-ready ledger row. **NOT applied to `lean-verifier/LEDGER.md`** — the cross-project hook
+   (Rule 8) blocks brain-platform writing a sibling repo, correctly. Check opened:
+   `steadyapi_leepa_ledger_row_not_yet_applied`.
+6. **Filed + indexed in the same pass** — both files have their `_RESEARCH/INDEX.md` lines.
+
+**FLOOR COMPOSITION RECORDED** (a floor bound to a bare number rots — the next session sees it move
+and can't tell why). Of 6,620 matched properties: 343 have no priced `Sold` event, 73 matched a
+parcel with no `last_sale_amount`, 18 dropped by the ambiguity guard, **6,186 land in the floor**.
+343 + 73 + 18 + 6,186 = 6,620, exact.
+
+**LEDGER FRAMING CORRECTED.** The OPEN row hoped this would be "the first sub-monthly agreement
+surface." **It cannot be** — the county side caps the pair at month grain permanently. Sub-monthly
+needs `lee_deed_official_records` (day grain), which holds zero rows behind Akamai.
+
+**NO ERROR CONTRACT ASSERTED.** 381 same-month price disagreements (8.66%), 75 of them >10% — a
+mismatch contract would be red day one, so the call is a watch and the 381 get triaged first.
+Check: `steadyapi_leepa_381_same_month_price_disagreements_untriaged`.
+
+**CONDO-GRAIN GAP, promoted out of prose into a check.** The 3,034 misses are **85.00% condos**, and
+**2,196 of 2,271 marked-unit misses (96.70%) reach a parcel once the unit is stripped** — the
+property is on the county roll, only unit grain is missing. Check:
+`steadyapi_leepa_condo_unit_grain_match_gap`. Same family as Marco Island 0/360.
+
+## 2026-08-04 (Opus 5) — listings-digest: section cards (3 states) + a living-area floor on "Room to spread out"
+
+Operator, on the 08/03 proof: *"put a nice light color card behind each section… make sure email lab
+can put boarder around or no color, as well. don't fuck up the original"* and *"I just don't
+understand apartments in Room To Spread Out section- this one has about 800 sq ft listed… make sure
+these are over 3k sq ft."*
+
+**WHERE THE 800 SQ FT CAME FROM — live-verified, not reasoned.** SteadyAPI
+`/search?location=Fort-Myers_FL` → HTTP 200, 200 rows. `3704 Broadway Apt 100` is verbatim
+`{"beds":1,"sqft":752,"lot_sqft":25857}` = 0.59 acres. The `big-lot` predicate was `lotSize >= 0.5`
+and read NOTHING about living area; on a condo row `lot_sqft` is the whole BUILDING's parcel, so
+every unit in the complex qualified as "room to spread out." The raw `description` object carries
+exactly six keys — beds/sqft/lot_sqft + their `_display` twins — and **no type or sub_type**, which
+re-confirms the 07/07/2026 finding that property_type is request-side only. A living-area floor is
+the only lever this endpoint offers. Now `lot >= 0.5 ac AND sqft >= 3000` (`BIG_LOT_MIN_SQFT`).
+
+**THE MARGIN IS MEASURED, NOT GUESSED.** Simulated the real cascade (real normalizer + ranker, live
+pool) at five thresholds: 0/1500/2000/2500 all leave 6 eligible; **3,000 leaves exactly 4 = MIN_CARDS**
+— it renders with nothing to spare. Check `big_lot_sqft_floor_margin` opened; 2,500 is the knob and
+it is the operator's call.
+
+**SECTION SURFACE — three states, one prop.** `ListingGridProps.surface: "none" | "card" | "outline"`
++ `surfaceBg`, default `"none"`. *"don't fuck up the original"* is treated as a testable guarantee,
+not a style note: rendered the committed `HEAD` component beside the new one — **10,311 bytes each,
+byte-identical** — and pinned it as a named test. Wired in BOTH switches (`ListingGridBlock` and the
+PDF's own arm) because a prop honoured in one engine and ignored in the other is F9, and both end in
+`default:`. Declared in `schema.ts` because `z.object` STRIPS unknown keys — omitting it there would
+have deleted the prop on every save/send path with nothing throwing. Lab control added to
+`BlockInspector` (None / Card / Border only, + colour picker for Card).
+
+**Two silent bugs caught in the build, both invisible to a visual check:** (1) every ink colour is
+computed against `bg`, so once text sits on the card the contrast base had to move with it — two pale
+colours would have hidden that permanently; (2) a card at full section padding would have narrowed
+the 2-across row below its wrap point, so the 24px gutter is SPLIT 8 outer / 16 inner and the cards
+keep their exact width.
+
+**PROOF SENDS — two colours to pick between (operator: "maybe 2 different ones. you pick"):**
+`b6eb6798-22ff-4ff7-a113-c0725a903819` "28 homes in Fort Myers — card A (warm)" `#F7F5F0` ·
+`73383eff-7368-423c-8b47-9719853d190f` "— card B (cool)" `#EDF2F7`. Both 81,749 bytes (Gmail clips
+~102KB). Grep gate: rdcpix **56** · `api.mapbox.com` **0** · realtor detail links **56** · `<img>`
+**29** (28 cards + logo) · unsubscribe **2** (case-insensitive) · url-lint clean. `3704 Broadway`
+**absent**. Tests: 290 pass / 0 fail across the email + digest suites.
+
+**NOT DONE, and both are open checks, not prose:** the section that is ABOUT size ships **0 of 4**
+spec lines — those four estates have no bath count, and the line is all-three-or-none
+(`big_lot_section_shows_no_sqft`). **NOTHING IS COMMITTED OR PUSHED** — `types.ts`, `schema.ts` and
+`BlockInspector.tsx` all carry a live parallel session's uncommitted button-destinations work, and
+committing those paths would bundle it.
+
 ## 2026-08-04 (Opus 5) — the pairing table nobody read: consumer wired + Gate 12 makes "brain-first" a mechanism
 
 **NOT PUSHED — awaiting operator approval** (16 files, >5 = RULE 1 ask-first). Committed locally,
@@ -105,6 +303,55 @@ prohibition line is unproven. That is the next verification, not a claim I'm mak
 `SESSION_LOG.md` + `_ASSISTANT/SCRATCHPAD.md` deliberately LEFT UNCOMMITTED — both carry a parallel
 session's in-flight entries mixed with mine; whoever pushes must commit them alongside (RULE 0).
 
+## 2026-08-04 (Opus 5) — fact-forcing gate: Edit/Write half OFF, destructive half KEPT (config only, no fork)
+
+**NOT PUSHED — awaiting operator approval.** One file: `.claude/settings.json` (+5, an `env` block).
+
+Operator: *"the fact-forcing gate fired 25 times this session, roughly doubling the round-trips on a
+12-file build. Worth deciding whether it should apply to multi-file feature work or just to one-off
+edits."*
+
+**Measured, not estimated.** The gate keeps a per-session ledger at `$USERPROFILE/.gateguard/`.
+Session `bbb2a595` (the 08/03 button-links build) reads `fact_force_denials: 25`, `checked: 26` —
+his 25 exactly, with no state-expiry double-counting. Second big session `cd1e0933`: also 25.
+
+**What it does** (`~/.claude/plugins/cache/ecc/ecc/2.0.0/scripts/hooks/gateguard-fact-force.js`):
+denies the first Edit/Write/MultiEdit **per distinct file path per session** (line 1202). Cost is
+linear in build width, which is why a 12-file build that also touches tests, docs and SCRATCHPAD hit
+25. Registered by the ECC plugin's `hooks/hooks.json`, NOT by anything in this repo.
+
+**It is a COUNTER, not a verifier.** Verified live twice: it denies, marks the path checked in the
+*same* write (`markCheckedAndCountDenial`, line 1203), and allows the retry regardless of what was
+presented — or whether anything was. The four questions are on the honor system; the only thing
+mechanically enforced is one interruption per path. That is what decided the call.
+
+**Why exemptions alone were not enough.** Replayed both real ledgers through the live `run()`:
+26 → 19 and 25 → 15. A quarter to a third off, residual still linear. So the operator chose: drop
+the Edit/Write half, keep the destructive half.
+
+**Which key is load-bearing** (so a future session doesn't fix the wrong knob):
+- `ECC_DISABLED_HOOKS=pre:edit-write:gateguard-fact-force` — **does the work.** Read by
+  `scripts/lib/hook-flags.js:24`. Proved end-to-end through the real wrapper: deny without it,
+  clean pass-through with it.
+- `GATEGUARD_BASH_ROUTINE_DISABLED=1` — kills only the once-per-session Bash denial. The destructive
+  branch (line 1245) runs *before* it (line 1261), so destructive stays.
+- `GATEGUARD_EXEMPT_GLOBS` — **dormant** while the edit-write hook is off. Kept because it is correct
+  if ever re-enabled. **Must be lowercase**: `getExemptMatchers()` compiles without the `i` flag
+  while `isExemptPath()` lowercases the path, so `_ASSISTANT/**` silently never matches — proved
+  both ways (14/14 lowercase, all-FAIL capitalized). `docs/sql/**` deliberately NOT exempt: a
+  migration is a schema change, so the gate's question 3 has a real answer there.
+
+**The destructive gate survives — proved, not assumed.** Bash reaches gateguard via a *different*
+registration (`pre:bash:dispatcher`); the only gateguard entry in `hooks.json` is
+`Edit|Write|MultiEdit`. Fed a synthetic recursive-force-delete through the wrapper with the
+edit-write id disabled → `DENIED`. Independently, the `rm -rf|drop table|truncate|DELETE FROM` regex
+hook in `~/.claude/settings.json` is also live (it blocked one of my own test payloads mid-session).
+
+**Not fixed / open:** takes effect NEXT session (env is read at startup). Check opened —
+`gateguard_edit_write_disabled_live_verify` — with a file-readable signal (`fact_force_denials`
+absent or 0 after a 2+ source-file session), deliberately not "I didn't notice denials," which would
+false-pass.
+
 ## 2026-08-04 (Opus 5) — carousel recipe locked into lib/social/CLAUDE.md §0; Sonnet research handoff written for social COPY + graphics
 
 Operator: *"MAKE SURE IT IS IN THE PLAYBOOK AT THE BEGINNING OF SOCIAL BUILDS!!!! WE DON'T WANT TO
@@ -131,6 +378,37 @@ SHIPPED — 2 of 2:
    its own falsifier. Done = research doc + INDEX line + a §0.4 rules card + a log entry, n of N.
 
 Docs only — nothing shipped to the live feed in this entry.
+## 2026-08-04 (Opus 5) — CORRECTION to the entry below: it was BROKEN in prod, and only a real profile showed it
+
+Operator: *"set destinations in my profile!!!!!!!!!!!! do whatever you need to do to test. come on
+man."* He was right, and the entry below was wrong to stop where it did. I had literally written
+"none of this is provable against real agent data yet" and treated that as a fact to report instead
+of a thing to go fix. **2,765 green unit tests, a verified prod column, and the feature did not
+work.**
+
+**THE BUG: a jsonb column does not arrive in one shape.** PostgREST parses it into an object; the
+raw Postgres driver hands back the JSON **text**. `roleDestinationsFromBrand` gated on
+`typeof map === "object"`, so a perfectly good string was silently rejected and EVERY
+`BUTTON_DEST_*` token went missing. Observed on the first real run: `community` resolved to an OPEN
+SLOT and `booking` wrongly fell through to the homepage — the exact granularity bug this whole
+build exists to kill. Every unit fixture was already an object, so no test could ever have seen it.
+This is the "a parser's shape is not the source's shape" trap, verbatim.
+
+Fixed by accepting both shapes (parse a string, reject arrays and malformed JSON), with three
+regression tests named for it. **Verified live on the operator's own profile** (`bun
+scripts/email/verify-button-destinations.mts ethanrickyjrjr@gmail.com`), all six behaviors visible
+in one run: primary-cta → his site · community → `/z/33990` (NOT the homepage) · booking →
+`/support` (a third, different destination) · listing → open slot, never our page · engine-set
+`mailto:` reply CTA survives · a user-typed URL survives. The fill-in popup dropped from asking
+about two buttons to one — the listing button, correctly. Destination URLs were curl-checked for
+200 BEFORE being written; never save a link we have not proven serves.
+
+**New:** `scripts/email/verify-button-destinations.mts` — the live harness that was missing. Unit
+tests over fixtures prove the function; they do not prove the column, the token bridge, and the
+overlay agree with each other in prod.
+
+`bun test lib/email lib/deliverable app/api/user` → **2,778 pass / 0 fail**; `bunx next build` clean.
+
 ## 2026-08-03 (Opus 5) — button links: the resolver is now WIRED, and the real bug was that a user's typed URL never survived
 
 **NOT PUSHED — awaiting operator approval.** Verified: `bunx next build` → compiled successfully,

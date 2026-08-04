@@ -369,6 +369,10 @@ export async function buildCommunityInfo(
       id: createBlock("button").id,
       type: "button",
       props: {
+        // role `community`: a homepage may NOT silently stand in for "ask about THIS
+        // neighborhood" — Gmail's sender guidelines require the reader know what to
+        // expect on click (button-destinations.ts, usesWebsiteDefault: false).
+        role: "community",
         label: hood ? `Ask about ${hood.name}` : "Ask about this community",
         ...(site ? { url: site } : {}),
       },

@@ -33,6 +33,11 @@ const SOCIAL_TOKENS: Record<string, string> = {
 };
 
 import { isFontFamily } from "@/lib/brand/fonts";
+import {
+  destinationTokenKey,
+  roleDestinationsFromBrand,
+  type ButtonRole,
+} from "@/lib/email/button-destinations";
 
 /** Map a project/account branding blob → email brand tokens (UPPER keys). */
 export function brandingToTokens(
@@ -80,10 +85,22 @@ export function brandingToTokens(
   // socials + unsubscribe
   for (const [key, token] of Object.entries(SOCIAL_TOKENS)) set(key, token);
 
-  // website doubles as the CTA destination
+  // website doubles as the CTA destination — the DEFAULT for the roles a homepage can
+  // honestly answer, no longer the answer for every button in the doc.
   if (b.website_url && b.website_url.trim()) {
     t.WEBSITE_URL = b.website_url.trim();
     t.CTA_URL = b.website_url.trim();
+  }
+
+  // Per-role button destinations. The agent owns where each button sends readers —
+  // "the agent can change all links and should be able to save that in their brand"
+  // (operator decree 08/03/2026). Flattened into the same UPPER token record every
+  // other brand field rides in, because `applyBrand` reads only that record.
+  //
+  // The map is a NESTED object in the branding blob, so it does not arrive through
+  // this function's `Record<string, string>` parameter type — read it off the raw blob.
+  for (const [role, url] of Object.entries(roleDestinationsFromBrand(branding))) {
+    if (url) t[destinationTokenKey(role as ButtonRole)] = url;
   }
 
   return t;

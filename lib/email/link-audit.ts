@@ -10,6 +10,11 @@
 // Engine/user writes only — the AI never touches a URL (schema strip mode).
 
 import type { EmailDoc } from "./doc/types";
+import {
+  buttonRoleOf,
+  resolveButtonDestination,
+  type SavedDestinations,
+} from "./button-destinations";
 
 export interface LinkAsk {
   blockId: string;
@@ -25,12 +30,24 @@ export interface FallbackCtx {
   brandWebsiteUrl?: string | null;
   replyMailto?: string | null;
   hostedUrl?: string | null;
+  /**
+   * The agent's per-role saved button destinations, from their brand.
+   *
+   * WHY IT LIVES HERE AND NOT ONLY IN `applyBrand`: all four send paths call this
+   * module — the lab claim-and-send route, the blast route, and the two SCHEDULED
+   * lanes (`emaildoc-occurrence.ts`, `sequence/frozen-occurrence.ts`). The scheduled
+   * lanes call this ladder but never call `applyBrand` at all (open defect
+   * `applybrand_no_server_side_caller`), so wiring role destinations in HERE is what
+   * makes an agent's saved links apply on an automated send instead of only in the
+   * Lab. Without this rung the feature is a green lab demo and the leak stays live.
+   */
+  savedDestinations?: SavedDestinations;
 }
 
 export interface AppliedFallback {
   blockId: string;
   url: string;
-  rung: "listing" | "website" | "reply" | "hosted";
+  rung: "saved-role" | "listing" | "website" | "reply" | "hosted";
   columnIndex?: number;
 }
 
@@ -89,7 +106,11 @@ export function applyLinkFallbacks(
   const asks = auditDocLinks(doc);
   if (asks.length === 0) return { doc, applied: [] };
   const rung = firstRung(ctx);
-  if (!rung) return { doc, applied: [] };
+  // An agent with a saved per-role destination and NOTHING else on the ladder must
+  // still get their link applied — so the empty-ladder early return has to account
+  // for the saved map too, or the scheduled lanes silently skip the whole feature.
+  const hasSaved = Object.values(ctx.savedDestinations ?? {}).some(has);
+  if (!rung && !hasSaved) return { doc, applied: [] };
 
   const applied: AppliedFallback[] = [];
   const byBlock = new Map<string, LinkAsk[]>();
@@ -101,9 +122,27 @@ export function applyLinkFallbacks(
     const blockAsks = byBlock.get(b.id);
     if (!blockAsks) return b;
     if (b.type === "button") {
-      applied.push({ blockId: b.id, url: rung.url, rung: rung.rung });
-      return { ...b, props: { ...b.props, url: rung.url } };
+      // The agent's OWN saved destination for this button's role outranks every
+      // generic rung — it is an explicit choice, the ladder below is a guess.
+      // Deliberately does NOT stamp `urlSource: "user"`: this is a send-time
+      // fallback, and marking it user-owned would immunize the guess against the
+      // next brand overlay forever.
+      const role = resolveButtonDestination({
+        role: buttonRoleOf((b.props as { role?: unknown }).role),
+        authoredUrl: null,
+        saved: ctx.savedDestinations,
+        // The generic ladder below already owns website/hosted; this call exists
+        // only to surface a SAVED per-role value, so the lower rungs stay null.
+        websiteUrl: null,
+        housePage: null,
+      });
+      const pick = role.url ?? rung?.url;
+      if (!pick) return b; // saved map empty for this role AND no generic ladder
+      const pickRung: AppliedFallback["rung"] = role.url ? "saved-role" : rung!.rung;
+      applied.push({ blockId: b.id, url: pick, rung: pickRung });
+      return { ...b, props: { ...b.props, url: pick } };
     }
+    if (!rung) return b; // non-button slots have only the generic ladder
     if (b.type === "listing") {
       applied.push({ blockId: b.id, url: rung.url, rung: rung.rung });
       return { ...b, props: { ...b.props, linkUrl: rung.url } };

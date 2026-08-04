@@ -4,7 +4,7 @@
 // fake THROWS on .from — any data read via it explodes every test), FM5
 // page-boundary truth through the REAL selectAllPaged (1001 rows, two pages),
 // FM7 BOM, FM8 read error → 500 JSON never text/csv. Plus 404/401/headers.
-import { describe, expect, test, mock } from "bun:test";
+import { afterAll, describe, expect, test, mock } from "bun:test";
 
 let fakeUser: { id: string } | null = { id: "user-1" };
 let tierResult: { tier: string; degraded: boolean } = { tier: "free", degraded: false };
@@ -173,5 +173,17 @@ describe("GET /api/export/[surface]", () => {
     expect(res.status).toBe(200);
     const lines = (await res.text()).trimEnd().split("\r\n");
     expect(lines.length).toBe(1);
+  });
+
+  // `mock.module` above replaced @/lib/billing/effective-tier for the WHOLE bun
+  // process and there is no unwind. Without this restore, the last test above
+  // leaves the shared tier at "starter" — paid — and every later test file that
+  // resolves a tier silently reads paid. That is exactly how
+  // app/api/segments/preview/route.test.ts went red in CI while passing alone.
+  // Those files now declare their own mock; this keeps the ambient default at
+  // the SAFE value ("free") so a future file that forgets fails closed, not open.
+  afterAll(() => {
+    tierResult = { tier: "free", degraded: false };
+    tierThrows = false;
   });
 });

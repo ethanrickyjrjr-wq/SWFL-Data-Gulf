@@ -384,6 +384,10 @@ export async function buildListingsShowcase(
         id: createBlock("button").id,
         type: "button",
         props: {
+          // role `listing`: per-card, and its destination TRAVELS WITH THE LISTING —
+          // a new listing means a new landing address (operator, 08/03/2026). Never
+          // falls back to a homepage or to our own page.
+          role: "listing",
           label: "Take a look",
           url: l.listingUrl!,
         },
@@ -402,6 +406,9 @@ export async function buildListingsShowcase(
       id: createBlock("button").id,
       type: "button",
       props: {
+        // role `primary-cta`: the closing ask is generic, so the agent's homepage IS
+        // an honest answer for it — the one role where the website default applies.
+        role: "primary-cta",
         label: "See more listings like these",
         ...(site ? { url: site } : {}),
       },

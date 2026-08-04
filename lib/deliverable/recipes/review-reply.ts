@@ -549,6 +549,9 @@ function buildGrid(
       id: createBlock("button").id,
       type: "button",
       props: {
+        // role `primary-cta`: a generic "search homes" ask, so the agent's homepage
+        // is an honest destination and the website default applies.
+        role: "primary-cta",
         label: seedButton?.props.label ?? "Search Homes in This Area",
         ...(site ? { url: site } : {}),
       },

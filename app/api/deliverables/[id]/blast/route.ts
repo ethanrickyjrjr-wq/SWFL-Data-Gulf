@@ -39,6 +39,7 @@ import { bindUnsubscribeHref } from "@/lib/email/bind-unsubscribe";
 import { renderEmailDocHtml } from "@/lib/email/render-email-doc";
 import { applyBrand } from "@/lib/email/brand/apply-brand";
 import { brandingToTokens } from "@/lib/email/brand/branding-to-tokens";
+import { roleDestinationsFromBrand, type SavedDestinations } from "@/lib/email/button-destinations";
 import { EmailDocSchema } from "@/lib/email/doc/schema";
 import { renderEmailDocToBuffer, pdfFilename } from "@/lib/pdf";
 import { logActivity } from "@/lib/project/activity";
@@ -294,6 +295,10 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{ id:
     // Empty-tolerant by contract: no profile row, no tokens, or a parse failure leaves
     // the doc exactly as it arrived. Branding must never block a send.
     let brandedDoc = parsedDoc.data;
+    // The agent's per-role saved button destinations, hoisted OUT of the try so the
+    // link ladder below can use them too — a slot the overlay left empty must still
+    // be fillable from the agent's own saved link rather than from a generic rung.
+    let savedDestinations: SavedDestinations = {};
     try {
       const { data: fullBrand } = await supabase
         .from("user_brand_profiles")
@@ -301,6 +306,7 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{ id:
         .eq("user_id", user.id)
         .maybeSingle();
       if (fullBrand) {
+        savedDestinations = roleDestinationsFromBrand(fullBrand);
         const tokens = brandingToTokens(fullBrand as unknown as Record<string, string>);
         const reparsed = EmailDocSchema.safeParse(applyBrand(brandedDoc, tokens));
         if (reparsed.success) brandedDoc = reparsed.data;
@@ -318,6 +324,7 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{ id:
       brandWebsiteUrl: brandWebsiteUrl(parsedDoc.data),
       replyMailto: null, // blast replies ride the reply-to header, not a body CTA
       hostedUrl: webUrl,
+      savedDestinations,
     });
     const sendDoc = ladder.doc;
     linkFallbacks = ladder.applied;

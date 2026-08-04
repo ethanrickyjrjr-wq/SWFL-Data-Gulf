@@ -253,7 +253,43 @@ export interface ListingGridProps extends BlockBase {
   cards: ListingGridCard[];
   ctaLabel?: string;
   ctaUrl?: string;
+  /**
+   * How this section is separated from the one above it. Operator, 08/04/2026:
+   * *"put a nice light color card behind each section. same color for each, but just
+   * to seperate the sections. make sure email lab can put boarder around or no color,
+   * as well."* — three states, one prop.
+   *
+   * `"none"` (DEFAULT) is today's look exactly: a full-width section closed by a
+   * hairline rule. The default is load-bearing and pinned by a named test — every doc
+   * saved before today carries no `surface`, and *"don't fuck up the original"* means
+   * their markup must not move by one byte.
+   *
+   * USER-OWNED, like every other styling field here: named outside the AI
+   * content-patch allowlist so a content pass can never restyle a section.
+   */
+  surface?: "none" | "card" | "outline";
+  /** Hex fill for `surface: "card"`. Omitted → SECTION_SURFACE_BG. Ignored by the
+   *  other two states — an outline is deliberately unfilled. */
+  surfaceBg?: string;
 }
+
+/**
+ * The default section-card fill: warm sand, ~6/10/15% off the #ffffff canvas per
+ * channel — a card you can actually SEE, while still reading as paper rather than as
+ * a grey UI panel. Text colour on top is computed for contrast against whichever
+ * colour actually wins, so overriding this with something dark degrades legibly.
+ *
+ * THE FLOOR THIS ENCODES: the first version of this constant was `#F7F5F0` — 3–6% off
+ * white — and the operator's reply to the proof send was *"why are they both the same?
+ * where are the background colors?????????????????"* (08/04/2026). It was present in
+ * the markup five times per email and invisible to the eye. A surface meant to be seen
+ * sits ~8–15% off its backdrop; presence in a grep is not visibility.
+ *
+ * Lives here rather than in blocks/styles.ts because BOTH renderers need it and the
+ * PDF keeps its own private copies of BORDER/MUTED/CARD_BG — a second copy of this
+ * one would make it the third place the same colour is written down.
+ */
+export const SECTION_SURFACE_BG = "#EFE6D8";
 
 /** One column in a `multi-column` row — a flat "feature card": image + heading +
  *  body + optional link. Intentionally NOT nested blocks (the doc model stays a
@@ -371,6 +407,35 @@ export interface ButtonProps {
   label?: string;
   url?: string;
   bgColor?: string;
+  /**
+   * Stable identity for "where does this button send readers?" — the key an agent's
+   * saved destinations are stored under (`lib/email/button-destinations.ts`,
+   * BUTTON_ROLES). Binding by ROLE rather than by label is what lets a relabel carry
+   * its URL along (operator pick 08/03/2026: *"if a user changes the name of a button,
+   * the saved website follows it"*).
+   *
+   * OPTIONAL on purpose — a deliberate deviation from the handoff's "make it
+   * REQUIRED". This type is mirrored by a Zod schema that parses PERSISTED docs, and
+   * every button in every saved deliverable predates the field; a required role would
+   * fail `EmailDocSchema.safeParse` across the whole back catalogue and break those
+   * agents' builds. The forcing function lives in a test over the EMITTERS instead
+   * (`button-roles.test.ts`), so a new recipe still cannot ship a roleless button
+   * while an old saved doc still opens. An absent role resolves as `primary-cta`.
+   */
+  role?: string;
+  /**
+   * Who owns this URL. `"user"` = a human typed it (the inspector's URL field or the
+   * link-ask modal) and the brand overlay must NOT touch it. That is the whole of
+   * *"all urls can be changed by the user for each button"* (operator, 08/03/2026):
+   * the input existed before this field, but `applyBrand` rewrote every non-mailto
+   * button to the brand website on the next pass, so the edit never survived.
+   *
+   * ABSENT MEANS ENGINE, and that default is load-bearing: every button in every
+   * saved doc today carries a URL and no marker, so reading `undefined` as "user"
+   * would freeze the entire back catalogue and silently switch the brand overlay off
+   * for it. Pinned by a named test — do not flip this later because it "seems safer".
+   */
+  urlSource?: "user" | "engine";
 }
 
 export interface DividerProps {

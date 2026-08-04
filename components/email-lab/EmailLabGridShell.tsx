@@ -2586,7 +2586,15 @@ export function EmailLabGridShell({
               const mine = answers.filter((a) => a.ask.blockId === b.id);
               if (mine.length === 0) return b;
               if (b.type === "button") {
-                return { ...b, props: { ...b.props, url: mine[0].url } };
+                // A HUMAN answered this prompt, so the URL is theirs: stamp it so the
+                // next brand overlay leaves it alone. Without this the user types a
+                // destination, `applyBrand` rewrites it to the brand website on the
+                // following pass, and "all urls can be changed by the user for each
+                // button" is false at the round-trip (operator, 08/03/2026).
+                return {
+                  ...b,
+                  props: { ...b.props, url: mine[0].url, urlSource: "user" as const },
+                };
               }
               if (b.type === "listing") {
                 return { ...b, props: { ...b.props, linkUrl: mine[0].url } };
