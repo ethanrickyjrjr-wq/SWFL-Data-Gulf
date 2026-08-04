@@ -1,3 +1,317 @@
+## 2026-08-04 (Opus 5) — STEADY STEP-3: three views were re-parsing the raw JSON a second time. All three now read their table.
+
+Operator: *"figure out what is wrong with this file"* → *"Why the fuck would we do a duplicate
+root???????"* → *"Fix it all you fucking idiots"* → *"commit and push yours and get rid of any
+changes that were incorrect."*
+
+**THE DEFECT.** Each of the three SteadyAPI STEP-3 families had its raw array parsed TWICE, live,
+by two objects with different rules. The typed tables shipped 08/03 (parser + tests + brain wiring);
+on 08/04 a second session built `*_v` views that re-parsed the SAME arrays at identical row counts,
+citing data-roots rule 4 ("roots are VIEWS") in their file headers. The same property could answer
+differently depending on which surface a caller reached — the table kept `price = 0`, the view
+NULLed it; the table stored the vendor percentage as text on purpose, the view cast it to numeric.
+
+**THE STANDARDS WERE NEVER IN CONFLICT.** `docs/standards/data-consolidation-plan.md` — the source
+of rule 4 — states three layers in one line: *"only ingest writes base tables; only root views read
+them; only consumers read root views."* The playbook's "typed tables from stored bytes" builds the
+BASE TABLE; rule 4's root view sits ON TOP of it. The 08/04 build flattened the two.
+
+**FIX — all three, verified live via `pg_get_viewdef`:**
+```
+steadyapi_listing_events_v   re-parses raw JSON: no | reads steadyapi_listing_events:  yes | 235383 = 235383
+steadyapi_tax_history_v      re-parses raw JSON: no | reads steadyapi_tax_history:     yes | 273051 = 273051
+steadyapi_property_permits_v re-parses raw JSON: no | reads steadyapi_property_permits:yes |  79281 =  79281
+```
+Guards all survived the move: 42,633 percentages parsed (2,263 dollar-shaped refused, 0 carry both
+markers), 22,935 zero-price sentinels, 17,022 rent events, 31,217 public-record rows, 124 pre-1900
+dates refused, 4 absurd-future permit dates refused. `bun test` → **39 pass, 0 fail** across the
+three consumer suites. Listing-events needed `drop`+`create` (column shape changed); the other two
+took `create or replace`.
+
+**THE LIVE COMMENTS WERE LYING AND ARE REPAIRED.** All three `comment on view` strings still
+asserted "parsed … from `data_lake.steadyapi_property_history_raw`", and the permits one asserted
+`effective_date_raw` "is the vendor string (UNIVERSALLY Mon D, YYYY)". Production metadata claiming
+a shape the view can no longer produce is the same defect class as the duplicate itself. Re-applied
+— all three now open with "READ LAYER".
+
+**ONE HONEST LOSS, NOT PAPERED OVER.** The permits TABLE stores the parsed date, not the vendor's
+literal "Mar 8, 2021", so `effective_date_raw` is now that date as ISO text. The 4 absurd futures
+stay inspectable and the dedupe key is unaffected (raw and parsed are 1:1), but the vendor's exact
+formatting is gone. Restoring it means adding the string in the PARSER — never by re-parsing in a
+view. Check `steadyapi_permits_vendor_date_string_not_stored` is OPEN.
+
+**WORDING CORRECTED IN THE CATALOG.** What was eliminated is two **parses**, not two **objects** —
+table + read view IS the intended shape. `data-roots.md` said "TWO-OBJECT PROBLEM RESOLVED", which
+would read to the next session as "we deleted one of them". Fixed in all three rows.
+Check `steadyapi_three_families_table_vs_view_duplicate` CLOSED with that evidence.
+
+**FOUR-LANE GATE HOOK WAS BLIND TO THIS REPO'S ONLY DB PATH.** `check-four-searches.mjs` matched
+`psql` / `execute_sql` / `supabase db` for the LIVE lane — none of which exist on this box. Every
+production query here goes through `new Bun.SQL()` or `scripts/run-migration.ts`, so two turns that
+had already queried prod were forced to re-answer. Matcher extended; 22 hook tests pass.
+
+**Not mine, riding along in shared files:** `SESSION_LOG.md`, `data-roots.md` and `SCRATCHPAD.md`
+also carry the parallel comps-email session's content, whose own code files are still uncommitted.
+Repolith shows no active claims, so those sessions are gone.
+
+## 2026-08-04 (Opus 5) — COMPS EMAIL: photos recovered without spending, no-photo comps dropped, BATHS finally rendered, ONE recipe
+
+Operator: *"put the two photos in ... Get rid of the no photo comps. Write the recipe as the only
+fucking one for comps"*, then *"Where the fuck is baths?????"*, *"Why the fuck is baths not in from
+fucking [Apify]!!!!?????"*, *"Why are all the fonts fucking different and stupid just about
+everywhere???!!!"*
+
+**SENT** -> hello@swfldatagulf.com, resend id `0fda7496-7fa4-40ae-af80-d339b49ece86`, run
+`2026-08-04-msen4wg4`. **5 photos · 5 listing links · 5 rows with baths · 0 charts · 0 aerials ·
+count reads "The 5 comparable homes".** Total new vendor spend: **$0.00.**
+
+**PHOTOS RECOVERED, NOT RE-BOUGHT.** Apify is still at its $29 cap. But the 5-photo dry run
+(`msecgv1v`, $3.95) had already bought them and the cache write was failing with Postgres 21000 at
+the time, so the rows never landed. Pulled the rdcpix URLs + realtor.com links out of that run's own
+HTML and upserted them — **which also live-verified the 21000 fix**: 5 rows landed, cache went 21 ->
+26. He asked for "the two"; five was the better artifact.
+
+**NO-PHOTO COMPS DROPPED (operator decree).** Filtered from the SET, not the table, so the median,
+range and count recompute together — filtering only the table would print "6 comparable homes ...
+$111 to $266" above five rows. Selection now runs over the WHOLE 12-deep ranked pool and takes the
+first MAX_COMPS *photographed*, so a missing picture costs the next-best comp instead of a gap.
+Floor `MIN_PHOTOGRAPHED_COMPS = 2`, below which the full set ships and the shortfall is logged loudly.
+**Stated cost, accepted by the operator:** photo coverage now selects the set and therefore moves the
+median and the claim — the one thing this file argued against for its whole life. The dropped comp
+was 16460 TIMBERLAKES DR (never bought, never in cache).
+
+**BATHS — TWO SEPARATE MISSES, BOTH SHIPPED FOR DAYS.**
+1. `compRow` built `[address, beds, sqft, date]` and never rendered `c.baths` — while RenderComp
+   carried it, `lee_comp_sales_v` SELECTs it, and the LeePA layer-23 join was wired 08/02. The data
+   crossed the entire pipeline and was dropped at the last line.
+2. `resolveCompEnrichment` read photo/link/style off a 69-field record and binned `full_baths` /
+   `half_baths` — the same read-two-fields pattern that made the cache necessary. Now read through
+   `bathsFromRecord` (the ONE conversion root, already used by the digest lane). Lake wins where it
+   has a value; the vendor fills holes only. Half-baths preserved (2.5), absent never becomes "0 ba".
+
+**FONTS — MEASURED, NOT GUESSED.** Census of the rendered HTML: 4 font-family declarations. Two carry
+`!important` and are the Outlook `[if mso]` pin (correct, invisible elsewhere). The real pair is
+Playfair display + Lato body — two families is the design. The BUG was which block got which: only
+HeaderBlock and HeroBlock called `displayFontStack`, so a 44px serif price sat directly above a 28px
+SANS section heading. New root `familyForRole()` derives family from the TYPE ROLE — display sizes
+(hero/h1/metric/h2) take the display family, body/caption/mono the body family — so no block gets a
+vote. Sizes (44/28/16/14/12) and weights (400/500/600) were already scale-conformant.
+
+**ONE RECIPE, and the duplicate I created earlier today is gone.** `emails.md` §0.6b is now THE comps
+recipe (C1-C8: set selection + the photo-selects-the-set trade, row contents incl. baths, block order,
+no chart, type/grid, photo sourcing, zero-is-never-self-explanatory, and VERIFY BY LOOKING).
+`data-roots.md` keeps only the vendor/table half (R1-R9) and points at it. Two documents, no overlap,
+neither repeating the other.
+
+**Tests:** 3136 pass / 0 fail across lib/email + lib/deliverable + lib/listings; `bunx tsc --noEmit`
+exit 0. New this pass: 5 comp-drop tests, 4 baths-on-row tests, 4 Apify-baths-lane tests.
+
+**STILL OPEN:** `apify_monthly_cap_exhausted` (the cap is the reason coverage is 5 and not 6),
+`comp_email_narrative_redundant_sentence`, `comp_email_stat_label_wrap`, and the SUBJECT's own baths
+render blank — `facts.baths` is empty for 8348 Southwindbay, which is a resolve-subject gap, not a
+comp-row one.
+
+## 2026-08-04 (Opus 5) — THE COMPS EMAIL, REFORMATTED: chart killed, description moved under the property facts, comp rows made one grid
+
+Operator, on the SENT email: *"Why the fuck does it suck?!!! Did you read the fucking email rules????
+Fonts, grids, sizes. And why the fuck is the description at the fucking bottom after the footer?????
+Do not use that stupid fucking chart for comps!!!!!!! ... It's not hard to make them the same!!!!!!"*
+Then: *"Description below property info."*
+
+**HE WAS RIGHT, AND THE INDICTMENT IS EXACT: I APPENDED §0.6b TO `emails.md` THIS SESSION WITHOUT
+EVER READING §0.1-§0.4.** I verified the last send with `grep -c` — counts, not composition. A grep
+proves a photo tag exists; it cannot see that a block is in the wrong place or that a table renders
+as two different tables. He had to open it on his phone to find what I should have.
+
+**1. THE CHART IS GONE.** Third time of asking. The 08/03 "fix" swapped the bars' unit from price to
+$/sq ft and KEPT the chart — a dodge, since a comparable set clusters by construction either way. Its
+labels also rendered cut mid-word ("848 Southwindbay Cir (Su...", "L MASTIQUE BEACH BLVD"). The
+comparison already appears twice in plainer form: the strip's "$333 THIS HOME" vs "$212 COMP MEDIAN",
+and each comp's own $/sq ft on its row. `compsPpsfSpec` stays exported for social/PDF; no email block
+reserves a chart slot. The old test asserting the slot EXISTED is inverted into the guard.
+
+**2. THE DESCRIPTION NOW SITS UNDER THE PROPERTY FACTS.** Root cause was NOT the array index — it was
+that `upsertDescriptionBlock` spliced a block carrying no `layout`, and `finalize-doc.ts:20` says
+plainly that such a block "sinks to y = 1_000_000 ... the bottom of the content, just above the
+footer." So it printed under the CTA and under "Sources (2)". Fixed properly: the recipe RESERVES an
+`emptyDescriptionSlot()` at the head of its middle (the first thing after the stats strip), the layout
+seam mints its coordinates, and the upsert fills it IN PLACE. `dropEmptyDescriptionSlot` removes it
+when there is nothing to say. **Reserving it was impossible before today** because
+`clearNarrativeSlots`/`fillNarrative` blanked every text block and overwrote the first empty one —
+`isDescriptionBlock` had existed since 08/03 with a test saying it existed "so a narrative pass can
+skip it", but nothing checked it. Both passes now honour the marker; the skip is a behaviour, not a claim.
+
+**3. THE COMP ROWS ARE ONE GRID.** `ListBlock.tsx` emitted the image `<td>` only on rows that HAD an
+image, with a `colSpan` that flipped to match — so a six-row table with two photos rendered as two
+different tables interleaved: photographed rows got a 56px thumb and a squeezed gutter that wrapped
+the address over four lines, unphotographed rows got the full width. Partial coverage is the NORMAL
+case here, so this was what the email looked like most of the time. Columns are now a property of the
+LIST, not the row: a missing photo is an empty cell, never a missing column, never a placeholder.
+
+**4. FONTS/GRID.** The strip's "$/Sq Ft — this home" / "$/Sq Ft — comp median" labels wrapped to two
+and three lines at ~120px per cell while "BEDS" stayed on one, breaking the 8px grid across a single
+row. Shortened to "This home" / "Comp median" / "Days listed" — the em-dash construction restated a
+unit the footnote directly below already defines. All five values now share one baseline.
+
+**VERIFIED BY LOOKING AT IT**, not by grepping it: served the built HTML and screenshotted three
+scroll positions. **SENT** -> hello@swfldatagulf.com, resend id `8a644de7-cd96-446f-a132-6dfdbf8be2f1`,
+run `2026-08-04-msee7p57`.
+
+**Tests:** 2797 pass / 0 fail across `lib/email` + `lib/deliverable`; `bunx tsc --noEmit` exit 0. New:
+8 `ListBlock` render tests (uniform grid), 20 description-placement tests (position asserted by
+`layout.y`, not array index — the old tests passed while the email was broken because they only
+checked the array).
+
+**STILL WRONG, both logged rather than swept up:** `comp_email_narrative_redundant_sentence` (the
+narrator states the same comparison twice, ~40 words spent saying it once) and
+`comp_email_stat_label_wrap` ("COMP MEDIAN" still wraps to two lines). **Comp photos are 0 in this
+send** — the Apify account is still at its $29 monthly cap (`apify_monthly_cap_exhausted`), so the
+uniform-grid fix is proven by the render tests, not yet by a photographed send.
+
+## 2026-08-04 (Opus 5) — GATE 14: the same root, built twice — the first guard in this repo that compares CONCEPTS, not filenames
+
+Operator: *"So we need more fucking guards. Make it and then bitch about too many guards later."*
+
+**Built, both halves, TDD, 11 new rule tests (87 pass / 0 fail across all hook libs), gate syntax
+green.** The static half is **Gate 14** in `check-prepush-gate.mjs` + pure rules in
+`.claude/hooks/lib/duplicate-root.mjs`: on any pushed `.sql` or `ingest/**.py` that CREATES a
+`data_lake` object, it compares **derivations** — keyed on `(source relation + the json array
+exploded)` — against every such artifact in the tree, and blocks a second parse of an array
+something else already owns. Escape `ALLOW_DUPLICATE_DERIVATION=1`.
+
+**Two design calls that decide whether a gate survives contact:** (1) the key is the *array*, not
+the source relation — events/tax/permits all legitimately read `steadyapi_property_history_raw`, so
+keying on the relation would flag all three on day one and the gate would be off within a week;
+(2) Python is scanned, not just SQL — the 08/03 migrations create EMPTY tables and the table→source
+link lives only in the parser's SQL string, so a `.sql`-only scan would have reported green on the
+exact push it exists to stop.
+
+**The live half — `node scripts/check-duplicate-roots.mjs`** — reads the DATABASE, because an object
+created out of band has no artifact to index (`steadyapi_property_permits` is live with a pkey and a
+unique key and has **no migration and no parser anywhere in this repo**). It pairs catalog
+dependencies (`pg_depend`, exact for views) with row counts, and excludes the legitimate 1:1
+read-layer shape by checking whether the view's dependency points at its base table or past it at the
+raw source. **Proven in BOTH directions on live data inside one session:** it named all three pairs
+(235,383 / 273,051 / 79,281) while the views were still second parses, then went silent once a
+parallel session rebuilt them to read their base tables. A check that only ever fires, or only ever
+passes, has not been tested.
+
+**Consequence for the entry below:** the three families are now correctly layered (base TABLE = root,
+`_v` = read layer) — the duplicate is resolved in prod, not merely catalogued. The data-roots rows I
+wrote still say "unresolved" and now overstate it; `docs/standards/data-roots.md` is held by a live
+parallel session so I did not override the claim (RULE 1.5). Check opened:
+`data_roots_steady_rows_say_unresolved_but_layering_landed`.
+
+## 2026-08-04 (Opus 5) — THE "FOUR NEW ROOTS" WERE THREE OLD ONES: all 3 Steady families are DOUBLED, and 4 defects fixed in the survivor
+
+Operator: *"finsh this off and make sure evrything runs correctly and we aren't dupelicating
+information anywhere. then write a follow up t make sure we are wired crrectly."*
+
+**The duplication is real and it is all three families.** Live-probed prod: `steadyapi_listing_events`
+235,383 = `_v` 235,383 · `steadyapi_tax_history` 273,051 = `_v` 273,051 · `steadyapi_property_permits`
+79,281 = `_v` 79,281. The TABLES shipped **08/03** (migrations `20260803_steadyapi_listing_events.sql`
++ `_tax_history.sql`, parsers `parse_listing_events.py` / `parse_tax_history.py`, handoff
+`2026-08-03-steadyapi-step3-sonnet-handoff.md`) and A+B have **live pack consumers** via
+`listing_recent_price_cuts_stats` / `listing_recent_tax_paid_stats` → `active-listings-residential-source.mts`
+→ active-listings-swfl. The 08/04 VIEWS have the trap guards and can't go stale (tables are
+wipe-and-re-derive from parsers **no cron runs**; `parsed_at` still 08/03 02:43). Nothing removed —
+C1 merge decision, check `steadyapi_three_families_table_vs_view_duplicate`. Permits is worst: the
+TABLE is live with pkey+unique key but has **no migration file and no parser in the repo**, and
+data-roots called it "🔴 not yet built" until today.
+
+**WIRING ANSWER: we are not wired.** Tree-wide grep — `listing-events.ts`, `property-tax-history.ts`,
+`property-permits.ts` have **ZERO importers**. Gate 12 does not catch it: it fires on ADDED `data_lake`
+TABLES; these are views whose readers exist but are never called.
+
+**FOUR DEFECTS FOUND + FIXED (all live-verified, all test-guarded):** (1) `price_change_pct` stripped
+`'%'` but not `'+'` → parsed 16,099 of 44,896 and **every survivor was negative** — a column that
+silently held cuts only; now 42,633 parsed / 26,534 positive, rows unchanged at 235,383. (2) 183 of
+6,488 events have a percentage whose **sign contradicts the vendor's own amount** (price 140,000,
+change −50,000, "+154.55%") — NULLed with `price_change_pct_conflict`; 0 contradictory pairs can now
+reach a caller. (3) `ROW_CAP = 200` shipped under the comment "busiest histories are well under this"
+— the two busiest carry **357 and 328**, and the fetch had **no ORDER BY**; now 500, ordered
+newest-first, `truncated` refuses a total. (4) `totalPriceCut` summed across **11 distinct listings
+over 16 years** on one address (3970 NE 68TH AVE 34120) = **$18,471,297 of cuts on one house**; now
+returns `listingCycleCount` and NULLs cross-cycle totals (`steadyapi_listing_events_per_cycle_total_undecided`).
+
+**data-roots.md — §2 blocker CLEARED** (the claim had been released): all four roots catalogued, pool
+folded into the existing comp-set row rather than a fifth row, traps **T11** (price-cut forward-sweep
+vs vendor-backward-history) and **T12** (listing-scope law) added, stale permits 🔴 corrected.
+Closed `data_roots_pool_root_line_owed`. Verification: **626 pass / 0 fail**, `tsc --noEmit` clean,
+corrected view applied to prod and re-probed, live end-to-end reads on two real property ids.
+Follow-up filed as §F1–F6 of `docs/superpowers/handoffs/2026-08-04-free-data-already-bought-HANDOFF.md`.
+
+**The pattern:** every finding came from re-deriving the SENTENCE, not the data. "SOLE SOURCE",
+"effectively absent", "busiest histories are well under this", "total price cut" — four confident
+phrases, each false, each written right after measuring something adjacent.
+
+## 2026-08-04 (Opus 5) — COMPS EMAIL SENT (2 of 6 photos, was 0) + the two silent failures that were eating the money
+
+Operator: *"get all of this done that is still open and get me my perfect emails!!!!!!!!!!!!!!!!"*
+(re `_ASSISTANT/2026-08-04-comp-photos-NEXT-HANDOFF.md`). 8 parts counted up front; **6 done, 2 blocked.**
+
+**SENT** -> hello@swfldatagulf.com, resend id `c65d4b55-a2e3-4a94-8161-00b1a8dfac6b`, run
+`2026-08-04-mseciwk4`. In the sent artifact: **2 of 6 comp rows carry a real rdcpix photo, 2 carry a
+distinct realtor.com detail link, 0 aerials, 0 wrong-house.** Was 0 photos AND 0 links.
+
+**THE PHOTO LANE, REBUILT.** The per-address lookup the previous handoff had already disproven was
+still live and billing ~6 calls per build for guaranteed nulls -- deleted, with the measurement
+written at the head of `apify-identity.ts` so it is not rebuilt a third time. Replaced with
+`compSaleMonthWindows` + ONE dated ZIP pull per sale month, joined on `compPhotoKey`, capped at 200
+results/month and hard-stopped at 700 (~$7). **No derivable sale window -> zero spend**, which is the
+guard the vendor AVM lane needed. Measured live: one 4-month window @120 = 2 of 6; per-month @200 =
+**5 of 6 for $3.95**.
+
+**TWO SILENT FAILURES FOUND, BOTH THE SAME SHAPE AS THE ORIGINAL BUG:**
+1. **The cache write never landed.** ~600 paid records bought today, `apify_property_records` stayed
+   at the 20 rows it already held. Cause reproduced against the live table: **Postgres 21000, `ON
+   CONFLICT DO UPDATE command cannot affect row a second time`** -- one repeated `address_key` in a
+   200-row ZIP pull rejects the ENTIRE batch, and the error was discarded. `dedupeRows` + chunked
+   upsert + a loud error. **This is why a $29/month budget went in a week: every build re-bought.**
+2. **A vendor 403 read as an empty market.** Three identical pulls returned 200, then 101, then 0 --
+   the 0 was HTTP 403 `platform-feature-disabled: Monthly usage hard limit exceeded`. `runApifyActor`
+   returned a bare `[]`. Now logged loudly.
+
+**BLOCKER, operator decision:** the Apify account is at **$30.05 against a $29.00 monthly hard cap**
+(cycle 07/28-08/27). Every paid photo/description/carousel lane returns 0 until the cap is raised or
+08/28. Check `apify_monthly_cap_exhausted`.
+
+**THE COMP-SET FLAP, mechanism found.** `comp-source-lake.ts` destructured only `data` and ignored
+PostgREST's `error`, then swallowed every throw to `[]` -- which makes `tryLeeLakeComps` return null
+and silently downgrades the whole email from our recorded-sale lane to the vendor's AVM lane
+(different houses, different ZIP, no sale dates). Now reports `onDegrade` and logs which of the three
+exits fired. 4 TDD tests.
+
+**THE RECIPE, in the two existing roots -- not a fourth handoff.** `docs/standards/data-roots.md` ->
+"THE APIFY RECIPE" (R1-R9: area-not-lookup, candidate-not-answer, no unwindowed sweep, per-month
+pulls, the two normalizers, the 21000 guard, refusal-is-not-empty, the three spend ceilings,
+photos-never-select) + `emails.md` §0.6b (the recipe-facing per-row contract).
+
+**Tests:** 158 pass / 0 fail across apify-identity, apify-record-store (new, 9), market-comps,
+no-aerial, comp-source-lake, comp-rank. `bunx tsc --noEmit` exit 0.
+
+**CORRECTION to the header line above — it is 6 done, 3 OPEN, not 2.** I first closed
+`apify_comp_email_live_verify` on the degraded 2-of-6 send, while separately opening
+`comp_photo_coverage_5of6_unreproduced` saying that very coverage is unreproducible — the ledger
+would have read settled and unsettled at once. **Reopened.** Close it only on an inbox count from a
+send where the vendor was not capped.
+
+**A SECOND LEAK IN MY OWN GUARD, found on review.** The send run logged `101 record(s)` for two
+DIFFERENT windows with no `CAPPED` marker, because 101 < the 200 cap — so a throttled response read
+as "this month only had 101 sales" in a ZIP measured at >200/month. R7 leaking through the guard
+written for R7. Identical counts across different windows now print a throttling warning.
+
+**OPEN (3 of 8):** `comp_email_rules_card_conformance` (unaudited); coverage reproducibility;
+`apify_comp_email_live_verify` (reopened). **`comp_email_font_scale_unverified` was DELIBERATELY not
+closed** — the handoff called it closable on 08/04 scale-census evidence I did not gather myself, and
+closing on someone else's unread evidence is the failure this ledger exists to stop.
+Checks opened: `apify_monthly_cap_exhausted`, `apify_cache_write_live_verify`,
+`comp_photo_coverage_5of6_unreproduced`, `apify_cache_probe_row_cleanup`.
+
+**OWNERSHIP NOTE:** the lake-lane degrade fix (`comp-source-lake.ts` + 4 tests, `comp-helper.ts`) was
+written in THIS session but landed inside a PARALLEL session's commit `95fb8d30` while uncommitted —
+which is why those files do not appear in this session's `git status`.
+
 ## 2026-08-04 (Fable 5) — AUGUST DESK OPENS: Issue 002 = the launch issue; Watch graded, 47 rows triaged, big-event crawls banked
 
 Operator: *"Let's blow last month out of the water. more inference, more focus on big events and
