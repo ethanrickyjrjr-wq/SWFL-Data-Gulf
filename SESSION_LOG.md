@@ -1,3 +1,11 @@
+## 2026-08-04 (Sonnet 5) — Committed the STEADYAPI duplicate-root handoff that was sitting untracked
+
+Operator flagged an untracked file left over from the earlier work in this session:
+`docs/superpowers/handoffs/2026-08-04-free-data-already-bought-HANDOFF.md`. Not clutter — it's the
+root-cause writeup for the table-vs-view duplicate this session's da2b6664 and Gate 14 (cc753834)
+resolved, and 7 of the 9 checks it names are still open. Committed per the directory's own
+convention (every other handoff there is committed as incident history, never deleted after use).
+
 ## 2026-08-04 (Sonnet 5) — Pushed the comps-email overhaul + Gate 14; caught a stale-test gap the commit itself missed
 
 Landed `cc753834` (comps email: photos recovered, no-photo comps dropped, baths, fonts/grid, chart
