@@ -299,7 +299,22 @@ async function runApifyActor(input: ApifyActorInput): Promise<unknown[]> {
       body: JSON.stringify(input),
     },
   );
-  if (!res.ok) return [];
+  if (!res.ok) {
+    // *** A VENDOR REFUSAL IS NOT "THIS ZIP HAS NO SOLD HOMES." ***
+    // Measured live 08/04/2026: three identical dated pulls on ZIP 33908 returned 200
+    // records, then 101, then 0 — and the 0 was an HTTP 403
+    // `{"type":"platform-feature-disabled","message":"Monthly usage hard limit exceeded"}`.
+    // Returning a bare [] made an exhausted ACCOUNT look exactly like an empty MARKET,
+    // and the email quietly shipped with open photo slots as though no photos existed.
+    // Same silent-zero shape as the APIFY_KEY name mismatch above; same fix — say it.
+    const body = await res.text().catch(() => "");
+    console.error(
+      `[apify-comps] VENDOR CALL FAILED ${res.status} ${res.statusText} — this is NOT ` +
+        `"no results". Photo/link slots will be empty for a reason that has nothing to do ` +
+        `with the houses: ${body.slice(0, 300)}`,
+    );
+    return [];
+  }
   const json = await res.json();
   return Array.isArray(json) ? json : [];
 }

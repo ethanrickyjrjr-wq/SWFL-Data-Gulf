@@ -145,23 +145,70 @@ export function toRow(r: ApifyRecord): StoredApifyRecord | null {
 }
 
 /**
+ * *** THE GUARD FOR POSTGRES 21000 — DO NOT REMOVE. ***
+ *
+ * Postgres refuses an `INSERT … ON CONFLICT DO UPDATE` when the INCOMING BATCH contains
+ * the same conflict key twice:
+ *
+ *     21000  ON CONFLICT DO UPDATE command cannot affect row a second time
+ *
+ * and it rejects the ENTIRE statement, not the duplicate row. A 200-record ZIP pull hits
+ * this constantly — a relisted home, a unit variant, the same house appearing in two
+ * months of a window.
+ *
+ * Measured live 08/04/2026: the comps email bought ~600 records across three dated ZIP
+ * pulls and the table stayed at the 20 rows it already held. Roughly $6 of paid data
+ * discarded, silently, because the error was swallowed and 0 rows looked exactly like
+ * nothing to save. Last record wins — a later pull is the fresher read of the same house.
+ */
+export function dedupeRows(rows: readonly StoredApifyRecord[]): StoredApifyRecord[] {
+  const byKey = new Map<string, StoredApifyRecord>();
+  for (const r of rows) if (r.address_key) byKey.set(r.address_key, r);
+  return [...byKey.values()];
+}
+
+/** Rows per statement. Each row carries the full 69-field `raw` blob, so a 600-record
+ *  pull in one request is a multi-megabyte body PostgREST may refuse outright. */
+const UPSERT_CHUNK = 100;
+
+/**
  * Persist a batch. Best-effort and non-fatal by contract — a failed write must never
  * turn a routine vendor call into a failed email build.
  *
  * Upsert on `address_key`: re-fetching a house REFRESHES it rather than duplicating.
+ * Deduped first (see above) and chunked, and a failure is now LOGGED rather than
+ * returning a 0 indistinguishable from "nothing to save".
  */
 export async function saveApifyRecords(records: readonly ApifyRecord[]): Promise<number> {
-  const rows = records.map(toRow).filter((r): r is StoredApifyRecord => r !== null);
-  if (rows.length === 0) return 0;
+  const all = dedupeRows(records.map(toRow).filter((r): r is StoredApifyRecord => r !== null));
+  if (all.length === 0) return 0;
+  let saved = 0;
   try {
     const db = createServiceRoleClientUntyped();
-    const { error } = await db
-      .schema("data_lake")
-      .from("apify_property_records")
-      .upsert(rows, { onConflict: "address_key" });
-    return error ? 0 : rows.length;
-  } catch {
-    return 0;
+    for (let i = 0; i < all.length; i += UPSERT_CHUNK) {
+      const chunk = all.slice(i, i + UPSERT_CHUNK);
+      const { error } = await db
+        .schema("data_lake")
+        .from("apify_property_records")
+        .upsert(chunk, { onConflict: "address_key" });
+      if (error) {
+        // LOUD. This write is the entire reason a house we already bought is free the
+        // second time; losing it silently means re-buying the whole ZIP on every build.
+        console.error(
+          `[apify-record-store] CACHE WRITE FAILED for ${chunk.length} paid record(s) — ` +
+            `they will be re-bought next build: ${error.code ?? ""} ${error.message}`,
+        );
+      } else {
+        saved += chunk.length;
+      }
+    }
+    return saved;
+  } catch (e) {
+    console.error(
+      `[apify-record-store] CACHE WRITE THREW — ${all.length} paid record(s) lost: ` +
+        `${e instanceof Error ? e.message : String(e)}`,
+    );
+    return saved;
   }
 }
 

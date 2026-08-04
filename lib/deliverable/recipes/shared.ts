@@ -20,6 +20,7 @@ import { EMAIL_MODEL_SONNET } from "@/lib/email/model-router";
 import { resolveSubjectListing } from "@/lib/listings/resolve-subject";
 import { mirrorHeroPhoto } from "@/lib/media/hero-photo";
 import { listingDescriptionFromPrompt } from "@/lib/email/listing-intent";
+
 import { auditClaims, numeralsIn, CLAIM_PROHIBITION } from "@/lib/deliverable/claims";
 import { communitySourceLine } from "@/lib/listings/listing-detail";
 import {
@@ -240,24 +241,50 @@ export function dropEmptyChartSlot(doc: EmailDoc): EmailDoc {
  *  prefills the commentary slot with raw remarks will therefore keep them — and
  *  2,000 characters of raw MLS copy ships instead of authored prose. CLEAR the slot
  *  first, then author. This cost real time on 07/13. */
+/** The description marker, read WITHOUT narrowing the block type.
+ *  `isDescriptionBlock` is a type predicate (`b is BlockOf<"text">`), so negating it
+ *  inside a branch already narrowed to `text` collapses the else-side to `never` and the
+ *  file stops compiling. Reading the prop directly keeps both passes type-safe. */
+function isDescriptionSlot(props: unknown): boolean {
+  return (props as { descriptionSlot?: boolean } | null)?.descriptionSlot === true;
+}
+
 export function fillNarrative(doc: EmailDoc, body: string): EmailDoc {
   let done = false;
   return {
     ...doc,
     blocks: doc.blocks.map((b) => {
-      if (done || b.type !== "text" || (b.props.body ?? "").trim()) return b;
+      if (done || b.type !== "text" || isDescriptionSlot(b.props) || (b.props.body ?? "").trim()) {
+        return b;
+      }
       done = true;
       return { ...b, props: { ...b.props, body } };
     }),
   };
 }
 
-/** Clear every text block so `fillNarrative` can actually write into it. */
+/** Clear every text block so `fillNarrative` can actually write into it —
+ *  EXCEPT the listing's own description.
+ *
+ *  *** THE DESCRIPTION SLOT IS NOT A NARRATIVE SLOT, AND THIS IS WHAT ENFORCES IT. ***
+ *  `isDescriptionBlock` has existed since 08/03/2026 with a test saying it exists "so a
+ *  narrative pass can skip it" — but nothing here actually checked it, so the skip was a
+ *  claim, not a behaviour. That is why the description could not simply be RESERVED in
+ *  the chrome next to the stats strip where it belongs: an empty reserved slot would be
+ *  blanked here and then overwritten with the narrator's paragraph by `fillNarrative`.
+ *  The workaround was to splice the block in afterwards, which hand-positioned it and
+ *  landed it at the bottom of the email, under the CTA and the sources line — which is
+ *  what the operator opened on his phone on 08/04/2026.
+ *
+ *  With the marker honoured, the slot is reserved through the layout seam like every
+ *  other block, and neither pass touches it. */
 export function clearNarrativeSlots(doc: EmailDoc): EmailDoc {
   return {
     ...doc,
     blocks: doc.blocks.map((b) =>
-      b.type === "text" ? { ...b, props: { ...b.props, body: "" } } : b,
+      b.type === "text" && !isDescriptionSlot(b.props)
+        ? { ...b, props: { ...b.props, body: "" } }
+        : b,
     ),
   };
 }

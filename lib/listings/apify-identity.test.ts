@@ -18,6 +18,7 @@
 import { describe, expect, it, test } from "bun:test";
 import {
   apifyListingUrlIndex,
+  compSaleMonthWindows,
   compSaleWindow,
   matchesAddress,
   pickAddressMatch,
@@ -270,8 +271,10 @@ describe("resolveCompEnrichment — LANE B is a dated ZIP pull", () => {
       ...extra,
     }) as never;
 
-  test("the actor is asked for the ZIP over the comps' OWN window — not a bare sweep", async () => {
-    const calls: unknown[] = [];
+  test("ONE dated pull PER SALE MONTH — not one wide window the cap cuts short", async () => {
+    // Measured 08/04/2026: a single 4-month window capped at 120 joined 2 of 6, because
+    // 33908 returns a full 120 for May ALONE — the pull never reached the older months.
+    const calls: { location?: string; dateFrom?: string; dateTo?: string }[] = [];
     await resolveCompEnrichment(comps, {
       zip: "33908",
       readCache: async () => new Map(),
@@ -280,13 +283,55 @@ describe("resolveCompEnrichment — LANE B is a dated ZIP pull", () => {
         return [];
       },
     });
-    expect(calls).toHaveLength(1);
+    expect(calls).toHaveLength(2); // March and May, in order
     expect(calls[0]).toMatchObject({
       location: "33908",
       listingType: "sold",
-      dateFrom: "2026-01-15", // 03-01 padded back 45d
-      dateTo: "2026-06-15", // 05-01 padded forward 45d
+      dateFrom: "2026-02-24", // 03-01 padded back 5d
+      dateTo: "2026-04-05", // 03-31 padded forward 5d
     });
+    expect(calls[1]).toMatchObject({ dateFrom: "2026-04-26", dateTo: "2026-06-05" });
+  });
+
+  test("comps sharing a month are covered by ONE pull, never one per house", async () => {
+    const calls: unknown[] = [];
+    await resolveCompEnrichment(
+      [
+        { addressLine: "1 A St", city: "Fort Myers", priceDate: "2026-05-01" },
+        { addressLine: "2 B St", city: "Fort Myers", priceDate: "2026-05-01" },
+        { addressLine: "3 C St", city: "Fort Myers", priceDate: "2026-05-01" },
+      ],
+      {
+        zip: "33908",
+        readCache: async () => new Map(),
+        fetchZip: async (q) => {
+          calls.push(q);
+          return [];
+        },
+      },
+    );
+    expect(calls).toHaveLength(1);
+  });
+
+  test("the HARD result ceiling stops a wide comp set — never an unbounded run", async () => {
+    // `max_results_per_location: 0` means UNLIMITED to this vendor; a comp set spanning a
+    // year at 200/month would be a $24 build. 700 results ≈ $7 is the standing ceiling.
+    const twelveMonths = Array.from({ length: 12 }, (_, i) => ({
+      addressLine: `${i} Main St`,
+      city: "Fort Myers",
+      priceDate: `2026-${String(i + 1).padStart(2, "0")}-01`,
+    }));
+    let bought = 0;
+    await resolveCompEnrichment(twelveMonths, {
+      zip: "33908",
+      readCache: async () => new Map(),
+      fetchZip: async (q) => {
+        const n = q.maxResults ?? 0;
+        bought += n;
+        return Array.from({ length: n }, (_, i) => ({ street: `filler ${bought}-${i}` })) as never;
+      },
+    });
+    expect(bought).toBeLessThanOrEqual(700);
   });
 
   test("a returned record JOINS to its comp by address, and brings photo + link", async () => {
@@ -361,5 +406,104 @@ describe("resolveCompEnrichment — LANE B is a dated ZIP pull", () => {
       },
     });
     expect(out.size).toBe(0);
+  });
+});
+
+describe("compSaleMonthWindows — the month IS the smallest honest window", () => {
+  // The lake's sale dates are MONTH GRAIN (lee_comp_sales_v.sale_month is always
+  // day-of-month 1, comp-source-lake.ts:18), so a cheap +/-3-day window around an exact
+  // sale date is simply not available to us. The month is the tightest window that can
+  // honestly be said to contain the sale.
+  test("one window per distinct sale month, sorted, padded past the month edges", () => {
+    const w = compSaleMonthWindows(["2026-05-01", "2026-03-01", "2026-05-01"], 5);
+    expect(w).toHaveLength(2);
+    expect(w[0]).toEqual({ dateFrom: "2026-02-24", dateTo: "2026-04-05" });
+    expect(w[1]).toEqual({ dateFrom: "2026-04-26", dateTo: "2026-06-05" });
+  });
+
+  test("February's real length is used — never a hardcoded 30 or 31", () => {
+    expect(compSaleMonthWindows(["2026-02-01"], 0)).toEqual([
+      { dateFrom: "2026-02-01", dateTo: "2026-02-28" },
+    ]);
+    expect(compSaleMonthWindows(["2028-02-01"], 0)).toEqual([
+      { dateFrom: "2028-02-01", dateTo: "2028-02-29" }, // leap year
+    ]);
+  });
+
+  test("December does not roll the year backwards", () => {
+    expect(compSaleMonthWindows(["2026-12-01"], 0)).toEqual([
+      { dateFrom: "2026-12-01", dateTo: "2026-12-31" },
+    ]);
+  });
+
+  test("no dates -> no windows -> no spend", () => {
+    expect(compSaleMonthWindows([null, undefined, "", "junk"])).toEqual([]);
+  });
+});
+
+describe("BATHS come off the SAME paid record as the photo — zero extra calls", () => {
+  // Operator, 08/04/2026: "Why the fuck is baths not in from fucking [Apify]!!!!?????"
+  //
+  // It never was. This lane pulled photo, link and style off a 69-field record we had
+  // already bought and dropped `full_baths`/`half_baths` on the floor — so a comp whose
+  // bath count the lake did not hold rendered without one, while the answer sat in the
+  // same response. The same read-two-fields-bin-the-rest pattern that made the record
+  // cache necessary in the first place.
+  const rec = (street: string, extra: Record<string, unknown>) =>
+    ({ street, city: "Fort Myers", ...extra }) as never;
+
+  test("full + half/2 — the MLS convention, via the ONE root (bathsFromRecord)", async () => {
+    const out = await resolveCompEnrichment(
+      [{ addressLine: "1 A St", city: "Fort Myers", priceDate: "2026-05-01" }],
+      {
+        zip: "33908",
+        readCache: async () => new Map(),
+        fetchZip: async () => [rec("1 A St", { full_baths: 2, half_baths: 1 })],
+      },
+    );
+    expect(out.get("1 A St")?.baths).toBe(2.5);
+  });
+
+  test("no bath fields → absent, never 0 (a bathless house is not a real claim)", async () => {
+    const out = await resolveCompEnrichment(
+      [{ addressLine: "1 A St", city: "Fort Myers", priceDate: "2026-05-01" }],
+      {
+        zip: "33908",
+        readCache: async () => new Map(),
+        fetchZip: async () => [rec("1 A St", { primary_photo: "https://ap.rdcpix.com/a.jpg" })],
+      },
+    );
+    expect(out.get("1 A St")?.baths).toBeUndefined();
+  });
+
+  test("a record carrying ONLY baths still enriches — it is not gated on a photo", async () => {
+    // The old guard only stored an entry when a photo, link or style survived, so a
+    // baths-only record was discarded whole.
+    const out = await resolveCompEnrichment(
+      [{ addressLine: "1 A St", city: "Fort Myers", priceDate: "2026-05-01" }],
+      {
+        zip: "33908",
+        readCache: async () => new Map(),
+        fetchZip: async () => [rec("1 A St", { full_baths: 3 })],
+      },
+    );
+    expect(out.get("1 A St")?.baths).toBe(3);
+  });
+
+  test("baths ride in from the CACHE too — a house bought once is free forever", async () => {
+    const out = await resolveCompEnrichment(
+      [{ addressLine: "1 A St", city: "Fort Myers", priceDate: "2026-05-01" }],
+      {
+        zip: "33908",
+        readCache: async () =>
+          new Map([
+            ["1 a st fort myers", rec("1 A St", { full_baths: 2, half_baths: 0 })],
+          ]) as never,
+        fetchZip: async () => {
+          throw new Error("must not pay — the cache had it");
+        },
+      },
+    );
+    expect(out.get("1 A St")?.baths).toBe(2);
   });
 });

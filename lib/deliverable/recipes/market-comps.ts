@@ -90,6 +90,8 @@ import { pickAddressMatch, resolveCompEnrichment } from "@/lib/listings/apify-id
 import {
   buildDescriptionBlock,
   upsertDescriptionBlock,
+  emptyDescriptionSlot,
+  dropEmptyDescriptionSlot,
 } from "@/lib/email/listing-description-block";
 import { formatSoldSpell } from "@/lib/listings/dom";
 import {
@@ -106,17 +108,10 @@ import { createBlock } from "@/lib/email/doc/default-docs";
 import { buildLifecycleEmail } from "@/lib/email/lifecycle-chrome";
 import type { ChromeBlock } from "@/lib/email/lifecycle-chrome";
 import { addressLineOf, pricePerSqft, spec } from "@/lib/email/listing-flyer";
-import { chartSpecToEmailImage } from "@/lib/email/spec-to-png";
-import {
-  assertHeroChartCoherence,
-  chartMagnitudeFromSpec,
-  type ChartMagnitude,
-} from "@/lib/deliverable/chart-coherence";
+import { chartMagnitudeFromSpec, type ChartMagnitude } from "@/lib/deliverable/chart-coherence";
 import type { ChartSpec } from "@/components/charts/registry/chart-spec";
-import { resolveHeadlineFigure } from "@/lib/email/doc/preview-fill";
 import {
   clearNarrativeSlots,
-  dropEmptyChartSlot,
   fillNarrative,
   FAVORABLE_FRAMING_POLICY,
   isComparableHome,
@@ -138,6 +133,12 @@ const MAX_COMPS = 6;
  *  sold-event enrichment is capped at 2 regardless of topN — so this widens the net
  *  for free. Verified live 07/13/2026: 12 nearby → 11 homes + 1 vacant lot. */
 const COMP_POOL = 12;
+
+/** The floor under "every comp has a photo" (operator decree 08/04/2026). Below this the
+ *  FULL ranked set ships instead: a price-defence email built on one comp defends nothing,
+ *  and a vendor outage must never masquerade as a thin market. Two is the minimum from
+ *  which a median and a range mean anything at all. */
+const MIN_PHOTOGRAPHED_COMPS = 2;
 
 /** Parse a verbatim vendor string ("$595,000", "2847") to a number. 0 → null. */
 function num(s?: string): number | null {
@@ -223,10 +224,13 @@ export async function resolveCompThumbnails(
   thumbnails: Map<string, string>;
   styles: Map<string, string>;
   listingUrls: Map<string, string>;
+  /** Total baths off the SAME paid record as the photo — see the note at the fill site. */
+  baths: Map<string, number>;
 }> {
   const thumbnails = new Map<string, string>();
   const styles = new Map<string, string>();
   const listingUrls = new Map<string, string>();
+  const baths = new Map<string, number>();
   try {
     // ── LANE 1 · OUR OWN LAKE. Free. Photos only; the nightly sweep's window opened
     // 06/30/2026, so a comp set reaching back 6-12 months mostly predates it and this
@@ -257,6 +261,11 @@ export async function resolveCompThumbnails(
         // rejects — an empty slot with no error, which is the failure shape this whole
         // module exists to kill.
         listingType: (c.priceKind === "sold" ? "sold" : "for_sale") as "sold" | "for_sale",
+        // THE FIELD THAT DECIDES THE SPEND. The paid lane narrows the ZIP to the window
+        // these dates describe and buys NOTHING without one — so a build on the vendor's
+        // AVM lane (every `priceDate` null, comp-helper.ts:440) costs zero rather than
+        // paying for an unwindowed sweep that can only join 0 of 6.
+        priceDate: c.priceDate,
       })),
       { state: "FL", zip },
     );
@@ -265,11 +274,19 @@ export async function resolveCompThumbnails(
       if (e.photoUrl && !thumbnails.has(addressLine)) thumbnails.set(addressLine, e.photoUrl);
       if (e.listingUrl) listingUrls.set(addressLine, e.listingUrl);
       if (e.style) styles.set(addressLine, e.style);
+      // BATHS FROM THE VENDOR RECORD. Operator, 08/04/2026: *"Why the fuck is baths not in
+      // from fucking [Apify]!!!!?????"* — it never was. This lane read photo, link and
+      // style off a 69-field record we had already paid for and dropped `full_baths` /
+      // `half_baths`, so a comp whose bath count the lake did not hold rendered without
+      // one even though the answer was sitting in the same response. Zero extra calls.
+      // The LAKE still wins where it has a value (see the merge below): it is a recorded
+      // county figure, the vendor's is an MLS listing figure.
+      if (e.baths != null) baths.set(addressLine, e.baths);
     }
-    return { thumbnails, styles, listingUrls };
+    return { thumbnails, styles, listingUrls, baths };
   } catch {
     // A miss is an empty slot, never a build failure.
-    return { thumbnails, styles, listingUrls };
+    return { thumbnails, styles, listingUrls, baths };
   }
 }
 
@@ -282,9 +299,22 @@ function compRow(c: RenderComp, thumbUrl?: string, listingUrl?: string): ListIte
   const lead = [usd(c.price as number), ppsf ? `${usd(ppsf)}/sq ft` : ""]
     .filter(Boolean)
     .join(" · ");
+  // *** BATHS. *** Operator, 08/04/2026: *"Where the fuck is baths?????????????????"*
+  //
+  // He is right and it was never here. The row printed "3 bd · 1,976 sq ft" and dropped the
+  // bath count on the floor — while `RenderComp.baths` was populated, `lee_comp_sales_v`
+  // SELECTS `baths` explicitly, and the LeePA layer-23 join that supplies it was wired on
+  // 08/02/2026. The data travelled the whole pipeline and then simply wasn't rendered. It
+  // is also half of the operator's own comparability rule ("WE WANT SIMILAR SQ FT, STYLE,
+  // BEDS AND BATHS SAME OR CLOSE ... WE ARE FUCKING COMPARING!!!") and the ranker already
+  // scores on it — so the email was hiding a dimension it was actively sorting by.
+  //
+  // Half-baths are real (2.5), so this is NOT integer-formatted. Absent → the segment is
+  // omitted, never a "0 ba" that asserts a bathless house.
   const text = [
     c.addressLine,
     c.beds != null ? `${c.beds} bd` : "",
+    c.baths != null ? `${c.baths} ba` : "",
     c.sqft != null ? `${c.sqft.toLocaleString("en-US")} sq ft` : "",
     priceKindPhrase(c),
   ]
@@ -334,8 +364,9 @@ function compPpsfs(comps: RenderComp[]): number[] {
  * the campaign's, so the comps email says the same things in the same row: the subject's
  * spec line, then the ONE number that wins the argument, then the set it is judged against.
  *
- *   $/Sq Ft — this home  is `primary`: it IS the claim, and it renders in the accent.
- *   Comparable homes     is `muted`: it is the scale of the evidence, not the evidence.
+ *   $/Sq Ft (this home's price ÷ its sqft) is `primary`: it IS the claim, in the accent.
+ *   Median (the comp set's own $/Sq Ft)    carries no emphasis — it is what the claim is
+ *   judged against, not a second claim.
  *
  * An unsourced value is "" — an OPEN SLOT on the canvas (the label is the instruction)
  * and ABSENT from the sent email. Never a zero, never a made-up median.
@@ -346,8 +377,25 @@ export function compsSpecs(facts: ListingFacts, comps: RenderComp[]): StatItem[]
     spec(facts.beds, "Beds"),
     spec(facts.baths, "Baths"),
     spec(num(facts.sqft)?.toLocaleString("en-US"), "Sq Ft"),
-    spec(pricePerSqft(facts.price, facts.sqft), "$/Sq Ft — this home", "primary"),
-    spec(medianPpsf ? usd(medianPpsf) : undefined, "$/Sq Ft — comp median"),
+    // *** LABELS MUST FIT ONE LINE, AND MUST MATCH THE CAMPAIGN'S OWN WORDS. ***
+    // Operator, 08/04/2026, on the sent email — twice: *"Fonts, grids, sizes"* AND *"it's
+    // $ sq. ft."* / *"why the fuck is it not nicely formatted... it's not hard to make
+    // them the same."* Both complaints trace to the same root: this recipe invented its own
+    // label text instead of reusing `listingSpecs` (`listing-flyer.ts`), which this repo's
+    // own header names as "the REFERENCE for the other six: copy this shape." That file
+    // already solved BOTH problems at 94px cells (six-cell strip, tighter than this five-cell
+    // one): `"$/Sq Ft"` for the price-per-square-foot cell, `"DOM"` for days-on-market, no
+    // emphasis on either. "This home" named nothing (the reader has no way to know it is a
+    // dollar figure without reading the value), "Comp median" (11 uppercase chars, two of
+    // them M) wrapped to two lines and broke the shared label baseline every other cell
+    // shares (`tallest`/`lines()` in StatsBlock.tsx), and "Days listed"/`"muted"` rendered
+    // smaller and greyer than its neighbors for no reason `listingSpecs` shares — three
+    // gratuitous divergences from the one recipe already proven at a TIGHTER cell width.
+    // Fixed by conforming, not by re-deriving: `"$/Sq Ft"` beside `"Median"` reads as the
+    // same unit compared two ways (the footnote states the range in that unit already), and
+    // `"DOM"` matches the reference file's own label for the same underlying number.
+    spec(pricePerSqft(facts.price, facts.sqft), "$/Sq Ft", "primary"),
+    spec(medianPpsf ? usd(medianPpsf) : undefined, "Median"),
     // DAYS ON MARKET — our own `listing_dom` root (docs/standards/data-roots.md:279
     // names "email DOM" as a wire target), attached by the lake resolve lane and NEVER
     // a first-seen floor. It took the cell the comp COUNT used to hold: that count is
@@ -358,8 +406,7 @@ export function compsSpecs(facts: ListingFacts, comps: RenderComp[]): StatItem[]
       facts.daysOnMarket != null && facts.daysOnMarket >= 0
         ? String(facts.daysOnMarket)
         : undefined,
-      "Days on market",
-      "muted",
+      "DOM",
     ),
   ];
 }
@@ -533,21 +580,49 @@ function compsMiddle(
   thumbnails: Map<string, string> = new Map(),
   listingUrls: Map<string, string> = new Map(),
 ): ChromeBlock[] {
-  const blocks: ChromeBlock[] = [
-    sized(
-      {
-        id: createBlock("image").id,
-        type: "image",
-        props: {
-          url: "",
-          kind: "chart",
-          alt: "Asking price vs nearby comparable homes",
-          caption: "",
-        },
-      },
-      6,
-    ),
-  ];
+  // ═══════════════════════════════════════════════════════════════════════════
+  // *** THERE IS NO CHART IN THIS EMAIL. DO NOT PUT ONE BACK. ***
+  //
+  // Operator, THREE times now:
+  //   08/03/2026 — "COMPARABLES ARE JUST THAT, COMPARABLE, SO IT'S A TERRIBLE CHART TO
+  //                 PUT IN THE EMAIL. PRICE IS GOING TO BE SIMILAR."
+  //   08/04/2026 — "Do not use that stupid fucking chart for comps!!!!!!! How many times
+  //                 do I have to say it!!!!!"
+  //
+  // The first time, this code "answered" him by swapping the total-PRICE bars for
+  // $/SQ FT bars and keeping the chart. That was a dodge, not a fix — it is still seven
+  // near-equal bars of a set that is comparable BY CONSTRUCTION, which is the entire
+  // reason he said it was a terrible chart. It also rendered with its own labels cut off
+  // mid-word ("848 Southwindbay Cir (Su…", "PORTOFINO SPRINGS B…", "L MASTIQUE BEACH
+  // BLVD") because seven full addresses do not fit a 600px canvas.
+  //
+  // The comparison this email argues is ALREADY on the face of it, twice, in a form that
+  // does not need decoding: the stat strip prints "$333 $/SQ FT — THIS HOME" beside
+  // "$212 $/SQ FT — COMP MEDIAN", and the evidence table prints every comp's own $/sq ft
+  // on its row. A chart adds a third copy of one number and a hundred lines of markup.
+  //
+  // `compsPpsfSpec` is kept and still tested — the SOCIAL/PDF surfaces may want it — but
+  // no email block reserves a chart slot. If you are about to add one, re-read this.
+  // ═══════════════════════════════════════════════════════════════════════════
+  // ── THE DESCRIPTION SLOT — RESERVED HERE, AND THAT IS WHY IT LANDS IN THE RIGHT
+  //    PLACE. Operator, 08/04/2026: *"Description below property info."*
+  //
+  // `compsMiddle` is the FIRST thing the chrome emits after the stats strip, so a slot
+  // reserved at the head of it renders directly beneath the beds/sq ft/$-per-sq-ft row —
+  // the prose form of the numbers immediately above it, and well before the ask.
+  //
+  // RESERVED, not spliced. `finalize-doc.ts` mints x/y/w/h for every block that goes
+  // through the plan; a block spliced in afterwards has no `layout` and sinks to
+  // y = 1_000_000, "the bottom of the content, just above the footer" — which is exactly
+  // where the listing's own copy printed in the 08/04 send, under the CTA and under
+  // "Sources (2)". Reserving it here is the same pattern the seed-slot playbook already
+  // uses. `upsertDescriptionBlock` fills it IN PLACE, keeping these coordinates.
+  //
+  // Safe from the narrator only because `clearNarrativeSlots`/`fillNarrative` now honour
+  // `isDescriptionBlock` (shared.ts). Before that they blanked every text block and wrote
+  // prose into the first empty one — which is what made reserving it impossible.
+  // Unfilled → `dropEmptyDescriptionSlot` removes it. An empty box is not a slot.
+  const blocks: ChromeBlock[] = [sized(emptyDescriptionSlot(), 3)];
   if (comps.length) {
     // PER-ROW photos. This used to be ALL-OR-NOTHING — every row shows its photo or
     // none do — on the reasoning that a table with two pictures and four blanks reads
@@ -1332,19 +1407,6 @@ export async function authorCompsCase(
   return context ? `${evidence} ${context}` : evidence;
 }
 
-/** Fill the chart slot IN PLACE (preserving its grid position), like upsertChartBlock
- *  does, but keyed on our own reserved slot rather than appending. */
-function fillChartSlot(doc: EmailDoc, url: string, alt: string, caption: string): EmailDoc {
-  return {
-    ...doc,
-    blocks: doc.blocks.map((b) =>
-      b.type === "image" && b.props.kind === "chart" && !b.props.url
-        ? { ...b, props: { ...b.props, url, alt, caption } }
-        : b,
-    ),
-  };
-}
-
 export async function buildMarketComps(ctx: RecipeBuildContext): Promise<EmailDoc | null> {
   const { facts, currentDoc } = ctx;
   // No subject → there is no asking price to defend. Fall through to the generic
@@ -1378,11 +1440,14 @@ export async function buildMarketComps(ctx: RecipeBuildContext): Promise<EmailDo
   // months to a year ago" — a sale carrying no date, or a valuation (no sale date to
   // go stale on), is never dropped by this filter; only an OLD RECORDED SALE is.
   const now = new Date();
-  const comps = (result?.comps ?? [])
+  // NOT sliced to MAX_COMPS yet — the photo filter below picks from the WHOLE ranked pool,
+  // so a comp we hold no picture for is replaced by the next-best one we do, rather than
+  // simply leaving a gap. Resolving photos over 12 candidates costs the same as over 6:
+  // it is one dated ZIP pull either way.
+  const pool = (result?.comps ?? [])
     .filter(isComparableHome)
     .filter((c) => isNotSubjectAddress(c, facts.address))
-    .filter((c) => isFreshSale(c, now))
-    .slice(0, MAX_COMPS);
+    .filter((c) => isFreshSale(c, now));
 
   // *** WHICH COMPS DEFEND THE PRICE IS DECIDED BEFORE ANY PHOTO IS FETCHED, AND
   //     IT MUST STAY THAT WAY. ***
@@ -1399,12 +1464,56 @@ export async function buildMarketComps(ctx: RecipeBuildContext): Promise<EmailDo
   // satellite aerial, never any other stand-in image (operator decree 08/03/2026).
   // A comp we cannot photograph ships without a picture and keeps its realtor.com
   // link — the PER-ROW contract stated in comp-photos.ts's own header.
-  const { thumbnails, styles, listingUrls } = await resolveCompThumbnails(comps, facts.zip);
+  const {
+    thumbnails,
+    styles,
+    listingUrls,
+    baths: vendorBaths,
+  } = await resolveCompThumbnails(pool, facts.zip);
+
+  // ═══════════════════════════════════════════════════════════════════════════
+  // *** EVERY COMP IN THIS EMAIL HAS A PHOTO. A COMP WE CANNOT PICTURE IS DROPPED. ***
+  //
+  // Operator, 08/04/2026: *"Get rid of the no photo comps."*
+  //
+  // Dropped from the SET, not merely from the table — the median, the range, the count and
+  // the whole price case recompute on exactly the rows the reader can see. Filtering only
+  // the table would print "6 comparable homes ... run from $111 to $266" above five rows,
+  // which is a worse defect than the ragged layout it would be fixing.
+  //
+  // *** THE COST, STATED PLAINLY BECAUSE IT IS REAL: PHOTO COVERAGE NOW SELECTS THE COMP
+  // SET, AND THEREFORE MOVES THE MEDIAN AND THE CLAIM. *** This file argued the opposite
+  // for its whole life ("Photos decorate the evidence; they never select it") and the
+  // reasoning still stands on its own terms — the comparison can shift for a reason that
+  // has nothing to do with the houses. The operator was told that in one sentence and
+  // decided anyway; this comment is the record of the trade, not a hedge against it.
+  //
+  // THE ONE FLOOR: if fewer than MIN_PHOTOGRAPHED_COMPS survive, keep the full ranked set.
+  // A price-defence email with one comp, or none, defends nothing — and a vendor outage
+  // (the 08/04 Apify cap returned 403 on every call) must not silently empty the evidence
+  // table. Falling back is LOUD, so a zero-photo build never passes for a small market.
+  // ═══════════════════════════════════════════════════════════════════════════
+  const photographed = pool.filter((c) => thumbnails.has(c.addressLine));
+  const enough = photographed.length >= MIN_PHOTOGRAPHED_COMPS;
+  if (!enough && pool.length) {
+    console.warn(
+      `[market-comps] ONLY ${photographed.length} of ${pool.length} comp(s) have a photo — ` +
+        `below the floor of ${MIN_PHOTOGRAPHED_COMPS}, so the FULL ranked set ships and some ` +
+        `rows will have no picture. This is a photo-supply problem (check the vendor cap), ` +
+        `not a thin market.`,
+    );
+  }
+  const comps = (enough ? photographed : pool).slice(0, MAX_COMPS);
   // Style rides onto the SAME comp objects everything downstream already reads —
   // one shape, not a second parallel map to keep in sync. Absent = open slot.
   const compsStyled = comps.map((c) => ({
     ...c,
     style: styles.get(c.addressLine) ?? null,
+    // OUR OWN NUMBER FIRST. The lake's `baths` is a recorded county figure; the vendor's
+    // is an MLS listing figure. They disagree on half-baths often enough that a silent
+    // vendor overwrite would change a comparability claim we already made. Vendor fills
+    // the HOLE only (RULE 0.7 lane order: our data, then the paid lane).
+    baths: c.baths ?? vendorBaths.get(c.addressLine) ?? null,
   }));
 
   // ── THE SUBJECT'S OWN RECORD — fetched ONCE, used twice ─────────────────────
@@ -1457,45 +1566,10 @@ export async function buildMarketComps(ctx: RecipeBuildContext): Promise<EmailDo
     listingUrls,
   );
 
-  // ── THE CHART — $/SQ FT, and the retirement of the price-bar version.
-  //
-  // This used to plot total PRICE via the shared `buildSoldCompsSpec`. Operator,
-  // 08/03/2026: *"COMPARABLES ARE JUST THAT, COMPARABLE, SO IT'S A TERRIBLE CHART TO PUT
-  // IN THE EMAIL. PRICE IS GOING TO BE SIMILAR."* He is right — and the size-band fix
-  // above makes him MORE right, because a genuinely comparable set clusters in price by
-  // construction. Six near-identical bars are decoration, not evidence.
-  //
-  // `compsPpsfSpec` plots the number this email actually argues over. The two local
-  // patches the price version needed (retitle away from "Recent sales near X"; shorten
-  // the subject's label so the PNG's gutter stops clipping it) are built into it, so
-  // nothing is rewritten after the fact and the shared module is untouched.
-  const spec = compsPpsfSpec(facts, comps, new Date().toISOString().slice(0, 10));
-
-  if (spec) {
-    // House rule (lib/email/CLAUDE.md): a chart-bearing deliverable's chart magnitude
-    // must cohere with its headline. Soft — an incoherent chart is DROPPED, never a
-    // blocked build.
-    // `ppsfChartMagnitude`, NOT the raw spec: the hero is a total asking price and the
-    // bars are dollars per square foot. Read literally the gate would compare $595,000
-    // against $195 and drop the chart on EVERY build. See that function's header.
-    const coherence = assertHeroChartCoherence({
-      hero: resolveHeadlineFigure(doc),
-      chart: ppsfChartMagnitude(spec),
-    });
-    if (coherence.coherent) {
-      const accent = doc.globalStyle.accentColor || "#B98F45";
-      const tint = accent.replace(/[^0-9a-fA-F]/g, "").slice(0, 6) || "x";
-      const key = `email-charts/market-comps-${facts.zip ?? "swfl"}-${spec.asOf ?? "x"}-${tint}.png`;
-      const image = await chartSpecToEmailImage(spec, accent, key).catch(() => null);
-      // NO block caption. The PNG already prints the title AND "SWFL Data Gulf ·
-      // realtor.com · as of MM/DD/YYYY" beneath the bars — the caption reprinted both
-      // verbatim under the image (seen in the render). The `alt` still carries the title
-      // for a client that blocks images.
-      if (image) doc = fillChartSlot(doc, image.url, image.alt, "");
-    }
-  }
-  // Nothing resolved → drop the slot. An empty chart box is worse than no chart.
-  doc = dropEmptyChartSlot(doc);
+  // ── NO CHART. See the block comment in `compsMiddle` — the operator has killed the
+  // comps chart three times and the previous "fix" swapped its unit instead of removing
+  // it. `compsPpsfSpec` / `ppsfChartMagnitude` stay exported and tested for the social
+  // and PDF surfaces; this email reserves no chart slot and fills none.
 
   // ── THE PROSE. The model does not write prose and nothing else — it writes LESS than
   // that. The COMPARISON is computed in code (buildPriceCase) and the model only writes
@@ -1526,6 +1600,9 @@ export async function buildMarketComps(ctx: RecipeBuildContext): Promise<EmailDo
   const remarks = facts.remarks ?? subjectRecord?.text ?? null;
   const description = buildDescriptionBlock(remarks, listingUrl ?? facts.sourceUrl);
   if (description) doc = upsertDescriptionBlock(doc, description);
+  // Reserved but nothing to say → take the slot back out. An empty panel where a
+  // description would have been is not an open slot, it is a hole.
+  doc = dropEmptyDescriptionSlot(doc);
 
   return doc;
 }

@@ -19,6 +19,33 @@ export function displayFontStack(gs: EmailGlobalStyle): string {
   return fontStack(gs.displayFontFamily ?? gs.fontFamily);
 }
 
+/**
+ * *** FAMILY FOLLOWS THE TYPE ROLE. THE ROLE DECIDES, NEVER THE BLOCK. ***
+ *
+ * Operator, 08/04/2026, on the sent comps email: *"Why are all the fonts fucking different
+ * and stupid just about everywhere???!!!!!!!!"*
+ *
+ * Measured on that build: FOUR font-family declarations, and the two that matter were
+ * `'Playfair Display', Georgia, serif` and `'Lato', …, sans-serif`. (The other two carried
+ * `!important` and are the Outlook `[if mso]` pin — correct, and invisible outside Outlook.)
+ * Two families is the design, not the bug. The bug was WHICH BLOCK GOT WHICH: only
+ * `HeaderBlock` and `HeroBlock` called `displayFontStack`, so a 44px serif price rendered
+ * directly above a 28px SANS section heading — two display-scale moments in two different
+ * typefaces, which reads as an accident rather than a system.
+ *
+ * The seven-role scale already says which type is display type. So the family is derived
+ * from the role and no block gets a vote: display sizes (hero/h1/metric/h2) take the
+ * display family, body/caption/mono take the body family. A doc that sets no separate
+ * `displayFontFamily` collapses to one family everywhere, exactly as before.
+ */
+export function familyForRole(
+  role: "hero" | "h1" | "metric" | "h2" | "body" | "caption" | "mono",
+  gs: EmailGlobalStyle,
+): string {
+  const DISPLAY_ROLES = new Set(["hero", "h1", "metric", "h2"]);
+  return DISPLAY_ROLES.has(role) ? displayFontStack(gs) : fontStack(gs.fontFamily);
+}
+
 /** Google Fonts CSS2 <link> URLs for web-font families — derived from the one font root. */
 export const WEB_FONT_URLS: Partial<Record<FontFamily, string>> = Object.fromEntries(
   Object.entries(BRAND_FONTS).flatMap(([k, v]) => (v.webfontUrl ? [[k, v.webfontUrl]] : [])),

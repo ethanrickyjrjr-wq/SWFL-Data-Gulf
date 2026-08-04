@@ -408,6 +408,71 @@ research, Part C synthesis — NAR, Keeping Current Matters, Rev Real Estate Sch
 Cadence follows the JOB, not a best-practice number: NAR's monthly mirrors a data drop (education);
 Rev's weekly "Market Monday" is paced to seller anxiety during an active listing (maintenance).
 
+### 0.6b ⛔ THE COMPS EMAIL — THE ONE RECIPE. There is no second one.
+
+**Operator, 08/04/2026: *"Write the recipe as the only fucking one for comps."*** He asked for
+this twice. Everything about building a comparables email is here: the data lanes, the photo rules,
+the block order, the spend ceilings. `docs/standards/data-roots.md` keeps only the TABLE facts and
+points here. Do not start a third document.
+
+**C1 · THE COMP SET IS CHOSEN BY COMPARABILITY, THEN FILTERED TO PHOTOGRAPHED.**
+Rank the pool with the size-band ranker (`compsForAddress` + `subjectDims` — hand it the subject's
+own sqft/beds/baths or it silently falls through to the vendor's raw nearest-first slice, which is
+how a $385,000 home got defended with $850,000 "comparables"). Filter: real home (beds AND sqft),
+not the subject itself, sale not stale. THEN drop every comp we hold no photo for — operator decree,
+*"Get rid of the no photo comps."* Dropped from the SET, not the table, so the median, the range and
+the count all recompute on the rows the reader can see. **Floor: `MIN_PHOTOGRAPHED_COMPS` (2).**
+Below it the full ranked set ships and the shortfall is logged loudly — a vendor outage must never
+pass for a thin market.
+⚠️ **The accepted cost:** photo coverage now selects the set, so it moves the median and the claim.
+That was the operator's call, made with the trade stated. It is the one place this email lets
+something other than the houses change the comparison.
+
+**C2 · WHAT EACH ROW SHOWS.** Photo · price · $/sq ft · address · **beds · baths** · sq ft ·
+sold/valued date · listing link. Baths are NOT optional — the ranker scores on them and the
+operator's rule is *"SIMILAR SQ FT, STYLE, BEDS AND BATHS SAME OR CLOSE ... WE ARE FUCKING
+COMPARING"*. Half-baths are real (2.5); never integer-format them, never print "0 ba".
+Lake baths win; the vendor's fill the hole only.
+
+**C3 · BLOCK ORDER, and it is not a free choice.**
+`header → ribbon → hero photo → address + price → stat strip → DESCRIPTION → comps table →
+narrative → agent card + ONE CTA → sources → footer`.
+The listing's own description sits **directly below the property facts** (operator: *"Description
+below property info"*) — it is the prose form of the numbers above it. It is RESERVED as an empty
+slot at the head of the recipe's middle so the layout seam mints its coordinates; a block spliced in
+afterwards carries no `layout` and sinks to `y = 1_000_000`, i.e. under the CTA and under the
+sources line, which is exactly how it shipped on 08/04/2026.
+
+**C4 · THERE IS NO CHART.** Operator, three times. A comparable set clusters by construction, so
+bars of it are decoration — and swapping the bars' unit from price to $/sq ft is not a fix, it is
+the same chart. The comparison already appears twice in plainer form: the strip's "$333 this home"
+against "$212 comp median", and each comp's own $/sq ft on its row.
+
+**C5 · TYPE, GRID, AND ONE GRAMMAR.**
+Family follows the TYPE ROLE, never the block (`familyForRole`): display sizes (hero/h1/metric/h2)
+take the display family, body/caption/mono take the body family. Two families, split by role — a
+44px serif price above a 28px sans heading reads as an accident.
+Stat-strip labels must fit ONE LINE in their own cell: five cells share 600px, so "$/Sq Ft — this
+home" wraps to two lines while "BEDS" does not, and the row goes ragged. Keep them short.
+Every row of a list shares ONE grid: columns belong to the LIST, not the row. A missing photo is an
+empty cell, never a missing column, never a placeholder image.
+
+**C6 · PHOTOS: WHERE THEY COME FROM.**
+Cache first (`data_lake.apify_property_records`), then ONE dated ZIP pull per SALE MONTH, joined on
+address. Never a per-address lookup — the vendor has none (see data-roots "THE APIFY RECIPE" R1).
+Never an unwindowed ZIP sweep — it joins 0 of 6 by construction. No derivable sale window → buy
+NOTHING. Ceilings: 200 results/month, hard stop 700 (~$7), and the Apify account's own
+`maxMonthlyUsageUsd`. A property visual is that listing's own photo or it is nothing — no aerial,
+no street view, no map tile, no placeholder (`no-aerial.test.ts` enforces it).
+
+**C7 · A ZERO IS NEVER SELF-EXPLANATORY.** "No photos" / "the pull was capped" / "the vendor
+refused" look identical in the HTML. Every lane that can return empty logs which one it was.
+
+**C8 · HOW TO VERIFY — LOOK AT IT.** `bun scripts/email/campaign-sim.mts --only market-comps`, then
+**open the built HTML and look**. Counting with `grep -o 'Listing photo of'` proves a tag exists; it
+cannot see that a block is in the wrong place or that a table renders as two interleaved grids. Both
+of those shipped to a real inbox on 08/04/2026 behind a green grep.
+
 ### 0.7 The rules that are already code — do not restate, call them
 
 `scale.ts` (type/spacing) · `lib/brand/fonts.ts` (6 families, all engines) · `capabilities.ts`

@@ -36,6 +36,28 @@ export function isDescriptionBlock(b: EmailDoc["blocks"][number]): b is BlockOf<
   return b.type === "text" && (b.props as { descriptionSlot?: boolean }).descriptionSlot === true;
 }
 
+/** The EMPTY description slot, reserved in a recipe's chrome so the layout seam mints
+ *  its coordinates. A recipe that wants the listing's own copy under the property facts
+ *  puts this at the head of its middle; `upsertDescriptionBlock` then fills it IN PLACE.
+ *  Spliced-in blocks carry no layout and sink to the bottom of the email — that is the
+ *  08/04/2026 defect this exists to make unreachable. */
+export function emptyDescriptionSlot(): BlockOf<"text"> {
+  return {
+    id: `desc-${Math.random().toString(36).slice(2, 10)}`,
+    type: "text",
+    props: { body: "", align: "left", descriptionSlot: true },
+  } as BlockOf<"text">;
+}
+
+/** Reserved but never filled → REMOVE it. An empty box is not an open slot, and the
+ *  reader must never see a blank panel where a description would have been. */
+export function dropEmptyDescriptionSlot(doc: EmailDoc): EmailDoc {
+  return {
+    ...doc,
+    blocks: doc.blocks.filter((b) => !(isDescriptionBlock(b) && !(b.props.body ?? "").trim())),
+  };
+}
+
 /**
  * The home's own words, cut to fit the render budget.
  *
@@ -65,27 +87,48 @@ export function buildDescriptionBlock(
 }
 
 /**
- * Insert or REPLACE the description, keyed on its own marker so a scheduled
- * rebuild can never stack two of them (the same discipline `upsertSoldCompsBlock`
- * uses for the comps list).
+ * Fill the RESERVED description slot, or — failing that — insert the block.
  *
- * Placement: before the first agent-card / button / footer, so the home's own
- * words sit with the content and never after the sign-off.
+ * Keyed on its own marker so a scheduled rebuild can never stack two of them (the same
+ * discipline `upsertSoldCompsBlock` uses for the comps list).
  */
 export function upsertDescriptionBlock(doc: EmailDoc, block: BlockOf<"text">): EmailDoc {
+  // ── THE PATH THAT MATTERS: fill the slot the recipe reserved, IN PLACE.
+  // The slot was minted by the layout seam next to the property facts, so filling it
+  // keeps those coordinates and the description renders where it was planned to.
   const idx = doc.blocks.findIndex(isDescriptionBlock);
   if (idx !== -1) {
     return {
       ...doc,
       blocks: doc.blocks.map((b, i) =>
-        i === idx ? ({ id: b.id, type: "text", props: block.props } as BlockOf<"text">) : b,
+        i === idx
+          ? ({
+              id: b.id,
+              type: "text",
+              props: block.props,
+              ...("layout" in b ? { layout: (b as { layout: unknown }).layout } : {}),
+            } as BlockOf<"text">)
+          : b,
       ),
     };
   }
-  const anchor = doc.blocks.findIndex(
+
+  // ── LAST RESORT: the doc reserved no slot.
+  //
+  // *** ARRAY POSITION IS NOT DOCUMENT POSITION — `layout.y` IS. ***
+  // `finalize-doc.ts` is explicit about what an array index is worth here: "a hand-written
+  // block with no `layout` sinks to y = 1_000_000 ... the bottom of the content, just above
+  // the footer." That is exactly how the listing's own copy shipped BELOW the "Find Out
+  // More" button and below "Sources (2)" on 08/04/2026 — the operator read it on his phone
+  // and asked why the description was under the footer.
+  //
+  // So this branch cannot actually place anything, and it does not pretend to. If you are
+  // landing here for a real email, reserve the slot in that recipe's chrome with
+  // `emptyDescriptionSlot()` instead — that is the fix, not a better index.
+  const beforeChrome = doc.blocks.findIndex(
     (b) => b.type === "agent-card" || b.type === "button" || b.type === "footer",
   );
   const blocks = [...doc.blocks];
-  blocks.splice(anchor === -1 ? blocks.length : anchor, 0, block);
+  blocks.splice(beforeChrome === -1 ? blocks.length : beforeChrome, 0, block);
   return { ...doc, blocks };
 }

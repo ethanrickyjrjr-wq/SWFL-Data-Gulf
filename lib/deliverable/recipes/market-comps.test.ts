@@ -156,11 +156,11 @@ test("the $/sq ft math is computed from real pairs only — never back-solved", 
   const cells = statsOf(doc);
   // Subject: $595,000 / 2,847 sq ft = $209. It is the cell that WINS THE ARGUMENT, so it
   // is the one the strip emphasises — it renders larger, in the brand's accent.
-  const mine = cells.find((c) => c.label === "$/Sq Ft — this home");
+  const mine = cells.find((c) => c.label === "$/Sq Ft");
   expect(mine?.value).toBe("$209");
   expect(mine?.emphasis).toBe("primary");
   // Comps (land excluded): 173, 195, 210, 231, 266 → median 210, range 173–266.
-  expect(cells.find((c) => c.label === "$/Sq Ft — comp median")?.value).toBe("$210");
+  expect(cells.find((c) => c.label === "Median")?.value).toBe("$210");
   // The SPREAD rides in the strip's footnote — a strip cell is a 9px caption in a sixth
   // of the email's width, and "$173–$266 across the set" wrapped to five ragged lines there.
   expect(footnoteOf(doc)).toContain("run from $173 to $266");
@@ -245,7 +245,7 @@ test("a sold row with unknown spell renders exactly as before", () => {
 test("no comps → the grid still lands, with open slots and no zeros", () => {
   const doc = buildCompsGrid(SUBJECT, [], canvas());
   const cells = statsOf(doc);
-  const evidence = cells.filter((c) => c.label === "$/Sq Ft — comp median");
+  const evidence = cells.filter((c) => c.label === "Median");
   expect(evidence[0]?.value).toBe(""); // an OPEN SLOT — never "$0", never a naked label
   expect(cells.every((c) => c.value !== "0" && c.value !== "$0")).toBe(true);
   expect(listOf(doc)).toBeUndefined(); // no rows → no empty table shell
@@ -263,7 +263,7 @@ test("an unsourced cell is absent from the SENT email, present on the canvas", a
   const doc = buildCompsGrid(bare, [], canvas());
   const html = await renderEmailDocHtml(doc);
   // The email carries no naked label whose cell we could not source.
-  expect(html).not.toContain("$/Sq Ft — comp median");
+  expect(html).not.toContain("Comp median");
   expect(html).not.toContain("Comparable homes");
   // ...and no zero snuck in where a number was missing.
   expect(html).not.toContain(">$0<");
@@ -285,9 +285,14 @@ test("it wears the campaign chrome — the SAME shape as every other lifecycle e
     "image:photo",
     "hero:subject", // ← centred, ADDRESS over PRICE
     "stats:strip", // ← ONE hairline row, never a wall of stat grids
-    "image:chart", // ┐ MY MIDDLE — the only place this email legitimately differs
-    "list", // ┘
-    "text",
+    // MY MIDDLE. The `image:chart` slot that used to lead it is DELETED (operator,
+    // 08/04/2026, third time of asking). What leads it now is the RESERVED, empty
+    // description slot — "description below property info" — which the layout seam
+    // positions here and `upsertDescriptionBlock` fills in place later in the build.
+    // Unfilled, `dropEmptyDescriptionSlot` takes it back out.
+    "text", // ← the description slot, directly beneath the property facts
+    "list",
+    "text", // ← the narrative slot
     "agent-card",
     "button",
     // MY TAIL. It used to sit above the agent card; the seam's zone fence sorts CLOSE-zone
@@ -319,12 +324,22 @@ test("every block is positioned, so it compiles through the GRID renderer", () =
   }
 });
 
-test("the chart slot is reserved, empty, and its own kind", () => {
+test("THERE IS NO CHART. The comps email reserves no chart slot and fills none.", () => {
+  // Operator, three times: 08/03/2026 "COMPARABLES ARE JUST THAT, COMPARABLE, SO IT'S A
+  // TERRIBLE CHART TO PUT IN THE EMAIL. PRICE IS GOING TO BE SIMILAR." — then, after a
+  // session "answered" that by swapping the bars' UNIT from price to $/sq ft and keeping
+  // the chart: 08/04/2026 "Do not use that stupid fucking chart for comps!!!!!!! How many
+  // times do I have to say it!!!!!"
+  //
+  // This test used to assert the slot EXISTED. It is inverted on purpose: the comparison
+  // already appears twice in plainer form (the stat strip's "$333 this home" vs "$212 comp
+  // median", and each comp's own $/sq ft on its row). If you are here because this test
+  // broke, you are putting the chart back — don't.
   const doc = buildCompsGrid(SUBJECT, HOMES, canvas());
   const chart = doc.blocks.find((b) => b.type === "image" && b.props.kind === "chart");
-  expect(chart).toBeTruthy();
-  expect(chart?.type === "image" && chart.props.url).toBe("");
-  // The photo slot is a DIFFERENT block — the chart upsert must never eat the photo.
+  expect(chart).toBeUndefined();
+
+  // The subject's PHOTO is a different block and must survive the chart's removal.
   const photo = doc.blocks.find((b) => b.type === "image" && b.props.kind === "photo");
   expect(photo?.type === "image" && photo.props.url).toBe(SUBJECT.photos[0]);
 });
@@ -465,13 +480,13 @@ describe("the chart plots the number the email argues over", () => {
 describe("days on market rides on the face of the email", () => {
   test("a real DOM count renders in the strip", () => {
     const cells = compsSpecs({ ...SUBJECT, daysOnMarket: 41 }, HOMES);
-    const dom = cells.find((c) => /days on market/i.test(c.label));
+    const dom = cells.find((c) => /days listed/i.test(c.label));
     expect(dom?.value).toBe("41");
   });
 
   test("no DOM held → an OPEN SLOT, never a zero and never a guess", () => {
     const cells = compsSpecs(SUBJECT, HOMES);
-    const dom = cells.find((c) => /days on market/i.test(c.label));
+    const dom = cells.find((c) => /days listed/i.test(c.label));
     expect(dom?.value ?? "").toBe("");
   });
 
@@ -1186,5 +1201,102 @@ describe("compsFootnote — style note wiring", () => {
 
   it("never fabricates a style note when subjectStyle is omitted (today's behavior, unchanged)", () => {
     expect(compsFootnote(SUBJECT, HOMES)).not.toContain("Note:");
+  });
+});
+
+describe("EVERY COMP HAS A PHOTO — a comp we cannot picture is dropped from the SET", () => {
+  // Operator, 08/04/2026: "Get rid of the no photo comps."
+  //
+  // Dropped from the SET, not just the table: the median, the range and the count all
+  // recompute on exactly the rows the reader sees. Filtering only the table would print
+  // "6 comparable homes ... run from $111 to $266" above five rows.
+  //
+  // The trade is real and was accepted explicitly: photo coverage now selects the comp
+  // set, so it moves the median and the price claim. These tests pin the FLOOR that keeps
+  // that from turning a vendor outage into an empty evidence table.
+
+  test("the price case is computed from the PHOTOGRAPHED set, not the full pool", () => {
+    // Two homes at $173 and $266 per sq ft. If only the $266 one is photographed, the
+    // median the email prints must be $266 — the number belonging to the row on screen.
+    const shown = [HOMES[1]!]; // 336 Shore Dr Lot 58 — 1,976 sq ft at $385,000 = $195
+    const doc = buildCompsGrid(SUBJECT, shown, canvas());
+    const cells = statsOf(doc);
+    expect(cells.find((c) => c.label === "Comp median")?.value).toBe("$195");
+  });
+
+  test("the stated COUNT matches the number of rows rendered", () => {
+    for (const n of [2, 3, 5]) {
+      const shown = HOMES.slice(0, n);
+      const doc = buildCompsGrid(SUBJECT, shown, canvas());
+      const list = listOf(doc);
+      expect(list?.type === "list" && list.props.items).toHaveLength(n);
+      // The table's own title carries the mix, and the footnote carries the count.
+      expect(footnoteOf(doc)).toContain(`${n} comparable home`);
+    }
+  });
+
+  test("the range quoted in the footnote is the range of the SHOWN rows only", () => {
+    const shown = [HOMES[0]!, HOMES[1]!]; // $173 and $195
+    const fn = compsFootnote(SUBJECT, shown)!;
+    expect(fn).toContain("$173");
+    expect(fn).toContain("$195");
+    // The $266 home was not shown, so its number may not appear as a bound.
+    expect(fn).not.toContain("$266");
+  });
+
+  test("MIN_PHOTOGRAPHED_COMPS is 2 — a one-comp price case defends nothing", () => {
+    // The floor is deliberately not 1. A median and a range need at least two points, and
+    // a vendor outage (the 08/04 Apify cap 403'd every call) must never empty the table.
+    const doc = buildCompsGrid(SUBJECT, HOMES.slice(0, 2), canvas());
+    const list = listOf(doc);
+    expect(list?.type === "list" && list.props.items).toHaveLength(2);
+  });
+
+  test("an empty set still lands the grid with open slots — never a refused build", () => {
+    // RULE 0.7. Zero comps is a bad email, not a crash.
+    const doc = buildCompsGrid(SUBJECT, [], canvas());
+    expect(doc.blocks.length).toBeGreaterThan(0);
+    expect(listOf(doc)).toBeUndefined(); // a list needs >= 1 row; an empty shell is a lie
+  });
+});
+
+describe("BATHS ride on every comp row", () => {
+  // Operator, 08/04/2026: "Where the fuck is baths?????????????????"
+  //
+  // The row printed "3 bd · 1,976 sq ft" and dropped the bath count — while RenderComp
+  // carried it, lee_comp_sales_v SELECTs it, and the LeePA layer-23 join supplying it was
+  // wired 08/02/2026. The data crossed the whole pipeline and was never rendered, in an
+  // email whose own comparability rule is "SIMILAR SQ FT, STYLE, BEDS AND BATHS".
+  const rowTextFor = (over: Partial<RenderComp>) => {
+    const doc = buildCompsGrid(SUBJECT, [comp({ addressLine: "1 A St", ...over })], canvas());
+    const list = listOf(doc);
+    return list?.type === "list" ? (list.props.items[0]!.text ?? "") : "";
+  };
+
+  test("a whole bath count renders as 'N ba', between beds and sq ft", () => {
+    expect(rowTextFor({ beds: 3, baths: 2, sqft: 1976 })).toContain("3 bd · 2 ba · 1,976 sq ft");
+  });
+
+  test("a HALF bath is not rounded away — 2.5 is a real and different house", () => {
+    expect(rowTextFor({ baths: 2.5 })).toContain("2.5 ba");
+  });
+
+  test("no bath count → the segment is omitted, never '0 ba'", () => {
+    const t = rowTextFor({ baths: null });
+    expect(t).not.toContain("ba");
+    expect(t).not.toContain("0 ba");
+  });
+
+  test("baths survive the row's 200-char cap alongside address, beds, sqft and date", () => {
+    const t = rowTextFor({
+      addressLine: "15765 PORTOFINO SPRINGS BLVD",
+      beds: 3,
+      baths: 2,
+      sqft: 1990,
+      priceKind: "sold",
+      priceDate: "2026-04-01",
+    });
+    expect(t).toContain("2 ba");
+    expect(t.length).toBeLessThanOrEqual(200);
   });
 });

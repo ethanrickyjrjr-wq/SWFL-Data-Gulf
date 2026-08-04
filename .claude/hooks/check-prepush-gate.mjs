@@ -56,6 +56,7 @@ import {
   tablesDeclaredInPipeline,
 } from "./lib/table-consumer.mjs";
 import { cronViolations } from "./lib/cron-failclosed.mjs";
+import { findDerivationCollisions, objectsCreatedInSql } from "./lib/duplicate-root.mjs";
 import {
   computeGaps,
   invalidClasses,
@@ -384,6 +385,19 @@ process.stdin.on("end", () => {
   // gated behind his approval. Rules + tests: lib/cron-failclosed{,.test}.mjs.
   // Escape: ALLOW_UNGATED_PAID_CRON=1.
   cronFailClosedGate(base);
+
+  // ---- Gate 14: THE SAME ROOT, BUILT TWICE ---------------------------------
+  // Operator decree 08/04/2026. Three typed tables landed 08/03 parsing
+  // steadyapi_property_history_raw; the NEXT DAY a different session parsed the same
+  // arrays into three views at IDENTICAL row counts (235,383 / 273,051 / 79,281) and
+  // called them new roots. Every guard was green: repolith claims and git merge are
+  // FILE-level and the sessions touched different files; Gate 12 wants a reader and
+  // these had one; tests and typecheck passed. Nothing compared CONCEPTS. This does —
+  // it keys on (source relation + the json array exploded), so three families off one
+  // raw table stay legal while a second parse of the same array does not. Rules +
+  // positive controls against the real artifacts: lib/duplicate-root{,.test}.mjs.
+  // Escape: ALLOW_DUPLICATE_DERIVATION=1.
+  duplicateRootGate(base);
 
   // ---- Gate 8: ZIP scope root (Lee + Collier, 57) ---------------------------
   // Coverage has ONE root (isCoreScope, refinery/lib/core-scope.mts) and the leak
@@ -1072,6 +1086,122 @@ function tableConsumerGate(base) {
         `  2. If the table is deliberately landing ahead of its consumer, say so out\n` +
         `     loud: ALLOW_TABLE_WITHOUT_CONSUMER=1 and open a check for the wiring in\n` +
         `     the same session (RULE 2.4 — no silent deferrals).`,
+    );
+  } catch {
+    return; // never wedge a push on this gate's own bug
+  }
+}
+
+// Gate 14 body — the same root, built twice (08/04/2026).
+//
+// Fires on ADDED **and MODIFIED** .sql / ingest .py files, unlike Gate 12 which looks at
+// additions only. Deliberate: the 08/04 duplicate arrived as a NEW file, but the cheapest
+// way to create the same collision tomorrow is to edit an existing view to re-parse an
+// array something else already owns. Re-litigating an untouched months-old file is still
+// impossible, because a file has to be in the push to be a candidate.
+//
+// The index it compares against is the pushed tree at HEAD — every .sql under docs/sql and
+// migrations, plus every ingest/**.py. Python matters more than the SQL here: the 08/03
+// migrations create EMPTY tables, and the link from table to source array lives only in the
+// parser's SQL string. A gate that read .sql alone would have passed the exact push it
+// exists to stop.
+//
+// Fail-OPEN on any internal error. Fail-CLOSED on a real collision.
+// Escape: ALLOW_DUPLICATE_DERIVATION=1.
+function duplicateRootGate(base) {
+  try {
+    if (process.env.ALLOW_DUPLICATE_DERIVATION === "1") {
+      process.stdout.write(
+        `\n[pre-push gate] OVERRIDE: ALLOW_DUPLICATE_DERIVATION=1 — shipping a second\n` +
+          `parse of an array another artifact already owns (logged).\n`,
+      );
+      return;
+    }
+
+    let touched = [];
+    try {
+      touched = sh(`git diff --name-only --diff-filter=AM ${base}..HEAD`)
+        .split("\n")
+        .map((s) => s.trim())
+        .filter(Boolean)
+        .filter(isSafeTestFilePath);
+    } catch {
+      return; // fail open
+    }
+    const isCandidate = (f) => /\.sql$/i.test(f) || /^ingest\/.*\.py$/i.test(f);
+    const candidates = touched.filter(isCandidate);
+    if (candidates.length === 0) return;
+
+    const readAtHead = (f) => {
+      try {
+        return sh(`git show HEAD:${f}`);
+      } catch {
+        return "";
+      }
+    };
+
+    // Only build the (expensive) index if something in the push actually CREATES a
+    // data_lake object. A pushed probe script or a comment fix is not a candidate.
+    const creating = candidates.filter((f) => objectsCreatedInSql(readAtHead(f)).length > 0);
+    if (creating.length === 0) return;
+
+    let indexPaths = [];
+    try {
+      indexPaths = sh(`git ls-tree -r --name-only HEAD`)
+        .split("\n")
+        .map((s) => s.trim())
+        .filter(Boolean)
+        .filter(isSafeTestFilePath)
+        .filter(isCandidate);
+    } catch {
+      return; // fail open
+    }
+    const index = indexPaths.map((p) => ({ artifact: p, text: readAtHead(p) }));
+
+    const hits = [];
+    for (const f of creating) {
+      for (const hit of findDerivationCollisions({ artifact: f, text: readAtHead(f) }, index)) {
+        hits.push({ ...hit, newArtifact: f });
+      }
+    }
+    if (hits.length === 0) return;
+
+    const lines = hits
+      .map(
+        (h) =>
+          `  data_lake.${h.newObject}  (${h.newArtifact})\n` +
+          `    re-parses  ${h.key.replace("::", "  ->  ")}\n` +
+          `    already owned by  ${h.existingArtifact}`,
+      )
+      .join("\n\n");
+
+    block(
+      `DUPLICATE ROOT — ${hits.length} second parse(s) of an array another artifact already owns`,
+      `${lines}\n\n` +
+        `The key is (source relation + the json array exploded), so three families off ONE\n` +
+        `raw table remain legal — property_history, tax_history and building_permits do not\n` +
+        `collide. What is blocked is a SECOND artifact exploding the SAME array.\n\n` +
+        `THE INCIDENT THIS GATE IS ANCHORED TO (08/03-08/04/2026): three typed tables landed\n` +
+        `parsing steadyapi_property_history_raw. The next day a different session parsed the\n` +
+        `same arrays into three views at IDENTICAL row counts - 235,383 / 273,051 / 79,281 -\n` +
+        `and a handoff called them new roots, one of them a "SOLE SOURCE". Both copies were\n` +
+        `live, with DIFFERENT rules: the tables kept price=0 as a real price, the views NULLed\n` +
+        `it; oldest event 1800-01-01 vs 1902-01-01. One question, two answers, depending on\n` +
+        `which surface a caller reached. Every other guard was green - repolith claims and git\n` +
+        `merges are FILE-level and the two sessions never touched the same file.\n\n` +
+        `Fix (in order of what is usually right):\n` +
+        `  1. READ the existing artifact. If it already does this, do not build it again -\n` +
+        `     extend it, or build a READ LAYER on top of it (data-roots rule 4: ingest writes\n` +
+        `     base tables, root views read them, consumers read root views). A view that\n` +
+        `     SELECTs from the existing table is not a collision and will not trip this gate.\n` +
+        `  2. If the two genuinely answer different questions, say which in\n` +
+        `     docs/standards/data-roots.md - one root per concept - and set\n` +
+        `     ALLOW_DUPLICATE_DERIVATION=1 with a check opened the same session (RULE 2.4).\n\n` +
+        `Live half: this gate reads the REPO. An object created out of band has no artifact\n` +
+        `to index - data_lake.steadyapi_property_permits is live in prod with no migration and\n` +
+        `no parser anywhere, and this gate cannot see it. Run\n` +
+        `  node scripts/check-duplicate-roots.mjs\n` +
+        `to compare what is actually IN the database.`,
     );
   } catch {
     return; // never wedge a push on this gate's own bug

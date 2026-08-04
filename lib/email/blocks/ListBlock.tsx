@@ -5,10 +5,11 @@
 // lead span the full width. Renders nothing when items is empty.
 import { Section, Text, Link, Img } from "@react-email/components";
 import type { EmailGlobalStyle, ListProps } from "../doc/types";
-import { fontStack, sectionPad, CARD_BG, BORDER } from "./styles";
+import { fontStack, familyForRole, sectionPad, CARD_BG, BORDER } from "./styles";
 import { isDarkBg, legibleAccent, legibleInk, ON_DARK_BODY, ON_DARK_TITLE } from "./on-dark";
 import { EditableText, type EditScope } from "./editable-text";
 import { text, pad, space, WEIGHT, TABLE_ROW_PAD } from "./scale";
+import { DISPLAY_FONT_CLASS } from "./email-head";
 
 export function ListBlock({
   props,
@@ -25,6 +26,26 @@ export function ListBlock({
   const bg = props.sectionBg ?? CARD_BG;
   const onDark = isDarkBg(bg);
 
+  // ═══════════════════════════════════════════════════════════════════════════
+  // *** ONE GRID FOR EVERY ROW. THE COLUMNS ARE A PROPERTY OF THE LIST, NEVER
+  //     OF THE ROW. ***
+  //
+  // Operator, 08/04/2026, on the sent comps email: *"Why the fuck is it not nicely
+  // formatted? We are coding the fucking emails! It's not hard to make them the same!!!"*
+  //
+  // He is describing this exact code. The image `<td>` used to be emitted ONLY on rows
+  // that had an image, and the text cell carried a `colSpan` that changed with it — so a
+  // six-row comp table with two photos rendered as TWO DIFFERENT TABLES interleaved:
+  // photographed rows got a 56px thumb + a squeezed address gutter that wrapped the
+  // address over four lines, unphotographed rows got the full width and did not. Nothing
+  // lined up, column to column, down the list.
+  //
+  // A missing photo is an EMPTY CELL, not a missing column — the same open-slot contract
+  // the rest of this pipeline already runs on. Decided ONCE for the whole list here.
+  // ═══════════════════════════════════════════════════════════════════════════
+  const anyImage = items.some((i) => !!i.imageUrl);
+  const anyLead = items.some((i) => !!i.lead);
+
   return (
     <Section
       style={{
@@ -40,8 +61,11 @@ export function ListBlock({
           path="title"
           scope={scope}
           placeholder="List title"
+          className={DISPLAY_FONT_CLASS}
           style={{
-            fontFamily: font,
+            // h2 is DISPLAY type — same family as the hero above it. Before this, the
+            // section heading rendered in the body sans directly beneath a serif price.
+            fontFamily: familyForRole("h2", globalStyle),
             ...text("h2"),
             color: onDark ? ON_DARK_TITLE : globalStyle.primaryColor,
             margin: space(0, 0, 8),
@@ -52,7 +76,7 @@ export function ListBlock({
         <tbody>
           {items.map((item, i) => (
             <tr key={i}>
-              {item.imageUrl ? (
+              {anyImage ? (
                 <td
                   style={{
                     width: 56,
@@ -62,23 +86,27 @@ export function ListBlock({
                 >
                   {/* Fixed HTML width/height (not CSS-only) — Outlook desktop ignores
                       CSS-only image sizing and renders at native pixel dimensions
-                      (docs/standards/emails.md render-constraints research, 08/03/2026). */}
-                  <Img
-                    src={item.imageUrl}
-                    alt={item.imageAlt ?? ""}
-                    width={56}
-                    height={56}
-                    style={{
-                      width: 56,
-                      height: 56,
-                      borderRadius: 4,
-                      display: "block",
-                      objectFit: "cover",
-                    }}
-                  />
+                      (docs/standards/emails.md render-constraints research, 08/03/2026).
+                      A row with no photo still holds its 56px cell — an OPEN SLOT, so the
+                      column below it stays straight. Never a placeholder image. */}
+                  {item.imageUrl ? (
+                    <Img
+                      src={item.imageUrl}
+                      alt={item.imageAlt ?? ""}
+                      width={56}
+                      height={56}
+                      style={{
+                        width: 56,
+                        height: 56,
+                        borderRadius: 4,
+                        display: "block",
+                        objectFit: "cover",
+                      }}
+                    />
+                  ) : null}
                 </td>
               ) : null}
-              {item.lead ? (
+              {anyLead ? (
                 <td
                   style={{
                     fontFamily: font,
@@ -103,7 +131,6 @@ export function ListBlock({
                 </td>
               ) : null}
               <td
-                colSpan={item.lead ? 1 : 2}
                 style={{
                   fontFamily: font,
                   ...text("body"),
