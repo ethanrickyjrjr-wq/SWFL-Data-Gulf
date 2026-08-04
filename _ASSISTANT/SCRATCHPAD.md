@@ -137,8 +137,21 @@ email (one per section), the two files differ, and the structure is right
 (`<table bg=#ffffff padding:24px 8px>` wrapping `<table bg=<card> border-radius:10px padding:16px>`).
 The defect is purely the VALUE.
 
+ROUND 2, same session — operator: *"i see warm sand. do not see anything on the other. why is this
+so fucking hard????????????"* Warm `#EFE6D8` VISIBLE, cool `#E2EAF2` INVISIBLE. Proved it was not a
+wiring bug: swapped the hex in one file and the two rendered emails were byte-identical, so the only
+difference between them was the colour value. Luminance is nearly equal (0.80 vs 0.81) — a WARM
+off-white reads as paper against white, a COOL one reads as glare and vanishes, and dark-mode
+rewriting makes it worse (our own 08/03 render research: 3 dark-mode behaviours, 2 clients with no
+coding workaround). **RESOLVED: warm sand `#EFE6D8` is the section colour. Do not re-litigate, and
+do not offer pale cool tints as an email surface again.**
+
 THE LESSON, and it generalises past this one email: **a colour choice is a claim about what the eye
-can see, and I never checked it.** I verified the colour was PRESENT in the markup (grep count 5)
+can see, and I never checked it.** Twice in one session I offered a PAIR of options where one was
+undecidable by eye — the operator had to do the verification I should have done. When a choice is
+between two things a client may render identically, it is not a choice, it is a second round trip.
+
+ I verified the colour was PRESENT in the markup (grep count 5)
 and treated presence as proof of visibility. Same class as "Resend accepted it" ≠ "it looks right in
 the inbox" — I had already written that sentence in the very same session and then made the identical
 mistake one layer down. A design token needs a measured delta against what sits behind it, not a
