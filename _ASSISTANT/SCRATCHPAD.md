@@ -1,3 +1,54 @@
+## 2026-08-04 (Opus 5) — OPERATOR: "make sure we can get any and all data for a property we can" — and the pool premise was wrong
+
+RESOLVED (the premise) + OPEN (the wiring, check `market_comps_pool_comparability`, now relabeled).
+
+**The handed premise:** *"Pool... genuinely needs a new vendor onboarding: the realtor.com actor we
+already pay for doesn't carry pool at all, so it means bringing in the Zillow Property Details actor
+(hasPrivatePool/poolFeatures), which under this repo's rules means a FULL-SCOPE-FIRST doc entry and a
+cadence_registry source_scope block before the code."*
+
+**True about the realtor.com actor. False about us.** For LEE we already hold pool, for free, at
+100% fill, and it is ONE COLUMN away from the comp view:
+
+- `data_lake.leepa_comparable_sales` — **108,848 rows, `pool` NOT NULL on 108,848 of 108,848**
+  (PostgREST `count=exact`, 08/04/2026). Values are `'Pool'` / `'No Pool'`. 75,746 rows carry
+  bedrooms; 62,218 sales are 2025+.
+- `ingest/pipelines/leepa_comp_sales/constants.py:42` already pulls `Pool`;
+  `resources.py:63,127` already maps it to a `text` column. Shipped 07/22/2026.
+- `lee_comp_sales_v` **already lateral-joins that exact row** for `c.bedrooms, c.bathrooms`
+  (`docs/sql/20260802_lee_comp_sales_v_beds_baths.sql:44`) and just doesn't select `c.pool`.
+- `comp-rank.ts` / `comp-source-lake.ts` / `comp-helper.ts` — **zero references to pool**, so
+  nothing downstream would have received it anyway.
+
+**No FULL-SCOPE doc and no `source_scope` block are owed for Lee pool** — the layer-23 field census
+is already written verbatim at `constants.py:17-31` and the ceiling is already recorded at
+`cadence_registry.yaml:876`.
+
+**COLLIER IS THE REAL GAP, and it must not be lost in the good news.** data-roots T9: no Collier
+equivalent to `lee_comp_sales_v` exists. A Collier pool source is a genuine open vendor question.
+"We have pool" without that split is a second wrong premise — build a comps email, point it at
+Naples, get nothing.
+
+**THE CLASS — this is the 4th recorded place pool was already known, and the 3rd time this exact
+failure has run.** `cadence_registry.yaml:876` ceiling (07/19) · SCRATCHPAD 3406, operator's own
+*"WHY DO WE NOT HAVE WHAT THE FUCKING PAGES HOLD IS /CENSUS OR DATA-ROOTS"* (07/22) · check
+`leepa_delinquent_tax_layer_unused`, which says verbatim *"23 (Comparable Sales w/ beds/baths/pool)
+also unused"* (16d untouched) · `constants.py` itself. `data-roots.md:30` states the rule that would
+have caught it: **"Before you tell anyone 'we don't have field X,' check the ceiling."**
+`information_schema` says what we PULLED; `source_scope.source_ceiling` says what EXISTS. The
+07/22 postmortem was two sessions telling him we had no beds/baths for comps when it was in the file
+twice. Same field, same layer, same doc, same miss — recording a ceiling is still not surfacing it.
+
+**Side finding, own check (`leepa_layer23_count_nondeterministic`):** the LeePA host is currently
+returning a DIFFERENT row count on every identical call — 8 calls 3s apart gave 17208, 400, 400,
+400, 20811, 21956, 23400, 24662, and an earlier burst gave `{count:0}` repeatedly. Schema returns
+fine every time; layers 0/1/2 went to 0 in the same window, so it's host-wide and intermittent, not
+layer 23 emptied. **I nearly wrote down "the layer is empty" off the first six zero-reads** — the
+retry is the only reason I didn't. It matters because `fetch_comp_sales` asserts every partition
+EXACTLY against its own `returnCountOnly`. Merge-not-replace protects the 108,848 rows we hold.
+
+---
+
 ## 2026-08-04 (Opus 5) — OPERATOR: "what fix??????? you basically made it worse and were going to run some shit that made it even worse"
 
 He was right, on both halves, and the entry below this one is where I got it wrong.
