@@ -161,6 +161,30 @@ skips first-touch gating per path), `GATEGUARD_BASH_ROUTINE_DISABLED`, `ECC_GATE
 `ECC_DISABLED_HOOKS`. All read from env, so they belong in a `settings.json` `env` block and take
 effect next session.
 
+## 2026-08-04 (Opus 5) — OPERATOR: "why do they have no fucking bath count??????????????"
+## — the paid lane searches the ZIP THE USER ASKED FOR, not the ZIPs the homes are actually in
+
+OPEN. Root cause found LIVE, all four lanes searched first.
+
+The digest for 33919 deliberately builds ONE pool: homes IN 33919, then city-backfill homes from the
+rest of Fort Myers. That backfill is the design. But `fetchApifyBathsByAddress(zip)` is called with
+the **requested** ZIP — so it searched 33919, returned **57 addresses**, and the four big estates are
+in **33905 / 33901 / 33908 / 33912**. Zero of four could ever match. The free lake lane also returned
+0 of 4 (consistent with its measured ~20% fill). Vendor lane is structurally null.
+
+WHY IT BITES THIS SECTION HARDEST: big-lot estates cluster OUTSIDE the dense inner ZIP by definition.
+So "Room to spread out" is the section most likely to be entirely city-backfill, and therefore the
+section GUARANTEED to be spec-less under a requested-ZIP-only bath lane. The failure is not random —
+it is correlated with exactly the category the operator was already complaining about.
+
+THE CLASS: a shared pool with a per-ZIP enrichment key. Same shape as the address-match failures in
+scratchpad 0ac (Marco Island 0/360) — an enrichment keyed on a narrower slice than the data it must
+cover. **Whenever a pool is widened, every enrichment lane keyed to the old scope silently misses the
+new rows.** Nothing errors; the column is just null.
+
+FIX: pass the ZIPs actually present in the pool. COST: one actor call per extra ZIP ($0.01/result,
+60 cap) — a real spend increase per build, so it is the operator's call, not a silent change.
+
 ## 2026-08-04 (Opus 5) — OPERATOR: "why are they both the same? where are the background
 ## colors?????????????????" — I shipped a card 3% off white and called it a colour
 
