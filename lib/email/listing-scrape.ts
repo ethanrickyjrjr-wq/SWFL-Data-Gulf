@@ -21,6 +21,7 @@ import { resolveEmailModel } from "./model-router";
 import { parseListingDetail } from "@/lib/listings/listing-detail";
 import type { ListingDetailFacts } from "@/lib/listings/listing-detail";
 import type { ResolvedCommunityStats } from "@/lib/listings/community-lookup";
+import type { ResolvedNeighborhood } from "@/lib/listings/neighborhood-amenities";
 
 export interface ListingFacts {
   address?: string;
@@ -65,6 +66,16 @@ export interface ListingFacts {
    *  Different provenance from `community`; never merged into it, never let one impersonate
    *  the other in citation language. */
   communityStats?: ResolvedCommunityStats;
+  /** AROUND THIS HOME -- the vendor's named neighborhood for this listing plus the
+   *  businesses within its search radius (golf, country clubs, groceries, cafes...),
+   *  resolved from the listing's own coordinates against stored boundary polygons.
+   *  A THIRD, distinct provenance: `community` is the listing's detail page,
+   *  `communityStats` is the tax roll, and this is the vendor's amenity sweep.
+   *  CRITICAL -- these are NEARBY businesses in a radius, NOT in-gate community
+   *  amenities. Never merge it with either sibling and never let it speak as though
+   *  the community owns what it lists; `neighborhoodAmenitiesSourceLine` carries the
+   *  prohibition that keeps a narrator honest about the difference. */
+  neighborhood?: ResolvedNeighborhood;
 }
 
 /** Pull one scalar value from the spec island by its machine id. Returns the

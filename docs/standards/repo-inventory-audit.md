@@ -109,7 +109,7 @@ is read from the actual pipeline code, not the registry.
 | market_aggregates_details | API (SteadyAPI) | data_lake.market_details_swfl |
 | realtor_geo_trends | API (SteadyAPI) | data_lake.realtor_geo_medians |
 | rentals_swfl | API (SteadyAPI) | data_lake.rental_listings_swfl |
-| neighborhood_amenities | API (SteadyAPI) | data_lake.steadyapi_neighborhoods + steadyapi_neighborhood_amenities + steadyapi_property_neighborhood (pairing edge) |
+| neighborhood_amenities | API (SteadyAPI) | data_lake.steadyapi_neighborhoods + steadyapi_neighborhood_amenities + steadyapi_property_neighborhood (pairing edge) — **consumers (wired 08/04/2026):** `lib/deliverable/recipes/community-info.ts` (typed community NAME → neighborhood + amenity counts) and `lib/listings/neighborhood-amenities.ts` (a LISTING → its community, vendor pairing first then boundary polygon; reaches every address-spine recipe via `resolveSubject`/`authorListingNarrative` in `recipes/shared.ts`). All three tables read by product code; before 08/04 the pairing edge had ZERO readers and Gate 12 now blocks that shape |
 | land_manufactured_swfl *(parked)* | not determinable — no pipeline code exists | none |
 | lee_deed_official_records *(parked)* | DuckDB | data_lake.lee_deed_official_records — 0 rows (Akamai blocks unattended fetch) |
 

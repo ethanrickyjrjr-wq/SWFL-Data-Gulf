@@ -16,38 +16,15 @@
 import zipPolygons from "@/fixtures/swfl-zip-polygons.json";
 import placeCrosswalk from "@/fixtures/swfl-place-zip-crosswalk.json";
 import { cityForZip } from "@/lib/swfl-zip-city";
-
-type Ring = [number, number][];
+// The ray-cast moved to lib/geo/ray-cast.ts 08/04/2026 — it was private here while a
+// second copy lived in Python and a third was about to be written for vendor
+// neighborhood boundaries. Same functions, same behavior; this file just stopped
+// owning geometry it wasn't the only user of.
+import { inPolygon, type Ring } from "@/lib/geo/ray-cast";
 
 interface ZipEntry {
   zip?: string;
   geometry?: { type?: string; coordinates?: unknown };
-}
-
-/** Standard ray-casting. `ring` is GeoJSON order: [lon, lat]. */
-function inRing(lon: number, lat: number, ring: Ring): boolean {
-  let inside = false;
-  for (let i = 0, j = ring.length - 1; i < ring.length; j = i++) {
-    const a = ring[i];
-    const b = ring[j];
-    if (!a || !b) continue;
-    const [xi, yi] = a;
-    const [xj, yj] = b;
-    const straddles = yi > lat !== yj > lat;
-    if (straddles && lon < ((xj - xi) * (lat - yi)) / (yj - yi) + xi) inside = !inside;
-  }
-  return inside;
-}
-
-/** A polygon is [outerRing, ...holes] — inside the outer ring and in no hole. */
-function inPolygon(lon: number, lat: number, poly: Ring[]): boolean {
-  const outer = poly[0];
-  if (!outer || !inRing(lon, lat, outer)) return false;
-  for (let h = 1; h < poly.length; h++) {
-    const hole = poly[h];
-    if (hole && inRing(lon, lat, hole)) return false;
-  }
-  return true;
 }
 
 const ENTRIES: ZipEntry[] = (zipPolygons as { entries?: ZipEntry[] }).entries ?? [];

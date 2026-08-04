@@ -51,6 +51,11 @@ import { resolvePushCwd } from "./push-context.mjs";
 import { parseLedger, findOrphanedClaims } from "./lib/ledger-parse.mjs";
 import { findUnwiredSecrets } from "./lib/secret-wiring.mjs";
 import {
+  orphanTables,
+  tablesCreatedInSql,
+  tablesDeclaredInPipeline,
+} from "./lib/table-consumer.mjs";
+import {
   computeGaps,
   invalidClasses,
   ratchetVerdict,
@@ -361,6 +366,16 @@ process.stdin.on("end", () => {
   // fails a push instead. Pure rules + positive controls:
   // lib/coverage-ratchet{,.test}.mjs.
   coverageRatchetGate(changed, base);
+
+  // ---- Gate 12: brain-first — a new data_lake table nothing READS -----------
+  // CLAUDE.md has always said "no bulk ingest hits Tier 2 (data_lake.*) without its
+  // consuming brain's PackDefinition in the same PR." Gates 1-11 never implemented
+  // it, so on 08/03/2026 three populated tables (245 neighborhoods / 16,304 amenity
+  // businesses / 19,805 paired properties) pushed clean with zero readers anywhere in
+  // refinery/ lib/ app/ — found a day later only because the operator asked. Prose
+  // doctrine is not a gate; this is. Rules + positive controls against that exact
+  // migration: lib/table-consumer{,.test}.mjs. Escape: ALLOW_TABLE_WITHOUT_CONSUMER=1.
+  tableConsumerGate(base);
 
   // ---- Gate 8: ZIP scope root (Lee + Collier, 57) ---------------------------
   // Coverage has ONE root (isCoreScope, refinery/lib/core-scope.mts) and the leak
@@ -960,6 +975,98 @@ function scheduleCatalogGate(changed) {
     );
   } catch {
     // never wedge a push on a guard bug — fail open
+  }
+}
+
+// Gate 12 body — the brain-first ingest gate, finally mechanized (08/04/2026).
+//
+// Fires only on ADDED .sql migrations and ADDED ingest pipeline .py files: a new
+// table arrives with a new file, and looking only at additions means editing an old
+// migration can never re-litigate a table that has been live for months.
+//
+// "Consumer" is decided by lib/table-consumer.mjs's isConsumerPath — a non-test file
+// under refinery/ lib/ app/ components/ utils/ scripts/. The writer itself, the
+// registry, the docs, and the tests explicitly do NOT count; a table catalogued in
+// data-roots.md and read by nobody is precisely the failure being gated.
+//
+// Fail-OPEN on any internal error (a broken gate must never wedge a push).
+// Fail-CLOSED on a real orphan. Escape: ALLOW_TABLE_WITHOUT_CONSUMER=1.
+function tableConsumerGate(base) {
+  try {
+    if (process.env.ALLOW_TABLE_WITHOUT_CONSUMER === "1") {
+      process.stdout.write(
+        `\n[pre-push gate] OVERRIDE: ALLOW_TABLE_WITHOUT_CONSUMER=1 — shipping a\n` +
+          `data_lake table with no reader (logged).\n`,
+      );
+      return;
+    }
+
+    let added = [];
+    try {
+      added = sh(`git diff --name-only --diff-filter=A ${base}..HEAD`)
+        .split("\n")
+        .map((s) => s.trim())
+        .filter(Boolean)
+        .filter(isSafeTestFilePath); // same path-shape guard as Gate 9 before any sh()
+    } catch {
+      return; // fail open
+    }
+    if (added.length === 0) return;
+
+    const tables = new Set();
+    for (const f of added) {
+      let body = "";
+      try {
+        body = sh(`git show HEAD:${f}`);
+      } catch {
+        continue;
+      }
+      if (/\.sql$/i.test(f)) for (const t of tablesCreatedInSql(body)) tables.add(t);
+      if (/^ingest\/.*\.py$/i.test(f))
+        for (const t of tablesDeclaredInPipeline(body)) tables.add(t);
+    }
+    if (tables.size === 0) return;
+
+    // Where is each table named anywhere in the pushed tree? `git grep` at HEAD, so
+    // wiring a consumer in the SAME commit passes — the gate asks for a reader in the
+    // push, not a reader that predates it.
+    const mentionsByTable = {};
+    for (const t of tables) {
+      const g = run(`git grep -lI --fixed-strings "${t}" HEAD`);
+      mentionsByTable[t] =
+        g.ran && g.code === 0
+          ? g.out
+              .split("\n")
+              .map((l) => l.replace(/^HEAD:/, "").trim())
+              .filter(Boolean)
+          : [];
+    }
+
+    const orphans = orphanTables([...tables], mentionsByTable);
+    if (orphans.length === 0) return;
+
+    block(
+      `BRAIN-FIRST — ${orphans.length} new data_lake table(s) that NOTHING reads`,
+      `${orphans.map((t) => `  data_lake.${t}`).join("\n")}\n\n` +
+        `Each table above is created by a file in this push and is referenced only by\n` +
+        `its own writer, the registry, the docs, or a test — no product consumer under\n` +
+        `refinery/ lib/ app/ components/.\n\n` +
+        `This is CLAUDE.md's brain-first ingest gate, which was prose until 08/04/2026:\n` +
+        `  "no bulk ingest hits Tier 2 (data_lake.*) without its consuming brain's\n` +
+        `   PackDefinition in the same PR"\n` +
+        `On 08/03/2026 three populated tables shipped past it — 245 neighborhoods,\n` +
+        `16,304 amenity businesses, 19,805 paired properties — and were read by nothing\n` +
+        `for a day, until the operator asked why.\n\n` +
+        `Fix (either is legitimate):\n` +
+        `  1. Wire a real consumer in THIS push — a brain source, a lib resolver, a\n` +
+        `     recipe, or a route that actually SELECTs the table. A doc line is not a\n` +
+        `     consumer; neither is a test that is the only reader.\n` +
+        `  2. If the table is deliberately landing ahead of its consumer, say so out\n` +
+        `     loud: ALLOW_TABLE_WITHOUT_CONSUMER=1 and open a check for the wiring in\n` +
+        `     the same session (RULE 2.4 — no silent deferrals).`,
+    );
+  } catch {
+    return; // never wedge a push on this gate's own bug
   }
 }
 

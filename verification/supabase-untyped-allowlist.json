@@ -31,6 +31,7 @@
   "lib/listings/community-lookup.ts",
   "lib/listings/comp-photos.ts",
   "lib/listings/listed-date-write.ts",
+  "lib/listings/neighborhood-amenities.ts",
   "lib/assistant/comp-source-lake.ts",
   "lib/listings/resolve-subject.ts",
   "lib/listings/select.ts",

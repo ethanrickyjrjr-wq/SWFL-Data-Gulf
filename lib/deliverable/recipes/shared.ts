@@ -23,6 +23,10 @@ import { listingDescriptionFromPrompt } from "@/lib/email/listing-intent";
 import { auditClaims, numeralsIn, CLAIM_PROHIBITION } from "@/lib/deliverable/claims";
 import { communitySourceLine } from "@/lib/listings/listing-detail";
 import {
+  neighborhoodAmenitiesSourceLine,
+  resolveNeighborhoodForListing,
+} from "@/lib/listings/neighborhood-amenities";
+import {
   resolveCommunityForListing,
   neighborhoodStatsSourceLine,
 } from "@/lib/listings/community-lookup";
@@ -178,10 +182,19 @@ export async function resolveSubject(address: string, prompt: string): Promise<R
     if (pasted) facts.remarks = pasted;
   }
 
-  if (facts.photos[0]) {
-    const mirrored = await mirrorHeroPhoto(facts.photos[0]).catch(() => null);
-    if (mirrored) facts.photos[0] = mirrored;
-  }
+  // AROUND THIS HOME — the vendor's neighborhood + what sits within its amenity
+  // radius, off this listing's OWN coordinates (no name typed, no vendor call). Runs
+  // in parallel with the photo mirror; both are best-effort and neither can fail a
+  // build. Needs lat/lon, so it is silently absent for an unresolved address —
+  // which is correct: no coordinates, no honest community claim.
+  const [mirrored, neighborhood] = await Promise.all([
+    facts.photos[0] ? mirrorHeroPhoto(facts.photos[0]).catch(() => null) : Promise.resolve(null),
+    facts.lat != null && facts.lon != null
+      ? resolveNeighborhoodForListing({ lat: facts.lat, lon: facts.lon }).catch(() => null)
+      : Promise.resolve(null),
+  ]);
+  if (mirrored) facts.photos[0] = mirrored;
+  if (neighborhood) facts.neighborhood = neighborhood;
 
   return { facts, resolved: Boolean(hit) };
 }
@@ -300,6 +313,10 @@ export async function authorListingNarrative(
     // NOT that the community lacks it.
     communitySourceLine(facts.community),
     neighborhoodStatsSourceLine(facts.communityStats),
+    // AROUND the home — nearby businesses in the vendor's radius. The line carries its
+    // own prohibition (never "the community has/includes/features", never on-site,
+    // never resident-only) because that distinction is the whole risk of this fact.
+    neighborhoodAmenitiesSourceLine(facts.neighborhood),
     opts.context && `Background context (NOT the subject of this email):\n${opts.context}`,
   ].filter(Boolean);
 
