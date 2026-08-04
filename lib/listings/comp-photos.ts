@@ -23,6 +23,7 @@
 // Supabase client intentionally does not cover — see utils/supabase/service-role.ts):
 import { createServiceRoleClientUntyped } from "@/utils/supabase/service-role";
 import { addressKey } from "./address-key";
+import type { ApifyRecord } from "./apify-comps";
 
 /** Street identity WITHOUT the ZIP — comps arrive with no ZIP, so the key is the
  *  normalized street core plus the city, both of which every lane carries. */
@@ -41,6 +42,10 @@ export interface LakePhotoRow {
 export interface CompPhotoDeps {
   /** Injectable for offline tests; default reads data_lake.listing_state. */
   fetchRows?: (addresses: string[]) => Promise<LakePhotoRow[]>;
+  /** LANE 2 — the PAID Apify fallback, for comps that predate the nightly sweep.
+   *  Called with ONLY the comps lane 1 missed, and only when there are any; absent
+   *  = today's behavior exactly (free lane only, no spend). See apify-comps.ts. */
+  enrich?: (missing: { addressLine: string; city: string }[]) => Promise<ApifyRecord[]>;
 }
 
 /** Bounded lake read: the exact comp addresses only (never a city-wide scan — an
@@ -89,6 +94,29 @@ export async function resolveCompPhotos(
   for (const c of wanted) {
     const hit = byKey.get(compPhotoKey(c.addressLine, c.city));
     if (hit) out.set(c.addressLine, hit);
+  }
+
+  // ── LANE 2 · the PAID fallback, and ONLY for what lane 1 could not cover ────
+  // The lake's window opened 06/30/2026; a comp set reaches back 6-12 months, so
+  // most of a comp set predates it. Three properties of this block are load-bearing:
+  //   • it runs ONLY on the misses — a fully-covered set never spends a cent;
+  //   • the lake's photo ALWAYS wins (we never pay to replace a free hit);
+  //   • it degrades to lane 1's result on any failure, never throwing. An empty
+  //     actor run is the NORMAL vendor failure here (design §4 F6), not an error.
+  const missing = wanted.filter((c) => !out.has(c.addressLine));
+  if (deps.enrich && missing.length) {
+    try {
+      // The SAME key as lane 1 — `compPhotoKey` includes the city, which is what
+      // stops "330 5th St, Naples" from lending its photo to a Fort Myers house.
+      const { apifyPhotoIndex } = await import("./apify-comps");
+      const idx = apifyPhotoIndex(await deps.enrich(missing));
+      for (const c of missing) {
+        const hit = idx.get(compPhotoKey(c.addressLine, c.city));
+        if (hit) out.set(c.addressLine, hit);
+      }
+    } catch {
+      // Lane 1's map stands on its own. A paid-lane miss is never a build failure.
+    }
   }
   return out;
 }

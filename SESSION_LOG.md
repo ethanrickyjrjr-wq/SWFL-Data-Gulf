@@ -1,3 +1,52 @@
+## 2026-08-03 (Opus 5) — comp email coded to the handoff and SENT; 5 of 6 — no Apify credential, so the two new features are dark
+
+Operator: *"i want to see this coded correctly for builder to make and sent to hello@swfldatagulf.com
+when it is complete. _ASSISTANT/2026-08-03-apify-comp-email-HANDOFF.md."*
+
+**SENT — resend id `c856adba-bec0-41e2-8f91-200b59dfdde1`, subject "2601 SW 37th Ter — is the price
+right?", 20.6 KB, url-lint clean. It landed at 5 of 6 requirements, and I am not calling that done.**
+
+The handoff's six-part shape maps onto the EXISTING `market-comps` chrome with ONE insertion and ONE
+relabel — not a new email type (§1 forbids a new spec component; `buildLifecycleEmail` +
+`campaign-coherence.test.ts` already own the shape). 1/2/5 were already built; 6 is a label change.
+
+**BUILT + GREEN (1,363 tests pass, `bunx next build` exit 0):**
+- `lib/listings/apify-comps.ts` — the Apify enrichment lane. NOT a comp source: the set still comes
+  from `compsForAddress` and still runs isComparableHome → isNotSubjectAddress → isFreshSale →
+  buildPriceCase → auditClaims, untouched. Apify records key onto that set via `compPhotoKey` and
+  fill two holes only — a missing photo, a missing description.
+- `lib/listings/comp-photos.ts` — lane 2 INSIDE the existing resolver (handoff §5: "extend it, do
+  not write a second photo resolver"). Runs only on lane-1 misses, capped, never throws.
+- `lib/email/listing-description-block.ts` — the home's own MLS remarks, vendor-verbatim. The model
+  never sees this text, so it cannot paraphrase it into a claim.
+- 12 named failure modes in the design spec, each with a test. The two that mattered:
+  **F1** — `compsMiddle` renders thumbnails all-or-nothing (`comps.every(...)`), so 4-of-6 coverage
+  would have shipped SIX rows and ZERO photos with no error anywhere. Fixed by ORDER: photos resolve
+  over the full pool, then coverage picks the set. **F3** — the virtual-staging disclosure is the
+  LAST sentence of the remarks, exactly where a truncator cuts; it is now detected and re-appended.
+
+**VENDOR CONTRACT RE-VERIFIED LIVE (global RULE 1 — a committed handoff is a hypothesis).** Actor
+`T5QRnLKtyvzxjWVRH`. Two facts the handoff did NOT carry, both now guards: **`radius` only works on a
+specific ADDRESS, not a ZIP** (a ZIP+radius is silently ignored — we drop it), and **`property_type`
+filters at the source**, so `land` is excluded before we are billed. Real run `JTdmKKjpQCNV3cBwX`
+returned **75 fields** (handoff said ~30) and `half_baths: "<NA>"` — the literal sentinel. Its real
+2,100-char remarks are now a regression test, not a fixture.
+
+**THE 1 OF 6 THAT DID NOT LAND, and it takes the comp photos with it: there is no Apify credential in
+the local dotenv.** Every prior proof in the handoff ran through the Apify MCP server, which carries
+its own auth — so the code path is correct and tested and has simply never executed in-process.
+Symptom in the sent email: **description MISSING and 0 of 6 comps photographed** (the lake's photo
+window opened 06/30/2026; these comps predate it, which is the whole reason lane 2 exists).
+Check `apify_token_missing_lane2_dead`. Add the credential, re-run
+`bun scripts/email/tmp-comp-email-send.mts`, and it should read 6 of 6.
+
+Also open: `apify_enrichment_source_scope_registry` — the FULL-SCOPE `source_scope` block is written
+in the design spec §5 and data-roots, but `ingest/cadence_registry.yaml` was claimed by a parallel
+session and I did not override another session's lock.
+
+Design: `docs/superpowers/specs/2026-08-03-apify-comp-email-design.md`. Roots catalogued in
+`docs/standards/data-roots.md` (same pass — scratchpad 0ae).
+
 ## 2026-08-03 (Opus 5) — social photo carousel BUILT and LIVE on Bluesky; post-now route still single-image
 
 Operator: *"code this so the social builder can build correctly when asked. send the results to our

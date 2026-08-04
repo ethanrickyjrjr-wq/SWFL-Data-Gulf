@@ -158,6 +158,14 @@ export interface TextProps extends BlockBase {
   body?: string;
   align?: TextAlign;
   linkUrl?: string;
+  /** Marks this text block as the LISTING'S OWN DESCRIPTION (vendor-verbatim MLS
+   *  remarks), not a narrator slot. `TextProps` has no title, so this is the only
+   *  way `upsertDescriptionBlock` can replace-in-place instead of stacking on a
+   *  rebuild, and the only way a narrative pass can tell the two apart.
+   *  USER/ENGINE-OWNED: deliberately outside the AI content-patch allowlist, so
+   *  the model can neither claim a narrator slot nor blank a real description.
+   *  See lib/email/listing-description-block.ts. */
+  descriptionSlot?: boolean;
 }
 
 export interface ImageProps extends BlockBase {

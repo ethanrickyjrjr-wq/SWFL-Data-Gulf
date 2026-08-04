@@ -1,3 +1,23 @@
+## 2026-08-03 (Opus 5) — a whole vendor lane built, tested, and DARK for want of one credential
+
+OPEN. The comp email shipped at **5 of 6** (resend `c856adba-bec0-41e2-8f91-200b59dfdde1`). The two
+things the operator actually asked for that were NEW — the home's description, and photos on the
+comps — are both missing from the email he received, and both for the same reason: **there is no
+Apify credential in the local dotenv.**
+
+The pattern worth naming, because it will recur: **the prior session proved the whole vendor contract
+through the Apify MCP server, which carries its OWN auth. That proof does not transfer to code.** A
+handoff that says "PROVEN, run IDs included" can be completely true and still leave the lane
+unrunnable in-process. Nothing in the handoff's §7 ledger flagged a credential as owed, because from
+inside an MCP session there was nothing to notice.
+
+Unblock is one line in `.env.local` + re-run `bun scripts/email/tmp-comp-email-send.mts`.
+Check: `apify_token_missing_lane2_dead`.
+
+Second, smaller: `ingest/cadence_registry.yaml` was claimed by a parallel session, so the FULL-SCOPE
+`source_scope` block is written in the design spec §5 and `data-roots.md` but NOT in the registry.
+I did not override another session's lock. Check: `apify_enrichment_source_scope_registry`.
+
 ## 2026-08-03 (Opus 5) — OPERATOR CORRECTION: the listing-grid block is TWO render edits, not three
 
 Operator, verbatim: *"One correction to something I told you earlier: I said the block touches 'all

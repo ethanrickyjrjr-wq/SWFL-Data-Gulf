@@ -1,0 +1,333 @@
+// lib/listings/apify-comps.ts
+//
+// THE APIFY ENRICHMENT LANE — realtor.com records for comp homes our own nightly
+// sweep never saw, plus the subject home's real MLS remarks.
+//
+// ── WHAT THIS IS NOT ─────────────────────────────────────────────────────────
+// It is NOT a comp source. `market-comps` derives its set from `compsForAddress`
+// and then runs isComparableHome -> isNotSubjectAddress -> isFreshSale ->
+// buildPriceCase -> auditClaims. Swapping the SOURCE would force every one of
+// those guards to be re-reasoned, including the claim gate that exists because
+// that recipe once shipped an INVERTED comparison. So these records are keyed
+// onto the EXISTING comp set and fill exactly two holes: a missing photo, and a
+// missing description. Design: docs/superpowers/specs/2026-08-03-apify-comp-email-design.md
+//
+// ── WHY IT EXISTS ────────────────────────────────────────────────────────────
+// `comp-photos.ts` resolves photos from data_lake.listing_state — the nightly
+// sweep, which first captured photos 06/30/2026. Its 98.5% figure is coverage
+// INSIDE that window only. A comp set reaches back 6-12 months, so MOST of a comp
+// set predates our collection and resolves to nothing. This is lane 2 of the same
+// resolver, never a second resolver.
+//
+// ── VENDOR CONTRACT, verified live 08/03/2026 (global RULE 1) ────────────────
+// moving_beacon-owner1/realtor-com-property-scraper (actor T5QRnLKtyvzxjWVRH).
+// PAY_PER_EVENT: $0.01/result + $0.00005/actor-start. Two facts the handoff
+// missed, both encoded below as guards:
+//   • `radius` ONLY works when the location is a specific ADDRESS. Passing a ZIP
+//     with a radius makes the vendor silently ignore it — so we drop it instead.
+//   • `property_type` filters at the SOURCE, and its enum includes `land` — the
+//     vacant lot is excluded before we are billed for the row.
+//
+// EMPTY IS NORMAL. 2 of 5 store actors tested for this job were junk (handoff §4).
+// Every path here returns [] on any failure and never throws.
+
+import { compPhotoKey } from "./comp-photos";
+
+/** The subset of the vendor record we read. The FULL ceiling is catalogued in the
+ *  design doc §5 and cadence_registry `source_scope` — this is what we consume. */
+export interface ApifyRecord {
+  street?: string | null;
+  city?: string | null;
+  state?: string | null;
+  zip_code?: string | null;
+  sold_price?: number | null;
+  last_sold_date?: string | null;
+  list_price?: number | null;
+  list_date?: string | null;
+  days_on_mls?: number | null;
+  beds?: number | null;
+  full_baths?: number | null;
+  half_baths?: number | null;
+  sqft?: number | null;
+  year_built?: number | null;
+  lot_sqft?: number | null;
+  price_per_sqft?: number | null;
+  style?: string | null;
+  property_url?: string | null;
+  primary_photo?: string | null;
+  /** ⚠️ A COMMA-SPACE-JOINED STRING, not an array. Proven live. Use parseAltPhotos. */
+  alt_photos?: string | string[] | null;
+  /** Populated for for_sale/pending; `<NA>` on sold (handoff §3, the description split). */
+  text?: string | null;
+}
+
+/** The vendor's own "no value" sentinel — it arrives as the literal string. */
+const NA = new Set(["<NA>", "NA", "N/A", "null", "undefined", "None"]);
+
+function isRealString(v: unknown): v is string {
+  return typeof v === "string" && v.trim().length > 0 && !NA.has(v.trim());
+}
+
+/** Only ever an http(s) URL. A `javascript:` or data: string must never reach an
+ *  <img src>, and a relative path is not a CDN photo. */
+function isHttpUrl(v: unknown): v is string {
+  return typeof v === "string" && /^https?:\/\/\S+$/i.test(v.trim());
+}
+
+/**
+ * `alt_photos` arrives as a COMMA-SPACE-JOINED STRING (proven live: 50 photos on
+ * one record). Treating it as an array yields a one-element list of a 3,000-char
+ * blob that then goes into an <img src>. Array input is tolerated because vendor
+ * shape drift should degrade, not crash.
+ */
+export function parseAltPhotos(raw: string | string[] | null | undefined): string[] {
+  const parts = Array.isArray(raw) ? raw : isRealString(raw) ? raw.split(",") : [];
+  return parts.map((p) => String(p).trim()).filter(isHttpUrl);
+}
+
+// ── THE DESCRIPTION ──────────────────────────────────────────────────────────
+
+/** Real MLS remarks run to ~3,000 characters. §0.1 of the email rules caps a body
+ *  at ~20 lines of text and §0.3 gives Gmail a ~102KB clip with NO `<details>`
+ *  support, so an accordion is not available to us. This is the budget for the
+ *  description block specifically — it rides OUTSIDE the 50-125 word copy band
+ *  (operator carve-out 08/03/2026: "if a home has a description of it, that does
+ *  not count towards the word count"), but it is not therefore unbounded. */
+export const DESCRIPTION_CHAR_CAP = 600;
+
+/** The disclosure that MUST survive truncation (handoff §5). Matched on meaning,
+ *  not on one exact vendor string — the wording varies by listing. */
+const STAGING_DISCLOSURE = /[^.!?]*virtually staged[^.!?]*[.!?]/i;
+
+/** Split into sentences, keeping their terminators. */
+function sentences(text: string): string[] {
+  return text.match(/[^.!?]+[.!?]+(?:\s|$)|[^.!?]+$/g) ?? [text];
+}
+
+/**
+ * The vendor's remarks, cut to fit — ON A SENTENCE BOUNDARY, never mid-word and
+ * never mid-number.
+ *
+ * *** THE VIRTUAL-STAGING DISCLOSURE RIDES ALONG. *** It sits at the END of the
+ * remarks, which is exactly where a truncator cuts. Republishing staged-photo
+ * copy while dropping the sentence that discloses the staging is the failure this
+ * function exists to prevent (handoff §5, operator decree). If the source has it,
+ * the output has it — appended after the cut when truncation would have eaten it.
+ *
+ * Returns null for anything that is not a real description, including the vendor's
+ * literal `<NA>` — so a caller can never print the sentinel as prose.
+ */
+export function truncateDescription(raw: string | null | undefined): string | null {
+  if (!isRealString(raw)) return null;
+  const text = raw.trim().replace(/\s+/g, " ");
+
+  const disclosure = text.match(STAGING_DISCLOSURE)?.[0]?.trim();
+  if (text.length <= DESCRIPTION_CHAR_CAP) return text;
+
+  // Take whole sentences while they fit. The disclosure is handled separately, so
+  // it never consumes the budget it would then be re-appended outside of.
+  const body = disclosure ? text.replace(disclosure, "").trim() : text;
+  let out = "";
+  for (const s of sentences(body)) {
+    if ((out + s).trim().length > DESCRIPTION_CHAR_CAP) break;
+    out += s;
+  }
+  out = out.trim();
+
+  // Not even one sentence fits: hard-cut at the last word boundary and close it.
+  if (!out) {
+    const cut = body.slice(0, DESCRIPTION_CHAR_CAP);
+    out =
+      cut
+        .slice(0, cut.lastIndexOf(" "))
+        .trim()
+        .replace(/[,;:]$/, "") + ".";
+  }
+
+  return disclosure ? `${out} ${disclosure}`.trim() : out;
+}
+
+// ── THE ACTOR INPUT — where money and correctness are decided ─────────────────
+
+export type ApifyListingType = "for_sale" | "for_rent" | "sold" | "pending";
+
+export interface ApifyCompQuery {
+  /** A ZIP, "City, ST", or a full street address. A RADIUS requires the last one. */
+  location: string;
+  listingType: ApifyListingType;
+  /** YYYY-MM-DD. The vendor's own format — never our MM/DD/YYYY display format. */
+  dateFrom?: string;
+  dateTo?: string;
+  radiusMiles?: number;
+  maxResults?: number;
+}
+
+/** THE COST CEILING. `max_results_per_location: 0` means UNLIMITED to the vendor
+ *  (up to 10k) — at $0.01/result that is a $100 run from one omitted field. This
+ *  default is what makes the unbounded run unreachable. Operator ceiling: $7. */
+const DEFAULT_MAX_RESULTS = 25;
+
+/** A bare ZIP (or ZIP+4). The vendor ignores `radius` unless the location is a
+ *  specific address — so we DROP the radius rather than send a lie. */
+function isBareZip(location: string): boolean {
+  return /^\s*\d{5}(-\d{4})?\s*$/.test(location);
+}
+
+export interface ApifyActorInput {
+  locations: string[];
+  listing_type: ApifyListingType;
+  max_results_per_location: number;
+  property_type: string[];
+  date_from?: string;
+  date_to?: string;
+  radius?: number;
+}
+
+/**
+ * The typed actor input. Every guard that costs money or correctness lives here:
+ *   • the run is ALWAYS capped (F7)
+ *   • `land` is excluded AT THE SOURCE, so a vacant lot is never billed and never
+ *     has to be caught downstream by isComparableHome (F7)
+ *   • a `radius` paired with a bare ZIP is DROPPED, because the vendor would
+ *     silently ignore it and hand back a whole-ZIP result set we paid for (F9)
+ */
+export function buildActorInput(q: ApifyCompQuery): ApifyActorInput {
+  const cap =
+    Number.isFinite(q.maxResults) && (q.maxResults as number) > 0
+      ? Math.floor(q.maxResults as number)
+      : DEFAULT_MAX_RESULTS;
+
+  const input: ApifyActorInput = {
+    locations: [q.location],
+    listing_type: q.listingType,
+    max_results_per_location: cap,
+    // Homes only. The enum's `land` is what `isComparableHome` was written to
+    // filter out downstream — excluding it here means we are never billed for it.
+    property_type: [
+      "single_family",
+      "condos",
+      "condo_townhome_rowhome_coop",
+      "condo_townhome",
+      "townhomes",
+      "duplex_triplex",
+      "multi_family",
+      "mobile",
+    ],
+  };
+
+  if (isRealString(q.dateFrom)) input.date_from = q.dateFrom;
+  if (isRealString(q.dateTo)) input.date_to = q.dateTo;
+  if (Number.isFinite(q.radiusMiles) && (q.radiusMiles as number) > 0 && !isBareZip(q.location)) {
+    input.radius = q.radiusMiles;
+  }
+  return input;
+}
+
+// ── THE FETCH — empty-tolerant by construction ───────────────────────────────
+
+export interface ApifyCompDeps {
+  /** Injectable for offline tests. Default is the live Apify run. */
+  runActor?: (input: ApifyActorInput) => Promise<unknown[]>;
+}
+
+/** A row is usable only if it identifies a house. Anything else — the `{error}`
+ *  shape parseforge returns, a null, a bare string — is dropped silently. */
+function isUsableRecord(r: unknown): r is ApifyRecord {
+  return !!r && typeof r === "object" && isRealString((r as ApifyRecord).street);
+}
+
+/**
+ * Run the actor and return usable records. NEVER THROWS.
+ *
+ * An empty result is the NORMAL failure shape here, not an exception: 2 of the 5
+ * store actors tested for this job returned 0 items or exited 1 (handoff §4), and
+ * failed items are never billed. A consumer that treats [] as an error would turn
+ * a routine vendor miss into a failed email build — RULE 0.7, never refuse a build.
+ */
+export async function fetchApifyComps(
+  q: ApifyCompQuery,
+  deps: ApifyCompDeps = {},
+): Promise<ApifyRecord[]> {
+  const run = deps.runActor ?? runApifyActor;
+  try {
+    const items = await run(buildActorInput(q));
+    return Array.isArray(items) ? items.filter(isUsableRecord) : [];
+  } catch {
+    return [];
+  }
+}
+
+const ACTOR_ID = "moving_beacon-owner1~realtor-com-property-scraper";
+
+/** The live call. Kept tiny and behind the injectable seam above so every test
+ *  runs offline and no test can ever spend money. */
+async function runApifyActor(input: ApifyActorInput): Promise<unknown[]> {
+  const token = process.env.APIFY_TOKEN;
+  if (!token) return [];
+  const res = await fetch(
+    `https://api.apify.com/v2/acts/${ACTOR_ID}/run-sync-get-dataset-items?token=${token}`,
+    {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(input),
+    },
+  );
+  if (!res.ok) return [];
+  const json = await res.json();
+  return Array.isArray(json) ? json : [];
+}
+
+// ── KEYING ONTO THE EXISTING COMP SET ────────────────────────────────────────
+
+/**
+ * address-key -> photo url, using `compPhotoKey` — THE SAME normalizer lane 1
+ * uses, never a second one. That is what stops "330 5th St, Naples" from lending
+ * its photo to "330 5th St, Fort Myers": the city is part of the key.
+ *
+ * First writer wins, so a nearer/earlier record is not overwritten by a later one.
+ */
+export function apifyPhotoIndex(records: ApifyRecord[]): Map<string, string> {
+  const out = new Map<string, string>();
+  for (const r of records) {
+    if (!isRealString(r.street) || !isHttpUrl(r.primary_photo)) continue;
+    const k = compPhotoKey(r.street, r.city ?? "");
+    if (!out.has(k)) out.set(k, r.primary_photo.trim());
+  }
+  return out;
+}
+
+// ── F1 · COVERAGE GATES SELECTION, NOT RENDERING ─────────────────────────────
+
+/** Below this many photographed comps, a photo-gated set stops being a comps
+ *  table and becomes a stub. Six unphotographed rows beat two photographed ones —
+ *  the argument is the evidence, and the photos are how it reads. */
+const MIN_PHOTOGRAPHED = 3;
+
+/**
+ * *** THE SILENT FAILURE THIS EXISTS TO KILL. ***
+ *
+ * `compsMiddle` renders thumbnails only when `comps.every(c => thumbnails.get(c))`
+ * — an all-or-nothing rule that is right on its own terms (a table where two rows
+ * have a picture and four are blank reads as broken). But combined with partial
+ * coverage it fails SILENTLY and in the worst direction: fill 4 of 6 and the
+ * reader gets SIX rows and ZERO photos. The operator asked for photos on the
+ * comps; that requirement would vanish with no error anywhere.
+ *
+ * The fix is ordering, not rendering: resolve photos FIRST, then let coverage
+ * choose the SET. Four photographed comps is a better comps email than six
+ * unphotographed ones.
+ *
+ * Vendor order (nearest-first) is preserved — this filters, it never re-ranks.
+ */
+export function selectPhotographedComps<T extends { addressLine: string }>(
+  comps: T[],
+  photos: Map<string, string>,
+  max: number,
+): T[] {
+  const withPhoto = comps.filter((c) => photos.has(c.addressLine));
+  // Enough real photos to carry a table -> the photographed set wins.
+  if (withPhoto.length >= MIN_PHOTOGRAPHED) return withPhoto.slice(0, max);
+  // Otherwise keep the full evidence set and ship it text + link, which is the
+  // documented no-photo behavior: a comp we cannot photograph keeps its link.
+  return comps.slice(0, max);
+}

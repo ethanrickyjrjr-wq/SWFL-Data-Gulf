@@ -85,6 +85,11 @@
 
 import { compSources, compsForAddress, type RenderComp } from "@/lib/assistant/comp-helper";
 import { resolveCompPhotos } from "@/lib/listings/comp-photos";
+import { fetchApifyComps, selectPhotographedComps } from "@/lib/listings/apify-comps";
+import {
+  buildDescriptionBlock,
+  upsertDescriptionBlock,
+} from "@/lib/email/listing-description-block";
 import { formatSoldSpell } from "@/lib/listings/dom";
 import {
   auditClaims,
@@ -209,9 +214,32 @@ function priceKindPhrase(c: RenderComp): string {
  *  NOTHING — the satellite-aerial thumbnail that used to fill this slot is deleted, and
  *  no substitute image (aerial, street view, map tile, placeholder) may take its place.
  *  A comp we hold no photo for ships with no image and keeps its realtor.com link. */
-export async function resolveCompThumbnails(comps: RenderComp[]): Promise<Map<string, string>> {
+export async function resolveCompThumbnails(
+  comps: RenderComp[],
+  zip?: string,
+): Promise<Map<string, string>> {
   try {
-    return await resolveCompPhotos(comps);
+    return await resolveCompPhotos(comps, {
+      // ── LANE 2 · the PAID Apify fallback ──────────────────────────────────
+      // Lane 1 is our nightly sweep, whose photo window opened 06/30/2026. A comp
+      // set reaches back 6-12 months, so MOST of a comp set predates our own
+      // collection and resolves to nothing — the 98.5% coverage figure in
+      // comp-photos.ts is coverage INSIDE that window only, and quoting it against
+      // a comp lookback is the mistake the handoff was written to stop.
+      //
+      // It runs ONLY on lane 1's misses (a fully-covered set never spends a cent),
+      // it is CAPPED, and it never runs without a ZIP to scope it. Empty is normal.
+      enrich: zip
+        ? (missing) =>
+            fetchApifyComps({
+              location: zip,
+              listingType: "sold",
+              // Cost gate: bounded by what we actually need, never the vendor's
+              // "0 = unlimited" default. Design §3.
+              maxResults: Math.min(missing.length * 4, 40),
+            })
+        : undefined,
+    });
   } catch {
     return new Map(); // a photo miss is an empty slot, never a build failure
   }
@@ -443,9 +471,12 @@ export function buildCompsGrid(
     // EMPTY — the narrator fills it (fillNarrative). Unwritten → an open slot.
     narrative: "",
     tail: compsTail(comps),
-    // The ask of a comps email is a CONVERSATION about the number, not a tour — and never
-    // a pointer back at the comps the reader is already looking at.
-    ctaLabel: "Talk Through These Numbers",
+    // "Find Out More" — operator decree, handoff §1 item 6. The LABEL changed; the
+    // reasoning under it did not: the ask is still a step toward the agent, never a
+    // pointer back at the comps the reader is already looking at. The target is the
+    // agent's own site when we hold one, and the listing page otherwise (item 6:
+    // "target is the agent's site URL; for now use the realtor.com listing URL").
+    ctaLabel: "Find Out More",
     ctaUrl: facts.sourceUrl,
   });
   return {
@@ -1132,16 +1163,22 @@ export async function buildMarketComps(ctx: RecipeBuildContext): Promise<EmailDo
   // months to a year ago" — a sale carrying no date, or a valuation (no sale date to
   // go stale on), is never dropped by this filter; only an OLD RECORDED SALE is.
   const now = new Date();
-  const comps = (result?.comps ?? [])
+  const eligible = (result?.comps ?? [])
     .filter(isComparableHome)
     .filter((c) => isNotSubjectAddress(c, facts.address))
-    .filter((c) => isFreshSale(c, now))
-    .slice(0, MAX_COMPS);
+    .filter((c) => isFreshSale(c, now));
 
-  // A REAL PHOTO of each comparable home, from our own lake — never a satellite aerial,
-  // never any other stand-in image (operator decree 08/03/2026). Photos render only when
-  // EVERY row has one; otherwise the table ships text + realtor.com link.
-  const thumbnails = await resolveCompThumbnails(comps);
+  // A REAL PHOTO of each comparable home — our own lake first, then the paid Apify
+  // lane for the ones that predate our sweep. Never a satellite aerial, never any
+  // other stand-in image (operator decree 08/03/2026).
+  //
+  // *** ORDER IS THE GUARD. *** Photos are resolved over the FULL eligible pool and
+  // only THEN does the set get chosen, because `compsMiddle` renders thumbnails
+  // all-or-nothing (`comps.every(...)`). Slice first and a 4-of-6 photo hit rate
+  // ships SIX rows with ZERO photos — the operator's "comps with thumbnails"
+  // requirement vanishing with no error anywhere. Design §4 F1.
+  const thumbnails = await resolveCompThumbnails(eligible, facts.zip);
+  const comps = selectPhotographedComps(eligible, thumbnails, MAX_COMPS);
   let doc = buildCompsGrid(facts, comps, currentDoc, thumbnails);
 
   // ── THE CHART. This deliverable IS about a number, so it earns one — and the
@@ -1211,6 +1248,32 @@ export async function buildMarketComps(ctx: RecipeBuildContext): Promise<EmailDo
   // that shipped 2,000 characters of raw MLS copy on 07/13).
   const narrative = await authorCompsCase(facts, comps);
   if (narrative) doc = fillNarrative(clearNarrativeSlots(doc), narrative);
+
+  // ── THE HOME'S OWN DESCRIPTION — operator ask, handoff §1 item 3 ────────────
+  //
+  // *** IT GOES IN AFTER THE NARRATIVE PASS, AND THAT ORDER IS LOAD-BEARING. ***
+  // `clearNarrativeSlots` blanks the body of EVERY text block and `fillNarrative`
+  // then writes into the first empty one. Insert the description before those two
+  // and it is wiped, then overwritten with the narrator's paragraph — the 07/13
+  // raw-MLS-copy landmine pointing the other way. Design §4 F4; the block carries
+  // its own `descriptionSlot` marker so a refresh replaces rather than stacks.
+  //
+  // TWO LANES, free first: the resolved record's own `remarks` (ours, already
+  // fetched), then the paid Apify `text` — which the vendor populates for ACTIVE
+  // listings in the same bulk call, so an active subject costs nothing extra.
+  // The model never sees this text and never rewrites it: it is the listing
+  // agent's own copy about a house we have never seen, verbatim or not at all.
+  let remarks = facts.remarks ?? null;
+  if (!remarks && facts.address) {
+    const [rec] = await fetchApifyComps({
+      location: facts.address,
+      listingType: "for_sale",
+      maxResults: 1,
+    });
+    remarks = rec?.text ?? null;
+  }
+  const description = buildDescriptionBlock(remarks, facts.sourceUrl);
+  if (description) doc = upsertDescriptionBlock(doc, description);
 
   return doc;
 }

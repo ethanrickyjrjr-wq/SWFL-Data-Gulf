@@ -136,6 +136,13 @@ const TextPropsSchema = z.object({
   body: z.string().max(2000).optional(),
   align: z.enum(["left", "center", "right"]).optional(),
   linkUrl: z.string().optional(),
+  // ENGINE-OWNED marker: this text block is the listing's own vendor-verbatim
+  // description, not a narrator slot. Named OUTSIDE the AI content-patch
+  // allowlist (BlockContentPatchSchema below) on purpose — same discipline as
+  // metricValue/metricLabel and ListingProps' price/beds: a held, non-authored
+  // fact is never AI-writable. Without it here, safeParse would STRIP the marker
+  // and a doc refresh would stack a second description block.
+  descriptionSlot: z.boolean().optional(),
   paddingY: paddingY(),
   sectionBg: sectionBg(),
 }) satisfies z.ZodType<TextProps>;

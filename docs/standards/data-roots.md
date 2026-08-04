@@ -287,6 +287,28 @@ the lake roots below. Everything "how the market looks right now" descends from 
 - **`daily_truth` (live_search)** — root: **daily asking-price + mortgage** into freshness-pulse. (Mortgage source is FRED weekly, served daily — see Weekly.)
 - Also daily: `city_pulse` (→ city-pulse), `news_swfl` (→ app/insiders).
 
+### Comp PHOTOS + the listing DESCRIPTION — two lanes, ONE resolver (added 08/03/2026)
+
+- **`listing_state.photo_url`** 🟢 — root: **a comparable home's real listing photo, LANE 1** (free,
+  ours). Resolver root: `lib/listings/comp-photos.ts resolveCompPhotos`. ⚠️ **Its 98.5% coverage
+  figure is coverage INSIDE the nightly sweep window ONLY** (photo capture began 06/30/2026,
+  `7c66a774`). A comp set reaches back 6–12 months, so most of a comp set predates our collection
+  and does not resolve. **Never quote 98.5% against a comp lookback.**
+- **`listing_photo_enrichment`** 🔴 *(not built — this is the intended home)* — root: **a comp photo
+  we did NOT capture, LANE 2** (paid, realtor.com via Apify `moving_beacon-owner1/
+  realtor-com-property-scraper`). Fetch root: `lib/listings/apify-comps.ts`. Read as a second lane
+  INSIDE `resolveCompPhotos` — **there is no second photo resolver**, by operator decree. Runs only
+  on lane-1 misses, always capped, never in a scheduled path. Stamp `source_tag='apify_realtor'` +
+  `fetched_at`. **Deliberately NOT `listing_state`**: that table's upsert/transition machinery is
+  keyed on the vendor `property_id` an Apify record does not carry, so an inserted row would sit
+  inside a state machine that cannot own it (probed 08/03/2026).
+- **The listing's own DESCRIPTION (MLS remarks)** 🟡 — root: **`ListingFacts.remarks`**
+  (`lib/email/listing-scrape.ts`), with the same Apify `text` field as the paid lane-2 fallback.
+  Block root: `lib/email/listing-description-block.ts`. Vendor-verbatim — the model never sees it.
+  ⚠️ The vendor populates `text` for **for_sale/pending** listings in the bulk call but returns
+  `<NA>` for **sold** ones; a sold subject's description needs the separate detail actor (deferred,
+  check `apify_sold_comp_backfill_wire`).
+
 ## WEEKLY (cadence_days = 7)
 
 - **`market_aggregates_histogram`** 🟡 — root: **price distribution / bands** (list-side, weekly). → price-distribution-swfl. *(Was missing from v1 of this catalog.)*

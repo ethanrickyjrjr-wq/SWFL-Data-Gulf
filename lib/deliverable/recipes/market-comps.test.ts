@@ -345,10 +345,16 @@ test("the RIBBON wears the Market Comps hat; the HERO carries the claim it defen
 
 test("the CTA asks for the NEXT ACTION — never a pointer at what they are looking at", () => {
   // The operator's example of the failure: "See the New Price" on an email whose whole
-  // job IS the new price. A comps email's next action is the conversation, not the comps.
+  // job IS the new price. A comps email's next action is a step toward the agent, not
+  // a pointer back at the comps.
+  //
+  // LABEL CHANGED 08/03/2026 by operator decree ("a 'Find Out More' button",
+  // _ASSISTANT/2026-08-03-apify-comp-email-HANDOFF.md §1 item 6). The RULE this test
+  // enforces is unchanged — only the wording moved. Both labels satisfy it; the
+  // assertion is on the decreed one so a silent revert reddens.
   const doc = buildCompsGrid(SUBJECT, HOMES, canvas());
   const cta = doc.blocks.find((b) => b.type === "button");
-  expect(cta?.type === "button" && cta.props.label).toBe("Talk Through These Numbers");
+  expect(cta?.type === "button" && cta.props.label).toBe("Find Out More");
 });
 
 test("brand is sticky — a real user brand is never overwritten", () => {

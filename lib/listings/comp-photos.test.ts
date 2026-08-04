@@ -64,3 +64,94 @@ describe("resolveCompPhotos", () => {
     expect(out.size).toBe(0);
   });
 });
+
+// ── LANE 2 · the paid Apify fallback for comps that predate our nightly sweep ──
+// Design §1/§6: ONE resolver, TWO lanes. Guards: never call the paid lane when the
+// free lane already covered the set, and never let it fail a build.
+describe("resolveCompPhotos · lane 2 (Apify fallback)", () => {
+  const comps = [
+    { addressLine: "409 SW 44th St", city: "Cape Coral" },
+    { addressLine: "2619 SW 5th Ave", city: "Cape Coral" },
+  ];
+
+  test("fills ONLY the comps the lake missed — the lake's photo always wins", async () => {
+    let asked: string[] = [];
+    const out = await resolveCompPhotos(comps, {
+      fetchRows: rows({
+        street_address: "409 SW 44th St",
+        city: "Cape Coral",
+        photo_url: "https://ap.rdcpix.com/from-lake.webp",
+      }),
+      enrich: async (missing) => {
+        asked = missing.map((m) => m.addressLine);
+        return [
+          {
+            street: "2619 SW 5th Ave",
+            city: "Cape Coral",
+            primary_photo: "https://ap.rdcpix.com/from-apify.jpg",
+          },
+        ];
+      },
+    });
+    expect(asked).toEqual(["2619 SW 5th Ave"]);
+    expect(out.get("409 SW 44th St")).toBe("https://ap.rdcpix.com/from-lake.webp");
+    expect(out.get("2619 SW 5th Ave")).toBe("https://ap.rdcpix.com/from-apify.jpg");
+  });
+
+  test("FULL lake coverage never spends a cent — the paid lane is not called", async () => {
+    let called = false;
+    await resolveCompPhotos(comps, {
+      fetchRows: rows(
+        {
+          street_address: "409 SW 44th St",
+          city: "Cape Coral",
+          photo_url: "https://ap.rdcpix.com/a.webp",
+        },
+        {
+          street_address: "2619 SW 5th Ave",
+          city: "Cape Coral",
+          photo_url: "https://ap.rdcpix.com/b.webp",
+        },
+      ),
+      enrich: async () => {
+        called = true;
+        return [];
+      },
+    });
+    expect(called).toBe(false);
+  });
+
+  test("no enrich dep configured = today's behavior exactly, no paid call", async () => {
+    const out = await resolveCompPhotos(comps, { fetchRows: rows() });
+    expect(out.size).toBe(0);
+  });
+
+  test("a THROWING paid lane degrades to the lake's result, never a failed build", async () => {
+    const out = await resolveCompPhotos(comps, {
+      fetchRows: rows({
+        street_address: "409 SW 44th St",
+        city: "Cape Coral",
+        photo_url: "https://ap.rdcpix.com/from-lake.webp",
+      }),
+      enrich: async () => {
+        throw new Error("actor exit 1");
+      },
+    });
+    expect(out.size).toBe(1);
+    expect(out.get("409 SW 44th St")).toBe("https://ap.rdcpix.com/from-lake.webp");
+  });
+
+  test("lane 2 obeys the SAME city rule — it cannot borrow another city's photo", async () => {
+    const out = await resolveCompPhotos([{ addressLine: "330 5th St", city: "Naples" }], {
+      fetchRows: rows(),
+      enrich: async () => [
+        {
+          street: "330 5th St",
+          city: "Fort Myers",
+          primary_photo: "https://ap.rdcpix.com/wrong-house.jpg",
+        },
+      ],
+    });
+    expect(out.size).toBe(0);
+  });
+});
