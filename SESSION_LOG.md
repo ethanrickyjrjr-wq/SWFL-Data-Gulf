@@ -1,3 +1,32 @@
+## 2026-08-04 (Opus 5) — main is now wired to the alarm that already existed
+
+Operator: *"how do we not have that already?"* **We did.** `log-cron-incident.yml` has watched 79
+workflows for months — ledger row, sticky-issue comment, auto-resolve on green. It was built for
+CRON health, and the generator that feeds it (`scripts/lib/watch-manifest.mjs::loggerWatchNames`)
+filters on `scheduled` = "has an uncommented `- cron:`". CI has no cron, so **the one signal that
+says main is broken was the one thing not plugged into the alarm.** That is why 42 consecutive reds
+(08/02–08/04) were silent until he asked.
+
+**It was NOT a three-name edit, and probing found two couplings first:**
+1. `maybe_auto_resolve` was gated on `event == 'schedule'` (line 148). Adding CI without widening it
+   would open a ledger row + sticky comment per red that **never closes** — 42 permanent rows from
+   this incident alone. Widened to accept `push`.
+2. `healWatchNames()` DERIVES from `loggerWatchNames()`, so anything added would have been
+   **auto-re-run on failure**. Auto-rerunning a red CI cannot fix a deterministic compile error, and
+   a flake that passes on retry makes a real red look transient. All three added to
+   `HEAL_EXCLUDED_NAMES` — log, never heal.
+
+**Landed:** `WATCH_PUSH_TRIGGERED` allow-list (CI, factuality-gate, deptry) in watch-manifest.mjs ·
+regenerated via `node scripts/build-watch-lists.mjs --write --write-watchers` (the list is CODEGEN,
+never hand-edited — two drift tests guard it) · **79 → 82 watched**, heal's list correctly unchanged ·
+`trigger-list-drift.test.mjs` EXCLUDED kept in lockstep as its own comment demands.
+`node --test .github/scripts`: **82 pass / 0 fail.**
+
+**Also corrected my own bad check.** `factuality_gate_anthropic_credits` was CLOSED, not left open:
+the credit outage is over (5 failures all 08/03, then 6 consecutive greens). I had bundled a
+resolved billing incident with an alerting gap in one check — that is exactly how a ledger grows to
+791 items nobody reads. The alerting half now lives alone as `ci_not_in_incident_logger`.
+
 ## 2026-08-04 (Opus 5) — CI had been red for 42 straight runs since 08/02; two causes, both fixed here
 
 Operator: *"WHY ARE THE LAST COUPLE GITHUBS RED????????"* It was not a couple. **Last green `ci.yml`

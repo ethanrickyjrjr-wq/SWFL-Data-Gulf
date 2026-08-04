@@ -49,7 +49,12 @@ function extractWorkflowList(yamlText) {
 const heal = extractWorkflowList(readFileSync(WF("heal-cron-failure.yml"), "utf8"));
 const log = extractWorkflowList(readFileSync(WF("log-cron-incident.yml"), "utf8"));
 
-const EXCLUDED = ["Nightly Chain", "Chief of staff nightly"];
+// Lockstep with HEAL_EXCLUDED_NAMES in scripts/lib/watch-manifest.mjs.
+// CI / factuality-gate / deptry are push-triggered (WATCH_PUSH_TRIGGERED) and are
+// LOGGED, never HEALED: an auto-rerun cannot fix a deterministic compile or test
+// failure, and a flake that passes on retry makes a real red look transient —
+// which is how CI stayed red for 42 runs 08/02–08/04 2026 without anyone noticing.
+const EXCLUDED = ["Nightly Chain", "Chief of staff nightly", "CI", "factuality-gate", "deptry"];
 
 test("trigger lists parsed (guard against a silent empty-list false pass)", () => {
   assert.ok(heal.length > 5, `heal watched set looks empty/unparsed: ${heal.length}`);

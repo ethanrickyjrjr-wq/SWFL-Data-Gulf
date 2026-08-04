@@ -56,10 +56,19 @@ export const WATCH_EXEMPT = {
 //                           (CHIEF_OF_STAFF_ENABLED); an L0 auto-rerun is an unattended
 //                           paid LLM call. Its plan (2026-07-10 Task 5) wires the
 //                           incident LOGGER only, never the healer.
+//   CI / factuality-gate / deptry — push-triggered (WATCH_PUSH_TRIGGERED above).
+//                           LOG only, NEVER heal. An auto-rerun of a red CI cannot
+//                           fix a deterministic compile or test failure; it only
+//                           burns minutes and, worse, a flake that passes on retry
+//                           makes a real red look transient — the exact way 42 reds
+//                           stayed invisible.
 export const HEAL_EXCLUDED_NAMES = [
   "Daily Brain Rebuild",
   "Nightly Chain",
   "Chief of staff nightly",
+  "CI",
+  "factuality-gate",
+  "deptry",
 ];
 /** @deprecated back-compat alias; use HEAL_EXCLUDED_NAMES. */
 export const HEAL_EXCLUDED_NAME = HEAL_EXCLUDED_NAMES[0];
@@ -160,10 +169,39 @@ export function assertManifestSane(entries) {
   return problems;
 }
 
+// Push-triggered workflows the logger ALSO watches. `scheduled` (an uncommented
+// `- cron:`) is the right filter for cron health but it silently excluded the one
+// signal that says main is broken: CI sat RED for 42 consecutive runs, 08/02–08/04
+// 2026, and surfaced only because the operator asked. The alarm existed and main
+// was simply not plugged into it.
+//
+// This is an ALLOW-LIST, never a "watch everything unscheduled" rule — most
+// workflow_run/dispatch-only workflows are helpers whose failures are already
+// reported by the job that called them.
+//
+// Two couplings that make this more than a name list, both live-verified:
+//   1. `maybe_auto_resolve` in log-cron-incident.yml is gated on
+//      `event == 'schedule'`. Without widening it to `push`, every red would open
+//      a ledger row + sticky-issue comment that NEVER closes — 42 permanent rows
+//      from this one incident.
+//   2. healWatchNames() derives from THIS function, so anything added here would
+//      be auto-re-run on failure. Auto-rerunning CI would mask real red and burn
+//      minutes on a deterministic compile error, so all three are also listed in
+//      HEAL_EXCLUDED_NAMES below. Log, never heal.
+export const WATCH_PUSH_TRIGGERED = {
+  "ci.yml": "CI",
+  "factuality-gate.yml": "factuality-gate",
+  "deptry.yml": "deptry",
+};
+
 export function loggerWatchNames(entries) {
+  const pushWatched = entries
+    .filter((e) => !e.scheduled && Object.hasOwn(WATCH_PUSH_TRIGGERED, e.file))
+    .map((e) => e.name);
   return entries
     .filter((e) => e.scheduled && !Object.hasOwn(WATCH_EXEMPT, e.file))
     .map((e) => e.name)
+    .concat(pushWatched)
     .sort(); // default (code-unit) sort — deterministic on every platform, unlike localeCompare
 }
 

@@ -18,6 +18,7 @@ on:
       - "BLS LAUS monthly"
       - "BLS OEWS SWFL annual"
       - "BLS QCEW quarterly"
+      - "CI"
       - "Census ACS annual"
       - "Census CBP annual"
       - "Chief of staff nightly"
@@ -75,6 +76,8 @@ on:
       - "ZORI SWFL Tier 2 load monthly"
       - "bls-ppi monthly"
       - "census-vip monthly"
+      - "deptry"
+      - "factuality-gate"
       - "fred-g17 monthly"
       - "fred-listing-swfl monthly"
       - "ingest-brevitas-listings"
@@ -145,7 +148,8 @@ jobs:
       vars.CRON_INCIDENT_LOGGER_ENABLED != 'false' &&
       vars.CRON_INCIDENT_AUTO_RESOLVE_ENABLED != 'false' &&
       github.event.workflow_run.conclusion == 'success' &&
-      github.event.workflow_run.event == 'schedule'
+      (github.event.workflow_run.event == 'schedule' ||
+      github.event.workflow_run.event == 'push')
     runs-on: ubuntu-latest
     timeout-minutes: 10
     steps:
