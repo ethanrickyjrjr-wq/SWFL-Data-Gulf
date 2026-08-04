@@ -38,12 +38,18 @@ const NEIGHBORHOODS_TABLE = "steadyapi_neighborhoods";
 const AMENITIES_TABLE = "steadyapi_neighborhood_amenities";
 const ASSIGNMENTS_TABLE = "steadyapi_property_neighborhood";
 
-/** Half-width of the centroid pre-filter box, in degrees (~27 miles). A macro
- *  neighborhood's centroid is comfortably inside this of any point within it, and
- *  filtering server-side is what keeps us from pulling 245 GeoJSON polygons on
- *  every single build (egress — see the standing egress items in SCRATCHPAD.md).
- *  A row with a NULL centroid can't be pre-filtered and is therefore invisible to
- *  the coordinate lane; the property_id lane still resolves it. */
+/** Half-width of the centroid pre-filter box, in degrees. Server-side filtering is
+ *  what keeps us from pulling every stored GeoJSON polygon on every build (egress —
+ *  see the standing egress items in SCRATCHPAD.md).
+ *
+ *  MEASURED, not guessed (live SQL 08/04/2026, all 429 stored neighborhoods): the
+ *  largest centroid-to-boundary-vertex distance is 0.0789 deg, so 0.4 carries ~5x
+ *  margin — no real neighborhood can be filtered out by this box. Re-measure if the
+ *  vendor ever stores something county-sized:
+ *    SELECT max(GREATEST(abs(centroid_lat-(pt->>1)::numeric), abs(centroid_lon-(pt->>0)::numeric)))
+ *  Also measured: 0 of 429 rows have a NULL centroid, so the coordinate lane loses
+ *  nothing today. A NULL-centroid row would be invisible to it (the property_id lane
+ *  still resolves that one). */
 const CENTROID_BOX_DEG = 0.4;
 
 export interface LocationScore {
@@ -219,10 +225,19 @@ export function neighborhoodAmenitiesSourceLine(
       ? `${n.searchRadiusMiles} miles`
       : null;
 
+  // NO BUSINESS NAMES. shared.ts's authorListingNarrative makes every fact line a
+  // SETTLED claim, and auditClaims derives allowedFeatures from that settled text
+  // (claims.ts, "unsourced-feature"). A name here would license its own words as
+  // sourced HOUSE features: "Gulf Harbour Marina" makes "gulf" sourced, "Bay Colony
+  // Golf Club" makes "bay" sourced — and the model may then put the house on the gulf.
+  // Identical shape to the BRAND_NAME hole where "SWFL Data Gulf" licensed a false
+  // "gulf view", but across 29k+ business rows instead of one string. The name was
+  // never load-bearing for an email; the category, the count, and the distance are.
+  // Test-enforced ("emits NO business names"). Do not add the name back.
   const items = n.amenities.map((a) => {
     const label = humanize(a.category);
     if (!a.nearest) return `${label}: ${a.count}`;
-    return `${label}: ${a.count} (nearest ${a.nearest.name}, ${a.nearest.distanceMiles} mi)`;
+    return `${label}: ${a.count} (nearest ${a.nearest.distanceMiles} mi)`;
   });
 
   const scope = radius ? `within ${radius}` : "nearby";

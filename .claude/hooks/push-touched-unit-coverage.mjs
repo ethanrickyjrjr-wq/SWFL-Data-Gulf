@@ -89,6 +89,15 @@ export const RECIPE_KEYS = [
   "sphere-weekly",
   "review-reply",
   "market-pulse",
+  // Added 08/04/2026 — the mirror test had been RED because these landed in
+  // lib/deliverable/recipes.ts without being reflected here, so a push touching one
+  // of them got no ledger nudge at all. The 2 social keys (social-pack, social-cut)
+  // stay OUT by design; they are not per-recipe ledger units.
+  "back-on-market",
+  "community-info",
+  "listings-showcase",
+  "listings-digest",
+  "default-grid",
 ];
 /** Recipe key if `filePath` is that recipe's own source or its own ledger —
  *  NOT shared.ts/index.ts/*.test.ts (those aren't a single unit's identity).

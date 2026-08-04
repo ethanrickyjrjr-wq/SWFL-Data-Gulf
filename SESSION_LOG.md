@@ -1,3 +1,110 @@
+## 2026-08-04 (Opus 5) — the pairing table nobody read: consumer wired + Gate 12 makes "brain-first" a mechanism
+
+**NOT PUSHED — awaiting operator approval** (16 files, >5 = RULE 1 ask-first). Committed locally,
+explicit paths only (parallel sessions active on `recipes.ts`, `community-info.ts`, `listing-scrape.ts`).
+
+Operator, on being told `steadyapi_property_neighborhood` had zero consumers: *"WHY IS
+THIS???????????????"* then *"FIX IT ALL!!!!"*.
+
+**ROOT CAUSE (four-lane, live SQL + git grep).** Two causes, and the second is the one that matters.
+(1) `community-info.ts` is keyed on a TYPED NAME (`findNeighborhood(prompt: string)`) and predates the
+pairing table by three weeks; the table's key is a `property_id`. Wrong shape for the only consumer
+that existed — a missing entry point, not a loose wire. (2) **CLAUDE.md's brain-first ingest gate was
+prose with no code.** `check-prepush-gate.mjs` implements Gates 1-11 and none of them checked that a
+new `data_lake.*` table has a reader, so 08/03's three populated tables pushed clean. The doctrine
+also only ever named a `PackDefinition` as the consumer — a deliverable recipe never satisfied it even
+in spirit.
+
+**SHIPPED — 4 of 4 in scope, plus 4 found en route.**
+1. **`lib/listings/neighborhood-amenities.ts`** — the listing→community entry point. Vendor pairing on
+   `property_id` first (what the vendor SAID), then lat/lon ray-cast against stored boundary polygons
+   (covers the ~15k unpaired AND anything outside the book). TDD, 29 tests green. Overlap of two
+   same-level polygons → **null, never a tie-break** (community-lookup.ts's condo fan-out rule: a wrong
+   community ships as a stated fact); a nested sub-neighborhood beats its macro parent.
+2. **Wired via the ONE shared narrator** — `resolveSubject` populates `facts.neighborhood` (parallel with
+   the photo mirror, both best-effort), `authorListingNarrative` adds the source line. Reaches every
+   address-spine recipe at once instead of per-recipe.
+   **The prohibition is the feature:** these are NEARBY businesses in the vendor's 5-mile radius, NOT
+   in-gate amenities (probe doc says so verbatim). `neighborhoodAmenitiesSourceLine` forbids
+   has/includes/features/on-site/resident-only by name, and the WORDING IS TEST-ENFORCED — a narrator
+   handed "golf: 3" bare writes "this community features three golf courses", which we cannot source.
+3. **Gate 12 — brain-first, mechanized.** `.claude/hooks/lib/table-consumer.mjs` + 19 node:test controls
+   anchored to the REAL 08/03 migration/pipeline. Fires only on ADDED `.sql`/ingest `.py` (editing an old
+   migration can't re-litigate a live table); consumer = non-test file under refinery/ lib/ app/
+   components/ — the writer, the registry, the docs, and a test-only reader explicitly do NOT count.
+   **PROVEN END-TO-END in a throwaway worktree:** orphan table → `PUSH BLOCKED`, exit **2**; same table
+   with one real consumer → exit **0**. Escape `ALLOW_TABLE_WITHOUT_CONSUMER=1`.
+4. **Pairing drain — PARTIAL, and counted.** One bounded 500-call run, live SQL before/after:
+   neighborhoods **245 → 429**, amenities **16,304 → 29,118**, pairings **19,805 → 21,008**, active book
+   paired **19,822 → 21,028** / unpaired **15,082 → 13,876**. Yield: 500 calls → 1,203 pairings + 184
+   neighborhoods, **316 gaps (63% of calls return no vendor polygon — a real ceiling, not a bug)**.
+   Finishing = ~5,800 more calls ≈ 11.6% of the 50k/mo quota ≈ 90 min; I did NOT spend that unannounced.
+   The intended mechanism is the daily cron (500-call cap, drains over days), still blocked by
+   `ENGINE_ENABLED=false` — operator-only. Check `amenities_pairing_drain_remaining_13876`.
+   Two diagnoses worth keeping: the 0 local assignments are CORRECT (the already-paired ARE the ones
+   inside the known polygons, so the remainder sit outside all of them by definition), and the earlier
+   "every call gapped" was `status 0 = NO API KEY` in my shell — zero quota spent on that probe.
+
+**FOUND EN ROUTE (each named, none swept up):**
+- **Gate 11's positive controls had NEVER RUN, ever.** `coverage-ratchet.test.mjs` imported `bun:test`,
+  but `bun test` skips dot-dirs and the only step that globs it (`node --test … .claude/hooks/lib/*`)
+  cannot load the `bun:` scheme at all — `ERR_UNSUPPORTED_ESM_URL_SCHEME`, verified live. Converted to
+  node:test, meaning preserved 1:1. Hook-lib suite: **0 runnable → 54 pass**.
+- **`neighborhood-amenities-daily` was in neither cron watcher** — its failures would have been silent.
+  Added to `log-cron-incident.yml` + `heal-cron-failure.yml`, `_watch-manifest.json` regenerated.
+- **8 more orphan `data_lake` tables** (check `orphan_data_lake_tables_backlog_8`) — 6 are `*_raw`
+  landings that may be deliberately consumer-less; triage, don't assume defect.
+- **`RECIPE_KEYS` drift** (check `hook_recipe_keys_drift_vs_recipes_ts`) — the hook's mirror test fails;
+  caused by newly added recipes, and `recipes.ts` is claimed by a live parallel session, so NOT touched.
+- Deduped the ray-cast into `lib/geo/ray-cast.ts` (was one private TS copy + one Python; a third was
+  about to be written). `point-in-zip` regression suite green.
+
+**EVIDENCE.** `bun test lib/listings lib/geo lib/email lib/deliverable` → **3097 pass / 0 fail**.
+`bunx next build` → **exit 0**. CI's own node:test command → **227/228** (the 1 is the RECIPE_KEYS
+drift above, pre-existing and not mine). Gate 12 block/pass exits pasted above.
+
+**THE ONE REAL RISK IN THIS DIFF — FOUND, TRACED, FIXED (not deferred).** Wiring a fact line into
+`authorListingNarrative` makes it a SETTLED claim, and `auditClaims` derives `allowedFeatures` from that
+settled text (`lib/deliverable/claims.ts:398`, `unsourced-feature`). So amenity BUSINESS NAMES would have
+licensed false HOUSE features: "Gulf Harbour Marina" makes "gulf" sourced, "Bay Colony Golf Club" makes
+"bay" sourced — identical shape to the BRAND_NAME hole where "SWFL Data Gulf" once licensed a false "gulf
+view", but across 29,118 business rows instead of one string. **FIX: the line no longer emits business
+names at all** — category + count + nearest DISTANCE only. Test `emits NO business names` proves a marina
+literally named "Gulf Harbour Bay Waterfront Marina" contributes neither word.
+**CORRECTION to my first write-up of this:** I named `under-contract.ts`'s `inventedAttributes` as the
+vector. Wrong — its `narratorSources()` carries only `communitySourceLine`, never the amenity line. The
+vector was `shared.ts`. Read the function before naming it; I asserted before tracing.
+
+**RECOUNTED (RULE 0.8 #5 — never speak a count you didn't re-derive).** I wrote "every address-spine
+recipe". Derived: `resolveSubject`/`authorListingNarrative` callers are **8 recipe files** — new-listing,
+coming-soon, just-sold, open-house, price-reduced, market-comps, under-contract, agent-brand-intro. But
+the amenity line only reaches the ones that author through `authorListingNarrative`; `under-contract`
+(own `authorUnderContractNote`) and `market-comps` (own `buildNarratorPrompt`) do NOT receive it, and
+`agent-brand-intro`'s prompt is no-numbers by contract. **Honest figure: 5 recipes get the new fact**
+(new-listing, coming-soon, just-sold, open-house, price-reduced), not "every".
+
+**MEASURED, not guessed** (both were assumptions until asked): 0 of 429 stored neighborhoods have a NULL
+centroid, and the largest centroid-to-boundary-vertex distance is 0.0789 deg — so `CENTROID_BOX_DEG=0.4`
+carries ~5x margin and cannot filter out a real neighborhood. Recorded in the constant's comment.
+
+**GATE 12's OWN HOLE, named in the module:** consumer detection is `git grep -l` + path class, not
+AST-aware, so a bare `// TODO: read data_lake.foo` comment in any lib/ file clears an orphan. It stops
+the ACCIDENTAL case (which is the documented failure); it cannot stop deliberate silencing, and that
+person already has the logged override.
+
+**NOT VERIFIED:** unit tests + a production build prove the code compiles and the pure logic holds; I did
+NOT drive a real rendered email through the narrator, so the model's actual behavior against the new
+prohibition line is unproven. That is the next verification, not a claim I'm making.
+
+**Checks closed (with evidence):** `neighborhood_amenities_zero_consumers`,
+`brain_first_gate_has_no_mechanism`, `amenities_pairing_surface`.
+**Checks opened:** `orphan_data_lake_tables_backlog_8`, `hook_recipe_keys_drift_vs_recipes_ts`,
+`amenities_pairing_drain_remaining_13876`, `amenity_business_names_widen_invented_attribute_hole`.
+
+**Committed locally as `e4fc1e8a`** (16 files, explicit paths, all hooks passed, no `--no-verify`).
+`SESSION_LOG.md` + `_ASSISTANT/SCRATCHPAD.md` deliberately LEFT UNCOMMITTED — both carry a parallel
+session's in-flight entries mixed with mine; whoever pushes must commit them alongside (RULE 0).
+
 ## 2026-08-04 (Opus 5) — carousel recipe locked into lib/social/CLAUDE.md §0; Sonnet research handoff written for social COPY + graphics
 
 Operator: *"MAKE SURE IT IS IN THE PLAYBOOK AT THE BEGINNING OF SOCIAL BUILDS!!!! WE DON'T WANT TO

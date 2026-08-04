@@ -21,7 +21,17 @@
 //  2. It gates the TABLE, not the pipeline. What matters is that something reads the
 //     rows, not which layer wrote them.
 //
-// KNOWN LIMITATION, stated rather than papered over: detection is convention-based —
+// KNOWN LIMITATION 2 — A COMMENT SATISFIES THIS GATE. Consumer detection is
+// file-granular (`git grep -l` + isConsumerPath), not AST-aware, so a bare
+// `// TODO: read data_lake.foo` inside any lib/ file clears the orphan. That is a real
+// hole and it is named here rather than hidden: the gate's job is to stop the
+// ACCIDENTAL case (a pipeline lands, the reader is "next session", nobody notices for
+// a day), which it does. It cannot stop someone deliberately writing a comment to
+// silence it — and that person already has ALLOW_TABLE_WITHOUT_CONSUMER=1, which at
+// least logs. Tightening to "the table name appears in a string literal or a .from()
+// call" is the obvious next step if the comment case ever actually happens.
+//
+// KNOWN LIMITATION 1, stated rather than papered over: detection is convention-based —
 // added .sql migrations that CREATE a data_lake table, and added ingest pipeline .py
 // files declaring `*_TABLE = "name"` constants (this repo's actual convention, see
 // ingest/pipelines/neighborhood_amenities/pipeline.py). A table conjured by dlt with no

@@ -158,11 +158,38 @@ describe("neighborhoodAmenitiesSourceLine", () => {
     expect(line).toContain("on-site");
   });
 
-  it("names the community and the nearest golf course with its real distance", () => {
+  it("names the community, the count, and the real nearest distance", () => {
     const line = neighborhoodAmenitiesSourceLine(resolved)!;
     expect(line).toContain("Rural Estates");
-    expect(line).toContain("Olde Florida Golf Club");
+    expect(line).toContain("golf");
     expect(line).toContain("0.24");
+  });
+
+  // FAILURE MODE — false feature licensing. shared.ts's authorListingNarrative turns
+  // every fact line into a SETTLED claim, and auditClaims derives allowedFeatures from
+  // that settled text (claims.ts "unsourced-feature"). A business NAME in this line
+  // therefore licenses its words as sourced house features: "Gulf Harbour Marina" makes
+  // "gulf" sourced, "Bay Colony Golf Club" makes "bay" sourced — and the model may then
+  // claim the HOUSE is on the gulf. Same shape as the BRAND_NAME hole ("SWFL Data Gulf"
+  // once licensed a false "gulf view"), but over 29k+ business rows instead of one name.
+  // The name was never load-bearing for an email, so it is not emitted at all.
+  it("emits NO business names — a name's words would license a false house feature", () => {
+    const line = neighborhoodAmenitiesSourceLine({
+      ...resolved,
+      amenities: [
+        {
+          category: "marinas",
+          count: 2,
+          nearest: { name: "Gulf Harbour Bay Waterfront Marina", distanceMiles: 1.1 },
+        },
+      ],
+    })!;
+    expect(line).not.toContain("Gulf Harbour");
+    expect(line).not.toContain("Waterfront");
+    expect(line.toLowerCase()).not.toContain("gulf harbour");
+    // the sourced facts themselves survive
+    expect(line).toContain("marinas");
+    expect(line).toContain("1.1");
   });
 
   it("writes as-of MM/DD/YYYY", () => {
