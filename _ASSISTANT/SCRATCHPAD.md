@@ -1,3 +1,22 @@
+## 2026-08-04 (Opus 5) — OPERATOR: "ALL EMAILS!!!!!!!!!!!!"
+
+OPEN — SCOPE CORRECTION, logged the moment it was raised. I reported back on the showcase-email
+addendum and he answered with this. **The job is not "showcase emails." It is every email lane in
+the registry.** Same sentence as his 08/04 decree — *"ALL EMAIL BUILDS LOCATED ON SHOWCASE SITE
+PAGE OR COMING FROM HOMEPAGE OR ANYWHERE ELSE ALL RUN THROUGH WHAT WE ARE PUTTING TOGETHER"* —
+restated because I narrowed it. Fifth restatement of the same design.
+
+  **What that means concretely, and what I am building against:** the three guards in the handoff's
+  §7 walk order are registry-wide by construction — recipe key on the deliverable row, the playbook
+  GENERATED from the registry, and the output-based seam assertion that iterates EVERY registered
+  key. None of them are showcase-specific. Build them first and every subsequent lane move is
+  measurable for all 17 email keys (19 registry keys minus `social-pack`/`social-cut`, a different
+  renderer that must print `chrome: none (social)` in the playbook so nobody "fixes" them onto
+  email chrome).
+
+  **The trap I must not fall into:** doing `listings-showcase` first because it is the named
+  example. The named example is the FIRST LANE TO MOVE, after the guards — not the scope.
+
 ## 2026-08-04 (Opus 5) — OPERATOR: "Please confirm all of this and let's get started on showcase emails the correct way using fields and tags and all the research we've found and actually build in place so Claude can't fuck more shit up"
 
 OPEN — the handoff `docs/superpowers/handoffs/2026-08-04-showcase-email-assembly-line-HANDOFF.md`

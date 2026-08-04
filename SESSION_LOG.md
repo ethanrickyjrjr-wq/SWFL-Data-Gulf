@@ -1,3 +1,42 @@
+## 2026-08-04 (Opus 5) — "ALL EMAILS": the registry-wide seam guard is LIVE, and it found two lanes nobody had named
+
+Operator: *"ALL EMAILS!!!!!!!!!!!!"* — scope correction after I reported back on the showcase
+addendum. The job is every email lane, not showcase. Logged to SCRATCHPAD first (RULE 2).
+
+**Built guard 2 of 3 from the handoff's §7 walk order** — `lib/deliverable/recipes/registry-seam.test.ts`.
+It iterates EVERY key in `RECIPE_KEYS` (17 email keys; `social-pack`/`social-cut` excluded by their
+declared `target: "social"`, never by a hand-kept list), calls the registered builder against a
+fully stubbed data boundary, and asserts on the OUTPUT: `wentThroughSeam(doc)` (the Symbol
+`finalizeDoc` stamps — survives `{...doc}` spreads, dropped by JSON, so it proves PROVENANCE) plus a
+numeric `layout` on every block. **Unlike `design-system-reachability.test.ts`, which greps source
+for the literal `layout: {`, this cannot be dodged by renaming a variable — and it covers a new
+recipe the moment its key is registered.**
+
+**FIRST RUN: 12 of 17 green, 4 red, 1 was a harness gap.** Evidence, `bun test
+lib/deliverable/recipes/registry-seam.test.ts` → `36 pass 0 fail` after the four reds were declared:
+
+- `agent-launch`, `market-pulse` — PREDICTED by the handoff. Hand-position (`layout: l` /
+  `layout: slotLayout`), never call the seam.
+- `back-on-market` — **NOT predicted.** Returns null when `loadBackOnMarketZip` misses, so a data
+  miss REFUSES the build instead of landing the grid with open slots. That is a RULE 0.7 violation
+  that no existing test saw.
+- `default-grid` — **NOT predicted, and it is the terminal fallback every keyless ask lands on.**
+  Rides `fillSkeletonFromSources`, which patches a committed seed grid in place and never
+  re-finalizes, so it carries no seam stamp. Blocks DO have layouts (seed-inherited) — a provenance
+  gap, not a broken email.
+- `market-comps` timed out at 5s until three unstubbed edges were closed — including
+  `fetchApifyComps`, **a PAID per-call vendor.** An unstubbed metered edge in a test does not just
+  hang CI, it spends money on every run.
+
+All four are declared in an EXPORTED `SEAM_BYPASS_KNOWN` map with a reason and a `checks` key, and
+the assertion for them is **INVERTED** — fix a lane and the suite goes red telling you to delete its
+exemption. No private `KNOWN_BYPASS` const this time (the `showing-prep-doc` failure mode).
+Checks opened: `email_seam_bypass_agent_launch`, `email_seam_bypass_market_pulse`,
+`email_back_on_market_refuses_on_data_miss`, `email_default_grid_no_seam_stamp`.
+
+**NOT DONE — 1 of 3 guards.** Guard 1 (recipe key on the deliverable row) and guard 3 (playbook
+GENERATED from the registry) are not written. Build registered as `email_common_foundation_live_verify`.
+
 ## 2026-08-04 (Opus 5) — CORRECTION: I told the operator we persist 3 of 64 fields. False. A registry summary was 2 days stale and I shipped it into a handoff
 
 Operator: *"Wait, we didn't expand to all 64?????? We just fixed that last night I thought."* He was
