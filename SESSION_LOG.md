@@ -1,3 +1,47 @@
+## 2026-08-04 (Opus 5) — CI, layer 2: the alarm that watches main shipped without its own test updated
+
+Second red behind the first. With Typecheck unblocked, `bun test` ran for the first time in five
+commits and failed ONE test of 20,238 assertions:
+
+```
+(fail) loggerWatchNames — every scheduled workflow except the watch-exempt ones
+  actual:   [ 'CI', 'Chief of staff nightly', 'City pulse daily', 'Daily Brain Rebuild' ]
+  expected: [       'Chief of staff nightly', 'City pulse daily', 'Daily Brain Rebuild' ]
+  scripts/lib/watch-manifest.test.mjs:163
+```
+
+**The feature is right; the test was stale.** `5422454a` ("wire main into the incident alarm that
+already watched 79 crons") added `WATCH_PUSH_TRIGGERED` because the `scheduled` filter — an
+uncommented `- cron:` — silently excluded the one signal that says main is broken. Its own comment
+names the incident: *"CI sat RED for 42 consecutive runs, 08/02–08/04 2026, and surfaced only
+because the operator asked."* That is the same red I was sent to fix. The allow-list landed, the
+assertion did not move, and the test failure was invisible because Typecheck was failing above it.
+
+Expectation updated to include "CI", with the reason written into the test: if that string ever
+falls out of the assertion, main is unwatched again and it is the 42-red incident reopening, not a
+cosmetic diff. 18 pass, 0 fail.
+
+**RAN THE REST OF THE PIPELINE LOCALLY FIRST rather than ping-ponging CI** — every step after
+Typecheck had been dark for five commits, so any of them could have been the next red:
+`bunx eslint .` (CI reached Test, so it already passed) · `bunx --bun knip` exit 0 ·
+`bun scripts/check-lake-reads.mts` → "31 known raw read(s), no new ones" ·
+`bun ingest/tools/check-registry-identity.mts --static` → "OK [static] — every
+registry↔workflow↔code identity resolves" (one advisory WARN, `lee_deed_official_records` pinned to
+checkout@v6 while v7 exists — explicitly marked do-not-mass-bump, v7 breaks fork-PR checkout on
+workflow_run which 4 workflows use).
+
+## 2026-08-04 (Sonnet 5) — Committing the code behind the last 3 log entries below — it was narrated as shipped but never left the index
+
+Operator: "figure out what is on the commit board and why it won't push." It wasn't blocked by
+anything — the code for COMPS EMAIL / THE COMPS EMAIL REFORMATTED / GATE 14 (below) was staged but
+never committed, so `git push` had nothing to push. `git diff HEAD -- SESSION_LOG.md` was empty:
+the log already read as done while the working tree held it uncommitted.
+
+Re-verified fresh before committing, not trusted from the log: `bunx tsc --noEmit` clean; `bun test`
+on the 5 touched spec files — 143 pass / 0 fail; the new Gate 14 hook test (`.claude/` is outside
+bun's default test glob, ran it the way CI does) — `node --test duplicate-root.test.mjs` — 11 pass
+/ 0 fail. No lock/rebase/merge state blocking the commit.
+
 ## 2026-08-04 (Opus 5) — CI: main had not typechecked since 95fb8d30. One call site, five red commits.
 
 Operator: *"gitub red"* — and it was, but not from my push. Last green build was `b6889cd1`.

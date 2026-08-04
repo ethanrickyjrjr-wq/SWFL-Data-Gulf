@@ -159,8 +159,13 @@ const FLEET = [
   { name: "CI", file: "ci.yml", scheduled: false },
 ];
 
-test("loggerWatchNames — every scheduled workflow except the watch-exempt ones", () => {
+test("loggerWatchNames — every scheduled workflow except the watch-exempt ones, PLUS the push-triggered allow-list", () => {
+  // "CI" is NOT scheduled and is still watched: 5422454a added WATCH_PUSH_TRIGGERED
+  // precisely because `scheduled` excluded the one signal that says main is broken.
+  // If this assertion ever loses "CI", main is silently unwatched again — that is the
+  // 42-consecutive-red incident (08/02-08/04/2026) reopening, not a cosmetic diff.
   assert.deepEqual(loggerWatchNames(FLEET), [
+    "CI",
     "Chief of staff nightly",
     "City pulse daily",
     "Daily Brain Rebuild",
