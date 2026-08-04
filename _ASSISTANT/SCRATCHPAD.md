@@ -1,3 +1,21 @@
+## 2026-08-03 (Opus 5) — OPERATOR CORRECTION: the listing-grid block is TWO render edits, not three
+
+Operator, verbatim: *"One correction to something I told you earlier: I said the block touches 'all
+three render engines,' which implied three edits. It's two. BlockRenderer.tsx serves both the
+free-tier and grid-tier engines; only the PDF has its own switch. That makes Task 2 smaller than the
+spec's cost paragraph suggests."*
+
+Verified in code: `lib/email/blocks/BlockRenderer.tsx` is dispatched by BOTH `EmailDocRenderer.tsx`
+(free tier) and `compile-grid.ts` (grid tier); `lib/pdf/email-doc-pdf.tsx` holds its own independent
+`switch`. So **three ENGINES, two EDITS.** The plan's Global Constraints line already states this
+correctly; the design spec's §1 cost paragraph ("touches ... all three render engines") reads as
+three edits and is what misled.
+
+**Standing lesson:** "three engines" is a rendering-SURFACE count, not a file count. Anyone costing
+a new block type counts SWITCH STATEMENTS (2), not engines (3). Don't go hunting for a third switch.
+
+---
+
 ## 2026-08-03 (Opus 5) — "why is this not coming in?" — I answered with the registry. The real answer is the engine is OFF and I never checked.
 
 OPERATOR, verbatim: *"why is this not coming in?"* then *"bring it in!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!"*
