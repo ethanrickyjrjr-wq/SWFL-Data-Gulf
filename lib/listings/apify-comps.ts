@@ -262,8 +262,18 @@ const ACTOR_ID = "moving_beacon-owner1~realtor-com-property-scraper";
 /** The live call. Kept tiny and behind the injectable seam above so every test
  *  runs offline and no test can ever spend money. */
 async function runApifyActor(input: ApifyActorInput): Promise<unknown[]> {
-  const token = process.env.APIFY_TOKEN;
-  if (!token) return [];
+  // BOTH names are read on purpose. `.env.local` has carried `APIFY_KEY` all along;
+  // this function only ever looked for `APIFY_TOKEN`, so the lane silently returned []
+  // on every call and read to me as "no token configured" (operator, 08/03/2026:
+  // "APIFY KEY IN .ENV.LOCAL THOUGH"). Renaming the operator's variable would have been
+  // the wrong fix — the code reads what is actually there.
+  const token = process.env.APIFY_TOKEN ?? process.env.APIFY_KEY;
+  if (!token) {
+    // A silent [] here is indistinguishable from "no comps found", which is exactly how
+    // a name mismatch survived undetected. Say it out loud.
+    console.warn("[apify-comps] no APIFY_TOKEN / APIFY_KEY in env — comp enrichment skipped");
+    return [];
+  }
   const res = await fetch(
     `https://api.apify.com/v2/acts/${ACTOR_ID}/run-sync-get-dataset-items?token=${token}`,
     {
