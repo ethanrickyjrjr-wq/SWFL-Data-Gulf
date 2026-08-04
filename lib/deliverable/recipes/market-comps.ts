@@ -258,7 +258,7 @@ export async function resolveCompThumbnails(
         // module exists to kill.
         listingType: (c.priceKind === "sold" ? "sold" : "for_sale") as "sold" | "for_sale",
       })),
-      { state: "FL", zip, maxPaidLookups: MAX_COMPS },
+      { state: "FL", zip },
     );
     for (const [addressLine, e] of enrichment) {
       // The lake's photo ALWAYS wins — we never pay to replace a free hit.
