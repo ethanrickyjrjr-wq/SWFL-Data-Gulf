@@ -1,3 +1,29 @@
+## 2026-08-04 (Opus 5) — OPERATOR: "Please confirm all of this and let's get started on showcase emails the correct way using fields and tags and all the research we've found and actually build in place so Claude can't fuck more shit up"
+
+OPEN — the handoff `docs/superpowers/handoffs/2026-08-04-showcase-email-assembly-line-HANDOFF.md`
+was re-verified end to end this session. **Every number in it holds except ONE.** Live re-derivation
+(PostgREST, exact counts, 08/04/2026): `apify_property_records` 26 rows / 46 cols / 20 distinct
+non-null property_ids · `listing_state` 35,202 · `steadyapi_property_history_raw` 17,875 ·
+`steadyapi_tax_history` 273,051 · `steadyapi_property_permits` 79,281 ·
+`steadyapi_listing_events` 235,383 · `deliverables` 92 rows, **template = `block-canvas` on every
+one** (the recipe key is genuinely unrecorded).
+
+  **THE ONE CORRECTION:** the handoff says `showing-prep-doc.ts` calls "chrome AND seam". It calls
+  NEITHER — zero `buildLifecycleEmail`, zero `finalizeDoc(`. It hand-writes `layout: { x: 0, y, … }`
+  and sits in `KNOWN_BYPASS` in `design-system-reachability.test.ts` with the comment "a one-off doc
+  builder, not on the campaign chrome." So the correct lane count is 8 on the chrome (7 direct +
+  new-listing via `buildListingFlyer`), 6 hand-chrome→seam, 2 neither (`agent-launch`,
+  `market-pulse`), 1 fully off the rails (`showing-prep-doc`), plus `default-grid`
+  (`fillSkeletonFromSources`) and 2 social keys that are not emails at all.
+
+  **"BUILD IN PLACE SO CLAUDE CAN'T FUCK MORE SHIT UP" IS THE ACTUAL ASK.** He is not asking for
+  another plan document. He is asking for the mechanism — the thing a future session cannot dodge.
+  The handoff's own §7 already names it in the right order and it must not be re-ordered for
+  convenience: (1) record the recipe key on the deliverable row, (2) GENERATE the playbook from the
+  registry, (3) the OUTPUT-based seam assertion (the current ledger matches the literal text
+  `layout: {` and is evaded today by `layout: l` in `agent-launch.ts:434` and `layout: slotLayout`
+  in `market-pulse.ts:843` — both confirmed live), THEN the extraction. Guard before deletion.
+
 ## 2026-08-04 (Opus 5) — OPERATOR: "Wait, we didn't expand to all 64?????? We just fixed that last night I thought. WHAT THE FUCK????!!!!!!"
 
 RESOLVED SAME SESSION — **he was right, I was wrong, and I had already shipped the error into a
