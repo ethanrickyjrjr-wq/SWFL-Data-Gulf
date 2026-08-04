@@ -25,6 +25,105 @@ session ships the same bug again.
 
 ---
 
+## 00. THE PICTURE — one pipe, five stops. Start here.
+
+**Added 08/03/2026 by operator decree, verbatim: _"IS THERE A FUCKING PLAYBOOK WITH ALL THE RULES
+FOR EMAILS AND WHERE TO ACTUALLY GO AT THE BEGINNING? ... DRAW A FUCKING PICTURE, A FUCKING MAP.
+ALL EMAILS ARE THE SAME BASICALLY. WE FUCKING CODE THEM! HOW CAN THEY CHANGE?"_**
+
+He is right: they cannot change, and they do not. **There is ONE pipe. Every email — every recipe,
+every campaign, the lab, a blast, a digest — walks these five stops in this order.** If you think
+you found a second way to build an email, you found a bug or a dead limb. Read this before §0.
+
+```
+     (1) RECIPE                  (2) PLAN                (3) THE SEAM
+  lib/deliverable/recipes/    a flat list of        lib/email/doc/finalize-doc.ts
+  <name>.ts                   entries — type,       finalizeDoc(plan)
+  one file per email type     span, props.           - sorts into zones
+  picks WHICH blocks and      NO x/y. NO             - groups into rows
+  WHAT data fills them        positions. Ever.       - assigns EVERY position
+           |                        |                - stamps the provenance mark
+           +------------------------+---------------------------+
+                                                                |
+                                                                v
+     (4) EmailDoc  -->  applyBrand()  -->  (5) renderEmailDocHtml()
+     blocks[] each with      colors, logo,       lib/email/render-email-doc.ts
+     {type, props, layout}   fonts, footer       -- the ONLY door to HTML --
+                             lib/email/brand/              |
+                                                           v
+                                                     compileGrid()
+                                                 lib/email/compile-grid.ts
+                                                           |
+                                                           v
+                                                   table HTML  -->  SEND
+```
+
+**What each block LOOKS like is not decided anywhere above.** It is decided once, in the block
+components (`lib/email/blocks/*.tsx`), and all eighteen of them import ONE type root:
+
+```
+  lib/email/blocks/scale.ts   <-  7 sizes | 3 weights | 8px grid | tabular-nums
+                                  text(role) returns size+leading+weight TOGETHER
+                                  an off-grid number is a COMPILE ERROR
+```
+
+**Five rules that make the pipe a pipe. Each is enforced by a red test, not by good intentions:**
+
+1. **A recipe NEVER writes a position.** A `layout: {` literal in a recipe fails
+   `design-system-reachability.test.ts`. Only the seam positions.
+2. **The seam stamps every doc it returns.** A hand-assembled doc — however perfect it looks —
+   fails `wentThroughSeam()`. Shape is trivial to fake; provenance is not.
+3. **`renderEmailDocHtml` is the only door to HTML.** Never call `compileGrid` or the renderer pair
+   directly. That divergence already shipped once: a blast sent grid docs through the free stacker
+   while preview compiled them.
+4. **Every block reads `scale.ts`.** Any path that emits HTML as a STRING cannot import it and is
+   therefore wrong by construction — see the duplicate named below.
+5. **Every number is sourced.** Four-lane, no invention. §0 and the deliverable playbook own this.
+
+### There is ONE renderer, not two. (Corrected 08/03/2026 — the old wording misled a session.)
+
+`renderEmailDocHtml` reads `isGridDoc(doc.blocks) ? compileGrid(doc) : render(EmailDocEmail(...))`,
+and the comments around it still describe a "paid grid / free stacked" tier split. **That split no
+longer exists in the build path.** `isGridDoc` is `blocks.some(b => b.layout != null)`; the seam
+writes a `layout` on EVERY block; therefore every doc a recipe produces is a grid doc and the free
+branch is unreachable from (1)→(5). It survives only as backcompat for docs saved before the grid
+existed (`lib/email/__tests__/block-canvas-backcompat.test.ts`). Nothing strips layouts to
+synthesize a free doc — there is no such call in the tree.
+
+**Do not read the comments in `render-email-doc.ts`, `doc/types.ts`, or `doc/default-docs.ts` as
+architecture.** They describe a tier the seam stopped producing. That is exactly how a session
+reported "two engines" to the operator as live design on 08/03/2026.
+
+### The ONE real duplicate — and it is not an email
+
+`renderGroundedReport` (`lib/deliverable/grounded-report.ts`) serves the **public share page**
+(`app/p/[id]/page.tsx`) and the **PDF print route** (`app/p/[id]/print/route.ts`). It predates the
+block system and **emits HTML as a string**, so it can never import `scale.ts` — which is why its
+frozen output measures font sizes 13/10/11/12/15/44px and weights 700/800/900 against a scale that
+defines seven sizes and three legal weights (measured 08/03/2026 off
+`lib/email/__fixtures__/golden/branded.html`).
+
+`reportToEmailHtml` (`lib/email/activation/render.ts`) is its thin wrapper and has **ZERO live
+callers** — only its own tests keep it compiling.
+
+A convergence plan for exactly this merge exists and was abandoned half-done:
+`docs/superpowers/plans/2026-06-16-deliverable-convergence/`. The spine was extracted and ten
+goldens were frozen specifically to prove the collapse is behavior-preserving — then it was declared
+green and left. The goldens are still there. **Finish it; do not start a third design.**
+
+### Where to go, by what you're doing
+
+- **Writing or editing a recipe, seed, template, or block** → §0 (the rules card), then §4 (the type
+  scale), then the pipe above. Nothing else is required reading.
+- **Changing how something LOOKS** → `lib/email/blocks/scale.ts` and the block component. Never a
+  recipe.
+- **Changing WHAT an email says or shows** → the recipe. Never a block.
+- **Adding a send lane** → §6. Sending and building are separate systems; do not merge them.
+- **An email is wrong in a real inbox** → §7, the failure catalog: every way this has actually
+  broken, with the guard that now stops each.
+
+---
+
 ## 0. BEFORE YOU CODE A RECIPE — the rules card
 
 **Read this section before writing or editing any recipe, seed, template, or block.** Written
@@ -47,6 +146,15 @@ do not reinstate a house number beside a sourced one.** Full evidence + the conf
 - **BODY LENGTH: 50–125 words.** Boomerang, measured on their own users' real sent mail — every
   length in that band returned a **response rate above 50%**. Their eyeball rule: 50 words is two
   short paragraphs; 125 words is two normal paragraphs plus a short one.
+- **WHAT COUNTS: the agent's own copy only** — framing, argument, commentary, CTA. **TWO CARVE-OUTS,
+  operator decree 08/03/2026, verbatim: *"if a home has a description of it, that does not count
+  towards the word count. Also, if we talk about the community, that should not count toward the
+  total."*** So:
+  - **The property description does NOT count.** A sourced listing description is reference the
+    reader chose to read, not persuasion they have to wade through.
+  - **The community block does NOT count** (see §0.1c).
+  - Everything else obeys the band. Do not use a carve-out as a pressure valve — you may not push
+    the agent's own argument past 125 words by relabeling it "description" or "community."
 - **The floor matters more than the ceiling, and it is the one people miss.** Going long is
   forgiving — 125 words → 500 words only drops ~50% to ~44%, and it stays flat out to ~2000 words.
   Going short is NOT: a **25-word email performs about as badly as a 2000-word one**, and a
@@ -122,6 +230,70 @@ Read these as RELATIVE comparisons within one panel (see the warning at the end 
   no-invention gate applied to borrowed benchmarks.
 - Send-day is a weak lever, not a strong one: best-to-worst open spans ~1.7 points (Monday 22.0%
   best, Sunday 20.3% worst; best CTR Tuesday). Don't build scheduling doctrine on it.
+
+### 0.1c The community block — free of the word count, and a door back to the agent
+
+Operator decree 08/03/2026, verbatim: *"we can also put a little about the community and a Find Out
+More about this community button that leads to our page of that community or the actual community
+page. A good call to action that shows clicks back to the agent."*
+
+- **A little about the community, not a lot.** It rides outside the 50–125-word band, which is
+  permission to include it — NOT permission to write an essay. Keep it to a short paragraph; the
+  button is what carries the reader deeper, not the block.
+- **Every community claim is sourced like any other fact.** The no-invention gate does not relax
+  because the copy is about a place. `community-info.ts` composes its paragraph in CODE from the
+  source's own sentences precisely so a model never decorates a neighborhood it has never seen —
+  hold the same line anywhere community copy appears. User-facing citation for the vendor
+  neighborhood tables is "realtor.com"; the vendor's name never appears in a built doc.
+- **THE BUTTON: "Find Out More About This Community."** Link target, in this order — see §0.1d,
+  which governs this and every other link:
+  1. **The agent's own destination, whatever they saved in brand.** Their community page, their
+     IDX/site, the community's own site — their call, not ours.
+  2. **Ours only as the fallback** when the agent hasn't set one:
+     `/r/communities-swfl/[community]`, or `/r/communities-swfl/n/[neighborhood]` for the
+     neighborhood grain (index: `/r/communities-swfl`). These EXIST — 245 named vendor
+     neighborhoods behind `lib/deliverable/recipes/community-info.ts`. Do not build a second
+     community page.
+- **THIS DOES NOT BREAK THE ONE-CTA RULE, and here is why — do not "fix" it either direction.**
+  The primary CTA stays exactly ONE (contact/book the agent). The community button is not a
+  competing ask; it is a click-tracked door that lands the reader back on the agent's surface.
+  A future builder should neither delete this button as a one-CTA violation nor read it as licence
+  for a third and fourth button.
+
+### 0.1d LINKS BELONG TO THE AGENT — our site is not the destination
+
+Operator decree 08/03/2026, verbatim: *"the agent can change all links and should be able to save
+that in their brand. We don't want anyone coming to our site unless they need to or we are activly
+marketing to."*
+
+**We are white-label infrastructure the agent puts their name on. We are not a traffic destination.**
+Routing the agent's own audience to `swfldatagulf.com` is a leak, and it quietly competes with the
+person we are selling to. An earlier draft of §0.1c had this backwards — it made our community page
+the "strongly preferred" target. That was wrong and is corrected above.
+
+- **Default every link to the agent's destination.** Ours is the FALLBACK, used when the agent has
+  not set one — never the preference.
+- **Traffic to our site is legitimate in exactly two cases:** the agent deliberately chose our page
+  as the destination, or we are actively marketing (our own outbound, our own funnel). Neither is
+  the default for a client's send.
+- **The agent can change any link and save it in their brand.** Their saved value wins over anything
+  a recipe or seed hard-codes.
+- **What the code does TODAY — know the limit before you promise it:**
+  - Brand `website_url` sets both `WEBSITE_URL` and `CTA_URL`
+    (`branding-to-tokens.ts`), and `applyBrand`'s button branch states the principle outright —
+    *"Brand owns ordinary link destinations"* — rewriting any non-`mailto:` button URL to the brand
+    CTA. An engine-set `mailto:` reply CTA deliberately survives; keep it that way.
+  - ⚠️ **That is ONE GLOBAL override, not per-link control.** Every ordinary button in a doc is
+    rewritten to the SAME `website_url`. An agent cannot yet give the community button one
+    destination and a booking button another. It also means a community button pointed at our page
+    is silently clobbered to the agent's homepage as soon as they set `website_url` — which is the
+    right DIRECTION (agent wins) but not the control the decree asks for. Open:
+    `brand_per_link_destination_overrides`.
+  - ⚠️ **On non-Lab send paths none of this runs at all** — `applyBrand` is browser-only, so links
+    stay whatever the engine set, i.e. OURS. The leak is worst exactly where nobody is watching.
+    Open: `applybrand_no_server_side_caller`.
+- **Building a new block with a link? Read its destination from brand with our page as fallback.**
+  Never hard-code a `swfldatagulf.com` URL into a recipe, seed, or block as the default.
 
 ### 0.2 Type, spacing, grid — mirror of §4, `lib/email/blocks/scale.ts` is authority
 
@@ -501,15 +673,23 @@ reasons in `docs/superpowers/specs/2026-06-28-email-lab-ai-design-research.md` �
 
 ## 5. RENDER — three engines that disagree
 
-An `EmailDoc` renders through THREE independent engines. A font/style that works on one can
-silently fall back on the others. **Any typography or block-style change touches all three.**
+**CORRECTED 08/03/2026 — the old wording of this section said "THREE independent engines" and a
+session read it back to the operator as live architecture. It is not. Live email has ONE renderer.
+See §00 for the verification.** What follows is the honest list: one live engine, one backcompat
+limb, one separate output format.
 
-1. **Free-tier email** — `lib/email/blocks/EmailDocRenderer.tsx` (`@react-email`). The only
-   path that injects the web-font `<link>` in `<Head>`.
-2. **Grid-tier email** — `lib/email/compile-grid.ts` (`compileGrid`; used whenever ANY block
-   has a `layout`). The 06/29 empty-`<Head>` font gap is FIXED (verified 07/19): both email
-   engines build their head from the SHARED `lib/email/blocks/email-head.ts`
-   (`emailHeadChildren` + `msoFontPin`) — keep it that way; never hand-build a `<Head>`.
+An `EmailDoc` reaches HTML through `renderEmailDocHtml` and nothing else. A font or block-style
+change must still be checked against the PDF, which is a genuinely separate renderer.
+
+1. **Grid email — THE live engine** — `lib/email/compile-grid.ts` (`compileGrid`), used whenever
+   ANY block has a `layout`, which is every doc the seam produces. This is the email path.
+2. **Free-tier stacker — BACKCOMPAT ONLY, not reachable from a recipe** —
+   `lib/email/blocks/EmailDocRenderer.tsx` (`@react-email`). Runs only for a doc where NO block
+   carries a `layout`, i.e. rows saved before the grid existed
+   (`lib/email/__tests__/block-canvas-backcompat.test.ts`). No code strips layouts to produce one.
+   The 06/29 empty-`<Head>` font gap is FIXED (verified 07/19): both email engines build their head
+   from the SHARED `lib/email/blocks/email-head.ts` (`emailHeadChildren` + `msoFontPin`) — keep it
+   that way; never hand-build a `<Head>`.
 3. **PDF** — `lib/pdf/email-doc-pdf.tsx` (`@react-pdf/renderer`, separate `PdfBlock` switch,
    built-in fonts only unless `Font.register` from a pinned CDN URL — `public/` is not in the
    Vercel lambda fs; unresolved variants THROW).
