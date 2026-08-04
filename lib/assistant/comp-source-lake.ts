@@ -168,9 +168,19 @@ export function lakeRowToCandidate(row: LeeCompSaleRow): CompCandidate | null {
   };
 }
 
+/** Why the lake lane came back empty WITHOUT having actually looked. Only ever a
+ *  failure — a genuine zero never reports one. */
+export interface LakeCompDegrade {
+  reason: "query_failed";
+  message: string;
+}
+
 export interface LakeCompDeps {
   /** DI seam so the ranker path is testable with no database. */
   fetchRows?: (f: LakeCompFilters) => Promise<LeeCompSaleRow[]>;
+  /** Called ONLY when the query itself failed, never on an honest empty result.
+   *  See the header comment on `fetchLeeComps` for why this exists. */
+  onDegrade?: (d: LakeCompDegrade) => void;
 }
 
 /**
@@ -180,6 +190,19 @@ export interface LakeCompDeps {
  * yields `[]` and never throws. An empty result means "we found no qualifying sales",
  * which the ranker reports as the standard not being met — it never becomes a claim
  * that the market had no sales.
+ *
+ * *** BUT AN EMPTY SET AND A FAILED QUERY ARE NOT THE SAME EVENT, AND USED TO BE. ***
+ * This function destructured only `data` and ignored PostgREST's `error`, then caught
+ * every throw to `[]`. Downstream, `[]` makes `tryLeeLakeComps` return null, which
+ * silently downgrades the ENTIRE comps email from our own recorded-sale lane to the
+ * vendor's AVM-valuation lane — different houses, different ZIPs, no sale dates. That
+ * is the comp-set non-determinism recorded on 08/04/2026: the same hard-coded subject
+ * address produced 33908 sold comps, then 33967 valuations, then 33908 sold comps
+ * across three consecutive builds, and a price-defence email that changes its evidence
+ * between builds is worse than one that has none.
+ *
+ * `onDegrade` fires ONLY on a real failure. The lane still degrades to the vendor —
+ * RULE 0.7, a build is never refused — but it can no longer do so invisibly.
  */
 export async function fetchLeeComps(
   subject: CompSubject,
@@ -200,14 +223,24 @@ export async function fetchLeeComps(
         .gte("living_area_sqft", f.sqftGte)
         .lte("living_area_sqft", f.sqftLte);
       if (f.zip) q = q.eq("zip_code", f.zip);
-      const { data } = await q.limit(f.limit);
+      const { data, error } = await q.limit(f.limit);
+      // READ THE ERROR. Ignoring it is what made a dead query look like a quiet market.
+      if (error) throw new Error(`PostgREST ${LEE_COMP_VIEW}: ${error.message}`);
       return Array.isArray(data) ? (data as unknown as LeeCompSaleRow[]) : [];
     });
 
   try {
     const rows = await fetchRows(filters);
     return rows.map(lakeRowToCandidate).filter((c): c is CompCandidate => c !== null);
-  } catch {
+  } catch (e) {
+    const message = e instanceof Error ? e.message : String(e);
+    deps.onDegrade?.({ reason: "query_failed", message });
+    // Loud on purpose. A build that quietly swapped comp lanes is how three sessions
+    // measured photo coverage against three different comp sets.
+    console.error(
+      `[comp-source-lake] LAKE QUERY FAILED — the email will fall through to the vendor ` +
+        `valuation lane and its comps will be DIFFERENT HOUSES: ${message}`,
+    );
     return [];
   }
 }

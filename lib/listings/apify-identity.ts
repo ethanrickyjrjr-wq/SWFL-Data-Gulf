@@ -166,6 +166,45 @@ export async function fetchApifyRecordForAddress(
 // nothing-joined shape that cost us this whole session. Each key is used only against the
 // structure it belongs to, and that is why both are imported here.
 
+// ── THE WINDOW — derived from the comps, or we do not buy ────────────────────
+//
+// A ZIP sweep with no date window returns an arbitrary slice of a ZIP that has hundreds
+// of sales, and joins to a specific six-house comp set 0 times. That is not bad luck,
+// it is the shape of the query. Narrowing the SAME sweep to the window the comps
+// actually sold in is the only thing that makes the join possible.
+//
+// When no comp carries a sale date — which is every build on the vendor's AVM lane,
+// where `comp-helper.ts:440` sets `priceDate: null` because "the vendor dates no sale" —
+// there is no window to narrow to, and the correct spend is ZERO. Returning null here
+// is what makes "don't buy" the default instead of a blind sweep.
+
+const ISO = /^\d{4}-\d{2}-\d{2}$/;
+
+/** min..max of the comps' own sale dates, padded. Null = no dated comp = DO NOT BUY. */
+export function compSaleWindow(
+  dates: readonly (string | null | undefined)[],
+  padDays = 45,
+): { dateFrom: string; dateTo: string } | null {
+  const iso = dates
+    .map((d) => (typeof d === "string" ? d.trim().slice(0, 10) : ""))
+    .filter((d) => ISO.test(d) && !Number.isNaN(Date.parse(d)))
+    .sort();
+  if (iso.length === 0) return null;
+  const shift = (d: string, days: number) =>
+    new Date(Date.parse(d) + days * 86_400_000).toISOString().slice(0, 10);
+  return { dateFrom: shift(iso[0]!, -padDays), dateTo: shift(iso[iso.length - 1]!, padDays) };
+}
+
+/** How far past the comps' own sale dates we widen. The vendor stamps a sale on its own
+ *  recording date, which lags the deed by weeks — too tight a window drops the house we
+ *  are paying to find. */
+const WINDOW_PAD_DAYS = 45;
+
+/** THE COST CEILING for one build's photo pull, in RESULTS (~$0.01 each), because that
+ *  is the unit the vendor bills. `apify-comps.ts` carries the standing $7 operator
+ *  ceiling for a single run; this default is well inside it. */
+const DEFAULT_MAX_PAID_RESULTS = 120;
+
 /** What a comp row needs filled, resolved for one house. Absent = open slot, never a guess. */
 export interface CompEnrichment {
   photoUrl?: string;
@@ -202,12 +241,16 @@ export async function resolveCompEnrichment(
      *  the house's NEIGHBOURS, `matchesAddress` rejects them all, and the slot comes back
      *  empty with no error — measured live 08/04/2026 on a 4-valuation comp set. */
     listingType?: "sold" | "for_sale" | "pending";
+    /** ISO `YYYY-MM-DD`. THE FIELD THAT DECIDES WHETHER WE SPEND AT ALL — the paid lane
+     *  narrows the ZIP to the window these dates describe, and buys nothing without one. */
+    priceDate?: string | null;
   }[],
   opts: {
     state?: string | null;
     zip?: string | null;
-    maxPaidLookups?: number;
-    fetchOne?: typeof fetchApifyRecordForAddress;
+    /** Vendor RESULTS to buy, ~$0.01 each — the unit the vendor actually bills. */
+    maxPaidResults?: number;
+    fetchZip?: typeof fetchApifyComps;
     readCache?: typeof fetchCachedRecords;
   } = {},
 ): Promise<Map<string, CompEnrichment>> {
@@ -245,16 +288,77 @@ export async function resolveCompEnrichment(
     // No cache, no creds, table missing -> lane B still runs. Never a build failure.
   }
 
-  // ── LANE B · one VERIFIED paid lookup per house the cache did not cover.
+  // ── LANE B · ONE DATED ZIP PULL, joined by address.
+  //
+  // *** THIS IS NOT A LOOKUP, BECAUSE THE VENDOR HAS NO LOOKUP. *** Measured live
+  // 08/04/2026: `location: "14503 DOLCE VISTA RD, FORT MYERS, FL 33908"`, radius 0.3 —
+  // returned 12078 Terraverde Ct, 16820 Sanibel Sunset Ct, 18200 Creekside View Dr,
+  // 16299 San Carlos Blvd, 12423 McGregor Woods Cir. The street address is accepted and
+  // silently treated as an area centre whose own record is not returned; `radius` is
+  // ignored. An earlier version of this function paid one such call per comp and got
+  // `null` every time, by construction — those five wrong houses are still in the record
+  // cache as the receipt.
+  //
+  // So we buy the ONE thing the vendor does sell — an area over a date range — and
+  // narrow it to the window our comps actually sold in, then join on address. No window,
+  // no purchase: an unwindowed sweep is the original 0-of-6 defect with a new name.
   const missing = wanted.filter((c) => !out.has(c.addressLine));
-  const budget = opts.maxPaidLookups ?? 6;
-  const fetchOne = opts.fetchOne ?? fetchApifyRecordForAddress;
-  for (const c of missing.slice(0, budget)) {
-    const rec = await fetchOne(
-      { addressLine: c.addressLine, city: c.city, state: opts.state, zip: opts.zip },
-      c.listingType ?? "sold",
+  if (missing.length === 0) return out;
+
+  const window = compSaleWindow(
+    missing.map((c) => c.priceDate),
+    WINDOW_PAD_DAYS,
+  );
+  if (!window) {
+    console.warn(
+      `[comp-enrichment] NO SALE DATES on ${missing.length} uncached comp(s) — skipping the ` +
+        `paid photo lane entirely. An undated comp set is the vendor valuation lane, and a ` +
+        `ZIP sweep with no window joins 0 of ${missing.length}.`,
     );
-    if (rec) put(c.addressLine, rec as unknown as Record<string, unknown>);
+    return out;
+  }
+
+  const zip = (opts.zip ?? "").trim();
+  if (!/^\d{5}$/.test(zip)) {
+    console.warn(`[comp-enrichment] no usable ZIP for the photo lane — skipping the paid lane.`);
+    return out;
+  }
+
+  try {
+    const fetchZip = opts.fetchZip ?? fetchApifyComps;
+    const records = await fetchZip({
+      location: zip,
+      // A recorded sale is only ever in the `sold` index. The window is built from sale
+      // dates, so `sold` is the only index those dates address.
+      listingType: "sold",
+      dateFrom: window.dateFrom,
+      dateTo: window.dateTo,
+      maxResults: opts.maxPaidResults ?? DEFAULT_MAX_PAID_RESULTS,
+    });
+    // THE JOIN. `compPhotoKey` on both sides — never `listingAddressKey`, which keys the
+    // cache table and would silently match nothing here (see the warning block above).
+    const byKey = new Map<string, ApifyRecord>();
+    for (const r of records) {
+      if (!isRealString(r.street)) continue;
+      const k = compPhotoKey(r.street, r.city ?? "");
+      if (!byKey.has(k)) byKey.set(k, r);
+    }
+    let joined = 0;
+    for (const c of missing) {
+      const hit = byKey.get(compPhotoKey(c.addressLine, c.city ?? ""));
+      if (hit) {
+        joined++;
+        put(c.addressLine, hit as unknown as Record<string, unknown>);
+      }
+    }
+    // The count is logged because an empty join and "these houses have no photos" are
+    // byte-identical without it — failure mode #3, the one that hid this bug for a week.
+    console.info(
+      `[comp-enrichment] dated ZIP pull ${zip} ${window.dateFrom}..${window.dateTo}: ` +
+        `${records.length} record(s) bought, ${joined} of ${missing.length} comp(s) joined.`,
+    );
+  } catch {
+    // A paid-lane miss is never a build failure (RULE 0.7).
   }
   return out;
 }

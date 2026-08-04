@@ -5,6 +5,7 @@
 
 import { describe, expect, test } from "bun:test";
 import {
+  fetchLeeComps,
   lakeRowToCandidate,
   lakeCompFilters,
   LEE_COMP_COLUMNS,
@@ -148,5 +149,67 @@ describe("POOL — held free in the lake since 07/22/2026, unwired until 08/04",
     // This is the test that would have caught 08/02: the lateral join was open and
     // beds/baths were taken from it while pool sat one line away, unselected.
     expect(LEE_COMP_COLUMNS).toContain("pool");
+  });
+});
+
+describe("A FAILED QUERY IS NOT 'NO QUALIFYING SALES' — the silent lane flap", () => {
+  // 08/04/2026. `_ASSISTANT/2026-08-04-comp-photos-FINDINGS.md` recorded the comp set
+  // changing between three consecutive builds of the SAME hard-coded subject address
+  // (33908 sold comps -> 33967 valuations -> 33908 sold comps) and called it "arguably
+  // the biggest remaining defect": a price-defence email that shows different evidence
+  // each build.
+  //
+  // THE MECHANISM, found here: this function destructured only `data` and ignored
+  // PostgREST's `error`, then swallowed every throw to `[]`. `[]` makes
+  // `tryLeeLakeComps` return null, which SILENTLY downgrades the whole email from our
+  // own recorded-sale lane to the vendor's AVM-valuation lane. A transient query
+  // failure was byte-identical to "we found no qualifying sales" — failure mode #3 of
+  // the handoff, in our own code this time.
+  //
+  // These tests do not make the query succeed. They make the two outcomes DISTINGUISHABLE,
+  // which is the only thing that lets the next session see a flap instead of inheriting it.
+
+  const subject = { sqft: 1978, beds: 3, baths: 2, zip: "33908" };
+
+  test("a query FAILURE reports degraded — it is never silently an empty set", async () => {
+    const seen: string[] = [];
+    const out = await fetchLeeComps(subject, new Date("2026-08-04T00:00:00Z"), {
+      fetchRows: async () => {
+        throw new Error("fetch failed");
+      },
+      onDegrade: (r) => seen.push(r.reason),
+    });
+    expect(out).toEqual([]);
+    expect(seen).toEqual(["query_failed"]);
+  });
+
+  test("a genuine EMPTY result does NOT report degraded — the honest zero stays honest", async () => {
+    const seen: string[] = [];
+    const out = await fetchLeeComps(subject, new Date("2026-08-04T00:00:00Z"), {
+      fetchRows: async () => [],
+      onDegrade: (r) => seen.push(r.reason),
+    });
+    expect(out).toEqual([]);
+    expect(seen).toEqual([]);
+  });
+
+  test("the degrade report carries the reason text, so the log says WHY", async () => {
+    let msg = "";
+    await fetchLeeComps(subject, new Date("2026-08-04T00:00:00Z"), {
+      fetchRows: async () => {
+        throw new Error("JWT expired");
+      },
+      onDegrade: (r) => (msg = r.message),
+    });
+    expect(msg).toContain("JWT expired");
+  });
+
+  test("no onDegrade callback is still safe — a caller that does not care cannot crash", async () => {
+    const out = await fetchLeeComps(subject, new Date("2026-08-04T00:00:00Z"), {
+      fetchRows: async () => {
+        throw new Error("boom");
+      },
+    });
+    expect(out).toEqual([]);
   });
 });

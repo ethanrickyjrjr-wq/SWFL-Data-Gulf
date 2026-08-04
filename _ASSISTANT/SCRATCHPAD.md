@@ -1,3 +1,29 @@
+## 2026-08-04 (Opus 5) — OPERATOR: "get all of this done that is still open and get me my perfect emails!!!!!!!!!!!!!!!!" (re: `_ASSISTANT/2026-08-04-comp-photos-NEXT-HANDOFF.md`)
+
+OPEN — in progress this session. This is the THIRD time he has asked for the same email. The
+handoff is the third document about one bug. **He is not asking for a fourth document.**
+
+**COUNTED BEFORE STARTING — 8 parts (RULE 0.8 #1):**
+  1. Kill the dead `apify-style` import if it survived the parallel session's delete (blocks
+     everything — nothing builds).
+  2. Cache census of `data_lake.apify_property_records` — FREE, and it decides how much the
+     photo pull actually costs. Do this BEFORE asking for a spend number.
+  3. Fix the lake-lane SILENT FALLTHROUGH (`comp-source-lake.ts:203` reads `data` and ignores
+     `error`; `:210` swallows everything to `[]`) — a transient query failure is byte-identical
+     to "no qualifying sales" and silently downgrades the whole email to the vendor valuation
+     lane. THIS is the comp-set non-determinism, and it gates the photo spend: the date window
+     is derived from the comp set's own sale dates, and the vendor lane has no sale dates.
+  4. Gate OFF the proven-dead paid lane — `fetchApifyRecordForAddress` is the per-address lookup
+     the vendor does not support; it bills ~6 calls per build for guaranteed nulls.
+  5. ONE bulk ZIP + date-window pull to fill the cache (spend number named first).
+  6. SEND to hello@swfldatagulf.com; photo count read FROM THE INBOX, not from the HTML.
+  7. The recipe — extend `data-roots.md` + `emails.md` §0. NOT a fourth handoff.
+  8. The four open checks in handoff §5 — each closed with pasted evidence or reported open
+     with the reason.
+
+**THE STANDING GRIPE THIS SITS ON:** same surface "fixed" repeatedly and never driven live.
+Report n of N. Partial is fine; partial reported as whole is the defect.
+
 ## 2026-08-04 (Opus 5) — OPERATOR: "fix and all and get me a fucking email to hello@swfldatagulf.com / write the fucking recipe so no one fucks up any more"
 
 OPEN — in progress this session.
@@ -88,7 +114,31 @@ already immutable, and a second copy buys only a staleness window and another cr
 [1900-01-01, today]; the raw string is always kept so nothing is destroyed and the garbage
 stays inspectable. Verified the string "2269" cannot reach a reader.
 
-**NOT DONE, named:** the data-roots.md lines for BOTH new roots (pool + permits) —
+**TAX HISTORY SHIPPED (third free win).** `steadyapi_tax_history_v` live: **273,051 year-rows
+/ 16,514 properties / 2007–2025, avg 16.5 years each, zero paid calls.** Consumer
+`lib/listings/property-tax-history.ts` + 9 TDD tests. Live end-to-end on property 5200800427:
+9 years, tax rising $356 (2017) → $7,269 (2025). 561 pass, `tsc` exit 0.
+
+**THE SPARSITY TRAP, measured — the census's "assessment{total,building,land}" is half true.**
+Every key exists on every row; the VALUES do not. assessment_total 99.99% but
+**assessment_building 22.0% and assessment_land 19.0%**; market_value_total 99.9%, building
+77.7%, land 67.3%. `market_value` is JSON *null* (not an object) on 139 rows; `tax_amount` is
+null on exactly 1. Absent stays NULL — rendering "$0 land value" for a figure the vendor never
+sent is a fabricated number. Visible in the live read: land present in 1 of the 6 newest years.
+4 rows carry `tax_amount = 0`; inspected as genuinely tiny parcels ($100–$103 assessed), so
+zero is KEPT as a real figure, not treated as a sentinel.
+
+**GATE SHIPPED IN CODE, NOT AS A PROMISE:** `tax_amount` is parsed and live but NOT cleared
+for user-facing serving — the playbook requires validation against a real county tax bill
+first. `TAX_AMOUNT_NOT_CLEARED_FOR_SERVING` is attached to EVERY summary object, so a caller
+physically cannot get the number without the caveat, and a test asserts the text. Check
+`steadyapi_tax_amount_validation_owed`.
+
+**A THIRD self-correction this session:** I said mid-probe that `assessment` "isn't always an
+object." Wrong — assessment is an object on all 273,051 rows; it was `market_value` that is a
+null scalar on 139. Caught by re-querying with type guards instead of trusting the error.
+
+**NOT DONE, named:** the data-roots.md lines for ALL THREE new roots (pool + permits + tax) —
 `repolith` reports the file claimed by session cd04b1f2 with their own uncommitted edit, so
 per RULE 1.5 I did not override. Paste-ready text for both is in check
 `data_roots_pool_root_line_owed`. Nothing is pushed.

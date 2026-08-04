@@ -269,12 +269,30 @@ async function tryLeeLakeComps(geo: GeocodedAddress, deps: CompDeps): Promise<Re
 
   const fetchLake = deps.fetchLeeComps ?? fetchLeeComps;
   const candidates = await fetchLake(subject, now);
-  if (candidates.length === 0) return null;
+  // *** WHY THIS LANE LOST, IN THE LOG, EVERY TIME. ***
+  // Falling through to the vendor changes the email's evidence completely — its comps
+  // are AVM valuations for different houses, often a different ZIP, with no sale dates
+  // (which is also why a photo date-window derived from a vendor comp set is derived
+  // from nothing). `fetchLeeComps` already shouts on a query failure; these two lines
+  // cover the other two exits, so the three reasons stop being one silent `null`.
+  if (candidates.length === 0) {
+    console.warn(
+      "[comps] LAKE LANE EMPTY — no qualifying recorded sales in the window; " +
+        "falling through to the vendor valuation lane.",
+    );
+    return null;
+  }
 
   // requireSaleDate defaults TRUE — every row is a real recorded sale (unlike the
   // vendor's AVM estimate), so the 6-month window is honestly enforceable here.
   const ranked = rankComps(subject, candidates, now);
-  if (!ranked.standardMet) return null; // thin lake result -> let the vendor try
+  if (!ranked.standardMet) {
+    console.warn(
+      `[comps] LAKE LANE BELOW STANDARD — ${candidates.length} candidate(s) ranked but ` +
+        `none met the comparability standard; falling through to the vendor valuation lane.`,
+    );
+    return null; // thin lake result -> let the vendor try
+  }
 
   return ranked.comps.map((c) => ({
     addressLine: c.addressLine,
