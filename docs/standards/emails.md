@@ -185,6 +185,13 @@ green and left. The goldens are still there. **Finish it; do not start a third d
 
 ## 0. BEFORE YOU CODE A RECIPE — the rules card
 
+> **➜ MOVED / SUPERSEDED FOR BUILDING — `docs/standards/email-build-playbook.md` IS THE ONE FILE.**
+> Operator decree 08/04/2026: *"stop fucking reading 6 documents and fucking write it in one."*
+> This section is a DIGEST that told you to go open five gitignored research files; the build
+> playbook writes every rule out in full, universal rules first, then ONE self-contained section per
+> email so you read only yours. **Build from the playbook.** This map keeps the pipeline picture,
+> the send lanes, the render engines, and the failure catalog.
+
 **Read this section before writing or editing any recipe, seed, template, or block.** Written
 08/03/2026 by operator decree — verbatim: *"I'M TIRED OF GETTING DIFFERENT TYPES OF EMAILS BUILT.
 ALL LOGO, CAN SPAM RULES EVERYTHING IN ONE PLACE THAT BUILDER SEES BEFORE CODING RECIPES."* Every
