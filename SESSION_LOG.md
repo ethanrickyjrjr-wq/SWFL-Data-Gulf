@@ -1,3 +1,44 @@
+## 2026-08-04 (Opus 5) — CORRECTION: I told the operator we persist 3 of 64 fields. False. A registry summary was 2 days stale and I shipped it into a handoff
+
+Operator: *"Wait, we didn't expand to all 64?????? We just fixed that last night I thought."* He was
+right. **Counted the rows instead of reading prose, 08/04/2026:**
+`steadyapi_property_history_raw` **17,875** (FULL response body in jsonb) ·
+`steadyapi_tax_history` **273,051** / 14 cols · `steadyapi_property_permits` **79,281** / 14 cols ·
+`steadyapi_listing_events` **235,383** / 22 cols. All three "unread" families landed AND typed on
+08/02–08/03.
+
+**Root cause, same shape as the 08/03 "two engines" incident one layer up:**
+`ingest/cadence_registry.yaml` `source_ceiling.summary` for listing_lifecycle still said "we persist
+3" and "root cause never landed: fetch_sold_event discards the raw body", `as_of: 08/02/2026` — while
+the registry's OWN comments twenty lines below recorded every one of those tables being built. That
+summary renders on the ops census page. Corrected it with the live counts, `as_of: 08/04/2026`, and
+opened `registry_source_ceiling_summaries_go_stale`: a hand-written summary sitting next to the facts
+it summarizes will always drift — the rendered line should be DERIVED, not typed.
+
+**Separately — and this is NOT the duplicate, and NOT new.** Operator asked whether the no-consumer
+finding was the same wiring defect fixed earlier today. It is not, and I over-framed it as a
+discovery. TWO DISTINCT THINGS:
+(a) **The duplicate — the table-vs-view DOUBLE PARSE — is genuinely fixed.** Re-verified live and
+independently this session via `pg_get_viewdef`: all three of `steadyapi_listing_events_v`,
+`steadyapi_tax_history_v`, `steadyapi_property_permits_v` read their typed table and re-parse no
+JSON. Two objects by design, one parse. Confirmed, not assumed.
+(b) **The readers having no callers is a KNOWN, already-recorded state** — `docs/standards/data-roots.md`
+already says of `lib/listings/listing-events.ts`: "reads the VIEW; **has no caller yet**." I opened
+`steadyapi_typed_readers_have_no_consumers` to track wiring all three into the email lanes, which is
+still the cheapest win available. But it is a documented gap someone else already wrote down, not
+something I found.
+
+**Apify full-scope, per operator decree** (*"leave nothing on the table, I would rather delete than
+spend money and not get"*): measured `apify_property_records` — 46 columns, and it already keeps
+`raw` jsonb (full body) + `alt_photos` jsonb + `description`, so nothing paid for was discarded. Two
+real gaps: agent/broker contacts and tax_history have no typed column (they sit in `raw` — zero extra
+spend to type), and the cache holds **26 rows / 20 distinct properties**, so nearly every build is a
+cold paid call. Handoff §3b now requires, per paid call: full body lands, which paths get typed, and
+the cache key that prevents paying twice.
+
+Handoff corrected in three places before push. It is the same lesson three times in one session: a
+summary describes the state its author saw — re-derive from the live source before planning on it.
+
 ## 2026-08-04 (Opus 5) — Handoff for the email assembly line; the live lake says "just use Apify" is not on the table yet
 
 Operator asked for a handoff so another Opus can write a plan per email — every email on ONE Common

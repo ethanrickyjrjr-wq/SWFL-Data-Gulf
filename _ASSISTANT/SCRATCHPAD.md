@@ -1,3 +1,46 @@
+## 2026-08-04 (Opus 5) — OPERATOR: "Wait, we didn't expand to all 64?????? We just fixed that last night I thought. WHAT THE FUCK????!!!!!!"
+
+RESOLVED SAME SESSION — **he was right, I was wrong, and I had already shipped the error into a
+committed handoff.** The 64-field expansion DID happen 08/02-08/03/2026. Verified live by direct
+row count 08/04: `steadyapi_property_history_raw` 17,875 rows (FULL body in jsonb) ·
+`steadyapi_tax_history` 273,051 · `steadyapi_property_permits` 79,281 ·
+`steadyapi_listing_events` 235,383. All three families are landed AND typed.
+
+  ROOT CAUSE — and it is the same shape as the 08/03 "two engines" incident, one layer over:
+  `ingest/cadence_registry.yaml` `source_ceiling.summary` for listing_lifecycle still read "we
+  persist 3 [of 64]" and "root cause never landed: fetch_sold_event discards the raw body",
+  `as_of: 08/02/2026` — TWO DAYS after the fix shipped, while the registry's OWN comment block
+  twenty lines below it recorded every table being built. That summary RENDERS ON /ops/census.
+  I read the summary, not the comments, and not the database. Fixed the line (as_of 08/04) and
+  opened `registry_source_ceiling_summaries_go_stale` — a hand-written summary next to the live
+  facts it summarizes will always drift; the rendered line should be DERIVED.
+
+  THE REAL GAP, found while checking: all three typed readers (`lib/listings/property-tax-history.ts`,
+  `property-permits.ts`, `listing-events.ts`) are built, typed and tested against live data — and
+  have **ZERO production callers.** Only their own tests import them. Free, landed, tested data with
+  no consumer. Check `steadyapi_typed_readers_have_no_consumers`.
+
+  MY RULE FROM THIS: before quoting any ceiling/"we don't have X" claim, COUNT THE ROWS. A summary
+  describes the state its author saw. This is the third time this session a stale line nearly
+  became a shipped decision.
+
+## 2026-08-04 (Opus 5) — OPERATOR: "Make sure we are bringing everything from apify. Leave nothing on the table. I would rather delete than spend money and not get."
+
+OPEN — FULL-SCOPE-FIRST FOR PAID PER-CALL SOURCES. Logged per RULE 2.
+
+  Measured live 08/04: `apify_property_records` has 46 columns and **already keeps `raw` jsonb (the
+  full body) plus `alt_photos` jsonb and `description`** — so nothing paid for has been discarded.
+  The storage design is right. Two things are not:
+  1. **Untyped-but-paid-for:** the sold scraper returns agent/broker contacts and a tax_history
+     block with NO column for either — they live only inside `raw`. Census it, type what earns a
+     column. Zero extra spend.
+  2. **Volume:** 26 rows / 20 distinct properties. Nearly every build today is a cold paid call.
+     Cache-first by property is load-bearing, not an optimization.
+
+  Rule written into the handoff §3b: never spend a paid call without landing the ENTIRE response
+  body, and never spend the same call twice. Each plan states, per paid call: full response
+  contents, which paths get typed, that raw lands, and the cache key.
+
 ## 2026-08-04 (Opus 5) — OPERATOR: "We are making this super simple. It is not hard…though I've repeated myself 59 times."
 
 OPEN — THE DESIGN HE KEEPS RESTATING. Written down so the next session inherits the DESIGN and not

@@ -143,19 +143,71 @@ on-demand call that is close to true, but **we have not stored it.**
   assume a store actor works — test it.
 - Our own actor `swfl-market-pulse` measured **$0.000665/run** (~1,500 runs per dollar).
 
-**What the lake wins at:** everything already paid for. Quota is 50k/month at 1 req/s. And
-`/property-tax-history` — an endpoint we **already call and already pay for** — returns 64 field
-paths of which we persist 3. The unread families are per-event price cuts with the vendor's own
-`days_after_listed`, a 9-year tax/assessment history that covers Collier where the county roll does
-not reach, and per-property building permits. **Those are ZERO extra calls.** That is the cheapest
-data on the board and it is sitting in a response we throw away
-(`extract_api.py fetch_sold_event` discards the raw body at its return).
+**What the lake wins at:** everything already paid for. Quota is 50k/month at 1 req/s. And the
+`/property-tax-history` families are **already landed and typed** — verified by direct row count,
+08/04/2026:
+
+```
+steadyapi_property_history_raw:  17,875 rows — the FULL response body in jsonb
+steadyapi_tax_history:          273,051 rows / 14 cols — 9-yr tax + assessment + market value
+steadyapi_property_permits:      79,281 rows / 14 cols — permit type/project/status/date
+steadyapi_listing_events:       235,383 rows / 22 cols — per-event price cuts, days_after_listed,
+                                                          source_name MLS board, status-change dates
+```
+
+**READ THIS BEFORE YOU PLAN ANY PAID CALL.** An earlier draft of this handoff said we persist 3 of
+64 field paths and throw the rest away. **That was FALSE** — it was quoted from a
+`source_ceiling.summary` in `ingest/cadence_registry.yaml` still dated 08/02/2026, two days after
+the fix shipped, while the registry's own comments twenty lines below it recorded the tables being
+built. The summary has since been corrected. **The lesson is the one this whole session keeps
+hitting: a summary describes the state its author saw. Re-derive from the live source before you
+plan against it.** Raw bodies are retained, so any field still unparsed costs ZERO paid calls to
+reach — re-census the raw body to see what's left (`statistics{}` / `meta{}` rollups had no typed
+table as of this writing). Brokerage and agent fields are a genuine vendor ceiling — zero across all
+18 endpoints.
+
+### 3b. APIFY FULL-SCOPE — operator decree 08/04/2026
+
+Verbatim: *"Make sure we are bringing everything from apify, as well. Leave nothing on the table.
+I would rather delete than spend money and not get."*
+
+This is FULL-SCOPE-FIRST (root `CLAUDE.md`) applied to a PAID, PER-CALL source, where the cost of
+under-pulling is real money rather than a re-run. **The rule: never spend a paid call without
+landing the ENTIRE response body, and never spend the same call twice.**
+
+Measured live 08/04/2026 — the storage design is already right, the volume is not:
+
+```
+apify_property_records: 46 columns, and critically it keeps
+  raw          jsonb  — the FULL response body
+  alt_photos   jsonb  — the full gallery, not just a primary
+  description  text   — the long MLS description
+…but only 26 rows across 20 distinct properties.
+```
+
+So **nothing we have paid for has been thrown away** — `raw` preserves every path. What is missing
+is typing and volume:
+
+- **Untyped but paid for:** the sold scraper returns agent/broker contacts and a `tax_history`
+  block. There is no column for either; they exist only inside `raw`. Census `raw` and decide what
+  earns a column. Zero additional spend to do this.
+- **Volume:** 20 properties cached means nearly every build today is a cold paid call. Cache-first
+  by property is not an optimization here, it is the difference between the ladder working and not.
+- **Verify before you trust a store actor:** 2 of 5 tested were junk (one failed both attempts, one
+  returned zero items). Test, then wire.
+
+**Each plan must state, per paid call: what the full response contains, which paths we type, that
+the raw body lands, and the cache key that prevents a second call for the same property.** A paid
+call whose response is not fully landed is the failure the operator named — spending money and not
+getting.
 
 **So the ladder, cheapest first — this is what each plan must specify per field:**
 
 1. **Lake / brains** — already paid, zero marginal cost. Default for everything it covers.
-2. **The already-paid response we discard** — the 61 unpersisted `/property-tax-history` fields.
-   Free. Landing them is the single highest-value cheap win in this whole job.
+2. **The already-paid response, already landed** — per-event price cuts with the vendor's own
+   days-on-market, 9-year tax and assessment history, per-property permits. Typed tables, live row
+   counts above, $0 marginal. **Most plans will find their field here and never need rung 4.**
+   Anything still unparsed sits in the retained raw body — also $0.
 3. **The user's own upload / a figure they typed** — free, and lane 2 and 4 of the four-lane moat.
 4. **Apify, per-call** — $0.007–$0.01/result. Reach for it where the lake genuinely cannot go:
    the full photo gallery, the full MLS description on a sold home, and sold events older than our
@@ -263,8 +315,10 @@ to that standard and it is not parity, it is the wedge.
    and listing body are fused in `buildLifecycleEmail`, which is why a report email cannot get the
    shared header without a listing hero). Deletes 8 byte-identical `keepOrDefault` copies. Provably
    safe: all 8 sites already pass identical geometry.
-5. **Land the 61 unpersisted fields** from the response we already pay for (§3). Cheapest data on
-   the board.
+5. **Wire the already-landed families into the email lanes** (§3) — tax history, permits, and
+   per-event price cuts are typed and populated but the email recipes do not read them. This is
+   free data with no consumer, which is the cheapest win on the board. Re-census the retained raw
+   body for anything still unparsed before assuming a paid call is needed.
 6. **Design the report grammar with the operator, one email at a time, starting with
    `listings-showcase`** — he named it, and it is the reference for the family.
 7. Then the remaining report recipes, then `showing-prep-doc.ts` (chrome AND seam in ONE change or
