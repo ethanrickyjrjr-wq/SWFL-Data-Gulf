@@ -366,3 +366,70 @@ describe("F9 — the vendor feed carries no sale dates and must not fake them", 
     expect(result.recencyVerified).toBe(true);
   });
 });
+
+describe("POOL as a comparability dimension — operator decree 08/04/2026", () => {
+  // "WE WANT SIMILAR SQ FT, STYLE, BEDS AND BATHS SAME OR CLOSE AND POOL OR NO POOL.
+  //  WE ARE FUCKING COMPARING!!!"
+  const POOL_SUBJECT: CompSubject = { sqft: 1978, beds: 3, baths: 2, zip: "33991", pool: true };
+
+  test("a pool home outranks an otherwise IDENTICAL no-pool home", () => {
+    // Identical on every other axis, so pool is the only thing that can order them.
+    const result = rankComps(
+      POOL_SUBJECT,
+      [
+        comp({ addressLine: "A no pool", pool: false }),
+        comp({ addressLine: "B has pool", pool: true }),
+        comp({ addressLine: "C no pool", pool: false }),
+      ],
+      NOW,
+    );
+    expect(result.comps[0].addressLine).toBe("B has pool");
+  });
+
+  test("pool NEVER outweighs a real size mismatch — F1, the scaling guarantee", () => {
+    // The failure this prevents: a 900 sq ft pool condo displacing a 1,950 sq ft
+    // no-pool house as the closest comp to a 1,978 sq ft home.
+    const result = rankComps(
+      POOL_SUBJECT,
+      [
+        comp({ addressLine: "tiny with pool", sqft: 1500, pool: true }),
+        comp({ addressLine: "right size no pool", sqft: 1950, pool: false }),
+        comp({ addressLine: "filler", sqft: 1900, pool: false }),
+      ],
+      NOW,
+    );
+    expect(result.comps[0].addressLine).toBe("right size no pool");
+  });
+
+  test("an UNKNOWN pool is not scored as a mismatch — absent is not 'no pool'", () => {
+    // A comp we hold no pool fact for must not be pushed below a known-no-pool comp.
+    // Scoring null as false would invent a fact about the home.
+    const known = rankComps(
+      POOL_SUBJECT,
+      [comp({ addressLine: "X", pool: false }), comp({ addressLine: "Y", pool: false })],
+      NOW,
+    );
+    const unknown = rankComps(
+      POOL_SUBJECT,
+      [comp({ addressLine: "X", pool: null }), comp({ addressLine: "Y", pool: null })],
+      NOW,
+    );
+    // The no-pool pair carries a real penalty; the unknown pair carries none.
+    expect(unknown.comps.length).toBe(known.comps.length);
+    expect(unknown.comps[0].why).not.toContain("pool");
+  });
+
+  test("the why line STATES the pool fact, both ways, in plain words", () => {
+    const withPool = rankComps(POOL_SUBJECT, [comp({ pool: true })], NOW);
+    expect(withPool.comps[0].why).toContain("pool");
+
+    const noPool = rankComps(POOL_SUBJECT, [comp({ pool: false })], NOW);
+    expect(noPool.comps[0].why).toContain("no pool");
+  });
+
+  test("a subject with no known pool never makes pool claims about its comps", () => {
+    const noSubjectPool: CompSubject = { sqft: 1978, beds: 3, baths: 2, zip: "33991", pool: null };
+    const result = rankComps(noSubjectPool, [comp({ pool: true })], NOW);
+    expect(result.comps[0].why).not.toContain("pool");
+  });
+});

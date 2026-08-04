@@ -18,6 +18,7 @@ import {
   evidenceParagraph,
   narratorClaims,
   ppsfChartMagnitude,
+  styleDifferenceNote,
   subjectDims,
 } from "./market-comps";
 import { assertHeroChartCoherence } from "@/lib/deliverable/chart-coherence";
@@ -1128,5 +1129,62 @@ describe("market-comps stays excluded from communityStats — same reasoning as 
     const claims = narratorClaims(subjectWithStats, pc);
     expect(claims.some((c) => c.sentence.includes("Heritage Bay"))).toBe(false);
     expect(claims.some((c) => /\b612,000\b/.test(c.sentence))).toBe(false);
+  });
+});
+
+// ── STYLE COMPARABILITY — operator, 08/04/2026: "WE WANT SIMILAR SQ FT, STYLE, BEDS
+// AND BATHS SAME OR CLOSE... WE ARE FUCKING COMPARING." Style must be surfaced when
+// we hold it, never invented when we don't (RULE 0.7).
+describe("styleDifferenceNote", () => {
+  it("is silent when the subject's own style is unknown", () => {
+    expect(styleDifferenceNote(null, [comp({ style: "Condo" })])).toBeNull();
+  });
+
+  it("is silent when no comp carries a real style, even if the subject does", () => {
+    expect(styleDifferenceNote("Single Family", [comp({}), comp({ style: null })])).toBeNull();
+  });
+
+  it("is silent when every known comp style matches the subject", () => {
+    expect(
+      styleDifferenceNote("Single Family", [
+        comp({ style: "Single Family" }),
+        comp({ style: "single family" }), // case-insensitive match
+      ]),
+    ).toBeNull();
+  });
+
+  it("names the ONE differing style when exactly one kind disagrees", () => {
+    const note = styleDifferenceNote("Single Family", [
+      comp({ style: "Single Family" }),
+      comp({ style: "Condo" }),
+    ]);
+    expect(note).toBe("Note: one comp is a Condo, not a Single Family.");
+  });
+
+  it("says the set mixes styles when more than one kind disagrees, never lists them all", () => {
+    const note = styleDifferenceNote("Single Family", [
+      comp({ style: "Condo" }),
+      comp({ style: "Townhouse" }),
+    ]);
+    expect(note).toBe("Note: the comps mix styles — not all are a Single Family like the subject.");
+  });
+});
+
+describe("compsFootnote — style note wiring", () => {
+  it("appends the style note onto the existing mix/derivation footnote when it fits", () => {
+    const styled = HOMES.slice(0, 2).map((c, i) => (i === 0 ? { ...c, style: "Condo" } : c));
+    const footnote = compsFootnote(SUBJECT, styled, "Single Family");
+    expect(footnote).toContain("Condo");
+  });
+
+  it("drops the style note (never the price range) when the footnote is over budget", () => {
+    const styled = HOMES.map((c, i) => (i === 0 ? { ...c, style: "Condo" } : c));
+    const footnote = compsFootnote(SUBJECT, styled, "Single Family");
+    expect(footnote).not.toContain("Condo");
+    expect(footnote).toContain("run from");
+  });
+
+  it("never fabricates a style note when subjectStyle is omitted (today's behavior, unchanged)", () => {
+    expect(compsFootnote(SUBJECT, HOMES)).not.toContain("Note:");
   });
 });

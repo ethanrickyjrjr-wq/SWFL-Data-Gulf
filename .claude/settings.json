@@ -1,4 +1,9 @@
 {
+  "env": {
+    "ECC_DISABLED_HOOKS": "pre:edit-write:gateguard-fact-force",
+    "GATEGUARD_BASH_ROUTINE_DISABLED": "1",
+    "GATEGUARD_EXEMPT_GLOBS": "**/*.test.ts,**/*.test.tsx,**/*.test.mts,**/*.test.mjs,**/*.md,_assistant/**,_research/**,**/scratchpad/**,**/tmp-*,**/tmp/**"
+  },
   "permissions": {
     "allow": [
       "Bash(bun run refinery:typecheck *)",

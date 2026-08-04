@@ -1,3 +1,34 @@
+## 2026-08-04 (Fable 5) — AUGUST DESK OPENS: Issue 002 = the launch issue; Watch graded, 47 rows triaged, big-event crawls banked
+
+Operator: *"Let's blow last month out of the water. more inference, more focus on big events and
+more outside resources… launch end of month."* Desk + collection files opened for August
+(`_FABLE5/desk/2026-08.md`, `_FABLE5/collection/2026-08.md`), FABLE5.md state block updated, check
+`insiders_issue002_august_launch` opened.
+
+**ISSUE 001'S WATCH GRADED (the Nature move, ready for print):** Marco Hilton expansion APPROVED
+3-2 by the planning board 07/31 — against a staff recommendation to DENY — now to city council
+with Rose Marina on the same docket (July's slip-scarcity pick lands there too). AA-at-APF watch
+stands. Bifurcation falsifier test PENDING on schedule: `tier_divergence_swfl` max period still
+2026-05-31 (probed live), June+July ZHVI land mid-August.
+
+**TRIAGE: 47 lake rows 07/26→08/02 → 11 picks.** Press vocabulary escalated from "cold" to
+"crash/shockwave" — and moved to RENTS. Crawl bank (all 08/04, named sources): Apartments.com July
+RentPulse via news-press — Fort Myers −3.5% / Sarasota −3.1% / Naples −3.0% = America's top 3 rent
+declines, Fort Myers #1 US concession rate 11.2%; RCLCO mid-year (primary) — top-50 MPC sales
++2.9% vs national new-home −5.6%, Wellen Park +37% / Babcock Ranch +28%; Collier preliminary tax
+roll −3.23% to ~$217.7B (assessor's own print). August thesis candidate: demand didn't die, it
+RELOCATED — across product (MPC new-build), tier (July's legs all stand), tenure (rent map
+bifurcates: Marco +10.0% while metro apartments lead national declines).
+
+**OUTSIDE-RESOURCE LANE OPENED (operator decree):** Apify reddit probe run twice (≤ ~$0.50 total,
+both capped) — keyword search returns junk (method lesson documented in collection §6), subreddit
+top-of-month URLs work. **THE FIND: r/FortMyers 08/01 — "Fort Myers looking at 10% property tax
+hike," a News-Press story our money-section capture never surfaced.** Values falling + millage
+rising = the SOH/carry-cost story with a villain and dated September hearings; hunt-list item
+opened. Plan for reddit/X/realtor harvests in collection §6 with the color-only rule (voices carry
+named source + date, never become figures). Vintage probe: Realtor market_details 07/04, Redfin
+city 05/31, `apify_property_records` 20 rows live, `lee_deed_official_records` still 0.
+
 ## 2026-08-04 (Opus 5) — KEEP WHAT WE PAID FOR: 69 fields per Apify record now persisted, plus section cards and a living-area floor
 
 Operator, on being shown the field list: *"we want all of that!!!!!!!!!!!!!!!!!!!"* — preceded by
@@ -48,6 +79,34 @@ And `style` — the field the 08/04 comp-comparability decree needs — was bein
 **NOT DONE:** `fetchCachedRecords` exists and NOTHING CALLS IT, so builds still re-buy houses already
 in the table (`apify_cached_records_unread`). `style` is stored but not wired into comp ranking.
 Handoff: `_ASSISTANT/2026-08-04-apify-record-cache-HANDOFF.md`.
+
+## 2026-08-04 (Sonnet 5) — precision follow-up: the literal `checks` row on `engine_enabled_kill_switch_owed`
+
+Operator pushed back correctly on loose phrasing in the entry below. Pulled the literal row instead
+of a summary: `engine_enabled_kill_switch_owed` — `created_at` 2026-08-02T16:13:46Z, `resolved_at`
+2026-08-03T02:28:05Z (NOT "same day 08/02" in UTC — that's US Eastern evening, not the UTC calendar
+day), `resolution=manual`, close proof verbatim: operator ran `gh variable set ENGINE_ENABLED --body
+false`, verified via `gh variable list`. `detail` is null — **no "superseded by" language anywhere
+in the row.** `engine_enabled_off_all_crons_dark` opened 2026-08-03T23:51:51Z, ~21.5 hours later, and
+its own `detail` explains why: the flag check 1 set to false is now blocking ~90 scheduled workflows.
+So: not a rename, not a reopen — two distinct, causally-chained checks about opposite directions of
+one flag. The earlier correction (below) was substantively right; this entry fixes only its imprecise
+date and removes an implied "superseded" framing the actual close note doesn't contain.
+
+## 2026-08-04 (Sonnet 5) — correcting my own earlier entry below: `engine_enabled_kill_switch_owed` was real
+
+Earlier today I closed out the SteadyAPI↔LeePA handoff and flagged that check key as nonexistent —
+wrong. `check.mjs list` only shows `state=eq.open`; I never queried closed state. Direct query of
+`public.checks` for the key in ANY state: it's real, opened 08/02/2026, closed same day (`done`) —
+it asked the operator to flip `ENGINE_ENABLED` OFF (a 3rd kill-switch layer after workflow-disable
+alone didn't hold on 07/19), and that happened. `engine_enabled_off_all_crons_dark` (opened 08/03) is
+a distinct check about the opposite direction — flipping the flag back ON — not a rename or reopen.
+Corrected the two authoritative citing files (`data-roots.md`, the raw-landing playbook) to the right
+key; annotated the 08/03 Step 3 handoff in place rather than rewriting it (its claim was already
+stale when written, which is worth keeping visible, not erasing). The 08/02 DOM handoff needed
+nothing — its citation is accurate history. The close-out handoff's own follow-up annotation is also
+wrong in the same way and still needs this fix, but that file is actively claimed by a parallel
+session right now; deferring rather than overriding the claim.
 
 ## 2026-08-04 (Sonnet 5) — SteadyAPI↔LeePA close-out: 3 checks closed, 1 opened, all findings verified live
 

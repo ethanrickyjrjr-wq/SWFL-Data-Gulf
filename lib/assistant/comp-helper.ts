@@ -54,6 +54,10 @@ export interface RenderComp {
   /** Captured realtor.com detail URL for FUNCTIONAL links (email comp rows).
    *  Chat prose + compSources ignore it — citations stay domain-level. */
   sourceUrl: string | null;
+  /** The vendor's own style/property-type label (e.g. "Single Family", "Condo"),
+   *  when the paid Apify enrichment lane covered this comp. Never derived, never
+   *  guessed — absent means we simply don't hold it for this comp. */
+  style?: string | null;
 }
 
 export interface CompResult {

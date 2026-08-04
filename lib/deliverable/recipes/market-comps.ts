@@ -86,6 +86,7 @@
 import { compSources, compsForAddress, type RenderComp } from "@/lib/assistant/comp-helper";
 import { resolveCompPhotos } from "@/lib/listings/comp-photos";
 import { fetchApifyComps } from "@/lib/listings/apify-comps";
+import { pickAddressMatch, resolveCompEnrichment } from "@/lib/listings/apify-identity";
 import {
   buildDescriptionBlock,
   upsertDescriptionBlock,
@@ -218,35 +219,65 @@ function priceKindPhrase(c: RenderComp): string {
 export async function resolveCompThumbnails(
   comps: RenderComp[],
   zip?: string,
-): Promise<Map<string, string>> {
+): Promise<{
+  thumbnails: Map<string, string>;
+  styles: Map<string, string>;
+  listingUrls: Map<string, string>;
+}> {
+  const thumbnails = new Map<string, string>();
+  const styles = new Map<string, string>();
+  const listingUrls = new Map<string, string>();
   try {
-    return await resolveCompPhotos(comps, {
-      // ── LANE 2 · the PAID Apify fallback ──────────────────────────────────
-      // Lane 1 is our nightly sweep, whose photo window opened 06/30/2026. A comp
-      // set reaches back 6-12 months, so MOST of a comp set predates our own
-      // collection and resolves to nothing — the 98.5% coverage figure in
-      // comp-photos.ts is coverage INSIDE that window only, and quoting it against
-      // a comp lookback is the mistake the handoff was written to stop.
-      //
-      // It runs ONLY on lane 1's misses (a fully-covered set never spends a cent),
-      // it is CAPPED, and it never runs without a ZIP to scope it. Empty is normal.
-      enrich: zip
-        ? (missing) =>
-            fetchApifyComps({
-              location: zip,
-              listingType: "sold",
-              // Cost gate: bounded by what we actually need, never the vendor's
-              // "0 = unlimited" default. Design §3.
-              maxResults: Math.min(missing.length * 4, 40),
-            })
-        : undefined,
-    });
+    // ── LANE 1 · OUR OWN LAKE. Free. Photos only; the nightly sweep's window opened
+    // 06/30/2026, so a comp set reaching back 6-12 months mostly predates it and this
+    // lane legitimately returns little. NO `enrich` here on purpose — lane 2 is now a
+    // per-address lookup and no longer belongs inside the photo resolver.
+    for (const [k, v] of await resolveCompPhotos(comps)) thumbnails.set(k, v);
+
+    // ── LANE 2 · CACHE FIRST, then ONE VERIFIED LOOKUP PER HOUSE.
+    //
+    // *** THIS REPLACED A ZIP-WIDE SAMPLE THAT COULD NEVER JOIN. *** The old lane asked
+    // the vendor for ~24 arbitrary sold homes in the ZIP and tried to key them onto six
+    // SPECIFIC comps. Measured live 08/04/2026: 24 records returned, all with real
+    // photos, intersection with our comp set 0 of 6 — every build, by construction, with
+    // no error anywhere. See lib/listings/apify-identity.ts for the full postmortem.
+    //
+    // `resolveCompEnrichment` reads `data_lake.apify_property_records` first (free, and
+    // the reason we stop re-buying the same houses), then pays for at most one verified
+    // call per remaining comp. It returns the LISTING URL too — the Lee lake comp lane
+    // sets `sourceUrl: null` (comp-helper.ts:291) because deed data carries no listing
+    // page, which is why every comp row rendered unlinked.
+    const enrichment = await resolveCompEnrichment(
+      comps.map((c) => ({
+        addressLine: c.addressLine,
+        city: c.city,
+        // A recorded sale lives in the `sold` index; a valuation or last-list is an
+        // ACTIVE record and lives in `for_sale`. Asking the wrong index returns only
+        // this house's neighbours, every one of which `matchesAddress` correctly
+        // rejects — an empty slot with no error, which is the failure shape this whole
+        // module exists to kill.
+        listingType: (c.priceKind === "sold" ? "sold" : "for_sale") as "sold" | "for_sale",
+      })),
+      { state: "FL", zip, maxPaidLookups: MAX_COMPS },
+    );
+    for (const [addressLine, e] of enrichment) {
+      // The lake's photo ALWAYS wins — we never pay to replace a free hit.
+      if (e.photoUrl && !thumbnails.has(addressLine)) thumbnails.set(addressLine, e.photoUrl);
+      if (e.listingUrl) listingUrls.set(addressLine, e.listingUrl);
+      if (e.style) styles.set(addressLine, e.style);
+    }
+    return { thumbnails, styles, listingUrls };
   } catch {
-    return new Map(); // a photo miss is an empty slot, never a build failure
+    // A miss is an empty slot, never a build failure.
+    return { thumbnails, styles, listingUrls };
   }
 }
 
-function compRow(c: RenderComp, thumbUrl?: string): ListItem {
+/** @param listingUrl the vendor listing page resolved for THIS comp. The Lee lake comp
+ *  lane sets `sourceUrl: null` (deed data has no listing page), so without this every
+ *  row rendered unlinked — breaking the half of the decree that survives a missing
+ *  photo: "no photo -> still a link, never a placeholder image." */
+function compRow(c: RenderComp, thumbUrl?: string, listingUrl?: string): ListItem {
   const ppsf = perSqft(c.price, c.sqft);
   const lead = [usd(c.price as number), ppsf ? `${usd(ppsf)}/sq ft` : ""]
     .filter(Boolean)
@@ -262,7 +293,7 @@ function compRow(c: RenderComp, thumbUrl?: string): ListItem {
   return {
     lead: lead.slice(0, 40),
     text: text.slice(0, 200),
-    ...(c.sourceUrl ? { linkUrl: c.sourceUrl } : {}),
+    ...(c.sourceUrl || listingUrl ? { linkUrl: c.sourceUrl ?? listingUrl } : {}),
     ...(thumbUrl ? { imageUrl: thumbUrl, imageAlt: `Listing photo of ${c.addressLine}` } : {}),
   };
 }
@@ -431,7 +462,34 @@ export function ppsfChartMagnitude(spec: ChartSpec): ChartMagnitude | null {
  * Never truncated mid-number: the schema caps a footnote at 120 characters, so we pick
  * the longest CANDIDATE that fits rather than slicing a "$173–$266" in half.
  */
-export function compsFootnote(facts: ListingFacts, comps: RenderComp[]): string | undefined {
+/**
+ * Real, sourced style comparison — never invented. Fires ONLY when the subject AND at
+ * least one comp both carry a real vendor style string and they disagree. Operator,
+ * 08/04/2026: "point out major community differences...if any" — applied to structural
+ * style the same way. Silent when either side is unknown (RULE 0.7: an open slot, never
+ * a guess).
+ */
+export function styleDifferenceNote(
+  subjectStyle: string | null | undefined,
+  comps: { style?: string | null }[],
+): string | null {
+  const subject = subjectStyle?.trim();
+  if (!subject) return null;
+  const differing = comps
+    .map((c) => c.style?.trim())
+    .filter((s): s is string => !!s && s.toLowerCase() !== subject.toLowerCase());
+  if (!differing.length) return null;
+  const distinct = [...new Set(differing.map((s) => s.toLowerCase()))];
+  return distinct.length === 1
+    ? `Note: one comp is a ${differing[0]}, not a ${subject}.`
+    : `Note: the comps mix styles — not all are a ${subject} like the subject.`;
+}
+
+export function compsFootnote(
+  facts: ListingFacts,
+  comps: RenderComp[],
+  subjectStyle?: string | null,
+): string | undefined {
   const derived = pricePerSqft(facts.price, facts.sqft) ? "*$/Sq Ft = price ÷ listed sq ft." : "";
 
   const ppsf = compPpsfs(comps);
@@ -446,10 +504,12 @@ export function compsFootnote(facts: ListingFacts, comps: RenderComp[]): string 
   const mix = comps.length
     ? `The ${comps.length} comparable ${homes}${mixParen(comps)}${range}.`
     : "";
+  const styleNote = styleDifferenceNote(subjectStyle, comps) ?? "";
 
-  const full = [derived, mix].filter(Boolean).join(" ");
+  const full = [derived, mix, styleNote].filter(Boolean).join(" ");
+  const mixPlusStyle = [mix, styleNote].filter(Boolean).join(" ");
   // Longest-that-fits, in order of what a reader loses least by losing.
-  for (const candidate of [full, mix, derived]) {
+  for (const candidate of [full, mixPlusStyle, mix, derived]) {
     if (candidate && candidate.length <= 120) return candidate;
   }
   return undefined;
@@ -471,6 +531,7 @@ function sized(block: Omit<EmailBlock, "layout">, h: number): ChromeBlock {
 function compsMiddle(
   comps: RenderComp[],
   thumbnails: Map<string, string> = new Map(),
+  listingUrls: Map<string, string> = new Map(),
 ): ChromeBlock[] {
   const blocks: ChromeBlock[] = [
     sized(
@@ -506,7 +567,9 @@ function compsMiddle(
           type: "list",
           props: {
             title: mixTitle(comps),
-            items: comps.map((c) => compRow(c, thumbnails.get(c.addressLine))),
+            items: comps.map((c) =>
+              compRow(c, thumbnails.get(c.addressLine), listingUrls.get(c.addressLine)),
+            ),
           },
         },
         Math.max(4, comps.length + 2),
@@ -566,6 +629,11 @@ export function buildCompsGrid(
   /** The subject's real listing page, when we hold one. Falls back to `facts.sourceUrl`
    *  — which is our own site — only because there is nothing better to point at. */
   listingUrl: string | null = null,
+  /** The subject's own vendor style label, when the Apify subject-record fetch ran.
+   *  Absent whenever that fetch didn't need to run — never guessed. */
+  subjectStyle: string | null = null,
+  /** Per-comp listing pages resolved by the enrichment lane. */
+  listingUrls: Map<string, string> = new Map(),
 ): EmailDoc {
   const destination = listingUrl ?? facts.sourceUrl;
   const doc = buildLifecycleEmail(current, {
@@ -583,8 +651,8 @@ export function buildCompsGrid(
     heroValue: facts.price ?? "",
     heroLabel: addressLineOf(facts),
     specs: compsSpecs(facts, comps),
-    specFootnote: compsFootnote(facts, comps),
-    middle: compsMiddle(comps, thumbnails),
+    specFootnote: compsFootnote(facts, comps, subjectStyle),
+    middle: compsMiddle(comps, thumbnails, listingUrls),
     // EMPTY — the narrator fills it (fillNarrative). Unwritten → an open slot.
     narrative: "",
     tail: compsTail(comps),
@@ -1331,7 +1399,13 @@ export async function buildMarketComps(ctx: RecipeBuildContext): Promise<EmailDo
   // satellite aerial, never any other stand-in image (operator decree 08/03/2026).
   // A comp we cannot photograph ships without a picture and keeps its realtor.com
   // link — the PER-ROW contract stated in comp-photos.ts's own header.
-  const thumbnails = await resolveCompThumbnails(comps, facts.zip);
+  const { thumbnails, styles, listingUrls } = await resolveCompThumbnails(comps, facts.zip);
+  // Style rides onto the SAME comp objects everything downstream already reads —
+  // one shape, not a second parallel map to keep in sync. Absent = open slot.
+  const compsStyled = comps.map((c) => ({
+    ...c,
+    style: styles.get(c.addressLine) ?? null,
+  }));
 
   // ── THE SUBJECT'S OWN RECORD — fetched ONCE, used twice ─────────────────────
   // Operator, 08/03/2026: *"WHY THE FUCK DOES THE BUTTON LINK BACK TO OUR SITE AND NOT
@@ -1348,19 +1422,40 @@ export async function buildMarketComps(ctx: RecipeBuildContext): Promise<EmailDo
   // This does not make us the destination by default — `applyBrand` still rewrites the
   // button to the agent's own saved URL when they have one. It stops us shipping OUR
   // homepage as the fallback when a real listing page exists.
+  // *** THE RETURNED RECORD IS VERIFIED TO BE THIS HOUSE. NEVER `[0]`. ***
+  // `location` is a SEARCH AREA, not a lookup key — passing the subject's own address
+  // returns homes NEAR it, in the vendor's own order. Measured live 08/04/2026: a query
+  // on 8348 Southwindbay Cir, Fort Myers 33908 returned 306 Chattanooga Dr, Fort Myers
+  // 33905 as record [0], and that stranger's listing shipped as BOTH the hero photo link
+  // and the "Find Out More" CTA, and fed `subjectStyle` into the footnote. Extra rows are
+  // requested precisely so the true match can sit behind a neighbour; `pickAddressMatch`
+  // then takes the one that IS this address, or nothing at all.
   const needsSubjectRecord = !facts.remarks || !isListingUrl(facts.sourceUrl);
   const subjectRecord = needsSubjectRecord
-    ? ((
+    ? pickAddressMatch(
         await fetchApifyComps({
           location: facts.address,
           listingType: "for_sale",
-          maxResults: 1,
-        }).catch(() => [])
-      )[0] ?? null)
+          maxResults: 5,
+        }).catch(() => []),
+        (facts.address ?? "").split(",")[0] ?? "",
+        (facts.address ?? "").split(",")[1] ?? "",
+      )
     : null;
   const listingUrl = subjectRecord?.property_url?.trim() || null;
+  // Free byproduct of the SAME subject-record fetch above — never a dedicated call
+  // just for style. Null whenever that fetch didn't need to run.
+  const subjectStyle = subjectRecord?.style?.trim() || null;
 
-  let doc = buildCompsGrid(facts, comps, currentDoc, thumbnails, listingUrl);
+  let doc = buildCompsGrid(
+    facts,
+    compsStyled,
+    currentDoc,
+    thumbnails,
+    listingUrl,
+    subjectStyle,
+    listingUrls,
+  );
 
   // ── THE CHART — $/SQ FT, and the retirement of the price-bar version.
   //

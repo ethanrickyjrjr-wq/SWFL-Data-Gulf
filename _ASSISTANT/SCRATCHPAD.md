@@ -1,3 +1,100 @@
+## 2026-08-04 (Opus 5) — OPERATOR: "fix and all and get me a fucking email to hello@swfldatagulf.com / write the fucking recipe so no one fucks up any more"
+
+OPEN — in progress this session.
+
+Raised right after the comps email was finally built and looked at and came back **0 of 6 photos,
+0 of 6 links**, plus a **wrong-house CTA** (subject 8348 Southwindbay Cir 33908; the hero photo link
+and "Find Out More" both pointed at 306 Chattanooga Dr, **33905**). Findings:
+`_ASSISTANT/2026-08-04-comp-photos-FINDINGS.md`.
+
+**The gripe underneath the words:** the same surface keeps getting "fixed" and nobody drives it
+live, so the next session inherits a claim instead of a working email. He is asking for three
+things and all three are the deliverable — not one of them alone:
+  1. FIX it (photos, links, wrong-house CTA),
+  2. SEND a real email to hello@swfldatagulf.com so it is proven in an inbox, not in a test,
+  3. WRITE THE RECIPE — a durable doc so the next session cannot re-make this mistake.
+
+**Root cause to encode in the recipe:** a vendor AREA SEARCH was consumed as an EXACT ADDRESS
+LOOKUP, with no identity check on the record coming back. ZIP-wide sampling can never join to a
+specific comp set. Two symptoms, one bug.
+
+## 2026-08-04 (Opus 5) — OPERATOR: "why the fuck are these things unwired and why the fuck are we not bringing in data we need!!!! get everything"
+
+OPEN. He is right and the answer is not "we forgot." **Every one of these was FOUND, WRITTEN DOWN,
+and then the writing-down was treated as the finish line.** That is the documented failure of RULE
+0.8 and RULE 2.4 — recording a gap is not closing a gap, and a `checks` row is not a wire.
+
+The specific mechanism, per item:
+- **pool** — pulled 07/22 into `leepa_comparable_sales`, 100% fill. The 08/02 view change added
+  `c.bedrooms, c.bathrooms` off the SAME lateral join and did not add `c.pool`. Nobody asked for
+  pool that day, so it wasn't taken. **The join was already open.**
+- **39 tax-history fields** — the 08/02 census counted them exactly and named the root cause
+  (`extract_api.py` `fetch_sold_event` discards the raw body at its `return`). An execution brief
+  was written (`plans/2026-08-02-steadyapi-raw-landing-playbook.md`). The brief was never run.
+- **`building_permits[]`** — ranked #2 on the should-get list with "ZERO new calls" next to it,
+  since 07/16. Still unbuilt on 08/04.
+- **LeePA layers 19/21/22** — one check, 16 days untouched.
+- **sold-home MLS description** — proven live 08/03 with real money spent, then the actor was
+  never wired; only `moving_beacon` is in code.
+
+**THE PATTERN:** we pay for a call, parse the one field the current ticket needs, and drop the
+other 39 on the floor — then a later session "discovers" them and writes another document. Research
+volume is not the problem; **conversion from research to wire is.** Four documents on pool, zero
+lines of pool in the view.
+
+**DONE THIS SESSION (not deferred to another doc):** Lee pool SHIPPED — migration
+`docs/sql/20260804_lee_comp_sales_v_pool.sql` applied and live-verified through PostgREST
+(real row: 2607 SE 23RD AVE, Cape Coral 33904, 4,464 sqft, 3bd/2ba, pool=Pool, 05/2026,
+$799,900). Coverage on the 6-month window the ranker reads: 7,126 rows, 6,989 pool-known,
+2,289 Pool / 4,700 No Pool. 9 TDD tests written failing first; 278 pass lib/assistant,
+262 pass lib/listings, `tsc --noEmit` exit 0.
+
+**ONE SPOT enforced (operator, mid-session: "make sure everything is going to one spot"):**
+`poolFromSource` is the single normalisation point and `lee_comp_sales_v.pool` the single
+root. Also found and killed a genuine SECOND LANE — my own `lib/listings/apify-style.ts`
+(00:00) had been superseded by the parallel session's `apify-identity.ts` (02:40), which
+market-comps.ts actually consumes; mine had ZERO importers. Deleted, backed up to scratchpad.
+
+**MEASURED, still unbuilt — the bodies are ALREADY BOUGHT AND STORED:**
+`steadyapi_property_history_raw` holds 17,875 landed bodies containing **79,281 building-permit
+rows across 12,946 properties** and **273,051 tax-year rows across 16,514 properties, 2007–2025
+(the one valuation series that reaches COLLIER)**. Zero new vendor calls to type either.
+Checks `steadyapi_raw_permits_typed_table` + `steadyapi_raw_tax_history_typed_table`.
+This also makes `permits_spine_thin_collier_missing`'s "NOT buildable" verdict stale for the
+per-property case — 79,281 vs the 300 rows it was opened against.
+
+**PERMITS SHIPPED TOO (operator: "yes" — keep going down the free list).**
+`steadyapi_property_permits_v` live: **79,281 permit rows / 12,946 properties, zero paid
+calls**, parsed out of bytes bought 08/02–08/03. Consumer `lib/listings/property-permits.ts`
++ 8 TDD tests. End-to-end live read verified through PostgREST. 548 pass, `tsc` exit 0.
+Built as a **VIEW not a table** — data-roots rule 4 says roots are views, the bytes are
+already immutable, and a second copy buys only a staleness window and another cron.
+
+**TWO NUMBERS I HAD TO CORRECT ON MYSELF THIS SESSION — both caught by re-deriving:**
+1. I said "7,274 exact-duplicate permit groups." Under the LOOSE key (property+type+status+
+   date) that is right — 12,371 surplus rows, 15.6%. Under the EVERY-FIELD key it is **673
+   groups / 882 rows (1.1%)**, a 14× gap, because rows share a type and date while carrying
+   different project_type tags. `dedupePermits` collapses only the byte-identical kind:
+   over-merging destroys history, double-counting only inflates a count. Check
+   `steadyapi_permits_duplicate_rows`.
+2. I told the operator the tax-history series "covers Collier where LEEPA doesn't reach."
+   **WRONG** — the playbook explicitly corrects that shorthand: `collier_parcels` IS the FDOR
+   pull, Collier is already covered, and Steady is not a valuation authority for either
+   county. Its real value is the THIRD cross-source validation family + annual tax paid.
+   Check detail corrected.
+
+**Source dirt found and guarded, not swallowed:** 4 permits parse to absurd futures
+("Feb 14, 2282"; "Aug 1, 2269" ×3, one of them status *Final*). Parsed date is NULLed outside
+[1900-01-01, today]; the raw string is always kept so nothing is destroyed and the garbage
+stays inspectable. Verified the string "2269" cannot reach a reader.
+
+**NOT DONE, named:** the data-roots.md lines for BOTH new roots (pool + permits) —
+`repolith` reports the file claimed by session cd04b1f2 with their own uncommitted edit, so
+per RULE 1.5 I did not override. Paste-ready text for both is in check
+`data_roots_pool_root_line_owed`. Nothing is pushed.
+
+---
+
 ## 2026-08-04 (Opus 5) — OPERATOR: "make sure we can get any and all data for a property we can" — and the pool premise was wrong
 
 RESOLVED (the premise) + OPEN (the wiring, check `market_comps_pool_comparability`, now relabeled).

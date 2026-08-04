@@ -50,11 +50,15 @@ export interface LeeCompSaleRow {
    *  Null when the join found no row or the count failed the view's sanity ceiling. */
   beds: number | null;
   baths: number | null;
+  /** RAW source string from LeePA layer 23 — 'Pool' or 'No Pool', populated on
+   *  108,848 of 108,848 rows (08/04/2026). Normalised by `poolFromSource`; never
+   *  read as a boolean directly. */
+  pool: string | null;
 }
 
 export const LEE_COMP_VIEW = "lee_comp_sales_v";
 export const LEE_COMP_COLUMNS =
-  "parcel_strap, address_line, city, zip_code, living_area_sqft, year_built, dor_use_code, sale_month, sale_price, beds, baths";
+  "parcel_strap, address_line, city, zip_code, living_area_sqft, year_built, dor_use_code, sale_month, sale_price, beds, baths, pool";
 
 /** Row cap. The bounded-read guard (failure mode F6) — a comp lookup must never
  *  approach a scan of a 387k-row view. Comfortably above any real ZIP's 6-month
@@ -112,6 +116,27 @@ function saneHomeCount(n: number | null | undefined): number | null {
 }
 
 /**
+ * PURE. The LeePA pool string -> a three-state fact.
+ *
+ * THE ONE PLACE this translation happens. `leepa_comparable_sales.pool` is the literal
+ * source string 'Pool' / 'No Pool' and it is the ONLY pool root we serve — any other
+ * surface that needs pool reads `lee_comp_sales_v`, never a second lane and never its
+ * own string test (data-roots RULE 0.55, one root per concept).
+ *
+ * 'No Pool' -> FALSE, deliberately, because it is a MEASURED fact and not a gap.
+ * Anything the source did not say — null, empty, or a value we do not recognise —
+ * stays NULL. Guessing FALSE from absence would invent a fact about a home, and the
+ * ranker treats null as "don't score this axis" precisely so it can't.
+ */
+export function poolFromSource(raw: string | null | undefined): boolean | null {
+  if (typeof raw !== "string") return null;
+  const v = raw.trim().toLowerCase();
+  if (v === "pool") return true;
+  if (v === "no pool") return false;
+  return null;
+}
+
+/**
  * PURE. One view row -> a rankable candidate, or null when the row cannot honestly
  * serve as a comp. Dropped rather than defaulted: a missing sale date, a missing
  * living area (that is land), or a missing address (a comp the reader cannot verify).
@@ -132,6 +157,9 @@ export function lakeRowToCandidate(row: LeeCompSaleRow): CompCandidate | null {
     // absent features rather than scoring them as zero.
     beds: saneHomeCount(row.beds),
     baths: saneHomeCount(row.baths),
+    // Pool rides the SAME lateral join that already produced beds/baths — zero extra
+    // cost, zero extra call. It sat one unselected line away from 08/02 to 08/04.
+    pool: poolFromSource(row.pool),
     sqft: row.living_area_sqft,
     price: row.sale_price ?? null,
     priceDate: row.sale_month,

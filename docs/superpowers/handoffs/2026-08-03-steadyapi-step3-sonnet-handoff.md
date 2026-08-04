@@ -107,6 +107,11 @@ envelope change fails loud instead of landing zero rows green.
 - **Crons are OFF by design** (`Nightly Chain` + `ingest-listing-lifecycle` disabled;
   `engine_enabled_kill_switch_owed` still operator-owed). Step 3 needs NO crons — parsing is
   one-shot against stored bytes. Re-enable is Step 5, NOT yours.
+  **ANNOTATED 08/04/2026 (not rewritten — this line was already stale when written):**
+  `engine_enabled_kill_switch_owed` was closed (`state=done`) same day it was opened, 08/02/2026 —
+  it asked the operator to turn the flag OFF, which happened. The re-enable obligation this
+  paragraph is actually pointing at lives under a distinct check, `engine_enabled_off_all_crons_dark`
+  (opened 08/03/2026), which was still open as of this annotation.
 - **Step 4 is NOT yours either** — scalars onto `listing_state` (`days_after_listed` etc.) carry
   the `_ENRICH_ONLY_COLS` twice-fired gun (wiped `listed_date` 07/19, `baths` 07/26). Step 3's
   own tables don't touch that merge path; that's the point of separate tables.

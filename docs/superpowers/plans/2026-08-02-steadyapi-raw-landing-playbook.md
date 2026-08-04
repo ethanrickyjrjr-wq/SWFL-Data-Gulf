@@ -39,7 +39,9 @@ free SQL query against bytes already paid for.
   (`upsert_state` `_ENRICH_ONLY_COLS` line ~195), `backfill_listed_date.py` (the runner Sonnet executes).
 - **Checks (live tracking):** `steadyapi_pth_raw_landing_before_backfill` (Step 1) ·
   `dom_backfill_repull_17k` (Step 2 — USE THIS, do not open a new one) ·
-  `engine_enabled_kill_switch_owed` (operator-owed) · `should_i_sell_property_tax_source` (false
+  `engine_enabled_off_all_crons_dark` (operator-owed re-enable; `engine_enabled_kill_switch_owed`
+  was the earlier, already-closed 08/02 check that asked the operator to turn the flag OFF) ·
+  `should_i_sell_property_tax_source` (false
   premise, fixable at Step 3) · `permits_spine_thin_collier_missing` (served by Step 3).
 - **Provenance rule (operator decree):** user-facing `source_tag`/citations say **"realtor.com"**,
   NEVER "SteadyAPI" (access layer). `docs/steadyapi-capability-census.md` header.

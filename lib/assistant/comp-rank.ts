@@ -34,6 +34,14 @@ export interface CompSubject {
   beds: number | null;
   baths: number | null;
   zip: string | null;
+  /** TRUE = has a pool · FALSE = measured as having none · NULL = we hold no pool fact.
+   *
+   *  The three-state is load-bearing. "No pool" is a MEASURED FACT in the Lee source
+   *  (`leepa_comparable_sales.pool` is the literal string 'No Pool' and is populated on
+   *  108,848 of 108,848 rows, 08/04/2026), so collapsing it to null would make a
+   *  pool-less home indistinguishable from a home we know nothing about — and the
+   *  ranker would stop penalising the very mismatch the operator asked it to weigh. */
+  pool?: boolean | null;
 }
 
 /** A candidate comp, in the shape both feeds can produce. */
@@ -62,6 +70,9 @@ export interface CompCandidate {
    *  never recorded, which is invented precision. The grain travels with the value so a
    *  feed cannot silently launder month data as an exact date. */
   dateGrain?: "day" | "month";
+  /** TRUE = has a pool · FALSE = measured as having none · NULL = unknown.
+   *  Same three-state contract as `CompSubject.pool` — never guess FALSE from absence. */
+  pool?: boolean | null;
 }
 
 export interface RankedComp extends CompCandidate {
@@ -141,6 +152,13 @@ const W_BEDS = 0.5;
 const W_BATHS = 0.3;
 const W_ZIP = 0.4;
 const W_RECENCY = 0.2;
+// POOL — operator decree 08/04/2026: "SIMILAR SQ FT, STYLE, BEDS AND BATHS SAME OR CLOSE
+// AND POOL OR NO POOL. WE ARE FUCKING COMPARING!!!" Sized deliberately BETWEEN a bed
+// mismatch (0.5) and a bath mismatch (0.3): a pool is worth more than a bathroom and
+// less than a bedroom. The ceiling that matters is F1 — it must never outrank a real
+// size gap. A 1,500 vs 1,978 sq ft mismatch scores 0.83, so at 0.45 a pool can never
+// pull a too-small home above a right-sized one. Applied ONLY when both sides are known.
+const W_POOL = 0.45;
 
 const MONTHS = [
   "January",
@@ -215,6 +233,11 @@ function score(subject: CompSubject, c: CompCandidate, now: Date, windowMonths: 
   // Phase 1's ONLY geographic signal — the vendor feed has no coordinates.
   if (subject.zip && c.zip && subject.zip !== c.zip) s += W_ZIP;
 
+  // Pool, only when BOTH sides carry a real fact. An unknown pool scores ZERO — the
+  // same treatment beds/baths get — so a comp we hold no pool fact for is never pushed
+  // below a comp we know has the wrong answer. Penalising absence would invent a fact.
+  if (subject.pool != null && c.pool != null && subject.pool !== c.pool) s += W_POOL;
+
   // Fresher sale scores better, normalized across the window so it can never
   // outweigh a genuine size or shape mismatch.
   if (c.priceDate) {
@@ -244,6 +267,10 @@ function whyLine(subject: CompSubject, c: CompCandidate): string {
     c.baths != null ? `${c.baths} bath` : "",
   ].filter(Boolean);
   if (shape.length) parts.push(shape.join(" / "));
+
+  // Spoken only when BOTH sides are known — otherwise the line would assert a pool
+  // fact about a home whose pool status nobody measured.
+  if (subject.pool != null && c.pool != null) parts.push(c.pool ? "pool" : "no pool");
 
   if (subject.zip && c.zip) parts.push(c.zip === subject.zip ? "same ZIP" : `ZIP ${c.zip}`);
 

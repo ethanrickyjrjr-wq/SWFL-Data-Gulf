@@ -41,11 +41,11 @@ ledger land in `runs/insiders-runs/<stamp>/`. Sends are operator commands only
 
 ## State of the desk (≤5 lines, update each visit)
 
-- 07/19/2026 eve: Realtor.com June-2026 alignment BANKED (operator screenshots + crawl4ai) — lake
-  corroborated; Lehigh sole inventory riser +3.74% = 5th bifurcation leg; PMMS 6.55% backdrop
-  cleared; sources→closed accordion decree; charts mapped to bklit email frames. **One Community
-  pair REGRAINED (operator catch — Lehigh is a CITY, city grain only): now Olympia Pointe $203,251
-  vs Aqualane Shores $7,404,579, 36.4x, size/vintage twins — collection §8.** Historical series +
-  receipts closer remain; 3 evening news rows all skips. Press run → tonight.
-- 07/17: 6 rows → 2 picks, airports; ZORI third leg. 07/16: thesis → bifurcation; collection
-  started. 07/11: first triage, luxury-diffusion candidate. 07/10: desk opened. No issue shipped.
+- 08/04/2026: AUGUST OPENS (Issue 002 = launch issue, end of month; operator: more inference, big
+  events, outside resources — reddit/X/realtor via Apify+SteadyAPI). 47 rows → 11 picks; press
+  escalated to "crash/shockwave" on RENTS (Apartments.com: Ft Myers/Naples top US declines) while
+  RCLCO shows Wellen +37%/Babcock +28% — thesis candidate: demand RELOCATED (product/tier/tenure).
+  **Watch graded: Marco Hilton APPROVED 3-2 over staff denial → city council (w/ Rose Marina).**
+  Collier prelim roll −3.23% to $217.7B banked. June ZHVI not landed (tier test pending mid-Aug).
+- 07/26: Issue 001 composed dry-green; gated read live at /insiders/001 (07/26 rebuild). July
+  history: see desk/2026-07.md + collection/2026-07.md.

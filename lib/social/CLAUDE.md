@@ -62,6 +62,95 @@ and it was wrong in the repo, in writing, from a prior session. Committed plans 
 hallucinated (`feedback_inherited-plan-skepticism`). A vendor-surface claim in a plan gets verified
 in-session or it does not get built on.
 
+## 0.4 — WRITING THE POST. Read before typing a caption or picking a size.
+
+**Locked 08/04/2026 by operator decree, verbatim: *"WRITE A HANDOFF TO SONNET TO FIND HOW TO
+ACTUALLY WRITE ON SOCIAL MEDIA AND HOW TO MAKE BETTER LOOKING POSTS AND CLICK GENERATING
+GRAPHICS."*** Full evidence + every source URL: `_RESEARCH/email-and-social/2026-08-04-social-copy-and-graphics.md`
+(3-agent crawl4ai/WebSearch fan-out). Same shape as `docs/standards/emails.md` §0 — numbers, not
+prose. **Scope: Bluesky (proven live), X, LinkedIn, Instagram, Facebook** — not TikTok, we can't
+execute a TikTok strategy (RULE 11).
+
+### Copy
+- **LENGTH is platform-specific and NOT uniformly "shorter is better."** Bluesky caps at 300
+  graphemes / 3,000 UTF-8 bytes (official lexicon) — links are NOT auto-shortened, budget for the
+  URL. LinkedIn is the one platform that rewards length: **1,301–2,500 chars = a 27% engagement
+  lift** over under-400-char posts (AuthoredUp, 372,126 posts, Sept 2025–Feb 2026). Instagram's
+  length sweet spot is UNRESOLVED — the one dataset found is stale (2023) and a newer number is
+  untraceable. Do not invent a target for Instagram; use judgment, not a fabricated number.
+- **LINKS: never in the X post body.** Buffer, 18.8M X posts through 08/2025: link posts from
+  regular accounts land at **~0% engagement** vs. ~0.40% for text. **Put the link in a reply.**
+  LinkedIn: officially denied as a penalty (LinkedIn's own Sr. Director of Product) but independent
+  data reports 18.8–60% reach reduction with a link in-body — write the post to stand alone without
+  the link regardless of which side is right. Instagram/Facebook: no vendor statement either way —
+  link-in-bio/first-comment is standard practice, not proven.
+- **HASHTAGS: real reach, not just aesthetics.** Instagram's Adam Mosseri, on record: hashtags are
+  "not a way to get more reach" — search/categorization only. Instagram cut per-post hashtags 30→5
+  and killed hashtag-follow 12/2024. On Bluesky a hashtag is a pure cost (eats the 300-grapheme
+  budget) with zero proven discovery benefit. No comparable statement exists for X or LinkedIn —
+  don't assert a number there.
+- **AI-TELL RISK IS PLATFORM-SPECIFIC.** Pangram scanned 1,002,627 posts (04/2026–07/2026):
+  **LinkedIn — 40%+ of long-form posts flagged fully AI-generated**, the single worst platform. X —
+  23.9%. **The guard is tightest on LinkedIn copy, not uniform across platforms.** The fix is the
+  same fix as the no-invention rule (RULE 0.7): specificity — a real address, a real percentage, a
+  real day-count — beats generic adjective-stacked prose. Avoid: delve, leverage, synergy, optimize,
+  streamline, empower, unlock, seamless, game-changer, unprecedented, "in today's fast-paced world."
+- **Real-estate lead-source numbers conflict — report the primary one.** NAR (primary PDF,
+  09/18/2025): 39% of Realtors name social their #1 lead source. Zillow (primary PDF, 12/30/2025):
+  only 7% of buyers actually discover their agent via social. The 47%/71%-style figures repeated on
+  real-estate-marketing blogs trace to no named study — don't cite them.
+
+### Graphics
+- **Canvas sizes: no change needed.** Square 1080×1080 / portrait 1080×1350 confirmed exact vs.
+  Meta's live ads-guide page. Landscape 1200×630 is fine — the suspected X 1600×900 mismatch is
+  FALSE; X's own spec is 1200×628 / 1920×1080 for 16:9. LinkedIn's current spec is 1200×628 (was
+  627 — 1px, cosmetic, low priority). Story 1080×1920 confirmed.
+- **Safe zones: no drift, no change needed.** Story top 14% / bottom 35% (danger boundary) / sides
+  6%; feed formats flat 7% — re-verified, matches `safe-zones.ts` exactly (triangulated across 3
+  independent 2026 sources; Meta's own primary page is JS-gated against automated fetch).
+- **The 32px minimum-legible-text floor stays `[INFERENCE]`.** No platform, accessibility body, or
+  named UX research org (checked Meta, LinkedIn, X, WCAG, NN/g) publishes a minimum in-image text
+  size anywhere. This is a confirmed absence — do not backfill it with a guessed number.
+- **Scrim/overlay: no vendor opacity spec exists.** Use WCAG contrast instead — 3:1 for large text
+  (≥18pt normal / ≥14pt bold), 4.5:1 for body — computed against the actual image, not a fixed %.
+- **Text-on-photo density:** Meta's hard 20%-text rejection rule was formally retired 09/2020. A
+  softer ranking-signal version is reported in secondary sources but not independently re-confirmed
+  this session. No word-count/glanceability threshold exists anywhere — don't invent one.
+- **Carousel/slideshow pacing: our 2.5s slide / 0.5s crossfade has zero evidence behind it.**
+  Baymard Institute's carousel usability research: **5–7s per slide, up to 10s for text-heavy** —
+  roughly double what we ship today. Worth revisiting; the mechanics (§0.1) stay proven and correct
+  either way, this is a pacing-only finding.
+- **Composition:** NN/g's F-pattern eye-tracking finding — users sweep top-heavy. Put the one
+  load-bearing fact (price/address/headline) in the top band, not centered-low.
+
+### What drives clicks (not just likes)
+- **Engagement rate and outbound clicks are DIFFERENT metrics — most available data measures the
+  wrong one.** Meta's own terminology: "outbound clicks" (leaves the platform — our actual goal) vs.
+  "link clicks" (includes on-platform destinations). Buffer's 52M-post 2026 benchmark measures
+  engagement, not outbound clicks — treat "link posts underperform" as evidence of reach
+  suppression, not proof of what maximizes clicks once someone's looking.
+- **We are almost certainly under the follower threshold where format strategy flips.** Metricool +
+  HypeAuditor (700M posts, Jan–Jun 2025): under ~50K followers, Reels drive more reach than
+  carousels; above it, carousels win both reach and engagement. We're well under 50K.
+  **LinkedIn is the exception and the opportunity: native document/PDF carousels are LinkedIn's
+  single highest-engagement format (7% vs. 6% video) and only 4.88% of profiles use it regularly** —
+  directly matches our market-card content, underused format, good fit.
+- **We may be optimizing carousels for the wrong signal.** Instagram's algorithm rewards
+  Swipe-Through Rate and Saves, not outbound clicks — those are not the same target as driving
+  traffic to swfldatagulf.com. Worth naming when reviewing carousel performance.
+- **Two real conflicts, deliberately left unresolved — do not silently pick a side:** (1) LinkedIn's
+  official no-link-penalty statement vs. independent reach-drop data; (2) Meta's "less text wins"
+  guidance vs. an unsourced "text overlay = more clicks" claim circulating on marketing blogs.
+- **No study exists — real-estate-specific or general — isolating price/address/question baked into
+  the image as a click driver.** The closest real evidence (a 27,616-experiment headline-concreteness
+  field study, *Scientific Reports* 2025) found a curvilinear effect: vague/curiosity hooks help only
+  when surrounding content is already vague, and hurt when it's already concrete. Don't assume a
+  question-in-the-graphic always helps.
+- **Apify scouted for future automation, nothing run/billed:** `apify/instagram-scraper` and
+  `apify/instagram-hashtag-analytics-scraper` for niche/competitor performance;
+  `trudax/reddit-scraper-lite` for r/realtors-style monitoring (reddit.com itself is blocked to our
+  own WebFetch/WebSearch — this is the workaround if that research needs repeating).
+
 ---
 
 ## THE ONE ROOT RULE — read this before you type a color or a font size

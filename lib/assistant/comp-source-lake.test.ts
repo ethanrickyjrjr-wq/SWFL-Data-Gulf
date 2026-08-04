@@ -4,7 +4,12 @@
 // Tests are named for the failure mode they prevent.
 
 import { describe, expect, test } from "bun:test";
-import { lakeRowToCandidate, lakeCompFilters, type LeeCompSaleRow } from "./comp-source-lake";
+import {
+  lakeRowToCandidate,
+  lakeCompFilters,
+  LEE_COMP_COLUMNS,
+  type LeeCompSaleRow,
+} from "./comp-source-lake";
 
 function row(over: Partial<LeeCompSaleRow> = {}): LeeCompSaleRow {
   return {
@@ -19,6 +24,7 @@ function row(over: Partial<LeeCompSaleRow> = {}): LeeCompSaleRow {
     sale_price: 425000,
     beds: null,
     baths: null,
+    pool: null,
     ...over,
   };
 }
@@ -108,5 +114,39 @@ describe("mapping — a row becomes a rankable candidate", () => {
 
   test("a row with no address is dropped — a comp the reader cannot verify is useless", () => {
     expect(lakeRowToCandidate(row({ address_line: null }))).toBeNull();
+  });
+});
+
+describe("POOL — held free in the lake since 07/22/2026, unwired until 08/04", () => {
+  // Operator, 08/04/2026: "WE WANT SIMILAR SQ FT, STYLE, BEDS AND BATHS SAME OR CLOSE
+  // AND POOL OR NO POOL. WE ARE FUCKING COMPARING!!!"
+  //
+  // data_lake.leepa_comparable_sales carries `pool` on 108,848 of 108,848 rows
+  // (PostgREST count=exact, 08/04/2026) as the literal strings 'Pool' / 'No Pool'.
+  // The view already lateral-joins that exact row for beds/baths.
+
+  test("'Pool' becomes true and 'No Pool' becomes FALSE, never null", () => {
+    // The whole point: "no pool" is a MEASURED FACT about the home, not missing data.
+    // Collapsing it to null would make a pool-less comp indistinguishable from a comp
+    // we know nothing about, and the ranker would stop penalising the mismatch.
+    expect(lakeRowToCandidate(row({ pool: "Pool" }))!.pool).toBe(true);
+    expect(lakeRowToCandidate(row({ pool: "No Pool" }))!.pool).toBe(false);
+  });
+
+  test("an absent or unrecognised pool value stays NULL — never guessed as false", () => {
+    expect(lakeRowToCandidate(row({ pool: null }))!.pool).toBeNull();
+    expect(lakeRowToCandidate(row({ pool: "" }))!.pool).toBeNull();
+    expect(lakeRowToCandidate(row({ pool: "Screened Lanai" }))!.pool).toBeNull();
+  });
+
+  test("casing and padding from the source do not change the answer", () => {
+    expect(lakeRowToCandidate(row({ pool: "  POOL " }))!.pool).toBe(true);
+    expect(lakeRowToCandidate(row({ pool: "no pool" }))!.pool).toBe(false);
+  });
+
+  test("the SELECT actually asks for pool — an unwired column is the whole defect", () => {
+    // This is the test that would have caught 08/02: the lateral join was open and
+    // beds/baths were taken from it while pool sat one line away, unselected.
+    expect(LEE_COMP_COLUMNS).toContain("pool");
   });
 });

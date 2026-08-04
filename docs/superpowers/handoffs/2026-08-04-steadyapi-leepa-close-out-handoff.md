@@ -34,7 +34,7 @@ available, and closing them anyway would be the exact lie this apparatus exists 
 | `steadyapi_step3_typed_families_spec` | **NO** | Family C (`steadyapi_property_permits`) has not shipped. Closes when it does. |
 | `should_i_sell_property_tax_source` | **NO** | Needs family B `tax_amount` validated against a real county tax bill first. Vendor annual tax ≠ county bill; asserting before that comparison asserts an unshown claim. |
 | `permits_spine_thin_collier_missing` | **NO — by design** | Family C serves per-property permits; it does not fix the area-wide Collier spine. Stays open deliberately. |
-| `engine_enabled_kill_switch_owed` | **NO — operator-owed** | Ricky's decision, not an agent's. Do not close it on his behalf. |
+| `engine_enabled_off_all_crons_dark` | **NO — operator-owed** | Ricky's decision, not an agent's. Do not close it on his behalf. **Key corrected 08/04:** this handoff originally said `engine_enabled_kill_switch_owed`, carried in from the Step 3 handoff §6. That key does not exist in the live `checks` table. The Step 3 handoff still miscites it — fix it there too, or it gets carried forward a third time. |
 
 **Three close today. Four do not.** If the session ends with seven closed, something was closed
 falsely — go back and find it.
