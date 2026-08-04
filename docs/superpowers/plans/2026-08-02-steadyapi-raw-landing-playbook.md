@@ -246,6 +246,13 @@ gets a blanket `EXCLUDED` overwrite on the nightly merge, and `/search` sets it 
 `gh variable set ENGINE_ENABLED --body true` → `gh workflow enable ingest-listing-lifecycle` →
 `gh workflow enable nightly-chain.yml`. Do not leave the kill switch off silently (freshness stops).
 
+**ORDERING RULE (locked 08/04/2026, from the SteadyAPI↔LeePA sale-grain call):** this step MUST NOT
+land before STEP 1's raw-insert is actually wired into the nightly path. Re-enable first and the lane
+resumes parse-and-discard: the `artifact` half of `check(claim, artifact)` stops being retained, any
+contract bound on `steadyapi_property_history_raw` goes stale, then reports **vacuously green** —
+precisely the failure adoption item 2 exists to prevent. A contract that cannot fail is worse than no
+contract. Confirm STEP 1's writer is live and being hit before running this step, not after.
+
 ---
 
 ## RULES THAT BIND THIS WORK

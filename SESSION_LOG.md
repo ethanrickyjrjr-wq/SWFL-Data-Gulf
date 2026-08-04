@@ -1,3 +1,43 @@
+## 2026-08-04 (Sonnet 5) — SteadyAPI↔LeePA close-out: 3 checks closed, 1 opened, all findings verified live
+
+Operator handed `docs/superpowers/handoffs/2026-08-04-steadyapi-leepa-close-out-handoff.md` and said
+verify + execute. Every claim checked before acting on it, nothing taken on the handoff's word alone.
+
+**§1 verified, then closed `steadyapi_leepa_ledger_row_not_yet_applied`:** `git show 563c8a7` in
+lean-verifier confirmed the commit, branch, and message match exactly; `sha256sum` on both copies of
+the evidence doc returned identical hashes. Real.
+
+**§2 triaged the 381 same-month price disagreements, live.** Reran `sale_pairs` from scratch —
+two-pass identical to bind time (6186, 4969, 4019, 381). The handoff's 4 hypotheses (vacant/land,
+nominal, multi-parcel, partial-interest) only explained ~20 of 381; a 5th class the handoff didn't
+name — de-minimis rounding (≤1% price delta) — explained 232 more once the eyeball sample forced it.
+Final: 91.86% land in a named class, 31 (8.14%) genuinely unexplained. Error contract now assertable
+on the excluded-class remainder (1.24% stated residual red-rate). Closed with evidence.
+
+**§3 closed the condo-grain gap as (a) measured-and-deferred**, per the handoff's own rule: checked
+`lee_parcels.phy_addr2` live — 0 of 556,083 rows populated, no other unit column exists — so
+unit-matching-now (option b) was impossible. Opened successor
+`steadyapi_leepa_condo_unit_matching_subproject`. Confirmed `marco_condo_price_cluster_unverified`
+does not overlap (different county, different mechanism).
+
+**§4/§5:** ordering rule (Step 5 must not land before raw-insert is wired) added to
+`docs/superpowers/plans/2026-08-02-steadyapi-raw-landing-playbook.md` STEP 5. 4-fact paste block for
+lean-verifier staged at `_RESEARCH/data-and-ingest/2026-08-04-lean-verifier-paste-block-steadyapi-leepa.md`
+(cross-project hook blocks writing lean-verifier directly — correct, not a bug).
+
+**One handoff inaccuracy caught, not acted on:** both the handoff and the underlying `.sql` cite check
+key `engine_enabled_kill_switch_owed` — that key does not exist. Live key is
+`engine_enabled_off_all_crons_dark`. Not touched (operator-owed per the handoff's own table); flagging
+so it isn't miscited again.
+
+**Not done — correctly left open:** `steadyapi_step3_typed_families_spec` (Family C unshipped),
+`should_i_sell_property_tax_source` (needs a real tax bill comparison), `permits_spine_thin_collier_missing`
+(by design, different problem), `engine_enabled_off_all_crons_dark` (operator's call). Three closed
+today, not seven — matches the handoff's own honest scope.
+
+Full evidence: `_RESEARCH/data-and-ingest/2026-08-04-steadyapi-leepa-sale-grain-proportion-call.md`
+ADDENDUM. Next: nothing pending on this thread until Step 5 (cron re-enable) is ready to be evaluated.
+
 ## 2026-08-04 (Opus 5) — Gate 13: a paid cron can no longer ship running-by-default
 
 Operator: *"WOULDN'T I WANT MORE GUARDS INSTEAD OF WATCHING YOU CHASE YOUR FUCKING DICK FOR AN
