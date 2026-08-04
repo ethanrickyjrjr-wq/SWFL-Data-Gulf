@@ -1,3 +1,51 @@
+## 2026-08-03 (Opus 5) — listings-digest SHIPPED: 5 categories × 6 real homes, no home twice, baths on 24 of 30 cards
+
+Built the plan `docs/superpowers/plans/2026-08-03-listings-digest-grid.md` as 5 TDD tasks, 5 commits:
+`7f0f9028` block vocabulary · `15d5433a` both render switches · `cf238096` ZIP/polygon lane ·
+`9b3cb3b7` the recipe · proof send below. Every test named for the failure mode it guards.
+
+**PROOF SEND — Resend id `b6de57eb-e702-483f-a4c1-d76401ebbb2e`**, subject "30 homes in Fort Myers",
+ZIP 33919, 9 blocks, 85,468 bytes (Gmail clips ~102KB). Grep gate on the rendered HTML:
+`rdcpix` **60** · `api.mapbox.com` **0** (F1) · `realestateandhomes-detail` **60** · `unsubscribe` **2**.
+url-lint clean. ⚠️ **Delivery is Resend-ACCEPTED, not inbox-verified** — the check
+`listings_digest_grid_live_verify` stays OPEN until the operator confirms the inbox
+(`feedback_checks-prod-evidence-not-dev-attestation`).
+
+**THREE THINGS THE PLAN/SPEC HAD WRONG, each found by probing rather than trusting:**
+1. **A FIFTH registry.** The plan named four (`types`/`schema`/`block-contract`/`default-docs`).
+   `BlockType` at `types.ts:13` is a hand-written literal union and `EmailBlock` maps over it — so
+   the variant did not exist until added there. Three more EXHAUSTIVE `Record`s also had to be
+   filled: `BlockInspector` LABELS, `GridCanvas` DEFAULT_H, `sequence/types` BLOCK_LABELS.
+2. **The plan's Step 9 premise is false.** It said a missing renderer arm surfaces at build time.
+   BOTH switches carry `default:` — a missing arm is neither a type error nor a throw; the block
+   silently renders as nothing. Only `listing-grid-engine-parity.test.tsx` catches F9, and its PDF
+   assertion reads the extracted TEXT LAYER because a `default: null` still emits a valid PDF.
+3. **`fixtures/swfl-zip-polygons.json` is NOT a GeoJSON FeatureCollection.** It is
+   `{ entries: [{ zip, geometry }] }`, not `{ features: [{ properties.zip, … }] }`. The plan's
+   implementation would have compiled, run, and resolved NOTHING.
+
+**F8 was STALE and is now the opposite.** The spec said every v1 card ships spec-less. A free lake
+baths lane (`fetchLakeBathsByPropertyId`) landed 08/03 at ~20% fill; per operator decision the paid
+Apify lane backfills the rest. Live result: **24 of 30 cards carry a full "3 bed · 2.5 bath ·
+1,735 sqft" line.** New failure mode **F13** (not in the spec): at partial fill a per-card rule ships
+a grid where two cards have a spec line and two are blank. Rule is now all-three-or-omitted per CARD
+**and all-cards-or-none per GRID** — visible live, "Room to spread out" shipped 0/6 rather than a
+ragged 3/6. Three lanes catalogued in `data-roots.md` in the recipe's own commit (F12).
+
+**ONE CTA, not six.** `emails.md` §0.1 is "ONE CTA per email. Never three." The reference
+realtor.com digest CTAs every category; five categories would ship six. Operator decision: no
+per-section CTA, one closing button. Live output confirms `cta=none` on all five grids.
+
+**NOT MINE, STILL RED:** `bunx next build` fails on the parallel session's uncommitted
+`button_destinations` / `urlSource` work (`app/api/lab/claim-and-send/route.ts`,
+`EmailLabGridShell.tsx`). `bunx tsc --noEmit` names exactly those two files and zero of mine.
+
+**Vendor-data oddity to eyeball, not a code bug:** the new-construction grid carries
+`$40,000 · 3 bed · 2 bath · 1,811 sqft · 1261 Brookpark Ave`. That is the vendor's own figure,
+restated verbatim per the no-invention rule — but it reads like a builder "from" price or a bad row.
+
+---
+
 ## 2026-08-03 (Opus 5) — CORRECTION: the "carousel" I shipped was a 2x2 GRID. Real carousel = app.bsky.embed.video + presentation:"gif"
 
 Operator, on seeing the post: *"WHY THE FUCK ISN'T IT A CAROUSEL"* + screenshot of a 2x2 grid.
