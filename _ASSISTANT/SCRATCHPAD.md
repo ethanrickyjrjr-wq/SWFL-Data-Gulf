@@ -1,3 +1,27 @@
+## 2026-08-04 (Opus 5) — OPERATOR: "We are making this super simple. It is not hard…though I've repeated myself 59 times."
+
+OPEN — THE DESIGN HE KEEPS RESTATING. Written down so the next session inherits the DESIGN and not
+another round of him typing it. Verbatim shape, his words compressed:
+
+  1. Every entry button carries a TAG for what it is ("Listing Email"), no matter where it is
+     clicked — showcase, homepage, anywhere. User lands on the email grid; the tagged click goes to
+     COMMON FOUNDATION in the background.
+  2. CF stamps the proper header + footer, READS THE TAG, and sends it down that tag's pipeline.
+  3. Each pipeline holds that email's coded format — cards, fonts, which chart, and EXACTLY where
+     each one goes. The doc is stamped with its grid before any data arrives.
+  4. Then it moves down the pipe to be FILLED — Apify / brains / lake / whatever wire runs to that
+     coded slot — keyed off the address.
+  5. Buttons auto-wire to the brand links the user gave us.
+  6. AI builder gets the numbers + the property description and writes COMMENTARY only — positive,
+     agent-voice, the way the research says. It may change the chart or anything else ON REQUEST.
+     It needs page awareness and grid awareness.
+  7. SAME PROCESS FOR EVERY EMAIL. The ONLY difference is the split after Common Foundation.
+
+  This is at least the FOURTH restatement of the same idea (07/xx "all the recipes and data in one
+  place!!!!", 08/04 "the only fucking one for comps", 08/04 the assembly-line decree, now the tag
+  routing). It is not a new design each time — it is the same one, and the sessions keep answering
+  it with analysis instead of building it. Do NOT re-derive this. Build against these seven lines.
+
 ## 2026-08-04 (Opus 5) — OPERATOR: "Get the actual rules from the gitignored into the first steps of email build. This is the foundation of everything. Every fucking email starts reading these rules and has to abide by them when used"
 
 OPEN — THE FOUNDATION DECREE. Logged before building, per RULE 2.

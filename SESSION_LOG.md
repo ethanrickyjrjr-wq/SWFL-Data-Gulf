@@ -1,3 +1,38 @@
+## 2026-08-04 (Opus 5) — Handoff for the email assembly line; the live lake says "just use Apify" is not on the table yet
+
+Operator asked for a handoff so another Opus can write a plan per email — every email on ONE Common
+Foundation, then one coded lane each — and asked the real question underneath: do we just use Apify,
+or combine sources, and what's the fallback when a field fails.
+
+**Measured it instead of asserting it. Live SQL, 08/04/2026:** `data_lake.apify_property_records`
+holds **26 rows across 20 distinct properties**; `data_lake.listing_state` holds **35,202**; the lake
+carries **16 relevant tables — 1 apify, 15 steadyapi**. So the Apify cache is effectively empty and
+the vendor-fed lake is the spine. He has seen reports that "apify brings in everything" — true for a
+single on-demand call, false for what we've STORED. Any plan assuming otherwise is planning against
+20 properties.
+
+Recorded the cheapest-first ladder with real prices from our own research: lake (paid already, $0) →
+**the 61 field paths we already pay for and discard** on `/property-tax-history` (64 returned, 3
+persisted; zero extra calls — the cheapest data on the board) → user-supplied → Apify per-call
+($0.01/result for the sold scraper w/ full 50-photo gallery + beds/baths/sqft/tax history, $0.007 for
+the 3,000-char full MLS description on a sold home) → open slot. Open slot beats an invented number
+and beats a bad link, always.
+
+Handoff: `docs/superpowers/handoffs/2026-08-04-showcase-email-assembly-line-HANDOFF.md`. Carries the
+operator's seven-line design verbatim, the four-lane evidence, the per-FIELD source-ladder
+requirement (not per-email — per field), failure modes with guards, and the walk order. Names the one
+real design gap: the REPORT grammar has never been designed, and the 08/03 research already holds
+Compass's actual rendered newsletter block order to build it from — plus the finding that Compass
+localizes stats BY HAND, which makes our auto-fill the wedge rather than parity.
+
+Two checks opened: `showcase_email_assembly_line_per_email_plans` and
+`email_build_cost_meter_unbuilt` (no per-build cost meter exists, so "run the cheapest" is currently
+a slogan, not an operation).
+
+Also corrected in the handoff, against decree item 6: the AI builder has PAGE awareness (docSkeleton
+hands it every figure — price/beds/baths/sqft/address/metric values) but NOT grid awareness (no
+x/y/w/h). The operator believed it already had both.
+
 ## 2026-08-04 (Opus 5) — The email type scale was never enforced; built the linter the research specified on 07/01 and never got
 
 Operator asked for the Common Foundation of the email assembly line — "fonts, actual numbers on
