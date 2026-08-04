@@ -105,12 +105,13 @@ import { createBlock } from "@/lib/email/doc/default-docs";
 import { buildLifecycleEmail } from "@/lib/email/lifecycle-chrome";
 import type { ChromeBlock } from "@/lib/email/lifecycle-chrome";
 import { addressLineOf, pricePerSqft, spec } from "@/lib/email/listing-flyer";
-import { buildSoldCompsSpec } from "@/lib/email/sold-comp-blocks";
 import { chartSpecToEmailImage } from "@/lib/email/spec-to-png";
 import {
   assertHeroChartCoherence,
   chartMagnitudeFromSpec,
+  type ChartMagnitude,
 } from "@/lib/deliverable/chart-coherence";
+import type { ChartSpec } from "@/components/charts/registry/chart-spec";
 import { resolveHeadlineFigure } from "@/lib/email/doc/preview-fill";
 import {
   clearNarrativeSlots,
@@ -316,8 +317,102 @@ export function compsSpecs(facts: ListingFacts, comps: RenderComp[]): StatItem[]
     spec(num(facts.sqft)?.toLocaleString("en-US"), "Sq Ft"),
     spec(pricePerSqft(facts.price, facts.sqft), "$/Sq Ft — this home", "primary"),
     spec(medianPpsf ? usd(medianPpsf) : undefined, "$/Sq Ft — comp median"),
-    spec(comps.length ? String(comps.length) : undefined, "Comparable homes", "muted"),
+    // DAYS ON MARKET — our own `listing_dom` root (docs/standards/data-roots.md:279
+    // names "email DOM" as a wire target), attached by the lake resolve lane and NEVER
+    // a first-seen floor. It took the cell the comp COUNT used to hold: that count is
+    // already stated in the footnote, on the evidence table's own title, and in the
+    // narrator's verdict — three surfaces — while how long THIS house has been on the
+    // market appeared nowhere at all. Absent → an open slot, never a zero.
+    spec(
+      facts.daysOnMarket != null && facts.daysOnMarket >= 0
+        ? String(facts.daysOnMarket)
+        : undefined,
+      "Days on market",
+      "muted",
+    ),
   ];
+}
+
+/** THE SUBJECT'S OWN DIMENSIONS, handed to the comp lookup so the size-band ranker
+ *  (`lib/assistant/comp-rank.ts`, built to Fannie B4-1.3-08) actually engages.
+ *
+ *  `compsForAddress` ranks ONLY when it is told the subject's size (comp-helper.ts:397)
+ *  — otherwise it falls through to the vendor's raw nearest-first slice, which is the
+ *  exact `nearby.slice(0, topN)` the ranker was written to replace, and is how a
+ *  $385,000 home got defended with $850,000 and $721,000 "comparables" (operator,
+ *  08/03/2026). Nothing here is derived or guessed: an unlisted or unparseable
+ *  dimension is simply absent, because ranking against an invented size would invent
+ *  the very fact it filters on. */
+export function subjectDims(facts: ListingFacts): {
+  subjectSqft?: number;
+  subjectBeds?: number;
+  subjectBaths?: number;
+} {
+  const sqft = num(facts.sqft);
+  const beds = num(facts.beds);
+  const baths = num(facts.baths); // 3.5 stays 3.5 — a half bath is a real difference
+  return {
+    ...(sqft != null ? { subjectSqft: sqft } : {}),
+    ...(beds != null ? { subjectBeds: beds } : {}),
+    ...(baths != null ? { subjectBaths: baths } : {}),
+  };
+}
+
+/**
+ * THE CHART — $/sq ft, not total price.
+ *
+ * Operator, 08/03/2026: *"COMPARABLES ARE JUST THAT, COMPARABLE, SO IT'S A TERRIBLE
+ * CHART TO PUT IN THE EMAIL. PRICE IS GOING TO BE SIMILAR."* He is right, and the
+ * size-band fix above makes him MORE right: once the set is genuinely comparable, total
+ * prices cluster by construction and six near-identical bars carry no information.
+ *
+ * $/sq ft is the number this email actually argues over — the strip's `primary` cell,
+ * the footnote's spread, and every relation `buildPriceCase` computes. The subject is
+ * its own first bar; comps sort ascending so the reader sees where the ask lands in the
+ * band. A comp with no price or no size has no $/sq ft and simply is not plotted.
+ */
+export function compsPpsfSpec(
+  facts: ListingFacts,
+  comps: RenderComp[],
+  asOfIso: string,
+): ChartSpec | null {
+  const subjectPpsf = perSqft(num(facts.price), num(facts.sqft));
+  if (subjectPpsf == null) return null;
+  const kindSuffix = (c: RenderComp) =>
+    c.priceKind === "sold" ? "" : c.priceKind === "estimate" ? " (est.)" : " (list)";
+  const plotted = comps
+    .map((c) => ({ c, ppsf: perSqft(c.price, c.sqft) }))
+    .filter((x): x is { c: RenderComp; ppsf: number } => x.ppsf != null)
+    .sort((a, b) => a.ppsf - b.ppsf);
+  if (plotted.length < 2) return null; // one bar next to the subject is not a comparison
+  const street = (facts.address ?? "").split(",")[0]?.trim() || "This home";
+  return {
+    frameId: "bar-table",
+    title: "Price per square foot — this home vs the comparable homes",
+    columns: ["Property", "$/Sq Ft"],
+    rows: [
+      [`${street} (Subject)`, Math.round(subjectPpsf)],
+      ...plotted.map((x) => [`${x.c.addressLine}${kindSuffix(x.c)}`, Math.round(x.ppsf)]),
+    ] as (string | number | null)[][],
+    value_format: "usd",
+    chart_type: "bar",
+    asOf: asOfIso,
+    source: { citation: "SWFL Data Gulf · realtor.com", url: "https://www.realtor.com" },
+  } as ChartSpec;
+}
+
+/** The magnitude this chart hands the coherence gate — deliberately `"other"`.
+ *
+ *  `assertHeroChartCoherence` compares like with like, and its own header says a
+ *  cross-class pair is always coherent. $195 per square foot under a $595,000 asking
+ *  headline IS such a pair, but the module's four-way `UnitClass` has no per-area
+ *  class, so reading this spec's `value_format: "usd"` literally would make the gate
+ *  false-fire and SILENTLY DROP the chart on every build. This is not a bypass: the
+ *  gate exists to catch a headline sitting orders of magnitude outside bars in the
+ *  SAME unit, and these are not the same unit. Pinned by test. */
+export function ppsfChartMagnitude(spec: ChartSpec): ChartMagnitude | null {
+  const m = chartMagnitudeFromSpec(spec);
+  return m ? { ...m, unit: "other" } : null;
 }
 
 /**
@@ -450,12 +545,29 @@ function compsTail(comps: RenderComp[]): ChromeBlock[] {
  * — the chrome lifts the agent's header, agent card, footer and colours off the canvas,
  * so a comps email arriving three weeks after the New Listing is visibly the same sender.
  */
+/** Is this URL a real LISTING page, or our own site standing in for one?
+ *  `resolve-subject.ts` fills `sourceUrl` with `https://www.swfldatagulf.com` when it
+ *  has nothing better, and a reader who clicks "Find Out More" on a specific house
+ *  expects that house — not our homepage. Host match only; never a fuzzy guess. */
+export function isListingUrl(url: string | undefined | null): boolean {
+  if (!url) return false;
+  try {
+    return !/(^|\.)swfldatagulf\.com$/i.test(new URL(url).hostname);
+  } catch {
+    return false;
+  }
+}
+
 export function buildCompsGrid(
   facts: ListingFacts,
   comps: RenderComp[],
   current: EmailDoc,
   thumbnails: Map<string, string> = new Map(),
+  /** The subject's real listing page, when we hold one. Falls back to `facts.sourceUrl`
+   *  — which is our own site — only because there is nothing better to point at. */
+  listingUrl: string | null = null,
 ): EmailDoc {
+  const destination = listingUrl ?? facts.sourceUrl;
   const doc = buildLifecycleEmail(current, {
     ribbon: "Market Comps",
     // The subject's photo — it identifies the house whose price is on trial. No photo →
@@ -464,7 +576,7 @@ export function buildCompsGrid(
       ? {
           url: facts.photos[0],
           alt: facts.address ?? "The subject property",
-          linkUrl: facts.sourceUrl,
+          linkUrl: destination,
         }
       : null,
     // The hero is the CLAIM this email defends: the ask, on this address.
@@ -482,7 +594,7 @@ export function buildCompsGrid(
     // agent's own site when we hold one, and the listing page otherwise (item 6:
     // "target is the agent's site URL; for now use the realtor.com listing URL").
     ctaLabel: "Find Out More",
-    ctaUrl: facts.sourceUrl,
+    ctaUrl: destination,
   });
   return {
     ...doc,
@@ -1174,7 +1286,17 @@ export async function buildMarketComps(ctx: RecipeBuildContext): Promise<EmailDo
   // THE ONE comp source (lib/assistant/comp-helper.ts) — geocode → Lee/Collier gate →
   // ONE /nearby-home-values call → <=2 exact-sale enrichments. Never throws; a miss is
   // an empty set, and the grid still lands with open slots (RULE 0.7: never refuse).
-  const result = await compsForAddress(facts.address, { topN: COMP_POOL }).catch(() => null);
+  //
+  // *** THE SUBJECT'S DIMENSIONS TRAVEL WITH THE ADDRESS. *** `compsForAddress` runs
+  // the size-band ranker ONLY when it is told what the subject IS (comp-helper.ts:397);
+  // handed an address alone it falls through to the vendor's raw nearest-first slice.
+  // This recipe did exactly that for its whole life, which is how a $385,000 home
+  // shipped with $850,000 and $721,000 "comparables" (operator, 08/03/2026). The
+  // dimensions were already in `facts` — `compsSpecs` renders them four lines away.
+  const result = await compsForAddress(facts.address, {
+    topN: COMP_POOL,
+    ...subjectDims(facts),
+  }).catch(() => null);
 
   // *** THE LAND FILTER. *** By DATA, never by name. Nearest-first order is the
   // vendor's own; we keep it and take the first MAX_COMPS real homes.
@@ -1210,50 +1332,60 @@ export async function buildMarketComps(ctx: RecipeBuildContext): Promise<EmailDo
   // A comp we cannot photograph ships without a picture and keeps its realtor.com
   // link — the PER-ROW contract stated in comp-photos.ts's own header.
   const thumbnails = await resolveCompThumbnails(comps, facts.zip);
-  let doc = buildCompsGrid(facts, comps, currentDoc, thumbnails);
 
-  // ── THE CHART. This deliverable IS about a number, so it earns one — and the
-  // SUBJECT IS ITS OWN BAR (we hold its list price). buildSoldCompsSpec already puts
-  // the subject first and suffixes "(est.)"/"(list)" on any comp whose price is not a
-  // recorded sale, so an AVM can never masquerade as a sale on the chart.
-  const subjectPrice = num(facts.price);
-  const street = facts.address.split(",")[0]?.trim() || "This home";
-  const built = buildSoldCompsSpec(
-    comps,
-    { street, listPrice: subjectPrice },
-    new Date().toISOString().slice(0, 10),
-  );
-
-  // TWO FIXES TO THE SHARED SPEC, both of which I SAW in the rendered PNG:
+  // ── THE SUBJECT'S OWN RECORD — fetched ONCE, used twice ─────────────────────
+  // Operator, 08/03/2026: *"WHY THE FUCK DOES THE BUTTON LINK BACK TO OUR SITE AND NOT
+  // THE LISTING FOR FIND OUT MORE? CLICKING ON THE PICTURE GOES TO US TOO?"*
   //
-  // 1. RETITLE. buildSoldCompsSpec is written for the "recent sales nearby" CONTEXT
-  //    list, so it titles itself "Recent sales near X" — and on the live fixture only 2
-  //    of the 6 comps are recorded sales; the other 4 are valuations. That title printed
-  //    a lie across the top of the chart AND into its caption (chartImageCaption reads
-  //    the title). The bar suffixes already say "(est.)"; the title must agree with them.
+  // Because `resolve-subject.ts` hard-codes `sourceUrl: "https://www.swfldatagulf.com"`
+  // and both the hero photo link and the CTA read it — the exact thing `emails.md` §0.1d
+  // forbids ("Never hard-code a `swfldatagulf.com` URL into a recipe, seed, or block as
+  // the default"). The lake carries no listing URL, so the only real one we can hold is
+  // the vendor's `property_url`, which the handoff named as the CTA target (§1 item 6)
+  // and which arrives on the SAME record that carries the description. One call, both
+  // jobs: no listing URL and no description costs one fetch, not two.
   //
-  // 2. RELABEL THE SUBJECT BAR. Its "(Subject — asking)" suffix makes a 31-character
-  //    label that OVERFLOWS the chart's label gutter — the rendered PNG clipped the
-  //    leading digit and printed "26 Shore Dr (Subject — a…" for 326 Shore Dr. "(Subject)"
-  //    fits, and the title now carries the word "asking" anyway.
-  //
-  // Both are done HERE, not in sold-comp-blocks.ts, because that module is shared with
-  // R5 and the pasted-URL flyer. Reported to the operator as a shared-file fix instead.
-  const spec = built
-    ? {
-        ...built,
-        title: "Asking price vs nearby comparable homes",
-        rows: built.rows.map((r, i) => (i === 0 ? [`${street} (Subject)`, r[1]] : r)),
-      }
+  // This does not make us the destination by default — `applyBrand` still rewrites the
+  // button to the agent's own saved URL when they have one. It stops us shipping OUR
+  // homepage as the fallback when a real listing page exists.
+  const needsSubjectRecord = !facts.remarks || !isListingUrl(facts.sourceUrl);
+  const subjectRecord = needsSubjectRecord
+    ? ((
+        await fetchApifyComps({
+          location: facts.address,
+          listingType: "for_sale",
+          maxResults: 1,
+        }).catch(() => [])
+      )[0] ?? null)
     : null;
+  const listingUrl = subjectRecord?.property_url?.trim() || null;
+
+  let doc = buildCompsGrid(facts, comps, currentDoc, thumbnails, listingUrl);
+
+  // ── THE CHART — $/SQ FT, and the retirement of the price-bar version.
+  //
+  // This used to plot total PRICE via the shared `buildSoldCompsSpec`. Operator,
+  // 08/03/2026: *"COMPARABLES ARE JUST THAT, COMPARABLE, SO IT'S A TERRIBLE CHART TO PUT
+  // IN THE EMAIL. PRICE IS GOING TO BE SIMILAR."* He is right — and the size-band fix
+  // above makes him MORE right, because a genuinely comparable set clusters in price by
+  // construction. Six near-identical bars are decoration, not evidence.
+  //
+  // `compsPpsfSpec` plots the number this email actually argues over. The two local
+  // patches the price version needed (retitle away from "Recent sales near X"; shorten
+  // the subject's label so the PNG's gutter stops clipping it) are built into it, so
+  // nothing is rewritten after the fact and the shared module is untouched.
+  const spec = compsPpsfSpec(facts, comps, new Date().toISOString().slice(0, 10));
 
   if (spec) {
     // House rule (lib/email/CLAUDE.md): a chart-bearing deliverable's chart magnitude
     // must cohere with its headline. Soft — an incoherent chart is DROPPED, never a
     // blocked build.
+    // `ppsfChartMagnitude`, NOT the raw spec: the hero is a total asking price and the
+    // bars are dollars per square foot. Read literally the gate would compare $595,000
+    // against $195 and drop the chart on EVERY build. See that function's header.
     const coherence = assertHeroChartCoherence({
       hero: resolveHeadlineFigure(doc),
-      chart: chartMagnitudeFromSpec(spec),
+      chart: ppsfChartMagnitude(spec),
     });
     if (coherence.coherent) {
       const accent = doc.globalStyle.accentColor || "#B98F45";
@@ -1294,16 +1426,10 @@ export async function buildMarketComps(ctx: RecipeBuildContext): Promise<EmailDo
   // listings in the same bulk call, so an active subject costs nothing extra.
   // The model never sees this text and never rewrites it: it is the listing
   // agent's own copy about a house we have never seen, verbatim or not at all.
-  let remarks = facts.remarks ?? null;
-  if (!remarks && facts.address) {
-    const [rec] = await fetchApifyComps({
-      location: facts.address,
-      listingType: "for_sale",
-      maxResults: 1,
-    });
-    remarks = rec?.text ?? null;
-  }
-  const description = buildDescriptionBlock(remarks, facts.sourceUrl);
+  // The record was already fetched ABOVE (it also carries the listing URL) — never a
+  // second paid call for the same row.
+  const remarks = facts.remarks ?? subjectRecord?.text ?? null;
+  const description = buildDescriptionBlock(remarks, listingUrl ?? facts.sourceUrl);
   if (description) doc = upsertDescriptionBlock(doc, description);
 
   return doc;

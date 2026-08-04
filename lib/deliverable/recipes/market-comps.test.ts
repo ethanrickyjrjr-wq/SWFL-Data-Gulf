@@ -12,10 +12,15 @@ import {
   buildNarratorPrompt,
   buildPriceCase,
   compsFootnote,
+  compsPpsfSpec,
+  compsSpecs,
   contextViolations,
   evidenceParagraph,
   narratorClaims,
+  ppsfChartMagnitude,
+  subjectDims,
 } from "./market-comps";
+import { assertHeroChartCoherence } from "@/lib/deliverable/chart-coherence";
 import { auditClaims, CLAIM_PROHIBITION } from "@/lib/deliverable/claims";
 import { FAVORABLE_FRAMING_POLICY } from "./shared";
 import { SEED_DOCS } from "@/lib/email/doc/default-docs";
@@ -177,10 +182,14 @@ test("the price-kind mix is stated on the face of the email — footnote AND tab
   // The registry prompt used to promise "six LIVE comparable listings". The set is not
   // that: it is recorded sales plus current valuations. The email says so where the rows
   // are, and again directly under the strip — never only in a label a reader skims past.
+  //
+  // AMENDED 08/03/2026: the COUNT no longer has a strip cell — days on market took it
+  // (operator: "THERE IS NO FUCKING DOM"). Nothing about the mix was weakened. It was
+  // always stated on four surfaces and the strip cell was the weakest of them: the
+  // footnote, the table title, each row's own "Sold …"/"Estimated value …" line, and
+  // the chart's "(est.)" suffix. This test now checks the three that carry it in text.
   const doc = buildCompsGrid(SUBJECT, HOMES, canvas());
-  const count = statsOf(doc).find((c) => c.label === "Comparable homes");
-  expect(count?.value).toBe("5");
-  expect(count?.emphasis).toBe("muted"); // the SCALE of the evidence, not the evidence
+  expect(statsOf(doc).find((c) => c.label === "Comparable homes")).toBeUndefined();
 
   expect(footnoteOf(doc)).toContain("The 5 comparable homes (2 recorded sales, 3 valuations)");
 
@@ -370,6 +379,105 @@ describe("the subject's own address is SOURCED, not a location claim", () => {
     const pc = buildPriceCase(subj, HOMES)!;
     const hits = contextViolations("2601 SW 37th Ter sold 14 times.", subj, HOMES, pc);
     expect(hits.some((h) => h.includes("14"))).toBe(true);
+  });
+});
+
+// ── THE COMPARABILITY FAILURE · operator, 08/03/2026 ──────────────────────────
+// "AN 850K AND 721K HOME IS NOT COMPARABLE TO 385K" / "COMPARABLE HOMES ARE CLOSE IN
+// SQ FT ... SIMILAR AMOUNT OF BATHS AND OTHER THINGS."
+//
+// The size-band ranker (`lib/assistant/comp-rank.ts`, built to Fannie B4-1.3-08) has
+// existed since 07/22/2026 and `compsForAddress` runs it ONLY when the caller hands it
+// the subject's dimensions (`comp-helper.ts:397`). This recipe handed it an address and
+// nothing else, so every comp email fell through to the vendor's raw nearest-first
+// order — the exact `nearby.slice(0, topN)` the ranker was written to replace. The
+// dimensions were four lines away the whole time: `compsSpecs` renders them.
+describe("the recipe TELLS the ranker what the subject is", () => {
+  test("subject dimensions reach the comp lookup — sqft, beds AND baths", () => {
+    const d = subjectDims(SUBJECT);
+    expect(d.subjectSqft).toBe(2847);
+    expect(d.subjectBeds).toBe(3);
+    expect(d.subjectBaths).toBe(3.5); // half-baths are real; never rounded away
+  });
+
+  test("a subject with no listed size passes NO size — never a guessed one", () => {
+    // Ranking against an invented size would invent the fact it filters on.
+    const d = subjectDims({ ...SUBJECT, sqft: undefined, beds: undefined, baths: undefined });
+    expect(d.subjectSqft).toBeUndefined();
+    expect(d.subjectBeds).toBeUndefined();
+    expect(d.subjectBaths).toBeUndefined();
+  });
+
+  test("a zero/garbage size is treated as absent, not as 0 sq ft", () => {
+    expect(subjectDims({ ...SUBJECT, sqft: "0" }).subjectSqft).toBeUndefined();
+    expect(subjectDims({ ...SUBJECT, sqft: "n/a" }).subjectSqft).toBeUndefined();
+  });
+});
+
+// ── THE CHART · operator, 08/03/2026 ──────────────────────────────────────────
+// "COMPARABLES ARE JUST THAT, COMPARABLE, SO IT'S A TERRIBLE CHART TO PUT IN THE
+// EMAIL. PRICE IS GOING TO BE SIMILAR."
+//
+// He is right, and the comparability fix above makes him MORE right: once the set is
+// genuinely size-banded, total prices cluster by construction and the bars say nothing.
+// The spread this email actually argues over is $/sq ft — the strip's primary cell, the
+// footnote's range, and every relation in `buildPriceCase`.
+describe("the chart plots the number the email argues over", () => {
+  test("bars are $/sq ft, not total price", () => {
+    const spec = compsPpsfSpec(SUBJECT, HOMES, "2026-08-03")!;
+    expect(spec).not.toBeNull();
+    const values = spec.rows.map((r) => Number(r[1]));
+    // Every bar is a per-square-foot figure: hundreds, never hundreds of thousands.
+    for (const v of values) expect(v).toBeLessThan(2000);
+    expect(Math.max(...values)).toBeGreaterThan(50);
+  });
+
+  test("the subject is its own first bar, labelled as the subject", () => {
+    const spec = compsPpsfSpec(SUBJECT, HOMES, "2026-08-03")!;
+    expect(String(spec.rows[0][0])).toContain("Subject");
+    expect(Number(spec.rows[0][1])).toBe(Math.round(595000 / 2847));
+  });
+
+  test("no chart at all when fewer than two comps carry a real $/sq ft", () => {
+    expect(compsPpsfSpec(SUBJECT, [], "2026-08-03")).toBeNull();
+    expect(compsPpsfSpec({ ...SUBJECT, sqft: undefined }, HOMES, "2026-08-03")).toBeNull();
+  });
+
+  test("a $/sq ft chart is NOT judged against a total-price headline", () => {
+    // chart-coherence compares like with like. $195/sq ft under a $595,000 headline is
+    // a cross-unit pair — the case that module's own header calls always coherent —
+    // but its 4-way UnitClass has no per-area class, so an unguarded comparison would
+    // false-fire and silently DROP the chart. Pinned so nobody "fixes" it back.
+    const spec = compsPpsfSpec(SUBJECT, HOMES, "2026-08-03")!;
+    const verdict = assertHeroChartCoherence({
+      hero: { value: 595000, unit: "currency" },
+      chart: ppsfChartMagnitude(spec),
+    });
+    expect(verdict.coherent).toBe(true);
+  });
+});
+
+// ── DOM · operator, 08/03/2026 ────────────────────────────────────────────────
+// "THERE IS NO FUCKING DOM! WE JUST FUCKING BROUGHT IT IN YESTERDAY."
+// `facts.daysOnMarket` is our own `listing_dom` root, attached by the lake resolve lane
+// and never a first-seen floor. The strip never read it.
+describe("days on market rides on the face of the email", () => {
+  test("a real DOM count renders in the strip", () => {
+    const cells = compsSpecs({ ...SUBJECT, daysOnMarket: 41 }, HOMES);
+    const dom = cells.find((c) => /days on market/i.test(c.label));
+    expect(dom?.value).toBe("41");
+  });
+
+  test("no DOM held → an OPEN SLOT, never a zero and never a guess", () => {
+    const cells = compsSpecs(SUBJECT, HOMES);
+    const dom = cells.find((c) => /days on market/i.test(c.label));
+    expect(dom?.value ?? "").toBe("");
+  });
+
+  test("the strip is still six cells — DOM replaced the comp COUNT, which the footnote already states", () => {
+    const cells = compsSpecs({ ...SUBJECT, daysOnMarket: 41 }, HOMES);
+    expect(cells).toHaveLength(6);
+    expect(compsFootnote(SUBJECT, HOMES)).toContain(String(HOMES.length));
   });
 });
 
