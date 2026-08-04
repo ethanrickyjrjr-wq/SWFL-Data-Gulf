@@ -25,7 +25,11 @@ const EXPECTED_KNOWN = Object.keys(DEFAULT_BLOCK_PROPS) as BlockType[];
 // listing's fields are data-seeded (loadListingContext/resolveSubject), never
 // AI-written; authorable:true would let the generic author offer it and ship a
 // hollow card with every field defaulting to "" (postmortem 07/20/2026).
-const EXPECTED_AUTHORABLE = EXPECTED_KNOWN.filter((t) => t !== "metric-card" && t !== "listing");
+// listing-grid joins them for the same reason: its cards carry a real photoUrl,
+// price and address, all data-seeded from held vendor rows and never AI-written.
+const EXPECTED_AUTHORABLE = EXPECTED_KNOWN.filter(
+  (t) => t !== "metric-card" && t !== "listing" && t !== "listing-grid",
+);
 
 // author-doc.ts:448 — BANDABLE set (blocks whose props extend BlockBase)
 const EXPECTED_BANDABLE: BlockType[] = [
@@ -35,6 +39,7 @@ const EXPECTED_BANDABLE: BlockType[] = [
   "text",
   "image",
   "listing",
+  "listing-grid",
   "multi-column",
   "list",
 ];
@@ -48,6 +53,7 @@ const EXPECTED_MENU: { type: BlockType; label: string; icon: string }[] = [
   { type: "text", label: "Text", icon: "¶" },
   { type: "image", label: "Image", icon: "▢" },
   { type: "listing", label: "Listing", icon: "⌂" },
+  { type: "listing-grid", label: "Listing Grid", icon: "⊞" },
   { type: "multi-column", label: "Columns", icon: "▥" },
   { type: "list", label: "List", icon: "☰" },
   { type: "agent-card", label: "Agent Card", icon: "☻" },

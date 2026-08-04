@@ -60,6 +60,15 @@ export const BLOCK_CONTRACT: Record<BlockType, BlockContractEntry> = {
     zone: "body",
     menu: { label: "Listing", icon: "⌂" },
   },
+  "listing-grid": {
+    // NOT authorable — same reason as `listing`: every field is data-seeded from a
+    // real listing (photoUrl/price/address), deliberately outside AuthoredBlockSchema.
+    // An authored one would ship a hollow card with every field defaulting to "".
+    authorable: false,
+    bandable: true,
+    zone: "body",
+    menu: { label: "Listing Grid", icon: "⊞" },
+  },
   "multi-column": {
     authorable: true,
     bandable: true,

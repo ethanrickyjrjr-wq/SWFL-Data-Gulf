@@ -85,6 +85,12 @@ export const DEFAULT_BLOCK_PROPS: { [K in BlockType]: BlockPropsMap[K] } = {
     address: "",
     badge: "",
   },
+  "listing-grid": {
+    title: "Homes worth a look",
+    // EMPTY on purpose — an open slot the builder fills with real listings. A seeded
+    // placeholder card would need a fabricated photoUrl (THE SLOT RULE, lib/email/CLAUDE.md).
+    cards: [],
+  },
   "multi-column": {
     columns: [
       { heading: "Column one", body: "A short description for the first column." },

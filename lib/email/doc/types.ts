@@ -215,6 +215,45 @@ export interface ListingProps extends BlockBase {
   linkUrl?: string;
 }
 
+/** One home in a category grid. Every field is DATA-SEEDED from a real listing —
+ *  named OUTSIDE the AI content-patch allowlist, exactly like ListingProps'
+ *  price/beds, so a content patch can never write a price or a photo. */
+export interface ListingGridCard {
+  /** REQUIRED. The listing's own photo, passed through verbatim — never constructed,
+   *  never a map tile. A card without one is dropped, never rendered. */
+  photoUrl: string;
+  photoAlt?: string;
+  /** REQUIRED. Real listing-detail URL. A card without one is dropped. */
+  linkUrl: string;
+  statusLabel?: string;
+  statusTone?: "active" | "sold";
+  price?: string;
+  /** The size of the CUT, preformatted (e.g. "$1,600") — rendered beside the price. */
+  priceCut?: string;
+  /** "3 bed · 2 bath · 1,295 sqft" — ALL THREE or absent. Never a partial line. */
+  specs?: string;
+  addressLine1?: string;
+  addressLine2?: string;
+}
+
+/** One category section: a header, an optional city subtitle, and a 2-across card
+ *  grid. ONE block per category — the 20-block EmailDoc cap makes a block-per-home
+ *  layout top out at 3 categories. `cards[]` is a structural exception ordered by
+ *  array position, like `stats` and `items`.
+ *
+ *  `ctaLabel`/`ctaUrl` exist for a HAND-BUILT palette grid only. The listings-digest
+ *  recipe deliberately leaves them unset: `docs/standards/emails.md` §0.1 is "ONE CTA
+ *  per email. Never three." — a per-section CTA across five categories would ship six
+ *  (operator decision 08/03/2026; the reference realtor.com digest does ship them and
+ *  we deliberately do not). Every card still links to its own listing. */
+export interface ListingGridProps extends BlockBase {
+  title?: string;
+  subtitle?: string;
+  cards: ListingGridCard[];
+  ctaLabel?: string;
+  ctaUrl?: string;
+}
+
 /** One column in a `multi-column` row — a flat "feature card": image + heading +
  *  body + optional link. Intentionally NOT nested blocks (the doc model stays a
  *  flat array; the paid grid is the path to richer side-by-side layouts). */
@@ -389,6 +428,7 @@ export interface BlockPropsMap {
   text: TextProps;
   image: ImageProps;
   listing: ListingProps;
+  "listing-grid": ListingGridProps;
   "multi-column": MultiColumnProps;
   list: ListProps;
   "metric-card": MetricCardProps;

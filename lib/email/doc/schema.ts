@@ -26,6 +26,7 @@ import type {
   HeaderProps,
   HeroProps,
   ImageProps,
+  ListingGridProps,
   ListingProps,
   ListProps,
   MetricCardProps,
@@ -210,6 +211,34 @@ const ListPropsSchema = z.object({
   sectionBg: sectionBg(),
 }) satisfies z.ZodType<ListProps>;
 
+const ListingGridCardSchema = z.object({
+  // REQUIRED, both of them: a card missing either is a dead card. The builder
+  // drops such listings; the schema makes it impossible to persist one.
+  photoUrl: z.string().min(1),
+  linkUrl: z.string().min(1),
+  photoAlt: z.string().max(160).optional(),
+  statusLabel: z.string().max(24).optional(),
+  statusTone: z.enum(["active", "sold"]).optional(),
+  price: z.string().max(24).optional(),
+  priceCut: z.string().max(24).optional(),
+  specs: z.string().max(60).optional(),
+  addressLine1: z.string().max(80).optional(),
+  addressLine2: z.string().max(80).optional(),
+});
+
+const ListingGridPropsSchema = z.object({
+  title: z.string().max(120).optional(),
+  subtitle: z.string().max(80).optional(),
+  // NO .min(1) — deliberately unlike ListProps.items. A palette-added grid starts
+  // EMPTY (the repo's open-slot convention); a .min(1) would force
+  // DEFAULT_BLOCK_PROPS to ship a placeholder card with a fabricated photo.
+  cards: z.array(ListingGridCardSchema).max(6),
+  ctaLabel: z.string().max(40).optional(),
+  ctaUrl: z.string().optional(),
+  paddingY: paddingY(),
+  sectionBg: sectionBg(),
+}) satisfies z.ZodType<ListingGridProps>;
+
 // metricValue/metricLabel are named OUTSIDE the AI content-patch allowlist
 // (BlockContentPatchSchema) on purpose — a held number is never AI-writable,
 // exactly like ListingProps' price/beds. `sub`/`rankText`/`movementText`/`barPct`
@@ -387,6 +416,7 @@ const BlockSchema = z
     z.object({ id: idIn, type: z.literal("text"), props: TextPropsSchema }),
     z.object({ id: idIn, type: z.literal("image"), props: ImagePropsSchema }),
     z.object({ id: idIn, type: z.literal("listing"), props: ListingPropsSchema }),
+    z.object({ id: idIn, type: z.literal("listing-grid"), props: ListingGridPropsSchema }),
     z.object({ id: idIn, type: z.literal("multi-column"), props: MultiColumnPropsSchema }),
     z.object({ id: idIn, type: z.literal("list"), props: ListPropsSchema }),
     z.object({ id: idIn, type: z.literal("metric-card"), props: MetricCardPropsSchema }),
