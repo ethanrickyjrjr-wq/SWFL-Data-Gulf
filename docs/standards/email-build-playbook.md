@@ -149,6 +149,9 @@ Source: `_RESEARCH/email-and-social/2026-08-03-button-link-mechanics.md`.
 - **Height 42–72px.** Tap target, not decoration.
 - **NEVER an image-based button.** Images-off is a normal reading mode; an image button becomes
   invisible.
+- **Label is 1–5 words, actionable.** More context goes in a headline ABOVE the button, never inside
+  it.
+- **Whitespace around the button matters** — bunched links produce mis-taps, worst on mobile.
 - **ONE call to action per email. Never three.** The single most-repeated craft rule in the research.
 - **Buttons wire by ROLE, not by button.** A community button and a booking button hold different
   saved URLs and both survive a relabel. Code root: `lib/email/button-destinations.ts`.
