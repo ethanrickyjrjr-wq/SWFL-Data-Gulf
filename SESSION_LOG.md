@@ -1,3 +1,44 @@
+## 2026-08-04 (Opus 5) — The email type scale was never enforced; built the linter the research specified on 07/01 and never got
+
+Operator asked for the Common Foundation of the email assembly line — "fonts, actual numbers on
+sizes and making everything even based on space." I answered from `app/_design/05-color-and-type.md`
+and the code, never opened `_RESEARCH/`, and reported the scale as compiler-enforced. He caught it
+twice ("make sure you are reading from the correct rules", then "which files are actually the
+correct ones based on our gitignored research"). RULE 0.4 skipped on the exact class of question it
+exists for.
+
+What the gitignored research actually said, `_RESEARCH/deliverable-and-design/2026-07-01-ai-
+deliverable-design-quality-research.md` §1.3: replace freeform styling props with closed enums,
+because "LLMs will use whatever props are available to them," and add a linter pass — explicitly
+naming this repo's own validator gates as the pattern. Written 07/01/2026. Never built.
+
+Built it: `lib/email/blocks/type-conformance.test.ts`. Spacing IS compiler-enforced (`Space` is a
+union); type never was, because React's `CSSProperties` declares `fontSize?: string | number` and we
+don't own that interface. The guard caught **11 live violations**, two shipping to real inboxes:
+`SourcesBlock.tsx:106` (`fontSize "11px"` + `lineHeight "1.6"` — neither on the scale, four lines
+below a correct `text("mono")`), `ImageBlock.tsx:82` (`fontWeight "700"` overriding a correct
+`text("h2")`; the doc states 600/500/400 — a survivor of the 07/14 "30 declarations, ZERO compliant"
+measurement), and `OpenSlot.tsx` (six raw sizes 13/11/11/12/12/12, three raw `fontWeight: 600`, plus
+off-grid 36/10/6/5px spacing — 36 being the exact number `styles.ts` already replaced with 32).
+All fixed through `text()`/`WEIGHT`. Verified: 3 pass 0 fail on the guard · **1741 pass, 0 fail,
+4817 expect() calls across 191 files** (`bun test lib/email`) · `bunx tsc --noEmit` clean.
+
+VERIFIED-CORRECT, so nobody re-derives it: all seven sizes, three weights, three leadings and the
+tracking in `scale.ts` match `05-color-and-type.md` line for line. That half was never the problem.
+
+Wired the research into the three things a build reads FIRST — `lib/email/CLAUDE.md` (auto-loads on
+edit), `emails.md` new §0.0, and `scale.ts`'s own header — each naming all five research files by
+path with the load-bearing warning: **the folder is gitignored, so an empty Grep is not evidence the
+research is absent.** Also corrected the NotebookLM mind map of this pipe (no seam node, no
+one-door node, branding at the start when `applyBrand` runs after authoring, AI at the end when it
+fills slots before the seam) and put the fixed version in `emails.md` §00 as mermaid — inside the
+existing map, not as a rival picture.
+
+NOT BUILT, check opened `email_internal_external_spacing_unbuilt`: the research's actual evenness
+rule (§1.1, internal ≤ external, Gestalt grouping) is unimplementable today — `compile-grid.ts`
+emits no between-block margin, so the external term is 0 on every email and every pair of sections
+reads identically spaced whether they group or not. Body-grammar decision for the assembly-line walk.
+
 ## 2026-08-04 (Sonnet 5) — Committed the STEADYAPI duplicate-root handoff that was sitting untracked
 
 Operator flagged an untracked file left over from the earlier work in this session:

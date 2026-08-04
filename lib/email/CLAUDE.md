@@ -1,5 +1,34 @@
 # lib/email/ — email & deliverable conventions (loads when you edit here)
 
+> **⛔ STEP ZERO — THE RULES ARE GITIGNORED. GREP RETURNS NOTHING; THAT IS NOT ABSENCE.**
+> Operator decree 08/04/2026: *"Get the actual rules from the gitignored into the first steps
+> of email build. This is the foundation of everything. Every fucking email starts reading
+> these rules and has to abide by them when used."* Open these BY PATH before any design,
+> type, spacing, copy, or CTA decision — a repo-wide search cannot see them:
+>
+> - `_RESEARCH/deliverable-and-design/2026-07-01-ai-deliverable-design-quality-research.md`
+>   — §1.1 internal ≤ external spacing (the evenness rule, ⚠ NOT implemented — no external
+>   term exists in the compiled email); §1.2 avoid small differences between scale steps;
+>   §1.3 closed enums not freeform props + a linter pass (✅ shipped as
+>   `blocks/type-conformance.test.ts`); §2.1 chart type by data shape; §2.2 WCAG 1.4.3 (4.5:1
+>   text, 3:1 large) and 1.4.11 (3:1 non-text) with the grayscale self-test.
+> - `_RESEARCH/deliverable-and-design/2026-07-01-taskB-wcag-contrast-verification.md` — the
+>   contrast half of the foundation.
+> - `_RESEARCH/email-and-social/2026-08-03-email-length-and-per-type-benchmarks.md` — the
+>   measured copy numbers behind §0.1 (50–125 words; the FLOOR bites harder).
+> - `_RESEARCH/email-and-social/2026-08-03-strongest-real-estate-email-concepts-structure.md`
+>   — the 5-part skeleton, subject-line taxonomy, market-report order, and Part D render
+>   constraints (Outlook has zero flex/grid; Gmail clips at ~102KB).
+> - `_RESEARCH/email-and-social/2026-08-03-button-link-mechanics.md` — button height 42–72px,
+>   never an image-based button, and why `usesWebsiteDefault: false` is a deliverability rule.
+>
+> **Why this block exists:** on 08/04/2026 a session answered a font/size/spacing question
+> from `app/_design/` and the code alone, never opened `_RESEARCH/`, and reported the type
+> scale as "compiler-enforced" when nothing enforced font size at all. The research had
+> already prescribed the exact missing guard — on 07/01/2026, three days of crawling, unread
+> for a month. **Research in markdown governs nothing; it governs when it becomes a code root
+> plus a red test.** That is the same lesson §4 of the email map already records.
+
 > **CODING A RECIPE, SEED, TEMPLATE, OR BLOCK? → `docs/standards/emails.md` §0 "BEFORE YOU CODE
 > A RECIPE" FIRST.** The rules card: body **50–125 words** (and a 25-word email is as weak as a
 > 2000-word one — the floor bites harder than the ceiling), ask 1–3 questions, 3rd-grade reading

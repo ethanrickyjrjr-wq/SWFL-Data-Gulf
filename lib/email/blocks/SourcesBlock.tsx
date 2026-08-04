@@ -103,7 +103,7 @@ export function SourcesBlock({
             c.linkable && c.href ? (
               <Text
                 key={c.href ?? i}
-                style={{ fontFamily: font, fontSize: "11px", lineHeight: "1.6", margin: "0 0 4px" }}
+                style={{ fontFamily: font, ...text("mono"), margin: "0 0 4px" }}
               >
                 <Link href={c.href} style={{ color: linkInk }}>
                   {c.label}

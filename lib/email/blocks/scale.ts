@@ -23,6 +23,41 @@
 //     label rendered at ratio 2.67. THIS is the mechanical cause of "uneven".
 //     Not the grid. An invisible default nobody set.
 //
+// ── THE RESEARCH BEHIND THIS FILE — GITIGNORED, SO GREP CANNOT FIND IT ───────
+//
+// `05-color-and-type.md` is the source of the NUMBERS. It is not the source of the
+// RULES. Those were researched live (crawl4ai, 07/01/2026) and live in a folder that
+// never ships — which means a repo-wide search returns nothing and a session concludes
+// the research is absent. Open it BY PATH:
+//
+//   _RESEARCH/deliverable-and-design/2026-07-01-ai-deliverable-design-quality-research.md
+//
+// Three findings in it govern every email. Their status here is stated honestly:
+//
+//   §1.1  INTERNAL ≤ EXTERNAL (cieden, grounded in Gestalt proximity): "the space around
+//         elements (external) should be equal to or, ideally, greater than the space
+//         within them." This is the rule that makes a reader see two blocks as ONE group
+//         or TWO. ⚠ NOT IMPLEMENTED, and not implementable as written: `compile-grid.ts`
+//         emits no between-block margin, so the external term is 0 on every email and all
+//         rhythm comes from each block's own `sectionPad`. Every pair of sections
+//         therefore reads identically spaced whether or not they belong together.
+//         Do not "fix" this by inventing a margin — it is a grammar decision that belongs
+//         to the assembly-line walk, not to this file.
+//
+//   §1.2  AVOID SMALL DIFFERENCES between scale steps (Material Design 3): "sizes should
+//         aim to provide impactful contrast between sizes by avoiding small differences."
+//         Ours crowd at the small end — 12→14 is 1.167×, 14→16 is 1.143× — which is
+//         exactly where captions, labels, source lines and strip text all live. Known and
+//         accepted: the seven steps come from OUR design doc, which outranks a vendor's
+//         ratio. Recorded so nobody re-derives it as a discovery.
+//
+//   §1.3  CLOSED ENUMS, NOT FREEFORM PROPS (sampiercelolla): "LLMs will use whatever props
+//         are available to them, so design your component API accordingly" — plus: add a
+//         linter pass to self-correct against, mirroring this repo's own validator gates.
+//         ✅ IMPLEMENTED 08/04/2026 as `type-conformance.test.ts` (this directory). It
+//         caught 11 live violations the day it was written, two of them shipping to real
+//         inboxes. `text()` is the closed enum; that test is the linter.
+//
 // ── THE ONE RULE THAT KILLS THAT BUG BY CONSTRUCTION ─────────────────────────
 //
 // `text(role)` returns fontSize AND lineHeight AND fontWeight TOGETHER. A size

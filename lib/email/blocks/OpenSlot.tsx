@@ -19,6 +19,7 @@
 import type * as React from "react";
 import type { EditScope } from "./editable-text";
 import { MUTED, BORDER } from "./styles";
+import { text, WEIGHT } from "./scale";
 
 const DASH = "#C7CDD3";
 
@@ -51,27 +52,28 @@ export function ImageSlot({
   scope?: EditScope;
   isChart?: boolean;
 }) {
+  // Spacing walks the 8px grid (scale.ts `Space`): 36 and 10 were off-grid — 36 is the exact
+  // number styles.ts already replaced with 32 on every block gutter.
   const box: React.CSSProperties = {
-    padding: "36px 24px",
+    padding: "32px 24px",
     textAlign: "center",
     backgroundColor: "#F9FAFB",
     border: `1px dashed ${DASH}`,
-    borderRadius: "6px",
+    borderRadius: "4px",
     margin: "12px",
   };
   const title: React.CSSProperties = {
     fontFamily: font,
-    fontSize: "13px",
-    fontWeight: 600,
+    ...text("caption", { weight: WEIGHT.emphasis }),
     color: "#4B5563",
-    margin: "0 0 10px",
+    margin: "0 0 8px",
   };
 
   if (isChart || !scope) {
     return (
       <div style={box}>
         <p style={title}>{instruction}</p>
-        <p style={{ fontFamily: font, fontSize: "11px", color: MUTED, margin: 0 }}>
+        <p style={{ fontFamily: font, ...text("mono"), color: MUTED, margin: 0 }}>
           {isChart
             ? "A chart lands here when its data resolves — every plotted number is a real one."
             : "Nothing here yet — it won't be sent."}
@@ -90,7 +92,7 @@ export function ImageSlot({
       }}
     >
       <p style={title}>{instruction}</p>
-      <p style={{ fontFamily: font, fontSize: "11px", color: MUTED, margin: "0 0 12px" }}>
+      <p style={{ fontFamily: font, ...text("mono"), color: MUTED, margin: "0 0 12px" }}>
         Drop a photo here, choose a file, or paste a link. Empty slots are never sent.
       </p>
       {scope.upload ? (
@@ -99,13 +101,12 @@ export function ImageSlot({
             display: "inline-block",
             cursor: "pointer",
             fontFamily: font,
-            fontSize: "12px",
-            fontWeight: 600,
+            ...text("mono", { weight: WEIGHT.emphasis }),
             color: "#06231f",
             backgroundColor: "#3DC9C0",
             borderRadius: "4px",
-            padding: "6px 12px",
-            marginBottom: "10px",
+            padding: "8px 12px",
+            marginBottom: "8px",
           }}
         >
           Choose a file
@@ -122,7 +123,7 @@ export function ImageSlot({
         </label>
       ) : null}
       <form
-        style={{ display: "flex", gap: "6px", justifyContent: "center" }}
+        style={{ display: "flex", gap: "8px", justifyContent: "center" }}
         onSubmit={(e: React.FormEvent<HTMLFormElement>) => {
           e.preventDefault();
           const raw = new FormData(e.currentTarget).get("slot-url");
@@ -137,8 +138,8 @@ export function ImageSlot({
           placeholder="…or paste an image link"
           style={{
             fontFamily: font,
-            fontSize: "12px",
-            padding: "5px 8px",
+            ...text("mono"),
+            padding: "4px 8px",
             border: `1px solid ${BORDER}`,
             borderRadius: "4px",
             color: "#111827",
@@ -150,9 +151,8 @@ export function ImageSlot({
           type="submit"
           style={{
             fontFamily: font,
-            fontSize: "12px",
-            fontWeight: 600,
-            padding: "5px 10px",
+            ...text("mono", { weight: WEIGHT.emphasis }),
+            padding: "4px 8px",
             border: `1px solid ${BORDER}`,
             borderRadius: "4px",
             backgroundColor: "#ffffff",

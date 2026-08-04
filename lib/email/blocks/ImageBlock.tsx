@@ -2,7 +2,7 @@
 import { Img, Link, Section, Text } from "@react-email/components";
 import type { EmailGlobalStyle, ImageProps } from "../doc/types";
 import { fontStack, MUTED, CARD_BG, BORDER } from "./styles";
-import { text, pad, space, CARD_PAD } from "./scale";
+import { text, pad, space, CARD_PAD, WEIGHT } from "./scale";
 import { EditableText, type EditScope } from "./editable-text";
 import { ImageSlot } from "./OpenSlot";
 
@@ -78,8 +78,9 @@ export function ImageBlock({
               placeholder="Headline"
               style={{
                 fontFamily: font,
-                ...text("h2"),
-                fontWeight: "700",
+                // 700 is not one of the document's three weights (600/500/400). The overlay
+                // title is a display moment, so it takes the doc's display weight by name.
+                ...text("h2", { weight: WEIGHT.display }),
                 color: textColor,
                 margin: space(0, 0, 12),
               }}

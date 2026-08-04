@@ -58,6 +58,65 @@ you found a second way to build an email, you found a bug or a dead limb. Read t
                                                    table HTML  -->  SEND
 ```
 
+### The same pipe as a mind map — corrected 08/04/2026
+
+A NotebookLM mind map of this pipe was brought to the operator's desk on 08/04/2026 with three
+stages (Common Foundation → Specialized Template Paths → AI Data Enrichment). It named real roots,
+but it **had no node for the seam, no node for the one door to HTML, put branding at the START when
+`applyBrand` runs AFTER authoring as a blank-filling overlay, and put AI at the END when the model
+fills open slots BEFORE the seam.** Built to, it re-creates the 07/19 `HERO_LABEL` clobber. This is
+the corrected form — **paste this, not the old one.** A second picture that disagrees with this file
+is how a session reported "two engines" as live design on 08/03/2026.
+
+```mermaid
+mindmap
+  root((SWFL Email<br/>Assembly Line))
+    STAGE 0 — READ THE RULES
+      _RESEARCH is GITIGNORED
+        Grep returns nothing — that is NOT absence
+        Open BY PATH, always
+      design-quality research 07/01
+        internal =< external spacing — NOT BUILT
+        avoid small differences between steps
+        closed enums not freeform props — BUILT
+        WCAG 4.5:1 text · 3:1 large · 3:1 non-text
+      copy + structure research 08/03
+        50-125 words · 1-3 questions · 3rd grade
+        5-part skeleton · one CTA
+        Outlook no flex/grid · Gmail clips ~102KB
+      button mechanics 08/03
+        42-72px · never an image button
+    STAGE 1 — COMMON FOUNDATION
+      scale.ts is the ONE type root
+        7 sizes 64/44/36/28/16/14/12
+        3 weights 600/500/400 — never 700
+        leading 1.1 / 1.55 / 1.4 — unitless
+        8px grid as a TYPE UNION
+        text-role returns size+leading+weight TOGETHER
+      type-conformance.test.ts is the linter
+        raw fontSize / fontWeight / lineHeight = RED
+      header + footer + CAN-SPAM address
+    STAGE 2 — RECIPE PICKS BLOCKS AND DATA
+      one file per recipe key
+      NEVER writes a position
+      declares positioning + ChartPolicy
+    STAGE 3 — AI FILLS OPEN SLOTS
+      runs BEFORE the seam, not at the end
+      empty field = open slot · filled = keep
+      code computes every claim and count
+      model selects points, never writes a number
+    STAGE 4 — THE SEAM
+      finalizeDoc assigns EVERY position
+      stamps provenance — fake shape cannot pass
+    STAGE 5 — BRAND OVERLAY
+      runs AFTER authoring, client-side
+      fills BLANKS ONLY — never overwrites
+    STAGE 6 — THE ONE DOOR
+      renderEmailDocHtml then compileGrid
+      never call the renderer pair directly
+      then SEND
+```
+
 **What each block LOOKS like is not decided anywhere above.** It is decided once, in the block
 components (`lib/email/blocks/*.tsx`), and all eighteen of them import ONE type root:
 
@@ -132,8 +191,37 @@ ALL LOGO, CAN SPAM RULES EVERYTHING IN ONE PLACE THAT BUILDER SEES BEFORE CODING
 number below either states its source inline or names the executable root that owns it. **Where this
 card and a code root disagree, the CODE ROOT WINS** — this card mirrors, it does not define.
 
-Most of §0.1–§0.3 came out of `_RESEARCH/` (gitignored, invisible to Grep) and governed nothing
-until it landed here. That is the same failure §4 documents about `app/_design/`.
+### 0.0 STEP ZERO — open the research BY PATH. It is gitignored; Grep returns nothing.
+
+**Operator decree 08/04/2026, verbatim:** *"Get the actual rules from the gitignored into the first
+steps of email build. This is the foundation of everything. Every fucking email starts reading these
+rules and has to abide by them when used."*
+
+A repo-wide search **cannot see these files.** An empty Grep is not evidence they don't exist — it is
+the exact reason they went unread for a month. Open them with Read, by path:
+
+- `_RESEARCH/deliverable-and-design/2026-07-01-ai-deliverable-design-quality-research.md` — the
+  foundation. §1.1 **internal ≤ external** spacing (Gestalt proximity; the real evenness rule —
+  ⚠ **NOT implemented**, see §4); §1.2 avoid small differences between type steps; §1.3 **closed
+  enums, not freeform props** + a linter pass (✅ shipped 08/04/2026 as
+  `lib/email/blocks/type-conformance.test.ts`); §2.1 chart type by data shape; §2.2 WCAG 1.4.3 /
+  1.4.11 with the grayscale self-test.
+- `_RESEARCH/deliverable-and-design/2026-07-01-taskB-wcag-contrast-verification.md` — contrast.
+- `_RESEARCH/email-and-social/2026-08-03-email-length-and-per-type-benchmarks.md` — §0.1's numbers.
+- `_RESEARCH/email-and-social/2026-08-03-strongest-real-estate-email-concepts-structure.md` — the
+  5-part skeleton, subject taxonomy, market-report order, Part D render constraints.
+- `_RESEARCH/email-and-social/2026-08-03-button-link-mechanics.md` — button 42–72px, never an
+  image-based button, payload-domain deliverability.
+
+§0.1–§0.3 are the DIGEST of those files, not a replacement for them. The digest carries the numbers;
+the research carries the reasoning and the sources, and only the research tells you which rules are
+still unbuilt. That distinction is what a session needs and what a summary always loses.
+
+**Postmortem that forced this heading (08/04/2026):** a session answered a font/size/spacing question
+from `app/_design/` and the code alone, never opened `_RESEARCH/`, and reported the type scale as
+"enforced by the compiler" when nothing enforced font size at all — two violations were shipping to
+real inboxes. The guard that would have caught them was specified in that research on 07/01/2026 and
+sat unread. Same failure §4 documents about `app/_design/`, one layer up.
 
 ### 0.1 Copy — how much, and shaped how
 
