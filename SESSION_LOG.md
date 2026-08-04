@@ -1,3 +1,36 @@
+## 2026-08-04 (Opus 5) — CI: main had not typechecked since 95fb8d30. One call site, five red commits.
+
+Operator: *"gitub red"* — and it was, but not from my push. Last green build was `b6889cd1`.
+
+`95fb8d30` renamed `resolveCompEnrichment`'s spend option from `maxPaidLookups` to
+`maxPaidResults` in `lib/listings/apify-identity.ts` and never updated the single call site in
+`lib/deliverable/recipes/market-comps.ts`. `bunx tsc --noEmit` has failed on every commit since —
+`310f3526`, `8efaefd3`, `c17ea274`, `95fb8d30`, and mine — and because Typecheck is step 3 of the
+build job, NOTHING after it has run for that whole stretch: no eslint, no `bun test`, no hook
+tests, no knip, no lake-read check. Five commits of "CI is red" that was really "CI never ran".
+
+```
+lib/deliverable/recipes/market-comps.ts(261,27): error TS2353: Object literal may only specify
+known properties, and 'maxPaidLookups' does not exist in type '{ state?; zip?; maxPaidResults?;
+fetchZip?; readCache? }'
+```
+
+**DROPPED, NOT RENAMED — the two options are not the same thing.** `maxPaidLookups` was a
+per-build lookup ceiling; `maxPaidResults` is "vendor RESULTS to buy, ~$0.01 each — the unit the
+vendor actually bills", read at `apify-identity.ts:362` as a PER-MONTH cap. Renaming it in place
+would have passed `MAX_COMPS` (6) as the whole month's paid-result budget — green CI, silently
+throttled spend, and no one would have found it until comps stopped enriching. The comps session's
+own in-flight tree resolves it the same way: `{ state: "FL", zip }`, letting the default stand.
+
+Landed as a one-line commit against the committed file only. The comps-email session's remaining
+uncommitted work on `market-comps.ts` was backed up, restored byte-identical (82,255 bytes), and is
+still theirs.
+
+⚠️ **The pre-commit hook stages the whole tree.** lint-staged's stash/restore cycle moved every one
+of the parallel session's uncommitted files into the INDEX. Nothing of theirs was committed (`git
+log` on `duplicate-root.mjs` is empty), but a bare `git commit` by the next session would have
+swept all of it. Unstaged after the push; working tree untouched.
+
 ## 2026-08-04 (Opus 5) — STEADY STEP-3: three views were re-parsing the raw JSON a second time. All three now read their table.
 
 Operator: *"figure out what is wrong with this file"* → *"Why the fuck would we do a duplicate
