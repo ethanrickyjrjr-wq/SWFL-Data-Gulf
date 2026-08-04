@@ -479,14 +479,16 @@ describe("the chart plots the number the email argues over", () => {
 // and never a first-seen floor. The strip never read it.
 describe("days on market rides on the face of the email", () => {
   test("a real DOM count renders in the strip", () => {
+    // Label conformed to listing-flyer.ts's "DOM" on 08/04/2026 (grid/font fix) — see the
+    // comment on compsSpecs. "Days listed" was the pre-conform label.
     const cells = compsSpecs({ ...SUBJECT, daysOnMarket: 41 }, HOMES);
-    const dom = cells.find((c) => /days listed/i.test(c.label));
+    const dom = cells.find((c) => c.label === "DOM");
     expect(dom?.value).toBe("41");
   });
 
   test("no DOM held → an OPEN SLOT, never a zero and never a guess", () => {
     const cells = compsSpecs(SUBJECT, HOMES);
-    const dom = cells.find((c) => /days listed/i.test(c.label));
+    const dom = cells.find((c) => c.label === "DOM");
     expect(dom?.value ?? "").toBe("");
   });
 
@@ -1221,7 +1223,8 @@ describe("EVERY COMP HAS A PHOTO — a comp we cannot picture is dropped from th
     const shown = [HOMES[1]!]; // 336 Shore Dr Lot 58 — 1,976 sq ft at $385,000 = $195
     const doc = buildCompsGrid(SUBJECT, shown, canvas());
     const cells = statsOf(doc);
-    expect(cells.find((c) => c.label === "Comp median")?.value).toBe("$195");
+    // Label conformed to listing-flyer.ts's "Median" on 08/04/2026 — see compsSpecs.
+    expect(cells.find((c) => c.label === "Median")?.value).toBe("$195");
   });
 
   test("the stated COUNT matches the number of rows rendered", () => {
