@@ -19,6 +19,12 @@ usage lives HERE (root CLAUDE.md keeps the rules, this file keeps the mechanics)
 - `node scripts/safe-push.mjs` — the ONLY push path. Landmines: it rebases and can carry
   foreign parallel-session commits — check `git log origin/main..HEAD` first and ASK before bundling;
   it also flattens `--no-ff` merges.
+- `node scripts/doc-index.mjs` — regenerates `.claude/skills/what-do-we-have/INDEX.md`, the map of
+  ALL 1,534 docs (path + title + one-line hook) that the `what-do-we-have` skill greps. **This is the
+  ONLY place `_RESEARCH/` is visible to a repo-wide search** — that directory is gitignored, so `Grep`
+  cannot see its 80 files and "I searched and found nothing" is NOT evidence of absence. Skill body
+  loads on demand (Anthropic's progressive disclosure), so it costs nothing until needed. **Run after
+  adding or moving docs. Never hand-edit INDEX.md.**
 - `node scripts/doc-reachability.mjs [--orphans] [--json] [--check]` — **run this before ever saying
   a doc/linking/indexing job is "done."** Answers "is every path noticeable to Claude when it needs
   it" as a number over all tracked text files: reachable by FULL PATH (strong), by NAME ONLY (weak,
