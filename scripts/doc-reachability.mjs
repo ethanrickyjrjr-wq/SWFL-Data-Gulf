@@ -4,7 +4,7 @@
 // when it needs it?", answered as a NUMBER instead of an opinion.
 //
 // *** WHY THIS FILE EXISTS. *** On 08/05/2026 the operator was told the doc-linking
-// work was "done" and "we are all good." It had covered 8 files out of 1,453 tracked
+// work was "done" and "we are all good." It had covered 8 files out of 1,533
 // markdown files. His reply, verbatim: *"To say you are done and we are all good is
 // the biggest lie I've heard from Claude. We have so many files and sections and
 // areas that there is no way we are good."* He was right, and nothing in the repo
@@ -36,13 +36,20 @@
 // the same move as deleting a failing test.
 // ═══════════════════════════════════════════════════════════════════════════════
 import { execSync } from "node:child_process";
-import { readFileSync, statSync } from "node:fs";
+import { readFileSync, readdirSync, statSync } from "node:fs";
 import { join, basename, dirname } from "node:path";
 import { fileURLToPath } from "node:url";
 
-/** Measured 08/05/2026: 229 orphans of 1,453 docs. Lower this as orphans are closed;
- *  never raise it. */
-const ORPHAN_BASELINE = 229;
+/** Measured 08/05/2026: **240 orphans of 1,533 docs.** Lower this as orphans are closed;
+ *  never raise it to make `--check` pass.
+ *
+ *  THE ONE TIME IT WAS RAISED, AND WHY THAT WAS NOT GAMING: it went 229 -> 240 within the
+ *  hour it was written, because the FIRST version scanned only `git ls-files` and therefore
+ *  counted 0 of the 80 gitignored `_RESEARCH/` docs. Widening a blind instrument surfaced 11
+ *  more orphans that were always there. **No orphan was created; the ruler got honest.**
+ *  That is the ONLY admissible reason to raise this number, it must be stated in the same
+ *  commit, and "the measurement changed" must never be used to launder an actual regression. */
+const ORPHAN_BASELINE = 240;
 
 const ROOT = join(dirname(fileURLToPath(import.meta.url)), "..");
 
@@ -57,12 +64,44 @@ const NOT_EVIDENCE = /^(node_modules|\.next|dist|build|coverage|graphify-out)\//
 /** Guard against a single huge generated file dominating the scan. */
 const MAX_BYTES = 4 * 1024 * 1024;
 
+/** Directories that are GITIGNORED ON PURPOSE but are still first-class documents an
+ *  agent is required to read. `_RESEARCH/` is the whole point: RULE 0.4 makes it the
+ *  FIRST thing opened, and its own index says "a research file not listed in this index
+ *  does not exist."
+ *
+ *  *** THIS LIST EXISTS BECAUSE THE FIRST VERSION OF THIS SCRIPT WAS ITSELF A LYING
+ *      INSTRUMENT. *** It measured reachability with `git ls-files` alone, so it counted
+ *      0 of the 80 `_RESEARCH/` docs — a census about unread documents that excluded the
+ *      documents most loudly documented as unread, and reported the total as if complete.
+ *      Same failure class as the Apify spend receipt that counted rows-added and printed
+ *      "$0 spent" while $2.00 was charged (08/05/2026). An instrument that can lie is
+ *      worse than no instrument, so the blind spot is closed here rather than caveated. */
+const UNTRACKED_DOC_ROOTS = ["_RESEARCH"];
+
+function walk(dir, acc = []) {
+  let entries;
+  try {
+    entries = readdirSync(join(ROOT, dir), { withFileTypes: true });
+  } catch {
+    return acc;
+  }
+  for (const e of entries) {
+    const rel = `${dir}/${e.name}`;
+    if (e.isDirectory()) walk(rel, acc);
+    else acc.push(rel);
+  }
+  return acc;
+}
+
 function trackedFiles() {
-  return execSync("git ls-files", { cwd: ROOT, maxBuffer: 256 * 1024 * 1024 })
+  const git = execSync("git ls-files", { cwd: ROOT, maxBuffer: 256 * 1024 * 1024 })
     .toString()
     .split("\n")
     .map((s) => s.trim())
     .filter(Boolean);
+  // Gitignored-but-required docs are unioned in, then deduped — a path could be both.
+  const extra = UNTRACKED_DOC_ROOTS.flatMap((d) => walk(d));
+  return [...new Set([...git, ...extra])];
 }
 
 export function census() {
