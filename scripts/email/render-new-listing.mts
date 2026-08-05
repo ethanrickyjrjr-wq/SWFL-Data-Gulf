@@ -135,10 +135,19 @@ const rows: [string, string | undefined, string][] = [
   ["Listing link", url ?? undefined, "paid row property_url — no link means NO BUTTON"],
 ];
 
+// A CLIPPED VALUE MUST LOOK CLIPPED. 08/05/2026: this table printed the agent headshot as
+// `https://www.swfldatagulf.com/showcase/launch` — a page URL where an image URL belongs — and it
+// was written into a handoff as a live defect. It was not. The real value is
+// `…/showcase/launch-blitz/live/assets/dani-vero.jpg`, it is in the rendered bytes, and it 200s as
+// image/jpeg. The column just cut it at 44 chars with no marker, and a plain prefix of a URL is
+// itself a plausible URL. That is the stale-alarm class this script exists to prevent, produced BY
+// this script. The ellipsis is the whole fix: it makes "there is more" unmissable.
+const clip = (s: string, n: number) => (s.length > n ? `${s.slice(0, n - 1)}…` : s);
+
 console.log("  CELL                 VALUE                                     SOURCE");
 console.log("  " + "─".repeat(100));
 for (const [cell, value, source] of rows) {
-  const v = value ? String(value).slice(0, 40) : "— OPEN SLOT";
+  const v = value ? clip(String(value), 40) : "— OPEN SLOT";
   console.log(`  ${cell.padEnd(20)} ${v.padEnd(41)} ${source}`);
 }
 
@@ -167,7 +176,7 @@ for (const [label, v] of [
   ["LinkedIn", fp.linkedinUrl],
 ] as [string, unknown][]) {
   console.log(
-    `  ${label.padEnd(30)} ${v ? String(v).slice(0, 44) : "— OPEN SLOT (fill in Branding)"}`,
+    `  ${label.padEnd(30)} ${v ? clip(String(v), 44) : "— OPEN SLOT (fill in Branding)"}`,
   );
 }
 

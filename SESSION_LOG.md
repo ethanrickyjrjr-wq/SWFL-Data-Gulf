@@ -1,3 +1,54 @@
+## 2026-08-05 (Opus 5) — Under Contract walked and the recipe decided: I designed the email as if WE send it, the agent does, and that one wrong premise had killed the best number in it.
+
+**No code shipped for the email. The recipe did.**
+`docs/superpowers/plans/2026-08-05-under-contract-24-BUILD-HANDOFF.md` carries the full ladder —
+every cell, source and fallback — and supersedes the pre-walk brief.
+
+**THE CORRECTION THAT MATTERED (operator).** I reasoned that because `listing_transitions` never logs
+a pending transition, the email has no trigger and no elapsed-time number, and wrote "speed is
+unusable, we cannot measure it" into a research file. **We are not the sender. The agent is** — they
+own the listing, build the campaign, and notify us at under-contract, and that notification IS the
+trigger (lane 4, first-class under RULE 0.7). Treating an empty lane 1 as a dead end is the exact
+refusal RULE 0.7 forbids. Speed = our listed date minus the agent's contract date, two real sources.
+Research file, index line and the check I had opened on that premise are all corrected/closed.
+
+**RESEARCH, 2 rounds, filed + indexed** (`_RESEARCH/email-and-social/2026-08-05-under-contract-email-purpose-and-design.md`).
+Round 1 was **1 of 10 URLs** — searched the artifact name ("under contract email template"), which
+returns only deal-desk transactional junk. Operator: *"1 out of 10 is shit and you looked it up
+wrong."* Round 2 searched per BENEFIT and hit primary material first try on all three: **5 of 13.**
+- Oakley Signs (06/18/2026) — the argument for this email, written about a yard-sign rider:
+  *"Just Listed, Under Contract, Sold tells a story that neighbors follow in real time … each status
+  update is another impression"* + the Rule of 7. This email has nothing to sell and that is the point.
+- Coffee & Contracts — the CTA formula (lead with the speed fact, close with *"Thinking about what
+  your home could sell for?"*), which dissolved what I had handed the operator as a fork: **speed is
+  the BODY, social proof is the CTA, one email.** Plus *"Most homes in [City] sell in X days, this one
+  sold in X"* — the market median is ours off the daily spine and nobody else emailing an agent's
+  list has it. Plus a 24–48h freshness window.
+- Redfin/NAR — **6% of sales fall through**, which kills any backup-offer ask (1-in-17). Recapture
+  CTA is "here's what else," not "get in line." A conflicting 16.3% figure is UNRESOLVED; neither
+  number ships until read at its own source (RULE 4).
+
+**A COMMITTED HANDOFF'S ONE OPEN DEFECT WAS FALSE.** The New Listing headshot renders correctly —
+the bytes carry `…/launch-blitz/live/assets/dani-vero.jpg`, **200 image/jpeg** live. The provenance
+table had clipped it at 44 chars with a bare `.slice()` and a URL prefix reads as a URL. The
+instrument built to answer "where did this come from" manufactured a defect and shipped it into a
+plan doc. Fixed: both tables clip through `clip()` and append `…` — verified in real output. Second
+lying instrument in two days (the Apify receipt printed "0 bought" against a $2.00 charge).
+
+**MEASURED LIVE, and two of them are now open checks.** There is no under-contract state — `state` is
+only active 30,708 / sold 789 / withdrawn 223. Pending is a flag on an otherwise-active row (7,209
+sale rows; Lee 4,824, Collier 2,221). `listing_transitions.to_state` is only active 49,996 / sold 820
+/ withdrawn 234. **5,118 under-contract homes sit inside `state='active'` and therefore inside the
+inventory counts the Coming Soon email ships** (`pending_homes_counted_as_active_inventory`), and the
+flag is **stale on 462 sold rows** (`flag_pending_stale_on_sold_rows`). `days_in_state` counts
+days-in-ACTIVE, so any duration cell built from it is a fabricated number off a real column.
+
+**Operator decisions locked:** contract date NOT a printed cell · price ships and is the LIST price ·
+audience is the agent's, not ours · no chart · listing's own photo or nothing.
+
+**NEXT:** write `lib/deliverable/recipes/under-contract.ts` + tests + `render-under-contract.mts`
+from §6 of the build handoff, render it, look at it, then the playbook section.
+
 ## 2026-08-05 (Opus 5) — The doc index got a pre-push gate, and the red-first test caught the index poisoning its own measurement within minutes of being committed.
 
 **GATE 1.5 — DOC INDEX DRIFT** (`.claude/hooks/check-prepush-gate.mjs`). Deliberately the SAME shape
