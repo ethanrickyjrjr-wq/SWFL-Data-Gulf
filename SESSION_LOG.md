@@ -43,6 +43,20 @@ and the citation root. Consumed as a DEFAULTED PARAMETER. **Frozen and never env
 output; an environment-varying field breaks that silently, and `SITE` already carries that scar
 (`NEXT_PUBLIC_SITE_URL` once shipped `http://localhost:3000` as every local doc's citation).
 
+**TWO FOLLOW-UPS, same session, both from a review pass after the push.**
+
+- **The `RAW_NUMBER` spacing guard had no red-first evidence** — the only violation
+  (`SourcesBlock:101 marginTop: 8`) was fixed in the same batch that added the assertion, so the
+  test had never been SEEN to fail. Confirmed by injecting `marginTop: 8` into `DividerBlock.tsx`:
+  **red, naming the file and line**; restored, green. The other three spacing assertions were red
+  first by construction.
+- **A ZERO ON THE SCOPE TOTAL FALLS THROUGH TO THE NEXT LADDER RUNG, and that was undocumented
+  rather than decided.** Now decided and written at both the `return` and the ladder header:
+  `activeHomes` carries NO band filter, so zero means we hold no active inventory for that county
+  at all — a ZIP crosswalking to Charlotte, Glades or Sarasota — and widening to the market we do
+  cover, saying so, beats three open slots in the email's whole middle. **The strong claim is not
+  at risk:** a genuinely rare home is a zero on `comparable`, which never triggers a fall-through.
+
 **PUSH OVERRIDE RECORDED — `ALLOW_PAID_SURFACE=1`.** `check-no-new-paid-surface.mjs` blocked the
 push on one ADDED line in `scripts/email/render-coming-soon.mts`: a **comment** reading *"ONLY when
 a description exists — run without ANTHROPIC_API_KEY and it becomes an open slot."* No new paid

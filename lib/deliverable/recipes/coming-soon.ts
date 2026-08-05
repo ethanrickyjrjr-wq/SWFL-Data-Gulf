@@ -414,7 +414,21 @@ async function countScarcity(
     ]);
 
     const activeHomes = total.count ?? 0;
-    if (!activeHomes) return null; // no inventory in scope → nothing to claim, try the next rung
+    // ── A ZERO HERE FALLS THROUGH TO THE NEXT RUNG. DELIBERATE, AND NOT THE SAME AS A
+    //    ZERO ANYWHERE ELSE IN THE FUNNEL. ──────────────────────────────────────────
+    //
+    // `activeHomes` is the county's TOTAL active for-sale homes with NO band filter on it.
+    // Zero does not mean "a rare home" — it means we hold no active inventory for that
+    // county AT ALL, i.e. we do not cover it. Lee and Collier are the two data-rich
+    // counties; a ZIP that crosswalks to Charlotte, Glades or Sarasota lands here, and the
+    // honest move is to widen to the market we DO cover and SAY the scope widened, rather
+    // than print three open slots on an email whose whole middle is this block.
+    //
+    // THE STRONG SCARCITY CLAIM IS NOT AT RISK FROM THIS. A genuinely rare home shows up as
+    // `comparable` (or `inBand`) at or near zero, and neither of those triggers a fall-
+    // through — only the scope total does. "Zero homes in Lee County match this one" is the
+    // best sentence this email can print and it survives intact.
+    if (!activeHomes) return null;
     if (band.count == null || like.count == null) return null;
 
     const lastSeen = (fresh.data as { last_seen?: string }[] | null)?.[0]?.last_seen;
@@ -497,6 +511,14 @@ export async function countyFromLake(zip?: string): Promise<string | null> {
  * A wider scope also makes a WEAKER scarcity claim — a market-wide funnel narrows less than
  * a county one. That is correct and deliberate: the reader is told the scope, and a weaker
  * true claim beats a stronger unverifiable one.
+ *
+ * ── WHAT A RUNG "MISSING" MEANS, since two different things return null ──────
+ *
+ * `countScarcity` returns null both when the query THREW (no creds, a network fault) and
+ * when the scope holds ZERO active homes. The ladder treats them identically on purpose,
+ * and the reason is written at that `return` — a zero on the SCOPE TOTAL means we do not
+ * cover that county, not that the home is rare. A rare home is a zero on `comparable`,
+ * which never triggers a fall-through and prints as the strongest line this email has.
  */
 export async function loadScarcity(
   subject: { zip?: string; county?: string | null; price: number; beds: number; sqft: number },
