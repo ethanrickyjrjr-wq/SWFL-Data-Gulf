@@ -24,6 +24,7 @@ import { listingDescriptionFromPrompt } from "@/lib/email/listing-intent";
 
 import { auditClaims, numeralsIn, CLAIM_PROHIBITION } from "@/lib/deliverable/claims";
 import { communitySourceLine } from "@/lib/listings/listing-detail";
+import { pricePerSqft } from "@/lib/email/listing-flyer";
 import {
   neighborhoodAmenitiesSourceLine,
   resolveNeighborhoodForListing,
@@ -32,6 +33,10 @@ import {
   resolveCommunityForListing,
   neighborhoodStatsSourceLine,
 } from "@/lib/listings/community-lookup";
+import {
+  resolveInsideTheGate,
+  insideTheGateSourceLine,
+} from "@/lib/listings/community-inside-the-gate";
 import type { ListingFacts } from "@/lib/email/listing-scrape";
 import type { EmailDoc } from "@/lib/email/doc/types";
 
@@ -198,6 +203,17 @@ export async function resolveSubject(address: string, prompt: string): Promise<R
   if (mirrored) facts.photos[0] = mirrored;
   if (neighborhood) facts.neighborhood = neighborhood;
 
+  // INSIDE THE GATE — the third community layer, and the one that never reached an email
+  // built from a typed address. It keys off the subdivision the tax-roll lookup just
+  // resolved, so it costs one indexed single-row read on a table we already hold and
+  // cannot drift onto a different name for the same place. A miss is NORMAL (81 profiles
+  // against 20,400 subdivisions) and a miss keeps the narrator's golf/pool/gate
+  // prohibition switched ON, which is the correct default.
+  if (facts.communityStats?.subdivisionName) {
+    const gate = await resolveInsideTheGate(facts.communityStats.subdivisionName).catch(() => null);
+    if (gate) facts.insideTheGate = gate;
+  }
+
   // LANE 3 — THE PAID ROW WE ALREADY OWN. Every email starts at the same spot, so
   // this sits HERE and not in any one recipe. Gap-fill only: the full MLS description,
   // the 9-to-55-photo gallery, the bath count (the only source at all for a Collier
@@ -332,9 +348,30 @@ export async function authorListingNarrative(
     facts.beds && `Beds: ${facts.beds}`,
     facts.baths && `Baths: ${facts.baths}`,
     facts.sqft && `Square feet: ${facts.sqft}`,
+    // THE SAME $/SQFT THE SPEC GRID ALREADY SHOWS (`pricePerSqft`, listing-flyer.ts) — handed
+    // here as its OWN settled anchor. Without this line the model still computes it (price and
+    // square feet are both given, and it's the single most natural thing to say about a listing),
+    // and the claim gate correctly treats an unstated-but-derivable number as unanchored and
+    // throws the WHOLE paragraph away. Reproduced live 08/05/2026: `[narrative] DROPPED — the
+    // narrator made 1 claim(s) it was not given: unanchored-number("231")` — on a real house
+    // where every other lane succeeded. Anchoring the figure here fixes the false trip without
+    // weakening the gate against an actually-invented claim (a view, a pool, a school).
+    pricePerSqft(facts.price, facts.sqft) &&
+      `Price per square foot: ${pricePerSqft(facts.price, facts.sqft)} (already shown in the ` +
+        `spec grid above your paragraph — do not restate it as a bare figure).`,
     facts.lotSize && `Lot: ${facts.lotSize}`,
     facts.propertyType && `Type: ${facts.propertyType}`,
     facts.yearBuilt && `Year built: ${facts.yearBuilt}`,
+    // THE THREE FACTS A SELLER'S DESCRIPTION ALMOST NEVER CARRIES — and the ones this
+    // paragraph is now told to write ABOUT rather than around. They were missing from this
+    // list entirely, so the instruction "say what the description doesn't" would have had
+    // nothing to say it WITH, and an instruction without material is an invitation to invent.
+    // They are also what makes each figure legal under the claim gate below: `auditClaims`
+    // only permits numerals that appear in these settled lines.
+    facts.daysOnMarket != null &&
+      `Days on the market so far: ${facts.daysOnMarket} (an exact count from our own records, not an estimate).`,
+    facts.hoaFee != null &&
+      `HOA fee: $${Math.round(facts.hoaFee).toLocaleString("en-US")} per month.`,
     facts.city && `City: ${facts.city}`,
     facts.zip && `ZIP: ${facts.zip}`,
     facts.isNewConstruction && `This is NEW CONSTRUCTION (vendor-stated).`,
@@ -349,6 +386,11 @@ export async function authorListingNarrative(
     // this fact being present, so "no community line" means the model may not mention golf at all,
     // NOT that the community lacks it.
     communitySourceLine(facts.community),
+    // INSIDE THE GATE, from our own community_profiles table — the layer that reaches an
+    // email built from a typed address, where `communitySourceLine` above only ever fires
+    // on the pasted-URL lane. Same lifting rule: present → the narrator may name golf/pool/
+    // gate; absent → the blanket prohibition below stays on.
+    insideTheGateSourceLine(facts.insideTheGate),
     neighborhoodStatsSourceLine(facts.communityStats),
     // AROUND the home — nearby businesses in the vendor's radius. The line carries its
     // own prohibition (never "the community has/includes/features", never on-site,
@@ -363,16 +405,40 @@ export async function authorListingNarrative(
     (opts.framing ? `WHAT THIS EMAIL IS: ${opts.framing}\n\n` : "") +
     `THIS EMAIL IS ABOUT THE HOUSE. Not the market, not the comps. A buyer reading it ` +
     `wants to know what this property IS.\n\n` +
-    `IF THE AGENT'S OWN LISTING DESCRIPTION IS PROVIDED, IT IS THE SOURCE OF TRUTH and ` +
-    `your job is to TIGHTEN it into email prose — pull the details that make this home ` +
-    `distinctive (the setting, the water, the rooms, the standout features) and cut the ` +
-    `rest. Do not reproduce it at full length, and do not flatten it into generalities: ` +
-    `the specifics ARE the value. Without it, lead with what is most distinctive and ` +
-    `true from the facts — new construction, a price that has come down, scale, the lot.\n\n` +
-    `THE SPEC GRID ALREADY SHOWS price, beds, baths, square feet, lot, and type directly ` +
-    `above your paragraph. Do NOT list them back. A description that recites the specs is ` +
-    `a failure. Background context is BACKGROUND ONLY — do not turn this into a market ` +
-    `analysis; at most one clause may touch the market, and only if it serves the house.\n\n` +
+    // *** THE DESCRIPTION IS ALREADY ON THE PAGE. DO NOT REWRITE IT. ***
+    //
+    // This instruction used to read "the description IS THE SOURCE OF TRUTH and your job is
+    // to TIGHTEN it into email prose." That was correct while the description never shipped —
+    // the paragraph WAS the description, cleaned up. On 08/05/2026 the description got its own
+    // verbatim block directly above this paragraph, and this line was not changed with it, so
+    // the reader got the same sentences twice: once in the seller's words, once paraphrased.
+    // Operator: *"why the fuck would the commentary repeat what was said up top!!!"*
+    //
+    // Adding a block changed this writer's job. That is the second-order check that was
+    // skipped, and this is the correction.
+    `*** THE LISTING'S OWN DESCRIPTION IS PRINTED IN FULL, VERBATIM, DIRECTLY ABOVE YOUR ` +
+    `PARAGRAPH. THE READER HAS ALREADY READ IT. *** Your job is NOT to summarise it, tighten ` +
+    `it, restate it, or "pull out the highlights" — every one of those puts the same sentences ` +
+    `on the page twice and is a FAILURE. Use it only to know what is already covered, so you ` +
+    `can avoid it.\n\n` +
+    `WRITE WHAT THE DESCRIPTION DOES NOT SAY. That is the entire assignment. The facts below ` +
+    `carry things the seller's copy almost never mentions: how long it has been on the market, ` +
+    `the year it was built, the monthly HOA, what the price works out to per square foot, the ` +
+    `size and make-up of the surrounding neighborhood. Those are YOURS. Pick the two or three ` +
+    `that a buyer would actually weigh and say what they mean for a decision — never as a list ` +
+    `of numbers, and never repeating a figure the spec grid already shows on its own.\n\n` +
+    `If the description is ABSENT, then and only then describe the home itself — lead with what ` +
+    `is most distinctive and true from the facts (new construction, a price that has come down, ` +
+    `scale, the lot).\n\n` +
+    `THE SPEC GRID ALREADY SHOWS every number you were given — price, beds, baths, square ` +
+    `feet, lot, type, days on the market, year built, HOA — directly above your paragraph. ` +
+    `Do NOT list them back. A paragraph that recites the specs is a failure. The distinction ` +
+    `that matters: the grid shows a NUMBER, you may say what it MEANS. "Eleven days on the ` +
+    `market" as a bare restatement is a failure; noting that it came to market this month is ` +
+    `the same fact doing work. Never more than one figure in a sentence, and never a figure ` +
+    `you were not given. Background context is BACKGROUND ONLY — do not turn this into a ` +
+    `market analysis; at most one clause may touch the market, and only if it serves the ` +
+    `house.\n\n` +
     `WHEN YOU USE THE AGENT'S WORDS, KEEP THEM TRUE. "Five-minute idle to open water" does ` +
     `not become "five minutes to the river" — if you restate a detail, restate what it ` +
     `actually said. And never add a selling claim of your own: "priced to move", "won't ` +
@@ -401,6 +467,20 @@ export async function authorListingNarrative(
     `comparison to another neighborhood, or a characterization of whether the value is high or ` +
     `low — that is a claim, not a restatement. If there is NO "THE NEIGHBORHOOD" line, say ` +
     `NOTHING about neighborhood home counts or values.\n\n` +
+    // ADDED 08/05/2026 — the "AROUND THIS HOME" fact line was in `lines` with zero instruction
+    // pointed at it, the only fact line in that position. The model was handed real counts and
+    // nearest-mile distances ("restaurants: 6 (nearest 0.63 mi), local groceries: 3 (nearest
+    // 0.71 mi)") and, with nothing telling it what to DO with the specifics, flattened them into
+    // "Groceries and restaurants are within a mile" — technically not wrong, but it threw away
+    // every number it was actually given and produced the same sentence any listing email could
+    // print. Operator: "THIS IS FUCKING TERRIBLE." Named here so it isn't vague again.
+    `THE AREA. If — and ONLY if — an "AROUND THIS HOME" fact line is present above, use its ` +
+    `actual numbers: name ONE OR TWO categories and their real nearest distance, e.g. "a grocery ` +
+    `store 0.7 miles away" or "six restaurants within a mile" — not a vague "nearby" or "close ` +
+    `to shopping and dining" that could describe any address. Never invent a business name — the ` +
+    `line deliberately carries none. These are businesses in the vendor's radius, never the ` +
+    `community's own amenities: never "the community has" or "on-site." If there is NO "AROUND ` +
+    `THIS HOME" line, say NOTHING about nearby businesses.\n\n` +
     `Return ONLY the paragraph.`;
 
   const user = `FACTS:\n${lines.join("\n")}\n\nWrite the description.`;

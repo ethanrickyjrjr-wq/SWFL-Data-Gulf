@@ -84,7 +84,13 @@ const CAST_COAST_TOKENS = brandingToTokens({
   // Trebuchet/Arial. MONTSERRAT_SANS/LATO_SANS both ship a real Google Fonts webfont.
   font_display: "MONTSERRAT_SANS",
   font_body: "LATO_SANS",
-  logo_url: "assets/castcoast-logo.png",
+  // NO logo_url (08/05/2026). This is the SECOND copy of the same broken reference already
+  // fixed in scripts/email/render-new-listing.mts — `public/showcase/launch-blitz/live/assets/`
+  // holds ONLY dani-vero.jpg, no logo file was ever added, so this 404s and renders as a
+  // broken-image icon captioned "Dani Vero" (companyName is the alt text) directly above the
+  // real "Dani Vero" name line. Fixing the render script alone didn't fix this — THIS file is
+  // what actually feeds the live showcase/Email Lab, a separate fixture from the acceptance
+  // script. HeaderBlock.tsx already degrades to text-only when logoUrl is absent.
 });
 
 // Mirror of applyBrand's block branches (EmailLabShell.tsx) — client-component internals a

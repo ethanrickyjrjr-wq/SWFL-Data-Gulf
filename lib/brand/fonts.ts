@@ -72,11 +72,17 @@ export const BRAND_FONTS: Record<FontFamily, BrandFont> = {
   },
   MONTSERRAT_SANS: {
     label: "Montserrat",
-    stack: "'Montserrat', 'Century Gothic', 'Trebuchet MS', sans-serif",
+    // FALLBACK RE-CHECKED 08/05/2026 (caniemail.com, re-crawled — the 07/02/2026 finding above
+    // still holds: ~24% @font-face support, Gmail webmail not among them). 'Century Gothic' and
+    // 'Trebuchet MS' are legacy Windows-desktop fonts absent on mobile and Gmail's own renderer —
+    // for the ~76% without webfont support this chain skipped both and landed on bare
+    // `sans-serif` anyway, so neither fallback name was doing real work. A real, universal
+    // system-font stack renders something intentional there instead of the OS's bare default.
+    stack: "'Montserrat', -apple-system, 'Segoe UI', Roboto, Arial, sans-serif",
     webfontUrl: "https://fonts.googleapis.com/css2?family=Montserrat:wght@400;700&display=swap",
     pdf: "Helvetica",
     canvasSvg: "Liberation Sans",
-    previewStack: "'Montserrat', 'Century Gothic', 'Trebuchet MS', sans-serif",
+    previewStack: "'Montserrat', -apple-system, 'Segoe UI', Roboto, Arial, sans-serif",
   },
 };
 

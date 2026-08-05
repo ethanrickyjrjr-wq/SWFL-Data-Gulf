@@ -320,11 +320,22 @@ export function StatsBlock({
     );
   }
 
+  // EQUAL THIRDS (08/05/2026). Without an explicit width a <Column> auto-sizes to its own
+  // content, so "Single Family" claims more of the row than "1988" or "$1,326" and a row that
+  // is supposed to read as N even cells reads as ragged instead — the operator's screenshot of
+  // this exact row is the proof. The strip variant above already solves this with hand-computed
+  // pixel widths; this branch never got the same treatment. A plain percentage share is enough
+  // here (unlike the strip, this branch has no phone-wrap requirement to design around).
+  const cellWidthPct = `${100 / cells.length}%`;
+
   return (
     <Section style={sectionStyle}>
       <Row>
         {cells.map(({ stat, i, empty }) => (
-          <Column key={i} style={{ textAlign: "center", padding: pad(METRIC_ROW_PAD, 8) }}>
+          <Column
+            key={i}
+            style={{ textAlign: "center", padding: pad(METRIC_ROW_PAD, 8), width: cellWidthPct }}
+          >
             <EditableText
               as={Text}
               value={stat.value}
