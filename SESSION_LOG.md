@@ -1,3 +1,42 @@
+## 2026-08-05 (Sonnet 5) — backfill_baths.py: killed the grid-sampling method, centered on each remaining target's own coords instead — canary proves it fills real baths, advisor caught an overclaim before it shipped.
+
+Operator: *"Look at the rules for SteadyAPI searches. Use the proven method... don't do what the
+last asshole was doing... do a small run to see if any new baths come in... advise opus if no
+returns."*
+
+**THE OLD SHAPE (still uncommitted on disk, same session's earlier grid-cluster + cursor fix) was
+diagnosed hours earlier the same day** (scratchpad 08/05): `/nearby-home-values` on GRID-CELL
+centers returns the 100 nearest properties to an arbitrary point, of which only ~9/100 were ever
+OUR null-baths rows — yield decayed 5.9 → 0.6 baths/call over 2,600 calls because it kept
+re-walking already-exhausted cells. **Replaced with per-target centering**, mirroring
+`backfill_listed_date.py`'s proven per-property/resumable shape (no cursor bookkeeping).
+
+**Canary run, live, verified via DB recount (not just trusted the print): 12,451 → 12,440, exactly
+11 filled from 15 calls.** Real return — not "nothing."
+
+**Advisor caught an overclaim before it shipped.** The docstring said the endpoint "always returns
+the queried point's own record" (based on one prior verified case, 326 Shore Dr). Discriminating
+check, live: re-issued target #1's exact call, printed the raw response — **its own property_id
+was ABSENT (0/100 self-match).** Corrected the docstring: the real win is never re-centering on
+ground already swept clean, not a self-match guarantee — density-dependent, same physics as the
+grid method. 10/15 calls self-missed; all 11 fills came from one dense-pocket call.
+
+**Second risk found and closed same session:** `load_null_baths_targets()` had no `ORDER BY`, so a
+~7% self-hit rate meant a bounded `--limit` run could get stuck re-probing the same non-resolving
+front of the list forever — the exact "stuck at cluster 0" failure, reproduced at row granularity.
+Fixed with `ORDER BY random()` (wrapped in a subquery — Postgres rejects it directly on `SELECT
+DISTINCT`). Verified live: two consecutive calls against the same 12,440-row set returned
+completely different orderings. Check `backfill_baths_no_order_by_stuck_front` opened then closed
+same session with the verification evidence.
+
+**Also:** overrode a stale file claim (session `df44f747...`, operator confirmed dead) to edit
+`backfill_baths.py`; deleted the orphaned `.backfill_baths_cursor` scratch file (untracked, no git
+history lost). Confirmed no live process was still burning quota with the old code (checked all 14
+running python.exe command lines — none were this script).
+
+**Not done:** only a 15-call canary ran; the real per-call rate needs a larger sample before
+quoting one to the desk.
+
 ## 2026-08-05 (Opus 5) — "Actively improving every day" is now a machine that goes RED when we stand still. Plus a reviewable 77-file deletion, staged and waiting.
 
 Operator: *"Take care of it all. We suck. We can't get any worse. Make sure we are actively improving
