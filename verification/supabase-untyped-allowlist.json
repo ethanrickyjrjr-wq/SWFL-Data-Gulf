@@ -30,6 +30,7 @@
   "lib/email/usage.ts",
   "lib/landing/load-home-map-data.ts",
   "lib/listings/apify-record-store.ts",
+  "lib/listings/community-inside-the-gate.ts",
   "lib/listings/community-lookup.ts",
   "lib/listings/comp-photos.ts",
   "lib/listings/listed-date-write.ts",
