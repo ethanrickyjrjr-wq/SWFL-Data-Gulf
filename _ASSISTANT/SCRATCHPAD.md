@@ -1,3 +1,34 @@
+## 2026-08-05 (Opus 5) — OPERATOR: "Do the homework so we can build once and write the recipe and move on to the next!!! ... We are doing this correctly for each and every one and creating the pipeline for each and every one correctly."
+
+OPEN — the standing directive for this whole email wave. **Build once, correctly, per email; write
+its recipe; move to the next. "We already built it" is NOT a reason to skip doing it right.**
+Homework first, every time — the ingredients and their real sources in front of us BEFORE code.
+
+## 2026-08-05 (Opus 5) — I shipped THREE wrong facts inside the document written to stop wrong facts.
+
+RESOLVED SAME SESSION by re-counting. Yesterday's handoff (`2026-08-04-EMAIL-DATA-TRUTH-HANDOFF.md`)
+opens with "EVERY NUMBER BELOW WAS COUNTED LIVE. DO NOT QUOTE THIS DOCUMENT EITHER. RE-COUNT."
+I re-counted. **Three of its claims were wrong**, and I had pushed all three to `main`:
+
+  1. **`lee_comp_sales_v` "returned HTTP 500, needs diagnosing before any comps email is trusted"** —
+     FALSE. Plain `?select=*&limit=1` = **200 in 1.7s** with a real row. The 500 was the PROBE's own
+     `Prefer: count=exact` header forcing a full-view `COUNT(*)` past the 8s statement timeout.
+     The root is HEALTHY for the only shape the email path issues. A whole "blocker" was invented by
+     a copy-pasted header.
+  2. **"schools are in the paid response too"** (commit `83f60f94`, pushed 20 min before I checked) —
+     FALSE. `nearby_schools` is the literal string `<NA>` on **all 20 resolved rows**, as are
+     `tax_history`, `builder_name`, `builder_id`, `list_price_min`, `list_price_max`. The agent /
+     office / broker contact half of that same commit IS true and stands.
+  3. **"`hoa_fee` populated on 19 of 20"** — non-null on 19, but **only 12 are greater than zero**.
+     Seven are literally `0`, which is indistinguishable from an unfilled field. Serving it would be
+     a fabricated "$0/mo HOA". Real coverage is 12.
+
+  **ROOT CAUSE, and it is the same one as the DOM-floor incident yesterday:** a number was read off
+  a previous surface (a doc, a probe's output, a prior session's summary) instead of counted at the
+  source. Writing "re-count, don't quote" at the top of a document does not make its own numbers
+  counted. The corrections live in `docs/superpowers/handoffs/2026-08-05-EMAIL-HOMEWORK-COUNTED.md`;
+  the 08/04 handoff carries a superseding banner and the playbook §2.1 gap list is fixed.
+
 ## 2026-08-04 (Opus 5) — OPERATOR: "We just got all DOM, how could it fucking be half our book is floor? Have you looked into anything??????????"
 
 RESOLVED SAME MINUTE — **he was right, my number was two weeks stale, and I had already shipped it

@@ -1,3 +1,46 @@
+## 2026-08-05 (Opus 5) — HOMEWORK RE-COUNT: three of yesterday's pushed claims were wrong, including the "blocker" that was never a blocker.
+
+Operator: *"Do the homework so we can build once and write the recipe and move on to the next!!!
+We are doing this correctly for each and every one and creating the pipeline for each and every one
+correctly."* Pushed the 6 held commits first (`1f6ec27e..83f60f94`), then re-counted every fact the
+08/04 handoff hands the email build. **Three were wrong.**
+
+**1. `lee_comp_sales_v` IS NOT BROKEN.** Four probes, same view, same minute: plain
+`?select=*&limit=1` → **200 in 1.7s** with a real row; `count=planned` → 206 in 1.9s;
+`count=estimated` and `count=exact` → **500 `57014` statement timeout in 8.1s**. The 08/04 "HTTP
+500, needs diagnosing before any comps email is trusted" was the probe's own `Prefer: count=exact`
+header forcing a full-view `COUNT(*)`. Bounded reads — the only shape the email path issues — are
+healthy. Closed `lee_comp_sales_v_postgrest_500`; opened the narrow real one,
+`lee_comp_sales_v_exact_count_times_out`.
+
+**2. SCHOOLS ARE `<NA>`.** Commit `83f60f94` (pushed 20 minutes before I checked) claimed the bulk
+actor returns `nearby_schools`. It returns the literal string `<NA>` on **all 20 resolved rows**, as
+do `tax_history`, `builder_name`, `builder_id`, `list_price_min/max`. The DETAIL actor
+(`one-api/realtor-property-scraper`) has never written a row here and stays unprobed — check
+`apify_detail_actor_schools_unprobed`. **The agent/office/broker contact half of that commit IS
+true**: `agent_name`/`agent_email`/`agent_phones` 20/26, `office_email` 19/26, `broker_name` 15/26.
+
+**3. HOA FEE IS 12, NOT 19.** Non-null on 19 of 26, but **only 12 are greater than zero** — seven
+are literally `0`, indistinguishable from an unfilled vendor field. Serving that is a fabricated
+"$0/mo" (playbook §1.14, NEVER a zero). **Decision: serve `hoa_fee > 0`; `0` is an OPEN SLOT.**
+
+**WRITE-BACK CLOSED, READ SIDE IS NOT.** Tree-wide grep found **exactly one** Apify call site
+(`lib/listings/apify-comps.ts:295`) and it awaits `saveApifyRecords` on every non-injected run —
+`one_off_paid_pulls_saved_correctly` closed on that evidence. But `fetchCachedRecords` has **one
+reader** (`apify-identity.ts`), so the baths, description and gallery lanes re-buy houses we already
+hold — check `apify_cache_read_not_wired_to_all_lanes`.
+
+Full census (26 rows · 46 columns · 71 raw keys · the 24 vendor fields with no column · galleries
+9–55 photos · descriptions 368–2,983 chars) is
+`docs/superpowers/handoffs/2026-08-05-EMAIL-HOMEWORK-COUNTED.md`. Playbook §2.1's "HOA fee, schools,
+flood zone: no verified source" line was wrong in both directions and is corrected in place.
+
+**Homework 3 of 5.** Done: raw census · comp-view diagnosis · write-back verification. NOT done:
+wiring HOA/gallery/description into the listing lanes, and the New Listing build itself — both
+gated on the fallback-ladder design (§2.1: "the fallback ladder is not written in code, for this
+email or any other. That is the next build"). `apify_monthly_cap_state_unknown` opened — the account
+hit a 403 monthly hard limit on 08/04 and its current state gates every paid probe.
+
 ## 2026-08-04 (Opus 5) — HANDOFF: what we ACTUALLY have for emails, counted live. And we have been paying for HOA fee and never reading it.
 
 Operator, after two days: *"HOW DO WE STILL NOT FUCKING KNOW ALL WE FUCKING HAVE AND WHERE IT

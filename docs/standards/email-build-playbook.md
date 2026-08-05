@@ -362,7 +362,20 @@ budget. The model never rewrites it into a claim; it stays the source's words.
   pool — never use it as one.
 - Annual taxes: parsed and sitting there for ~16,500 properties, but **BLOCKED from customer-facing
   use** until one is validated against a real county bill.
-- HOA fee, schools, flood zone: **no verified source.** Do not claim we have them.
+- **HOA fee — WE DO HAVE IT, already bought.** Counted live 08/05/2026 in
+  `data_lake.apify_property_records`: 19 of 26 rows carry a non-null fee, but **only 12 are greater
+  than zero**. **Serve `hoa_fee > 0` only.** A `0` is not "this home has no HOA" — it is
+  indistinguishable from an unfilled vendor field, so rendering it as "$0/mo" is a fabricated figure
+  (§1.14, NEVER a zero). A `0` is an OPEN SLOT. An earlier draft of this line said "no verified
+  source" for HOA; that was wrong, and we had been paying for the field and never reading it.
+- **Schools — no source, and that is now MEASURED, not assumed.** The bulk actor we actually run
+  (`moving_beacon-owner1~realtor-com-property-scraper`) returns `nearby_schools` as the literal
+  string `<NA>` on all 20 resolved rows. The *detail* actor (`one-api/realtor-property-scraper`) has
+  never written a row here and is **UNPROBED** — do not claim schools in either direction until it
+  is. Same for `tax_history`, `builder_name`, `list_price_min/max`: all `<NA>` × 20.
+- Flood zone: **no verified source.** Do not claim we have it.
+- **The full live census — column fill, all 71 raw keys, the 24 we pay for and never promote — is
+  `docs/superpowers/handoffs/2026-08-05-EMAIL-HOMEWORK-COUNTED.md`.** Re-count before quoting it.
 - **The fallback ladder is not written in code** — for this email or any other. Which source fills
   each ingredient when the first misses lives in this document and nowhere else yet. That is the
   next build.

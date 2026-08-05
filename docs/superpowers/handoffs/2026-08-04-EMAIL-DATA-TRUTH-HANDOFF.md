@@ -1,5 +1,25 @@
 # HANDOFF — WHAT WE ACTUALLY HAVE FOR EMAILS, COUNTED LIVE. NOT QUOTED.
 
+> ## ⚠️ RE-COUNTED 08/05/2026 — THREE CLAIMS BELOW ARE WRONG. READ THE CORRECTIONS FIRST.
+>
+> This document told the next session to re-count instead of quoting it. That re-count is
+> **`docs/superpowers/handoffs/2026-08-05-EMAIL-HOMEWORK-COUNTED.md`**, and it found three errors
+> here. The text below is kept verbatim as history; these three lines are superseded:
+>
+> 1. **"`lee_comp_sales_v` returned HTTP 500 … needs diagnosing before any comps email is
+>    trusted."** — **FALSE. The view is healthy.** A plain `?select=*&limit=1` returns 200 in 1.7s.
+>    The 500 came from the PROBE's own `Prefer: count=exact` header forcing a full-view `COUNT(*)`
+>    past the 8s statement timeout. Only exact-count consumers 500.
+> 2. **"schools … the bulk actor returns it"** (commit `83f60f94`) — **FALSE.** `nearby_schools` is
+>    the literal string `<NA>` on all 20 resolved rows, as are `tax_history`, `builder_name` and
+>    `list_price_min/max`. The DETAIL actor is a different actor and remains unprobed. The agent /
+>    office / broker contact half of that claim IS correct and stands.
+> 3. **"`hoa_fee` populated on 19 of 20."** — non-null on 19, but **only 12 are greater than zero**;
+>    7 are literally `0`. `0` is an open slot, never "$0/mo". Real HOA coverage is 12.
+>
+> The failure that produced all three is the one this document was written to stop: a number read
+> off a previous surface instead of counted. It happened again inside the document that says so.
+
 **Written 08/04/2026 by Opus 5, under operator decree, verbatim:** *"HOW DO WE STILL NOT FUCKING
 KNOW ALL WE FUCKING HAVE AND WHERE IT FUCKING COMES FROM AND WE ABOUT TO BUILD EMAILS!!!!!! I've
 been doing this for 2 fucking days!!!!!! Make sure the next session knows the real facts about all
