@@ -1,3 +1,107 @@
+## 2026-08-05 (Opus 5) — "WHY TTHE FUCK CAN'T I FUCKING PUSH": nothing was ever committed, and two lint failures with masked exit codes were why.
+
+Operator asked this in FOUR sessions. Answer, in order of what actually blocked him:
+
+**1. There was nothing to push.** `git rev-list --left-right --count origin/main...HEAD` = `0 0`.
+Zero commits ahead; ~33 files sat as uncommitted working-tree state. The banner everyone kept
+hitting is `check-scratchpad-on-push.mjs` (dirty `_ASSISTANT/SCRATCHPAD.md`) — a *pre*-push gate
+that never got as far as a push, but reads like "push is broken."
+
+**2. Two real pre-commit lint failures, both with the exit code masked.** Commits were failing and
+the failure was invisible because the output was piped through `tail`, which returns its own exit
+0. Found by checking `git log` instead of trusting the exit code:
+  - `lib/listings/community-inside-the-gate.ts` imports `createServiceRoleClientUntyped`
+    (`community_profiles` is in `data_lake`, uncovered by the typed client). The KNOWN-DEBT comment
+    was already in the file; the `verification/supabase-untyped-allowlist.json` entry was missing.
+    Its sibling lake readers were all already listed. → entry added.
+  - `lib/email/lifecycle-chrome.ts` had three imports left from the refactor its own comments
+    describe — `DEFAULT_GLOBAL_STYLE`, `HOUSE_BRAND`, `FontFamily`, referenced nowhere but comment
+    text. eslint runs `--max-warnings=0` in the pre-commit hook, so they hard-failed. → removed.
+
+**3. Four parallel sessions, one shared working tree, on `main`.** `60f2a315` (live), `2f9cb100`,
+`b5378f9c`, `ae2652df` each held repolith claims on a different slice of the same dirty tree, so
+no session owned a committable set and each correctly refused to `git add -A`. Deadlock by
+politeness. RULE 1.5 says isolate in a worktree, but nothing enforces it and all four started on
+bare `main`. See SCRATCHPAD — a session-start warning when another session already holds claims
+would have caught this at minute one instead of minute thirty-five.
+
+Landed 4 commits, clustered by owning session, explicit pathspecs only, nothing pushed:
+`15bb91f7` (listing-url + inside-the-gate + allowlist), `9a77dfab` (flyer/lifecycle-chrome),
+`98b6fac8` (New Listing render pass + showcase set), plus this log/scratchpad entry.
+Evidence: `bunx next build` exit 0; 37/37 tests across listing-flyer, lifecycle-chrome,
+listing-url, type-conformance; `npx eslint lib/email/lifecycle-chrome.ts` exit 0.
+
+**NOT done, and deliberately:** the live session `60f2a315`'s in-flight files are untouched and
+still uncommitted — `scripts/email/render-coming-soon.mts`, `_write-brand.mts`, `_brand-backup.mts`,
+`_probe-funnel.mts`, `_probe-subject.mts`, `_upload-headshot.mts`, `_probe-account.mts`,
+`_ASSISTANT/brand-backups/`. That session was mid-write. **Nothing is pushed — push needs operator
+approval per push.** `15bb91f7` carries the message "probe" from a diagnostic commit that landed
+for real; the `--amend` guard correctly refused to rewrite shared-main history, so it stands.
+
+---
+
+## 2026-08-05 (Sonnet 5) — New Listing: three real rendering defects found and fixed by rendering and measuring, not reading code; narrator reliability is still open; coming-soon (§2.2) handed off.
+
+Operator screenshots caught three live defects in the acceptance render, each verified with hard
+evidence before and after the fix, not eyeballing:
+
+1. **Second spec row (Built/HOA/Type) read uneven.** `StatsBlock.tsx`'s default/"grid" density
+   `<Column>` had no explicit width, so it auto-sized to content — "Single Family" claimed more
+   row-width than "1988" or "$1,326". Fixed with an explicit `width: 100/cells.length + "%"` per
+   cell; re-measured live via `getBoundingClientRect()` in a real browser: 184px/184px/184px,
+   exact. Separately found (not yet fixed, logged as a task check): that row's Section padding is
+   24px (`sectionPad`/`CARD_PAD`) vs the six-cell strip above it at 16px (`STRIP_PAD_X`) — an 8px
+   inset confirmed in the rendered HTML `padding:` attributes. Operator looked at it live and
+   called it fine visually; parked, not urgent.
+2. **Header showed "Dani Vero" twice with a broken-image icon.** `castcoast-logo.png` 404s
+   (curl-verified) — a demo-fixture asset that was never created (`public/showcase/launch-blitz/
+   live/assets/` holds only `dani-vero.jpg`). Dropped `logo_url` from the fixture in
+   `scripts/email/render-new-listing.mts`; `HeaderBlock.tsx` already degrades to a text-only
+   masthead when absent (`props.logoUrl ? <Img/> : null`) — no image, no broken icon.
+3. **The AI-authored paragraph was silently missing**, no error shown to the reader.
+   `authorListingNarrative` (`lib/deliverable/recipes/shared.ts`) never handed the model its own
+   $/sq-ft figure as a settled fact; the model computed and used it anyway ("$231/sq ft"), and the
+   claim gate correctly killed the whole paragraph as an unanchored number — reproduced live:
+   `[narrative] DROPPED — unanchored-number("231")`. Added the figure as an anchor. **This did
+   NOT make the narrator reliable** — the very next live run dropped for two entirely different
+   reasons (`artifact-positional`, `comparative`), and the run after that for a third
+   (`sequence`). Opened `new_listing_narrator_claim_gate_nondeterministic` — three different
+   failure categories across three runs on the same house means there is no measured delivery
+   rate, not a one-line bug. Separately fixed a real quality gap in the same prompt: the model was
+   handed real nearby-amenity counts+distances ("restaurants: 6, nearest 0.63 mi") and had zero
+   instruction on what to do with them, so it flattened them into "Groceries and restaurants are
+   within a mile" — added a "THE AREA." instruction block telling it to use the actual numbers.
+
+**Fonts were NOT broken** — checked before touching anything, not from memory. Opened the actual
+rendered file in a real browser and read the network tab: Montserrat + Lato both loaded, 200 OK.
+`lib/brand/fonts.ts` already carried a dated citation (caniemail.com, 07/02/2026: ~24% of email
+clients honor `@font-face` at all, Gmail webmail isn't one) — re-crawled the same source live
+tonight, still accurate. One real, small gap fixed: MONTSERRAT_SANS's fallback chain named two
+fonts absent on mobile/Gmail (`'Century Gothic', 'Trebuchet MS'`) that were never doing real work
+for the ~76% without webfont support; swapped for a real system-font stack.
+
+**Corrected a stale claim I nearly repeated to the operator**: a check
+(`amenities_pairing_drain_remaining_13876`) said the neighborhood-amenities cron was blocked on
+the shared `ENGINE_ENABLED` flag. Live-checked (`node scripts/engine.mjs status`): that flag is
+`true` right now. The cron actually runs on its own dedicated `AMENITIES_DRAIN_ENABLED` variable,
+isolated on purpose (08/04 fix) so a routine engine flip can't silently restart a paid SteadyAPI
+spend — plus a real quality gate (only 14% of pairings land at a nameable grain) worth reading
+before turning it back on.
+
+**Handed off the next recipe walk**: `docs/superpowers/handoffs/2026-08-05-coming-soon-next-
+build-handoff.md` — names the exact file (`lib/deliverable/recipes/coming-soon.ts`, already
+651 lines, NOT a blank-slate build), the playbook target (§2.2), what's already built (address
+suppression, the scarcity/funnel chart) vs. what the walk still needs (an acceptance script, a
+live suppression check, the funnel's real fill rate, the same cheapest-first-then-Apify ladder as
+§2.1), and named failure modes.
+
+**Checks opened this session:** `new_listing_narrator_claim_gate_nondeterministic` (defect, open),
+`new_listing_second_row_padding_8px_narrower` (task, open, low-priority).
+
+**Verification:** `bunx tsc --noEmit` clean on touched files. Every fix re-rendered and
+re-measured live (`bun --env-file=.env.local scripts/email/render-new-listing.mts`, real browser
+DOM reads, real network tab, real curl checks) — nothing here is asserted from reading code alone.
+
 ## 2026-08-05 (Opus 5) — WHY THE PUSH WAS STUCK: nothing was ever committed, and the scratchpad gate was holding the door.
 
 Operator: *"WHY TTHE FUCK CAN'T I FUCKING PUSH"* — reproduced live rather than guessed.

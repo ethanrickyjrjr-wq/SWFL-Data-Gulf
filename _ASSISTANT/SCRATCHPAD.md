@@ -1,3 +1,72 @@
+## 2026-08-05 (Opus 5) — OPERATOR, in FOUR separate sessions: "WHY TTHE FUCK CAN'T I FUCKING PUSH"
+
+OPEN. Asked in `b5378f9c` (35m), `2f9cb100` ("well you can't push until finised now can you", 9m),
+and `ae2652df` ("FIGURE OUT WHY i CAN'T PUSH AND GETT EVERYTHING NOT BEING WORKED ON OFF THE
+BOARDD"). He had to type it three times. That is the RULE 2 failure this file exists to stop.
+
+**ROOT CAUSE — there was never anything to push.** `git rev-list --left-right --count
+origin/main...HEAD` = `0 0`. Zero commits ahead. All ~33 changed files sat as UNCOMMITTED
+working-tree state. Every session was reaching for `safe-push` when the missing step was `git
+commit`. The blocked-push banner he kept seeing is `check-scratchpad-on-push.mjs` firing on a dirty
+`_ASSISTANT/SCRATCHPAD.md` — a *pre*-push gate, which reads like "push is broken" but actually
+never got as far as a push.
+
+**WHY IT STAYED STUCK — four parallel sessions, one shared working tree, on `main`.**
+`60f2a315` (live), `2f9cb100`, `b5378f9c`, `ae2652df` each hold repolith claims on a different slice
+of the SAME dirty tree. No session owns a clean, committable set, so each one correctly refuses to
+`git add -A` (RULE 1.5 / commit-only-owned-files) and nobody commits anything. Deadlock by
+politeness. The guardrails all worked; what was missing is that **no rule says who commits a shared
+tree when N sessions dirty it at once.**
+
+**THE STANDING GAP THIS EXPOSES.** RULE 1.5 says "isolate in a worktree when two sessions touch
+overlapping files" — but nothing *enforces* it, and four sessions started on bare `main` anyway.
+A hook that warns on session start when another session already holds claims in this repo would
+have caught it at minute one instead of minute thirty-five. Worth a check.
+
+RESOLVED when the tree is committed in owner-clustered commits and `git status` is short again.
+
+---
+
+## 2026-08-05 (Opus 5) — OPERATOR: "DO THIS THE RIGHT WAY / RECORD EVER FUCKING STEP / BUILD BRAND NEW WITH OUR FUCKING BRAND"
+
+OPEN — the COMING SOON (§2.2) build, handed off via
+`docs/superpowers/handoffs/2026-08-05-coming-soon-next-build-handoff.md`. Verbatim:
+
+> DO THIS THE RIGHT WAY / FUCKING READ THE NEW EMAIL FILE / RECORD EVER FUCKING STEP / BUILD BRAND
+> NEW WITH OUR FUCKING BRAND!!!!!!!!!!!!! / USE THE ethanrickyjrjr@gmail.com account / fill it all
+> in with a different fake realtor with a history and socials. everything. find a good real estate
+> pic or make a decent one.
+
+**FOUR STANDING INSTRUCTIONS THIS ENCODES:**
+
+1. **RECORD EVERY STEP.** Not a summary at the end. The step log is the deliverable alongside the
+   email — it lives in the playbook §2.2 and in `SESSION_LOG.md`, not only in a chat answer.
+2. **THE BRAND PROFILE IS THE REAL ONE, ON A REAL ACCOUNT.** `ethanrickyjrjr@gmail.com` — the brand
+   gets FILLED IN through the real branding surface, not hardcoded into a render script. This
+   OVERRIDES the handoff's "don't invent a second demo agent fixture" line: the operator asked
+   explicitly for **a different fake realtor**, so Dani Vero is NOT reused here.
+3. **"HISTORY AND SOCIALS. EVERYTHING."** — the fake realtor is not a name and a color. Bio/history,
+   phone, brokerage, CAN-SPAM postal address, email, website, Instagram/Facebook/LinkedIn, headshot.
+   Every field the brand profile carries gets a value, or it is named as an open slot.
+4. **A REAL HEADSHOT/PROPERTY IMAGE, FOUND OR MADE.** Not a placeholder box, not a 404 URL — the
+   08/05 doubled-name defect came from exactly that.
+
+**FOLLOW-UP, same session — "change my name. female pic. more female agents."**
+
+5. **THE ACCOUNT'S `agent_name` COMES OFF.** Ricky Cooper is REPLACED on
+   `ethanrickyjrjr@gmail.com`'s brand profile by the fictional agent. This is the operator's
+   explicit go-ahead on overwriting a live brand row — the real one is backed up to
+   `_ASSISTANT/brand-backups/` first so it restores in one command.
+6. **THE AGENT IS FEMALE, AND SO IS THE HEADSHOT.** Not an initials avatar, not a stock photo of a
+   real identifiable person — a generated portrait, disclosed fictional the same way
+   `dani-vero.jpg` is.
+7. **STANDING PREFERENCE — "more female agents."** Demo/showcase agent personas skew female by
+   default from here, not just this one. Worth a memory, not just a scratchpad line.
+
+RESOLVED when §2.2 is written, the acceptance run is pasted, and the render has been LOOKED at.
+
+---
+
 ## 2026-08-05 (Opus 5) — OPERATOR: "DID YOU FIX THE FUCKING FILES????????????????????????????"
 
 OPEN — he asked for memory to be cleaned and I did ONLY memory, then reported on memory, while the
