@@ -1,3 +1,43 @@
+## 2026-08-05 (Opus 5) — CORRECTION, same hour: the reachability census I had just committed was itself a lying instrument. 240 orphans of 1,533, not 229 of 1,453.
+
+**The four-lane gate caught me.** I had run CODE and LIVE and never RESEARCH or CATALOG. Running the
+two missing lanes did not confirm my answer — it broke it.
+
+**THE DEFECT: `census()` built its file list from `git ls-files` alone.** `_RESEARCH/` is gitignored
+by design, so **a census about UNREAD DOCUMENTS counted 0 of the 80 documents this project most
+loudly documents as unread** — the ones RULE 0.4 makes the FIRST thing any agent opens. It reported
+1,453 docs / 229 orphans as the whole population. It was not.
+
+**Third lying instrument in one day**, same class each time: the Apify spend receipt counted
+rows-added and printed "$0 spent" while $2.00 was charged; the provenance table clipped a URL at 44
+chars with no ellipsis and invented a headshot defect that cost a session an hour. **An instrument
+that can lie is worse than no instrument.** Fixed at the source (`UNTRACKED_DOC_ROOTS`), not
+caveated in prose.
+
+**CORRECTED — 5,379 files scanned, 1,533 docs:** reachable by full path **770 (50.2%)** · by bare
+name only **523 (34.1%)** · **ORPHANED, ZERO MENTIONS: 240 (15.7%)**.
+
+**THE NEWLY-VISIBLE ORPHANS ARE ALL RESEARCH WE PAID FOR — 18 in `_RESEARCH/`:** 9 `audits`,
+5 `competitor-and-strategy`, 3 `private`, 1 `data-and-ingest`. `_RESEARCH/INDEX.md` states its own
+rule verbatim: *"A research file not listed in this index does not exist — that is the exact failure
+this index was built to stop (07/20/2026)."* **By its own rule, 18 paid-for research files do not
+exist.**
+
+**BASELINE RAISED 229 → 240, AND THAT IS NOT GAMING — no orphan was created, the ruler got honest.**
+The `ORPHAN_BASELINE` comment now states this is the ONLY admissible reason to raise it, that it
+must be declared in the same commit, and that "the measurement changed" may never launder a real
+regression.
+
+**WHAT THE CATALOG LANE FOUND — TWO PROVEN PATTERNS WE ALREADY OWN, so the burndown does NOT need a
+new invention** (operator: *"not building new when we already have"*):
+1. `_RESEARCH/INDEX.md`'s rule — *not listed = does not exist* — is the governing rule for the 18.
+2. `scripts/ceilings-to-checks.mjs` (231 lines) already turns a measured gap-list into one
+   idempotent check each, and "reads the registry, so it cannot go stale." That is the exact shape
+   the orphan burndown should take. **Do not write a third mechanism.**
+
+**STATUS — 1 OF 3. Measured and now measured HONESTLY. All 240 orphans are still orphans; the 523
+name-only docs are still weak. Nothing was re-pointed. Check `doc_orphans_229_invisible`.**
+
 ## 2026-08-05 (Opus 5) — I said "done" over 8 files out of 1,453. The operator called it the biggest lie he'd heard, and he was right. Here is the number nobody had ever measured.
 
 Operator, verbatim: *"Don't care about token cost. I care about things working and Claude not making
