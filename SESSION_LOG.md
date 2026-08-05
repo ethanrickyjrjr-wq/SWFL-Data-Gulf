@@ -1,3 +1,49 @@
+## 2026-08-05 (Opus 5) — "How do we build everything as a field?" — spec written, and two counted findings the spec exists to fix.
+
+Operator: *"How do we build everything as a field?"* → *"SPEC"* → *"We can still edit if we use
+fields?"* → *"Close recipe_key gap"*.
+
+**Landed: `docs/superpowers/specs/2026-08-05-brand-field-registry-authority-design.md`**, registered
+via `new-build.mjs` (check `brand_field_registry_authority_live_verify`). 10 failure modes each with
+its guard, 9 named TDD tests, explicit out-of-scope. **Brainstorming NOT run** — operator said SPEC.
+
+**THE ANSWER IS THAT WE ALREADY DO IT, ONCE.** `lib/brand/profile-ledger.ts` is the pattern: 31
+typed field specs, every consumer *derives* (`profileGaps`, `completenessSummary`, `MUST_KEYS`).
+Counted, not estimated: **16 hand-written key lists across 5 production files** against that 1
+registry — `app/api/user/brand/route.ts` (7), `BrandingBlock.tsx` (5), `apply-brand.ts` (2),
+`resolve-brand.ts` (1), `showcase/recipe.ts` (1). **Plus a 17th copy inside the ledger's own test** —
+the `apiKeys` array claims to make the ledger authoritative and does not; it is a third copy that
+only fires if someone remembers to update it.
+
+**LIVE, 08/05/2026:** `user_brand_profiles` = 42 columns / 38 field columns; registry knows 31;
+`applyUserBrandToProject` carries 14. **24 of 38 structurally cannot cross account→project.** Keep
+apart from the sibling check's 17 (that is *filled* fields on ONE account). pg types of the 7
+unregistered: `company_name`/`sender_address`/`sender_name` text · `button_destinations`/
+`color_palettes` jsonb · `sender_domain_verified` boolean · `source` text. Registering a non-text key
+naively breaks `isBlank()` (`typeof v !== "string"`) and corrupts the completeness count — the real
+defect is that **nothing distinguishes a field from a column**.
+
+**EDITING IS NOT AT RISK, and it is the majority case.** Live: 11 projects hold a branding blob, 14
+distinct keys, **zero outside the registry**, and **9 of 11 DIVERGE from the account value**
+(`agent_name` 9, `primary_color` 7, `accent_color` 7). The predecessor spec already ruled two-way
+sync REJECTED. Written in as failure mode 10 with those numbers: the registry governs the PATCH
+allowlist, which panel inputs render, and the carry set — never `projects.branding`, never an edit.
+
+**recipe_key gap — OPENED AND NOT CLOSED (0 of 1).** Live: **92 deliverables, 0 carrying a key.**
+Wiring is NOT broken — both write paths carry it through `isRecipeKey` (materials route tests 2 pass
+0 fail; claim-and-send has 4 assertions incl. invalid-key-nulls). Zero coverage because no build has
+gone through the product since the column landed and both acceptance scripts render HTML to disk
+without inserting a row. A code-only fix would be the exact failure the check names, so it stays open:
+`recipe_key_zero_coverage_since_landing`.
+
+**Also opened:** `deliverable_cell_registry_spec_owed` — brand fields got a registry, deliverable
+cells did not (per-cell source ladder untracked, build manifest unbuilt).
+
+**Correction to my own framing:** the playbook already IS the field-rule system — Part 1 universal
+(16 sections), Part 2 per-email at **2 of 17 walked**, and the three dials are the named
+style-varies-by-field-rules mechanism. I proposed inventing it. Next is 2.3, walked in the
+Coming Soon handoff's order.
+
 ## 2026-08-05 (Opus 5) — THE THREE OPEN ITEMS CLOSED: the spacing guard, the scarcity LADDER, and every literal lifted into a field.
 
 Operator: *"Fix it all commit and push — internal ≤ external spacing has no guard, the recipe's
