@@ -1,3 +1,89 @@
+## 2026-08-05 (Opus 5) — WHY THE PUSH WAS STUCK: nothing was ever committed, and the scratchpad gate was holding the door.
+
+Operator: *"WHY TTHE FUCK CAN'T I FUCKING PUSH"* — reproduced live rather than guessed.
+`git rev-list --left-right --count origin/main...HEAD` → **0 0**. There were no commits to send; a
+push was a no-op. On top of that `check-scratchpad-on-push.mjs` blocks any push while
+`_ASSISTANT/SCRATCHPAD.md` is dirty, and it was — I had appended tonight's entries and never
+committed them. Two blockers, one visible.
+
+**Landed here:** the playbook gains **§2.1.6 THE FINISH PASS** — the seven defects the operator
+found on the RENDERED New Listing email that no test could catch (editorial serif palette, an
+unguarded `fontFamily` while size/weight/leading were guarded, the paragraph restating the
+description, an uneven spec strip, a `muted` cell in a three-cell row, the bare bottom) each written
+WITH its guard, plus the render-and-look indictment at the top: 3,241 passing tests and a provenance
+table proved the data and said nothing about whether the thing was readable. Also recorded: the bare
+bottom is fixed by FILLING THE BRAND, never by adding a `social-icons` block — `FooterBlock` already
+owns socials off `lib/email/social/platforms.ts`, and a second one splits the root.
+
+**Verified live, not quoted:** `bunx tsc --noEmit` clean · `community_profiles` **81** ·
+`apify_property_records` **26** · `listing_state` **35,202`, all `count=exact` against the lake and
+all matching what §2.1 claims. Render run twice — 15 of 17 cells, 21KB, real headshot/phone/socials
+at the bottom, button to the real listing page.
+
+**Opened `new_listing_narrative_silently_dropped`** — run 1 of the render printed
+`[narrative] DROPPED … sequence("before the showing")` and shipped with NO authored paragraph; run 2
+was clean. Showing-prep language leaking into a new-listing framing; the guard is right, the framing
+is wrong.
+
+**NOT pushed and NOT mine:** the New Listing finish-pass CODE (13 paths under `lib/`) plus
+`lib/brand/fonts.ts` are in this shared working tree under **live parallel sessions** — `fonts.ts`
+changed during my own test run and a hook named session `2f9cb100`. Staging them would bundle another
+session's in-flight edit. They stay for their author to land.
+
+## 2026-08-05 (Opus 5) — NEW LISTING IS BUILT. 15 of 17 cells sourced on a real house, and two live defects were starving all seven address emails.
+
+Operator: *"build the fucking new listing email... make sure you have all we currently have plus DOM,
+baths, property description, community commentary in the AI response, as well as a call to action
+and link the button to the realtor.com listing... Free first, paid fallback."*
+
+**Acceptance run — `bun --env-file=.env.local scripts/email/render-new-listing.mts`, one command
+that drives the real pipe and prints its own per-cell provenance.** Default house
+12554 Kellysands Way, Fort Myers 33908, chosen off a live join because it exercises every lane with
+ZERO new spend: **15 of 17 cells sourced, 2 open slots, 17KB** (inside Gmail's ~102KB clip).
+$350,000 · 2 bd · 2 ba · 1,515 sq ft · $231/sq ft · **DOM 11, real not floored** · built 1988 ·
+**HOA $1,326/mo** · 43-photo gallery · the seller's 549-char description verbatim · one authored
+paragraph · **button → the real realtor.com listing page.** Full ingredient census, every source,
+every fallback rung, and all nine site entry points: **playbook §2.1** (now §2.1.0–2.1.5).
+
+**TWO LIVE DEFECTS, both hitting all 7 address-spine emails, both found by rendering rather than
+reading.** (1) **The button pointed at our homepage** — the flyer used `facts.sourceUrl`, which
+`resolve-subject.ts` hardcodes to swfldatagulf.com, so every address-resolved listing email shipped
+"View the Full Listing" → our home page. That is §1.8 verbatim. `listingUrl` is now a separate
+field with its own root (`lib/listings/listing-url.ts`) and a miss means no destination, never a
+fallback. (2) **The paid row almost never joined.** `fillFromPaidRecord` passed the FULL address
+where a STREET LINE was expected, so it missed on every address with a comma — and even corrected,
+the two feeds spell streets differently: the sweep writes "12554 Kellysands Way", the paid record
+"12554 Kelly Sands Way". **Measured: 8 of 26 rows join on the exact key, 5 more once spacing is
+ignored.** Despacing checked for safety FIRST — 25 collisions across 30,655 active listings and
+**every one is the same place spelled two ways**, never two houses.
+
+**Also newly reaching a reader:** the seller's **description had never shipped at all** (the chrome
+passed it as `narrative`, and the recipe cleared that very slot and wrote the model's paragraph over
+it) — it now has its own reserved `descriptionSlot` block both narrative passes already knew to
+skip. **Year built and HOA** were resolved and rendered nowhere; they now ride a second `4+4+4` row.
+**Inside-the-gate community facts** (`community_profiles`, re-counted **81 rows**, not the 69 in the
+catalog) never reached an email built from a typed address — only the pasted-URL scrape lane wrote
+that field. New root `lib/listings/community-inside-the-gate.ts`, joined on the same canonical slug
+as `neighborhood_stats`, **true-only** (a `false` and a `null` are both "we do not know" and both
+stay silent — 81 profiles against 20,400 subdivisions makes a miss the normal case).
+
+**Operator correction, logged to SCRATCHPAD mid-session: "we aren't fucking scrapping."** I was
+fetching realtor.com pages to verify a URL derivable from the free spine's `property_id`. Stopped.
+The URL is a value we already hold (`property_url`, 26 of 26). The derivation is recorded as NOT
+ADOPTED with its numbers — 13 of 20 permalinks rebuild byte-exact, all 7 misses are unit/condo
+addresses, and the only way to verify one is the thing we just agreed never to do.
+
+**Green:** `bunx tsc --noEmit` clean · **3,241 pass / 0 fail** across `lib/deliverable`,
+`lib/listings`, `lib/email` — including `registry-seam.test.ts` (all 17 builders, twice) and
+`seed-recipe-parity.test.ts`. 12 new tests, each named after the failure mode it targets.
+**Checks opened:** `new_listing_paid_by_address_rung_unwired` (the $0.01 one-call rung that fills
+six cells at once is wired to Listings Digest only; ~$14 headroom of a $50 cap),
+`new_listing_subject_no_personalization`, `paid_record_join_rate_8_of_26`.
+
+**NOT done, named:** no new crawl4ai pass this session — §2.1 leans on the prior session's crawl,
+already filed in the ingredient census. §2.2–2.17 remain TO BE WALKED, one at a time, per the
+standing order.
+
 ## 2026-08-05 (Sonnet 5) — Loops.so deep-crawled for the New Listing paid-fallback vendor question.
 
 Operator asked for a deep crawl4ai pass on `loops.so/docs`. BFS deep crawl, 241 distinct pages.

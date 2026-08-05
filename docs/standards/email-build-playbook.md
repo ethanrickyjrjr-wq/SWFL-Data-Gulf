@@ -539,97 +539,352 @@ in this playbook and must never be "fixed" onto email chrome.
 
 ## 2.1 NEW LISTING — tag `new-listing`
 
+**Walked with the operator 08/05/2026 and BUILT in the same session.** Every count below was
+produced by a query run that day, not quoted from a document. Re-count before quoting any of it.
+
 **Spine:** ONE house. The address resolves exactly once, before any layout happens. It comes from
 the address field OR from the words the user typed — **the builder decides which, never the door
 they clicked.** (Gating on the field alone is what once sent every in-lab campaign build to the
 generic author and produced a photo-less ZIP grab-bag.)
 
 **Grammar:** the listing grammar. Ribbon, photo, hero with address over price, spec strip, the
-email's own middle, narrative.
+seller's own description, a second spec row, the authored paragraph, agent card + one button.
 
 **Chart: NONE.** Operator ruling 07/13/2026 — this email is about a HOUSE and its visual IS the
 photo. An area index says nothing about the house. A comps bar turns it into a comps email.
 
-**Subject line:** wants an OPEN → 30–40 characters.
+**Subject line:** wants an OPEN → 30–40 characters. `newListingSubject`, deterministic, never
+model-authored: `Just listed: 12554 Kellysands Way`.
 
-### Ingredients — every one, with where it comes from
-
-**IDENTITY (from the user's brand profile, no data source involved)**
-- Agent name, brokerage, phone, headshot, business postal address.
-- The postal address is a legal requirement, not a design choice.
-- The headshot is the field agents most often skip — it must survive being missing.
-
-**THE HOUSE (from the live for-sale record, resolved once)**
-- Asking price · street address · city · state · ZIP
-- Hero photo — from the listing's own gallery, **mirrored into our own storage** so a rotted vendor
-  link never blanks the email months later.
-- Beds · square feet · lot size · year built · property type
-
-**BATHS — the weak one.** Primary: the for-sale record. Fallback: our own Lee County property
-records, exact-address match only. **Collier has no equivalent** — a Collier listing with no stated
-bath count leaves the cell OPEN.
-
-**DOLLARS PER SQUARE FOOT** — computed from price ÷ square feet. If either won't parse, the cell
-stays OPEN. Never a wrong number from a partial input.
-
-**TIME ON MARKET** — today minus the vendor's list date, from our own per-listing days-on-market
-root. **COVERAGE IS GOOD AND THIS CELL IS SAFE TO BUILD ON. Counted live 08/04/2026:** 34,904
-listings, **31,825 real (91.2%)**, only **3,079 floored (8.8%)** — Lee 22,458 of 24,548 real
-(91.5%), Collier 8,202 of 9,142 real (89.7%), list date present on 31,309.
-**⚠ CORRECTION, and read this before you quote anything:** an earlier draft of this line said
-"roughly half the book is a floor" and "Collier ~14% real." **Both were wrong by an order of
-magnitude** — quoted from a trap note in `data-roots.md` dated 07/20/2026 instead of counted. The
-backfill landed since. **RE-COUNT ANY COVERAGE CLAIM LIVE BEFORE SPEAKING IT, including from our own
-docs.** A floored count is still never printed as a fact — but it is now the rare case, not the norm.
-
-**THE DESCRIPTION** — the property's own marketing description verbatim, or the one the seller or
-agent pasted in. **The biggest quality lever in this email**, and it does NOT count against the word
-budget. The model never rewrites it into a claim; it stays the source's words.
-
-**THE COMMUNITY — three different things that must never impersonate each other:**
-1. **Inside the gate** — golf, pool, gated, clubhouse. Held for 69 communities today, thinly: 42
-   with golf, 12 with an HOA range, 11 with gated status.
-2. **Nearby** — the vendor's named neighborhood plus businesses in its search radius, matched by the
-   vendor's own property pairing first, then by dropping the listing's coordinates into stored
-   boundary shapes. **These are businesses within about five miles, NOT amenities inside the
-   community, and the copy must say so.**
-3. **The subdivision** — home count and median assessed value from our own tax-roll parcel data.
-   Universal: every home in Lee and Collier, unlike (1) and (2).
-
-**COMMENTARY (what the AI writes — and the ONLY thing it writes)**
-- One paragraph, from the description and the sourced facts.
-- **It gets NO comps.** Handing the narrator a comp set is what once turned this paragraph into a
-  market analysis.
-- It writes prose and never a figure.
-
-**THE BUTTON** — one, "View the Full Listing", pointed at the real listing link saved for that role.
-**No real link means no button.** Never a homepage.
-
-### Known gaps — named, not hidden
-- Baths in Collier: no free fallback.
-- Pool: Lee only. **Collier has no pool source at all.** A pool permit is an EVENT, not proof of a
-  pool — never use it as one.
-- Annual taxes: parsed and sitting there for ~16,500 properties, but **BLOCKED from customer-facing
-  use** until one is validated against a real county bill.
-- **HOA fee — WE DO HAVE IT, already bought.** Counted live 08/05/2026 in
-  `data_lake.apify_property_records`: 19 of 26 rows carry a non-null fee, but **only 12 are greater
-  than zero**. **Serve `hoa_fee > 0` only.** A `0` is not "this home has no HOA" — it is
-  indistinguishable from an unfilled vendor field, so rendering it as "$0/mo" is a fabricated figure
-  (§1.14, NEVER a zero). A `0` is an OPEN SLOT. An earlier draft of this line said "no verified
-  source" for HOA; that was wrong, and we had been paying for the field and never reading it.
-- **Schools — no source, and that is now MEASURED, not assumed.** The bulk actor we actually run
-  (`moving_beacon-owner1~realtor-com-property-scraper`) returns `nearby_schools` as the literal
-  string `<NA>` on all 20 resolved rows. The *detail* actor (`one-api/realtor-property-scraper`) has
-  never written a row here and is **UNPROBED** — do not claim schools in either direction until it
-  is. Same for `tax_history`, `builder_name`, `list_price_min/max`: all `<NA>` × 20.
-- Flood zone: **no verified source.** Do not claim we have it.
-- **The full live census — column fill, all 71 raw keys, the 24 we pay for and never promote — is
-  `docs/superpowers/handoffs/2026-08-05-EMAIL-HOMEWORK-COUNTED.md`.** Re-count before quoting it.
-- **The fallback ladder is not written in code** — for this email or any other. Which source fills
-  each ingredient when the first misses lives in this document and nowhere else yet. That is the
-  next build.
+**Code:** `lib/deliverable/recipes/new-listing.ts` → `buildListingFlyer`
+(`lib/email/listing-flyer.ts`) → `buildLifecycleEmail` (`lib/email/lifecycle-chrome.ts`).
+The house is resolved by `resolveSubject` (`lib/deliverable/recipes/shared.ts`) — **the ONE
+inspection point all seven address-spine emails share, so a fact wired there reaches all seven.**
 
 ---
+
+### 2.1.0 REPRODUCE IT — one command, and it prints its own provenance
+
+```
+bun --env-file=.env.local scripts/email/render-new-listing.mts "<address>"
+```
+
+It drives the real pipe end to end, prints a per-cell table of what filled each cell and from
+which lane, and writes the HTML to `~/Downloads/new-listing-email.html`. **The default address is
+`12554 Kellysands Way, Fort Myers, FL 33908`** — chosen off a live join because it is the one house
+that exercises every lane with ZERO new spend.
+
+**Acceptance run, 08/05/2026 — 15 of 17 cells sourced, 2 open slots, 17KB:**
+$350,000 · 2 beds · 2 baths · 1,515 sq ft · 0.22 ac · **$231/sq ft** · **DOM 11 (real, not a
+floor)** · built 1988 · **HOA $1,326/mo** · a 43-photo gallery · the seller's 549-character
+description verbatim · one authored paragraph · and the button pointed at the real
+realtor.com listing page. The two open slots are the subdivision and the in-gate community
+profile — honest misses, printed as such.
+
+**The only metered call in the whole build is the one authored paragraph.** Run without
+`ANTHROPIC_API_KEY` and even that becomes an open slot; everything else still renders.
+
+---
+
+### 2.1.1 THE FOUR SUPPLIERS — what each one actually gives this email
+
+**THE LAKE — `data_lake.listing_state`, our own daily sweep. FREE, and it is lane 1 for everything
+it holds.** 35,202 rows · 34,904 `for_sale` · Lee 24,548 · Collier 9,142 · Hendry 1,512. Carrying
+the new-listing flag right now: **2,684** (Lee 1,909 · Collier 559 · Hendry 216).
+
+Fill, counted live over all 35,202 rows: asking price 100% · property type 100% · hero photo
+98.5% · coordinates 98.2% · list date 88.9% · lot acres 78.0% · beds 73.7% · square feet 70.6% ·
+**baths 15.3%** · subdivision 0.8% · brokerage 0.8%.
+
+On the 2,684 flagged NEW listings specifically — the actual population this email serves: Lee has a
+photo on 1,895 of 1,909, beds on 1,560, sq ft on 1,519, **baths on only 537**; Collier has a photo
+on 558 of 559, beds on 513, sq ft on 510, **baths on only 217.**
+
+**THE COLUMN CEILING, read from `information_schema` rather than remembered — all 42 columns.**
+The free spine does NOT have: `year_built`, any description or remarks, any photo gallery, any HOA
+fee, stories, garage, pool — **and no URL column of any kind.** Do not plan a free fallback for a
+field that is not on this list. It DOES carry `property_id` (99.2%), `mls_name`, `subdivision` and
+`brokerage` (both 0.8%, effectively empty), and the seven `flag_*` booleans including
+`flag_new_listing`.
+
+**Type mix, and why "single family" framing is wrong:** single_family 16,410 · **land 9,046** ·
+condo 6,489 · other 1,742 · multi_family 616 · townhouse 601. **A quarter of the book is LAND** —
+beds/baths/sq ft are legitimately absent there, not missing.
+
+**OUR OWN LISTING CLOCK — `data_lake.listing_dom`.** 34,904 rows, **31,825 real (91.2%)**, 3,079
+first-seen floors (8.8%). Days are computed at read time so they cannot go stale. **This cell is
+safe to build on.** A floored count is never printed as a fact.
+
+**STEADYAPI — the vendor behind the daily sweep.** It documents **18 real-estate endpoints, all
+v1, and we call 8.** Never called: `/autocomplete`, `/nearby-rentals`, `/property-urgency`,
+`/property-estimates`, `/environment-risk`, `/geo-details`, `/similar-homes`,
+`/gallery-similar-homes`, `/new-construction`, `/mortgage-rate`. Two of those document fields this
+email currently has no source for (`/environment-risk` documents flood/wind/heat/wildfire;
+`/property-estimates` documents an estimated value) — **but none of the ten has ever been called
+here, and every candidate returns NEARBY or SIMILAR homes, so subject-level resolution is
+UNPROVEN.** Do not write a ladder rung on them until someone probes them (check
+`steadyapi_unused_endpoints_probe`). What we DO use it for live in this email: the bath fallback via
+`/nearby-home-values` (a property is the nearest property to its own coordinates, so the subject
+returns as its own first row — verified live 07/13/2026) and the list date via
+`/property-tax-history`.
+
+**APIFY — the paid realtor.com record. `data_lake.apify_property_records`, 26 rows today.**
+**Reading it costs NOTHING — the rows are bought and on disk.** Fill across all 26:
+**`property_url` 26 (the best-filled column on the table)** · description 20 · gallery 20 ·
+`baths_total` 20 · `year_built` 20 · `style` 20 · `mls` 20 · `days_on_mls` 20 · permalink 20 ·
+estimated value 19 · last sold price 19 · garage 13 · **HOA greater than zero 12** · stories 12 ·
+**`tax` 0.** Each record carries 69 fields and the whole untouched record is kept in `raw`, so a
+field we have not promoted yet is already on disk.
+
+**BRAINS — they feed this email NOTHING, and that is deliberate, not a gap.** The chart policy is
+NONE (07/13/2026) and the narrator is given NO comps by rule, because handing it a comp set is what
+once turned this paragraph into a market analysis. A brain speaks about an AREA; this email is
+about a HOUSE. **Do not wire one in.** The place area data legitimately belongs is Market Comps
+(§2.3) and Monthly Market Pulse (§2.12).
+
+---
+
+### 2.1.2 EVERY INGREDIENT, ITS SOURCE, AND WHAT FILLS IT WHEN THAT MISSES
+
+**Stop at the first hit. An exhausted ladder is an OPEN SLOT — never a zero, never a guess.**
+**Free first, and note that rungs 1 AND 2 are both zero-cost: reading a row we already bought
+spends nothing. No rung below issues a new vendor call.**
+
+**IDENTITY — the agent.** Name, brokerage, phone, headshot, business postal address, all from the
+user's brand profile. No data source involved. The postal address is a CAN-SPAM requirement, not a
+design choice. **The headshot is the field agents most often skip — it must survive being missing.**
+The identity block sits at the TOP (confirmed independently at Zillow, Compass and BoldTrail).
+
+**Asking price · street · city · state · ZIP** — the free spine. 100%. No fallback needed.
+
+**Property type** — the free spine. 100%. Mapped to a display label at the render edge only
+(`shortType`); the lake's `single_family` reached a real inbox once as `single_family`.
+
+**Hero photo** — the free spine's `photo_url` (98.5%), **mirrored into our own storage** so a
+rotted vendor link never blanks the email months later. → the paid row's `primary_photo`. → an
+open dropzone on the canvas.
+
+**The gallery** — **the paid row only** (`alt_photos`, 20 of 26, 9 to 55 photos). The free lane
+carries exactly ONE photo. **No free fallback exists.** Appended BEHIND the mirrored hero, deduped
+by exact URL — the vendor's own list starts with the same primary photo, so without the dedupe the
+hero appears twice on every build.
+
+**Beds** — free spine (73.7%) → paid row → OPEN. Legitimately open on land.
+
+**Square feet** — free spine (70.6%) → paid row → OPEN.
+
+**Lot size** — free spine `lot_acres` (78.0%) → paid row `lot_sqft`, **converted at exactly 43,560**
+(`acresFromLotSqft`). Pouring one into the other unconverted printed "8712 ac" on a fifth-acre lot;
+there is a test named after that.
+
+**BATHS — the weak one, and it has five lanes.** free spine (15.3% — Lee 13.1%, Collier 17.5%) →
+**our own Lee county records**, exact-address match only, filling only when exactly one parcel
+matches (two folios sharing a key is an ambiguity, and an ambiguous bath count is a guess) →
+**SteadyAPI `/nearby-home-values` on the subject's own coordinates** — one call, works REGION-WIDE
+including Collier → the paid row's `baths_total` → OPEN. **The vendor's `/search` row sets
+`bathrooms: null` unconditionally, so the search feed is never a bath source.**
+
+**DOLLARS PER SQUARE FOOT** — computed, price ÷ square feet. If either will not parse the cell
+stays OPEN. Never a wrong number from a partial input. **No footnote** (operator, 07/20/2026) —
+both operands sit two cells away in the same strip and explaining the division read as a
+spreadsheet export.
+
+**TIME ON MARKET** — our own listing clock, 91.2% real. → `today − the vendor's list date` via two
+hour-cached vendor calls → the Type cell simply keeps its slot. **A floored count is never printed
+as a fact.** A fresh listing reads ONE, not zero.
+
+**YEAR BUILT** — **the paid row and nothing else.** The free spine has no such column at all. 20 of
+26 rows. → OPEN.
+
+**HOA FEE** — the paid row, **greater than zero ONLY.** 19 of 26 rows are non-null and **seven of
+those are literally `0`**, so real coverage is 12 of 26. A vendor `0` is indistinguishable from a
+field it never filled; rendering "$0/mo" is a fabricated figure. **A `0` is an OPEN SLOT.**
+
+**THE DESCRIPTION — the biggest quality lever in this email.** The agent's own pasted words (lane
+2, and the best source) → the paid row's `description` (20 of 26, measured 368 to 2,983 characters)
+→ OPEN. It ships **VERBATIM in its own block**, it does **NOT** count against the 50–125-word
+budget (§1.9 carve-out), and the model never rewrites it into a claim. Cut at 900 characters on a
+**sentence** boundary, never mid-word and never with an ellipsis — an "…" on someone else's
+marketing copy reads as though we edited it.
+
+**THE LISTING LINK — where the one button goes.** The agent's pasted listing link → **the paid
+row's `property_url`** (26 of 26 — the single best-filled column we hold) → **NO BUTTON.** Never a
+homepage, never our own site, never a search page. Root: `lib/listings/listing-url.ts`.
+
+**THE COMMUNITY — THREE layers that must never impersonate each other:**
+
+1. **INSIDE THE GATE** — `data_lake.community_profiles`, **81 rows.** Golf (with a hole count),
+   pool, tennis, pickleball, fitness, clubhouse, on-site dining, marina, gated. What a RESIDENT can
+   use. Root: `lib/listings/community-inside-the-gate.ts`. **Every flag is TRUE-ONLY: a `false` and
+   a `null` are both "we do not know" and both stay SILENT.** 81 profiles against 20,400
+   subdivisions means a miss is the NORMAL case, and a miss keeps the narrator's golf/pool/gate
+   prohibition switched ON. Never write that a community lacks something.
+2. **NEARBY** — `steadyapi_neighborhoods` (429) + `steadyapi_neighborhood_amenities` (29,118),
+   resolved from the listing's own coordinates. **These are BUSINESSES within about five miles, NOT
+   amenities inside the community, and the copy must say so.**
+3. **THE SUBDIVISION** — `data_lake.neighborhood_stats`, **20,400 subdivisions**, home count and
+   median **ASSESSED** value from our own tax roll. Universal — every home in Lee and Collier,
+   unlike (1) and (2). **It is an assessed value, never a sale or list price**; "median home price"
+   or "homes here sell for" is a different claim and is forbidden.
+
+   **Grain trap:** a home count of 29,225 (Lehigh Acres) is a CITY, not a community.
+
+**COMMENTARY — the ONLY thing the AI writes.** One paragraph, two to four sentences, from the
+description and the sourced facts. **It gets NO comps.** It writes prose and never a figure. It may
+name golf/pool/gate ONLY when an in-gate line was actually present. Every paragraph is run through
+the claim gate and **DROPPED to an open slot** if it asserts anything it was not given — a missing
+paragraph is honest, a confident false one is not.
+
+**THE BUTTON — exactly one.** "View the Full Listing", pointed at the real listing page. One CTA
+per email, 42–72px, never an image-based button, label 1–5 words.
+
+---
+
+### 2.1.3 WHERE A NEW LISTING CAN BE STARTED ON THE SITE — every door, all routing to one builder
+
+Every one of these carries the tag `new-listing`, and the tag is what routes the build. The seed
+prompt text is DISPLAY and SEED only; a build is never routed on it.
+
+- **The homepage hero bar** — `components/landing/HeroBar.tsx` via `HERO_CAMPAIGNS`
+  (`lib/campaigns.ts`). The first chip.
+- **The address router** — `lib/geo/address-route.ts`. An address typed anywhere on the landing
+  surface resolves to the New Listing campaign.
+- **The showcase** — `lib/showcase/registry.ts`, "Listing → Close: The Auto Email Plan", campaign
+  button "New Listing Campaign".
+- **A project's materials hub** — `components/project/TemplateRail.tsx` (mounted in
+  `MaterialsHub.tsx`), first template in the rail.
+- **The Email Lab, inside a project** — `app/project/[id]/email-lab/`, via `ArcStrip.tsx`
+  ("It's live →") and `ListingCampaignHero.tsx`.
+- **The recipe registry itself** — `lib/deliverable/recipes.ts`, the seed prompt a keyless ask can
+  land on, plus `suggest-recipe.ts` chips (navigation-only, never routing).
+- **The layout API** — `app/api/email-lab/layout/route.ts` (`?recipe=new-listing`), which stores
+  and clears a per-recipe custom layout.
+- **The social side-door** — `?campaign=new-listing-socials` on `app/project/[id]/social/`
+  auto-generates the listing-launch week. **Different renderer — never give it email chrome.**
+- **Dev preview only** — `app/dev-emails/page.tsx`. Not a customer surface.
+
+---
+
+### 2.1.4 TWO LIVE DEFECTS FOUND AND FIXED WHILE WALKING THIS — both hit ALL SEVEN address emails
+
+Neither was theoretical; both were starving this email of data we had already paid for.
+
+1. **The button pointed at our homepage.** `resolve-subject.ts toFacts` hardcodes
+   `sourceUrl: "https://www.swfldatagulf.com"` (correct — that is the CITATION field), and the
+   flyer used that same value for the CTA and the hero photo link. So every address-resolved
+   listing email shipped "View the Full Listing" → our home page, which is exactly what §1.8
+   forbids. `listingUrl` is now a separate field and a missing one means no destination, never a
+   fallback.
+2. **The paid row almost never joined.** Two bugs in one lookup. `fillFromPaidRecord` passed
+   `facts.address` — the FULL printable address, commas and ZIP and all — where a STREET LINE was
+   expected, so the key it built could never equal a stored one. And even correct, the two feeds
+   spell the same street differently: **the daily sweep writes "12554 Kellysands Way" where the
+   paid record writes "12554 Kelly Sands Way."** Measured across all 26 paid rows: **8 joined on
+   the exact key; 5 more join once spacing is ignored** (McGregor Woods, Kelly Sands, Marco Island,
+   Creekside View, Bristol Bnd). A despaced secondary key is now tried after the exact one.
+   **Safety, measured before adopting it:** across 30,655 active listings despacing produces 25
+   collisions and **every one is the same place spelled two ways** ("cape coral"/"capecoral"),
+   never two different houses — and the house number and city both stay in the key.
+
+**The description had never shipped at all.** The chrome passed the raw remarks in as the
+`narrative` value, and the recipe then cleared that very slot and wrote the model's paragraph over
+it. The remarks survived only as the narrator's source. There is now a separate reserved block
+marked `descriptionSlot`, which both narrative passes already knew to skip.
+
+**Year built and the HOA fee were resolved and then rendered nowhere** — the six-cell strip is full
+and DOM already takes Type's slot. They now ride a second `4+4+4` row, emitted only when at least
+one of the three is sourced.
+
+---
+
+### 2.1.5 KNOWN GAPS — named, not hidden
+
+- **Baths on a Collier listing with no stated count**: the free spine holds 17.5%, there is no
+  county-records lane for Collier, and the region-wide `/nearby-home-values` lane is one paid call.
+  Otherwise OPEN.
+- **Pool: Lee only. Collier has no pool source at all.** A pool permit is an EVENT, not proof of a
+  pool — never use it as one.
+- **Annual taxes**: parsed for roughly 16,500 properties and **BLOCKED from customer-facing use**
+  until one is validated against a real county bill. The paid row's own `tax` column is **0 of 26**.
+- **Schools: a MEASURED absence.** The bulk actor we run returns `nearby_schools` as the literal
+  string `<NA>` on all 20 resolved rows — same for `tax_history`, `builder_name`,
+  `list_price_min/max`. The *detail* actor is a different actor, has never written a row here, and
+  is UNPROBED. **Do not claim schools in either direction.**
+- **Flood zone: no verified source today.** `/environment-risk` documents one and has never been
+  called.
+- **The agent's own book** — `public.user_listings` is **0 rows, 0 users.** Anything depending on
+  an agent having imported their listings does not work today; the pasted description in the build
+  box is the real lane-2 source.
+- **A NEW paid call is not wired into this email.** The by-address Apify lookup (~$0.01, one call,
+  one record, and it fills description + gallery + baths + year built + HOA + the listing URL all
+  at once) exists and is proven — `fetchApifyBathsForHomes` — but is wired into Listings Digest
+  ONLY, not into `resolveSubject`. Account headroom read live 08/05/2026: **$50 cap, $35.99 used,
+  cycle 07/28→08/27 — roughly $14, about 1,400 address lookups.** Wiring it in puts spend in the
+  build path for **all seven** address-spine emails at once, so it needs to be injectable, gated on
+  an explicit miss, and never fired on every build.
+- **We do not fetch listing portals.** Operator, 08/05/2026: *"we aren't fucking scrapping."* A
+  listing URL is a value we already hold or it is nothing. The permalink IS derivable from the free
+  spine's `property_id` (the paid row's `6551280400` is exactly its permalink's `M65512-80400`) but
+  it rebuilds byte-exact on only **13 of 20** held permalinks and **fails on every unit/condo
+  address**, and the only way to verify one is the thing we just agreed never to do. **Not adopted.**
+
+---
+
+
+### 2.1.6 THE FINISH PASS — seven defects the DATA was never going to catch
+
+Operator, 08/05/2026, on a screenshot of the rendered email: *"did you start in the fucking right
+place??? how can we have different fonts if we have rules? put a nice agent photo at the bottom and
+name, contact info, social links. the whole look. it's really pretty good, just a few tweeks."*
+
+**The indictment first, because it outranks the seven items.** I proved the data with a per-cell
+provenance table and 3,241 passing tests and reported this email done **without opening it.** Every
+defect below was visible in one second and invisible to every test we own. **Reading PART 1 is not
+starting in the right place — RENDERING AND LOOKING is.** A test suite proves logic does what it was
+told for known inputs; it says nothing about palette, rhythm, evenness or whether a row reads
+top-heavy. For a rendered artifact the render IS the evidence class. Second time this has bitten —
+see the `{8,4}` CTA note in `lifecycle-chrome.ts`: *"this was settled by RENDERING it, not by taste."*
+
+1. **The email came out in a serif editorial palette — zero of our teal.** `EDITORIAL_STYLE` in
+   `lifecycle-chrome.ts` spread a serif pair and a gold accent over `globalStyle`. It is **deleted**;
+   the only surviving mention is a comment in the test that now forbids it.
+2. **"How can we have different fonts if we have rules" — because THE RULES COVERED SIZE, WEIGHT AND
+   LEADING, AND NOTHING COVERED FONT FAMILY.** `blocks/type-conformance.test.ts` (shipped 08/04,
+   caught 11 live violations) fails a raw `fontSize`/`fontWeight`/`lineHeight` and said nothing about
+   `fontFamily`, so a serif swap passed every guard. **A rule that is only a document is not a rule.**
+   The test now also denies a bare `serif`/`sans-serif`/`Georgia`/`Times`/`Playfair`/`Inter` assigned
+   to `fontFamily` or `displayFontFamily`. **Standing rule: when you write a rule into this playbook,
+   name its guard in the same pass, or mark it ⚠ NOT BUILT with the reason** (§1.5b does this).
+3. **The paragraph restated the description, and that was a second-order defect of MY OWN change from
+   the same session.** The narrator's prompt says the description *"IS THE SOURCE OF TRUTH and your
+   job is to TIGHTEN it"* — correct while the description never shipped. Giving it its own verbatim
+   block without changing the narrator's job handed the reader the same sentences twice. **Adding a
+   block is never free; it changes what every downstream writer should be doing.**
+4. **The spec strip did not read even.** `$231` rendered 28px against 16px everywhere else.
+5. **Same defect one level down on the second row** — Built and HOA rendered large, Type rendered
+   muted-small. **Never mark ONE cell in a three-cell row `muted`.** All three carry the same weight
+   or the row reads broken.
+6. **The bottom was bare — and it was never missing a block.** It rendered against an EMPTY brand, so
+   the agent card had no photo and no phone and the footer had no social URLs to draw. `AgentCardProps`
+   has carried `photoUrl` and `phone` all along. **The first cut added a `social-icons` row to the
+   spine and that was wrong** — `FooterBlock` already renders company, address, phone, email,
+   unsubscribe AND the registry-mapped socials off `lib/email/social/platforms.ts`, the ONE platform
+   root. A block would have duplicated the links on every listing email and split the root in two.
+   **The fix for a bare bottom is filling the brand, never adding a second root.**
+7. **Rendered and looked at, 08/05/2026** — Dani Vero · Cast & Coast Realty · Cape Coral, the real
+   `dani-vero.jpg` headshot, phone, CAN-SPAM address, email, website, Instagram, Facebook, LinkedIn;
+   button → the real realtor.com page; **21KB, 15 of 17 cells sourced.**
+
+**ONE DEFECT THE RENDER ITSELF FOUND, and it is why this section exists.** Run 1 printed
+`[narrative] DROPPED — the narrator made 1 claim(s) it was not given: sequence("before the showing")`
+and the email shipped with **no authored paragraph at all**. Run 2 was clean. So the AI commentary
+silently vanishes on some builds: showing-prep language leaking into a new-listing framing, the
+no-invention guard doing exactly its job, **the framing at fault, not the guard.** Open as
+`new_listing_narrative_silently_dropped`. A dropped paragraph does not fail anything — it just ships
+a thinner email, which is the worst failure shape we have.
+
+---
+
 
 ## 2.2 – 2.17 — TO BE WALKED
 
