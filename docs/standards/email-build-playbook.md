@@ -224,6 +224,16 @@ uneven."**
 captions, labels and source lines live. Material Design says avoid small differences between steps.
 Our design doc outranks a vendor ratio. Recorded so nobody re-derives it as a discovery.
 
+**⚠ OPEN OPERATOR DECISION — body 16px vs 18px.** Outside research brought to the desk 08/05/2026
+argues **18px** body for a senior demographic ("prevents eye strain, allows 200% resizing without
+clipping"). That audience claim is unusually on-point here: SWFL is literally a retiree market, so
+this is the one outside recommendation aimed squarely at our actual reader. **The code root wins
+until the operator rules** — `scale.ts` says 16 because `app/_design/05-color-and-type.md` says
+1rem. Two facts for the decision: at 18px the full-width measure becomes **~61 characters, still
+inside the 45–75 band** (§1.16), so line length does NOT argue against the change; what it costs is
+every frozen golden and possible reflow in tight blocks. **Do not change `TYPE.body` without the
+ruling.** Tracked in `checks`.
+
 ## 1.4 Spacing — the 8px grid
 
 Source: cieden spacing best practices + Material Design 3, crawled 07/01/2026.
@@ -249,6 +259,58 @@ Source: cieden spacing best practices + Material Design 3, crawled 07/01/2026.
   was carrying meaning alone. Fix it.
 - Colour, block order, and what a template LOOKS like are deliberately NOT unified. Operator ruling
   07/14/2026: keep every design as a choice. We unify RHYTHM, not appearance.
+
+### 1.5b Dark mode — ⚠ PRESCRIBED BY OUR OWN RESEARCH, NOT BUILT
+
+Source: `_RESEARCH/email-and-social/2026-08-03-strongest-real-estate-email-concepts-structure.md`
+Part D (Litmus, Campaign Monitor, live caniemail tables). **Written 08/03/2026, still unbuilt as of
+08/05/2026 — verified against `lib/email/blocks/email-head.ts`, which emits webfont `<link>`s and
+nothing else.** Recorded here so it stops being rediscovered.
+
+**Three behaviors, not one — and two clients have NO workaround at all:**
+- **No change (opt-in only):** Apple Mail.
+- **Partial invert (light backgrounds detected):** Gmail mobile app, Outlook Web App, Outlook mobile.
+- **Full invert, no coding workaround:** Outlook desktop (Windows), Gmail desktop webmail.
+
+**What the fix requires — all of it together, or none of it:**
+1. `<meta name="color-scheme" content="light dark">` **and**
+   `<meta name="supported-color-schemes" content="light dark">`. Both, or neither works.
+2. A `@media (prefers-color-scheme: dark)` block.
+3. `[data-ogsc]` (foreground) / `[data-ogsb]` (background) selectors for Gmail-mobile and
+   Outlook-web/mobile. **The attribute must be repeated on EVERY comma-separated selector** —
+   `[data-ogsc] p, [data-ogsc] p a`, never `[data-ogsc] p, p a`.
+4. **Never pure `#FFFFFF` / `#000000`** — multiple clients force-invert these even with
+   `!important`. Use near-white / near-black (`#FEFEFE` / `#0E0E0E`).
+5. Logos and icons need a midtone color, stroke, or background shape to survive the uncontrolled
+   full inversion where there is no workaround.
+6. **Never CSS `filter`** for dark-mode image handling — ~45% ecosystem support (caniemail), ~15%
+   in Litmus's own Gmail-heavy audience.
+
+**WHY THE METAS CANNOT SHIP ALONE — the trap, measured 08/05/2026.** `#ffffff` appears **34 times**
+in the render path, including both canvas containers (`compile-grid.ts` and
+`blocks/EmailDocRenderer.tsx`) and `CARD_BG` (`blocks/styles.ts`). Declaring `color-scheme:
+light dark` **opts us into** client dark handling — including in Apple Mail, which today does
+nothing. Shipping rule (4) at the same time is not optional polish; without it the metas hand our
+pure-white surfaces to the exact force-invert path the research names. **Ship both halves or ship
+neither.** (`legibleInk("#ffffff", bg, …)` calls are foreground-on-accent contrast math, a different
+concern — leave them alone.)
+
+### 1.5c What IS already compliant — verified 08/05/2026, do not "fix" these
+
+Counted so the next accessibility pass doesn't burn a session re-deriving it:
+- **`lang="en"` is set on both render paths** (`compile-grid.ts`, `blocks/EmailDocRenderer.tsx`).
+- **Every `<img>` carries an `alt` attribute**, asserted by a red test
+  (`blocks/ListBlock.test.tsx`). Recipes set meaningful alt text on every meaningful image, and
+  `chartImageBlock` (`lib/email/inject-chart.ts`) takes `alt` as a **required** field. The `?? ""`
+  defaults inside the block components are unreached fallbacks, not the live behavior — and an
+  empty alt on a genuinely decorative image is CORRECT accessibility. Do not flip those defaults
+  blind; it makes screen readers announce spacers.
+- **Layout tables carry `role="presentation"`** (`compile-grid.ts`).
+
+**Still open:** no `<h1>`–`<h3>` anywhere in the eighteen block components — every headline is a
+styled `div`/`Text`, so a screen reader gets no document outline to navigate. Real gap, real fix,
+but it changes emitted HTML for every email and moves the frozen goldens. It is a scoped build with
+a brainstorm, not a quick win. Tracked in `checks`, not here.
 
 ## 1.6 Header — what sits at the top
 
@@ -385,6 +447,60 @@ DISPLAY and SEED only; it is never the identity and a build is never routed on i
 - Two bars showing was-versus-now is a fact wearing a chart costume. Write the fact.
 - The chart's magnitude must cohere with the headline — same unit, headline within ~3× of the
   plotted range.
+
+## 1.16 Measure — how WIDE a line of prose may be
+
+Added 08/05/2026. Source: outside typography research (Smashing/Baymard lineage) brought to the
+desk, **checked against our own grid before being written down.** The band is the one number every
+typography source agrees on; the span math below is ours, counted from `grid-schema.ts`.
+
+- **Running prose reads best at 45–75 characters per line.** Too long and the eye loses the start of
+  the next line; too short and it ping-pongs, which is worse. This is a real constraint we had
+  written down nowhere.
+- **Our canvas satisfies it at full width, by construction.** Span 12 = 600px, minus `CARD_PAD` 24
+  each side = 552px of text. At `body` 16px that is **~69 characters — inside the band.**
+- **The span ladder, counted:** span 12 ≈ 69 chars · span 8 ≈ 44 chars (right at the floor) ·
+  span 6 ≈ 31 chars · span 4 ≈ 19 chars.
+- **THE RULE: a paragraph of running prose is span 12. Never span 6 or span 4.** A block narrower
+  than span 8 may carry a label, a figure, a caption, or a one-line strapline — never a paragraph.
+- **Verified 08/05/2026 — we are compliant, and it is not an accident.** The `push()` helper in
+  every recipe hardcodes `span: GRID_COLS`, so every prose block in all 17 emails is full width.
+  The single exception is the paired hero cards in Weekly Sphere (`sphere-weekly.ts`, `pairCell`
+  at span 6, a blessed `{6,6}` row) whose `prose` field runs ~31 chars per line. That is correct
+  **only** because it holds a short strapline under a big number. **If that field ever grows into a
+  paragraph, the row is wrong, not the rule.**
+- No lint enforces this yet — the rule is the doc, the compliance is a property of `push()`.
+  Tracked in `checks`.
+
+---
+
+# PART 1.5 — READING AN OUTSIDE DOCUMENT ABOUT OUR OWN SYSTEM
+
+**Added 08/05/2026, after the third occurrence.** Outside write-ups about this project — NotebookLM
+mind maps, AI-generated "master synthesis" briefs, consultant decks — arrive looking authoritative
+and describing a system that does not exist. **They are hypotheses. This file and the code roots are
+the authority.** The pattern, three times now:
+
+1. **08/04/2026 — the NotebookLM mind map.** Named real roots, but had no node for the seam or the
+   one door, put branding at the START and AI at the END. Built to, it re-creates the 07/19
+   `HERO_LABEL` clobber. Corrected into PART 0.
+2. **08/05/2026 — the "SWFL Master Synthesis" brief.** Asserted **"27+ real estate layouts."** The
+   registry holds **19 keys: 17 emails + 2 social**, counted from `lib/deliverable/recipes/index.ts`.
+   It also named "Veza Digital-aligned automation" and "WAIO (Webflow AI Optimization)" as if they
+   were standards. They are vendor marketing, not specifications.
+3. Same brief carried **uncited conversion percentages** — "228% DVI outperformance", "10–25%
+   conversion lift", and a UGC lift given as **43% in one document and 82% in another for the same
+   claim, neither sourced.**
+
+**THE HARD RULE, and it is just §1.14 pointed at prose:** an uncited percentage from an outside
+document does not enter this playbook, a recipe, an email, or an answer. Not as a target, not as a
+justification, not as a footnote. **Every figure names a real source.** A number that disagrees ~2×
+with itself across two documents is not evidence of anything except that nobody checked.
+
+**What outside documents ARE good for:** naming a constraint we never wrote down. §1.16 exists
+because one of them raised line length — the *band* was the useful part; the *span math* had to be
+counted here before it could be a rule. Take the question, verify the answer against our own code,
+then write it down.
 
 ---
 
