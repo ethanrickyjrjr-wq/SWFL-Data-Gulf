@@ -1,3 +1,20 @@
+## 2026-08-05 (Opus 5) — HANDOFF WRITTEN: next session picks up at New Listing ingredients.
+
+`docs/superpowers/handoffs/2026-08-05-NEW-LISTING-BUILD-HANDOFF.md`. Carries the standing order in
+the operator's words (code to the rules → name every ingredient's source → **reproducible by
+builder** → next email), the three facts the 08/04 handoff got wrong and their live corrections, the
+one-pipe/three-dials shape, **every New Listing ingredient with its root and its fallback**, what is
+already wired and must not be rebuilt (the paid-record lane), the first four moves, the open checks,
+and the five traps that cost this session time.
+
+Opened `deliverable_recipe_key_column` — **92 built deliverables, all recording `block-canvas`, and
+no column recording which email built them.** "Every email runs one pipe" is true in the code and
+unverifiable in the product until that lands. It is step 1 of the assembly-line walk order and is
+additive and zero-risk.
+
+Three commits still LOCAL and unpushed: `fe88c090` (fact corrections) · `c9388d7f` (paid-record lane)
+· `c4c8d545` (mind map merged as PART 0).
+
 ## 2026-08-05 (Opus 5) — THE MIND MAP IS MERGED INTO THE PLAYBOOK. 16 of its 24 emails do not exist.
 
 Operator handed a NotebookLM mind map: *"use it how you see fit to keep everything together, edit it
