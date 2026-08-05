@@ -1,32 +1,26 @@
 import type { SupabaseClient } from "@supabase/supabase-js";
 import { resolveUserBrand } from "@/lib/email/templates/resolve-brand";
+import { PROJECT_CARRY_KEYS, isBlank } from "@/lib/brand/profile-ledger";
 
-type AgentBrand = {
-  agent_name: string | null;
-  nickname?: string | null;
-  agent_title?: string | null;
-  photo_url: string | null;
-  license: string | null;
-  brokerage: string | null;
-  agent_bio?: string | null;
-  contact_email?: string | null;
-  contact_phone?: string | null;
-  website_url?: string | null;
-  business_address?: string | null;
-};
+/**
+ * A brand profile row, as far as this module is concerned: an open bag keyed by
+ * column name. It used to be a hand-written 11-key type sitting beside a
+ * hand-written 11-key select and a hand-written 14-key object literal — three
+ * copies of one list, against a table with 38 field columns. The registry is
+ * the one authority now; this type deliberately does not restate it.
+ */
+type BrandProfileRow = Record<string, unknown>;
 
 async function defaultAgentLookup(
   supabase: SupabaseClient,
   userId: string,
-): Promise<AgentBrand | null> {
+): Promise<BrandProfileRow | null> {
   const { data } = await supabase
     .from("user_brand_profiles")
-    .select(
-      "agent_name, nickname, agent_title, photo_url, license, brokerage, agent_bio, contact_email, contact_phone, website_url, business_address",
-    )
+    .select(PROJECT_CARRY_KEYS.join(", "))
     .eq("user_id", userId)
     .maybeSingle();
-  return (data as AgentBrand | null) ?? null;
+  return (data as BrandProfileRow | null) ?? null;
 }
 
 /**
@@ -53,7 +47,7 @@ export async function applyUserBrandToProject(
   agentLookup: (
     supabase: SupabaseClient,
     userId: string,
-  ) => Promise<AgentBrand | null> = defaultAgentLookup,
+  ) => Promise<BrandProfileRow | null> = defaultAgentLookup,
 ): Promise<void> {
   try {
     const brand = await resolve(supabase, userId).catch(() => null);
@@ -61,20 +55,21 @@ export async function applyUserBrandToProject(
 
     const branding: Record<string, string> = {};
 
+    // Every carry-flagged field, straight off the registry. A key the profile
+    // holds blank is SKIPPED rather than written as "" — an empty string in a
+    // project's branding blob reads downstream as "the agent chose blank",
+    // which is not the same thing as "never filled in".
+    for (const key of PROJECT_CARRY_KEYS) {
+      const v = agent?.[key];
+      if (!isBlank(v)) branding[key] = (v as string).trim();
+    }
+
+    // resolveUserBrand stays authoritative for the three theme keys — it is the
+    // established root and carries the project-level precedence rules that a
+    // raw profile read does not.
     if (brand?.primary) branding.primary_color = brand.primary;
     if (brand?.accent) branding.accent_color = brand.accent;
     if (brand?.logoUrl) branding.logo_url = brand.logoUrl;
-    if (agent?.agent_name) branding.agent_name = agent.agent_name;
-    if (agent?.nickname) branding.nickname = agent.nickname;
-    if (agent?.agent_title) branding.agent_title = agent.agent_title;
-    if (agent?.photo_url) branding.photo_url = agent.photo_url;
-    if (agent?.license) branding.license = agent.license;
-    if (agent?.brokerage) branding.brokerage = agent.brokerage;
-    if (agent?.agent_bio) branding.agent_bio = agent.agent_bio;
-    if (agent?.contact_email) branding.contact_email = agent.contact_email;
-    if (agent?.contact_phone) branding.contact_phone = agent.contact_phone;
-    if (agent?.website_url) branding.website_url = agent.website_url;
-    if (agent?.business_address) branding.business_address = agent.business_address;
 
     if (Object.keys(branding).length === 0) return;
 

@@ -1,5 +1,6 @@
 import { describe, it, expect } from "bun:test";
 import { applyUserBrandToProject, persistClaimBrandToProfile } from "./apply-brand";
+import { PROJECT_CARRY_KEYS } from "@/lib/brand/profile-ledger";
 
 /** A minimal recorder standing in for the supabase update chain. */
 function recorderClient() {
@@ -23,6 +24,74 @@ function recorderClient() {
 }
 
 describe("applyUserBrandToProject", () => {
+  // ── FM 3: the account→project copy silently narrows ────────────────────────
+  //
+  // THE DEFECT THIS BUILD EXISTS TO CLOSE. The carry set used to be a select
+  // string (11 keys) and an object literal (14 keys) maintained BY HAND, against
+  // a live table of 38 field columns — so 24 columns structurally could not
+  // cross from an account to a project, and nothing anywhere noticed.
+  //
+  // Driven from the registry, so adding a carry-flagged field automatically
+  // extends this assertion instead of quietly leaving the new field behind.
+  it("writes every carry-flagged registry key — driven from the registry, not a literal", async () => {
+    const { client, calls } = recorderClient();
+    const fullProfile = Object.fromEntries(PROJECT_CARRY_KEYS.map((k) => [k, `v-${k}`]));
+
+    await applyUserBrandToProject(
+      client,
+      "user-1",
+      "proj-1",
+      async () => null, // no theme override — the profile itself must supply them
+      async () => fullProfile,
+    );
+
+    expect(calls).toHaveLength(1);
+    const branding = (calls[0].payload as { branding: Record<string, string> }).branding;
+    expect(Object.keys(branding).sort()).toEqual([...PROJECT_CARRY_KEYS].sort());
+    // and it is a real copy, not just the right key set
+    expect(branding.business_address).toBe("v-business_address");
+    expect(branding.unsubscribe_url).toBe("v-unsubscribe_url");
+  });
+
+  it("never carries sending-identity or provenance columns into a project", async () => {
+    const { client, calls } = recorderClient();
+    // A profile row carrying the non-field columns alongside the real ones —
+    // exactly the shape a `select *` would hand back.
+    const withNonFields = {
+      ...Object.fromEntries(PROJECT_CARRY_KEYS.map((k) => [k, `v-${k}`])),
+      source: "email_signup",
+      sender_domain_verified: true,
+      sender_address: "mail@example.com",
+      sender_name: "Sender",
+    };
+
+    await applyUserBrandToProject(
+      client,
+      "user-1",
+      "proj-1",
+      async () => null,
+      async () => withNonFields as Record<string, string>,
+    );
+
+    const branding = (calls[0].payload as { branding: Record<string, string> }).branding;
+    for (const forbidden of ["source", "sender_domain_verified", "sender_address", "sender_name"]) {
+      expect(branding).not.toHaveProperty(forbidden);
+    }
+  });
+
+  it("blank and missing profile values are skipped, not written as empty strings", async () => {
+    const { client, calls } = recorderClient();
+    await applyUserBrandToProject(
+      client,
+      "user-1",
+      "proj-1",
+      async () => null,
+      async () => ({ agent_name: "Marisol Vega", brokerage: "   ", license: null }) as never,
+    );
+    const branding = (calls[0].payload as { branding: Record<string, string> }).branding;
+    expect(branding).toEqual({ agent_name: "Marisol Vega" });
+  });
+
   it("writes branding with the canonical color/logo keys when a brand resolves", async () => {
     const { client, calls } = recorderClient();
     await applyUserBrandToProject(client, "user-1", "proj-1", async () => ({
