@@ -98,12 +98,12 @@ export function SourcesBlock({
         >
           Sources ({cited.length})
         </summary>
-        <div style={{ marginTop: 8 }}>
+        <div style={{ marginTop: space(8) }}>
           {cited.map((c, i) =>
             c.linkable && c.href ? (
               <Text
                 key={c.href ?? i}
-                style={{ fontFamily: font, ...text("mono"), margin: "0 0 4px" }}
+                style={{ fontFamily: font, ...text("mono"), margin: space(0, 0, 4) }}
               >
                 <Link href={c.href} style={{ color: linkInk }}>
                   {c.label}

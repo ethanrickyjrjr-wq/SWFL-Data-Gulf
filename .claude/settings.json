@@ -140,6 +140,10 @@
           {
             "type": "command",
             "command": "node .claude/hooks/check-project-path.mjs"
+          },
+          {
+            "type": "command",
+            "command": "node .claude/hooks/check-playbook-read-before-email-edit.mjs"
           }
         ]
       },

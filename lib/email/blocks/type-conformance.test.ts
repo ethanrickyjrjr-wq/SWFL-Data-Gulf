@@ -78,12 +78,20 @@ function sourceFiles(dir: string, out: string[] = []): string[] {
  *  its own postmortem teaches people to delete the postmortem. Prose is not code. */
 const isComment = (line: string): boolean => /^\s*(\/\/|\*|\/\*)/.test(line);
 
+/** Strip a TRAILING `// …` comment so a guard cannot fire on prose sitting beside code.
+ *  `md: CARD_PAD, // the doc's "Card padding: 24"` is compliant code whose comment quotes
+ *  the design doc — and the bare-number spacing guard matched the quotation, not the value.
+ *  The `\s` before `//` is what keeps a `https://` inside a string literal intact. */
+const stripTrailingComment = (line: string): string => line.replace(/(^|\s)\/\/.*$/, "$1");
+
 /** Every line of `src` matching `re`, as "file:line — trimmed source". */
 function hits(rel: string, src: string, re: RegExp): string[] {
   return src
     .split("\n")
     .map((line, i) =>
-      !isComment(line) && re.test(line) ? `${rel}:${i + 1} — ${line.trim()}` : null,
+      !isComment(line) && re.test(stripTrailingComment(line))
+        ? `${rel}:${i + 1} — ${line.trim()}`
+        : null,
     )
     .filter((x): x is string => x !== null);
 }
@@ -116,6 +124,93 @@ describe("type conformance — every block reads the scale, none restates it", (
     // @react-email's injected ABSOLUTE 24px box, which is what clipped every 36px stat.
     // A hand-typed leading is the same failure wearing a number.
     expect(scan(RAW_LEADING)).toEqual([]);
+  });
+});
+
+// ── THE SPACING GUARD — added 08/05/2026 ─────────────────────────────────────
+//
+// Operator, after a session that fixed the font and the type sizes: *"internal ≤ external
+// spacing has no guard."* True, and the honest answer has TWO halves, only one of which is
+// a guard. Both are stated here so nobody reports this as finished.
+//
+// ── HALF ONE: THE 8px GRID. There WAS a hole, and this closes it. ────────────
+//
+// The header of this file says "Spacing IS compiler-enforced: `Space` is a union, so an
+// off-grid number where a `Space` is expected does not compile." That sentence is true and
+// it was NOT the whole picture, in the exact way the fontFamily gap was not: the union only
+// binds where a `Space` is actually expected. `padding` on a CSSProperties object is
+// `string | number`, so a block can bypass the union entirely by typing the string itself —
+// and fourteen places did:
+//
+//   OpenSlot.tsx           ×8   padding "32px 24px" / "8px 12px" / "4px 8px" ×2,
+//                               margin "12px" / "0 0 8px" / "0 0 12px", marginBottom "8px"
+//   ListingGridBlock.tsx   ×2   paddingBottom "16px", padding `${CARD_INSET}px`
+//   FooterBlock.tsx        ×1   marginRight "12px"
+//   MultiColumnBlock.tsx   ×1   marginBottom "8px"
+//   SourcesBlock.tsx       ×1   margin "0 0 4px"
+//
+// **MEASURED BEFORE FIXING: every one of those values was already ON the grid** (4, 8, 12,
+// 16, 24, 32 are all `Space` tokens). So this guard found no bad pixel — it found that
+// nothing would have stopped one. `padding: "13px"` compiled fine in any of those files
+// yesterday. That is the same shape as the fontFamily defect: not a wrong value on screen,
+// a channel with no gate on it. All fourteen now route through `pad()`/`space()`, so the
+// union is the ONLY way a spacing value enters a block.
+//
+// LEGAL RAW VALUES, both deliberate and neither a grid measurement:
+//   • `margin: "0 auto"` — horizontal centering of the 600px container. A keyword, not a gap.
+//   • `paddingY: "lg"` — the blocks' own semantic size enum (a prop, not a CSS value); it
+//     resolves through `sectionPad()`, which is `Space`-typed.
+//
+// ── HALF TWO: INTERNAL ≤ EXTERNAL. STILL NOT GUARDED. STILL NOT IMPLEMENTABLE. ──
+//
+// `_RESEARCH/deliverable-and-design/2026-07-01-ai-deliverable-design-quality-research.md`
+// §1.1 (cieden, grounded in Gestalt proximity): "the space around elements (external) should
+// be equal to or, ideally, greater than the space within them." This is the rule that makes
+// a reader see two blocks as ONE group or as TWO.
+//
+// **It cannot be checked, because one of its two terms does not exist.** `compile-grid.ts`
+// lines 130–131 state it outright: the 8px `GRID_MARGIN` gutter "is not reproduced in the
+// email (column px come from `colSpanToPx`, which is gutter-agnostic)." The compiler emits
+// no between-block margin at all, so the EXTERNAL term is structurally zero on every email
+// ever sent from here, and all rhythm comes from each block's own `sectionPad`. A guard
+// comparing internal to a constant zero would fail every block in the codebase and tell you
+// nothing about grouping.
+//
+// A nesting-walk over the rendered HTML with an allowlist of today's failures was designed
+// and REJECTED 08/05/2026: it would report a decorative pass while the actual rule — do two
+// adjacent blocks read as one group — remained unexpressible. Calling that "implemented"
+// is the partial-reported-as-whole defect (RULE 0.8). It stays ⚠ OPEN, with the reason.
+//
+// Fixing it for real means giving the compiler a between-block spacing term, which is a
+// LAYOUT-GRAMMAR change to every email at once — the per-email walk in PART 2 of the
+// playbook, not a lint. Do not "fix" it by inventing a margin in a block.
+describe("spacing conformance — every block reads the grid, none restates it", () => {
+  // `margin: "0 auto"` is centering, not a gap: the keyword is what makes it legal, and the
+  // lookahead below is what lets it through while still failing `margin: "0 12px"`.
+  const RAW_PADDING = /padding(?:Top|Right|Bottom|Left)?:\s*["'`]/;
+  const RAW_MARGIN = /margin(?:Top|Right|Bottom|Left)?:\s*["'`](?!0 auto["'`])/;
+  // A template literal is the sneakier form of the same bypass — `` `${CARD_INSET}px` ``
+  // reads as principled because the number has a name, and still never meets the union.
+  const TEMPLATE_SPACE = /(?:padding|margin)(?:Top|Right|Bottom|Left)?:\s*`/;
+
+  it("no block hand-types a padding", () => {
+    expect(scan(RAW_PADDING)).toEqual([]);
+  });
+
+  it("no block hand-types a margin", () => {
+    expect(scan(RAW_MARGIN)).toEqual([]);
+  });
+
+  it("no block builds a spacing value in a template literal", () => {
+    expect(scan(TEMPLATE_SPACE)).toEqual([]);
+  });
+
+  it("no block hand-types a bare spacing number", () => {
+    // `margin: 0` is legal everywhere and is used ~20 times to kill @react-email's default
+    // paragraph margin — absence of space needs no token. Any OTHER bare number is the same
+    // bypass without the quotes (`marginTop: 8`, SourcesBlock.tsx:101).
+    const RAW_NUMBER = /(?:padding|margin)(?:Top|Right|Bottom|Left)?:\s*[1-9]/;
+    expect(scan(RAW_NUMBER)).toEqual([]);
   });
 });
 

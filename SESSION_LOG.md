@@ -1,3 +1,67 @@
+## 2026-08-05 (Opus 5) — THE THREE OPEN ITEMS CLOSED: the spacing guard, the scarcity LADDER, and every literal lifted into a field.
+
+Operator: *"Fix it all commit and push — internal ≤ external spacing has no guard, the recipe's
+ribbon, button label, subject template and the ±10%/80% band constants are hardcoded rather than
+fields, and the scarcity counts have one rung instead of a ladder."*
+
+**3 of 3 addressed. One of them is 1-of-2 and is reported as such, not as done.**
+
+**1. SPACING — the 8px grid is now guarded; internal ≤ external is NOT, and cannot be.** The
+`Space` union made an off-grid number a compile error *wherever a `Space` was expected* — and
+`padding` on a CSSProperties object is `string | number`, so a block could bypass it by typing the
+value. **Fourteen places did** (OpenSlot ×8, ListingGridBlock ×2, Footer/MultiColumn/Sources ×1,
+plus one built by string arithmetic). **Every one of those values was already on the grid** — this
+found no bad pixel, it found that nothing would have stopped one: `padding: "13px"` compiled fine
+in any of them yesterday. All fourteen now route through `pad()`/`space()`/a new `sectionPadX()`,
+and four tests in `type-conformance.test.ts` fail a raw string, a bare number and a template
+literal. **INTERNAL ≤ EXTERNAL STAYS OPEN** — `compile-grid.ts:130-131` emits no between-block
+margin, so the external term is structurally ZERO on every email ever sent from here and a guard
+would compare against a constant. A rendered-HTML nesting walk with an allowlist was designed and
+REJECTED: it reports a decorative pass while the real question stays unexpressible, and shipping
+that as "implemented" is RULE 0.8's partial-reported-as-whole. Check
+`email_internal_external_spacing_unbuilt` stays open. **§1.4 was itself WRONG and is corrected: the
+tokens are 4/8/12/16/24/32/48/64/96 — 4 and 12 are real steps, and the 40 and 56 it listed never
+were.** Code root wins.
+
+**2. THE SCARCITY LADDER — the numbers this email is ABOUT had one rung.** Every other ingredient in
+the campaign has a real chain (baths walk five lanes); the three headline counts had "a ZIP the
+frozen Census fixture happened to know, or nothing." Now four rungs: crosswalk county → **county
+read off `listing_state` itself by `zip_code`** (free, daily-fresh, covers ZIPs the fixture never
+had) → **the whole covered market, no county filter** → open slots.
+
+**THE RULE THAT MAKES RUNG 3 SHIPPABLE:** widening the scope CHANGES THE DISCLOSED CRITERION, and
+this email's authority rests on a reader reproducing the printed count from the stated band. So the
+scope rides in `Scarcity.scopeLabel` and **all three consumers print that one field** — the stat
+cells, the chart title, the sources note. A market-wide count under a "Lee County" label is a
+checkable claim that fails its own check. Test asserts no consumer emits an unauthorised county
+name. Column renamed `countyHomes` → `activeHomes` for the same reason.
+
+**3. EVERYTHING IS A FIELD — `COMING_SOON_FIELDS`, frozen.** Ribbon, button label, both subject
+forms, photo-alt template, region label, the band constants (±10%, 80% floor, 1,000/50 rounding)
+and the citation root. Consumed as a DEFAULTED PARAMETER. **Frozen and never env/DB-derived** —
+`registry-seam.test.ts` runs all 17 builders twice over independent contexts and asserts identical
+output; an environment-varying field breaks that silently, and `SITE` already carries that scar
+(`NEXT_PUBLIC_SITE_URL` once shipped `http://localhost:3000` as every local doc's citation).
+
+**EVIDENCE.** `bunx tsc --noEmit` clean. `bun test lib/email lib/deliverable` → **2875 pass, 0
+fail** (251 files). Acceptance render on the real account, `16209 Asheboro Ct`: **14 of 18 cells
+sourced, 23KB**, ladder **rung 1 / county grain**, 14,643 → 834 → 518, suppression **4 of 4 probes
+ABSENT**. Rendered bytes: **zero** Playfair/Georgia/Times, 4 Montserrat + 32 Lato, teal ×10,
+"Lee County" in exactly the 3 consumer slots, **5 distinct font sizes (44/28/16/14/12) all on the
+seven-role scale**, and six distinct paddings — `4/8 · 24/24 · 0 · 12/16 · 8/24 · 16/32` — every one
+a grid token.
+
+**ALSO LANDED, from the earlier half of this session:** the two stat rows that mixed `primary` and
+`muted` cells in one horizontal line (playbook defects 4 and 5, re-committed on the next email) are
+one weight now, and **the two tests that ASSERTED that defect now forbid it**. Playbook gains
+**§2.2.2 rewritten in full** (every cell, every rung — it used to say "only the deltas are listed")
+and **§2.2.6**, the finish pass.
+
+**NOT DONE, named:** the degenerate-funnel floor (`coming_soon_degenerate_funnel_floor` — a funnel
+of 1 still prints; the ladder fixed where counts come from, not when they are useless) and **ladder
+rungs 2 and 3 have NO live proof** — the acceptance run resolved on rung 1. Opened as
+`coming_soon_scarcity_rungs_2_3_unproven`.
+
 ## 2026-08-05 (Opus 5) — COMING SOON (§2.2) BUILT ON A REAL ACCOUNT — and reading the render found that most of the brand never reaches an email.
 
 Operator: *"DO THIS THE RIGHT WAY / RECORD EVER FUCKING STEP / BUILD BRAND NEW WITH OUR FUCKING

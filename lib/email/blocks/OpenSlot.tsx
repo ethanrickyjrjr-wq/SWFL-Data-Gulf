@@ -19,7 +19,7 @@
 import type * as React from "react";
 import type { EditScope } from "./editable-text";
 import { MUTED, BORDER } from "./styles";
-import { text, WEIGHT } from "./scale";
+import { pad, space, text, WEIGHT } from "./scale";
 
 const DASH = "#C7CDD3";
 
@@ -55,18 +55,18 @@ export function ImageSlot({
   // Spacing walks the 8px grid (scale.ts `Space`): 36 and 10 were off-grid — 36 is the exact
   // number styles.ts already replaced with 32 on every block gutter.
   const box: React.CSSProperties = {
-    padding: "32px 24px",
+    padding: pad(32, 24),
     textAlign: "center",
     backgroundColor: "#F9FAFB",
     border: `1px dashed ${DASH}`,
     borderRadius: "4px",
-    margin: "12px",
+    margin: space(12),
   };
   const title: React.CSSProperties = {
     fontFamily: font,
     ...text("caption", { weight: WEIGHT.emphasis }),
     color: "#4B5563",
-    margin: "0 0 8px",
+    margin: space(0, 0, 8),
   };
 
   if (isChart || !scope) {
@@ -92,7 +92,7 @@ export function ImageSlot({
       }}
     >
       <p style={title}>{instruction}</p>
-      <p style={{ fontFamily: font, ...text("mono"), color: MUTED, margin: "0 0 12px" }}>
+      <p style={{ fontFamily: font, ...text("mono"), color: MUTED, margin: space(0, 0, 12) }}>
         Drop a photo here, choose a file, or paste a link. Empty slots are never sent.
       </p>
       {scope.upload ? (
@@ -105,8 +105,8 @@ export function ImageSlot({
             color: "#06231f",
             backgroundColor: "#3DC9C0",
             borderRadius: "4px",
-            padding: "8px 12px",
-            marginBottom: "8px",
+            padding: pad(8, 12),
+            marginBottom: space(8),
           }}
         >
           Choose a file
@@ -139,7 +139,7 @@ export function ImageSlot({
           style={{
             fontFamily: font,
             ...text("mono"),
-            padding: "4px 8px",
+            padding: pad(4, 8),
             border: `1px solid ${BORDER}`,
             borderRadius: "4px",
             color: "#111827",
@@ -152,7 +152,7 @@ export function ImageSlot({
           style={{
             fontFamily: font,
             ...text("mono", { weight: WEIGHT.emphasis }),
-            padding: "4px 8px",
+            padding: pad(4, 8),
             border: `1px solid ${BORDER}`,
             borderRadius: "4px",
             backgroundColor: "#ffffff",

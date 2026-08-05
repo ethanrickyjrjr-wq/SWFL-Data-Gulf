@@ -105,6 +105,70 @@ import type { EmailDoc, StatItem } from "@/lib/email/doc/types";
  *  every locally-built doc (observed 07/13/2026 in the first proof run). */
 const SITE = "https://www.swfldatagulf.com";
 
+/**
+ * EVERY LITERAL THIS EMAIL PRINTS OR QUERIES ON, IN ONE PLACE.
+ *
+ * Operator, 08/05/2026: *"You have written down the entire recipe? We can reproduce easily?
+ * We know where everything has come from and has fallbacks!? Everything is a field?"* The
+ * honest answer to the last one was NO. The ribbon word, the button label, the subject
+ * template, the ±10% band, the 80% size floor, the 50-unit rounding and the citation root
+ * were seven magic values scattered across 600 lines. Each was individually defensible and
+ * collectively they meant the recipe could not be READ — you had to grep for a string you
+ * had already seen in a rendered email to find out where it came from.
+ *
+ * ── THE TWO RULES THAT KEEP THIS HONEST ─────────────────────────────────────
+ *
+ * 1. **A FIELD, NOT A SETTING. Frozen, and never read from env or a DB.** `registry-seam.test.ts`
+ *    runs every one of the 17 builders TWICE over two independent contexts and asserts the
+ *    same document comes back (17/17 green). A value that varies by environment breaks that
+ *    guarantee silently — and the SITE constant three lines up already carries the scar:
+ *    reading `NEXT_PUBLIC_SITE_URL` here shipped `http://localhost:3000` as the citation URL
+ *    of every locally-built doc. Consumers take this as a DEFAULTED PARAMETER, so a test or a
+ *    future per-brokerage override can pass its own without a global anywhere.
+ * 2. **THE BAND NUMBERS ARE QUERY INPUTS, NOT COPY.** `priceBand`/`sqftFloorRatio` are read by
+ *    `scarcityBand`, which rounds BEFORE querying so the criterion the email prints is the
+ *    criterion the count was computed over. Change one of these and the printed band moves
+ *    with it — which is the point. They must never drift from the disclosure in `tail`.
+ */
+export const COMING_SOON_FIELDS = Object.freeze({
+  /** The chrome's ribbon word. The private-preview promise lives HERE and in `ctaLabel`,
+   *  both written by code — which is why the narrator is forbidden from claiming it. */
+  ribbon: "Coming Soon",
+  /** The one button. The NEXT ACTION, never a restatement of the email. 1–5 words (§1.8). */
+  ctaLabel: "Join the Private Preview List",
+  /** The subject, deterministic and never model-authored, so it cannot smuggle the street.
+   *  30–40 characters is the open-rate target (§1.10); the city form runs long and is kept
+   *  because a named town beats a generic tease for this audience. */
+  subject: {
+    withCity: (city: string) => `Coming soon in ${city} — before it hits the market`,
+    noCity: "Coming soon — before it hits the market",
+  },
+  /** The hero label when the subject has no city, and the widest honest scope name. */
+  regionLabel: "Southwest Florida",
+  /** Photo alt text — read aloud by screen readers and shown by Outlook with images off,
+   *  which is why it names the CITY and never the street. */
+  photoAlt: (city: string, fields: { regionLabel: string }) =>
+    `Coming soon — a home in ${city || fields.regionLabel}`,
+  /** The comparison band. ±10% of list price, at least the subject's beds, at least 80% of
+   *  its size. Rounded to these units BEFORE the query so the printed criterion reproduces. */
+  band: {
+    priceLo: 0.9,
+    priceHi: 1.1,
+    priceRoundTo: 1000,
+    sqftFloorRatio: 0.8,
+    sqftRoundTo: 50,
+  },
+  /** The citation root. A citation always points at SWFL Data Gulf (`resolve-subject.ts`
+   *  hardcodes the same). NOT the same concept as `shared.ts`'s env-derived BASE_URL — that
+   *  one is where a READER is sent, this one is who the DATA is attributed to. */
+  citation: { label: "SWFL Data Gulf", url: SITE },
+  /** The sources note is a single line in a collapsed list; longer than this and it wraps
+   *  into a paragraph that reads as a disclaimer. */
+  noteMaxChars: 200,
+});
+
+export type ComingSoonFields = typeof COMING_SOON_FIELDS;
+
 // ── Street suppression ───────────────────────────────────────────────────────
 // The one thing this recipe cannot get wrong. Everything below is deterministic;
 // none of it asks a model to cooperate.
@@ -195,10 +259,30 @@ export function countyForZip(zip?: string): string | null {
  *  DISCLOSED (it rides in the cell labels, the chart, and the sources note) — the
  *  counts are real, and a stated band is what keeps "how scarce" from reading as a
  *  number we made up. */
+export type ScarcityGrain = "county" | "market";
+
 export interface Scarcity {
-  county: string;
-  /** Active for-sale HOMES in the county (beds + sqft present — land excluded). */
-  countyHomes: number;
+  /** The county the counts were scoped to — NULL when the ladder fell through to market grain. */
+  county: string | null;
+  /** WHAT WAS COUNTED. `county` = one county; `market` = every county in the lake. */
+  grain: ScarcityGrain;
+  /**
+   * *** THE ONE STRING EVERY CONSUMER PRINTS. ***
+   *
+   * "Lee County" or "Southwest Florida". The stat labels, the chart title AND the sources
+   * note all read THIS — never a county name of their own. That is not tidiness: this
+   * email's entire integrity argument is that a reader who re-runs the stated criterion
+   * reproduces the printed count (it is why `scarcityBand` rounds before querying). If the
+   * ladder widens to market grain and even ONE consumer still says "Lee County", the email
+   * ships a checkable-looking claim that does not reproduce — worse than an open slot,
+   * because it invites the check and fails it. Pinned by a test that asserts no consumer
+   * emits a county name the scope did not authorise.
+   */
+  scopeLabel: string;
+  /** WHICH RUNG produced this, for the provenance table. 1 crosswalk · 2 lake · 3 market. */
+  rung: 1 | 2 | 3;
+  /** Active for-sale HOMES in scope (beds + sqft present — land excluded). */
+  activeHomes: number;
   /** …of those, inside the subject's price band. */
   inBand: number;
   /** …of those, also matching the subject's beds and size. */
@@ -207,7 +291,7 @@ export interface Scarcity {
   bandHi: number;
   bedFloor: number;
   sqftFloor: number;
-  /** The lake's own freshness — max(last_seen) on the county's rows, ISO yyyy-mm-dd. */
+  /** The lake's own freshness — max(last_seen) on the scoped rows, ISO yyyy-mm-dd. */
   asOfIso: string;
 }
 
@@ -233,13 +317,15 @@ export interface Scarcity {
 export function scarcityBand(
   price: number,
   sqft: number,
+  fields: ComingSoonFields = COMING_SOON_FIELDS,
 ): { bandLo: number; bandHi: number; sqftFloor: number } {
+  const b = fields.band;
   // Round to the same thousand `usdShort` renders, BEFORE the query sees it.
-  const toK = (n: number) => Math.round(n / 1000) * 1000;
+  const toK = (n: number) => Math.round(n / b.priceRoundTo) * b.priceRoundTo;
   return {
-    bandLo: toK(price * 0.9),
-    bandHi: toK(price * 1.1),
-    sqftFloor: Math.floor((sqft * 0.8) / 50) * 50,
+    bandLo: toK(price * b.priceLo),
+    bandHi: toK(price * b.priceHi),
+    sqftFloor: Math.floor((sqft * b.sqftFloorRatio) / b.sqftRoundTo) * b.sqftRoundTo,
   };
 }
 
@@ -273,22 +359,37 @@ function mdY(iso: string): string {
  * → null, and the caller ships open slots + no chart instead. NEVER throws, NEVER
  * invents a count.
  */
-export async function loadScarcity(
-  county: string,
+async function countScarcity(
+  county: string | null,
+  grain: ScarcityGrain,
+  rung: 1 | 2 | 3,
+  scopeLabel: string,
   price: number,
   beds: number,
   sqft: number,
+  fields: ComingSoonFields,
 ): Promise<Scarcity | null> {
-  if (!county || !price || !beds || !sqft) return null;
-  const { bandLo, bandHi, sqftFloor } = scarcityBand(price, sqft);
+  const { bandLo, bandHi, sqftFloor } = scarcityBand(price, sqft, fields);
   try {
     const db = createServiceRoleClientUntyped();
+    /** The scope predicate — the ONLY difference between a county count and a market count.
+     *  Everything else (the active/sale/feed filters and the land filter) is identical, so
+     *  the two rungs cannot drift into counting different things. */
+    //
+    // Cast through a one-method shape rather than threading PostgREST's own builder generic:
+    // written as `<T extends { eq: (c, v) => T }>` this tripped TS2589 ("type instantiation
+    // is excessively deep"), because the builder's return type re-instantiates itself on
+    // every chained filter and the constraint made the compiler unroll it.
+    const scoped = <T>(q: T): T =>
+      county ? ((q as { eq: (c: string, v: string) => unknown }).eq("county", county) as T) : q;
+
     const base = () =>
-      db
-        .schema("data_lake")
-        .from("listing_state")
-        .select("listing_id", { count: "exact", head: true })
-        .eq("county", county)
+      scoped(
+        db
+          .schema("data_lake")
+          .from("listing_state")
+          .select("listing_id", { count: "exact", head: true }),
+      )
         .eq("state", "active")
         .eq("sale_or_rent", "sale")
         .eq("source_name", "api_feed")
@@ -304,11 +405,7 @@ export async function loadScarcity(
         .lte("list_price", bandHi)
         .gte("beds", beds)
         .gte("sqft", sqftFloor),
-      db
-        .schema("data_lake")
-        .from("listing_state")
-        .select("last_seen")
-        .eq("county", county)
+      scoped(db.schema("data_lake").from("listing_state").select("last_seen"))
         .eq("state", "active")
         .eq("sale_or_rent", "sale")
         .eq("source_name", "api_feed")
@@ -316,8 +413,8 @@ export async function loadScarcity(
         .limit(1),
     ]);
 
-    const countyHomes = total.count ?? 0;
-    if (!countyHomes) return null; // no inventory for this county → nothing to claim
+    const activeHomes = total.count ?? 0;
+    if (!activeHomes) return null; // no inventory in scope → nothing to claim, try the next rung
     if (band.count == null || like.count == null) return null;
 
     const lastSeen = (fresh.data as { last_seen?: string }[] | null)?.[0]?.last_seen;
@@ -325,7 +422,10 @@ export async function loadScarcity(
 
     return {
       county,
-      countyHomes,
+      grain,
+      scopeLabel,
+      rung,
+      activeHomes,
       inBand: band.count,
       comparable: like.count,
       bandLo,
@@ -335,8 +435,96 @@ export async function loadScarcity(
       asOfIso,
     };
   } catch {
-    return null; // a DB hiccup degrades to open slots — it never blocks the build
+    return null; // a DB hiccup degrades to the next rung, then to open slots
   }
+}
+
+/**
+ * RUNG 2 — the county read off THE LAKE ITSELF, for a ZIP the committed crosswalk misses.
+ *
+ * `countyForZip` reads a Census file frozen in the repo; `listing_state` carries its own
+ * `county` beside its own `zip_code` on every row and is refreshed daily. A ZIP that is new,
+ * re-mapped, or simply absent from the fixture is invisible to rung 1 and sitting in plain
+ * sight here. One row, one column — not a count.
+ */
+export async function countyFromLake(zip?: string): Promise<string | null> {
+  const z = String(zip ?? "").match(/\d{5}/)?.[0];
+  if (!z) return null;
+  try {
+    const db = createServiceRoleClientUntyped();
+    const { data } = await db
+      .schema("data_lake")
+      .from("listing_state")
+      .select("county")
+      .eq("zip_code", z)
+      .not("county", "is", null)
+      .limit(1);
+    return (data as { county?: string }[] | null)?.[0]?.county?.trim() || null;
+  } catch {
+    return null;
+  }
+}
+
+/**
+ * THE SCARCITY LADDER — stop at the first hit, and SAY WHAT YOU COUNTED.
+ *
+ * ── WHY THIS IS A LADDER AND NOT A QUERY (08/05/2026) ───────────────────────
+ *
+ * Operator: *"We know where everything has come from and has fallbacks!?"* For the three
+ * counts, the honest answer was NO. §2.1.2 of the playbook gives every OTHER ingredient in
+ * this campaign a real chain — beds walk free spine → paid row → open; baths walk five lanes
+ * — and the three numbers this entire email is ABOUT had exactly one rung: a ZIP the frozen
+ * Census fixture happened to know, or nothing. That is not a fallback, it is a coin flip
+ * dressed as a source, and it fails in the most ordinary way there is: an unlisted ZIP.
+ *
+ *   RUNG 1 — county from the committed Census crosswalk (`countyForZip`). Free, offline.
+ *   RUNG 2 — county from `listing_state` itself, by the subject's ZIP. Free, daily-fresh,
+ *            and it covers exactly the ZIPs rung 1 cannot: new, re-mapped, or never in the
+ *            fixture. One row read.
+ *   RUNG 3 — THE WHOLE COVERED MARKET, no county filter at all. Every count is still real
+ *            and every filter is identical; only the SCOPE widens.
+ *   RUNG 4 — OPEN SLOTS. Never a zero, never a guess, never a refusal (RULE 0.7).
+ *
+ * ── THE RULE THAT MAKES RUNG 3 SHIPPABLE RATHER THAN A LIE ──────────────────
+ *
+ * Widening the scope CHANGES THE DISCLOSED CRITERION, and this email's whole claim to
+ * authority is that a reader who re-runs the stated criterion gets the printed number (it is
+ * why `scarcityBand` rounds before it queries). So the scope is not a private detail of the
+ * query — it rides in `scopeLabel` and every consumer prints it: the stat cells, the chart
+ * title and the sources note. A market-wide count under a "Lee County" label would be a
+ * checkable claim that fails its own check. There is a test on exactly that.
+ *
+ * A wider scope also makes a WEAKER scarcity claim — a market-wide funnel narrows less than
+ * a county one. That is correct and deliberate: the reader is told the scope, and a weaker
+ * true claim beats a stronger unverifiable one.
+ */
+export async function loadScarcity(
+  subject: { zip?: string; county?: string | null; price: number; beds: number; sqft: number },
+  fields: ComingSoonFields = COMING_SOON_FIELDS,
+): Promise<Scarcity | null> {
+  const { price, beds, sqft } = subject;
+  // The band is meaningless without all three, and a partial band would silently widen the
+  // query rather than narrow it. No subject numbers → open slots, immediately.
+  if (!price || !beds || !sqft) return null;
+
+  const label = (c: string) => `${c} County`;
+
+  // RUNG 1 — the crosswalk. `subject.county` is what the caller already resolved.
+  const rung1 = subject.county?.trim() || countyForZip(subject.zip);
+  if (rung1) {
+    const hit = await countScarcity(rung1, "county", 1, label(rung1), price, beds, sqft, fields);
+    if (hit) return hit;
+  }
+
+  // RUNG 2 — the lake's own ZIP→county mapping, for the ZIPs the fixture never knew.
+  const rung2 = await countyFromLake(subject.zip);
+  if (rung2 && rung2 !== rung1) {
+    const hit = await countScarcity(rung2, "county", 2, label(rung2), price, beds, sqft, fields);
+    if (hit) return hit;
+  }
+
+  // RUNG 3 — the whole covered market. Same filters, wider scope, and it SAYS SO.
+  return countScarcity(null, "market", 3, fields.regionLabel, price, beds, sqft, fields);
 }
 
 /**
@@ -350,10 +538,21 @@ export async function loadScarcity(
  * rendered at identical weight, which is how a punchline reads as a wall.
  */
 export function scarcityStats(s: Scarcity): StatItem[] {
+  // ONE WEIGHT ACROSS THE ROW. The playbook's finish pass, defect 5, verbatim: "Never mark
+  // ONE cell in a three-cell row `muted`. All three carry the same weight or the row reads
+  // broken." This row had BOTH — `muted` on the county total AND `primary` on the match
+  // count — so three cells rendered at three different sizes and the strip read as a
+  // ransom note. The funnel's narrowing is carried by the NUMBERS and by the chart beneath
+  // it; it does not need type size shouting on top of them.
+  //
+  // AND THE LABEL COMES OFF `scopeLabel`, NEVER off `s.county`. This cell used to print
+  // `${s.county} County` — which was correct while a county was the only thing that could
+  // be counted, and becomes a false claim the moment the ladder's rung 3 counts the whole
+  // market. The scope is disclosed wherever the count is.
   return [
-    spec(count(s.countyHomes), `Active homes · ${s.county} County`, "muted"),
+    spec(count(s.activeHomes), `Active homes · ${s.scopeLabel}`),
     spec(count(s.inBand), `Priced ${usdShort(s.bandLo)}–${usdShort(s.bandHi)}`),
-    spec(count(s.comparable), `…that also match beds + size`, "primary"),
+    spec(count(s.comparable), `…that also match beds + size`),
   ];
 }
 
@@ -383,20 +582,25 @@ export function scarcityOpenSlots(): StatItem[] {
  * digit for digit. (The `count` formatter's collapse is a real defect in a shared
  * file — reported, not patched here.)
  */
-export function scarcityChartSpec(s: Scarcity): ChartSpec {
+export function scarcityChartSpec(
+  s: Scarcity,
+  fields: ComingSoonFields = COMING_SOON_FIELDS,
+): ChartSpec {
   return {
     frameId: "bar-table",
-    title: `Homes like this one in ${s.county} County`,
+    // `scopeLabel`, never `s.county` — the chart title is the second of the three places
+    // the scope has to agree with what was counted.
+    title: `Homes like this one in ${s.scopeLabel}`,
     columns: ["Segment", "Active homes"],
     rows: [
-      [`All active homes`, s.countyHomes],
+      [`All active homes`, s.activeHomes],
       [`In this price range`, s.inBand],
       [`Beds + size match too`, s.comparable],
     ],
     value_format: "number",
     chart_type: "bar",
     asOf: s.asOfIso,
-    source: { citation: "SWFL Data Gulf", url: SITE },
+    source: { citation: fields.citation.label, url: fields.citation.url },
   } as ChartSpec;
 }
 
@@ -421,16 +625,24 @@ export function teaserWhere(facts: ListingFacts): string {
  *  narrows a parcel search further than a teaser should, and the cell is the only one in
  *  `listingSpecs` that helps locate the house rather than describe it. */
 export function teaserSpecs(facts: ListingFacts): StatItem[] {
+  // ONE WEIGHT ACROSS THE ROW — same rule as the scarcity strip below, and the same defect
+  // the playbook's finish pass already fixed once on New Listing (defects 4 and 5): a
+  // `primary` cell and a `muted` cell in the SAME strip renders three different type sizes
+  // in one horizontal line. Five cells at one size is a spec strip; five cells at three
+  // sizes is noise.
   return [
     spec(facts.beds, "Beds"),
     spec(facts.baths, "Baths"),
     spec(withCommas(facts.sqft), "Sq Ft"),
-    spec(pricePerSqft(facts.price, facts.sqft), "$/Sq Ft", "primary"),
-    spec(shortType(facts.propertyType) || undefined, "Type", "muted"),
+    spec(pricePerSqft(facts.price, facts.sqft), "$/Sq Ft"),
+    spec(shortType(facts.propertyType) || undefined, "Type"),
   ];
 }
 
-export async function buildComingSoon(ctx: RecipeBuildContext): Promise<EmailDoc | null> {
+export async function buildComingSoon(
+  ctx: RecipeBuildContext,
+  fields: ComingSoonFields = COMING_SOON_FIELDS,
+): Promise<EmailDoc | null> {
   const { facts, currentDoc } = ctx;
   // No subject → nothing to tease. Fall through to the generic author rather than
   // shipping an empty teaser (never refuse a build, but never fake a house either).
@@ -442,19 +654,26 @@ export async function buildComingSoon(ctx: RecipeBuildContext): Promise<EmailDoc
   const where = teaserWhere(facts);
   const county = countyForZip(facts.zip);
 
-  // Live county inventory. A miss → open slots + no chart, never an invented count.
-  const scarcity = county
-    ? await loadScarcity(county, num(facts.price), num(facts.beds), num(facts.sqft)).catch(
-        () => null,
-      )
-    : null;
+  // Live inventory, down the four-rung ladder (crosswalk county → lake county → whole
+  // market → open slots). A miss at every rung → open slots + no chart, never an invented
+  // count. `scopeLabel` on what comes back is what every printed label reads.
+  const scarcity = await loadScarcity(
+    {
+      zip: facts.zip,
+      county,
+      price: num(facts.price),
+      beds: num(facts.beds),
+      sqft: num(facts.sqft),
+    },
+    fields,
+  ).catch(() => null);
 
   const ctaUrl = brandWebsiteUrl(currentDoc) ?? SITE;
 
   // The chrome, minus the parts that need a rendered chart. Declared ONCE so the shell
   // pass below and the real pass cannot drift apart.
   const chrome: LifecycleChrome = {
-    ribbon: "Coming Soon",
+    ribbon: fields.ribbon,
     // The alt text is the classic leak: buildListingFlyer sets `alt: facts.address`, and
     // alt text is READ ALOUD by screen readers and shown when images are blocked — which
     // is most of Outlook. It says the CITY. The link goes to the agent's own site, never
@@ -463,9 +682,7 @@ export async function buildComingSoon(ctx: RecipeBuildContext): Promise<EmailDoc
     photo: facts.photos[0]
       ? {
           url: facts.photos[0],
-          alt: city
-            ? `Coming soon — a home in ${city}`
-            : "Coming soon — a home in Southwest Florida",
+          alt: fields.photoAlt(city, fields),
           linkUrl: ctaUrl,
         }
       : null,
@@ -478,7 +695,7 @@ export async function buildComingSoon(ctx: RecipeBuildContext): Promise<EmailDoc
     // The narrator's slot stays EMPTY here and is authored into below — and only from
     // lane-2 material. See the block comment at the narrator.
     narrative: "",
-    ctaLabel: "Join the Private Preview List",
+    ctaLabel: fields.ctaLabel,
     ctaUrl,
   };
 
@@ -495,9 +712,9 @@ export async function buildComingSoon(ctx: RecipeBuildContext): Promise<EmailDoc
   const tint = accent.replace(/[^0-9a-fA-F]/g, "").slice(0, 6) || "x";
   const chart = scarcity
     ? await chartSpecToEmailImage(
-        scarcityChartSpec(scarcity),
+        scarcityChartSpec(scarcity, fields),
         accent,
-        `email-charts/coming-soon-${scarcity.county}-${scarcity.bandLo}-${scarcity.bandHi}-${scarcity.bedFloor}-${scarcity.sqftFloor}-${scarcity.asOfIso}-${tint}.png`,
+        `email-charts/coming-soon-${scarcity.county ?? scarcity.grain}-${scarcity.bandLo}-${scarcity.bandHi}-${scarcity.bedFloor}-${scarcity.sqftFloor}-${scarcity.asOfIso}-${tint}.png`,
       ).catch(() => null)
     : null;
 
@@ -549,13 +766,16 @@ export async function buildComingSoon(ctx: RecipeBuildContext): Promise<EmailDoc
             props: {
               sources: [
                 {
-                  label: `Active for-sale homes, ${scarcity.county} County — as of ${mdY(scarcity.asOfIso)}`,
-                  url: SITE,
+                  // THE THIRD CONSUMER. Same rule as the cells and the chart title: the
+                  // citation names the scope that was actually counted, so the reader can
+                  // re-run it. `scopeLabel`, never `scarcity.county`.
+                  label: `Active for-sale homes, ${scarcity.scopeLabel} — as of ${mdY(scarcity.asOfIso)}`,
+                  url: fields.citation.url,
                 },
               ],
               note: `"Like this one" = list price ${usdShort(scarcity.bandLo)}–${usdShort(scarcity.bandHi)}, ${scarcity.bedFloor}+ beds, ${count(scarcity.sqftFloor)}+ sq ft. Vacant land excluded.`.slice(
                 0,
-                200,
+                fields.noteMaxChars,
               ),
             },
           },
@@ -569,11 +789,7 @@ export async function buildComingSoon(ctx: RecipeBuildContext): Promise<EmailDoc
     // THE SUBJECT LINE. deriveEmailDocSubject falls back to a hero's LABEL, so without
     // this the subject would be bare geography. Written deterministically from the city —
     // a model never touches it, so it can never smuggle the street into it.
-    subjectVariants: [
-      city
-        ? `Coming soon in ${city} — before it hits the market`
-        : "Coming soon — before it hits the market",
-    ],
+    subjectVariants: [city ? fields.subject.withCity(city) : fields.subject.noCity],
   };
 
   // ── The narrator ───────────────────────────────────────────────────────────
@@ -610,6 +826,23 @@ export async function buildComingSoon(ctx: RecipeBuildContext): Promise<EmailDoc
     state: undefined,
     zip: undefined,
     remarks: facts.remarks ? redactStreetLine(facts.remarks, street) : undefined,
+    // ── TWO FIELDS THAT MUST DIE HERE, BOTH FOUND BY READING A RENDERED PARAGRAPH
+    //    08/05/2026 — neither is an address, and stripping the address was not enough.
+    //
+    // LOT SIZE. `teaserSpecs` deliberately drops the lot cell, and the reason is written
+    // three functions up: "a lot size plus a city narrows a parcel search further than a
+    // teaser should." That omission was defeated in one sentence — handed the raw facts,
+    // the narrator wrote "The 0.2-acre lot is owner-land — not leased." Suppressing a cell
+    // from the GRID while feeding it to the WRITER suppresses nothing. Anything the spec
+    // strip refuses to print has to be refused to the model in the same breath.
+    //
+    // DAYS ON MARKET. Strictly worse than a leak, because it is a CONTRADICTION: this
+    // email announces a home that is NOT YET FOR SALE, and the narrator opened with "on
+    // the market for just over two weeks." Both facts were true of the resolved listing
+    // and the sentence is nonsense in a Coming Soon frame. The claim gate could never
+    // catch it — DOM was a fact we DID give it, so the paragraph was honest and wrong.
+    lotSize: undefined,
+    daysOnMarket: undefined,
     // THE COMMUNITY RIDES, BY NAME. What is withheld is the STREET ADDRESS — the house — not
     // the community it sits in. "Coming soon in Bay Colony" is the teaser working as intended:
     // it is exactly the line that makes an agent's sphere lean in, and a buyer cannot walk up
@@ -628,11 +861,27 @@ export async function buildComingSoon(ctx: RecipeBuildContext): Promise<EmailDoc
           "in the description you were given; write around them. YOU MAY name the COMMUNITY " +
           "and the CITY — 'coming soon in Bay Colony' is the whole appeal of this email, and " +
           "a community is not a doorstep. Tighten the agent's description into two or three " +
-          "sentences of anticipation and close on the fact that it will be shown privately " +
-          "first. Describe ONLY what that description actually says — you may not add a room, " +
-          "a layout, a finish, a view, a builder's intention, or any quality it does not " +
+          "sentences. Describe ONLY what that description actually says — you may not add a " +
+          "room, a layout, a finish, a view, a builder's intention, or any quality it does not " +
           "state. Do not claim the home is rare or scarce; the email's own figures make " +
-          "that case.",
+          "that case." +
+          // THE FRAMING USED TO INSTRUCT THE EXACT CLAIM THE GATE THEN KILLED. Until
+          // 08/05/2026 this said "…two or three sentences OF ANTICIPATION and CLOSE ON THE
+          // FACT THAT IT WILL BE SHOWN PRIVATELY FIRST." Both halves are claims the model
+          // was never given: "shown privately first" is a SEQUENCE claim about what happens
+          // when, and "anticipation" pushes it to characterise a seller's MOTIVE. The
+          // no-invention gate correctly dropped the paragraph — first live run of this
+          // recipe under the account brand printed `[narrative] DROPPED — the narrator made
+          // 2 claim(s) it was not given: motive("serious"), sequence("before the home is
+          // listed")`. The guard was right and the FRAMING was wrong: we were ordering the
+          // model to invent, then discarding its work for obeying. The private-preview
+          // promise belongs where it already lives and is TRUE by construction — the CTA
+          // button ("Join the Private Preview List") and the ribbon ("Coming Soon"), both
+          // written by code. Prose never has to carry it.
+          " Do NOT say when the home will be listed, shown, or previewed, and do not " +
+          "describe the seller's motivation or urgency — you were not told either one, the " +
+          "ribbon and the button already say it, and a claim about timing is dropped by the " +
+          "no-invention gate rather than sent.",
       }).catch(() => null)
     : null;
 

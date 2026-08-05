@@ -1,3 +1,21 @@
+## 2026-08-05 (Opus 5) — OPERATOR: "Fix it all commit and push" — the three items I had left open
+
+RESOLVED (2 of 3 fully, 1 reported as half). He listed them back to me verbatim from my own
+accounting, which is the tell that I had named them and then not done them in the same breath.
+
+- **Spacing guard** — the 8px grid had a 14-place bypass (raw padding/margin strings never meet the
+  `Space` union). Closed with 3 new tests + all 14 sites routed through `pad()`/`space()`.
+  **Internal ≤ external is NOT closed and cannot be** — the compiler emits no between-block margin,
+  so its external term is structurally zero. Reported as half, not as done. Check stays open.
+- **Scarcity ladder** — 1 rung → 4 (crosswalk county → lake county by ZIP → whole market → open
+  slots), with `scopeLabel` read by all three consumers so a widened scope can never ship under a
+  county name.
+- **Fields** — 7 literals into a frozen `COMING_SOON_FIELDS`.
+
+**THE PATTERN WORTH KEEPING:** all three were things I had ALREADY WRITTEN DOWN as open in a
+previous answer, then moved on from. Naming a gap in prose is not opening it — that is RULE 2.4,
+and it cost him a turn to hand my own list back to me.
+
 ## 2026-08-05 (Opus 5) — OPERATOR, in FOUR separate sessions: "WHY TTHE FUCK CAN'T I FUCKING PUSH"
 
 OPEN. Asked in `b5378f9c` (35m), `2f9cb100` ("well you can't push until finised now can you", 9m),

@@ -24,8 +24,8 @@
 import { Section, Img, Text, Link } from "@react-email/components";
 import { SECTION_SURFACE_BG } from "../doc/types";
 import type { EmailGlobalStyle, ListingGridCard, ListingGridProps } from "../doc/types";
-import { fontStack, sectionPad, MUTED, BORDER, CARD_BG } from "./styles";
-import { text, pad, space, WEIGHT } from "./scale";
+import { fontStack, sectionPad, sectionPadX, MUTED, BORDER, CARD_BG } from "./styles";
+import { text, pad, space, WEIGHT, type Space } from "./scale";
 import { isDarkBg, legibleInk, legibleAccent, ON_DARK_BODY, ON_DARK_MUTED } from "./on-dark";
 
 /** Status-dot colors. Sold red matches the lifecycle chrome; the green is only ever
@@ -69,10 +69,8 @@ export function ListingGridBlock({
   // 600 − 48 = 552 = 2 × (260 max-width + 8 + 8). So the surfaced layout SPLITS that
   // same 24px — 8px of outer gutter outside the card, 16px of inset inside it — and
   // the cards keep their width instead of wrapping to one column.
-  const OUTER_GUTTER = 8;
-  const CARD_INSET = 16;
-  // Read the vertical token off the one root rather than re-declaring the scale.
-  const padY = sectionPad(props.paddingY).split(" ")[0]!;
+  const OUTER_GUTTER: Space = 8;
+  const CARD_INSET: Space = 16;
 
   const body = (
     <>
@@ -114,7 +112,7 @@ export function ListingGridBlock({
               minWidth: `${minW}px`,
               boxSizing: "border-box",
               padding: pad(0, 8),
-              paddingBottom: "16px",
+              paddingBottom: space(16),
               textAlign: "left",
             }}
           >
@@ -255,7 +253,10 @@ export function ListingGridBlock({
     <Section
       style={{
         backgroundColor: sectionBg,
-        padding: surface === "none" ? sectionPad(props.paddingY) : `${padY} ${OUTER_GUTTER}px`,
+        padding:
+          surface === "none"
+            ? sectionPad(props.paddingY)
+            : sectionPadX(props.paddingY, OUTER_GUTTER),
         // The hairline rule exists to separate one section from the next. A card or an
         // outline already does that job — shipping both reads as a mistake.
         ...(surface === "none" ? { borderBottom: `1px solid ${BORDER}` } : {}),
@@ -273,7 +274,7 @@ export function ListingGridBlock({
             ...(surface === "card" ? { backgroundColor: bg } : {}),
             ...(surface === "outline" ? { border: `1px solid ${BORDER}` } : {}),
             borderRadius: "10px",
-            padding: `${CARD_INSET}px`,
+            padding: space(CARD_INSET),
           }}
         >
           {body}

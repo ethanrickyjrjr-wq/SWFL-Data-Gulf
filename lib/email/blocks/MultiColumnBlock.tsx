@@ -72,7 +72,7 @@ export function MultiColumnBlock({
                   objectFit: "cover",
                   display: "block",
                   borderRadius: "6px",
-                  marginBottom: "8px",
+                  marginBottom: space(8),
                 }}
               />
             ) : null}

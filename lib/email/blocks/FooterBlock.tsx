@@ -127,7 +127,7 @@ export function FooterBlock({
               href={soc.url}
               style={{
                 color: linkInk,
-                marginRight: "12px",
+                marginRight: space(12),
                 textDecoration: "none",
                 display: "inline-flex",
                 alignItems: "center",

@@ -23,6 +23,7 @@
 import { describe, expect, test } from "bun:test";
 import {
   buildComingSoon,
+  COMING_SOON_FIELDS,
   countyForZip,
   leaksStreet,
   redactStreetLine,
@@ -191,9 +192,11 @@ describe("it wears the campaign chrome — same look as every other lifecycle em
     expect(cells.map((c) => c.label)).toEqual(["Beds", "Baths", "Sq Ft", "$/Sq Ft", "Type"]);
     expect(cells.map((c) => c.label)).not.toContain("Lot");
     expect(cells.map((c) => c.value)).toEqual(["3", "3.5", "2,847", "$209", "Single Family"]);
-    // The cell that wins the argument is the emphasised one; type is context.
-    expect(cells[3].emphasis).toBe("primary");
-    expect(cells[4].emphasis).toBe("muted");
+    // ONE WEIGHT ACROSS THE ROW — playbook §2.1.6 defects 4 and 5, verbatim: "Never mark
+    // ONE cell in a row `muted`. All carry the same weight or the row reads broken." This
+    // strip carried BOTH a `primary` and a `muted` cell, so five cells rendered at three
+    // type sizes in one horizontal line. The test asserted the defect; now it forbids it.
+    for (const cell of cells) expect(cell.emphasis).toBeUndefined();
   });
 
   test("the brand is sticky — the agent's colours ride through untouched", async () => {
@@ -271,7 +274,10 @@ describe("scarcity — real counts, disclosed criterion, never a zero for a gap"
 
   const S: Scarcity = {
     county: "Lee",
-    countyHomes: 13122,
+    grain: "county",
+    scopeLabel: "Lee County",
+    rung: 1,
+    activeHomes: 13122,
     inBand: 1062,
     comparable: 328,
     bandLo: 536000,
@@ -282,10 +288,12 @@ describe("scarcity — real counts, disclosed criterion, never a zero for a gap"
   };
 
   test("the cells restate the real counts, state what is being counted, and emphasise the punchline", () => {
+    // Same one-weight rule as the spec strip above: the funnel's narrowing is carried by
+    // the NUMBERS and by the chart beneath them, never by type size shouting on top.
     expect(scarcityStats(S)).toEqual([
-      { value: "13,122", label: "Active homes · Lee County", emphasis: "muted" },
+      { value: "13,122", label: "Active homes · Lee County" },
       { value: "1,062", label: "Priced $536K–$655K" },
-      { value: "328", label: "…that also match beds + size", emphasis: "primary" },
+      { value: "328", label: "…that also match beds + size" },
     ]);
   });
 
@@ -305,6 +313,80 @@ describe("scarcity — real counts, disclosed criterion, never a zero for a gap"
     const values = (spec.rows as [string, number][]).map(([, v]) => v);
     expect(values[0]).toBeGreaterThan(values[1]);
     expect(values[1]).toBeGreaterThan(values[2]);
+  });
+
+  // ── THE LADDER'S ONE LOAD-BEARING RULE ────────────────────────────────────
+  //
+  // Rung 3 counts the WHOLE MARKET, not a county. That changes the disclosed criterion,
+  // and this email's entire claim to authority is that a reader who re-runs the stated
+  // criterion reproduces the printed number — it is why `scarcityBand` rounds BEFORE it
+  // queries. So if the scope widens and even ONE consumer still prints "Lee County", the
+  // email ships a checkable-looking claim that fails its own check. That is strictly worse
+  // than an open slot, because it invites the check.
+  //
+  // Three consumers, and this asserts all three: the stat cells, the chart title, and the
+  // sources note. Deliberately written against the SHAPE (no county name may appear
+  // anywhere the scope did not authorise) rather than against three exact strings, so a
+  // fourth consumer added later has to satisfy it too.
+  const MARKET: Scarcity = {
+    ...S,
+    county: null,
+    grain: "market",
+    scopeLabel: "Southwest Florida",
+    rung: 3,
+  };
+
+  test("at market grain NO consumer prints a county name — the scope is disclosed wherever the count is", () => {
+    const labels = scarcityStats(MARKET).map((c) => c.label);
+    expect(labels[0]).toBe("Active homes · Southwest Florida");
+    for (const label of labels) {
+      expect(label).not.toMatch(/\bLee\b|\bCollier\b|\bCounty\b/);
+    }
+
+    const title = String(scarcityChartSpec(MARKET).title);
+    expect(title).toBe("Homes like this one in Southwest Florida");
+    expect(title).not.toMatch(/\bLee\b|\bCollier\b|\bCounty\b/);
+  });
+
+  test("at county grain every consumer names THAT county — the same one, from the same field", () => {
+    expect(scarcityStats(S)[0].label).toContain(S.scopeLabel);
+    expect(String(scarcityChartSpec(S).title)).toContain(S.scopeLabel);
+  });
+
+  test("the band numbers are FIELDS — change the field, the query and the printed band move together", () => {
+    const wider = {
+      ...COMING_SOON_FIELDS,
+      band: { ...COMING_SOON_FIELDS.band, priceLo: 0.8, priceHi: 1.2 },
+    };
+    // The default ±10% of 595,000, rounded to the thousand `usdShort` renders.
+    expect(scarcityBand(595000, 2847)).toEqual({
+      bandLo: 536000,
+      bandHi: 655000,
+      sqftFloor: 2250,
+    });
+    // ±20% off the same subject — proof the literals are read, not baked in.
+    expect(scarcityBand(595000, 2847, wider)).toEqual({
+      bandLo: 476000,
+      bandHi: 714000,
+      sqftFloor: 2250,
+    });
+  });
+
+  test("the ribbon, the button and the subject are fields, not strings buried in the build", () => {
+    // A recipe you cannot READ is a recipe you cannot reproduce. These four are what a
+    // reader of the rendered email sees first, and each used to be a literal 400 lines deep.
+    expect(COMING_SOON_FIELDS.ribbon).toBe("Coming Soon");
+    expect(COMING_SOON_FIELDS.ctaLabel).toBe("Join the Private Preview List");
+    expect(COMING_SOON_FIELDS.subject.withCity("Fort Myers")).toBe(
+      "Coming soon in Fort Myers — before it hits the market",
+    );
+    expect(COMING_SOON_FIELDS.photoAlt("Fort Myers", COMING_SOON_FIELDS)).toBe(
+      "Coming soon — a home in Fort Myers",
+    );
+    // No city → the region, never a blank and never a street.
+    expect(COMING_SOON_FIELDS.photoAlt("", COMING_SOON_FIELDS)).toBe(
+      "Coming soon — a home in Southwest Florida",
+    );
   });
 });
 

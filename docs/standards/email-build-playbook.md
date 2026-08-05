@@ -238,15 +238,41 @@ ruling.** Tracked in `checks`.
 
 Source: cieden spacing best practices + Material Design 3, crawled 07/01/2026.
 
-- **Every spacing value — padding, margin, gaps — is a multiple of 8.** 8, 16, 24, 32, 40, 48, 56.
-- **4px is allowed for line-height and fine typography ONLY.** Nowhere else.
+**THE TOKENS ARE 4 / 8 / 12 / 16 / 24 / 32 / 48 / 64 / 96, plus 0.** Code root: the `Space` union
+in `lib/email/blocks/scale.ts`, lifted from `app/_design/05-color-and-type.md` §"Spacing".
+
+**CORRECTED 08/05/2026 — this section used to say "every spacing value is a multiple of 8" and
+"4px is allowed for line-height ONLY". Both were wrong against the code root**, which has always
+carried 4 and 12 as real spacing steps (and 40 and 56, which that line listed, are NOT tokens at
+all). Conflict order at the top of this file: the code root wins. Measured in the rendered Coming
+Soon email 08/05/2026 — six distinct paddings, `4px 8px` · `24px 24px` · `0` · `12px 16px` ·
+`8px 24px` · `16px 32px`, every one a token.
+
+**✅ THE GRID IS NOW GUARDED, BOTH WAYS INTO A BLOCK.** The `Space` union made an off-grid number a
+COMPILE error wherever a `Space` was expected — and that was never the whole picture, in the exact
+way the fontFamily gap was not. `padding` on a CSSProperties object is `string | number`, so a block
+could bypass the union entirely by typing the value itself, and **fourteen places did** (OpenSlot ×8,
+ListingGridBlock ×2, Footer/MultiColumn/Sources ×1 each, plus one built by string arithmetic).
+**Every one of those values was already on the grid** — so this found no bad pixel; it found that
+nothing would have stopped one. `padding: "13px"` compiled fine in any of them. All fourteen now
+route through `pad()`/`space()`/`sectionPadX()`, and four new tests in
+`lib/email/blocks/type-conformance.test.ts` fail a raw string, a bare number, and a template literal.
+`margin: "0 auto"` (centering, a keyword) and `margin: 0` (absence of space) are the two legal raws.
+
 - **INTERNAL ≤ EXTERNAL** — the space around an element should be equal to or greater than the space
   within it. This is the rule that makes a reader see two blocks as ONE group or as TWO.
-  **⚠ NOT IMPLEMENTED, and not implementable as written today:** the compiler emits no
-  between-block margin, so the external term is zero on every email and all rhythm comes from each
-  block's own internal padding. Every pair of sections therefore reads identically spaced whether or
-  not they belong together. **DO NOT "fix" this by inventing a margin.** It is a grammar decision
-  that belongs to the per-email walk in PART 2.
+  **⚠ STILL NOT IMPLEMENTED, AND STILL NOT IMPLEMENTABLE — one of its two terms does not exist.**
+  `compile-grid.ts` lines 130–131 say it outright: the 8px `GRID_MARGIN` gutter "is not reproduced
+  in the email." The compiler emits no between-block margin at all, so the EXTERNAL term is
+  structurally **zero** on every email ever sent from here, and all rhythm comes from each block's
+  own `sectionPad`. A guard comparing internal against a constant zero would fail every block in the
+  codebase and tell you nothing about grouping.
+  **A nesting-walk over the rendered HTML with an allowlist of today's failures was designed and
+  REJECTED 08/05/2026:** it would have reported a decorative pass while the actual question — do two
+  adjacent blocks read as one group — stayed unexpressible, and shipping that as "implemented" is
+  RULE 0.8's partial-reported-as-whole. **DO NOT "fix" this by inventing a margin in a block.**
+  Fixing it for real means giving the COMPILER a between-block spacing term, which changes the
+  layout grammar of all 17 emails at once — a per-email walk in PART 2, not a lint.
 - Bigger sections get MORE external space, never less.
 - Consistent horizontal spacing between repeating cards, even when their heights differ — that is
   what makes a card row read as a rhythm instead of a pile.
@@ -515,7 +541,7 @@ gaps.**
 | Tag | Email | Section |
 |---|---|---|
 | `new-listing` | New Listing | 2.1 |
-| `coming-soon` | Coming Soon | 2.2 — TO BE WALKED |
+| `coming-soon` | Coming Soon | 2.2 |
 | `market-comps` | Market Comps | 2.3 — TO BE WALKED |
 | `under-contract` | Under Contract | 2.4 — TO BE WALKED |
 | `just-sold` | Just Sold | 2.5 — TO BE WALKED |
@@ -886,8 +912,334 @@ a thinner email, which is the worst failure shape we have.
 ---
 
 
-## 2.2 – 2.17 — TO BE WALKED
+## 2.2 COMING SOON — tag `coming-soon`
+
+**Walked and BUILT 08/05/2026.** Every count below came from a query run that day. Re-count before
+quoting any of it.
+
+**Spine:** ONE house — the SAME `resolveSubject` inspection point New Listing uses. Nothing about
+the resolution differs; what differs is that almost none of it is allowed to be printed.
+
+**Grammar:** the listing grammar, one substitution. Ribbon "Coming Soon", photo, hero with **the
+CITY over the price** where New Listing puts the address, spec strip **minus the lot**, the scarcity
+strip, the funnel chart, the authored paragraph, agent card + one button.
+
+**Chart: YES — and it is the one lifecycle email that has one.** A three-tier inventory funnel (all
+active county homes → in this price band → beds and size match too). New Listing's chart policy is
+NONE because that email is about a house; this email is about **a number** — how few homes like this
+one exist — so the chart carries the argument.
+
+**Subject line:** deterministic, written from the city, never model-authored, so it cannot smuggle
+the street: `Coming soon in Fort Myers — before it hits the market`.
+
+**Code:** `lib/deliverable/recipes/coming-soon.ts` → `buildLifecycleEmail`. Registry key
+`coming-soon` (`lib/deliverable/recipes.ts`).
+
+---
+
+### 2.2.0 REPRODUCE IT — one command, and it asserts its own contract
+
+```
+bun --env-file=.env.local scripts/email/render-coming-soon.mts "<address>"
+```
+
+**Default house: `16209 Asheboro Ct, Fort Myers, FL 33908`.** Writes
+`~/Downloads/coming-soon-email.html`, prints a per-cell provenance table, and **exits non-zero if
+the address leaks.**
+
+**This script does three things `render-new-listing.mts` does not**, and each is a lesson from 2.1:
+
+1. **The brand is READ OFF A REAL ACCOUNT, not hardcoded.** New Listing's script hand-writes a
+   `DEMO_BRAND` literal — that proves the renderer and proves nothing about whether an agent who
+   fills in their brand actually gets it. This one loads `user_brand_profiles`, so a field that does
+   not travel shows up as an open slot instead of hiding behind a literal. **That is how §2.2.4's
+   headline defect was found.**
+2. **It greps the RENDERED HTML** for the street line, the house number, the street core and the
+   ZIP. Reading the code and trusting its comments is not verification.
+3. **It counts what the project path drops** (§2.2.4).
+
+**Acceptance run, 08/05/2026 — 14 of 17 cells sourced, 23KB:** $219,900 · 2 bd · 2 ba · 1,481 sq ft
+· **$148/sq ft** · Single Family · Lee County · **14,643 active homes → 834 in band → 518 matching**
+· funnel chart rendered · the agent's 1,779-character description as narrator fuel · one authored
+paragraph · full agent card and CAN-SPAM footer off the account. Suppression: **4 of 4 probes
+ABSENT.** Tests: **180 pass, 0 fail**; `bunx tsc --noEmit` clean.
+
+---
+
+### 2.2.1 THE SUPPLIERS — same four as §2.1, plus ONE new data shape
+
+**Do not re-derive §2.1.1.** The free spine, our listing clock, SteadyAPI and the 26 paid Apify rows
+are the same suppliers with the same fill rates, and this email reads them through the same
+`resolveSubject`. What is NEW is the scarcity funnel.
+
+**THE FUNNEL — `data_lake.listing_state`, live, FREE, aggregated at source.** Three `count: "exact",
+head: true` queries (zero rows hauled). **The land filter is load-bearing:** `beds` and `sqft` both
+non-null is what separates a home from a vacant lot, filtered BY DATA and never by guessing at
+`property_type`. Lee's active book is **20,560 rows of which 6,567 are bare land** — counting those
+as "homes" would inflate the denominator and make the scarcity claim a lie. **Lee's real active-home
+count, 08/05/2026: 14,643.**
+
+**THE FUNNEL'S USEFULNESS VARIES ENORMOUSLY BY SUBJECT — measured, not assumed.** Same county, same
+query, eight candidate houses:
+
+- `13630 Brynwood Ln` — 14,643 → **321 → 20**
+- `5121 Muddy Ln` — 14,643 → **799 → 87**
+- `16209 Asheboro Ct` — 14,643 → **834 → 518**
+- `12078 Terraverde Ct` — 14,643 → **2,310 → 2,235**
+- `12554 Kellysands Way` (**New Listing's own default house**) — 14,643 → **2,747 → 2,575**
+
+**A funnel that goes 2,747 → 2,575 is not scarcity, it is filler.** The subject a teaser is built on
+is a real editorial choice, and the house that makes the best New Listing makes a limp Coming Soon.
+
+---
+
+### 2.2.2 THE INGREDIENT LADDER — EVERY CELL, ITS SOURCE, AND WHAT FILLS IT WHEN THAT MISSES
+
+**Rewritten in full 08/05/2026.** This section used to open *"Only the deltas are listed. Every other
+cell rides §2.1.2 unchanged"* — which was true and useless. Operator: *"You have written down the
+entire recipe? We know where everything has come from and has fallbacks!?"* A reader of a
+delta-list has to hold two documents open and diff them in their head to answer "where did this
+number come from", which is the scavenger hunt this whole file exists to end. **Every cell is
+written out here.** Where a rung is genuinely identical to §2.1.2 it says so AND states the rung.
+
+**Stop at the first hit. An exhausted ladder is an OPEN SLOT — never a zero, never a guess.**
+**Nothing below issues a new paid vendor call: rungs on the free spine, our own lake, and the 26
+already-purchased Apify rows all spend zero.**
+
+#### The identity block — the agent
+
+**Name · title · brokerage · phone · email · headshot · business postal address · socials** — the
+user's brand profile, no data source involved. The postal address is CAN-SPAM, not decoration. →
+OPEN. **⚠ 17 of these fields do not survive `applyUserBrandToProject` today — see §2.2.4 defect 1.
+That is a live defect, not a ladder rung.**
+
+#### The house — identical rungs to §2.1.2, restated so you do not have to go look
+
+| Cell | Rung 1 | Rung 2 | Rung 3 | Exhausted |
+|---|---|---|---|---|
+| **Asking price** | free spine (100%) | — | — | never misses |
+| **City · state** | free spine (100%) | — | — | `Southwest Florida` (a field: `regionLabel`) |
+| **Property type** | free spine (100%) | — | — | cell keeps its slot |
+| **Hero photo** | free spine `photo_url` (98.5%), mirrored to our storage | paid row `primary_photo` | — | OPEN dropzone, alt = the CITY |
+| **Beds** | free spine (73.7%) | paid row | — | OPEN |
+| **Square feet** | free spine (70.6%) | paid row | — | OPEN |
+| **Baths** | free spine (15.3%) | our own Lee county records, exact-address, one-parcel-only | SteadyAPI `/nearby-home-values` on the subject's coordinates | paid row `baths_total` → OPEN |
+| **$/sq ft** | computed, price ÷ sq ft | — | — | OPEN if either operand will not parse. **No footnote** — both operands sit two cells away |
+| **The description** (narrator fuel only, never printed here) | the agent's own paste | paid row `description` | — | OPEN → **the paragraph is dropped** |
+
+#### The cells this email REFUSES that §2.1 prints — and why
+
+**STREET ADDRESS — SUPPRESSED, structurally, at four layers.** Never read into a rendered field →
+stripped from the model's fact sheet (`teaserFacts`) → redacted out of the model's output
+(`redactStreetLine`) → **a paragraph that still carries it is DROPPED entirely** (`leaksStreet`).
+The photo's alt text is the CITY, because alt text is read aloud and is what Outlook shows with
+images off. There is no rung 2. **A suppression is not a gap and never falls through to a fallback.**
+
+**LOT SIZE — DELIBERATELY OMITTED from the grid, and the omission now extends to the writer.** A lot
+size plus a city narrows a parcel search further than a teaser should. §2.2.4 defect 4.
+
+**DAYS ON MARKET — WITHHELD FROM THE NARRATOR.** This email announces a home that is *not yet for
+sale*, so the number is nonsense in frame even when it is true. §2.2.4 defect 4.
+
+**THE LISTING LINK — there is none.** §2.1's button points at the real listing page; a Coming Soon
+has no listing page to point at, and pointing at a search result would locate the house. The one
+button goes to the agent's own site (`brandWebsiteUrl`) → the citation root.
+
+#### The scarcity funnel — THE LADDER, four rungs (built 08/05/2026)
+
+Until 08/05 these three counts — the numbers this entire email is *about* — had **exactly one rung**:
+a ZIP the frozen Census fixture happened to know, or nothing. Every other ingredient in the campaign
+had a real chain and the headline number had a coin flip. It now walks:
+
+1. **County from the committed Census crosswalk** (`countyForZip`). Free, offline, no I/O.
+2. **County from `data_lake.listing_state` itself**, by the subject's `zip_code`. Free, daily-fresh,
+   one row read. Covers exactly what rung 1 cannot: a ZIP that is new, re-mapped, or was never in
+   the fixture.
+3. **THE WHOLE COVERED MARKET — no county filter at all.** Every count still real, every other
+   filter byte-identical; only the SCOPE widens.
+4. **OPEN SLOTS** — three cells whose labels are the instruction. Never a zero, never a refusal.
+
+**THE RULE THAT MAKES RUNG 3 SHIPPABLE RATHER THAN A LIE.** Widening the scope CHANGES THE DISCLOSED
+CRITERION, and this email's whole claim to authority is that a reader who re-runs the stated
+criterion reproduces the printed number. So the scope is not a private detail of the query: it rides
+in **`Scarcity.scopeLabel`**, and **all three consumers print that one field** — the stat cells, the
+chart title, and the sources note. A market-wide count under a "Lee County" label would be a
+checkable claim that fails its own check, which is worse than an open slot because it invites the
+check. Pinned by a test that asserts no consumer emits a county name the scope did not authorise.
+A wider scope also makes a WEAKER scarcity claim; that is correct — a weaker true claim beats a
+stronger unverifiable one.
+
+**THE LAND FILTER IS LOAD-BEARING at every rung.** `beds` and `sqft` both non-null is what separates
+a home from a vacant lot — filtered BY DATA, never by guessing at `property_type`.
+
+**THE BAND IS ROUNDED BEFORE IT IS QUERIED, never after.** The email prints "$198K–$242K" and the
+count behind it is computed over exactly that.
+
+#### Geography that DOES ship, all written by CODE
+
+The **community** by name in the prose (a buyer cannot knock on a subdivision, and "coming soon in
+Bay Colony" is the entire appeal) — `data_lake.community_profiles`, 81 rows against 20,400
+subdivisions, so **a miss is the normal case** → OPEN. The **city** in the hero. The **scope label**
+in the scarcity block. The model writes none of them.
+
+#### The narrator — the ONLY thing the AI writes
+
+Runs **ONLY on lane-2 material.** No vendor sells us MLS remarks (all 18 SteadyAPI endpoints,
+07/13/2026), so without a pasted description there is nothing honest to say that the grid does not
+already say, and the paragraph is an **OPEN SLOT, not an improvisation.** Every paragraph is run
+through the claim gate and dropped if it asserts anything it was not given.
+
+#### EVERYTHING ELSE IS A FIELD — `COMING_SOON_FIELDS`, one frozen object
+
+The seven values that used to be literals buried across 600 lines: the **ribbon word**, the **button
+label**, the **subject template** (both the with-city and no-city forms), the **photo alt template**,
+the **region label**, the **band constants** (±10%, the 80% size floor, the 1,000 and 50 rounding
+units) and the **citation root**. Consumers take it as a DEFAULTED PARAMETER.
+
+**They are FIELDS, not SETTINGS — frozen, never read from env or a DB.** `registry-seam.test.ts`
+runs every one of the 17 builders twice over two independent contexts and asserts the same document
+comes back; a value that varies by environment breaks that silently. The `SITE` constant already
+carries that scar — reading `NEXT_PUBLIC_SITE_URL` shipped `http://localhost:3000` as the citation
+URL of every locally-built doc. **`SITE` is NOT the same concept as `shared.ts`'s env-derived
+`BASE_URL`:** that one is where a READER is sent, this one is who the DATA is attributed to. Do not
+consolidate them.
+
+---
+
+### 2.2.3 WHERE A COMING SOON CAN BE STARTED — inherited, not re-derived
+
+Every door in §2.1.3 routes on the TAG, so `coming-soon` reaches the same builder through the same
+surfaces. The one that is specifically this email: the lifecycle campaign puts Coming Soon FIRST in
+the arc, before New Listing.
+
+---
+
+### 2.2.4 FIVE DEFECTS FOUND BY RENDERING AND LOOKING — none catchable by a test
+
+**§2.1.6's lesson held on the very next email.** 180 tests passed and the provenance table was green
+while all five of these were on screen.
+
+1. **THE BRAND CANNOT REACH A PROJECT — 17 of the account's filled fields are dropped on the floor.**
+   `applyUserBrandToProject` (`lib/project/apply-brand.ts`) copies **14** columns onto a new
+   project's branding. Filled on the account and copied: **zero** of `company_name`, all **nine**
+   socials, `unsubscribe_url`, `font_display`, `font_body`, `text_color`, `background_color`,
+   `surface_color`, `surface_dark_color`, `button_destinations`. **This is the actual root of
+   08/05's "the bottom was bare."** §2.1.6 item 6 concluded "the fix for a bare bottom is filling
+   the brand" — correct, and incomplete: **the brand cannot fill, because most of it never
+   travels.** An agent who saves their fonts and socials at account level gets emails with neither,
+   plus **no CAN-SPAM unsubscribe URL.** Hardcoding a fixture in the render script is exactly what
+   hid this for a whole session. Open as `brand_fields_lost_account_to_project`.
+2. **5 of 8 social platforms are dead ends on every lifecycle email.** `footerPropKey` in
+   `lib/email/social/platforms.ts` is TYPED to three values — `instagramUrl | facebookUrl |
+   linkedinUrl` — and `FooterBlock` renders `PLATFORMS.filter(m => m.footerPropKey)`. X, TikTok,
+   YouTube, Pinterest and Threads have brand tokens and a Branding-panel field, and render
+   **nowhere**. Verified live: 8 of 8 saved, 3 of 8 rendered. Open as
+   `footer_renders_only_three_socials`.
+3. **The funnel chart shipped TEAL inside a TERRACOTTA email.** The recipe tints the PNG with
+   `buildLifecycleEmail(currentDoc, …).globalStyle.accentColor` — the accent of the canvas it was
+   HANDED. Hand it an unbranded `defaultDoc()` and the picture is a different brand from the email
+   around it, which is the precise drift the recipe's own comment says it asks the chrome in order
+   to avoid. Guard: the acceptance script seeds a branded canvas, mirroring the live app.
+4. **The narrator defeated a suppression the grid was enforcing, and contradicted the email's
+   premise — in one paragraph.** `teaserFacts` stripped address/city/state/ZIP and nothing else, so
+   the model still held the lot size and the days-on-market and wrote: *"…on the market for just
+   over two weeks… The 0.2-acre lot is owner-land — not leased."* Both facts were TRUE, so the
+   claim gate passed them. **Suppressing a cell from the GRID while feeding it to the WRITER
+   suppresses nothing**, and DOM on a not-yet-listed home is nonsense. Guard: `lotSize` and
+   `daysOnMarket` are now `undefined` on the teaser fact sheet.
+5. **The agent card printed an unbounded bio.** The field's placeholder has always read "Short
+   bio…" and nothing enforced it; a seven-sentence agent history rendered as a ~25-line grey column
+   with the CTA stranded in white space. **A rule that lives only in a placeholder is not a rule**
+   — the same lesson as §2.1.6's `fontFamily` gap. Guard: `cardBio()` in `AgentCardBlock.tsx`, cut
+   at 260 chars on a **sentence** boundary, no ellipsis, with the live inspector exempt so the
+   agent still edits the whole thing.
+
+**A SIXTH, in the acceptance script itself:** its provenance table reported the authored paragraph
+as an OPEN SLOT on a run where the paragraph had shipped and was visible on screen — it guessed a
+prop name. **A provenance table that under-reports is worse than none.** It now walks every string
+in the built blocks.
+
+**AND THE FRAMING BUG BEHIND §2.1's `new_listing_narrative_silently_dropped`.** First run under the
+account brand printed `[narrative] DROPPED — the narrator made 2 claim(s) it was not given:
+motive("serious"), sequence("before the home is listed")`. The cause was not the guard: the framing
+**instructed** the model to write "two or three sentences OF ANTICIPATION and CLOSE ON THE FACT THAT
+IT WILL BE SHOWN PRIVATELY FIRST" — a motive claim and a sequence claim, ordered and then discarded.
+**We were telling it to invent, then punishing it for obeying.** The private-preview promise belongs
+where it is true by construction: the ribbon and the CTA button, both written by code. Prose never
+had to carry it.
+
+---
+
+### 2.2.5 KNOWN GAPS — named, not hidden
+
+- **NOTHING IN THE PIPE CAN TELL AN AERIAL FROM A FRONT ELEVATION, and the operator rule is locked
+  (the listing's own photo or nothing, never a drone view).** Looked at directly: **two of the three
+  strongest-funnel candidates have drone shots as their primary photo** — the vendor feed is full of
+  them. The default house is the compromise: a real elevation and a weaker funnel (834 → 518)
+  instead of Muddy Ln's 799 → 87 with an aerial hero. **The best scarcity claim and the usable photo
+  are not the same house, and today only a human eye knows.** Open as `hero_photo_aerial_detection`.
+- **No floor below which the funnel refuses to render.** 20 comparable homes is a strong claim;
+  2,575 is filler; **1 would be an embarrassment** and would still print. The chart drops only when
+  the counts fail to load, never when they are degenerate. **STILL OPEN after the 08/05 ladder pass**
+  — the ladder fixed where the counts COME FROM; it did not add a floor for when they are useless.
+  Deliberately left, so the ladder shipped as one change. Open as
+  `coming_soon_degenerate_funnel_floor`.
+- **The community is an OPEN SLOT on the default house** — 81 community profiles against 20,400
+  subdivisions means a miss is the NORMAL case (§2.1.2). The one geography this email most wants to
+  name is the one it most often cannot.
+- **The narrator is silent without a pasted description.** By design, but it means the email's only
+  prose depends on a lane the agent has to fill.
+- **The demo agent is FICTIONAL and disclosed:** Marisa Delgado / Coral Ledge Realty, an
+  `.example` domain (RFC 2606 reserved) and a 555-01xx phone (reserved fictional block), with a
+  generated portrait of a person who does not exist. **Gemini image generation was NOT the source —
+  that API returned "prepayment credits are depleted" 08/05/2026.**
+
+---
+
+### 2.2.6 THE FINISH PASS — the font, the sizes, and three answers that were "no"
+
+**Everything below was found by RENDERING AND LOOKING, or by the operator asking a question the
+code could not answer. None of it was catchable by the 180 tests that were green throughout.**
+
+**1. THE EMAIL SHIPPED IN A SERIF THE PLAYBOOK HAD DELETED HOURS EARLIER.** Restoring the account's
+brand profile from a backup restored `PLAYFAIR_SERIF`/`LATO` — the exact pair §2.1.6 defect 1
+removed, with a guard that denies Playfair BY NAME. **The guard was on the BLOCK, and the value came
+from the ACCOUNT ROW.** Fixed to `MONTSERRAT_SANS`/`LATO_SANS`; verified in the rendered bytes —
+**zero occurrences** of Playfair, Georgia or Times; 4 Montserrat, 32 Lato.
+
+**2. TWO STAT ROWS MIXED THREE TYPE SIZES IN ONE HORIZONTAL LINE.** Operator: *"Why the fuck would
+you have so many different sizes."* Both the spec strip and the scarcity strip marked one cell
+`primary` and another `muted` — **playbook defects 4 and 5, verbatim**, re-committed on the very
+next email. Now one weight across each row. **Rendered count: five distinct sizes in the whole
+email — 44 · 28 · 16 · 14 · 12 — every one on the seven-role scale.** The two tests that asserted
+the defect now forbid it.
+
+*A note on what the research actually says about this, because the instinct was to cut steps:*
+Material Design 3's guidance is the OPPOSITE — "avoid small differences between sizes." The
+documented failure is near-identical sizes with no contrast, not too many steps. The fix was never
+fewer rungs on the ladder; it was not mixing three weights inside one row.
+
+**3. "EVERYTHING IS A FIELD?" — it was not.** Seven literals lifted into `COMING_SOON_FIELDS`. §2.2.2.
+
+**4. "WE KNOW WHERE EVERYTHING HAS COME FROM AND HAS FALLBACKS?" — the headline numbers did not.**
+The scarcity ladder, four rungs. §2.2.2.
+
+**5. "SPACING HAS NO GUARD" — half true, and the half that was fixable is fixed.** The 8px grid had
+a fourteen-place bypass and now has three tests; **internal ≤ external remains ⚠ open because one of
+its two terms does not exist in a compiled email.** Full accounting in §1.4 — including that §1.4
+itself was WRONG about the tokens (4 and 12 are real steps; 40 and 56 never were).
+
+**AND THE MECHANISM, because a promise is not a mechanism (RULE 0.8).** Operator, after three
+already-written rules were skipped in one build: *"Fix why you don't fucking listen."*
+`.claude/hooks/check-playbook-read-before-email-edit.mjs` now BLOCKS an Edit/Write to
+`lib/email/**` or `lib/deliverable/**` code unless the session transcript shows a real `Read` of
+this file. Grep does not count. Docs and tests pass through, every error path fails open, and
+`ALLOW_EMAIL_EDIT_WITHOUT_PLAYBOOK=1` is the escape hatch. Six cases tested.
+
+---
+
+## 2.3 – 2.17 — TO BE WALKED
 
 Each section gets written when that email is walked with the operator. **Do not pre-fill one from
-memory or by copying 2.1** — the whole point of the walk is that each email's ingredients and
+memory or by copying 2.1 or 2.2** — the whole point of the walk is that each email's ingredients and
 sources get decided deliberately, one at a time.
