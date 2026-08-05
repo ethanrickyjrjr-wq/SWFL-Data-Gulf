@@ -19,6 +19,14 @@ usage lives HERE (root CLAUDE.md keeps the rules, this file keeps the mechanics)
 - `node scripts/safe-push.mjs` — the ONLY push path. Landmines: it rebases and can carry
   foreign parallel-session commits — check `git log origin/main..HEAD` first and ASK before bundling;
   it also flattens `--no-ff` merges.
+- `node scripts/doc-reachability.mjs [--orphans] [--json] [--check]` — **run this before ever saying
+  a doc/linking/indexing job is "done."** Answers "is every path noticeable to Claude when it needs
+  it" as a number over all tracked text files: reachable by FULL PATH (strong), by NAME ONLY (weak,
+  a basename match leads nowhere), or ORPHANED (zero mentions — invisible, nothing will ever lead an
+  agent there). Measured 08/05/2026: **729 / 495 / 229 of 1,453 docs — 15.8% invisible**, including 4
+  of our own `.claude/agents` definitions. `--check` is a RATCHET against the committed baseline and
+  exits 1 on regression; the baseline may only ever be LOWERED. Burndown: check
+  `doc_orphans_229_invisible`. Born from calling an 8-file pass "done" against a 1,453-file repo.
 - `node scripts/new-build.mjs <slug> "<label>"` — registers a build: spec stub in
   `docs/superpowers/specs/` + the `<slug>_live_verify` check in one step. slug = short kebab-case id
   (lowercase letters, numbers, hyphens); label = human-readable name.
