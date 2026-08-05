@@ -1,3 +1,15 @@
+## 2026-08-05 (Sonnet 5) — Loops.so deep-crawled for the New Listing paid-fallback vendor question.
+
+Operator asked for a deep crawl4ai pass on `loops.so/docs`. BFS deep crawl, 241 distinct pages.
+Filed the distillation at `_RESEARCH/email-and-social/2026-08-05-loops-so-vendor-deep-crawl.md`
+(indexed same pass). **The finding that matters:** Loops wants to own the email template — both
+its REST API and its SMTP relay require a `transactionalId` pre-registered in Loops' own editor;
+even the SMTP path sends a JSON payload resolved server-side against that template, not raw
+rendered HTML. That's a mismatch with our own-the-rendering model (`lib/email/build-doc.ts`).
+Fits better as a deliverability-hardening fallback (dedicated IPs, DKIM/DMARC, pre-send Guardian
+check) than a drop-in relay for what we already render. Priced on contact count, not send volume;
+free tier 4k sends/mo. Paid-tier dollar amounts are JS-slider-only — not captured, still open.
+
 ## 2026-08-05 (Opus 5) — NEW LISTING: the ingredient census, counted live — and the spec ladder is now in code.
 
 Operator: *"take notes so we can replicate... try for least expensive inhouse with paid fall back...

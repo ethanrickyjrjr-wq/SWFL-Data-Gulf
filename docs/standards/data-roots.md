@@ -373,7 +373,9 @@ counts across different windows is the throttling tell; a count under the cap is
 month.
 
 **R8 · SPEND CEILINGS, ALL THREE.** Per-month 200 results (~$2) · hard per-build stop 700 (~$7) ·
-and the account's own `maxMonthlyUsageUsd` ($29, cycle the 28th to the 27th). Check
+and the account's own `maxMonthlyUsageUsd` (**$50** — corrected 08/05/2026 from the $29 recorded
+here; read live off the limits endpoint below, which also showed $35.99 used, cycle 07/28→08/27,
+i.e. NOT capped out). Check
 `https://api.apify.com/v2/users/me/limits` before blaming the code for zero results.
 
 **R9 · READ EVERY FIELD YOU PAID FOR.** The record carries 69 fields. Photo, listing URL, style AND

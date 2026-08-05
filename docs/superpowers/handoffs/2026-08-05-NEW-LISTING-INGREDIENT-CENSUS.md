@@ -12,6 +12,43 @@ of a doc instead of counted.
 
 ---
 
+## ⚠ CORRECTION — 08/05/2026, same day. THIS CENSUS READ ONE VENDOR AS ONE ENDPOINT.
+
+**Operator: *"did this idiot use steadyapi or apify at all?"*** Both are used, heavily — but this
+document measured SteadyAPI's ceiling by reading `information_schema` on `data_lake.listing_state`.
+**That is a TABLE's columns, not the VENDOR's ceiling.** Re-counted off a fresh crawl of
+`docs.steadyapi.com` (08/05/2026): SteadyAPI documents **18 real-estate endpoints, all v1** — there
+is no `v2/real-estate/*` URL anywhere in the docs — **and we call 8 of them.**
+
+**Never called (10):** `/autocomplete` · `/nearby-rentals` · `/property-urgency` ·
+`/property-estimates` · `/environment-risk` · `/geo-details` · `/similar-homes` ·
+`/gallery-similar-homes` · `/new-construction` · `/mortgage-rate`.
+
+**Two claims below are contradicted by the vendor's own documented response bodies**, and both were
+routed here to an Apify account that hit a 403 hard cap on 08/04:
+
+- **§8 "Flood zone has no verified source"** — `/environment-risk` documents `flood`, `wind`,
+  `heat`, `wildfire`, `severity`, `overall_risk_level`.
+- **§3 AVM (`estimated_value`) = the paid Apify row only, 19 rows** — `/property-estimates` and
+  `/nearby-home-values` both document `estimated_value`.
+
+**§8's baths rung stands, with a name added.** The SteadyAPI bath lane is already built —
+`/nearby-home-values`, cluster-based, `ingest/pipelines/listing_lifecycle/backfill_baths.py`. **The
+15.3% IS that lane's output**, not an unexploited lane.
+
+**HONEST LIMIT: none of the 10 has been called.** These are documented example responses, not live
+probes, and every candidate returns NEARBY/SIMILAR homes — subject-level resolution is UNPROVEN.
+
+**And the answer was already written down.** `ingest/cadence_registry.yaml:2078` `source_ceiling`,
+dated **07/16/2026**, already named most of these unused siblings and cited the research behind it.
+This census never opened the catalog. RULE 0.4 / RULE 0.55.
+
+Open checks: **`steadyapi_unused_endpoints_probe`** (probe the 10) and
+**`steadyapi_search_raw_landing_dead`** (`steadyapi_search_raw` and `steadyapi_rentals_search_raw`
+are both **0 rows** — the 08/02 raw-landing decree never landed a row for `/search` or `/rentals`).
+
+---
+
 ## 0. THE ONE-PARAGRAPH ANSWER
 
 **The free lane covers the shape of the house; it does not cover the SELL.** Price, type, photo and

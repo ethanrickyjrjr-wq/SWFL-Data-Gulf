@@ -1,3 +1,94 @@
+## 2026-08-05 (Opus 5) — OPERATOR: "Where do we get baths from? We already know apify can get us everything. Why is that information not here? Where do we get fucking baths from???????"
+
+OPEN — **he is right and the census is worse than I said an hour ago. There are FIVE bath lanes in
+the code and the census named TWO.** All five read live this session, from the code.
+
+  1. The vendor row — always `null`. SteadyAPI `/search` sets `bathrooms: null` unconditionally.
+  2. **The lake, by property_id** — `listing_state.baths`, `fetchLakeBathsByPropertyId`, filled by
+     the nightly lat/lon-clustered `enrich_baths_batched` + `backfill_baths.py`. THIS IS THE 15.3%.
+  3. **Lee county records** — LeePA layer-23 through `lee_comp_sales_v`, exact street match,
+     Lee only. `resolve-subject.ts fetchLeePaBathsFromLake`.
+  4. **SteadyAPI `/nearby-home-values` ON THE SUBJECT ITSELF** — `resolve-subject.ts withBaths`.
+     A property is always the nearest property to its OWN coordinates, so the subject comes back as
+     its own first row. **Verified live 07/13/2026: 326 Shore Dr → baths 3.5.** ONE call, works
+     REGION-WIDE. **The census said Collier has no free bath fallback. THIS IS IT, and it is
+     already wired.**
+  5. **Apify by ADDRESS — `fetchApifyBathsForHomes`, $0.01, one call, one record, the right
+     house.** Verified live: "5121 Muddy Ln, Fort Myers" → full_baths 3 / half_baths 1.
+
+  **THE OMISSION HE IS ANGRY ABOUT.** The census's ladder mentions only the 26 CACHED Apify rows
+  sitting on disk. It never says the LIVE by-address Apify call exists, is wired, is proven, and
+  costs a penny per house. Lane 5 is wired into `listings-digest.ts` ONLY — the single-listing path
+  (`resolveSubject`, what a New Listing email uses) does NOT call it. That is a real gap, and it is
+  a different gap from the one the census described.
+
+  **AND THE BLOCKER WAS FALSE.** Census §9: "any plan whose first step is a NEW paid call is
+  BLOCKED — `apify_monthly_cap_state_unknown`." **Read live today off
+  `api.apify.com/v2/users/me/limits`: HTTP 200, cap $50, used $35.99, cycle 07/28→08/27. FOURTEEN
+  DOLLARS OF HEADROOM — about 1,400 address lookups at a penny each.** Not blocked. The census
+  declared a blocker it never checked, on an endpoint our own catalog (data-roots R8) tells us to
+  check first.
+
+  **Catalog correction made same session:** R8 recorded the cap as $29. It is $50.
+
+  **OPERATOR, same breath: "Don't run another fucking apify agent. Look at the fucking notes and
+  agents we already fucking ran."** Noted, and NO ACTOR WAS RUN — the only Apify call this session
+  was a read of `users/me/limits` (account metadata, free, bills nothing, starts no actor). The
+  standing rule: the answer comes from the notes and the runs already paid for, never a fresh
+  actor. Everything above was read from code, the catalog, and the 26 rows already on disk.
+
+## 2026-08-05 (Opus 5) — OPERATOR: "did this idiot use steadyapi or apify at all?"
+
+OPEN — **he was right to ask. Both vendors are all over the census, and the census still read
+SteadyAPI as ONE endpoint.** Answered with a live probe + a fresh crawl of `docs.steadyapi.com`
+(08/05/2026), not memory.
+
+  **RE-COUNTED off the crawl, not estimated: SteadyAPI documents 18 real-estate endpoints and we
+  call 8.** Called: `/search`, `/nearby-home-values`, `/property-tax-history`,
+  `/neighborhood-amenities`, `/rentals-search`, `/price-histogram`, `/housing-market-details`,
+  `/neighborhood-market-trends`. **Never called (10):** `/autocomplete`, `/nearby-rentals`,
+  `/property-urgency`, `/property-estimates`, `/environment-risk`, `/geo-details`,
+  `/similar-homes`, `/gallery-similar-homes`, `/new-construction`, `/mortgage-rate`.
+
+  **TWO CELLS THE CENSUS CALLED DEAD HAVE A DOCUMENTED FIELD ON A SUBSCRIPTION WE ALREADY PAY
+  FOR** — while the census routed both to an Apify account that hit a 403 hard cap on 08/04:
+  · **flood** — the census wrote "flood zone has no verified source." `/environment-risk` documents
+    flood + wind + heat + wildfire + severity + overall_risk_level.
+  · **AVM** — the census said `estimated_value` is Apify-only (19 rows). `/property-estimates` and
+    `/nearby-home-values` both document it.
+  Plus `/property-urgency` (views/saves — a live demand signal we hold nothing like anywhere).
+
+  **CORRECTION TO MY OWN FIRST READ — baths is NOT one of them.** The SteadyAPI bath lane is
+  ALREADY BUILT: `/nearby-home-values`, cluster-based, `ingest/pipelines/listing_lifecycle/
+  backfill_baths.py` + `extract_api.py:403`. **The 15.3% IS that lane's output**, not an
+  unexploited lane. The unused endpoints that also carry `baths_full`/`baths_half`
+  (`/similar-homes`, `/gallery-similar-homes`, `/geo-details`, `/new-construction`) are the same
+  nearby/similar shape we already work — more of the same, probably not a breakthrough.
+
+  **THE WORST PART: THE ANSWER WAS ALREADY IN THE CATALOG AND NOBODY OPENED IT.**
+  `ingest/cadence_registry.yaml:2078` `source_ceiling`, dated **07/16/2026**, already names
+  `/environment-risk`, `/property-estimates`, `/property-urgency`, `/similar-homes`,
+  `/new-construction`, `/mortgage-rate` as unused siblings, and cites the research
+  (`2026-07-16-realtor-full-scope-audit.md`). This is a RULE 0.4 / RULE 0.55 failure, not a
+  discovery — the census skipped the catalog. **That ceiling line is itself now stale**: it still
+  lists `/neighborhood-market-trends`, `/neighborhood-amenities`, `/nearby-home-values` as unused
+  and all three have since been wired.
+
+  **HONEST LIMIT — nothing above has been called.** These are the vendor's own documented example
+  responses, crawled today. Every unused candidate returns NEARBY/SIMILAR homes, so whether any
+  resolves the SUBJECT property is UNTESTED. That probe is the next step, not a claim.
+
+  **Confirmed, and the version question is settled:** there is **no `v2/real-estate/*` URL anywhere
+  in the docs** — the nav's "GET /v2/search" label points at the v1 anchor and the v1 URL. So
+  `/search` really does carry only beds/sqft/lot_sqft — no baths, no year_built, no remarks. Year
+  built and the marketing description remain Apify-only.
+
+  **SEPARATE LIVE DEFECT FOUND WHILE PROBING:** the 08/02 "ALL paid surfaces raw-land" decree never
+  landed a row. `data_lake.steadyapi_search_raw` = **0** and `steadyapi_rentals_search_raw` = **0**
+  (real `count(*)`, 08/05/2026), while `cadence_registry.yaml` documents both as written every
+  sweep. Only `steadyapi_property_history_raw` landed (17,875 rows, and it stopped — every row
+  fetched inside one window, 08/02 18:58 → 08/03 01:11 UTC, nothing since).
+
 ## 2026-08-05 (Opus 5) — OPERATOR: "let's code the New Listing email / take notes so we can replicate / least expensive inhouse with paid fall back / crawl4ai what a new listing email entails and make ours better / every build doesn't need all the data, but we need to have it available so find out what, where, how and how much we can get."
 
 OPEN — the census landed, the CODE did not. `docs/superpowers/handoffs/2026-08-05-NEW-LISTING-INGREDIENT-CENSUS.md`
