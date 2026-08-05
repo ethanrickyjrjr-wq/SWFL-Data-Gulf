@@ -1,3 +1,37 @@
+## 2026-08-04 (Opus 5) — HANDOFF: what we ACTUALLY have for emails, counted live. And we have been paying for HOA fee and never reading it.
+
+Operator, after two days: *"HOW DO WE STILL NOT FUCKING KNOW ALL WE FUCKING HAVE AND WHERE IT
+FUCKING COMES FROM AND WE ABOUT TO BUILD EMAILS!!!!!! Make sure the next session knows the real
+facts about all data we fucking need for emails... Especially apify."*
+
+Wrote `docs/superpowers/handoffs/2026-08-04-EMAIL-DATA-TRUTH-HANDOFF.md`. **Every number in it was
+counted live via direct query on 08/04/2026. None was quoted from a doc** — because three times in
+this one session I quoted a stale summary and shipped a wrong fact, and he caught all three.
+
+**THE FINDING THAT MATTERS MOST — we are buying data and not reading it.** Per-field fill counted
+live across all 26 rows of `apify_property_records` (20 fully resolved): **`hoa_fee` populated on
+19 of 20.** I had told him hours earlier we had "no verified source for HOA fee." We have been
+paying for it and storing it. Also unread: **`alt_photos` galleries of 9–55 photos** (our free lane
+carries ONE photo) and **full MLS descriptions of 368–2,983 characters**. `raw` — the complete
+response body — is present on 26 of 26, so nothing paid for was discarded; it is just untyped and
+unconsumed. Checks: `apify_hoa_fee_gallery_description_unread`, `apify_raw_body_census_owed`.
+
+**THE CORRECTION HE FORCED.** Live `listing_dom`: **34,904 total · 3,079 floored (8.8%) · 31,825
+real (91.2%)** — Lee 91.5%, Collier 89.7%. I had shipped "half the book is a floor / Collier 14%"
+into a committed playbook, quoted from a 07/20/2026 trap note in `data-roots.md` that the backfill
+has since obsoleted. Both docs corrected; the old text kept as marked history.
+
+**FOUR MORE COUNTS OUR DOCS UNDERSTATE:** `steadyapi_neighborhoods` 429 (doc: 245) ·
+`steadyapi_neighborhood_amenities` 29,118 (doc: 16,304) · `steadyapi_property_neighborhood` 21,008
+(doc: 19,805) · `community_profiles` 81 (doc: 69).
+
+**NEW DEFECT FOUND WHILE COUNTING:** `lee_comp_sales_v` returns **HTTP 500** through PostgREST —
+it is the Lee sold-comp root AND the free baths fallback. Check `lee_comp_sales_v_postgrest_500`.
+
+**NOT DONE, and each has a check:** the crawl4ai research on New Listing email anatomy (2 URLs
+attempted, both dead), the email build itself, and verifying that every paid call writes its full
+body back before returning (`one_off_paid_pulls_saved_correctly`).
+
 ## 2026-08-04 (Opus 5) — "ALL EMAILS": the registry-wide seam guard is LIVE, and it found two lanes nobody had named
 
 Operator: *"ALL EMAILS!!!!!!!!!!!!"* — scope correction after I reported back on the showcase
