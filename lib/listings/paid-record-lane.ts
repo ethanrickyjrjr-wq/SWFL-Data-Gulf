@@ -24,9 +24,19 @@
 //
 // ── WHAT IT MAY AND MAY NOT FILL ─────────────────────────────────────────────
 // ONLY facts that do not move: the description, the photo gallery, the bath count,
-// the HOA fee. It may NEVER fill list price, status, or days on market from a cached
-// row — a price from three weeks ago presented as today's ask is a wrong number, not
-// a stale one. Those stay with the live record.
+// the HOA fee, and (added 08/05/2026) beds, square feet, lot size and year built.
+// It may NEVER fill list price, status, or days on market from a cached row — a price
+// from three weeks ago presented as today's ask is a wrong number, not a stale one.
+// Those stay with the live record.
+//
+// ── WHY THE SPEC RUNGS WERE ADDED — the census, counted live 08/05/2026 ───────
+// Over `data_lake.listing_state` (35,202 rows), the FREE spine carries:
+//   beds  25,934 (73.7%) · sqft 24,861 (70.6%) · lot_acres 27,448 (78.0%)
+//   baths  5,372 (15.3%)  <- Lee 13.1%, Collier 17.5%
+// and, read from `information_schema` rather than remembered, it has NO year_built
+// column, NO description and NO photo gallery AT ALL. Those three exist nowhere but
+// this already-purchased row. Filling them here is the least-expensive lane there is:
+// the rows are on disk, bought, and this issues no vendor call.
 import { fetchCachedRecords, type StoredApifyRecord } from "./apify-record-store";
 import { listingAddressKey } from "./apify-baths";
 import type { ListingFacts } from "@/lib/email/listing-scrape";
@@ -83,12 +93,38 @@ export function mergeGallery(
   return out;
 }
 
+/**
+ * A positive integer spec, or null. **NEVER A ZERO** (playbook §1.14): a `0` bed
+ * count or a `0` year built is the vendor's unfilled field, not a fact about the
+ * house, and rendering it is a fabricated figure. An absent spec is an OPEN SLOT.
+ */
+function positiveInt(v: unknown): number | null {
+  return typeof v === "number" && Number.isFinite(v) && v > 0 ? Math.round(v) : null;
+}
+
+/**
+ * THE UNIT SEAM. The free lane writes lot size as ACRES (`resolve-subject.ts`:
+ * `${acres} ac`); the paid row stores `lot_sqft`. Pouring one into the other
+ * unconverted prints a number 43,560x too large — "8712 ac" on a fifth-acre lot.
+ * 43,560 sq ft = 1 acre, exactly.
+ */
+export function acresFromLotSqft(lotSqft: unknown): string | null {
+  const n = positiveInt(lotSqft);
+  if (n == null) return null;
+  const acres = Math.round((n / 43_560) * 100) / 100;
+  return acres > 0 ? `${acres} ac` : null;
+}
+
 /** What the paid row actually contributed, for the source line and for tests. */
 export interface PaidLaneFill {
   description: boolean;
   photosAdded: number;
   baths: boolean;
   hoaFee: boolean;
+  beds: boolean;
+  sqft: boolean;
+  lotSize: boolean;
+  yearBuilt: boolean;
 }
 
 export const NO_FILL: PaidLaneFill = {
@@ -96,6 +132,10 @@ export const NO_FILL: PaidLaneFill = {
   photosAdded: 0,
   baths: false,
   hoaFee: false,
+  beds: false,
+  sqft: false,
+  lotSize: false,
+  yearBuilt: false,
 };
 
 export interface PaidLaneDeps {
@@ -162,6 +202,45 @@ export async function fillFromPaidRecord(
     if (hoa != null) {
       facts.hoaFee = hoa;
       fill.hoaFee = true;
+    }
+  }
+
+  // ── THE REST OF THE SPEC LADDER (census 08/05/2026) ────────────────────────
+  // Counted live over data_lake.listing_state (35,202 rows): the free spine carries
+  // beds on 73.7%, sqft on 70.6%, lot_acres on 78.0% — and it has NO year_built
+  // column at all (read from information_schema, not remembered). The paid row
+  // carries year_built on 20 of its 26 rows, so for that cell this is the ONLY
+  // source we hold anywhere. Same contract as everything above: gap-fill only,
+  // never a zero, and never a moving fact.
+  if (!facts.beds) {
+    const beds = positiveInt(row.beds);
+    if (beds != null) {
+      facts.beds = String(beds);
+      fill.beds = true;
+    }
+  }
+
+  if (!facts.sqft) {
+    const sqft = positiveInt(row.sqft);
+    if (sqft != null) {
+      facts.sqft = String(sqft);
+      fill.sqft = true;
+    }
+  }
+
+  if (!facts.lotSize) {
+    const lot = acresFromLotSqft(row.lot_sqft);
+    if (lot) {
+      facts.lotSize = lot;
+      fill.lotSize = true;
+    }
+  }
+
+  if (!facts.yearBuilt) {
+    const yb = positiveInt(row.year_built);
+    if (yb != null) {
+      facts.yearBuilt = String(yb);
+      fill.yearBuilt = true;
     }
   }
 

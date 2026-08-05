@@ -1,3 +1,88 @@
+## 2026-08-05 (Opus 5) — NEW LISTING: the ingredient census, counted live — and the spec ladder is now in code.
+
+Operator: *"take notes so we can replicate... try for least expensive inhouse with paid fall back...
+find out what, where, how and how much we can get."* Four lanes searched before answering.
+
+**The number that changes the build: BATHS ARE 15.3% ON THE FREE SPINE** — 5,372 of 35,202
+`data_lake.listing_state` rows (Lee 13.1%, Collier 17.5%, Hendry 37.1%). And read from
+`information_schema` rather than remembered: **the free spine has NO `year_built` column, NO
+description and NO photo gallery at all.** Those three exist nowhere but the paid row we already
+bought (26 rows — description 20, gallery 20, year_built 20).
+
+Rest of the free spine: price and property type 100% · photo 98.5% · lat/lon 98.2% · listed_date
+88.9% · lot_acres 78.0% · beds 73.7% · sqft 70.6% · subdivision and brokerage 0.8%. Type mix:
+**9,046 of 35,202 rows are LAND** — beds/baths absent there is correct, not missing. DOM root:
+34,904 rows, 31,825 real (91.2%). Subdivision root: 20,400 subdivisions, 2,425 at community grain.
+In-gate `community_profiles` 81 rows. `user_listings` is **0 rows**.
+
+**CODED (TDD, 16/0):** `paid-record-lane.ts` now fills **beds, sqft, lot size and year built** on top
+of description/gallery/baths/HOA. Gap-fill only, never a zero, never a moving fact, **zero vendor
+spend** — it reads rows already on disk. The unit seam is explicit: free lane writes ACRES, paid row
+stores `lot_sqft`, `acresFromLotSqft` converts at exactly 43,560 — unconverted it printed "8712 ac"
+on a fifth-acre lot, and there is now a test named after that failure.
+
+**1032/0 across `lib/listings` + `lib/deliverable/recipes` · `bunx next build` compiled clean.**
+
+**crawl4ai (4 sources):** the NAR "just-listed email" page is **404 — do not cite it**. The one
+concrete improvement the live sources support that we do NOT do: put the recipient's name or their
+neighborhood in the subject line; ours is deterministic and address-only.
+
+**NOT done, named:** the Lee county-records baths rung is still uncoded and its coverage is
+**unmeasurable** — `lee_comp_sales_v` times out on a bounded 5,000-row sample (opened
+`lee_comp_sales_v_bounded_sample_times_out`). Nothing reads `flag_new_listing`, `subdivision` or
+`brokerage` off the free spine. Any NEW paid call stays blocked behind
+`apify_monthly_cap_state_unknown`.
+
+Full census with every query: `docs/superpowers/handoffs/2026-08-05-NEW-LISTING-INGREDIENT-CENSUS.md`.
+
+## 2026-08-05 (Opus 5) — AUDITED three outside research docs against the email system: we already comply with most of it, and the one real gap was prescribed by our own research on 08/03 and never built.
+
+Operator handed two generic UX/typography docs and one AI-written "SWFL Master Synthesis" about our
+own system: *"make sure we are abiding by these... we don't need everything changed, we need the
+information that is important in the right places."*
+
+**No code shipped this pass, deliberately.** The only change worth making (dark mode) cannot be
+half-shipped, and there was no zero-risk quick win — `lang="en"`, `role="presentation"` and alt text
+were already correct, so I did not manufacture one.
+
+**`docs/standards/email-build-playbook.md` — four additions, all verified against code first:**
+- **§1.5b DARK MODE, ⚠ NOT BUILT.** `_RESEARCH/email-and-social/2026-08-03-strongest-real-estate-
+  email-concepts-structure.md` Part D already prescribes both `color-scheme` metas + a
+  `prefers-color-scheme` block + `[data-ogsc]`/`[data-ogsb]` (attribute repeated on every
+  comma-separated selector). `lib/email/blocks/email-head.ts` emits webfont links and nothing else.
+  **Documented WHY the metas cannot ship alone:** `#ffffff` appears **34 times** in the render path
+  including both canvas containers (`compile-grid.ts`, `blocks/EmailDocRenderer.tsx`) and `CARD_BG`
+  (`blocks/styles.ts`). Declaring `color-scheme: light dark` opts us INTO client dark handling
+  including Apple Mail, which today does nothing. Ship the near-white swap with it or ship neither.
+- **§1.5c WHAT ALREADY PASSES** — `lang="en"` on both render paths, `role="presentation"` on layout
+  tables, alt on every `<img>` (asserted by `blocks/ListBlock.test.tsx`; `chartImageBlock` takes
+  `alt` as REQUIRED). Recorded so the next accessibility pass doesn't re-derive it. Explicitly warns
+  NOT to flip the `?? ""` alt defaults — empty alt on a decorative image is correct a11y.
+- **§1.16 MEASURE — new rule, we had it nowhere.** 45–75 chars/line. Counted off `grid-schema.ts`:
+  span 12 ≈ 69 (in band) · span 8 ≈ 44 (at the floor) · span 6 ≈ 31 · span 4 ≈ 19. **We comply, but
+  as a property of `push()` hardcoding `span: GRID_COLS`, not a guard.** Sole narrow case is Weekly
+  Sphere's `pairCell` heroes at span 6 — fine for a strapline, wrong if it ever grows a paragraph.
+- **PART 1.5 — READING AN OUTSIDE DOCUMENT ABOUT OUR OWN SYSTEM.** Third occurrence of this failure.
+  The "Master Synthesis" asserts **"27+ real estate layouts"** (registry: **19 keys, 17 emails +
+  2 social**), names "Veza Digital automation" and "WAIO" as standards (vendor marketing), and
+  carries uncited percentages — 228% DVI, 10–25% lift, and a UGC lift stated as **43% in one doc and
+  82% in the other for the same claim.** None entered the playbook. §1.14 pointed at prose.
+- **§1.3 — flagged body 16px vs 18px as an OPEN OPERATOR DECISION**, not a change. At 18px the
+  measure is ~61 chars, still in band, so line length does not block it; the cost is every frozen
+  golden. `TYPE.body` untouched.
+
+**SELF-CORRECTION mid-audit:** I first read `push(block, 4)` in three recipes as a span-4 prose block
+and was about to report them as violations. The second arg is row HEIGHT; `span` is hardcoded to
+`GRID_COLS`. Verified the signature before writing anything down.
+
+**4 checks opened (RULE 2.4):** `email_darkmode_head_markup`, `email_semantic_headings`,
+`email_body_16_vs_18px`, `email_measure_lint`. The headings one is real — **zero `<h1>`–`<h3>` in all
+18 block components** — but it moves every frozen golden and needs a brainstorm, not a patch.
+
+**Released a ghost repolith claim** on the playbook from session `e0ad7af9` (the compacted
+predecessor). Timeline-checked first: working tree clean for that file, its work committed AND
+pushed (`HEAD == origin/main == ad617945`).
+
 ## 2026-08-05 (Opus 5) — BUILD TRACKING LANDED: every email now records which recipe built it, and all 17 are proven reproducible.
 
 Operator: *"MAKE SURE WE ARE TRACKING WHERE AND HOW EVERYTHING GETS BUILT SO WE CAN REPRODUCE

@@ -123,6 +123,72 @@ describe("the paid row we already own", () => {
     expect(called).toBe(false); // never guesses a key
   });
 
+  // ── THE REST OF THE LADDER (census 08/05/2026) ─────────────────────────────
+  // Live counts over data_lake.listing_state, 35,202 rows, and the column ceiling
+  // read from information_schema. The free spine carries beds 73.7%, sqft 70.6%,
+  // lot_acres 78.0% — and NO year_built column AT ALL. The paid row carries
+  // year_built on 20 of 26. Without these rungs those cells are permanently open.
+
+  test("FAILURE: year built is on NO free source, so an unfilled paid rung leaves it empty forever", async () => {
+    // `information_schema`, 08/05/2026: data_lake.listing_state has no year_built
+    // column. This rung is not a nicety — it is the ONLY source we hold.
+    const f = facts();
+    const fill = await fillFromPaidRecord(f, { readCache: reader(row({ year_built: 2019 })) });
+    expect(f.yearBuilt).toBe("2019");
+    expect(fill.yearBuilt).toBe(true);
+  });
+
+  test("FAILURE: a lot size in SQUARE FEET renders as '8712 ac' — the free lane's unit is ACRES", async () => {
+    // resolve-subject.ts writes `${acres} ac`; the paid row stores lot_sqft. Filling
+    // one into the other without converting prints a 43,560x wrong number.
+    const f = facts();
+    await fillFromPaidRecord(f, { readCache: reader(row({ lot_sqft: 8712 })) });
+    expect(f.lotSize).toBe("0.2 ac");
+  });
+
+  test("FAILURE: beds and square feet stay open on the ~27% of listings the free spine misses", async () => {
+    const f = facts();
+    const fill = await fillFromPaidRecord(f, { readCache: reader(row({ beds: 3, sqft: 2847 })) });
+    expect(f.beds).toBe("3");
+    expect(f.sqft).toBe("2847");
+    expect(fill.beds).toBe(true);
+    expect(fill.sqft).toBe(true);
+  });
+
+  test("FAILURE: a new rung overwrites what the LIVE record already stated", async () => {
+    const f = facts({ beds: "4", sqft: "3100", lotSize: "0.5 ac", yearBuilt: "2001" });
+    const fill = await fillFromPaidRecord(f, {
+      readCache: reader(row({ beds: 3, sqft: 2847, lot_sqft: 8712, year_built: 2019 })),
+    });
+    expect(f.beds).toBe("4");
+    expect(f.sqft).toBe("3100");
+    expect(f.lotSize).toBe("0.5 ac");
+    expect(f.yearBuilt).toBe("2001");
+    expect([fill.beds, fill.sqft, fill.lotSize, fill.yearBuilt]).toEqual([
+      false,
+      false,
+      false,
+      false,
+    ]);
+  });
+
+  test("FAILURE: a 0 or absent spec renders as a real number — NEVER a zero (playbook 1.14)", async () => {
+    const f = facts();
+    const fill = await fillFromPaidRecord(f, {
+      readCache: reader(row({ beds: 0, sqft: 0, lot_sqft: 0, year_built: 0 })),
+    });
+    expect(f.beds).toBeUndefined();
+    expect(f.sqft).toBeUndefined();
+    expect(f.lotSize).toBeUndefined();
+    expect(f.yearBuilt).toBeUndefined();
+    expect([fill.beds, fill.sqft, fill.lotSize, fill.yearBuilt]).toEqual([
+      false,
+      false,
+      false,
+      false,
+    ]);
+  });
+
   test("NEVER fills a moving fact — price, status and days on market stay with the live record", async () => {
     const f = facts();
     await fillFromPaidRecord(f, {

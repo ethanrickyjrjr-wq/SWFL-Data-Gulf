@@ -1,3 +1,74 @@
+## 2026-08-05 (Opus 5) — OPERATOR: "let's code the New Listing email / take notes so we can replicate / least expensive inhouse with paid fall back / crawl4ai what a new listing email entails and make ours better / every build doesn't need all the data, but we need to have it available so find out what, where, how and how much we can get."
+
+OPEN — the census landed, the CODE did not. `docs/superpowers/handoffs/2026-08-05-NEW-LISTING-INGREDIENT-CENSUS.md`
+carries every ingredient with a LIVE-counted number, the free-vs-paid ladder, and the crawl4ai findings.
+
+  **The number that changes the build: BATHS ARE 15.3% ON THE FREE SPINE** (5,372 of 35,202 —
+  Lee 13.1%, Collier 17.5%). And **year built, the marketing description and the photo GALLERY are
+  not on the free spine AT ALL** — read from `information_schema`, not remembered. They exist only
+  on the paid row we already bought (26 rows, description 20, gallery 20, year_built 20).
+
+  **STILL OWED:** the ladder is written in the census doc and is STILL NOT IN CODE — that is the
+  "one recipe per fact" the operator has now asked for eight times. Next session codes it into
+  `lib/deliverable/recipes/new-listing.ts` + `resolve-subject.ts`, TDD, one test per rung.
+
+  **Blocked:** any NEW paid call — `apify_monthly_cap_state_unknown` (403 hard limit 08/04, never
+  re-checked). Reading the 26 rows we already own is unaffected and costs nothing.
+
+  **Could not measure:** `lee_comp_sales_v` (the FREE Lee baths fallback) TIMED OUT on a bounded
+  5k sample. Its coverage is unmeasured and no coverage claim may be made for it.
+
+  **crawl4ai:** the NAR "just-listed email" page is 404 — do not cite it. The one concrete
+  improvement the outside research supports that we do NOT do: put the recipient's name or their
+  neighborhood in the subject line. Ours is deterministic and address-only.
+
+## 2026-08-05 (Opus 5) — OPERATOR handed three outside research docs (two Google/UX generic, one "SWFL Master Synthesis" written about us): "make sure we are abiding by these and our email designs are adhering... we don't need everything changed, we need the information that is important in the right places to adjust as we see fit. anything that makes us immediately better, we can implement."
+
+OPEN — audited all three against the code. **Verdict: we already comply with most of it, the
+"Master Synthesis" doc is the THIRD outside document to describe a system we don't have, and the
+one real unbuilt gap was already prescribed by OUR OWN research on 08/03 and never built.**
+
+  **The Master Synthesis doc is a hypothesis, not authority — same failure as the 08/04 mind map.**
+  It asserts "27+ real estate layouts" (registry holds 19 keys: 17 emails + 2 social), names "Veza
+  Digital automation" and "WAIO" as if they were standards (vendor marketing), and carries uncited
+  percentages — 228% DVI, 10-25% conversion lift, and a UGC lift given as **43% in one doc and 82%
+  in the other for the same claim, neither sourced.** None of those numbers entered the playbook.
+  This is now written up as PART 1.5 of `email-build-playbook.md` so the fourth one gets caught.
+
+  **DARK MODE is the one real gap, and we already knew.** `_RESEARCH/.../2026-08-03-strongest-real-
+  estate-email-concepts-structure.md` Part D prescribes both color-scheme metas + a
+  prefers-color-scheme block + `[data-ogsc]`/`[data-ogsb]`. `lib/email/blocks/email-head.ts` emits
+  webfont links and nothing else. **It cannot be half-shipped:** `#ffffff` appears 34 times in the
+  render path including both canvas containers and CARD_BG, and declaring `color-scheme: light dark`
+  opts us INTO client dark handling — including Apple Mail, which today does nothing. Metas without
+  the near-white swap make it worse. Check `email_darkmode_head_markup`.
+
+  **What I checked and we PASS, recorded so nobody re-audits it:** contrast 4.5:1/3:1, `lang="en"`
+  on both render paths, `role="presentation"` on layout tables, alt text on every `<img>` (red test,
+  and `chartImageBlock` takes `alt` as REQUIRED), one CTA, 5-part skeleton, 8px grid, 600px canvas,
+  Outlook/Gmail constraints, copy length + questions + reading level, plain language.
+
+  **NEW RULE that came out of this — measure (line length), Playbook §1.16.** 45-75 chars is the
+  one thing every typography source agrees on and we had it written down NOWHERE. Counted our grid:
+  span 12 = ~69 chars (in band) · span 8 = ~44 (at the floor) · span 6 = ~31 · span 4 = ~19.
+  **We are compliant, and it is an accident of `push()` hardcoding `span: GRID_COLS`, not a guard**
+  — no lint enforces it. Check `email_measure_lint`.
+
+  **I CORRECTED MYSELF MID-AUDIT:** I first read `push(block, 4)` as a span-4 prose block and was
+  about to report three recipes as violations. The second arg is row HEIGHT; span is hardcoded to 12.
+  Verified before writing. The only genuinely narrow prose is Weekly Sphere's paired hero cards
+  (span 6, ~31 chars) — correct only because it holds a short strapline, not a paragraph.
+
+  **DECISION FOR THE OPERATOR — body 16px vs 18px.** The research argues 18px for a senior
+  demographic, and SWFL is literally a retiree market, so this is the one outside recommendation
+  aimed at our actual reader. At 18px the measure is ~61 chars, still in band — line length does NOT
+  block it. Cost is every frozen golden. `TYPE.body` unchanged pending his ruling.
+  Check `email_body_16_vs_18px`.
+
+  **Also open:** zero `<h1>`-`<h3>` in all 18 block components — every headline is a styled div, so
+  screen readers get no outline. Real, but it moves every golden; needs a brainstorm, not a patch.
+  Check `email_semantic_headings`.
+
 ## 2026-08-05 (Opus 5) — OPERATOR handed the NotebookLM mind map: "use it how you see fit to keep everything together, edit it and make sure we can all understand. Then we start fresh with a New Listing email. We code it exactly to the rules and figure out where data comes from for the recipe, then we make it reproducible by builder and move on to the next one."
 
 OPEN — the working order for the whole email wave, and it is now PART 0 of
