@@ -59,8 +59,22 @@ const ROOT = join(dirname(fileURLToPath(import.meta.url)), "..");
 const SCANNABLE = /\.(md|ts|tsx|mts|mjs|js|jsx|py|ya?ml|json|sql|toml|sh|txt)$/i;
 
 /** A generated or vendored blob can "mention" a path by coincidence and would report
- *  an orphan as reachable. Reachability must come from something a human wrote. */
-const NOT_EVIDENCE = /^(node_modules|\.next|dist|build|coverage|graphify-out)\//;
+ *  an orphan as reachable. Reachability must come from something a human wrote.
+ *
+ *  *** THE GENERATED INDEX IS THE MOST DANGEROUS ENTRY HERE, AND IT WAS CAUGHT RED. ***
+ *  `.claude/skills/what-do-we-have/INDEX.md` lists EVERY doc's full path. The moment it
+ *  was committed it became a universal referrer: every document was "mentioned by another
+ *  file," and the census reported **1,536 by path · 0 by name only · 0 orphaned** — it
+ *  would have announced the problem was completely solved seconds after it was created.
+ *  A map may never be evidence for the territory it maps. Caught 08/05/2026 by the
+ *  red-first test on the pre-push gate; it is the 4th lying instrument found that day and
+ *  the only one that was self-inflicted. */
+const NOT_EVIDENCE =
+  /^(node_modules|\.next|dist|build|coverage|graphify-out)\/|^\.claude\/skills\/what-do-we-have\/INDEX\.md$/;
+
+/** The generated map is not a DOCUMENT about this project — it is the catalogue. Counting
+ *  it inflates the corpus and makes the totals drift every regeneration. */
+const NOT_A_DOC = new Set([".claude/skills/what-do-we-have/INDEX.md"]);
 
 /** Guard against a single huge generated file dominating the scan. */
 const MAX_BYTES = 4 * 1024 * 1024;
@@ -107,7 +121,7 @@ function trackedFiles() {
 
 export function census() {
   const tracked = trackedFiles();
-  const docs = tracked.filter((f) => f.toLowerCase().endsWith(".md"));
+  const docs = tracked.filter((f) => f.toLowerCase().endsWith(".md") && !NOT_A_DOC.has(f));
   const scannable = tracked.filter((f) => SCANNABLE.test(f) && !NOT_EVIDENCE.test(f));
 
   const corpus = new Map();

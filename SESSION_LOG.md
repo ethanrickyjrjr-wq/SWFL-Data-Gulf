@@ -1,3 +1,39 @@
+## 2026-08-05 (Opus 5) — The doc index got a pre-push gate, and the red-first test caught the index poisoning its own measurement within minutes of being committed.
+
+**GATE 1.5 — DOC INDEX DRIFT** (`.claude/hooks/check-prepush-gate.mjs`). Deliberately the SAME shape
+as Gate 1 (lockfile): a generated artifact must ship in the same push as the thing that changes it.
+Any `.md` in the push → regenerate the corpus map → if it drifted, BLOCK with the regeneration
+already done. Escape `ALLOW_STALE_DOC_INDEX=1`. A generator that exits non-zero blocks too, rather
+than passing quietly (the empty-tolerance shape, `new-project-playbook` §4.12).
+
+**Why a gate and not a habit:** a STALE map is worse than no map. It is the only place `_RESEARCH/`
+is searchable, so a stale copy answers *"we don't have that"* with confidence about documents we own
+— the precise bug the map was built to kill.
+
+**THE RED-FIRST TEST EARNED ITS KEEP IMMEDIATELY — it found a self-inflicted lying instrument, the
+4th of the day.** Added a temp doc, regenerated, and the census reported
+**`1,536 by path · 0 by name only · 0 orphaned`.** Zero orphans. The problem apparently solved
+minutes after being discovered.
+
+**Cause: `INDEX.md` lists EVERY doc's full path, so the moment it was committed it became a
+UNIVERSAL REFERRER.** Every document was now "mentioned by another file" — by the map itself. **A map
+may never be evidence for the territory it maps.** Had the test not run, the next session would have
+read "0 orphaned" and closed the check. Fixed in `doc-reachability.mjs`: the generated index is
+excluded from the evidence corpus (`NOT_EVIDENCE`) and from the doc population (`NOT_A_DOC`).
+
+**Determinism proven, because a gate that cries wolf gets disabled:** two consecutive generations
+hash identically (`e55f2f095397dc02`), so an unchanged tree can never trip the gate.
+
+**TRUE NUMBERS AFTER THE FIX — 1,535 docs · 789 by path (51.4%) · 524 weak (34.1%) · 222 ORPHANED
+(14.5%).** Unchanged orphan count from before the contamination, which is the point: the fix restored
+the measurement rather than improving it.
+
+**STATUS — 3 OF 4.** ✅ measured honestly · ✅ seeable (skill + generated map, proven by finding P7
+and P9) · ✅ cannot go stale (Gate 1.5, red-first tested, deterministic) · ❌ **NOT DELETED — 222
+orphans remain and P7's 8 dead objects are still live.** `P7-corpse-deletelist.md` IS the delete
+list, finished 07/18/2026, every item `[NEEDS-SIGN-OFF]`, with pre-flight guard SQL. **Do not write a
+new one. Read P7 and get sign-off.**
+
 ## 2026-08-05 (Opus 5) — Built the thing that lets Claude SEE what we have. Within minutes it found a discoverability plan and a delete list we already paid for and could not see. Orphans 240 → 222.
 
 Operator: *"Build the best way we can build!!!!!! … We see the things we have, we don't make up shit.

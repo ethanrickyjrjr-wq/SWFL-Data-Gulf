@@ -153,6 +153,41 @@ process.stdin.on("end", () => {
     );
   }
 
+  // ---- Gate 1.5: doc index drift -------------------------------------------
+  // Same shape as Gate 1 (lockfile): a generated artifact must ship in the SAME push as
+  // the thing that changes it. Here the artifact is the corpus map the `what-do-we-have`
+  // skill greps — the ONLY place `_RESEARCH/` (gitignored, invisible to Grep) is
+  // searchable. A stale map is worse than none: it answers "we don't have that" with
+  // confidence, which is the exact re-derive-what-we-already-bought bug it was built to
+  // kill. Escape: ALLOW_STALE_DOC_INDEX=1.
+  const docsTouched = changed.some(
+    (f) => f.toLowerCase().endsWith(".md") && f !== ".claude/skills/what-do-we-have/INDEX.md",
+  );
+  if (docsTouched && process.env.ALLOW_STALE_DOC_INDEX !== "1") {
+    const gen = run("node scripts/doc-index.mjs");
+    // A generator that cannot run must never silently pass — that is the empty-tolerance
+    // failure shape (new-project-playbook §4.12). Only a clean run counts as evidence.
+    if (gen.ran && gen.code !== 0) {
+      block(
+        "DOC INDEX — the generator failed, so the map cannot be trusted",
+        `\`node scripts/doc-index.mjs\` exited ${gen.code}.\n\n${truncate(gen.out)}\n\n` +
+          `Fix the generator, or push with ALLOW_STALE_DOC_INDEX=1 if this is unrelated.`,
+      );
+    }
+    const drifted = sh("git status --porcelain .claude/skills/what-do-we-have/INDEX.md").trim();
+    if (drifted) {
+      block(
+        "DOC INDEX — markdown changed but the generated map did not ship with it",
+        `You changed .md file(s); the corpus map is now stale and has been REGENERATED for you.\n` +
+          `It is the only place \`_RESEARCH/\` is visible to a search, so a stale copy makes\n` +
+          `Claude answer "we don't have that" about documents we own.\n\n` +
+          `Fix (the regeneration already ran — just ship it):\n` +
+          `  git add .claude/skills/what-do-we-have/INDEX.md && git commit -m "chore(docs): regenerate doc index"\n` +
+          `then retry the push.`,
+      );
+    }
+  }
+
   // ---- Gate 2: vocab orphans / corridor-alias desync ------------------------
   const vocabTouched = changed.some(
     (f) =>
