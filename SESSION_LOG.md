@@ -1,3 +1,31 @@
+## 2026-08-05 (Opus 5) — THE MIND MAP IS MERGED INTO THE PLAYBOOK. 16 of its 24 emails do not exist.
+
+Operator handed a NotebookLM mind map: *"use it how you see fit to keep everything together, edit it
+and make sure we can all understand."* Merged as **PART 0 of `docs/standards/email-build-playbook.md`**
+rather than filed as a second picture — a second picture is how "two engines" got reported as live
+design on 08/03.
+
+**Reconciled against the registry, executed live 08/05/2026 (19 keys · 17 emails · 17 of 17 with a
+working builder · 2 social):** the map drew **24 boxes — 8 are real, 16 do not exist**, and **9 real
+emails were missing from it** (Coming Soon, Market Comps, Under Contract, Agent Brand Intro, Review
+Reply, Community Info, Listings Showcase, Listings Digest, the catch-all Market Email). Its "Deep
+Report Series" and "Visual & Data Reports" are not email families — they are report pages and charts.
+
+**PART 0 now states the shape in one place:** one pipe, five stops, and **three dials** — the SPINE
+(address 7 · area 8 · agent 2), the CHART POLICY (12 of 17 are none, and none means DROP the slot),
+and sell-side vs story-side. An email is not a different process; it is a different set of values.
+Also carried into PART 0: the four lanes that still bypass the seam, and the fact that **92 built
+deliverables all record `block-canvas` and no column records which email built them** — so "every
+email runs one pipe" is true in code and unverifiable in the product until that column lands.
+
+⚠ **A COUNT I ALMOST SHIPPED WRONG:** `Prefer: count=planned` returns the PLANNER'S ESTIMATE, not a
+count — it reported `apify_property_records` at 20 when the exact count is 26, and the non-floored
+DOM rows at 34,903 when yesterday's exact was 31,825. **Only `count=exact` is a count.** Same header
+family that faked the `lee_comp_sales_v` 500 this morning.
+
+Next, per operator: New Listing coded exactly to the rules, every ingredient's source named, and
+**reproducible by builder** — that is the acceptance test, not "it rendered once."
+
 ## 2026-08-05 (Opus 5) — THE PAID ROW IS WIRED AT THE ONE INSPECTION POINT. Every address email gets it at once.
 
 Operator: *"No. We all start at the fucking same spot. Why the fuck are we going over this again!!!?????

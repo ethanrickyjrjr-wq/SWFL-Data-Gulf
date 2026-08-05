@@ -23,6 +23,107 @@ you find a disagreement, fix it here in the same session.
 
 ---
 
+# PART 0 — THE MAP. One pipe, three dials. Read this before PART 1.
+
+**Operator brought a NotebookLM mind map to the desk 08/05/2026: _"use it how you see fit to keep
+everything together, edit it and make sure we can all understand."_ This is that map, merged with
+what the code actually holds. It replaces the picture, and there is no second one.**
+
+## What the picture got right, and the three things it got wrong
+
+Right: there IS a common foundation, the emails DO fall into families, and AI enrichment IS a real
+stage. Wrong, and each one re-creates a real bug if you build to it:
+
+1. **It drew branching STAGES. There is one pipe with three dials.** An email is not a different
+   process; it is a different set of values.
+2. **It put branding FIRST.** Branding runs LAST, as a blank-filling overlay after authoring.
+   Building it first re-creates the 07/19/2026 clobber where the overlay overwrote authored copy.
+3. **It put AI at the END, and it has no node for the seam or for the one door to HTML.** The model
+   fills open slots BEFORE positions are assigned. Nothing renders except through the one door.
+
+## THE PIPE — five stops, every email, no exceptions
+
+```
+(1) THE EMAIL'S OWN FILE          picks WHICH blocks and WHAT data fills them
+        |                          lib/deliverable/recipes/<name>.ts
+        v
+(2) A FLAT LIST                   type, span, props.  NO x. NO y. NO positions. EVER.
+        |
+        v
+(2.5) AI FILLS OPEN SLOTS         prose only. It never writes a figure, never picks a
+        |                          cell, never decides layout. BEFORE the seam.
+        v
+(3) THE SEAM                      sorts into zones, groups into rows, assigns EVERY
+        |                          position, stamps provenance a fake cannot forge.
+        v                          lib/email/doc/finalize-doc.ts
+(4) BRAND OVERLAY                 colors, logo, fonts, footer — fills BLANKS ONLY.
+        |                          lib/email/brand/
+        v
+(5) THE ONE DOOR                  renderEmailDocHtml -> compileGrid -> table HTML -> SEND
+                                   Never call the renderer or the compiler directly.
+```
+
+## THE THREE DIALS — this is the entire difference between one email and another
+
+**DIAL 1 — THE SPINE. What the email is about, resolved once before any layout.**
+- **address** (7): New Listing · Coming Soon · Market Comps · Under Contract · Just Sold ·
+  Open House · Price Improved. One house, resolved at the ONE inspection point
+  (`resolveSubject`), which is why a fact wired there reaches all seven at once.
+- **area** (8): Weekly Sphere · Review Reply · Monthly Market Pulse · Back on the Market ·
+  Community Info · Listings Showcase · Listings Digest · Market Email (the catch-all).
+- **agent** (2): Agent Brand Intro · Agent Launch. About the person, not a property or a place.
+
+**DIAL 2 — THE CHART POLICY, declared per email.** Twelve of seventeen are **none**, and none means
+DROP the slot — an empty chart box is worse than no chart. The five that carry one: Market Comps and
+Just Sold (comps bar) · Price Improved (price vs. area) · Coming Soon (inventory scarcity) ·
+Monthly Market Pulse (month-over-month) · Review Reply (area value trend) · Agent Brand Intro
+(ZIP-by-ZIP asking).
+
+**DIAL 3 — SELL-SIDE or STORY-SIDE.** Nine sell-side (pitching a property or the agent's own brand),
+eight story-side (recurring relationship content). This governs the copy framing and nothing else.
+
+## RECONCILING THE PICTURE WITH REALITY — counted from the registry 08/05/2026
+
+The registry holds **19 keys: 17 emails, all 17 with a working builder, plus 2 social** (a genuinely
+different renderer — never give them email chrome).
+
+The mind map drew **24 boxes. Eight are real emails. Sixteen do not exist.**
+
+- **Real, and on his map (8):** New Listing Hero → New Listing · Open House Invite → Open House ·
+  Price Reduced → Price Improved · Just Sold Grid → Just Sold · Back on the Market ·
+  Weekly Pulse → Weekly Sphere · Monthly Digest → Monthly Market Pulse · Agent Launch (Day One).
+- **Not built, and not to be treated as a backlog (16):** Market Spotlight · Rate Watch ·
+  Year in Review · Luxury Market Report · Neighborhood Report · Investment Brief · Editorial &
+  Market Letters · Welcome Onboard · Agent Spotlight · Stay in Touch · Corridor Positioning Scatter ·
+  Flood Exposure · Freight Nowcast · Storm-Year Timeline · Seasonal Exposure Index ·
+  "The Auto Email Plan (Listing to Close)" — that last one is a SEQUENCE of the listing emails, not
+  an email.
+- **Real, and MISSING from his map (9):** Coming Soon · Market Comps · Under Contract ·
+  Agent Brand Intro · Review Reply · Community Info · Listings Showcase · Listings Digest ·
+  Market Email (the catch-all every keyless ask lands on).
+
+**"Deep Report Series" and "Visual & Data Reports" are not email families at all.** Flood exposure,
+freight, storm-year and corridor work are report-page and chart surfaces. Putting them on the email
+map is how a session ends up building a second email system.
+
+## THE FOUR LANES THAT DO NOT YET RUN THE PIPE — declared, not hidden
+
+Agent Launch and Monthly Market Pulse hand-position their own blocks. Back on the Market refuses to
+build when its area lane misses instead of landing the grid with open slots. The catch-all Market
+Email patches a committed seed grid and never gets re-stamped. Each is declared with a reason and an
+open check in `lib/deliverable/recipes/registry-seam.test.ts`, and the assertion is INVERTED for
+them — fix one and the suite goes red telling you to delete its exemption line.
+
+## AND THE ONE THING NONE OF THIS CAN PROVE YET
+
+**92 built deliverables, every one recording its template as `block-canvas`, and there is no column
+recording which email built it** (live query 08/05/2026: `deliverables.recipe_key` does not exist).
+"Every email runs one pipe" is true in the code and **unverifiable in the product**. Recording the
+key on the deliverable row is additive, zero-risk, and until it lands this map is a claim rather
+than a fact.
+
+---
+
 # PART 1 — UNIVERSAL. TRUE FOR EVERY EMAIL.
 
 ## 1.1 The pipe — five stops, no exceptions

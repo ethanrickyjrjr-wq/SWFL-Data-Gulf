@@ -1,3 +1,28 @@
+## 2026-08-05 (Opus 5) — OPERATOR handed the NotebookLM mind map: "use it how you see fit to keep everything together, edit it and make sure we can all understand. Then we start fresh with a New Listing email. We code it exactly to the rules and figure out where data comes from for the recipe, then we make it reproducible by builder and move on to the next one."
+
+OPEN — the working order for the whole email wave, and it is now PART 0 of
+`docs/standards/email-build-playbook.md` (the ONE file). **The map is merged, not filed separately** —
+a second picture is how "two engines" got reported as live design on 08/03.
+
+  **What the picture claimed vs. what the registry holds (counted 08/05/2026):** it drew 24 boxes.
+  **8 are real emails. 16 do not exist** (Rate Watch, Year in Review, Luxury Market Report,
+  Investment Brief, Welcome Onboard, Agent Spotlight, Stay in Touch, Flood Exposure, Freight
+  Nowcast, Storm-Year Timeline, Seasonal Exposure Index, Corridor Positioning Scatter, Market
+  Spotlight, Neighborhood Report, Editorial & Market Letters, and "The Auto Email Plan" which is a
+  SEQUENCE, not an email). **9 real emails were missing from it** — Coming Soon, Market Comps, Under
+  Contract, Agent Brand Intro, Review Reply, Community Info, Listings Showcase, Listings Digest, and
+  the catch-all Market Email. Its "Deep Report Series" and "Visual & Data Reports" are not email
+  families at all; they are report pages and charts, and putting them on the email map is exactly
+  how a second email system gets built.
+
+  **The three structural errors, same as the 08/04 version:** branching STAGES instead of one pipe
+  with three dials · branding FIRST when it runs LAST as a blank-filling overlay · AI at the END
+  when it fills open slots BEFORE the seam, plus no node for the seam or the one door to HTML.
+
+  **THE ORDER FOR EVERY EMAIL FROM HERE, his words:** code it exactly to the rules → figure out
+  where each ingredient's data comes from → make it REPRODUCIBLE BY BUILDER → move to the next.
+  Reproducible-by-builder is the acceptance test, not "it rendered once."
+
 ## 2026-08-05 (Opus 5) — OPERATOR: "No. We all start at the fucking same spot. Why the fuck are we going over this again!!!????? I've had this conversation 7 times tonight."
 
 OPEN — **MY FAILURE, and the scratchpad already had the answer.** I ended the homework report by
