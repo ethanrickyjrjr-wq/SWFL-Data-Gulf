@@ -17,10 +17,10 @@ change lands HERE in the same session it happens. A map that lags one incident i
 session ships the same bug again.
 
 **Sibling docs — don't duplicate them:**
-- `docs/standards/deliverable-playbook.md` — the DOCTRINE (claim gate, recipe table, invention
+- [`deliverable-playbook.md`](./deliverable-playbook.md) — the DOCTRINE (claim gate, recipe table, invention
   is claim-shaped not number-shaped). Deep reference; this map indexes it.
-- `docs/standards/email-images.md` — image handling specifics.
-- `docs/standards/data-roots.md` — which table feeds any NUMBER an email shows. Its authority
+- [`email-images.md`](./email-images.md) — image handling specifics.
+- [`data-roots.md`](./data-roots.md) — which table feeds any NUMBER an email shows. Its authority
   picks are pending operator sign-off — treat as recommendations, verify before relying.
 
 ---
@@ -185,7 +185,7 @@ green and left. The goldens are still there. **Finish it; do not start a third d
 
 ## 0. BEFORE YOU CODE A RECIPE — the rules card
 
-> **➜ MOVED / SUPERSEDED FOR BUILDING — `docs/standards/email-build-playbook.md` IS THE ONE FILE.**
+> **➜ MOVED / SUPERSEDED FOR BUILDING — [`email-build-playbook.md`](./email-build-playbook.md) IS THE ONE FILE.**
 > Operator decree 08/04/2026: *"stop fucking reading 6 documents and fucking write it in one."*
 > This section is a DIGEST that told you to go open five gitignored research files; the build
 > playbook writes every rule out in full, universal rules first, then ONE self-contained section per
@@ -507,7 +507,7 @@ Rev's weekly "Market Monday" is paced to seller anxiety during an active listing
 
 **Operator, 08/04/2026: *"Write the recipe as the only fucking one for comps."*** He asked for
 this twice. Everything about building a comparables email is here: the data lanes, the photo rules,
-the block order, the spend ceilings. `docs/standards/data-roots.md` keeps only the TABLE facts and
+the block order, the spend ceilings. [`data-roots.md`](./data-roots.md) keeps only the TABLE facts and
 points here. Do not start a third document.
 
 **C1 · THE COMP SET IS CHOSEN BY COMPARABILITY, THEN FILTERED TO PHOTOGRAPHED.**
@@ -1066,7 +1066,7 @@ evidence the research is absent. Read by path, and start at `_RESEARCH/INDEX.md`
 - `docs/superpowers/plans/2026-07-08-ai-design-and-email-marketing-hacks-sweep.md`,
   `2026-07-09-email-ink-fence-and-palette-gate.md`, `2026-06-29-email-lab-text-styling.md`,
   `2026-07-06-email-grid-gridstack-*` (NOT executed — §4) — the design/build plan trail.
-- `docs/standards/deliverable-playbook.md` + `docs/standards/email-images.md`.
+- [`deliverable-playbook.md`](./deliverable-playbook.md) + [`email-images.md`](./email-images.md).
 
 **Local-only (gitignored — on this machine, never committed):**
 - `docs/steadyapi-research/STEADY-PAINS.md` — THE distilled buyer/seller/agent pain reference

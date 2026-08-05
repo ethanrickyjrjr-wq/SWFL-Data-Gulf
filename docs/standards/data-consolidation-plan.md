@@ -5,7 +5,7 @@ different sources, so surfaces contradict each other. We stop building new and c
 process one at a time, list every source that feeds it, collapse the duplicates, name ONE root, point
 every consumer at that root, and fix the checks that the drift opened. **Sale page first.**
 
-Reference for where things currently live: `data-authority-map.md` (companion). This file is the
+Reference for where things currently live: [`data-authority-map.md`](./data-authority-map.md) (companion). This file is the
 active walk — the scratchpad we work down, one process at a time.
 
 ## The doctrine (operator, 2026-07-18)

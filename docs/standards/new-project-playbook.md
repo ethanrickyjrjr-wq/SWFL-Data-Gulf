@@ -2,7 +2,7 @@
 
 **Written 07/25/2026 from this project's own incident record**, not from theory. Every failure shape
 below has at least one dated, named instance in `_ASSISTANT/SCRATCHPAD.md`, `SESSION_LOG.md`,
-`docs/cron-rebuild-failures.md`, or `docs/standards/data-roots.md`.
+`docs/cron-rebuild-failures.md`, or [`data-roots.md`](./data-roots.md).
 
 **This file is deliberately NOT in `_RESEARCH/`.** `_RESEARCH/` is gitignored, and §2 of this
 document is the proof that gitignoring a document is what stops it being read. A playbook filed

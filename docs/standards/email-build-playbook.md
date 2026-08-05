@@ -10,9 +10,9 @@ fucking write it in one that we will add to."*
 **How to use this file:** read PART 1 once — it applies to every email ever built here. Then jump
 straight to your email's section in PART 2 and read nothing else.
 
-**Why this file exists and the others failed:** the rules were spread across `emails.md` §0, five
+**Why this file exists and the others failed:** the rules were spread across [`emails.md`](./emails.md) §0, five
 GITIGNORED research files it told you to go open, `lib/email/CLAUDE.md`,
-`lib/deliverable/CLAUDE.md`, `deliverable-playbook.md`, and `data-roots.md`. Six places, five of
+`lib/deliverable/CLAUDE.md`, [`deliverable-playbook.md`](./deliverable-playbook.md), and [`data-roots.md`](./data-roots.md). Six places, five of
 them invisible to a repo-wide search. That is a scavenger hunt, not a playbook. **Every rule below
 is written out HERE, verbatim, with its source named. You do not have to go read the source to
 build.** The research keeps the reasoning, the citations, and the ⚠ still-unbuilt flags; this file

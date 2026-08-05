@@ -1,3 +1,43 @@
+## 2026-08-05 (Opus 5) — The standards docs cross-reference each other 25 times and linked each other zero times. Now 22 of them are real links.
+
+Operator handed a post on Karpathy's "LLM Wiki" pattern (ingest raw docs once → distil into clean
+wiki pages → query the pages) and asked whether it works.
+
+**VERDICT: sound, and we already run it — `_RESEARCH/INDEX.md`, `data-roots.md`, `emails.md`,
+`repo-inventory-audit.md`, MEMORY.md and RULES 0.4/0.5/0.55 ARE that pattern.** Nothing to adopt.
+The "41,000 developers at 5%" and "70–90% token savings" figures are Medium engagement numbers, not
+measurements — same class as the "4 sources" figure that came off a marketing slide. **And our
+failure mode is the INVERSE of the one the pattern fixes:** we do not burn tokens reprocessing raw
+sources; our distilled pages exist and go UNREAD (RULE 0.4 says so verbatim; the scratchpad logged
+it again 08/05/2026 — "the answer was already written THREE times in one session"). More
+wiki-building machinery does not touch that.
+
+**THE ONE PORTABLE IDEA, TAKEN: the link layer. Probed before building — `grep` for real markdown
+links across all 13 `docs/standards/*.md` returned 0 in every single file**, while 25 bare
+backticked sibling-doc mentions sat there unlinked. That is the mechanical half of why the same
+answer gets re-derived: the docs name each other and never point at each other.
+
+**22 bare mentions across 8 files are now real relative links** (`[`data-roots.md`](./data-roots.md)`).
+Converted by a script that skips fenced code blocks, skips self-references, and links a target ONLY
+if that file exists in the directory — 20 insertions / 20 deletions, one line each, no content and
+no line endings touched. Verified by reading every changed line, including the two long
+`data-roots.md` table rows where the only delta is the link.
+
+**CORRECTION TO MY OWN PROPOSAL, MADE BEFORE WRITING:** I had said `[[name]]`. That renders only in
+Obsidian and our memory system — in GitHub and VS Code it is literal text. Real relative links
+render everywhere. Same idea, working mechanism.
+
+**DELIBERATELY NOT SHIPPED — the same pass over CLAUDE.md (37 links), and the reason is RULE 11.**
+CLAUDE.md loads into EVERY session's context, so 37 link wrappers cost ~300 tokens on every turn
+forever, and buy nothing for the agent (a bare path reads identically) and little for a human (the
+terminal and VS Code already make bare paths clickable). Standards docs are the opposite — read on
+demand, zero per-session cost. **Useful byproduct of the dry run: all 37 paths referenced in
+CLAUDE.md exist on disk. The reference index is not stale.**
+
+**Also opened: check `brand_backup_untracked_pii`** — `_ASSISTANT/brand-backups/` holds the
+operator's real `user_brand_profiles` row and is NOT gitignored, so one `git add -A` ships his
+account data.
+
 ## 2026-08-05 (Opus 5) — The paid lane is OFF by default: $14.08 measured at the vendor, a button that bought a guaranteed null, and a receipt that read our cache instead of the bill.
 
 Operator decree, verbatim: *"First make sure we are checking all free lanes and in-house data before

@@ -1,6 +1,6 @@
 # Pipeline Freshness Standard
 
-> Part of **THE BIBLE** (`docs/standards/data-and-build-bible.md`) — see §5 there
+> Part of **THE BIBLE** ([`data-and-build-bible.md`](./data-and-build-bible.md)) — see §5 there
 > for the full data→brain wiring checklist this standard is step 1 of.
 
 Every ingest pipeline (Tier 1 and Tier 2) must satisfy all four rules below before merging to `main`.

@@ -262,7 +262,7 @@ Every Tier-1 object gets exactly one row, written by
 Do these in order. Steps that must share a single commit are marked **[same PR]**.
 
 1. **Pipeline** — `ingest/pipelines/<x>/` (dlt) or `ingest/duckdb_pipelines/<x>/`.
-   Ship `--dry-run` + a GHA cron wrapper **[same PR]** (`docs/standards/pipeline-freshness.md`).
+   Ship `--dry-run` + a GHA cron wrapper **[same PR]** ([`pipeline-freshness.md`](./pipeline-freshness.md)).
    Verify vendor cadence against the publisher's release calendar, not memory.
    **HTML/JS scraping goes through `ingest/lib/crawl4ai_client.py`** (crawl4ai only — never
    Firecrawl/Spider/`requests`); for a scrape target, follow §0.3 (HTTP strategy for server-rendered
@@ -319,7 +319,7 @@ Do these in order. Steps that must share a single commit are marked **[same PR]*
 | Topic                                         | File                                   |
 | --------------------------------------------- | -------------------------------------- |
 | Data Tier Policy + tool-placement matrix      | `docs/API_BLUEPRINTS.md`               |
-| Pipeline-freshness (cron + dry-run + cadence) | `docs/standards/pipeline-freshness.md` |
+| Pipeline-freshness (cron + dry-run + cadence) | [`pipeline-freshness.md`](./pipeline-freshness.md) |
 | Consumption contract (downstream Claude)      | `docs/consumption-contract.md`         |
 | Ontology + roadmap                            | `docs/ontology-and-roadmap.md`         |
 | Current wiring gaps (orphan data)             | `SESSION_LOG.md` (newest entry)        |

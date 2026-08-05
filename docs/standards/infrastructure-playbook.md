@@ -112,12 +112,12 @@ Supabase directly is the correct shape at our size.
 
 **EVIDENCE.** Supabase Postgres across three schemas — `public`, `data_lake`,
 `personal_vault`. Python ingest via dlt + DuckDB. Supabase Storage for media (listing photos,
-email media, project materials, social uploads). `docs/standards/data-roots.md` is the single
+email media, project materials, social uploads). [`data-roots.md`](./data-roots.md) is the single
 catalog of which table feeds which concept.
 
 **PLAYBOOK — keep it in order.**
 
-1. `docs/standards/data-roots.md` top section is the FIRST file opened for any data question
+1. [`data-roots.md`](./data-roots.md) top section is the FIRST file opened for any data question
    or new consumer. One root per concept per cadence. If the root isn't listed you ADD a root;
    you do not add a second table.
 2. Roots carry status markers. A not-built root is the *intended home*, never a served number.
@@ -203,7 +203,7 @@ VMs, no orchestrator, nothing to patch.
 2. Long jobs belong in GitHub Actions, not in a route handler. The boundary: if it can exceed
    a function timeout, it is a workflow.
 3. Every pipeline ships its GHA cron wrapper and a `--dry-run` in the same PR
-   (`docs/standards/pipeline-freshness.md`).
+   ([`pipeline-freshness.md`](./pipeline-freshness.md)).
 
 **DON'T.** Do not containerize. Do not introduce Kubernetes, ECS, Fly.io, or a worker queue
 service. Do not migrate ingest off GitHub Actions. Every one of these solves a problem we do
