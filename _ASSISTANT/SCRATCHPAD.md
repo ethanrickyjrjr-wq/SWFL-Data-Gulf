@@ -1,3 +1,23 @@
+## 2026-08-05 (Opus 5) — OPERATOR on SHOWCASE: variety was the whole point, and it got us lost
+
+OPEN. Verbatim: *"For showcase, showing different builds was the purpose, we just can't do it
+without getting lost. So we are building all the same and then we will build new styles with new
+field rules, I guess…if possible. Examples will be set to their recipes and field rules."*
+
+**The order he set, do not invert it:** ONE pipe first (every email built the same way, field-driven),
+THEN variety re-introduced as *named field-rule sets* layered on that pipe — never as bespoke
+per-example builders, which is the thing that lost us. An example row pins BOTH its recipe key AND
+its field-rule set, so what the showcase card shows is reproducible by the builder.
+
+**Half of this already exists and nobody said so:** `lib/showcase/recipe.ts` already pins a showcase
+example to a `RecipeKey` (the comment is explicit — "this is what makes the hero pill, the showcase
+card, the campaign button and the lab pick produce the SAME thing") and already declares `needs`,
+a brand-field list read from the profile ledger. `needs` IS a primitive field rule. The missing
+dimension is STYLE — a named rule set that varies presentation over the SAME recipe.
+
+Ties directly to `docs/superpowers/specs/2026-08-05-brand-field-registry-authority-design.md`
+(fields as the one authority) and to the ONE-pipe memory. Do not re-litigate variety-first.
+
 ## 2026-08-05 (Opus 5) — OPERATOR: "Fix it all commit and push" — the three items I had left open
 
 RESOLVED (2 of 3 fully, 1 reported as half). He listed them back to me verbatim from my own
