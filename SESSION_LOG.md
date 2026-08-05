@@ -54,6 +54,14 @@ refusals 1, 5 of 5 assertions pass, 29KB** — comps still ship with photos off 
 acceptance script is the thing re-run seven times in an afternoon, so it is the thing that must not
 spend by default.
 
+**`ALLOW_PAID_SURFACE=1` USED ON THIS PUSH — AND IT ADDS NO PAID SURFACE.** The no-new-paid-surface
+hook flagged one ADDED line in `scripts/email/render-market-comps.mts:57`. It is prose inside the
+file's `/** */` header — *"run without `ANTHROPIC_API_KEY` and the prose becomes the code-authored
+verdict alone, which is the designed fail-closed state"* — and it references no client, no
+`process.env`, and no call site. It reads as added only because the header block was rewritten
+around it. The narrator call this script makes is unchanged and still goes through the metered
+client. Verified by reading the line and its ten surrounding lines before overriding, not assumed.
+
 **NOT IN THIS PUSH, AND WHY (3 held back):** `ingest/pipelines/listing_lifecycle/backfill_baths.py`
 carries an incremental-commit fix but is under a live repolith claim by a parallel session — not
 mine to commit. `_ASSISTANT/brand-backups/*.json` is the operator's real account row and is NOT
