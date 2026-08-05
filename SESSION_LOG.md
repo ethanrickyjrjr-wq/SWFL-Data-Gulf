@@ -43,6 +43,14 @@ and the citation root. Consumed as a DEFAULTED PARAMETER. **Frozen and never env
 output; an environment-varying field breaks that silently, and `SITE` already carries that scar
 (`NEXT_PUBLIC_SITE_URL` once shipped `http://localhost:3000` as every local doc's citation).
 
+**PUSH OVERRIDE RECORDED — `ALLOW_PAID_SURFACE=1`.** `check-no-new-paid-surface.mjs` blocked the
+push on one ADDED line in `scripts/email/render-coming-soon.mts`: a **comment** reading *"ONLY when
+a description exists — run without ANTHROPIC_API_KEY and it becomes an open slot."* No new paid
+surface: the script calls `buildComingSoon`, whose one model call is the existing metered
+`authorListingNarrative`. The hook greps added lines and cannot tell prose from a call site — a
+false positive worth taking over reneging on the comment, since the comment is what tells the next
+operator why the paragraph is sometimes empty.
+
 **EVIDENCE.** `bunx tsc --noEmit` clean. `bun test lib/email lib/deliverable` → **2875 pass, 0
 fail** (251 files). Acceptance render on the real account, `16209 Asheboro Ct`: **14 of 18 cells
 sourced, 23KB**, ladder **rung 1 / county grain**, 14,643 → 834 → 518, suppression **4 of 4 probes
