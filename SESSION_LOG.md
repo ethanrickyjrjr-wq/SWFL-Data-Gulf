@@ -1,3 +1,48 @@
+## 2026-08-05 (Opus 5) — COMING SOON (§2.2) BUILT ON A REAL ACCOUNT — and reading the render found that most of the brand never reaches an email.
+
+Operator: *"DO THIS THE RIGHT WAY / RECORD EVER FUCKING STEP / BUILD BRAND NEW WITH OUR FUCKING
+BRAND / USE THE ethanrickyjrjr@gmail.com account / fill it all in with a different fake realtor with
+a history and socials"* + *"change my name. female pic. more female agents."*
+
+**Landed:** playbook **§2.2 COMING SOON**, six subsections, plus
+`scripts/email/render-coming-soon.mts`. Acceptance run, `16209 Asheboro Ct, Fort Myers 33908`:
+**14 of 17 cells sourced, 23KB**, $219,900 · 2 bd · 2 ba · 1,481 sq ft · $148/sq ft · funnel
+**14,643 active Lee homes → 834 in band → 518 matching** · authored paragraph present · full agent
+card + CAN-SPAM footer. `bunx tsc --noEmit` clean · **180 pass, 0 fail**.
+
+**THE SUPPRESSION CONTRACT IS PROVEN AGAINST THE RENDERED BYTES, not the comments:** street line,
+house number, street core and ZIP — **4 of 4 ABSENT**, and the script exits non-zero on any hit.
+
+**THE HEADLINE FINDING — the brand cannot reach an email.** The acceptance script reads the brand
+off a REAL account (`user_brand_profiles`) instead of hardcoding a fixture, and that is the only
+reason this surfaced: `applyUserBrandToProject` copies **14** columns to a new project and drops
+**17 filled ones** — ALL NINE socials, both fonts, four palette colors, `company_name`,
+`button_destinations`, and the **CAN-SPAM `unsubscribe_url`**. §2.1.6 concluded "the fix for a bare
+bottom is filling the brand"; that was right and incomplete — **the brand cannot fill.** Hardcoding
+`DEMO_BRAND` in `render-new-listing.mts` is what hid it.
+
+**FOUR MORE, all found by rendering and LOOKING, none catchable by a test:** 5 of 8 social platforms
+are dead ends (`footerPropKey` is typed to three) · the funnel chart shipped **teal inside a
+terracotta email** (tinted from an unbranded canvas) · the narrator **defeated the grid's own lot-size
+suppression and contradicted the premise** ("on the market for just over two weeks" on a not-yet-listed
+home) because `teaserFacts` stripped only the address · the agent card printed an **unbounded bio** as
+a 25-line column. Guards shipped for the last three; two opened as defects.
+
+**AND THE CAUSE OF `new_listing_narrative_silently_dropped`:** the Coming Soon framing *instructed*
+"sentences OF ANTICIPATION" and "CLOSE ON THE FACT THAT IT WILL BE SHOWN PRIVATELY FIRST" — a motive
+claim and a sequence claim — then the no-invention gate dropped the paragraph for obeying. **The
+guard was right; the framing was wrong.** Fixed.
+
+**The demo agent is fictional and disclosed:** Marisa Delgado / Coral Ledge Realty, `.example`
+domain (RFC 2606) and a 555-01xx phone, portrait generated of a person who does not exist. Gemini
+image generation was NOT used — that API returned **"prepayment credits are depleted."** The real
+Ricky Cooper profile is backed up at `_ASSISTANT/brand-backups/ethanrickyjrjr-brand-2026-08-05.json`
+and restores in one command.
+
+**Checks opened (5):** `coming_soon_live_verify`, `brand_fields_lost_account_to_project`,
+`footer_renders_only_three_socials`, `hero_photo_aerial_detection`,
+`coming_soon_degenerate_funnel_floor`. **NOT COMMITTED, NOT PUSHED — awaiting the operator's say-so.**
+
 ## 2026-08-05 (Opus 5) — "WHY TTHE FUCK CAN'T I FUCKING PUSH": nothing was ever committed, and two lint failures with masked exit codes were why.
 
 Operator asked this in FOUR sessions. Answer, in order of what actually blocked him:
@@ -37,6 +82,17 @@ still uncommitted — `scripts/email/render-coming-soon.mts`, `_write-brand.mts`
 `_ASSISTANT/brand-backups/`. That session was mid-write. **Nothing is pushed — push needs operator
 approval per push.** `15bb91f7` carries the message "probe" from a diagnostic commit that landed
 for real; the `--amend` guard correctly refused to rewrite shared-main history, so it stands.
+
+**`ALLOW_PAID_SURFACE=1` used on this push, and why it is not a new surface.**
+`check-no-new-paid-surface.mjs` matched ONE added line in `scripts/email/render-new-listing.mts`:
+`" * one narrator paragraph. Run without ANTHROPIC_API_KEY to skip even that — the paragraph"`.
+That is a comment in the file's doc header. Verified with
+`grep -n "ANTHROPIC\|anthropic\|Anthropic" scripts/email/render-new-listing.mts`: exactly one hit,
+that comment, no other. The script's imports are node fs/os/path, `buildNewListing`,
+`resolveSubject`, `listingButtonUrl`, `defaultDoc`, `applyBrand`, `brandingToTokens`,
+`renderEmailDocHtml` — no Anthropic client, no key read. The narrator call the comment describes
+happens inside the existing metered build path, unchanged. The hook matched prose ABOUT a metered
+call, not a new unmetered one.
 
 ---
 
