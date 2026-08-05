@@ -33,6 +33,14 @@
 // Over `data_lake.listing_state` (35,202 rows), the FREE spine carries:
 //   beds  25,934 (73.7%) · sqft 24,861 (70.6%) · lot_acres 27,448 (78.0%)
 //   baths  5,372 (15.3%)  <- Lee 13.1%, Collier 17.5%
+//
+// ⚠️ **THE BATHS FIGURE ABOVE IS STALE — RE-COUNTED LIVE 08/05/2026: 10,991 of 35,202 =
+// 31.2%.** It roughly DOUBLED (almost certainly the LeePA layer-23 beds/baths join landing).
+// This matters because a coverage number is the argument for SPENDING: "baths are only 15%
+// free" is how a paid per-address lane gets justified, and at 31.2% that argument is half
+// the size it looks. **Re-derive coverage before citing it as a reason to pay** — never quote
+// this block from memory. Operator decree 08/05/2026: we do not run extra vendor calls for
+// data we already hold. The already-bought rows carry `baths_total` on **98.2% of 383 rows**.
 // and, read from `information_schema` rather than remembered, it has NO year_built
 // column, NO description and NO photo gallery AT ALL. Those three exist nowhere but
 // this already-purchased row. Filling them here is the least-expensive lane there is:

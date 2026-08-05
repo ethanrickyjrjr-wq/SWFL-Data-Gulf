@@ -32,7 +32,8 @@
 import { compPhotoKey } from "./comp-photos";
 import { fetchApifyComps, type ApifyRecord } from "./apify-comps";
 import { listingAddressKey, bathsFromRecord } from "./apify-baths";
-import { fetchCachedRecords } from "./apify-record-store";
+import { fetchCachedRecords, fetchCachedRecordLoose } from "./apify-record-store";
+import { freeLaneReport } from "./free-lanes-first";
 
 /** The vendor's own "no value" sentinels — they arrive as literal strings. */
 const NA = new Set(["<NA>", "NA", "N/A", "null", "undefined", "None"]);
@@ -131,12 +132,35 @@ export interface AddressFetchDeps {
 // address is ACCEPTED and silently treated as an area centre whose own record is not
 // returned, and `radius` is ignored. (The older note in `apify-comps.ts`'s header —
 // "radius ONLY works when the location is a specific ADDRESS" — is misleading; this is
-// the correction.) A true per-property lookup exists at `one-api/realtor-property-scraper`
-// ($0.007/result) but it is keyed on `property_inputs: [<realtor.com detail URL>]`, and
-// the lake comp lane carries no detail URL — so it is only ever reachable DOWNSTREAM of
-// the dated ZIP pull below, never instead of it.
+// the correction.)
 //
-// The lane that does work is `resolveCompEnrichment`: cache, then ONE dated ZIP pull.
+// *** ⛔ SCOPE OF THAT RULE: IT IS ABOUT **THIS ACTOR**, NOT ABOUT APIFY. ***
+// The paragraph that used to sit here generalised it into "there is no per-property
+// lookup anywhere", and that generalisation was FALSE and expensive. It read:
+//   "A true per-property lookup exists at one-api/realtor-property-scraper ($0.007/result)
+//    but it is keyed on property_inputs: [<realtor.com detail URL>], and the lake comp lane
+//    carries no detail URL — so it is only ever reachable DOWNSTREAM of the dated ZIP pull."
+//
+// **VERIFIED LIVE 08/05/2026 (crawl4ai, the vendor's own store page), VERBATIM:**
+//   "Need just one property? Use the `property_inputs` section — auto-detects
+//    `property_id`, URL, or address."
+//
+// IT TAKES AN ADDRESS. We have addresses. It was reachable the whole time, and the
+// comment claiming otherwise is why nobody tried. The cost of that one wrong sentence,
+// in the vendor's own units: we bought ~200 records (~$1.95) per sale month to join 2 of
+// 6 comps, when 6 single-property lookups cost ~$0.042 — **~46x, and the cheap lane is
+// also the accurate one**, because it returns THE house instead of 194 strangers that
+// `matchesAddress` then throws away. Same page: "Pay per result — you only pay for
+// dataset items the Actor pushes", and a failed input bills as one row, so a MISS costs
+// ~$0.007 rather than a whole area sweep.
+//
+// OPERATOR PRINCIPLE, 08/05/2026, verbatim: *"If we need one bath number and it costs
+// .01, why wouldn't we run that actor?"* — **buy the FIELD, never buy an area and sift
+// it.** Wiring that lane is check `apify_per_property_lane_wire`. The dated ZIP pull
+// below stays only as a BULK fallback, never as the default way to learn one house.
+//
+// Until that lands, the lane that runs is `resolveCompEnrichment`: cache, then ONE dated
+// ZIP pull — now behind the process spend guard (`apify-spend-guard.ts`).
 // ═════════════════════════════════════════════════════════════════════════════
 
 // ── READ THE CACHE BEFORE YOU PAY ────────────────────────────────────────────
@@ -316,6 +340,38 @@ export async function resolveCompEnrichment(
       const row = cached.get(key);
       if (row) put(c.addressLine, row as unknown as Record<string, unknown>);
     }
+
+    // ── LANE A2 · THE LOOSE KEY. STILL FREE, AND WE WERE SKIPPING IT BEFORE PAYING.
+    //
+    // Operator decree 08/05/2026: *"First make sure we are checking all free lanes and
+    // in-house data before anyone runs fucking apify … we aren't running extra fucking runs
+    // for shit we already have!!!!!!"*
+    //
+    // The daily sweep writes "12554 Kellysands Way"; the paid row writes "12554 Kelly Sands
+    // Way". Same house, two spellings, so the EXACT key misses. `paid-record-lane.ts` has
+    // always tried a loose key second — counted live 08/05/2026, exact reaches 8 of 26 rows
+    // and loose reaches **5 MORE** — but THIS lane, the one that actually spends $1.95, only
+    // ever tried the exact key. We skipped a free rung worth ~60% more cache hits and then
+    // bought a ZIP month.
+    //
+    // Tried ONLY after the exact key misses, so it can never override a real hit. Skipped
+    // when `deps.readCache` is injected, so every test stays offline (same contract as
+    // `fillFromPaidRecord`).
+    if (!opts.readCache) {
+      const stillMissing = wanted.filter((c) => !out.has(c.addressLine));
+      for (const c of stillMissing) {
+        try {
+          const loose = await fetchCachedRecordLoose(
+            c.addressLine,
+            c.city ?? "",
+            STABLE_FIELD_MAX_AGE_DAYS,
+          );
+          if (loose) put(c.addressLine, loose as unknown as Record<string, unknown>);
+        } catch {
+          // One address failing the loose read never stops the others, and never spends.
+        }
+      }
+    }
   } catch {
     // No cache, no creds, table missing -> lane B still runs. Never a build failure.
   }
@@ -334,7 +390,25 @@ export async function resolveCompEnrichment(
   // So we buy the ONE thing the vendor does sell — an area over a date range — and
   // narrow it to the window our comps actually sold in, then join on address. No window,
   // no purchase: an unwindowed sweep is the original 0-of-6 defect with a new name.
+  // ── THE GATE BETWEEN "FREE LANES RAN" AND "MAY WE SPEND" ───────────────────
+  // Operator decree 08/05/2026: free + in-house are exhausted BEFORE anyone runs Apify.
+  // Everything above this line was free. This line says, out loud, what is genuinely left —
+  // per house and per field — so a build can never buy a cell it already holds.
   const missing = wanted.filter((c) => !out.has(c.addressLine));
+  console.info(
+    freeLaneReport(
+      wanted.map((c) => {
+        const e = out.get(c.addressLine);
+        return {
+          addressLine: c.addressLine,
+          photoUrl: e?.photoUrl ?? null,
+          listingUrl: e?.listingUrl ?? null,
+          baths: e?.baths ?? null,
+        };
+      }),
+      { photoUrl: true, listingUrl: true },
+    ),
+  );
   if (missing.length === 0) return out;
 
   const windows = compSaleMonthWindows(missing.map((c) => c.priceDate));
