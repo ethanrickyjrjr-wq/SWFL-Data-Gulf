@@ -1197,7 +1197,7 @@ Reachability at generation: 791 by path · 523 by name only · 222 orphaned. Re-
 - `_ASSISTANT/HANDOFF-EGRESS-20260721.md` — HANDOFF — Supabase egress overage + production outage (07/21/2026) — Do NOT hand him another theory. Hand him a burner with a file path and a number.
 - `_ASSISTANT/HANDOFF-second-order-test.md` — HANDOFF — test the second-order agent — Written 07/21/2026 by the session that built it. For a fresh session to verify, not to rebuild.
 - `_ASSISTANT/RULES.md`
-- `_ASSISTANT/SCRATCHPAD.md` — 2026-08-05 (Opus 5) — OPERATOR: "We aren't sending out any under contract emails you fuck. The agent fucking i — transition, there is no trigger and therefore no elapsed-time number — and I wrote "speed as a
+- `_ASSISTANT/SCRATCHPAD.md` — 2026-08-05 (Opus 5) — OPERATOR, LOCKED: "I'm tired of moving backwards and Claude not updating memory and sayi — 1. NOT UPDATING MEMORY. 205 memory files exist and I added ZERO this session while breaking two
 - `_ASSISTANT/seller-report-launch.md` — Seller Spread launch kit — 07/19/2026 — The product: /r/should-i-sell — free honest seller read for any Lee/Collier ZIP; the
 
 ## _AUDIT_AND_ROADMAP/Operation July — 22
@@ -1465,7 +1465,7 @@ Reachability at generation: 791 by path · 523 by name only · 222 orphaned. Re-
 - `DELIVERABLES.md` — DELIVERABLES — the map (start here) — There are TWO ways a deliverable gets rendered. Knowing which one you're in saves hours.
 - `ENGINE-HANDOFF.md` — Engine Turn-On Handoff — 2026-06-20 — Yes. Live + running.
 - `README.md` — What it is — SWFL Data Gulf is a multi-brain intelligence platform for Lee and Collier counties. Dozens of live data pipelines feed into a DAG of "brains" — each brain owns one slice of reality and emits
-- `SESSION_LOG.md` — 2026-08-05 (Opus 5) — Under Contract walked and the recipe decided: I designed the email as if WE send it, the — docs/superpowers/plans/2026-08-05-under-contract-24-BUILD-HANDOFF.md carries the full ladder —
+- `SESSION_LOG.md` — 2026-08-05 (Opus 5) — HANDOFF WRITTEN: docs/superpowers/handoffs/2026-08-05-DOC-DISCOVERABILITY-HANDOFF.md — a — Operator: "Write a handoff of everything… Don't assume anything… I'm tired of moving backwards and
 - `SOURCED.md` — SOURCED.md — Magic number citations — Every numeric constant in refinery pack code that affects scoring, confidence, or ranking
 - `THE-CONTRACT.md` — THE CONTRACT — what follows the conversation — This is the discipline that travels with every SWFL Data Gulf payload so a
 

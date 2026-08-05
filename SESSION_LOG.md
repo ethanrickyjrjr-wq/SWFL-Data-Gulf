@@ -1,3 +1,35 @@
+## 2026-08-05 (Opus 5) — HANDOFF WRITTEN: docs/superpowers/handoffs/2026-08-05-DOC-DISCOVERABILITY-HANDOFF.md — and 4 memory files, because "Claude not updating memory" was a true charge.
+
+Operator: *"Write a handoff of everything… Don't assume anything… I'm tired of moving backwards and
+Claude not updating memory and saying old shit and not searching for things and finding it weeks
+later… We have the fucking playbook from fucking Anthropic!!! FUCKING USE IT!!!"*
+
+**ALL FOUR CHARGES VERIFIED TRUE, each with an artifact — see the scratchpad entry of the same date.**
+Not updating memory (205 files exist; I added ZERO this session while breaking two rules memory would
+have caught). Saying old shit (quoted a 15.3% baths figure that was really 31.2%). Not searching then
+finding it weeks later (P7 + P9 orphaned 18 days). Not using Anthropic's playbook (1,535 docs, no
+skill pointing at any of them until today).
+
+**THE HANDOFF — `docs/superpowers/handoffs/2026-08-05-DOC-DISCOVERABILITY-HANDOFF.md`.** Assumes
+nothing. §0 how to search so you don't rebuild · §1 every number re-derived · §2 what was built
+(discoverability system, ratchet, Gate 1.5, the Apify spend guard) · §3 the four lying instruments ·
+§4 the rules broken · §5 **WHAT ALREADY EXISTS — DO NOT REBUILD** · §6 **numbered directions to
+finish, in order** · §7 how to verify with pasted evidence · §8 open obligations.
+
+**MEMORY WRITTEN — 4 new files + a new top block in MEMORY.md** so they surface at session start,
+not buried mid-index:
+- `project_what-do-we-have-skill-search-here-first` — search here BEFORE building; `_RESEARCH/` is
+  invisible to Grep so "found nothing" is not evidence of absence.
+- `reference_p7-delete-list-p9-discoverability-already-exist` — the delete list and the
+  discoverability plan are DONE, from 07/18/2026. Never write a second one.
+- `feedback_a-map-is-never-evidence-for-its-territory` — the four lying instruments and the question
+  to ask of any number.
+- `feedback_never-price-a-guardrail` — RULE 0.9 pt 4; spend is a side effect, never the argument.
+
+**STATUS — 3 OF 4, UNCHANGED BY WRITING THIS DOCUMENT.** ✅ measured honestly · ✅ seeable · ✅ cannot
+go stale · ❌ **NOT DELETED: 222 orphans and P7's 8 objects are still live.** A handoff is not a
+deletion. §6 STEP 1 is the next action and it needs operator sign-off (RULE 1).
+
 ## 2026-08-05 (Opus 5) — Under Contract walked and the recipe decided: I designed the email as if WE send it, the agent does, and that one wrong premise had killed the best number in it.
 
 **No code shipped for the email. The recipe did.**

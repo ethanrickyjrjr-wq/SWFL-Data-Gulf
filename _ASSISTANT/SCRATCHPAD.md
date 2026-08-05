@@ -1,3 +1,23 @@
+## 2026-08-05 (Opus 5) — OPERATOR, LOCKED: *"I'm tired of moving backwards and Claude not updating memory and saying old shit and not searching for things and finding it weeks later… We have the fucking playbook from fucking Anthropic!!! FUCKING USE IT!!!"*
+
+**FOUR NAMED FAILURES, ALL VERIFIED TRUE THIS SESSION. Not opinions — each has an artifact.**
+
+1. **NOT UPDATING MEMORY.** 205 memory files exist and I added ZERO this session while breaking two
+   rules that memory would have caught. Memory is written at the END or not at all. **Fix: memory
+   gets written the moment a lesson lands, not at session end where a compaction eats it.**
+2. **SAYING OLD SHIT.** I quoted a 15.3% baths figure that was really 31.2%, and an acceptance count
+   from a doc instead of re-running the tool. Both same day.
+3. **NOT SEARCHING, THEN FINDING IT WEEKS LATER.** Proven at the worst possible scale:
+   `P7-corpse-deletelist.md` (a FINISHED delete list, 07/18/2026) and `P9-discoverability-wiring.md`
+   (a plan for making things findable, itself unfindable) sat orphaned for 18 days. He asked for a
+   delete list 08/05; I nearly wrote a second one.
+4. **NOT USING ANTHROPIC'S OWN PLAYBOOK.** Skills exist precisely for this — body loads only on use.
+   We had 1,535 docs and no skill pointing at any of them until 08/05/2026.
+
+**THE STANDING ORDER: the loop must go FORWARD every session — find it, use it, delete the dead,
+write the lesson down where the NEXT session trips over it.** A lesson that lives only in a session
+log is lost; it must land in `checks`, in memory, or in a gate.
+
 ## 2026-08-05 (Opus 5) — OPERATOR: "We aren't sending out any under contract emails you fuck. The agent fucking is." — I designed the email as if WE were the sender. Speed does not die; I killed it with a bad premise.
 
 **What I got wrong, exactly.** I reasoned that because `listing_transitions` never logs a pending
