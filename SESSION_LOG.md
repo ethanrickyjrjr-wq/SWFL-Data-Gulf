@@ -39,6 +39,14 @@ is self-referential fraud and it already happened once today.
 **RUN THIS TO APPLY (one command, reversible with `git revert`):**
 `node scripts/doc-burndown-delete.mjs --apply`
 
+**DEFERRAL REGISTERED, NOT LEFT AS PROSE (RULE 2.4).** The ~145 orphans NOT covered by the 77-file
+deletion — 105 `docs/superpowers`, 18 VENDORED `app/_design/animejs-docs`, and the rest — are carried
+by check `doc_orphans_superpowers_and_design`, which also holds the deliberate `docs/_archive/parked/`
+exclusion and warns against "excluding vendored docs" purely to move the number. The pre-existing
+burndown obligation remains `doc_orphans_229_invisible`. **The push hook caught this one — I wrote
+"deliberately excluded" in a log and tried to push without a ledger entry, which is the exact
+07/07/2026 condo-grain failure the gate exists to stop.**
+
 **STATUS — 3.5 OF 4.** ✅ measured ✅ seeable ✅ cannot go stale ✅ **improvement now mandatory and
 machine-checked daily** · ❌ **NOT DELETED — 222 orphans stand; the 77-file removal is one operator
 command away, and P7's 8 platform objects still need sign-off.**
