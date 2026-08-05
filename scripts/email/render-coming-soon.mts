@@ -58,6 +58,7 @@ import {
   loadScarcity,
 } from "../../lib/deliverable/recipes/coming-soon";
 import { resolveSubject } from "../../lib/deliverable/recipes/shared";
+import { PROJECT_CARRY_KEYS } from "../../lib/brand/profile-ledger";
 import { defaultDoc } from "../../lib/email/doc/default-docs";
 import { applyBrand } from "../../lib/email/brand/apply-brand";
 import { brandingToTokens } from "../../lib/email/brand/branding-to-tokens";
@@ -272,24 +273,16 @@ for (const [label, needle] of probes) {
   );
 }
 
-// ── WHAT THE PROJECT PATH WOULD HAVE DROPPED ────────────────────────────────
-// applyUserBrandToProject copies these 14 columns and no others.
-const COPIED = new Set([
-  "primary_color",
-  "accent_color",
-  "logo_url",
-  "agent_name",
-  "nickname",
-  "agent_title",
-  "photo_url",
-  "license",
-  "brokerage",
-  "agent_bio",
-  "contact_email",
-  "contact_phone",
-  "website_url",
-  "business_address",
-]);
+// ── WHAT THE PROJECT PATH CARRIES, AND WHAT IT STILL DROPS ──────────────────
+//
+// FIXED 08/05/2026. This block used to hold its OWN hardcoded 14-key copy of
+// applyUserBrandToProject's carry list — a 20th hand-written key list, in the
+// very script whose job is to catch brand fields going missing. When the carry
+// set was widened from 14 to 32 that same day, this diagnostic kept printing
+// "copied to a project: 0" against a defect that was already closed. A stale
+// alarm is worse than no alarm: the next session reads it and re-opens fixed
+// work. It now derives from the registry, so it can never disagree again.
+const COPIED = new Set<string>(PROJECT_CARRY_KEYS);
 const SKIP = new Set([
   "id",
   "user_id",
@@ -306,10 +299,13 @@ const SKIP = new Set([
 const lost = Object.entries(p)
   .filter(([k, v]) => typeof v === "string" && v.trim() && !COPIED.has(k) && !SKIP.has(k))
   .map(([k]) => k);
+const carried = Object.entries(p).filter(
+  ([k, v]) => typeof v === "string" && v.trim() && COPIED.has(k),
+).length;
 console.log(
-  `\n  BRAND FIELDS THAT DO NOT SURVIVE applyUserBrandToProject — ${lost.length} filled on the account, copied to a project: 0`,
+  `\n  BRAND FIELDS ACROSS applyUserBrandToProject — ${carried} filled and carried, ${lost.length} filled and DROPPED`,
 );
-console.log(`  ${lost.join(", ")}`);
+console.log(`  ${lost.length ? lost.join(", ") : "nothing filled is dropped ✓"}`);
 
 const outDir = join(homedir(), "Downloads");
 try {

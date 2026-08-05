@@ -134,6 +134,52 @@ Gates: `bun test lib/deliverable/recipes/` **657/0** · market-comps **75/0** ·
 5s default; **10/0 green at `--timeout 60000`**, verified twice) · `bunx tsc --noEmit` clean on both
 touched files. NOT PUSHED — awaiting operator approval.
 
+## 2026-08-05 (Opus 5) — The brand drop is CLOSED (14 → 32 columns), and the alarm that was still ringing over it was stale.
+
+Operator: *"Brainstorm against the spec first and then TDD"* → *"Just had a sonnet review this"* →
+*"Good to go"* → *"make sure New Listing and Coming soon are good, then write handoff for opus to
+rebuild 2.4"*.
+
+**FOUND THE REVIEW NOBODY COULD SEE.** He ran a Sonnet review in another session and asked this one
+to act on it. No artifact on disk. It was in that session's transcript —
+`~/.claude/projects/…/7e3a7500-….jsonl`, Sonnet 5, 52 hits on the spec's terms. Other sessions'
+transcripts ARE readable; giving up at "I can't see another context" was wrong. Opened
+`cross_session_review_not_discoverable`.
+
+**The review agreed with all five of my findings and corrected one:** `span?: "full"` on
+`AGENT_FIELDS` is DEAD CODE (declared `BrandingBlock.tsx:26`, never set, never read). The live
+full-width mechanism is a hardcoded key check at line 250 on `website_url` + `business_address`. A
+hint-parity test built off the declared facets would have pinned the dead one and missed the live
+one. It also found 4 touch points outside the spec's 5 files, incl. a 4th copy of the theme write in
+`auth/callback/route.ts` that also writes `source`.
+
+**SHIPPED, TDD red-first.** Spec count corrected 16 → 19 (re-derived file by file, twice wrong
+before). `owner` now gates SCORING, not just rendering — `company_name` is text, so `valueType`
+could not have kept it out of `completenessSummary()` or `PREFILL_KEYS`; registering it would have
+moved every account's strip from "n of 31" to "n of 32". `f()` replaced by object literals +
+`as const satisfies`, which makes the carry guard a REAL discriminated union instead of an
+unreachable promise (the explicit return type erased every literal).
+
+**THE LIVE DEFECT IS CLOSED.** `applyUserBrandToProject` maintained its carry set by hand in three
+places (an 11-key type, an 11-key select, a 14-key literal) against 38 field columns. Now derived
+from `PROJECT_CARRY_KEYS`: **32 columns carry, up from 14.**
+
+**THE STALE ALARM.** `render-coming-soon.mts` held a **20th** hardcoded 14-key list and kept printing
+"copied to a project: 0" hours after the fix landed. A stale alarm is worse than none — the next
+session reads it and re-opens closed work. Now derives; live output reads **30 filled and carried, 1
+dropped** (`button_destinations`, jsonb with its own root, correctly excluded).
+
+**VERIFIED BOTH BUILT EMAILS BY RENDERING, not by the suite.** New Listing 21KB, Coming Soon 23KB,
+both inside Gmail's clip; Coming Soon's four suppression checks all ABSENT. 2407 tests pass / 0 fail;
+`tsc --noEmit` 0 errors.
+
+**NOT DONE, named so it is not mistaken for finished:** 5 of 12 TDD tests, 3 of 19 hand-lists
+replaced. Schema-parity guard NOT built. Blast radius of the carry change NOT checked — every new
+project's blob gains 18 keys; existing projects are NOT backfilled (9 of 11 diverge deliberately, so
+a backfill needs his call). New Listing's headshot renders as a page URL, not an image — found, not
+fixed. Handoff for §2.4 Under Contract:
+`docs/superpowers/plans/2026-08-05-under-contract-24-handoff.md`.
+
 ## 2026-08-05 (Opus 5) — "How do we build everything as a field?" — spec written, and two counted findings the spec exists to fix.
 
 Operator: *"How do we build everything as a field?"* → *"SPEC"* → *"We can still edit if we use
