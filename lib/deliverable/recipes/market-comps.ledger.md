@@ -15,5 +15,10 @@
 - The CTA and hero photo fall through to our own homepage: the recipe does not use
   `listingButtonUrl` and pays for an Apify area query that by vendor design cannot return the
   subject's own record. Named in playbook §2.3.5, check `market_comps_cta_points_at_homepage`.
-- NO CHART is asserted only by `scripts/email/render-market-comps.mts` (one image block max), not by
-  a unit test — the acceptance run is the guard.
+- NO CHART is asserted only by `scripts/email/render-market-comps.mts` (exactly one image block when
+  a subject photo exists), not by a unit test — the acceptance run is the guard. Proven red
+  08/05/2026 by pushing a chart block into `compsMiddle`: exit 1.
+- PAIRED WITH THE ROW RENDERER, and a future session will break this first: `priceKindPhrase`,
+  `sourcedDates` and `sourcedDigits` ALL carry the `dateGrain` rule now. `mdy` survives at exactly
+  one call site (`sourcedDates`) and is correct there ONLY because it is guarded by a day-grain
+  check. Change one, change all three.

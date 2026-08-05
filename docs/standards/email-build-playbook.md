@@ -1287,8 +1287,11 @@ Coming Soon's contract is a SUPPRESSION contract. This email prints the address 
 contract is about the evidence instead — **five assertions, every one read off the built doc or the
 rendered bytes, never off the source:**
 
-1. **NO CHART.** Exactly one `image` block is legal (the subject's own photo). A second one means a
-   chart came back.
+1. **NO CHART, AND THE PHOTO IS STILL THERE.** Exactly one `image` block when we hold a subject
+   photo — that photo. More means a chart came back; fewer means the photo vanished (a ceiling with
+   no floor would pass a chart that REPLACED the photo). **Proven red 08/05/2026** by pushing a
+   chart-shaped block into `compsMiddle` and confirming exit 1 — an assertion that has never gone
+   red is a comment with a `process.exit(1)` attached.
 2. **EVERY COMP ROW CARRIES BEDS AND SQ FT** — the land filter, read back off the render.
 3. **NO RECORDED SALE OLDER THAN 365 DAYS** — parsed from each row's own sale line.
 4. **THE SUBJECT IS NOT ITS OWN COMP.**
@@ -1298,8 +1301,10 @@ rendered bytes, never off the source:**
 **And the one thing nothing surfaced before: DID THE CLAIM GATE FIRE?** `authorCompsCase` drops the
 narrator's paragraph on any violation and logs a single `console.error`. A dropped context ships the
 code-authored verdict ALONE, which reads like a thin email rather than a guard doing its job. The
-script captures that line into the provenance table. **Measured over 5 runs on the same house: 1
-drop, 4 shipped.** That is the gate working, not a bug — but you have to be able to see it.
+script captures that line into the provenance table. **Observed once in five runs on the same
+house** — a tell that the gate fires, NOT a rate: five non-independent runs against one subject is
+nowhere near a frequency, and quoting it as "1 in 5" would be a number nobody measured. That is the
+gate working, not a bug — but you have to be able to see it.
 
 **Acceptance run, 08/05/2026 — 18 of 19 cells sourced, 29KB:** $659,000 · 3 bd · 2 ba · 1,978 sq ft
 · **$333/sq ft against a $210 comp median** · DOM 18 · 5 comparable homes, all recorded sales, **5
@@ -1518,8 +1523,10 @@ operator. Check `market_comps_cta_points_at_homepage`.
 
 **2. THE ADDRESS CARRIES A COMMA US CONVENTION DOES NOT.** The hero prints `8348 Southwindbay Cir,
 Fort Myers, FL, 33908`. It is the vendor's own `formattedAddress`, passed through verbatim by
-`resolve-subject.ts toFacts` — so the wart is on the SHARED SPINE and shows on all seven
-address emails, not just this one. Not fixed: normalising a verbatim vendor string is a
+`resolve-subject.ts toFacts`. **MEASURED ON TWO OF THE SEVEN, 08/05/2026** — Market Comps above,
+and New Listing's own acceptance run prints `12554 Kellysands Way, Fort Myers, FL, 33908`. The other
+five share the same spine and the same `addressLineOf`, so they are IMPLICATED BUT UNCOUNTED; do not
+quote a "all seven" until someone runs them. Not fixed: normalising a verbatim vendor string is a
 one-root change with a seven-email blast radius, and it belongs in a pass that walks all seven.
 
 **3. NO COMMUNITY FACTS, ON PURPOSE.** This recipe's location ban is absolute, not fact-gated — the

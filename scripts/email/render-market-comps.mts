@@ -263,11 +263,22 @@ console.log(
 const fail: string[] = [];
 const warn: string[] = [];
 
-// 1 · NO CHART. One image block is legal: the subject's own photo.
-if (imageBlocks.length > 1) {
+// 1 · NO CHART, AND THE PHOTO IS STILL THERE. Exactly one image block is legal when we
+// hold a subject photo: that photo. A `> 1` test alone would pass a build with ZERO image
+// blocks — a chart that REPLACED the photo, or a photo that silently stopped rendering,
+// both slip through a ceiling with no floor.
+//
+// PROVEN RED 08/05/2026 before being trusted: a chart-shaped image block pushed into
+// `compsMiddle` made this run exit 1 with "A CHART CAME BACK — 2 image blocks". An
+// assertion that has never gone red is a comment with a process.exit(1) attached.
+const expectImages = facts.photos[0] ? 1 : 0;
+if (imageBlocks.length !== expectImages) {
   fail.push(
-    `A CHART CAME BACK — ${imageBlocks.length} image blocks, only the subject photo is legal. ` +
-      `The operator has killed this chart three times; re-read compsMiddle before adding one.`,
+    imageBlocks.length > expectImages
+      ? `A CHART CAME BACK — ${imageBlocks.length} image blocks, only the subject photo is legal. ` +
+          `The operator has killed this chart three times; re-read compsMiddle before adding one.`
+      : `THE SUBJECT PHOTO IS GONE — ${imageBlocks.length} image blocks, expected ${expectImages}. ` +
+          `We hold a photo for this house and the email is not showing it.`,
   );
 }
 
