@@ -53,6 +53,9 @@ import { readdirSync, readFileSync, statSync } from "node:fs";
 import { join } from "node:path";
 
 const BLOCKS_DIR = "lib/email/blocks";
+/** The whole email tree — the palette guard at the bottom scans here, because the defect it
+ *  exists to stop (a replacement palette in `lifecycle-chrome.ts`) was never in a block. */
+const EMAIL_DIR = "lib/email";
 
 /** Raw font size that is not the legal `0` whitespace-killer. */
 const RAW_SIZE = /fontSize:\s*(?!0\s*[,}\n])['"`]?[1-9]/;
@@ -113,5 +116,78 @@ describe("type conformance — every block reads the scale, none restates it", (
     // @react-email's injected ABSOLUTE 24px box, which is what clipped every 36px stat.
     // A hand-typed leading is the same failure wearing a number.
     expect(scan(RAW_LEADING)).toEqual([]);
+  });
+});
+
+// ── THE FONT-FAMILY GUARD — added 08/05/2026 ─────────────────────────────────
+//
+// Operator, on a rendered New Listing email: *"how can we have different fonts if we have
+// rules?"* The honest answer was that the three rules above cover SIZE, WEIGHT and LEADING
+// and nothing covered FONT FAMILY. So `lifecycle-chrome.ts` could — and did — overwrite
+// `globalStyle.fontFamily` and `displayFontFamily` with serif on every listing email, and
+// every guard we own passed. Counted in the rendered artifact: our teal appeared ZERO times
+// and every font declaration was Georgia/Times.
+//
+// A rule that lives only in a document is not a rule. This is the mechanism.
+//
+// SCOPE, deliberately: this fails a hardcoded family in a BLOCK. Blocks render; they must
+// take the family from the doc's `globalStyle` like every other brand value. The stacks
+// themselves live in the font root, and `scale.ts` is exempt for the same reason it is
+// exempt above — it is the one file allowed to state the values.
+describe("brand conformance — no block invents a typeface", () => {
+  it("no block hand-types a font family", () => {
+    // Any literal CSS font stack: a quoted family name followed by a fallback keyword, or a
+    // bare `serif`/`sans-serif`/`monospace` assigned to fontFamily.
+    const RAW_FAMILY =
+      /fontFamily\s*:\s*["'`](?!\$\{)[^"'`]*(?:serif|sans-serif|monospace|Georgia|Arial|Helvetica|Times|Playfair|Inter)/i;
+    expect(scan(RAW_FAMILY)).toEqual([]);
+  });
+});
+
+// ── AND THE GUARD THAT WOULD ACTUALLY HAVE CAUGHT IT ─────────────────────────
+//
+// The block-level check above is necessary and was NOT sufficient: the real defect lived in
+// `lifecycle-chrome.ts`, which is not a block. It declared a whole replacement palette
+// (`EDITORIAL_STYLE`) and spread it over the doc's `globalStyle`, swapping both typefaces and
+// every colour. No block hardcoded anything; the brand was replaced one level up.
+//
+// So this asserts the rule where it was broken: OUTSIDE the two files that legitimately
+// define the brand, nothing may assign a `fontFamily`/`displayFontFamily` or hand-write a
+// palette hex into a globalStyle. `DEFAULT_GLOBAL_STYLE` (default-docs.ts) is the brand;
+// `applyBrand` (brand/) applies the USER's. Everything else consumes.
+describe("brand conformance — nothing outside the brand root replaces the palette", () => {
+  // The files that legitimately DEFINE a palette, each for a stated reason:
+  //   default-docs.ts   — DEFAULT_GLOBAL_STYLE, the SWFL brand itself.
+  //   brand/            — applyBrand, which lays the USER's brand over a doc.
+  //   scale.ts          — the type scale, the one file allowed to state type values.
+  //   types.ts          — the FontFamily union.
+  //   skeleton-style.ts — NEUTRAL_SKELETON_STYLE: a deliberately neutral slate palette for
+  //                       auto-seeded docs, so an unbranded send does not read as OURS in
+  //                       disguise. It keeps MODERN_SANS, so it changes colour and never type.
+  //                       That is the opposite of the deleted editorial palette, which
+  //                       replaced BOTH on docs that already carried a brand.
+  const BRAND_ROOTS = [
+    "doc/default-docs.ts",
+    "brand/",
+    "blocks/scale.ts",
+    "doc/types.ts",
+    "doc/skeleton-style.ts",
+  ];
+
+  function scanTree(dir: string, re: RegExp): string[] {
+    const found: string[] = [];
+    for (const file of sourceFiles(dir)) {
+      const rel = file.split("\\").join("/");
+      if (BRAND_ROOTS.some((r) => rel.includes(r))) continue;
+      if (rel.includes(".test.")) continue;
+      found.push(...hits(rel, readFileSync(file, "utf8"), re));
+    }
+    return found;
+  }
+
+  it("no file outside the brand root assigns a typeface into a style object", () => {
+    // `fontFamily: "BOOK_SERIF" as FontFamily` — the exact shape of the deleted palette.
+    const ASSIGNS_FAMILY = /(?:display)?[fF]ontFamily\s*:\s*["'`][A-Z_]+["'`]/;
+    expect(scanTree(EMAIL_DIR, ASSIGNS_FAMILY)).toEqual([]);
   });
 });

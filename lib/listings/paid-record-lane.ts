@@ -37,7 +37,11 @@
 // column, NO description and NO photo gallery AT ALL. Those three exist nowhere but
 // this already-purchased row. Filling them here is the least-expensive lane there is:
 // the rows are on disk, bought, and this issues no vendor call.
-import { fetchCachedRecords, type StoredApifyRecord } from "./apify-record-store";
+import {
+  fetchCachedRecords,
+  fetchCachedRecordLoose,
+  type StoredApifyRecord,
+} from "./apify-record-store";
 import { listingAddressKey } from "./apify-baths";
 import type { ListingFacts } from "@/lib/email/listing-scrape";
 
@@ -125,6 +129,7 @@ export interface PaidLaneFill {
   sqft: boolean;
   lotSize: boolean;
   yearBuilt: boolean;
+  listingUrl: boolean;
 }
 
 export const NO_FILL: PaidLaneFill = {
@@ -136,6 +141,7 @@ export const NO_FILL: PaidLaneFill = {
   sqft: false,
   lotSize: false,
   yearBuilt: false,
+  listingUrl: false,
 };
 
 export interface PaidLaneDeps {
@@ -155,7 +161,15 @@ export async function fillFromPaidRecord(
   facts: ListingFacts,
   deps: PaidLaneDeps = {},
 ): Promise<PaidLaneFill> {
-  const street = facts.address;
+  // THE STREET LINE, NOT THE WHOLE ADDRESS.
+  //
+  // `facts.address` is the FULL printable address — "12554 Kellysands Way, Fort Myers, FL
+  // 33908" — while every stored `address_key` was built from the STREET column alone
+  // ("12554 Kelly Sands Way" + "Fort Myers"). Feeding the full string in produced
+  // "12554 kellysands way fort myers fl 33908 fort myers", which can never equal a stored
+  // key, so this lane missed on every address that carried a comma. Both halves of the join
+  // now normalise the same way — the discipline this file's own header preaches.
+  const street = facts.address?.split(",")[0]?.trim();
   const city = facts.city;
   if (!street || !city) return { ...NO_FILL };
 
@@ -164,6 +178,14 @@ export async function fillFromPaidRecord(
     const read = deps.readCache ?? fetchCachedRecords;
     const key = listingAddressKey(street, city);
     row = (await read([key], SPEC_MAX_AGE_DAYS)).get(key);
+    // SECOND KEY — the same house, spelled differently by the two feeds. The daily sweep
+    // writes "12554 Kellysands Way"; the paid record writes "12554 Kelly Sands Way". Counted
+    // live 08/05/2026: the exact key alone reaches 8 of our 26 paid rows, and ignoring
+    // spacing reaches 5 more. Tried only AFTER the exact key misses, so it can never
+    // override a real hit. See `fetchCachedRecordLoose` for the collision measurement.
+    if (!row && !deps.readCache) {
+      row = await fetchCachedRecordLoose(street, city, SPEC_MAX_AGE_DAYS);
+    }
   } catch {
     // A dead connection may not fail an email build. RULE 0.7.
     return { ...NO_FILL };
@@ -241,6 +263,22 @@ export async function fillFromPaidRecord(
     if (yb != null) {
       facts.yearBuilt = String(yb);
       fill.yearBuilt = true;
+    }
+  }
+
+  // THE LISTING'S PUBLIC PAGE — the one thing the whole "View the Full Listing" button
+  // needs, and the ONE place we hold it. `property_url` is the vendor's own url STRING,
+  // stored verbatim; counted live 08/05/2026 it is present on **26 of 26 rows**, the
+  // best-filled column on the table. The free spine has NO url column at all (read from
+  // information_schema, all 42 columns — there is no `listing_url`, no `source_url`).
+  //
+  // Never fetched to confirm and never derived from the permalink formula — see
+  // `lib/listings/listing-url.ts` for why that idea is closed.
+  if (!facts.listingUrl) {
+    const u = row.property_url;
+    if (typeof u === "string" && /^https?:\/\/\S+$/i.test(u.trim())) {
+      facts.listingUrl = u.trim();
+      fill.listingUrl = true;
     }
   }
 

@@ -22,6 +22,7 @@ import { parseListingDetail } from "@/lib/listings/listing-detail";
 import type { ListingDetailFacts } from "@/lib/listings/listing-detail";
 import type { ResolvedCommunityStats } from "@/lib/listings/community-lookup";
 import type { ResolvedNeighborhood } from "@/lib/listings/neighborhood-amenities";
+import type { InsideTheGate } from "@/lib/listings/community-inside-the-gate";
 
 export interface ListingFacts {
   address?: string;
@@ -57,6 +58,14 @@ export interface ListingFacts {
    *  values were `0`, counted live 08/05/2026), so a zero is dropped here and the
    *  cell stays an open slot rather than rendering a fabricated "$0/mo". */
   hoaFee?: number;
+  /** THE PUBLIC LISTING PAGE — where the single "View the Full Listing" button points.
+   *  Filled verbatim from the paid record's own `property_url` (26 of 26 rows carry it,
+   *  counted live 08/05/2026) or from the agent's pasted link. **Never derived, never
+   *  fetched to confirm** (operator, 08/05/2026: "we aren't fucking scrapping").
+   *  ABSENT MEANS NO BUTTON — see `lib/listings/listing-url.ts`. It is deliberately a
+   *  DIFFERENT field from `sourceUrl`: that one is the citation and legitimately holds
+   *  our own site, which is the one value a listing button may never carry (§1.8). */
+  listingUrl?: string;
   sourceUrl: string; // the citation
   /** THE COMMUNITY — golf, pool, gated, clubhouse — parsed from the SAME html this function
    *  already fetched, so it costs no extra request. The index scrape never captured any of
@@ -64,6 +73,14 @@ export interface ListingFacts {
    *  Absent/`ok:false` when the page didn't state it — and absent must stay SILENT, never
    *  become "no golf". */
   community?: ListingDetailFacts;
+  /** INSIDE THE GATE, from our own `community_profiles` table (81 rows, counted live
+   *  08/05/2026) rather than from a listing page — so it reaches an email built from a
+   *  TYPED ADDRESS, which `community` above never could (it is parsed from html the
+   *  pasted-URL lane fetched). Same three-layer prohibition applies: this is what a
+   *  RESIDENT can use, `neighborhood` is what is nearby, `communityStats` is size and
+   *  assessed value. Absent is the normal case (81 profiles against 20,400 subdivisions)
+   *  and absent stays SILENT — never "this community has no golf". */
+  insideTheGate?: InsideTheGate;
   /** THE NEIGHBORHOOD -- home count + median ASSESSED value, resolved from this listing's
    *  street address against our own tax-roll parcel data (universal: every home in Lee +
    *  Collier, unlike `community` above which only covers listings we could scrape). Absent

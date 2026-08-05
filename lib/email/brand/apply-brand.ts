@@ -118,5 +118,13 @@ export function applyBrand(doc: EmailDoc, t?: Record<string, string>): EmailDoc 
     }
     return { ...b, props } as EmailBlock;
   });
-  return { globalStyle, blocks };
+  // SPREAD THE DOC. This used to return a bare `{ globalStyle, blocks }`, which silently
+  // DELETED every other field on the document — and the one that matters is
+  // `subjectVariants`. Caught 08/05/2026: a New Listing doc carrying the subject
+  // "Just listed: 12554 Kellysands Way" came out of the overlay with no subject at all.
+  //
+  // The brand overlay is stop 4 of five and runs AFTER the recipe has authored, so anything
+  // the recipe set that is not a block or a style was being thrown away here by construction.
+  // An overlay paints; it does not replace the canvas.
+  return { ...doc, globalStyle, blocks };
 }

@@ -84,9 +84,14 @@ describe("BRAND IS STICKY — the editorial palette must not stomp a real brand"
     expect(built.globalStyle.fontFamily).toBe(DEFAULT_GLOBAL_STYLE.fontFamily);
   });
 
-  it("still applies the editorial palette to a genuinely blank seed", () => {
-    // The palette was built for this case and KEEPS working — the fix narrowed the
-    // predicate, it did not delete the fallback.
+  it("renders a genuinely blank seed in OUR brand — never an invented palette", () => {
+    // INVERTED 08/05/2026. This used to assert the editorial gold #B98F45 landed here, and
+    // that assertion is exactly what let the bug live: it PINNED the stomp as correct.
+    // Operator, on a real rendered email: "where the fuck are our fucking brand color... is
+    // this the right font?" Measured in that artifact — our teal appeared ZERO times and
+    // every font declaration was Georgia/Times serif.
+    //
+    // A blank brand is not permission to invent one. It renders in ours.
     const built = buildLifecycleEmail(
       {
         globalStyle: DEFAULT_GLOBAL_STYLE,
@@ -94,7 +99,10 @@ describe("BRAND IS STICKY — the editorial palette must not stomp a real brand"
       },
       chrome,
     );
-    expect(built.globalStyle.accentColor).toBe("#B98F45");
+    expect(built.globalStyle.accentColor).toBe(DEFAULT_GLOBAL_STYLE.accentColor);
+    expect(built.globalStyle.primaryColor).toBe(DEFAULT_GLOBAL_STYLE.primaryColor);
+    expect(built.globalStyle.fontFamily).toBe(DEFAULT_GLOBAL_STYLE.fontFamily);
+    expect(built.globalStyle.accentColor).not.toBe("#B98F45");
   });
 });
 

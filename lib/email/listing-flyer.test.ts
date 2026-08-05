@@ -76,8 +76,14 @@ test("flyer builds THE SAMPLE'S LAYOUT — ribbon, centred address over price, o
 
   // WHICH NUMBER MATTERS: $/sq ft wins a listing argument; Type is context.
   const cells = s?.type === "stats" ? s.props.stats : [];
-  expect(cells.find((c) => c.label === "$/Sq Ft")?.emphasis).toBe("primary");
-  expect(cells.find((c) => c.label === "Type")?.emphasis).toBe("muted");
+  // INVERTED 08/05/2026. This pinned `$/Sq Ft` as the emphasised cell, which rendered it at
+  // 28px against 16px for every other cell in the same six-cell strip — measured in a real
+  // email. Operator: "why the fuck is sq ft number bigger than everything else?" The asking
+  // price is the argument on a new listing and it is already the hero at 44px right above.
+  // THE STRIP READS EVEN: no cell carries emphasis.
+  expect(cells.every((c) => c.emphasis === undefined)).toBe(true);
+  // …including Type: a shrunken cell in an even row is a ragged row, not de-emphasis.
+  expect(cells.find((c) => c.label === "Type")?.emphasis).toBeUndefined();
 
   // NO FOOTNOTE ON $/SQ FT (operator, 07/20/2026, on reading it in a real inbox). Price
   // over square footage is the most self-evident derivation in residential real estate,
@@ -162,12 +168,16 @@ test("no photo → an EMPTY photo block (the canvas drag-drop), never refuses", 
   expect(photo?.type === "image" && photo.props.url).toBe("");
 });
 
-test("blank brand gets the editorial palette; a real brand is preserved", () => {
-  // Blank brand = house default accent → editorial fallback applies.
+test("EVERY brand renders as given — ours on a blank doc, theirs on a branded one", () => {
+  // INVERTED 08/05/2026 along with its twin in lifecycle-chrome.test.ts. It used to assert
+  // that a blank doc came back gold #B98F45, which pinned the palette stomp as intended
+  // behaviour and is why it survived a month of tests.
   const houseDoc = SEED_DOCS.find((s) => s.id === "market-spotlight")!.build();
-  const editorial = buildListingFlyer(FACTS, houseDoc);
-  expect(editorial.globalStyle.accentColor).toBe("#B98F45");
-  // A real brand (branded doc sets #C17B3E) is left untouched.
+  const house = buildListingFlyer(FACTS, houseDoc);
+  expect(house.globalStyle.accentColor).toBe(houseDoc.globalStyle.accentColor);
+  expect(house.globalStyle.fontFamily).toBe(houseDoc.globalStyle.fontFamily);
+  expect(house.globalStyle.accentColor).not.toBe("#B98F45");
+  // A real brand (branded doc sets #C17B3E) is left untouched — unchanged guarantee.
   const branded = buildListingFlyer(FACTS, brandedCurrentDoc());
   expect(branded.globalStyle.accentColor).toBe("#C17B3E");
 });

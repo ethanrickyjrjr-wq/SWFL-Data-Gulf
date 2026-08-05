@@ -245,3 +245,66 @@ export async function fetchCachedRecords(
     return out;
   }
 }
+
+/**
+ * THE SAME ADDRESS, SPELLED TWO WAYS — every non-alphanumeric removed, not folded to a
+ * space. `listingAddressKey` preserves word breaks, which is correct as the PRIMARY key
+ * and is exactly what makes the two feeds miss each other:
+ *
+ *   the daily sweep writes  "12554 Kellysands Way"
+ *   the paid record writes  "12554 Kelly Sands Way"
+ *
+ * One street, one house, two spellings, no join.
+ */
+export function looseAddressKey(street: string, city: string): string {
+  return `${street} ${city}`.toLowerCase().replace(/[^a-z0-9]+/g, "");
+}
+
+/**
+ * Find the paid row for ONE address when the exact key missed, by house number + city,
+ * matched on `looseAddressKey`.
+ *
+ * ── WHY THIS EXISTS, WITH THE NUMBER ─────────────────────────────────────────
+ * Counted live 08/05/2026 over all 26 paid rows against the active book: **8 join on the
+ * exact key. Five more join only once spacing is ignored** — McGregor Woods / Mcgregorwoods,
+ * Kelly Sands / Kellysands, Marco Island / Marcoisland, Creekside View / Creeksideview,
+ * Bristol Bnd / Bristolbnd. That is a 62% lift (8 → 13) on rows we had already paid for and
+ * could not reach, and it is why the demo house rendered every paid cell as an open slot.
+ *
+ * ── WHY IT IS SAFE, ALSO WITH THE NUMBER ─────────────────────────────────────
+ * Despacing can in principle merge two different addresses. Measured across **30,655 active
+ * listings it produces 25 collisions, and every one is the SAME place spelled two ways**
+ * ("fort denaud rd" / "fortdenaud rd", "cape coral" / "capecoral"). Those are the pairs we
+ * want merged. The house number and the city both stay in the key, so the "330 5th St,
+ * Naples vs Fort Myers" hazard the exact key exists to stop is untouched.
+ *
+ * SECONDARY ONLY — the caller tries the exact key first, and this never overrides a hit.
+ * Never throws; a miss is `undefined`.
+ */
+export async function fetchCachedRecordLoose(
+  street: string,
+  city: string,
+  maxAgeDays = 30,
+): Promise<StoredApifyRecord | undefined> {
+  const houseNumber = street.trim().split(/\s+/)[0] ?? "";
+  if (!/^\d+$/.test(houseNumber) || !city.trim()) return undefined;
+  const want = looseAddressKey(street, city);
+  try {
+    const cutoff = new Date(Date.now() - maxAgeDays * 86_400_000).toISOString();
+    const db = createServiceRoleClientUntyped();
+    const { data } = await db
+      .schema("data_lake")
+      .from("apify_property_records")
+      .select("*")
+      .ilike("city", city.trim())
+      .ilike("street", `${houseNumber} %`)
+      .gte("fetched_at", cutoff)
+      .limit(25);
+    if (!Array.isArray(data)) return undefined;
+    return (data as StoredApifyRecord[]).find(
+      (r) => looseAddressKey(String(r.street ?? ""), String(r.city ?? "")) === want,
+    );
+  } catch {
+    return undefined;
+  }
+}
