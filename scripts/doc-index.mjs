@@ -37,10 +37,35 @@ const ROOT = join(dirname(fileURLToPath(import.meta.url)), "..");
 const SKILL_DIR = join(ROOT, ".claude", "skills", "what-do-we-have");
 const OUT = join(SKILL_DIR, "INDEX.md");
 
+/** APPEND-ONLY LOGS whose newest entry changes on EVERY push. Their first-prose line is
+ *  worthless as a hook (it is just whatever landed last) and it would make this index
+ *  churn on every single commit — which would make Gate 1.5 demand a second "regenerate"
+ *  commit on every push forever.
+ *
+ *  *** THAT FRICTION IS HOW A GATE DIES. *** A guard that fires on every push regardless
+ *  of whether anything meaningful changed gets bypassed, then disabled, then deleted
+ *  (documented pattern in this repo: ops-repo push-hook friction). So these get a FIXED
+ *  description and the index stays stable unless the DOC SET actually changes. The index
+ *  is a map of what EXISTS — it is not a mirror of content. Found 08/05/2026 when the
+ *  gate blocked three consecutive pushes over nothing but a new SESSION_LOG entry. */
+const VOLATILE_LOGS = new Map([
+  [
+    "SESSION_LOG.md",
+    "Append-only session log — newest entry on top. RULE 0: write before every push.",
+  ],
+  [
+    "_ASSISTANT/SCRATCHPAD.md",
+    "Append-only operator gripes/corrections — RULE 2. Read at session start.",
+  ],
+  ["_ASSISTANT/TODAY.md", "What is in flight right now — open checks, last ship."],
+]);
+
 /** Pull a usable one-line hook out of a doc: its first heading, plus the first line of
  *  real prose. Headings alone are often useless ("# Overview"), and prose alone often
  *  lacks the noun you would search for, so both are kept and joined. */
 function hookFor(relPath) {
+  const fixed = VOLATILE_LOGS.get(relPath);
+  if (fixed) return { title: "", hook: fixed };
   let text;
   try {
     text = readFileSync(join(ROOT, relPath), "utf8");
