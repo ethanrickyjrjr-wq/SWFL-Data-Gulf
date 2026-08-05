@@ -1,3 +1,227 @@
+## 2026-08-05 (Opus 5) — OPERATOR: "Just had a sonnet review this. Can you see if they found any issues?" — I COULD NOT. A review run in another session is INVISIBLE to this one.
+
+He ran a Sonnet review of the brand-field-registry spec in a different session, then asked this
+session to act on it while away from the computer. **Nothing was findable.** Searched: the spec's
+git history (ONE commit, `426dbe75`, no uncommitted edits), every file touched in the last 8 hours
+(all 8 are the parallel session's market-comps work), untracked files matching
+review/audit/critique/feedback (none), and a tree-wide grep for the spec's own facet names.
+
+**THE GAP, and it is structural, not a one-off:** a review that lives only in another session's
+context does not exist to any other session. He experiences it as "I had it reviewed"; the next
+session experiences it as nothing. This will happen every time he reviews in one window and asks
+in another — and the failure is SILENT, because the asked-session's only honest move is to say
+"I can't see it," which reads like the work was skipped.
+
+**THE FIX WHEN HE IS BACK (needs his call, not mine):** a review that matters gets written to disk
+before the session that produced it ends — the existing `_RESEARCH/` or a `reviews/` sibling — the
+same way SESSION_LOG exists because a diary in context survives nothing. Until then, the honest
+answer to "did you see the review" is no, and this entry is so he does not have to discover that
+twice.
+
+Proceeded on his "or build" — spec amended from my own verification pass, TDD started. NOT pushed.
+
+## 2026-08-05 (Opus 5) — OPERATOR DECREE, LOCKED: "First make sure we are checking all free lanes and in-house data before anyone runs fucking apify and then build… we aren't running extra fucking runs for shit we already have!!!!!!"
+
+**THE ORDER, AND IT IS NOT NEGOTIABLE: free spine → in-house rows we already bought → ONLY THEN
+paid.** Widen the paid lane later, per-field, and only when we KNOW our own coverage on that
+field is thin (his example: baths). Never a paid call for a field we already hold.
+
+**COUNTED LIVE 08/05/2026 against our own database — this is why he is right:**
+
+`data_lake.apify_property_records` — **383 rows we have ALREADY PAID FOR**, and they are nearly
+fully populated on every single field the paid lane kept re-buying:
+- property_url **100.0%** (383/383) · style **99.5%** · year_built **98.7%** · baths_total
+  **98.2%** · beds **98.4%** · sqft **95.3%** · primary_photo **94.5%** · alt_photos **94.0%**
+  · description **93.5%**
+
+`data_lake.listing_state` — the FREE spine, 35,202 rows:
+- photo_url **98.5%** · beds **73.7%** · sqft **70.6%** · **baths 31.2%**
+
+**SO: photos are a SOLVED problem for free (98.5%), and the one genuinely thin field is BATHS —
+exactly the field he named.** That is the only place a per-field paid lane has an argument, and
+even there the already-bought rows carry baths on 98.2%.
+
+**⚠️ A STALE NUMBER IN OUR OWN CODE, found by this count.** `lib/listings/paid-record-lane.ts`
+header states the free spine carries **baths 15.3%** (Lee 13.1% / Collier 17.5%), counted
+08/05/2026. Live today it is **31.2% (10,991/35,202)** — it roughly DOUBLED, almost certainly the
+LeePA layer-23 beds/baths join landing. A comment quoting 15.3% is what justifies paying for
+baths. Fix the comment, and re-derive coverage before ever citing it as a reason to spend.
+
+**THE FREE LANE WE ARE NOT EVEN FULLY USING BEFORE PAYING.** `paid-record-lane.ts` tries the
+exact `listingAddressKey` and THEN a LOOSE key (`fetchCachedRecordLoose`) — because the daily
+sweep writes "12554 Kellysands Way" and the paid row writes "12554 Kelly Sands Way". Counted
+08/05: exact reaches 8 of 26 rows, loose reaches **5 more**. **`resolveCompEnrichment` (the comp
+lane, the one that spends the $1.95) only ever tries the EXACT key.** So we skip a free lane that
+is worth ~60% more cache hits, and then buy a ZIP month. That is "running extra runs for shit we
+already have" in one sentence.
+
+**BUILD ORDER SET BY THIS DECREE:** (1) exhaust free + in-house in the comp lane — loose key,
+free spine, already-bought rows — and log what is genuinely still missing; (2) only then consider
+paid, per FIELD not per area; (3) the per-property detail lane
+(`apify_per_property_lane_wire`) is for what survives step 1, nothing else.
+
+## 2026-08-05 (Opus 5) — OPERATOR: "We can build our own fucking actors! Why the fuck would we not build an actor for the actual information needed. If we need one bath number and it costs .01, why wouldn't we run that actor?????????????"
+
+**HE IS RIGHT, AND I GUARDED THE WRONG THING. The unit price was NEVER the problem — the
+QUERY was. I turned spending OFF when the fix was to buy the RIGHT ONE RECORD.**
+
+**THE FINDING THAT MAKES THIS INDEFENSIBLE — verified live 08/05/2026 via crawl4ai against
+`https://apify.com/one-api/realtor-property-scraper`, the vendor's own store page, VERBATIM:**
+
+> "**Need just one property?** Use the `property_inputs` section — **auto-detects `property_id`,
+> URL, or address**."
+
+**OUR OWN CODE SAYS THE OPPOSITE AND THAT IS WHY WE NEVER USED IT.** `apify-identity.ts:134-137`
+states this actor is *"keyed on `property_inputs: [<realtor.com detail URL>]`, and the lake comp
+lane carries no detail URL — so it is only ever reachable DOWNSTREAM of the dated ZIP pull."*
+**THAT CLAIM IS FALSE.** It takes an ADDRESS. We have addresses. It was reachable the whole time.
+Same false claim is mirrored in `data-roots.md:405-406` and the design spec §3 ("deferred").
+
+**THE MONEY THAT COMMENT COST, in the vendor's own units:**
+- What we did: **~200 records @ $0.01 = ~$1.95 per sale month**, to join 2 of 6 comps.
+- What was available: **6 comps × 1 result @ ~$0.007 = ~$0.042**, each one the RIGHT house.
+- **That is ~46x, and the cheap lane is also the ACCURATE one** — no area-centre guessing, no
+  `matchesAddress` rejecting 194 strangers we paid for.
+- Pricing note from the same page: *"Pay per result — you only pay for dataset items the Actor
+  pushes. Failed inputs return a row with `Status: ERROR` and are billed the same."* So a miss
+  costs $0.007, not $1.95.
+
+**CORRECTION TO MY OWN ANSWER, same session — I SAID "WE HAVE NEVER BUILT AN ACTOR." THAT IS
+FALSE, AND I SAID IT BECAUSE I GREPPED THE WRONG TREE.** `_RESEARCH/competitor-and-strategy/
+2026-08-03-apify-actor-fit-assessment.md`, read in full on the forced redo:
+
+- **WE ALREADY BUILT AND DEPLOYED ONE, 08/03/2026, IN ABOUT AN HOUR.** `swfl-market-pulse`,
+  Actor ID `7XwiUmlTzzxvWMbsr`, JS template, ~70-line `src/main.js`. Remote Docker build 0.0.1
+  SUCCEEDED; cloud run `3n0WpvFUdWLZvNfLy` SUCCEEDED, 7 items, exit 0.
+- **MEASURED COST: $0.000665/run — ~1,500 runs per dollar**, at the default 4096MB, and memory
+  could drop to 256MB and cut that ~16x.
+- It is at `C:\Users\ethan\dev\swfl-market-pulse` — **its OWN repo, outside brain-platform**,
+  which is exactly why my tree-wide grep for `.actor/` found nothing and I reported zero
+  scaffolding. The grep was correct; my conclusion from it was not.
+- `apify-cli` 1.7.1 is installed and **logged in** as `rectangular_horn`. Not a hypothetical.
+
+**SO THE OPERATOR IS MORE RIGHT THAN I CREDITED: not "we could build one" — we DID, it took an
+hour, and it runs for two thirds of a tenth of a cent.**
+
+**AND THE PER-PROPERTY DETAIL LANE WAS ALREADY RUN LIVE ON 08/03.** Same research, §ADDENDUM:
+run `y6PbRIwA5FJvbOUfP` against `one-api/realtor-property-scraper` returned a 92,784-byte `Raw`
+blob carrying the **full 3,000-char MLS description on an ALREADY-SOLD home**, plus
+`property_history[]` with per-event photos, street_view_url, schools, tax assessments. It works.
+It was PROVEN. Total spend to prove the whole 2-step recipe: **~$0.80.**
+
+**THE RESEARCH ALREADY PRESCRIBED THE EXACT DESIGN AND THE SPEC DEFERRED IT.** Verbatim: *"2.
+DETAIL (**only for homes actually featured in an email**) — `one-api/realtor-property-scraper`,
+$0.007/result."* Bulk for the area, detail for the houses that actually ship. That is precisely
+what the operator just asked for, written down 2 days ago, proven with live runs, and then
+`docs/superpowers/specs/2026-08-03-apify-comp-email-design.md` §3 marked step 2 **"DEFERRED"** —
+so we shipped the expensive half and skipped the cheap half.
+
+**BE FAIR ABOUT WHERE THE FALSE CLAIM ENTERED.** The research says `property_inputs:
+[<realtor.com detail URL>]` because a URL is what they TESTED with — it never claimed an address
+was impossible. `apify-identity.ts` escalated that into *"it is keyed on [URL] … so it is only
+ever reachable DOWNSTREAM of the dated ZIP pull."* **A description of one tested input became a
+stated vendor limitation, and that invented limitation is what closed the cheap lane.**
+
+**THE STANDING PRINCIPLE HE JUST SET, in his words: if the information we need is one field and
+it costs a penny, BUY THAT FIELD.** Never buy an area and sift it. The guard I shipped (paid lane
+off by default) is a floor against runaway spend, NOT the answer, and it must not become the
+reason the product ships without photos.
+
+**NEXT — not done yet:** wire `one-api/realtor-property-scraper` `property_inputs` as the
+per-address lane (the thing `apify-identity.ts` says never to build, for a reason that turns out
+to be wrong about THIS actor), keep the dated ZIP pull only as a bulk fallback, and re-verify the
+$0.007 against the actor's own pricing tab. Check: `apify_per_property_lane_wire`.
+
+## 2026-08-05 (Opus 5) — OPERATOR: "Claude fucking sucks. Figure out what the fuck this fucking terrible AI was doing and make sure this is guarded. Apify"
+
+**GUARDED. The spend is now OFF BY DEFAULT and proven so by running the exact script that
+cost $14.08.** This closes the money half of the entry below it; the entry below stays for
+the diagnosis.
+
+**WHAT THE PREVIOUS SESSION WAS ACTUALLY DOING** — three separate defects, all money:
+1. **Seven acceptance renders, seven full purchases.** `scripts/email/render-market-comps.mts`
+   spent real money BY DEFAULT. It is the script you re-run while iterating, so it was the
+   worst possible thing to leave billable.
+2. **A button paid $0.05 per build to learn nothing.** The subject-record call passed the
+   subject's own address as `location`, but this actor treats an address as an AREA CENTRE
+   and never returns the centre's own record — our own `apify-identity.ts` header proved
+   that on 08/04. `pickAddressMatch` returned null EVERY time. Deleted; the URL was already
+   on disk (`property_url`, 26 of 26 rows).
+3. **The receipt was a false-pass instrument.** It counted rows ADDED to our cache — which is
+   0 when you re-buy the same 200 houses — so it printed "0 bought" while $2.00 was charged,
+   and I reported that to him as fact.
+
+**THE GUARD — `lib/listings/apify-spend-guard.ts`, wired into `runApifyActor`.** It sits at
+the ONE place money leaves the process, BELOW the `deps.runActor` seam every test injects, so
+no caller present or future can route around it. `OPERATOR_APPROVED_PAID_RUN=1` (the repo's
+existing idiom, not a new variable) arms it; absent that, every vendor call is refused. A
+300-result / ~$3 per-process budget stops a runaway loop inside an armed run. Charged on the
+REQUESTED cap BEFORE the call, because a call that returns 200 has already been billed.
+
+**A REFUSAL IS LOUD AND NAMED, because this directory has two scars from a silent `[]`** (the
+`APIFY_KEY` name mismatch, the 403 monthly-limit) that both read as "this market has no
+houses". The comps floor warning now asks the ledger and says "the paid lane was REFUSED"
+instead of sending the next reader hunting a vendor outage.
+
+**PROVEN, not announced** — `bun scripts/email/render-market-comps.mts`, no env, unchanged
+invocation:
+```
+[apify-spend-guard] PAID LANE OFF — refused to buy 200 record(s). *** THIS IS NOT "NO RESULTS" ***
+  paid lane           OFF — no vendor call was made, nothing was billed
+  results committed   0 (~$0.00 at $0.01/result)
+  refusals            1  ← empty photo/link slots below are THIS, not an empty market
+```
+The email still built and all 4 evidence assertions passed. 1,498 tests green, `bunx next build` green.
+
+**STILL OPEN, each with a check (RULE 2.4) — I am not calling this finished:**
+- `apify_purchased_window_memo` — the STRUCTURAL root of the re-buy is untouched.
+  `resolveCompEnrichment` returns early only when `missing.length === 0`, so ONE comp the ZIP
+  pull never returns re-buys every sale month on every build, forever. The switch makes it
+  non-urgent (it can't run unattended now); the memo needs a real design pass.
+- `apify_baths_per_address_contradiction` — `apify-baths.ts` says the vendor honours a street
+  address; `apify-identity.ts` proves live it does not. Both in one directory. If identity is
+  right, that lane bills one call per address for a guaranteed null. Settle it from records we
+  ALREADY BOUGHT — not another probe.
+- `apify_unit_price_rule04_verify` — $0.01/result is what we were CHARGED, never checked
+  against the live store page. crawl4ai, not another actor run.
+
+## 2026-08-05 (Opus 5) — OPERATOR: "What do you mean a fucking button uses apify??? 3.95 to build one fucking house email?! They are fractions of a fucking penny to run!!! What the fuck did you do?"
+
+**HE IS RIGHT AND MY NUMBER WAS ALSO WRONG — IT WAS WORSE. Pulled the vendor's OWN billing API
+(`/v2/actor-runs`, actor T5QRnLKtyvzxjWVRH) rather than trusting our code's estimate:**
+
+- **MY WALK COST $14.08 across 21 runs, not $3.95.** Today's total on that actor: **$14.37 / 51 runs.**
+- Charge shape today: **$2.0000 x1 · $1.9501 x6 · $0.0501 x6 · $0.0100 x37 · $0.0001 x1.**
+- **EVERY render bought a fresh ~195-200-result ZIP month (~$1.95) PLUS a 5-result subject query
+  (~$0.05). Seven renders, seven purchases. THE CACHE PREVENTED NOTHING.**
+
+**MY "SPEND RECEIPT" WAS A FALSE-PASS INSTRUMENT AND I REPORTED ITS ANSWER AS FACT.** It counted
+ROWS ADDED to `data_lake.apify_property_records` before/after. Re-buying the SAME 200 houses upserts
+to ZERO new rows — so it printed "NEW HOUSES BOUGHT THIS RUN: 0" while $1.95 was being charged. I
+told him "second build cost zero". It cost $2.00. This is exactly the check-signal trap: a signal
+that passes while the thing is broken. The receipt must read the VENDOR'S charge, never our own
+row delta.
+
+**"A BUTTON USES APIFY" — YES, AND HE IS RIGHT THAT IT IS ABSURD.** `buildMarketComps` pays
+`fetchApifyComps({location: <the subject's own address>, maxResults: 5})` to find the subject's own
+listing URL for the "Find Out More" button (plus description + style). That is the **$0.0501 x6**
+line — one per render. And the vendor CANNOT return the subject's own record for an address query
+(it treats the address as an area centre) — so it is **$0.05 per email, forever, to join zero**, and
+the button still falls back to our homepage. Check `market_comps_cta_points_at_homepage` already
+open; the money side was NOT in it.
+
+**"FRACTIONS OF A PENNY" — the UNIT is $0.01/result (our code) and the real charges divide exactly
+by that ($1.9501 = 195 results + $0.00005 start). So the unit is not the problem. THE VOLUME IS: we
+buy 200 records to enrich 3 comps.** Whether $0.01/result is even the right unit is UNVERIFIED
+against the live Apify store page — RULE 0.4 pass owed.
+
+**SUSPECTED ROOT OF THE RE-BUY (to confirm):** `resolveCompThumbnails(pool, ...)` is handed the
+POOL (up to 12 candidates), not the 5 comps that ship. Any pooled comp the ZIP pull never returns
+never lands in the cache, so `missing` is never empty and the whole month gets re-bought on every
+single build, forever.
+
+OPEN — nothing about this is fixed yet.
+
 ## 2026-08-05 (Opus 5) — OPERATOR on SHOWCASE: variety was the whole point, and it got us lost
 
 OPEN. Verbatim: *"For showcase, showing different builds was the purpose, we just can't do it
