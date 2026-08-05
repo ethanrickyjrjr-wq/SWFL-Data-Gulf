@@ -51,6 +51,12 @@ export interface ListingFacts {
    *  first-seen floor. Present → recipes use it directly and skip the two-call
    *  vendor list-date chain. Never a floored count, never invented. */
   daysOnMarket?: number;
+  /** Monthly HOA fee, from the paid record we already hold for this address
+   *  (`lib/listings/paid-record-lane.ts`). **ONLY EVER GREATER THAN ZERO** — the
+   *  vendor's `0` is indistinguishable from an unfilled field (7 of 19 non-null
+   *  values were `0`, counted live 08/05/2026), so a zero is dropped here and the
+   *  cell stays an open slot rather than rendering a fabricated "$0/mo". */
+  hoaFee?: number;
   sourceUrl: string; // the citation
   /** THE COMMUNITY — golf, pool, gated, clubhouse — parsed from the SAME html this function
    *  already fetched, so it costs no extra request. The index scrape never captured any of

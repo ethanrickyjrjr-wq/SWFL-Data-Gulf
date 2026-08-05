@@ -19,6 +19,7 @@ import { getAnthropic } from "@/refinery/agents/anthropic.mts";
 import { EMAIL_MODEL_SONNET } from "@/lib/email/model-router";
 import { resolveSubjectListing } from "@/lib/listings/resolve-subject";
 import { mirrorHeroPhoto } from "@/lib/media/hero-photo";
+import { fillFromPaidRecord, NO_FILL } from "@/lib/listings/paid-record-lane";
 import { listingDescriptionFromPrompt } from "@/lib/email/listing-intent";
 
 import { auditClaims, numeralsIn, CLAIM_PROHIBITION } from "@/lib/deliverable/claims";
@@ -196,6 +197,15 @@ export async function resolveSubject(address: string, prompt: string): Promise<R
   ]);
   if (mirrored) facts.photos[0] = mirrored;
   if (neighborhood) facts.neighborhood = neighborhood;
+
+  // LANE 3 — THE PAID ROW WE ALREADY OWN. Every email starts at the same spot, so
+  // this sits HERE and not in any one recipe. Gap-fill only: the full MLS description,
+  // the 9-to-55-photo gallery, the bath count (the only source at all for a Collier
+  // listing), and an HOA fee that is greater than zero. It spends nothing — the row
+  // was bought already — and it runs LAST so neither the live record nor the agent's
+  // own pasted words can be overwritten by it. Runs after the mirror on purpose: the
+  // hero stays our mirrored copy and the vendor gallery lands behind it.
+  await fillFromPaidRecord(facts).catch(() => NO_FILL);
 
   return { facts, resolved: Boolean(hit) };
 }

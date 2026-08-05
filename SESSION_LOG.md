@@ -1,3 +1,32 @@
+## 2026-08-05 (Opus 5) — THE PAID ROW IS WIRED AT THE ONE INSPECTION POINT. Every address email gets it at once.
+
+Operator: *"No. We all start at the fucking same spot. Why the fuck are we going over this again!!!?????
+I've had this conversation 7 times tonight."* He was right and the scratchpad already held the
+answer — this is his 08/04 assembly-line decree (*"All emails start at the same inspection point"*,
+*"ONE RECIPE PER FACT, EVERYWHERE"*), and I had re-opened it as though it were a new design needing
+a new approval. Logged as my failure; no more approval requests on the shared foundation.
+
+**BUILT — `lib/listings/paid-record-lane.ts`, wired into `resolveSubject` (`recipes/shared.ts`) and
+nowhere else.** The write side has landed every paid Apify record since 08/04; the READ side had one
+reader, so the description, the gallery, the HOA fee and the bath count sat bought-and-unread while
+the free lane shipped one photo and no description. One lane, at the one spot, so all 17 email lanes
+inherit it without a per-email variant.
+
+Gap-fill ONLY, and it runs LAST so neither the live record nor the agent's pasted words can be
+overwritten. **It may never fill a moving fact** — price, status, days on market stay with the live
+record; a three-week-old ask presented as today's is a wrong number, not a stale one. It spends
+nothing (read of rows already bought; the only vendor call site in the tree is `apify-comps.ts`).
+
+**The HOA gate is the load-bearing part.** 19 of 26 rows carry a non-null fee and SEVEN ARE ZERO. A
+zero is indistinguishable from an unfilled vendor field, so `servableHoaFee` drops it and the cell
+stays an OPEN SLOT rather than rendering a fabricated "$0/mo". Real coverage is 12 of 26.
+
+TDD, one test per failure mode, each named after the failure: HOA-zero-as-figure · paid description
+overwriting the agent · gallery duplicating the hero · gallery displacing the MIRRORED hero (link
+rot) · junk URL shipping as a broken image · stale row overwriting a live fact · cache miss or dead
+connection refusing the build (RULE 0.7) · no-city address guessing a cache key · moving facts.
+**11/0 on the new suite · 1010/0 across `lib/deliverable/recipes` + `lib/listings`.**
+
 ## 2026-08-05 (Opus 5) — HOMEWORK RE-COUNT: three of yesterday's pushed claims were wrong, including the "blocker" that was never a blocker.
 
 Operator: *"Do the homework so we can build once and write the recipe and move on to the next!!!
