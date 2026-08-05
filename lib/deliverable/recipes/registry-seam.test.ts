@@ -461,3 +461,72 @@ describe("REGISTRY-WIDE — every email recipe key", () => {
     });
   }
 });
+
+// ─────────────────────────────────────────────────────────────────────────────
+// REPRODUCIBLE BY BUILDER — the acceptance test the operator named, 08/05/2026:
+// "MAKE SURE WE ARE TRACKING WHERE AND HOW EVERYTHING GETS BUILT SO WE CAN
+// REPRODUCE EXACTLY."
+//
+// WHAT "EXACTLY" SCOPES TO, DECLARED UP FRONT rather than discovered when this
+// goes flaky. Two inputs are non-deterministic BY DESIGN and are normalised out
+// below — anything else that differs between two runs is a real defect:
+//
+//   1. BLOCK IDS — minted per build. They are addresses within one document, not
+//      content; two runs that differ only by id produced the same email.
+//   2. THE NARRATIVE — an LLM writes it. Here the model call is stubbed, so the
+//      prose IS stable and is NOT normalised; against the live model it is not,
+//      and that is the declared boundary. Structure, cells and sourcing
+//      reproduce; the sentence does not.
+//
+// The clock (`new Date()` in the days-on-market lane) is not normalised either:
+// the fixture carries `daysOnMarket`, so no builder reads the clock on this
+// path. If one starts to, this test goes red — which is the correct signal, not
+// something to normalise away.
+//
+// WHY THIS AND NOT A SCREENSHOT: a screenshot proves one build rendered. This
+// proves the SAME INPUTS PRODUCE THE SAME DOCUMENT, which is the property that
+// makes a recipe a recipe instead of a one-time result.
+
+/** Strip the declared-volatile fields (block ids) so the comparison is content. */
+function reproducibleShape(doc: EmailDoc): string {
+  return JSON.stringify(
+    {
+      subjectVariants: doc.subjectVariants ?? null,
+      globalStyle: doc.globalStyle,
+      blocks: doc.blocks.map((b) => {
+        const { id: _id, ...rest } = b as { id?: string } & Record<string, unknown>;
+        return rest;
+      }),
+    },
+    // Key order is an artifact of object construction, never of content.
+    (_k, v) =>
+      v && typeof v === "object" && !Array.isArray(v)
+        ? Object.fromEntries(Object.entries(v as Record<string, unknown>).sort())
+        : v,
+  );
+}
+
+describe("REPRODUCIBLE BY BUILDER — same inputs, same document", () => {
+  for (const key of EMAIL_KEYS) {
+    test(`${key} builds the SAME doc twice from the same context`, async () => {
+      if (UNBUILT_KEYS[key] || HARNESS_EXEMPT[key]) return;
+      const builder = builderFor(key);
+      if (!builder) return;
+
+      // Two INDEPENDENT contexts, not the same object reused — a builder that
+      // mutates its input would otherwise pass by contaminating run two.
+      const first = await builder(ctxFor(key));
+      const second = await builder(ctxFor(key));
+      if (first === null && second === null) return; // stable miss is still stable
+      expect(first, `${key}: run 1 built, run 2 did not (or vice versa)`).not.toBeNull();
+      expect(second, `${key}: run 2 built, run 1 did not`).not.toBeNull();
+
+      expect(
+        reproducibleShape(second!),
+        `${key} is NOT reproducible: two runs over identical inputs produced different ` +
+          `documents. Block ids and the LLM sentence are already normalised out, so the ` +
+          `difference is real — a clock read, a random pick, or state leaking between builds.`,
+      ).toBe(reproducibleShape(first!));
+    });
+  }
+});

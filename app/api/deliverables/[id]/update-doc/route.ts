@@ -32,7 +32,7 @@ export async function POST(_req: NextRequest, { params }: { params: Promise<{ id
   const { data: src } = await supabase
     .from("deliverables")
     .select(
-      "user_id, project_id, template, instruction, narrative, items_snapshot, branding, scope_kind, scope_value, campaign_key, doc, deleted_at",
+      "user_id, project_id, template, instruction, narrative, items_snapshot, branding, scope_kind, scope_value, campaign_key, recipe_key, doc, deleted_at",
     )
     .eq("id", id)
     .maybeSingle();
@@ -91,6 +91,11 @@ export async function POST(_req: NextRequest, { params }: { params: Promise<{ id
     scope_kind: src.scope_kind,
     scope_value: src.scope_value,
     campaign_key: src.campaign_key,
+    // BUILD PROVENANCE CARRIES DOWN THE VERSION CHAIN. This is a re-render of an
+    // existing email with fresh data, not a new build — the recipe that produced the
+    // original is still what produced this. Dropping it here would blank the key on
+    // every scheduled refresh, so the column would be right until the email was used.
+    recipe_key: src.recipe_key,
     supersedes_id: id,
     doc: freshDoc,
     data_as_of: new Date().toISOString(),

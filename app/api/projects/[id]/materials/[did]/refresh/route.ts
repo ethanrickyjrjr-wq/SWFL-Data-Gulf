@@ -33,7 +33,7 @@ export async function POST(
   // project is proven owned, and every deliverable in it belongs to the owner).
   const { data: existing } = await db
     .from("deliverables")
-    .select("id, template, doc, scope_kind, scope_value")
+    .select("id, template, doc, scope_kind, scope_value, recipe_key")
     .eq("id", did)
     .eq("project_id", id)
     .single();
@@ -85,6 +85,11 @@ export async function POST(
     narrative: EMPTY_NARRATIVE,
     items_snapshot: [],
     status: "ready",
+    // Carried, not re-derived: a data refresh forks a new VERSION of the same email,
+    // so the recipe that built the original is what built this. (Same reason
+    // update-doc carries it — otherwise the key blanks the first time an email is
+    // refreshed, and the column reads as "untracked" for the rows we use most.)
+    recipe_key: existing.recipe_key,
     supersedes_id: existing.id, // forks a new version; splitDeliverableVersions collapses the chain
   });
   if (error) return NextResponse.json({ error: error.message }, { status: 500 });

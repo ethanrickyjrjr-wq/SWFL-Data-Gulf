@@ -14,6 +14,7 @@ import type { MarketFigure } from "@/lib/email/market-context";
 import * as anthropicModule from "@/refinery/agents/anthropic.mts";
 import * as chartForQuestionModule from "@/lib/assistant/chart-for-question";
 import * as defaultGridModule from "@/lib/deliverable/recipes/default-grid";
+import * as recipesIndexModule from "@/lib/deliverable/recipes/index";
 import { SEED_DOCS } from "./doc/default-docs";
 
 // mock.module is process-global (no per-file isolation) — snapshot + restore, same
@@ -27,11 +28,13 @@ import { SEED_DOCS } from "./doc/default-docs";
 const anthropicOrig = { ...anthropicModule };
 const chartForQuestionOrig = { ...chartForQuestionModule };
 const defaultGridOrig = { ...defaultGridModule };
+const recipesIndexOrig = { ...recipesIndexModule };
 const fetchOrig = globalThis.fetch;
 afterAll(() => {
   mock.module("@/refinery/agents/anthropic.mts", () => anthropicOrig);
   mock.module("@/lib/assistant/chart-for-question", () => chartForQuestionOrig);
   mock.module("@/lib/deliverable/recipes/default-grid", () => defaultGridOrig);
+  mock.module("@/lib/deliverable/recipes/index", () => recipesIndexOrig);
   globalThis.fetch = fetchOrig;
 });
 globalThis.fetch = (async () => {
@@ -97,6 +100,60 @@ test("FM5b: a key with NO registered builder falls back to the default grid, thr
   expect(calls).toBe(1);
   expect(result.payload.applied).toBe(true);
   expect(result.payload.authored).toBeUndefined();
+});
+
+// ── BUILD TRACKING (08/05/2026) — `deliverables.recipe_key` ──────────────────
+// Operator: "MAKE SURE WE ARE TRACKING WHERE AND HOW EVERYTHING GETS BUILT SO WE
+// CAN REPRODUCE EXACTLY." 92 deliverables existed with no record of which of the
+// 17 emails produced them. `authorDoc` reporting the BUILDING recipe is the
+// source of that column, so these three tests are what make it trustworthy.
+
+test("FM-TRACK-1: a keyed build REPORTS its key — without this the column is null and tracking is a claim", async () => {
+  const current = SEED_DOCS.find((s) => s.id === "market-spotlight")!.build();
+  const result = await authorDoc({
+    prompt: "Send a weekly update to my sphere for Cape Coral.",
+    rawDoc: current,
+    recipeKey: "sphere-weekly",
+  });
+  expect(result.payload.applied).toBe(true);
+  expect(result.payload.recipeKey).toBe("sphere-weekly");
+});
+
+test("FM-TRACK-2: a build that FELL THROUGH reports default-grid, never the key that was asked for", async () => {
+  // The requested recipe's builder misses; the terminal lane produces the doc.
+  // Reporting "sphere-weekly" here would launder a fallback as a success and make
+  // every fallthrough invisible in the very column built to surface it.
+  mock.module("@/lib/deliverable/recipes/default-grid", () => ({
+    buildDefaultGrid: async (ctx: { currentDoc: unknown }) => ctx.currentDoc,
+  }));
+  // Patch the DISPATCH TABLE, not the builder's own module: `index.ts` captures each
+  // builder into `RECIPE_BUILDERS` at module-eval time, so mocking `sphere-weekly.ts`
+  // afterwards changes nothing the dispatcher reads.
+  mock.module("@/lib/deliverable/recipes/index", () => ({
+    ...recipesIndexOrig,
+    builderFor: () => async () => null, // every builder misses
+  }));
+  const current = SEED_DOCS.find((s) => s.id === "market-spotlight")!.build();
+  const result = await authorDoc({
+    prompt: "Send a weekly update to my sphere for Cape Coral.",
+    rawDoc: current,
+    recipeKey: "sphere-weekly",
+  });
+  expect(result.payload.applied).toBe(true);
+  expect(result.payload.recipeKey).toBe("default-grid");
+  // mock.module is process-global and this one blinds EVERY builder — restore it here
+  // rather than in afterAll, so a test added below this line still gets real builders.
+  mock.module("@/lib/deliverable/recipes/index", () => recipesIndexOrig);
+});
+
+test("FM-TRACK-3: a keyless organic ask reports default-grid, so organic builds are countable too", async () => {
+  const current = SEED_DOCS.find((s) => s.id === "market-spotlight")!.build();
+  const result = await authorDoc({
+    prompt: "Write a friendly market update email with a strong subject line.",
+    rawDoc: current,
+  });
+  expect(result.payload.applied).toBe(true);
+  expect(result.payload.recipeKey).toBe("default-grid");
 });
 
 // CHOKEPOINT GUARD: an unfilled recipe [[blank]] must NEVER reach the model. Every

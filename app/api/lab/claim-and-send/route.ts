@@ -15,6 +15,7 @@ import { NextResponse, type NextRequest } from "next/server";
 import { createClient } from "@/utils/supabase/server";
 import { createServiceRoleClient } from "@/utils/supabase/service-role";
 import { EmailDocSchema } from "@/lib/email/doc/schema";
+import { isRecipeKey } from "@/lib/deliverable/recipes";
 import { renderEmailDocHtml } from "@/lib/email/render-email-doc";
 import { getMarketingResend } from "@/lib/email/marketing-client";
 import { resolvePostalAddress } from "@/lib/email/postal-address";
@@ -71,6 +72,11 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: "invalid doc" }, { status: 400 });
   }
   const zip = typeof body?.zip === "string" && /^\d{5}$/.test(body.zip) ? body.zip : null;
+  // WHICH EMAIL BUILT THIS (`deliverables.recipe_key`) — reported by `authorDoc` and
+  // handed back by the lab shell. Validated against the registry rather than stored
+  // raw: an anonymous-origin funnel is exactly where an unchecked client string would
+  // land in a provenance column. Absent → NULL, the honest "no recipe produced this".
+  const recipeKey = isRecipeKey(body?.recipe_key) ? body.recipe_key : null;
   const ref = typeof body?.ref === "string" && REF_RE.test(body.ref) ? body.ref : null;
 
   // ── 1. Project (cookie client — RLS WITH CHECK is the authorization) ──
@@ -115,6 +121,7 @@ export async function POST(req: NextRequest) {
     user_id: user.id,
     template: "block-canvas",
     doc: parsed.data,
+    recipe_key: recipeKey,
     instruction: null,
     data_as_of: new Date().toISOString(),
     narrative: EMPTY_NARRATIVE,

@@ -32,7 +32,13 @@ import {
   listingDescriptionFromPrompt,
 } from "@/lib/email/listing-intent";
 import { resolveSubjectListing } from "@/lib/listings/resolve-subject";
-import { recipeByKey, recipeFromPrompt, RECIPES, type Recipe } from "@/lib/deliverable/recipes";
+import {
+  recipeByKey,
+  recipeFromPrompt,
+  RECIPES,
+  type Recipe,
+  type RecipeKey,
+} from "@/lib/deliverable/recipes";
 import { resolveVoice, voiceSection, type VoicePresetId } from "@/lib/email/voice-presets";
 import { builderFor } from "@/lib/deliverable/recipes/index";
 import { buildDefaultGrid } from "@/lib/deliverable/recipes/default-grid";
@@ -1129,6 +1135,13 @@ export async function authorDoc({
     builtDoc: EmailDoc,
     resolvedSubject: Awaited<ReturnType<typeof resolveSubject>> | null,
     subject: string | null,
+    // WHICH BUILDER ACTUALLY PRODUCED THIS DOC — the value persisted as
+    // `deliverables.recipe_key`, and the reason that column can be trusted.
+    // It defaults to the resolved recipe, and the ONE caller that overrides it is
+    // the terminal fallback: a keyed build whose builder missed lands there, and
+    // stamping the REQUESTED key on a doc the default grid built would launder a
+    // fallback as a success. Report what ran, never what was asked for.
+    builtBy: RecipeKey = recipe.key,
   ): Promise<BuildResult> => {
     // ── THE USER'S OWN GRID ────────────────────────────────────────────────
     // "IF IT IS 123 STREET, WE BUILD 12345 STREET THE SAME WAY WITH EVERY GRID
@@ -1196,6 +1209,7 @@ export async function authorDoc({
         doc: withBio.doc,
         applied: true,
         replacedLayout: true,
+        recipeKey: builtBy,
         ...(resolvedSubject
           ? {
               listing: {
@@ -1367,6 +1381,11 @@ export async function authorDoc({
 
     const parsed = EmailDocSchema.safeParse(flyer);
     if (parsed.success) {
+      // NO `recipeKey` ON THIS LANE, DELIBERATELY. It only runs when NOTHING resolved
+      // to a recipe (`!keyedBuilder`), so there is no key to report. It builds a
+      // listing-flyer-shaped doc, and stamping `new-listing` on it because it LOOKS
+      // like one would be an inferred value in a provenance field. Absent is the
+      // honest answer, and it makes this legacy lane's real usage countable.
       return {
         payload: {
           doc: parsed.data,
@@ -1424,7 +1443,11 @@ export async function authorDoc({
   }).catch(() => null);
   const fallbackParsed = fallbackBuilt ? EmailDocSchema.safeParse(fallbackBuilt) : null;
   if (fallbackParsed?.success) {
-    return finish(fallbackRecipe, fallbackParsed.data, null, null);
+    // `buildDefaultGrid` produced this doc, so `default-grid` is what gets recorded —
+    // even when `fallbackRecipe` is the key the caller asked for and whose builder
+    // just missed. That difference is the whole signal: a `default-grid` row against
+    // a keyed ask is a builder that fell through, and it should be findable.
+    return finish(fallbackRecipe, fallbackParsed.data, null, null, "default-grid");
   }
 
   // Defensive tail — buildDefaultGrid is total over a valid canvas doc (the doc

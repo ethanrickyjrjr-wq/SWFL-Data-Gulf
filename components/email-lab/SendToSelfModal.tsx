@@ -22,12 +22,18 @@ export function SendToSelfModal({
   open,
   onClose,
   getDoc,
+  getRecipeKey,
   zip,
   refCode,
 }: {
   open: boolean;
   onClose: () => void;
   getDoc: () => EmailDoc;
+  /** BUILD PROVENANCE — the recipe whose builder produced the doc being claimed,
+   *  persisted as `deliverables.recipe_key`. This funnel is where an anonymous
+   *  visitor's first real email lands, so without it the busiest create path in
+   *  the product would record nothing about how its emails were made. */
+  getRecipeKey?: () => string | null;
   zip?: string | null;
   refCode?: string | null;
 }) {
@@ -91,6 +97,7 @@ export function SendToSelfModal({
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           doc: getDoc(),
+          ...(getRecipeKey?.() ? { recipe_key: getRecipeKey!() } : {}),
           ...(zip ? { zip } : {}),
           ...(refCode ? { ref: refCode } : {}),
         }),

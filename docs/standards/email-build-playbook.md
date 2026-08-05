@@ -114,13 +114,45 @@ Email patches a committed seed grid and never gets re-stamped. Each is declared 
 open check in `lib/deliverable/recipes/registry-seam.test.ts`, and the assertion is INVERTED for
 them — fix one and the suite goes red telling you to delete its exemption line.
 
-## AND THE ONE THING NONE OF THIS CAN PROVE YET
+## HOW A BUILD IS TRACKED — landed 08/05/2026, and the rules for reading it
 
-**92 built deliverables, every one recording its template as `block-canvas`, and there is no column
-recording which email built it** (live query 08/05/2026: `deliverables.recipe_key` does not exist).
-"Every email runs one pipe" is true in the code and **unverifiable in the product**. Recording the
-key on the deliverable row is additive, zero-risk, and until it lands this map is a claim rather
-than a fact.
+**Operator decree, verbatim:** *"MAKE SURE WE ARE TRACKING WHERE AND HOW EVERYTHING GETS BUILT SO WE
+CAN REPRODUCE EXACTLY."* Before this, 92 built deliverables all recorded their template as
+`block-canvas` and **nothing recorded which of the 17 emails produced any of them** — "every email
+runs one pipe" was true in the code and uncheckable in the product.
+
+**`deliverables.recipe_key`** now records it. Four things about the value, all load-bearing:
+
+1. **It is the recipe whose BUILDER PRODUCED THE DOC — never the key the door asked for.** They
+   match on every healthy build. When a keyed builder misses and the terminal lane picks it up, the
+   row records `default-grid`, because default-grid is what built it. Stamping the requested key
+   there would launder a fallback as a success and hide the exact failure the column exists to
+   surface. So: **a `default-grid` row on a keyed ask is a builder that fell through — go look.**
+2. **A client-supplied key is validated against the registry or dropped to NULL.** Two write paths
+   take the key from the browser (the project save and the anonymous send-to-self funnel). An
+   unverifiable string sitting in a provenance column is worse than an honest gap.
+3. **NULL means "no recipe produced this," and it is a real answer** — a hand-edited seed saved
+   without ever building, the legacy listing lane, showing-prep, and the non-email report templates.
+   It is never a guess and never inferred from the doc.
+4. **The 92 pre-existing rows stay NULL forever.** Their key was never recorded; deriving one from
+   `doc` or `instruction` would put an inferred value in the field added to end inference.
+
+Provenance **carries down the version chain**: a data refresh or a scheduled re-render forks a new
+row and copies the key, because a refresh makes a new version of the same email, not a new build.
+Without that the key would blank on first use, and the column would read as untracked for exactly
+the rows we touch most.
+
+**REPRODUCIBLE BY BUILDER — the acceptance test, and it is green for all 17.**
+`registry-seam.test.ts` runs every email key's builder **twice over two independent contexts** and
+asserts the same document comes back. **17 of 17 pass** (08/05/2026). Two inputs are declared
+non-deterministic and normalised out — **block ids** (addresses inside one document, not content)
+and **the LLM sentence** (stable here only because the model call is stubbed; against the live model
+it is not, and that is the boundary). The clock is deliberately NOT normalised: no builder reads it
+on this path, and if one starts to, that test goes red — which is the signal, not a nuisance.
+
+**What is still NOT tracked, named so nobody reports this as finished:** the per-cell source ladder,
+the requested-vs-built key when they differ, and the model/prompt version behind the one authored
+paragraph. Those are the build manifest (`deliverable_build_manifest`), a separate build.
 
 ---
 

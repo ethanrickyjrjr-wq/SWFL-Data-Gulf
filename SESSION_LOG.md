@@ -1,3 +1,39 @@
+## 2026-08-05 (Opus 5) — BUILD TRACKING LANDED: every email now records which recipe built it, and all 17 are proven reproducible.
+
+Operator: *"MAKE SURE WE ARE TRACKING WHERE AND HOW EVERYTHING GETS BUILT SO WE CAN REPRODUCE
+EXACTLY."* That was the biggest open item in the New Listing handoff §7.
+
+**`deliverables.recipe_key` is live** (`scripts/migrate-deliverable-recipe-key.mts` — text, nullable,
+`NOTIFY pgrst` included; verified by live read). **92 rows, all NULL by design — NO BACKFILL.** Their
+key was never recorded and deriving one from `doc`/`instruction` would put an inferred value in the
+column added to end inference.
+
+**The value is the recipe whose BUILDER PRODUCED THE DOC, never the key the door asked for.**
+`authorDoc` reports it; the terminal fallback reports `default-grid` even when a keyed ask fell into
+it, because stamping the requested key there would launder a fallback as a success.
+
+**5 of 10 deliverable write sites carry it** — materials POST, claim-and-send (both validate the
+client string against the registry or store NULL), update-doc + materials/refresh (carry-forward
+down the version chain, so a refresh does not blank the key). **5 declared N/A with reasons:**
+`assemble.ts` and `examples.ts` (legacy non-email templates), `ai-material`, `showing-prep`, `week`
+— no recipe is resolved on those paths.
+
+**REPRODUCIBLE BY BUILDER — 17 of 17 green.** `registry-seam.test.ts` now builds every email key
+twice from two independent contexts and asserts the same document. Declared non-deterministic and
+normalised out: block ids, the LLM sentence. **The clock is deliberately NOT normalised** — no
+builder reads it on this path, and if one starts to the test goes red, which is the signal.
+
+**1063/0 across `lib/deliverable/recipes` + `lib/listings` + `build-doc.test.ts` + claim-and-send ·
+`bunx next build` green.** New tests are named after the failure they prevent (FM-TRACK-1..6).
+
+**NOT done, and named in the playbook so nobody reports this as finished:** the per-cell source
+ladder, requested-vs-built key when they differ, and the model/prompt version. Opened as
+`deliverable_build_manifest`. `deliverable_recipe_key_column` stays OPEN for the live proof — 0 of
+92 production rows carry a key until a real build+save is queried.
+
+Also healed: `database-generated.types.ts` was missing `user_brand_profiles.button_destinations`
+(pre-existing drift, picked up by the regen).
+
 ## 2026-08-05 (Opus 5) — HANDOFF WRITTEN: next session picks up at New Listing ingredients.
 
 `docs/superpowers/handoffs/2026-08-05-NEW-LISTING-BUILD-HANDOFF.md`. Carries the standing order in

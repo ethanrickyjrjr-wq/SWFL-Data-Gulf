@@ -1100,6 +1100,7 @@ export interface Database {
           doc: Json | null;
           data_as_of: string | null;
           campaign_key: string | null;
+          recipe_key: string | null;
         };
         Insert: {
           id: string;
@@ -1120,6 +1121,7 @@ export interface Database {
           doc?: Json | null;
           data_as_of?: string | null;
           campaign_key?: string | null;
+          recipe_key?: string | null;
         };
         Update: {
           id?: string;
@@ -1140,6 +1142,7 @@ export interface Database {
           doc?: Json | null;
           data_as_of?: string | null;
           campaign_key?: string | null;
+          recipe_key?: string | null;
         };
         Relationships: [];
       };
@@ -3955,6 +3958,7 @@ export interface Database {
           preferred_recipe: string | null;
           default_photo_ratio: string | null;
           agent_bio: string | null;
+          button_destinations: Json | null;
         };
         Insert: {
           id?: string;
@@ -3998,6 +4002,7 @@ export interface Database {
           preferred_recipe?: string | null;
           default_photo_ratio?: string | null;
           agent_bio?: string | null;
+          button_destinations?: Json | null;
         };
         Update: {
           id?: string;
@@ -4041,6 +4046,7 @@ export interface Database {
           preferred_recipe?: string | null;
           default_photo_ratio?: string | null;
           agent_bio?: string | null;
+          button_destinations?: Json | null;
         };
         Relationships: [];
       };

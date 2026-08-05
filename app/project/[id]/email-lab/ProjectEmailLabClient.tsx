@@ -431,6 +431,11 @@ export function ProjectEmailLabClient({
     doc: EmailDoc,
     prompt: string,
     campaignKey?: string | null,
+    // BUILD PROVENANCE — which recipe's builder produced this doc, reported by the
+    // server and carried by the shell. Written on CREATE only (like campaign_key):
+    // a later hand-edit changes the email, it does not change what built it, and
+    // re-sending a stale value on PATCH is how provenance drifts from fact.
+    recipeKey?: string | null,
   ): Promise<string | void> {
     setSaving(true);
     try {
@@ -478,6 +483,7 @@ export function ProjectEmailLabClient({
           doc,
           ai_prompt: prompt,
           ...(campaignKey ? { campaign_key: campaignKey } : {}),
+          ...(recipeKey ? { recipe_key: recipeKey } : {}),
         }),
       });
       if (res.ok) {

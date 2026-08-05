@@ -17,6 +17,7 @@ import { cookies } from "next/headers";
 import { createClient } from "@/utils/supabase/server";
 import { createServiceRoleClient } from "@/utils/supabase/service-role";
 import { EmailDocSchema } from "@/lib/email/doc/schema";
+import { isRecipeKey } from "@/lib/deliverable/recipes";
 import { findFreezingSchedule, type FreezeQueryDb } from "@/lib/email/sequence/freeze";
 
 const EMPTY_NARRATIVE = { exec_summary: "", sections: [], inference_notes: [] };
@@ -55,6 +56,14 @@ export async function POST(
   // Resend tag. Registry keys are kebab-case; anything else is dropped.
   const rawCampaign = typeof body?.campaign_key === "string" ? body.campaign_key.trim() : "";
   const campaignKey = /^[a-z0-9-]{1,40}$/.test(rawCampaign) ? rawCampaign : null;
+  // WHICH EMAIL BUILT THIS (`deliverables.recipe_key`). The lab sends back the key
+  // `authorDoc` reported for the build it just ran — the recipe whose BUILDER produced
+  // the doc, not the one the door asked for. Validated against the registry, never
+  // stored raw: this is a provenance column, and a client-supplied string that isn't a
+  // real key would be an unverifiable value sitting in the field we added to make
+  // builds verifiable. Absent (a hand-edited seed saved without a build) → NULL, which
+  // is the honest "no recipe produced this" and NOT a gap to paper over.
+  const recipeKey = isRecipeKey(body?.recipe_key) ? body.recipe_key : null;
   const admin = createServiceRoleClient(); // deliverables has no owner INSERT policy — write via service-role
   const { error } = await admin.from("deliverables").insert({
     id: newId,
@@ -64,6 +73,7 @@ export async function POST(
     doc: parsed.data,
     instruction: aiPrompt,
     campaign_key: campaignKey,
+    recipe_key: recipeKey,
     // Always server-stamped — never trust a client-supplied value here (matches
     // the PATCH handler below), so the freshness/staleness signal can't be spoofed.
     data_as_of: new Date().toISOString(),

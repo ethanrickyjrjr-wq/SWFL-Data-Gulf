@@ -244,7 +244,15 @@ export interface EmailLabGridShellProps {
   /** Save the doc as a deliverable. `campaignKey` = quick-start campaign
    *  provenance (null for organic builds) — stored as
    *  deliverables.campaign_key, read back as the blast `campaign` tag. */
-  onSave?: (doc: EmailDoc, aiPrompt: string, campaignKey?: string | null) => Promise<string | void>;
+  /** `recipeKey` is the BUILD PROVENANCE — which recipe's builder produced this doc,
+   *  as reported by the server. Persisted to `deliverables.recipe_key` so a saved
+   *  email records how it was made. Null when nothing built it (a hand-edited seed). */
+  onSave?: (
+    doc: EmailDoc,
+    aiPrompt: string,
+    campaignKey?: string | null,
+    recipeKey?: string | null,
+  ) => Promise<string | void>;
   saving?: boolean;
   autoOpenSchedule?: boolean;
   deliverableId?: string | null;
@@ -254,6 +262,11 @@ export interface EmailLabGridShellProps {
   /** Cockpit D2: reports every committed/live-edited doc so the canvas toggle
    *  can detect in-flight edits (unsaved-switch dialog). */
   onDocChange?: (doc: EmailDoc) => void;
+  /** Fires with the recipe key whose builder produced the doc, every time a build
+   *  succeeds. For hosts that persist the doc through a path other than `onSave`
+   *  (the anonymous send-to-self funnel), so build provenance reaches their write
+   *  too — otherwise the whole funnel would save rows with a null key. */
+  onBuiltRecipeKey?: (key: string | null) => void;
 }
 
 export function EmailLabGridShell({
@@ -274,6 +287,7 @@ export function EmailLabGridShell({
   projectPhotos,
   initialBranding,
   onDocChange,
+  onBuiltRecipeKey,
 }: EmailLabGridShellProps) {
   // Tier dial (lib/email/lab/capabilities.ts) — socials etc. are gated on this, never hardcoded.
   const caps = capabilitiesFor("paid");
@@ -324,6 +338,15 @@ export function EmailLabGridShell({
   // WHICH deliverable it is. This is what the builder dispatches on, so a user typing
   // their address over the [[blank]] can no longer reroute the build to another recipe.
   const [activeRecipeKey, setActiveRecipeKey] = useState<string | null>(initialRecipe?.key ?? null);
+  // WHAT ACTUALLY BUILT THE DOC ON THE CANVAS — persisted as `deliverables.recipe_key`
+  // so "every email runs one pipe" is checkable in the product and a build is
+  // reproducible from its row. NOT `activeRecipeKey`: that is the key the DOOR asked
+  // for, and the server reports which builder really ran (a builder that misses falls
+  // through to the default grid, and that difference is the whole point of recording
+  // it). A ref, not state — nothing renders from it, and a re-render must not drop it.
+  // Null until a build reports one: a hand-edited seed saved without ever building has
+  // no recipe behind it, and NULL is the honest answer rather than a guess.
+  const builtRecipeKeyRef = useRef<string | null>(null);
 
   // ── THE USER'S OWN GRID ─────────────────────────────────────────────────────
   // Operator, 07/13/2026: *"WHATEVER THEY MAKE, THAT IS HOW IT SAVES. ASK THEM —
@@ -536,6 +559,8 @@ export function EmailLabGridShell({
         note?: string;
         listing?: { subject?: string };
         suggestions?: { key: string; label: string; href: string }[];
+        // The recipe whose BUILDER produced this doc (build-doc.ts). Persisted on save.
+        recipeKey?: string;
       };
       setSuggestions(data.suggestions ?? []);
       // Only treat it as a real build when the engine actually authored — the
@@ -551,6 +576,11 @@ export function EmailLabGridShell({
             keepSavedStyle(applyBrand(parsed.data, brandTokens), parsed.data, opts.useSavedLayout),
           );
           commit(normalized);
+          // Record WHICH RECIPE BUILT IT, from the server's own report — set here, on
+          // the success branch only, so a failed or malformed build never leaves a key
+          // pointing at a doc it did not produce.
+          builtRecipeKeyRef.current = data.recipeKey ?? null;
+          onBuiltRecipeKey?.(builtRecipeKeyRef.current);
           // The grid AS BUILT. Everything they do to it from here is THEIR layout —
           // and until they do something, there is nothing personal to save.
           layoutBaselineRef.current = JSON.stringify(normalized);
@@ -624,6 +654,8 @@ export function EmailLabGridShell({
         applied?: boolean;
         message?: string;
         listing?: { subject?: string };
+        // The recipe whose BUILDER produced this doc (build-doc.ts). Persisted on save.
+        recipeKey?: string;
       };
       if (data.applied === false) {
         setAiMessage(data.message ?? "The AI couldn't build the layout — try rephrasing.");
@@ -644,6 +676,11 @@ export function EmailLabGridShell({
             keepSavedStyle(applyBrand(parsed.data, tokens), parsed.data, useSavedLayout),
           );
           commit(normalized);
+          // Same as runAuthor: the server's report of which builder ran, recorded on
+          // the success branch only. The arrival door is where MOST real emails get
+          // built, so a key missed here would leave the column mostly null.
+          builtRecipeKeyRef.current = data.recipeKey ?? null;
+          onBuiltRecipeKey?.(builtRecipeKeyRef.current);
           // The grid AS BUILT — edits from here are what make it theirs.
           layoutBaselineRef.current = JSON.stringify(normalized);
           layoutSubjectRef.current = data.listing?.subject ?? layoutSubjectRef.current;
@@ -1432,7 +1469,7 @@ export function EmailLabGridShell({
     let id = deliverableId ?? null;
     if (onSave) {
       await saveBrandIfDirty();
-      const saved = await onSave(doc, aiPrompt, campaignKey);
+      const saved = await onSave(doc, aiPrompt, campaignKey, builtRecipeKeyRef.current);
       if (typeof saved === "string") id = saved;
     }
     if (id) {
@@ -1445,7 +1482,7 @@ export function EmailLabGridShell({
     let id = deliverableId ?? null;
     if (onSave) {
       await saveBrandIfDirty();
-      const saved = await onSave(doc, aiPrompt, campaignKey);
+      const saved = await onSave(doc, aiPrompt, campaignKey, builtRecipeKeyRef.current);
       if (typeof saved === "string") id = saved;
     }
     if (id) {
@@ -1763,7 +1800,7 @@ export function EmailLabGridShell({
                 type="button"
                 onClick={async () => {
                   await saveBrandIfDirty();
-                  await onSave(doc, aiPrompt, campaignKey);
+                  await onSave(doc, aiPrompt, campaignKey, builtRecipeKeyRef.current);
                 }}
                 disabled={saving}
                 className="rounded-lg border border-gulf-teal/30 bg-gulf-teal/20 px-3 py-1.5 text-sm text-gulf-teal transition-colors hover:bg-gulf-teal/30 disabled:opacity-40"

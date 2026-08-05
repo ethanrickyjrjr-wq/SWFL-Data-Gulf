@@ -124,6 +124,10 @@ export function EmailLabGridClient({
   // anonymous visitor's exit ramp is "Send this to yourself" → inline OTP →
   // project + one send. The shell owns the live doc; hold it for send time.
   const currentDocRef = useRef<EmailDoc>(initialDoc);
+  // The recipe whose builder produced the doc on the canvas, reported by the server.
+  // Null until a build succeeds — an untouched seed claimed straight through has no
+  // recipe behind it, and NULL is the honest record of that.
+  const builtRecipeKeyRef = useRef<string | null>(null);
   const [sendOpen, setSendOpen] = useState(false);
 
   // A signed-in SEED arrival (the /showcase start-from door) confirms the project
@@ -306,6 +310,11 @@ export function EmailLabGridClient({
             currentDocRef.current = d;
             setDirty(true);
           }}
+          // Which recipe's builder produced the doc — carried to claim-and-send so
+          // the anonymous funnel's deliverable records how it was built.
+          onBuiltRecipeKey={(k) => {
+            builtRecipeKeyRef.current = k;
+          }}
           // Address-first scope: a property email's subject is the ADDRESS (comps
           // ride scope.address, and the feed is NOT narrowed to a ZIP), so ZIP is
           // just one derived layer among many. The email is ZIP-scoped ONLY when the
@@ -343,6 +352,7 @@ export function EmailLabGridClient({
           open={sendOpen}
           onClose={() => setSendOpen(false)}
           getDoc={() => currentDocRef.current}
+          getRecipeKey={() => builtRecipeKeyRef.current}
           zip={zip}
           refCode={refCode}
         />
