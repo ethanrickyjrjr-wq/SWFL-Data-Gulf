@@ -1464,7 +1464,7 @@ Reachability at generation: 789 by path · 524 by name only · 222 orphaned. Re-
 - `DELIVERABLES.md` — DELIVERABLES — the map (start here) — There are TWO ways a deliverable gets rendered. Knowing which one you're in saves hours.
 - `ENGINE-HANDOFF.md` — Engine Turn-On Handoff — 2026-06-20 — Yes. Live + running.
 - `README.md` — What it is — SWFL Data Gulf is a multi-brain intelligence platform for Lee and Collier counties. Dozens of live data pipelines feed into a DAG of "brains" — each brain owns one slice of reality and emits
-- `SESSION_LOG.md` — 2026-08-05 (Opus 5) — Built the thing that lets Claude SEE what we have. Within minutes it found a discoverabi — Operator: "Build the best way we can build!!!!!! … We see the things we have, we don't make up shit.
+- `SESSION_LOG.md` — 2026-08-05 (Opus 5) — The doc index got a pre-push gate, and the red-first test caught the index poisoning its — as Gate 1 (lockfile): a generated artifact must ship in the same push as the thing that changes it.
 - `SOURCED.md` — SOURCED.md — Magic number citations — Every numeric constant in refinery pack code that affects scoring, confidence, or ranking
 - `THE-CONTRACT.md` — THE CONTRACT — what follows the conversation — This is the discipline that travels with every SWFL Data Gulf payload so a
 
