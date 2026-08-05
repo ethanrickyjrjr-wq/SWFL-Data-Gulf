@@ -84,6 +84,7 @@
 // slot — the code-authored verdict still ships, because it is true by construction.
 
 import { compSources, compsForAddress, type RenderComp } from "@/lib/assistant/comp-helper";
+import { saleDateLabel } from "@/lib/assistant/comp-rank";
 import { resolveCompPhotos } from "@/lib/listings/comp-photos";
 import { fetchApifyComps } from "@/lib/listings/apify-comps";
 import { pickAddressMatch, resolveCompEnrichment } from "@/lib/listings/apify-identity";
@@ -186,19 +187,35 @@ function mdy(iso: string | null): string | undefined {
   return m ? `${m[2]}/${m[3]}/${m[1]}` : undefined;
 }
 
+/** The date THE RECORD ACTUALLY CARRIES, at the precision it carries it.
+ *
+ *  *** A DAY WE WERE NEVER TOLD IS AN INVENTED FACT. *** Our own lake comp lane reads
+ *  `sale_month` and tags every row `dateGrain: "month"` (comp-source-lake.ts:167) because
+ *  "every row is day-of-month 1 by construction". `RenderComp` has carried that tag since
+ *  the lane was built, the chat lane has always honoured it ("sold in May 2026"), and the
+ *  ranker honours it — this row renderer did not. It called `mdy()` unconditionally, so a
+ *  month became "05/01/2026" and a price-defence email printed five recorded sales all
+ *  dated the first of the month. Found by rendering and looking, 08/05/2026 (§2.3.4).
+ *
+ *  `saleDateLabel` (comp-rank.ts) is the ONE root for this and is reused verbatim rather
+ *  than re-derived here — the whole defect was a second formatter that did not know. */
+function priceDateLabel(c: RenderComp): string | undefined {
+  return saleDateLabel(c.priceDate, c.dateGrain ?? "day") ?? undefined;
+}
+
 /** What the price actually IS — never dressed as a sale it was not. The chat lane's
  *  own vocabulary ("sold … on", "estimated value", "last listed"), kept honest.
  *  A recorded sale with a known spell adds "· sold in N days" (code-computed off the
  *  same vendor response — spec 2026-07-16-listing-dom-design.md §4). */
 function priceKindPhrase(c: RenderComp): string {
   if (c.priceKind === "sold") {
-    const d = mdy(c.priceDate);
+    const d = priceDateLabel(c);
     const spell = formatSoldSpell(c.soldInDays);
     const base = d ? `Sold ${d}` : "Sold";
     return spell ? `${base} · ${spell}` : base;
   }
   if (c.priceKind === "estimate") {
-    const d = mdy(c.priceDate);
+    const d = priceDateLabel(c);
     return d ? `Estimated value ${d}` : "Estimated value";
   }
   return "Last listed";
@@ -238,17 +255,28 @@ export async function resolveCompThumbnails(
     // per-address lookup and no longer belongs inside the photo resolver.
     for (const [k, v] of await resolveCompPhotos(comps)) thumbnails.set(k, v);
 
-    // ── LANE 2 · CACHE FIRST, then ONE VERIFIED LOOKUP PER HOUSE.
+    // ── LANE 2 · CACHE FIRST, then ONE **DATED ZIP PULL** — and it is not cheap.
     //
-    // *** THIS REPLACED A ZIP-WIDE SAMPLE THAT COULD NEVER JOIN. *** The old lane asked
-    // the vendor for ~24 arbitrary sold homes in the ZIP and tried to key them onto six
-    // SPECIFIC comps. Measured live 08/04/2026: 24 records returned, all with real
-    // photos, intersection with our comp set 0 of 6 — every build, by construction, with
-    // no error anywhere. See lib/listings/apify-identity.ts for the full postmortem.
+    // *** THE PARAGRAPH THAT USED TO SIT HERE SAID "ONE VERIFIED LOOKUP PER HOUSE … at
+    // most one verified call per remaining comp" AND THAT IS NOT WHAT HAPPENS. *** It
+    // described a per-property lookup the vendor does not sell. `apify-identity.ts` ran
+    // this to ground on 08/04/2026 and says so in its own header: a street address is
+    // accepted and silently treated as an AREA CENTRE, `radius` is ignored, so the only
+    // thing purchasable is an area over a date range. `resolveCompEnrichment` therefore
+    // buys the ZIP narrowed to the months our comps actually sold in — up to 200 records
+    // PER SALE MONTH (`DEFAULT_MAX_PAID_RESULTS_PER_MONTH`), not one per comp.
+    //
+    // *** THE MEASURED PRICE, 08/05/2026, ONE BUILD ON 8348 SOUTHWINDBAY CIR: two sale
+    // months, 395 records bought, ~$3.95, 2 of 3 uncached comps joined. *** The record
+    // store went 26 → 383 rows and the SECOND build on the same house bought ZERO. So
+    // the cost is real but it is per ZIP-and-window, not per email, and it amortises —
+    // which is exactly why the cache lane runs first and why a walk should stay on one
+    // subject. A comment that quotes ~$0.01 for that is not a rounding error, it is the
+    // wrong order of magnitude in the one place a builder looks before spending.
     //
     // `resolveCompEnrichment` reads `data_lake.apify_property_records` first (free, and
-    // the reason we stop re-buying the same houses), then pays for at most one verified
-    // call per remaining comp. It returns the LISTING URL too — the Lee lake comp lane
+    // the reason we stop re-buying the same houses). It returns the LISTING URL too —
+    // the Lee lake comp lane
     // sets `sourceUrl: null` (comp-helper.ts:291) because deed data carries no listing
     // page, which is why every comp row rendered unlinked.
     const enrichment = await resolveCompEnrichment(
@@ -960,7 +988,21 @@ export function buildPriceCase(facts: ListingFacts, comps: RenderComp[]): PriceC
 
   // The position sentence is compareToSet's, verbatim — a shared, tested, code-owned
   // comparison. It never comes from here and it never comes from the model.
-  if (setClaim) sentences.push(setClaim.sentence);
+  //
+  // *** BUT NOT WHEN THE EXTREME TIER ALREADY SAID IT. *** `isExtreme` means the ask sits
+  // strictly outside [min, max] of the priced set, and `s1` already printed exactly that
+  // ("sits $123 above every comparable home in the set — not just the $210 median, the
+  // entire range"). `compareToSet` then says "the asking price per square foot is above
+  // every comparable in the set (which run from $182 to $266)" — the SAME relation, the
+  // same range, in different words. The 08/05/2026 live render shipped both, plus the
+  // recorded-sales sentence, and read as three-times padding (§2.3.4 defect 2).
+  //
+  // The gate is `isExtreme` and nothing else, so it is direction-symmetric by construction:
+  // it drops the duplicate identically whether the ask sits above or below the set. When
+  // the tier does NOT fire, the subject is somewhere inside the band and this sentence is
+  // the only thing that says WHERE — so it stays. A fact is never dropped here; only a
+  // second copy of one already printed in the sentence immediately before it.
+  if (setClaim && !isExtreme) sentences.push(setClaim.sentence);
 
   if (subjectIsLargest && subjSqft != null) {
     sentences.push(
@@ -1191,7 +1233,11 @@ function sourcedDigits(facts: ListingFacts, comps: RenderComp[], pc: PriceCase):
     add(c.beds);
     add(c.baths);
     add(perSqft(c.price, c.sqft));
-    add(mdy(c.priceDate));
+    // THE SAME GRAIN RULE AS THE ROW. Handing the narrator "05012026" off a month-grain
+    // record would ALLOW it to write the fabricated day the row renderer just stopped
+    // printing — an allow-set is a permission, and this one was minted from a date we
+    // do not hold. A month-grain label carries no day, so no day is permitted.
+    add(priceDateLabel(c));
   }
   add(pc.subjectPpsf);
   add(pc.medianPpsf);
@@ -1253,8 +1299,14 @@ export function contextViolations(
   // into "08", "29" and "2025" and rejected all three. So dates are checked WHOLE against
   // the dates we actually hold (house format MM/DD/YYYY), then lifted out of the text
   // before the number scan.
+  // MONTH-GRAIN ROWS CONTRIBUTE NO DAY. A lake comp's `priceDate` is a month stamped to
+  // day 1, so passing it through `mdy` would put "05/01/2026" in the ALLOW-SET — licensing
+  // the narrator to write the exact fabricated day the row renderer was just fixed to stop
+  // printing. An allow-set built from a date we do not hold is a permission we cannot give.
   const sourcedDates = new Set(
-    comps.map((c) => mdy(c.priceDate)).filter((d): d is string => Boolean(d)),
+    comps
+      .map((c) => ((c.dateGrain ?? "day") === "day" ? mdy(c.priceDate) : undefined))
+      .filter((d): d is string => Boolean(d)),
   );
   const DATE = /\b\d{2}\/\d{2}\/\d{4}\b/g;
   for (const d of scanned.match(DATE) ?? []) {

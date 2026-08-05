@@ -240,6 +240,51 @@ test("a sold row with unknown spell renders exactly as before", () => {
   expect(JSON.stringify(doc)).not.toContain("sold in");
 });
 
+// ── THE DATE THE RECORD DOES NOT CARRY ───────────────────────────────────────
+//
+// Found by rendering and looking, 08/05/2026 (playbook §2.3.4 defect 1). A real send on
+// 8348 Southwindbay Cir printed FIVE recorded sales, every one of them dated the FIRST of
+// the month: "Sold 05/01/2026", "Sold 04/01/2026", "Sold 03/01/2026". Not a coincidence —
+// our own lake comp lane (`comp-source-lake.ts:167`) reads `sale_month` and tags the row
+// `dateGrain: "month"` precisely because "every row is day-of-month 1 by construction".
+// The chat lane honours that tag and says "in May 2026"; THIS row renderer called `mdy()`
+// unconditionally and minted a day the county record does not hold.
+//
+// A precise date nobody recorded is an invented fact wearing a real number's clothes, and
+// it shipped on the face of the one email whose entire job is defending a price with
+// records. Month grain in, month grain out.
+test("a month-grain lake sale never renders a fabricated day", () => {
+  const monthly = HOMES.map((c) =>
+    c.priceKind === "sold" ? { ...c, priceDate: "2026-05-01", dateGrain: "month" as const } : c,
+  );
+  const doc = buildCompsGrid(SUBJECT, monthly, canvas());
+  const items =
+    listOf(doc)?.type === "list"
+      ? (listOf(doc) as { props: { items: unknown[] } }).props.items
+      : [];
+  const rows = items as { text: string }[];
+  const sold = rows.filter((r) => r.text.includes("Sold"));
+  expect(sold.length).toBeGreaterThan(0);
+  for (const r of sold) {
+    expect(r.text).toContain("Sold May 2026");
+    expect(r.text).not.toContain("05/01/2026");
+  }
+  // The whole doc, not just the rows — no day-of-month may reach the reader anywhere.
+  expect(JSON.stringify(doc)).not.toContain("05/01/2026");
+});
+
+test("a day-grain vendor sale still renders its exact date", () => {
+  const doc = buildCompsGrid(SUBJECT, HOMES, canvas());
+  const items =
+    listOf(doc)?.type === "list"
+      ? (listOf(doc) as { props: { items: unknown[] } }).props.items
+      : [];
+  const rows = items as { text: string }[];
+  expect(rows.find((r) => r.text.startsWith("330 Shore Dr Lot 59"))?.text).toContain(
+    "Sold 08/29/2025",
+  );
+});
+
 // ── THE OPEN-SLOT CONTRACT ───────────────────────────────────────────────────
 
 test("no comps → the grid still lands, with open slots and no zeros", () => {
@@ -678,6 +723,78 @@ test("buildPriceCase states an extreme gap plainly, direction-symmetric", () => 
   expect(expensive!.vsMedian.dir).toBe("above");
 });
 
+// ── ONE FACT, ONCE ───────────────────────────────────────────────────────────
+//
+// Found by rendering and looking, 08/05/2026 (playbook §2.3.4 defect 2). The real send on
+// 8348 Southwindbay Cir opened with THREE sentences carrying one fact:
+//
+//   "…sits $123 above every comparable home in the set — not just the $210 median, the
+//    entire range. That is above all 5 recorded sales in the set ($182, $210, $210, $220
+//    and $266 per square foot). The asking price per square foot is above every comparable
+//    in the set (which run from $182 to $266)."
+//
+// Sentence 3 is `compareToSet`'s and it is a VERBATIM restatement of sentence 1 whenever
+// the extreme tier fired: "outside the full range" and "above every comparable in the set"
+// are the same claim. (Sentence 2 stays — it names the actual sale figures, which neither
+// of the others does.) A price-defence paragraph that says the same thing three times
+// reads as padding, and padding is what a reader discounts.
+//
+// The drop is keyed on `isExtreme` ALONE, so it is direction-symmetric by construction —
+// it fires identically whether the ask sits above or below the set.
+test("the extreme tier states the position ONCE — compareToSet does not restate it", () => {
+  const richComps = [
+    {
+      addressLine: "1 A St",
+      city: "Fort Myers",
+      beds: 3,
+      baths: 2,
+      sqft: 2000,
+      status: "sold",
+      price: 400000,
+      priceKind: "sold" as const,
+      priceDate: "2026-01-01",
+      soldInDays: null,
+      sourceUrl: null,
+    },
+    {
+      addressLine: "2 B St",
+      city: "Fort Myers",
+      beds: 3,
+      baths: 2,
+      sqft: 2000,
+      status: "sold",
+      price: 440000,
+      priceKind: "sold" as const,
+      priceDate: "2026-01-01",
+      soldInDays: null,
+      sourceUrl: null,
+    },
+  ] as never;
+  const above = buildPriceCase(
+    { address: "1 Pricey Ln, Fort Myers, FL 33905", price: "$5,000,000", sqft: "2000" } as never,
+    richComps,
+  )!;
+  expect(above.verdict).toContain("the entire range");
+  expect(above.verdict).not.toContain("above every comparable in the set");
+  // The sale figures still ship — that sentence carries information the others do not.
+  expect(above.verdict).toContain("both recorded sales in the set");
+
+  const below = buildPriceCase(
+    { address: "1 Cheap Ln, Fort Myers, FL 33905", price: "$100,000", sqft: "2000" } as never,
+    richComps,
+  )!;
+  expect(below.verdict).toContain("the entire range");
+  expect(below.verdict).not.toContain("below every comparable in the set");
+
+  // ...and when the tier does NOT fire, the position sentence is real information and stays.
+  const inside = buildPriceCase(
+    { address: "1 Mid Ln, Fort Myers, FL 33905", price: "$420,000", sqft: "2000" } as never,
+    richComps,
+  )!;
+  expect(inside.verdict).not.toContain("the entire range");
+  expect(inside.verdict).toMatch(/asking price per square foot/i);
+});
+
 test("the extreme tier never fires on a SINGLE priced comp — 'the entire range' needs an actual range (final-review Fix 4)", () => {
   // With n === 1, "outside the full comp range" and "outside the median" are the SAME
   // one-comp comparison wearing two names — a one-element set is not a range. Before this
@@ -823,24 +940,29 @@ test("position in the set is COUNTED by compareToSet, never characterized as a '
   expect(pc?.lowerCount).toBe(2);
   expect(pc?.higherCount).toBe(3);
 
-  // Below every comp → compareToSet says exactly that, not "at the low end".
+  // Below every comp → the position is still stated EXACTLY, and still never characterized.
+  // It is now carried by the extreme tier's own sentence rather than repeated a second time
+  // by compareToSet (§2.3.4 defect 2) — WHICH sentence says it was never the point of this
+  // test; that it is counted rather than characterized is.
   // $200,000 / 2,847 = $70. Every comp ($173…$266) is above it.
   const cheap = buildPriceCase({ ...SUBJECT, price: "$200,000" }, HOMES);
   expect(cheap?.subjectPpsf).toBe(70);
   expect(cheap?.higherCount).toBe(5);
   expect(cheap?.verdict).toContain(
-    "The asking price per square foot is below every comparable in the set " +
-      "(which run from $173 to $266).",
+    "sits $140 below every comparable home in the set — not just the $210 median, " +
+      "the entire range.",
   );
+  expect(cheap?.verdict).not.toMatch(/low end|high end|band/i);
 
-  // Above every comp → the mirror. $800,000 / 2,847 = $281 > $266.
+  // Above every comp → the mirror, same tier, same wording. $800,000 / 2,847 = $281 > $266.
   const rich = buildPriceCase({ ...SUBJECT, price: "$800,000" }, HOMES);
   expect(rich?.subjectPpsf).toBe(281);
   expect(rich?.lowerCount).toBe(5);
   expect(rich?.verdict).toContain(
-    "The asking price per square foot is above every comparable in the set " +
-      "(which run from $173 to $266).",
+    "sits $71 above every comparable home in the set — not just the $210 median, " +
+      "the entire range.",
   );
+  expect(rich?.verdict).not.toMatch(/low end|high end|band/i);
 });
 
 test("a valuation is never counted as a recorded sale in the comparison", () => {

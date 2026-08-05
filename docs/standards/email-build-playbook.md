@@ -542,7 +542,7 @@ gaps.**
 |---|---|---|
 | `new-listing` | New Listing | 2.1 |
 | `coming-soon` | Coming Soon | 2.2 |
-| `market-comps` | Market Comps | 2.3 — TO BE WALKED |
+| `market-comps` | Market Comps | 2.3 |
 | `under-contract` | Under Contract | 2.4 — TO BE WALKED |
 | `just-sold` | Just Sold | 2.5 — TO BE WALKED |
 | `open-house` | Open House | 2.6 — TO BE WALKED |
@@ -958,7 +958,9 @@ the address leaks.**
    ZIP. Reading the code and trusting its comments is not verification.
 3. **It counts what the project path drops** (§2.2.4).
 
-**Acceptance run, 08/05/2026 — 14 of 17 cells sourced, 23KB:** $219,900 · 2 bd · 2 ba · 1,481 sq ft
+**Acceptance run, re-run 08/05/2026 — 14 of 18 cells sourced, 23KB** (this line said "14 of 17"
+until the script was re-run; a count quoted from a doc instead of from the tool is exactly what
+RULE 0.8 forbids): $219,900 · 2 bd · 2 ba · 1,481 sq ft
 · **$148/sq ft** · Single Family · Lee County · **14,643 active homes → 834 in band → 518 matching**
 · funnel chart rendered · the agent's 1,779-character description as narrator fuel · one authored
 paragraph · full agent card and CAN-SPAM footer off the account. Suppression: **4 of 4 probes
@@ -1238,8 +1240,316 @@ this file. Grep does not count. Docs and tests pass through, every error path fa
 
 ---
 
-## 2.3 – 2.17 — TO BE WALKED
+## 2.3 MARKET COMPS — tag `market-comps`
+
+**Walked 08/05/2026, and three defects were fixed in the same session.** Every number below came
+from a run that day. Re-count before quoting any of it.
+
+**Spine:** the SAME `resolveSubject` inspection point New Listing and Coming Soon use. What is
+different is what the subject IS here: not a house to admire, but **an asking price on trial.** No
+price → no claim → the grid still ships and the case becomes an open slot.
+
+**Grammar:** the listing grammar, with the middle swapped. Ribbon "Market Comps", photo, hero with
+**the address over the price** (the claim), spec strip, the footnote, **the evidence table**, the
+prose, sources, agent card + one button.
+
+**Chart: NONE — and this one has been argued three times, so read before you add one.**
+Operator 08/03/2026: *"COMPARABLES ARE JUST THAT, COMPARABLE, SO IT'S A TERRIBLE CHART TO PUT IN
+THE EMAIL. PRICE IS GOING TO BE SIMILAR."* 08/04/2026: *"Do not use that stupid fucking chart for
+comps!!!!!!! How many times do I have to say it!!!!!"* The first "fix" swapped total-price bars for
+$/sq ft bars and kept the chart, which answered nothing — a size-banded set clusters BY
+CONSTRUCTION, so the bars are near-equal either way, and seven full addresses do not fit 600px
+(they rendered cut mid-word). The comparison is already on the face of the email twice: `$333
+$/SQ FT` beside `$210 MEDIAN` in the strip, and every comp's own $/sq ft on its row. `compsPpsfSpec`
+stays exported and tested for the social/PDF surfaces. **The acceptance script now ASSERTS the
+absence** (§2.3.0) — a comment was the only thing guarding it, and a comment is not a guard.
+
+**Subject line:** wants an OPEN, and the thing worth opening is the question, not the price.
+`marketCompsSubject`, deterministic, never model-authored: `8348 Southwindbay Cir — is the price
+right?`
+
+**Code:** `lib/deliverable/recipes/market-comps.ts` → `buildLifecycleEmail`. Registry key
+`market-comps`.
+
+---
+
+### 2.3.0 REPRODUCE IT — one command, and it asserts the EVIDENCE contract
+
+```
+bun --env-file=.env.local scripts/email/render-market-comps.mts "<address>"
+```
+
+**Default house: `8348 Southwindbay Cir, Fort Myers, FL 33908`.** Writes
+`~/Downloads/market-comps-email.html`, prints a per-cell provenance table, prints the evidence
+table row by row, and **exits non-zero if the evidence contract fails.**
+
+Coming Soon's contract is a SUPPRESSION contract. This email prints the address on purpose, so its
+contract is about the evidence instead — **five assertions, every one read off the built doc or the
+rendered bytes, never off the source:**
+
+1. **NO CHART.** Exactly one `image` block is legal (the subject's own photo). A second one means a
+   chart came back.
+2. **EVERY COMP ROW CARRIES BEDS AND SQ FT** — the land filter, read back off the render.
+3. **NO RECORDED SALE OLDER THAN 365 DAYS** — parsed from each row's own sale line.
+4. **THE SUBJECT IS NOT ITS OWN COMP.**
+5. **THE DESTINATIONS** — reported, not fatal, because no listing page is a legitimate state and an
+   unnoticed one is not. It is reporting a real defect today (§2.3.5).
+
+**And the one thing nothing surfaced before: DID THE CLAIM GATE FIRE?** `authorCompsCase` drops the
+narrator's paragraph on any violation and logs a single `console.error`. A dropped context ships the
+code-authored verdict ALONE, which reads like a thin email rather than a guard doing its job. The
+script captures that line into the provenance table. **Measured over 5 runs on the same house: 1
+drop, 4 shipped.** That is the gate working, not a bug — but you have to be able to see it.
+
+**Acceptance run, 08/05/2026 — 18 of 19 cells sourced, 29KB:** $659,000 · 3 bd · 2 ba · 1,978 sq ft
+· **$333/sq ft against a $210 comp median** · DOM 18 · 5 comparable homes, all recorded sales, **5
+of 5 photographed and 5 of 5 linked** · $182–$266 spread · code-authored verdict · sources (2) ·
+full agent card and CAN-SPAM footer off the account. Contract: **5 of 5 assertions pass**, 2
+destination warnings. Tests: **75 pass, 0 fail** in the recipe suite; **2,878 across
+`lib/deliverable` + `lib/email` with 1 network-timeout flake** (`campaign-coherence.test.ts` on the
+5s default; 10/0 green at `--timeout 60000`).
+
+---
+
+### 2.3.1 THE SUPPLIERS — the same four, plus THE ONE THAT COSTS REAL MONEY
+
+**Do not re-derive §2.1.1.** The free spine, our listing clock, SteadyAPI and the paid Apify rows
+are the same four suppliers reading through the same `resolveSubject`. What is new here is the comp
+set, and **this is the first email in the walk whose build is not free.**
+
+**THE COMP SET — `compsForAddress` (`lib/assistant/comp-helper.ts`).** Geocode → Lee/Collier gate →
+the lake lane first, then the vendor's nearby-values lane. **The subject's own dimensions travel
+with the address** (`subjectDims`) — without them `compsForAddress` never engages the size-band
+ranker and falls through to a raw nearest-first slice, which is how a $385,000 home once shipped
+with $850,000 and $721,000 "comparables". Then four filters, in order: the land filter
+(`isComparableHome` — beds AND sqft, by DATA never by name), not-the-subject, the 365-day
+freshness ceiling, and photographed-only.
+
+**THE PHOTO FLOOR IS THE VARIABLE THAT DECIDES WHETHER THIS EMAIL WORKS.** Operator decree
+08/04/2026: *"Get rid of the no photo comps."* Comps are dropped from the SET, not merely the
+table, so the median, the range and the whole price case recompute on exactly the rows the reader
+can see — **photo coverage therefore moves the claim**, which this file argued against for its whole
+life and the operator overruled knowingly. The one floor: below `MIN_PHOTOGRAPHED_COMPS` (2) the
+FULL ranked set ships and the fallback logs LOUDLY, so a vendor outage can never masquerade as a
+thin market. On the acceptance house the floor was never approached — 5 of 5.
+
+**THE MONEY, MEASURED RATHER THAN PROMISED.** `resolveCompEnrichment` reads
+`data_lake.apify_property_records` first — free, and the reason we stop re-buying houses. On a miss
+it buys **the ZIP narrowed to the months the comps actually sold in, up to 200 records PER SALE
+MONTH.** Not one call per comp. The recipe's own comment claimed "at most one verified call per
+remaining comp (~$0.01)" and that was the wrong order of magnitude in the one place a builder looks
+before spending; it has been corrected in the file.
+
+- **First build on 8348 Southwindbay Cir, 08/05/2026: 2 sale months, 395 records, ~$3.95, 2 of 3
+  uncached comps joined.** The record store went **26 → 383 rows.**
+- **Second build on the same house: 0 records bought.** The acceptance script prints the row count
+  before and after, so the receipt is on every run.
+- **The cost is per ZIP-and-window, not per email, and it amortises.** Walk one subject and stay on
+  it. A spread of candidate houses across different ZIPs is where this gets expensive.
+
+**WHY THE VENDOR CANNOT SIMPLY BE ASKED ABOUT ONE HOUSE** — because it has no lookup. A street
+address is accepted and silently treated as an AREA CENTRE whose own record is not returned, and
+`radius` is ignored (`lib/listings/apify-identity.ts`, run to ground 08/04/2026). That single fact
+explains both the dated-ZIP design above and the live defect in §2.3.5.
+
+---
+
+### 2.3.2 THE INGREDIENT LADDER — EVERY CELL, ITS SOURCE, AND WHAT FILLS IT WHEN THAT MISSES
+
+**Stop at the first hit. An exhausted ladder is an OPEN SLOT — never a zero, never a guess.**
+Every cell is written out, per the §2.2.2 lesson: a delta-list makes the reader hold two documents
+open and diff them in their head, which is the scavenger hunt this file exists to end.
+
+#### The identity block — the agent
+
+**Name · title · brokerage · phone · email · headshot · business postal address · socials** — the
+user's brand profile, no data source involved. The postal address is CAN-SPAM, not decoration.
+→ OPEN. **⚠ The same 17-field project-path drop §2.2.4 found applies here unchanged** — check
+`brand_fields_lost_account_to_project`.
+
+#### The hero — the claim on trial
+
+- **Asking price** → free spine (daily sweep) → the agent's pasted listing page → OPEN. **No price
+  is not a degraded email, it is a different one:** `buildPriceCase` returns null, the prose slot
+  stays open, and the grid still ships.
+- **Address line** → `facts.address`, printed in full. Verbatim from the vendor's own
+  `formattedAddress` — including its non-US-convention comma before the ZIP (§2.3.5).
+- **Subject photo** → the listing's own photo, mirrored to our storage → NOTHING. Never an aerial,
+  never a map tile, never a placeholder (locked operator rule).
+
+#### The spec strip — THE TERMS OF THE COMPARISON, not a wall of stats
+
+Six cells, one weight across the row. The labels are `listingSpecs`' own, deliberately — this
+recipe invented three of its own once ("This home", "Comp median", "Days listed") and they wrapped,
+broke the shared label baseline and rendered at three different emphases in one horizontal line.
+
+- **Beds · Baths · Sq Ft** → free spine → Lee records → nearby-values → the paid row → OPEN.
+- **$/Sq Ft** (`primary`, the accent — it IS the claim) → computed, price ÷ listed sq ft. Either
+  input missing → OPEN. Never estimated.
+- **Median** → computed over the comp set's own $/sq ft. No priced comp → OPEN, never a made-up
+  median.
+- **DOM** → our own `listing_dom` root, and NEVER a first-seen floor → OPEN. It took the cell the
+  comp COUNT used to hold, because that count is already stated in the footnote, on the table's
+  title and in the verdict — three surfaces — while how long this house had been listed appeared
+  nowhere.
+
+#### The footnote — the derivation, THE MIX, and the spread
+
+→ `compsFootnote`. Three candidates longest-that-fits under the schema's 120-char cap, never
+truncated mid-number: derivation + mix + style note → mix + style note → mix → derivation → OPEN.
+The **style note fires only when the subject AND at least one comp both carry a real vendor style
+string and they disagree** — silent when either side is unknown, never a guess.
+
+#### The description — the seller's own words
+
+→ `facts.remarks` (free, already fetched) → the paid subject record's `text` → **the slot is
+removed entirely.** Verbatim or not at all: the model never sees this text and never rewrites it.
+Reserved at the HEAD of the middle so it lands under the spec strip; a block spliced in afterwards
+carries no layout and sinks below the CTA, which is where it printed on 08/04.
+
+#### The evidence table — one row per comparable home
+
+- **Price · $/sq ft** (the lead) → computed from the comp's own price and size.
+- **Address · beds · baths · sq ft** → the comp record. **Baths came off a 69-field paid record we
+  had already bought and were dropping on the floor** until 08/04. Our lake's count wins where it
+  has one (a recorded county figure); the vendor fills the hole only.
+- **What the price IS** → `Sold <date>` / `Estimated value <date>` / `Last listed`. **A valuation is
+  never dressed as a sale.** A recorded sale with a known spell adds `· sold in N days`.
+- **THE DATE'S PRECISION IS PART OF THE FACT** → a vendor row is day grain and prints `Sold
+  08/29/2025`; **our own lake row is MONTH grain and prints `Sold May 2026`.** See §2.3.4 defect 1.
+- **Photo** → our own lake → the already-bought paid record → **the row ships with no picture and
+  keeps its link.** Per-row, never all-or-nothing.
+- **Link** → the comp's captured `sourceUrl` → the paid record's `property_url` → unlinked.
+
+#### The prose — a verdict authored in CODE, and colour authored by a model that may not compare
+
+**This is the recipe claims.ts exists for.** It shipped, to a rendered artifact, a comparison that
+was INVERTED — "sits just below … the two recorded sales" when $209 was 7% and 21% OVER them. A
+stronger prompt is not the fix; the old prompt already said not to hide it and the model hid it by
+asserting the opposite.
+
+- **The verdict** → `buildPriceCase`, deterministic. Every relation computed, composed into settled
+  English sentences. No price / no sq ft / no priced comp → **the paragraph does not ship at all.**
+- **The narrator's context** → one Sonnet call handed ONLY the settled sentences.
+  `buildNarratorPrompt` **does not take the comp array** — there is no `RenderComp` in its
+  signature, so there is no set for it to draw a third claim between. Violation → context DROPPED,
+  verdict alone ships. Fail-closed: the guard can cost prose, never truth.
+
+#### The tail
+
+- **Sources** → `compSources`, domain-level, never a vendor name, never an MLS id. Empty comp set →
+  no block.
+- **CTA "Find Out More"** → the subject's real listing page → `facts.sourceUrl` → **which is our own
+  homepage, and that is the live defect in §2.3.5.**
+
+---
+
+### 2.3.3 WHERE A MARKET COMPS CAN BE STARTED — inherited, not re-derived
+
+Every door in §2.1.3 reaches this recipe unchanged: the registry key `market-comps` dispatches from
+the lab, from a project, from a template pick and from a campaign step. **The builder decides from
+the address and the words typed, never from the door clicked.** Nothing about the doors is special
+here, and re-listing them would be the delta-list mistake pointing the other way.
+
+---
+
+### 2.3.4 TWO DEFECTS FOUND BY RENDERING AND LOOKING — AND FIXED, RED-FIRST
+
+**Neither was catchable by the 73 tests that were green throughout.** Both were found by running the
+real pipe on a real house and reading the output.
+
+**1. FIVE RECORDED SALES, EVERY ONE DATED THE FIRST OF THE MONTH.** The send printed `Sold
+05/01/2026`, `Sold 04/01/2026`, `Sold 03/01/2026`. Not a coincidence: our own lake comp lane reads
+`sale_month` and tags every row `dateGrain: "month"` (`comp-source-lake.ts:167`) **precisely
+because "every row is day-of-month 1 by construction."** `RenderComp` has carried that tag since
+the lane was built; the chat lane honours it and says "in May 2026"; the ranker honours it. **This
+row renderer did not** — it called `mdy()` unconditionally and minted a day the county record does
+not hold. **A precise date nobody recorded is an invented fact wearing a real number's clothes**,
+and it shipped on the face of the one email whose whole job is defending a price with records.
+
+Fixed by reusing `saleDateLabel` — the ONE root that already knew — rather than teaching a second
+formatter the rule. **The allow-set had the same hole and got the same fix:** `sourcedDates` and
+`sourcedDigits` were minting `05/01/2026` as a PERMITTED numeral, which would have licensed the
+narrator to write the exact day the row renderer had just stopped printing. Two tests: month grain
+renders `Sold May 2026` and the day appears nowhere in the doc; day grain still renders
+`Sold 08/29/2025`.
+
+**2. THE VERDICT SAID ONE FACT THREE TIMES.** Verbatim from the send:
+
+> "…sits $123 above every comparable home in the set — not just the $210 median, the entire range.
+> That is above all 5 recorded sales in the set ($182, $210, $210, $220 and $266 per square foot).
+> The asking price per square foot is above every comparable in the set (which run from $182 to
+> $266)."
+
+Sentence 3 is `compareToSet`'s and it is a verbatim restatement of sentence 1 **whenever the extreme
+tier fired** — "outside the full range" and "above every comparable in the set" are the same claim
+with the same range. (Sentence 2 stays: it names the actual sale figures, which neither other
+sentence does.) The code was written for a MIXED set and nobody had rendered an all-recorded-sales
+one. A price-defence paragraph that says the same thing three times reads as padding, and padding
+is what a reader discounts.
+
+Fixed by gating the position sentence on `!isExtreme`. **The gate is `isExtreme` and nothing else,
+so it is direction-symmetric by construction** — it drops the duplicate identically whether the ask
+sits above or below the set, which is the standing rule for this recipe (a tier that only sharpens
+language in the flattering direction is spin). When the tier does not fire, the subject is somewhere
+inside the band and that sentence is the only thing that says WHERE, so it stays. **No fact is ever
+dropped here; only a second copy of one printed in the sentence immediately before it.** Verdict
+went 800 → 397 characters on the acceptance house.
+
+**3. A COMMENT UNDERSTATED THE BUILD COST BY TWO ORDERS OF MAGNITUDE.** Not a code defect, but it is
+in the one place a builder reads before spending, so it counts. §2.3.1 has the corrected numbers.
+
+---
+
+### 2.3.5 KNOWN GAPS — named, not hidden
+
+**1. THE BUTTON AND THE HERO PHOTO POINT AT OUR HOMEPAGE.** Live on the acceptance run: CTA url =
+`https://www.swfldatagulf.com`, and the photo links there too. **This is exactly what §1.8 forbids
+and what `lib/listings/listing-url.ts` was built on 08/05 to end** — and this recipe does not use
+it. It hand-rolls its own check and pays for `fetchApifyComps({location: <the subject's own
+address>})`, which **by vendor design can never return the subject's own record** (§2.3.1) — our own
+record store is the receipt: that query left `306 Chattanooga Dr` in the cache and there is no
+`southwindbay` row in it at all. So the lane spends up to 5 records every build to join zero, and
+takes the description slot and the style note down with it. **The fix is named — route `destination`
+through `listingButtonUrl(facts)` and honour its `null` by DROPPING the button — and was
+deliberately NOT made mid-walk**, because "no link → no button" interacts with the lifecycle
+chrome's `ctaUrl` and `applyBrand`'s rewrite, and that is a button-contract decision for the
+operator. Check `market_comps_cta_points_at_homepage`.
+
+**2. THE ADDRESS CARRIES A COMMA US CONVENTION DOES NOT.** The hero prints `8348 Southwindbay Cir,
+Fort Myers, FL, 33908`. It is the vendor's own `formattedAddress`, passed through verbatim by
+`resolve-subject.ts toFacts` — so the wart is on the SHARED SPINE and shows on all seven
+address emails, not just this one. Not fixed: normalising a verbatim vendor string is a
+one-root change with a seven-email blast radius, and it belongs in a pass that walks all seven.
+
+**3. NO COMMUNITY FACTS, ON PURPOSE.** This recipe's location ban is absolute, not fact-gated — the
+narrator may not name a road, not even the subject's own, because the shipped lie called two comps
+"on the same street". Whether the SUBJECT's community should be exempt from that is an open design
+question, already tracked: `market_comps_community_deliberately_unwired`. Left alone.
+
+**4. THE CLAIM GATE'S DROP RATE IS MEASURED BUT NOT TUNED.** 1 in 5 runs on the same house lost the
+narrator's context to a banned token. That is the design working, but nobody has looked at WHICH
+token, and the banned list includes bare `"than"` and every road suffix — a wide net by choice.
+A drop is now visible in the acceptance table, which is the precondition for ever tuning it.
+
+---
+
+### 2.3.6 THE FINISH PASS — what the walk changed, and what it refused to
+
+- **The chart's absence is now a GUARD, not a comment.** Three operator killings were protected by
+  a block comment. The acceptance script fails the run on a second image block.
+- **The spend is now a RECEIPT printed on every run**, not a claim in a header — and the header that
+  made the claim was wrong.
+- **A dropped narrator paragraph is now VISIBLE.** It was a `console.error` nobody read, and its
+  symptom (a short email) looks like nothing being wrong.
+- **REFUSED: adding the chart back.** Read the block comment in `compsMiddle` first; it has the
+  three dates and the two verbatim quotes.
+- **REFUSED: fixing the CTA mid-walk.** Named, checked, and handed up — see §2.3.5 item 1.
+
+---
+
+## 2.4 – 2.17 — TO BE WALKED
 
 Each section gets written when that email is walked with the operator. **Do not pre-fill one from
-memory or by copying 2.1 or 2.2** — the whole point of the walk is that each email's ingredients and
-sources get decided deliberately, one at a time.
+memory or by copying 2.1, 2.2 or 2.3** — the whole point of the walk is that each email's
+ingredients and sources get decided deliberately, one at a time.

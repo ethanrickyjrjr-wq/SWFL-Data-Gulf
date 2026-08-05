@@ -1,3 +1,69 @@
+## 2026-08-05 (Opus 5) — §2.3 MARKET COMPS walked: an acceptance script, two truth defects fixed red-first, and the $3.95 nobody had counted.
+
+Operator: *"Coming to Market is done with correct fonts, fields and actually using our email
+builder…I think. section is 2.3 next, I believe."*
+
+**COMING SOON IS 2 OF 3, NOT DONE — and the missing one is the one he named.** Re-ran
+`render-coming-soon.mts`: **fonts VERIFIED** in the rendered bytes (0 Playfair / 0 Georgia / 0
+Times, 4 Montserrat, 32 Lato), **builder VERIFIED** (real recipe → `buildLifecycleEmail`, brand off
+a real account, 14 of 18 cells, 4 of 4 suppression probes ABSENT, exit 0). **FIELDS: NOT verified —
+17 brand fields still die on `applyUserBrandToProject`**, which is the path a real agent's send
+takes. Already carried by check `brand_fields_lost_account_to_project`; not re-closed here. Also
+corrected §2.2.0's acceptance line, which said "14 of 17" against a script that prints 18 — a count
+quoted from a doc instead of re-run from the tool (RULE 0.8).
+
+**§2.3 MARKET COMPS — WALKED AND WRITTEN.** New `scripts/email/render-market-comps.mts` is the
+acceptance run: brand off a real account, per-cell provenance, the evidence table row by row, and
+**five contract assertions read off the built artifact** — no chart (exactly one image block, the
+subject photo), every comp row carries beds + sq ft, no recorded sale past 365 days, the subject is
+not its own comp, and the destinations. Acceptance: **18 of 19 cells, 29KB, 5 of 5 assertions pass.**
+
+**DEFECT 1 — FIVE RECORDED SALES, EVERY ONE DATED THE FIRST OF THE MONTH.** The send printed `Sold
+05/01/2026`, `Sold 04/01/2026`, `Sold 03/01/2026`. Our own lake comp lane reads `sale_month` and
+tags rows `dateGrain: "month"` *precisely because* every row is day-1 by construction; the chat lane
+and the ranker both honour it — **the email's row renderer called `mdy()` unconditionally and minted
+a day the county record does not hold.** A precise date nobody recorded is an invented fact, on the
+face of the one email whose job is defending a price with records. Fixed by reusing `saleDateLabel`
+(the root that already knew) rather than teaching a second formatter. **The allow-sets had the same
+hole** — `sourcedDates`/`sourcedDigits` were minting `05/01/2026` as a PERMITTED numeral, licensing
+the narrator to write the day the renderer had just stopped printing. Both fixed. Two tests,
+red-first; renders `Sold May 2026` now.
+
+**DEFECT 2 — THE VERDICT SAID ONE FACT THREE TIMES.** `compareToSet`'s position sentence is a
+verbatim restatement of the extreme tier's whenever that tier fires ("outside the full range" ==
+"above every comparable in the set", same range). Written for a MIXED set; nobody had rendered an
+all-recorded-sales one. Gated on `!isExtreme` — **keyed on `isExtreme` alone, so it is
+direction-symmetric by construction.** No fact dropped, only a second copy. Verdict 800 → 397 chars.
+One pre-existing test updated: it asserted WHICH sentence carried the position, which was never its
+point (it is "counted, never characterized as a low end") — the extreme tier carries it now and the
+`/low end|high end|band/` guard was added to both arms.
+
+**DEFECT 3 — A COMMENT UNDERSTATED THE BUILD COST BY TWO ORDERS OF MAGNITUDE.** `market-comps.ts`
+said the enrichment lane "pays for at most one verified call per remaining comp (~$0.01)". It does
+not — the vendor sells no per-property lookup, so `resolveCompEnrichment` buys the ZIP narrowed to
+the comps' sale months, **up to 200 records PER MONTH.** Measured: first build on 8348 Southwindbay
+Cir = **2 months, 395 records, ~$3.95, 2 of 3 uncached comps joined**, record store 26 → 383 rows.
+**Second build on the same house = 0 bought.** Cost is per ZIP-and-window, amortises, and the
+acceptance script now prints the row count before and after as a receipt on every run.
+
+**NAMED, NOT FIXED — check `market_comps_cta_points_at_homepage` (defect).** The CTA and the hero
+photo point at `swfldatagulf.com`. The recipe never uses `listingButtonUrl` (the ONE root built
+08/05 for §2.1) and instead pays for `fetchApifyComps({location: <the subject's own address>})`,
+which **by vendor design can never return the subject's own record** — our record store is the
+receipt: that query left `306 Chattanooga Dr` behind and holds no `southwindbay` row. Up to 5
+records spent per build to join zero, taking the description slot and the style note with it. The
+fix is named in the check; it was not made mid-walk because "no link → no button" is a
+button-contract decision that interacts with the chrome and `applyBrand`.
+
+**ALSO SURFACED, NOT A BUG:** the claim gate dropped the narrator's paragraph on **1 of 5 runs**.
+It was a `console.error` nobody read, and its symptom is a short email that looks like nothing is
+wrong. Now in the provenance table.
+
+Gates: `bun test lib/deliverable/recipes/` **657/0** · market-comps **75/0** · `lib/deliverable` +
+`lib/email` **2,878 with 1 fail — a network-timeout flake** (`campaign-coherence.test.ts` on bun's
+5s default; **10/0 green at `--timeout 60000`**, verified twice) · `bunx tsc --noEmit` clean on both
+touched files. NOT PUSHED — awaiting operator approval.
+
 ## 2026-08-05 (Opus 5) — "How do we build everything as a field?" — spec written, and two counted findings the spec exists to fix.
 
 Operator: *"How do we build everything as a field?"* → *"SPEC"* → *"We can still edit if we use
