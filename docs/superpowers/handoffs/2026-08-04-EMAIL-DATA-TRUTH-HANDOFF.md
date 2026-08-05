@@ -124,6 +124,30 @@ pay Apify for them.
 - **HOA FEE** — see above.
 - **Half baths** — `half_baths` exists as its own column; our free lane has one `baths` number.
 
+### 2b-2. WHAT THE PAID RESPONSE RETURNS THAT WE DO NOT EVEN HAVE A COLUMN FOR
+
+From the 08/03/2026 assessment addendum, **proven with real runs, ~$0.80 spent live** — these came
+back in the response and there is NO column for them in `apify_property_records`. They exist today
+only inside the retained `raw` blob:
+
+- **`nearby_schools`.** On 08/04/2026 I told the operator we had "no verified source for schools."
+  **Wrong — the bulk actor returns it.** Second `hoa_fee`-shaped miss in one session.
+- **Agent, broker and office contacts including EMAIL and PHONE.** Vendor-ceiling gap on SteadyAPI
+  (zero across all 18 endpoints) — Apify has it. Do not use it for outbound without deciding the
+  policy first, but know we are already buying it.
+- **`tax` AND `tax_history`** — our `tax` column is 0/26 empty while the response carries both.
+- **`fips_code`**, **`half_baths` as its own field**, assessed and estimated value.
+- From the DETAIL actor: **`street_view_url`**, **`property_history[]` with per-event photos**,
+  schools, tax assessments, estimates. **The 3,000-char MLS description is NOT a first-class field —
+  parse it out of the raw blob.**
+
+**AND THE ONE THAT RETIRES AN OPEN PROBLEM.** Our own sold-price backfill research documented that a
+listing stamped sold with price 0 is TERMINAL — the real closing price was only ever recoverable via
+a per-build paid call, forever, and 11 of 19 captured sold transitions were price-0. **A date-ranged
+Apify sold pull returns the real sold price for any window at a penny a home.** That is a bulk
+repair path the research explicitly had no answer for. Verified reaching **14 months back**
+(06/2025) with explicit `date_from`/`date_to`.
+
 ### 2c. The economics, from the 08/03/2026 assessment (RE-VERIFY BEFORE SPENDING)
 
 - `moving_beacon-owner1/realtor-com-property-scraper` — **$0.01 per result.** Takes explicit
