@@ -86,8 +86,14 @@
 import { compSources, compsForAddress, type RenderComp } from "@/lib/assistant/comp-helper";
 import { saleDateLabel } from "@/lib/assistant/comp-rank";
 import { resolveCompPhotos } from "@/lib/listings/comp-photos";
-import { fetchApifyComps } from "@/lib/listings/apify-comps";
-import { pickAddressMatch, resolveCompEnrichment } from "@/lib/listings/apify-identity";
+// NOTE: `fetchApifyComps` / `pickAddressMatch` are deliberately NOT imported here any
+// more. The subject-record call that used them was a paid vendor round-trip that could
+// not succeed by construction — see the block comment at the subject-record read below.
+// The paid ZIP pull this recipe still makes goes through `resolveCompEnrichment`, which
+// is cache-first and now sits behind the process spend guard (apify-spend-guard.ts).
+import { resolveCompEnrichment } from "@/lib/listings/apify-identity";
+import { fetchCachedRecordLoose } from "@/lib/listings/apify-record-store";
+import { spendLedger } from "@/lib/listings/apify-spend-guard";
 import {
   buildDescriptionBlock,
   upsertDescriptionBlock,
@@ -140,6 +146,13 @@ const COMP_POOL = 12;
  *  and a vendor outage must never masquerade as a thin market. Two is the minimum from
  *  which a median and a range mean anything at all. */
 const MIN_PHOTOGRAPHED_COMPS = 2;
+
+/** How stale a CACHED subject record may be and still supply the listing URL and style.
+ *  Both are stable facts about a house — a listing's permalink and its architectural
+ *  style do not change while it sits on the market — which is the same reasoning behind
+ *  `paid-record-lane.ts`'s 365-day `SPEC_MAX_AGE_DAYS`. This lane may never serve a
+ *  MOVING fact (price, status, days on market) from a cached row, and it does not. */
+const SUBJECT_RECORD_MAX_AGE_DAYS = 365;
 
 /** Parse a verbatim vendor string ("$595,000", "2847") to a number. 0 → null. */
 function num(s?: string): number | null {
@@ -1548,11 +1561,23 @@ export async function buildMarketComps(ctx: RecipeBuildContext): Promise<EmailDo
   const photographed = pool.filter((c) => thumbnails.has(c.addressLine));
   const enough = photographed.length >= MIN_PHOTOGRAPHED_COMPS;
   if (!enough && pool.length) {
+    // *** NAME THE REAL REASON, DO NOT SAY "CHECK THE VENDOR CAP". ***
+    // This warning used to send every reader hunting a vendor outage. Since 08/05/2026
+    // the overwhelmingly likely cause is that the paid lane was simply OFF — it is off by
+    // default now — and a builder who reads "photo-supply problem" goes looking for a
+    // problem that does not exist. The guard knows which it was, so ask it.
+    const spent = spendLedger();
+    const why = spent.refused
+      ? `THE PAID PHOTO LANE WAS REFUSED THIS RUN (${spent.refusals} refusal(s)) — most likely ` +
+        `it is simply OFF. It is off by default; set OPERATOR_APPROVED_PAID_RUN=1 to spend. ` +
+        `This is NOT a thin market and NOT a vendor outage.`
+      : `The paid lane RAN (${spent.results} record(s), ~$${spent.estimatedUsd.toFixed(2)}) and ` +
+        `still did not cover these comps — so this is a genuine photo-supply problem ` +
+        `(vendor cap, or the houses are outside the months we pulled), not a thin market.`;
     console.warn(
       `[market-comps] ONLY ${photographed.length} of ${pool.length} comp(s) have a photo — ` +
         `below the floor of ${MIN_PHOTOGRAPHED_COMPS}, so the FULL ranked set ships and some ` +
-        `rows will have no picture. This is a photo-supply problem (check the vendor cap), ` +
-        `not a thin market.`,
+        `rows will have no picture. ${why}`,
     );
   }
   const comps = (enough ? photographed : pool).slice(0, MAX_COMPS);
@@ -1583,30 +1608,56 @@ export async function buildMarketComps(ctx: RecipeBuildContext): Promise<EmailDo
   // This does not make us the destination by default — `applyBrand` still rewrites the
   // button to the agent's own saved URL when they have one. It stops us shipping OUR
   // homepage as the fallback when a real listing page exists.
-  // *** THE RETURNED RECORD IS VERIFIED TO BE THIS HOUSE. NEVER `[0]`. ***
-  // `location` is a SEARCH AREA, not a lookup key — passing the subject's own address
-  // returns homes NEAR it, in the vendor's own order. Measured live 08/04/2026: a query
-  // on 8348 Southwindbay Cir, Fort Myers 33908 returned 306 Chattanooga Dr, Fort Myers
-  // 33905 as record [0], and that stranger's listing shipped as BOTH the hero photo link
-  // and the "Find Out More" CTA, and fed `subjectStyle` into the footnote. Extra rows are
-  // requested precisely so the true match can sit behind a neighbour; `pickAddressMatch`
-  // then takes the one that IS this address, or nothing at all.
+  // ═══════════════════════════════════════════════════════════════════════════
+  // *** THIS WAS A PAID VENDOR CALL. IT BOUGHT 5 RECORDS PER BUILD TO JOIN ZERO,
+  //     BY CONSTRUCTION, AND IT IS DELETED. ***
+  //
+  // Operator, 08/05/2026: *"What do you mean a fucking button uses apify???"* — he was
+  // right, and it was worse than absurd, it was provably futile. The vendor's OWN billing
+  // API shows this line as **$0.0501 x6 on 08/05/2026** — one charge per render.
+  //
+  // The call passed the subject's own address as `location` and asked `pickAddressMatch`
+  // for the record that IS this house. But `location` is a SEARCH AREA: this actor treats
+  // a street address as an area CENTRE and **does not return the centre's own record**
+  // (run to ground live 08/04/2026 — the header block of `apify-identity.ts` lists the
+  // five wrong houses a radius-0.3 query on 14503 Dolce Vista Rd came back with, and
+  // playbook §2.3.1 states the same fact). So `pickAddressMatch` returned null EVERY time
+  // it ran. $0.05 a build, forever, for a guaranteed null — and the button then fell back
+  // to our homepage anyway, which is the §1.8 violation it was added to fix.
+  //
+  // THE URL WAS ALREADY ON DISK THE WHOLE TIME. `data_lake.apify_property_records` carries
+  // `property_url` on **26 of 26 rows** (counted live 08/05/2026 — the best-filled column
+  // on that table) and `style` beside it, on rows we have ALREADY BOUGHT. This reads that
+  // row. It issues no vendor call and cannot: free, and it hits more often than the paid
+  // call it replaces, which hit never. The full ladder — and why we never derive a
+  // permalink instead — is `lib/listings/listing-url.ts`.
+  //
+  // A miss stays null, and null is a first-class answer: `listingButtonUrl` DROPS the
+  // button rather than substituting a homepage (playbook §1.8 — a listing button may never
+  // fall back to a homepage; Gmail sender guidelines, a deliverability rule not a taste call).
+  // ═══════════════════════════════════════════════════════════════════════════
   const needsSubjectRecord = !facts.remarks || !isListingUrl(facts.sourceUrl);
   const subjectRecord = needsSubjectRecord
-    ? pickAddressMatch(
-        await fetchApifyComps({
-          location: facts.address,
-          listingType: "for_sale",
-          maxResults: 5,
-        }).catch(() => []),
-        (facts.address ?? "").split(",")[0] ?? "",
-        (facts.address ?? "").split(",")[1] ?? "",
-      )
+    ? ((await fetchCachedRecordLoose(
+        (facts.address ?? "").split(",")[0]?.trim() ?? "",
+        facts.city ?? (facts.address ?? "").split(",")[1]?.trim() ?? "",
+        SUBJECT_RECORD_MAX_AGE_DAYS,
+      ).catch(() => undefined)) ?? null)
     : null;
-  const listingUrl = subjectRecord?.property_url?.trim() || null;
+  // `StoredApifyRecord` carries an `[k: string]: unknown` index signature, so these two
+  // columns arrive UNTYPED and must be narrowed rather than trusted. That is not
+  // ceremony: a non-string here would reach an `href`, and `isListingUrl` is the same
+  // gate `listing-url.ts` applies — an absolute http(s) URL or NO BUTTON at all (§1.8).
+  const rawSubjectUrl = subjectRecord?.property_url;
+  const listingUrl =
+    typeof rawSubjectUrl === "string" && isListingUrl(rawSubjectUrl.trim())
+      ? rawSubjectUrl.trim()
+      : null;
   // Free byproduct of the SAME subject-record fetch above — never a dedicated call
   // just for style. Null whenever that fetch didn't need to run.
-  const subjectStyle = subjectRecord?.style?.trim() || null;
+  const rawSubjectStyle = subjectRecord?.style;
+  const subjectStyle =
+    typeof rawSubjectStyle === "string" && rawSubjectStyle.trim() ? rawSubjectStyle.trim() : null;
 
   let doc = buildCompsGrid(
     facts,
@@ -1642,14 +1693,20 @@ export async function buildMarketComps(ctx: RecipeBuildContext): Promise<EmailDo
   // raw-MLS-copy landmine pointing the other way. Design §4 F4; the block carries
   // its own `descriptionSlot` marker so a refresh replaces rather than stacks.
   //
-  // TWO LANES, free first: the resolved record's own `remarks` (ours, already
-  // fetched), then the paid Apify `text` — which the vendor populates for ACTIVE
-  // listings in the same bulk call, so an active subject costs nothing extra.
-  // The model never sees this text and never rewrites it: it is the listing
-  // agent's own copy about a house we have never seen, verbatim or not at all.
-  // The record was already fetched ABOVE (it also carries the listing URL) — never a
-  // second paid call for the same row.
-  const remarks = facts.remarks ?? subjectRecord?.text ?? null;
+  // TWO LANES, BOTH FREE NOW: the resolved record's own `remarks` (ours, already
+  // fetched), then the description off the ALREADY-BOUGHT row read above. The model
+  // never sees this text and never rewrites it: it is the listing agent's own copy
+  // about a house we have never seen, verbatim or not at all.
+  //
+  // *** THE COLUMN IS `description`, NOT `text`. *** The live vendor record calls this
+  // field `text` (`ApifyRecord.text`); `toRow` promotes it into the cache column
+  // `description` (apify-record-store.ts), which is what `paid-record-lane.ts` reads.
+  // Since this lane now reads the STORED row rather than a live one, reading `.text`
+  // here would silently be `undefined` on every build — a free fact dropped on the
+  // floor with no error, which is the exact failure shape this directory keeps hitting.
+  const rawRemarks = subjectRecord?.description;
+  const remarks =
+    facts.remarks ?? (typeof rawRemarks === "string" && rawRemarks.trim() ? rawRemarks : null);
   const description = buildDescriptionBlock(remarks, listingUrl ?? facts.sourceUrl);
   if (description) doc = upsertDescriptionBlock(doc, description);
   // Reserved but nothing to say → take the slot back out. An empty panel where a

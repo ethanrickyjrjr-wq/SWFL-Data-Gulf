@@ -332,6 +332,23 @@ recipe as the only fucking one for comps."* This block keeps ONLY what belongs t
 what the vendor can and cannot answer, how it is keyed, and what it costs. Nothing here is repeated
 there. Do not start a third document.
 
+**R0 · 🔴 THE PAID LANE IS OFF BY DEFAULT (locked 08/05/2026). `OPERATOR_APPROVED_PAID_RUN=1` OR IT
+DOES NOT SPEND.** Guard root: `lib/listings/apify-spend-guard.ts`, wired into `runApifyActor`
+(`apify-comps.ts`) — the ONE place money leaves the process, and BELOW the `deps.runActor` seam every
+test injects, so no caller can route around it. Also a **300-result (~$3) per-process budget**,
+charged on the REQUESTED cap *before* the call. A refusal is loud and named, never a silent `[]`:
+this lane already has two scars (the `APIFY_KEY` name mismatch, the 403 monthly limit) where a
+refusal was byte-identical to "this market has no houses."
+
+*Why:* **$14.08 across 21 runs in one afternoon** (vendor's own `/v2/actor-runs`, actor
+T5QRnLKtyvzxjWVRH; $14.37/51 runs that day). Seven acceptance renders of ONE email each bought a
+fresh ~200-record ZIP month (~$1.95) plus a 5-record subject query (~$0.05). **The cache prevented
+nothing** — `resolveCompEnrichment` returns early only when `missing.length === 0`, so one comp the
+ZIP pull never returns re-buys every sale month on every build, forever (open:
+`apify_purchased_window_memo`). And the "spend receipt" counted rows ADDED to
+`apify_property_records` — **zero when you re-buy the same houses** — so it reported $0.00 while
+$2.00 was charged. **A receipt reads what the VENDOR charged, never our own row delta.**
+
 **R1 · `location` IS A SEARCH AREA. THERE IS NO ADDRESS LOOKUP.** `moving_beacon-owner1/
 realtor-com-property-scraper` answers AREAS ONLY. A street address is *accepted* and silently
 treated as an area centre whose own record is **not returned**; `radius` is ignored. Proven live

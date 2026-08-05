@@ -38,10 +38,18 @@
  * like a thin email, not like a gate doing its job. This run captures that line and puts
  * it in the provenance table, so "the prose is short today" is never a mystery.
  *
- * ── SPEND, MEASURED RATHER THAN PROMISED ────────────────────────────────────
- * `resolveCompEnrichment` reads `data_lake.apify_property_records` BEFORE it pays, so a
- * re-render of the same address is mostly free. This counts that table before and after:
- * **new rows = houses we bought on this run.** Pick one subject and stay on it.
+ * ── SPEND — THIS RUN IS FREE BY DEFAULT, AND THAT IS THE POINT ──────────────
+ * **The paid Apify lane is OFF unless you set `OPERATOR_APPROVED_PAID_RUN=1` for this
+ * run** (`lib/listings/apify-spend-guard.ts`). Run it plain and it costs nothing at the
+ * vendor: comps ship with whatever photos our own lake holds, the no-photo floor logs
+ * loudly, and every structural assertion below still runs. That is deliberate — the
+ * acceptance script is the thing that gets re-run seven times in an afternoon, so it is
+ * the thing that must not spend by default.
+ *
+ * The old header promised "new rows = houses we bought on this run" and that was FALSE:
+ * re-buying the same 200 houses upserts to zero new rows, so the receipt printed 0 while
+ * $2.00 was charged. The receipt now counts RESULTS REQUESTED — the unit the vendor
+ * bills — and the row delta is kept only as a cache statistic, labelled as one.
  *
  * DEFAULT HOUSE: `8348 Southwindbay Cir, Fort Myers, FL 33908` — the 08/04/2026 live-probe
  * subject, so its comparable set is already sitting in the record store and a re-run costs
@@ -59,6 +67,7 @@ import { applyBrand } from "../../lib/email/brand/apply-brand";
 import { brandingToTokens } from "../../lib/email/brand/branding-to-tokens";
 import { renderEmailDocHtml } from "../../lib/email/render-email-doc";
 import { createServiceRoleClientUntyped } from "../../utils/supabase/service-role";
+import { spendLedger, paidLaneEnabled, USD_PER_RESULT } from "../../lib/listings/apify-spend-guard";
 
 const ADDRESS = process.argv[2] ?? "8348 Southwindbay Cir, Fort Myers, FL 33908";
 const UID = process.env.DEMO_BRAND_USER_ID ?? "37cc6c49-4759-4e07-9686-0a8dcce1f8ff";
@@ -331,11 +340,37 @@ console.log(
   `  subject exclusion    ${fail.some((f) => f.startsWith("THE SUBJECT")) ? "✗" : "the subject is not its own comp ✓"}`,
 );
 
-// ── SPEND, MEASURED ─────────────────────────────────────────────────────────
-console.log("\n  SPEND RECEIPT — data_lake.apify_property_records");
+// ── SPEND, IN THE UNIT THE VENDOR ACTUALLY BILLS ────────────────────────────
+//
+// *** THE RECEIPT THAT USED TO PRINT HERE WAS A FALSE-PASS INSTRUMENT AND ITS ANSWER
+//     WAS REPORTED TO THE OPERATOR AS FACT. ***
+//
+// It counted ROWS ADDED to `data_lake.apify_property_records` before/after and called
+// the delta "NEW HOUSES BOUGHT THIS RUN". Re-buying the SAME 200 houses upserts to ZERO
+// new rows — so it printed "0 bought" while the vendor charged $2.00. On 08/05/2026 that
+// number was used to tell him "the second build cost zero." The real figure, pulled from
+// Apify's own `/v2/actor-runs`: **$14.08 across 21 runs on that walk.**
+//
+// A receipt must read what we were CHARGED, never what our own cache happened to keep.
+// The ledger below counts RESULTS REQUESTED — the unit the vendor bills ($0.01/result,
+// verified against the real charges: $1.9501 = 195 x $0.01 + the actor start) — and it
+// is charged BEFORE each call, so it cannot under-report a call that already happened.
+const spent = spendLedger();
+console.log("\n  SPEND RECEIPT — charged, not inferred");
 console.log(
-  `  rows before ${paidBefore ?? "?"} · after ${paidAfter ?? "?"} · ` +
-    `NEW HOUSES BOUGHT THIS RUN: ${paidBefore != null && paidAfter != null ? paidAfter - paidBefore : "?"}`,
+  `  paid lane           ${paidLaneEnabled() ? "ON (OPERATOR_APPROVED_PAID_RUN=1)" : "OFF — no vendor call was made, nothing was billed"}`,
+);
+console.log(
+  `  results committed   ${spent.results} (~$${spent.estimatedUsd.toFixed(2)} at $${USD_PER_RESULT}/result)`,
+);
+console.log(
+  `  refusals            ${spent.refusals}${spent.refused ? "  ← empty photo/link slots below are THIS, not an empty market" : ""}`,
+);
+// The row delta is still worth SEEING — it says how much of what we bought was new to us
+// — but it is labelled for what it is and can never again be read as a cost.
+console.log(
+  `  cache rows          ${paidBefore ?? "?"} → ${paidAfter ?? "?"} ` +
+    `(rows NEW TO THE CACHE — NOT a spend figure: re-buying the same houses adds 0 rows)`,
 );
 
 const outDir = join(homedir(), "Downloads");

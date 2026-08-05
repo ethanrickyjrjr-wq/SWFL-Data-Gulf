@@ -1345,12 +1345,36 @@ MONTH.** Not one call per comp. The recipe's own comment claimed "at most one ve
 remaining comp (~$0.01)" and that was the wrong order of magnitude in the one place a builder looks
 before spending; it has been corrected in the file.
 
-- **First build on 8348 Southwindbay Cir, 08/05/2026: 2 sale months, 395 records, ~$3.95, 2 of 3
-  uncached comps joined.** The record store went **26 → 383 rows.**
-- **Second build on the same house: 0 records bought.** The acceptance script prints the row count
-  before and after, so the receipt is on every run.
-- **The cost is per ZIP-and-window, not per email, and it amortises.** Walk one subject and stay on
-  it. A spread of candidate houses across different ZIPs is where this gets expensive.
+**⚠ THE PAID LANE IS NOW OFF BY DEFAULT — `lib/listings/apify-spend-guard.ts`.** Set
+`OPERATOR_APPROVED_PAID_RUN=1` for a run that is allowed to spend; without it every vendor call is
+refused, loudly and by name, and the build ships with whatever our own lake holds. The guard sits
+inside `runApifyActor`, below the `deps.runActor` seam every test injects, so no caller can route
+around it. A 300-result (~$3) per-process budget stops a runaway loop inside an armed run.
+
+**🔴 CORRECTION 08/05/2026 — THE TWO BULLETS THAT USED TO SIT HERE WERE WRONG, AND ONE WAS A
+MEASURING-INSTRUMENT FAILURE, NOT A TYPO.** They read "First build … ~$3.95" and "**Second build on
+the same house: 0 records bought**". The second is false. The acceptance script's receipt counted
+rows ADDED to `data_lake.apify_property_records` — and re-buying the SAME 200 houses upserts to
+**zero new rows**, so it printed "0 bought" while the vendor charged $2.00.
+
+**What the vendor's own billing API (`/v2/actor-runs`, actor T5QRnLKtyvzxjWVRH) says about that
+afternoon:** **$14.08 across 21 runs on the walk; $14.37 / 51 runs on the actor that day.** Charge
+shape: `$2.0000 x1 · $1.9501 x6 · $0.0501 x6 · $0.0100 x37 · $0.0001 x1`. **Every render bought a
+fresh ~195–200-record ZIP month (~$1.95) plus a 5-record subject query (~$0.05). Seven renders,
+seven purchases. THE CACHE PREVENTED NOTHING.**
+
+- **The unit is not the problem, the VOLUME is:** $0.01/result (the charges divide exactly by it),
+  and we buy ~200 records to enrich 3 comps.
+- **The cache does not amortise the way this file claimed.** `resolveCompEnrichment` returns early
+  only when `missing.length === 0`, so ONE comp the ZIP pull never returns re-buys every sale month
+  on every build, forever. Open check: `apify_purchased_window_memo`.
+- **The `$0.0501 x6` line is deleted, not amortised.** That was the "Find Out More" button paying to
+  find the subject's own listing — impossible by construction (§2.3.1 above: a street address is an
+  AREA CENTRE whose own record is never returned), so it bought a guaranteed null six times. It now
+  reads `property_url` off the row we already own (26 of 26 rows carry it).
+- **A receipt must read what we were CHARGED, never what our cache happened to keep.** The script
+  now prints results committed in the billed unit, plus a refusal count, and labels the row delta as
+  a cache statistic.
 
 **WHY THE VENDOR CANNOT SIMPLY BE ASKED ABOUT ONE HOUSE** — because it has no lookup. A street
 address is accepted and silently treated as an AREA CENTRE whose own record is not returned, and

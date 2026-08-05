@@ -1,3 +1,65 @@
+## 2026-08-05 (Opus 5) — The paid lane is OFF by default: $14.08 measured at the vendor, a button that bought a guaranteed null, and a receipt that read our cache instead of the bill.
+
+Operator decree, verbatim: *"First make sure we are checking all free lanes and in-house data before
+anyone runs fucking apify … we aren't running extra fucking runs for shit we already have!!!!!!"*
+and *"What do you mean a fucking button uses apify???"*
+
+**THE NUMBER, FROM THE VENDOR AND NOT FROM US: $14.08 across 21 runs** on one afternoon's walk
+(Apify `/v2/actor-runs`, actor T5QRnLKtyvzxjWVRH; $14.37/51 runs on that actor that day). Charge
+shape `$2.0000 x1 · $1.9501 x6 · $0.0501 x6 · $0.0100 x37`. Seven acceptance renders of ONE email
+each bought a fresh ~200-record ZIP month (~$1.95) plus a 5-record subject query (~$0.05).
+
+**THE MEASURING INSTRUMENT WAS THE ROOT DEFECT, NOT THE SPEND.** The acceptance script's "spend
+receipt" counted rows ADDED to `data_lake.apify_property_records`. Re-buying the SAME 200 houses
+upserts to **zero new rows** — so it printed "0 bought" while $2.00 was charged, and that zero was
+reported to the operator as fact. A receipt now reads what the VENDOR charged (results committed, in
+the billed $0.01 unit, charged BEFORE the call so it cannot under-report), and the row delta survives
+only as a cache statistic, labelled as one.
+
+**FOUR THINGS SHIPPED (4 of 4):**
+
+1. **`lib/listings/apify-spend-guard.ts`** — the paid lane is **OFF unless `OPERATOR_APPROVED_PAID_RUN=1`**,
+   plus a 300-result (~$3) per-process budget charged on the REQUESTED cap before the call. Wired
+   into `runApifyActor` — the one place money leaves the process, and BELOW the `deps.runActor` seam
+   every test injects, so no caller can route around it deliberately or by accident. A refusal is
+   loud and named, never a silent `[]`: this lane already has two scars (the `APIFY_KEY` name
+   mismatch, the 403 monthly cap) where a refusal was byte-identical to "this market has no houses."
+2. **`lib/listings/free-lanes-first.ts`** — states out loud, per house and per field, what is
+   genuinely left before anyone may spend. Plus **LANE A2, a free rung we were skipping**: the daily
+   sweep writes "12554 Kellysands Way", the paid row writes "12554 Kelly Sands Way", so the EXACT
+   cache key missed. `paid-record-lane.ts` always tried a loose key second; the lane that actually
+   spends $1.95 never did. Counted live: exact reaches 8 of 26 rows, loose reaches **5 more** — ~60%
+   more cache hits, skipped, then a ZIP month bought.
+3. **The `$0.0501 x6` line is DELETED, not amortised.** That was the "Find Out More" button paying
+   to find the subject's own listing — **impossible by construction**: this actor treats a street
+   address as an area CENTRE and never returns the centre's own record, so `pickAddressMatch`
+   returned null EVERY time, six times, and the button fell back to our homepage anyway (the §1.8
+   violation it was added to fix). It now reads `property_url` off a row we already own — 26 of 26
+   rows carry it, the best-filled column on that table. Free, and it hits more often than the paid
+   call it replaces, which hit never. Also fixed alongside it: the stored column is `description`,
+   not the live record's `text`, so the remarks lane would have been silently `undefined` forever.
+4. **A FALSE AND EXPENSIVE COMMENT, CORRECTED WITH THE VENDOR'S OWN WORDS.** `apify-identity.ts`
+   claimed the per-property actor "is keyed on `property_inputs: [<realtor.com detail URL>]`, and the
+   lake comp lane carries no detail URL." Verified live 08/05/2026 via crawl4ai, the vendor's store
+   page, verbatim: *"Need just one property? Use the `property_inputs` section — auto-detects
+   `property_id`, URL, or address."* **It takes an address. We have addresses.** Cost of that one
+   sentence: ~200 records (~$1.95) per sale month to join 2 of 6 comps, when 6 single-property
+   lookups cost ~$0.042 — **~46x, and the cheap lane is also the accurate one.** Carried by open
+   check `apify_per_property_lane_wire`; the re-buy root is `apify_purchased_window_memo`.
+
+**EVIDENCE, RUN NOT REMEMBERED.** `bun test lib/listings/{apify-spend-guard,free-lanes-first,apify-identity,apify-comps}.test.ts`
+→ **80 pass, 0 fail**. `bun test lib/deliverable/recipes/` → **657 pass, 0 fail**.
+`bun scripts/email/render-market-comps.mts` → **paid lane OFF, results committed 0 (~$0.00),
+refusals 1, 5 of 5 assertions pass, 29KB** — comps still ship with photos off our own cache. The
+acceptance script is the thing re-run seven times in an afternoon, so it is the thing that must not
+spend by default.
+
+**NOT IN THIS PUSH, AND WHY (3 held back):** `ingest/pipelines/listing_lifecycle/backfill_baths.py`
+carries an incremental-commit fix but is under a live repolith claim by a parallel session — not
+mine to commit. `_ASSISTANT/brand-backups/*.json` is the operator's real account row and is NOT
+gitignored; it stays local. Seven `scripts/email/_*.mts` one-off scratch scripts (several mutate his
+brand row) are left untracked pending his call on which deserve to be real tools.
+
 ## 2026-08-05 (Opus 5) — §2.3 MARKET COMPS walked: an acceptance script, two truth defects fixed red-first, and the $3.95 nobody had counted.
 
 Operator: *"Coming to Market is done with correct fonts, fields and actually using our email
