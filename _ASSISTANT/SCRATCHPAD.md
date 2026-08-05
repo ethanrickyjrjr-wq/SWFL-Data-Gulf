@@ -1,3 +1,27 @@
+## 2026-08-04 (Opus 5) — OPERATOR: "We just got all DOM, how could it fucking be half our book is floor? Have you looked into anything??????????"
+
+RESOLVED SAME MINUTE — **he was right, my number was two weeks stale, and I had already shipped it
+into a committed playbook.** I quoted a 07/20/2026 measurement instead of counting the rows.
+
+  **LIVE COUNT, 08/04/2026, `data_lake.listing_dom` via PostgREST exact counts:**
+  - TOTAL 34,904 · **floored 3,079 (8.8%)** · **real 31,825 (91.2%)**
+  - **Lee: 22,458 real of 24,548 = 91.5%**
+  - **Collier: 8,202 real of 9,142 = 89.7%**
+  - `listed_date` populated on 31,309 of 34,904 (89.7%); `dom_days` non-null on 34,904 of 34,904.
+
+  **What I said, and it is wrong in BOTH directions:** "roughly half the active book carries a
+  floor" (real: 8.8%) and "Collier only about 14% real" (real: 89.7%). The 07/20 numbers came from
+  the trap block in `docs/standards/data-roots.md` (T1), which still records 54.2% floored and
+  Collier 14.0% real. **That trap text is now the stale artifact and must be corrected there too —
+  it is the thing that will mislead the next session, exactly as it misled me.**
+
+  ROOT CAUSE — the same shape as the registry-summary incident earlier today and the 64-field
+  incident before that: **a hand-written summary sitting next to the live facts it summarizes will
+  always drift, and I read the summary instead of counting.** Third time in one session.
+
+  MY RULE, and it is now the third time I have written it: any coverage/percentage claim gets
+  re-counted live BEFORE it is spoken, never quoted from a doc — including from our own docs.
+
 ## 2026-08-04 (Opus 5) — OPERATOR: "The rules should be in one playbook"
 
 OPEN — and he is right, and I can name exactly why it is not one today. `docs/standards/emails.md`

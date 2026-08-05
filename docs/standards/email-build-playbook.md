@@ -324,10 +324,14 @@ bath count leaves the cell OPEN.
 stays OPEN. Never a wrong number from a partial input.
 
 **TIME ON MARKET** — today minus the vendor's list date, from our own per-listing days-on-market
-root. **⚠ THE TRAP:** roughly half the active book carries a FLOOR, not a true count — we know how
-long we've been watching, not how long it's been listed — and it is badly uneven by county
-(Lee ~59% real, Collier ~14% real, measured 07/20/2026). **This cell prints ONLY when the count is
-genuinely real. A floor is never printed as a fact.**
+root. **COVERAGE IS GOOD AND THIS CELL IS SAFE TO BUILD ON. Counted live 08/04/2026:** 34,904
+listings, **31,825 real (91.2%)**, only **3,079 floored (8.8%)** — Lee 22,458 of 24,548 real
+(91.5%), Collier 8,202 of 9,142 real (89.7%), list date present on 31,309.
+**⚠ CORRECTION, and read this before you quote anything:** an earlier draft of this line said
+"roughly half the book is a floor" and "Collier ~14% real." **Both were wrong by an order of
+magnitude** — quoted from a trap note in `data-roots.md` dated 07/20/2026 instead of counted. The
+backfill landed since. **RE-COUNT ANY COVERAGE CLAIM LIVE BEFORE SPEAKING IT, including from our own
+docs.** A floored count is still never printed as a fact — but it is now the rare case, not the norm.
 
 **THE DESCRIPTION** — the property's own marketing description verbatim, or the one the seller or
 agent pasted in. **The biggest quality lever in this email**, and it does NOT count against the word
