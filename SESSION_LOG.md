@@ -1,3 +1,48 @@
+## 2026-08-05 (Opus 5) — "Actively improving every day" is now a machine that goes RED when we stand still. Plus a reviewable 77-file deletion, staged and waiting.
+
+Operator: *"Take care of it all. We suck. We can't get any worse. Make sure we are actively improving
+every fucking day."*
+
+**THE POLARITY WAS WRONG AND THAT IS THE WHOLE POINT.** `doc-reachability.mjs --check` (pre-push)
+fires when things get WORSE and is silent forever if nothing ever improves — it is content with a
+repo that rots in place. He asked for the opposite. `scripts/doc-ratchet.mjs check` **EXITS 1 when
+the orphan count has not fallen in 7 days. Stagnation is the failure state.**
+
+**PROVEN BOTH DIRECTIONS, not asserted:** seeded a stagnant 7-day history → **exit 1**; seeded a
+7-days-ago-was-worse history → **exit 0**. Test rows then removed; the ledger holds only the real
+measurement (`docs/standards/doc-ratchet-ledger.json`, one row per calendar day, re-recording a day
+OVERWRITES so a chatty session cannot manufacture a trend).
+
+**DAILY, DURABLY — `.github/workflows/doc-ratchet-daily.yml`, 07:23 UTC.** Deliberately NOT a
+Claude-session cron: those are session-only, die on exit, and auto-expire in 7 days, so scheduling
+one and calling it "daily" would be announcing a behavior change instead of building one (RULE 0.8).
+A committed workflow survives every session, compaction and model. **Zero vendor cost** — no LLM
+call, no API key, just the repo and arithmetic. **Registered in `cadence_registry.yaml` `jobs:` —
+Gate 10 was checked BEFORE pushing and reported it unregistered; it now reports `unregistered: []`.**
+
+**DELETION — 77 FILES IDENTIFIED, STAGED AS ONE REVIEWABLE COMMAND, NOT APPLIED.** Bulk `git rm` was
+denied by the harness permission classifier; I did not route around it. `scripts/doc-burndown-delete.mjs`
+(DRY RUN by default) prints the exact list and refuses to touch anything that is not orphaned
+markdown. **28 `_ASSISTANT/investigations/` + 8 `docs/_FINISHED/` + 39 `docs/_archive/superseded/` +
+2 committed `desktop.ini`. Orphans 222 → ~147.**
+
+**A CORRECTION I MADE BEFORE ACTING, NOT AFTER:** my first instinct was to delete those three
+DIRECTORIES. They hold **111 tracked files in `docs/_archive/superseded` alone**, including `.py`,
+`.html` and `.json` that are NOT orphans. Deleting by directory would have destroyed referenced code.
+The script deletes by FILE, only `.md`, and aborts if a non-markdown path ever enters the set.
+`docs/_archive/parked/` is deliberately excluded — parked is deferred, not dead.
+
+**TRAP NAMED IN ADVANCE, IN THE CODE:** the orphan count may fall ONLY by deleting a dead doc or
+adding a real pointer. It may NEVER fall because a generated file started listing everything — that
+is self-referential fraud and it already happened once today.
+
+**RUN THIS TO APPLY (one command, reversible with `git revert`):**
+`node scripts/doc-burndown-delete.mjs --apply`
+
+**STATUS — 3.5 OF 4.** ✅ measured ✅ seeable ✅ cannot go stale ✅ **improvement now mandatory and
+machine-checked daily** · ❌ **NOT DELETED — 222 orphans stand; the 77-file removal is one operator
+command away, and P7's 8 platform objects still need sign-off.**
+
 ## 2026-08-05 (Opus 5) — HANDOFF WRITTEN: docs/superpowers/handoffs/2026-08-05-DOC-DISCOVERABILITY-HANDOFF.md — and 4 memory files, because "Claude not updating memory" was a true charge.
 
 Operator: *"Write a handoff of everything… Don't assume anything… I'm tired of moving backwards and

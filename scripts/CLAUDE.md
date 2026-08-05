@@ -19,6 +19,17 @@ usage lives HERE (root CLAUDE.md keeps the rules, this file keeps the mechanics)
 - `node scripts/safe-push.mjs` — the ONLY push path. Landmines: it rebases and can carry
   foreign parallel-session commits — check `git log origin/main..HEAD` first and ASK before bundling;
   it also flattens `--no-ff` merges.
+- `node scripts/doc-ratchet.mjs [status|record|check]` — **the "are we actually improving?" ledger.**
+  Opposite polarity to `doc-reachability --check`, which only catches regressions and is happy with a
+  repo that rots in place. `check` EXITS 1 when the orphan count has not fallen in 7 days —
+  **stagnation is the failure state.** Runs daily in CI via `.github/workflows/doc-ratchet-daily.yml`
+  (zero vendor cost — no LLM, no API key). Ledger: `docs/standards/doc-ratchet-ledger.json`, one row
+  per calendar day, re-recording a day overwrites so a chatty session cannot fake progress.
+- `node scripts/doc-burndown-delete.mjs [--apply]` — deletes ONLY markdown that is orphaned AND sits
+  in a self-declared-dead directory (`docs/_archive/superseded/`, `docs/_FINISHED/`,
+  `_ASSISTANT/investigations/`). **DRY RUN by default.** Refuses to touch non-markdown — those dirs
+  also hold `.py`/`.html`/`.json` that are NOT orphans. `docs/_archive/parked/` is deliberately
+  excluded: parked is deferred, not dead. After `--apply`, LOWER `ORPHAN_BASELINE` in the same commit.
 - `node scripts/doc-index.mjs` — regenerates `.claude/skills/what-do-we-have/INDEX.md`, the map of
   ALL 1,534 docs (path + title + one-line hook) that the `what-do-we-have` skill greps. **This is the
   ONLY place `_RESEARCH/` is visible to a repo-wide search** — that directory is gitignored, so `Grep`

@@ -2519,6 +2519,14 @@ coverage_exempt:
 # view-vintages-monthly) — added here. Net: 28 GHA + 2 Vercel entries.
 # ─────────────────────────────────────────────────────────────────────────────
 jobs:
+  - name: doc-ratchet-daily
+    workflow: doc-ratchet-daily.yml
+    purpose: >-
+      Asks once a day whether doc reachability actually IMPROVED, and fails when it did not.
+      Opposite polarity to the pre-push --check, which only catches regressions and is happy
+      with a repo that rots in place. Zero vendor cost — no LLM call, no API key, just the
+      repo and arithmetic. Red means: delete a dead doc or add a real pointer. The delete
+      list already exists at _RESEARCH/audits/2026-07-18-data-consolidation/P7-corpse-deletelist.md.
   - name: daily-rebuild
     workflow: daily-rebuild.yml
     purpose: Brain Rebuild — refinery DAG rebuild of stale brains. Runs via nightly-chain.yml's needs order; own schedule retired 07/12.

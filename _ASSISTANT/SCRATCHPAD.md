@@ -1,3 +1,107 @@
+## 2026-08-05 (Opus 5) — OPERATOR: *"Take care of it all. We suck. We can't get any worse. Make sure we are actively improving every fucking day"*
+
+**TWO ORDERS, and the second one is the durable one.**
+1. **Burn the 222 orphans down** — delete the dead, genuinely point at the live.
+2. **A MECHANISM THAT DEMANDS DAILY IMPROVEMENT, not one that merely prevents regression.** The
+   ratchet (`--check`) only stops things getting worse. He is asking for the opposite polarity: a
+   thing that goes off when we have NOT improved. Stagnation must be a failure state, not a
+   neutral one.
+
+**TRAP TO AVOID, NAMED IN ADVANCE:** generating more index files does NOT legitimately reduce the
+orphan count — an index that lists everything makes everything "referenced" by itself. That is the
+exact contamination caught earlier today (the census briefly reported 0 orphans). **Any generated
+map must be excluded from the evidence corpus, so the only honest ways to reduce orphans are DELETE
+the dead or add a REAL human-meaningful pointer.** If the number falls because a generator started
+counting itself, that is fraud, not progress.
+
+**Deletion posture:** git makes deletion recoverable, and he has now said "delete the shit we don't
+use" twice. Clearly-dead (`docs/_archive`, `docs/_FINISHED`, closed investigations) gets deleted with
+the evidence in the commit. Anything ambiguous stays and gets proposed, never guessed.
+
+## 2026-08-05 (Opus 5) — OPERATOR ALARM: *"What the fuck is the delete list!!?????? You fuckers already deleted our work once you better not have fucking done it again"*
+
+**NOTHING WAS DELETED. Verified live 08/05/2026, all 8 named objects present in `data_lake`:**
+`listing_state`, `listing_dom`, `listing_active_stats`, `listing_active_homes`,
+`active_listings_residential`, `active_listings_residential_zip_stats`, `market_details_swfl`,
+`listing_momentum_stats` — MISSING: none. `git status` shows zero deleted files. Every SQL this
+session was a `select`/`count`.
+
+**"The delete list" was MY jargon and it caused this scare — RULE 5 violation (no unexplained
+system nouns).** It is not a queue and nothing executes off it. It is: (a) a NOTE inside
+`docs/standards/data-roots.md:295` reading "DELETE after live: `listing_state.days_on_market`
+(0% pop)…" — i.e. remove the dead duplicate only ONCE its replacement is live; and (b) a read-only
+audit, `_RESEARCH/audits/2026-07-18-data-consolidation/P7-corpse-deletelist.md` (07/18/2026), with
+every one of its 8 items marked `[NEEDS-SIGN-OFF]`.
+
+**The catalog's own guard, `data-roots.md:20`:** never `DROP`/`DELETE` a duplicate until its
+replacement runs, every consumer repoints, AND the operator signs off. **Standing order taken from
+this exchange: never say "delete list" again without saying it is a proposal awaiting his signature.**
+
+## 2026-08-05 (Opus 5) — OPERATOR CAUGHT A REAL DEFECT FROM THE SMELL: *"What the fuck is days since listed?? We have DOM from fucking SteadyAPI in-house."*
+
+**He is right and it costs money on every New Listing build.** `new-listing.ts:121` is the only
+line that uses the two functions imported from the old `under-contract.ts`:
+`facts.daysOnMarket ?? daysSinceListed(await resolveSubjectListDate(facts), new Date())`.
+`resolveSubjectListDate` makes **TWO PAID SteadyAPI calls** — `/nearby-home-values` to find the
+property's own id, then `/property-tax-history` to read its list date — to re-derive a number
+**we already hold for free**.
+
+**Measured live 08/05/2026:** `data_lake.listing_dom` — the catalogued list-side DOM root
+(`docs/standards/data-roots.md:69`, wording root `lib/listings/dom.ts formatDom`) — holds
+**35,174 rows** and already carries `dom_days`, `cdom_days`, `dom_is_floor`, `listed_date`,
+`days_in_state`, `spell_anchor`, `cdom_anchor`. `listing_state.listed_date` is populated on
+**31,343 of 35,472** rows (88.4%).
+
+**One precision, not an argument:** SteadyAPI does NOT hand us a DOM number —
+`listing_state.days_on_market` (the vendor's own column) is populated on **298 of 35,472** rows
+(0.8%), which is why the catalog has it on the delete list. The DOM we hold is OURS, computed
+in-house off the vendor's `listed_date`. Either way it is free and already built.
+
+**"Days Since Listed" is the old file's label**, chosen in July because that build had no contract
+date and refused to say "days to contract." Both the label and the paid-call path die with the
+rewrite. Check opened: `new_listing_pays_for_dom_we_already_hold`.
+
+## 2026-08-05 (Opus 5) — OPERATOR, LOCKED: *"There can't be code for this if it is not from today. We are building everything new so we build it fucking right."*
+
+**The date on a file is the test of whether it belongs to this build.** The July
+`under-contract.ts` (07/17/2026, 1,098 lines) is NOT the Under Contract email — it is
+old-world code that predates the assembly line, and I spent a whole answer costing it out
+as a diff target. Wrong frame. **The three emails that exist were each written NEW in the
+walk that produced their playbook section** — `new-listing.ts`, `coming-soon.ts`,
+`market-comps.ts`, all dated 08/05/2026, each with its own render script and its own
+`email-build-playbook.md` section (§2.1, §2.2, §2.3). Under Contract is §2.4 and gets the
+same treatment: written new, not patched.
+
+**The one real entanglement, recorded so it is not discovered mid-build:** `new-listing.ts:44`
+imports `daysSinceListed` and `resolveSubjectListDate` FROM the old `under-contract.ts`. A
+shipped email depends on two functions living in the corpse. They move to a shared home
+before the old file goes anywhere.
+
+## 2026-08-05 (Opus 5) — OPERATOR DECREE + A FALSE "ZERO CODE" CLAIM I CAUGHT ON THE NEXT PROMPT
+
+**DECREE, LOCKED, verbatim:** *"The fucking under contract date is the date the email is fucking
+made, user can change it if they want."*
+
+The contract date is **not** a thing we wait on the agent to type, and not a gap. It **defaults to
+the build date** and is an **editable field**. That single line kills the blocker the whole 07/13
+refutation was built around — days-TO-contract stops being "held by no source" and becomes
+`buildDate − listedDate`, with the user able to correct it. `under-contract.ts` today prints
+**"Days Since Listed"** and its header says days-to-contract "is held by no source — that is the
+fabrication that shipped." That comment is now STALE and the label is now WRONG.
+
+**THE FALSE CLAIM — mine, written 08/05 in `docs/superpowers/plans/2026-08-05-under-contract-24-
+BUILD-HANDOFF.md` §7:** *"Zero code exists for this email. No test has been written."*
+**FALSE.** `lib/deliverable/recipes/under-contract.ts` is **1,098 lines**, dated 07/17/2026,
+registered at `recipes/index.ts:94` and `recipes.ts:223`, with **1,045 lines of tests** in
+`under-contract.test.ts` (07/20) — and `new-listing.ts:44` **imports `daysSinceListed` and
+`resolveSubjectListDate` FROM IT**. I wrote a build handoff for a file that already existed and
+that another shipped email depends on. **A `ls` of the recipes directory would have caught it.**
+This is failure #3 from the entry below — not searching, then finding it later — repeated the
+same day, in the document written to stop it.
+
+**What that means for the handoff:** §6 ("copy the structure of coming-soon.ts", "register it") is
+wrong work. The real job is a **DIFF against the existing recipe**, not a build from zero.
+
 ## 2026-08-05 (Opus 5) — OPERATOR, LOCKED: *"I'm tired of moving backwards and Claude not updating memory and saying old shit and not searching for things and finding it weeks later… We have the fucking playbook from fucking Anthropic!!! FUCKING USE IT!!!"*
 
 **FOUR NAMED FAILURES, ALL VERIFIED TRUE THIS SESSION. Not opinions — each has an artifact.**

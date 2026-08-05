@@ -1,0 +1,80 @@
+name: doc-ratchet-daily
+
+# ═══════════════════════════════════════════════════════════════════════════════
+# ARE WE ACTUALLY IMPROVING? Asked once a day, by a machine, in public.
+#
+# Operator decree 08/05/2026, verbatim: *"Make sure we are actively improving every
+# fucking day."*
+#
+# *** WHY THIS EXISTS AND `--check` DOES NOT COVER IT. *** `doc-reachability.mjs --check`
+# runs in the pre-push gate and has the WRONG POLARITY: it fires when things get worse and
+# stays silent forever if nothing ever improves. It is happy with a repo that rots in
+# place. This job fires when we have NOT improved — stagnation is the failure state.
+#
+# *** WHY GITHUB ACTIONS AND NOT A CLAUDE-SESSION CRON. *** A cron scheduled inside a
+# Claude session is SESSION-ONLY: it dies when the session exits and auto-expires in 7
+# days. Scheduling one and calling it "a daily job" would be announcing a behavior change
+# instead of building one — the exact failure RULE 0.8 exists to stop. A committed
+# workflow file survives every session, every compaction, and every model.
+#
+# It costs nothing at a vendor: no LLM call, no API key, no paid lane. It reads the repo
+# and does arithmetic.
+#
+# WHAT TO DO WHEN IT GOES RED — two honest moves, and only two:
+#   1. DELETE a dead document   -> node scripts/doc-reachability.mjs --orphans
+#   2. Add a REAL pointer to a live one, from the doc that would actually need it
+# Start with the delete list we ALREADY HAVE and keep forgetting:
+#   _RESEARCH/audits/2026-07-18-data-consolidation/P7-corpse-deletelist.md
+#
+# NEVER move the number by making a generated file list more things. That is
+# self-referential fraud and it already happened once (08/05/2026 — the generated index
+# counted itself as a referrer and briefly reported 0 orphans).
+# ═══════════════════════════════════════════════════════════════════════════════
+
+on:
+  schedule:
+    # 07:23 UTC. Deliberately off the :00/:30 marks — the whole planet schedules there and
+    # GitHub's own scheduler drifts worst under that load.
+    - cron: "23 7 * * *"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: doc-ratchet-daily
+  cancel-in-progress: false
+
+jobs:
+  ratchet:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          # Full history is not needed; the census reads the working tree via git ls-files.
+          fetch-depth: 1
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+
+      # The census is dependency-free by design — no install step, nothing to go stale.
+      - name: Measure reachability
+        run: node scripts/doc-reachability.mjs
+
+      # `check` records today's row, prints the trend, and EXITS 1 when the orphan count
+      # has not fallen within STAGNATION_DAYS. The ledger written here is ephemeral (CI
+      # working tree) — the committed ledger is updated by whoever does the burndown, which
+      # is the point: the ledger only moves when a human/agent actually improves something.
+      - name: Fail if we have not improved
+        run: node scripts/doc-ratchet.mjs check
+
+      - name: What to fix (only runs when the ratchet failed)
+        if: failure()
+        run: |
+          echo "::error::Doc reachability has not improved. Orphaned docs are invisible to Claude."
+          echo "Orphans (deletion candidates):"
+          node scripts/doc-reachability.mjs --orphans | head -40
+          echo ""
+          echo "Read this BEFORE writing a new delete list — we already have one:"
+          echo "  _RESEARCH/audits/2026-07-18-data-consolidation/P7-corpse-deletelist.md"
