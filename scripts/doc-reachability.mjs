@@ -40,7 +40,7 @@ import { readFileSync, readdirSync, statSync } from "node:fs";
 import { join, basename, dirname } from "node:path";
 import { fileURLToPath } from "node:url";
 
-/** Measured 08/05/2026: **222 orphans of 1,534 docs** — LOWERED from 240 the same day by
+/** Measured 08/05/2026: **220 orphans of 1,537 docs** — LOWERED from 240 the same day by
  *  recovering the 18 `_RESEARCH/` files that were absent from `_RESEARCH/INDEX.md`. Lower this as orphans are closed;
  *  never raise it to make `--check` pass.
  *
@@ -50,7 +50,7 @@ import { fileURLToPath } from "node:url";
  *  more orphans that were always there. **No orphan was created; the ruler got honest.**
  *  That is the ONLY admissible reason to raise this number, it must be stated in the same
  *  commit, and "the measurement changed" must never be used to launder an actual regression. */
-const ORPHAN_BASELINE = 222;
+const ORPHAN_BASELINE = 220;
 
 const ROOT = join(dirname(fileURLToPath(import.meta.url)), "..");
 

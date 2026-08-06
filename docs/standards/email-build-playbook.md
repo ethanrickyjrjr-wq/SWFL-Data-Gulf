@@ -10,6 +10,15 @@ fucking write it in one that we will add to."*
 **How to use this file:** read PART 1 once — it applies to every email ever built here. Then jump
 straight to your email's section in PART 2 and read nothing else.
 
+**⚠️ THE AUTHORITY FOR *WHY* THIS BUILD IS RUNNING — both were ORPHANED until 08/05/2026, meaning
+nothing in the repo pointed at them and no session could find them:**
+- [`docs/superpowers/handoffs/2026-08-04-showcase-email-assembly-line-HANDOFF.md`](../superpowers/handoffs/2026-08-04-showcase-email-assembly-line-HANDOFF.md)
+  — the base design for the assembly line this playbook implements.
+- [`docs/superpowers/handoffs/2026-08-04-showcase-email-GO-ADDENDUM.md`](../superpowers/handoffs/2026-08-04-showcase-email-GO-ADDENDUM.md)
+  — **the operator's GO order (08/04/2026) plus an independent second verification pass that records
+  what was WRONG in the base handoff.** Read the base first, then this. Being unable to find the
+  document that says what the base design got wrong is how a corrected error gets re-shipped.
+
 **Why this file exists and the others failed:** the rules were spread across [`emails.md`](./emails.md) §0, five
 GITIGNORED research files it told you to go open, `lib/email/CLAUDE.md`,
 `lib/deliverable/CLAUDE.md`, [`deliverable-playbook.md`](./deliverable-playbook.md), and [`data-roots.md`](./data-roots.md). Six places, five of

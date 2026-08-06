@@ -3,6 +3,13 @@
 Design doc. Follows `_ASSISTANT/research/2026-07-01-email-social-ai-pipeline-report.md` (read-only audit)
 and a same-day plan-review pass that corrected two of its gaps against live code + a live lake query.
 
+> **⚠️ UNFINISHED FOLLOW-ON, ORPHANED FOR A MONTH.** Gap 4's backend shipped (commit `bf84bcfb`)
+> but its UI wiring was scope-trimmed out and handed off to
+> [`docs/superpowers/handoffs/2026-07-01-schedule-suggestion-ui-prefill.md`](../handoffs/2026-07-01-schedule-suggestion-ui-prefill.md),
+> which then sat with ZERO inbound references from 07/01/2026 until the orphan census found it on
+> 08/05/2026. Shipped backend with no surface. Carried by check `schedule_suggestion_ui_prefill_unwired`.
+
+
 ## Scope
 
 Three independent pieces, one shared spine (`fetchLakeParts`, `lib/email/build-doc.ts:87-95`):
