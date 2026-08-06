@@ -1,3 +1,35 @@
+## 2026-08-06 (Opus 5) — FINISHED IT: the absence signal is attached to a real check and the ledger CLOSED IT ITSELF. First machine-closed check on this platform.
+
+The prior entry shipped the type attached to nothing. That was the unfinished half. It is done.
+
+**THE LEAK, run to ground.** `_RESEARCH/audits/2026-07-18-site-audit.md:187` (finding 22) records
+the exact served string: the 33904 payload was emitting *"Naples feed last refreshed 04/30/2026;
+current build excludes Collier from the SWFL rollup."* — internal build-state wording on a
+plain-English answer surface. **Probed live 08/06/2026: `GET /api/z/33904` returns ZERO matches for
+`current build` / `last refreshed` / `excludes Collier` / `rollup`.** The fix had landed at some
+point and nobody ever closed the check — it sat open on a solved problem.
+
+**NEGATIVE-TESTED BEFORE ATTACHING, all four live:**
+  POSITIVE 33904        true  — 200, real surface (has "ZIP 33904"), "current build" ABSENT
+  NEG soft-404 /z/00000 false — **returns HTTP 200** and was correctly REFUSED on missing proof-of-life
+  NEG wrong-zip proof   false — refused
+  NEG leak-is-there     false — refused
+**The soft-404 case is the point.** `/api/z/00000` serves 200, exactly the trap
+`.claude/skills/check-signal/SKILL.md` warns about. A naive `not_contains` would have passed it
+forever and never self-healed. `requires` blocked it live.
+
+**THEN THE MACHINE CLOSED IT.** `check-sweep --dry-run` → `1 OPEN check(s) carry a live signal` →
+`CLOSE`. Live run: `1 closed · 0 still open · 0 signal-broken`. **No human typed a close.** That is
+the first check on this platform discharged by the automatic closer, and it now RE-VERIFIES for
+free forever — `reverify-signals.mjs` reopens it the moment that wording comes back.
+
+**HONEST COUNT, NOT SPIN: total went 878 -> 881 while I did this.** My close landed; parallel
+sessions opened more than one check in the same window. **The lesson is the whole point of this
+work — one machine-verifiable check beats ten hand-closed ones, because only the machine-verifiable
+one stays closed and re-checks itself.** 3 of ~881 now carry signals-worth of automation
+(1 signal attached, 2 closed manually with proof earlier today). The remaining ~878 still need
+signals, and that is the burn-down.
+
 ## 2026-08-06 (Sonnet 5) — WEEK IN REVIEW Task 1 done end-to-end: the DB query landed, TDD green (17/17).
 
 Took over from the prior session's handoff — the pure contract (`lib/week-in-review/load.ts`) was
@@ -190,6 +222,23 @@ routes) — NOT fixed this session, opened as checks instead of silently deferre
 - `sa0718_portal_route_drops_supabase_read_error` — `portal/route.ts:24-28` drops the Supabase `error`
   on the customer-lookup read; a transient read failure reads as "no customer" → 404 for a real
   subscriber. Lower stakes (retryable by reloading) but same root cause.
+
+**Operator: "why the fuck would you not fix it" — fixed both same session, no more asking.**
+- `report-unlock/route.ts` — added `lookupSession()`: `StripeInvalidRequestError` (bad/expired
+  session id) is genuinely unpaid, proceeds as before; any other error (network/API/rate-limit) now
+  retries once, logs every failed attempt (was completely silent before), and on persistent failure
+  redirects with `?unlock_error=1` instead of landing the buyer on the identical paywall a real
+  never-paid visitor would see.
+- `portal/route.ts` — now destructures and checks `error` on the `billing_subscriptions` read;
+  returns `503 billing_unavailable` instead of collapsing a transient read failure into `404
+  no_customer`.
+- `tsc --noEmit` clean on all 3 touched route files. `bunx next build` run: fails, but on
+  `lib/deliverable/recipes/agent-brand-intro.ts` (unrelated file, actively claimed by a parallel
+  session per the repolith workspace listing) — not a regression from this work.
+- Reclassified all 3 checks `defect → verify` (fix committed + tested, NOT live-verified — per
+  `checks-prod-evidence` this repo never closes a check on a green suite alone):
+  `sa0718_checkout_session_completed_silently_drops_`,
+  `sa0718_report_unlock_swallows_retrieve_error_to_unpaid`, `sa0718_portal_route_drops_supabase_read_error`.
 
 Also flagged, not acted on: two stale docs (`docs/superpowers/specs/2026-07-03-stripe-billing-design.md`,
 `docs/superpowers/plans/2026-07-03-stripe-billing.md`) still state "200 always" and carry the OLD
