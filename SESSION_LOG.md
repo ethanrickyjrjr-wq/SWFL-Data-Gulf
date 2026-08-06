@@ -1,3 +1,41 @@
+## 2026-08-06 (Sonnet 5) — Checks ledger: dropped 23 stale email/social `*_live_verify` rows (905→882), left the live rebuild untouched.
+
+Operator: *"we need to get all of the old checks on emails gone since we are building all new. we
+have way too many check to get off the list. delete all that are not relevant anymore, as well. or
+really old."*
+
+Pulled all 905 open `checks` rows and grep'd 325 email/social-tagged ones before touching anything —
+the literal ask ("old email checks") didn't match the ledger: ~200 of those 325 are 0-4 days old and
+ARE the in-flight email-assembly-line rebuild itself (`market_pulse_walk_live_verify`,
+`just_sold_prefill_send_time_confirm`, `back_on_market_*`, `apify_*` lanes). Deleting "all email
+checks" would have gutted the tracker for the exact work in progress — flagged this via `/advisor`
+before acting.
+
+**Dropped 23** (`check.mjs close <key> --drop "<reason>"`, `state='dropped'`, reversible via
+`reopen`) — all `verify`-class, 30-54 days untouched, naming systems superseded by the current
+recipe rebuild: `email_scheduler_f_live_verify`, `email_s3_smoke_live_verify`,
+`welcome_smoke_no_invention`, `task5_inchat_send_verify`, `piece1_workspace_shell_verify`,
+`piece4_edit_refresh_trash_verify`, `p1_ai_surface_prod_verify`, `social_x_media_v2_scope_verify`,
+`social_u1_connect_live_verify`, `prochart_rendering_live_verify`, `email_lab_tracking_live_verify`,
+`listing_flyer_email_live_verify`, `grid_email_canvas_v2_live_verify`,
+`email_lab_text_styling_live_verify`, `sold_email_builder_live_verify`, `project_cockpit_live_verify`,
+`brand_tokens_one_root_live_verify`, `funnel_demo_email_live_verify`,
+`lab_first_funnel_landing_live_verify`, `lab_entry_root_live_verify`, `link_click_routing_live_verify`,
+`new_listing_grid_fill_live_verify`, `listing_flyer_design_variants_live_verify`.
+
+Verified: `node scripts/check.mjs list` → `882 open — 243 defect · 109 verify · 322 task · 208
+untriaged` (was 905 — 243 · 132 · 322 · 208).
+
+**Not touched, on purpose:** the ~200 0-4d in-flight rebuild rows; the `sa0718_*` site-audit slice
+(84 rows, 14-18d, mostly non-email real defects — separate pass, next up); a handful of
+near-duplicate raw-enum-in-Type-cell rows that turned out to describe genuinely distinct bugs on
+closer read.
+
+Skill used: `checks-burndown`. No code changed this entry — DB-only via Supabase REST, nothing to
+diff.
+
+---
+
 ## 2026-08-06 (Opus 5) — CI RED SINCE 05:30Z, root-caused to a missing `timeout-minutes:` on a workflow added 18h earlier. Fixed + doc-ratchet exempted from the cron watchers.
 
 **Symptom:** 5 consecutive red CI runs, 05:30Z–16:40Z. **Not** the diffs that were pushed — every
