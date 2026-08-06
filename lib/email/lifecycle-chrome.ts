@@ -100,6 +100,13 @@ export interface LifecycleChrome {
    *  "Just Sold" · "Market Comps". */
   ribbon: string;
 
+  /** THE RIBBON AS A STAMP rather than a caption — one step up the type ladder, deeper band,
+   *  display face. OPT-IN PER EMAIL and default off, so the other six render byte-identical.
+   *  Just Sold takes it (operator, 08/06/2026: the announcement word read as chrome, not as
+   *  the headline). See `HeroProps.ribbonLoud` for the measured reason it is a band and not
+   *  an on-photo overlay. */
+  ribbonLoud?: boolean;
+
   /** The photo. `null` = an OPEN SLOT (a dropzone on the canvas, absent from the email).
    *  Never a stock image, never a refusal. */
   photo: { url: string; alt: string; linkUrl?: string } | null;
@@ -211,7 +218,15 @@ export function buildLifecycleEmail(current: EmailDoc, chrome: LifecycleChrome):
   //    that is identical in shape and different in word across all seven emails.
   entries.push(
     row(
-      { id: createBlock("hero").id, type: "hero", props: { kicker: chrome.ribbon, ribbon: true } },
+      {
+        id: createBlock("hero").id,
+        type: "hero",
+        props: {
+          kicker: chrome.ribbon,
+          ribbon: true,
+          ...(chrome.ribbonLoud ? { ribbonLoud: true } : {}),
+        },
+      },
       1,
     ),
   );

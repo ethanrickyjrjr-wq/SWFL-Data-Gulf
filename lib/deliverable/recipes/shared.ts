@@ -362,6 +362,15 @@ export async function authorListingNarrative(
      * other settled line.
      */
     anchors?: string[];
+    /**
+     * Does the reader actually SEE the listing's own description on this email?
+     *
+     * Default TRUE — every lifecycle email ships it in its own reserved block. **Just Sold does
+     * not** (a for-sale pitch is stale the moment the house closes), and the system prompt below
+     * used to assert the block was there regardless. Pass `false` when your recipe suppresses it,
+     * or the narrator will write sentences that point the reader at a block that is not on the page.
+     */
+    descriptionRendered?: boolean;
   } = {},
 ): Promise<string | null> {
   // Nothing real to describe → leave the slot empty (never improvise a house).
@@ -442,11 +451,23 @@ export async function authorListingNarrative(
     //
     // Adding a block changed this writer's job. That is the second-order check that was
     // skipped, and this is the correction.
-    `*** THE LISTING'S OWN DESCRIPTION IS PRINTED IN FULL, VERBATIM, DIRECTLY ABOVE YOUR ` +
-    `PARAGRAPH. THE READER HAS ALREADY READ IT. *** Your job is NOT to summarise it, tighten ` +
-    `it, restate it, or "pull out the highlights" — every one of those puts the same sentences ` +
-    `on the page twice and is a FAILURE. Use it only to know what is already covered, so you ` +
-    `can avoid it.\n\n` +
+    // WHETHER THE DESCRIPTION IS ACTUALLY ON THE PAGE IS NOT UNIVERSAL — measured 08/06/2026.
+    // Just Sold deliberately suppresses the block (a for-sale pitch is stale once the house
+    // closes), so telling its narrator the description sits "directly above your paragraph" is
+    // a false premise, and it wrote to it: *"The listing description covers the interior updates
+    // in full"* — pointing the reader at something that is not there. Found by rendering and
+    // looking, one screenshot after the block was removed. The instruction now follows the
+    // rendering instead of assuming it.
+    (opts.descriptionRendered === false
+      ? `*** THE LISTING'S OWN DESCRIPTION IS **NOT** ON THIS PAGE. THE READER CANNOT SEE IT. *** ` +
+        `You are given it below only so you know what is true about the home. NEVER refer to "the ` +
+        `listing", "the description", or "the listing description" — to the reader those point at ` +
+        `nothing. Do not summarise it either: describe the home in your own words from the facts.\n\n`
+      : `*** THE LISTING'S OWN DESCRIPTION IS PRINTED IN FULL, VERBATIM, DIRECTLY ABOVE YOUR ` +
+        `PARAGRAPH. THE READER HAS ALREADY READ IT. *** Your job is NOT to summarise it, tighten ` +
+        `it, restate it, or "pull out the highlights" — every one of those puts the same sentences ` +
+        `on the page twice and is a FAILURE. Use it only to know what is already covered, so you ` +
+        `can avoid it.\n\n`) +
     `WRITE WHAT THE DESCRIPTION DOES NOT SAY. That is the entire assignment. The facts below ` +
     `carry things the seller's copy almost never mentions: how long it has been on the market, ` +
     `the year it was built, the monthly HOA, what the price works out to per square foot, the ` +

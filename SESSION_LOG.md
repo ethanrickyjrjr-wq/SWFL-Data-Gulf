@@ -1,3 +1,47 @@
+## 2026-08-06 (Opus 5) — "the worst just sold email i have ever seen." Crawled what actually works, put it in the PLAYBOOK, and made JUST SOLD a stamp.
+
+Operator, on the email I had just proved 8/8 correct. He was right, and the miss is named in
+§1.19 T13 now: **an acceptance run measures TRUTH and nothing in it measures WORTH.**
+
+**CRAWLED (crawl4ai, live, 5 URLs — 3 his, 2 mine; 4 returned content).** leadsites.com ·
+propphy.com · housingwire.com prospecting letters · theclose.com just-sold postcards ·
+luxurypresence.com. reallygoodemails.com came back 4KB of JS shell — recorded as fetched-and-empty,
+not as a finding. Filed: `_RESEARCH/email-and-social/2026-08-06-just-sold-craft-and-agent-email-voice.md`
++ its `_RESEARCH/INDEX.md` line + the category count (11 → 12).
+
+**THE HEADLINE FINDING, and it indicts the build:** a Just Sold email is not an announcement about a
+house, it is a message to the NEIGHBOURS about THEIR house. All three operator-handed sources lead
+with the reader's equity — The Close names *"your equity has changed"* as the line that stops a
+homeowner. **Ours never mentions the reader once.** That is a copy/structure defect, not a data one.
+
+**IN THE PLAYBOOK (one file, per his standing decree — no new handoff):**
+- **§1.20 HOW AN AGENT EMAIL SPEAKS** — the voice card, every line sourced. The reader is the hero,
+  never the agent and never the house. Direct not vague. Sell the reply, not the house. One CTA.
+  30–40 char subjects (third source to converge). **Stop quoting open rates — Apple MPP.**
+- **§1.19 T13** — the truth-vs-worth trap.
+- **PART 3 — POTENTIAL BUILDS & IMPROVEMENTS**, a backlog with the evidence attached: 7
+  improvements (reader-first framing · days-on-market gated to the recorded rung · offers count as a
+  lane-4 slot · client-win panel · **a photo-rights gate we have no guard for** · re-test the design
+  itself) and 8 new emails (neighbour-farming Just Sold, "your future competition just went live",
+  neighbourhood alerts, home-iversary, review request, Deal of the Week, seven prospecting types,
+  and SMS as a compliance wall — NOT a build).
+
+**JUST SOLD NOW STANDS OUT.** `HeroProps.ribbonLoud` — the ribbon walks one step up the EXISTING
+ladder (caption 14 → h2 28, display weight, deeper band). Opt-in per email; the other six render
+byte-identical. **Deliberately NOT an on-photo overlay:** `overlayTitle` exists, but it renders the
+photo as a CSS background-image and Outlook desktop drops those — the house would vanish to gain a
+word. The Close's 13-postcard teardown is the evidence for the loud version ("large, bold text",
+"a short sentence in HUGE print").
+
+**ONE MORE DEFECT, found by looking at the new render:** the narrator wrote *"The listing description
+covers the interior updates in full"* — pointing the reader at a block this email suppresses. The ONE
+narrator asserted the description was on the page for every recipe. Now `descriptionRendered` follows
+the actual rendering. The rewritten paragraph describes the home itself and is materially better.
+
+8/8 assertions still green on both houses · 769 tests pass across recipes + blocks · sent to
+hello@swfldatagulf.com (Resend `e20053dd-7f39-4049-a6a4-12b630d19320`).
+
+
 ## 2026-08-06 (Sonnet 5) — AGENT BRAND INTRO WALKED AND SENT. Account was already fully profiled; the gap was the acceptance script, not the recipe.
 
 Operator: *"CREATE agent-brand-intro so builder has the recipe and we are built with all rules in

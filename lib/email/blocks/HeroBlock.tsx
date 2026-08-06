@@ -2,7 +2,7 @@
 import { Link, Section, Text } from "@react-email/components";
 import type { EmailGlobalStyle, HeroProps } from "../doc/types";
 import { displayFontStack, fontStack, sectionPad, MUTED, BORDER, CARD_BG } from "./styles";
-import { text, label, lines, pad, space, CARD_PAD } from "./scale";
+import { text, label, lines, pad, space, CARD_PAD, TRACK, WEIGHT } from "./scale";
 import { DISPLAY_FONT_CLASS } from "./email-head";
 import { isDarkBg, legibleAccent, ON_DARK_BODY, ON_DARK_MUTED, ON_DARK_TITLE } from "./on-dark";
 import { EditableText, type EditScope } from "./editable-text";
@@ -38,14 +38,31 @@ export function HeroBlock({
 
   // The RIBBON: a full-width accent band carrying the kicker. This is the "◆ NEW LISTING ◆"
   // bar in the sample — a design element, not a caption.
+  // `ribbonLoud` walks the band ONE STEP UP the existing ladder — caption 14 → h2 28, at the
+  // display weight, in a deeper band. No invented sizes: both ends are roles that already
+  // exist (scale.ts TYPE/WEIGHT/TRACK). See `HeroProps.ribbonLoud` for why this is a band and
+  // not an on-photo overlay (Outlook desktop drops background images).
+  const ribbonType = props.ribbonLoud
+    ? {
+        ...text("h2", { weight: WEIGHT.display }),
+        letterSpacing: TRACK.label,
+        textTransform: "uppercase" as const,
+      }
+    : { ...label(), textTransform: "uppercase" as const };
   const ribbon =
     props.ribbon && props.kicker ? (
-      <Section style={{ backgroundColor: accent, padding: pad(8, CARD_PAD) }}>
+      <Section
+        style={{
+          backgroundColor: accent,
+          padding: props.ribbonLoud ? pad(16, CARD_PAD) : pad(8, CARD_PAD),
+        }}
+      >
         <Text
           style={{
-            fontFamily: font,
-            ...label(),
-            textTransform: "uppercase",
+            // The loud stamp is a display moment; the quiet band stays on the body face so
+            // every existing lifecycle email renders byte-identical.
+            fontFamily: props.ribbonLoud ? displayFont : font,
+            ...ribbonType,
             textAlign: "center",
             color: isDarkBg(accent) ? "#ffffff" : "#1a1a1a",
             margin: 0,

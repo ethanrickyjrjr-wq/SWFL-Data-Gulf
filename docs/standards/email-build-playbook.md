@@ -599,7 +599,8 @@ The general form: consolidate what is genuinely one thing; a parameter is not du
 **2. STATE THE BUILT COUNT FIRST, COUNTED FROM CODE.** How many emails have a builder (count
 `lib/deliverable/recipes/index.ts`) and how many have been WALKED (count `scripts/email/render-*.mts`).
 Those are different numbers and conflating them is how a status report lies. **08/06/2026: 17
-builders, 5 walked** (New Listing, Coming Soon, Market Comps, Under Contract, Just Sold).
+builders, 6 walked** (New Listing, Coming Soon, Market Comps, Under Contract, Just Sold, Monthly
+Market Pulse).
 
 **3. BRAINSTORM → NAME THE BREAK → TDD.** `superpowers:brainstorming` is mandatory. No design is
 approved without a failure-modes section: every way it can break, each paired with the guard that
@@ -677,6 +678,57 @@ stale baseline reports a false difference.
 spend; the only metered call is the one narrator paragraph. Running without `ANTHROPIC_API_KEY` skips
 even that — which is also how the deterministic paired run in T10 is done.
 
+**T13. AN ACCEPTANCE RUN MEASURES TRUTH. NOTHING IN IT MEASURES WORTH.** Eight green assertions
+proved the Just Sold email's sourcing was airtight and told us nothing about whether anyone would
+read it. Operator's verdict on that same artifact: *"this is the worst just sold email I have ever
+seen."* **Before you call an email done, read it as the RECIPIENT** — see §1.20.
+
+---
+
+## 1.20 HOW AN AGENT EMAIL SPEAKS. THE VOICE CARD.
+
+**Every line here comes from a crawled source, not from taste.** Full pass with quotes and URLs:
+`_RESEARCH/email-and-social/2026-08-06-just-sold-craft-and-agent-email-voice.md` (gitignored — open
+it by path, a Grep cannot see it).
+
+**THE ONE RULE: THE READER IS THE HERO. NOT THE AGENT, NOT THE HOUSE.** The Close's Use-This/Not-This
+table is the whole card: *"Profit from your home!"* beats *"We know how to sell your home!"* —
+because it *"make[s] the seller the hero of the story."* *"Get your free home valuation today!"*
+beats *"We can tell you how much your home is worth!"* — it *"conveys what the homeowner will
+receive rather than what you can do."* An email about a property that never mentions the reader is
+the failure this rule names, and it is the one we shipped.
+
+- **Be direct, never vague.** *"Call or text me"* beats *"let us know if you're interested"* —
+  passive asks get ignored.
+- **Answer "why should I care?" above the fold.** *"Here's what your home might be worth now,"* not
+  *"Hope you're well."*
+- **Concrete value, never motivation.** Market data, pricing insight, a real number — *"not fluffy
+  motivation quotes."*
+- **Sell the REPLY or the CLICK, not the house.** The email's job is the next step, not the sale.
+- **ONE CTA.** *"When we've tried to cram multiple CTAs into one message, performance drops across
+  the board."* Already enforced by the chrome — keep it that way.
+- **Short. Under 30 seconds to absorb.** *"Most agents over-write these emails."* Consistent with the
+  50–125-word band in §1.9.
+- **Clear, not clever.** The subject must promise a benefit the body actually delivers.
+- **No pressure.** *"No pressure — just good information to have"* is the closing line of the
+  best-sourced template we crawled.
+- **Never ship a bracketed placeholder.** An open slot ships EMPTY with its label as the instruction.
+
+**ONE UNRESOLVED CONFLICT, and do not resolve it by assertion.** LeadSites: *"Plain-text or minimally
+designed emails often outperform heavily branded templates in real estate … feels less like marketing
+and more like a note from a trusted advisor."* That cuts against our whole designed chrome. The
+honest read is that our differentiator is sourced local data, which needs structure to be legible —
+but that is a hypothesis, not evidence. **A/B testable, not knowable from here.** Flagged, not fixed.
+
+**SUBJECT LINES: 30–40 characters.** Three independent sources now converge (LeadSites says under 50,
+Luxury Presence says 40 or fewer, our own 08/03 pass says 30–40 for an open). Lead with the STREET,
+then pivot to the reader.
+
+**AND STOP QUOTING OPEN RATES.** Apple Mail Privacy Protection pre-loads tracking pixels, so open
+rate is directional at best — that is now the third independent source saying it. Usable targets:
+CTR **2–5%** is strong, unsubscribe over **0.5%** on one send means something is wrong, bounce under
+**2%**.
+
 ---
 
 # PART 2 — THE EMAILS, ONE BY ONE. JUMP TO YOURS.
@@ -700,7 +752,7 @@ gaps.**
 | `agent-launch` | Agent Launch — The Letter | 2.9 — TO BE WALKED |
 | `sphere-weekly` | Weekly Sphere Update | 2.10 — TO BE WALKED |
 | `review-reply` | The REVIEW Reply | 2.11 — TO BE WALKED |
-| `market-pulse` | Monthly Market Pulse | 2.12 — TO BE WALKED |
+| `market-pulse` | Monthly Market Pulse | 2.12 |
 | `back-on-market` | Back on the Market | 2.13 — TO BE WALKED |
 | `community-info` | Community Info | 2.14 — TO BE WALKED |
 | `listings-showcase` | Listings Showcase | 2.15 — TO BE WALKED |
@@ -2297,8 +2349,250 @@ explicit "thank you for reading" line) is non-blocking.
 
 ---
 
-## 2.9 – 2.17 — TO BE WALKED
+## 2.9 – 2.11 — TO BE WALKED
 
 Each section gets written when that email is walked with the operator. **Do not pre-fill one from
 memory or by copying an earlier section** — the whole point of the walk is that each email's
 ingredients and sources get decided deliberately, one at a time.
+
+---
+
+## 2.12 MONTHLY MARKET PULSE — tag `market-pulse` — **WALKED 08/06/2026.**
+
+**Spine:** ONE PLACE, resolved ONCE, before any layout. `ctx.facts` is NULL — there is no house.
+`resolveArea` reads `ctx.zip` first (a door that handed us a ZIP wins), else the place named in the
+prompt via the sourced crosswalk (`zipFromPromptPlace`). A city is its ZIP SET — Cape Coral is six
+ZIPs, not one.
+
+**Grammar:** the `trend-snapshot` seed — chart leads, no hero: header, one trend chart, a 3-cell
+stat row, a prose slot, agent card, footer. **This is one of the FOUR declared lanes that hand-
+position their own blocks and do not call `finalizeDoc`** (PART 0; `email_seam_bypass_market_pulse`,
+inverted-assertion in `registry-seam.test.ts` — a file another session owns this session, left
+untouched on purpose. See Known Gaps below.)
+
+**Chart: `zip-mom-move`.** One ranked bar per ZIP (home value), each carrying its OWN
+month-over-month chip — projected off the SAME table `buildChartForQuestion` would reach for, minus
+the YoY column, because the shared binder would otherwise bind year-over-year under a
+month-over-month headline (see the recipe's own header for why).
+
+**Subject:** `marketPulseSubject(place)` — deterministic, never model-authored.
+
+**Code:** `lib/deliverable/recipes/market-pulse.ts` → `buildMarketPulse`. Registry key `market-pulse`.
+
+### 2.12.0 WHY THIS WALK HAPPENED, AND THE QUESTION IT ANSWERED FIRST
+
+Operator ask, mid-session: *"More AI commentary here since it will be more of a weekly to monthly
+email."* Before touching the recipe, he asked the harder question straight: **"if we code in chips
+on the only numbers builder can mention, will it still make shit up?"**
+
+That "chip" instinct is not new here — it is exactly how this recipe already worked, and the reason
+it is the one recipe proven immune to the platform's one documented hallucination incident
+(07/13/2026: handed six real ZIP rows and told not to count them, Sonnet wrote "five of those six
+ZIPs" — the true answer was four). `pulseUserMessage` takes `SettledClaim[]`, never a row or a set;
+the model's own sentence is audited against **zero digits, not wrong digits** — any digit at all
+gets the sentence dropped, fail-closed, spine-ships-alone. 53 tests cover this, including one that
+replays the exact historical defect and proves the gate now catches it.
+
+**The widen, decided against that constraint — never touch the model's INPUT, only its OUTPUT
+VOLUME and CODE's own settled facts:**
+1. The model's closing commentary widened from 1 sentence to 2-3 — same zero-digit gate, same
+   fail-closed drop, just more room.
+2. A NEW code-settled sentence — the YEAR-over-year range, off `value_yoy_pct` (held on every row,
+   previously read only to be stripped OUT of the chart, never stated anywhere). Real, new context;
+   still computed in code, still verbatim-exempt.
+3. A CTA button — the `trend-snapshot` seed carried **none at all**, checked against
+   `default-docs.ts` before assuming. `_RESEARCH/email-and-social/2026-08-03-strongest-real-estate-
+   email-concepts-structure.md` Part C names "close pushing to conversation, never end on a number"
+   as a cross-platform market-report pattern; this email had no close of any kind. Role `community`,
+   mirroring `community-info.ts`'s own convention exactly (T2).
+
+### 2.12.1 REPRODUCE IT — one command, chosen for a coverage GAP, not a clean number
+
+```
+bun --env-file=.env.local scripts/email/render-market-pulse.mts "<place>"
+```
+
+**Default place: Fort Myers.** Live-probed the SAME session against the real brain (not assumed):
+Fort Myers spans 9 ZIPs and `home-values-swfl` (ZHVI) holds 8 of them — a real, current coverage
+gap, so the run exercises `settledPulseFacts`' "8 of 9 ZIPs ... carry a published home value"
+sentence. Cape Coral (6 of 6) would never exercise that sentence; Naples (13 of 13, but only 8
+drawn) exercises TRUNCATION instead — pass it as argv[1] to check that path on demand.
+
+**Acceptance run, 08/06/2026 — 9 of 9 cells sourced, 16KB, 6 of 6 assertions pass.**
+Fort Myers · 8 of 9 ZIPs held · biggest mover ZIP 33907 at −0.87% · highest value ZIP 33913 at
+$441,150 · **YoY range −10.75% to −5.07% (new)** · chart rendered · closing read shipped (603
+chars, model's sentence accepted on this run — see §2.12.3 for the run where it was rejected and
+the spine shipped alone, both proven live) · CTA "Ask about Fort Myers" (new).
+
+**SPEND:** zero new vendor spend — the chart is a free, already-fetched Tier-2 brain read. The only
+metered call is the 2-3-sentence closing read; run without `ANTHROPIC_API_KEY` and it becomes an
+open slot (spine ships alone).
+
+### 2.12.2 THE INGREDIENT LADDER
+
+| Cell | Source | Exhausted |
+|---|---|---|
+| **Place** | sourced ZIP crosswalk (`zipFromPromptPlace`) or a door's `ctx.zip` | no place named → `buildMarketPulse` returns null, falls to the terminal author |
+| **ZIPs covered / spans** | `home-values-swfl` row count vs. crosswalk span | a place with zero held rows → same null fallthrough |
+| **Biggest mover · highest value** | SELECTED out of held rows, never computed | — |
+| **Month-over-month chart** | `bindRankedDeltaSpec`, YoY column projected out | no rows → no chart (a bonus, never a blocker) |
+| **YoY range (NEW)** | `value_yoy_pct`, held but previously unused | fewer than 2 real values, or all equal → no sentence, never a fake range |
+| **Closing commentary (WIDENED)** | code-settled spine (always, when ≥1 ZIP held) + 0-3 model sentences | model's contribution can be dropped twice and the spine still ships; the WHOLE read fails only if the assembled paragraph itself fails the gate — then OPEN SLOT |
+| **CTA button (NEW)** | role `community`, `brandWebsiteUrl(doc)` authored, resolved further by the account's own saved per-role destination | no footer at all → doc unchanged (defensive; never hit in practice, every seed carries one) |
+
+### 2.12.3 WHAT THE WALK ACTUALLY FOUND
+
+**Two real defects, both in the NEW acceptance script, neither in the recipe — found by rendering,
+not by the 53 unit tests (which stayed green throughout).**
+
+1. **THE PROVENANCE TABLE MANUFACTURED A FALSE POSITIVE ON THE CHART'S OWN URL.** The first run
+   reported *"Closing commentary — 136 chars: https://…"* — the chart's Supabase-hosted PNG url,
+   picked up because the "walk every string, exclude chrome block types" technique (§2.2.4/§2.4)
+   excluded `agent-card`/`footer`/`header`/`sources`/`button`/`stats` but not `image` — a block type
+   none of the four already-walked address emails carry a FORCED chart on, so nobody had hit this
+   before. Same sin, new block type. Fixed: excluded `image` too, plus a `!/^https?:\/\//` guard as
+   a second line of defense.
+2. **AN ASSERTION CHECKED THE WRONG INVARIANT.** "The closing read carries no digit" was written
+   against the WHOLE rendered paragraph — but the whole paragraph is spine-plus-sentence, and the
+   spine is SUPPOSED to carry digits (it's the settled facts). It failed on the recipe's own "8 of
+   9" and "−0.87%," which is correct behavior, not a defect. The invariant that DOES hold — the
+   MODEL's own added sentence carries zero digits — is already proven exhaustively by
+   `market-pulse.test.ts`'s `auditConnective` tests against the exact prompt this run sends, and
+   cannot be re-isolated from rendered HTML once the two are concatenated. Replaced with what an
+   acceptance run actually CAN prove: the read did not silently collapse to an open slot (T8).
+
+**One finding in the recipe's own header comment, unrelated to the widen — a stale row count.**
+The 07/13/2026 comment claimed **"109 SWFL ZIP rows."** Re-queried live 08/06/2026: **53 today.**
+Cross-checked against `fixtures/swfl-zip-county.json` the same session — zero leakage, every one of
+the 53 resolves to Lee (34) or Collier (19). Most likely Zillow's own ZHVI coverage narrowing (they
+do not publish a value for every ZIP), not a defect on our side — but unconfirmed, so a check is
+open (`zhvi_zip_coverage_dropped_109_to_53`) rather than asserted either way. Comment corrected in
+the same commit; do not trust a row count in it without re-querying `fetchBrain`.
+
+**One run of the widened commentary was rejected twice** (`word-count:"every tracked ZIP"`) and
+shipped the spine alone — proven LIVE, on a real API call, not simulated. This is the fail-closed
+design working exactly as built (§2.12.0), not a defect: the reader got a slightly shorter but
+completely honest email instead of a risky one. Worth watching, not fixing — a persistently high
+rejection rate on the widened prompt would be worth a follow-up walk; one observed rejection across
+two live runs is not that signal yet.
+
+### 2.12.4 KNOWN GAPS — named, not hidden
+
+- **⚠ THIS RECIPE HAND-POSITIONS ITS OWN BLOCKS AND DOES NOT CALL `finalizeDoc`** — declared
+  exemption #`email_seam_bypass_market_pulse`, inverted assertion in `registry-seam.test.ts`. That
+  file is owned by another session as of this walk; **left untouched on purpose.** Folding this
+  email into the shared seam is real future work, not a defect this walk introduces or fixes.
+- **The CTA's destination is NOT `brandWebsiteUrl` in practice, and that is correct, not a bug.**
+  `withCta` authors `url: brandWebsiteUrl(doc)` as a fallback, but role `community`'s SAVED per-role
+  destination (`button_destinations.community` on the account row) outranks it once `applyBrand`
+  resolves the button — observed live: the rendered button pointed at `/z/33990`, a real,
+  more-specific, already-saved destination, not the generic homepage. Same behavior
+  `community-info.ts`'s identical CTA gets; do not "fix" this into always using the homepage link.
+- **Dark mode** — repo-wide known gap (§1.5b), not new to this email, not addressed by this walk.
+- **The rejection rate on the widened 2-3 sentence prompt is unmeasured beyond two live runs.**
+  Named above; revisit if it becomes a pattern.
+
+---
+
+## 2.13 – 2.17 — TO BE WALKED
+
+Each section gets written when that email is walked with the operator. **Do not pre-fill one from
+memory or by copying an earlier section** — the whole point of the walk is that each email's
+ingredients and sources get decided deliberately, one at a time.
+
+---
+
+# PART 3 — POTENTIAL BUILDS & IMPROVEMENTS. THE BACKLOG, WITH ITS EVIDENCE ATTACHED.
+
+**Opened 08/06/2026 by operator instruction:** *"bring in all information from any site you visit
+that will make any email better and generate new email ideas. anything that will help builder speak
+and write, as well. all needs to be in playbook potential builds/improvements."*
+
+**This is a BACKLOG, not a plan.** Nothing here is approved, scheduled, or half-built. Every entry
+names the evidence behind it and the lane its data would come from, so the next session can argue
+with it instead of re-deriving it. Sources for this round:
+`_RESEARCH/email-and-social/2026-08-06-just-sold-craft-and-agent-email-voice.md` (LeadSites,
+Propphy, HousingWire, The Close, Luxury Presence — all crawled live 08/06/2026).
+
+**When you pick one up: brainstorm → name the break → TDD → register (§1.18). Do not skip to code
+because the idea is already written down here.**
+
+## 3.1 IMPROVEMENTS TO EMAILS THAT ALREADY EXIST
+
+**B1 — MAKE JUST SOLD ABOUT THE READER. The single biggest gap, and it applies to every
+announcement email.** Every source leads with the neighbour's own equity: *"Sold on [Street] — and
+what it could mean for your home"* (LeadSites), *"your neighborhood is hot! Your neighbors at
+[address] just sold"* (HousingWire), and The Close names *"your equity has changed"* as the line
+that stops a homeowner cold — *"(hello, money!)"*. Ours is a photo, a price, three specs and a
+paragraph about the house, and the recipient is never in it. **Data lane:** none needed for the
+copy; the framing changes. A real equity CLAIM would need a computed comparison and would have to
+survive the claim gate. **Start with the framing, not the number.**
+
+**B2 — A "DAYS ON MARKET" CELL ON THE RECORDED RUNG ONLY.** LeadSites' data block is `Sold price: $X
+| Days on market: X`, and the speed number is the one figure this email owns. We ban it today,
+correctly: `days_in_state` is days-in-ACTIVE, not a completed interval. **But when we hold a RECORDED
+sale we hold both ends** — our listed date and the recorded sale date — so the honest completed
+interval exists exactly on the rung where the chart and the derived cells already unlock. Gate it
+the same way. **Do not compute it from `days_in_state`, ever.**
+
+**B3 — THE LIST-PRICE PAIR IS ALREADY RIGHT. Leave it.** HousingWire states both prices in its
+letter (*"sold for [sale price]. It was listed at $[list price]"*), which is what our pairing rule
+already does on the recorded rung. Recorded here so nobody "improves" it into showing an ask alone.
+
+**B4 — NUMBER OF OFFERS.** HousingWire: *"If there were multiple offers, you may also want to
+include how many were received … which means there are still qualified buyers eager to make an
+offer!"* **We will never hold this from a feed. It is lane 4 — the agent types it.** A one-field
+open slot on the Just Sold canvas, absent from the send when empty. Cheap, and it is the strongest
+social-proof number in the crawled corpus.
+
+**B5 — A CLIENT-WIN PANEL / TESTIMONIAL.** The Close's postcard #4 highlights *"Sold Seller Saved
+$14,000"* in a bright panel next to a client quote, and calls social proof a design element rather
+than copy. Lane 4 again (the agent's own figure and their own client's words). **Never generate a
+testimonial — that is the one thing on this whole page that would be fabrication.**
+
+**B6 — A PHOTO-RIGHTS GATE.** HousingWire, and it is a legal exposure we have no guard for: an agent
+who did not list the property *"must get explicit permission to use their photos"* — the recommended
+alternative is *"take your own photo of the property from the street."* Both LeadSites and
+HousingWire say to send Just Sold emails for houses you did not represent, so this is the common
+case, not the edge. Our hero photo comes straight from the listing feed. **Candidate guard: a
+build-time acknowledgement on the Just Sold canvas when the sending agent is not the listing agent —
+which we may not even know. Needs scoping before it needs code.**
+
+**B7 — RE-TEST THE DESIGN ITSELF.** LeadSites claims plain, lightly-designed emails outperform
+heavily branded ones in real estate. That is a direct challenge to our chrome and we have no
+evidence either way. **A/B testable, not knowable from here.** See §1.20.
+
+## 3.2 NEW EMAILS THIS ROUND SURFACED
+
+Ranked by "do we already hold the data".
+
+**N1 — THE NEIGHBOUR-FARMING JUST SOLD.** Same event, different list, reader-first copy. LeadSites
+and HousingWire BOTH ship it as a separate template from the sphere version, which is the tell: it
+is a different email, not a different subject line. **We hold everything it needs.**
+
+**N2 — "YOUR FUTURE COMPETITION JUST WENT LIVE."** Propphy's strongest idea: a NEW LISTING near a
+known future seller, framed as competitive intel for them — *"buyers will compare your home directly
+to this one"* — closing with an offer to re-run their pricing. We hold new listings and can define
+"near". **Highest-value new email on the page, and it needs no new data.**
+
+**N3 — NEIGHBOURHOOD LISTING ALERTS ("before Zillow").** Propphy's standing-subscription framing:
+*"Every time a new listing hits the market in [Neighborhood] that's similar to your home… you'll
+know how fast homes are selling and for how much."* That is close to a description of our lake.
+
+**N4 — HOME-IVERSARY / CLOSING ANNIVERSARY.** Pure date trigger on a past client. Trivial data,
+and the crawled sources rate past-client nurture as the highest-response segment they have.
+
+**N5 — REVIEW / TESTIMONIAL REQUEST**, 7–14 days after closing. Feeds B5.
+
+**N6 — DEAL OF THE WEEK.** *"[CITY] Deal of the Week – Best value under [PRICE]"* with a "why it's a
+deal" line. ⚠️ **The "why" is a comparative claim** — exactly the class the claim gate blocks unless
+code computes it. Buildable only off a computed comp set, never off narrator prose.
+
+**N7 — THE SEVEN PROSPECTING-LETTER TYPES WE HAVE NO EMAIL FOR:** renter conversion, expired
+listing, FSBO, off-market "golden letter", investor solicitation, neighbourhood-agent introduction,
+open-house preview (HousingWire 3–10, each with full copy). Several need lists we do not hold.
+
+**N8 — SMS AS A PAIRED CHANNEL: NOT A BUILD, A COMPLIANCE WALL.** LeadSites pairs every email with a
+text 30–60 minutes later and hands over templates for both. **TCPA requires explicit WRITTEN consent
+— an existing relationship is not enough — plus 10DLC registration, quiet hours, and STOP handling.**
+Recorded here so nobody proposes it casually as "just add SMS."

@@ -490,6 +490,12 @@ export async function buildJustSold(ctx: RecipeBuildContext): Promise<EmailDoc |
   // ── THE CAMPAIGN CHROME. One layout, seven emails, one agent.
   let doc = buildLifecycleEmail(currentDoc, {
     ribbon: "Just Sold",
+    // THE STAMP, not a caption. Operator 08/06/2026: *"make JUST SOLD stand out more somewhere
+    // on the photo or something!!!!!!"* — it was a 14px band and read as chrome. The printed
+    // version of this exact piece agrees: The Close's just-sold postcard teardown ranks "large,
+    // bold text" and "a short sentence in HUGE print" as the two designs that work. Opt-in, so
+    // the other six lifecycle emails are untouched until he says otherwise.
+    ribbonLoud: true,
     // The photo of the win. A genuinely SOLD house is not in the for-sale feed, so it
     // often has none → an OPEN SLOT: a dropzone on the canvas, absent from the sent
     // email. Never stock art, never a refusal.
@@ -626,6 +632,10 @@ export async function buildJustSold(ctx: RecipeBuildContext): Promise<EmailDoc |
         : `\nWrite NO PRICE FOR THIS HOME — not the list price, not a sale price, not a ` +
           `per-square-foot figure. We hold no sourced sale price for it. (A cost that is ` +
           `clearly labelled as what it is, like a monthly HOA fee, is fine.)`),
+    // THIS EMAIL SUPPRESSES THE DESCRIPTION BLOCK, so the narrator must not be told it is on the
+    // page. Without this it wrote "The listing description covers the interior updates in full" —
+    // a pointer to a block the reader cannot see. Found by looking at the render, 08/06/2026.
+    descriptionRendered: false,
     ...(anchors.length ? { anchors } : {}),
     ...(context ? { context } : {}),
   });
