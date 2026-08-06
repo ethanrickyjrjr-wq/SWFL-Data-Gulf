@@ -42,6 +42,7 @@
   "lib/pulse/corridor-nearby.ts",
   "lib/pulse/nearby.ts",
   "lib/should-i-sell/load-parcel-soh.ts",
+  "lib/week-in-review/load.ts",
   "lib/why-not-selling/cut-history.ts",
   "lib/why-not-selling/load-report.ts",
   "lib/why-not-selling/parcel-read.ts",

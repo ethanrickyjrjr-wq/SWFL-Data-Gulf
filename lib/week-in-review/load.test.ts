@@ -7,6 +7,9 @@ import {
   errorResult,
   isRenderable,
   grainCoverageLabel,
+  loadWeekInReview,
+  type TransitionRow,
+  type GeoRow,
 } from "./load";
 
 // Named for the failure mode each targets (RULE 3.5), matching the design's §6:
@@ -98,4 +101,153 @@ test("a grain with zero covered ZIPs is labelled, never silently rolled up", () 
   expect(grainCoverageLabel({ covered: 0, total: 8 })).toBe(
     "Based on 0 of 8 ZIP codes with recorded activity in this window.",
   );
+});
+
+// ─── loadWeekInReview — the DB-backed query, deps-injected exactly like
+// lib/why-not-selling/cut-history.ts so no test touches Supabase. ───
+
+const WINDOW = { start: "2026-07-30", end: "2026-08-06" };
+const EARLY_COVERAGE_START = "2026-06-22";
+
+function row(overrides: Partial<TransitionRow> = {}): TransitionRow {
+  return {
+    address_key: "K:33904",
+    from_state: "active",
+    to_state: "active",
+    at: "2026-08-01",
+    price: 590000,
+    price_delta: -10000,
+    ...overrides,
+  };
+}
+
+function geo(overrides: Partial<GeoRow> = {}): GeoRow {
+  return {
+    address_key: "K:33904",
+    zip_code: "33904",
+    city: "Cape Coral",
+    county: "Lee",
+    ...overrides,
+  };
+}
+
+test("buckets matching-grain transitions by kind and counts them", async () => {
+  const transitions = [
+    row({ address_key: "A", from_state: "active", to_state: "active" }),
+    row({ address_key: "A", from_state: "active", to_state: "active" }),
+    row({ address_key: "B", from_state: "active", to_state: "holding" }),
+  ];
+  const result = await loadWeekInReview("zip", "33904", WINDOW, {
+    fetchCoverageStart: async () => EARLY_COVERAGE_START,
+    fetchFootprintZips: async () => ["33904"],
+    fetchTransitions: async () => transitions,
+    fetchGeo: async () => [geo({ address_key: "A" }), geo({ address_key: "B" })],
+  });
+  expect(result.ok).toBe(true);
+  if (!result.ok) throw new Error("expected ok");
+  const byKind = new Map(result.events.map((e) => [e.kind, e.count]));
+  expect(byKind.get("active->active")).toBe(2);
+  expect(byKind.get("active->holding")).toBe(1);
+});
+
+test("excludes rows whose resolved geo does not match the requested grain and key", async () => {
+  const transitions = [row({ address_key: "IN_ZIP" }), row({ address_key: "OUT_OF_ZIP" })];
+  const result = await loadWeekInReview("zip", "33904", WINDOW, {
+    fetchCoverageStart: async () => EARLY_COVERAGE_START,
+    fetchFootprintZips: async () => ["33904"],
+    fetchTransitions: async () => transitions,
+    fetchGeo: async () => [
+      geo({ address_key: "IN_ZIP", zip_code: "33904" }),
+      geo({ address_key: "OUT_OF_ZIP", zip_code: "33990" }),
+    ],
+  });
+  expect(result.ok).toBe(true);
+  if (!result.ok) throw new Error("expected ok");
+  const total = result.events.reduce((n, e) => n + e.count, 0);
+  expect(total).toBe(1);
+});
+
+test("filters by city or county through the listing_state geo columns, not a fixture", async () => {
+  const transitions = [row({ address_key: "A" }), row({ address_key: "B" })];
+  const result = await loadWeekInReview("city", "Cape Coral", WINDOW, {
+    fetchCoverageStart: async () => EARLY_COVERAGE_START,
+    fetchFootprintZips: async () => ["33904", "33990"],
+    fetchTransitions: async () => transitions,
+    fetchGeo: async () => [
+      geo({ address_key: "A", city: "Cape Coral" }),
+      geo({ address_key: "B", city: "Fort Myers" }),
+    ],
+  });
+  expect(result.ok).toBe(true);
+  if (!result.ok) throw new Error("expected ok");
+  const total = result.events.reduce((n, e) => n + e.count, 0);
+  expect(total).toBe(1);
+});
+
+// §6.3 again, at the loader level this time: a genuinely quiet window and a
+// broken query must not collapse to the same value.
+test("a genuinely empty window returns ok with zero events", async () => {
+  const result = await loadWeekInReview("zip", "33904", WINDOW, {
+    fetchCoverageStart: async () => EARLY_COVERAGE_START,
+    fetchFootprintZips: async () => ["33904"],
+    fetchTransitions: async () => [],
+    fetchGeo: async () => [],
+  });
+  expect(result).toEqual(emptyResult());
+});
+
+test("a fetch failure returns an error, never a false empty", async () => {
+  const result = await loadWeekInReview("zip", "33904", WINDOW, {
+    fetchCoverageStart: async () => EARLY_COVERAGE_START,
+    fetchFootprintZips: async () => ["33904"],
+    fetchTransitions: async () => {
+      throw new Error("connection refused");
+    },
+    fetchGeo: async () => [],
+  });
+  expect(result.ok).toBe(false);
+  expect(isRenderable(result)).toBe(false);
+});
+
+// §6.2 at the loader level: refuse before ever querying transitions.
+test("refuses a window before coverage starts without querying transitions", async () => {
+  let transitionsFetchCalled = false;
+  const result = await loadWeekInReview(
+    "zip",
+    "33904",
+    { start: "2026-06-01", end: "2026-06-08" },
+    {
+      fetchCoverageStart: async () => EARLY_COVERAGE_START,
+      fetchFootprintZips: async () => ["33904"],
+      fetchTransitions: async () => {
+        transitionsFetchCalled = true;
+        return [];
+      },
+      fetchGeo: async () => [],
+    },
+  );
+  expect(result.ok).toBe(false);
+  expect(transitionsFetchCalled).toBe(false);
+});
+
+// §6.6 at the loader level: the loader reports covered-vs-total so the page
+// can label a partial rollup rather than presenting it as complete.
+test("reports ZIP coverage for a multi-ZIP grain so a partial rollup can be labelled", async () => {
+  const transitions = [row({ address_key: "A" }), row({ address_key: "B" })];
+  const result = await loadWeekInReview("county", "Lee", WINDOW, {
+    fetchCoverageStart: async () => EARLY_COVERAGE_START,
+    fetchFootprintZips: async () => ["33904", "33905", "33990"],
+    fetchTransitions: async () => transitions,
+    fetchGeo: async () => [
+      geo({ address_key: "A", zip_code: "33904", county: "Lee" }),
+      geo({ address_key: "B", zip_code: "33905", county: "Lee" }),
+    ],
+  });
+  expect(result.ok).toBe(true);
+  if (!result.ok) throw new Error("expected ok");
+  expect(result.coverage).toEqual({ covered: 2, total: 3 });
+});
+
+test("an empty result never carries a coverage field either", () => {
+  expect(emptyResult()).not.toHaveProperty("coverage");
 });

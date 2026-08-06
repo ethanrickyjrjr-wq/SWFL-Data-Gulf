@@ -1,3 +1,43 @@
+## 2026-08-06 (Sonnet 5) — WEEK IN REVIEW Task 1 done end-to-end: the DB query landed, TDD green (17/17).
+
+Took over from the prior session's handoff — the pure contract (`lib/week-in-review/load.ts`) was
+green but `loadWeekInReview` itself, the actual query, was still unbuilt. Built it.
+
+**`bun test lib/week-in-review/` → 17 pass, 0 fail, 31 expect() calls.** Six new TDD tests added
+before implementation (bucketing by kind, grain exclusion for zip/city/county, empty-vs-error at
+the loader level per §6.3, the §6.2 window-guard short-circuits BEFORE querying transitions, and
+the §6.6 covered/total coverage figure).
+
+**Shape:** `loadWeekInReview(grain, key, window, deps?)` — deps-injected exactly like
+`lib/why-not-selling/cut-history.ts` (`CutHistoryDeps` precedent), so no test touches Supabase.
+One paginated query against `listing_transitions` for the whole window (weekly volume ~1,908 rows,
+over PostgREST's 1000-row page cap — `selectAllPaged` is not optional here), then a chunked geo
+join against `listing_state` (mirrors `zipJoin` in `lib/email/zip-events/state.ts`). Design §4 says
+geo for zip/city/county resolves through `listing_state`, NOT a fixture — county/city grain
+footprints are live-queried from there; only "area" reads the committed `swfl-market-areas.json`
+fixture, since area isn't a `listing_state` column.
+
+Every `MarketFact` attached per kind is built ONLY from `price`/`price_delta` — no invented
+figures. `active->active` carries the delta (from/to); every other kind carries the price the
+record moved at.
+
+Added `lib/week-in-review/load.ts` to `verification/supabase-untyped-allowlist.json` — required by
+the KNOWN-DEBT hatch lint, same pattern as `cut-history.ts`.
+
+**Did NOT re-run the Task 0 crawl4ai research pass** — the design doc's §7 already carries today's
+(08/06/2026) research findings from earlier in this same operator day; re-fetching would violate
+the "don't re-check what's already been checked" cost discipline, not the "research every session"
+rule (that rule's intent is one fresh pass per calendar work session on this surface, already
+satisfied today).
+
+**NOT BUILT — Tasks 2-5 remain:** section mapping (`lib/week-in-review/sections.ts`), the page
+(`app/week-in-review/[grain]/[key]/page.tsx`), the `bakedAreaRead()` prose wiring, and the live
+verify. `week_in_review_live_verify` stays OPEN.
+
+**Repolith note:** the file claim on `lib/week-in-review/load.ts` + `load.test.ts` was held by the
+prior session's own (stale, pre-`/model`-switch) claim — released it as a same-thread takeover, not
+a cross-session override.
+
 ## 2026-08-06 (Opus 5) — Built the missing `http_body_absent` signal type. The ledger's real problem is that 0 of ~878 open checks are machine-verifiable.
 
 **THE MEASUREMENT THAT REFRAMES "HOW COULD A HUMAN READ THEM ALL":** `check-sweep --dry-run`
