@@ -1,9 +1,9 @@
-<!-- FRESHNESS: v39 | Token: SWFL-7421-v39-20260730-104ba865 -->
+<!-- FRESHNESS: v40 | Token: SWFL-7421-v40-20260806-a03081ad -->
 ---
 brain_id: permits-swfl
-version: 39
-refined_at: 2026-07-30T06:52:19Z
-freshness_token: SWFL-7421-v39-20260730-104ba865
+version: 40
+refined_at: 2026-08-06T07:24:24Z
+freshness_token: SWFL-7421-v40-20260806-a03081ad
 ttl_seconds: 604800
 pack_hash: 618cdece934b
 context_type: user_saved_reference
@@ -31,20 +31,20 @@ SCOPE: SWFL building-permit issuance flow (Lee + Collier) - corridor-level z-sco
 
 --- CITATION TABLE ---
 id  | source                                                                                                                                                                                                                                                                                                                       | verified   | expires
-s01 | Lee County Accela Citizen Access — building permit records (data_lake.lee_building_permits), scraped daily via Firecrawl. Portal: https://aca-prod.accela.com/LEECO/Cap/CapHome.aspx?module=Permitting&TabName=Permitting.                                                                                                   | 2026-07-30 | 2026-08-06
-s02 | Collier County Building Permits — monthly XLSX reports (data_lake.collier_building_permits), scraped via Firecrawl stealth proxy + geocoded via Census batch API. Portal: https://www.colliercountyfl.gov/Business-Resources/Building-Permits-Construction/Meetings-Advisory-Boards-Reports/Monthly-Building-Permit-Reports. | 2026-07-30 | 2026-08-06
+s01 | Lee County Accela Citizen Access — building permit records (data_lake.lee_building_permits), scraped daily via Firecrawl. Portal: https://aca-prod.accela.com/LEECO/Cap/CapHome.aspx?module=Permitting&TabName=Permitting.                                                                                                   | 2026-08-06 | 2026-08-13
+s02 | Collier County Building Permits — monthly XLSX reports (data_lake.collier_building_permits), scraped via Firecrawl stealth proxy + geocoded via Census batch API. Portal: https://www.colliercountyfl.gov/Business-Resources/Building-Permits-Construction/Meetings-Advisory-Boards-Reports/Monthly-Building-Permit-Reports. | 2026-08-06 | 2026-08-13
 
 --- SAVED FACTS ---
 [
-  {"id":"f001","topic":"corpus_overview","fact":"SWFL building-permits corpus (Lee + Collier)","value":"5,278 permits (Lee 303, Collier 4,975) in trailing 155d window across 42 (corridor x bucket) cells. SWFL-weighted z = 0.44, SWFL saturation = 0.00.","src":"s01","date":"2026-07-30"}
+  {"id":"f001","topic":"corpus_overview","fact":"SWFL building-permits corpus (Lee + Collier)","value":"5,278 permits (Lee 303, Collier 4,975) in trailing 162d window across 42 (corridor x bucket) cells. SWFL-weighted z = 0.44, SWFL saturation = 0.00.","src":"s01","date":"2026-08-06"}
 ]
 
 --- OUTPUT ---
 {
   "brain_id": "permits-swfl",
-  "version": 39,
-  "refined_at": "2026-07-30T06:52:19Z",
-  "expires": "2026-08-06T06:52:19Z",
+  "version": 40,
+  "refined_at": "2026-08-06T07:24:24Z",
+  "expires": "2026-08-13T07:24:24Z",
   "ttl_seconds": 604800,
   "direction": "neutral",
   "magnitude": 0.14647590162773835,
@@ -62,7 +62,7 @@ s02 | Collier County Building Permits — monthly XLSX reports (data_lake.collie
       "display_format": "ratio",
       "source": {
         "url": "https://aca-prod.accela.com/LEECO/Cap/CapHome.aspx?module=Permitting&TabName=Permitting",
-        "fetched_at": "2026-07-30T06:52:18Z",
+        "fetched_at": "2026-08-06T07:24:23Z",
         "tier": 1,
         "citation": "Lee + Collier County Building Permits (SWFL rollup) — Lee: Accela; Collier: colliercountyfl.gov monthly XLSX."
       },
@@ -81,7 +81,7 @@ s02 | Collier County Building Permits — monthly XLSX reports (data_lake.collie
       "display_format": "ratio",
       "source": {
         "url": "https://aca-prod.accela.com/LEECO/Cap/CapHome.aspx?module=Permitting&TabName=Permitting",
-        "fetched_at": "2026-07-30T06:52:18Z",
+        "fetched_at": "2026-08-06T07:24:23Z",
         "tier": 1,
         "citation": "Lee County Accela Citizen Access — building permit records, daily scrape via Firecrawl + dlt; corridor assignment via nearest-centroid."
       },
@@ -100,7 +100,7 @@ s02 | Collier County Building Permits — monthly XLSX reports (data_lake.collie
       "display_format": "ratio",
       "source": {
         "url": "https://www.colliercountyfl.gov/Business-Resources/Building-Permits-Construction/Meetings-Advisory-Boards-Reports/Monthly-Building-Permit-Reports",
-        "fetched_at": "2026-07-30T06:52:18Z",
+        "fetched_at": "2026-08-06T07:24:23Z",
         "tier": 1,
         "citation": "Collier County Building Permits — monthly XLSX, Firecrawl stealth proxy + Census batch geocode; corridor assignment via nearest-centroid."
       },
@@ -119,7 +119,7 @@ s02 | Collier County Building Permits — monthly XLSX reports (data_lake.collie
       "display_format": "percent",
       "source": {
         "url": "https://aca-prod.accela.com/LEECO/Cap/CapHome.aspx?module=Permitting&TabName=Permitting",
-        "fetched_at": "2026-07-30T06:52:18Z",
+        "fetched_at": "2026-08-06T07:24:23Z",
         "tier": 1,
         "citation": "Lee + Collier County Building Permits (SWFL rollup) — Lee: Accela; Collier: colliercountyfl.gov monthly XLSX."
       },
@@ -138,7 +138,7 @@ s02 | Collier County Building Permits — monthly XLSX reports (data_lake.collie
       "display_format": "percent",
       "source": {
         "url": "https://aca-prod.accela.com/LEECO/Cap/CapHome.aspx?module=Permitting&TabName=Permitting",
-        "fetched_at": "2026-07-30T06:52:18Z",
+        "fetched_at": "2026-08-06T07:24:23Z",
         "tier": 1,
         "citation": "Lee County Accela Citizen Access — building permit records, daily scrape via Firecrawl + dlt; corridor assignment via nearest-centroid."
       },
@@ -157,7 +157,7 @@ s02 | Collier County Building Permits — monthly XLSX reports (data_lake.collie
       "display_format": "percent",
       "source": {
         "url": "https://www.colliercountyfl.gov/Business-Resources/Building-Permits-Construction/Meetings-Advisory-Boards-Reports/Monthly-Building-Permit-Reports",
-        "fetched_at": "2026-07-30T06:52:18Z",
+        "fetched_at": "2026-08-06T07:24:23Z",
         "tier": 1,
         "citation": "Collier County Building Permits — monthly XLSX, Firecrawl stealth proxy + Census batch geocode; corridor assignment via nearest-centroid."
       },
@@ -176,7 +176,7 @@ s02 | Collier County Building Permits — monthly XLSX reports (data_lake.collie
       "display_format": "ratio",
       "source": {
         "url": "https://aca-prod.accela.com/LEECO/Cap/CapHome.aspx?module=Permitting&TabName=Permitting",
-        "fetched_at": "2026-07-30T06:52:18Z",
+        "fetched_at": "2026-08-06T07:24:23Z",
         "tier": 1,
         "citation": "Lee County Accela Citizen Access — building permit records, daily scrape via Firecrawl + dlt; corridor assignment via nearest-centroid."
       },
@@ -195,7 +195,7 @@ s02 | Collier County Building Permits — monthly XLSX reports (data_lake.collie
       "display_format": "ratio",
       "source": {
         "url": "https://aca-prod.accela.com/LEECO/Cap/CapHome.aspx?module=Permitting&TabName=Permitting",
-        "fetched_at": "2026-07-30T06:52:18Z",
+        "fetched_at": "2026-08-06T07:24:23Z",
         "tier": 1,
         "citation": "Lee County Accela Citizen Access — building permit records, daily scrape via Firecrawl + dlt; corridor assignment via nearest-centroid."
       },
@@ -214,7 +214,7 @@ s02 | Collier County Building Permits — monthly XLSX reports (data_lake.collie
       "display_format": "ratio",
       "source": {
         "url": "https://aca-prod.accela.com/LEECO/Cap/CapHome.aspx?module=Permitting&TabName=Permitting",
-        "fetched_at": "2026-07-30T06:52:18Z",
+        "fetched_at": "2026-08-06T07:24:23Z",
         "tier": 1,
         "citation": "Lee County Accela Citizen Access — building permit records, daily scrape via Firecrawl + dlt; corridor assignment via nearest-centroid."
       },
@@ -233,7 +233,7 @@ s02 | Collier County Building Permits — monthly XLSX reports (data_lake.collie
       "display_format": "ratio",
       "source": {
         "url": "https://aca-prod.accela.com/LEECO/Cap/CapHome.aspx?module=Permitting&TabName=Permitting",
-        "fetched_at": "2026-07-30T06:52:18Z",
+        "fetched_at": "2026-08-06T07:24:23Z",
         "tier": 1,
         "citation": "Lee County Accela Citizen Access — building permit records, daily scrape via Firecrawl + dlt; corridor assignment via nearest-centroid."
       },
@@ -252,7 +252,7 @@ s02 | Collier County Building Permits — monthly XLSX reports (data_lake.collie
       "display_format": "ratio",
       "source": {
         "url": "https://aca-prod.accela.com/LEECO/Cap/CapHome.aspx?module=Permitting&TabName=Permitting",
-        "fetched_at": "2026-07-30T06:52:18Z",
+        "fetched_at": "2026-08-06T07:24:23Z",
         "tier": 1,
         "citation": "Lee County Accela Citizen Access — building permit records, daily scrape via Firecrawl + dlt; corridor assignment via nearest-centroid."
       },
@@ -271,7 +271,7 @@ s02 | Collier County Building Permits — monthly XLSX reports (data_lake.collie
       "display_format": "ratio",
       "source": {
         "url": "https://aca-prod.accela.com/LEECO/Cap/CapHome.aspx?module=Permitting&TabName=Permitting",
-        "fetched_at": "2026-07-30T06:52:18Z",
+        "fetched_at": "2026-08-06T07:24:23Z",
         "tier": 1,
         "citation": "Lee County Accela Citizen Access — building permit records, daily scrape via Firecrawl + dlt; corridor assignment via nearest-centroid."
       },
@@ -290,7 +290,7 @@ s02 | Collier County Building Permits — monthly XLSX reports (data_lake.collie
       "display_format": "ratio",
       "source": {
         "url": "https://aca-prod.accela.com/LEECO/Cap/CapHome.aspx?module=Permitting&TabName=Permitting",
-        "fetched_at": "2026-07-30T06:52:18Z",
+        "fetched_at": "2026-08-06T07:24:23Z",
         "tier": 1,
         "citation": "Lee County Accela Citizen Access — building permit records, daily scrape via Firecrawl + dlt; corridor assignment via nearest-centroid."
       },
@@ -309,7 +309,7 @@ s02 | Collier County Building Permits — monthly XLSX reports (data_lake.collie
       "display_format": "ratio",
       "source": {
         "url": "https://aca-prod.accela.com/LEECO/Cap/CapHome.aspx?module=Permitting&TabName=Permitting",
-        "fetched_at": "2026-07-30T06:52:18Z",
+        "fetched_at": "2026-08-06T07:24:23Z",
         "tier": 1,
         "citation": "Lee County Accela Citizen Access — building permit records, daily scrape via Firecrawl + dlt; corridor assignment via nearest-centroid."
       },
@@ -328,7 +328,7 @@ s02 | Collier County Building Permits — monthly XLSX reports (data_lake.collie
       "display_format": "ratio",
       "source": {
         "url": "https://aca-prod.accela.com/LEECO/Cap/CapHome.aspx?module=Permitting&TabName=Permitting",
-        "fetched_at": "2026-07-30T06:52:18Z",
+        "fetched_at": "2026-08-06T07:24:23Z",
         "tier": 1,
         "citation": "Lee County Accela Citizen Access — building permit records, daily scrape via Firecrawl + dlt; corridor assignment via nearest-centroid."
       },
@@ -347,7 +347,7 @@ s02 | Collier County Building Permits — monthly XLSX reports (data_lake.collie
       "display_format": "ratio",
       "source": {
         "url": "https://aca-prod.accela.com/LEECO/Cap/CapHome.aspx?module=Permitting&TabName=Permitting",
-        "fetched_at": "2026-07-30T06:52:18Z",
+        "fetched_at": "2026-08-06T07:24:23Z",
         "tier": 1,
         "citation": "Lee County Accela Citizen Access — building permit records, daily scrape via Firecrawl + dlt; corridor assignment via nearest-centroid."
       },
@@ -358,7 +358,7 @@ s02 | Collier County Building Permits — monthly XLSX reports (data_lake.collie
     },
     {
       "metric": "permits_collier_corridor_waterside-shops_residential_z",
-      "value": -0.34,
+      "value": -0.401,
       "direction": "stable",
       "label": "Collier permits - Waterside, residential - 90d vs trailing-365d z (n_current=0)",
       "variable_type": "intensive",
@@ -366,7 +366,7 @@ s02 | Collier County Building Permits — monthly XLSX reports (data_lake.collie
       "display_format": "ratio",
       "source": {
         "url": "https://www.colliercountyfl.gov/Business-Resources/Building-Permits-Construction/Meetings-Advisory-Boards-Reports/Monthly-Building-Permit-Reports",
-        "fetched_at": "2026-07-30T06:52:18Z",
+        "fetched_at": "2026-08-06T07:24:23Z",
         "tier": 1,
         "citation": "Collier County Building Permits — monthly XLSX, Firecrawl stealth proxy + Census batch geocode; corridor assignment via nearest-centroid."
       },
@@ -377,7 +377,7 @@ s02 | Collier County Building Permits — monthly XLSX reports (data_lake.collie
     },
     {
       "metric": "permits_collier_corridor_immokalee-rd-north-naples_residential_z",
-      "value": -0.313,
+      "value": -0.397,
       "direction": "stable",
       "label": "Collier permits - North Naples (Immokalee Rd), residential - 90d vs trailing-365d z (n_current=0)",
       "variable_type": "intensive",
@@ -385,7 +385,7 @@ s02 | Collier County Building Permits — monthly XLSX reports (data_lake.collie
       "display_format": "ratio",
       "source": {
         "url": "https://www.colliercountyfl.gov/Business-Resources/Building-Permits-Construction/Meetings-Advisory-Boards-Reports/Monthly-Building-Permit-Reports",
-        "fetched_at": "2026-07-30T06:52:18Z",
+        "fetched_at": "2026-08-06T07:24:23Z",
         "tier": 1,
         "citation": "Collier County Building Permits — monthly XLSX, Firecrawl stealth proxy + Census batch geocode; corridor assignment via nearest-centroid."
       },
@@ -396,7 +396,7 @@ s02 | Collier County Building Permits — monthly XLSX reports (data_lake.collie
     },
     {
       "metric": "permits_collier_corridor_airport-pulling-naples_residential_z",
-      "value": -0.331,
+      "value": -0.387,
       "direction": "stable",
       "label": "Collier permits - Airport-Pulling, residential - 90d vs trailing-365d z (n_current=0)",
       "variable_type": "intensive",
@@ -404,7 +404,7 @@ s02 | Collier County Building Permits — monthly XLSX reports (data_lake.collie
       "display_format": "ratio",
       "source": {
         "url": "https://www.colliercountyfl.gov/Business-Resources/Building-Permits-Construction/Meetings-Advisory-Boards-Reports/Monthly-Building-Permit-Reports",
-        "fetched_at": "2026-07-30T06:52:18Z",
+        "fetched_at": "2026-08-06T07:24:23Z",
         "tier": 1,
         "citation": "Collier County Building Permits — monthly XLSX, Firecrawl stealth proxy + Census batch geocode; corridor assignment via nearest-centroid."
       },
@@ -415,7 +415,7 @@ s02 | Collier County Building Permits — monthly XLSX reports (data_lake.collie
     },
     {
       "metric": "permits_collier_corridor_vanderbilt-beach-rd-mercato_residential_z",
-      "value": -0.314,
+      "value": -0.383,
       "direction": "stable",
       "label": "Collier permits - Vanderbilt, residential - 90d vs trailing-365d z (n_current=0)",
       "variable_type": "intensive",
@@ -423,7 +423,7 @@ s02 | Collier County Building Permits — monthly XLSX reports (data_lake.collie
       "display_format": "ratio",
       "source": {
         "url": "https://www.colliercountyfl.gov/Business-Resources/Building-Permits-Construction/Meetings-Advisory-Boards-Reports/Monthly-Building-Permit-Reports",
-        "fetched_at": "2026-07-30T06:52:18Z",
+        "fetched_at": "2026-08-06T07:24:23Z",
         "tier": 1,
         "citation": "Collier County Building Permits — monthly XLSX, Firecrawl stealth proxy + Census batch geocode; corridor assignment via nearest-centroid."
       },
@@ -434,7 +434,7 @@ s02 | Collier County Building Permits — monthly XLSX reports (data_lake.collie
     },
     {
       "metric": "permits_collier_corridor_davis-blvd-east-naples_residential_z",
-      "value": -0.335,
+      "value": -0.406,
       "direction": "stable",
       "label": "Collier permits - East Naples, residential - 90d vs trailing-365d z (n_current=0)",
       "variable_type": "intensive",
@@ -442,7 +442,7 @@ s02 | Collier County Building Permits — monthly XLSX reports (data_lake.collie
       "display_format": "ratio",
       "source": {
         "url": "https://www.colliercountyfl.gov/Business-Resources/Building-Permits-Construction/Meetings-Advisory-Boards-Reports/Monthly-Building-Permit-Reports",
-        "fetched_at": "2026-07-30T06:52:18Z",
+        "fetched_at": "2026-08-06T07:24:23Z",
         "tier": 1,
         "citation": "Collier County Building Permits — monthly XLSX, Firecrawl stealth proxy + Census batch geocode; corridor assignment via nearest-centroid."
       },
@@ -453,7 +453,7 @@ s02 | Collier County Building Permits — monthly XLSX reports (data_lake.collie
     },
     {
       "metric": "permits_collier_corridor_pine-ridge-rd-naples_residential_z",
-      "value": -0.345,
+      "value": -0.393,
       "direction": "stable",
       "label": "Collier permits - Pine Ridge, residential - 90d vs trailing-365d z (n_current=0)",
       "variable_type": "intensive",
@@ -461,7 +461,7 @@ s02 | Collier County Building Permits — monthly XLSX reports (data_lake.collie
       "display_format": "ratio",
       "source": {
         "url": "https://www.colliercountyfl.gov/Business-Resources/Building-Permits-Construction/Meetings-Advisory-Boards-Reports/Monthly-Building-Permit-Reports",
-        "fetched_at": "2026-07-30T06:52:18Z",
+        "fetched_at": "2026-08-06T07:24:23Z",
         "tier": 1,
         "citation": "Collier County Building Permits — monthly XLSX, Firecrawl stealth proxy + Census batch geocode; corridor assignment via nearest-centroid."
       },
@@ -472,7 +472,7 @@ s02 | Collier County Building Permits — monthly XLSX reports (data_lake.collie
     },
     {
       "metric": "permits_collier_corridor_tamiami-naples_residential_z",
-      "value": -0.361,
+      "value": -0.402,
       "direction": "stable",
       "label": "Collier permits - East Trail (Naples), residential - 90d vs trailing-365d z (n_current=0)",
       "variable_type": "intensive",
@@ -480,7 +480,7 @@ s02 | Collier County Building Permits — monthly XLSX reports (data_lake.collie
       "display_format": "ratio",
       "source": {
         "url": "https://www.colliercountyfl.gov/Business-Resources/Building-Permits-Construction/Meetings-Advisory-Boards-Reports/Monthly-Building-Permit-Reports",
-        "fetched_at": "2026-07-30T06:52:18Z",
+        "fetched_at": "2026-08-06T07:24:23Z",
         "tier": 1,
         "citation": "Collier County Building Permits — monthly XLSX, Firecrawl stealth proxy + Census batch geocode; corridor assignment via nearest-centroid."
       },
@@ -491,7 +491,7 @@ s02 | Collier County Building Permits — monthly XLSX reports (data_lake.collie
     },
     {
       "metric": "permits_collier_corridor_collier-blvd-cr-951_residential_z",
-      "value": -0.289,
+      "value": -0.401,
       "direction": "stable",
       "label": "Collier permits - Collier Blvd, residential - 90d vs trailing-365d z (n_current=0)",
       "variable_type": "intensive",
@@ -499,7 +499,7 @@ s02 | Collier County Building Permits — monthly XLSX reports (data_lake.collie
       "display_format": "ratio",
       "source": {
         "url": "https://www.colliercountyfl.gov/Business-Resources/Building-Permits-Construction/Meetings-Advisory-Boards-Reports/Monthly-Building-Permit-Reports",
-        "fetched_at": "2026-07-30T06:52:18Z",
+        "fetched_at": "2026-08-06T07:24:23Z",
         "tier": 1,
         "citation": "Collier County Building Permits — monthly XLSX, Firecrawl stealth proxy + Census batch geocode; corridor assignment via nearest-centroid."
       },
@@ -510,7 +510,7 @@ s02 | Collier County Building Permits — monthly XLSX reports (data_lake.collie
     },
     {
       "metric": "permits_collier_corridor_5th-ave-south-3rd-street-south_commercial_new_z",
-      "value": -0.289,
+      "value": -0.426,
       "direction": "stable",
       "label": "Collier permits - Downtown Naples, commercial_new - 90d vs trailing-365d z (n_current=0)",
       "variable_type": "intensive",
@@ -518,7 +518,7 @@ s02 | Collier County Building Permits — monthly XLSX reports (data_lake.collie
       "display_format": "ratio",
       "source": {
         "url": "https://www.colliercountyfl.gov/Business-Resources/Building-Permits-Construction/Meetings-Advisory-Boards-Reports/Monthly-Building-Permit-Reports",
-        "fetched_at": "2026-07-30T06:52:18Z",
+        "fetched_at": "2026-08-06T07:24:23Z",
         "tier": 1,
         "citation": "Collier County Building Permits — monthly XLSX, Firecrawl stealth proxy + Census batch geocode; corridor assignment via nearest-centroid."
       },
@@ -529,7 +529,7 @@ s02 | Collier County Building Permits — monthly XLSX reports (data_lake.collie
     },
     {
       "metric": "permits_lee_corridor_bonita-beach-rd-bonita-beach_residential_z",
-      "value": -0.382,
+      "value": -0.424,
       "direction": "stable",
       "label": "Lee permits - Bonita Beach, residential - 90d vs trailing-365d z (n_current=0)",
       "variable_type": "intensive",
@@ -537,7 +537,7 @@ s02 | Collier County Building Permits — monthly XLSX reports (data_lake.collie
       "display_format": "ratio",
       "source": {
         "url": "https://aca-prod.accela.com/LEECO/Cap/CapHome.aspx?module=Permitting&TabName=Permitting",
-        "fetched_at": "2026-07-30T06:52:18Z",
+        "fetched_at": "2026-08-06T07:24:23Z",
         "tier": 1,
         "citation": "Lee County Accela Citizen Access — building permit records, daily scrape via Firecrawl + dlt; corridor assignment via nearest-centroid."
       },
@@ -548,7 +548,7 @@ s02 | Collier County Building Permits — monthly XLSX reports (data_lake.collie
     },
     {
       "metric": "permits_collier_corridor_5th-ave-south-3rd-street-south_residential_z",
-      "value": -0.345,
+      "value": -0.414,
       "direction": "stable",
       "label": "Collier permits - Downtown Naples, residential - 90d vs trailing-365d z (n_current=0)",
       "variable_type": "intensive",
@@ -556,7 +556,7 @@ s02 | Collier County Building Permits — monthly XLSX reports (data_lake.collie
       "display_format": "ratio",
       "source": {
         "url": "https://www.colliercountyfl.gov/Business-Resources/Building-Permits-Construction/Meetings-Advisory-Boards-Reports/Monthly-Building-Permit-Reports",
-        "fetched_at": "2026-07-30T06:52:18Z",
+        "fetched_at": "2026-08-06T07:24:23Z",
         "tier": 1,
         "citation": "Collier County Building Permits — monthly XLSX, Firecrawl stealth proxy + Census batch geocode; corridor assignment via nearest-centroid."
       },
@@ -575,7 +575,7 @@ s02 | Collier County Building Permits — monthly XLSX reports (data_lake.collie
       "display_format": "ratio",
       "source": {
         "url": "https://www.colliercountyfl.gov/Business-Resources/Building-Permits-Construction/Meetings-Advisory-Boards-Reports/Monthly-Building-Permit-Reports",
-        "fetched_at": "2026-07-30T06:52:18Z",
+        "fetched_at": "2026-08-06T07:24:23Z",
         "tier": 1,
         "citation": "Collier County Building Permits — monthly XLSX, Firecrawl stealth proxy + Census batch geocode; corridor assignment via nearest-centroid."
       },
@@ -594,7 +594,7 @@ s02 | Collier County Building Permits — monthly XLSX reports (data_lake.collie
       "display_format": "ratio",
       "source": {
         "url": "https://www.colliercountyfl.gov/Business-Resources/Building-Permits-Construction/Meetings-Advisory-Boards-Reports/Monthly-Building-Permit-Reports",
-        "fetched_at": "2026-07-30T06:52:18Z",
+        "fetched_at": "2026-08-06T07:24:23Z",
         "tier": 1,
         "citation": "Collier County Building Permits — monthly XLSX, Firecrawl stealth proxy + Census batch geocode; corridor assignment via nearest-centroid."
       },
@@ -605,7 +605,7 @@ s02 | Collier County Building Permits — monthly XLSX reports (data_lake.collie
     },
     {
       "metric": "permits_collier_corridor_tamiami-naples_commercial_alteration_z",
-      "value": -0.289,
+      "value": -0.375,
       "direction": "stable",
       "label": "Collier permits - East Trail (Naples), commercial_alteration - 90d vs trailing-365d z (n_current=0)",
       "variable_type": "intensive",
@@ -613,7 +613,7 @@ s02 | Collier County Building Permits — monthly XLSX reports (data_lake.collie
       "display_format": "ratio",
       "source": {
         "url": "https://www.colliercountyfl.gov/Business-Resources/Building-Permits-Construction/Meetings-Advisory-Boards-Reports/Monthly-Building-Permit-Reports",
-        "fetched_at": "2026-07-30T06:52:18Z",
+        "fetched_at": "2026-08-06T07:24:23Z",
         "tier": 1,
         "citation": "Collier County Building Permits — monthly XLSX, Firecrawl stealth proxy + Census batch geocode; corridor assignment via nearest-centroid."
       },
@@ -624,7 +624,7 @@ s02 | Collier County Building Permits — monthly XLSX reports (data_lake.collie
     },
     {
       "metric": "permits_collier_corridor_waterside-shops_commercial_alteration_z",
-      "value": -0.33,
+      "value": -0.411,
       "direction": "stable",
       "label": "Collier permits - Waterside, commercial_alteration - 90d vs trailing-365d z (n_current=0)",
       "variable_type": "intensive",
@@ -632,7 +632,7 @@ s02 | Collier County Building Permits — monthly XLSX reports (data_lake.collie
       "display_format": "ratio",
       "source": {
         "url": "https://www.colliercountyfl.gov/Business-Resources/Building-Permits-Construction/Meetings-Advisory-Boards-Reports/Monthly-Building-Permit-Reports",
-        "fetched_at": "2026-07-30T06:52:18Z",
+        "fetched_at": "2026-08-06T07:24:23Z",
         "tier": 1,
         "citation": "Collier County Building Permits — monthly XLSX, Firecrawl stealth proxy + Census batch geocode; corridor assignment via nearest-centroid."
       },
@@ -651,7 +651,7 @@ s02 | Collier County Building Permits — monthly XLSX reports (data_lake.collie
       "display_format": "ratio",
       "source": {
         "url": "https://www.colliercountyfl.gov/Business-Resources/Building-Permits-Construction/Meetings-Advisory-Boards-Reports/Monthly-Building-Permit-Reports",
-        "fetched_at": "2026-07-30T06:52:18Z",
+        "fetched_at": "2026-08-06T07:24:23Z",
         "tier": 1,
         "citation": "Collier County Building Permits — monthly XLSX, Firecrawl stealth proxy + Census batch geocode; corridor assignment via nearest-centroid."
       },
@@ -670,7 +670,7 @@ s02 | Collier County Building Permits — monthly XLSX reports (data_lake.collie
       "display_format": "ratio",
       "source": {
         "url": "https://www.colliercountyfl.gov/Business-Resources/Building-Permits-Construction/Meetings-Advisory-Boards-Reports/Monthly-Building-Permit-Reports",
-        "fetched_at": "2026-07-30T06:52:18Z",
+        "fetched_at": "2026-08-06T07:24:23Z",
         "tier": 1,
         "citation": "Collier County Building Permits — monthly XLSX, Firecrawl stealth proxy + Census batch geocode; corridor assignment via nearest-centroid."
       },
@@ -689,7 +689,7 @@ s02 | Collier County Building Permits — monthly XLSX reports (data_lake.collie
       "display_format": "ratio",
       "source": {
         "url": "https://www.colliercountyfl.gov/Business-Resources/Building-Permits-Construction/Meetings-Advisory-Boards-Reports/Monthly-Building-Permit-Reports",
-        "fetched_at": "2026-07-30T06:52:18Z",
+        "fetched_at": "2026-08-06T07:24:23Z",
         "tier": 1,
         "citation": "Collier County Building Permits — monthly XLSX, Firecrawl stealth proxy + Census batch geocode; corridor assignment via nearest-centroid."
       },
@@ -708,7 +708,7 @@ s02 | Collier County Building Permits — monthly XLSX reports (data_lake.collie
       "display_format": "ratio",
       "source": {
         "url": "https://www.colliercountyfl.gov/Business-Resources/Building-Permits-Construction/Meetings-Advisory-Boards-Reports/Monthly-Building-Permit-Reports",
-        "fetched_at": "2026-07-30T06:52:18Z",
+        "fetched_at": "2026-08-06T07:24:23Z",
         "tier": 1,
         "citation": "Collier County Building Permits — monthly XLSX, Firecrawl stealth proxy + Census batch geocode; corridor assignment via nearest-centroid."
       },
@@ -727,7 +727,7 @@ s02 | Collier County Building Permits — monthly XLSX reports (data_lake.collie
       "display_format": "ratio",
       "source": {
         "url": "https://www.colliercountyfl.gov/Business-Resources/Building-Permits-Construction/Meetings-Advisory-Boards-Reports/Monthly-Building-Permit-Reports",
-        "fetched_at": "2026-07-30T06:52:18Z",
+        "fetched_at": "2026-08-06T07:24:23Z",
         "tier": 1,
         "citation": "Collier County Building Permits — monthly XLSX, Firecrawl stealth proxy + Census batch geocode; corridor assignment via nearest-centroid."
       },
@@ -746,7 +746,7 @@ s02 | Collier County Building Permits — monthly XLSX reports (data_lake.collie
       "display_format": "ratio",
       "source": {
         "url": "https://www.colliercountyfl.gov/Business-Resources/Building-Permits-Construction/Meetings-Advisory-Boards-Reports/Monthly-Building-Permit-Reports",
-        "fetched_at": "2026-07-30T06:52:18Z",
+        "fetched_at": "2026-08-06T07:24:23Z",
         "tier": 1,
         "citation": "Collier County Building Permits — monthly XLSX, Firecrawl stealth proxy + Census batch geocode; corridor assignment via nearest-centroid."
       },
@@ -765,7 +765,7 @@ s02 | Collier County Building Permits — monthly XLSX reports (data_lake.collie
       "display_format": "ratio",
       "source": {
         "url": "https://www.colliercountyfl.gov/Business-Resources/Building-Permits-Construction/Meetings-Advisory-Boards-Reports/Monthly-Building-Permit-Reports",
-        "fetched_at": "2026-07-30T06:52:18Z",
+        "fetched_at": "2026-08-06T07:24:23Z",
         "tier": 1,
         "citation": "Collier County Building Permits — monthly XLSX, Firecrawl stealth proxy + Census batch geocode; corridor assignment via nearest-centroid."
       },
@@ -784,7 +784,7 @@ s02 | Collier County Building Permits — monthly XLSX reports (data_lake.collie
       "display_format": "ratio",
       "source": {
         "url": "https://www.colliercountyfl.gov/Business-Resources/Building-Permits-Construction/Meetings-Advisory-Boards-Reports/Monthly-Building-Permit-Reports",
-        "fetched_at": "2026-07-30T06:52:18Z",
+        "fetched_at": "2026-08-06T07:24:23Z",
         "tier": 1,
         "citation": "Collier County Building Permits — monthly XLSX, Firecrawl stealth proxy + Census batch geocode; corridor assignment via nearest-centroid."
       },
@@ -803,7 +803,7 @@ s02 | Collier County Building Permits — monthly XLSX reports (data_lake.collie
       "display_format": "ratio",
       "source": {
         "url": "https://www.colliercountyfl.gov/Business-Resources/Building-Permits-Construction/Meetings-Advisory-Boards-Reports/Monthly-Building-Permit-Reports",
-        "fetched_at": "2026-07-30T06:52:18Z",
+        "fetched_at": "2026-08-06T07:24:23Z",
         "tier": 1,
         "citation": "Collier County Building Permits — monthly XLSX, Firecrawl stealth proxy + Census batch geocode; corridor assignment via nearest-centroid."
       },
@@ -814,7 +814,7 @@ s02 | Collier County Building Permits — monthly XLSX reports (data_lake.collie
     },
     {
       "metric": "permits_collier_corridor_davis-blvd-east-naples_commercial_alteration_z",
-      "value": -0.289,
+      "value": -0.426,
       "direction": "stable",
       "label": "Collier permits - East Naples, commercial_alteration - 90d vs trailing-365d z (n_current=0)",
       "variable_type": "intensive",
@@ -822,7 +822,7 @@ s02 | Collier County Building Permits — monthly XLSX reports (data_lake.collie
       "display_format": "ratio",
       "source": {
         "url": "https://www.colliercountyfl.gov/Business-Resources/Building-Permits-Construction/Meetings-Advisory-Boards-Reports/Monthly-Building-Permit-Reports",
-        "fetched_at": "2026-07-30T06:52:18Z",
+        "fetched_at": "2026-08-06T07:24:23Z",
         "tier": 1,
         "citation": "Collier County Building Permits — monthly XLSX, Firecrawl stealth proxy + Census batch geocode; corridor assignment via nearest-centroid."
       },
@@ -841,7 +841,7 @@ s02 | Collier County Building Permits — monthly XLSX reports (data_lake.collie
       "display_format": "ratio",
       "source": {
         "url": "https://www.colliercountyfl.gov/Business-Resources/Building-Permits-Construction/Meetings-Advisory-Boards-Reports/Monthly-Building-Permit-Reports",
-        "fetched_at": "2026-07-30T06:52:18Z",
+        "fetched_at": "2026-08-06T07:24:23Z",
         "tier": 1,
         "citation": "Collier County Building Permits — monthly XLSX, Firecrawl stealth proxy + Census batch geocode; corridor assignment via nearest-centroid."
       },
@@ -860,7 +860,7 @@ s02 | Collier County Building Permits — monthly XLSX reports (data_lake.collie
       "display_format": "ratio",
       "source": {
         "url": "https://www.colliercountyfl.gov/Business-Resources/Building-Permits-Construction/Meetings-Advisory-Boards-Reports/Monthly-Building-Permit-Reports",
-        "fetched_at": "2026-07-30T06:52:18Z",
+        "fetched_at": "2026-08-06T07:24:23Z",
         "tier": 1,
         "citation": "Collier County Building Permits — monthly XLSX, Firecrawl stealth proxy + Census batch geocode; corridor assignment via nearest-centroid."
       },
@@ -879,7 +879,7 @@ s02 | Collier County Building Permits — monthly XLSX reports (data_lake.collie
       "display_format": "ratio",
       "source": {
         "url": "https://www.colliercountyfl.gov/Business-Resources/Building-Permits-Construction/Meetings-Advisory-Boards-Reports/Monthly-Building-Permit-Reports",
-        "fetched_at": "2026-07-30T06:52:18Z",
+        "fetched_at": "2026-08-06T07:24:23Z",
         "tier": 1,
         "citation": "Collier County Building Permits — monthly XLSX, Firecrawl stealth proxy + Census batch geocode; corridor assignment via nearest-centroid."
       },
@@ -898,7 +898,7 @@ s02 | Collier County Building Permits — monthly XLSX reports (data_lake.collie
       "display_format": "ratio",
       "source": {
         "url": "https://www.colliercountyfl.gov/Business-Resources/Building-Permits-Construction/Meetings-Advisory-Boards-Reports/Monthly-Building-Permit-Reports",
-        "fetched_at": "2026-07-30T06:52:18Z",
+        "fetched_at": "2026-08-06T07:24:23Z",
         "tier": 1,
         "citation": "Collier County Building Permits — monthly XLSX, Firecrawl stealth proxy + Census batch geocode; corridor assignment via nearest-centroid."
       },
@@ -917,7 +917,7 @@ s02 | Collier County Building Permits — monthly XLSX reports (data_lake.collie
       "display_format": "ratio",
       "source": {
         "url": "https://www.colliercountyfl.gov/Business-Resources/Building-Permits-Construction/Meetings-Advisory-Boards-Reports/Monthly-Building-Permit-Reports",
-        "fetched_at": "2026-07-30T06:52:18Z",
+        "fetched_at": "2026-08-06T07:24:23Z",
         "tier": 1,
         "citation": "Collier County Building Permits — monthly XLSX, Firecrawl stealth proxy + Census batch geocode; corridor assignment via nearest-centroid."
       },
@@ -936,7 +936,7 @@ s02 | Collier County Building Permits — monthly XLSX reports (data_lake.collie
       "display_format": "ratio",
       "source": {
         "url": "https://www.colliercountyfl.gov/Business-Resources/Building-Permits-Construction/Meetings-Advisory-Boards-Reports/Monthly-Building-Permit-Reports",
-        "fetched_at": "2026-07-30T06:52:18Z",
+        "fetched_at": "2026-08-06T07:24:23Z",
         "tier": 1,
         "citation": "Collier County Building Permits — monthly XLSX, Firecrawl stealth proxy + Census batch geocode; corridor assignment via nearest-centroid."
       },
@@ -955,7 +955,7 @@ s02 | Collier County Building Permits — monthly XLSX reports (data_lake.collie
       "display_format": "ratio",
       "source": {
         "url": "https://www.colliercountyfl.gov/Business-Resources/Building-Permits-Construction/Meetings-Advisory-Boards-Reports/Monthly-Building-Permit-Reports",
-        "fetched_at": "2026-07-30T06:52:18Z",
+        "fetched_at": "2026-08-06T07:24:23Z",
         "tier": 1,
         "citation": "Collier County Building Permits — monthly XLSX, Firecrawl stealth proxy + Census batch geocode; corridor assignment via nearest-centroid."
       },
@@ -974,7 +974,7 @@ s02 | Collier County Building Permits — monthly XLSX reports (data_lake.collie
       "display_format": "ratio",
       "source": {
         "url": "https://aca-prod.accela.com/LEECO/Cap/CapHome.aspx?module=Permitting&TabName=Permitting",
-        "fetched_at": "2026-07-30T06:52:18Z",
+        "fetched_at": "2026-08-06T07:24:23Z",
         "tier": 1,
         "citation": "Lee County Accela Citizen Access — building permit records, daily scrape via Firecrawl + dlt; corridor assignment via nearest-centroid."
       },
@@ -993,7 +993,7 @@ s02 | Collier County Building Permits — monthly XLSX reports (data_lake.collie
       "display_format": "ratio",
       "source": {
         "url": "https://aca-prod.accela.com/LEECO/Cap/CapHome.aspx?module=Permitting&TabName=Permitting",
-        "fetched_at": "2026-07-30T06:52:18Z",
+        "fetched_at": "2026-08-06T07:24:23Z",
         "tier": 1,
         "citation": "Lee County Accela Citizen Access — building permit records, daily scrape via Firecrawl + dlt; corridor assignment via nearest-centroid."
       },
@@ -1012,7 +1012,7 @@ s02 | Collier County Building Permits — monthly XLSX reports (data_lake.collie
       "display_format": "ratio",
       "source": {
         "url": "https://aca-prod.accela.com/LEECO/Cap/CapHome.aspx?module=Permitting&TabName=Permitting",
-        "fetched_at": "2026-07-30T06:52:18Z",
+        "fetched_at": "2026-08-06T07:24:23Z",
         "tier": 1,
         "citation": "Lee County Accela Citizen Access — building permit records, daily scrape via Firecrawl + dlt; corridor assignment via nearest-centroid."
       },
@@ -1031,7 +1031,7 @@ s02 | Collier County Building Permits — monthly XLSX reports (data_lake.collie
       "display_format": "ratio",
       "source": {
         "url": "https://aca-prod.accela.com/LEECO/Cap/CapHome.aspx?module=Permitting&TabName=Permitting",
-        "fetched_at": "2026-07-30T06:52:18Z",
+        "fetched_at": "2026-08-06T07:24:23Z",
         "tier": 1,
         "citation": "Lee County Accela Citizen Access — building permit records, daily scrape via Firecrawl + dlt; corridor assignment via nearest-centroid."
       },
@@ -1050,7 +1050,7 @@ s02 | Collier County Building Permits — monthly XLSX reports (data_lake.collie
       "display_format": "ratio",
       "source": {
         "url": "https://aca-prod.accela.com/LEECO/Cap/CapHome.aspx?module=Permitting&TabName=Permitting",
-        "fetched_at": "2026-07-30T06:52:18Z",
+        "fetched_at": "2026-08-06T07:24:23Z",
         "tier": 1,
         "citation": "Lee County Accela Citizen Access — building permit records, daily scrape via Firecrawl + dlt; corridor assignment via nearest-centroid."
       },
@@ -1069,7 +1069,7 @@ s02 | Collier County Building Permits — monthly XLSX reports (data_lake.collie
       "display_format": "ratio",
       "source": {
         "url": "https://aca-prod.accela.com/LEECO/Cap/CapHome.aspx?module=Permitting&TabName=Permitting",
-        "fetched_at": "2026-07-30T06:52:18Z",
+        "fetched_at": "2026-08-06T07:24:23Z",
         "tier": 1,
         "citation": "Lee County Accela Citizen Access — building permit records, daily scrape via Firecrawl + dlt; corridor assignment via nearest-centroid."
       },
@@ -1088,7 +1088,7 @@ s02 | Collier County Building Permits — monthly XLSX reports (data_lake.collie
       "display_format": "ratio",
       "source": {
         "url": "https://aca-prod.accela.com/LEECO/Cap/CapHome.aspx?module=Permitting&TabName=Permitting",
-        "fetched_at": "2026-07-30T06:52:18Z",
+        "fetched_at": "2026-08-06T07:24:23Z",
         "tier": 1,
         "citation": "Lee County Accela Citizen Access — building permit records, daily scrape via Firecrawl + dlt; corridor assignment via nearest-centroid."
       },
@@ -1107,7 +1107,7 @@ s02 | Collier County Building Permits — monthly XLSX reports (data_lake.collie
       "display_format": "ratio",
       "source": {
         "url": "https://aca-prod.accela.com/LEECO/Cap/CapHome.aspx?module=Permitting&TabName=Permitting",
-        "fetched_at": "2026-07-30T06:52:18Z",
+        "fetched_at": "2026-08-06T07:24:23Z",
         "tier": 1,
         "citation": "Lee County Accela Citizen Access — building permit records, daily scrape via Firecrawl + dlt; corridor assignment via nearest-centroid."
       },
@@ -1126,7 +1126,7 @@ s02 | Collier County Building Permits — monthly XLSX reports (data_lake.collie
       "display_format": "ratio",
       "source": {
         "url": "https://aca-prod.accela.com/LEECO/Cap/CapHome.aspx?module=Permitting&TabName=Permitting",
-        "fetched_at": "2026-07-30T06:52:18Z",
+        "fetched_at": "2026-08-06T07:24:23Z",
         "tier": 1,
         "citation": "Lee County Accela Citizen Access — building permit records, daily scrape via Firecrawl + dlt; corridor assignment via nearest-centroid."
       },
@@ -1145,7 +1145,7 @@ s02 | Collier County Building Permits — monthly XLSX reports (data_lake.collie
       "display_format": "ratio",
       "source": {
         "url": "https://aca-prod.accela.com/LEECO/Cap/CapHome.aspx?module=Permitting&TabName=Permitting",
-        "fetched_at": "2026-07-30T06:52:18Z",
+        "fetched_at": "2026-08-06T07:24:23Z",
         "tier": 1,
         "citation": "Lee County Accela Citizen Access — building permit records, daily scrape via Firecrawl + dlt; corridor assignment via nearest-centroid."
       },
@@ -1164,7 +1164,7 @@ s02 | Collier County Building Permits — monthly XLSX reports (data_lake.collie
       "display_format": "ratio",
       "source": {
         "url": "https://aca-prod.accela.com/LEECO/Cap/CapHome.aspx?module=Permitting&TabName=Permitting",
-        "fetched_at": "2026-07-30T06:52:18Z",
+        "fetched_at": "2026-08-06T07:24:23Z",
         "tier": 1,
         "citation": "Lee County Accela Citizen Access — building permit records, daily scrape via Firecrawl + dlt; corridor assignment via nearest-centroid."
       },
@@ -1183,7 +1183,7 @@ s02 | Collier County Building Permits — monthly XLSX reports (data_lake.collie
       "display_format": "ratio",
       "source": {
         "url": "https://aca-prod.accela.com/LEECO/Cap/CapHome.aspx?module=Permitting&TabName=Permitting",
-        "fetched_at": "2026-07-30T06:52:18Z",
+        "fetched_at": "2026-08-06T07:24:23Z",
         "tier": 1,
         "citation": "Lee County Accela Citizen Access — building permit records, daily scrape via Firecrawl + dlt; corridor assignment via nearest-centroid."
       },
@@ -1202,7 +1202,7 @@ s02 | Collier County Building Permits — monthly XLSX reports (data_lake.collie
       "display_format": "ratio",
       "source": {
         "url": "https://aca-prod.accela.com/LEECO/Cap/CapHome.aspx?module=Permitting&TabName=Permitting",
-        "fetched_at": "2026-07-30T06:52:18Z",
+        "fetched_at": "2026-08-06T07:24:23Z",
         "tier": 1,
         "citation": "Lee County Accela Citizen Access — building permit records, daily scrape via Firecrawl + dlt; corridor assignment via nearest-centroid."
       },
@@ -1221,7 +1221,7 @@ s02 | Collier County Building Permits — monthly XLSX reports (data_lake.collie
       "display_format": "ratio",
       "source": {
         "url": "https://aca-prod.accela.com/LEECO/Cap/CapHome.aspx?module=Permitting&TabName=Permitting",
-        "fetched_at": "2026-07-30T06:52:18Z",
+        "fetched_at": "2026-08-06T07:24:23Z",
         "tier": 1,
         "citation": "Lee County Accela Citizen Access — building permit records, daily scrape via Firecrawl + dlt; corridor assignment via nearest-centroid."
       },
@@ -1240,7 +1240,7 @@ s02 | Collier County Building Permits — monthly XLSX reports (data_lake.collie
       "display_format": "ratio",
       "source": {
         "url": "https://aca-prod.accela.com/LEECO/Cap/CapHome.aspx?module=Permitting&TabName=Permitting",
-        "fetched_at": "2026-07-30T06:52:18Z",
+        "fetched_at": "2026-08-06T07:24:23Z",
         "tier": 1,
         "citation": "Lee County Accela Citizen Access — building permit records, daily scrape via Firecrawl + dlt; corridor assignment via nearest-centroid."
       },
@@ -1259,7 +1259,7 @@ s02 | Collier County Building Permits — monthly XLSX reports (data_lake.collie
       "display_format": "ratio",
       "source": {
         "url": "https://aca-prod.accela.com/LEECO/Cap/CapHome.aspx?module=Permitting&TabName=Permitting",
-        "fetched_at": "2026-07-30T06:52:18Z",
+        "fetched_at": "2026-08-06T07:24:23Z",
         "tier": 1,
         "citation": "Lee County Accela Citizen Access — building permit records, daily scrape via Firecrawl + dlt; corridor assignment via nearest-centroid."
       },
@@ -1278,7 +1278,7 @@ s02 | Collier County Building Permits — monthly XLSX reports (data_lake.collie
       "display_format": "ratio",
       "source": {
         "url": "https://aca-prod.accela.com/LEECO/Cap/CapHome.aspx?module=Permitting&TabName=Permitting",
-        "fetched_at": "2026-07-30T06:52:18Z",
+        "fetched_at": "2026-08-06T07:24:23Z",
         "tier": 1,
         "citation": "Lee County Accela Citizen Access — building permit records, daily scrape via Firecrawl + dlt; corridor assignment via nearest-centroid."
       },
@@ -1297,7 +1297,7 @@ s02 | Collier County Building Permits — monthly XLSX reports (data_lake.collie
       "display_format": "ratio",
       "source": {
         "url": "https://aca-prod.accela.com/LEECO/Cap/CapHome.aspx?module=Permitting&TabName=Permitting",
-        "fetched_at": "2026-07-30T06:52:18Z",
+        "fetched_at": "2026-08-06T07:24:23Z",
         "tier": 1,
         "citation": "Lee County Accela Citizen Access — building permit records, daily scrape via Firecrawl + dlt; corridor assignment via nearest-centroid."
       },
@@ -1316,7 +1316,7 @@ s02 | Collier County Building Permits — monthly XLSX reports (data_lake.collie
       "display_format": "ratio",
       "source": {
         "url": "https://aca-prod.accela.com/LEECO/Cap/CapHome.aspx?module=Permitting&TabName=Permitting",
-        "fetched_at": "2026-07-30T06:52:18Z",
+        "fetched_at": "2026-08-06T07:24:23Z",
         "tier": 1,
         "citation": "Lee County Accela Citizen Access — building permit records, daily scrape via Firecrawl + dlt; corridor assignment via nearest-centroid."
       },
@@ -1335,7 +1335,7 @@ s02 | Collier County Building Permits — monthly XLSX reports (data_lake.collie
       "display_format": "ratio",
       "source": {
         "url": "https://aca-prod.accela.com/LEECO/Cap/CapHome.aspx?module=Permitting&TabName=Permitting",
-        "fetched_at": "2026-07-30T06:52:18Z",
+        "fetched_at": "2026-08-06T07:24:23Z",
         "tier": 1,
         "citation": "Lee County Accela Citizen Access — building permit records, daily scrape via Firecrawl + dlt; corridor assignment via nearest-centroid."
       },
@@ -1354,7 +1354,7 @@ s02 | Collier County Building Permits — monthly XLSX reports (data_lake.collie
       "display_format": "ratio",
       "source": {
         "url": "https://aca-prod.accela.com/LEECO/Cap/CapHome.aspx?module=Permitting&TabName=Permitting",
-        "fetched_at": "2026-07-30T06:52:18Z",
+        "fetched_at": "2026-08-06T07:24:23Z",
         "tier": 1,
         "citation": "Lee County Accela Citizen Access — building permit records, daily scrape via Firecrawl + dlt; corridor assignment via nearest-centroid."
       },
@@ -1373,7 +1373,7 @@ s02 | Collier County Building Permits — monthly XLSX reports (data_lake.collie
       "display_format": "ratio",
       "source": {
         "url": "https://aca-prod.accela.com/LEECO/Cap/CapHome.aspx?module=Permitting&TabName=Permitting",
-        "fetched_at": "2026-07-30T06:52:18Z",
+        "fetched_at": "2026-08-06T07:24:23Z",
         "tier": 1,
         "citation": "Lee County Accela Citizen Access — building permit records, daily scrape via Firecrawl + dlt; corridor assignment via nearest-centroid."
       },
@@ -1392,7 +1392,7 @@ s02 | Collier County Building Permits — monthly XLSX reports (data_lake.collie
       "display_format": "ratio",
       "source": {
         "url": "https://aca-prod.accela.com/LEECO/Cap/CapHome.aspx?module=Permitting&TabName=Permitting",
-        "fetched_at": "2026-07-30T06:52:18Z",
+        "fetched_at": "2026-08-06T07:24:23Z",
         "tier": 1,
         "citation": "Lee County Accela Citizen Access — building permit records, daily scrape via Firecrawl + dlt; corridor assignment via nearest-centroid."
       },
@@ -1411,7 +1411,7 @@ s02 | Collier County Building Permits — monthly XLSX reports (data_lake.collie
       "display_format": "ratio",
       "source": {
         "url": "https://aca-prod.accela.com/LEECO/Cap/CapHome.aspx?module=Permitting&TabName=Permitting",
-        "fetched_at": "2026-07-30T06:52:18Z",
+        "fetched_at": "2026-08-06T07:24:23Z",
         "tier": 1,
         "citation": "Lee County Accela Citizen Access — building permit records, daily scrape via Firecrawl + dlt; corridor assignment via nearest-centroid."
       },
@@ -1430,7 +1430,7 @@ s02 | Collier County Building Permits — monthly XLSX reports (data_lake.collie
       "display_format": "ratio",
       "source": {
         "url": "https://aca-prod.accela.com/LEECO/Cap/CapHome.aspx?module=Permitting&TabName=Permitting",
-        "fetched_at": "2026-07-30T06:52:18Z",
+        "fetched_at": "2026-08-06T07:24:23Z",
         "tier": 1,
         "citation": "Lee County Accela Citizen Access — building permit records, daily scrape via Firecrawl + dlt; corridor assignment via nearest-centroid."
       },
@@ -1449,7 +1449,7 @@ s02 | Collier County Building Permits — monthly XLSX reports (data_lake.collie
       "display_format": "ratio",
       "source": {
         "url": "https://aca-prod.accela.com/LEECO/Cap/CapHome.aspx?module=Permitting&TabName=Permitting",
-        "fetched_at": "2026-07-30T06:52:18Z",
+        "fetched_at": "2026-08-06T07:24:23Z",
         "tier": 1,
         "citation": "Lee County Accela Citizen Access — building permit records, daily scrape via Firecrawl + dlt; corridor assignment via nearest-centroid."
       },
@@ -1468,7 +1468,7 @@ s02 | Collier County Building Permits — monthly XLSX reports (data_lake.collie
       "display_format": "ratio",
       "source": {
         "url": "https://aca-prod.accela.com/LEECO/Cap/CapHome.aspx?module=Permitting&TabName=Permitting",
-        "fetched_at": "2026-07-30T06:52:18Z",
+        "fetched_at": "2026-08-06T07:24:23Z",
         "tier": 1,
         "citation": "Lee County Accela Citizen Access — building permit records, daily scrape via Firecrawl + dlt; corridor assignment via nearest-centroid."
       },
@@ -1487,7 +1487,7 @@ s02 | Collier County Building Permits — monthly XLSX reports (data_lake.collie
       "display_format": "ratio",
       "source": {
         "url": "https://aca-prod.accela.com/LEECO/Cap/CapHome.aspx?module=Permitting&TabName=Permitting",
-        "fetched_at": "2026-07-30T06:52:18Z",
+        "fetched_at": "2026-08-06T07:24:23Z",
         "tier": 1,
         "citation": "Lee County Accela Citizen Access — building permit records, daily scrape via Firecrawl + dlt; corridor assignment via nearest-centroid."
       },
@@ -1506,7 +1506,7 @@ s02 | Collier County Building Permits — monthly XLSX reports (data_lake.collie
       "display_format": "ratio",
       "source": {
         "url": "https://aca-prod.accela.com/LEECO/Cap/CapHome.aspx?module=Permitting&TabName=Permitting",
-        "fetched_at": "2026-07-30T06:52:18Z",
+        "fetched_at": "2026-08-06T07:24:23Z",
         "tier": 1,
         "citation": "Lee County Accela Citizen Access — building permit records, daily scrape via Firecrawl + dlt; corridor assignment via nearest-centroid."
       },
@@ -1525,7 +1525,7 @@ s02 | Collier County Building Permits — monthly XLSX reports (data_lake.collie
       "display_format": "ratio",
       "source": {
         "url": "https://aca-prod.accela.com/LEECO/Cap/CapHome.aspx?module=Permitting&TabName=Permitting",
-        "fetched_at": "2026-07-30T06:52:18Z",
+        "fetched_at": "2026-08-06T07:24:23Z",
         "tier": 1,
         "citation": "Lee County Accela Citizen Access — building permit records, daily scrape via Firecrawl + dlt; corridor assignment via nearest-centroid."
       },
@@ -1544,7 +1544,7 @@ s02 | Collier County Building Permits — monthly XLSX reports (data_lake.collie
       "display_format": "ratio",
       "source": {
         "url": "https://aca-prod.accela.com/LEECO/Cap/CapHome.aspx?module=Permitting&TabName=Permitting",
-        "fetched_at": "2026-07-30T06:52:18Z",
+        "fetched_at": "2026-08-06T07:24:23Z",
         "tier": 1,
         "citation": "Lee County Accela Citizen Access — building permit records, daily scrape via Firecrawl + dlt; corridor assignment via nearest-centroid."
       },
@@ -1563,7 +1563,7 @@ s02 | Collier County Building Permits — monthly XLSX reports (data_lake.collie
       "display_format": "ratio",
       "source": {
         "url": "https://aca-prod.accela.com/LEECO/Cap/CapHome.aspx?module=Permitting&TabName=Permitting",
-        "fetched_at": "2026-07-30T06:52:18Z",
+        "fetched_at": "2026-08-06T07:24:23Z",
         "tier": 1,
         "citation": "Lee County Accela Citizen Access — building permit records, daily scrape via Firecrawl + dlt; corridor assignment via nearest-centroid."
       },
@@ -1582,7 +1582,7 @@ s02 | Collier County Building Permits — monthly XLSX reports (data_lake.collie
       "display_format": "ratio",
       "source": {
         "url": "https://aca-prod.accela.com/LEECO/Cap/CapHome.aspx?module=Permitting&TabName=Permitting",
-        "fetched_at": "2026-07-30T06:52:18Z",
+        "fetched_at": "2026-08-06T07:24:23Z",
         "tier": 1,
         "citation": "Lee County Accela Citizen Access — building permit records, daily scrape via Firecrawl + dlt; corridor assignment via nearest-centroid."
       },
@@ -1601,7 +1601,7 @@ s02 | Collier County Building Permits — monthly XLSX reports (data_lake.collie
       "display_format": "ratio",
       "source": {
         "url": "https://aca-prod.accela.com/LEECO/Cap/CapHome.aspx?module=Permitting&TabName=Permitting",
-        "fetched_at": "2026-07-30T06:52:18Z",
+        "fetched_at": "2026-08-06T07:24:23Z",
         "tier": 1,
         "citation": "Lee County Accela Citizen Access — building permit records, daily scrape via Firecrawl + dlt; corridor assignment via nearest-centroid."
       },
@@ -1620,7 +1620,7 @@ s02 | Collier County Building Permits — monthly XLSX reports (data_lake.collie
       "display_format": "ratio",
       "source": {
         "url": "https://aca-prod.accela.com/LEECO/Cap/CapHome.aspx?module=Permitting&TabName=Permitting",
-        "fetched_at": "2026-07-30T06:52:18Z",
+        "fetched_at": "2026-08-06T07:24:23Z",
         "tier": 1,
         "citation": "Lee County Accela Citizen Access — building permit records, daily scrape via Firecrawl + dlt; corridor assignment via nearest-centroid."
       },
@@ -1639,7 +1639,7 @@ s02 | Collier County Building Permits — monthly XLSX reports (data_lake.collie
       "display_format": "ratio",
       "source": {
         "url": "https://aca-prod.accela.com/LEECO/Cap/CapHome.aspx?module=Permitting&TabName=Permitting",
-        "fetched_at": "2026-07-30T06:52:18Z",
+        "fetched_at": "2026-08-06T07:24:23Z",
         "tier": 1,
         "citation": "Lee County Accela Citizen Access — building permit records, daily scrape via Firecrawl + dlt; corridor assignment via nearest-centroid."
       },
@@ -1658,7 +1658,7 @@ s02 | Collier County Building Permits — monthly XLSX reports (data_lake.collie
       "display_format": "ratio",
       "source": {
         "url": "https://aca-prod.accela.com/LEECO/Cap/CapHome.aspx?module=Permitting&TabName=Permitting",
-        "fetched_at": "2026-07-30T06:52:18Z",
+        "fetched_at": "2026-08-06T07:24:23Z",
         "tier": 1,
         "citation": "Lee County Accela Citizen Access — building permit records, daily scrape via Firecrawl + dlt; corridor assignment via nearest-centroid."
       },
@@ -1677,7 +1677,7 @@ s02 | Collier County Building Permits — monthly XLSX reports (data_lake.collie
       "display_format": "ratio",
       "source": {
         "url": "https://aca-prod.accela.com/LEECO/Cap/CapHome.aspx?module=Permitting&TabName=Permitting",
-        "fetched_at": "2026-07-30T06:52:18Z",
+        "fetched_at": "2026-08-06T07:24:23Z",
         "tier": 1,
         "citation": "Lee County Accela Citizen Access — building permit records, daily scrape via Firecrawl + dlt; corridor assignment via nearest-centroid."
       },
@@ -1696,7 +1696,7 @@ s02 | Collier County Building Permits — monthly XLSX reports (data_lake.collie
       "display_format": "ratio",
       "source": {
         "url": "https://aca-prod.accela.com/LEECO/Cap/CapHome.aspx?module=Permitting&TabName=Permitting",
-        "fetched_at": "2026-07-30T06:52:18Z",
+        "fetched_at": "2026-08-06T07:24:23Z",
         "tier": 1,
         "citation": "Lee County Accela Citizen Access — building permit records, daily scrape via Firecrawl + dlt; corridor assignment via nearest-centroid."
       },
@@ -1715,7 +1715,7 @@ s02 | Collier County Building Permits — monthly XLSX reports (data_lake.collie
       "display_format": "ratio",
       "source": {
         "url": "https://aca-prod.accela.com/LEECO/Cap/CapHome.aspx?module=Permitting&TabName=Permitting",
-        "fetched_at": "2026-07-30T06:52:18Z",
+        "fetched_at": "2026-08-06T07:24:23Z",
         "tier": 1,
         "citation": "Lee County Accela Citizen Access — building permit records, daily scrape via Firecrawl + dlt; corridor assignment via nearest-centroid."
       },
@@ -1734,7 +1734,7 @@ s02 | Collier County Building Permits — monthly XLSX reports (data_lake.collie
       "display_format": "ratio",
       "source": {
         "url": "https://aca-prod.accela.com/LEECO/Cap/CapHome.aspx?module=Permitting&TabName=Permitting",
-        "fetched_at": "2026-07-30T06:52:18Z",
+        "fetched_at": "2026-08-06T07:24:23Z",
         "tier": 1,
         "citation": "Lee County Accela Citizen Access — building permit records, daily scrape via Firecrawl + dlt; corridor assignment via nearest-centroid."
       },
@@ -1753,7 +1753,7 @@ s02 | Collier County Building Permits — monthly XLSX reports (data_lake.collie
       "display_format": "ratio",
       "source": {
         "url": "https://aca-prod.accela.com/LEECO/Cap/CapHome.aspx?module=Permitting&TabName=Permitting",
-        "fetched_at": "2026-07-30T06:52:18Z",
+        "fetched_at": "2026-08-06T07:24:23Z",
         "tier": 1,
         "citation": "Lee County Accela Citizen Access — building permit records, daily scrape via Firecrawl + dlt; corridor assignment via nearest-centroid."
       },
@@ -1772,7 +1772,7 @@ s02 | Collier County Building Permits — monthly XLSX reports (data_lake.collie
       "display_format": "ratio",
       "source": {
         "url": "https://aca-prod.accela.com/LEECO/Cap/CapHome.aspx?module=Permitting&TabName=Permitting",
-        "fetched_at": "2026-07-30T06:52:18Z",
+        "fetched_at": "2026-08-06T07:24:23Z",
         "tier": 1,
         "citation": "Lee County Accela Citizen Access — building permit records, daily scrape via Firecrawl + dlt; corridor assignment via nearest-centroid."
       },
@@ -1791,7 +1791,7 @@ s02 | Collier County Building Permits — monthly XLSX reports (data_lake.collie
       "display_format": "ratio",
       "source": {
         "url": "https://aca-prod.accela.com/LEECO/Cap/CapHome.aspx?module=Permitting&TabName=Permitting",
-        "fetched_at": "2026-07-30T06:52:18Z",
+        "fetched_at": "2026-08-06T07:24:23Z",
         "tier": 1,
         "citation": "Lee County Accela Citizen Access — building permit records, daily scrape via Firecrawl + dlt; corridor assignment via nearest-centroid."
       },
@@ -1810,7 +1810,7 @@ s02 | Collier County Building Permits — monthly XLSX reports (data_lake.collie
       "display_format": "ratio",
       "source": {
         "url": "https://aca-prod.accela.com/LEECO/Cap/CapHome.aspx?module=Permitting&TabName=Permitting",
-        "fetched_at": "2026-07-30T06:52:18Z",
+        "fetched_at": "2026-08-06T07:24:23Z",
         "tier": 1,
         "citation": "Lee County Accela Citizen Access — building permit records, daily scrape via Firecrawl + dlt; corridor assignment via nearest-centroid."
       },
@@ -1829,7 +1829,7 @@ s02 | Collier County Building Permits — monthly XLSX reports (data_lake.collie
       "display_format": "ratio",
       "source": {
         "url": "https://aca-prod.accela.com/LEECO/Cap/CapHome.aspx?module=Permitting&TabName=Permitting",
-        "fetched_at": "2026-07-30T06:52:18Z",
+        "fetched_at": "2026-08-06T07:24:23Z",
         "tier": 1,
         "citation": "Lee County Accela Citizen Access — building permit records, daily scrape via Firecrawl + dlt; corridor assignment via nearest-centroid."
       },
@@ -1848,7 +1848,7 @@ s02 | Collier County Building Permits — monthly XLSX reports (data_lake.collie
       "display_format": "ratio",
       "source": {
         "url": "https://aca-prod.accela.com/LEECO/Cap/CapHome.aspx?module=Permitting&TabName=Permitting",
-        "fetched_at": "2026-07-30T06:52:18Z",
+        "fetched_at": "2026-08-06T07:24:23Z",
         "tier": 1,
         "citation": "Lee County Accela Citizen Access — building permit records, daily scrape via Firecrawl + dlt; corridor assignment via nearest-centroid."
       },
@@ -1867,7 +1867,7 @@ s02 | Collier County Building Permits — monthly XLSX reports (data_lake.collie
       "display_format": "ratio",
       "source": {
         "url": "https://aca-prod.accela.com/LEECO/Cap/CapHome.aspx?module=Permitting&TabName=Permitting",
-        "fetched_at": "2026-07-30T06:52:18Z",
+        "fetched_at": "2026-08-06T07:24:23Z",
         "tier": 1,
         "citation": "Lee County Accela Citizen Access — building permit records, daily scrape via Firecrawl + dlt; corridor assignment via nearest-centroid."
       },
@@ -1886,7 +1886,7 @@ s02 | Collier County Building Permits — monthly XLSX reports (data_lake.collie
       "display_format": "ratio",
       "source": {
         "url": "https://aca-prod.accela.com/LEECO/Cap/CapHome.aspx?module=Permitting&TabName=Permitting",
-        "fetched_at": "2026-07-30T06:52:18Z",
+        "fetched_at": "2026-08-06T07:24:23Z",
         "tier": 1,
         "citation": "Lee County Accela Citizen Access — building permit records, daily scrape via Firecrawl + dlt; corridor assignment via nearest-centroid."
       },
@@ -1905,7 +1905,7 @@ s02 | Collier County Building Permits — monthly XLSX reports (data_lake.collie
       "display_format": "ratio",
       "source": {
         "url": "https://aca-prod.accela.com/LEECO/Cap/CapHome.aspx?module=Permitting&TabName=Permitting",
-        "fetched_at": "2026-07-30T06:52:18Z",
+        "fetched_at": "2026-08-06T07:24:23Z",
         "tier": 1,
         "citation": "Lee County Accela Citizen Access — building permit records, daily scrape via Firecrawl + dlt; corridor assignment via nearest-centroid."
       },
@@ -1924,7 +1924,7 @@ s02 | Collier County Building Permits — monthly XLSX reports (data_lake.collie
       "display_format": "ratio",
       "source": {
         "url": "https://aca-prod.accela.com/LEECO/Cap/CapHome.aspx?module=Permitting&TabName=Permitting",
-        "fetched_at": "2026-07-30T06:52:18Z",
+        "fetched_at": "2026-08-06T07:24:23Z",
         "tier": 1,
         "citation": "Lee County Accela Citizen Access — building permit records, daily scrape via Firecrawl + dlt; corridor assignment via nearest-centroid."
       },
@@ -1943,7 +1943,7 @@ s02 | Collier County Building Permits — monthly XLSX reports (data_lake.collie
       "display_format": "ratio",
       "source": {
         "url": "https://aca-prod.accela.com/LEECO/Cap/CapHome.aspx?module=Permitting&TabName=Permitting",
-        "fetched_at": "2026-07-30T06:52:18Z",
+        "fetched_at": "2026-08-06T07:24:23Z",
         "tier": 1,
         "citation": "Lee County Accela Citizen Access — building permit records, daily scrape via Firecrawl + dlt; corridor assignment via nearest-centroid."
       },
@@ -1962,7 +1962,7 @@ s02 | Collier County Building Permits — monthly XLSX reports (data_lake.collie
       "display_format": "ratio",
       "source": {
         "url": "https://aca-prod.accela.com/LEECO/Cap/CapHome.aspx?module=Permitting&TabName=Permitting",
-        "fetched_at": "2026-07-30T06:52:18Z",
+        "fetched_at": "2026-08-06T07:24:23Z",
         "tier": 1,
         "citation": "Lee County Accela Citizen Access — building permit records, daily scrape via Firecrawl + dlt; corridor assignment via nearest-centroid."
       },
@@ -1981,7 +1981,7 @@ s02 | Collier County Building Permits — monthly XLSX reports (data_lake.collie
       "display_format": "ratio",
       "source": {
         "url": "https://aca-prod.accela.com/LEECO/Cap/CapHome.aspx?module=Permitting&TabName=Permitting",
-        "fetched_at": "2026-07-30T06:52:18Z",
+        "fetched_at": "2026-08-06T07:24:23Z",
         "tier": 1,
         "citation": "Lee County Accela Citizen Access — building permit records, daily scrape via Firecrawl + dlt; corridor assignment via nearest-centroid."
       },
@@ -2000,7 +2000,7 @@ s02 | Collier County Building Permits — monthly XLSX reports (data_lake.collie
       "display_format": "ratio",
       "source": {
         "url": "https://aca-prod.accela.com/LEECO/Cap/CapHome.aspx?module=Permitting&TabName=Permitting",
-        "fetched_at": "2026-07-30T06:52:18Z",
+        "fetched_at": "2026-08-06T07:24:23Z",
         "tier": 1,
         "citation": "Lee County Accela Citizen Access — building permit records, daily scrape via Firecrawl + dlt; corridor assignment via nearest-centroid."
       },
@@ -2019,7 +2019,7 @@ s02 | Collier County Building Permits — monthly XLSX reports (data_lake.collie
       "display_format": "ratio",
       "source": {
         "url": "https://aca-prod.accela.com/LEECO/Cap/CapHome.aspx?module=Permitting&TabName=Permitting",
-        "fetched_at": "2026-07-30T06:52:18Z",
+        "fetched_at": "2026-08-06T07:24:23Z",
         "tier": 1,
         "citation": "Lee County Accela Citizen Access — building permit records, daily scrape via Firecrawl + dlt; corridor assignment via nearest-centroid."
       },
@@ -2038,7 +2038,7 @@ s02 | Collier County Building Permits — monthly XLSX reports (data_lake.collie
       "display_format": "ratio",
       "source": {
         "url": "https://aca-prod.accela.com/LEECO/Cap/CapHome.aspx?module=Permitting&TabName=Permitting",
-        "fetched_at": "2026-07-30T06:52:18Z",
+        "fetched_at": "2026-08-06T07:24:23Z",
         "tier": 1,
         "citation": "Lee County Accela Citizen Access — building permit records, daily scrape via Firecrawl + dlt; corridor assignment via nearest-centroid."
       },
@@ -2057,7 +2057,7 @@ s02 | Collier County Building Permits — monthly XLSX reports (data_lake.collie
       "display_format": "ratio",
       "source": {
         "url": "https://aca-prod.accela.com/LEECO/Cap/CapHome.aspx?module=Permitting&TabName=Permitting",
-        "fetched_at": "2026-07-30T06:52:18Z",
+        "fetched_at": "2026-08-06T07:24:23Z",
         "tier": 1,
         "citation": "Lee County Accela Citizen Access — building permit records, daily scrape via Firecrawl + dlt; corridor assignment via nearest-centroid."
       },
@@ -2076,7 +2076,7 @@ s02 | Collier County Building Permits — monthly XLSX reports (data_lake.collie
       "display_format": "ratio",
       "source": {
         "url": "https://aca-prod.accela.com/LEECO/Cap/CapHome.aspx?module=Permitting&TabName=Permitting",
-        "fetched_at": "2026-07-30T06:52:18Z",
+        "fetched_at": "2026-08-06T07:24:23Z",
         "tier": 1,
         "citation": "Lee County Accela Citizen Access — building permit records, daily scrape via Firecrawl + dlt; corridor assignment via nearest-centroid."
       },
@@ -2087,7 +2087,7 @@ s02 | Collier County Building Permits — monthly XLSX reports (data_lake.collie
     },
     {
       "metric": "permits_collier_zip_34120_residential_z",
-      "value": -0.321,
+      "value": -0.413,
       "direction": "stable",
       "label": "Collier permits - ZIP 34120, residential - 90d vs trailing-365d z (n_current=0)",
       "variable_type": "intensive",
@@ -2095,7 +2095,7 @@ s02 | Collier County Building Permits — monthly XLSX reports (data_lake.collie
       "display_format": "ratio",
       "source": {
         "url": "https://www.colliercountyfl.gov/Business-Resources/Building-Permits-Construction/Meetings-Advisory-Boards-Reports/Monthly-Building-Permit-Reports",
-        "fetched_at": "2026-07-30T06:52:18Z",
+        "fetched_at": "2026-08-06T07:24:23Z",
         "tier": 1,
         "citation": "Collier County Building Permits — monthly XLSX, Firecrawl stealth proxy + Census batch geocode; corridor assignment via nearest-centroid."
       },
@@ -2106,7 +2106,7 @@ s02 | Collier County Building Permits — monthly XLSX reports (data_lake.collie
     },
     {
       "metric": "permits_collier_zip_34108_residential_z",
-      "value": -0.327,
+      "value": -0.389,
       "direction": "stable",
       "label": "Collier permits - ZIP 34108, residential - 90d vs trailing-365d z (n_current=0)",
       "variable_type": "intensive",
@@ -2114,7 +2114,7 @@ s02 | Collier County Building Permits — monthly XLSX reports (data_lake.collie
       "display_format": "ratio",
       "source": {
         "url": "https://www.colliercountyfl.gov/Business-Resources/Building-Permits-Construction/Meetings-Advisory-Boards-Reports/Monthly-Building-Permit-Reports",
-        "fetched_at": "2026-07-30T06:52:18Z",
+        "fetched_at": "2026-08-06T07:24:23Z",
         "tier": 1,
         "citation": "Collier County Building Permits — monthly XLSX, Firecrawl stealth proxy + Census batch geocode; corridor assignment via nearest-centroid."
       },
@@ -2125,7 +2125,7 @@ s02 | Collier County Building Permits — monthly XLSX reports (data_lake.collie
     },
     {
       "metric": "permits_collier_zip_34117_residential_z",
-      "value": -0.358,
+      "value": -0.424,
       "direction": "stable",
       "label": "Collier permits - ZIP 34117, residential - 90d vs trailing-365d z (n_current=0)",
       "variable_type": "intensive",
@@ -2133,7 +2133,7 @@ s02 | Collier County Building Permits — monthly XLSX reports (data_lake.collie
       "display_format": "ratio",
       "source": {
         "url": "https://www.colliercountyfl.gov/Business-Resources/Building-Permits-Construction/Meetings-Advisory-Boards-Reports/Monthly-Building-Permit-Reports",
-        "fetched_at": "2026-07-30T06:52:18Z",
+        "fetched_at": "2026-08-06T07:24:23Z",
         "tier": 1,
         "citation": "Collier County Building Permits — monthly XLSX, Firecrawl stealth proxy + Census batch geocode; corridor assignment via nearest-centroid."
       },
@@ -2144,7 +2144,7 @@ s02 | Collier County Building Permits — monthly XLSX reports (data_lake.collie
     },
     {
       "metric": "permits_collier_zip_34119_residential_z",
-      "value": -0.332,
+      "value": -0.4,
       "direction": "stable",
       "label": "Collier permits - ZIP 34119, residential - 90d vs trailing-365d z (n_current=0)",
       "variable_type": "intensive",
@@ -2152,7 +2152,7 @@ s02 | Collier County Building Permits — monthly XLSX reports (data_lake.collie
       "display_format": "ratio",
       "source": {
         "url": "https://www.colliercountyfl.gov/Business-Resources/Building-Permits-Construction/Meetings-Advisory-Boards-Reports/Monthly-Building-Permit-Reports",
-        "fetched_at": "2026-07-30T06:52:18Z",
+        "fetched_at": "2026-08-06T07:24:23Z",
         "tier": 1,
         "citation": "Collier County Building Permits — monthly XLSX, Firecrawl stealth proxy + Census batch geocode; corridor assignment via nearest-centroid."
       },
@@ -2163,7 +2163,7 @@ s02 | Collier County Building Permits — monthly XLSX reports (data_lake.collie
     },
     {
       "metric": "permits_collier_zip_34114_commercial_alteration_z",
-      "value": -0.289,
+      "value": -0.401,
       "direction": "stable",
       "label": "Collier permits - ZIP 34114, commercial_alteration - 90d vs trailing-365d z (n_current=0)",
       "variable_type": "intensive",
@@ -2171,7 +2171,7 @@ s02 | Collier County Building Permits — monthly XLSX reports (data_lake.collie
       "display_format": "ratio",
       "source": {
         "url": "https://www.colliercountyfl.gov/Business-Resources/Building-Permits-Construction/Meetings-Advisory-Boards-Reports/Monthly-Building-Permit-Reports",
-        "fetched_at": "2026-07-30T06:52:18Z",
+        "fetched_at": "2026-08-06T07:24:23Z",
         "tier": 1,
         "citation": "Collier County Building Permits — monthly XLSX, Firecrawl stealth proxy + Census batch geocode; corridor assignment via nearest-centroid."
       },
@@ -2190,7 +2190,7 @@ s02 | Collier County Building Permits — monthly XLSX reports (data_lake.collie
       "display_format": "ratio",
       "source": {
         "url": "https://www.colliercountyfl.gov/Business-Resources/Building-Permits-Construction/Meetings-Advisory-Boards-Reports/Monthly-Building-Permit-Reports",
-        "fetched_at": "2026-07-30T06:52:18Z",
+        "fetched_at": "2026-08-06T07:24:23Z",
         "tier": 1,
         "citation": "Collier County Building Permits — monthly XLSX, Firecrawl stealth proxy + Census batch geocode; corridor assignment via nearest-centroid."
       },
@@ -2201,7 +2201,7 @@ s02 | Collier County Building Permits — monthly XLSX reports (data_lake.collie
     },
     {
       "metric": "permits_collier_zip_34116_commercial_alteration_z",
-      "value": -0.289,
+      "value": -0.387,
       "direction": "stable",
       "label": "Collier permits - ZIP 34116, commercial_alteration - 90d vs trailing-365d z (n_current=0)",
       "variable_type": "intensive",
@@ -2209,7 +2209,7 @@ s02 | Collier County Building Permits — monthly XLSX reports (data_lake.collie
       "display_format": "ratio",
       "source": {
         "url": "https://www.colliercountyfl.gov/Business-Resources/Building-Permits-Construction/Meetings-Advisory-Boards-Reports/Monthly-Building-Permit-Reports",
-        "fetched_at": "2026-07-30T06:52:18Z",
+        "fetched_at": "2026-08-06T07:24:23Z",
         "tier": 1,
         "citation": "Collier County Building Permits — monthly XLSX, Firecrawl stealth proxy + Census batch geocode; corridor assignment via nearest-centroid."
       },
@@ -2220,7 +2220,7 @@ s02 | Collier County Building Permits — monthly XLSX reports (data_lake.collie
     },
     {
       "metric": "permits_collier_zip_34110_commercial_alteration_z",
-      "value": -0.357,
+      "value": -0.391,
       "direction": "stable",
       "label": "Collier permits - ZIP 34110, commercial_alteration - 90d vs trailing-365d z (n_current=0)",
       "variable_type": "intensive",
@@ -2228,7 +2228,7 @@ s02 | Collier County Building Permits — monthly XLSX reports (data_lake.collie
       "display_format": "ratio",
       "source": {
         "url": "https://www.colliercountyfl.gov/Business-Resources/Building-Permits-Construction/Meetings-Advisory-Boards-Reports/Monthly-Building-Permit-Reports",
-        "fetched_at": "2026-07-30T06:52:18Z",
+        "fetched_at": "2026-08-06T07:24:23Z",
         "tier": 1,
         "citation": "Collier County Building Permits — monthly XLSX, Firecrawl stealth proxy + Census batch geocode; corridor assignment via nearest-centroid."
       },
@@ -2239,7 +2239,7 @@ s02 | Collier County Building Permits — monthly XLSX reports (data_lake.collie
     },
     {
       "metric": "permits_collier_zip_34109_residential_z",
-      "value": -0.319,
+      "value": -0.392,
       "direction": "stable",
       "label": "Collier permits - ZIP 34109, residential - 90d vs trailing-365d z (n_current=0)",
       "variable_type": "intensive",
@@ -2247,7 +2247,7 @@ s02 | Collier County Building Permits — monthly XLSX reports (data_lake.collie
       "display_format": "ratio",
       "source": {
         "url": "https://www.colliercountyfl.gov/Business-Resources/Building-Permits-Construction/Meetings-Advisory-Boards-Reports/Monthly-Building-Permit-Reports",
-        "fetched_at": "2026-07-30T06:52:18Z",
+        "fetched_at": "2026-08-06T07:24:23Z",
         "tier": 1,
         "citation": "Collier County Building Permits — monthly XLSX, Firecrawl stealth proxy + Census batch geocode; corridor assignment via nearest-centroid."
       },
@@ -2258,7 +2258,7 @@ s02 | Collier County Building Permits — monthly XLSX reports (data_lake.collie
     },
     {
       "metric": "permits_collier_zip_34112_residential_z",
-      "value": -0.336,
+      "value": -0.426,
       "direction": "stable",
       "label": "Collier permits - ZIP 34112, residential - 90d vs trailing-365d z (n_current=0)",
       "variable_type": "intensive",
@@ -2266,7 +2266,7 @@ s02 | Collier County Building Permits — monthly XLSX reports (data_lake.collie
       "display_format": "ratio",
       "source": {
         "url": "https://www.colliercountyfl.gov/Business-Resources/Building-Permits-Construction/Meetings-Advisory-Boards-Reports/Monthly-Building-Permit-Reports",
-        "fetched_at": "2026-07-30T06:52:18Z",
+        "fetched_at": "2026-08-06T07:24:23Z",
         "tier": 1,
         "citation": "Collier County Building Permits — monthly XLSX, Firecrawl stealth proxy + Census batch geocode; corridor assignment via nearest-centroid."
       },
@@ -2277,7 +2277,7 @@ s02 | Collier County Building Permits — monthly XLSX reports (data_lake.collie
     },
     {
       "metric": "permits_collier_zip_34105_residential_z",
-      "value": -0.344,
+      "value": -0.393,
       "direction": "stable",
       "label": "Collier permits - ZIP 34105, residential - 90d vs trailing-365d z (n_current=0)",
       "variable_type": "intensive",
@@ -2285,7 +2285,7 @@ s02 | Collier County Building Permits — monthly XLSX reports (data_lake.collie
       "display_format": "ratio",
       "source": {
         "url": "https://www.colliercountyfl.gov/Business-Resources/Building-Permits-Construction/Meetings-Advisory-Boards-Reports/Monthly-Building-Permit-Reports",
-        "fetched_at": "2026-07-30T06:52:18Z",
+        "fetched_at": "2026-08-06T07:24:23Z",
         "tier": 1,
         "citation": "Collier County Building Permits — monthly XLSX, Firecrawl stealth proxy + Census batch geocode; corridor assignment via nearest-centroid."
       },
@@ -2296,7 +2296,7 @@ s02 | Collier County Building Permits — monthly XLSX reports (data_lake.collie
     },
     {
       "metric": "permits_collier_zip_34113_residential_z",
-      "value": -0.335,
+      "value": -0.412,
       "direction": "stable",
       "label": "Collier permits - ZIP 34113, residential - 90d vs trailing-365d z (n_current=0)",
       "variable_type": "intensive",
@@ -2304,7 +2304,7 @@ s02 | Collier County Building Permits — monthly XLSX reports (data_lake.collie
       "display_format": "ratio",
       "source": {
         "url": "https://www.colliercountyfl.gov/Business-Resources/Building-Permits-Construction/Meetings-Advisory-Boards-Reports/Monthly-Building-Permit-Reports",
-        "fetched_at": "2026-07-30T06:52:18Z",
+        "fetched_at": "2026-08-06T07:24:23Z",
         "tier": 1,
         "citation": "Collier County Building Permits — monthly XLSX, Firecrawl stealth proxy + Census batch geocode; corridor assignment via nearest-centroid."
       },
@@ -2315,7 +2315,7 @@ s02 | Collier County Building Permits — monthly XLSX reports (data_lake.collie
     },
     {
       "metric": "permits_collier_zip_34104_residential_z",
-      "value": -0.347,
+      "value": -0.413,
       "direction": "stable",
       "label": "Collier permits - ZIP 34104, residential - 90d vs trailing-365d z (n_current=0)",
       "variable_type": "intensive",
@@ -2323,7 +2323,7 @@ s02 | Collier County Building Permits — monthly XLSX reports (data_lake.collie
       "display_format": "ratio",
       "source": {
         "url": "https://www.colliercountyfl.gov/Business-Resources/Building-Permits-Construction/Meetings-Advisory-Boards-Reports/Monthly-Building-Permit-Reports",
-        "fetched_at": "2026-07-30T06:52:18Z",
+        "fetched_at": "2026-08-06T07:24:23Z",
         "tier": 1,
         "citation": "Collier County Building Permits — monthly XLSX, Firecrawl stealth proxy + Census batch geocode; corridor assignment via nearest-centroid."
       },
@@ -2334,7 +2334,7 @@ s02 | Collier County Building Permits — monthly XLSX reports (data_lake.collie
     },
     {
       "metric": "permits_collier_zip_34110_residential_z",
-      "value": -0.336,
+      "value": -0.413,
       "direction": "stable",
       "label": "Collier permits - ZIP 34110, residential - 90d vs trailing-365d z (n_current=0)",
       "variable_type": "intensive",
@@ -2342,7 +2342,7 @@ s02 | Collier County Building Permits — monthly XLSX reports (data_lake.collie
       "display_format": "ratio",
       "source": {
         "url": "https://www.colliercountyfl.gov/Business-Resources/Building-Permits-Construction/Meetings-Advisory-Boards-Reports/Monthly-Building-Permit-Reports",
-        "fetched_at": "2026-07-30T06:52:18Z",
+        "fetched_at": "2026-08-06T07:24:23Z",
         "tier": 1,
         "citation": "Collier County Building Permits — monthly XLSX, Firecrawl stealth proxy + Census batch geocode; corridor assignment via nearest-centroid."
       },
@@ -2353,7 +2353,7 @@ s02 | Collier County Building Permits — monthly XLSX reports (data_lake.collie
     },
     {
       "metric": "permits_collier_zip_34116_residential_z",
-      "value": -0.331,
+      "value": -0.4,
       "direction": "stable",
       "label": "Collier permits - ZIP 34116, residential - 90d vs trailing-365d z (n_current=0)",
       "variable_type": "intensive",
@@ -2361,7 +2361,7 @@ s02 | Collier County Building Permits — monthly XLSX reports (data_lake.collie
       "display_format": "ratio",
       "source": {
         "url": "https://www.colliercountyfl.gov/Business-Resources/Building-Permits-Construction/Meetings-Advisory-Boards-Reports/Monthly-Building-Permit-Reports",
-        "fetched_at": "2026-07-30T06:52:18Z",
+        "fetched_at": "2026-08-06T07:24:23Z",
         "tier": 1,
         "citation": "Collier County Building Permits — monthly XLSX, Firecrawl stealth proxy + Census batch geocode; corridor assignment via nearest-centroid."
       },
@@ -2372,7 +2372,7 @@ s02 | Collier County Building Permits — monthly XLSX reports (data_lake.collie
     },
     {
       "metric": "permits_collier_zip_34114_residential_z",
-      "value": -0.347,
+      "value": -0.409,
       "direction": "stable",
       "label": "Collier permits - ZIP 34114, residential - 90d vs trailing-365d z (n_current=0)",
       "variable_type": "intensive",
@@ -2380,7 +2380,7 @@ s02 | Collier County Building Permits — monthly XLSX reports (data_lake.collie
       "display_format": "ratio",
       "source": {
         "url": "https://www.colliercountyfl.gov/Business-Resources/Building-Permits-Construction/Meetings-Advisory-Boards-Reports/Monthly-Building-Permit-Reports",
-        "fetched_at": "2026-07-30T06:52:18Z",
+        "fetched_at": "2026-08-06T07:24:23Z",
         "tier": 1,
         "citation": "Collier County Building Permits — monthly XLSX, Firecrawl stealth proxy + Census batch geocode; corridor assignment via nearest-centroid."
       },
@@ -2391,7 +2391,7 @@ s02 | Collier County Building Permits — monthly XLSX reports (data_lake.collie
     },
     {
       "metric": "permits_collier_zip_34134_residential_z",
-      "value": -0.354,
+      "value": -0.404,
       "direction": "stable",
       "label": "Collier permits - ZIP 34134, residential - 90d vs trailing-365d z (n_current=0)",
       "variable_type": "intensive",
@@ -2399,7 +2399,7 @@ s02 | Collier County Building Permits — monthly XLSX reports (data_lake.collie
       "display_format": "ratio",
       "source": {
         "url": "https://www.colliercountyfl.gov/Business-Resources/Building-Permits-Construction/Meetings-Advisory-Boards-Reports/Monthly-Building-Permit-Reports",
-        "fetched_at": "2026-07-30T06:52:18Z",
+        "fetched_at": "2026-08-06T07:24:23Z",
         "tier": 1,
         "citation": "Collier County Building Permits — monthly XLSX, Firecrawl stealth proxy + Census batch geocode; corridor assignment via nearest-centroid."
       },
@@ -2410,7 +2410,7 @@ s02 | Collier County Building Permits — monthly XLSX reports (data_lake.collie
     },
     {
       "metric": "permits_collier_zip_34142_residential_z",
-      "value": -0.296,
+      "value": -0.373,
       "direction": "stable",
       "label": "Collier permits - ZIP 34142, residential - 90d vs trailing-365d z (n_current=0)",
       "variable_type": "intensive",
@@ -2418,7 +2418,7 @@ s02 | Collier County Building Permits — monthly XLSX reports (data_lake.collie
       "display_format": "ratio",
       "source": {
         "url": "https://www.colliercountyfl.gov/Business-Resources/Building-Permits-Construction/Meetings-Advisory-Boards-Reports/Monthly-Building-Permit-Reports",
-        "fetched_at": "2026-07-30T06:52:18Z",
+        "fetched_at": "2026-08-06T07:24:23Z",
         "tier": 1,
         "citation": "Collier County Building Permits — monthly XLSX, Firecrawl stealth proxy + Census batch geocode; corridor assignment via nearest-centroid."
       },
@@ -2429,7 +2429,7 @@ s02 | Collier County Building Permits — monthly XLSX reports (data_lake.collie
     },
     {
       "metric": "permits_collier_zip_34104_commercial_alteration_z",
-      "value": -0.337,
+      "value": -0.387,
       "direction": "stable",
       "label": "Collier permits - ZIP 34104, commercial_alteration - 90d vs trailing-365d z (n_current=0)",
       "variable_type": "intensive",
@@ -2437,7 +2437,7 @@ s02 | Collier County Building Permits — monthly XLSX reports (data_lake.collie
       "display_format": "ratio",
       "source": {
         "url": "https://www.colliercountyfl.gov/Business-Resources/Building-Permits-Construction/Meetings-Advisory-Boards-Reports/Monthly-Building-Permit-Reports",
-        "fetched_at": "2026-07-30T06:52:18Z",
+        "fetched_at": "2026-08-06T07:24:23Z",
         "tier": 1,
         "citation": "Collier County Building Permits — monthly XLSX, Firecrawl stealth proxy + Census batch geocode; corridor assignment via nearest-centroid."
       },
@@ -2448,7 +2448,7 @@ s02 | Collier County Building Permits — monthly XLSX reports (data_lake.collie
     },
     {
       "metric": "permits_collier_zip_34103_residential_z",
-      "value": -0.32,
+      "value": -0.371,
       "direction": "stable",
       "label": "Collier permits - ZIP 34103, residential - 90d vs trailing-365d z (n_current=0)",
       "variable_type": "intensive",
@@ -2456,7 +2456,7 @@ s02 | Collier County Building Permits — monthly XLSX reports (data_lake.collie
       "display_format": "ratio",
       "source": {
         "url": "https://www.colliercountyfl.gov/Business-Resources/Building-Permits-Construction/Meetings-Advisory-Boards-Reports/Monthly-Building-Permit-Reports",
-        "fetched_at": "2026-07-30T06:52:18Z",
+        "fetched_at": "2026-08-06T07:24:23Z",
         "tier": 1,
         "citation": "Collier County Building Permits — monthly XLSX, Firecrawl stealth proxy + Census batch geocode; corridor assignment via nearest-centroid."
       },
@@ -2467,7 +2467,7 @@ s02 | Collier County Building Permits — monthly XLSX reports (data_lake.collie
     },
     {
       "metric": "permits_collier_zip_34104_commercial_new_z",
-      "value": -0.426,
+      "value": -0.289,
       "direction": "stable",
       "label": "Collier permits - ZIP 34104, commercial_new - 90d vs trailing-365d z (n_current=0)",
       "variable_type": "intensive",
@@ -2475,7 +2475,7 @@ s02 | Collier County Building Permits — monthly XLSX reports (data_lake.collie
       "display_format": "ratio",
       "source": {
         "url": "https://www.colliercountyfl.gov/Business-Resources/Building-Permits-Construction/Meetings-Advisory-Boards-Reports/Monthly-Building-Permit-Reports",
-        "fetched_at": "2026-07-30T06:52:18Z",
+        "fetched_at": "2026-08-06T07:24:23Z",
         "tier": 1,
         "citation": "Collier County Building Permits — monthly XLSX, Firecrawl stealth proxy + Census batch geocode; corridor assignment via nearest-centroid."
       },
@@ -2486,7 +2486,7 @@ s02 | Collier County Building Permits — monthly XLSX reports (data_lake.collie
     },
     {
       "metric": "permits_collier_zip_34109_commercial_alteration_z",
-      "value": -0.289,
+      "value": -0.326,
       "direction": "stable",
       "label": "Collier permits - ZIP 34109, commercial_alteration - 90d vs trailing-365d z (n_current=0)",
       "variable_type": "intensive",
@@ -2494,7 +2494,7 @@ s02 | Collier County Building Permits — monthly XLSX reports (data_lake.collie
       "display_format": "ratio",
       "source": {
         "url": "https://www.colliercountyfl.gov/Business-Resources/Building-Permits-Construction/Meetings-Advisory-Boards-Reports/Monthly-Building-Permit-Reports",
-        "fetched_at": "2026-07-30T06:52:18Z",
+        "fetched_at": "2026-08-06T07:24:23Z",
         "tier": 1,
         "citation": "Collier County Building Permits — monthly XLSX, Firecrawl stealth proxy + Census batch geocode; corridor assignment via nearest-centroid."
       },
@@ -2505,7 +2505,7 @@ s02 | Collier County Building Permits — monthly XLSX reports (data_lake.collie
     },
     {
       "metric": "permits_collier_zip_34113_commercial_new_z",
-      "value": -0.401,
+      "value": -0.289,
       "direction": "stable",
       "label": "Collier permits - ZIP 34113, commercial_new - 90d vs trailing-365d z (n_current=0)",
       "variable_type": "intensive",
@@ -2513,7 +2513,7 @@ s02 | Collier County Building Permits — monthly XLSX reports (data_lake.collie
       "display_format": "ratio",
       "source": {
         "url": "https://www.colliercountyfl.gov/Business-Resources/Building-Permits-Construction/Meetings-Advisory-Boards-Reports/Monthly-Building-Permit-Reports",
-        "fetched_at": "2026-07-30T06:52:18Z",
+        "fetched_at": "2026-08-06T07:24:23Z",
         "tier": 1,
         "citation": "Collier County Building Permits — monthly XLSX, Firecrawl stealth proxy + Census batch geocode; corridor assignment via nearest-centroid."
       },
@@ -2532,7 +2532,7 @@ s02 | Collier County Building Permits — monthly XLSX reports (data_lake.collie
       "display_format": "ratio",
       "source": {
         "url": "https://www.colliercountyfl.gov/Business-Resources/Building-Permits-Construction/Meetings-Advisory-Boards-Reports/Monthly-Building-Permit-Reports",
-        "fetched_at": "2026-07-30T06:52:18Z",
+        "fetched_at": "2026-08-06T07:24:23Z",
         "tier": 1,
         "citation": "Collier County Building Permits — monthly XLSX, Firecrawl stealth proxy + Census batch geocode; corridor assignment via nearest-centroid."
       },
@@ -2543,7 +2543,7 @@ s02 | Collier County Building Permits — monthly XLSX reports (data_lake.collie
     },
     {
       "metric": "permits_collier_zip_34105_commercial_alteration_z",
-      "value": -0.289,
+      "value": -0.426,
       "direction": "stable",
       "label": "Collier permits - ZIP 34105, commercial_alteration - 90d vs trailing-365d z (n_current=0)",
       "variable_type": "intensive",
@@ -2551,7 +2551,7 @@ s02 | Collier County Building Permits — monthly XLSX reports (data_lake.collie
       "display_format": "ratio",
       "source": {
         "url": "https://www.colliercountyfl.gov/Business-Resources/Building-Permits-Construction/Meetings-Advisory-Boards-Reports/Monthly-Building-Permit-Reports",
-        "fetched_at": "2026-07-30T06:52:18Z",
+        "fetched_at": "2026-08-06T07:24:23Z",
         "tier": 1,
         "citation": "Collier County Building Permits — monthly XLSX, Firecrawl stealth proxy + Census batch geocode; corridor assignment via nearest-centroid."
       },
@@ -2570,7 +2570,7 @@ s02 | Collier County Building Permits — monthly XLSX reports (data_lake.collie
       "display_format": "ratio",
       "source": {
         "url": "https://www.colliercountyfl.gov/Business-Resources/Building-Permits-Construction/Meetings-Advisory-Boards-Reports/Monthly-Building-Permit-Reports",
-        "fetched_at": "2026-07-30T06:52:18Z",
+        "fetched_at": "2026-08-06T07:24:23Z",
         "tier": 1,
         "citation": "Collier County Building Permits — monthly XLSX, Firecrawl stealth proxy + Census batch geocode; corridor assignment via nearest-centroid."
       },
@@ -2581,7 +2581,7 @@ s02 | Collier County Building Permits — monthly XLSX reports (data_lake.collie
     },
     {
       "metric": "permits_collier_zip_34109_commercial_new_z",
-      "value": -0.289,
+      "value": -0.426,
       "direction": "stable",
       "label": "Collier permits - ZIP 34109, commercial_new - 90d vs trailing-365d z (n_current=0)",
       "variable_type": "intensive",
@@ -2589,7 +2589,7 @@ s02 | Collier County Building Permits — monthly XLSX reports (data_lake.collie
       "display_format": "ratio",
       "source": {
         "url": "https://www.colliercountyfl.gov/Business-Resources/Building-Permits-Construction/Meetings-Advisory-Boards-Reports/Monthly-Building-Permit-Reports",
-        "fetched_at": "2026-07-30T06:52:18Z",
+        "fetched_at": "2026-08-06T07:24:23Z",
         "tier": 1,
         "citation": "Collier County Building Permits — monthly XLSX, Firecrawl stealth proxy + Census batch geocode; corridor assignment via nearest-centroid."
       },
@@ -2600,7 +2600,7 @@ s02 | Collier County Building Permits — monthly XLSX reports (data_lake.collie
     },
     {
       "metric": "permits_collier_zip_34117_commercial_new_z",
-      "value": -0.289,
+      "value": -0.401,
       "direction": "stable",
       "label": "Collier permits - ZIP 34117, commercial_new - 90d vs trailing-365d z (n_current=0)",
       "variable_type": "intensive",
@@ -2608,7 +2608,7 @@ s02 | Collier County Building Permits — monthly XLSX reports (data_lake.collie
       "display_format": "ratio",
       "source": {
         "url": "https://www.colliercountyfl.gov/Business-Resources/Building-Permits-Construction/Meetings-Advisory-Boards-Reports/Monthly-Building-Permit-Reports",
-        "fetched_at": "2026-07-30T06:52:18Z",
+        "fetched_at": "2026-08-06T07:24:23Z",
         "tier": 1,
         "citation": "Collier County Building Permits — monthly XLSX, Firecrawl stealth proxy + Census batch geocode; corridor assignment via nearest-centroid."
       },
@@ -2619,7 +2619,7 @@ s02 | Collier County Building Permits — monthly XLSX reports (data_lake.collie
     },
     {
       "metric": "permits_collier_zip_34112_commercial_alteration_z",
-      "value": -0.289,
+      "value": -0.417,
       "direction": "stable",
       "label": "Collier permits - ZIP 34112, commercial_alteration - 90d vs trailing-365d z (n_current=0)",
       "variable_type": "intensive",
@@ -2627,7 +2627,7 @@ s02 | Collier County Building Permits — monthly XLSX reports (data_lake.collie
       "display_format": "ratio",
       "source": {
         "url": "https://www.colliercountyfl.gov/Business-Resources/Building-Permits-Construction/Meetings-Advisory-Boards-Reports/Monthly-Building-Permit-Reports",
-        "fetched_at": "2026-07-30T06:52:18Z",
+        "fetched_at": "2026-08-06T07:24:23Z",
         "tier": 1,
         "citation": "Collier County Building Permits — monthly XLSX, Firecrawl stealth proxy + Census batch geocode; corridor assignment via nearest-centroid."
       },
@@ -2646,7 +2646,7 @@ s02 | Collier County Building Permits — monthly XLSX reports (data_lake.collie
       "display_format": "ratio",
       "source": {
         "url": "https://www.colliercountyfl.gov/Business-Resources/Building-Permits-Construction/Meetings-Advisory-Boards-Reports/Monthly-Building-Permit-Reports",
-        "fetched_at": "2026-07-30T06:52:18Z",
+        "fetched_at": "2026-08-06T07:24:23Z",
         "tier": 1,
         "citation": "Collier County Building Permits — monthly XLSX, Firecrawl stealth proxy + Census batch geocode; corridor assignment via nearest-centroid."
       },
@@ -2657,7 +2657,7 @@ s02 | Collier County Building Permits — monthly XLSX reports (data_lake.collie
     },
     {
       "metric": "permits_collier_zip_34114_commercial_new_z",
-      "value": -0.289,
+      "value": -0.426,
       "direction": "stable",
       "label": "Collier permits - ZIP 34114, commercial_new - 90d vs trailing-365d z (n_current=0)",
       "variable_type": "intensive",
@@ -2665,7 +2665,7 @@ s02 | Collier County Building Permits — monthly XLSX reports (data_lake.collie
       "display_format": "ratio",
       "source": {
         "url": "https://www.colliercountyfl.gov/Business-Resources/Building-Permits-Construction/Meetings-Advisory-Boards-Reports/Monthly-Building-Permit-Reports",
-        "fetched_at": "2026-07-30T06:52:18Z",
+        "fetched_at": "2026-08-06T07:24:23Z",
         "tier": 1,
         "citation": "Collier County Building Permits — monthly XLSX, Firecrawl stealth proxy + Census batch geocode; corridor assignment via nearest-centroid."
       },
@@ -2676,7 +2676,7 @@ s02 | Collier County Building Permits — monthly XLSX reports (data_lake.collie
     },
     {
       "metric": "permits_collier_zip_34142_commercial_alteration_z",
-      "value": -0.33,
+      "value": -0.375,
       "direction": "stable",
       "label": "Collier permits - ZIP 34142, commercial_alteration - 90d vs trailing-365d z (n_current=0)",
       "variable_type": "intensive",
@@ -2684,7 +2684,7 @@ s02 | Collier County Building Permits — monthly XLSX reports (data_lake.collie
       "display_format": "ratio",
       "source": {
         "url": "https://www.colliercountyfl.gov/Business-Resources/Building-Permits-Construction/Meetings-Advisory-Boards-Reports/Monthly-Building-Permit-Reports",
-        "fetched_at": "2026-07-30T06:52:18Z",
+        "fetched_at": "2026-08-06T07:24:23Z",
         "tier": 1,
         "citation": "Collier County Building Permits — monthly XLSX, Firecrawl stealth proxy + Census batch geocode; corridor assignment via nearest-centroid."
       },
@@ -2703,7 +2703,7 @@ s02 | Collier County Building Permits — monthly XLSX reports (data_lake.collie
       "display_format": "ratio",
       "source": {
         "url": "https://www.colliercountyfl.gov/Business-Resources/Building-Permits-Construction/Meetings-Advisory-Boards-Reports/Monthly-Building-Permit-Reports",
-        "fetched_at": "2026-07-30T06:52:18Z",
+        "fetched_at": "2026-08-06T07:24:23Z",
         "tier": 1,
         "citation": "Collier County Building Permits — monthly XLSX, Firecrawl stealth proxy + Census batch geocode; corridor assignment via nearest-centroid."
       },
@@ -2722,7 +2722,7 @@ s02 | Collier County Building Permits — monthly XLSX reports (data_lake.collie
       "display_format": "ratio",
       "source": {
         "url": "https://www.colliercountyfl.gov/Business-Resources/Building-Permits-Construction/Meetings-Advisory-Boards-Reports/Monthly-Building-Permit-Reports",
-        "fetched_at": "2026-07-30T06:52:18Z",
+        "fetched_at": "2026-08-06T07:24:23Z",
         "tier": 1,
         "citation": "Collier County Building Permits — monthly XLSX, Firecrawl stealth proxy + Census batch geocode; corridor assignment via nearest-centroid."
       },
@@ -2741,7 +2741,7 @@ s02 | Collier County Building Permits — monthly XLSX reports (data_lake.collie
       "display_format": "ratio",
       "source": {
         "url": "https://www.colliercountyfl.gov/Business-Resources/Building-Permits-Construction/Meetings-Advisory-Boards-Reports/Monthly-Building-Permit-Reports",
-        "fetched_at": "2026-07-30T06:52:18Z",
+        "fetched_at": "2026-08-06T07:24:23Z",
         "tier": 1,
         "citation": "Collier County Building Permits — monthly XLSX, Firecrawl stealth proxy + Census batch geocode; corridor assignment via nearest-centroid."
       },
@@ -2760,7 +2760,7 @@ s02 | Collier County Building Permits — monthly XLSX reports (data_lake.collie
       "display_format": "ratio",
       "source": {
         "url": "https://www.colliercountyfl.gov/Business-Resources/Building-Permits-Construction/Meetings-Advisory-Boards-Reports/Monthly-Building-Permit-Reports",
-        "fetched_at": "2026-07-30T06:52:18Z",
+        "fetched_at": "2026-08-06T07:24:23Z",
         "tier": 1,
         "citation": "Collier County Building Permits — monthly XLSX, Firecrawl stealth proxy + Census batch geocode; corridor assignment via nearest-centroid."
       },
@@ -2771,7 +2771,7 @@ s02 | Collier County Building Permits — monthly XLSX reports (data_lake.collie
     },
     {
       "metric": "permits_collier_zip_34116_other_z",
-      "value": -0.289,
+      "value": -0.401,
       "direction": "stable",
       "label": "Collier permits - ZIP 34116, other - 90d vs trailing-365d z (n_current=0)",
       "variable_type": "intensive",
@@ -2779,7 +2779,7 @@ s02 | Collier County Building Permits — monthly XLSX reports (data_lake.collie
       "display_format": "ratio",
       "source": {
         "url": "https://www.colliercountyfl.gov/Business-Resources/Building-Permits-Construction/Meetings-Advisory-Boards-Reports/Monthly-Building-Permit-Reports",
-        "fetched_at": "2026-07-30T06:52:18Z",
+        "fetched_at": "2026-08-06T07:24:23Z",
         "tier": 1,
         "citation": "Collier County Building Permits — monthly XLSX, Firecrawl stealth proxy + Census batch geocode; corridor assignment via nearest-centroid."
       },
@@ -2790,7 +2790,7 @@ s02 | Collier County Building Permits — monthly XLSX reports (data_lake.collie
     },
     {
       "metric": "permits_collier_zip_34120_demolition_z",
-      "value": -0.289,
+      "value": -0.375,
       "direction": "stable",
       "label": "Collier permits - ZIP 34120, demolition - 90d vs trailing-365d z (n_current=0)",
       "variable_type": "intensive",
@@ -2798,7 +2798,7 @@ s02 | Collier County Building Permits — monthly XLSX reports (data_lake.collie
       "display_format": "ratio",
       "source": {
         "url": "https://www.colliercountyfl.gov/Business-Resources/Building-Permits-Construction/Meetings-Advisory-Boards-Reports/Monthly-Building-Permit-Reports",
-        "fetched_at": "2026-07-30T06:52:18Z",
+        "fetched_at": "2026-08-06T07:24:23Z",
         "tier": 1,
         "citation": "Collier County Building Permits — monthly XLSX, Firecrawl stealth proxy + Census batch geocode; corridor assignment via nearest-centroid."
       },
@@ -2809,7 +2809,7 @@ s02 | Collier County Building Permits — monthly XLSX reports (data_lake.collie
     },
     {
       "metric": "permits_collier_zip_34116_demolition_z",
-      "value": -0.289,
+      "value": -0.357,
       "direction": "stable",
       "label": "Collier permits - ZIP 34116, demolition - 90d vs trailing-365d z (n_current=0)",
       "variable_type": "intensive",
@@ -2817,7 +2817,7 @@ s02 | Collier County Building Permits — monthly XLSX reports (data_lake.collie
       "display_format": "ratio",
       "source": {
         "url": "https://www.colliercountyfl.gov/Business-Resources/Building-Permits-Construction/Meetings-Advisory-Boards-Reports/Monthly-Building-Permit-Reports",
-        "fetched_at": "2026-07-30T06:52:18Z",
+        "fetched_at": "2026-08-06T07:24:23Z",
         "tier": 1,
         "citation": "Collier County Building Permits — monthly XLSX, Firecrawl stealth proxy + Census batch geocode; corridor assignment via nearest-centroid."
       },
@@ -2836,7 +2836,7 @@ s02 | Collier County Building Permits — monthly XLSX reports (data_lake.collie
       "display_format": "ratio",
       "source": {
         "url": "https://www.colliercountyfl.gov/Business-Resources/Building-Permits-Construction/Meetings-Advisory-Boards-Reports/Monthly-Building-Permit-Reports",
-        "fetched_at": "2026-07-30T06:52:18Z",
+        "fetched_at": "2026-08-06T07:24:23Z",
         "tier": 1,
         "citation": "Collier County Building Permits — monthly XLSX, Firecrawl stealth proxy + Census batch geocode; corridor assignment via nearest-centroid."
       },
@@ -2855,7 +2855,7 @@ s02 | Collier County Building Permits — monthly XLSX reports (data_lake.collie
       "display_format": "ratio",
       "source": {
         "url": "https://www.colliercountyfl.gov/Business-Resources/Building-Permits-Construction/Meetings-Advisory-Boards-Reports/Monthly-Building-Permit-Reports",
-        "fetched_at": "2026-07-30T06:52:18Z",
+        "fetched_at": "2026-08-06T07:24:23Z",
         "tier": 1,
         "citation": "Collier County Building Permits — monthly XLSX, Firecrawl stealth proxy + Census batch geocode; corridor assignment via nearest-centroid."
       },
@@ -2866,7 +2866,7 @@ s02 | Collier County Building Permits — monthly XLSX reports (data_lake.collie
     },
     {
       "metric": "permits_collier_zip_34104_demolition_z",
-      "value": -0.289,
+      "value": -0.401,
       "direction": "stable",
       "label": "Collier permits - ZIP 34104, demolition - 90d vs trailing-365d z (n_current=0)",
       "variable_type": "intensive",
@@ -2874,7 +2874,7 @@ s02 | Collier County Building Permits — monthly XLSX reports (data_lake.collie
       "display_format": "ratio",
       "source": {
         "url": "https://www.colliercountyfl.gov/Business-Resources/Building-Permits-Construction/Meetings-Advisory-Boards-Reports/Monthly-Building-Permit-Reports",
-        "fetched_at": "2026-07-30T06:52:18Z",
+        "fetched_at": "2026-08-06T07:24:23Z",
         "tier": 1,
         "citation": "Collier County Building Permits — monthly XLSX, Firecrawl stealth proxy + Census batch geocode; corridor assignment via nearest-centroid."
       },
@@ -2893,7 +2893,7 @@ s02 | Collier County Building Permits — monthly XLSX reports (data_lake.collie
       "display_format": "ratio",
       "source": {
         "url": "https://www.colliercountyfl.gov/Business-Resources/Building-Permits-Construction/Meetings-Advisory-Boards-Reports/Monthly-Building-Permit-Reports",
-        "fetched_at": "2026-07-30T06:52:18Z",
+        "fetched_at": "2026-08-06T07:24:23Z",
         "tier": 1,
         "citation": "Collier County Building Permits — monthly XLSX, Firecrawl stealth proxy + Census batch geocode; corridor assignment via nearest-centroid."
       },
@@ -2912,7 +2912,7 @@ s02 | Collier County Building Permits — monthly XLSX reports (data_lake.collie
       "display_format": "ratio",
       "source": {
         "url": "https://www.colliercountyfl.gov/Business-Resources/Building-Permits-Construction/Meetings-Advisory-Boards-Reports/Monthly-Building-Permit-Reports",
-        "fetched_at": "2026-07-30T06:52:18Z",
+        "fetched_at": "2026-08-06T07:24:23Z",
         "tier": 1,
         "citation": "Collier County Building Permits — monthly XLSX, Firecrawl stealth proxy + Census batch geocode; corridor assignment via nearest-centroid."
       },
@@ -2931,7 +2931,7 @@ s02 | Collier County Building Permits — monthly XLSX reports (data_lake.collie
       "display_format": "ratio",
       "source": {
         "url": "https://www.colliercountyfl.gov/Business-Resources/Building-Permits-Construction/Meetings-Advisory-Boards-Reports/Monthly-Building-Permit-Reports",
-        "fetched_at": "2026-07-30T06:52:18Z",
+        "fetched_at": "2026-08-06T07:24:23Z",
         "tier": 1,
         "citation": "Collier County Building Permits — monthly XLSX, Firecrawl stealth proxy + Census batch geocode; corridor assignment via nearest-centroid."
       },
@@ -2950,7 +2950,7 @@ s02 | Collier County Building Permits — monthly XLSX reports (data_lake.collie
       "display_format": "ratio",
       "source": {
         "url": "https://www.colliercountyfl.gov/Business-Resources/Building-Permits-Construction/Meetings-Advisory-Boards-Reports/Monthly-Building-Permit-Reports",
-        "fetched_at": "2026-07-30T06:52:18Z",
+        "fetched_at": "2026-08-06T07:24:23Z",
         "tier": 1,
         "citation": "Collier County Building Permits — monthly XLSX, Firecrawl stealth proxy + Census batch geocode; corridor assignment via nearest-centroid."
       },
@@ -2969,7 +2969,7 @@ s02 | Collier County Building Permits — monthly XLSX reports (data_lake.collie
       "display_format": "ratio",
       "source": {
         "url": "https://www.colliercountyfl.gov/Business-Resources/Building-Permits-Construction/Meetings-Advisory-Boards-Reports/Monthly-Building-Permit-Reports",
-        "fetched_at": "2026-07-30T06:52:18Z",
+        "fetched_at": "2026-08-06T07:24:23Z",
         "tier": 1,
         "citation": "Collier County Building Permits — monthly XLSX, Firecrawl stealth proxy + Census batch geocode; corridor assignment via nearest-centroid."
       },
@@ -2988,7 +2988,7 @@ s02 | Collier County Building Permits — monthly XLSX reports (data_lake.collie
       "display_format": "ratio",
       "source": {
         "url": "https://www.colliercountyfl.gov/Business-Resources/Building-Permits-Construction/Meetings-Advisory-Boards-Reports/Monthly-Building-Permit-Reports",
-        "fetched_at": "2026-07-30T06:52:18Z",
+        "fetched_at": "2026-08-06T07:24:23Z",
         "tier": 1,
         "citation": "Collier County Building Permits — monthly XLSX, Firecrawl stealth proxy + Census batch geocode; corridor assignment via nearest-centroid."
       },
@@ -2999,7 +2999,7 @@ s02 | Collier County Building Permits — monthly XLSX reports (data_lake.collie
     },
     {
       "metric": "permits_collier_zip_34119_commercial_alteration_z",
-      "value": -0.289,
+      "value": -0.426,
       "direction": "stable",
       "label": "Collier permits - ZIP 34119, commercial_alteration - 90d vs trailing-365d z (n_current=0)",
       "variable_type": "intensive",
@@ -3007,7 +3007,7 @@ s02 | Collier County Building Permits — monthly XLSX reports (data_lake.collie
       "display_format": "ratio",
       "source": {
         "url": "https://www.colliercountyfl.gov/Business-Resources/Building-Permits-Construction/Meetings-Advisory-Boards-Reports/Monthly-Building-Permit-Reports",
-        "fetched_at": "2026-07-30T06:52:18Z",
+        "fetched_at": "2026-08-06T07:24:23Z",
         "tier": 1,
         "citation": "Collier County Building Permits — monthly XLSX, Firecrawl stealth proxy + Census batch geocode; corridor assignment via nearest-centroid."
       },
@@ -3018,7 +3018,7 @@ s02 | Collier County Building Permits — monthly XLSX reports (data_lake.collie
     },
     {
       "metric": "permits_collier_zip_34139_residential_z",
-      "value": -0.375,
+      "value": -0.289,
       "direction": "stable",
       "label": "Collier permits - ZIP 34139, residential - 90d vs trailing-365d z (n_current=0)",
       "variable_type": "intensive",
@@ -3026,7 +3026,7 @@ s02 | Collier County Building Permits — monthly XLSX reports (data_lake.collie
       "display_format": "ratio",
       "source": {
         "url": "https://www.colliercountyfl.gov/Business-Resources/Building-Permits-Construction/Meetings-Advisory-Boards-Reports/Monthly-Building-Permit-Reports",
-        "fetched_at": "2026-07-30T06:52:18Z",
+        "fetched_at": "2026-08-06T07:24:23Z",
         "tier": 1,
         "citation": "Collier County Building Permits — monthly XLSX, Firecrawl stealth proxy + Census batch geocode; corridor assignment via nearest-centroid."
       },
@@ -3045,7 +3045,7 @@ s02 | Collier County Building Permits — monthly XLSX reports (data_lake.collie
       "display_format": "ratio",
       "source": {
         "url": "https://www.colliercountyfl.gov/Business-Resources/Building-Permits-Construction/Meetings-Advisory-Boards-Reports/Monthly-Building-Permit-Reports",
-        "fetched_at": "2026-07-30T06:52:18Z",
+        "fetched_at": "2026-08-06T07:24:23Z",
         "tier": 1,
         "citation": "Collier County Building Permits — monthly XLSX, Firecrawl stealth proxy + Census batch geocode; corridor assignment via nearest-centroid."
       },
@@ -3064,7 +3064,7 @@ s02 | Collier County Building Permits — monthly XLSX reports (data_lake.collie
       "display_format": "ratio",
       "source": {
         "url": "https://www.colliercountyfl.gov/Business-Resources/Building-Permits-Construction/Meetings-Advisory-Boards-Reports/Monthly-Building-Permit-Reports",
-        "fetched_at": "2026-07-30T06:52:18Z",
+        "fetched_at": "2026-08-06T07:24:23Z",
         "tier": 1,
         "citation": "Collier County Building Permits — monthly XLSX, Firecrawl stealth proxy + Census batch geocode; corridor assignment via nearest-centroid."
       },
@@ -3083,7 +3083,7 @@ s02 | Collier County Building Permits — monthly XLSX reports (data_lake.collie
       "display_format": "ratio",
       "source": {
         "url": "https://www.colliercountyfl.gov/Business-Resources/Building-Permits-Construction/Meetings-Advisory-Boards-Reports/Monthly-Building-Permit-Reports",
-        "fetched_at": "2026-07-30T06:52:18Z",
+        "fetched_at": "2026-08-06T07:24:23Z",
         "tier": 1,
         "citation": "Collier County Building Permits — monthly XLSX, Firecrawl stealth proxy + Census batch geocode; corridor assignment via nearest-centroid."
       },
@@ -3094,7 +3094,7 @@ s02 | Collier County Building Permits — monthly XLSX reports (data_lake.collie
     },
     {
       "metric": "permits_collier_zip_34113_commercial_alteration_z",
-      "value": -0.289,
+      "value": -0.426,
       "direction": "stable",
       "label": "Collier permits - ZIP 34113, commercial_alteration - 90d vs trailing-365d z (n_current=0)",
       "variable_type": "intensive",
@@ -3102,7 +3102,7 @@ s02 | Collier County Building Permits — monthly XLSX reports (data_lake.collie
       "display_format": "ratio",
       "source": {
         "url": "https://www.colliercountyfl.gov/Business-Resources/Building-Permits-Construction/Meetings-Advisory-Boards-Reports/Monthly-Building-Permit-Reports",
-        "fetched_at": "2026-07-30T06:52:18Z",
+        "fetched_at": "2026-08-06T07:24:23Z",
         "tier": 1,
         "citation": "Collier County Building Permits — monthly XLSX, Firecrawl stealth proxy + Census batch geocode; corridor assignment via nearest-centroid."
       },
@@ -3121,7 +3121,7 @@ s02 | Collier County Building Permits — monthly XLSX reports (data_lake.collie
       "display_format": "ratio",
       "source": {
         "url": "https://www.colliercountyfl.gov/Business-Resources/Building-Permits-Construction/Meetings-Advisory-Boards-Reports/Monthly-Building-Permit-Reports",
-        "fetched_at": "2026-07-30T06:52:18Z",
+        "fetched_at": "2026-08-06T07:24:23Z",
         "tier": 1,
         "citation": "Collier County Building Permits — monthly XLSX, Firecrawl stealth proxy + Census batch geocode; corridor assignment via nearest-centroid."
       },
@@ -3140,7 +3140,7 @@ s02 | Collier County Building Permits — monthly XLSX reports (data_lake.collie
       "display_format": "ratio",
       "source": {
         "url": "https://www.colliercountyfl.gov/Business-Resources/Building-Permits-Construction/Meetings-Advisory-Boards-Reports/Monthly-Building-Permit-Reports",
-        "fetched_at": "2026-07-30T06:52:18Z",
+        "fetched_at": "2026-08-06T07:24:23Z",
         "tier": 1,
         "citation": "Collier County Building Permits — monthly XLSX, Firecrawl stealth proxy + Census batch geocode; corridor assignment via nearest-centroid."
       },
@@ -3159,7 +3159,7 @@ s02 | Collier County Building Permits — monthly XLSX reports (data_lake.collie
       "display_format": "ratio",
       "source": {
         "url": "https://www.colliercountyfl.gov/Business-Resources/Building-Permits-Construction/Meetings-Advisory-Boards-Reports/Monthly-Building-Permit-Reports",
-        "fetched_at": "2026-07-30T06:52:18Z",
+        "fetched_at": "2026-08-06T07:24:23Z",
         "tier": 1,
         "citation": "Collier County Building Permits — monthly XLSX, Firecrawl stealth proxy + Census batch geocode; corridor assignment via nearest-centroid."
       },
@@ -3178,7 +3178,7 @@ s02 | Collier County Building Permits — monthly XLSX reports (data_lake.collie
       "display_format": "ratio",
       "source": {
         "url": "https://www.colliercountyfl.gov/Business-Resources/Building-Permits-Construction/Meetings-Advisory-Boards-Reports/Monthly-Building-Permit-Reports",
-        "fetched_at": "2026-07-30T06:52:18Z",
+        "fetched_at": "2026-08-06T07:24:23Z",
         "tier": 1,
         "citation": "Collier County Building Permits — monthly XLSX, Firecrawl stealth proxy + Census batch geocode; corridor assignment via nearest-centroid."
       },
@@ -3197,7 +3197,7 @@ s02 | Collier County Building Permits — monthly XLSX reports (data_lake.collie
       "display_format": "ratio",
       "source": {
         "url": "https://www.colliercountyfl.gov/Business-Resources/Building-Permits-Construction/Meetings-Advisory-Boards-Reports/Monthly-Building-Permit-Reports",
-        "fetched_at": "2026-07-30T06:52:18Z",
+        "fetched_at": "2026-08-06T07:24:23Z",
         "tier": 1,
         "citation": "Collier County Building Permits — monthly XLSX, Firecrawl stealth proxy + Census batch geocode; corridor assignment via nearest-centroid."
       },
@@ -3208,7 +3208,7 @@ s02 | Collier County Building Permits — monthly XLSX reports (data_lake.collie
     },
     {
       "metric": "permits_collier_zip_34103_commercial_alteration_z",
-      "value": -0.289,
+      "value": -0.426,
       "direction": "stable",
       "label": "Collier permits - ZIP 34103, commercial_alteration - 90d vs trailing-365d z (n_current=0)",
       "variable_type": "intensive",
@@ -3216,7 +3216,7 @@ s02 | Collier County Building Permits — monthly XLSX reports (data_lake.collie
       "display_format": "ratio",
       "source": {
         "url": "https://www.colliercountyfl.gov/Business-Resources/Building-Permits-Construction/Meetings-Advisory-Boards-Reports/Monthly-Building-Permit-Reports",
-        "fetched_at": "2026-07-30T06:52:18Z",
+        "fetched_at": "2026-08-06T07:24:23Z",
         "tier": 1,
         "citation": "Collier County Building Permits — monthly XLSX, Firecrawl stealth proxy + Census batch geocode; corridor assignment via nearest-centroid."
       },
@@ -3235,7 +3235,7 @@ s02 | Collier County Building Permits — monthly XLSX reports (data_lake.collie
       "display_format": "ratio",
       "source": {
         "url": "https://www.colliercountyfl.gov/Business-Resources/Building-Permits-Construction/Meetings-Advisory-Boards-Reports/Monthly-Building-Permit-Reports",
-        "fetched_at": "2026-07-30T06:52:18Z",
+        "fetched_at": "2026-08-06T07:24:23Z",
         "tier": 1,
         "citation": "Collier County Building Permits — monthly XLSX, Firecrawl stealth proxy + Census batch geocode; corridor assignment via nearest-centroid."
       },
@@ -3254,7 +3254,7 @@ s02 | Collier County Building Permits — monthly XLSX reports (data_lake.collie
       "display_format": "ratio",
       "source": {
         "url": "https://www.colliercountyfl.gov/Business-Resources/Building-Permits-Construction/Meetings-Advisory-Boards-Reports/Monthly-Building-Permit-Reports",
-        "fetched_at": "2026-07-30T06:52:18Z",
+        "fetched_at": "2026-08-06T07:24:23Z",
         "tier": 1,
         "citation": "Collier County Building Permits — monthly XLSX, Firecrawl stealth proxy + Census batch geocode; corridor assignment via nearest-centroid."
       },
@@ -3273,7 +3273,7 @@ s02 | Collier County Building Permits — monthly XLSX reports (data_lake.collie
       "display_format": "ratio",
       "source": {
         "url": "https://www.colliercountyfl.gov/Business-Resources/Building-Permits-Construction/Meetings-Advisory-Boards-Reports/Monthly-Building-Permit-Reports",
-        "fetched_at": "2026-07-30T06:52:18Z",
+        "fetched_at": "2026-08-06T07:24:23Z",
         "tier": 1,
         "citation": "Collier County Building Permits — monthly XLSX, Firecrawl stealth proxy + Census batch geocode; corridor assignment via nearest-centroid."
       },
@@ -4027,7 +4027,7 @@ s02 | Collier County Building Permits — monthly XLSX reports (data_lake.collie
       ],
       "source": {
         "url": "https://aca-prod.accela.com/LEECO/Cap/CapHome.aspx?module=Permitting&TabName=Permitting",
-        "fetched_at": "2026-07-30T06:52:18Z",
+        "fetched_at": "2026-08-06T07:24:23Z",
         "tier": 1,
         "citation": "Lee County Accela Citizen Access — building permit records, daily scrape via Firecrawl + dlt; corridor assignment via nearest-centroid."
       },
@@ -4035,10 +4035,10 @@ s02 | Collier County Building Permits — monthly XLSX reports (data_lake.collie
     }
   ],
   "caveats": [
-    "Lee permit history only reaches back 155d (< 365d) - the historical baseline is incomplete; the rate-of-change reads above are indicative, not robust.",
+    "Lee permit history only reaches back 162d (< 365d) - the historical baseline is incomplete; the rate-of-change reads above are indicative, not robust.",
     "42 of 42 (corridor x bucket) cells have n < 10 in the current 90d window — z-scores on those cells are computed against small samples.",
     "100% of corridors have no cell with n >= 10 in the current window - county direction reads as neutral by construction.",
-    "Most recent Naples permit issued 2026-04-30; monthly XLSX has not refreshed for 91 days (cadence 30d). Collier signal in this build is stale.",
+    "Most recent Naples permit issued 2026-04-30; monthly XLSX has not refreshed for 98 days (cadence 30d). Collier signal in this build is stale.",
     "Collier z-scores are based on 1 month of data; signal stabilizes after 6+ months. Treat Collier values as directional only."
   ],
   "contradicts": [],
@@ -4051,7 +4051,7 @@ s02 | Collier County Building Permits — monthly XLSX reports (data_lake.collie
   "relevance": {
     "decay_curve": "weeks",
     "half_life_hours": 720,
-    "computed_at": "2026-07-30T06:52:19Z"
+    "computed_at": "2026-08-06T07:24:24Z"
   },
   "exogenous_signals": []
 }
@@ -4060,5 +4060,5 @@ s02 | Collier County Building Permits — monthly XLSX reports (data_lake.collie
 - permits-swfl: track Lee + Collier commercial permit velocity as a leading CRE demand signal across SWFL.
 
 --- RECENT NOTES ---
-- 2026-07-30: pack refined by the Refinery — 1 fact(s) from 2 source(s).
+- 2026-08-06: pack refined by the Refinery — 1 fact(s) from 2 source(s).
 ```
