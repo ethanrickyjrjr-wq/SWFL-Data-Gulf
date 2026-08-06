@@ -35,6 +35,8 @@ export const SHOULD_BE_DARK = {
 export const WATCH_EXEMPT = {
   "tripwire-hourly.yml":
     "Self-reporting alarm: it opens its own `TRIPWIRE RED` issue and then `exit 1`s by design (tripwire-hourly.yml:47-62). Watching it would open a duplicate cron-incident issue + check every hour it is RED.",
+  "doc-ratchet-daily.yml":
+    "RED IS THE PRODUCT, not a cron failure. `doc-ratchet.mjs check` exits 1 by design when the orphan count has NOT fallen — stagnation is the failure state (scripts/CLAUDE.md; doc-ratchet-daily.yml:9-12). Same shape as tripwire-hourly, s/hour/day/: watching it appends a `docs/cron-rebuild-failures.md` row + sticky-issue comment EVERY DAY we have not deleted an orphan, flooding the one ledger that is supposed to mean `a scheduled job broke`. Exempting here also drops it from the healer (healWatchNames derives from loggerWatchNames), which matters more: the check is DETERMINISTIC over the working tree, so an auto-re-run 30s later returns the identical red — the exact waste CI/factuality-gate are heal-excluded for. Its red stays visible on the Actions board + its own `::error::` annotation. NOT self-reporting like tripwire — that gap is tracked in `doc_ratchet_red_is_board_only`.",
 };
 
 // Watched by the logger, never auto-healed. Keyed by workflow NAME (the watcher lists

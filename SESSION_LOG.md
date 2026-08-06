@@ -1,3 +1,39 @@
+## 2026-08-06 (Opus 5) — CI RED SINCE 05:30Z, root-caused to a missing `timeout-minutes:` on a workflow added 18h earlier. Fixed + doc-ratchet exempted from the cron watchers.
+
+**Symptom:** 5 consecutive red CI runs, 05:30Z–16:40Z. **Not** the diffs that were pushed — every
+commit after 05:30 inherited someone else's red.
+
+**Chain:** `doc-ratchet-daily.yml` (added 18h earlier, `5f2b30fb`) is SCHEDULED and declared no
+`timeout-minutes:`. `assertManifestSane` (`scripts/lib/watch-manifest.mjs:157`) hard-errors on that
+— without a ceiling `classifyTermination` cannot tell a TIMEOUT kill from an UNKNOWN_CANCEL. So
+`build-watch-lists.mjs` REFUSED to write, `.github/_watch-manifest.json` went stale, and 3 tests in
+`.github/scripts/watch-manifest-drift.test.mjs` failed. **The guard was correct; it fired in CI,
+after the push, instead of at the gate.**
+
+**Fix (3 files, +17/-0):** `timeout-minutes: 10` on the `ratchet` job; `doc-ratchet-daily.yml` added
+to `WATCH_EXEMPT`; manifest regenerated. Evidence — 29/29 green locally:
+`watch-manifest-drift.test.mjs` 4/4 (was 1/4), `scripts/lib/watch-manifest.test.mjs` 18/18,
+`.github/scripts/trigger-list-drift.test.mjs` 7/7.
+
+**Why EXEMPT and not watched — the non-obvious half.** `doc-ratchet check` exits 1 BY DESIGN when
+the orphan count has not fallen; stagnation IS the failure state. Watching it would append a
+`docs/cron-rebuild-failures.md` row + sticky-issue comment EVERY DAY we have not deleted an orphan,
+polluting the one ledger that is supposed to mean "a scheduled job broke." And because
+`healWatchNames()` derives from `loggerWatchNames()`, exempting also stops the healer auto-re-running
+a check that is DETERMINISTIC over the working tree — a re-run 30s later returns the identical red,
+the exact waste CI/factuality-gate are heal-excluded for. Precedent is verbatim `tripwire-hourly.yml`,
+s/hour/day/. Net effect on the watcher YAMLs: **unchanged from origin** (82 logged / 77 healed).
+
+**NOT OURS, same board:** GitHub Actions is in a MAJOR OUTAGE (githubstatus.com, "Incident with
+Actions", opened 15:22Z). Everything is QUEUED; the 16:40 run died with `Failed to resolve action
+download info. Error: Service Unavailable`. **This push will queue, not go green today.** The pile of
+cron failures behind it (Heal cron failure x3, Data Targets, Pipeline freshness probe,
+Data-readiness) is outage debris — do not chase it until Actions clears.
+
+**Checks opened (2):** `watch_manifest_drift_ci_only` [defect] — move the drift test into the
+pre-push gate when a push touches `.github/workflows/`. `doc_ratchet_red_is_board_only` [task] —
+exempting it means its red is Actions-board-only; unlike tripwire it does not self-report.
+
 ## 2026-08-06 (Sonnet 5) — AGENT BRAND INTRO'S BODY FIXED: the builder now writes the intro, and the chart is a dot plot, not a bar.
 
 Operator, same session as the §2.8 walk below: *"first fix your shit email. crawl4ai what an

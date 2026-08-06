@@ -48,6 +48,11 @@ concurrency:
 jobs:
   ratchet:
     runs-on: ubuntu-latest
+    # Required by `assertManifestSane` for every SCHEDULED workflow: without a ceiling,
+    # `classifyTermination` cannot tell a TIMEOUT kill from an UNKNOWN_CANCEL. Two
+    # dependency-free node scripts over the working tree finish in well under a minute;
+    # 10 is a generous ceiling that still makes a hang legible.
+    timeout-minutes: 10
     steps:
       - uses: actions/checkout@v4
         with:
