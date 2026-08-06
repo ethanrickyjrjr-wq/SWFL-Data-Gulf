@@ -1,3 +1,30 @@
+## 2026-08-06 (Opus 5) — CORRECTION to the entry below: the crexi cause I gave was WRONG. Handoff filed.
+
+**RULE 0 is append-only, so this corrects rather than rewrites.** The entry below says
+`ingest-crexi-listings` declares a self-hosted runner "and the repo has 0 registered runners… it can
+never pass until that line changes." **That is no longer true and the cause was misattributed.** The
+operator brought a runner up; the job RAN at 08/06T19:44 and the pipeline actually executed. Line 30
+is now correct, not a bug.
+
+**The real blocker, from the 19:44 failed-step log:** `Blocked by anti-bot protection: Cloudflare JS
+challenge` on `https://www.crexi.com/lease` for every target city (Estero, Fort Myers Beach, …),
+terminating in `ERROR: 0 raw listings from all targets`. The check
+`cron_incident_ingest_crexi_listings` **stays open** — still red, new cause.
+
+**Lesson this repeats:** the 0-runners measurement was true when taken this morning and I carried it
+forward as a standing fact instead of re-probing. A cause carries an as-of date like any other number.
+
+**ALSO DIAGNOSED, and it changes the verdict:** ran `node scripts/reverify-signals.mjs --dry-run` —
+**`0/66 regressed, 6/66 signal-broken (unevaluated)`.** `reverify-signals-daily` is NOT red from a
+regression. It is red because 6 signals never evaluate and the final step exits 1 on any non-success,
+which contradicts that workflow's own header ("a signal that never evaluates… never reopens anything").
+
+**A separate session was actively editing `.github/workflows/ingest-crexi-listings.yml` and its fix
+had NOT reached `origin/main`** when this pushed (`git log HEAD..origin/main` empty). This push lands
+first by circumstance, not by jumping the queue; that commit rebases on top cleanly. Their file was
+NOT staged here.
+
+**Handoff filed:** `_ASSISTANT/2026-08-06-checks-burndown-HANDOFF.md`.
 ## 2026-08-06 (Opus 5) — "fix it all": confirmed or denied every cron incident against live run history, dated against the outage
 
 **Operator decree: *"we don't need checks on everything. everything doesn't work, so what good is a
