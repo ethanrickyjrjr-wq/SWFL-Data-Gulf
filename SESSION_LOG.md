@@ -1,4 +1,44 @@
-## 2026-08-06 (Opus 5) — Commercial listings get a lifecycle: what leaves the market is now saved, not overwritten
+## 2026-08-06 (Sonnet 5) — Open House email: real shape fixes plus a narrator prompt bug (buyer-leverage tone on an invitation)
+
+Built for the operator's own realtor.com link (9340 Vittoria Ct, Fort Myers) and walked through
+5 rounds of live rendering + correction. `lib/deliverable/recipes/open-house.ts`,
+`lib/deliverable/recipes/shared.ts`, `lib/email/doc/default-docs.ts`,
+`lib/email/listing-scrape.ts`, new `scripts/email/render-open-house.mts` (this recipe's
+acceptance script — it had none). 46 tests updated/added, all green; full `lib/deliverable/` +
+`lib/email/` suite (2,847 tests) green.
+
+**Shape changes, all operator-driven, reading real renders:**
+- Description was missing entirely — the paid Apify row for this address didn't exist yet.
+  Ran ONE targeted, one-result gap-fill (RULE 0.7a rung 3, `OPERATOR_APPROVED_PAID_RUN=1`,
+  ~$0.01), now cached in `data_lake.apify_property_records` — free on every future build.
+- Date/time moved OUT of the spec strip into their own `signal` callout card (`dateTimeCard`),
+  riding in the chrome's `middle` slot ahead of the narrative. Never renders when both are
+  unset — an open slot, not an invented placeholder (still true: no vendor holds this, all 18
+  SteadyAPI endpoints checked 07/13/2026).
+- Added `$/Sq Ft` and `DOM` to the spec strip (both were previously excluded on purpose;
+  operator wanted them back as plain data cells).
+- Reordered PROSE: narrator's own paragraph now ships BEFORE the verbatim seller description
+  (was going to ship via the chrome's built-in `description` slot, which lands before the
+  narrative — used `tail` instead to get the requested order).
+
+**The real bug, not just a shape preference:** `authorListingNarrative`'s DEFAULT system prompt
+is built for a for-sale PITCH (New Listing/Just Sold/Price Reduced) — "mine what the description
+leaves out: days on market, HOA, $/sq ft — and say what it means for a buy decision." Applied to
+Open House unmodified, it wrote *"this home came to market roughly two months ago, which gives a
+buyer walking through today real room to have a conversation about terms... the $1,229 monthly
+HOA is worth factoring into carrying costs before the visit"* — negotiating-leverage coaching on
+an RSVP. Crawled real open-house invite scripts (RULE 0.4 — theclose.com, maestrolabs.com, and
+an operator-supplied digitaldreamhomes.com link) to ground the fix: real invites are one or two
+sentences, warm, direct, at most one feature said in plain words, never a number. Added an
+`invitation` opt-in mode to the shared narrator (used ONLY by Open House) that swaps the
+market-analysis directive for that — plus an explicit "never invent a time of day" rule after a
+demo render described "evening light" against a 1–3pm example time.
+
+**What's still open:** the date/time card has no real value yet — it's a required, human-supplied
+fact (lane 4) with no vendor source, so it needs the actual open-house date/time from the
+operator before a real send.
+
+
 
 **Operator: "fix the query for each run we do. Sold moves to saved data we can track numbers from
 and get smarter about price and where things are selling."**
@@ -40,6 +80,66 @@ writes, observations append once per run, empty rows write nothing.
 has the identical no-expiry shape. The two dispatched runs (31127277610 crexi, 31127278359
 dbpr-sirs) are still QUEUED behind the GitHub Actions major outage, so this reconcile has NOT yet
 executed against a real scrape. Not pushed at time of writing.
+
+## 2026-08-06 (Opus 5) — first deliberate signal backfill: 4 signals attached, 3 machine-closed; and `http_body_absent` was implemented all along
+
+**The blocker on the whole verify class was a stale doc, not a missing capability.**
+`.claude/skills/check-signal/SKILL.md` listed **four** signal types and stated outright that
+absence — "count is zero", "the banned string is gone" — was inexpressible. It is not.
+`scripts/lib/check-signals.mjs:145` implements **`http_body_absent {url, absent, requires}`**,
+`runSignal` dispatches it at line 201, and `SIGNAL_TYPES` (line 18) carries it, so
+`check.mjs:189`'s validator has always accepted it. A session that read the doc instead of the
+code would skip the single largest signalable family we have — every "raw internal token / banned
+phrase / internal build-state wording leaked into served output" row. **Corrected the skill
+(five types, the absence form, and why `requires` is mandatory: a 500, a soft-404 at 200, or an
+empty body all trivially "do not contain" the leaked string and would report the leak fixed
+forever).** Precedent it unlocks is already live and green —
+`sa0718_internal_build_notes_leak_into_the_served_` closed today on
+`{"type":"http_body_absent","url":".../api/z/33904","absent":"current build","requires":"ZIP 33904"}`.
+
+**Signals attached: 4. Before this pass, 0 of 125 open verify rows carried one; the sweep's
+standing verdict was `0 OPEN check(s) carry a live signal`.** Every one was negative-tested live
+before attaching, and `check-sweep --dry-run` confirmed **0 signal-broken (unevaluated)** — an
+unevaluatable signal is what makes `reverify-signals-daily` red, so adding one would have made a
+known-red workflow worse.
+
+- `apify_cache_write_live_verify` — the row's own label states the criterion verbatim: "confirm
+  `data_lake.apify_property_records` grows past 20 rows." Measured live: **384 rows**, oldest
+  `2026-08-04T05:46:56Z`. Check opened `05:41:42Z` — **the first row landed five minutes after the
+  check was written**, so this is not the already-satisfied trap; the table went empty→populated
+  because the fix worked. Signal `db_row_exists … fetched_at=gte.2026-08-04T07:47:08Z, min:20`.
+- `apify_record_cache_live_verify` — same table, same empty→populated proof, `min:1`.
+- `check_sweep_live_verify` — `db_row_exists checks?resolved_by=eq.check-sweep, min:3`. Cannot be
+  retroactively already-true: the tool did not exist before 07/22.
+- `precomputed_commentary_live_verify` — `db_row_exists narratives?surface=eq.area-email`.
+  **Deliberately red, and that is the point.** Probed live: `area-email` has **0 rows** today, so
+  the signal cannot pass until the bake actually lands, and the sweep will close it for free the
+  moment it does. This is the shape worth copying — the negative test is the current state.
+
+**`node scripts/check-sweep.mjs` (real run, not dry): 3 closed · 1 still open (signal ran, did not
+pass) · 0 signal-broken.** First closes ever produced by a deliberate backfill rather than a
+hand-typed key. Open total reads **870** live afterwards (871 at handoff; other openers ran
+concurrently, so do not read 871→870 as this pass's net).
+
+**Refused a signal on purpose — `supabase_db_metrics_live_verify`.** Its criterion is "/db-health
+renders a scrape newer than **3h**". `db_fresh` floors age to whole **days**
+(`check-signals.mjs:127`), so `max_age_days:0` is a ~24h window: with the newest scrape at
+`14:43Z` and the clock at `20:21Z` — **5h38m stale, criterion violated** — the signal would have
+returned `ok:true` and closed it. That is a false pass, and a false pass never self-heals. Left
+open with no signal. **NOT_SIGNALABLE with the types we have; the unblock is a sub-day freshness
+type, not cleverness.**
+
+**One cron dated, not blamed.** That same staleness traces to `supabase-metrics-scrape.yml`, red at
+18:44Z and 17:03Z after succeeding at 14:43Z. Annotation on run `31126294674`: *"The job was not
+acquired by Runner of type hosted even after multiple attempts"* — a runner-acquisition failure,
+both attempts inside the Actions outage that opened `08/06T15:22:49Z`. **Same disposition as
+`data-readiness-cron`, proven the same way: by date and by the error text. Not an 8th red cron.**
+
+**Untouched, named so it is not mistaken for covered:** 121 of 125 verify rows still carry no
+signal; the 55 `sa0718_*` defect rows are not yet confirmed against current code (the
+`_RESEARCH/audits/2026-07-18-fanout-fix-log.md` key is validated and its "43 fixed" claims
+spot-check clean at 4/5, but its paths are 19 days stale — `lib/email/grounded-report.ts` has
+moved); the other 164 defect rows are untriaged by this pass. Nothing here was mass-closed.
 
 ## 2026-08-06 (Opus 5) — swfl-local runner LIVE for the first time; found the proxy var that defeated its whole purpose
 

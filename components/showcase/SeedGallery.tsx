@@ -9,7 +9,28 @@ import {
   seedPreviewsFor,
   type SeedPreview,
 } from "@/lib/email/doc/seed-previews";
-import { seedGalleryDestination } from "@/lib/lab-entry/destination";
+import { seedGalleryDestination, recipeDestination } from "@/lib/lab-entry/destination";
+import { SEED_SUPERSEDED_BY } from "@/lib/showcase/campaign-order";
+import { RECIPES } from "@/lib/deliverable/recipes";
+
+/** Where a preview's CTA sends a visitor, and what it's labelled — a superseded
+ *  seed builds the real, rebuilt recipe (never the old blank canvas); every
+ *  other seed keeps today's "start from this layout" behavior unchanged. */
+function seedCtaFor(preview: SeedPreview): { href: string; label: string; image: string } {
+  const override = SEED_SUPERSEDED_BY[preview.id];
+  if (!override) {
+    return {
+      href: seedGalleryDestination(preview.id),
+      label: "Use this layout →",
+      image: preview.image,
+    };
+  }
+  return {
+    href: recipeDestination(RECIPES[override.recipeKey]),
+    label: "Make this →",
+    image: override.image ?? preview.image,
+  };
+}
 
 /**
  * The /showcase "Start-from layouts" section — every SEED_DOCS template as a
@@ -56,6 +77,8 @@ export function SeedGallery() {
 }
 
 function SeedCard({ preview, onOpen }: { preview: SeedPreview; onOpen: () => void }) {
+  const superseded = Boolean(SEED_SUPERSEDED_BY[preview.id]);
+  const cta = seedCtaFor(preview);
   return (
     <div className="group relative overflow-hidden rounded-lg border border-white/10 bg-[#0f1d24] transition-colors hover:border-white/30">
       <button
@@ -66,24 +89,31 @@ function SeedCard({ preview, onOpen }: { preview: SeedPreview; onOpen: () => voi
       >
         {/* eslint-disable-next-line @next/next/no-img-element -- committed static capture, top crop */}
         <img
-          src={preview.image}
+          src={cta.image}
           alt=""
           className="h-48 w-full object-cover object-top"
           loading="lazy"
         />
         <span className="block px-3 py-2.5">
-          <span className="block text-xs font-semibold text-[#f0ede6]">{preview.name}</span>
+          <span className="flex items-center gap-1.5">
+            <span className="block text-xs font-semibold text-[#f0ede6]">{preview.name}</span>
+            {superseded && (
+              <span className="shrink-0 rounded-full bg-gulf-teal px-1.5 py-0.5 text-[8px] font-bold uppercase tracking-wide text-navy-dark">
+                Updated
+              </span>
+            )}
+          </span>
           <span className="mt-0.5 block text-[10px] leading-snug text-gray-400">
             {preview.description}
           </span>
         </span>
       </button>
-      {/* Stripo dual CTA: straight to the lab without opening the preview. */}
+      {/* Stripo dual CTA: straight to the lab (or the rebuilt recipe) without opening the preview. */}
       <Link
-        href={seedGalleryDestination(preview.id)}
+        href={cta.href}
         className="absolute right-2 top-2 rounded-md bg-gulf-teal px-2.5 py-1.5 text-[10px] font-bold text-navy-dark opacity-0 shadow transition-opacity focus:opacity-100 group-hover:opacity-100"
       >
-        Use this layout →
+        {cta.label}
       </Link>
     </div>
   );
@@ -91,6 +121,7 @@ function SeedCard({ preview, onOpen }: { preview: SeedPreview; onOpen: () => voi
 
 function SeedPreviewOverlay({ preview, onClose }: { preview: SeedPreview; onClose: () => void }) {
   const scrimRef = useRef<HTMLDivElement>(null);
+  const cta = seedCtaFor(preview);
 
   useEffect(() => {
     function onKey(e: KeyboardEvent) {
@@ -119,10 +150,10 @@ function SeedPreviewOverlay({ preview, onClose }: { preview: SeedPreview; onClos
             <p className="truncate text-[11px] text-gray-400">{preview.description}</p>
           </div>
           <Link
-            href={seedGalleryDestination(preview.id)}
+            href={cta.href}
             className="shrink-0 rounded-lg bg-gulf-teal px-4 py-2 text-xs font-bold text-navy-dark transition-opacity hover:opacity-90"
           >
-            Use this layout →
+            {cta.label}
           </Link>
           <button
             type="button"
@@ -143,7 +174,7 @@ function SeedPreviewOverlay({ preview, onClose }: { preview: SeedPreview; onClos
         <div className="min-h-0 flex-1 overflow-y-auto bg-[#101f27] p-4 sm:p-6">
           {/* eslint-disable-next-line @next/next/no-img-element -- committed static capture */}
           <img
-            src={preview.image}
+            src={cta.image}
             alt={`${preview.name} template, filled with live SWFL data`}
             className="mx-auto w-full max-w-xl rounded-lg border border-white/10"
           />

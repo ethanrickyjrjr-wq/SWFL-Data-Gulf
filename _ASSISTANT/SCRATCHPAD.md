@@ -1,3 +1,21 @@
+## 2026-08-06 (Opus 5) — OPERATOR: *"Still untouched: the 221-row defect class beyond the cron family, and no signals backfilled onto the 125 verify rows — that last one is what actually bends the curve, and it's per-check judgment, not a sweep. Get this done!!!"*
+
+**STATUS: PARTIAL — 4 of 125 verify rows signalled. Named here so it is not mistaken for done.**
+
+- **The thing that was blocking it was a lie in our own doc.** `check-signal/SKILL.md` said there
+  were four signal types and that absence was inexpressible. `http_body_absent` has been
+  implemented in `scripts/lib/check-signals.mjs:145` the whole time. **Skill corrected.** Same
+  failure shape as the fonts postmortem below: the answer was on disk, a session read the map
+  instead of the territory.
+- 4 signals attached (all negative-tested, **0 signal-broken**), 3 machine-closed by
+  `check-sweep`. `precomputed_commentary_live_verify` left deliberately RED — 0 `area-email` rows —
+  so it closes itself for free when the bake lands. **121 verify rows still unsignalled.**
+- Refused a signal on `supabase_db_metrics_live_verify` rather than ship a false pass: its
+  criterion is 3h, `db_fresh` floors to whole days, and `max_age_days:0` would have closed a
+  check whose condition was violated by 5h38m. Opened `db_fresh_subday_granularity`.
+- **The 221 defect rows are NOT touched.** The `sa0718` fix-log key is validated but its paths are
+  19 days stale — re-locate every file before citing it.
+
 ## 2026-08-06 (Opus 5) - FOLLOW-UP: runner is LIVE and ran its first real job; operator asked "isn't this something ollama can do?"
 
 **PROOF, not a claim.** Operator ran `run.cmd`; runner flipped `offline` -> `online`. Both workflows

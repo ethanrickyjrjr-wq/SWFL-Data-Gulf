@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import { ShowcaseGrid } from "./ShowcaseGrid";
-import { CampaignExamples } from "@/components/showcase/CampaignExamples";
+import { CampaignRows } from "@/components/showcase/CampaignRows";
 import { SeedGallery } from "@/components/showcase/SeedGallery";
 import { SEED_PREVIEWS } from "@/lib/email/doc/seed-previews";
 import { PageShell } from "@/components/PageShell";
@@ -22,13 +22,12 @@ export default function ShowcasePage() {
           What we can build for you
         </h1>
         <p className="mt-3 max-w-2xl text-text-secondary">
-          Real campaigns we&rsquo;ve built, real data behind every one. Click any card to see it
-          full-size — then click &ldquo;Make this →&rdquo; to open the email lab with that exact
-          campaign ready to go: just add your address and branding.
+          Every email we build, in send order — click a card to build it yourself, or scroll to the
+          last card in a row to see the whole campaign step by step.
         </p>
       </header>
 
-      <CampaignExamples />
+      <CampaignRows />
 
       <hr className="my-14 border-gulf-haze" />
 

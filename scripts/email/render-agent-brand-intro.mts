@@ -83,8 +83,12 @@ const strings: string[] = [];
   else if (v && typeof v === "object") Object.values(v).forEach(walk);
 })(doc.blocks);
 
-const heroBlock = doc.blocks.find((b) => b.type === "hero" && b.props.kicker === "Meet your agent");
+// NO "Meet your agent" hero block anymore (08/06/2026 reorder: intro opens the email,
+// the agent-card — name/photo/phone — closes it, same as every other lifecycle email).
+// The farm area now surfaces first in the chart's own title, and the agent's name lives
+// on the agent-card at the bottom of the doc.
 const chartBlock = doc.blocks.find((b) => b.type === "image" && b.props.kind === "chart");
+const agentCardBlock = doc.blocks.find((b) => b.type === "agent-card");
 const anchorHeroBlock = doc.blocks.find(
   (b) => b.type === "hero" && b.props.kicker === "My newest listing",
 );
@@ -92,11 +96,15 @@ const areaRead = strings.find((s) => s.length > 80 && s.includes("Asking prices 
 
 const rows: ProvenanceRow[] = [
   [
-    "Farm area (hero label)",
-    heroBlock?.props.label as string | undefined,
+    "Farm area (chart title)",
+    chartBlock?.props.alt as string | undefined,
     "declared span → crosswalk (ZIP set)",
   ],
-  ["Agent name (hero)", heroBlock?.props.value as string | undefined, "brand profile, sticky"],
+  [
+    "Agent name (agent card, bottom)",
+    agentCardBlock?.props.name as string | undefined,
+    "brand profile, sticky",
+  ],
   [
     "Chart",
     chartBlock?.props.url ? "rendered" : undefined,
@@ -124,13 +132,12 @@ const { html } = await renderAndSave(doc, "agent-brand-intro-email.html");
 // ── ASSERTIONS, AGAINST THE RENDERED BYTES ────────────────────────────────────
 const HOUSE_PLACEHOLDER_BIO = "A short bio that builds trust with your readers.";
 const bioSnippet = String(p.agent_bio ?? "").slice(0, 40);
-// THE CITY-SENSITIVE TEXT ONLY — the hero label, the chart title/alt, and the CTA label. Not
-// the whole HTML: the agent's own bio legitimately names other cities she serves ("between Fort
-// Myers and Estero" is Marisa's real authored text), and that is not the wrong-city bug this
-// recipe's header describes — that bug was the HERO/CHART/CTA silently disagreeing with the
-// agent's declared farm area.
+// THE CITY-SENSITIVE TEXT ONLY — the chart title/alt and the CTA label (no hero anymore,
+// 08/06/2026 reorder). Not the whole HTML: the agent's own bio legitimately names other
+// cities she serves ("between Fort Myers and Estero" is Marisa's real authored text), and
+// that is not the wrong-city bug this recipe's header describes — that bug was the
+// CHART/CTA silently disagreeing with the agent's declared farm area.
 const citySensitiveText = [
-  heroBlock?.props.label,
   chartBlock?.props.alt,
   doc.blocks.find((b) => b.type === "button")?.props.label,
 ]

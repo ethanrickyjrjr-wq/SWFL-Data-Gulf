@@ -91,3 +91,45 @@ Writing row #880 is not work. Confirming or denying #1 through #871 is.
 The **221-row defect class**, beyond the cron family. Median age 19 days, oldest 64. And **no signals
 were backfilled onto the 125 open verify-class rows** — that is the work that actually bends the
 curve, and it is per-check human judgment (`.claude/skills/check-signal/SKILL.md`), never a sweep.
+
+---
+
+## APPENDED 08/06/2026 (later Opus 5 session) — the signal backfill is STARTED, and the doc that blocked it is fixed
+
+**Read this before re-planning the verify pass. The premise above ("no signals backfilled") is now
+partly stale, and one stated constraint was never true.**
+
+**`http_body_absent` exists and always did.** `check-signal/SKILL.md` said there were four types and
+that absence was inexpressible. `scripts/lib/check-signals.mjs:145` implements
+`http_body_absent {url, absent, requires}`; `SIGNAL_TYPES` carries it; `check.mjs:189` accepts it.
+**The skill is corrected.** This is the unblock for the entire leaked-string family — every raw-token
+/ banned-phrase / internal-wording row. Working precedent, green today:
+`{"type":"http_body_absent","url":"https://www.swfldatagulf.com/api/z/33904","absent":"current build","requires":"ZIP 33904"}`.
+
+**4 signals attached, 3 machine-closed, 0 signal-broken.** `apify_cache_write_live_verify` (its own
+label named the threshold: >20 rows — measured 384), `apify_record_cache_live_verify`,
+`check_sweep_live_verify`, and `precomputed_commentary_live_verify` (deliberately RED —
+`narratives?surface=eq.area-email` is 0 rows, so it closes itself for free when the bake lands).
+**121 of 125 verify rows still carry no signal.**
+
+**Two traps confirmed live — do not re-walk into either.**
+1. **`db_fresh` cannot express a sub-day criterion.** It floors age to whole days
+   (`check-signals.mjs:127`), so `max_age_days:0` is a ~24h window. `supabase_db_metrics_live_verify`
+   requires "newer than 3h"; the table was 5h38m stale and `db_fresh` would have returned `ok:true`
+   and closed it. **Left with no signal on purpose.** Cheapest unblock for this family is a
+   `max_age_hours` option, not a cleverer filter.
+2. **Test the already-satisfied trap against the row's own `created_at`.** It is mechanically
+   checkable and it cleared both apify rows: the first `apify_property_records` row landed
+   `05:46:56Z`, five minutes *after* the check opened at `05:41:42Z`.
+
+**`supabase-metrics-scrape.yml` is red (18:44Z, 17:03Z) but is NOT an 8th real cron defect.**
+Run `31126294674` annotation: *"The job was not acquired by Runner of type hosted even after
+multiple attempts"* — runner acquisition, both inside the `08/06T15:22:49Z` Actions outage. Same
+disposition as `data-readiness-cron`, proven the same way.
+
+**Still genuinely untouched:** the 55 `sa0718_*` defect rows (the fix-log key is validated and its
+"43 fixed" claims spot-check 4/5 clean, but **its paths are 19 days stale** —
+`lib/email/grounded-report.ts` no longer exists at that path; re-locate before citing), the other
+164 defect rows, and 121 verify rows. Also note `components/showcase/CampaignExamples.tsx` is
+deleted in the working tree, so finding #56's check is **moot, not fixed** — closing it as fixed
+would be a false claim.

@@ -60,8 +60,18 @@
 //         agent — `authorAreaRead` and `authorAgentIntro` are two separate calls with two
 //         separate, non-overlapping fact sets.
 //     (`authorListingNarrative` is house-specific and is deliberately not used here.)
-//  6. FRAMING — headshot + name up front, the farm area's asking-price spread as the
-//     evidence, the agent's newest listing as the anchor, one CTA.
+//  6. FRAMING — CORRECTED 08/06/2026 (operator: *"start the email with the fucking
+//     introduction and put the name photo and number footer at the bottom like all the
+//     other fucking emails"*). The OLD framing led with a full-bleed headshot and a
+//     "Meet your agent" hero repeating the name — a SECOND identity block stacked on top
+//     of the agent-card, front-loading the agent instead of the reason to read on. Every
+//     OTHER listing-lifecycle recipe (`lib/email/lifecycle-chrome.ts` — new-listing,
+//     coming-soon, market-comps, under-contract, just-sold, open-house, price-reduced)
+//     carries the agent's identity in exactly ONE place: the `agent-card`, paired with
+//     the CTA in one row directly above the footer. This recipe now matches that: the
+//     personal introduction opens the email, the chart/area-read/anchor content follows,
+//     and the agent-card (photo + name + phone — all it ever needed to carry) closes it
+//     beside the CTA, like every other campaign email.
 
 import { withCommas } from "@/lib/format-number";
 import { createBlock, DEFAULT_BLOCK_PROPS } from "@/lib/email/doc/default-docs";
@@ -1035,8 +1045,6 @@ export async function buildAgentBrandIntro(ctx: RecipeBuildContext): Promise<Ema
   // THE ONE PARAGRAPH — the chart's own figures, nothing else. No chart → no read.
   const areaRead = chart && area ? await authorAreaRead(area, rows) : null;
 
-  const headshot = brandHeadshot(currentDoc);
-  const agentName = brandAgentName(currentDoc);
   const siteUrl = brandWebsiteUrl(currentDoc) || BASE_URL;
 
   const entries: PlanEntry[] = [];
@@ -1053,63 +1061,43 @@ export async function buildAgentBrandIntro(ctx: RecipeBuildContext): Promise<Ema
       ...(isStatic ? { isStatic: true } : {}),
     });
   };
+  // A two-column row — the SAME `{7,5}` pair `lifecycle-chrome.ts` uses for its own
+  // agent-card + CTA row, so this recipe's bottom looks identical to every other one.
+  const pushCell = (
+    block: Omit<EmailBlock, "layout">,
+    h: number,
+    span: number,
+    newRow: boolean,
+    isStatic?: true,
+  ) => {
+    entries.push({
+      id: block.id,
+      type: block.type,
+      props: block.props as Record<string, unknown>,
+      span,
+      newRow,
+      height: h,
+      ...(isStatic ? { isStatic: true } : {}),
+    });
+  };
 
   // 1. Header — the agent's branded header (company, logo, colors). Sticky.
   push(keepOrDefault(currentDoc, "header"), 2);
 
-  // 2. HEADSHOT — up front, as the recipe asks. The brand's photo when it carries one;
-  //    otherwise an OPEN SLOT with a file picker + paste-a-link (ImageBlock → ImageSlot),
-  //    which does not exist in the sent email. NEVER a stock photo of a stranger.
-  //    NOT an `agent-hero`: that block ignores `emailRender` and ships a 300px dark
-  //    "Agent photo" box to real recipients when its photo is missing.
-  push(
-    headshot
-      ? heroPhotoBlock({
-          url: headshot,
-          alt: agentName ?? "Your agent",
-          linkUrl: siteUrl,
-        })
-      : {
-          id: createBlock("image").id,
-          type: "image",
-          props: {
-            url: "",
-            kind: "photo",
-            // The LABEL IS THE INSTRUCTION (open-slot contract, playbook Part 4).
-            alt: "your headshot — a photo of you, not your logo",
-          },
-        },
-    6,
-  );
-
-  // 3. The name, up front. The value is the agent's REAL name from the brand or nothing
-  //    at all — never a placeholder. With no name the hero is still honest copy (a kicker
-  //    and the place); with one it is the 48px display line the recipe asks for.
-  //    NO FARM AREA → NO PLACE LINE. A hero that names a city we could not resolve is the
-  //    exact lie this recipe exists to stop; an empty label simply renders nothing.
-  push(
-    {
-      id: createBlock("hero").id,
-      type: "hero",
-      props: {
-        kicker: "Meet your agent",
-        value: agentName ?? "",
-        label: area ? `${area.place}, Florida` : "",
-      },
-    },
-    3,
-  );
-
-  // 4. The agent card — name, title, bio, phone. Brand-owned and sticky; we never author
-  //    a word of it, and we never let its default INSTRUCTION text ship as content.
+  // 2. The agent card — name, title, bio, phone, headshot. Brand-owned and sticky; we
+  //    never author a word of it, and we never let its default INSTRUCTION text ship as
+  //    content. Resolved HERE (not pushed yet — it moves to the bottom, item 8) because
+  //    the personal introduction below is condensed FROM its bio.
   const agentCard = brandAgentCard(currentDoc);
-  push(agentCard, 4);
 
-  // 5. The personal introduction — condensed FROM the agent's own bio (lane 1: our data,
-  //    the account's own `agent_bio`), never invented. `authorAgentIntro` is a fail-safe
-  //    author: no bio on file → null → the same open TEXT slot as before; a bio on file →
-  //    a warm, email-length paragraph, or the bio verbatim if the model adds anything the
-  //    bio itself doesn't say. Operator, 08/06/2026: "have builder write a fucking intro."
+  // 3. THE PERSONAL INTRODUCTION OPENS THE EMAIL — condensed FROM the agent's own bio
+  //    (lane 1: our data, the account's own `agent_bio`), never invented.
+  //    `authorAgentIntro` is a fail-safe author: no bio on file → null → an open TEXT
+  //    slot; a bio on file → a warm, email-length paragraph, or the bio verbatim if the
+  //    model adds anything the bio itself doesn't say. Operator, 08/06/2026: "have
+  //    builder write a fucking intro" — then, same day: "start the email with the
+  //    fucking introduction." No headshot, no repeated name banner ahead of it: the
+  //    reason to keep reading leads, the agent's own name/photo/phone card closes.
   // `brandAgentCard` returns the wide `EmailBlock`, so `.props` is the union of EVERY block's
   // props and `.bio` does not exist on it — `bunx next build` failed type check on exactly this
   // line. Narrow through the block's own discriminant rather than casting: an agent-card block
@@ -1122,7 +1110,7 @@ export async function buildAgentBrandIntro(ctx: RecipeBuildContext): Promise<Ema
     4,
   );
 
-  // 6. THE CHART — asking prices by ZIP across the farm area. This deliverable IS about
+  // 4. THE CHART — asking prices by ZIP across the farm area. This deliverable IS about
   //    a number, so it earns one. Unresolved → the slot is dropped below, never an empty
   //    box.
   if (chart) {
@@ -1168,7 +1156,7 @@ export async function buildAgentBrandIntro(ctx: RecipeBuildContext): Promise<Ema
     );
   }
 
-  // 7. The one authored paragraph — the chart's figures read back honestly, or an open
+  // 5. The one authored paragraph — the chart's figures read back honestly, or an open
   //    slot. Written straight into the block: this grid has TWO text slots, and
   //    `fillNarrative` fills the FIRST empty one, which is the personal intro above.
   push(
@@ -1180,7 +1168,7 @@ export async function buildAgentBrandIntro(ctx: RecipeBuildContext): Promise<Ema
     4,
   );
 
-  // 8. THE ANCHOR LISTING — the agent's newest listing.
+  // 6. THE ANCHOR LISTING — the agent's newest listing.
   //    Resolved (they named it) → the real photo, price, address and specs.
   //    Not named → open slots that tell them exactly how to fill it, and that a
   //    recipient never sees. We do NOT substitute the area's newest live listing: we
@@ -1235,7 +1223,7 @@ export async function buildAgentBrandIntro(ctx: RecipeBuildContext): Promise<Ema
     );
   }
 
-  // 9. Sources — the collapsed citation list. Seeded from the ONE figure set this email
+  // 7. Sources — the collapsed citation list. Seeded from the ONE figure set this email
   //    actually plots; empty (no chart) → SourcesBlock renders nothing.
   push(
     {
@@ -1256,11 +1244,20 @@ export async function buildAgentBrandIntro(ctx: RecipeBuildContext): Promise<Ema
     2,
   );
 
-  // 10. One CTA. Its label NAMES THE PLACE — so with no farm area it must not name one.
-  //     "See what's for sale in Fort Myers" under a Cape Coral agent's headshot is the
-  //     same lie as the hero. Buttons do not honor `emailRender`, so this one degrades to
-  //     honest copy instead of vanishing.
-  push(
+  // 8. THE AGENT AND THE ASK — ONE ROW, NOT TWO, RIGHT ABOVE THE FOOTER.
+  //    THE SAME `{7,5}` PAIR `lifecycle-chrome.ts` uses for every other listing-lifecycle
+  //    email — the agent card leads and the CTA follows, because the hybrid columns the
+  //    compiler emits stack in SOURCE ORDER on a phone: reversing these two lines would
+  //    put the ask above the agent on every phone (measured, lifecycle-chrome.ts:320-338).
+  //    This is the ONLY place the agent's name, photo and phone number appear — closing
+  //    the email, not opening it, "like all the other fucking emails" (operator,
+  //    08/06/2026).
+  //    Its label NAMES THE PLACE — so with no farm area it must not name one. "See what's
+  //    for sale in Fort Myers" under a Cape Coral agent's card is the same lie as the hero
+  //    used to be. Buttons do not honor `emailRender`, so this one degrades to honest copy
+  //    instead of vanishing.
+  pushCell(agentCard, 4, 7, true);
+  pushCell(
     {
       id: createBlock("button").id,
       type: "button",
@@ -1273,9 +1270,11 @@ export async function buildAgentBrandIntro(ctx: RecipeBuildContext): Promise<Ema
       },
     },
     2,
+    5,
+    false, // ← beside the agent card, not below it.
   );
 
-  // 11. Footer — the agent's CAN-SPAM footer (address, socials, unsubscribe). Sticky.
+  // 9. Footer — the agent's CAN-SPAM footer (address, socials, unsubscribe). Sticky.
   push(keepOrDefault(currentDoc, "footer"), 3, true);
 
   let doc: EmailDoc = finalizeDoc({ globalStyle: { ...currentDoc.globalStyle }, entries });

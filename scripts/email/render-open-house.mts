@@ -244,10 +244,18 @@ const checks: Assertion[] = [
     detail: zip ? `"${zip}"` : "no ZIP on the resolved subject",
   },
   {
-    name: "3 · NO invented day/date/time in the NARRATOR's own paragraph",
-    pass: !INVENTED_DATE_WORDS.some((w) => narrativeTextLower.includes(w)),
+    // A day-name is INVENTED only when no real date/time was supplied at all — when one WAS
+    // (operator, 08/06/2026: "Write about the fucking time!!!!!!"), the narrator is now told
+    // to state it naturally, so its presence is the feature working, not a violation.
+    name: "3 · NO invented day/date/time when NONE was supplied",
+    pass:
+      Boolean(OPEN_HOUSE_DATE || OPEN_HOUSE_TIME) ||
+      !INVENTED_DATE_WORDS.some((w) => narrativeTextLower.includes(w)),
     detail:
-      INVENTED_DATE_WORDS.filter((w) => narrativeTextLower.includes(w)).join(", ") || "none found",
+      OPEN_HOUSE_DATE || OPEN_HOUSE_TIME
+        ? "a real date/time was supplied — not checked for invention"
+        : INVENTED_DATE_WORDS.filter((w) => narrativeTextLower.includes(w)).join(", ") ||
+          "none found",
   },
   {
     name: "4 · the moment's CARD matches what was supplied",

@@ -50,13 +50,13 @@
 //   4. CHART — NONE (declared on the key). A house and a moment are not a number. Two dates
 //      is not a chart.
 //   5. PROSE — TWO separate blocks, in THIS order (operator ask 08/06/2026: talk about the
-//      open house, then the property): the narrator's own paragraph (the invitation — what
-//      a visitor will see, never a date/day/time) FIRST, then the seller's own MLS
-//      description verbatim SECOND, via `tail` — never touched by the model, never blended
-//      into the narrative (`lib/email/listing-description-block.ts`). ONE extra prohibition
-//      this recipe needs and no other does: the narrator may not name a day, a date, or a
-//      time — that fact ships in its own card above, never duplicated or paraphrased in
-//      prose, even once the operator has actually filled it in.
+//      open house, then the property): the narrator's short invitation FIRST, then the
+//      seller's own MLS description verbatim SECOND, via `tail` — never touched by the
+//      model, never blended into the narrative (`lib/email/listing-description-block.ts`).
+//      The narrator MAY state the real date/time when we hold one — handed in as anchors,
+//      so it can say "join us Saturday from 1 to 3" the way a real invite does — but may
+//      NEVER invent one when we don't, and may never invent a time-of-day/lighting detail
+//      ("evening light") we were never told either way.
 //   6. FRAMING — the "Open House" ribbon, the address over the price, one RSVP CTA. The CTA
 //      asks for the NEXT ACTION (tell me you're coming), never points at what they are
 //      already reading.
@@ -147,6 +147,23 @@ function rsvpUrl(current: EmailDoc, facts: ListingFacts): string | undefined {
   return cta || facts.sourceUrl || undefined;
 }
 
+/** THE SUBJECT LINE — "open" style (playbook §1.10): 30-40 chars, clarity over cleverness,
+ *  never a promised open rate. Street + the real date when we hold one (crawled real invite
+ *  subjects lead with both — theclose.com/maestrolabs.com, 08/06/2026); street alone, then
+ *  city, then a bare fallback when even that is missing (RULE 0.7 — never refuse a subject
+ *  for a miss). Never "this Sunday" or any date we were not actually given. */
+export function openHouseSubject(facts: ListingFacts, date?: string): string {
+  const street =
+    String(facts.address ?? "")
+      .split(",")[0]
+      ?.trim() ?? "";
+  const d = date?.trim();
+  if (street) return d ? `Open House: ${street}, ${d}` : `Open House: ${street}`;
+  const city = facts.city?.trim();
+  if (city) return d ? `Open House in ${city}, ${d}` : `Open House in ${city}`;
+  return "You're Invited to an Open House";
+}
+
 export async function buildOpenHouse(ctx: RecipeBuildContext): Promise<EmailDoc | null> {
   const { facts, currentDoc } = ctx;
   // No subject → there is no house to invite anyone to. Fall through to the generic author
@@ -226,6 +243,17 @@ export async function buildOpenHouse(ctx: RecipeBuildContext): Promise<EmailDoc 
   delete narratorFacts.isPriceReduced;
   delete narratorFacts.priceReduction;
 
+  // THE DATE/TIME, HANDED TO THE NARRATOR AS ANCHORS when we hold them — operator, 08/06/2026:
+  // "Write about the fucking time!!!!!!" Real crawled invite scripts state it directly in the
+  // sentence ("our open house this Sunday from 1 to 4 PM") — withholding it entirely, which
+  // this recipe did through the first several rounds today, was overcorrecting against a
+  // DIFFERENT bug (the narrator inventing "evening light" it was never told). Anchoring the
+  // real values lets it state them verbatim without opening the door to inventing one when
+  // they are absent — `auditClaims` (the claim gate) only permits numerals/words that appear
+  // in an anchor line, same mechanism `pricePerSqft` already relies on above.
+  const dateAnchor = facts.openHouseDate?.trim();
+  const timeAnchor = facts.openHouseTime?.trim();
+
   const narrative = await authorListingNarrative(narratorFacts, {
     invitation: true,
     // Open House ships its description via `tail`, not the chrome's built-in slot — but the
@@ -233,13 +261,22 @@ export async function buildOpenHouse(ctx: RecipeBuildContext): Promise<EmailDoc 
     // to assuming one is on the page and a reader who got a build with no remarks would see
     // the narrator refer to a block that was never rendered.
     descriptionRendered: Boolean(description),
+    anchors: [
+      dateAnchor && `Open house date: ${dateAnchor}`,
+      timeAnchor && `Open house time: ${timeAnchor}`,
+    ].filter((x): x is string => Boolean(x)),
     framing:
       "An open-house INVITATION. The home is open for visitors and the reader is deciding " +
-      "whether to come walk through it. Write the paragraph that makes them want to — " +
-      "describe what they will actually SEE when they get there.\n" +
-      "• YOU WERE NOT GIVEN A DATE, A TIME, OR A DAY. They are shown separately, above " +
-      "your paragraph. Never write one, never imply one ('this weekend', 'Saturday', " +
-      "'stop by Sunday'), and never place the open house at any particular time.\n" +
+      "whether to come walk through it. Write the short invite that makes them want to.\n" +
+      (dateAnchor || timeAnchor
+        ? "• STATE THE DATE AND/OR TIME NATURALLY IN YOUR SENTENCE, exactly as given in the " +
+          "anchors above (e.g. 'join us Saturday from 1 to 3' if that is what was given) — " +
+          "never reformat, reinterpret, or add a detail ('this weekend', a season, a length " +
+          "of visit) beyond what the anchor states. It is also shown in its own card, so a " +
+          "little redundancy here is fine and matches how real invite emails are written.\n"
+        : "• YOU WERE NOT GIVEN A DATE OR A TIME. Never write one, never imply one ('this " +
+          "weekend', 'Saturday', 'stop by Sunday'), never place the open house at any " +
+          "particular hour.\n") +
       "• DO NOT ARGUE THE PRICE, THE MARKET, OR THE TERMS. This is an invitation, not a " +
       "price announcement and not a negotiating brief. Even though the days-on-market and " +
       "HOA figures below are real, do not turn them into leverage or cost analysis — no " +
@@ -251,6 +288,9 @@ export async function buildOpenHouse(ctx: RecipeBuildContext): Promise<EmailDoc 
       "• Do not write the word RSVP — the button says it.",
   });
   if (narrative) doc = fillNarrative(doc, narrative);
+
+  // THE SUBJECT LINE — street + the real date when held, never a date we were not given.
+  doc = { ...doc, subjectVariants: [openHouseSubject(facts, dateAnchor)] };
 
   return doc;
 }

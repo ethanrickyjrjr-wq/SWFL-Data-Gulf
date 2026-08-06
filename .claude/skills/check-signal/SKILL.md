@@ -16,19 +16,35 @@ When in doubt, write the stricter signal or write none at all.
 
 A check you cannot verify gets a `--due`, not a close.
 
-## The four types, and what they cannot express
+## The five types, and what they cannot express
 
-`http_ok {url}` · `http_body {url,contains}` · `db_row_exists {table,filter}` · `db_fresh {table,column,max_age_days}`
+`http_ok {url}` · `http_body {url,contains}` · **`http_body_absent {url,absent,requires}`** ·
+`db_row_exists {table,filter}` · `db_fresh {table,column,max_age_days}`
 
 (`workflow_success` is recognized-but-unimplemented — `scripts/lib/check-signals.mjs`
-returns `ok:false` unconditionally, so attaching it makes a check permanently un-closeable.)
+returns `ok:false` unconditionally, so attaching it makes a check permanently un-closeable.
+**Never attach it.** A cron/pipeline check gets a `--due` or a `db_fresh` on what the run
+writes, never `workflow_success`.)
+
+**`http_body_absent` is the leak detector, and it is the most under-used type.** It is the
+only one that can assert a string is GONE from served output — the whole "raw internal token
+/ banned phrase / internal build-state wording leaked into the payload" family, which is
+otherwise structurally un-signalable. `requires` is mandatory and is the reason it is safe:
+absence is the dangerous direction, so the signal demands a proof-of-life phrase that only
+the real working surface emits. Without it, a 500, a soft-404 served at 200, an empty body,
+or a redirect stub all "do not contain" the leaked string and would report the leak fixed
+forever. (Corrected 08/06/2026 — this section previously listed four types and said absence
+was inexpressible. The code at `scripts/lib/check-signals.mjs:145` had implemented it; a
+session read the doc instead of the code and nearly skipped the largest signalable family.
+`SIGNAL_TYPES` in that file is the authority, not this list.)
 
 They **cannot** express, and no cleverness will make them:
 
 - **Column-to-column comparison** (`listed_date != first_seen`). Every PostgREST filter
   compares a column to a literal. Materialize it as a generated column or a view instead.
-- **Absence / "count is zero"** — `db_row_exists` only proves presence.
-- **Before/after state** ("`refined_at` advanced past a source landing time"). All four
+- **"Count is zero" in the database** — `db_row_exists` only proves presence, and there is
+  no `db_row_absent`. (Absence is expressible over HTTP, not over PostgREST.)
+- **Before/after state** ("`refined_at` advanced past a source landing time"). All five
   types are single-shot point-in-time reads.
 - **Rendering or internal consistency** ("the stated direction matches the plotted line").
   The actual failure — caption says rising, line is flat — leaves both strings present and
@@ -87,6 +103,12 @@ was regressed.
 
 ```bash
 node scripts/check.mjs update <key> --signal '{"type":"http_body","url":"https://www.swfldatagulf.com/api/b/<brain>?view=speak&tier=2","contains":"<phrase only live output has>"}'
+```
+
+Absence form — `requires` is not optional and is not decoration:
+
+```bash
+node scripts/check.mjs update <key> --signal '{"type":"http_body_absent","url":"https://www.swfldatagulf.com/r/<page>","absent":"<the banned string>","requires":"<phrase only the real working page emits>"}'
 ```
 
 Then `node scripts/check-sweep.mjs --dry-run` to confirm it evaluates before you trust it.
