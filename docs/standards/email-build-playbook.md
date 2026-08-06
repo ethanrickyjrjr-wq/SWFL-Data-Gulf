@@ -696,7 +696,7 @@ gaps.**
 | `just-sold` | Just Sold | 2.5 — TO BE WALKED |
 | `open-house` | Open House | 2.6 — TO BE WALKED |
 | `price-reduced` | Price Improved | 2.7 — TO BE WALKED |
-| `agent-brand-intro` | Agent Brand Intro | 2.8 — TO BE WALKED |
+| `agent-brand-intro` | Agent Brand Intro | 2.8 — WALKED 08/06/2026 |
 | `agent-launch` | Agent Launch — The Letter | 2.9 — TO BE WALKED |
 | `sphere-weekly` | Weekly Sphere Update | 2.10 — TO BE WALKED |
 | `review-reply` | The REVIEW Reply | 2.11 — TO BE WALKED |
@@ -2220,7 +2220,84 @@ sold house's photo would come from; that lane is untouched by this build.
 
 ---
 
-## 2.6 – 2.17 — TO BE WALKED
+## 2.6 – 2.7 — TO BE WALKED
+
+Each section gets written when that email is walked with the operator. **Do not pre-fill one from
+memory or by copying an earlier section** — the whole point of the walk is that each email's
+ingredients and sources get decided deliberately, one at a time.
+
+---
+
+## 2.8 AGENT BRAND INTRO — tag `agent-brand-intro` — **WALKED AND BUILT 08/06/2026.**
+
+**Spine:** TWO at once — the agent's farm area (a ZIP-by-ZIP live-asking-price chart) and their
+newest listing as the anchor. The recipe's own file header (`agent-brand-intro.ts`) is the design
+doc for this one; see it for the full farm-area/anchor-split regex machinery and the 07/13/2026
+wrong-city bug it exists to prevent. This section is the WALK — proving the already-built recipe
+against a real, fully-profiled account and a real send.
+
+**The account was already fully profiled going in.** `ethanrickyjrjr@gmail.com`
+(`user_id 37cc6c49-4759-4e07-9686-0a8dcce1f8ff`) carried the Marisa Delgado persona from the
+08/05/2026 Coming Soon walk — real bio, license, brokerage, business address, all 8 socials, and a
+real headshot (a trimmed-transparent PNG uploaded via `scripts/email/_use-operator-photo.mts` to
+`email-media/showcase-agents/marisa-delgado.png`). Nothing needed filling; this walk proves the
+recipe CARRIES what the account already holds.
+
+**Code:** `lib/deliverable/recipes/agent-brand-intro.ts` → `buildAgentBrandIntro`. Registry key
+`agent-brand-intro` (`lib/deliverable/recipes.ts`).
+
+### 2.8.0 REPRODUCE IT
+
+```
+bun --env-file=.env.local scripts/email/render-agent-brand-intro.mts ["<farm area>"]
+```
+
+Default farm area: **Fort Myers** — one of the two cities Marisa's own bio already claims
+("between Fort Myers and Estero"; `resolveFarmArea`'s declared-span reader stops at "and", so a
+two-city cue is not a shape this recipe resolves — one city is the honest input). Writes
+`~/Downloads/agent-brand-intro-email.html`, prints a per-cell provenance table, and asserts 6
+things against the rendered bytes:
+
+1. the account's real `agent_bio` ships, never the shared-file house placeholder
+   ("A short bio that builds trust with your readers.")
+2. the real headshot URL ships
+3. the real agent name ships
+4. the hero/chart/CTA agree with the declared farm area (checked on those three blocks only —
+   NOT the whole HTML, because the agent's own bio can legitimately name a second city she also
+   serves; that is not the wrong-city bug this recipe's header describes)
+5. no empty `<img src="">` reaches the sent HTML
+6. under Gmail's ~102KB clip point
+
+**One real defect the walk found, fixed in the harness script, not the recipe:** the acceptance
+script's canvas (`applyBrand(defaultDoc(), BRAND)`) carried no `agent-card` block, because
+`skeleton-clean-white` (what `defaultDoc()` returns) ships none and `applyBrand` only ever
+overlays an EXISTING block's props — it never creates one. `brandHeadshot`/`brandAgentName`
+(agent-brand-intro.ts) read the account's photo/name off `currentDoc` DURING the build, so without
+seeding an agent-card first, the up-front headshot and the "Meet your agent — `<Name>`" hero both
+rendered as open slots even though the account was fully profiled. A real Email Lab canvas never
+hits this because the UI's own "apply brand" action stamps an agent-card before any recipe build
+runs — this was an acceptance-script gap, not a product bug. Fixed by seeding
+`createBlock("agent-card")` onto the canvas before `applyBrand` runs, mirroring what the live
+canvas already carries.
+
+**No anchor listing was named, on purpose.** Substituting a real house as "Marisa's newest
+listing" would put a stranger's home under a fictional agent's name (we hold no agent↔listing
+link — `listing_state.brokerage` is 100% null) — worse than the open slot. The anchor block
+correctly drops out of the sent HTML entirely rather than shipping empty.
+
+**RESEARCH (RULE 0.4):** not in `_RESEARCH/` — crawled live, filed at
+`_RESEARCH/email-and-social/2026-08-06-agent-intro-email-content-research.md`. Confirms the
+recipe's own genre split against an independent source (agentadvice.com): a farm-area/authority
+intro (this recipe) is a named, distinct use case from a cold 1:1 referred-lead letter
+(`agent-launch`), not a design gap. The one cosmetic difference from the generic template (no
+explicit "thank you for reading" line) is non-blocking.
+
+**Sent for review:** `hello@swfldatagulf.com`, Resend id `dfb4c497-7f38-4933-808a-e946ba9d85e0`,
+08/06/2026 — subject "Meet Marisa Delgado, Fort Myers", 15275 bytes.
+
+---
+
+## 2.9 – 2.17 — TO BE WALKED
 
 Each section gets written when that email is walked with the operator. **Do not pre-fill one from
 memory or by copying an earlier section** — the whole point of the walk is that each email's

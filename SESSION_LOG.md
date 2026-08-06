@@ -1,4 +1,36 @@
-## 2026-08-06 (Opus 5) — JUST SOLD IS BUILT, WALKED AND SENT. The close cell prefills from our last list price, editable, and the prefill never leaves the hero. Apify rung SUSPENDED by decree.
+## 2026-08-06 (Sonnet 5) — AGENT BRAND INTRO WALKED AND SENT. Account was already fully profiled; the gap was the acceptance script, not the recipe.
+
+Operator: *"CREATE agent-brand-intro so builder has the recipe and we are built with all rules in
+place. Use the transparent agent picture i sent yesterday. use ethanrickyjrjr account for agent
+details. there should be a full profile."* + email to hello@swfldatagulf.com when finished.
+
+**The recipe already existed** (`agent-brand-intro.ts`, shipped in `cc37e972`) and the account
+already carried a full profile — Marisa Delgado, from the 08/05/2026 Coming Soon walk, headshot
+included ("the transparent agent picture" = the trimmed-transparent PNG
+`_use-operator-photo.mts` uploaded that session). So the real task was the §2.8 WALK: prove the
+recipe against the live account and send it.
+
+Wrote `scripts/email/render-agent-brand-intro.mts` (the `_harness.mts` pattern, live brand read,
+6 acceptance assertions). First run found a real gap in the ACCEPTANCE SCRIPT (not the recipe):
+the seeded canvas carried no `agent-card` block, so the up-front headshot and "Meet your agent"
+hero rendered as open slots even though the account was fully profiled — `applyBrand` only
+overlays an existing block, never creates one. Fixed by seeding `createBlock("agent-card")`
+before the overlay, matching what a live Email Lab canvas already carries. 6/6 assertions pass;
+rendered and LOOKED at via claude-in-chrome (screenshot) before calling it done.
+
+crawl4ai research (RULE 0.4, `_RESEARCH/email-and-social/2026-08-06-agent-intro-email-content-research.md`)
+confirmed the recipe's farm-area/authority-intro genre is a named, distinct best-practice use case
+from a cold 1:1 letter (`agent-launch`) — not a design gap.
+
+Sent to `hello@swfldatagulf.com` — Resend id `dfb4c497-7f38-4933-808a-e946ba9d85e0`. Playbook
+§2.8 updated to WALKED. Check `agent_brand_intro_walked` opened and closed with evidence.
+
+**Parallel-session note:** `docs/standards/email-build-playbook.md` was actively locked by
+session `385d725e` (a live `just-sold` walk) mid-edit — waited via the claim tool rather than
+overriding; applied cleanly once released. No live Supabase writes this session — brand row was
+read-only.
+
+
 
 Operator: *"JUST SOLD IS UP. PLEASE GET SOMETHING RIGHT. EMAIL TO HELLO@SWFLDATAGULF.COM. APIFY IS
 FALL BACK FOR SOLD PRICE. WE WILL NOT USE IT UNTIL WE SEE THERE IS AN ACTUAL DIFFERENCE. I WILL
