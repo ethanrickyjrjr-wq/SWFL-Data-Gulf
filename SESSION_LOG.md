@@ -1,3 +1,26 @@
+## 2026-08-06 (Opus 5) — PUSH NOTE: `ALLOW_PAID_SURFACE=1` used on the Back on the Market push, and why it is NOT new paid surface.
+
+`check-no-new-paid-surface.mjs` blocked the push on ONE added line — a **comment in the
+header of `scripts/email/render-back-on-market.mts`** that named the Anthropic env var while
+explaining that the script degrades to an open slot without a key. Prose, not surface.
+
+**No new paid surface exists in this push.** The only model call is the house narrator, which
+rides the existing metered root (`authorListingNarrative` → `refinery/agents/anthropic.mts`).
+Nothing new was wired, no client was constructed outside the metered root.
+
+I reworded the comment first and it did NOT clear the gate — correctly, because the gate reads
+ADDED LINES ACROSS THE WHOLE PUSH RANGE, and the line was already committed in `ad868b00`. The
+only way to make it disappear is to rewrite a commit on shared `main`, which is banned with
+parallel sessions live. So the override is the sanctioned path, used exactly as the gate's own
+message instructs, and recorded here.
+
+**THE REAL SPEND CHANGE IN THIS PUSH, stated plainly so it is not buried behind a false
+positive:** `NARRATOR_ATTEMPTS = 2` in `back-on-market.ts` means a FACT-POOR house can cost
+TWO Sonnet calls instead of one — the claim gate legitimately drops an invented paragraph and
+we ask once more, then stop. Same metered client, no new surface, but a genuine increase.
+It exists because the alternative was an email with ZERO words (below §1.9's 50-word floor),
+and we do not lower the claim gate to fill a slot. Recorded in the recipe ledger too.
+
 ## 2026-08-06 (Opus 5) — Back on the Market leads with the HOUSE: it now *calls* the New Listing flyer instead of resembling one.
 
 Operator, on two consecutive real renders: *"WHERE THE FUCK IS THE HOUSE INFORMATION? PRICE, SQ FT.

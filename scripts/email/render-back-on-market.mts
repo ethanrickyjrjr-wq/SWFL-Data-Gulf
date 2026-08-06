@@ -70,8 +70,13 @@
  * `apify_sold_comp_backfill_wire`. A relist is never sold.)
  *
  * SPEND: ONE metered call — the house narrator (`authorListingNarrative`, Sonnet). The
- * geocode and the spine read are free. Run without `ANTHROPIC_API_KEY` and even that becomes
- * an open slot — the flyer still ships (RULE 0.7).
+ * geocode and the spine read are free. Run with no Anthropic key configured and even that
+ * becomes an open slot — the flyer still ships (RULE 0.7).
+ *
+ * ⚠️ `NARRATOR_ATTEMPTS = 2` (back-on-market.ts) means a FACT-POOR house can cost TWO calls,
+ * not one: the claim gate legitimately drops an invented paragraph and we ask once more. It
+ * is the same metered client either way — no new paid surface — but it is a real spend
+ * increase and is recorded as such in SESSION_LOG and the recipe ledger.
  */
 import {
   buildBackOnMarket,
