@@ -2,11 +2,15 @@
 
 > **Recommended model:** ⚡ Sonnet — 6 tasks
 
+
+
 **Date:** 2026-08-06
 **Design:** `docs/superpowers/specs/2026-08-06-week-in-review-design.md` — read it first; every
 measurement and every sourced structural choice lives there. Do not re-derive.
 **Check:** `week_in_review_live_verify`
-**Status:** NOT STARTED. No file below exists yet.
+**Status:** Task 1 (the loader) DONE — `lib/week-in-review/load.ts`, `bun test lib/week-in-review/`
+17/17 green, commit `fb9395b5` (2026-08-06). Tasks 2-5 not started. Handoff notes below the task
+list.
 
 ---
 
@@ -152,3 +156,41 @@ Task 0 (research) → 1 (loader, TDD) → 2 (sections, TDD) → 3 (page) → 4 (
 
 Tasks 1 and 2 are independent of 3 and 4 and can land as their own commit with tests green — that is
 the natural checkpoint if the session runs short.
+
+---
+
+## Handoff — 2026-08-06 (Sonnet 5), Task 1 → Task 2
+
+**Task 1 is fully done, not just the pure contract.** `lib/week-in-review/load.ts` now exports
+`loadWeekInReview(grain, key, window, deps?)` — deps-injected like `CutHistoryDeps` in
+`lib/why-not-selling/cut-history.ts`, so its tests never touch Supabase. Read `load.ts` top to
+bottom before starting Task 2; the shapes below are load-bearing.
+
+**What Task 2 (`lib/week-in-review/sections.ts`) consumes:**
+- `WeekInReviewResult` — `{ ok: true; events: WeekEvent[]; coverage?: {covered,total} } | { ok:
+  false; reason: string }`. Section mapping only runs on the `ok: true` branch; the `ok: false`
+  branch renders as an error, never as empty sections (this is §6.3 carried through — do not let a
+  query error collapse into "no recorded changes").
+- `WeekEvent` — `{ kind: TransitionKind; count: number; facts: MarketFact[] }`. `TRANSITION_KINDS`
+  and `KIND_LABELS` are already exported from `load.ts`; Task 2 maps kinds into the five Market
+  Mondays sections (design §3: Feedback → Market Update → Marketing → Recommendation →
+  Conclusion), not the other way around — the loader groups by RAW kind, Task 2 buckets kinds
+  INTO sections.
+- `coverage` on the ok branch is `{covered, total}` RAW NUMBERS, not a rendered string — Task 2 (or
+  Task 3) calls the already-exported `grainCoverageLabel()` to render it. Don't recompute
+  covered/total yourselves; the loader already resolved it through `listing_state` per §6.6.
+- A `WeekEvent` for a kind with zero occurrences will NOT appear in `events` at all (the loader
+  only emits kinds it actually saw) — Task 2's "explicit no-change section" requirement (§6.3 at
+  the presentation layer, called out explicitly in the plan's Task 2 description) means: for any
+  section whose mapped kinds are ALL absent from `events`, render that section with the "no
+  recorded changes in this window" copy, not by omitting the section. Missing-from-the-array must
+  become an explicit sentence, not a skipped section.
+
+**Not done, and don't assume otherwise:** the page (Task 3), the `bakedAreaRead()` prose wiring
+(Task 4), and the live verify (Task 5) — `week_in_review_live_verify` is still OPEN, closes only on
+a live screenshot per RULE 0.8, never on a green suite.
+
+**One thing to check, not re-derive:** Task 0's crawl4ai research pass was already run earlier
+TODAY (08/06/2026) per design §7's own dated content — don't re-run it a second time this same
+calendar day on the same surface; that's redundant spend against the "research every session" rule,
+which means one fresh pass per work session, not per model switch within the same session's day.
