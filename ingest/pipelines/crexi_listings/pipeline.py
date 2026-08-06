@@ -12,7 +12,7 @@ import argparse
 import sys
 
 from .extract import SEARCH_TARGETS, fetch_listings_for_city
-from .distill import normalize, upsert_rows
+from .distill import normalize, upsert_rows, close_unseen
 
 
 def run(args: argparse.Namespace) -> None:
@@ -32,6 +32,12 @@ def run(args: argparse.Namespace) -> None:
 
     total_raw = 0
     total_written = 0
+    # Per-run reconcile state. `covered_cities` is what this run actually LOOKED at
+    # (--corridor narrows it); `seen_ids` is what it found. Anything in a covered city
+    # that is not in seen_ids left the market since the last run — that transition is
+    # the number we want, and it is only knowable per run.
+    covered_cities: list[str] = []
+    seen_ids: list[str] = []
     for target in targets:
         print(f"[search] {target['label']}", flush=True)
         raw_rows = fetch_listings_for_city(target)
@@ -43,6 +49,15 @@ def run(args: argparse.Namespace) -> None:
 
         n = upsert_rows(normed, dry_run=args.dry_run)
         total_written += n
+        covered_cities.append(target["city"])
+        seen_ids.extend(r["id"] for r in normed)
+
+    # Close out what disappeared. Runs AFTER every city so a --corridor-less run
+    # reconciles the whole covered set in one pass. Rows are never deleted: they keep
+    # their last asking price and gain gone_at, becoming the off-market history.
+    closed = close_unseen(covered_cities, seen_ids, dry_run=args.dry_run)
+    if closed:
+        print(f"  {closed} listing(s) no longer on market — closed out to history", flush=True)
 
     # Guard: a total-empty scrape means every target failed (e.g. Cloudflare blocked the
     # datacenter IP, or assets/search changed shape). extract.fetch_listings_for_city

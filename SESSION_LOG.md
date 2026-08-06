@@ -1,3 +1,46 @@
+## 2026-08-06 (Opus 5) — Commercial listings get a lifecycle: what leaves the market is now saved, not overwritten
+
+**Operator: "fix the query for each run we do. Sold moves to saved data we can track numbers from
+and get smarter about price and where things are selling."**
+
+**The defect, measured live 08/06/2026 (not inferred):** `data_lake.active_listings_cre` held 62
+rows — 61 crexi, ALL `status='available'`, ALL frozen at 07/05/2026 (32 days stale), plus 1
+brevitas row from 08/02/2026. The table had NO lifecycle columns at all: id, source_name,
+corridor_name, address, city, state, property_type, sqft, asking_price_psf, status, listed_date,
+source_url, _ingested_at. The writer was a blind `ON CONFLICT DO UPDATE` with no expiry, so a
+listing that left the market stayed "available" forever and its last asking price was silently
+overwritten on every run. Tracked by `cre_active_listings_no_expiry_stale_available`.
+
+**SHIPPED (migration APPLIED live, verified 62/62 rows backfilled):**
+`docs/sql/20260806_cre_listing_lifecycle.sql` — adds `first_seen_at` / `last_seen_at` / `gone_at`
+to `active_listings_cre`, and creates `data_lake.cre_listing_observations` (append-only, one row
+per listing per run, UNIQUE(listing_id, observed_at)). That observations table is the actual asset:
+a price/size time series per listing, so a price cut becomes an observed fact instead of a
+number that got overwritten.
+
+**Code:** `distill.upsert_rows` now writes both timestamps, keeps `first_seen_at` WRITE-ONCE via
+COALESCE (days-on-market stays measurable), and clears `gone_at` when a listing reappears (a relist
+is visible instead of looking like it never left). New `distill.close_unseen(cities, seen_ids)`
+marks covered-but-unreturned listings `off_market` with `gone_at` — **nothing is deleted**, the row
+keeps address, size, last asking price and first_seen_at. `pipeline.run` tracks `covered_cities` +
+`seen_ids` and reconciles once after all cities.
+
+**THE GUARD THAT MATTERS MOST (named before built, per RULE 3.5):** fixing the no-expiry defect
+introduces a WORSE failure — a blocked scrape returns 0 rows for every city, and a naive reconcile
+would close out the entire market in one run and manufacture a fake exodus. That is not
+hypothetical: it happened 07/12/2026 (run 29191537886) and again today (run 31127088993). So
+`close_unseen` REFUSES on an empty `seen_ids` and prints why. Scoping is per covered city, because
+a `--corridor` run must not close listings in a city it never looked at.
+
+**TDD: `ingest/pipelines/crexi_listings/test_lifecycle.py`, 5/5 pass**, each named after its
+failure mode — empty scrape does not wipe the city, no covered cities closes nothing, dry-run never
+writes, observations append once per run, empty rows write nothing.
+
+**NOT DONE / owed:** brevitas writes the same table through its own path and was NOT touched — it
+has the identical no-expiry shape. The two dispatched runs (31127277610 crexi, 31127278359
+dbpr-sirs) are still QUEUED behind the GitHub Actions major outage, so this reconcile has NOT yet
+executed against a real scrape. Not pushed at time of writing.
+
 ## 2026-08-06 (Opus 5) — swfl-local runner LIVE for the first time; found the proxy var that defeated its whole purpose
 
 **The `swfl-local` self-hosted runner ran its first verifiable job today.** Registered runner

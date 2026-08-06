@@ -120,11 +120,11 @@ def upsert_rows(rows: list[dict[str, Any]], *, dry_run: bool = False) -> int:
         INSERT INTO {_TABLE}
           (id, source_name, corridor_name, address, city, state,
            property_type, sqft, asking_price_psf, status, listed_date,
-           source_url, _ingested_at)
+           source_url, _ingested_at, first_seen_at, last_seen_at)
         VALUES
           (%(id)s, %(source_name)s, %(corridor_name)s, %(address)s, %(city)s, %(state)s,
            %(property_type)s, %(sqft)s, %(asking_price_psf)s, %(status)s, %(listed_date)s,
-           %(source_url)s, %(now)s)
+           %(source_url)s, %(now)s, %(now)s, %(now)s)
         ON CONFLICT (source_name, source_url) DO UPDATE SET
           address        = EXCLUDED.address,
           city           = EXCLUDED.city,
@@ -133,7 +133,14 @@ def upsert_rows(rows: list[dict[str, Any]], *, dry_run: bool = False) -> int:
           asking_price_psf = EXCLUDED.asking_price_psf,
           status         = EXCLUDED.status,
           listed_date    = EXCLUDED.listed_date,
-          _ingested_at   = EXCLUDED._ingested_at
+          _ingested_at   = EXCLUDED._ingested_at,
+          -- first_seen_at is WRITE-ONCE: COALESCE keeps the original sighting, so
+          -- days-on-market stays measurable across every later run.
+          first_seen_at  = COALESCE({_TABLE.split('.')[-1]}.first_seen_at, EXCLUDED.first_seen_at),
+          last_seen_at   = EXCLUDED.last_seen_at,
+          -- A listing that comes BACK is live again. Clearing gone_at here is what
+          -- makes a relist visible instead of looking like it never left.
+          gone_at        = NULL
         WHERE active_listings_cre.source_url IS NOT NULL
     """
     now = datetime.now(timezone.utc)
@@ -142,5 +149,72 @@ def upsert_rows(rows: list[dict[str, Any]], *, dry_run: bool = False) -> int:
     with _get_conn() as conn:
         with conn.cursor() as cur:
             cur.executemany(sql, params)
+            _insert_observations(cur, rows, now)
         conn.commit()
     return len(rows)
+
+
+def _insert_observations(cur, rows: list[dict[str, Any]], observed_at: datetime) -> int:
+    """Append one observation per listing per run — the price/size time series.
+
+    Append-only and never updated. The active row holds only TODAY's asking price;
+    without this, a price cut is silently overwritten and unmeasurable. UNIQUE
+    (listing_id, observed_at) makes a re-run of the same batch a no-op.
+    """
+    if not rows:
+        return 0
+    cur.executemany(
+        """
+        INSERT INTO data_lake.cre_listing_observations
+          (listing_id, source_name, city, observed_at, status, sqft, asking_price_psf)
+        VALUES (%(id)s, %(source_name)s, %(city)s, %(now)s, %(status)s, %(sqft)s,
+                %(asking_price_psf)s)
+        ON CONFLICT (listing_id, observed_at) DO NOTHING
+        """,
+        [{**r, "now": observed_at} for r in rows],
+    )
+    return len(rows)
+
+
+def close_unseen(cities: list[str], seen_ids: list[str], *, dry_run: bool = False) -> int:
+    """Mark listings this run COVERED but did not return as gone. Returns rows closed.
+
+    Scoped to `cities` on purpose: a --corridor run only covers one city, and closing
+    listings in a city this run never looked at would fabricate an off-market event.
+
+    NOTHING IS DELETED. The row keeps its address, size, last asking price and
+    first_seen_at, and gains gone_at — that is the record we learn from: what the
+    market cleared at, where, and how long it took.
+
+    Guard: an empty `seen_ids` for a covered city means the scrape FAILED (Cloudflare,
+    shape change), not that every listing vanished. Closing on that would wipe the
+    city's live set in one run, so it is refused.
+    """
+    if not cities:
+        return 0
+    if not seen_ids:
+        print("[close_unseen] refused: 0 listings seen — treating as a failed scrape, "
+              "not an empty market. No rows closed.", flush=True)
+        return 0
+    if dry_run:
+        print(f"[dry-run] would close unseen listings in {cities} (saw {len(seen_ids)})")
+        return 0
+
+    now = datetime.now(timezone.utc)
+    with _get_conn() as conn:
+        with conn.cursor() as cur:
+            cur.execute(
+                f"""
+                UPDATE {_TABLE}
+                   SET status  = 'off_market',
+                       gone_at = %s
+                 WHERE source_name = %s
+                   AND city = ANY(%s)
+                   AND gone_at IS NULL
+                   AND NOT (id = ANY(%s))
+                """,
+                (now, _SOURCE_NAME, cities, seen_ids),
+            )
+            closed = cur.rowcount
+        conn.commit()
+    return closed
