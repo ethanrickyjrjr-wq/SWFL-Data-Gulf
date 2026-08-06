@@ -1,9 +1,9 @@
-<!-- FRESHNESS: v25 | Token: SWFL-7421-v25-20260719 -->
+<!-- FRESHNESS: v26 | Token: SWFL-7421-v26-20260806-83498501 -->
 ---
 brain_id: env-swfl
-version: 25
-refined_at: 2026-07-19T02:26:54Z
-freshness_token: SWFL-7421-v25-20260719
+version: 26
+refined_at: 2026-08-06T04:29:26Z
+freshness_token: SWFL-7421-v26-20260806-83498501
 ttl_seconds: 2592000
 pack_hash: a84a15767c29
 context_type: user_saved_reference
@@ -30,25 +30,25 @@ SCOPE: Southwest Florida flood-hazard exposure (modeled NFHL polygons), realized
 
 --- CITATION TABLE ---
 id  | source                                                                                                                                                                                                                                                                                                                                                                                                                                          | verified   | expires
-s01 | FEMA NFHL — Flood Hazard Zones (ArcGIS REST Layer 28 / S_FLD_HAZ_AR; SWFL core-county area-weighted aggregate)                                                                                                                                                                                                                                                                                                                                  | 2026-07-19 | 2026-08-18
-s02 | OpenFEMA FimaNfipClaims via data_lake.fema_nfip_county_year + data_lake.fema_nfip_zip_window_agg (aggregated from data_lake.fema_nfip_claims; FL state, SWFL core counties 12071+12021+12051, storm-list reviewed 2026-05-17) — https://jtkdowmrjaxfvwmemxso.supabase.co/rest/v1/fema_nfip_county_year                                                                                                                                          | 2026-07-19 | 2026-08-18
-s03 | USGS Water Services daily values via Tier-1 Parquet s3://lake-tier1/environmental/usgs_water_swfl.parquet × site catalog s3://lake-tier1/environmental/usgs_water_swfl_sites.parquet (dual-read; refreshed monthly by usgs-monthly.yml → ingest/duckdb_pipelines/usgs/pipeline.py; upstream https://waterservices.usgs.gov/nwis/dv/?stateCd=FL&parameterCd=00065&statCd=00003&siteStatus=active; Caloosahatchee filter huc_cd LIKE '03090205%') | 2026-07-19 | 2026-08-18
-s04 | NOAA GHCN-Daily via AWS Open Data (s3://noaa-ghcn-pds/csv/by_year/, no auth). Anchor stations: USW00012835 Fort Myers Page Field (Lee), USW00012894 RSW (Lee), USW00012897 Naples Muni (Collier), USC00086078 Naples COOP (Collier). Annual totals: sum of daily PRCP ÷ 254 (tenths-mm → in) for days passing QC; SWFL value = average of station totals for the latest complete year (≥300 day-coverage).                                      | 2026-07-19 | 2026-08-18
+s01 | FEMA NFHL — Flood Hazard Zones (ArcGIS REST Layer 28 / S_FLD_HAZ_AR; SWFL core-county area-weighted aggregate)                                                                                                                                                                                                                                                                                                                                  | 2026-08-06 | 2026-09-05
+s02 | OpenFEMA FimaNfipClaims via data_lake.fema_nfip_county_year + data_lake.fema_nfip_zip_window_agg (aggregated from data_lake.fema_nfip_claims; FL state, SWFL core counties 12071+12021+12051, storm-list reviewed 2026-05-17) — https://jtkdowmrjaxfvwmemxso.supabase.co/rest/v1/fema_nfip_county_year                                                                                                                                          | 2026-08-06 | 2026-09-05
+s03 | USGS Water Services daily values via Tier-1 Parquet s3://lake-tier1/environmental/usgs_water_swfl.parquet × site catalog s3://lake-tier1/environmental/usgs_water_swfl_sites.parquet (dual-read; refreshed monthly by usgs-monthly.yml → ingest/duckdb_pipelines/usgs/pipeline.py; upstream https://waterservices.usgs.gov/nwis/dv/?stateCd=FL&parameterCd=00065&statCd=00003&siteStatus=active; Caloosahatchee filter huc_cd LIKE '03090205%') | 2026-08-06 | 2026-09-05
+s04 | NOAA GHCN-Daily via AWS Open Data (s3://noaa-ghcn-pds/csv/by_year/, no auth). Anchor stations: USW00012835 Fort Myers Page Field (Lee), USW00012894 RSW (Lee), USW00012897 Naples Muni (Collier), USC00086078 Naples COOP (Collier). Annual totals: sum of daily PRCP ÷ 254 (tenths-mm → in) for days passing QC; SWFL value = average of station totals for the latest complete year (≥300 day-coverage).                                      | 2026-08-06 | 2026-09-05
 
 --- SAVED FACTS ---
 [
-  {"id":"f001","topic":"env_snapshot","fact":"SWFL flood-hazard exposure — area-weighted across 3 counties","value":"Southwest Florida flood-hazard exposure across 3 counties: 49.01% of mapped area falls in a FEMA Special Flood Hazard Area, with 3.90% in coastal high-hazard (V/VE) zones (484 distinct VE polygons).","src":"s01","date":"2026-07-19"},
-  {"id":"f002","topic":"env_county:12021","fact":"Collier County (FIPS 12021) flood-hazard exposure","value":"Collier County area-weighted SFHA coverage: 60.66%; coastal V/VE zones: 3.45% (207 VE polygons).","src":"s01","date":"2026-07-19"},
-  {"id":"f003","topic":"env_county:12051","fact":"Hendry County (FIPS 12051) flood-hazard exposure","value":"Hendry County area-weighted SFHA coverage: 37.67%; coastal V/VE zones: 3.65% (2 VE polygons).","src":"s01","date":"2026-07-19"},
-  {"id":"f004","topic":"env_county:12071","fact":"Lee County (FIPS 12071) flood-hazard exposure","value":"Lee County area-weighted SFHA coverage: 38.52%; coastal V/VE zones: 5.75% (275 VE polygons).","src":"s01","date":"2026-07-19"}
+  {"id":"f001","topic":"env_snapshot","fact":"SWFL flood-hazard exposure — area-weighted across 3 counties","value":"Southwest Florida flood-hazard exposure across 3 counties: 49.01% of mapped area falls in a FEMA Special Flood Hazard Area, with 3.90% in coastal high-hazard (V/VE) zones (484 distinct VE polygons).","src":"s01","date":"2026-08-06"},
+  {"id":"f002","topic":"env_county:12021","fact":"Collier County (FIPS 12021) flood-hazard exposure","value":"Collier County area-weighted SFHA coverage: 60.66%; coastal V/VE zones: 3.45% (207 VE polygons).","src":"s01","date":"2026-08-06"},
+  {"id":"f003","topic":"env_county:12051","fact":"Hendry County (FIPS 12051) flood-hazard exposure","value":"Hendry County area-weighted SFHA coverage: 37.67%; coastal V/VE zones: 3.65% (2 VE polygons).","src":"s01","date":"2026-08-06"},
+  {"id":"f004","topic":"env_county:12071","fact":"Lee County (FIPS 12071) flood-hazard exposure","value":"Lee County area-weighted SFHA coverage: 38.52%; coastal V/VE zones: 5.75% (275 VE polygons).","src":"s01","date":"2026-08-06"}
 ]
 
 --- OUTPUT ---
 {
   "brain_id": "env-swfl",
-  "version": 25,
-  "refined_at": "2026-07-19T02:26:54Z",
-  "expires": "2026-08-18T02:26:54Z",
+  "version": 26,
+  "refined_at": "2026-08-06T04:29:26Z",
+  "expires": "2026-09-05T04:29:26Z",
   "ttl_seconds": 2592000,
   "direction": "bearish",
   "magnitude": 0.8,
@@ -66,7 +66,7 @@ s04 | NOAA GHCN-Daily via AWS Open Data (s3://noaa-ghcn-pds/csv/by_year/, no aut
       "display_format": "ratio",
       "source": {
         "url": "https://hazards.fema.gov/arcgis/rest/services/public/NFHL/MapServer/28",
-        "fetched_at": "2026-07-19T02:26:38Z",
+        "fetched_at": "2026-08-06T04:28:55Z",
         "tier": 1,
         "citation": "FEMA NFHL Flood Hazard Zones (Layer 28 / S_FLD_HAZ_AR), area-weighted aggregate across 3 SWFL counties: Collier (12021), Hendry (12051), Lee (12071)."
       },
@@ -85,7 +85,7 @@ s04 | NOAA GHCN-Daily via AWS Open Data (s3://noaa-ghcn-pds/csv/by_year/, no aut
       "display_format": "ratio",
       "source": {
         "url": "https://hazards.fema.gov/arcgis/rest/services/public/NFHL/MapServer/28",
-        "fetched_at": "2026-07-19T02:26:38Z",
+        "fetched_at": "2026-08-06T04:28:55Z",
         "tier": 1,
         "citation": "FEMA NFHL Flood Hazard Zones (Layer 28 / S_FLD_HAZ_AR), area-weighted aggregate across 3 SWFL counties: Collier (12021), Hendry (12051), Lee (12071)."
       },
@@ -104,7 +104,7 @@ s04 | NOAA GHCN-Daily via AWS Open Data (s3://noaa-ghcn-pds/csv/by_year/, no aut
       "display_format": "count",
       "source": {
         "url": "https://hazards.fema.gov/arcgis/rest/services/public/NFHL/MapServer/28",
-        "fetched_at": "2026-07-19T02:26:38Z",
+        "fetched_at": "2026-08-06T04:28:55Z",
         "tier": 1,
         "citation": "FEMA NFHL Flood Hazard Zones (Layer 28 / S_FLD_HAZ_AR), area-weighted aggregate across 3 SWFL counties: Collier (12021), Hendry (12051), Lee (12071)."
       },
@@ -123,7 +123,7 @@ s04 | NOAA GHCN-Daily via AWS Open Data (s3://noaa-ghcn-pds/csv/by_year/, no aut
       "display_format": "ratio",
       "source": {
         "url": "https://hazards.fema.gov/arcgis/rest/services/public/NFHL/MapServer/28/query?where=1%3D1&geometry=-82.32%2C26.32%2C-81.57%2C26.91&geometryType=esriGeometryEnvelope&inSR=4326&spatialRel=esriSpatialRelIntersects&groupByFieldsForStatistics=FLD_ZONE&outStatistics=%5B%7B%22statisticType%22%3A%22count%22%2C%22onStatisticField%22%3A%22OBJECTID%22%2C%22outStatisticFieldName%22%3A%22polygon_count%22%7D%2C%7B%22statisticType%22%3A%22sum%22%2C%22onStatisticField%22%3A%22Shape__Area%22%2C%22outStatisticFieldName%22%3A%22area_total%22%7D%5D&f=json",
-        "fetched_at": "2026-07-19T02:26:38Z",
+        "fetched_at": "2026-08-06T04:28:55Z",
         "tier": 1,
         "citation": "FEMA NFHL Flood Hazard Zones (Layer 28 / S_FLD_HAZ_AR), groupBy FLD_ZONE with sum(Shape__Area), bbox -82.32,26.32,-81.57,26.91 (Lee County, FIPS 12071)."
       },
@@ -142,7 +142,7 @@ s04 | NOAA GHCN-Daily via AWS Open Data (s3://noaa-ghcn-pds/csv/by_year/, no aut
       "display_format": "ratio",
       "source": {
         "url": "https://hazards.fema.gov/arcgis/rest/services/public/NFHL/MapServer/28/query?where=1%3D1&geometry=-82.32%2C26.32%2C-81.57%2C26.91&geometryType=esriGeometryEnvelope&inSR=4326&spatialRel=esriSpatialRelIntersects&groupByFieldsForStatistics=FLD_ZONE&outStatistics=%5B%7B%22statisticType%22%3A%22count%22%2C%22onStatisticField%22%3A%22OBJECTID%22%2C%22outStatisticFieldName%22%3A%22polygon_count%22%7D%2C%7B%22statisticType%22%3A%22sum%22%2C%22onStatisticField%22%3A%22Shape__Area%22%2C%22outStatisticFieldName%22%3A%22area_total%22%7D%5D&f=json",
-        "fetched_at": "2026-07-19T02:26:38Z",
+        "fetched_at": "2026-08-06T04:28:55Z",
         "tier": 1,
         "citation": "FEMA NFHL Flood Hazard Zones (Layer 28 / S_FLD_HAZ_AR), groupBy FLD_ZONE with sum(Shape__Area), bbox -82.32,26.32,-81.57,26.91 (Lee County, FIPS 12071)."
       },
@@ -161,7 +161,7 @@ s04 | NOAA GHCN-Daily via AWS Open Data (s3://noaa-ghcn-pds/csv/by_year/, no aut
       "display_format": "ratio",
       "source": {
         "url": "https://hazards.fema.gov/arcgis/rest/services/public/NFHL/MapServer/28/query?where=1%3D1&geometry=-81.91%2C25.79%2C-80.85%2C26.5&geometryType=esriGeometryEnvelope&inSR=4326&spatialRel=esriSpatialRelIntersects&groupByFieldsForStatistics=FLD_ZONE&outStatistics=%5B%7B%22statisticType%22%3A%22count%22%2C%22onStatisticField%22%3A%22OBJECTID%22%2C%22outStatisticFieldName%22%3A%22polygon_count%22%7D%2C%7B%22statisticType%22%3A%22sum%22%2C%22onStatisticField%22%3A%22Shape__Area%22%2C%22outStatisticFieldName%22%3A%22area_total%22%7D%5D&f=json",
-        "fetched_at": "2026-07-19T02:26:38Z",
+        "fetched_at": "2026-08-06T04:28:55Z",
         "tier": 1,
         "citation": "FEMA NFHL Flood Hazard Zones (Layer 28 / S_FLD_HAZ_AR), groupBy FLD_ZONE with sum(Shape__Area), bbox -81.91,25.79,-80.85,26.5 (Collier County, FIPS 12021)."
       },
@@ -180,7 +180,7 @@ s04 | NOAA GHCN-Daily via AWS Open Data (s3://noaa-ghcn-pds/csv/by_year/, no aut
       "display_format": "ratio",
       "source": {
         "url": "https://hazards.fema.gov/arcgis/rest/services/public/NFHL/MapServer/28/query?where=1%3D1&geometry=-81.91%2C25.79%2C-80.85%2C26.5&geometryType=esriGeometryEnvelope&inSR=4326&spatialRel=esriSpatialRelIntersects&groupByFieldsForStatistics=FLD_ZONE&outStatistics=%5B%7B%22statisticType%22%3A%22count%22%2C%22onStatisticField%22%3A%22OBJECTID%22%2C%22outStatisticFieldName%22%3A%22polygon_count%22%7D%2C%7B%22statisticType%22%3A%22sum%22%2C%22onStatisticField%22%3A%22Shape__Area%22%2C%22outStatisticFieldName%22%3A%22area_total%22%7D%5D&f=json",
-        "fetched_at": "2026-07-19T02:26:38Z",
+        "fetched_at": "2026-08-06T04:28:55Z",
         "tier": 1,
         "citation": "FEMA NFHL Flood Hazard Zones (Layer 28 / S_FLD_HAZ_AR), groupBy FLD_ZONE with sum(Shape__Area), bbox -81.91,25.79,-80.85,26.5 (Collier County, FIPS 12021)."
       },
@@ -199,7 +199,7 @@ s04 | NOAA GHCN-Daily via AWS Open Data (s3://noaa-ghcn-pds/csv/by_year/, no aut
       "display_format": "currency",
       "source": {
         "url": "https://www.fema.gov/api/open/v2/FimaNfipClaims",
-        "fetched_at": "2026-07-19T02:26:44Z",
+        "fetched_at": "2026-08-06T04:29:09Z",
         "tier": 1,
         "citation": "OpenFEMA FimaNfipClaims via data_lake.fema_nfip_claims, FL state, 3 SWFL core counties (FIPS 12071+12021+12051), storm-list reviewed 2026-05-17."
       },
@@ -218,7 +218,7 @@ s04 | NOAA GHCN-Daily via AWS Open Data (s3://noaa-ghcn-pds/csv/by_year/, no aut
       "display_format": "currency",
       "source": {
         "url": "https://www.fema.gov/api/open/v2/FimaNfipClaims",
-        "fetched_at": "2026-07-19T02:26:44Z",
+        "fetched_at": "2026-08-06T04:29:09Z",
         "tier": 1,
         "citation": "OpenFEMA FimaNfipClaims via data_lake.fema_nfip_claims, FL state, 3 SWFL core counties (FIPS 12071+12021+12051), storm-list reviewed 2026-05-17."
       },
@@ -237,7 +237,7 @@ s04 | NOAA GHCN-Daily via AWS Open Data (s3://noaa-ghcn-pds/csv/by_year/, no aut
       "display_format": "count",
       "source": {
         "url": "https://www.fema.gov/api/open/v2/FimaNfipClaims",
-        "fetched_at": "2026-07-19T02:26:44Z",
+        "fetched_at": "2026-08-06T04:29:09Z",
         "tier": 1,
         "citation": "OpenFEMA FimaNfipClaims via data_lake.fema_nfip_claims, FL state, 3 SWFL core counties (FIPS 12071+12021+12051), storm-list reviewed 2026-05-17."
       },
@@ -256,7 +256,7 @@ s04 | NOAA GHCN-Daily via AWS Open Data (s3://noaa-ghcn-pds/csv/by_year/, no aut
       "display_format": "ratio",
       "source": {
         "url": "https://www.fema.gov/api/open/v2/FimaNfipClaims",
-        "fetched_at": "2026-07-19T02:26:44Z",
+        "fetched_at": "2026-08-06T04:29:09Z",
         "tier": 1,
         "citation": "OpenFEMA FimaNfipClaims via data_lake.fema_nfip_claims, FL state, 3 SWFL core counties (FIPS 12071+12021+12051), storm-list reviewed 2026-05-17."
       },
@@ -275,7 +275,7 @@ s04 | NOAA GHCN-Daily via AWS Open Data (s3://noaa-ghcn-pds/csv/by_year/, no aut
       "display_format": "raw",
       "source": {
         "url": "https://waterservices.usgs.gov/nwis/dv/?stateCd=FL&parameterCd=00065&siteStatus=active&format=json",
-        "fetched_at": "2026-07-19T02:26:54Z",
+        "fetched_at": "2026-08-06T04:29:26Z",
         "tier": 1,
         "citation": "USGS Water Services daily values via Tier-1 Parquet usgs_water_swfl.parquet (dual-read with usgs_water_swfl_sites.parquet, refreshed monthly), parameterCd 00065, latest dv read on 2026-07-09, HUC 03090205 (Caloosahatchee), sites: 02292010,02292490,02292740,02292780,02292900,02293230,02293262."
       },
@@ -294,7 +294,7 @@ s04 | NOAA GHCN-Daily via AWS Open Data (s3://noaa-ghcn-pds/csv/by_year/, no aut
       "display_format": "raw",
       "source": {
         "url": "https://registry.opendata.aws/noaa-ghcn/",
-        "fetched_at": "2026-07-19T02:26:54Z",
+        "fetched_at": "2026-08-06T04:29:26Z",
         "tier": 1,
         "citation": "NOAA GHCN-Daily via AWS Open Data (s3://noaa-ghcn-pds/csv/by_year/). Lee+Collier anchor stations (USW00012835 Page Field, USW00012894 RSW, USW00012897 Naples Muni, USC00086078 Naples COOP); 3 stations in latest complete year (2025); average of station annual totals (VALUE/254, QC-passed days only)."
       },
@@ -313,7 +313,7 @@ s04 | NOAA GHCN-Daily via AWS Open Data (s3://noaa-ghcn-pds/csv/by_year/, no aut
       "display_format": "currency",
       "source": {
         "url": "https://www.fema.gov/api/open/v2/FimaNfipClaims",
-        "fetched_at": "2026-07-19T02:26:44Z",
+        "fetched_at": "2026-08-06T04:29:09Z",
         "tier": 1,
         "citation": "OpenFEMA FimaNfipClaims via data_lake.fema_nfip_claims, ZIP 33957 (Lee County, FIPS 12071), AAL window = last 10 years ending 2026, 5673 claims in window, 2020 ACS population estimate 7,000 × 0.3 NSI proxy (v1)."
       },
@@ -332,7 +332,7 @@ s04 | NOAA GHCN-Daily via AWS Open Data (s3://noaa-ghcn-pds/csv/by_year/, no aut
       "display_format": "raw",
       "source": {
         "url": "https://www.fema.gov/api/open/v2/FimaNfipClaims",
-        "fetched_at": "2026-07-19T02:26:44Z",
+        "fetched_at": "2026-08-06T04:29:09Z",
         "tier": 1,
         "citation": "OpenFEMA FimaNfipClaims via data_lake.fema_nfip_claims, ZIP 33957 (Lee County, FIPS 12071), AAL window = last 10 years ending 2026, 5673 claims in window, 2020 ACS population estimate 7,000 × 0.3 NSI proxy (v1)."
       },
@@ -351,7 +351,7 @@ s04 | NOAA GHCN-Daily via AWS Open Data (s3://noaa-ghcn-pds/csv/by_year/, no aut
       "display_format": "raw",
       "source": {
         "url": "internal://refinery/lib/swfl-geo.mts",
-        "fetched_at": "2026-07-19T02:26:44Z",
+        "fetched_at": "2026-08-06T04:29:09Z",
         "tier": 1,
         "citation": "Static SWFL barrier-island classification table (refinery/lib/swfl-geo.mts): ZIP 33957 → barrier."
       },
@@ -370,7 +370,7 @@ s04 | NOAA GHCN-Daily via AWS Open Data (s3://noaa-ghcn-pds/csv/by_year/, no aut
       "display_format": "raw",
       "source": {
         "url": "internal://refinery/lib/swfl-geo.mts",
-        "fetched_at": "2026-07-19T02:26:44Z",
+        "fetched_at": "2026-08-06T04:29:09Z",
         "tier": 1,
         "citation": "swfl-geo capRateBpsFor(1) midpoint; range +50-70 bps. Calibrated against ULI/LaSalle 2024 \"+25-50 bps for elevated physical risk\" stratified by exposure intensity."
       },
@@ -389,7 +389,7 @@ s04 | NOAA GHCN-Daily via AWS Open Data (s3://noaa-ghcn-pds/csv/by_year/, no aut
       "display_format": "ratio",
       "source": {
         "url": "https://www.fema.gov/api/open/v2/FimaNfipClaims",
-        "fetched_at": "2026-07-19T02:26:44Z",
+        "fetched_at": "2026-08-06T04:29:09Z",
         "tier": 1,
         "citation": "Computed: (AAL × 2) ÷ (median_building_property_value × 0.08). AAL = $32,610 USD/yr; median building value = $290,417 USD; 8% cap-rate assumption. Source: OpenFEMA FimaNfipClaims via data_lake.fema_nfip_claims, ZIP 33957 (Lee County, FIPS 12071), AAL window = last 10 years ending 2026, 5673 claims in window, 2020 ACS population estimate 7,000 × 0.3 NSI proxy (v1)."
       },
@@ -408,7 +408,7 @@ s04 | NOAA GHCN-Daily via AWS Open Data (s3://noaa-ghcn-pds/csv/by_year/, no aut
       "display_format": "currency",
       "source": {
         "url": "https://www.fema.gov/api/open/v2/FimaNfipClaims",
-        "fetched_at": "2026-07-19T02:26:44Z",
+        "fetched_at": "2026-08-06T04:29:09Z",
         "tier": 1,
         "citation": "OpenFEMA FimaNfipClaims via data_lake.fema_nfip_claims, ZIP 33931 (Lee County, FIPS 12071), AAL window = last 10 years ending 2026, 4114 claims in window, 2020 ACS population estimate 7,000 × 0.3 NSI proxy (v1)."
       },
@@ -427,7 +427,7 @@ s04 | NOAA GHCN-Daily via AWS Open Data (s3://noaa-ghcn-pds/csv/by_year/, no aut
       "display_format": "raw",
       "source": {
         "url": "https://www.fema.gov/api/open/v2/FimaNfipClaims",
-        "fetched_at": "2026-07-19T02:26:44Z",
+        "fetched_at": "2026-08-06T04:29:09Z",
         "tier": 1,
         "citation": "OpenFEMA FimaNfipClaims via data_lake.fema_nfip_claims, ZIP 33931 (Lee County, FIPS 12071), AAL window = last 10 years ending 2026, 4114 claims in window, 2020 ACS population estimate 7,000 × 0.3 NSI proxy (v1)."
       },
@@ -446,7 +446,7 @@ s04 | NOAA GHCN-Daily via AWS Open Data (s3://noaa-ghcn-pds/csv/by_year/, no aut
       "display_format": "raw",
       "source": {
         "url": "internal://refinery/lib/swfl-geo.mts",
-        "fetched_at": "2026-07-19T02:26:44Z",
+        "fetched_at": "2026-08-06T04:29:09Z",
         "tier": 1,
         "citation": "Static SWFL barrier-island classification table (refinery/lib/swfl-geo.mts): ZIP 33931 → barrier."
       },
@@ -465,7 +465,7 @@ s04 | NOAA GHCN-Daily via AWS Open Data (s3://noaa-ghcn-pds/csv/by_year/, no aut
       "display_format": "raw",
       "source": {
         "url": "internal://refinery/lib/swfl-geo.mts",
-        "fetched_at": "2026-07-19T02:26:44Z",
+        "fetched_at": "2026-08-06T04:29:09Z",
         "tier": 1,
         "citation": "swfl-geo capRateBpsFor(1) midpoint; range +50-70 bps. Calibrated against ULI/LaSalle 2024 \"+25-50 bps for elevated physical risk\" stratified by exposure intensity."
       },
@@ -484,7 +484,7 @@ s04 | NOAA GHCN-Daily via AWS Open Data (s3://noaa-ghcn-pds/csv/by_year/, no aut
       "display_format": "ratio",
       "source": {
         "url": "https://www.fema.gov/api/open/v2/FimaNfipClaims",
-        "fetched_at": "2026-07-19T02:26:44Z",
+        "fetched_at": "2026-08-06T04:29:09Z",
         "tier": 1,
         "citation": "Computed: (AAL × 2) ÷ (median_building_property_value × 0.08). AAL = $31,308 USD/yr; median building value = $242,771 USD; 8% cap-rate assumption. Source: OpenFEMA FimaNfipClaims via data_lake.fema_nfip_claims, ZIP 33931 (Lee County, FIPS 12071), AAL window = last 10 years ending 2026, 4114 claims in window, 2020 ACS population estimate 7,000 × 0.3 NSI proxy (v1)."
       },
@@ -503,7 +503,7 @@ s04 | NOAA GHCN-Daily via AWS Open Data (s3://noaa-ghcn-pds/csv/by_year/, no aut
       "display_format": "currency",
       "source": {
         "url": "https://www.fema.gov/api/open/v2/FimaNfipClaims",
-        "fetched_at": "2026-07-19T02:26:44Z",
+        "fetched_at": "2026-08-06T04:29:09Z",
         "tier": 1,
         "citation": "OpenFEMA FimaNfipClaims via data_lake.fema_nfip_claims, ZIP 33921 (Lee County, FIPS 12071), AAL window = last 10 years ending 2026, 732 claims in window, 2020 ACS population estimate 1,000 × 0.3 NSI proxy (v1)."
       },
@@ -522,7 +522,7 @@ s04 | NOAA GHCN-Daily via AWS Open Data (s3://noaa-ghcn-pds/csv/by_year/, no aut
       "display_format": "raw",
       "source": {
         "url": "https://www.fema.gov/api/open/v2/FimaNfipClaims",
-        "fetched_at": "2026-07-19T02:26:44Z",
+        "fetched_at": "2026-08-06T04:29:09Z",
         "tier": 1,
         "citation": "OpenFEMA FimaNfipClaims via data_lake.fema_nfip_claims, ZIP 33921 (Lee County, FIPS 12071), AAL window = last 10 years ending 2026, 732 claims in window, 2020 ACS population estimate 1,000 × 0.3 NSI proxy (v1)."
       },
@@ -541,7 +541,7 @@ s04 | NOAA GHCN-Daily via AWS Open Data (s3://noaa-ghcn-pds/csv/by_year/, no aut
       "display_format": "raw",
       "source": {
         "url": "internal://refinery/lib/swfl-geo.mts",
-        "fetched_at": "2026-07-19T02:26:44Z",
+        "fetched_at": "2026-08-06T04:29:09Z",
         "tier": 1,
         "citation": "Static SWFL barrier-island classification table (refinery/lib/swfl-geo.mts): ZIP 33921 → barrier."
       },
@@ -560,7 +560,7 @@ s04 | NOAA GHCN-Daily via AWS Open Data (s3://noaa-ghcn-pds/csv/by_year/, no aut
       "display_format": "raw",
       "source": {
         "url": "internal://refinery/lib/swfl-geo.mts",
-        "fetched_at": "2026-07-19T02:26:44Z",
+        "fetched_at": "2026-08-06T04:29:09Z",
         "tier": 1,
         "citation": "swfl-geo capRateBpsFor(1) midpoint; range +50-70 bps. Calibrated against ULI/LaSalle 2024 \"+25-50 bps for elevated physical risk\" stratified by exposure intensity."
       },
@@ -579,7 +579,7 @@ s04 | NOAA GHCN-Daily via AWS Open Data (s3://noaa-ghcn-pds/csv/by_year/, no aut
       "display_format": "ratio",
       "source": {
         "url": "https://www.fema.gov/api/open/v2/FimaNfipClaims",
-        "fetched_at": "2026-07-19T02:26:44Z",
+        "fetched_at": "2026-08-06T04:29:09Z",
         "tier": 1,
         "citation": "Computed: (AAL × 2) ÷ (median_building_property_value × 0.08). AAL = $15,894 USD/yr; median building value = $300,370 USD; 8% cap-rate assumption. Source: OpenFEMA FimaNfipClaims via data_lake.fema_nfip_claims, ZIP 33921 (Lee County, FIPS 12071), AAL window = last 10 years ending 2026, 732 claims in window, 2020 ACS population estimate 1,000 × 0.3 NSI proxy (v1)."
       },
@@ -598,7 +598,7 @@ s04 | NOAA GHCN-Daily via AWS Open Data (s3://noaa-ghcn-pds/csv/by_year/, no aut
       "display_format": "currency",
       "source": {
         "url": "https://www.fema.gov/api/open/v2/FimaNfipClaims",
-        "fetched_at": "2026-07-19T02:26:44Z",
+        "fetched_at": "2026-08-06T04:29:09Z",
         "tier": 1,
         "citation": "OpenFEMA FimaNfipClaims via data_lake.fema_nfip_claims, ZIP 33908 (Lee County, FIPS 12071), AAL window = last 10 years ending 2026, 8043 claims in window, 2020 ACS population estimate 27,000 × 0.3 NSI proxy (v1)."
       },
@@ -617,7 +617,7 @@ s04 | NOAA GHCN-Daily via AWS Open Data (s3://noaa-ghcn-pds/csv/by_year/, no aut
       "display_format": "raw",
       "source": {
         "url": "https://www.fema.gov/api/open/v2/FimaNfipClaims",
-        "fetched_at": "2026-07-19T02:26:44Z",
+        "fetched_at": "2026-08-06T04:29:09Z",
         "tier": 1,
         "citation": "OpenFEMA FimaNfipClaims via data_lake.fema_nfip_claims, ZIP 33908 (Lee County, FIPS 12071), AAL window = last 10 years ending 2026, 8043 claims in window, 2020 ACS population estimate 27,000 × 0.3 NSI proxy (v1)."
       },
@@ -636,7 +636,7 @@ s04 | NOAA GHCN-Daily via AWS Open Data (s3://noaa-ghcn-pds/csv/by_year/, no aut
       "display_format": "raw",
       "source": {
         "url": "internal://refinery/lib/swfl-geo.mts",
-        "fetched_at": "2026-07-19T02:26:44Z",
+        "fetched_at": "2026-08-06T04:29:09Z",
         "tier": 1,
         "citation": "Static SWFL barrier-island classification table (refinery/lib/swfl-geo.mts): ZIP 33908 → inland."
       },
@@ -655,7 +655,7 @@ s04 | NOAA GHCN-Daily via AWS Open Data (s3://noaa-ghcn-pds/csv/by_year/, no aut
       "display_format": "raw",
       "source": {
         "url": "internal://refinery/lib/swfl-geo.mts",
-        "fetched_at": "2026-07-19T02:26:44Z",
+        "fetched_at": "2026-08-06T04:29:09Z",
         "tier": 1,
         "citation": "swfl-geo capRateBpsFor(0) midpoint; range no flood cap-rate adjustment. Calibrated against ULI/LaSalle 2024 \"+25-50 bps for elevated physical risk\" stratified by exposure intensity."
       },
@@ -674,7 +674,7 @@ s04 | NOAA GHCN-Daily via AWS Open Data (s3://noaa-ghcn-pds/csv/by_year/, no aut
       "display_format": "ratio",
       "source": {
         "url": "https://www.fema.gov/api/open/v2/FimaNfipClaims",
-        "fetched_at": "2026-07-19T02:26:44Z",
+        "fetched_at": "2026-08-06T04:29:09Z",
         "tier": 1,
         "citation": "Computed: (AAL × 2) ÷ (median_building_property_value × 0.08). AAL = $10,937 USD/yr; median building value = $253,191 USD; 8% cap-rate assumption. Source: OpenFEMA FimaNfipClaims via data_lake.fema_nfip_claims, ZIP 33908 (Lee County, FIPS 12071), AAL window = last 10 years ending 2026, 8043 claims in window, 2020 ACS population estimate 27,000 × 0.3 NSI proxy (v1)."
       },
@@ -693,7 +693,7 @@ s04 | NOAA GHCN-Daily via AWS Open Data (s3://noaa-ghcn-pds/csv/by_year/, no aut
       "display_format": "currency",
       "source": {
         "url": "https://www.fema.gov/api/open/v2/FimaNfipClaims",
-        "fetched_at": "2026-07-19T02:26:44Z",
+        "fetched_at": "2026-08-06T04:29:09Z",
         "tier": 1,
         "citation": "OpenFEMA FimaNfipClaims via data_lake.fema_nfip_claims, ZIP 33924 (Lee County, FIPS 12071), AAL window = last 10 years ending 2026, 994 claims in window, 2020 ACS population estimate 1,000 × 0.3 NSI proxy (v1)."
       },
@@ -712,7 +712,7 @@ s04 | NOAA GHCN-Daily via AWS Open Data (s3://noaa-ghcn-pds/csv/by_year/, no aut
       "display_format": "raw",
       "source": {
         "url": "https://www.fema.gov/api/open/v2/FimaNfipClaims",
-        "fetched_at": "2026-07-19T02:26:44Z",
+        "fetched_at": "2026-08-06T04:29:09Z",
         "tier": 1,
         "citation": "OpenFEMA FimaNfipClaims via data_lake.fema_nfip_claims, ZIP 33924 (Lee County, FIPS 12071), AAL window = last 10 years ending 2026, 994 claims in window, 2020 ACS population estimate 1,000 × 0.3 NSI proxy (v1)."
       },
@@ -731,7 +731,7 @@ s04 | NOAA GHCN-Daily via AWS Open Data (s3://noaa-ghcn-pds/csv/by_year/, no aut
       "display_format": "raw",
       "source": {
         "url": "internal://refinery/lib/swfl-geo.mts",
-        "fetched_at": "2026-07-19T02:26:44Z",
+        "fetched_at": "2026-08-06T04:29:09Z",
         "tier": 1,
         "citation": "Static SWFL barrier-island classification table (refinery/lib/swfl-geo.mts): ZIP 33924 → barrier."
       },
@@ -750,7 +750,7 @@ s04 | NOAA GHCN-Daily via AWS Open Data (s3://noaa-ghcn-pds/csv/by_year/, no aut
       "display_format": "raw",
       "source": {
         "url": "internal://refinery/lib/swfl-geo.mts",
-        "fetched_at": "2026-07-19T02:26:44Z",
+        "fetched_at": "2026-08-06T04:29:09Z",
         "tier": 1,
         "citation": "swfl-geo capRateBpsFor(1) midpoint; range +50-70 bps. Calibrated against ULI/LaSalle 2024 \"+25-50 bps for elevated physical risk\" stratified by exposure intensity."
       },
@@ -769,7 +769,7 @@ s04 | NOAA GHCN-Daily via AWS Open Data (s3://noaa-ghcn-pds/csv/by_year/, no aut
       "display_format": "ratio",
       "source": {
         "url": "https://www.fema.gov/api/open/v2/FimaNfipClaims",
-        "fetched_at": "2026-07-19T02:26:44Z",
+        "fetched_at": "2026-08-06T04:29:09Z",
         "tier": 1,
         "citation": "Computed: (AAL × 2) ÷ (median_building_property_value × 0.08). AAL = $9,937 USD/yr; median building value = $254,464 USD; 8% cap-rate assumption. Source: OpenFEMA FimaNfipClaims via data_lake.fema_nfip_claims, ZIP 33924 (Lee County, FIPS 12071), AAL window = last 10 years ending 2026, 994 claims in window, 2020 ACS population estimate 1,000 × 0.3 NSI proxy (v1)."
       },
@@ -788,7 +788,7 @@ s04 | NOAA GHCN-Daily via AWS Open Data (s3://noaa-ghcn-pds/csv/by_year/, no aut
       "display_format": "currency",
       "source": {
         "url": "https://www.fema.gov/api/open/v2/FimaNfipClaims",
-        "fetched_at": "2026-07-19T02:26:44Z",
+        "fetched_at": "2026-08-06T04:29:09Z",
         "tier": 1,
         "citation": "OpenFEMA FimaNfipClaims via data_lake.fema_nfip_claims, ZIP 34102 (Collier County, FIPS 12021), AAL window = last 10 years ending 2026, 2872 claims in window, 2020 ACS population estimate 17,000 × 0.3 NSI proxy (v1)."
       },
@@ -807,7 +807,7 @@ s04 | NOAA GHCN-Daily via AWS Open Data (s3://noaa-ghcn-pds/csv/by_year/, no aut
       "display_format": "raw",
       "source": {
         "url": "https://www.fema.gov/api/open/v2/FimaNfipClaims",
-        "fetched_at": "2026-07-19T02:26:44Z",
+        "fetched_at": "2026-08-06T04:29:09Z",
         "tier": 1,
         "citation": "OpenFEMA FimaNfipClaims via data_lake.fema_nfip_claims, ZIP 34102 (Collier County, FIPS 12021), AAL window = last 10 years ending 2026, 2872 claims in window, 2020 ACS population estimate 17,000 × 0.3 NSI proxy (v1)."
       },
@@ -826,7 +826,7 @@ s04 | NOAA GHCN-Daily via AWS Open Data (s3://noaa-ghcn-pds/csv/by_year/, no aut
       "display_format": "raw",
       "source": {
         "url": "internal://refinery/lib/swfl-geo.mts",
-        "fetched_at": "2026-07-19T02:26:44Z",
+        "fetched_at": "2026-08-06T04:29:09Z",
         "tier": 1,
         "citation": "Static SWFL barrier-island classification table (refinery/lib/swfl-geo.mts): ZIP 34102 → coastal-mainland."
       },
@@ -845,7 +845,7 @@ s04 | NOAA GHCN-Daily via AWS Open Data (s3://noaa-ghcn-pds/csv/by_year/, no aut
       "display_format": "raw",
       "source": {
         "url": "internal://refinery/lib/swfl-geo.mts",
-        "fetched_at": "2026-07-19T02:26:44Z",
+        "fetched_at": "2026-08-06T04:29:09Z",
         "tier": 1,
         "citation": "swfl-geo capRateBpsFor(0.5) midpoint; range +20-35 bps. Calibrated against ULI/LaSalle 2024 \"+25-50 bps for elevated physical risk\" stratified by exposure intensity."
       },
@@ -864,7 +864,7 @@ s04 | NOAA GHCN-Daily via AWS Open Data (s3://noaa-ghcn-pds/csv/by_year/, no aut
       "display_format": "ratio",
       "source": {
         "url": "https://www.fema.gov/api/open/v2/FimaNfipClaims",
-        "fetched_at": "2026-07-19T02:26:44Z",
+        "fetched_at": "2026-08-06T04:29:09Z",
         "tier": 1,
         "citation": "Computed: (AAL × 2) ÷ (median_building_property_value × 0.08). AAL = $6,636 USD/yr; median building value = $580,638 USD; 8% cap-rate assumption. Source: OpenFEMA FimaNfipClaims via data_lake.fema_nfip_claims, ZIP 34102 (Collier County, FIPS 12021), AAL window = last 10 years ending 2026, 2872 claims in window, 2020 ACS population estimate 17,000 × 0.3 NSI proxy (v1)."
       },
@@ -955,7 +955,7 @@ s04 | NOAA GHCN-Daily via AWS Open Data (s3://noaa-ghcn-pds/csv/by_year/, no aut
       ],
       "source": {
         "url": "https://www.fema.gov/api/open/v2/FimaNfipClaims",
-        "fetched_at": "2026-07-19T02:26:44Z",
+        "fetched_at": "2026-08-06T04:29:09Z",
         "tier": 1,
         "citation": "OpenFEMA FimaNfipClaims via data_lake.fema_nfip_claims, FL, SWFL core counties (FIPS 12071+12021+12051). Per-named-storm paid totals (building + contents + ICO). 2024 storms split by date_of_loss at Milton landfall (2024-10-09); null-date 2024 claims are excluded from per-storm rows. Storm-list reviewed 2026-05-17."
       },
@@ -1563,7 +1563,7 @@ s04 | NOAA GHCN-Daily via AWS Open Data (s3://noaa-ghcn-pds/csv/by_year/, no aut
       ],
       "source": {
         "url": "https://www.fema.gov/api/open/v2/FimaNfipClaims",
-        "fetched_at": "2026-07-19T02:26:44Z",
+        "fetched_at": "2026-08-06T04:29:09Z",
         "tier": 1,
         "citation": "OpenFEMA FimaNfipClaims via data_lake.fema_nfip_claims — every SWFL ZIP with ≥1 claim in the 10-year rolling window; per-insured-property AAL, 2020 ACS population × 0.3 NSI proxy denominator (v1)."
       },
@@ -1590,7 +1590,7 @@ s04 | NOAA GHCN-Daily via AWS Open Data (s3://noaa-ghcn-pds/csv/by_year/, no aut
   "relevance": {
     "decay_curve": "weeks",
     "half_life_hours": 720,
-    "computed_at": "2026-07-19T02:26:54Z"
+    "computed_at": "2026-08-06T04:29:26Z"
   },
   "exogenous_signals": []
 }
@@ -1599,5 +1599,5 @@ s04 | NOAA GHCN-Daily via AWS Open Data (s3://noaa-ghcn-pds/csv/by_year/, no aut
 - env-swfl: standing flood-hazard exposure read for SWFL — area-weighted FEMA NFHL aggregates with coastal V/VE breakouts; first brain shipped with per-metric P2 provenance.
 
 --- RECENT NOTES ---
-- 2026-07-19: pack refined by the Refinery — 4 fact(s) from 4 source(s).
+- 2026-08-06: pack refined by the Refinery — 4 fact(s) from 4 source(s).
 ```
