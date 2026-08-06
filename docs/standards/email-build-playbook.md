@@ -2049,6 +2049,23 @@ property (`listing_state.list_price` — live-probed 08/06/2026: **35,599 rows c
 **EDITABLE**. The agent who just closed the house is looking at that cell and puts the real number
 in. Our data is the starting value; theirs is the final one.
 
+**THE PREFILL LADDER — reach for the REAL sold price FIRST.** Our own truth handoff
+(`docs/superpowers/handoffs/2026-08-04-EMAIL-DATA-TRUTH-HANDOFF.md` §2b) already recorded a repair
+path this section originally missed: **a date-ranged Apify sold pull returns the real sold price for
+any window at $0.01 per home, verified reaching 14 months back** with explicit `date_from`/`date_to`.
+It also recorded why it is needed — a listing stamped sold with `price = 0` is TERMINAL, and 11 of
+19 captured sold transitions were price-0. **Live 08/06/2026: 821 sold transitions in
+`listing_transitions`, 383 rows already in `apify_property_records`.**
+
+So the cell fills in this order, and the decree governs the LAST rung, not the only one:
+1. **A real recorded sold price we already hold** (the paid row on disk — costs nothing, it is bought).
+2. **A date-ranged paid pull** where the operator has approved the spend — a penny a home.
+3. **The last list price we hold** (`listing_state.list_price`) — the decree's prefill, and the
+   normal case, because recording lags weeks.
+4. **The agent's own number**, typed over whatever was prefilled. Always available, always wins.
+
+Whichever rung fills it, the cell is EDITABLE and the provenance row says which rung it came from.
+
 **This is not an invented number and it never was.** It is lane 1 (our own record, named source) with
 lane 4 (the figure the user writes in) on top — exactly the four-lane order. A prefilled editable
 field is not a claim the system asserts.
