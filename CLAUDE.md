@@ -144,6 +144,14 @@ gets whatever this call produced.
 **THE RULE: a baked narrative that covers your surface is lane 1. A live model call is the fallback,
 not the default.** Before adding an LLM call to any build, check `narratives` for that surface first.
 
+**AND A BAKE HAS AN AGE — CHECK IT, DO NOT ASSUME IT.** Measured 08/06/2026: of the 121 baked
+narratives, **83 were baked that same day, but the rest trail back to 07/13/2026** — and all 121 came
+from one model generation (`claude-sonnet-4-6`). So "baked" is not a synonym for "current." A surface
+whose bake predates the data it describes is a STALE FALLBACK, not lane 1, and serving it silently is
+the same class of error as a stale alarm. The bridge must compare the bake against the inputs it was
+made from (`inputs_hash` and `baked_at` are both on the row for exactly this) and fall through to a
+live call when it does not match — that fall-through IS the fallback this rule demands.
+
 ⚠️ **The email↔narrative bridge is being built right now by a parallel session**
 (`lib/narratives/area-email-inputs.ts`, research + design + plan already filed). **Do not build a
 second one.** This rule states the law; that work does the wiring.

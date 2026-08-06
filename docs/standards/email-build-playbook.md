@@ -2973,6 +2973,14 @@ that call produced; and every email build pays for text we had already written a
 rung sat there. **A baked narrative covering your surface is lane 1. A live call is the FALLBACK.**
 Before you add an LLM call to a recipe, look in `narratives` for that surface.
 
+**AND A BAKE HAS AN AGE — CHECK IT, DO NOT ASSUME IT.** Measured 08/06/2026: of the 121 baked
+narratives, **83 were baked that same day, but the rest trail back to 07/13/2026** — and all 121 came
+from one model generation (`claude-sonnet-4-6`). So "baked" is not a synonym for "current." A surface
+whose bake predates the data it describes is a STALE FALLBACK, not lane 1, and serving it silently is
+the same class of error as a stale alarm. The bridge must compare the bake against the inputs it was
+made from (`inputs_hash` and `baked_at` are both on the row for exactly this) and fall through to a
+live call when it does not match — that fall-through IS the fallback this rule demands.
+
 ⚠️ **THE BRIDGE IS BEING BUILT RIGHT NOW BY A PARALLEL SESSION** —
 `lib/narratives/area-email-inputs.ts`, with its research, design and plan already filed
 (`docs/superpowers/plans/2026-08-06-precomputed-commentary-plan.md`). **Do not build a second one,
