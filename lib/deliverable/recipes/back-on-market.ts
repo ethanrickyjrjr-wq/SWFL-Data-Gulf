@@ -51,6 +51,7 @@
 //                    (local vs. national) — the property's hero/strip carry the LISTING's
 //                    own numbers (price, days off market, beds/baths/sqft/lot), not the
 //                    area's rate, and the narrative carries no numbers at all.
+import { withCommas } from "@/lib/format-number";
 import { buildLifecycleEmail, type ChromeBlock } from "@/lib/email/lifecycle-chrome";
 import { spec } from "@/lib/email/listing-flyer";
 import { createBlock } from "@/lib/email/doc/default-docs";
@@ -87,15 +88,6 @@ const pct = (n: number | null): string => (n == null ? "" : `${n}%`);
  * of over-explaining as the deleted $/sq ft footnote (lib/email/CLAUDE.md). */
 function placeOf(data: BackOnMarketZip): string {
   return data.place && data.place !== data.zip ? data.place : data.zip;
-}
-
-/** "1980" → "1,980". Nothing in → undefined (an open slot, never a fabricated 0). Mirrors
- *  the same tiny formatter every other lifecycle recipe carries locally (listing-flyer.ts,
- *  open-house.ts) — not extracted, it carries no business rule. */
-function withCommas(n?: string): string | undefined {
-  const digits = (n ?? "").replace(/[^\d]/g, "");
-  if (!digits) return undefined;
-  return digits.replace(/\B(?=(\d{3})+(?!\d))/g, ",");
 }
 
 // ═══════════════════════════════════════════════════════════════════════════════════

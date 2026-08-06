@@ -1,0 +1,60 @@
+{
+  "id": "f24a9a10-7d04-42ae-b1de-c6b7af191a45",
+  "user_id": "37cc6c49-4759-4e07-9686-0a8dcce1f8ff",
+  "primary_color": "#0F1D24",
+  "accent_color": "#3DC9C0",
+  "logo_url": "https://www.swfldatagulf.com/logo-mark.png",
+  "company_name": "SWFL Data Gulf",
+  "website_url": "https://www.swfldatagulf.com",
+  "sender_name": null,
+  "sender_address": null,
+  "sender_domain_verified": false,
+  "source": "manual",
+  "created_at": "2026-06-19T17:37:36.33054+00:00",
+  "updated_at": "2026-08-04T04:17:03.008926+00:00",
+  "agent_name": "Ricky Cooper",
+  "photo_url": "https://ui-avatars.com/api/?name=Ricky+Cooper&size=512&background=0F1D24&color=3DC9C0&format=png&bold=true",
+  "license": null,
+  "brokerage": "SWFL Data Gulf",
+  "color_palettes": [
+    {
+      "id": "0fc7d30c-a896-4e5c-bf31-5d87d566801a",
+      "name": "Palette 1",
+      "colors": ["#0ea5e9", "#22c55e", "#f59e0b", ""]
+    },
+    {
+      "id": "3e4a0f4f-cabf-4f4d-9622-ef4c428c09b7",
+      "name": "Palette 2",
+      "colors": ["#334155", "#cbd5e1", "#0f172a", ""]
+    },
+    {
+      "id": "d61becbd-f826-43c2-b03e-1a5cd2fc3940",
+      "name": "Palette 3",
+      "colors": ["#1b2a4a", "#1b2a4a", "#f59e0b", ""]
+    }
+  ],
+  "instagram_url": null,
+  "facebook_url": null,
+  "linkedin_url": null,
+  "x_url": null,
+  "tiktok_url": null,
+  "youtube_url": null,
+  "pinterest_url": null,
+  "threads_url": null,
+  "unsubscribe_url": "https://www.swfldatagulf.com/unsubscribe",
+  "business_address": "7191 Cypress Lake Drive STE 3, Fort Myers, FL 33907",
+  "nickname": "Ricky",
+  "agent_title": "Founder",
+  "contact_email": "hello@swfldatagulf.com",
+  "contact_phone": null,
+  "font_display": "PLAYFAIR_SERIF",
+  "font_body": "LATO_SANS",
+  "text_color": "#1A2B33",
+  "background_color": "#FFFFFF",
+  "surface_color": "#F7F9FA",
+  "surface_dark_color": "#152832",
+  "preferred_recipe": null,
+  "default_photo_ratio": null,
+  "agent_bio": "I build the data layer under Southwest Florida real estate. Every number I send you traces back to a named source — county records, live listing feeds, or a figure you handed me yourself. If I cannot source it, I will not print it. That is the whole product, and it is why I started SWFL Data Gulf.",
+  "button_destinations": "{\"primary-cta\":\"https://www.swfldatagulf.com\",\"community\":\"https://www.swfldatagulf.com/z/33990\",\"booking\":\"https://www.swfldatagulf.com/support\"}"
+}

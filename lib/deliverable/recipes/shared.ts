@@ -43,8 +43,13 @@ import type { EmailDoc } from "@/lib/email/doc/types";
 /**
  * THE ONE SHARED FRAMING BLOCK — pasted VERBATIM (never paraphrased) into the system
  * prompt of every narrator whose job is stating facts about a property or a price:
- * `authorListingNarrative` (this file), `authorUnderContractNote`
- * (recipes/under-contract.ts), `buildNarratorPrompt` (recipes/market-comps.ts).
+ * `authorListingNarrative` (this file) and `buildNarratorPrompt` (recipes/market-comps.ts).
+ *
+ * **Was three.** `authorUnderContractNote` (recipes/under-contract.ts) was the third and died
+ * with the July under-contract recipe, rewritten new 08/06/2026. The replacement carries no
+ * narrator prompt of its own — it calls `authorListingNarrative`, so it INHERITS this block
+ * instead of pasting a second copy. That is the preferred shape for any new recipe: one more
+ * verbatim paste is one more place this can silently drift.
  *
  * NEVER pasted into `authorAreaRead` (agent-brand-intro.ts) or `LETTER_SYSTEM`
  * (agent-launch.ts) — both carry an absolute no-numbers/no-facts constraint this

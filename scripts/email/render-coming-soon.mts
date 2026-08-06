@@ -49,24 +49,28 @@
  * ONLY when a description exists — run without ANTHROPIC_API_KEY and it becomes an open
  * slot, which is the designed state.
  */
-import { mkdirSync, writeFileSync } from "node:fs";
-import { homedir } from "node:os";
-import { join } from "node:path";
 import {
   buildComingSoon,
   countyForZip,
   loadScarcity,
 } from "../../lib/deliverable/recipes/coming-soon";
 import { resolveSubject } from "../../lib/deliverable/recipes/shared";
-import { PROJECT_CARRY_KEYS } from "../../lib/brand/profile-ledger";
 import { defaultDoc } from "../../lib/email/doc/default-docs";
 import { applyBrand } from "../../lib/email/brand/apply-brand";
-import { brandingToTokens } from "../../lib/email/brand/branding-to-tokens";
-import { renderEmailDocHtml } from "../../lib/email/render-email-doc";
-import { createServiceRoleClientUntyped } from "../../utils/supabase/service-role";
+// THE ONE ACCEPTANCE HARNESS — see `_harness.mts`. Everything below that is not this email's
+// own provenance rows or its own assertions comes from there.
+import {
+  captureNarratorDrops,
+  loadAccountBrand,
+  printBottom,
+  printBrandCarry,
+  printProvenance,
+  renderAndSave,
+  subjectAddress,
+  type ProvenanceRow,
+} from "./_harness.mts";
 
-const ADDRESS = process.argv[2] ?? "16209 Asheboro Ct, Fort Myers, FL 33908";
-const UID = process.env.DEMO_BRAND_USER_ID ?? "37cc6c49-4759-4e07-9686-0a8dcce1f8ff";
+const ADDRESS = subjectAddress("16209 Asheboro Ct, Fort Myers, FL 33908");
 
 console.log(`\n  SUBJECT (never printed in the email): ${ADDRESS}\n`);
 
@@ -74,23 +78,8 @@ console.log(`\n  SUBJECT (never printed in the email): ${ADDRESS}\n`);
 // The account table spells the page background `background_color`; the email token
 // bridge reads `backdrop_color`. That rename is a real seam, not a typo here — see the
 // LOST-FIELD report at the bottom of this run.
-const db = createServiceRoleClientUntyped();
-const { data: profile, error: profileErr } = await db
-  .from("user_brand_profiles")
-  .select("*")
-  .eq("user_id", UID)
-  .maybeSingle();
-if (profileErr || !profile) {
-  console.error(`  no brand profile for ${UID}: ${profileErr?.message ?? "no row"}`);
-  process.exit(1);
-}
-const p = profile as Record<string, string | null>;
-const brandingBlob: Record<string, string> = {};
-for (const [k, v] of Object.entries(p)) {
-  if (typeof v === "string" && v.trim())
-    brandingBlob[k === "background_color" ? "backdrop_color" : k] = v;
-}
-const BRAND = brandingToTokens(brandingBlob);
+const { brand: BRAND, profile: p } = await loadAccountBrand();
+const narratorLog = captureNarratorDrops();
 
 // ── THE BUILD — the real recipe, the real chrome ─────────────────────────────
 const { facts, resolved } = await resolveSubject(ADDRESS, "");
@@ -135,7 +124,7 @@ const scarcity = await loadScarcity({
   sqft: n(facts.sqft),
 });
 
-const rows: [string, string | undefined, string][] = [
+const rows: ProvenanceRow[] = [
   ["Asking price", facts.price, "free spine (daily sweep)"],
   ["City (hero label)", facts.city, "free spine — the ONLY geography in the hero"],
   ["Beds", facts.beds, "free spine → paid row"],
@@ -196,51 +185,16 @@ const authored = strings.find(
 );
 rows[14][1] = authored ? `${authored.length} chars` : undefined;
 
-console.log("  CELL                        VALUE                          SOURCE");
-console.log("  " + "─".repeat(108));
-for (const [cell, value, source] of rows) {
-  console.log(
-    `  ${cell.padEnd(27)} ${(value ? String(value).slice(0, 29) : "— OPEN SLOT").padEnd(30)} ${source}`,
-  );
-}
-const sourced = rows.filter(([, v]) => v).length;
-console.log(
-  `\n  ${sourced} of ${rows.length} cells sourced · ${rows.length - sourced} open/suppressed`,
-);
+printProvenance(rows);
+if (narratorLog.length)
+  console.log(`
+  NARRATOR DROPPED: ${narratorLog.join(" | ")}`);
 
-// ── THE BOTTOM — identity, contact, socials, all off the ACCOUNT ─────────────
-const agent = doc.blocks.find((b) => b.type === "agent-card");
-const footer = doc.blocks.find((b) => b.type === "footer");
-const ap = (agent?.props ?? {}) as Record<string, unknown>;
-const fp = (footer?.props ?? {}) as Record<string, unknown>;
-console.log("\n  THE BOTTOM — every value below came from the ACCOUNT's brand profile");
-for (const [label, v] of [
-  ["Agent name", ap.name],
-  ["Agent title", ap.title],
-  ["Agent headshot", ap.photoUrl],
-  ["Agent phone", ap.phone],
-  ["Business address (CAN-SPAM)", fp.address],
-  ["Email", fp.email],
-  ["Website", fp.websiteUrl],
-  ["Instagram", fp.instagramUrl],
-  ["Facebook", fp.facebookUrl],
-  ["LinkedIn", fp.linkedinUrl],
-  ["X", fp.xUrl],
-  ["Unsubscribe", fp.unsubscribeUrl],
-] as [string, unknown][]) {
-  console.log(
-    `  ${label.padEnd(29)} ${v ? String(v).slice(0, 52) : "— OPEN SLOT (fill in Branding)"}`,
-  );
-}
+printBottom(doc);
 
 console.log(`\n  Subject line: "${doc.subjectVariants?.[0] ?? "(none)"}"`);
 
-// ── RENDER THROUGH THE ONE DOOR ──────────────────────────────────────────────
-const html = await renderEmailDocHtml(doc);
-const kb = Math.round(Buffer.byteLength(html, "utf8") / 1024);
-console.log(
-  `  HTML: ${kb}KB ${kb > 102 ? "⚠ OVER Gmail's ~102KB clip point" : "(inside Gmail's ~102KB clip)"}`,
-);
+const { html } = await renderAndSave(doc, "coming-soon-email.html");
 
 // ── THE SUPPRESSION ASSERTION — against the rendered bytes, not the source ───
 // The handoff: "not by reading the code and trusting the comments — render a real house
@@ -273,49 +227,7 @@ for (const [label, needle] of probes) {
   );
 }
 
-// ── WHAT THE PROJECT PATH CARRIES, AND WHAT IT STILL DROPS ──────────────────
-//
-// FIXED 08/05/2026. This block used to hold its OWN hardcoded 14-key copy of
-// applyUserBrandToProject's carry list — a 20th hand-written key list, in the
-// very script whose job is to catch brand fields going missing. When the carry
-// set was widened from 14 to 32 that same day, this diagnostic kept printing
-// "copied to a project: 0" against a defect that was already closed. A stale
-// alarm is worse than no alarm: the next session reads it and re-opens fixed
-// work. It now derives from the registry, so it can never disagree again.
-const COPIED = new Set<string>(PROJECT_CARRY_KEYS);
-const SKIP = new Set([
-  "id",
-  "user_id",
-  "created_at",
-  "updated_at",
-  "source",
-  "color_palettes",
-  "sender_name",
-  "sender_address",
-  "sender_domain_verified",
-  "preferred_recipe",
-  "default_photo_ratio",
-]);
-const lost = Object.entries(p)
-  .filter(([k, v]) => typeof v === "string" && v.trim() && !COPIED.has(k) && !SKIP.has(k))
-  .map(([k]) => k);
-const carried = Object.entries(p).filter(
-  ([k, v]) => typeof v === "string" && v.trim() && COPIED.has(k),
-).length;
-console.log(
-  `\n  BRAND FIELDS ACROSS applyUserBrandToProject — ${carried} filled and carried, ${lost.length} filled and DROPPED`,
-);
-console.log(`  ${lost.length ? lost.join(", ") : "nothing filled is dropped ✓"}`);
-
-const outDir = join(homedir(), "Downloads");
-try {
-  mkdirSync(outDir, { recursive: true });
-} catch {
-  /* EEXIST on Windows */
-}
-const file = join(outDir, "coming-soon-email.html");
-writeFileSync(file, html, "utf8");
-console.log(`\n  SAVED → ${file}\n`);
+printBrandCarry(p);
 
 if (leaked) {
   console.error(

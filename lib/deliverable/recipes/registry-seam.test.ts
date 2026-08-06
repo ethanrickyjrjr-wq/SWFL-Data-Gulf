@@ -479,9 +479,19 @@ describe("REGISTRY-WIDE — every email recipe key", () => {
 //      reproduce; the sentence does not.
 //
 // The clock (`new Date()` in the days-on-market lane) is not normalised either:
-// the fixture carries `daysOnMarket`, so no builder reads the clock on this
-// path. If one starts to, this test goes red — which is the correct signal, not
-// something to normalise away.
+// the fixture carries `daysOnMarket`, so the vendor list-date lane never fires.
+//
+// ⚠️ CORRECTED 08/06/2026 — this used to say "so NO BUILDER reads the clock on
+// this path. If one starts to, this test goes red." **The second sentence was
+// never true, and the first stopped being true.** `under-contract`'s `loadSpeed`
+// calls `todayIso()` for the comparand's as-of date. This test would NOT have
+// gone red: it runs each builder twice milliseconds apart, so both reads return
+// the same date. A once-a-day UTC-midnight window is the only way it could flake.
+//
+// Exposure is nil HERE because that date reaches the doc only through the sources
+// note, which needs a median, and there are no DB creds in this environment — a
+// property of the test env, not a guarantee. `loadSpeed` therefore takes an
+// injectable `deps.asOf`. **Do not read this comment as a working clock guard.**
 //
 // WHY THIS AND NOT A SCREENSHOT: a screenshot proves one build rendered. This
 // proves the SAME INPUTS PRODUCE THE SAME DOCUMENT, which is the property that

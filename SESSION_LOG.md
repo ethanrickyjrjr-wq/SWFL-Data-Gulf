@@ -1,3 +1,86 @@
+## 2026-08-06 (Opus 5) — The acceptance harness and the number formatter get ONE root each. Nothing a customer receives changes; the proof is a paired run, and it caught a bug I introduced.
+
+Operator: *"Why would we build multiple of anything and not use the same?"* then *"Run it and fix it
+correctly and make the rule in the playbook email file."*
+
+**5 of 5 parts done.**
+1. `lib/format-number.ts` + `format-number.test.ts` — **8** copies of `withCommas` collapsed to one
+   (6 recipes + `showing-prep-doc.ts` + `listing-flyer.ts`), 4 spellings, all behaviourally identical.
+   Characterization test written first, pinning every behaviour any copy had.
+2. `scripts/email/_harness.mts` — the ONE acceptance harness. The four `render-*.mts` scripts went
+   1,330 lines to 991 + a 275-line harness.
+3. Two latent defects closed by sharing rather than copying: Coming Soon and Market Comps were still
+   truncating with a bare `.slice()` (no ellipsis — the exact generator of the false headshot defect),
+   and Market Comps had no brand-carry diagnostic at all. The carry line now derives from the ledger:
+   **30 filled and carried of 32 keys**, matching a live probe of `user_brand_profiles`.
+4. **A BUG I INTRODUCED, caught by the paired run:** the first cut gave all four scripts one shared
+   default address. Each had its own on purpose, so Coming Soon and Market Comps silently began
+   testing a different house. Fixed — the default is now a parameter. Written into the playbook as
+   the postmortem, because it is the same error the harness exists to prevent.
+5. Playbook **PART 1.12** written: the harness is shared, the rows/assertions/default house are not,
+   and a consolidation is proved by a PAIRED run — never against an earlier snapshot, because
+   `resolveSubject` reads live vendor data and the subject price, hero hash and comp set all move.
+
+**EVIDENCE.** `bun test lib/deliverable/recipes/ lib/format-number.test.ts` gave **604 pass, 0 fail**.
+`bunx next build` clean. Paired old-vs-new, back to back on the same live data: **Coming Soon
+IDENTICAL, Market Comps IDENTICAL**; New Listing differs by design (it was the only script branding
+from a hardcoded fixture instead of the real account row — now all four read the same source).
+Under Contract byte-identical against its own pre-change run, 6 of 6 assertions pass.
+
+**HONEST COST NOTE.** This fixes nothing a customer receives. The return is forward-looking: the
+next email's acceptance script is ~60 lines instead of ~350. A large share of the ~$83 session went
+on repairing my own mistakes mid-refactor — see the scratchpad entry.
+
+
+## 2026-08-06 (Opus 5) — UNDER CONTRACT (§2.4) built NEW, 6 of 6 parts. Four defects the tests could not see were found by rendering and looking; one assertion was a latent false alarm that would have fired on any condo.
+
+Operator: *"Please fucking folllow the fucking rules of the fucking email system and fucking code new the next fucking email... LOOK AT THE FUCKING PLAYBOOK!!!!! Tell me which emails have been built before you start. DO NOT USE OLD CODE. DO NOT FUCK UP ANY OTHER EMAIL."*
+
+**Built state before starting, counted from `recipes/index.ts` + `scripts/email/`, not from a doc:**
+17 email keys, all 17 with a registered builder. **Walked under the assembly line — playbook section
++ acceptance script + finish pass — was 3 of 17** (New Listing §2.1, Coming Soon §2.2, Market Comps
+§2.3; the only three `render-*.mts` that exist). Under Contract was 0 of 5.
+
+**6 of 6 parts done** (the handoff listed 5; the registry prompt was a real sixth — it still said
+*"invite backup offers"*, a 1-in-17 ask per NAR/Redfin, and the prompt is what a keyless ask seeds
+from):
+1. `lib/deliverable/recipes/under-contract.ts` — written NEW, one resolver, registered.
+2. `under-contract.test.ts` — 24 tests, red-first, each named for its failure mode.
+3. `scripts/email/render-under-contract.mts` — 6 bytes-level assertions, non-zero exit.
+4. Rendered and looked at. 5. Registry prompt corrected. 6. Playbook §2.4 written in full.
+
+**THE OLD JULY FILE'S HELPER MOVED RATHER THAN BREAKING NEW LISTING.** `new-listing.ts:44` imported
+`daysSinceListed`/`resolveSubjectListDate` from the 1,098-line July recipe. Those are a SteadyAPI
+vendor chain, not a recipe concern → `lib/listings/list-date.ts` (verbatim move, tests moved with
+it). One import line changed in another email, and **New Listing's acceptance render was re-run to
+prove it** (21KB, real realtor.com button). Unfiltered `bunx tsc --noEmit` is clean, and a repo-wide
+grep finds zero surviving references to the 25 deleted exports.
+
+**FOUR DEFECTS FOUND BY RENDERING, ZERO BY TESTS** (3,202 green throughout): the Lot cell printed
+`0.19 ac ac` (the spine already formats the unit); the provenance table reported a 574-char
+"authored paragraph" that was **the agent's bio** — an OVER-reporting table, §2.2.4's sixth defect
+inverted; the paragraph came back as five figures in three sentences, one **restating a spec cell two
+rows above it**; and the framing itself induced the claim the gate then killed
+(`sequence("before weighing the list price")` — I told it the price, which it never needed).
+
+**AND ONE THE REVIEW CAUGHT BEFORE IT COULD FIRE:** assertion 5 tested `!lower.includes("dom")`
+against the whole HTML. **"condominium" contains "dom"** — 6,489 condos in the lake — so the first
+condo run would have exited 1 on a phantom defect. Now a case-sensitive `\bDOM\b`, proven to pass a
+condo description and still catch a real DOM cell.
+
+**Evidence:** acceptance run 13–14 of 15 cells (the paragraph is non-deterministic), 23KB, **6 of 6
+assertions pass**; assertions 1–5 **proven RED** by mutating the rendered HTML; assertion 6 counts
+doc blocks and is declared weaker for it. 3,202 tests pass across `lib/deliverable` + `lib/listings`
++ `lib/email`.
+
+**Deliberately NOT done, each with a check:** `under_contract_narrator_has_no_job` (the paragraph
+declines on a description-rich house — a design fork for the operator),
+`lifecycle_agent_card_second_cta` (all 7 lifecycle emails ship two CTAs — shared chrome),
+`under_contract_status_word_unratified` ("under contract" vs "pending" never settled),
+`under_contract_comparand_length_bias` (the two speed numbers are not the same quantity).
+No county rung on the comparand — writing one would mint a second root for a concept
+`data-roots.md` already assigns to one.
+
 ## 2026-08-05 (Opus 5) — Orphans 222 → 220 by pointing at two LOST documents, each of which turned out to be real abandoned work. Deletion is BLOCKED AT THE HARNESS, twice, and needs the operator.
 
 Operator: *"Get it done."*

@@ -539,6 +539,44 @@ then write it down.
 
 ---
 
+## 1.12 THE ACCEPTANCE SCRIPT IS SHARED. THE ROWS AND THE ASSERTIONS ARE NOT.
+
+**Locked 08/06/2026.** Operator: *"Why would we build multiple of anything and not use the same?"*
+
+Every email's acceptance run (`scripts/email/render-<email>.mts`) imports `scripts/email/_harness.mts`.
+**Do not copy its functions into a new script — import them.** The harness owns: the account-brand
+load, the provenance table printer, `clip`, the bottom-of-email table, the brand-carry diff, render +
+save, and the assertion reporter. A new email's script is roughly 60 lines, not 350.
+
+**What stays hand-written per email, always:** its `rows[]` provenance list, its assertions, and
+**its own default house** (passed to `subjectAddress(...)`, never a shared constant). Those are the
+per-email thinking. Consolidating them is a bug, not a cleanup — see the postmortem below.
+
+**Why the rule exists — copying a fix leaves it unapplied.** Four scripts had been written one at a
+time, each copying the last: 1,330 lines doing the same seven things. Two consequences, both real:
+`clip()` was written for New Listing after a truncated URL got filed as a live defect that was not
+one — and Coming Soon and Market Comps were still running a bare `.slice()` with no ellipsis, the
+same alarm generator, still armed. And Coming Soon carried its own hardcoded 14-key copy of the
+brand carry list; when the real list widened to 32 it kept printing a stale count against a closed
+defect. Live-probed 08/06/2026: **32 carry keys, 30 filled on the demo account row.**
+
+**A CONSOLIDATION IS PROVED BY A PAIRED RUN, NOT BY A GREEN TEST.** Run the pre-change script and
+the post-change script **back to back on the same live data**, and byte-compare the rendered HTML.
+Never compare against a snapshot taken earlier: `resolveSubject` reads a live vendor feed, so the
+subject price, the hero photo hash and the comp set all move between runs, and a stale baseline
+reports a false difference. Measured 08/06/2026 — Coming Soon and Market Comps came back
+byte-identical; New Listing differs **by design**, because it was the only script still branding
+from a hardcoded fixture instead of the real account row.
+
+**THE POSTMORTEM, from building this harness.** The first cut gave all four scripts one shared
+default address. Each had its own on purpose — Coming Soon needs a house whose suppression contract
+can actually leak, Market Comps needs one with a real comp set — so two scripts silently began
+testing a different house. That is the same "one root for things that only look alike" error the
+harness exists to prevent, committed inside the fix for it, and **only the paired run caught it.**
+The general form: consolidate what is genuinely one thing; a parameter is not duplication.
+
+---
+
 # PART 2 — THE EMAILS, ONE BY ONE. JUMP TO YOURS.
 
 Each section is self-contained. Read PART 1 once, then read ONLY your email's section.
@@ -552,7 +590,7 @@ gaps.**
 | `new-listing` | New Listing | 2.1 |
 | `coming-soon` | Coming Soon | 2.2 |
 | `market-comps` | Market Comps | 2.3 |
-| `under-contract` | Under Contract | 2.4 — TO BE WALKED |
+| `under-contract` | Under Contract | 2.4 |
 | `just-sold` | Just Sold | 2.5 — TO BE WALKED |
 | `open-house` | Open House | 2.6 — TO BE WALKED |
 | `price-reduced` | Price Improved | 2.7 — TO BE WALKED |
@@ -1588,8 +1626,313 @@ A drop is now visible in the acceptance table, which is the precondition for eve
 
 ---
 
-## 2.4 – 2.17 — TO BE WALKED
+## 2.4 UNDER CONTRACT — tag `under-contract`
+
+**Walked 08/05/2026 and BUILT NEW 08/06/2026.** Every number below came from a run on those
+days. Re-count before quoting any of it.
+
+**The July file is not this email.** `under-contract.ts` dated 07/17/2026 (1,098 lines) predated
+the assembly line. Operator decree 08/05/2026: *"There can't be code for this if it is not from
+today. We are building everything new so we build it fucking right."* It was replaced outright, not
+diffed. The one thing worth keeping — the SteadyAPI list-date chain that **New Listing** imports as
+its DOM fallback — moved to `lib/listings/list-date.ts`, where a vendor fetch chain belongs. That
+was the only edit to another email's code, and New Listing's acceptance render was re-run to prove
+it (21KB, real realtor.com button, unchanged).
+
+**Spine:** the SAME `resolveSubject` inspection point the other six address emails use. What differs
+is that this house is off the market and the email is not selling it.
+
+**Grammar:** the listing grammar. Ribbon "Under Contract", photo, hero with **the address over the
+LIST price**, the six-cell spec strip **with the lot**, the seller's description verbatim, the speed
+pair, the authored paragraph, sources, agent card + one button.
+
+**Chart: NONE.** Locked in `recipes.ts` and unchallenged by the research: a lifecycle email about one
+house gets the photo as its visual, and two bars reading was-versus-now is a fact wearing a chart
+costume. Policy "none" means DROP the slot — no image block is ever pushed.
+
+**Subject:** wants an OPEN → `Under contract: 12554 Kellysands Way`. Deterministic, never
+model-authored, leads with the STATUS rather than the celebration.
+
+**Code:** `lib/deliverable/recipes/under-contract.ts` → `buildLifecycleEmail`. Registry key
+`under-contract`.
+
+---
+
+### 2.4.0 THE DECREE THAT UNBLOCKED THIS EMAIL — read this before anything else
+
+**Operator, 08/05/2026, verbatim:** *"The fucking under contract date is the date the email is
+fucking made, user can change it if they want."*
+
+That one sentence dissolved the gap the July build fabricated its way around. The contract date is
+**not** detected, **not** a wait on a vendor, and **not** held by any source — it **defaults to the
+build date**, and the doc is editable afterwards, which is what the Lab is. So days-to-contract stops
+being an interval nobody holds and becomes `contractDate − listedDate` — and with the contract date
+pinned to today, that is exactly what our own listing clock already computes at read time.
+
+**THE CONTRACT DATE IS NEVER PARSED OUT OF THE PROMPT, and that was a live temptation.** §1.13 is
+explicit that the seed prompt text is DISPLAY and SEED only and a build is never routed on it. A
+regex turning "we went pending 7/28" into a headline number is identity-from-prose, and the claim it
+produced would be **TRUE and therefore invisible to the claim gate** — the exact shape of §2.2.4
+defect 4. Rejected at design time rather than after it shipped.
+
+---
+
+### 2.4.1 REPRODUCE IT — one command, and it asserts the PENDING contract
+
+```
+bun --env-file=.env.local scripts/email/render-under-contract.mts "<address>"
+```
+
+**UPDATED 08/06/2026 — this script now rides the SHARED acceptance harness** (`scripts/email/_harness.mts`,
+PART 1.12). It went 407 lines to 292; the brand load, provenance printer, `clip`, bottom table,
+brand-carry diff, render/save and assertion reporter all moved there. **What did NOT move: this
+email's `rows[]`, its six assertions, and its own default house** — those are per-email by rule. The
+recipe itself (`lib/deliverable/recipes/under-contract.ts`, written NEW 08/06/2026 — the July file's
+`daysSinceListed`/`resolveSubjectListDate` moved to `lib/listings/list-date.ts` rather than being
+imported from a dead recipe) is UNCHANGED by that consolidation, and the run was proved
+byte-identical against its pre-change output before the change landed. `withCommas` here is now
+imported from `lib/format-number.ts` — do not re-declare it.
+
+**Default house: `12554 Kellysands Way, Fort Myers, FL 33908`** — New Listing's own acceptance
+subject, chosen because it carries **both** inputs this email needs: a real non-floored listing clock
+**and** a 549-character seller description. Writes `~/Downloads/under-contract-email.html`.
+
+**Acceptance run, 08/06/2026 — 13–14 of 15 cells sourced, 23KB, 6 of 6 assertions pass.**
+**The range is not sloppiness: the authored paragraph is NON-DETERMINISTIC** and was observed both
+shipping and declining across runs on the same house (see §2.4.5). Everything else reproduced
+identically. Re-run before quoting a single number.
+$350,000 · 2 bd · 2 ba · 1,515 sq ft · **$231/sq ft** · 0.22 ac · Single Family ·
+**12 days to contract against a ZIP-33908 median of 127 days listed (1,095 listings)** · the
+seller's 549-character description verbatim · sources (1) · full agent card and CAN-SPAM footer off
+the account. The two open cells are the authored paragraph (see §2.4.5) and the chart (policy none).
+
+**THE PENDING CONTRACT — this email's bytes-level invariant.** New Listing's is that the address DOES
+ship; Coming Soon's is that it does NOT. **Ours is that the email states a PENDING fact and never a
+SOLD one.** Six assertions, non-zero exit:
+
+1. The street line is PRESENT · 2. the ZIP is PRESENT — this is a public, celebrated status, so a
+missing address is a defect here exactly as a present one is on Coming Soon.
+3. **NO SOLD LANGUAGE** — `sold for`, `sold price`, `closed at`, `final sale`, `sale price`.
+4. The price on the page IS the list price, verbatim.
+5. **NO "days on market" phrasing** (trap 1 — see §2.4.3).
+6. NO chart.
+
+**Assertions 1–5 were PROVEN RED before they were trusted** (mutating the rendered HTML — redact the
+street, zero the ZIP, splice in "sold for", change the price, splice in "days on market" — and
+confirming each flips to FAIL). **Assertion 6 is NOT proven that way and is weaker for it:** it
+counts image blocks on the built doc, so an HTML mutation cannot exercise it. Named, not hidden.
+
+**The banned phrase list is ONE exported root** (`SOLD_LANGUAGE`), imported by both the recipe's own
+guard and the script. A hand-typed second copy in the script is how a guard silently stops guarding.
+
+**SPEND: ZERO new vendor spend.** The free spine, our own `listing_dom` clock and the
+`zip_active_dom_median` RPC are all free reads. **This recipe issues no paid call at all** — unlike
+Market Comps, it never buys a comp set. The only metered call is the one narrator paragraph.
+
+---
+
+### 2.4.2 THE INGREDIENT LADDER — EVERY CELL, ITS SOURCE, AND WHAT FILLS IT WHEN THAT MISSES
+
+**Stop at the first hit. An exhausted ladder is an OPEN SLOT — never a zero, never a guess.**
+Written out in full per the §2.2.2 lesson: a delta-list makes the reader hold two documents open and
+diff them in their head.
+
+#### The identity block — the agent
+
+**Name · title · brokerage · phone · email · headshot · business postal address · socials** — the
+user's brand profile, no data source. The postal address is CAN-SPAM, not decoration. → OPEN.
+Measured on the acceptance run: **30 of 31 filled account fields carried across
+`applyUserBrandToProject`; the one dropped is `button_destinations`.**
+
+#### The house
+
+| Cell | Rung 1 | Rung 2 | Rung 3 | Exhausted |
+|---|---|---|---|---|
+| **Address (street·city·state·ZIP)** | free spine (100%) | — | — | **the build RETURNS NULL** — see below |
+| **LIST price** | free spine `list_price` | — | — | OPEN. **Never a sold price** |
+| **Beds** | free spine (73.7%) | paid row | — | OPEN |
+| **Square feet** | free spine (70.6%) | paid row | — | OPEN |
+| **Baths** | free spine (15.3%) | our own Lee county records, exact-address, one-parcel-only | SteadyAPI `/nearby-home-values` on the subject's coords | paid row → OPEN |
+| **$/sq ft** | computed, price ÷ sq ft | — | — | OPEN if either operand will not parse. **No footnote** — both operands sit two cells away |
+| **Lot** | free spine `lot_acres` | — | — | OPEN. **SHIPS here** — Coming Soon drops it to avoid narrowing a parcel search, and that reason is gone the moment the address ships |
+| **Hero photo** | free spine `photo_url`, mirrored to our storage | paid row `primary_photo` | — | no photo — the layout degrades to a text masthead. **Never an aerial** |
+| **Description** | the agent's own paste | paid row `description` | — | the slot is not emitted at all |
+
+**THE ADDRESS IS THE INVARIANT, AND ITS EXHAUSTED RUNG IS NOT AN OPEN SLOT.** No street and no city
+→ `buildUnderContract` returns null, which hands the build to the terminal author and stamps
+`recipe_key = default-grid`. PART 0 reads that as *"a builder fell through — go look."* **That IS the
+loud failure — recorded in provenance, not swallowed.**
+
+**AND THE GATE IS STREET-OR-CITY, NOT "`addressLineOf` IS NON-EMPTY".** Caught by its own test
+08/06/2026: `addressLineOf` falls back to `[city, state].join(", ")`, so a subject carrying nothing
+but `state: "FL"` produced the truthy string `"FL"` and built an email whose hero read **"FL"** over
+the price. *Non-empty is not the same predicate as identifying.*
+
+#### THE SPEED PAIR — the headline, and the moat
+
+**This home's number** — `contractDate − listedDate`, and with the contract date pinned to the build
+date that is exactly `facts.daysOnMarket` off `data_lake.listing_dom`. → **rung 2 is DROPPED
+ENTIRELY. Never estimated.**
+
+**THE FLOOR GUARD IS INHERITED, NOT RE-IMPLEMENTED.** `resolve-subject.ts:362` attaches
+`daysOnMarket` **only** when `domIsFloor !== true`, so an absent value already means "we do not
+honestly hold this." **A `listedDate` field was considered for `ListingFacts` and deliberately NOT
+added:** when the DOM is floored, a listed date is a floored first-seen date — precisely what the
+handoff says to refuse — so the symmetric-looking field would have been a lane routing around our own
+guard. Symmetry is not a reason to add a shared-type field across seven emails.
+
+**The comparand** — `data_lake.zip_active_dom_median(p_zip)` via `fetchZipBenchmark`
+(`lib/buyer-leverage/zip-benchmark.ts`). Active for-sale, first-seen floors excluded.
+**LIST-SIDE, and that is load-bearing:** `data-roots.md:69-71` assigns list-side to `listing_dom` and
+sold-side to `redfin_swfl.median_dom` and says *never interchange*. **The July build compared against
+the sold-side median — a second, separate error from the date error.** A red test asserts this recipe
+never reads the sold-side table.
+
+**THE COUNTY RUNG IS DELIBERATELY NOT BUILT.** The handoff's ladder reads "ZIP → county → dropped."
+There is no county-scoped median root today, and writing a fresh county aggregate here would mint a
+SECOND root for a concept `data-roots.md` already assigns to one (RULE 0.55). A ZIP miss drops
+straight to "this home's number ships alone" — a weaker true claim beats a stronger unverifiable one.
+Same posture as §2.3.6's refusal to fix the comps CTA mid-walk: named, handed up, not bodged.
+
+**THE SAMPLE FLOOR — `minMedianSample: 10`, a FIELD not a magic number.** A median over three
+listings is not a market fact, and shipping one beside this home's real number lends it authority it
+has not earned. Below the floor the comparison is DROPPED and this home's number ships alone.
+**This is the open `coming_soon_degenerate_funnel_floor` failure shape caught BEFORE it ships rather
+than after** — that email's funnel will still happily print "2,575 comparable homes" as scarcity.
+
+**THE SCOPE LABEL IS THE ONE STRING EVERY CONSUMER PRINTS** (`Speed.scopeLabel`) — the stat cell AND
+the sources note read it, never a ZIP of their own. Same rule as Coming Soon's, same reason: a count
+under a label the query did not use is a checkable claim that fails its own check.
+
+#### The narrator — the ONLY thing the AI writes
+
+Runs **ONLY on lane-2 material** (a pasted or already-bought description). No description → OPEN
+SLOT, not an improvisation.
+
+**IT IS HANDED NO DAYS COUNT AND NO FIGURES IT DID NOT NEED.** `daysOnMarket`, `lotSize`,
+`yearBuilt`, `hoaFee`, the nearby-business sweep and the tax-roll stats are all stripped from its
+fact sheet. See §2.4.4 defect 3 for what happens when they are not.
+
+#### The CTA — ONE, and it is NOT a backup-offer ask
+
+**"See What Else Is Available"**, pointed at the agent's own site. Redfin cites NAR: **only 6% of
+home sales fall through.** That is a 1-in-17 ask, and the registry prompt used to request it in as
+many words (*"and invite backup offers"*) — **corrected in the same pass**, because the prompt is what
+a keyless ask seeds from and leaving it would ship the killed CTA through the back door.
+
+**This is NOT the §2.3.5 homepage defect.** That one is a button *labelled* "View the Full Listing"
+landing on our home page — a promise the destination does not keep. This button promises "what else
+is available" and lands where the agent's other listings live. `listingButtonUrl(facts)` is
+deliberately NOT used: this home is under contract, so its own listing page is the one destination
+that would waste the click.
+
+---
+
+### 2.4.3 THE TWO TRAPS — both measured, both live landmines
+
+**TRAP 1 — `days_in_state` is NOT time under contract.** It ages only while `state` is unchanged and
+resets only on a `state` CHANGE (`ingest/pipelines/listing_lifecycle/transitions.py:66,80`), and
+**`flag_pending` is not part of `state`**. A live Lee row reads flag_pending true, state active,
+days_in_state 34, listed 09/13/2024 — that 34 is days in ACTIVE. Printing "under contract in 34 days"
+off it is **a fabricated number built from a real column**, and it is what got the July recipe
+refuted. Guarded three ways: the recipe never names the column (red test over comment-stripped
+source), no DOM cell is ever emitted (`listing-flyer.ts` says it outright — *"this cell is for ACTIVE
+listings ONLY. Never pass it on under-contract or just-sold"*), and the rendered bytes are grepped
+for "days on market".
+
+**TRAP 2 — do NOT build a pending detector.** The agent tells us; that notification IS the trigger.
+Measured live 08/05/2026: there is no under-contract state (`state` is only active 30,708 / sold 789
+/ withdrawn 223), pending is a flag on an otherwise-active row (7,209 sale rows), and **the flag is
+stale on 462 sold rows.** A red test asserts the recipe never reads `flag_pending`,
+`listing_transitions` or `to_state`.
+
+---
+
+### 2.4.4 FOUR DEFECTS FOUND BY RENDERING AND LOOKING — none catchable by a test
+
+**§2.1.6's lesson held for the third consecutive email.** 3,202 tests were green and all four of
+these were on screen.
+
+**1. THE LOT CELL PRINTED `0.19 ac ac`.** `resolve-subject.ts:283` formats the lake's `lot_acres` as
+`"0.19 ac"` before it ever reaches a recipe, and the shared `listingSpecs` passes `facts.lotSize`
+straight through for exactly that reason. This recipe appended a second unit. **Same class as the
+43,560 conversion bug** — a recipe assuming a raw number where the spine hands it a formatted string.
+
+**2. THE PROVENANCE TABLE MANUFACTURED A GREEN CELL.** It reported *"Authored paragraph — 574 chars"*
+on a run where the narrator had **correctly not fired** (no remarks). The 574 characters were **the
+agent's bio** off the agent card. A length heuristic over every string in the doc cannot tell an
+authored paragraph from any other long sentence the brand supplies. **This is §2.2.4's sixth defect
+pointing the other way: an OVER-reporting table hides a missing paragraph instead of a present one.
+Both are the same sin.** Fixed by excluding the block types the recipe does not author.
+
+**3. THE PARAGRAPH WAS A WALL OF FIGURES, ONE OF THEM A VERBATIM RESTATEMENT OF A CELL.** Handed the
+full fact sheet, the narrator ignored the description entirely and wrote: *"Built in 1988 and set on
+a 0.22-acre lot, this home carries a monthly HOA of $1,326 … Grocery stores and restaurants each open
+within a mile, with the nearest of each category sitting at 0.71 and 0.63 miles respectively."* Five
+figures in three sentences, the lot **repeating a spec cell two rows above it**, and not one word
+from the seller's copy. Every fact was TRUE so the claim gate passed it. This is §2.1.6 defect 3
+meeting §1.14's standing rule that **the model writes prose and never a figure.** Fixed by removing
+the material, not by a sterner prompt.
+
+**4. THE FRAMING ORDERED A CLAIM THE GATE THEN KILLED — on the FIRST acceptance run.** It printed
+`[narrative] DROPPED — the narrator made 1 claim(s) it was not given: sequence("before weighing the
+list price")`. The cause was one sentence in the framing: *"The price shown is the LIST price."* **The
+model does not need the price to describe a house, and naming it invited exactly the reasoning that
+produced a sequence claim.** §2.2.4's closing lesson arriving on the very next email: **a fact you
+hand the writer is a fact it will try to use.** Removed. And the drop is now VISIBLE in the
+provenance table (§2.3.0's lesson: a `console.error` nobody reads looks identical to nothing being
+wrong).
+
+---
+
+### 2.4.5 KNOWN GAPS — named, not hidden
+
+- **⚠ THE STATUS WORD IS UNRATIFIED.** "Under contract" vs "pending" in Florida practice was
+  researched 08/05/2026 and **three sources failed to settle it.** The default is "under contract"
+  because it is the recipe key and the operator's own word throughout the walk — **but he has not
+  ruled, and this section must not be read as settling it.**
+- **THE AUTHORED PARAGRAPH DECLINES ON A DESCRIPTION-RICH HOUSE, and that is a design fork, not a
+  bug.** Because the description ships VERBATIM, a paragraph that summarises it hands the reader the
+  same sentences twice (§2.1.6 defect 3). The framing now forbids restating it and tells the model to
+  say nothing if it has nothing honest to add — **and on the acceptance house it says nothing.** So
+  the agent's own word count is ZERO against §1.9's 50–125 floor, with the description carrying the
+  body. Conservative is the right direction under the no-invention gate, but **the operator should
+  decide whether this email wants an authored paragraph at all.** Open as
+  `under_contract_narrator_has_no_job`.
+- **THE AGENT CARD SHIPS A SECOND CTA.** The rendered email carries "Get in touch" inside the agent
+  card **and** the recipe's own button — two asks, against §1.8's *"ONE call to action per email,
+  never three."* `agent-launch.ts:402` already names this exact shape as a defect. It is shared
+  chrome (`default-docs.ts:129`) and hits **all seven** lifecycle emails, so it was NOT fixed
+  mid-walk. Open as `lifecycle_agent_card_second_cta`.
+- **The address prints a comma US convention does not** — `12554 Kellysands Way, Fort Myers, FL,
+  33908`. This is §2.3.5 gap 2, pre-existing and shared: the vendor's own `formattedAddress` passed
+  through verbatim by `resolve-subject.ts toFacts`. **Now measured on THREE of the seven** (New
+  Listing, Market Comps, Under Contract). Still not fixed — a one-root change with a seven-email
+  blast radius belongs in a pass that walks all seven.
+- **Nothing in the pipe can tell an aerial from a front elevation** (`hero_photo_aerial_detection`,
+  open). The locked operator rule is the listing's own photo or nothing, and only a human eye
+  enforces it.
+- **No county rung on the comparand** — see §2.4.2. A ZIP the RPC has no median for drops the
+  comparison entirely.
+- **THE TWO SPEED NUMBERS ARE NOT THE SAME QUANTITY, and the difference flatters us.** `12 Days to
+  contract` is a COMPLETED interval; `127 Median days listed` is the current AGE of homes that have
+  **not** sold. Fast sales leave that pool, so the active median is length-biased UPWARD and the
+  juxtaposition implies a larger speed advantage than the data supports. The honest comparand is a
+  completed sold-side interval — which the handoff explicitly ruled out (`data-roots.md:69-71`,
+  list-side vs sold-side, never interchange), so this is a consequence of a ruling, not a bug to fix
+  here. **What keeps it shippable is that the cell label and the sources note both state exactly what
+  was counted** ("how long homes currently for sale in ZIP 33908 have been on the market"), so a
+  reader who re-runs the stated criterion reproduces the number. Recorded so nobody quotes the pair
+  as a like-for-like speed multiple. Open as `under_contract_comparand_length_bias`.
+- **This builder READS THE CLOCK — the first one that does**, and `registry-seam.test.ts`'s comment
+  claiming no builder does was corrected in the same pass. See `loadSpeed`'s own note and
+  `deps.asOf`. It is not currently reachable in that test (no DB creds → no median → no sources
+  note), but that is an environment property, not a guarantee.
+
+---
+
+## 2.5 – 2.17 — TO BE WALKED
 
 Each section gets written when that email is walked with the operator. **Do not pre-fill one from
-memory or by copying 2.1, 2.2 or 2.3** — the whole point of the walk is that each email's
+memory or by copying 2.1, 2.2, 2.3 or 2.4** — the whole point of the walk is that each email's
 ingredients and sources get decided deliberately, one at a time.

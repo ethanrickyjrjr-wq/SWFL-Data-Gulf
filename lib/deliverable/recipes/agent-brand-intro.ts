@@ -54,6 +54,7 @@
 //  6. FRAMING — headshot + name up front, the farm area's asking-price spread as the
 //     evidence, the agent's newest listing as the anchor, one CTA.
 
+import { withCommas } from "@/lib/format-number";
 import { createBlock, DEFAULT_BLOCK_PROPS } from "@/lib/email/doc/default-docs";
 import { brandWebsiteUrl, heroPhotoBlock } from "@/lib/email/inject-photo";
 import { chartImageBlock } from "@/lib/email/inject-chart";
@@ -853,12 +854,6 @@ export function brandAgentName(current: EmailDoc): string | null {
     if (b.type === "agent-hero" && b.props.name && b.props.name !== house) return b.props.name;
   }
   return null;
-}
-
-/** "7453" → "7,453". Undefined in → undefined (an open slot, never a fabricated 0). */
-function withCommas(n?: string): string | undefined {
-  const digits = (n ?? "").replace(/[^\d]/g, "");
-  return digits ? digits.replace(/\B(?=(\d{3})+(?!\d))/g, ",") : undefined;
 }
 
 /** Price ÷ sqft. Both must parse, or the cell stays an OPEN SLOT. */

@@ -242,8 +242,22 @@ export const RECIPES: Record<RecipeKey, Recipe> = {
     // contract took. `chart` is "none" for the same reason: dom-vs-area needs this home's
     // days-to-contract as its subject bar, and that bar can never be honestly drawn.
     chart: "none",
+    // ── AND THE CTA USED TO REQUEST A 1-IN-17 ASK. Corrected 08/06/2026. ──────────
+    //
+    // It read "…and invite backup offers." Redfin cites NAR: **only 6% of home sales fall
+    // through.** Asking a whole list to queue behind a signed contract spends the reader's
+    // attention on a coin that lands wrong sixteen times out of seventeen, and it is the
+    // documented failure mode for this email — a bare congratulations with no real ask.
+    //
+    // The honest recapture is **"here's what else," never "get in line."** The underbidders
+    // are the audience worth recovering (known band, known area, known moment of wanting),
+    // and what they can actually act on is the agent's other inventory — not this house.
+    //
+    // The prompt is what a KEYLESS ask seeds from, so leaving the old wording here would
+    // have shipped the killed CTA through the back door even after the builder stopped
+    // writing it (§1.13: the seed text is display and seed only, but it still seeds).
     prompt:
-      "Build an under-contract announcement email for my listing at [[your listing address]] — announce it's under contract, set its time on the market against the area's typical days on market, and invite backup offers.",
+      "Build an under-contract announcement email for my listing at [[your listing address]] — announce it's under contract, set how fast it went against how long homes in the area have been listed, and point readers to what else is available.",
     needs: ["agent_name", "brokerage", "business_address"],
   },
   "just-sold": {

@@ -27,9 +27,12 @@
 - **Every `Recipe` declares `positioning: "sell-side" | "story-side"`** (`recipes.ts`). Sell-side = pitches
   a specific property or the agent's own brand; story-side = recurring relationship/informational content.
   Adding a recipe? It will not compile without this field.
-- **`FAVORABLE_FRAMING_POLICY` (`recipes/shared.ts`) is pasted VERBATIM into exactly THREE prompts** —
-  `authorListingNarrative` (shared.ts), `authorUnderContractNote` (under-contract.ts), `buildNarratorPrompt`
-  (market-comps.ts) — never paraphrased, never re-typed. **Never paste it into `authorAreaRead`
+- **`FAVORABLE_FRAMING_POLICY` (`recipes/shared.ts`) is pasted VERBATIM into exactly TWO prompts** —
+  `authorListingNarrative` (shared.ts) and `buildNarratorPrompt` (market-comps.ts) — never paraphrased,
+  never re-typed. (**Was three.** `authorUnderContractNote` was the third and died with the July
+  under-contract recipe, rewritten new 08/06/2026. The replacement carries no narrator prompt of its
+  own: it calls the shared `authorListingNarrative`, so it inherits the block rather than pasting a
+  second copy — which is the preferred shape for any new recipe.) **Never paste it into `authorAreaRead`
   (agent-brand-intro.ts) or `LETTER_SYSTEM` (agent-launch.ts)** — both carry an absolute no-numbers/no-facts
   constraint the block would contradict, not just leave unused. `positioning: "sell-side"` on those two
   recipes is a categorization fact only; it does not mean their prompts change.

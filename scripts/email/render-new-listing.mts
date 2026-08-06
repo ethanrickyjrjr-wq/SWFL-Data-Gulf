@@ -20,19 +20,24 @@
  * It also prints a PER-CELL PROVENANCE TABLE, because "where did this number come from" is
  * the question this whole email exists to answer.
  */
-import { mkdirSync, writeFileSync } from "node:fs";
-import { homedir } from "node:os";
-import { join } from "node:path";
 import { buildNewListing } from "../../lib/deliverable/recipes/new-listing";
 import { resolveSubject } from "../../lib/deliverable/recipes/shared";
 import { listingButtonUrl } from "../../lib/listings/listing-url";
 import { defaultDoc } from "../../lib/email/doc/default-docs";
 import { applyBrand } from "../../lib/email/brand/apply-brand";
-import { brandingToTokens } from "../../lib/email/brand/branding-to-tokens";
+// THE ONE ACCEPTANCE HARNESS — see `_harness.mts`.
+import {
+  captureNarratorDrops,
+  loadAccountBrand,
+  printBottom,
+  printBrandCarry,
+  printProvenance,
+  renderAndSave,
+  subjectAddress,
+  type ProvenanceRow,
+} from "./_harness.mts";
 
-import { renderEmailDocHtml } from "../../lib/email/render-email-doc";
-
-const ADDRESS = process.argv[2] ?? "12554 Kellysands Way, Fort Myers, FL 33908";
+const ADDRESS = subjectAddress("12554 Kellysands Way, Fort Myers, FL 33908");
 
 console.log(`\n  SUBJECT: ${ADDRESS}\n`);
 
@@ -44,50 +49,15 @@ if (!resolved) {
   );
 }
 
-// THE BOTTOM OF THE EMAIL — agent identity, contact, social links, and the brand.
+// THE BRAND, OFF THE REAL ACCOUNT ROW — never a hardcoded literal.
 //
-// THE DEMO AGENT IS **DANI VERO / CAST & COAST REALTY**, and she is not invented here: she is
-// the fictional Cape Coral agent this repo already uses for every showcase email, defined in
-// `scripts/email/build-showcase-lifecycle-extras.mts` with a committed logo and an
-// AI-generated portrait, both disclosed as fictional in `lib/showcase/registry.ts`. Reusing
-// her is the point — a second made-up agent would be a second root for one concept.
-//
-// Two corrections this encodes, both from 08/05/2026:
-//   1. The first preview rendered on a BLANK canvas and the bottom came out bare. Nothing was
-//      missing from the email; I simply never gave it a brand.
-//   2. Fonts: MONTSERRAT_SANS + LATO_SANS, not the geometric/modern pair. Those two carry no
-//      webfont URL (`lib/brand/fonts.ts`), so every render silently fell back to Trebuchet or
-//      Arial — the 08/03 "why does the font suck" finding, already fixed for the showcase and
-//      worth inheriting rather than rediscovering.
-//
-// The brand travels the SAME path a real send uses — `brandingToTokens` → `applyBrand` — so
-// this preview is not a preview-only approximation. Anything the profile does not carry (a
-// phone, social handles) stays an honest open slot rather than being invented.
-const DEMO_BRAND = brandingToTokens({
-  agent_name: "Dani Vero",
-  agent_title: "Cast & Coast Realty · Cape Coral",
-  brokerage: "Cast & Coast Realty",
-  business_address: "1520 SE 46th St, Cape Coral, FL 33904",
-  contact_email: "dani@castandcoast.example",
-  contact_phone: "(239) 555-0142",
-  photo_url: "https://www.swfldatagulf.com/showcase/launch-blitz/live/assets/dani-vero.jpg",
-  // NO logo_url. `public/showcase/launch-blitz/live/assets/` holds ONLY `dani-vero.jpg` — no
-  // logo file was ever added there. The old value here (`castcoast-logo.png`) 404s, which
-  // rendered as a broken-image icon captioned "Dani Vero" (companyName is the alt text) sitting
-  // directly above the real "Dani Vero" name line — the doubled-name screenshot, 08/05/2026.
-  // The header already degrades to a text-only masthead when `logoUrl` is absent — that is the
-  // real fix, not a guessed-at filename that might also 404.
-  instagram_url: "https://instagram.com/castandcoast",
-  facebook_url: "https://facebook.com/castandcoast",
-  linkedin_url: "https://linkedin.com/company/castandcoast",
-  unsubscribe_url: "https://www.swfldatagulf.com/unsubscribe",
-  primary_color: "#12343B",
-  accent_color: "#0E7C86",
-  text_color: "#2E4A50",
-  backdrop_color: "#F2FAFB",
-  font_display: "MONTSERRAT_SANS",
-  font_body: "LATO_SANS",
-});
+// THIS SCRIPT USED TO HAND-WRITE A `DEMO_BRAND` FIXTURE and it was the only one of the four
+// that did. A fixture proves the RENDERER and proves nothing about whether an agent who fills
+// in their brand actually gets it — hardcoding one is what hid the 17-field account->project
+// drop for a whole session (playbook 2.2.4 defect 1). The other three scripts already read the
+// account row; this one now does too, so all four measure the same real thing.
+const { brand: DEMO_BRAND, profile: p } = await loadAccountBrand();
+const narratorLog = captureNarratorDrops();
 
 // BRAND RUNS **LAST**, as an overlay — stop 4 of the five-stop pipe, after the recipe and the
 // layout seam, never before them. The first cut here branded the canvas and THEN built, which
@@ -111,7 +81,7 @@ const doc = applyBrand(built, DEMO_BRAND);
 
 // ── THE PROVENANCE TABLE — every cell, and which lane filled it ──────────────
 const url = listingButtonUrl(facts);
-const rows: [string, string | undefined, string][] = [
+const rows: ProvenanceRow[] = [
   ["Asking price", facts.price, "free spine (daily sweep)"],
   ["Address", facts.address, "free spine"],
   ["Beds", facts.beds, "free spine → paid row"],
@@ -142,61 +112,14 @@ const rows: [string, string | undefined, string][] = [
 // image/jpeg. The column just cut it at 44 chars with no marker, and a plain prefix of a URL is
 // itself a plausible URL. That is the stale-alarm class this script exists to prevent, produced BY
 // this script. The ellipsis is the whole fix: it makes "there is more" unmissable.
-const clip = (s: string, n: number) => (s.length > n ? `${s.slice(0, n - 1)}…` : s);
 
-console.log("  CELL                 VALUE                                     SOURCE");
-console.log("  " + "─".repeat(100));
-for (const [cell, value, source] of rows) {
-  const v = value ? clip(String(value), 40) : "— OPEN SLOT";
-  console.log(`  ${cell.padEnd(20)} ${v.padEnd(41)} ${source}`);
-}
-
-const openSlots = rows.filter(([, v]) => !v).length;
-console.log(
-  `\n  ${rows.length - openSlots} of ${rows.length} cells sourced · ${openSlots} open slot(s)`,
-);
-// What the BOTTOM of the email is carrying — the operator's "whole look".
-const agent = doc.blocks.find((b) => b.type === "agent-card");
-const footer = doc.blocks.find((b) => b.type === "footer");
-const ap = (agent?.props ?? {}) as Record<string, unknown>;
-const fp = (footer?.props ?? {}) as Record<string, unknown>;
-console.log(
-  "\n  THE BOTTOM — identity, contact, links (all from the BRAND PROFILE, not the listing)",
-);
-for (const [label, v] of [
-  ["Agent name", ap.name],
-  ["Agent title", ap.title],
-  ["Agent headshot", ap.photoUrl],
-  ["Agent phone", ap.phone],
-  ["Business address (CAN-SPAM)", fp.address],
-  ["Email", fp.email],
-  ["Website", fp.websiteUrl],
-  ["Instagram", fp.instagramUrl],
-  ["Facebook", fp.facebookUrl],
-  ["LinkedIn", fp.linkedinUrl],
-] as [string, unknown][]) {
-  console.log(
-    `  ${label.padEnd(30)} ${v ? clip(String(v), 44) : "— OPEN SLOT (fill in Branding)"}`,
-  );
-}
+printProvenance(rows);
+printBottom(doc);
 
 console.log(`
   Subject line: "${doc.subjectVariants?.[0] ?? "(none)"}"`);
 console.log(`  Button: ${url ? `→ ${url}` : "NONE (no real link — never a homepage)"}`);
 
-// ── RENDER THROUGH THE ONE DOOR ──────────────────────────────────────────────
-const html = await renderEmailDocHtml(doc);
-const kb = Math.round(Buffer.byteLength(html, "utf8") / 1024);
-console.log(
-  `  HTML: ${kb}KB ${kb > 102 ? "⚠ OVER Gmail's ~102KB clip point" : "(inside Gmail's ~102KB clip)"}`,
-);
-
-const outDir = join(homedir(), "Downloads");
-try {
-  mkdirSync(outDir, { recursive: true });
-} catch {
-  /* already there — Windows still throws EEXIST on a recursive mkdir of an existing dir */
-}
-const file = join(outDir, "new-listing-email.html");
-writeFileSync(file, html, "utf8");
-console.log(`\n  SAVED → ${file}\n`);
+await renderAndSave(doc, "new-listing-email.html");
+printBrandCarry(p);
+if (narratorLog.length) console.log(`  NARRATOR: ${narratorLog.join(" | ")}`);

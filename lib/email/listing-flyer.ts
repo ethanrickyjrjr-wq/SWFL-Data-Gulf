@@ -15,19 +15,12 @@
 // Never refuses (RULE 0.7): no photo → a canvas dropzone; no spec → an open slot the user
 // fills; no remarks → an instruction. Never a zero, never invented.
 
+import { withCommas } from "@/lib/format-number";
 import { buildLifecycleEmail } from "./lifecycle-chrome";
 import { listingButtonUrl } from "@/lib/listings/listing-url";
 import type { ChromeBlock } from "./lifecycle-chrome";
 import type { EmailDoc, StatItem } from "./doc/types";
 import type { ListingFacts } from "./listing-scrape";
-
-/** "7453" → "7,453"; strips any non-digits first. Undefined in → undefined. */
-function withCommas(n?: string): string | undefined {
-  if (!n) return undefined;
-  const digits = n.replace(/[^\d]/g, "");
-  if (!digits) return undefined;
-  return digits.replace(/\B(?=(\d{3})+(?!\d))/g, ",");
-}
 
 /** List price ÷ listed square footage → "$1,914". Both must parse to a positive number;
  *  anything missing → undefined (an open slot, never a fabricated value). */

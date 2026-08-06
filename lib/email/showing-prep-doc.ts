@@ -9,6 +9,7 @@
 // never a fabricated number. Brand/identity (header, agent card, footer, globalStyle)
 // is sticky, lifted from the doc on the canvas.
 
+import { withCommas } from "@/lib/format-number";
 import { createBlock } from "./doc/default-docs";
 import { heroPhotoBlock } from "./inject-photo";
 import { listingsMapUrl, type MapPin } from "@/lib/listings/listings-map";
@@ -33,12 +34,6 @@ const DISCLOSURE_LABEL = "Attach seller disclosure (optional)";
 
 function keepOrDefault(current: EmailDoc, type: EmailBlock["type"]): EmailBlock {
   return current.blocks.find((b) => b.type === type) ?? createBlock(type);
-}
-
-function withCommas(n?: string): string | undefined {
-  if (!n) return undefined;
-  const digits = n.replace(/[^\d]/g, "");
-  return digits ? digits.replace(/\B(?=(\d{3})+(?!\d))/g, ",") : undefined;
 }
 
 function usd(n: number | null): string {

@@ -57,26 +57,36 @@
  * `ANTHROPIC_API_KEY` and the prose becomes the code-authored verdict alone, which is the
  * designed fail-closed state, not a break.
  */
-import { mkdirSync, writeFileSync } from "node:fs";
-import { homedir } from "node:os";
-import { join } from "node:path";
 import { buildMarketComps, isListingUrl } from "../../lib/deliverable/recipes/market-comps";
 import { resolveSubject } from "../../lib/deliverable/recipes/shared";
 import { defaultDoc } from "../../lib/email/doc/default-docs";
-import { applyBrand } from "../../lib/email/brand/apply-brand";
-import { brandingToTokens } from "../../lib/email/brand/branding-to-tokens";
-import { renderEmailDocHtml } from "../../lib/email/render-email-doc";
 import { createServiceRoleClientUntyped } from "../../utils/supabase/service-role";
+import { applyBrand } from "../../lib/email/brand/apply-brand";
+// THE ONE ACCEPTANCE HARNESS — see `_harness.mts`. Everything below that is not this email's
+// own provenance rows or its own assertions comes from there.
+import {
+  captureNarratorDrops,
+  loadAccountBrand,
+  printBottom,
+  printBrandCarry,
+  printProvenance,
+  renderAndSave,
+  subjectAddress,
+  type ProvenanceRow,
+} from "./_harness.mts";
 import { spendLedger, paidLaneEnabled, USD_PER_RESULT } from "../../lib/listings/apify-spend-guard";
 
-const ADDRESS = process.argv[2] ?? "8348 Southwindbay Cir, Fort Myers, FL 33908";
-const UID = process.env.DEMO_BRAND_USER_ID ?? "37cc6c49-4759-4e07-9686-0a8dcce1f8ff";
+const ADDRESS = subjectAddress("8348 Southwindbay Cir, Fort Myers, FL 33908");
 
 console.log(`\n  SUBJECT: ${ADDRESS}\n`);
 
-const db = createServiceRoleClientUntyped();
+const { brand: BRAND, profile: p } = await loadAccountBrand();
+const narratorLog = captureNarratorDrops();
 
-/** The paid-record receipt. Counted before and after — the delta IS the spend. */
+// THE PAID-ROW RECEIPT — this is the one email that can BUY a comp set, so the run counts the
+// cache rows before and after and reports the delta. Its own client: the harness keeps a
+// private one for the brand read and does not expose it.
+const db = createServiceRoleClientUntyped();
 async function paidRecordCount(): Promise<number | null> {
   const { count } = await db
     .schema("data_lake")
@@ -85,24 +95,6 @@ async function paidRecordCount(): Promise<number | null> {
   return count ?? null;
 }
 const paidBefore = await paidRecordCount();
-
-// ── THE BRAND, OFF THE REAL ACCOUNT ──────────────────────────────────────────
-const { data: profile, error: profileErr } = await db
-  .from("user_brand_profiles")
-  .select("*")
-  .eq("user_id", UID)
-  .maybeSingle();
-if (profileErr || !profile) {
-  console.error(`  no brand profile for ${UID}: ${profileErr?.message ?? "no row"}`);
-  process.exit(1);
-}
-const p = profile as Record<string, string | null>;
-const brandingBlob: Record<string, string> = {};
-for (const [k, v] of Object.entries(p)) {
-  if (typeof v === "string" && v.trim())
-    brandingBlob[k === "background_color" ? "backdrop_color" : k] = v;
-}
-const BRAND = brandingToTokens(brandingBlob);
 
 // ── CAPTURE THE CLAIM GATE. It speaks exactly once, on stderr, and then the email
 //    quietly ships shorter. Wrap before the build; restore after.
@@ -174,7 +166,7 @@ const descriptionShipped = remarks ? texts.some((t) => t.trim() === remarks) : f
 const verdictish = texts.find((t) => /per square foot, the asking price/i.test(t));
 
 // ── THE PROVENANCE TABLE — every cell, and which lane filled it ──────────────
-const rows: [string, string | undefined, string][] = [
+const rows: ProvenanceRow[] = [
   ["Asking price (hero)", facts.price, "free spine (daily sweep) — the CLAIM this email defends"],
   ["Address (hero label)", facts.address, "free spine — printed, unlike Coming Soon"],
   ["Beds", statOf("Beds"), "free spine → paid row"],
@@ -220,15 +212,10 @@ const rows: [string, string | undefined, string][] = [
   ["CTA", ctaUrl, "the subject's real listing page → our site only as last resort"],
 ];
 
-console.log("  CELL                        VALUE                          SOURCE");
-console.log("  " + "─".repeat(112));
-for (const [cell, value, source] of rows) {
-  console.log(
-    `  ${cell.padEnd(27)} ${(value ? String(value).slice(0, 29) : "— OPEN SLOT").padEnd(30)} ${source}`,
-  );
-}
-const sourced = rows.filter(([, v]) => v).length;
-console.log(`\n  ${sourced} of ${rows.length} cells sourced · ${rows.length - sourced} open`);
+printProvenance(rows);
+if (narratorLog.length)
+  console.log(`
+  NARRATOR DROPPED: ${narratorLog.join(" | ")}`);
 
 // ── THE EVIDENCE ROWS, PRINTED — this is what the reader sees ────────────────
 console.log("\n  THE EVIDENCE TABLE, ROW BY ROW");
@@ -238,35 +225,11 @@ for (const r of rowsOut) {
   );
 }
 
-// ── THE BOTTOM — identity, contact, socials, all off the ACCOUNT ─────────────
-const agent = blocks.find((b) => b.type === "agent-card");
-const footer = blocks.find((b) => b.type === "footer");
-const ap = (agent?.props ?? {}) as Record<string, unknown>;
-const fp = (footer?.props ?? {}) as Record<string, unknown>;
-console.log("\n  THE BOTTOM — every value below came from the ACCOUNT's brand profile");
-for (const [label, v] of [
-  ["Agent name", ap.name],
-  ["Agent title", ap.title],
-  ["Agent headshot", ap.photoUrl],
-  ["Agent phone", ap.phone],
-  ["Business address (CAN-SPAM)", fp.address],
-  ["Email", fp.email],
-  ["Website", fp.websiteUrl],
-  ["Unsubscribe", fp.unsubscribeUrl],
-] as [string, unknown][]) {
-  console.log(
-    `  ${label.padEnd(29)} ${v ? String(v).slice(0, 52) : "— OPEN SLOT (fill in Branding)"}`,
-  );
-}
+printBottom(doc);
 
 console.log(`\n  Subject line: "${doc.subjectVariants?.[0] ?? "(none)"}"`);
 
-// ── RENDER THROUGH THE ONE DOOR ──────────────────────────────────────────────
-const html = await renderEmailDocHtml(doc);
-const kb = Math.round(Buffer.byteLength(html, "utf8") / 1024);
-console.log(
-  `  HTML: ${kb}KB ${kb > 102 ? "⚠ OVER Gmail's ~102KB clip point" : "(inside Gmail's ~102KB clip)"}`,
-);
+await renderAndSave(doc, "market-comps-email.html");
 
 // ── THE EVIDENCE CONTRACT — asserted against the BUILT ARTIFACT ──────────────
 const fail: string[] = [];
@@ -373,15 +336,7 @@ console.log(
     `(rows NEW TO THE CACHE — NOT a spend figure: re-buying the same houses adds 0 rows)`,
 );
 
-const outDir = join(homedir(), "Downloads");
-try {
-  mkdirSync(outDir, { recursive: true });
-} catch {
-  /* EEXIST on Windows */
-}
-const file = join(outDir, "market-comps-email.html");
-writeFileSync(file, html, "utf8");
-console.log(`\n  SAVED → ${file}`);
+printBrandCarry(p);
 
 if (warn.length) {
   console.log("\n  ⚠ REPORTED, NOT FATAL");

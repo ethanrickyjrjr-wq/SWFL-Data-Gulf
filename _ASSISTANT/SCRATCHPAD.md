@@ -1,3 +1,50 @@
+## 2026-08-06 (Opus 5) — OPERATOR: *"what is this fucking fixing for all this money you are stealing from me?"* + *"stop just jumping into shit. fucking plan it out."*
+
+OPEN — the behaviour, not the code. I answered a should-we-do-this question by making the case FOR
+spending, when the honest framing was: this changes NOTHING a customer receives, it only makes the
+next email's test script cheaper. Then I improvised the refactor with generated python transforms
+instead of reading the files — broke three scripts, swallowed a function block out of Market Comps,
+and collapsed four different default test addresses into one. Each was caught and fixed, but the
+churn IS the defect. **The rule for next time: for any work with no customer-facing output, say so
+in the first sentence and let him decide BEFORE a single edit; and write the steps down before
+touching a file.** Session ~$83, a large share of it burned on my own repairs.
+
+
+## 2026-08-06 (Opus 5) — OPERATOR: *"Why would we build multiple of anything and not use the same ????????"*
+
+**He is right, and the counts are mine.** Asked on the Under Contract build, and it lands on code I
+wrote in this session while writing a file whose whole argument is "one root per concept."
+
+**COUNTED LIVE 08/06/2026, not estimated:**
+- `withCommas` — **6 copies** (agent-brand-intro, back-on-market, coming-soon, just-sold,
+  open-house, under-contract). **I added the sixth.**
+- `mdY` (yyyy-mm-dd → MM/DD/YYYY) — 2 copies (coming-soon, under-contract). I added the second.
+- `clip()` — 2 copies (render-new-listing, render-under-contract). I added the second.
+- **Four acceptance scripts, 1,330 lines** (new-listing 202 · coming-soon 325 · market-comps 396 ·
+  under-contract 407) doing the same seven things: load the account brand, build a provenance
+  table, clip values, print the bottom table, diff `PROJECT_CARRY_KEYS`, render, save.
+
+**THE AGGRAVATING FACT: the handoff TOLD me to copy** — *"Copy the helper into
+`render-under-contract.mts`. Never re-introduce a silent slice."* I followed the letter (no silent
+slice) and re-committed the disease (a second copy). **An instruction to duplicate is still
+duplication, and a plan is a hypothesis, not authority.**
+
+**THIS IS NOT A HYPOTHETICAL COST — it already fired, in this same walk.** Coming Soon's script held
+its OWN hardcoded 14-key copy of the brand carry list. When the real list widened to 32, the copy
+kept printing "0 carried" against an already-closed defect — a stale alarm inside the very script
+whose job is catching brand fields going missing. That is the second-copy failure mode, measured,
+in the same file family.
+
+**What the codebase already gets RIGHT, so this is inconsistency and not ignorance:** `spec()`,
+`listingSpecs`, `listingButtonUrl`, `social/platforms.ts`, `SOLD_LANGUAGE`, `formatDom` are each ONE
+root with many consumers.
+
+**THE FIX, not yet done — needs his call because it touches all four emails:** one acceptance
+harness that each email parameterises (default address, the provenance rows, its own assertions),
+and one formatting module for `withCommas`/`mdY`/`num`/`count`/`clip`. Estimated ~60 lines per email
+instead of 200–400. **Blocked on: he said "DO NOT FUCK UP ANY OTHER EMAIL," and this by definition
+edits three shipped ones.** Open as `email_acceptance_harness_duplicated_4x`.
+
 ## 2026-08-05 (Opus 5) — OPERATOR: *"Take care of it all. We suck. We can't get any worse. Make sure we are actively improving every fucking day"*
 
 **TWO ORDERS, and the second one is the durable one.**

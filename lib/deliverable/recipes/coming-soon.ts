@@ -83,6 +83,7 @@
 // 2,847 sq ft · Lee County): 13,122 active Lee County homes · 1,062 priced $536K–$655K ·
 // 328 that also match on beds and size.
 
+import { withCommas } from "@/lib/format-number";
 import { buildLifecycleEmail } from "@/lib/email/lifecycle-chrome";
 import { createBlock } from "@/lib/email/doc/default-docs";
 import { brandWebsiteUrl } from "@/lib/email/inject-photo";
@@ -627,11 +628,6 @@ export function scarcityChartSpec(
 }
 
 // ── The build ────────────────────────────────────────────────────────────────
-
-function withCommas(n?: string): string | undefined {
-  const digits = String(n ?? "").replace(/[^\d]/g, "");
-  return digits ? digits.replace(/\B(?=(\d{3})+(?!\d))/g, ",") : undefined;
-}
 
 const num = (s?: string): number => Number(String(s ?? "").replace(/[^\d.]/g, "")) || 0;
 

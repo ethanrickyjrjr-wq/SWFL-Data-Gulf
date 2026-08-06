@@ -69,6 +69,7 @@
 //      asks for the NEXT ACTION (tell me you're coming), never points at what they are
 //      already reading.
 
+import { withCommas } from "@/lib/format-number";
 import { buildLifecycleEmail } from "@/lib/email/lifecycle-chrome";
 import { addressLineOf, spec } from "@/lib/email/listing-flyer";
 import {
@@ -80,13 +81,6 @@ import {
 import type { RecipeBuildContext } from "./index";
 import type { ListingFacts } from "@/lib/email/listing-scrape";
 import type { EmailDoc, StatItem } from "@/lib/email/doc/types";
-
-/** "2847" → "2,847". Nothing in → undefined (an open slot, never a fabricated 0). */
-function withCommas(n?: string): string | undefined {
-  const digits = (n ?? "").replace(/[^\d]/g, "");
-  if (!digits) return undefined;
-  return digits.replace(/\B(?=(\d{3})+(?!\d))/g, ",");
-}
 
 /**
  * THE STRIP THIS EMAIL WEARS — the campaign's hairline row, with the MOMENT in front.

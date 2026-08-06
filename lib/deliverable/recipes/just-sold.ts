@@ -74,6 +74,7 @@
 // • THE PAIRING RULE — see `soldSpecs`. A price cell that is not the close may only
 //   appear ALONGSIDE the close, never instead of it.
 
+import { withCommas } from "@/lib/format-number";
 import { compsForAddress, type RenderComp } from "@/lib/assistant/comp-helper";
 import { canonStreet } from "@/lib/listings/resolve-subject";
 import { chartSpecToEmailImage } from "@/lib/email/spec-to-png";
@@ -106,12 +107,6 @@ function isoToMDY(iso: string | null): string | null {
 /** The street line of an address — everything before the first comma. */
 function streetOf(address: string | undefined): string {
   return (address ?? "").split(",")[0]?.trim() ?? "";
-}
-
-/** "2847" → "2,847". Undefined in → undefined (an open slot, never a zero). */
-function withCommas(n?: string): string | undefined {
-  const digits = (n ?? "").replace(/[^\d]/g, "");
-  return digits ? digits.replace(/\B(?=(\d{3})+(?!\d))/g, ",") : undefined;
 }
 
 /** Digits of a money/number string → a positive number, else null. */

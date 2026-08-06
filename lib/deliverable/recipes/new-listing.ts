@@ -41,7 +41,7 @@
 
 import { buildListingFlyer, spec, shortType } from "@/lib/email/listing-flyer";
 import { createBlock } from "@/lib/email/doc/default-docs";
-import { daysSinceListed, resolveSubjectListDate } from "./under-contract";
+import { daysSinceListed, resolveSubjectListDate } from "@/lib/listings/list-date";
 import {
   authorListingNarrative,
   clearNarrativeSlots,

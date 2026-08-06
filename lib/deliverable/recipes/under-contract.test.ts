@@ -1,1045 +1,402 @@
 // lib/deliverable/recipes/under-contract.test.ts
 //
-// R4 · UNDER CONTRACT. Every test here drives a PURE function with fixture data —
-// ZERO live calls, ZERO clock dependence (the clock is injected).
+// R4 · UNDER CONTRACT — written NEW 08/06/2026 alongside the recipe it tests. The July
+// suite that used to live at this path tested a builder that no longer exists (operator
+// decree 08/05/2026: *"There can't be code for this if it is not from today. We are
+// building everything new so we build it fucking right."*). Its two surviving describes —
+// the vendor list-date chain — moved with that code to `lib/listings/list-date.test.ts`.
 //
-// ── THE ORACLE ───────────────────────────────────────────────────────────────
+// ── THE INVARIANT THIS FILE DEFENDS ──────────────────────────────────────────
 //
-// An earlier suite was 35/35 GREEN ON A WRONG ORACLE. It asserted, at line 387:
+// New Listing's invariant is that the address DOES ship. Coming Soon's is that it does
+// NOT. **Ours: the email states a PENDING fact and never a SOLD one.** A pending home has
+// not sold, and we do not hold a sold price. Every test below is named for the failure
+// mode it targets, per RULE 3.5.
 //
-//     expect(offerClaims("This home went under contract after 75 days on the
-//                         market.")).toEqual([])
-//
-// …and treated that as PASSING — pinning the exact fabricated interval that shipped
-// to the rendered email as correct behavior. A green suite over a wrong oracle is
-// worse than a red one: it certifies the lie.
-//
-// The oracle is now TWO propositions, and every test below serves one of them:
-//
-//   1. NO SOURCE HOLDS THE DAYS-TO-CONTRACT INTERVAL, the contract date, or the
-//      ORDER of the price cut against the contract. Any such claim is INVENTED.
-//   2. INVENTION IS CLAIM-SHAPED, NOT NUMBER-SHAPED. The sentence that shipped
-//      contained no invented number — it drew a false RELATION between three
-//      correctly-sourced ones. So the narrator is handed NO raw figure to relate,
-//      and `auditClaims` fail-closes on any relation it draws anyway.
-//
-// The fixtures are the live vendor bodies captured 07/13/2026:
-//   • 326 Shore Dr, Fort Myers 33905 — property_id 6951062705
-//   • its ZIP's median days on market (72) from the housing-swfl brain
-import { describe, expect, it, mock, afterAll } from "bun:test";
+// ZERO network calls, on purpose. `loadSpeed` guards on a ZIP, and the narrator only runs
+// on pasted remarks — so a fixture without either exercises the whole structure
+// deterministically.
+
+import { describe, expect, it } from "bun:test";
 import {
-  buildUnderContractGrid,
-  daysSinceListed,
-  fallbackNote,
-  formatListDate,
-  inventedAttributes,
-  loadAreaTiming,
-  narratorSources,
-  offerClaims,
-  parseActiveListDate,
-  proseViolations,
-  settleAll,
-  settleAreaTiming,
-  settleCommunityStats,
-  settleNewConstruction,
-  settlePriceCut,
-  settleStatus,
-  timingClaims,
-  timingLine,
-  type MarketTiming,
-  type NarratorInput,
+  buildUnderContract,
+  daysToContract,
+  SOLD_LANGUAGE,
+  speedOpenSlots,
+  speedStats,
+  UNDER_CONTRACT_FIELDS,
+  underContractSpecs,
+  underContractSubject,
+  type Speed,
 } from "./under-contract";
-import { numeralsIn } from "@/lib/deliverable/claims";
-import { renderEmailDocHtml } from "@/lib/email/render-email-doc";
-import { DEFAULT_GLOBAL_STYLE } from "@/lib/email/doc/default-docs";
+import { defaultDoc } from "@/lib/email/doc/default-docs";
+import { RECIPES } from "@/lib/deliverable/recipes";
+import type { RecipeBuildContext } from "./index";
 import type { EmailDoc, StatItem } from "@/lib/email/doc/types";
 import type { ListingFacts } from "@/lib/email/listing-scrape";
 
-// ── Task 4: authorUnderContractNote wires in FAVORABLE_FRAMING_POLICY ────────
-//
-// mock.module is process-global (no per-file isolation) — snapshot + restore, the
-// same pattern already used in shared.test.ts / agent-launch.test.ts. This file had
-// NO getAnthropic mock before this task: every other test here drives a PURE
-// function with fixture data and makes zero live calls. This mock exists ONLY for
-// the one test below that reaches the model call inside authorUnderContractNote.
-const realAnthropic = await import("@/refinery/agents/anthropic.mts");
-const anthropicOrig = { ...realAnthropic };
-afterAll(() => {
-  mock.module("@/refinery/agents/anthropic.mts", () => anthropicOrig);
-});
+const SUBJECT = "8348 Southwindbay Cir, Fort Myers, FL 33908";
 
-let systemSeen = "";
-mock.module("@/refinery/agents/anthropic.mts", () => ({
-  ...anthropicOrig,
-  getAnthropic: () => ({
-    messages: {
-      create: async (args: { system: string }) => {
-        systemSeen = args.system;
-        return {
-          content: [
-            {
-              type: "text",
-              text:
-                "This home is under contract. It is new construction. The asking price came " +
-                "down by $104,975, to $595,000. Backup offers are still being accepted.",
-            },
-          ],
-        };
-      },
-    },
-  }),
-}));
-
-/** VERBATIM shape of /property-tax-history for 326 Shore Dr (trimmed to the fields
- *  the parser reads). The current for-sale cycle sits alongside two OLD sold
- *  listings — the parser must never confuse a 2023 sale's list date for today's. */
-const TAX_HISTORY = {
-  body: {
-    property_history: [
-      {
-        date: "2026-07-01",
-        event_name: "Price Changed",
-        listing: { status: "for_sale", list_date: "2026-04-29T17:46:36Z" },
-      },
-      {
-        date: "2026-04-29",
-        event_name: "Listed",
-        listing: { status: "for_sale", list_date: "2026-04-29T17:46:36Z" },
-      },
-      {
-        date: "2023-03-17",
-        event_name: "Sold",
-        listing: { status: "sold", list_date: "2023-08-25T06:36:25Z" },
-      },
-      {
-        date: "2020-11-01",
-        event_name: "Listing removed",
-        listing: { status: "off_market", list_date: "2020-08-02T20:52:24Z" },
-      },
-    ],
-  },
-};
-
-/** The resolved subject, exactly as the dispatcher hands it to the builder. */
 const FACTS: ListingFacts = {
-  address: "326 Shore Dr, Fort Myers, FL, 33905",
+  address: SUBJECT,
   city: "Fort Myers",
   state: "FL",
-  zip: "33905",
-  price: "$595,000",
+  zip: "33908",
+  price: "$659,000",
   beds: "3",
-  baths: "3.5",
-  sqft: "2847",
-  lotSize: "0.26 ac",
-  propertyType: "Residential",
-  isNewConstruction: true,
-  isPriceReduced: true,
-  priceReduction: "$104,975",
-  photos: ["https://example.test/photo.webp"],
-  lat: 26.688788,
-  lon: -81.805899,
+  baths: "2",
+  sqft: "1978",
+  lotSize: "0.23",
+  propertyType: "single_family",
+  photos: [],
   sourceUrl: "https://www.swfldatagulf.com",
 };
 
-/** 33905's median_dom is 72; its Redfin metro is "Cape Coral, FL". The peer set is
- *  every OTHER ZIP IN THAT METRO.
- *  RE-DERIVED BY HAND: strictly > 72 → 96, 88, 73 → THREE. 72 is NOT > 72. Total SIX. */
-const PEERS = [96, 88, 73, 72, 51, 34];
-const METRO = "Cape Coral, FL";
-const TIMING: MarketTiming = {
-  areaDom: 72,
-  zip: "33905",
-  metro: METRO,
-  peers: PEERS,
-  asOf: "06/29/2026",
-};
-
-const LISTED_ISO = "2026-04-29T17:46:36Z";
-const LISTED_ON = "04/29/2026";
-/** A FIXED "now". 04/29 → 07/13 = 1 + 31 + 30 + 12 = 75 whole days (UTC).
- *  (Apr 29 17:46Z + 75d = Jul 13 17:46Z; our `now` is 18:00Z, so floor() = 75.) */
-const NOW = new Date("2026-07-13T18:00:00Z");
-const DAYS_LISTED = 75;
-
-const BLANK_DOC: EmailDoc = { globalStyle: DEFAULT_GLOBAL_STYLE, blocks: [] };
+/** Every string a recipient could ever read, flattened out of a built doc. */
+function allText(doc: EmailDoc): string {
+  const out: string[] = [...(doc.subjectVariants ?? []), ...(doc.ctaVariants ?? [])];
+  const walk = (v: unknown): void => {
+    if (typeof v === "string") out.push(v);
+    else if (Array.isArray(v)) v.forEach(walk);
+    else if (v && typeof v === "object") Object.values(v).forEach(walk);
+  };
+  doc.blocks.forEach((b) => walk(b.props));
+  return out.join("\n");
+}
 
 const statsOf = (doc: EmailDoc): StatItem[] =>
-  doc.blocks.flatMap((b) => (b.type === "stats" ? b.props.stats : []));
-const cellFor = (doc: EmailDoc, label: string): StatItem | undefined =>
-  statsOf(doc).find((s) => s.label === label);
+  doc.blocks.flatMap((b) => (b.type === "stats" ? (b.props.stats as StatItem[]) : []));
 
-const fullDoc = () =>
-  buildUnderContractGrid({
-    facts: FACTS,
-    current: BLANK_DOC,
-    listedOn: LISTED_ON,
-    daysListed: DAYS_LISTED,
-    timing: TIMING,
-  });
-
-const INPUT: NarratorInput = { settled: settleAll(FACTS, TIMING), remarks: FACTS.remarks };
-
-// ─────────────────────────────────────────────────────────────────────────────
-// 1. THE REFUTATION. These are the EXACT strings that shipped to the rendered
-//    email. Not one of them contains an invented NUMBER.
-// ─────────────────────────────────────────────────────────────────────────────
-
-/** Screenshot A — 326 Shore Dr, the canonical fixture. */
-const REFUTED_A =
-  "This home went under contract after 75 days on market, in line with the 72-day median for ZIP 33905. The seller had reduced the asking price by $104,975 before a contract was reached.";
-/** Screenshot B — 14550 Carva Ln, the chart branch. */
-const REFUTED_B =
-  "The home went under contract after 45 days on the market. The current asking price had been adjusted by $4,910 before the contract was accepted.";
-/** The OLD deterministic fallback — it fabricated BY CONSTRUCTION, on the
- *  guaranteed-on-API-failure path. */
-const REFUTED_FALLBACK =
-  "It went under contract after 45 days on the market - 27 days quicker than the 72-day median for ZIP 33905.";
-
-describe("THE REFUTATION — every sentence that actually shipped is now blocked", () => {
-  it("blocks the canonical fabricated interval + the invented event ordering", () => {
-    // The narrow guards are narrow BY DESIGN. The SHIP GATE is proseViolations.
-    expect(offerClaims(REFUTED_A)).toEqual([]); // still narrow — not the gate
-    expect(timingClaims(REFUTED_A).length).toBeGreaterThan(0);
-    expect(proseViolations(REFUTED_A, "", INPUT.settled)).not.toEqual([]); // THE GATE
-  });
-
-  it("blocks the chart-branch fabrication", () => {
-    expect(proseViolations(REFUTED_B, "", INPUT.settled)).not.toEqual([]);
-  });
-
-  it("blocks the OLD deterministic fallback — the path that lied on every API failure", () => {
-    expect(proseViolations(REFUTED_FALLBACK, "", INPUT.settled)).not.toEqual([]);
-  });
-
-  it("the interval is blocked even with EVERY number correctly sourced", () => {
-    // THE POINT OF THE WHOLE EXERCISE. 75, 72, 33905 and $104,975 are all real. Feed
-    // the gate a settled set that contains every one of them as an anchor, so the
-    // unanchored-number check CANNOT be what fires — and the sentence is STILL dead,
-    // because what is invented is the CLAIM, not the number.
-    const everyNumberAnchored = [
-      ...INPUT.settled,
-      { sentence: "75 72 33905.", anchors: ["75", "72", "33905"] },
-    ];
-    expect(proseViolations(REFUTED_A, "", everyNumberAnchored)).not.toEqual([]);
-  });
+const ctxFor = (facts: ListingFacts | null): RecipeBuildContext => ({
+  recipe: RECIPES["under-contract"],
+  prompt: "",
+  currentDoc: defaultDoc(),
+  facts,
+  resolved: Boolean(facts),
 });
 
-// ─────────────────────────────────────────────────────────────────────────────
-// 2. THE CLAIM GATE — code computes the relation; the narrator restates it.
-// ─────────────────────────────────────────────────────────────────────────────
+/** The recipe's own source, for the guards that are about what the code MAY NOT READ. */
+const SOURCE = await Bun.file(
+  new URL("./under-contract.ts", import.meta.url).pathname.replace(/^\/([A-Za-z]:)/, "$1"),
+).text();
 
-const CITE = "(SWFL Data Gulf, as of 06/29/2026)";
-
-describe("settleAreaTiming — the count is an integer comparison, never a model's guess", () => {
-  it("counts the peers ABOVE the subject ZIP — re-derived by hand", () => {
-    // peers = [96, 88, 73, 72, 51, 34]; areaDom = 72.
-    // STRICTLY greater than 72: 96, 88, 73 → 3.   NOT 72 itself (72 > 72 is FALSE),
-    // not 51, not 34.  total peers = 6.  → "3 of 6".
-    const claim = settleAreaTiming(TIMING);
-    expect(claim?.sentence).toBe(
-      `3 of 6 ZIP codes in the Cape Coral, FL metro have a longer typical time-to-sell than 33905 ${CITE}.`,
-    );
-    // The claim CARRIES ITS OWN SOURCE, because the sentence is what ships.
-    expect(claim?.anchors).toEqual(["3", "6", "33905", "06", "29", "2026"]);
-  });
-
-  it("says ALL when every peer is above — the market-pulse miscount class", () => {
-    // market-pulse wrote "five of those six" over a set whose true answer was four. A
-    // word-count carries no digits, so a digit lint sails straight past it.
-    const claim = settleAreaTiming({ ...TIMING, areaDom: 10, peers: [11, 12, 13] });
-    expect(claim?.sentence).toBe(
-      `All 3 ZIP codes in the Cape Coral, FL metro have a longer typical time-to-sell than 33905 ${CITE}.`,
-    );
-  });
-
-  it("counts ZERO honestly when the ZIP is the region's slowest", () => {
-    const claim = settleAreaTiming({ ...TIMING, areaDom: 200, peers: [11, 12, 13] });
-    expect(claim?.sentence).toBe(
-      `0 of 3 ZIP codes in the Cape Coral, FL metro have a longer typical time-to-sell than 33905 ${CITE}.`,
-    );
-  });
-
-  it("an unparseable as-of names the SOURCE and no date — never the raw token", () => {
-    // Rule 5: MM/DD/YYYY, and the freshness token is INTERNAL. market-snapshot.ts
-    // falls back to the raw token; leaking `SWFL-7421-v9-20260629` into an agent's
-    // email is not a citation, it is a leak.
-    const claim = settleAreaTiming({ ...TIMING, asOf: null });
-    expect(claim?.sentence).toContain("(SWFL Data Gulf).");
-    expect(claim?.sentence).not.toContain("SWFL-7421");
-  });
-
-  it("no timing, or no peers → NO claim (never a benchmark of one)", () => {
-    expect(settleAreaTiming(null)).toBeNull();
-    expect(settleAreaTiming({ ...TIMING, peers: [] })).toBeNull();
-  });
-
-  it("its own sentence survives the ship gate — a settled fact must be shippable", () => {
-    const claim = settleAreaTiming(TIMING)!;
-    expect(proseViolations(claim.sentence, "", [claim])).toEqual([]);
-  });
-});
-
-describe("settlePriceCut — the AMOUNT is sourced; the ORDER never was", () => {
-  it("states the amount and places it in NO order against anything", () => {
-    const claim = settlePriceCut(FACTS)!;
-    expect(claim.sentence).toBe("The asking price came down by $104,975, to $595,000.");
-    // Both numerals become anchors — the ONLY digits the narrator may then type.
-    expect(claim.anchors).toEqual(["104975", "595000"]);
-    expect(claim.sentence).not.toMatch(/before|after|then|once/i);
-  });
-
-  it("omits the current ask when we do not hold one", () => {
-    expect(settlePriceCut({ ...FACTS, price: undefined })?.sentence).toBe(
-      "The asking price came down by $104,975.",
-    );
-  });
-
-  it("no cut → no claim (never a $0, never a 'held firm')", () => {
-    expect(settlePriceCut({ ...FACTS, isPriceReduced: false })).toBeNull();
-    expect(settlePriceCut({ ...FACTS, priceReduction: undefined })).toBeNull();
-  });
-});
-
-describe("settleStatus — code authors 'under contract', and that is not cosmetic", () => {
-  it("is a settled sentence, so the narrator may restate it", () => {
-    expect(settleStatus().sentence).toBe("This home is under contract.");
-    expect(settleStatus().anchors).toEqual([]);
-  });
-
-  it("the status sentence must PASS the gate — 'under' is a comparative trigger", () => {
-    // auditClaims fires on a positional word that relates a QUANTITY. "under" is one,
-    // and this email exists to write it. Settling the sentence is what keeps the gate
-    // sharp WITHOUT weakening it — the trigger word is spent on a sentence WE wrote.
-    expect(proseViolations(settleStatus().sentence, "", [settleStatus()])).toEqual([]);
-  });
-
-  it("but 'under contract' bolted onto a QUANTITY is still killed", () => {
-    // The narrator merging the status into a price clause is a NEW claim, and dies.
-    const merged = "This home is under contract at the full asking price of $595,000.";
-    expect(proseViolations(merged, "", INPUT.settled)).not.toEqual([]);
-  });
-
-  it("new construction is a FLAG, not a figure", () => {
-    expect(settleNewConstruction(FACTS)?.sentence).toBe("It is new construction.");
-    expect(settleNewConstruction({ ...FACTS, isNewConstruction: false })).toBeNull();
-  });
-});
-
-describe("auditClaims is WIRED — proseViolations catches the generic claim shapes", () => {
-  const S = INPUT.settled;
-
-  it("a COMPARISON the narrator drew itself (the market-comps inversion class)", () => {
-    expect(proseViolations("The ask sits below the median for the area.", "", S)).not.toEqual([]);
-  });
-
-  it("a TRAJECTORY invented from a single level (the sphere-weekly class)", () => {
-    expect(proseViolations("Interest in this ZIP is widening.", "", S)).not.toEqual([]);
-  });
-
-  it("a SEQUENCE of market events (the class that shipped HERE)", () => {
-    expect(proseViolations("The price was cut before the contract.", "", S)).not.toEqual([]);
-  });
-
-  it("a MOTIVE — we never hold why anyone did anything", () => {
-    expect(proseViolations("The seller is motivated.", "", S)).not.toEqual([]);
-  });
-
-  it("a LOCATION relation — and it beat a ban on the word 'street' with 'Shore Dr'", () => {
-    expect(proseViolations("Two more just like it on Shore Dr.", "", S)).not.toEqual([]);
-  });
-
-  it("an UNANCHORED number — a digit no settled fact contains", () => {
-    const hits = proseViolations("It drew 14 showings.", "", S);
-    expect(hits.some((h) => h.startsWith("unanchored-number:14"))).toBe(true);
-  });
-});
+/**
+ * SOURCE WITH COMMENTS STRIPPED — what the code actually DOES, not what it explains.
+ *
+ * Caught by its own test 08/06/2026: the "never reads the sold-side median" guard went red
+ * against a prose comment that names `redfin_swfl.median_dom` precisely to say we do NOT
+ * use it. A guard that fires on the documentation of a rule punishes writing the rule down,
+ * and the next person's fix is to delete the explanation — which is exactly backwards.
+ * Forbidden-token checks read THIS; required-token checks may read either.
+ */
+const CODE = SOURCE.replace(/\/\*[\s\S]*?\*\//g, "").replace(/^\s*\/\/.*$/gm, "");
 
 // ─────────────────────────────────────────────────────────────────────────────
-// 3. *** THE DONE-CONDITION *** — the narrator receives no raw set.
+// FAILURE MODE 1 — the email claims a SALE. It has not sold.
 // ─────────────────────────────────────────────────────────────────────────────
 
-describe("THE NARRATOR RECEIVES NO RAW SET — structural, and greppable", () => {
-  const RICH: NarratorInput = {
-    settled: settleAll(FACTS, TIMING),
-    remarks: "Direct canal access with a private dock.",
-  };
-  const shown = narratorSources(RICH).join("\n");
-
-  it("is handed NEITHER number the refuted build compared", () => {
-    // WORD-BOUNDARY, not substring: `toContain("75")` passes for "$104,975", which is
-    // a legitimately-anchored figure. The claim is that neither number appears AS A
-    // NUMBER — and a lazy substring assertion here would have failed for the wrong
-    // reason and taught me nothing.
-    expect(shown).not.toMatch(new RegExp(`\\b${DAYS_LISTED}\\b`)); // 75 — the home's clock
-    expect(shown).not.toMatch(new RegExp(`\\b${TIMING.areaDom}\\b`)); // 72 — the ZIP's median
-    // Both are live in `buildUnderContract`'s scope on the very line that builds this
-    // input. Neither is passed. IT CANNOT COMPARE TWO NUMBERS IT WAS NEVER GIVEN TWO OF.
-    expect(shown).not.toContain(LISTED_ON);
-    expect(shown).not.toContain(LISTED_ISO);
-  });
-
-  it("is handed NO raw peer set — nothing to draw a new count from", () => {
-    for (const p of PEERS) expect(shown).not.toMatch(new RegExp(`\\b${p}\\b`));
-  });
-
-  it("EVERY numeral it can see is an ANCHOR — allowedNumerals ⊇ what it was shown", () => {
-    // The invariant that makes the unanchored-number check total: the model cannot
-    // even COPY a digit that isn't already permitted, because it was never shown one.
-    const allowed = new Set(RICH.settled.flatMap((s) => s.anchors));
-    for (const n of numeralsIn(shown)) expect(allowed.has(n)).toBe(true);
-  });
-
-  it("the TYPE itself carries no figure — this is the greppable part", () => {
-    // If someone adds `areaDom`, `daysListed`, `peers` or `facts` to NarratorInput,
-    // this fails and they have to justify handing the model something to compare.
-    expect(Object.keys(RICH).sort()).toEqual(["remarks", "settled"]);
-  });
-});
-
-// ─────────────────────────────────────────────────────────────────────────────
-// 4. The timing facts — a DATE, a RUNNING AGE, and an AREA MEDIAN.
-// ─────────────────────────────────────────────────────────────────────────────
-
-describe("parseActiveListDate — the list date /search does not carry", () => {
-  it("reads the ACTIVE for-sale listing's list date", () => {
-    expect(parseActiveListDate(TAX_HISTORY)).toBe(LISTED_ISO);
-  });
-
-  it("never mistakes an old SOLD listing's list date for the current cycle", () => {
-    const onlySold = {
-      body: {
-        property_history: [
-          { event_name: "Sold", listing: { status: "sold", list_date: "2023-08-25T06:36:25Z" } },
-        ],
-      },
-    };
-    expect(parseActiveListDate(onlySold)).toBeNull();
-  });
-
-  it("returns null on a body with no history (never throws, never invents)", () => {
-    expect(parseActiveListDate({})).toBeNull();
-    expect(parseActiveListDate(null)).toBeNull();
-    expect(parseActiveListDate({ body: { property_history: "nope" } })).toBeNull();
-  });
-});
-
-describe("formatListDate + daysSinceListed — a DATE, and a RUNNING AGE", () => {
-  it("renders the vendor's list date as MM/DD/YYYY (Rule 5), in UTC", () => {
-    expect(formatListDate(LISTED_ISO)).toBe(LISTED_ON);
-    expect(formatListDate(null)).toBeNull();
-    expect(formatListDate("not a date")).toBeNull();
-  });
-
-  it("counts whole days from the list date — CLOCK INJECTED, so it is deterministic", () => {
-    // RE-DERIVED BY HAND, UTC: Apr 29 → Apr 30 is 1 day. May = 31, June = 30, and
-    // Jul 1 → Jul 13 = 12. 1 + 31 + 30 + 12 = 74 calendar-day boundaries… but the
-    // interval is timestamp-to-timestamp: 2026-04-29T17:46:36Z → 2026-07-13T18:00:00Z
-    // is 75 days and 13 minutes. floor() = 75.
-    expect(daysSinceListed(LISTED_ISO, NOW)).toBe(75);
-    // One second BEFORE the 75-day mark is still 74. floor(), not round().
-    expect(daysSinceListed(LISTED_ISO, new Date("2026-07-13T17:46:35Z"))).toBe(74);
-  });
-
-  it("null / unparseable / a FUTURE list date → null → an open slot, never a 0", () => {
-    expect(daysSinceListed(null, NOW)).toBeNull();
-    expect(daysSinceListed("not a date", NOW)).toBeNull();
-    expect(daysSinceListed("2026-12-01T00:00:00Z", NOW)).toBeNull();
-  });
-
-  it("exposes NO subject-vs-area helper to be re-narrated as an interval", async () => {
-    const mod = (await import("./under-contract")) as Record<string, unknown>;
-    expect(mod.daysOnMarket).toBeUndefined(); // the old, refuted name
-    expect(mod.daysToContract).toBeUndefined();
-    expect(mod.compareDom).toBeUndefined();
-    expect(mod.domChartSpec).toBeUndefined();
-  });
-});
-
-describe("loadAreaTiming — the ZIP's median, and its COMMENSURABLE peer set", () => {
-  // The REAL token shape (`SWFL-7421-v{n}-{YYYYMMDD}`) — asOfFromToken parses the
-  // trailing 8 digits. My first fixture invented an `@2026-06-29` form, the parser
-  // returned null, and the old `?? brain.freshness_token` fallback would have shipped
-  // the raw token into an email. That is how the Rule-5 bug above got caught.
-  const brain = (rows: Array<{ key: string; cells: Record<string, unknown> }>) => ({
-    freshness_token: "SWFL-7421-v9-20260629",
-    output: { detail_tables: [{ id: "housing_by_zip", rows }] },
-  });
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const load = (rows: Parameters<typeof brain>[0]) => (async () => brain(rows)) as any;
-
-  it("splits the subject ZIP from its peers — same metric, same cohort, same source", async () => {
-    const t = await loadAreaTiming("33905", {
-      load: load([
-        { key: "33905", cells: { median_dom: 72, metro: METRO } },
-        { key: "33908", cells: { median_dom: 96, metro: METRO } },
-        { key: "33916", cells: { median_dom: 51, metro: METRO } },
-      ]),
-    });
-    expect(t?.areaDom).toBe(72);
-    expect(t?.metro).toBe(METRO);
-    expect(t?.peers.sort((a, b) => a - b)).toEqual([51, 96]);
-    expect(t?.asOf).toBe("06/29/2026"); // MM/DD/YYYY — never the raw token
-  });
-
-  it("*** COUNTS ONLY THE SUBJECT'S OWN METRO — the population bug ***", async () => {
-    // THE FINDING. Live, `housing_by_zip` holds 124 rows across FOUR Redfin metros:
-    // Cape Coral (Lee) 39, Naples (Collier) 20, Punta Gorda (CHARLOTTE) 13, and North
-    // Port (SARASOTA/MANATEE) 52. My first cut counted over ALL of them and called
-    // them "SWFL ZIP codes we track" — a set that is more than half outside our
-    // coverage. CLAUDE.md: "Charlotte/Glades/Sarasota are NOT real coverage today."
-    //
-    // settledCount would have counted that PERFECTLY. The arithmetic was exact and the
-    // sentence was false. A gate over the wrong population is a correct number welded
-    // to a lie — the refutation wearing a new host.
-    const t = await loadAreaTiming("33905", {
-      load: load([
-        { key: "33905", cells: { median_dom: 72, metro: "Cape Coral, FL" } },
-        { key: "33908", cells: { median_dom: 96, metro: "Cape Coral, FL" } },
-        { key: "34112", cells: { median_dom: 51, metro: "Naples, FL" } }, // Collier
-        { key: "33950", cells: { median_dom: 88, metro: "Punta Gorda, FL" } }, // CHARLOTTE
-        { key: "34287", cells: { median_dom: 120, metro: "North Port, FL" } }, // SARASOTA
-      ]),
-    });
-    expect(t?.peers).toEqual([96]); // ONLY the Cape Coral peer. Not Naples, not Sarasota.
-    // And the sentence names the metro VERBATIM from the row — never "SWFL", which
-    // would claim Charlotte and Sarasota, and never a county name we inferred.
-    expect(settleAreaTiming(t)!.sentence).toContain("ZIP codes in the Cape Coral, FL metro");
-    expect(settleAreaTiming(t)!.sentence).not.toMatch(/\bSWFL ZIP/);
-  });
-
-  it("drops thin-sample and null rows — a benchmark is never built on noise", async () => {
-    const t = await loadAreaTiming("33905", {
-      load: load([
-        { key: "33905", cells: { median_dom: 72, metro: METRO } },
-        { key: "33913", cells: { median_dom: 300, low_sample: true, metro: METRO } },
-        { key: "33914", cells: { median_dom: null, metro: METRO } },
-        { key: "33916", cells: { median_dom: 40, metro: METRO } },
-      ]),
-    });
-    expect(t?.peers).toEqual([40]);
-  });
-
-  it("a thin-sample SUBJECT is null too — the same guard, both sides", async () => {
-    // The subject and the peers MUST be filtered on identical rules, or the count
-    // compares a number we would not have shown against numbers we would.
-    expect(
-      await loadAreaTiming("33905", {
-        load: load([{ key: "33905", cells: { median_dom: 72, low_sample: true, metro: METRO } }]),
-      }),
-    ).toBeNull();
-  });
-
-  it("the subject ZIP missing, or metro-less → null → open slots, never a fabrication", async () => {
-    expect(
-      await loadAreaTiming("33905", {
-        load: load([{ key: "34112", cells: { median_dom: 51, metro: "Naples, FL" } }]),
-      }),
-    ).toBeNull();
-    // No metro on the row → we cannot name the population → NO claim at all.
-    expect(
-      await loadAreaTiming("33905", { load: load([{ key: "33905", cells: { median_dom: 72 } }]) }),
-    ).toBeNull();
-    expect(await loadAreaTiming("not-a-zip")).toBeNull();
-  });
-});
-
-// ─────────────────────────────────────────────────────────────────────────────
-// 5. The grid.
-// ─────────────────────────────────────────────────────────────────────────────
-
-/** The doc's block sequence, the way campaign-coherence.test.ts reads it. */
-const spineOf = (doc: EmailDoc): string[] =>
-  [...doc.blocks]
-    .sort((a, b) => (a.layout?.y ?? 0) - (b.layout?.y ?? 0))
-    .map((b) => {
-      if (b.type === "hero") return b.props.ribbon ? "hero:ribbon" : "hero:subject";
-      if (b.type === "stats") return b.props.variant === "strip" ? "stats:strip" : "stats:grid";
-      if (b.type === "image") return `image:${String(b.props.kind ?? "?")}`;
-      return b.type;
-    });
-
-const heroOf = (doc: EmailDoc, ribbon: boolean) =>
-  doc.blocks.find((b) => b.type === "hero" && Boolean(b.props.ribbon) === ribbon);
-
-describe("buildUnderContractGrid — it wears the CAMPAIGN CHROME, not a grid of its own", () => {
-  // ── THE MIGRATION (07/13/2026) ─────────────────────────────────────────────
-  // This recipe used to emit FOUR STACKED STAT GRIDS — 3 + 3 + 3 + 1, ten chunky
-  // 32px cells, a WALL — while New Listing ran one hairline spec strip. Seven
-  // lifecycle emails, seven layouts, "one campaign" that read as seven companies.
-  // Operator: "EACH EMAIL WOULD HAVE THE SAME LOOK, JUST DIFFERENT INFORMATION."
-  // The shape now comes from `buildLifecycleEmail`, and these tests pin that.
-
-  it("*** THE WALL IS GONE *** — the campaign has ONE stat device, and it is the STRIP", () => {
-    const s = spineOf(fullDoc());
-    // FOUR of these is what shipped. Zero is the contract.
-    expect(s.filter((x) => x === "stats:grid")).toEqual([]);
-    // The house's spec line, plus this recipe's own TIMING line. Both strips.
-    expect(s.filter((x) => x === "stats:strip").length).toBe(2);
-  });
-
-  it("wears the campaign spine, in the campaign's order", () => {
-    const s = spineOf(fullDoc());
-    expect(s.slice(0, 5)).toEqual([
-      "header",
-      "hero:ribbon", // the ONE element that says which email in the campaign this is
-      "image:photo",
-      "hero:subject", // centred: ADDRESS over PRICE
-      "stats:strip", // ONE hairline spec line — never a wall
-    ]);
-    expect(s.slice(-3)).toEqual(["agent-card", "button", "footer"]);
-    // Exactly one narrative slot and exactly one CTA.
-    expect(s.filter((x) => x === "text").length).toBe(1);
-    expect(s.filter((x) => x === "button").length).toBe(1);
-  });
-
-  it("the RIBBON carries the word; the HERO carries address over price", () => {
-    const doc = fullDoc();
-    expect(heroOf(doc, true)?.type === "hero" && heroOf(doc, true)!.props.kicker).toBe(
-      "Under Contract",
-    );
-    const hero = heroOf(doc, false);
-    expect(hero?.type === "hero" && hero.props.value).toBe("$595,000");
-    expect(hero?.type === "hero" && hero.props.label).toBe(FACTS.address);
-    // The chrome centres it and puts the ADDRESS first — that is how a flyer reads.
-    expect(hero?.type === "hero" && hero.props.align).toBe("center");
-    expect(hero?.type === "hero" && hero.props.order).toBe("label-first");
-  });
-
-  it("SETS THE TWO CLOCKS SIDE BY SIDE — and LABELS them as different quantities", () => {
-    const doc = fullDoc();
-    expect(cellFor(doc, "Listed")?.value).toBe("04/29/2026");
-    // A RUNNING AGE. The label never says "on market" (an MLS term whose clock stops
-    // at pending) and never says "to contract" (held by no source — the fabrication).
-    expect(cellFor(doc, "Days Since Listed")?.value).toBe("75");
-    // A COMPLETED duration over homes that SOLD. The label says TO SELL, because that
-    // is what median_dom measures. The two labels name two different quantities on
-    // their face — and no sentence anywhere relates them.
-    expect(cellFor(doc, "Typical Days to Sell in 33905")?.value).toBe("72");
-    expect(cellFor(doc, "Days to Contract")).toBeUndefined();
-    expect(cellFor(doc, "Days on Market")).toBeUndefined();
-  });
-
-  it("NO TIMING CELL IS EMPHASISED — a comparison drawn in typography is still a claim", () => {
-    // `emphasis: "primary"` says WHICH NUMBER WINS THE ARGUMENT. The whole point of the
-    // timing line is that these two clocks are NOT commensurable and make NO argument
-    // against each other (see THE NON-COMMENSURABILITY). Weighting one over the other
-    // would assert the relation the prose is structurally forbidden from writing.
-    const timingCells = timingLine({
-      listedOn: LISTED_ON,
-      daysListed: DAYS_LISTED,
-      timing: TIMING,
-      zip: "33905",
-    });
-    // `timingLine` now hands the chrome a PLAN entry — the block plus the row height it
-    // wants — because a recipe no longer gets to say WHERE its block lands. Unwrap it.
-    const block = timingCells.block;
-    const stats = block.type === "stats" ? block.props.stats : [];
-    expect(stats.every((c) => c.emphasis === undefined)).toBe(true);
-    // …and it is a STRIP. The campaign has exactly one stat device.
-    expect(block.type === "stats" && block.props.variant).toBe("strip");
-  });
-
-  it("the SPEC STRIP is the shared listing spec line — the same six cells New Listing wears", () => {
-    const doc = fullDoc();
-    // ONE authority (`listingSpecs`), so a subscriber who got the New Listing email in
-    // April sees the identical spec line here in July.
-    expect(cellFor(doc, "Beds")?.value).toBe("3");
-    expect(cellFor(doc, "Baths")?.value).toBe("3.5");
-    expect(cellFor(doc, "Sq Ft")?.value).toBe("2,847");
-    expect(cellFor(doc, "Lot")?.value).toBe("0.26 ac");
-    expect(cellFor(doc, "$/Sq Ft")?.value).toBe("$209"); // 595000 / 2847 = 208.99…
-    expect(cellFor(doc, "$/Sq Ft")?.emphasis).toBe("primary"); // it wins the argument
-    expect(cellFor(doc, "Type")?.value).toBe("Residential");
-    expect(cellFor(doc, "Type")?.emphasis).toBe("muted"); // context, not competing
-  });
-
-  it("the PRICE is stated ONCE — it left the cells when it moved into the hero", () => {
-    // The old grid printed the ask in a "List Price" cell AND nowhere else useful; the
-    // chrome's hero is the price's home. Two statements of one number is a wall, not a flyer.
-    expect(cellFor(fullDoc(), "List Price")).toBeUndefined();
-  });
-
-  it("carries NO footnote — $/sq ft explains itself, and both operands are in the strip", () => {
-    // Operator, 07/20/2026, on reading it in a real inbox: "*Computed from list price ÷
-    // listed square footage." is a developer narrating a formula, not an agent talking to
-    // a buyer. A derived cell earns a note when the derivation is non-obvious or could be
-    // misread (price-reduced's previous price, just-sold's sale-price $/sq ft) — never for
-    // restating grade-school division. See specFootnote's header in lib/email/listing-flyer.ts.
-    const strip = fullDoc().blocks.find((b) => b.type === "stats" && b.props.variant === "strip");
-    expect(strip?.type === "stats" && strip.props.footnote).toBeFalsy();
-  });
-
-  it("asks for the backup offer — that is the whole point of this email", () => {
-    const btn = fullDoc().blocks.find((b) => b.type === "button");
-    expect(btn?.type === "button" && btn.props.label).toBe("Submit a Backup Offer");
-    // The CTA asks for the NEXT ACTION. It never points at what the reader is already
-    // looking at ("See the New Price" on the price-cut email — the operator's example).
-  });
-
-  it("leaves the commentary slot EMPTY for the narrator (fillNarrative skips a filled one)", () => {
-    const text = fullDoc().blocks.find((b) => b.type === "text");
-    expect(text?.type === "text" && text.props.body).toBe("");
-  });
-
-  it("builds NO chart slot at all — the registry says chart: none", () => {
-    // dom-vs-area needed this home's days-to-contract as its subject bar. That bar can
-    // never be honestly drawn, so the box is never BUILT — not reserved then dropped.
-    // A fabricated comparison rendered as a PICTURE is worse than in prose: a chart
-    // reads as measured.
-    const chart = fullDoc().blocks.find((b) => b.type === "image" && b.props.kind === "chart");
-    expect(chart).toBeUndefined();
-  });
-
-  it("stacks with no void — every ROW sits directly under the one above it", () => {
-    // This walked every BLOCK (cursor += h), which quietly asserted one block per row — true
-    // only while the campaign was a flat stack. The agent card and the CTA now share a row at
-    // unequal heights (4 and 2), so the cursor advances by the row's TALLEST block. Same
-    // invariant (no void, no overlap); the grain is the row, which is what it always meant.
-    const rows = new Map<number, number>(); // y → tallest h
-    for (const l of fullDoc().blocks.map((b) => b.layout!)) {
-      rows.set(l.y, Math.max(rows.get(l.y) ?? 0, l.h));
-    }
-    let cursor = 0;
-    for (const y of [...rows.keys()].sort((a, b) => a - b)) {
-      expect(y).toBe(cursor);
-      cursor += rows.get(y)!;
+describe("FAILURE MODE: sold language renders on a home that has not sold", () => {
+  it("ships none of the banned sold phrasings anywhere a reader can see", async () => {
+    const doc = await buildUnderContract(ctxFor(FACTS));
+    expect(doc).not.toBeNull();
+    const text = allText(doc!).toLowerCase();
+    for (const phrase of SOLD_LANGUAGE) {
+      expect(text).not.toContain(phrase);
     }
   });
 
-  it("THE BRAND IS STICKY — the chrome is the SHAPE, the user's colours are the SKIN", () => {
-    const branded: EmailDoc = {
-      globalStyle: { ...DEFAULT_GLOBAL_STYLE, accentColor: "#123456" },
-      blocks: [],
-    };
-    const doc = buildUnderContractGrid({
-      facts: FACTS,
-      current: branded,
-      listedOn: LISTED_ON,
-      daysListed: DAYS_LISTED,
-      timing: TIMING,
+  it("keeps the banned list as ONE exported root, so the recipe and the acceptance script cannot drift", () => {
+    // The bytes assertion in scripts/email/render-under-contract.mts imports THIS array.
+    // A second hand-typed copy is how a guard silently stops guarding.
+    expect(SOLD_LANGUAGE).toContain("sold for");
+    expect(SOLD_LANGUAGE).toContain("sold price");
+    expect(SOLD_LANGUAGE).toContain("closed at");
+    expect(SOLD_LANGUAGE).toContain("final sale");
+    expect(SOLD_LANGUAGE).toContain("sale price");
+    expect(Object.isFrozen(SOLD_LANGUAGE)).toBe(true);
+  });
+
+  it("the ribbon says the status and the status is not a sale", () => {
+    expect(UNDER_CONTRACT_FIELDS.ribbon).toBe("Under Contract");
+  });
+});
+
+// ─────────────────────────────────────────────────────────────────────────────
+// FAILURE MODE 2 — the price shown is not the LIST price.
+// ─────────────────────────────────────────────────────────────────────────────
+
+describe("FAILURE MODE: the printed price is not the list price", () => {
+  it("prints facts.price verbatim as the hero value", async () => {
+    const doc = await buildUnderContract(ctxFor(FACTS));
+    expect(allText(doc!)).toContain("$659,000");
+  });
+
+  it("never derives, rounds, or discounts the price", () => {
+    // The only thing the recipe may do with a price is print it and divide it by sqft.
+    expect(CODE).not.toMatch(/sold_price|salePrice|sale_price/);
+  });
+
+  it("no price at all → an open slot, never a zero", async () => {
+    const doc = await buildUnderContract(ctxFor({ ...FACTS, price: undefined }));
+    expect(doc).not.toBeNull();
+    expect(allText(doc!)).not.toMatch(/\$0\b/);
+  });
+});
+
+// ─────────────────────────────────────────────────────────────────────────────
+// FAILURE MODE 3 — the speed number is ESTIMATED instead of dropped.
+// ─────────────────────────────────────────────────────────────────────────────
+
+describe("FAILURE MODE: the speed line estimates instead of dropping", () => {
+  it("computes days-to-contract from our own listing clock when it is real", () => {
+    expect(daysToContract({ ...FACTS, daysOnMarket: 18 })).toBe(18);
+  });
+
+  it("DROPS to null when the listing clock has no real count — never an estimate", () => {
+    // `resolve-subject.ts` attaches `daysOnMarket` ONLY when the count is not a
+    // first-seen floor. Absent therefore means "we do not honestly hold this".
+    expect(daysToContract(FACTS)).toBeNull();
+    expect(daysToContract({ ...FACTS, daysOnMarket: undefined })).toBeNull();
+  });
+
+  it("refuses a negative or nonsense count rather than printing it", () => {
+    expect(daysToContract({ ...FACTS, daysOnMarket: -3 })).toBeNull();
+    expect(daysToContract({ ...FACTS, daysOnMarket: Number.NaN })).toBeNull();
+  });
+
+  it("a build with no real clock ships OPEN SLOTS whose labels are the instruction", async () => {
+    const doc = await buildUnderContract(ctxFor(FACTS));
+    const labels = statsOf(doc!).map((s) => s.label);
+    const slots = speedOpenSlots().map((s) => s.label);
+    // EVERY open-slot label must actually be on the doc, carrying an empty value.
+    // This used to read `if (cell) expect(...)` with a trailing
+    // `expect(labels.length).toBeGreaterThan(0)` — which asserted nothing: the guard
+    // skipped when the cell was missing, and the length check passed off the spec strip
+    // whether or not the open-slot path had fired at all. A test that cannot fail is a
+    // comment.
+    expect(labels).toEqual(expect.arrayContaining(slots));
+    for (const slot of slots) {
+      const cell = statsOf(doc!).find((s) => s.label === slot);
+      expect(cell).toBeDefined();
+      expect(cell!.value).toBe("");
+    }
+  });
+});
+
+// ─────────────────────────────────────────────────────────────────────────────
+// FAILURE MODE 4 — `days_in_state` is read and printed as an interval.
+//
+// TRAP 1 from the build handoff, and the reason the July recipe was refuted. The column
+// ages only while `state` is unchanged, and `flag_pending` is NOT part of `state` — so it
+// is days-in-ACTIVE. A live Lee row reads flag_pending true, state active, days_in_state
+// 34, listed 09/13/2024. Printing "under contract in 34 days" off it is a fabricated
+// number built from a real column.
+// ─────────────────────────────────────────────────────────────────────────────
+
+describe("FAILURE MODE: days_in_state is read as time-under-contract", () => {
+  it("the recipe never names the column at all", () => {
+    expect(CODE).not.toMatch(/days_in_state/);
+  });
+
+  it("the recipe never selects it from the lake", () => {
+    expect(CODE).not.toMatch(/daysInState/);
+  });
+
+  it("never emits a 'days on market' cell — that cell is for ACTIVE listings only", async () => {
+    // `listing-flyer.ts` says it in as many words: "this cell is for ACTIVE listings
+    // ONLY. Never pass it on under-contract or just-sold." The market clock stopped.
+    const doc = await buildUnderContract(ctxFor({ ...FACTS, daysOnMarket: 18 }));
+    const labels = statsOf(doc!).map((s) => s.label);
+    expect(labels).not.toContain("DOM");
+    expect(allText(doc!).toLowerCase()).not.toContain("days on market");
+  });
+});
+
+// ─────────────────────────────────────────────────────────────────────────────
+// FAILURE MODE 5 — the address does not ship.
+// ─────────────────────────────────────────────────────────────────────────────
+
+describe("FAILURE MODE: the address does not ship", () => {
+  it("prints the full street line in the hero — this is a public, celebrated status", async () => {
+    const doc = await buildUnderContract(ctxFor(FACTS));
+    expect(allText(doc!)).toContain("8348 Southwindbay Cir");
+  });
+
+  it("carries the ZIP too", async () => {
+    const doc = await buildUnderContract(ctxFor(FACTS));
+    expect(allText(doc!)).toContain("33908");
+  });
+
+  it("falls through to the terminal author rather than shipping a headless email", async () => {
+    expect(await buildUnderContract(ctxFor(null))).toBeNull();
+    expect(
+      await buildUnderContract(ctxFor({ ...FACTS, address: undefined, city: undefined })),
+    ).toBeNull();
+  });
+});
+
+// ─────────────────────────────────────────────────────────────────────────────
+// FAILURE MODE 6 — the comparand is the SOLD-side median.
+//
+// `docs/standards/data-roots.md:69-71` — list-side is `listing_dom`, sold-side is
+// `redfin_swfl.median_dom`, "never interchange." The July build compared against the
+// sold-side median. That is a second, separate error from the date error.
+// ─────────────────────────────────────────────────────────────────────────────
+
+describe("FAILURE MODE: the comparand is the sold-side median", () => {
+  it("never reads the sold-side Redfin table", () => {
+    expect(CODE).not.toMatch(/housing_by_zip|redfin/i);
+  });
+
+  it("reads the list-side median through the ONE root that already owns it", () => {
+    expect(SOURCE).toMatch(/zip-benchmark|fetchZipBenchmark/);
+  });
+});
+
+// ─────────────────────────────────────────────────────────────────────────────
+// FAILURE MODE 7 — a degenerate median ships as if it meant something.
+//
+// The open `coming_soon_degenerate_funnel_floor` failure shape, arriving on a different
+// email. A median over a handful of listings is not a market fact.
+// ─────────────────────────────────────────────────────────────────────────────
+
+describe("FAILURE MODE: a degenerate comparand ships anyway", () => {
+  const speed = (over: Partial<Speed>): Speed => ({
+    daysToContract: 18,
+    medianDom: 96,
+    sampleSize: 250,
+    scopeLabel: "ZIP 33908",
+    rung: 1,
+    asOfIso: "2026-08-06",
+    ...over,
+  });
+
+  it("ships BOTH numbers when the sample is real", () => {
+    const cells = speedStats(speed({}));
+    expect(cells.some((c) => c.value === "18")).toBe(true);
+    expect(cells.some((c) => c.value === "96")).toBe(true);
+  });
+
+  it("drops the comparison below the sample floor — this home's number still ships", () => {
+    const cells = speedStats(speed({ sampleSize: 3, medianDom: 12 }));
+    expect(cells.some((c) => c.value === "18")).toBe(true);
+    expect(cells.some((c) => c.value === "12")).toBe(false);
+  });
+
+  it("the floor is a FIELD, not a magic number", () => {
+    expect(UNDER_CONTRACT_FIELDS.minMedianSample).toBeGreaterThan(1);
+  });
+});
+
+// ─────────────────────────────────────────────────────────────────────────────
+// FAILURE MODE 8 — the printed scope is not the scope that was counted.
+//
+// §2.2.2's rung-3 lesson, verbatim: widening the scope CHANGES THE DISCLOSED CRITERION.
+// A reader who re-runs the stated criterion must reproduce the printed number.
+// ─────────────────────────────────────────────────────────────────────────────
+
+describe("FAILURE MODE: the label claims a scope the count did not use", () => {
+  it("every consumer prints scopeLabel, never a ZIP of its own", () => {
+    const cells = speedStats({
+      daysToContract: 18,
+      medianDom: 96,
+      sampleSize: 250,
+      scopeLabel: "Lee County",
+      rung: 2,
+      asOfIso: "2026-08-06",
     });
-    expect(doc.globalStyle.accentColor).toBe("#123456");
+    const text = cells.map((c) => `${c.value} ${c.label}`).join(" ");
+    expect(text).toContain("Lee County");
+    expect(text).not.toContain("33908");
   });
 });
 
-describe("THE OPEN-SLOT CONTRACT — a gap is an invitation, never a zero", () => {
-  /** Nothing timing-related resolved: no list date AND no ZIP median. */
-  const blindDoc = () =>
-    buildUnderContractGrid({
-      facts: FACTS,
-      current: BLANK_DOC,
-      listedOn: null,
-      daysListed: null,
-      timing: null,
+// ─────────────────────────────────────────────────────────────────────────────
+// FAILURE MODE 9 — one row, three type sizes.
+//
+// Playbook §2.1.6 defects 4 and 5, re-committed on the very next email (§2.2.6 item 2).
+// Operator: *"Why the fuck would you have so many different sizes."*
+// ─────────────────────────────────────────────────────────────────────────────
+
+describe("FAILURE MODE: mixed emphasis inside one horizontal row", () => {
+  it("the spec strip carries ONE weight across the row", () => {
+    const cells = underContractSpecs(FACTS);
+    expect(new Set(cells.map((c) => c.emphasis ?? "none")).size).toBe(1);
+  });
+
+  it("the speed row carries ONE weight across the row", () => {
+    const cells = speedStats({
+      daysToContract: 18,
+      medianDom: 96,
+      sampleSize: 250,
+      scopeLabel: "ZIP 33908",
+      rung: 1,
+      asOfIso: "2026-08-06",
     });
-
-  it("an unsourced list date and an unsourced age are OPEN SLOTS, never a 0", () => {
-    // THE SLOT RULE (lib/email/CLAUDE.md): the LABEL is the instruction. "Days Since
-    // Listed" over an empty value tells the user exactly what to type; on the canvas
-    // it wears a dashed "+ Add" affordance. A "0" would read as a real figure.
-    const cells = statsOf(blindDoc());
-    expect(cells.find((c) => c.label === "Listed")?.value).toBe("");
-    expect(cells.find((c) => c.label === "Days Since Listed")?.value).toBe("");
-    expect(cells.some((c) => c.value === "0")).toBe(false);
+    expect(new Set(cells.map((c) => c.emphasis ?? "none")).size).toBe(1);
   });
 
-  it("an unsourced area median is an OPEN SLOT, never a fabricated benchmark", () => {
-    // No timing → we cannot even name the ZIP off the row, so the label falls back to
-    // the generic form. Either way the VALUE is empty: we never invent a benchmark.
-    const cells = statsOf(blindDoc());
-    expect(cells.find((c) => c.label.startsWith("Typical Days to Sell"))?.value).toBe("");
-  });
-
-  it("still leads with the price — the subject hero is never a naked ribbon", () => {
-    const hero = heroOf(blindDoc(), false);
-    expect(hero?.type === "hero" && hero.props.value).toBe("$595,000");
-    expect(hero?.type === "hero" && hero.props.label).toBe(FACTS.address);
-  });
-
-  it("NO open slot reaches the recipient — it is a canvas affordance only", async () => {
-    const html = await renderEmailDocHtml(blindDoc());
-    // Every cell in the timing line is unsourced → StatsBlock drops each cell, and a
-    // row with no surviving cell does not exist in the sent email at all.
-    expect(html).not.toContain("Days Since Listed");
-    expect(html).not.toContain("Typical Days to Sell");
-    expect(html).not.toContain("Listed");
-    // …while the sourced facts DO ship.
-    expect(html).toContain("$595,000");
-    expect(html).toContain("Under Contract"); // the ribbon always rides
-  });
-
-  it("an unsourced spec is an instruction, and the sent email simply omits it", async () => {
-    const bare: ListingFacts = {
-      address: "1 Nowhere St, Fort Myers, FL, 33905",
-      photos: [],
-      sourceUrl: "https://www.swfldatagulf.com",
-    };
-    const doc = buildUnderContractGrid({
-      facts: bare,
-      current: BLANK_DOC,
-      listedOn: null,
-      daysListed: null,
-      timing: null,
-    });
-    expect(statsOf(doc).every((c) => c.value === "")).toBe(true);
-    const html = await renderEmailDocHtml(doc);
-    expect(html).not.toContain("type the bedroom count");
-    expect(html).not.toContain("Beds");
-    expect(html).not.toMatch(/>0</);
-  });
-});
-
-describe("THE SENT EMAIL — no interval, no ordering, no comparison", () => {
-  it("carries the sourced facts and NONE of the refuted claims", async () => {
-    const html = await renderEmailDocHtml(fullDoc());
-    expect(html).toContain("$595,000");
-    expect(html).toContain("04/29/2026");
-    expect(html).not.toMatch(/days?\s+on\s+(the\s+)?market/i);
-    expect(html).not.toMatch(/days?\s+to\s+contract/i);
-    expect(html).not.toMatch(/went under contract after/i);
-    expect(html).not.toMatch(/in line with/i);
+  it("the open-slot row carries ONE weight too", () => {
+    expect(new Set(speedOpenSlots().map((c) => c.emphasis ?? "none")).size).toBe(1);
   });
 });
 
 // ─────────────────────────────────────────────────────────────────────────────
-// 6. The recipe-specific invention classes.
+// FAILURE MODE 10 — the CTA asks for a backup offer.
+//
+// Redfin cites NAR: only 6% of home sales fall through. That is a 1-in-17 ask. The
+// honest recapture CTA is "here's what else," never "get in line."
 // ─────────────────────────────────────────────────────────────────────────────
 
-describe("timingClaims — INVENTION CLASS 3: a claim about time", () => {
-  it("catches any duration, numeric or spelled out", () => {
-    expect(timingClaims("It was listed for 75 days.")).not.toEqual([]);
-    expect(timingClaims("Against a 72-day median.")).not.toEqual([]);
-    expect(timingClaims("It found a buyer in three weeks.")).not.toEqual([]);
-    expect(timingClaims("On the market barely a month.")).not.toEqual([]);
+describe("FAILURE MODE: the CTA invites backup offers", () => {
+  it("the label never asks the reader to queue behind a signed contract", () => {
+    const label = UNDER_CONTRACT_FIELDS.ctaLabel.toLowerCase();
+    expect(label).not.toContain("backup");
+    expect(label).not.toContain("back-up");
+    expect(label).not.toContain("get in line");
   });
 
-  it("catches days-on-market phrasing in any form", () => {
-    expect(timingClaims("Its days on market tell the story.")).not.toEqual([]);
-    expect(timingClaims("Days to contract: well under the norm.")).not.toEqual([]);
-    expect(timingClaims("Its time on the market was notable.")).not.toEqual([]);
-    expect(timingClaims("75 days since listed.")).not.toEqual([]);
+  it("the registry prompt does not request one either — it is what a keyless ask seeds from", () => {
+    const prompt = RECIPES["under-contract"].prompt.toLowerCase();
+    expect(prompt).not.toContain("backup offer");
   });
 
-  it("catches an ORDERING of events we do not hold — the price cut vs the contract", () => {
-    expect(timingClaims("The seller cut the price before a contract was reached.")).not.toEqual([]);
-    expect(timingClaims("A contract was accepted soon after.")).not.toEqual([]);
-    expect(timingClaims("Interest picked up after the price cut.")).not.toEqual([]);
-    expect(timingClaims("The reduction drew a buyer.")).not.toEqual([]);
-  });
-
-  it("catches SPEED characterization — ours to state, and we never state it", () => {
-    expect(timingClaims("This one went quickly.")).not.toEqual([]);
-    expect(timingClaims("It didn't last.")).not.toEqual([]);
-    expect(timingClaims("It was snapped up.")).not.toEqual([]);
-    expect(timingClaims("A slow burn, then a contract.")).not.toEqual([]);
-  });
-
-  it("catches COMPARING this home to the area — a comparative claim is a factual claim", () => {
-    expect(timingClaims("That is in line with the area median.")).not.toEqual([]);
-    expect(timingClaims("It beat the typical home in this ZIP.")).not.toEqual([]);
-    expect(timingClaims("The typical home here needs 72 days.")).not.toEqual([]);
-  });
-
-  it("PASSES an honest transaction paragraph — the guard is sharp, not merely loud", () => {
-    const good =
-      "This home is under contract. It is new construction. The asking price came down by " +
-      "$104,975, to $595,000. Backup offers are still being accepted.";
-    expect(timingClaims(good)).toEqual([]);
-    expect(proseViolations(good, narratorSources(INPUT).join(" "), INPUT.settled)).toEqual([]);
-  });
-});
-
-describe("inventedAttributes — INVENTION CLASS 1: the class that is not a number", () => {
-  // This guard exists because the SHARED narrator (authorListingNarrative) invented
-  // "this three-story home" on these exact facts, live, 07/13/2026.
-  const SOURCES = "CONTEXT: under contract. It is new construction.";
-
-  it("catches the storey count the shared narrator actually invented", () => {
-    const bad = "New construction on a quarter-acre lot, this three-story home is under contract.";
-    expect(inventedAttributes(bad, SOURCES)).toContain("story");
-  });
-
-  it("catches the classic unsourced qualities — water, a pool, a view, a renovation", () => {
-    expect(inventedAttributes("Waterfront living at its finest.", SOURCES)).toContain("waterfront");
-    expect(inventedAttributes("The pool is heated.", SOURCES)).toContain("pool");
-    const viewHits = inventedAttributes("Sweeping views of the gulf.", SOURCES);
-    expect(viewHits).toContain("views");
-    expect(viewHits).toContain("gulf");
-    expect(inventedAttributes("Fully renovated in 2024.", SOURCES)).toContain("renovated");
-  });
-
-  it("ALLOWS an attribute the agent's own pasted description states (LANE 2)", () => {
-    const withRemarks = `${SOURCES} THE AGENT'S OWN LISTING DESCRIPTION:\nDirect canal access with a private dock and a heated pool.`;
-    expect(inventedAttributes("A canal-front home with a heated pool.", withRemarks)).toEqual([]);
-  });
-
-  it("OUR OWN BYLINE MAY NOT LAUNDER AN ATTRIBUTE — 'SWFL Data Gulf' is not a gulf view", () => {
-    // The guard caught this itself the moment the citation started riding inside the
-    // settled sentence. It cuts both ways, and both directions are pinned here.
-    const citedSources = narratorSources(INPUT).join(" ");
-    expect(citedSources).toContain("SWFL Data Gulf"); // the byline IS in the sources…
-
-    // …and it must NOT wave through an invented water view.
-    expect(inventedAttributes("Sweeping views of the gulf.", citedSources)).toContain("gulf");
-
-    // …while our own cited sentence must still pass its own gate, or every honest
-    // paragraph silently degrades to the fallback forever.
-    expect(inventedAttributes(settleAreaTiming(TIMING)!.sentence, "")).toEqual([]);
-  });
-});
-
-describe("offerClaims — INVENTION CLASS 2: a fabricated contract term", () => {
-  it("catches the exact sentence the model actually produced", () => {
-    expect(offerClaims("The seller accepted an offer at the current ask of $595,000.")).not.toEqual(
-      [],
-    );
-  });
-
-  it("catches over/under-ask and full-price claims", () => {
-    expect(offerClaims("It went over asking.")).not.toEqual([]);
-    expect(offerClaims("They took a full-price offer.")).not.toEqual([]);
-    expect(offerClaims("An offer of $600,000 was accepted.")).not.toEqual([]);
-  });
-
-  it("ALLOWS the sourced price-cut sentence — that is the ASK's history, not the offer", () => {
-    expect(offerClaims(settlePriceCut(FACTS)!.sentence)).toEqual([]);
+  it("ships exactly ONE call to action", () => {
+    expect(UNDER_CONTRACT_FIELDS.ctaLabel.split(/\s+/).length).toBeLessThanOrEqual(5);
   });
 });
 
 // ─────────────────────────────────────────────────────────────────────────────
-// 7. The floor. When the model fails twice, THIS is what ships.
+// FAILURE MODE 11 — the subject line smuggles a claim or runs long.
 // ─────────────────────────────────────────────────────────────────────────────
 
-describe("fallbackNote — deterministic, zero model, and it FABRICATES NOTHING", () => {
-  it("PASSES ITS OWN SHIP GATE — the guaranteed path can no longer lie", () => {
-    // It is assembled from settled sentences ONLY, so this holds BY CONSTRUCTION.
-    const note = fallbackNote(INPUT);
-    expect(proseViolations(note, narratorSources(INPUT).join(" "), INPUT.settled)).toEqual([]);
+describe("FAILURE MODE: the subject line is model-authored or overlong", () => {
+  it("leads with the status and is deterministic", () => {
+    expect(underContractSubject(FACTS, 18)).toBe("Under contract: 8348 Southwindbay Cir");
   });
 
-  it("states the status, new construction, the sourced cut, and the settled count", () => {
-    const note = fallbackNote(INPUT);
-    expect(note).toBe(
-      "This home is under contract. It is new construction. " +
-        "The asking price came down by $104,975, to $595,000. " +
-        `3 of 6 ZIP codes in the Cape Coral, FL metro have a longer typical time-to-sell than 33905 ${CITE}. ` +
-        "Backup offers are still being accepted — if this one was on your list, it is " +
-        "worth putting your position on paper now.",
-    );
-    // No interval, no ordering, no speed.
-    expect(note).not.toMatch(/\bdays?\b/i);
-    expect(note).not.toMatch(/\bbefore\b|\bafter\b/i);
+  it("always resolves — there is no rung 4", () => {
+    expect(underContractSubject({ ...FACTS, address: undefined }, null)).toContain("Fort Myers");
+    expect(
+      underContractSubject({ ...FACTS, address: undefined, city: undefined }, null).length,
+    ).toBeGreaterThan(0);
   });
 
-  it("degrades to the bare status when we hold nothing else — never a zero, never a guess", () => {
-    const bare: ListingFacts = { address: "1 Nowhere St", photos: [], sourceUrl: "x" };
-    const input: NarratorInput = { settled: settleAll(bare, null) };
-    expect(fallbackNote(input)).toBe(
-      "This home is under contract. Backup offers are still being accepted — if this one " +
-        "was on your list, it is worth putting your position on paper now.",
-    );
-    expect(proseViolations(fallbackNote(input), "", input.settled)).toEqual([]);
-  });
-
-  it("asserts nothing about the house itself", () => {
-    expect(inventedAttributes(fallbackNote(INPUT), "")).toEqual([]);
+  it("never claims a sale in the subject", () => {
+    const s = underContractSubject(FACTS, 18).toLowerCase();
+    for (const phrase of SOLD_LANGUAGE) expect(s).not.toContain(phrase);
   });
 });
 
 // ─────────────────────────────────────────────────────────────────────────────
-// 8. THE NEIGHBORHOOD — our own address-resolved, tax-roll-backed community stats,
-//    settled as a claim the narrator may restate. The SIXTH lifecycle recipe runs
-//    this stricter layer ON TOP of the shared narrator; the other five (via
-//    shared.ts) get the same fact through `neighborhoodStatsSourceLine` directly.
+// FAILURE MODE 12 — the recipe builds a pending DETECTOR.
+//
+// TRAP 2. The agent tells us. There is no under-contract state, pending is a flag on an
+// otherwise-active row, and the flag is stale on 462 sold rows.
 // ─────────────────────────────────────────────────────────────────────────────
 
-describe("settleCommunityStats — the neighborhood-stats settled claim", () => {
-  const STATS = {
-    subdivisionName: "Heritage Bay",
-    homeCount: 1900,
-    medianJustValue: 612000,
-    countByType: null,
-    sourceUrl: "https://www.swfldatagulf.com/r/source/neighborhood_stats",
-    asOf: "2026-07-14",
-  };
-
-  it("settles the fact and anchors both numerals when present", () => {
-    const claim = settleCommunityStats(STATS);
-    expect(claim).not.toBeNull();
-    expect(claim!.anchors).toContain("1900");
-    expect(claim!.anchors).toContain("612000");
-    expect(claim!.sentence).toContain("Heritage Bay");
-  });
-
-  it("returns null when absent", () => {
-    expect(settleCommunityStats(undefined)).toBeNull();
-  });
-
-  it("settleAll includes it when facts.communityStats is present", () => {
-    const facts = {
-      address: "123 Main St",
-      photos: [],
-      sourceUrl: "x",
-      communityStats: STATS,
-    } as unknown as ListingFacts;
-    const settled = settleAll(facts, null);
-    expect(settled.some((s) => s.sentence.includes("Heritage Bay"))).toBe(true);
-  });
-
-  // ── THE END-TO-END PROOF, IN BOTH DIRECTIONS (deviates from the plan's literal
-  //    test; see task-7 report) ────────────────────────────────────────────────
-  //
-  // The plan's original single test fed a PARAPHRASE ("The tax roll counts 1,900
-  // homes…") and expected `[]`. Run against the real gate it does NOT pass — and it
-  // SHOULD NOT. In this architecture "restate" means WORD FOR WORD: the narrator is
-  // instructed "restate it word for word, never re-derive", and `auditClaims` accepts
-  // a count-shaped sentence ONLY as a verbatim restatement of a settled one
-  // (claims.ts: "Anything else is dropped"). "1,900 homes" is count-shaped — the comma
-  // makes "900 homes" a COUNT match — so a re-count in the narrator's own words is a
-  // claim it drew itself, and the fail-closed gate drops it. That is the gate working,
-  // not a bug, so the two tests below pin BOTH edges rather than weaken either.
-
-  it("a WORD-FOR-WORD restatement of the settled neighborhood numbers survives proseViolations", () => {
-    // This is the real "the numerals are accepted end-to-end" proof. The settled
-    // sentence riding in `sourceText` also legitimizes "Heritage Bay" — its "bay" is an
-    // ATTRIBUTE_CLAIMS word (a water body), self-legitimizing here exactly as the
-    // BRAND_NAME/"gulf" fix intends. See the report's finding #2 for the sharp edge.
-    const settled = [settleStatus(), settleCommunityStats(STATS)!];
-    const sourceText = narratorSources({ settled, community: undefined }).join(" ");
-    const paragraph = `${settleStatus().sentence} ${settleCommunityStats(STATS)!.sentence}`;
-    expect(proseViolations(paragraph, sourceText, settled)).toEqual([]);
-  });
-
-  it("a PARAPHRASED re-count is correctly rejected — COUNT is verbatim-only, by design", () => {
-    // The plan's original paragraph, kept here so it stays traceable — asserted the
-    // OTHER way. A precise matcher (not a loose `.not.toEqual([])`) so it cannot rot
-    // into passing for some unrelated reason.
-    const settled = [settleStatus(), settleCommunityStats(STATS)!];
-    const sourceText = narratorSources({ settled, community: undefined }).join(" ");
-    const paraphrase =
-      "This home is under contract. The tax roll counts 1,900 homes in this neighborhood, " +
-      "with a median assessed value of $612,000.";
-    expect(proseViolations(paraphrase, sourceText, settled)).toContain("word-count:900 homes");
-  });
-});
-
-// ─────────────────────────────────────────────────────────────────────────────
-// 9. Task 4 — FAVORABLE_FRAMING_POLICY wired into authorUnderContractNote's own
-//    system prompt (the SAME constant Task 3 wired into authorListingNarrative,
-//    a different, unrelated function's prompt).
-// ─────────────────────────────────────────────────────────────────────────────
-
-describe("authorUnderContractNote wires in FAVORABLE_FRAMING_POLICY", () => {
-  it("the model's system prompt includes FAVORABLE_FRAMING_POLICY verbatim", async () => {
-    const { FAVORABLE_FRAMING_POLICY: policy } = await import("./shared");
-    // Dynamic import AFTER the mock.module call above, so authorUnderContractNote's
-    // OWN lazy call to getAnthropic() (inside its function body, not at module load)
-    // resolves against the mocked module.
-    const { authorUnderContractNote } = await import("./under-contract");
-    // INPUT (module-level, defined above) has 4 settled facts (status, new
-    // construction, price cut, area timing) -- well past the "settled.length <= 1
-    // && !remarks" short-circuit -- so this reaches the model call, not the fallback.
-    await authorUnderContractNote(INPUT);
-    expect(systemSeen).toContain(policy);
+describe("FAILURE MODE: the recipe detects pending instead of being told", () => {
+  it("never reads the pending flag or the transitions table", () => {
+    expect(CODE).not.toMatch(/flag_pending|listing_transitions|to_state/);
   });
 });
