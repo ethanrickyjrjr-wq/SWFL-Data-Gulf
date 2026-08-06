@@ -50,13 +50,24 @@
  * transition with `days_off_market >= 7` (the real Lane-2 relist floor) — a GENUINE relist.
  * It carries the full spec line: $669,000 · 3 beds · 2.5 baths · 2,361 sqft · 0.26-acre lot.
  *
- * ⚠️ KNOWN OPEN SLOT ON THIS HOUSE — the seller's own description. Counted live 08/06/2026:
- * **102 relist events (>= 7 days off) in `listing_transitions`, and ZERO of their addresses
- * carry a row in `data_lake.apify_property_records`** — which is the only place a listing
- * description exists anywhere in the lake (`listing_state`, the free spine, has no such
- * column at all). So the description block is WIRED and correct here, and no relist address
- * we hold can currently fill it. It lights up the moment a paid row lands for one. Do not
- * read its absence as a bug in the recipe, and do not "fix" it by inventing copy.
+ * ⚠️ KNOWN OPEN SLOT ON THIS HOUSE — the seller's own description, and it is a SPEND
+ * DECISION, not missing data. Counted live 08/06/2026: **102 relist events (>= 7 days off)
+ * in `listing_transitions`, and ZERO of their addresses carry a row in
+ * `data_lake.apify_property_records`** (383 rows held, none a relist) — and that table is
+ * the only place a listing description lands in the lake (`listing_state`, the free spine,
+ * has no such column at all).
+ *
+ * But per `docs/standards/data-roots.md` §"Comp PHOTOS + the listing DESCRIPTION", **the
+ * vendor populates its `text` field for for_sale/pending listings** — and a relist is
+ * ACTIVE. So the vendor HAS a description for all 102; we have simply never bought a row for
+ * a relisted address. Filling it is RULE 0.7a rung 3 (a paid call for ONE specific missing
+ * field, behind the spend switch). An earlier version of this header said no relist "can
+ * currently fill it", which read as a dead end and was wrong. Do not read the empty block as
+ * a bug in the recipe, and do not "fix" it by inventing copy.
+ *
+ * (The sold case is genuinely different and is NOT this email's problem: the vendor returns
+ * `<NA>` for sold listings and needs the separate detail actor — check
+ * `apify_sold_comp_backfill_wire`. A relist is never sold.)
  *
  * SPEND: ONE metered call — the house narrator (`authorListingNarrative`, Sonnet). The
  * geocode and the spine read are free. Run without `ANTHROPIC_API_KEY` and even that becomes
