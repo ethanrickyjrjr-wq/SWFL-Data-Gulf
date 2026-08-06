@@ -30,6 +30,37 @@ one stays closed and re-checks itself.** 3 of ~881 now carry signals-worth of au
 (1 signal attached, 2 closed manually with proof earlier today). The remaining ~878 still need
 signals, and that is the burn-down.
 
+## 2026-08-06 (Sonnet 5) — NAMED the sold->active event, live, everywhere it was silently uncounted: listing_pulse_daily (already-shipped, /desk + charts) AND week-in-review.
+
+Operator reaction to the previous entry's finding ("no named surface for a closing that fell
+through after recording sold") was direct: name it. Did, immediately, at the data layer, in both
+places that enumerate transition kinds by name.
+
+**`listing_pulse_daily` — the LIVE view feeding `/desk`'s Daily Market Pulse and the charts
+gallery right now.** `migrations/20260806_listing_pulse_daily_fell_through.sql` adds a
+`fell_through` column (`from_state='sold' AND to_state='active'`), appended at the END of the
+SELECT list — Postgres treats inserting a column mid-list as a RENAME of everything after it
+(`cannot change name of view column "total_events" to "fell_through"`, hit and fixed live). Ran via
+`bun scripts/run-migration.ts` per RULE 1. **Verified: sum of `fell_through` across all 30 days =
+32, matching the earlier live count exactly; `returned`/`departures`/`sold`/`total_events` on the
+same rows are unchanged.** Wired into `lib/desk/types.ts` (`PulseDay.fellThrough`) and
+`lib/desk/loaders.ts` (`PulseRow.fell_through` → mapped); `lib/desk/alerts.test.ts`'s `pulseDay()`
+helper updated in the same commit (RULE 3: type change ships with all consumers, atomically).
+
+**`lib/week-in-review/load.ts`** — added `"sold->active"` as an 8th `TRANSITION_KIND`, labeled
+"Fell through after closing." New TDD test proves the kind buckets and carries a real
+(`price`-sourced) fact.
+
+**Evidence:** `bun test lib/desk/ lib/week-in-review/` → 84 pass, 0 fail, 185 expect() calls.
+`bunx tsc --noEmit` clean on both areas. `bunx eslint` clean.
+
+**Deliberate scope line, stated once so it isn't re-litigated:** did NOT touch
+`lib/back-on-market/relist-fact.ts`. Its `RELIST_MIN_DAYS_OFF_MARKET` floor logic is tuned
+specifically for `holding->active` (distinguishing a real relist from scan flicker); grafting
+`sold->active` onto that same floor without checking whether the same day-count logic even applies
+to a post-close fallthrough is how a fix ships a wrong number. Check `sold_to_active_no_named_surface`
+stays open for that decision.
+
 ## 2026-08-06 (Sonnet 5) — WEEK IN REVIEW Task 1 done end-to-end: the DB query landed, TDD green (17/17).
 
 Took over from the prior session's handoff — the pure contract (`lib/week-in-review/load.ts`) was

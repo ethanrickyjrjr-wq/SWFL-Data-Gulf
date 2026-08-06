@@ -42,6 +42,38 @@ test("buckets are the transition kinds the sweep actually writes", () => {
     "active->sold",
     "active->withdrawn",
     "holding->withdrawn",
+    "sold->active",
+  ]);
+});
+
+// A closing that fell through AFTER recording sold — added 08/06/2026, live-quantified
+// at 32 occurrences since coverage began (check: sold_to_active_no_named_surface). This
+// event was in the feed the whole time; the kind list simply never named it.
+test("names a closing that fell through after recording sold", async () => {
+  const transitions = [
+    row({ address_key: "A", from_state: "sold", to_state: "active", price: 450000 }),
+  ];
+  const result = await loadWeekInReview("zip", "33904", WINDOW, {
+    fetchCoverageStart: async () => EARLY_COVERAGE_START,
+    fetchFootprintZips: async () => ["33904"],
+    fetchTransitions: async () => transitions,
+    fetchGeo: async () => [geo({ address_key: "A" })],
+  });
+  expect(result.ok).toBe(true);
+  if (!result.ok) throw new Error("expected ok");
+  expect(result.events).toEqual([
+    {
+      kind: "sold->active",
+      count: 1,
+      facts: [
+        {
+          label: "Fell through after closing",
+          value: 450000,
+          unit: "$",
+          source: "SWFL Data Gulf",
+        },
+      ],
+    },
   ]);
 });
 

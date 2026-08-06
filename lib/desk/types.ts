@@ -122,6 +122,11 @@ export interface PulseDay {
   departures: number;
   sold: number;
   withdrawn: number;
+  /** sold->active: a closing that fell through AFTER the deal recorded sold —
+   *  distinct from `returned` (holding->active, a PENDING deal falling
+   *  through before closing). Added 08/06/2026; the event was always in the
+   *  feed, it simply had no named bucket until now. */
+  fellThrough: number;
   total: number;
   /** Incomplete sweep (low coverage vs. window median) — labeled, never hidden. */
   partial: boolean;

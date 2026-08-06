@@ -330,6 +330,7 @@ interface PulseRow {
   withdrawn: number;
   total_events: number;
   latest_scraped_at: string | null;
+  fell_through: number;
 }
 
 async function loadPulse(supabase: Supabase): Promise<PulseData | null> {
@@ -353,6 +354,7 @@ async function loadPulse(supabase: Supabase): Promise<PulseData | null> {
       departures: r.departures,
       sold: r.sold,
       withdrawn: r.withdrawn,
+      fellThrough: r.fell_through,
       total: r.total_events,
       partial: partials[i],
       carryoverAfterPartial: carryovers[i],

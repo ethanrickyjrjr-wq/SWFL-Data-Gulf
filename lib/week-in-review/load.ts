@@ -40,6 +40,13 @@ export const ALLOWED_SOURCE_TABLE = "listing_transitions" as const;
  * 74 back on market · 73 sold direct · 27 withdrawn from active · 25 withdrawn
  * from pending.
  *
+ * `sold->active` ADDED 08/06/2026 (Sonnet 5) — a closing that fell through
+ * AFTER the deal recorded sold, distinct from `holding->active` (a pending
+ * deal that fell through before closing). Live-quantified: 32 occurrences
+ * since coverage began 07/02/2026 (~6-7/week, Lee+Collier). It existed in the
+ * live feed the whole time; this list simply never named it. Check:
+ * `sold_to_active_no_named_surface`.
+ *
  * Adding a kind means the sweep started writing one. Renaming a kind means
  * someone stopped reading the feed and started authoring it.
  */
@@ -51,6 +58,7 @@ export const TRANSITION_KINDS = [
   "active->sold",
   "active->withdrawn",
   "holding->withdrawn",
+  "sold->active",
 ] as const;
 
 export type TransitionKind = (typeof TRANSITION_KINDS)[number];
@@ -64,6 +72,7 @@ export const KIND_LABELS: Record<TransitionKind, string> = {
   "active->sold": "Sold direct",
   "active->withdrawn": "Withdrawn from active",
   "holding->withdrawn": "Withdrawn from pending",
+  "sold->active": "Fell through after closing",
 };
 
 export interface Window {

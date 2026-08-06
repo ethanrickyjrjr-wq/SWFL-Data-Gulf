@@ -25,6 +25,7 @@ function pulseDay(over: Partial<PulseDay>): PulseDay {
     departures: 0,
     sold: 0,
     withdrawn: 0,
+    fellThrough: 0,
     total: 70,
     partial: false,
     carryoverAfterPartial: false,
