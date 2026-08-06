@@ -37,6 +37,13 @@ export interface ListingFacts {
   yearBuilt?: string;
   propertyType?: string;
   remarks?: string; // the marketing description, verbatim
+  /** THE OPEN HOUSE MOMENT. No vendor feed carries this (all 18 SteadyAPI endpoints
+   *  checked 07/13/2026, `lib/deliverable/recipes/open-house.ts`) — it is lane-4, the
+   *  agent's own words, typed in verbatim. Never parsed, never guessed, never defaulted
+   *  to "this weekend". Absent = the canvas shows an open "+ Add" cell; the sent email
+   *  shows no date/time card at all rather than a half-filled one. */
+  openHouseDate?: string;
+  openHouseTime?: string;
   /** Vendor-stated listing characteristics — what a NEW LISTING email is actually
    *  about. The feed carries no MLS remarks, so these are the real descriptive facts
    *  we hold about the house itself. Absent = not stated; never inferred. */

@@ -4,19 +4,20 @@
 //
 // It wears the CAMPAIGN CHROME (lib/email/lifecycle-chrome.ts), same as its six siblings:
 //   header · RIBBON("Open House") · photo · hero(address over price) · spec strip
-//          · narrative · agent card · CTA(RSVP) · footer
+//          · [middle: the moment's own CARD] · narrative · [tail: the description] ·
+//          agent card · CTA(RSVP) · footer
 // The shape is pinned by campaign-coherence.test.ts. What THIS suite pins is the sourcing —
-// and the fact that the two cells this email is ABOUT can never be sourced at all.
+// and the fact that the date/time this email is ABOUT can never be invented.
 //
 // The date and the time of an open house are in NO vendor feed (all 18 SteadyAPI
-// endpoints checked 07/13/2026). They are a lane-2/lane-4 fact: the agent supplies
-// them. So this recipe is the cleanest test in the fan-out of the one rule that keeps
-// "never invent" from becoming "never build":
+// endpoints checked 07/13/2026). They are a lane-2/lane-4 fact: the agent supplies them
+// (`ListingFacts.openHouseDate`/`openHouseTime`). So this recipe is the cleanest test in
+// the fan-out of the one rule that keeps "never invent" from becoming "never build":
 //
-//   an unsourceable fact is an INVITATION on the canvas (an editable cell whose LABEL
-//   is the instruction) and DOES NOT EXIST in the sent email.
+//   an unsourceable fact is a CARD THAT DOES NOT EXIST until the agent fills it — never a
+//   half-filled callout, never a naked kicker with nothing under it.
 //
-// Never a zero. Never a placeholder date. Never a naked label to a recipient.
+// Never a zero. Never a placeholder date. Never an empty box.
 //
 // Fully offline: the Anthropic client, the subject resolver and the photo mirror are
 // all stubbed, so this suite makes ZERO network calls and costs nothing to run.
@@ -113,70 +114,55 @@ async function build(facts: ListingFacts | null, current?: EmailDoc): Promise<Em
 
 // ─────────────────────────────────────────────────────────────────────────────
 describe("THE OPEN-SLOT CONTRACT — the date and time are never invented", () => {
-  test("the moment is TWO OPEN SLOTS on the canvas, and the label is the instruction", async () => {
+  test("neither date nor time held → NO CARD AT ALL, not an empty one", async () => {
+    // SHORE_DR carries no openHouseDate/openHouseTime — the fixture is silent on the
+    // moment, same as any freshly-resolved listing. `dateTimeCard` must return null, and
+    // the built doc must ship no `signal` block — an empty callout box is the T6 failure
+    // (an empty chart box is worse than no chart) applied to a card.
+    const { dateTimeCard } = await import("./open-house");
+    expect(dateTimeCard(SHORE_DR)).toBeNull();
+
     const doc = await build(SHORE_DR);
+    expect(doc.blocks.some((b) => b.type === "signal")).toBe(false);
 
-    const date = labelled(doc, "Date");
-    const time = labelled(doc, "Time");
-    // The cells EXIST — the canvas renders each as an editable "+ Add" affordance
-    // (StatsBlock: empty + scope → the dashed open-slot outline).
-    expect(date).toBeDefined();
-    expect(time).toBeDefined();
-    // And they are EMPTY. Never a zero, never "TBD", never a placeholder date.
-    expect(date!.value).toBe("");
-    expect(time!.value).toBe("");
-  });
-
-  test("the SENT email contains no date, no time, and no naked label", async () => {
-    const html = await renderEmailDocHtml(await build(SHORE_DR));
-
-    // The instruction is a canvas affordance. It must not reach a recipient.
-    expect(html).not.toContain(">Date<");
-    expect(html).not.toContain(">Time<");
+    const html = await renderEmailDocHtml(doc);
     // And nothing invented a moment in its place.
     expect(html).not.toMatch(/\b(Saturday|Sunday|Monday|Tuesday|Wednesday|Thursday|Friday)\b/i);
     expect(html).not.toMatch(/\bTBD\b|\bTBA\b/i);
     expect(html).not.toMatch(/\b\d{1,2}\s*[-–—]\s*\d{1,2}\s*(am|pm)\b/i);
-    // The classic failure mode: an unsourced cell rendered as a zero.
-    expect(html).not.toMatch(/>\s*0\s*</);
   });
 
-  test("once the agent fills the moment, it ships — and it LEADS the strip", async () => {
-    const doc = await build(SHORE_DR);
-    // Simulate the canvas edit: the agent types into the open cells. A real edit patches
-    // `stats.<i>.value` — it does NOT replace props — so variant and emphasis survive.
-    const fill: Record<string, string> = {
-      Date: "Sat, Jul 19",
-      Time: "1–4 PM",
+  test("once the agent fills the moment, it ships as its OWN CARD — between the strip and the paragraph", async () => {
+    const filled: ListingFacts = {
+      ...SHORE_DR,
+      openHouseDate: "Sat, Jul 19",
+      openHouseTime: "1–4 PM",
     };
-    const filled: EmailDoc = {
-      ...doc,
-      blocks: doc.blocks.map((b) =>
-        b.type === "stats"
-          ? {
-              ...b,
-              props: {
-                ...b.props,
-                stats: b.props.stats.map((s) => ({ ...s, value: fill[s.label] ?? s.value })),
-              },
-            }
-          : b,
-      ),
-    };
-    const html = await renderEmailDocHtml(filled);
+    const doc = await build(filled);
+
+    const signal = doc.blocks.find((b) => b.type === "signal");
+    if (signal?.type !== "signal") throw new Error("no signal card");
+    expect(signal.props.kicker).toBe("Open House");
+    expect(signal.props.title).toBe("Sat, Jul 19");
+    expect(signal.props.body).toBe("1–4 PM");
+
+    const html = await renderEmailDocHtml(doc);
     expect(html).toContain("Sat, Jul 19");
     expect(html).toContain("1–4 PM");
-    // The label now reads as a CAPTION under the value — which is why it was never
-    // written as a canvas-only imperative ("Add the date here").
-    expect(html).toContain(">Date<");
 
-    // UP FRONT — as far up as the open-slot contract allows. The campaign chrome puts the
-    // ADDRESS over the PRICE in the hero (that is the shape all seven emails share, and
-    // HeroBlock ships any label it carries, so an instruction can never live there). The
-    // moment therefore leads the very next element: the first two cells of the spec strip,
-    // in the accent colour, ahead of the specs and well ahead of the paragraph.
-    expect(html.indexOf("Sat, Jul 19")).toBeLessThan(html.indexOf("2,847"));
+    // AFTER the spec strip, AHEAD of the narrative paragraph — the card rides in the
+    // chrome's `middle` slot, which sits between the two (lifecycle-chrome.ts §6).
+    expect(html.indexOf("Sat, Jul 19")).toBeGreaterThan(html.indexOf("2,847"));
     expect(html.indexOf("1–4 PM")).toBeLessThan(html.indexOf(NARRATIVE));
+  });
+
+  test("only ONE of the two held → the card still ships, with just that one", async () => {
+    // A real, honest partial fact — same doctrine as any other open-slot cell.
+    const doc = await build({ ...SHORE_DR, openHouseTime: "1–4 PM" });
+    const signal = doc.blocks.find((b) => b.type === "signal");
+    if (signal?.type !== "signal") throw new Error("no signal card");
+    expect(signal.props.title).toBeUndefined();
+    expect(signal.props.body).toBe("1–4 PM");
   });
 });
 
@@ -189,15 +175,14 @@ describe("the cells — each renders only if sourced", () => {
     expect(labelled(doc, "Sq Ft")).toEqual({ value: "2,847", label: "Sq Ft" });
   });
 
-  test("the strip does NOT argue the price — no $/sq ft, no lot, no type", async () => {
-    // An invitation is not a price announcement. Those three cells are the argument
-    // New Listing and Price Improved make; carrying them here turns a "come see it"
-    // into a valuation, which is also exactly the drift the narrator is forbidden.
+  test("the strip carries $/sq ft and DOM, but not lot or type", async () => {
+    // $/Sq Ft and DOM shipped 08/06/2026 (operator: "where is $ sq.ft" / "DOM too!!!!").
+    // Lot and Type stay off — neither is a fact a visitor decides on in the driveway.
     const doc = await build(SHORE_DR);
-    expect(labelled(doc, "$/Sq Ft")).toBeUndefined();
+    expect(labelled(doc, "$/Sq Ft")).toEqual({ value: "$209", label: "$/Sq Ft" });
     expect(labelled(doc, "Lot")).toBeUndefined();
     expect(labelled(doc, "Type")).toBeUndefined();
-    // …and the strip carries no derived cell, so it needs no provenance footnote.
+    // …and the strip carries no footnote — both $/Sq Ft's operands sit in the same strip.
     const strip = doc.blocks.find((b) => b.type === "stats");
     expect(strip?.type === "stats" && strip.props.footnote).toBeFalsy();
   });
@@ -208,18 +193,17 @@ describe("the cells — each renders only if sourced", () => {
     expect(rows).toHaveLength(1);
     if (rows[0].type !== "stats") throw new Error("no strip");
     expect(rows[0].props.variant).toBe("strip");
-    // The moment LEADS it, and it is the cell the eye should land on — via ORDER, not
-    // shouted emphasis (fixed 08/03/2026: the ribbon already says "Open House", so
-    // shouting the date/time cells too just made the strip louder, not clearer).
+    // Date/Time moved OUT of the strip and into their own card (see the contract suite
+    // above) — the strip carries the specs, in reading order, no shouted emphasis (fixed
+    // 08/03/2026: the ribbon already says "Open House").
     expect(rows[0].props.stats.map((s) => s.label)).toEqual([
-      "Date",
-      "Time",
       "Beds",
       "Baths",
       "Sq Ft",
+      "$/Sq Ft",
+      "DOM",
     ]);
-    expect(rows[0].props.stats[0].emphasis).toBeUndefined();
-    expect(rows[0].props.stats[1].emphasis).toBeUndefined();
+    expect(rows[0].props.stats.every((s) => !s.emphasis)).toBe(true);
   });
 
   test("the campaign chrome: RIBBON('Open House') then the ADDRESS over the PRICE", async () => {
@@ -379,6 +363,49 @@ describe("chart, prose, and framing", () => {
 });
 
 // ─────────────────────────────────────────────────────────────────────────────
+describe("the property's own description — verbatim, and AFTER the invitation", () => {
+  const REMARKS = "Sunset views from every western window. A large kitchen anchors the great room.";
+
+  test("no remarks held → no tail block, no empty panel", async () => {
+    const doc = await build(SHORE_DR); // SHORE_DR carries no `remarks`
+    const texts = doc.blocks.filter((b) => b.type === "text");
+    // Exactly one text block: the narrative slot. No description panel with nothing in it.
+    expect(texts.filter((b) => b.type === "text" && b.props.descriptionSlot)).toHaveLength(0);
+  });
+
+  test("remarks held → they ship verbatim, in their OWN block, marked as a description", async () => {
+    const doc = await build({ ...SHORE_DR, remarks: REMARKS });
+    const descBlock = doc.blocks.find(
+      (b) => b.type === "text" && (b.props as { descriptionSlot?: boolean }).descriptionSlot,
+    );
+    if (descBlock?.type !== "text") throw new Error("no description block");
+    expect(descBlock.props.body).toContain(REMARKS);
+
+    const html = await renderEmailDocHtml(doc);
+    expect(html).toContain(REMARKS);
+    // AFTER the narrator's own paragraph — operator ask 08/06/2026: talk about the open
+    // house first, then the property's own words.
+    expect(html.indexOf(REMARKS)).toBeGreaterThan(html.indexOf(NARRATIVE));
+  });
+
+  test("the model never touches it — it is not a narrator source it can rewrite in place", async () => {
+    // `clearNarrativeSlots` must skip the description block (it is marked, not blank),
+    // and `fillNarrative` must never write the narrator's paragraph into it. If either
+    // guard regresses, the verbatim MLS copy silently becomes model prose.
+    const doc = await build({ ...SHORE_DR, remarks: REMARKS });
+    const descBlock = doc.blocks.find(
+      (b) => b.type === "text" && (b.props as { descriptionSlot?: boolean }).descriptionSlot,
+    );
+    if (descBlock?.type !== "text") throw new Error("no description block");
+    expect(descBlock.props.body).not.toBe(NARRATIVE);
+    const narrativeBlock = doc.blocks.find(
+      (b) => b.type === "text" && !(b.props as { descriptionSlot?: boolean }).descriptionSlot,
+    );
+    expect(narrativeBlock?.type === "text" && narrativeBlock.props.body).toBe(NARRATIVE);
+  });
+});
+
+// ─────────────────────────────────────────────────────────────────────────────
 describe("THE REAL PATH — authorDoc, from the prompt alone, with NO scope", () => {
   // The Lab door. It passes NOTHING: the address lives only in the prompt text, and
   // gating the property lane on scope.address is what sent 15 of 17 recipes to the
@@ -407,12 +434,12 @@ describe("THE REAL PATH — authorDoc, from the prompt alone, with NO scope", ()
     const hero = doc.blocks.filter((b) => b.type === "hero")[1];
     expect(hero?.type === "hero" && hero.props.value).toBe("$595,000");
     expect(labelled(doc, "Sq Ft")?.value).toBe("2,847");
-    expect(labelled(doc, "Date")?.value).toBe("");
+    // No date/time in the prompt → no card at all (the prompt carries no lane-4 fact).
+    expect(doc.blocks.some((b) => b.type === "signal")).toBe(false);
 
     const html = await renderEmailDocHtml(doc);
     expect(html).toContain("326 Shore Dr");
     expect(html).toContain("$595,000");
     expect(html).toContain("RSVP for the Open House");
-    expect(html).not.toContain(">Date<");
   });
 });

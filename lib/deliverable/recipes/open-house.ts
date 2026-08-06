@@ -13,7 +13,8 @@
 // allowed to own: the RIBBON WORD, the numbers, its own middle, and the CTA.
 //
 //   header · RIBBON("Open House") · photo · hero(address over price) · spec strip
-//          · [no middle] · narrative · agent card · CTA(RSVP) · footer
+//          · [middle: the moment's own CARD] · narrative · [tail: the home's own description]
+//          · agent card · CTA(RSVP) · footer
 //
 // The brand (globalStyle, header, agent card, footer) is lifted from the canvas untouched.
 // The chrome is the SHAPE; the brand is the SKIN.
@@ -22,56 +23,49 @@
 //
 // This is still the cleanest test of THE OPEN-SLOT CONTRACT (playbook Part 4) in the whole
 // fan-out, because the date and the time of an open house are in NO feed (all 18 SteadyAPI
-// endpoints checked 07/13/2026). They are a lane-2/lane-4 fact: the AGENT supplies them.
+// endpoints checked 07/13/2026). They are a lane-2/lane-4 fact: the AGENT supplies them
+// (`ListingFacts.openHouseDate`/`openHouseTime`) — never parsed, never guessed.
 //
-// So they are never invented, never a placeholder date, never "TBD". They are the first two
-// cells of the SPEC STRIP, with empty values:
+// CHANGED 08/06/2026 — operator, reading the first render: the date and time were folded
+// into the six-cell spec strip as two small "+ Add" cells, no more visually weighted than
+// Beds or Baths. Moved to their own `signal` callout (`dateTimeCard`, below) — kicker "Open
+// House", title the date, body the time — riding in `middle`, directly under the strip and
+// ahead of the narrative, because it is the single fact this whole email exists to deliver.
 //
-//   Canvas  → two dashed "+ Add" cells reading DATE / TIME.
-//   Email   → StatsBlock drops an empty cell (`emailRender`), so an un-dated invitation says
-//             nothing at all about a date. No zero, no naked label.
-//   Filled  → they lead the strip, directly under the address — the two things this
-//             email is actually about.
-//
-// LABELS ARE SHORT ON PURPOSE (fixed 08/03/2026 — operator, reading a real render: the old
-// "OPEN HOUSE DATE" / "OPEN HOUSE TIME" labels wrapped over three lines in a 94px cell and
-// made the whole strip ragged). The RIBBON directly above already says "Open House" — a
-// reader does not need the words "Open House" repeated inside the strip to know what a
-// date or a time on THIS email means. Same reasoning drops the `"primary"` emphasis: that
-// accent weight is for the HERO's impactful contrast (the researched rule is size/weight
-// contrast at the headline, not shouting inside a hairline strip) — every cell in this
-// strip now reads at the same normal weight.
-//
-// The labels are written to read as CAPTIONS once filled ("Date"), never as canvas-only
-// imperatives ("Add the date here") — because the moment the agent fills the cell, the
-// label ships under the value to the recipient (lib/email/CLAUDE.md, THE SLOT RULE).
-//
-// The strip is the ONLY place in the document model where an unsourceable fact can be BOTH an
-// instruction the agent sees AND nothing at all in the email: it is the one block type that
-// carries a PER-CELL label and honors `emailRender`. The hero cannot — HeroBlock takes no
-// `emailRender` flag and would ship its instruction label naked to a real recipient. That is
-// why the moment lives one row BELOW the hero and not inside it.
+//   Canvas  → the block canvas's own dashed "+ Add" affordance for an empty `signal` block.
+//   Email   → `null` (neither date nor time held) means NO entry in `middle` at all — never
+//             an empty callout box, the T6 lesson (an empty chart box is worse than no
+//             chart) applied to a card instead of a chart.
+//   Filled  → the FIRST block after the spec strip, ahead of the narrative and the
+//             description — the two things this email is actually about, read first.
 //
 // The six answers (playbook Part 6):
 //   1. SUBJECT — the resolved house, handed to us by the dispatcher (ctx.facts). Never a
 //      second resolver.
 //   2. SKELETON — `buildLifecycleEmail`. The campaign chrome, not a grid of our own.
-//   3. CELLS — date · time (open slots) · beds · baths · sq ft. NOT $/sq ft, not lot,
-//      not type: those are the price argument, and this email is an invitation. Each cell
-//      renders only if sourced; unsourced is an open slot, never a zero.
+//   3. CELLS — beds · baths · sq ft · $/sq ft. NOT lot, not type: neither is a fact a
+//      visitor decides on standing in the driveway. Date/time moved OUT of the strip into
+//      their own card (see above). Each cell renders only if sourced; unsourced is an open
+//      slot, never a zero.
 //   4. CHART — NONE (declared on the key). A house and a moment are not a number. Two dates
 //      is not a chart.
-//   5. PROSE — the vendor record + the agent's pasted description (lane 2). Plus ONE extra
-//      prohibition this recipe needs and no other does: the narrator may not name a day, a
-//      date, or a time. It was not given one, so "this Saturday" would be an invented FACT
-//      wearing the costume of a friendly sentence.
+//   5. PROSE — TWO separate blocks, in THIS order (operator ask 08/06/2026: talk about the
+//      open house, then the property): the narrator's own paragraph (the invitation — what
+//      a visitor will see, never a date/day/time) FIRST, then the seller's own MLS
+//      description verbatim SECOND, via `tail` — never touched by the model, never blended
+//      into the narrative (`lib/email/listing-description-block.ts`). ONE extra prohibition
+//      this recipe needs and no other does: the narrator may not name a day, a date, or a
+//      time — that fact ships in its own card above, never duplicated or paraphrased in
+//      prose, even once the operator has actually filled it in.
 //   6. FRAMING — the "Open House" ribbon, the address over the price, one RSVP CTA. The CTA
 //      asks for the NEXT ACTION (tell me you're coming), never points at what they are
 //      already reading.
 
 import { withCommas } from "@/lib/format-number";
-import { buildLifecycleEmail } from "@/lib/email/lifecycle-chrome";
-import { addressLineOf, spec } from "@/lib/email/listing-flyer";
+import { buildLifecycleEmail, type ChromeBlock } from "@/lib/email/lifecycle-chrome";
+import { createBlock } from "@/lib/email/doc/default-docs";
+import { addressLineOf, pricePerSqft, spec } from "@/lib/email/listing-flyer";
+import { buildDescriptionBlock } from "@/lib/email/listing-description-block";
 import {
   authorListingNarrative,
   clearNarrativeSlots,
@@ -83,29 +77,66 @@ import type { ListingFacts } from "@/lib/email/listing-scrape";
 import type { EmailDoc, StatItem } from "@/lib/email/doc/types";
 
 /**
- * THE STRIP THIS EMAIL WEARS — the campaign's hairline row, with the MOMENT in front.
+ * THE STRIP THIS EMAIL WEARS — beds/baths/sq ft/$-per-sq-ft, the campaign strip's own
+ * reading order. `Lot` and `Type` stay absent: neither is a fact a visitor decides on
+ * standing in the driveway. `$/Sq Ft` shipped 08/06/2026 (operator, reading a render:
+ * "where is $ sq.ft in the fucking information") — a plain, non-emphasized cell
+ * (`pricePerSqft`, `lib/email/listing-flyer.ts`), same computation every sibling email
+ * uses, no derivation footnote (both operands sit in this same strip — CLAUDE.md's rule).
  *
- * The two cells that matter most here are the two we cannot source, so they lead. They are
- * NOT `emphasis: "primary"` (fixed 08/03/2026 — the ribbon above already announces "Open
- * House", and impactful size/weight contrast belongs at the HERO; shouting every cell in a
- * hairline strip just makes the strip louder, not clearer). Beds/baths/sq ft follow as the
- * campaign strip's own reading order. `$/Sq Ft`, `Lot` and `Type` are deliberately absent:
- * they are the argument New Listing and Price Improved make, and an invitation does not
- * argue price.
- *
- * Labels are "Date"/"Time", not "Open House Date"/"Open House Time" (fixed 08/03/2026 —
- * the longer label wrapped over three lines in a 94px cell (568÷6), making the strip
- * ragged). The ribbon already says which email this is.
+ * DATE AND TIME USED TO LIVE HERE AS TWO OPEN-SLOT CELLS (through 08/06/2026) and were
+ * moved OUT to their own callout (`dateTimeCard`, below) — operator, reading a real render:
+ * the two facts the whole email is FOR were buried as two small cells in a six-cell hairline
+ * strip, no more visually weighted than beds or baths. A moment is not a spec.
  */
 export function openHouseSpecs(facts: ListingFacts): StatItem[] {
   return [
-    // NO VENDOR HOLDS THESE. Empty = an open slot, and the LABEL is the instruction.
-    spec(undefined, "Date"),
-    spec(undefined, "Time"),
     spec(facts.beds, "Beds"),
     spec(facts.baths, "Baths"),
     spec(withCommas(facts.sqft), "Sq Ft"),
+    spec(pricePerSqft(facts.price, facts.sqft), "$/Sq Ft"),
+    // DOM shipped 08/06/2026 (operator: "DOM too!!!!"), same real per-listing clock every
+    // sibling email uses (`facts.daysOnMarket` — our own listing_dom root, never floored,
+    // never invented). A plain fact cell, same as beds/baths — the narrator is separately
+    // forbidden from turning this NUMBER into leverage-coaching prose (see the narrator
+    // call below); showing it here is not that.
+    spec(
+      facts.daysOnMarket != null && facts.daysOnMarket >= 0
+        ? String(facts.daysOnMarket)
+        : undefined,
+      "DOM",
+    ),
   ];
+}
+
+/**
+ * THE MOMENT'S OWN CARD — a `signal` callout (kicker + title + body), the one block type in
+ * the doc model built for exactly this: a highlighted panel, not a table cell. Sits in the
+ * chrome's `middle` slot, directly under the spec strip — the first thing a reader sees after
+ * the price, because it is the reason this email exists.
+ *
+ * NEITHER FIELD IS SOURCED FROM ANY VENDOR (see `ListingFacts.openHouseDate`/`openHouseTime`).
+ * `null` when BOTH are empty — never a card with an empty title, which is a visible box with
+ * nothing in it, the T6 lesson applied to a callout instead of a chart. A card with only ONE
+ * of the two still renders: "Time" or "Date" alone is a real, honest partial fact, and the
+ * canvas's own "+ Add" cells work the same way (an unfilled cell drops, a filled one ships).
+ */
+export function dateTimeCard(facts: ListingFacts): ChromeBlock | null {
+  const date = facts.openHouseDate?.trim();
+  const time = facts.openHouseTime?.trim();
+  if (!date && !time) return null;
+  return {
+    block: {
+      id: createBlock("signal").id,
+      type: "signal",
+      props: {
+        kicker: "Open House",
+        ...(date ? { title: date } : {}),
+        ...(time ? { body: time } : {}),
+      },
+    },
+    height: 3,
+  };
 }
 
 /** Where an RSVP goes. The agent's own CTA link (their brand, already on the canvas) when they
@@ -122,6 +153,20 @@ export async function buildOpenHouse(ctx: RecipeBuildContext): Promise<EmailDoc 
   // rather than shipping an invitation to nowhere.
   if (!facts) return null;
 
+  // THE MOMENT'S CARD rides in `middle` — directly under the spec strip, ahead of the
+  // narrative. `null` (neither date nor time held) means no entry at all, never an empty box.
+  const card = dateTimeCard(facts);
+
+  // THE PROPERTY'S OWN DESCRIPTION, verbatim, via `tail` rather than the chrome's built-in
+  // `description` slot (which Under Contract uses and which lands BEFORE the narrative,
+  // position 5b). Operator ask, reading a real render: an invitation should TALK about the
+  // open house first, then let the seller's own words follow — not open with a wall of MLS
+  // copy before the reader has been asked to come. `tail` rides right after the narrative
+  // text block (both are "body"-zone, so document order is push order — see
+  // `lifecycle-chrome.ts`), which is exactly that sequence: narrative, then description.
+  // `buildDescriptionBlock` returns null on no/empty remarks — no block, not an empty panel.
+  const description = buildDescriptionBlock(facts.remarks, facts.sourceUrl);
+
   // THE CAMPAIGN CHROME. Same shape as New Listing, Coming Soon, Just Sold — different word,
   // different numbers, different CTA. That is the whole idea.
   let doc = buildLifecycleEmail(currentDoc, {
@@ -136,9 +181,11 @@ export async function buildOpenHouse(ctx: RecipeBuildContext): Promise<EmailDoc 
     heroValue: facts.price ?? "",
     heroLabel: addressLineOf(facts),
     specs: openHouseSpecs(facts),
-    // No footnote: this strip carries no DERIVED cell (that is $/Sq Ft's provenance line, and
-    // $/Sq Ft is not on this email).
+    // No footnote on the $/Sq Ft cell — both operands (price, sq ft) sit in this same strip,
+    // and CLAUDE.md's rule is a footnote only when the reader can't check the arithmetic.
+    middle: card ? [card] : [],
     narrative: "", // authored below, never prefilled — see the landmine note.
+    tail: description ? [{ block: description, height: 5 }] : [],
     ctaLabel: "RSVP for the Open House",
     ctaUrl: rsvpUrl(currentDoc, facts),
   });
@@ -162,11 +209,30 @@ export async function buildOpenHouse(ctx: RecipeBuildContext): Promise<EmailDoc 
   // argument — "the price now reflects where the market has settled on homes of this scale"
   // (live, 07/13/2026), a market claim we never gave it and cannot cite. Withholding it hides
   // nothing: the asking price is the hero. It is choosing which facts THIS email is about.
+  //
+  // DAYS ON MARKET AND HOA STAY VISIBLE TO THE MODEL (operator, 08/06/2026: "why would the
+  // model not see HOA????" — right call; both cells are now on the page (the strip, above),
+  // so hiding the underlying figure from the writer while showing it to the reader is
+  // backwards). The bug was never that the model COULD see these numbers — it was the
+  // DEFAULT system prompt (built for a for-sale PITCH, not an invitation) instructing it to
+  // MINE them for leverage: handed both, it wrote *"this home came to market roughly two
+  // months ago, which gives a buyer walking through today real room to have a conversation
+  // about terms... the $1,229 monthly HOA is worth factoring into carrying costs before the
+  // visit."* Operator: *"We are talking about an invitation to a fucking open house... What
+  // the fuck are you doing?"* The fix is `invitation: true` below, which swaps that entire
+  // instruction for one that explicitly forbids market/terms/cost framing — not blinding the
+  // model to real, already-shown facts.
   const narratorFacts: ListingFacts = { ...facts };
   delete narratorFacts.isPriceReduced;
   delete narratorFacts.priceReduction;
 
   const narrative = await authorListingNarrative(narratorFacts, {
+    invitation: true,
+    // Open House ships its description via `tail`, not the chrome's built-in slot — but the
+    // shared narrator's preamble still needs to know whether it exists at all, or it defaults
+    // to assuming one is on the page and a reader who got a build with no remarks would see
+    // the narrator refer to a block that was never rendered.
+    descriptionRendered: Boolean(description),
     framing:
       "An open-house INVITATION. The home is open for visitors and the reader is deciding " +
       "whether to come walk through it. Write the paragraph that makes them want to — " +
@@ -174,12 +240,14 @@ export async function buildOpenHouse(ctx: RecipeBuildContext): Promise<EmailDoc 
       "• YOU WERE NOT GIVEN A DATE, A TIME, OR A DAY. They are shown separately, above " +
       "your paragraph. Never write one, never imply one ('this weekend', 'Saturday', " +
       "'stop by Sunday'), and never place the open house at any particular time.\n" +
-      "• DO NOT ARGUE THE PRICE. This is an invitation, not a price announcement, and it " +
-      "is not a market analysis. Say nothing about what the market has done, what homes " +
-      "like this are worth, or what the price reflects — you were given no market data.\n" +
-      "• DO NOT RESTATE the square footage, the bed count, the bath count or the lot size. " +
-      "They sit in the strip directly above your paragraph; repeating them wastes the only " +
-      "sentences you get.\n" +
+      "• DO NOT ARGUE THE PRICE, THE MARKET, OR THE TERMS. This is an invitation, not a " +
+      "price announcement and not a negotiating brief. Even though the days-on-market and " +
+      "HOA figures below are real, do not turn them into leverage or cost analysis — no " +
+      "'room to talk', no 'worth factoring into carrying costs', no reading of what the " +
+      "market has done or what homes like this are worth.\n" +
+      "• DO NOT RESTATE the square footage, the bed count, the bath count, the price per " +
+      "square foot, or the days on market. They sit in the strip directly above your " +
+      "paragraph; repeating them wastes the only sentences you get.\n" +
       "• Do not write the word RSVP — the button says it.",
   });
   if (narrative) doc = fillNarrative(doc, narrative);

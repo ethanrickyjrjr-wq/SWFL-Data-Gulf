@@ -850,7 +850,7 @@ export const SEED_DOCS: SeedDoc[] = [
     subject: "address",
     name: "Open House Invite",
     description:
-      "Full-width exterior photo, date/time hero, specs, description + RSVP side-by-side, agent card.",
+      "Full-width exterior photo, specs incl. $/sq ft, invitation, description, RSVP side-by-side, agent card.",
     build: () => ({
       globalStyle: {
         ...style(),
@@ -879,20 +879,25 @@ export const SEED_DOCS: SeedDoc[] = [
             order: "label-first",
           },
         ),
-        // The DATE and TIME are in NO vendor feed — the agent supplies them. They LEAD the
-        // strip (they are the point of this email) and they are OPEN SLOTS whose labels are
-        // the instruction. Never a placeholder date, never a zero.
+        // CHANGED 08/06/2026 — the DATE and TIME moved OUT of this strip into their own
+        // `signal` callout (`dateTimeCard`, recipes/open-house.ts). They are NOT reserved
+        // here: the recipe only emits that callout when at least one is actually held, so an
+        // empty one would structurally disagree with what a real, unresolved build produces
+        // (seed-recipe-parity.test.ts — the seed and an unresolved build must be the SAME
+        // shape). Until a user has typed a real date/time it simply does not exist on either
+        // side, same as any other open slot. Add it manually via the canvas's block picker
+        // ("Callout") if you need to demonstrate the filled state.
         seedBlockGrid(
           "stats",
           { x: 0, y: 13, w: 12, h: 3 },
           {
             variant: "strip",
             stats: [
-              { value: "", label: "Open House Date", emphasis: "primary" as const },
-              { value: "", label: "Open House Time", emphasis: "primary" as const },
               { value: "", label: "Beds" },
               { value: "", label: "Baths" },
               { value: "", label: "Sq Ft" },
+              { value: "", label: "$/Sq Ft" },
+              { value: "", label: "DOM" },
             ],
           },
         ),

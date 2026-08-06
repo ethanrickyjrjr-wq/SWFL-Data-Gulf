@@ -371,6 +371,29 @@ export async function authorListingNarrative(
      * or the narrator will write sentences that point the reader at a block that is not on the page.
      */
     descriptionRendered?: boolean;
+    /**
+     * TRUE ONLY FOR OPEN HOUSE. Every other caller (New Listing, Just Sold, Price Reduced) is
+     * a FOR-SALE PITCH — "should you act on this" — and the default system prompt below is
+     * built for exactly that job: mine the facts the seller's copy leaves out (days on market,
+     * HOA, $/sq ft, neighborhood value) and say what they mean for a BUY decision.
+     *
+     * An open house is not a buy decision, it is an RSVP to walk through a house. Crawled
+     * real open-house invite copy (theclose.com, maestrolabs.com, 08/06/2026 — RULE 0.4) is
+     * uniformly two sentences: "we warmly invite you... we look forward to giving you a tour."
+     * None mention days on market, HOA cost, or "terms." Live proof of the default prompt
+     * misapplied here, same day: it wrote *"this home came to market roughly two months ago,
+     * which gives a buyer walking through today real room to have a conversation about
+     * terms... the $1,229 monthly HOA is worth factoring into carrying costs before the
+     * visit"* — negotiating-leverage coaching on an INVITATION. Operator: *"We are talking
+     * about an invitation to a fucking open house... What the fuck are you doing?"*
+     *
+     * `invitation: true` swaps the "write what the description doesn't say" analytical
+     * directive for one built from that research: warm, direct, describes what a VISITOR will
+     * see and feel walking through — never a data point standing alone, never a cost or a
+     * market fact. Community/neighborhood/area sub-rules are unchanged — "the pool is a short
+     * walk away" is a reason to come, not a market claim.
+     */
+    invitation?: boolean;
   } = {},
 ): Promise<string | null> {
   // Nothing real to describe → leave the slot empty (never improvise a house).
@@ -468,24 +491,62 @@ export async function authorListingNarrative(
         `it, restate it, or "pull out the highlights" — every one of those puts the same sentences ` +
         `on the page twice and is a FAILURE. Use it only to know what is already covered, so you ` +
         `can avoid it.\n\n`) +
-    `WRITE WHAT THE DESCRIPTION DOES NOT SAY. That is the entire assignment. The facts below ` +
-    `carry things the seller's copy almost never mentions: how long it has been on the market, ` +
-    `the year it was built, the monthly HOA, what the price works out to per square foot, the ` +
-    `size and make-up of the surrounding neighborhood. Those are YOURS. Pick the two or three ` +
-    `that a buyer would actually weigh and say what they mean for a decision — never as a list ` +
-    `of numbers, and never repeating a figure the spec grid already shows on its own.\n\n` +
-    `If the description is ABSENT, then and only then describe the home itself — lead with what ` +
-    `is most distinctive and true from the facts (new construction, a price that has come down, ` +
-    `scale, the lot).\n\n` +
-    `THE SPEC GRID ALREADY SHOWS every number you were given — price, beds, baths, square ` +
-    `feet, lot, type, days on the market, year built, HOA — directly above your paragraph. ` +
-    `Do NOT list them back. A paragraph that recites the specs is a failure. The distinction ` +
-    `that matters: the grid shows a NUMBER, you may say what it MEANS. "Eleven days on the ` +
-    `market" as a bare restatement is a failure; noting that it came to market this month is ` +
-    `the same fact doing work. Never more than one figure in a sentence, and never a figure ` +
-    `you were not given. Background context is BACKGROUND ONLY — do not turn this into a ` +
-    `market analysis; at most one clause may touch the market, and only if it serves the ` +
-    `house.\n\n` +
+    (opts.invitation
+      ? // *** THE INVITATION BRANCH — Open House ONLY. *** Real open-house invite scripts,
+        // crawled 08/06/2026 (RULE 0.4 — theclose.com, maestrolabs.com, and the operator's
+        // own link, digitaldreamhomes.com/open-house-announcement-script-for-realtors)
+        // converge on ONE shape: "I wanted to personally invite you to our open house this
+        // Sunday from 1 to 4 PM at 123 Main Street. It's a beautifully updated 3-bedroom
+        // with an open floor plan and a backyard made for entertaining. We'll have light
+        // refreshments, and I'd love for you to stop by." SHORT. Warm greeting, ONE feature
+        // said the way a person talks (never a computed number), then the ask.
+        //
+        // Two corrections landed here, both from live proof on the same subject: (1) the
+        // first version asked for a full descriptive paragraph and produced a 5-6 sentence
+        // essay; (2) the SECOND version banned every detail to fix that, and produced "we
+        // look forward to welcoming you" with a golf-course-and-restaurant-count sentence
+        // right before it that read like a GIS printout, not an invite — operator: *"No one
+        // says a fucking golf course .57 miles away!!!! Just fucking invite to the fucking
+        // open house."* The crawled scripts show the actual fix: not zero detail, ONE detail,
+        // said in PLAIN HUMAN WORDS instead of a distance or a count.
+        `THIS IS A SHORT INVITATION, NOT A DESCRIPTION. Do not re-describe the home — that is ` +
+        `not your job here (see above whether the description is on the page). Model it on a ` +
+        `real agent's invite: "I wanted to personally invite you to our open house at [this ` +
+        `home]. It's a [ONE plain, human feature], and I'd love for you to stop by."\n\n` +
+        `ONE OR TWO SENTENCES. Roughly 15-35 words. A warm greeting, AT MOST ONE feature, ` +
+        `then the ask — not a paragraph, not a list, not a walk through the house.\n\n` +
+        `THE ONE FEATURE, IF YOU USE ONE, MUST BE SAID THE WAY A PERSON TALKS, NEVER A NUMBER. ` +
+        `"A chef's kitchen" or "sweeping golf course views" — real words from the facts or the ` +
+        `description above. NEVER a mileage figure, a count ("six restaurants"), a percentage, ` +
+        `or anything that reads like a data point rather than a sentence a person would say ` +
+        `out loud. If the only material you have IS a number, skip the feature and just invite.\n\n` +
+        `NEVER MENTION: how long the home has been on the market, the HOA fee or any carrying ` +
+        `cost, price per square foot, or anything framed as a negotiating fact, a term, or ` +
+        `something "worth factoring into" a decision. This is not the email that argues the ` +
+        `deal.\n\n` +
+        `NEVER INVENT A TIME OF DAY. You were not given when the open house happens — that is ` +
+        `shown separately, in its own card, and it could be any hour. Never write "evening ` +
+        `light," "sunset," "morning sun," "golden hour," or any other time-of-day or lighting ` +
+        `detail — you have no way to know it will be true, and a home shown at 1pm does not ` +
+        `have an evening.\n\n`
+      : `WRITE WHAT THE DESCRIPTION DOES NOT SAY. That is the entire assignment. The facts below ` +
+        `carry things the seller's copy almost never mentions: how long it has been on the market, ` +
+        `the year it was built, the monthly HOA, what the price works out to per square foot, the ` +
+        `size and make-up of the surrounding neighborhood. Those are YOURS. Pick the two or three ` +
+        `that a buyer would actually weigh and say what they mean for a decision — never as a list ` +
+        `of numbers, and never repeating a figure the spec grid already shows on its own.\n\n` +
+        `If the description is ABSENT, then and only then describe the home itself — lead with what ` +
+        `is most distinctive and true from the facts (new construction, a price that has come down, ` +
+        `scale, the lot).\n\n` +
+        `THE SPEC GRID ALREADY SHOWS every number you were given — price, beds, baths, square ` +
+        `feet, lot, type, days on the market, year built, HOA — directly above your paragraph. ` +
+        `Do NOT list them back. A paragraph that recites the specs is a failure. The distinction ` +
+        `that matters: the grid shows a NUMBER, you may say what it MEANS. "Eleven days on the ` +
+        `market" as a bare restatement is a failure; noting that it came to market this month is ` +
+        `the same fact doing work. Never more than one figure in a sentence, and never a figure ` +
+        `you were not given. Background context is BACKGROUND ONLY — do not turn this into a ` +
+        `market analysis; at most one clause may touch the market, and only if it serves the ` +
+        `house.\n\n`) +
     `WHEN YOU USE THE AGENT'S WORDS, KEEP THEM TRUE. "Five-minute idle to open water" does ` +
     `not become "five minutes to the river" — if you restate a detail, restate what it ` +
     `actually said. And never add a selling claim of your own: "priced to move", "won't ` +
