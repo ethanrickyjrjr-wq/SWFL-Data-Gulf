@@ -15,7 +15,13 @@ import { Resvg } from "@resvg/resvg-js";
 import { createServiceRoleClient } from "@/utils/supabase/service-role";
 import { formatAxisTick, type ValueFormat } from "@/lib/charts/format";
 import { formatAxisDateLabel, formatDisplayDate } from "@/lib/format-date";
-import { CHART_FONT_FILES, CHART_FONT_FAMILY } from "@/lib/charts/chart-fonts";
+import {
+  CANVAS_FONT_FILES,
+  CANVAS_DEFAULT_FAMILY,
+  canvasFilesFor,
+  canvasFamilyFor,
+} from "@/lib/brand/fonts";
+import type { FontFamily } from "@/lib/email/doc/types";
 import { MEDIA_CACHE_IMMUTABLE } from "@/lib/media/cache-control";
 
 const PUBLIC_BUCKET = "email-media";
@@ -312,15 +318,25 @@ function esc(s: string): string {
  *  `scale` rasterizes ABOVE the SVG's intrinsic size via resvg `fitTo` zoom — the display
  *  width stays logical (ImageBlock caps at 600px), so the default 2x = retina without any
  *  layout change. Pass `scale: 1` for an exact intrinsic-size raster. */
-export function svgToPng(svg: string, opts?: { scale?: number; background?: string }): Buffer {
+export function svgToPng(
+  svg: string,
+  opts?: { scale?: number; background?: string; fontFamily?: FontFamily },
+): Buffer {
   const scale = opts?.scale ?? 2;
+  // THE BRAND'S OWN FACE, NOT A FIXED ARIAL CLONE (operator, 08/06/2026). Every builder
+  // above emits `font-family="Arial"`, which is never a loaded family — so resvg resolves
+  // each label through `defaultFontFamily`. Pointing THAT at the brand's face makes a
+  // chart match the email around it, across all 15 SVG builders, without touching one of
+  // their Arial literals. No brand on the build → the product default face, never blank.
   return new Resvg(svg, {
     background: opts?.background ?? "rgba(255,255,255,1)",
     fitTo: { mode: "zoom", value: scale },
     font: {
-      fontFiles: CHART_FONT_FILES,
+      fontFiles: opts?.fontFamily ? canvasFilesFor(opts.fontFamily) : CANVAS_FONT_FILES,
       loadSystemFonts: false,
-      defaultFontFamily: CHART_FONT_FAMILY,
+      defaultFontFamily: opts?.fontFamily
+        ? canvasFamilyFor(opts.fontFamily)
+        : CANVAS_DEFAULT_FAMILY,
     },
   })
     .render()

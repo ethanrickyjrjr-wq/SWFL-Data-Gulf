@@ -37,6 +37,13 @@ const nextConfig: NextConfig = {
     // runtime (lib/brand/fonts CANVAS_FONT_FILES) — same blank-text landmine as
     // the chart route above.
     "/api/social/render/[format]": ["./assets/fonts/*.ttf"],
+    // Every route that can reach `svgToPng` MUST trace the faces, or resvg loads nothing
+    // and renders each chart label BLANK — silently, in prod only (lib/charts/chart-fonts
+    // header). These three build emails with charts and were missing from this list while
+    // /api/email-lab/ai had it; found 08/06/2026 while making charts brand-aware.
+    "/api/lab/claim-and-send": ["./assets/fonts/*.ttf"],
+    "/api/projects/[id]/materials": ["./assets/fonts/*.ttf"],
+    "/api/switch/apply-forward": ["./assets/fonts/*.ttf"],
     // sharp (Next's default external) dlopens libvips-cpp.so from
     // @img/sharp-libvips-linux-x64 — an RPATH link, invisible to the file
     // tracer, so prod threw ERR_DLOPEN_FAILED (07/03/2026: killed This Week +

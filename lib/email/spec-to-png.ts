@@ -8,6 +8,7 @@ import type { ChartSpec } from "@/components/charts/registry/chart-spec";
 import { chartSpecToEmailSvg } from "@/lib/charts/spec-to-image";
 import { svgToPng, hostEmailPng } from "@/lib/email/chart-image";
 import { formatDisplayDate } from "@/lib/format-date";
+import type { FontFamily } from "@/lib/email/doc/types";
 
 export { chartSpecToEmailSvg };
 
@@ -38,12 +39,17 @@ export async function chartSpecToEmailImage(
   spec: ChartSpec,
   accent: string,
   key: string,
+  /** The doc's brand font. Charts rasterize in the BRAND's face so the image matches the
+   *  email wrapped around it (operator, 08/06/2026 — a chart title in an Arial clone
+   *  inside a Montserrat email is what "the font looks fucking different" was). Read it
+   *  off `doc.globalStyle.fontFamily`; omitted → the product default face, never blank. */
+  fontFamily?: FontFamily,
 ): Promise<EmailChartImage | null> {
   const svg = await chartSpecToEmailSvg(spec, accent);
   if (!svg) return null;
   try {
     const title = spec.title || "Market data";
-    const png = svgToPng(svg);
+    const png = svgToPng(svg, { fontFamily });
     const url = await hostEmailPng(key, png);
     return { url, alt: title, caption: chartImageCaption(spec) };
   } catch {

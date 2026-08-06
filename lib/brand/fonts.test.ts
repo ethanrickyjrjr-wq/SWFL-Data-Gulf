@@ -21,15 +21,19 @@ describe("brand font registry — the one root", () => {
       expect(e.label.length).toBeGreaterThan(0);
       expect(e.stack).toContain(","); // a real fallback stack, never a lone family
       expect(["Helvetica", "Times-Roman"]).toContain(e.pdf);
-      expect(["Liberation Sans", "Liberation Serif"]).toContain(e.canvasSvg);
+      expect(e.canvasFamily.length).toBeGreaterThan(0);
+      expect(e.canvasFiles).toHaveLength(2);
       expect(e.previewStack).toContain(",");
     }
   });
 
   test("serif families map to serif everywhere; sans to sans", () => {
+    // The canvas face is the BRAND's own now (08/06/2026), so this no longer asserts one
+    // shared Liberation pair — it asserts each family's serif-ness survives every engine.
+    // Per-family identities and the on-disk faces live in ./canvas-fonts.test.ts.
     for (const f of ["BOOK_SERIF", "PLAYFAIR_SERIF"] as FontFamily[]) {
       expect(BRAND_FONTS[f].pdf).toBe("Times-Roman");
-      expect(BRAND_FONTS[f].canvasSvg).toBe("Liberation Serif");
+      expect(["Gelasio", "Playfair Display"]).toContain(BRAND_FONTS[f].canvasFamily);
     }
     for (const f of [
       "MODERN_SANS",
@@ -38,7 +42,7 @@ describe("brand font registry — the one root", () => {
       "MONTSERRAT_SANS",
     ] as FontFamily[]) {
       expect(BRAND_FONTS[f].pdf).toBe("Helvetica");
-      expect(BRAND_FONTS[f].canvasSvg).toBe("Liberation Sans");
+      expect(["Gelasio", "Playfair Display"]).not.toContain(BRAND_FONTS[f].canvasFamily);
     }
   });
 
@@ -46,13 +50,13 @@ describe("brand font registry — the one root", () => {
     expect(Object.keys(BRAND_FONTS).sort()).toEqual(Object.keys(FONT_ROUTING).sort());
   });
 
-  test("all canvas TTFs exist on disk (sans + serif, regular + bold)", () => {
-    expect(CANVAS_FONT_FILES.length).toBe(4);
+  test("all canvas TTFs exist on disk (regular + bold for every brand)", () => {
+    expect(CANVAS_FONT_FILES.length).toBe(FAMILIES.length * 2);
     for (const p of CANVAS_FONT_FILES) expect(existsSync(p)).toBe(true);
   });
 
-  test("default canvas family is the bundled sans", () => {
-    expect(CANVAS_DEFAULT_FAMILY).toBe("Liberation Sans");
+  test("default canvas family is the product default's real face", () => {
+    expect(CANVAS_DEFAULT_FAMILY).toBe(BRAND_FONTS.MODERN_SANS.canvasFamily);
   });
 
   test("isFontFamily guards unknown keys", () => {

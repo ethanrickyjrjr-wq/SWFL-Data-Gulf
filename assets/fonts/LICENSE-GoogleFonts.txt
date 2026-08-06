@@ -1,0 +1,51 @@
+SIL OPEN FONT LICENSE 1.1 — bundled Google Fonts faces
+======================================================
+
+These faces are vendored so server-side chart rasterization (resvg) renders in the
+AGENT'S OWN BRAND FONT rather than a single fixed Arial clone. See lib/brand/fonts.ts
+(canvasFamily / canvasFiles) for which brand maps to which face, and
+lib/brand/canvas-fonts.test.ts for the guards.
+
+Every face below is licensed under the SIL Open Font License, Version 1.1, which
+permits bundling and redistribution with or without modification, provided the fonts
+are not sold by themselves and this notice is retained. Full license text:
+https://openfontlicense.org  ·  Upstream: https://github.com/google/fonts
+
+Files were pulled 08/06/2026 as STATIC Regular (400) / Bold (700) instances from the
+Google Fonts css2 endpoint, which serves per-weight TTFs to a legacy user agent. Static
+instances are deliberate: resvg 2.6.2 does not apply variable-font weight axes, so a
+variable file would render every bold chart title at regular weight.
+
+Copyright notices, verbatim from each family's upstream OFL.txt:
+
+  Inter-Regular.ttf, Inter-Bold.ttf
+    Copyright 2020 The Inter Project Authors
+    https://github.com/rsms/inter
+
+  Montserrat-Regular.ttf, Montserrat-Bold.ttf
+    Copyright 2024 The Montserrat.Git Project Authors
+    https://github.com/JulietaUla/Montserrat.git
+
+  Lato-Regular.ttf, Lato-Bold.ttf
+    Copyright (c) 2010-2014 by tyPoland Lukasz Dziedzic (team@latofonts.com)
+    with Reserved Font Name "Lato"
+
+  PlayfairDisplay-Regular.ttf, PlayfairDisplay-Bold.ttf
+    Copyright 2017 The Playfair Display Project Authors, with Reserved Font Name
+    "Playfair Display"
+    https://github.com/clauseggers/Playfair-Display
+
+  Gelasio-Regular.ttf, Gelasio-Bold.ttf
+    Copyright 2022 The Gelasio Project Authors
+    https://github.com/SorkinType/Gelasio
+    (Used as the canvas face for BOOK_SERIF: Georgia is proprietary and cannot be
+    bundled; Gelasio is metrics-compatible with Georgia in Regular and Bold.)
+
+  Jost-Regular.ttf, Jost-Bold.ttf
+    Copyright 2020 The Jost Project Authors
+    https://github.com/indestructible-type
+    (Used as the canvas face for GEOMETRIC_SANS: Century Gothic is proprietary and has
+    no metric-compatible OFL twin; Jost is a Futura revival — a STYLE match, not a
+    metric one.)
+
+The Liberation faces in this directory are covered separately by LICENSE-Liberation.txt.

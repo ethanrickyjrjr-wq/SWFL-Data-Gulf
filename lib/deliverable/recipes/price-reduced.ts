@@ -423,7 +423,12 @@ export async function buildPriceReduced(ctx: RecipeBuildContext): Promise<EmailD
         `${spec.asOf}-${tint}.png`;
       // NO block caption — the PNG already bakes in the title, source and as-of date; a
       // text caption would duplicate it (mirrors market-comps.ts's own chart fill).
-      const image = await chartSpecToEmailImage(spec, accent, key).catch(() => null);
+      const image = await chartSpecToEmailImage(
+        spec,
+        accent,
+        key,
+        doc.globalStyle.fontFamily,
+      ).catch(() => null);
       if (image) doc = fillChartSlot(doc, image.url, image.alt, "");
     }
   }

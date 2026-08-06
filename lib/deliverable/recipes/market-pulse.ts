@@ -805,7 +805,12 @@ export async function buildMarketPulse(ctx: RecipeBuildContext): Promise<EmailDo
       const accent = doc.globalStyle.accentColor || "#3DC9C0";
       const tint = accent.replace(/[^0-9a-fA-F]/g, "").slice(0, 6) || "x";
       const key = `email-charts/zip-mom-move-${area.place.replace(/\W+/g, "-").toLowerCase()}-${spec.asOf ?? "x"}-${tint}.png`;
-      const image = await chartSpecToEmailImage(spec, accent, key).catch(() => null);
+      const image = await chartSpecToEmailImage(
+        spec,
+        accent,
+        key,
+        doc.globalStyle.fontFamily,
+      ).catch(() => null);
       if (image) {
         // LANDMINE: upsertChartBlock's own comment says "id and position preserved",
         // but it rebuilds the block as { id, type, props } and DROPS `layout`. The

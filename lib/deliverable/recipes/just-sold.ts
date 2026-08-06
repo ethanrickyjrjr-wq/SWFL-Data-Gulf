@@ -489,6 +489,7 @@ export async function buildJustSold(ctx: RecipeBuildContext): Promise<EmailDoc |
       // The accent the CHROME will land on — never the canvas's. See chromeAccent.
       chromeAccent(currentDoc),
       `just-sold-${facts.zip ?? "swfl"}-${Date.now()}`,
+      currentDoc.globalStyle.fontFamily,
     ).catch(() => null);
     // An empty chart box is worse than no chart — a failed render simply doesn't ride.
     if (chartImg) middle.push({ block: chartImageBlock(chartImg), height: 6 });

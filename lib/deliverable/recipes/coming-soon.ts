@@ -733,6 +733,7 @@ export async function buildComingSoon(
         scarcityChartSpec(scarcity, fields),
         accent,
         `email-charts/coming-soon-${scarcity.county ?? scarcity.grain}-${scarcity.bandLo}-${scarcity.bandHi}-${scarcity.bedFloor}-${scarcity.sqftFloor}-${scarcity.asOfIso}-${tint}.png`,
+        currentDoc.globalStyle.fontFamily,
       ).catch(() => null)
     : null;
 

@@ -282,7 +282,7 @@ async function buildPromptChart(
     // otherwise the browser serves the stale (old-color) PNG from the same address.
     const tint = accent.replace(/[^0-9a-fA-F]/g, "").slice(0, 6) || "x";
     const key = `email-charts/${chart.frameId}-${scope?.value ?? "swfl"}-${chart.asOf ?? "x"}-${tint}.png`;
-    const image = await chartSpecToEmailImage(chart, accent, key);
+    const image = await chartSpecToEmailImage(chart, accent, key, doc.globalStyle.fontFamily);
     if (!image) console.log("[email-lab/chart] spec-to-png failed for frameId:", chart.frameId);
     return image ? { image, groundingNote: cfq.groundingNote, note } : null;
   } catch (e) {
@@ -801,6 +801,7 @@ async function fillSkeletonResult({
           spec,
           accent,
           `comps-${facts.zip ?? "swfl"}-${Date.now()}`,
+          doc.globalStyle.fontFamily,
         ).catch(() => null);
         if (chartImg) {
           flyer = upsertChartBlock(flyer, chartImageBlock(chartImg));
