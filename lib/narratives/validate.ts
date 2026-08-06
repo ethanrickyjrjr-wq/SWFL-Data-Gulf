@@ -1,4 +1,5 @@
 import type { BakeInputs, NarrativeSectionsData } from "./types";
+import { lengthProfile } from "./length";
 
 /**
  * Deterministic gates a baked narrative must clear before its row is written
@@ -13,10 +14,46 @@ export function numericTokens(text: string): string[] {
   return (text.match(/\d[\d,]*(?:\.\d+)?/g) ?? []).map((t) => t.replace(/,/g, ""));
 }
 
+/**
+ * Same VALUE, one spelling. Strips a decimal tail that carries no information:
+ * "3.0" → "3", "3.50" → "3.5", "300000" → "300000".
+ *
+ * This is deliberately the ONLY notation liberty taken. It does NOT round: an
+ * input of "1.04" canonicalizes to "1.04", so a narrative writing "1.0" still
+ * fails, which is correct — that is a different number (validate-scale.test.ts
+ * B3). Measured 08/06/2026: of 11 real bake failures, 3 were pure notation and
+ * 8 were rounding or arithmetic. Only the notation cases are absorbed here.
+ */
+export function canonicalNumber(token: string): string {
+  if (!token.includes(".")) return token;
+  const trimmed = token.replace(/0+$/, "").replace(/\.$/, "");
+  return trimmed === "" ? token : trimmed;
+}
+
+/** `$637K` → 637000, `$89M` → 89000000. Fires ONLY when the suffix is literally
+ *  present in the source text, so a bare count of 300 never licenses 300,000. */
+const SCALED = /(\d[\d,]*(?:\.\d+)?)\s*([KkMm])\b/g;
+function scaleExpansions(text: string): string[] {
+  const out: string[] = [];
+  for (const m of text.matchAll(SCALED)) {
+    const n = Number(m[1]!.replace(/,/g, ""));
+    if (!Number.isFinite(n)) continue;
+    const mult = m[2]!.toLowerCase() === "k" ? 1_000 : 1_000_000;
+    out.push(String(n * mult));
+  }
+  return out;
+}
+
 export function buildNumberWhitelist(inputs: BakeInputs): Set<string> {
   const allow = new Set<string>();
   const feed = (s: string | null | undefined) => {
-    if (s) for (const t of numericTokens(s)) allow.add(t);
+    if (!s) return;
+    for (const t of numericTokens(s)) {
+      allow.add(t);
+      allow.add(canonicalNumber(t));
+    }
+    // A "$300K" bucket label legitimately licenses "$300,000" in prose.
+    for (const e of scaleExpansions(s)) allow.add(e);
   };
   for (const f of inputs.facts) {
     feed(f.label);
@@ -50,13 +87,15 @@ export function validateNarrative(data: NarrativeSectionsData, inputs: BakeInput
   const allow = buildNumberWhitelist(inputs);
   const checkNumbers = (text: string, where: string) => {
     for (const t of numericTokens(text)) {
-      if (!allow.has(t)) errors.push(`${where}: number "${t}" not present in inputs (invented)`);
+      if (allow.has(t) || allow.has(canonicalNumber(t))) continue;
+      errors.push(`${where}: number "${t}" not present in inputs (invented)`);
     }
   };
 
   const narration = data.narration ?? "";
-  if (narration.length < 300 || narration.length > 2000) {
-    errors.push(`narration: length ${narration.length} outside 300–2000`);
+  const len = lengthProfile(inputs.surface);
+  if (narration.length < len.minChars || narration.length > len.maxChars) {
+    errors.push(`narration: length ${narration.length} outside ${len.minChars}–${len.maxChars}`);
   }
   if (inputs.asOf) {
     const n = occurrences(narration, inputs.asOf);

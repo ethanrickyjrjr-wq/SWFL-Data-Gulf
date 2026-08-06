@@ -1,4 +1,5 @@
 import type { BakeInputs } from "./types";
+import { lengthProfile } from "./length";
 
 /**
  * ONE prompt root for every surface's narrative bake (spec §One root #3).
@@ -22,7 +23,7 @@ export function buildNarrativePrompt(inputs: BakeInputs): { system: string; user
     "2. State the as-of date exactly once in the narration, formatted exactly as given.",
     "   For any other time reference use 'a year ago', 'now', or 'currently' — NEVER write a",
     "   bare calendar year (like 2022 or 2025) unless it appears in the figures below.",
-    "3. Narration: 2–3 short paragraphs, ABOUT 200 WORDS (1,100–1,400 characters), on what",
+    `3. Narration: ${lengthProfile(inputs.surface).instruction}, on what`,
     "   most sets this area apart right now and what just moved, weaving the strongest",
     "   signals together. Conversational, concrete, zero filler. This same read is what a",
     "   reader gets in their inbox, so it must stand on its own.",

@@ -37,6 +37,10 @@ import {
   listCorridorSurfaceKeys,
 } from "../lib/narratives/corridor-inputs";
 import { assembleBrainBakeInputs, listBrainSurfaceKeys } from "../lib/narratives/brain-inputs";
+import {
+  assembleAreaEmailInputs,
+  listAreaEmailSurfaceKeys,
+} from "../lib/narratives/area-email-inputs";
 import type { BakeInputs, NarrativeSectionsData } from "../lib/narratives/types";
 
 type Args = { surface: string; keys: string[] | null; force: boolean; dryRun: boolean };
@@ -65,6 +69,10 @@ const SURFACE_ADAPTERS: Record<
   zip: { list: listZipSurfaceKeys, assemble: assembleZipBakeInputs },
   corridor: { list: listCorridorSurfaceKeys, assemble: assembleCorridorBakeInputs },
   brain: { list: listBrainSurfaceKeys, assemble: assembleBrainBakeInputs },
+  // The pre-checked area commentary an email recipe reads instead of authoring
+  // its own (plan 2026-08-06-precomputed-commentary-plan.md). Same data root as
+  // `zip` (assembleZipReport); differs in length, fact count, and no context.
+  "area-email": { list: listAreaEmailSurfaceKeys, assemble: assembleAreaEmailInputs },
 };
 
 function runCapUsd(): number {
