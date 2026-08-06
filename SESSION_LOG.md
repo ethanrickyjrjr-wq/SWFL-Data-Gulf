@@ -1,3 +1,44 @@
+## 2026-08-06 (Opus 5) — Just Sold rebuilt to the TARGET: badge burned into the photo, campaign bar back to standard, house description gone, one reader-first paragraph.
+
+Operator, three corrections: *"don't change the just sold bar so it's different from every other
+email. just put a graphic somewhere on the picture"* · *"get the fucking house description out of
+there. no one cares"* · *"make the email how it should be and we build towards it."*
+
+**1. THE BAR IS REVERTED — mechanism and all.** `ribbonLoud` is gone from `types.ts`,
+`HeroBlock.tsx`, `lifecycle-chrome.ts` and the recipe. Making one lifecycle email's shared chrome
+different is the "seven emails, seven companies" failure re-introduced by me while fixing something
+else. **Standing rule now in §2.5.-1: the variation goes in the email's OWN elements, never in the
+shared chrome.**
+
+**2. THE BADGE IS BURNED INTO THE JPEG.** `lib/media/photo-badge.ts` — fetch the vendor photo →
+sharp cover-crop 3:2 → resvg composites a diagonal corner ribbon in the agent's accent → sharp to
+JPEG → `hostEmailMedia`. **Every client renders it because it IS the image.** Rejected
+`ImageProps.overlayTitle` on evidence: it renders the photo as a CSS background and Outlook desktop
+drops those — the house would vanish to gain a word. **Invented no machinery** — social cards
+already ran this pipeline (`lib/social/listing-card-render.ts`) and sharp + @resvg/resvg-js were
+already production deps; imported its `fetchPhoto`, the one canvas-font root, the one uploader.
+Best-effort: any failure ships the ORIGINAL photo. Live proof — the rendered `<img>` points at
+`email-media/email-photos/just-sold-33908-*.jpg`, not at rdcpix.
+
+**3. THE HOUSE DESCRIPTION IS OUT AND THE READER IS IN.** The model-written paragraph is DELETED and
+replaced by `readerLine()` — code-authored, reader-first, **names no figure at all**. Three
+consequences and all of them are the point: the claim gate can never drop the body (it did twice
+during this build), the copy is identical every send, and **this recipe is no longer a metered
+call**. Why code and not a better prompt: a reader-first sentence is exactly where a model invents
+("values around you are climbing") — code cannot invent.
+
+**4. THE TARGET IS WRITTEN DOWN — §2.5.5 WHAT WE BUILD TOWARD**, seven gaps, each with what it needs
+and which lane feeds it: the equity line with a real number (**the nearest real build — we already
+hold the ratified ZIP median sold root**), days-to-sell on the recorded rung, the offer count
+(lane 4), the seller's own words (lane 4, and generating one would be outright fabrication),
+comps from the Lee comp root instead of the dateless vendor feed, a photo for a sold house off the
+paid row already on disk, and the photo-rights gate. Plus §2.5.-1 (what this email IS) and §2.5.4
+(the badge, and the two wrong answers before it).
+
+8/8 assertions green on both houses · 38 recipe tests · sent to hello@swfldatagulf.com
+(Resend `f2e5c6de-c86e-48b7-afe5-362b7c608ef7`).
+
+
 ## 2026-08-06 (Opus 5) — "the worst just sold email i have ever seen." Crawled what actually works, put it in the PLAYBOOK, and made JUST SOLD a stamp.
 
 Operator, on the email I had just proved 8/8 correct. He was right, and the miss is named in

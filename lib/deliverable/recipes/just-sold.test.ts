@@ -16,7 +16,7 @@ import {
   heroPrice,
   realSaleComps,
   soldFootnote,
-  soldNarrativeLine,
+  readerLine,
   soldSpecs,
   subjectRow,
   withSubjectRowFacts,
@@ -384,15 +384,25 @@ describe("the prefill NEVER leaks out of the hero cell", () => {
     expect(chartAnchor({ price: 613_850, date: null })).toBe(613_850);
   });
 
-  it("F5 · with no recorded close the narrator is FORBIDDEN to name a sale price", () => {
-    // Prose is baked at author time and is not editable. A prefill the agent will correct
-    // in the cell would survive, uncorrected, inside the paragraph.
-    const line = soldNarrativeLine(null);
-    expect(line).toContain("NOT AVAILABLE TO YOU");
-    expect(line).not.toContain("$");
-    const withClose = soldNarrativeLine({ price: 613_850, date: "2026-05-20" });
-    expect(withClose).toContain("$613,850");
-    expect(withClose).toContain("05/20/2026");
+  it("F5 · the body copy names NO figure at all, and speaks to the READER", () => {
+    // The paragraph is code-authored now (operator 08/06/2026: *"get the fucking house
+    // description out of there. no one cares."*). Two invariants, and they are why it is code:
+    // it may never carry a number — the hero is EDITABLE and this is not, so a figure here
+    // survives the agent's correction — and it must be about the reader's home, not this one.
+    const withCity = readerLine({
+      address: "326 Shore Dr, Fort Myers, FL 33905",
+      city: "Fort Myers",
+      price: "$595,000",
+      photos: [],
+      sourceUrl: "x",
+    });
+    expect(withCity).toContain("Fort Myers");
+    expect(withCity).toContain("YOUR home");
+    expect(withCity).not.toMatch(/\$|\d/); // not one digit, anywhere
+    // No city held → it still speaks to the reader, it just cannot name the place.
+    const bare = readerLine({ address: "x", photos: [], sourceUrl: "x" });
+    expect(bare).toContain("A home near you just sold");
+    expect(bare).not.toMatch(/\$|\d/);
   });
 });
 

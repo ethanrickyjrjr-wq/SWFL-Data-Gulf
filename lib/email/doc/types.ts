@@ -110,25 +110,6 @@ export interface HeroProps extends BlockBase {
   /** Render the kicker as a full-width ACCENT RIBBON above the hero ("◆ NEW LISTING ◆"),
    *  instead of an 11px caption. USER-OWNED. Default off — existing docs unchanged. */
   ribbon?: boolean;
-  /**
-   * THE RIBBON AS A STAMP, not a caption — one step UP the type ladder (caption 14 → h2 28,
-   * display weight, deeper band). Opt-in per email; default off, so every existing doc renders
-   * unchanged. USER-OWNED.
-   *
-   * Operator, 08/06/2026: *"make JUST SOLD stand out more somewhere on the photo or
-   * something!!!!!!"* — the announcement word was a 14px caption in a thin band and read as
-   * chrome rather than as the headline. Crawled the same day and it is the near-universal
-   * convention on the printed version of this exact piece: The Close's just-sold postcard
-   * teardown ranks "large, bold text to grab attention" and "a short sentence in HUGE print"
-   * as the two designs that work, and calls dramatic colour the thing that draws the eye.
-   *
-   * NOT AN ON-PHOTO OVERLAY, deliberately. `ImageProps.overlayTitle` would put the word
-   * literally on the picture — but it renders the photo as a CSS `background-image`, and
-   * **Outlook desktop drops background images entirely**, so those recipients would get a
-   * coloured panel where the house should be. Losing the photo to gain a word is a bad trade
-   * on the one email whose photo is the win. This is the version every client renders.
-   */
-  ribbonLoud?: boolean;
   /** "label-first" puts the LABEL above the VALUE — the address over the price, which is
    *  how a listing flyer actually reads. Default "value-first" (today's behavior). */
   order?: "value-first" | "label-first";

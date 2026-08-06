@@ -1,3 +1,38 @@
+## 2026-08-06 (Opus 5) — OPERATOR: *"don't change the just sold bar so it's different from every other email. just put a graphic somewhere on the picture"* + *"write up the fucking email how it should be. get the fucking house description out of there. no one cares."* + *"love the new ideas. make the email how it should be and we build towards it."*
+
+OPEN — being worked now. Three corrections, and the first two are both mine:
+
+1. **THE CAMPAIGN BAR IS THE CAMPAIGN BAR.** I made Just Sold's ribbon bigger than the other six.
+   That breaks the one element whose entire job is being IDENTICAL across the lifecycle — the
+   "seven emails that looked like seven different companies" failure, re-introduced by me while
+   fixing something else. `ribbonLoud` is REVERTED, mechanism and all. **Standing rule: never make
+   one lifecycle email's shared chrome different. The variation goes in the email's OWN elements.**
+2. **A GRAPHIC ON THE PICTURE, not a louder band.** That is what he asked for the first time and I
+   substituted a type change because the overlay path breaks Outlook. The right answer is to bake
+   the badge INTO the image so every client renders it.
+3. **NOBODY CARES ABOUT THE HOUSE DESCRIPTION.** The authored paragraph described the home — on an
+   email sent to people who are not buying it. Cut. The email is about the NEIGHBOUR'S equity,
+   which is exactly finding B1 from the crawl I filed an hour earlier and then did not act on.
+
+**And the direction, which matters more than the three fixes:** *"make the email how it should be
+and we build towards it. we will figure it out. just update the playbook with what we need to get
+there."* — **BUILD THE TARGET, NOT THE ACHIEVABLE.** Write the email as it should exist, let the
+gaps be visible open slots, and record in the playbook what each gap needs. Do NOT trim the design
+down to what we hold today.
+
+
+## 2026-08-06 (Opus 5) — OPERATOR: *"fix whatever you need to and mint area email, i guess"*
+
+DECISION, overriding my recommendation. I recommended reusing the existing `('zip', key)` baked row
+(one row, zero drift); he chose a **separate `area-email` surface**. Executing that, not re-arguing
+it (RULE 10). The "i guess" is not enthusiasm — the reuse-vs-mint tradeoff was mine to make and I
+handed him a coin flip instead of a call. If the email voice turns out identical to the report-page
+voice, the honest follow-up is to collapse them later, and that stays my job to notice, not his.
+
+Also authorized: "fix whatever you need to" = Phase 0 unblocked — the validator defect
+(`narrative_bake_invented_number_rejects`, open since 07/26) and the ZHVI index-called-a-median
+label defect (`docs/standards/data-roots.md` trap T2, mislabel live in three places incl. email).
+
 ## 2026-08-06 (Opus 5) — OPERATOR: *"i want a complete plan that will actually work / crawl4ai what you need, don't just make shit up"*
 
 OPEN — plan delivered, nothing built yet. He said this after I handed him a precompute/caching spec

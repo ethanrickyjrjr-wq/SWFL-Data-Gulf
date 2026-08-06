@@ -413,6 +413,41 @@ measured on real sent mail).
   3–6 lines.
 - **Close on an open-ended question**, not a figure.
 
+### 1.9a Zip codes — never "ZIP". Never "X of Y" for what we don't hold.
+
+**Operator decree 08/06/2026, verbatim, looking at a real render:** *"STOP CAPITALIZING THE WORD
+ZIP!!! We say zip codes. what the fuck is ZIP. change it everywhere."* Followed immediately by:
+*"why say 8 of 9 zip codes? just talk about the 8 fucking zip codes we fucking have."*
+
+Two separate rules, both universal — every email, not just the ones with a chart:
+
+1. **NEVER write "ZIP" (all-caps) in customer-facing copy.** Always "zip code" (singular) or "zip
+   codes" (plural), spelled out, lowercase. This applies to sentences, chart titles/captions, and
+   stat-cell labels — even labels the CSS renders `text-transform:uppercase` (the CSS transform
+   changes the pixels, not the correctness of the underlying word; a screen reader and any future
+   restyle both read the source text).
+   - **EXCEPTION — source citations.** A vendor's own descriptor (e.g. Zillow's "ZIP-level
+     all-homes") is quoted, not authored — rewording a citation for our style guide is a
+     source-faithfulness violation (`feedback_derivable-is-not-source-faithful`), and
+     `refinery/validate/zip-level-framing-lint.mts` already protects this exact class of phrase on
+     purpose. Do not "fix" a citation's casing.
+   - **NOT the same rule as `feedback_no-zip-level-intelligence-framing`.** That one is about
+     PRODUCT-POSITIONING framing ("ZIP-level intelligence" as a moat claim) and is already enforced
+     structurally by the same lint. This rule is about customer-facing WORD CHOICE in the copy
+     itself. Different concern, same file's lint deliberately does not overlap the two.
+2. **NEVER frame a real gap as "X of Y" when Y is a count we hold ZERO data for.** Comparing our
+   count against a number we don't have anything for reads as an apology, not a fact — "8 of 9 zip
+   codes carry a published home value" implies something is missing/wrong. Just state the count we
+   HAVE: "8 zip codes." This does not weaken the no-invention gate — stating a plain count is not a
+   completeness claim ("every zip code"/"all of them" still is, and stays banned).
+   - **THIS DOES NOT APPLY TO TRUNCATION.** A genuinely different case: when we hold MORE real rows
+     than a chart or list can draw (e.g. a 12-zip-code place, an 8-bar chart frame), "top 8 of 12" is
+     confident framing — "our top picks" — not an apology, because we really do hold the other 4 and
+     are choosing what to show. Keep "top N of M" there. Collapsing the two cases into one rule was
+     considered and rejected — see `lib/deliverable/recipes/market-pulse.ts`'s `chartTitleFor` and
+     `settledPulseFacts` for the reference split (coverage sentence has no "of Y"; truncation
+     sentence keeps it).
+
 ## 1.10 Subject lines — two rules, pick by what you want back
 
 - **Want a REPLY** (follow-up, check-in, a question to one person) → **3–4 words.** Measured on
@@ -2098,6 +2133,29 @@ Acceptance run: `bun --env-file=.env.local scripts/email/render-just-sold.mts [a
 **8 of 8 assertions pass on both**, 08/06/2026. Both renders were sent to `hello@swfldatagulf.com`
 the same session (Resend ids `2ab14232-…` prefill, `1c1c65c7-…` recorded).
 
+### 2.5.-1 WHAT THIS EMAIL IS. READ THIS BEFORE ANY OF THE MECHANICS BELOW.
+
+**A JUST SOLD EMAIL IS NOT AN ANNOUNCEMENT ABOUT A HOUSE. IT IS A MESSAGE TO THE NEIGHBOURS
+ABOUT THEIR HOUSE.** Everything in §2.5.0 onward is plumbing for that sentence. The first version
+of this email got every number right and was still worthless, because it talked about the property
+to people who are not buying it. Operator: *"this is the worst just sold email I have ever seen"*
+and *"get the fucking house description out of there. no one cares."*
+
+**THE SHAPE, top to bottom, as built 08/06/2026:**
+
+1. **The campaign ribbon — IDENTICAL to the other six.** Not bigger, not a different face. A
+   version of this email shipped with a louder ribbon and it was reverted the same day: the ribbon
+   is the one element whose entire job is being the same across the lifecycle. **The variation goes
+   in the email's OWN elements. Never in the shared chrome.**
+2. **The photo, WITH THE BADGE BURNED INTO IT** — a diagonal "JUST SOLD" corner ribbon in the
+   agent's accent colour, composited server-side (`lib/media/photo-badge.ts`). See §2.5.4.
+3. **The hero** — address over the close.
+4. **The spec strip** — beds / baths / sq ft, plus the derived cells on the recorded rung only.
+5. **ONE PARAGRAPH, ABOUT THE READER, CODE-AUTHORED** (`readerLine`). It names no figure at all.
+6. **The sold comps nearby**, when we hold real recorded sales.
+7. **ONE CTA: "What's My Home Worth?"** — every crawled source names the valuation as the correct
+   ask for this email.
+
 ### 2.5.0 THE CLOSE PRICE — OPERATOR DECREE 08/06/2026
 
 **Verbatim: *"SOLD PRICE IS ENTERED AS LAST LISTED PRICE WE HAVE. USER CAN CHANGE IT IF THEY WANT."***
@@ -2223,6 +2281,75 @@ reportAssertions("THE SOLD CONTRACT", [ /* YOUR assertions, read off `html` */ ]
 its own comp set, or every run tests the prefill path and the recorded rung is never exercised once.
 **And run a SECOND address that has NOT sold**, or the prefill path — the common case — is never
 exercised either. Written and run: `scripts/email/render-just-sold.mts`, 8 assertions, both houses.
+
+### 2.5.4 THE BADGE ON THE PHOTO, AND THE TWO WRONG ANSWERS BEFORE IT
+
+Operator asked twice: *"make JUST SOLD stand out more somewhere on the photo or something!!!!!!"*
+then, after the first attempt, *"don't change the just sold bar so it's different from every other
+email. just put a graphic somewhere on the picture."*
+
+**WRONG ANSWER 1 — a louder ribbon.** Reverted, mechanism and all. It broke campaign identity to
+solve a per-email problem.
+
+**WRONG ANSWER 2 — `ImageProps.overlayTitle`.** It exists, it puts text on the picture, and it is
+still wrong: it renders the photo as a CSS `background-image`, and **Outlook desktop drops
+background images entirely** — those recipients get a coloured panel where the house should be.
+Absolute positioning is not available in email either. **Losing the photo to gain a word is a bad
+trade on the one email whose photo is the win.**
+
+**RIGHT ANSWER — bake it into the JPEG.** `lib/media/photo-badge.ts` fetches the vendor photo,
+cover-crops it 3:2 with sharp, composites a diagonal corner ribbon in the agent's accent with resvg,
+re-encodes to JPEG and uploads through `hostEmailMedia`. Every client renders it, because it IS the
+image. **It invented no machinery:** `lib/social/listing-card-render.ts` already ran this exact
+pipeline for social cards and both libraries were already production dependencies — we import its
+`fetchPhoto`, the one canvas-font root, and the one email-media uploader.
+
+**Best-effort by construction.** Any failure — dead URL, undecodable vendor image, storage hiccup —
+returns null and the ORIGINAL photo ships. A badge is never worth a missing house.
+
+### 2.5.5 WHAT WE BUILD TOWARD. THE EMAIL AS IT SHOULD BE.
+
+**Operator, 08/06/2026:** *"make the email how it should be and we build towards it. we will figure
+it out. just update the playbook with what we need to get there."*
+
+**So the rule for this section is: design the TARGET, not the achievable.** Each gap below says what
+it needs and which lane feeds it. None of them are wired. Do not trim the design to what we hold.
+
+**G1 — THE EQUITY LINE, WITH A REAL NUMBER.** Today's paragraph offers a valuation. What it should
+say is what the reader's own home is worth *now* — The Close's *"your equity has changed"* is the
+strongest line in the whole crawled corpus. **What it needs:** a ZIP-grain median sold price, which
+we ALREADY HOLD — `market_details_swfl_latest.median_sold_price` is the ratified root for
+sold/recorded value (`docs/standards/data-roots.md`). This is the nearest real build on the list,
+and the thing that stops it is not data: it is that a per-reader equity claim is a COMPARATIVE
+claim, so it must be code-computed and code-worded, never narrated. **Never let a model near it.**
+
+**G2 — DAYS TO SELL, ON THE RECORDED RUNG.** LeadSites' data block is `Sold price | Days on market`,
+and speed is the one number this email owns. **What it needs:** nothing new — when we hold a
+RECORDED sale we hold both ends (our listed date, the recorded sale date). Gate it exactly where the
+chart and derived cells already unlock. **Never from `days_in_state`** — that is days-in-ACTIVE.
+
+**G3 — THE OFFER COUNT.** HousingWire: *"we had [number] offers, which means there are still
+qualified buyers eager to make an offer!"* — the strongest social-proof number in the corpus.
+**What it needs:** a lane-4 field. We will never hold it from a feed. One open slot on the canvas,
+absent from the send when empty.
+
+**G4 — THE SELLER'S OWN WORDS.** The Close's postcard #4 pairs a client win with a client quote.
+**What it needs:** lane 4, and a hard rule — **a testimonial is the one thing on this page that
+would be outright fabrication if generated.** Type it or omit it.
+
+**G5 — WHAT SOLD NEARBY, FOR EVERY SUBJECT.** The comps list is the email's proof and it is empty
+on most runs (0 recorded sales came back on the acceptance house). **What it needs:** the Lee comp
+root rather than the vendor's nearby feed — `lee_comp_sales_v` is the ratified per-subject sold-comp
+root and the vendor feed carries **no sale date at all**. Collier has no equivalent.
+
+**G6 — A PHOTO FOR A SOLD HOUSE.** A genuinely sold home leaves the for-sale feed, so the recorded
+rung — the BEST version of this email — usually has no photo and no badge to put one on. **What it
+needs:** the paid row already on disk (`apify_property_records` carries a full gallery). Reading a
+row we already bought is not new spend.
+
+**G7 — THE PHOTO-RIGHTS GATE.** An agent sending a Just Sold for a house they did not list may not
+use the listing agent's photos (HousingWire). Both sources say to send those anyway, so it is the
+common case. **What it needs:** scoping first — we may not even know who the listing agent was.
 
 ### 2.5.3 WHAT THE WALK ACTUALLY FOUND — five defects, three of them invisible to any test
 

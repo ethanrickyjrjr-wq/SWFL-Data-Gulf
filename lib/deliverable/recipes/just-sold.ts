@@ -97,7 +97,8 @@ import { soldCompsListBlock } from "@/lib/email/sold-comp-blocks";
 import { buildLifecycleEmail } from "@/lib/email/lifecycle-chrome";
 import type { ChromeBlock } from "@/lib/email/lifecycle-chrome";
 import { addressLineOf, pricePerSqft, spec } from "@/lib/email/listing-flyer";
-import { authorListingNarrative, clearNarrativeSlots, fillNarrative } from "./shared";
+import { stampPhotoBadge } from "@/lib/media/photo-badge";
+import { clearNarrativeSlots, fillNarrative } from "./shared";
 import { justSoldSubject } from "./subject-lines";
 import type { RecipeBuildContext } from "./index";
 import type { ChartSpec } from "@/components/charts/registry/chart-spec";
@@ -217,7 +218,7 @@ export interface HeroPrice {
  * everything DERIVED, CHARTED, FOOTNOTED or WRITTEN INTO PROSE. None of those are editable
  * and none carry their own label, so a prefill reaching them stops being a starting value
  * and becomes an assertion. `soldSpecs`, `soldFootnote`, `chartAnchor` and
- * `soldNarrativeLine` all take the RECORDED close and nothing else.
+ * `chartAnchor` all take the RECORDED close and nothing else, and the body copy names no figure at all.
  *
  * STILL FORBIDDEN, and it is a different mechanism: never fill this from the property's LAST
  * RECORDED TRANSFER (`fetchSoldEvent`). Probed live 07/13/2026 — a house ACTIVE at $595,000
@@ -250,23 +251,38 @@ export function chartAnchor(close: SubjectClose | null): number | null {
 }
 
 /**
- * WHAT THE NARRATOR IS TOLD ABOUT THE PRICE. Prose is baked at author time and is NOT
- * editable, so a prefill the agent will fix in the cell would survive uncorrected inside the
- * paragraph. No recorded close → the model is forbidden to name any sale price at all,
- * including the ask sitting right there in the facts.
+ * THE BODY COPY. Code-authored, reader-first, and it never names a price.
+ *
+ * *** A JUST SOLD EMAIL IS NOT AN ANNOUNCEMENT ABOUT A HOUSE. IT IS A MESSAGE TO THE
+ *     NEIGHBOURS ABOUT THEIR HOUSE. ***
+ *
+ * Operator, 08/06/2026: *"get the fucking house description out of there. no one cares."*
+ * What this replaced was a model-written paragraph describing the property — year built, lot
+ * size, HOA — mailed to people who are not buying it. Every source in the 08/06 crawl says the
+ * same thing: LeadSites' subject is *"Sold on [Street] — and what it could mean for your
+ * home"*; HousingWire opens *"your neighborhood is hot! Your neighbors at [address] just
+ * sold"*; The Close names *"your equity has changed"* as the strongest line on its whole page
+ * and states the rule as *"make the seller the hero of the story."*
+ *
+ * WHY CODE AND NOT A MODEL. A reader-first sentence is precisely where a model invents — the
+ * natural next clause is "and values around you are climbing," which is an unsourced market
+ * claim. Code cannot invent. This also means the claim gate can never drop the body (it did
+ * exactly that twice while this email was being built), the copy is identical on every send,
+ * and the recipe issues no metered call at all.
+ *
+ * IT NAMES NO FIGURE, EVER. Not the close, not the prefill, not an area median. The hero
+ * carries the one number, and the hero is EDITABLE where this paragraph is not — a figure
+ * here would survive the agent's correction. What it offers is a VALUATION, which is an offer
+ * rather than a claim, and which every crawled source names as the correct ask for this email.
  */
-export function soldNarrativeLine(close: SubjectClose | null): string {
-  if (!close) {
-    return (
-      `This home has SOLD. THE CLOSING PRICE IS NOT AVAILABLE TO YOU — do not state, estimate, ` +
-      `or imply any sale price, and do NOT present the "List price" in the facts as the sale price ` +
-      `(it is the ask). Write about the home itself and the fact that it is sold.`
-    );
-  }
-  const on = isoToMDY(close.date);
+export function readerLine(facts: ListingFacts): string {
+  const place = (facts.city ?? "").trim();
+  const opening = place ? `Another home in ${place} just sold.` : `A home near you just sold.`;
   return (
-    `This home has SOLD. It closed at ${usd(close.price)}${on ? ` on ${on}` : ""}. ` +
-    `The closing price is the headline — the "List price" in the facts is what it was ASKING, not what it sold for.`
+    `${opening} If you own nearby, the number that actually matters to you is not this one — ` +
+    `it is what YOUR home would bring today. That is not a guess off a website. It comes from ` +
+    `what has really been selling around you, and I will put it together for you at no cost ` +
+    `and with no obligation. One reply is all it takes.`
   );
 }
 
@@ -487,21 +503,29 @@ export async function buildJustSold(ctx: RecipeBuildContext): Promise<EmailDoc |
   const hero = heroPrice(facts, close);
   const footnote = soldFootnote(facts, close);
 
+  // ── THE BADGE, BURNED INTO THE PHOTO. Operator 08/06/2026: *"just put a graphic somewhere
+  // on the picture."* Composited server-side (`lib/media/photo-badge.ts`) rather than laid
+  // over the image in HTML, because the HTML route renders the photo as a CSS background and
+  // Outlook desktop drops those — the house would vanish to gain a word. In the accent the
+  // CHROME will land on, never the canvas's (same reason `chromeAccent` exists for the chart).
+  // Best-effort: any failure ships the ORIGINAL photo, never a placeholder and never a block.
+  const badgedPhoto = facts.photos[0]
+    ? await stampPhotoBadge(facts.photos[0], {
+        word: "Just Sold",
+        accent: chromeAccent(currentDoc),
+        keyHint: `just-sold-${facts.zip ?? "swfl"}`,
+      }).catch(() => null)
+    : null;
+
   // ── THE CAMPAIGN CHROME. One layout, seven emails, one agent.
   let doc = buildLifecycleEmail(currentDoc, {
     ribbon: "Just Sold",
-    // THE STAMP, not a caption. Operator 08/06/2026: *"make JUST SOLD stand out more somewhere
-    // on the photo or something!!!!!!"* — it was a 14px band and read as chrome. The printed
-    // version of this exact piece agrees: The Close's just-sold postcard teardown ranks "large,
-    // bold text" and "a short sentence in HUGE print" as the two designs that work. Opt-in, so
-    // the other six lifecycle emails are untouched until he says otherwise.
-    ribbonLoud: true,
-    // The photo of the win. A genuinely SOLD house is not in the for-sale feed, so it
-    // often has none → an OPEN SLOT: a dropzone on the canvas, absent from the sent
-    // email. Never stock art, never a refusal.
+    // The photo of the win, WITH THE BADGE BURNED INTO IT (see `badgedPhoto` above). A
+    // genuinely SOLD house is not in the for-sale feed, so it often has none → an OPEN SLOT:
+    // a dropzone on the canvas, absent from the sent email. Never stock art, never a refusal.
     photo: facts.photos[0]
       ? {
-          url: facts.photos[0],
+          url: badgedPhoto ?? facts.photos[0],
           alt: facts.address ?? "The home that just sold",
           linkUrl: facts.sourceUrl,
         }
@@ -549,96 +573,29 @@ export async function buildJustSold(ctx: RecipeBuildContext): Promise<EmailDoc |
     ...(facts.sourceUrl ? { ctaUrl: facts.sourceUrl } : {}),
   });
 
-  // ── PROSE. The model writes prose and nothing else. The close rides in the FRAMING
-  // (so the paragraph may state it) and the nearby sales ride in as BACKGROUND. When
-  // we have no close, the narrator is explicitly forbidden from naming a sale price —
-  // otherwise the ask ($595,000) is right there in the facts and reads like a close.
-  // A PREFILLED HERO DOES NOT UNLOCK THE PROSE. `soldNarrativeLine` takes the RECORDED
-  // close only: the paragraph is baked and uneditable, so a number the agent will correct
-  // in the cell would survive uncorrected inside the sentence.
-  const soldLine = soldNarrativeLine(close);
-  const context =
-    comps.length > 0
-      ? `Real recorded sales near this home (background only — do not list them back):\n` +
-        comps
-          .slice(0, 6)
-          .map(
-            (c) =>
-              `- ${c.addressLine}: ${usd(c.price as number)}` +
-              `${c.beds != null ? `, ${c.beds} bd` : ""}` +
-              `${c.sqft != null ? `, ${c.sqft.toLocaleString("en-US")} sqft` : ""}`,
-          )
-          .join("\n")
-      : undefined;
-
-  // THE CLOSE, AS A SETTLED FACT — not only as framing. Measured 08/06/2026 on the first
-  // acceptance run: the framing named the recorded close and its date, the model dutifully
-  // wrote them, and the claim gate threw the WHOLE paragraph away as
-  // `unanchored-number("08"), ("29"), ("2025")` — leaving the email whose entire job is one
-  // number with ZERO words of body copy, under §1.9's 50–125-word floor. A fact stated only
-  // in `framing` is shown but not settled. Anchors are settled. (T8: the drop is a
-  // console.error nobody reads and its symptom looks like nothing being wrong.)
-  const anchors = close
-    ? [
-        `Recorded sale price of THIS home: ${usd(close.price)} (a recorded sale, from the county record).`,
-        ...(isoToMDY(close.date) ? [`Recorded sale date: ${isoToMDY(close.date)}.`] : []),
-        ...(pricePerSqft(usd(close.price), facts.sqft)
-          ? [
-              `Sale price per square foot: ${pricePerSqft(usd(close.price), facts.sqft)} (already ` +
-                `shown in the spec strip above your paragraph — do not restate it as a bare figure).`,
-            ]
-          : []),
-      ]
-    : [];
-
-  const narrative = await authorListingNarrative(facts, {
-    framing:
-      `A JUST-SOLD announcement to the agent's sphere. ${soldLine} ` +
-      // NO "end with an offer" CLAUSE. It was here and it cost the paragraph: asked to offer
-      // a valuation, the model wrote "if you want to know…" and the gate killed it as
-      // `motive("want to")`. The BUTTON already says "What's My Home Worth?" — the CTA is a
-      // chrome element, not the narrator's job, and asking prose to duplicate a button is how
-      // an instruction and a guard end up fighting each other. (Measured 08/06/2026.)
-      `Do NOT write a call to action, an invitation, or an offer of any kind — the email's ` +
-      `button already carries it.\n` +
-      // The model reliably smuggles a pitch in as market commentary when it is not
-      // shut off explicitly: given the price cut it wrote "reflecting the kind of
-      // pricing movement that tends to draw serious buyers quickly" — an invented
-      // claim about how buyers behave, dressed as analysis. State what happened; say
-      // nothing about what it means or what anyone will do next.
-      `FORBIDDEN: any claim about what buyers or sellers do, feel, want, or will do; any ` +
-      `characterization of the market's behavior, momentum, or direction; any prediction; any ` +
-      `word about how fast, how competitive, or how desirable anything is. You are reporting a ` +
-      `sale that happened, not interpreting it. If a sentence explains what the facts "reflect", ` +
-      `"signal", or "mean", DELETE IT.\n` +
-      // House style: dates are MM/DD/YYYY everywhere a user can see them.
-      `Write any date exactly as MM/DD/YYYY — never "August 29, 2025".\n` +
-      // THE MARKET CLOCK IS NOT A SOLD FACT, and reaching for it kills the paragraph.
-      // Measured 08/06/2026 on the prefill run: the model wrote "after 12 days on the
-      // market" (gate: `sequence`) and derived a list date, "07/22" (gate:
-      // `unanchored-number`). `days_on_market` on the shared fact list is days-in-ACTIVE —
-      // the same trap Under Contract documents — and on a house that has sold it is both
-      // meaningless and an invitation to narrate a timeline we never handed over.
-      `Do NOT mention how long the home was on the market, when it was listed, or any ` +
-      `sequence of events. The ONLY date you may write is a recorded sale date, and only ` +
-      `if one is stated in the facts.` +
-      // THE PREFILL IS NOT IN THE PROSE. With no recorded close the hero may be carrying a
-      // PREFILLED list price the agent is about to type over — but the paragraph is baked and
-      // cannot be typed over. A dollar figure in prose under a JUST SOLD ribbon reads as the
-      // close no matter which cell it came from, so with no recorded sale NO money may appear
-      // in the paragraph at all.
-      (close
-        ? ""
-        : `\nWrite NO PRICE FOR THIS HOME — not the list price, not a sale price, not a ` +
-          `per-square-foot figure. We hold no sourced sale price for it. (A cost that is ` +
-          `clearly labelled as what it is, like a monthly HOA fee, is fine.)`),
-    // THIS EMAIL SUPPRESSES THE DESCRIPTION BLOCK, so the narrator must not be told it is on the
-    // page. Without this it wrote "The listing description covers the interior updates in full" —
-    // a pointer to a block the reader cannot see. Found by looking at the render, 08/06/2026.
-    descriptionRendered: false,
-    ...(anchors.length ? { anchors } : {}),
-    ...(context ? { context } : {}),
-  });
+  // ── THE BODY COPY. DETERMINISTIC. NO MODEL, NO HOUSE DESCRIPTION.
+  //
+  // Operator, 08/06/2026: *"get the fucking house description out of there. no one cares."*
+  // He is right and the crawled corpus says the same thing in every source
+  // (`_RESEARCH/email-and-social/2026-08-06-just-sold-craft-and-agent-email-voice.md` §1):
+  //
+  //   *** A JUST SOLD EMAIL IS NOT AN ANNOUNCEMENT ABOUT A HOUSE. IT IS A MESSAGE TO THE
+  //       NEIGHBOURS ABOUT THEIR HOUSE. ***
+  //
+  // What shipped before this was a model-written paragraph describing the property — its
+  // year built, its lot, its HOA — sent to people who are not buying it. The Close names the
+  // strongest line in its whole 13-postcard teardown as *"your equity has changed"*, and its
+  // Use-This/Not-This table states the rule outright: *"Always keep the focus on the
+  // homeowner … make the seller the hero of the story."*
+  //
+  // SO THE PARAGRAPH IS CODE-AUTHORED NOW, AND THAT IS THE POINT, NOT A SHORTCUT. The one
+  // thing this email needs to say is a sentence about the READER, and a reader-first sentence
+  // is exactly where a model invents ("values in your area are climbing"). Code cannot invent.
+  // Three consequences, all good: the claim gate can never drop the body (it dropped it twice
+  // during this build), the copy is identical every send, and the recipe is no longer a
+  // metered call. `authorListingNarrative` stays imported by the other recipes; this one is
+  // simply not a prose email.
+  const narrative = readerLine(facts);
   if (narrative) doc = fillNarrative(clearNarrativeSlots(doc), narrative);
 
   // THE SUBJECT LINE — deterministic, never model-authored (subject-lines.ts). It was
