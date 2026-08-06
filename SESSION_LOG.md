@@ -28,11 +28,25 @@ Open House unmodified, it wrote *"this home came to market roughly two months ag
 buyer walking through today real room to have a conversation about terms... the $1,229 monthly
 HOA is worth factoring into carrying costs before the visit"* — negotiating-leverage coaching on
 an RSVP. Crawled real open-house invite scripts (RULE 0.4 — theclose.com, maestrolabs.com, and
-an operator-supplied digitaldreamhomes.com link) to ground the fix: real invites are one or two
-sentences, warm, direct, at most one feature said in plain words, never a number. Added an
-`invitation` opt-in mode to the shared narrator (used ONLY by Open House) that swaps the
-market-analysis directive for that — plus an explicit "never invent a time of day" rule after a
-demo render described "evening light" against a 1–3pm example time.
+an operator-supplied digitaldreamhomes.com link) to ground the fix. Added an `invitation` opt-in
+mode to the shared narrator (used ONLY by Open House) that swaps the market-analysis directive
+for one built from those scripts: short, warm, models the crawled "I wanted to personally invite
+you to our open house this Sunday from 1 to 4 PM" shape, plus a "never invent a time of day"
+rule after a demo render described "evening light" against a 1–3pm example time.
+
+**Two more corrections after the first invitation-mode pass, both from live proof:**
+- Banning every feature outright (my first fix) produced a bare "we look forward to welcoming
+  you" — correct per the crawled scripts is ONE feature stated in plain words, never a computed
+  number (the actual defect the operator flagged was "a golf course 0.57 miles away," a distance
+  figure, not the presence of a feature at all).
+- The narrator was withholding the date/time entirely even once the operator gave one, on the
+  theory that the card already showed it — wrong: crawled scripts state it directly in the
+  sentence ("this Sunday from 1 to 4 PM"). Now anchored in via `opts.anchors` (same claim-gate
+  mechanism `pricePerSqft` already uses) and the narrator is told to state it naturally when
+  given, never invented when not.
+
+**Also added: a real subject line** (`openHouseSubject`) — street + the real date when held,
+this recipe had none before (`doc.subjectVariants` was empty on every build).
 
 **What's still open:** the date/time card has no real value yet — it's a required, human-supplied
 fact (lane 4) with no vendor source, so it needs the actual open-house date/time from the
