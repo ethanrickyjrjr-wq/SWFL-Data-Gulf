@@ -1,3 +1,41 @@
+## 2026-08-06 (Opus 5) — Built the missing `http_body_absent` signal type. The ledger's real problem is that 0 of ~878 open checks are machine-verifiable.
+
+**THE MEASUREMENT THAT REFRAMES "HOW COULD A HUMAN READ THEM ALL":** `check-sweep --dry-run`
+reports **`0 OPEN check(s) carry a live signal`.** The ledger has an automatic REOPENER
+(`reverify-signals.mjs`) and an automatic CLOSER (`check-sweep.mjs`) — and the closer has had
+NOTHING to act on, ever. **The count grows monotonically BY CONSTRUCTION, not by neglect.**
+Hand-closing rows cannot change that; only making checks machine-verifiable can.
+
+**WHY A WHOLE CLASS WAS UN-SIGNALABLE.** The four live types can only prove PRESENCE
+(`http_body.contains`). Every "an internal build note / debug field / stale claim LEAKED into the
+served payload" check asserts an ABSENCE, so none of them could ever carry a signal. That class was
+structurally condemned to manual closes forever. Named as a known gap in
+`.claude/skills/checks-burndown/SKILL.md` ("add a `not_contains` / `row_count_is` type") and never
+built.
+
+**`http_body_absent {url, absent, requires}` — built TDD, red first (2 failing), now 26/26 green.**
+The design point is `requires`, and it is MANDATORY, not optional. Per the check-signal asymmetry,
+`reverify-signals` only REOPENS on a FAIL, so **a false pass is permanent and nothing ever
+re-checks it.** A 500 page, a soft-404 served at 200 (our `/z/*` and `/r/*` families do exactly
+this), an empty body, or a redirect stub ALL trivially "do not contain" the leaked string — every
+one would report the leak fixed, forever. `requires` is a proof-of-life phrase only the real
+working surface emits; without it the signal HARD-FAILS rather than silently passing.
+
+**PROVEN LIVE AGAINST PRODUCTION**, not just against mocks —
+`GET /api/b/master?view=speak&tier=1&v=5`:
+  PASS  (leak absent)   true  — 200, real surface (has "Freshness"), "TODO(" ABSENT
+  NEG   leak present    false — 200, "Freshness" is STILL PRESENT
+  NEG   wrong page      false — 404 (not 2xx) — absence NOT proven
+  NEG   no `requires`   false — rejected with the reason, never a silent pass
+One pass and **three distinct false-pass traps blocked.** `scripts/check.mjs` picks the type up
+automatically (it validates against `SIGNAL_TYPES`).
+
+**NOT DONE, STATED PLAINLY (RULE 0.8):** the type is built and proven but **attached to ZERO
+checks.** The obvious first target, `sa0718_internal_build_notes_leak_into_the_served_`, was being
+touched by another live session today, and writing a signal without first probing the exact leaked
+string would risk the one failure this whole type is designed to prevent. Attaching signals to real
+checks is the next session's first job, and it is where the count actually starts falling.
+
 ## 2026-08-06 (Opus 5) — Chief-of-staff nightly DECLARED dark (it was already disabled at the API), manifest state backfilled, 2 checks closed with proof.
 
 **THE JOB THAT WAS COSTING MONEY FOR NOTHING.** `chief-of-staff-nightly` failed **5 for 5**

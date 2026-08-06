@@ -20,6 +20,7 @@ export const SIGNAL_TYPES = [
   "http_body",
   "db_row_exists",
   "db_fresh", // alias: table_fresh
+  "http_body_absent",
   "workflow_success",
 ];
 
@@ -131,6 +132,54 @@ export async function dbFresh(signal, rest, now) {
   };
 }
 
+// GET <url> → 2xx AND body includes `requires` AND body does NOT include `absent`.
+//
+// WHY `requires` IS MANDATORY AND NOT A CONVENIENCE. `contains` can only ever prove
+// PRESENCE, which left every "an internal note / debug field / stale claim leaked into the
+// served payload" check structurally un-signalable. Absence is the dangerous direction:
+// reverify-signals only REOPENS on a FAIL, so a false pass is permanent and nothing
+// re-checks it. A 500 page, a soft-404 served at 200 (our /z/* and /r/* families do exactly
+// this), an empty body, or a redirect stub all trivially "do not contain" the leaked string
+// and would report the leak fixed forever. `requires` is the proof-of-life: a phrase only
+// the real, working surface emits. No `requires` → hard fail, never a silent pass.
+export async function httpBodyAbsent(signal, fetchImpl) {
+  const { url, absent, requires } = signal ?? {};
+  if (!url || absent == null)
+    return { ok: false, observed: null, detail: "http_body_absent: missing url or absent" };
+  if (!requires)
+    return {
+      ok: false,
+      observed: null,
+      detail:
+        "http_body_absent: missing `requires` — an absence assertion without a proof-of-life " +
+        "phrase would pass on a 500, a soft-404, or an empty body and never self-heal",
+    };
+  let res, text;
+  try {
+    res = await fetchImpl(url, { method: "GET" });
+    text = await res.text();
+  } catch (e) {
+    return { ok: false, observed: null, detail: `http_body_absent: fetch failed — ${e.message}` };
+  }
+  const status = res.status;
+  const httpFine = status >= 200 && status < 300;
+  const body = String(text);
+  const alive = body.includes(requires);
+  const leaked = body.includes(absent);
+  const ok = httpFine && alive && !leaked;
+  return {
+    ok,
+    observed: { status, alive, leaked },
+    detail: ok
+      ? `GET ${url} → ${status}, real surface (has "${requires}"), "${absent}" ABSENT`
+      : !httpFine
+        ? `GET ${url} → ${status} (not 2xx) — absence NOT proven`
+        : !alive
+          ? `GET ${url} → ${status} but proof-of-life "${requires}" missing — wrong/error page, absence NOT proven`
+          : `GET ${url} → ${status}, "${absent}" is STILL PRESENT`,
+  };
+}
+
 // Recognized-but-next: kept so the seed checks' workflow_success signals don't
 // read as "unknown type", but the close path does NOT gate on gh being authed.
 export function workflowSuccess(signal) {
@@ -149,6 +198,8 @@ export async function runSignal(signal, opts = {}) {
       return httpOk(signal, fetchImpl);
     case "http_body":
       return httpBody(signal, fetchImpl);
+    case "http_body_absent":
+      return httpBodyAbsent(signal, fetchImpl);
     case "db_row_exists":
       return dbRowExists(signal, rest);
     case "db_fresh":

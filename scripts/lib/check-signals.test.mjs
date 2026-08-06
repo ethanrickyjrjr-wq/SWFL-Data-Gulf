@@ -185,3 +185,81 @@ test("no signal at all — fails closed", async () => {
   const r = await runSignal(undefined, {});
   assert.equal(r.ok, false);
 });
+
+// --- http_body_absent ---
+// The absence type exists because `contains` can only prove PRESENCE, so every
+// "internal note / debug field / stale claim leaked into the served payload" check was
+// structurally un-signalable. Absence is the dangerous direction: per the check-signal
+// asymmetry, reverify only reopens on FAIL, so a false PASS is permanent. A 500 page, a
+// soft-404, or an empty body all trivially "do not contain" the leak — so `requires` is
+// MANDATORY and proves we actually fetched the real surface before believing the absence.
+test("http_body_absent — real page, leak gone → passes", async () => {
+  const r = await runSignal(
+    {
+      type: "http_body_absent",
+      url: "https://x/z/33901",
+      absent: "TODO(build-note)",
+      requires: "Median sale",
+    },
+    { fetchImpl: fakeFetch(200, "<h1>Median sale price</h1><p>clean</p>") },
+  );
+  assert.equal(r.ok, true);
+});
+
+test("http_body_absent — real page, leak still present → fails", async () => {
+  const r = await runSignal(
+    {
+      type: "http_body_absent",
+      url: "https://x/z/33901",
+      absent: "TODO(build-note)",
+      requires: "Median sale",
+    },
+    { fetchImpl: fakeFetch(200, "<h1>Median sale price</h1><!-- TODO(build-note) -->") },
+  );
+  assert.equal(r.ok, false);
+});
+
+// THE FALSE-PASS TRAP THIS TYPE EXISTS TO SURVIVE. Without `requires`, every one of these
+// three would report ok:true — "the leak is not in the body" — and never self-heal.
+test("http_body_absent — 500 error page must NOT pass as absence", async () => {
+  const r = await runSignal(
+    {
+      type: "http_body_absent",
+      url: "https://x/z/33901",
+      absent: "TODO(build-note)",
+      requires: "Median sale",
+    },
+    { fetchImpl: fakeFetch(500, "Internal Server Error") },
+  );
+  assert.equal(r.ok, false);
+});
+
+test("http_body_absent — soft-404 at HTTP 200 must NOT pass as absence", async () => {
+  const r = await runSignal(
+    {
+      type: "http_body_absent",
+      url: "https://x/z/00000",
+      absent: "TODO(build-note)",
+      requires: "Median sale",
+    },
+    { fetchImpl: fakeFetch(200, "Outside our coverage") },
+  );
+  assert.equal(r.ok, false);
+});
+
+test("http_body_absent — a signal with no `requires` is rejected, never silently trusted", async () => {
+  const r = await runSignal(
+    { type: "http_body_absent", url: "https://x/y", absent: "TODO(build-note)" },
+    { fetchImpl: fakeFetch(200, "anything") },
+  );
+  assert.equal(r.ok, false);
+  assert.match(r.detail, /requires/);
+});
+
+test("http_body_absent — fetch failure is a FAIL, not an absence", async () => {
+  const r = await runSignal(
+    { type: "http_body_absent", url: "https://x/y", absent: "TODO", requires: "Median sale" },
+    { fetchImpl: throwingFetch },
+  );
+  assert.equal(r.ok, false);
+});
