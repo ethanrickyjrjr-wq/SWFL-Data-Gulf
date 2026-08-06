@@ -13,7 +13,7 @@
 // big-stat → title-only) — a saved block always gets a card, never a refusal.
 
 import { barChartSvg, trendChartSvg, svgToPng, type TrendPoint } from "@/lib/email/chart-image";
-import { formatAxisTick, type ValueFormat } from "@/lib/charts/format";
+import { formatAxisTick, type ValueFormat, TABULAR } from "@/lib/charts/format";
 import { formatDisplayDate } from "@/lib/format-date";
 import { BRAND } from "@/lib/brand/tokens";
 import type { ChartBlock } from "@/refinery/validate/chart-block-lint.mts";
@@ -146,7 +146,7 @@ function bigStats(points: TrendPoint[], fmt: ValueFormat): string {
       const cx = M + i * slotW + slotW / 2;
       const label = p.label.length > 22 ? `${p.label.slice(0, 21)}…` : p.label;
       return (
-        `<text x="${cx.toFixed(1)}" y="390" text-anchor="middle" font-family="Arial" font-size="64" font-weight="bold" fill="${NAVY}">${esc(formatAxisTick(fmt, p.value))}</text>` +
+        `<text x="${cx.toFixed(1)}" y="390" text-anchor="middle" font-family="Arial" ${TABULAR} font-size="64" font-weight="bold" fill="${NAVY}">${esc(formatAxisTick(fmt, p.value))}</text>` +
         `<text x="${cx.toFixed(1)}" y="432" text-anchor="middle" font-family="Arial" font-size="20" fill="${GREY}">${esc(label)}</text>`
       );
     })

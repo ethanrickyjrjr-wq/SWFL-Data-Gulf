@@ -13,6 +13,7 @@
 
 import type { ChartSpec } from "@/components/charts/registry/chart-spec";
 import type { ValueFormat } from "@/lib/charts/format";
+import type { FontFamily } from "@/lib/email/doc/types";
 import { trendChartSvg, barChartSvg, type TrendPoint } from "@/lib/email/chart-image";
 import { bklitTrendSvg, bklitComposedSvg } from "@/components/charts/vendor/bklit/email-svg";
 import { rankedDeltaSvg } from "@/lib/charts/svg/ranked-delta";
@@ -79,7 +80,18 @@ function specToBars(spec: ChartSpec): { label: string; value: number }[] | null 
  *  zhvi-area path's bklit AreaChart render goes through `@react-email/render`
  *  (2026-07-08 — see render-static.tsx for why that's not a direct
  *  `react-dom/server` import). */
-export async function chartSpecToEmailSvg(spec: ChartSpec, accent: string): Promise<string | null> {
+export async function chartSpecToEmailSvg(
+  spec: ChartSpec,
+  accent: string,
+  /** The brand face this SVG will RASTERIZE in (svgToPng's `fontFamily`). Threaded into
+   *  every builder so labels are FITTED against the face that actually renders them,
+   *  and the label gutter sizes itself to those measured widths — see
+   *  lib/brand/text-metrics. Omitted → the product default, which is what resvg's
+   *  `defaultFontFamily` falls back to for a brand-less build. Getting this wrong does
+   *  not error; it silently paints labels over the bars, so it rides in `baseOpts`
+   *  (spread into every builder) rather than being passed builder by builder. */
+  fontFamily?: FontFamily,
+): Promise<string | null> {
   try {
     const title = spec.title || "Market data";
     const vf = mapValueFormat(spec.value_format);
@@ -89,6 +101,7 @@ export async function chartSpecToEmailSvg(spec: ChartSpec, accent: string): Prom
       valueFormat: vf,
       source: spec.source?.citation ?? undefined,
       asOf: spec.asOf ?? undefined,
+      fontFamily,
     };
     const o = (spec.options ?? {}) as Record<string, unknown>;
     let svg: string | null = null;

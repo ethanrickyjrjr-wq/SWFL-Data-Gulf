@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Sources — what's in this project</title>
+<link rel="stylesheet" href="../colors_and_type.css">
+<link rel="stylesheet" href="_base.css">
+<style>
+  body.preview {
+    padding: 24px 28px;
+    background: var(--gulf-midnight);
+    color: var(--text-primary);
+    font-family: var(--font-body);
+  }
+  .sm-h {
+    font-family: var(--font-mono);
+    font-size: 10px;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--gulf-teal);
+    font-weight: 500;
+    text-shadow: 0 0 10px color-mix(in srgb, var(--gulf-teal) 50%, transparent);
+    margin: 0 0 4px;
+  }
+  .sm-section {
+    margin-bottom: 18px;
+  }
+  .sm-title {
+    font-family: var(--font-display);
+    font-size: 14px;
+    font-weight: 600;
+    color: var(--text-primary);
+    letter-spacing: -0.01em;
+    margin: 0 0 8px;
+  }
+  .sm-list {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 4px 14px;
+    font-family: var(--font-mono);
+    font-size: 11px;
+    color: var(--text-secondary);
+    font-weight: 500;
+  }
+  .sm-list li {
+    display: flex;
+    gap: 8px;
+    align-items: baseline;
+  }
+  .sm-bullet {
+    color: var(--gulf-teal);
+    width: 8px;
+  }
+  .sm-tag {
+    margin-left: auto;
+    font-size: 9px;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--text-tertiary);
+  }
+</style>
+</head>
+<body class="preview">
+  <p class="sm-h">In this project · use these</p>
+
+  <div class="sm-section">
+    <h2 class="sm-title">Design system docs · <span style="color:var(--text-tertiary);font-weight:500;font-family:var(--font-mono);font-size:11px;">app/_design/</span></h2>
+    <ul class="sm-list">
+      <li><span class="sm-bullet">→</span>00-START-HERE.md</li>
+      <li><span class="sm-bullet">→</span>01-product-brief.md</li>
+      <li><span class="sm-bullet">→</span>02-motion-rules.md</li>
+      <li><span class="sm-bullet">→</span>03-surface-recipes.md</li>
+      <li><span class="sm-bullet">→</span>04-context-decision-tree.md</li>
+      <li><span class="sm-bullet">→</span>05-color-and-type.md</li>
+      <li><span class="sm-bullet">→</span>06-voice-and-microcopy.md</li>
+      <li><span class="sm-bullet">→</span>QUICK-REFERENCE.md</li>
+      <li><span class="sm-bullet">→</span>NOTES-FOR-CLAUDE-DESIGN.md</li>
+      <li><span class="sm-bullet">→</span>README.md</li>
+    </ul>
+  </div>
+
+  <div class="sm-section">
+    <h2 class="sm-title">Report data · <span style="color:var(--text-tertiary);font-weight:500;font-family:var(--font-mono);font-size:11px;">reports/</span></h2>
+    <ul class="sm-list">
+      <li><span class="sm-bullet">→</span>SWFL CRE<span class="sm-tag">8 corridors</span></li>
+      <li><span class="sm-bullet">→</span>SWFL environment<span class="sm-tag">hurricane · flood</span></li>
+      <li><span class="sm-bullet">→</span>SWFL logistics<span class="sm-tag">FAF5</span></li>
+      <li><span class="sm-bullet">→</span>SWFL logistics nowcast<span class="sm-tag">FDOT z-score</span></li>
+      <li><span class="sm-bullet">→</span>Florida macro<span class="sm-tag">state</span></li>
+      <li><span class="sm-bullet">→</span>SWFL macro<span class="sm-tag">regional</span></li>
+      <li><span class="sm-bullet">→</span>US macro<span class="sm-tag">national</span></li>
+      <li><span class="sm-bullet">→</span>Franchise outcomes<span class="sm-tag">14 brands</span></li>
+    </ul>
+  </div>
+
+  <div class="sm-section">
+    <h2 class="sm-title">Geography · <span style="color:var(--text-tertiary);font-weight:500;font-family:var(--font-mono);font-size:11px;">root</span></h2>
+    <ul class="sm-list">
+      <li><span class="sm-bullet">→</span>geojson-fl-counties-fips.json<span class="sm-tag">67 counties</span></li>
+      <li><span class="sm-bullet">→</span>ui_kits/charts/swfl-geo.json<span class="sm-tag">Lee + Collier</span></li>
+    </ul>
+  </div>
+
+  <div class="sm-section">
+    <h2 class="sm-title">Fonts · <span style="color:var(--text-tertiary);font-weight:500;font-family:var(--font-mono);font-size:11px;">fonts/</span></h2>
+    <ul class="sm-list">
+      <li><span class="sm-bullet">→</span>Inter 400 · 500 · 600 · 700</li>
+      <li><span class="sm-bullet">→</span>JetBrains Mono 400 · 500</li>
+    </ul>
+  </div>
+
+  <div class="sm-section">
+    <h2 class="sm-title">Visual references · <span style="color:var(--text-tertiary);font-weight:500;font-family:var(--font-mono);font-size:11px;">uploads/</span></h2>
+    <ul class="sm-list">
+      <li><span class="sm-bullet">→</span>meteo-ashwyn.png<span class="sm-tag">closest aesthetic</span></li>
+      <li><span class="sm-bullet">→</span>linear-app.png<span class="sm-tag">restraint</span></li>
+      <li><span class="sm-bullet">→</span>pudding-birthday-effect.png<span class="sm-tag">big-type</span></li>
+      <li><span class="sm-bullet">→</span>nodal-gg.png<span class="sm-tag">depth</span></li>
+    </ul>
+  </div>
+</body>
+</html>

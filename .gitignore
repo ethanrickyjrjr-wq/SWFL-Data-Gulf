@@ -154,7 +154,12 @@ data/
 
 # Claude Design — local-only logo/color/chat-chart reference for Claude Code mobile.
 # Never push to GitHub. Stays in-house.
-docs/design-reference/
+# docs/design-reference/ IS NO LONGER IGNORED (operator decree 08/06/2026).
+# It holds the house design system — colors_and_type.css names Inter + JetBrains Mono,
+# the full type scale, and "tabular figures are non-negotiable for numbers". While it was
+# gitignored it was invisible to every repo-wide grep, so a session searched _RESEARCH/,
+# found no typeface, and answered "there is no research basis for our fonts." The research
+# existed the whole time. Research nobody can find governs nothing.
 
 # ── _RESEARCH/ — ALL local research, ONE folder, NEVER committed ──────────────
 # Locked 07/20/2026 by operator decree. Consolidated here in one move:

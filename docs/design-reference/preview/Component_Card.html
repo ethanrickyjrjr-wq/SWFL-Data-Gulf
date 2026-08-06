@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Component — Card</title>
+<link rel="stylesheet" href="../colors_and_type.css">
+<link rel="stylesheet" href="_base.css">
+</head>
+<body class="preview">
+<div class="card-frame">
+
+<div style="display:flex;gap:16px;">
+  <div style="flex:1;background:var(--gulf-slate);border:1px solid var(--gulf-haze);border-radius:6px;padding:24px;display:flex;flex-direction:column;gap:8px;">
+    <div class="metric-label">Cap rate, Lee multifamily</div>
+    <div style="display:flex;align-items:baseline;gap:6px;">
+      <span class="metric-value">5.42</span><span class="metric-unit">%</span>
+    </div>
+    <div style="font-size:12px;color:var(--mangrove);font-variant-numeric:tabular-nums;">▲ +18 bps QoQ</div>
+    <a class="source-link" style="font-size:12px;align-self:flex-start;margin-top:4px;font-family:var(--font-mono);">LeePA ↗</a>
+  </div>
+  <div style="flex:1;background:var(--gulf-slate-hi);border:1px solid var(--gulf-haze);border-radius:6px;padding:24px;display:flex;flex-direction:column;gap:8px;">
+    <div class="metric-label">Naples RevPAR</div>
+    <div style="display:flex;align-items:baseline;gap:6px;">
+      <span class="metric-value">$312</span>
+    </div>
+    <div style="font-size:12px;color:var(--mangrove);font-variant-numeric:tabular-nums;">▲ +4% YoY</div>
+    <a class="source-link" style="font-size:12px;align-self:flex-start;margin-top:4px;font-family:var(--font-mono);">Florida DOR ↗</a>
+  </div>
+</div>
+<div style="font-size:11px;color:var(--text-tertiary);">Default state · hover state — background steps from slate to slate-hi · border stays, no shadow.</div>
+</div></body></html>

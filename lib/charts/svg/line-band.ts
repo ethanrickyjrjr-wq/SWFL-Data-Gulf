@@ -11,7 +11,7 @@
 // for dates). ADDS a shaded lo/hi confidence band (accent at 0.12 opacity) under
 // the hero line — the visual home for a forecast's uncertainty.
 
-import { formatAxisTick, type ValueFormat } from "@/lib/charts/format";
+import { formatAxisTick, type ValueFormat, TABULAR } from "@/lib/charts/format";
 import { formatAxisDateLabel, formatDisplayDate } from "@/lib/format-date";
 
 export interface LineBandPoint {
@@ -81,7 +81,7 @@ export function lineBandSvg(points: LineBandPoint[], opts: LineBandOpts): string
       `<line x1="${padL}" y1="${gy.toFixed(1)}" x2="${W - padR}" y2="${gy.toFixed(1)}" stroke="${GRID}" stroke-width="1"/>`,
     );
     grid.push(
-      `<text x="${padL - 8}" y="${(gy + 4).toFixed(1)}" text-anchor="end" font-family="Arial" font-size="11" fill="${AXIS_TEXT}">${esc(formatAxisTick(fmt, gv))}</text>`,
+      `<text x="${padL - 8}" y="${(gy + 4).toFixed(1)}" text-anchor="end" font-family="Arial" ${TABULAR} font-size="11" fill="${AXIS_TEXT}">${esc(formatAxisTick(fmt, gv))}</text>`,
     );
   }
 
@@ -130,7 +130,7 @@ export function lineBandSvg(points: LineBandPoint[], opts: LineBandOpts): string
   const last = points[n - 1];
   const endLabel =
     `<circle cx="${x(n - 1).toFixed(1)}" cy="${y(last.value).toFixed(1)}" r="3.5" fill="${esc(opts.accent)}"/>` +
-    `<text x="${(x(n - 1) + 6).toFixed(1)}" y="${(y(last.value) + 4).toFixed(1)}" font-family="Arial" font-size="12" font-weight="bold" fill="${esc(opts.accent)}">${esc(formatAxisTick(fmt, last.value))}</text>`;
+    `<text x="${(x(n - 1) + 6).toFixed(1)}" y="${(y(last.value) + 4).toFixed(1)}" font-family="Arial" ${TABULAR} font-size="12" font-weight="bold" fill="${esc(opts.accent)}">${esc(formatAxisTick(fmt, last.value))}</text>`;
 
   // source/as-of caption
   const captionParts: string[] = [];

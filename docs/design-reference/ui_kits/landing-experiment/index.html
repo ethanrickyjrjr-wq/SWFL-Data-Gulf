@@ -1,0 +1,798 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>SWFL Data Gulf · Landing experiment v2</title>
+<link rel="stylesheet" href="../../colors_and_type.css">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Lora:wght@500;600;700&family=Cormorant+Garamond:wght@500;600;700&family=Righteous&family=Cabin:wght@500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --teal: #3DC9C0;
+    --teal-bright: #6FE5DD;
+    --teal-dim: #2A8C85;
+  }
+  body {
+    margin: 0;
+    background: var(--gulf-midnight);
+    color: var(--text-primary);
+    font-family: var(--font-body);
+    -webkit-font-smoothing: antialiased;
+    min-height: 100vh;
+    overflow-x: hidden;
+  }
+
+  .v-notice {
+    position: fixed;
+    top: 18px; left: 18px;
+    z-index: 30;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    background: color-mix(in srgb, var(--gulf-slate) 80%, transparent);
+    backdrop-filter: blur(6px);
+    border: 1px solid var(--gulf-haze);
+    border-radius: 4px;
+    padding: 6px 10px;
+    font-family: var(--font-mono);
+    font-size: 10px;
+    color: var(--text-secondary);
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    font-weight: 500;
+  }
+  .v-notice .dot {
+    width: 6px; height: 6px; border-radius: 50%;
+    background: var(--teal);
+    box-shadow: 0 0 8px var(--teal);
+  }
+  .v-notice a {
+    color: var(--teal);
+    text-decoration: none;
+    margin-left: 6px;
+  }
+  .v-notice a:hover { color: var(--teal-bright); }
+
+  .v-controls { position: fixed; top: 18px; right: 18px; z-index: 30; display: flex; gap: 8px; }
+  .v-btn {
+    background: var(--gulf-slate);
+    border: 1px solid var(--gulf-haze);
+    color: var(--text-primary);
+    font-family: var(--font-mono);
+    font-size: 10px;
+    font-weight: 500;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    padding: 6px 12px;
+    border-radius: 4px;
+    cursor: pointer;
+    transition: all 120ms ease;
+  }
+  .v-btn:hover { border-color: var(--teal-dim); color: var(--teal); }
+
+  /* Matrix rain — full-viewport canvas, sits behind everything */
+  #matrix {
+    position: fixed;
+    inset: 0;
+    z-index: 0;
+    pointer-events: none;
+  }
+
+  /* Pixel stage — fragments rise from bottom into the word position */
+  .v-stage {
+    position: fixed;
+    inset: 0;
+    pointer-events: none;
+    z-index: 2;
+    overflow: hidden;
+  }
+  .v-pixel {
+    position: absolute;
+    background: var(--teal);
+    border-radius: 1px;
+    will-change: transform, opacity;
+    box-shadow: 0 0 6px color-mix(in srgb, var(--teal) 55%, transparent);
+  }
+
+  .v-page {
+    position: relative;
+    z-index: 3;
+    min-height: 100vh;
+    display: grid;
+    grid-template-rows: 1fr auto;
+  }
+
+  .v-hero {
+    align-self: center;
+    justify-self: center;
+    text-align: center;
+    padding: 80px 24px;
+    max-width: 1100px;
+  }
+
+  .v-eyebrow {
+    display: block;
+    font-family: var(--font-mono);
+    font-size: 11px;
+    color: var(--teal);
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    font-weight: 500;
+    text-shadow: 0 0 12px color-mix(in srgb, var(--teal) 50%, transparent);
+    margin-bottom: 28px;
+    opacity: 0;
+    transform: translateY(8px);
+    transition: opacity 600ms cubic-bezier(.16,.84,.44,1), transform 600ms cubic-bezier(.16,.84,.44,1);
+  }
+  .v-eyebrow.is-revealed { opacity: 1; transform: translateY(0); }
+
+  .v-headline {
+    font-family: var(--tw-font, "Lora"), Georgia, serif;
+    font-size: clamp(2.5rem, 7vw, 5.25rem);
+    font-weight: 600;
+    letter-spacing: -0.015em;
+    line-height: 1.04;
+    margin: 0 0 28px;
+    text-wrap: balance;
+    color: var(--text-primary);
+  }
+  .v-ai-word {
+    color: var(--tw-ai-color, #6CB9FF);
+    font-weight: 700;
+    letter-spacing: -0.01em;
+    text-shadow: 0 0 26px color-mix(in srgb, var(--tw-ai-color, #6CB9FF) 35%, transparent),
+                 0 0 60px color-mix(in srgb, var(--tw-ai-color, #6CB9FF) 18%, transparent);
+  }
+
+  /* The "data" slot — letters are invisible until the pixel stage lands.
+     The pixels paint AT the same position; once landed we fade in the
+     real text underneath so it's selectable / accessible. */
+  .v-data-word {
+    display: inline-block;
+    position: relative;
+    color: var(--teal);
+    font-weight: 600;
+    /* Lowercase, ever so slightly tighter */
+    letter-spacing: -0.045em;
+    opacity: 0;
+    transition: opacity 500ms cubic-bezier(.22, .85, .35, 1) 0s,
+                text-shadow 900ms ease 0s;
+    text-shadow: 0 0 0 transparent;
+  }
+  .v-data-word.is-locked {
+    opacity: 1;
+    text-shadow:
+      0 0 24px color-mix(in srgb, var(--teal) 35%, transparent),
+      0 0 60px color-mix(in srgb, var(--teal) 18%, transparent);
+  }
+
+  .v-sub {
+    font-family: var(--font-body);
+    font-size: clamp(1rem, 1.4vw, 1.1875rem);
+    color: var(--text-secondary);
+    margin: 0 auto 48px;
+    max-width: 56ch;
+    line-height: 1.55;
+    text-wrap: balance;
+    opacity: 0;
+    transform: translateY(8px);
+    transition: opacity 600ms cubic-bezier(.16,.84,.44,1), transform 600ms cubic-bezier(.16,.84,.44,1);
+  }
+  .v-sub.is-revealed { opacity: 1; transform: translateY(0); }
+
+  .v-install {
+    display: inline-flex;
+    align-items: center;
+    gap: 12px;
+    background: var(--gulf-slate);
+    border: 1px solid var(--gulf-haze);
+    border-radius: 6px;
+    padding: 12px 16px;
+    font-family: var(--font-mono);
+    font-size: 13px;
+    color: var(--text-primary);
+    opacity: 0;
+    transform: translateY(8px);
+    transition: opacity 600ms cubic-bezier(.16,.84,.44,1), transform 600ms cubic-bezier(.16,.84,.44,1);
+  }
+  .v-install.is-revealed { opacity: 1; transform: translateY(0); }
+  .v-install .prompt { color: var(--text-tertiary); }
+  .v-install .cmd { color: var(--teal); }
+  .v-install .copy {
+    background: transparent;
+    border: 1px solid var(--gulf-haze);
+    color: var(--text-secondary);
+    padding: 4px 10px;
+    border-radius: 3px;
+    font-family: var(--font-mono);
+    font-size: 11px;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    cursor: pointer;
+    transition: all 120ms ease;
+    margin-left: 8px;
+  }
+  .v-install .copy:hover { color: var(--teal); border-color: var(--teal-dim); }
+
+  .v-foot {
+    padding: 24px 32px;
+    font-family: var(--font-mono);
+    font-size: 11px;
+    color: var(--text-tertiary);
+    letter-spacing: 0.04em;
+    text-align: center;
+    border-top: 1px solid var(--gulf-haze);
+    opacity: 0;
+    transition: opacity 600ms ease;
+  }
+  .v-foot.is-revealed { opacity: 1; }
+</style>
+</head>
+<body>
+
+<div class="v-notice">
+  <span class="dot"></span>
+  Animation experiment v2 · current landing untouched
+  <a href="v1-letter-fragments.html">↗ v1</a>
+</div>
+<div class="v-controls">
+  <button class="v-btn" id="replay">↻ Replay</button>
+</div>
+
+<canvas id="matrix"></canvas>
+<div class="v-stage" id="stage"></div>
+
+<main class="v-page" data-screen-label="Landing experiment v2 — matrix to blocks">
+  <section class="v-hero">
+    <span class="v-eyebrow" id="eyebrow">SWFL Data Gulf</span>
+    <h1 class="v-headline">
+      Real <span class="v-data-word" id="dataWord">data</span> Brought Together<br/>With Your <span class="v-ai-word">AI</span>.
+    </h1>
+    <p class="v-sub" id="sub">
+      Lee + Collier corridor data, environmental risk, freight nowcast,
+      SBA franchise outcomes — every number cited, every source linked,
+      delivered straight into Claude.
+    </p>
+    <div class="v-install" id="install">
+      <span class="prompt">$</span>
+      <span class="cmd">claude mcp add swfl https://swfl.data.gulf/mcp</span>
+      <button class="copy" type="button">Copy</button>
+    </div>
+  </section>
+
+  <footer class="v-foot" id="foot">
+    Currently in beta · public launch Q3 2026
+  </footer>
+</main>
+
+<script type="module">
+// ============================================================
+// SWFL Data Gulf — landing animation v2
+// Matrix-style rain in the background; pixel blocks rise from
+// the bottom and stack to form the lowercase word "data".
+// Once formed, the real text fades in underneath for accessibility.
+// ============================================================
+
+const stage = document.getElementById("stage");
+const word = document.getElementById("dataWord");
+const matrixCanvas = document.getElementById("matrix");
+const mctx = matrixCanvas.getContext("2d");
+
+const TEAL = "#3DC9C0";
+const TEAL_DIM = "#2A8C85";
+
+// Easings
+const easeOutCubic = t => 1 - Math.pow(1 - t, 3);
+const easeOutQuint = t => 1 - Math.pow(1 - t, 5);
+const lerp = (a, b, t) => a + (b - a) * t;
+const rng = () => Math.random();
+
+function tween({ from = 0, to = 1, duration = 500, delay = 0, ease = easeOutCubic, onUpdate, onComplete }) {
+  const start = performance.now() + delay;
+  const range = to - from;
+  function frame(now) {
+    const t = Math.max(0, Math.min(1, (now - start) / Math.max(duration, 1)));
+    if (now >= start) onUpdate(from + range * ease(t));
+    if (t < 1) requestAnimationFrame(frame);
+    else if (onComplete) onComplete();
+  }
+  requestAnimationFrame(frame);
+}
+
+// ============================================================
+// Matrix rain — falling characters in columns. Cheap canvas.
+// ============================================================
+const MATRIX_CHARS = "01·:|/+[]<>{}=";
+let columns = [];
+let matrixOpacity = 0.55;
+let matrixFadeTarget = 0.55;
+
+function resizeMatrix() {
+  matrixCanvas.width = window.innerWidth;
+  matrixCanvas.height = window.innerHeight;
+  const colWidth = 18;
+  const cols = Math.ceil(window.innerWidth / colWidth);
+  columns = Array.from({ length: cols }, (_, i) => ({
+    x: i * colWidth + colWidth / 2,
+    y: -rng() * window.innerHeight,
+    speed: lerp(1.2, 3.5, rng()),
+    char: MATRIX_CHARS[Math.floor(rng() * MATRIX_CHARS.length)],
+    nextSwap: performance.now() + rng() * 600,
+  }));
+}
+resizeMatrix();
+window.addEventListener("resize", () => {
+  resizeMatrix();
+  // Recompute pixel targets on resize too
+  if (currentRunId === lastResolvedRunId) runAnimation();
+});
+
+let matrixRunning = true;
+window.__matrixFadeTarget = matrixFadeTarget;
+function drawMatrix(now) {
+  // Smoothly approach the target opacity (window.__matrixFadeTarget is
+  // driven by the tweaks panel; defaults handled below).
+  if (typeof window.__matrixFadeTarget === "number") matrixFadeTarget = window.__matrixFadeTarget;
+  matrixOpacity += (matrixFadeTarget - matrixOpacity) * 0.04;
+
+  // Trailing fade for the rain effect
+  mctx.fillStyle = `rgba(10, 20, 25, 0.18)`;
+  mctx.fillRect(0, 0, matrixCanvas.width, matrixCanvas.height);
+
+  mctx.font = "600 14px 'JetBrains Mono', ui-monospace, monospace";
+  mctx.textAlign = "center";
+  mctx.textBaseline = "middle";
+
+  for (const c of columns) {
+    // Head — bright
+    mctx.fillStyle = `rgba(111, 229, 221, ${0.95 * matrixOpacity})`;
+    mctx.fillText(c.char, c.x, c.y);
+
+    // Trail — dim
+    mctx.fillStyle = `rgba(61, 201, 192, ${0.35 * matrixOpacity})`;
+    for (let j = 1; j < 6; j++) {
+      mctx.fillText(c.char, c.x, c.y - j * 18);
+    }
+
+    c.y += c.speed;
+    if (c.y > window.innerHeight + 100) {
+      c.y = -lerp(40, 200, rng());
+      c.speed = lerp(1.2, 3.5, rng());
+    }
+    if (now >= c.nextSwap) {
+      c.char = MATRIX_CHARS[Math.floor(rng() * MATRIX_CHARS.length)];
+      c.nextSwap = now + lerp(180, 700, rng());
+    }
+  }
+
+  if (matrixRunning) requestAnimationFrame(drawMatrix);
+}
+requestAnimationFrame(drawMatrix);
+
+// ============================================================
+// Sample "data" from offscreen canvas to get a pixel grid.
+// Each "on" pixel becomes a block target.
+// ============================================================
+function samplePixelsForWord(text, fontPx, pixelSize) {
+  const off = document.createElement("canvas");
+  const octx = off.getContext("2d");
+  const fontStack = `600 ${fontPx}px "Inter", system-ui, sans-serif`;
+  octx.font = fontStack;
+  const metrics = octx.measureText(text);
+  const w = Math.ceil(metrics.width) + 20;
+  const ascent = metrics.actualBoundingBoxAscent || fontPx * 0.8;
+  const descent = metrics.actualBoundingBoxDescent || fontPx * 0.25;
+  const h = Math.ceil(ascent + descent) + 4;
+
+  off.width = w;
+  off.height = h;
+  octx.font = fontStack;
+  octx.fillStyle = "white";
+  octx.textBaseline = "alphabetic";
+  octx.fillText(text, 10, ascent + 2);
+
+  const img = octx.getImageData(0, 0, w, h);
+  const pixels = [];
+  for (let y = 0; y < h; y += pixelSize) {
+    for (let x = 0; x < w; x += pixelSize) {
+      const i = (y * w + x) * 4;
+      const alpha = img.data[i + 3];
+      if (alpha > 90) {
+        pixels.push({ localX: x, localY: y });
+      }
+    }
+  }
+  return { pixels, width: w, height: h };
+}
+
+// ============================================================
+// Main animation
+// ============================================================
+let currentRunId = 0;
+let lastResolvedRunId = -1;
+
+function runAnimation() {
+  const myRunId = ++currentRunId;
+  // Reset state
+  stage.innerHTML = "";
+  word.classList.remove("is-locked");
+  ["eyebrow", "sub", "install", "foot"].forEach(id => document.getElementById(id).classList.remove("is-revealed"));
+  matrixFadeTarget = 0.55;
+
+  // Briefly hide the real text so the pixels paint it.
+  // It'll fade back in once pixels arrive.
+  word.style.opacity = "0";
+
+  // Measure where the "data" word lives on screen
+  const wordRect = word.getBoundingClientRect();
+  const centerX = wordRect.left + wordRect.width / 2;
+  const centerY = wordRect.top + wordRect.height / 2;
+
+  // Sample pixels — render at the actual height of the word, choose
+  // pixel granularity that gives roughly 80-160 pixels total.
+  const heroFontPx = Math.max(48, Math.min(200, wordRect.height * 0.95));
+  // Pixel block size driven by tweaks panel (defaults to ~14px granularity).
+  const tweakDensity = (typeof window.__getPixelDensity === "function") ? window.__getPixelDensity() : 8;
+  const pixelSize = Math.max(4, tweakDensity);
+  const { pixels, width: pw, height: ph } = samplePixelsForWord("data", heroFontPx, pixelSize);
+
+  if (pixels.length === 0) return;
+
+  // Position so the sampled image is centered on the word's box
+  const offsetX = centerX - pw / 2;
+  const offsetY = centerY - ph / 2;
+
+  // Sort pixels: bottom-most rows arrive first, then left-to-right.
+  // This produces the "stacking up from the bottom" feel.
+  pixels.sort((a, b) => (b.localY - a.localY) || (a.localX - b.localX));
+
+  // Compute per-pixel timing — pixels in the same row arrive close together
+  // so the word builds row-by-row from the bottom.
+  const ROW_GAP = pixelSize * 0.9;
+  const ROW_DUR = 110;
+  const PIXEL_JITTER = 24;
+  const FLIGHT_DUR = 700;
+  const START_DELAY = 250;
+
+  // Group by row
+  let rowIdx = -1;
+  let lastRowY = Infinity;
+  const fragments = [];
+
+  pixels.forEach((p, i) => {
+    if (Math.abs(p.localY - lastRowY) > pixelSize * 0.5) {
+      rowIdx++;
+      lastRowY = p.localY;
+    }
+    const targetX = offsetX + p.localX;
+    const targetY = offsetY + p.localY;
+
+    // Initial position — below viewport with horizontal jitter
+    const startX = targetX + (rng() - 0.5) * 40;
+    const startY = window.innerHeight + 40 + rng() * 200;
+
+    const el = document.createElement("div");
+    el.className = "v-pixel";
+    el.style.width = pixelSize + "px";
+    el.style.height = pixelSize + "px";
+    el.style.transform = `translate(${startX.toFixed(1)}px, ${startY.toFixed(1)}px)`;
+    el.style.opacity = "0";
+    stage.appendChild(el);
+
+    fragments.push({ el, startX, startY, targetX, targetY, rowIdx, p });
+  });
+
+  const maxRow = rowIdx;
+  // We want bottom row to arrive first, so larger rowIdx → smaller delay.
+  // But sort already put bottom rows first, so use sort index.
+  fragments.forEach((f, i) => {
+    const rowOrder = f.rowIdx; // 0 = bottommost
+    const baseDelay = START_DELAY + rowOrder * ROW_DUR;
+    const jitterDelay = rng() * PIXEL_JITTER;
+    const delay = baseDelay + jitterDelay;
+
+    // Phase A: fade in at start position
+    tween({
+      from: 0, to: 0.9,
+      duration: 200,
+      delay: delay - 80,
+      onUpdate: v => {
+        if (currentRunId !== myRunId) return;
+        f.el.style.opacity = v.toFixed(3);
+      },
+    });
+
+    // Phase B: rise to target position
+    tween({
+      from: 0, to: 1,
+      duration: FLIGHT_DUR + rng() * 200,
+      delay,
+      ease: easeOutQuint,
+      onUpdate: p => {
+        if (currentRunId !== myRunId) return;
+        const x = lerp(f.startX, f.targetX, p);
+        const y = lerp(f.startY, f.targetY, p);
+        f.el.style.transform = `translate(${x.toFixed(1)}px, ${y.toFixed(1)}px)`;
+        // Tighten opacity once it lands
+        if (p > 0.9) f.el.style.opacity = "1";
+      },
+    });
+  });
+
+  // Lock the word — fade real text in as pixels finish
+  const allDone = START_DELAY + maxRow * ROW_DUR + FLIGHT_DUR + 200;
+  setTimeout(() => {
+    if (currentRunId !== myRunId) return;
+    lastResolvedRunId = myRunId;
+    // Real text fades in (so it's selectable + accessible)
+    word.style.opacity = "1";
+    word.classList.add("is-locked");
+    // Pixels fade away, ceding their position to the text
+    tween({
+      from: 1, to: 0,
+      duration: 600,
+      delay: 200,
+      ease: easeOutCubic,
+      onUpdate: v => {
+        if (currentRunId !== myRunId) return;
+        for (const f of fragments) f.el.style.opacity = v.toFixed(3);
+      },
+      onComplete: () => {
+        if (currentRunId !== myRunId) return;
+        stage.innerHTML = "";
+      },
+    });
+    // Matrix calms down
+    matrixFadeTarget = 0.18;
+  }, allDone);
+
+  // Supporting copy reveal
+  setTimeout(() => document.getElementById("eyebrow").classList.add("is-revealed"), 50);
+  setTimeout(() => document.getElementById("sub").classList.add("is-revealed"),     allDone + 200);
+  setTimeout(() => document.getElementById("install").classList.add("is-revealed"), allDone + 400);
+  setTimeout(() => document.getElementById("foot").classList.add("is-revealed"),    allDone + 600);
+}
+
+// Initial run — wait a tick for layout / fonts to settle
+window.addEventListener("load", () => setTimeout(runAnimation, 80));
+
+document.getElementById("replay").addEventListener("click", runAnimation);
+</script>
+
+<!-- ============================================================
+     Tweaks panel — toggle on via the toolbar in the design system.
+     Defaults live in the EDITMODE-BEGIN/END block so direct edits
+     persist on disk. Keys: headlineFont, aiColor, dataColor, pixelDensity.
+     ============================================================ -->
+<div class="v-tweaks" id="tweaks" hidden>
+  <div class="v-tweaks-head">
+    <span class="v-tweaks-title">Tweaks</span>
+    <button class="v-tweaks-close" id="tweaks-close" type="button" aria-label="Close">×</button>
+  </div>
+
+  <div class="v-tweaks-section">
+    <span class="v-tweaks-label">Headline font</span>
+    <div class="v-tweaks-radio" id="tw-font">
+      <button data-v="Lora">Lora</button>
+      <button data-v="Cormorant Garamond">Garamond</button>
+      <button data-v="Righteous">Righteous</button>
+      <button data-v="Cabin">Cabin</button>
+      <button data-v="Inter">Inter</button>
+    </div>
+  </div>
+
+  <div class="v-tweaks-section">
+    <span class="v-tweaks-label">"AI" color</span>
+    <div class="v-tweaks-swatches" id="tw-ai">
+      <button data-v="#6CB9FF" style="background:#6CB9FF;" aria-label="Sky"></button>
+      <button data-v="#3D8CFF" style="background:#3D8CFF;" aria-label="Royal"></button>
+      <button data-v="#2A4FCC" style="background:#2A4FCC;" aria-label="Deep"></button>
+      <button data-v="#7B5BE0" style="background:#7B5BE0;" aria-label="Violet"></button>
+      <button data-v="#3DC9C0" style="background:#3DC9C0;" aria-label="Teal"></button>
+    </div>
+  </div>
+
+  <div class="v-tweaks-section">
+    <span class="v-tweaks-label">"data" color</span>
+    <div class="v-tweaks-swatches" id="tw-data">
+      <button data-v="#3DC9C0" style="background:#3DC9C0;" aria-label="Teal"></button>
+      <button data-v="#5BC97A" style="background:#5BC97A;" aria-label="Mangrove"></button>
+      <button data-v="#D4B370" style="background:#D4B370;" aria-label="Gold"></button>
+      <button data-v="#6CB9FF" style="background:#6CB9FF;" aria-label="Sky"></button>
+    </div>
+  </div>
+
+  <div class="v-tweaks-section">
+    <span class="v-tweaks-label">Pixel block size</span>
+    <input type="range" min="4" max="14" step="1" id="tw-pixel" />
+    <span class="v-tweaks-readout" id="tw-pixel-read">8</span>
+  </div>
+
+  <div class="v-tweaks-section">
+    <span class="v-tweaks-label">Matrix opacity</span>
+    <input type="range" min="0" max="100" step="1" id="tw-matrix" />
+    <span class="v-tweaks-readout" id="tw-matrix-read">55</span>
+  </div>
+</div>
+
+<style>
+  .v-tweaks {
+    position: fixed;
+    top: 70px;
+    right: 18px;
+    z-index: 50;
+    width: 240px;
+    background: var(--gulf-slate);
+    border: 1px solid var(--gulf-haze);
+    border-radius: 8px;
+    padding: 16px 16px 18px;
+    font-family: var(--font-mono);
+    color: var(--text-primary);
+    box-shadow: 0 12px 32px rgba(0,0,0,0.4);
+  }
+  .v-tweaks[hidden] { display: none; }
+  .v-tweaks-head {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding-bottom: 10px;
+    margin-bottom: 14px;
+    border-bottom: 1px solid var(--gulf-haze);
+  }
+  .v-tweaks-title {
+    font-family: var(--font-display);
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--text-primary);
+    letter-spacing: 0;
+    text-transform: none;
+  }
+  .v-tweaks-close {
+    background: transparent;
+    border: none;
+    color: var(--text-secondary);
+    font-size: 20px;
+    line-height: 1;
+    cursor: pointer;
+    padding: 0 4px;
+  }
+  .v-tweaks-close:hover { color: var(--text-primary); }
+  .v-tweaks-section { margin-bottom: 14px; }
+  .v-tweaks-label {
+    display: block;
+    font-size: 10px;
+    color: var(--text-secondary);
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    margin-bottom: 6px;
+    font-weight: 500;
+  }
+  .v-tweaks-radio { display: flex; flex-direction: column; gap: 4px; }
+  .v-tweaks-radio button {
+    background: transparent;
+    border: 1px solid var(--gulf-haze);
+    color: var(--text-secondary);
+    padding: 6px 10px;
+    font-family: var(--font-mono);
+    font-size: 11px;
+    border-radius: 3px;
+    cursor: pointer;
+    text-align: left;
+    transition: all 120ms ease;
+  }
+  .v-tweaks-radio button:hover { color: var(--text-primary); border-color: var(--gulf-teal-dim); }
+  .v-tweaks-radio button.is-active {
+    background: var(--gulf-slate-hi);
+    border-color: var(--gulf-teal);
+    color: var(--text-primary);
+  }
+  .v-tweaks-swatches { display: flex; gap: 6px; }
+  .v-tweaks-swatches button {
+    width: 28px;
+    height: 28px;
+    border-radius: 4px;
+    border: 2px solid transparent;
+    cursor: pointer;
+    padding: 0;
+    transition: transform 120ms ease, border-color 120ms ease;
+  }
+  .v-tweaks-swatches button:hover { transform: scale(1.08); }
+  .v-tweaks-swatches button.is-active {
+    border-color: var(--text-primary);
+    box-shadow: 0 0 0 1px var(--gulf-midnight);
+  }
+  .v-tweaks-section input[type="range"] {
+    width: calc(100% - 36px);
+    accent-color: var(--gulf-teal);
+    vertical-align: middle;
+  }
+  .v-tweaks-readout {
+    display: inline-block;
+    width: 28px;
+    text-align: right;
+    font-size: 11px;
+    color: var(--text-primary);
+    font-variant-numeric: tabular-nums;
+  }
+</style>
+
+<script>
+// ============================================================
+// Tweaks defaults & protocol
+// ============================================================
+const TWEAK_DEFAULTS = /*EDITMODE-BEGIN*/{
+  "headlineFont": "Lora",
+  "aiColor": "#6CB9FF",
+  "dataColor": "#3DC9C0",
+  "pixelDensity": 8,
+  "matrixOpacity": 55
+}/*EDITMODE-END*/;
+
+const tweaksEl = document.getElementById("tweaks");
+const state = { ...TWEAK_DEFAULTS };
+
+function applyTweaks() {
+  document.documentElement.style.setProperty("--tw-font", `"${state.headlineFont}"`);
+  document.documentElement.style.setProperty("--tw-ai-color", state.aiColor);
+  // Data color drives both the lowercase letter and the pixel blocks
+  document.documentElement.style.setProperty("--teal", state.dataColor);
+  // Matrix opacity needs the matrix loop's target
+  if (typeof window.__setMatrixOpacity === "function") {
+    window.__setMatrixOpacity(state.matrixOpacity / 100);
+  }
+  // Reflect on UI controls
+  document.querySelectorAll("#tw-font button").forEach(b =>
+    b.classList.toggle("is-active", b.dataset.v === state.headlineFont));
+  document.querySelectorAll("#tw-ai button").forEach(b =>
+    b.classList.toggle("is-active", b.dataset.v === state.aiColor));
+  document.querySelectorAll("#tw-data button").forEach(b =>
+    b.classList.toggle("is-active", b.dataset.v === state.dataColor));
+  document.getElementById("tw-pixel").value = state.pixelDensity;
+  document.getElementById("tw-pixel-read").textContent = state.pixelDensity;
+  document.getElementById("tw-matrix").value = state.matrixOpacity;
+  document.getElementById("tw-matrix-read").textContent = state.matrixOpacity;
+}
+
+function setTweak(key, value) {
+  state[key] = value;
+  applyTweaks();
+  try {
+    window.parent.postMessage({ type: "__edit_mode_set_keys", edits: { [key]: value } }, "*");
+  } catch (e) {}
+}
+
+// Expose for the matrix loop to read
+window.__getPixelDensity = () => state.pixelDensity;
+window.__setMatrixOpacity = (v) => { window.__matrixFadeTarget = v; };
+
+// Wire up controls
+document.querySelectorAll("#tw-font button").forEach(b =>
+  b.addEventListener("click", () => setTweak("headlineFont", b.dataset.v)));
+document.querySelectorAll("#tw-ai button").forEach(b =>
+  b.addEventListener("click", () => setTweak("aiColor", b.dataset.v)));
+document.querySelectorAll("#tw-data button").forEach(b =>
+  b.addEventListener("click", () => setTweak("dataColor", b.dataset.v)));
+document.getElementById("tw-pixel").addEventListener("input", (e) =>
+  setTweak("pixelDensity", Number(e.target.value)));
+document.getElementById("tw-matrix").addEventListener("input", (e) =>
+  setTweak("matrixOpacity", Number(e.target.value)));
+document.getElementById("tweaks-close").addEventListener("click", () => {
+  tweaksEl.hidden = true;
+  try { window.parent.postMessage({ type: "__edit_mode_dismissed" }, "*"); } catch (e) {}
+});
+
+// Apply once on load
+applyTweaks();
+
+// Listen for host activate / deactivate FIRST, then announce
+window.addEventListener("message", (e) => {
+  if (!e.data || !e.data.type) return;
+  if (e.data.type === "__activate_edit_mode")   tweaksEl.hidden = false;
+  if (e.data.type === "__deactivate_edit_mode") tweaksEl.hidden = true;
+});
+try { window.parent.postMessage({ type: "__edit_mode_available" }, "*"); } catch (e) {}
+</script>
+</body>
+</html>

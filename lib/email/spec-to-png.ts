@@ -45,7 +45,10 @@ export async function chartSpecToEmailImage(
    *  off `doc.globalStyle.fontFamily`; omitted → the product default face, never blank. */
   fontFamily?: FontFamily,
 ): Promise<EmailChartImage | null> {
-  const svg = await chartSpecToEmailSvg(spec, accent);
+  // The face goes into the SVG BUILD, not just the raster. Handing it only to svgToPng
+  // rasterized the right typeface into a layout fitted for a different one — which is how
+  // a 26-char label that "passed" its budget still painted over the bars. Both halves.
+  const svg = await chartSpecToEmailSvg(spec, accent, fontFamily);
   if (!svg) return null;
   try {
     const title = spec.title || "Market data";

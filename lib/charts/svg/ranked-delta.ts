@@ -11,8 +11,10 @@
 // dates through formatDisplayDate, every data label through esc() — matching the
 // chart-image.ts idiom exactly.
 
-import { formatAxisTick, type ValueFormat } from "@/lib/charts/format";
+import { formatAxisTick, type ValueFormat, TABULAR } from "@/lib/charts/format";
 import { formatDisplayDate } from "@/lib/format-date";
+import { fitText, labelGutterFor } from "@/lib/brand/text-metrics";
+import type { FontFamily } from "@/lib/email/doc/types";
 
 const GRID = "#EAECEF";
 const AXIS_TEXT = "#6B7280";
@@ -45,7 +47,22 @@ export interface RankedDeltaOpts {
   source?: string;
   asOf?: string;
   width?: number;
+  /** The brand face this chart will RASTERIZE in. Labels are fitted against THIS face's
+   *  real advance widths, and the label gutter sizes itself to them. Omitted → the
+   *  product default, which is what resvg falls back to for a brand-less build. */
+  fontFamily?: FontFamily;
 }
+
+/** Label type size — one place, so the measurement and the rendered `font-size` can
+ *  never drift apart (measuring 12 and painting 13 silently overflows again). */
+const LABEL_SIZE = 12;
+/** Gap between the right edge of the label and the start of the track. */
+const LABEL_PAD = 8;
+/** Gutter floor/ceiling. The floor keeps the title's left edge from crowding the canvas
+ *  when every label is a bare ZIP; the ceiling stops one pathological label from eating
+ *  the plot area (fitText trims it to the ceiling instead). */
+const GUTTER_MIN = 84;
+const GUTTER_MAX = 210;
 
 /**
  * Email-safe RANKED-WITH-DELTA chart as a self-contained SVG string (system
@@ -57,8 +74,19 @@ export function rankedDeltaSvg(items: RankedDeltaItem[], opts: RankedDeltaOpts):
   const W = opts.width ?? 600;
   const rows = items.slice(0, 8);
   const n = rows.length;
-  const padL = 150,
-    padR = 132,
+  // THE GUTTER IS MEASURED, NOT PINNED (operator 08/06/2026: "why the fuck isn't
+  // everything centered into grid and auto adjusts"). It was a hardcoded 150px with a
+  // 22-CHARACTER truncation. A character budget is blind on two axes at once: the same
+  // 22 chars span 1.14x ACROSS our six faces, and 3.08x WITHIN Montserrat alone (87.4px
+  // of "1" vs 268.9px of "W" at 11px, measured off the bundled TTFs 08/06/2026). So the
+  // budget was never right for any face, and could not be. Measured: the gutter fits
+  // these labels in this face, and short labels hand their unused width back to the bars.
+  const labelMetrics = { family: opts.fontFamily, size: LABEL_SIZE } as const;
+  const padL = labelGutterFor(
+    rows.map((r) => r.label),
+    { ...labelMetrics, padding: LABEL_PAD, min: GUTTER_MIN, max: GUTTER_MAX },
+  );
+  const padR = 132,
     padT = 46,
     padB = 44;
   const rowH = 30;
@@ -82,7 +110,9 @@ export function rankedDeltaSvg(items: RankedDeltaItem[], opts: RankedDeltaOpts):
   rows.forEach((r, i) => {
     const cy = padT + i * rowH;
     const w = Math.max(2, Math.round((Math.abs(r.value) / maxV) * trackW));
-    const label = r.label.length > 22 ? `${r.label.slice(0, 21)}…` : r.label;
+    // Fitted to the pixels actually available, in the face this will rasterize in —
+    // never to a character count. `padL - LABEL_PAD` is the label's own right edge.
+    const label = fitText(r.label, padL - LABEL_PAD, labelMetrics);
 
     parts.push(
       // right-aligned label (clipped)
@@ -91,7 +121,7 @@ export function rankedDeltaSvg(items: RankedDeltaItem[], opts: RankedDeltaOpts):
       `<rect x="${padL}" y="${cy + 5}" width="${trackW}" height="16" rx="3" fill="${GRID}"/>`,
       `<rect x="${padL}" y="${cy + 5}" width="${w}" height="16" rx="3" fill="${esc(opts.accent)}"/>`,
       // formatted value
-      `<text x="${valueX}" y="${cy + 17}" font-family="Arial" font-size="12" font-weight="bold" fill="${VALUE_TEXT}">${esc(formatAxisTick(fmt, r.value))}</text>`,
+      `<text x="${valueX}" y="${cy + 17}" font-family="Arial" ${TABULAR} font-size="12" font-weight="bold" fill="${VALUE_TEXT}">${esc(formatAxisTick(fmt, r.value))}</text>`,
     );
 
     // signed delta chip — ▲ green / ▼ red / → grey

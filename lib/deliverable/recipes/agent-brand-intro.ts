@@ -1110,7 +1110,13 @@ export async function buildAgentBrandIntro(ctx: RecipeBuildContext): Promise<Ema
   //    author: no bio on file → null → the same open TEXT slot as before; a bio on file →
   //    a warm, email-length paragraph, or the bio verbatim if the model adds anything the
   //    bio itself doesn't say. Operator, 08/06/2026: "have builder write a fucking intro."
-  const agentIntro = await authorAgentIntro(agentCard.props.bio);
+  // `brandAgentCard` returns the wide `EmailBlock`, so `.props` is the union of EVERY block's
+  // props and `.bio` does not exist on it — `bunx next build` failed type check on exactly this
+  // line. Narrow through the block's own discriminant rather than casting: an agent-card block
+  // is the only shape that carries a bio, and if it is ever not one, the intro degrades to the
+  // same open TEXT slot the fail-safe author already produces for "no bio on file".
+  const cardProps = agentCard.type === "agent-card" ? agentCard.props : undefined;
+  const agentIntro = await authorAgentIntro(cardProps?.bio);
   push(
     { id: createBlock("text").id, type: "text", props: { body: agentIntro ?? "", align: "left" } },
     4,

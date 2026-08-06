@@ -37,7 +37,7 @@
 // This file NEVER decides which of those it is drawing. lib/charts/fit-overlay.ts does,
 // once, for every surface. This file paints what it is handed.
 
-import { formatAxisTick, type ValueFormat } from "@/lib/charts/format";
+import { formatAxisTick, type ValueFormat, TABULAR } from "@/lib/charts/format";
 import type { FitCurve, FitLayer, FitOverlay } from "@/lib/charts/fit-overlay";
 import type { FitPoint } from "@/lib/charts/fit-line";
 import { formatAxisDateLabel, formatDisplayDate } from "@/lib/format-date";
@@ -154,7 +154,7 @@ export function fitTrendSvg(
       `<line x1="${padL}" y1="${gy.toFixed(1)}" x2="${W - padR}" y2="${gy.toFixed(1)}" stroke="${GRID}" stroke-width="1"/>`,
     );
     grid.push(
-      `<text x="${padL - 8}" y="${(gy + 4).toFixed(1)}" text-anchor="end" font-family="Arial" font-size="11" fill="${AXIS_TEXT}">${esc(formatAxisTick(fmt, gv))}</text>`,
+      `<text x="${padL - 8}" y="${(gy + 4).toFixed(1)}" text-anchor="end" font-family="Arial" ${TABULAR} font-size="11" fill="${AXIS_TEXT}">${esc(formatAxisTick(fmt, gv))}</text>`,
     );
   }
 
@@ -226,7 +226,7 @@ export function fitTrendSvg(
   const last = pts[n - 1];
   const endLabel =
     `<circle cx="${x(last.when).toFixed(1)}" cy="${y(last.y).toFixed(1)}" r="3.5" fill="${OBSERVED}"/>` +
-    `<text x="${(x(last.when) + 6).toFixed(1)}" y="${(y(last.y) + 4).toFixed(1)}" font-family="Arial" font-size="12" font-weight="bold" fill="${OBSERVED}">${esc(formatAxisTick(fmt, last.y))}</text>`;
+    `<text x="${(x(last.when) + 6).toFixed(1)}" y="${(y(last.y) + 4).toFixed(1)}" font-family="Arial" ${TABULAR} font-size="12" font-weight="bold" fill="${OBSERVED}">${esc(formatAxisTick(fmt, last.y))}</text>`;
 
   // THE WINDOW LABEL TRAVELS. `ex-boom`'s label discloses that we removed the 2021–22
   // run-up; a chart that drew that fit and dropped the label would be hiding the

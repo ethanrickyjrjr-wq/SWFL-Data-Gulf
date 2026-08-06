@@ -12,7 +12,7 @@
 // ones fall together. Rising lines take the accent; falling lines take the
 // muted ink, so a bifurcating set reads at a glance without a legend table.
 
-import { formatAxisTick, type ValueFormat } from "@/lib/charts/format";
+import { formatAxisTick, type ValueFormat, TABULAR } from "@/lib/charts/format";
 import { formatDisplayDate } from "@/lib/format-date";
 
 const AXIS_TEXT = "#6B7280";
@@ -89,8 +89,8 @@ export function slopePairSvg(items: SlopePairItem[], opts: SlopePairOpts): strin
       `<line x1="${xThen}" y1="${y1.toFixed(1)}" x2="${xNow}" y2="${y2.toFixed(1)}" stroke="${esc(ink)}" stroke-width="2.5" stroke-linecap="round"/>`,
       `<circle cx="${xThen}" cy="${y1.toFixed(1)}" r="4.5" fill="${esc(ink)}"/>`,
       `<circle cx="${xNow}" cy="${y2.toFixed(1)}" r="4.5" fill="${esc(ink)}"/>`,
-      `<text x="${xThen - 10}" y="${(y1 + 4).toFixed(1)}" text-anchor="end" font-family="Arial" font-size="11" fill="${LABEL_INK}">${esc(formatAxisTick(fmt, r.then))}</text>`,
-      `<text x="${xNow + 10}" y="${(y2 + 4).toFixed(1)}" font-family="Arial" font-size="11" font-weight="bold" fill="${esc(ink)}">${esc(formatAxisTick(fmt, r.now))} ${esc(label)}</text>`,
+      `<text x="${xThen - 10}" y="${(y1 + 4).toFixed(1)}" text-anchor="end" font-family="Arial" ${TABULAR} font-size="11" fill="${LABEL_INK}">${esc(formatAxisTick(fmt, r.then))}</text>`,
+      `<text x="${xNow + 10}" y="${(y2 + 4).toFixed(1)}" font-family="Arial" ${TABULAR} font-size="11" font-weight="bold" fill="${esc(ink)}">${esc(formatAxisTick(fmt, r.now))} ${esc(label)}</text>`,
     );
   });
 

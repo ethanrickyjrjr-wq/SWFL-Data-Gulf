@@ -13,7 +13,7 @@
 
 import { Resvg } from "@resvg/resvg-js";
 import { createServiceRoleClient } from "@/utils/supabase/service-role";
-import { formatAxisTick, type ValueFormat } from "@/lib/charts/format";
+import { formatAxisTick, TABULAR, type ValueFormat } from "@/lib/charts/format";
 import { formatAxisDateLabel, formatDisplayDate } from "@/lib/format-date";
 import {
   CANVAS_FONT_FILES,
@@ -23,6 +23,7 @@ import {
 } from "@/lib/brand/fonts";
 import type { FontFamily } from "@/lib/email/doc/types";
 import { MEDIA_CACHE_IMMUTABLE } from "@/lib/media/cache-control";
+import { fitText, labelGutterFor } from "@/lib/brand/text-metrics";
 
 const PUBLIC_BUCKET = "email-media";
 
@@ -63,6 +64,15 @@ export interface TrendChartOpts {
 const GRID = "#EAECEF";
 const AXIS_TEXT = "#6B7280";
 const GREY_LINE = "#B6BDC6";
+
+/** Bar-label type size, gap, and gutter clamp — ONE place, so the size we MEASURE and the
+ *  size we PAINT can never drift apart (measuring 12 and rendering 13 silently overflows
+ *  again). Floor keeps the title off the canvas edge; ceiling stops one pathological label
+ *  from eating the plot area — `fitText` trims to the ceiling instead of widening past it. */
+const BAR_LABEL_SIZE = 12;
+const BAR_LABEL_PAD = 8;
+const BAR_GUTTER_MIN = 88;
+const BAR_GUTTER_MAX = 220;
 
 /** Email-safe trend chart as a self-contained SVG string (system fonts, explicit
  *  size) ready for resvg. Gridlines, area fill, four formatted x-labels, unit
@@ -105,7 +115,7 @@ export function trendChartSvg(points: TrendPoint[], opts: TrendChartOpts): strin
       `<line x1="${padL}" y1="${gy.toFixed(1)}" x2="${W - padR}" y2="${gy.toFixed(1)}" stroke="${gridColor}" stroke-width="1"/>`,
     );
     grid.push(
-      `<text x="${padL - 8}" y="${(gy + 4).toFixed(1)}" text-anchor="end" font-family="Arial" font-size="11" fill="${axisColor}">${esc(formatAxisTick(fmt, gv))}</text>`,
+      `<text x="${padL - 8}" y="${(gy + 4).toFixed(1)}" text-anchor="end" font-family="Arial" ${TABULAR} font-size="11" fill="${axisColor}">${esc(formatAxisTick(fmt, gv))}</text>`,
     );
   }
 
@@ -168,7 +178,7 @@ export function trendChartSvg(points: TrendPoint[], opts: TrendChartOpts): strin
   const endLabel = now
     ? histEndDot
     : histEndDot +
-      `<text x="${(x(n - 1) + 6).toFixed(1)}" y="${(y(last.value) + 4).toFixed(1)}" font-family="Arial" font-size="12" font-weight="bold" fill="${esc(opts.accent)}">${esc(formatAxisTick(fmt, last.value))}</text>`;
+      `<text x="${(x(n - 1) + 6).toFixed(1)}" y="${(y(last.value) + 4).toFixed(1)}" font-family="Arial" ${TABULAR} font-size="12" font-weight="bold" fill="${esc(opts.accent)}">${esc(formatAxisTick(fmt, last.value))}</text>`;
 
   // LIVE "NOW" DOT — a separately-sourced current value grafted onto the extra slot past
   // the history line. A dashed connector + a white-ringed dot + a small "now" tag mark it as
@@ -187,7 +197,7 @@ export function trendChartSvg(points: TrendPoint[], opts: TrendChartOpts): strin
             `<polyline points="${hx.toFixed(1)},${hy.toFixed(1)} ${nx.toFixed(1)},${ny.toFixed(1)}" fill="none" stroke="${esc(opts.accent)}" stroke-width="2" stroke-dasharray="2 3" stroke-linecap="round"/>` +
             `<circle cx="${nx.toFixed(1)}" cy="${ny.toFixed(1)}" r="4.5" fill="${esc(opts.accent)}" stroke="#ffffff" stroke-width="1.5"/>` +
             `<text x="${nx.toFixed(1)}" y="${tagY.toFixed(1)}" text-anchor="middle" font-family="Arial" font-size="9" fill="${axisColor}">now</text>` +
-            `<text x="${nx.toFixed(1)}" y="${valY.toFixed(1)}" text-anchor="middle" font-family="Arial" font-size="12" font-weight="bold" fill="${esc(opts.accent)}">${esc(formatAxisTick(fmt, now.value))}</text>`
+            `<text x="${nx.toFixed(1)}" y="${valY.toFixed(1)}" text-anchor="middle" font-family="Arial" ${TABULAR} font-size="12" font-weight="bold" fill="${esc(opts.accent)}">${esc(formatAxisTick(fmt, now.value))}</text>`
           );
         })()
       : "";
@@ -257,6 +267,10 @@ export function barChartSvg(
     /** Caption label for `asOf` (default "as of") — see TrendChartOpts.asOfLabel. */
     asOfLabel?: string;
     width?: number;
+    /** The brand face this chart will RASTERIZE in. Labels are fitted against THIS
+     *  face's real advance widths (lib/brand/text-metrics) and the gutter sizes itself
+     *  to them. Omitted → the product default, which is what resvg falls back to. */
+    fontFamily?: FontFamily;
   },
 ): string {
   const W = opts.width ?? 600;
@@ -265,8 +279,19 @@ export function barChartSvg(
   const series = opts.series && opts.series.length ? opts.series : null;
   const rows = bars.slice(0, 8);
   const n = rows.length;
-  const padL = 156,
-    padR = 80,
+  // THE GUTTER IS MEASURED, NOT PINNED. It was a hardcoded 156px with a 26-CHARACTER
+  // truncation — and that truncation did not work even for the face it was written for.
+  // "Whiskey Creek 33919 — SOLD" is exactly 26 characters, passed the budget untouched,
+  // and measured 168.7px against a 148px gutter: 20.7px painted over the bars in
+  // Liberation Sans, the incumbent Arial-metric face, before any brand font existed.
+  // A character budget is blind ACROSS faces (1.14x spread) AND WITHIN one face (3.08x —
+  // 22 chars of "1" vs "W" in Montserrat). Measuring kills both.
+  const labelMetrics = { family: opts.fontFamily, size: BAR_LABEL_SIZE } as const;
+  const padL = labelGutterFor(
+    rows.map((b) => b.label),
+    { ...labelMetrics, padding: BAR_LABEL_PAD, min: BAR_GUTTER_MIN, max: BAR_GUTTER_MAX },
+  );
+  const padR = 80,
     padT = 46,
     padB = 44;
   const rowH = 28;
@@ -282,13 +307,13 @@ export function barChartSvg(
   rows.forEach((b, i) => {
     const cy = padT + i * rowH;
     const w = Math.max(2, Math.round((Math.abs(b.value) / maxV) * trackW));
-    const label = b.label.length > 26 ? `${b.label.slice(0, 25)}…` : b.label;
+    const label = fitText(b.label, padL - BAR_LABEL_PAD, labelMetrics);
     const barColor = series ? series[i % series.length] : opts.accent;
     parts.push(
       `<text x="${padL - 8}" y="${cy + 15}" text-anchor="end" font-family="Arial" font-size="12" fill="#374151">${esc(label)}</text>`,
       `<rect x="${padL}" y="${cy + 4}" width="${trackW}" height="16" rx="3" fill="${gridColor}"/>`,
       `<rect x="${padL}" y="${cy + 4}" width="${w}" height="16" rx="3" fill="${esc(barColor)}"/>`,
-      `<text x="${padL + trackW + 8}" y="${cy + 16}" font-family="Arial" font-size="12" font-weight="bold" fill="#1F2937">${esc(formatAxisTick(fmt, b.value))}</text>`,
+      `<text x="${padL + trackW + 8}" y="${cy + 16}" font-family="Arial" ${TABULAR} font-size="12" font-weight="bold" fill="#1F2937">${esc(formatAxisTick(fmt, b.value))}</text>`,
     );
   });
   const captionParts: string[] = [];

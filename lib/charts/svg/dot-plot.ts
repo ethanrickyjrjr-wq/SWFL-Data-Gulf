@@ -15,8 +15,19 @@
 // GRID / AXIS_TEXT palette, the esc() helper, formatAxisTick(fmt,v) for numbers,
 // formatDisplayDate(s) for the as-of caption.
 
-import { formatAxisTick, type ValueFormat } from "@/lib/charts/format";
+import { formatAxisTick, type ValueFormat, TABULAR } from "@/lib/charts/format";
 import { formatDisplayDate } from "@/lib/format-date";
+import { fitText, labelGutterFor } from "@/lib/brand/text-metrics";
+import type { FontFamily } from "@/lib/email/doc/types";
+
+/** Label type size — one place, so the measurement and the rendered `font-size` can
+ *  never drift apart (measuring 12 and painting 13 silently overflows again). */
+const LABEL_SIZE = 12;
+/** Gap between the right edge of the label and the start of the track. */
+const LABEL_PAD = 8;
+/** Gutter floor/ceiling — see ranked-delta.ts for the reasoning. */
+const GUTTER_MIN = 84;
+const GUTTER_MAX = 210;
 
 const GRID = "#EAECEF";
 const AXIS_TEXT = "#6B7280";
@@ -42,6 +53,9 @@ export interface DotPlotOpts {
   source?: string;
   asOf?: string;
   width?: number;
+  /** The brand face this chart will RASTERIZE in. Labels are fitted against THIS face's
+   *  real advance widths, and the label gutter sizes itself to them. */
+  fontFamily?: FontFamily;
 }
 
 /**
@@ -58,8 +72,15 @@ export function dotPlotSvg(items: DotPlotItem[], opts: DotPlotOpts): string {
   const fmt: ValueFormat = opts.valueFormat ?? "usd";
   const refLabel = opts.referenceLabel ?? "reference";
 
-  const padL = 156,
-    padR = 88,
+  // MEASURED, NOT PINNED — see ranked-delta.ts for the full reasoning and the numbers.
+  // Was a hardcoded 156px with a 26-CHARACTER truncation; a character budget cannot see
+  // that the same 22 chars span 3.08x in width inside one face.
+  const labelMetrics = { family: opts.fontFamily, size: LABEL_SIZE } as const;
+  const padL = labelGutterFor(
+    rows.map((r) => r.label),
+    { ...labelMetrics, padding: LABEL_PAD, min: GUTTER_MIN, max: GUTTER_MAX },
+  );
+  const padR = 88,
     padT = 64,
     padB = 44;
   const rowH = 30;
@@ -101,7 +122,8 @@ export function dotPlotSvg(items: DotPlotItem[], opts: DotPlotOpts): string {
 
   rows.forEach((r, i) => {
     const cy = padT + i * rowH + rowH / 2;
-    const label = r.label.length > 26 ? `${r.label.slice(0, 25)}…` : r.label;
+    // Fitted to the pixels actually available, in the face this will rasterize in.
+    const label = fitText(r.label, padL - LABEL_PAD, labelMetrics);
     // label + faint baseline rule
     parts.push(
       `<text x="${padL - 8}" y="${(cy + 4).toFixed(1)}" text-anchor="end" font-family="Arial" font-size="12" fill="#374151">${esc(label)}</text>`,
@@ -116,7 +138,7 @@ export function dotPlotSvg(items: DotPlotItem[], opts: DotPlotOpts): string {
     // accent value dot + end label
     parts.push(
       `<circle cx="${xPos(r.value).toFixed(1)}" cy="${cy.toFixed(1)}" r="6" fill="${esc(opts.accent)}"/>`,
-      `<text x="${(padL + trackW + 14).toFixed(1)}" y="${(cy + 4).toFixed(1)}" font-family="Arial" font-size="12" font-weight="bold" fill="#1F2937">${esc(formatAxisTick(fmt, r.value))}</text>`,
+      `<text x="${(padL + trackW + 14).toFixed(1)}" y="${(cy + 4).toFixed(1)}" font-family="Arial" ${TABULAR} font-size="12" font-weight="bold" fill="#1F2937">${esc(formatAxisTick(fmt, r.value))}</text>`,
     );
   });
 

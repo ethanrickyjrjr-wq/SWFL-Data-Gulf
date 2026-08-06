@@ -21,11 +21,19 @@ export async function POST(req: NextRequest): Promise<Response> {
   if (!user) return NextResponse.json({ error: "unauthorized" }, { status: 401 });
 
   const db = createServiceRoleClient();
-  const { data: row } = await db
+  // sa0718_portal_route_drops_supabase_read_error: `error` used to be
+  // silently discarded, so a transient read failure looked identical to "no
+  // customer" — a real subscriber got a 404 instead of their portal link.
+  // Fail closed with a distinct status instead of collapsing into "not found".
+  const { data: row, error: readErr } = await db
     .from("billing_subscriptions")
     .select("stripe_customer_id")
     .eq("user_id", user.id)
     .maybeSingle();
+  if (readErr) {
+    console.error(`[stripe-portal] billing_subscriptions read failed: ${readErr.message}`);
+    return NextResponse.json({ error: "billing_unavailable" }, { status: 503 });
+  }
   if (!row?.stripe_customer_id) {
     return NextResponse.json({ error: "no_customer" }, { status: 404 });
   }

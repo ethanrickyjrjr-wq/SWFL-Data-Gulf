@@ -42,7 +42,10 @@ function factsFromSubscriptionObject(sub: Record<string, unknown>): Subscription
 
 export async function normalizeEvent(
   event: Stripe.Event,
-  fetchSubscription: (id: string) => Promise<SubscriptionFacts | null>,
+  // Resolves with facts on success; MUST reject (never resolve null) on a
+  // fetch failure — a caller only has a subscriptionId to fetch when one is
+  // legitimately expected, so a failed retrieve is an error, not "no facts".
+  fetchSubscription: (id: string) => Promise<SubscriptionFacts>,
 ): Promise<NormalizedStripeEvent> {
   const obj = event.data.object as unknown as Record<string, unknown>;
   const base: NormalizedStripeEvent = { type: event.type, customerId: str(obj.customer) };

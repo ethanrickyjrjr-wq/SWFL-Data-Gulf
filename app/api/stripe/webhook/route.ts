@@ -2,9 +2,12 @@
 /**
  * Stripe webhook — the ONLY writer of billing_subscriptions tier state.
  * Same refuse-to-process pattern as app/api/webhooks/resend/route.ts:
- * unset secret → 500, bad signature → 401. Handled/ignored events → 200
- * always, so Stripe never retry-storms. Idempotent: upsert keyed on user
- * (checkout) or update keyed on customer id (everything else).
+ * unset secret → 500, bad signature → 401. A genuinely ignored/unknown event
+ * type → 200 (nothing to do). A normalize failure or a DB write failure →
+ * 5xx, on purpose, so Stripe's own retry redelivers it rather than the tier
+ * change being silently lost (sa0718_checkout_session_completed_silently_
+ * drops_, fixed 08/06/2026 — was 200-always). Idempotent: upsert keyed on
+ * user (checkout) or update keyed on customer id (everything else).
  */
 import { NextResponse } from "next/server";
 import type Stripe from "stripe";
@@ -35,27 +38,35 @@ export async function POST(request: Request): Promise<Response> {
     return NextResponse.json({ error: "bad_signature" }, { status: 401 });
   }
 
-  const fetchSubscription = async (id: string): Promise<SubscriptionFacts | null> => {
-    try {
-      const sub = await getStripe().subscriptions.retrieve(id);
-      const item = sub.items.data[0];
-      const periodEnd =
-        (item as unknown as { current_period_end?: number }).current_period_end ??
-        (sub as unknown as { current_period_end?: number }).current_period_end ??
-        null;
-      return {
-        lookupKey: item?.price.lookup_key ?? null,
-        status: sub.status,
-        currentPeriodEndIso: periodEnd ? new Date(periodEnd * 1000).toISOString() : null,
-        customerId: typeof sub.customer === "string" ? sub.customer : sub.customer.id,
-      };
-    } catch (err) {
-      console.error("[stripe-webhook] subscription retrieve failed:", err);
-      return null;
-    }
+  // sa0718_checkout_session_completed_silently_drops_: this used to catch a
+  // retrieve failure and return null, which normalizeEvent reads as "no
+  // lookup key" — a real Stripe hiccup was indistinguishable from "nothing to
+  // fetch," so the write was silently skipped, we ack'd 200, and Stripe never
+  // retried: the tier upgrade was gone forever. Let it throw instead — the
+  // POST handler below catches it and returns a 5xx so Stripe retries the
+  // event until the write actually lands.
+  const fetchSubscription = async (id: string): Promise<SubscriptionFacts> => {
+    const sub = await getStripe().subscriptions.retrieve(id);
+    const item = sub.items.data[0];
+    const periodEnd =
+      (item as unknown as { current_period_end?: number }).current_period_end ??
+      (sub as unknown as { current_period_end?: number }).current_period_end ??
+      null;
+    return {
+      lookupKey: item?.price.lookup_key ?? null,
+      status: sub.status,
+      currentPeriodEndIso: periodEnd ? new Date(periodEnd * 1000).toISOString() : null,
+      customerId: typeof sub.customer === "string" ? sub.customer : sub.customer.id,
+    };
   };
 
-  const normalized = await normalizeEvent(event, fetchSubscription);
+  let normalized;
+  try {
+    normalized = await normalizeEvent(event, fetchSubscription);
+  } catch (err) {
+    console.error(`[stripe-webhook] normalize failed for ${event.type} — retry requested:`, err);
+    return NextResponse.json({ error: "normalize_failed" }, { status: 502 });
+  }
   const mutation = subscriptionMutationFromEvent(normalized, new Date().toISOString());
   if (!mutation) return NextResponse.json({ received: true, ignored: true });
 
@@ -66,17 +77,28 @@ export async function POST(request: Request): Promise<Response> {
     const { error } = await db
       .from("billing_subscriptions")
       .upsert({ ...mutation, user_id: mutation.user_id }, { onConflict: "user_id" });
-    if (error) console.error("[stripe-webhook] upsert failed:", error.message);
+    if (error) {
+      // Same failure shape as the retrieve fix above (sa0718 second-order
+      // review, 08/06/2026): acking 200 on a write failure drops the tier
+      // upgrade exactly as silently as a swallowed fetch error did. A 5xx
+      // asks Stripe to retry instead of losing the event.
+      console.error("[stripe-webhook] upsert failed — retry requested:", error.message);
+      return NextResponse.json({ error: "write_failed" }, { status: 502 });
+    }
   } else {
     // subscription/invoice events: keyed by customer id. A miss means we
-    // never saw the checkout — log and ack (never invent a row).
+    // never saw the checkout — log and ack (never invent a row); that's a
+    // data-integrity signal, not a transient failure, so it stays a 200.
     const { stripe_customer_id, ...fields } = mutation;
     const { error, count } = await db
       .from("billing_subscriptions")
       .update(fields, { count: "exact" })
       .eq("stripe_customer_id", stripe_customer_id);
-    if (error) console.error("[stripe-webhook] update failed:", error.message);
-    else if (count === 0)
+    if (error) {
+      console.error("[stripe-webhook] update failed — retry requested:", error.message);
+      return NextResponse.json({ error: "write_failed" }, { status: 502 });
+    }
+    if (count === 0)
       console.error(`[stripe-webhook] no row for customer ${stripe_customer_id} (${event.type})`);
   }
 

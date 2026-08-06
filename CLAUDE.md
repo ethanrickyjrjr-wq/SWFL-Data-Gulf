@@ -17,7 +17,20 @@
 **Locked 2026-06-22. Amended 07/20/2026 — our own research comes first.**
 **No fix, no answer, no plan until you've researched the real answer.**
 
-0. **READ OUR OWN RESEARCH FIRST — `_RESEARCH/INDEX.md`.** ALL research lives in `_RESEARCH/`,
+0. **READ OUR OWN RESEARCH FIRST — AND `_RESEARCH/` IS NOT ALL OF IT.**
+   **DESIGN / TYPE / COLOR / SPACING questions do NOT start at `_RESEARCH/`. They start at
+   `app/_design/05-color-and-type.md` (committed) and `docs/design-reference/colors_and_type.css`
+   (UN-GITIGNORED 08/06/2026).** Those name the fonts outright — Inter display + body, JetBrains
+   Mono, tabular figures on every number — plus the full scale, leading, tracking and 8px tokens.
+   **Postmortem that forced this line (08/06/2026):** asked "are these the fonts we want, based on
+   the gitignored research," a session grepped only `_RESEARCH/`, found no typeface, and answered
+   *"there is no research basis for our six families."* The answer was on disk the whole time, in a
+   folder this rule never named. `ingest/pipelines/report_design_research/crawl_report_designs.py`
+   — the "find the best-looking and recreate it" typography crawl of Chartr, Axios Markets, Morning
+   Brew, The Daily Upside and Redfin Data Center — is also written and **has never been run.**
+   Run `git status --ignored --short` before ever concluding research does not exist.
+
+0b. **THEN `_RESEARCH/INDEX.md`.** ALL research lives in `_RESEARCH/`,
    **GITIGNORED — it never ships, so write freely.** Consolidated there 07/20/2026 by operator
    decree: agent-behavior, audits (was `docs/audits/`), competitor-and-strategy (was
    `docs/steadyapi-research/`), data-and-ingest, deliverable-and-design, email-and-social,
@@ -200,6 +213,33 @@ record" only after the four-lane hook caught the catalog lane had never been ope
 research "filed" whose `_RESEARCH/INDEX.md` line was never written. Both inside twenty minutes,
 both while explicitly claiming rigor. The operator has a memory; the session does not. Rules
 persist, promises don't.
+
+---
+
+# RULE 0.85 — FIX IT, DON'T FILE IT. A CHECK IS NOT A DELIVERABLE.
+
+**Locked 08/06/2026 by operator decree.** Verbatim: *"STOP OPENING FUCKING CHECKS THAT NEVER GET
+FUCKING CLOSED. MAKE IT A FUCKING RULE. FIX WHAT YOU ARE SUPPOSED TO FIX AND FIX ANYTHING YOU FIND."*
+
+The ledger stood at **900+ open** while sessions kept adding to it. Opening a check had become the
+way to LOOK rigorous while shipping nothing — RULE 0.8's partial-reported-as-whole, wearing a
+ledger entry as a disguise.
+
+1. **FOUND IT IN THE FILES YOU ARE ALREADY IN? FIX IT NOW.** Default is repair, not record. If you
+   can see the defect and you are already holding the file, a check is the wrong artifact.
+2. **A CHECK IS ONLY LEGAL WHEN THE FIX IS GENUINELY OUT OF REACH THIS SESSION** — it needs an
+   operator decision, a paid run, a records request, a rebuild, or another team's file. Then the
+   check must name **what specifically blocks it**, not just what is wrong.
+3. **NEVER OPEN A CHECK FOR SOMETHING YOU HAVE THE MEANS TO FIX IN THIS SESSION.** "I noted it" is
+   RULE 2.4's forgetting-on-a-delay wearing a ledger entry.
+4. **CLOSE WHAT YOU FIX, IN THE SAME SESSION.** `node scripts/check.mjs close <key>`. A fix that
+   leaves its own check open is how the number only ever goes up.
+5. **NET-NEGATIVE OR NEUTRAL.** A session that opens more checks than it closes owes an explicit
+   sentence saying so and why. Opening three and closing none is a reportable outcome, not a
+   neutral one.
+
+**RULE 0.8 still stands and does not conflict:** every unfinished part is still *declared*. This
+rule governs WHERE the declaration goes — the answer to the operator, not a row nobody reads.
 
 ---
 

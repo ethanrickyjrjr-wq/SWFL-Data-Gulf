@@ -1,3 +1,4 @@
+import type { Metadata } from "next";
 import { CorridorRentChart, ZHVIAreaChart } from "@/components/charts";
 import { resolveOrigin } from "@/lib/fetch-brain";
 import {
@@ -13,6 +14,16 @@ import type { JoinedCorridorRow } from "@/types/viz";
 // lib/demo/live-loaders.ts). Demo page renders the rent chart only;
 // permits / centroid join is the embed page's job.
 export const revalidate = 300;
+
+// sa0718_demo_page_renders_fully_fabricated_brain_o (indexability half — the
+// fabrication half was already fixed by switching to live-loaders.ts): this
+// is a marketing walkthrough, not a citable report, and app/robots.ts's
+// wildcard rule (`allow: "/", disallow: "/api/"`) leaves it indexable by
+// default. Keep it out of search results explicitly rather than relying on
+// robots.txt alone (advisory, and this route was never in its disallow list).
+export const metadata: Metadata = {
+  robots: { index: false, follow: true },
+};
 
 export default async function DemoPage() {
   const origin = resolveOrigin();

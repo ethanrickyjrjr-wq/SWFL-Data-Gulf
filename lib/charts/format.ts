@@ -73,3 +73,22 @@ export function formatAsOf(month: string | undefined): string | undefined {
   const date = new Date(Number(m[1]), Number(m[2]) - 1, 1);
   return date.toLocaleDateString("en-US", { month: "short", year: "numeric" });
 }
+
+/**
+ * TABULAR FIGURES — the design-system rule that existed for months and was posted nowhere
+ * it is used. `app/_design/05-color-and-type.md` (committed; the root the email playbook
+ * §1.3 cites): *"so columns of numbers align. Inter has `font-variant-numeric:
+ * tabular-nums`."* The playbook restates it ("metric 36px — the big number, always tabular
+ * figures") and `lib/email/blocks/scale.ts` + `StatsBlock.tsx` honor it. NOT ONE of the SVG
+ * chart builders did — so a stat row rendered aligned figures and the chart directly
+ * beneath it rendered proportional ones, on the same numbers, in the same email.
+ *
+ * It lives HERE, beside the one value root, because tabular figures are a property of how
+ * a NUMBER is rendered — the same reason `formatAxisTick` lives here. A pure SVG builder
+ * importing it from `lib/email` would invert the dependency direction.
+ *
+ * Emitted as BOTH the presentation attribute and the CSS property: renderers disagree on
+ * which they honor, and one that honors neither is simply unchanged. Numbers only —
+ * text labels stay proportional, which is correct.
+ */
+export const TABULAR = `font-variant-numeric="tabular-nums" style="font-variant-numeric:tabular-nums"`;

@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>SWFL Data Gulf</title>
+<link rel="icon" href="../../assets/favicon.svg" type="image/svg+xml">
+<link rel="stylesheet" href="../../colors_and_type.css">
+<style>
+  /* ============================================================
+     SWFL Data Gulf — pure brand mark
+     Hi-res, centered, screenshot-grade. Static. No animation.
+     ============================================================ */
+  html, body { height: 100%; margin: 0; }
+  body {
+    background: radial-gradient(ellipse 110% 65% at 50% 45%, #112028 0%, var(--gulf-midnight) 65%);
+    color: var(--text-primary);
+    font-family: var(--font-body);
+    -webkit-font-smoothing: antialiased;
+    display: grid;
+    place-items: center;
+    overflow: hidden;
+  }
+
+  .mark {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.45em;
+    font-size: clamp(2.5rem, 9vw, 6rem);
+    line-height: 1;
+  }
+
+  .mark-glyph {
+    width: 0.78em;
+    height: 0.78em;
+    display: block;
+    flex-shrink: 0;
+    overflow: visible;
+    filter: drop-shadow(0 0 24px color-mix(in srgb, var(--gulf-teal) 30%, transparent));
+  }
+  .mark-glyph path {
+    stroke: #3DC9C0;
+    stroke-width: 7;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+    fill: none;
+  }
+  .mark-glyph .wave-2 { opacity: 0.65; }
+  .mark-glyph .wave-3 { opacity: 0.30; }
+
+  .mark-text {
+    font-family: var(--font-mono);
+    font-weight: 700;
+    letter-spacing: 0.04em;
+    color: var(--text-primary);
+    text-shadow: 0 0 32px color-mix(in srgb, var(--text-primary) 10%, transparent);
+  }
+
+  .mark-meta {
+    margin-top: 36px;
+    font-family: var(--font-mono);
+    font-size: 11px;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    color: var(--text-tertiary);
+    text-align: center;
+  }
+
+  .mark-meta-dot {
+    display: inline-block;
+    width: 4px;
+    height: 4px;
+    border-radius: 50%;
+    background: var(--gulf-teal);
+    box-shadow: 0 0 8px var(--gulf-teal);
+    vertical-align: middle;
+    margin: 0 10px 2px;
+  }
+
+  .stage {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 48px;
+  }
+
+  @media print {
+    body { background: var(--gulf-midnight); }
+    .mark-meta { color: var(--text-secondary); }
+  }
+</style>
+</head>
+<body data-screen-label="Brand mark · high resolution">
+  <div class="stage">
+    <div class="mark" aria-label="SWFL Data Gulf">
+      <svg class="mark-glyph" viewBox="0 0 64 64" fill="none" aria-hidden="true" preserveAspectRatio="xMidYMid meet">
+        <path class="wave-1" d="M6 14 C 14 6, 22 6, 32 14 C 42 22, 50 22, 58 14"/>
+        <path class="wave-2" d="M6 32 C 14 24, 22 24, 32 32 C 42 40, 50 40, 58 32"/>
+        <path class="wave-3" d="M6 50 C 14 42, 22 42, 32 50 C 42 58, 50 58, 58 50"/>
+      </svg>
+      <span class="mark-text">SWFL DATA GULF</span>
+    </div>
+
+    <div class="mark-meta">
+      Lee
+      <span class="mark-meta-dot"></span>
+      Collier
+    </div>
+  </div>
+</body>
+</html>

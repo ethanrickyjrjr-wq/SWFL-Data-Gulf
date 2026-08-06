@@ -16,7 +16,7 @@
 // 5x row stay readable on one shared axis. The ratio badge is computed here,
 // in code — the narrator may only restate it (same rule as settledCount).
 
-import { formatAxisTick, type ValueFormat } from "@/lib/charts/format";
+import { formatAxisTick, type ValueFormat, TABULAR } from "@/lib/charts/format";
 import { formatDisplayDate } from "@/lib/format-date";
 
 const GRID = "#EAECEF";
@@ -127,8 +127,8 @@ export function dumbbellGapSvg(items: DumbbellGapItem[], opts: DumbbellGapOpts):
     const hi = Math.max(...rows.map((r) => r.high));
     const axisY = padT + n * rowH + 14;
     parts.push(
-      `<text x="${padL}" y="${axisY}" font-family="Arial" font-size="10" fill="${AXIS_TEXT}">${esc(formatAxisTick(fmt, lo))}</text>`,
-      `<text x="${padL + trackW}" y="${axisY}" text-anchor="end" font-family="Arial" font-size="10" fill="${AXIS_TEXT}">${esc(formatAxisTick(fmt, hi))}</text>`,
+      `<text x="${padL}" y="${axisY}" font-family="Arial" ${TABULAR} font-size="10" fill="${AXIS_TEXT}">${esc(formatAxisTick(fmt, lo))}</text>`,
+      `<text x="${padL + trackW}" y="${axisY}" text-anchor="end" font-family="Arial" ${TABULAR} font-size="10" fill="${AXIS_TEXT}">${esc(formatAxisTick(fmt, hi))}</text>`,
     );
   }
 

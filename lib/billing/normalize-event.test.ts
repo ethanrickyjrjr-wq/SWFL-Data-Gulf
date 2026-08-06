@@ -81,4 +81,40 @@ describe("normalizeEvent", () => {
     assert.equal(n.type, "charge.refunded");
     assert.equal(n.customerId, "cus_9");
   });
+
+  // sa0718_checkout_session_completed_silently_drops_: a transient
+  // subscription-retrieve failure must reject, never resolve with
+  // lookupKey:null — that null reads as "no paid tier" downstream and the
+  // caller (the webhook route) must see the rejection to avoid ack'ing the
+  // event and dropping the upgrade forever.
+  const fetchFails = async () => {
+    throw new Error("stripe api hiccup");
+  };
+
+  test("checkout.session.completed: a retrieve failure rejects instead of yielding null facts", async () => {
+    await assert.rejects(
+      normalizeEvent(
+        stripeEvent("checkout.session.completed", {
+          customer: "cus_1",
+          subscription: "sub_1",
+          client_reference_id: "user-1",
+        }),
+        fetchFails,
+      ),
+      /stripe api hiccup/,
+    );
+  });
+
+  test("invoice.paid: a retrieve failure rejects instead of yielding null facts", async () => {
+    await assert.rejects(
+      normalizeEvent(
+        stripeEvent("invoice.paid", {
+          customer: "cus_1",
+          parent: { subscription_details: { subscription: "sub_1" } },
+        }),
+        fetchFails,
+      ),
+      /stripe api hiccup/,
+    );
+  });
 });

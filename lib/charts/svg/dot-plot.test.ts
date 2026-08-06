@@ -81,9 +81,17 @@ test("min-value dot clears the row-label gutter (inset from track start)", () =>
     Number(m[1]),
   );
   expect(cxs.length).toBe(items.length);
-  // padL = 156; the smallest value's dot must sit a visible inset inside the track,
-  // not at x=156 where its 6px radius lands 2px from the label text.
-  expect(Math.min(...cxs)).toBeGreaterThanOrEqual(156 + 12);
+  // The invariant is CLEARANCE FROM THE TRACK START, not a magic 156. The gutter is now
+  // MEASURED from the real labels in the real face (lib/brand/text-metrics), so pinning
+  // this to the old hardcoded padL asserted the bug, not the rule: it passed only while
+  // the gutter happened to be 156 wide, and would have kept passing if a label ran
+  // straight over the dots. Read the track start out of the rendered SVG instead — the
+  // per-row baseline rule is the one element that starts exactly at padL.
+  const trackStart = Number(/<line x1="([\d.]+)" y1="[\d.]+" x2=/.exec(svg)?.[1] ?? NaN);
+  expect(Number.isFinite(trackStart)).toBe(true);
+  // the smallest value's dot must sit a visible inset inside the track, not at padL
+  // where its 6px radius lands 2px from the label text.
+  expect(Math.min(...cxs)).toBeGreaterThanOrEqual(trackStart + 12);
 });
 
 test("value labels sit clear of the max-value dot (gap ≥ dot radius + 8)", () => {
@@ -91,10 +99,16 @@ test("value labels sit clear of the max-value dot (gap ≥ dot radius + 8)", () 
   const cxs = [...svg.matchAll(/<circle cx="([\d.]+)" cy="[\d.]+" r="6" fill="#0aa"/g)].map((m) =>
     Number(m[1]),
   );
+  // Attribute-order-tolerant on purpose. This regex used to pin the exact string
+  // `font-family="Arial" font-size="12" font-weight="bold"`, so adding the tabular-figures
+  // attributes between them silently matched ZERO nodes — and a zero-length match makes
+  // Math.min() return Infinity, which would have PASSED the clearance assertion while
+  // measuring nothing. Match the value-label nodes by what makes them value labels.
+  // Matched by TABULAR + bold, which is exactly what makes a node a VALUE label here: it
+  // renders a number, so it carries tabular figures, and the bold chart title does not.
+  // (A looser `font-weight="bold"` match picks up the title and reports 4 for 3 rows.)
   const labelXs = [
-    ...svg.matchAll(
-      /<text x="([\d.]+)" y="[\d.]+" font-family="Arial" font-size="12" font-weight="bold"/g,
-    ),
+    ...svg.matchAll(/<text x="([\d.]+)" y="[\d.]+"[^>]*tabular-nums[^>]*font-weight="bold"/g),
   ].map((m) => Number(m[1]));
   expect(labelXs.length).toBe(items.length);
   const maxDot = Math.max(...cxs);

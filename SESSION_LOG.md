@@ -271,6 +271,44 @@ routes) — NOT fixed this session, opened as checks instead of silently deferre
   `sa0718_checkout_session_completed_silently_drops_`,
   `sa0718_report_unlock_swallows_retrieve_error_to_unpaid`, `sa0718_portal_route_drops_supabase_read_error`.
 
+**Operator: "WHAT?????? FIX IT ALL" — did items 2/3/4/5 same session, no more asking.**
+
+2. **/map** — re-confirmed the "Sample data — not live" badge actually exists in
+   `components/charts/MapCanvas.tsx:345` (grepped it directly). Code-correct; still no live curl this
+   session (nothing changed in code, so left the check as-is rather than reclassifying on partial evidence).
+
+3. **/demo** — the fabrication half was ALREADY fixed (a prior session's `lib/demo/live-loaders.ts`
+   reads live brain output + Supabase tables, confirmed by reading it in full). The indexability half
+   was not: added `export const metadata = { robots: { index: false, follow: true } }` to
+   `app/demo/page.tsx` — it's a marketing walkthrough, not a citable report, and `app/robots.ts`'s
+   wildcard rule (`allow: "/", disallow: "/api/"`) left it indexable by default.
+
+4. **DOM contradiction — did the one concrete, already-diagnosed slice** (`listing_active_stats_dom_
+   repoint`), left the structural 3-source-authority question alone as designed (still needs operator
+   sign-off, not something to pick unilaterally). `data_lake.listing_active_stats.avg_days_on_market`
+   was averaging `listing_state.days_on_market` — the dead RentCast column, NULL on every `api_feed`
+   row, so this figure was NULL region-wide. Wrote + applied
+   `docs/sql/20260806_listing_active_stats_dom_repoint.sql` (`bun scripts/run-migration.ts`, live):
+   repoints it onto `data_lake.listing_dom.dom_days` (the real per-listing DOM authority, built
+   07/17), excluding floored/censored rows the same way `zip_active_dom_median` already does.
+   **Live-verified, not just code-read**: queried the view post-migration — Collier 6,335 listings /
+   141d avg, Lee 15,779 / 138d, region 22,114 / 139d (was NULL everywhere before). Check CLOSED with
+   pasted evidence (only fully-closed item this session; everything else stayed at `verify`).
+
+5. **CAN-SPAM/a11y/contrast** — read `app/for-agents/page.tsx` in full (the file the audit named).
+   All body/border colors are hardcoded `neutral-300`/`400`/`border-white/[.145]` with no `dark:`
+   dependency — they render the same regardless of visitor OS color-scheme, so the "illegible for
+   light-mode-OS visitors" failure the audit described isn't reproducible in current code. Appears
+   already fixed in a prior session; reclassified `defect → verify`, NOT independently
+   screenshotted under a light-mode OS. Did not touch the CAN-SPAM item (already `verify`) or the
+   `task`-class a11y items (icon-only dismiss button, progressbar ARIA, etc.) — those were never
+   `defect`-class and stay correctly lower priority.
+
+**Net this session: 1 check closed with live evidence (`listing_active_stats_dom_repoint`), 6
+reclassified defect→verify with code+test evidence (3 Stripe, /demo has no ledger key of its own to
+flip, `sa0718_page_uses_light_mode_default_tailwind_colo`), 2 new defects found+opened by second-order
+review. Nothing pushed — 6 files + 1 new SQL migration file uncommitted, awaiting operator go-ahead.**
+
 Also flagged, not acted on: two stale docs (`docs/superpowers/specs/2026-07-03-stripe-billing-design.md`,
 `docs/superpowers/plans/2026-07-03-stripe-billing.md`) still state "200 always" and carry the OLD
 nullable `fetchSubscription` type + the pre-fix route body verbatim — the plan doc is marked for

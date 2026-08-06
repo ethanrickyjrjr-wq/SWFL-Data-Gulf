@@ -1,0 +1,164 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>SWFL Data Gulf — Corridor Explorer</title>
+<link rel="icon" href="../../assets/favicon.svg" type="image/svg+xml">
+<link rel="stylesheet" href="../../colors_and_type.css">
+<link rel="stylesheet" href="explorer.css">
+</head>
+<body>
+<div id="root" data-screen-label="Charts Kit"></div>
+
+<script src="https://unpkg.com/react@18.3.1/umd/react.development.js" integrity="sha384-hD6/rw4ppMLGNu3tX5cjIb+uRZ7UkRJ6BPkLpg4hAu/6onKUg4lLsHAs9EBPT82L" crossorigin="anonymous"></script>
+<script src="https://unpkg.com/react-dom@18.3.1/umd/react-dom.development.js" integrity="sha384-u6aeetuaXnQ38mYT8rp6sbXaQe3NL9t+IBXmnYxwkUI2Hw4bsp2Wvmx4yRQF1uAm" crossorigin="anonymous"></script>
+<script src="https://unpkg.com/@babel/standalone@7.29.0/babel.min.js" integrity="sha384-m08KidiNqLdpJqLq95G/LEi8Qvjl/xUYll3QILypMoQ65QorJ9Lvtp2RXYGBFj1y" crossorigin="anonymous"></script>
+
+<script type="text/babel" src="data.jsx"></script>
+<script type="text/babel" src="CorridorScatter.jsx"></script>
+<script type="text/babel" src="CorridorMap.jsx"></script>
+<script type="text/babel" src="CorridorDetail.jsx"></script>
+<script type="text/babel" src="CorridorTable.jsx"></script>
+<script type="text/babel" src="UpstreamSplit.jsx"></script>
+
+<script type="text/babel">
+const { useState } = React;
+
+function App() {
+  const [selectedId, setSelectedId] = useState("immokalee");
+  const [hoveredId, setHoveredId] = useState(null);
+  const [paletteKey, setPaletteKey] = useState("brand");
+  const palette = window.CHART_PALETTES[paletteKey];
+  const corridor = window.CORRIDORS.find(c => c.id === selectedId);
+  const meta = window.PACK_META;
+  const medians = window.PACK_MEDIANS;
+
+  return (
+    <main className="cv-page">
+      <header className="cv-page-header">
+        <div className="cv-page-head-row">
+          <div>
+            <span className="cv-page-tag">SWFL CRE · 8 corridors · refined {meta.refined}</span>
+            <h1>8 SWFL corridors, one selection.</h1>
+            <p className="cv-page-sub">
+              Click any corridor — in the scatter, on the map, or in the table —
+              and every view focuses on it. Pack reads <span className="cv-verdict-pill">{meta.verdict}</span> at
+              magnitude {meta.magnitude.toFixed(2)}, confidence {meta.confidence.toFixed(2)}.
+            </p>
+          </div>
+          <div className="cv-head-controls">
+            <div className="cv-palette-toggle" role="radiogroup" aria-label="Color palette">
+              <span className="cv-palette-label">PALETTE</span>
+              {Object.entries(window.CHART_PALETTES).map(([k, p]) => (
+                <button
+                  key={k}
+                  role="radio"
+                  aria-checked={paletteKey === k}
+                  className={"cv-palette-opt" + (paletteKey === k ? " is-active" : "")}
+                  onClick={() => setPaletteKey(k)}
+                  title={p.label + " palette"}
+                >
+                  <span className="cv-palette-swatches">
+                    <span style={{ background: p.growing }} />
+                    <span style={{ background: p.stable }} />
+                    <span style={{ background: p.repositioning }} />
+                    <span style={{ background: p.declining }} />
+                  </span>
+                  {p.label}
+                </button>
+              ))}
+            </div>
+            <a className="cv-source-chip" href={meta.source.url} target="_blank" rel="noreferrer">{meta.source.label} ↗</a>
+          </div>
+        </div>
+
+        <div className="cv-pack-medians">
+          {Object.entries(medians).map(([k, m]) => (
+            <div key={k} className="cv-pack-med-cell">
+              <span className="cv-pack-med-label">{m.label}</span>
+              <span className="cv-pack-med-val">
+                {k === "absorption" ? m.val.toLocaleString() + " sqft"
+                  : k === "rent" ? "$" + m.val.toFixed(2) + " PSF"
+                  : m.val.toFixed(1) + "%"}
+                <span className={"cv-pack-med-dir is-" + m.dir}>
+                  {m.dir === "rising" ? "↑" : m.dir === "falling" ? "↓" : "→"}
+                </span>
+              </span>
+            </div>
+          ))}
+        </div>
+      </header>
+
+      <section className="cv-section">
+        <div className="cv-section-head">
+          <div>
+            <span className="cv-section-tag">Linked view</span>
+            <h2 className="cv-section-h">Cap rate × vacancy, with the map showing where.</h2>
+          </div>
+          <span className="caption">{corridor ? corridor.name : "—"}</span>
+        </div>
+
+        <div className="cv-linked-grid">
+          <div className="cv-linked-left">
+            <CorridorScatter
+              selectedId={selectedId}
+              hoveredId={hoveredId}
+              onSelect={setSelectedId}
+              onHover={setHoveredId}
+              palette={palette}
+            />
+            <CorridorMap
+              selectedId={selectedId}
+              hoveredId={hoveredId}
+              onSelect={setSelectedId}
+              onHover={setHoveredId}
+              palette={palette}
+            />
+          </div>
+          <aside className="cv-linked-right">
+            <CorridorDetail corridor={corridor} palette={palette} />
+          </aside>
+        </div>
+      </section>
+
+      <section className="cv-section">
+        <div className="cv-section-head">
+          <div>
+            <span className="cv-section-tag">Audit table</span>
+            <h2 className="cv-section-h">All 8 corridors, sortable.</h2>
+          </div>
+          <span className="caption">Click a row to inspect</span>
+        </div>
+        <CorridorTable
+          selectedId={selectedId}
+          hoveredId={hoveredId}
+          onSelect={setSelectedId}
+          onHover={setHoveredId}
+          palette={palette}
+        />
+      </section>
+
+      <section className="cv-section">
+        <div className="cv-section-head">
+          <div>
+            <span className="cv-section-tag">Active flags</span>
+            <h2 className="cv-section-h">Ground-truth not in public listings.</h2>
+          </div>
+          <span className="caption">10 active flags across 7 corridors</span>
+        </div>
+        <UpstreamSplit palette={palette} />
+      </section>
+
+      <footer className="cv-page-foot">
+        <span className="caption">Freshness · {meta.freshness}</span>
+        <span className="caption">{meta.caveat}</span>
+      </footer>
+    </main>
+  );
+}
+
+ReactDOM.createRoot(document.getElementById("root")).render(<App />);
+</script>
+</body>
+</html>

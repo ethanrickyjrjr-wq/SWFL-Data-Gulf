@@ -11,7 +11,7 @@
 // GRID/AXIS_TEXT colors, the esc() helper, formatAxisTick(fmt,v) for numbers,
 // formatDisplayDate(s) for the as-of caption.
 
-import { formatAxisTick, type ValueFormat } from "@/lib/charts/format";
+import { formatAxisTick, type ValueFormat, TABULAR } from "@/lib/charts/format";
 import { formatDisplayDate } from "@/lib/format-date";
 
 const GRID = "#EAECEF";
@@ -89,7 +89,7 @@ export function sparkGridSvg(cards: SparkCard[], opts: SparkGridOpts): string {
     const label = card.label.length > 22 ? `${card.label.slice(0, 21)}…` : card.label;
     parts.push(
       `<text x="${(cx + 12).toFixed(1)}" y="${gridTop + labelDY}" font-family="Arial" font-size="11" fill="${AXIS_TEXT}">${esc(label)}</text>`,
-      `<text x="${(cx + 12).toFixed(1)}" y="${gridTop + valueDY}" font-family="Arial" font-size="22" font-weight="bold" fill="${VALUE_FILL}">${esc(formatAxisTick(fmt, card.value))}</text>`,
+      `<text x="${(cx + 12).toFixed(1)}" y="${gridTop + valueDY}" font-family="Arial" ${TABULAR} font-size="22" font-weight="bold" fill="${VALUE_FILL}">${esc(formatAxisTick(fmt, card.value))}</text>`,
     );
 
     // Sparkline — normalized polyline of the series with an accent end dot.

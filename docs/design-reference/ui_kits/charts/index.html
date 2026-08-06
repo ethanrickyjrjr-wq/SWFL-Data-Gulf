@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>SWFL Data Gulf — Chat Charts</title>
+<link rel="icon" href="../../assets/favicon.svg" type="image/svg+xml">
+<link rel="stylesheet" href="../../colors_and_type.css">
+<link rel="stylesheet" href="chat.css">
+</head>
+<body>
+<div id="root" data-screen-label="Chat Charts Kit"></div>
+
+<script src="https://unpkg.com/react@18.3.1/umd/react.development.js" integrity="sha384-hD6/rw4ppMLGNu3tX5cjIb+uRZ7UkRJ6BPkLpg4hAu/6onKUg4lLsHAs9EBPT82L" crossorigin="anonymous"></script>
+<script src="https://unpkg.com/react-dom@18.3.1/umd/react-dom.development.js" integrity="sha384-u6aeetuaXnQ38mYT8rp6sbXaQe3NL9t+IBXmnYxwkUI2Hw4bsp2Wvmx4yRQF1uAm" crossorigin="anonymous"></script>
+<script src="https://unpkg.com/@babel/standalone@7.29.0/babel.min.js" integrity="sha384-m08KidiNqLdpJqLq95G/LEi8Qvjl/xUYll3QILypMoQ65QorJ9Lvtp2RXYGBFj1y" crossorigin="anonymous"></script>
+
+<script type="text/babel" src="data.jsx"></script>
+<script type="text/babel" src="ChatCards.jsx"></script>
+
+<script type="text/babel">
+const { useState } = React;
+
+const SAMPLE_USER_QS = {
+  KPICard:       "Show me the SWFL cap rate trend.",
+  StatRow:       "Give me the pack medians at a glance.",
+  HBarChart:     "Which corridors are paying the highest rent?",
+  CompareTable:  "Compare Immokalee, Alico, Estero, Cape Coral.",
+  DonutCard:     "What corridor types are in the dataset?",
+  DotPlot:       "Where do cap rates land across the pack?",
+  VerdictBars:   "Summarize all four SWFL signals.",
+  SparkList:     "Show me each median with a 12-month spark.",
+};
+
+function App() {
+  const [paletteKey, setPaletteKey] = useState("brand");
+  const palette = window.CHART_PALETTES[paletteKey];
+
+  // Order the cards into a 2-col masonry-ish grid
+  const cards = [
+    { name: "KPICard",      C: window.KPICard,      ask: SAMPLE_USER_QS.KPICard },
+    { name: "StatRow",      C: window.StatRow,      ask: SAMPLE_USER_QS.StatRow },
+    { name: "SparkList",    C: window.SparkList,    ask: SAMPLE_USER_QS.SparkList },
+    { name: "VerdictBars",  C: window.VerdictBars,  ask: SAMPLE_USER_QS.VerdictBars },
+    { name: "HBarChart",    C: window.HBarChart,    ask: SAMPLE_USER_QS.HBarChart },
+    { name: "CompareTable", C: window.CompareTable, ask: SAMPLE_USER_QS.CompareTable },
+    { name: "DotPlot",      C: window.DotPlot,      ask: SAMPLE_USER_QS.DotPlot },
+    { name: "DonutCard",    C: window.DonutCard,    ask: SAMPLE_USER_QS.DonutCard },
+  ];
+
+  return (
+    <main className="cg-page">
+      <header className="cg-page-header">
+        <div className="cg-head-row">
+          <div>
+            <span className="cg-eyebrow">SWFL Data Gulf · chat-embed gallery</span>
+            <h1>Charts the way they arrive in a conversation.</h1>
+            <p className="cg-sub">
+              Each card is a self-contained answer — sized to fit inside an AI chat bubble
+              (480–640px wide), pulling real SWFL corridor data. Switch palettes
+              to drop into any branded report.
+            </p>
+          </div>
+          <div className="cg-palette-toggle" role="radiogroup" aria-label="Color palette">
+            <span className="cg-palette-label">PALETTE</span>
+            {Object.entries(window.CHART_PALETTES).map(([k, p]) => (
+              <button
+                key={k}
+                role="radio"
+                aria-checked={paletteKey === k}
+                className={"cg-palette-opt" + (paletteKey === k ? " is-active" : "")}
+                onClick={() => setPaletteKey(k)}
+              >
+                <span className="cg-palette-swatches">
+                  <span style={{ background: p.growing }} />
+                  <span style={{ background: p.stable }} />
+                  <span style={{ background: p.repositioning }} />
+                  <span style={{ background: p.declining }} />
+                </span>
+                {p.label}
+              </button>
+            ))}
+          </div>
+        </div>
+      </header>
+
+      <div className="cg-grid">
+        {cards.map((card) => (
+          <article key={card.name} className="cg-tile">
+            <header className="cg-tile-head">
+              <span className="cg-bubble-user">{card.ask}</span>
+            </header>
+            <div className="cg-bubble-ai">
+              <card.C palette={palette} />
+            </div>
+            <footer className="cg-tile-foot">
+              <span className="cg-tile-name">{card.name}</span>
+              <span className="cg-tile-w">~580px embed</span>
+            </footer>
+          </article>
+        ))}
+      </div>
+
+      <footer className="cg-page-foot">
+        <span className="caption">Real corridor data · gulf-midnight surface · gulf-teal accent</span>
+      </footer>
+    </main>
+  );
+}
+
+ReactDOM.createRoot(document.getElementById("root")).render(<App />);
+</script>
+</body>
+</html>

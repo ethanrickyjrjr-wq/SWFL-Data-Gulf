@@ -7,15 +7,18 @@
  * It drives the REAL pipe — `resolveSubject` → `buildNewListing` → `renderEmailDocHtml` —
  * so what lands on disk is exactly what a send would carry. Nothing is hand-written.
  *
- * DEFAULT HOUSE: 12554 Kellysands Way, Fort Myers 33908. Chosen off a live join
- * 08/05/2026 because it is the one address that exercises EVERY lane with ZERO new spend:
- * the free spine holds its price/beds/baths/sqft/lot/type/photo, our own listing clock holds
- * a REAL (non-floored) day count, and the paid row already on disk holds its year built,
- * HOA, description, 43-photo gallery and the realtor.com link.
+ * DEFAULT HOUSE: 12281 McGregor Palms Dr, Fort Myers 33908 (operator-designated 08/06/2026 —
+ * the real subject for the New Listing email, off the realtor.com listing
+ * realtor.com/realestateandhomes-detail/12281-McGregor-Palms-Dr_Fort-Myers_FL_33908_M64209-95517).
+ * The free spine resolves price/beds/baths/sqft/lot/type/photo with ZERO spend. There is no paid
+ * Apify row on disk for this address yet (checked live 08/06/2026) — year built, HOA, description,
+ * gallery, and the listing button link stay OPEN SLOTS until that row is bought
+ * (`OPERATOR_APPROVED_PAID_RUN=1`, `lib/listings/apify-comps.ts` is the ONE vendor call root; never
+ * fetch realtor.com directly to fill them).
  *
- * SPEND: reading the paid row costs nothing (it is on disk). The ONLY metered call is the
- * one narrator paragraph. Run without ANTHROPIC_API_KEY to skip even that — the paragraph
- * then stays an open slot, which is the designed state, and everything else renders.
+ * SPEND: the free-spine render above costs nothing. The paid row, if bought, is a one-time few-cent
+ * subject-record pull, gated by `lib/listings/apify-spend-guard.ts`. The ONLY OTHER metered call is
+ * the narrator paragraph. Run without ANTHROPIC_API_KEY to skip even that.
  *
  * It also prints a PER-CELL PROVENANCE TABLE, because "where did this number come from" is
  * the question this whole email exists to answer.
@@ -37,7 +40,15 @@ import {
   type ProvenanceRow,
 } from "./_harness.mts";
 
-const ADDRESS = subjectAddress("12554 Kellysands Way, Fort Myers, FL 33908");
+const DEFAULT_HOUSE = "12281 McGregor Palms Dr, Fort Myers, FL 33908";
+// The operator's own realtor.com link for the default house (RULE 0.7 lane 4 — a value
+// handed to us directly, never fetched/scraped — see `feedback_never-fetch-listing-portals`).
+// `apify-comps.ts`'s vendor actor cannot do an exact-address lookup (it treats `location` as
+// a search-area centre, not a listing lookup — documented 08/04/2026 in the market-comps
+// photo/CTA defect), so this is the ONLY correct source for this cell until that changes.
+const DEFAULT_LISTING_URL =
+  "https://www.realtor.com/realestateandhomes-detail/12281-McGregor-Palms-Dr_Fort-Myers_FL_33908_M64209-95517";
+const ADDRESS = subjectAddress(DEFAULT_HOUSE);
 
 console.log(`\n  SUBJECT: ${ADDRESS}\n`);
 
@@ -47,6 +58,9 @@ if (!resolved) {
     "  ⚠ NOT RESOLVED — the grid still lands, every cell an open slot (RULE 0.7).\n" +
       "    Outside Lee/Collier, or the nightly sweep has not landed this listing yet.\n",
   );
+}
+if (ADDRESS === DEFAULT_HOUSE && !facts.listingUrl) {
+  facts.listingUrl = DEFAULT_LISTING_URL;
 }
 
 // THE BRAND, OFF THE REAL ACCOUNT ROW — never a hardcoded literal.

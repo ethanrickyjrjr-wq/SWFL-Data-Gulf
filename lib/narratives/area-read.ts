@@ -91,7 +91,13 @@ export async function bakedAreaRead(
   for (const surface of ["area-email", "zip"] as const) {
     try {
       const row = await loadNarrative(surface, zip);
-      const narration = row?.sections?.narration;
+      // Bail on a missing row HERE, not implicitly. The later `row.inputs_hash` staleness
+      // gate read `row` un-narrowed and failed type check ("'row' is possibly null") — and
+      // the optional-chaining two lines down is what hid it, because a null row only fell
+      // out of the narration check by accident. An explicit guard makes the staleness gate
+      // provably reachable only with a real row.
+      if (!row) continue;
+      const narration = row.sections?.narration;
       if (typeof narration !== "string" || narration.trim() === "") continue;
       const text = firstParagraph(narration);
       if (!text) continue;

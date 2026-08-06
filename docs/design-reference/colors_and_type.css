@@ -1,0 +1,295 @@
+/* ============================================================
+   SWFL DATA GULF — Colors & Type
+   Deep gulf palette, sharp financial-adjacent display type,
+   tabular figures, borders not shadows.
+   ============================================================ */
+
+/* ------------------------------------------------------------
+   Fonts — Inter (display + body) + JetBrains Mono (mono).
+   Inter at 600/700 stands in for "Inter Display" at 28px+.
+   ------------------------------------------------------------ */
+@font-face {
+  font-family: "Inter";
+  src: url("./fonts/inter-400.woff2") format("woff2");
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
+@font-face {
+  font-family: "Inter";
+  src: url("./fonts/inter-500.woff2") format("woff2");
+  font-weight: 500;
+  font-style: normal;
+  font-display: swap;
+}
+@font-face {
+  font-family: "Inter";
+  src: url("./fonts/inter-600.woff2") format("woff2");
+  font-weight: 600;
+  font-style: normal;
+  font-display: swap;
+}
+@font-face {
+  font-family: "Inter";
+  src: url("./fonts/inter-700.woff2") format("woff2");
+  font-weight: 700;
+  font-style: normal;
+  font-display: swap;
+}
+@font-face {
+  font-family: "JetBrains Mono";
+  src: url("./fonts/jetbrains-mono-400.woff2") format("woff2");
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
+@font-face {
+  font-family: "JetBrains Mono";
+  src: url("./fonts/jetbrains-mono-500.woff2") format("woff2");
+  font-weight: 500;
+  font-style: normal;
+  font-display: swap;
+}
+
+:root {
+  /* ------------------------------------------------------------
+     Surfaces — background → foreground
+     ------------------------------------------------------------ */
+  --gulf-midnight: #0a1419;    /* primary background, near-black w/ blue-green undertone */
+  --gulf-deep:     #0f1d24;    /* section background just above midnight */
+  --gulf-slate:    #152832;    /* card / surface, water at dusk */
+  --gulf-slate-hi: #1c3340;    /* elevated surface — hovered card, expanded caveat */
+  --gulf-haze:     #22414f;    /* divider lines, table borders, low-emphasis outlines */
+
+  /* ------------------------------------------------------------
+     Accents — data + brand
+     ------------------------------------------------------------ */
+  --gulf-teal:      #0a8078;   /* primary accent — real color off Naples, saturated not neon */
+  --gulf-teal-dim:  #2a8c85;   /* lower-emphasis accent — links, secondary CTA borders */
+  --mangrove:       #5bc97a;   /* bullish signals — alive, not stock-market neon */
+  --mangrove-dim:   #3d8a52;   /* bullish on muted backgrounds (chip bg w/ white text) */
+  --sunset-coral:   #e08158;   /* bearish — warm warning, not alarm red */
+  --coral-dim:      #a45a3d;   /* bearish on muted backgrounds */
+  --neutral-gold:   #d4b370;   /* mixed/neutral — sand at sunset, not yellow alert */
+
+  /* ------------------------------------------------------------
+     Text
+     ------------------------------------------------------------ */
+  --text-primary:    #f0ede6;  /* warm off-white — NEVER pure white */
+  --text-secondary:  #b8b4a8;  /* body copy on secondary surfaces, table cell text */
+  --text-tertiary:   #807e76;  /* captions, freshness token, footnotes, audit source urls */
+  --text-on-accent:  #0a1419;  /* text on --gulf-teal — use midnight, never white */
+
+  /* ------------------------------------------------------------
+     Type families
+     ------------------------------------------------------------ */
+  --font-display: "Inter", system-ui, sans-serif;
+  --font-body:    "Inter", system-ui, sans-serif;
+  --font-mono:    "JetBrains Mono", ui-monospace, "SF Mono", monospace;
+
+  /* ------------------------------------------------------------
+     Scale (rem, 16px base)
+     ------------------------------------------------------------ */
+  --fs-hero:    clamp(3rem, 6vw, 5rem); /* /connect hero */
+  --fs-h1:      2.75rem;  /* report direction word, Tier 2 */
+  --fs-h2:      1.75rem;  /* section header */
+  --fs-metric:  2.25rem;  /* big metric value */
+  --fs-body:    1rem;
+  --fs-small:   0.875rem;
+  --fs-label:   0.875rem; /* metric label uppercase +0.06em */
+  --fs-caption: 0.75rem;  /* freshness token, source url */
+
+  /* line heights */
+  --lh-display: 1.08;
+  --lh-body:    1.55;
+  --lh-caption: 1.4;
+
+  /* tracking */
+  --tracking-display: -0.02em; /* -2% at 28px+ */
+  --tracking-label:    0.06em;
+
+  /* ------------------------------------------------------------
+     Spacing (8px base grid). Tokens: 4 / 8 / 12 / 16 / 24 / 32 / 48 / 64 / 96
+     ------------------------------------------------------------ */
+  --s-4:  4px;
+  --s-8:  8px;
+  --s-12: 12px;
+  --s-16: 16px;
+  --s-24: 24px;
+  --s-32: 32px;
+  --s-48: 48px;
+  --s-64: 64px;
+  --s-96: 96px;
+
+  /* ------------------------------------------------------------
+     Borders & radii — borders, never shadows.
+     ------------------------------------------------------------ */
+  --border-card:    1px solid var(--gulf-haze);
+  --border-divider: 1px solid var(--gulf-haze);
+  --border-input:   1px solid var(--gulf-slate-hi);
+  --border-focus:   1px solid var(--gulf-teal);
+
+  --radius-xs: 2px;
+  --radius-sm: 4px;
+  --radius-md: 6px;   /* default card radius — tight, not friendly */
+  --radius-lg: 10px;  /* /connect install block */
+  --radius-pill: 999px;
+
+  /* ------------------------------------------------------------
+     Motion — anchor durations & eases.
+     No bounce. No elastic. Surfacing, not springing.
+     ------------------------------------------------------------ */
+  --dur-hover:    140ms;
+  --dur-block:    400ms;
+  --dur-section:  600ms;
+  --dur-hero:     800ms;
+  --ease-out-quad:  cubic-bezier(.25, .46, .45, .94);
+  --ease-out-cubic: cubic-bezier(.215, .61, .355, 1);
+  --ease-out-quart: cubic-bezier(.165, .84, .44, 1);
+  --ease-out-quint: cubic-bezier(.23, 1, .32, 1);
+
+  /* Subtle body gradient — the only gradient allowed.
+     Implies deep-water depth without literalizing it. */
+  --gradient-body:
+    radial-gradient(120% 80% at 50% 0%, var(--gulf-deep) 0%, var(--gulf-midnight) 70%);
+}
+
+/* ============================================================
+   Semantic primitives — drop-in classes for any page/component.
+   ============================================================ */
+
+html, body {
+  background: var(--gulf-midnight);
+  color: var(--text-primary);
+  font-family: var(--font-body);
+  font-size: 16px;
+  line-height: var(--lh-body);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  text-rendering: optimizeLegibility;
+}
+
+/* Tabular figures are non-negotiable for numbers. */
+.numeric,
+.metric-value,
+td.numeric,
+.tabular {
+  font-variant-numeric: tabular-nums;
+  font-feature-settings: "tnum" 1;
+}
+
+/* --- Display & headings --- */
+.hero,
+h1.hero {
+  font-family: var(--font-display);
+  font-size: var(--fs-hero);
+  font-weight: 600;
+  line-height: var(--lh-display);
+  letter-spacing: var(--tracking-display);
+  color: var(--text-primary);
+  margin: 0;
+}
+
+h1, .h1 {
+  font-family: var(--font-display);
+  font-size: var(--fs-h1);
+  font-weight: 600;
+  line-height: var(--lh-display);
+  letter-spacing: var(--tracking-display);
+  margin: 0;
+}
+
+h2, .h2 {
+  font-family: var(--font-display);
+  font-size: var(--fs-h2);
+  font-weight: 500;
+  line-height: 1.2;
+  letter-spacing: -0.01em;
+  color: var(--text-primary);
+  margin: 0;
+}
+
+/* --- Direction word (the verdict) --- */
+.verdict {
+  font-family: var(--font-display);
+  font-size: var(--fs-h1);
+  font-weight: 600;
+  letter-spacing: var(--tracking-display);
+  line-height: 1;
+  text-transform: lowercase;
+  margin: 0;
+}
+
+[data-direction="bullish"] { color: var(--mangrove); }
+[data-direction="bearish"] { color: var(--sunset-coral); }
+[data-direction="mixed"]   { color: var(--neutral-gold); }
+[data-direction="neutral"] { color: var(--text-secondary); }
+
+/* --- Body & text levels --- */
+.body,
+p {
+  font-size: var(--fs-body);
+  line-height: var(--lh-body);
+  color: var(--text-secondary);
+  margin: 0;
+  text-wrap: pretty;
+}
+
+.body-primary  { color: var(--text-primary); }
+.body-small    { font-size: var(--fs-small); line-height: 1.5; }
+.caption       { font-size: var(--fs-caption); line-height: var(--lh-caption); color: var(--text-tertiary); }
+
+/* --- Metric label / value --- */
+.metric-label {
+  font-size: var(--fs-label);
+  font-weight: 500;
+  letter-spacing: var(--tracking-label);
+  text-transform: uppercase;
+  color: var(--text-tertiary);
+}
+
+.metric-value {
+  font-family: var(--font-display);
+  font-size: var(--fs-metric);
+  font-weight: 600;
+  line-height: 1.05;
+  letter-spacing: -0.015em;
+  color: var(--text-primary);
+  font-variant-numeric: tabular-nums;
+}
+
+.metric-unit {
+  font-size: 0.875rem;
+  font-weight: 500;
+  color: var(--text-tertiary);
+  margin-left: 4px;
+  letter-spacing: 0.02em;
+}
+
+/* --- Monospace primitives --- */
+.mono,
+code,
+kbd,
+.freshness {
+  font-family: var(--font-mono);
+  font-size: var(--fs-caption);
+  font-weight: 500;
+  color: var(--text-tertiary);
+  letter-spacing: 0;
+}
+
+/* --- Source link treatment --- */
+a.source,
+.source-link {
+  color: var(--gulf-teal-dim);
+  text-decoration: none;
+  border-bottom: 1px solid transparent;
+  transition: border-color var(--dur-hover) var(--ease-out-quad);
+}
+a.source:hover,
+.source-link:hover { border-bottom-color: currentColor; }
+
+/* --- Trend indicator (next to deltas) --- */
+.trend-up   { color: var(--mangrove); }
+.trend-down { color: var(--sunset-coral); }
+.trend-flat { color: var(--text-secondary); }

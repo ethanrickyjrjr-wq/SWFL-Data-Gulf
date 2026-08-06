@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Component — Trend indicators</title>
+<link rel="stylesheet" href="../colors_and_type.css">
+<link rel="stylesheet" href="_base.css">
+</head>
+<body class="preview">
+<div class="card-frame">
+
+<div style="display:flex;flex-direction:column;gap:10px;font-family:var(--font-body);font-size:14px;">
+  <div style="display:flex;align-items:center;gap:10px;">
+    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#5BC97A" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 15 12 9 18 15"/></svg>
+    <span style="color:var(--mangrove);font-variant-numeric:tabular-nums;">+18 bps QoQ</span>
+    <span style="color:var(--text-tertiary);font-family:var(--font-mono);font-size:11px;">bullish</span>
+  </div>
+  <div style="display:flex;align-items:center;gap:10px;">
+    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#E08158" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
+    <span style="color:var(--sunset-coral);font-variant-numeric:tabular-nums;">-12% YoY</span>
+    <span style="color:var(--text-tertiary);font-family:var(--font-mono);font-size:11px;">bearish</span>
+  </div>
+  <div style="display:flex;align-items:center;gap:10px;">
+    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#B8B4A8" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="12" x2="19" y2="12"/></svg>
+    <span style="color:var(--text-secondary);font-variant-numeric:tabular-nums;">Flat vs prior quarter</span>
+    <span style="color:var(--text-tertiary);font-family:var(--font-mono);font-size:11px;">neutral</span>
+  </div>
+</div>
+<div style="font-size:11px;color:var(--text-tertiary);">chevron-up / chevron-down / minus (Lucide). 1.5px stroke. Color = direction.</div>
+</div></body></html>

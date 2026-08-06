@@ -1,0 +1,243 @@
+/* MCP widget — inline in an AI chat bubble.
+   Width 480-640px. Layered on top of colors_and_type.css. */
+
+body {
+  margin: 0;
+  padding: 32px;
+  background: var(--gulf-midnight);
+  font-family: var(--font-body);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 16px;
+  min-height: 100vh;
+}
+
+/* Fake chat host wrapper so the widget reads in context */
+.mcp-host {
+  width: 100%;
+  max-width: 720px;
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+}
+.mcp-host-line {
+  font-family: var(--font-body);
+  font-size: 14px;
+  color: var(--text-secondary);
+  line-height: 1.55;
+  padding-left: 8px;
+}
+.mcp-host-user {
+  align-self: flex-end;
+  background: var(--gulf-slate-hi);
+  color: var(--text-primary);
+  padding: 10px 14px;
+  border-radius: 14px 14px 4px 14px;
+  font-size: 14px;
+  max-width: 520px;
+  border: 1px solid var(--gulf-haze);
+}
+.mcp-host-ai {
+  align-self: flex-start;
+  font-size: 14px;
+  color: var(--text-secondary);
+  max-width: 560px;
+  line-height: 1.55;
+}
+.mcp-host-tag {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-family: var(--font-mono);
+  font-size: 10px;
+  color: var(--text-tertiary);
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  margin-bottom: 6px;
+}
+
+/* The widget itself */
+.mcp-widget {
+  width: 100%;
+  max-width: 560px;
+  background: var(--gulf-slate);
+  border: 1px solid var(--gulf-haze);
+  border-radius: 8px;
+  padding: 20px 22px;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  position: relative;
+}
+.mcp-widget::before {
+  content: "";
+  position: absolute;
+  top: 14px;
+  right: 16px;
+  font-family: var(--font-mono);
+  font-size: 9px;
+  color: var(--text-tertiary);
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+}
+
+/* Header strip — brand + freshness */
+.mw-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+.mw-brand {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  font-family: var(--font-display);
+  font-size: 10.5px;
+  font-weight: 700;
+  letter-spacing: 0.16em;
+  color: var(--text-primary);
+}
+.mw-fresh {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-family: var(--font-mono);
+  font-size: 10px;
+  color: var(--text-tertiary);
+}
+
+/* Verdict + conclusion */
+.mw-hero {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin-top: 2px;
+}
+.mw-verdict {
+  font-family: var(--font-display);
+  font-weight: 600;
+  font-size: 36px;
+  line-height: 1;
+  letter-spacing: -0.02em;
+  text-transform: lowercase;
+  margin: 0;
+}
+.mw-conclusion {
+  margin: 0;
+  font-size: 14px;
+  line-height: 1.5;
+  color: var(--text-primary);
+}
+
+/* Metrics block — 3 rows max */
+.mw-metrics {
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+  margin-top: 6px;
+  border-top: 1px solid var(--gulf-haze);
+}
+.mw-row {
+  display: grid;
+  grid-template-columns: 1.4fr 1fr auto;
+  align-items: baseline;
+  gap: 12px;
+  padding: 10px 0;
+  border-bottom: 1px solid var(--gulf-haze);
+}
+.mw-row:last-child { border-bottom: none; }
+.mw-label { font-size: 12px; color: var(--text-secondary); }
+.mw-value-cell { display: flex; align-items: baseline; gap: 4px; font-variant-numeric: tabular-nums; }
+.mw-value { font-family: var(--font-display); font-size: 18px; font-weight: 600; color: var(--text-primary); }
+.mw-unit  { font-size: 11px; color: var(--text-tertiary); }
+.mw-delta { font-size: 11px; font-variant-numeric: tabular-nums; display: inline-flex; align-items: center; gap: 4px; }
+.mw-source {
+  font-family: var(--font-mono);
+  font-size: 10px;
+  color: var(--gulf-teal-dim);
+  text-decoration: none;
+  white-space: nowrap;
+}
+.mw-source:hover { border-bottom: 1px solid currentColor; }
+
+/* Footer — caveat toggle + view full link */
+.mw-foot {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-top: 4px;
+  padding-top: 12px;
+  border-top: 1px solid var(--gulf-haze);
+}
+.mw-caveat-btn,
+.mw-view-full {
+  background: transparent;
+  border: none;
+  font: inherit;
+  font-size: 11px;
+  cursor: pointer;
+  padding: 0;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  color: var(--text-tertiary);
+  font-family: var(--font-body);
+}
+.mw-caveat-btn:hover { color: var(--text-secondary); }
+.mw-view-full {
+  color: var(--gulf-teal);
+  text-decoration: none;
+  font-weight: 500;
+}
+.mw-view-full:hover { color: var(--text-primary); }
+
+.mw-caveats {
+  font-size: 12px;
+  color: var(--text-secondary);
+  line-height: 1.5;
+  margin-top: 8px;
+  padding-top: 8px;
+  border-top: 1px solid var(--gulf-haze);
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  opacity: 0.85;
+}
+
+/* Mode selector (impress vs subtle) — host UI demonstration */
+.mw-mode-bar {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-family: var(--font-mono);
+  font-size: 11px;
+  color: var(--text-tertiary);
+  padding: 6px 0 14px;
+}
+.mw-mode-bar button {
+  background: var(--gulf-slate);
+  border: 1px solid var(--gulf-haze);
+  color: var(--text-secondary);
+  font: inherit;
+  padding: 4px 10px;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: border-color var(--dur-hover) var(--ease-out-quad), color var(--dur-hover) var(--ease-out-quad);
+}
+.mw-mode-bar button.is-active { color: var(--text-primary); border-color: var(--gulf-teal-dim); }
+
+/* Animations */
+@keyframes mw-spring-rise {
+  0%   { opacity: 0; transform: translateY(10px); }
+  100% { opacity: 1; transform: translateY(0); }
+}
+@keyframes mw-fade {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .mw-verdict, .mw-metrics, .mw-foot { animation: none !important; }
+}

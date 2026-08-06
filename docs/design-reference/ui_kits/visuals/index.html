@@ -1,0 +1,191 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>SWFL Data Gulf · Interactive visuals</title>
+<link rel="stylesheet" href="../../colors_and_type.css">
+<style>
+  body { margin: 0; background: var(--gulf-midnight); color: var(--text-primary); font-family: var(--font-body); -webkit-font-smoothing: antialiased; }
+  .v-page { max-width: 1100px; margin: 0 auto; padding: 64px 32px 96px; }
+  .v-eyebrow { font-family: var(--font-mono); font-size: 11px; color: var(--gulf-teal); letter-spacing: 0.1em; text-transform: uppercase; font-weight: 500; text-shadow: 0 0 12px color-mix(in srgb, var(--gulf-teal) 45%, transparent); }
+  h1 { font-family: var(--font-display); font-size: 2.5rem; font-weight: 600; letter-spacing: -0.025em; margin: 10px 0 8px; text-wrap: balance; }
+  .v-sub { color: var(--text-secondary); font-size: 1rem; margin: 0 0 56px; max-width: 64ch; line-height: 1.55; }
+
+  /* Grid of cards — each links to a single-page interactive visual */
+  .v-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 20px; }
+  .v-card {
+    background: var(--gulf-slate);
+    border: 1px solid var(--gulf-haze);
+    border-radius: 10px;
+    padding: 22px 24px 20px;
+    text-decoration: none;
+    color: inherit;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    transition: border-color 150ms ease, background 150ms ease, transform 200ms cubic-bezier(.16,.84,.44,1);
+  }
+  .v-card:hover {
+    border-color: var(--gulf-teal-dim);
+    background: var(--gulf-slate-hi);
+    transform: translateY(-2px);
+  }
+  .v-card-num {
+    font-family: var(--font-mono);
+    font-size: 10px;
+    color: var(--gulf-teal);
+    letter-spacing: 0.1em;
+    font-weight: 500;
+  }
+  .v-card-title {
+    font-family: var(--font-display);
+    font-size: 1.125rem;
+    font-weight: 600;
+    letter-spacing: -0.015em;
+    color: var(--text-primary);
+    margin: 0;
+    text-wrap: balance;
+  }
+  .v-card-data {
+    font-family: var(--font-mono);
+    font-size: 11px;
+    color: var(--text-secondary);
+    letter-spacing: 0.04em;
+  }
+  .v-card-desc {
+    color: var(--text-secondary);
+    font-size: 13px;
+    line-height: 1.5;
+    margin: 0;
+  }
+  .v-card-foot {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding-top: 12px;
+    border-top: 1px solid var(--gulf-haze);
+    font-family: var(--font-mono);
+    font-size: 11px;
+    color: var(--text-tertiary);
+    letter-spacing: 0.04em;
+  }
+  .v-card-foot .arrow { color: var(--gulf-teal); transition: transform 150ms ease; }
+  .v-card:hover .arrow { transform: translateX(4px); }
+
+  .v-foot {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding-top: 24px;
+    margin-top: 40px;
+    border-top: 1px solid var(--gulf-haze);
+    font-family: var(--font-mono);
+    font-size: 11px;
+    color: var(--text-tertiary);
+    letter-spacing: 0.02em;
+    flex-wrap: wrap;
+    gap: 8px;
+  }
+
+  @media (max-width: 720px) {
+    .v-grid { grid-template-columns: 1fr; }
+    h1 { font-size: 1.875rem; }
+  }
+</style>
+</head>
+<body>
+<main class="v-page" data-screen-label="Visuals index">
+  <span class="v-eyebrow">SWFL Data Gulf · interactive visuals</span>
+  <h1>Standalone interactive charts, one per page.</h1>
+  <p class="v-sub">Each one pulls real SWFL data — corridors, franchise
+    outcomes, flood exposure, freight nowcast. Open them, see what reads,
+    keep the ones that work, throw out the rest.</p>
+
+  <div class="v-grid">
+    <a class="v-card" href="01-corridor-scatter.html">
+      <span class="v-card-num">01 · CRE</span>
+      <h3 class="v-card-title">Corridor positioning — cap rate × vacancy</h3>
+      <span class="v-card-data">8 corridors · bubble size = absorption · click for profile</span>
+      <p class="v-card-desc">Quadrant scatter with pack-median crosshair.
+        Color by evolution (growing / stable / repositioning / declining).
+        Quadrant labels call out landlord-market vs distressed.</p>
+      <div class="v-card-foot">
+        <span>From SWFL CRE corridor profiles</span>
+        <span class="arrow">→</span>
+      </div>
+    </a>
+
+    <a class="v-card" href="02-franchise-survival.html">
+      <span class="v-card-num">02 · Franchise</span>
+      <h3 class="v-card-title">Franchise survival — SBA 7(a)/504 outcomes</h3>
+      <span class="v-card-data">14 brands · 169 resolved loans · sortable</span>
+      <p class="v-card-desc">Ranked horizontal bar chart with median-line
+        marker. Color by performance vs the 76.25% pack median. Click any
+        row for charge-off rate, sample size, and gross approval.</p>
+      <div class="v-card-foot">
+        <span>From SBA loan-status reporting</span>
+        <span class="arrow">→</span>
+      </div>
+    </a>
+
+    <a class="v-card" href="03-flood-exposure.html">
+      <span class="v-card-num">03 · Environment</span>
+      <h3 class="v-card-title">Flood exposure — Lee County SFHA + V/VE</h3>
+      <span class="v-card-data">37.95% SFHA · 5.15% V/VE · $21.4M storm-year claims</span>
+      <p class="v-card-desc">Schematic Lee County with SFHA and coastal
+        high-hazard layers, plus the storm-year vs non-storm baseline
+        comparison ($21.4M against $59.9K). Click KPIs for context.</p>
+      <div class="v-card-foot">
+        <span>From FEMA NFHL + OpenFEMA NFIP</span>
+        <span class="arrow">→</span>
+      </div>
+    </a>
+
+    <a class="v-card" href="04-freight-nowcast.html">
+      <span class="v-card-num">04 · Logistics</span>
+      <h3 class="v-card-title">Freight nowcast — z-score against rolling history</h3>
+      <span class="v-card-data">9 FDOT segments · 90-day rolling baseline · z = −0.02</span>
+      <p class="v-card-desc">Deviation gauge for current annualized
+        freight activity vs the brain's own rolling FDOT history.
+        Reads "normal" — on baseline. Full stat rail underneath.</p>
+      <div class="v-card-foot">
+        <span>From FDOT AADT freight-coded segments</span>
+        <span class="arrow">→</span>
+      </div>
+    </a>
+
+    <a class="v-card" href="05-seasonal-radial.html">
+      <span class="v-card-num">05 · CRE</span>
+      <h3 class="v-card-title">Seasonal exposure — radial across corridors</h3>
+      <span class="v-card-data">8 corridors · index 0.10 (Alico) → 0.88 (Estero)</span>
+      <p class="v-card-desc">Radial bar chart sorted by seasonality.
+        Click any corridor (in the chart or the list) for its read on
+        winter dependence vs year-round demand.</p>
+      <div class="v-card-foot">
+        <span>From SWFL CRE corridor profiles</span>
+        <span class="arrow">→</span>
+      </div>
+    </a>
+
+    <a class="v-card" href="06-storm-claims.html">
+      <span class="v-card-num">06 · Environment</span>
+      <h3 class="v-card-title">Storm-year timeline — named storms vs baseline</h3>
+      <span class="v-card-data">6 named storms · 2004–2024 · $21.4M total</span>
+      <p class="v-card-desc">Vertical timeline of NFIP paid claims per
+        named storm. Ian is the peak (Cat 5, Fort Myers Beach landfall).
+        Non-storm baseline at $59.9K shown for scale.</p>
+      <div class="v-card-foot">
+        <span>From OpenFEMA NFIP paid claims</span>
+        <span class="arrow">→</span>
+      </div>
+    </a>
+  </div>
+
+  <div class="v-foot">
+    <span>All visuals use real SWFL data — corridor profiles, SBA loans, FEMA NFIP, FDOT</span>
+    <span>Designed against the SWFL Data Gulf spec · design/QUICK-REFERENCE.md</span>
+  </div>
+</main>
+</body>
+</html>

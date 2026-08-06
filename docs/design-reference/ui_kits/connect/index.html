@@ -1,0 +1,545 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>SWFL Data Gulf</title>
+<link rel="icon" href="../../assets/favicon.svg" type="image/svg+xml">
+<link rel="stylesheet" href="../../colors_and_type.css">
+<style>
+  :root {
+    --teal: #3DC9C0;
+    --teal-bright: #6FE5DD;
+    --teal-dim: #2A8C85;
+  }
+  body {
+    margin: 0;
+    background: var(--gulf-midnight);
+    color: var(--text-primary);
+    font-family: var(--font-body);
+    -webkit-font-smoothing: antialiased;
+    min-height: 100vh;
+    overflow-x: hidden;
+  }
+
+  /* ============================================================
+     Top nav — logo top-left, links + replay top-right.
+     Matches the chrome of ui_kits/connect/.
+     ============================================================ */
+  .ln-nav {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 22px 40px;
+    border-bottom: 1px solid var(--gulf-haze);
+    position: relative;
+    z-index: 30;
+  }
+  .ln-brand {
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+    text-decoration: none;
+    color: var(--text-primary);
+  }
+  .ln-brand:hover { color: var(--teal-bright); }
+  .ln-wordmark {
+    font-family: var(--font-display);
+    font-weight: 700;
+    letter-spacing: 0.18em;
+    font-size: 12px;
+  }
+  .ln-nav-links {
+    display: flex;
+    align-items: center;
+    gap: 28px;
+    font-size: 13px;
+  }
+  .ln-nav-links a {
+    color: var(--text-secondary);
+    text-decoration: none;
+    transition: color 120ms ease;
+  }
+  .ln-nav-links a:hover { color: var(--text-primary); }
+  .ln-replay {
+    background: transparent;
+    border: 1px solid var(--gulf-haze);
+    color: var(--text-secondary);
+    font-family: var(--font-mono);
+    font-size: 10px;
+    font-weight: 500;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    padding: 6px 10px;
+    border-radius: 3px;
+    cursor: pointer;
+    transition: all 120ms ease;
+  }
+  .ln-replay:hover { border-color: var(--teal-dim); color: var(--teal); }
+
+  /* ============================================================
+     Pixel stage — blocks fly in from every direction and stay
+     ============================================================ */
+  .v-stage {
+    position: fixed;
+    inset: 0;
+    pointer-events: none;
+    z-index: 2;
+    overflow: hidden;
+  }
+  .v-pixel {
+    position: absolute;
+    background: var(--teal);
+    border-radius: 1px;
+    will-change: transform, opacity;
+    box-shadow: 0 0 4px color-mix(in srgb, var(--teal) 35%, transparent);
+  }
+  .v-pixel.is-landed {
+    box-shadow: 0 0 6px color-mix(in srgb, var(--teal) 55%, transparent),
+                0 0 14px color-mix(in srgb, var(--teal) 22%, transparent);
+  }
+
+  /* ============================================================
+     Page composition
+     ============================================================ */
+  .v-page {
+    position: relative;
+    z-index: 3;
+    min-height: calc(100vh - 70px);
+    display: grid;
+    grid-template-rows: 1fr auto;
+  }
+
+  .v-hero {
+    align-self: center;
+    justify-self: center;
+    text-align: center;
+    padding: 96px 24px 80px;
+    max-width: 1100px;
+    width: 100%;
+    box-sizing: border-box;
+  }
+
+  .v-eyebrow {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    font-family: var(--font-mono);
+    font-size: 11px;
+    color: var(--teal);
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    font-weight: 500;
+    padding: 6px 14px;
+    border: 1px solid var(--teal-dim);
+    border-radius: 999px;
+    background: color-mix(in srgb, var(--teal) 8%, transparent);
+    margin-bottom: 28px;
+    opacity: 0;
+    transform: translateY(8px);
+    transition: opacity 600ms cubic-bezier(.16,.84,.44,1), transform 600ms cubic-bezier(.16,.84,.44,1);
+  }
+  .v-eyebrow.is-revealed { opacity: 1; transform: translateY(0); }
+  .v-eyebrow-dot {
+    width: 6px; height: 6px; border-radius: 50%;
+    background: var(--teal);
+    box-shadow: 0 0 8px var(--teal);
+  }
+
+  .v-headline {
+    font-family: var(--font-display);
+    font-size: clamp(2.5rem, 7vw, 5.25rem);
+    font-weight: 600;
+    letter-spacing: -0.035em;
+    line-height: 1.04;
+    margin: 0 0 28px;
+    text-wrap: balance;
+    color: var(--text-primary);
+  }
+
+  /* "data" slot — invisible, the pixel grid IS the word */
+  .v-data-word {
+    display: inline-block;
+    position: relative;
+    color: transparent;
+    font-weight: 600;
+    letter-spacing: -0.045em;
+  }
+  /* AI accent — visible blue */
+  .v-accent {
+    color: #6CB9FF;
+    font-weight: 600;
+    text-shadow:
+      0 0 24px color-mix(in srgb, #6CB9FF 35%, transparent),
+      0 0 60px color-mix(in srgb, #6CB9FF 18%, transparent);
+  }
+
+  .v-sub {
+    font-family: var(--font-body);
+    font-size: clamp(1rem, 1.4vw, 1.1875rem);
+    color: var(--text-secondary);
+    margin: 0 auto 40px;
+    max-width: 56ch;
+    line-height: 1.55;
+    text-wrap: balance;
+    opacity: 0;
+    transform: translateY(8px);
+    transition: opacity 600ms cubic-bezier(.16,.84,.44,1), transform 600ms cubic-bezier(.16,.84,.44,1);
+  }
+  .v-sub.is-revealed { opacity: 1; transform: translateY(0); }
+
+  /* Install block — multi-client tabs to match connect landing */
+  .v-install {
+    max-width: 640px;
+    margin: 0 auto;
+    opacity: 0;
+    transform: translateY(14px) scale(0.96);
+    transition: opacity 700ms cubic-bezier(.16,.84,.44,1), transform 700ms cubic-bezier(.16,.84,.44,1);
+  }
+  .v-install.is-revealed { opacity: 1; transform: translateY(0) scale(1); }
+
+  .v-install-tabs {
+    display: flex;
+    gap: 4px;
+    padding: 4px;
+    background: var(--gulf-deep);
+    border: 1px solid var(--gulf-haze);
+    border-radius: 8px 8px 0 0;
+    border-bottom: none;
+    width: fit-content;
+    margin: 0 auto;
+    position: relative;
+    bottom: -1px;
+    z-index: 1;
+  }
+  .v-install-tab {
+    background: transparent;
+    border: none;
+    color: var(--text-tertiary);
+    font: inherit;
+    font-size: 12px;
+    padding: 8px 14px;
+    border-radius: 4px;
+    cursor: pointer;
+    transition: color 120ms ease, background 120ms ease;
+    font-family: var(--font-body);
+  }
+  .v-install-tab:hover { color: var(--text-secondary); }
+  .v-install-tab.is-active {
+    color: var(--text-primary);
+    background: var(--gulf-slate);
+    font-weight: 500;
+  }
+  .v-install-block {
+    background: var(--gulf-slate);
+    border: 1px solid var(--gulf-haze);
+    border-radius: 10px;
+    padding: 18px 20px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 14px;
+  }
+  .v-install-cmd {
+    font-family: var(--font-mono);
+    font-size: 14px;
+    font-weight: 500;
+    color: var(--text-primary);
+    user-select: all;
+  }
+  .v-install-cmd .prompt { color: var(--teal); margin-right: 8px; }
+  .v-install-copy {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 7px 12px;
+    background: var(--gulf-slate-hi);
+    border: 1px solid var(--gulf-haze);
+    border-radius: 4px;
+    color: var(--text-secondary);
+    font-family: var(--font-mono);
+    font-size: 12px;
+    cursor: pointer;
+    transition: transform 150ms ease, border-color 120ms ease, color 120ms ease;
+  }
+  .v-install-copy:hover { border-color: var(--teal-dim); color: var(--text-primary); }
+  .v-install-copy:active { transform: scale(0.96); }
+  .v-install-copy.is-copied { color: var(--teal); border-color: var(--teal-dim); }
+
+  /* Footer bar */
+  .ln-foot {
+    border-top: 1px solid var(--gulf-haze);
+    padding: 32px 40px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    font-family: var(--font-mono);
+    font-size: 11px;
+    color: var(--text-tertiary);
+    position: relative;
+    z-index: 3;
+    opacity: 0;
+    transition: opacity 600ms ease;
+  }
+  .ln-foot.is-revealed { opacity: 1; }
+
+  /* === Other entrance animations off — show eyebrow/sub/install/foot immediately ===
+     But KEEP the pixel "data" animation — it's the only one that worked. */
+  .v-eyebrow,
+  .v-sub,
+  .v-install,
+  .ln-foot {
+    opacity: 1 !important;
+    transform: none !important;
+    transition: none !important;
+  }
+
+  @media (max-width: 720px) {
+    .ln-nav { padding: 18px 20px; }
+    .ln-nav-links { gap: 14px; font-size: 12px; }
+    .ln-nav-links .ln-nav-link { display: none; }
+    .v-install-block { flex-direction: column; align-items: stretch; }
+    .ln-foot { padding: 24px 20px; flex-direction: column; gap: 8px; }
+  }
+</style>
+</head>
+<body>
+
+<nav class="ln-nav">
+  <a class="ln-brand" href="#" aria-label="SWFL Data Gulf home">
+    <svg width="20" height="14" viewBox="0 0 40 28" fill="none" aria-hidden="true">
+      <!-- ≈ wave glyph — 3 stacked sine waves, tightly proportioned so they sit at the same height as the text caps. -->
+      <path d="M2 6  C 7 1,  13 1,  20 6  C 27 11, 33 11, 38 6"  stroke="#3DC9C0" stroke-width="3" stroke-linecap="round" fill="none"/>
+      <path d="M2 14 C 7 9,  13 9,  20 14 C 27 19, 33 19, 38 14" stroke="#3DC9C0" stroke-width="3" stroke-linecap="round" fill="none" opacity="0.65"/>
+      <path d="M2 22 C 7 17, 13 17, 20 22 C 27 27, 33 27, 38 22" stroke="#3DC9C0" stroke-width="3" stroke-linecap="round" fill="none" opacity="0.3"/>
+    </svg>
+    <span class="ln-wordmark">SWFL DATA GULF</span>
+  </a>
+  <div class="ln-nav-links">
+    <a href="#coverage" class="ln-nav-link">Coverage</a>
+    <a href="../report/index.html" class="ln-nav-link">Sample report</a>
+    <a href="../connect/index.html" class="ln-nav-link">Other landing</a>
+    <button class="ln-replay" id="replay" type="button">↻ Replay</button>
+  </div>
+</nav>
+
+<div class="v-stage" id="stage"></div>
+
+<main class="v-page" data-screen-label="Landing (pixel data)">
+  <section class="v-hero">
+    <span class="v-eyebrow" id="eyebrow">
+      <span class="v-eyebrow-dot"></span>
+      Now in beta · Lee, Collier
+    </span>
+    <h1 class="v-headline" style="font-family: Poppins; line-height: 1.1"><span style="font-size: 0.55em; letter-spacing: 0.14em; font-weight: 500; color: var(--text-secondary); display: block; margin-bottom: 0.2em;">SWFL</span><span class="v-data-word" id="dataWord" aria-label="data" style="font-size: 96px; font-weight: 700;">data</span><br><span style="font-size: 56px; font-weight: 500;">Brought Together</span><br><span style="font-size: 56px; font-weight: 500;">With Your <span class="v-accent" style="color: #3DC9C0; font-weight: 700;">AI</span></span></h1>
+    <p class="v-sub" id="sub">
+      Install once. Your AI gets sourced data on housing, CRE, permits,
+      traffic, tourism, hurricane risk, and the macro context behind
+      them. Sourced. Fresh. Surgical.
+    </p>
+    <div class="v-install" id="install">
+      <div class="v-install-tabs" role="tablist" aria-label="Install client">
+        <button class="v-install-tab is-active" role="tab" data-client="claude" aria-selected="true">Claude</button>
+        <button class="v-install-tab" role="tab" data-client="cursor" aria-selected="false">Cursor</button>
+        <button class="v-install-tab" role="tab" data-client="chatgpt" aria-selected="false">ChatGPT</button>
+      </div>
+      <div class="v-install-block">
+        <span class="v-install-cmd">
+          <span class="prompt">$</span><span id="cmdText">claude mcp add swfl npx @swfl/connect</span>
+        </span>
+        <button class="v-install-copy" id="copyBtn" type="button">
+          <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
+          <span id="copyLabel">Copy</span>
+        </button>
+      </div>
+    </div>
+  </section>
+</main>
+
+<footer class="ln-foot" id="foot">
+  <span>© 2026 SWFL Data Gulf · Lee · Collier</span>
+  <span>Sourced. Fresh. Surgical.</span>
+</footer>
+
+<script type="module">
+// ============================================================
+// Animation — "data" pixel grid. Blocks fly in from every
+// direction. Once landed they stay; the word IS the mosaic.
+// ============================================================
+const stage = document.getElementById("stage");
+const word = document.getElementById("dataWord");
+
+const easeOutQuint = t => 1 - Math.pow(1 - t, 5);
+const lerp = (a, b, t) => a + (b - a) * t;
+const rng = () => Math.random();
+
+function tween({ from = 0, to = 1, duration = 500, delay = 0, ease = easeOutQuint, onUpdate, onComplete, guard }) {
+  const start = performance.now() + delay;
+  const range = to - from;
+  function frame(now) {
+    if (guard && !guard()) return;
+    const t = Math.max(0, Math.min(1, (now - start) / Math.max(duration, 1)));
+    if (now >= start) onUpdate(from + range * ease(t));
+    if (t < 1) requestAnimationFrame(frame);
+    else if (onComplete) onComplete();
+  }
+  requestAnimationFrame(frame);
+}
+
+function samplePixels(text, fontPx, cellSize) {
+  const off = document.createElement("canvas");
+  const octx = off.getContext("2d");
+  const fontStack = `600 ${fontPx}px "Inter", system-ui, sans-serif`;
+  octx.font = fontStack;
+  const metrics = octx.measureText(text);
+  const w = Math.ceil(metrics.width) + 20;
+  const ascent = metrics.actualBoundingBoxAscent || fontPx * 0.8;
+  const descent = metrics.actualBoundingBoxDescent || fontPx * 0.25;
+  const h = Math.ceil(ascent + descent) + 4;
+  off.width = w; off.height = h;
+  octx.font = fontStack;
+  octx.fillStyle = "white";
+  octx.textBaseline = "alphabetic";
+  octx.fillText(text, 10, ascent + 2);
+  const img = octx.getImageData(0, 0, w, h);
+  const cells = [];
+  for (let y = 0; y < h; y += cellSize) {
+    for (let x = 0; x < w; x += cellSize) {
+      const i = (y * w + x) * 4;
+      if (img.data[i + 3] > 90) cells.push({ lx: x, ly: y });
+    }
+  }
+  return { cells, width: w, height: h };
+}
+
+function offscreenStart(centerX, centerY, vw, vh) {
+  const angle = rng() * Math.PI * 2;
+  const cos = Math.cos(angle), sin = Math.sin(angle);
+  const margin = 80;
+  const dx = cos > 0 ? (vw - centerX + margin) : (centerX + margin);
+  const dy = sin > 0 ? (vh - centerY + margin) : (centerY + margin);
+  const tX = Math.abs(cos) > 1e-6 ? dx / Math.abs(cos) : Infinity;
+  const tY = Math.abs(sin) > 1e-6 ? dy / Math.abs(sin) : Infinity;
+  const t = Math.min(tX, tY) + 40 + rng() * 80;
+  return { sx: centerX + cos * t, sy: centerY + sin * t };
+}
+
+let runId = 0;
+function runAnimation() {
+  const me = ++runId;
+  const isActive = () => runId === me;
+
+  stage.innerHTML = "";
+  ["eyebrow", "sub", "install", "foot"].forEach(id => document.getElementById(id).classList.remove("is-revealed"));
+
+  const wordRect = word.getBoundingClientRect();
+  const centerX = wordRect.left + wordRect.width / 2;
+  const centerY = wordRect.top + wordRect.height / 2;
+  const vw = window.innerWidth, vh = window.innerHeight;
+
+  const heroFontPx = Math.max(56, Math.min(220, wordRect.height * 0.96));
+  const CELL = Math.max(6, Math.round(heroFontPx / 14));
+  const { cells, width: pw, height: ph } = samplePixels("data", heroFontPx, CELL);
+  if (!cells.length) return;
+
+  const offsetX = centerX - pw / 2;
+  const offsetY = centerY - ph / 2;
+
+  for (let i = cells.length - 1; i > 0; i--) {
+    const j = Math.floor(rng() * (i + 1));
+    [cells[i], cells[j]] = [cells[j], cells[i]];
+  }
+
+  const TOTAL_SPREAD = 1100;
+  const FLIGHT_BASE = 900;
+  const FLIGHT_VAR = 400;
+
+  const pixels = [];
+  cells.forEach(c => {
+    const targetX = offsetX + c.lx;
+    const targetY = offsetY + c.ly;
+    const { sx, sy } = offscreenStart(centerX, centerY, vw, vh);
+    const el = document.createElement("div");
+    el.className = "v-pixel";
+    el.style.width = el.style.height = CELL + "px";
+    el.style.opacity = "0";
+    el.style.transform = `translate(${sx.toFixed(1)}px, ${sy.toFixed(1)}px)`;
+    stage.appendChild(el);
+    pixels.push({ el, sx, sy, targetX, targetY });
+  });
+
+  pixels.forEach(p => {
+    const delay = rng() * TOTAL_SPREAD;
+    const flightDur = FLIGHT_BASE + rng() * FLIGHT_VAR;
+
+    tween({
+      from: 0, to: 1, duration: 200,
+      delay: Math.max(0, delay - 60),
+      guard: isActive,
+      onUpdate: v => { p.el.style.opacity = v.toFixed(3); },
+    });
+
+    tween({
+      from: 0, to: 1, duration: flightDur, delay,
+      ease: easeOutQuint, guard: isActive,
+      onUpdate: t => {
+        const x = lerp(p.sx, p.targetX, t);
+        const y = lerp(p.sy, p.targetY, t);
+        p.el.style.transform = `translate(${x.toFixed(1)}px, ${y.toFixed(1)}px)`;
+      },
+      onComplete: () => {
+        if (!isActive()) return;
+        p.el.classList.add("is-landed");
+        p.el.style.opacity = "1";
+      },
+    });
+  });
+
+  const allDone = TOTAL_SPREAD + FLIGHT_BASE + FLIGHT_VAR;
+  setTimeout(() => isActive() && document.getElementById("eyebrow").classList.add("is-revealed"), 50);
+  setTimeout(() => isActive() && document.getElementById("sub").classList.add("is-revealed"),     allDone + 100);
+  setTimeout(() => isActive() && document.getElementById("install").classList.add("is-revealed"), allDone + 280);
+  setTimeout(() => isActive() && document.getElementById("foot").classList.add("is-revealed"),    allDone + 440);
+}
+
+window.addEventListener("load", () => setTimeout(runAnimation, 80));
+window.addEventListener("resize", () => runAnimation());
+document.getElementById("replay").addEventListener("click", runAnimation);
+
+// ============================================================
+// Install command tabs + copy
+// ============================================================
+const COMMANDS = {
+  claude:  "claude mcp add swfl npx @swfl/connect",
+  cursor:  "cursor mcp add swfl npx @swfl/connect",
+  chatgpt: "open https://chat.openai.com/g/swfl-data-gulf",
+};
+
+const cmdText = document.getElementById("cmdText");
+const copyLabel = document.getElementById("copyLabel");
+const copyBtn = document.getElementById("copyBtn");
+
+document.querySelectorAll(".v-install-tab").forEach(tab => {
+  tab.addEventListener("click", () => {
+    document.querySelectorAll(".v-install-tab").forEach(t => {
+      t.classList.remove("is-active");
+      t.setAttribute("aria-selected", "false");
+    });
+    tab.classList.add("is-active");
+    tab.setAttribute("aria-selected", "true");
+    cmdText.textContent = COMMANDS[tab.dataset.client];
+  });
+});
+
+copyBtn.addEventListener("click", () => {
+  navigator.clipboard?.writeText(cmdText.textContent);
+  copyBtn.classList.add("is-copied");
+  copyLabel.textContent = "Copied";
+  setTimeout(() => {
+    copyBtn.classList.remove("is-copied");
+    copyLabel.textContent = "Copy";
+  }, 1500);
+});
+</script>
+</body>
+</html>

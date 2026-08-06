@@ -1402,7 +1402,7 @@ Reachability at generation: 803 by path · 521 by name only · 224 orphaned. Re-
 
 ## lib/deliverable — 14
 
-- `lib/deliverable/CLAUDE.md` — lib/deliverable/ — sell-side vs story-side conventions (loads when you edit here) — keyless/organic ask and every builder miss lands there (blank skeleton + sourced fill, open
+- `lib/deliverable/CLAUDE.md` — ⛔ TYPOGRAPHY IS DECIDED. DO NOT PICK A FONT, A SIZE, OR A CLIPPING RULE. — 08/06/2026 for exactly this reason:
 - `lib/deliverable/recipes/agent-brand-intro.ledger.md` — Enforced — Test: lib/deliverable/recipes/agent-brand-intro.test.ts > "the anchor listing can never hijack the farm area"
 - `lib/deliverable/recipes/agent-launch.ledger.md` — Enforced — Test: lib/deliverable/recipes/agent-launch.test.ts > "buildAgentLaunch: NO chart, ever"
 - `lib/deliverable/recipes/back-on-market.ledger.md` **[ORPHAN]** — back-on-market — coverage ledger — What this recipe's tests actually hold down, and what they do not. Rewritten 08/06/2026 when
@@ -1731,7 +1731,7 @@ Reachability at generation: 803 by path · 521 by name only · 224 orphaned. Re-
 
 ## lib/email — 1
 
-- `lib/email/CLAUDE.md` — lib/email/ — email & deliverable conventions (loads when you edit here) — asks → the default-grid recipe (blank skeleton, sourced fill via fillSkeletonFromSources,
+- `lib/email/CLAUDE.md` — ⛔ TYPOGRAPHY IS DECIDED. DO NOT PICK A FONT, A SIZE, OR A CLIPPING RULE. — 08/06/2026 for exactly this reason:
 
 ## lib/pdf — 1
 
@@ -1739,7 +1739,7 @@ Reachability at generation: 803 by path · 521 by name only · 224 orphaned. Re-
 
 ## lib/social — 1
 
-- `lib/social/CLAUDE.md` — lib/social/ — social conventions (loads when you edit here) — BEGINNING OF SOCIAL BUILDS!!!! WE DON'T WANT TO LOSE THE RECIPE." It is here because it was
+- `lib/social/CLAUDE.md` — ⛔ TYPOGRAPHY IS DECIDED. DO NOT PICK A FONT, A SIZE, OR A CLIPPING RULE. — 08/06/2026 for exactly this reason:
 
 ## mcp-widget — 1
 

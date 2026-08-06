@@ -11,7 +11,7 @@
 // formatDisplayDate, a bold title at top and an optional source/as-of caption at
 // the bottom.
 
-import { formatAxisTick, type ValueFormat } from "@/lib/charts/format";
+import { formatAxisTick, type ValueFormat, TABULAR } from "@/lib/charts/format";
 import { formatDisplayDate } from "@/lib/format-date";
 import { extendPalette } from "@/lib/charts/palette";
 
@@ -183,7 +183,7 @@ export function donutShareSvg(segments: DonutSegment[], opts: DonutShareOpts): s
 
   // Center total + unit label.
   const center = [
-    `<text x="${cx}" y="${cy - 2}" text-anchor="middle" font-family="Arial" font-size="26" font-weight="bold" fill="${palette.title}">${esc(formatAxisTick(fmt, total))}</text>`,
+    `<text x="${cx}" y="${cy - 2}" text-anchor="middle" font-family="Arial" ${TABULAR} font-size="26" font-weight="bold" fill="${palette.title}">${esc(formatAxisTick(fmt, total))}</text>`,
   ];
   if (opts.unit) {
     center.push(
@@ -201,7 +201,7 @@ export function donutShareSvg(segments: DonutSegment[], opts: DonutShareOpts): s
     legend.push(
       `<rect x="${legendX}" y="${ty}" width="${swatch}" height="${swatch}" rx="2" fill="${esc(color)}"/>`,
       `<text x="${legendX + swatch + 8}" y="${ty + swatch - 1}" font-family="Arial" font-size="12" fill="${palette.label}">${esc(label)}</text>`,
-      `<text x="${W - 24}" y="${ty + swatch - 1}" text-anchor="end" font-family="Arial" font-size="12" font-weight="bold" fill="${palette.title}">${esc(formatAxisTick(fmt, s.value))}</text>`,
+      `<text x="${W - 24}" y="${ty + swatch - 1}" text-anchor="end" font-family="Arial" ${TABULAR} font-size="12" font-weight="bold" fill="${palette.title}">${esc(formatAxisTick(fmt, s.value))}</text>`,
       `<text x="${W - 24}" y="${ty + swatch + 12}" text-anchor="end" font-family="Arial" font-size="10" fill="${palette.axis}">${esc(pct)}%</text>`,
     );
   });

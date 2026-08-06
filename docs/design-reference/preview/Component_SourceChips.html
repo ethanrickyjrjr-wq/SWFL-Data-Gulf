@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Component — Source chips</title>
+<link rel="stylesheet" href="../colors_and_type.css">
+<link rel="stylesheet" href="_base.css">
+<style>
+  body.preview { padding: 22px 24px; }
+  .sc-row {
+    display: flex;
+    gap: 10px;
+    flex-wrap: wrap;
+  }
+  .sc-chip {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 7px 12px;
+    font-family: var(--font-mono);
+    font-size: 12.5px;
+    font-weight: 500;
+    color: var(--gulf-teal);
+    background: color-mix(in srgb, var(--gulf-teal) 8%, var(--gulf-slate));
+    border: 1px solid color-mix(in srgb, var(--gulf-teal-dim) 90%, transparent);
+    border-radius: 4px;
+    text-decoration: none;
+    letter-spacing: 0.01em;
+    text-shadow: 0 0 12px color-mix(in srgb, var(--gulf-teal) 40%, transparent);
+    transition:
+      background var(--dur-hover) var(--ease-out-quad),
+      border-color var(--dur-hover) var(--ease-out-quad),
+      color var(--dur-hover) var(--ease-out-quad);
+  }
+  .sc-chip:hover {
+    background: color-mix(in srgb, var(--gulf-teal) 14%, var(--gulf-slate-hi));
+    border-color: var(--gulf-teal);
+    color: var(--text-primary);
+  }
+  .sc-chip svg { stroke: currentColor; }
+
+  .sc-note {
+    margin-top: 14px;
+    font-family: var(--font-mono);
+    font-size: 11px;
+    font-weight: 500;
+    color: var(--text-secondary);
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+  }
+  .sc-note .accent { color: var(--gulf-teal); text-shadow: 0 0 10px color-mix(in srgb, var(--gulf-teal) 45%, transparent); }
+</style>
+</head>
+<body class="preview">
+<div class="sc-row">
+  <a class="sc-chip" href="#">LeePA<svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M7 17L17 7"/><path d="M7 7h10v10"/></svg></a>
+  <a class="sc-chip" href="#">Lee Accela<svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M7 17L17 7"/><path d="M7 7h10v10"/></svg></a>
+  <a class="sc-chip" href="#">Florida DOR<svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M7 17L17 7"/><path d="M7 7h10v10"/></svg></a>
+  <a class="sc-chip" href="#">NOAA<svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M7 17L17 7"/><path d="M7 7h10v10"/></svg></a>
+  <a class="sc-chip" href="#">Census<svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M7 17L17 7"/><path d="M7 7h10v10"/></svg></a>
+  <a class="sc-chip" href="#">FEMA NFIP<svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M7 17L17 7"/><path d="M7 7h10v10"/></svg></a>
+  <a class="sc-chip" href="#">FDOT<svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M7 17L17 7"/><path d="M7 7h10v10"/></svg></a>
+  <a class="sc-chip" href="#">BTS FAF5<svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M7 17L17 7"/><path d="M7 7h10v10"/></svg></a>
+</div>
+<p class="sc-note"><span class="accent">Sourced.</span> &nbsp; Brighter chip — text-shadow glow · 8% teal tint · teal-dim border</p>
+</body>
+</html>

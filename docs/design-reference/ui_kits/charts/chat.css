@@ -1,0 +1,578 @@
+/* Chat-embed charts gallery
+   Each card is sized to render cleanly inside a Claude chat bubble. */
+
+body {
+  margin: 0;
+  background: var(--gradient-body);
+  min-height: 100vh;
+  font-family: var(--font-body);
+  color: var(--text-primary);
+}
+
+.cg-page {
+  max-width: 1280px;
+  margin: 0 auto;
+  padding: 40px 28px 64px;
+}
+
+/* =====================================================
+   PAGE HEAD
+   ===================================================== */
+.cg-page-header {
+  margin-bottom: 36px;
+  padding-bottom: 24px;
+  border-bottom: 1px solid var(--gulf-haze);
+}
+.cg-head-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 24px;
+  flex-wrap: wrap;
+}
+.cg-eyebrow {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--gulf-teal);
+  font-weight: 500;
+  text-shadow: 0 0 12px color-mix(in srgb, var(--gulf-teal) 50%, transparent);
+}
+.cg-page-header h1 {
+  font-family: var(--font-display);
+  font-size: 2.25rem;
+  font-weight: 600;
+  letter-spacing: -0.02em;
+  margin: 8px 0 6px;
+  text-wrap: balance;
+  text-shadow: 0 0 24px color-mix(in srgb, var(--text-primary) 14%, transparent);
+}
+.cg-sub {
+  color: var(--text-secondary);
+  font-size: 0.95rem;
+  max-width: 60ch;
+  margin: 0;
+  font-weight: 500;
+  line-height: 1.55;
+}
+
+/* PALETTE TOGGLE */
+.cg-palette-toggle {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  background: var(--gulf-slate);
+  border: 1px solid var(--gulf-haze);
+  border-radius: 6px;
+  padding: 6px 8px 6px 12px;
+}
+.cg-palette-label {
+  font-family: var(--font-mono);
+  font-size: 10px;
+  letter-spacing: 0.08em;
+  color: var(--text-secondary);
+  font-weight: 500;
+  margin-right: 4px;
+}
+.cg-palette-opt {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 4px 8px;
+  border-radius: 3px;
+  background: transparent;
+  border: 1px solid transparent;
+  font-family: var(--font-mono);
+  font-size: 11px;
+  font-weight: 500;
+  color: var(--text-secondary);
+  cursor: pointer;
+  transition: all var(--dur-hover) var(--ease-out-quad);
+}
+.cg-palette-opt:hover { color: var(--text-primary); }
+.cg-palette-opt.is-active {
+  background: var(--gulf-slate-hi);
+  border-color: var(--gulf-teal-dim);
+  color: var(--text-primary);
+}
+.cg-palette-swatches { display: inline-flex; gap: 2px; }
+.cg-palette-swatches span { width: 8px; height: 14px; border-radius: 1px; }
+
+/* =====================================================
+   GRID OF TILES
+   Each tile shows a fake user question + the AI card response.
+   ===================================================== */
+.cg-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 28px;
+}
+.cg-tile {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+.cg-tile-head {
+  display: flex;
+  justify-content: flex-end;
+}
+.cg-bubble-user {
+  display: inline-block;
+  max-width: 80%;
+  padding: 10px 14px;
+  background: var(--gulf-slate-hi);
+  border: 1px solid var(--gulf-haze);
+  border-radius: 14px 14px 4px 14px;
+  font-size: 13px;
+  color: var(--text-primary);
+  font-weight: 500;
+  line-height: 1.4;
+}
+.cg-bubble-ai {
+  align-self: flex-start;
+  width: 100%;
+  max-width: 580px;
+  /* The AI bubble visually contains the card. Slight pad/border. */
+  padding: 0;
+}
+.cg-tile-foot {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding-top: 4px;
+  font-family: var(--font-mono);
+  font-size: 10px;
+  color: var(--text-tertiary);
+  letter-spacing: 0.06em;
+}
+.cg-tile-name { color: var(--gulf-teal); text-shadow: 0 0 8px color-mix(in srgb, var(--gulf-teal) 40%, transparent); }
+
+/* =====================================================
+   COMMON CARD CHROME (.cc-card)
+   ===================================================== */
+.cc-card {
+  background: var(--gulf-slate);
+  border: 1px solid var(--gulf-haze);
+  border-radius: 10px;
+  padding: 16px 18px 14px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  width: 100%;
+  box-sizing: border-box;
+  box-shadow: 0 1px 0 color-mix(in srgb, var(--gulf-haze) 60%, transparent);
+}
+.cc-card-head {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+.cc-card-eyebrow {
+  font-family: var(--font-mono);
+  font-size: 10px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--text-secondary);
+  font-weight: 500;
+}
+.cc-card-title {
+  font-family: var(--font-display);
+  font-size: 15px;
+  font-weight: 600;
+  color: var(--text-primary);
+  letter-spacing: -0.005em;
+}
+.cc-card-foot {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  color: var(--text-tertiary);
+  padding-top: 8px;
+  border-top: 1px dashed var(--gulf-haze);
+}
+
+/* =====================================================
+   KPI CARD
+   ===================================================== */
+.cc-kpi-body {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 16px;
+}
+.cc-kpi-left {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+.cc-kpi-val {
+  font-family: var(--font-display);
+  font-size: 36px;
+  font-weight: 600;
+  letter-spacing: -0.02em;
+  font-variant-numeric: tabular-nums;
+  line-height: 1;
+  color: var(--text-primary);
+}
+.cc-kpi-delta {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  font-family: var(--font-mono);
+  font-size: 12px;
+  font-weight: 500;
+  font-variant-numeric: tabular-nums;
+}
+.cc-kpi-delta.is-good { color: var(--mangrove); }
+.cc-kpi-delta-arrow {
+  font-family: var(--font-display);
+  font-size: 14px;
+  font-weight: 600;
+}
+.cc-kpi-spark {
+  width: 180px;
+  height: 56px;
+}
+
+/* =====================================================
+   STAT GRID
+   ===================================================== */
+.cc-stat-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 10px;
+}
+.cc-stat-cell {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  padding: 8px 0;
+  border-left: 1px solid var(--gulf-haze);
+  padding-left: 10px;
+}
+.cc-stat-cell:first-child { border-left: none; padding-left: 0; }
+.cc-stat-label {
+  font-family: var(--font-mono);
+  font-size: 10px;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--text-secondary);
+  font-weight: 500;
+}
+.cc-stat-val {
+  font-family: var(--font-display);
+  font-size: 19px;
+  font-weight: 600;
+  letter-spacing: -0.015em;
+  font-variant-numeric: tabular-nums;
+  color: var(--text-primary);
+}
+.cc-stat-delta {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  font-weight: 500;
+  font-variant-numeric: tabular-nums;
+}
+
+/* =====================================================
+   HORIZONTAL BAR LIST
+   ===================================================== */
+.cc-hbar-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+.cc-hbar-row {
+  display: grid;
+  grid-template-columns: 130px 1fr 56px;
+  align-items: center;
+  gap: 10px;
+}
+.cc-hbar-label {
+  font-size: 12px;
+  color: var(--text-primary);
+  font-weight: 500;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.cc-hbar-track {
+  height: 14px;
+  background: color-mix(in srgb, var(--gulf-slate-hi) 60%, transparent);
+  border-radius: 2px;
+  overflow: hidden;
+}
+.cc-hbar-fill {
+  height: 100%;
+  border-radius: 2px;
+  box-shadow: 0 0 10px color-mix(in srgb, currentColor 25%, transparent);
+}
+.cc-hbar-val {
+  font-family: var(--font-mono);
+  font-size: 12px;
+  font-weight: 500;
+  text-align: right;
+  font-variant-numeric: tabular-nums;
+  color: var(--text-primary);
+}
+
+/* =====================================================
+   COMPARISON TABLE
+   ===================================================== */
+.cc-cmp {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 13px;
+}
+.cc-cmp thead th {
+  text-align: right;
+  font-family: var(--font-mono);
+  font-size: 10px;
+  font-weight: 500;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--text-secondary);
+  padding: 6px 8px 8px;
+  border-bottom: 1px solid var(--gulf-haze);
+}
+.cc-cmp thead th:first-child { text-align: left; }
+.cc-cmp tbody td {
+  padding: 10px 8px;
+  border-bottom: 1px solid color-mix(in srgb, var(--gulf-haze) 50%, transparent);
+  text-align: right;
+  font-family: var(--font-mono);
+  font-variant-numeric: tabular-nums;
+  font-weight: 500;
+  color: var(--text-primary);
+  font-size: 13px;
+}
+.cc-cmp tbody tr:last-child td { border-bottom: none; }
+.cc-cmp tbody td:first-child {
+  text-align: left;
+  font-family: var(--font-body);
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.cc-cmp-dot {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  box-shadow: 0 0 8px currentColor;
+  flex-shrink: 0;
+}
+.cc-cmp-name { color: var(--text-primary); font-weight: 500; }
+.cc-tcell-dash { color: var(--text-tertiary); }
+.cc-tcell-mv {
+  display: inline-flex;
+  align-items: baseline;
+  gap: 4px;
+  justify-content: flex-end;
+}
+.cc-tcell-arrow { font-weight: 600; }
+
+/* =====================================================
+   DONUT
+   ===================================================== */
+.cc-donut-body {
+  display: grid;
+  grid-template-columns: 180px 1fr;
+  gap: 16px;
+  align-items: center;
+}
+.cc-donut {
+  width: 180px;
+  height: 180px;
+}
+.cc-donut-big {
+  font-family: var(--font-display);
+  font-size: 36px;
+  font-weight: 700;
+  fill: var(--text-primary);
+  letter-spacing: -0.02em;
+  dominant-baseline: middle;
+}
+.cc-donut-small {
+  font-family: var(--font-mono);
+  font-size: 10px;
+  fill: var(--text-secondary);
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  dominant-baseline: middle;
+}
+.cc-donut-legend {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+.cc-donut-legend li {
+  display: grid;
+  grid-template-columns: 12px 1fr auto;
+  align-items: center;
+  gap: 8px;
+  font-size: 12px;
+  color: var(--text-primary);
+  font-weight: 500;
+}
+.cc-leg-sw {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  box-shadow: 0 0 8px currentColor;
+}
+.cc-leg-lbl { text-transform: capitalize; }
+.cc-leg-val {
+  font-family: var(--font-mono);
+  font-variant-numeric: tabular-nums;
+  color: var(--text-secondary);
+  font-weight: 500;
+}
+
+/* =====================================================
+   DOT PLOT (distribution)
+   ===================================================== */
+.cc-dotplot {
+  width: 100%;
+  height: 96px;
+  display: block;
+}
+.cc-axis-tick {
+  font-family: var(--font-mono);
+  font-size: 10px;
+  fill: var(--text-tertiary);
+  font-weight: 500;
+}
+
+/* =====================================================
+   VERDICT BARS
+   ===================================================== */
+.cc-verdict-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+.cc-verdict-row {
+  display: grid;
+  grid-template-columns: 140px 80px 1fr 40px;
+  align-items: center;
+  gap: 10px;
+}
+.cc-verdict-name {
+  font-size: 13px;
+  color: var(--text-primary);
+  font-weight: 500;
+}
+.cc-verdict-pill {
+  display: inline-block;
+  text-align: center;
+  padding: 2px 6px;
+  border: 1px solid currentColor;
+  border-radius: 3px;
+  font-family: var(--font-mono);
+  font-size: 10px;
+  font-weight: 500;
+  letter-spacing: 0.06em;
+  text-shadow: 0 0 10px color-mix(in srgb, currentColor 40%, transparent);
+}
+.cc-mag-track {
+  height: 6px;
+  background: color-mix(in srgb, var(--gulf-slate-hi) 60%, transparent);
+  border-radius: 2px;
+  overflow: hidden;
+}
+.cc-mag-fill { height: 100%; box-shadow: 0 0 8px color-mix(in srgb, currentColor 30%, transparent); }
+.cc-verdict-conf {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  text-align: right;
+  font-variant-numeric: tabular-nums;
+  color: var(--text-secondary);
+  font-weight: 500;
+}
+
+/* =====================================================
+   SPARK LIST
+   ===================================================== */
+.cc-sl-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+.cc-sl-row {
+  display: grid;
+  grid-template-columns: 150px 1fr 80px;
+  align-items: center;
+  gap: 14px;
+  padding: 4px 0;
+  border-bottom: 1px solid color-mix(in srgb, var(--gulf-haze) 50%, transparent);
+}
+.cc-sl-row:last-child { border-bottom: none; }
+.cc-sl-label {
+  font-size: 13px;
+  color: var(--text-primary);
+  font-weight: 500;
+}
+.cc-sl-spark { width: 100%; height: 28px; }
+.cc-sl-val {
+  font-family: var(--font-mono);
+  font-size: 13px;
+  font-weight: 500;
+  text-align: right;
+  font-variant-numeric: tabular-nums;
+  color: var(--text-primary);
+}
+
+/* =====================================================
+   FOOTER
+   ===================================================== */
+.cg-page-foot {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 24px 0 0;
+  margin-top: 32px;
+  border-top: 1px solid var(--gulf-haze);
+  gap: 16px;
+  flex-wrap: wrap;
+}
+.cg-explorer-link {
+  font-family: var(--font-mono);
+  font-size: 12px;
+  color: var(--gulf-teal);
+  text-decoration: none;
+  font-weight: 500;
+  text-shadow: 0 0 10px color-mix(in srgb, var(--gulf-teal) 40%, transparent);
+}
+.cg-explorer-link:hover { color: var(--text-primary); }
+
+/* =====================================================
+   RESPONSIVE
+   ===================================================== */
+@media (max-width: 920px) {
+  .cg-grid { grid-template-columns: 1fr; }
+  .cg-page-header h1 { font-size: 1.75rem; }
+}
+@media (max-width: 560px) {
+  .cc-stat-grid { grid-template-columns: repeat(2, 1fr); gap: 12px; }
+  .cc-stat-cell { border-left: none; padding-left: 0; }
+  .cc-donut-body { grid-template-columns: 1fr; }
+  .cc-hbar-row { grid-template-columns: 100px 1fr 50px; }
+  .cc-verdict-row { grid-template-columns: 110px 70px 1fr 36px; }
+  .cc-sl-row { grid-template-columns: 110px 1fr 70px; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  * { transition: none !important; animation: none !important; }
+}
