@@ -7,7 +7,7 @@
 
 Markers: **[ORPHAN]** nothing in the repo points at this file — it is invisible unless you come through this index, and it is a DELETION CANDIDATE. **[weak]** reachable only by bare filename, which leads nowhere.
 
-Reachability at generation: 800 by path · 523 by name only · 225 orphaned. Re-measure with `node scripts/doc-reachability.mjs`.
+Reachability at generation: 803 by path · 521 by name only · 224 orphaned. Re-measure with `node scripts/doc-reachability.mjs`.
 
 ## docs/superpowers — 820
 
@@ -304,7 +304,7 @@ Reachability at generation: 800 by path · 523 by name only · 225 orphaned. Re-
 - `docs/superpowers/plans/2026-08-05-under-contract-24-BUILD-HANDOFF.md` — BUILD HANDOFF — UNDER CONTRACT, the 4th email. THE RECIPE IS DECIDED. WRITE THE CODE. — pre-walk brief; its §2.4 questions are ANSWERED here, and one of its "known defects" was false).
 - `docs/superpowers/plans/2026-08-05-under-contract-24-handoff.md` — HANDOFF — §2.4 UNDER CONTRACT, the fourth email walked — under-contract is the 4th key in RECIPEKEYS (lib/deliverable/recipes.ts) and the 4th of 17
 - `docs/superpowers/plans/2026-08-06-precomputed-commentary-plan.md` — Precomputed, pre-checked commentary for the builder — the plan — is checked before it hits builder and builder can just add a CTA and a little extra commentary."
-- `docs/superpowers/plans/2026-08-06-week-in-review-plan.md` **[ORPHAN]** — Week in Review — Implementation Plan — measurement and every sourced structural choice lives there. Do not re-derive.
+- `docs/superpowers/plans/2026-08-06-week-in-review-plan.md` — Week in Review — Implementation Plan — measurement and every sourced structural choice lives there. Do not re-derive.
 - `docs/superpowers/plans/_FINISHED/2026-05-17-dlt-faf5-ingest.md` **[ORPHAN]** — FAF5 dlt Ingest Pipeline — Implementation Plan — Create these six files, each empty:
 - `docs/superpowers/plans/_FINISHED/2026-05-17-ingest-pipelines.md` **[ORPHAN]** — Ingest Pipelines Implementation Plan — No TDD — these are infra steps. Do these before any pipeline code.
 - `docs/superpowers/plans/_FINISHED/2026-05-18-bls-qcew-pipeline.md` **[ORPHAN]** — BLS QCEW Pipeline Implementation Plan — Create ingest/pipelines/blsqcew/init.py — empty file.
@@ -1245,7 +1245,7 @@ Reachability at generation: 800 by path · 523 by name only · 225 orphaned. Re-
 - `_RESEARCH/competitor-and-strategy/2026-07-26-tangled-forge-tool-scan.md` *[weak]* — Tangled.org tool scan — anything generic we could use? (07/26/2026) — Operator asked whether tangled.org (AT-Protocol git forge, alpha, by Tangled Labs Oy) holds
 - `_RESEARCH/competitor-and-strategy/2026-08-02-agent-skills-spec-for-intake.md` — Agent Skills spec — the format our hosted intake skill file must follow (08/02/2026) — Fetched live via crawl4ai from https://agentskills.io/specification (the open Agent Skills
 - `_RESEARCH/competitor-and-strategy/2026-08-02-claydotcom-app-drive.md` — Clay.com — INSIDE the app (logged-in drive, 08/02/2026) — Operator logged into app.clay.com (workspace 1309395) and asked me to drive Chrome and see
-- `_RESEARCH/competitor-and-strategy/2026-08-02-claydotcom-scan.md` *[weak]* — Clay.com scan — what they do, how, tools, vs. us (08/02/2026) — Operator asked for a couple crawl4ais on clay.com: what they do, how, and how we compare.
+- `_RESEARCH/competitor-and-strategy/2026-08-02-claydotcom-scan.md` — Clay.com scan — what they do, how, tools, vs. us (08/02/2026) — Operator asked for a couple crawl4ais on clay.com: what they do, how, and how we compare.
 - `_RESEARCH/competitor-and-strategy/2026-08-02-email-enrichment-vendor-scan.md` — B2B contact-enrichment vendor scan — the 9 named in Clay's waterfall (08/02/2026) — Operator asked to crawl4ai each vendor individually: Prospeo, DropContact, Datagma, Hunter,
 - `_RESEARCH/competitor-and-strategy/2026-08-02-mixpanel-app-drive.md` — Mixpanel in-app drive — data intake, chart building, AI (08/02/2026) — Source: live Chrome drive of the operator's free-trial project
 - `_RESEARCH/competitor-and-strategy/2026-08-03-apify-actor-fit-assessment.md` — Apify — where it fits brain-platform, and the one Actor worth building — Installed apify-cli 1.7.1 globally via npm 08/03/2026. LOGGED IN 08/03/2026 as
@@ -1527,7 +1527,7 @@ Reachability at generation: 800 by path · 523 by name only · 225 orphaned. Re-
 ## .claude/skills — 6
 
 - `.claude/skills/check-signal/SKILL.md` — Writing a check signal that cannot lie — scripts/reverify-signals.mjs reopens a closed check only when its signal FAILS.
-- `.claude/skills/checks-burndown/SKILL.md` *[weak]* — Burning down the checks ledger — The ledger is not a rotting backlog and the count is not a discipline problem.
+- `.claude/skills/checks-burndown/SKILL.md` — Burning down the checks ledger — The ledger is not a rotting backlog and the count is not a discipline problem.
 - `.claude/skills/deliverable-distiller/SKILL.md` — Deliverable Distiller — Turn a found deliverable into library growth. One find per run (imports run one
 - `.claude/skills/one-room/SKILL.md` — One room — the in-app chrome law — Locked 07/16/2026 after the projects-cockpit rejection: a full hub build was thrown
 - `.claude/skills/verify/SKILL.md` — Verifying UI changes (brain-platform) — 1. bunx next build — the repo's own gate (types + lint ride along).
