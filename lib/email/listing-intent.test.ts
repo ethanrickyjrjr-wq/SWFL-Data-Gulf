@@ -93,3 +93,33 @@ test("organic prompt with no city/zip suffix still yields the bare street addres
 test("a bare ZIP with no street suffix is still not an address (no false positive)", () => {
   expect(subjectAddressFromPrompt("Weekly market update for ZIP 33905")).toBe(null);
 });
+
+// ── FALLBACK 2 — a bare pasted listing URL, no typed street at all ──────────
+// 08/06/2026 postmortem: STREET_CORE needs a house number followed by a SPACE, so a
+// realtor.com slug ("4140-Horse-Creek-Blvd_...") never matches it — a user who pastes
+// only the link got a null subject and the build silently fell through to the generic
+// ZIP grab-bag. The URL itself is now a valid subject: resolveSubjectListing extracts
+// the vendor's own listing id straight out of it (extractRealtorPropertyId) and
+// matches exactly, no street text required.
+const REALTOR_URL =
+  "https://www.realtor.com/realestateandhomes-detail/4140-Horse-Creek-Blvd_Fort-Myers_FL_33905_M68630-97870";
+
+test("returns the realtor.com URL itself when no plain-text address is present", () => {
+  expect(
+    subjectAddressFromPrompt(`This one just went pending — build the email. ${REALTOR_URL}`),
+  ).toBe(REALTOR_URL);
+});
+
+test("a real typed address still wins over a URL sitting in the same prompt", () => {
+  expect(
+    subjectAddressFromPrompt(
+      `New listing announcement for 14189 Mindello Dr, Fort Myers, FL 33905. Full listing: ${REALTOR_URL}`,
+    ),
+  ).toBe("14189 Mindello Dr, Fort Myers, FL 33905");
+});
+
+test("a non-realtor URL with no typed address still yields null (no guessing)", () => {
+  expect(
+    subjectAddressFromPrompt("check this out https://www.zillow.com/homedetails/x/123_zpid/"),
+  ).toBe(null);
+});

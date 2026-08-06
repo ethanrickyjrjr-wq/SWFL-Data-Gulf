@@ -60,6 +60,16 @@ const STREET_CORE = new RegExp(
 const TAIL_STOP =
   /[.!?]|(?:\s+[—–]\s+|\s+-\s+)|,?\s*(?:use|please|with|and|showing|note|thanks)\b/i;
 
+// FALLBACK 2 — no plain-text address anywhere, but a realtor.com URL is. 08/06/2026
+// postmortem: STREET_CORE needs a house number followed by a SPACE, so a URL slug
+// ("4140-Horse-Creek-Blvd_...") never matches it — a user who pastes only the link got
+// a null subject and the build silently fell through to the generic ZIP grab-bag. The
+// URL is now itself a valid subject: `resolveSubjectListing`
+// (lib/listings/resolve-subject.ts, `extractRealtorPropertyId`) pulls the vendor's own
+// listing id straight out of it and matches EXACTLY, no street text required. Only
+// realtor.com is recognized here — another vendor's URL is not a verified shape.
+const REALTOR_URL = /https?:\/\/(?:www\.)?realtor\.com\/\S+/i;
+
 export function subjectAddressFromPrompt(prompt: string): string | null {
   const p = prompt || "";
 
@@ -69,7 +79,7 @@ export function subjectAddressFromPrompt(prompt: string): string | null {
   if (atSpan && /\d/.test(atSpan) && atSpan.length >= 6) return atSpan;
 
   const core = STREET_CORE.exec(p);
-  if (!core) return null;
+  if (!core) return REALTOR_URL.exec(p)?.[0] ?? null;
   const rest = p.slice(core.index + core[0].length);
   const stop = TAIL_STOP.exec(rest);
   const tail = stop ? rest.slice(0, stop.index) : rest.slice(0, 60);

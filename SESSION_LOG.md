@@ -1,3 +1,30 @@
+## 2026-08-06 (Sonnet 5) — Pending-home email built for 4140 Horsecreek Blvd; found + fixed the address matcher's real bug on the way
+
+Built the Under Contract ("pending") email off the operator's realtor.com URL for
+4140 Horsecreek Blvd, Fort Myers 33905 — `scripts/email/render-under-contract.mts`, 6 of 6
+assertions pass, saved to `~/Downloads/under-contract-email.html`. $1,220,000 · 4bd/3.5ba/3,162
+sqft · 34 days to contract vs a 104.5-day zip 33905 median (648 listings).
+
+**Found on the first render:** the typed address "4140 Horse Creek Blvd" MISSED our own lake's
+row (`property_id` 6863097870, `flag_pending` true) because `canonStreet` folds suffix
+abbreviations/directionals but has no rule for a compound street name the MLS feed spells as one
+word ("Horsecreek"). Opened + closed check `under_contract_compound_street_name_match_miss`.
+
+**Fixed the root cause, not just this address.** Added an exact-vendor-id lane to
+`resolveSubjectListing` (`lib/listings/resolve-subject.ts`): `extractRealtorPropertyId` pulls the
+realtor.com detail URL's own numeric listing id (`..._M68630-97870` → `6863097870`, verified
+against our lake's `property_id` column) and `fetchLakeCandidatesById` matches it EXACTLY —
+tried before geocode/canonStreet, so it can't be broken by street-text drift at all.
+`subjectAddressFromPrompt` (`lib/email/listing-intent.ts`) now falls back to a bare pasted
+realtor.com URL when no plain-text address parses (previously: null subject, silent fall-through
+to the generic grab-bag). TDD: 29 new/updated tests across both files. Verified: 452/452 in
+`lib/listings/` + affected recipe suites, `tsc --noEmit` clean, and live-proved on the real
+repro — the raw URL now resolves directly with zero manual respelling, same 6/6-pass output.
+
+Not pushed yet — holding for confirmation per standing no-autonomous-push rule.
+
+---
+
 ## 2026-08-06 (Opus 5) — FINISHED IT: the absence signal is attached to a real check and the ledger CLOSED IT ITSELF. First machine-closed check on this platform.
 
 The prior entry shipped the type attached to nothing. That was the unfinished half. It is done.

@@ -70,6 +70,11 @@ export type FetchLakeSubjectFn = (q: {
   city: string;
 }) => Promise<Listing[]>;
 
+/** Lane-0 candidate fetcher — our own lake, keyed by the vendor's EXACT numeric
+ *  listing id (never a street-text compare). Returns candidates; the resolver takes
+ *  the first live row, since an id match needs no further disambiguation. */
+export type FetchLakeByIdFn = (propertyId: string) => Promise<Listing[]>;
+
 export interface ResolveSubjectDeps {
   /** Nearby-values fetcher — the PAID bath fallback (/search carries no bath count). */
   fetchNearby?: FetchNearbyFn;
@@ -79,10 +84,58 @@ export interface ResolveSubjectDeps {
   geocode?: GeocodeFn;
   /** Injectable lake candidates feed — tests never touch Supabase. */
   fetchLakeCandidates?: FetchLakeSubjectFn;
+  /** Injectable EXACT-ID lake feed — see `extractRealtorPropertyId`. */
+  fetchLakeById?: FetchLakeByIdFn;
   /** Injectable city listings feed — tests never touch SteadyAPI. */
   fetchListings?: FetchListingsFn;
   /** Pages of ~200 to scan for the subject before giving up (1 Steady call each). */
   maxPages?: number;
+}
+
+/**
+ * A pasted realtor.com detail-page URL carries the vendor's own numeric listing id
+ * in its trailing slug — "..._M68630-97870". That id is an EXACT join key against
+ * `data_lake.listing_state`/`listing_dom`'s `property_id` column (verified live
+ * 08/06/2026: 4140 Horsecreek Blvd's `property_id` is "6863097870", exactly that id
+ * with the dash removed).
+ *
+ * *** WHY THIS EXISTS — the Horsecreek postmortem, same day. *** A correctly-typed
+ * "4140 Horse Creek Blvd" MISSED the lake's own "4140 Horsecreek Blvd" through
+ * `canonStreet`, which folds suffix abbreviations and directionals but has no rule for
+ * a compound street name the MLS feed spells as one word. That is a real, structural
+ * gap in ANY street-text matcher — abbreviations and spacing drift are not the same
+ * failure, and this one has no text-normalization fix. An id needs no normalization at
+ * all: it either equals the stored value or it doesn't.
+ *
+ * Only realtor.com's id shape is recognized — other vendors' URLs return null rather
+ * than guessing at a slug format never verified against a real row.
+ */
+export function extractRealtorPropertyId(text: string): string | null {
+  const m = /realtor\.com\/[^\s"'<>]*_M(\d+)-(\d+)\b/i.exec(String(text ?? ""));
+  return m ? `${m[1]}${m[2]}` : null;
+}
+
+/** Default lane-0 impl: an EXACT `property_id` read off the same authority view the
+ *  street-text lane uses (`listing_dom`) — free, no geocode, no county gate. Empty-
+ *  tolerant: no creds, no row, any query error → `[]`, never throws (four-lane/ODD). */
+async function fetchLakeCandidatesById(propertyId: string): Promise<Listing[]> {
+  if (!propertyId) return [];
+  try {
+    const db = createServiceRoleClientUntyped();
+    const { data } = await db
+      .schema("data_lake")
+      .from("listing_dom")
+      .select(LAKE_LISTING_COLUMNS)
+      .eq("sale_or_rent", "sale")
+      .eq("property_id", propertyId)
+      .limit(5);
+    if (!Array.isArray(data)) return [];
+    const rows = data as unknown as LakeListingRow[];
+    await healFlooredRows(rows);
+    return rows.map(lakeRowToListing).filter((l): l is Listing => l !== null);
+  } catch {
+    return [];
+  }
 }
 
 /** Default lane-1 impl: active for-sale rows from the listing_dom authority view
@@ -315,6 +368,34 @@ export async function resolveSubjectListing(
   const fetchLeePa: FetchLeePaBathsFn = deps.fetchLeePaBaths ?? fetchLeePaBathsFromLake;
   const maxPages = Math.max(1, deps.maxPages ?? 4);
   const PAGE = 200;
+
+  // 0) THE EXACT VENDOR ID — tried BEFORE geocoding, because it needs no address text
+  //    at all. Beats every lane below it: no geocode call, no county gate, no
+  //    street-suffix or compound-word normalization to get right. See
+  //    `extractRealtorPropertyId` for why this lane exists (the Horsecreek postmortem).
+  const idHint = extractRealtorPropertyId(subject);
+  if (idHint) {
+    const fetchById = deps.fetchLakeById ?? fetchLakeCandidatesById;
+    const idHit = (await fetchById(idHint).catch(() => [] as Listing[])).find(Boolean);
+    if (idHit) {
+      const facts = toFacts(idHit, idHit.zipCode || null, subject);
+      const full = [idHit.addressLine1, idHit.city, idHit.state, idHit.zipCode]
+        .filter(Boolean)
+        .join(", ");
+      if (full) facts.address = full;
+      if (idHit.domIsFloor !== true && idHit.daysOnMarket != null && idHit.daysOnMarket >= 0) {
+        facts.daysOnMarket = idHit.daysOnMarket;
+      }
+      // The MATCHED record's own street, never the raw pasted text — an id hit has
+      // already settled identity, so this is purely for the baths lane's canonical key.
+      const idTarget = canonStreet(idHit.addressLine1 || idHit.formattedAddress);
+      return withBaths(facts, idTarget, fetchLeePa, fetchNearby);
+    }
+    // An id was found but isn't in the lake yet (not swept, or genuinely elsewhere) —
+    // fall through to the ordinary address-text lanes below. A URL alone rarely parses
+    // as a usable street/city, so this commonly still ends in an honest null, same as
+    // it always has; this lane can only ADD a resolve, never remove one.
+  }
 
   let geo;
   try {

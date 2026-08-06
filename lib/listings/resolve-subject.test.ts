@@ -1,5 +1,10 @@
 import { describe, test, expect } from "bun:test";
-import { resolveSubjectListing, canonStreet, type FetchListingsFn } from "./resolve-subject";
+import {
+  resolveSubjectListing,
+  canonStreet,
+  extractRealtorPropertyId,
+  type FetchListingsFn,
+} from "./resolve-subject";
 import { isNewListingRecipePrompt } from "@/lib/email/listing-intent";
 import type { GeocodeFn } from "@/lib/geo/geocode-address";
 import type { Listing } from "./rentcast";
@@ -366,6 +371,101 @@ describe("withBaths — free LeePA lane before the paid vendor call (P1b Step 2)
     });
     expect(facts!.baths).toBeUndefined();
     expect(facts!.baths).not.toBe("0");
+  });
+});
+
+// ── THE ID LANE — 08/06/2026, the Horsecreek postmortem ─────────────────────
+// "4140 Horse Creek Blvd" (typed, correctly spaced) missed "4140 Horsecreek Blvd" (the
+// MLS feed's own one-word spelling) through canonStreet, on a listing that was fully in
+// our lake — property_id 6863097870, flag_pending true. A pasted realtor.com URL
+// carries that same id verbatim in its slug ("..._M68630-97870"). An id match is exact
+// and needs no street-text parsing, no geocode, and no county gate at all.
+const REALTOR_URL =
+  "https://www.realtor.com/realestateandhomes-detail/4140-Horse-Creek-Blvd_Fort-Myers_FL_33905_M68630-97870";
+
+const PENDING_HOME = mkListing({
+  addressLine1: "4140 Horsecreek Blvd",
+  formattedAddress: "4140 Horsecreek Blvd",
+  city: "Fort Myers",
+  state: "FL",
+  zipCode: "33905",
+  price: 1220000,
+  bedrooms: 4,
+  bathrooms: 3.5,
+  squareFootage: 3162,
+  photoUrl: "https://ap.rdcpix.com/abc/4140.jpg",
+});
+
+describe("extractRealtorPropertyId", () => {
+  test("pulls the digits out of a realtor.com detail URL's trailing slug", () => {
+    expect(extractRealtorPropertyId(REALTOR_URL)).toBe("6863097870");
+  });
+  test("works when the URL sits inside a longer pasted message", () => {
+    expect(
+      extractRealtorPropertyId(`this one just went pending: ${REALTOR_URL} — build the email`),
+    ).toBe("6863097870");
+  });
+  test("null on plain text or a non-realtor URL — never guesses at a shape", () => {
+    expect(extractRealtorPropertyId("4140 Horse Creek Blvd, Fort Myers, FL 33905")).toBeNull();
+    expect(extractRealtorPropertyId("https://www.zillow.com/homedetails/4140-x/12345_zpid/")).toBe(
+      null,
+    );
+    expect(extractRealtorPropertyId("")).toBeNull();
+  });
+});
+
+describe("resolveSubjectListing — the ID lane (exact, beats fuzzy street text)", () => {
+  test("resolves via the vendor id even though the typed street MISSES the lake's spelling", async () => {
+    let geocodeCalls = 0;
+    let streetLakeCalls = 0;
+    // The realistic repro: the operator pastes the address AND the listing link in the
+    // same message. The id in the URL is what saves this build, not the street text —
+    // that street text alone still misses (see the next describe block).
+    const facts = await resolveSubjectListing(
+      `4140 Horse Creek Blvd, Fort Myers, FL 33905 ${REALTOR_URL}`,
+      {
+        geocode: (async () => {
+          geocodeCalls++;
+          return { lat: 26.68, lon: -81.75, place: "", zip: "33905" };
+        }) as unknown as GeocodeFn,
+        fetchNearby: noNearby,
+        fetchLakeCandidates: async () => {
+          streetLakeCalls++;
+          return []; // the real bug: "Horse Creek" never matches lake's "Horsecreek"
+        },
+        fetchLakeById: async (id) => (id === "6863097870" ? [PENDING_HOME] : []),
+        fetchListings: noLake,
+      } as never,
+    );
+    expect(facts).not.toBeNull();
+    expect(facts!.price).toBe("$1,220,000");
+    // Only reachable when the caller HANDS us the id — plain typed text carries none,
+    // so the fuzzy lanes must still run when there is no URL to extract from.
+    expect(geocodeCalls).toBe(0);
+    expect(streetLakeCalls).toBe(0);
+  });
+
+  test("resolves off a BARE pasted URL — no typed street at all", async () => {
+    const facts = await resolveSubjectListing(REALTOR_URL, {
+      fetchLakeById: async (id) => (id === "6863097870" ? [PENDING_HOME] : []),
+      fetchListings: noLake,
+      fetchLakeCandidates: noLake,
+      fetchNearby: noNearby,
+    } as never);
+    expect(facts).not.toBeNull();
+    expect(facts!.address).toContain("Horsecreek");
+    expect(facts!.zip).toBe("33905");
+  });
+
+  test("an id present but not yet in the lake falls through to the ordinary address lanes", async () => {
+    const facts = await resolveSubjectListing("4140 Horse Creek Blvd, Fort Myers, FL 33905", {
+      geocode: geocodeReturning("33905"),
+      fetchNearby: noNearby,
+      fetchLakeById: async () => [], // not swept yet
+      fetchLakeCandidates: noLake,
+      fetchListings: noLake,
+    } as never);
+    expect(facts).toBeNull(); // same honest miss as before — never worse than today
   });
 });
 
