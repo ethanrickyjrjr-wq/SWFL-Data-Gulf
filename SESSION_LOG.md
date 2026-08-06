@@ -1,3 +1,42 @@
+## 2026-08-06 (Opus 5) — "fix it all": confirmed or denied every cron incident against live run history, dated against the outage
+
+**Operator decree: *"we don't need checks on everything. everything doesn't work, so what good is a
+check. you are the only one who can confirm or deny the important ones."*** Taken as authorization to
+triage on my own judgment (which `checks-burndown` otherwise routes to him) — with the no-invention
+constraint intact: a confirm needs a probe, a deny needs a reason.
+
+**Took the whole `cron_incident_*` family (13 open) and resolved every one against `gh run list`
+— not opinion, actual conclusions and timestamps.** Critically, dated each failure against the
+GitHub Actions **major outage that opened 2026-08-06T15:22:49Z**, so an outage artifact is never
+reported as a code defect.
+
+**DENIED — 5 closed, each with its evidence on the row:**
+- `ingest-bls-ppi` (newest = success) · `daily-rebuild` (success ×3) · `neighborhood-stats-annual`
+  (newest = success) · `ingest-dbpr-re-licensees` (newest = a conditional SKIP, not a failure; last
+  real execution green).
+- `data-readiness-cron` — **outage artifact, proven by date**: its only failure is 08/06T16:23Z,
+  inside the outage window; 08/05T16:18 and 08/04T16:28 both SUCCEEDED.
+
+**CONFIRMED STILL BROKEN — 7 stay open, now with a dated cause instead of a bare "cron failure":**
+- `nightly-chain` — 3 consecutive failures, 08/06T07:10 and 08/06T04:23 BOTH PRE-OUTAGE. Failing job
+  isolated: **`bake · narratives / bake`**. Not an infra artifact. The most important red on the board.
+- `freshness-probe-daily` — failed 08/06, 08/05, 08/04; two are pre-outage. Real.
+- `ingest-crexi-listings` — failed 07/12, pre-outage, and the cause is already known from this
+  morning's scratchpad: it declares `runs-on: [self-hosted, swfl-local]` and the repo has **0
+  registered runners**. It can never pass until that line changes.
+- `ingest-fl-dbpr-licenses` (08/05, pre-outage) · `redfin-collier-monthly` (07/18) ·
+  `tier-divergence-tier2-monthly` (07/22) · `reverify-signals-daily` (08/04 pre-outage; note its
+  final step is a DELIBERATE `exit 1` on any regression, so its red may be the alarm working —
+  local `reverify-signals.mjs --dry-run` was still running when this entry was written, NOT concluded).
+- `cron_incident_ci` — left open, unresolved: no workflow named `ci.yml` answered `gh run list`, so
+  the key does not map to a runnable surface. Named here rather than silently skipped.
+
+**LEDGER: 8 closed today, 0 opened. 879 -> 871.** First sustained net-negative movement; every close
+names a command and its output, none was a mass-close.
+
+**NOT DONE (RULE 0.8):** the 7 confirmed-red crons are diagnosed, not repaired — `narratives/bake`
+and the crexi runner line are the two with a named cause and no fix yet. The 222-row defect class is
+untouched beyond this family.
 ## 2026-08-06 (Opus 5) — "how do we have this many fucking problems and no claude fixes anything": measured the ledger, found the drain was never wired, wired it
 
 **Operator asked why issue #169's morning brief shows 70 never-started items and 725 with no
