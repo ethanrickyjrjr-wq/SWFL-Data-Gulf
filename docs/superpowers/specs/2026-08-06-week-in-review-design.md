@@ -46,8 +46,13 @@ active->withdrawn    27   withdrawn from active
 holding->withdrawn   25   withdrawn from pending
 ```
 
-Six unbroken weeks of rows back to 06/22/2026. `listing_state` newest `last_seen` 08/06/2026,
-35,622 rows.
+**Correction (Sonnet 5, 08/06/2026, live-verified):** the loader's own live coverage-start query
+returns **2026-07-02**, not 06/22 as originally measured — the earliest date below was stale by the
+time Task 1 shipped. `loadWeekInReview` queries this live rather than trusting either number, which
+is exactly why: a hardcoded coverage-start would have been silently wrong here. `listing_state`
+newest `last_seen` 08/06/2026, 35,622 rows.
+
+~~Six unbroken weeks of rows back to 06/22/2026.~~ (superseded, see correction above)
 
 **Those seven transition kinds ARE the buckets.** Not a taxonomy we invent — the states the sweep
 already writes. The page groups by them; it does not rename them.
