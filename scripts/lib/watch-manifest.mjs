@@ -29,6 +29,8 @@ export const SHOULD_BE_DARK = {
     "TEMPORARILY DARK 07/18/2026: same offline `swfl-local` runner as dbpr-sirs — the workflow header itself directs keeping it disabled while the runner is unregistered (weekly cron would queue against a missing runner and fail after 24h). Shared runner root: check `swfl_local_runner_offline_dark_sources`. darkDrift flags any re-enable.",
   "daily-email-digest.yml":
     "KILLED 07/16/2026 (operator): disabled after crime news shipped in a send; the City Voices gate now drops crime/courts/disaster items. NEVER re-enable without Ricky — darkDrift makes any re-enable loud.",
+  "chief-of-staff-nightly.yml":
+    "KILLED 08/06/2026 (operator ran the disable himself; API reads `disabled_manually`). It was a `claude-code-action` job that hit its 30-turn ceiling and died on EVERY run 08/02-08/06 — verbatim `Reached maximum number of turns (30)` — burning a full PAID agent budget (~12 min wall clock) nightly for three weeks and writing nothing. Its failure defect `cron_incident_chief_of_staff_nightly` had been open since due Jul 17, and `morning_brief_no_consumer` separately recorded that the brief has ZERO human engagement even when it succeeds. Red daily + unread when green = pure noise on a paid meter. NEVER re-enable without Ricky AND without first fixing the turn ceiling; darkDrift makes any re-enable loud.",
 };
 
 // Scheduled workflows the two watchers deliberately do NOT watch.

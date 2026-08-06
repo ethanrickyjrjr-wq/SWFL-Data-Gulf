@@ -1,4 +1,125 @@
-## 2026-08-06 (Opus 5) — WEEK IN REVIEW Task 1: pure contract landed GREEN (9 pass / 0 fail). Loader query still to come.
+## 2026-08-06 (Opus 5) — Chief-of-staff nightly DECLARED dark (it was already disabled at the API), manifest state backfilled, 2 checks closed with proof.
+
+**THE JOB THAT WAS COSTING MONEY FOR NOTHING.** `chief-of-staff-nightly` failed **5 for 5**
+(08/02-08/06/2026), every run the identical `Reached maximum number of turns (30)` /
+`Claude execution failed`. It is a `claude-code-action` job: it ran a PAID agent to its full
+30-turn ceiling (~12 min wall clock, 11:07->11:19 on 08/06), died, and wrote nothing — for three
+weeks. Its failure defect had been open since **due Jul 17**, and a SEPARATE open task recorded
+that the brief has **ZERO human engagement even when it succeeds**. Operator killed it
+(`disabled_manually` at the API). This commit does the half that was still owed: DECLARES it in
+`SHOULD_BE_DARK` so `darkDrift` fires loudly on any re-enable. Declaring it earlier — while it was
+still enabled — would have ADDED an alarm instead of removing one, which is why it waited.
+
+**MANIFEST STATE BACKFILLED.** Regenerated with `--with-state`: **`"disabled": null` went 11 -> 0.**
+The manifest had been carrying unknown state for every workflow it had never seen live, which is
+exactly the input `darkDrift` and `zombieCrons` reason over. It now records real API state for all
+114. That surfaced a live finding on the spot: **ZOMBIE_CRON — `neighborhood-amenities-daily.yml`
+is disabled at the API but its cron is LIVE in source**, so a re-enable resumes it instantly while
+the registry still expects fresh rows. Already tracked under `amenities_pairing_drain_remaining_13876`
+(blocked on the operator-only `ENGINE_ENABLED` flag) — not re-opened, just now visible in the manifest.
+
+**Evidence, 29/29 green:** `watch-manifest-drift.test.mjs` 4/4 · `scripts/lib/watch-manifest.test.mjs`
+18/18 · `trigger-list-drift.test.mjs` 7/7.
+
+**CHECKS CLOSED — 2, each naming its proof:** `cron_incident_chief_of_staff_nightly` (fixed by
+removal — the workflow cannot fail again) and `morning_brief_no_consumer` (resolved by removal of
+the producer, stated as removal and NOT as "engagement fixed"; must be re-opened before any morning
+brief is rebuilt).
+
+**THE STRUCTURAL FINDING, and it is the answer to "how could a human read them all":**
+`check-sweep --dry-run` reports **0 of ~901 OPEN checks carry a live signal.** The automatic
+REOPENER (`reverify-signals.mjs`) has work; the automatic CLOSER has none, because nothing is
+machine-verifiable. **The count grows monotonically by construction, not by neglect.** Closing rows
+by hand does not change that — attaching signals does. Next lever, not yet done.
+
+## 2026-08-06 (Sonnet 5) — Operator handed 5 audit-style bugs; all 5 map to the existing sa0718 site-audit ledger (84 checks, 07/18). 1 of 5 fixed+tested this session; rest triaged, not rebuilt.
+
+Operator listed: (1) Stripe checkout downgrade-to-free on a DB/read hiccup, (2) /map fake flood-loss
+mock data with no label, (3) /demo fully fabricated numbers, publicly indexable, (4) contradicting
+DOM figures per ZIP across sources, (5) CAN-SPAM/a11y/dark-mode-contrast on live pages. Traced each
+to its exact `sa0718_*` checks-ledger key before touching anything (RULE 0.5/0.8) — this is the same
+84-finding 07/18 site audit, partially fanned-out-fixed (`daeb1f6e`, 43/89, already on `main`) but
+**deliberately left open** ("not closing fixed until reviewed and live" — `checks-prod-evidence` rule).
+
+1. **Stripe — FIXED, tested, NOT pushed.** Two related checks, two different states:
+   - `sa0718_unchecked_supabase_read_on_the_customer_lo` (checkout-session DB-read overwrite) —
+     **already fixed** in a prior session (`app/api/stripe/checkout/route.ts:47-59`, fails closed
+     with a 503 on a Supabase read error instead of treating it as "new customer"). Verified by
+     reading the live file; did not touch it. Check should close on live-verify, not by me guessing.
+   - `sa0718_checkout_session_completed_silently_drops_` (webhook subscription-retrieve hiccup) —
+     **was still live.** `fetchSubscription` in `app/api/stripe/webhook/route.ts` caught a transient
+     `subscriptions.retrieve()` failure and returned `null`; `normalizeEvent` read that identically to
+     "nothing to fetch," `subscriptionMutationFromEvent` returned `null` for the unresolved tier, the
+     route ack'd 200 with NO write, and Stripe never retried — a paid checkout's tier upgrade was gone
+     forever, silently. Fix: `fetchSubscription` now throws through instead of swallowing;
+     `normalizeEvent`'s type signature dropped `| null` to lock the contract; the POST handler wraps
+     the `normalizeEvent` call and returns 502 (no DB write) on failure so Stripe's own retry delivers
+     the event again until it lands. TDD: 2 new regression tests in
+     `lib/billing/normalize-event.test.ts` (checkout.session.completed / invoice.paid reject on a
+     throwing fetch) — written first, already green against the untouched pure module (the bug was
+     entirely in the route's swallow, not the pure logic), confirming the contract. `bun test
+     lib/billing/` → 28/28 green. `tsc --noEmit` clean on touched files. second-order review
+     dispatched (billing blast radius) — result not back yet this session.
+
+2. **`/map` — appears ALREADY FIXED, NOT verified live.** `lib/landing/load-map-flood.ts` +
+   `app/map/page.tsx` already cite both `sa0718_map_page_always_renders_hardcoded_mock_flo` and
+   `sa0718_live_flood_gradient_bounds_are_numerically` by key in their own comments, read the live
+   `env-swfl` flood detail table, compute real min/max from the rendered rows (never the mock
+   fixture's), and fall back to an honest "Sample data — not live" state when the brain has no rows.
+   Did NOT confirm `MapCanvas` actually renders that badge, and did NOT curl the live page — brains
+   are frozen since 07/24 (`nightly_chain_dark_anthropic_credits`), so it's unconfirmed which branch
+   is live right now. Checks stay open pending that live-verify — not closed on code-reading alone.
+
+3. **`/demo` — NOT investigated this session.** Checks-ledger still lists
+   `sa0718_demo_page_renders_fully_fabricated_brain_o` as the biggest open item from 07/18. Not
+   reached; `lib/demo/live-loaders.ts` (does it actually read live data now?) and indexability
+   (`app/robots.ts` / missing `metadata.robots` export on `app/demo/page.tsx`) both unread this
+   session.
+
+4. **Contradicting DOM — NOT touched, correctly fenced.** `sa0718_same_metric_multiple_unreconciled_
+   values_p` / `sa0718_two_contradictory_temperature_reads_per_zi` are real, but
+   `data_authority_single_source_registry` already marks the underlying one-authority-per-concept
+   decision STRUCTURAL, brainstorm-first, needs operator sign-off (`docs/standards/
+   data-authority-map.md`). Picking an authority myself this session would have been the RULE 3.5
+   violation the doc itself warns against. `listing_active_stats_dom_repoint` (avg_days_on_market
+   averaging the dead all-NULL RentCast column) is the one concrete, already-diagnosed slice — not
+   done this session either.
+
+5. **CAN-SPAM/a11y/contrast — NOT touched.** `sa0718_page_uses_light_mode_default_tailwind_colo` is
+   the one live DEFECT-class contrast bug in the sa0718 slice; `sa0718_claim_and_send_skips_the_can_
+   spam_postal_a` is already `verify`-class (fix committed, awaiting live check per the CAN-SPAM
+   playbook). Neither touched this session. The rest of the sa0718 a11y items are `task`-class, lower
+   priority, correctly not swept.
+
+**3 of 5 items have zero code change this session (items 2 partial-verify-only, 3, 4, 5) — all
+already carry open checks in the ledger under their exact `sa0718_*` keys, so nothing new needed
+opening.** Item 1 is the only code change; NOT pushed pending operator confirmation (billing surface).
+
+**second-order review on item 1 landed — found the real gap, fixed it same session.** Its highest-
+consequence finding: the retrieve-failure fix only closed HALF the drop-forever path. `route.ts` still
+logged-and-fell-through to `200 {received:true}` when the SUPABASE WRITE itself failed (upsert or
+update), which is the identical outcome the check names — a hiccup on a different line, same silent
+loss. Fixed: both write-error branches now return `502` (no ack) instead of falling through, so
+Stripe retries a failed DB write exactly like a failed retrieve. Re-ran `bun test lib/billing/` (28/28)
+and `tsc --noEmit` on the touched file — both clean. Also fixed the route's own docstring, which still
+claimed "200 always" after the first edit.
+
+The review also surfaced 2 NEW money-path defects (same swallow-to-null anti-pattern, different
+routes) — NOT fixed this session, opened as checks instead of silently deferred (RULE 2.4):
+- `sa0718_report_unlock_swallows_retrieve_error_to_unpaid` — `report-unlock/route.ts:26-36` catches a
+  `checkout.sessions.retrieve` failure and treats it as unpaid; a buyer who just paid gets bounced back
+  to the paywall with no webhook fallback (report-checkout deliberately ignores payment-mode sessions).
+- `sa0718_portal_route_drops_supabase_read_error` — `portal/route.ts:24-28` drops the Supabase `error`
+  on the customer-lookup read; a transient read failure reads as "no customer" → 404 for a real
+  subscriber. Lower stakes (retryable by reloading) but same root cause.
+
+Also flagged, not acted on: two stale docs (`docs/superpowers/specs/2026-07-03-stripe-billing-design.md`,
+`docs/superpowers/plans/2026-07-03-stripe-billing.md`) still state "200 always" and carry the OLD
+nullable `fetchSubscription` type + the pre-fix route body verbatim — the plan doc is marked for
+`superpowers:executing-plans`, so executing it cold would reintroduce this exact bug. Not fixed this
+session (docs, not live code — lower priority than the 2 new live defects above).
+
+
 
 TDD per the plan. Tests written red first (`Cannot find module './load'`), then implemented to green.
 `bun test lib/week-in-review/` → **9 pass, 0 fail, 16 expect() calls.**

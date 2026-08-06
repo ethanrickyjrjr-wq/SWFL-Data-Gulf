@@ -96,8 +96,8 @@
     "timeout_minutes": 20,
     "cancel_in_progress": false,
     "paid": true,
-    "should_be_dark": false,
-    "disabled": false
+    "should_be_dark": true,
+    "disabled": true
   },
   {
     "name": "CI",
@@ -257,7 +257,7 @@
     "cancel_in_progress": false,
     "paid": false,
     "should_be_dark": false,
-    "disabled": null
+    "disabled": false
   },
   {
     "name": "Render Email Assets",
@@ -557,7 +557,7 @@
     "cancel_in_progress": false,
     "paid": false,
     "should_be_dark": false,
-    "disabled": null
+    "disabled": false
   },
   {
     "name": "ingest-local-cre-context",
@@ -627,7 +627,7 @@
     "cancel_in_progress": false,
     "paid": false,
     "should_be_dark": false,
-    "disabled": null
+    "disabled": false
   },
   {
     "name": "Lee County permits weekly",
@@ -647,7 +647,7 @@
     "cancel_in_progress": false,
     "paid": false,
     "should_be_dark": false,
-    "disabled": null
+    "disabled": false
   },
   {
     "name": "LeePA parcels annual",
@@ -677,7 +677,7 @@
     "cancel_in_progress": false,
     "paid": false,
     "should_be_dark": false,
-    "disabled": false
+    "disabled": true
   },
   {
     "name": "listing-week-weekly",
@@ -687,7 +687,7 @@
     "cancel_in_progress": false,
     "paid": false,
     "should_be_dark": false,
-    "disabled": null
+    "disabled": false
   },
   {
     "name": "Live Search Daily (sourced freshness)",
@@ -737,7 +737,7 @@
     "cancel_in_progress": false,
     "paid": false,
     "should_be_dark": false,
-    "disabled": null
+    "disabled": true
   },
   {
     "name": "Neighborhood stats annual (aggregate parcel_subdivision_v)",
@@ -837,7 +837,7 @@
     "cancel_in_progress": false,
     "paid": false,
     "should_be_dark": false,
-    "disabled": null
+    "disabled": false
   },
   {
     "name": "Redfin SWFL city market monthly",
@@ -917,7 +917,7 @@
     "cancel_in_progress": false,
     "paid": false,
     "should_be_dark": false,
-    "disabled": null
+    "disabled": false
   },
   {
     "name": "Rollback on red — Prod",
@@ -997,7 +997,7 @@
     "cancel_in_progress": false,
     "paid": false,
     "should_be_dark": false,
-    "disabled": null
+    "disabled": false
   },
   {
     "name": "SWFL Inc. economic dev weekly",
