@@ -1,3 +1,36 @@
+## 2026-08-06 (Opus 5) — OPERATOR: *"the font looks fucking different and the email sucks... make sure whatever they added doesn't make our emails different"*
+
+He was right, and the cause was NOT the playbook edit he suspected. §1.9a is copy-only (his own
+zip-code decree) and cannot move a pixel. The real cause is structural and pre-dated it: all 15 SVG
+chart builders hardcode `font-family="Arial"`, which is never a loaded face, so resvg resolved every
+chart label through ONE pinned `defaultFontFamily` — Liberation Sans — for every brand. A bold chart
+title therefore sat inside a Montserrat email in an Arial clone, always. `BrandFont.canvasSvg`
+existed for exactly this and was dead on the chart path. What made it VISIBLE was a session deleting
+the chart title from the caption line: the title used to print twice, once baked in Arial and once
+as caption text in the brand font, and killing the caption copy left only the Arial one.
+
+FIXED (operator picked "bundle the real brand fonts" over two cheaper options). 12 static
+Regular/Bold TTFs vendored (Inter, Montserrat, Lato, Playfair Display, Gelasio, Jost), all SIL OFL,
+pulled from the Google Fonts css2 endpoint — verified live that it serves per-weight STATIC TTFs to a
+legacy UA, which matters because resvg 2.6.2 does not apply variable-font weight axes and a variable
+file would render every bold title at regular weight. Georgia and Century Gothic are proprietary:
+BOOK_SERIF → Gelasio (metric-compatible with Georgia, verified on the specimen page), GEOMETRIC_SANS
+→ Jost (a Futura revival — a STYLE match, called out as not metric).
+
+**The Arial literals were deliberately NOT touched.** Pointing resvg's fallback at the brand face
+fixes all 15 builders at once with no new machinery — the fallback is the mechanism the renderer
+already documents.
+
+Also closed while in there: `/api/lab/claim-and-send`, `/api/projects/[id]/materials` and
+`/api/switch/apply-forward` reach `svgToPng` but never traced the fonts, so their chart text would
+render BLANK in prod only. Pre-existing; only `/api/email-lab/ai` had the trace.
+
+Proof: 7027 tests pass / 0 fail, 0 typecheck errors, and the same SVG rasterized under three brands
+produces three different PNGs — looked at Montserrat and Playfair renders directly, both correct,
+no overflow or clipping. Check `chart_font_never_follows_brand` opened then closed.
+
+NOT COMMITTED — the tree carries a parallel session's work too; needs his push call.
+
 ## 2026-08-06 (Opus 5) — OPERATOR: *"fucking land it!!! we have more than /r/ sites, too!!! why the fuck did we build all of this? to sit around and no one fucking use??? STOP EVERYONE AND UPDATE EVERYTHING."*
 
 LANDED same session. He is right and the anger is earned: `/r/` has served baked, validated prose
