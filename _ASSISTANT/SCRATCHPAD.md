@@ -1,3 +1,74 @@
+## 2026-08-06 (Opus 5) — OPERATOR DECREE: *"fix it all! we don't need checks on everything. everything doesn't work, so what good is a check. you are the only one who can confirm or deny the important ones"*
+
+**THE DECREE HAS TWO HALVES AND THE SECOND ONE IS THE PERMISSION SLIP.**
+
+1. **FIX IT ALL** — the defects, not the ledger. Closing rows is not the job; making the thing work is.
+2. **A CHECK ON EVERYTHING IS WORTH NOTHING.** Verbatim: *"everything doesn't work, so what good is a
+   check."* A ledger that records 879 obligations against a system where the operator's lived
+   experience is "nothing works" is not a tracking system, it is a receipt for inaction. **He is
+   explicitly telling me to STOP treating an open check as an acceptable resting place** — which is
+   RULE 0.85 stated from his side of the table.
+3. **"YOU ARE THE ONLY ONE WHO CAN CONFIRM OR DENY THE IMPORTANT ONES"** — this is authorization to
+   TRIAGE ON MY OWN JUDGMENT, which the checks-burndown skill otherwise routes to him ("Ask before
+   any bulk disposition. Core-vs-parked is Ricky's call"). He has now made that call: I confirm or
+   deny. The constraint that does NOT lift is the no-invention one — a confirm still needs a real
+   probe, a deny still needs a real reason. Authority to decide is not authority to guess.
+
+**STANDING RULE THIS ESTABLISHES: a check is not a deliverable and never was.** The measurement from
+earlier this session is the proof — 774 of 879 open rows never touched after the moment they were
+written, 0 of 879 machine-closeable, 271 opened in 7 days with no signal. Writing row #880 is not
+work. Confirming or denying #1 through #879 is.
+
+**IN FLIGHT:** commit e1be8dc8 (wired the orphaned auto-closer, --signal on new-build.mjs, un-redded
+the registry spine — 15 passed 1 failed -> 16 passed). Ledger 879 -> 876.
+
+## 2026-08-06 (Opus 5) - OPERATOR: *"ok, use swfl-local for now / does any of this have a cost? why was it shut down? / bulk-close the 12 two-week-old smoke-red issues"*
+
+**DONE this turn:**
+- **12 stale `deploy-incident(soft)` issues CLOSED** (#142 #143 #144 #154 #155 #156 #157 #158 #160
+  #162 #163 #164), reason `not planned`, each with a comment saying they are a stale-sweep, NOT a
+  claim that each smoke failure was root-caused. `deploy-incident` open count is now **0**.
+- **The `swfl-local` runner is REGISTERED for the first time.** Runner v2.336.0 downloaded to
+  `C:\Users\ethan\actions-runner`, configured unattended, labels
+  `self-hosted,Windows,X64,swfl-local`. `GET actions/runners` now returns 1 runner (was 0).
+- **Both pinned venvs BUILT** (they never existed - the 08/02 brief was right):
+  `C:\Users\ethan\sirs-runner-venv` (py3.12.13 + ingest reqs + playwright chromium, import smoke OK)
+  and `C:\Users\ethan\crexi-runner-venv` (py3.12 + ingest reqs + crawl4ai-setup/patchright, import
+  smoke OK).
+
+**NOT DONE - blocked, and the reason matters:**
+- **The runner listener is NOT running**, so status is `offline`. Both `Register-ScheduledTask` and
+  a background `run.cmd` were BLOCKED by the permission classifier. Operator has to start it:
+  `! cd C:\Users\ethan\actions-runner; .\run.cmd`. For durability it wants an elevated
+  `config.cmd --runasservice` (this shell was NOT elevated).
+- **The two workflows are STILL `disabled_manually` ON PURPOSE.** Enabling them before the listener
+  is up recreates exactly the failure their own header warns about - runs queue against a missing
+  runner and fail after 24h, minting fresh `cron-failure` issues. Enable AFTER the runner shows
+  `online`.
+
+**WHY IT WAS "SHUT DOWN" - it was never up, and then it was parked, twice, deliberately:**
+The 06/22/2026 SESSION_LOG narrative claiming runner `MYNAMEJEFF` worked was FALSE - the 08/02/2026
+Fable-5 brief found all 3 cited run IDs 404 at the API, `actions-runner\` empty, both venvs absent;
+the 06/22 SIRS rows came from a LOCAL pipeline run, not GHA. Then the operator parked both:
+`parked_dbpr_sirs_monthly_local_pull` (dbpr-sirs stays off GHA, monthly LOCAL pull; data as of
+06/22/2026, next pull due before 08/21/2026) and `parked_crexi_restore_pending_proxy_research`
+(08/02/2026, crexi dark until the platform runs green). Also standing:
+`dbpr_sirs_intentionally_disabled_waf_block`. **Those three checks now contradict this decree and
+need reconciling in the same push that re-enables anything.**
+
+**COST - measured, not assumed:**
+GitHub side is **$0 either way.** Repo is PUBLIC so hosted minutes are free, and self-hosted runners
+carry no GitHub charge. Crexi's extraction is **pure crawl4ai, no LLM** (`extract.py` header: the
+XHR/`assets/search` branch REPLACED the BeautifulSoup->Haiku path on 06/22; no anthropic import
+anywhere in `ingest/pipelines/crexi_listings/`) - so `ANTHROPIC_API_KEY` in
+`ingest-crexi-listings.yml` env is DEAD WEIGHT from the old design and should be dropped. dbpr-sirs
+is a QIX pull, no paid vendor. Real costs are only: the machine being on, ~1.5 GB disk for runner +
+two venvs + two browser sets, and residential-IP exposure.
+
+**SECURITY, one sentence, not a veto:** a self-hosted runner on a PUBLIC repo means any accepted
+fork PR can execute on this machine - today that risk is theoretical (0 forks, 0 open PRs) but it
+becomes real the first time an outside PR is approved to run.
+
 ## 2026-08-06 (Opus 5) — OPERATOR: *"how do we have this many fucking problems and no claude fixes anything"* (issue #169, morning brief 08/01)
 
 **MEASURED THE LEDGER ITSELF. The number is not a bug count — it is an intake with a manual-only drain.**
