@@ -42,14 +42,23 @@
 //     This deliverable IS about a number. It is NOT routed through
 //     `buildChartForQuestion`: `routeChart` sees the word "price" and returns the ZHVI
 //     home-value TREND — a modelled Zillow index of every home, not live asking prices.
-//     Wrong chart. A hand-built `bar-table` ChartSpec is the precedent
-//     (`buildSoldCompsSpec`). Too few priced ZIPs → drop the slot, never an empty box.
-//  5. PROSE — ONE authored paragraph, and IT NEVER SEES THE ZIP-BY-ZIP SET. The
-//     relations over that set (the count, the top, the bottom, the spread) are computed
-//     in CODE and handed over as settled English sentences (lib/deliverable/claims.ts).
-//     The narrator cannot compare two ZIPs because it was never given two. We know
-//     NOTHING about this agent, so the model writes NOTHING about them: the personal
-//     introduction is an open TEXT slot in the agent's own words.
+//     Wrong chart. A DOT PLOT is the frame (each ZIP vs. the area's own median as a shared
+//     reference dot — registry: "ranked-categories"), not `bar-table`: a row of similarly
+//     sized bars is the platform's reach-for-it-by-habit default and it throws away the one
+//     real comparison this data supports (operator, 08/06/2026: "stop only using bar
+//     charts, we have tons of charts"). Too few priced ZIPs → drop the slot, never an
+//     empty box.
+//  5. PROSE — TWO authored paragraphs, from TWO disjoint sources, never merged.
+//     (a) THE PERSONAL INTRO — condensed FROM the agent's OWN `agent_bio` (lane 1: our
+//         data). No bio on file → the open TEXT slot, unchanged. A bio on file →
+//         `authorAgentIntro` shortens/warms it for an email opener and may add NOTHING the
+//         bio itself doesn't say (checked; falls back to the bio verbatim on any miss).
+//     (b) THE AREA READ — and IT NEVER SEES THE ZIP-BY-ZIP SET. The relations over that set
+//         (the count, the top, the bottom, the spread) are computed in CODE and handed over
+//         as settled English sentences (lib/deliverable/claims.ts). The narrator cannot
+//         compare two ZIPs because it was never given two, and it knows nothing about the
+//         agent — `authorAreaRead` and `authorAgentIntro` are two separate calls with two
+//         separate, non-overlapping fact sets.
 //     (`authorListingNarrative` is house-specific and is deliberately not used here.)
 //  6. FRAMING — headshot + name up front, the farm area's asking-price spread as the
 //     evidence, the agent's newest listing as the anchor, one CTA.
@@ -78,7 +87,7 @@ import {
 } from "@/lib/deliverable/claims";
 import { resolveHeadlineFigure } from "@/lib/email/doc/preview-fill";
 import { loadMarketFigures, type MarketFigure } from "@/lib/email/market-context";
-import { resolveSubject, dropEmptyChartSlot } from "./shared";
+import { resolveSubject, dropEmptyChartSlot, median } from "./shared";
 import { finalizeDoc } from "@/lib/email/doc/finalize-doc";
 import type { PlanEntry } from "@/lib/email/doc/finalize-doc";
 import { GRID_COLS } from "@/lib/email/grid-schema";
@@ -564,22 +573,44 @@ async function loadAskingByZip(zips: string[]): Promise<{ rows: ZipAsk[]; asOf: 
   return { rows, asOf: latestAsOfIso(rows) };
 }
 
-/** The bar spec. Null below the 3-ZIP floor — the caller then drops the slot. */
+/**
+ * The chart spec — a DOT PLOT, each ZIP's median asking price against the farm area's OWN
+ * median as a shared reference dot. Not `bar-table`: a bar chart over 7-8 similarly-sized
+ * dollar bars is the platform's reach-for-it-by-habit default (operator, 08/06/2026: "stop
+ * only using bar charts, we have tons of charts"), and it also throws away a real, honestly
+ * computed comparison this data already supports — how far each ZIP sits from the area's
+ * center — that a set of same-length bars cannot show at a glance. `dot-plot` (registry:
+ * "ranked-categories", the shape this data already is) draws exactly that: an accent dot per
+ * ZIP against a shared grey reference dot, capped at 8 rows (`dotPlotSvg`). The area median is
+ * computed here, in code, from the SAME priced rows the chart plots — never a second number.
+ * `columns`/`rows` stay populated (not just `options.data`): `chartMagnitudeFromSpec`
+ * (chart-coherence.ts) reads them regardless of `frameId`, and dropping them would silently
+ * break the hero/chart coherence guard for this recipe alone.
+ */
 export function buildZipAskingSpec(
   area: FarmArea,
   rows: ZipAsk[],
   asOfIso: string | null,
 ): ChartSpec | null {
   if (rows.length < MIN_ZIPS_FOR_CHART || !asOfIso) return null;
+  const areaMedian = median(rows.map((r) => r.medianList));
+  if (areaMedian == null) return null;
   return {
-    frameId: "bar-table",
+    frameId: "dot-plot",
     title: `What homes are asking in ${area.place}, by ZIP`,
     columns: ["ZIP", "Median asking price"],
     rows: rows.map((r) => [r.zip, r.medianList] as (string | number | null)[]),
     value_format: "usd",
-    chart_type: "bar",
+    chart_type: "scatter",
     asOf: asOfIso,
     source: { citation: "SWFL Data Gulf", url: BASE_URL },
+    options: {
+      data: rows
+        .slice(0, 8)
+        .map((r) => ({ label: r.zip, value: r.medianList, reference: areaMedian })),
+      valueFormat: "usd",
+      referenceLabel: `${area.place} median`,
+    },
   } as ChartSpec;
 }
 
@@ -710,6 +741,73 @@ export function violationsIn(text: string, settled: readonly SettledClaim[]): st
       settled.map((s) => s.sentence),
     ).map((q) => `unsourced quantity: "${q}"`),
   ];
+}
+
+/**
+ * THE PERSONAL INTRODUCTION — the agent's OWN bio, condensed to email length.
+ *
+ * THIS REPLACES THE OLD "we know nothing about the agent, so write nothing" STANCE (see the
+ * file header's item 5) FOR THE ONE CASE where that premise no longer holds: the account's
+ * brand profile now carries a real, agent-authored `agent_bio` — lane 1, our own data, not an
+ * invention. The header's reasoning about the AREA READ (item 7 below) is untouched: this
+ * function never sees the ZIP-by-ZIP set and asserts nothing about the market.
+ *
+ * SOURCED FROM ONE THING ONLY: the bio string the caller hands in (the account's own
+ * `agent-card` bio, already resolved by `brandAgentCard`). The model may shorten, reorder and
+ * warm up the tone for a "meet your agent" opener (per crawl4ai research,
+ * `_RESEARCH/email-and-social/2026-08-06-agent-intro-email-content-research.md` — real intro
+ * copy runs ~40-70 words and leads with a concrete credibility fact) — it may NOT add a name,
+ * year, number, brokerage, place, or claim the bio itself does not state.
+ *
+ * FAIL-SAFE, NEVER BLANK: no bio on file → null (the open slot, unchanged from before). A
+ * numeric claim in the draft that cannot be traced back to the bio, or any model/network
+ * failure → fall back to the bio VERBATIM. The verbatim bio is by definition already the
+ * agent's own sourced words, so "worst case" here is still zero-invention, never an empty slot
+ * where a bio exists.
+ */
+export async function authorAgentIntro(bio: string | undefined): Promise<string | null> {
+  const clean = String(bio ?? "").trim();
+  if (!clean) return null;
+
+  const system =
+    `You write ONE short, warm paragraph — STRICTLY 30-50 words, 2-3 sentences — introducing a ` +
+    `real-estate agent at the very top of a "meet your agent" email. You are given the agent's ` +
+    `OWN bio below — that is the ONLY source of fact you may use.\n\n` +
+    `${CLAIM_PROHIBITION}\n\n` +
+    `THIS PARAGRAPH SITS DIRECTLY ABOVE A COMPACT BIO CARD THAT ALREADY STATES THE FULL BIO ` +
+    `BELOW IT, verbatim. Your job is NOT to restate the bio in fewer words — pick ONE detail ` +
+    `from it to lead with (the one a stranger would find most compelling) and write a brief, ` +
+    `forward-looking welcome around it. Do not walk through the agent's career history in ` +
+    `order; that is what the card below is for. Do NOT add any name, year, number, brokerage, ` +
+    `place, credential, or claim that is not already stated in the bio below. Write in the ` +
+    `same voice as the bio (first person if the bio is first person). No hype, no exclamation ` +
+    `marks. Return ONLY the paragraph — nothing else, no preamble.`;
+  const ask =
+    `AGENT'S OWN BIO (the only source of fact — pick ONE detail, do not summarize the whole ` +
+    `thing, invent nothing):\n${clean}\n\nWrite the paragraph.`;
+
+  try {
+    const client = getAnthropic("email_build");
+    const msg = await client.messages.create({
+      model: EMAIL_MODEL_SONNET,
+      max_tokens: 300,
+      system,
+      messages: [{ role: "user", content: ask }],
+    });
+    const text = msg.content[0]?.type === "text" ? msg.content[0].text.trim() : "";
+    if (!text) return clean;
+    const badNumbers = extractNumbers(text).filter((t) => !anchorsExactly(t, anchorsFor([clean])));
+    if (badNumbers.length) {
+      console.log(
+        `[agent-brand-intro] AGENT INTRO rejected — unsourced number(s) not in the bio: ` +
+          `${badNumbers.join(", ")}. Falling back to the bio verbatim.`,
+      );
+      return clean;
+    }
+    return text;
+  } catch {
+    return clean; // any failure → the agent's own words, verbatim. Never blank, never invented.
+  }
 }
 
 export async function authorAreaRead(area: FarmArea, rows: ZipAsk[]): Promise<string | null> {
@@ -930,6 +1028,7 @@ export async function buildAgentBrandIntro(ctx: RecipeBuildContext): Promise<Ema
           spec,
           accent,
           `email-charts/zip-asking-${slug}-${asOf}-${tint}.png`,
+          currentDoc.globalStyle.fontFamily,
         ).catch(() => null)
       : null;
 
@@ -1003,12 +1102,19 @@ export async function buildAgentBrandIntro(ctx: RecipeBuildContext): Promise<Ema
 
   // 4. The agent card — name, title, bio, phone. Brand-owned and sticky; we never author
   //    a word of it, and we never let its default INSTRUCTION text ship as content.
-  push(brandAgentCard(currentDoc), 4);
+  const agentCard = brandAgentCard(currentDoc);
+  push(agentCard, 4);
 
-  // 5. The personal introduction — the agent's OWN words. We know nothing about this
-  //    person, so the model may not write it and we do not fake it: an empty text block
-  //    is an open slot on the canvas and does not exist in the sent email.
-  push({ id: createBlock("text").id, type: "text", props: { body: "", align: "left" } }, 4);
+  // 5. The personal introduction — condensed FROM the agent's own bio (lane 1: our data,
+  //    the account's own `agent_bio`), never invented. `authorAgentIntro` is a fail-safe
+  //    author: no bio on file → null → the same open TEXT slot as before; a bio on file →
+  //    a warm, email-length paragraph, or the bio verbatim if the model adds anything the
+  //    bio itself doesn't say. Operator, 08/06/2026: "have builder write a fucking intro."
+  const agentIntro = await authorAgentIntro(agentCard.props.bio);
+  push(
+    { id: createBlock("text").id, type: "text", props: { body: agentIntro ?? "", align: "left" } },
+    4,
+  );
 
   // 6. THE CHART — asking prices by ZIP across the farm area. This deliverable IS about
   //    a number, so it earns one. Unresolved → the slot is dropped below, never an empty

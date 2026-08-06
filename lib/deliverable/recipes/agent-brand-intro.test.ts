@@ -364,7 +364,6 @@ describe("the chart spec", () => {
 
   test("plots real dollars per ZIP, cited and dated", () => {
     const spec = buildZipAskingSpec(AREA, asks, "2026-07-13")!;
-    expect(spec.chart_type).toBe("bar");
     expect(spec.value_format).toBe("usd");
     expect(spec.rows).toEqual([
       ["33914", 525000],
@@ -374,6 +373,32 @@ describe("the chart spec", () => {
     expect(spec.asOf).toBe("2026-07-13");
     expect(spec.source?.citation).toBe("SWFL Data Gulf");
     expect(spec.title).toContain("Cape Coral");
+  });
+
+  // Operator, 08/06/2026: "stop only using bar charts, we have tons of charts." A dot plot
+  // (registry: "ranked-categories", same shape this data already is) draws each ZIP against
+  // the area's OWN median as a shared reference dot — a real comparison a row of same-length
+  // bars cannot show. The reference is computed from the SAME priced rows the chart plots.
+  test("is a dot plot, each ZIP against the area's own median as the reference", () => {
+    const spec = buildZipAskingSpec(AREA, asks, "2026-07-13")!;
+    expect(spec.frameId).toBe("dot-plot");
+    const opts = spec.options as { data: { label: string; value: number; reference: number }[] };
+    expect(opts.data).toHaveLength(3);
+    // median of [525000, 457500, 344100] sorted [344100, 457500, 525000] = 457500
+    expect(opts.data.every((d) => d.reference === 457500)).toBe(true);
+    expect(opts.data.map((d) => d.label)).toEqual(["33914", "33991", "33909"]);
+  });
+
+  // dotPlotSvg caps at 8 rows — cap the data we hand it too, never rely on the renderer to
+  // silently drop the overflow.
+  test("caps the dot-plot rows at 8, never handing the renderer more than it draws", () => {
+    const many: ZipAsk[] = Array.from({ length: 10 }, (_, i) => ({
+      zip: String(33900 + i),
+      medianList: 300000 + i * 1000,
+    }));
+    const spec = buildZipAskingSpec(AREA, many, "2026-07-13")!;
+    const opts = spec.options as { data: unknown[] };
+    expect(opts.data).toHaveLength(8);
   });
 
   // Two bars is a fact wearing a chart costume — and an empty chart box is worse than no
@@ -599,5 +624,56 @@ describe("the agent's identity comes from the brand, never from us", () => {
     ).props as Record<string, string>;
     expect(props.name).toBe("Marisol Vega");
     expect(props.bio).toBe("Fifteen years here.");
+  });
+});
+
+// ── THE PERSONAL INTRO — condensed FROM the account's own bio, never invented ──────
+//
+// Operator, 08/06/2026: "have builder write a fucking intro." The old stance ("we know
+// nothing about the agent, write nothing") no longer holds once the account carries a real
+// `agent_bio` — this is the fail-safe author that replaces the always-blank slot for that
+// one case, never the market-read paragraph.
+describe("authorAgentIntro — the personal intro, sourced from the account's own bio", () => {
+  test("no bio on file → null, the same open slot as before", async () => {
+    const { authorAgentIntro } = await import("./agent-brand-intro");
+    expect(await authorAgentIntro(undefined)).toBeNull();
+    expect(await authorAgentIntro("")).toBeNull();
+    expect(await authorAgentIntro("   ")).toBeNull();
+  });
+
+  // Reuses the file's existing getAnthropic mock (Task 6, top of file), which always
+  // returns "Homes here are worth a look this month." — no numbers, so nothing to reject.
+  // A bio on file drives the model call and its clean output ships, proving the model path
+  // actually fires rather than silently falling back to the raw bio on every call.
+  test("a clean draft with no unsourced numbers ships as written", async () => {
+    const { authorAgentIntro } = await import("./agent-brand-intro");
+    const result = await authorAgentIntro("I have sold homes here for a long time.");
+    expect(result).toBe("Homes here are worth a look this month.");
+  });
+
+  // A number the model adds that is NOT in the bio is exactly the invention this recipe's
+  // no-invention gate exists to catch — even here, where the source is the agent's own text
+  // rather than a lake figure. Fail-safe: fall back to the bio VERBATIM, never blank.
+  //
+  // `mock.module` MUST be called inside the test body, not in the enclosing `describe`'s own
+  // synchronous body — bun collects every `describe` (running its body) before running ANY
+  // test, so a reassignment sitting directly in `describe()` fires at COLLECTION time and
+  // clobbers the module for the whole file, including tests declared earlier in the file
+  // (caught here: it broke Task 6's assertion at the top of this file on the first pass).
+  test("falls back to the source bio, never the invented number", async () => {
+    mock.module("@/refinery/agents/anthropic.mts", () => ({
+      ...anthropicOrigABI,
+      getAnthropic: () => ({
+        messages: {
+          create: async () => ({
+            content: [{ type: "text", text: "I've closed over 400 homes in the last decade." }],
+          }),
+        },
+      }),
+    }));
+    const { authorAgentIntro } = await import("./agent-brand-intro");
+    const bio = "I have sold homes here for a long time and love this community.";
+    expect(await authorAgentIntro(bio)).toBe(bio);
+    mock.module("@/refinery/agents/anthropic.mts", () => anthropicOrigABI); // restore immediately
   });
 });

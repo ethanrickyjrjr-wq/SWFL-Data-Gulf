@@ -1,3 +1,37 @@
+## 2026-08-06 (Sonnet 5) — AGENT BRAND INTRO'S BODY FIXED: the builder now writes the intro, and the chart is a dot plot, not a bar.
+
+Operator, same session as the §2.8 walk below: *"first fix your shit email. crawl4ai what an
+meet agent email actually writes. have builder write a fucking intro!!!!!!!!!!!!!!!!!!!!! make
+sure we stop only using bar charts. we have tons of charts. i like the top of the email, but
+this really sucks at the body and really needs some research with crawl4ai."*
+
+6/6 acceptance assertions passing was never evidence the body was good. Two fixes, both landed
+in `lib/deliverable/recipes/agent-brand-intro.ts` (not the render script):
+
+1. **`authorAgentIntro`** — the always-blank personal-intro slot now writes FROM the account's
+   real `agent_bio` (lane 1, not invented). First draft duplicated the compact agent-card bio
+   right below it (told to "shorten," the model barely did); fixed by forcing a real 30-50 word
+   cap and an explicit "pick ONE detail, don't walk the career history" instruction. Fail-safe:
+   no bio → the open slot unchanged; any unsourced number in the draft → falls back to the bio
+   verbatim.
+2. **Chart is `dot-plot`**, not `bar-table` — each ZIP vs. the farm area's own median as a
+   reference dot, not a row of same-length bars.
+
+crawl4ai research filed:
+`_RESEARCH/email-and-social/2026-08-06-agent-intro-email-content-research.md`. A real caching
+trap nearly got logged as a bug: the first re-render screenshot still showed bars because
+Chrome cached the hosted PNG by its same-day URL — a cache-busted direct fetch confirmed the
+actual file was already correct. 2 new chart-spec tests + 3 new `authorAgentIntro` tests,
+57/57 green in the file, 620/620 across `lib/deliverable/recipes/`. Re-sent to
+hello@swfldatagulf.com, Resend id `cc9c11c9-16a0-48a2-8d30-5619e7828f2c`. Playbook §2.8.1.
+
+**Parallel-session notes:** two more collisions this session (agent-brand-intro.ts/.test.ts held
+by session `6c067fb9` for 25+ min; the playbook held again by the same session) — operator
+explicitly directed "ignore it, just push through" both times; verified via `git diff` that
+neither session had actually written anything to disk before overriding, so nothing was lost.
+
+---
+
 ## 2026-08-06 (Opus 5) — PUSH NOTE: `ALLOW_PAID_SURFACE=1` used on the Back on the Market push, and why it is NOT new paid surface.
 
 `check-no-new-paid-surface.mjs` blocked the push on ONE added line — a **comment in the

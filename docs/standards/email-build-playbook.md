@@ -2536,6 +2536,46 @@ explicit "thank you for reading" line) is non-blocking.
 **Sent for review:** `hello@swfldatagulf.com`, Resend id `dfb4c497-7f38-4933-808a-e946ba9d85e0`,
 08/06/2026 — subject "Meet Marisa Delgado, Fort Myers", 15275 bytes.
 
+### 2.8.1 THE BODY WAS THIN — operator caught it on the FIRST send, same day
+
+Verbatim: *"first fix your shit email. crawl4ai what an meet agent email actually writes. have
+builder write a fucking intro!!!!!!!!!!!!!!!!!!!!! make sure we stop only using bar charts. we
+have tons of charts. i like the top of the email, but this really sucks at the body and really
+needs some research with crawl4ai."* 6/6 acceptance assertions passing was never evidence the
+BODY was good — it only proved the account's fields carried through.
+
+**Two fixes, both crawl4ai'd first (RULE 0.4), landed in the recipe itself, not the render
+script:**
+
+1. **`authorAgentIntro`** — the always-blank personal-intro slot now writes FROM the account's
+   own `agent_bio` (lane 1, not an invention: the old "we know nothing about the agent" stance
+   predates the account having a real bio on file). Fail-safe: no bio → the same open slot;
+   any number in the draft not traceable to the bio → falls back to the bio verbatim, never
+   invented, never blank when a bio exists. **First draft failed on sight** — told to
+   "reorder, shorten, warm up" a bio that was already short and warm, the model kept nearly
+   the full ~90 words, lightly reworded, so it duplicated the compact agent-card bio sitting
+   right below it. Fixed by an explicit instruction: pick ONE detail, do not walk the career
+   history in order (that's the card's job), 30-50 words, 2-3 sentences.
+2. **The chart is a DOT PLOT**, not `bar-table` — each ZIP's asking price against the farm
+   area's own median as a shared reference dot (registry: "ranked-categories", the shape this
+   data already is). A row of same-length dollar bars was the platform's reach-for-it-by-habit
+   default and it threw away a real, honestly-computed comparison (how far each ZIP sits from
+   the center) that the bars could not show at a glance.
+
+**A caching trap almost passed for a bug.** The first re-render's screenshot still showed bars
+— the hosted PNG's storage key is `zip-asking-<slug>-<asOf>-<tint>.png`, unchanged run to run
+on the same day, so Chrome served its cached copy of the OLD bar image for the SAME URL. A
+direct cache-busted fetch of the file confirmed the actually-hosted PNG was already a correct
+dot plot. **Screenshot evidence needs a cache-buster whenever a chart's storage key can repeat
+same-day** — logged so the next chart walk doesn't re-diagnose this as a real defect.
+
+Research: `_RESEARCH/email-and-social/2026-08-06-agent-intro-email-content-research.md`
+(theclose.com bio-example pairs — the pattern behind the "pick ONE detail" instruction).
+Tests: 2 new `buildZipAskingSpec` cases (dot-plot shape, the 8-row cap) + 3 new
+`authorAgentIntro` cases (no bio → null, clean draft ships, unsourced number falls back to
+verbatim) — 57/57 green in this file, 620/620 across `lib/deliverable/recipes/`. Re-sent to
+`hello@swfldatagulf.com`, Resend id `cc9c11c9-16a0-48a2-8d30-5619e7828f2c`.
+
 ---
 
 ## 2.9 – 2.11 — TO BE WALKED

@@ -1,3 +1,115 @@
+## 2026-08-06 (Opus 5) — OPERATOR: *"MAKE SURE WE STICK TO PROVEN TACTICS FROM SOLID INTERNET REFERENCES AND USE CRAWL4AI WHENEVER WE NEED BETTER/NEW/DIFFERENT STYLES, DECISIONS, CURRENT CLICK GENERATING SUBJECTS AND HIGHER ENGAGEMENT DATA/FORMAT THAT KEEPS PEOPLE COMING BACK. I WANT RESEARCH EVERY TIME WE WORK ON THIS TO GET A LITTLE BETTER. BUT WE NEED TO START OFF ON THE RIGHT FOOT SO EVERYTHING FROM HERE IS ONLY MINOR ADJUSTMENTS."*
+
+STANDING RULE for the week-in-review / builder-vocabulary surface: **every work session on it opens
+with a crawl4ai pass** on current engagement craft — subject lines that earn clicks NOW, format,
+retention/return-rate tactics — and the findings land in `_RESEARCH/email-and-social/` + its INDEX
+line in the SAME pass. Not a one-time research step; a per-session ritual. The bar he set: the FIRST
+version must be right enough that everything after is a minor adjustment, so v1 carries the sourced
+structure, not a guess we iterate off.
+
+Proven-tactics-only. No invented format. Every structural choice in this surface names the source
+that proved it.
+## 2026-08-06 (Opus 5) — OPERATOR: *"GITHUB PROBABLY RED AND I CAN'T PUSH ALL THIS SHIT ON THE BOARD. FUCK"*
+
+He was right that it was red, and right to be blocked. TWO SEPARATE THINGS, only one of them ours.
+
+**1. OURS — CI genuinely red since ~05:30Z today. FIXED THIS SESSION, unpushed pending his call.**
+Three failing tests, all one root cause: `.github/_watch-manifest.json` was stale. The regenerator
+(`node scripts/build-watch-lists.mjs --write --write-watchers`) **refused to run** because
+`doc-ratchet-daily.yml` — added 18h ago in `5f2b30fb` — is a SCHEDULED workflow declaring no
+`timeout-minutes:`. `assertManifestSane` (`scripts/lib/watch-manifest.mjs:157`) hard-errors on that,
+because without a ceiling `classifyTermination` cannot tell a TIMEOUT kill from an UNKNOWN_CANCEL.
+So a missing one-line ceiling froze the manifest, the stale manifest reddened CI, and **every commit
+pushed after 05:30 inherited a red board that had nothing to do with its own diff.** The guard was
+correct and the new workflow shipped past it. Fix: `timeout-minutes: 10` on the `ratchet` job, then
+regenerate. Result: 4/4 pass locally, +17 lines / -0, the two watcher lists each gained exactly one
+`doc-ratchet-daily` line — meaning that job's failures are now logged and healed like every other
+scheduled job, which they were NOT for the last 18 hours.
+
+**LESSON: a new scheduled workflow is not done when it is committed.** It is done when the manifest
+regenerates. The pre-push gate did not catch this because the drift test lives in CI, not the gate.
+
+**2. NOT OURS — GitHub Actions is in a MAJOR OUTAGE right now.** githubstatus.com verbatim:
+"Incident with Actions", investigating, opened 15:22Z. Everything queued, nothing running. The 16:40
+CI run died with `Failed to resolve action download info. Error: Service Unavailable` — infra, not
+code. **Do not read anything into a red board until this clears**, and do not chase the cron
+failures piled up behind it (Heal cron failure x3, Data Targets, Pipeline freshness probe, etc.)
+until Actions is green — they will re-run.
+
+**3. NOTHING WAS ACTUALLY STUCK UNPUSHED.** `git rev-list --left-right --count origin/main...HEAD`
+= `0 0`. The 26 uncommitted files on the board are the parallel session's FONT work (13 .ttf +
+`lib/brand/fonts.ts`, `canvas-fonts.test.ts`, 5 recipes, `spec-to-png.ts`, `next.config.ts`) — a
+live in-flight change owned by another session, NOT something blocked by CI. Do not commit those
+from here (RULE 1.5 / commit-only-owned-files).
+## 2026-08-06 (Opus 5) — OPERATOR: *"WHAT ARE WE FANNING OUT ON? WE ALREADY HAVE THE DATA COMING IN ON ZIP PAGES, DO WE NOT AND /R/ PAGES AND ALL OTHER PAGES. WE START BUILDING FROM NOW FORWARD. WE DON'T NEED NEW DATA. WE WILL WORRY ABOUT QUARTER AND YEARLY WHEN WE NEED TO"*
+
+He is right and my fan-out question was the defect. I costed a bake matrix (53 ZIPs x 5 windows x 3
+grains) for data we ALREADY COLLECT. That is the "priced a guardrail" failure wearing a different
+hat — answering a build directive with a spend table.
+
+**MEASURED LIVE 08/06/2026 — the week in review is ALREADY IN THE LAKE, dated, weekly.**
+`data_lake.listing_transitions` "at" column, last 7 days: **1,060 price changes (active->active),
+527 went pending (active->holding), 122 sold from pending, 73 sold direct, 74 back on market
+(holding->active), 27 withdrawn.** Six straight weeks of rows back to 06/22. Plus
+`listing_transitions_recent_zip_stats` already rolls 30d/90d in one pass and is read by
+`market-context.ts` today. **No new ingest. No fan-out. The feed exists.**
+
+**THE ONE REAL DEFECT, and it is not a data gap.** The only code that ever writes a market-state
+snapshot is welded to the email send path. `lib/email/zip-events/state.ts:322` verbatim: *"Upsert
+snapshots AFTER a confirmed send only (never stamp without a send). DRY_RUN never calls this."* Its
+only callers are `scripts/email/weekly-read-run.mts:608,651`. And `.github/workflows/weekly-read.yml`
+has its `schedule:` COMMENTED OUT pending an operator-approved live cycle. So: 1 subscriber, no
+cron, approval-locked -> `market_event_snapshots` is 0 rows and structurally always will be.
+**Market history accrues as a side effect of emailing a stranger.**
+
+**DECISION (mine, stated not asked):** the week-in-review page reads `listing_transitions` +
+the existing 30d/90d view DIRECTLY. It does NOT wait on the snapshot store. Snapshots exist for
+alert dedup ("what did we last SHOW you") — a different job from "what happened this week," and
+coupling to it would inherit the send-lock for no benefit.
+
+Quarter/half/year: NOT NOW, per his call. The window is a parameter, not a schema.
+## 2026-08-06 (Opus 5) — OPERATOR: *"do we have any pages helping builder speak that can auto consolidate a 'week in review'... then quarter and 6 month and year in review... we already have /desk and /insider finding important info. we need all important data brought to one area, seperated into buckets/catagories/time and give builder a better vocabulary."*
+
+ANSWERED, NOT YET BUILT. Four lanes searched before answering. The honest read:
+
+**WE HAVE THE PIECES AND NO GEOGRAPHY-KEYED PERIOD NARRATIVE.** What exists: 121 baked narratives
+(`public.narratives`, surfaces `zip` 53 / `brain` 41 / `corridor` 27 — NO city, NO county) whose
+sections are only `narration` + `outlook`; a 4th surface `area-email` minted TODAY (bake side built,
+dry-run 52 surfaces, **no real bake has run**, no recipe reads it — check
+`area_email_readthrough_phase2`); `/desk` (live terminal, no history), `/insiders` (monthly
+editorial, hand-composed), `/r/*` (point-in-time). What does NOT exist: any surface keyed by a TIME
+WINDOW. `narratives` has `surface` + `surface_key` and no period column. Nothing bakes "this week vs
+last week" for any geography.
+
+**MEASURED LIVE 08/06/2026 — both "period-ish" systems are BUILT AND EMPTY, not running:**
+- `public.market_event_snapshots` — **0 rows.** The market-area alerts engine (`lib/email/zip-events/`,
+  spec 07/10) has the exact shape asked for — stored snapshot, typed diff detectors,
+  `MarketEventClass = alert|weekly|baseline`, `MarketEventGrain = zip|area|city|county` — and has
+  **never captured a single snapshot.** It is a code seed, not a live system. Every detector diffs
+  against a store that is empty, so nothing can fire.
+- `public.weekly_read_subscribers` — **1 row.** Built (spec 07/03, `lib/email/weekly-read/*`,
+  `scripts/email/weekly-read-run.mts`), effectively unused. `_AUDIT_AND_ROADMAP/Operation July/17`
+  lists it among five paused send engines; the row count agrees.
+- `public.narratives` columns, verbatim: `surface, surface_key, sections, inputs_hash, sources,
+  model, baked_at`. **No period column** — confirmed at the schema, not inferred.
+
+**THE ONE REAL SEED:** `lib/email/zip-events/` (market-area alerts, spec 2026-07-10) already has the
+exact shape asked for — a stored snapshot per ZIP (`market_event_snapshots`), typed detectors that
+DIFF it against fresh data, a `MarketEventClass` of `alert | weekly | baseline`, `MarketEventGrain`
+of `zip | area | city | county`, and `composeWeeklyDoc`/`composeRichWeeklyDoc`. It is EMAIL-only and
+weekly-only. Quarter/half/year would be the same machinery with a longer window.
+
+Second seed: `listing_transitions_recent_zip_stats` already computes 30d/90d counts (price cuts,
+raises, new holdings, sales, new listings, pending sale price) in ONE pass — read by
+`lib/email/market-context.ts` and `lib/concoctions/defs/zip-listing-activity.ts`.
+
+**RELATED, SUPERSEDED:** `docs/superpowers/specs/2026-08-06-precompute-narrative-cache-design.md`
+was killed the same morning for conflating call sites — its replacement is
+`docs/superpowers/plans/2026-08-06-precomputed-commentary-plan.md`. Any period-bake rides the
+EXISTING `scripts/bake-narratives.mts` + `lib/narratives/*` pipeline as a 4th/5th surface adapter,
+NOT a new system.
+
+Open question for him: one new surface (`period`) with a window key, or a new page. Not decided.
 ## 2026-08-06 (Opus 5) — OPERATOR: *"the font looks fucking different and the email sucks... make sure whatever they added doesn't make our emails different"*
 
 He was right, and the cause was NOT the playbook edit he suspected. §1.9a is copy-only (his own
@@ -125,8 +237,23 @@ chart for the ZIP-by-ZIP asking-price data.
    pick one that fits "asking price by ZIP" better (map/choropleth is the obvious real-estate fit
    for ZIP-grain data) rather than reaching for bar-table by habit.
 
-RESOLVED when: crawl4ai research is filed + indexed, the recipe writes a real sourced intro, a
-non-bar chart choice is evaluated (and used if it fits), rendered, LOOKED at, and reported n of N.
+RESOLVED 08/06/2026. 2 of 2:
+1. **The builder writes the intro.** `authorAgentIntro` (agent-brand-intro.ts) condenses the
+   account's own `agent_bio` into a 30-50 word opener — picks ONE detail, does not restate the
+   compact agent card underneath (first prompt draft kept the full ~90-word bio nearly verbatim,
+   duplicating the card below it; tightened to force real brevity and forbid walking the career
+   history in order — fixed, rendered, confirmed distinct). Fails safe: no bio → the same open
+   slot as before; any unsourced number in the draft → falls back to the bio verbatim, never
+   invented, never blank when a bio exists.
+2. **Stopped defaulting to bar.** `buildZipAskingSpec` is now `frameId: "dot-plot"` — each ZIP's
+   asking price against the farm area's own median as a shared reference dot (registry:
+   "ranked-categories", the shape this data already is). First screenshot pass falsely looked
+   like bars still — Chrome had cached the PNG by URL from an earlier run with an unchanged
+   filename; confirmed with a cache-busted direct fetch that the hosted file is a real dot plot.
+
+crawl4ai research filed: `_RESEARCH/email-and-social/2026-08-06-agent-intro-email-content-research.md`.
+57/57 recipe tests green, 620/620 across `lib/deliverable/recipes/`. Re-sent to
+hello@swfldatagulf.com (Resend id `cc9c11c9-16a0-48a2-8d30-5619e7828f2c`).
 
 ---
 
