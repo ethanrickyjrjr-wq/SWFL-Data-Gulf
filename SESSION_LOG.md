@@ -1,3 +1,41 @@
+## 2026-08-06 (Opus 5) — swfl-local runner LIVE for the first time; found the proxy var that defeated its whole purpose
+
+**The `swfl-local` self-hosted runner ran its first verifiable job today.** Registered runner
+v2.336.0 (`C:\Users\ethan\actions-runner`, labels `self-hosted,Windows,X64,swfl-local`), built the
+two venvs the workflows pin — `sirs-runner-venv` (py3.12.13 + ingest reqs + playwright chromium)
+and `crexi-runner-venv` (py3.12 + ingest reqs + crawl4ai-setup) — **neither existed before today**,
+confirming the 08/02/2026 Fable-5 brief that the 06/22/2026 "runner MYNAMEJEFF working" narrative
+was false. Operator started the listener; status flipped `offline` -> `online`, and both workflows
+were flipped `disabled_manually` -> `active`.
+
+**THE REAL FIND — the residential-IP fix was never actually in effect.** Test-dispatch run
+**31127088993** FAILED, and its log shows why: `CRAWL4AI_PROXY: ***` was **set**. Both workflows'
+comments claimed the proxy "stays unset" on the self-hosted runner, but the secret is live in the
+repo, so `${{ secrets.CRAWL4AI_PROXY }}` resolved and every request left through the Webshare
+shared pool — NOT through the residential connection. Estero and Fort Myers Beach both died on
+`Blocked by anti-bot protection: Cloudflare JS challenge`, the identical failure as run
+29191537886 on 07/12/2026 (proxy active). So the self-hosted runner had never been given a fair
+test: the one variable it existed to change was still overridden.
+
+**FIXED, both workflows:** `CRAWL4AI_PROXY` removed from `ingest-crexi-listings.yml` and
+`dbpr-sirs-monthly.yml` env blocks, each with the run ID and the failure string in the comment so
+nobody re-adds it. Also dropped the dead `ANTHROPIC_API_KEY` from the crexi env — verified zero
+anthropic imports in `ingest/pipelines/crexi_listings/` (the build-11 XHR branch against
+`api-lease.crexi.com/assets/search` replaced the Haiku path on 06/22/2026), so that pipeline makes
+NO paid model calls; it was also making `.claude/hooks/check-no-paid-dispatch.mjs` block the enable.
+
+**Guard note:** that hook regexes the literal key string ANYWHERE in the file — it blocked again on
+my own replacement COMMENT mentioning the name, and separately on an unrelated shell command
+containing it. It cannot distinguish a live secret from prose about one. Not loosened this session.
+
+**Cadence, from the catalog:** crexi = weekly, Sunday 11:00 UTC (`cadence_days: 7`, tolerance 3.0);
+dbpr-sirs = monthly, 1st at 07:00 UTC (`cadence_days: 30`).
+
+**Still owed:** three ledger checks now contradict live state —
+`parked_crexi_restore_pending_proxy_research`, `parked_dbpr_sirs_monthly_local_pull`,
+`dbpr_sirs_intentionally_disabled_waf_block`. And the runner listener has no service/scheduled task
+(both blocked by the permission classifier), so it dies when the operator's terminal closes.
+
 ## 2026-08-06 (Opus 5) — CORRECTION to the entry below: the crexi cause I gave was WRONG. Handoff filed.
 
 **RULE 0 is append-only, so this corrects rather than rewrites.** The entry below says

@@ -43,11 +43,13 @@ jobs:
           SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
           SUPABASE_SERVICE_KEY: ${{ secrets.SUPABASE_SERVICE_KEY }}
           DESTINATION__POSTGRES__CREDENTIALS: ${{ secrets.DESTINATION__POSTGRES__CREDENTIALS }}
-          # Runs on the self-hosted 'swfl-local' runner (residential IP), so it reaches the
-          # DBPR WAF directly and CRAWL4AI_PROXY stays unset -> qix.py goes direct. Kept wired
-          # as a fallback: if this ever moves back to a cloud runner, set the secret to escape
-          # the datacenter-IP block without touching code.
-          CRAWL4AI_PROXY: ${{ secrets.CRAWL4AI_PROXY }}
+          # CRAWL4AI_PROXY DELIBERATELY NOT WIRED (08/06/2026) — same defect found in
+          # ingest-crexi-listings.yml the same day. The old comment claimed the proxy "stays unset"
+          # on the self-hosted runner; it did not. The secret is live in the repo, so the expression
+          # resolved and every request left through the Webshare shared pool instead of this
+          # machine's residential connection — defeating the whole reason the job is self-hosted.
+          # With the var absent, qix.py goes direct. Re-add the line only if this moves back to a
+          # cloud runner; the secret is still live.
         run: |
           $pyArgs = @()
           if ("${{ github.event.inputs.dry_run }}" -eq "true") { $pyArgs += "--dry-run" }

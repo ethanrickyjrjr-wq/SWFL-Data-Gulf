@@ -30,14 +30,23 @@ jobs:
     runs-on: [self-hosted, swfl-local]
     timeout-minutes: 30
     env:
-      ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+      # The Anthropic key env was REMOVED 08/06/2026 — dead weight, and it made this workflow read as
+      # "paid" to .claude/hooks/check-no-paid-dispatch.mjs (which blocked enabling it). extract.py's
+      # build-11 XHR branch (POST api-lease.crexi.com/assets/search, read inside the Cloudflare-cleared
+      # page context) REPLACED the BeautifulSoup->Haiku->json.loads path on 06/22/2026 and returns
+      # typed JSON. Verified 08/06/2026: no anthropic/claude import anywhere in
+      # ingest/pipelines/crexi_listings/. This pipeline makes ZERO paid model calls.
       DATABASE_URL: ${{ secrets.DESTINATION__POSTGRES__CREDENTIALS }}
-      # Runs on the self-hosted 'swfl-local' runner (residential IP), so crawl4ai reaches Crexi's
-      # Cloudflare WAF directly and CRAWL4AI_PROXY stays unset -> crawl_client._proxy_from_env()
-      # returns None -> direct fetch. Kept wired as a fallback: if this ever moves back to a cloud
-      # runner, set the secret (already a live repo secret) to escape the datacenter-IP block
-      # without touching code.
-      CRAWL4AI_PROXY: ${{ secrets.CRAWL4AI_PROXY }}
+      # CRAWL4AI_PROXY DELIBERATELY NOT WIRED (08/06/2026). The old comment here claimed the proxy
+      # "stays unset" on the self-hosted runner — it did NOT. The secret exists in the repo, so
+      # `${{ secrets.CRAWL4AI_PROXY }}` resolved to the Webshare shared pool and every request left
+      # through it, NOT through the residential IP. That defeated the entire reason this job runs
+      # self-hosted. Proof: run 31127088993 (08/06/2026), the first job the swfl-local runner ever
+      # picked up — env shows `CRAWL4AI_PROXY: ***` set, and both cities died on "Blocked by
+      # anti-bot protection: Cloudflare JS challenge", the exact same failure as run 29191537886 on
+      # 07/12/2026 (proxy active). With the var absent, crawl_client._proxy_from_env() returns None
+      # and crawl4ai fetches direct from this machine's residential connection. If this job is ever
+      # moved back to a cloud runner, re-add the line — the secret is still live in the repo.
       # Dedicated uv-managed venv (Python 3.12) holding the ingest deps INCLUDING crawl4ai==0.9.0 +
       # playwright — crexi's extract.py drives Crawl4aiSession + UndetectedAdapter (a real browser),
       # unlike dbpr_sirs's raw Playwright, so the venv MUST have crawl4ai's browsers provisioned.

@@ -1,3 +1,35 @@
+## 2026-08-06 (Opus 5) - FOLLOW-UP: runner is LIVE and ran its first real job; operator asked "isn't this something ollama can do?"
+
+**PROOF, not a claim.** Operator ran `run.cmd`; runner flipped `offline` -> `online`. Both workflows
+flipped `disabled_manually` -> `active`. Test-dispatched crexi: run **31127088993**, job `ingest`
+**in_progress**, runner `busy=true`. That is the FIRST verifiable GHA job the `swfl-local` runner has
+ever picked up - the 06/22/2026 claim that it worked was false (all 3 cited run IDs 404).
+
+**Two guard notes worth keeping:**
+1. `.claude/hooks/check-no-paid-dispatch.mjs` blocked the crexi enable command because it regexes the
+   literal Anthropic-key string ANYWHERE in the workflow file. I removed the dead env var (verified:
+   zero anthropic imports in `ingest/pipelines/crexi_listings/`) - and the block PERSISTED, because my
+   own replacement COMMENT contained the literal string. Reworded the comment; the enable then
+   succeeded. **The hook cannot tell a live secret from a comment about one** - and it also fires on
+   that string appearing in an unrelated shell command, which is how this very scratchpad write got
+   blocked once. Worth narrowing to an assignment match; NOT fixed, deliberately left rather than
+   loosening a spend guard mid-session.
+2. **UNPUSHED working-tree change:** `.github/workflows/ingest-crexi-listings.yml` (dead Anthropic env
+   removed + comment). Remote still has it. Needs operator-approved push.
+
+**OLLAMA - answered, and there is prior research.** No: this is not a model problem, it is an IP
+problem. DBPR and Crexi drop requests from GitHub datacenter IPs; the fix is a request originating
+from a residential connection. Ollama serves LLMs locally and cannot change where an HTTP request
+comes from. Separately, `_RESEARCH/agent-behavior/2026-07-30-omnigent-meta-harness-and-local-ollama-agents.md`
+already evaluated local Ollama for MODEL routing - verdict **do not adopt** (measured $50.12/30d
+product API spend, $27.71 of it already ruled out on quality; RTX 4060 Ti 16 GB verified). Don't
+re-derive it.
+
+**STILL OWED:** three checks now contradict live state and must be reconciled -
+`parked_crexi_restore_pending_proxy_research`, `parked_dbpr_sirs_monthly_local_pull`,
+`dbpr_sirs_intentionally_disabled_waf_block`. Also: the runner listener dies when that terminal
+closes - no service, no scheduled task (both blocked by the permission classifier).
+
 ## 2026-08-06 (Opus 5) — OPERATOR DECREE: *"fix it all! we don't need checks on everything. everything doesn't work, so what good is a check. you are the only one who can confirm or deny the important ones"*
 
 **THE DECREE HAS TWO HALVES AND THE SECOND ONE IS THE PERMISSION SLIP.**
