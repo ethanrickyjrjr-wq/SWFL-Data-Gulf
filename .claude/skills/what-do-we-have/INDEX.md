@@ -1443,7 +1443,7 @@ Reachability at generation: 794 by path · 523 by name only · 223 orphaned. Re-
 - `lib/deliverable/recipes/price-reduced.ledger.md` — Enforced — Test: lib/deliverable/recipes/price-reduced.test.ts > "previous price = current + cut"
 - `lib/deliverable/recipes/review-reply.ledger.md` — Enforced — (Playbook Part 6), which is a framing choice, not a currently test-checked failure mode. Verify
 - `lib/deliverable/recipes/sphere-weekly.ledger.md` — Enforced — Test: lib/deliverable/recipes/sphere-weekly.test.ts > "THE HEADLINE — a lane-3 fact, or an open slot. Never an invention"
-- `lib/deliverable/recipes/under-contract.ledger.md` — Enforced — Test: lib/deliverable/recipes/under-contract.test.ts > "SETS THE TWO CLOCKS SIDE BY SIDE — and LABELS them as different quantities"
+- `lib/deliverable/recipes/under-contract.ledger.md` — Enforced — shipping an estimate when that clock holds no real count (a firstseen floor is not a count).
 
 ## _RESEARCH/email-and-social — 12
 
