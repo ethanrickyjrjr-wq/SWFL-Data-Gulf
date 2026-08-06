@@ -1,3 +1,28 @@
+## 2026-08-06 (Sonnet 5) — OPERATOR, mid agent-brand-intro walk: *"first fix your shit email. crawl4ai what an meet agent email actually writes. have builder write a fucking intro!!!!!!!!!!!!!!!!!!!!! make sure we stop only using bar charts. we have tons of charts. i like the top of the email, but this really sucks at the body and really needs some research with crawl4ai"*
+
+OPEN — being worked now. The §2.8 walk (previous entry below, commit `be2bc3f7`) proved the
+recipe carries what the account holds and passed 6/6 acceptance assertions — but "passes
+assertions" is not "the body is good," and the operator is right that the body reads thin: an
+empty personal-intro text slot (the recipe deliberately never writes about the agent — see
+`agent-brand-intro.ts` item 5's comment "we know NOTHING about this agent") and a plain bar
+chart for the ZIP-by-ZIP asking-price data.
+
+**TWO FIXES, BOTH REQUIRE CRAWL4AI FIRST (RULE 0.4), NOT MEMORY:**
+1. **THE BUILDER MUST WRITE THE INTRO.** The account (Marisa Delgado) now carries a REAL
+   `agent_bio` (17 years, property-management background, Fort Myers/Estero referral business) —
+   this is LANE 1 (our data), not an invention. The recipe's "we know nothing about the agent"
+   rationale predates the account having a real bio on file. crawl4ai what an actual "meet the
+   agent" email writes (body copy, not letter-writing tips) and have the builder author the intro
+   FROM the account's own bio — never inventing beyond it.
+2. **STOP DEFAULTING TO BAR CHARTS.** The chart registry has more than one frame; check it and
+   pick one that fits "asking price by ZIP" better (map/choropleth is the obvious real-estate fit
+   for ZIP-grain data) rather than reaching for bar-table by habit.
+
+RESOLVED when: crawl4ai research is filed + indexed, the recipe writes a real sourced intro, a
+non-bar chart choice is evaluated (and used if it fits), rendered, LOOKED at, and reported n of N.
+
+---
+
 ## 2026-08-06 (Opus 5) — OPERATOR: *"we don't go paid on every fucking email. did you now read the ladder??????"* + *"If a house sold, we have the fucking house in the lake 99 percent of the time"* + *"we are only using actors for specific needs unless we don't have a lot on the property"* + *"list all of our actors and what they can get in the playbook and where all that information is saved"*
 
 OPEN — being worked now. **I skipped the lane order on the very rule I had just written into the

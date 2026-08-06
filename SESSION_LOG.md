@@ -1,3 +1,53 @@
+## 2026-08-06 (Opus 5) — AREA-EMAIL SURFACE MINTED. The bake ran red for 17 days; measuring it showed the model was ROUNDING, not hallucinating, because the prompt hands raw values and then forbids rounding.
+
+Operator: *"i want a complete plan that will actually work / crawl4ai what you need, don't just make
+shit up"*, then *"fix whatever you need to and mint area email, i guess"*.
+
+**FIRST, A CORRECTION I OWE THE RECORD.** The spec I handed him last turn targeted a DEAD path. Live
+probe: `deliverable_build` fired 187 times lifetime, **last on 07/17/2026, zero in 30 days**, and
+`/refresh` has been used **once ever** (1 of 92 rows). The live narrative traffic is `email_build`,
+636 calls / $5.89 per 30d. **This is the second occurrence of SCRATCHPAD 0z** (07/21/2026, *"there
+is no traffic..is there?"*) — a caching plan sized before the problem was, 16 days apart, both times
+a two-minute query away. Spec marked SUPERSEDED in place, kept as the record.
+
+**AND THE MECHANISM ALREADY EXISTED.** `scripts/bake-narratives.mts` + `lib/narratives/*` is a live
+precompute→validate→cache pipeline (1,446 calls/30d) with an `inputsHash` delta gate, a fail-closed
+no-invention validator, and the Batches API at 50%. `lib/email/zip-seed.ts:76` already reads a baked
+row into an email. It was a 4th adapter all along, not a new system.
+
+**THE DIAGNOSIS THAT MATTERS (`d9632d2b`).** The bake had exited red every run since 07/26 and nobody
+had named the numbers. Pulled the last real run (07/22) and replayed each failing key's inputs. Of 11
+failures: **3 notation drift** (value present, spelling differs), **5 ROUNDING** (93.7%→93,
+$399,900→$400,000, 1.04→1.0), **2 ARITHMETIC** ($400,000−$325,000=$75,000). 8 of 11 genuine, so the
+gate was NOT loosened. Root cause: **the prompt hands raw values then forbids rounding — a writer
+told to produce plain English will round, because that is what prose does.** The instruction and the
+material were in conflict every run.
+
+Shipped: `validate.ts` value-aware gate (`canonicalNumber` + K/M `scaleExpansions`, the latter only
+when the suffix is literally in the source, so a bare 300 never licenses 300,000 — classes B and C
+still fail, pinned by test); `length.ts` per-surface narration length read by BOTH prompt and
+validator so the two cannot disagree; `area-email-inputs.ts` on the SAME data root as the zip
+surface (`assembleZipReport` — never a second path). It selects the top six facts **that are
+copy-ready**, not the top six outright: measured across all 52 live surfaces, **25 had ranked a bare
+ratio into their top six**, exactly the shape that caused the rounding. Never rescaled or relabelled —
+whether a "pending ratio" may be shown as a percent is a semantic claim the adapter can't make.
+
+Gates: **45 pass / 0 fail** `lib/narratives`, **21 pass / 0 fail** downstream (zip-seed,
+gate-narrative). Dry-run `--surface area-email`: 52 surfaces, 6.00 facts each, 0 unready, 0 starved.
+
+**NOT DONE — checks opened, this is not finished:** no recipe reads the baked row yet
+(`area_email_readthrough_phase2`), classes B/C still live on zip/brain/corridor
+(`bake_rounding_computed_prompt_fix`), and **no real bake has run** — dry-run + unit tests only.
+Closed with evidence: `zhvi_median_mislabel_email` (already fixed 07/18, the figure was REMOVED;
+zero consumers call ZHVI a median) — it was a stale obligation, not a live defect; residual upstream
+brain label opened as `zhvi_median_brain_metric_label`.
+
+**NEAR-LOSS WORTH RECORDING:** a parallel session's `safe-push` stashed this session's entire
+uncommitted tree and never popped it — all nine files vanished from disk before commit. Recovered
+from `stash@{0}` by path (`git show stash@{0}:<path>`), not by popping, so the other session's work
+stayed untouched. **Lesson: commit early when parallel sessions are live; an uncommitted tree is not
+yours.** Plan: `docs/superpowers/plans/2026-08-06-precomputed-commentary-plan.md`.
+
 ## 2026-08-06 (Opus 5) — Just Sold rebuilt to the TARGET: badge burned into the photo, campaign bar back to standard, house description gone, one reader-first paragraph.
 
 Operator, three corrections: *"don't change the just sold bar so it's different from every other
