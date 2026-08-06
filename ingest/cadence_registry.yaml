@@ -1393,6 +1393,13 @@ pipelines:
     freshness_table: data_lake.dbpr_sirs_submissions
     freshness_column: scraped_at # table has scraped_at + created_at, no inserted_at
     expected_rows_min: 50 # floor at 50; Lee+Collier July 2025+ alone is 77+
+    # CRAWL4AI_PROXY is read by qix.py but DELIBERATELY not wired into the workflow env
+    # (08/06/2026). Wiring it routes the request through the Webshare shared pool and defeats the
+    # swfl-local residential-IP runner — the exact defect that made crexi run 31127088993 fail on a
+    # Cloudflare JS challenge. Intentional; re-wire only if this moves back to a cloud runner.
+    known_drift:
+      - rule: secret_not_wired
+        check: dbpr_sirs_proxy_deliberately_unwired
     # Non-dlt pipeline — freshness checked via MAX(scraped_at) on the table directly.
     # Source: DBPR SIRS Reporting Database — two Qlik Sense apps:
     #   pre-July 2025 (appid 14f1ed21) and July 2025+ (appid d217126f).
