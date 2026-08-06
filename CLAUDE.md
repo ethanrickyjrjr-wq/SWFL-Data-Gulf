@@ -152,9 +152,20 @@ the same class of error as a stale alarm. The bridge must compare the bake again
 made from (`inputs_hash` and `baked_at` are both on the row for exactly this) and fall through to a
 live call when it does not match — that fall-through IS the fallback this rule demands.
 
-⚠️ **The email↔narrative bridge is being built right now by a parallel session**
-(`lib/narratives/area-email-inputs.ts`, research + design + plan already filed). **Do not build a
-second one.** This rule states the law; that work does the wiring.
+✅ **THE BRIDGE IS BUILT AND PUSHED (08/06/2026).** `lib/narratives/area-read.ts` `bakedAreaRead()`
+is the ONE reader — **never write a second one.** It tries the email-tuned `area-email` surface, then
+the `zip` report surface (**53 rows baked; probed live 8/8 available**), then returns null so the
+caller runs its live call. **First consumer wired: `review-reply.ts`.**
+
+**THE SAFETY RULE THAT MAKES IT LEGAL:** baked prose was written against the REPORT's 28–30 facts;
+an email shows ~6. So the CALLER passes its own anchoring guard (`unanchoredNumbers`) and baked prose
+ships ONLY if every number in it is sourced by THIS email. Prose that fails is dropped and the live
+call runs. The bridge can make an email cheaper and better; it can never make it less sourced.
+
+**Wiring a new recipe = one call**, before the live model call, passing that recipe's own guard.
+NOT every recipe is a fit: `market-pulse`'s prose slot is **digit-free by design** (`auditConnective`
+runs a zero-digit audit — code writes every factual sentence), so baked prose would fail its own gate.
+Check the recipe's guard shape before wiring. Remaining: `area_email_readthrough_phase2`.
 
 ---
 

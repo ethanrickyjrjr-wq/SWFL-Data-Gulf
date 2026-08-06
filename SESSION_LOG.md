@@ -1,3 +1,34 @@
+## 2026-08-06 (Opus 5) — THE EMAIL↔NARRATIVE BRIDGE IS LANDED. `/r/` served baked prose for a month while every email rewrote it from scratch.
+
+Operator: *"fucking land it!!! we have more than /r/ sites, too!!! why the fuck did we build all of
+this? to sit around and no one fucking use??? STOP EVERYONE AND UPDATE EVERYTHING."* Earned. 121
+baked narratives on hand (53 zip, 41 brain, 27 corridor) and the email side read exactly ONE
+(`zip-seed.ts`); every other area email paid for a live Sonnet call to rewrite prose we had already
+written AND already validated.
+
+**BUILT: `lib/narratives/area-read.ts` `bakedAreaRead()` — the ONE bridge.** Surface order:
+`area-email` → `zip` → null (caller runs its live call). **First consumer wired: `review-reply.ts`.**
+
+**TWO GUARDS, both load-bearing, neither optional:**
+1. **SOURCING.** Baked prose was written against the REPORT's 28–30 facts; an email shows ~6.
+   Returning the row as-is would put a figure in front of a reader that the email never shows — the
+   one hard block. So the CALLER passes its own `unanchoredNumbers` guard and baked prose ships only
+   if THIS email sources every number in it. Fails → live call.
+2. **AGE.** Per the same-day rule from a parallel session ("a bake has an age; baked is not a synonym
+   for current"), the bridge recomputes `inputsHash` — the SAME delta gate the bake uses — and
+   requires it to match the row. Data moved since the bake → stale → live call.
+
+**MEASURED LIVE, both gates:** 8/8 probed ZIPs have baked prose available; **7 of 8 survive the
+freshness gate, 1 correctly rejected as stale.** The gate is not decorative.
+
+**NOT EVERY RECIPE FITS, and that is a finding, not laziness.** `market-pulse`'s prose slot is
+digit-free BY DESIGN (`auditConnective` = zero-digit audit; code writes every factual sentence), so
+baked prose fails its own gate. `sphere-weekly` deleted its digit-token guard. Both need their own
+seam. Tracked: `area_email_readthrough_phase2`.
+
+Gates: **94 pass / 0 fail** across `lib/narratives`, `review-reply`, `zip-seed`. CLAUDE.md 0.7b
+updated from "being built by a parallel session" (it was this session) to the built contract.
+
 ## 2026-08-06 (Opus 5) — AREA-EMAIL SURFACE MINTED. The bake ran red for 17 days; measuring it showed the model was ROUNDING, not hallucinating, because the prompt hands raw values and then forbids rounding.
 
 Operator: *"i want a complete plan that will actually work / crawl4ai what you need, don't just make

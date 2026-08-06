@@ -57,6 +57,7 @@ import {
 } from "@/lib/deliverable/chart-coherence";
 import { anchorsExactly, extractNumbers, normalizeNumber } from "@/lib/deliverable/narrative-lint";
 import { getAnthropic } from "@/refinery/agents/anthropic.mts";
+import { bakedAreaRead } from "@/lib/narratives/area-read";
 import { EMAIL_MODEL_SONNET } from "@/lib/email/model-router";
 import { clearNarrativeSlots, fillNarrative } from "./shared";
 import { finalizeDoc } from "@/lib/email/doc/finalize-doc";
@@ -376,9 +377,18 @@ async function authorAreaRead(
   figures: ReviewFigures,
   areaLabel: string,
   points: TrendPoint[],
+  zip?: string,
 ): Promise<string | null> {
   if (rendered(figures).length === 0) return null; // never improvise an area
   const facts = factLines(figures, points);
+
+  // LANE 1 — prose we already wrote AND already validated (RULE 0.7b). The /r/
+  // pages have served baked area reads since 07/2026 while this recipe rewrote
+  // one from scratch on every build. It only ships if it clears THIS email's own
+  // anchoring guard, so a report figure this email doesn't show can never ride in
+  // on it. Miss, or prose that fails the guard → fall through to the live call.
+  const baked = await bakedAreaRead(zip, (t) => unanchoredNumbers(t, facts).length === 0);
+  if (baked) return baked.text;
   const user = `AREA: ${areaLabel}\n\nFACTS (the only things you know):\n${facts.join("\n")}\n\nWrite the read.`;
 
   const ask = async (content: string): Promise<string | null> => {
@@ -615,6 +625,7 @@ export async function buildReviewReply(ctx: RecipeBuildContext): Promise<EmailDo
           `email-charts/review-reply-${area.zip}-${spec.asOf ?? "x"}-${
             accent.replace(/[^0-9a-fA-F]/g, "").slice(0, 6) || "x"
           }.png`,
+          currentDoc.globalStyle.fontFamily,
         ).catch(() => null)
       : null;
 
@@ -633,7 +644,7 @@ export async function buildReviewReply(ctx: RecipeBuildContext): Promise<EmailDo
   // THE READ. LANDMINE: `fillNarrative` SKIPS a text block that already has content, so
   // clear first — always, even though our own grid seeds it empty. A future skeleton
   // change must never silently ship its instruction copy to a recipient.
-  const read = await authorAreaRead(figures, area.label, chart ? points : []);
+  const read = await authorAreaRead(figures, area.label, chart ? points : [], area.zip);
   if (read) doc = fillNarrative(clearNarrativeSlots(doc), read);
 
   return doc;

@@ -1,3 +1,23 @@
+## 2026-08-06 (Opus 5) — OPERATOR: *"fucking land it!!! we have more than /r/ sites, too!!! why the fuck did we build all of this? to sit around and no one fucking use??? STOP EVERYONE AND UPDATE EVERYTHING."*
+
+LANDED same session. He is right and the anger is earned: `/r/` has served baked, validated prose
+since 07/2026 and the email recipes rewrote it from scratch on every build. 121 baked narratives on
+hand (53 zip, 41 brain, 27 corridor) and the email side read exactly ONE of them (`zip-seed.ts`).
+
+Built `lib/narratives/area-read.ts` `bakedAreaRead()` — the ONE bridge. Wired `review-reply.ts`.
+Probed live: **8 of 8 ZIPs return baked prose**, so this does real work TODAY rather than waiting on
+a paid bake of the new surface.
+
+**The thing I nearly got wrong:** returning the baked row as-is would have put REPORT figures (28-30
+facts) into an EMAIL that shows ~6 — an unsourced number in front of a reader, the one hard block.
+So the caller passes its own `unanchoredNumbers` guard and baked prose ships only if THIS email
+sources every number in it. Fails → live call, exactly as before.
+
+**Not every recipe fits, and that is not laziness:** `market-pulse`'s prose slot is digit-free BY
+DESIGN (`auditConnective` = zero-digit audit; code writes every factual sentence). Baked prose would
+fail its own gate. `sphere-weekly` deleted its digit-token guard. Both need their own seam, not this
+one — tracked in `area_email_readthrough_phase2`.
+
 ## 2026-08-06 (Opus 5) — OPERATOR DECREE: *"everything should work the same that needs to and everything should have a fall back. with apify, we should always have the data we need. simple. make sure in the rules. START WITH WHAT WE HAVE, MOVE TO PAID"* + *"AND WE HAVE A LOT IN /R/, AS WELL FOR COMMENTARY"*
 
 OPEN — being written into the rules now. Two halves of ONE law:
