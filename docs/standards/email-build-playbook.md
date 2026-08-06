@@ -539,7 +539,7 @@ then write it down.
 
 ---
 
-## 1.12 THE ACCEPTANCE SCRIPT IS SHARED. THE ROWS AND THE ASSERTIONS ARE NOT.
+## 1.17 THE ACCEPTANCE SCRIPT IS SHARED. THE ROWS AND THE ASSERTIONS ARE NOT.
 
 **Locked 08/06/2026.** Operator: *"Why would we build multiple of anything and not use the same?"*
 
@@ -574,6 +574,108 @@ can actually leak, Market Comps needs one with a real comp set — so two script
 testing a different house. That is the same "one root for things that only look alike" error the
 harness exists to prevent, committed inside the fix for it, and **only the paired run caught it.**
 The general form: consolidate what is genuinely one thing; a parameter is not duplication.
+
+---
+
+## 1.18 BUILDING A NEW EMAIL — THE ORDER OF OPERATIONS. DO NOT IMPROVISE THIS.
+
+**Every walk that produced a defect produced it by skipping a step here.**
+
+**1. READ, IN THIS ORDER, BEFORE WRITING A LINE OF CODE.**
+   a. **This file** — PART 1 in full, then your email's section in PART 2, then §2.1–2.4 of the four
+      already walked. A hook blocks email edits when the playbook was never opened in the session;
+      that hook is the record of three defects that were written down *before* the build that
+      re-shipped them.
+   b. The gitignored rules, **by path** — `Grep` cannot see them and a search returning nothing is
+      NOT evidence of absence:
+      `_RESEARCH/deliverable-and-design/2026-07-01-ai-deliverable-design-quality-research.md` ·
+      `_RESEARCH/email-and-social/2026-08-03-strongest-real-estate-email-concepts-structure.md` ·
+      `_RESEARCH/email-and-social/2026-08-03-email-length-and-per-type-benchmarks.md`
+   c. `lib/deliverable/CLAUDE.md` and `lib/email/CLAUDE.md`.
+   d. **The recipe file that already exists for your email.** All 17 keys already have a builder.
+      You are almost never writing from zero — you are deciding what the walk changes. Read what is
+      there before proposing to replace it.
+
+**2. STATE THE BUILT COUNT FIRST, COUNTED FROM CODE.** How many emails have a builder (count
+`lib/deliverable/recipes/index.ts`) and how many have been WALKED (count `scripts/email/render-*.mts`).
+Those are different numbers and conflating them is how a status report lies. **08/06/2026: 17
+builders, 4 walked** (New Listing, Coming Soon, Market Comps, Under Contract).
+
+**3. BRAINSTORM → NAME THE BREAK → TDD.** `superpowers:brainstorming` is mandatory. No design is
+approved without a failure-modes section: every way it can break, each paired with the guard that
+stops it. Then `superpowers:test-driven-development` — the failing test is named after the failure
+mode it targets. **A green suite is not a guard against an environment hazard, a data-existence
+failure, or an invented claim**; those need a validation/gate/lint named separately.
+
+**4. REGISTER THE BUILD.** `node scripts/new-build.mjs <slug> "<label>"` — spec stub plus the
+`<slug>_live_verify` check in one step. Without it there is no check to close and the build is
+invisible to the session loop.
+
+**5. RENDER IT AND LOOK AT IT.** Under Contract found **four defects by rendering and looking that
+no test could see**, plus one assertion that was a latent false alarm which would have fired on any
+condo. Coming Soon found its doubled-name broken-logo bug the same way.
+
+**6. REPORT n OF N.** Never report a multi-part task without the fraction and the names of the parts
+NOT done. Partial is fine. Partial reported as whole is the defect.
+
+**7. CLOSE THE CHECK WITH PASTED EVIDENCE** — the command and its real output, the assertion lines,
+the rendered file path. Not "tests pass"; the test line.
+
+---
+
+## 1.19 THE TRAPS. EVERY ONE MEASURED, NONE THEORETICAL.
+
+**T1. DO NOT WRITE A SECOND RESOLVER.** `resolveSubject` (`recipes/shared.ts`) is the ONE inspection
+point for all seven address-spine emails — a fact wired there reaches all seven at once. If your
+recipe needs a fact it does not return, check first whether we are already fetching it and throwing
+it away: `lotSize`, `propertyType` and `baths` all were.
+
+**T2. DO NOT COPY A HELPER. IMPORT IT.** `withCommas` had **eight** copies; `clip` had three variants
+and the two scripts missing it still carried the bug it was written to fix. Roots that exist and must
+be imported, never re-typed: `lib/format-number.ts` (`withCommas`) · `scripts/email/_harness.mts`
+(the whole acceptance scaffold) · `lib/email/social/platforms.ts` · `lib/email/listing-flyer.ts`
+(`spec`, `pricePerSqft`) · `lib/listings/listing-url.ts` · `lib/brand/profile-ledger.ts`
+(`PROJECT_CARRY_KEYS`).
+
+**T3. BUT A PARAMETER IS NOT DUPLICATION.** The counterweight, and it bit the same day: each
+acceptance script's **default house is its own**, chosen for what that email exercises. Collapsing
+them into one shared constant silently re-pointed two scripts at a different property. Consolidate
+what is genuinely one thing.
+
+**T4. BRAND OFF THE REAL ACCOUNT ROW, NEVER A HARDCODED FIXTURE.** A fixture proves the renderer and
+proves nothing about whether an agent who fills in their brand actually gets it. One hid a 17-field
+account→project drop for an entire session. Use `loadAccountBrand()`.
+
+**T5. A STALE ALARM IS WORSE THAN NO ALARM.** Any diagnostic that hardcodes a list living elsewhere
+goes stale and then reports a defect that is already closed — and the next session re-opens fixed
+work. Derive from the root. Coming Soon's 14-key copy of a 32-key list is the worked example.
+
+**T6. AN EMPTY CHART BOX IS WORSE THAN NO CHART.** Twelve of seventeen declare chart policy `none`,
+and none means DROP the slot — `dropEmptyChartSlot` also closes the hole, because filtering a
+positioned block leaves a void.
+
+**T7. THE OPEN-SLOT CONTRACT.** An unsourceable fact is an OPEN SLOT — never a zero, never a
+placeholder, never "TBD", never invented. The label is the instruction to whoever fills it, and it
+ships to the recipient once filled.
+
+**T8. THE CLAIM GATE FAILS CLOSED AND SILENTLY.** A dropped narrator paragraph is a `console.error`
+nobody reads, and its symptom — a slightly thin email — looks like nothing being wrong. Wire
+`captureNarratorDrops()` and print the line on every acceptance run.
+
+**T9. ASSERT AGAINST THE RENDERED BYTES, NOT THE SOURCE DOC.** And watch substring false alarms: a
+`!lower.includes("dom")` check fires on **"condominium"** — 6,489 condos in the lake — on the first
+condo it ever sees. Case-sensitive word boundaries for token labels.
+
+**T10. PROVE A REFACTOR WITH A PAIRED RUN** (§1.17). Old script and new script back to back on the
+same live data, byte-compare the HTML. Never against an earlier snapshot: `resolveSubject` reads a
+live vendor feed, so the subject price, hero photo hash and comp set all move between runs and a
+stale baseline reports a false difference.
+
+**T11. NEVER FETCH A LISTING PORTAL, AND NO AERIAL VIEWS.** The listing's own photo or nothing.
+
+**T12. STATE THE METERED CALLS BEFORE RUNNING.** Each acceptance house is chosen for ZERO new vendor
+spend; the only metered call is the one narrator paragraph. Running without `ANTHROPIC_API_KEY` skips
+even that — which is also how the deterministic paired run in T10 is done.
 
 ---
 
@@ -1931,8 +2033,94 @@ wrong).
 
 ---
 
-## 2.5 – 2.17 — TO BE WALKED
+## 2.5 JUST SOLD — tag `just-sold` — **NOT YET WALKED. PRE-BRIEF ONLY.**
+
+**This is the next email to build** (the lifecycle successor to Under Contract). This section is a
+PRE-BRIEF, not a walk: everything below is read out of `lib/deliverable/recipes/just-sold.ts`, whose
+header records a live probe from 07/13/2026. **It is code-probed fact, not memory, and it is not a
+substitute for walking the email with the operator.** Follow §1.18 in order.
+
+### 2.5.0 THE CLOSE PRICE — OPERATOR DECREE 08/06/2026
+
+**Verbatim: *"SOLD PRICE IS ENTERED AS LAST LISTED PRICE WE HAVE. USER CAN CHANGE IT IF THEY WANT."***
+
+That is the design. The close cell is **PREFILLED from the last list price we hold** for that
+property (`listing_state.list_price` — live-probed 08/06/2026: **35,599 rows carry one**), and it is
+**EDITABLE**. The agent who just closed the house is looking at that cell and puts the real number
+in. Our data is the starting value; theirs is the final one.
+
+**This is not an invented number and it never was.** It is lane 1 (our own record, named source) with
+lane 4 (the figure the user writes in) on top — exactly the four-lane order. A prefilled editable
+field is not a claim the system asserts.
+
+**An earlier draft of this section called the list price "an ASK" and declared it FORBIDDEN in a sold
+hero, leaving the cell empty instead. That was wrong and is struck.** It confused a prefill with an
+assertion, and it would have shipped an email whose single most important cell was blank in the
+common case — because county recording lags weeks, so we will rarely hold a recorded sale by send
+time. An empty cell is not more honest than a sourced, editable one; it is just less useful.
+
+**THE ONE THING THAT IS STILL FORBIDDEN, and it is a different mechanism.** Do NOT fill this cell
+from `fetchSoldEvent` / the property's LAST RECORDED TRANSFER. Probed live 07/13/2026: a house
+ACTIVE at $595,000 returns a 2023 land/teardown transfer of **$160,000**. That is not a stale
+starting value the agent will notice and correct — it is a plausible-looking wrong number from a
+different decade, and it reads as authoritative. **A real source is not the same as a source-faithful
+answer.** Prefill from the last list price we hold; never from an old recorded transfer, and never
+from an AVM estimate.
+
+**Residual risk, named so the guard is deliberate:** an agent who edits nothing ships a list price
+under a "Just Sold" headline. The cell is visible and labelled, which is the mitigation the decree
+relies on. If a stronger guard is ever wanted, it belongs at SEND (confirm the close before the
+send completes), never at BUILD — blocking the build would re-create the empty-cell failure above.
+
+### 2.5.1 THE REST, ALREADY SETTLED IN CODE
+
+- **A comp must have beds AND sqft or it is bare land.** Confirmed in this subject's own sold set:
+  315 Shore Dr — beds null, sqft null, $127,500. Charting bare land beside a 2,847 sq ft house makes
+  the close look like a steal for a fake reason. Filter BY DATA, never by guessing at a type name.
+- **The pairing rule.** A price cell that is not the close may only appear ALONGSIDE the close,
+  never instead of it.
+- **Date grain.** Every sale date we serve is MONTH grain and lags ~7 weeks. Render "May 2026",
+  never "05/01/2026" — an exact day asserts precision the source does not have.
+- **Chart.** Comps-bar — the subject's own bar IS the point. Under the 2.5.0 decree the close cell
+  is always prefilled, so the subject bar always has a value and the chart always has its anchor.
+  (The old "no close → no chart" rule was a consequence of the empty-cell design and dies with it.)
+  If the comp set itself is empty, drop the chart and close the hole — the sold-comps list still
+  carries the context.
+- **$/Sq Ft footnote SURVIVES here** (it is the SALE price ÷ sq ft, which distinguishes it from the
+  list-price version every other lifecycle email shows).
+
+### 2.5.2 THE ACCEPTANCE SCRIPT YOU WILL WRITE — ~60 lines
+
+Import everything from `scripts/email/_harness.mts` (§1.17). Write only your `rows[]`, your
+assertions, and your own default house.
+
+```
+const ADDRESS = subjectAddress("<your own default house>");
+const { brand, profile } = await loadAccountBrand();
+const narratorLog = captureNarratorDrops();
+const { facts } = await resolveSubject(ADDRESS, "");
+const built = await buildJustSold({ facts, currentDoc: applyBrand(defaultDoc(), brand), prompt: "", scope: {} });
+const doc = applyBrand(built, brand);
+const rows: ProvenanceRow[] = [ /* YOUR cells, each naming the lane that filled it */ ];
+printProvenance(rows);
+if (narratorLog.length) console.log(`  NARRATOR DROPPED: ${narratorLog.join(" | ")}`);
+printBottom(doc);
+const { html } = await renderAndSave(doc, "just-sold-email.html");
+printBrandCarry(profile);
+reportAssertions("THE SOLD CONTRACT", [ /* YOUR assertions, read off `html` */ ]);
+```
+
+**Pick the default house deliberately** — for Just Sold it must be one with a REAL recorded sale in
+its own comp set, or every run tests the open-slot path and the close cell is never exercised once.
+
+---
+
+## 2.6 – 2.17 — TO BE WALKED
 
 Each section gets written when that email is walked with the operator. **Do not pre-fill one from
-memory or by copying 2.1, 2.2, 2.3 or 2.4** — the whole point of the walk is that each email's
+memory or by copying an earlier section** — the whole point of the walk is that each email's
+ingredients and sources get decided deliberately, one at a time. (§2.5 above is an exception with a
+reason: it is transcribed from a live probe already recorded in the recipe, and it is labelled
+PRE-BRIEF so nobody mistakes it for a completed walk.)
+
 ingredients and sources get decided deliberately, one at a time.

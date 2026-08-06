@@ -1,3 +1,36 @@
+## 2026-08-06 (Opus 5) — CORRECTION to the entry below: I put the next email's build knowledge in a SEPARATE HANDOFF. That is the six-documents scavenger hunt this playbook exists to end. Folded in and the handoff deleted.
+
+Operator: *"WHAT IS THIS NEW FUCKING HANDOFF??? HOW THE FUCK IS CLAUDE GOING TO BE ABLE TO SEE HOW WE
+FUCKING BUILD?"* He is right, and his original decree is the first line of the playbook: **one file,
+that we add to.** A handoff nobody opens is knowledge that does not exist.
+
+**What was actually wrong, and what was not.** The playbook DID get updated — §1.17 and the §2.4.1
+harness note are both on origin/main (verified with `git show origin/main:...`). The defect was that
+the *next email's* build knowledge went somewhere else instead of into PART 1 and PART 2.
+
+**Fixed, 4 of 4:**
+1. `docs/superpowers/handoffs/2026-08-06-NEXT-EMAIL-BUILD-HANDOFF.md` — **DELETED.** Its content now
+   lives in the playbook.
+2. **§1.18 BUILDING A NEW EMAIL — the order of operations**, 7 steps: what to read and in what order
+   (including the gitignored paths a Grep cannot see), state the built count from code, brainstorm →
+   name the break → TDD, register the build, render it and LOOK, report n of N, close with pasted
+   evidence.
+3. **§1.19 THE TRAPS** — 12, every one measured: no second resolver · import don't copy · but a
+   parameter is not duplication · brand off the real account row · a stale alarm is worse than none ·
+   an empty chart box · the open-slot contract · the claim gate fails silently · assert on rendered
+   bytes and watch "condominium" matching "dom" · prove a refactor with a paired run · never fetch a
+   portal · state the metered calls.
+4. **§2.5 JUST SOLD — pre-brief**, replacing the bare "2.5–2.17 TO BE WALKED" stub: the close price
+   is the one number no vendor sells us, `fetchSoldEvent` returns a 2023 teardown transfer for a
+   house asking $595,000, the only honest close is the subject's own sold row, and an unsourced close
+   is an OPEN SLOT — the common case, because recording lags weeks. Labelled PRE-BRIEF, transcribed
+   from the live probe already in the recipe header, explicitly NOT a substitute for the walk.
+
+**A SECOND DEFECT FOUND WHILE DOING IT:** my §1.12 collided with the existing "1.12 Render
+constraints" — two sections with one number, in the file whose whole job is being the one place to
+look. 1.13–1.16 were taken too. Mine are now §1.17–1.19 with every cross-reference repointed.
+
+
 ## 2026-08-06 (Opus 5) — The acceptance harness and the number formatter get ONE root each. Nothing a customer receives changes; the proof is a paired run, and it caught a bug I introduced.
 
 Operator: *"Why would we build multiple of anything and not use the same?"* then *"Run it and fix it
