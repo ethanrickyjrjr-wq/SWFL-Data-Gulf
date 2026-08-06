@@ -1,3 +1,31 @@
+## 2026-08-06 (Opus 5) — OPERATOR: *"who the fuck would build something that runs non stop"*
+
+Fair, and the answer is NOT 81 crons. **MEASURED 08/06/2026 off `.github/workflows/` (81 live
+crons parsed):** ~44 scheduled runs/day, ~308/week. But **24 of those 44 — 55% — are ONE job**,
+`supabase-metrics-scrape.yml`, hourly. **52 of 81 workflows run LESS than once a week.** 17 run
+daily. So the fleet is mostly dormant; the "non stop" feeling comes from three places, and only
+the first is a cron:
+
+1. **One hourly job is the majority of all scheduled volume.** If the board looks busy at any
+   random moment, it is probably the metrics scrape. Nothing else is hourly. (`tripwire-hourly.yml`
+   is NAMED hourly and is actually `17 13 * * *` — once a day. The name lies; that is its own
+   small trap.)
+2. **THE REAL AMPLIFIER — every failure spawns TWO more runs.** `log-cron-incident.yml` and
+   `heal-cron-failure.yml` have NO cron; they are `workflow_run`-triggered and currently watch 82 /
+   77 workflows. One red job = one logger run + one healer run. A bad hour therefore triples on the
+   board. Observed in the same window: "Log cron incident" ran 16 times (13 ok / 3 fail).
+3. **Today specifically: GitHub's Actions outage failed everything at once**, so the amplifier in
+   (2) fired across the whole fleet. That is why the board looked worse than the fleet actually is.
+
+**NOT PROPOSING A CULL.** Noted as measurement only, and the cull question is the operator's call.
+If it ever gets asked, the honest first two candidates are (a) drop the metrics scrape from hourly
+to every 4-6h — it is 55% of all volume for a dashboard nobody watches hourly — and (b) confirm the
+healer is worth its run count, since it is excluded from re-running the things that actually break
+(CI, factuality-gate, the rebuilds). Do NOT touch the watchers to make the board quieter — that is
+how 42 consecutive CI reds stayed invisible 08/02-08/04.
+
+Related, same session: `watch_manifest_drift_ci_only` [defect], `doc_ratchet_red_is_board_only` [task].
+
 ## 2026-08-06 (Opus 5) — OPERATOR: *"MAKE SURE WE STICK TO PROVEN TACTICS FROM SOLID INTERNET REFERENCES AND USE CRAWL4AI WHENEVER WE NEED BETTER/NEW/DIFFERENT STYLES, DECISIONS, CURRENT CLICK GENERATING SUBJECTS AND HIGHER ENGAGEMENT DATA/FORMAT THAT KEEPS PEOPLE COMING BACK. I WANT RESEARCH EVERY TIME WE WORK ON THIS TO GET A LITTLE BETTER. BUT WE NEED TO START OFF ON THE RIGHT FOOT SO EVERYTHING FROM HERE IS ONLY MINOR ADJUSTMENTS."*
 
 STANDING RULE for the week-in-review / builder-vocabulary surface: **every work session on it opens
