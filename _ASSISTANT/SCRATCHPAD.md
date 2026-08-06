@@ -1,3 +1,35 @@
+## 2026-08-06 (Opus 5) - OPERATOR: *"why do we have all this shit going on in github that doesn't work????????????????????????"* (2 screenshots: Actions all Queued, 40 open auto-filed issues)
+
+**Measured, not guessed. Three separate things are in those screenshots and only two are ours.**
+
+1. **THE QUEUE IS NOT OURS - GitHub Actions is in a MAJOR OUTAGE right now.**
+   `githubstatus.com/api/v2/summary.json` at the time of asking: `status = Partial System Outage`,
+   `Actions = major_outage`, `Pages = major_outage`, incident opened **2026-08-06T15:22:49Z**,
+   verbatim: *"Workflow runs are still failing, and jobs may remain queued for an extended period
+   before starting or may time out. Jobs using GitHub-hosted runners are particularly affected
+   while capacity is constrained."* Our repo matches exactly: **17 queued, 0 in_progress**, oldest
+   queued 17:38:36Z, last job that actually ran finished 17:36Z. Nothing to fix in our code; the
+   backlog drains when GitHub recovers. Repo is PUBLIC so hosted minutes are free - this is NOT a
+   billing/quota stall.
+
+2. **OURS AND REAL: two workflows target a self-hosted runner that DOES NOT EXIST.**
+   `.github/workflows/dbpr-sirs-monthly.yml` and `.github/workflows/ingest-crexi-listings.yml` both
+   declare `runs-on: [self-hosted, swfl-local]`. `GET repos/:owner/:repo/actions/runners` returns
+   `total_count: 0`. Those two queue forever every time they fire, outage or no outage - they have
+   never had a runner to pick them up. 114 workflow files total; 116 `runs-on: ubuntu-latest`.
+
+3. **OURS AND REAL: the auto-filers write issues nobody closes.** 40 open issues -
+   **21 `cron-failure`, 12 `deploy-incident`**, 2 `data-ingest`, 2 `odd-manual-drop`, 1
+   `morning-brief` - all opened by `github-actions`. Same landfill shape as the 900-check ledger:
+   the opener is automated, the closer is not. 12 are `deploy-incident(soft): prod smoke red @ <sha>`
+   from 2w ago - one issue per red smoke, never reconciled.
+
+**AND THEN WHAT (second-order, not yet done):** `heal-cron-failure` / `log-cron-incident` fire on
+`workflow_run: completed` of every workflow. During an Actions outage the failures the outage
+causes will each spawn a heal+log run when the queue drains - expect a burst of new `cron-failure`
+issues that are outage artifacts, not real defects. Do not read tomorrow's issue count as signal
+without dating it against this incident.
+
 ## 2026-08-06 (Sonnet 5) — OPERATOR: *"where is the fucking handoff???? is opus taking care of the back-on-market? push"*
 
 **No — nobody is "taking care of" back-on-market. There is no scheduling mechanism that hands work
