@@ -1,3 +1,23 @@
+## 2026-08-06 (Opus 5) — WEEK IN REVIEW Task 1: pure contract landed GREEN (9 pass / 0 fail). Loader query still to come.
+
+TDD per the plan. Tests written red first (`Cannot find module './load'`), then implemented to green.
+`bun test lib/week-in-review/` → **9 pass, 0 fail, 16 expect() calls.**
+
+Built `lib/week-in-review/load.ts` — the pure contract only:
+- `ALLOWED_SOURCE_TABLE = "listing_transitions"`, asserted by test, with T11 quoted in the header so
+  nobody blends the forward-only sweep with the vendor's backward history.
+- `TRANSITION_KINDS` — the seven states the sweep already writes, pinned by test. A renamed kind
+  means someone stopped reading the feed and started authoring one.
+- `WeekInReviewResult` — a discriminated union where EMPTY and ERROR are different values.
+  `lib/figures/sourced.ts` collapses both to `[]`, which is right for a figure list and wrong here:
+  a quiet ZIP and a broken query would render identically as "nothing happened."
+- `windowWithinCoverage` — refuses a window opening before the feed's coverage start, rather than
+  caveating an artificially quiet market.
+- `grainCoverageLabel` — full coverage gets no label; anything short says so plainly.
+
+NOT BUILT: the async DB query itself (Task 1 remainder), sections (Task 2), page (Task 3), prose
+(Task 4), live verify (Task 5). `week_in_review_live_verify` stays OPEN — it closes on a live drive
+with a screenshot, never on a green suite.
 ## 2026-08-06 (Opus 5) — WEEK IN REVIEW: the feed was already there. Design landed; the fan-out I proposed was the defect.
 
 Operator: *"WHAT ARE WE FANNING OUT ON? WE ALREADY HAVE THE DATA COMING IN ON ZIP PAGES, DO WE NOT
