@@ -1,3 +1,57 @@
+## 2026-08-06 (Opus 5) — OPERATOR DECREE: *"everything should work the same that needs to and everything should have a fall back. with apify, we should always have the data we need. simple. make sure in the rules. START WITH WHAT WE HAVE, MOVE TO PAID"* + *"AND WE HAVE A LOT IN /R/, AS WELL FOR COMMENTARY"*
+
+OPEN — being written into the rules now. Two halves of ONE law:
+
+1. **START WITH WHAT WE HAVE, MOVE TO PAID. EVERY FIELD, EVERY TIME, NO EXCEPTIONS.** Free lake →
+   the paid row already bought (a READ, costs nothing) → an actor call for a SPECIFIC missing field
+   → an open slot. **With the paid rung as a real fallback we should never be missing data.** The
+   failure is not "we don't hold it" — the failure is reaching for a rung before checking the one
+   below it, which I did twice today.
+2. **COMMENTARY HAS THE SAME LADDER AND WE ARE IGNORING IT.** The report pages serve BAKED,
+   VALIDATED, CACHED prose. The email recipes call the model LIVE on every single build and rewrite
+   from scratch. `lib/email/zip-seed.ts` is the ONLY email-side file that reads a baked narrative.
+   **That is why the reports read better than the emails, and why every email build pays for text we
+   already wrote and already validated.**
+
+**DO NOT BUILD THE BRIDGE — a parallel session is mid-build on it right now**
+(`lib/narratives/area-email-inputs.ts`). My job this turn is the RULE, not the wiring. Touching
+those files would clobber live work.
+
+
+## 2026-08-06 (Opus 5) — OPERATOR: *"i told you to get rid of this shit and no one cares about how many days it was off market"* + *"lead like a new fucking listing"* + *"get rid of the stupid talk...it's basically a new listing.. please use the playbook"*
+
+RESOLVED same session — Back on Market property mode is now `buildListingFlyer` with two dials
+(ribbon word, CTA label). Three deletions, each with a red test: the cancellation-rate paragraph,
+the "Days Off" cell, and the homepage behind the CTA. Live: 6/6 assertions.
+
+**STANDING RULE THIS LEAVES:** on a single-address lifecycle email the RIBBON and the SUBJECT LINE
+are the entire status budget. Prose that re-explains the status is prose the reader did not ask
+for. Recorded in playbook 2.13.1 and the recipe header.
+
+## 2026-08-06 (Opus 5) — OPERATOR: the /r/ pages read better than the emails because they use BAKED narratives and the emails call Sonnet live on every build
+
+OPEN — not mine to build; a parallel session is mid-build on `lib/narratives/area-email-inputs.ts`.
+Recording the SEAM so it does not get re-derived:
+
+**Probed live 08/06/2026 — every baked surface is AREA-GRAIN.** `loadNarrative(surface, surfaceKey)`
+and the four producers: `zip` (zip-inputs.ts), `brain` (brain-inputs.ts), `corridor`
+(corridor-inputs.ts), and `area-email` (the in-flight one). Consumers: `/r/zip-report`,
+`/r/cre-swfl`, `/r/housing-swfl`, and `lib/email/zip-seed.ts` — the one email-side reader, and it
+loads `("zip", zip)`.
+
+**So the bridge pays off on the AREA-grain emails and cannot absorb the per-LISTING paragraph.**
+A house paragraph is written from THIS house's beds/baths/sqft/lot/remarks/community across 35,202
+listings whose facts move; there is no place key to bake it against. **Back on Market is BOTH:** its
+AREA mode composes `neutralTruth()` in code today and is a direct candidate for the bake; its
+PROPERTY mode paragraph is not. Same for market-pulse (area) vs the seven address-spine emails.
+
+**My own contribution to the problem, stated plainly:** I set `NARRATOR_ATTEMPTS = 2` in
+back-on-market this session, so a fact-poor house now costs up to TWO Sonnet calls per build instead
+of one. It is the right stopgap for a real defect (the gate correctly killed the paragraph every run
+and the email shipped wordless, under 1.9's 50-word floor) and it is exactly the pattern he is
+flagging. The analogous real fix for the address-spine emails is a per-LISTING cache keyed on
+`address_key + inputs_hash`, not the area bake — a decision, not something I should assume.
+
 ## 2026-08-06 (Sonnet 5) — OPERATOR, mid agent-brand-intro walk: *"first fix your shit email. crawl4ai what an meet agent email actually writes. have builder write a fucking intro!!!!!!!!!!!!!!!!!!!!! make sure we stop only using bar charts. we have tons of charts. i like the top of the email, but this really sucks at the body and really needs some research with crawl4ai"*
 
 OPEN — being worked now. The §2.8 walk (previous entry below, commit `be2bc3f7`) proved the

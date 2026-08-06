@@ -101,6 +101,53 @@ Four lanes, tried in order:
 
 A gap fills from the next lane. The ONLY block is an **invented number** (no real source). Build: never blocked. Invent: always blocked. The no-invention lint enforces on OUTPUT (`lib/deliverable/build.ts` `gateNarrative`), never on geography.
 
+## 0.7a — START WITH WHAT WE HAVE, MOVE TO PAID. THE ORDER IS THE RULE.
+
+**Locked 08/06/2026 by operator decree.** Verbatim: *"everything should work the same that needs to
+and everything should have a fall back. with apify, we should always have the data we need. simple.
+make sure in the rules. START WITH WHAT WE HAVE, MOVE TO PAID."*
+
+**The lanes were always ordered. What was missing is that SKIPPING DOWN THE LADDER IS ITSELF THE
+DEFECT** — not just an inefficiency. Twice on 08/06/2026 I proposed buying a field we already held,
+including a per-build paid fetch for a photo that sits in our own lake on **99.6% of sold homes**
+(848 of 851, measured). Operator: *"we don't go paid on every fucking email. did you now read the
+ladder?"*
+
+**EVERY FIELD, EVERY TIME, IN THIS ORDER:**
+1. **Our own free data** — the lake. Check here FIRST, always, even when you are sure.
+2. **A paid row we ALREADY BOUGHT** — a read, not a call. Costs nothing. Never treat it as spend.
+3. **A paid call, for ONE SPECIFIC MISSING FIELD** — never as a routine build step, never when we
+   already hold most of the property, and always behind the spend switch.
+4. **An open slot** — labelled, editable, honest.
+
+**AND EVERY RUNG HAS THE ONE BELOW IT AS A FALLBACK, so we are never simply missing data.** With the
+paid rung available as a backup, "we don't hold it" is almost never the true answer. **The real
+failure is reaching for a rung before checking the one under it.** State which rung filled a value
+when it matters; a build that silently jumps to paid is a defect even when it returns the right
+number. Detail for email/property work — the actor inventory, what each returns, where it lands, and
+the guards — lives in `docs/standards/email-build-playbook.md` §3.3.
+
+## 0.7b — COMMENTARY OBEYS THE SAME LADDER. BAKED PROSE BEFORE A LIVE MODEL CALL.
+
+**Same decree, same day:** *"AND WE HAVE A LOT IN /R/, AS WELL FOR COMMENTARY."*
+
+The report pages under `/r/` serve **baked, validated, cached** prose (`lib/narratives/store.ts` →
+`loadNarrative` → `NarrativeSections`). **Live 08/06/2026: 121 baked narratives on hand — 53 zip, 41
+brain, 27 corridor — freshest baked the same day.** The email recipes read **one** of them
+(`lib/email/zip-seed.ts`) and otherwise call the model LIVE on every single build, rewriting from
+scratch prose we had already written and already validated.
+
+**That is the same ladder violation as buying a photo we own — paid rung first, free rung ignored.**
+It is also why the reports read better than the emails: baked prose passed a validator, live prose
+gets whatever this call produced.
+
+**THE RULE: a baked narrative that covers your surface is lane 1. A live model call is the fallback,
+not the default.** Before adding an LLM call to any build, check `narratives` for that surface first.
+
+⚠️ **The email↔narrative bridge is being built right now by a parallel session**
+(`lib/narratives/area-email-inputs.ts`, research + design + plan already filed). **Do not build a
+second one.** This rule states the law; that work does the wiring.
+
 ---
 
 # RULE 0.8 — COMPLETION IS COUNTED AND PROVEN (never announced)

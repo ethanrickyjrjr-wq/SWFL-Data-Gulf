@@ -2683,7 +2683,77 @@ two live runs is not that signal yet.
 
 ---
 
-## 2.13 – 2.17 — TO BE WALKED
+## 2.13 BACK ON THE MARKET — tag `back-on-market` — **WALKED 08/06/2026.**
+
+Reproduce: `bun --env-file=.env.local scripts/email/render-back-on-market.mts` (six assertions,
+non-zero exit on failure). One metered call — the house narrator.
+
+### 2.13.1 THE RULING THAT SHAPED IT — the status budget
+
+Operator, on two consecutive real renders: *"WHERE THE FUCK IS THE HOUSE INFORMATION? PRICE, SQ FT.
+IT'S JUST LIKE A NEW FUCKING LISTING… ADD THE EXTRA STUFF, BUT FOR CHRIST'S SAKE, GET THE DETAILS
+FIRST"* — then *"no one cares about how many days it was off market … lead like a new listing …
+get rid of the stupid talk. it's basically a new listing."*
+
+**THE STANDING RULE, and it generalises past this email: on a single-address lifecycle email the
+RIBBON and the SUBJECT LINE are the entire status budget. Prose that re-explains the status is
+prose the reader did not ask for.** A relisted house is a house for sale; the reader wants what any
+listing email gives them. What the email is *about* goes in the chrome, not in a paragraph.
+
+### 2.13.2 THE SHAPE — it does not resemble §2.1, it IS §2.1
+
+`buildBackOnMarket` PROPERTY mode calls **`buildListingFlyer`** and turns exactly two dials —
+`ribbon: "Back on the Market"` and `ctaLabel: "Schedule a Showing"` — plus `secondSpecRow(facts,
+false)` for year built · HOA. Everything else is inherited: the six-cell strip, the `$/Sq Ft`
+emphasis ruling, the seller's own description block, the `listingButtonUrl` ladder.
+
+**This is the pattern for the remaining listing-lifecycle emails.** Handing `buildLifecycleEmail`
+the same field set by hand is a SECOND COPY of every one of those decisions, and the 08/05 `$/Sq Ft`
+emphasis fix would have had to be made twice. If two emails are "basically the same", make it so
+they *cannot* drift. A recipe that needs a genuinely different strip is not a flyer — call
+`buildLifecycleEmail` directly, as price-reduced and just-sold do.
+
+**No `daysOnMarket` is passed, deliberately.** A relisted home's vendor `list_date` may belong to
+the ORIGINAL listing run, so printing it as DOM would state a number that quietly means something
+else. Type keeps the sixth slot.
+
+**AREA mode (a bare zip/city ask) is untouched** and keeps the fallthrough/relist rates. That is
+where those numbers were always right — there is no house to describe. It has never been rendered
+and looked at; check `back_on_market_area_mode_never_rendered`.
+
+### 2.13.3 THREE DEFECTS THIS WALK FOUND, none catchable by the recipe's own tests
+
+1. **The CTA and the photo link pointed at our homepage.** `facts.sourceUrl` is the CITATION field
+   and `resolve-subject.ts` hardcodes it to swfldatagulf.com. This recipe never inherited §1.8's
+   08/05 fix. Now on `listingButtonUrl` — no real link means NO BUTTON.
+2. **`addressLineOf` shipped the vendor's stray comma** ("…, FL, 33928") on five of seven lifecycle
+   emails, while price-reduced and back-on-market each carried a private fix and a comment saying
+   the root *"is not mine to edit."* Lifted into `addressLineOf`; all seven read one authority.
+3. **The narrator leak guard was written for the inverse bug and made it worse.** It took the LAST
+   segment after a `---` rule, assuming self-narration always leads. The next live render put the
+   real description first and an apology last — so it kept the apology, binned the description, and
+   the email shipped with NO PROSE AT ALL. Position is not the signal; shape is. And a bracketed
+   placeholder now costs its SENTENCE, not the whole paragraph (§1.20 already bans shipping one).
+   **Ordering is load-bearing: strip brackets BEFORE testing for narration** — `[year not provided]`
+   contains the literal phrase "not provided".
+
+### 2.13.4 KNOWN GAPS — named, not hidden
+
+- **No relist address we hold can fill the description block.** Counted live 08/06/2026: **102
+  relist events (`holding → active`, `days_off_market >= 7`) in `data_lake.listing_transitions`,
+  and ZERO of their addresses carry a row in `data_lake.apify_property_records`** — the only place
+  a listing description exists anywhere (the free spine `listing_state` has no such column). The
+  block is wired and correct and lights up when a paid row lands.
+  Check: `back_on_market_no_paid_row_for_any_relist`.
+- **A fact-poor house can ship with NO agent-authored prose**, so §1.9's 50-word body floor is not
+  guaranteed. On the acceptance house the claim gate correctly dropped the paragraph run after run
+  (invented "office", "2400", "under 2 [miles]"). `NARRATOR_ATTEMPTS = 2` halves the empty rate and
+  then stops — **we do not lower the gate to fill a slot.**
+  Check: `back_on_market_wordless_on_fact_poor_house`.
+- The leak guard is a LOCAL BACKSTOP; every lifecycle recipe calls the same narrator.
+  Check: `shared_narrator_leaks_reasoning_preamble`.
+
+## 2.14 – 2.17 — TO BE WALKED
 
 Each section gets written when that email is walked with the operator. **Do not pre-fill one from
 memory or by copying an earlier section** — the whole point of the walk is that each email's
@@ -2884,3 +2954,30 @@ for sale, 3 pending, 1 null; primary_photo on 362, description on 358, sold_pric
 
 **Why the guards exist, in one number: $14.08 across 21 runs in one afternoon.** Seven acceptance
 renders of ONE email, each buying a fresh area-month.
+
+### 3.3.5 COMMENTARY OBEYS THE SAME LADDER — AND EMAILS ARE THE ONES BREAKING IT
+
+**Operator, 08/06/2026:** *"AND WE HAVE A LOT IN /R/, AS WELL FOR COMMENTARY."* Now RULE 0.7b.
+
+**The report pages serve baked, validated, cached prose.** `lib/narratives/store.ts` → `loadNarrative`
+→ `NarrativeSections`, read by the corridor, housing, zip-report and `[slug]` pages. **Live count
+08/06/2026: 121 baked narratives on hand — 53 zip, 41 brain, 27 corridor — freshest baked that same
+day.**
+
+**The email recipes read exactly ONE of them** (`lib/email/zip-seed.ts`). Every other recipe calls
+the model LIVE on every build and rewrites from scratch. **Two consequences, both real:** the reports
+read better than the emails, because baked prose cleared a validator and live prose gets whatever
+that call produced; and every email build pays for text we had already written and already checked.
+
+**It is the same defect as buying a photo we already own** — the paid rung reached for while the free
+rung sat there. **A baked narrative covering your surface is lane 1. A live call is the FALLBACK.**
+Before you add an LLM call to a recipe, look in `narratives` for that surface.
+
+⚠️ **THE BRIDGE IS BEING BUILT RIGHT NOW BY A PARALLEL SESSION** —
+`lib/narratives/area-email-inputs.ts`, with its research, design and plan already filed
+(`docs/superpowers/plans/2026-08-06-precomputed-commentary-plan.md`). **Do not build a second one,
+and do not edit those files from an email session.** This section is the law; that work is the wiring.
+
+**Where Just Sold sits today:** its body copy is DETERMINISTIC (`readerLine`) and issues no model
+call at all — so it is already compliant, by a different route. The recipes that still call live on
+every build are the ones this applies to.
