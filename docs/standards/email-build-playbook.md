@@ -508,6 +508,52 @@ DISPLAY and SEED only; it is never the identity and a build is never routed on i
 - A derived cell earns a footnote ONLY when the reader can't check it. Never restate arithmetic
   whose operands sit two cells away — that reads as a spreadsheet export, not as an agent.
 
+## 1.14b Pre-checked commentary — the gate moved BEFORE the build (bake side landed 08/06/2026)
+
+Operator: *"Has to be a fucking way we can get commentary that is checked before it hits builder
+and builder can just add a CTA and a little extra commentary."* §1.14 is that gate running DURING
+the build, once per request. This runs it ONCE, ahead of time, and hands the builder a row that has
+already passed.
+
+**What can and cannot be pre-checked — this is decided by the recipe's subject spine, not its name.**
+
+- **AREA-spined recipes** (market pulse, the REVIEW reply, weekly sphere, community info, listings
+  showcase/digest) have a bounded subject set — 52 core ZIPs we already enumerate. The area read is
+  baked on a cadence and validated before it is readable. **These are precomputable.**
+- **ADDRESS-spined recipes** (new listing, coming soon, comps, under contract, just sold, open
+  house, price improved) are about a house the user typed in a second ago. There is no key set to
+  enumerate. **These keep generating live, and that is correct, not a gap.**
+
+That split is the operator's sentence implemented: the checked AREA read is precomputed, and the
+builder adds the CTA and the one house-specific line.
+
+**THE MEASURED LESSON — why the facts handed to a writer must already be display-ready.**
+
+The bake ran red for 17 days. Diagnosed 08/06/2026 by replaying every failing key: of 11 failures,
+only 3 were notation. **Five were the model ROUNDING** (93.7% → 93, $399,900 → $400,000, 1.04 → 1.0)
+and **two were ARITHMETIC across two given figures** ($400,000 − $325,000 = $75,000).
+
+The cause is not a bad model. **The prompt handed raw values and then forbade rounding.** A writer
+told to produce plain English for a local reader *will* round — that is what readable prose does.
+The instruction and the material were in conflict, so it broke every single run.
+
+**The rule this buys us, and it applies to every prompt in this system:** do not hand a writer a raw
+value and ask for restraint. Hand it the string exactly as it should appear, so "restate this
+verbatim" is trivially satisfiable instead of a rule the material fights.
+
+Applied: the area-email adapter selects the top six facts **that are copy-ready**, not the top six
+outright. Measured across all 52 live surfaces, **25 had ranked a bare ratio** (`Pending Ratio=0.16`,
+`Average household size=1.63`) into their top six — exactly the shape that caused the rounding. Those
+are passed over. They are **never rescaled or relabelled**: whether a "pending ratio" may be shown as
+a percent is a semantic claim the adapter has no standing to make, and the pool holds 28–30 signals,
+so skipping two costs nothing.
+
+**Status — do not read this as finished.** The bake side is built, tested and dry-run proven (52
+surfaces, 6 facts each, 0 unready). **No recipe reads the baked row yet**, and no real bake has run.
+Until that lands, every area email still authors its own commentary exactly as before. Checks:
+`area_email_readthrough_phase2`, `bake_rounding_computed_prompt_fix`. Plan:
+`docs/superpowers/plans/2026-08-06-precomputed-commentary-plan.md`.
+
 ## 1.15 Charts
 
 - **A chart ships ONLY when the deliverable is ABOUT a number, and about the SUBJECT.**
@@ -2342,10 +2388,26 @@ on most runs (0 recorded sales came back on the acceptance house). **What it nee
 root rather than the vendor's nearby feed — `lee_comp_sales_v` is the ratified per-subject sold-comp
 root and the vendor feed carries **no sale date at all**. Collier has no equivalent.
 
-**G6 — A PHOTO FOR A SOLD HOUSE.** A genuinely sold home leaves the for-sale feed, so the recorded
-rung — the BEST version of this email — usually has no photo and no badge to put one on. **What it
-needs:** the paid row already on disk (`apify_property_records` carries a full gallery). Reading a
-row we already bought is not new spend.
+**G6 — A PHOTO FOR A SOLD HOUSE. REWRITTEN TWICE THE SAME DAY. THE FIX IS FREE AND IT IS OURS.**
+
+This said a sold house has no photo. Then it said the photo lives in the paid row and we need a
+trigger to go buy it. **Both were wrong, and the operator caught each one.**
+
+*"If a house sold, we have the fucking house in the lake 99 percent of the time."* **Measured live
+08/06/2026 — he is right to the decimal: of the 851 distinct sold addresses we have watched close,
+848 carry a photo in our OWN free spine. 99.6%.**
+
+**SO WHY DID 330 SHORE DR RENDER WITH AN EMPTY PHOTO SLOT? OUR OWN RESOLVER REFUSES TO LOOK AT IT.**
+`lib/listings/select.ts:383` filters `.eq("state", "active")`. The row is sitting there with its
+photo; the one subject resolver excludes it for being sold — **on the one email that only ever runs
+on sold houses.** That is the whole gap: a free, lane-1 fix in our own code. No actor, no spend, no
+trigger. Check `just_sold_sold_subject_resolver`.
+
+**What the paid rung is for, per §3.3.0:** the remaining ~0.4%, and a specific missing FIELD on a
+property we otherwise hold. **Never a build step.** My "go buy it for a penny on every build"
+proposal reached for lane 3 before checking lane 1 and would have required flipping the operator's
+own kill switch on every send. *"we don't go paid on every fucking email. did you now read the
+ladder?"*
 
 **G7 — THE PHOTO-RIGHTS GATE.** An agent sending a Just Sold for a house they did not list may not
 use the listing agent's photos (HousingWire). Both sources say to send those anyway, so it is the
@@ -2723,3 +2785,102 @@ open-house preview (HousingWire 3–10, each with full copy). Several need lists
 text 30–60 minutes later and hands over templates for both. **TCPA requires explicit WRITTEN consent
 — an existing relationship is not enough — plus 10DLC registration, quiet hours, and STOP handling.**
 Recorded here so nobody proposes it casually as "just add SMS."
+
+---
+
+## 3.3 THE ACTORS. WHAT EACH ONE GETS, WHERE IT LANDS, AND WHEN IT IS ALLOWED TO RUN.
+
+**Written 08/06/2026 on operator instruction:** *"list all of our actors and what they can get in
+the playbook and where all that information is saved."* Read from code and the catalog, not memory.
+
+### 3.3.0 THE LAW, BEFORE THE LIST
+
+**Operator, 08/06/2026, correcting me:** *"we don't go paid on every fucking email. did you now read
+the ladder?"* and *"we are only using actors for specific needs unless we don't have a lot on the
+property"* and *"if a house sold, we have the fucking house in the lake 99 percent of the time."*
+
+**HE IS RIGHT TO THE DECIMAL. MEASURED LIVE 08/06/2026:** of the **851 distinct sold addresses we
+have watched close**, **848 carry a photo in our OWN free spine — 99.6%.** Not 99% as a figure of
+speech. 99.6%, counted.
+
+**So the order is, and there is no exception:**
+1. **OUR LAKE.** A house that sold was on the market, so we watched it and we hold it. Photo,
+   beds, baths, sq ft, list price, listed date — all free, all ours, already on disk.
+2. **THE PAID ROW WE ALREADY BOUGHT** (`apify_property_records`) — a READ, not a call. Costs nothing.
+3. **AN ACTOR CALL — only for a SPECIFIC missing need**, and only when we do not already hold most
+   of the property. **Never as a routine step in an email build.**
+
+**AN ACTOR IS NEVER A BUILD STEP.** I proposed exactly that — "this subject isn't in the paid store,
+go get it for a penny" — and it was wrong twice over: it reached for lane 3 before checking lane 1,
+and it would have required flipping the operator's own kill switch on every send.
+
+**AND WHAT COMES BACK MUST BE LINKED, NOT PARALLELED.** A paid row pulled to fill one or two missing
+fields JOINS the property we already hold. It never becomes a second record of the same house. The
+hazard is documented and real: the two feeds spell the same street differently (`12554 Kellysands
+Way` vs `12554 Kelly Sands Way`), which is why the read root carries a loose secondary key.
+
+### 3.3.1 WIRED — AND THERE IS EXACTLY ONE
+
+**`moving_beacon-owner1~realtor-com-property-scraper`** — `lib/listings/apify-comps.ts:278`, the
+ONLY actor id in the codebase. **$0.01 per result.**
+
+**WHAT IT CAN GET** (verified live 08/03/2026): sold price and last-sold date · beds · full baths
+and half baths as SEPARATE fields · sq ft · lot sq ft · year built · stories · style · garage ·
+HOA fee · the full MLS description · primary photo AND the whole alt-photo gallery (50 photos on
+one home) · the realtor.com listing URL and permalink · status, MLS name and number, list date,
+days on MLS, pending date · tax, assessed value, estimated value · agent and broker contacts.
+
+**WHAT IT CANNOT DO — R1, and it is the expensive lesson:** *"`location` IS A SEARCH AREA. THERE IS
+NO ADDRESS LOOKUP."* A street address is accepted, silently treated as an area centre, and **its own
+record is not returned**; `radius` is ignored. `fetchApifyRecordForAddress` existed, billed one call
+per comp for a guaranteed null, and was deleted. **Never build it again.**
+
+**HOW IT IS DRIVEN:** an AREA plus an explicit `date_from`/`date_to` window — verified reaching
+**14 months back**. That date-ranged sold pull is the recorded repair path for the price-zero
+problem below.
+
+**THE TWO LANES THAT CALL IT** (`apify-baths.ts`, `apify-identity.ts`) — the baths lane and the
+identity lane. Both are gap-fillers on a specific missing field. Neither is an email build step.
+
+### 3.3.2 RESEARCHED, NOT WIRED
+
+**`one-api/realtor-property-scraper`** — ~$0.007/result, a TRUE per-property lookup keyed on a
+realtor.com detail URL. Its `Raw.details.text` is the full ~3,000-character MLS description **on an
+already-sold home**. Not wired, and not reachable today: the lake comp lane carries no detail URL,
+so it only exists downstream of a dated area pull.
+
+**`swfl-market-pulse`** — an actor WE built and pushed (08/03/2026). It is an OUTBOUND distribution
+experiment wrapping our own API. **It is not a data source and never fetches anything for us.**
+
+**Tested and rejected:** 2 of 5 store actors probed were junk — one failed both runs, one returned
+zero items. The fragile-source class. Do not re-shop them.
+
+### 3.3.3 WHERE EVERYTHING LANDS — ONE TABLE
+
+**`data_lake.apify_property_records`** — the ONE root for a full realtor.com record, keyed
+`address_key` (normalised street + city). **44 columns. 383 rows live 08/06/2026** — 369 SOLD, 10
+for sale, 3 pending, 1 null; primary_photo on 362, description on 358, sold_price on 380.
+
+- **Write root:** `lib/listings/apify-record-store.ts` `saveApifyRecords`, called from INSIDE the one
+  fetch root, so every lane persists without opting in.
+- **Read roots:** `fetchCachedRecords(keys, maxAgeDays)` and `fetchCachedRecordLoose(street, city,
+  days)` — the loose one exists because of the address-key drift above.
+- **Consumer:** `fillFromPaidRecord` (`lib/listings/paid-record-lane.ts`), reached through the ONE
+  subject resolver, so every listing email already reads it. It fills description, photos, baths,
+  HOA, beds, sq ft, lot, year built and the listing URL — and **may never fill list price, status or
+  days on market**, deliberately.
+
+### 3.3.4 THE GUARDS — ALREADY UP, AND THEY ARE THE REASON A BUILD CANNOT QUIETLY SPEND
+
+- **The paid lane is OFF BY DEFAULT.** `OPERATOR_APPROVED_PAID_RUN=1` or it does not spend.
+- **A 300-result (~$3) per-process budget**, charged on the REQUESTED cap *before* the call — an
+  uncapped request is priced as expensive, never as zero.
+- **One choke point:** `runApifyActor`, below the seam every test injects, so no caller can route
+  around it. Guard root: `lib/listings/apify-spend-guard.ts`.
+- **A refusal is loud and NAMED, never a silent empty list** — this lane has two scars where a
+  refusal was byte-identical to "this market has no houses."
+- **A spend receipt reads what the VENDOR charged, never our own row delta.** Counting rows added
+  reports $0.00 while $2.00 was billed, because re-buying the same houses adds nothing.
+
+**Why the guards exist, in one number: $14.08 across 21 runs in one afternoon.** Seven acceptance
+renders of ONE email, each buying a fresh area-month.

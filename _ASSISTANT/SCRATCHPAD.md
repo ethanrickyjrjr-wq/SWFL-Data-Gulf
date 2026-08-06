@@ -1,3 +1,65 @@
+## 2026-08-06 (Opus 5) — OPERATOR: *"we don't go paid on every fucking email. did you now read the ladder??????"* + *"If a house sold, we have the fucking house in the lake 99 percent of the time"* + *"we are only using actors for specific needs unless we don't have a lot on the property"* + *"list all of our actors and what they can get in the playbook and where all that information is saved"*
+
+OPEN — being worked now. **I skipped the lane order on the very rule I had just written into the
+playbook.** I proposed a PER-BUILD paid fetch ("this subject isn't in the paid store, go get it")
+without first asking whether OUR OWN LAKE already has the house. That is lane 3 before lane 1, and
+the four-lane order exists precisely to stop it.
+
+**His correction, and it is the design:**
+1. **THE LAKE FIRST, ALWAYS.** A house that sold was on the market, so we watched it — we hold it
+   ~99% of the time. The photo and the description come from OUR data. Apify is the BACKUP rung,
+   not the first move.
+2. **NEVER PER-BUILD.** An actor call is for a SPECIFIC missing need, not a routine step in an
+   email build. If we already hold most of the property, we do not call an actor at all.
+3. **LINK WHAT COMES BACK.** Any paid row pulled for one or two missing fields must be JOINED to
+   the property we already have — not left as a second, parallel record. (The address-key drift
+   between the two feeds is already documented and is exactly this hazard.)
+4. **GUARDS UP** so a build cannot quietly turn into a spend.
+
+**DELIVERABLE HE ASKED FOR: the actor inventory in the playbook** — every actor, what each one can
+return, and WHERE that information lands. Not memory: read from code + the catalog + a live probe.
+
+
+## 2026-08-06 (Opus 5) — OPERATOR: *"don't we run apify on sold houses or listings we don't have"* + *"send when it is supposed to with notification to user. A day before? they can look at and send right then?"*
+
+OPEN — being answered now. Two separate things:
+
+1. **A CHALLENGE TO MY OWN "WE DON'T HOLD IT" CLAIMS.** I told him a sold house has no photo and no
+   description on the free spine, and that the sold PRICE has to be prefilled. He is asking whether
+   the paid lane we ALREADY RUN covers exactly that gap. **Check before answering — memory says the
+   paid Apify row is already wired and must not be rebuilt.** If it already covers sold homes, then
+   `just_sold_sold_house_photo_lane` is not a build, it is a WIRING job, and my own gap list is
+   overstated.
+
+2. **A NEW BUILD DIRECTION — SCHEDULED SEND WITH A REVIEW WINDOW.** *"send when it is supposed to
+   with notification to user. A day before? they can look at and send right then?"* — the email
+   builds and schedules itself, the agent gets a heads-up a day ahead, opens it, and can send it
+   immediately instead of waiting for the scheduled slot. That is the answer to the residual risk
+   already on the ledger (`just_sold_prefill_send_time_confirm`): **the review window IS the place
+   the agent corrects a prefilled price.** Do not design a separate build-time gate for it.
+
+
+## 2026-08-06 (Opus 5) — OPERATOR: *"i told you to get rid of this shit and no one cares about how many days it was off market"* + *"lead like a new fucking listing"* + *"get rid of the stupid talk...it's basically a new listing.. please use the playbook"*
+
+OPEN — being worked now. Back on Market property mode, three defects, all mine:
+
+1. **THE CANCELLATION-RATE PARAGRAPH IS THE "STUPID TALK".** `propertyNeutralTruth` — "in 33928
+   about 8.66% of pending deals fall through, nationally 13.6%..." — is a MARKET-STATISTICS lecture
+   on an email about ONE HOUSE. The ribbon and the subject line BOTH already say "Back on the
+   market"; the reader needs nothing else. Those rates belong to AREA mode (a bare zip ask), which
+   is what they were written for. Property mode drops them entirely.
+2. **"DAYS OFF" LED THE SPEC STRIP.** Nobody cares how long it sat. The strip is the standard
+   new-listing strip — beds · baths · sq ft · lot · $/sq ft · type — and nothing else.
+3. **THE SELLER'S OWN DESCRIPTION WAS NEVER EMITTED.** New Listing reserves a `description` block
+   for the listing's verbatim remarks (the biggest copy-quality lever in a listing email, carved
+   out of the 50–125 word budget on purpose). Back on Market never passed one. That is the literal
+   "WHERE THE FUCK IS THE HOUSE INFORMATION" — the answer was not a thinner data row, it was a
+   block I never wired.
+
+**Standing rule this leaves:** a lifecycle email about ONE ADDRESS leads with the house. The
+lifecycle STATUS is carried by the ribbon and the subject line — those two are the status budget,
+and prose that re-explains the status is prose the reader did not ask for.
+
 ## 2026-08-06 (Opus 5) — OPERATOR: *"don't change the just sold bar so it's different from every other email. just put a graphic somewhere on the picture"* + *"write up the fucking email how it should be. get the fucking house description out of there. no one cares."* + *"love the new ideas. make the email how it should be and we build towards it."*
 
 OPEN — being worked now. Three corrections, and the first two are both mine:
