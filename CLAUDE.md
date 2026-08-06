@@ -265,6 +265,36 @@ build and are not good at."*
 
 ---
 
+# RULE 0.95 — EXHAUST BEFORE YOU CLAIM ABSENCE
+
+**Locked 08/06/2026 by operator decree.** Verbatim: *"YOU HAVE TO DO WHAT I TELL YOU AND EXHAUST
+ALL OPTIONS BEFORE YOU FUCKING LIE TO ME."*
+
+**"We don't have that," "there's no data for X," "that's not possible" is a claim, not a shrug.**
+An absence claim made without exhausting the lanes that could have contradicted it lands on the
+operator exactly like a lie, whether or not it was told as one — he has no way to tell an honest
+gap from a lazy grep from where he's sitting. Same failure family as the font postmortem in
+RULE 0.4 (searched `_RESEARCH/` only, missed `app/_design/`, declared "no research basis" — the
+answer was on disk the whole time) and RULE 0.85/2's no-silent-deferrals: a confident negative
+that was never actually checked.
+
+1. **Before saying "we don't have X" / "can't be done" / "there is no Y", exhaust every applicable
+   lane first** — RULE 0.4 (`_RESEARCH/INDEX.md`, then crawl4ai), RULE 0.5 (the actual code), RULE
+   0.55 (`data-roots.md`), RULE 0.7 (all four sourcing lanes), `git status --ignored --short` for
+   anything gitignored. Not the lane that seemed most likely — all of them that apply.
+2. **State which lanes you checked and what each returned, inline, BEFORE the negative sentence** —
+   not after, not summarized as "I looked and found nothing." Name the files opened, the commands
+   run, the searches issued.
+3. **If a lane genuinely wasn't checked, say so and mark the claim provisional.** A partial search
+   reported as a complete one is the exact defect this rule exists to stop — never round up.
+
+This governs the burden of proof on absence/impossibility claims — it does not hand over judgment
+on destructive or irreversible actions, which still route through RULE 1's ask-first list. "Do what
+I tell you" means: don't tell the operator something isn't there until you've actually gone and
+looked everywhere it could be.
+
+---
+
 # RULE 1 — COMMIT & PUSH AUTONOMY
 
 **Just push (no diff request):** docs-only, CLAUDE.md, SESSION_LOG.md, hooks, memory, typos, small tooling, trivial reverts.

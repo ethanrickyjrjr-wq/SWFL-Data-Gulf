@@ -1,3 +1,12 @@
+## 2026-08-06 (Sonnet 5) — Locked new RULE 0.95: exhaust every lane before claiming absence
+
+Operator decree, same day as the font-research postmortem already logged in RULE 0.4: told me
+directly that a negative claim made without exhausting all applicable lanes lands on him like a
+lie, whether intended or not. Added `CLAUDE.md` RULE 0.95 (between 0.9 and RULE 1) — before
+saying "we don't have X" / "can't be done", exhaust RULE 0.4/0.5/0.55/0.7's lanes, state what each
+lane returned inline before the negative sentence, and mark a claim provisional if a lane wasn't
+checked. Docs-only, pushed under RULE 1 autonomy.
+
 ## 2026-08-06 (Sonnet 5) — Pending-home email built for 4140 Horsecreek Blvd; found + fixed the address matcher's real bug on the way
 
 Built the Under Contract ("pending") email off the operator's realtor.com URL for
