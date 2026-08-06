@@ -46,6 +46,36 @@ NOT BUILT: the page and its loader. Design only.
 
 Note: the design file was swept into c94d8aa6 ("Add tests for canvas font rendering and validation")
 by a parallel session's broad staging — committed safely, misleading subject, history left alone.
+## 2026-08-06 (Sonnet 5) — Checks ledger part 2: triaged the sa0718 site-audit slice (84 rows), dropped 4 confirmed-dead-code findings, reclassified 13 fix-committed-pending-verify rows defect→verify. 882→878.
+
+Continuation of the prior entry below, operator: *"push and then audit backlog."*
+
+Read all 84 `sa0718_*` rows' full `detail` text (not just labels — several only make sense there,
+e.g. rows that already say "Fix committed <hash> ... NOT closing — dev-committed, not yet
+live/prod-verified"). Most of the 84 are real, live, still-open bugs — did NOT bulk-prune this
+bucket; only two narrow, evidence-backed moves:
+
+**Dropped 4** (`--drop`, reversible), each grep-verified against current code before dropping:
+- `sa0718_six_of_the_nine_homepage_components_in_thi`, `sa0718_dead_component_s_chart_captions_hardcode_a`,
+  `sa0718_dead_components_use_a_second_hardcoded_hex` — `Grep "from .*components/landing/(Capabilities|ComparisonSection|ProofStrip|DeliverableShowcase|Waitlist)"` and `Grep "from .*landing/Charts"` across the whole repo: zero matches. `app/page.tsx` imports only HeroBar/Hero/SiteDoors/GuidesStrip/PricingStrip/ObjectionFaq — confirmed dead per the audit's own claim.
+- `sa0718_metric_card_callout_box_stat_row_map_place` — `Grep "renderMetricCard|renderCallout|renderStatRow|renderMapPlaceholder"`: only the component definition files + `lib/email/__tests__/*.test.ts` + docs; zero hits in `grounded-report.ts`/`activation/render.ts`/`recurring-report.ts`/`drip-email.ts`.
+
+**Reclassified 13** `defect`→`verify` (metadata-only, no drop) — each row's own `detail` already names
+a landed commit hash and says "NOT closing — dev-committed, not yet live/prod-verified"; per
+[[feedback_checks-prod-evidence-not-dev-attestation]] a dev-committed fix isn't done until verified
+live, so these were never really open bugs, just open verify obligations mis-tagged as `defect`.
+Full list of 13 keys in the `check.mjs update` calls this session.
+
+**Left alone, on purpose:** ~65 rows — the genuinely live, unfixed bugs (Stripe webhook/customer-tier
+races, CAN-SPAM/light-mode/dark-mode defects, data-match contradictions across brains, a11y gaps,
+etc.). This bucket is real defect backlog, not stale tracking — pruning further would need actual
+fixes, not another triage pass.
+
+Verified: `node scripts/check.mjs list` → `878 open — 227 defect · 122 verify · 321 task · 208
+untriaged` (was 882 — 243 · 109 · 322 · 208 after part 1).
+
+---
+
 ## 2026-08-06 (Sonnet 5) — Checks ledger: dropped 23 stale email/social `*_live_verify` rows (905→882), left the live rebuild untouched.
 
 Operator: *"we need to get all of the old checks on emails gone since we are building all new. we
