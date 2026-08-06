@@ -1,3 +1,23 @@
+## 2026-08-06 (Opus 5) — OPERATOR: *"JUST SOLD IS UP. PLEASE GET SOMETHING RIGHT."* + *"APIFY IS FALL BACK FOR SOLD PRICE. WE WILL NOT USE IT UNTIL WE SEE THERE IS AN ACTUAL DIFFERENCE. I WILL DECIDE. NOT STUPID CLAUDE."*
+
+RESOLVED 08/06/2026 — built, walked, 8/8 assertions on both acceptance houses, both renders sent to
+hello@swfldatagulf.com. Playbook §2.5 is now a WALK, not a pre-brief; §2.5.3 records the five
+defects. Deferrals opened as checks: `just_sold_sold_house_photo_lane`,
+`just_sold_prefill_send_time_confirm`. Two decrees, both narrowing §2.5.0:
+
+1. **THE PAID RUNG IS OFF.** The playbook's prefill ladder listed a date-ranged Apify sold pull as
+   rungs 1-2. **Rungs 1 and 2 are SUSPENDED by operator decree.** Just Sold prefills the close from
+   `listing_state.list_price` (the last list price we hold) and nothing else. No paid call, no
+   `apify_property_records` read, until HE decides there is a measured difference worth paying for.
+   The decision to turn it on is his, not a build-time judgement call.
+2. **"PLEASE GET SOMETHING RIGHT"** - the standing complaint, earned. The prior session argued with
+   the decree instead of coding it (left the close cell EMPTY and called an editable prefill an
+   invention). The prefill is lane 1 + lane 4; it was never an invention, and the argument cost a
+   session. Code the decree; raise a concern in one sentence, then execute.
+
+Delivery: render Just Sold end to end and EMAIL IT to hello@swfldatagulf.com.
+
+
 ## 2026-08-06 (Opus 5) — OPERATOR: *"WHAT IS THIS NEW FUCKING HANDOFF??? HOW THE FUCK IS CLAUDE GOING TO BE ABLE TO SEE HOW WE FUCKING BUILD?"*
 
 RESOLVED same session. **Build knowledge goes in the PLAYBOOK, never in a new handoff.** The first

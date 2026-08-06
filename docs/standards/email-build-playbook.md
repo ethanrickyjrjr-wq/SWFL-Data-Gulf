@@ -599,7 +599,7 @@ The general form: consolidate what is genuinely one thing; a parameter is not du
 **2. STATE THE BUILT COUNT FIRST, COUNTED FROM CODE.** How many emails have a builder (count
 `lib/deliverable/recipes/index.ts`) and how many have been WALKED (count `scripts/email/render-*.mts`).
 Those are different numbers and conflating them is how a status report lies. **08/06/2026: 17
-builders, 4 walked** (New Listing, Coming Soon, Market Comps, Under Contract).
+builders, 5 walked** (New Listing, Coming Soon, Market Comps, Under Contract, Just Sold).
 
 **3. BRAINSTORM → NAME THE BREAK → TDD.** `superpowers:brainstorming` is mandatory. No design is
 approved without a failure-modes section: every way it can break, each paired with the guard that
@@ -2033,12 +2033,18 @@ wrong).
 
 ---
 
-## 2.5 JUST SOLD — tag `just-sold` — **NOT YET WALKED. PRE-BRIEF ONLY.**
+## 2.5 JUST SOLD — tag `just-sold` — **WALKED AND BUILT 08/06/2026. FIFTH OF SEVENTEEN.**
 
-**This is the next email to build** (the lifecycle successor to Under Contract). This section is a
-PRE-BRIEF, not a walk: everything below is read out of `lib/deliverable/recipes/just-sold.ts`, whose
-header records a live probe from 07/13/2026. **It is code-probed fact, not memory, and it is not a
-substitute for walking the email with the operator.** Follow §1.18 in order.
+Acceptance run: `bun --env-file=.env.local scripts/email/render-just-sold.mts [address]`.
+**Two houses, not one** — one address cannot exercise both rungs of the close ladder:
+
+- `330 Shore Dr, Fort Myers, FL 33905` (the default) — a REAL recorded sale, $300,000 on
+  08/29/2025. Exercises rung 1: the sold-date kicker, `$/Sq Ft` off the close, the comps chart.
+- `12554 Kellysands Way, Fort Myers, FL 33908` — an active listing. Exercises rung 3, the PREFILL,
+  which under the decree below is the COMMON case.
+
+**8 of 8 assertions pass on both**, 08/06/2026. Both renders were sent to `hello@swfldatagulf.com`
+the same session (Resend ids `2ab14232-…` prefill, `1c1c65c7-…` recorded).
 
 ### 2.5.0 THE CLOSE PRICE — OPERATOR DECREE 08/06/2026
 
@@ -2057,14 +2063,40 @@ It also recorded why it is needed — a listing stamped sold with `price = 0` is
 19 captured sold transitions were price-0. **Live 08/06/2026: 821 sold transitions in
 `listing_transitions`, 383 rows already in `apify_property_records`.**
 
-So the cell fills in this order, and the decree governs the LAST rung, not the only one:
-1. **A real recorded sold price we already hold** (the paid row on disk — costs nothing, it is bought).
-2. **A date-ranged paid pull** where the operator has approved the spend — a penny a home.
-3. **The last list price we hold** (`listing_state.list_price`) — the decree's prefill, and the
-   normal case, because recording lags weeks.
+So the cell fills in this order:
+1. **A real recorded sale of the subject itself** — its own row in its own nearby-SOLD set, carrying
+   `priceKind: "sold"` (a `/property-tax-history` Sold event). Free; the call is already made.
+2. ~~**A date-ranged paid pull**~~ — **SUSPENDED, SAME DAY, BY A SECOND DECREE.** Verbatim:
+   *"APIFY IS FALL BACK FOR SOLD PRICE. WE WILL NOT USE IT UNTIL WE SEE THERE IS AN ACTUAL
+   DIFFERENCE. I WILL DECIDE. NOT STUPID CLAUDE."* It is **not wired**, deliberately, and
+   `just-sold.test.ts` fails if such an import ever appears in the recipe. Turning it on is an
+   operator decision made against a measured difference — never a build-time judgement call.
+   Suspended, not deleted: the repair path (~$0.01/home, verified 14 months back) stays on record.
+3. **The last list price we hold** (`listing_state.list_price` → `facts.price`, via
+   `lib/listings/select.ts:264`) — the decree's prefill, and the NORMAL case, because recording
+   lags weeks. Measured on the acceptance houses: rung 3 filled Kellysands Way at $350,000.
 4. **The agent's own number**, typed over whatever was prefilled. Always available, always wins.
 
-Whichever rung fills it, the cell is EDITABLE and the provenance row says which rung it came from.
+Whichever rung fills it, the cell is EDITABLE and the provenance row says which rung it came from
+(`heroPrice()` returns the rung, not just a string, for exactly this reason).
+
+**AND THE PREFILL NEVER LEAVES THE HERO.** This is the other half of the decree and it is where the
+build actually lives. A prefill is a starting value in an EDITABLE cell; it stops being that the
+moment it reaches a cell the agent cannot correct. So `soldSpecs`, `soldFootnote`, `chartAnchor` and
+`soldNarrativeLine` all take the RECORDED close and nothing else, and four things stay closed on a
+prefilled run — each named after what it would have asserted:
+
+- **`List-to-Sale`** — from a prefill it computes **100.0%** off the same figure twice, and renders
+  in the accent as the strip's PRIMARY cell. A fabricated market outcome wearing the most
+  authoritative styling on the page. The worst defect available in this email.
+- **`List Price`** — the hero's own number again, at a second scale (the bug the recipe header
+  already records: *"the HTML greps clean; only the screenshot showed it"*).
+- **`$/Sq Ft`** — list-price-per-sqft under a label that says sale.
+- **The comps bar** — a baked PNG carries no label, no provenance row and no editability, so it is
+  the one number on the page the agent cannot reach. Same mechanism as the forbidden old transfer
+  below, with the correction path removed. **A PREFILL IS NEVER A BAR.**
+- **The paragraph** — prose is baked at author time. A number the agent fixes in the cell would
+  survive, uncorrected, inside the sentence.
 
 **This is not an invented number and it never was.** It is lane 1 (our own record, named source) with
 lane 4 (the figure the user writes in) on top — exactly the four-lane order. A prefilled editable
@@ -2096,13 +2128,21 @@ send completes), never at BUILD — blocking the build would re-create the empty
   the close look like a steal for a fake reason. Filter BY DATA, never by guessing at a type name.
 - **The pairing rule.** A price cell that is not the close may only appear ALONGSIDE the close,
   never instead of it.
-- **Date grain.** Every sale date we serve is MONTH grain and lags ~7 weeks. Render "May 2026",
-  never "05/01/2026" — an exact day asserts precision the source does not have.
-- **Chart.** Comps-bar — the subject's own bar IS the point. Under the 2.5.0 decree the close cell
-  is always prefilled, so the subject bar always has a value and the chart always has its anchor.
-  (The old "no close → no chart" rule was a consequence of the empty-cell design and dies with it.)
-  If the comp set itself is empty, drop the chart and close the hole — the sold-comps list still
-  carries the context.
+- **Date grain — AND THE ONE EXCEPTION, confirmed at build time 08/06/2026.** Sale dates that come
+  off OUR LAKE are MONTH grain and lag ~7 weeks: render "May 2026", never "05/01/2026", because an
+  exact day asserts precision the source does not have. **The hero kicker is not one of those.** It
+  is the date carried by the vendor's own `/property-tax-history` Sold EVENT for this specific
+  property — a recorded transfer date, exact by construction — so it renders MM/DD/YYYY ("Sold
+  08/29/2025", measured on 330 Shore Dr). Same word, two different sources, two different grains;
+  do not collapse them. A prefill gets NO kicker at all: a date line is not editable, so it would
+  ship a claim the agent cannot correct.
+- **Chart.** Comps-bar — the subject's own bar IS the point. **CORRECTED AT BUILD TIME, 08/06/2026:
+  this section previously said the prefill fills the subject bar too ("the chart always has its
+  anchor"). It does not, and that line is struck.** A bar is baked into a PNG: no label, no
+  provenance row, no editability. Plotting a list price bar-for-bar against RECORDED sales is the
+  same mechanism §2.5.0 forbids for an old transfer, minus the ability to fix it. `chartAnchor()`
+  takes the recorded close only; no recorded close → no chart at all, and the sold-comps LIST still
+  carries the context. If the comp set is empty, drop the chart and close the hole.
 - **$/Sq Ft footnote SURVIVES here** (it is the SALE price ÷ sq ft, which distinguishes it from the
   list-price version every other lifecycle email shows).
 
@@ -2128,7 +2168,55 @@ reportAssertions("THE SOLD CONTRACT", [ /* YOUR assertions, read off `html` */ ]
 ```
 
 **Pick the default house deliberately** — for Just Sold it must be one with a REAL recorded sale in
-its own comp set, or every run tests the open-slot path and the close cell is never exercised once.
+its own comp set, or every run tests the prefill path and the recorded rung is never exercised once.
+**And run a SECOND address that has NOT sold**, or the prefill path — the common case — is never
+exercised either. Written and run: `scripts/email/render-just-sold.mts`, 8 assertions, both houses.
+
+### 2.5.3 WHAT THE WALK ACTUALLY FOUND — five defects, three of them invisible to any test
+
+1. **THE FRAMING INDUCED ITS OWN CLAIM-GATE DROP, and the email lost every word of body copy.**
+   The recorded close and its date rode in `framing`, which is SHOWN to the model but not SETTLED,
+   so the gate killed the whole paragraph: `unanchored-number("08"), ("29"), ("2025")`. The email
+   whose entire job is one number was forbidden to mention it. Fixed at the ONE root:
+   `authorListingNarrative` now takes `anchors?: string[]` — code-computed facts `ListingFacts` has
+   no field for, handed to the model AND registered with the gate, exactly like the `$/sq ft` line
+   already there. **The general rule: a fact you want the narrator to state goes in `anchors`, not
+   in `framing`.** T8 in action — the drop is a `console.error` nobody reads and its symptom looks
+   like nothing being wrong.
+2. **An instruction and a guard were fighting.** "End with ONE plain clause offering a private
+   valuation" made the model write *"if you want to know…"* → `motive("want to")` → paragraph
+   dropped. The BUTTON already says "What's My Home Worth?". The narrator is now told to write NO
+   call to action at all. Asking prose to duplicate a chrome element is how this happens.
+3. **`days_on_market` is poison on a sold email.** The model wrote *"after 12 days on the market"*
+   (`sequence`) and derived a list date *"07/22"* (`unanchored-number`). That clock is
+   days-in-ACTIVE — the same trap Under Contract documents — and on a closed house it is both
+   meaningless and an invitation to narrate a timeline we never handed over. Now explicitly banned
+   in the framing.
+4. **THE SELLER'S FOR-SALE DESCRIPTION MUST NOT SHIP — found by wiring it up and LOOKING.** Every
+   sibling on this chrome ships `listingDescription(facts.remarks)`; this recipe never did, and the
+   provenance table's "549 chars held" made that look like a plain bug. Added in one line, what
+   appeared under the gold JUST SOLD ribbon was the ACTIVE LISTING'S PITCH, verbatim: *"Best-priced
+   single-family home in the community — don't miss this opportunity…"* A for-sale pitch is STALE
+   THE MOMENT THE HOUSE CLOSES, and the block is verbatim by contract so it cannot be edited into
+   coherence. Reverted, and the omission is now asserted in BOTH the unit test and the acceptance
+   script — because it looks like a bug to the next person who reads the provenance row. Under
+   Contract keeps its description: PENDING is not SOLD.
+5. **No subject line at all.** The acceptance run printed `Subject line: "(none)"` — four sibling
+   recipes set theirs from `subject-lines.ts` and this one never did, so a send would have fallen
+   back to whatever `deriveEmailDocSubject` scraped off the doc. Added `justSoldSubject()` to the
+   one root. **The street, never the price** — a subject is baked into the send, so it is the one
+   place a prefilled number could never be corrected.
+
+**One assertion of mine also went red on healthy output and had to be narrowed** (T5, the stale-alarm
+class, caught inside the same session): "the narrator names no price" fired on a monthly HOA fee of
+$1,326 — sourced, and labelled as what it is. It now checks the only thing that is actually wrong:
+that the prose never restates the PREFILL.
+
+**Known, accepted, not fixed here:** on a genuinely sold house the for-sale spine holds no photo and
+no description, so the recorded-close render is thin (photo slot open, no description block, and on
+330 Shore Dr the narrator legitimately dropped for inventing `spatial("same street")` and
+`unsourced-feature("waterfront")` — the gate working, not failing). The paid row on disk is where a
+sold house's photo would come from; that lane is untouched by this build.
 
 ---
 
@@ -2136,8 +2224,4 @@ its own comp set, or every run tests the open-slot path and the close cell is ne
 
 Each section gets written when that email is walked with the operator. **Do not pre-fill one from
 memory or by copying an earlier section** — the whole point of the walk is that each email's
-ingredients and sources get decided deliberately, one at a time. (§2.5 above is an exception with a
-reason: it is transcribed from a live probe already recorded in the recipe, and it is labelled
-PRE-BRIEF so nobody mistakes it for a completed walk.)
-
 ingredients and sources get decided deliberately, one at a time.

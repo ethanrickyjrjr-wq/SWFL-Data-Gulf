@@ -1,3 +1,50 @@
+## 2026-08-06 (Opus 5) — JUST SOLD IS BUILT, WALKED AND SENT. The close cell prefills from our last list price, editable, and the prefill never leaves the hero. Apify rung SUSPENDED by decree.
+
+Operator: *"JUST SOLD IS UP. PLEASE GET SOMETHING RIGHT. EMAIL TO HELLO@SWFLDATAGULF.COM. APIFY IS
+FALL BACK FOR SOLD PRICE. WE WILL NOT USE IT UNTIL WE SEE THERE IS AN ACTUAL DIFFERENCE. I WILL
+DECIDE."* Fifth of seventeen emails walked. **17 builders, 5 walked** (counted from code).
+
+**THE DECREE, CODED.** `heroPrice()` returns the value AND the RUNG: a real recorded sale of the
+subject when we hold one, else a PREFILL from `listing_state.list_price` verbatim (`facts.price`,
+via `lib/listings/select.ts:264`), else an open slot — never a zero. Rung 2 (the ~$0.01/home
+date-ranged paid pull) is NOT WIRED and `just-sold.test.ts` fails if such an import appears.
+
+**THE OTHER HALF, which is where the build actually lives: the prefill never leaves the hero.**
+`soldSpecs`, `soldFootnote`, `chartAnchor` and `soldNarrativeLine` take the RECORDED close only, so
+a prefilled run closes `List-to-Sale` (it would compute a fake 100.0% in the accent as the PRIMARY
+cell), `List Price` (the hero's number at a second scale), `$/Sq Ft`, the comps bar (a baked PNG is
+the one number the agent cannot correct) and the paragraph (baked, uneditable).
+
+**ACCEPTANCE — 8 of 8 on BOTH houses.** `scripts/email/render-just-sold.mts`.
+- `330 Shore Dr, Fort Myers, FL 33905` → RECORDED, $300,000, kicker "Sold 08/29/2025", $/Sq Ft $173.
+- `12554 Kellysands Way, Fort Myers, FL 33908` → PREFILL, $350,000, no kicker, no derived cells.
+
+**SENT to hello@swfldatagulf.com**, both renders — Resend ids `2ab14232-df83-4cd7-82df-ffe09bdc0076`
+(prefill) and `1c1c65c7-8083-4407-b058-7290c7de0876` (recorded).
+
+**FIVE DEFECTS FOUND, three invisible to any test** (playbook §2.5.3 has them in full):
+1. The framing induced its own claim-gate drop — the recorded close rode in `framing` (shown, not
+   settled) and the gate killed the whole paragraph on `unanchored-number("08"/"29"/"2025")`. Fixed
+   at the ONE root: `authorListingNarrative({ anchors })`. A fact you want stated goes in `anchors`.
+2. "End with a valuation offer" → `motive("want to")` → dropped. The button already says it.
+3. `days_on_market` on a sold email → `sequence("after 12 days on the market")` + a derived list
+   date. Banned in the framing; that clock is days-in-ACTIVE.
+4. **The seller's for-sale description must NOT ship on a sold email.** Wired it up because the
+   provenance row said "549 chars held" — and the render put *"don't miss this opportunity"* under
+   the gold JUST SOLD ribbon. A pitch is stale the moment the house closes and the block is verbatim
+   by contract. Reverted; the omission is now asserted in the unit test AND the acceptance script.
+5. No subject line at all — added `justSoldSubject()` to `subject-lines.ts`. The street, never the
+   price: a subject is baked into the send.
+
+One of MY OWN assertions went red on healthy output and was narrowed (T5): "narrator names no price"
+fired on a sourced, labelled $1,326 monthly HOA. It now checks only that prose never restates the
+PREFILL. `scripts/email/send-test.mts` parameterized (file + subject), both defaults unchanged.
+
+Tests: 609 pass in `lib/deliverable/recipes/`, 1,750 pass in `lib/email/`, tsc clean on the touched
+files. Next: §2.6 open-house, or fix the sold-house photo lane (a genuinely sold house has no photo
+and no description on the free spine, so the recorded-close render is thin).
+
+
 ## 2026-08-06 (Opus 5) — CORRECTION to the entry below: I put the next email's build knowledge in a SEPARATE HANDOFF. That is the six-documents scavenger hunt this playbook exists to end. Folded in and the handoff deleted.
 
 Operator: *"WHAT IS THIS NEW FUCKING HANDOFF??? HOW THE FUCK IS CLAUDE GOING TO BE ABLE TO SEE HOW WE

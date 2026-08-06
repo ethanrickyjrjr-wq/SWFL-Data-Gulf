@@ -343,7 +343,26 @@ export function clearNarrativeSlots(doc: EmailDoc): EmailDoc {
  */
 export async function authorListingNarrative(
   facts: ListingFacts,
-  opts: { framing?: string; context?: string } = {},
+  opts: {
+    framing?: string;
+    context?: string;
+    /**
+     * EXTRA SETTLED FACTS THIS RECIPE COMPUTED, which `ListingFacts` has no field for.
+     * Each string is handed to the model AND registered with the claim gate, exactly like
+     * the `$/sq ft` line below — so its numerals stop being "unanchored".
+     *
+     * WHY THIS EXISTS (measured 08/06/2026, first Just Sold acceptance run). A fact stated
+     * only in `framing` is shown to the model but is NOT settled, so the gate correctly
+     * kills the paragraph for repeating it. Just Sold's framing handed the narrator a
+     * RECORDED close and its date — both real, both sourced, neither on `ListingFacts` —
+     * and the run dropped with `unanchored-number("08"), ("29"), ("2025")`. The framing
+     * itself induced the drop: the email whose entire job is one number was forbidden to
+     * mention it. **A fact you want the narrator to state goes HERE, not in the framing.**
+     * The gate is not weakened — an anchor is a sentence CODE authored, same as every
+     * other settled line.
+     */
+    anchors?: string[];
+  } = {},
 ): Promise<string | null> {
   // Nothing real to describe → leave the slot empty (never improvise a house).
   if (!facts.price && !facts.beds && !facts.sqft) return null;
@@ -401,6 +420,8 @@ export async function authorListingNarrative(
     // own prohibition (never "the community has/includes/features", never on-site,
     // never resident-only) because that distinction is the whole risk of this fact.
     neighborhoodAmenitiesSourceLine(facts.neighborhood),
+    // The recipe's own code-computed facts — settled exactly like every line above.
+    ...(opts.anchors ?? []),
     opts.context && `Background context (NOT the subject of this email):\n${opts.context}`,
   ].filter(Boolean);
 

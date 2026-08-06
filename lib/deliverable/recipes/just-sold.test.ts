@@ -8,11 +8,15 @@
 // buildJustSold's one compsForAddress call and is not exercised here.
 
 import { describe, expect, it } from "bun:test";
+import { readFileSync } from "node:fs";
 import {
   buildJustSoldSpec,
+  chartAnchor,
   closeFrom,
+  heroPrice,
   realSaleComps,
   soldFootnote,
+  soldNarrativeLine,
   soldSpecs,
   subjectRow,
   withSubjectRowFacts,
@@ -290,5 +294,133 @@ describe("buildJustSoldSpec — the chart is about the SUBJECT or it does not sh
   it("refuses under two comps — two bars is a fact wearing a chart costume", () => {
     expect(buildJustSoldSpec(two.slice(0, 1), { street: SUBJECT, close: 610_000 }, "x")).toBeNull();
     expect(buildJustSoldSpec([], { street: SUBJECT, close: 610_000 }, "x")).toBeNull();
+  });
+});
+
+// ── THE CLOSE CELL — OPERATOR DECREE 08/06/2026 ────────────────────────────────
+//
+// Verbatim: *"SOLD PRICE IS ENTERED AS LAST LISTED PRICE WE HAVE. USER CAN CHANGE IT
+// IF THEY WANT."* And, the same day: *"APIFY IS FALL BACK FOR SOLD PRICE. WE WILL NOT
+// USE IT UNTIL WE SEE THERE IS AN ACTUAL DIFFERENCE. I WILL DECIDE."*
+//
+// So the cell fills from a REAL recorded sale when we hold one, otherwise it PREFILLS
+// from `listing_state.list_price` (which is `facts.price` — `lib/listings/select.ts:264`),
+// and the agent types over it. The paid rungs of the playbook ladder are SUSPENDED.
+//
+// Every test below is named after the failure mode it stops. The shape they all guard is
+// ONE thing: a prefill is a STARTING VALUE IN AN EDITABLE CELL, never a measurement — so
+// it may never reach a cell that is DERIVED, CHARTED, FOOTNOTED or WRITTEN INTO PROSE,
+// because none of those are editable and none of them carry their own label.
+describe("heroPrice — the close cell, and which rung filled it", () => {
+  const active: ListingFacts = {
+    address: "326 Shore Dr",
+    price: "$595,000",
+    sqft: "2847",
+    photos: [],
+    sourceUrl: "x",
+  };
+
+  it("a REAL recorded sale wins, and carries the Sold-date kicker", () => {
+    const hero = heroPrice(active, { price: 613_850, date: "2026-05-20" });
+    expect(hero).toEqual({ value: "$613,850", rung: "recorded", kicker: "Sold 05/20/2026" });
+  });
+
+  it("F6 · NO recorded sale → the last list price PREFILLS it, with NO sold-date kicker", () => {
+    // A "Sold <date>" kicker over a prefill asserts a recorded date we do not hold. The
+    // number is editable; the date line would not be, and it would ship to the recipient.
+    const hero = heroPrice(active, null);
+    expect(hero.rung).toBe("prefill");
+    expect(hero.kicker).toBeUndefined();
+  });
+
+  it("F9 · the prefill is our list price VERBATIM — never reformatted", () => {
+    // The agent recognizes their own number and leaves it or fixes it. Round-tripping it
+    // through a formatter ($595,000 → $595000 → $595,000) is a silent way to hand back a
+    // number that is no longer theirs, and it breaks the acceptance assertion outright.
+    expect(heroPrice({ ...active, price: "$1,275,000" }, null).value).toBe("$1,275,000");
+  });
+
+  it("F8 · nothing held at all → an OPEN SLOT, never a zero", () => {
+    const bare: ListingFacts = { address: "x", photos: [], sourceUrl: "x" };
+    expect(heroPrice(bare, null)).toEqual({ value: "", rung: "open", kicker: undefined });
+  });
+});
+
+describe("the prefill NEVER leaks out of the hero cell", () => {
+  const active: ListingFacts = {
+    address: "326 Shore Dr",
+    price: "$595,000",
+    sqft: "2847",
+    photos: [],
+    sourceUrl: "x",
+  };
+
+  it("F1/F2/F3 · with a prefill in the hero, the strip's derived cells stay OPEN", () => {
+    // F1 List-to-Sale would compute 100.0% from the same figure twice and render it in the
+    // accent as the strip's PRIMARY cell — a fabricated market outcome, the worst defect
+    // available here. F2 $/Sq Ft would be list-price-per-sqft under a label saying sale.
+    // F3 List Price would print the hero's own number again at a second scale — the exact
+    // bug this recipe's header records ("the HTML greps clean; only the screenshot showed it").
+    expect(heroPrice(active, null).rung).toBe("prefill"); // the hero IS filled…
+    const strip = soldSpecs(active, null); // …and the strip still knows nothing
+    const cell = (l: string) => strip.find((c) => c.label === l)?.value;
+    expect(cell("List-to-Sale")).toBe("");
+    expect(cell("List Price")).toBe("");
+    expect(cell("$/Sq Ft")).toBe("");
+    expect(strip.map((c) => c.value).join()).not.toContain("595,000");
+  });
+
+  it("F2 · the footnote claims nothing when nothing was computed", () => {
+    // A footnote is a provenance claim. "$/Sq Ft is the sale price ÷ listed square footage"
+    // is false by construction when the hero holds a prefill.
+    expect(soldFootnote(active, null)).toBeUndefined();
+  });
+
+  it("F4 · a prefill is NEVER a bar — the chart anchors on a recorded close or not at all", () => {
+    // A baked PNG bar carries no label, no provenance row and no editability, so it is the
+    // one element the agent cannot correct. That is the same mechanism §2.5.0 forbids for
+    // an old recorded transfer: a plausible-looking wrong number that reads as authoritative.
+    expect(chartAnchor(null)).toBeNull();
+    expect(chartAnchor({ price: 613_850, date: null })).toBe(613_850);
+  });
+
+  it("F5 · with no recorded close the narrator is FORBIDDEN to name a sale price", () => {
+    // Prose is baked at author time and is not editable. A prefill the agent will correct
+    // in the cell would survive, uncorrected, inside the paragraph.
+    const line = soldNarrativeLine(null);
+    expect(line).toContain("NOT AVAILABLE TO YOU");
+    expect(line).not.toContain("$");
+    const withClose = soldNarrativeLine({ price: 613_850, date: "2026-05-20" });
+    expect(withClose).toContain("$613,850");
+    expect(withClose).toContain("05/20/2026");
+  });
+});
+
+describe("F10 · the paid rung is OFF until the operator turns it on", () => {
+  it("this recipe reaches for no paid sold-price lane", () => {
+    // Decree 08/06/2026: *"APIFY IS FALL BACK FOR SOLD PRICE. WE WILL NOT USE IT UNTIL WE
+    // SEE THERE IS AN ACTUAL DIFFERENCE. I WILL DECIDE. NOT STUPID CLAUDE."* A grep-shaped
+    // guard is the honest one here: the failure is an IMPORT appearing, and no unit test of
+    // a pure function can see that.
+    const src = readFileSync(new URL("./just-sold.ts", import.meta.url), "utf8");
+    const paid = src.match(/^import[\s\S]*?from\s+"[^"]*(apify|paid-record|property-tax)[^"]*";/gm);
+    expect(paid).toBeNull();
+  });
+});
+
+describe("the seller's for-sale description does NOT ship on a sold email", () => {
+  it("no `description:` is handed to the chrome — the pitch is stale once it closes", () => {
+    // Found by RENDERING AND LOOKING (08/06/2026), never by a test: wired up on the
+    // acceptance house it printed "Best-priced single-family home in the community — don't
+    // miss this opportunity" under a gold JUST SOLD ribbon. Urging a reader not to miss a
+    // house that is already gone is incoherent, and the block is VERBATIM by contract so it
+    // cannot be edited into coherence. The element and the headline cannot both be right.
+    //
+    // This is a source-shaped guard on purpose: the failure is a LINE REAPPEARING, and the
+    // most likely way it comes back is someone reading the provenance row, seeing a held
+    // description that does not ship, and "fixing" it. Under Contract keeps its description
+    // because PENDING is not SOLD — do not copy that line into this file.
+    const src = readFileSync(new URL("./just-sold.ts", import.meta.url), "utf8");
+    expect(/^\s*description:/m.test(src)).toBe(false);
   });
 });

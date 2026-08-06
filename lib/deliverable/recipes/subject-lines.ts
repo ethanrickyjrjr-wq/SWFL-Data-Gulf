@@ -89,6 +89,34 @@ export function priceReducedSubject(address: string | undefined, newPrice?: stri
 }
 
 /**
+ * JUST SOLD — the "social proof" type, and the one subject line the research names a
+ * literal winner for: *"Just sold in {neighborhood}"* and *"{First name}, your neighbor
+ * just sold"* are both quoted as real winning lines in the Part B pass. Finding 3 (local
+ * specificity beats generic copy) is the whole design here.
+ *
+ * THE STREET, NOT THE PRICE. Never put a figure in this subject: under the 08/06/2026
+ * decree the hero may be carrying a PREFILLED list price the agent is about to type over,
+ * and a subject line is baked into the send — the one place a number can never be corrected.
+ * The street is sourced, stable, and is what a neighbour actually recognizes.
+ */
+export function justSoldSubject(address: string | undefined, city?: string): string {
+  const street = streetOf(address);
+  if (street) return clampSubject(`Just sold: ${street}`);
+  return clampSubject(city ? `Just sold in ${city}` : "Just sold nearby");
+}
+
+/**
+ * BACK ON THE MARKET — informational + local, same taxonomy family as `newListingSubject`
+ * (announcement itself is the hook, no invented urgency: "won't last" is a banned phrase
+ * on this recipe specifically — BACK_ON_MARKET_PROHIBITIONS, back-on-market.ts). Property
+ * mode only; area mode has no street to name and keeps its own `ctaLabel`-adjacent copy.
+ */
+export function backOnMarketSubject(address: string | undefined): string {
+  const street = streetOf(address);
+  return clampSubject(street ? `Back on the market: ${street}` : "Back on the market");
+}
+
+/**
  * MARKET PULSE — the monthly "market-report" type (Part A cross-platform finding:
  * the OTHER universal email type, present at Zillow, Compass, Sierra, Luxury
  * Presence, Real Geeks, Wise Agent). Informational + local, and deliberately never

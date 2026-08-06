@@ -20,15 +20,18 @@
 //   2. SKELETON — none of its own. `buildLifecycleEmail`, the campaign chrome.
 //      Brand (globalStyle, header, agent card, footer) is lifted from the canvas.
 //   3. CELLS — the CLOSE PRICE is the hero. It is the one number this email exists
-//      for, and it is the one number the vendor does not sell us. See THE
-//      CLOSE-PRICE PROBE below: unsourced → an OPEN SLOT the agent fills, never a
-//      list price wearing a sold hat, never a zero.
-//   4. CHART — comps-bar, and ONLY when the close is sourced. The subject's own bar
+//      for, and it is the one number the vendor does not sell us. A recorded sale
+//      fills it when we hold one; otherwise it is PREFILLED from the last list price
+//      we hold and the agent types over it (decree 08/06/2026 — see `heroPrice`).
+//      Never a zero, and never from an old recorded transfer.
+//   4. CHART — comps-bar, and ONLY when the close is RECORDED. The subject's own bar
 //      IS the point ("set the close among the week's real sales"); a bar chart of
 //      six neighbours with no subject bar is an AREA chart on a listing email —
-//      exactly the failure playbook rule 3 names. No close → no chart at all (the
-//      chrome only positions the middle blocks it is handed, so there is no empty
-//      slot left behind), and the sold-comps LIST still carries the context.
+//      exactly the failure playbook rule 3 names. **A PREFILL IS NOT A BAR** — a
+//      baked PNG carries no label and cannot be edited, so the one number the agent
+//      would fix is the one number they cannot reach. No recorded close → no chart
+//      at all (the chrome only positions the middle blocks it is handed, so there is
+//      no empty slot left behind), and the sold-comps LIST still carries the context.
 //   5. PROSE — the house's own facts + the agent's pasted description, with the
 //      close (when sourced) and the nearby sales as BACKGROUND. Never a pitch.
 //   6. FRAMING — "Just Sold" ribbon, the address over the CLOSE, a private
@@ -40,10 +43,15 @@
 // The vendor gives us a LIST price for an ACTIVE listing. A SOLD price is a
 // different thing, and it is NOT the same field:
 //
-//   • resolveSubjectListing() reads the FOR-SALE `/search` feed. `facts.price` is
-//     therefore an ASK. Putting it in a "Just Sold" hero would announce a close
-//     that never happened — a real number answering the wrong question. FORBIDDEN.
-//     `ListingFacts` carries no sold price, no sold date, and no propertyId.
+//   • resolveSubjectListing() reads the FOR-SALE `/search` feed, so `facts.price` is
+//     the last LIST price we hold (`listing_state.list_price`, lib/listings/select.ts:264).
+//     ** AMENDED 08/06/2026 BY OPERATOR DECREE. ** This file used to call that an ASK and
+//     declare it FORBIDDEN, leaving the hero EMPTY in the common case. Verbatim: *"SOLD
+//     PRICE IS ENTERED AS LAST LISTED PRICE WE HAVE. USER CAN CHANGE IT IF THEY WANT."*
+//     It is a PREFILL in an EDITABLE cell, not an assertion — lane 1 with lane 4 on top.
+//     What it may never do is leak into a DERIVED, CHARTED, FOOTNOTED or WRITTEN cell,
+//     none of which are editable. See `heroPrice`. `ListingFacts` still carries no sold
+//     price, no sold date, and no propertyId.
 //
 //   • `fetchSoldEvent(propertyId)` (/property-tax-history) DOES return a real
 //     recorded sale — but it is the property's LAST RECORDED TRANSFER, whenever
@@ -54,16 +62,22 @@
 //     house asking $595,000 is the exact trap this recipe had to find. A real
 //     source is not the same as a source-faithful answer.
 //
-// SO: the ONLY honest close is the subject's OWN row in its OWN nearby-SOLD set,
-// carrying a RECORDED sale (priceKind === "sold" — a /property-tax-history Sold
-// event). A property is the nearest property to its own coordinates, so a genuinely
-// sold subject comes back in its own comp set (the same trick withBaths() uses).
-// An `estimate` (AVM) or a `last_list` is NOT a sale and can NEVER fill this cell.
+// SO: the only RECORDED close is the subject's OWN row in its OWN nearby-SOLD set,
+// carrying a real sale (priceKind === "sold" — a /property-tax-history Sold event).
+// A property is the nearest property to its own coordinates, so a genuinely sold
+// subject comes back in its own comp set (the same trick withBaths() uses). An
+// `estimate` (AVM) or a `last_list` is NOT a sale and can never be treated as one.
 //
-// Everything else → the close is an OPEN SLOT: an editable "$0" placeholder on the
-// canvas (HeroBlock renders the placeholder only when `scope` is present) and
-// ABSENT from the sent email. The agent who just closed the house knows the number;
-// county recording lags by weeks, so this is the COMMON case, not the edge case.
+// Everything else → the hero PREFILLS from the last list price we hold, editable,
+// and the agent types the real number over it. County recording lags by weeks, so
+// that is the COMMON case, not the edge case — which is exactly why an empty hero
+// was the wrong answer. Nothing held at all → an open slot ("" — a canvas
+// placeholder, absent from the sent email), never a zero.
+//
+// THE PAID RUNG IS OFF. Decree 08/06/2026: *"APIFY IS FALL BACK FOR SOLD PRICE. WE
+// WILL NOT USE IT UNTIL WE SEE THERE IS AN ACTUAL DIFFERENCE. I WILL DECIDE."* A
+// date-ranged paid sold pull would fill this cell for ~$0.01/home; it is NOT wired
+// here on purpose, and `just-sold.test.ts` fails if such an import ever appears.
 //
 // ── LANDMINES HONORED ────────────────────────────────────────────────────────────
 // • A COMP MUST HAVE beds AND sqft, OR IT IS A VACANT LOT. Confirmed live in this
@@ -84,6 +98,7 @@ import { buildLifecycleEmail } from "@/lib/email/lifecycle-chrome";
 import type { ChromeBlock } from "@/lib/email/lifecycle-chrome";
 import { addressLineOf, pricePerSqft, spec } from "@/lib/email/listing-flyer";
 import { authorListingNarrative, clearNarrativeSlots, fillNarrative } from "./shared";
+import { justSoldSubject } from "./subject-lines";
 import type { RecipeBuildContext } from "./index";
 import type { ChartSpec } from "@/components/charts/registry/chart-spec";
 import type { EmailDoc, StatItem } from "@/lib/email/doc/types";
@@ -164,6 +179,95 @@ export function subjectRow(comps: RenderComp[], subjectStreet: string): RenderCo
 export function closeFrom(row: RenderComp | null): SubjectClose | null {
   if (!row || row.priceKind !== "sold" || row.price == null) return null;
   return { price: row.price, date: row.priceDate };
+}
+
+/** What the hero cell carries, and WHICH RUNG of the decree's ladder filled it. */
+export interface HeroPrice {
+  /** Rendered verbatim into the hero. "" = an open slot (a canvas placeholder, nothing sent). */
+  value: string;
+  rung: "recorded" | "prefill" | "open";
+  /** The one accent line above the address. ONLY ever a recorded sale's recorded date. */
+  kicker: string | undefined;
+}
+
+/**
+ * THE CLOSE CELL — OPERATOR DECREE 08/06/2026.
+ *
+ * Verbatim: *"SOLD PRICE IS ENTERED AS LAST LISTED PRICE WE HAVE. USER CAN CHANGE IT IF
+ * THEY WANT."* The cell is PREFILLED and it is EDITABLE. Our data is the starting value;
+ * the agent who just closed the house puts the final one in.
+ *
+ * THE LADDER, and which rungs are live:
+ *   1. A real recorded sale of the subject itself (`closeFrom` — a /property-tax-history
+ *      Sold event that came back inside the subject's own nearby set). Free, already bought.
+ *   2. A date-ranged paid pull — **SUSPENDED 08/06/2026 by operator decree**: *"APIFY IS
+ *      FALL BACK FOR SOLD PRICE. WE WILL NOT USE IT UNTIL WE SEE THERE IS AN ACTUAL
+ *      DIFFERENCE. I WILL DECIDE. NOT STUPID CLAUDE."* Not wired here, deliberately. Turning
+ *      it on is his call, made against a measured difference — not a build-time judgement.
+ *   3. **The last list price we hold** — `facts.price`, which IS `listing_state.list_price`
+ *      (`lib/listings/select.ts:264`). The normal case, because county recording lags weeks.
+ *   4. The agent's own number, typed over whatever was prefilled. Always available, always wins.
+ *
+ * AN EARLIER DESIGN LEFT THIS CELL EMPTY when no recorded sale existed, on the reasoning
+ * that a list price under a JUST SOLD ribbon is a lie. That was struck by the decree and it
+ * was wrong: a prefilled, labelled, editable field is not a claim the system asserts, and an
+ * empty hero on the email whose entire job is one number is not more honest — just useless.
+ *
+ * WHAT THE PREFILL MAY NEVER TOUCH, and why the rung is returned rather than just a string:
+ * everything DERIVED, CHARTED, FOOTNOTED or WRITTEN INTO PROSE. None of those are editable
+ * and none carry their own label, so a prefill reaching them stops being a starting value
+ * and becomes an assertion. `soldSpecs`, `soldFootnote`, `chartAnchor` and
+ * `soldNarrativeLine` all take the RECORDED close and nothing else.
+ *
+ * STILL FORBIDDEN, and it is a different mechanism: never fill this from the property's LAST
+ * RECORDED TRANSFER (`fetchSoldEvent`). Probed live 07/13/2026 — a house ACTIVE at $595,000
+ * returns a 2023 land/teardown transfer of $160,000. That is not a stale starting value an
+ * agent notices; it is a plausible wrong number from a different decade.
+ */
+export function heroPrice(facts: ListingFacts, close: SubjectClose | null): HeroPrice {
+  if (close) {
+    const on = isoToMDY(close.date);
+    return { value: usd(close.price), rung: "recorded", kicker: on ? `Sold ${on}` : undefined };
+  }
+  // VERBATIM — never round-tripped through a formatter. The agent has to recognize their own
+  // number to decide whether to leave it, and `$595,000` → `$595000` is how you hand back a
+  // number that is no longer theirs.
+  const listed = (facts.price ?? "").trim();
+  if (listed) return { value: listed, rung: "prefill", kicker: undefined };
+  return { value: "", rung: "open", kicker: undefined };
+}
+
+/**
+ * THE CHART'S ANCHOR — a recorded close, or no chart at all.
+ *
+ * A prefill is never a bar. A baked PNG bar carries no label, no provenance row and no
+ * editability, so it is the one element on the page the agent cannot correct — plotting a
+ * list price bar-for-bar against RECORDED sales is the same mechanism the header forbids for
+ * an old transfer, with the correction path removed.
+ */
+export function chartAnchor(close: SubjectClose | null): number | null {
+  return close ? close.price : null;
+}
+
+/**
+ * WHAT THE NARRATOR IS TOLD ABOUT THE PRICE. Prose is baked at author time and is NOT
+ * editable, so a prefill the agent will fix in the cell would survive uncorrected inside the
+ * paragraph. No recorded close → the model is forbidden to name any sale price at all,
+ * including the ask sitting right there in the facts.
+ */
+export function soldNarrativeLine(close: SubjectClose | null): string {
+  if (!close) {
+    return (
+      `This home has SOLD. THE CLOSING PRICE IS NOT AVAILABLE TO YOU — do not state, estimate, ` +
+      `or imply any sale price, and do NOT present the "List price" in the facts as the sale price ` +
+      `(it is the ask). Write about the home itself and the fact that it is sold.`
+    );
+  }
+  const on = isoToMDY(close.date);
+  return (
+    `This home has SOLD. It closed at ${usd(close.price)}${on ? ` on ${on}` : ""}. ` +
+    `The closing price is the headline — the "List price" in the facts is what it was ASKING, not what it sold for.`
+  );
 }
 
 /**
@@ -355,10 +459,11 @@ export async function buildJustSold(ctx: RecipeBuildContext): Promise<EmailDoc |
   // LIST below still carries the context honestly. (A chart PNG is baked at author
   // time, so a close typed into the open slot later cannot retroactively enter it —
   // reported as a known limitation.)
-  const chartSpec = close
+  const anchor = chartAnchor(close);
+  const chartSpec = anchor
     ? buildJustSoldSpec(
         comps,
-        { street: street || "This home", close: close.price },
+        { street: street || "This home", close: anchor },
         new Date().toISOString().slice(0, 10),
       )
     : null;
@@ -377,7 +482,9 @@ export async function buildJustSold(ctx: RecipeBuildContext): Promise<EmailDoc |
   const compRows = soldCompsListBlock(comps);
   if (compRows) middle.push({ block: compRows, height: 5 });
 
-  const soldOn = isoToMDY(close?.date ?? null);
+  // THE CLOSE CELL — decree 08/06/2026. A recorded sale if we hold one, else our last list
+  // price as an EDITABLE PREFILL, else an open slot. See `heroPrice`.
+  const hero = heroPrice(facts, close);
   const footnote = soldFootnote(facts, close);
 
   // ── THE CAMPAIGN CHROME. One layout, seven emails, one agent.
@@ -393,13 +500,37 @@ export async function buildJustSold(ctx: RecipeBuildContext): Promise<EmailDoc |
           linkUrl: facts.sourceUrl,
         }
       : null,
-    // THE CLOSE — or "" (an editable open slot on the canvas, nothing at all in the
-    // email). NEVER facts.price: that is the ASK, and an ask in a sold hero is a lie.
-    heroValue: close ? usd(close.price) : "",
+    // THE CLOSE — a recorded sale, else our last list price PREFILLED and editable
+    // (decree 08/06/2026), else "" (an open slot: a canvas placeholder, nothing sent).
+    heroValue: hero.value,
     heroLabel: addressLineOf(facts),
-    // The one accent line above the address: WHEN it sold. Only ever the recorded
-    // date of the recorded sale — no close, no date, no kicker.
-    ...(close && soldOn ? { heroKicker: `Sold ${soldOn}` } : {}),
+    // The one accent line above the address: WHEN it sold. Only ever the recorded date of
+    // a RECORDED sale — a prefill gets no kicker, because a date line is not editable and
+    // would ship a claim the agent cannot correct.
+    ...(hero.kicker ? { heroKicker: hero.kicker } : {}),
+    // *** NO DESCRIPTION BLOCK ON THIS EMAIL. THIS IS A DELIBERATE OMISSION. ***
+    //
+    // Every sibling on this chrome ships `listingDescription(facts.remarks)` — the seller's
+    // own words, verbatim, in their own reserved block. Just Sold must not, and the reason
+    // is the ELEMENT COHERENCE RULE, not tidiness.
+    //
+    // MEASURED 08/06/2026, BY WIRING IT UP AND LOOKING AT THE RENDER. The provenance table
+    // said "Description (verbatim) — 549 chars", so the missing block looked like a plain
+    // bug; it was added in one line. What then appeared on the page, under a gold JUST SOLD
+    // ribbon, was the ACTIVE LISTING'S SALES PITCH, verbatim and unfixable:
+    //
+    //     "Best-priced single-family home in the community — don't miss this opportunity
+    //      to enjoy the Southwest Florida lifestyle!"
+    //
+    // A for-sale pitch is STALE THE MOMENT THE HOUSE CLOSES. Urging a reader not to miss a
+    // home that is already gone is incoherent to them, and we may not fix it by editing the
+    // seller's copy — verbatim means verbatim (that is the whole point of the block). The
+    // element and the headline cannot both be right, so the element does not ship. Under
+    // Contract keeps it because PENDING is not SOLD; that is a different fact.
+    //
+    // The 50–125-word floor is still met without it: the authored paragraph runs ~68 words
+    // on the acceptance house. `just-sold.test.ts` asserts this omission so a future session
+    // does not "fix" it back. NO TEST FOUND THIS AND NO TEST COULD — the screenshot did.
     specs: soldSpecs(facts, close),
     ...(footnote ? { specFootnote: footnote } : {}),
     middle,
@@ -416,12 +547,10 @@ export async function buildJustSold(ctx: RecipeBuildContext): Promise<EmailDoc |
   // (so the paragraph may state it) and the nearby sales ride in as BACKGROUND. When
   // we have no close, the narrator is explicitly forbidden from naming a sale price —
   // otherwise the ask ($595,000) is right there in the facts and reads like a close.
-  const soldLine = close
-    ? `This home has SOLD. It closed at ${usd(close.price)}${soldOn ? ` on ${soldOn}` : ""}. ` +
-      `The closing price is the headline — the "List price" in the facts is what it was ASKING, not what it sold for.`
-    : `This home has SOLD. THE CLOSING PRICE IS NOT AVAILABLE TO YOU — do not state, estimate, ` +
-      `or imply any sale price, and do NOT present the "List price" in the facts as the sale price ` +
-      `(it is the ask). Write about the home itself and the fact that it is sold.`;
+  // A PREFILLED HERO DOES NOT UNLOCK THE PROSE. `soldNarrativeLine` takes the RECORDED
+  // close only: the paragraph is baked and uneditable, so a number the agent will correct
+  // in the cell would survive uncorrected inside the sentence.
+  const soldLine = soldNarrativeLine(close);
   const context =
     comps.length > 0
       ? `Real recorded sales near this home (background only — do not list them back):\n` +
@@ -436,10 +565,36 @@ export async function buildJustSold(ctx: RecipeBuildContext): Promise<EmailDoc |
           .join("\n")
       : undefined;
 
+  // THE CLOSE, AS A SETTLED FACT — not only as framing. Measured 08/06/2026 on the first
+  // acceptance run: the framing named the recorded close and its date, the model dutifully
+  // wrote them, and the claim gate threw the WHOLE paragraph away as
+  // `unanchored-number("08"), ("29"), ("2025")` — leaving the email whose entire job is one
+  // number with ZERO words of body copy, under §1.9's 50–125-word floor. A fact stated only
+  // in `framing` is shown but not settled. Anchors are settled. (T8: the drop is a
+  // console.error nobody reads and its symptom looks like nothing being wrong.)
+  const anchors = close
+    ? [
+        `Recorded sale price of THIS home: ${usd(close.price)} (a recorded sale, from the county record).`,
+        ...(isoToMDY(close.date) ? [`Recorded sale date: ${isoToMDY(close.date)}.`] : []),
+        ...(pricePerSqft(usd(close.price), facts.sqft)
+          ? [
+              `Sale price per square foot: ${pricePerSqft(usd(close.price), facts.sqft)} (already ` +
+                `shown in the spec strip above your paragraph — do not restate it as a bare figure).`,
+            ]
+          : []),
+      ]
+    : [];
+
   const narrative = await authorListingNarrative(facts, {
     framing:
       `A JUST-SOLD announcement to the agent's sphere. ${soldLine} ` +
-      `End with ONE plain clause offering readers a private valuation of their own home.\n` +
+      // NO "end with an offer" CLAUSE. It was here and it cost the paragraph: asked to offer
+      // a valuation, the model wrote "if you want to know…" and the gate killed it as
+      // `motive("want to")`. The BUTTON already says "What's My Home Worth?" — the CTA is a
+      // chrome element, not the narrator's job, and asking prose to duplicate a button is how
+      // an instruction and a guard end up fighting each other. (Measured 08/06/2026.)
+      `Do NOT write a call to action, an invitation, or an offer of any kind — the email's ` +
+      `button already carries it.\n` +
       // The model reliably smuggles a pitch in as market commentary when it is not
       // shut off explicitly: given the price cut it wrote "reflecting the kind of
       // pricing movement that tends to draw serious buyers quickly" — an invented
@@ -451,10 +606,34 @@ export async function buildJustSold(ctx: RecipeBuildContext): Promise<EmailDoc |
       `sale that happened, not interpreting it. If a sentence explains what the facts "reflect", ` +
       `"signal", or "mean", DELETE IT.\n` +
       // House style: dates are MM/DD/YYYY everywhere a user can see them.
-      `Write any date exactly as MM/DD/YYYY — never "August 29, 2025".`,
+      `Write any date exactly as MM/DD/YYYY — never "August 29, 2025".\n` +
+      // THE MARKET CLOCK IS NOT A SOLD FACT, and reaching for it kills the paragraph.
+      // Measured 08/06/2026 on the prefill run: the model wrote "after 12 days on the
+      // market" (gate: `sequence`) and derived a list date, "07/22" (gate:
+      // `unanchored-number`). `days_on_market` on the shared fact list is days-in-ACTIVE —
+      // the same trap Under Contract documents — and on a house that has sold it is both
+      // meaningless and an invitation to narrate a timeline we never handed over.
+      `Do NOT mention how long the home was on the market, when it was listed, or any ` +
+      `sequence of events. The ONLY date you may write is a recorded sale date, and only ` +
+      `if one is stated in the facts.` +
+      // THE PREFILL IS NOT IN THE PROSE. With no recorded close the hero may be carrying a
+      // PREFILLED list price the agent is about to type over — but the paragraph is baked and
+      // cannot be typed over. A dollar figure in prose under a JUST SOLD ribbon reads as the
+      // close no matter which cell it came from, so with no recorded sale NO money may appear
+      // in the paragraph at all.
+      (close
+        ? ""
+        : `\nWrite NO PRICE FOR THIS HOME — not the list price, not a sale price, not a ` +
+          `per-square-foot figure. We hold no sourced sale price for it. (A cost that is ` +
+          `clearly labelled as what it is, like a monthly HOA fee, is fine.)`),
+    ...(anchors.length ? { anchors } : {}),
     ...(context ? { context } : {}),
   });
   if (narrative) doc = fillNarrative(clearNarrativeSlots(doc), narrative);
 
-  return doc;
+  // THE SUBJECT LINE — deterministic, never model-authored (subject-lines.ts). It was
+  // MISSING entirely until 08/06/2026: the acceptance run printed `Subject line: "(none)"`
+  // and the send would have fallen back to whatever `deriveEmailDocSubject` scraped off the
+  // doc. Four sibling recipes already set theirs here; this one simply never did.
+  return { ...doc, subjectVariants: [justSoldSubject(facts.address, facts.city)] };
 }
