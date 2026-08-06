@@ -2739,11 +2739,14 @@ and looked at; check `back_on_market_area_mode_never_rendered`.
 
 ### 2.13.4 KNOWN GAPS — named, not hidden
 
-- **No relist address we hold can fill the description block.** Counted live 08/06/2026: **102
-  relist events (`holding → active`, `days_off_market >= 7`) in `data_lake.listing_transitions`,
-  and ZERO of their addresses carry a row in `data_lake.apify_property_records`** — the only place
-  a listing description exists anywhere (the free spine `listing_state` has no such column). The
-  block is wired and correct and lights up when a paid row lands.
+- **No relist address we hold carries a description TODAY — and that is a SPEND DECISION, not a
+  data gap.** Counted live 08/06/2026: **102 relist events (`holding → active`,
+  `days_off_market >= 7`) in `data_lake.listing_transitions`, ZERO of their addresses carry a row
+  in `data_lake.apify_property_records`** (383 rows held, none a relist). Per `data-roots.md`
+  §"Comp PHOTOS + the listing DESCRIPTION", **the vendor populates the `text` field for
+  for_sale/pending listings** and a relist is ACTIVE — so the description exists on the vendor
+  side for all 102. Filling it is RULE 0.7a rung 3: a paid call for ONE specific missing field,
+  behind the spend switch. The block is wired; it lights up the moment a row lands.
   Check: `back_on_market_no_paid_row_for_any_relist`.
 - **A fact-poor house can ship with NO agent-authored prose**, so §1.9's 50-word body floor is not
   guaranteed. On the acceptance house the claim gate correctly dropped the paragraph run after run

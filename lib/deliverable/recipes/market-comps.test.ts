@@ -408,7 +408,13 @@ test("the RIBBON wears the Market Comps hat; the HERO carries the claim it defen
   // The subject hero is the CLAIM under examination: the ask, centred under the address.
   const hero = heroes.find((b) => b.type === "hero" && !b.props.ribbon);
   expect(hero?.type === "hero" && hero.props.value).toBe("$595,000");
-  expect(hero?.type === "hero" && hero.props.label).toBe(SUBJECT.address);
+  // RE-PUNCTUATED, not raw (08/06/2026). `SUBJECT.address` is the vendor's own
+  // `formattedAddress`, which carries a stray comma before the zip ("…, FL, 33905").
+  // `addressLineOf` (lib/email/listing-flyer.ts) is now the ONE root that composes the
+  // hero line from the record's structured fields, so all seven lifecycle emails print
+  // it cleanly instead of two of them fixing it by hand. This assertion pinned the
+  // BROKEN string.
+  expect(hero?.type === "hero" && hero.props.label).toBe("326 Shore Dr, Fort Myers, FL 33905");
   expect(hero?.type === "hero" && hero.props.align).toBe("center");
   expect(hero?.type === "hero" && hero.props.order).toBe("label-first");
 });

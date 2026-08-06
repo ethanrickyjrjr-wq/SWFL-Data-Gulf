@@ -93,10 +93,12 @@ export const SEAM_BYPASS_KNOWN: Readonly<Record<string, string>> = {
     "Hand-positions its blocks (`layout: slotLayout`, market-pulse.ts) and never calls " +
     "finalizeDoc — the second predicted bypass, and the one that evades the source-text " +
     "ledger by naming a variable. Check: email_seam_bypass_market_pulse",
-  "back-on-market":
-    "Returns null when its ZIP lane misses (loadBackOnMarketZip -> null), so a data miss " +
-    "refuses the build instead of landing the grid with open slots — RULE 0.7. NOT predicted " +
-    "by the handoff; found by this guard. Check: email_back_on_market_refuses_on_data_miss",
+  // "back-on-market" — REMOVED 08/06/2026, because this guard's own inverted assertion went
+  // red and demanded it. It used to return null when its zip lane missed
+  // (loadBackOnMarketZip -> null), refusing the build instead of landing the grid with open
+  // slots (RULE 0.7). Area mode now degrades to an open-slot grid, and property mode never
+  // reads a zip rate at all, so both paths go through the seam. Check
+  // email_back_on_market_refuses_on_data_miss closed with this.
   "default-grid":
     "The TERMINAL FALLBACK — every keyless ask lands here — rides fillSkeletonFromSources, " +
     "which patches a committed seed grid in place and never re-finalizes, so the doc carries " +

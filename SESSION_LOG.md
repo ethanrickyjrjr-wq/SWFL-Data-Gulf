@@ -1,3 +1,65 @@
+## 2026-08-06 (Opus 5) — Back on the Market leads with the HOUSE: it now *calls* the New Listing flyer instead of resembling one.
+
+Operator, on two consecutive real renders: *"WHERE THE FUCK IS THE HOUSE INFORMATION? PRICE, SQ FT.
+IT'S JUST LIKE A NEW FUCKING LISTING… ADD THE EXTRA STUFF, BUT FOR CHRIST'S SAKE, GET THE DETAILS
+FIRST"* — then *"no one cares about how many days it was off market … lead like a new listing … get
+rid of the stupid talk. it's basically a new listing. please use the playbook."*
+
+**PROPERTY mode now calls `buildListingFlyer` and turns exactly two dials** — the ribbon word and the
+CTA label — plus `secondSpecRow(facts, false)`. The strip, the description block, the $/Sq Ft
+emphasis ruling and the `listingButtonUrl` ladder are all INHERITED, so the two emails cannot drift
+the way seven hand-built layouts once did. Added `FlyerVariant` to `listing-flyer.ts` for the two
+dials; deliberately nothing else is dialable.
+
+**THE STANDING RULE THIS LEAVES (playbook §2.13.1):** on a single-address lifecycle email the RIBBON
+and the SUBJECT LINE are the entire status budget. Prose that re-explains the status is prose the
+reader did not ask for.
+
+**Three deletions, each with a red test:** the cancellation-rate paragraph ("the stupid talk" — a
+market-statistics lecture on an email about ONE house; those rates stay in AREA mode, which is what
+they were written for); the "Days Off" cell that led the strip and displaced $/Sq Ft and Type; and
+`facts.sourceUrl` behind the CTA and photo link, which `resolve-subject.ts` hardcodes to our own
+HOMEPAGE — the §1.8 deliverability violation this recipe never inherited the 08/05 fix for.
+
+**Three defects found on the way, none of them in scope when I started:**
+1. `addressLineOf` shipped the vendor's stray comma ("…, FL, 33928") on five of seven lifecycle
+   emails while price-reduced and back-on-market each carried a private fix plus a comment saying
+   the root *"is not mine to edit."* Lifted into `addressLineOf`; all seven read ONE authority.
+2. **My own narrator leak guard from earlier today was written for the inverse bug and made it
+   worse.** It took the LAST segment after a `---` rule, assuming self-narration always LEADS. The
+   next live render put the real description first and an apology last — so it kept the apology,
+   binned the description, and the email shipped with NO PROSE AT ALL. Position is not the signal;
+   shape is. A bracketed placeholder now costs its SENTENCE, not the paragraph. **Order is
+   load-bearing: strip brackets BEFORE the narration test** — `[year not provided]` literally
+   contains "not provided". Both leaks are replayed verbatim as tests.
+3. `registry-seam.test.ts`'s INVERTED guard went red and demanded its own exemption be deleted —
+   back-on-market goes through the seam now, both modes. Entry removed, check closed with evidence.
+
+**LIVE PROOF — `bun --env-file=.env.local scripts/email/render-back-on-market.mts`, 6 of 6
+assertions pass** on 13501 Brown Bear Run: $669,000 · 3 bd · 2.5 ba · 2,361 sqft · 0.26 ac · $283/sqft.
+No rate prose, no "days off", no stats:grid, no homepage link, address re-punctuated. Suites:
+`back-on-market` 40 pass, and 194 pass / 0 fail across the six affected files.
+
+**FOUR-LANE, run because the gate caught me short and it CHANGED AN ANSWER.** I reported that the
+description block "will be empty on every relist." Wrong. LIVE: 102 relist events (`holding→active`,
+≥7d off), 102 distinct addresses, **0** with an `apify_property_records` row (383 rows held, none a
+relist). But CATALOG (`data-roots.md` §"Comp PHOTOS + the listing DESCRIPTION") says the vendor
+populates `text` for **for_sale/pending** listings — and a relist is ACTIVE. So the vendor holds a
+description for all 102; we have simply never bought a row for a relisted address. That is RULE 0.7a
+rung 3 — a paid call for ONE specific missing field, behind the spend switch — an operator SPEND
+DECISION, not missing data. Corrected in the ledger, playbook §2.13.4, and the check.
+
+**Open, all with checks:** `back_on_market_no_paid_row_for_any_relist` ·
+`back_on_market_wordless_on_fact_poor_house` (a fact-poor house can ship with zero agent prose —
+`NARRATOR_ATTEMPTS = 2` halves it and then STOPS; we do not lower the claim gate to fill a slot, so
+§1.9's 50-word floor is not guaranteed) · `listing_type_cell_prints_raw_Residential` ·
+`back_on_market_area_mode_never_rendered`. Closed: `email_back_on_market_refuses_on_data_miss`.
+
+⚠️ **A parallel session hard-reset the working tree THREE times during this session**, wiping all
+uncommitted work each time. Recovered from `stash@{0}` (its own never-popped `safe-push-stash`) and
+kept backups outside the repo. **That stash still holds another session's in-flight work and is one
+`git stash drop` from gone.**
+
 ## 2026-08-06 (Opus 5) — THE EMAIL↔NARRATIVE BRIDGE IS LANDED. `/r/` served baked prose for a month while every email rewrote it from scratch.
 
 Operator: *"fucking land it!!! we have more than /r/ sites, too!!! why the fuck did we build all of

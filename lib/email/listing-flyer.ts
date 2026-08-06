@@ -194,9 +194,33 @@ export function specFootnote(_facts: ListingFacts): string | undefined {
   return undefined;
 }
 
-/** The address line a listing hero leads with. */
+/** The address line a listing hero leads with — composed from the record's STRUCTURED
+ *  fields, not the vendor's pre-formatted string.
+ *
+ *  The vendor's `formattedAddress` comes back "326 Shore Dr, Fort Myers, FL, 33905" — a
+ *  stray comma before the ZIP (seen live 07/13/2026, and again 08/06/2026 on
+ *  "13501 Brown Bear Run, Fort Myers, FL, 33928"). city/state/zip are the same record's own
+ *  fields and compose cleanly. Nothing is invented — only re-punctuated.
+ *
+ *  LIFTED HERE 08/06/2026. `price-reduced.ts` and `back-on-market.ts` each carried a private
+ *  copy of this composition, and price-reduced's own comment named the debt in as many words:
+ *  *"REPORTED, NOT FIXED: `addressLineOf` … returns `facts.address` RAW, so the rest of the
+ *  campaign still ships the stray comma. This helper should be lifted into that root — one
+ *  authority per shared concept — but that file is not mine to edit."* It is lifted now, so
+ *  all seven lifecycle emails read ONE authority instead of two-of-seven getting it right by
+ *  hand (T1: never a second resolver for a shared fact).
+ *
+ *  The raw address stays the fallback for a subject the vendor never matched (the typed
+ *  address is all we have, and it is still real); city/state is the last resort. */
 export function addressLineOf(facts: ListingFacts): string {
-  return facts.address ?? [facts.city, facts.state].filter(Boolean).join(", ");
+  const full = (facts.address ?? "").trim();
+  const comma = full.indexOf(",");
+  const street = comma > 0 ? full.slice(0, comma).trim() : full;
+  const locality = [facts.city, [facts.state, facts.zip].filter(Boolean).join(" ").trim()]
+    .filter(Boolean)
+    .join(", ");
+  if (!street) return locality;
+  return locality ? `${street}, ${locality}` : full;
 }
 
 /**
@@ -228,6 +252,32 @@ const DESCRIPTION_MAX_CHARS = 900;
 /** Below this a "clean" cut has thrown away most of the description — take the window. */
 const DESCRIPTION_MIN_CHARS = 300;
 
+/**
+ * THE TWO DIALS A SIBLING LIFECYCLE EMAIL MAY TURN — and there are only two.
+ *
+ * Added 08/06/2026 for Back on the Market. Operator, on that email: *"it's basically a new
+ * fucking listing, how can you fuck it up?"* — and he was right: a relisted house is a house
+ * for sale. Everything a reader wants (the photo, the price, the specs, the seller's own
+ * description, one paragraph) is IDENTICAL; what differs is the word on the ribbon and the
+ * ask under it.
+ *
+ * The alternative was for the sibling to hand `buildLifecycleEmail` the same field set by
+ * hand — which is a SECOND COPY of the strip/description/hero/CTA decisions, and this file's
+ * own header is the receipt for where that ends ("seven files, seven layouts"). The 08/05
+ * `$/Sq Ft` emphasis fix would have had to be made twice. If two emails are "basically the
+ * same," they must not be ABLE to drift.
+ *
+ * Deliberately NOT a dial: the specs, the description, the hero, the photo rules, the link
+ * ladder. A recipe that needs a different strip is not a new-listing flyer and should call
+ * `buildLifecycleEmail` directly, the way price-reduced and just-sold already do.
+ */
+export interface FlyerVariant {
+  /** The ribbon word. Default "New Listing". */
+  ribbon?: string;
+  /** The single CTA's label. Default "View the Full Listing". */
+  ctaLabel?: string;
+}
+
 export function buildListingFlyer(
   facts: ListingFacts,
   current: EmailDoc,
@@ -236,6 +286,8 @@ export function buildListingFlyer(
   daysOnMarket?: number | null,
   /** The recipe's own blocks, riding between the spec strip and the description. */
   middle?: ChromeBlock[],
+  /** The ribbon word and the CTA label. Everything else is the same flyer. */
+  variant: FlyerVariant = {},
 ): EmailDoc {
   // THE ONE LINK. `null` = we hold no real listing page for this house, and that means NO
   // BUTTON and no photo link — never our homepage. Until 08/05/2026 both of these read
@@ -245,7 +297,7 @@ export function buildListingFlyer(
   const listingUrl = listingButtonUrl(facts);
 
   return buildLifecycleEmail(current, {
-    ribbon: "New Listing",
+    ribbon: variant.ribbon ?? "New Listing",
     photo: facts.photos[0]
       ? {
           url: facts.photos[0],
@@ -271,7 +323,7 @@ export function buildListingFlyer(
     description: listingDescription(facts.remarks),
     // The narrator's slot, left OPEN. `buildNewListing` authors into it after this returns.
     narrative: "",
-    ctaLabel: "View the Full Listing",
+    ctaLabel: variant.ctaLabel ?? "View the Full Listing",
     ...(listingUrl ? { ctaUrl: listingUrl } : {}),
   });
 }
