@@ -1,3 +1,41 @@
+## 2026-08-06 (Opus 5) — OPERATOR: *"this sounds terrible... can we not fix it so we don't have so much shit going on that doesn't work? everything is always broke, so what are these crons doing? better not be fucking up egress bill"*
+
+**"EVERYTHING IS ALWAYS BROKE" IS TWO JOBS, MEASURED.** Pulled 78 scheduled runs off the Actions
+API spanning 08/03/2026 19:01Z - 08/06/2026 17:49Z: **62 success, 12 failure, 3 still running, 1
+cancelled.** Of the 12 failures, **4 are today's GitHub outage** and 8 predate it. Those 8 are not
+spread across the fleet — they concentrate:
+
+  Chief of staff nightly          3 failures / 3 daily runs — fails EVERY DAY
+  Pipeline freshness probe        3 failures — 08/04, 08/05, + one in the outage
+  Reverify closed-check signals   1
+  FL DBPR contractor licenses     1 (monthly)
+  Nightly Chain                   1
+
+**So ~84% of scheduled runs succeed, and the "always broke" feeling is TWO chronically red jobs
+being multiplied by three on the board** (each failure spawns a logger run + a healer run). Two
+broken jobs generate roughly six board entries a day. That is the whole illusion.
+
+**AND THE LEDGER ALREADY KNEW.** `cron_incident_chief_of_staff_nightly` [defect] has been open since
+**due Jul 17 — 19 days untouched.** Its companion `morning_brief_no_consumer` [task, due Jul 21, 22
+days untouched] says verbatim that the nightly morning-brief issues have **ZERO human engagement**.
+So the single loudest daily failure is a job that (a) has been red for ~3 weeks and (b) nobody reads
+when it is green. Also open: `cron_incident_daily_rebuild` [defect], **38 days untouched**. This is
+scratchpad 0aj repeating — criticals sitting correctly recorded and unread.
+
+**EGRESS — NOT ANSWERED, AND DELIBERATELY NOT GUESSED.** The hourly metrics scrape does NOT read our
+tables: `scripts/supabase-metrics-scrape.mjs:184` fetches
+`https://<ref>.supabase.co/customer/v1/privileged/metrics` (Supabase's own Metrics API) and upserts
+one row. Its workflow header states outright: *"NOT egress: this feed is the Postgres instance and
+its host only... Never cite it as egress coverage."* The named burner in our OWN scratchpad (0a) is
+the lake MCP sniffing the whole bucket on every BOOT — not a cron. **But per 0am / the open defect,
+nobody has read the REAL bill; every egress claim to date is payload arithmetic.** I did not add
+another one. That check stays open.
+
+**PROPOSED, NOT DONE — needs operator call:** kill or fix `chief-of-staff-nightly` (a job that is
+red daily and unread when green is the definition of pure noise), and run down the freshness probe.
+Do NOT quiet the watchers to make the board look better — that is how 42 straight CI reds hid
+08/02-08/04.
+
 ## 2026-08-06 (Opus 5) — OPERATOR: *"who the fuck would build something that runs non stop"*
 
 Fair, and the answer is NOT 81 crons. **MEASURED 08/06/2026 off `.github/workflows/` (81 live

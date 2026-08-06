@@ -1,3 +1,51 @@
+## 2026-08-06 (Opus 5) — WEEK IN REVIEW: the feed was already there. Design landed; the fan-out I proposed was the defect.
+
+Operator: *"WHAT ARE WE FANNING OUT ON? WE ALREADY HAVE THE DATA COMING IN ON ZIP PAGES, DO WE NOT
+AND /R/ PAGES AND ALL OTHER PAGES. WE START BUILDING FROM NOW FORWARD. WE DON'T NEED NEW DATA."*
+Earned. I had costed a bake matrix (53 ZIPs x 5 windows x 3 grains) for data we already collect —
+answering a build directive with a spend table.
+
+**MEASURED LIVE 08/06/2026 — `data_lake.listing_transitions`, last 7 days, whole coverage:** 1,060
+price changes · 527 went pending · 122 sold out of pending · 74 back on market · 73 sold direct · 27
+withdrawn from active · 25 withdrawn from pending. Six unbroken weeks back to 06/22/2026.
+`listing_state` 35,622 rows, newest 08/06/2026. **The week in review was already in the lake.**
+
+**THE ONE REAL DEFECT FOUND, and it is not a data gap.** The only writer of a market-state snapshot
+is welded to the email send. `lib/email/zip-events/state.ts:322` verbatim: *"Upsert snapshots AFTER a
+confirmed send only (never stamp without a send)."* Only callers:
+`scripts/email/weekly-read-run.mts:608,651`. `.github/workflows/weekly-read.yml` has its `schedule:`
+COMMENTED OUT pending an approved live cycle; `weekly_read_subscribers` holds 1 row. Result:
+`market_event_snapshots` is **0 rows** and structurally stays that way. Market history was accruing
+as a side effect of emailing a stranger. Verified tree-wide (all languages) — no second writer
+exists; the extra grep hits were `.claude/worktrees/` duplicate checkouts.
+
+**DESIGN: `docs/superpowers/specs/2026-08-06-week-in-review-design.md`.** Reads
+`listing_transitions` + the existing 30d/90d view DIRECTLY; the snapshot store is explicitly walled
+off (it answers "what did we last SHOW you" — alert dedup — not "what happened this week").
+
+**Structure is sourced, not invented** (`_RESEARCH/email-and-social/2026-08-03-strongest-real-estate-email-concepts-structure.md`):
+Rev Real Estate School's "Market Mondays" 4-section order + NAR's number-first anatomy. NAR states
+outright it leaves ZIP/neighborhood grain to local layers — our lane, in their words. Cadence
+evidence: GetResponse 2024 / 4.4B messages, newsletter engagement peaks at 1/week.
+
+**T11 is why this surface is the RIGHT home for the forward-only lane.** `listing_transitions.price_delta`
+is blind before we started watching a listing — normally a landmine. A week-in-review asks only what
+happened INSIDE the window, so that weakness costs nothing here, and the vendor's backward lane
+(listing-scoped) could never form an area statistic. Written into the design so nobody blends them later.
+
+Seven failure modes, each with a named guard, five test-shaped. Quarter/half/year deliberately NOT
+built — the window is a parameter, not a schema (operator's call).
+
+**Honest miss:** the crawl4ai pass this session returned 2022 benchmarks, older than what we already
+hold. Recorded in the design so nobody re-fetches it expecting an upgrade.
+
+Checks opened: `week_in_review_live_verify` · `zhvi_index_plotted_as_value_market_pulse` (Market Pulse
+still charts ZHVI; data-roots demoted it to index-only 07/18).
+
+NOT BUILT: the page and its loader. Design only.
+
+Note: the design file was swept into c94d8aa6 ("Add tests for canvas font rendering and validation")
+by a parallel session's broad staging — committed safely, misleading subject, history left alone.
 ## 2026-08-06 (Sonnet 5) — Checks ledger: dropped 23 stale email/social `*_live_verify` rows (905→882), left the live rebuild untouched.
 
 Operator: *"we need to get all of the old checks on emails gone since we are building all new. we
