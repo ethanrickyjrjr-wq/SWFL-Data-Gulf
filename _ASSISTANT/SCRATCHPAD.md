@@ -1,3 +1,44 @@
+## 2026-08-06 (Opus 5) — OPERATOR: *"how do we have this many fucking problems and no claude fixes anything"* (issue #169, morning brief 08/01)
+
+**MEASURED THE LEDGER ITSELF. The number is not a bug count — it is an intake with a manual-only drain.**
+
+Live against `public.checks` (1,514 rows ever): **879 open · 546 done · 89 dropped.**
+Class split of the 879: **224 defect · 320 task · 210 untriaged · 125 verify.** Only **95** end in
+`_live_verify`, so the brief's "70 never started" is nearly EVERY live-verify check ever left open
+(251 created ever → 136 done, 20 dropped, 95 open, oldest 57d).
+
+**INTAKE vs DRAIN, per month:** 07/2026 opened 1,018 / closed 447 (**net +571**). 08/2026 through the
+6th: opened 266 / closed 75 (**net +191**). Daily last week: +24, +36, +50, +53, +27. It has never had
+a negative day in that window. **774 of the 879 open rows have never been updated since the moment
+they were written** — written once, never touched again.
+
+**THE ROOT CAUSE, RUN TO GROUND — the automatic closer exists and can act on ZERO of them.**
+`scripts/check-sweep.mjs` (built 07/22) walks OPEN checks, re-runs each stored `signal`, closes what
+passes. Ran it live just now: `check-sweep: 0 OPEN check(s) carry a live signal`. **0 of 879.** Only
+**66 of 1,514 rows EVER** carried a signal. **271 checks were opened in the last 7 days and not one
+of them carries a signal.** So every close must be a human typing `check.mjs close <key>` one key at
+a time — machine closes are **14 of ~635 ever** (`resolved_by='check-sweep'`), under 3%.
+
+**AND THE CRON JOBS ONLY PUSH THE NUMBER UP.** `reverify-signals-daily.yml` runs daily and does two
+things, both intake: re-runs closed checks' signals and **REOPENS** regressions, then runs
+`ceilings-to-checks.mjs --apply` which **OPENS** new checks from recorded source ceilings.
+`check-sweep.mjs` — the only draining half — is wired to **no workflow, no hook, no package.json
+script**. Same "recording half built, acting half never wired" shape as the ceilings postmortem, one
+level up: this time the un-wired half is the one that makes the number go down.
+
+**"NO CLAUDE FIXES ANYTHING" IS NOT WHAT THE COMMITS SHOW — and that is the trap.** 342 commits in
+the last 14 days, 272 since 08/01, 50 today. Work ships constantly. The ledger grows anyway because
+**shipping does not close a check and opening one costs nothing.** RULE 0.85 (locked earlier TODAY)
+says net-negative-or-neutral in prose — prose with no mechanism, which is the documented
+[a rule only in a doc is not a rule] failure.
+
+**OPEN — the fix is not chosen yet; do not let this entry stand in for it.** Three candidates, none
+built: (1) wire `check-sweep` into the same daily workflow that already runs the two openers —
+correct, but closes 0 today because no signals exist; (2) make `check.mjs open` demand a `--signal`
+or an explicit `--no-signal "<why>"` so un-closeable-by-machine becomes a deliberate act, not the
+default; (3) backfill signals onto the open checks that can carry one. (2) is the one that changes
+the slope. Operator's call.
+
 ## 2026-08-06 (Opus 5) - OPERATOR: *"why do we have all this shit going on in github that doesn't work????????????????????????"* (2 screenshots: Actions all Queued, 40 open auto-filed issues)
 
 **Measured, not guessed. Three separate things are in those screenshots and only two are ours.**

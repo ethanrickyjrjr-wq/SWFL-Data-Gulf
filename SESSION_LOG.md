@@ -1,3 +1,48 @@
+## 2026-08-06 (Opus 5) — "how do we have this many fucking problems and no claude fixes anything": measured the ledger, found the drain was never wired, wired it
+
+**Operator asked why issue #169's morning brief shows 70 never-started items and 725 with no
+evidence. Measured `public.checks` live instead of guessing.** 1,514 rows ever: 879 open, 546 done,
+89 dropped. Class split of the 879: 224 defect · 320 task · 210 untriaged · 125 verify. Intake vs
+drain by last-touch date — July opened 1,018 / closed 447; August through the 6th opened 266 /
+closed 75. Daily last week: +24, +36, +50, +53, +27. Never a negative day. **774 of 879 open rows
+have never been updated since the moment they were written.**
+
+**ROOT CAUSE, run to ground and reproduced live: the automatic closer exists and can act on ZERO
+rows.** `node scripts/check-sweep.mjs --dry-run` → `0 OPEN check(s) carry a live signal`. Only 66 of
+1,514 rows EVER carried a signal; **271 opened in the last 7 days, none with one.** Machine closes
+are 14 of ~635 ever (`resolved_by='check-sweep'`). Meanwhile `reverify-signals-daily.yml` ran two
+automatic OPENERS every day (reopen-on-regression + `ceilings-to-checks --apply`) and the closer was
+invoked by **no workflow, no hook, no package.json script.**
+
+**FIXED, not filed (RULE 0.85) — 3 repairs:**
+1. `.github/workflows/reverify-signals-daily.yml` — wired `check-sweep.mjs` in as a third step
+   alongside the two openers. `continue-on-error` + last so it can never mask a signal regression.
+   The closer was orphaned; it now runs on the same clock as the two openers, so every signal
+   attached from here forward drains automatically instead of accumulating.
+2. `scripts/new-build.mjs` — now accepts `--signal '<json>'` and passes it to `check.mjs open`.
+   This script is the largest producer of verify-class checks (RULE 3.5 mandates it per build; 251
+   `*_live_verify` rows created ever, 0 with a signal) and had no way to attach one. Validates the
+   JSON *before* writing the spec stub, and when no signal is given prints the exact
+   `check.mjs update … --signal` command plus the false-pass warning. Deliberately NOT defaulted —
+   a loose signal closes a broken thing and never self-heals.
+3. `ingest/cadence_registry.yaml` — found a RED test at HEAD while verifying an unrelated check:
+   `test_jobs_workflows_exist_and_are_not_double_registered` failed because
+   `neighborhood-amenities-daily.yml` was registered under BOTH `pipelines:` and `jobs:`. Removed
+   the `jobs:` duplicate (the `pipelines:` entry is authoritative and carries lane/cadence/scope).
+   **Before: 15 passed 1 failed. After: 16 passed in 0.15s.** Gate 10 membership still
+   `"unregistered": []` — all three sections share the `workflow:` field.
+
+**CLOSED 3, OPENED 0 — the first net-negative contribution, each naming its own proof:**
+`nightly_chain_dark_anthropic_credits` + `anthropic_credits_nightly_red` (live
+`/api/b/master?view=speak&tier=1` serves a current read stamped 08/06/2026 — chain is not dark,
+master not frozen at v118) · `cadence_spine_pin_75_vs_76` (the count literal was DELETED 08/03, not
+bumped; suite re-run live 08/06, 16 passed).
+
+**NOT DONE, named per RULE 0.8:** no signals were backfilled onto the 125 open verify-class rows —
+that is the work that actually moves the number, and it is per-check human judgment
+(`.claude/skills/check-signal/SKILL.md`), not a sweep. The 530 task+untriaged rows sharing one
+counter with the 224 defects is a triage question for the operator, not a unilateral drop.
+
 ## 2026-08-06 (Sonnet 5) — Locked new RULE 0.95: exhaust every lane before claiming absence
 
 Operator decree, same day as the font-research postmortem already logged in RULE 0.4: told me

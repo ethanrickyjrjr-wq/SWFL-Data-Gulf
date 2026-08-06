@@ -83,6 +83,34 @@ jobs:
             node scripts/ceilings-to-checks.mjs --apply
           fi
 
+      # WIRED 08/06/2026 — the DRAINING half, and the reason this file needed it.
+      # Measured that morning against public.checks: 879 open, and BOTH automatic
+      # mechanisms in this workflow only push that number UP — the step above REOPENS
+      # regressions, and ceilings-to-checks --apply OPENS new rows. scripts/check-sweep.mjs
+      # (built 07/22) is the only thing that closes anything without a human typing a key,
+      # and it was invoked by no workflow, no hook, and no package.json script — same
+      # "recording half built, acting half never wired" shape as the ceilings postmortem
+      # directly above, one level up. July: 1,018 opened / 447 closed. 14 of ~635 closes
+      # ever were machine closes.
+      # It can only close a check whose STORED signal passes live, re-validated
+      # server-side by the checks_require_proof trigger — so this can never mass-close.
+      # Today it closes 0 (0 of 879 open checks carry a signal); it exists so the drain is
+      # automatic the moment signals start being attached at open time.
+      # continue-on-error + last, so a sweep hiccup can never mask a signal regression,
+      # which is this workflow's day job.
+      - name: Auto-close open checks whose stored signal passes live
+        continue-on-error: true
+        env:
+          SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+          SUPABASE_SERVICE_KEY: ${{ secrets.SUPABASE_SERVICE_KEY }}
+        run: |
+          set -o pipefail
+          if [ "${{ inputs.dry_run }}" = "true" ]; then
+            node scripts/check-sweep.mjs --dry-run
+          else
+            node scripts/check-sweep.mjs
+          fi
+
       - name: Open or update the regression issue
         if: steps.run.outcome == 'failure'
         env:

@@ -2591,12 +2591,13 @@ jobs:
   - name: graphify-republish
     workflow: graphify-republish.yml
     purpose: Republishes the graphify code graph.
-  - name: neighborhood-amenities-daily
-    workflow: neighborhood-amenities-daily.yml
-    purpose: >-
-      SteadyAPI /neighborhood-amenities sweep -> data_lake.steadyapi_neighborhoods /
-      steadyapi_neighborhood_amenities / steadyapi_property_neighborhood. One call per unknown
-      vendor neighborhood polygon; bounded 500 calls/run, ~9 min at the shared 1 req/s throttle.
+  # neighborhood-amenities-daily.yml is deliberately NOT listed here — it is an ingest
+  # pipeline and already carries the authoritative `neighborhood_amenities` entry under
+  # pipelines: (lane, cadence_days, consuming_pack, raw_landing_class, source_scope). All
+  # three sections share the same `workflow:` field for Gate 10 membership
+  # (scripts/schedule-catalog.mjs buildCatalog), so the pipelines: entry alone registers it
+  # — a second row here bought nothing and reddened test_jobs_workflows_exist_and_are_not_
+  # double_registered ("one entry per thing"). Removed 08/06/2026.
   - name: home-values-investor-monthly
     workflow: home-values-investor-monthly.yml
     purpose: Home-Values + Investor Composite build (ingest-flavored; promotion to pipelines with freshness fields tracked in checks).
