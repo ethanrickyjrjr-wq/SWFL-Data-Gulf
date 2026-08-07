@@ -316,7 +316,9 @@ const ARTIFACT_POSITIONAL = new RegExp(
 const SPATIAL =
   /\b(same street|this street|the same block|next door|across the street|down the road|same (neighborhood|community|subdivision))\b|\bon [A-Z][a-z]+ (Dr|Drive|Blvd|Boulevard|Ln|Lane|Ct|Court|Rd|Road|Ave|Avenue|Way|Ter|Terrace|Cir|Circle|Pl|Place)\b/;
 
-/** 
+/** A NAMED SUB-AREA the narrator invented — a subdivision/neighborhood name the settled
+ *  facts never mention. "the Coconut Creek area of Iona" for a Fort Myers house sailed
+ *  past every other check above. */
 const NAMED_AREA =
   /\bthe\s+([A-Z][a-zA-Z]+(?:\s+[A-Z][a-zA-Z]+){0,2})\s+(area|neighborhood|community|subdivision|district)\b/g;
 
@@ -352,7 +354,7 @@ export interface ClaimViolation {
  */
 export function auditClaims(prose: string, settled: readonly SettledClaim[]): ClaimViolation[] {
   const out: ClaimViolation[] = [];
-  const settledText = settled.map((s) => s.sentence.toLowerCase()).join("   ");
+  const settledText = settled.map((s) => s.sentence.toLowerCase()).join("   ");
   const allowedNumerals = new Set(settled.flatMap((s) => s.anchors));
   // A FACT ABOUT A HOME IS NOT ONLY A NUMBER. Features get the SAME closed-world treatment:
   // a feature named in the prose must be named in the facts. This is the check that "FROM THE
