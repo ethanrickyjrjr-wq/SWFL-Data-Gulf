@@ -1,8 +1,8 @@
 {
   "target": "master",
   "timestamps": {
-    "started": "2026-08-07T04:33:16.987Z",
-    "finished": "2026-08-07T04:33:44.128Z"
+    "started": "2026-08-07T06:02:08.181Z",
+    "finished": "2026-08-07T06:02:30.707Z"
   },
   "source": "live",
   "outcomes": [
@@ -114,65 +114,65 @@
     {
       "packId": "city-pulse-swfl",
       "status": "built",
-      "version": 52,
+      "version": 53,
       "written": true,
       "brainOutput": {
         "brain_id": "city-pulse-swfl",
-        "version": 52,
-        "refined_at": "2026-08-07T04:33:17Z",
-        "expires": "2026-08-08T04:33:17Z",
+        "version": 53,
+        "refined_at": "2026-08-07T06:02:08Z",
+        "expires": "2026-08-08T06:02:08Z",
         "ttl_seconds": 86400,
         "direction": "neutral",
         "magnitude": 0,
         "drivers": [],
         "overrides": [],
-        "conclusion": "SWFL city pulse as of 2026-08-07: 107 live current-events signals across 11 cities — Fort Myers (27), Cape Coral (20), Naples (30), North Naples (6), Fort Myers Beach (5), Marco Island (5), Sanibel (4), Golden Gate (2), Bonita Springs (4), Estero (3), Lehigh Acres (1). Most current: Fort Myers — A builder cancelled the no-reserve auction for a newly built, move-in-ready waterfront estate in North Naples, as of Aug. 3, 2026; Naples-based Elite Auctions had been hired to handle the auction. These are current cited facts only; the cross-vertical read and any direction call live downstream in master.",
+        "conclusion": "SWFL city pulse as of 2026-08-07: 109 live current-events signals across 11 cities — Fort Myers (28), Naples (31), Cape Coral (20), North Naples (6), Fort Myers Beach (5), Marco Island (5), Sanibel (4), Golden Gate (2), Bonita Springs (4), Estero (3), Lehigh Acres (1). Most current: Fort Myers — State Department issued an advisory warning of 'Suitcase Invaders' citing SW Florida Burmese pythons among concerns, published Aug. 1, 2026. These are current cited facts only; the cross-vertical read and any direction call live downstream in master.",
         "key_metrics": [
           {
-            "metric": "signal_transactions_1",
+            "metric": "signal_breaking_1",
+            "value": "Fort Myers: State Department issued an advisory warning of 'Suitcase Invaders' citing SW Florida Burmese pythons among concerns, published Aug. 1, 2026.",
+            "direction": "stable",
+            "label": "Fort Myers — breaking",
+            "variable_type": "categorical",
+            "source": {
+              "url": "https://www.news-press.com/story/money/2026/08/01/sw-florida-burmese-pythons-among-concerns-in-state-department-advisory-naples-lee-county-everglades/91089085007/",
+              "fetched_at": "2026-08-07T06:02:08Z",
+              "tier": 2,
+              "citation": "SW Florida Burmese pythons among concerns in State Department advisory: \"[](https://www.news-press.com/)\n[](https://subscribe.news-press.com/rr/nanobar?gps-source=CPTILELEFT&itm_campaign=2026ENTJULBAU&itm_medium=ONSITE&success-url=https%3A%2F%2Fwww.news-press.com%2Fstory%2Fmoney%2F2026%2F08%2F01%2Fsw-florida-burmese-pythons-among-concerns-in-state-department-advisory-naples-lee-county-everglades%2F91089085007%2F)\n[](https://subscribe.news-press.com/rr/masthead?gps-source=CPMASTHEAD&itm_campaign=2026ENTJULBAU&itm_medium=ONSITE&success-url=https%3A%2F%2Fwww.news-press.com%2Fstory%2Fmoney%2F2026%2F08%2F01%2Fsw-florida-burmese-pythons-among-concerns-in-state-department-advisory-naples-lee-county-everglades%2F91089085007%2F)\n[News](https://www.news-press.com/news/) [Cape Coral](https://www.news-press.com/news/cape-coral/) [Sports](https://www.news-press.com/sports/) [Restaurants](https://www.news-press.com/taste/) [Real Estate](https://www.news-press.com/real-estate) [Advertise](https://advertising.usatoday.com/advertise-with-us/?cid=Web_LiQ_Network_AdvertiseWithUs_AdvertiseInquiry&publication=the_news_press&utm_source=local_publication&utm_medium=menu&utm_campaign=advertise_with_us) [Obituaries](https://www.news-press.com/obituaries) [eNewspaper](https://user.news-press.com/user/enewspaper) [Legals](https://www.news-press.com/public-notices)\n[](https://www.news-press.com/search/ \"Search\")\n[](https://www.news-press.com/weather/ \"Weather in Fort Myers: 74°F Partly Cloudy\") [](https://subscribe.news-press.com/rr/navsub?gps-source=CPTOPNAVBAR&itm_campaign=2026ENTJULBAU&itm_medium=ONSITE&success-url=https%3A%2F%2Fwww.news-press.com%2Fstory%2Fmoney%2F2026%2F08%2F01%2Fsw-florida-burmese-pythons-among-concerns-in-state-department-advisory-naples-lee-county-everglades%2F91089085007%2F)\n[](https://login.news-press.com/PFTM-GUP/authenticate/?success-url=https%3A%2F%2Fwww.news-press.com%2Fstory%2Fmoney%2F2026%2F08%2F01%2Fsw-florida-burmese-pythons-among-concerns-in-state-department-advisory-naples-lee-county-everglades%2F91089085007%2F&cancel-url=https%3A%2F%2Fwww.news-press.com%2Fstory%2Fmoney%2F2026%2F08%2F01%2Fsw-florida-burmese-pythons-among-concerns-in-state-department-advisory-naples-lee-county-everglades%2F91089085007%2F)\n[](https://www.news-press.com/) [](https://www.news-press.com/)\nMONEY\n# After Florida incursion, State Department warns of 'Suitcase Invaders'\n[![Portrait of Phil Fernandez](https://www.news-press.com/gcdn/presto/2019/09/14/PNDN/6a77b474-579f-48fa-b56f-a2cc2b9de797-NDN_Phil_Fernandez.jpg?crop=2999,2999,x0,y570&width=48&height=48&format=pjpg&auto=webp) Phil Fernandez](https://www.naplesnews.com/staff/2684114001/phil-fernandez/)\nFort Myers News-Press & Naples Daily News\nAug. 1, 2026, 5:02 a.m. ET\nSummer in [Southwest Florida](https://www.news-press.com/story/news/environment/2025/06/09/pythons-in-florida-team-works-to-put-dent-in-species-killing-wildlife/83952033007/) is often associated with family vacations, hurricane season and, [increasingly, efforts](https://www.news-press.com/story/news/local/2026/06/27/s\""
+            },
+            "suggestions": [
+              "What's driving signal breaking 1?",
+              "How does signal breaking 1 here compare to other SWFL areas?"
+            ]
+          },
+          {
+            "metric": "signal_breaking_2",
+            "value": "Naples: The U.S. State Department issued an advisory warning about 'Suitcase Invaders' including SW Florida Burmese pythons, published August 1, 2026.",
+            "direction": "stable",
+            "label": "Naples — breaking",
+            "variable_type": "categorical",
+            "source": {
+              "url": "https://www.naplesnews.com/story/money/2026/08/01/sw-florida-burmese-pythons-among-concerns-in-state-department-advisory-naples-lee-county-everglades/91089085007/",
+              "fetched_at": "2026-08-07T06:02:08Z",
+              "tier": 2,
+              "citation": "SW Florida Burmese pythons among concerns in State Department advisory: \"[](https://www.naplesnews.com/)\n[](https://subscribe.naplesnews.com/rr/nanobar?gps-source=CPTILELEFT&itm_campaign=2026ENTJULBAU&itm_medium=ONSITE&success-url=https%3A%2F%2Fwww.naplesnews.com%2Fstory%2Fmoney%2F2026%2F08%2F01%2Fsw-florida-burmese-pythons-among-concerns-in-state-department-advisory-naples-lee-county-everglades%2F91089085007%2F)\n[](https://subscribe.naplesnews.com/rr/masthead?gps-source=CPMASTHEAD&itm_campaign=2026ENTJULBAU&itm_medium=ONSITE&success-url=https%3A%2F%2Fwww.naplesnews.com%2Fstory%2Fmoney%2F2026%2F08%2F01%2Fsw-florida-burmese-pythons-among-concerns-in-state-department-advisory-naples-lee-county-everglades%2F91089085007%2F)\n[News](https://www.naplesnews.com/news/) [Sports](https://www.naplesnews.com/sports/) [Real Estate](https://www.naplesnews.com/business/real-estate/) [Restaurants](https://www.naplesnews.com/entertainment/restaurants/) [Opinion](https://www.naplesnews.com/opinion/) [Advertise](https://advertising.usatoday.com/advertise-with-us/?cid=Web_LiQ_Network_AdvertiseWithUs_AdvertiseInquiry&publication=naples_daily_news&utm_source=local_publication&utm_medium=menu&utm_campaign=advertise_with_us) [Obituaries](https://www.naplesnews.com/obituaries) [eNewspaper](https://user.naplesnews.com/user/enewspaper) [Legals](https://www.naplesnews.com/public-notices)\n[](https://www.naplesnews.com/search/ \"Search\")\n[](https://www.naplesnews.com/weather/ \"Weather in Naples: 76°F Partly Cloudy\") [](https://subscribe.naplesnews.com/rr/navsub?gps-source=CPTOPNAVBAR&itm_campaign=2026ENTJULBAU&itm_medium=ONSITE&success-url=https%3A%2F%2Fwww.naplesnews.com%2Fstory%2Fmoney%2F2026%2F08%2F01%2Fsw-florida-burmese-pythons-among-concerns-in-state-department-advisory-naples-lee-county-everglades%2F91089085007%2F)\n[](https://login.naplesnews.com/PNDN-GUP/authenticate/?success-url=https%3A%2F%2Fwww.naplesnews.com%2Fstory%2Fmoney%2F2026%2F08%2F01%2Fsw-florida-burmese-pythons-among-concerns-in-state-department-advisory-naples-lee-county-everglades%2F91089085007%2F&cancel-url=https%3A%2F%2Fwww.naplesnews.com%2Fstory%2Fmoney%2F2026%2F08%2F01%2Fsw-florida-burmese-pythons-among-concerns-in-state-department-advisory-naples-lee-county-everglades%2F91089085007%2F)\n[](https://www.naplesnews.com/) [](https://www.naplesnews.com/)\nMONEY\n# After Florida incursion, State Department warns of 'Suitcase Invaders'\n[![Portrait of Phil Fernandez](https://www.naplesnews.com/gcdn/presto/2019/09/14/PNDN/6a77b474-579f-48fa-b56f-a2cc2b9de797-NDN_Phil_Fernandez.jpg?crop=2999,2999,x0,y570&width=48&height=48&format=pjpg&auto=webp) Phil Fernandez](https://www.naplesnews.com/staff/2684114001/phil-fernandez/)\nFort Myers News-Press & Naples Daily News\nAug. 1, 2026, 5:02 a.m. ET\nSummer in [Southwest Florida](https://www.naplesnews.com/story/news/environment/2025/06/09/pythons-in-florida-team-works-to-put-dent-in-species-killing-wildlife/83952033007/) is often associated with family vacations, hurricane season and, [increasingly, efforts](https://www.naplesnews.com/story/news/\""
+            },
+            "suggestions": [
+              "What's driving signal breaking 2?",
+              "How does signal breaking 2 here compare to other SWFL areas?"
+            ]
+          },
+          {
+            "metric": "signal_transactions_3",
             "value": "Fort Myers: A builder cancelled the no-reserve auction for a newly built, move-in-ready waterfront estate in North Naples, as of Aug. 3, 2026; Naples-based Elite Auctions had been hired to handle the auction.",
             "direction": "stable",
             "label": "Fort Myers — transactions",
             "variable_type": "categorical",
             "source": {
               "url": "https://www.news-press.com/story/money/business/local/2026/08/03/builder-cancels-auction-for-luxury-north-naples-florida-estate/91127240007/",
-              "fetched_at": "2026-08-07T04:33:17Z",
+              "fetched_at": "2026-08-07T06:02:08Z",
               "tier": 2,
               "citation": "Builder cancels auction for luxury North Naples estate: \"[](https://www.news-press.com/)\n[](https://subscribe.news-press.com/rr/nanobar?gps-source=CPTILELEFT&itm_campaign=2026ENTJULBAU&itm_medium=ONSITE&success-url=https%3A%2F%2Fwww.news-press.com%2Fstory%2Fmoney%2Fbusiness%2Flocal%2F2026%2F08%2F03%2Fbuilder-cancels-auction-for-luxury-north-naples-florida-estate%2F91127240007%2F)\n[](https://subscribe.news-press.com/rr/masthead?gps-source=CPMASTHEAD&itm_campaign=2026ENTJULBAU&itm_medium=ONSITE&success-url=https%3A%2F%2Fwww.news-press.com%2Fstory%2Fmoney%2Fbusiness%2Flocal%2F2026%2F08%2F03%2Fbuilder-cancels-auction-for-luxury-north-naples-florida-estate%2F91127240007%2F)\n[News](https://www.news-press.com/news/) [Cape Coral](https://www.news-press.com/news/cape-coral/) [Sports](https://www.news-press.com/sports/) [Restaurants](https://www.news-press.com/taste/) [Real Estate](https://www.news-press.com/real-estate) [Advertise](https://advertising.usatoday.com/advertise-with-us/?cid=Web_LiQ_Network_AdvertiseWithUs_AdvertiseInquiry&publication=the_news_press&utm_source=local_publication&utm_medium=menu&utm_campaign=advertise_with_us) [Obituaries](https://www.news-press.com/obituaries) [eNewspaper](https://user.news-press.com/user/enewspaper) [Legals](https://www.news-press.com/public-notices)\n[](https://www.news-press.com/search/ \"Search\")\n[](https://www.news-press.com/weather/ \"Weather in Fort Myers: 75°F Cloudy\") [](https://subscribe.news-press.com/rr/navsub?gps-source=CPTOPNAVBAR&itm_campaign=2026ENTJULBAU&itm_medium=ONSITE&success-url=https%3A%2F%2Fwww.news-press.com%2Fstory%2Fmoney%2Fbusiness%2Flocal%2F2026%2F08%2F03%2Fbuilder-cancels-auction-for-luxury-north-naples-florida-estate%2F91127240007%2F)\n[](https://login.news-press.com/PFTM-GUP/authenticate/?success-url=https%3A%2F%2Fwww.news-press.com%2Fstory%2Fmoney%2Fbusiness%2Flocal%2F2026%2F08%2F03%2Fbuilder-cancels-auction-for-luxury-north-naples-florida-estate%2F91127240007%2F&cancel-url=https%3A%2F%2Fwww.news-press.com%2Fstory%2Fmoney%2Fbusiness%2Flocal%2F2026%2F08%2F03%2Fbuilder-cancels-auction-for-luxury-north-naples-florida-estate%2F91127240007%2F)\n[](https://www.news-press.com/) [](https://www.news-press.com/)\nLOCAL BUSINESS\n# Builder cancels auction for luxury waterfront estate in North Naples\n[![Portrait of Laura Layden](https://www.news-press.com/gcdn/authoring/authoring-images/2024/02/08/PNDN/72524348007-ndn-jh-20240126-laura-0001.JPG?crop=3313,3312,x1506,y0&width=48&height=48&format=pjpg&auto=webp) Laura Layden](https://www.naplesnews.com/staff/2647080001/laura-layden/)\nFort Myers News-Press & Naples Daily News\nAug. 3, 2026, 4:11 p.m. ET\nA highly publicized auction for a newly built, move-in-ready waterfront estate in North Naples didn't happen.\nWhile the auction generated interest, the seller decided not to move forward with it.\nNaples-based Elite Auctions was [hired to handle the no-reserve auction](https://www.news-press.com/story/money/business/local/2026/07/10/north-naples-waterfront-estate-to-sell-at-no-reserve-auction/90861406007/) for\""
-            },
-            "suggestions": [
-              "What's driving signal transactions 1?",
-              "How does signal transactions 1 here compare to other SWFL areas?"
-            ]
-          },
-          {
-            "metric": "signal_transactions_2",
-            "value": "Cape Coral: A builder cancelled a highly publicized no-reserve auction for a newly built, move-in-ready waterfront estate in North Naples; Naples-based Elite Auctions had been hired to handle the sale.",
-            "direction": "stable",
-            "label": "Cape Coral — transactions",
-            "variable_type": "categorical",
-            "source": {
-              "url": "https://www.news-press.com/story/money/business/local/2026/08/03/builder-cancels-auction-for-luxury-north-naples-florida-estate/91127240007/",
-              "fetched_at": "2026-08-07T04:33:17Z",
-              "tier": 2,
-              "citation": "Builder cancels auction for luxury North Naples estate: \"[](https://www.news-press.com/)\n[](https://subscribe.news-press.com/rr/nanobar?gps-source=CPTILELEFT&itm_campaign=2026ENTJULBAU&itm_medium=ONSITE&success-url=https%3A%2F%2Fwww.news-press.com%2Fstory%2Fmoney%2Fbusiness%2Flocal%2F2026%2F08%2F03%2Fbuilder-cancels-auction-for-luxury-north-naples-florida-estate%2F91127240007%2F)\n[](https://subscribe.news-press.com/rr/masthead?gps-source=CPMASTHEAD&itm_campaign=2026ENTJULBAU&itm_medium=ONSITE&success-url=https%3A%2F%2Fwww.news-press.com%2Fstory%2Fmoney%2Fbusiness%2Flocal%2F2026%2F08%2F03%2Fbuilder-cancels-auction-for-luxury-north-naples-florida-estate%2F91127240007%2F)\n[News](https://www.news-press.com/news/) [Cape Coral](https://www.news-press.com/news/cape-coral/) [Sports](https://www.news-press.com/sports/) [Restaurants](https://www.news-press.com/taste/) [Real Estate](https://www.news-press.com/real-estate) [Advertise](https://advertising.usatoday.com/advertise-with-us/?cid=Web_LiQ_Network_AdvertiseWithUs_AdvertiseInquiry&publication=the_news_press&utm_source=local_publication&utm_medium=menu&utm_campaign=advertise_with_us) [Obituaries](https://www.news-press.com/obituaries) [eNewspaper](https://user.news-press.com/user/enewspaper) [Legals](https://www.news-press.com/public-notices)\n[](https://www.news-press.com/search/ \"Search\")\n[](https://www.news-press.com/weather/ \"Weather in Fort Myers: 75°F Cloudy\") [](https://subscribe.news-press.com/rr/navsub?gps-source=CPTOPNAVBAR&itm_campaign=2026ENTJULBAU&itm_medium=ONSITE&success-url=https%3A%2F%2Fwww.news-press.com%2Fstory%2Fmoney%2Fbusiness%2Flocal%2F2026%2F08%2F03%2Fbuilder-cancels-auction-for-luxury-north-naples-florida-estate%2F91127240007%2F)\n[](https://login.news-press.com/PFTM-GUP/authenticate/?success-url=https%3A%2F%2Fwww.news-press.com%2Fstory%2Fmoney%2Fbusiness%2Flocal%2F2026%2F08%2F03%2Fbuilder-cancels-auction-for-luxury-north-naples-florida-estate%2F91127240007%2F&cancel-url=https%3A%2F%2Fwww.news-press.com%2Fstory%2Fmoney%2Fbusiness%2Flocal%2F2026%2F08%2F03%2Fbuilder-cancels-auction-for-luxury-north-naples-florida-estate%2F91127240007%2F)\n[](https://www.news-press.com/) [](https://www.news-press.com/)\nLOCAL BUSINESS\n# Builder cancels auction for luxury waterfront estate in North Naples\n[![Portrait of Laura Layden](https://www.news-press.com/gcdn/authoring/authoring-images/2024/02/08/PNDN/72524348007-ndn-jh-20240126-laura-0001.JPG?crop=3313,3312,x1506,y0&width=48&height=48&format=pjpg&auto=webp) Laura Layden](https://www.naplesnews.com/staff/2647080001/laura-layden/)\nFort Myers News-Press & Naples Daily News\nAug. 3, 2026, 4:11 p.m. ET\nA highly publicized auction for a newly built, move-in-ready waterfront estate in North Naples didn't happen.\nWhile the auction generated interest, the seller decided not to move forward with it.\nNaples-based Elite Auctions was [hired to handle the no-reserve auction](https://www.news-press.com/story/money/business/local/2026/07/10/north-naples-waterfront-estate-to-sell-at-no-reserve-auction/90861406007/) for\""
-            },
-            "suggestions": [
-              "What's driving signal transactions 2?",
-              "How does signal transactions 2 here compare to other SWFL areas?"
-            ]
-          },
-          {
-            "metric": "signal_transactions_3",
-            "value": "Cape Coral: A waterfront condominium on Fort Myers Beach sold for $2 million on or around July 24, 2026, setting a new record as the highest price ever paid for an existing (resale) condo on the island.",
-            "direction": "stable",
-            "label": "Cape Coral — transactions",
-            "variable_type": "categorical",
-            "source": {
-              "url": "https://www.news-press.com/story/money/companies/2026/07/24/fort-myers-beach-condo-sells-for-2-million-a-new-record-in-the-sand/90999859007/",
-              "fetched_at": "2026-08-07T04:33:17Z",
-              "tier": 2,
-              "citation": "Fort Myers Beach condo sells for $2 million, a new record in the sand: \"[](https://www.news-press.com/)\n[](https://subscribe.news-press.com/rr/nanobar?gps-source=CPTILELEFT&itm_campaign=2026ENTJULBAU&itm_medium=ONSITE&success-url=https%3A%2F%2Fwww.news-press.com%2Fstory%2Fmoney%2Fcompanies%2F2026%2F07%2F24%2Ffort-myers-beach-condo-sells-for-2-million-a-new-record-in-the-sand%2F90999859007%2F)\n[](https://subscribe.news-press.com/rr/masthead?gps-source=CPMASTHEAD&itm_campaign=2026ENTJULBAU&itm_medium=ONSITE&success-url=https%3A%2F%2Fwww.news-press.com%2Fstory%2Fmoney%2Fcompanies%2F2026%2F07%2F24%2Ffort-myers-beach-condo-sells-for-2-million-a-new-record-in-the-sand%2F90999859007%2F)\n[News](https://www.news-press.com/news/) [Cape Coral](https://www.news-press.com/news/cape-coral/) [Sports](https://www.news-press.com/sports/) [Restaurants](https://www.news-press.com/taste/) [Real Estate](https://www.news-press.com/real-estate) [Advertise](https://advertising.usatoday.com/advertise-with-us/?cid=Web_LiQ_Network_AdvertiseWithUs_AdvertiseInquiry&publication=the_news_press&utm_source=local_publication&utm_medium=menu&utm_campaign=advertise_with_us) [Obituaries](https://www.news-press.com/obituaries) [eNewspaper](https://user.news-press.com/user/enewspaper) [Legals](https://www.news-press.com/public-notices)\n[](https://www.news-press.com/search/ \"Search\")\n[](https://www.news-press.com/weather/ \"Weather in Fort Myers: 77°F Mostly Cloudy\") [](https://subscribe.news-press.com/rr/navsub?gps-source=CPTOPNAVBAR&itm_campaign=2026ENTJULBAU&itm_medium=ONSITE&success-url=https%3A%2F%2Fwww.news-press.com%2Fstory%2Fmoney%2Fcompanies%2F2026%2F07%2F24%2Ffort-myers-beach-condo-sells-for-2-million-a-new-record-in-the-sand%2F90999859007%2F)\n[](https://login.news-press.com/PFTM-GUP/authenticate/?success-url=https%3A%2F%2Fwww.news-press.com%2Fstory%2Fmoney%2Fcompanies%2F2026%2F07%2F24%2Ffort-myers-beach-condo-sells-for-2-million-a-new-record-in-the-sand%2F90999859007%2F&cancel-url=https%3A%2F%2Fwww.news-press.com%2Fstory%2Fmoney%2Fcompanies%2F2026%2F07%2F24%2Ffort-myers-beach-condo-sells-for-2-million-a-new-record-in-the-sand%2F90999859007%2F)\n[](https://www.news-press.com/) [](https://www.news-press.com/)\nCOMPANIES\n# A big deal: Fort Myers Beach condo sells for record $2 million\n[![Portrait of Laura Layden](https://www.news-press.com/gcdn/authoring/authoring-images/2024/02/08/PNDN/72524348007-ndn-jh-20240126-laura-0001.JPG?crop=3313,3312,x1506,y0&width=48&height=48&format=pjpg&auto=webp) Laura Layden](https://www.naplesnews.com/staff/2647080001/laura-layden/)\nFort Myers News-Press & Naples Daily News\nJuly 24, 2026, 5:06 a.m. ET\nA waterfront condominium on Fort Myers Beach fetched $2 million, setting a new record on the island.\nIt's the highest price paid for an existing — or resale — condo on the sand in the town — ever, according to the seller's agent.\n[](https://www.news-press.com/)\n[Help](https://help.news-press.com) [Accessibility](https://cm.news-press.com/accessibility/) [Sitemap](https://www.news-press.com/sitemap/) [Terms of Service](htt\""
             },
             "suggestions": [
               "What's driving signal transactions 3?",
@@ -181,13 +181,13 @@
           },
           {
             "metric": "signal_transactions_4",
-            "value": "Naples: A highly publicized no-reserve auction for a newly built, move-in-ready waterfront estate in North Naples was cancelled; the seller decided not to move forward with it. Naples-based Elite Auctions had been hired to handle the auction.",
+            "value": "Cape Coral: A builder cancelled a highly publicized no-reserve auction for a newly built, move-in-ready waterfront estate in North Naples; Naples-based Elite Auctions had been hired to handle the sale.",
             "direction": "stable",
-            "label": "Naples — transactions",
+            "label": "Cape Coral — transactions",
             "variable_type": "categorical",
             "source": {
               "url": "https://www.news-press.com/story/money/business/local/2026/08/03/builder-cancels-auction-for-luxury-north-naples-florida-estate/91127240007/",
-              "fetched_at": "2026-08-07T04:33:17Z",
+              "fetched_at": "2026-08-07T06:02:08Z",
               "tier": 2,
               "citation": "Builder cancels auction for luxury North Naples estate: \"[](https://www.news-press.com/)\n[](https://subscribe.news-press.com/rr/nanobar?gps-source=CPTILELEFT&itm_campaign=2026ENTJULBAU&itm_medium=ONSITE&success-url=https%3A%2F%2Fwww.news-press.com%2Fstory%2Fmoney%2Fbusiness%2Flocal%2F2026%2F08%2F03%2Fbuilder-cancels-auction-for-luxury-north-naples-florida-estate%2F91127240007%2F)\n[](https://subscribe.news-press.com/rr/masthead?gps-source=CPMASTHEAD&itm_campaign=2026ENTJULBAU&itm_medium=ONSITE&success-url=https%3A%2F%2Fwww.news-press.com%2Fstory%2Fmoney%2Fbusiness%2Flocal%2F2026%2F08%2F03%2Fbuilder-cancels-auction-for-luxury-north-naples-florida-estate%2F91127240007%2F)\n[News](https://www.news-press.com/news/) [Cape Coral](https://www.news-press.com/news/cape-coral/) [Sports](https://www.news-press.com/sports/) [Restaurants](https://www.news-press.com/taste/) [Real Estate](https://www.news-press.com/real-estate) [Advertise](https://advertising.usatoday.com/advertise-with-us/?cid=Web_LiQ_Network_AdvertiseWithUs_AdvertiseInquiry&publication=the_news_press&utm_source=local_publication&utm_medium=menu&utm_campaign=advertise_with_us) [Obituaries](https://www.news-press.com/obituaries) [eNewspaper](https://user.news-press.com/user/enewspaper) [Legals](https://www.news-press.com/public-notices)\n[](https://www.news-press.com/search/ \"Search\")\n[](https://www.news-press.com/weather/ \"Weather in Fort Myers: 75°F Cloudy\") [](https://subscribe.news-press.com/rr/navsub?gps-source=CPTOPNAVBAR&itm_campaign=2026ENTJULBAU&itm_medium=ONSITE&success-url=https%3A%2F%2Fwww.news-press.com%2Fstory%2Fmoney%2Fbusiness%2Flocal%2F2026%2F08%2F03%2Fbuilder-cancels-auction-for-luxury-north-naples-florida-estate%2F91127240007%2F)\n[](https://login.news-press.com/PFTM-GUP/authenticate/?success-url=https%3A%2F%2Fwww.news-press.com%2Fstory%2Fmoney%2Fbusiness%2Flocal%2F2026%2F08%2F03%2Fbuilder-cancels-auction-for-luxury-north-naples-florida-estate%2F91127240007%2F&cancel-url=https%3A%2F%2Fwww.news-press.com%2Fstory%2Fmoney%2Fbusiness%2Flocal%2F2026%2F08%2F03%2Fbuilder-cancels-auction-for-luxury-north-naples-florida-estate%2F91127240007%2F)\n[](https://www.news-press.com/) [](https://www.news-press.com/)\nLOCAL BUSINESS\n# Builder cancels auction for luxury waterfront estate in North Naples\n[![Portrait of Laura Layden](https://www.news-press.com/gcdn/authoring/authoring-images/2024/02/08/PNDN/72524348007-ndn-jh-20240126-laura-0001.JPG?crop=3313,3312,x1506,y0&width=48&height=48&format=pjpg&auto=webp) Laura Layden](https://www.naplesnews.com/staff/2647080001/laura-layden/)\nFort Myers News-Press & Naples Daily News\nAug. 3, 2026, 4:11 p.m. ET\nA highly publicized auction for a newly built, move-in-ready waterfront estate in North Naples didn't happen.\nWhile the auction generated interest, the seller decided not to move forward with it.\nNaples-based Elite Auctions was [hired to handle the no-reserve auction](https://www.news-press.com/story/money/business/local/2026/07/10/north-naples-waterfront-estate-to-sell-at-no-reserve-auction/90861406007/) for\""
             },
@@ -198,15 +198,15 @@
           },
           {
             "metric": "signal_transactions_5",
-            "value": "North Naples: Naples-based Elite Auctions was hired to handle the no-reserve auction for the North Naples waterfront estate, but the auction did not take place as of Aug. 3, 2026.",
+            "value": "Cape Coral: A waterfront condominium on Fort Myers Beach sold for $2 million on or around July 24, 2026, setting a new record as the highest price ever paid for an existing (resale) condo on the island.",
             "direction": "stable",
-            "label": "North Naples — transactions",
+            "label": "Cape Coral — transactions",
             "variable_type": "categorical",
             "source": {
-              "url": "https://www.news-press.com/story/money/business/local/2026/08/03/builder-cancels-auction-for-luxury-north-naples-florida-estate/91127240007/",
-              "fetched_at": "2026-08-07T04:33:17Z",
+              "url": "https://www.news-press.com/story/money/companies/2026/07/24/fort-myers-beach-condo-sells-for-2-million-a-new-record-in-the-sand/90999859007/",
+              "fetched_at": "2026-08-07T06:02:08Z",
               "tier": 2,
-              "citation": "Builder cancels auction for luxury North Naples estate: \"[](https://www.news-press.com/)\n[](https://subscribe.news-press.com/rr/nanobar?gps-source=CPTILELEFT&itm_campaign=2026ENTJULBAU&itm_medium=ONSITE&success-url=https%3A%2F%2Fwww.news-press.com%2Fstory%2Fmoney%2Fbusiness%2Flocal%2F2026%2F08%2F03%2Fbuilder-cancels-auction-for-luxury-north-naples-florida-estate%2F91127240007%2F)\n[](https://subscribe.news-press.com/rr/masthead?gps-source=CPMASTHEAD&itm_campaign=2026ENTJULBAU&itm_medium=ONSITE&success-url=https%3A%2F%2Fwww.news-press.com%2Fstory%2Fmoney%2Fbusiness%2Flocal%2F2026%2F08%2F03%2Fbuilder-cancels-auction-for-luxury-north-naples-florida-estate%2F91127240007%2F)\n[News](https://www.news-press.com/news/) [Cape Coral](https://www.news-press.com/news/cape-coral/) [Sports](https://www.news-press.com/sports/) [Restaurants](https://www.news-press.com/taste/) [Real Estate](https://www.news-press.com/real-estate) [Advertise](https://advertising.usatoday.com/advertise-with-us/?cid=Web_LiQ_Network_AdvertiseWithUs_AdvertiseInquiry&publication=the_news_press&utm_source=local_publication&utm_medium=menu&utm_campaign=advertise_with_us) [Obituaries](https://www.news-press.com/obituaries) [eNewspaper](https://user.news-press.com/user/enewspaper) [Legals](https://www.news-press.com/public-notices)\n[](https://www.news-press.com/search/ \"Search\")\n[](https://www.news-press.com/weather/ \"Weather in Fort Myers: 75°F Cloudy\") [](https://subscribe.news-press.com/rr/navsub?gps-source=CPTOPNAVBAR&itm_campaign=2026ENTJULBAU&itm_medium=ONSITE&success-url=https%3A%2F%2Fwww.news-press.com%2Fstory%2Fmoney%2Fbusiness%2Flocal%2F2026%2F08%2F03%2Fbuilder-cancels-auction-for-luxury-north-naples-florida-estate%2F91127240007%2F)\n[](https://login.news-press.com/PFTM-GUP/authenticate/?success-url=https%3A%2F%2Fwww.news-press.com%2Fstory%2Fmoney%2Fbusiness%2Flocal%2F2026%2F08%2F03%2Fbuilder-cancels-auction-for-luxury-north-naples-florida-estate%2F91127240007%2F&cancel-url=https%3A%2F%2Fwww.news-press.com%2Fstory%2Fmoney%2Fbusiness%2Flocal%2F2026%2F08%2F03%2Fbuilder-cancels-auction-for-luxury-north-naples-florida-estate%2F91127240007%2F)\n[](https://www.news-press.com/) [](https://www.news-press.com/)\nLOCAL BUSINESS\n# Builder cancels auction for luxury waterfront estate in North Naples\n[![Portrait of Laura Layden](https://www.news-press.com/gcdn/authoring/authoring-images/2024/02/08/PNDN/72524348007-ndn-jh-20240126-laura-0001.JPG?crop=3313,3312,x1506,y0&width=48&height=48&format=pjpg&auto=webp) Laura Layden](https://www.naplesnews.com/staff/2647080001/laura-layden/)\nFort Myers News-Press & Naples Daily News\nAug. 3, 2026, 4:11 p.m. ET\nA highly publicized auction for a newly built, move-in-ready waterfront estate in North Naples didn't happen.\nWhile the auction generated interest, the seller decided not to move forward with it.\nNaples-based Elite Auctions was [hired to handle the no-reserve auction](https://www.news-press.com/story/money/business/local/2026/07/10/north-naples-waterfront-estate-to-sell-at-no-reserve-auction/90861406007/) for\""
+              "citation": "Fort Myers Beach condo sells for $2 million, a new record in the sand: \"[](https://www.news-press.com/)\n[](https://subscribe.news-press.com/rr/nanobar?gps-source=CPTILELEFT&itm_campaign=2026ENTJULBAU&itm_medium=ONSITE&success-url=https%3A%2F%2Fwww.news-press.com%2Fstory%2Fmoney%2Fcompanies%2F2026%2F07%2F24%2Ffort-myers-beach-condo-sells-for-2-million-a-new-record-in-the-sand%2F90999859007%2F)\n[](https://subscribe.news-press.com/rr/masthead?gps-source=CPMASTHEAD&itm_campaign=2026ENTJULBAU&itm_medium=ONSITE&success-url=https%3A%2F%2Fwww.news-press.com%2Fstory%2Fmoney%2Fcompanies%2F2026%2F07%2F24%2Ffort-myers-beach-condo-sells-for-2-million-a-new-record-in-the-sand%2F90999859007%2F)\n[News](https://www.news-press.com/news/) [Cape Coral](https://www.news-press.com/news/cape-coral/) [Sports](https://www.news-press.com/sports/) [Restaurants](https://www.news-press.com/taste/) [Real Estate](https://www.news-press.com/real-estate) [Advertise](https://advertising.usatoday.com/advertise-with-us/?cid=Web_LiQ_Network_AdvertiseWithUs_AdvertiseInquiry&publication=the_news_press&utm_source=local_publication&utm_medium=menu&utm_campaign=advertise_with_us) [Obituaries](https://www.news-press.com/obituaries) [eNewspaper](https://user.news-press.com/user/enewspaper) [Legals](https://www.news-press.com/public-notices)\n[](https://www.news-press.com/search/ \"Search\")\n[](https://www.news-press.com/weather/ \"Weather in Fort Myers: 77°F Mostly Cloudy\") [](https://subscribe.news-press.com/rr/navsub?gps-source=CPTOPNAVBAR&itm_campaign=2026ENTJULBAU&itm_medium=ONSITE&success-url=https%3A%2F%2Fwww.news-press.com%2Fstory%2Fmoney%2Fcompanies%2F2026%2F07%2F24%2Ffort-myers-beach-condo-sells-for-2-million-a-new-record-in-the-sand%2F90999859007%2F)\n[](https://login.news-press.com/PFTM-GUP/authenticate/?success-url=https%3A%2F%2Fwww.news-press.com%2Fstory%2Fmoney%2Fcompanies%2F2026%2F07%2F24%2Ffort-myers-beach-condo-sells-for-2-million-a-new-record-in-the-sand%2F90999859007%2F&cancel-url=https%3A%2F%2Fwww.news-press.com%2Fstory%2Fmoney%2Fcompanies%2F2026%2F07%2F24%2Ffort-myers-beach-condo-sells-for-2-million-a-new-record-in-the-sand%2F90999859007%2F)\n[](https://www.news-press.com/) [](https://www.news-press.com/)\nCOMPANIES\n# A big deal: Fort Myers Beach condo sells for record $2 million\n[![Portrait of Laura Layden](https://www.news-press.com/gcdn/authoring/authoring-images/2024/02/08/PNDN/72524348007-ndn-jh-20240126-laura-0001.JPG?crop=3313,3312,x1506,y0&width=48&height=48&format=pjpg&auto=webp) Laura Layden](https://www.naplesnews.com/staff/2647080001/laura-layden/)\nFort Myers News-Press & Naples Daily News\nJuly 24, 2026, 5:06 a.m. ET\nA waterfront condominium on Fort Myers Beach fetched $2 million, setting a new record on the island.\nIt's the highest price paid for an existing — or resale — condo on the sand in the town — ever, according to the seller's agent.\n[](https://www.news-press.com/)\n[Help](https://help.news-press.com) [Accessibility](https://cm.news-press.com/accessibility/) [Sitemap](https://www.news-press.com/sitemap/) [Terms of Service](htt\""
             },
             "suggestions": [
               "What's driving signal transactions 5?",
@@ -215,15 +215,15 @@
           },
           {
             "metric": "signal_transactions_6",
-            "value": "Fort Myers: A historic Naples cottage once owned by legendary interior designer Albert Hadley, believed to have been home to the original postmistress in Old Naples and built in the 1930s, has hit the market as of July 30, 2026.",
+            "value": "Naples: A highly publicized no-reserve auction for a newly built, move-in-ready waterfront estate in North Naples was cancelled; the seller decided not to move forward with it. Naples-based Elite Auctions had been hired to handle the auction.",
             "direction": "stable",
-            "label": "Fort Myers — transactions",
+            "label": "Naples — transactions",
             "variable_type": "categorical",
             "source": {
-              "url": "https://www.naplesnews.com/story/money/real-estate/2026/07/30/historic-naples-florida-cottage-once-owned-by-design-icon-hits-market/91088413007/",
-              "fetched_at": "2026-08-07T04:33:17Z",
+              "url": "https://www.news-press.com/story/money/business/local/2026/08/03/builder-cancels-auction-for-luxury-north-naples-florida-estate/91127240007/",
+              "fetched_at": "2026-08-07T06:02:08Z",
               "tier": 2,
-              "citation": "Historic Naples cottage once owned by design icon hits market: \"[](https://www.naplesnews.com/)\n[](https://subscribe.naplesnews.com/rr/nanobar?gps-source=CPTILELEFT&itm_campaign=2026ENTJULBAU&itm_medium=ONSITE&success-url=https%3A%2F%2Fwww.naplesnews.com%2Fstory%2Fmoney%2Freal-estate%2F2026%2F07%2F30%2Fhistoric-naples-florida-cottage-once-owned-by-design-icon-hits-market%2F91088413007%2F)\n[](https://subscribe.naplesnews.com/rr/masthead?gps-source=CPMASTHEAD&itm_campaign=2026ENTJULBAU&itm_medium=ONSITE&success-url=https%3A%2F%2Fwww.naplesnews.com%2Fstory%2Fmoney%2Freal-estate%2F2026%2F07%2F30%2Fhistoric-naples-florida-cottage-once-owned-by-design-icon-hits-market%2F91088413007%2F)\n[News](https://www.naplesnews.com/news/) [Sports](https://www.naplesnews.com/sports/) [Real Estate](https://www.naplesnews.com/business/real-estate/) [Restaurants](https://www.naplesnews.com/entertainment/restaurants/) [Opinion](https://www.naplesnews.com/opinion/) [Advertise](https://advertising.usatoday.com/advertise-with-us/?cid=Web_LiQ_Network_AdvertiseWithUs_AdvertiseInquiry&publication=naples_daily_news&utm_source=local_publication&utm_medium=menu&utm_campaign=advertise_with_us) [Obituaries](https://www.naplesnews.com/obituaries) [eNewspaper](https://user.naplesnews.com/user/enewspaper) [Legals](https://www.naplesnews.com/public-notices)\n[](https://www.naplesnews.com/search/ \"Search\")\n[](https://www.naplesnews.com/weather/ \"Weather in Naples: 81°F Showers\") [](https://subscribe.naplesnews.com/rr/navsub?gps-source=CPTOPNAVBAR&itm_campaign=2026ENTJULBAU&itm_medium=ONSITE&success-url=https%3A%2F%2Fwww.naplesnews.com%2Fstory%2Fmoney%2Freal-estate%2F2026%2F07%2F30%2Fhistoric-naples-florida-cottage-once-owned-by-design-icon-hits-market%2F91088413007%2F)\n[](https://login.naplesnews.com/PNDN-GUP/authenticate/?success-url=https%3A%2F%2Fwww.naplesnews.com%2Fstory%2Fmoney%2Freal-estate%2F2026%2F07%2F30%2Fhistoric-naples-florida-cottage-once-owned-by-design-icon-hits-market%2F91088413007%2F&cancel-url=https%3A%2F%2Fwww.naplesnews.com%2Fstory%2Fmoney%2Freal-estate%2F2026%2F07%2F30%2Fhistoric-naples-florida-cottage-once-owned-by-design-icon-hits-market%2F91088413007%2F)\n[](https://www.naplesnews.com/) [](https://www.naplesnews.com/)\n[REAL ESTATE](https://www.naplesnews.com/business/real-estate/)\n# Rare Naples cottage once owned by design icon hits market\n[![Portrait of Laura Layden](https://www.naplesnews.com/gcdn/authoring/authoring-images/2024/02/08/PNDN/72524348007-ndn-jh-20240126-laura-0001.JPG?crop=3313,3312,x1506,y0&width=48&height=48&format=pjpg&auto=webp) Laura Layden](https://www.naplesnews.com/staff/2647080001/laura-layden/)\nFort Myers News-Press & Naples Daily News\nJuly 30, 2026, 10:28 a.m. ET\nA quaint cottage that once served as a personal retreat for Albert Hadley, a legendary interior designer, has hit the market in Naples.\nBelieved to have been home to the original postmistress in Old Naples, Hadley discovered the 1930s-era cottage decades later and reportedly purchased it on the spot.\nThe late American designer's client list\""
+              "citation": "Builder cancels auction for luxury North Naples estate: \"[](https://www.news-press.com/)\n[](https://subscribe.news-press.com/rr/nanobar?gps-source=CPTILELEFT&itm_campaign=2026ENTJULBAU&itm_medium=ONSITE&success-url=https%3A%2F%2Fwww.news-press.com%2Fstory%2Fmoney%2Fbusiness%2Flocal%2F2026%2F08%2F03%2Fbuilder-cancels-auction-for-luxury-north-naples-florida-estate%2F91127240007%2F)\n[](https://subscribe.news-press.com/rr/masthead?gps-source=CPMASTHEAD&itm_campaign=2026ENTJULBAU&itm_medium=ONSITE&success-url=https%3A%2F%2Fwww.news-press.com%2Fstory%2Fmoney%2Fbusiness%2Flocal%2F2026%2F08%2F03%2Fbuilder-cancels-auction-for-luxury-north-naples-florida-estate%2F91127240007%2F)\n[News](https://www.news-press.com/news/) [Cape Coral](https://www.news-press.com/news/cape-coral/) [Sports](https://www.news-press.com/sports/) [Restaurants](https://www.news-press.com/taste/) [Real Estate](https://www.news-press.com/real-estate) [Advertise](https://advertising.usatoday.com/advertise-with-us/?cid=Web_LiQ_Network_AdvertiseWithUs_AdvertiseInquiry&publication=the_news_press&utm_source=local_publication&utm_medium=menu&utm_campaign=advertise_with_us) [Obituaries](https://www.news-press.com/obituaries) [eNewspaper](https://user.news-press.com/user/enewspaper) [Legals](https://www.news-press.com/public-notices)\n[](https://www.news-press.com/search/ \"Search\")\n[](https://www.news-press.com/weather/ \"Weather in Fort Myers: 75°F Cloudy\") [](https://subscribe.news-press.com/rr/navsub?gps-source=CPTOPNAVBAR&itm_campaign=2026ENTJULBAU&itm_medium=ONSITE&success-url=https%3A%2F%2Fwww.news-press.com%2Fstory%2Fmoney%2Fbusiness%2Flocal%2F2026%2F08%2F03%2Fbuilder-cancels-auction-for-luxury-north-naples-florida-estate%2F91127240007%2F)\n[](https://login.news-press.com/PFTM-GUP/authenticate/?success-url=https%3A%2F%2Fwww.news-press.com%2Fstory%2Fmoney%2Fbusiness%2Flocal%2F2026%2F08%2F03%2Fbuilder-cancels-auction-for-luxury-north-naples-florida-estate%2F91127240007%2F&cancel-url=https%3A%2F%2Fwww.news-press.com%2Fstory%2Fmoney%2Fbusiness%2Flocal%2F2026%2F08%2F03%2Fbuilder-cancels-auction-for-luxury-north-naples-florida-estate%2F91127240007%2F)\n[](https://www.news-press.com/) [](https://www.news-press.com/)\nLOCAL BUSINESS\n# Builder cancels auction for luxury waterfront estate in North Naples\n[![Portrait of Laura Layden](https://www.news-press.com/gcdn/authoring/authoring-images/2024/02/08/PNDN/72524348007-ndn-jh-20240126-laura-0001.JPG?crop=3313,3312,x1506,y0&width=48&height=48&format=pjpg&auto=webp) Laura Layden](https://www.naplesnews.com/staff/2647080001/laura-layden/)\nFort Myers News-Press & Naples Daily News\nAug. 3, 2026, 4:11 p.m. ET\nA highly publicized auction for a newly built, move-in-ready waterfront estate in North Naples didn't happen.\nWhile the auction generated interest, the seller decided not to move forward with it.\nNaples-based Elite Auctions was [hired to handle the no-reserve auction](https://www.news-press.com/story/money/business/local/2026/07/10/north-naples-waterfront-estate-to-sell-at-no-reserve-auction/90861406007/) for\""
             },
             "suggestions": [
               "What's driving signal transactions 6?",
@@ -232,15 +232,15 @@
           },
           {
             "metric": "signal_transactions_7",
-            "value": "Fort Myers: A waterfront condominium on Fort Myers Beach sold for $2 million, setting a new record as the highest price paid for an existing (resale) condo on the island — ever, according to the seller's agent. The sale was reported July 24, 2026.",
+            "value": "North Naples: Naples-based Elite Auctions was hired to handle the no-reserve auction for the North Naples waterfront estate, but the auction did not take place as of Aug. 3, 2026.",
             "direction": "stable",
-            "label": "Fort Myers — transactions",
+            "label": "North Naples — transactions",
             "variable_type": "categorical",
             "source": {
-              "url": "https://www.news-press.com/story/money/companies/2026/07/24/fort-myers-beach-condo-sells-for-2-million-a-new-record-in-the-sand/90999859007/",
-              "fetched_at": "2026-08-07T04:33:17Z",
+              "url": "https://www.news-press.com/story/money/business/local/2026/08/03/builder-cancels-auction-for-luxury-north-naples-florida-estate/91127240007/",
+              "fetched_at": "2026-08-07T06:02:08Z",
               "tier": 2,
-              "citation": "Fort Myers Beach condo sells for $2 million, a new record in the sand: \"[](https://www.news-press.com/)\n[](https://subscribe.news-press.com/rr/nanobar?gps-source=CPTILELEFT&itm_campaign=2026ENTJULBAU&itm_medium=ONSITE&success-url=https%3A%2F%2Fwww.news-press.com%2Fstory%2Fmoney%2Fcompanies%2F2026%2F07%2F24%2Ffort-myers-beach-condo-sells-for-2-million-a-new-record-in-the-sand%2F90999859007%2F)\n[](https://subscribe.news-press.com/rr/masthead?gps-source=CPMASTHEAD&itm_campaign=2026ENTJULBAU&itm_medium=ONSITE&success-url=https%3A%2F%2Fwww.news-press.com%2Fstory%2Fmoney%2Fcompanies%2F2026%2F07%2F24%2Ffort-myers-beach-condo-sells-for-2-million-a-new-record-in-the-sand%2F90999859007%2F)\n[News](https://www.news-press.com/news/) [Cape Coral](https://www.news-press.com/news/cape-coral/) [Sports](https://www.news-press.com/sports/) [Restaurants](https://www.news-press.com/taste/) [Real Estate](https://www.news-press.com/real-estate) [Advertise](https://advertising.usatoday.com/advertise-with-us/?cid=Web_LiQ_Network_AdvertiseWithUs_AdvertiseInquiry&publication=the_news_press&utm_source=local_publication&utm_medium=menu&utm_campaign=advertise_with_us) [Obituaries](https://www.news-press.com/obituaries) [eNewspaper](https://user.news-press.com/user/enewspaper) [Legals](https://www.news-press.com/public-notices)\n[](https://www.news-press.com/search/ \"Search\")\n[](https://www.news-press.com/weather/ \"Weather in Fort Myers: 81°F Cloudy\") [](https://subscribe.news-press.com/rr/navsub?gps-source=CPTOPNAVBAR&itm_campaign=2026ENTJULBAU&itm_medium=ONSITE&success-url=https%3A%2F%2Fwww.news-press.com%2Fstory%2Fmoney%2Fcompanies%2F2026%2F07%2F24%2Ffort-myers-beach-condo-sells-for-2-million-a-new-record-in-the-sand%2F90999859007%2F)\n[](https://login.news-press.com/PFTM-GUP/authenticate/?success-url=https%3A%2F%2Fwww.news-press.com%2Fstory%2Fmoney%2Fcompanies%2F2026%2F07%2F24%2Ffort-myers-beach-condo-sells-for-2-million-a-new-record-in-the-sand%2F90999859007%2F&cancel-url=https%3A%2F%2Fwww.news-press.com%2Fstory%2Fmoney%2Fcompanies%2F2026%2F07%2F24%2Ffort-myers-beach-condo-sells-for-2-million-a-new-record-in-the-sand%2F90999859007%2F)\n[](https://www.news-press.com/) [](https://www.news-press.com/)\nCOMPANIES\n# A big deal: Fort Myers Beach condo sells for record $2 million\n[![Portrait of Laura Layden](https://www.news-press.com/gcdn/authoring/authoring-images/2024/02/08/PNDN/72524348007-ndn-jh-20240126-laura-0001.JPG?crop=3313,3312,x1506,y0&width=48&height=48&format=pjpg&auto=webp) Laura Layden](https://www.naplesnews.com/staff/2647080001/laura-layden/)\nFort Myers News-Press & Naples Daily News\nJuly 24, 2026, 5:06 a.m. ET\nA waterfront condominium on Fort Myers Beach fetched $2 million, setting a new record on the island.\nIt's the highest price paid for an existing — or resale — condo on the sand in the town — ever, according to the seller's agent.\n[](https://www.news-press.com/)\n[Help](https://help.news-press.com) [Accessibility](https://cm.news-press.com/accessibility/) [Sitemap](https://www.news-press.com/sitemap/) [Terms of Service](https://cm\""
+              "citation": "Builder cancels auction for luxury North Naples estate: \"[](https://www.news-press.com/)\n[](https://subscribe.news-press.com/rr/nanobar?gps-source=CPTILELEFT&itm_campaign=2026ENTJULBAU&itm_medium=ONSITE&success-url=https%3A%2F%2Fwww.news-press.com%2Fstory%2Fmoney%2Fbusiness%2Flocal%2F2026%2F08%2F03%2Fbuilder-cancels-auction-for-luxury-north-naples-florida-estate%2F91127240007%2F)\n[](https://subscribe.news-press.com/rr/masthead?gps-source=CPMASTHEAD&itm_campaign=2026ENTJULBAU&itm_medium=ONSITE&success-url=https%3A%2F%2Fwww.news-press.com%2Fstory%2Fmoney%2Fbusiness%2Flocal%2F2026%2F08%2F03%2Fbuilder-cancels-auction-for-luxury-north-naples-florida-estate%2F91127240007%2F)\n[News](https://www.news-press.com/news/) [Cape Coral](https://www.news-press.com/news/cape-coral/) [Sports](https://www.news-press.com/sports/) [Restaurants](https://www.news-press.com/taste/) [Real Estate](https://www.news-press.com/real-estate) [Advertise](https://advertising.usatoday.com/advertise-with-us/?cid=Web_LiQ_Network_AdvertiseWithUs_AdvertiseInquiry&publication=the_news_press&utm_source=local_publication&utm_medium=menu&utm_campaign=advertise_with_us) [Obituaries](https://www.news-press.com/obituaries) [eNewspaper](https://user.news-press.com/user/enewspaper) [Legals](https://www.news-press.com/public-notices)\n[](https://www.news-press.com/search/ \"Search\")\n[](https://www.news-press.com/weather/ \"Weather in Fort Myers: 75°F Cloudy\") [](https://subscribe.news-press.com/rr/navsub?gps-source=CPTOPNAVBAR&itm_campaign=2026ENTJULBAU&itm_medium=ONSITE&success-url=https%3A%2F%2Fwww.news-press.com%2Fstory%2Fmoney%2Fbusiness%2Flocal%2F2026%2F08%2F03%2Fbuilder-cancels-auction-for-luxury-north-naples-florida-estate%2F91127240007%2F)\n[](https://login.news-press.com/PFTM-GUP/authenticate/?success-url=https%3A%2F%2Fwww.news-press.com%2Fstory%2Fmoney%2Fbusiness%2Flocal%2F2026%2F08%2F03%2Fbuilder-cancels-auction-for-luxury-north-naples-florida-estate%2F91127240007%2F&cancel-url=https%3A%2F%2Fwww.news-press.com%2Fstory%2Fmoney%2Fbusiness%2Flocal%2F2026%2F08%2F03%2Fbuilder-cancels-auction-for-luxury-north-naples-florida-estate%2F91127240007%2F)\n[](https://www.news-press.com/) [](https://www.news-press.com/)\nLOCAL BUSINESS\n# Builder cancels auction for luxury waterfront estate in North Naples\n[![Portrait of Laura Layden](https://www.news-press.com/gcdn/authoring/authoring-images/2024/02/08/PNDN/72524348007-ndn-jh-20240126-laura-0001.JPG?crop=3313,3312,x1506,y0&width=48&height=48&format=pjpg&auto=webp) Laura Layden](https://www.naplesnews.com/staff/2647080001/laura-layden/)\nFort Myers News-Press & Naples Daily News\nAug. 3, 2026, 4:11 p.m. ET\nA highly publicized auction for a newly built, move-in-ready waterfront estate in North Naples didn't happen.\nWhile the auction generated interest, the seller decided not to move forward with it.\nNaples-based Elite Auctions was [hired to handle the no-reserve auction](https://www.news-press.com/story/money/business/local/2026/07/10/north-naples-waterfront-estate-to-sell-at-no-reserve-auction/90861406007/) for\""
             },
             "suggestions": [
               "What's driving signal transactions 7?",
@@ -249,13 +249,13 @@
           },
           {
             "metric": "signal_transactions_8",
-            "value": "Naples: A historic Naples cottage once owned by Albert Hadley, a legendary interior designer, hit the market on July 30, 2026; the 1930s-era cottage is believed to have been home to the original postmistress in Old Naples.",
+            "value": "Fort Myers: A historic Naples cottage once owned by legendary interior designer Albert Hadley, believed to have been home to the original postmistress in Old Naples and built in the 1930s, has hit the market as of July 30, 2026.",
             "direction": "stable",
-            "label": "Naples — transactions",
+            "label": "Fort Myers — transactions",
             "variable_type": "categorical",
             "source": {
               "url": "https://www.naplesnews.com/story/money/real-estate/2026/07/30/historic-naples-florida-cottage-once-owned-by-design-icon-hits-market/91088413007/",
-              "fetched_at": "2026-08-07T04:33:17Z",
+              "fetched_at": "2026-08-07T06:02:08Z",
               "tier": 2,
               "citation": "Historic Naples cottage once owned by design icon hits market: \"[](https://www.naplesnews.com/)\n[](https://subscribe.naplesnews.com/rr/nanobar?gps-source=CPTILELEFT&itm_campaign=2026ENTJULBAU&itm_medium=ONSITE&success-url=https%3A%2F%2Fwww.naplesnews.com%2Fstory%2Fmoney%2Freal-estate%2F2026%2F07%2F30%2Fhistoric-naples-florida-cottage-once-owned-by-design-icon-hits-market%2F91088413007%2F)\n[](https://subscribe.naplesnews.com/rr/masthead?gps-source=CPMASTHEAD&itm_campaign=2026ENTJULBAU&itm_medium=ONSITE&success-url=https%3A%2F%2Fwww.naplesnews.com%2Fstory%2Fmoney%2Freal-estate%2F2026%2F07%2F30%2Fhistoric-naples-florida-cottage-once-owned-by-design-icon-hits-market%2F91088413007%2F)\n[News](https://www.naplesnews.com/news/) [Sports](https://www.naplesnews.com/sports/) [Real Estate](https://www.naplesnews.com/business/real-estate/) [Restaurants](https://www.naplesnews.com/entertainment/restaurants/) [Opinion](https://www.naplesnews.com/opinion/) [Advertise](https://advertising.usatoday.com/advertise-with-us/?cid=Web_LiQ_Network_AdvertiseWithUs_AdvertiseInquiry&publication=naples_daily_news&utm_source=local_publication&utm_medium=menu&utm_campaign=advertise_with_us) [Obituaries](https://www.naplesnews.com/obituaries) [eNewspaper](https://user.naplesnews.com/user/enewspaper) [Legals](https://www.naplesnews.com/public-notices)\n[](https://www.naplesnews.com/search/ \"Search\")\n[](https://www.naplesnews.com/weather/ \"Weather in Naples: 81°F Showers\") [](https://subscribe.naplesnews.com/rr/navsub?gps-source=CPTOPNAVBAR&itm_campaign=2026ENTJULBAU&itm_medium=ONSITE&success-url=https%3A%2F%2Fwww.naplesnews.com%2Fstory%2Fmoney%2Freal-estate%2F2026%2F07%2F30%2Fhistoric-naples-florida-cottage-once-owned-by-design-icon-hits-market%2F91088413007%2F)\n[](https://login.naplesnews.com/PNDN-GUP/authenticate/?success-url=https%3A%2F%2Fwww.naplesnews.com%2Fstory%2Fmoney%2Freal-estate%2F2026%2F07%2F30%2Fhistoric-naples-florida-cottage-once-owned-by-design-icon-hits-market%2F91088413007%2F&cancel-url=https%3A%2F%2Fwww.naplesnews.com%2Fstory%2Fmoney%2Freal-estate%2F2026%2F07%2F30%2Fhistoric-naples-florida-cottage-once-owned-by-design-icon-hits-market%2F91088413007%2F)\n[](https://www.naplesnews.com/) [](https://www.naplesnews.com/)\n[REAL ESTATE](https://www.naplesnews.com/business/real-estate/)\n# Rare Naples cottage once owned by design icon hits market\n[![Portrait of Laura Layden](https://www.naplesnews.com/gcdn/authoring/authoring-images/2024/02/08/PNDN/72524348007-ndn-jh-20240126-laura-0001.JPG?crop=3313,3312,x1506,y0&width=48&height=48&format=pjpg&auto=webp) Laura Layden](https://www.naplesnews.com/staff/2647080001/laura-layden/)\nFort Myers News-Press & Naples Daily News\nJuly 30, 2026, 10:28 a.m. ET\nA quaint cottage that once served as a personal retreat for Albert Hadley, a legendary interior designer, has hit the market in Naples.\nBelieved to have been home to the original postmistress in Old Naples, Hadley discovered the 1930s-era cottage decades later and reportedly purchased it on the spot.\nThe late American designer's client list\""
             },
@@ -290,6 +290,16 @@
             ],
             "rows": [
               {
+                "key": "34102",
+                "label": "34102",
+                "cells": {
+                  "items": 5,
+                  "latest_fact": "The U.S. State Department issued an advisory warning about 'Suitcase Invaders' including SW Florida Burmese pythons, published August 1, 2026.",
+                  "latest_place": "Everglades",
+                  "latest_source": "https://www.naplesnews.com/story/money/2026/08/01/sw-florida-burmese-pythons-among-concerns-in-state-department-advisory-naples-lee-county-everglades/91089085007/"
+                }
+              },
+              {
                 "key": "34110",
                 "label": "34110",
                 "cells": {
@@ -297,16 +307,6 @@
                   "latest_fact": "A highly publicized no-reserve auction for a newly built, move-in-ready waterfront estate in North Naples was cancelled; the seller decided not to move forward with it. Naples-based Elite Auctions had been hired to handle the auction.",
                   "latest_place": "North Naples",
                   "latest_source": "https://www.news-press.com/story/money/business/local/2026/08/03/builder-cancels-auction-for-luxury-north-naples-florida-estate/91127240007/"
-                }
-              },
-              {
-                "key": "34102",
-                "label": "34102",
-                "cells": {
-                  "items": 4,
-                  "latest_fact": "Barneys New York is making a comeback with its first store planned for Naples, coming to Bayfront, a mixed-use development overlooking Naples.",
-                  "latest_place": "Bayfront",
-                  "latest_source": "https://www.naplesnews.com/story/money/business/local/2026/08/04/bayfront-in-naples-florida-is-getting-more-than-a-barneys-see-whats-coming/91105441007/"
                 }
               },
               {
@@ -342,7 +342,7 @@
             ],
             "source": {
               "url": "https://www.swfldatagulf.com/r/source/city_pulse",
-              "fetched_at": "2026-08-07T04:33:17Z",
+              "fetched_at": "2026-08-07T06:02:08Z",
               "tier": 2,
               "citation": "Distilled, citation-backed SWFL news signals; each ZIP's items carry per-item source URLs in data_lake.city_pulse."
             },
@@ -350,7 +350,7 @@
           }
         ],
         "caveats": [
-          "99 additional live signals not surfaced here (cap 8); the full set is in data_lake.city_pulse.",
+          "101 additional live signals not surfaced here (cap 8); the full set is in data_lake.city_pulse.",
           "Each signal is dated current-events context with a per-signal source; freshness is TTL-bounded by topic (breaking 1d → structural 90d)."
         ],
         "contradicts": [],
@@ -363,7 +363,7 @@
         "relevance": {
           "decay_curve": "weeks",
           "half_life_hours": 720,
-          "computed_at": "2026-08-07T04:33:17Z"
+          "computed_at": "2026-08-07T06:02:08Z"
         },
         "exogenous_signals": []
       }
@@ -380,119 +380,8 @@
     },
     {
       "packId": "freshness-pulse",
-      "status": "built",
-      "version": 35,
-      "written": true,
-      "brainOutput": {
-        "brain_id": "freshness-pulse",
-        "version": 35,
-        "refined_at": "2026-08-07T04:33:17Z",
-        "expires": "2026-08-08T04:33:17Z",
-        "ttl_seconds": 86400,
-        "direction": "neutral",
-        "magnitude": 0,
-        "drivers": [],
-        "overrides": [],
-        "conclusion": "Today's sourced snapshot — Cape Coral median asking price (as of 2026-08-07) $399,900; Fort Myers median asking price (as of 2026-08-07) $325,000; Naples median asking price (as of 2026-08-07) $650,000; SWFL 30-year fixed mortgage rate (as of 2026-08-06) 6.69%. These are cited current facts only; the direction call lives downstream in master.",
-        "key_metrics": [
-          {
-            "metric": "freshness_median_asking_price_cape_coral_usd",
-            "value": 399900,
-            "direction": "stable",
-            "label": "Cape Coral median asking price (as of 2026-08-07)",
-            "variable_type": "extensive",
-            "units": "USD",
-            "display_format": "currency",
-            "source": {
-              "url": "https://www.swfldatagulf.com/desk",
-              "fetched_at": "2026-08-07T04:24:25.952147+00:00",
-              "tier": 2,
-              "citation": "SWFL Data Gulf active-listing inventory — current median asking price for Cape Coral, sourced 2026-08-07"
-            },
-            "suggestions": [
-              "Chart asking rents across the corridors",
-              "What's driving freshness median asking price cape coral usd?",
-              "How does freshness median asking price cape coral usd here compare to other SWFL areas?"
-            ]
-          },
-          {
-            "metric": "freshness_median_asking_price_fort_myers_usd",
-            "value": 325000,
-            "direction": "stable",
-            "label": "Fort Myers median asking price (as of 2026-08-07)",
-            "variable_type": "extensive",
-            "units": "USD",
-            "display_format": "currency",
-            "source": {
-              "url": "https://www.swfldatagulf.com/desk",
-              "fetched_at": "2026-08-07T04:24:25.952147+00:00",
-              "tier": 2,
-              "citation": "SWFL Data Gulf active-listing inventory — current median asking price for Fort Myers, sourced 2026-08-07"
-            },
-            "suggestions": [
-              "Chart asking rents across the corridors",
-              "What's driving freshness median asking price fort myers usd?",
-              "How does freshness median asking price fort myers usd here compare to other SWFL areas?"
-            ]
-          },
-          {
-            "metric": "freshness_median_asking_price_naples_usd",
-            "value": 650000,
-            "direction": "stable",
-            "label": "Naples median asking price (as of 2026-08-07)",
-            "variable_type": "extensive",
-            "units": "USD",
-            "display_format": "currency",
-            "source": {
-              "url": "https://www.swfldatagulf.com/desk",
-              "fetched_at": "2026-08-07T04:24:25.952147+00:00",
-              "tier": 2,
-              "citation": "SWFL Data Gulf active-listing inventory — current median asking price for Naples, sourced 2026-08-07"
-            },
-            "suggestions": [
-              "Chart asking rents across the corridors",
-              "What's driving freshness median asking price naples usd?",
-              "How does freshness median asking price naples usd here compare to other SWFL areas?"
-            ]
-          },
-          {
-            "metric": "freshness_mortgage_30yr_fixed_pct",
-            "value": 6.69,
-            "direction": "stable",
-            "label": "SWFL 30-year fixed mortgage rate (as of 2026-08-06)",
-            "variable_type": "intensive",
-            "units": "percent",
-            "display_format": "percent",
-            "source": {
-              "url": "https://fred.stlouisfed.org/series/MORTGAGE30US",
-              "fetched_at": "2026-08-07T04:24:25.952147+00:00",
-              "tier": 2,
-              "citation": "FRED — current 30-year fixed mortgage rate for SWFL, sourced 2026-08-06"
-            },
-            "suggestions": [
-              "What's driving freshness mortgage 30yr fixed pct?",
-              "How does freshness mortgage 30yr fixed pct here compare to other SWFL areas?"
-            ]
-          }
-        ],
-        "detail_tables": [],
-        "caveats": [
-          "Each county-grain number is a single grounded source's current figure, provenance-gated to a real source URL; held anomalies and unsourced (model-memory) numbers are excluded by design."
-        ],
-        "contradicts": [],
-        "confidence": 0.8,
-        "joint_integrity": 1,
-        "confidence_dispersion": 0,
-        "chain_depth": 0,
-        "trust_tier": 2,
-        "upstream_count": 0,
-        "relevance": {
-          "decay_curve": "weeks",
-          "half_life_hours": 720,
-          "computed_at": "2026-08-07T04:33:17Z"
-        },
-        "exogenous_signals": []
-      }
+      "status": "skipped-fresh",
+      "written": false
     },
     {
       "packId": "seller-stress-swfl",
@@ -516,134 +405,8 @@
     },
     {
       "packId": "condo-sirs-swfl",
-      "status": "built",
-      "version": 9,
-      "written": true,
-      "brainOutput": {
-        "brain_id": "condo-sirs-swfl",
-        "version": 9,
-        "refined_at": "2026-08-07T04:33:17Z",
-        "expires": "2026-09-06T04:33:17Z",
-        "ttl_seconds": 2592000,
-        "direction": "neutral",
-        "magnitude": 1,
-        "drivers": [],
-        "overrides": [],
-        "conclusion": "DBPR confirms 1,366 SWFL condominium and cooperative associations have submitted their Structural Integrity Reserve Study as of 2026-08-06. Lee County: 608, Collier County: 758. Of these, 664 filed under the HB 913 compliance push (July 2025+ database). This is a positive-signal-only registry: presence confirms SIRS filing; absence cannot be interpreted without a baseline count of all SWFL 3-story+ condominiums.",
-        "key_metrics": [
-          {
-            "metric": "sirs_confirmed_swfl",
-            "label": "SIRS-Confirmed Associations — SWFL (Lee + Collier)",
-            "value": 1366,
-            "direction": "stable",
-            "variable_type": "extensive",
-            "units": "associations",
-            "display_format": "count",
-            "source": {
-              "url": "https://dbpr-publicrecords.myfloridalicense.com/qpr/single/",
-              "fetched_at": "2026-08-07T04:33:17Z",
-              "tier": 1,
-              "citation": "DBPR SIRS Reporting Database — pre-July 2025 app (14f1ed21) + July 2025+ app (d217126f); Lee + Collier county_normalized; confirmed SIRS filings: 1,366"
-            },
-            "suggestions": [
-              "What's driving sirs confirmed swfl?",
-              "How does sirs confirmed swfl here compare to other SWFL areas?"
-            ]
-          },
-          {
-            "metric": "sirs_lee_count",
-            "label": "SIRS-Confirmed Associations — Lee County",
-            "value": 608,
-            "direction": "stable",
-            "variable_type": "extensive",
-            "units": "associations",
-            "display_format": "count",
-            "source": {
-              "url": "https://dbpr-publicrecords.myfloridalicense.com/qpr/single/",
-              "fetched_at": "2026-08-07T04:33:17Z",
-              "tier": 1,
-              "citation": "DBPR SIRS Reporting Database — county_normalized=LEE rows: 608"
-            },
-            "suggestions": [
-              "What's driving sirs lee count?",
-              "How does sirs lee count here compare to other SWFL areas?"
-            ]
-          },
-          {
-            "metric": "sirs_collier_count",
-            "label": "SIRS-Confirmed Associations — Collier County",
-            "value": 758,
-            "direction": "stable",
-            "variable_type": "extensive",
-            "units": "associations",
-            "display_format": "count",
-            "source": {
-              "url": "https://dbpr-publicrecords.myfloridalicense.com/qpr/single/",
-              "fetched_at": "2026-08-07T04:33:17Z",
-              "tier": 1,
-              "citation": "DBPR SIRS Reporting Database — county_normalized=COLLIER rows: 758"
-            },
-            "suggestions": [
-              "What's driving sirs collier count?",
-              "How does sirs collier count here compare to other SWFL areas?"
-            ]
-          },
-          {
-            "metric": "sirs_july2025_plus_count",
-            "label": "SIRS Filings — HB 913 Era (July 2025+)",
-            "value": 664,
-            "direction": "stable",
-            "variable_type": "extensive",
-            "units": "associations",
-            "display_format": "count",
-            "source": {
-              "url": "https://dbpr-publicrecords.myfloridalicense.com/qpr/single/",
-              "fetched_at": "2026-08-07T04:33:17Z",
-              "tier": 1,
-              "citation": "DBPR SIRS Reporting Database — July 2025+ app (d217126f); database_period=july_2025_plus; Lee + Collier: 664. Represents post-HB 913 compliance push."
-            },
-            "suggestions": [
-              "What's driving sirs july2025 plus count?",
-              "How does sirs july2025 plus count here compare to other SWFL areas?"
-            ]
-          },
-          {
-            "metric": "sirs_result_truncated",
-            "label": "Qlik Data Coverage — SIRS Registry",
-            "value": "complete",
-            "direction": "stable",
-            "variable_type": "categorical",
-            "source": {
-              "url": "https://dbpr-publicrecords.myfloridalicense.com/qpr/single/",
-              "fetched_at": "2026-08-07T04:33:17Z",
-              "tier": 1,
-              "citation": "DBPR SIRS Qlik apps — coverage flag set when 'Load more' visible at scrape end (Qlik hypercube limit). Current: \"complete\"."
-            },
-            "suggestions": [
-              "What's driving sirs result truncated?",
-              "How does sirs result truncated here compare to other SWFL areas?"
-            ]
-          }
-        ],
-        "caveats": [
-          "Qlik data coverage: complete (hypercube limit did not fire).",
-          "Compliance rate cannot be derived — no baseline registry of all SWFL 3-story+ condominium associations exists in this dataset. Presence = confirmed SIRS filing; absence has no meaning.",
-          "Pre-July 2025 and July 2025+ are two separate DBPR databases — the pre-July set holds older filings and the July 2025+ set holds post-HB 913 mandate filings; they are distinct registers, not one continuous time series."
-        ],
-        "contradicts": [],
-        "confidence": 1,
-        "joint_integrity": 1,
-        "confidence_dispersion": 0,
-        "chain_depth": 0,
-        "trust_tier": 1,
-        "upstream_count": 0,
-        "relevance": {
-          "decay_curve": "weeks",
-          "half_life_hours": 720,
-          "computed_at": "2026-08-07T04:33:17Z"
-        },
-        "exogenous_signals": []
-      }
+      "status": "skipped-fresh",
+      "written": false
     },
     {
       "packId": "permits-commercial-swfl",
@@ -677,737 +440,8 @@
     },
     {
       "packId": "active-listings-swfl",
-      "status": "built",
-      "version": 22,
-      "written": true,
-      "brainOutput": {
-        "brain_id": "active-listings-swfl",
-        "version": 22,
-        "refined_at": "2026-08-07T04:33:22Z",
-        "expires": "2026-08-09T04:33:22Z",
-        "ttl_seconds": 172800,
-        "direction": "neutral",
-        "magnitude": 0,
-        "drivers": [],
-        "overrides": [],
-        "conclusion": "22,167 active SWFL residential listings, median asking $415,000, avg 139 days on market (active residential listings, as of 2026-08-07). By county: Lee 15,851 (median $369,900), Collier 6,316 (median $650,000), Lee 1 (median $314,900).",
-        "key_metrics": [
-          {
-            "metric": "active_listings_count_swfl",
-            "label": "SWFL active residential listings (count)",
-            "value": 22167,
-            "direction": "stable",
-            "variable_type": "extensive",
-            "units": "listings",
-            "display_format": "count",
-            "source": {
-              "url": "https://www.swfldatagulf.com/r/source/listing_active_stats?label=SWFL+active+for-sale+listings+%28aggregated%29&source=realtor.com+for-sale+listings&brain=active-listings-swfl&date_col=scraped_at",
-              "fetched_at": "2026-08-07T04:33:22Z",
-              "tier": 2,
-              "citation": "22,167 active SWFL residential listings as of 2026-08-07"
-            },
-            "suggestions": [
-              "What's driving active listings count swfl?",
-              "How does active listings count swfl here compare to other SWFL areas?"
-            ]
-          },
-          {
-            "metric": "median_list_price_swfl",
-            "label": "SWFL median asking price (active residential)",
-            "value": 415000,
-            "direction": "stable",
-            "variable_type": "intensive",
-            "units": "USD",
-            "display_format": "currency",
-            "source": {
-              "url": "https://www.swfldatagulf.com/r/source/listing_active_stats?label=SWFL+active+for-sale+listings+%28aggregated%29&source=realtor.com+for-sale+listings&brain=active-listings-swfl&date_col=scraped_at",
-              "fetched_at": "2026-08-07T04:33:22Z",
-              "tier": 2,
-              "citation": "median asking price across 22,167 active SWFL listings: $415,000"
-            },
-            "suggestions": [
-              "What's driving median list price swfl?",
-              "How does median list price swfl here compare to other SWFL areas?"
-            ]
-          },
-          {
-            "metric": "recent_price_cuts_count_swfl",
-            "label": "SWFL listings with a price cut in the last 90 days",
-            "value": 6359,
-            "direction": "stable",
-            "variable_type": "extensive",
-            "units": "listings",
-            "display_format": "count",
-            "source": {
-              "url": "https://www.swfldatagulf.com/r/source/listing_active_stats?label=SWFL+active+for-sale+listings+%28aggregated%29&source=realtor.com+for-sale+listings&brain=active-listings-swfl&date_col=scraped_at",
-              "fetched_at": "2026-08-07T04:33:22Z",
-              "tier": 2,
-              "citation": "6,359 SWFL listings took at least one price cut in the trailing 90 days, median cut $10,999"
-            },
-            "suggestions": [
-              "What's driving recent price cuts count swfl?",
-              "How does recent price cuts count swfl here compare to other SWFL areas?"
-            ]
-          },
-          {
-            "metric": "median_annual_tax_swfl",
-            "label": "SWFL median vendor-reported annual property tax",
-            "value": 4008,
-            "direction": "stable",
-            "variable_type": "intensive",
-            "units": "USD",
-            "display_format": "currency",
-            "source": {
-              "url": "https://www.swfldatagulf.com/r/source/listing_active_stats?label=SWFL+active+for-sale+listings+%28aggregated%29&source=realtor.com+for-sale+listings&brain=active-listings-swfl&date_col=scraped_at",
-              "fetched_at": "2026-08-07T04:33:22Z",
-              "tier": 2,
-              "citation": "Median vendor-reported annual property tax across 16,514 SWFL properties with tax history: $4,008"
-            },
-            "suggestions": [
-              "What's driving median annual tax swfl?",
-              "How does median annual tax swfl here compare to other SWFL areas?"
-            ]
-          },
-          {
-            "metric": "avg_days_on_market_swfl",
-            "label": "SWFL average days on market (active residential)",
-            "value": 139,
-            "direction": "stable",
-            "variable_type": "intensive",
-            "units": "days",
-            "display_format": "count",
-            "source": {
-              "url": "https://www.swfldatagulf.com/r/source/listing_active_stats?label=SWFL+active+for-sale+listings+%28aggregated%29&source=realtor.com+for-sale+listings&brain=active-listings-swfl&date_col=scraped_at",
-              "fetched_at": "2026-08-07T04:33:22Z",
-              "tier": 2,
-              "citation": "average days on market across active SWFL listings: 139 days"
-            },
-            "suggestions": [
-              "What's driving avg days on market swfl?",
-              "How does avg days on market swfl here compare to other SWFL areas?"
-            ]
-          }
-        ],
-        "detail_tables": [
-          {
-            "id": "active_listings_by_county",
-            "title": "SWFL active residential listings by county",
-            "grain": "county",
-            "columns": [
-              {
-                "id": "listing_count",
-                "label": "Active listings",
-                "display_format": "count",
-                "units": "listings"
-              },
-              {
-                "id": "median_list_price",
-                "label": "Median asking price",
-                "display_format": "currency",
-                "units": "USD"
-              },
-              {
-                "id": "avg_days_on_market",
-                "label": "Avg days on market",
-                "display_format": "count",
-                "units": "days"
-              }
-            ],
-            "rows": [
-              {
-                "key": "Lee",
-                "label": "Lee",
-                "cells": {
-                  "listing_count": 15851,
-                  "median_list_price": 369900,
-                  "avg_days_on_market": 138
-                }
-              },
-              {
-                "key": "Collier",
-                "label": "Collier",
-                "cells": {
-                  "listing_count": 6316,
-                  "median_list_price": 650000,
-                  "avg_days_on_market": 141
-                }
-              },
-              {
-                "key": "Lee",
-                "label": "Lee",
-                "cells": {
-                  "listing_count": 1,
-                  "median_list_price": 314900,
-                  "avg_days_on_market": null
-                }
-              }
-            ],
-            "source": {
-              "url": "https://www.swfldatagulf.com/r/source/listing_active_stats?label=SWFL+active+for-sale+listings+%28aggregated%29&source=realtor.com+for-sale+listings&brain=active-listings-swfl&date_col=scraped_at",
-              "fetched_at": "2026-08-07T04:33:22Z",
-              "tier": 2,
-              "citation": "Active SWFL residential listings, aggregated per grain in SQL (listing_active_stats) as of 2026-08-07"
-            }
-          },
-          {
-            "id": "active_listings_by_zip",
-            "title": "SWFL active residential listings by ZIP",
-            "grain": "zip",
-            "columns": [
-              {
-                "id": "listing_count",
-                "label": "Active listings",
-                "display_format": "count",
-                "units": "listings"
-              },
-              {
-                "id": "median_list_price",
-                "label": "Median asking price",
-                "display_format": "currency",
-                "units": "USD"
-              },
-              {
-                "id": "avg_days_on_market",
-                "label": "Avg days on market",
-                "display_format": "count",
-                "units": "days"
-              }
-            ],
-            "rows": [
-              {
-                "key": "33993",
-                "label": "33993 (Lee)",
-                "cells": {
-                  "listing_count": 1101,
-                  "median_list_price": 390000,
-                  "avg_days_on_market": 127
-                }
-              },
-              {
-                "key": "33908",
-                "label": "33908 (Lee)",
-                "cells": {
-                  "listing_count": 988,
-                  "median_list_price": 329950,
-                  "avg_days_on_market": 161
-                }
-              },
-              {
-                "key": "33914",
-                "label": "33914 (Lee)",
-                "cells": {
-                  "listing_count": 843,
-                  "median_list_price": 525000,
-                  "avg_days_on_market": 132
-                }
-              },
-              {
-                "key": "33917",
-                "label": "33917 (Lee)",
-                "cells": {
-                  "listing_count": 810,
-                  "median_list_price": 197950,
-                  "avg_days_on_market": 134
-                }
-              },
-              {
-                "key": "33909",
-                "label": "33909 (Lee)",
-                "cells": {
-                  "listing_count": 768,
-                  "median_list_price": 339900,
-                  "avg_days_on_market": 112
-                }
-              },
-              {
-                "key": "34135",
-                "label": "34135 (Lee)",
-                "cells": {
-                  "listing_count": 742,
-                  "median_list_price": 456780,
-                  "avg_days_on_market": 138
-                }
-              },
-              {
-                "key": "33974",
-                "label": "33974 (Lee)",
-                "cells": {
-                  "listing_count": 707,
-                  "median_list_price": 320900,
-                  "avg_days_on_market": 100
-                }
-              },
-              {
-                "key": "34120",
-                "label": "34120 (Collier)",
-                "cells": {
-                  "listing_count": 700,
-                  "median_list_price": 649000,
-                  "avg_days_on_market": 115
-                }
-              },
-              {
-                "key": "33904",
-                "label": "33904 (Lee)",
-                "cells": {
-                  "listing_count": 637,
-                  "median_list_price": 420000,
-                  "avg_days_on_market": 129
-                }
-              },
-              {
-                "key": "33913",
-                "label": "33913 (Lee)",
-                "cells": {
-                  "listing_count": 605,
-                  "median_list_price": 469800,
-                  "avg_days_on_market": 118
-                }
-              },
-              {
-                "key": "33971",
-                "label": "33971 (Lee)",
-                "cells": {
-                  "listing_count": 604,
-                  "median_list_price": 319998,
-                  "avg_days_on_market": 117
-                }
-              },
-              {
-                "key": "34114",
-                "label": "34114 (Collier)",
-                "cells": {
-                  "listing_count": 598,
-                  "median_list_price": 554500,
-                  "avg_days_on_market": 135
-                }
-              },
-              {
-                "key": "33931",
-                "label": "33931 (Lee)",
-                "cells": {
-                  "listing_count": 588,
-                  "median_list_price": 675000,
-                  "avg_days_on_market": 176
-                }
-              },
-              {
-                "key": "33928",
-                "label": "33928 (Lee)",
-                "cells": {
-                  "listing_count": 570,
-                  "median_list_price": 532500,
-                  "avg_days_on_market": 116
-                }
-              },
-              {
-                "key": "34112",
-                "label": "34112 (Collier)",
-                "cells": {
-                  "listing_count": 557,
-                  "median_list_price": 339999,
-                  "avg_days_on_market": 143
-                }
-              },
-              {
-                "key": "33903",
-                "label": "33903 (Lee)",
-                "cells": {
-                  "listing_count": 551,
-                  "median_list_price": 145000,
-                  "avg_days_on_market": 153
-                }
-              },
-              {
-                "key": "33919",
-                "label": "33919 (Lee)",
-                "cells": {
-                  "listing_count": 519,
-                  "median_list_price": 249000,
-                  "avg_days_on_market": 136
-                }
-              },
-              {
-                "key": "34145",
-                "label": "34145 (Collier)",
-                "cells": {
-                  "listing_count": 507,
-                  "median_list_price": 949000,
-                  "avg_days_on_market": 137
-                }
-              },
-              {
-                "key": "33905",
-                "label": "33905 (Lee)",
-                "cells": {
-                  "listing_count": 495,
-                  "median_list_price": 354000,
-                  "avg_days_on_market": 125
-                }
-              },
-              {
-                "key": "33991",
-                "label": "33991 (Lee)",
-                "cells": {
-                  "listing_count": 454,
-                  "median_list_price": 450000,
-                  "avg_days_on_market": 125
-                }
-              },
-              {
-                "key": "33972",
-                "label": "33972 (Lee)",
-                "cells": {
-                  "listing_count": 448,
-                  "median_list_price": 356500,
-                  "avg_days_on_market": 109
-                }
-              },
-              {
-                "key": "33976",
-                "label": "33976 (Lee)",
-                "cells": {
-                  "listing_count": 446,
-                  "median_list_price": 329450,
-                  "avg_days_on_market": 125
-                }
-              },
-              {
-                "key": "33936",
-                "label": "33936 (Lee)",
-                "cells": {
-                  "listing_count": 437,
-                  "median_list_price": 245000,
-                  "avg_days_on_market": 109
-                }
-              },
-              {
-                "key": "34102",
-                "label": "34102 (Collier)",
-                "cells": {
-                  "listing_count": 436,
-                  "median_list_price": 3144500,
-                  "avg_days_on_market": 211
-                }
-              },
-              {
-                "key": "34119",
-                "label": "34119 (Collier)",
-                "cells": {
-                  "listing_count": 429,
-                  "median_list_price": 685000,
-                  "avg_days_on_market": 126
-                }
-              },
-              {
-                "key": "34134",
-                "label": "34134 (Lee)",
-                "cells": {
-                  "listing_count": 429,
-                  "median_list_price": 799000,
-                  "avg_days_on_market": 174
-                }
-              },
-              {
-                "key": "34110",
-                "label": "34110 (Collier)",
-                "cells": {
-                  "listing_count": 422,
-                  "median_list_price": 676000,
-                  "avg_days_on_market": 144
-                }
-              },
-              {
-                "key": "34108",
-                "label": "34108 (Collier)",
-                "cells": {
-                  "listing_count": 415,
-                  "median_list_price": 1295000,
-                  "avg_days_on_market": 154
-                }
-              },
-              {
-                "key": "34113",
-                "label": "34113 (Collier)",
-                "cells": {
-                  "listing_count": 407,
-                  "median_list_price": 524900,
-                  "avg_days_on_market": 147
-                }
-              },
-              {
-                "key": "33957",
-                "label": "33957 (Lee)",
-                "cells": {
-                  "listing_count": 374,
-                  "median_list_price": 950000,
-                  "avg_days_on_market": 217
-                }
-              },
-              {
-                "key": "34103",
-                "label": "34103 (Collier)",
-                "cells": {
-                  "listing_count": 340,
-                  "median_list_price": 1462500,
-                  "avg_days_on_market": 155
-                }
-              },
-              {
-                "key": "33990",
-                "label": "33990 (Lee)",
-                "cells": {
-                  "listing_count": 339,
-                  "median_list_price": 399900,
-                  "avg_days_on_market": 113
-                }
-              },
-              {
-                "key": "34142",
-                "label": "34142 (Collier)",
-                "cells": {
-                  "listing_count": 328,
-                  "median_list_price": 435748,
-                  "avg_days_on_market": 103
-                }
-              },
-              {
-                "key": "33912",
-                "label": "33912 (Lee)",
-                "cells": {
-                  "listing_count": 299,
-                  "median_list_price": 349900,
-                  "avg_days_on_market": 136
-                }
-              },
-              {
-                "key": "34109",
-                "label": "34109 (Collier)",
-                "cells": {
-                  "listing_count": 283,
-                  "median_list_price": 737000,
-                  "avg_days_on_market": 126
-                }
-              },
-              {
-                "key": "34104",
-                "label": "34104 (Collier)",
-                "cells": {
-                  "listing_count": 276,
-                  "median_list_price": 399000,
-                  "avg_days_on_market": 124
-                }
-              },
-              {
-                "key": "33907",
-                "label": "33907 (Lee)",
-                "cells": {
-                  "listing_count": 276,
-                  "median_list_price": 181450,
-                  "avg_days_on_market": 139
-                }
-              },
-              {
-                "key": "33916",
-                "label": "33916 (Lee)",
-                "cells": {
-                  "listing_count": 257,
-                  "median_list_price": 304900,
-                  "avg_days_on_market": 358
-                }
-              },
-              {
-                "key": "33901",
-                "label": "33901 (Lee)",
-                "cells": {
-                  "listing_count": 250,
-                  "median_list_price": 309500,
-                  "avg_days_on_market": 160
-                }
-              },
-              {
-                "key": "33967",
-                "label": "33967 (Lee)",
-                "cells": {
-                  "listing_count": 220,
-                  "median_list_price": 395000,
-                  "avg_days_on_market": 106
-                }
-              },
-              {
-                "key": "33920",
-                "label": "33920 (Lee)",
-                "cells": {
-                  "listing_count": 219,
-                  "median_list_price": 428990,
-                  "avg_days_on_market": 110
-                }
-              },
-              {
-                "key": "33973",
-                "label": "33973 (Lee)",
-                "cells": {
-                  "listing_count": 207,
-                  "median_list_price": 472000,
-                  "avg_days_on_market": 116
-                }
-              },
-              {
-                "key": "34105",
-                "label": "34105 (Collier)",
-                "cells": {
-                  "listing_count": 200,
-                  "median_list_price": 395000,
-                  "avg_days_on_market": 127
-                }
-              },
-              {
-                "key": "34117",
-                "label": "34117 (Collier)",
-                "cells": {
-                  "listing_count": 175,
-                  "median_list_price": 749900,
-                  "avg_days_on_market": 119
-                }
-              },
-              {
-                "key": "33966",
-                "label": "33966 (Lee)",
-                "cells": {
-                  "listing_count": 164,
-                  "median_list_price": 318000,
-                  "avg_days_on_market": 115
-                }
-              },
-              {
-                "key": "33924",
-                "label": "33924 (Lee)",
-                "cells": {
-                  "listing_count": 132,
-                  "median_list_price": 1499500,
-                  "avg_days_on_market": 224
-                }
-              },
-              {
-                "key": "33922",
-                "label": "33922 (Lee)",
-                "cells": {
-                  "listing_count": 114,
-                  "median_list_price": 490000,
-                  "avg_days_on_market": 162
-                }
-              },
-              {
-                "key": "33956",
-                "label": "33956 (Lee)",
-                "cells": {
-                  "listing_count": 102,
-                  "median_list_price": 584000,
-                  "avg_days_on_market": 175
-                }
-              },
-              {
-                "key": "34116",
-                "label": "34116 (Collier)",
-                "cells": {
-                  "listing_count": 89,
-                  "median_list_price": 575000,
-                  "avg_days_on_market": 106
-                }
-              },
-              {
-                "key": "33921",
-                "label": "33921 (Lee)",
-                "cells": {
-                  "listing_count": 44,
-                  "median_list_price": 3985000,
-                  "avg_days_on_market": 215
-                }
-              },
-              {
-                "key": "34138",
-                "label": "34138 (Collier)",
-                "cells": {
-                  "listing_count": 31,
-                  "median_list_price": 185000,
-                  "avg_days_on_market": 397
-                }
-              },
-              {
-                "key": "34139",
-                "label": "34139 (Collier)",
-                "cells": {
-                  "listing_count": 30,
-                  "median_list_price": 349000,
-                  "avg_days_on_market": 220
-                }
-              },
-              {
-                "key": "34140",
-                "label": "34140 (Collier)",
-                "cells": {
-                  "listing_count": 14,
-                  "median_list_price": 525000,
-                  "avg_days_on_market": 324
-                }
-              },
-              {
-                "key": "34137",
-                "label": "34137 (Collier)",
-                "cells": {
-                  "listing_count": 2,
-                  "median_list_price": 290000,
-                  "avg_days_on_market": 89
-                }
-              },
-              {
-                "key": "34141",
-                "label": "34141 (Collier)",
-                "cells": {
-                  "listing_count": 2,
-                  "median_list_price": 269500,
-                  "avg_days_on_market": 107
-                }
-              }
-            ],
-            "source": {
-              "url": "https://www.swfldatagulf.com/r/source/listing_active_stats?label=SWFL+active+for-sale+listings+%28aggregated%29&source=realtor.com+for-sale+listings&brain=active-listings-swfl&date_col=scraped_at",
-              "fetched_at": "2026-08-07T04:33:22Z",
-              "tier": 2,
-              "citation": "Active SWFL residential listings, aggregated per grain in SQL (listing_active_stats) as of 2026-08-07"
-            }
-          }
-        ],
-        "caveats": [
-          "List-side only: asking prices and days-on-market for ACTIVE listings — not sold/closed prices (that is the closed-sale records lane).",
-          "Median asking price spans ALL active listings INCLUDING vacant land/lots — in lot-heavy areas this pulls the median well below typical home prices. Use the property_type field or the per-county/ZIP detail to separate homes from land.",
-          "Daily snapshot — broad SWFL coverage but not comprehensive. Direction is neutral on any one day; the day-over-day diff is what reads the inventory trend.",
-          "Source is realtor.com for-sale listings; a direct licensed MLS/IDX feed can swap into the same table when credentialed.",
-          "Price-cut counts cover only listings we have probed (listed/sold history), not every active listing region-wide — a per-property depth signal, not a full-book statistic.",
-          "Annual property tax is vendor-reported (not a county tax bill) and not yet validated against county appraiser records — treat as directional, not authoritative. Covers only properties we have probed, not the full tax roll."
-        ],
-        "contradicts": [],
-        "confidence": 0.8,
-        "joint_integrity": 1,
-        "confidence_dispersion": 0,
-        "chain_depth": 0,
-        "trust_tier": 2,
-        "upstream_count": 0,
-        "relevance": {
-          "decay_curve": "weeks",
-          "half_life_hours": 720,
-          "computed_at": "2026-08-07T04:33:22Z"
-        },
-        "exogenous_signals": [],
-        "grain_boundary": {
-          "not_available": [
-            "Sold / closed sale prices — active asking prices only, not closed transactions",
-            "Per-listing history or price-cut events — current snapshot only",
-            "Rental listings — sale listings only"
-          ],
-          "finest_grain": "zip-snapshot"
-        }
-      }
+      "status": "skipped-fresh",
+      "written": false
     },
     {
       "packId": "active-rentals-swfl",
@@ -1430,13 +464,13 @@
     {
       "packId": "master",
       "status": "built",
-      "version": 128,
+      "version": 129,
       "written": true,
       "brainOutput": {
         "brain_id": "master",
-        "version": 128,
-        "refined_at": "2026-08-07T04:33:43Z",
-        "expires": "2026-08-14T04:33:43Z",
+        "version": 129,
+        "refined_at": "2026-08-07T06:02:30Z",
+        "expires": "2026-08-14T06:02:30Z",
         "ttl_seconds": 604800,
         "direction": "bearish",
         "magnitude": 0.85,
@@ -1929,22 +963,20 @@
             ]
           },
           {
-            "metric": "active_listings_count_swfl",
-            "label": "SWFL active residential listings (count)",
-            "value": 22167,
+            "metric": "signal_breaking_1",
+            "value": "Fort Myers: State Department issued an advisory warning of 'Suitcase Invaders' citing SW Florida Burmese pythons among concerns, published Aug. 1, 2026.",
             "direction": "stable",
-            "variable_type": "extensive",
-            "units": "listings",
-            "display_format": "count",
+            "label": "Fort Myers — breaking",
+            "variable_type": "categorical",
             "source": {
-              "url": "https://www.swfldatagulf.com/r/source/listing_active_stats?label=SWFL+active+for-sale+listings+%28aggregated%29&source=realtor.com+for-sale+listings&brain=active-listings-swfl&date_col=scraped_at",
-              "fetched_at": "2026-08-07T04:33:22Z",
+              "url": "https://www.news-press.com/story/money/2026/08/01/sw-florida-burmese-pythons-among-concerns-in-state-department-advisory-naples-lee-county-everglades/91089085007/",
+              "fetched_at": "2026-08-07T06:02:08Z",
               "tier": 2,
-              "citation": "22,167 active SWFL residential listings as of 2026-08-07"
+              "citation": "SW Florida Burmese pythons among concerns in State Department advisory: \"[](https://www.news-press.com/)\n[](https://subscribe.news-press.com/rr/nanobar?gps-source=CPTILELEFT&itm_campaign=2026ENTJULBAU&itm_medium=ONSITE&success-url=https%3A%2F%2Fwww.news-press.com%2Fstory%2Fmoney%2F2026%2F08%2F01%2Fsw-florida-burmese-pythons-among-concerns-in-state-department-advisory-naples-lee-county-everglades%2F91089085007%2F)\n[](https://subscribe.news-press.com/rr/masthead?gps-source=CPMASTHEAD&itm_campaign=2026ENTJULBAU&itm_medium=ONSITE&success-url=https%3A%2F%2Fwww.news-press.com%2Fstory%2Fmoney%2F2026%2F08%2F01%2Fsw-florida-burmese-pythons-among-concerns-in-state-department-advisory-naples-lee-county-everglades%2F91089085007%2F)\n[News](https://www.news-press.com/news/) [Cape Coral](https://www.news-press.com/news/cape-coral/) [Sports](https://www.news-press.com/sports/) [Restaurants](https://www.news-press.com/taste/) [Real Estate](https://www.news-press.com/real-estate) [Advertise](https://advertising.usatoday.com/advertise-with-us/?cid=Web_LiQ_Network_AdvertiseWithUs_AdvertiseInquiry&publication=the_news_press&utm_source=local_publication&utm_medium=menu&utm_campaign=advertise_with_us) [Obituaries](https://www.news-press.com/obituaries) [eNewspaper](https://user.news-press.com/user/enewspaper) [Legals](https://www.news-press.com/public-notices)\n[](https://www.news-press.com/search/ \"Search\")\n[](https://www.news-press.com/weather/ \"Weather in Fort Myers: 74°F Partly Cloudy\") [](https://subscribe.news-press.com/rr/navsub?gps-source=CPTOPNAVBAR&itm_campaign=2026ENTJULBAU&itm_medium=ONSITE&success-url=https%3A%2F%2Fwww.news-press.com%2Fstory%2Fmoney%2F2026%2F08%2F01%2Fsw-florida-burmese-pythons-among-concerns-in-state-department-advisory-naples-lee-county-everglades%2F91089085007%2F)\n[](https://login.news-press.com/PFTM-GUP/authenticate/?success-url=https%3A%2F%2Fwww.news-press.com%2Fstory%2Fmoney%2F2026%2F08%2F01%2Fsw-florida-burmese-pythons-among-concerns-in-state-department-advisory-naples-lee-county-everglades%2F91089085007%2F&cancel-url=https%3A%2F%2Fwww.news-press.com%2Fstory%2Fmoney%2F2026%2F08%2F01%2Fsw-florida-burmese-pythons-among-concerns-in-state-department-advisory-naples-lee-county-everglades%2F91089085007%2F)\n[](https://www.news-press.com/) [](https://www.news-press.com/)\nMONEY\n# After Florida incursion, State Department warns of 'Suitcase Invaders'\n[![Portrait of Phil Fernandez](https://www.news-press.com/gcdn/presto/2019/09/14/PNDN/6a77b474-579f-48fa-b56f-a2cc2b9de797-NDN_Phil_Fernandez.jpg?crop=2999,2999,x0,y570&width=48&height=48&format=pjpg&auto=webp) Phil Fernandez](https://www.naplesnews.com/staff/2684114001/phil-fernandez/)\nFort Myers News-Press & Naples Daily News\nAug. 1, 2026, 5:02 a.m. ET\nSummer in [Southwest Florida](https://www.news-press.com/story/news/environment/2025/06/09/pythons-in-florida-team-works-to-put-dent-in-species-killing-wildlife/83952033007/) is often associated with family vacations, hurricane season and, [increasingly, efforts](https://www.news-press.com/story/news/local/2026/06/27/s\""
             },
             "suggestions": [
-              "What's driving active listings count swfl?",
-              "How does active listings count swfl here compare to other SWFL areas?"
+              "What's driving signal breaking 1?",
+              "How does signal breaking 1 here compare to other SWFL areas?"
             ]
           },
           {
@@ -2085,7 +1117,7 @@
           "1 of 3 announcements in the last 90 days matched qualifying categories (relocation, expansion, grant, infrastructure); the rest are general chamber/policy posts excluded from the momentum count.",
           "Investment and job figures reflect disclosures at announcement time; actual outcomes may vary as projects develop.",
           "SWFL Inc. covers primarily Lee County projects; Collier County coverage depends on cross-county partnerships and co-announcements.",
-          "99 additional live signals not surfaced here (cap 8); the full set is in data_lake.city_pulse.",
+          "101 additional live signals not surfaced here (cap 8); the full set is in data_lake.city_pulse.",
           "Each signal is dated current-events context with a per-signal source; freshness is TTL-bounded by topic (breaking 1d → structural 90d).",
           "Construction enforcement split: public notices = confirmed individual actions (hard-parsed violation_type); press releases = announced sweeps (Sonnet-inferred affected_industries). Do not sum them.",
           "Polarity: rising construction notices = bullish (recovery-driven unlicensed activity). Rising ABT notices = bearish (hospitality compliance stress).",
@@ -2210,8 +1242,8 @@
         "upstream_count": 39,
         "relevance": {
           "decay_curve": "weeks",
-          "half_life_hours": 719.9999999999999,
-          "computed_at": "2026-08-07T04:33:43.000Z"
+          "half_life_hours": 720,
+          "computed_at": "2026-08-07T06:02:30.000Z"
         },
         "exogenous_signals": [],
         "conditional_claims": [
