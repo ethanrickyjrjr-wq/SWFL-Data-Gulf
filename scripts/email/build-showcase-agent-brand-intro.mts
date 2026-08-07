@@ -53,6 +53,10 @@ const CAST_COAST_TOKENS = brandingToTokens({
     "I sell Cape Coral, and I open every listing conversation with the numbers, not the " +
     "sales pitch. Fourteen years watching this market taught me that buyers and sellers " +
     "both do better when they see the real data first.",
+  // Real Cast & Coast logo — already committed for the back-on-market showcase
+  // (same brand, same file), copied into launch-blitz's own assets/ so this slide
+  // carries it too instead of degrading to a text-only masthead.
+  logo_url: "assets/castcoast-logo.png",
   primary_color: "#12343B",
   accent_color: "#0E7C86",
   text_color: "#2E4A50",
@@ -112,9 +116,17 @@ function applyBrandTokens(doc: EmailDoc, t: Record<string, string>): EmailDoc {
   return { globalStyle, blocks };
 }
 
+// ANCHOR ADDRESS — verified live 08/06/2026 via `resolveSubject`: a REAL active Cape
+// Coral listing with a real photo and price ($589,900). The original demo's anchor
+// (1927 Savona Parkway W) no longer resolves — checked live, `resolveSubject` returns
+// only a bare address with zero photos/price, meaning it's off-market since the 07/02
+// capture. Rather than keep a dead address (which silently drops the listing photo,
+// price and specs to open slots), swapped to one that resolves today. RULE 0.7: never
+// invent a number — a stale reference that quietly stops resolving is the same failure
+// class as inventing one, just slower to notice.
 const PROMPT =
   "Build an agent-introduction email for my farm area Cape Coral — a ZIP-by-ZIP asking-price " +
-  "chart from live listings, my newest listing at 1927 Savona Parkway W, Cape Coral, FL 33914.";
+  "chart from live listings, my newest listing at 163 SW 51st Ter, Cape Coral, FL 33914.";
 
 const currentDoc = applyBrandTokens(
   (seedById("luxury-market-report") ?? SEED_DOCS[0]!).build(),

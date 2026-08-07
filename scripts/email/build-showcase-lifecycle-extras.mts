@@ -177,7 +177,14 @@ function fillOpenHouseMoment(doc: EmailDoc, date: string, time: string): EmailDo
 }
 
 async function buildDemo(opts: {
-  key: "open-house" | "price-reduced" | "back-on-market" | "community-info";
+  key:
+    | "open-house"
+    | "price-reduced"
+    | "back-on-market"
+    | "community-info"
+    | "coming-soon"
+    | "new-listing"
+    | "market-comps";
   /** community-info only: the full build-box prompt naming the neighborhood. */
   communityPrompt?: string;
   /** Address-spined demos resolve a real house; area-spined ones (back-on-market)
@@ -343,6 +350,44 @@ const GORDONIA_REMARKS =
   "across 7,733 square feet, on grounds that give the home the setback and privacy the " +
   "corridor is known for.";
 
+// Coming Soon / New Listing / Market Comps — the ORIGINAL 01/02/03 captures were
+// hand-authored (vendored commit d3292777, see file header), never run through the
+// real builders. Rebuilt 08/06/2026 on the SAME Gordonia Road property — the current
+// `buildComingSoon`/`buildNewListing`/`buildMarketComps` recipes, never hand HTML.
+const GORDONIA_PHOTO_FALLBACK =
+  "https://jtkdowmrjaxfvwmemxso.supabase.co/storage/v1/object/public/email-media/hero-photos/107979fc62aaa2ef3002fbbb.webp";
+
+await buildDemo({
+  key: "coming-soon",
+  address: "465 Gordonia Road, Naples, FL 34108",
+  zip: "34108",
+  file: "01-coming-soon.html",
+  outDir: LIFECYCLE_OUT,
+  tokens: LATITUDE_TOKENS,
+  mirroredPhotoFallback: GORDONIA_PHOTO_FALLBACK,
+});
+
+await buildDemo({
+  key: "new-listing",
+  address: "465 Gordonia Road, Naples, FL 34108",
+  zip: "34108",
+  file: "02-new-listing.html",
+  outDir: LIFECYCLE_OUT,
+  tokens: LATITUDE_TOKENS,
+  remarks: GORDONIA_REMARKS,
+  mirroredPhotoFallback: GORDONIA_PHOTO_FALLBACK,
+});
+
+await buildDemo({
+  key: "market-comps",
+  address: "465 Gordonia Road, Naples, FL 34108",
+  zip: "34108",
+  file: "03-comps.html",
+  outDir: LIFECYCLE_OUT,
+  tokens: LATITUDE_TOKENS,
+  mirroredPhotoFallback: GORDONIA_PHOTO_FALLBACK,
+});
+
 await buildDemo({
   key: "open-house",
   address: "465 Gordonia Road, Naples, FL 34108",
@@ -351,8 +396,7 @@ await buildDemo({
   outDir: LIFECYCLE_OUT,
   tokens: LATITUDE_TOKENS,
   remarks: GORDONIA_REMARKS,
-  mirroredPhotoFallback:
-    "https://jtkdowmrjaxfvwmemxso.supabase.co/storage/v1/object/public/email-media/hero-photos/107979fc62aaa2ef3002fbbb.webp",
+  mirroredPhotoFallback: GORDONIA_PHOTO_FALLBACK,
 });
 
 await buildDemo({

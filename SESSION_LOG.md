@@ -1,3 +1,37 @@
+## 2026-08-07 (Sonnet 5) — Showcase demo rebuilds verified safe and pushed (was uncommitted, operator thought it was accidental damage)
+
+Operator opened the session upset: a prior session had rewritten 8 showcase `live/*.html` demo
+emails (agent-launch 01-03, listing-to-close 01/02/03/06/07) plus their `.webp` captures, sitting
+**uncommitted**. He never asked for a rewrite — he only wanted new email thumbnails added to the
+top of `/showcase`. Investigated instead of reverting blindly (his instruction: don't revert, don't
+just push either — check first).
+
+**Finding: this is not damage.** `scripts/email/build-showcase-lifecycle-extras.mts` replaced OLD
+HAND-TYPED mock HTML (vendored commit d3292777, never run through a real builder) with output from
+the REAL recipe builders (`builderFor(key)`) on the same Gordonia Road demo listing — the platform's
+own standing rule ("never hand HTML"). Verified directly: working-tree `02-new-listing.html` is
+~byte-identical to `~/Downloads/new-listing-email.html` (built yesterday in the Lab) — an 8-line
+diff after normalization, incidental only. So "the redo" and "the new email he wanted up" are the
+same artifact for New Listing.
+
+**The "new emails, correct order, categories, thumbnails on top" ask was already done** —
+`lib/showcase/campaign-order.ts` + `components/showcase/CampaignRows.tsx` (Netflix-style rows,
+listing lifecycle first, every recipe as its own card) were already committed 08/06 in `81c7eeca`
+and earlier, untouched by this diff. Nothing left to build there.
+
+**Blast-radius check (RULE 12):** these `live/*.html` files are read in exactly one other place —
+`lib/showcase/registry.ts`'s `liveHref`, the iframe inside the "see the whole campaign" pop-up
+overlay. No test references any of these filenames (grepped `*.test.ts(x)/*.mts`). So worst case
+if the rewritten copy/voice reads worse than before (a taste call, not verified either way — flagged
+to operator), it only affects that one iframe, never ordering/categories/buttons/anything else from
+the past week.
+
+`build-showcase-agent-brand-intro.mts`'s diff + the untracked `castcoast-logo.png` are the
+logo-and-dead-address fix the operator explicitly said he DID want kept.
+
+Staged and pushed the full dirty set (all of it showcase-scoped, nothing left behind):
+8 `live/*.html` + 12 `.webp` captures + 2 build scripts + 1 new logo asset.
+
 ## 2026-08-06 (Sonnet 5) — Open House email: real shape fixes plus a narrator prompt bug (buyer-leverage tone on an invitation)
 
 Built for the operator's own realtor.com link (9340 Vittoria Ct, Fort Myers) and walked through
