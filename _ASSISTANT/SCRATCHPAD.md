@@ -1,12 +1,3 @@
-## 2026-08-07 (Sonnet 5) — OPERATOR: *"idiot [prior session] redid all the old showcase emails incorrectly, stealing more money and time from me. I did not want these redone."*
-
-Uncommitted local changes sitting in the working tree rewrote 8 showcase HTML files (agent-launch
-01-03, listing-to-close 01/02/03/06/07) that operator did NOT ask to be touched — he only wanted
-new email thumbnails added to the TOP of /showcase. Operator: don't revert blindly (may destroy
-this-week work), don't just push the redo either — get the NEW emails (Downloads: new-listing-email.html,
-back-on-market-email.html, + others built 08/06) onto /showcase in the correct order/category, and
-tell him whether the redo breaks anything from the past week before pushing. Investigating now.
-
 ## 2026-08-06 (Opus 5) — OPERATOR: *"Still untouched: the 221-row defect class beyond the cron family, and no signals backfilled onto the 125 verify rows — that last one is what actually bends the curve, and it's per-check judgment, not a sweep. Get this done!!!"*
 
 **STATUS: PARTIAL — 4 of 125 verify rows signalled. Named here so it is not mistaken for done.**
