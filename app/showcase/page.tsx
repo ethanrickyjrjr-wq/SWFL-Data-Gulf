@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { ShowcaseGrid } from "./ShowcaseGrid";
 import { CampaignRows } from "@/components/showcase/CampaignRows";
+import { NewEmails } from "@/components/showcase/NewEmails";
 import { SeedGallery } from "@/components/showcase/SeedGallery";
 import { SEED_PREVIEWS } from "@/lib/email/doc/seed-previews";
 import { PageShell } from "@/components/PageShell";
@@ -26,6 +27,8 @@ export default function ShowcasePage() {
           last card in a row to see the whole campaign step by step.
         </p>
       </header>
+
+      <NewEmails />
 
       <CampaignRows />
 

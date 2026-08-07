@@ -316,14 +316,7 @@ const ARTIFACT_POSITIONAL = new RegExp(
 const SPATIAL =
   /\b(same street|this street|the same block|next door|across the street|down the road|same (neighborhood|community|subdivision))\b|\bon [A-Z][a-z]+ (Dr|Drive|Blvd|Boulevard|Ln|Lane|Ct|Court|Rd|Road|Ave|Avenue|Way|Ter|Terrace|Cir|Circle|Pl|Place)\b/;
 
-/** A NAMED SUB-AREA the narrator invented out of nothing. Live 08/06/2026: a New Listing
- *  narrator wrote "the Coconut Creek area of Iona" for a Fort Myers house — Coconut Creek is
- *  a real place, in Broward County, nowhere near this listing. SPATIAL above catches street
- *  names and "same neighborhood" phrasing; it had no check for a fabricated NAME. The only
- *  named-area source ever handed to the model is `communitySourceLine`/`neighborhoodStatsSourceLine`
- *  /`neighborhoodAmenitiesSourceLine` (settled sentences) — a capitalized "___ area/neighborhood/
- *  community/subdivision/district" not echoed in one of those settled sentences was never given
- *  to the model and is invented, exactly like an unsourced feature. */
+/** 
 const NAMED_AREA =
   /\bthe\s+([A-Z][a-zA-Z]+(?:\s+[A-Z][a-zA-Z]+){0,2})\s+(area|neighborhood|community|subdivision|district)\b/g;
 
