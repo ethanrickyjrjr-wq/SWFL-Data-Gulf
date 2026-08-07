@@ -1,3 +1,25 @@
+## 2026-08-07 (Sonnet 5) — CI red: fixed `lib/deliverable/claims.ts` corruption (dangling comment + stray NUL byte)
+
+Operator reported GitHub red with a typecheck error. `bunx tsc --noEmit` (the exact CI gate,
+`.github/workflows/ci.yml`) reproduced it locally: `TS2304: Cannot find name 'NAMED_AREA'`.
+Root cause: an unterminated `/**` comment (from the `feat(claims): add regex for detecting
+invented named areas` commit, e3876d67) swallowed the `const NAMED_AREA = ...` regex
+declaration whole — it was never actually compiled code. Fixed by closing the comment with a
+real docstring above the const (matching the style of `SPATIAL`/`MOTIVE` beside it). Same pass
+found and fixed one stray NUL byte (`\x00`) that had landed inside an unrelated
+`.join(" ")` string literal a few lines down — same file, same corruption event. `bunx tsc
+--noEmit` now clean; `bun test lib/deliverable/claims.test.ts` 23/23 green. Commit `08b89b8c`.
+
+Also this session: added a "Newest emails" section to `/showcase` (`components/showcase/NewEmails.tsx`)
+— 9 real rendered emails (Coming Soon, New Listing, Open House, Market Comps, Under Contract,
+Just Sold, Back on the Market, Agent Brand Intro, Market Pulse) as compact horizontal-scroll
+cards grouped by category (Listing Lifecycle first), click → full preview + a working "Build
+this →" button via the existing `recipeDestination`. Recipes with no rendered capture yet
+(Price Improved, Agent Launch, Weekly Sphere Update, The REVIEW Reply, Community Info,
+Listings Showcase, Listings Digest) get a labelled blank holder instead of being silently
+skipped. Files live in `public/new-emails/`. Committed by the operator directly as
+`b879221e`.
+
 ## 2026-08-06 (Sonnet 5) — Open House email: real shape fixes plus a narrator prompt bug (buyer-leverage tone on an invitation)
 
 Built for the operator's own realtor.com link (9340 Vittoria Ct, Fort Myers) and walked through
