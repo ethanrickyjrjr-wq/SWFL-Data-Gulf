@@ -1,9 +1,9 @@
-<!-- FRESHNESS: v130 | Token: SWFL-7421-v130-20260808-c4dd113c -->
+<!-- FRESHNESS: v131 | Token: SWFL-7421-v131-20260808-2cbb157b -->
 ---
 brain_id: master
-version: 130
-refined_at: 2026-08-08T04:37:28Z
-freshness_token: SWFL-7421-v130-20260808-c4dd113c
+version: 131
+refined_at: 2026-08-08T05:18:50Z
+freshness_token: SWFL-7421-v131-20260808-2cbb157b
 ttl_seconds: 604800
 pack_hash: be8f0d44e0e6
 context_type: user_saved_reference
@@ -116,9 +116,9 @@ s39 | home-values-swfl brain — https://www.swfldatagulf.com/api/b/home-values-
 --- OUTPUT ---
 {
   "brain_id": "master",
-  "version": 130,
-  "refined_at": "2026-08-08T04:37:28Z",
-  "expires": "2026-08-15T04:37:28Z",
+  "version": 131,
+  "refined_at": "2026-08-08T05:18:50Z",
+  "expires": "2026-08-15T05:18:50Z",
   "ttl_seconds": 604800,
   "direction": "bearish",
   "magnitude": 0.85,
@@ -611,22 +611,20 @@ s39 | home-values-swfl brain — https://www.swfldatagulf.com/api/b/home-values-
       ]
     },
     {
-      "metric": "active_listings_count_swfl",
-      "label": "SWFL active residential listings (count)",
-      "value": 22247,
+      "metric": "signal_breaking_1",
+      "value": "Fort Myers: SW Florida Burmese pythons were cited among concerns in a U.S. State Department advisory warning of 'Suitcase Invaders,' published Aug. 1, 2026, referencing the Lee County / Everglades area.",
       "direction": "stable",
-      "variable_type": "extensive",
-      "units": "listings",
-      "display_format": "count",
+      "label": "Fort Myers — breaking",
+      "variable_type": "categorical",
       "source": {
-        "url": "https://www.swfldatagulf.com/r/source/listing_active_stats?label=SWFL+active+for-sale+listings+%28aggregated%29&source=realtor.com+for-sale+listings&brain=active-listings-swfl&date_col=scraped_at",
-        "fetched_at": "2026-08-08T04:37:07Z",
+        "url": "https://www.naplesnews.com/story/money/2026/08/01/sw-florida-burmese-pythons-among-concerns-in-state-department-advisory-naples-lee-county-everglades/91089085007/",
+        "fetched_at": "2026-08-08T05:18:28Z",
         "tier": 2,
-        "citation": "22,247 active SWFL residential listings as of 2026-08-08"
+        "citation": "SW Florida Burmese pythons among concerns in State Department advisory: \"[](https://www.naplesnews.com/)\n[](https://subscribe.naplesnews.com/rr/nanobar?gps-source=CPTILELEFT&itm_campaign=2026ENTJULBAU&itm_medium=ONSITE&success-url=https%3A%2F%2Fwww.naplesnews.com%2Fstory%2Fmoney%2F2026%2F08%2F01%2Fsw-florida-burmese-pythons-among-concerns-in-state-department-advisory-naples-lee-county-everglades%2F91089085007%2F)\n[](https://subscribe.naplesnews.com/rr/masthead?gps-source=CPMASTHEAD&itm_campaign=2026ENTJULBAU&itm_medium=ONSITE&success-url=https%3A%2F%2Fwww.naplesnews.com%2Fstory%2Fmoney%2F2026%2F08%2F01%2Fsw-florida-burmese-pythons-among-concerns-in-state-department-advisory-naples-lee-county-everglades%2F91089085007%2F)\n[News](https://www.naplesnews.com/news/) [Sports](https://www.naplesnews.com/sports/) [Real Estate](https://www.naplesnews.com/business/real-estate/) [Restaurants](https://www.naplesnews.com/entertainment/restaurants/) [Opinion](https://www.naplesnews.com/opinion/) [Advertise](https://advertising.usatoday.com/advertise-with-us/?cid=Web_LiQ_Network_AdvertiseWithUs_AdvertiseInquiry&publication=naples_daily_news&utm_source=local_publication&utm_medium=menu&utm_campaign=advertise_with_us) [Obituaries](https://www.naplesnews.com/obituaries) [eNewspaper](https://user.naplesnews.com/user/enewspaper) [Legals](https://www.naplesnews.com/public-notices)\n[](https://www.naplesnews.com/search/ \"Search\")\n[](https://www.naplesnews.com/weather/ \"Weather in Naples: 74°F Clear\") [](https://subscribe.naplesnews.com/rr/navsub?gps-source=CPTOPNAVBAR&itm_campaign=2026ENTJULBAU&itm_medium=ONSITE&success-url=https%3A%2F%2Fwww.naplesnews.com%2Fstory%2Fmoney%2F2026%2F08%2F01%2Fsw-florida-burmese-pythons-among-concerns-in-state-department-advisory-naples-lee-county-everglades%2F91089085007%2F)\n[](https://login.naplesnews.com/PNDN-GUP/authenticate/?success-url=https%3A%2F%2Fwww.naplesnews.com%2Fstory%2Fmoney%2F2026%2F08%2F01%2Fsw-florida-burmese-pythons-among-concerns-in-state-department-advisory-naples-lee-county-everglades%2F91089085007%2F&cancel-url=https%3A%2F%2Fwww.naplesnews.com%2Fstory%2Fmoney%2F2026%2F08%2F01%2Fsw-florida-burmese-pythons-among-concerns-in-state-department-advisory-naples-lee-county-everglades%2F91089085007%2F)\n[](https://www.naplesnews.com/) [](https://www.naplesnews.com/)\nMONEY\n# After Florida incursion, State Department warns of 'Suitcase Invaders'\n[![Portrait of Phil Fernandez](https://www.naplesnews.com/gcdn/presto/2019/09/14/PNDN/6a77b474-579f-48fa-b56f-a2cc2b9de797-NDN_Phil_Fernandez.jpg?crop=2999,2999,x0,y570&width=48&height=48&format=pjpg&auto=webp) Phil Fernandez](https://www.naplesnews.com/staff/2684114001/phil-fernandez/)\nFort Myers News-Press & Naples Daily News\nAug. 1, 2026, 5:02 a.m. ET\nSummer in [Southwest Florida](https://www.naplesnews.com/story/news/environment/2025/06/09/pythons-in-florida-team-works-to-put-dent-in-species-killing-wildlife/83952033007/) is often associated with family vacations, hurricane season and, [increasingly, efforts](https://www.naplesnews.com/story/news/local/20\""
       },
       "suggestions": [
-        "What's driving active listings count swfl?",
-        "How does active listings count swfl here compare to other SWFL areas?"
+        "What's driving signal breaking 1?",
+        "How does signal breaking 1 here compare to other SWFL areas?"
       ]
     },
     {
@@ -892,8 +890,8 @@ s39 | home-values-swfl brain — https://www.swfldatagulf.com/api/b/home-values-
   "upstream_count": 39,
   "relevance": {
     "decay_curve": "weeks",
-    "half_life_hours": 720.0000000000001,
-    "computed_at": "2026-08-08T04:37:28.000Z"
+    "half_life_hours": 720.0000000000003,
+    "computed_at": "2026-08-08T05:18:50.000Z"
   },
   "exogenous_signals": [],
   "conditional_claims": [
