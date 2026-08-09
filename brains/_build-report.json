@@ -1,8 +1,8 @@
 {
   "target": "master",
   "timestamps": {
-    "started": "2026-08-08T05:18:28.510Z",
-    "finished": "2026-08-08T05:18:50.572Z"
+    "started": "2026-08-09T04:30:16.997Z",
+    "finished": "2026-08-09T04:30:52.631Z"
   },
   "source": "live",
   "outcomes": [
@@ -114,52 +114,52 @@
     {
       "packId": "city-pulse-swfl",
       "status": "built",
-      "version": 55,
+      "version": 56,
       "written": true,
       "brainOutput": {
         "brain_id": "city-pulse-swfl",
-        "version": 55,
-        "refined_at": "2026-08-08T05:18:28Z",
-        "expires": "2026-08-09T05:18:28Z",
+        "version": 56,
+        "refined_at": "2026-08-09T04:30:17Z",
+        "expires": "2026-08-10T04:30:17Z",
         "ttl_seconds": 86400,
         "direction": "neutral",
         "magnitude": 0,
         "drivers": [],
         "overrides": [],
-        "conclusion": "SWFL city pulse as of 2026-08-08: 107 live current-events signals across 11 cities — Fort Myers (27), Naples (30), Cape Coral (22), North Naples (5), Marco Island (5), Sanibel (4), Golden Gate (2), Bonita Springs (4), Estero (3), Fort Myers Beach (4), Lehigh Acres (1). Most current: Fort Myers — SW Florida Burmese pythons were cited among concerns in a U.S. State Department advisory warning of 'Suitcase Invaders,' published Aug. 1, 2026, referencing the Lee County / Everglades area. These are current cited facts only; the cross-vertical read and any direction call live downstream in master.",
+        "conclusion": "SWFL city pulse as of 2026-08-09: 111 live current-events signals across 11 cities — Fort Myers (28), Naples (31), Cape Coral (24), North Naples (5), Marco Island (5), Sanibel (4), Estero (4), Bonita Springs (4), Fort Myers Beach (4), Lehigh Acres (1), Golden Gate (1). Most current: Fort Myers — The only privately owned land on Buck Key Island — roughly 14 acres — is listed for $13 million in Lee County, as of Aug. 7, 2026; the property has remained under the same ownership for more than 50 years. These are current cited facts only; the cross-vertical read and any direction call live downstream in master.",
         "key_metrics": [
           {
-            "metric": "signal_breaking_1",
-            "value": "Fort Myers: SW Florida Burmese pythons were cited among concerns in a U.S. State Department advisory warning of 'Suitcase Invaders,' published Aug. 1, 2026, referencing the Lee County / Everglades area.",
+            "metric": "signal_transactions_1",
+            "value": "Fort Myers: The only privately owned land on Buck Key Island — roughly 14 acres — is listed for $13 million in Lee County, as of Aug. 7, 2026; the property has remained under the same ownership for more than 50 years.",
             "direction": "stable",
-            "label": "Fort Myers — breaking",
+            "label": "Fort Myers — transactions",
             "variable_type": "categorical",
             "source": {
-              "url": "https://www.naplesnews.com/story/money/2026/08/01/sw-florida-burmese-pythons-among-concerns-in-state-department-advisory-naples-lee-county-everglades/91089085007/",
-              "fetched_at": "2026-08-08T05:18:28Z",
+              "url": "https://www.naplesnews.com/story/money/companies/2026/08/07/rare-buck-key-island-offering-listed-for-13-million-in-lee-county/91189530007/",
+              "fetched_at": "2026-08-09T04:30:17Z",
               "tier": 2,
-              "citation": "SW Florida Burmese pythons among concerns in State Department advisory: \"[](https://www.naplesnews.com/)\n[](https://subscribe.naplesnews.com/rr/nanobar?gps-source=CPTILELEFT&itm_campaign=2026ENTJULBAU&itm_medium=ONSITE&success-url=https%3A%2F%2Fwww.naplesnews.com%2Fstory%2Fmoney%2F2026%2F08%2F01%2Fsw-florida-burmese-pythons-among-concerns-in-state-department-advisory-naples-lee-county-everglades%2F91089085007%2F)\n[](https://subscribe.naplesnews.com/rr/masthead?gps-source=CPMASTHEAD&itm_campaign=2026ENTJULBAU&itm_medium=ONSITE&success-url=https%3A%2F%2Fwww.naplesnews.com%2Fstory%2Fmoney%2F2026%2F08%2F01%2Fsw-florida-burmese-pythons-among-concerns-in-state-department-advisory-naples-lee-county-everglades%2F91089085007%2F)\n[News](https://www.naplesnews.com/news/) [Sports](https://www.naplesnews.com/sports/) [Real Estate](https://www.naplesnews.com/business/real-estate/) [Restaurants](https://www.naplesnews.com/entertainment/restaurants/) [Opinion](https://www.naplesnews.com/opinion/) [Advertise](https://advertising.usatoday.com/advertise-with-us/?cid=Web_LiQ_Network_AdvertiseWithUs_AdvertiseInquiry&publication=naples_daily_news&utm_source=local_publication&utm_medium=menu&utm_campaign=advertise_with_us) [Obituaries](https://www.naplesnews.com/obituaries) [eNewspaper](https://user.naplesnews.com/user/enewspaper) [Legals](https://www.naplesnews.com/public-notices)\n[](https://www.naplesnews.com/search/ \"Search\")\n[](https://www.naplesnews.com/weather/ \"Weather in Naples: 74°F Clear\") [](https://subscribe.naplesnews.com/rr/navsub?gps-source=CPTOPNAVBAR&itm_campaign=2026ENTJULBAU&itm_medium=ONSITE&success-url=https%3A%2F%2Fwww.naplesnews.com%2Fstory%2Fmoney%2F2026%2F08%2F01%2Fsw-florida-burmese-pythons-among-concerns-in-state-department-advisory-naples-lee-county-everglades%2F91089085007%2F)\n[](https://login.naplesnews.com/PNDN-GUP/authenticate/?success-url=https%3A%2F%2Fwww.naplesnews.com%2Fstory%2Fmoney%2F2026%2F08%2F01%2Fsw-florida-burmese-pythons-among-concerns-in-state-department-advisory-naples-lee-county-everglades%2F91089085007%2F&cancel-url=https%3A%2F%2Fwww.naplesnews.com%2Fstory%2Fmoney%2F2026%2F08%2F01%2Fsw-florida-burmese-pythons-among-concerns-in-state-department-advisory-naples-lee-county-everglades%2F91089085007%2F)\n[](https://www.naplesnews.com/) [](https://www.naplesnews.com/)\nMONEY\n# After Florida incursion, State Department warns of 'Suitcase Invaders'\n[![Portrait of Phil Fernandez](https://www.naplesnews.com/gcdn/presto/2019/09/14/PNDN/6a77b474-579f-48fa-b56f-a2cc2b9de797-NDN_Phil_Fernandez.jpg?crop=2999,2999,x0,y570&width=48&height=48&format=pjpg&auto=webp) Phil Fernandez](https://www.naplesnews.com/staff/2684114001/phil-fernandez/)\nFort Myers News-Press & Naples Daily News\nAug. 1, 2026, 5:02 a.m. ET\nSummer in [Southwest Florida](https://www.naplesnews.com/story/news/environment/2025/06/09/pythons-in-florida-team-works-to-put-dent-in-species-killing-wildlife/83952033007/) is often associated with family vacations, hurricane season and, [increasingly, efforts](https://www.naplesnews.com/story/news/local/20\""
+              "citation": "Rare Buck Key Island offering listed for $13 million in Lee County: \"[](https://www.naplesnews.com/)\n[](https://subscribe.naplesnews.com/rr/nanobar?gps-source=CPTILELEFT&itm_campaign=2026ENTJULBAU&itm_medium=ONSITE&success-url=https%3A%2F%2Fwww.naplesnews.com%2Fstory%2Fmoney%2Fcompanies%2F2026%2F08%2F07%2Frare-buck-key-island-offering-listed-for-13-million-in-lee-county%2F91189530007%2F)\n[](https://subscribe.naplesnews.com/rr/masthead?gps-source=CPMASTHEAD&itm_campaign=2026ENTJULBAU&itm_medium=ONSITE&success-url=https%3A%2F%2Fwww.naplesnews.com%2Fstory%2Fmoney%2Fcompanies%2F2026%2F08%2F07%2Frare-buck-key-island-offering-listed-for-13-million-in-lee-county%2F91189530007%2F)\n[News](https://www.naplesnews.com/news/) [Sports](https://www.naplesnews.com/sports/) [Real Estate](https://www.naplesnews.com/business/real-estate/) [Restaurants](https://www.naplesnews.com/entertainment/restaurants/) [Opinion](https://www.naplesnews.com/opinion/) [Advertise](https://advertising.usatoday.com/advertise-with-us/?cid=Web_LiQ_Network_AdvertiseWithUs_AdvertiseInquiry&publication=naples_daily_news&utm_source=local_publication&utm_medium=menu&utm_campaign=advertise_with_us) [Obituaries](https://www.naplesnews.com/obituaries) [eNewspaper](https://user.naplesnews.com/user/enewspaper) [Legals](https://www.naplesnews.com/public-notices)\n[](https://www.naplesnews.com/search/ \"Search\")\n[](https://www.naplesnews.com/weather/ \"Weather in Naples: 78°F Mostly Cloudy\") [](https://subscribe.naplesnews.com/rr/navsub?gps-source=CPTOPNAVBAR&itm_campaign=2026ENTJULBAU&itm_medium=ONSITE&success-url=https%3A%2F%2Fwww.naplesnews.com%2Fstory%2Fmoney%2Fcompanies%2F2026%2F08%2F07%2Frare-buck-key-island-offering-listed-for-13-million-in-lee-county%2F91189530007%2F)\n[](https://login.naplesnews.com/PNDN-GUP/authenticate/?success-url=https%3A%2F%2Fwww.naplesnews.com%2Fstory%2Fmoney%2Fcompanies%2F2026%2F08%2F07%2Frare-buck-key-island-offering-listed-for-13-million-in-lee-county%2F91189530007%2F&cancel-url=https%3A%2F%2Fwww.naplesnews.com%2Fstory%2Fmoney%2Fcompanies%2F2026%2F08%2F07%2Frare-buck-key-island-offering-listed-for-13-million-in-lee-county%2F91189530007%2F)\n[](https://www.naplesnews.com/) [](https://www.naplesnews.com/)\nCOMPANIES\n# Exclusive: Last 'puzzle piece' on Buck Key Island hits market for $13M\n[![Portrait of Laura Layden](https://www.naplesnews.com/gcdn/authoring/authoring-images/2024/02/08/PNDN/72524348007-ndn-jh-20240126-laura-0001.JPG?crop=3313,3312,x1506,y0&width=48&height=48&format=pjpg&auto=webp) Laura Layden](https://www.naplesnews.com/staff/2647080001/laura-layden/)\nFort Myers News-Press & Naples Daily News\nUpdated Aug. 7, 2026, 10:13 a.m. ET\nThe only privately owned land on Buck Key Island is back on the market.\nOver the decades, the roughly 14-acre property has been on and off the market — and it has been considered for conservation.\nYet, it has remained under the same ownership for more than 50 years.\n[](https://www.naplesnews.com/)\n[Help](https://help.naplesnews.com) [Accessibility](https://cm.naplesnews.com/accessibility/) [Sitemap\""
             },
             "suggestions": [
-              "What's driving signal breaking 1?",
-              "How does signal breaking 1 here compare to other SWFL areas?"
+              "What's driving signal transactions 1?",
+              "How does signal transactions 1 here compare to other SWFL areas?"
             ]
           },
           {
-            "metric": "signal_breaking_2",
-            "value": "Naples: SW Florida Burmese pythons were cited among concerns in a U.S. State Department advisory — published Aug. 1, 2026 — warning of 'Suitcase Invaders' following a Florida incursion.",
+            "metric": "signal_transactions_2",
+            "value": "Naples: The only privately owned land on Buck Key Island — a roughly 14-acre property that has remained under the same ownership for more than 50 years — is listed for $13 million (reported Aug. 7, 2026).",
             "direction": "stable",
-            "label": "Naples — breaking",
+            "label": "Naples — transactions",
             "variable_type": "categorical",
             "source": {
-              "url": "https://www.news-press.com/story/money/2026/08/01/sw-florida-burmese-pythons-among-concerns-in-state-department-advisory-naples-lee-county-everglades/91089085007/",
-              "fetched_at": "2026-08-08T05:18:28Z",
+              "url": "https://www.naplesnews.com/story/money/companies/2026/08/07/rare-buck-key-island-offering-listed-for-13-million-in-lee-county/91189530007/",
+              "fetched_at": "2026-08-09T04:30:17Z",
               "tier": 2,
-              "citation": "SW Florida Burmese pythons among concerns in State Department advisory: \"[](https://www.news-press.com/)\n[](https://subscribe.news-press.com/rr/nanobar?gps-source=CPTILELEFT&itm_campaign=2026ENTJULBAU&itm_medium=ONSITE&success-url=https%3A%2F%2Fwww.news-press.com%2Fstory%2Fmoney%2F2026%2F08%2F01%2Fsw-florida-burmese-pythons-among-concerns-in-state-department-advisory-naples-lee-county-everglades%2F91089085007%2F)\n[](https://subscribe.news-press.com/rr/masthead?gps-source=CPMASTHEAD&itm_campaign=2026ENTJULBAU&itm_medium=ONSITE&success-url=https%3A%2F%2Fwww.news-press.com%2Fstory%2Fmoney%2F2026%2F08%2F01%2Fsw-florida-burmese-pythons-among-concerns-in-state-department-advisory-naples-lee-county-everglades%2F91089085007%2F)\n[News](https://www.news-press.com/news/) [Cape Coral](https://www.news-press.com/news/cape-coral/) [Sports](https://www.news-press.com/sports/) [Restaurants](https://www.news-press.com/taste/) [Real Estate](https://www.news-press.com/real-estate) [Advertise](https://advertising.usatoday.com/advertise-with-us/?cid=Web_LiQ_Network_AdvertiseWithUs_AdvertiseInquiry&publication=the_news_press&utm_source=local_publication&utm_medium=menu&utm_campaign=advertise_with_us) [Obituaries](https://www.news-press.com/obituaries) [eNewspaper](https://user.news-press.com/user/enewspaper) [Legals](https://www.news-press.com/public-notices)\n[](https://www.news-press.com/search/ \"Search\")\n[](https://www.news-press.com/weather/ \"Weather in Fort Myers: 74°F Clear\") [](https://subscribe.news-press.com/rr/navsub?gps-source=CPTOPNAVBAR&itm_campaign=2026ENTJULBAU&itm_medium=ONSITE&success-url=https%3A%2F%2Fwww.news-press.com%2Fstory%2Fmoney%2F2026%2F08%2F01%2Fsw-florida-burmese-pythons-among-concerns-in-state-department-advisory-naples-lee-county-everglades%2F91089085007%2F)\n[](https://login.news-press.com/PFTM-GUP/authenticate/?success-url=https%3A%2F%2Fwww.news-press.com%2Fstory%2Fmoney%2F2026%2F08%2F01%2Fsw-florida-burmese-pythons-among-concerns-in-state-department-advisory-naples-lee-county-everglades%2F91089085007%2F&cancel-url=https%3A%2F%2Fwww.news-press.com%2Fstory%2Fmoney%2F2026%2F08%2F01%2Fsw-florida-burmese-pythons-among-concerns-in-state-department-advisory-naples-lee-county-everglades%2F91089085007%2F)\n[](https://www.news-press.com/) [](https://www.news-press.com/)\nMONEY\n# After Florida incursion, State Department warns of 'Suitcase Invaders'\n[![Portrait of Phil Fernandez](https://www.news-press.com/gcdn/presto/2019/09/14/PNDN/6a77b474-579f-48fa-b56f-a2cc2b9de797-NDN_Phil_Fernandez.jpg?crop=2999,2999,x0,y570&width=48&height=48&format=pjpg&auto=webp) Phil Fernandez](https://www.naplesnews.com/staff/2684114001/phil-fernandez/)\nFort Myers News-Press & Naples Daily News\nAug. 1, 2026, 5:02 a.m. ET\nSummer in [Southwest Florida](https://www.news-press.com/story/news/environment/2025/06/09/pythons-in-florida-team-works-to-put-dent-in-species-killing-wildlife/83952033007/) is often associated with family vacations, hurricane season and, [increasingly, efforts](https://www.news-press.com/story/news/local/2026/06/27/she-chase\""
+              "citation": "Rare Buck Key Island offering listed for $13 million in Lee County: \"[](https://www.naplesnews.com/)\n[](https://subscribe.naplesnews.com/rr/nanobar?gps-source=CPTILELEFT&itm_campaign=2026ENTJULBAU&itm_medium=ONSITE&success-url=https%3A%2F%2Fwww.naplesnews.com%2Fstory%2Fmoney%2Fcompanies%2F2026%2F08%2F07%2Frare-buck-key-island-offering-listed-for-13-million-in-lee-county%2F91189530007%2F)\n[](https://subscribe.naplesnews.com/rr/masthead?gps-source=CPMASTHEAD&itm_campaign=2026ENTJULBAU&itm_medium=ONSITE&success-url=https%3A%2F%2Fwww.naplesnews.com%2Fstory%2Fmoney%2Fcompanies%2F2026%2F08%2F07%2Frare-buck-key-island-offering-listed-for-13-million-in-lee-county%2F91189530007%2F)\n[News](https://www.naplesnews.com/news/) [Sports](https://www.naplesnews.com/sports/) [Real Estate](https://www.naplesnews.com/business/real-estate/) [Restaurants](https://www.naplesnews.com/entertainment/restaurants/) [Opinion](https://www.naplesnews.com/opinion/) [Advertise](https://advertising.usatoday.com/advertise-with-us/?cid=Web_LiQ_Network_AdvertiseWithUs_AdvertiseInquiry&publication=naples_daily_news&utm_source=local_publication&utm_medium=menu&utm_campaign=advertise_with_us) [Obituaries](https://www.naplesnews.com/obituaries) [eNewspaper](https://user.naplesnews.com/user/enewspaper) [Legals](https://www.naplesnews.com/public-notices)\n[](https://www.naplesnews.com/search/ \"Search\")\n[](https://www.naplesnews.com/weather/ \"Weather in Naples: 78°F Mostly Cloudy\") [](https://subscribe.naplesnews.com/rr/navsub?gps-source=CPTOPNAVBAR&itm_campaign=2026ENTJULBAU&itm_medium=ONSITE&success-url=https%3A%2F%2Fwww.naplesnews.com%2Fstory%2Fmoney%2Fcompanies%2F2026%2F08%2F07%2Frare-buck-key-island-offering-listed-for-13-million-in-lee-county%2F91189530007%2F)\n[](https://login.naplesnews.com/PNDN-GUP/authenticate/?success-url=https%3A%2F%2Fwww.naplesnews.com%2Fstory%2Fmoney%2Fcompanies%2F2026%2F08%2F07%2Frare-buck-key-island-offering-listed-for-13-million-in-lee-county%2F91189530007%2F&cancel-url=https%3A%2F%2Fwww.naplesnews.com%2Fstory%2Fmoney%2Fcompanies%2F2026%2F08%2F07%2Frare-buck-key-island-offering-listed-for-13-million-in-lee-county%2F91189530007%2F)\n[](https://www.naplesnews.com/) [](https://www.naplesnews.com/)\nCOMPANIES\n# Exclusive: Last 'puzzle piece' on Buck Key Island hits market for $13M\n[![Portrait of Laura Layden](https://www.naplesnews.com/gcdn/authoring/authoring-images/2024/02/08/PNDN/72524348007-ndn-jh-20240126-laura-0001.JPG?crop=3313,3312,x1506,y0&width=48&height=48&format=pjpg&auto=webp) Laura Layden](https://www.naplesnews.com/staff/2647080001/laura-layden/)\nFort Myers News-Press & Naples Daily News\nUpdated Aug. 7, 2026, 10:13 a.m. ET\nThe only privately owned land on Buck Key Island is back on the market.\nOver the decades, the roughly 14-acre property has been on and off the market — and it has been considered for conservation.\nYet, it has remained under the same ownership for more than 50 years.\n[](https://www.naplesnews.com/)\n[Help](https://help.naplesnews.com) [Accessibility](https://cm.naplesnews.com/accessibility/) [Sitemap\""
             },
             "suggestions": [
-              "What's driving signal breaking 2?",
-              "How does signal breaking 2 here compare to other SWFL areas?"
+              "What's driving signal transactions 2?",
+              "How does signal transactions 2 here compare to other SWFL areas?"
             ]
           },
           {
@@ -170,7 +170,7 @@
             "variable_type": "categorical",
             "source": {
               "url": "https://www.news-press.com/story/money/business/local/2026/08/03/builder-cancels-auction-for-luxury-north-naples-florida-estate/91127240007/",
-              "fetched_at": "2026-08-08T05:18:28Z",
+              "fetched_at": "2026-08-09T04:30:17Z",
               "tier": 2,
               "citation": "Builder cancels auction for luxury North Naples estate: \"[](https://www.news-press.com/)\n[](https://subscribe.news-press.com/rr/nanobar?gps-source=CPTILELEFT&itm_campaign=2026ENTJULBAU&itm_medium=ONSITE&success-url=https%3A%2F%2Fwww.news-press.com%2Fstory%2Fmoney%2Fbusiness%2Flocal%2F2026%2F08%2F03%2Fbuilder-cancels-auction-for-luxury-north-naples-florida-estate%2F91127240007%2F)\n[](https://subscribe.news-press.com/rr/masthead?gps-source=CPMASTHEAD&itm_campaign=2026ENTJULBAU&itm_medium=ONSITE&success-url=https%3A%2F%2Fwww.news-press.com%2Fstory%2Fmoney%2Fbusiness%2Flocal%2F2026%2F08%2F03%2Fbuilder-cancels-auction-for-luxury-north-naples-florida-estate%2F91127240007%2F)\n[News](https://www.news-press.com/news/) [Cape Coral](https://www.news-press.com/news/cape-coral/) [Sports](https://www.news-press.com/sports/) [Restaurants](https://www.news-press.com/taste/) [Real Estate](https://www.news-press.com/real-estate) [Advertise](https://advertising.usatoday.com/advertise-with-us/?cid=Web_LiQ_Network_AdvertiseWithUs_AdvertiseInquiry&publication=the_news_press&utm_source=local_publication&utm_medium=menu&utm_campaign=advertise_with_us) [Obituaries](https://www.news-press.com/obituaries) [eNewspaper](https://user.news-press.com/user/enewspaper) [Legals](https://www.news-press.com/public-notices)\n[](https://www.news-press.com/search/ \"Search\")\n[](https://www.news-press.com/weather/ \"Weather in Fort Myers: 75°F Cloudy\") [](https://subscribe.news-press.com/rr/navsub?gps-source=CPTOPNAVBAR&itm_campaign=2026ENTJULBAU&itm_medium=ONSITE&success-url=https%3A%2F%2Fwww.news-press.com%2Fstory%2Fmoney%2Fbusiness%2Flocal%2F2026%2F08%2F03%2Fbuilder-cancels-auction-for-luxury-north-naples-florida-estate%2F91127240007%2F)\n[](https://login.news-press.com/PFTM-GUP/authenticate/?success-url=https%3A%2F%2Fwww.news-press.com%2Fstory%2Fmoney%2Fbusiness%2Flocal%2F2026%2F08%2F03%2Fbuilder-cancels-auction-for-luxury-north-naples-florida-estate%2F91127240007%2F&cancel-url=https%3A%2F%2Fwww.news-press.com%2Fstory%2Fmoney%2Fbusiness%2Flocal%2F2026%2F08%2F03%2Fbuilder-cancels-auction-for-luxury-north-naples-florida-estate%2F91127240007%2F)\n[](https://www.news-press.com/) [](https://www.news-press.com/)\nLOCAL BUSINESS\n# Builder cancels auction for luxury waterfront estate in North Naples\n[![Portrait of Laura Layden](https://www.news-press.com/gcdn/authoring/authoring-images/2024/02/08/PNDN/72524348007-ndn-jh-20240126-laura-0001.JPG?crop=3313,3312,x1506,y0&width=48&height=48&format=pjpg&auto=webp) Laura Layden](https://www.naplesnews.com/staff/2647080001/laura-layden/)\nFort Myers News-Press & Naples Daily News\nAug. 3, 2026, 4:11 p.m. ET\nA highly publicized auction for a newly built, move-in-ready waterfront estate in North Naples didn't happen.\nWhile the auction generated interest, the seller decided not to move forward with it.\nNaples-based Elite Auctions was [hired to handle the no-reserve auction](https://www.news-press.com/story/money/business/local/2026/07/10/north-naples-waterfront-estate-to-sell-at-no-reserve-auction/90861406007/) for\""
             },
@@ -187,7 +187,7 @@
             "variable_type": "categorical",
             "source": {
               "url": "https://www.news-press.com/story/money/business/local/2026/08/03/builder-cancels-auction-for-luxury-north-naples-florida-estate/91127240007/",
-              "fetched_at": "2026-08-08T05:18:28Z",
+              "fetched_at": "2026-08-09T04:30:17Z",
               "tier": 2,
               "citation": "Builder cancels auction for luxury North Naples estate: \"[](https://www.news-press.com/)\n[](https://subscribe.news-press.com/rr/nanobar?gps-source=CPTILELEFT&itm_campaign=2026ENTJULBAU&itm_medium=ONSITE&success-url=https%3A%2F%2Fwww.news-press.com%2Fstory%2Fmoney%2Fbusiness%2Flocal%2F2026%2F08%2F03%2Fbuilder-cancels-auction-for-luxury-north-naples-florida-estate%2F91127240007%2F)\n[](https://subscribe.news-press.com/rr/masthead?gps-source=CPMASTHEAD&itm_campaign=2026ENTJULBAU&itm_medium=ONSITE&success-url=https%3A%2F%2Fwww.news-press.com%2Fstory%2Fmoney%2Fbusiness%2Flocal%2F2026%2F08%2F03%2Fbuilder-cancels-auction-for-luxury-north-naples-florida-estate%2F91127240007%2F)\n[News](https://www.news-press.com/news/) [Cape Coral](https://www.news-press.com/news/cape-coral/) [Sports](https://www.news-press.com/sports/) [Restaurants](https://www.news-press.com/taste/) [Real Estate](https://www.news-press.com/real-estate) [Advertise](https://advertising.usatoday.com/advertise-with-us/?cid=Web_LiQ_Network_AdvertiseWithUs_AdvertiseInquiry&publication=the_news_press&utm_source=local_publication&utm_medium=menu&utm_campaign=advertise_with_us) [Obituaries](https://www.news-press.com/obituaries) [eNewspaper](https://user.news-press.com/user/enewspaper) [Legals](https://www.news-press.com/public-notices)\n[](https://www.news-press.com/search/ \"Search\")\n[](https://www.news-press.com/weather/ \"Weather in Fort Myers: 75°F Cloudy\") [](https://subscribe.news-press.com/rr/navsub?gps-source=CPTOPNAVBAR&itm_campaign=2026ENTJULBAU&itm_medium=ONSITE&success-url=https%3A%2F%2Fwww.news-press.com%2Fstory%2Fmoney%2Fbusiness%2Flocal%2F2026%2F08%2F03%2Fbuilder-cancels-auction-for-luxury-north-naples-florida-estate%2F91127240007%2F)\n[](https://login.news-press.com/PFTM-GUP/authenticate/?success-url=https%3A%2F%2Fwww.news-press.com%2Fstory%2Fmoney%2Fbusiness%2Flocal%2F2026%2F08%2F03%2Fbuilder-cancels-auction-for-luxury-north-naples-florida-estate%2F91127240007%2F&cancel-url=https%3A%2F%2Fwww.news-press.com%2Fstory%2Fmoney%2Fbusiness%2Flocal%2F2026%2F08%2F03%2Fbuilder-cancels-auction-for-luxury-north-naples-florida-estate%2F91127240007%2F)\n[](https://www.news-press.com/) [](https://www.news-press.com/)\nLOCAL BUSINESS\n# Builder cancels auction for luxury waterfront estate in North Naples\n[![Portrait of Laura Layden](https://www.news-press.com/gcdn/authoring/authoring-images/2024/02/08/PNDN/72524348007-ndn-jh-20240126-laura-0001.JPG?crop=3313,3312,x1506,y0&width=48&height=48&format=pjpg&auto=webp) Laura Layden](https://www.naplesnews.com/staff/2647080001/laura-layden/)\nFort Myers News-Press & Naples Daily News\nAug. 3, 2026, 4:11 p.m. ET\nA highly publicized auction for a newly built, move-in-ready waterfront estate in North Naples didn't happen.\nWhile the auction generated interest, the seller decided not to move forward with it.\nNaples-based Elite Auctions was [hired to handle the no-reserve auction](https://www.news-press.com/story/money/business/local/2026/07/10/north-naples-waterfront-estate-to-sell-at-no-reserve-auction/90861406007/) for\""
             },
@@ -204,7 +204,7 @@
             "variable_type": "categorical",
             "source": {
               "url": "https://www.news-press.com/story/money/companies/2026/07/24/fort-myers-beach-condo-sells-for-2-million-a-new-record-in-the-sand/90999859007/",
-              "fetched_at": "2026-08-08T05:18:28Z",
+              "fetched_at": "2026-08-09T04:30:17Z",
               "tier": 2,
               "citation": "Fort Myers Beach condo sells for $2 million, a new record in the sand: \"[](https://www.news-press.com/)\n[](https://subscribe.news-press.com/rr/nanobar?gps-source=CPTILELEFT&itm_campaign=2026ENTJULBAU&itm_medium=ONSITE&success-url=https%3A%2F%2Fwww.news-press.com%2Fstory%2Fmoney%2Fcompanies%2F2026%2F07%2F24%2Ffort-myers-beach-condo-sells-for-2-million-a-new-record-in-the-sand%2F90999859007%2F)\n[](https://subscribe.news-press.com/rr/masthead?gps-source=CPMASTHEAD&itm_campaign=2026ENTJULBAU&itm_medium=ONSITE&success-url=https%3A%2F%2Fwww.news-press.com%2Fstory%2Fmoney%2Fcompanies%2F2026%2F07%2F24%2Ffort-myers-beach-condo-sells-for-2-million-a-new-record-in-the-sand%2F90999859007%2F)\n[News](https://www.news-press.com/news/) [Cape Coral](https://www.news-press.com/news/cape-coral/) [Sports](https://www.news-press.com/sports/) [Restaurants](https://www.news-press.com/taste/) [Real Estate](https://www.news-press.com/real-estate) [Advertise](https://advertising.usatoday.com/advertise-with-us/?cid=Web_LiQ_Network_AdvertiseWithUs_AdvertiseInquiry&publication=the_news_press&utm_source=local_publication&utm_medium=menu&utm_campaign=advertise_with_us) [Obituaries](https://www.news-press.com/obituaries) [eNewspaper](https://user.news-press.com/user/enewspaper) [Legals](https://www.news-press.com/public-notices)\n[](https://www.news-press.com/search/ \"Search\")\n[](https://www.news-press.com/weather/ \"Weather in Fort Myers: 77°F Mostly Cloudy\") [](https://subscribe.news-press.com/rr/navsub?gps-source=CPTOPNAVBAR&itm_campaign=2026ENTJULBAU&itm_medium=ONSITE&success-url=https%3A%2F%2Fwww.news-press.com%2Fstory%2Fmoney%2Fcompanies%2F2026%2F07%2F24%2Ffort-myers-beach-condo-sells-for-2-million-a-new-record-in-the-sand%2F90999859007%2F)\n[](https://login.news-press.com/PFTM-GUP/authenticate/?success-url=https%3A%2F%2Fwww.news-press.com%2Fstory%2Fmoney%2Fcompanies%2F2026%2F07%2F24%2Ffort-myers-beach-condo-sells-for-2-million-a-new-record-in-the-sand%2F90999859007%2F&cancel-url=https%3A%2F%2Fwww.news-press.com%2Fstory%2Fmoney%2Fcompanies%2F2026%2F07%2F24%2Ffort-myers-beach-condo-sells-for-2-million-a-new-record-in-the-sand%2F90999859007%2F)\n[](https://www.news-press.com/) [](https://www.news-press.com/)\nCOMPANIES\n# A big deal: Fort Myers Beach condo sells for record $2 million\n[![Portrait of Laura Layden](https://www.news-press.com/gcdn/authoring/authoring-images/2024/02/08/PNDN/72524348007-ndn-jh-20240126-laura-0001.JPG?crop=3313,3312,x1506,y0&width=48&height=48&format=pjpg&auto=webp) Laura Layden](https://www.naplesnews.com/staff/2647080001/laura-layden/)\nFort Myers News-Press & Naples Daily News\nJuly 24, 2026, 5:06 a.m. ET\nA waterfront condominium on Fort Myers Beach fetched $2 million, setting a new record on the island.\nIt's the highest price paid for an existing — or resale — condo on the sand in the town — ever, according to the seller's agent.\n[](https://www.news-press.com/)\n[Help](https://help.news-press.com) [Accessibility](https://cm.news-press.com/accessibility/) [Sitemap](https://www.news-press.com/sitemap/) [Terms of Service](htt\""
             },
@@ -221,7 +221,7 @@
             "variable_type": "categorical",
             "source": {
               "url": "https://www.news-press.com/story/money/business/local/2026/08/03/builder-cancels-auction-for-luxury-north-naples-florida-estate/91127240007/",
-              "fetched_at": "2026-08-08T05:18:28Z",
+              "fetched_at": "2026-08-09T04:30:17Z",
               "tier": 2,
               "citation": "Builder cancels auction for luxury North Naples estate: \"[](https://www.news-press.com/)\n[](https://subscribe.news-press.com/rr/nanobar?gps-source=CPTILELEFT&itm_campaign=2026ENTJULBAU&itm_medium=ONSITE&success-url=https%3A%2F%2Fwww.news-press.com%2Fstory%2Fmoney%2Fbusiness%2Flocal%2F2026%2F08%2F03%2Fbuilder-cancels-auction-for-luxury-north-naples-florida-estate%2F91127240007%2F)\n[](https://subscribe.news-press.com/rr/masthead?gps-source=CPMASTHEAD&itm_campaign=2026ENTJULBAU&itm_medium=ONSITE&success-url=https%3A%2F%2Fwww.news-press.com%2Fstory%2Fmoney%2Fbusiness%2Flocal%2F2026%2F08%2F03%2Fbuilder-cancels-auction-for-luxury-north-naples-florida-estate%2F91127240007%2F)\n[News](https://www.news-press.com/news/) [Cape Coral](https://www.news-press.com/news/cape-coral/) [Sports](https://www.news-press.com/sports/) [Restaurants](https://www.news-press.com/taste/) [Real Estate](https://www.news-press.com/real-estate) [Advertise](https://advertising.usatoday.com/advertise-with-us/?cid=Web_LiQ_Network_AdvertiseWithUs_AdvertiseInquiry&publication=the_news_press&utm_source=local_publication&utm_medium=menu&utm_campaign=advertise_with_us) [Obituaries](https://www.news-press.com/obituaries) [eNewspaper](https://user.news-press.com/user/enewspaper) [Legals](https://www.news-press.com/public-notices)\n[](https://www.news-press.com/search/ \"Search\")\n[](https://www.news-press.com/weather/ \"Weather in Fort Myers: 75°F Cloudy\") [](https://subscribe.news-press.com/rr/navsub?gps-source=CPTOPNAVBAR&itm_campaign=2026ENTJULBAU&itm_medium=ONSITE&success-url=https%3A%2F%2Fwww.news-press.com%2Fstory%2Fmoney%2Fbusiness%2Flocal%2F2026%2F08%2F03%2Fbuilder-cancels-auction-for-luxury-north-naples-florida-estate%2F91127240007%2F)\n[](https://login.news-press.com/PFTM-GUP/authenticate/?success-url=https%3A%2F%2Fwww.news-press.com%2Fstory%2Fmoney%2Fbusiness%2Flocal%2F2026%2F08%2F03%2Fbuilder-cancels-auction-for-luxury-north-naples-florida-estate%2F91127240007%2F&cancel-url=https%3A%2F%2Fwww.news-press.com%2Fstory%2Fmoney%2Fbusiness%2Flocal%2F2026%2F08%2F03%2Fbuilder-cancels-auction-for-luxury-north-naples-florida-estate%2F91127240007%2F)\n[](https://www.news-press.com/) [](https://www.news-press.com/)\nLOCAL BUSINESS\n# Builder cancels auction for luxury waterfront estate in North Naples\n[![Portrait of Laura Layden](https://www.news-press.com/gcdn/authoring/authoring-images/2024/02/08/PNDN/72524348007-ndn-jh-20240126-laura-0001.JPG?crop=3313,3312,x1506,y0&width=48&height=48&format=pjpg&auto=webp) Laura Layden](https://www.naplesnews.com/staff/2647080001/laura-layden/)\nFort Myers News-Press & Naples Daily News\nAug. 3, 2026, 4:11 p.m. ET\nA highly publicized auction for a newly built, move-in-ready waterfront estate in North Naples didn't happen.\nWhile the auction generated interest, the seller decided not to move forward with it.\nNaples-based Elite Auctions was [hired to handle the no-reserve auction](https://www.news-press.com/story/money/business/local/2026/07/10/north-naples-waterfront-estate-to-sell-at-no-reserve-auction/90861406007/) for\""
             },
@@ -238,7 +238,7 @@
             "variable_type": "categorical",
             "source": {
               "url": "https://www.news-press.com/story/money/business/local/2026/08/03/builder-cancels-auction-for-luxury-north-naples-florida-estate/91127240007/",
-              "fetched_at": "2026-08-08T05:18:28Z",
+              "fetched_at": "2026-08-09T04:30:17Z",
               "tier": 2,
               "citation": "Builder cancels auction for luxury North Naples estate: \"[](https://www.news-press.com/)\n[](https://subscribe.news-press.com/rr/nanobar?gps-source=CPTILELEFT&itm_campaign=2026ENTJULBAU&itm_medium=ONSITE&success-url=https%3A%2F%2Fwww.news-press.com%2Fstory%2Fmoney%2Fbusiness%2Flocal%2F2026%2F08%2F03%2Fbuilder-cancels-auction-for-luxury-north-naples-florida-estate%2F91127240007%2F)\n[](https://subscribe.news-press.com/rr/masthead?gps-source=CPMASTHEAD&itm_campaign=2026ENTJULBAU&itm_medium=ONSITE&success-url=https%3A%2F%2Fwww.news-press.com%2Fstory%2Fmoney%2Fbusiness%2Flocal%2F2026%2F08%2F03%2Fbuilder-cancels-auction-for-luxury-north-naples-florida-estate%2F91127240007%2F)\n[News](https://www.news-press.com/news/) [Cape Coral](https://www.news-press.com/news/cape-coral/) [Sports](https://www.news-press.com/sports/) [Restaurants](https://www.news-press.com/taste/) [Real Estate](https://www.news-press.com/real-estate) [Advertise](https://advertising.usatoday.com/advertise-with-us/?cid=Web_LiQ_Network_AdvertiseWithUs_AdvertiseInquiry&publication=the_news_press&utm_source=local_publication&utm_medium=menu&utm_campaign=advertise_with_us) [Obituaries](https://www.news-press.com/obituaries) [eNewspaper](https://user.news-press.com/user/enewspaper) [Legals](https://www.news-press.com/public-notices)\n[](https://www.news-press.com/search/ \"Search\")\n[](https://www.news-press.com/weather/ \"Weather in Fort Myers: 75°F Cloudy\") [](https://subscribe.news-press.com/rr/navsub?gps-source=CPTOPNAVBAR&itm_campaign=2026ENTJULBAU&itm_medium=ONSITE&success-url=https%3A%2F%2Fwww.news-press.com%2Fstory%2Fmoney%2Fbusiness%2Flocal%2F2026%2F08%2F03%2Fbuilder-cancels-auction-for-luxury-north-naples-florida-estate%2F91127240007%2F)\n[](https://login.news-press.com/PFTM-GUP/authenticate/?success-url=https%3A%2F%2Fwww.news-press.com%2Fstory%2Fmoney%2Fbusiness%2Flocal%2F2026%2F08%2F03%2Fbuilder-cancels-auction-for-luxury-north-naples-florida-estate%2F91127240007%2F&cancel-url=https%3A%2F%2Fwww.news-press.com%2Fstory%2Fmoney%2Fbusiness%2Flocal%2F2026%2F08%2F03%2Fbuilder-cancels-auction-for-luxury-north-naples-florida-estate%2F91127240007%2F)\n[](https://www.news-press.com/) [](https://www.news-press.com/)\nLOCAL BUSINESS\n# Builder cancels auction for luxury waterfront estate in North Naples\n[![Portrait of Laura Layden](https://www.news-press.com/gcdn/authoring/authoring-images/2024/02/08/PNDN/72524348007-ndn-jh-20240126-laura-0001.JPG?crop=3313,3312,x1506,y0&width=48&height=48&format=pjpg&auto=webp) Laura Layden](https://www.naplesnews.com/staff/2647080001/laura-layden/)\nFort Myers News-Press & Naples Daily News\nAug. 3, 2026, 4:11 p.m. ET\nA highly publicized auction for a newly built, move-in-ready waterfront estate in North Naples didn't happen.\nWhile the auction generated interest, the seller decided not to move forward with it.\nNaples-based Elite Auctions was [hired to handle the no-reserve auction](https://www.news-press.com/story/money/business/local/2026/07/10/north-naples-waterfront-estate-to-sell-at-no-reserve-auction/90861406007/) for\""
             },
@@ -248,20 +248,20 @@
             ]
           },
           {
-            "metric": "signal_transactions_8",
-            "value": "Fort Myers: A historic Naples cottage once owned by legendary interior designer Albert Hadley, believed to have been home to the original postmistress in Old Naples and built in the 1930s, has hit the market as of July 30, 2026.",
+            "metric": "signal_development_8",
+            "value": "Fort Myers: Lee County's $100 million road to nowhere will eventually go somewhere, as of Aug. 6, 2026.",
             "direction": "stable",
-            "label": "Fort Myers — transactions",
+            "label": "Fort Myers — development",
             "variable_type": "categorical",
             "source": {
-              "url": "https://www.naplesnews.com/story/money/real-estate/2026/07/30/historic-naples-florida-cottage-once-owned-by-design-icon-hits-market/91088413007/",
-              "fetched_at": "2026-08-08T05:18:28Z",
+              "url": "https://www.naplesnews.com/story/money/2026/08/06/florida-pavement-paradise-palm-trees-streetlights-no-traffic-for-now-swfl-lee-county-fort-myers/91155476007/",
+              "fetched_at": "2026-08-09T04:30:17Z",
               "tier": 2,
-              "citation": "Historic Naples cottage once owned by design icon hits market: \"[](https://www.naplesnews.com/)\n[](https://subscribe.naplesnews.com/rr/nanobar?gps-source=CPTILELEFT&itm_campaign=2026ENTJULBAU&itm_medium=ONSITE&success-url=https%3A%2F%2Fwww.naplesnews.com%2Fstory%2Fmoney%2Freal-estate%2F2026%2F07%2F30%2Fhistoric-naples-florida-cottage-once-owned-by-design-icon-hits-market%2F91088413007%2F)\n[](https://subscribe.naplesnews.com/rr/masthead?gps-source=CPMASTHEAD&itm_campaign=2026ENTJULBAU&itm_medium=ONSITE&success-url=https%3A%2F%2Fwww.naplesnews.com%2Fstory%2Fmoney%2Freal-estate%2F2026%2F07%2F30%2Fhistoric-naples-florida-cottage-once-owned-by-design-icon-hits-market%2F91088413007%2F)\n[News](https://www.naplesnews.com/news/) [Sports](https://www.naplesnews.com/sports/) [Real Estate](https://www.naplesnews.com/business/real-estate/) [Restaurants](https://www.naplesnews.com/entertainment/restaurants/) [Opinion](https://www.naplesnews.com/opinion/) [Advertise](https://advertising.usatoday.com/advertise-with-us/?cid=Web_LiQ_Network_AdvertiseWithUs_AdvertiseInquiry&publication=naples_daily_news&utm_source=local_publication&utm_medium=menu&utm_campaign=advertise_with_us) [Obituaries](https://www.naplesnews.com/obituaries) [eNewspaper](https://user.naplesnews.com/user/enewspaper) [Legals](https://www.naplesnews.com/public-notices)\n[](https://www.naplesnews.com/search/ \"Search\")\n[](https://www.naplesnews.com/weather/ \"Weather in Naples: 81°F Showers\") [](https://subscribe.naplesnews.com/rr/navsub?gps-source=CPTOPNAVBAR&itm_campaign=2026ENTJULBAU&itm_medium=ONSITE&success-url=https%3A%2F%2Fwww.naplesnews.com%2Fstory%2Fmoney%2Freal-estate%2F2026%2F07%2F30%2Fhistoric-naples-florida-cottage-once-owned-by-design-icon-hits-market%2F91088413007%2F)\n[](https://login.naplesnews.com/PNDN-GUP/authenticate/?success-url=https%3A%2F%2Fwww.naplesnews.com%2Fstory%2Fmoney%2Freal-estate%2F2026%2F07%2F30%2Fhistoric-naples-florida-cottage-once-owned-by-design-icon-hits-market%2F91088413007%2F&cancel-url=https%3A%2F%2Fwww.naplesnews.com%2Fstory%2Fmoney%2Freal-estate%2F2026%2F07%2F30%2Fhistoric-naples-florida-cottage-once-owned-by-design-icon-hits-market%2F91088413007%2F)\n[](https://www.naplesnews.com/) [](https://www.naplesnews.com/)\n[REAL ESTATE](https://www.naplesnews.com/business/real-estate/)\n# Rare Naples cottage once owned by design icon hits market\n[![Portrait of Laura Layden](https://www.naplesnews.com/gcdn/authoring/authoring-images/2024/02/08/PNDN/72524348007-ndn-jh-20240126-laura-0001.JPG?crop=3313,3312,x1506,y0&width=48&height=48&format=pjpg&auto=webp) Laura Layden](https://www.naplesnews.com/staff/2647080001/laura-layden/)\nFort Myers News-Press & Naples Daily News\nJuly 30, 2026, 10:28 a.m. ET\nA quaint cottage that once served as a personal retreat for Albert Hadley, a legendary interior designer, has hit the market in Naples.\nBelieved to have been home to the original postmistress in Old Naples, Hadley discovered the 1930s-era cottage decades later and reportedly purchased it on the spot.\nThe late American designer's client list\""
+              "citation": "Florida pavement paradise: Palm trees, streetlights, almost no traffic: \"[](https://www.naplesnews.com/)\n[](https://subscribe.naplesnews.com/rr/nanobar?gps-source=CPTILELEFT&itm_campaign=2026ENTJULBAU&itm_medium=ONSITE&success-url=https%3A%2F%2Fwww.naplesnews.com%2Fstory%2Fmoney%2F2026%2F08%2F06%2Fflorida-pavement-paradise-palm-trees-streetlights-no-traffic-for-now-swfl-lee-county-fort-myers%2F91155476007%2F)\n[](https://subscribe.naplesnews.com/rr/masthead?gps-source=CPMASTHEAD&itm_campaign=2026ENTJULBAU&itm_medium=ONSITE&success-url=https%3A%2F%2Fwww.naplesnews.com%2Fstory%2Fmoney%2F2026%2F08%2F06%2Fflorida-pavement-paradise-palm-trees-streetlights-no-traffic-for-now-swfl-lee-county-fort-myers%2F91155476007%2F)\n[News](https://www.naplesnews.com/news/) [Sports](https://www.naplesnews.com/sports/) [Real Estate](https://www.naplesnews.com/business/real-estate/) [Restaurants](https://www.naplesnews.com/entertainment/restaurants/) [Opinion](https://www.naplesnews.com/opinion/) [Advertise](https://advertising.usatoday.com/advertise-with-us/?cid=Web_LiQ_Network_AdvertiseWithUs_AdvertiseInquiry&publication=naples_daily_news&utm_source=local_publication&utm_medium=menu&utm_campaign=advertise_with_us) [Obituaries](https://www.naplesnews.com/obituaries) [eNewspaper](https://user.naplesnews.com/user/enewspaper) [Legals](https://www.naplesnews.com/public-notices)\n[](https://www.naplesnews.com/search/ \"Search\")\n[](https://www.naplesnews.com/weather/ \"Weather in Naples: 74°F Clear\") [](https://subscribe.naplesnews.com/rr/navsub?gps-source=CPTOPNAVBAR&itm_campaign=2026ENTJULBAU&itm_medium=ONSITE&success-url=https%3A%2F%2Fwww.naplesnews.com%2Fstory%2Fmoney%2F2026%2F08%2F06%2Fflorida-pavement-paradise-palm-trees-streetlights-no-traffic-for-now-swfl-lee-county-fort-myers%2F91155476007%2F)\n[](https://login.naplesnews.com/PNDN-GUP/authenticate/?success-url=https%3A%2F%2Fwww.naplesnews.com%2Fstory%2Fmoney%2F2026%2F08%2F06%2Fflorida-pavement-paradise-palm-trees-streetlights-no-traffic-for-now-swfl-lee-county-fort-myers%2F91155476007%2F&cancel-url=https%3A%2F%2Fwww.naplesnews.com%2Fstory%2Fmoney%2F2026%2F08%2F06%2Fflorida-pavement-paradise-palm-trees-streetlights-no-traffic-for-now-swfl-lee-county-fort-myers%2F91155476007%2F)\n[](https://www.naplesnews.com/) [](https://www.naplesnews.com/)\n[MONEY](https://www.naplesnews.com/business/)\n# $100 million Florida road to nowhere will go somewhere some day\n[![Portrait of Phil Fernandez](https://www.naplesnews.com/gcdn/presto/2019/09/14/PNDN/6a77b474-579f-48fa-b56f-a2cc2b9de797-NDN_Phil_Fernandez.jpg?crop=2999,2999,x0,y570&width=48&height=48&format=pjpg&auto=webp) Phil Fernandez](https://www.naplesnews.com/staff/2684114001/phil-fernandez/)\nFort Myers News-Press & Naples Daily News\nAug. 6, 2026, 5:03 a.m. ET\nVery kind and [observant motoring](https://www.naplesnews.com/story/money/2026/07/06/remarkable-week-shows-how-far-fort-myers-beach-florida-has-come-lee-couinty-swfl-resort-pier-island/90767068007/) reader Ron DeLigny [dropped a line](https://www.naplesnews.com/story/money/2026/08/03/2-florida-co\""
             },
             "suggestions": [
-              "What's driving signal transactions 8?",
-              "How does signal transactions 8 here compare to other SWFL areas?"
+              "What's driving signal development 8?",
+              "How does signal development 8 here compare to other SWFL areas?"
             ]
           }
         ],
@@ -318,21 +318,11 @@
                   "latest_place": "Bayfront",
                   "latest_source": "https://www.naplesnews.com/story/money/business/local/2026/08/04/bayfront-in-naples-florida-is-getting-more-than-a-barneys-see-whats-coming/91105441007/"
                 }
-              },
-              {
-                "key": "34120",
-                "label": "34120",
-                "cells": {
-                  "items": 1,
-                  "latest_fact": "Golden Gate Estates opened a new fire and EMS station this week.",
-                  "latest_place": "Golden Gate Estates",
-                  "latest_source": "https://www.gulfshorebusiness.com/news/golden-gate-estates-opens-new-fire-and-ems-station-this-week/article_587014e5-2ee5-418c-ba6b-0d27fcc1c5e7.html"
-                }
               }
             ],
             "source": {
               "url": "https://www.swfldatagulf.com/r/source/city_pulse",
-              "fetched_at": "2026-08-08T05:18:28Z",
+              "fetched_at": "2026-08-09T04:30:17Z",
               "tier": 2,
               "citation": "Distilled, citation-backed SWFL news signals; each ZIP's items carry per-item source URLs in data_lake.city_pulse."
             },
@@ -340,7 +330,7 @@
           }
         ],
         "caveats": [
-          "99 additional live signals not surfaced here (cap 8); the full set is in data_lake.city_pulse.",
+          "103 additional live signals not surfaced here (cap 8); the full set is in data_lake.city_pulse.",
           "Each signal is dated current-events context with a per-signal source; freshness is TTL-bounded by topic (breaking 1d → structural 90d)."
         ],
         "contradicts": [],
@@ -353,15 +343,226 @@
         "relevance": {
           "decay_curve": "weeks",
           "half_life_hours": 720,
-          "computed_at": "2026-08-08T05:18:28Z"
+          "computed_at": "2026-08-09T04:30:17Z"
         },
         "exogenous_signals": []
       }
     },
     {
       "packId": "rsw-airport",
-      "status": "skipped-fresh",
-      "written": false
+      "status": "built",
+      "version": 11,
+      "written": true,
+      "brainOutput": {
+        "brain_id": "rsw-airport",
+        "version": 11,
+        "refined_at": "2026-08-09T04:30:17Z",
+        "expires": "2026-09-08T04:30:17Z",
+        "ttl_seconds": 2592000,
+        "direction": "bullish",
+        "magnitude": 0.15891458763781738,
+        "drivers": [],
+        "overrides": [],
+        "conclusion": "LCPA Aviation April 2026 — RSW 1,152,669 total passengers (-2.2% YoY), trailing-12-mo 11,197,951 (+2.4% vs prior year — the direction basis), 512,534 arrivals / 640,135 departures, 10,797 aircraft operations, 3,463,896 lbs air freight. Source: Lee County Port Authority (flylcpa.com/about-lcpa/reports-and-statistics/).",
+        "key_metrics": [
+          {
+            "metric": "rsw_trailing_12mo_total_passengers_yoy",
+            "label": "RSW Total Passengers — Trailing-12-Mo YoY (direction driver)",
+            "value": 2.3837188145672608,
+            "direction": "rising",
+            "variable_type": "intensive",
+            "units": "%",
+            "display_format": "raw",
+            "source": {
+              "url": "https://s3.wasabisys.com/cdn.flylcpa.com/app/uploads/2024/11/21145013/Total-Passengers-2026.pdf",
+              "fetched_at": "2026-08-09T04:30:17Z",
+              "tier": 1,
+              "citation": "Lee County Port Authority Aviation Statistics — RSW trailing-12-mo total passengers ending 2026-04 vs prior 12 mo: +2.4%"
+            },
+            "suggestions": [
+              "What's driving rsw trailing 12mo total passengers yoy?",
+              "How does rsw trailing 12mo total passengers yoy here compare to other SWFL areas?"
+            ]
+          },
+          {
+            "metric": "rsw_trailing_12mo_total_passengers",
+            "label": "RSW Trailing 12-Mo Total Passengers",
+            "value": 11197951,
+            "direction": "rising",
+            "variable_type": "extensive",
+            "units": "passengers",
+            "display_format": "count",
+            "source": {
+              "url": "https://s3.wasabisys.com/cdn.flylcpa.com/app/uploads/2024/11/21145013/Total-Passengers-2026.pdf",
+              "fetched_at": "2026-08-09T04:30:17Z",
+              "tier": 1,
+              "citation": "Lee County Port Authority Aviation Statistics — RSW trailing 12-month total passengers ending 2026-04"
+            },
+            "suggestions": [
+              "What's driving rsw trailing 12mo total passengers?",
+              "How does rsw trailing 12mo total passengers here compare to other SWFL areas?"
+            ]
+          },
+          {
+            "metric": "rsw_total_passengers",
+            "label": "RSW Monthly Total Passengers",
+            "value": 1152669,
+            "direction": "falling",
+            "variable_type": "extensive",
+            "units": "passengers",
+            "display_format": "count",
+            "source": {
+              "url": "https://s3.wasabisys.com/cdn.flylcpa.com/app/uploads/2024/11/21145013/Total-Passengers-2026.pdf",
+              "fetched_at": "2026-08-09T04:30:17Z",
+              "tier": 1,
+              "citation": "Lee County Port Authority Aviation Statistics — RSW 2026-04 — 1,152,669 total passengers (-2.2% YoY, single month)"
+            },
+            "suggestions": [
+              "What's driving rsw total passengers?",
+              "How does rsw total passengers here compare to other SWFL areas?"
+            ]
+          },
+          {
+            "metric": "rsw_deplanements",
+            "label": "RSW Monthly Deplanements (Arrivals)",
+            "value": 512534,
+            "direction": "falling",
+            "variable_type": "extensive",
+            "units": "passengers",
+            "display_format": "count",
+            "source": {
+              "url": "https://s3.wasabisys.com/cdn.flylcpa.com/app/uploads/2024/12/21142454/Passenger-Deplanements.pdf",
+              "fetched_at": "2026-08-09T04:30:17Z",
+              "tier": 1,
+              "citation": "Lee County Port Authority Aviation Statistics — RSW 2026-04 arrivals — 512,534 deplanements"
+            },
+            "suggestions": [
+              "What's driving rsw deplanements?",
+              "How does rsw deplanements here compare to other SWFL areas?"
+            ]
+          },
+          {
+            "metric": "rsw_monthly_enplanements",
+            "label": "RSW Monthly Enplanements (Departures)",
+            "value": 640135,
+            "direction": "rising",
+            "variable_type": "extensive",
+            "units": "passengers",
+            "display_format": "count",
+            "source": {
+              "url": "https://s3.wasabisys.com/cdn.flylcpa.com/app/uploads/2024/11/21144941/RSW-Enplanement-Passengers.pdf",
+              "fetched_at": "2026-08-09T04:30:17Z",
+              "tier": 1,
+              "citation": "Lee County Port Authority Aviation Statistics — RSW 2026-04 departures — 640,135 enplanements"
+            },
+            "suggestions": [
+              "What's driving rsw monthly enplanements?",
+              "How does rsw monthly enplanements here compare to other SWFL areas?"
+            ]
+          },
+          {
+            "metric": "rsw_aircraft_operations",
+            "label": "RSW Monthly Aircraft Operations",
+            "value": 10797,
+            "direction": "rising",
+            "variable_type": "extensive",
+            "units": "operations",
+            "display_format": "count",
+            "source": {
+              "url": "https://s3.wasabisys.com/cdn.flylcpa.com/app/uploads/2024/11/21142550/RSW-Operations.pdf",
+              "fetched_at": "2026-08-09T04:30:17Z",
+              "tier": 1,
+              "citation": "Lee County Port Authority Aviation Statistics — RSW 2026-04 — 10,797 aircraft operations (movements)"
+            },
+            "suggestions": [
+              "What's driving rsw aircraft operations?",
+              "How does rsw aircraft operations here compare to other SWFL areas?"
+            ]
+          },
+          {
+            "metric": "rsw_freight_lbs",
+            "label": "RSW Monthly Air Freight",
+            "value": 3463896,
+            "direction": "rising",
+            "variable_type": "extensive",
+            "units": "lbs",
+            "display_format": "count",
+            "source": {
+              "url": "https://s3.wasabisys.com/cdn.flylcpa.com/app/uploads/2024/11/21144911/RSW-Total-Freight.pdf",
+              "fetched_at": "2026-08-09T04:30:17Z",
+              "tier": 1,
+              "citation": "Lee County Port Authority Aviation Statistics — RSW 2026-04 — 3,463,896 lbs air freight"
+            },
+            "suggestions": [
+              "What's driving rsw freight lbs?",
+              "How does rsw freight lbs here compare to other SWFL areas?"
+            ]
+          },
+          {
+            "metric": "rsw_pax_per_operation",
+            "label": "RSW Passengers per Aircraft Operation (utilization proxy)",
+            "value": 106.7582661850514,
+            "direction": "stable",
+            "variable_type": "intensive",
+            "units": "passengers/operation",
+            "display_format": "raw",
+            "source": {
+              "url": "https://s3.wasabisys.com/cdn.flylcpa.com/app/uploads/2024/11/21145013/Total-Passengers-2026.pdf",
+              "fetched_at": "2026-08-09T04:30:17Z",
+              "tier": 1,
+              "citation": "Lee County Port Authority Aviation Statistics — RSW 2026-04 — 107 passengers per aircraft operation (proxy)"
+            },
+            "suggestions": [
+              "What's driving rsw pax per operation?",
+              "How does rsw pax per operation here compare to other SWFL areas?"
+            ]
+          },
+          {
+            "metric": "rsw_seasonality_ratio",
+            "label": "RSW Seasonality Ratio (peak ÷ median month, trailing 12)",
+            "value": 1.7134388142047172,
+            "direction": "stable",
+            "variable_type": "intensive",
+            "units": "ratio",
+            "display_format": "raw",
+            "source": {
+              "url": "https://s3.wasabisys.com/cdn.flylcpa.com/app/uploads/2024/11/21145013/Total-Passengers-2026.pdf",
+              "fetched_at": "2026-08-09T04:30:17Z",
+              "tier": 1,
+              "citation": "Lee County Port Authority Aviation Statistics — RSW trailing-12 total passengers: peak month ÷ median month = 1.71"
+            },
+            "suggestions": [
+              "What's driving rsw seasonality ratio?",
+              "How does rsw seasonality ratio here compare to other SWFL areas?"
+            ]
+          }
+        ],
+        "caveats": [],
+        "contradicts": [],
+        "confidence": 1,
+        "joint_integrity": 1,
+        "confidence_dispersion": 0,
+        "chain_depth": 0,
+        "trust_tier": 1,
+        "upstream_count": 0,
+        "relevance": {
+          "decay_curve": "weeks",
+          "half_life_hours": 720,
+          "computed_at": "2026-08-09T04:30:17Z"
+        },
+        "exogenous_signals": [],
+        "grain_boundary": {
+          "not_available": [
+            "Origin-and-destination (O&D) / passengers-per-day-each-way — the truest local air-travel demand measure — is not published by LCPA; this brain proxies demand with total passenger throughput.",
+            "Deplanements are counted as arrivals / inbound throughput, not a visitor count — they include returning residents (the visitor-vs-resident split is a market-study convention LCPA does not report).",
+            "Passengers-per-aircraft-operation is a utilization proxy, not airline load factor (true load factor needs seat counts / available seat-miles, which LCPA does not publish).",
+            "Seasonality ratio is a characterizing statistic (peak ÷ median month), not a direction signal — no downstream brain consumes it.",
+            "Punta Gorda (PGD / Charlotte County) airport — separate operator, no LCPA source; out of scope for this brain.",
+            "Airline-level or sub-county passenger breakdowns."
+          ],
+          "finest_grain": "airport-month"
+        }
+      }
     },
     {
       "packId": "news-swfl",
@@ -370,8 +571,119 @@
     },
     {
       "packId": "freshness-pulse",
-      "status": "skipped-fresh",
-      "written": false
+      "status": "built",
+      "version": 37,
+      "written": true,
+      "brainOutput": {
+        "brain_id": "freshness-pulse",
+        "version": 37,
+        "refined_at": "2026-08-09T04:30:18Z",
+        "expires": "2026-08-10T04:30:18Z",
+        "ttl_seconds": 86400,
+        "direction": "neutral",
+        "magnitude": 0,
+        "drivers": [],
+        "overrides": [],
+        "conclusion": "Today's sourced snapshot — SWFL 30-year fixed mortgage rate (as of 2026-08-06) 6.69%; Cape Coral median asking price (as of 2026-08-09) $399,900; Fort Myers median asking price (as of 2026-08-09) $325,000; Naples median asking price (as of 2026-08-09) $650,000. These are cited current facts only; the direction call lives downstream in master.",
+        "key_metrics": [
+          {
+            "metric": "freshness_mortgage_30yr_fixed_pct",
+            "value": 6.69,
+            "direction": "stable",
+            "label": "SWFL 30-year fixed mortgage rate (as of 2026-08-06)",
+            "variable_type": "intensive",
+            "units": "percent",
+            "display_format": "percent",
+            "source": {
+              "url": "https://fred.stlouisfed.org/series/MORTGAGE30US",
+              "fetched_at": "2026-08-09T04:24:06.12482+00:00",
+              "tier": 2,
+              "citation": "FRED — current 30-year fixed mortgage rate for SWFL, sourced 2026-08-06"
+            },
+            "suggestions": [
+              "What's driving freshness mortgage 30yr fixed pct?",
+              "How does freshness mortgage 30yr fixed pct here compare to other SWFL areas?"
+            ]
+          },
+          {
+            "metric": "freshness_median_asking_price_cape_coral_usd",
+            "value": 399900,
+            "direction": "stable",
+            "label": "Cape Coral median asking price (as of 2026-08-09)",
+            "variable_type": "extensive",
+            "units": "USD",
+            "display_format": "currency",
+            "source": {
+              "url": "https://www.swfldatagulf.com/desk",
+              "fetched_at": "2026-08-09T04:24:06.12482+00:00",
+              "tier": 2,
+              "citation": "SWFL Data Gulf active-listing inventory — current median asking price for Cape Coral, sourced 2026-08-09"
+            },
+            "suggestions": [
+              "Chart asking rents across the corridors",
+              "What's driving freshness median asking price cape coral usd?",
+              "How does freshness median asking price cape coral usd here compare to other SWFL areas?"
+            ]
+          },
+          {
+            "metric": "freshness_median_asking_price_fort_myers_usd",
+            "value": 325000,
+            "direction": "stable",
+            "label": "Fort Myers median asking price (as of 2026-08-09)",
+            "variable_type": "extensive",
+            "units": "USD",
+            "display_format": "currency",
+            "source": {
+              "url": "https://www.swfldatagulf.com/desk",
+              "fetched_at": "2026-08-09T04:24:06.12482+00:00",
+              "tier": 2,
+              "citation": "SWFL Data Gulf active-listing inventory — current median asking price for Fort Myers, sourced 2026-08-09"
+            },
+            "suggestions": [
+              "Chart asking rents across the corridors",
+              "What's driving freshness median asking price fort myers usd?",
+              "How does freshness median asking price fort myers usd here compare to other SWFL areas?"
+            ]
+          },
+          {
+            "metric": "freshness_median_asking_price_naples_usd",
+            "value": 650000,
+            "direction": "stable",
+            "label": "Naples median asking price (as of 2026-08-09)",
+            "variable_type": "extensive",
+            "units": "USD",
+            "display_format": "currency",
+            "source": {
+              "url": "https://www.swfldatagulf.com/desk",
+              "fetched_at": "2026-08-09T04:24:06.12482+00:00",
+              "tier": 2,
+              "citation": "SWFL Data Gulf active-listing inventory — current median asking price for Naples, sourced 2026-08-09"
+            },
+            "suggestions": [
+              "Chart asking rents across the corridors",
+              "What's driving freshness median asking price naples usd?",
+              "How does freshness median asking price naples usd here compare to other SWFL areas?"
+            ]
+          }
+        ],
+        "detail_tables": [],
+        "caveats": [
+          "Each county-grain number is a single grounded source's current figure, provenance-gated to a real source URL; held anomalies and unsourced (model-memory) numbers are excluded by design."
+        ],
+        "contradicts": [],
+        "confidence": 0.8,
+        "joint_integrity": 1,
+        "confidence_dispersion": 0,
+        "chain_depth": 0,
+        "trust_tier": 2,
+        "upstream_count": 0,
+        "relevance": {
+          "decay_curve": "weeks",
+          "half_life_hours": 720,
+          "computed_at": "2026-08-09T04:30:18Z"
+        },
+        "exogenous_signals": []
+      }
     },
     {
       "packId": "seller-stress-swfl",
@@ -380,8 +692,1691 @@
     },
     {
       "packId": "market-heat-swfl",
-      "status": "skipped-fresh",
-      "written": false
+      "status": "built",
+      "version": 4,
+      "written": true,
+      "brainOutput": {
+        "brain_id": "market-heat-swfl",
+        "version": 4,
+        "refined_at": "2026-08-09T04:30:23Z",
+        "expires": "2026-09-13T04:30:23Z",
+        "ttl_seconds": 3024000,
+        "direction": "bullish",
+        "magnitude": 0.33,
+        "drivers": [],
+        "overrides": [],
+        "conclusion": "SWFL market heat is tightening (bullish) at 66/100. Inventory down 18.5% Y/Y, DOM down 6.5% Y/Y across 40 ZIPs. Tightest: 34105 (84), 33990 (82), 34116 (80). [INFERENCE] Forward read anchors on the pending ratio (median 0.26), the leading demand edge: a sustained rise points to firming prices. Falsified if the pending ratio falls for 2+ consecutive months while active inventory rises.",
+        "key_metrics": [
+          {
+            "metric": "market_heat_tilt_swfl",
+            "value": 66.3,
+            "direction": "rising",
+            "label": "SWFL market-heat tilt (0-100, 50 = balanced; >50 = tightening/seller-favoring) at 202607 — 40 ZIPs scored",
+            "variable_type": "intensive",
+            "units": "score (0-100)",
+            "display_format": "raw",
+            "source": {
+              "url": "https://www.realtor.com/research/data/",
+              "fetched_at": "2026-08-09T04:30:21Z",
+              "tier": 3,
+              "citation": "Data provided by Realtor.com — Economic Research Data Library (ZIP-grain Core Inventory + Market Hotness, monthly). Attribution-only license. Hotness is a relative cross-sectional rank, not the vote driver."
+            },
+            "suggestions": [
+              "What's driving market heat tilt swfl?",
+              "How does market heat tilt swfl here compare to other SWFL areas?"
+            ]
+          },
+          {
+            "metric": "market_heat_inventory_yy_swfl",
+            "value": -18.5,
+            "direction": "falling",
+            "label": "SWFL median active-listing count, year-over-year change — the lead tightening signal (falling = bullish)",
+            "variable_type": "intensive",
+            "units": "%",
+            "display_format": "percent",
+            "source": {
+              "url": "https://www.realtor.com/research/data/",
+              "fetched_at": "2026-08-09T04:30:21Z",
+              "tier": 3,
+              "citation": "Data provided by Realtor.com — Economic Research Data Library (ZIP-grain Core Inventory + Market Hotness, monthly). Attribution-only license. Hotness is a relative cross-sectional rank, not the vote driver."
+            },
+            "suggestions": [
+              "What's driving market heat inventory yy swfl?",
+              "How does market heat inventory yy swfl here compare to other SWFL areas?"
+            ]
+          },
+          {
+            "metric": "market_heat_dom_yy_swfl",
+            "value": -6.5,
+            "direction": "falling",
+            "label": "SWFL median days-on-market, year-over-year change (falling = homes selling faster = bullish)",
+            "variable_type": "intensive",
+            "units": "%",
+            "display_format": "percent",
+            "source": {
+              "url": "https://www.realtor.com/research/data/",
+              "fetched_at": "2026-08-09T04:30:21Z",
+              "tier": 3,
+              "citation": "Data provided by Realtor.com — Economic Research Data Library (ZIP-grain Core Inventory + Market Hotness, monthly). Attribution-only license. Hotness is a relative cross-sectional rank, not the vote driver."
+            },
+            "suggestions": [
+              "What's driving market heat dom yy swfl?",
+              "How does market heat dom yy swfl here compare to other SWFL areas?"
+            ]
+          },
+          {
+            "metric": "market_heat_pending_ratio_swfl",
+            "value": 0.263,
+            "direction": "rising",
+            "label": "SWFL median pending ratio (pending ÷ active listings) — the leading demand edge (rising = bullish)",
+            "variable_type": "intensive",
+            "units": "ratio",
+            "display_format": "ratio",
+            "source": {
+              "url": "https://www.realtor.com/research/data/",
+              "fetched_at": "2026-08-09T04:30:21Z",
+              "tier": 3,
+              "citation": "Data provided by Realtor.com — Economic Research Data Library (ZIP-grain Core Inventory + Market Hotness, monthly). Attribution-only license. Hotness is a relative cross-sectional rank, not the vote driver."
+            },
+            "suggestions": [
+              "What's driving market heat pending ratio swfl?",
+              "How does market heat pending ratio swfl here compare to other SWFL areas?"
+            ]
+          },
+          {
+            "metric": "market_heat_price_cut_share_swfl",
+            "value": 15.3,
+            "direction": "falling",
+            "label": "SWFL median share of active listings with a price reduction — coincident context (rising = softening)",
+            "variable_type": "intensive",
+            "units": "%",
+            "display_format": "percent",
+            "source": {
+              "url": "https://www.realtor.com/research/data/",
+              "fetched_at": "2026-08-09T04:30:21Z",
+              "tier": 3,
+              "citation": "Data provided by Realtor.com — Economic Research Data Library (ZIP-grain Core Inventory + Market Hotness, monthly). Attribution-only license. Hotness is a relative cross-sectional rank, not the vote driver."
+            },
+            "suggestions": [
+              "What's driving market heat price cut share swfl?",
+              "How does market heat price cut share swfl here compare to other SWFL areas?"
+            ]
+          }
+        ],
+        "detail_tables": [
+          {
+            "id": "market_heat_by_zip",
+            "title": "SWFL market heat by ZIP — 202607 (realtor.com list-side metrics)",
+            "grain": "zip",
+            "columns": [
+              {
+                "id": "market_heat_score",
+                "label": "Heat Tilt (0-100)",
+                "display_format": "raw",
+                "units": "score"
+              },
+              {
+                "id": "active_listing_count",
+                "label": "Active Listings",
+                "display_format": "count",
+                "units": "listings"
+              },
+              {
+                "id": "inventory_yy",
+                "label": "Inventory Y/Y",
+                "display_format": "percent",
+                "units": "%"
+              },
+              {
+                "id": "median_dom",
+                "label": "Median DOM",
+                "display_format": "count",
+                "units": "days"
+              },
+              {
+                "id": "dom_yy",
+                "label": "DOM Y/Y",
+                "display_format": "percent",
+                "units": "%"
+              },
+              {
+                "id": "pending_ratio",
+                "label": "Pending Ratio",
+                "display_format": "ratio",
+                "units": "ratio"
+              },
+              {
+                "id": "pending_ratio_yy",
+                "label": "Pending Ratio Y/Y",
+                "display_format": "percent",
+                "units": "%"
+              },
+              {
+                "id": "new_listing_count",
+                "label": "New Listings",
+                "display_format": "count",
+                "units": "listings"
+              },
+              {
+                "id": "price_reduced_share",
+                "label": "Price-Cut Share",
+                "display_format": "percent",
+                "units": "%"
+              },
+              {
+                "id": "hotness_score",
+                "label": "Hotness (relative)",
+                "display_format": "raw",
+                "units": "score"
+              },
+              {
+                "id": "hotness_rank",
+                "label": "Hotness Rank (relative)",
+                "display_format": "count",
+                "units": "rank"
+              },
+              {
+                "id": "month",
+                "label": "Month"
+              },
+              {
+                "id": "suppressed_reason",
+                "label": "Suppressed"
+              }
+            ],
+            "rows": [
+              {
+                "key": "34105",
+                "label": "34105",
+                "cells": {
+                  "market_heat_score": 83.8,
+                  "active_listing_count": 172,
+                  "inventory_yy": -35,
+                  "median_dom": 90,
+                  "dom_yy": -22.5,
+                  "pending_ratio": 0.2238,
+                  "pending_ratio_yy": 8.4,
+                  "new_listing_count": 30,
+                  "price_reduced_share": 13.2,
+                  "hotness_score": 11.859712230215827,
+                  "hotness_rank": 13264,
+                  "month": "202607",
+                  "suppressed_reason": null
+                }
+              },
+              {
+                "key": "33990",
+                "label": "33990",
+                "cells": {
+                  "market_heat_score": 81.5,
+                  "active_listing_count": 189,
+                  "inventory_yy": -32.7,
+                  "median_dom": 72,
+                  "dom_yy": -15.5,
+                  "pending_ratio": 0.3413,
+                  "pending_ratio_yy": 11.2,
+                  "new_listing_count": 52,
+                  "price_reduced_share": 22.1,
+                  "hotness_score": 32.877697841726615,
+                  "hotness_rank": 10104,
+                  "month": "202607",
+                  "suppressed_reason": null
+                }
+              },
+              {
+                "key": "34116",
+                "label": "34116",
+                "cells": {
+                  "market_heat_score": 79.7,
+                  "active_listing_count": 68,
+                  "inventory_yy": -33.3,
+                  "median_dom": 73,
+                  "dom_yy": -8.2,
+                  "pending_ratio": 0.3382,
+                  "pending_ratio_yy": 15.2,
+                  "new_listing_count": 26,
+                  "price_reduced_share": 13.1,
+                  "hotness_score": 25.09712230215827,
+                  "hotness_rank": 11557,
+                  "month": "202607",
+                  "suppressed_reason": null
+                }
+              },
+              {
+                "key": "33991",
+                "label": "33991",
+                "cells": {
+                  "market_heat_score": 79,
+                  "active_listing_count": 295,
+                  "inventory_yy": -20.9,
+                  "median_dom": 78,
+                  "dom_yy": -18.8,
+                  "pending_ratio": 0.3153,
+                  "pending_ratio_yy": 12.5,
+                  "new_listing_count": 64,
+                  "price_reduced_share": 27.2,
+                  "hotness_score": 31.327338129496404,
+                  "hotness_rank": 10418,
+                  "month": "202607",
+                  "suppressed_reason": null
+                }
+              },
+              {
+                "key": "33928",
+                "label": "33928",
+                "cells": {
+                  "market_heat_score": 78.4,
+                  "active_listing_count": 352,
+                  "inventory_yy": -25.6,
+                  "median_dom": 85,
+                  "dom_yy": -18.1,
+                  "pending_ratio": 0.2798,
+                  "pending_ratio_yy": 7.5,
+                  "new_listing_count": 76,
+                  "price_reduced_share": 19.5,
+                  "hotness_score": 29.20503597122302,
+                  "hotness_rank": 10810,
+                  "month": "202607",
+                  "suppressed_reason": null
+                }
+              },
+              {
+                "key": "33904",
+                "label": "33904",
+                "cells": {
+                  "market_heat_score": 77.3,
+                  "active_listing_count": 430,
+                  "inventory_yy": -28.4,
+                  "median_dom": 91,
+                  "dom_yy": -11.2,
+                  "pending_ratio": 0.2421,
+                  "pending_ratio_yy": 9.5,
+                  "new_listing_count": 90,
+                  "price_reduced_share": 16.6,
+                  "hotness_score": 33.16187050359712,
+                  "hotness_rank": 10058,
+                  "month": "202607",
+                  "suppressed_reason": null
+                }
+              },
+              {
+                "key": "34104",
+                "label": "34104",
+                "cells": {
+                  "market_heat_score": 74.4,
+                  "active_listing_count": 221,
+                  "inventory_yy": -25.4,
+                  "median_dom": 91,
+                  "dom_yy": -9.4,
+                  "pending_ratio": 0.2789,
+                  "pending_ratio_yy": 9.1,
+                  "new_listing_count": 44,
+                  "price_reduced_share": 16.5,
+                  "hotness_score": 12.56474820143885,
+                  "hotness_rank": 13187,
+                  "month": "202607",
+                  "suppressed_reason": null
+                }
+              },
+              {
+                "key": "34135",
+                "label": "34135",
+                "cells": {
+                  "market_heat_score": 74.3,
+                  "active_listing_count": 453,
+                  "inventory_yy": -30.6,
+                  "median_dom": 91,
+                  "dom_yy": -7.1,
+                  "pending_ratio": 0.2627,
+                  "pending_ratio_yy": 6.7,
+                  "new_listing_count": 96,
+                  "price_reduced_share": 14.2,
+                  "hotness_score": 24.10431654676259,
+                  "hotness_rank": 11709,
+                  "month": "202607",
+                  "suppressed_reason": null
+                }
+              },
+              {
+                "key": "34108",
+                "label": "34108",
+                "cells": {
+                  "market_heat_score": 73.8,
+                  "active_listing_count": 383,
+                  "inventory_yy": -21.8,
+                  "median_dom": 120,
+                  "dom_yy": -11.8,
+                  "pending_ratio": 0.1958,
+                  "pending_ratio_yy": 9.3,
+                  "new_listing_count": 46,
+                  "price_reduced_share": 7.3,
+                  "hotness_score": 12.597122302158274,
+                  "hotness_rank": 13185,
+                  "month": "202607",
+                  "suppressed_reason": null
+                }
+              },
+              {
+                "key": "33908",
+                "label": "33908",
+                "cells": {
+                  "market_heat_score": 72.4,
+                  "active_listing_count": 670,
+                  "inventory_yy": -27.1,
+                  "median_dom": 109,
+                  "dom_yy": -7.2,
+                  "pending_ratio": 0.1642,
+                  "pending_ratio_yy": 6,
+                  "new_listing_count": 94,
+                  "price_reduced_share": 16.8,
+                  "hotness_score": 15.16906474820144,
+                  "hotness_rank": 12933,
+                  "month": "202607",
+                  "suppressed_reason": null
+                }
+              },
+              {
+                "key": "33993",
+                "label": "33993",
+                "cells": {
+                  "market_heat_score": 72,
+                  "active_listing_count": 722,
+                  "inventory_yy": -23.1,
+                  "median_dom": 82,
+                  "dom_yy": -9.9,
+                  "pending_ratio": 0.2779,
+                  "pending_ratio_yy": 6.5,
+                  "new_listing_count": 152,
+                  "price_reduced_share": 26.4,
+                  "hotness_score": 17.798561151079134,
+                  "hotness_rank": 12614,
+                  "month": "202607",
+                  "suppressed_reason": null
+                }
+              },
+              {
+                "key": "33905",
+                "label": "33905",
+                "cells": {
+                  "market_heat_score": 69.9,
+                  "active_listing_count": 273,
+                  "inventory_yy": -18.9,
+                  "median_dom": 74,
+                  "dom_yy": -12.7,
+                  "pending_ratio": 0.2606,
+                  "pending_ratio_yy": 4.2,
+                  "new_listing_count": 62,
+                  "price_reduced_share": 16.1,
+                  "hotness_score": 41.20863309352518,
+                  "hotness_rank": 8357,
+                  "month": "202607",
+                  "suppressed_reason": null
+                }
+              },
+              {
+                "key": "33922",
+                "label": "33922",
+                "cells": {
+                  "market_heat_score": 69.9,
+                  "active_listing_count": 79,
+                  "inventory_yy": -14.7,
+                  "median_dom": 103,
+                  "dom_yy": -19.6,
+                  "pending_ratio": 0.1401,
+                  "pending_ratio_yy": 1.5,
+                  "new_listing_count": 14,
+                  "price_reduced_share": 15.5,
+                  "hotness_score": 20.888489208633096,
+                  "hotness_rank": 12213,
+                  "month": "202607",
+                  "suppressed_reason": null
+                }
+              },
+              {
+                "key": "34112",
+                "label": "34112",
+                "cells": {
+                  "market_heat_score": 69.8,
+                  "active_listing_count": 379,
+                  "inventory_yy": -21.8,
+                  "median_dom": 99,
+                  "dom_yy": -10,
+                  "pending_ratio": 0.223,
+                  "pending_ratio_yy": 3.8,
+                  "new_listing_count": 76,
+                  "price_reduced_share": 9.4,
+                  "hotness_score": 13.942446043165468,
+                  "hotness_rank": 13051,
+                  "month": "202607",
+                  "suppressed_reason": null
+                }
+              },
+              {
+                "key": "34114",
+                "label": "34114",
+                "cells": {
+                  "market_heat_score": 69.6,
+                  "active_listing_count": 383,
+                  "inventory_yy": -23.6,
+                  "median_dom": 96,
+                  "dom_yy": -9.9,
+                  "pending_ratio": 0.1997,
+                  "pending_ratio_yy": 1.8,
+                  "new_listing_count": 64,
+                  "price_reduced_share": 13.8,
+                  "hotness_score": 16.258992805755394,
+                  "hotness_rank": 12802,
+                  "month": "202607",
+                  "suppressed_reason": null
+                }
+              },
+              {
+                "key": "33909",
+                "label": "33909",
+                "cells": {
+                  "market_heat_score": 69.5,
+                  "active_listing_count": 418,
+                  "inventory_yy": -16.8,
+                  "median_dom": 81,
+                  "dom_yy": -5.8,
+                  "pending_ratio": 0.3928,
+                  "pending_ratio_yy": 12.5,
+                  "new_listing_count": 112,
+                  "price_reduced_share": 24.9,
+                  "hotness_score": 28.989208633093526,
+                  "hotness_rank": 10861,
+                  "month": "202607",
+                  "suppressed_reason": null
+                }
+              },
+              {
+                "key": "33913",
+                "label": "33913",
+                "cells": {
+                  "market_heat_score": 68.7,
+                  "active_listing_count": 423,
+                  "inventory_yy": -20.4,
+                  "median_dom": 92,
+                  "dom_yy": -5.2,
+                  "pending_ratio": 0.273,
+                  "pending_ratio_yy": 8,
+                  "new_listing_count": 80,
+                  "price_reduced_share": 19.4,
+                  "hotness_score": 23.363309352517987,
+                  "hotness_rank": 11831,
+                  "month": "202607",
+                  "suppressed_reason": null
+                }
+              },
+              {
+                "key": "34119",
+                "label": "34119",
+                "cells": {
+                  "market_heat_score": 68.3,
+                  "active_listing_count": 358,
+                  "inventory_yy": -19.9,
+                  "median_dom": 97,
+                  "dom_yy": -0.5,
+                  "pending_ratio": 0.3231,
+                  "pending_ratio_yy": 12.5,
+                  "new_listing_count": 68,
+                  "price_reduced_share": 15,
+                  "hotness_score": 19.28776978417266,
+                  "hotness_rank": 12430,
+                  "month": "202607",
+                  "suppressed_reason": null
+                }
+              },
+              {
+                "key": "33917",
+                "label": "33917",
+                "cells": {
+                  "market_heat_score": 68.1,
+                  "active_listing_count": 287,
+                  "inventory_yy": -11.4,
+                  "median_dom": 83,
+                  "dom_yy": -9,
+                  "pending_ratio": 0.3798,
+                  "pending_ratio_yy": 12.2,
+                  "new_listing_count": 56,
+                  "price_reduced_share": 17.2,
+                  "hotness_score": 20.805755395683455,
+                  "hotness_rank": 12223,
+                  "month": "202607",
+                  "suppressed_reason": null
+                }
+              },
+              {
+                "key": "33912",
+                "label": "33912",
+                "cells": {
+                  "market_heat_score": 66.4,
+                  "active_listing_count": 167,
+                  "inventory_yy": -12.3,
+                  "median_dom": 97,
+                  "dom_yy": -4.5,
+                  "pending_ratio": 0.3234,
+                  "pending_ratio_yy": 12.7,
+                  "new_listing_count": 26,
+                  "price_reduced_share": 16.8,
+                  "hotness_score": 22.406474820143885,
+                  "hotness_rank": 11990,
+                  "month": "202607",
+                  "suppressed_reason": null
+                }
+              },
+              {
+                "key": "33956",
+                "label": "33956",
+                "cells": {
+                  "market_heat_score": 66.3,
+                  "active_listing_count": 89,
+                  "inventory_yy": -16.9,
+                  "median_dom": 121,
+                  "dom_yy": -10.6,
+                  "pending_ratio": 0.1412,
+                  "pending_ratio_yy": 1.9,
+                  "new_listing_count": 12,
+                  "price_reduced_share": 14.4,
+                  "hotness_score": 16.399280575539567,
+                  "hotness_rank": 12782,
+                  "month": "202607",
+                  "suppressed_reason": null
+                }
+              },
+              {
+                "key": "34120",
+                "label": "34120",
+                "cells": {
+                  "market_heat_score": 66.1,
+                  "active_listing_count": 523,
+                  "inventory_yy": -6.4,
+                  "median_dom": 88,
+                  "dom_yy": -14.1,
+                  "pending_ratio": 0.3062,
+                  "pending_ratio_yy": 8.6,
+                  "new_listing_count": 92,
+                  "price_reduced_share": 16.2,
+                  "hotness_score": 24.41726618705036,
+                  "hotness_rank": 11651,
+                  "month": "202607",
+                  "suppressed_reason": null
+                }
+              },
+              {
+                "key": "34110",
+                "label": "34110",
+                "cells": {
+                  "market_heat_score": 66.1,
+                  "active_listing_count": 337,
+                  "inventory_yy": -20.3,
+                  "median_dom": 115,
+                  "dom_yy": -3.4,
+                  "pending_ratio": 0.2377,
+                  "pending_ratio_yy": 5.4,
+                  "new_listing_count": 66,
+                  "price_reduced_share": 12.3,
+                  "hotness_score": 21.91007194244604,
+                  "hotness_rank": 12056,
+                  "month": "202607",
+                  "suppressed_reason": null
+                }
+              },
+              {
+                "key": "33903",
+                "label": "33903",
+                "cells": {
+                  "market_heat_score": 65.7,
+                  "active_listing_count": 184,
+                  "inventory_yy": -17.3,
+                  "median_dom": 98,
+                  "dom_yy": -10.3,
+                  "pending_ratio": 0.1793,
+                  "pending_ratio_yy": 0.6,
+                  "new_listing_count": 22,
+                  "price_reduced_share": 23.5,
+                  "hotness_score": 14.989208633093524,
+                  "hotness_rank": 12958,
+                  "month": "202607",
+                  "suppressed_reason": null
+                }
+              },
+              {
+                "key": "34113",
+                "label": "34113",
+                "cells": {
+                  "market_heat_score": 65.3,
+                  "active_listing_count": 348,
+                  "inventory_yy": -18,
+                  "median_dom": 120,
+                  "dom_yy": -0.8,
+                  "pending_ratio": 0.2256,
+                  "pending_ratio_yy": 8.7,
+                  "new_listing_count": 36,
+                  "price_reduced_share": 10.7,
+                  "hotness_score": 20.823741007194247,
+                  "hotness_rank": 12222,
+                  "month": "202607",
+                  "suppressed_reason": null
+                }
+              },
+              {
+                "key": "33967",
+                "label": "33967",
+                "cells": {
+                  "market_heat_score": 61.9,
+                  "active_listing_count": 116,
+                  "inventory_yy": -16.2,
+                  "median_dom": 85,
+                  "dom_yy": 4,
+                  "pending_ratio": 0.4095,
+                  "pending_ratio_yy": 9.2,
+                  "new_listing_count": 38,
+                  "price_reduced_share": 15.2,
+                  "hotness_score": 27.823741007194243,
+                  "hotness_rank": 11070,
+                  "month": "202607",
+                  "suppressed_reason": null
+                }
+              },
+              {
+                "key": "33957",
+                "label": "33957",
+                "cells": {
+                  "market_heat_score": 61.4,
+                  "active_listing_count": 313,
+                  "inventory_yy": -24.1,
+                  "median_dom": 154,
+                  "dom_yy": 11,
+                  "pending_ratio": 0.1342,
+                  "pending_ratio_yy": 7.5,
+                  "new_listing_count": 20,
+                  "price_reduced_share": 7.7,
+                  "hotness_score": 20.57913669064748,
+                  "hotness_rank": 12261,
+                  "month": "202607",
+                  "suppressed_reason": null
+                }
+              },
+              {
+                "key": "34109",
+                "label": "34109",
+                "cells": {
+                  "market_heat_score": 60.6,
+                  "active_listing_count": 246,
+                  "inventory_yy": -16.9,
+                  "median_dom": 104,
+                  "dom_yy": 7.2,
+                  "pending_ratio": 0.2648,
+                  "pending_ratio_yy": 9.4,
+                  "new_listing_count": 46,
+                  "price_reduced_share": 12,
+                  "hotness_score": 14.676258992805755,
+                  "hotness_rank": 12986,
+                  "month": "202607",
+                  "suppressed_reason": null
+                }
+              },
+              {
+                "key": "33931",
+                "label": "33931",
+                "cells": {
+                  "market_heat_score": 60,
+                  "active_listing_count": 426,
+                  "inventory_yy": -15,
+                  "median_dom": 124,
+                  "dom_yy": -0.6,
+                  "pending_ratio": 0.0905,
+                  "pending_ratio_yy": 2.4,
+                  "new_listing_count": 36,
+                  "price_reduced_share": 12.7,
+                  "hotness_score": 9.58273381294964,
+                  "hotness_rank": 13475,
+                  "month": "202607",
+                  "suppressed_reason": null
+                }
+              },
+              {
+                "key": "34117",
+                "label": "34117",
+                "cells": {
+                  "market_heat_score": 58.9,
+                  "active_listing_count": 137,
+                  "inventory_yy": -9.6,
+                  "median_dom": 78,
+                  "dom_yy": -1,
+                  "pending_ratio": 0.3321,
+                  "pending_ratio_yy": 5.5,
+                  "new_listing_count": 36,
+                  "price_reduced_share": 13.8,
+                  "hotness_score": 28.471223021582734,
+                  "hotness_rank": 10954,
+                  "month": "202607",
+                  "suppressed_reason": null
+                }
+              },
+              {
+                "key": "34134",
+                "label": "34134",
+                "cells": {
+                  "market_heat_score": 58.3,
+                  "active_listing_count": 379,
+                  "inventory_yy": -26.7,
+                  "median_dom": 145,
+                  "dom_yy": 16.9,
+                  "pending_ratio": 0.2127,
+                  "pending_ratio_yy": 5.1,
+                  "new_listing_count": 44,
+                  "price_reduced_share": 8.6,
+                  "hotness_score": 11.697841726618705,
+                  "hotness_rank": 13282,
+                  "month": "202607",
+                  "suppressed_reason": null
+                }
+              },
+              {
+                "key": "33971",
+                "label": "33971",
+                "cells": {
+                  "market_heat_score": 57.8,
+                  "active_listing_count": 379,
+                  "inventory_yy": -13.2,
+                  "median_dom": 85,
+                  "dom_yy": 9,
+                  "pending_ratio": 0.3263,
+                  "pending_ratio_yy": 9.9,
+                  "new_listing_count": 76,
+                  "price_reduced_share": 22.9,
+                  "hotness_score": 8.20503597122302,
+                  "hotness_rank": 13572,
+                  "month": "202607",
+                  "suppressed_reason": null
+                }
+              },
+              {
+                "key": "33920",
+                "label": "33920",
+                "cells": {
+                  "market_heat_score": 55,
+                  "active_listing_count": 136,
+                  "inventory_yy": -3.5,
+                  "median_dom": 89,
+                  "dom_yy": -9.6,
+                  "pending_ratio": 0.239,
+                  "pending_ratio_yy": -4.1,
+                  "new_listing_count": 28,
+                  "price_reduced_share": 21.5,
+                  "hotness_score": 12.266187050359711,
+                  "hotness_rank": 13213,
+                  "month": "202607",
+                  "suppressed_reason": null
+                }
+              },
+              {
+                "key": "33936",
+                "label": "33936",
+                "cells": {
+                  "market_heat_score": 55,
+                  "active_listing_count": 259,
+                  "inventory_yy": -3,
+                  "median_dom": 78,
+                  "dom_yy": 2,
+                  "pending_ratio": 0.2722,
+                  "pending_ratio_yy": 7.9,
+                  "new_listing_count": 62,
+                  "price_reduced_share": 21.7,
+                  "hotness_score": 16.845323741007192,
+                  "hotness_rank": 12739,
+                  "month": "202607",
+                  "suppressed_reason": null
+                }
+              },
+              {
+                "key": "33974",
+                "label": "33974",
+                "cells": {
+                  "market_heat_score": 49.8,
+                  "active_listing_count": 424,
+                  "inventory_yy": -13.2,
+                  "median_dom": 89,
+                  "dom_yy": 21.1,
+                  "pending_ratio": 0.3081,
+                  "pending_ratio_yy": 7.6,
+                  "new_listing_count": 96,
+                  "price_reduced_share": 15.1,
+                  "hotness_score": 5.068345323741007,
+                  "hotness_rank": 13765,
+                  "month": "202607",
+                  "suppressed_reason": null
+                }
+              },
+              {
+                "key": "33976",
+                "label": "33976",
+                "cells": {
+                  "market_heat_score": 47.4,
+                  "active_listing_count": 271,
+                  "inventory_yy": 3.6,
+                  "median_dom": 81,
+                  "dom_yy": 10.6,
+                  "pending_ratio": 0.3247,
+                  "pending_ratio_yy": 9.5,
+                  "new_listing_count": 56,
+                  "price_reduced_share": 26.1,
+                  "hotness_score": 8.874100719424462,
+                  "hotness_rank": 13523,
+                  "month": "202607",
+                  "suppressed_reason": null
+                }
+              },
+              {
+                "key": "34138",
+                "label": "34138",
+                "cells": {
+                  "market_heat_score": 45.8,
+                  "active_listing_count": 3,
+                  "inventory_yy": -25,
+                  "median_dom": 231,
+                  "dom_yy": 62.9,
+                  "pending_ratio": null,
+                  "pending_ratio_yy": 0,
+                  "new_listing_count": 0,
+                  "price_reduced_share": 0,
+                  "hotness_score": null,
+                  "hotness_rank": null,
+                  "month": "202607",
+                  "suppressed_reason": null
+                }
+              },
+              {
+                "key": "33972",
+                "label": "33972",
+                "cells": {
+                  "market_heat_score": 41.3,
+                  "active_listing_count": 309,
+                  "inventory_yy": 6.8,
+                  "median_dom": 84,
+                  "dom_yy": 11.3,
+                  "pending_ratio": 0.2399,
+                  "pending_ratio_yy": 2.4,
+                  "new_listing_count": 62,
+                  "price_reduced_share": 14.2,
+                  "hotness_score": 10.859712230215827,
+                  "hotness_rank": 13359,
+                  "month": "202607",
+                  "suppressed_reason": null
+                }
+              },
+              {
+                "key": "33921",
+                "label": "33921",
+                "cells": {
+                  "market_heat_score": 26.4,
+                  "active_listing_count": 67,
+                  "inventory_yy": 22.9,
+                  "median_dom": 163,
+                  "dom_yy": 24.2,
+                  "pending_ratio": 0.1119,
+                  "pending_ratio_yy": 4.8,
+                  "new_listing_count": 2,
+                  "price_reduced_share": 2.1,
+                  "hotness_score": 5.762589928057554,
+                  "hotness_rank": 13721,
+                  "month": "202607",
+                  "suppressed_reason": null
+                }
+              },
+              {
+                "key": "34142",
+                "label": "34142",
+                "cells": {
+                  "market_heat_score": 21.8,
+                  "active_listing_count": 274,
+                  "inventory_yy": 25.8,
+                  "median_dom": 93,
+                  "dom_yy": 20.5,
+                  "pending_ratio": 0.1517,
+                  "pending_ratio_yy": -4.6,
+                  "new_listing_count": 48,
+                  "price_reduced_share": 17,
+                  "hotness_score": 8.848920863309353,
+                  "hotness_rank": 13525,
+                  "month": "202607",
+                  "suppressed_reason": null
+                }
+              },
+              {
+                "key": "33901",
+                "label": "33901",
+                "cells": {
+                  "market_heat_score": null,
+                  "active_listing_count": 178,
+                  "inventory_yy": null,
+                  "median_dom": null,
+                  "dom_yy": null,
+                  "pending_ratio": null,
+                  "pending_ratio_yy": null,
+                  "new_listing_count": null,
+                  "price_reduced_share": null,
+                  "hotness_score": 17.345323741007196,
+                  "hotness_rank": 12682,
+                  "month": "202607",
+                  "suppressed_reason": "quality_flag"
+                }
+              },
+              {
+                "key": "33907",
+                "label": "33907",
+                "cells": {
+                  "market_heat_score": null,
+                  "active_listing_count": 212,
+                  "inventory_yy": null,
+                  "median_dom": null,
+                  "dom_yy": null,
+                  "pending_ratio": null,
+                  "pending_ratio_yy": null,
+                  "new_listing_count": null,
+                  "price_reduced_share": null,
+                  "hotness_score": 13.726618705035971,
+                  "hotness_rank": 13074,
+                  "month": "202607",
+                  "suppressed_reason": "quality_flag"
+                }
+              },
+              {
+                "key": "33914",
+                "label": "33914",
+                "cells": {
+                  "market_heat_score": null,
+                  "active_listing_count": 559,
+                  "inventory_yy": null,
+                  "median_dom": null,
+                  "dom_yy": null,
+                  "pending_ratio": null,
+                  "pending_ratio_yy": null,
+                  "new_listing_count": null,
+                  "price_reduced_share": null,
+                  "hotness_score": 27.18705035971223,
+                  "hotness_rank": 11188,
+                  "month": "202607",
+                  "suppressed_reason": "quality_flag"
+                }
+              },
+              {
+                "key": "33916",
+                "label": "33916",
+                "cells": {
+                  "market_heat_score": null,
+                  "active_listing_count": 159,
+                  "inventory_yy": null,
+                  "median_dom": null,
+                  "dom_yy": null,
+                  "pending_ratio": null,
+                  "pending_ratio_yy": null,
+                  "new_listing_count": null,
+                  "price_reduced_share": null,
+                  "hotness_score": 14.89928057553957,
+                  "hotness_rank": 12968,
+                  "month": "202607",
+                  "suppressed_reason": "quality_flag"
+                }
+              },
+              {
+                "key": "33919",
+                "label": "33919",
+                "cells": {
+                  "market_heat_score": null,
+                  "active_listing_count": 391,
+                  "inventory_yy": null,
+                  "median_dom": null,
+                  "dom_yy": null,
+                  "pending_ratio": null,
+                  "pending_ratio_yy": null,
+                  "new_listing_count": null,
+                  "price_reduced_share": null,
+                  "hotness_score": 21.859712230215827,
+                  "hotness_rank": 12062,
+                  "month": "202607",
+                  "suppressed_reason": "quality_flag"
+                }
+              },
+              {
+                "key": "33924",
+                "label": "33924",
+                "cells": {
+                  "market_heat_score": null,
+                  "active_listing_count": 137,
+                  "inventory_yy": null,
+                  "median_dom": null,
+                  "dom_yy": null,
+                  "pending_ratio": null,
+                  "pending_ratio_yy": null,
+                  "new_listing_count": null,
+                  "price_reduced_share": null,
+                  "hotness_score": 7.079136690647482,
+                  "hotness_rank": 13649,
+                  "month": "202607",
+                  "suppressed_reason": "quality_flag"
+                }
+              },
+              {
+                "key": "33965",
+                "label": "33965",
+                "cells": {
+                  "market_heat_score": null,
+                  "active_listing_count": 1,
+                  "inventory_yy": null,
+                  "median_dom": null,
+                  "dom_yy": null,
+                  "pending_ratio": null,
+                  "pending_ratio_yy": null,
+                  "new_listing_count": null,
+                  "price_reduced_share": null,
+                  "hotness_score": null,
+                  "hotness_rank": null,
+                  "month": "201708",
+                  "suppressed_reason": "insufficient_signals"
+                }
+              },
+              {
+                "key": "33966",
+                "label": "33966",
+                "cells": {
+                  "market_heat_score": null,
+                  "active_listing_count": 108,
+                  "inventory_yy": null,
+                  "median_dom": null,
+                  "dom_yy": null,
+                  "pending_ratio": null,
+                  "pending_ratio_yy": null,
+                  "new_listing_count": null,
+                  "price_reduced_share": null,
+                  "hotness_score": 16.28776978417266,
+                  "hotness_rank": 12799,
+                  "month": "202607",
+                  "suppressed_reason": "quality_flag"
+                }
+              },
+              {
+                "key": "33973",
+                "label": "33973",
+                "cells": {
+                  "market_heat_score": null,
+                  "active_listing_count": 18,
+                  "inventory_yy": null,
+                  "median_dom": null,
+                  "dom_yy": null,
+                  "pending_ratio": null,
+                  "pending_ratio_yy": null,
+                  "new_listing_count": null,
+                  "price_reduced_share": null,
+                  "hotness_score": 19.992805755395683,
+                  "hotness_rank": 12339,
+                  "month": "202607",
+                  "suppressed_reason": "quality_flag"
+                }
+              },
+              {
+                "key": "34101",
+                "label": "34101",
+                "cells": {
+                  "market_heat_score": null,
+                  "active_listing_count": 0,
+                  "inventory_yy": null,
+                  "median_dom": null,
+                  "dom_yy": null,
+                  "pending_ratio": null,
+                  "pending_ratio_yy": null,
+                  "new_listing_count": null,
+                  "price_reduced_share": null,
+                  "hotness_score": null,
+                  "hotness_rank": null,
+                  "month": "202101",
+                  "suppressed_reason": "quality_flag"
+                }
+              },
+              {
+                "key": "34102",
+                "label": "34102",
+                "cells": {
+                  "market_heat_score": null,
+                  "active_listing_count": 419,
+                  "inventory_yy": null,
+                  "median_dom": null,
+                  "dom_yy": null,
+                  "pending_ratio": null,
+                  "pending_ratio_yy": null,
+                  "new_listing_count": null,
+                  "price_reduced_share": null,
+                  "hotness_score": 16.56834532374101,
+                  "hotness_rank": 12767,
+                  "month": "202607",
+                  "suppressed_reason": "quality_flag"
+                }
+              },
+              {
+                "key": "34103",
+                "label": "34103",
+                "cells": {
+                  "market_heat_score": null,
+                  "active_listing_count": 316,
+                  "inventory_yy": null,
+                  "median_dom": null,
+                  "dom_yy": null,
+                  "pending_ratio": null,
+                  "pending_ratio_yy": null,
+                  "new_listing_count": null,
+                  "price_reduced_share": null,
+                  "hotness_score": 8.859712230215827,
+                  "hotness_rank": 13524,
+                  "month": "202607",
+                  "suppressed_reason": "quality_flag"
+                }
+              },
+              {
+                "key": "34139",
+                "label": "34139",
+                "cells": {
+                  "market_heat_score": null,
+                  "active_listing_count": 20,
+                  "inventory_yy": null,
+                  "median_dom": null,
+                  "dom_yy": null,
+                  "pending_ratio": null,
+                  "pending_ratio_yy": null,
+                  "new_listing_count": null,
+                  "price_reduced_share": null,
+                  "hotness_score": 6.133093525179857,
+                  "hotness_rank": 13705,
+                  "month": "202607",
+                  "suppressed_reason": "quality_flag"
+                }
+              },
+              {
+                "key": "34140",
+                "label": "34140",
+                "cells": {
+                  "market_heat_score": null,
+                  "active_listing_count": 11,
+                  "inventory_yy": null,
+                  "median_dom": null,
+                  "dom_yy": null,
+                  "pending_ratio": null,
+                  "pending_ratio_yy": null,
+                  "new_listing_count": null,
+                  "price_reduced_share": null,
+                  "hotness_score": 7.633093525179857,
+                  "hotness_rank": 13608,
+                  "month": "202607",
+                  "suppressed_reason": "quality_flag"
+                }
+              },
+              {
+                "key": "34141",
+                "label": "34141",
+                "cells": {
+                  "market_heat_score": null,
+                  "active_listing_count": 1,
+                  "inventory_yy": null,
+                  "median_dom": null,
+                  "dom_yy": null,
+                  "pending_ratio": null,
+                  "pending_ratio_yy": null,
+                  "new_listing_count": null,
+                  "price_reduced_share": null,
+                  "hotness_score": null,
+                  "hotness_rank": null,
+                  "month": "202607",
+                  "suppressed_reason": "quality_flag"
+                }
+              },
+              {
+                "key": "34145",
+                "label": "34145",
+                "cells": {
+                  "market_heat_score": null,
+                  "active_listing_count": 439,
+                  "inventory_yy": null,
+                  "median_dom": null,
+                  "dom_yy": null,
+                  "pending_ratio": null,
+                  "pending_ratio_yy": null,
+                  "new_listing_count": null,
+                  "price_reduced_share": null,
+                  "hotness_score": 33.356115107913666,
+                  "hotness_rank": 10016,
+                  "month": "202607",
+                  "suppressed_reason": "quality_flag"
+                }
+              }
+            ],
+            "source": {
+              "url": "https://www.realtor.com/research/data/",
+              "fetched_at": "2026-08-09T04:30:21Z",
+              "tier": 3,
+              "citation": "Data provided by Realtor.com — Economic Research Data Library (ZIP-grain Core Inventory + Market Hotness, monthly). Attribution-only license. Hotness is a relative cross-sectional rank, not the vote driver."
+            }
+          },
+          {
+            "id": "market_heat_region_trend",
+            "title": "SWFL market heat — region monthly trend (realtor.com core inventory)",
+            "grain": "region-month",
+            "columns": [
+              {
+                "id": "month",
+                "label": "Month"
+              },
+              {
+                "id": "region_median_active_listings",
+                "label": "Median Active Listings",
+                "display_format": "count",
+                "units": "listings"
+              },
+              {
+                "id": "region_median_dom",
+                "label": "Median DOM",
+                "display_format": "count",
+                "units": "days"
+              },
+              {
+                "id": "region_median_pending_ratio",
+                "label": "Median Pending Ratio",
+                "display_format": "ratio",
+                "units": "ratio"
+              }
+            ],
+            "rows": [
+              {
+                "key": "202308",
+                "label": "202308",
+                "cells": {
+                  "month": "202308",
+                  "region_median_active_listings": 142,
+                  "region_median_dom": 67,
+                  "region_median_pending_ratio": 0.4921
+                }
+              },
+              {
+                "key": "202309",
+                "label": "202309",
+                "cells": {
+                  "month": "202309",
+                  "region_median_active_listings": 155.5,
+                  "region_median_dom": 65.5,
+                  "region_median_pending_ratio": 0.4169
+                }
+              },
+              {
+                "key": "202310",
+                "label": "202310",
+                "cells": {
+                  "month": "202310",
+                  "region_median_active_listings": 169,
+                  "region_median_dom": 62.5,
+                  "region_median_pending_ratio": 0.33225000000000005
+                }
+              },
+              {
+                "key": "202311",
+                "label": "202311",
+                "cells": {
+                  "month": "202311",
+                  "region_median_active_listings": 185,
+                  "region_median_dom": 60,
+                  "region_median_pending_ratio": 0.28795
+                }
+              },
+              {
+                "key": "202312",
+                "label": "202312",
+                "cells": {
+                  "month": "202312",
+                  "region_median_active_listings": 202.5,
+                  "region_median_dom": 65.5,
+                  "region_median_pending_ratio": 0.2438
+                }
+              },
+              {
+                "key": "202401",
+                "label": "202401",
+                "cells": {
+                  "month": "202401",
+                  "region_median_active_listings": 235,
+                  "region_median_dom": 73,
+                  "region_median_pending_ratio": 0.21575
+                }
+              },
+              {
+                "key": "202402",
+                "label": "202402",
+                "cells": {
+                  "month": "202402",
+                  "region_median_active_listings": 243,
+                  "region_median_dom": 64,
+                  "region_median_pending_ratio": 0.27215
+                }
+              },
+              {
+                "key": "202403",
+                "label": "202403",
+                "cells": {
+                  "month": "202403",
+                  "region_median_active_listings": 244,
+                  "region_median_dom": 62,
+                  "region_median_pending_ratio": 0.3006
+                }
+              },
+              {
+                "key": "202404",
+                "label": "202404",
+                "cells": {
+                  "month": "202404",
+                  "region_median_active_listings": 241,
+                  "region_median_dom": 71,
+                  "region_median_pending_ratio": 0.29305000000000003
+                }
+              },
+              {
+                "key": "202405",
+                "label": "202405",
+                "cells": {
+                  "month": "202405",
+                  "region_median_active_listings": 241,
+                  "region_median_dom": 72,
+                  "region_median_pending_ratio": 0.2713
+                }
+              },
+              {
+                "key": "202406",
+                "label": "202406",
+                "cells": {
+                  "month": "202406",
+                  "region_median_active_listings": 243,
+                  "region_median_dom": 79,
+                  "region_median_pending_ratio": 0.2384
+                }
+              },
+              {
+                "key": "202407",
+                "label": "202407",
+                "cells": {
+                  "month": "202407",
+                  "region_median_active_listings": 235,
+                  "region_median_dom": 86,
+                  "region_median_pending_ratio": 0.2167
+                }
+              },
+              {
+                "key": "202408",
+                "label": "202408",
+                "cells": {
+                  "month": "202408",
+                  "region_median_active_listings": 230,
+                  "region_median_dom": 92,
+                  "region_median_pending_ratio": 0.21805
+                }
+              },
+              {
+                "key": "202409",
+                "label": "202409",
+                "cells": {
+                  "month": "202409",
+                  "region_median_active_listings": 223,
+                  "region_median_dom": 90,
+                  "region_median_pending_ratio": 0.21989999999999998
+                }
+              },
+              {
+                "key": "202410",
+                "label": "202410",
+                "cells": {
+                  "month": "202410",
+                  "region_median_active_listings": 236,
+                  "region_median_dom": 85.5,
+                  "region_median_pending_ratio": 0.18514999999999998
+                }
+              },
+              {
+                "key": "202411",
+                "label": "202411",
+                "cells": {
+                  "month": "202411",
+                  "region_median_active_listings": 271.5,
+                  "region_median_dom": 75,
+                  "region_median_pending_ratio": 0.1671
+                }
+              },
+              {
+                "key": "202412",
+                "label": "202412",
+                "cells": {
+                  "month": "202412",
+                  "region_median_active_listings": 291,
+                  "region_median_dom": 72,
+                  "region_median_pending_ratio": 0.1593
+                }
+              },
+              {
+                "key": "202501",
+                "label": "202501",
+                "cells": {
+                  "month": "202501",
+                  "region_median_active_listings": 318.5,
+                  "region_median_dom": 71,
+                  "region_median_pending_ratio": 0.14215
+                }
+              },
+              {
+                "key": "202502",
+                "label": "202502",
+                "cells": {
+                  "month": "202502",
+                  "region_median_active_listings": 362,
+                  "region_median_dom": 71,
+                  "region_median_pending_ratio": 0.1658
+                }
+              },
+              {
+                "key": "202503",
+                "label": "202503",
+                "cells": {
+                  "month": "202503",
+                  "region_median_active_listings": 363,
+                  "region_median_dom": 71.5,
+                  "region_median_pending_ratio": 0.20355
+                }
+              },
+              {
+                "key": "202504",
+                "label": "202504",
+                "cells": {
+                  "month": "202504",
+                  "region_median_active_listings": 372,
+                  "region_median_dom": 81.5,
+                  "region_median_pending_ratio": 0.1953
+                }
+              },
+              {
+                "key": "202505",
+                "label": "202505",
+                "cells": {
+                  "month": "202505",
+                  "region_median_active_listings": 358,
+                  "region_median_dom": 90.5,
+                  "region_median_pending_ratio": 0.19105
+                }
+              },
+              {
+                "key": "202506",
+                "label": "202506",
+                "cells": {
+                  "month": "202506",
+                  "region_median_active_listings": 326,
+                  "region_median_dom": 96.5,
+                  "region_median_pending_ratio": 0.19325
+                }
+              },
+              {
+                "key": "202507",
+                "label": "202507",
+                "cells": {
+                  "month": "202507",
+                  "region_median_active_listings": 310,
+                  "region_median_dom": 104,
+                  "region_median_pending_ratio": 0.1863
+                }
+              },
+              {
+                "key": "202508",
+                "label": "202508",
+                "cells": {
+                  "month": "202508",
+                  "region_median_active_listings": 300,
+                  "region_median_dom": 108,
+                  "region_median_pending_ratio": 0.2044
+                }
+              },
+              {
+                "key": "202509",
+                "label": "202509",
+                "cells": {
+                  "month": "202509",
+                  "region_median_active_listings": 297.5,
+                  "region_median_dom": 108.5,
+                  "region_median_pending_ratio": 0.2091
+                }
+              },
+              {
+                "key": "202510",
+                "label": "202510",
+                "cells": {
+                  "month": "202510",
+                  "region_median_active_listings": 300.5,
+                  "region_median_dom": 90,
+                  "region_median_pending_ratio": 0.18230000000000002
+                }
+              },
+              {
+                "key": "202511",
+                "label": "202511",
+                "cells": {
+                  "month": "202511",
+                  "region_median_active_listings": 311.5,
+                  "region_median_dom": 78,
+                  "region_median_pending_ratio": 0.1793
+                }
+              },
+              {
+                "key": "202512",
+                "label": "202512",
+                "cells": {
+                  "month": "202512",
+                  "region_median_active_listings": 319.5,
+                  "region_median_dom": 79.5,
+                  "region_median_pending_ratio": 0.1699
+                }
+              },
+              {
+                "key": "202601",
+                "label": "202601",
+                "cells": {
+                  "month": "202601",
+                  "region_median_active_listings": 318,
+                  "region_median_dom": 83,
+                  "region_median_pending_ratio": 0.1679
+                }
+              },
+              {
+                "key": "202602",
+                "label": "202602",
+                "cells": {
+                  "month": "202602",
+                  "region_median_active_listings": 326.5,
+                  "region_median_dom": 83.5,
+                  "region_median_pending_ratio": 0.236
+                }
+              },
+              {
+                "key": "202603",
+                "label": "202603",
+                "cells": {
+                  "month": "202603",
+                  "region_median_active_listings": 321.5,
+                  "region_median_dom": 76,
+                  "region_median_pending_ratio": 0.27475
+                }
+              },
+              {
+                "key": "202604",
+                "label": "202604",
+                "cells": {
+                  "month": "202604",
+                  "region_median_active_listings": 313.5,
+                  "region_median_dom": 82,
+                  "region_median_pending_ratio": 0.26405
+                }
+              },
+              {
+                "key": "202605",
+                "label": "202605",
+                "cells": {
+                  "month": "202605",
+                  "region_median_active_listings": 300.5,
+                  "region_median_dom": 89,
+                  "region_median_pending_ratio": 0.2581
+                }
+              },
+              {
+                "key": "202606",
+                "label": "202606",
+                "cells": {
+                  "month": "202606",
+                  "region_median_active_listings": 286,
+                  "region_median_dom": 92,
+                  "region_median_pending_ratio": 0.2517
+                }
+              },
+              {
+                "key": "202607",
+                "label": "202607",
+                "cells": {
+                  "month": "202607",
+                  "region_median_active_listings": 280.5,
+                  "region_median_dom": 92,
+                  "region_median_pending_ratio": 0.23945
+                }
+              }
+            ],
+            "source": {
+              "url": "https://www.realtor.com/research/data/",
+              "fetched_at": "2026-08-09T04:30:21Z",
+              "tier": 3,
+              "citation": "Data provided by Realtor.com — Economic Research Data Library (ZIP-grain Core Inventory + Market Hotness, monthly). Attribution-only license. Hotness is a relative cross-sectional rank, not the vote driver."
+            }
+          }
+        ],
+        "caveats": [
+          "List-side only — these are active-listing metrics; there are no closed/sold prices in this source. Sold-price reads come from the ATTOM lane.",
+          "Hotness is a cross-sectional national rank, not an absolute cycle gauge — a SWFL ZIP can rank hot nationally while cooling locally. The directional call is driven by inventory/DOM/pending year-over-year, not by Hotness.",
+          "~50% of SWFL transactions are all-cash (Lee County, ATTOM 2024) — national rate-sensitive thresholds are muted; read the YoY tightening, not absolute DOM cutoffs.",
+          "Hurricane Ian (Sept 2022) is a labeled event — inventory/DOM dislocations Oct 2022–Mar 2023 are forced, not organic demand.",
+          "Data provided by Realtor.com.",
+          "16 ZIPs suppressed (insufficient signals or realtor quality_flag)."
+        ],
+        "contradicts": [],
+        "confidence": 0.6,
+        "joint_integrity": 1,
+        "confidence_dispersion": 0,
+        "chain_depth": 0,
+        "trust_tier": 3,
+        "upstream_count": 0,
+        "relevance": {
+          "decay_curve": "weeks",
+          "half_life_hours": 720,
+          "computed_at": "2026-08-09T04:30:23Z"
+        },
+        "exogenous_signals": []
+      }
     },
     {
       "packId": "hurricane-tracks-fl",
@@ -430,8 +2425,737 @@
     },
     {
       "packId": "active-listings-swfl",
-      "status": "skipped-fresh",
-      "written": false
+      "status": "built",
+      "version": 24,
+      "written": true,
+      "brainOutput": {
+        "brain_id": "active-listings-swfl",
+        "version": 24,
+        "refined_at": "2026-08-09T04:30:30Z",
+        "expires": "2026-08-11T04:30:30Z",
+        "ttl_seconds": 172800,
+        "direction": "neutral",
+        "magnitude": 0,
+        "drivers": [],
+        "overrides": [],
+        "conclusion": "22,322 active SWFL residential listings, median asking $415,000, avg 139 days on market (active residential listings, as of 2026-08-09). By county: Lee 16,032 (median $369,900), Collier 6,290 (median $649,999), Lee 1 (median $314,900).",
+        "key_metrics": [
+          {
+            "metric": "active_listings_count_swfl",
+            "label": "SWFL active residential listings (count)",
+            "value": 22322,
+            "direction": "stable",
+            "variable_type": "extensive",
+            "units": "listings",
+            "display_format": "count",
+            "source": {
+              "url": "https://www.swfldatagulf.com/r/source/listing_active_stats?label=SWFL+active+for-sale+listings+%28aggregated%29&source=realtor.com+for-sale+listings&brain=active-listings-swfl&date_col=scraped_at",
+              "fetched_at": "2026-08-09T04:30:30Z",
+              "tier": 2,
+              "citation": "22,322 active SWFL residential listings as of 2026-08-09"
+            },
+            "suggestions": [
+              "What's driving active listings count swfl?",
+              "How does active listings count swfl here compare to other SWFL areas?"
+            ]
+          },
+          {
+            "metric": "median_list_price_swfl",
+            "label": "SWFL median asking price (active residential)",
+            "value": 415000,
+            "direction": "stable",
+            "variable_type": "intensive",
+            "units": "USD",
+            "display_format": "currency",
+            "source": {
+              "url": "https://www.swfldatagulf.com/r/source/listing_active_stats?label=SWFL+active+for-sale+listings+%28aggregated%29&source=realtor.com+for-sale+listings&brain=active-listings-swfl&date_col=scraped_at",
+              "fetched_at": "2026-08-09T04:30:30Z",
+              "tier": 2,
+              "citation": "median asking price across 22,322 active SWFL listings: $415,000"
+            },
+            "suggestions": [
+              "What's driving median list price swfl?",
+              "How does median list price swfl here compare to other SWFL areas?"
+            ]
+          },
+          {
+            "metric": "recent_price_cuts_count_swfl",
+            "label": "SWFL listings with a price cut in the last 90 days",
+            "value": 6326,
+            "direction": "stable",
+            "variable_type": "extensive",
+            "units": "listings",
+            "display_format": "count",
+            "source": {
+              "url": "https://www.swfldatagulf.com/r/source/listing_active_stats?label=SWFL+active+for-sale+listings+%28aggregated%29&source=realtor.com+for-sale+listings&brain=active-listings-swfl&date_col=scraped_at",
+              "fetched_at": "2026-08-09T04:30:30Z",
+              "tier": 2,
+              "citation": "6,326 SWFL listings took at least one price cut in the trailing 90 days, median cut $10,999"
+            },
+            "suggestions": [
+              "What's driving recent price cuts count swfl?",
+              "How does recent price cuts count swfl here compare to other SWFL areas?"
+            ]
+          },
+          {
+            "metric": "median_annual_tax_swfl",
+            "label": "SWFL median vendor-reported annual property tax",
+            "value": 4008,
+            "direction": "stable",
+            "variable_type": "intensive",
+            "units": "USD",
+            "display_format": "currency",
+            "source": {
+              "url": "https://www.swfldatagulf.com/r/source/listing_active_stats?label=SWFL+active+for-sale+listings+%28aggregated%29&source=realtor.com+for-sale+listings&brain=active-listings-swfl&date_col=scraped_at",
+              "fetched_at": "2026-08-09T04:30:30Z",
+              "tier": 2,
+              "citation": "Median vendor-reported annual property tax across 16,514 SWFL properties with tax history: $4,008"
+            },
+            "suggestions": [
+              "What's driving median annual tax swfl?",
+              "How does median annual tax swfl here compare to other SWFL areas?"
+            ]
+          },
+          {
+            "metric": "avg_days_on_market_swfl",
+            "label": "SWFL average days on market (active residential)",
+            "value": 139,
+            "direction": "stable",
+            "variable_type": "intensive",
+            "units": "days",
+            "display_format": "count",
+            "source": {
+              "url": "https://www.swfldatagulf.com/r/source/listing_active_stats?label=SWFL+active+for-sale+listings+%28aggregated%29&source=realtor.com+for-sale+listings&brain=active-listings-swfl&date_col=scraped_at",
+              "fetched_at": "2026-08-09T04:30:30Z",
+              "tier": 2,
+              "citation": "average days on market across active SWFL listings: 139 days"
+            },
+            "suggestions": [
+              "What's driving avg days on market swfl?",
+              "How does avg days on market swfl here compare to other SWFL areas?"
+            ]
+          }
+        ],
+        "detail_tables": [
+          {
+            "id": "active_listings_by_county",
+            "title": "SWFL active residential listings by county",
+            "grain": "county",
+            "columns": [
+              {
+                "id": "listing_count",
+                "label": "Active listings",
+                "display_format": "count",
+                "units": "listings"
+              },
+              {
+                "id": "median_list_price",
+                "label": "Median asking price",
+                "display_format": "currency",
+                "units": "USD"
+              },
+              {
+                "id": "avg_days_on_market",
+                "label": "Avg days on market",
+                "display_format": "count",
+                "units": "days"
+              }
+            ],
+            "rows": [
+              {
+                "key": "Lee",
+                "label": "Lee",
+                "cells": {
+                  "listing_count": 16032,
+                  "median_list_price": 369900,
+                  "avg_days_on_market": 138
+                }
+              },
+              {
+                "key": "Collier",
+                "label": "Collier",
+                "cells": {
+                  "listing_count": 6290,
+                  "median_list_price": 649999,
+                  "avg_days_on_market": 142
+                }
+              },
+              {
+                "key": "Lee",
+                "label": "Lee",
+                "cells": {
+                  "listing_count": 1,
+                  "median_list_price": 314900,
+                  "avg_days_on_market": null
+                }
+              }
+            ],
+            "source": {
+              "url": "https://www.swfldatagulf.com/r/source/listing_active_stats?label=SWFL+active+for-sale+listings+%28aggregated%29&source=realtor.com+for-sale+listings&brain=active-listings-swfl&date_col=scraped_at",
+              "fetched_at": "2026-08-09T04:30:30Z",
+              "tier": 2,
+              "citation": "Active SWFL residential listings, aggregated per grain in SQL (listing_active_stats) as of 2026-08-09"
+            }
+          },
+          {
+            "id": "active_listings_by_zip",
+            "title": "SWFL active residential listings by ZIP",
+            "grain": "zip",
+            "columns": [
+              {
+                "id": "listing_count",
+                "label": "Active listings",
+                "display_format": "count",
+                "units": "listings"
+              },
+              {
+                "id": "median_list_price",
+                "label": "Median asking price",
+                "display_format": "currency",
+                "units": "USD"
+              },
+              {
+                "id": "avg_days_on_market",
+                "label": "Avg days on market",
+                "display_format": "count",
+                "units": "days"
+              }
+            ],
+            "rows": [
+              {
+                "key": "33993",
+                "label": "33993 (Lee)",
+                "cells": {
+                  "listing_count": 1111,
+                  "median_list_price": 392000,
+                  "avg_days_on_market": 128
+                }
+              },
+              {
+                "key": "33908",
+                "label": "33908 (Lee)",
+                "cells": {
+                  "listing_count": 998,
+                  "median_list_price": 330000,
+                  "avg_days_on_market": 162
+                }
+              },
+              {
+                "key": "33914",
+                "label": "33914 (Lee)",
+                "cells": {
+                  "listing_count": 852,
+                  "median_list_price": 525000,
+                  "avg_days_on_market": 132
+                }
+              },
+              {
+                "key": "33917",
+                "label": "33917 (Lee)",
+                "cells": {
+                  "listing_count": 816,
+                  "median_list_price": 199900,
+                  "avg_days_on_market": 135
+                }
+              },
+              {
+                "key": "33909",
+                "label": "33909 (Lee)",
+                "cells": {
+                  "listing_count": 776,
+                  "median_list_price": 339900,
+                  "avg_days_on_market": 112
+                }
+              },
+              {
+                "key": "34135",
+                "label": "34135 (Lee)",
+                "cells": {
+                  "listing_count": 750,
+                  "median_list_price": 456780,
+                  "avg_days_on_market": 139
+                }
+              },
+              {
+                "key": "33974",
+                "label": "33974 (Lee)",
+                "cells": {
+                  "listing_count": 715,
+                  "median_list_price": 320000,
+                  "avg_days_on_market": 100
+                }
+              },
+              {
+                "key": "34120",
+                "label": "34120 (Collier)",
+                "cells": {
+                  "listing_count": 703,
+                  "median_list_price": 649000,
+                  "avg_days_on_market": 116
+                }
+              },
+              {
+                "key": "33904",
+                "label": "33904 (Lee)",
+                "cells": {
+                  "listing_count": 647,
+                  "median_list_price": 420000,
+                  "avg_days_on_market": 129
+                }
+              },
+              {
+                "key": "33913",
+                "label": "33913 (Lee)",
+                "cells": {
+                  "listing_count": 613,
+                  "median_list_price": 469000,
+                  "avg_days_on_market": 119
+                }
+              },
+              {
+                "key": "33971",
+                "label": "33971 (Lee)",
+                "cells": {
+                  "listing_count": 611,
+                  "median_list_price": 319900,
+                  "avg_days_on_market": 118
+                }
+              },
+              {
+                "key": "34114",
+                "label": "34114 (Collier)",
+                "cells": {
+                  "listing_count": 599,
+                  "median_list_price": 550000,
+                  "avg_days_on_market": 134
+                }
+              },
+              {
+                "key": "33931",
+                "label": "33931 (Lee)",
+                "cells": {
+                  "listing_count": 590,
+                  "median_list_price": 675000,
+                  "avg_days_on_market": 178
+                }
+              },
+              {
+                "key": "33928",
+                "label": "33928 (Lee)",
+                "cells": {
+                  "listing_count": 578,
+                  "median_list_price": 538500,
+                  "avg_days_on_market": 116
+                }
+              },
+              {
+                "key": "34112",
+                "label": "34112 (Collier)",
+                "cells": {
+                  "listing_count": 556,
+                  "median_list_price": 339450,
+                  "avg_days_on_market": 144
+                }
+              },
+              {
+                "key": "33903",
+                "label": "33903 (Lee)",
+                "cells": {
+                  "listing_count": 556,
+                  "median_list_price": 145500,
+                  "avg_days_on_market": 154
+                }
+              },
+              {
+                "key": "33919",
+                "label": "33919 (Lee)",
+                "cells": {
+                  "listing_count": 523,
+                  "median_list_price": 248000,
+                  "avg_days_on_market": 136
+                }
+              },
+              {
+                "key": "33905",
+                "label": "33905 (Lee)",
+                "cells": {
+                  "listing_count": 505,
+                  "median_list_price": 355000,
+                  "avg_days_on_market": 125
+                }
+              },
+              {
+                "key": "34145",
+                "label": "34145 (Collier)",
+                "cells": {
+                  "listing_count": 502,
+                  "median_list_price": 950000,
+                  "avg_days_on_market": 138
+                }
+              },
+              {
+                "key": "33991",
+                "label": "33991 (Lee)",
+                "cells": {
+                  "listing_count": 460,
+                  "median_list_price": 450000,
+                  "avg_days_on_market": 125
+                }
+              },
+              {
+                "key": "33936",
+                "label": "33936 (Lee)",
+                "cells": {
+                  "listing_count": 451,
+                  "median_list_price": 245000,
+                  "avg_days_on_market": 108
+                }
+              },
+              {
+                "key": "33976",
+                "label": "33976 (Lee)",
+                "cells": {
+                  "listing_count": 451,
+                  "median_list_price": 329000,
+                  "avg_days_on_market": 126
+                }
+              },
+              {
+                "key": "33972",
+                "label": "33972 (Lee)",
+                "cells": {
+                  "listing_count": 449,
+                  "median_list_price": 355000,
+                  "avg_days_on_market": 111
+                }
+              },
+              {
+                "key": "34102",
+                "label": "34102 (Collier)",
+                "cells": {
+                  "listing_count": 437,
+                  "median_list_price": 3100000,
+                  "avg_days_on_market": 211
+                }
+              },
+              {
+                "key": "34134",
+                "label": "34134 (Lee)",
+                "cells": {
+                  "listing_count": 431,
+                  "median_list_price": 799000,
+                  "avg_days_on_market": 175
+                }
+              },
+              {
+                "key": "34119",
+                "label": "34119 (Collier)",
+                "cells": {
+                  "listing_count": 429,
+                  "median_list_price": 689000,
+                  "avg_days_on_market": 126
+                }
+              },
+              {
+                "key": "34110",
+                "label": "34110 (Collier)",
+                "cells": {
+                  "listing_count": 417,
+                  "median_list_price": 659000,
+                  "avg_days_on_market": 145
+                }
+              },
+              {
+                "key": "34108",
+                "label": "34108 (Collier)",
+                "cells": {
+                  "listing_count": 410,
+                  "median_list_price": 1299000,
+                  "avg_days_on_market": 156
+                }
+              },
+              {
+                "key": "34113",
+                "label": "34113 (Collier)",
+                "cells": {
+                  "listing_count": 405,
+                  "median_list_price": 525000,
+                  "avg_days_on_market": 146
+                }
+              },
+              {
+                "key": "33957",
+                "label": "33957 (Lee)",
+                "cells": {
+                  "listing_count": 374,
+                  "median_list_price": 950000,
+                  "avg_days_on_market": 219
+                }
+              },
+              {
+                "key": "33990",
+                "label": "33990 (Lee)",
+                "cells": {
+                  "listing_count": 345,
+                  "median_list_price": 399900,
+                  "avg_days_on_market": 113
+                }
+              },
+              {
+                "key": "34103",
+                "label": "34103 (Collier)",
+                "cells": {
+                  "listing_count": 338,
+                  "median_list_price": 1462500,
+                  "avg_days_on_market": 157
+                }
+              },
+              {
+                "key": "34142",
+                "label": "34142 (Collier)",
+                "cells": {
+                  "listing_count": 329,
+                  "median_list_price": 435900,
+                  "avg_days_on_market": 104
+                }
+              },
+              {
+                "key": "33912",
+                "label": "33912 (Lee)",
+                "cells": {
+                  "listing_count": 302,
+                  "median_list_price": 349450,
+                  "avg_days_on_market": 137
+                }
+              },
+              {
+                "key": "34109",
+                "label": "34109 (Collier)",
+                "cells": {
+                  "listing_count": 282,
+                  "median_list_price": 738000,
+                  "avg_days_on_market": 126
+                }
+              },
+              {
+                "key": "33907",
+                "label": "33907 (Lee)",
+                "cells": {
+                  "listing_count": 277,
+                  "median_list_price": 182000,
+                  "avg_days_on_market": 140
+                }
+              },
+              {
+                "key": "34104",
+                "label": "34104 (Collier)",
+                "cells": {
+                  "listing_count": 271,
+                  "median_list_price": 390000,
+                  "avg_days_on_market": 125
+                }
+              },
+              {
+                "key": "33916",
+                "label": "33916 (Lee)",
+                "cells": {
+                  "listing_count": 259,
+                  "median_list_price": 300000,
+                  "avg_days_on_market": 357
+                }
+              },
+              {
+                "key": "33901",
+                "label": "33901 (Lee)",
+                "cells": {
+                  "listing_count": 258,
+                  "median_list_price": 309500,
+                  "avg_days_on_market": 157
+                }
+              },
+              {
+                "key": "33967",
+                "label": "33967 (Lee)",
+                "cells": {
+                  "listing_count": 224,
+                  "median_list_price": 396000,
+                  "avg_days_on_market": 106
+                }
+              },
+              {
+                "key": "33920",
+                "label": "33920 (Lee)",
+                "cells": {
+                  "listing_count": 221,
+                  "median_list_price": 428990,
+                  "avg_days_on_market": 111
+                }
+              },
+              {
+                "key": "33973",
+                "label": "33973 (Lee)",
+                "cells": {
+                  "listing_count": 210,
+                  "median_list_price": 471000,
+                  "avg_days_on_market": 116
+                }
+              },
+              {
+                "key": "34105",
+                "label": "34105 (Collier)",
+                "cells": {
+                  "listing_count": 199,
+                  "median_list_price": 395000,
+                  "avg_days_on_market": 128
+                }
+              },
+              {
+                "key": "34117",
+                "label": "34117 (Collier)",
+                "cells": {
+                  "listing_count": 173,
+                  "median_list_price": 750000,
+                  "avg_days_on_market": 121
+                }
+              },
+              {
+                "key": "33966",
+                "label": "33966 (Lee)",
+                "cells": {
+                  "listing_count": 168,
+                  "median_list_price": 319750,
+                  "avg_days_on_market": 115
+                }
+              },
+              {
+                "key": "33924",
+                "label": "33924 (Lee)",
+                "cells": {
+                  "listing_count": 132,
+                  "median_list_price": 1499500,
+                  "avg_days_on_market": 226
+                }
+              },
+              {
+                "key": "33922",
+                "label": "33922 (Lee)",
+                "cells": {
+                  "listing_count": 116,
+                  "median_list_price": 482450,
+                  "avg_days_on_market": 161
+                }
+              },
+              {
+                "key": "33956",
+                "label": "33956 (Lee)",
+                "cells": {
+                  "listing_count": 104,
+                  "median_list_price": 583750,
+                  "avg_days_on_market": 174
+                }
+              },
+              {
+                "key": "34116",
+                "label": "34116 (Collier)",
+                "cells": {
+                  "listing_count": 88,
+                  "median_list_price": 582000,
+                  "avg_days_on_market": 106
+                }
+              },
+              {
+                "key": "33921",
+                "label": "33921 (Lee)",
+                "cells": {
+                  "listing_count": 44,
+                  "median_list_price": 3985000,
+                  "avg_days_on_market": 217
+                }
+              },
+              {
+                "key": "34138",
+                "label": "34138 (Collier)",
+                "cells": {
+                  "listing_count": 31,
+                  "median_list_price": 185000,
+                  "avg_days_on_market": 399
+                }
+              },
+              {
+                "key": "34139",
+                "label": "34139 (Collier)",
+                "cells": {
+                  "listing_count": 30,
+                  "median_list_price": 349000,
+                  "avg_days_on_market": 222
+                }
+              },
+              {
+                "key": "34140",
+                "label": "34140 (Collier)",
+                "cells": {
+                  "listing_count": 15,
+                  "median_list_price": 530000,
+                  "avg_days_on_market": 304
+                }
+              },
+              {
+                "key": "34137",
+                "label": "34137 (Collier)",
+                "cells": {
+                  "listing_count": 2,
+                  "median_list_price": 290000,
+                  "avg_days_on_market": 91
+                }
+              },
+              {
+                "key": "34141",
+                "label": "34141 (Collier)",
+                "cells": {
+                  "listing_count": 2,
+                  "median_list_price": 269500,
+                  "avg_days_on_market": 109
+                }
+              }
+            ],
+            "source": {
+              "url": "https://www.swfldatagulf.com/r/source/listing_active_stats?label=SWFL+active+for-sale+listings+%28aggregated%29&source=realtor.com+for-sale+listings&brain=active-listings-swfl&date_col=scraped_at",
+              "fetched_at": "2026-08-09T04:30:30Z",
+              "tier": 2,
+              "citation": "Active SWFL residential listings, aggregated per grain in SQL (listing_active_stats) as of 2026-08-09"
+            }
+          }
+        ],
+        "caveats": [
+          "List-side only: asking prices and days-on-market for ACTIVE listings — not sold/closed prices (that is the closed-sale records lane).",
+          "Median asking price spans ALL active listings INCLUDING vacant land/lots — in lot-heavy areas this pulls the median well below typical home prices. Use the property_type field or the per-county/ZIP detail to separate homes from land.",
+          "Daily snapshot — broad SWFL coverage but not comprehensive. Direction is neutral on any one day; the day-over-day diff is what reads the inventory trend.",
+          "Source is realtor.com for-sale listings; a direct licensed MLS/IDX feed can swap into the same table when credentialed.",
+          "Price-cut counts cover only listings we have probed (listed/sold history), not every active listing region-wide — a per-property depth signal, not a full-book statistic.",
+          "Annual property tax is vendor-reported (not a county tax bill) and not yet validated against county appraiser records — treat as directional, not authoritative. Covers only properties we have probed, not the full tax roll."
+        ],
+        "contradicts": [],
+        "confidence": 0.8,
+        "joint_integrity": 1,
+        "confidence_dispersion": 0,
+        "chain_depth": 0,
+        "trust_tier": 2,
+        "upstream_count": 0,
+        "relevance": {
+          "decay_curve": "weeks",
+          "half_life_hours": 720,
+          "computed_at": "2026-08-09T04:30:30Z"
+        },
+        "exogenous_signals": [],
+        "grain_boundary": {
+          "not_available": [
+            "Sold / closed sale prices — active asking prices only, not closed transactions",
+            "Per-listing history or price-cut events — current snapshot only",
+            "Rental listings — sale listings only"
+          ],
+          "finest_grain": "zip-snapshot"
+        }
+      }
     },
     {
       "packId": "active-rentals-swfl",
@@ -454,13 +3178,13 @@
     {
       "packId": "master",
       "status": "built",
-      "version": 131,
+      "version": 132,
       "written": true,
       "brainOutput": {
         "brain_id": "master",
-        "version": 131,
-        "refined_at": "2026-08-08T05:18:50Z",
-        "expires": "2026-08-15T05:18:50Z",
+        "version": 132,
+        "refined_at": "2026-08-09T04:30:52Z",
+        "expires": "2026-08-16T04:30:52Z",
         "ttl_seconds": 604800,
         "direction": "bearish",
         "magnitude": 0.85,
@@ -630,6 +3354,25 @@
         "conclusion": "Read is bearish (high magnitude). Driven by: franchise-outcomes, cre-swfl, macro-us, macro-florida, macro-swfl, sector-credit-swfl, tourism-tdt, env-swfl, logistics-swfl, logistics-swfl-nowcast, traffic-swfl, properties-lee-value, properties-collier-value, permits-swfl, rentals-swfl, housing-swfl, safety-swfl, labor-demand-swfl, econ-dev-swfl, city-pulse-swfl, rsw-airport, news-swfl, freshness-pulse, seller-stress-swfl, market-heat-swfl, storm-history-swfl, hurricane-tracks-fl, licenses-swfl, condo-sirs-swfl, permits-commercial-swfl, price-distribution-swfl, listing-momentum-swfl, market-temperature-swfl, investor-zip-swfl, active-listings-swfl, active-rentals-swfl, communities-swfl, tier-divergence-swfl, home-values-swfl. Overrides: flood-barrier-mode-1, storm-history-modifier, rising-rates-dominance. Note conflicts: macro-us (bearish) vs labor-demand-swfl (bullish). Combined confidence 0.86, trust tier T4, based on 39 upstream brains.",
         "key_metrics": [
           {
+            "metric": "rsw_trailing_12mo_total_passengers_yoy",
+            "label": "RSW Total Passengers — Trailing-12-Mo YoY (direction driver)",
+            "value": 2.3837188145672608,
+            "direction": "rising",
+            "variable_type": "intensive",
+            "units": "%",
+            "display_format": "raw",
+            "source": {
+              "url": "https://s3.wasabisys.com/cdn.flylcpa.com/app/uploads/2024/11/21145013/Total-Passengers-2026.pdf",
+              "fetched_at": "2026-08-09T04:30:17Z",
+              "tier": 1,
+              "citation": "Lee County Port Authority Aviation Statistics — RSW trailing-12-mo total passengers ending 2026-04 vs prior 12 mo: +2.4%"
+            },
+            "suggestions": [
+              "What's driving rsw trailing 12mo total passengers yoy?",
+              "How does rsw trailing 12mo total passengers yoy here compare to other SWFL areas?"
+            ]
+          },
+          {
             "metric": "sirs_confirmed_swfl",
             "label": "SIRS-Confirmed Associations — SWFL (Lee + Collier)",
             "value": 1366,
@@ -779,25 +3522,6 @@
             "suggestions": [
               "What's driving sofr rate?",
               "How does sofr rate here compare to other SWFL areas?"
-            ]
-          },
-          {
-            "metric": "rsw_trailing_12mo_total_passengers_yoy",
-            "label": "RSW Total Passengers — Trailing-12-Mo YoY (direction driver)",
-            "value": 2.3837188145672608,
-            "direction": "rising",
-            "variable_type": "intensive",
-            "units": "%",
-            "display_format": "raw",
-            "source": {
-              "url": "https://s3.wasabisys.com/cdn.flylcpa.com/app/uploads/2024/11/21145013/Total-Passengers-2026.pdf",
-              "fetched_at": "2026-07-30T06:59:47Z",
-              "tier": 1,
-              "citation": "Lee County Port Authority Aviation Statistics — RSW trailing-12-mo total passengers ending 2026-04 vs prior 12 mo: +2.4%"
-            },
-            "suggestions": [
-              "What's driving rsw trailing 12mo total passengers yoy?",
-              "How does rsw trailing 12mo total passengers yoy here compare to other SWFL areas?"
             ]
           },
           {
@@ -953,20 +3677,22 @@
             ]
           },
           {
-            "metric": "signal_breaking_1",
-            "value": "Fort Myers: SW Florida Burmese pythons were cited among concerns in a U.S. State Department advisory warning of 'Suitcase Invaders,' published Aug. 1, 2026, referencing the Lee County / Everglades area.",
+            "metric": "active_listings_count_swfl",
+            "label": "SWFL active residential listings (count)",
+            "value": 22322,
             "direction": "stable",
-            "label": "Fort Myers — breaking",
-            "variable_type": "categorical",
+            "variable_type": "extensive",
+            "units": "listings",
+            "display_format": "count",
             "source": {
-              "url": "https://www.naplesnews.com/story/money/2026/08/01/sw-florida-burmese-pythons-among-concerns-in-state-department-advisory-naples-lee-county-everglades/91089085007/",
-              "fetched_at": "2026-08-08T05:18:28Z",
+              "url": "https://www.swfldatagulf.com/r/source/listing_active_stats?label=SWFL+active+for-sale+listings+%28aggregated%29&source=realtor.com+for-sale+listings&brain=active-listings-swfl&date_col=scraped_at",
+              "fetched_at": "2026-08-09T04:30:30Z",
               "tier": 2,
-              "citation": "SW Florida Burmese pythons among concerns in State Department advisory: \"[](https://www.naplesnews.com/)\n[](https://subscribe.naplesnews.com/rr/nanobar?gps-source=CPTILELEFT&itm_campaign=2026ENTJULBAU&itm_medium=ONSITE&success-url=https%3A%2F%2Fwww.naplesnews.com%2Fstory%2Fmoney%2F2026%2F08%2F01%2Fsw-florida-burmese-pythons-among-concerns-in-state-department-advisory-naples-lee-county-everglades%2F91089085007%2F)\n[](https://subscribe.naplesnews.com/rr/masthead?gps-source=CPMASTHEAD&itm_campaign=2026ENTJULBAU&itm_medium=ONSITE&success-url=https%3A%2F%2Fwww.naplesnews.com%2Fstory%2Fmoney%2F2026%2F08%2F01%2Fsw-florida-burmese-pythons-among-concerns-in-state-department-advisory-naples-lee-county-everglades%2F91089085007%2F)\n[News](https://www.naplesnews.com/news/) [Sports](https://www.naplesnews.com/sports/) [Real Estate](https://www.naplesnews.com/business/real-estate/) [Restaurants](https://www.naplesnews.com/entertainment/restaurants/) [Opinion](https://www.naplesnews.com/opinion/) [Advertise](https://advertising.usatoday.com/advertise-with-us/?cid=Web_LiQ_Network_AdvertiseWithUs_AdvertiseInquiry&publication=naples_daily_news&utm_source=local_publication&utm_medium=menu&utm_campaign=advertise_with_us) [Obituaries](https://www.naplesnews.com/obituaries) [eNewspaper](https://user.naplesnews.com/user/enewspaper) [Legals](https://www.naplesnews.com/public-notices)\n[](https://www.naplesnews.com/search/ \"Search\")\n[](https://www.naplesnews.com/weather/ \"Weather in Naples: 74°F Clear\") [](https://subscribe.naplesnews.com/rr/navsub?gps-source=CPTOPNAVBAR&itm_campaign=2026ENTJULBAU&itm_medium=ONSITE&success-url=https%3A%2F%2Fwww.naplesnews.com%2Fstory%2Fmoney%2F2026%2F08%2F01%2Fsw-florida-burmese-pythons-among-concerns-in-state-department-advisory-naples-lee-county-everglades%2F91089085007%2F)\n[](https://login.naplesnews.com/PNDN-GUP/authenticate/?success-url=https%3A%2F%2Fwww.naplesnews.com%2Fstory%2Fmoney%2F2026%2F08%2F01%2Fsw-florida-burmese-pythons-among-concerns-in-state-department-advisory-naples-lee-county-everglades%2F91089085007%2F&cancel-url=https%3A%2F%2Fwww.naplesnews.com%2Fstory%2Fmoney%2F2026%2F08%2F01%2Fsw-florida-burmese-pythons-among-concerns-in-state-department-advisory-naples-lee-county-everglades%2F91089085007%2F)\n[](https://www.naplesnews.com/) [](https://www.naplesnews.com/)\nMONEY\n# After Florida incursion, State Department warns of 'Suitcase Invaders'\n[![Portrait of Phil Fernandez](https://www.naplesnews.com/gcdn/presto/2019/09/14/PNDN/6a77b474-579f-48fa-b56f-a2cc2b9de797-NDN_Phil_Fernandez.jpg?crop=2999,2999,x0,y570&width=48&height=48&format=pjpg&auto=webp) Phil Fernandez](https://www.naplesnews.com/staff/2684114001/phil-fernandez/)\nFort Myers News-Press & Naples Daily News\nAug. 1, 2026, 5:02 a.m. ET\nSummer in [Southwest Florida](https://www.naplesnews.com/story/news/environment/2025/06/09/pythons-in-florida-team-works-to-put-dent-in-species-killing-wildlife/83952033007/) is often associated with family vacations, hurricane season and, [increasingly, efforts](https://www.naplesnews.com/story/news/local/20\""
+              "citation": "22,322 active SWFL residential listings as of 2026-08-09"
             },
             "suggestions": [
-              "What's driving signal breaking 1?",
-              "How does signal breaking 1 here compare to other SWFL areas?"
+              "What's driving active listings count swfl?",
+              "How does active listings count swfl here compare to other SWFL areas?"
             ]
           },
           {
@@ -1107,7 +3833,7 @@
           "1 of 3 announcements in the last 90 days matched qualifying categories (relocation, expansion, grant, infrastructure); the rest are general chamber/policy posts excluded from the momentum count.",
           "Investment and job figures reflect disclosures at announcement time; actual outcomes may vary as projects develop.",
           "SWFL Inc. covers primarily Lee County projects; Collier County coverage depends on cross-county partnerships and co-announcements.",
-          "99 additional live signals not surfaced here (cap 8); the full set is in data_lake.city_pulse.",
+          "103 additional live signals not surfaced here (cap 8); the full set is in data_lake.city_pulse.",
           "Each signal is dated current-events context with a per-signal source; freshness is TTL-bounded by topic (breaking 1d → structural 90d).",
           "Construction enforcement split: public notices = confirmed individual actions (hard-parsed violation_type); press releases = announced sweeps (Sonnet-inferred affected_industries). Do not sum them.",
           "Polarity: rising construction notices = bullish (recovery-driven unlicensed activity). Rising ABT notices = bearish (hospitality compliance stress).",
@@ -1124,7 +3850,7 @@
           "~50% of SWFL transactions are all-cash (Lee County, ATTOM 2024) — national rate-sensitive thresholds are muted; read the YoY tightening, not absolute DOM cutoffs.",
           "Hurricane Ian (Sept 2022) is a labeled event — inventory/DOM dislocations Oct 2022–Mar 2023 are forced, not organic demand.",
           "Data provided by Realtor.com.",
-          "13 ZIPs suppressed (insufficient signals or realtor quality_flag).",
+          "16 ZIPs suppressed (insufficient signals or realtor quality_flag).",
           "NOAA modernized the Storm Events schema in 1996; this brain reads the modern-schema vintage only (1996+). Pre-1996 records use an incompatible column layout and are excluded by construction.",
           "damage_property strings are parsed best-effort (regex matches \"1.5M\" / \"10K\" / \"2B\" / plain numbers). 6 events in this corpus had unparseable damage strings and are excluded from damage-based metrics (counted but not summed).",
           "Vintage end year is 2025 — bump YEAR_RANGE_END in ingest/duckdb_pipelines/storm_history_swfl/constants.py and re-run the ingest when NCEI publishes the next yearly file.",
@@ -1176,7 +3902,7 @@
           "~50% of SWFL buyers (≈70% for condos) pay cash and insulate the luxury tier — a holding or rising top tier is part of the K-shape, not a bullish signal on its own.",
           "Covers 50 SWFL ZIPs holding BOTH a starter and a luxury tier; ZIPs lacking one tier are excluded from the divergence.",
           "Upstream brain 'active-rentals-swfl' was stale at build time (expired 2026-07-19).",
-          "Upstream brain 'active-rentals-swfl' failed to rebuild on 2026-08-08; using last good read from 2026-07-11 (v3)."
+          "Upstream brain 'active-rentals-swfl' failed to rebuild on 2026-08-09; using last good read from 2026-07-11 (v3)."
         ],
         "contradicts": [
           "macro-us (bearish) vs labor-demand-swfl (bullish)",
@@ -1232,8 +3958,8 @@
         "upstream_count": 39,
         "relevance": {
           "decay_curve": "weeks",
-          "half_life_hours": 720.0000000000003,
-          "computed_at": "2026-08-08T05:18:50.000Z"
+          "half_life_hours": 720,
+          "computed_at": "2026-08-09T04:30:52.000Z"
         },
         "exogenous_signals": [],
         "conditional_claims": [
