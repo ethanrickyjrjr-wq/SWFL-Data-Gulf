@@ -1,7 +1,60 @@
+## 2026-08-09 (Fable 5) — OPERATOR: map the voice research to each email + code the allowed words with fill-in slots
+Verbatim: *"HOW DO WE FIGURE OUT WHICH EMAILS THESE GO WITH, CODE IN WHAT WORDS ARE ALLOWED TO BE
+SAID AND LEAVE BLANK THE NUMBERS AND DATES AND ADDRESSES, COMMUNITY INFO, OPEN HOUSE TIME, ETC
+BUILDER CAN FILL IN FOR EACH DIFFERENT BUILD"* — i.e. per-recipe approved-sentence skeletons with
+typed slots (number/date/address/community/open-house-time), words fixed in code, facts filled per
+build. Direction, not yet built. Related priors: market-pulse's coded-sentence + digit-free
+connective pattern, deliverable-distiller's prose-recipe/skeleton concept, voice-presets/voice-guard.
+
+## 2026-08-09 (Fable 5) — OPERATOR: *"DO IT AND MAKE HERMES BETTER. THE ASSHOLE LIED AND SAID HE WAS UPDATED"*
+Approved: delete the 4 Hermes files (this push). "Lied about being updated" = Hermes presented a
+stale/hallucinated picture of the repo as current knowledge. Fix = ground-truth `.hermes.md`
+(machine-local, gitignored) carrying the already-built inventory + never-invent rules, plus the
+model upgrade the 08/08 research already verified (gpt-oss:20b fits the 4060 Ti). Work logged below.
+
+## 2026-08-09 (Fable 5) — OPERATOR: pasted Hermes's roadmap pitch — *"LOOK INTO ALL OF THIS AND LET ME KNOW IF HERMES IS BETTER THAN CLAUDE"*
+Hermes (local Ollama agent) proposed a 3-phase build (Data Warden / Intelligence Analyst / Brand
+Spokesman) and left 4 files: `development_road_map.md` (untracked), `docs/system_logic_manifest.md`
++ `docs/agents_roles/{data_warden,intelligence_analyst}_spec.md` (committed b1def3e7/ffa03d2b).
+Verified against the repo: every phase proposes rebuilding something ALREADY LIVE — the "Warden" is
+`20260804_steadyapi_listing_events_v.sql`'s four measured guards (Hermes cites that exact file as
+the thing to automate), the "Analyst" is the brain factory, the "Spokesman" is the deliverable
+layer + gateNarrative/unanchoredNumbers/baked narratives. Its manifest also invents fields
+(`viewership`), undefined metrics (Momentum Score), hallucinated tables (`lie_parcels`,
+`lee_parcends`), wrong DOM root, misquoted Rule 4 — and a naive %-rule that matches the exact bug
+the real view's header documents fixing. Full assessment in session answer. Committed Hermes docs
+carry a rival "Source of Truth" claim — operator to decide keep/fix/delete.
+
+## 2026-08-09 (Fable 5) — OPERATOR follow-up: *"SO YOU FUCKING BUILT IT NEW FROM THE PLAYBOOK??????"*
+Partially, and partial-as-whole is the defect (RULE 0.8): Price Improved was built through the
+playbook's UNIVERSAL rules (Part 1) + the shared chrome, but its OWN walk section (§2.7) was left
+"TO BE WALKED" while back-on-market/under-contract each got their section written in the same pass
+as their rebuild. A build is not "from the playbook" until its Part-2 section is written from what
+the build actually proved. §2.7 written this session, same pass as the build.
+
+## 2026-08-09 (Fable 5) — OPERATOR: *"HOW DOES THE RECIPE FUCKING EXIST IF WE ARE BUILDING ALL FUCKING NEW????"*
+On my phrase "recipe exists" during the Price Improved build. The confusion is real and mine:
+"exists" = a code file (`price-reduced.ts`) was DRAFTED 07/13/2026 in the one-chrome consolidation,
+but it had NEVER been built for real — never rendered, never asserted, no capture, and it carried
+two live defects (homepage CTA §1.8, wrapping label) that only driving it exposed. "Building all
+new" = the walk: real subject, current shared chrome (itself rebuilt during this walk), acceptance
+harness, rendered-bytes assertions, capture. Lesson: never say a surface "exists" when it has never
+been DRIVEN — drafted code is a hypothesis, not a built email (same rule as inherited plans).
+
 ## 2026-08-09 (Fable 5) — OPERATOR, on /showcase "Newest emails" + the emails themselves (3 screenshots):
 1. *"newest email clicked thumbnails need to be resized so the cards don't drop a line and it looks wrong. make it so everything fits like the actual email will look."* — Root cause found: thumbnail iframe loses ~17px to a scrollbar and the overlay iframe is `max-w-xl` (576px), but every strip is sized to fit EXACTLY 600 (6×94, 5×113, 3×189) — so cells wrap in OUR preview that never wrap in the sent email.
 2. *"DOM can't be on its own line, nor can house type or whatever it is. make all the fucking emails right and not have random data on one line."* — DOM/Type wraps are the preview artifact above, EXCEPT one real shipped defect: new-listing's `secondSpecRow` (Built·HOA·Type) degrades to a LONE 28px "Residential/Type" row when Built+HOA are unsourced.
 3. *"this also fucking sucks...can we not get some fucking complementary backlit graphs/charts into the fucking emails. why is it so hard????"* — email charts are flat bars; wants a backlit/glow treatment complementary to the design. Charts are rasterized PNG so gradients/glows are render-safe in every client.
+
+## 2026-08-09 (Fable 5) — OPERATOR pasted a Hermes-authored "Master Brain implementation plan"
+
+Inherited-plan skepticism applies (it's a hypothesis, not a status): its cards 1–2 (GHA sentinel,
+nag timer) were ALREADY BUILT AND LIVE hours earlier this same night; "17–28 days" is not a
+parameter, it's the observed ages of the currently-quiet requests (real threshold: ≥14d); it names
+Slack (not used) and "core_logic" (doesn't exist). Claim-check run this session; the one genuinely
+new card (operator morning digest to Telegram) evaluated on its merits. NOTE: customer-facing
+daily digest was KILLED 07/16 and stays dead — an operator-only Telegram digest is a different
+surface and does not touch that decision.
 
 ## 2026-08-09 (Fable 5) — OPERATOR: *"crawl4ai what we can have hermes actually do to make this project better since claude sucks. How do we make it work continuously on problems so we can do something right? Claude can't handle this"*
 

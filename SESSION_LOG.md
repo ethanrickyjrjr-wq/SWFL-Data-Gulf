@@ -1,3 +1,21 @@
+## 2026-08-09 (Fable 5) — Hermes cleanup: 4 hallucinated docs deleted, agent updated + upgraded
+
+Operator pasted Hermes's (local Ollama agent) roadmap pitch and asked if Hermes is better than
+Claude; verdict from all four lanes: every phase proposed rebuilding something already live (the
+"Data Warden" is `docs/sql/20260804_steadyapi_listing_events_v.sql`'s four measured guards — the
+exact file Hermes cited as its source; the "Analyst" is the refinery; the "Spokesman" is
+lib/deliverable's gated narrative layer), and its committed manifest invented a field
+(`viewership`), undefined metrics, and nonexistent tables (`lie_parcels`, `lee_parcends`).
+On operator decree ("DO IT AND MAKE HERMES BETTER — the asshole lied and said he was updated"):
+DELETED `docs/system_logic_manifest.md`, `docs/agents_roles/{data_warden,intelligence_analyst}_spec.md`
+(committed b1def3e7/ffa03d2b), and untracked `development_road_map.md`. Hermes itself: its own
+`.update_check` showed v0.20.0, 242 commits behind — ran the vendor updater (`hermes update --yes`,
+after `hermes gateway stop` + killing 2 blocking PIDs), switching `model.default` gemma4:12b →
+gpt-oss:20b (already pulled 13GB; the 08/08 research's verified free upgrade for the 4060 Ti), and
+rewrote gitignored `.hermes.md` with the incident, an already-built inventory (never re-propose),
+prove-the-gap-before-proposing, and a no-`git commit` rule (old rule only banned push — these specs
+got committed through that hole).
+
 ## 2026-08-09 (Fable 5) — PRICE IMPROVED built end-to-end: real cut, 6/6 assertions, showcase card live
 
 The next lifecycle hole ("build the next one"). Subject found live in `data_lake.listing_state`
