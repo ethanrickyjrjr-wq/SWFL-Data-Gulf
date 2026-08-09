@@ -24,6 +24,14 @@ import {
 import type { FontFamily } from "@/lib/email/doc/types";
 import { MEDIA_CACHE_IMMUTABLE } from "@/lib/media/cache-control";
 import { fitText, labelGutterFor } from "@/lib/brand/text-metrics";
+import {
+  backlitDefs,
+  backlitBar,
+  backlitTrack,
+  backlitAreaDefs,
+  areaFillRef,
+  lineGlowRef,
+} from "@/lib/charts/svg/backlit";
 
 const PUBLIC_BUCKET = "email-media";
 
@@ -131,6 +139,8 @@ export function trendChartSvg(points: TrendPoint[], opts: TrendChartOpts): strin
   const hero: string[] = [];
   if (proj == null || proj <= 0 || proj >= n - 1) {
     hero.push(
+      // BACKLIT: a blurred copy of the hero line glows under the crisp one.
+      `<polyline points="${lineAll}" fill="none" stroke="${esc(opts.accent)}" stroke-width="5" opacity="0.35" filter="${lineGlowRef(opts.accent)}" stroke-linejoin="round" stroke-linecap="round"/>`,
       `<polyline points="${lineAll}" fill="none" stroke="${esc(opts.accent)}" stroke-width="2.5" stroke-linejoin="round" stroke-linecap="round"/>`,
     );
   } else {
@@ -144,6 +154,7 @@ export function trendChartSvg(points: TrendPoint[], opts: TrendChartOpts): strin
       .join(" ");
     hero.push(
       `<rect x="${x(proj).toFixed(1)}" y="${padT}" width="${(W - padR - x(proj)).toFixed(1)}" height="${innerH}" fill="${gridColor}" opacity="0.55"/>`,
+      `<polyline points="${solid}" fill="none" stroke="${esc(opts.accent)}" stroke-width="5" opacity="0.35" filter="${lineGlowRef(opts.accent)}" stroke-linejoin="round" stroke-linecap="round"/>`,
       `<polyline points="${solid}" fill="none" stroke="${esc(opts.accent)}" stroke-width="2.5" stroke-linejoin="round" stroke-linecap="round"/>`,
       `<polyline points="${dashed}" fill="none" stroke="${esc(opts.accent)}" stroke-width="2.5" stroke-dasharray="5 4" stroke-linejoin="round" stroke-linecap="round"/>`,
     );
@@ -233,10 +244,13 @@ export function trendChartSvg(points: TrendPoint[], opts: TrendChartOpts): strin
 
   return [
     `<svg xmlns="http://www.w3.org/2000/svg" width="${W}" height="${H}" viewBox="0 0 ${W} ${H}">`,
+    // BACKLIT (08/09/2026): the flat 10%-opacity area fill becomes a vertical
+    // accent fade, and the hero line carries a soft glow (defs in backlit.ts).
+    backlitAreaDefs(opts.accent),
     `<rect width="${W}" height="${H}" fill="#ffffff"/>`,
     `<text x="${padL}" y="28" font-family="Arial" font-size="15" font-weight="bold" fill="#1F2937">${esc(title)}</text>`,
     ...grid,
-    `<path d="${areaD}" fill="${esc(opts.accent)}" fill-opacity="0.10" stroke="none"/>`,
+    `<path d="${areaD}" fill="${areaFillRef(opts.accent)}" stroke="none"/>`,
     compareLine,
     ...hero,
     endLabel,
@@ -274,7 +288,6 @@ export function barChartSvg(
   },
 ): string {
   const W = opts.width ?? 600;
-  const gridColor = opts.grid ?? GRID;
   const axisColor = opts.axisText ?? AXIS_TEXT;
   const series = opts.series && opts.series.length ? opts.series : null;
   const rows = bars.slice(0, 8);
@@ -299,8 +312,17 @@ export function barChartSvg(
   const fmt: ValueFormat = opts.valueFormat ?? "usd";
   const trackW = W - padL - padR;
   const maxV = Math.max(...rows.map((b) => Math.abs(b.value)), 1);
+  // BACKLIT (08/09/2026, operator decree): glow + gradient come from ONE styling
+  // authority (lib/charts/svg/backlit.ts) — one defs block per DISTINCT bar color.
+  // The track now tints from the bar's own accent (backlitTrack) so the row reads
+  // as one lit unit instead of the foreign grid grey — which is why `opts.grid`
+  // no longer reaches this builder's rects.
+  const barColors = Array.from(
+    new Set(rows.map((_, i) => (series ? series[i % series.length] : opts.accent))),
+  );
   const parts: string[] = [
     `<svg xmlns="http://www.w3.org/2000/svg" width="${W}" height="${H}" viewBox="0 0 ${W} ${H}">`,
+    ...barColors.map((c) => backlitDefs(c)),
     `<rect width="${W}" height="${H}" fill="#ffffff"/>`,
     `<text x="${padL}" y="28" font-family="Arial" font-size="15" font-weight="bold" fill="#1F2937">${esc(opts.title)}</text>`,
   ];
@@ -311,8 +333,8 @@ export function barChartSvg(
     const barColor = series ? series[i % series.length] : opts.accent;
     parts.push(
       `<text x="${padL - 8}" y="${cy + 15}" text-anchor="end" font-family="Arial" font-size="12" fill="#374151">${esc(label)}</text>`,
-      `<rect x="${padL}" y="${cy + 4}" width="${trackW}" height="16" rx="3" fill="${gridColor}"/>`,
-      `<rect x="${padL}" y="${cy + 4}" width="${w}" height="16" rx="3" fill="${esc(barColor)}"/>`,
+      backlitTrack(padL, cy + 4, trackW, 16, barColor),
+      backlitBar(padL, cy + 4, w, 16, barColor),
       `<text x="${padL + trackW + 8}" y="${cy + 16}" font-family="Arial" ${TABULAR} font-size="12" font-weight="bold" fill="#1F2937">${esc(formatAxisTick(fmt, b.value))}</text>`,
     );
   });

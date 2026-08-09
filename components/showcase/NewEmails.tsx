@@ -122,10 +122,16 @@ function EmailCard({
       className="group relative block w-64 shrink-0 snap-start overflow-hidden rounded-lg border border-white/10 bg-[#0f1d24] text-left transition-colors hover:border-white/30"
     >
       <div className="relative h-48 w-full overflow-hidden bg-white">
+        {/* scrolling="no" is load-bearing: with it absent, content taller than the
+            iframe grows a vertical scrollbar that steals ~17px of the 600px canvas,
+            re-wraps the spec strips (which fit 600 EXACTLY — 6×94, 5×113, 3×189)
+            and leaves a white gutter sliver. The thumbnail must be the sent email,
+            not a squeezed variant of it (operator, 08/09/2026). */}
         <iframe
           src={src}
           title={label}
           tabIndex={-1}
+          scrolling="no"
           style={{
             width: "600px",
             height: "1600px",
@@ -133,6 +139,7 @@ function EmailCard({
             transformOrigin: "top left",
             pointerEvents: "none",
             border: "none",
+            overflow: "hidden",
           }}
         />
       </div>
@@ -156,6 +163,67 @@ function EmptyCard({ recipeKey }: { recipeKey: RecipeKey }) {
         Not rendered yet
       </span>
       <span className="mt-2 text-xs font-semibold text-[#f0ede6]/70">{label}</span>
+    </div>
+  );
+}
+
+/** The email canvas is 600px and every spec strip is arithmetic-fitted to EXACTLY
+ *  600 (6×94px, 5×113px, 3×189px cells) — so a preview viewport of 576px (the old
+ *  `max-w-xl`) or 600-minus-scrollbar re-wraps rows the sent email never wraps:
+ *  DOM dropped to its own line, "Single Family / TYPE" orphaned (operator
+ *  screenshots, 08/09/2026). This renders the iframe at TRUE 600px with
+ *  scrolling="no", measures the document's real height on load (same-origin —
+ *  the captures live in /public), and scales the whole thing down only when the
+ *  container is narrower than 600. The preview IS the sent email, at every width. */
+const EMAIL_W = 600;
+
+function TrueSizeEmail({ src, title }: { src: string; title: string }) {
+  const wrapRef = useRef<HTMLDivElement>(null);
+  const iframeRef = useRef<HTMLIFrameElement>(null);
+  const [scale, setScale] = useState(1);
+  const [docH, setDocH] = useState(1600);
+
+  useEffect(() => {
+    const el = wrapRef.current;
+    if (!el) return;
+    const ro = new ResizeObserver(() => {
+      setScale(Math.min(1, el.clientWidth / EMAIL_W));
+    });
+    ro.observe(el);
+    return () => ro.disconnect();
+  }, []);
+
+  const measure = () => {
+    try {
+      const doc = iframeRef.current?.contentDocument;
+      const h = doc?.documentElement?.scrollHeight ?? doc?.body?.scrollHeight;
+      if (h && h > 0) setDocH(h);
+    } catch {
+      // cross-origin would throw; captures are same-origin, so this is belt-and-suspenders
+    }
+  };
+
+  return (
+    <div ref={wrapRef} className="mx-auto w-full" style={{ maxWidth: EMAIL_W }}>
+      <div
+        className="mx-auto overflow-hidden rounded-lg border border-white/10 bg-white"
+        style={{ height: docH * scale, width: EMAIL_W * scale }}
+      >
+        <iframe
+          ref={iframeRef}
+          src={src}
+          title={title}
+          scrolling="no"
+          onLoad={measure}
+          style={{
+            width: EMAIL_W,
+            height: docH,
+            transform: `scale(${scale})`,
+            transformOrigin: "top left",
+            border: "none",
+          }}
+        />
+      </div>
     </div>
   );
 }
@@ -220,11 +288,7 @@ function EmailOverlay({
           </button>
         </div>
         <div className="min-h-0 flex-1 overflow-y-auto bg-[#101f27] p-4 sm:p-6">
-          <iframe
-            src={src}
-            title={recipe.label}
-            className="mx-auto h-[2200px] w-full max-w-xl rounded-lg border border-white/10 bg-white"
-          />
+          <TrueSizeEmail src={src} title={recipe.label} />
         </div>
       </div>
     </div>,

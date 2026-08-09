@@ -1,3 +1,23 @@
+## 2026-08-09 (Fable 5) — /showcase previews now render the email AT TRUE 600px; lone "Residential/Type" row killed; charts go BACKLIT
+
+Three operator screenshots, three defects. (1) **Preview infidelity:** every spec strip is
+arithmetic-fitted to EXACTLY 600px (6×94, 5×113, 3×189 cells), but the showcase thumbnail iframe
+lost ~17px to a scrollbar and the overlay was `max-w-xl` (576px) — so DOM and "Single Family/TYPE"
+wrapped in OUR preview while the sent email was fine. `components/showcase/NewEmails.tsx`:
+thumbnails get `scrolling="no"`, the overlay is a new `TrueSizeEmail` (iframe at real 600px,
+doc-height measured on load, scaled down only when the container is narrower). Verified live on a
+dev server: all six cells on one line. (2) **Real shipped defect:** new-listing's `secondSpecRow`
+(Built·HOA·Type) emitted with only ONE sourced cell, shipping a full-width 28px orphan
+"Residential/Type" band. Now requires ≥2 sourced cells (`lib/deliverable/recipes/new-listing.ts`);
+proven on the real pipe via `render-new-listing.mts` — strip intact, orphan gone. (3) **Backlit
+charts** (operator decree): new ONE-root `lib/charts/svg/backlit.ts` (OKLab gradient pill + gaussian
+glow underlay + accent-tinted track; resvg renders both — verified by rasterizing and LOOKING).
+Applied to `barChartSvg` + `trendChartSvg` (`lib/email/chart-image.ts`) and `rankedDeltaSvg`.
+Fresh captures for new-listing + coming-soon (real backlit chart PNG hosted from the live run).
+Tests: chart-image/svg/spec-to-image/recipe suites 159 pass 0 fail; `bunx tsc --noEmit` clean.
+NOT done (counted): 12 other SVG builders still flat, market-pulse/agent-brand-intro captures stale
+→ check `backlit_remaining_svg_builders`.
+
 ## 2026-08-07 (Sonnet 5) — CI red: fixed `lib/deliverable/claims.ts` corruption (dangling comment + stray NUL byte)
 
 Operator reported GitHub red with a typecheck error. `bunx tsc --noEmit` (the exact CI gate,

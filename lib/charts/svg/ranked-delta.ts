@@ -15,8 +15,8 @@ import { formatAxisTick, type ValueFormat, TABULAR } from "@/lib/charts/format";
 import { formatDisplayDate } from "@/lib/format-date";
 import { fitText, labelGutterFor } from "@/lib/brand/text-metrics";
 import type { FontFamily } from "@/lib/email/doc/types";
+import { backlitDefs, backlitBar, backlitTrack } from "@/lib/charts/svg/backlit";
 
-const GRID = "#EAECEF";
 const AXIS_TEXT = "#6B7280";
 const LABEL_TEXT = "#374151";
 const VALUE_TEXT = "#1F2937";
@@ -103,6 +103,10 @@ export function rankedDeltaSvg(items: RankedDeltaItem[], opts: RankedDeltaOpts):
 
   const parts: string[] = [
     `<svg xmlns="http://www.w3.org/2000/svg" width="${W}" height="${H}" viewBox="0 0 ${W} ${H}">`,
+    // BACKLIT (08/09/2026): glow + gradient from the ONE styling authority
+    // (lib/charts/svg/backlit.ts) — the ranked bar is lit, the track tints
+    // from the same accent instead of the foreign grid grey.
+    backlitDefs(opts.accent),
     `<rect width="${W}" height="${H}" fill="#ffffff"/>`,
     `<text x="${padL}" y="28" font-family="Arial" font-size="15" font-weight="bold" fill="${VALUE_TEXT}">${esc(opts.title)}</text>`,
   ];
@@ -117,9 +121,9 @@ export function rankedDeltaSvg(items: RankedDeltaItem[], opts: RankedDeltaOpts):
     parts.push(
       // right-aligned label (clipped)
       `<text x="${padL - 8}" y="${cy + 16}" text-anchor="end" font-family="Arial" font-size="12" fill="${LABEL_TEXT}">${esc(label)}</text>`,
-      // track + accent ranked bar
-      `<rect x="${padL}" y="${cy + 5}" width="${trackW}" height="16" rx="3" fill="${GRID}"/>`,
-      `<rect x="${padL}" y="${cy + 5}" width="${w}" height="16" rx="3" fill="${esc(opts.accent)}"/>`,
+      // track + backlit ranked bar (glow underlay + luminance gradient)
+      backlitTrack(padL, cy + 5, trackW, 16, opts.accent),
+      backlitBar(padL, cy + 5, w, 16, opts.accent),
       // formatted value
       `<text x="${valueX}" y="${cy + 17}" font-family="Arial" ${TABULAR} font-size="12" font-weight="bold" fill="${VALUE_TEXT}">${esc(formatAxisTick(fmt, r.value))}</text>`,
     );

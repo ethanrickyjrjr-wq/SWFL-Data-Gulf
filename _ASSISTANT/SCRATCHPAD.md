@@ -1,3 +1,24 @@
+## 2026-08-09 (Fable 5) — OPERATOR, on /showcase "Newest emails" + the emails themselves (3 screenshots):
+1. *"newest email clicked thumbnails need to be resized so the cards don't drop a line and it looks wrong. make it so everything fits like the actual email will look."* — Root cause found: thumbnail iframe loses ~17px to a scrollbar and the overlay iframe is `max-w-xl` (576px), but every strip is sized to fit EXACTLY 600 (6×94, 5×113, 3×189) — so cells wrap in OUR preview that never wrap in the sent email.
+2. *"DOM can't be on its own line, nor can house type or whatever it is. make all the fucking emails right and not have random data on one line."* — DOM/Type wraps are the preview artifact above, EXCEPT one real shipped defect: new-listing's `secondSpecRow` (Built·HOA·Type) degrades to a LONE 28px "Residential/Type" row when Built+HOA are unsourced.
+3. *"this also fucking sucks...can we not get some fucking complementary backlit graphs/charts into the fucking emails. why is it so hard????"* — email charts are flat bars; wants a backlit/glow treatment complementary to the design. Charts are rasterized PNG so gradients/glows are render-safe in every client.
+
+## 2026-08-09 (Fable 5) — OPERATOR: *"crawl4ai what we can have hermes actually do to make this project better since claude sucks. How do we make it work continuously on problems so we can do something right? Claude can't handle this"*
+
+Follow-on to the 08/08 Hermes-model entry below. Wanted: not a better model, but CONTINUOUS
+autonomous work — Hermes grinding on problems unattended. Researched live 08/09: Hermes ships
+exactly this harness — `/goal` completion-contract loop with shell-command quality gates, Kanban
+multi-agent board (durable SQLite queue + dispatcher + goal-mode cards + git-worktree workspaces),
+cron (incl. zero-token script-only watchdogs), session heartbeats, Telegram delivery. Research
+filed: `_RESEARCH/agent-behavior/2026-08-09-hermes-continuous-work-research.md`. WIRED LIVE same
+session ("go"): kanban board `brain-platform` created; 2 zero-token no-agent cron watchdogs
+(gha-red-watch every 30m — first dry-run found 3 real failed runs incl. Nightly Chain; records-
+request-nag daily 9am — found 4 quiet ≥14d) delivering to Telegram (connected); gateway installed
+as login item + running, cron ticker beating; pilot goal-card t_46da3186 (absorption named-source
+research, gpt-oss:120b cloud override, dir-pinned to `_RESEARCH/hermes-inbox/`, 2h cap). Standing
+division of labor: Hermes = bounded gated grinding + watchdogs, Claude = judgment + anything that
+lands on main. Hermes NEVER pushes.
+
 ## 2026-08-08 (Fable 5) — OPERATOR: *"HOW DO WE MAKE IT BETTER!!! DID YOU REALLY RESEARCH. I MEAN STEADYAPI REDDIT. YOU ACT LIKE YOU KNOW, BUT YOU DON'T. HOW DO WE GET IT BETTER THAN GEMMA:12B"*
 
 Context: Hermes (local agent, `AppData\Local\hermes`) runs gemma4:12b via Ollama on the RTX 4060 Ti

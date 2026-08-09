@@ -71,8 +71,9 @@ function hoaCell(fee: number | undefined): string | undefined {
  * source we hold anywhere — the free spine has no such column at all) and `hoa_fee`
  * (12 of 26 rows carry a servable one) reached `ListingFacts` and then rendered nowhere.
  *
- * Emitted ONLY when at least one of the three is sourced — three empty cells under a full
- * strip is a wall, not a grid. `4+4+4` is a blessed row shape (§1.2).
+ * Emitted ONLY when at least TWO of the three are sourced — three empty cells under a full
+ * strip is a wall, and one lone survivor is a full-width 28px orphan (see below).
+ * `4+4+4` is a blessed row shape (§1.2).
  */
 export function secondSpecRow(
   facts: ListingFacts,
@@ -89,7 +90,15 @@ export function secondSpecRow(
     spec(hoaCell(facts.hoaFee), "HOA/mo"),
     spec(domTookTypeSlot ? shortType(facts.propertyType) || undefined : undefined, "Type"),
   ];
-  if (!cells.some((c) => c.value.trim().length > 0)) return [];
+  // A ROW OF PEERS NEEDS PEERS (operator, 08/09/2026: "nor can house type or
+  // whatever it is [sit] on its own line"). StatsBlock drops unsourced cells at
+  // render, so a row emitted with ONE sourced cell ships as a single full-width
+  // 28px orphan — the rendered new-listing capture showed a lone "Residential /
+  // Type" band when Built + HOA both missed. Two sourced cells make a row; one
+  // does not. Type alone is the cell the reader "will never use" (listingSpecs'
+  // own words) and Built/HOA alone read no better, so a lone survivor is dropped,
+  // never enthroned.
+  if (cells.filter((c) => c.value.trim().length > 0).length < 2) return [];
   return [
     {
       block: { id: createBlock("stats").id, type: "stats", props: { stats: cells } },

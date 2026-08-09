@@ -17,7 +17,10 @@ test("draws gridlines + an area fill, not a bare baseline", () => {
   const svg = trendChartSvg(pts, { title: "Median price", accent: "#1BB8C9" });
   const lineCount = (svg.match(/<line /g) || []).length;
   expect(lineCount).toBeGreaterThanOrEqual(4); // multiple gridlines, not one baseline
-  expect(svg).toMatch(/<path[^>]*fill-opacity/); // area fill under the hero line
+  // BACKLIT (08/09/2026): the area under the hero line is a vertical accent fade
+  // (gradient def from lib/charts/svg/backlit.ts), and the line carries a glow pass.
+  expect(svg).toMatch(/<path[^>]*fill="url\(#bkarea-/); // gradient area fill
+  expect(svg).toMatch(/filter="url\(#bkline-/); // hero-line glow underlay
 });
 
 test("currency uses the millions branch — never $1285K", () => {
@@ -136,8 +139,12 @@ test("trendChartSvg themes gridlines from an injected grid color", () => {
 
 test("builders fall back to accent + default grid when no palette injected", () => {
   const svg = barChartSvg([{ label: "A", value: 10 }], { title: "t", accent: "#1BB8C9" });
-  expect(svg).toContain('fill="#1BB8C9"'); // bar uses accent
-  expect(svg).toContain('fill="#EAECEF"'); // default track/grid color
+  // BACKLIT (08/09/2026): the bar is an accent-derived gradient pill with a glow
+  // underlay, and the track tints from the SAME accent (whisper opacity) instead
+  // of the foreign grid grey — the whole row derives from the one accent.
+  expect(svg).toMatch(/fill="url\(#bkbar-1bb8c9\)"/); // gradient bar
+  expect(svg).toMatch(/fill="#1BB8C9" fill-opacity="0.10"/); // accent-tinted track
+  expect(svg).toMatch(/filter="url\(#bkglow-1bb8c9\)"/); // the backlight itself
 });
 
 // LIVE "NOW" DOT (Task 1, prochart-rendering fork-A): the trend line is held HISTORY through
