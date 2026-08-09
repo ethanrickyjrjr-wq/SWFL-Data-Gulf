@@ -21,7 +21,7 @@
  *   1. THE STREET LINE IS PRESENT, with no stray comma before the zip (addressLine).
  *   2. THE KICKER STATES THE CUT — "Price cut $65,000" above the address, and the number is
  *      the vendor's own reduced_amount, never a derivation.
- *   3. THE ARITHMETIC HOLDS ON SCREEN: Was cell = hero price + the kicker's cut.
+ *   3. THE ARITHMETIC HOLDS ON SCREEN: Previous cell = hero price + the kicker's cut.
  *      All three numbers ship, and previous − cut = current is checkable in the reader's head.
  *   4. NO TYPE CELL — the recipe's own ruling: the anchor (Previous Price) takes its slot,
  *      and a seventh cell would FAIL EmailDocSchema and fall through to the generic author.
@@ -33,9 +33,11 @@
  *      to pass `facts.sourceUrl`, which resolve-subject hardcodes to swfldatagulf.com; it
  *      now rides the `listingButtonUrl` ladder, and no real link means NO destination).
  *
- * SPEND: ZERO metered calls on the default house — the narrator only fires when a real
- * descriptive source (paid-row remarks) exists, and none does for this address. The comp
- * fetch for the dot-plot chart is a free lake read; the chart PNG upload is storage only.
+ * SPEND: ONE metered call — the house narrator (`authorListingNarrative`, the walked
+ * siblings' shared lane, rebuilt onto this recipe 08/09/2026: the July draft shipped a
+ * ZERO-word body without a paid-row description, below the playbook's 50-word floor).
+ * The claim gate may legitimately drop the paragraph — then the slot is OPEN and the drop
+ * is ON RECORD (assertion 7). The comp fetch is a free lake read; the PNG upload is storage.
  */
 import { buildPriceReduced } from "../../lib/deliverable/recipes/price-reduced";
 import { resolveSubject } from "../../lib/deliverable/recipes/shared";
@@ -60,7 +62,7 @@ const ADDRESS = subjectAddress("3113 SW 18th Ave, Cape Coral, FL 33914");
 
 console.log(`\n  SUBJECT: ${ADDRESS}\n`);
 console.log(
-  `  METERED CALLS: 0 expected — the narrator needs a paid-row description this address lacks.\n`,
+  `  METERED CALLS: 1-2 (the house narrator; a clean second ask only after a gate drop).\n`,
 );
 
 const { brand: BRAND, profile: p } = await loadAccountBrand();
@@ -120,7 +122,7 @@ const rows: ProvenanceRow[] = [
   ],
   [
     "Previous Price",
-    cell("Was"),
+    cell("Previous"),
     "DERIVED — hero price + the cut (both operands two cells away; footnoted)",
   ],
   ["Beds", cell("Beds"), "free spine → paid row"],
@@ -137,7 +139,7 @@ const rows: ProvenanceRow[] = [
   ],
   [
     "CHART — new price vs. comps",
-    chartBlock?.url ? "dot-plot PNG" : undefined,
+    chartBlock?.url ? "bklit composed PNG" : undefined,
     chartBlock?.url
       ? "priceVsAreaDotSpec — subject $/sqft vs median of real nearby comps (free lake read)"
       : "slot dropped — fewer than 2 comps with usable $/sqft (never an empty box)",
@@ -147,8 +149,7 @@ const rows: ProvenanceRow[] = [
     undefined,
     narratorLog.length
       ? `DROPPED BY THE CLAIM GATE — ${narratorLog[0].split("—").slice(1).join("—").trim()}`
-      : "OPEN SLOT — no paid-row description for this address, so no narrator call at all " +
-        "(the recipe's documented honest state: never invent a reason a price moved)",
+      : "filled below — one Sonnet call, record + amenity lanes, the no-reason-for-the-cut framing",
   ],
   [
     "Button destination",
@@ -158,6 +159,23 @@ const rows: ProvenanceRow[] = [
       : "no real listing url → NO destination (§1.8). Never our homepage.",
   ],
 ];
+
+// Walk the built blocks for the narrator's own paragraph (never the description block).
+const authoredBody =
+  (
+    doc.blocks.find(
+      (b) =>
+        b.type === "text" &&
+        !(b.props as { descriptionSlot?: boolean }).descriptionSlot &&
+        ((b.props as { body?: string }).body ?? "").trim().length > 0,
+    )?.props as { body?: string } | undefined
+  )?.body ?? "";
+const narratorRow = rows.findIndex(([c]) => c === "House paragraph");
+if (!narratorLog.length) {
+  rows[narratorRow][1] = authoredBody
+    ? `${authoredBody.trim().split(/\s+/).length} words`
+    : undefined;
+}
 
 printProvenance(rows);
 printBottom(doc);
@@ -190,7 +208,7 @@ const reasonHits = REASON_PROSE.filter((s) => lower.includes(s));
 
 const cut = digits(heroProps?.kicker);
 const current = digits(heroProps?.value);
-const previous = digits(cell("Was"));
+const previous = digits(cell("Previous"));
 const arithmeticHolds = cut > 0 && current > 0 && previous === current + cut;
 
 const checks: Assertion[] = [
@@ -208,9 +226,9 @@ const checks: Assertion[] = [
     detail: heroProps?.kicker ?? "(no kicker — vendor flag absent?)",
   },
   {
-    name: "3 · the arithmetic holds on screen: Was (previous price) = hero price + the cut",
+    name: "3 · the arithmetic holds on screen: Previous = hero price + the cut",
     pass: arithmeticHolds,
-    detail: `${cell("Was") ?? "(none)"} = ${heroProps?.value ?? "(none)"} + ${heroProps?.kicker?.replace(/price cut /i, "") ?? "(none)"} ${arithmeticHolds ? "✓" : "✗"}`,
+    detail: `${cell("Previous") ?? "(none)"} = ${heroProps?.value ?? "(none)"} + ${heroProps?.kicker?.replace(/price cut /i, "") ?? "(none)"} ${arithmeticHolds ? "✓" : "✗"}`,
   },
   {
     name: "4 · NO Type cell — the Previous Price anchor takes its slot (EmailDocSchema caps at 6)",
@@ -228,6 +246,16 @@ const checks: Assertion[] = [
     detail: buttonProps?.url ?? "(no destination — correct when we hold no listing page)",
   },
 ];
+
+checks.push({
+  name: "7 · the body is never SILENTLY empty — prose ships, or the claim gate's drop is on record",
+  pass: Boolean(authoredBody) || narratorLog.length > 0,
+  detail: authoredBody
+    ? `${authoredBody.trim().split(/\s+/).length} words shipped`
+    : narratorLog.length
+      ? `gate drop on record: ${narratorLog[0]}`
+      : "NO paragraph and NO recorded drop — the July zero-word hard return is back",
+});
 
 printBrandCarry(p);
 

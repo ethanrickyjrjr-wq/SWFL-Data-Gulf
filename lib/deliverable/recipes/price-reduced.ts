@@ -68,6 +68,7 @@
 //   new price means": you can now buy THIS house — with its real, cited features — at
 //   this price. So the paragraph describes the HOUSE. The numbers stay in the grid.
 
+import { createHash } from "node:crypto";
 import { buildLifecycleEmail } from "@/lib/email/lifecycle-chrome";
 import { listingButtonUrl } from "@/lib/listings/listing-url";
 import { listingSpecs, spec, specFootnote } from "@/lib/email/listing-flyer";
@@ -156,35 +157,48 @@ export function priceVsAreaDotSpec(facts: ListingFacts, comps: RenderComp[]): Ch
   // first and gate the floor on ITS length — it now measures what the median is actually
   // built from, not what merely looks like a house.
   const comparable = comps.filter(isComparableHome);
-  const ppsfValues = comparable
-    .map((c) => perSqft(c.price, c.sqft))
-    .filter((v): v is number => v != null);
-  const referencePpsf = median(ppsfValues);
-  if (referencePpsf == null || ppsfValues.length < MIN_COMPS_FOR_CHART) return null;
+  const withPpsf = comparable
+    .map((c) => ({ c, ppsf: perSqft(c.price, c.sqft) }))
+    .filter((x): x is { c: RenderComp; ppsf: number } => x.ppsf != null)
+    .sort((a, b) => a.ppsf - b.ppsf);
+  const referencePpsf = median(withPpsf.map((x) => x.ppsf));
+  if (referencePpsf == null || withPpsf.length < MIN_COMPS_FOR_CHART) return null;
 
-  const street = facts.address?.split(",")[0]?.trim() || "This home";
+  // ── A REAL BKLIT CHART, NOT THE DOT-PLOT (operator decree 08/09/2026: "WHERE ARE
+  // ALL THE BKLIT CHARTS… STOP WITH THE SAME FUCKING CHARTS"). The two-dot slider is
+  // gone: this is bklit's ComposedChart via the email bridge (bklitComposedSvg,
+  // "composed-bar-line" in the spec-to-image dispatch) — each nearby comparable
+  // home's own $/sq ft as a bar, sorted ascending, and THIS home's NEW $/sq ft drawn
+  // across them as the reference line. Where the line cuts the bars IS the argument.
+  // Every plotted number is a sourced comp's own figure or the subject's own
+  // derivation — the bridge's "average" parameter carries the subject's value, a
+  // real derived number, never a second invented one (the bridge's own rule).
+  //
+  // Bar labels are HOUSE NUMBERS (the street line's leading token): full addresses
+  // measured 20.7px over the plot on a 600px canvas (market-comps postmortem), and
+  // the title already says what the bars are. Endpoint value labels ON — a chart
+  // with no numbers on it sucks (decree 08/02/2026).
   return {
-    frameId: "dot-plot",
-    title: "The new price vs. nearby comparable homes",
-    columns: ["Row", "$/Sq Ft"],
-    rows: [
-      [street, subjectPpsf],
-      ["Comparable homes (median)", referencePpsf],
-    ],
+    frameId: "composed-bar-line",
+    title: `Nearby comps' $/sq ft — the line is this home's new ${usd(subjectPpsf)}`,
+    columns: ["Comparable", "$/Sq Ft"],
+    rows: withPpsf.map((x) => [x.c.addressLine, Math.round(x.ppsf)]) as (string | number)[][],
     value_format: "usd",
-    chart_type: "scatter",
+    chart_type: "bar",
     asOf: new Date().toISOString().slice(0, 10),
     source: { citation: "SWFL Data Gulf · realtor.com", url: "https://www.realtor.com" },
     options: {
-      data: [{ label: street, value: subjectPpsf, reference: referencePpsf }],
-      // FIX (final-review, 07/16/2026): a SINGLE-ITEM dot-plot scales its track to
-      // [value, reference], so the two dots always sit at opposite ends of the track no
-      // matter how close the real numbers are — a $1/sqft gap renders identical to a
-      // $200/sqft gap, and neither figure appeared anywhere in the email. Folding the
-      // already-computed, already-sourced numbers into the legend labels is the minimal
-      // fix — no new data, no new derivation.
-      referenceLabel: `area median (${usd(referencePpsf)}/sq ft)`,
-      valueLabel: `new price (${usd(subjectPpsf)}/sq ft)`,
+      // Category labels are EMPTY on purpose (looked at 08/09/2026): the first render
+      // used house numbers, and "1720 … 1801" under a chart reads as YEARS. Which comp
+      // is which is the table's job (rows above carry full address lines); the chart's
+      // job is the shape. `display` puts the DOLLAR form on the endpoint labels.
+      items: withPpsf.map((x) => ({
+        label: "",
+        value: Math.round(x.ppsf),
+        display: usd(Math.round(x.ppsf)),
+      })),
+      average: subjectPpsf,
+      value_labels: "endpoints",
     },
   };
 }
@@ -268,13 +282,13 @@ function addressLine(facts: ListingFacts): string {
  */
 function priceStrip(facts: ListingFacts, previous?: string): StatItem[] {
   return [
-    // "Was", not "Previous Price" (renamed 08/09/2026, seen on the rendered bytes):
-    // a two-word label wraps to two lines in a 94px six-cell strip and breaks the
-    // shared label baseline — the exact defect market-comps fixed by renaming
-    // "Comp median" → "Median" (StatsBlock's own KNOWN TENSION note: fix the
-    // CONTENT, not the mechanism). "$865,000 / WAS" is the retail convention and
-    // the footnote still states the full derivation.
-    spec(previous, "Was", "muted"),
+    // "PREVIOUS" — third label on this cell, this time MEASURED, not guessed
+    // (08/09/2026). "Previous Price" wrapped its 94px cell (two words + tracking);
+    // "Was" fit but read as noise on the rendered strip (operator: "WHAT THE FUCK
+    // IS 'WAS'"). "PREVIOUS" measures ~70px + tracking against the 78px content
+    // box (text-metrics, run before adoption) and is ONE word, so it cannot wrap
+    // in any face. The footnote still states the full derivation.
+    spec(previous, "Previous", "muted"),
     ...listingSpecs(facts).filter((c) => c.label !== "Type"),
   ];
 }
@@ -391,6 +405,12 @@ export async function buildPriceReduced(ctx: RecipeBuildContext): Promise<EmailD
         ]
       : [],
 
+    // The seller's own description, verbatim in its own block — the chrome emits it only
+    // when we actually hold one (never an open slot to a recipient). The July draft never
+    // passed this at all, so even a paid-row description rendered nowhere on this email
+    // while every walked sibling shipped it (found in the 08/09/2026 playbook rebuild).
+    description: facts.remarks,
+
     // The narrative is authored BELOW, and only from a real descriptive source. An empty
     // string here is an OPEN SLOT: an instruction on the canvas, absent from the email.
     narrative: "",
@@ -435,9 +455,17 @@ export async function buildPriceReduced(ctx: RecipeBuildContext): Promise<EmailD
       const tint = accent.replace(/[^0-9a-fA-F]/g, "").slice(0, 6) || "x";
       // The subject discriminator (final-review fix, 07/16/2026) — see streetSlug's own
       // doc comment for the collision this closes.
+      // THE KEY IS CONTENT-STAMPED (08/09/2026). email-media is cached immutable, and
+      // chart-image.ts's cacheControl comment PROMISES "changed content lands on a NEW
+      // key" — but this key (zip+slug+date+tint) carried no content term, so a same-day
+      // chart change kept serving the previous bytes forever: first the dot-plot after
+      // the bklit composed redesign, then the composed chart with its old labels after
+      // the label fix. Hashing the full spec closes the class, not one instance; same
+      // house + same spec still upserts one stable key (deterministic — no Date.now()).
+      const specHash = createHash("sha1").update(JSON.stringify(spec)).digest("hex").slice(0, 8);
       const key =
-        `email-charts/price-reduced-${facts.zip ?? "swfl"}-${streetSlug(facts.address)}-` +
-        `${spec.asOf}-${tint}.png`;
+        `email-charts/price-reduced-${facts.zip ?? "swfl"}-` +
+        `${streetSlug(facts.address)}-${spec.asOf}-${tint}-${specHash}.png`;
       // NO block caption — the PNG already bakes in the title, source and as-of date; a
       // text caption would duplicate it (mirrors market-comps.ts's own chart fill).
       const image = await chartSpecToEmailImage(
@@ -459,35 +487,19 @@ export async function buildPriceReduced(ctx: RecipeBuildContext): Promise<EmailD
   // gave us something real. A gap stays an OPEN SLOT, never a fabrication.
   doc = clearNarrativeSlots(doc);
 
-  // ── NO DESCRIPTION → NO PARAGRAPH. THE SLOT STAYS OPEN. ──────────────────────
+  // ── THE PARAGRAPH RIDES THE WALKED NARRATOR LANE (rebuilt 08/09/2026) ────────
   //
-  // This is the most important decision in the file, and it was made by LOOKING at
-  // what the model actually wrote (live, 07/13/2026) when handed the record alone:
-  //
-  //   "New construction on a quarter-acre lot in Fort Myers, this three-bedroom,
-  //    three-and-a-half-bath home delivers nearly 2,850 square feet — and the asking
-  //    price has come down. THE ADDRESS ON SHORE DRIVE SUGGESTS A SETTING WORTH A
-  //    CLOSER LOOK, and the scale of the floor plan offers ROOM THAT NEWER BUILDS AT
-  //    THIS SIZE RARELY COMPROMISE ON. WORTH SCHEDULING A SHOWING…"
-  //
-  // Three inventions and a recitation, from a model under an explicit ban on all four:
-  // a SETTING inferred from the street NAME (the playbook's "waterfront character"
-  // guess, exactly); a comparative claim about OTHER BUILDS it was shown none of; a
-  // SELLING CLAIM of its own; and the spec grid read back to a reader who can see it.
-  //
-  // More prohibitions do not fix this, and the playbook already says why (Part 3,
-  // rule 4): "handed the spec cells and told 'use only these facts', the only sentence
-  // it can write is the cells read back." A house's DESCRIPTION is not in any feed we
-  // buy — no vendor sells MLS remarks. So without lane 2, the narrator has NO SOURCE
-  // for a paragraph about this home, and a paragraph with no source is exactly the one
-  // thing this product forbids.
-  //
-  // So: the paragraph is authored ONLY from a real descriptive source. With none, the
-  // slot stays OPEN — on the canvas TextBlock renders its instruction ("Paste your
-  // text here — we'll tighten it") and the agent pastes the remarks they already own;
-  // in the SENT email the block does not exist (TextBlock, emailRender). The strip, the
-  // photo and the cut still carry the email. Never refuse, never invent.
-  if (!facts.remarks?.trim()) return doc;
+  // The July draft hard-returned here without a paid-row description, shipping a
+  // ZERO-word body — below the playbook's 50-word floor, and a divergence from every
+  // walked sibling (new-listing's acceptance run ships a sourced house paragraph on
+  // the SAME no-remarks house class). That July decision was made by looking at what
+  // the model wrote when handed the bare record — three inventions — but it predates
+  // what the shared narrator has since become: a settled-facts anchor list (record +
+  // $/sqft + DOM + HOA + community/inside-the-gate/nearby-amenity lanes), the claim
+  // gate that DROPS any paragraph making a claim it was not given, and the
+  // descriptionRendered contract. The guard against invention is the GATE now, not
+  // silence. A gate drop leaves the slot open — never refused, never invented — which
+  // is RULE 0.7's posture, with prose when the facts support it instead of never.
 
   // ── WHAT THE NARRATOR MAY DRAW FROM ──────────────────────────────────────────
   // authorListingNarrative hands it the record AND the agent's pasted description as
@@ -496,6 +508,17 @@ export async function buildPriceReduced(ctx: RecipeBuildContext): Promise<EmailD
   // a number that MOVED, and "why did it move" is the one question nothing we hold can
   // answer.
   const reduced = Boolean(kicker);
+  const hasRemarks = Boolean(facts.remarks?.trim());
+  // The source bullet follows what we actually hold — telling the model a description
+  // is "your source" when none exists is a false premise (the shared narrator's own
+  // descriptionRendered lesson, measured on Just Sold 08/06/2026).
+  const sourceBullet = hasRemarks
+    ? "• THE AGENT'S OWN DESCRIPTION IS YOUR SOURCE. Pull the specifics from it — the setting, " +
+      "the rooms, the finishes, the standout features — and tighten them. Keep them TRUE: " +
+      "restate what it actually said, never an upgraded version of it.\n"
+    : "• YOUR SOURCE IS THE RECORD AND THE VERIFIED NEARBY FACTS in the settled lines you were " +
+      "given — the community, what's inside the gate, what's genuinely close by. Describe what " +
+      "a buyer actually gets from those facts alone; a fact not in those lines does not exist.\n";
   const framing = reduced
     ? "A PRICE IMPROVEMENT announcement. The asking price on this home has come DOWN, and " +
       "that is the news.\n" +
@@ -514,9 +537,7 @@ export async function buildPriceReduced(ctx: RecipeBuildContext): Promise<EmailD
       "now a deal, a value, a bargain, a steal, or 'priced to move' or that it 'won't last'. " +
       "Those are sales claims, and every one of them is a fact about a market you were never " +
       "shown.\n" +
-      "• THE AGENT'S OWN DESCRIPTION IS YOUR SOURCE. Pull the specifics from it — the setting, " +
-      "the rooms, the finishes, the standout features — and tighten them. Keep them TRUE: " +
-      "restate what it actually said, never an upgraded version of it.\n" +
+      sourceBullet +
       "• NEVER READ THE ADDRESS AS A FACT. A street called Shore Drive tells you NOTHING about " +
       "water, a view, or a setting. Do not infer, hint at, or 'suggest' any quality of the " +
       "location from its name — that is inventing a feature out of a word.\n" +
@@ -530,7 +551,7 @@ export async function buildPriceReduced(ctx: RecipeBuildContext): Promise<EmailD
       "• NEVER REFER TO THE PAGE ITSELF. No 'the grid above', 'listed below', 'as you can see', " +
       "'shown here'. The reader sees a home, not a layout. Write about the house.\n" +
       "• WHAT YOU MAY WRITE: what a buyer actually GETS at this price — the home itself, from " +
-      "the agent's description. That IS what the new price means. Describe the house."
+      "your source above. That IS what the new price means. Describe the house."
     : // The vendor does not flag this house as reduced, and we hold no previous price.
       // The strip renders the cut cells as OPEN SLOTS for the agent; the narrator is told
       // NOTHING about a cut, because a framing that says "lead with the reduction" when
@@ -540,9 +561,27 @@ export async function buildPriceReduced(ctx: RecipeBuildContext): Promise<EmailD
       "• YOU WERE NOT TOLD THE PRICE CHANGED. No record we hold says it did. Never write that " +
       "the price was reduced, improved, cut, adjusted or lowered; never name a previous price; " +
       "never imply the number moved.\n" +
-      "• Describe the home itself, from the facts and the agent's own description.";
+      "• Describe the home itself, from the facts" +
+      (hasRemarks ? " and the agent's own description." : " you were given, and nothing else.");
 
-  const narrative = await authorListingNarrative(facts, { framing });
+  // TWO attempts, same as back-on-market's NARRATOR_ATTEMPTS: the claim gate legitimately
+  // drops an inventing paragraph (measured on this recipe's first live walk run 08/09/2026:
+  // an invented "2022" year and a "since the listing" sequence) and one clean re-ask is a
+  // bounded, recorded spend — never a loop. Both drop → the slot stays OPEN; the gate is
+  // never lowered to fill it.
+  let narrative: string | null = null;
+  for (let attempt = 0; attempt < 2 && !narrative; attempt++) {
+    narrative = await authorListingNarrative(facts, {
+      framing,
+      // The previous price is THIS recipe's own derivation — settled here so a single legal
+      // mention doesn't die at the claim gate as an unanchored number (the Just Sold lesson:
+      // a fact you want the narrator allowed to state goes in anchors, not only in framing).
+      ...(previous ? { anchors: [`The previous asking price was ${previous}.`] } : {}),
+      // The chrome ships the verbatim description block only when we hold remarks — tell the
+      // narrator the truth about what the reader can see.
+      descriptionRendered: hasRemarks,
+    }).catch(() => null);
+  }
   if (narrative) doc = fillNarrative(doc, narrative);
 
   return doc;

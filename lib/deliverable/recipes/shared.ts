@@ -623,10 +623,14 @@ export async function authorListingNarrative(
       .flatMap((p) => p.split(/(?<=[.!?])\s+/))
       .map((s) => s.trim())
       .filter((s) => s && !/[[\]]/.test(s))
-      .filter((s) => !/\bI\b/.test(s))
+      // First person in ANY form is the tell — "I will describe", "my instructions",
+      // "would not serve me". A property description has no use for any of them
+      // ("my instructions define as a failure" shipped LIVE 08/09/2026 straight past
+      // the bare \bI\b test — a possessive is the same leak in a different case).
+      .filter((s) => !/\b(I|me|my|mine)\b/.test(s))
       .filter(
         (s) =>
-          !/\b(fact line|is absent|are absent|is present|not given|not provided|was provided|were provided|honest description|the description stops|describing the home itself)\b/i.test(
+          !/\b(fact line|is absent|are absent|is present|not given|not provided|was provided|were provided|honest description|the description stops|describing the home itself|instructions?|the reader|grid figures?)\b/i.test(
             s,
           ),
       )

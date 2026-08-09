@@ -149,7 +149,14 @@ export async function chartSpecToEmailSvg(
           svg = await bklitComposedSvg(
             o.items as Parameters<typeof bklitComposedSvg>[0],
             o.average,
-            baseOpts,
+            {
+              ...baseOpts,
+              // Numbers ON the chart when the spec asks (decree 08/02/2026: a chart
+              // with no numbers on it sucks) — the bridge defaults to unlabeled.
+              ...(o.value_labels === "endpoints" || o.value_labels === "all"
+                ? { valueLabels: o.value_labels }
+                : {}),
+            },
           );
         break;
       case "composition": {

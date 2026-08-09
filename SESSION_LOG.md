@@ -16,6 +16,24 @@ rewrote gitignored `.hermes.md` with the incident, an already-built inventory (n
 prove-the-gap-before-proposing, and a no-`git commit` rule (old rule only banned push — these specs
 got committed through that hole).
 
+## 2026-08-09 (Fable 5) — price-reduced chart is a REAL BKLIT composed chart; chart keys content-stamped; scaffolding strip widened; "Previous" label
+
+Operator decrees, same evening: "backlit" = the vendored bklit library (components/charts/vendor/
+bklit — committed, NOT gitignored), and "stop with the same charts" = the two-dot dot-plot slider.
+price-reduced's chart is now bklit's ComposedChart via the email bridge ("composed-bar-line"):
+each nearby comp's own $/sqft as a bar ascending, THIS home's new $/sqft as the reference line,
+$-formatted endpoint labels (empty category labels — house numbers rendered as "1720/1801" and
+read as YEARS; looked at, fixed). TWO cache traps found by LOOKING: the chart storage key carried
+NO content term, so the immutable email-media cache served the dot-plot after the redesign and the
+old labels after the label fix — key now carries a sha1 of the full spec (closes the class).
+Narrator scaffolding strip widened after a live leak shipped "my instructions define as a failure"
+past the bare \bI\b test — first-person in ANY form (I/me/my/mine) + instruction-talk now strips
+per sentence. Strip label = "PREVIOUS" (measured ~70px vs the 78px box, one word, cannot wrap).
+value_labels threads through the composed dispatch (spec-to-image). 7/7 acceptance, tests green,
+tsc clean, capture refreshed. Also identified: the "other session" holding files was HERMES
+(claims on .hermes.md/development_road_map.md); its stale claims released. Opened
+`email_doctrine_one_file` (three overlapping email doctrine docs — merge into the ONE playbook).
+
 ## 2026-08-09 (Fable 5) — Narrator scaffolding-leak fixed at the SHARED root; drop-capture harness bug; claim-gate ZIP false-trip; dot-plot onto the type scale
 
 Operator caught the shared narrator shipping compliance-narration to a READER ("No community

@@ -147,6 +147,15 @@ const statsRows = (doc: EmailDoc): StatItem[][] =>
 const allCells = (doc: EmailDoc): StatItem[] => statsRows(doc).flat();
 const cellNamed = (doc: EmailDoc, label: string): StatItem | undefined =>
   allCells(doc).find((c) => c.label === label);
+/** The NARRATOR's slot only — `description: facts.remarks` (added 08/09/2026) ships the
+ *  seller's own words as a separate `descriptionSlot: true` block, and a body getter that
+ *  grabs "the first text block" now reads the description instead of the paragraph. */
+const bodyOf = (doc: EmailDoc): string =>
+  (
+    doc.blocks.find(
+      (b) => b.type === "text" && !(b.props as { descriptionSlot?: boolean }).descriptionSlot,
+    )?.props as { body?: string } | undefined
+  )?.body ?? "";
 
 /** The chrome lays down TWO hero blocks: the RIBBON band (kicker only) and the SUBJECT
  *  hero (address over price). This is the subject one. */
@@ -302,7 +311,7 @@ describe("the cut renders ABOVE the price, smaller, in a different color", () =>
 
   test("the three numbers check each other: previous − cut = current", async () => {
     const doc = (await buildPriceReduced(ctx(SHORE_DR)))!;
-    const prev = Number(cellNamed(doc, "Was")!.value.replace(/[^\d]/g, ""));
+    const prev = Number(cellNamed(doc, "Previous")!.value.replace(/[^\d]/g, ""));
     const cut = Number(heroOf(doc)!.kicker!.replace(/[^\d]/g, ""));
     const now = Number(heroOf(doc)!.value!.replace(/[^\d]/g, ""));
     expect(prev - cut).toBe(now);
@@ -313,7 +322,7 @@ describe("the cut renders ABOVE the price, smaller, in a different color", () =>
     // A falsy kicker is dropped by the chrome entirely — the prop never lands.
     expect(heroOf(doc)!.kicker ?? "").toBe("");
     // …and the previous-price cell is an OPEN SLOT, not a fabricated anchor.
-    expect(cellNamed(doc, "Was")!.value).toBe("");
+    expect(cellNamed(doc, "Previous")!.value).toBe("");
     // The recipe presupposes a cut; with none, it still BUILDS (RULE 0.7 — never refuse).
     expect(heroOf(doc)!.value).toBe("$595,000");
   });
@@ -328,7 +337,7 @@ describe("every cell is sourced or open", () => {
     // an email whose subject is a number that MOVED. It had to go: six is the schema's
     // hard cap on a stats row, and the anchor earns the slot.
     expect(allCells(doc).map((c) => c.label)).toEqual([
-      "Was",
+      "Previous",
       "Beds",
       "Baths",
       "Sq Ft",
@@ -354,7 +363,7 @@ describe("every cell is sourced or open", () => {
 
   test("the previous price is MUTED — it must never out-shout the price you can pay", async () => {
     const doc = (await buildPriceReduced(ctx(SHORE_DR)))!;
-    expect(cellNamed(doc, "Was")!.emphasis).toBe("muted");
+    expect(cellNamed(doc, "Previous")!.emphasis).toBe("muted");
   });
 
   test("the UNCHECKABLE derived cell states its provenance — and only that one", async () => {
@@ -419,19 +428,17 @@ const REMARKS =
 const WITH_REMARKS: ListingFacts = { ...SHORE_DR, remarks: REMARKS };
 
 describe("the narrator", () => {
-  test("NO pasted description → NO paragraph. The slot stays OPEN.", async () => {
-    // THE FINDING THAT CHANGED THIS BUILD (live, 07/13/2026). Handed the record alone,
-    // Sonnet wrote: "The address on Shore Drive suggests a setting worth a closer look…
-    // room that newer builds at this size rarely compromise on. Worth scheduling a
-    // showing…" — a setting inferred from a STREET NAME, a comparison to homes it was
-    // never shown, and a call to action of its own. All three are banned in its prompt.
-    // It wrote them anyway, because with no description it has NO SOURCE for a
-    // paragraph, and the playbook already knew it (Part 3, rule 4).
-    //
-    // So we don't ask. The paragraph is authored only from a real descriptive source.
+  test("NO pasted description → the paragraph rides the RECORD lanes, told the truth about the page", async () => {
+    // REBUILT 08/09/2026 (playbook walk). The July draft hard-returned here — a ZERO-word
+    // body, below the playbook's 50-word floor and a divergence from every walked sibling.
+    // That decision was made when the narrator had no settled-facts anchor list and no
+    // claim gate; today the gate is the guard against invention, not silence. Without
+    // remarks the narrator IS called, from the record + amenity lanes, and its prompt
+    // states the truth: the description is NOT on the page, and the source is the record.
     const doc = (await buildPriceReduced(ctx(SHORE_DR)))!;
-    const body = (doc.blocks.find((b) => b.type === "text")!.props as { body?: string }).body ?? "";
-    expect(body).toBe("");
+    expect(bodyOf(doc)).toBe(NARRATIVE);
+    expect(lastSystem).toContain("**NOT** ON THIS PAGE");
+    expect(lastSystem).toContain("YOUR SOURCE IS THE RECORD");
   });
 
   test("the OPEN paragraph does not exist in the sent email", async () => {
@@ -444,8 +451,7 @@ describe("the narrator", () => {
 
   test("WITH the agent's description (lane 2) → the paragraph is authored", async () => {
     const doc = (await buildPriceReduced(ctx(WITH_REMARKS)))!;
-    const body = (doc.blocks.find((b) => b.type === "text")!.props as { body?: string }).body ?? "";
-    expect(body).toBe(NARRATIVE);
+    expect(bodyOf(doc)).toBe(NARRATIVE);
   });
 
   test("no coaching note EVER survives into the body", async () => {
@@ -455,10 +461,8 @@ describe("the narrator", () => {
     // fillNarrative SKIPS a non-empty text block, so the slot is cleared FIRST, always.
     for (const f of [SHORE_DR, WITH_REMARKS]) {
       const doc = (await buildPriceReduced(ctx(f)))!;
-      const body =
-        (doc.blocks.find((b) => b.type === "text")!.props as { body?: string }).body ?? "";
-      expect(body).not.toContain("motivated seller");
-      expect(body).not.toContain("room to negotiate");
+      expect(bodyOf(doc)).not.toContain("motivated seller");
+      expect(bodyOf(doc)).not.toContain("room to negotiate");
     }
   });
 
@@ -473,21 +477,26 @@ describe("the narrator", () => {
         },
       }),
     }));
-    const doc = (await buildPriceReduced(ctx(WITH_REMARKS)))!;
-    const body = (doc.blocks.find((b) => b.type === "text")!.props as { body?: string }).body ?? "";
-    expect(body).toBe(""); // cleared, and left open — never a fabrication
-    // restore the good narrator for the tests below
-    mock.module("@/refinery/agents/anthropic.mts", () => ({
-      ...realAnthropic,
-      getAnthropic: () => ({
-        messages: {
-          create: async (req: { system?: string }) => {
-            lastSystem = req.system ?? "";
-            return { content: [{ type: "text", text: NARRATIVE }] };
+    // try/finally (08/09/2026): the restore used to sit AFTER the assertion, so one red
+    // expect left the THROWING narrator installed for every test below it — a cascade of
+    // three phantom failures that pointed at the wrong code. A mock installed in a test
+    // is restored on the way out, pass or fail.
+    try {
+      const doc = (await buildPriceReduced(ctx(WITH_REMARKS)))!;
+      expect(bodyOf(doc)).toBe(""); // cleared, and left open — never a fabrication
+    } finally {
+      mock.module("@/refinery/agents/anthropic.mts", () => ({
+        ...realAnthropic,
+        getAnthropic: () => ({
+          messages: {
+            create: async (req: { system?: string }) => {
+              lastSystem = req.system ?? "";
+              return { content: [{ type: "text", text: NARRATIVE }] };
+            },
           },
-        },
-      }),
-    }));
+        }),
+      }));
+    }
   });
 
   test("is forbidden, BY NAME, from every invention the live run produced", async () => {
@@ -531,14 +540,14 @@ describe("the sendable email (renderEmailDocHtml — what the recipient actually
     const html = await renderEmailDocHtml(doc);
     expect(cellNamed(doc, "Lot")!.value).toBe(""); // an open slot on the canvas…
     expect(html).not.toContain(">Lot<"); // …and absent from the email
-    expect(html).toContain(">Was<"); // the strip itself survives (label renamed 08/09/2026 — two-word labels wrap a 94px cell)
+    expect(html).toContain(">Previous<"); // the strip itself survives (label renamed 08/09/2026 — two-word labels wrap a 94px cell)
   });
 
   test("a house with no cut sends no price-cut language at all", async () => {
     const doc = (await buildPriceReduced(ctx({ ...SHORE_DR, isPriceReduced: false })))!;
     const html = await renderEmailDocHtml(doc);
     expect(html).not.toContain("Price cut");
-    expect(html).not.toContain(">Was<"); // the cell is unsourced → dropped
+    expect(html).not.toContain(">Previous<"); // the cell is unsourced → dropped
     expect(html).toContain("$595,000"); // the honest current ask still ships
   });
 });
@@ -572,7 +581,11 @@ test("priceVsAreaDotSpec returns null with no subject price or sqft", () => {
   expect(priceVsAreaDotSpec(facts, [comp(400000, 2000), comp(420000, 2100)])).toBeNull();
 });
 
-test("priceVsAreaDotSpec plots the subject's $/sqft against the comp median, on the dot-plot frame", () => {
+test("priceVsAreaDotSpec plots each comp's $/sqft as a bklit bar, the subject as the reference line", () => {
+  // REBUILT 08/09/2026 (operator decree: bklit charts, never the two-dot slider again).
+  // The frame is bklit's ComposedChart via the email bridge: bars = the comps' own
+  // $/sqft ascending, the line = THIS home's new $/sqft ("average" carries the
+  // subject's real derived value — the bridge's never-a-second-invented-number rule).
   const facts = {
     address: "1 Main St, Fort Myers, FL 33905",
     price: "$400,000",
@@ -580,13 +593,15 @@ test("priceVsAreaDotSpec plots the subject's $/sqft against the comp median, on 
   } as never;
   const spec = priceVsAreaDotSpec(facts, [comp(440000, 2000), comp(460000, 2000)]); // 220, 230 $/sqft
   expect(spec).not.toBeNull();
-  expect(spec!.frameId).toBe("dot-plot");
-  expect((spec!.options as { data: { value: number; reference?: number }[] }).data[0].value).toBe(
-    200,
-  ); // 400000/2000
-  expect(
-    (spec!.options as { data: { value: number; reference?: number }[] }).data[0].reference,
-  ).toBe(225); // median(220,230)
+  expect(spec!.frameId).toBe("composed-bar-line");
+  const o = spec!.options as {
+    items: { label: string; value: number }[];
+    average: number;
+    value_labels?: string;
+  };
+  expect(o.items.map((i) => i.value)).toEqual([220, 230]); // each comp, ascending
+  expect(o.average).toBe(200); // 400000/2000 — the subject line
+  expect(o.value_labels).toBe("endpoints"); // numbers ON the chart (decree 08/02/2026)
 });
 
 test("priceVsAreaDotSpec filters out vacant-lot comps (no beds/sqft) before computing the median", () => {
@@ -598,26 +613,23 @@ test("priceVsAreaDotSpec filters out vacant-lot comps (no beds/sqft) before comp
   const vacantLot: RenderComp = { ...comp(139800, 0), beds: null, sqft: null };
   const spec = priceVsAreaDotSpec(facts, [comp(440000, 2000), comp(460000, 2000), vacantLot]);
   expect(spec).not.toBeNull();
-  expect((spec!.options as { data: { reference?: number }[] }).data[0].reference).toBe(225); // unaffected by the lot
+  // the lot never becomes a bar, and the plotted set is exactly the two real comps
+  expect((spec!.options as { items: { value: number }[] }).items.map((i) => i.value)).toEqual([
+    220, 230,
+  ]);
 });
 
-// ── FINAL-REVIEW FIX 1: the single-row dot-plot must print the median's own number ──
-//
-// A single-item dot-plot scales its track to [value, reference], so the two dots always
-// sit at opposite ends of the track no matter how close the real numbers are — a $1/sqft
-// gap would render identically to a $200/sqft gap, and neither number appeared anywhere
-// in the email. The fix folds both already-sourced numbers into the legend labels.
-test("priceVsAreaDotSpec folds the formatted subject and median $/sqft into the legend labels", () => {
+// The subject's own figure rides the TITLE, so the number is on the artifact even
+// before the bridge draws its endpoint labels (the dot-plot's old legend-label fix,
+// carried forward onto the composed frame in the 08/09/2026 rebuild).
+test("priceVsAreaDotSpec puts the subject's formatted $/sqft in the chart title", () => {
   const facts = {
     address: "1 Main St, Fort Myers, FL 33905",
     price: "$400,000",
     sqft: "2000",
   } as never;
   const spec = priceVsAreaDotSpec(facts, [comp(440000, 2000), comp(460000, 2000)]); // 220, 230 $/sqft
-  const options = spec!.options as { referenceLabel?: string; valueLabel?: string };
-  // subject: 400,000 / 2,000 = $200/sqft. Reference: median(220, 230) = $225/sqft.
-  expect(options.valueLabel).toBe("new price ($200/sq ft)");
-  expect(options.referenceLabel).toBe("area median ($225/sq ft)");
+  expect(spec!.title).toContain("$200"); // 400,000 / 2,000
 });
 
 // ── FINAL-REVIEW FIX 5: the floor counts USABLE $/sqft values, not comps with beds/sqft ──
