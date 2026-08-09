@@ -600,8 +600,42 @@ export async function authorListingNarrative(
       system: `${system}\n\n${CLAIM_PROHIBITION}\n\n${FAVORABLE_FRAMING_POLICY}`,
       messages: [{ role: "user", content: user }],
     });
-    const t = msg.content[0]?.type === "text" ? msg.content[0].text.trim() : "";
-    if (!t) return null;
+    const raw = msg.content[0]?.type === "text" ? msg.content[0].text.trim() : "";
+    if (!raw) return null;
+
+    // ── STRIP LEAKED SCAFFOLDING, AT THE SHARED ROOT (08/09/2026, closes
+    // `shared_narrator_leaks_reasoning_preamble`) ─────────────────────────────
+    // The model sometimes narrates its own constraints INTO the paragraph, and that is
+    // not a claim-gate violation (no invented fact), so it shipped raw — three times on
+    // live renders: "THE COMMUNITY fact line is absent, so I will say nothing…" (back-on-
+    // market, 08/06/2026, fixed LOCALLY there because this file was claimed by a parallel
+    // session), "THE LISTING'S OWN DESCRIPTION IS ABSENT, so I am describing the home
+    // itself" (new-listing capture), and "No community facts, neighborhood figures, or
+    // nearby business distances were provided for this address, so the honest description
+    // stops at the home itself" (price-reduced, 08/09/2026 — operator: unprintable).
+    // Sentence-level and DELETE-ONLY (back-on-market's own bracket lesson: one bad clause
+    // is one bad clause — nothing is rewritten, so nothing can be invented). First person
+    // is the strongest tell; the phrase list is the shapes measured live, extended with
+    // the provision-talk variant the "not provided" enumeration missed.
+    const t = raw
+      .split(/\n\s*(?:-{3,}|\*{3,}|_{3,})\s*\n/)
+      .flatMap((seg) => seg.split(/\n{2,}/))
+      .flatMap((p) => p.split(/(?<=[.!?])\s+/))
+      .map((s) => s.trim())
+      .filter((s) => s && !/[[\]]/.test(s))
+      .filter((s) => !/\bI\b/.test(s))
+      .filter(
+        (s) =>
+          !/\b(fact line|is absent|are absent|is present|not given|not provided|was provided|were provided|honest description|the description stops|describing the home itself)\b/i.test(
+            s,
+          ),
+      )
+      .join(" ")
+      .trim();
+    if (!t) {
+      console.warn("[narrative] DROPPED — nothing but narration scaffolding survived the strip");
+      return null;
+    }
 
     // THE CLAIM GATE, on the shared listing narrator. It was wired into the individual
     // recipes and NOT into here — so the reference implementation itself still invented.

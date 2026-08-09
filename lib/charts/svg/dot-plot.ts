@@ -17,7 +17,7 @@
 
 import { formatAxisTick, type ValueFormat, TABULAR } from "@/lib/charts/format";
 import { formatDisplayDate } from "@/lib/format-date";
-import { fitText, labelGutterFor } from "@/lib/brand/text-metrics";
+import { fitText, labelGutterFor, measureText } from "@/lib/brand/text-metrics";
 import type { FontFamily } from "@/lib/email/doc/types";
 
 /** Label type size — one place, so the measurement and the rendered `font-size` can
@@ -104,20 +104,26 @@ export function dotPlotSvg(items: DotPlotItem[], opts: DotPlotOpts): string {
   const parts: string[] = [
     `<svg xmlns="http://www.w3.org/2000/svg" width="${W}" height="${H}" viewBox="0 0 ${W} ${H}">`,
     `<rect width="${W}" height="${H}" fill="#ffffff"/>`,
-    `<text x="${padL}" y="28" font-family="Arial" font-size="15" font-weight="bold" fill="#1F2937">${esc(opts.title)}</text>`,
+    // ON THE EMAIL'S OWN TYPE SCALE (08/09/2026 — operator, on the rendered chart:
+    // "DIFFERENT FONTS??? SIZES???"): title = body 16 / weight 500, small text = mono 12,
+    // values = 12 / 500 tabular. 15/11/10px and font-weight:bold exist on no step of the
+    // seven-size scale and in no slot of the weight set (600 hero · 500 headers/emphasis ·
+    // 400 body) — the chart read as a foreign artifact pasted into the email it sits in.
+    `<text x="${padL}" y="28" font-family="Arial" font-size="16" font-weight="500" fill="#1F2937">${esc(opts.title)}</text>`,
   ];
 
   // Tiny top legend: ● {valueLabel}  ○ {referenceLabel}. The reference dot is placed
-  // AFTER the value label (width estimated from its length, ~6.2px/char at 11px) so a
-  // long label like "Median sale price" never collides with the reference legend.
+  // AFTER the value label at its MEASURED width (text-metrics, real advance widths in
+  // the face that rasterizes — a per-character estimate is the banned idiom).
   const legY = 46;
   const valLabel = opts.valueLabel ?? "value";
-  const refDotX = padL + 15 + Math.round(valLabel.length * 6.2) + 16;
+  const refDotX =
+    padL + 15 + Math.ceil(measureText(valLabel, { family: opts.fontFamily, size: 12 })) + 16;
   parts.push(
     `<circle cx="${padL + 5}" cy="${legY - 4}" r="5" fill="${esc(opts.accent)}"/>`,
-    `<text x="${padL + 15}" y="${legY}" font-family="Arial" font-size="11" fill="${AXIS_TEXT}">${esc(valLabel)}</text>`,
+    `<text x="${padL + 15}" y="${legY}" font-family="Arial" font-size="12" fill="${AXIS_TEXT}">${esc(valLabel)}</text>`,
     `<circle cx="${refDotX}" cy="${legY - 4}" r="5" fill="#ffffff" stroke="${REF_DOT}" stroke-width="2"/>`,
-    `<text x="${refDotX + 10}" y="${legY}" font-family="Arial" font-size="11" fill="${AXIS_TEXT}">${esc(refLabel)}</text>`,
+    `<text x="${refDotX + 10}" y="${legY}" font-family="Arial" font-size="12" fill="${AXIS_TEXT}">${esc(refLabel)}</text>`,
   );
 
   rows.forEach((r, i) => {
@@ -138,7 +144,7 @@ export function dotPlotSvg(items: DotPlotItem[], opts: DotPlotOpts): string {
     // accent value dot + end label
     parts.push(
       `<circle cx="${xPos(r.value).toFixed(1)}" cy="${cy.toFixed(1)}" r="6" fill="${esc(opts.accent)}"/>`,
-      `<text x="${(padL + trackW + 14).toFixed(1)}" y="${(cy + 4).toFixed(1)}" font-family="Arial" ${TABULAR} font-size="12" font-weight="bold" fill="#1F2937">${esc(formatAxisTick(fmt, r.value))}</text>`,
+      `<text x="${(padL + trackW + 14).toFixed(1)}" y="${(cy + 4).toFixed(1)}" font-family="Arial" ${TABULAR} font-size="12" font-weight="500" fill="#1F2937">${esc(formatAxisTick(fmt, r.value))}</text>`,
     );
   });
 
@@ -148,7 +154,7 @@ export function dotPlotSvg(items: DotPlotItem[], opts: DotPlotOpts): string {
   if (opts.asOf) captionParts.push(`as of ${formatDisplayDate(opts.asOf)}`);
   if (captionParts.length)
     parts.push(
-      `<text x="${padL}" y="${H - 12}" font-family="Arial" font-size="10" fill="${AXIS_TEXT}">${esc(captionParts.join(" · "))}</text>`,
+      `<text x="${padL}" y="${H - 12}" font-family="Arial" font-size="12" fill="${AXIS_TEXT}">${esc(captionParts.join(" · "))}</text>`,
     );
 
   parts.push(`</svg>`);

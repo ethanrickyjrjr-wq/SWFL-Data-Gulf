@@ -108,7 +108,7 @@ test("value labels sit clear of the max-value dot (gap ≥ dot radius + 8)", () 
   // renders a number, so it carries tabular figures, and the bold chart title does not.
   // (A looser `font-weight="bold"` match picks up the title and reports 4 for 3 rows.)
   const labelXs = [
-    ...svg.matchAll(/<text x="([\d.]+)" y="[\d.]+"[^>]*tabular-nums[^>]*font-weight="bold"/g),
+    ...svg.matchAll(/<text x="([\d.]+)" y="[\d.]+"[^>]*tabular-nums[^>]*font-weight="500"/g),
   ].map((m) => Number(m[1]));
   expect(labelXs.length).toBe(items.length);
   const maxDot = Math.max(...cxs);

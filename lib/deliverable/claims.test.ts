@@ -243,6 +243,19 @@ describe("honest prose survives the gate", () => {
     expect(v.some((x) => x.kind === "unsourced-feature" && x.match === "pool")).toBe(true);
     expect(v.some((x) => x.kind === "unsourced-feature" && x.match === "lanai")).toBe(true);
   });
+
+  it("a ZIP CODE before the word 'zip' is a NAME, not a count of zips", () => {
+    // Found live 08/09/2026 (price-reduced acceptance): the narrator wrote "the 33914 zip"
+    // — its own settled ZIP, naming the area — and the COUNT rule's bare `\d+` quantifier
+    // read the five-digit code as a count of zips, dropping a clean paragraph. A gate that
+    // eats honest sentences is a gate nobody keeps (this file's own separator lesson).
+    const facts = { sentence: "ZIP: 33914", anchors: ["33914"] };
+    const v = auditClaims("Set on a quarter-acre lot in the 33914 zip.", [facts]);
+    expect(v.filter((x) => x.kind === "word-count")).toEqual([]);
+    // …and a REAL count of zips is still caught, words or digits.
+    const real = auditClaims("Prices rose in 5 of the 8 zips nearby.", [facts]);
+    expect(real.some((x) => x.kind === "word-count")).toBe(true);
+  });
 });
 
 describe("the prompt and the lint stay in lockstep", () => {

@@ -16,6 +16,25 @@ rewrote gitignored `.hermes.md` with the incident, an already-built inventory (n
 prove-the-gap-before-proposing, and a no-`git commit` rule (old rule only banned push — these specs
 got committed through that hole).
 
+## 2026-08-09 (Fable 5) — Narrator scaffolding-leak fixed at the SHARED root; drop-capture harness bug; claim-gate ZIP false-trip; dot-plot onto the type scale
+
+Operator caught the shared narrator shipping compliance-narration to a READER ("No community
+facts… were provided for this address") — same class as check `shared_narrator_leaks_reasoning_
+preamble` (open 3d, parked only because shared.ts was then claimed). Fixed at the root:
+`authorListingNarrative` now strips scaffolding SENTENCES delete-only (brackets → first-person →
+provision-talk, incl. the "were provided" variant the old enumeration missed) BEFORE the claim
+gate; nothing left → recorded drop. Check CLOSED. Two more real bugs from the same live run:
+(1) `captureNarratorDrops` hooked console.error but the gate logs via console.WARN — no acceptance
+script ever captured a drop; hooks both now. (2) The claim gate's COUNT rule read "the 33914 zip"
+(a ZIP naming an area) as a count of zips via bare `\d+` and dropped a clean paragraph — quantifier
+capped at `\d{1,4}(?!\d)`, regression test added. Also: dot-plot text moved onto the email's own
+type scale (16/500 title, 12 small text, no `bold` — operator: "DIFFERENT FONTS??? SIZES???") and
+its banned per-character legend estimate replaced with measured text-metrics. price-reduced narrator
+now rides the walked 2-attempt lane. NOT in this commit: price-reduced.ts/.test.ts/render script +
+capture — CLAIMED by a parallel session mid-edit; the bklit composed-chart rewire (comps' $/sqft
+bars + the new price as the reference line, replacing the dot-plot — operator decree: bklit charts,
+"stop with the same charts") is written and queued behind that claim.
+
 ## 2026-08-09 (Fable 5) — PRICE IMPROVED built end-to-end: real cut, 6/6 assertions, showcase card live
 
 The next lifecycle hole ("build the next one"). Subject found live in `data_lake.listing_state`

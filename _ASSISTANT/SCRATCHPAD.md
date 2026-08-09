@@ -6,6 +6,13 @@ typed slots (number/date/address/community/open-house-time), words fixed in code
 build. Direction, not yet built. Related priors: market-pulse's coded-sentence + digit-free
 connective pattern, deliverable-distiller's prose-recipe/skeleton concept, voice-presets/voice-guard.
 
+## 2026-08-09 (Fable 5) — OPERATOR follow-up: *"HOW DO WE MAKE IT BETTER??????????"*
+After update+model switch+context rewrite. Next rungs from the 08/08 research ladder (RULE 0.7a):
+the ollama-cloud provider is ALREADY configured with a signed-in key (gpt-oss:120b, kimi-k3,
+glm-5.2, deepseek-v4-pro…) — wire fallback/routing so hard jobs escalate local→cloud free tier;
+Pro $20/mo only if the free cap bites. Structural ceiling stays: local models degrade as state
+accumulates (BFCL 07/30), so Hermes stays in low-state lanes regardless of model.
+
 ## 2026-08-09 (Fable 5) — OPERATOR: *"DO IT AND MAKE HERMES BETTER. THE ASSHOLE LIED AND SAID HE WAS UPDATED"*
 Approved: delete the 4 Hermes files (this push). "Lied about being updated" = Hermes presented a
 stale/hallucinated picture of the repo as current knowledge. Fix = ground-truth `.hermes.md`
@@ -24,6 +31,21 @@ layer + gateNarrative/unanchoredNumbers/baked narratives. Its manifest also inve
 `lee_parcends`), wrong DOM root, misquoted Rule 4 — and a naive %-rule that matches the exact bug
 the real view's header documents fixing. Full assessment in session answer. Committed Hermes docs
 carry a rival "Source of Truth" claim — operator to decide keep/fix/delete.
+
+## 2026-08-09 (Fable 5) — OPERATOR: *"WHAT THE FUCK ARE YOU LOOKING AT TO BUILD? STOP WITH THE SAME FUCKING CHARTS!!!"*
+The dot-plot (two dots on a slider) keeps reappearing across emails (agent-brand-intro, now
+price-reduced) — and its own code comment admits the shape's flaw: a single-item dot-plot pins the
+two dots at opposite track ends whatever the real gap. The build source question: the answer to
+"what are you looking at" must be OUR design research (_RESEARCH/deliverable-and-design/) + the
+§2.1 walk + the existing chart-frame repertoire — never defaults from memory. Also standing:
+`ingest/pipelines/report_design_research/crawl_report_designs.py` (the Chartr/Axios/Morning Brew
+"find the best-looking and recreate it" crawl) is WRITTEN and has NEVER been run (RULE 0.4 note).
+
+## 2026-08-09 (Fable 5) — OPERATOR, on the price-reduced render (screenshot 180659):
+1. *"WHAT IS THIS FUCKING CHART? DIFFERENT FONTS??? SIZES??? THIS IS WHY WE FOLLOW THE FUCKING RULES"* — the dot-plot's text (15px title / 11px legend / 12px rows) does not sit on the email's own type scale (14/16/28) and the face must be verified to thread to the rasterizer. Chart typography must ride the SAME scale roles as the email.
+2. *"WAS??? WHAT THE FUCK IS 'WAS'"* — my rename made it worse. The previous-price cell label must read instantly ("OLD PRICE" class), measured to fit the 94px cell.
+3. *"No community facts... were provided for this address — WHAT IN THE ACTUAL FUCK IS THIS SHIT"* — the shared narrator leaked compliance-narration into the SHIPPED paragraph. Same class as check `shared_narrator_leaks_reasoning_preamble` (already open, parked 3d because shared.ts was claimed; it is free now). Fix at the SHARED root, sentence-level, this session.
+4. *"YOU SAID THIS WAS FUCKING DONE"* — I reported done on 6/6 assertions while the rendered LOOK still held these three defects. Assertions are necessary, not sufficient; the look is part of done.
 
 ## 2026-08-09 (Fable 5) — OPERATOR follow-up: *"SO YOU FUCKING BUILT IT NEW FROM THE PLAYBOOK??????"*
 Partially, and partial-as-whole is the defect (RULE 0.8): Price Improved was built through the
@@ -45,6 +67,23 @@ been DRIVEN — drafted code is a hypothesis, not a built email (same rule as in
 1. *"newest email clicked thumbnails need to be resized so the cards don't drop a line and it looks wrong. make it so everything fits like the actual email will look."* — Root cause found: thumbnail iframe loses ~17px to a scrollbar and the overlay iframe is `max-w-xl` (576px), but every strip is sized to fit EXACTLY 600 (6×94, 5×113, 3×189) — so cells wrap in OUR preview that never wrap in the sent email.
 2. *"DOM can't be on its own line, nor can house type or whatever it is. make all the fucking emails right and not have random data on one line."* — DOM/Type wraps are the preview artifact above, EXCEPT one real shipped defect: new-listing's `secondSpecRow` (Built·HOA·Type) degrades to a LONE 28px "Residential/Type" row when Built+HOA are unsourced.
 3. *"this also fucking sucks...can we not get some fucking complementary backlit graphs/charts into the fucking emails. why is it so hard????"* — email charts are flat bars; wants a backlit/glow treatment complementary to the design. Charts are rasterized PNG so gradients/glows are render-safe in every client.
+
+## 2026-08-09 (Fable 5) — OPERATOR: *"WHEN WE WILL EVER GET SOMETHING TO WORK MORE THAN A WEEK. FIX EASY ONES, THEN WE STOP WITH THIS GARBAGE AND FOCUS ON APIFY"*
+
+Decree: fix the easy reds (4 broken reverify signals + the new CI red), then STOP the ops
+grinding — next focus is APIFY. The durability gripe is real: the swfl-local runner worked 08/06,
+was offline again by 08/09 (manual run.cmd = dies on reboot; durable fix is the service install,
+needs his UAC click). Standing lesson for every fix this session: prefer the form that survives a
+reboot/re-run without a human remembering it.
+
+## 2026-08-09 (Fable 5) — OPERATOR: *"I feel like everything is always red, so every 30 minutes is going to be a lot of messages"*
+
+Alert-fatigue gripe on the new GHA watchdog, and he's right: run-ID dedup means a chronically
+failing hourly workflow pings every tick forever. Fix applied same session: dedup by WORKFLOW NAME
+with a 24h cooldown — first failure of a workflow alerts, repeats of the same workflow stay silent
+for 24h. Chronic reds surface once per day (and in the 8am digest), not 48×. The deeper ask —
+"how do we get those done" — is the RULE 0.85 point: fix the reds, don't alert on them harder.
+Diagnosis of the 4 currently-red workflows run this session.
 
 ## 2026-08-09 (Fable 5) — OPERATOR pasted a Hermes-authored "Master Brain implementation plan"
 

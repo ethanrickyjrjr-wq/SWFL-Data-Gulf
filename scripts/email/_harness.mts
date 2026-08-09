@@ -124,12 +124,22 @@ export async function loadAccountBrand(): Promise<{
  */
 export function captureNarratorDrops(): string[] {
   const log: string[] = [];
+  // BOTH channels (fixed 08/09/2026). The claim gate has always logged its drops via
+  // console.WARN (shared.ts `[narrative] DROPPED`), but this hook only ever wrapped
+  // console.ERROR — so no acceptance script ever actually captured a drop, and every
+  // "DROPPED BY THE CLAIM GATE" provenance row was unreachable. Found when price-reduced's
+  // assertion 7 read a live gate drop as "no paragraph and no recorded drop".
   const realError = console.error.bind(console);
-  console.error = (...args: unknown[]) => {
-    const line = args.map(String).join(" ");
-    if (line.includes("[narrative]")) log.push(line);
-    else realError(...args);
-  };
+  const realWarn = console.warn.bind(console);
+  const hook =
+    (passthrough: (...a: unknown[]) => void) =>
+    (...args: unknown[]) => {
+      const line = args.map(String).join(" ");
+      if (line.includes("[narrative]")) log.push(line);
+      else passthrough(...args);
+    };
+  console.error = hook(realError);
+  console.warn = hook(realWarn);
   return log;
 }
 

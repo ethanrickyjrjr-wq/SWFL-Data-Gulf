@@ -260,7 +260,14 @@ const TRAJECTORY =
  * must be a VERBATIM restatement of a settled one. Anything else is dropped.
  */
 const COUNT_ENTITY = String.raw`(zips?|homes?|sales?|listings?|comps?|comparables?|properties|areas?|neighborhoods?|of them)`;
-const COUNT_QUANTIFIER = String.raw`(one|two|three|four|five|six|seven|eight|nine|ten|eleven|twelve|half|most|majority|all|none|every|each|both|several|many|few|\d+)`;
+// The numeric quantifier is capped at FOUR digits (found live 08/09/2026, price-reduced
+// acceptance run): "the 33914 zip" is a ZIP CODE naming an area, not a count of zips, and
+// `\d+` read it as one — the gate dropped an otherwise-clean paragraph over its own settled
+// ZIP. A five-digit COUNT of zips/homes/comps cannot occur in 2-4 sentence email prose, and
+// our own settled lines format every large figure with separators ("6,145"), whose 3-digit
+// tail still matches. The words and 1-4 digit forms — the shapes a count actually takes —
+// are untouched.
+const COUNT_QUANTIFIER = String.raw`(one|two|three|four|five|six|seven|eight|nine|ten|eleven|twelve|half|most|majority|all|none|every|each|both|several|many|few|\d{1,4}(?!\d))`;
 const COUNT = new RegExp(
   String.raw`\b(all\s+)?${COUNT_QUANTIFIER}\s+(of\s+)?(the\s+|those\s+|these\s+)?\w*\s*${COUNT_ENTITY}\b`,
   "i",
