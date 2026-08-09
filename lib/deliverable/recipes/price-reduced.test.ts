@@ -302,7 +302,7 @@ describe("the cut renders ABOVE the price, smaller, in a different color", () =>
 
   test("the three numbers check each other: previous − cut = current", async () => {
     const doc = (await buildPriceReduced(ctx(SHORE_DR)))!;
-    const prev = Number(cellNamed(doc, "Previous Price")!.value.replace(/[^\d]/g, ""));
+    const prev = Number(cellNamed(doc, "Was")!.value.replace(/[^\d]/g, ""));
     const cut = Number(heroOf(doc)!.kicker!.replace(/[^\d]/g, ""));
     const now = Number(heroOf(doc)!.value!.replace(/[^\d]/g, ""));
     expect(prev - cut).toBe(now);
@@ -313,7 +313,7 @@ describe("the cut renders ABOVE the price, smaller, in a different color", () =>
     // A falsy kicker is dropped by the chrome entirely — the prop never lands.
     expect(heroOf(doc)!.kicker ?? "").toBe("");
     // …and the previous-price cell is an OPEN SLOT, not a fabricated anchor.
-    expect(cellNamed(doc, "Previous Price")!.value).toBe("");
+    expect(cellNamed(doc, "Was")!.value).toBe("");
     // The recipe presupposes a cut; with none, it still BUILDS (RULE 0.7 — never refuse).
     expect(heroOf(doc)!.value).toBe("$595,000");
   });
@@ -328,7 +328,7 @@ describe("every cell is sourced or open", () => {
     // an email whose subject is a number that MOVED. It had to go: six is the schema's
     // hard cap on a stats row, and the anchor earns the slot.
     expect(allCells(doc).map((c) => c.label)).toEqual([
-      "Previous Price",
+      "Was",
       "Beds",
       "Baths",
       "Sq Ft",
@@ -354,7 +354,7 @@ describe("every cell is sourced or open", () => {
 
   test("the previous price is MUTED — it must never out-shout the price you can pay", async () => {
     const doc = (await buildPriceReduced(ctx(SHORE_DR)))!;
-    expect(cellNamed(doc, "Previous Price")!.emphasis).toBe("muted");
+    expect(cellNamed(doc, "Was")!.emphasis).toBe("muted");
   });
 
   test("the UNCHECKABLE derived cell states its provenance — and only that one", async () => {
@@ -531,14 +531,14 @@ describe("the sendable email (renderEmailDocHtml — what the recipient actually
     const html = await renderEmailDocHtml(doc);
     expect(cellNamed(doc, "Lot")!.value).toBe(""); // an open slot on the canvas…
     expect(html).not.toContain(">Lot<"); // …and absent from the email
-    expect(html).toContain("Previous Price"); // the strip itself survives
+    expect(html).toContain(">Was<"); // the strip itself survives (label renamed 08/09/2026 — two-word labels wrap a 94px cell)
   });
 
   test("a house with no cut sends no price-cut language at all", async () => {
     const doc = (await buildPriceReduced(ctx({ ...SHORE_DR, isPriceReduced: false })))!;
     const html = await renderEmailDocHtml(doc);
     expect(html).not.toContain("Price cut");
-    expect(html).not.toContain("Previous Price"); // the cell is unsourced → dropped
+    expect(html).not.toContain(">Was<"); // the cell is unsourced → dropped
     expect(html).toContain("$595,000"); // the honest current ask still ships
   });
 });

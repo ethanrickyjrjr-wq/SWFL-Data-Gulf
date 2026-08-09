@@ -1,3 +1,21 @@
+## 2026-08-09 (Fable 5) — PRICE IMPROVED built end-to-end: real cut, 6/6 assertions, showcase card live
+
+The next lifecycle hole ("build the next one"). Subject found live in `data_lake.listing_state`
+(`flag_price_reduced=true`, stated `reduced_amount`): 3113 SW 18th Ave, Cape Coral 33914 —
+$800,000 asking, cut $65,000, full spec line + photo. New acceptance run
+`scripts/email/render-price-reduced.mts` (harness pattern, 6 assertions off the RENDERED bytes):
+street line clean · kicker "Price cut $65,000" · arithmetic checkable on screen ($865,000 = $800,000
++ $65,000) · no Type cell · no invented-reason language · CTA never our homepage. **6/6 PASS, ZERO
+metered calls** (no paid-row description → narrator never fires → paragraph stays an open slot, as
+designed). Dot-plot chart resolved from real comps ($377 vs $243 median). TWO recipe defects fixed
+while building (RULE 0.85): (1) §1.8 — `ctaUrl`/photo `linkUrl` passed `facts.sourceUrl` (hardcoded
+to our homepage by resolve-subject); now rides `listingButtonUrl`, no real link → no destination —
+the same defect the back-on-market walk fixed there; (2) "Previous Price" label wrapped its 94px
+cell to two lines, breaking the shared label baseline — renamed "Was" (same content-fix precedent
+as market-comps' "Median"). Tests updated, 45/45 green; `bunx tsc --noEmit` clean. Capture at
+`public/new-emails/price-reduced-email.html`, card wired in NewEmails.tsx (10 of 17 now rendered).
+NOT done: playbook §2.7 walk is still "TO BE WALKED" (the doc walk, distinct from this build).
+
 ## 2026-08-09 (Fable 5) — /showcase previews now render the email AT TRUE 600px; lone "Residential/Type" row killed; charts go BACKLIT
 
 Three operator screenshots, three defects. (1) **Preview infidelity:** every spec strip is

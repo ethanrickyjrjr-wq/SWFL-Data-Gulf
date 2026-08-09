@@ -69,6 +69,7 @@
 //   this price. So the paragraph describes the HOUSE. The numbers stay in the grid.
 
 import { buildLifecycleEmail } from "@/lib/email/lifecycle-chrome";
+import { listingButtonUrl } from "@/lib/listings/listing-url";
 import { listingSpecs, spec, specFootnote } from "@/lib/email/listing-flyer";
 import {
   authorListingNarrative,
@@ -267,7 +268,13 @@ function addressLine(facts: ListingFacts): string {
  */
 function priceStrip(facts: ListingFacts, previous?: string): StatItem[] {
   return [
-    spec(previous, "Previous Price", "muted"),
+    // "Was", not "Previous Price" (renamed 08/09/2026, seen on the rendered bytes):
+    // a two-word label wraps to two lines in a 94px six-cell strip and breaks the
+    // shared label baseline — the exact defect market-comps fixed by renaming
+    // "Comp median" → "Median" (StatsBlock's own KNOWN TENSION note: fix the
+    // CONTENT, not the mechanism). "$865,000 / WAS" is the retail convention and
+    // the footnote still states the full derivation.
+    spec(previous, "Was", "muted"),
     ...listingSpecs(facts).filter((c) => c.label !== "Type"),
   ];
 }
@@ -329,6 +336,12 @@ export async function buildPriceReduced(ctx: RecipeBuildContext): Promise<EmailD
   const previous = previousPrice(facts); // "$699,975"          — current + cut
   const photo = facts.photos[0];
 
+  // §1.8 (fixed 08/09/2026, same defect the back-on-market walk found): `facts.sourceUrl`
+  // is the CITATION field and resolve-subject hardcodes it to our own homepage — which is
+  // exactly the value that must never become a button or a photo link. The flyer's ladder
+  // is the ONE root for this decision: a real listing page or nothing.
+  const realLink = listingButtonUrl(facts);
+
   // THE ONE LAYOUT. Brand (globalStyle, header, agent card, footer) is STICKY and lifted
   // from the canvas — we never author a user's colours or their signature.
   let doc = buildLifecycleEmail(currentDoc, {
@@ -338,7 +351,11 @@ export async function buildPriceReduced(ctx: RecipeBuildContext): Promise<EmailD
     // re-send months from now must not depend on the vendor CDN). Unsourced → `null`,
     // and the chrome lays down a dropzone the agent fills; the sent email omits it.
     photo: photo
-      ? { url: photo, alt: facts.address ?? "Featured property", linkUrl: facts.sourceUrl }
+      ? {
+          url: photo,
+          alt: facts.address ?? "Featured property",
+          ...(realLink ? { linkUrl: realLink } : {}),
+        }
       : null,
 
     // The hero: the CUT above, the ADDRESS, then the NEW price. An empty kicker is
@@ -385,7 +402,7 @@ export async function buildPriceReduced(ctx: RecipeBuildContext): Promise<EmailD
     //
     // A price cut exists to get people through the door. So the CTA is the NEXT ACTION.
     ctaLabel: "Schedule a Showing",
-    ctaUrl: facts.sourceUrl,
+    ...(realLink ? { ctaUrl: realLink } : {}),
   });
   // THE SUBJECT LINE — deterministic, never model-authored (subject-lines.ts). Set here,
   // before every early-return path below, so it applies whether or not the narrative or

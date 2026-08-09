@@ -13,6 +13,7 @@ const FILE_FOR_KEY: Partial<Record<RecipeKey, string>> = {
   "new-listing": "/new-emails/new-listing-email.html",
   "open-house": "/new-emails/open-house-email.html",
   "market-comps": "/new-emails/market-comps-email.html",
+  "price-reduced": "/new-emails/price-reduced-email.html",
   "under-contract": "/new-emails/under-contract-email.html",
   "just-sold": "/new-emails/just-sold-email.html",
   "back-on-market": "/new-emails/back-on-market-email.html",
