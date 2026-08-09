@@ -1,3 +1,13 @@
+## 2026-08-08 (Fable 5) — OPERATOR: *"HOW DO WE MAKE IT BETTER!!! DID YOU REALLY RESEARCH. I MEAN STEADYAPI REDDIT. YOU ACT LIKE YOU KNOW, BUT YOU DON'T. HOW DO WE GET IT BETTER THAN GEMMA:12B"*
+
+Context: Hermes (local agent, `AppData\Local\hermes`) runs gemma4:12b via Ollama on the RTX 4060 Ti
+16GB. I called that the ceiling from 07/30 `_RESEARCH` notes instead of researching fresh — exactly
+the RULE 0.9 #3 failure ("who is good at what is UNKNOWN until researched; model claims from memory
+are stale by definition"). Owed: live research (Reddit/community + Ollama library + Hermes provider
+options) on what actually beats gemma4:12b for this box — bigger local quants, Ollama cloud models,
+Nous Portal / OpenRouter routing, per-profile model routing in Hermes. Hermes is model-agnostic, so
+"better" is not capped by VRAM. Answer goes in this session; research filed to `_RESEARCH/`.
+
 ## 2026-08-06 (Opus 5) — OPERATOR: *"Still untouched: the 221-row defect class beyond the cron family, and no signals backfilled onto the 125 verify rows — that last one is what actually bends the curve, and it's per-check judgment, not a sweep. Get this done!!!"*
 
 **STATUS: PARTIAL — 4 of 125 verify rows signalled. Named here so it is not mistaken for done.**

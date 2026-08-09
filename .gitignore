@@ -273,3 +273,7 @@ brains/_ingest-freshness.json*
 # qmd hybrid-search index — machine-local, never tracked (92MB sqlite)
 .qmd/*.sqlite
 .carousel-out/
+
+# Hermes (local Ollama agent) per-repo context file — machine-local instructions,
+# never repo content. Hermes merges it into its prompt when working in this folder.
+.hermes.md
