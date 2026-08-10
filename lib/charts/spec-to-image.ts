@@ -156,6 +156,9 @@ export async function chartSpecToEmailSvg(
               ...(o.value_labels === "endpoints" || o.value_labels === "all"
                 ? { valueLabels: o.value_labels }
                 : {}),
+              // The reference line names itself on the chart (looked at 08/09/2026:
+              // an unlabeled grey line was invisible AND unexplained).
+              ...(typeof o.average_label === "string" ? { averageLabel: o.average_label } : {}),
             },
           );
         break;

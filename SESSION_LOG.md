@@ -1,3 +1,29 @@
+## 2026-08-09 (Fable 5) — price-reduced chart: size band ARMED, bklit bridge on the type scale, the line names itself, chart keys stamped with the RENDERED bytes
+
+Operator, on the rendered chart: "$173 → $421… COMPS ARE NOT 421 AND 173 DOLLARS" + "HOW ARE FONTS
+AND SPACING DIFFERENT?" + "WHAT THE FUCK IS THE CHART ABOUT?" Three defects, all fixed and looked at:
+(1) **The comp set was never size-banded** — the ±25% living-area ranker (`comp-rank.ts`, the
+ratified `comps_no_size_band_guard` fix) existed, but `price-reduced.ts` called `compsForAddress`
+without `subjectSqft`, so it fell to the blind vendor slice. Now passes sqft/beds/baths; the banded
+set clusters $121–$159/sq ft (vs the $173–$421 shack-to-mansion spread). A chart can only exist
+when the band could arm (subjectPpsf already requires facts.sqft).
+(2) **The bklit email bridge drew its own typography** — hardcoded Arial 15-bold/11-bold/10 chrome
+in `email-svg.tsx`, same class of defect fixed on dot-plot the same night. Both fns now 16/500
+title · 12/500 TABULAR values · 12 small text.
+(3) **The chart didn't say what it was** — reference line was a 2px grey gradient FADING TO
+TRANSPARENT at both ends (bklit's per-series line gradient), unlabeled; endpoint labels were bare
+dollars. Now: solid ink line recolored post-render, labeled on-chart "$377/sq ft — this home now"
+(`average_label` through spec-to-image → new `averageLabel` bridge opt; geometry from
+`averageLinePath` — ComposedChart's Line has NO visx-linepath class, probed live), endpoint labels
+carry "/sq ft", title "Price per sq ft — nearby homes this size".
+ALSO: the chart key's content stamp now hashes the RENDERED PNG, not the spec (`{hash}` token in
+`chartSpecToEmailImage`) — a renderer change redraws the same spec onto the same key, the third
+stale-immutable-cache vector in one night; spec hashing could not see it.
+Two silent label misses caught only by LOOKING at renders 2 and 3 (scrape keyed on a class the
+composed line lacks; then the recolor ran before the scrape that keyed on the gradient it removed).
+Evidence: 45/45 recipe tests, 9/9 bridge label tests, 3/3 dispatch tests, 7/7 acceptance, tsc
+clean, final PNG verified by eye. Capture refreshed. NOT pushed — awaiting operator word.
+
 ## 2026-08-09 (Fable 5) — Hermes cleanup: 4 hallucinated docs deleted, agent updated + upgraded
 
 Operator pasted Hermes's (local Ollama agent) roadmap pitch and asked if Hermes is better than

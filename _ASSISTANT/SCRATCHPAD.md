@@ -1,4 +1,36 @@
-## 2026-08-09 (Sonnet 5) — OPERATOR: "who said you can fucking fan out???????????????????" — dispatched Agent tool without asking
+## 2026-08-09 (Fable 5) — OPERATOR: "HOW DO WE TRAIN YOUR MEMORY TO BE MORE REAL ESTATE SMART" + "UPDATE WHERE THE NEW PLAYBOOK IS... GET CLAUDE BETTER ORGANIZED. THIS SUCKS"
+Two asks: (1) memory should carry real-estate DOMAIN judgment (the $173–$421/sq-ft comp fiasco is
+the trigger — a session that knew comps must be size-banded and same-type would never have shipped
+it), not just process rules; (2) the references to the email map were stale — CLAUDE.md's ★ Emails
+row still crowned `emails.md` while `email-build-playbook.md` is the decreed ONE FILE, and the
+playbook's own §0.4 registry table contradicted its own sections (just-sold/back-on-market marked
+TO BE WALKED while their sections said WALKED 08/06). Fixed this session: playbook table trued to
+the 9 render-*.mts scripts (8 walked, §2.6–2.7 built-in-code/sections-OWED, 7 unwalked), CLAUDE.md
+row repointed, memory MEMORY.md + email-assembly-line memory refreshed, new real-estate domain-rules
+memory started. The domain-rules memory is the standing answer to (1): every domain error costs a
+line there, same session — that IS how the memory gets smarter.
+
+## 2026-08-09 (Fable 5) — OPERATOR: price-reduced bklit chart FAILED THE LOOK — 3 defects in one screenshot
+Verbatim: *"$173 → $421 what the fuck is this? WE ARE COMPARING COMPS — COMPS ARE NOT 421 AND 173
+DOLLARS"* + *"ARE YOU IN THE FUCKING PLAYBOOK? HOW ARE FONTS AND SPACING DIFFERENT?"* + *"WHAT THE
+FUCK IS THE CHART ABOUT?"* (screenshot 215622). The three defects: (1) the comp set is NOT
+size-banded — a $173–$421/sq-ft spread on a 2,123 sq ft subject means shack-sized rows are in the
+comp set (this is the ALREADY-OPEN defect check "Comp set has no SIZE-BAND guard", shipped anyway);
+(2) the bklit composed bridge renders its own typography, not the email's type scale — title/labels
+visibly a different face+size than the doc (playbook chart-typography rule violated by the NEW
+chart the same night the dot-plot was fixed for the same thing); (3) the chart doesn't SAY what it
+is — 12 anonymous bars, no units on the $ labels, reference line nearly invisible and unlabeled.
+"RENDER IT AND LOOK" was done but the look was accepted uncritically. Fix all three before any
+"done" word.
+RESOLVED same session (08/09/2026): (1) band ARMED — the ranker existed all along
+(comp-rank.ts ±25%), price-reduced just never passed subjectSqft; banded set clusters
+$121–$159/sq ft. (2) bridge on the scale — 16/500 title, 12/500 tabular values, 12 small, both
+bklit fns. (3) chart self-describing — solid ink line labeled "$377/sq ft — this home now",
+endpoint labels carry "/sq ft". Plus the THIRD stale-cache vector closed: `{hash}` in the chart
+key now = sha1 of the rendered PNG (renderer changes move the key; a spec hash could not see
+them). Two follow-on renders had to be looked at to catch (a) the label scrape keying on a class
+the composed Line doesn't have, then (b) the recolor running before the scrape that keyed on the
+gradient it removed. Verified by eye on the 4th render.
 Asked to audit the sentence-bank design proposal, I launched the deliverable-builder agent (Agent
 tool, 12-point research brief, 206k subagent tokens, ~10 min) without asking first. This is exactly
 [[feedback_ask-before-subagent-waves]] — a rule already on the books from a prior session, violated
@@ -28,6 +60,15 @@ BUILDER CAN FILL IN FOR EACH DIFFERENT BUILD"* — i.e. per-recipe approved-sent
 typed slots (number/date/address/community/open-house-time), words fixed in code, facts filled per
 build. Direction, not yet built. Related priors: market-pulse's coded-sentence + digit-free
 connective pattern, deliverable-distiller's prose-recipe/skeleton concept, voice-presets/voice-guard.
+
+## 2026-08-09 (Fable 5) — Hermes market-watch run 3: FULL PASS → standing cron wired
+All 3 steps delivered: verbatim read, 4 real cited stories off the RSS, honest disagree call.
+One editorial miss (kept a PR Newswire promo) → prompt hardened: wire services named explicitly
+as skip. STANDING JOB CREATED: `swfl-morning-market-watch` (id 4b639fe053a5), weekdays 7:30am,
+delivers to Telegram, scheduler heartbeat verified live. Prompt file:
+scratchpad/hermes-market-watch-prompt.txt (session scratchpad). Remove: `hermes cron rm 4b639fe053a5`.
+Proven pattern for ALL Hermes prompts: fetch-a-URL-and-quote contracts; never parse/search
+capability contracts.
 
 ## 2026-08-09 (Fable 5) — Hermes market-watch run 2: Step 1 PERFECT (verbatim quotes, honest blanks), Step 2 dead
 Web search returned [no sources reachable]: Hermes's search chain (firecrawl→…→brave-free→ddgs)

@@ -19,6 +19,7 @@ import { Line } from "./line";
 import { SeriesBar } from "./series-bar";
 import { renderBklitStaticSvg } from "./render-static";
 import { formatDisplayDate } from "@/lib/format-date";
+import { TABULAR } from "@/lib/charts/format";
 
 const AXIS_TEXT = "#6B7280";
 const LABEL_INK = "#1F2937";
@@ -50,6 +51,23 @@ export function lineEndpoints(
   svg: string,
 ): { x0: number; y0: number; x1: number; y1: number } | null {
   const m = svg.match(/class="visx-linepath" d="([^"]+)"/);
+  if (!m) return null;
+  const pairs = [...m[1].matchAll(/(-?[\d.]+),(-?[\d.]+)/g)];
+  if (pairs.length < 2) return null;
+  const f = pairs[0];
+  const l = pairs[pairs.length - 1];
+  return { x0: +f[1], y0: +f[2], x1: +l[1], y1: +l[2] };
+}
+
+/** The composed chart's reference line (plot coords). Unlike the AreaChart's
+ *  line, ComposedChart's `Line` renders a CLASS-LESS `<path>` whose stroke is a
+ *  per-series gradient (`url(#line-gradient-<dataKey>-…)`) — probed 08/09/2026
+ *  when the visx-linepath scrape silently drew no label. Keyed to the `average`
+ *  series' own gradient id so a second Line could never be misread. */
+export function averageLinePath(
+  svg: string,
+): { x0: number; y0: number; x1: number; y1: number } | null {
+  const m = svg.match(/<path d="([^"]+)"[^>]*stroke="url\(#line-gradient-average-/);
   if (!m) return null;
   const pairs = [...m[1].matchAll(/(-?[\d.]+),(-?[\d.]+)/g)];
   if (pairs.length < 2) return null;
@@ -106,6 +124,12 @@ export interface BklitTrendOpts {
    *  drift), the chart renders UNLABELED rather than mislabeled — showcase
    *  callers assert label presence and fail loud (databrief-chart.mts). */
   valueLabels?: "endpoints" | "all";
+  /** Composed only: text drawn ON the reference line (left end, dark ink), so the
+   *  line identifies itself — e.g. "$377/sq ft — this home now". Looked at
+   *  08/09/2026: an unlabeled grey line was both invisible and unexplained. The
+   *  caller composes it from already-sourced values; this file never invents it.
+   *  Same scrape-miss posture as valueLabels: no geometry → no label. */
+  averageLabel?: string;
 }
 
 /** A time-series trend as a real bklit `AreaChart` (gradient fill + line),
@@ -144,10 +168,14 @@ export async function bklitTrendSvg(
   const captionParts: string[] = [];
   if (opts.source) captionParts.push(opts.source);
   if (opts.asOf) captionParts.push(`as of ${formatDisplayDate(opts.asOf)}`);
+  // ON THE EMAIL'S OWN TYPE SCALE (08/09/2026 — operator, on the rendered chart:
+  // "DIFFERENT FONTS??? SIZES???"): title 16/500, values 12/500 tabular, small
+  // text 12. The bridge's original 15-bold/11-bold/10 chrome existed on no step
+  // of the seven-size scale — same defect, same day, same fix as dot-plot.ts.
   const chrome = [
-    `<text x="16" y="26" font-family="Arial" font-size="15" font-weight="bold" fill="#1F2937">${escXml(opts.title)}</text>`,
+    `<text x="16" y="26" font-family="Arial" font-size="16" font-weight="500" fill="#1F2937">${escXml(opts.title)}</text>`,
     captionParts.length
-      ? `<text x="16" y="${H - 10}" font-family="Arial" font-size="10" fill="${AXIS_TEXT}">${escXml(captionParts.join(" · "))}</text>`
+      ? `<text x="16" y="${H - 10}" font-family="Arial" font-size="12" fill="${AXIS_TEXT}">${escXml(captionParts.join(" · "))}</text>`
       : "",
   ].join("");
 
@@ -170,10 +198,10 @@ export async function bklitTrendSvg(
       labels = [
         `<circle cx="${x0}" cy="${y0}" r="4" fill="${opts.accent}" stroke="#ffffff" stroke-width="2"/>`,
         `<circle cx="${x1}" cy="${y1}" r="4" fill="${opts.accent}" stroke="#ffffff" stroke-width="2"/>`,
-        `<text x="${x0 + 8}" y="${Math.max(y0text, 44)}" font-family="Arial" font-size="12" font-weight="bold" fill="${LABEL_INK}">${escXml(first.display ?? defaultValueDisplay(first.value))}</text>`,
-        `<text x="${x1 - 8}" y="${Math.max(y1text, 44)}" font-family="Arial" font-size="12" font-weight="bold" fill="${LABEL_INK}" text-anchor="end">${escXml(last.display ?? defaultValueDisplay(last.value))}</text>`,
-        `<text x="${x0}" y="${H - 24}" font-family="Arial" font-size="10" fill="${AXIS_TEXT}">${escXml(axisLabel(first.label))}</text>`,
-        `<text x="${x1}" y="${H - 24}" font-family="Arial" font-size="10" fill="${AXIS_TEXT}" text-anchor="end">${escXml(axisLabel(last.label))}</text>`,
+        `<text x="${x0 + 8}" y="${Math.max(y0text, 44)}" font-family="Arial" ${TABULAR} font-size="12" font-weight="500" fill="${LABEL_INK}">${escXml(first.display ?? defaultValueDisplay(first.value))}</text>`,
+        `<text x="${x1 - 8}" y="${Math.max(y1text, 44)}" font-family="Arial" ${TABULAR} font-size="12" font-weight="500" fill="${LABEL_INK}" text-anchor="end">${escXml(last.display ?? defaultValueDisplay(last.value))}</text>`,
+        `<text x="${x0}" y="${H - 24}" font-family="Arial" font-size="12" fill="${AXIS_TEXT}">${escXml(axisLabel(first.label))}</text>`,
+        `<text x="${x1}" y="${H - 24}" font-family="Arial" font-size="12" fill="${AXIS_TEXT}" text-anchor="end">${escXml(axisLabel(last.label))}</text>`,
       ].join("");
     }
   }
@@ -219,24 +247,39 @@ export async function bklitComposedSvg(
   // shown — only the real (label, value) pairs plot as bar height + line.
   const data = points.map((p, i) => ({ date: new Date(2000, 0, i + 1), value: p.value, average }));
 
-  const svg = await renderBklitStaticSvg(
+  let svg = await renderBklitStaticSvg(
     <ComposedChart data={data} staticSize={{ width: W, height: H }} xDataKey="date">
       <Grid horizontal stroke={opts.gridStroke ?? "#EAECEF"} />
       <SeriesBar dataKey="value" fill={opts.accent} />
-      <Line dataKey="average" stroke={AXIS_TEXT} strokeWidth={2} />
+      {/* Dark ink, not axis grey (looked at 08/09/2026): a 2px #6B7280 line over
+          teal bars was nearly invisible — and the reference line IS the argument. */}
+      <Line dataKey="average" stroke={LABEL_INK} strokeWidth={2.5} />
     </ComposedChart>,
   );
   if (!svg) return null;
 
+  // Scrape the reference line's geometry BEFORE recoloring it — averageLinePath
+  // keys on the gradient stroke the next line removes (the first cut ran these
+  // in the other order and the label silently never drew — looked at 08/09/2026).
+  const avgEp = averageLinePath(svg);
+
+  // SOLID reference line (looked at 08/09/2026): bklit strokes a Line with a
+  // per-series gradient whose ends fade to opacity 0 — right for a decorative
+  // trend, wrong for a reference line, which read as a smear. Swap the
+  // `average` series' gradient stroke for flat ink; the orphaned <defs>
+  // gradient is inert.
+  svg = svg.replace(/stroke="url\(#line-gradient-average-[^)]*\)"/, `stroke="${LABEL_INK}"`);
+
   // Same chrome pattern as bklitTrendSvg — see its comment for why this is
-  // plain <text> outside the bklit subtree rather than bklit's own axis text.
+  // plain <text> outside the bklit subtree rather than bklit's own axis text,
+  // and its type-scale comment for why 16/500 · 12/500 tabular · 12.
   const captionParts: string[] = [];
   if (opts.source) captionParts.push(opts.source);
   if (opts.asOf) captionParts.push(`as of ${formatDisplayDate(opts.asOf)}`);
   const chrome = [
-    `<text x="16" y="26" font-family="Arial" font-size="15" font-weight="bold" fill="#1F2937">${escXml(opts.title)}</text>`,
+    `<text x="16" y="26" font-family="Arial" font-size="16" font-weight="500" fill="#1F2937">${escXml(opts.title)}</text>`,
     captionParts.length
-      ? `<text x="16" y="${H - 10}" font-family="Arial" font-size="10" fill="${AXIS_TEXT}">${escXml(captionParts.join(" · "))}</text>`
+      ? `<text x="16" y="${H - 10}" font-family="Arial" font-size="12" fill="${AXIS_TEXT}">${escXml(captionParts.join(" · "))}</text>`
       : "",
   ].join("");
 
@@ -256,12 +299,20 @@ export async function bklitComposedSvg(
           const cx = PLOT_X + r.cx;
           const p = points[i];
           return [
-            `<text x="${cx}" y="${H - 24}" font-family="Arial" font-size="10" fill="${AXIS_TEXT}" text-anchor="middle">${escXml(axisLabel(p.label))}</text>`,
-            `<text x="${cx}" y="${Math.max(PLOT_Y + r.top - 6, 44)}" font-family="Arial" font-size="11" font-weight="bold" fill="${LABEL_INK}" text-anchor="middle">${escXml(p.display ?? defaultValueDisplay(p.value))}</text>`,
+            `<text x="${cx}" y="${H - 24}" font-family="Arial" font-size="12" fill="${AXIS_TEXT}" text-anchor="middle">${escXml(axisLabel(p.label))}</text>`,
+            `<text x="${cx}" y="${Math.max(PLOT_Y + r.top - 6, 44)}" font-family="Arial" ${TABULAR} font-size="12" font-weight="500" fill="${LABEL_INK}" text-anchor="middle">${escXml(p.display ?? defaultValueDisplay(p.value))}</text>`,
           ].join("");
         })
         .join("");
     }
+  }
+
+  // The reference line names itself — dark ink at its LEFT end, where ascending
+  // bars are shortest so the text sits over open plot, not over a bar. Geometry
+  // is `avgEp`, scraped above pre-recolor (the visx-linepath class exists only
+  // on the AreaChart's line, not here); a scrape miss draws nothing.
+  if (opts.averageLabel && avgEp) {
+    labels += `<text x="${PLOT_X + avgEp.x0}" y="${Math.max(PLOT_Y + avgEp.y0 - 10, 44)}" font-family="Arial" ${TABULAR} font-size="12" font-weight="500" fill="${LABEL_INK}">${escXml(opts.averageLabel)}</text>`;
   }
 
   return svg

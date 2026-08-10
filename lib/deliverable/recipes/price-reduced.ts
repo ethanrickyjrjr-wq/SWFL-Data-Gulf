@@ -68,7 +68,6 @@
 //   new price means": you can now buy THIS house — with its real, cited features — at
 //   this price. So the paragraph describes the HOUSE. The numbers stay in the grid.
 
-import { createHash } from "node:crypto";
 import { buildLifecycleEmail } from "@/lib/email/lifecycle-chrome";
 import { listingButtonUrl } from "@/lib/listings/listing-url";
 import { listingSpecs, spec, specFootnote } from "@/lib/email/listing-flyer";
@@ -180,7 +179,12 @@ export function priceVsAreaDotSpec(facts: ListingFacts, comps: RenderComp[]): Ch
   // with no numbers on it sucks (decree 08/02/2026).
   return {
     frameId: "composed-bar-line",
-    title: `Nearby comps' $/sq ft — the line is this home's new ${usd(subjectPpsf)}`,
+    // The title says what the BARS are; the line carries its own on-chart label
+    // (`average_label` below), so neither leans on the other. "this size" is true by
+    // construction: the caller arms compsForAddress's ±25% living-area band with the
+    // subject's own sqft, and this spec cannot exist without that sqft (subjectPpsf
+    // guard above) — so a plotted set is always a size-banded set.
+    title: "Price per sq ft — nearby homes this size",
     columns: ["Comparable", "$/Sq Ft"],
     rows: withPpsf.map((x) => [x.c.addressLine, Math.round(x.ppsf)]) as (string | number)[][],
     value_format: "usd",
@@ -191,13 +195,18 @@ export function priceVsAreaDotSpec(facts: ListingFacts, comps: RenderComp[]): Ch
       // Category labels are EMPTY on purpose (looked at 08/09/2026): the first render
       // used house numbers, and "1720 … 1801" under a chart reads as YEARS. Which comp
       // is which is the table's job (rows above carry full address lines); the chart's
-      // job is the shape. `display` puts the DOLLAR form on the endpoint labels.
+      // job is the shape. `display` puts the DOLLAR form on the endpoint labels — WITH
+      // its unit (looked at again 08/09/2026: a bare "$421" over a house chart reads as
+      // a price, and the operator read it exactly that way).
       items: withPpsf.map((x) => ({
         label: "",
         value: Math.round(x.ppsf),
-        display: usd(Math.round(x.ppsf)),
+        display: `${usd(Math.round(x.ppsf))}/sq ft`,
       })),
       average: subjectPpsf,
+      // Drawn ON the line by the bridge, dark ink — the reference line identifies
+      // itself instead of asking the reader to find the title's clause about it.
+      average_label: `${usd(subjectPpsf)}/sq ft — this home now`,
       value_labels: "endpoints",
     },
   };
@@ -448,24 +457,34 @@ export async function buildPriceReduced(ctx: RecipeBuildContext): Promise<EmailD
   // the comps' median $/sqft) come from the same perSqft/median math over the same
   // sourced comps, so they can never disagree by more than the comps themselves do.
   if (kicker && facts.address) {
-    const result = await compsForAddress(facts.address, { topN: COMP_POOL }).catch(() => null);
+    // SUBJECT SHAPE ARMS THE SIZE BAND (looked at 08/09/2026 — operator, on the render:
+    // "COMPS ARE NOT 421 AND 173 DOLLARS"). Without `subjectSqft`, compsForAddress falls
+    // back to a blind vendor slice, and this chart plotted a $173–$421/sq ft spread
+    // against a 2,123 sq ft subject — shack-sized rows "compared" to a real house, the
+    // exact defect `comps_no_size_band_guard` names. The ranker (comp-rank.ts, ±25%
+    // living-area band, same-ZIP first) was already built and ratified; this call just
+    // never armed it. The chart's own gate (subjectPpsf requires facts.sqft) means a
+    // chart can only exist when the band could arm — an unbanded set can never plot.
+    const result = await compsForAddress(facts.address, {
+      topN: COMP_POOL,
+      subjectSqft: money(facts.sqft) ?? null,
+      subjectBeds: money(facts.beds) ?? null,
+      subjectBaths: money(facts.baths) ?? null,
+    }).catch(() => null);
     const spec = priceVsAreaDotSpec(facts, result?.comps ?? []);
     if (spec) {
       const accent = doc.globalStyle.accentColor || "#B98F45";
       const tint = accent.replace(/[^0-9a-fA-F]/g, "").slice(0, 6) || "x";
       // The subject discriminator (final-review fix, 07/16/2026) — see streetSlug's own
       // doc comment for the collision this closes.
-      // THE KEY IS CONTENT-STAMPED (08/09/2026). email-media is cached immutable, and
-      // chart-image.ts's cacheControl comment PROMISES "changed content lands on a NEW
-      // key" — but this key (zip+slug+date+tint) carried no content term, so a same-day
-      // chart change kept serving the previous bytes forever: first the dot-plot after
-      // the bklit composed redesign, then the composed chart with its old labels after
-      // the label fix. Hashing the full spec closes the class, not one instance; same
-      // house + same spec still upserts one stable key (deterministic — no Date.now()).
-      const specHash = createHash("sha1").update(JSON.stringify(spec)).digest("hex").slice(0, 8);
+      // THE KEY IS CONTENT-STAMPED (08/09/2026). email-media is cached immutable, so
+      // `{hash}` becomes the sha1 of the RENDERED PNG inside chartSpecToEmailImage —
+      // not a spec hash. A spec hash was the first fix and missed a renderer change
+      // the same night (same spec, new drawing, same key, stale edge cache forever).
+      // Same house + same pixels still lands one stable key (deterministic).
       const key =
         `email-charts/price-reduced-${facts.zip ?? "swfl"}-` +
-        `${streetSlug(facts.address)}-${spec.asOf}-${tint}-${specHash}.png`;
+        `${streetSlug(facts.address)}-${spec.asOf}-${tint}-{hash}.png`;
       // NO block caption — the PNG already bakes in the title, source and as-of date; a
       // text caption would duplicate it (mirrors market-comps.ts's own chart fill).
       const image = await chartSpecToEmailImage(

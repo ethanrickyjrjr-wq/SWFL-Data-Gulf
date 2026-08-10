@@ -595,13 +595,17 @@ test("priceVsAreaDotSpec plots each comp's $/sqft as a bklit bar, the subject as
   expect(spec).not.toBeNull();
   expect(spec!.frameId).toBe("composed-bar-line");
   const o = spec!.options as {
-    items: { label: string; value: number }[];
+    items: { label: string; value: number; display?: string }[];
     average: number;
+    average_label?: string;
     value_labels?: string;
   };
   expect(o.items.map((i) => i.value)).toEqual([220, 230]); // each comp, ascending
   expect(o.average).toBe(200); // 400000/2000 — the subject line
   expect(o.value_labels).toBe("endpoints"); // numbers ON the chart (decree 08/02/2026)
+  // Every on-chart dollar carries its UNIT (looked at 08/09/2026: a bare "$421"
+  // over a house chart reads as a price — the operator read it exactly that way).
+  expect(o.items.map((i) => i.display)).toEqual(["$220/sq ft", "$230/sq ft"]);
 });
 
 test("priceVsAreaDotSpec filters out vacant-lot comps (no beds/sqft) before computing the median", () => {
@@ -619,17 +623,19 @@ test("priceVsAreaDotSpec filters out vacant-lot comps (no beds/sqft) before comp
   ]);
 });
 
-// The subject's own figure rides the TITLE, so the number is on the artifact even
-// before the bridge draws its endpoint labels (the dot-plot's old legend-label fix,
-// carried forward onto the composed frame in the 08/09/2026 rebuild).
-test("priceVsAreaDotSpec puts the subject's formatted $/sqft in the chart title", () => {
+// The subject's own figure rides the LINE'S OWN LABEL (`average_label`, drawn on the
+// chart by the bridge), with its unit and an identity — the reference line names
+// itself instead of leaning on a title clause. The title stays about the BARS.
+test("priceVsAreaDotSpec labels the reference line with the subject's $/sqft, unit and identity", () => {
   const facts = {
     address: "1 Main St, Fort Myers, FL 33905",
     price: "$400,000",
     sqft: "2000",
   } as never;
   const spec = priceVsAreaDotSpec(facts, [comp(440000, 2000), comp(460000, 2000)]); // 220, 230 $/sqft
-  expect(spec!.title).toContain("$200"); // 400,000 / 2,000
+  const o = spec!.options as { average_label?: string };
+  expect(o.average_label).toBe("$200/sq ft — this home now"); // 400,000 / 2,000
+  expect(spec!.title).toBe("Price per sq ft — nearby homes this size");
 });
 
 // ── FINAL-REVIEW FIX 5: the floor counts USABLE $/sqft values, not comps with beds/sqft ──
