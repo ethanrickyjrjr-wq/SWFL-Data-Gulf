@@ -18,6 +18,15 @@ OFF THE WEBSITE AND HAVE NO PATH TO THEM." Screenshot 235833 = the CampaignRows 
 rows, duplicating the registry-built NewEmails section directly above it. The ONE place = the
 recipe registry's re-baked captures (NewEmails / public/new-emails/*.html). Old email surfaces and
 their stale captures must be unreachable from the site — not just de-emphasized.
+RESOLVED 2026-08-10 (pending push) — every rendering surface of the old captures removed: /showcase
+CampaignRows + seed-layout gallery sections; BriefcasePanel "See it built" rail + ?showcase= overlay;
+AskAiDock example rail; EmptyLaunchpad finished-campaign cards; email-lab hero filmstrip; the
+Examples accordion in BOTH labs. 10 files deleted (CampaignRows, SeedGallery, ExamplesAccordion,
+ShowcaseCard, ShowcaseOverlay, SocialBoard, campaign-order.ts+test, overlay-logic.ts+test).
+SHOWCASES registry kept ONLY as campaign metadata for lib/campaigns.ts quick-start buttons (marked
+HISTORICAL in code). Residual: the raw files under public/showcase/** still exist unlinked (direct
+URL only — capture scripts/asset tests reference them); NewEmails.tsx comment update owed (file
+claimed by a parallel session). bunx next build green; 61 tests pass 0 fail.
 
 ## 2026-08-10 (Fable 5) — OPERATOR: showcase pop-up click = homepage in a new tab, EVERY email
 Verbatim: "WHY IF I CLICK THE POP UP ON WEBPAGE SHOWCASE IT BRINGS ME BACK TO THE HOMEPAGE IN A
