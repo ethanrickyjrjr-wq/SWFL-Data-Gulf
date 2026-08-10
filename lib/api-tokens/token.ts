@@ -17,23 +17,54 @@ export function hashToken(raw: string): string {
   return createHash("sha256").update(raw).digest("hex");
 }
 
-/** `Authorization: Bearer sdg_…` → the owning user_id, or null. */
-export async function resolveTokenUser(
+// Shared row-fetch: parses the Bearer header, looks up user_api_tokens by
+// hash, stamps last_used_at. `scope` is selected too (agent-driver, Task 2)
+// even though the generated Database type doesn't know the column yet
+// (migration 20260810_agent_driver.sql added it; types weren't regenerated) —
+// cast at the boundary rather than duplicate this whole lookup a second time
+// in lib/api-tokens/scopes.ts (RULE 0.5: don't re-derive what's already here).
+async function findTokenRow(
   admin: SupabaseClient<Database>,
   authHeader: string | null,
-): Promise<string | null> {
+): Promise<{ token_hash: string; user_id: string; scope: string | null } | null> {
   if (!authHeader?.startsWith("Bearer ")) return null;
   const raw = authHeader.slice("Bearer ".length);
   if (!raw.startsWith(PREFIX)) return null;
   const { data } = await admin
     .from("user_api_tokens")
-    .select("token_hash, user_id")
+    .select("token_hash, user_id, scope")
     .eq("token_hash", hashToken(raw))
     .maybeSingle();
-  if (!data) return null;
+  const row = data as { token_hash: string; user_id: string; scope: string | null } | null;
+  if (!row) return null;
   await admin
     .from("user_api_tokens")
     .update({ last_used_at: new Date().toISOString() })
-    .eq("token_hash", data.token_hash);
-  return data.user_id;
+    .eq("token_hash", row.token_hash);
+  return row;
+}
+
+/** `Authorization: Bearer sdg_…` → the owning user_id, or null. */
+export async function resolveTokenUser(
+  admin: SupabaseClient<Database>,
+  authHeader: string | null,
+): Promise<string | null> {
+  const row = await findTokenRow(admin, authHeader);
+  return row?.user_id ?? null;
+}
+
+/**
+ * `Authorization: Bearer sdg_…` → { userId, scope }, or null.
+ * `scope` is NULL for legacy (pre-agent-driver) tokens — see
+ * migrations/20260810_agent_driver.sql. Added for lib/api-tokens/scopes.ts
+ * (requireScope) which needs the scope column resolveTokenUser doesn't
+ * surface.
+ */
+export async function resolveTokenUserWithScope(
+  admin: SupabaseClient<Database>,
+  authHeader: string | null,
+): Promise<{ userId: string; scope: string | null } | null> {
+  const row = await findTokenRow(admin, authHeader);
+  if (!row) return null;
+  return { userId: row.user_id, scope: row.scope };
 }
