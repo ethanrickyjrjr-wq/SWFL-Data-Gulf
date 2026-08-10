@@ -2,7 +2,7 @@
 
 import { useEffect, useRef } from "react";
 import { createPortal } from "react-dom";
-import { LoginForm } from "@/app/login/login-form";
+import { AuthPanel } from "@/components/auth/AuthPanel";
 
 interface Props {
   open: boolean;
@@ -60,13 +60,9 @@ export function LoginModal({ open, onClose, onSignedIn, title, blurb }: Props) {
             />
           </svg>
         </button>
-        <h2 className="text-2xl font-semibold tracking-tight text-black dark:text-zinc-50">
-          {title ?? "Sign in"}
-        </h2>
-        <p className="mt-2 text-sm leading-6 text-zinc-600 dark:text-zinc-400">
-          {blurb ?? "Enter your email. We’ll send you a sign-in code."}
-        </p>
-        <LoginForm next="/project" onSignedIn={onSignedIn} />
+        {/* All card copy (sign-in ⇆ create-account framing) lives in AuthPanel —
+            THE auth root. This modal owns only the overlay chrome. */}
+        <AuthPanel next="/project" onSignedIn={onSignedIn} title={title} blurb={blurb} />
       </div>
     </div>,
     document.body,

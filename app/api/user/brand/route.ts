@@ -137,6 +137,9 @@ export async function GET(_req: NextRequest) {
   return NextResponse.json({
     ...profile,
     color_palettes: sanitizePalettes((profile as Record<string, unknown>).color_palettes),
+    // Read-only: the auth email, so the editor can seed a blank contact_email
+    // (first-login pre-fill). Never persisted by PATCH (unknown key, ignored).
+    account_email: user.email ?? null,
   });
 }
 

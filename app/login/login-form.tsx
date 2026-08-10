@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { createClient } from "@/utils/supabase/client";
-import { isSafeReturnPath } from "@/lib/safe-return";
+import { brandProfileStarted, postLoginDestination } from "@/lib/auth/post-login-route";
 import { suggestEmailFix } from "@/lib/email/typo-suggest";
 import { ENABLED_LOGIN_PROVIDERS, type LoginProviderSlug } from "@/lib/auth/social-login";
 
@@ -25,12 +25,16 @@ type Step = "email" | "code";
 export function LoginForm({
   next,
   onSignedIn,
+  emailStepFooter,
 }: {
   next: string;
   /** Given → verify does NOT navigate; the caller keeps the page (and its unsaved
    *  work) and finishes the job in place. Used by the in-lab brand save, which must
    *  not hard-reload the canvas out from under a half-built email. */
   onSignedIn?: () => void | Promise<void>;
+  /** Rendered under the email step only (AuthPanel's sign-in ⇆ create toggle).
+   *  Hidden on the code step — switching framings mid-verify is noise. */
+  emailStepFooter?: React.ReactNode;
 }) {
   const [step, setStep] = useState<Step>("email");
   const [email, setEmail] = useState("");
@@ -126,9 +130,23 @@ export function LoginForm({
       setPending(false);
       return;
     }
+    // First login (no brand value saved yet) lands on Brand fill-out with the
+    // email pre-filled; anyone else honors `next`. Keyed on PROFILE STATE, not on
+    // which framing (Sign in / Create account) was clicked — the wrong door
+    // self-heals. Any fetch failure falls through to `next`, never strands.
+    let profileStarted: boolean | "unknown" = "unknown";
+    try {
+      const res = await fetch("/api/user/brand");
+      if (res.ok) profileStarted = brandProfileStarted(await res.json());
+    } catch {
+      // unknown → normal destination
+    }
     // Hard navigation so the server re-reads the new session cookie. Same-origin
-    // guard (rejects `//evil.com`) — never trust `next` as a bare startsWith("/").
-    window.location.assign(isSafeReturnPath(next) ? next : "/");
+    // guard (rejects `//evil.com`) lives inside postLoginDestination — never trust
+    // `next` as a bare startsWith("/").
+    window.location.assign(
+      postLoginDestination({ stayInPlace: false, profileStarted, next }) ?? "/",
+    );
   }
 
   const inputBase =
@@ -271,6 +289,7 @@ export function LoginForm({
           <p className="text-sm leading-6 text-red-600 dark:text-red-400">{errorMessage}</p>
         )}
       </form>
+      {emailStepFooter}
     </div>
   );
 }

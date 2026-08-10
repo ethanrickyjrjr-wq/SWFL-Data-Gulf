@@ -26,7 +26,14 @@ export function AccountBrandEditor({ variant }: { variant: "modal" | "page" }) {
         if (profile) {
           const next: Record<string, string> = {};
           for (const [k, v] of Object.entries(profile)) {
+            if (k === "account_email") continue; // read-only auth email, not a brand field
             if (typeof v === "string" && v) next[k] = v;
+          }
+          // First-login pre-fill: seed a blank Email field with the address the
+          // account was created with. A visible default in the input — persisted
+          // only when the user actually saves.
+          if (!next.contact_email && typeof profile.account_email === "string") {
+            next.contact_email = profile.account_email;
           }
           setBranding(next);
           setPalettes(sanitizePalettes(profile.color_palettes));

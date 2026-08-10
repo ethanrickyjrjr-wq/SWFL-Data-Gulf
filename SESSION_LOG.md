@@ -1,3 +1,24 @@
+## 2026-08-10 (Fable 5) — auth create-account framing BUILT: AuthPanel root + first-login → Brand with email pre-filled
+
+Operator: "make a create an account button at the bottom of log in… does just putting in an email
+create an account? can first log in lead to Brand fill out with email already filled in?… should be
+a root so this updates every page." Probed first: email+code ALREADY creates the account
+(`signInWithOtp shouldCreateUser:true`); the header button is a client modal (why Hermes's outside
+audit found no href). Live-crawled Substack/Dropbox/GitHub (filed:
+`_RESEARCH/competitor-and-strategy/2026-08-10-auth-screen-create-account-patterns.md` — INDEX line
+BLOCKED by another session's claim on INDEX.md, background wait armed): passwordless products split
+the COPY, never the flow. Built per spec `docs/superpowers/specs/2026-08-10-auth-create-account-design.md`:
+(1) `components/auth/AuthPanel.tsx` — THE auth-card root (copy map + sign-in ⇆ create toggle,
+"free, no credit card"), now rendered by BOTH `/login` and `LoginModal` — one edit updates every
+page; explicit title/onSignedIn (email-lab) suppresses the toggle. (2) `lib/auth/post-login-route.ts`
+— pure post-verify routing keyed on PROFILE STATE not the clicked door: no brand value saved →
+`/account/brand?welcome=1`, else safe `next`; fetch failure falls through; stay-in-place never
+navigates. 9 bun tests pass (0 fail). (3) Brand GET returns read-only `account_email`; editor seeds
+blank Email field with it; `?welcome=1` renders a one-line welcome strip. `bunx next build` exit 0.
+Hermes's third-button + dropdown suggestions rejected (crawl evidence + locked lab-first funnel).
+Check `auth_create_account_live_verify` open until deployed + eyeballed. NOT pushed — awaiting
+operator confirmation.
+
 ## 2026-08-10 (Fable 5) — RULE 2 §0b gets its COUNTER: STRIKES.md built + backfilled, Gate 15 capture-freshness, fleet-tripwire check opened
 
 Operator: "how does claude know if it is the third time? can we backfill on all these issues?
