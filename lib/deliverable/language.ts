@@ -80,3 +80,44 @@ export function auditBankTemplates(bank: SentenceBank): string[] {
   }
   return violations;
 }
+
+export interface FilledBank {
+  filled: string[];
+  droppedLabels: string[];
+}
+
+/** Render every sentence; a sentence that can't fully fill drops WHOLE and reports the
+ *  labels of its unfilled slots (the canvas instruction text — what the builder sees). */
+export function fillSentences(
+  bank: SentenceBank,
+  values: Record<string, string | undefined>,
+): FilledBank {
+  const filled: string[] = [];
+  const droppedLabels: string[] = [];
+  for (const t of bank.sentences) {
+    const r = renderTemplate(t, values);
+    if (r) filled.push(r);
+    else droppedLabels.push(...t.slots.filter((s) => !values[s.name]?.trim()).map((s) => s.label));
+  }
+  return { filled, droppedLabels };
+}
+
+/** Labels of ESSENTIAL slots with no value — the send gate reads this (manual send
+ *  blocks by name; scheduled sends skip-with-log — spec Decision 2). */
+export function essentialGaps(
+  bank: SentenceBank,
+  values: Record<string, string | undefined>,
+): string[] {
+  const gaps: string[] = [];
+  for (const t of bank.sentences)
+    for (const s of t.slots)
+      if (s.essential && !values[s.name]?.trim() && !gaps.includes(s.label)) gaps.push(s.label);
+  return gaps;
+}
+
+/** Word count for the 50-word floor (emails.md §0.1 — the floor bites harder than the
+ *  ceiling). The floor was previously enforced NOWHERE in the build path (verified
+ *  08/09/2026); the builders log through this, loudly, and never pad. */
+export function bodyWordCount(text: string): number {
+  return text.split(/\s+/).filter(Boolean).length;
+}
