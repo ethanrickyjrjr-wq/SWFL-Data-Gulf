@@ -1,3 +1,15 @@
+## 2026-08-10 (Fable 5) — OPERATOR: just-sold "fixed" but STILL THE SAME on the site
+Verbatim: "we just fixed the just sold email. WHY IS IT STILL THE FUCKING SAME!!!!" ROOT CAUSE:
+the recipe fix landed in code (97724164, just-sold bottom flag + DOM/$-per-sqft cells + sentence
+bank) but `public/new-emails/just-sold-email.html` — the capture the showcase actually serves —
+was NEVER re-rendered (still the 08/07 02:11 bake). Same class as RULE 0.7b / "code fix ≠ live
+until artifact rebuilds." A recipe commit that doesn't re-bake its capture in the same commit is
+an incomplete ship. Fix: re-render just-sold capture now; rule candidate: render script run =
+part of every recipe change.
+RESOLVED 2026-08-10 — re-ran render-just-sold.mts through the real pipe (8/8 assertions, recorded
+$300k close at 330 Shore Dr, $/Sq Ft + DOM cells present), copied into public/new-emails/,
+committed. Goes live on next push+deploy.
+
 ## 2026-08-10 (Fable 5) — OPERATOR: OLD emails OFF the website, NO path to them — ONE place only
 Verbatim: "GET THESE OLD EMAIS OUT OF HERE. CLAUDE CAN NOT FOCUS ON WHERE WE ARE ACTUALLY
 BUILDING. THERE IS ONLY ONE PLACE. CLAUDE IS DUMB SO WE CAN'T CHANGE THESE LATER. JUST GET THEM

@@ -1,3 +1,13 @@
+## 2026-08-10 (Fable 5) — Just-sold showcase capture re-baked: the fix was in code, never in the artifact
+
+Operator: "we just fixed the just sold email. WHY IS IT STILL THE FUCKING SAME!!!!" Root cause: the
+recipe fix (97724164 — bottom complementary flag, DOM + $/sq ft cells, sentence bank) never
+re-rendered `public/new-emails/just-sold-email.html` — the capture /showcase serves was still the
+08/07 02:11 bake (Kellysands prefill case). Re-ran `render-just-sold.mts` through the real pipe:
+8/8 assertions pass, recorded $300,000 close at 330 Shore Dr (the script's canonical showcase
+house), $/Sq Ft + DOM cells in the bytes. Copied into public/new-emails/. Lesson (scratchpad'd):
+a recipe change that doesn't re-bake its capture in the same commit is an incomplete ship.
+
 ## 2026-08-10 (Fable 5) — Distances speak like a person: humanDistance() at the ONE amenity root, every email inherits it
 
 Operator, off "a grocery store 0.57 miles away": "NEED TO MAKE SURE THESE ARE 1/2 MILE OR QUARTER
