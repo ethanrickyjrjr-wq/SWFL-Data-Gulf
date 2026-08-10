@@ -1,3 +1,24 @@
+## 2026-08-09 (Fable 5) — SENTENCE BANKS built end-to-end: engine + first bank (price-reduced) + §2.7 walked + second-order audit fixes
+
+Operator decree: code the allowed words, blanks for the builder to fill. Spec
+`docs/superpowers/specs/2026-08-10-sentence-banks-design.md` (adversarially reviewed — 5 claims
+verified against code, 2 confirmed/2 refined/1 refuted with artifacts) + plan + 7 commits:
+ff647a70/b2c18e3d (engine `lib/deliverable/language.ts` — renderTemplate drop-whole, digit audit,
+fillSentences, essentialGaps, bodyWordCount; 11 tests), 33a87cfc (first bank
+`price-reduced.language.ts` + `language-banks.ts` registry), 9ad62e5b (integration: code prepends
+bank sentences, model additive-only, 50-word floor logged — floor was previously enforced NOWHERE),
+f26bcbb3 (harness assertions 8–10: bank verbatim, move ≤1 mention, no `{{` residue), 435b07f0/
+22ebe07a (spec+plan), 3eaf7bb9 (second-order audit fixes: bank/kicker gate alignment — flag AND
+amount, the one real divergence lane; prompt once/never contradiction superseded by name;
+RecipeKey-typed registry; scaffold-strip vocabulary extended; harness predicates made independent).
+**Acceptance: 10/10 off rendered bytes; both narrator attempts gate-dropped (invented
+waterfront/view) and the bank's 10 words STILL shipped where pre-bank shipped zero — the design
+proving itself live.** §2.7 written into the playbook (9 walked now; bank words pending operator
+reword; §2.6 open-house next — gets the essentialGaps send-gate wiring). 75 tests green, tsc clean,
+merge-tag vendor research filed + indexed. NOT pushed — operator approves pushes. Known-open:
+served captures predate the bank (one carries a narrator meta-leak — operator call on re-capture);
+community sentence untested live.
+
 ## 2026-08-09 (Fable 5) — price-reduced chart: size band ARMED, bklit bridge on the type scale, the line names itself, chart keys stamped with the RENDERED bytes
 
 Operator, on the rendered chart: "$173 → $421… COMPS ARE NOT 421 AND 173 DOLLARS" + "HOW ARE FONTS

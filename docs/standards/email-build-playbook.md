@@ -822,23 +822,28 @@ gaps.**
 
 | Tag | Email | Section |
 |---|---|---|
-| `new-listing` | New Listing | 2.1 |
-| `coming-soon` | Coming Soon | 2.2 |
-| `market-comps` | Market Comps | 2.3 |
-| `under-contract` | Under Contract | 2.4 |
-| `just-sold` | Just Sold | 2.5 — TO BE WALKED |
-| `open-house` | Open House | 2.6 — TO BE WALKED |
-| `price-reduced` | Price Improved | 2.7 — TO BE WALKED |
+| `new-listing` | New Listing | 2.1 — WALKED 08/05/2026 |
+| `coming-soon` | Coming Soon | 2.2 — WALKED |
+| `market-comps` | Market Comps | 2.3 — WALKED |
+| `under-contract` | Under Contract | 2.4 — WALKED |
+| `just-sold` | Just Sold | 2.5 — WALKED 08/06/2026 |
+| `open-house` | Open House | 2.6 — BUILT (code + `render-open-house.mts` live); playbook section OWED |
+| `price-reduced` | Price Improved | 2.7 — WALKED 08/09/2026 (first sentence bank; bank words pending operator reword) |
 | `agent-brand-intro` | Agent Brand Intro | 2.8 — WALKED 08/06/2026 |
 | `agent-launch` | Agent Launch — The Letter | 2.9 — TO BE WALKED |
 | `sphere-weekly` | Weekly Sphere Update | 2.10 — TO BE WALKED |
 | `review-reply` | The REVIEW Reply | 2.11 — TO BE WALKED |
-| `market-pulse` | Monthly Market Pulse | 2.12 |
-| `back-on-market` | Back on the Market | 2.13 — TO BE WALKED |
+| `market-pulse` | Monthly Market Pulse | 2.12 — WALKED 08/06/2026 |
+| `back-on-market` | Back on the Market | 2.13 — WALKED 08/06/2026 |
 | `community-info` | Community Info | 2.14 — TO BE WALKED |
 | `listings-showcase` | Listings Showcase | 2.15 — TO BE WALKED |
 | `listings-digest` | Listings Digest | 2.16 — TO BE WALKED |
 | `default-grid` | Market Email (the catch-all) | 2.17 — TO BE WALKED |
+
+**Live count as of 08/09/2026: 9 sections walked (§2.7 landed with the first sentence bank), 1 more
+built-in-code with its section owed (§2.6), 7 to be walked.** The 9 acceptance scripts under `scripts/email/render-*.mts` are the
+ground truth for what is BUILT; this table is the ground truth for what is WRITTEN. When they
+disagree, a section is owed — do not mark WALKED until the section exists.
 
 `social-pack` and `social-cut` are NOT emails. Different renderer, different contract. They are not
 in this playbook and must never be "fixed" onto email chrome.
@@ -2461,11 +2466,80 @@ sold house's photo would come from; that lane is untouched by this build.
 
 ---
 
-## 2.6 – 2.7 — TO BE WALKED
+## 2.6 OPEN HOUSE — tag `open-house` — BUILT IN CODE, SECTION OWED
 
-Each section gets written when that email is walked with the operator. **Do not pre-fill one from
-memory or by copying an earlier section** — the whole point of the walk is that each email's
-ingredients and sources get decided deliberately, one at a time.
+LIVE in code with its acceptance script (`render-open-house.mts`, rebuilt 08/09/2026: date/time
+signal card, invitation logic, shared narrative adapted for open-house context). **What is owed is
+the WRITTEN WALK — this section.** Do not pre-fill it from memory or by copying an earlier section.
+Note for that walk: open-house date/time is ALWAYS lane-4 (human-typed) — zero open-house columns
+anywhere in the lake, the vendor's own doc examples show its `open_houses` field only `[]`/`null`,
+and `render-open-house.mts` takes date/time as typed arguments (all three lanes checked live
+08/09/2026). Its sentence bank (rollout step 2 of the sentence-banks spec) is where the ESSENTIAL
+slot machinery (`essentialGaps`, built and tested in `lib/deliverable/language.ts`) gets its first
+send-gate wiring.
+
+---
+
+## 2.7 PRICE IMPROVED — tag `price-reduced` — **WALKED 08/09/2026, bank sentences pending operator reword.**
+
+**Spine:** address (lifecycle 7, `resolveSubject`). **Positioning:** sell-side. **Chart policy:**
+one slot, reserved only when a sourced cut exists — the new price's $/sqft as a reference line
+across real nearby comps' bars (bklit composed via `priceVsAreaDotSpec`; size-banded same-type
+comps, email type scale, self-naming reference line — the three 08/09/2026 defects, all fixed in
+`654c6fe7` before this section was written). No cut → no slot; no usable comps → slot dropped.
+
+**The three numbers, and the arithmetic that must hold on screen:** the kicker carries the vendor's
+own `reduced_amount` ("Price cut $65,000"), the hero carries the current ask ($800,000), and the
+strip's muted "Previous" cell carries the ONE derivation — current + cut ($865,000) — footnoted, so
+a reader can check previous − cut = current in their head. `reduced_amount` is the SIZE OF THE CUT,
+never the old price (probed live 07/13/2026; the enforced ledger rides the recipe file). Type cell
+dropped by design — a seventh cell fails `EmailDocSchema` and falls through to the generic author.
+
+**THE SENTENCE BANK (spec `2026-08-10-sentence-banks-design.md` — this email is the FIRST bank).**
+The Voice Card (§1.20) extension for this email, verbatim from
+`lib/deliverable/recipes/price-reduced.language.ts` — **starting set, reword in walk review with
+the operator; reworded sentences replace them in that FILE, same session:**
+
+- "The price on {{street}} just came down." — street: address slot, fills only when the vendor
+  flags a reduction. THE ONE legal mention of the move; the model is forbidden to restate it in
+  any words.
+- "The home sits inside {{community}}." — community slot, fills from the parcel-resolved
+  subdivision (`communityStats.subdivisionName`); drops WHOLE on a miss, never "inside .".
+
+Mechanics: code fills the templates (`fillSentences`) and PREPENDS them; the model never sees bank
+text as rewritable — it only ADDS digit-free connective behind the same claim gate as always, told
+what already opens the paragraph. A sentence with an unfilled slot drops whole (never a literal
+blank — the Mailchimp/HubSpot failure, per the 08/09/2026 vendor-doc pass). Body under 50 words
+logs LOUDLY (`bodyWordCount` — the floor was previously enforced nowhere), never padded, never
+blocked. Research cited in the bank file header (strongest-concepts, sell-side copywriting,
+merge-tag fallback passes).
+
+**What the AI writes:** connective only, additive-only, behind the recipe's prohibition framing
+(no reason for the cut, no seller/market claims, no urgency, no spec recital, no CTA — the framing
+block in `price-reduced.ts` is the authority). Previous price is anchored so its single legal
+mention survives the gate. Two attempts max; both dropped → the bank sentences still ship.
+
+**Buttons:** "Schedule a Showing" → `listingButtonUrl` ladder; no real listing page → NO
+destination, never our homepage (§1.8).
+
+**Acceptance evidence (08/09/2026, `render-price-reduced.mts` on 3113 SW 18th Ave, Cape Coral):**
+**10 of 10 assertions PASS** off the rendered bytes — street line, kicker, on-screen arithmetic,
+no Type cell, no invented reason, CTA rule, body-never-silently-empty, **bank sentence verbatim,
+move stated at most once, no `{{` residue**. Metered calls: 2 (both narrator attempts
+gate-dropped — invented "waterfront"/"view" on a no-remarks house) — and the body STILL shipped
+the bank's 10 words where the pre-bank build shipped zero. That run is the sentence-bank design
+proving itself: the gate can kill the model's prose without killing the paragraph.
+
+**Known gaps:** on no-remarks houses the connective is frequently gate-dropped, so the body runs
+well under the 50-word floor (logged, honest, thin) — the fix lane is a bigger walked bank, not a
+lower gate. The community sentence has never rendered live (the acceptance house resolves no
+subdivision) and MAY double-state the community with the narrator's settled neighborhood line —
+suspected, untested; check on the first community-resolving walk run. The two SERVED captures
+(`public/new-emails/price-reduced-email.html`, `public/showcase/listing-to-close/live/07-*.html`)
+predate the bank — and the new-emails one carries a live narrator meta-narration leak ("Nothing. It
+may be shorter than you want…") — operator call on when to re-capture (the fresh bank-era capture
+is honest but thin at 10 words). Bank register: the §1.20 conflict (plain-note vs designed chrome)
+stands unresolved here too — flagged, not fixed.
 
 ---
 
