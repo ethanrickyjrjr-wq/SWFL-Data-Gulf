@@ -141,6 +141,45 @@ describe("the five falsehoods that actually shipped", () => {
     ).toEqual([]);
   });
 
+  it("does NOT eat a DIGIT count the seller's own description asserts", () => {
+    // Found live 08/09/2026, New Listing narrator, dropped TWICE on the same true count:
+    // the remarks said "consisting of 150 Olde Florida style homes" and the narrator
+    // faithfully condensed it to "150 homes" — the verbatim-restatement rule killed it.
+    // A digit count whose numeral AND entity both sit in ONE settled sentence is a
+    // restatement, not the narrator counting for itself.
+    const remarks = {
+      sentence:
+        "The listing's own description: Coconut Creek is a desirable, gated community consisting of 150 Olde Florida style homes.",
+      anchors: numeralsIn(
+        "The listing's own description: Coconut Creek is a desirable, gated community consisting of 150 Olde Florida style homes.",
+      ),
+    };
+    expect(
+      auditClaims("The community is made up of 150 homes.", [remarks]).filter(
+        (x) => x.kind === "word-count",
+      ),
+    ).toEqual([]);
+
+    // The numeral and the entity must sit in the SAME settled sentence — "150" from an
+    // HOA line plus "homes" from elsewhere anchors nothing.
+    const hoa = {
+      sentence: "HOA fee: $150 per month.",
+      anchors: numeralsIn("HOA fee: $150 per month."),
+    };
+    const other = { sentence: "Nearby homes are plentiful.", anchors: [] as string[] };
+    expect(
+      auditClaims("There are 150 homes here.", [hoa, other]).some((x) => x.kind === "word-count"),
+    ).toBe(true);
+
+    // SPELLED quantifiers stay strict — "five of those six ZIPs" is the market-pulse bug
+    // and can never be digit-anchored.
+    expect(
+      auditClaims("Five of those six ZIPs moved up.", [remarks]).some(
+        (x) => x.kind === "word-count",
+      ),
+    ).toBe(true);
+  });
+
   it("does NOT flag an honest number just because the facts wrote it without a comma", () => {
     // Live bug: the FACTS said "Square feet: 2847" and the correctly-sourced prose said
     // "2,847 sq ft" — and the gate flagged its own true number as unanchored. It failed

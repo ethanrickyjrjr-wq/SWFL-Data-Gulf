@@ -242,6 +242,30 @@ export async function renderAndSave(
   filename: string,
 ): Promise<{ html: string; kb: number }> {
   const html = await renderEmailDocHtml(doc);
+
+  // ── NO SCAFFOLDING IN THE RENDERED BYTES — EVER (08/09/2026) ──────────────
+  // "THE LISTING'S OWN DESCRIPTION IS ABSENT, so I am describing the home itself."
+  // shipped INSIDE the committed new-listing showcase example, because the bake
+  // predated the narrator strip in recipes/shared.ts. The strip cleans the narrator;
+  // THIS guard is the backstop on the artifact itself: whatever pipe authored the
+  // prose, a render carrying instruction-talk never saves and never becomes an
+  // example. Checked on visible text (tags stripped), phrases from the leaks
+  // measured live — kept tight so real estate copy can't false-trip it.
+  const visible = html.replace(/<style[\s\S]*?<\/style>/gi, " ").replace(/<[^>]+>/g, " ");
+  const leak =
+    /\b(fact line|is absent|are absent|not provided|was provided|were provided|honest description|describing the home itself|my instructions|the narrator|settled fact)\b/i.exec(
+      visible,
+    );
+  if (leak) {
+    console.error(
+      `\n  ✗ SCAFFOLDING LEAKED INTO THE RENDERED EMAIL — refusing to save.\n` +
+        `    matched: "${leak[0]}"\n` +
+        `    A reader must never see instruction-talk. Fix the authoring pipe; the\n` +
+        `    narrator strip lives in lib/deliverable/recipes/shared.ts.\n`,
+    );
+    process.exit(1);
+  }
+
   const kb = Math.round(Buffer.byteLength(html, "utf8") / 1024);
   console.log(
     `  HTML: ${kb}KB ${kb > 102 ? "⚠ OVER Gmail's ~102KB clip point" : "(inside Gmail's ~102KB clip)"}`,

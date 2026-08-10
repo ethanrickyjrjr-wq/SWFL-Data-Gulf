@@ -31,6 +31,18 @@ filtered out of the model's prose before render — no guard catches it; (2) the
 treated as absent when Apify holds it (ladder 0.7a rung 2/3 — check the paid row we already bought,
 then a targeted paid call for the ONE missing field, before shipping a "we don't have it" email).
 Both must be fixed in code, not noted.
+RESOLVED same session (08/09/2026): (1) subject's paid row BOUGHT (1,064-char description, year
+built 2003, HOA $225, 43 photos — one spend-guarded ~$0.25 pull; first attempt lost 22 rows to a
+wrong-cwd env file and was re-run, raw dump kept on disk); the render now shows "Description 1064
+chars · paid row", 14 of 17 cells sourced. (2) the leak was a STALE BAKE — the committed showcase
+was rendered 01:16, the shared-root strip landed 18:21 the same day; fresh render is clean, and
+`_harness.mts` `renderAndSave` now HARD-FAILS (exit 1, refuses to save) on any scaffolding phrase
+in the rendered bytes, so a leaky bake can never become an example again. Bonus root-cause: the
+narrator paragraph was being dropped TWICE on a claim-gate false trip — remarks say "150 Olde
+Florida style homes", narrator wrote "150 homes", verbatim-only COUNT rule killed it. Narrow fix in
+`claims.ts` `countIsAnchored` (leading-digit counts only, partitives/"all N" stay strict, digit
+must sit within 3 words of the entity in ONE settled sentence); all 25 gate tests + corruption
+traps green.
 
 ## 2026-08-09 (Fable 5) — OPERATOR: "HOW DO WE TRAIN YOUR MEMORY TO BE MORE REAL ESTATE SMART" + "UPDATE WHERE THE NEW PLAYBOOK IS... GET CLAUDE BETTER ORGANIZED. THIS SUCKS"
 Two asks: (1) memory should carry real-estate DOMAIN judgment (the $173–$421/sq-ft comp fiasco is

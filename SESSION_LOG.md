@@ -1,3 +1,26 @@
+## 2026-08-09 (Fable 5) — New Listing showcase: leaked scaffolding sentence killed, description bought from Apify, artifact-level guard added
+
+Operator (screenshot 231534): the committed showcase example opened its paragraph with "THE
+LISTING'S OWN DESCRIPTION IS ABSENT, so I am describing the home itself." — prompt scaffolding
+shipped to a reader — while the description sat one paid Apify pull away. THREE FIXES, all looked
+at on the rendered bytes:
+(1) **The subject's paid row is BOUGHT** (12281 McGregor Palms Dr — 1,064-char MLS description,
+year built 2003, HOA $225, 43 photos; one spend-guarded ~$0.25 pull, raw dump kept). Render now:
+"Description 1064 chars · paid row", 14 of 17 cells sourced (was 9 + a leak). First attempt lost
+its 22 rows to a wrong-cwd `--env-file` (store creds missing → save threw AFTER billing); re-run
+from repo root, and the buy script now dumps raw JSON to disk before anything can throw.
+(2) **The leak was a stale bake** — showcase rendered 01:16, the shared-root narrator strip landed
+18:21 same day. Fresh render is clean, showcase HTML replaced. NEW GUARD at the artifact level:
+`_harness.mts` `renderAndSave` hard-fails (exit 1, refuses to save) on any scaffolding phrase in
+the rendered visible text — whatever pipe authored the prose, a leaky render can never become an
+example. All 10 showcase files scanned: only new-listing carried the leak.
+(3) **Claim-gate false trip fixed** — the narrator paragraph was dropping TWICE on the same TRUE
+count: remarks say "consisting of 150 Olde Florida style homes", narrator wrote "150 homes",
+verbatim-only COUNT rule killed it (the gate eating honest sentences). `claims.ts` gains
+`countIsAnchored`: leading-digit counts only, partitive ("4 of 6") and universal ("all 6") shapes
+stay verbatim-only, and the digit must sit within 3 words of the entity in ONE settled sentence.
+25/25 gate tests green including both corruption-on-restate traps; new-listing recipe tests green.
+
 ## 2026-08-09 (Fable 5) — Coming Soon showcase demo un-trailered: root cause was the render script's bare default address
 
 Operator: "HOW IS THE COMING SOON EMAIL BACK TO THE TRAILER? WHO CHANGED IT BACK?" Traced: commit

@@ -10,11 +10,12 @@
  * DEFAULT HOUSE: 12281 McGregor Palms Dr, Fort Myers 33908 (operator-designated 08/06/2026 —
  * the real subject for the New Listing email, off the realtor.com listing
  * realtor.com/realestateandhomes-detail/12281-McGregor-Palms-Dr_Fort-Myers_FL_33908_M64209-95517).
- * The free spine resolves price/beds/baths/sqft/lot/type/photo with ZERO spend. There is no paid
- * Apify row on disk for this address yet (checked live 08/06/2026) — year built, HOA, description,
- * gallery, and the listing button link stay OPEN SLOTS until that row is bought
- * (`OPERATOR_APPROVED_PAID_RUN=1`, `lib/listings/apify-comps.ts` is the ONE vendor call root; never
- * fetch realtor.com directly to fill them).
+ * The free spine resolves price/beds/baths/sqft/lot/type/photo with ZERO spend. The paid Apify
+ * row for this address WAS BOUGHT 08/09/2026 (operator decree — the leaked "DESCRIPTION IS
+ * ABSENT" showcase bake) and now fills year built (2003), HOA ($225), the 1,064-char MLS
+ * description, the 43-photo gallery, and the listing button link as a free READ on every build.
+ * (`lib/listings/apify-comps.ts` stays the ONE vendor call root; never fetch realtor.com
+ * directly.)
  *
  * SPEND: the free-spine render above costs nothing. The paid row, if bought, is a one-time few-cent
  * subject-record pull, gated by `lib/listings/apify-spend-guard.ts`. The ONLY OTHER metered call is

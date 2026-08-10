@@ -335,6 +335,35 @@ const NAMED_AREA =
 const MOTIVE =
   /\b(seller is|sellers are|owner is|builder has|motivated|serious|eager|anxious|willing to|hoping to|looking to|wants? to|committed to|priced to (move|sell)|won'?t last|rare opportunity|act (fast|now)|don'?t miss)\b/i;
 
+/**
+ * Is this count a RESTATEMENT of a settled fact rather than the narrator counting?
+ *
+ * Allowed ONLY when all three hold:
+ *  1. The prose sentence has no partitive count ("4 of 6") — the anchor set can supply
+ *     both digits of a corrupted "N of M", so those stay verbatim-only.
+ *  2. The matched count LEADS with a bare digit ("150 homes") — spelled and universal
+ *     quantifiers ("five", "all 6", "most") stay verbatim-only.
+ *  3. One settled sentence carries that digit within three words of that entity
+ *     ("…150 Olde Florida style homes…") — digit-in-anchors alone is not enough,
+ *     or "$150 HOA" plus "homes" two lines apart would anchor "150 homes".
+ */
+function countIsAnchored(
+  sentence: string,
+  match: string,
+  settled: readonly SettledClaim[],
+): boolean {
+  if (new RegExp(String.raw`\b${COUNT_QUANTIFIER}\s+of\b`, "i").test(sentence)) return false;
+  const head = new RegExp(
+    String.raw`^(\d{1,4})\s+(?:the\s+|those\s+|these\s+)?[\w'-]*\s*${COUNT_ENTITY}\b`,
+    "i",
+  ).exec(match.trim());
+  if (!head) return false;
+  const num = head[1];
+  const entity = head[2];
+  const adjacent = new RegExp(String.raw`\b${num}\s+(?:[\w'-]+\s+){0,3}${entity}\b`, "i");
+  return settled.some((s) => s.anchors.includes(num) && adjacent.test(s.sentence));
+}
+
 export interface ClaimViolation {
   kind:
     | "comparative"
@@ -396,7 +425,18 @@ export function auditClaims(prose: string, settled: readonly SettledClaim[]): Cl
     ];
     for (const [kind, re] of checks) {
       const m = re.exec(s);
-      if (m) out.push({ kind, match: m[0] });
+      if (!m) continue;
+      // A SIMPLE DIGIT count the facts themselves assert is a restatement, not the
+      // narrator counting for itself. Found live 08/09/2026 (New Listing): remarks said
+      // "consisting of 150 Olde Florida style homes", the narrator wrote "150 homes",
+      // and the verbatim-only rule dropped the paragraph twice on the same true count —
+      // the gate eating honest sentences, numeralsIn's own documented failure class.
+      // The allowance is deliberately NARROW (see countIsAnchored): partitive shapes
+      // ("4 of 6") and spelled/universal quantifiers ("five", "all 6") stay verbatim-only,
+      // because the anchor set can supply both digits of a corrupted "N of M" — the
+      // round-2 hole this gate exists to close.
+      if (kind === "word-count" && countIsAnchored(s, m[0], settled)) continue;
+      out.push({ kind, match: m[0] });
     }
 
     // Any numeral the narrator wrote that no settled fact contains is unanchored.
