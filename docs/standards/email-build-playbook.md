@@ -2198,11 +2198,22 @@ and *"get the fucking house description out of there. no one cares."*
    version of this email shipped with a louder ribbon and it was reverted the same day: the ribbon
    is the one element whose entire job is being the same across the lifecycle. **The variation goes
    in the email's OWN elements. Never in the shared chrome.**
-2. **The photo, WITH THE BADGE BURNED INTO IT** — a diagonal "JUST SOLD" corner ribbon in the
-   agent's accent colour, composited server-side (`lib/media/photo-badge.ts`). See §2.5.4.
+2. **The photo, WITH THE FLAG BURNED INTO IT** — a flat, full-width "JUST SOLD" band across the
+   BOTTOM of the picture, in the COMPLEMENT of the agent's accent with a slim accent keyline
+   (operator decree 08/09/2026 — the diagonal corner ribbon and its black scrim are DEAD, see
+   §2.5.4), composited server-side (`lib/media/photo-badge.ts`).
 3. **The hero** — address over the close.
-4. **The spec strip** — beds / baths / sq ft, plus the derived cells on the recorded rung only.
-5. **ONE PARAGRAPH, ABOUT THE READER, CODE-AUTHORED** (`readerLine`). It names no figure at all.
+4. **The spec strip** — beds / baths / sq ft, plus the derived cells on the recorded rung only:
+   `$/Sq Ft`, `Days on Market` (§2.5.5 G2, BUILT 08/09/2026 — the recorded closed-spell
+   `soldInDays`, never `days_in_state`), and `List-to-Sale`. The muted `List Price` cell gave DOM
+   its seat the same day.
+5. **ONE PARAGRAPH, BANK-OPENED, CODE-CLOSED, ZERO MODEL CALLS.** Decree 08/09/2026: *"TALK LIKE A
+   REAL ESTATE AGENT WHO DID A GOOD JOB … USE THE SCRIPTS."* The sentence bank
+   (`just-sold.language.ts`, registry `language-banks.ts`) opens in the agent-pride voice; its two
+   bragging sentences (sold quicker than nearby / stronger $/sq ft) fill ONLY when
+   `soldStoryValues` proves the comparison TRUE of the RECORDED close and the SIZE-BANDED comp set
+   (±25% living area, two-value floor on every median) — a prefill fills no figure slot, ever. The
+   code-authored `readerLine` closes reader-first with the one question.
 6. **The sold comps nearby**, when we hold real recorded sales.
 7. **ONE CTA: "What's My Home Worth?"** — every crawled source names the valuation as the correct
    ask for this email.
@@ -2349,8 +2360,19 @@ Absolute positioning is not available in email either. **Losing the photo to gai
 trade on the one email whose photo is the win.**
 
 **RIGHT ANSWER — bake it into the JPEG.** `lib/media/photo-badge.ts` fetches the vendor photo,
-cover-crops it 3:2 with sharp, composites a diagonal corner ribbon in the agent's accent with resvg,
-re-encodes to JPEG and uploads through `hostEmailMedia`. Every client renders it, because it IS the
+cover-crops it 3:2 with sharp, composites the flag with resvg, re-encodes to JPEG and uploads
+through `hostEmailMedia`.
+
+**WRONG ANSWER 3 — the diagonal corner ribbon (the first baked design). DEAD 08/09/2026.**
+Operator, looking at the render: *"I CAN SEE A BLACK LINE AND THE ANGLE IS TERRIBLE. JUST MAKE IT A
+DIFFERENT COLORED COMPLEMENTARY COLOR FLAG AT THE BOTTOM OF THE PICTURE."* The black line was the
+corner scrim (a black gradient laid under the ribbon for bright skies); the angle was the −45°
+rotate. The shipped design is a flat, full-width band on the photo's bottom edge in
+`complementOf(accent)` (hue rotated 180°, derived from the brand — never invented) with a 6px
+accent keyline; a solid band manufactures its own contrast, so no scrim. `photo-badge.test.ts`
+pins all four clauses of the decree. The storage key is now the sha1 of the RENDERED bytes — an
+input-stamped key would have served the old ribbon forever off the immutable edge cache (the
+chart-key lesson, same week). Every client renders it, because it IS the
 image. **It invented no machinery:** `lib/social/listing-card-render.ts` already ran this exact
 pipeline for social cards and both libraries were already production dependencies — we import its
 `fetchPhoto`, the one canvas-font root, and the one email-media uploader.
@@ -2374,10 +2396,14 @@ sold/recorded value (`docs/standards/data-roots.md`). This is the nearest real b
 and the thing that stops it is not data: it is that a per-reader equity claim is a COMPARATIVE
 claim, so it must be code-computed and code-worded, never narrated. **Never let a model near it.**
 
-**G2 — DAYS TO SELL, ON THE RECORDED RUNG.** LeadSites' data block is `Sold price | Days on market`,
-and speed is the one number this email owns. **What it needs:** nothing new — when we hold a
-RECORDED sale we hold both ends (our listed date, the recorded sale date). Gate it exactly where the
-chart and derived cells already unlock. **Never from `days_in_state`** — that is days-in-ACTIVE.
+**G2 — DAYS TO SELL, ON THE RECORDED RUNG. ✅ BUILT 08/09/2026.** LeadSites' data block is
+`Sold price | Days on market`, and speed is the one number this email owns. Built exactly as
+designed: the `Days on Market` strip cell and the bank's speed-brag sentence both read the vendor's
+recorded closed-spell (`RenderComp.soldInDays` — sold date − vendor list date, same response), gated
+where every derived cell unlocks (recorded close only, never a prefill, never `days_in_state`).
+Caveat measured on the acceptance house: the vendor row for 330 Shore Dr carries no list date, so
+`soldInDays` is null there and the cell stays an OPEN SLOT — the gates are proven by unit test, and
+the cell fills wherever the vendor holds both ends.
 
 **G3 — THE OFFER COUNT.** HousingWire: *"we had [number] offers, which means there are still
 qualified buyers eager to make an offer!"* — the strongest social-proof number in the corpus.
