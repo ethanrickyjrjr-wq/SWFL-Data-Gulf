@@ -1,17 +1,19 @@
 import type { Metadata } from "next";
 import { ShowcaseGrid } from "./ShowcaseGrid";
-import { CampaignRows } from "@/components/showcase/CampaignRows";
 import { NewEmails } from "@/components/showcase/NewEmails";
-import { SeedGallery } from "@/components/showcase/SeedGallery";
-import { SEED_PREVIEWS } from "@/lib/email/doc/seed-previews";
 import { PageShell } from "@/components/PageShell";
 
 export const metadata: Metadata = {
   title: "Showcase — SWFL Data Gulf",
   description:
-    "Real campaigns and visual reports SWFL Data Gulf can build with your data — listing lifecycle emails, launch-weekend social packs, self-updating market briefs, corridor positioning, flood exposure, freight nowcast, and more.",
+    "Real campaigns and visual reports SWFL Data Gulf can build with your data — listing lifecycle emails, self-updating market briefs, corridor positioning, flood exposure, freight nowcast, and more.",
 };
 
+// OLD EMAILS ARE GONE FROM THIS PAGE ON PURPOSE — operator decree 08/10/2026:
+// "GET THESE OLD EMAILS OUT OF HERE… THERE IS ONLY ONE PLACE… NO PATH TO THEM."
+// The ONE place is the recipe registry's re-baked captures (NewEmails,
+// public/new-emails/*.html). Never re-add CampaignRows, the seed-layout
+// gallery, or any other surface that renders /showcase/**/*.webp era captures.
 export default function ShowcasePage() {
   return (
     <PageShell width="wide" className="py-16">
@@ -23,32 +25,12 @@ export default function ShowcasePage() {
           What we can build for you
         </h1>
         <p className="mt-3 max-w-2xl text-text-secondary">
-          Every email we build, in send order — click a card to build it yourself, or scroll to the
-          last card in a row to see the whole campaign step by step.
+          Every email we build, in send order — real data at every step. Click a card to see it full
+          size, then build it yourself.
         </p>
       </header>
 
       <NewEmails />
-
-      <CampaignRows />
-
-      <hr className="my-14 border-gulf-haze" />
-
-      <header className="mb-12">
-        <span className="font-mono text-[11px] font-medium uppercase tracking-[0.1em] text-gulf-teal">
-          Start-from Layouts
-        </span>
-        <h2 className="mt-2 text-2xl font-semibold tracking-tight text-text-primary">
-          {SEED_PREVIEWS.length} email layouts, ready to make yours
-        </h2>
-        <p className="mt-3 max-w-2xl text-text-secondary">
-          Every layout the email lab offers, shown filled with live SWFL data so you can see what it
-          becomes. Pick one and you start from the clean version — the AI fills it with your
-          area&rsquo;s real figures, your brand, your voice.
-        </p>
-      </header>
-
-      <SeedGallery />
 
       <hr className="my-14 border-gulf-haze" />
 

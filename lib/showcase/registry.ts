@@ -58,10 +58,10 @@ export interface ShowcaseSlide {
    *  Buildable email slides carry one; social-surface slides are wired in a
    *  follow-up (exempt list in registry.test.ts). */
   recipe?: ShowcaseRecipe;
-  /** Social-format slides render LIVE, responsive cards (SocialBoard) instead of
-   *  the flat `image` — one wide capture can't be big on both desktop and phone,
-   *  so the cards reflow (side-by-side → stacked) and stay crisp at any width.
-   *  `image` stays as the JS-off / asset-test fallback. Renderer: SocialBoard. */
+  /** Which live social board this slide maps to. HISTORICAL: the SocialBoard
+   *  renderer and every story-overlay surface were removed 08/10/2026 (operator:
+   *  old emails off the website, no path to them) — this registry survives ONLY
+   *  as campaign metadata for lib/campaigns.ts; nothing renders these slides. */
   socialBoard?: "market-pulse" | "launch-blitz";
 }
 

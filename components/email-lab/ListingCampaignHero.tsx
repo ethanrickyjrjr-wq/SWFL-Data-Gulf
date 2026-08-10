@@ -7,12 +7,10 @@
 import { useState } from "react";
 import { AddressPopup } from "@/components/lab-entry/AddressPopup";
 import { createListingProjectAndEnter } from "@/lib/lab-entry/create-listing-project";
-import { SHOWCASES } from "@/lib/showcase/registry";
 
-const FILMSTRIP = (SHOWCASES.find((s) => s.id === "listing-to-close")?.slides ?? []).map((s) => ({
-  image: s.image,
-  title: s.title,
-}));
+// The old-capture filmstrip (listing-to-close .webp slides) was REMOVED
+// 08/10/2026 (operator: old emails off the website, no path to them — the one
+// email showcase is /showcase's NewEmails, re-baked from the registry).
 
 export function ListingCampaignHero({
   subjectAddress,
@@ -75,29 +73,6 @@ export function ListingCampaignHero({
         is the property&rsquo;s own story. Paste your description into the builder and it takes the
         campaign from there. Open house invite, private showing email — one prompt away.
       </p>
-
-      {FILMSTRIP.length > 0 && (
-        <div className="mt-5 flex items-start gap-3 overflow-x-auto pb-2">
-          {FILMSTRIP.map((f, i) => (
-            <figure key={f.title} className="min-w-[10.5rem] flex-1">
-              <figcaption className="mb-1.5 text-center text-[11px] text-white/60">
-                <span className="font-semibold text-gulf-teal/80">{i + 1}</span>
-                <span className="mx-1 text-white/25">·</span>
-                {f.title}
-              </figcaption>
-              {/* Full email, top to bottom — the committed capture at its natural aspect,
-                  never cropped (operator, 07/16/2026: "full picture thumbnails"). */}
-              {/* eslint-disable-next-line @next/next/no-img-element -- committed static capture */}
-              <img
-                src={f.image}
-                alt={`${f.title} — the full email`}
-                className="w-full rounded-lg border border-white/10"
-                loading="lazy"
-              />
-            </figure>
-          ))}
-        </div>
-      )}
 
       <div className="mt-4">
         {subjectAddress ? (

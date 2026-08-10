@@ -1,3 +1,19 @@
+## 2026-08-10 (Fable 5) — OLD emails stripped from every surface: no rendered path to the pre-registry captures remains
+
+Operator: "GET THESE OLD EMAILS OUT OF HERE… THERE IS ONLY ONE PLACE… JUST GET THEM OFF THE WEBSITE
+AND HAVE NO PATH TO THEM." (Screenshot 235833 = /showcase CampaignRows, the Latitude 26-era .webp
+cards.) Removed every surface that rendered the old captures: /showcase CampaignRows + "Start-from
+Layouts" seed gallery; BriefcasePanel "See it built" rail + ?showcase= deep-link overlay; AskAiDock
+anon example rail; EmptyLaunchpad finished-campaign cards; email-lab ListingCampaignHero filmstrip;
+ExamplesAccordion in the email lab AND the project social page. Deleted 10 files: CampaignRows,
+SeedGallery, ExamplesAccordion, ShowcaseCard, ShowcaseOverlay, SocialBoard, campaign-order.ts(+test),
+overlay-logic.ts(+test). SHOWCASES registry KEPT — it is campaign metadata for lib/campaigns.ts
+quick-start buttons (marked HISTORICAL; nothing renders its slides). The ONE email showcase is
+NewEmails (public/new-emails/*.html, re-baked from the registry). Evidence: bunx next build green;
+bun test registry/recipe/campaigns/recipes.parity → 61 pass 0 fail. Residual, declared: raw
+public/showcase/** files remain unlinked (asset tests + capture scripts reference them);
+NewEmails.tsx stale comment owed (file claimed by parallel session).
+
 ## 2026-08-10 (Fable 5) — Just-sold showcase capture re-baked: the fix was in code, never in the artifact
 
 Operator: "we just fixed the just sold email. WHY IS IT STILL THE FUCKING SAME!!!!" Root cause: the

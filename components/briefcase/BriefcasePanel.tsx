@@ -15,14 +15,7 @@ import {
 import { projectPrompts } from "@/lib/project/prompt-engine";
 import { projectHome } from "@/lib/project/tool-tabs";
 import { panelState, resolveBuildAction } from "@/lib/briefcase/panel-logic";
-import { SHOWCASES } from "@/lib/showcase/registry";
-import {
-  recipeDestination,
-  signedInLabArrival,
-  type ShowcaseRecipe,
-} from "@/lib/lab-entry/destination";
-import { ShowcaseCard } from "@/components/showcase/ShowcaseCard";
-import { ShowcaseOverlay } from "@/components/showcase/ShowcaseOverlay";
+import { signedInLabArrival } from "@/lib/lab-entry/destination";
 import { BriefcaseChat } from "@/components/briefcase/BriefcaseChat";
 import { MCPInstallCard } from "@/components/briefcase/MCPInstallCard";
 import { LoginModal } from "@/components/landing/LoginModal";
@@ -68,26 +61,9 @@ export function BriefcasePanel({
   const [visits] = useState(() => bumpVisitsOnce(browserStorage()));
   const [loginOpen, setLoginOpen] = useState(false);
   const [showMcp, setShowMcp] = useState(false);
-  // Deep-linkable showcase overlay (?showcase=<id>). Lazy init from the URL —
-  // never set state in an effect (hard ESLint error); handlers sync the param.
-  const [openShowcase, setOpenShowcase] = useState<string | null>(() => {
-    if (typeof window === "undefined") return null;
-    const id = new URLSearchParams(window.location.search).get("showcase");
-    return SHOWCASES.some((s) => s.id === id) ? id : null;
-  });
-
-  function openShowcaseId(id: string) {
-    setOpenShowcase(id);
-    const u = new URL(window.location.href);
-    u.searchParams.set("showcase", id);
-    window.history.replaceState(null, "", u);
-  }
-  function closeShowcase() {
-    setOpenShowcase(null);
-    const u = new URL(window.location.href);
-    u.searchParams.delete("showcase");
-    window.history.replaceState(null, "", u);
-  }
+  // The ?showcase= deep-link overlay and its example-card rail were REMOVED
+  // 08/10/2026 (operator: old emails off the website, no path to them — the
+  // one email showcase is /showcase's NewEmails, re-baked from the registry).
 
   const authed = session?.authed ?? false;
   const draftItems = briefcase?.draftItems ?? [];
@@ -130,21 +106,6 @@ export function BriefcasePanel({
       return;
     }
     window.location.assign(projectId ? projectHome(projectId) : signedInLabArrival());
-  }
-
-  // "Make this →" on a showcase slide (operator ruling 07/03/2026: the pill's
-  // examples get the same build path the lab's own Examples accordion has).
-  // The pill has no Build box on screen, so the recipe rides via
-  // recipeDestination (lib/showcase/recipe.ts) — the ONE root every recipe
-  // carrier (this pill, the /showcase page) shares, so the URL scheme only
-  // ever lives in one place.
-  function onUseRecipe(recipe: ShowcaseRecipe) {
-    setOpenShowcase(null);
-    if (resolveBuildAction(authed) === "login") {
-      setLoginOpen(true);
-      return;
-    }
-    window.location.assign(recipeDestination(recipe, { projectId }));
   }
 
   // PROJECT MODE — chat + (any carried draft items) only. No funnel.
@@ -211,22 +172,6 @@ export function BriefcasePanel({
           <p className="text-[10px] text-gray-500">
             Answers and figures you file land here — open a project to build &amp; send.
           </p>
-
-          <div>
-            <p className="mb-1.5 text-[10px] uppercase tracking-wider text-gray-500">
-              See it built — real campaigns, real data
-            </p>
-            <ul className="grid grid-cols-1 gap-1.5">
-              {/* PHONE ONLY: show just the first showcase card so the first-visit panel
-                  stays short over the homepage map; cards after the first are hidden < sm
-                  and restored at sm: (desktop shows all of them, unchanged). */}
-              {SHOWCASES.map((s, i) => (
-                <li key={s.id} className={i === 0 ? undefined : "hidden sm:block"}>
-                  <ShowcaseCard showcase={s} onOpen={openShowcaseId} />
-                </li>
-              ))}
-            </ul>
-          </div>
 
           <div className="flex flex-col gap-2">
             <button
@@ -295,14 +240,6 @@ export function BriefcasePanel({
         </div>
       )}
 
-      {openShowcase && (
-        <ShowcaseOverlay
-          showcase={SHOWCASES.find((s) => s.id === openShowcase)!}
-          onClose={closeShowcase}
-          onUseRecipe={onUseRecipe}
-          onAuthedCta={onBuild}
-        />
-      )}
       <LoginModal open={loginOpen} onClose={() => setLoginOpen(false)} />
     </div>
   );

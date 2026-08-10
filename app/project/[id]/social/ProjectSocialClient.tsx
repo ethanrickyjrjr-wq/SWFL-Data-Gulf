@@ -10,7 +10,6 @@ import { useSocialComposer } from "@/components/email-lab/social/useSocialCompos
 import { SocialCalendarPanel } from "@/components/email-lab/SocialCalendarPanel";
 import { ScheduleSocialModal } from "@/components/email-lab/ScheduleSocialModal";
 import { PhotosPanel } from "@/components/email-lab/PhotosPanel";
-import { ExamplesAccordion } from "@/components/showcase/ExamplesAccordion";
 import { CampaignQuickStart } from "@/components/campaigns/CampaignQuickStart";
 import type { SocialElement } from "@/lib/social/design/types";
 import { SOCIAL_FORMATS, type SocialFormat } from "@/lib/social/formats";
@@ -381,11 +380,8 @@ export function ProjectSocialClient({
           />
         </div>
 
-        {/* Social showcases, closed by default — same operator ruling as the
-            Email lab: examples in the lab they demonstrate, never in the AI. */}
-        <div className="mt-4">
-          <ExamplesAccordion surface="social" />
-        </div>
+        {/* The Examples accordion (old-capture showcase stories) was REMOVED
+            08/10/2026 (operator: old emails off the website, no path to them). */}
       </aside>
 
       {scheduleDraft && (

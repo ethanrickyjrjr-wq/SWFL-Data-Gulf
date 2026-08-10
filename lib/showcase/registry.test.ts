@@ -73,10 +73,10 @@ describe("showcase registry", () => {
     }
   });
 
-  it("every social-target slide renders a live board (SocialBoard)", () => {
-    // Social formats reflow as live cards, not a flat capture — the wiring is
-    // the slide's socialBoard id, and it must point at a board the renderer
-    // knows (components/showcase/SocialBoard.tsx BOARDS).
+  it("every social-target slide names a known board id", () => {
+    // Data-consistency guard on the socialBoard field. HISTORICAL: the
+    // SocialBoard renderer was removed 08/10/2026 with every story-overlay
+    // surface (operator: old emails off the website, no path to them).
     const KNOWN_BOARDS = new Set(["market-pulse", "launch-blitz"]);
     for (const s of SHOWCASES) {
       for (const sl of s.slides) {

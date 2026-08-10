@@ -3,10 +3,6 @@
 import { useEffect, useRef, useState } from "react";
 import Image from "next/image";
 import { useConverse } from "@/lib/assistant/use-converse";
-import { useSession } from "@/lib/auth/use-session";
-import { SHOWCASES } from "@/lib/showcase/registry";
-import { ShowcaseCard } from "@/components/showcase/ShowcaseCard";
-import { ShowcaseOverlay } from "@/components/showcase/ShowcaseOverlay";
 import {
   applyDockDrag,
   applyDockResize,
@@ -80,14 +76,9 @@ export function AskAiDock({
   const { ask, answer, reach, error, streaming, reset } = useConverse();
   const [filed, setFiled] = useState<string | null>(null);
   const bodyRef = useRef<HTMLDivElement>(null);
-  // Funnel examples for PROSPECTS on report pages — the same "See it built"
-  // showcase cards the standalone BriefcasePanel shows. Gated to resolved-anon
-  // (`session` non-null AND not authed) so a logged-in load never flashes them;
-  // converted users don't get fixture campaigns presented next to real data
-  // (same reasoning as the 07/03 project-mode ruling).
-  const session = useSession();
-  const showExamples = session !== null && !session.authed;
-  const [openShowcase, setOpenShowcase] = useState<string | null>(null);
+  // The "See it built" example rail and its step-through overlay were REMOVED
+  // 08/10/2026 (operator: old emails off the website, no path to them — the
+  // one email showcase is /showcase's NewEmails, re-baked from the registry).
 
   const vp = (): Viewport => ({
     width: window.innerWidth,
@@ -320,21 +311,6 @@ export function AskAiDock({
             >
               Summarize for my AI →
             </button>
-
-            {showExamples && (
-              <div className="mt-5">
-                <p className="mb-1.5 text-[10px] uppercase tracking-wider text-gray-500">
-                  See it built — real campaigns, real data
-                </p>
-                <ul className="grid grid-cols-1 gap-1.5">
-                  {SHOWCASES.map((s) => (
-                    <li key={s.id}>
-                      <ShowcaseCard showcase={s} onOpen={setOpenShowcase} />
-                    </li>
-                  ))}
-                </ul>
-              </div>
-            )}
           </div>
         )}
 
@@ -491,14 +467,6 @@ export function AskAiDock({
             <path d="M9 1 1 9M9 5 5 9" stroke="currentColor" strokeWidth="1.2" />
           </svg>
         </div>
-      )}
-
-      {/* Showcase step-through — portals to body at z-[90], above this dock. */}
-      {openShowcase && (
-        <ShowcaseOverlay
-          showcase={SHOWCASES.find((s) => s.id === openShowcase)!}
-          onClose={() => setOpenShowcase(null)}
-        />
       )}
     </div>
   );

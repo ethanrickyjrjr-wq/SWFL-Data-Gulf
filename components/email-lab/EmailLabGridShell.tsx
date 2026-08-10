@@ -78,7 +78,6 @@ import { BrandingBlock } from "@/components/brand/BrandingBlock";
 import { AddressPopup, type SavedLayoutOffer } from "@/components/lab-entry/AddressPopup";
 import { LoginModal } from "@/components/landing/LoginModal";
 import { registerBrandPanel, pulseBrandPanel } from "@/lib/brand/reveal-brand-panel";
-import { ExamplesAccordion } from "@/components/showcase/ExamplesAccordion";
 import { campaignFollowUpForPrompt, campaignKeyForPrompt } from "@/lib/campaigns";
 import {
   brandGaps,
@@ -2013,20 +2012,10 @@ export function EmailLabGridShell({
             </div>
           )}
 
-          {/* ── Examples — the ONE campaign surface (operator ruling 07/13/2026).
-              CampaignQuickStart used to sit right here too, directly above this: both
-              are thin reads over the SAME SHOWCASES registry, so the email rail showed
-              New Listing / Agent Launch / Newsletter as blurb cards and then showed the
-              exact same three showcases again as example cards, back to back, wired to
-              the same handleUseRecipe. Two skins, one registry, stacked — indefensible.
-              The example cards win: they carry the artwork, so you SEE the thing before
-              you start it. The blurb row is gone from this rail (CampaignQuickStart is
-              still the right component on the hub and the social cockpit, where no
-              examples list renders). Supersedes the 07/07 "Start a Campaign below the
-              AI box" placement, which is what created the double. ── */}
-          {mode === "email" && (
-            <ExamplesAccordion surface="email" defaultOpen onUseRecipe={handleUseRecipe} />
-          )}
+          {/* ── The Examples accordion (old-capture showcase stories) was REMOVED
+              08/10/2026 (operator: old emails off the website, no path to them —
+              the one email showcase is /showcase's NewEmails, re-baked from the
+              registry). ── */}
 
           {/* ── SOCIAL: Build the post (author) / Fill ── */}
           {mode === "social" && (
