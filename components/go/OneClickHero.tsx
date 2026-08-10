@@ -1,7 +1,6 @@
 // components/go/OneClickHero.tsx
 "use client";
 
-import Image from "next/image";
 import { useEffect, useRef, useState } from "react";
 import { heroDestination } from "@/lib/lab-entry/destination";
 import { RECIPES, type RecipeKey } from "@/lib/deliverable/recipes";
@@ -120,7 +119,6 @@ export default function OneClickHero() {
       style={{ color: BRAND.text }}
     >
       <div className="flex w-full max-w-2xl grow flex-col items-center justify-center pb-24">
-        <Image src="/logo-mark.png" alt="SWFL Data Gulf" width={64} height={64} priority />
         <h1
           className="mt-4 text-center font-bold"
           style={{
@@ -203,13 +201,11 @@ export default function OneClickHero() {
                   key={key}
                   type="button"
                   role="menuitem"
-                  className="flex w-full items-baseline gap-3 px-5 py-3 text-left hover:bg-slate-50"
+                  className="w-full px-5 py-3 text-left text-sm font-semibold hover:bg-slate-50"
+                  style={{ color: BRAND.primary }}
                   onClick={() => build(key)}
                 >
-                  <span className="shrink-0 text-sm font-semibold" style={{ color: BRAND.primary }}>
-                    {RECIPES[key].label}
-                  </span>
-                  <span className="truncate text-xs text-slate-500">{BLURBS[key]}</span>
+                  {RECIPES[key].label}
                 </button>
               ))}
             </div>

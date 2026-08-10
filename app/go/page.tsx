@@ -16,7 +16,9 @@ const montserrat = Montserrat({
 const lato = Lato({ subsets: ["latin"], weight: ["400", "700"] });
 
 export const metadata: Metadata = {
-  title: "Address to Email in One Click",
+  // absolute: escape the root layout's "%s — SWFL Data Gulf" template — no
+  // SWFL Data Gulf anywhere on this page (operator, 08/10/2026).
+  title: { absolute: "Address to Email in One Click" },
   description:
     "Type your listing's address, pick the email, and it's built — every number names its source.",
 };
