@@ -5,6 +5,9 @@ tagline under the bar ("Type the address. Pick the email…"), and a footer line
 blurbs in the dropdown. Same shape as the homepage-grammar gripes: when the operator specifies the
 exact contents of a surface, the spec is a CEILING, not a floor — decoration copy is a defect, not
 polish. Fixed same session: page stripped to logo mark + h1 + bar + the 7 labels.
+FOLLOW-UP, same session: "just get rid of swfl data gulf and logo" — the logo mark and ALL
+SWFL Data Gulf traces removed too (incl. the tab-title template suffix via title.absolute).
+The /go page carries NO company identity until he says otherwise — it moves to a new domain.
 
 ## 2026-08-10 (Fable 5) — OPERATOR: "WE DON'T FUCKING NEED DISTANCE FOR EVERY FUCKING THING" — distance-survey prose, strike 3+ of the shape
 Live paragraph shipped three distance clauses in a row ("golf about three-quarters of a mile…

@@ -1,3 +1,18 @@
+## 2026-08-10 (Fable 5) — /go ONE-CLICK PAGE: hero + bar + 7 lifecycle options into the lab door, then STRIPPED after copy-creep rage
+
+Built the standalone /go page (operator decree: "Address to email in one click," Google-simple,
+new URL, main site untouched). Chrome-free via CHROME_FREE_PREFIXES + AI_CHROME_FREE_PREFIXES;
+address autocomplete rides /api/address-suggest+retrieve; the 7 lifecycle options navigate via
+heroDestination (param type loosened to a structural subset) → /email-lab/grid?recipe&rkey&
+recipeNeeds&addr — click-through verified on a prod build. TWO RAGES, both mine: shipped extra
+copy (wordmark, taglines, footer, dropdown blurbs) on a page decreed to be hero+bar ONLY, then
+"just get rid of swfl data gulf and logo" — page now carries NO identity, tab title escaped the
+layout template (title.absolute). Commits 8120baf6 + aab70433. Parallel-session collisions: my
+first commit swept their pre-staged hermes plan doc (redone path-limited); their d705a5c9 swept
+my half-stripped component (superseded by aab70433, tip clean). Handoff for the make-it-work
+slice: docs/superpowers/plans/2026-08-10-go-one-click-apify-handoff.md — any address → lab →
+COMPLETED email via the Apify rung; no UI, no words.
+
 ## 2026-08-10 (Fable 5) — HOMEPAGE FIX AFTER OPERATOR RAGE: NEW email captures (not seed-previews), bar demoted BELOW the proof
 
 Operator, on the previous push: "WE DON'T EVEN USE THESE FUCKING EMAILS... WE JUST BUILT ALL NEW
