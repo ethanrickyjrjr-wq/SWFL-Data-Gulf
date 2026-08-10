@@ -345,6 +345,12 @@ Single session / no file overlap → just work on `main`.
    start next to `TODAY.md`; move items to RESOLVED with a date when they actually close.
    This is not a substitute for a `checks` entry (see 4) — the scratchpad catches it in the
    moment; `checks` is where a real obligation lives.
+   **0b. THREE STRIKES = A GUARD, NOT A THIRD ENTRY (adopted 08/10/2026 from the steipete/**
+   **agent-rules trial, its one keeper).** The THIRD time the same gripe/correction/failure shape
+   lands in the scratchpad, writing another entry is BANNED as the response — that session builds
+   the mechanism instead (hook, lint, test, or CLAUDE.md rule) and links the entries to it. The
+   scratchpad is a queue for mechanisms, not a diary of repeats — 45 open items and "same surface
+   fixed five times in a row" is the documented failure this line exists to stop.
 1. **CHECK** — SessionStart prints it: `SESSION_LOG.md`, open `checks` (Supabase `public.checks`), build queue (`_AUDIT_AND_ROADMAP/build-queue.md`). Trust it; verify surprises against `git`.
 2. **SUBMIT** — commit + SESSION_LOG entry + `node scripts/safe-push.mjs`.
 3. **UPDATE** — same push: `node scripts/check.mjs close <key>` / `open <project> <key> "<label>"` / `list`. Open obligations live in `checks` — never as `⬜/✅` in plan docs.

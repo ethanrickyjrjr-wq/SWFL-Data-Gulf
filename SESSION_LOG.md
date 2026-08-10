@@ -1,3 +1,15 @@
+## 2026-08-10 (Fable 5) — steipete/agent-rules trialed: DO NOT ADOPT, one keeper → RULE 2 §0b (three strikes = a guard)
+
+Operator: "start with steipete." Shallow-cloned agent-rules (48 files), read the 4 generic rules
+in full. Half the repo is Swift/macOS (dead weight); the generic half is prompt-command versions
+of machinery we already run hook-ENFORCED (five-whys ⊂ second-order + systematic-debugging;
+check.mdc vs our pre-push gates; context-prime = SessionStart hooks). ONE keeper stolen —
+continuous-improvement's graduation trigger, adopted as CLAUDE.md RULE 2 §0b: the THIRD
+occurrence of the same gripe bans a third scratchpad entry; that session builds the mechanism
+(hook/lint/test/rule) instead. Targets the documented "same surface fixed five times in a row" +
+45-open-scratchpad failure. Verdict filed in the harvest research doc + INDEX addendum. Next
+repo when operator says go: anthropics/skills.
+
 ## 2026-08-10 (Fable 5) — Instagram improvement-harvest lane BUILT: 4th task saved, $0.49 of $3 spent, GitHub skill map filed
 
 Operator: "build an Instagram apify that finds skills to make us better... make a few runs on

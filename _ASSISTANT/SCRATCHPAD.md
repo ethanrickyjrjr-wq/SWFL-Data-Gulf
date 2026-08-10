@@ -19,6 +19,11 @@ anthropics/skills, steipete/agent-rules, alirezarezvani/claude-skills, zilliztec
 nothing-design-skill; ZERO real-estate skills exist — our domain playbooks stay homegrown.
 Findings: _RESEARCH/agent-behavior/2026-08-10-instagram-improvement-harvest.md. OPEN half: which
 repos to trial is the operator's pick.
+UPDATE 2026-08-10 — operator picked steipete first. Trialed (48 files read-mapped, 4 generic
+rules read in full): DO NOT ADOPT — half Swift/macOS, generic half weaker than our hook-enforced
+equivalents. ONE keeper adopted into CLAUDE.md RULE 2 §0b: THIRD occurrence of the same gripe =
+build the hook/lint/test that session; a third scratchpad entry is banned as the response.
+Next repo in queue when operator says go: anthropics/skills.
 
 ## 2026-08-10 (Fable 5) — OPERATOR: "are we not building and saving our actors in apify?... look through past actors first!! then save all the ones we will use!!! and update playbook"
 Counted live against the Apify API, not memory: 247 lifetime runs across 27 distinct actors, but
