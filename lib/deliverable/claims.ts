@@ -199,10 +199,16 @@ const HOME_FEATURES = [
   "view",
 ] as const;
 
-/** Every home FEATURE named in a string — the anchor set for physical claims. */
+/** Every home FEATURE named in a string — the anchor set for physical claims.
+ *  Inflection-tolerant (08/10/2026): "beaches" in the source licenses "beach" in the
+ *  prose and vice versa — a live new-listing draw was dropped on unsourced-feature
+ *  ("beach") against a description that said "close to the islands and beaches". Same
+ *  word in a different number is not a new feature; both sides of the comparison run
+ *  through this one function, so the license stays symmetric and a feature named in
+ *  NEITHER form is refused exactly as before. */
 export function featuresIn(text: string): string[] {
   const t = (text ?? "").toLowerCase();
-  return HOME_FEATURES.filter((f) => new RegExp(`\\b${f}\\b`, "i").test(t));
+  return HOME_FEATURES.filter((f) => new RegExp(`\\b${f}(?:es|s)?\\b`, "i").test(t));
 }
 
 // ── THE FAIL-CLOSED BACKSTOP ───────────────────────────────────────────────

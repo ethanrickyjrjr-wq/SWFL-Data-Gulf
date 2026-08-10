@@ -1,3 +1,12 @@
+## 2026-08-10 (Fable 5) — OPERATOR: "i've done this with claude 10 times and it never works" — self-improvement audits keep failing
+Ask: (1) an Apify lane Sonnet can run on Instagram + Reddit to harvest improvement ideas for
+Claude/Hermes/AI workflows; (2) questions to ask HERMES for a cold outside read of everything we
+suck at (design, UI, SEO, writing, data reliability, playbook drift, real estate, backend,
+frontend, marketing, email, tooling) — because asking Claude to audit itself has failed ~10
+times. The gripe to never repeat: Claude-audits-Claude produces flattering, non-falsifiable
+answers. Hermes prompts must demand ranked, concrete, evidence-pointed observations. Waiting on
+operator to paste Hermes responses back.
+
 ## 2026-08-10 (Fable 5) — OPERATOR: the under-contract showcase house is 4140 HORSECREEK BLVD — NOT Kellysands Way
 Verbatim: "4140 Horsecreek Blvd. I DON'T WANT FUCKING KELLYSANDS WAY!!!" My re-bake swapped the
 showcase subject to Kellysands (New Listing's house) to get a description into the bytes — wrong
@@ -65,6 +74,14 @@ Four defects in the authored paragraph: (1) repeats facts the description above 
 (HOA $) — costs are the realtor's conversation, never the email's. Wanted instead: the GOOD —
 proximity to beach/downtown, amenities, lifestyle. Applies to EVERY email's prose, not just
 new-listing. Research pass (crawl4ai) on AI voice control explicitly ordered.
+RESOLVED 2026-08-10 (pending push) — shared narrator rewritten at the ONE root (role + worked
+example per Anthropic's live prompting guide; assignment now = the GOOD around the home; NEVER
+TALK ABOUT COSTS + NEVER A NEGATIVE incl. concessives; AI tells banned by name), each rule backed
+by a delete-only sentence filter in code; "beaches" now a priority amenity category (the lake
+already held the vendor category); claim gate's singular/plural feature false-trip fixed
+(beaches↔beach); new-listing + coming-soon captures re-baked clean (0 HOA/trade-off hits in
+bytes). Research filed + indexed. All shared-narrator emails inherit; just-sold untouched (zero
+model calls + files claimed by parallel session); market-comps' $/sqft is that email's purpose.
 
 ## 2026-08-10 (Fable 5) — OPERATOR: showcase JUST SOLD house must be $750,000+ — pick a new house
 Verbatim: "WE ALREADY HAD THE FUCKING PHOTO!!! MAKE THE FUCKING HOUSE JUST SOLD 750,000 OR MORE.

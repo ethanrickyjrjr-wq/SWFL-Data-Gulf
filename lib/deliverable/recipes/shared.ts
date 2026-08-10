@@ -464,9 +464,22 @@ export async function authorListingNarrative(
     opts.context && `Background context (NOT the subject of this email):\n${opts.context}`,
   ].filter(Boolean);
 
+  // ROLE + VOICE over prohibition-piling (08/10/2026 polish decree — "TALKS LIKE AI").
+  // The prompt below was a wall of bans with no voice model, and the paragraphs read
+  // like a model: "which softens the inland trade-off the listing's own copy
+  // acknowledges" shipped live. Anthropic's own prompting guide (crawled 08/10/2026,
+  // RULE 0.4): "Examples are one of the most reliable ways to steer Claude's output
+  // format, tone, and structure" and "Setting a role in the system prompt focuses
+  // Claude's behavior and tone… Even a single sentence makes a difference." The AI
+  // tells banned in SOUND LIKE A PERSON below are the measured ones from Wikipedia's
+  // signs-of-AI-writing catalog (same crawl): marketing verbs standing in for "has",
+  // negative parallelisms ("not just X, but Y"), rule-of-three lists, and
+  // significance-summing final clauses.
   const system =
-    `You write the property description for a real-estate email — the paragraph an ` +
-    `agent puts under the photo. Two to four sentences.\n\n` +
+    `You are a Southwest Florida real-estate agent writing to your own contact list — ` +
+    `people who know you. You write the short paragraph under the photo, and you write ` +
+    `it the way you would say it out loud to a neighbor: plain words, short sentences ` +
+    `(a third-grader could read them), warm and specific. Two to four sentences.\n\n` +
     (opts.framing ? `WHAT THIS EMAIL IS: ${opts.framing}\n\n` : "") +
     `THIS EMAIL IS ABOUT THE HOUSE. Not the market, not the comps. A buyer reading it ` +
     `wants to know what this property IS.\n\n` +
@@ -536,12 +549,30 @@ export async function authorListingNarrative(
         `light," "sunset," "morning sun," "golden hour," or any other time-of-day or lighting ` +
         `detail — you have no way to know it will be true, and a home shown at 1pm does not ` +
         `have an evening.\n\n`
-      : `WRITE WHAT THE DESCRIPTION DOES NOT SAY. That is the entire assignment. The facts below ` +
-        `carry things the seller's copy almost never mentions: how long it has been on the market, ` +
-        `the year it was built, the monthly HOA, what the price works out to per square foot, the ` +
-        `size and make-up of the surrounding neighborhood. Those are YOURS. Pick the two or three ` +
-        `that a buyer would actually weigh and say what they mean for a decision — never as a list ` +
-        `of numbers, and never repeating a figure the spec grid already shows on its own.\n\n` +
+      : // THE ASSIGNMENT, REWRITTEN 08/10/2026 (operator): the old version handed the
+        // narrator "the monthly HOA, what the price works out to per square foot" as
+        // its material, and the live paragraph dutifully recited "$225 a month" cost
+        // talk under a grid that already showed it. Costs are the agent's conversation
+        // with the buyer; this paragraph sells the WANTING, and its material is the
+        // GOOD around the home — the community and area fact lines below.
+        `WRITE THE GOOD THE DESCRIPTION DOES NOT SAY. That is the entire assignment. The fact ` +
+        `lines below carry what makes this ADDRESS worth wanting, and the seller's copy almost ` +
+        `never covers it: what the community itself has (when a COMMUNITY or INSIDE THE GATE ` +
+        `line is present), what sits close by — a beach, groceries, restaurants, golf (when an ` +
+        `AROUND THIS HOME line is present), the shape of the neighborhood around it. Pick the ` +
+        `one or two strongest and say them the way a person points something out, not the way ` +
+        `a report lists it. If it just came to market, that is news you may share.\n\n` +
+        `NEVER TALK ABOUT COSTS. Not the HOA fee, not taxes, not insurance, not carrying costs, ` +
+        `not price per square foot, not what anything runs per month. Every cost figure is ` +
+        `already in the grid above, and cost questions are a conversation for the agent to ` +
+        `have in person — your paragraph is about wanting the house, never about paying ` +
+        `for it.\n\n` +
+        `NEVER A NEGATIVE. You are writing so someone wants to see this house. Never name a ` +
+        `drawback, a trade-off, a compromise, or anything to "factor in" or "keep in mind". ` +
+        `Never frame the location by what it is far from — if the home sits inland, say what is ` +
+        `close, and stop. No concessions in any form: "even though", "although", "despite" all ` +
+        `frame a fact as a drawback, and none of them belong in this paragraph. And never ` +
+        `restate as a concession something the seller's copy states as a strength.\n\n` +
         `If the description is ABSENT, then and only then describe the home itself — lead with what ` +
         `is most distinctive and true from the facts (new construction, a price that has come down, ` +
         `scale, the lot).\n\n` +
@@ -559,6 +590,23 @@ export async function authorListingNarrative(
     `actually said. And never add a selling claim of your own: "priced to move", "won't ` +
     `last", "a rare opportunity" are YOUR words, not facts about the house. Describe; ` +
     `do not pitch.\n\n` +
+    `SOUND LIKE A PERSON, NOT A MODEL. Say it the way you would say it out loud. "Has" beats ` +
+    `"boasts", "offers", "features", "showcases". Never "not just X, but Y" or "isn't only ` +
+    `X — it's Y". Never three parallel items where one or two would do. Never a closing ` +
+    `clause that explains the sentence you just wrote — no "...which means", "...making it ` +
+    `perfect for", "...adding to the appeal". No "nestled", "vibrant", "sought-after". At ` +
+    `most one dash in the whole paragraph.\n\n` +
+    `WORKED EXAMPLE — the same community fact, two ways.\n` +
+    `Weak (reads like a machine): "Residents enjoy access to a vibrant gated community ` +
+    `boasting numerous amenities, making it perfect for the Florida lifestyle."\n` +
+    `Strong (reads like an agent): "The community has its own pool and clubhouse, and the ` +
+    `gate is staffed." — plain verbs, only what the fact lines actually say.\n\n` +
+    `A FACT ALREADY ON THE PAGE IS ALREADY ON THE PAGE. The seller's description and the ` +
+    `spec grid sit right above your paragraph. Anything either already states — the ` +
+    `community's name and size, the lot, gated status, a pool — you do not say again ` +
+    `unless you are adding something new about it, and never the same figure. If the ` +
+    `description says the community is 150 homes, writing "a community of 150 homes" is ` +
+    `a failure.\n\n` +
     `HARD RULES. Every number you write must appear in the facts given. And a FACT ABOUT ` +
     `THE HOME IS NOT ONLY A NUMBER: you may not assert a view, a waterfront, a pool, a ` +
     `renovation, a garage, a school, a floor plan, a finish, a builder, or a neighborhood ` +
@@ -576,7 +624,8 @@ export async function authorListingNarrative(
     `a gate or amenities — its absence means we could not read the page, NOT that the ` +
     `community lacks them. Never write that a community lacks something.\n\n` +
     `THE NEIGHBORHOOD. If — and ONLY if — a "THE NEIGHBORHOOD" fact line is present above, you ` +
-    `may restate ONLY the home count and median value it states, word for word. This is an ` +
+    `may restate ONLY the home count and median value it states, word for word — and NEVER when ` +
+    `the seller's description already states that count; a figure on the page twice is a failure. This is an ` +
     `ASSESSED value from the tax roll, not a sale or list price — never call it "median home ` +
     `price" or say homes in this neighborhood "sell for" this figure. Never invent a trend, a ` +
     `comparison to another neighborhood, or a characterization of whether the value is high or ` +
@@ -591,7 +640,8 @@ export async function authorListingNarrative(
     // print. Operator: "THIS IS FUCKING TERRIBLE." Named here so it isn't vague again.
     `THE AREA. If — and ONLY if — an "AROUND THIS HOME" fact line is present above, use its ` +
     `actual specifics: name ONE OR TWO categories and their nearest distance EXACTLY AS THE LINE ` +
-    `WRITES IT — the distances arrive already in plain words ("about half a mile", "about a ` +
+    `WRITES IT. When the line lists a beach, lead with the beach — in this market nothing beats ` +
+    `being close to the sand. The distances arrive already in plain words ("about half a mile", "about a ` +
     `quarter mile"); repeat them as written and NEVER convert one to a decimal figure like ` +
     `"0.57 miles" — nobody talks that way. E.g. "a grocery store about half a mile away" or ` +
     `"six restaurants within a mile" — not a vague "nearby" or "close ` +
@@ -645,6 +695,31 @@ export async function authorListingNarrative(
           // exactly that meta-vocabulary into the prompt, and this recipe family has
           // FOUR measured live leaks of prompt language shipping as prose.
           !/\b(fact line|is absent|are absent|is present|not given|not provided|was provided|were provided|honest description|the description stops|describing the home itself|instructions?|the reader|grid figures?|already open|written by us|fixed copy|sentences? above|supersedes?)\b/i.test(
+            s,
+          ),
+      )
+      // ── COST TALK AND NEGATIVITY, ENFORCED IN CODE (08/10/2026 decree) ─────────
+      // "LET'S NOT TALK ABOUT MORE COSTS LIKE HOW MUCH THE HOA IS, THAT IS A QUESTION
+      // THE REALTOR CAN ANSWER" + "TALKS NEGETIVE ABOUT BEING INLAND". The prompt now
+      // forbids both; these delete-only filters are the guard behind the rule (a rule
+      // only in a prompt is a rule the model can miss — live proof: "at $225 a month
+      // the HOA covers…" and "softens the inland trade-off" both shipped). Same
+      // contract as the scaffolding strip above: one bad sentence is one bad
+      // sentence, deleted whole, nothing rewritten. The HOA/DOM facts stay VISIBLE
+      // to the model (operator, 08/06/2026: "why would the model not see HOA????") —
+      // this governs what the prose may SAY, never what the model may see.
+      .filter(
+        (s) =>
+          !/\bHOA\b|homeowners['’]? association|carrying cost|monthly (?:fee|dues|cost)|\bdues\b|\$[\d,]+\s*(?:a|per)\s*month/i.test(
+            s,
+          ),
+      )
+      // Concessives included (first live draw after the rewrite): "daily errands stay
+      // easy even though you're tucked inland" — "even though" IS the negative, in a
+      // sentence with no banned noun in it.
+      .filter(
+        (s) =>
+          !/\btrade-?offs?\b|\bdownsides?\b|\bdrawbacks?\b|\bcompromises?\b|\beven though\b|\balthough\b|\bdespite\b/i.test(
             s,
           ),
       )

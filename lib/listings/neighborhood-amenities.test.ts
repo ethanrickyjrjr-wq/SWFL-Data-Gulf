@@ -158,6 +158,18 @@ describe("summarizeAmenities", () => {
     expect(out.map((c) => c.category)).toContain("countryclubs");
   });
 
+  it("puts the BEACH first of all when one is in radius — the 08/10/2026 decree", () => {
+    // Operator: "LET'S JUST TALK ABOUT THE GOOD THINGS THAT ARE THERE. IF IT IS CLOSE
+    // TO THE BEACH…" — the vendor's own `beaches` category exists in the lake and was
+    // sorting behind golf on count alone.
+    const out = summarizeAmenities([
+      ...rows,
+      { slug_id: "s", category: "beaches", name: "Vanderbilt Beach", distance_from_property: 1.1 },
+    ]);
+    expect(out[0]?.category).toBe("beaches");
+    expect(out[1]?.category).toBe("golf");
+  });
+
   it("is empty for no rows — never a zero-filled category list", () => {
     expect(summarizeAmenities([])).toEqual([]);
   });

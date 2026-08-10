@@ -28,7 +28,10 @@ describe("PRICE_REDUCED_BANK", () => {
 describe("bankFor registry (spec FM6: un-banked recipes are untouched)", () => {
   test("price-reduced resolves; an un-banked recipe is null", () => {
     expect(bankFor("price-reduced")).toBe(PRICE_REDUCED_BANK);
-    expect(bankFor("just-sold")).toBeNull();
+    // just-sold WAS the un-banked example here until 97724164 gave it a bank and
+    // forgot this assertion (stale-red since 08/09). new-listing's prose is the
+    // shared narrator, never a bank — the honest un-banked example.
+    expect(bankFor("new-listing")).toBeNull();
     expect(bankFor("")).toBeNull();
   });
 });

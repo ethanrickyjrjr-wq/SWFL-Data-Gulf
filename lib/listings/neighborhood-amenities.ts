@@ -161,8 +161,12 @@ export function matchNeighborhoodByPoint(
   return finalists.length === 1 ? finalists[0]! : null;
 }
 
-/** Categories the operator's coverage decree named — surfaced first when present. */
-const PRIORITY_CATEGORIES = ["golf", "countryclubs"];
+/** Categories the operator's coverage decrees named — surfaced first when present.
+ *  `beaches` leads (08/10/2026: "LET'S JUST TALK ABOUT THE GOOD THINGS THAT ARE
+ *  THERE. IF IT IS CLOSE TO THE BEACH…" — a vendor category the lake already holds,
+ *  which was sorting behind golf on raw count); golf + country clubs are the
+ *  original coverage decree. */
+const PRIORITY_CATEGORIES = ["beaches", "golf", "countryclubs"];
 
 /** Keep the narrator's fact list bounded; the vendor returned 31 categories on one
  *  probed call and an email body is 50-125 words. */

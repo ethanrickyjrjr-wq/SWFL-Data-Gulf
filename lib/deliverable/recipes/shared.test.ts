@@ -32,13 +32,16 @@ let capturedSystem = "";
 // silently stripping every OTHER named export of @/refinery/agents/anthropic.mts (e.g.
 // model-id constants) for the duration of this file's mock window. Spread anthropicOrig2
 // (captured above, before any mock ran) so only getAnthropic is actually overridden.
+// What the mocked model "writes" — tests that exercise the delete-only sentence
+// filters (cost talk, negativity) set this, then assert on what survives.
+let nextModelText = "A well-kept three-bedroom home.";
 mock.module("@/refinery/agents/anthropic.mts", () => ({
   ...anthropicOrig2,
   getAnthropic: () => ({
     messages: {
       create: async (args: { system: string }) => {
         capturedSystem = args.system;
-        return { content: [{ type: "text", text: "A well-kept three-bedroom home." }] };
+        return { content: [{ type: "text", text: nextModelText }] };
       },
     },
   }),
@@ -115,8 +118,73 @@ test("FAVORABLE_FRAMING_POLICY includes a counter-example boundary", () => {
 
 test("authorListingNarrative's system prompt includes FAVORABLE_FRAMING_POLICY verbatim", async () => {
   const { authorListingNarrative, FAVORABLE_FRAMING_POLICY: policy } = await import("./shared");
+  nextModelText = "A well-kept three-bedroom home.";
   await authorListingNarrative({ address: "1 Main St", price: "$500,000", beds: 3 } as never);
   expect(capturedSystem).toContain(policy);
+});
+
+// ── The 08/10/2026 polish decree: no cost talk, no negativity, human voice ──────────
+// Operator: "LET'S NOT TALK ABOUT MORE COSTS LIKE HOW MUCH THE HOA IS … LET'S JUST TALK
+// ABOUT THE GOOD THINGS THAT ARE THERE … TALKS NEGETIVE ABOUT BEING INLAND AND TALKS
+// LIKE AI." Each rule below is enforced in CODE (delete-only sentence filter), not just
+// in the prompt — a rule only in a prompt is a rule the model can miss.
+
+test("a sentence reciting the HOA cost is deleted, the rest of the paragraph survives", async () => {
+  const { authorListingNarrative } = await import("./shared");
+  nextModelText = "The home just came to market. At $225 a month the HOA covers the grounds.";
+  const out = await authorListingNarrative({
+    address: "1 Main St",
+    price: "$500,000",
+    beds: 3,
+  } as never);
+  expect(out).toBe("The home just came to market.");
+});
+
+test("a sentence framing the location as a trade-off is deleted, the rest survives", async () => {
+  const { authorListingNarrative } = await import("./shared");
+  nextModelText =
+    "Groceries and restaurants are about half a mile away. That softens the inland trade-off of this location.";
+  const out = await authorListingNarrative({
+    address: "1 Main St",
+    price: "$500,000",
+    beds: 3,
+  } as never);
+  expect(out).toBe("Groceries and restaurants are about half a mile away.");
+});
+
+test("a concessive ('even though') sentence is deleted — a concession is a drawback in disguise", async () => {
+  const { authorListingNarrative } = await import("./shared");
+  nextModelText =
+    "The home just came to market. Errands stay easy even though the home sits inland.";
+  const out = await authorListingNarrative({
+    address: "1 Main St",
+    price: "$500,000",
+    beds: 3,
+  } as never);
+  expect(out).toBe("The home just came to market.");
+});
+
+test("a monthly-fee phrasing without the word HOA is still caught", async () => {
+  const { authorListingNarrative } = await import("./shared");
+  nextModelText =
+    "The clubhouse anchors the neighborhood. Monthly dues take care of the grounds and the gate.";
+  const out = await authorListingNarrative({
+    address: "1 Main St",
+    price: "$500,000",
+    beds: 3,
+  } as never);
+  expect(out).toBe("The clubhouse anchors the neighborhood.");
+});
+
+test("the system prompt forbids cost talk and negative framing, and drops the old cost assignment", async () => {
+  const { authorListingNarrative } = await import("./shared");
+  nextModelText = "A well-kept three-bedroom home.";
+  await authorListingNarrative({ address: "1 Main St", price: "$500,000", beds: 3 } as never);
+  expect(capturedSystem).toContain("NEVER TALK ABOUT COSTS");
+  expect(capturedSystem).toContain("NEVER A NEGATIVE");
+  // The old assignment handed the narrator "the monthly HOA" and "$ per square foot"
+  // as things to write ABOUT — that is exactly the cost talk the decree kills.
+  expect(capturedSystem).not.toContain("the monthly HOA, what the price works out to");
 });
 
 import { isComparableHome, perSqft, median } from "./shared";

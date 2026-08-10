@@ -283,6 +283,23 @@ describe("honest prose survives the gate", () => {
     expect(v.some((x) => x.kind === "unsourced-feature" && x.match === "lanai")).toBe(true);
   });
 
+  it("a feature sourced in the PLURAL licenses the singular, and vice versa", () => {
+    // Found live 08/10/2026 (new-listing re-bake): the description said "close to the
+    // islands and beaches", the narrator wrote "the beach", and the gate dropped a clean
+    // paragraph on unsourced-feature("beach") — the same word, inflected. Same word ≠
+    // new feature; a DIFFERENT feature stays refused.
+    const facts = {
+      sentence: "The listing's own description: Great location close to the islands and beaches.",
+      anchors: [],
+    };
+    expect(auditClaims("The beach is a short drive away.", [facts])).toEqual([]);
+    const flipped = { sentence: "THE COMMUNITY: it has a pool.", anchors: [] };
+    expect(auditClaims("The community pools are heated.", [flipped])).toEqual([]);
+    // A feature in neither number is still an invention.
+    const v = auditClaims("The beach is a short drive away.", [flipped]);
+    expect(v.some((x) => x.kind === "unsourced-feature" && x.match === "beach")).toBe(true);
+  });
+
   it("a ZIP CODE before the word 'zip' is a NAME, not a count of zips", () => {
     // Found live 08/09/2026 (price-reduced acceptance): the narrator wrote "the 33914 zip"
     // — its own settled ZIP, naming the area — and the COUNT rule's bare `\d+` quantifier

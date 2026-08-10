@@ -1,3 +1,27 @@
+## 2026-08-10 (Fable 5) — New Listing talk POLISHED at the shared root: no cost talk, no negativity, no AI voice — every shared-narrator email inherits
+
+Operator: "TOO MUCH REPEATING WITH 150 HOMES … TALKS NEGETIVE ABOUT BEING INLAND AND TALKS LIKE
+AI … NOT TALK ABOUT MORE COSTS LIKE HOW MUCH THE HOA IS … JUST TALK ABOUT THE GOOD THINGS."
+Research first (ordered): crawl4ai on Anthropic's live prompting guide (examples are the most
+reliable tone lever; a one-sentence role shifts voice) + Wikipedia's signs-of-AI-writing catalog
+(boasts/offers/features for "has", not-just-X-but-Y, rule of three, summing clauses) — filed at
+_RESEARCH/voice-and-positioning/2026-08-10-ai-voice-control-research.md + INDEX line. Fixes, all
+at the ONE root (authorListingNarrative, shared.ts): agent role sentence + digit-free worked
+example; assignment rewritten from "monthly HOA / $ per sq ft" material to THE GOOD around the
+home; NEVER TALK ABOUT COSTS + NEVER A NEGATIVE (incl. concessives — first live draw wrote "even
+though you're tucked inland"), each backed by a delete-only sentence filter IN CODE; no-repeat
+extended to the seller's description (the "150 homes" case verbatim). "beaches" promoted to
+priority amenity category (vendor category already in the lake — probed data_lake, 27 rows in the
+a–b slice alone); AREA rule leads with the beach. Claim-gate false-trip fixed at featuresIn():
+"beaches" in the description now licenses "beach" (a live draw died on exactly this). Also fixed
+stale-red price-reduced.language.test (bankFor("just-sold") assertion never flipped when 97724164
+registered the bank). NOT touched: just-sold (zero model calls; files claimed by parallel
+session), market-comps ($/sqft is that email's purpose). Evidence: shared 16/16, claims 26/26,
+amenities 31/31, sweep 3299 pass 0 fail, bunx next build exit 0; new-listing + coming-soon
+captures re-baked through the real pipe and read back — 0 HOA/trade-off/even-though hits in the
+bytes; new-listing paragraph now: "…when you're ready for the beach, the islands are just a
+short drive from here."
+
 ## 2026-08-10 (Fable 5) — Under Contract capture back on HORSECREEK, description bought onto the paid row, community paragraph ships
 
 Operator: "4140 Horsecreek Blvd. I DON'T WANT FUCKING KELLYSANDS WAY!!!" — the showcase house is
