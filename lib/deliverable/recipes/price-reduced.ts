@@ -81,6 +81,8 @@ import {
   perSqft,
 } from "./shared";
 import { priceReducedSubject } from "./subject-lines";
+import { bankFor } from "../language-banks";
+import { bodyWordCount, fillSentences } from "../language";
 import { compsForAddress, type RenderComp } from "@/lib/assistant/comp-helper";
 import { chartSpecToEmailImage } from "@/lib/email/spec-to-png";
 import { createBlock } from "@/lib/email/doc/default-docs";
@@ -115,6 +117,21 @@ export function previousPrice(facts: ListingFacts): string | undefined {
   const cut = money(facts.priceReduction);
   if (current === undefined || cut === undefined) return undefined;
   return usd(current + cut);
+}
+
+/** Slot values for PRICE_REDUCED_BANK, from the recipe's ALREADY-RESOLVED facts —
+ *  the engine never fetches (spec FM3: the four-lane ladder runs upstream, in
+ *  resolveSubject, never here). The street slot only earns a value when the vendor
+ *  actually flags a reduction — the same condition as the kicker — so the bank's cut
+ *  sentence can never announce a move the record doesn't hold. Community comes from
+ *  the parcel-resolved subdivision (the field the narrator's inside-the-gate lane
+ *  keys on, shared.ts) — absent is the normal case and the sentence drops whole. */
+export function bankValues(facts: ListingFacts): Record<string, string | undefined> {
+  const street = (facts.address ?? "").split(",")[0]?.trim() || undefined;
+  return {
+    street: facts.isPriceReduced ? street : undefined,
+    community: facts.communityStats?.subdivisionName?.trim() || undefined,
+  };
 }
 
 /** How many real comps to require before charting a reference — one point is not a
@@ -583,6 +600,21 @@ export async function buildPriceReduced(ctx: RecipeBuildContext): Promise<EmailD
       "• Describe the home itself, from the facts" +
       (hasRemarks ? " and the agent's own description." : " you were given, and nothing else.");
 
+  // ── THE SENTENCE BANK (spec 2026-08-10-sentence-banks-design.md) ─────────────
+  // Code-owned fact sentences open the paragraph; the model NEVER sees them as
+  // rewritable text — it only ADDS connective after them, and the claim gate keeps
+  // gating its additions exactly as before. The bank now owns the ONE legal mention
+  // of the move, so the framing must forbid the model restating it in any words.
+  const bank = bankFor("price-reduced");
+  const bankFilled = bank ? fillSentences(bank, bankValues(facts)).filled : [];
+  const bankAddendum = bankFilled.length
+    ? "\n• THESE SENTENCES ALREADY OPEN THE PARAGRAPH (written by us, not you — do not " +
+      "repeat, rephrase, or contradict them): " +
+      bankFilled.map((s) => `"${s}"`).join(" ") +
+      "\n• Because the price move is already stated above, you may NOT mention it again in " +
+      "any words."
+    : "";
+
   // TWO attempts, same as back-on-market's NARRATOR_ATTEMPTS: the claim gate legitimately
   // drops an inventing paragraph (measured on this recipe's first live walk run 08/09/2026:
   // an invented "2022" year and a "since the listing" sequence) and one clean re-ask is a
@@ -591,7 +623,7 @@ export async function buildPriceReduced(ctx: RecipeBuildContext): Promise<EmailD
   let narrative: string | null = null;
   for (let attempt = 0; attempt < 2 && !narrative; attempt++) {
     narrative = await authorListingNarrative(facts, {
-      framing,
+      framing: framing + bankAddendum,
       // The previous price is THIS recipe's own derivation — settled here so a single legal
       // mention doesn't die at the claim gate as an unanchored number (the Just Sold lesson:
       // a fact you want the narrator allowed to state goes in anchors, not only in framing).
@@ -601,7 +633,22 @@ export async function buildPriceReduced(ctx: RecipeBuildContext): Promise<EmailD
       descriptionRendered: hasRemarks,
     }).catch(() => null);
   }
-  if (narrative) doc = fillNarrative(doc, narrative);
+
+  // CODE assembles: bank first, connective after. The model never touched the bank words.
+  const paragraph = [...bankFilled, narrative ?? ""].join(" ").trim();
+
+  // FLOOR GUARD (spec FM7; emails.md §0.1 — the floor bites harder than the ceiling).
+  // Previously enforced NOWHERE in the build path (verified 08/09/2026). Under 50 words
+  // is logged LOUDLY, never padded and never blocked — the grid still carries the email;
+  // the log is what makes the shortfall visible (T8's lesson: a silent drop looks like
+  // nothing being wrong).
+  if (paragraph && bodyWordCount(paragraph) < 50) {
+    console.error(
+      `[price-reduced] body ${bodyWordCount(paragraph)} words — under the 50-word floor ` +
+        `(bank ${bankFilled.length} sentence(s), connective ${narrative ? "ran" : "dropped"})`,
+    );
+  }
+  if (paragraph) doc = fillNarrative(doc, paragraph);
 
   return doc;
 }

@@ -436,7 +436,9 @@ describe("the narrator", () => {
     // remarks the narrator IS called, from the record + amenity lanes, and its prompt
     // states the truth: the description is NOT on the page, and the source is the record.
     const doc = (await buildPriceReduced(ctx(SHORE_DR)))!;
-    expect(bodyOf(doc)).toBe(NARRATIVE);
+    // SENTENCE BANK (spec 2026-08-10): the paragraph now OPENS with the code-owned cut
+    // sentence — the model's prose follows it and never contains the move.
+    expect(bodyOf(doc)).toBe(`The price on 326 Shore Dr just came down. ${NARRATIVE}`);
     expect(lastSystem).toContain("**NOT** ON THIS PAGE");
     expect(lastSystem).toContain("YOUR SOURCE IS THE RECORD");
   });
@@ -451,7 +453,7 @@ describe("the narrator", () => {
 
   test("WITH the agent's description (lane 2) → the paragraph is authored", async () => {
     const doc = (await buildPriceReduced(ctx(WITH_REMARKS)))!;
-    expect(bodyOf(doc)).toBe(NARRATIVE);
+    expect(bodyOf(doc)).toBe(`The price on 326 Shore Dr just came down. ${NARRATIVE}`);
   });
 
   test("no coaching note EVER survives into the body", async () => {
@@ -483,7 +485,11 @@ describe("the narrator", () => {
     // is restored on the way out, pass or fail.
     try {
       const doc = (await buildPriceReduced(ctx(WITH_REMARKS)))!;
-      expect(bodyOf(doc)).toBe(""); // cleared, and left open — never a fabrication
+      // SENTENCE BANK (spec 2026-08-10, RULE 0.7b): the bank is the baked lane — a dead
+      // model no longer means an EMPTY slot; the code-owned cut sentence still ships
+      // (with the floor shortfall logged loudly). Still never a fabrication: every word
+      // is the bank's, every fact is the record's.
+      expect(bodyOf(doc)).toBe("The price on 326 Shore Dr just came down.");
     } finally {
       mock.module("@/refinery/agents/anthropic.mts", () => ({
         ...realAnthropic,
@@ -709,5 +715,31 @@ describe("the build-level wiring — the chart fills when sourced, drops cleanly
     // slot was never reserved at all (dropEmptyChartSlot has nothing to find here; the
     // reserve-then-drop path is what the "no chart" fixtures above this block exercise).
     expect(chartBlock).toBeUndefined();
+  });
+});
+
+// ── SENTENCE-BANK INTEGRATION (spec 2026-08-10-sentence-banks-design.md) ──────────
+import { bankFor } from "../language-banks";
+import { fillSentences } from "../language";
+import { bankValues } from "./price-reduced";
+
+describe("sentence-bank integration", () => {
+  test("bankValues maps facts → slot values (street from the address's first segment)", () => {
+    expect(bankValues(SHORE_DR).street).toBe("326 Shore Dr");
+  });
+  test("no reduction → no street value → the cut sentence drops whole", () => {
+    const v = bankValues({ ...SHORE_DR, isPriceReduced: false });
+    const r = fillSentences(bankFor("price-reduced")!, v);
+    expect(r.filled.some((s) => /came down/i.test(s))).toBe(false);
+  });
+  test("community fills from the parcel-resolved subdivision only", () => {
+    const withCommunity: ListingFacts = {
+      ...SHORE_DR,
+      communityStats: {
+        subdivisionName: "Whiskey Creek",
+      } as NonNullable<ListingFacts["communityStats"]>,
+    };
+    expect(bankValues(withCommunity).community).toBe("Whiskey Creek");
+    expect(bankValues(SHORE_DR).community).toBeUndefined();
   });
 });
