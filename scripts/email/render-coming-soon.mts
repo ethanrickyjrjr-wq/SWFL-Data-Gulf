@@ -28,21 +28,25 @@
  *    CAN-SPAM unsubscribe URL — never travel. That is the actual root of the 08/05
  *    "the bottom was bare" defect, and it is invisible unless something counts it.
  *
- * DEFAULT HOUSE: 16209 Asheboro Ct, Fort Myers 33908 — and the choice cost something,
- * which is worth stating rather than hiding. Two constraints pull against each other:
+ * DEFAULT HOUSE: 2287 Somerset Pl, Naples 34120 — AND THE DEFAULT IS THE SHOWCASE
+ * SUBJECT, which is the load-bearing fact. A bare run of this script is what
+ * regenerates `public/new-emails/coming-soon-email.html`, so whatever address sits
+ * here is what /showcase ships to prospects.
  *
- *   • THE FUNNEL wants a subject whose comparable set is genuinely small. Probed live
- *     08/05/2026 across Lee's 14,643 active homes: 5121 Muddy Ln gives 799 → 87 and
- *     13630 Brynwood Ln gives 321 → 20, both strong. New Listing's own default house
- *     (12554 Kellysands Way) gives 2,747 → 2,575 — a funnel that barely moves, which
- *     would make the scarcity claim read as filler.
- *   • THE HERO PHOTO must not be an aerial (locked operator rule: the listing's own
- *     photo or nothing, and never a drone view). **Both strong-funnel candidates have
- *     drone shots as their primary photo** — the vendor's feed is full of them.
+ * POSTMORTEM (08/09/2026): the default used to be 16209 Asheboro Ct, Fort Myers —
+ * a manufactured home picked 08/05 as a throwaway ACCEPTANCE subject (it beat the
+ * stronger-funnel Lee candidates only because their primary photos were drone shots,
+ * which the locked no-aerial rule forbids). The showcase capture was then built
+ * separately from THIS Naples address — but when the backlit-chart session re-ran the
+ * script bare to refresh the chart, the acceptance default silently swapped the demo
+ * back to the trailer. Operator: "HOW IS THE COMING SOON EMAIL BACK TO THE TRAILER?"
+ * The fix is structural: the default IS the demo house. Never point it at a subject
+ * you would not put in front of a prospect; pass a throwaway address as argv[2] when
+ * you need one.
  *
- * The photo rule is the locked one, so it wins. Asheboro Ct has a real front-elevation
- * photo and a weaker but honest funnel (834 in band → 518 matching). Nothing in the pipe
- * today can tell an aerial from an elevation; see the open check.
+ * Why this house: real front-elevation photo (no aerial), and an honest funnel that
+ * actually moves — 6,105 Collier active → 280 in the ±10% band → 84 matching beds+size
+ * (probed live 08/09/2026).
  *
  * SPEND: zero new vendor spend. The free spine and the already-bought paid row cover it.
  * The ONLY metered call is the one narrator paragraph, and Coming Soon's narrator runs
@@ -70,7 +74,7 @@ import {
   type ProvenanceRow,
 } from "./_harness.mts";
 
-const ADDRESS = subjectAddress("16209 Asheboro Ct, Fort Myers, FL 33908");
+const ADDRESS = subjectAddress("2287 Somerset Pl, Naples, FL 34120");
 
 console.log(`\n  SUBJECT (never printed in the email): ${ADDRESS}\n`);
 

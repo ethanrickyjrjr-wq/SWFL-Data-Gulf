@@ -1,3 +1,37 @@
+## 2026-08-09 (Fable 5) — OPERATOR: "HOW THE FUCK IS THE COMING SOON EMAIL BACK TO THE FUCKING TRAILER?? WHO IN THE FUCK CHANGED IT BACK?" + "WE ALREADY WENT OVER ALL OF THIS. 1-1.5 MILLION OR BETTER FUCKING NUMBERS"
+The /showcase Coming Soon demo regressed from the $1.42M Naples estate (2287 Somerset Pl, 34120)
+back to the 16209 Asheboro Ct manufactured home. WHO: no one on purpose — the 08/09 01:16 backlit-
+charts session (commit 9bd4fb45) re-ran `render-coming-soon.mts` BARE to refresh the chart PNG, and
+the script's hardcoded default address was the Asheboro ACCEPTANCE subject, so the regeneration
+silently swapped the showcase subject. ROOT CAUSE: the bare default regenerates the PUBLIC capture,
+but the default was a throwaway acceptance house, not the demo house. FIXED same session: capture
+rebuilt from Somerset ($1.42M · 4/3/2,815 · 6,105→280→84 funnel · estate photo verified by eye),
+default address changed to Somerset with a postmortem comment so a bare re-run reproduces the DEMO,
+never the trailer. STANDING RULE FROM THIS: a render script's default address IS the showcase
+subject — never point it at a house you wouldn't show a prospect.
+RESOLVED 2026-08-09 (pending push).
+
+## 2026-08-09 (Fable 5) — OPERATOR: JUST SOLD email fails the look + reads wrong
+Verbatim: "I CAN SEE A BLACK LINE AND THE ANGLE IS TERRIBLE. JUST MAKE IT A DIFFERENT COLORED
+COMPLEMENTARY COLOR FLAG AT THE BOTTOM OF THE PICTURE. INCLUDE % SQ FT / DOM. TALK ABOUT IN A GOOD
+LIGHT AS IF IT SOLD IN LESS DAYS ON MARKET AS TO OTHERS AND AT A GOOD PRICE PER FOOT. TALK LIKE A
+REAL ESTATE AGENT WHO DID A GOOD JOB IN A COMMUNITY AND OTHERS SHOULD BE INTERESTED IF THEY ARE
+LOOKING TO SELL!!!! USE THE SCRIPTS!!!!" Four asks: (1) kill the diagonal black banner on the photo
+— flat complementary-color flag at the BOTTOM of the picture; (2) surface price per sq ft; (3)
+surface DOM; (4) body voice = proud listing agent — sold faster than the area, strong $/sq ft,
+"thinking of selling? this is what your home could do" — built on the sentence bank
+(price-reduced pattern), rendered via scripts/email/render-just-sold.mts and LOOKED at.
+
+## 2026-08-09 (Fable 5) — OPERATOR: "THIS SHIT CAN NOT HAPPEN" — email body LEAKED the internal gap-instruction sentence, and the description gap itself is a ladder violation
+Screenshot 231534: rendered email body opens with "THE LISTING'S OWN DESCRIPTION IS ABSENT, so I am
+describing the home itself." — that is PROMPT SCAFFOLDING shipped to a reader. Verbatim: "HOW CAN WE
+CAN DESCRIPTIONS OF EVERY FUCKING HOUSE, BUT WE PUT UP SHIT LIKE THIS FOR AN EXAMPLE???? I CAN
+PROMISE YOU THE DESCRIPTION IS IN APIFY." Two defects: (1) internal meta/instruction text is not
+filtered out of the model's prose before render — no guard catches it; (2) the description was
+treated as absent when Apify holds it (ladder 0.7a rung 2/3 — check the paid row we already bought,
+then a targeted paid call for the ONE missing field, before shipping a "we don't have it" email).
+Both must be fixed in code, not noted.
+
 ## 2026-08-09 (Fable 5) — OPERATOR: "HOW DO WE TRAIN YOUR MEMORY TO BE MORE REAL ESTATE SMART" + "UPDATE WHERE THE NEW PLAYBOOK IS... GET CLAUDE BETTER ORGANIZED. THIS SUCKS"
 Two asks: (1) memory should carry real-estate DOMAIN judgment (the $173–$421/sq-ft comp fiasco is
 the trigger — a session that knew comps must be size-banded and same-type would never have shipped
