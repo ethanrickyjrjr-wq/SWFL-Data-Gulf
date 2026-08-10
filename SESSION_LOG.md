@@ -1,3 +1,11 @@
+## 2026-08-10 (Fable 5) — Playbook §1.9 distance rule LANDED — check closed, pending file deleted
+
+The other session released its playbook claim (third background wait); the DISTANCES SPEAK LIKE A
+PERSON rule is now in §1.9 naming humanDistance() as the one root. Check
+playbook_distance_rule_line closed with grep evidence; _ASSISTANT/pending-playbook-19-distance-rule.md
+deleted — the rule lives where rules live now. This completes 08/10/2026's distance decree: code
+root + AREA instruction + tests + re-baked showcase (31436091) + the universal playbook rule.
+
 ## 2026-08-10 (Fable 5) — OLD emails stripped from every surface: no rendered path to the pre-registry captures remains
 
 Operator: "GET THESE OLD EMAILS OUT OF HERE… THERE IS ONLY ONE PLACE… JUST GET THEM OFF THE WEBSITE
