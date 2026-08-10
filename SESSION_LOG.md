@@ -1,3 +1,17 @@
+## 2026-08-09 (Fable 5) — Coming Soon showcase demo un-trailered: root cause was the render script's bare default address
+
+Operator: "HOW IS THE COMING SOON EMAIL BACK TO THE TRAILER? WHO CHANGED IT BACK?" Traced: commit
+9bd4fb45 (08/09 01:16, the backlit-charts/600px session) re-ran `render-coming-soon.mts` with NO
+address to refresh the chart PNG, and the script's hardcoded default was the ACCEPTANCE subject
+16209 Asheboro Ct (a manufactured home) — so the fresh capture silently replaced the $1.42M Naples
+demo. Nobody chose the trailer; the default did. Recovered the demo subject from the old chart key
+(`Collier-1278000-1562000-4-2250` → list $1,420,000, 4bd, sqft 2,813–2,874 → lake query → 2287
+Somerset Pl, Naples 34120 — hero hash 19585bc2 matches exactly). Rebuilt
+`public/new-emails/coming-soon-email.html` from Somerset on the real pipe (suppression 4/4 ✓, 22KB,
+backlit funnel 6,105→280→84, LOOKED at the render), and changed the script default to Somerset with
+a postmortem comment: the bare default IS the showcase subject — never an acceptance throwaway.
+Only this one capture carried the trailer photo (grepped all of public/).
+
 ## 2026-08-09 (Fable 5) — SENTENCE BANKS built end-to-end: engine + first bank (price-reduced) + §2.7 walked + second-order audit fixes
 
 Operator decree: code the allowed words, blanks for the builder to fill. Spec
