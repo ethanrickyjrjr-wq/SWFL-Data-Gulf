@@ -14,8 +14,9 @@
 - Claim: a prefill is never a chart bar — the comps chart anchors on a RECORDED close or is dropped
   Test: lib/deliverable/recipes/just-sold.test.ts > "F4 · a prefill is NEVER a bar"
   Live: render-just-sold.mts assertion 6
-- Claim: with no recorded close the narrator may name no sale price, and never restates the prefill
-  Test: lib/deliverable/recipes/just-sold.test.ts > "F5 · with no recorded close the narrator is FORBIDDEN to name a sale price"
+- Claim: the closer prose is digit-free — it can never name a sale price or restate the prefill
+  (the 08/09 sentence-bank rebuild made the old narrator guard stronger: no figure at all)
+  Test: lib/deliverable/recipes/just-sold.test.ts > "F5 · the CLOSER names no figure, speaks to the READER, and asks the one question"
   Live: render-just-sold.mts assertion 8
 - Claim: no paid sold-price lane (Apify / property-tax) is wired into this recipe — SUSPENDED by
   operator decree 08/06/2026 until he decides there is a measured difference
