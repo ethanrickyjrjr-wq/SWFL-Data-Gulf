@@ -321,11 +321,26 @@ export function scarcityBand(
   fields: ComingSoonFields = COMING_SOON_FIELDS,
 ): { bandLo: number; bandHi: number; sqftFloor: number } {
   const b = fields.band;
-  // Round to the same thousand `usdShort` renders, BEFORE the query sees it.
-  const toK = (n: number) => Math.round(n / b.priceRoundTo) * b.priceRoundTo;
+  // THE STEP IS HUMAN, SCALED TO THE SUBJECT (operator 08/09/2026: "WHY ARE THE NUMBERS
+  // NOT 1.2-1.5?" — a $1.4M email printing "$1.28M–$1.56M" reads as machine output).
+  // Both ends FLOOR to a number a person would say out loud, and those same rounded
+  // numbers feed the query, so the checkability contract above is untouched. Flooring
+  // the top can never drop it below the subject's own price: at every threshold, 10% of
+  // the price is at least the step (0.1 × $1M ≥ $100K, 0.1 × $500K ≥ $50K, …).
+  const step =
+    price >= 1_000_000
+      ? 100_000
+      : price >= 500_000
+        ? 50_000
+        : price >= 250_000
+          ? 25_000
+          : price >= 100_000
+            ? 10_000
+            : b.priceRoundTo;
+  const down = (n: number) => Math.floor(n / step) * step;
   return {
-    bandLo: toK(price * b.priceLo),
-    bandHi: toK(price * b.priceHi),
+    bandLo: down(price * b.priceLo),
+    bandHi: down(price * b.priceHi),
     sqftFloor: Math.floor((sqft * b.sqftFloorRatio) / b.sqftRoundTo) * b.sqftRoundTo,
   };
 }
@@ -909,6 +924,11 @@ export async function buildComingSoon(
   // fills, and it is strictly better than a teaser that names the house.
   const cleaned = raw ? redactStreetLine(raw, street) : null;
   const narrative = cleaned && !leaksStreet(cleaned, street) ? cleaned : null;
+  // NEVER SILENT (08/09/2026): this drop was the one un-logged path — a paragraph
+  // killed here looked identical to "no description existed", and the demo shipped
+  // wordless for a night before anyone could say why.
+  if (cleaned && !narrative)
+    console.warn("[narrative] DROPPED — the authored paragraph still carried the street");
 
   // LANDMINE: fillNarrative SKIPS a text block that already has content. The chrome leaves
   // the commentary slot empty on purpose, but clearNarrativeSlots keeps that true even if

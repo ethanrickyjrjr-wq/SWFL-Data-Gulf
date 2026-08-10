@@ -61,6 +61,28 @@ verbatim-only COUNT rule killed it (the gate eating honest sentences). `claims.t
 stay verbatim-only, and the digit must sit within 3 words of the entity in ONE settled sentence.
 25/25 gate tests green including both corruption-on-restate traps; new-listing recipe tests green.
 
+## 2026-08-10 (Fable 5) — Coming Soon demo: human band ($1.2M–$1.5M), and the HOUSE PARAGRAPH ships — description bought once for $0.007
+
+Operator (screenshot 233250): "WHY ARE THE NUMBERS NOT 1.2-1.5" + "WHERE THE FUCK IS THE HOUSE
+DESCRIPTION". (1) `scarcityBand` now FLOORS both ends to a magnitude-scaled human step
+($100K at $1M+, $50K/$25K/$10K below) — query and label stay identical (the checkability
+contract), $1,420,000 → "$1.2M–$1.5M" exactly; tests updated, 30/30. (2) The demo house had no
+description on any free lane (no paid row, no paste) — bought its record via
+`one-api/realtor-property-scraper` property_inputs ($0.007, run MdWKQA4bKzH8uufrO), saved through
+`toRow`/`saveApifyRecords` into `data_lake.apify_property_records` (2,263-char MLS text, HOA $675,
+photos) — a cached read forever after. En route, three real defects: (a) `fillFromPaidRecord` was
+fill-only, so a ~155-char page-scrape snippet could block the full description it prefixes — now
+completes a normalized strict prefix, never overwrites different text; (b) coming-soon's
+`leaksStreet` drop was the one unlogged narrator drop — now warns; (c) the acceptance table's
+"Description 155 chars" was FALSE — the authored-paragraph patch-in writes `rows[14]` (the
+Description row, off-by-one) and its detector matches the 155-char AGENT BIO, so the table
+mislabeled the bio as the description all along (remarks were fine in-process, proven by debug
+clone). Rendered, LOOKED: paragraph ships ("Built in 2019… LaMorada… half-acre… $675 HOA"),
+suppression 4/4, capture installed. `bunx tsc --noEmit` clean. OWED (files claimed by parallel
+sessions, claim-wait running): shared.ts narrator slice 1,200→6,000 (fuel truncation manufactures
+invention — pool/lanai sit past the cut), render script rows[14]→label-addressed + bio-excluding
+detector.
+
 ## 2026-08-09 (Fable 5) — Coming Soon showcase demo un-trailered: root cause was the render script's bare default address
 
 Operator: "HOW IS THE COMING SOON EMAIL BACK TO THE TRAILER? WHO CHANGED IT BACK?" Traced: commit

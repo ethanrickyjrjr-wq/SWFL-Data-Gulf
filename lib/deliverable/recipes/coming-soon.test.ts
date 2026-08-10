@@ -251,12 +251,21 @@ describe("redactStreetLine / leaksStreet — the guard on the MODEL's output", (
 });
 
 describe("scarcity — real counts, disclosed criterion, never a zero for a gap", () => {
-  test("the band is ±10% of price and 80% of size, floored to a clean 50 sq ft", () => {
+  test("the band is ±10% of price and 80% of size, floored to HUMAN steps (operator 08/09: '$1.2M–$1.5M', never '$1.28M–$1.56M')", () => {
+    // $595K subject → $50K step: both ends floor to numbers a person would say.
     expect(scarcityBand(595000, 2847)).toEqual({
-      bandLo: 536000,
-      bandHi: 655000,
+      bandLo: 500000,
+      bandHi: 650000,
       sqftFloor: 2250,
     });
+    // $1.42M subject → $100K step → the exact label the operator asked for.
+    const m = scarcityBand(1420000, 2815);
+    expect(m.bandLo).toBe(1200000);
+    expect(m.bandHi).toBe(1500000);
+    expect(`${usdShort(m.bandLo)}–${usdShort(m.bandHi)}`).toBe("$1.2M–$1.5M");
+    // Flooring the top can never exclude the subject's own price: at every step
+    // threshold, 10% of price ≥ the step.
+    expect(m.bandHi).toBeGreaterThanOrEqual(1420000);
   });
 
   test("usdShort keeps a cell label readable", () => {
@@ -358,16 +367,16 @@ describe("scarcity — real counts, disclosed criterion, never a zero for a gap"
       ...COMING_SOON_FIELDS,
       band: { ...COMING_SOON_FIELDS.band, priceLo: 0.8, priceHi: 1.2 },
     };
-    // The default ±10% of 595,000, rounded to the thousand `usdShort` renders.
+    // The default ±10% of 595,000, floored to the human $50K step.
     expect(scarcityBand(595000, 2847)).toEqual({
-      bandLo: 536000,
-      bandHi: 655000,
+      bandLo: 500000,
+      bandHi: 650000,
       sqftFloor: 2250,
     });
     // ±20% off the same subject — proof the literals are read, not baked in.
     expect(scarcityBand(595000, 2847, wider)).toEqual({
-      bandLo: 476000,
-      bandHi: 714000,
+      bandLo: 450000,
+      bandHi: 700000,
       sqftFloor: 2250,
     });
   });

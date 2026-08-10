@@ -1,9 +1,39 @@
+## 2026-08-10 (Fable 5) — OPERATOR: showcase pop-up click = homepage in a new tab, EVERY email
+Verbatim: "WHY IF I CLICK THE POP UP ON WEBPAGE SHOWCASE IT BRINGS ME BACK TO THE HOMEPAGE IN A
+NEW TAB IF I CLICK ANY POP UP OF ANY EMAIL????" Clicking the enlarged email pop-up on /showcase
+opens the site homepage in a new tab instead of doing something useful (or nothing). ROOT CAUSE:
+the overlay's iframe was live while the thumbnail cards were click-inert — and the captures are
+real emails whose CTA/hero/logo/agent-card links all target="_blank" at the homepage. FIXED:
+pointerEvents "none" on the overlay iframe (NewEmails.tsx) with a load-bearing comment; the only
+action in the pop-up is Build this →. bunx next build exit 0.
+RESOLVED 2026-08-10 (pending push).
+
+## 2026-08-10 (Fable 5) — OPERATOR: the email "voices" are wrong for a real-estate product
+Verbatim: "WHY THE FUCK ARE THESE THE 'VOICES' FOR OUR EMAILS!?? WE WRITE REAL ESTATE EMAILS!!"
+Screenshot 234800: Plain / Editorial letter / Editorial showcase / Magazine issue. WHY: refactor
+survivors — the 08/02 one-lane collapse carried the 3 editorial presets verbatim from the deleted
+author-recipes registry; nobody ever authored agent voices. Operator approved the new lineup
+("THOSE NAMES ARE GOOD"): Plain · Neighborhood agent · Luxury specialist · Straight-talk advisor.
+BUILT: voice-presets.ts rewritten (pure sound, Voice Card §1.20 reader-is-hero, digit-free +
+no-layout-nouns tests); legacy editorial ids degrade letter→neighborhood, showcase→luxury,
+magazine→plain; wiring tests updated incl. retired-id end-to-end. 33 tests green.
+RESOLVED 2026-08-10 (pending push).
+
 ## 2026-08-10 (Fable 5) — OPERATOR: narrator must NEVER alter the agent-written listing description
 Verbatim: "JUST MAKE SURE THE NARRATOR IS NOT CHANGING THE FUCKING DESCRIPTIONS WE BRING IN FOR
 THE ACTUAL LISTING THAT THE AGENT WROTE." The remarks/description brought in from the feed or paid
 row is the AGENT'S OWN COPY — it ships verbatim or not at all; the model may never rewrite,
 paraphrase, trim, or 'improve' it. Verify every recipe's description path in code and enforce with
 a guard/test, not a prompt line.
+RESOLVED 2026-08-10 — verified ALREADY ENFORCED IN CODE, no gap found: the description block is
+code-owned (`buildDescriptionBlock` / `listingDescription`, pure truncation only, no model in the
+path, marked `descriptionSlot: true`); the ONE narrative seam every recipe uses physically skips
+it (`fillNarrative` shared.ts:288, `clearNarrativeSlots` shared.ts:316); tested at that exact seam
+(open-house.test.ts:391 "the model never touches it", back-on-market.test.ts:523 body `.toBe`
+remarks) — ran both files live: 58 pass / 0 fail. Just-sold suppresses the block by design (stale
+once closed). ONE surface where remarks feed the model instead of shipping verbatim: coming-soon's
+teaser (street-redacted remarks as fuel, address deliberately withheld) — already covered by the
+open 08/09 item about the coming-soon body words.
 
 ## 2026-08-10 (Fable 5) — OPERATOR: "WE SERIOUSLY NEED TO BE SMARTER ABOUT REAL ESTATE"
 Verbatim: "WHAT DO YOU NEED TO RESEARCH AND HOW DO WE MAKE THIS HAPPEN? ... HOW CAN THE BUILDER
@@ -12,6 +42,8 @@ DIAGNOSIS + RESEARCH PLAN: why does every email walk still take a session of scr
 corrections (banner angle, DOM/$-per-sqft missing, agent-bio filler instead of the house, machine
 numbers) when the playbook + sentence banks + scripts all exist. The gap he's naming is REAL ESTATE
 DOMAIN JUDGMENT — what a good agent email says and shows by default — not more pipe.
+
+## 2026-08-09 (Fable 5) — RESOLVED same session (both): band now floors to human steps ($1.2M–$1.5M, query = label, tests updated); house description bought for $0.007 (one-api per-property actor → apify_property_records, Somerset row cached forever) and the narrator paragraph SHIPS. THREE root defects found on the way: (1) paid-lane fill-only let a truncated scrape snippet block its own full description — now completes a strict prefix; (2) coming-soon's leaksStreet drop was silent — now logs; (3) the acceptance script's "155 chars" was the AGENT BIO length written into the WRONG PROVENANCE ROW (rows[14] off-by-one) — render script + shared.ts (1,200-char narrator slice) fixes still owed, both files claimed by parallel sessions.
 
 ## 2026-08-09 (Fable 5) — OPERATOR, on the restored Coming Soon demo (screenshot 233250): band label + body words
 Verbatim: "WHY ARE THE NUMBERS NOT 1.2-1.5 OR 1 TO 1.5????" + "WHAT ARE ALL THESE WORDS AND WEHRE
@@ -59,6 +91,15 @@ reader-first with the one question. 76 unit tests green, 8/8 acceptance on BOTH 
 bunx next build exit 0. CAVEAT reported: 330 Shore Dr's vendor row carries no list date, so DOM
 rendered as an open slot there — gates proven by unit test, cell fills where the vendor holds
 both ends.
+
+## 2026-08-10 (Fable 5) — OPERATOR: "0.57-mile grocery — NEED TO MAKE SURE THESE ARE 1/2 MILE OR QUARTER MILE. WE AREN'T BEING EXACT HERE. AND ALL THESE RESTRAINTS NEED TO BE IN EVERY EMAIL RULE"
+Distances in email prose must read the way a person talks — "about half a mile," "a quarter mile,"
+"about a mile" — never a two-decimal figure like "0.57 miles." Same lesson the open-house invite
+already learned ("No one says a fucking golf course .57 miles away") but it was only applied to
+the INVITATION branch, not the amenity fact line every narrator email reads. THE ROOT DEMAND:
+restraints like this go at the ONE code root (shared narrator source line) so every email inherits
+them, AND into the playbook's PART 1 universal rules — never patched into one recipe. "WE CAN'T
+JUST UPDATE IN ONE PLACE AND NOT ANOTHER."
 
 ## 2026-08-09 (Fable 5) — OPERATOR CORRECTION: "THE POINT OF THE NARRATOR IS NEVER FOR THE FUCKING DESCRIPTION… IT IS ADDING EXTRA BELOW AND CALLS TO ACTION… IT CAN WORK OFF A SCRIPT BUT NOT JUST ECHO IT"
 I over-rotated: read "no narrator when description exists" as KILL the paragraph, and shipped that.

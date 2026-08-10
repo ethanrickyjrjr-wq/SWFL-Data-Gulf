@@ -206,9 +206,28 @@ export async function fillFromPaidRecord(
   // NOT count against the 50–125 word budget (playbook §1.9 carve-out). Fill-only:
   // the live record's remarks win, and so does anything the agent pasted in, because
   // this runs AFTER that lane. The model never rewrites it into a claim.
-  if (!facts.remarks && typeof row.description === "string" && row.description.trim()) {
-    facts.remarks = row.description.trim();
-    fill.description = true;
+  //
+  // ONE EXCEPTION, AND IT COMPLETES RATHER THAN OVERWRITES (08/09/2026): a page-scrape
+  // lane sometimes lands a ~155-char SEO snippet in `remarks` — the first sentences of
+  // the SAME MLS text this row holds in full — and "fill-only" then let a truncation
+  // block its own complete version (measured live: a 155-char prefix beat 2,263 chars
+  // of the identical description, and the narrator wrote from the stub). If what we
+  // hold is a strict prefix of this row's description, take the full text; identical
+  // leading text is proof it is the same words, not an agent's paste being replaced.
+  if (typeof row.description === "string" && row.description.trim()) {
+    const full = row.description.trim();
+    // Whitespace-collapsed, trailing-ellipsis-stripped — a scraped snippet arrives
+    // reflowed and often ends "…", and a byte-exact prefix test misses its own match.
+    const norm = (s: string) =>
+      s
+        .replace(/\s+/g, " ")
+        .replace(/(\.\.\.|…)\s*$/, "")
+        .trim();
+    const held = norm(facts.remarks ?? "");
+    if (!held || (norm(full).length > held.length && norm(full).startsWith(held))) {
+      facts.remarks = full;
+      fill.description = true;
+    }
   }
 
   // THE GALLERY — 9 to 55 photos against the free lane's one.
