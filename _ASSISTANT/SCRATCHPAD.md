@@ -4,6 +4,15 @@ showcase subject to Kellysands (New Listing's house) to get a description into t
 call: the showcase house choice is the OPERATOR'S, and each showcase email has its own house.
 The fix must land ON HORSECREEK: fill its description from a real lane (paid row read → paid
 gap-fill → operator paste), never by swapping the house. Re-bake owed on Horsecreek.
+RESOLVED 2026-08-10 — Horsecreek's description bought onto the paid row (dated-area pull, ZIP
+33905 + list-date window, ~$0.27 total through the paid-run valve; vendor spells it "4140 Horse
+Creek Blvd", loose key bridges). Capture re-baked ON HORSECREEK: 2,432-char description verbatim
+in the bytes, authored community paragraph shipped (golf ~3/4 mi, farmers market ~1/2 mi —
+positives only, no costs), 6/6 assertions, render script default house now Horsecreek by decree.
+LESSON RE-LEARNED AT COST: §3.3.1 R1 says in bold the actor has NO address lookup — I paid $0.05
+re-proving it before reading §3.3. Read the actor law BEFORE any paid call, not after.
+NOTE: the narrator call SUCCEEDED this run — the earlier "credit balance too low" failures did
+not recur; balance may be intermittent/low rather than empty. Credits check stays open.
 
 ## 2026-08-10 (Fable 5) — OPERATOR: DESK CHART IS FROM MAY — "HOW IS EVERYTHING NOT AUTOMATED? CAN WE PUT HERMES ON THIS?"
 Verbatim: "WHY IS THE DESK CHART FROM MAY? IT'S AUGUST. HOW IS EVERYTHING NOT AUTOMATED? CAN WE PUT

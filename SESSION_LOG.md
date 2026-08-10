@@ -1,3 +1,18 @@
+## 2026-08-10 (Fable 5) — Under Contract capture back on HORSECREEK, description bought onto the paid row, community paragraph ships
+
+Operator: "4140 Horsecreek Blvd. I DON'T WANT FUCKING KELLYSANDS WAY!!!" — the showcase house is
+his call, one house per email, and my Kellysands swap was the wrong fix. Landed on Horsecreek:
+(1) description bought via the RECORDED actor drive (dated-area pull — ZIP 33905 + list-date
+window 06/28–07/08; §3.3.1 R1: the actor has NO address lookup, which I re-proved at $0.05 by
+trying the address form first before reading §3.3 — own goal, logged). ~$0.27 total through
+scripts/paid-run.mjs; vendor row "4140 Horse Creek Blvd" (loose key bridges the drift), 2,432-char
+description now on data_lake.apify_property_records. (2) render-under-contract.mts default house
+changed to Horsecreek by decree, capture re-baked: description verbatim IN THE BYTES ("HUGE PRICE
+DISCOUNT..." grep-confirmed), authored community paragraph SHIPPED (golf ~3/4 mi, farmers market
+~1/2 mi — positives only, humanDistance bands, zero echo, zero costs), 13-14/15 cells sourced,
+6/6 assertions, 23KB. Narrator call succeeded this run — the earlier credit-balance 400s did not
+recur; under_contract_capture_rebake_after_credits stays open pending an operator read on billing.
+
 ## 2026-08-10 (Fable 5) — Under Contract: the description NOW SHIPS and the community reaches the writer — two stacked defects, both fixed
 
 Operator: "UNDER CONTRACT HAS NO DESCRIPTION!!! WE ARE SENDING OUT EMAILS TO PEOPLE WHO MAY BUY IF

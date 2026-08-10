@@ -42,7 +42,13 @@
  * **Assertion 6 is NOT proven that way and is weaker for it:** it counts image BLOCKS on the
  * built doc rather than reading the rendered bytes, so an HTML mutation cannot exercise it.
  *
- * ── DEFAULT HOUSE: 12554 Kellysands Way, Fort Myers, FL 33908 ────────────────
+ * ── DEFAULT HOUSE: 4140 Horsecreek Blvd, Fort Myers, FL 33905 ────────────────
+ *
+ * CHANGED AGAIN 08/10/2026, by operator decree: the showcase keeps ONE house per email and
+ * under-contract's is Horsecreek ("I DON'T WANT FUCKING KELLYSANDS WAY"). Its description
+ * was bought onto the paid row the same day (dated-area pull, §3.3.1 — there is NO address
+ * lookup on the actor; the 08/07 capture shipped description-less because no lane held it).
+ * The history below records why Kellysands briefly held the seat — lane coverage:
  *
  * CHANGED 08/06/2026, after the first acceptance run. It was Market Comps' house
  * (8348 Southwindbay Cir) because that subject was already measured to carry a real,
@@ -93,7 +99,12 @@ import {
   type ProvenanceRow,
 } from "./_harness.mts";
 
-const ADDRESS = subjectAddress("12554 Kellysands Way, Fort Myers, FL 33908");
+// OPERATOR DECREE 08/10/2026: the under-contract showcase house is 4140 Horsecreek Blvd —
+// "I DON'T WANT FUCKING KELLYSANDS WAY" (each showcase email keeps its OWN house; Kellysands
+// is New Listing's). Its description lives on the paid row bought 08/10/2026 (vendor spells
+// it "Horse Creek" — the loose key bridges the drift), so this house now exercises the
+// description slot, the community layers AND the speed pair.
+const ADDRESS = subjectAddress("4140 Horsecreek Blvd, Fort Myers, FL 33905");
 
 console.log(`\n  SUBJECT: ${ADDRESS}\n`);
 
