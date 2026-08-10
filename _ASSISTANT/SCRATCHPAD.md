@@ -70,6 +70,12 @@ SHIT BECAUSE YOU FEEL LIKE IT" — a decree that sounds like "delete X" still ge
 the playbook's built email before code changes; deviation from a WALKED build needs the playbook
 section read FIRST. Action: restore the built behavior (narrator unconditional, echo-prohibition
 already in the prompt), re-render, re-bake showcase.
+RESOLVED same session (08/09/2026): new-listing.ts restored to the walked build (git checkout from
+a04dc10e^ — narrator unconditional again, per playbook §2.1 grammar "the authored paragraph").
+Re-rendered until a draw passed the claim gate (two draws died on comparative "over half an acre";
+the passing one leads "corner half-acre in a gated 150-home enclave" — the 150-home restatement is
+legal via the countIsAnchored fix). Showcase re-baked: description verbatim + authored EXTRA
+(community amenities, $225 HOA, 0.57-mi grocery) + CTA. 6/6 recipe tests. Committed 0d033208.
 
 ## 2026-08-09 (Fable 5) — [SUPERSEDED BY THE ENTRY ABOVE] OPERATOR: "WE DON'T NEED A FUCKING NARRATOR WHEN THE FUCKING DESCRIPTION IS ALREADY WRITTEN"
 The rule, decreed: when the listing's own description is on the email, the seller's words ARE the
