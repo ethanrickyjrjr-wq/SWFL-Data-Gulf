@@ -1,3 +1,15 @@
+## 2026-08-10 (Fable 5) — OPERATOR: "how the fuck are these not wired????" — cre_figures + commercial-permits consumer
+Four-lane answer on the record: `permits-commercial-swfl` IS fully wired (pack → master.mts:258/:330,
+served /api/b + /r + MCP). The dark half is `cre_figures` + `cre_figures_confidence` — 1,078 + 985
+live rows, built ~08/02, ZERO consumers (tree-wide grep hits only its own build script, engine libs,
+migration, docs). WHY IT HAPPENED: the 07/18 plan deliberately decoupled table-build from brain-wire;
+the 08/02 "wire!!!" decree shipped 5 of 6 parts and the cre_figures consumer half was deferred into a
+cadence_registry YAML COMMENT ("open half of the 08/02 wire decree") with NO check ever opened — so it
+was invisible at every session start since. RULE 2.4 violation, same shape as 0ab (lake comp feed,
+zero consumers). Filed as new strike shape `built-dark-no-consumer` (4 backfilled strikes). The
+consumer the operator means = a CRE deliverable reading BOTH the table and the brain (yesterday's
+big-industry email direction) + the decreed cre-swfl confidence-layer read.
+
 ## 2026-08-10 (Fable 5) — OPERATOR challenges the Apify direction: "agents already have MLS — are we looking at the right industry? 56,000 actors and we are just changing geography. I'm not saying you're wrong, i just want to make sure you are right. we can't build emails well right now. Build me an email for a million dollar house in Ohio using Apify and our builder. save to my downloads"
 Three things raised at once: (1) STRATEGY DOUBT — agents' MLS access may make a national listing-email
 actor redundant ("tap mls into claude and they have an email"); differentiation question is OPEN, not
