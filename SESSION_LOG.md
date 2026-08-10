@@ -1,3 +1,22 @@
+## 2026-08-10 (Fable 5) — Just-sold: house photo + flag restored to the capture; ÷-footnote killed everywhere with its playbook loophole
+
+Operator: "where is the fucking picture of the house with the sold flag??" + "WHY THE FUCK DOES IT
+SAY THIS" (the "*$/Sq Ft is the sale price ÷ listed square footage." footnote) + "WHERE IN THE
+FUCKING PLAYBOOK DOES IT SAY TO ADD THIS SHIT". (1) PHOTO: a sold subject is invisible to the
+for-sale spine AND the lake resolver's state='active' filter, so the build shipped photo-less over
+photos our sold rows RETAIN (99.7%). New `withSubjectPhoto()` (just-sold.ts) walks the subject
+photo through the ONE resolver (resolveCompPhotos), free lanes only, zero spend; acceptance script
+shares the same export. 330 Shore Dr itself sold 08/29/2025 — before photo capture began
+06/30/2026, no rung holds its photo (lake 0 rows, paid rows 0, paid pull suspended) — so the
+canonical showcase house moved to 2099 Grove Dr, Naples 34120: recorded $389,000 close, kicker
+"Sold 07/09/2026", photo held, flag stamped. (2) FOOTNOTE: the 07/20 decree killed formula
+footnotes but emails.md AND playbook §2.5.1 carried a carve-out keeping just-sold's ÷-sentence,
+with a test asserting the defect. soldFootnote now emits ONLY the DOM provenance note; both
+carve-outs deleted; tests flipped to ban ÷-narration. Evidence: 139 tests pass 0 fail (just-sold,
+price-reduced, comp-photos, resolve-subject), 8/8 acceptance on the new house, `bunx next build`
+exit 0, capture re-baked into public/new-emails/ with photo + JUST SOLD band in the bytes, badge
+image downloaded and LOOKED AT, 0 grep hits for "listed square footage".
+
 ## 2026-08-10 (Fable 5) — Playbook §1.9 distance rule LANDED — check closed, pending file deleted
 
 The other session released its playbook claim (third background wait); the DISTANCES SPEAK LIKE A

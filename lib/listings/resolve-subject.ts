@@ -291,7 +291,7 @@ function cityOf(address: string, matched: string): string {
   const fromInput = commaCity(address);
   return fromInput || commaCity(matched);
 }
-function commaCity(s: string): string {
+export function commaCity(s: string): string {
   const parts = String(s ?? "")
     .split(",")
     .map((p) => p.trim())

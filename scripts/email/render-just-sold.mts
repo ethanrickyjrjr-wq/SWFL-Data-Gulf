@@ -48,13 +48,17 @@
  *   8. THE PROSE NEVER RESTATES A PREFILL. Prose is baked and uneditable, so the number the
  *      agent is about to correct in the hero would survive inside the paragraph.
  *
- * ── DEFAULT HOUSE: 330 Shore Dr, Fort Myers, FL 33905 ────────────────────────
+ * ── DEFAULT HOUSE: 2099 Grove Dr, Naples, FL 34120 (changed 08/10/2026) ──────
  *
- * Picked deliberately per §2.5.2: it is the one address measured to carry a REAL recorded
- * sale in its own comp set (closed $300,000 on 08/29/2025, probed live 07/13/2026), so the
- * RECORDED rung is exercised rather than only the prefill. **Run it a second time against a
- * live listing — `12554 Kellysands Way, Fort Myers, FL 33908` — to exercise the PREFILL
- * rung, which under the decree is the common case.** One address cannot prove both.
+ * Picked per §2.5.2, now with the photo requirement: it carries a REAL recorded sale in
+ * its own comp set (closed $389,000, "Sold 07/09/2026", probed live 08/10/2026) AND its
+ * listing photo on our own retained sold row — so the RECORDED rung, the badge flag, and
+ * the photo ladder are all exercised at once. The previous default (330 Shore Dr, Fort
+ * Myers — closed 08/29/2025) sold before photo capture began 06/30/2026, so its capture
+ * shipped photo-less; it remains a useful manual variant for the no-photo open-slot path.
+ * **Run a second time against a live listing — `12554 Kellysands Way, Fort Myers, FL
+ * 33908` — to exercise the PREFILL rung, which under the decree is the common case.**
+ * One address cannot prove both.
  *
  * SPEND: no Apify, no paid sold pull. Decree 08/06/2026 — *"APIFY IS FALL BACK FOR SOLD
  * PRICE. WE WILL NOT USE IT UNTIL WE SEE THERE IS AN ACTUAL DIFFERENCE. I WILL DECIDE."*
@@ -69,6 +73,7 @@ import {
   realSaleComps,
   soldSpecs,
   subjectRow,
+  withSubjectPhoto,
   withSubjectRowFacts,
 } from "../../lib/deliverable/recipes/just-sold";
 import { resolveSubject } from "../../lib/deliverable/recipes/shared";
@@ -88,7 +93,14 @@ import {
   type ProvenanceRow,
 } from "./_harness.mts";
 
-const ADDRESS = subjectAddress("330 Shore Dr, Fort Myers, FL 33905");
+// DEFAULT HOUSE CHANGED 08/10/2026 (operator: "where is the fucking picture of the house
+// with the sold flag") — 330 Shore Dr exercises the recorded rung but sold 08/29/2025,
+// BEFORE the lake's photo capture began (06/30/2026), so no free rung holds its photo and
+// the showcase capture shipped photo-less. 2099 Grove Dr carries BOTH: a recorded close
+// ($389,000, kicker "Sold 07/09/2026", probed live 08/10/2026) AND its listing photo on
+// our own sold row — so the flag has a photo to be stamped onto. 330 Shore Dr remains a
+// useful manual variant for the no-photo / no-list-date open-slot path.
+const ADDRESS = subjectAddress("2099 Grove Dr, Naples, FL 34120");
 
 console.log(`\n  SUBJECT: ${ADDRESS}\n`);
 
@@ -133,6 +145,9 @@ const allComps = facts.address
 const self = subjectRow(allComps, street);
 const close = closeFrom(self);
 const filled = withSubjectRowFacts(facts, self);
+// The same photo ladder the builder walks (ONE copy — exported from the recipe): the
+// lake's retained sold-row photo through the one resolver, free lanes only.
+await withSubjectPhoto(filled, street);
 const hero = heroPrice(filled, close);
 const strip = soldSpecs(filled, close, self?.soldInDays);
 const cellOf = (label: string) => strip.find((c) => c.label === label)?.value || undefined;
@@ -165,7 +180,11 @@ const rows: ProvenanceRow[] = [
     "the RECORDED closed-spell (soldInDays) — never days_in_state, never from a prefill",
   ],
   ["List-to-Sale", cellOf("List-to-Sale"), "DERIVED — a prefill would compute a fake 100.0%"],
-  ["Hero photo", filled.photos[0], "free spine photo_url → paid row already on disk → no photo"],
+  [
+    "Hero photo",
+    filled.photos[0],
+    "free spine → the lake's RETAINED sold-row photo (comp-photos resolver) → no photo",
+  ],
   [
     "Comps chart",
     chartAnchor(close) != null ? "anchored on the recorded close" : undefined,

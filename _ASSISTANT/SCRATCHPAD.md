@@ -1,3 +1,55 @@
+## 2026-08-10 (Fable 5) — OPERATOR: UNDER CONTRACT has NO DESCRIPTION — and no community info
+Verbatim: "UNDER CONTRACT HAS NO DESCRIPTION!!! WE ARE SENDING OUT EMAILS TO PEOPLE WHO MAY BUY IF
+THE DEAL FALLS THROUGH...WHY WOULD WE NOT HAVE A FUCKING DESCRIPTION AND COMMUNITY INFORMATION
+MAYBE. SO DUMB." The under-contract email's audience is BACKUP BUYERS — it must sell the house
+(seller's description + community info), not just announce the status. Fix in
+lib/deliverable/recipes/under-contract.ts, following new-listing's walked grammar (description
+verbatim + authored extra below), honoring the same-day polish decree (no cost talk, positives only).
+
+## 2026-08-10 (Fable 5) — OPERATOR: New Listing narrator TALK needs polish — repeats, negativity, AI-voice, cost talk
+Verbatim: "HAVE TO POLISH THE NEW LISTING TALK. TOO MUCH REPEATING WITH 150 HOMES THAT IS ALREAD
+MENTIONED IN THE TOP DESCRIPTION AND TALKS NEGETIVE ABOUT BEING INLAND AND TALKS LIKE AI. LET'S NOT
+TALK ABOUT MORE COSTS LIKE HOW MUCH THE HOA IS, THAT IS A QUESTION THE REALTOR CAN ANSWER, LET'S
+JUST TALK ABOUT THE GOOD THINGS THAT ARE THERE. IF IT IS CLOSE TO THE BEACH OR CLOSE TO DOWNTOWN?
+CRAWL4AI INSRUCTIONS ON HOW TO GET AI TO SPEAK HOW YOU WANT IT TO... FIX NEW LISTING AND MAKE SURE
+ALL OTHER EMAILS ARE UPDATED TO FOCUS ON WHAT IS IMPORTANT AND NOT UPING THE PRICE."
+Four defects in the authored paragraph: (1) repeats facts the description above already states
+(e.g. "150 homes"); (2) frames location negatively ("inland"); (3) AI cadence; (4) recites costs
+(HOA $) — costs are the realtor's conversation, never the email's. Wanted instead: the GOOD —
+proximity to beach/downtown, amenities, lifestyle. Applies to EVERY email's prose, not just
+new-listing. Research pass (crawl4ai) on AI voice control explicitly ordered.
+
+## 2026-08-10 (Fable 5) — OPERATOR: "$/Sq Ft is the sale price ÷ listed square footage" footnote — KILL IT, and the playbook carve-out that protected it
+Verbatim: "WHY THE FUCK DOES IT SAY THIS!!" + "WHERE IN THE FUCKING PLAYBOOK DOES IT SAY TO ADD
+THIS SHIT!!" + "HOW MANY TIMES DO I HAVE TO FUCKING FIX EVERYTHING!!" The 07/20 decree killed
+formula footnotes ("a developer narrating a formula"), but emails.md:909-911 wrote a CARVE-OUT
+keeping just-sold's "$/Sq Ft is the SALE price ÷ sq ft" version — a loophole written into the same
+paragraph as the decree. just-sold.ts:482 emits it, just-sold.test.ts:280 asserts the defect IS
+present. Decree now total: NO arithmetic-narration footnotes anywhere. Fix: strip ÷-sentences from
+soldFootnote, flip tests to assert absence, delete the playbook carve-out.
+RESOLVED 2026-08-10 — soldFootnote keeps ONLY the DOM provenance note; tests flipped to assert no
+÷-sentence ever; carve-outs deleted in BOTH docs (playbook §2.5.1 bullet + emails.md 07/20 entry).
+Rendered bytes verified: 0 hits for "listed square footage".
+
+## 2026-08-10 (Fable 5) — OPERATOR: just-sold HOUSE PHOTO with the SOLD flag is MISSING from the capture
+Verbatim: "where is the fucking picture of the house with the sold flag?? i just did this last
+night!!" Screenshot 121700: the just-sold email renders header → JUST SOLD band → price block with
+NO hero photo. The photo-badge work (bottom complementary flag band) shipped 08/09 and the capture
+was re-baked 08/10, yet the served capture has no house photo at all. Investigating whether the
+re-bake dropped the photo, the photo asset was purged with public/showcase/**, or the badge
+storage path broke.
+RESOLVED 2026-08-10 — three stacked causes, all fixed: (1) a sold house isn't in the for-sale
+spine and the lake resolver reads state='active' ONLY, so the subject arrived photo-less while
+sold rows RETAIN photos (99.7%); withSubjectRowFacts filled beds/baths/sqft but never the photo.
+Fix: withSubjectPhoto() in just-sold.ts — subject photo through the ONE resolver
+(resolveCompPhotos), free lanes only, builder + acceptance script share the one copy. (2) 330
+Shore Dr specifically sold 08/29/2025, BEFORE photo capture began 06/30/2026 — no free rung holds
+its photo (lake: 0 rows; paid rows: 0; paid pull suspended by decree), so the canonical showcase
+house could never show a flag. Default house changed to 2099 Grove Dr, Naples 34120 (recorded
+$389,000 close + photo held). (3) The 08/10 re-bake session copied a photo-less render into the
+showcase without flagging it — RENDER-AND-LOOK violated. Capture re-baked: photo + JUST SOLD
+band in the bytes, 8/8 assertions, badge image downloaded and looked at.
+
 ## 2026-08-10 (Fable 5) — OPERATOR: the 2 declared leftovers — GET RID OF, and stop leaving trails
 Verbatim: "2 GET RID OF. ALL WE DO IS GET LOST. THIS SUCKS." The two residuals declared after the
 old-email sweep (raw public/showcase/** story captures + the stale NewEmails.tsx comment) are not

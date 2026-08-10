@@ -266,7 +266,7 @@ describe("soldSpecs — THE PAIRING RULE (found by looking at the render)", () =
   });
 });
 
-describe("soldFootnote — a derived cell says where it came from", () => {
+describe("soldFootnote — NEVER narrates arithmetic (operator decree 08/10/2026)", () => {
   const active: ListingFacts = {
     address: "326 Shore Dr",
     price: "$595,000",
@@ -275,31 +275,25 @@ describe("soldFootnote — a derived cell says where it came from", () => {
     sourceUrl: "x",
   };
 
-  it("names BOTH derivations when both cells rendered", () => {
-    const note = soldFootnote(active, { price: 613_850, date: null });
-    expect(note).toContain("$/Sq Ft is the sale price ÷ listed square footage");
-    expect(note).toContain("List-to-Sale is the sale price ÷ the list price");
+  it("never emits a ÷-sentence — the reader can do the math", () => {
+    // These two sentences shipped and were killed by decree: "WHY THE FUCK DOES IT SAY
+    // THIS" (08/10/2026). Same class as the 07/20 "*Computed from list price ÷ listed
+    // square footage." kill — the just-sold carve-out is dead too.
+    const note = soldFootnote(active, { price: 613_850, date: null }, 18);
+    expect(note ?? "").not.toContain("÷");
+    expect(note ?? "").not.toContain("listed square footage");
+    expect(note ?? "").not.toContain("$/Sq Ft");
+    expect(note ?? "").not.toContain("List-to-Sale");
   });
 
-  it("names the DOM derivation only when the DOM cell rendered", () => {
+  it("keeps ONLY the DOM note, and only when the DOM cell rendered", () => {
+    // WHICH spell DOM measures is uncheckable from the page — that provenance survives.
     const withDom = soldFootnote(active, { price: 613_850, date: null }, 18);
     expect(withDom).toContain("Days on Market runs first list date to closing");
-    const withoutDom = soldFootnote(active, { price: 613_850, date: null });
-    expect(withoutDom).not.toContain("Days on Market");
+    // No DOM cell → no footnote at all now.
+    expect(soldFootnote(active, { price: 613_850, date: null })).toBeUndefined();
     // A prefill computes no spell, so it claims none — even if a spell number exists.
     expect(soldFootnote(active, null, 18)).toBeUndefined();
-  });
-
-  it("names only what rendered — a sold house with no ask has no list-to-sale", () => {
-    const sold: ListingFacts = {
-      address: "330 Shore Dr",
-      sqft: "1736",
-      photos: [],
-      sourceUrl: "x",
-    };
-    const note = soldFootnote(sold, { price: 300_000, date: null });
-    expect(note).toContain("$/Sq Ft");
-    expect(note).not.toContain("List-to-Sale");
   });
 
   it("is absent with no close — nothing was computed, so nothing is claimed", () => {
@@ -416,8 +410,7 @@ describe("the prefill NEVER leaks out of the hero cell", () => {
   });
 
   it("F2 · the footnote claims nothing when nothing was computed", () => {
-    // A footnote is a provenance claim. "$/Sq Ft is the sale price ÷ listed square footage"
-    // is false by construction when the hero holds a prefill.
+    // A footnote is a provenance claim — a prefilled hero computes no spell, so no note.
     expect(soldFootnote(active, null)).toBeUndefined();
   });
 

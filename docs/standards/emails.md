@@ -906,10 +906,12 @@ Every entry is a class of bug, not just an incident. Check your change against e
   (2) `specFootnote` emitted "*Computed from list price ÷ listed square footage." under every
   lifecycle spec strip. Killed by operator decree: $/sq ft is the most self-evident derivation in
   residential real estate and BOTH OPERANDS SIT IN THE SAME STRIP, so the sentence was a developer
-  narrating a formula. The surviving rule: **a derived cell earns a note when the derivation is
-  NON-OBVIOUS or could be MISREAD** — price-reduced's "previous price = ask + reduction on record"
-  (uncheckable from the page) and just-sold's "$/Sq Ft is the SALE price ÷ sq ft" (distinguishes it
-  from the list-price version) both keep theirs. CLASSES: *a concurrency guard read once at startup
+  narrating a formula. The surviving rule: **a derived cell earns a note ONLY when the reader cannot
+  check it from the page** — price-reduced's "previous price = ask + reduction on record"
+  (uncheckable) and just-sold's Days-on-Market spell note keep theirs. **The just-sold "$/Sq Ft is
+  the SALE price ÷ sq ft" carve-out that used to live in this sentence is DEAD (operator decree
+  08/10/2026)** — it was a loophole against this very rule, and the decree is total: no ÷-sentence,
+  no arithmetic narration, anywhere. CLASSES: *a concurrency guard read once at startup
   is not a concurrency guard — re-read the authority immediately before the irreversible act; a
   reported process kill is a claim, not a fact; provenance is for numbers the reader CANNOT check,
   and explaining arithmetic they can do in their head reads as a spreadsheet export, not an agent.*

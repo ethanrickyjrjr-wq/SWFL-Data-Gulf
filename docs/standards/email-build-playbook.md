@@ -2187,8 +2187,14 @@ wrong).
 Acceptance run: `bun --env-file=.env.local scripts/email/render-just-sold.mts [address]`.
 **Two houses, not one** — one address cannot exercise both rungs of the close ladder:
 
-- `330 Shore Dr, Fort Myers, FL 33905` (the default) — a REAL recorded sale, $300,000 on
-  08/29/2025. Exercises rung 1: the sold-date kicker, `$/Sq Ft` off the close, the comps chart.
+- `2099 Grove Dr, Naples, FL 34120` (the default, changed 08/10/2026) — a REAL recorded sale,
+  $389,000, kicker "Sold 07/09/2026", AND its listing photo held on our own retained sold row.
+  Exercises rung 1 (sold-date kicker, `$/Sq Ft` off the close, comps chart) plus the PHOTO ladder
+  and the badge flag. The previous default, `330 Shore Dr, Fort Myers, FL 33905` ($300,000 on
+  08/29/2025), sold BEFORE the lake's photo capture began 06/30/2026 — no free rung holds its
+  photo, so the showcase capture shipped with no house and no flag (operator, 08/10/2026: "where
+  is the fucking picture of the house with the sold flag"). 330 Shore Dr stays as the manual
+  no-photo / no-list-date open-slot variant.
 - `12554 Kellysands Way, Fort Myers, FL 33908` — an active listing. Exercises rung 3, the PREFILL,
   which under the decree below is the COMMON case.
 
@@ -2326,8 +2332,12 @@ send completes), never at BUILD — blocking the build would re-create the empty
   same mechanism §2.5.0 forbids for an old transfer, minus the ability to fix it. `chartAnchor()`
   takes the recorded close only; no recorded close → no chart at all, and the sold-comps LIST still
   carries the context. If the comp set is empty, drop the chart and close the hole.
-- **$/Sq Ft footnote SURVIVES here** (it is the SALE price ÷ sq ft, which distinguishes it from the
-  list-price version every other lifecycle email shows).
+- **$/Sq Ft footnote is DEAD here too (operator decree 08/10/2026 — "WHY THE FUCK DOES IT SAY
+  THIS").** This bullet previously carved out an exception keeping "$/Sq Ft is the sale price ÷
+  listed square footage" on the sold email — a loophole written against §1's own rule ("never
+  restate arithmetic"). The decree is TOTAL: no ÷-sentence, no arithmetic narration, on ANY email.
+  The only footnote this email may carry is the Days on Market provenance note (which spell it
+  measures — uncheckable from the page).
 
 ### 2.5.2 THE ACCEPTANCE SCRIPT YOU WILL WRITE — ~60 lines
 

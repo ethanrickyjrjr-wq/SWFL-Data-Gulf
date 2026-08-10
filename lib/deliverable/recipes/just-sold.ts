@@ -90,7 +90,8 @@
 
 import { withCommas } from "@/lib/format-number";
 import { compsForAddress, type RenderComp } from "@/lib/assistant/comp-helper";
-import { canonStreet } from "@/lib/listings/resolve-subject";
+import { canonStreet, commaCity } from "@/lib/listings/resolve-subject";
+import { resolveCompPhotos } from "@/lib/listings/comp-photos";
 import { chartSpecToEmailImage } from "@/lib/email/spec-to-png";
 import { chartImageBlock } from "@/lib/email/inject-chart";
 import { soldCompsListBlock } from "@/lib/email/sold-comp-blocks";
@@ -381,6 +382,28 @@ export function withSubjectRowFacts(facts: ListingFacts, row: RenderComp | null)
 }
 
 /**
+ * THE SUBJECT'S OWN PHOTO, through the ONE photo resolver (comp-photos.ts — never a
+ * second one, by decree). The lake RETAINS a sold home's listing photo after it sells
+ * (99.7% of state='sold' rows, measured 08/03/2026), but the for-sale resolver can
+ * never see a sold row — so the exact house this recipe exists for arrived here
+ * photo-less while its photo sat on our own free rung (RULE 0.7a, found 08/10/2026:
+ * "where is the fucking picture of the house"). Free lanes only — no `enrich` passed,
+ * so this can never spend; no hit → the open slot stands. Mutates `facts.photos` in
+ * place so the builder and the acceptance script share ONE copy of the ladder.
+ * City: an UNRESOLVED sold subject carries none, so fall back to the comma-segment of
+ * the typed address (`commaCity` — the resolver's own city-token root, not a re-parse).
+ */
+export async function withSubjectPhoto(facts: ListingFacts, street: string): Promise<void> {
+  const photoCity = facts.city ?? commaCity(facts.address ?? "");
+  if (facts.photos[0] || !street || !photoCity) return;
+  const photoHit = await resolveCompPhotos([{ addressLine: street, city: photoCity }]).catch(
+    () => new Map<string, string>(),
+  );
+  const url = photoHit.get(street);
+  if (url) facts.photos = [url, ...facts.photos.slice(1)];
+}
+
+/**
  * THE SPEC STRIP — the campaign's ONE hairline row, wearing the sold hat.
  *
  * The chrome gives every lifecycle email the same strip; what differs is WHICH CELLS
@@ -469,23 +492,22 @@ function chromeAccent(current: EmailDoc): string {
   return probe.globalStyle.accentColor ?? "#2563eb";
 }
 
-/** Provenance for the DERIVED cells, stated where the reader can see it. Names only
- *  the cells that actually rendered — a footnote for a cell that is an open slot is
- *  itself a claim that something was computed. */
+/** Provenance ONLY for a number the reader cannot check from the page. Operator decree
+ *  08/10/2026, TOTAL — no arithmetic-narration footnotes, ever: "$/Sq Ft is the sale
+ *  price ÷ …" and "List-to-Sale is … ÷ …" both died here. The reader can do that math;
+ *  a footnote explaining it reads as a spreadsheet export, not an agent. (The §2.5
+ *  carve-out that kept the $/Sq Ft sentence was deleted the same day.) Days on Market
+ *  keeps its note because WHICH spell it measures (first list date → closing, off the
+ *  sale record) is uncheckable from the page and genuinely misreadable. */
 export function soldFootnote(
   facts: ListingFacts,
   close: SubjectClose | null,
   soldInDays?: number | null,
 ): string | undefined {
-  const parts: string[] = [];
-  if (close && pricePerSqft(usd(close.price), facts.sqft)) {
-    parts.push("$/Sq Ft is the sale price ÷ listed square footage");
-  }
   if (close && soldInDays != null && soldInDays > 0) {
-    parts.push("Days on Market runs first list date to closing, from the sale record");
+    return "*Days on Market runs first list date to closing, from the sale record.";
   }
-  if (close && num(facts.price)) parts.push("List-to-Sale is the sale price ÷ the list price");
-  return parts.length > 0 ? `*${parts.join("; ")}.` : undefined;
+  return undefined;
 }
 
 /**
@@ -551,6 +573,8 @@ export async function buildJustSold(ctx: RecipeBuildContext): Promise<EmailDoc |
   const self = subjectRow(allComps, street);
   const close = closeFrom(self);
   const facts = withSubjectRowFacts(resolved, self);
+
+  await withSubjectPhoto(facts, street);
 
   // Vacant lots out, AVM estimates out, the subject out — and SIZE-BANDED (±25% living
   // area) once the subject row has taught us the sqft. See realSaleComps.
