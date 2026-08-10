@@ -1,8 +1,10 @@
 // components/landing/HeroBar.tsx
 "use client";
 
+import Image from "next/image";
 import Link from "next/link";
 import { useEffect, useRef, useState } from "react";
+import { EMAIL_LAB_LANDING } from "@/lib/lab-entry/destination";
 import { HERO_CAMPAIGNS, type HeroCampaignEntry } from "@/lib/campaigns";
 import { heroBarAction, homeAskInput, type HeroBarMode } from "@/lib/landing/hero-bar-action";
 import { useConverse } from "@/lib/assistant/use-converse";
@@ -157,8 +159,34 @@ export default function HeroBar() {
         <Link className="hero-sub-link" href="/guides/sourced-numbers">
           every number names its source
         </Link>
-        . Your brand, ready to send. Pick what comes out:
+        . Your brand, ready to send.
       </p>
+      <div className="hero-cta-row">
+        <a className="cap-btn" href={EMAIL_LAB_LANDING}>
+          Build one free
+        </a>
+      </div>
+      <div className="email-proof-row">
+        {[
+          { img: "/new-emails/previews/new-listing-email.png", label: "New Listing" },
+          { img: "/new-emails/previews/under-contract-email.png", label: "Under Contract" },
+          { img: "/new-emails/previews/just-sold-email.png", label: "Just Sold" },
+        ].map((p) => (
+          <Link key={p.label} href="/showcase" className="email-proof-card">
+            <Image
+              src={p.img}
+              alt={`${p.label} email built by the engine from live SWFL data`}
+              width={640}
+              height={760}
+            />
+            <span className="email-proof-label">{p.label}</span>
+          </Link>
+        ))}
+      </div>
+      <p className="email-proof-hint">
+        <Link href="/showcase">Real sends, real data — see every email we build →</Link>
+      </p>
+      <p className="hero-build-lead">Or start from an address — pick what comes out:</p>
       <div className="hero-mode-row" role="tablist" aria-label="What we build for you">
         {MODES.map((m) => (
           <button

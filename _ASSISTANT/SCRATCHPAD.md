@@ -1,3 +1,14 @@
+## 2026-08-10 (Fable 5) — OPERATOR: "WE DON'T FUCKING NEED DISTANCE FOR EVERY FUCKING THING" — distance-survey prose, strike 3+ of the shape
+Live paragraph shipped three distance clauses in a row ("golf about three-quarters of a mile…
+farmers market about half a mile… food and drink about half a mile from the front door") AND
+stated a distance to golf for a home IN a golf community. Decree: mention ONE OR TWO distances,
+talk about the rest as great things to do with NO measurement; a thing the community itself has
+is RIGHT THERE — never give it a distance. Shape family: distance-speak/GIS-printout prose
+(strikes: 08/06 ".57 miles" open-house, 08/10 humanDistance banding decree, 08/10 this).
+§0b applies → mechanism, not another entry: cap distances STRUCTURALLY at the one root
+(`neighborhoodAmenitiesSourceLine` — at most 2 categories carry a distance), suppress nearby-golf
+when the in-gate line already has golf, rewrite THE AREA prompt in shared.ts, tests enforce both.
+
 ## 2026-08-10 (Fable 5) — OPERATOR: "how the fuck are these not wired????" — cre_figures + commercial-permits consumer
 Four-lane answer on the record: `permits-commercial-swfl` IS fully wired (pack → master.mts:258/:330,
 served /api/b + /r + MCP). The dark half is `cre_figures` + `cre_figures_confidence` — 1,078 + 985
@@ -9,6 +20,21 @@ was invisible at every session start since. RULE 2.4 violation, same shape as 0a
 zero consumers). Filed as new strike shape `built-dark-no-consumer` (4 backfilled strikes). The
 consumer the operator means = a CRE deliverable reading BOTH the table and the brain (yesterday's
 big-industry email direction) + the decreed cre-swfl confidence-layer read.
+
+## 2026-08-10 (Fable 5) — OPERATOR DECREE: "fuck it, let's get stripe set up, all 7 initial emails set up through apify only and a basic landing page to try it all out"
+Full decree, after the Ohio test landed: strip the play down to (1) Stripe payments, (2) the 7
+lifecycle emails buildable through the Apify data rung ONLY (no lake dependency — Ohio test proved
+11/15 cells fill from a $0.04 pull), (3) a basic landing page to demo/sell it. "All we need is to
+show the email build and have it work correctly." Registered as build `apify-email-storefront`.
+OPEN QUESTION he raised, unresolved: "i still don't believe MLS isn't plugged into claude" — the
+differentiation claim rests on artifact quality (render gates, brand, CAN-SPAM, no-invention), NOT
+data exclusivity. Landing-page pitch must be written on that basis.
+SAME MESSAGE, GRIPE + FIX: stat-strip values wrapping AGAIN (3 screenshots — "Single Family",
+"4 full, 2 half"). FIXED same session: white-space:nowrap in BOTH StatsBlock branches + regression
+test (render-email-doc.test.ts, 6 pass). STRIKE LINE OWED under fixed-but-not-live — STRIKES.md
+was claimed by parallel session c0a7e6fa at write time; next session in that file adds:
+"08/10 stat values wrapped AGAIN — nowrap both branches + red test built". NOT pushed —
+awaiting per-push approval; Gate 15 will want a fresh capture with it.
 
 ## 2026-08-10 (Fable 5) — OPERATOR challenges the Apify direction: "agents already have MLS — are we looking at the right industry? 56,000 actors and we are just changing geography. I'm not saying you're wrong, i just want to make sure you are right. we can't build emails well right now. Build me an email for a million dollar house in Ohio using Apify and our builder. save to my downloads"
 Three things raised at once: (1) STRATEGY DOUBT — agents' MLS access may make a national listing-email
@@ -51,6 +77,17 @@ Mid-brainstorm on the Create-an-account button, corrected my framing: "if you al
 account, you aren't creating an account." Same email+code flow serving both is fine mechanically
 (shouldCreateUser: true already does), but the COPY must not pretend they're one thing. Directive:
 research real companies' auth-screen patterns via crawl4ai before proposing the design.
+
+## 2026-08-10 (Fable 5) — OPERATOR RAGE ×2 on the homepage ship: WRONG EMAILS + SEARCH BAR STILL LEADS
+(1) "WE DON'T EVEN USE THESE FUCKING EMAILS... WE JUST BUILT ALL NEW FUCKING EMAILS" — I put
+showcase/seed-previews webp thumbnails on the homepage; those are the OLD purged-era email look.
+The REAL product is the NEW lifecycle captures in public/new-emails/*.html (the 08/2026 walks:
+new-listing, under-contract, just-sold Horsecreek, etc.). RULE: any surface that SHOWS an email
+shows a CURRENT capture from public/new-emails, never seed-previews. (2) "SEARCH BAR????? WE JUST
+DID THE FUCKING RESEARCH" — I changed the headline but left the input+mode pills as the visual
+centerpiece, so the first screen still reads search-engine. The research said: headline → product
+image → ONE CTA; the input comes AFTER the proof. Fix: captures + Build-one-free CTA move INSIDE
+the hero above the bar; bar demoted to the beat below.
 
 ## 2026-08-10 (Fable 5) — OPERATOR: "get it going and then we have to focus on emails" — homepage rebuild GO
 Decree: build the product-first homepage lead now (stick-out framing), then session focus returns

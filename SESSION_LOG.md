@@ -1,4 +1,19 @@
-## 2026-08-10 (Fable 5) — HOMEPAGE LEADS WITH THE PRODUCT: stick-out hero + real email captures; Hermes audit rounds refereed; SEO/a11y fixes; Vercel analytics wired
+## 2026-08-10 (Fable 5) — HOMEPAGE FIX AFTER OPERATOR RAGE: NEW email captures (not seed-previews), bar demoted BELOW the proof
+
+Operator, on the previous push: "WE DON'T EVEN USE THESE FUCKING EMAILS... WE JUST BUILT ALL NEW
+FUCKING EMAILS" + "SEARCH BAR????? WE JUST DID THE FUCKING RESEARCH." Two real defects in my ship:
+(1) the proof strip used showcase/seed-previews webp — the OLD purged-era email look — instead of
+the current lifecycle captures; (2) I changed the headline but left the input+pills as the visual
+centerpiece, so the fold still read search-engine. Fixed: rendered REAL screenshots of the new
+captures (playwright/chromium from the crawl4ai venv → public/new-emails/previews/{new-listing,
+under-contract,just-sold}-email.png, 600px canvas top-crop) and restructured the hero INSIDE
+HeroBar to the researched pattern: h1 → sub → Build one free CTA → three real email cards
+(McGregor Palms $689K / Horsecreek $1.22M / Carlene $1.35M w/ SOLD flag) → showcase link → "Or
+start from an address" → modes+bar. Strip removed from page.tsx. VERIFIED WITH EYES this time:
+production build served locally on :4311, full-page screenshot read back — three cards on one row
+(228px, fits the 820px hero), fold shows product not search. bunx next build green ×2, landing
+tests 8 pass. Standing rule added to scratchpad: email-showing surfaces use public/new-emails
+captures, never seed-previews.
 
 Operator decree: "we look like a search site... we lead with what we do, build your emails
 without wasting time finding data" → reframed same session to SAMENESS ("all emails are the

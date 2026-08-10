@@ -1,6 +1,4 @@
 import type { Metadata } from "next";
-import Image from "next/image";
-import Link from "next/link";
 import { EMAIL_LAB_LANDING } from "@/lib/lab-entry/destination";
 import HeroBar from "@/components/landing/HeroBar";
 import Hero from "@/components/landing/Hero";
@@ -31,28 +29,6 @@ export default async function Home() {
   return (
     <main className="home-explorer relative">
       <HeroBar />
-      <section className="email-proof" aria-label="Real emails built by the engine">
-        <div className="email-proof-row">
-          {[
-            { img: "/showcase/seed-previews/new-listing.webp", label: "New Listing" },
-            { img: "/showcase/seed-previews/just-sold.webp", label: "Just Sold" },
-            { img: "/showcase/seed-previews/weekly-pulse.webp", label: "Weekly Pulse" },
-          ].map((p) => (
-            <Link key={p.label} href="/showcase" className="email-proof-card">
-              <Image
-                src={p.img}
-                alt={`${p.label} email built by the engine from live SWFL data`}
-                width={440}
-                height={560}
-              />
-              <span className="email-proof-label">{p.label}</span>
-            </Link>
-          ))}
-        </div>
-        <p className="email-proof-hint">
-          <Link href="/showcase">Real sends, real data — see every email we build →</Link>
-        </p>
-      </section>
       <SiteDoors />
       <GuidesStrip />
       <Hero payload={payload} />

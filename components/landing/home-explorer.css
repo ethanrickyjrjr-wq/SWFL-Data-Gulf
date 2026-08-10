@@ -18,9 +18,10 @@
 .home-explorer .hero-sub {font-size:16px;color:var(--text-secondary);line-height:1.6;max-width:560px;margin:0 auto 24px}
 .home-explorer .hero-sub-link {color:inherit;text-decoration:underline;text-decoration-color:var(--gulf-teal);text-underline-offset:3px}
 .home-explorer .hero-sub-link:hover {color:var(--gulf-teal)}
-.home-explorer .email-proof {padding:8px 24px 56px;text-align:center}
+.home-explorer .hero-cta-row {display:flex;justify-content:center;margin:0 0 32px}
+.home-explorer .hero-build-lead {margin:36px auto 14px;font-size:14px;color:var(--text-secondary)}
 .home-explorer .email-proof-row {display:flex;gap:20px;justify-content:center;flex-wrap:wrap;max-width:860px;margin:0 auto}
-.home-explorer .email-proof-card {display:block;width:250px;border:1px solid var(--gulf-slate);border-radius:10px;overflow:hidden;text-decoration:none;transition:transform .15s,border-color .15s}
+.home-explorer .email-proof-card {display:block;width:228px;border:1px solid var(--gulf-slate);border-radius:10px;overflow:hidden;text-decoration:none;transition:transform .15s,border-color .15s}
 .home-explorer .email-proof-card:hover {transform:translateY(-3px);border-color:var(--gulf-teal)}
 .home-explorer .email-proof-card img {width:100%;height:auto;display:block}
 .home-explorer .email-proof-label {display:block;padding:10px 12px;font-size:12px;font-weight:600;letter-spacing:.06em;text-transform:uppercase;color:var(--text-secondary);border-top:1px solid var(--gulf-slate)}
