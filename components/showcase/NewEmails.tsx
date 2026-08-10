@@ -210,6 +210,12 @@ function TrueSizeEmail({ src, title }: { src: string; title: string }) {
         className="mx-auto overflow-hidden rounded-lg border border-white/10 bg-white"
         style={{ height: docH * scale, width: EMAIL_W * scale }}
       >
+        {/* pointerEvents "none" is load-bearing: the captures carry real
+            target="_blank" links (CTA, hero photo, logo, agent card) all
+            pointing at the site homepage, so a live iframe turns any click on
+            the enlarged email into "homepage in a new tab" (operator,
+            08/10/2026). The preview is a picture of the email — the only
+            action here is the Build button in the header bar. */}
         <iframe
           ref={iframeRef}
           src={src}
@@ -222,6 +228,7 @@ function TrueSizeEmail({ src, title }: { src: string; title: string }) {
             transform: `scale(${scale})`,
             transformOrigin: "top left",
             border: "none",
+            pointerEvents: "none",
           }}
         />
       </div>

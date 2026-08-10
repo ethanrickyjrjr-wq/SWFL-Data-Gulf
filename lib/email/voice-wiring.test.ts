@@ -53,19 +53,28 @@ const { buildContentDoc, authorDoc } = await import("./build-doc");
 
 const seedDoc = () => SEED_DOCS.find((s) => s.id === "market-spotlight")!.build();
 
-// Distinctive phrases that exist ONLY inside the editorial presets' guidance text.
-const LETTER_MARK = "EDITORIAL LETTER";
-const SHOWCASE_MARK = "EDITORIAL SHOWCASE";
+// Distinctive phrases that exist ONLY inside the agent-voice presets' guidance text.
+const NEIGHBOR_MARK = "NEIGHBORHOOD AGENT";
+const LUXURY_MARK = "LUXURY SPECIALIST";
 const VOICE_HEADER = "VOICE —";
 
-test("fill lane: an editorial pick reaches the fill model's system prompt", async () => {
+test("fill lane: an agent-voice pick reaches the fill model's system prompt", async () => {
   await buildContentDoc({
     prompt: "a short note about how the season is going",
     rawDoc: seedDoc(),
-    recipeId: "editorial-letter",
+    recipeId: "neighborhood-agent",
   });
   expect(capturedSystems.length).toBeGreaterThan(0);
-  expect(capturedSystems.some((s) => s.includes(LETTER_MARK))).toBe(true);
+  expect(capturedSystems.some((s) => s.includes(NEIGHBOR_MARK))).toBe(true);
+});
+
+test("fill lane: a RETIRED editorial id still lands on its agent voice end-to-end (FM2)", async () => {
+  await buildContentDoc({
+    prompt: "a short note about how the season is going",
+    rawDoc: seedDoc(),
+    recipeId: "editorial-letter", // saved pre-08/10 brand blobs hold this
+  });
+  expect(capturedSystems.some((s) => s.includes(NEIGHBOR_MARK))).toBe(true);
 });
 
 test("fill lane: plain (and absent) pick adds NO voice section — byte-identical builds", async () => {
@@ -83,7 +92,7 @@ test("fill lane: plain (and absent) pick adds NO voice section — byte-identica
   expect(plainSystems.length).toBeGreaterThan(0);
   for (const s of [...plainSystems, ...capturedSystems]) {
     expect(s).not.toContain(VOICE_HEADER);
-    expect(s).not.toContain(LETTER_MARK);
+    expect(s).not.toContain(NEIGHBOR_MARK);
   }
   // The pick must be the ONLY difference: plain and absent produce the same prompts.
   expect(capturedSystems).toEqual(plainSystems);
@@ -100,7 +109,7 @@ test("fill lane: the pick is a real difference — same build, different voice, 
   await buildContentDoc({
     prompt: "a short note about how the season is going",
     rawDoc: seedDoc(),
-    recipeId: "editorial-letter",
+    recipeId: "neighborhood-agent",
   });
   expect(capturedSystems).not.toEqual(plainSystems);
 });
@@ -109,9 +118,9 @@ test("author lane: a keyless organic ask carries the pick through default-grid's
   await authorDoc({
     prompt: "a short note about how the season is going",
     rawDoc: seedDoc(),
-    recipeId: "editorial-showcase",
+    recipeId: "luxury-specialist",
   });
-  expect(capturedSystems.some((s) => s.includes(SHOWCASE_MARK))).toBe(true);
+  expect(capturedSystems.some((s) => s.includes(LUXURY_MARK))).toBe(true);
 });
 
 test("stale legacy ids degrade to plain — no voice section, never a throw (FM4)", async () => {

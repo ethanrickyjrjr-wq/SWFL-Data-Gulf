@@ -1,3 +1,18 @@
+## 2026-08-10 (Fable 5) — Showcase pop-up click-hijack killed + editorial voices replaced with agent voices
+
+Operator: "WHY IF I CLICK THE POP UP ON WEBPAGE SHOWCASE IT BRINGS ME BACK TO THE HOMEPAGE IN A
+NEW TAB" + "WHY THE FUCK ARE THESE THE 'VOICES' FOR OUR EMAILS!?? WE WRITE REAL ESTATE EMAILS!!"
+(1) `NewEmails.tsx` overlay iframe was LIVE while the thumbnail cards were click-inert — the
+captures are real emails whose CTA/hero/logo links all target="_blank" at the homepage; overlay
+iframe now pointerEvents "none", Build this → is the only action. (2) The Email Lab voice picker's
+Plain / Editorial letter / Editorial showcase / Magazine issue were refactor survivors of the
+08/02 one-lane collapse, and they described STRUCTURE. Operator approved the new lineup
+("THOSE NAMES ARE GOOD"): Plain · Neighborhood agent · Luxury specialist · Straight-talk advisor —
+`voice-presets.ts` rewritten as pure sound on the Voice Card (playbook §1.20, reader-is-hero),
+with two new red tests (no layout nouns; retired editorial ids degrade letter→neighborhood,
+showcase→luxury, magazine→plain) and the wiring suite proving a stale saved id still lands
+end-to-end. Evidence: 33 tests pass / 0 fail; `bunx next build` exit 0 twice (once per change).
+
 ## 2026-08-09 (Fable 5) — New Listing narrator RESTORED to the walked build — its job is the EXTRA below, never the description
 
 Operator: "THE POINT OF THE NARRATOR IS NEVER FOR THE FUCKING DESCRIPTION… IT IS ADDING EXTRA

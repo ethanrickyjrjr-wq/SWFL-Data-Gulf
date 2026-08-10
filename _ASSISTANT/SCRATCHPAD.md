@@ -1,3 +1,12 @@
+## 2026-08-10 (Fable 5) — OPERATOR: OLD emails OFF the website, NO path to them — ONE place only
+Verbatim: "GET THESE OLD EMAIS OUT OF HERE. CLAUDE CAN NOT FOCUS ON WHERE WE ARE ACTUALLY
+BUILDING. THERE IS ONLY ONE PLACE. CLAUDE IS DUMB SO WE CAN'T CHANGE THESE LATER. JUST GET THEM
+OFF THE WEBSITE AND HAVE NO PATH TO THEM." Screenshot 235833 = the CampaignRows section on
+/showcase — old static captures (Latitude 26-era PNGs) in "Listing Lifecycle" / "Agent & Community"
+rows, duplicating the registry-built NewEmails section directly above it. The ONE place = the
+recipe registry's re-baked captures (NewEmails / public/new-emails/*.html). Old email surfaces and
+their stale captures must be unreachable from the site — not just de-emphasized.
+
 ## 2026-08-10 (Fable 5) — OPERATOR: showcase pop-up click = homepage in a new tab, EVERY email
 Verbatim: "WHY IF I CLICK THE POP UP ON WEBPAGE SHOWCASE IT BRINGS ME BACK TO THE HOMEPAGE IN A
 NEW TAB IF I CLICK ANY POP UP OF ANY EMAIL????" Clicking the enlarged email pop-up on /showcase
