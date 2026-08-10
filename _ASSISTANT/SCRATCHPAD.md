@@ -12,6 +12,13 @@ at everything, so make a few runs on what GitHub's or programs we can use. Spend
 dollars." Five improvement axes: rule-following/discipline, UI, real estate knowledge, autonomous
 email building, general skills. Deliverable: shopped actor + a few runs + findings filed in
 _RESEARCH + saved task. Budget hard cap $3.
+RESOLVED 2026-08-10 — $0.49 spent (vendor-billed, 10 runs). Lane law learned cheap: the flagship
+instagram-scraper's hashtag SEARCH is junk (5/5 runs); instagram-hashtag-scraper works — saved as
+task `instagram-improvement-harvest` (7 tags × 30). Instagram signal modest; GitHub lane strong:
+anthropics/skills, steipete/agent-rules, alirezarezvani/claude-skills, zilliztech/claude-context,
+nothing-design-skill; ZERO real-estate skills exist — our domain playbooks stay homegrown.
+Findings: _RESEARCH/agent-behavior/2026-08-10-instagram-improvement-harvest.md. OPEN half: which
+repos to trial is the operator's pick.
 
 ## 2026-08-10 (Fable 5) — OPERATOR: "are we not building and saving our actors in apify?... look through past actors first!! then save all the ones we will use!!! and update playbook"
 Counted live against the Apify API, not memory: 247 lifetime runs across 27 distinct actors, but

@@ -1,3 +1,18 @@
+## 2026-08-10 (Fable 5) — Instagram improvement-harvest lane BUILT: 4th task saved, $0.49 of $3 spent, GitHub skill map filed
+
+Operator: "build an Instagram apify that finds skills to make us better... make a few runs on
+what GitHub's or programs we can use. Spend less than 3 dollars." Vendor-billed $0.49 / 10 runs.
+Lane law (paid $0.01 to learn): apify/instagram-scraper hashtag SEARCH = junk 5/5 (garbage
+Cyrillic entity or no_items); apify/instagram-hashtag-scraper works first try — 186 real posts,
+saved as task `instagram-improvement-harvest` (7 tags × 30 ≈ $0.48/run). Instagram signal modest
+(prompt-injection warning validates verbatim-description guard; 1-listing→week-of-content;
+Amplifiles.ai competitor class). GitHub lane (rag-web-browser ×3) strong: anthropics/skills,
+alirezarezvani/claude-skills, steipete/agent-rules (rule-following axis), zilliztech/
+claude-context, dominikmartn/nothing-design-skill (UI axis), awesome-skills hubs; obra/superpowers
+re-validated (we run it); ZERO real-estate skills in the ecosystem — domain playbooks stay
+homegrown. Filed _RESEARCH/agent-behavior/2026-08-10-instagram-improvement-harvest.md + INDEX;
+playbook §3.3.2b Instagram line updated. Next: operator picks repos to trial, one at a time.
+
 ## 2026-08-10 (Fable 5) — Apify account audited live: 3 tasks SAVED (were zero), one-api by-ADDRESS lookup proven into the playbook + data-roots
 
 Operator: "are we not building and saving our actors in apify?... look through past actors

@@ -3123,8 +3123,11 @@ are built and the playbook reflects it."* Counted against the live Apify API, no
 
 **A saved task is a saved INPUT, not a wired lane.** Spend still exits ONLY through `runApifyActor`
 under the guard (§3.3.4); the tasks exist so a proven shape is never re-invented and the account
-shows what we actually use. **No Instagram actor has ever been run on this account** — the
-Instagram half of the harvest ask is an open shopping decision, not a forgotten build.
+shows what we actually use. **Instagram: shopped and RUN 08/10/2026** — the flagship
+`apify/instagram-scraper` hashtag-SEARCH lane returned junk 5/5, `apify/instagram-hashtag-scraper`
+worked first try; saved as task 4, `instagram-improvement-harvest` (7 tags × 30 posts ≈
+$0.48/run, $0.0023/result). Findings + lane law:
+`_RESEARCH/agent-behavior/2026-08-10-instagram-improvement-harvest.md`.
 
 ### 3.3.3 WHERE EVERYTHING LANDS — ONE TABLE
 
