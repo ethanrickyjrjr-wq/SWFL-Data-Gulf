@@ -434,7 +434,14 @@ export async function authorListingNarrative(
     facts.isPriceReduced &&
       facts.priceReduction &&
       `The price was REDUCED by ${facts.priceReduction} from its original ask.`,
-    facts.remarks && `The listing's own description: ${facts.remarks.slice(0, 1200)}`,
+    // THE WHOLE DESCRIPTION, NOT ITS FIRST 1,200 CHARS (fixed 08/10/2026). The old
+    // slice fed the model AND the claim gate the same cut, so every feature past it —
+    // the pool, the lanai, the amenity list of a 2,263-char Naples listing — was both
+    // invisible fuel and an illegal word: the model, told to describe a home it could
+    // half-see, improvised the missing half and the gate correctly dropped the
+    // paragraph. Fuel clipping was manufacturing invention. Real MLS remarks run
+    // ~3,000 chars (apify-comps.ts); 6,000 is prompt-size control, not a fuel cut.
+    facts.remarks && `The listing's own description: ${facts.remarks.slice(0, 6000)}`,
     // THE COMMUNITY — golf, pool, gated, clubhouse — off the listing's own detail page, which
     // `fetchListingFacts` already had in hand. Every recipe on this shared narrator (new-listing,
     // just-sold, open-house, price-reduced) gets it from this one line. Absent when we could not
@@ -667,7 +674,13 @@ export async function authorListingNarrative(
       return null;
     }
     return t;
-  } catch {
+  } catch (e) {
+    // NEVER SILENT (08/10/2026). This catch ate real failures while both drop paths
+    // above logged theirs — a narrator that died here was indistinguishable from
+    // "no description existed", and the coming-soon demo shipped wordless for a
+    // night while three people hunted the wrong layer. Same fail-closed contract
+    // (null → open slot), but the failure is named.
+    console.warn(`[narrative] DROPPED — narrator call failed: ${String(e).slice(0, 200)}`);
     return null;
   }
 }
