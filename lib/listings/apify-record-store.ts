@@ -261,6 +261,35 @@ export function looseAddressKey(street: string, city: string): string {
 }
 
 /**
+ * THE UNIT SEAM — the third spelling drift, measured 08/09/2026.
+ *
+ * The spine writes a condo's unit INTO the street line ("8521 Oakshade Cir #422");
+ * the paid record keeps the street bare and the unit in its own column ("8521
+ * Oakshade Cir" + "Unit 422"). Neither the exact key nor despacing can join those —
+ * of the 4 not-sold paid rows that missed the spine entirely, this seam was the only
+ * fixable class (the others had simply left the market).
+ *
+ * `splitUnitFromStreet` peels a trailing unit token off a street LINE; `unitTokenOf`
+ * normalises a unit written any way ("#422", "Unit 422", "Apt 4B") to its bare token.
+ * A subject WITH a unit may only match a row whose own unit agrees — a building of
+ * condos shares one street line, and guessing the unit would fill one home's email
+ * with another home's paid facts.
+ */
+export function splitUnitFromStreet(street: string): { core: string; unit: string | null } {
+  const m = street.match(
+    /^(.*?)\s*(?:#|\b(?:unit|apt|apartment|ste|suite)\.?\s*#?)\s*([a-z0-9-]+)\s*$/i,
+  );
+  if (!m || !m[1].trim()) return { core: street.trim(), unit: null };
+  return { core: m[1].trim(), unit: m[2].toLowerCase() };
+}
+
+export function unitTokenOf(unit: unknown): string | null {
+  if (typeof unit !== "string" || !unit.trim()) return null;
+  const m = unit.match(/([a-z0-9-]+)\s*$/i);
+  return m ? m[1].toLowerCase() : null;
+}
+
+/**
  * Find the paid row for ONE address when the exact key missed, by house number + city,
  * matched on `looseAddressKey`.
  *
@@ -301,8 +330,22 @@ export async function fetchCachedRecordLoose(
       .gte("fetched_at", cutoff)
       .limit(25);
     if (!Array.isArray(data)) return undefined;
-    return (data as StoredApifyRecord[]).find(
+    const rows = data as StoredApifyRecord[];
+    const hit = rows.find(
       (r) => looseAddressKey(String(r.street ?? ""), String(r.city ?? "")) === want,
+    );
+    if (hit) return hit;
+    // THE UNIT SEAM (see splitUnitFromStreet). Only when the subject street carries a
+    // unit token: compare the bare street, and require the row's own unit column to
+    // agree. A row with no unit is NEVER matched to a unit-bearing subject — in a condo
+    // building that would be a guess, and a wrong condo's facts are wrong facts.
+    const { core, unit } = splitUnitFromStreet(street);
+    if (!unit) return undefined;
+    const wantCore = looseAddressKey(core, city);
+    return rows.find(
+      (r) =>
+        looseAddressKey(String(r.street ?? ""), String(r.city ?? "")) === wantCore &&
+        unitTokenOf(r.unit) === unit,
     );
   } catch {
     return undefined;

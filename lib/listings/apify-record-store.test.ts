@@ -26,7 +26,13 @@
 // Tests are named for the failure mode they prevent.
 
 import { describe, expect, test } from "bun:test";
-import { dedupeRows, toRow, type StoredApifyRecord } from "./apify-record-store";
+import {
+  dedupeRows,
+  toRow,
+  splitUnitFromStreet,
+  unitTokenOf,
+  type StoredApifyRecord,
+} from "./apify-record-store";
 import type { ApifyRecord } from "./apify-comps";
 
 const rec = (street: string, city = "Fort Myers", extra: Record<string, unknown> = {}) =>
@@ -101,5 +107,45 @@ describe("toRow — a row without a key is never written", () => {
     );
     expect(r?.primary_photo).toBe("https://ap.rdcpix.com/a.jpg");
     expect(r?.property_url).toBe("https://www.realtor.com/a");
+  });
+});
+
+describe("the unit seam — a condo joins its OWN paid row or none (measured 08/09/2026)", () => {
+  test("the live miss that motivated this: '8521 Oakshade Cir #422' splits to core + token", () => {
+    expect(splitUnitFromStreet("8521 Oakshade Cir #422")).toEqual({
+      core: "8521 Oakshade Cir",
+      unit: "422",
+    });
+  });
+
+  test("every spelling of a unit yields the same bare token", () => {
+    expect(splitUnitFromStreet("8521 Oakshade Cir Unit 422").unit).toBe("422");
+    expect(splitUnitFromStreet("8521 Oakshade Cir Apt 4B").unit).toBe("4b");
+    expect(splitUnitFromStreet("120 Main St Ste 100").unit).toBe("100");
+    expect(splitUnitFromStreet("8521 Oakshade Cir unit #422").unit).toBe("422");
+  });
+
+  test("a street WITHOUT a unit is untouched — no token invented", () => {
+    expect(splitUnitFromStreet("12554 Kelly Sands Way")).toEqual({
+      core: "12554 Kelly Sands Way",
+      unit: null,
+    });
+  });
+
+  test("a degenerate unit-only line never strips to an empty street", () => {
+    expect(splitUnitFromStreet("#422")).toEqual({ core: "#422", unit: null });
+  });
+
+  test("the paid row's own unit column normalises to the same token: 'Unit 422' = '#422'", () => {
+    expect(unitTokenOf("Unit 422")).toBe("422");
+    expect(unitTokenOf("#422")).toBe("422");
+    expect(unitTokenOf("Apt 4B")).toBe("4b");
+  });
+
+  test("a row with NO unit yields null — it may never satisfy a unit-bearing subject", () => {
+    expect(unitTokenOf(null)).toBeNull();
+    expect(unitTokenOf("")).toBeNull();
+    expect(unitTokenOf("   ")).toBeNull();
+    expect(unitTokenOf(422)).toBeNull();
   });
 });
