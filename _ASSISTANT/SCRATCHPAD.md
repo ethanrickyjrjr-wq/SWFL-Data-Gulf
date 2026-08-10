@@ -5,6 +5,14 @@ killed the tool call. Standing rule: the thing he asked to HOLD IN HIS HANDS shi
 work waits its turn. Apify lane: actors picked (reddit fatihtahta/reddit-scraper-search-fast,
 instagram apify/instagram-hashtag-scraper), NO run fired, waiting on his go.
 
+## 2026-08-10 (Fable 5) — OPERATOR: build the INSTAGRAM Apify lane — harvest skills/GitHubs/programs that make us better, <$3
+Verbatim: "build an Instagram apify that finds skills to make us better at not sucking, following
+rules, better UI, better at real estate knowledge, better at building autonomous emails. We suck
+at everything, so make a few runs on what GitHub's or programs we can use. Spend less than 3
+dollars." Five improvement axes: rule-following/discipline, UI, real estate knowledge, autonomous
+email building, general skills. Deliverable: shopped actor + a few runs + findings filed in
+_RESEARCH + saved task. Budget hard cap $3.
+
 ## 2026-08-10 (Fable 5) — OPERATOR: "are we not building and saving our actors in apify?... look through past actors first!! then save all the ones we will use!!! and update playbook"
 Counted live against the Apify API, not memory: 247 lifetime runs across 27 distinct actors, but
 the account held exactly ONE actor of ours (swfl-market-pulse, built+pushed 08/03, ran once
