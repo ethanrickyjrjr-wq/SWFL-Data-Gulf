@@ -14,8 +14,8 @@
 // mode it targets, per RULE 3.5.
 //
 // ZERO network calls, on purpose. `loadSpeed` guards on a ZIP, and the narrator only runs
-// on pasted remarks — so a fixture without either exercises the whole structure
-// deterministically.
+// on honest material (pasted remarks or our own community layers) — so a fixture holding
+// none of those exercises the whole structure deterministically.
 
 import { describe, expect, it } from "bun:test";
 import {
@@ -398,5 +398,52 @@ describe("FAILURE MODE: the subject line is model-authored or overlong", () => {
 describe("FAILURE MODE: the recipe detects pending instead of being told", () => {
   it("never reads the pending flag or the transitions table", () => {
     expect(CODE).not.toMatch(/flag_pending|listing_transitions|to_state/);
+  });
+});
+
+// ─────────────────────────────────────────────────────────────────────────────
+// FAILURE MODE 13 — the community never reaches the writer.
+//
+// Operator decree 08/10/2026, verbatim: "UNDER CONTRACT HAS NO DESCRIPTION!!! WE ARE
+// SENDING OUT EMAILS TO PEOPLE WHO MAY BUY IF THE DEAL FALLS THROUGH... WHY WOULD WE NOT
+// HAVE A FUCKING DESCRIPTION AND COMMUNITY INFORMATION MAYBE." The 08/06 recipe wrote
+// "the community rides" in a comment and then stripped `neighborhood` and
+// `communityStats` from the writer's fact sheet — and refused to run the writer at all
+// without a pasted description, so a house whose community layers sat sourced in our own
+// lake (lane 1, free) still shipped a wall of numbers. The ladder read upside down.
+// ─────────────────────────────────────────────────────────────────────────────
+
+describe("FAILURE MODE: the community is stripped from the writer's fact sheet", () => {
+  it("never strips neighborhood or communityStats from narratorFacts", () => {
+    expect(CODE).not.toMatch(/neighborhood:\s*undefined/);
+    expect(CODE).not.toMatch(/communityStats:\s*undefined/);
+  });
+
+  it("the writer gates on community material as well as a pasted description", () => {
+    expect(CODE).toContain("hasCommunityMaterial");
+    for (const layer of [
+      "facts.community",
+      "facts.insideTheGate",
+      "facts.communityStats",
+      "facts.neighborhood",
+    ]) {
+      expect(CODE).toContain(layer);
+    }
+  });
+
+  it("still strips the costs and the stopped clock — the decree is positives, not a firehose", () => {
+    // Costs are the realtor's conversation (same-day polish decree), and daysOnMarket /
+    // lotSize stay stripped for the claim-gate reasons the recipe documents.
+    expect(CODE).toMatch(/daysOnMarket:\s*undefined/);
+    expect(CODE).toMatch(/lotSize:\s*undefined/);
+    expect(CODE).toMatch(/yearBuilt:\s*undefined/);
+    expect(CODE).toMatch(/hoaFee:\s*undefined/);
+  });
+
+  it("a house with neither material still builds — the paragraph stays an open slot", async () => {
+    // FACTS holds no remarks and no community layers, so the writer must not fire and the
+    // build must still land (this is also what keeps this suite offline).
+    const doc = await buildUnderContract(ctxFor(FACTS));
+    expect(doc).not.toBeNull();
   });
 });

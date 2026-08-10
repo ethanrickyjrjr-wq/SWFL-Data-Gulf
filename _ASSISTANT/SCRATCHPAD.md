@@ -1,3 +1,11 @@
+## 2026-08-10 (Fable 5) — OPERATOR: ANTHROPIC API CREDITS EXHAUSTED — every narrator paragraph is dying platform-wide
+Found during the under-contract re-bake: the narrator call fails with "Your credit balance is too
+low to access the Anthropic API. Please go to Plans & Billing to upgrade or purchase credits."
+This kills the authored paragraph on EVERY email build (new-listing, coming-soon, market-comps,
+under-contract...) — each degrades to an open slot, so emails ship without their one AI paragraph
+and nothing errors loudly. OPERATOR ACTION: top up credits; then re-bake affected captures.
+Check opened: under_contract_capture_rebake_after_credits.
+
 ## 2026-08-10 (Fable 5) — OPERATOR: UNDER CONTRACT has NO DESCRIPTION — and no community info
 Verbatim: "UNDER CONTRACT HAS NO DESCRIPTION!!! WE ARE SENDING OUT EMAILS TO PEOPLE WHO MAY BUY IF
 THE DEAL FALLS THROUGH...WHY WOULD WE NOT HAVE A FUCKING DESCRIPTION AND COMMUNITY INFORMATION
@@ -5,6 +13,16 @@ MAYBE. SO DUMB." The under-contract email's audience is BACKUP BUYERS — it mus
 (seller's description + community info), not just announce the status. Fix in
 lib/deliverable/recipes/under-contract.ts, following new-listing's walked grammar (description
 verbatim + authored extra below), honoring the same-day polish decree (no cost talk, positives only).
+RESOLVED 2026-08-10 (code + capture) — TWO stacked defects: (1) the served capture (baked 08/07)
+used 4140 Horsecreek Blvd, a house with no description on any lane, so the description slot was
+legitimately empty — re-baked with the default acceptance house (Kellysands Way, 549-char
+description now IN THE BYTES, 6/6 assertions); (2) the recipe stripped neighborhood+communityStats
+from the narrator AND only ran it on pasted remarks — fixed: community layers restored, narrator
+runs on remarks OR community material, framing rewritten (the EXTRA below the description =
+community + location, positives only, no costs). 36/36 recipe tests + 81 seam/parity/coherence +
+next build green. REMAINING: the authored paragraph itself is an OPEN SLOT in the capture — the
+narrator call is blocked by the API credit balance (see entry above). Playbook §2.4 update owed —
+file under another session's claim.
 
 ## 2026-08-10 (Fable 5) — OPERATOR: New Listing narrator TALK needs polish — repeats, negativity, AI-voice, cost talk
 Verbatim: "HAVE TO POLISH THE NEW LISTING TALK. TOO MUCH REPEATING WITH 150 HOMES THAT IS ALREAD
@@ -18,6 +36,13 @@ Four defects in the authored paragraph: (1) repeats facts the description above 
 (HOA $) — costs are the realtor's conversation, never the email's. Wanted instead: the GOOD —
 proximity to beach/downtown, amenities, lifestyle. Applies to EVERY email's prose, not just
 new-listing. Research pass (crawl4ai) on AI voice control explicitly ordered.
+
+## 2026-08-10 (Fable 5) — OPERATOR: showcase JUST SOLD house must be $750,000+ — pick a new house
+Verbatim: "WE ALREADY HAD THE FUCKING PHOTO!!! MAKE THE FUCKING HOUSE JUST SOLD 750,000 OR MORE.
+PICK A NEW HOUSE." Two points: (1) the photo was always sitting in our own lake — the build just
+never read it (RULE 0.7a again, the ladder skipped); (2) the showcase close must read $750k+ —
+a bigger win sells the agent better. Standing rule for showcase-house selection: recorded close
+≥ $750,000 AND photo held on our own rung.
 
 ## 2026-08-10 (Fable 5) — OPERATOR: "$/Sq Ft is the sale price ÷ listed square footage" footnote — KILL IT, and the playbook carve-out that protected it
 Verbatim: "WHY THE FUCK DOES IT SAY THIS!!" + "WHERE IN THE FUCKING PLAYBOOK DOES IT SAY TO ADD

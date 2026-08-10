@@ -1,3 +1,22 @@
+## 2026-08-10 (Fable 5) — Under Contract: the description NOW SHIPS and the community reaches the writer — two stacked defects, both fixed
+
+Operator: "UNDER CONTRACT HAS NO DESCRIPTION!!! WE ARE SENDING OUT EMAILS TO PEOPLE WHO MAY BUY IF
+THE DEAL FALLS THROUGH... WHY WOULD WE NOT HAVE A FUCKING DESCRIPTION AND COMMUNITY INFORMATION."
+(1) The served capture (baked 08/07) used 4140 Horsecreek Blvd — a house holding no description on
+any lane — so the slot was legitimately empty; re-baked via render-under-contract.mts with the
+default acceptance house (12554 Kellysands Way): the 549-char seller description is now IN THE
+BYTES, 13/15 cells sourced, 6/6 assertions. (2) under-contract.ts stripped neighborhood +
+communityStats from the narrator's fact sheet (directly under a comment claiming "the community
+rides") AND gated the narrator on pasted remarks only — fixed: community layers restored, narrator
+runs on remarks OR community material (lane 1, free), framing rewritten so the paragraph's job is
+the EXTRA below the description (community + location, positives only, no costs/negatives — the
+same-day polish decree applied at authoring time). This resolves playbook §2.4.5's open fork
+(narrator_has_no_job): the operator ruled. Evidence: 36/36 under-contract tests, 81/81
+seam+parity+coherence, bunx next build green. DECLARED: the authored paragraph in the capture is
+an OPEN SLOT — the narrator call died on "credit balance is too low" (Anthropic API, platform-wide,
+operator billing action); check under_contract_capture_rebake_after_credits opened. Playbook §2.4
+text update owed — file under another session's active claim.
+
 ## 2026-08-10 (Fable 5) — Just-sold: house photo + flag restored to the capture; ÷-footnote killed everywhere with its playbook loophole
 
 Operator: "where is the fucking picture of the house with the sold flag??" + "WHY THE FUCK DOES IT

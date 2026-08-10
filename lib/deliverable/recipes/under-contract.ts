@@ -49,8 +49,9 @@
 //              lifecycle email about one house gets the photo as its visual, and two bars
 //              reading was-versus-now is a fact wearing a chart costume. Policy "none"
 //              means DROP the slot — no image block is ever pushed here.
-//   PROSE    — the shared listing narrator, on lane-2 material only, and it is handed NO
-//              numbers and NO days count.
+//   PROSE    — the seller's description VERBATIM in its reserved slot, plus the shared
+//              listing narrator writing the EXTRA below it — the community and the
+//              location (operator decree 08/10/2026) — handed NO days count and NO costs.
 //   CTA      — ONE. "here's what else," never "get in line."
 //
 // ── WHY THIS EMAIL EXISTS (three jobs, one email) ────────────────────────────
@@ -506,10 +507,10 @@ export async function buildUnderContract(
 
   // ── The narrator — the ONLY thing the AI writes ────────────────────────────
   //
-  // RUNS ONLY ON LANE-2 MATERIAL, the same rule Coming Soon learned the hard way. No
-  // vendor sells us MLS remarks, so without a pasted description there is nothing honest
-  // to say that the grid does not already say, and the paragraph is an OPEN SLOT rather
-  // than an improvisation.
+  // RUNS ON ANY HONEST MATERIAL: lane-2 remarks OR our own community layers (lane 1,
+  // free). Until 08/10/2026 the pasted description was the ONLY trigger — the gate below
+  // explains why that was the ladder read upside down. With NEITHER held, the paragraph
+  // is an OPEN SLOT rather than an improvisation, exactly as before.
   //
   // *** IT IS HANDED NO DAYS COUNT. *** `daysOnMarket` is stripped from its fact sheet for
   // the same reason Coming Soon strips it: the number is TRUE, so the claim gate would
@@ -533,72 +534,108 @@ export async function buildUnderContract(
   // **the model writes prose and never a figure.**
   //
   // The fix is the one this codebase keeps re-learning: not a sterner prompt, but removing
-  // the material. `yearBuilt`, `hoaFee`, the nearby-business sweep and the tax-roll stats
-  // are real and belong to OTHER emails; here they are a pile of numbers sitting next to an
-  // instruction to describe a house. The community rides — "under contract in Kelly Greens"
-  // is legitimate and a reader cannot knock on a subdivision.
+  // the material. `yearBuilt` and `hoaFee` are stripped — costs are the realtor's
+  // conversation, never the email's (operator decree 08/10/2026: "LET'S NOT TALK ABOUT MORE
+  // COSTS... JUST TALK ABOUT THE GOOD THINGS THAT ARE THERE"). `daysOnMarket` and `lotSize`
+  // stay stripped for the claim-gate reasons above.
+  //
+  // *** THE COMMUNITY RIDES — FOR REAL THIS TIME (operator decree 08/10/2026). *** Verbatim:
+  // "UNDER CONTRACT HAS NO DESCRIPTION!!! WE ARE SENDING OUT EMAILS TO PEOPLE WHO MAY BUY IF
+  // THE DEAL FALLS THROUGH... WHY WOULD WE NOT HAVE A FUCKING DESCRIPTION AND COMMUNITY
+  // INFORMATION MAYBE." The 08/06 version of this file WROTE the sentence "the community
+  // rides" and then stripped `neighborhood` and `communityStats` three lines below it — so
+  // the shared narrator's community layers (inside the gate · nearby amenities · the
+  // subdivision) never reached this email's writer. The reader of this email is exactly the
+  // person the community sells to: someone who wanted this house and may still get it. This
+  // also answers §2.4.5's open fork (`under_contract_narrator_has_no_job`): the paragraph's
+  // job is the community and the location — the EXTRA below the description, never its echo.
   const narratorFacts: ListingFacts = {
     ...facts,
     daysOnMarket: undefined,
     lotSize: undefined,
     yearBuilt: undefined,
     hoaFee: undefined,
-    neighborhood: undefined,
-    communityStats: undefined,
   };
 
-  const raw = facts.remarks
-    ? await authorListingNarrative(narratorFacts, {
-        framing:
-          "AN UNDER-CONTRACT ANNOUNCEMENT. This home has accepted an offer and is under " +
-          "contract. IT HAS NOT SOLD and it has not closed — you must NOT write 'sold', " +
-          "'sold for', 'sold price', 'closed at', 'final sale' or 'sale price', and you " +
-          "must not state or imply any sale figure. " +
-          // AND IT IS TOLD NOTHING ABOUT THE PRICE. Removed 08/06/2026 after the FIRST
-          // acceptance run dropped the paragraph: this sentence used to read "The price
-          // shown is the LIST price," and the gate printed `[narrative] DROPPED — the
-          // narrator made 1 claim(s) it was not given: sequence("before weighing the list
-          // price")`. The model does not need the price to describe a house, and naming it
-          // invited exactly the reasoning that produced a sequence claim. §2.2.4's closing
-          // lesson, arriving on the very next email: **a fact you hand the writer is a fact
-          // it will try to use.** The strip prints the price; prose never has to.
-          // ── THE NARRATOR'S JOB IS NOT "TIGHTEN THE DESCRIPTION". ──────────────
-          // §2.1.6 defect 3, arriving here for the same structural reason: this email
-          // ships the seller's description VERBATIM in its own block, so a paragraph that
-          // summarises it hands the reader the same sentences twice. Read on the second
-          // acceptance run 08/06/2026 — the description said "the gated, bundled golf
-          // community of Kelly Greens, offering championship golf, tennis, and … just
-          // minutes from Sanibel Island, Fort Myers Beach … SWFL International Airport",
-          // and the paragraph came back "Kelly Greens is a gated, bundled golf community …
-          // also offers tennis, and the location puts Sanibel Island, Fort Myers Beach,
-          // and Southwest Florida International Airport within a short drive."
-          // **Adding a block is never free; it changes what every downstream writer should
-          // be doing.**
-          "The seller's own description is printed IN FULL directly above your paragraph, " +
-          "and the reader has just read it. DO NOT summarise it, restate it, or repeat any " +
-          "fact it already states. Your job is the ONE sentence it does not contain: what " +
-          "this home's appeal means for someone reading the announcement. If the " +
-          "description leaves you nothing honest to add, say nothing — a missing paragraph " +
-          "is fine and a redundant one is not. Never add a room, a layout, a finish, a " +
-          "view, a builder's intention, or any quality the description does not state. " +
-          "WRITE PROSE, NOT FIGURES: do not restate the price, the beds, the baths, the " +
-          "square footage, the lot size or any other number that already appears in the " +
-          "email — those cells sit directly above your paragraph and repeating them reads " +
-          "as a spreadsheet export rather than as an agent. " +
-          // THE FRAMING MUST NOT ORDER A CLAIM THE GATE WILL THEN KILL. §2.2.4's closing
-          // lesson: Coming Soon's prompt instructed "anticipation" and "shown privately
-          // first" — a motive claim and a sequence claim — and the no-invention gate
-          // correctly dropped every paragraph that obeyed. We were telling it to invent,
-          // then punishing it for complying. Everything about SPEED and STATUS here is
-          // true by construction in code (the ribbon, the strip, the button), so prose
-          // never has to carry it.
-          "Do NOT say how fast it went, how long it was listed, how many offers there " +
-          "were, or how the market is doing — you were not told any of those, the ribbon " +
-          "and the figures already say what is known, and a claim about timing or demand " +
-          "is dropped by the no-invention gate rather than sent. Do NOT invite backup " +
-          "offers or suggest the reader can still buy this home.",
-      }).catch(() => null)
-    : null;
+  // THE WRITER RUNS ON ANY HONEST MATERIAL, NOT ONLY ON A PASTE. Lane-2 remarks were the
+  // ONLY trigger until 08/10/2026 — which meant a house whose community layers sat fully
+  // sourced in our own lake (lane 1, free) still shipped a wall of numbers whenever no
+  // description was held. That is the sourcing ladder read upside down (RULE 0.7a). A house
+  // with NEITHER still gets the open slot, never an improvisation.
+  const hasDescription = Boolean(facts.remarks);
+  const hasCommunityMaterial = Boolean(
+    facts.community || facts.insideTheGate || facts.communityStats || facts.neighborhood,
+  );
+
+  const raw =
+    hasDescription || hasCommunityMaterial
+      ? await authorListingNarrative(narratorFacts, {
+          descriptionRendered: hasDescription,
+          framing:
+            "AN UNDER-CONTRACT ANNOUNCEMENT. This home has accepted an offer and is under " +
+            "contract. IT HAS NOT SOLD and it has not closed — you must NOT write 'sold', " +
+            "'sold for', 'sold price', 'closed at', 'final sale' or 'sale price', and you " +
+            "must not state or imply any sale figure. " +
+            // AND IT IS TOLD NOTHING ABOUT THE PRICE. Removed 08/06/2026 after the FIRST
+            // acceptance run dropped the paragraph: this sentence used to read "The price
+            // shown is the LIST price," and the gate printed `[narrative] DROPPED — the
+            // narrator made 1 claim(s) it was not given: sequence("before weighing the list
+            // price")`. The model does not need the price to describe a house, and naming it
+            // invited exactly the reasoning that produced a sequence claim. §2.2.4's closing
+            // lesson, arriving on the very next email: **a fact you hand the writer is a fact
+            // it will try to use.** The strip prints the price; prose never has to.
+            // ── THE NARRATOR'S JOB IS NOT "TIGHTEN THE DESCRIPTION" — IT IS THE EXTRA
+            // BELOW IT: THE COMMUNITY AND THE LOCATION. ───────────────────────────
+            // §2.1.6 defect 3 still governs when a description ships: a paragraph that
+            // summarises it hands the reader the same sentences twice. Read on the second
+            // acceptance run 08/06/2026 — the description said "the gated, bundled golf
+            // community of Kelly Greens, offering championship golf, tennis, and … just
+            // minutes from Sanibel Island, Fort Myers Beach … SWFL International Airport",
+            // and the paragraph came back "Kelly Greens is a gated, bundled golf community …
+            // also offers tennis, and the location puts Sanibel Island, Fort Myers Beach,
+            // and Southwest Florida International Airport within a short drive."
+            // What changed 08/10/2026 is the paragraph's POSITIVE job: with the community
+            // layers back on the fact sheet, it writes what the description does NOT say —
+            // the same walked grammar as New Listing's authored extra ("THE POINT OF THE
+            // NARRATOR IS... ADDING EXTRA BELOW", 08/09/2026).
+            (hasDescription
+              ? "The seller's own description is printed IN FULL directly above your " +
+                "paragraph, and the reader has just read it. DO NOT summarise it, restate " +
+                "it, or repeat any fact it already states. Your job is the EXTRA it does " +
+                "not contain: what the community and the location offer, drawn ONLY from " +
+                "the community and neighborhood facts you were given. If those facts and " +
+                "the description overlap, say only what is genuinely new; if you have " +
+                "nothing honest to add, say nothing — a missing paragraph is fine and a " +
+                "redundant one is not. "
+              : "No seller description is available for this home, so your paragraph is " +
+                "the only body copy the reader gets. Describe what makes this home and " +
+                "its community appealing, drawn ONLY from the facts you were given. ") +
+            "Never add a room, a layout, a finish, a view, a builder's intention, or any " +
+            "quality your facts do not state. " +
+            // ONLY THE GOOD THINGS — operator decree 08/10/2026 (the polish decree, applied
+            // at authoring time): positives only, no cost talk, no negative framing of the
+            // location. Costs are the realtor's conversation, never the email's.
+            "Speak only to the GOOD: what is nearby, what the community offers, what the " +
+            "location puts close at hand. Never frame the location or the home " +
+            "negatively, and never mention any cost, fee, or dollar amount. " +
+            "WRITE PROSE, NOT FIGURES: do not restate the price, the beds, the baths, the " +
+            "square footage, the lot size or any other number that already appears in the " +
+            "email — those cells sit directly above your paragraph and repeating them reads " +
+            "as a spreadsheet export rather than as an agent. " +
+            // THE FRAMING MUST NOT ORDER A CLAIM THE GATE WILL THEN KILL. §2.2.4's closing
+            // lesson: Coming Soon's prompt instructed "anticipation" and "shown privately
+            // first" — a motive claim and a sequence claim — and the no-invention gate
+            // correctly dropped every paragraph that obeyed. We were telling it to invent,
+            // then punishing it for complying. Everything about SPEED and STATUS here is
+            // true by construction in code (the ribbon, the strip, the button), so prose
+            // never has to carry it.
+            "Do NOT say how fast it went, how long it was listed, how many offers there " +
+            "were, or how the market is doing — you were not told any of those, the ribbon " +
+            "and the figures already say what is known, and a claim about timing or demand " +
+            "is dropped by the no-invention gate rather than sent. Do NOT invite backup " +
+            "offers or suggest the reader can still buy this home.",
+        }).catch(() => null)
+      : null;
 
   // BELT AND BRACES. The framing above forbids sold language; this refuses it. A framing
   // sentence asking a model nicely is not a guarantee — that is the whole lesson of the
