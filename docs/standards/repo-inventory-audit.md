@@ -66,7 +66,7 @@ is read from the actual pipeline code, not the registry.
 | leepa_comp_sales | ArcGIS REST | data_lake.leepa_comparable_sales — 108,848 rows, zero consumer |
 | redfin_collier | CSV (redfin-public-data S3) | data_lake.redfin_collier_market |
 | redfin_lee | CSV (redfin-public-data S3) | data_lake.redfin_lee_market |
-| redfin_city_swfl | CSV (redfin-public-data S3) | data_lake.redfin_city_swfl |
+| redfin_city_swfl | CSV (redfin-public-data S3, `redfin_data_center/housing_market/monthly/all_cities.csv` — retargeted 08/10/2026 off the frozen legacy dump) | data_lake.redfin_city_swfl |
 | collier_parcels | ArcGIS REST (FDOR services9) | data_lake.collier_parcels |
 | lee_parcels | ArcGIS REST (FDOR services9) | data_lake.lee_parcels |
 | neighborhood_stats | DuckDB derivation over our lake | data_lake.neighborhood_stats |

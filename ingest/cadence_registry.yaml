@@ -920,19 +920,24 @@ pipelines:
       # the first live load (not a dry-run count). Hero-trio slice matches the 07/11 dry-run exactly:
       # cape_coral 655 / fort_myers 648 / naples 614. Grows monthly.
     count_table: data_lake.redfin_city_swfl
-    # Source: Redfin Data Center CITY market tracker (free public TSV, ~1 GB gz), filtered to EVERY
-    # Florida city (widened from 3 desk cities 07/12/2026, operator directive: bring in all the data,
-    # separate in the lake). Refreshes ~monthly. The monthly source-faithful SOLD anchor beneath the
-    # daily ASKING line on the desk hero (daily-price-dual-signal). SteadyAPI/Redfin county grain
-    # can't serve a true city-grain sold median.
+    # RETARGETED 08/10/2026: legacy city_market_tracker.tsv000.gz FROZE at Last-Modified 06/02/2026
+    # while serving stale 200s — the desk hero sat on May closes into August. Same freeze family +
+    # same fix as redfin_swfl's 07/17 retarget (ed0b2efd); the city file was MISSED in that pass.
+    # Source now: redfin_data_center/housing_market/monthly/all_cities.csv (plain CSV, ~536 MB),
+    # filtered to EVERY Florida City-type region (widened from 3 desk cities 07/12/2026, operator
+    # directive: bring in all the data, separate in the lake). Refreshes ~monthly. The monthly
+    # source-faithful SOLD anchor beneath the daily ASKING line on the desk hero
+    # (daily-price-dual-signal). SteadyAPI/Redfin county grain can't serve a true city-grain sold
+    # median. Content-freshness gate (55d on newest period_end) is the frozen-source tripwire.
     source_scope:
       confirmed_total:
-        summary: "Monthly true-sold median sale price at city grain for every Florida city in Redfin's free city tracker (desk reads the Cape Coral / Fort Myers / Naples slice; any other FL city is a query, not a pipeline change) — full period_end history, all property types"
+        summary: "Monthly true-sold median sale price at city grain for every Florida city in Redfin's free city tracker (desk reads the Cape Coral / Fort Myers / Naples slice; any other FL city is a query, not a pipeline change) — full period_end history, all-residential rollup (the retargeted feed has no per-property-type split; 'All Residential' is stamped to preserve the desk contract)"
         source: "our ingest (redfin.com origin)"
       source_ceiling:
-        summary: "The national file also carries every non-FL city (no consumer today) and per-property-type breakouts we already land. Ceiling within FL: none — the whole state's city grain is ingested."
-        as_of: "07/12/2026"
-        source_label: "Redfin Data Center city_market_tracker"
+        summary: "The national file also carries every non-FL city (no consumer today). The per-property-type breakouts the LEGACY feed carried live in a separate property_types/ path on the new feed — not pulled (no consumer reads a non-rollup city row today)."
+        as_of: "08/10/2026"
+        source_url: "https://redfin-public-data.s3.us-west-2.amazonaws.com/redfin_data_center/housing_market/monthly/all_cities.csv"
+        source_label: "Redfin Data Center housing_market monthly all_cities.csv"
 
   - name: collier_parcels
     workflow: collier-parcels-annual.yml

@@ -356,6 +356,11 @@ treated as an area centre whose own record is **not returned**; `radius` is igno
 Ct · 16820 Sanibel Sunset Ct · 18200 Creekside View Dr · 16299 San Carlos Blvd · 12423 McGregor
 Woods Cir. **Never build `fetchApifyRecordForAddress`** — it existed, billed one call per comp for a
 guaranteed `null`, and was deleted. The rule is written at the head of `lib/listings/apify-identity.ts`.
+**R1 is about THIS actor, not the vendor class:** a TRUE per-address lookup exists one rung over —
+`one-api/realtor-property-scraper`, `property_inputs: ["<full street address>"]`, ~$0.007/result,
+proven live 08/10/2026 (run `MdWKQA4bKzH8uufrO` bought a 2,263-char description off a bare address;
+row saved to `apify_property_records`). Not a wired code lane; the proven input is saved in the
+Apify account as task `property-by-address` (playbook §3.3.2).
 
 **R2 · EVERY RECORD IS A CANDIDATE, NEVER AN ANSWER.** It becomes one only via `matchesAddress`.
 Taking `[0]` blind is how 306 Chattanooga Dr, 33905 shipped as the hero photo link AND the CTA of an

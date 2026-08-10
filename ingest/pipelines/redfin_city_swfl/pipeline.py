@@ -13,7 +13,7 @@ import argparse
 import sys
 
 from .constants import REDFIN_CITY_TRACKER_URL, REGION_TO_AREA
-from .resources import ingest_redfin_city, iter_city_rows
+from .resources import dedupe_city_rows, ingest_redfin_city, iter_city_rows
 
 
 def main(argv: list[str] | None = None) -> int:
@@ -26,7 +26,8 @@ def main(argv: list[str] | None = None) -> int:
     args = parser.parse_args(argv)
 
     if args.dry_run:
-        rows = list(iter_city_rows(REDFIN_CITY_TRACKER_URL))
+        # Same dedupe the write path applies, so dry-run counts match what would land.
+        rows = dedupe_city_rows(list(iter_city_rows(REDFIN_CITY_TRACKER_URL)))
         print(f"redfin_city_swfl dry-run: {len(rows)} FL city rows")
         if rows:
             by_area: dict[str, int] = {}
