@@ -141,7 +141,7 @@ export function isHiddenPath(pathname: string | null): boolean {
  * pins it), so folding the email-lab editor in there would wrongly suppress the
  * highlighter. Only SiteShell + SiteFooter read this.
  */
-export const CHROME_FREE_PREFIXES = ["/email-lab/grid"] as const;
+export const CHROME_FREE_PREFIXES = ["/email-lab/grid", "/go"] as const;
 
 export function isChromeFree(pathname: string | null): boolean {
   return !!pathname && CHROME_FREE_PREFIXES.some((p) => pathname.startsWith(p));

@@ -121,7 +121,13 @@ export const HERO_CAMPAIGNS: HeroCampaignEntry[] = [
  *  and multi-ZIP city charts key off that derived place, not a URL zip. A user who
  *  means a ZIP as the SUBJECT (typed bare ZIP, or a map/report click) routes through
  *  openZipLab instead — that's the only path that makes the email ZIP-scoped. */
-export function heroDestination(entry: HeroCampaignEntry, opts: { filled: string }): string {
+export function heroDestination(
+  // Structural subset so non-hero doors (the /go one-click page's 7 lifecycle
+  // options) can ride the SAME lab door with any registry recipe — one URL
+  // scheme, one [[blank]]-fill rule, no parallel builder.
+  entry: Pick<HeroCampaignEntry, "input" | "recipe">,
+  opts: { filled: string },
+): string {
   const filled = opts.filled.trim();
   const ph = findPlaceholder(entry.recipe.prompt);
   // An EMPTY fill must NOT collapse the [[blank]] to nothing: a placeless prompt
