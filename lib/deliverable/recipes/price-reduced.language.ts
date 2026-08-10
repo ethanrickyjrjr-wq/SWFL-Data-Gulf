@@ -9,7 +9,10 @@
 // the framing block in buildPriceReduced): the cut is stated ONCE, plain words, NO
 // figures (they sit in the hero and the strip directly above the paragraph), no
 // reason for the move, no market claim, no urgency, no CTA (the button does that
-// job). That is why every sentence here is digit-free INCLUDING its slot values.
+// job). Every sentence's FIXED WORDS are digit-free (auditBankTemplates enforces it);
+// the street slot's VALUE carries the house number, which is fine — the address is
+// settled fact upstream (shared.ts anchors it), and the no-figures rule is about
+// prices and specs, never the street line.
 import type { SentenceBank } from "../language";
 
 export const PRICE_REDUCED_BANK: SentenceBank = {

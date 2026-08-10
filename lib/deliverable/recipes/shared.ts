@@ -630,7 +630,11 @@ export async function authorListingNarrative(
       .filter((s) => !/\b(I|me|my|mine)\b/.test(s))
       .filter(
         (s) =>
-          !/\b(fact line|is absent|are absent|is present|not given|not provided|was provided|were provided|honest description|the description stops|describing the home itself|instructions?|the reader|grid figures?)\b/i.test(
+          // "already open|written by us|fixed copy|sentences above|supersede" added
+          // 08/09/2026 (second-order audit 4.7): the sentence-bank addendum introduced
+          // exactly that meta-vocabulary into the prompt, and this recipe family has
+          // FOUR measured live leaks of prompt language shipping as prose.
+          !/\b(fact line|is absent|are absent|is present|not given|not provided|was provided|were provided|honest description|the description stops|describing the home itself|instructions?|the reader|grid figures?|already open|written by us|fixed copy|sentences? above|supersedes?)\b/i.test(
             s,
           ),
       )

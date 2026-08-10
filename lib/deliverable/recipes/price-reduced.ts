@@ -129,7 +129,11 @@ export function previousPrice(facts: ListingFacts): string | undefined {
 export function bankValues(facts: ListingFacts): Record<string, string | undefined> {
   const street = (facts.address ?? "").split(",")[0]?.trim() || undefined;
   return {
-    street: facts.isPriceReduced ? street : undefined,
+    // EXACTLY the kicker's condition — flag AND amount (second-order audit 08/09/2026,
+    // finding 2.2): gating on the flag alone let code-owned prose announce a cut on an
+    // email whose kicker, Previous cell, and narrator all held "no sourced cut". The
+    // one divergence lane (flag true, amount absent) now drops the sentence whole.
+    street: facts.isPriceReduced && facts.priceReduction ? street : undefined,
     community: facts.communityStats?.subdivisionName?.trim() || undefined,
   };
 }
@@ -534,8 +538,9 @@ export async function buildPriceReduced(ctx: RecipeBuildContext): Promise<EmailD
   // $/sqft + DOM + HOA + community/inside-the-gate/nearby-amenity lanes), the claim
   // gate that DROPS any paragraph making a claim it was not given, and the
   // descriptionRendered contract. The guard against invention is the GATE now, not
-  // silence. A gate drop leaves the slot open — never refused, never invented — which
-  // is RULE 0.7's posture, with prose when the facts support it instead of never.
+  // silence. A gate drop takes only the model's connective — the code-owned bank
+  // sentences below still ship (never refused, never invented, RULE 0.7's posture);
+  // with no bank sentence either, the slot stays open.
 
   // ── WHAT THE NARRATOR MAY DRAW FROM ──────────────────────────────────────────
   // authorListingNarrative hands it the record AND the agent's pasted description as
@@ -607,27 +612,37 @@ export async function buildPriceReduced(ctx: RecipeBuildContext): Promise<EmailD
   // of the move, so the framing must forbid the model restating it in any words.
   const bank = bankFor("price-reduced");
   const bankFilled = bank ? fillSentences(bank, bankValues(facts)).filled : [];
+  // The addendum SUPERSEDES the framing's "you may refer ONCE" bullet by name — without
+  // that sentence the prompt told the model both "once" and "never" about the same move
+  // (second-order audit 08/09/2026, finding 2.1: a live self-contradiction on every
+  // reduced build).
   const bankAddendum = bankFilled.length
-    ? "\n• THESE SENTENCES ALREADY OPEN THE PARAGRAPH (written by us, not you — do not " +
-      "repeat, rephrase, or contradict them): " +
+    ? "\n• THESE SENTENCES ALREADY OPEN THE PARAGRAPH (fixed copy, not yours to repeat, " +
+      "rephrase, or contradict): " +
       bankFilled.map((s) => `"${s}"`).join(" ") +
-      "\n• Because the price move is already stated above, you may NOT mention it again in " +
-      "any words."
+      "\n• THIS SUPERSEDES THE 'ONCE, IN PLAIN WORDS' PERMISSION ABOVE: the one permitted " +
+      "mention of the price move is already written. You may NOT mention the move at all — " +
+      "not the new price, not the previous price, not that anything changed."
     : "";
 
   // TWO attempts, same as back-on-market's NARRATOR_ATTEMPTS: the claim gate legitimately
   // drops an inventing paragraph (measured on this recipe's first live walk run 08/09/2026:
   // an invented "2022" year and a "since the listing" sequence) and one clean re-ask is a
-  // bounded, recorded spend — never a loop. Both drop → the slot stays OPEN; the gate is
-  // never lowered to fill it.
+  // bounded, recorded spend — never a loop. Both drop → the CONNECTIVE stays out; the
+  // code-owned bank sentences still ship (the baked lane, RULE 0.7b), and with no bank
+  // the slot stays OPEN. The gate is never lowered to fill anything.
   let narrative: string | null = null;
   for (let attempt = 0; attempt < 2 && !narrative; attempt++) {
     narrative = await authorListingNarrative(facts, {
       framing: framing + bankAddendum,
-      // The previous price is THIS recipe's own derivation — settled here so a single legal
-      // mention doesn't die at the claim gate as an unanchored number (the Just Sold lesson:
-      // a fact you want the narrator allowed to state goes in anchors, not only in framing).
-      ...(previous ? { anchors: [`The previous asking price was ${previous}.`] } : {}),
+      // The previous price is THIS recipe's own derivation. Pre-bank, it was anchored so a
+      // single legal mention could survive the claim gate (the Just Sold lesson). With the
+      // bank's cut sentence on the page the addendum forbids the model the move ENTIRELY,
+      // so the anchor only rides along when no bank sentence fired — whitelisting a claim
+      // the same prompt bans would be the 2.1 contradiction back in anchor form.
+      ...(previous && !bankFilled.length
+        ? { anchors: [`The previous asking price was ${previous}.`] }
+        : {}),
       // The chrome ships the verbatim description block only when we hold remarks — tell the
       // narrator the truth about what the reader can see.
       descriptionRendered: hasRemarks,

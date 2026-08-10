@@ -265,10 +265,13 @@ checks.push({
 });
 
 // ── SENTENCE BANK (spec 2026-08-10-sentence-banks-design.md) ─────────────────
-// The bank's cut sentence with the real street, character-for-character. When the
-// vendor flags a cut, the paragraph OPENS with these code-owned words.
-const bankCutSentence =
-  facts.isPriceReduced && street ? `The price on ${street} just came down.` : "";
+// The bank's cut sentence with the real street, character-for-character. Predicated on
+// the KICKER IN THE RENDERED BYTES, not on bankValues' own condition (second-order
+// audit 4.2: an assertion that mirrors the producer's predicate can never catch the
+// producer diverging) — the invariant here is "cut sentence ships IFF a kicker states
+// a cut on screen".
+const kickerStatesCut = /price cut \$[\d,]+/.test(lower);
+const bankCutSentence = kickerStatesCut && street ? `The price on ${street} just came down.` : "";
 checks.push({
   name: "8 · BANK VERBATIM — the code-owned cut sentence ships character-for-character",
   pass: !bankCutSentence || html.includes(bankCutSentence),
@@ -282,7 +285,12 @@ checks.push({
 // The move is stated at most ONCE in the body prose — the bank's mention plus zero
 // model restatements (the framing forbids the model the move in any words).
 const moveMentions = (
-  authoredBody.match(/(came down|reduced|price cut|lowered|improved|adjusted)/gi) ?? []
+  authoredBody.match(
+    // Widened 08/09/2026 (second-order audit 4.3): "come down" (the served pre-bank
+    // capture's own phrasing), dropped/repriced/trimmed — restatement synonyms the
+    // first list missed.
+    /(came down|come down|reduced|price cut|lowered|improved|adjusted|dropped|repriced|trimmed)/gi,
+  ) ?? []
 ).length;
 checks.push({
   name: "9 · the move is stated at most once in the body — the bank's mention, never the model's",

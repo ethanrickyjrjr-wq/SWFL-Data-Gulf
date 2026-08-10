@@ -732,6 +732,15 @@ describe("sentence-bank integration", () => {
     const r = fillSentences(bankFor("price-reduced")!, v);
     expect(r.filled.some((s) => /came down/i.test(s))).toBe(false);
   });
+  test("FM (second-order 2.2): flag WITHOUT amount → no cut sentence — the bank can never announce a cut the kicker denies", () => {
+    // The three population lanes set flag and amount under independent conditions, so
+    // flag-true/amount-absent is reachable. On it the kicker is empty, the Previous
+    // cell is an open slot, and the narrator is told nothing moved — the bank must
+    // agree with all three, so its condition is EXACTLY the kicker's (flag AND amount).
+    const v = bankValues({ ...SHORE_DR, isPriceReduced: true, priceReduction: undefined });
+    const r = fillSentences(bankFor("price-reduced")!, v);
+    expect(r.filled.some((s) => /came down/i.test(s))).toBe(false);
+  });
   test("community fills from the parcel-resolved subdivision only", () => {
     const withCommunity: ListingFacts = {
       ...SHORE_DR,
