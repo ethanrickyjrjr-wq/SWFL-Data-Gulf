@@ -20,6 +20,45 @@ import { resolve } from "node:path";
 import { renderDigest } from "./lib/scratchpad-parse.mjs";
 
 const PATH = resolve(process.cwd(), "_ASSISTANT/SCRATCHPAD.md");
+const STRIKES_PATH = resolve(process.cwd(), "_ASSISTANT/STRIKES.md");
+
+// RULE 2 §0b's counter. Parses _ASSISTANT/STRIKES.md (`## shape:` header, one `guard:`
+// line, `- strike:` lines) and renders every shape at 2+ strikes whose guard is still
+// OWED, plus a one-line tally of guarded shapes. Same fail-soft contract as the digest:
+// a missing or malformed registry prints nothing — a broken counter must never wedge
+// session start, and a counter that only exists in prose is exactly what §0b replaces.
+function renderStrikes(text) {
+  const shapes = [];
+  let cur = null;
+  for (const line of text.split("\n")) {
+    const h = line.match(/^## shape:\s*(\S+)/);
+    if (h) {
+      cur = { slug: h[1], guard: "", strikes: 0 };
+      shapes.push(cur);
+      continue;
+    }
+    if (!cur) continue;
+    const g = line.match(/^guard:\s*(.+)$/);
+    if (g) cur.guard = g[1].trim();
+    if (/^- strike:/.test(line)) cur.strikes += 1;
+  }
+  if (shapes.length === 0) return "";
+  const owed = shapes.filter((s) => /^OWED/i.test(s.guard) && s.strikes >= 2);
+  const built = shapes.filter((s) => !/^OWED/i.test(s.guard));
+  const lines = [];
+  lines.push("――― STRIKES (RULE 2 §0b: 3rd strike = build the guard, not another entry) ―――");
+  for (const s of owed) {
+    lines.push(
+      `  🔴 ${s.slug} — ${s.strikes} strikes, guard OWED${s.strikes >= 3 ? " — A NEW SCRATCHPAD ENTRY FOR THIS SHAPE IS BANNED; BUILD THE MECHANISM" : ""}`,
+    );
+    lines.push(`     ${s.guard}`);
+  }
+  if (owed.length === 0) lines.push("  no unguarded shape at 2+ strikes");
+  lines.push(
+    `  guarded: ${built.map((s) => `${s.slug}(${s.strikes})`).join(" · ")} — full registry: _ASSISTANT/STRIKES.md`,
+  );
+  return lines.join("\n") + "\n";
+}
 
 let raw = "";
 process.stdin.setEncoding("utf8");
@@ -37,6 +76,13 @@ process.stdin.on("end", () => {
     if (digest) process.stdout.write(digest);
   } catch {
     // Never let a parse bug wedge session start.
+  }
+
+  try {
+    const strikes = renderStrikes(readFileSync(STRIKES_PATH, "utf8"));
+    if (strikes) process.stdout.write(strikes);
+  } catch {
+    // Registry absent or malformed — the digest above still printed; stay soft.
   }
   process.exit(0);
 });

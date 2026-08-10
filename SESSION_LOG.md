@@ -1,3 +1,20 @@
+## 2026-08-10 (Fable 5) — RULE 2 §0b gets its COUNTER: STRIKES.md built + backfilled, Gate 15 capture-freshness, fleet-tripwire check opened
+
+Operator: "how does claude know if it is the third time? can we backfill on all these issues?
+fix it all!!!" Count: 4 parts, 3 built, 1 deferred-with-blocker. (1) `_ASSISTANT/STRIKES.md` —
+the §0b counter, backfilled from clustering ~70 scratchpad headers into 6 shapes / 26 strikes,
+each with a guard: line (4 already guarded by the RULE 0.x series — the rules WERE the
+backfill). (2) print-scratchpad.mjs renderStrikes — SessionStart prints unguarded shapes at 2+
+strikes red; proven live (stale-source-served-silently renders at 5 strikes, banned banner at
+3+). (3) Gate 15 captureFreshnessGate in check-prepush-gate.mjs — email-surface code without a
+re-baked public/new-emails/*.html BLOCKS (shape fixed-but-not-live, 5 strikes; escape
+ALLOW_STALE_CAPTURE=1); node --check clean both files. (4) shape stale-source-served-silently
+still OWED: check `stale_source_tripwire_fleet` opened — fleet rollout is ingest-scale and
+redfin_city is claimed by the parallel desk-chart session mirroring the same pattern. Checks:
++1 opened / 0 closed this session, deliberately. Also answered: SESSION_LOG intact (32,629
+lines, append-only; the "missing" logs were chat-side MCP probe sessions that never touch the
+repo — 08/08 has zero entries because no repo session ran).
+
 ## 2026-08-10 (Fable 5) — steipete/agent-rules trialed: DO NOT ADOPT, one keeper → RULE 2 §0b (three strikes = a guard)
 
 Operator: "start with steipete." Shallow-cloned agent-rules (48 files), read the 4 generic rules

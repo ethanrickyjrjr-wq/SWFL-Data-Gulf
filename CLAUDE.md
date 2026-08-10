@@ -351,6 +351,12 @@ Single session / no file overlap → just work on `main`.
    the mechanism instead (hook, lint, test, or CLAUDE.md rule) and links the entries to it. The
    scratchpad is a queue for mechanisms, not a diary of repeats — 45 open items and "same surface
    fixed five times in a row" is the documented failure this line exists to stop.
+   **THE COUNTER IS `_ASSISTANT/STRIKES.md` (built + backfilled 08/10/2026).** "Third time" is
+   not judgment anymore: when an entry matches a `## shape:` there, add a `- strike:` line in the
+   same edit; a new shape gets a header. The SessionStart scratchpad printer counts it and prints
+   every unguarded shape at 2+ strikes in red. When a guard ships, flip that shape's `guard:` line
+   to BUILT with the artifact and date — the registry is also the map of which mechanism answers
+   which recurring failure.
 1. **CHECK** — SessionStart prints it: `SESSION_LOG.md`, open `checks` (Supabase `public.checks`), build queue (`_AUDIT_AND_ROADMAP/build-queue.md`). Trust it; verify surprises against `git`.
 2. **SUBMIT** — commit + SESSION_LOG entry + `node scripts/safe-push.mjs`.
 3. **UPDATE** — same push: `node scripts/check.mjs close <key>` / `open <project> <key> "<label>"` / `list`. Open obligations live in `checks` — never as `⬜/✅` in plan docs.

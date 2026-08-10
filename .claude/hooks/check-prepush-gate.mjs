@@ -434,6 +434,15 @@ process.stdin.on("end", () => {
   // Escape: ALLOW_DUPLICATE_DERIVATION=1.
   duplicateRootGate(base);
 
+  // ---- Gate 15: capture freshness — email code can't ship without its re-bake --
+  // Strike registry shape `fixed-but-not-live`, 5 strikes before this existed
+  // (_ASSISTANT/STRIKES.md). The recurring incident: recipe/render code is "fixed",
+  // the push ships, but the baked capture under public/new-emails/ — the bytes the
+  // operator actually opens on /showcase — was never re-rendered, so the site shows
+  // the OLD email and the fix is announced-but-invisible ("just-sold fixed but
+  // STILL THE SAME on the site", 08/10/2026).
+  captureFreshnessGate(changed);
+
   // ---- Gate 8: ZIP scope root (Lee + Collier, 57) ---------------------------
   // Coverage has ONE root (isCoreScope, refinery/lib/core-scope.mts) and the leak
   // still reopened twice, because nothing FORCED a new surface to call it: the
@@ -1315,6 +1324,47 @@ function cronFailClosedGate(base) {
     );
   } catch {
     return; // never wedge a push on this gate's own bug
+  }
+}
+
+// Gate 15 body. Fail-OPEN on internal error, BLOCK on violation, escape
+// ALLOW_STALE_CAPTURE=1 (legitimate for pure refactors that provably leave the
+// rendered bytes identical, doc-comment-only edits, or when the capture re-bake
+// is blocked by a parallel session's file claim — say which in the push message).
+function captureFreshnessGate(changed) {
+  try {
+    if (process.env.ALLOW_STALE_CAPTURE === "1") {
+      process.stdout.write(
+        `\n[pre-push gate] OVERRIDE: ALLOW_STALE_CAPTURE=1 — email-surface code is\n` +
+          `shipping without a re-baked capture (logged).\n`,
+      );
+      return;
+    }
+    const isEmailSurface = (f) =>
+      (f.startsWith("lib/deliverable/") ||
+        f.startsWith("lib/email/") ||
+        /^scripts\/email\/render-.*\.mts$/.test(f)) &&
+      !/\.test\.(ts|mts|tsx)$/.test(f) &&
+      !f.endsWith(".md");
+    const surface = changed.filter(isEmailSurface);
+    if (surface.length === 0) return;
+    const rebaked = changed.some((f) => /^public\/new-emails\/.*\.html$/.test(f));
+    if (rebaked) return;
+    block(
+      "CAPTURE FRESHNESS — email code changed but no capture was re-baked (Gate 15)",
+      `This push edits the email surface but ships no public/new-emails/*.html —\n` +
+        `the bytes the operator actually opens. Five strikes of this shape are in\n` +
+        `_ASSISTANT/STRIKES.md ("fixed-but-not-live"): the fix lands in code, the site\n` +
+        `still shows the old email, and the repair gets announced as done.\n\n` +
+        `Email-surface files in this push:\n` +
+        surface.map((f) => `  - ${f}`).join("\n") +
+        `\n\nFix: re-run the surface's acceptance render (scripts/email/render-*.mts) and\n` +
+        `commit the refreshed capture in the SAME push.\n` +
+        `Legitimate exceptions (pure refactor with identical bytes, capture blocked by a\n` +
+        `parallel session's claim): ALLOW_STALE_CAPTURE=1 and say why in the message.`,
+    );
+  } catch {
+    // never wedge a push on a guard bug — fail open
   }
 }
 

@@ -1,3 +1,30 @@
+## 2026-08-10 (Fable 5) — OPERATOR: "how does claude know if it is the third time? can we backfill on all these issues?"
+RULE 2 §0b has no counter yet — third-time detection is read-the-scratchpad judgment. Backfill
+clustering run over ~70 entry headers, counted shapes: (A) "fixed but not live / same surface
+again" ≥5 hits — guard PARTIAL (verify skill exists, not a gate); (B) "didn't read the
+playbook/research first" ≥6 — guarded since (four-lane gate, 0.4/0.95, what-do-we-have); (C)
+"stale source served silently / manual thing not automated" ≥5 (desk May chart, deed fetch,
+records request 11d, red crons) — TOP UNGUARDED shape; fleet-wide source-staleness tripwire owed
+(pattern exists on redfin_swfl only); (D) paid-before-free ≥4 — guarded (0.7a + spend guard);
+(E) leaked scaffolding/alter-description 3 — guarded 08/09 (artifact-level guard). Mechanism owed
+for §0b: shape-slug convention on new entries + strike counter in the SessionStart print.
+Backfill verdict: the RULE 0.x series IS the backfill for B/D/E; A and C still owe their guard.
+RESOLVED 2026-08-10 ("fix it all") — 3 of 4 built this session, 1 opened as a blocked check:
+(1) `_ASSISTANT/STRIKES.md` BUILT + BACKFILLED — 6 shapes, 26 strikes, guard status per shape;
+(2) SessionStart printer now counts it (print-scratchpad.mjs renderStrikes, fail-soft, proven
+live: stale-source prints red at 5 strikes); (3) shape A guard BUILT — pre-push Gate 15
+capture-freshness: email-surface code can't push without a re-baked public/new-emails capture
+(override ALLOW_STALE_CAPTURE=1); RULE 2 §0b now names the registry as the counter.
+(4) shape C (fleet staleness tripwire) NOT built — check `stale_source_tripwire_fleet` opened
+with named blocker (ingest-scale rollout; redfin_city claimed by parallel session). Session
+check ledger: +1 opened, 0 closed — the +1 is the deliberate deferral above.
+
+## 2026-08-10 (Fable 5) — OPERATOR: login modal must distinguish "have account" vs "creating one" — crawl4ai what REAL companies do
+Mid-brainstorm on the Create-an-account button, corrected my framing: "if you already have an
+account, you aren't creating an account." Same email+code flow serving both is fine mechanically
+(shouldCreateUser: true already does), but the COPY must not pretend they're one thing. Directive:
+research real companies' auth-screen patterns via crawl4ai before proposing the design.
+
 ## 2026-08-10 (Fable 5) — OPERATOR: "PROMPTS FOR FUCKING HERMES FIRST" — deliver the named deliverable BEFORE infrastructure
 When the operator names the deliverable order ("give me questions... and wait"), that order IS the
 task. I ran lane searches + tried a paid Apify proof run before handing the Hermes prompts; he
