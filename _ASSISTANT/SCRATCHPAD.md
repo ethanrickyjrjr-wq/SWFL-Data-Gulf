@@ -1,3 +1,10 @@
+## 2026-08-10 (Fable 5) — OPERATOR: narrator must NEVER alter the agent-written listing description
+Verbatim: "JUST MAKE SURE THE NARRATOR IS NOT CHANGING THE FUCKING DESCRIPTIONS WE BRING IN FOR
+THE ACTUAL LISTING THAT THE AGENT WROTE." The remarks/description brought in from the feed or paid
+row is the AGENT'S OWN COPY — it ships verbatim or not at all; the model may never rewrite,
+paraphrase, trim, or 'improve' it. Verify every recipe's description path in code and enforce with
+a guard/test, not a prompt line.
+
 ## 2026-08-10 (Fable 5) — OPERATOR: "WE SERIOUSLY NEED TO BE SMARTER ABOUT REAL ESTATE"
 Verbatim: "WHAT DO YOU NEED TO RESEARCH AND HOW DO WE MAKE THIS HAPPEN? ... HOW CAN THE BUILDER
 NOT BE ABLE TO WORK OFF SCRIPTS AND MAKE EMAILS WITH ALL OF THIS HELP??????????" The ask is a
@@ -53,7 +60,18 @@ bunx next build exit 0. CAVEAT reported: 330 Shore Dr's vendor row carries no li
 rendered as an open slot there — gates proven by unit test, cell fills where the vendor holds
 both ends.
 
-## 2026-08-09 (Fable 5) — OPERATOR: "WE DON'T NEED A FUCKING NARRATOR WHEN THE FUCKING DESCRIPTION IS ALREADY WRITTEN"
+## 2026-08-09 (Fable 5) — OPERATOR CORRECTION: "THE POINT OF THE NARRATOR IS NEVER FOR THE FUCKING DESCRIPTION… IT IS ADDING EXTRA BELOW AND CALLS TO ACTION… IT CAN WORK OFF A SCRIPT BUT NOT JUST ECHO IT"
+I over-rotated: read "no narrator when description exists" as KILL the paragraph, and shipped that.
+Wrong. The narrator's job was never describing the home (we'd lose to the seller's copy every
+time); it is the EXTRA below — what the description doesn't say (DOM/HOA/psf/community/distances),
+CTAs, an open-house announcement — sourced, never echoing. That is literally what the shared
+prompt's "WRITE WHAT THE DESCRIPTION DOES NOT SAY" branch was built for. + "DON'T JUST FUCKING DO
+SHIT BECAUSE YOU FEEL LIKE IT" — a decree that sounds like "delete X" still gets checked against
+the playbook's built email before code changes; deviation from a WALKED build needs the playbook
+section read FIRST. Action: restore the built behavior (narrator unconditional, echo-prohibition
+already in the prompt), re-render, re-bake showcase.
+
+## 2026-08-09 (Fable 5) — [SUPERSEDED BY THE ENTRY ABOVE] OPERATOR: "WE DON'T NEED A FUCKING NARRATOR WHEN THE FUCKING DESCRIPTION IS ALREADY WRITTEN"
 The rule, decreed: when the listing's own description is on the email, the seller's words ARE the
 email — no model-authored paragraph on top. The narrator is ONLY the fallback for a missing
 description (RULE 0.7b's exact shape: existing prose first, live model call as fallback). Apply to

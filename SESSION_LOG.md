@@ -1,3 +1,14 @@
+## 2026-08-09 (Fable 5) — New Listing narrator RESTORED to the walked build — its job is the EXTRA below, never the description
+
+Operator: "THE POINT OF THE NARRATOR IS NEVER FOR THE FUCKING DESCRIPTION… IT IS ADDING EXTRA
+BELOW AND CALLS TO ACTION… NOT JUST ECHO IT." My previous commit (a04dc10e) skipped the narrator
+whenever a description shipped — that DEVIATED from playbook §2.1's walked grammar ("the seller's
+own description, a second spec row, THE AUTHORED PARAGRAPH"). Recipe restored from a04dc10e^;
+showcase re-baked with description verbatim + the authored extra (community amenities, $225 HOA,
+0.57-mi grocery — sourced, zero echo). Two narrator draws died honestly on comparative "over half
+an acre" (0.56 ac restated as a comparison); third draw passed clean. Lesson logged: a decree that
+sounds like "delete X" still gets checked against the playbook's walked build BEFORE code changes.
+
 ## 2026-08-09 (Fable 5) — Just Sold: bottom complementary flag, DOM + $/sq ft, agent-pride sentence bank with truth gates
 
 Operator: "I CAN SEE A BLACK LINE AND THE ANGLE IS TERRIBLE … COMPLEMENTARY COLOR FLAG AT THE
