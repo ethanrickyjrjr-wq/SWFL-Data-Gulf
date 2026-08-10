@@ -171,10 +171,17 @@ const authoredBody =
     )?.props as { body?: string } | undefined
   )?.body ?? "";
 const narratorRow = rows.findIndex(([c]) => c === "House paragraph");
-if (!narratorLog.length) {
-  rows[narratorRow][1] = authoredBody
-    ? `${authoredBody.trim().split(/\s+/).length} words`
-    : undefined;
+// SENTENCE BANK (spec 2026-08-10): the bank's code-owned sentences ship even when the
+// claim gate drops the model's connective — so the row shows what actually landed, and
+// a gate drop annotates it instead of masking it as an open slot.
+if (authoredBody) {
+  rows[narratorRow][1] = `${authoredBody.trim().split(/\s+/).length} words`;
+  if (narratorLog.length) {
+    rows[narratorRow][2] =
+      `bank sentences only — connective DROPPED BY THE CLAIM GATE: ${narratorLog[0].split("—").slice(1).join("—").trim()}`;
+  }
+} else if (!narratorLog.length) {
+  rows[narratorRow][1] = undefined;
 }
 
 printProvenance(rows);
@@ -255,6 +262,41 @@ checks.push({
     : narratorLog.length
       ? `gate drop on record: ${narratorLog[0]}`
       : "NO paragraph and NO recorded drop — the July zero-word hard return is back",
+});
+
+// ── SENTENCE BANK (spec 2026-08-10-sentence-banks-design.md) ─────────────────
+// The bank's cut sentence with the real street, character-for-character. When the
+// vendor flags a cut, the paragraph OPENS with these code-owned words.
+const bankCutSentence =
+  facts.isPriceReduced && street ? `The price on ${street} just came down.` : "";
+checks.push({
+  name: "8 · BANK VERBATIM — the code-owned cut sentence ships character-for-character",
+  pass: !bankCutSentence || html.includes(bankCutSentence),
+  detail: bankCutSentence
+    ? html.includes(bankCutSentence)
+      ? `"${bankCutSentence}" ✓`
+      : `MISSING: "${bankCutSentence}"`
+    : "no vendor cut flag — bank sentence correctly absent",
+});
+
+// The move is stated at most ONCE in the body prose — the bank's mention plus zero
+// model restatements (the framing forbids the model the move in any words).
+const moveMentions = (
+  authoredBody.match(/(came down|reduced|price cut|lowered|improved|adjusted)/gi) ?? []
+).length;
+checks.push({
+  name: "9 · the move is stated at most once in the body — the bank's mention, never the model's",
+  pass: moveMentions <= 1,
+  detail: `${moveMentions} mention(s) in the ${authoredBody ? authoredBody.trim().split(/\s+/).length : 0}-word body`,
+});
+
+// A literal {{token}} in the rendered bytes is a template that leaked — instant FAIL.
+// (Floor visibility: the word count already prints in assertion 7 and the builder logs
+// any sub-50 body loudly; the floor never fails the run — a leak always does.)
+checks.push({
+  name: "10 · no template residue — a literal {{ in the rendered bytes is a leak",
+  pass: !html.includes("{{"),
+  detail: html.includes("{{") ? "FOUND literal {{ in rendered HTML" : "clean",
 });
 
 printBrandCarry(p);
