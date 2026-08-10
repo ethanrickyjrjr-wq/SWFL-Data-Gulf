@@ -34,6 +34,7 @@
 // vendor image, a dead URL, a storage hiccup — none of them may cost the reader the picture,
 // and none of them may block a build (RULE 0.7).
 
+import { createHash } from "node:crypto";
 import { Resvg } from "@resvg/resvg-js";
 import sharp from "sharp";
 import { fetchPhoto } from "@/lib/social/listing-card-render";
@@ -71,12 +72,66 @@ function isDark(hex: string): boolean {
 }
 
 /**
- * THE BADGE, as an SVG over the photo.
+ * The COMPLEMENT of a brand colour — hue rotated 180° in HSL, saturation and lightness
+ * kept, so the flag is "a different colored complementary color" (operator decree
+ * 08/09/2026) that is still DERIVED from the brand rather than invented per-send.
+ * Unparseable input falls to a neutral deep slate — a UI fallback, never a data value.
+ */
+export function complementOf(hex: string): string {
+  const m = /^#?([0-9a-f]{6})$/i.exec(hex.trim());
+  if (!m) return "#334155";
+  const n = parseInt(m[1], 16);
+  const r = ((n >> 16) & 255) / 255;
+  const g = ((n >> 8) & 255) / 255;
+  const b = (n & 255) / 255;
+  const max = Math.max(r, g, b);
+  const min = Math.min(r, g, b);
+  const l = (max + min) / 2;
+  const d = max - min;
+  let h = 0;
+  const s = d === 0 ? 0 : d / (1 - Math.abs(2 * l - 1));
+  if (d !== 0) {
+    if (max === r) h = ((g - b) / d + (g < b ? 6 : 0)) / 6;
+    else if (max === g) h = ((b - r) / d + 2) / 6;
+    else h = ((r - g) / d + 4) / 6;
+  }
+  h = (h + 0.5) % 1; // the rotation — everything else passes through
+  const hue = (t0: number) => {
+    let t = t0;
+    if (t < 0) t += 1;
+    if (t > 1) t -= 1;
+    const q = l < 0.5 ? l * (1 + s) : l + s - l * s;
+    const p = 2 * l - q;
+    if (t < 1 / 6) return p + (q - p) * 6 * t;
+    if (t < 1 / 2) return q;
+    if (t < 2 / 3) return p + (q - p) * (2 / 3 - t) * 6;
+    return p;
+  };
+  const to255 = (v: number) =>
+    Math.round(v * 255)
+      .toString(16)
+      .padStart(2, "0");
+  return `#${to255(hue(h + 1 / 3))}${to255(hue(h))}${to255(hue(h - 1 / 3))}`;
+}
+
+/** The flag's height on the 1200×800 canvas — tall enough to read on a phone,
+ *  never tall enough to eat the house. */
+const FLAG_H = 120;
+
+/**
+ * THE FLAG, as an SVG over the photo.
  *
- * A DIAGONAL CORNER RIBBON in the agent's accent colour, top-left, plus a soft top-corner
- * scrim so the ribbon never lands on a bright sky and disappear. Exported so a test can assert
- * the burned-in word without rasterising anything (the same seam
- * `composeListingCardSvg` uses).
+ * A FLAT, FULL-WIDTH BAND ACROSS THE BOTTOM of the picture, in the COMPLEMENT of the
+ * agent's accent, with a slim accent keyline on its top edge tying it back to the brand.
+ *
+ * ── WHY NOT THE DIAGONAL CORNER RIBBON THIS REPLACED ────────────────────────────
+ * Operator, 08/09/2026, looking at the render: *"I CAN SEE A BLACK LINE AND THE ANGLE
+ * IS TERRIBLE. JUST MAKE IT A DIFFERENT COLORED COMPLEMENTARY COLOR FLAG AT THE BOTTOM
+ * OF THE PICTURE."* The black line was the corner scrim — a black gradient rect laid
+ * under the ribbon so it read on bright skies; the angle was the ribbon's −45° rotate.
+ * Both are gone: a solid bottom band needs no scrim (it manufactures its own contrast)
+ * and has no angle. Exported so a test can assert the geometry and the word without
+ * rasterising anything (the same seam `composeListingCardSvg` uses).
  */
 export function composeBadgeSvg(args: {
   photoPngBase64: string;
@@ -84,27 +139,16 @@ export function composeBadgeSvg(args: {
   accent: string;
 }): string {
   const { photoPngBase64, word, accent } = args;
-  const ink = isDark(accent) ? "#ffffff" : "#1a1a1a";
-  // The ribbon runs corner to corner across the top-left. These are the band's two ends on
-  // the top and left edges; the label sits on its midpoint, rotated to match.
-  const reach = 520; // px along each edge — big enough to read at a phone's render width
-  const band = 116; // the band's thickness
-  const mid = reach / 2;
+  const flag = complementOf(accent);
+  const ink = isDark(flag) ? "#ffffff" : "#1a1a1a";
+  const top = H - FLAG_H;
   return `<svg xmlns="http://www.w3.org/2000/svg" width="${W}" height="${H}" viewBox="0 0 ${W} ${H}">
   <image href="data:image/png;base64,${photoPngBase64}" x="0" y="0" width="${W}" height="${H}" preserveAspectRatio="xMidYMid slice"/>
-  <defs>
-    <linearGradient id="cornerScrim" x1="0" y1="0" x2="1" y2="1">
-      <stop offset="0" stop-color="#000000" stop-opacity="0.38"/>
-      <stop offset="1" stop-color="#000000" stop-opacity="0"/>
-    </linearGradient>
-  </defs>
-  <rect x="0" y="0" width="${reach + band}" height="${reach + band}" fill="url(#cornerScrim)"/>
-  <g transform="rotate(-45 ${mid} ${mid})">
-    <rect x="${mid - reach}" y="${mid - band / 2}" width="${reach * 2}" height="${band}" fill="${accent}"/>
-    <text x="${mid}" y="${mid + 18}" text-anchor="middle"
-      font-family="${CANVAS_DEFAULT_FAMILY}" font-size="52" font-weight="700"
-      letter-spacing="6" fill="${ink}">${esc(word.toUpperCase())}</text>
-  </g>
+  <rect x="0" y="${top}" width="${W}" height="${FLAG_H}" fill="${flag}"/>
+  <rect x="0" y="${top}" width="${W}" height="6" fill="${accent}"/>
+  <text x="${W / 2}" y="${top + FLAG_H / 2 + 18}" text-anchor="middle"
+    font-family="${CANVAS_DEFAULT_FAMILY}" font-size="52" font-weight="700"
+    letter-spacing="6" fill="${ink}">${esc(word.toUpperCase())}</text>
 </svg>`;
 }
 
@@ -165,12 +209,13 @@ export async function stampPhotoBadge(
     }
     if (!encoded) return null;
 
-    // The key is content-stamped so a long cache TTL is safe: a different photo, word or
-    // accent lands on a NEW key and can never serve a stale hit. Same discipline as the chart
-    // keys — egress hit 311% of plan once with no cache headers anywhere.
-    const stamp = Buffer.from(`${photoUrl}|${opts.word}|${opts.accent}`)
-      .toString("base64url")
-      .slice(0, 24);
+    // The key is stamped with the RENDERED BYTES, not the inputs. An input stamp
+    // (`photoUrl|word|accent`) could not see a change to the DRAWING — the diagonal-ribbon →
+    // bottom-flag redesign (08/09/2026) would have served the old ribbon forever off the
+    // immutable edge cache, the exact third-vector lesson the chart keys learned the same
+    // week. Same pixels → same key (deterministic); any change that moves a pixel moves the
+    // key. Egress hit 311% of plan once with no cache headers anywhere — long TTLs stay safe.
+    const stamp = createHash("sha1").update(encoded).digest("hex").slice(0, 20);
     const slug = (opts.keyHint ?? "badge").replace(/[^a-z0-9-]/gi, "-").toLowerCase();
     return await put(`email-photos/${slug}-${stamp}.jpg`, encoded, "image/jpeg");
   } catch {

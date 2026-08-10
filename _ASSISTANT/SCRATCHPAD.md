@@ -1,3 +1,11 @@
+## 2026-08-10 (Fable 5) — OPERATOR: "WE SERIOUSLY NEED TO BE SMARTER ABOUT REAL ESTATE"
+Verbatim: "WHAT DO YOU NEED TO RESEARCH AND HOW DO WE MAKE THIS HAPPEN? ... HOW CAN THE BUILDER
+NOT BE ABLE TO WORK OFF SCRIPTS AND MAKE EMAILS WITH ALL OF THIS HELP??????????" The ask is a
+DIAGNOSIS + RESEARCH PLAN: why does every email walk still take a session of screenshot-driven
+corrections (banner angle, DOM/$-per-sqft missing, agent-bio filler instead of the house, machine
+numbers) when the playbook + sentence banks + scripts all exist. The gap he's naming is REAL ESTATE
+DOMAIN JUDGMENT — what a good agent email says and shows by default — not more pipe.
+
 ## 2026-08-09 (Fable 5) — OPERATOR, on the restored Coming Soon demo (screenshot 233250): band label + body words
 Verbatim: "WHY ARE THE NUMBERS NOT 1.2-1.5 OR 1 TO 1.5????" + "WHAT ARE ALL THESE WORDS AND WEHRE
 THE FUCK IS THE HOUSE DESCRIPTION??" Two defects: (1) the scarcity band prints machine numbers
@@ -32,6 +40,18 @@ LOOKING TO SELL!!!! USE THE SCRIPTS!!!!" Four asks: (1) kill the diagonal black 
 surface DOM; (4) body voice = proud listing agent — sold faster than the area, strong $/sq ft,
 "thinking of selling? this is what your home could do" — built on the sentence bank
 (price-reduced pattern), rendered via scripts/email/render-just-sold.mts and LOOKED at.
+RESOLVED same session (08/09/2026): (1) flag SHIPPED — flat full-width band at the photo's
+bottom in complementOf(accent) + 6px accent keyline, no scrim, no rotate; badge key now sha1 of
+the rendered bytes so the old ribbon can't serve from edge cache; looked at on Kellysands Way
+(brick-red flag over teal brand). (2)+(3) strip is Beds/Baths/SqFt/$-per-SqFt/Days-on-Market/
+List-to-Sale (muted List Price cell gave DOM its seat); DOM = recorded soldInDays only, never
+days_in_state, never on a prefill — playbook G2 built. (4) just-sold sentence bank + soldStoryValues
+truth gates: speed/$-per-foot brags fill ONLY when true of the recorded close vs the ±25%
+size-banded comp median (two-value floor); prefill fills no figure slot; readerLine closes
+reader-first with the one question. 76 unit tests green, 8/8 acceptance on BOTH houses,
+bunx next build exit 0. CAVEAT reported: 330 Shore Dr's vendor row carries no list date, so DOM
+rendered as an open slot there — gates proven by unit test, cell fills where the vendor holds
+both ends.
 
 ## 2026-08-09 (Fable 5) — OPERATOR: "WE DON'T NEED A FUCKING NARRATOR WHEN THE FUCKING DESCRIPTION IS ALREADY WRITTEN"
 The rule, decreed: when the listing's own description is on the email, the seller's words ARE the

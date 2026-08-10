@@ -98,7 +98,9 @@ import { buildLifecycleEmail } from "@/lib/email/lifecycle-chrome";
 import type { ChromeBlock } from "@/lib/email/lifecycle-chrome";
 import { addressLineOf, pricePerSqft, spec } from "@/lib/email/listing-flyer";
 import { stampPhotoBadge } from "@/lib/media/photo-badge";
-import { clearNarrativeSlots, fillNarrative } from "./shared";
+import { clearNarrativeSlots, fillNarrative, median, perSqft } from "./shared";
+import { bankFor } from "../language-banks";
+import { bodyWordCount, fillSentences } from "../language";
 import { justSoldSubject } from "./subject-lines";
 import type { RecipeBuildContext } from "./index";
 import type { ChartSpec } from "@/components/charts/registry/chart-spec";
@@ -150,8 +152,21 @@ function num(s?: string): number | null {
  * COST, and it is real: compsForAddress enriches at most TWO comps with their exact
  * recorded sale (`Math.min(deps.enrichN ?? 2, 2)` — a hard cap that keeps the whole
  * request to ≤3 vendor calls), so this can surface at most 2 real sales. Reported.
+ *
+ * THE SIZE BAND (08/09/2026 — the "$173 → $421" defect class, fixed on price-reduced
+ * the same night): with `subjectSqft` known, only comps within ±25% of the subject's
+ * living area survive — the ratified band pct from comp-rank.ts. It is applied HERE,
+ * locally, rather than by arming compsForAddress's `subjectSqft`, because this recipe
+ * DEPENDS on the subject's own row coming back inside the vendor's blind nearest-set
+ * (that row is the only honest close source), and the subject's sqft is usually only
+ * learned FROM that row — the band cannot arm before the call that teaches it the size.
+ * Zero extra vendor calls; the band only ever tightens the set.
  */
-export function realSaleComps(comps: RenderComp[], subjectStreet: string): RenderComp[] {
+export function realSaleComps(
+  comps: RenderComp[],
+  subjectStreet: string,
+  subjectSqft?: number | null,
+): RenderComp[] {
   const self = canonStreet(subjectStreet);
   return comps.filter(
     (c) =>
@@ -159,7 +174,8 @@ export function realSaleComps(comps: RenderComp[], subjectStreet: string): Rende
       c.sqft != null &&
       c.price != null &&
       c.priceKind === "sold" &&
-      (!self || canonStreet(c.addressLine) !== self),
+      (!self || canonStreet(c.addressLine) !== self) &&
+      (subjectSqft == null || (c.sqft >= subjectSqft * 0.75 && c.sqft <= subjectSqft * 1.25)),
   );
 }
 
@@ -251,39 +267,89 @@ export function chartAnchor(close: SubjectClose | null): number | null {
 }
 
 /**
- * THE BODY COPY. Code-authored, reader-first, and it never names a price.
+ * THE BODY COPY — bank-opened, code-closed, still ZERO model calls.
  *
  * *** A JUST SOLD EMAIL IS NOT AN ANNOUNCEMENT ABOUT A HOUSE. IT IS A MESSAGE TO THE
- *     NEIGHBOURS ABOUT THEIR HOUSE. ***
+ *     NEIGHBOURS ABOUT THEIR HOUSE — DELIVERED BY THE AGENT WHO JUST WON IT. ***
  *
- * Operator, 08/06/2026: *"get the fucking house description out of there. no one cares."*
- * What this replaced was a model-written paragraph describing the property — year built, lot
- * size, HOA — mailed to people who are not buying it. Every source in the 08/06 crawl says the
- * same thing: LeadSites' subject is *"Sold on [Street] — and what it could mean for your
- * home"*; HousingWire opens *"your neighborhood is hot! Your neighbors at [address] just
- * sold"*; The Close names *"your equity has changed"* as the strongest line on its whole page
- * and states the rule as *"make the seller the hero of the story."*
+ * Two decrees govern this paragraph, in order:
+ *   • 08/06/2026: *"get the fucking house description out of there. no one cares."* —
+ *     no property description, reader-first, valuation as the ask.
+ *   • 08/09/2026: *"TALK ABOUT IN A GOOD LIGHT AS IF IT SOLD IN LESS DAYS ON MARKET AS
+ *     TO OTHERS AND AT A GOOD PRICE PER FOOT. TALK LIKE A REAL ESTATE AGENT WHO DID A
+ *     GOOD JOB IN A COMMUNITY AND OTHERS SHOULD BE INTERESTED IF THEY ARE LOOKING TO
+ *     SELL."* — the agent-pride voice, riding the SENTENCE BANK
+ *     (just-sold.language.ts via bankFor — "USE THE SCRIPTS").
  *
- * WHY CODE AND NOT A MODEL. A reader-first sentence is precisely where a model invents — the
- * natural next clause is "and values around you are climbing," which is an unsourced market
- * claim. Code cannot invent. This also means the claim gate can never drop the body (it did
- * exactly that twice while this email was being built), the copy is identical on every send,
- * and the recipe issues no metered call at all.
+ * The earlier "IT NAMES NO FIGURE, EVER" rule is AMENDED, not discarded: a figure may
+ * now enter the prose, but ONLY through a bank slot, and `soldStoryValues` fills those
+ * slots ONLY from the RECORDED close and the SIZE-BANDED comp set. A prefill still
+ * fills nothing (prose is baked and uneditable — acceptance assertion 8 unchanged),
+ * and each bragging sentence ships only when its comparison is TRUE of the data.
  *
- * IT NAMES NO FIGURE, EVER. Not the close, not the prefill, not an area median. The hero
- * carries the one number, and the hero is EDITABLE where this paragraph is not — a figure
- * here would survive the agent's correction. What it offers is a VALUATION, which is an offer
- * rather than a claim, and which every crawled source names as the correct ask for this email.
+ * WHY CODE AND NOT A MODEL, still: a reader-first brag is precisely where a model
+ * invents ("values around you are climbing"). Code cannot invent, the claim gate can
+ * never drop the body, the copy is identical every send, and the recipe issues no
+ * metered call at all.
  */
 export function readerLine(facts: ListingFacts): string {
   const place = (facts.city ?? "").trim();
-  const opening = place ? `Another home in ${place} just sold.` : `A home near you just sold.`;
+  const where = place ? `in ${place}` : "nearby";
   return (
-    `${opening} If you own nearby, the number that actually matters to you is not this one — ` +
-    `it is what YOUR home would bring today. That is not a guess off a website. It comes from ` +
-    `what has really been selling around you, and I will put it together for you at no cost ` +
-    `and with no obligation. One reply is all it takes.`
+    `If you own ${where}, this sale moved your number too. Want to know what YOUR home ` +
+    `would bring right now? I will put it together from what has really been selling ` +
+    `around you — no cost, no obligation, no pressure. One reply is all it takes.`
   );
+}
+
+/**
+ * THE SLOT VALUES for the sentence bank — the truth gates behind the brags.
+ *
+ * Every figure here is RECORDED and SIZE-BANDED or it is not offered at all:
+ *   • dom / typical_dom fill together, only when the subject's own recorded
+ *     closed-spell (`soldInDays` — never `days_in_state`) BEAT the banded nearby
+ *     median, and only when at least two comps carry a spell (a "typical pace" built
+ *     from one comp is that comp's own number wearing a median costume — the
+ *     price-reduced floor lesson).
+ *   • ppsf fills only when the recorded close ÷ sq ft BEAT the banded nearby median
+ *     $/sq ft, on the same two-value floor.
+ *   • No close → no figure slots at all. The street always may fill: "is officially
+ *     sold" is the email's premise, not a measurement.
+ *
+ * The bank's fixed words say "quicker" and "stronger"; these gates are what make those
+ * words TRUE on every send that carries them. An unfavourable comparison is not
+ * softened — it is simply not this email's sentence (favorable framing chooses among
+ * true statements; the strip above still shows the plain cells either way).
+ */
+export function soldStoryValues(
+  facts: ListingFacts,
+  close: SubjectClose | null,
+  self: RenderComp | null,
+  comps: RenderComp[],
+): Record<string, string | undefined> {
+  const values: Record<string, string | undefined> = {
+    street: streetOf(facts.address) || undefined,
+  };
+  const sqft = num(facts.sqft);
+  if (!close || sqft == null) return values; // recorded + banded, or no figures at all
+
+  const dom = self?.soldInDays ?? null;
+  const spells = comps.map((c) => c.soldInDays).filter((d): d is number => d != null && d > 0);
+  const typicalDom = spells.length >= 2 ? median(spells) : null;
+  if (dom != null && dom > 0 && typicalDom != null && dom < typicalDom) {
+    values.dom = String(dom);
+    values.typical_dom = String(Math.round(typicalDom));
+  }
+
+  const soldPpsf = perSqft(close.price, sqft);
+  const compPpsfs = comps
+    .map((c) => perSqft(c.price, c.sqft))
+    .filter((v): v is number => v != null);
+  const typicalPpsf = compPpsfs.length >= 2 ? median(compPpsfs) : null;
+  if (soldPpsf != null && typicalPpsf != null && soldPpsf > typicalPpsf) {
+    values.ppsf = usd(soldPpsf);
+  }
+  return values;
 }
 
 /**
@@ -340,18 +406,35 @@ export function withSubjectRowFacts(facts: ListingFacts, row: RenderComp | null)
  * $/SQ FT IS THE SALE PRICE ÷ SQUARE FEET — never the ask ÷ square feet. A sold
  * email's $/sq ft is a claim about what the market PAID. Two sourced figures in, one
  * rate out (the same shape as the flyer's), never back-solved from one of them.
+ *
+ * DAYS ON MARKET (added 08/09/2026 by operator decree — "INCLUDE % SQ FT / DOM") is
+ * playbook §2.5.5 G2 built: the RECORDED closed-spell only (`soldInDays` — sold date −
+ * vendor list date, same response), gated on the recorded close exactly where every
+ * other derived cell unlocks. NEVER `days_in_state` (days-in-ACTIVE) and never from a
+ * prefill — a spell needs both ends, and a prefilled hero holds neither.
+ *
+ * LIST PRICE'S MUTED CELL IS GONE (same decree, same day). The strip holds six cells;
+ * DOM earned its seat and the raw ask was the least informative of the seven — its
+ * whole story is already told better by `List-to-Sale`, whose footnote names the
+ * derivation. The PAIRING RULE survives unchanged: List-to-Sale still only fills
+ * alongside a recorded close, never from a prefill.
  */
-export function soldSpecs(facts: ListingFacts, close: SubjectClose | null): StatItem[] {
+export function soldSpecs(
+  facts: ListingFacts,
+  close: SubjectClose | null,
+  soldInDays?: number | null,
+): StatItem[] {
   const listPrice = num(facts.price);
   const pair = close && listPrice ? { close: close.price, list: listPrice } : null;
   // Derived from the CLOSE, or not at all. `pricePerSqft` parses digits out of both.
   const soldPerSqft = close ? pricePerSqft(usd(close.price), facts.sqft) : undefined;
+  const dom = close && soldInDays != null && soldInDays > 0 ? String(soldInDays) : undefined;
   return [
     spec(facts.beds, "Beds"),
     spec(facts.baths, "Baths"),
     spec(withCommas(facts.sqft), "Sq Ft"),
     spec(soldPerSqft, "$/Sq Ft"),
-    spec(pair ? usd(pair.list) : undefined, "List Price", "muted"),
+    spec(dom, "Days on Market"),
     spec(
       pair ? `${Math.round((pair.close / pair.list) * 1000) / 10}%` : undefined,
       "List-to-Sale",
@@ -389,10 +472,17 @@ function chromeAccent(current: EmailDoc): string {
 /** Provenance for the DERIVED cells, stated where the reader can see it. Names only
  *  the cells that actually rendered — a footnote for a cell that is an open slot is
  *  itself a claim that something was computed. */
-export function soldFootnote(facts: ListingFacts, close: SubjectClose | null): string | undefined {
+export function soldFootnote(
+  facts: ListingFacts,
+  close: SubjectClose | null,
+  soldInDays?: number | null,
+): string | undefined {
   const parts: string[] = [];
   if (close && pricePerSqft(usd(close.price), facts.sqft)) {
     parts.push("$/Sq Ft is the sale price ÷ listed square footage");
+  }
+  if (close && soldInDays != null && soldInDays > 0) {
+    parts.push("Days on Market runs first list date to closing, from the sale record");
   }
   if (close && num(facts.price)) parts.push("List-to-Sale is the sale price ÷ the list price");
   return parts.length > 0 ? `*${parts.join("; ")}.` : undefined;
@@ -462,8 +552,9 @@ export async function buildJustSold(ctx: RecipeBuildContext): Promise<EmailDoc |
   const close = closeFrom(self);
   const facts = withSubjectRowFacts(resolved, self);
 
-  // Vacant lots out, AVM estimates out, the subject out. See realSaleComps.
-  const comps = realSaleComps(allComps, street);
+  // Vacant lots out, AVM estimates out, the subject out — and SIZE-BANDED (±25% living
+  // area) once the subject row has taught us the sqft. See realSaleComps.
+  const comps = realSaleComps(allComps, street, num(facts.sqft));
 
   // ── THE MIDDLE — the only place this email legitimately differs from its siblings.
   const middle: ChromeBlock[] = [];
@@ -502,7 +593,7 @@ export async function buildJustSold(ctx: RecipeBuildContext): Promise<EmailDoc |
   // THE CLOSE CELL — decree 08/06/2026. A recorded sale if we hold one, else our last list
   // price as an EDITABLE PREFILL, else an open slot. See `heroPrice`.
   const hero = heroPrice(facts, close);
-  const footnote = soldFootnote(facts, close);
+  const footnote = soldFootnote(facts, close, self?.soldInDays);
 
   // ── THE BADGE, BURNED INTO THE PHOTO. Operator 08/06/2026: *"just put a graphic somewhere
   // on the picture."* Composited server-side (`lib/media/photo-badge.ts`) rather than laid
@@ -562,7 +653,7 @@ export async function buildJustSold(ctx: RecipeBuildContext): Promise<EmailDoc |
     // The 50–125-word floor is still met without it: the authored paragraph runs ~68 words
     // on the acceptance house. `just-sold.test.ts` asserts this omission so a future session
     // does not "fix" it back. NO TEST FOUND THIS AND NO TEST COULD — the screenshot did.
-    specs: soldSpecs(facts, close),
+    specs: soldSpecs(facts, close, self?.soldInDays),
     ...(footnote ? { specFootnote: footnote } : {}),
     middle,
     // The narrator's slot is left OPEN here and authored into below (fillNarrative
@@ -576,28 +667,27 @@ export async function buildJustSold(ctx: RecipeBuildContext): Promise<EmailDoc |
 
   // ── THE BODY COPY. DETERMINISTIC. NO MODEL, NO HOUSE DESCRIPTION.
   //
-  // Operator, 08/06/2026: *"get the fucking house description out of there. no one cares."*
-  // He is right and the crawled corpus says the same thing in every source
-  // (`_RESEARCH/email-and-social/2026-08-06-just-sold-craft-and-agent-email-voice.md` §1):
-  //
-  //   *** A JUST SOLD EMAIL IS NOT AN ANNOUNCEMENT ABOUT A HOUSE. IT IS A MESSAGE TO THE
-  //       NEIGHBOURS ABOUT THEIR HOUSE. ***
-  //
-  // What shipped before this was a model-written paragraph describing the property — its
-  // year built, its lot, its HOA — sent to people who are not buying it. The Close names the
-  // strongest line in its whole 13-postcard teardown as *"your equity has changed"*, and its
-  // Use-This/Not-This table states the rule outright: *"Always keep the focus on the
-  // homeowner … make the seller the hero of the story."*
-  //
-  // SO THE PARAGRAPH IS CODE-AUTHORED NOW, AND THAT IS THE POINT, NOT A SHORTCUT. The one
-  // thing this email needs to say is a sentence about the READER, and a reader-first sentence
-  // is exactly where a model invents ("values in your area are climbing"). Code cannot invent.
-  // Three consequences, all good: the claim gate can never drop the body (it dropped it twice
-  // during this build), the copy is identical every send, and the recipe is no longer a
-  // metered call. `authorListingNarrative` stays imported by the other recipes; this one is
-  // simply not a prose email.
-  const narrative = readerLine(facts);
-  if (narrative) doc = fillNarrative(clearNarrativeSlots(doc), narrative);
+  // BANK FIRST (decree 08/09/2026 — the agent-pride voice, "USE THE SCRIPTS"), the
+  // reader-first valuation close after. Every sentence is code-owned: the bank's fixed
+  // words are pinned by test, its figure slots fill only from the RECORDED, SIZE-BANDED
+  // data (`soldStoryValues` — a prefill fills nothing), and each bragging sentence drops
+  // WHOLE when its comparison is not true of the data. `readerLine` keeps the 08/06
+  // decree ("no one cares" about the house description): the closer is about the READER'S
+  // home and asks the one question. Still zero metered calls on this recipe.
+  const bank = bankFor("just-sold");
+  const opening = bank
+    ? fillSentences(bank, soldStoryValues(facts, close, self, comps)).filled
+    : [];
+  const paragraph = [...opening, readerLine(facts)].join(" ").trim();
+  // FLOOR GUARD (emails.md §0.1 — the floor bites harder than the ceiling). Under 50
+  // words is logged LOUDLY, never padded and never blocked — same shape as price-reduced.
+  if (bodyWordCount(paragraph) < 50) {
+    console.error(
+      `[just-sold] body ${bodyWordCount(paragraph)} words — under the 50-word floor ` +
+        `(bank filled ${opening.length} of ${bank?.sentences.length ?? 0} sentences)`,
+    );
+  }
+  doc = fillNarrative(clearNarrativeSlots(doc), paragraph);
 
   // THE SUBJECT LINE — deterministic, never model-authored (subject-lines.ts). It was
   // MISSING entirely until 08/06/2026: the acceptance run printed `Subject line: "(none)"`

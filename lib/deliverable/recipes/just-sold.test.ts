@@ -16,6 +16,7 @@ import {
   heroPrice,
   realSaleComps,
   soldFootnote,
+  soldStoryValues,
   readerLine,
   soldSpecs,
   subjectRow,
@@ -35,6 +36,7 @@ const comp = (over: Partial<RenderComp>): RenderComp => ({
   price: 400_000,
   priceKind: "sold",
   priceDate: "2026-05-20",
+  soldInDays: null,
   sourceUrl: null,
   ...over,
 });
@@ -80,6 +82,26 @@ describe("realSaleComps — what may sit beside a close", () => {
 
   it("drops an unpriced comp (no price = no row)", () => {
     expect(realSaleComps([comp({ addressLine: "A St", price: null })], SUBJECT)).toEqual([]);
+  });
+
+  it("SIZE-BANDS the set (±25% living area) once the subject's sqft is known", () => {
+    // The "$173 → $421" defect class (operator, 08/09/2026): shack-sized rows compared
+    // against a real house. With subject sqft 2,000, only 1,500–2,500 sqft rows survive.
+    const out = realSaleComps(
+      [
+        comp({ addressLine: "Shack St", sqft: 700 }),
+        comp({ addressLine: "Band St", sqft: 1900 }),
+        comp({ addressLine: "Mansion St", sqft: 4200 }),
+      ],
+      SUBJECT,
+      2000,
+    );
+    expect(out.map((c) => c.addressLine)).toEqual(["Band St"]);
+  });
+
+  it("no subject sqft → no band — the filter never guesses a size", () => {
+    const out = realSaleComps([comp({ addressLine: "Shack St", sqft: 700 })], SUBJECT, null);
+    expect(out.map((c) => c.addressLine)).toEqual(["Shack St"]);
   });
 });
 
@@ -158,15 +180,33 @@ describe("soldSpecs — THE PAIRING RULE (found by looking at the render)", () =
   const cell = (strip: StatItem[], label: string) => strip.find((c) => c.label === label);
 
   it("is ONE strip — the chrome's single hairline row, never a wall of stat grids", () => {
+    // "List Price" (muted) gave its seat to "Days on Market" 08/09/2026 by operator
+    // decree ("INCLUDE % SQ FT / DOM") — six cells, and DOM is the one number a farm
+    // list reads as speed. The ask's story is still told by List-to-Sale + footnote.
     const strip = soldSpecs(active, { price: 613_850, date: "2026-05-20" });
     expect(strip.map((c) => c.label)).toEqual([
       "Beds",
       "Baths",
       "Sq Ft",
       "$/Sq Ft",
-      "List Price",
+      "Days on Market",
       "List-to-Sale",
     ]);
+  });
+
+  it("DOM fills from the RECORDED closed-spell only, alongside a close", () => {
+    const strip = soldSpecs(active, { price: 613_850, date: "2026-05-20" }, 18);
+    expect(cell(strip, "Days on Market")?.value).toBe("18");
+  });
+
+  it("DOM stays an OPEN SLOT on a prefill — a spell needs both ends, a prefill holds neither", () => {
+    expect(cell(soldSpecs(active, null, 18), "Days on Market")?.value).toBe("");
+  });
+
+  it("DOM never renders a zero or negative spell", () => {
+    const close = { price: 613_850, date: "2026-05-20" };
+    expect(cell(soldSpecs(active, close, 0), "Days on Market")?.value).toBe("");
+    expect(cell(soldSpecs(active, close, null), "Days on Market")?.value).toBe("");
   });
 
   it("NEVER carries the close — the hero says it once, and once is enough", () => {
@@ -177,28 +217,25 @@ describe("soldSpecs — THE PAIRING RULE (found by looking at the render)", () =
     expect(strip.map((c) => c.value).join()).not.toContain("613,850");
   });
 
-  it("with NO close, the list price does NOT render — an ask under a JUST SOLD ribbon reads as the close", () => {
-    // With the close an open slot, "$595,000 / List Price" standing in the strip under
-    // a gold JUST SOLD ribbon says the house closed at its asking price. Every word
-    // true; the page still lying. All-or-nothing on the PAIR.
+  it("with NO close, the ask never renders anywhere — an ask under a JUST SOLD ribbon reads as the close", () => {
+    // With the close an open slot, an ask-derived cell in the strip under a gold JUST
+    // SOLD ribbon says the house closed at its asking price. Every word true; the page
+    // still lying.
     const strip = soldSpecs(active, null);
-    expect(cell(strip, "List Price")?.value).toBe("");
     expect(cell(strip, "List-to-Sale")?.value).toBe("");
     expect(strip.map((c) => c.value).join()).not.toContain("595,000");
   });
 
-  it("with a close, the ask + list-to-sale fill, computed from TWO sourced numbers", () => {
+  it("with a close, list-to-sale fills, computed from TWO sourced numbers — and the raw ask never renders", () => {
     const strip = soldSpecs(active, { price: 613_850, date: "2026-05-20" });
-    expect(cell(strip, "List Price")).toEqual({
-      value: "$595,000",
-      label: "List Price",
-      emphasis: "muted",
-    });
     expect(cell(strip, "List-to-Sale")).toEqual({
       value: "103.2%", // 613850 / 595000
       label: "List-to-Sale",
       emphasis: "primary",
     });
+    // The muted "List Price" cell is gone (08/09/2026) — its seat belongs to DOM.
+    expect(strip.some((c) => c.label === "List Price")).toBe(false);
+    expect(strip.map((c) => c.value).join()).not.toContain("595,000");
   });
 
   it("$/Sq Ft is the SALE price ÷ sq ft — never the ask ÷ sq ft", () => {
@@ -209,12 +246,11 @@ describe("soldSpecs — THE PAIRING RULE (found by looking at the render)", () =
     expect(cell(soldSpecs(active, null), "$/Sq Ft")?.value).toBe("");
   });
 
-  it("with a close but NO ask (the REAL sold-house case), the price cells stay open", () => {
+  it("with a close but NO ask (the REAL sold-house case), the comparison cell stays open", () => {
     // The for-sale feed cannot see a sold home, so `facts.price` is absent. The hero
     // carries the close on its own; a comparison cell with nothing to compare is not a cell.
     const sold: ListingFacts = { address: "330 Shore Dr", photos: [], sourceUrl: "x" };
     const strip = soldSpecs(sold, { price: 300_000, date: "2025-08-29" });
-    expect(cell(strip, "List Price")?.value).toBe("");
     expect(cell(strip, "List-to-Sale")?.value).toBe(""); // never back-solved from one number
   });
 
@@ -243,6 +279,15 @@ describe("soldFootnote — a derived cell says where it came from", () => {
     const note = soldFootnote(active, { price: 613_850, date: null });
     expect(note).toContain("$/Sq Ft is the sale price ÷ listed square footage");
     expect(note).toContain("List-to-Sale is the sale price ÷ the list price");
+  });
+
+  it("names the DOM derivation only when the DOM cell rendered", () => {
+    const withDom = soldFootnote(active, { price: 613_850, date: null }, 18);
+    expect(withDom).toContain("Days on Market runs first list date to closing");
+    const withoutDom = soldFootnote(active, { price: 613_850, date: null });
+    expect(withoutDom).not.toContain("Days on Market");
+    // A prefill computes no spell, so it claims none — even if a spell number exists.
+    expect(soldFootnote(active, null, 18)).toBeUndefined();
   });
 
   it("names only what rendered — a sold house with no ask has no list-to-sale", () => {
@@ -362,11 +407,11 @@ describe("the prefill NEVER leaks out of the hero cell", () => {
     // F3 List Price would print the hero's own number again at a second scale — the exact
     // bug this recipe's header records ("the HTML greps clean; only the screenshot showed it").
     expect(heroPrice(active, null).rung).toBe("prefill"); // the hero IS filled…
-    const strip = soldSpecs(active, null); // …and the strip still knows nothing
+    const strip = soldSpecs(active, null, 18); // …and the strip still knows nothing
     const cell = (l: string) => strip.find((c) => c.label === l)?.value;
     expect(cell("List-to-Sale")).toBe("");
-    expect(cell("List Price")).toBe("");
     expect(cell("$/Sq Ft")).toBe("");
+    expect(cell("Days on Market")).toBe(""); // F2's sibling: a spell needs a recorded close
     expect(strip.map((c) => c.value).join()).not.toContain("595,000");
   });
 
@@ -384,11 +429,11 @@ describe("the prefill NEVER leaks out of the hero cell", () => {
     expect(chartAnchor({ price: 613_850, date: null })).toBe(613_850);
   });
 
-  it("F5 · the body copy names NO figure at all, and speaks to the READER", () => {
-    // The paragraph is code-authored now (operator 08/06/2026: *"get the fucking house
-    // description out of there. no one cares."*). Two invariants, and they are why it is code:
-    // it may never carry a number — the hero is EDITABLE and this is not, so a figure here
-    // survives the agent's correction — and it must be about the reader's home, not this one.
+  it("F5 · the CLOSER names no figure, speaks to the READER, and asks the one question", () => {
+    // The closer stays code-authored and digit-free (the hero is EDITABLE, prose is
+    // not — a figure here would survive the agent's correction). Figures live only in
+    // the BANK's slots, which fill from recorded data (see soldStoryValues below).
+    // §1.9: the body must ask 1–3 questions; the closer carries the one.
     const withCity = readerLine({
       address: "326 Shore Dr, Fort Myers, FL 33905",
       city: "Fort Myers",
@@ -398,11 +443,81 @@ describe("the prefill NEVER leaks out of the hero cell", () => {
     });
     expect(withCity).toContain("Fort Myers");
     expect(withCity).toContain("YOUR home");
+    expect(withCity).toContain("?");
     expect(withCity).not.toMatch(/\$|\d/); // not one digit, anywhere
     // No city held → it still speaks to the reader, it just cannot name the place.
     const bare = readerLine({ address: "x", photos: [], sourceUrl: "x" });
-    expect(bare).toContain("A home near you just sold");
+    expect(bare).toContain("If you own nearby");
     expect(bare).not.toMatch(/\$|\d/);
+  });
+});
+
+// ── THE STORY VALUES — the truth gates behind the bank's bragging sentences ────────
+//
+// Operator decree 08/09/2026: *"TALK ABOUT IN A GOOD LIGHT AS IF IT SOLD IN LESS DAYS
+// ON MARKET AS TO OTHERS AND AT A GOOD PRICE PER FOOT."* The bank's fixed words say
+// "quicker" and "stronger"; these gates are what make those words TRUE on every send.
+describe("soldStoryValues — a brag fills only when the data makes it true", () => {
+  const soldFacts: ListingFacts = {
+    address: "330 Shore Dr, Fort Myers, FL 33905",
+    city: "Fort Myers",
+    sqft: "1736",
+    photos: [],
+    sourceUrl: "x",
+  };
+  const close = { price: 300_000, date: "2025-08-29" };
+  const selfRow = comp({ addressLine: "330 Shore Dr", sqft: 1736, soldInDays: 21 });
+  // Banded comps: spells 40/60 (median 50), $/sqft ~139 and ~127 (median ~133) vs subject 173.
+  const nearby = [
+    comp({ addressLine: "A St", sqft: 1800, price: 250_000, soldInDays: 40 }),
+    comp({ addressLine: "B St", sqft: 1650, price: 210_000, soldInDays: 60 }),
+  ];
+
+  it("fills dom + typical_dom when the subject beat the banded median spell", () => {
+    const v = soldStoryValues(soldFacts, close, selfRow, nearby);
+    expect(v.dom).toBe("21");
+    expect(v.typical_dom).toBe("50");
+  });
+
+  it("fills ppsf when the recorded close ÷ sqft beat the banded median $/sq ft", () => {
+    const v = soldStoryValues(soldFacts, close, selfRow, nearby);
+    expect(v.ppsf).toBe("$173"); // 300000 / 1736
+  });
+
+  it("REFUSES the speed brag when the subject was SLOWER — never softened, simply absent", () => {
+    const slow = comp({ addressLine: "330 Shore Dr", sqft: 1736, soldInDays: 90 });
+    const v = soldStoryValues(soldFacts, close, slow, nearby);
+    expect(v.dom).toBeUndefined();
+    expect(v.typical_dom).toBeUndefined();
+  });
+
+  it("REFUSES the $/sq ft brag when the close was below the banded median", () => {
+    const rich = [
+      comp({ addressLine: "A St", sqft: 1800, price: 400_000, soldInDays: 40 }),
+      comp({ addressLine: "B St", sqft: 1650, price: 380_000, soldInDays: 60 }),
+    ];
+    expect(soldStoryValues(soldFacts, close, selfRow, rich).ppsf).toBeUndefined();
+  });
+
+  it("a PREFILL fills no figure slot at all — only the street", () => {
+    const v = soldStoryValues(soldFacts, null, selfRow, nearby);
+    expect(v.street).toBe("330 Shore Dr");
+    expect(v.dom).toBeUndefined();
+    expect(v.typical_dom).toBeUndefined();
+    expect(v.ppsf).toBeUndefined();
+  });
+
+  it("a one-comp 'median' is that comp's own number — two-value floor on both brags", () => {
+    const v = soldStoryValues(soldFacts, close, selfRow, nearby.slice(0, 1));
+    expect(v.dom).toBeUndefined();
+    expect(v.ppsf).toBeUndefined();
+  });
+
+  it("no subject sqft → the band never armed → no figure slots (unbanded brags are the $173–$421 defect)", () => {
+    const noSqft: ListingFacts = { address: "330 Shore Dr", photos: [], sourceUrl: "x" };
+    const v = soldStoryValues(noSqft, close, selfRow, nearby);
+    expect(v.dom).toBeUndefined();
+    expect(v.ppsf).toBeUndefined();
   });
 });
 

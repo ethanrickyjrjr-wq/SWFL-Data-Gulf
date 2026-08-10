@@ -77,7 +77,6 @@ import { defaultDoc } from "../../lib/email/doc/default-docs";
 import { applyBrand } from "../../lib/email/brand/apply-brand";
 // THE ONE ACCEPTANCE HARNESS (§1.17). Import it; never copy it.
 import {
-  captureNarratorDrops,
   loadAccountBrand,
   printBottom,
   printBrandCarry,
@@ -93,8 +92,9 @@ const ADDRESS = subjectAddress("330 Shore Dr, Fort Myers, FL 33905");
 
 console.log(`\n  SUBJECT: ${ADDRESS}\n`);
 
+// No narrator-drop capture: this recipe issues ZERO model calls (bank + code closer),
+// so there is no claim gate to observe.
 const { brand: BRAND, profile: p } = await loadAccountBrand();
-const narratorLog = captureNarratorDrops();
 
 // ── THE BUILD — the real recipe, the real chrome ─────────────────────────────
 const { facts, resolved } = await resolveSubject(ADDRESS, "");
@@ -134,8 +134,12 @@ const self = subjectRow(allComps, street);
 const close = closeFrom(self);
 const filled = withSubjectRowFacts(facts, self);
 const hero = heroPrice(filled, close);
-const strip = soldSpecs(filled, close);
+const strip = soldSpecs(filled, close, self?.soldInDays);
 const cellOf = (label: string) => strip.find((c) => c.label === label)?.value || undefined;
+// The same size-banded set the builder uses (±25% living area once the subject row
+// taught us the sqft) — so the provenance counts describe what actually shipped.
+const subjectSqft = Number(filled.sqft) > 0 ? Number(filled.sqft) : null;
+const nearby = realSaleComps(allComps, street, subjectSqft);
 
 const RUNG_SOURCE: Record<string, string> = {
   recorded: "RUNG 1 — a REAL recorded sale of this house (priceKind 'sold')",
@@ -155,20 +159,22 @@ const rows: ProvenanceRow[] = [
   ["Baths", filled.baths, "free spine → Lee records → nearby-values → subject row"],
   ["Square feet", filled.sqft, "free spine → subject row"],
   ["$/Sq Ft", cellOf("$/Sq Ft"), "DERIVED from the RECORDED close ÷ sq ft — never from a prefill"],
-  ["List Price", cellOf("List Price"), "the PAIRING RULE — only ever alongside a recorded close"],
+  [
+    "Days on Market",
+    cellOf("Days on Market"),
+    "the RECORDED closed-spell (soldInDays) — never days_in_state, never from a prefill",
+  ],
   ["List-to-Sale", cellOf("List-to-Sale"), "DERIVED — a prefill would compute a fake 100.0%"],
   ["Hero photo", filled.photos[0], "free spine photo_url → paid row already on disk → no photo"],
   [
     "Comps chart",
     chartAnchor(close) != null ? "anchored on the recorded close" : undefined,
-    `${realSaleComps(allComps, street).length} real recorded sales nearby; a PREFILL IS NEVER A BAR`,
+    `${nearby.length} real recorded sales nearby (size-banded); a PREFILL IS NEVER A BAR`,
   ],
   [
     "Sold-comps list",
-    realSaleComps(allComps, street).length
-      ? `${realSaleComps(allComps, street).length} rows`
-      : undefined,
-    "recorded sales only — beds AND sqft required, AVM estimates dropped, subject excluded",
+    nearby.length ? `${nearby.length} rows` : undefined,
+    "recorded sales only — beds AND sqft required, size-banded ±25%, AVMs dropped, subject excluded",
   ],
   [
     "Description (verbatim)",
@@ -180,11 +186,8 @@ const rows: ProvenanceRow[] = [
   [
     "Authored paragraph",
     undefined,
-    narratorLog.length
-      ? `DROPPED BY THE CLAIM GATE — ${narratorLog[0].split("—").slice(1).join("—").trim()}`
-      : close
-        ? "one Sonnet call; the recorded close rides in the FRAMING so prose may state it"
-        : "one Sonnet call; NO price may be named — the prefill is not in the framing",
+    "SENTENCE BANK + code closer — zero model calls; figure slots fill from the RECORDED, " +
+      "size-banded data only (a prefill fills none)",
   ],
   [
     "PAID SOLD PULL",
@@ -231,7 +234,7 @@ const lower = html.toLowerCase();
 const zip = String(filled.zip || filled.address || "").match(/\b\d{5}\b/)?.[0] ?? "";
 const imageBlocks = doc.blocks.filter((b) => b.type === "image").length;
 const prefilled = hero.rung === "prefill";
-const DERIVED_LABELS = ["List-to-Sale", "List Price", "$/Sq Ft"];
+const DERIVED_LABELS = ["List-to-Sale", "Days on Market", "$/Sq Ft"];
 const leaked = prefilled ? DERIVED_LABELS.filter((l) => html.includes(l)) : [];
 const priceInProse = /\$\s?[\d,]{3,}/.exec(authored ?? "")?.[0];
 
@@ -259,7 +262,7 @@ const checks: Assertion[] = [
     detail: prefilled
       ? leaked.length
         ? `LEAKED: ${leaked.join(", ")}`
-        : "List-to-Sale / List Price / $/Sq Ft all absent ✓"
+        : "List-to-Sale / Days on Market / $/Sq Ft all absent ✓"
       : "n/a — this run holds a RECORDED close, so the derived cells are legitimate",
   },
   {

@@ -1,3 +1,22 @@
+## 2026-08-09 (Fable 5) — Just Sold: bottom complementary flag, DOM + $/sq ft, agent-pride sentence bank with truth gates
+
+Operator: "I CAN SEE A BLACK LINE AND THE ANGLE IS TERRIBLE … COMPLEMENTARY COLOR FLAG AT THE
+BOTTOM … INCLUDE % SQ FT / DOM … TALK LIKE A REAL ESTATE AGENT WHO DID A GOOD JOB … USE THE
+SCRIPTS." Shipped, all four: (1) `photo-badge.ts` — the −45° ribbon + black corner scrim replaced
+by a flat full-width bottom band in `complementOf(accent)` (hue+180°, brand-derived) with a 6px
+accent keyline; storage key now sha1 of the RENDERED bytes (input-stamped key would have served the
+old ribbon off the immutable edge cache forever — the chart-key lesson). (2) strip:
+`Days on Market` cell (recorded `soldInDays` only — never `days_in_state`, never a prefill;
+playbook §2.5.5 G2 built) + `$/Sq Ft` kept; muted `List Price` cell dropped for the seat.
+(3) `just-sold.language.ts` bank + `soldStoryValues` truth gates: speed/$-per-foot brags fill ONLY
+when true vs the ±25% size-banded comp median (two-value floor), prefill fills no figure slot,
+`readerLine` closes reader-first with the one question; still zero model calls. (4) `realSaleComps`
+now size-bands (chart/list/prose all read the banded set — the $173–$421 defect class closed here
+too). Evidence: 76 unit tests green (just-sold, bank, badge, engine), 8/8 acceptance on BOTH
+houses (330 Shore Dr recorded, Kellysands Way prefill), `bunx next build` exit 0, flag + both
+full renders screenshotted and looked at. Caveat: 330 Shore Dr's vendor row holds no list date →
+DOM open slot there; gates proven by unit test.
+
 ## 2026-08-09 (Fable 5) — New Listing: narrator is FALLBACK-ONLY — the seller's description IS the email
 
 Operator: "WE DON'T NEED A FUCKING NARRATOR WHEN THE FUCKING DESCRIPTION IS ALREADY WRITTEN."
