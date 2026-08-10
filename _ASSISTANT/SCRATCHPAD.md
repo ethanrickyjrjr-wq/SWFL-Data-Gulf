@@ -1,3 +1,17 @@
+## 2026-08-10 (Fable 5) — OPERATOR: the 2 declared leftovers — GET RID OF, and stop leaving trails
+Verbatim: "2 GET RID OF. ALL WE DO IS GET LOST. THIS SUCKS." The two residuals declared after the
+old-email sweep (raw public/showcase/** story captures + the stale NewEmails.tsx comment) are not
+acceptable leftovers — purge them. The larger gripe: sessions keep leaving old-artifact trails that
+future sessions get lost in. Leftover = defect, not a footnote.
+RESOLVED 2026-08-10 (pending push) — purged: public/showcase/{listing-to-close,agent-launch,
+launch-blitz,community-info,market-pulse,back-on-market,agents} (all old captures + live HTML),
+app/dev-emails/ (the "delete when triage is done" page serving every old email), the 5 generator/tmp
+scripts that baked those artifacts, and scripts/capture-showcase.mjs. registry.test asset guard
+removed with the assets; ListingCampaignHero.test now asserts NO /showcase/ imagery renders;
+NewEmails.tsx comment fixed (claim overridden after 45-min hold — comment-only edit). KEPT:
+public/showcase/seed-previews/** (live lab template thumbnails + guides). Evidence: 73 tests pass
+0 fail; bunx next build exit 0, zero dev-emails mentions.
+
 ## 2026-08-10 (Fable 5) — OPERATOR: just-sold "fixed" but STILL THE SAME on the site
 Verbatim: "we just fixed the just sold email. WHY IS IT STILL THE FUCKING SAME!!!!" ROOT CAUSE:
 the recipe fix landed in code (97724164, just-sold bottom flag + DOM/$-per-sqft cells + sentence

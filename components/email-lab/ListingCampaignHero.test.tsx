@@ -34,13 +34,10 @@ describe("ListingCampaignHero", () => {
     expect(html).toContain("Starting…");
   });
 
-  it("shows the real five-milestone filmstrip from the listing-to-close showcase, not invented images", () => {
+  it("renders NO old-capture imagery — the filmstrip is gone for good (operator decree 08/10/2026)", () => {
     const html = renderToStaticMarkup(createElement(ListingCampaignHero, { subjectAddress: null }));
-    expect(html).toContain("Coming Soon");
-    expect(html).toContain("New Listing");
-    expect(html).toContain("Market Comps");
-    expect(html).toContain("Under Contract");
-    expect(html).toContain("/showcase/listing-to-close/step-1.webp");
+    expect(html).not.toContain("/showcase/");
+    expect(html).not.toContain(".webp");
   });
 
   it("names the real click-alert capability", () => {
@@ -66,12 +63,6 @@ describe("ListingCampaignHero", () => {
   it("asks for the one input we genuinely lack — the property description", () => {
     const html = renderToStaticMarkup(createElement(ListingCampaignHero, { subjectAddress: null }));
     expect(html).toContain("Paste your description into the builder");
-  });
-
-  it("renders the filmstrip captures uncropped — full email, natural aspect", () => {
-    const html = renderToStaticMarkup(createElement(ListingCampaignHero, { subjectAddress: null }));
-    expect(html).not.toContain("object-cover");
-    expect(html).not.toContain("object-top");
   });
 
   it("names socials as coming soon, with no dead link", () => {

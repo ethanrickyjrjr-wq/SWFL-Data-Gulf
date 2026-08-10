@@ -6,6 +6,21 @@ playbook_distance_rule_line closed with grep evidence; _ASSISTANT/pending-playbo
 deleted — the rule lives where rules live now. This completes 08/10/2026's distance decree: code
 root + AREA instruction + tests + re-baked showcase (31436091) + the universal playbook rule.
 
+## 2026-08-10 (Fable 5) — Old-email PURGE complete: captures, dev route, and generator scripts deleted — no path, no files, no trail
+
+Operator: "2 GET RID OF. ALL WE DO IS GET LOST. THIS SUCKS." The two residuals from the sweep below
+are gone: (1) public/showcase/{listing-to-close,agent-launch,launch-blitz,community-info,
+market-pulse,back-on-market,agents} deleted outright — captures, live/*.html, logos, all of it;
+also deleted app/dev-emails/ (unlinked triage route that served every old email — its own header
+said "Delete it when triage is done"), scripts/capture-showcase.mjs, and the 5 build-showcase-*/
+tmp-* scripts that generated those artifacts. (2) NewEmails.tsx stale comment fixed (45-min-held
+claim overridden for the comment-only edit). registry.test's asset-existence guard removed WITH the
+assets; ListingCampaignHero.test flipped to assert NO /showcase/ imagery renders. KEPT:
+public/showcase/seed-previews/** — live lab template-picker thumbnails + guide images, not old
+emails. Verified before deleting: public/new-emails/*.html reference only showcase-agents/
+(marisa-delgado.png), never public/showcase/**. Evidence: bun test (registry, recipe, campaigns,
+parity, hero, seed-previews) 73 pass 0 fail; bunx next build exit 0, 0 grep hits for dev-emails.
+
 ## 2026-08-10 (Fable 5) — OLD emails stripped from every surface: no rendered path to the pre-registry captures remains
 
 Operator: "GET THESE OLD EMAILS OUT OF HERE… THERE IS ONLY ONE PLACE… JUST GET THEM OFF THE WEBSITE

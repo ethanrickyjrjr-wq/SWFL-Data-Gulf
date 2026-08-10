@@ -147,8 +147,8 @@ export function heroDestination(entry: HeroCampaignEntry, opts: { filled: string
 }
 
 /** A not-yet-built campaign — greyed chip, no wiring. Promote by adding a
- *  Showcase with `campaign.status:"live"` + `seedRecipe` and capturing its
- *  slide assets (scripts/capture-showcase.mjs). */
+ *  Showcase with `campaign.status:"live"` + `seedRecipe`. (Slide-art capture
+ *  is gone — old-email surfaces were purged 08/10/2026, operator decree.) */
 export interface ComingTile {
   label: string;
   blurb: string;

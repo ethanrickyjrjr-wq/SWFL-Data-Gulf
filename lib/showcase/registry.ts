@@ -1,10 +1,12 @@
 /**
- * Client-safe showcase registry for the pill panel (and, later, the homepage).
- * Display metadata + committed asset paths ONLY — no server imports, no fs, so
- * it's safe in the browser bundle (mirrors the old example-cards.ts contract).
- * Asset existence is guarded by registry.test.ts; slide order mirrors
- * scripts/capture-showcase.mjs. The tier/CTA slide is NOT listed here — the
- * overlay appends it as the final step.
+ * CAMPAIGN METADATA ONLY (since 08/10/2026 — operator decree: old emails off
+ * the website, no path to them). Every surface that rendered these showcases
+ * (cards, overlays, /showcase rows, dev-emails) and their public/showcase/**
+ * captures were deleted. What still reads this file: lib/campaigns.ts
+ * quick-start buttons (campaign/seedRecipe/followUp fields) and the parity
+ * tests. Slide image/thumb/liveHref paths are historical strings pointing at
+ * deleted files — do not resurrect them; the ONE email showcase is
+ * components/showcase/NewEmails.tsx over public/new-emails/*.html.
  */
 
 import type { ShowcaseRecipe } from "./recipe";

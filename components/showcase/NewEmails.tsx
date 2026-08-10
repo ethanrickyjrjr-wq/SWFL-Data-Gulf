@@ -21,9 +21,11 @@ const FILE_FOR_KEY: Partial<Record<RecipeKey, string>> = {
   "market-pulse": "/new-emails/market-pulse-email.html",
 };
 
-/** Same three groups, same order, as the lifecycle CampaignRows already uses
- *  (`lib/showcase/campaign-order.ts`) — lifecycle first, every key a real
- *  `RECIPES` entry. Keys with no file yet render as a labelled blank holder. */
+/** Lifecycle first, every key a real `RECIPES` entry. Keys with no file yet
+ *  render as a labelled blank holder. THIS IS THE ONE EMAIL SHOWCASE — every
+ *  old-email surface (CampaignRows, seed gallery, story overlays, dev-emails)
+ *  and public/showcase/** captures were deleted 08/10/2026 by operator decree
+ *  ("old emails off the website, no path to them"); never re-add one. */
 const NEW_EMAIL_CATEGORIES: { id: string; title: string; keys: RecipeKey[] }[] = [
   {
     id: "listing-lifecycle",

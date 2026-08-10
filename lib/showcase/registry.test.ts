@@ -1,6 +1,4 @@
 import { describe, it, expect } from "bun:test";
-import { existsSync } from "node:fs";
-import { join } from "node:path";
 import { SHOWCASES } from "./registry";
 import { NEED_LABELS, findPlaceholder } from "./recipe";
 
@@ -15,17 +13,10 @@ describe("showcase registry", () => {
     expect(new Set(SHOWCASES.map((s) => s.id)).size).toBe(6);
   });
 
-  it("every asset path exists under public/", () => {
-    for (const s of SHOWCASES) {
-      expect(existsSync(join(process.cwd(), "public", s.thumb))).toBe(true);
-      for (const sl of s.slides) {
-        expect(existsSync(join(process.cwd(), "public", sl.image))).toBe(true);
-        if (sl.liveHref) {
-          expect(existsSync(join(process.cwd(), "public", sl.liveHref))).toBe(true);
-        }
-      }
-    }
-  });
+  // The asset-existence guard is GONE with the assets: public/showcase/** story
+  // captures were purged 08/10/2026 (operator: old emails off the website, no
+  // path to them). The registry's asset paths are historical metadata only —
+  // nothing renders them; lib/campaigns.ts reads campaign/recipe fields alone.
 
   it("1-7 content slides, non-empty captions, disclosure present", () => {
     for (const s of SHOWCASES) {
