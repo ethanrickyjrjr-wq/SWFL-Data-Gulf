@@ -168,26 +168,28 @@ const rows: ProvenanceRow[] = [
   ["LOT SIZE", undefined, "DELIBERATELY OMITTED — lot + city narrows a parcel search"],
   ["STREET ADDRESS", undefined, "DELIBERATELY SUPPRESSED — the point of this email"],
 ];
-// THE ACCEPTANCE TABLE ITSELF HAD A FALSE NEGATIVE. This first looked only at blocks of
-// `type === "text"` and reported "— OPEN SLOT" for the authored paragraph on a run where
-// the paragraph had in fact shipped and was plainly visible in the render. A provenance
-// table that under-reports is worse than none: it would have sent someone hunting a
-// narrator bug that did not exist, and on the next run it would have hidden a real one.
-// Read the same slot the recipe writes, whatever block type carries it.
-// Walk EVERY string in the built blocks rather than guessing a prop name — the narrative
-// does not live on `props.text`, which is exactly why the first two versions of this line
-// reported an open slot while the paragraph was visible on screen.
-const strings: string[] = [];
-(function walk(v: unknown) {
-  if (typeof v === "string") strings.push(v);
-  else if (Array.isArray(v)) v.forEach(walk);
-  else if (v && typeof v === "object") Object.values(v).forEach(walk);
-})(doc.blocks);
+// THE ACCEPTANCE TABLE ITSELF HAS LIED IN BOTH DIRECTIONS — this detector's history is
+// two opposite failures, so read both before "improving" it again.
+// UNDER-REPORT (07/xx): an early version read `props.text` of text blocks — the wrong
+// prop name — and printed "OPEN SLOT" while the paragraph was visibly on screen.
+// OVER-REPORT (08/09/2026): the walk-every-string rewrite matched the ~155-char AGENT
+// BIO (which lives in the agent card, so no brand-derived exclusion list can ever be
+// complete) and patched its length into `rows[14]` — the DESCRIPTION row, off by one.
+// The table printed "Description (narrator fuel) 155 chars" for a night while the real
+// description sat at 2,263 chars: both columns wrong at once, and three layers got
+// hunted for a narrator bug that did not exist.
+// THE RULE: read exactly the slot `fillNarrative` writes — `props.body` of a text
+// block that is not the description slot — and address the row BY LABEL so an
+// inserted row can never shift the patch onto a neighbor.
 const remarks = (facts.remarks ?? "").trim();
-const authored = strings.find(
-  (s) => s.length > 120 && s.trim() !== remarks && !remarks.includes(s.trim()),
-);
-rows[14][1] = authored ? `${authored.length} chars` : undefined;
+const authored = doc.blocks
+  .filter((b) => b.type === "text")
+  .map((b) => (b.props as { body?: string; descriptionSlot?: boolean }) ?? {})
+  .filter((p) => p.descriptionSlot !== true)
+  .map((p) => (p.body ?? "").trim())
+  .find((body) => body.length > 120 && body !== remarks && !remarks.includes(body));
+const authoredRow = rows.find(([label]) => label === "Authored paragraph");
+if (authoredRow) authoredRow[1] = authored ? `${authored.length} chars` : undefined;
 
 printProvenance(rows);
 if (narratorLog.length)

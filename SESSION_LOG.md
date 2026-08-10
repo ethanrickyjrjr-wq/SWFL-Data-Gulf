@@ -123,6 +123,20 @@ verbatim-only COUNT rule killed it (the gate eating honest sentences). `claims.t
 stay verbatim-only, and the digit must sit within 3 words of the entity in ONE settled sentence.
 25/25 gate tests green including both corruption-on-restate traps; new-listing recipe tests green.
 
+## 2026-08-10 (Fable 5) — Coming Soon acceptance table now tells the truth; narrator reads the whole description
+
+Follow-through on the owed items: (1) shared.ts narrator slice 1,200→6,000 + the bare catch logs
+(commit cdd9e94f) — the paragraph now names pickleball/poolside restaurant/theater/half-acre
+lakefront/generator, all from the description's back half. (2) render-coming-soon.mts provenance:
+authored-paragraph patch was `rows[14]` (the DESCRIPTION row, off by one) and its any-long-string
+detector matched the 155-char agent bio — now reads exactly the slot `fillNarrative` writes
+(text-block `props.body`, non-descriptionSlot) and addresses the row BY LABEL. Proven live:
+"Description (narrator fuel) 2263 chars · Authored paragraph 566 chars", suppression 4/4. The
+stale hour-old claim on the script was released after confirming zero on-disk edits (repolith
+barred re-take 5 min). Closed `coming_soon_provenance_row_off_by_one`. Playbook §2.2.0 default-
+house line still says Asheboro — file actively claimed by a parallel session, opened
+`coming_soon_playbook_default_house_line`.
+
 ## 2026-08-10 (Fable 5) — Coming Soon demo: human band ($1.2M–$1.5M), and the HOUSE PARAGRAPH ships — description bought once for $0.007
 
 Operator (screenshot 233250): "WHY ARE THE NUMBERS NOT 1.2-1.5" + "WHERE THE FUCK IS THE HOUSE
