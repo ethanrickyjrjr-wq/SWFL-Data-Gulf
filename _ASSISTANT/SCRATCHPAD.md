@@ -1,3 +1,11 @@
+## 2026-08-10 (Fable 5) — OPERATOR: "YOU SAY NOTHING ELSE WRITTEN, BUT THEN WRITE MORE BESIDES WHAT I TOLD YOU" — /go page copy creep
+Decree was a Google-simple page: hero "Address to email in one click" + search bar, NOTHING else.
+I shipped it with three extra written lines nobody asked for: a "SWFL DATA GULF" wordmark label, a
+tagline under the bar ("Type the address. Pick the email…"), and a footer line — plus per-option
+blurbs in the dropdown. Same shape as the homepage-grammar gripes: when the operator specifies the
+exact contents of a surface, the spec is a CEILING, not a floor — decoration copy is a defect, not
+polish. Fixed same session: page stripped to logo mark + h1 + bar + the 7 labels.
+
 ## 2026-08-10 (Fable 5) — OPERATOR: "WE DON'T FUCKING NEED DISTANCE FOR EVERY FUCKING THING" — distance-survey prose, strike 3+ of the shape
 Live paragraph shipped three distance clauses in a row ("golf about three-quarters of a mile…
 farmers market about half a mile… food and drink about half a mile from the front door") AND

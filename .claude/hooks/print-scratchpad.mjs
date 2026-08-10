@@ -60,6 +60,41 @@ function renderStrikes(text) {
   return lines.join("\n") + "\n";
 }
 
+// built-dark-no-consumer guard (08/10/2026, 5 strikes). Scans ingest/cadence_registry.yaml
+// for entries whose `consuming_pack:` is `none` — data landed that NOTHING reads. The
+// cre_figures consumer decision lived 8+ days in a YAML comment nobody re-opened ("how the
+// fuck are these not wired"); this prints the dark list every session start so a parked
+// consumer decision can never be invisible again. Deliberate parks keep printing — that
+// pressure is the point; wire it or park it with a check. Same fail-soft contract.
+function renderDarkRoots(text) {
+  const dark = [];
+  let cur = null;
+  for (const line of text.split("\n")) {
+    const n = line.match(/^\s*-\s*name:\s*(\S+)/);
+    if (n) {
+      cur = n[1];
+      continue;
+    }
+    if (cur && /^\s*consuming_pack:\s*none\b/.test(line)) {
+      if (!dark.includes(cur)) dark.push(cur);
+    }
+  }
+  if (dark.length === 0) return "";
+  const lines = [];
+  lines.push(
+    `――― DARK ROOTS — ${dark.length} registry entr${dark.length === 1 ? "y" : "ies"} with consuming_pack: none (data lands, NOTHING reads it) ―――`,
+  );
+  for (let i = 0; i < dark.length; i += 6) {
+    lines.push(`  🔴 ${dark.slice(i, i + 6).join(" · ")}`);
+  }
+  lines.push(
+    "     wire a consumer or park it with a checks entry — a YAML comment is not a deferral",
+  );
+  return lines.join("\n") + "\n";
+}
+
+const REGISTRY_PATH = resolve(process.cwd(), "ingest/cadence_registry.yaml");
+
 let raw = "";
 process.stdin.setEncoding("utf8");
 process.stdin.on("data", (chunk) => (raw += chunk));
@@ -83,6 +118,13 @@ process.stdin.on("end", () => {
     if (strikes) process.stdout.write(strikes);
   } catch {
     // Registry absent or malformed — the digest above still printed; stay soft.
+  }
+
+  try {
+    const darkRoots = renderDarkRoots(readFileSync(REGISTRY_PATH, "utf8"));
+    if (darkRoots) process.stdout.write(darkRoots);
+  } catch {
+    // Cadence registry absent or malformed — stay soft.
   }
   process.exit(0);
 });

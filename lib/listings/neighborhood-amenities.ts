@@ -254,10 +254,41 @@ export function humanDistance(mi: number): string {
   return `about ${Math.round(mi)} miles`;
 }
 
+/** How many categories may carry a stated distance. Operator decree 08/10/2026 — "WE
+ *  DON'T FUCKING NEED DISTANCE FOR EVERY FUCKING THING… JUST MENTION ONE OR TWO AND
+ *  TALK ABOUT THE OTHER GREAT THINGS TO DO": a live paragraph strung THREE mileage
+ *  clauses in a row and read like a survey. Prompt-side "name one or two" wording
+ *  (shared.ts, 08/05) already failed to hold — the model recited every distance it was
+ *  handed — so the cap is STRUCTURAL: a narrator cannot speak a third distance it was
+ *  never given. Third strike of the distance-speak shape (08/06 ".57 miles", 08/10
+ *  humanDistance banding, 08/10 this); this cap + the in-gate suppression below are
+ *  the RULE 2 §0b mechanism. */
+const MAX_SPOKEN_DISTANCES = 2;
+
+/** The vendor categories that mean "golf" — both tokens measured in the lake (they are
+ *  the two the coverage decree named in PRIORITY_CATEGORIES). Do not add tokens the
+ *  vendor was never measured to emit. */
+const GOLF_CATEGORIES = new Set(["golf", "countryclubs"]);
+
+export interface NeighborhoodAmenitiesLineOpts {
+  /** TRUE ONLY when a community fact lane (`insideTheGate.golf` or the listing page's
+   *  `hasGolf`) states this community ITSELF has golf. Then nearby-golf rows are
+   *  dropped entirely — same decree: "IF THEY LIVE IN A GOLF COMMUNITY, GOLF IS RIGHT
+   *  FUCKING THERE." Telling that reader a course sits three-quarters of a mile away
+   *  is worse than silence; the in-gate line already speaks the golf that matters. */
+  communityHasGolf?: boolean;
+}
+
 export function neighborhoodAmenitiesSourceLine(
   n: ResolvedNeighborhood | undefined | null,
+  opts: NeighborhoodAmenitiesLineOpts = {},
 ): string | null {
   if (!n || n.amenities.length === 0) return null;
+
+  const amenities = opts.communityHasGolf
+    ? n.amenities.filter((a) => !GOLF_CATEGORIES.has(a.category))
+    : n.amenities;
+  if (amenities.length === 0) return null;
 
   const asOf = n.asOf ? ` as of ${toMmDdYyyy(n.asOf)}` : "";
   const radius =
@@ -274,9 +305,15 @@ export function neighborhoodAmenitiesSourceLine(
   // "gulf view", but across 29k+ business rows instead of one string. The name was
   // never load-bearing for an email; the category, the count, and the distance are.
   // Test-enforced ("emits NO business names"). Do not add the name back.
-  const items = n.amenities.map((a) => {
+  //
+  // AT MOST TWO DISTANCES, taken in the already-priority-sorted order (beach first,
+  // then golf/country clubs, then by count) — every category past the budget states
+  // its count only. See MAX_SPOKEN_DISTANCES.
+  let spokenDistances = 0;
+  const items = amenities.map((a) => {
     const label = humanize(a.category);
-    if (!a.nearest) return `${label}: ${a.count}`;
+    if (!a.nearest || spokenDistances >= MAX_SPOKEN_DISTANCES) return `${label}: ${a.count}`;
+    spokenDistances++;
     return `${label}: ${a.count} (nearest ${humanDistance(a.nearest.distanceMiles)})`;
   });
 
@@ -308,7 +345,9 @@ export function neighborhoodAmenitiesSourceLine(
     `community. Never write that the community "has", "includes", "features", or ` +
     `"offers" any of them; never "on-site"; never "resident-only"; never imply a ` +
     `bundled membership, a private course, or a gate. You may say a named business ` +
-    `is a stated distance away, nothing more.`
+    `is a stated distance away, nothing more. State a distance ONLY where this line ` +
+    `gives one — at most two — and mention anything else as something nearby with NO ` +
+    `distance at all. A paragraph where every sentence carries a mileage is a failure.`
   );
 }
 

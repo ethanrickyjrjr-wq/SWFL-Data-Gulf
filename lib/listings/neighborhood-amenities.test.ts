@@ -318,6 +318,73 @@ describe("neighborhoodAmenitiesSourceLine", () => {
     expect(line).not.toContain("1.1");
   });
 
+  // DECREE 08/10/2026 — "WE DON'T FUCKING NEED DISTANCE FOR EVERY FUCKING THING…
+  // JUST FUCKING MENTION ONE OR TWO AND TALK ABOUT THE OTHER GREAT THINGS TO DO."
+  // A live paragraph strung three mileage clauses in a row. Prompt-side "one or two"
+  // wording had already failed once, so the cap is STRUCTURAL: the line itself hands
+  // the narrator at most two distances; the rest are count-only.
+  it("hands over AT MOST TWO distances, in priority order — the rest are count-only", () => {
+    const line = neighborhoodAmenitiesSourceLine({
+      ...resolved,
+      amenities: [
+        { category: "beaches", count: 1, nearest: { name: "B", distanceMiles: 1.1 } },
+        { category: "golf", count: 3, nearest: { name: "G", distanceMiles: 0.7 } },
+        { category: "restaurants", count: 6, nearest: { name: "R", distanceMiles: 0.5 } },
+        { category: "local_groceries", count: 3, nearest: { name: "L", distanceMiles: 0.6 } },
+      ],
+    })!;
+    expect(line.split("(nearest").length - 1).toBe(2);
+    // the two spoken distances are the first two in the given (priority-sorted) order
+    expect(line).toContain("beaches: 1 (nearest");
+    expect(line).toContain("golf: 3 (nearest");
+    expect(line).toContain("restaurants: 6;");
+    expect(line).toContain("local groceries: 3.");
+  });
+
+  it("tells the narrator the distance budget in so many words", () => {
+    const line = neighborhoodAmenitiesSourceLine(resolved)!.toLowerCase();
+    expect(line).toContain("at most two");
+    expect(line).toContain("no distance at all");
+  });
+
+  // DECREE 08/10/2026 — "IF THEY LIVE IN A GOLF COMMUNITY, GOLF IS RIGHT FUCKING
+  // THERE." When an in-gate lane states the community itself has golf, the nearby-golf
+  // rows (vendor tokens `golf` + `countryclubs`) are dropped at the root — telling that
+  // reader a course sits three-quarters of a mile away is worse than silence.
+  it("drops nearby golf AND country clubs when the community itself has golf", () => {
+    const line = neighborhoodAmenitiesSourceLine(
+      {
+        ...resolved,
+        amenities: [
+          { category: "golf", count: 3, nearest: { name: "G", distanceMiles: 0.7 } },
+          { category: "countryclubs", count: 2, nearest: { name: "C", distanceMiles: 0.9 } },
+          { category: "restaurants", count: 6, nearest: { name: "R", distanceMiles: 0.5 } },
+        ],
+      },
+      { communityHasGolf: true },
+    )!;
+    expect(line).not.toContain("golf: 3");
+    expect(line).not.toContain("countryclubs");
+    expect(line).toContain("restaurants: 6");
+  });
+
+  it("keeps nearby golf when NO community lane states golf — absence never suppresses", () => {
+    const line = neighborhoodAmenitiesSourceLine(resolved, { communityHasGolf: false })!;
+    expect(line).toContain("golf: 3 (nearest about a quarter mile)");
+  });
+
+  it("returns null when in-gate suppression removes every category — never an empty list", () => {
+    expect(
+      neighborhoodAmenitiesSourceLine(
+        {
+          ...resolved,
+          amenities: [{ category: "golf", count: 3, nearest: { name: "G", distanceMiles: 0.7 } }],
+        },
+        { communityHasGolf: true },
+      ),
+    ).toBeNull();
+  });
+
   it("writes as-of MM/DD/YYYY", () => {
     expect(neighborhoodAmenitiesSourceLine(resolved)!).toContain("08/03/2026");
   });

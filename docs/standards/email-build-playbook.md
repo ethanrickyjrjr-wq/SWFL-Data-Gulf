@@ -423,6 +423,18 @@ measured on real sent mail).
   written. Any new surface that renders a distance calls `humanDistance` — never formats miles
   inline. (Same lesson as the 08/06/2026 open-house correction — *"No one says a fucking golf course
   .57 miles away"* — which had only been applied to the invitation branch, not the fact line.)
+- **AT MOST TWO DISTANCES PER EMAIL — and NONE for what the community already has.** Operator decree
+  08/10/2026, off a live paragraph that strung three mileage clauses in a row: *"WE DON'T FUCKING
+  NEED DISTANCE FOR EVERY FUCKING THING… JUST FUCKING MENTION ONE OR TWO AND TALK ABOUT THE OTHER
+  GREAT THINGS TO DO."* And: *"IF THEY LIVE IN A GOLF COMMUNITY, GOLF IS RIGHT FUCKING THERE"* —
+  never state a distance to a thing the in-gate/community lane says the community itself has.
+  **BOTH ROOTS ARE STRUCTURAL, not prompt wording** (prompt-side "one or two" had already failed):
+  `MAX_SPOKEN_DISTANCES = 2` in `neighborhoodAmenitiesSourceLine()` caps how many distances the
+  narrator is ever handed, and its `communityHasGolf` option (wired from `insideTheGate.golf` /
+  `community.hasGolf` in `recipes/shared.ts`) drops nearby `golf`/`countryclubs` rows entirely.
+  Every other category is mentioned as a good thing nearby with no measurement. Test-enforced in
+  `neighborhood-amenities.test.ts`. This was strike 3 of the distance-speak shape — see
+  `_ASSISTANT/STRIKES.md`.
 
 ### 1.9a Zip codes — never "ZIP". Never "X of Y" for what we don't hold.
 

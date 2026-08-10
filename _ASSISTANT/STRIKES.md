@@ -47,6 +47,20 @@ guard: BUILT — artifact-level scaffolding guard (08/09/2026) + narrator drop l
 - strike: 08/10 narrator altered the agent-written description
 - strike: 08/10 "the 2 declared leftovers — stop leaving trails"
 
+## shape: built-dark-no-consumer
+guard: BUILT — dark-roots SessionStart printer (08/10/2026): print-scratchpad.mjs renderDarkRoots scans cadence_registry for consuming_pack: none and prints the dark list red every session
+- strike: 07/22 lake comp feed 20205251 zero consumers
+- strike: 07/22 community_profiles pipeline built, never registered/wired
+- strike: 07/22 marketbeat 261 rows ingested, all dropped dark
+- strike: 08/03 cre_figures consumer deferred into a YAML comment
+- strike: 08/10 "how the fuck are these not wired"
+
+## shape: distance-speak-not-person-speak
+guard: BUILT — MAX_SPOKEN_DISTANCES=2 structural cap + communityHasGolf in-gate suppression at neighborhoodAmenitiesSourceLine, test-enforced (08/10/2026); humanDistance banding (08/10/2026); playbook §1.9
+- strike: 08/06 "no one says a golf course .57 miles away"
+- strike: 08/10 "0.57 miles" grocery — quarters and halves decree
+- strike: 08/10 three mileage clauses in a row + golf-community told golf is 3/4 mi away
+
 ## shape: partial-reported-as-whole
 guard: BUILT — RULE 0.8 count-and-prove (07/30/2026) + RULE 0.85 fix-don't-file (08/06/2026)
 - strike: 07/30 "all four lanes on the record" — one never opened

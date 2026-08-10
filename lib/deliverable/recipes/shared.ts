@@ -458,7 +458,13 @@ export async function authorListingNarrative(
     // AROUND the home — nearby businesses in the vendor's radius. The line carries its
     // own prohibition (never "the community has/includes/features", never on-site,
     // never resident-only) because that distinction is the whole risk of this fact.
-    neighborhoodAmenitiesSourceLine(facts.neighborhood),
+    // `communityHasGolf` wires the in-gate lanes INTO it (operator decree 08/10/2026:
+    // "IF THEY LIVE IN A GOLF COMMUNITY, GOLF IS RIGHT FUCKING THERE") — when either
+    // community lane states golf, the nearby-golf rows are dropped at the root so the
+    // narrator can never tell a golf-community reader how far away golf is.
+    neighborhoodAmenitiesSourceLine(facts.neighborhood, {
+      communityHasGolf: facts.insideTheGate?.golf === true || facts.community?.hasGolf === true,
+    }),
     // The recipe's own code-computed facts — settled exactly like every line above.
     ...(opts.anchors ?? []),
     opts.context && `Background context (NOT the subject of this email):\n${opts.context}`,
@@ -638,17 +644,29 @@ export async function authorListingNarrative(
     // "Groceries and restaurants are within a mile" — technically not wrong, but it threw away
     // every number it was actually given and produced the same sentence any listing email could
     // print. Operator: "THIS IS FUCKING TERRIBLE." Named here so it isn't vague again.
-    `THE AREA. If — and ONLY if — an "AROUND THIS HOME" fact line is present above, use its ` +
-    `actual specifics: name ONE OR TWO categories and their nearest distance EXACTLY AS THE LINE ` +
-    `WRITES IT. When the line lists a beach, lead with the beach — in this market nothing beats ` +
-    `being close to the sand. The distances arrive already in plain words ("about half a mile", "about a ` +
-    `quarter mile"); repeat them as written and NEVER convert one to a decimal figure like ` +
-    `"0.57 miles" — nobody talks that way. E.g. "a grocery store about half a mile away" or ` +
-    `"six restaurants within a mile" — not a vague "nearby" or "close ` +
-    `to shopping and dining" that could describe any address. Never invent a business name — the ` +
-    `line deliberately carries none. These are businesses in the vendor's radius, never the ` +
-    `community's own amenities: never "the community has" or "on-site." If there is NO "AROUND ` +
-    `THIS HOME" line, say NOTHING about nearby businesses.\n\n` +
+    // REWRITTEN 08/10/2026 (operator: "WE DON'T FUCKING NEED DISTANCE FOR EVERY FUCKING
+    // THING… JUST FUCKING MENTION ONE OR TWO AND TALK ABOUT THE OTHER GREAT THINGS TO
+    // DO"). The prior wording ("name ONE OR TWO categories and their nearest distance
+    // EXACTLY AS THE LINE WRITES IT") made a distance MANDATORY for every named category,
+    // and the live paragraph strung three mileage clauses in a row — a survey, not a
+    // person. The fact line itself now hands over at most TWO distances (structural cap,
+    // MAX_SPOKEN_DISTANCES in neighborhood-amenities.ts); this instruction matches it:
+    // a distance is seasoning, the rest is what there is to DO nearby.
+    `THE AREA. If — and ONLY if — an "AROUND THIS HOME" fact line is present above, talk about ` +
+    `it the way a person points out their neighborhood: state a distance for AT MOST one or two ` +
+    `things — only where the line itself gives one, repeated exactly as written ("about half a ` +
+    `mile"), NEVER converted to a decimal like "0.57 miles" — and mention the rest as good ` +
+    `things close by with NO distance at all ("good restaurants close by", "a farmers market"). ` +
+    `A paragraph where every sentence carries a mileage is a FAILURE — one distance clause, two ` +
+    `at the very most. When the line lists a beach, lead with the beach — in this market ` +
+    `nothing beats being close to the sand. Still be specific to THIS address (a category and ` +
+    `its count are specifics), not a vague "close to shopping and dining" that could describe ` +
+    `any address. Never invent a business name — the line deliberately carries none. These are ` +
+    `businesses in the vendor's radius, never the community's own amenities: never "the ` +
+    `community has" or "on-site." If the community's own fact lines above already give it golf ` +
+    `or a marina, that thing is RIGHT THERE where the reader would live — never describe it as ` +
+    `some distance away. If there is NO "AROUND THIS HOME" line, say NOTHING about nearby ` +
+    `businesses.\n\n` +
     `Return ONLY the paragraph.`;
 
   const user = `FACTS:\n${lines.join("\n")}\n\nWrite the description.`;

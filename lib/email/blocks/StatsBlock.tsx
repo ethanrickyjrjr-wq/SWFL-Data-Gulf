@@ -245,7 +245,11 @@ export function StatsBlock({
           `<!--[if mso]><td width="${cellPx}" valign="top" style="vertical-align:top;text-align:center;"><![endif]-->` +
           `<div style="display:inline-block;width:100%;max-width:${cellPx}px;vertical-align:top;` +
           `text-align:center;padding:${cellPad};box-sizing:border-box;">` +
-          `<p style="${cssText(valueStyle(empty, stat.emphasis))}">${escHtml(stat.value ?? "")}</p>` +
+          // A VALUE NEVER WRAPS (operator screenshots 08/10/2026 — "Single Family" and
+          // "4 full, 2 half" broke to a second line, third recurrence of this shape). A
+          // two-word value overflowing its fixed cell by a few px, centered, reads fine; a
+          // wrapped value never does. Labels may still wrap — they sit below by design.
+          `<p style="${cssText(valueStyle(empty, stat.emphasis))};white-space:nowrap">${escHtml(stat.value ?? "")}</p>` +
           `<p style="${labelCss}">${escHtml(stat.label ?? "")}</p>` +
           `</div>` +
           `<!--[if mso]></td><![endif]-->`;
@@ -342,7 +346,9 @@ export function StatsBlock({
               path={`stats.${i}.value`}
               scope={scope}
               placeholder="+ Add"
-              style={valueStyle(empty, stat.emphasis)}
+              // Same no-wrap rule as the email strip above — this branch produced the
+              // operator's third screenshot ("Single Family" wrapped under TYPE).
+              style={{ ...valueStyle(empty, stat.emphasis), whiteSpace: "nowrap" }}
             />
             <EditableText
               as={Text}

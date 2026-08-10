@@ -174,3 +174,41 @@ describe("renderEmailDocHtml — the ONE EmailDoc→HTML root", () => {
     expect(html).toContain("Residential");
   });
 });
+
+describe("stat values never wrap (operator screenshots 08/10/2026 — third recurrence)", () => {
+  // "Single Family" and "4 full, 2 half" each broke to a second line in a fixed-width
+  // strip cell. The rule is structural: every VALUE paragraph carries white-space:nowrap
+  // in the compiled email; labels sit below and may wrap. This test is the §0b mechanism —
+  // if a branch of StatsBlock loses the nowrap, this goes red, not another screenshot.
+  it("every strip value paragraph carries white-space:nowrap", async () => {
+    const doc: EmailDoc = {
+      globalStyle: STYLE,
+      blocks: [
+        {
+          id: "s1",
+          type: "stats",
+          props: {
+            variant: "strip",
+            stats: [
+              { value: "5", label: "Beds" },
+              { value: "4 full, 2 half", label: "Baths" },
+              { value: "5,032", label: "Sq Ft" },
+              { value: "1.01 ac", label: "Lot" },
+              { value: "$229", label: "$/Sq Ft" },
+              { value: "Single Family", label: "Type" },
+            ],
+          },
+        },
+      ],
+    } as EmailDoc;
+    const html = await renderEmailDocHtml(doc);
+    // Each multi-word value must sit inside a nowrap paragraph.
+    for (const v of ["4 full, 2 half", "Single Family"]) {
+      const idx = html.indexOf(v);
+      expect(idx).toBeGreaterThan(-1);
+      const openTag = html.lastIndexOf("<p", idx);
+      const tag = html.slice(openTag, idx);
+      expect(tag).toContain("white-space:nowrap");
+    }
+  });
+});

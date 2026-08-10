@@ -31,17 +31,6 @@ const LIFECYCLE_KEYS: readonly RecipeKey[] = [
   "just-sold",
 ];
 
-/** One-line menu descriptors — each restates its recipe's own registry prompt. */
-const BLURBS: Record<string, string> = {
-  "new-listing": "Announce it — key specs, price per square foot, one honest line.",
-  "coming-soon": "Tease it — street address held back, real scarcity numbers.",
-  "open-house": "Date and time up front, one RSVP.",
-  "market-comps": "Six comparable homes and a straight case for your price.",
-  "price-reduced": "Lead with the new price and what it means.",
-  "under-contract": "Announce the contract, point readers at what's next.",
-  "just-sold": "Set the close among the week's real sales.",
-};
-
 // Brand row for ethanrickyjrjr@gmail.com (user_brand_profiles, read 08/10/2026).
 const BRAND = {
   primary: "#0F1D24",
@@ -132,12 +121,6 @@ export default function OneClickHero() {
     >
       <div className="flex w-full max-w-2xl grow flex-col items-center justify-center pb-24">
         <Image src="/logo-mark.png" alt="SWFL Data Gulf" width={64} height={64} priority />
-        <p
-          className="mt-3 text-xs font-semibold uppercase"
-          style={{ letterSpacing: "0.18em", color: BRAND.accent }}
-        >
-          SWFL Data Gulf
-        </p>
         <h1
           className="mt-4 text-center font-bold"
           style={{
@@ -232,13 +215,7 @@ export default function OneClickHero() {
             </div>
           )}
         </div>
-
-        <p className="mt-6 text-sm text-slate-500">
-          Type the address. Pick the email. It&rsquo;s built — every number names its source.
-        </p>
       </div>
-
-      <p className="pb-6 text-xs text-slate-400">SWFL Data Gulf · Southwest Florida</p>
     </main>
   );
 }
