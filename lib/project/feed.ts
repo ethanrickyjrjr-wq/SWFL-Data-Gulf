@@ -3,6 +3,7 @@ import type { SupabaseClient } from "@supabase/supabase-js";
 import { cookies } from "next/headers";
 import { createServiceRoleClient } from "@/utils/supabase/service-role";
 import { createClient } from "@/utils/supabase/server";
+import { pgOrValue } from "@/lib/supabase/pg-or-value";
 
 // ---------------------------------------------------------------------------
 // Types
@@ -88,18 +89,13 @@ export async function writeFeed(
   }
 }
 
-/**
- * Quote a value for use inside a PostgREST `.or()` filter. PostgREST treats
- * `, . : ( )` as reserved; a bare reserved char silently breaks the parse or
- * mis-matches. SWFL `scope_value`s (5-digit ZIPs, lowercase place names) are
- * reserved-char-free today, but the gazetteer could gain a "St. James City"
- * (period) or "Naples, FL" (comma) tomorrow — quote defensively (doubling any
- * embedded `"`) so the filter can't rot when the data does.
- * https://postgrest.org/en/stable/references/api/url_grammar.html#reserved-characters
- */
-function pgOrValue(v: string): string {
-  return `"${v.replace(/"/g, '""')}"`;
-}
+// pgOrValue quotes scope_value for the .or() filter below -- extracted to
+// lib/supabase/pg-or-value.ts (review fix, hermes-email-driver Task 3 round 2,
+// 08/10/2026) so lib/agent-feed/transitions-source.ts can reuse the identical
+// quoting instead of duplicating it. SWFL scope_values (5-digit ZIPs, lowercase
+// place names) are reserved-char-free today, but the gazetteer could gain a
+// "St. James City" (period) or "Naples, FL" (comma) tomorrow -- quote
+// defensively so the filter can't rot when the data does.
 
 // ---------------------------------------------------------------------------
 // readProjectFeed — cookie client (RLS enforces owner), never throws

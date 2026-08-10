@@ -50,6 +50,7 @@ import type { SupabaseClient } from "@supabase/supabase-js";
 // database.types.ts (migration landed this session, codegen not re-run). This module owns
 // the ONE untyped client for both reads -- verification/supabase-untyped-allowlist.json.
 import { createServiceRoleClientUntyped } from "@/utils/supabase/service-role";
+import { pgOrValue } from "@/lib/supabase/pg-or-value";
 
 export interface Cursor {
   at: string;
@@ -106,10 +107,21 @@ function toFullIso(raw: string): string {
 /** The keyset predicate for "strictly after this cursor", PostgREST .or() syntax:
  *  at > cursor.at  OR  (at = cursor.at AND id > cursor.id). Undefined (no filter) when the
  *  cursor is the beginning-of-time sentinel or otherwise unusable -- the caller fetches from
- *  the start in that case. */
+ *  the start in that case.
+ *
+ *  QUOTING (review fix, round 2, was CRITICAL). cursor.at is a full ISO-8601 timestamp
+ *  ("2026-08-01T00:00:00.000Z") -- it always contains the `:` and `.` characters PostgREST
+ *  reserves inside .or() filters (url_grammar reserved-characters). Splicing it in unquoted
+ *  breaks the filter's parse silently; both fetchers below swallow query errors
+ *  (`if (error || !data) return []`), so the production failure mode was a SILENT EMPTY
+ *  FEED on every cursored call -- worse than the original unpushed-down wedge it replaced.
+ *  `id` is a plain integer (no reserved chars, never quoted). Reuses pgOrValue
+ *  (lib/supabase/pg-or-value.ts, itself extracted from lib/project/feed.ts:100's original --
+ *  that file solved this exact problem first) rather than re-deriving the quoting rule. */
 function keysetFilter(cursor: Cursor): string | undefined {
   if (!cursor.at || !Number.isFinite(cursor.id)) return undefined;
-  return `at.gt.${cursor.at},and(at.eq.${cursor.at},id.gt.${cursor.id})`;
+  const at = pgOrValue(cursor.at);
+  return `at.gt.${at},and(at.eq.${at},id.gt.${cursor.id})`;
 }
 
 async function fetchRealTransitions(
