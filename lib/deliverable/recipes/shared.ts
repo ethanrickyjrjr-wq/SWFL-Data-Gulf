@@ -583,8 +583,11 @@ export async function authorListingNarrative(
     // every number it was actually given and produced the same sentence any listing email could
     // print. Operator: "THIS IS FUCKING TERRIBLE." Named here so it isn't vague again.
     `THE AREA. If — and ONLY if — an "AROUND THIS HOME" fact line is present above, use its ` +
-    `actual numbers: name ONE OR TWO categories and their real nearest distance, e.g. "a grocery ` +
-    `store 0.7 miles away" or "six restaurants within a mile" — not a vague "nearby" or "close ` +
+    `actual specifics: name ONE OR TWO categories and their nearest distance EXACTLY AS THE LINE ` +
+    `WRITES IT — the distances arrive already in plain words ("about half a mile", "about a ` +
+    `quarter mile"); repeat them as written and NEVER convert one to a decimal figure like ` +
+    `"0.57 miles" — nobody talks that way. E.g. "a grocery store about half a mile away" or ` +
+    `"six restaurants within a mile" — not a vague "nearby" or "close ` +
     `to shopping and dining" that could describe any address. Never invent a business name — the ` +
     `line deliberately carries none. These are businesses in the vendor's radius, never the ` +
     `community's own amenities: never "the community has" or "on-site." If there is NO "AROUND ` +

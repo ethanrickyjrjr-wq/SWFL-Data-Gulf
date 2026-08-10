@@ -109,6 +109,14 @@ the INVITATION branch, not the amenity fact line every narrator email reads. THE
 restraints like this go at the ONE code root (shared narrator source line) so every email inherits
 them, AND into the playbook's PART 1 universal rules — never patched into one recipe. "WE CAN'T
 JUST UPDATE IN ONE PLACE AND NOT ANOTHER."
+RESOLVED code side same session (08/10/2026): `humanDistance()` added in
+lib/listings/neighborhood-amenities.ts (the ONE amenity fact-line root every address-spine
+narrator reads) — <0.375 quarter mile, <0.625 half, <0.875 three-quarters, <1.25 a mile, <1.75
+mile and a half, else whole miles, all "about"-prefixed; shared.ts AREA instruction now orders
+"repeat as written, never a decimal". 30/30 amenity tests incl. band test. Showcase re-baked:
+"Groceries and restaurants are both about half a mile away", zero decimals. PLAYBOOK LINE OWED:
+§1.9 universal rule written but BLOCKED by session 073f1296's active claim on the playbook —
+claim-wait running in background, commit the line the moment it frees.
 
 ## 2026-08-09 (Fable 5) — OPERATOR CORRECTION: "THE POINT OF THE NARRATOR IS NEVER FOR THE FUCKING DESCRIPTION… IT IS ADDING EXTRA BELOW AND CALLS TO ACTION… IT CAN WORK OFF A SCRIPT BUT NOT JUST ECHO IT"
 I over-rotated: read "no narrator when description exists" as KILL the paragraph, and shipped that.

@@ -7,6 +7,7 @@ import {
   summarizeAmenities,
   type AmenityRow,
   type NeighborhoodRow,
+  humanDistance,
 } from "./neighborhood-amenities";
 
 // A unit square around (-81.8..-81.7, 26.1..26.2). Vendor boundaries are GeoJSON
@@ -204,10 +205,11 @@ describe("neighborhoodAmenitiesSourceLine", () => {
     expect(line).toContain("on-site");
   });
 
-  it("states the count and the real nearest distance", () => {
+  it("states the count and a HUMAN nearest distance — never a decimal (decree 08/10/2026)", () => {
     const line = neighborhoodAmenitiesSourceLine(resolved)!;
     expect(line).toContain("golf");
-    expect(line).toContain("0.24");
+    expect(line).toContain("about a quarter mile");
+    expect(line).not.toContain("0.24");
   });
 
   // FAILURE MODE — A ROAD STATED AS A PLACE. Measured live 08/04/2026 over all
@@ -229,7 +231,7 @@ describe("neighborhoodAmenitiesSourceLine", () => {
     expect(line.toLowerCase()).not.toContain("places it in");
     // the sourced facts survive
     expect(line).toContain("golf");
-    expect(line).toContain("0.24");
+    expect(line).toContain("about a quarter mile");
     expect(line).toContain("5 miles");
   });
 
@@ -300,7 +302,8 @@ describe("neighborhoodAmenitiesSourceLine", () => {
     expect(line.toLowerCase()).not.toContain("gulf harbour");
     // the sourced facts themselves survive
     expect(line).toContain("marinas");
-    expect(line).toContain("1.1");
+    expect(line).toContain("about a mile");
+    expect(line).not.toContain("1.1");
   });
 
   it("writes as-of MM/DD/YYYY", () => {
@@ -376,5 +379,21 @@ describe("resolveNeighborhoodForListing", () => {
       },
     };
     expect(await resolveNeighborhoodForListing({ lat: 26.15, lon: -81.75 }, broken)).toBeNull();
+  });
+});
+
+// THE DISTANCE BANDS — the decreed root (08/10/2026: "1/2 MILE OR QUARTER MILE… WE
+// AREN'T BEING EXACT"). Bands only ever COARSEN the measurement; the boundaries here
+// are the contract every email inherits.
+describe("humanDistance — quarters and halves, never decimals", () => {
+  it("maps the measured shapes", () => {
+    expect(humanDistance(0.1)).toBe("about a quarter mile");
+    expect(humanDistance(0.24)).toBe("about a quarter mile");
+    expect(humanDistance(0.57)).toBe("about half a mile");
+    expect(humanDistance(0.71)).toBe("about three-quarters of a mile");
+    expect(humanDistance(1.1)).toBe("about a mile");
+    expect(humanDistance(1.5)).toBe("about a mile and a half");
+    expect(humanDistance(3.4)).toBe("about 3 miles");
+    expect(humanDistance(Number.NaN)).toBe("nearby");
   });
 });

@@ -1,3 +1,16 @@
+## 2026-08-10 (Fable 5) — Distances speak like a person: humanDistance() at the ONE amenity root, every email inherits it
+
+Operator, off "a grocery store 0.57 miles away": "NEED TO MAKE SURE THESE ARE 1/2 MILE OR QUARTER
+MILE… WE AREN'T BEING EXACT HERE. AND ALL THESE RESTRAINTS NEED TO BE IN EVERY EMAIL RULE… A
+ROOT." Fixed at the root, not the recipe: `humanDistance()` in
+`lib/listings/neighborhood-amenities.ts` now formats the nearest-distance INSIDE the amenity fact
+line every address-spine narrator reads ("about a quarter/half/three-quarters of a mile / a mile /
+mile and a half", whole miles beyond), and shared.ts's AREA instruction orders the model to repeat
+it as written — §1.14b's hand-the-writer-the-final-string lesson. 30/30 amenity tests including the
+band contract. Showcase re-baked: "Groceries and restaurants are both about half a mile away," zero
+decimal distances in the bytes. Playbook §1.9 universal rule drafted but the playbook is under
+another session's active claim — claim-wait in background, line lands when it frees.
+
 ## 2026-08-10 (Fable 5) — Showcase pop-up click-hijack killed + editorial voices replaced with agent voices
 
 Operator: "WHY IF I CLICK THE POP UP ON WEBPAGE SHOWCASE IT BRINGS ME BACK TO THE HOMEPAGE IN A

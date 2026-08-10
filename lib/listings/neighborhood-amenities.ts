@@ -229,6 +229,27 @@ function humanize(category: string): string {
  * Returns null when absent or when there are no amenities — absence stays SILENT,
  * never "no golf nearby", which is a claim our data cannot support either.
  */
+/**
+ * A DISTANCE THE WAY A PERSON SAYS IT — quarters and halves, never two decimals.
+ *
+ * Operator decree 08/10/2026, off "a grocery store 0.57 miles away" in the New Listing
+ * showcase: "NEED TO MAKE SURE THESE ARE 1/2 MILE OR QUARTER MILE. WE AREN'T BEING EXACT
+ * HERE." Same lesson the open-house invite learned on 08/06/2026 ("No one says a fucking
+ * golf course .57 miles away") — applied HERE, at the one source line every address-spine
+ * email reads, so no recipe can print a decimal distance again. Playbook §1.9 carries the
+ * universal rule; this function is its root. "About" keeps it a characterization; the
+ * bands only ever COARSEN what we measured, never sharpen it.
+ */
+export function humanDistance(mi: number): string {
+  if (!Number.isFinite(mi) || mi < 0) return "nearby";
+  if (mi < 0.375) return "about a quarter mile";
+  if (mi < 0.625) return "about half a mile";
+  if (mi < 0.875) return "about three-quarters of a mile";
+  if (mi < 1.25) return "about a mile";
+  if (mi < 1.75) return "about a mile and a half";
+  return `about ${Math.round(mi)} miles`;
+}
+
 export function neighborhoodAmenitiesSourceLine(
   n: ResolvedNeighborhood | undefined | null,
 ): string | null {
@@ -252,7 +273,7 @@ export function neighborhoodAmenitiesSourceLine(
   const items = n.amenities.map((a) => {
     const label = humanize(a.category);
     if (!a.nearest) return `${label}: ${a.count}`;
-    return `${label}: ${a.count} (nearest ${a.nearest.distanceMiles} mi)`;
+    return `${label}: ${a.count} (nearest ${humanDistance(a.nearest.distanceMiles)})`;
   });
 
   const scope = radius ? `within ${radius}` : "nearby";
