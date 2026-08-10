@@ -1,3 +1,25 @@
+## 2026-08-10 (Fable 5) — HOMEPAGE LEADS WITH THE PRODUCT: stick-out hero + real email captures; Hermes audit rounds refereed; SEO/a11y fixes; Vercel analytics wired
+
+Operator decree: "we look like a search site... we lead with what we do, build your emails
+without wasting time finding data" → reframed same session to SAMENESS ("all emails are the
+same... they all have CRMs"). Evidence: Mailchimp/Figma/Stripo/BoldTrail heroes crawled live
+(category h1 + product shown + one CTA — never an input-first hero); filed
+`_RESEARCH/competitor-and-strategy/2026-08-10-homepage-lead-with-emails-research.md` + INDEX line.
+Shipped: (1) HeroBar h1 → "Emails your competition can't send." / "Type an address. We build the
+campaign." (industry-portable h1, real estate in sub, "AI" still banned — test updated, 4 pass);
+(2) email-proof strip after hero — 3 REAL showcase captures (new-listing/just-sold/weekly-pulse
+webp) linking /showcase; (3) map/Top-ZIPs demoted below doors+guides (trust-section role kept);
+(4) Top-ZIP rail rows button→Link (crawlable hrefs to 51 ZIP reports — SEO+a11y), pricing tier
+names div→h3, footer Explore split into Explore/Tools (nav semantics already existed — Hermes
+misread the flattened tree); (5) hero sub links /guides/sourced-numbers; (6) @vercel/analytics
+added + <Analytics/> in root layout — records NOTHING until Web Analytics is enabled in the
+Vercel dashboard (operator). Metadata now leads with emails. Verified: bunx next build green ×3,
+bun test components/landing 8 pass. Hermes referee scores logged in scratchpad; its invented
+metrics (10% lift = 2.0→3.6%) flagged. Flagged, operator call pending: footer "Systems
+Operational" badge is hardcoded (fake instrument). Next per decree: back to emails.
+NOTE: this push carries 4 finished commits from parallel sessions (hermes-email-driver spec ×2,
+auth create-account framing, guards/STRIKES) — named, not silent.
+
 ## 2026-08-10 (Fable 5) — auth create-account framing BUILT: AuthPanel root + first-login → Brand with email pre-filled
 
 Operator: "make a create an account button at the bottom of log in… does just putting in an email

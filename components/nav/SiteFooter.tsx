@@ -28,19 +28,19 @@ const FOOTER_COLUMNS: { title: string; links: { label: string; href: string }[] 
       { label: "Insiders Edition", href: "/insiders" },
       { label: "Data Desk", href: "/desk" },
       { label: "Showcase", href: "/showcase" },
+      // /r/zip-report has no index route (dynamic-only) — send people to the search entry.
+      { label: "ZIP Reports", href: "/r/search" },
+    ],
+  },
+  {
+    title: "Tools",
+    links: [
       { label: "Projects", href: "/project" },
       { label: "Charts", href: "/charts" },
       { label: "Maps", href: "/map" },
       { label: "Alerts", href: "/alerts" },
-      // /r/zip-report has no index route (dynamic-only) — send people to the search entry.
-      { label: "ZIP Reports", href: "/r/search" },
       { label: "Demo", href: "/demo" },
       { label: "Ask AI", href: "/ask" },
-    ],
-  },
-  {
-    title: "Company",
-    links: [
       { label: "Support", href: "/support" },
       { label: "API Reference", href: "/api/b/master" },
     ],

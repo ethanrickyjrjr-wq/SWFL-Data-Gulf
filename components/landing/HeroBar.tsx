@@ -1,6 +1,7 @@
 // components/landing/HeroBar.tsx
 "use client";
 
+import Link from "next/link";
 import { useEffect, useRef, useState } from "react";
 import { HERO_CAMPAIGNS, type HeroCampaignEntry } from "@/lib/campaigns";
 import { heroBarAction, homeAskInput, type HeroBarMode } from "@/lib/landing/hero-bar-action";
@@ -147,12 +148,16 @@ export default function HeroBar() {
   return (
     <div className="hero">
       <h1>
-        Type a place.
+        Emails your competition can’t send.
         <br />
-        <em>Get the campaign, the report, or the answer.</em>
+        <em>Type an address. We build the campaign.</em>
       </h1>
       <p className="hero-sub">
-        Built from live Southwest Florida data — every number names its source. Pick what comes out:
+        Built from live Southwest Florida data the MLS doesn’t carry —{" "}
+        <Link className="hero-sub-link" href="/guides/sourced-numbers">
+          every number names its source
+        </Link>
+        . Your brand, ready to send. Pick what comes out:
       </p>
       <div className="hero-mode-row" role="tablist" aria-label="What we build for you">
         {MODES.map((m) => (

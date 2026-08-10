@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useMemo, useRef, useState } from "react";
+import Link from "next/link";
 import { useRouter } from "next/navigation";
 import {
   METRIC_ORDER,
@@ -285,18 +286,14 @@ export default function Hero({ payload }: { payload: Payload }) {
                 <ol className="rail-top-list">
                   {activeRanked.slice(0, 5).map(([zip, val], i) => (
                     <li key={zip}>
-                      <button
-                        type="button"
-                        className="rail-top-row"
-                        onClick={() => router.push(zipReportHref(zip))}
-                      >
+                      <Link className="rail-top-row" href={zipReportHref(zip)}>
                         <span className="rail-top-rank">{i + 1}</span>
                         <span className="rail-top-place">
                           {data.placeNames[zip] ?? zip}
                           <span className="rail-top-zip">{zip}</span>
                         </span>
                         <span className="rail-top-val">{fmt(val, active.format)}</span>
-                      </button>
+                      </Link>
                     </li>
                   ))}
                 </ol>

@@ -1,4 +1,6 @@
 import type { Metadata } from "next";
+import Image from "next/image";
+import Link from "next/link";
 import { EMAIL_LAB_LANDING } from "@/lib/lab-entry/destination";
 import HeroBar from "@/components/landing/HeroBar";
 import Hero from "@/components/landing/Hero";
@@ -10,15 +12,16 @@ import { loadHomeMapData } from "@/lib/landing/load-home-map-data";
 import "@/components/landing/home-explorer.css";
 
 export const metadata: Metadata = {
-  title: "SWFL Data Gulf — Campaigns, market reports, and answers from live SWFL data",
+  title: "SWFL Data Gulf — Real estate emails built from live, cited SWFL data",
   description:
-    "Type a place. Get a ready-to-send listing campaign, the full market report, or a cited answer — built from live Southwest Florida data, every number named to its source. Free to build, no credit card.",
+    "Emails your competition can't send: type an address and get a ready-to-send campaign built from live Southwest Florida data the MLS doesn't carry — every number named to its source. Free to build, no credit card.",
 };
 
 // One-bar spine (spec docs/superpowers/specs/2026-07-12-homepage-one-bar-design.md,
-// operator-approved 07/12/2026): ONE input on the whole page (HeroBar — three
-// labeled modes wired to existing tools), the map as the trust section (its own
-// search bar deleted), two doors, the Guides cards restored. No demos, no
+// operator-approved 07/12/2026), EVOLVED 08/10/2026 by operator decree: the page
+// leads with the PRODUCT (email captures + stick-out headline) because the
+// input-first hero read as a search site. Still ONE input (HeroBar), the map keeps
+// its designed trust-section role but rides below the product beats. No demos, no
 // decorative controls — every element works or is honestly a link.
 export const revalidate = 3600;
 
@@ -28,9 +31,31 @@ export default async function Home() {
   return (
     <main className="home-explorer relative">
       <HeroBar />
-      <Hero payload={payload} />
+      <section className="email-proof" aria-label="Real emails built by the engine">
+        <div className="email-proof-row">
+          {[
+            { img: "/showcase/seed-previews/new-listing.webp", label: "New Listing" },
+            { img: "/showcase/seed-previews/just-sold.webp", label: "Just Sold" },
+            { img: "/showcase/seed-previews/weekly-pulse.webp", label: "Weekly Pulse" },
+          ].map((p) => (
+            <Link key={p.label} href="/showcase" className="email-proof-card">
+              <Image
+                src={p.img}
+                alt={`${p.label} email built by the engine from live SWFL data`}
+                width={440}
+                height={560}
+              />
+              <span className="email-proof-label">{p.label}</span>
+            </Link>
+          ))}
+        </div>
+        <p className="email-proof-hint">
+          <Link href="/showcase">Real sends, real data — see every email we build →</Link>
+        </p>
+      </section>
       <SiteDoors />
       <GuidesStrip />
+      <Hero payload={payload} />
       <PricingStrip />
       <ObjectionFaq />
       <section className="final-cta">

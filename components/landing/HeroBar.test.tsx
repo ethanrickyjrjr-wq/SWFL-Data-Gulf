@@ -31,7 +31,9 @@ describe("HeroBar", () => {
   });
 
   it("headline passes the descriptive litmus and never says AI", () => {
-    expect(html).toContain("Type a place.");
+    // 08/10/2026 operator decree: lead with the product (emails), not the input.
+    expect(html).toContain("Emails your competition can’t send.");
+    expect(html).toContain("Type an address.");
     expect(html.toLowerCase()).not.toContain(">ai<");
   });
 });

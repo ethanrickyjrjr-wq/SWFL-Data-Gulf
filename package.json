@@ -71,6 +71,7 @@
     "@sentry/nextjs": "^10.67.0",
     "@supabase/ssr": "0.12.0",
     "@supabase/supabase-js": "^2.108.2",
+    "@vercel/analytics": "^2.0.1",
     "@visx/curve": "^4.0.0",
     "@visx/event": "^4.0.0",
     "@visx/gradient": "^4.0.0",

@@ -14,14 +14,14 @@ export default function PricingStrip() {
       </div>
       <div className="pricing-row">
         <div className="pricing-cell">
-          <div className="pricing-name">Free</div>
+          <h3 className="pricing-name">Free</h3>
           <div className="pricing-price">$0</div>
           <div className="pricing-sends">{FREE_SENDS_PER_MONTH} sends/mo</div>
           <div className="pricing-note">Build anything. Try the engine.</div>
         </div>
         {BILLING_TIERS.map((t) => (
           <div className="pricing-cell" key={t.slug}>
-            <div className="pricing-name">{t.name}</div>
+            <h3 className="pricing-name">{t.name}</h3>
             <div className="pricing-price">
               ${t.priceMonthlyUsd}
               <span className="pricing-per">/mo</span>

@@ -1,3 +1,18 @@
+## 2026-08-10 (Fable 5) — OPERATOR challenges the Apify direction: "agents already have MLS — are we looking at the right industry? 56,000 actors and we are just changing geography. I'm not saying you're wrong, i just want to make sure you are right. we can't build emails well right now. Build me an email for a million dollar house in Ohio using Apify and our builder. save to my downloads"
+Three things raised at once: (1) STRATEGY DOUBT — agents' MLS access may make a national listing-email
+actor redundant ("tap mls into claude and they have an email"); differentiation question is OPEN, not
+answered by "geography expansion." (2) QUALITY GRIPE — "we can't build emails well right now" (strikes
+family: same email surface repeatedly reworked). (3) PROOF-BY-DOING ORDER — one live end-to-end test:
+$1M Ohio house, Apify data rung, OUR builder, artifact to Downloads. This is the acceptance test for
+the whole national-lane idea; verdict belongs in the answer + next session pickup.
+
+## 2026-08-10 (Fable 5) — OPERATOR: "why don't we just build our email system all off of apify — tons of email lanes, reports, information. pick a big industry and put together one? look at cost?"
+Direction raised while reviewing the Apify actor inventory (08/03 fit assessment + live v0 actor
+swfl-market-pulse). Read WITH the 08/28-scope guard from the homepage decree: "For now we are
+focused on real estate, but leave room for growth/other industries." Key architectural fact found
+same session: the hermes-email-driver spec (08/10) already designs POST /api/agent/build — an
+Apify Actor is just a second driver on that same seam. Answer + costing delivered in-session.
+
 ## 2026-08-10 (Fable 5) — OPERATOR: "how does claude know if it is the third time? can we backfill on all these issues?"
 RULE 2 §0b has no counter yet — third-time detection is read-the-scratchpad judgment. Backfill
 clustering run over ~70 entry headers, counted shapes: (A) "fixed but not live / same surface
@@ -24,6 +39,33 @@ Mid-brainstorm on the Create-an-account button, corrected my framing: "if you al
 account, you aren't creating an account." Same email+code flow serving both is fine mechanically
 (shouldCreateUser: true already does), but the COPY must not pretend they're one thing. Directive:
 research real companies' auth-screen patterns via crawl4ai before proposing the design.
+
+## 2026-08-10 (Fable 5) — OPERATOR: "get it going and then we have to focus on emails" — homepage rebuild GO
+Decree: build the product-first homepage lead now (stick-out framing), then session focus returns
+to EMAILS. Scope guard: "For now we are focused on real estate, but leave room for growth/other
+industries" — keep the h1 industry-portable, real estate named in the sub, no hardcoded
+real-estate-only framing in structure. Hermes's proposal round mostly re-described what's already
+built (build-from-address engine, citations, templates) — its "Zero setup / one click" copy is
+overclaim, not used verbatim.
+
+## 2026-08-10 (Fable 5) — OPERATOR REFRAME: the pain is SAMENESS, not a data hunt
+Verbatim: "Agents basically have data handed to them with MLS... but all emails are the same with
+limited same data sent to each and every agent. They all have CRMs, they all can design an email.
+we need to research what they can't do and how we make them stick out... so we are expanding your
+data, knowledge and look, all while saving time." KILLS the "minus the data hunt" headline angle
+— agents don't hunt listing data. The sell = differentiation: data BEYOND the MLS + written
+knowledge + a look that isn't the CRM template, faster than doing it yourself. Homepage hero must
+sell stick-out.
+
+## 2026-08-10 (Fable 5) — OPERATOR DIRECTION: "we look like a search site" — HOMEPAGE MUST LEAD WITH EMAIL BUILDING
+Verbatim core: "No one really knows what we do unless they get to Showcase... Search and data are
+the last things people are going to use this for, it kind of became a search site because we had
+the data... we keep map and data somewhere to be clicked to like an /r/ page, but we lead with
+what we do, build your emails without wasting time finding data." This EVOLVES the 07/12 one-bar
+"Type a place" homepage: the search-bar-first grammar itself is what reads as a search site. New
+lead = show the emails we build (the product), map/data demoted to a linked page. Next: Hermes
+prompt round + Mailchimp/Figma/email-competitor homepage research, THEN a redesign brainstorm.
+Do not re-litigate: leading with the product is decided; only the HOW is open.
 
 ## 2026-08-10 (Fable 5) — OPERATOR: "PROMPTS FOR FUCKING HERMES FIRST" — deliver the named deliverable BEFORE infrastructure
 When the operator names the deliverable order ("give me questions... and wait"), that order IS the
