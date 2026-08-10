@@ -1,3 +1,13 @@
+## 2026-08-09 (Fable 5) — New Listing: narrator is FALLBACK-ONLY — the seller's description IS the email
+
+Operator: "WE DON'T NEED A FUCKING NARRATOR WHEN THE FUCKING DESCRIPTION IS ALREADY WRITTEN."
+`new-listing.ts` now skips the model call entirely when `facts.remarks` ships in the verbatim
+description block — narrative slots blanked (no template residue, empty blocks omitted), zero
+Sonnet spend on a description-carrying build. The narrator fires ONLY for a description-less
+listing (RULE 0.7b: prose that already exists beats a live model call). Showcase re-rendered and
+replaced: description → spec cells → agent card → CTA. 6/6 recipe tests green; harness scaffolding
+guard passed on the saved bytes.
+
 ## 2026-08-09 (Fable 5) — New Listing showcase: leaked scaffolding sentence killed, description bought from Apify, artifact-level guard added
 
 Operator (screenshot 231534): the committed showcase example opened its paragraph with "THE

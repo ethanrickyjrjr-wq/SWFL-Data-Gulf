@@ -154,22 +154,24 @@ export async function buildNewListing(ctx: RecipeBuildContext): Promise<EmailDoc
   // fill it with filler. An empty chart box is worse than no chart.
   doc = dropEmptyChartSlot(doc);
 
-  // THE PARAGRAPH — the ONLY thing the model writes on this email, and it writes PROSE,
-  // never a figure. It is handed the listing's description as its SOURCE plus the three
-  // community layers (inside the gate · nearby businesses · the subdivision's size and
-  // assessed value), each carrying its own prohibition so none can impersonate another.
+  // THE PARAGRAPH — FALLBACK ONLY. Operator decree 08/09/2026: "WE DON'T NEED A
+  // FUCKING NARRATOR WHEN THE FUCKING DESCRIPTION IS ALREADY WRITTEN." When the
+  // listing's own description ships in its verbatim block, the seller's words ARE
+  // the email — no model-authored paragraph beside them, no Sonnet call at all
+  // (RULE 0.7b: prose that already exists beats a live model call). The narrative
+  // slots are still blanked so no template residue can ship in their place; the
+  // open-slot contract omits the empty blocks.
   //
-  // It gets NO COMPS. Handing the narrator a comp set is what once turned this paragraph
-  // into a market analysis.
-  //
-  // `clearNarrativeSlots` blanks every text block EXCEPT the description slot, so the
-  // seller's own words survive and the authored paragraph lands beside them rather than
-  // on top of them. Before the description had its own marked slot, this pair of calls
-  // silently destroyed it on every build.
-  const narrative = await authorListingNarrative(facts, {
-    framing: "A new listing announcement — the home has just come to market. Introduce it.",
-  });
-  if (narrative) doc = fillNarrative(clearNarrativeSlots(doc), narrative);
+  // Only a description-less listing gets the narrator, and it gets NO COMPS —
+  // handing it a comp set is what once turned this paragraph into a market analysis.
+  if (facts.remarks) {
+    doc = clearNarrativeSlots(doc);
+  } else {
+    const narrative = await authorListingNarrative(facts, {
+      framing: "A new listing announcement — the home has just come to market. Introduce it.",
+    });
+    if (narrative) doc = fillNarrative(clearNarrativeSlots(doc), narrative);
+  }
 
   return doc;
 }

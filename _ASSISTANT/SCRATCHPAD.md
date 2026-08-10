@@ -1,3 +1,14 @@
+## 2026-08-09 (Fable 5) — OPERATOR, on the restored Coming Soon demo (screenshot 233250): band label + body words
+Verbatim: "WHY ARE THE NUMBERS NOT 1.2-1.5 OR 1 TO 1.5????" + "WHAT ARE ALL THESE WORDS AND WEHRE
+THE FUCK IS THE HOUSE DESCRIPTION??" Two defects: (1) the scarcity band prints machine numbers
+"$1.28M–$1.56M" — he wants human numbers ($1.2M–$1.5M); band is a QUERY INPUT so the fix must round
+the BAND ITSELF (query and copy stay identical — never a display-only lie). (2) the email body's
+paragraph is agent-bio filler ("I have sold Southwest Florida for seventeen years…") while the
+HOUSE description — which EXISTS, 155 chars of narrator fuel off the paid row — never shows as the
+body. The house description is the words a Coming Soon email exists to carry. Also: "WHY DID YOU
+NOT FUCKING ANSWER ME" — the 23:24 mid-turn message read as confirmation of the $1.42M subject when
+it was ALSO the band-format complaint; answer the words on the screen, not the interpretation.
+
 ## 2026-08-09 (Fable 5) — OPERATOR: "HOW THE FUCK IS THE COMING SOON EMAIL BACK TO THE FUCKING TRAILER?? WHO IN THE FUCK CHANGED IT BACK?" + "WE ALREADY WENT OVER ALL OF THIS. 1-1.5 MILLION OR BETTER FUCKING NUMBERS"
 The /showcase Coming Soon demo regressed from the $1.42M Naples estate (2287 Somerset Pl, 34120)
 back to the 16209 Asheboro Ct manufactured home. WHO: no one on purpose — the 08/09 01:16 backlit-
@@ -21,6 +32,16 @@ LOOKING TO SELL!!!! USE THE SCRIPTS!!!!" Four asks: (1) kill the diagonal black 
 surface DOM; (4) body voice = proud listing agent — sold faster than the area, strong $/sq ft,
 "thinking of selling? this is what your home could do" — built on the sentence bank
 (price-reduced pattern), rendered via scripts/email/render-just-sold.mts and LOOKED at.
+
+## 2026-08-09 (Fable 5) — OPERATOR: "WE DON'T NEED A FUCKING NARRATOR WHEN THE FUCKING DESCRIPTION IS ALREADY WRITTEN"
+The rule, decreed: when the listing's own description is on the email, the seller's words ARE the
+email — no model-authored paragraph on top. The narrator is ONLY the fallback for a missing
+description (RULE 0.7b's exact shape: existing prose first, live model call as fallback). Apply to
+new-listing now; same logic anywhere a verbatim description block ships.
+RESOLVED same session (08/09/2026): new-listing.ts skips `authorListingNarrative` entirely when
+`facts.remarks` is present — slots blanked so no template residue, zero Sonnet spend on the build;
+narrator now fires ONLY for a description-less listing. Showcase re-rendered and replaced: seller's
+1,064-char description -> spec cells -> agent card -> CTA, no model paragraph. 6/6 recipe tests.
 
 ## 2026-08-09 (Fable 5) — OPERATOR: "THIS SHIT CAN NOT HAPPEN" — email body LEAKED the internal gap-instruction sentence, and the description gap itself is a ladder violation
 Screenshot 231534: rendered email body opens with "THE LISTING'S OWN DESCRIPTION IS ABSENT, so I am
