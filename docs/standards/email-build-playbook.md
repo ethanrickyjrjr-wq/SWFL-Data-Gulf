@@ -3062,7 +3062,9 @@ Way` vs `12554 Kelly Sands Way`), which is why the read root carries a loose sec
 ### 3.3.1 WIRED — AND THERE IS EXACTLY ONE
 
 **`moving_beacon-owner1~realtor-com-property-scraper`** — `lib/listings/apify-comps.ts:278`, the
-ONLY actor id in the codebase. **$0.01 per result.**
+ONLY actor id in the codebase. **$0.01 per result.** Saved in the account as task
+`sold-dated-area-pull` (08/10/2026) carrying the exact `buildActorInput` shape — 175 lifetime runs,
+every one SUCCEEDED.
 
 **WHAT IT CAN GET** (verified live 08/03/2026): sold price and last-sold date · beds · full baths
 and half baths as SEPARATE fields · sq ft · lot sq ft · year built · stories · style · garage ·
@@ -3084,16 +3086,45 @@ identity lane. Both are gap-fillers on a specific missing field. Neither is an e
 
 ### 3.3.2 RESEARCHED, NOT WIRED
 
-**`one-api/realtor-property-scraper`** — ~$0.007/result, a TRUE per-property lookup keyed on a
-realtor.com detail URL. Its `Raw.details.text` is the full ~3,000-character MLS description **on an
-already-sold home**. Not wired, and not reachable today: the lake comp lane carries no detail URL,
-so it only exists downstream of a dated area pull.
+**`one-api/realtor-property-scraper`** — ~$0.007/result, a TRUE per-property lookup. **CORRECTED
+08/10/2026: `property_inputs` takes a PLAIN STREET ADDRESS — no detail URL needed.** Proven live:
+run `MdWKQA4bKzH8uufrO` bought the Coming Soon demo house's 2,263-char MLS description, HOA and
+photos off nothing but `"2287 Somerset Pl, Naples, FL 34120"`, and the row landed in
+`apify_property_records` via `toRow`/`saveApifyRecords`. So the by-address lookup R1 says the wired
+actor CANNOT do exists one rung over, cheaper. Still not wired as a code lane (comment-only in
+`apify-identity.ts`); the proven input is saved as account task `property-by-address`. Its
+`Raw.details.text` is the full ~3,000-character MLS description **on an already-sold home**.
 
 **`swfl-market-pulse`** — an actor WE built and pushed (08/03/2026). It is an OUTBOUND distribution
 experiment wrapping our own API. **It is not a data source and never fetches anything for us.**
 
 **Tested and rejected:** 2 of 5 store actors probed were junk — one failed both runs, one returned
 zero items. The fragile-source class. Do not re-shop them.
+
+### 3.3.2b THE ACCOUNT IS THE RECORD — WHAT IS BUILT AND SAVED ON APIFY (counted live 08/10/2026)
+
+Operator, 08/10/2026: *"are we not building and saving our actors in apify… make sure all actors
+are built and the playbook reflects it."* Counted against the live Apify API, not memory:
+
+- **Actors WE built: exactly ONE.** `rectangular_horn/swfl-market-pulse` (build 0.0.1 SUCCEEDED
+  08/03/2026, ran once, SUCCEEDED) — the outbound experiment above. Every other actor is a store
+  actor rented per result; there is nothing else of ours to "build."
+- **Saved tasks: 3 — and they were ZERO until 08/10/2026.** Every prior call re-typed its input
+  from code or an interactive MCP chat, which is why the account looked empty. Each task carries a
+  PROVEN input copied verbatim from a successful billed run:
+  · `sold-dated-area-pull` → the wired workhorse's dated-area sold pull (§3.3.1)
+  · `property-by-address` → one-api single-address record buy (above)
+  · `reddit-swfl-harvest` → 4 SWFL subreddits, top/month — the improvement-harvest lane
+- **Run history: 247 runs across 27 distinct actors, lifetime.** The workhorse owns 175 (all
+  SUCCEEDED). The rest are probe sessions with `origin=MCP` that left NO repo trace: the 08/03
+  realtor shop, 08/04 + 08/10 Reddit, an 08/09 sweep of TEN email-finder/LinkedIn actors with no
+  committed lane and no SESSION_LOG entry, and an early Facebook-Ads/Google-Ads-transparency/
+  Maps-reviews research cluster. The account's own run log is the only record those happened.
+
+**A saved task is a saved INPUT, not a wired lane.** Spend still exits ONLY through `runApifyActor`
+under the guard (§3.3.4); the tasks exist so a proven shape is never re-invented and the account
+shows what we actually use. **No Instagram actor has ever been run on this account** — the
+Instagram half of the harvest ask is an open shopping decision, not a forgotten build.
 
 ### 3.3.3 WHERE EVERYTHING LANDS — ONE TABLE
 

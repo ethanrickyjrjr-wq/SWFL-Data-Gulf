@@ -1,3 +1,19 @@
+## 2026-08-10 (Fable 5) — Apify account audited live: 3 tasks SAVED (were zero), one-api by-ADDRESS lookup proven into the playbook + data-roots
+
+Operator: "are we not building and saving our actors in apify?... look through past actors
+first!! then save all the ones we will use!!! and update playbook." Counted against the live API:
+247 lifetime runs / 27 distinct actors; ONE actor ours (swfl-market-pulse, build 0.0.1 SUCCEEDED,
+ran once); saved tasks were ZERO — every past probe ran origin=MCP from chats and left no repo
+trace (08/03 realtor shop, 08/04+08/10 Reddit, 08/09 ten-actor email-finder/LinkedIn sweep,
+early ads-research cluster). Saved 3 tasks with inputs copied from successful billed runs:
+sold-dated-area-pull (workhorse §3.3.1), property-by-address (one-api), reddit-swfl-harvest.
+Material correction shipped: one-api `property_inputs` takes a PLAIN STREET ADDRESS (proven run
+MdWKQA4bKzH8uufrO, $0.007, 2,263-char description → apify_property_records) — the by-address
+lookup R1 denies exists one rung over; playbook §3.3.2 corrected + new §3.3.2b (account is the
+record), data-roots R1 addendum. No Instagram actor ever run — open pick, said so. Playbook claim
+released after 31-min-idle hold (holder barred 5 min, §3.3-only edits, no overlap with its
+sections). Next: nothing owed on this thread; Instagram actor choice awaits operator.
+
 ## 2026-08-10 (Fable 5) — New Listing talk POLISHED at the shared root: no cost talk, no negativity, no AI voice — every shared-narrator email inherits
 
 Operator: "TOO MUCH REPEATING WITH 150 HOMES … TALKS NEGETIVE ABOUT BEING INLAND AND TALKS LIKE
