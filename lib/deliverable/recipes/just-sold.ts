@@ -194,8 +194,23 @@ export function subjectRow(comps: RenderComp[], subjectStreet: string): RenderCo
  * (see the header). `priceKind === "sold"` is a /property-tax-history Sold event; an
  * AVM `estimate` or a `last_list` is NOT a sale and may never fill this cell.
  */
-export function closeFrom(row: RenderComp | null): SubjectClose | null {
+/** A sold event older than this is a PRIOR TRANSFER, not the close this email announces.
+ *  Found live 08/10/2026: 7146 Congdon Rd, ACTIVE at $1,399,000, came back with its OWN
+ *  2024 purchase ($1,125,000, "Sold 11/04/2024") as the subject row's sold event — and
+ *  the email rendered "Just Sold" over a two-year-old sale with a 4,008-day DOM. Same
+ *  defect class the header already forbids for `fetchSoldEvent`, arriving through the
+ *  nearby-set lane instead. Six months comfortably covers county recording lag (weeks);
+ *  a "just sold" older than that is not just sold. */
+const CLOSE_MAX_AGE_DAYS = 180;
+
+export function closeFrom(row: RenderComp | null, now = new Date()): SubjectClose | null {
   if (!row || row.priceKind !== "sold" || row.price == null) return null;
+  // No date on the event = unverifiable recency; with the stale-transfer failure proven
+  // live, an undatable sale may not wear the "just sold" ribbon either. The prefill rung
+  // (the agent's own editable number) is the honest fallback in both cases.
+  if (!row.priceDate) return null;
+  const ageDays = (now.getTime() - new Date(row.priceDate).getTime()) / 86_400_000;
+  if (!Number.isFinite(ageDays) || ageDays < 0 || ageDays > CLOSE_MAX_AGE_DAYS) return null;
   return { price: row.price, date: row.priceDate };
 }
 

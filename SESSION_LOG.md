@@ -17,6 +17,19 @@ an OPEN SLOT — the narrator call died on "credit balance is too low" (Anthropi
 operator billing action); check under_contract_capture_rebake_after_credits opened. Playbook §2.4
 text update owed — file under another session's active claim.
 
+## 2026-08-10 (Fable 5) — Showcase house is now a $1.35M FRESH close; closeFrom grew the recency gate a stale 2024 transfer forced
+
+Operator: "MAKE THE FUCKING HOUSE JUST SOLD 750,000 OR MORE. PICK A NEW HOUSE." Standing rule
+written into playbook §2.5: showcase close $750,000+, RECENT, photo on our own rung. First pick
+(7146 Congdon Rd, $1,125,000) EXPOSED A REAL DEFECT: its only sold event was its own 11/04/2024
+purchase and the email rendered "Just Sold" over a two-year-old transfer with a 4,008-day DOM —
+`closeFrom` accepted any priceKind='sold' regardless of age. Fix: 180-day recency gate + undated
+events refused (both fall to the honest PREFILL rung); tests added; the gate then rejected 3 of 6
+luxury candidates as stale transfers. Final showcase house: 1275 Carlene Ave, Fort Myers 33901 —
+recorded $1,350,000 close on 07/10/2026, DOM 95, photo held, JUST SOLD band stamped (image
+downloaded and looked at). Capture re-baked into public/new-emails/. Evidence: 141 tests pass 0
+fail, 8/8 acceptance, bunx next build exit 0.
+
 ## 2026-08-10 (Fable 5) — Just-sold: house photo + flag restored to the capture; ÷-footnote killed everywhere with its playbook loophole
 
 Operator: "where is the fucking picture of the house with the sold flag??" + "WHY THE FUCK DOES IT

@@ -106,17 +106,32 @@ describe("realSaleComps — what may sit beside a close", () => {
 });
 
 describe("closeFrom — the ONLY thing that may fill a sale price", () => {
-  it("takes a RECORDED sale", () => {
+  // Deterministic clock — the gate is about AGE, so the tests pin "today".
+  const NOW = new Date("2025-09-15T12:00:00Z");
+
+  it("takes a RECENT recorded sale", () => {
     const row = comp({ addressLine: SUBJECT, price: 300_000, priceDate: "2025-08-29" });
-    expect(closeFrom(row)).toEqual({ price: 300_000, date: "2025-08-29" });
+    expect(closeFrom(row, NOW)).toEqual({ price: 300_000, date: "2025-08-29" });
+  });
+
+  it("REFUSES a STALE sold event — a prior transfer is not 'just sold'", () => {
+    // Found live 08/10/2026: 7146 Congdon Rd, ACTIVE at $1,399,000, carried its own 2024
+    // purchase as the subject row's sold event — the email rendered "Just Sold" over a
+    // two-year-old sale with a 4,008-day DOM. Older than 180 days → prefill rung instead.
+    const stale = comp({ addressLine: SUBJECT, price: 1_125_000, priceDate: "2024-11-04" });
+    expect(closeFrom(stale, new Date("2026-08-10T12:00:00Z"))).toBeNull();
+  });
+
+  it("REFUSES an UNDATED sold event — recency it cannot prove, it does not claim", () => {
+    expect(closeFrom(comp({ price: 300_000, priceDate: null }), NOW)).toBeNull();
   });
 
   it("REFUSES an AVM estimate — an estimate is not a sale", () => {
-    expect(closeFrom(comp({ priceKind: "estimate", price: 743_500 }))).toBeNull();
+    expect(closeFrom(comp({ priceKind: "estimate", price: 743_500 }), NOW)).toBeNull();
   });
 
   it("REFUSES a last-list price — an ask is not a sale", () => {
-    expect(closeFrom(comp({ priceKind: "last_list", price: 595_000 }))).toBeNull();
+    expect(closeFrom(comp({ priceKind: "last_list", price: 595_000 }), NOW)).toBeNull();
   });
 
   it("REFUSES a missing subject row", () => {

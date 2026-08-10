@@ -1,3 +1,23 @@
+## 2026-08-10 (Fable 5) — OPERATOR: the under-contract showcase house is 4140 HORSECREEK BLVD — NOT Kellysands Way
+Verbatim: "4140 Horsecreek Blvd. I DON'T WANT FUCKING KELLYSANDS WAY!!!" My re-bake swapped the
+showcase subject to Kellysands (New Listing's house) to get a description into the bytes — wrong
+call: the showcase house choice is the OPERATOR'S, and each showcase email has its own house.
+The fix must land ON HORSECREEK: fill its description from a real lane (paid row read → paid
+gap-fill → operator paste), never by swapping the house. Re-bake owed on Horsecreek.
+
+## 2026-08-10 (Fable 5) — OPERATOR: DESK CHART IS FROM MAY — "HOW IS EVERYTHING NOT AUTOMATED? CAN WE PUT HERMES ON THIS?"
+Verbatim: "WHY IS THE DESK CHART FROM MAY? IT'S AUGUST. HOW IS EVERYTHING NOT AUTOMATED? CAN WE PUT
+HERMES ON THIS?" Root cause (evidence, not guess): the /desk hero rides data_lake.redfin_city_swfl
+(monthly closed-sale medians) whose pipeline ingest/pipelines/redfin_city_swfl still downloads the
+LEGACY Redfin dump (redfin_market_tracker/city_market_tracker.tsv000.gz) — FROZEN at Last-Modified
+06/02/2026 while serving stale 200s. The sibling ZIP pipeline (redfin_swfl) was retargeted to the
+live redfin_data_center feed on 07/17 (ed0b2efd) WITH a source-staleness tripwire; the city pipeline
+was MISSED in that retarget. Its one run ever (07/18, green) landed May bytes. New feed has
+all_cities.csv, Last-Modified 08/10/2026 (probed live). Fix: mirror the retarget + tripwire onto
+redfin_city_swfl, re-run, desk advances to June (July lands with Redfin's mid-Aug drop, cron day 18).
+Automation answer: the pipe IS automated — the failure was a vendor freezing a file while run-level
+freshness stayed green; the tripwire pattern is the fix, not a new harness.
+
 ## 2026-08-10 (Fable 5) — OPERATOR: ANTHROPIC API CREDITS EXHAUSTED — every narrator paragraph is dying platform-wide
 Found during the under-contract re-bake: the narrator call fails with "Your credit balance is too
 low to access the Anthropic API. Please go to Plans & Billing to upgrade or purchase credits."
@@ -43,6 +63,13 @@ PICK A NEW HOUSE." Two points: (1) the photo was always sitting in our own lake 
 never read it (RULE 0.7a again, the ladder skipped); (2) the showcase close must read $750k+ —
 a bigger win sells the agent better. Standing rule for showcase-house selection: recorded close
 ≥ $750,000 AND photo held on our own rung.
+RESOLVED 2026-08-10 — showcase house is now 1275 Carlene Ave, Fort Myers 33901: recorded
+$1,350,000 close on 07/10/2026, DOM 95, photo held, flag stamped, 8/8 acceptance, capture
+re-baked. BONUS DEFECT FOUND AND FIXED en route: the first $750k+ pick (7146 Congdon Rd) rendered
+"Just Sold" over its own 2024 purchase with a 4,008-day DOM — closeFrom had NO recency gate.
+Now refuses sold events older than 180 days or undated (falls to prefill rung); tested. The gate
+rejected 3 of 6 luxury candidates as stale transfers. Standing rule extended: the close must
+also be RECENT.
 
 ## 2026-08-10 (Fable 5) — OPERATOR: "$/Sq Ft is the sale price ÷ listed square footage" footnote — KILL IT, and the playbook carve-out that protected it
 Verbatim: "WHY THE FUCK DOES IT SAY THIS!!" + "WHERE IN THE FUCKING PLAYBOOK DOES IT SAY TO ADD

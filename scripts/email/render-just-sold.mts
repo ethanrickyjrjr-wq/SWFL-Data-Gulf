@@ -48,14 +48,18 @@
  *   8. THE PROSE NEVER RESTATES A PREFILL. Prose is baked and uneditable, so the number the
  *      agent is about to correct in the hero would survive inside the paragraph.
  *
- * ── DEFAULT HOUSE: 2099 Grove Dr, Naples, FL 34120 (changed 08/10/2026) ──────
+ * ── DEFAULT HOUSE: 1275 Carlene Ave, Fort Myers, FL 33901 (decree 08/10/2026) ─
  *
- * Picked per §2.5.2, now with the photo requirement: it carries a REAL recorded sale in
- * its own comp set (closed $389,000, "Sold 07/09/2026", probed live 08/10/2026) AND its
- * listing photo on our own retained sold row — so the RECORDED rung, the badge flag, and
- * the photo ladder are all exercised at once. The previous default (330 Shore Dr, Fort
- * Myers — closed 08/29/2025) sold before photo capture began 06/30/2026, so its capture
- * shipped photo-less; it remains a useful manual variant for the no-photo open-slot path.
+ * Picked per §2.5.2 plus TWO operator requirements added 08/10/2026: the showcase close
+ * must be $750,000 OR MORE, and the photo must be held on our own rung. This house
+ * carries a REAL, FRESH recorded sale in its own comp set (closed $1,350,000 on
+ * 07/10/2026, DOM 95 — probed live 08/10/2026) AND its listing photo on our retained
+ * sold row — recorded rung, badge flag, and photo ladder all exercised at once, in the
+ * demo agent's own market. NOT 7146 Congdon Rd: its only sold event was its own 2024
+ * purchase, which is what forced `closeFrom`'s 180-day recency gate. The original
+ * default (330 Shore Dr, Fort Myers — closed 08/29/2025) sold before photo capture
+ * began 06/30/2026, so its capture shipped photo-less; it remains a useful manual
+ * variant for the no-photo open-slot path.
  * **Run a second time against a live listing — `12554 Kellysands Way, Fort Myers, FL
  * 33908` — to exercise the PREFILL rung, which under the decree is the common case.**
  * One address cannot prove both.
@@ -93,14 +97,17 @@ import {
   type ProvenanceRow,
 } from "./_harness.mts";
 
-// DEFAULT HOUSE CHANGED 08/10/2026 (operator: "where is the fucking picture of the house
-// with the sold flag") — 330 Shore Dr exercises the recorded rung but sold 08/29/2025,
-// BEFORE the lake's photo capture began (06/30/2026), so no free rung holds its photo and
-// the showcase capture shipped photo-less. 2099 Grove Dr carries BOTH: a recorded close
-// ($389,000, kicker "Sold 07/09/2026", probed live 08/10/2026) AND its listing photo on
-// our own sold row — so the flag has a photo to be stamped onto. 330 Shore Dr remains a
-// useful manual variant for the no-photo / no-list-date open-slot path.
-const ADDRESS = subjectAddress("2099 Grove Dr, Naples, FL 34120");
+// DEFAULT HOUSE CHANGED 08/10/2026, twice in one day. First: 330 Shore Dr sold
+// 08/29/2025, BEFORE the lake's photo capture began (06/30/2026), so no free rung holds
+// its photo and the showcase capture shipped photo-less ("where is the fucking picture
+// of the house with the sold flag"). Then by decree — "MAKE THE FUCKING HOUSE JUST SOLD
+// 750,000 OR MORE. PICK A NEW HOUSE" — the showcase house must close at $750k+ AND hold
+// its photo on our own rung. 1275 Carlene Ave carries all of it, probed live
+// 08/10/2026: recorded $1,350,000 close on 07/10/2026 (FRESH — inside closeFrom's
+// 180-day gate), DOM 95, listing photo on our retained sold row, 8/8 acceptance, in the
+// demo agent's own Fort Myers market. 330 Shore Dr remains a useful manual variant for
+// the no-photo / no-list-date open-slot path.
+const ADDRESS = subjectAddress("1275 Carlene Ave, Fort Myers, FL 33901");
 
 console.log(`\n  SUBJECT: ${ADDRESS}\n`);
 

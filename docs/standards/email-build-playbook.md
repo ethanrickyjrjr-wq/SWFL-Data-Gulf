@@ -2187,14 +2187,20 @@ wrong).
 Acceptance run: `bun --env-file=.env.local scripts/email/render-just-sold.mts [address]`.
 **Two houses, not one** — one address cannot exercise both rungs of the close ladder:
 
-- `2099 Grove Dr, Naples, FL 34120` (the default, changed 08/10/2026) — a REAL recorded sale,
-  $389,000, kicker "Sold 07/09/2026", AND its listing photo held on our own retained sold row.
-  Exercises rung 1 (sold-date kicker, `$/Sq Ft` off the close, comps chart) plus the PHOTO ladder
-  and the badge flag. The previous default, `330 Shore Dr, Fort Myers, FL 33905` ($300,000 on
-  08/29/2025), sold BEFORE the lake's photo capture began 06/30/2026 — no free rung holds its
-  photo, so the showcase capture shipped with no house and no flag (operator, 08/10/2026: "where
-  is the fucking picture of the house with the sold flag"). 330 Shore Dr stays as the manual
-  no-photo / no-list-date open-slot variant.
+- `1275 Carlene Ave, Fort Myers, FL 33901` (the default, decree 08/10/2026) — a REAL, FRESH
+  recorded sale ($1,350,000 on 07/10/2026, DOM 95) AND its listing photo held on our own retained
+  sold row. Exercises rung 1 (sold-date kicker, `$/Sq Ft` off the close, comps chart) plus the
+  PHOTO ladder and the badge flag. **STANDING RULE for the showcase house (operator decree
+  08/10/2026: "MAKE THE FUCKING HOUSE JUST SOLD 750,000 OR MORE. PICK A NEW HOUSE"): the recorded
+  close is $750,000+, RECENT (inside `closeFrom`'s 180-day gate), AND the photo is held on our
+  own rung.** The stale-transfer trap this surfaced: 7146 Congdon Rd's only sold event was its
+  own 2024 purchase ($1,125,000, "Sold 11/04/2024") and the email rendered "Just Sold" over it
+  with a 4,008-day DOM — which is why `closeFrom` now refuses sold events older than 180 days or
+  undated (they fall to the PREFILL rung instead). The original default, `330 Shore Dr, Fort
+  Myers, FL 33905` ($300,000 on 08/29/2025), sold BEFORE the lake's photo capture began
+  06/30/2026 — no free rung holds its photo, so the showcase capture shipped with no house and
+  no flag (operator, 08/10/2026: "where is the fucking picture of the house with the sold
+  flag"). 330 Shore Dr stays as the manual no-photo / no-list-date open-slot variant.
 - `12554 Kellysands Way, Fort Myers, FL 33908` — an active listing. Exercises rung 3, the PREFILL,
   which under the decree below is the COMMON case.
 
