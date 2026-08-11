@@ -1,3 +1,24 @@
+## 2026-08-11 (Opus 5) — OPERATOR: "WE HAVE HOSTED GRAPHIFY!!!!!!!!!" + "CHECK MCP"
+I spent a whole answer on whether to flip `vars.CHAIN_GRAPHIFY_ENABLED` — **and that switch has
+nothing to do with the graph we actually query.** Two different things share the word "graphify":
+1. `graphify-republish.yml` / the chain's `warm · graphify republish` leg = `graphify update .`
+   (builds the LOCAL `graphify-out/graph.json`, the artifact CLAUDE.md now calls a stale gitignored
+   build product) → `graphify-publish.mjs` → static `app/graph/brain-graph.json` in the **ops repo**.
+   That is a PICTURE on the ops /graph page. Flipping the gate refreshes a chart, not the brain.
+2. The HOSTED index at `api.graphify.com/mcp` (`.mcp.json` → `graphify`), repo
+   `ethanrickyjrjr-wq/SWFL-Data-Gulf` — the one RULE 0.5 says is the first reach. **Measured live
+   this session:** build `80a9a855`, commitSha `149f4f6f`, 20,875 nodes / 49,254 edges / 837
+   communities. `149f4f6f` is *"feat(graphify): go all in on hosted graph"*, 08/11/2026 00:53 —
+   and HEAD is `919395ac`, **14 commits later the same day**. So the hosted index went all-in and
+   then stopped tracking within hours.
+**NOTHING IN THIS REPO REFRESHES THE HOSTED INDEX.** grep of `.github/` for graphify returns 5
+files, all of them the LOCAL/ops-picture lane. The one graph the rules say to trust is the one leg
+we have no wire to. Refresh mechanism NOT yet verified (their service side — RULE 0.4 crawl owed).
+**Second live footgun found in the same read:** `.mcp.json` still wires `graphify-local` at
+`graphify-out/graph.json` — a queryable MCP server serving the 07/08 snapshot RULE 0.5 explicitly
+says is missing symbols. A stale answer from it is indistinguishable from a fresh one.
+Shape: `didnt-read-what-we-hold` + `stale-source-served-silently`. Name collision was the carrier.
+
 ## 2026-08-11 (Opus 5) — OPERATOR: "whenever you have to put in an address or choose, NO NEW PROJECT, it fucks everything up" + "every first land at email labs needs to be fucking BLANK"
 Two screenshots, two live defects on the address-first door we shipped 08/10 — i.e. the SAME surface
 broken again the next morning (`fixed-but-not-live`, 4th strike; the ?addr= live-browser drive was
@@ -13,6 +34,15 @@ logged as OWED in SESSION_LOG 08/11 and never run — that omission is the root 
    out on prefilled canvases — this moves parts of the build." First land renders nothing.
 Also visible in the 08/10 22:44 shot: the native "Leave site?" over our own hop. `guard.bypass()` is
 in `intoProject` now — any NEW auto-route path has to call it too or that returns.
+
+## 2026-08-11 (Opus 5) — OPERATOR: "i still want sign up!!!!!!!!!!!!!!" — I SWAPPED when he said ADD
+He asked for "brand and sign up up top", I shipped Sign up, he then specified the My Brand button
+and its popup — and I READ THE SECOND MESSAGE AS A REPLACEMENT and deleted Sign up. He never said
+remove anything. Shape: a follow-up spec that ADDS detail to one element is not a decree to delete
+the others. Same family as the copy-creep rages inverted — there I added what he didn't ask for,
+here I removed what he did. Both are "the spec is a CEILING" misread in opposite directions; the
+rule is that the spec is EXACTLY the contents, no more and NO LESS. Fixed same turn: bar is now
+logo · My Brand (outline) · Sign up (filled), pinned by go-identity.test.ts FM3.
 
 ## 2026-08-11 (Opus 5) — OPERATOR, IDENTITY RULE CLARIFIED (supersedes the 08/10 blanket strip): "no SWFL DATA GULF name any where… logo is fine, address is fine and all cam spam… just make our name SWFL Data Gulf in email. we will use it there but no mention anywhere else."
 **THE RULE, split by artifact — this unblocks `launch_whitelabel_stripe_gate`'s naming half:**

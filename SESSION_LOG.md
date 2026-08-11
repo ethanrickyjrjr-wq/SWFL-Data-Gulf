@@ -1,3 +1,50 @@
+## 2026-08-11 (Opus 5) — completion handoff for the five-item re-verify + ledger burned DOWN (1 closed, 3 corrected with live evidence, 0 opened)
+
+Operator: "close checks and give me handoff to complete what we need to complete all the way to
+finish." Both delivered on top of `a803c51f`.
+
+**LEDGER — net negative, per RULE 0.85. Opened 0.**
+- **CLOSED `redfin_city_null_filter_dropped_no_paging`** — the defect it describes is gone: both
+  defenses are present at `lib/desk/loaders.ts:170` (`selectAllPaged`) and `:181`
+  (`.not(median_sale_price, is, null)`), documented as exactly that pair in the docstring
+  `:150-160`. Fix was a foreign session's; closed on pasted evidence, not authorship.
+- **UPDATED `redfin_city_swfl_not_swfl`** — still REAL and it has GROWN: **896 statewide regions
+  when filed 07/13/2026 → 952 live 08/11/2026.** Current consumer is safe (`loadSoldSeries` filters
+  `.in("area", CITY_DEFS)`); the risk is any NEW unfiltered reader.
+- **UPDATED `identity_live_red_baseline`** — its `redfin_city_swfl` clause ("table never landed") is
+  now FALSE: 403,565 rows, live consumer. Its other THREE clauses (`fgcu_reri_indicators`,
+  `dbpr_re_licensees`, `news_swfl`) were NOT re-probed and stay open — said so in the detail rather
+  than quietly closing the whole row.
+- **UPDATED `cre_figures_build_cron_cadence`** — re-scoped: the REGISTRY half is already done
+  (`cadence_registry.yaml:1624`); only the cron + a consumer remain.
+
+**HANDOFF: `docs/handoff/2026-08-11-five-item-reverify-completion-handoff.md`** (indexed via
+`doc-index.mjs` — 1,633 docs). Six items, ordered, each with file+line+live number, and each tagged
+`[FIXABLE NOW]` vs `[NEEDS OPERATOR DECISION]` so the next session does not stall on the wrong one:
+1. **`cre_figures` — WIRE IT** (biggest gap). Blocked on ONE unanswered C1/C2 call open since
+   07/18: does it REPLACE `marketbeat_swfl` as the CRE authority? Wiring a consumer first creates
+   the second-root problem RULE 0.55 exists to stop.
+2. **The dark-roots classifier is WRONG** — `consuming_pack` only answers "does a BRAIN PACK read
+   this," so a page/route/SQL consumer is invisible and the root reads as dark. It mis-flagged
+   `redfin_city_swfl`, which is **rung 1 of the desk hero**. The remaining 5 flagged roots are
+   NOT re-verified for non-pack consumers — `cb803b1c` deleted 5 pipelines on this same signal.
+3. **RULE 0.5 carve-out** — the graph's false negative needs two named exceptions (value /
+   default-parameter refs; any `data_lake.*` question) + a re-index trigger. Operator's wording.
+4. **`reportToEmailHtml`** — finish the half-done convergence plan (its own goldens exist to prove
+   the collapse is behavior-preserving) or leave the 4th path gated. Phase D also hits the open
+   `applyBrand is browser-only` defect.
+5. **`redfin_city_swfl` scope guard** — pin the SWFL area set so a new reader cannot get statewide.
+6. **Residual:** the 3 un-probed `identity_live_red_baseline` clauses.
+
+**PARALLEL-SESSION INCIDENT, caught and repaired — safe-push DROPPED a concurrent session's
+uncommitted work.** `safe-push.mjs` stashed the other session's 10 modified files, rebased, and the
+stash ended DROPPED (`52416ee`) — `git status` came back clean of all 10. Recovered with
+`git stash apply 52416ee` (the object survives until gc); verified both sessions' content intact
+afterwards (my committed entries + their `/go` address-door and blank-canvas work). **This is the
+documented `safe-push carries/loses foreign work` landmine firing for real, not theoretically** —
+worth a guard, because the only reason it was caught is that I diffed `git status` after the push
+instead of trusting "Done."
+
 ## 2026-08-11 (Opus 5) — the 5 held-back provisional items re-verified: 4 of 5 claims were WRONG, 6 stale doc lines corrected, and the hosted graph produced a false negative on the one question RULE 0.5 says it wins
 
 Operator: "LOOK INTO THESE" — the five items the failed graph re-verify left single-pass/provisional.
