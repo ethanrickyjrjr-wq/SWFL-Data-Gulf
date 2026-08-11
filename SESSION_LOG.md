@@ -1,3 +1,55 @@
+## 2026-08-11 (Opus 5) — ALL IN ON GRAPHIFY HOSTED: 150 files un-ignored so the graph can see them; RULE 0.5 repointed from the stale local file to the hosted index
+
+OPERATOR DECREE, verbatim: *"make everything not gitignored, we are public anyway, we only use
+graphify, no grepping… do whatever you need to do to go all in on graphify hosted… there is no way
+we make it with our current path."*
+
+WHY, measured this session before touching anything: a gitignored file is invisible to graphify on
+EVERY tier — paying does not fix it. Our own local graph proved it: `_RESEARCH` 0 nodes, `_FABLE5` 0,
+`_private` 0, while tracked `docs/` alone is 9,593 nodes. The 93 research documents that RULE 0.4
+exists because nobody reads were structurally unreachable by the one tool meant to find them.
+
+WHAT LANDED:
+- `.gitignore` rewritten. 150 files newly tracked: 93 `_RESEARCH/`, 54 `docs/` (janitor, mls-reso,
+  corridor-broker, grid-lab plans), `scripts/reddit.mjs`, `crawl4ai-email-out.md`,
+  `_ASSISTANT/TODAY.md`. Total added weight 2.6MB — it will not strain a node budget.
+- ONLY two categories stay ignored, and neither is our content: (1) CREDENTIALS — `.env*`,
+  `**/secrets.toml`, `/.dlt/`, `cloud-secrets/.passphrase|*.key`, `scripts/_rls_probe.py`
+  (hardcoded prod password on line 4), `*.pem`; (2) MACHINE JUNK + LARGE BINARIES — node_modules,
+  build output, caches, and `data/` 263MB · `.qmd/` 89MB · `graphify-out/` 45MB · `runs/` 19MB.
+  Committing node_modules would hand the graph hundreds of thousands of nodes of other people's
+  code and bury ours — that defeats the decree rather than serving it.
+- HELD BACK, one item, flagged to him in-session: `.private/` — 2 files, 8KB, personal vault
+  strategy/trading notes. Not platform code, zero value to a code graph. Three lines to reverse.
+- PRE-PUBLISH SECRET SWEEP RUN, and this is the load-bearing evidence since the repo is PUBLIC
+  (`gh repo view` → isPrivate:false) and history survives deletion: scanned all 150 files for
+  `sk-ant-`, `apify_api_`, `ghp_`, `github_pat_`, JWT headers, PEM private keys. ZERO hits. One
+  earlier flag on `_RESEARCH/private/stocks-brains-original-greeks-ibrx.md` was a false positive —
+  the string `service_role` in prose about a Postgres role name, not a key.
+- CLAUDE.md RULE 0.5 rewritten: graph FIRST, grep as fallback; names the real MCP tool names
+  (`gx_rank_files`, `gx_callers`, `gx_impact`, `gx_trace`, `gx_tests_for`, `gx_find`) instead of the
+  CLI subcommands it wrongly named; carries the one-line `ToolSearch` load because the tools are
+  DEFERRED while Grep/Read are loaded at turn start — that asymmetry was the whole failure.
+- CLAUDE.md RULE 0.4 amended twice for consistency with the tree: `_RESEARCH/` is no longer
+  described as gitignored/never-ships, and the blanket "crawl4ai files NEVER go to GitHub" ban is
+  reversed for OUTPUT (venv and credential-bearing crawls still excluded).
+
+MEASURED, and it is why we repointed at hosted: local `graphify-out/graph.json` stamps
+`built_at_commit ee2c074c` = 07/08/2026 and has NO `bakedAreaRead` node (shipped 08/06); the hosted
+index resolved that symbol plus its single caller `authorAreaRead()` at
+`lib/deliverable/recipes/review-reply.ts:390`. Hosted also followed a mid-session push — it answered
+at `ceab01dc`, then minutes later at `7fc8c44b`.
+
+VENDOR FACTS, crawled 08/11/2026 (graphify.com/pricing): Free = "Automatic updates, limited per
+day" + "Indexes your full code plus README"; Pro = "Unlimited automatic updates" + "Deep semantic
+indexing across all docs". **The public pricing page names NO node number** — the 25,000 figure is
+not vendor-verified from the docs. So re-indexing of these 150 files is rate-limited on Free; Pro is
+the lever if it lags.
+
+NEXT: push is the operator's call (per-push approval, never carried). After it lands, the hosted
+index has to re-crawl before any of this is queryable — verify with `gx_find` on a `_RESEARCH`
+term before trusting the graph to answer research questions.
+
 ## 2026-08-11 (Fable 5) — LAUNCH DIRECTIVE: /go anonymous popup-gate FIXED; launch punch list censused
 
 Operator decree: get /go running correctly → buy domain → launch; 7-8 lifecycle+agent-intro emails

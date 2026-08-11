@@ -1,3 +1,21 @@
+## 2026-08-11 (Opus 5) — OPERATOR DECREE, LOCKED: ALL IN ON GRAPHIFY HOSTED. "make everything not gitignored, we are public anyway, we only use graphify, no grepping… there is no way we make it with our current path."
+DONE THIS SESSION (full detail in SESSION_LOG, not duplicated here): `.gitignore` rewritten, 150
+files newly tracked (93 `_RESEARCH/`, 54 `docs/`, +3), secret-swept clean before staging, RULE 0.5
+repointed from the stale local graph file to the HOSTED index with the real MCP tool names, RULE 0.4
+amended so `_RESEARCH/` is no longer described as never-shipping and the crawl4ai-never-GitHub ban is
+reversed for output. Only credentials and machine junk stay ignored. `.private/` (2 files, personal
+vault) held back and flagged — three lines to reverse if he wants it in.
+THE STANDING BEHAVIORAL CHANGE, which is the part that has to survive compaction: **the graph is the
+FIRST reach on any structural question; grep is the fallback.** A structural question answered by
+grep alone with no graph call in the transcript is now the defect. The tools are DEFERRED — pay the
+one-line ToolSearch, it is written into RULE 0.5.
+OPEN, his call: (a) Pro trial — Free is "Automatic updates, limited per day", so re-indexing 150 new
+files may lag; Pro is "Unlimited automatic updates" + "Deep semantic indexing across all docs" (the
+docs line matters now that 93 research files are tracked). (b) The 25,000-node figure is NOT on the
+public pricing page — do not repeat it as vendor-verified; if it's real it came from the dashboard.
+(c) After the push lands, the hosted index must RE-CRAWL before any of this is queryable — verify
+with a `gx_find` on a `_RESEARCH` term before trusting the graph on research questions.
+
 ## 2026-08-11 (Opus 5) — OPERATOR, four questions: "ARE WE USING IT CORRECTLY? HOW DOES IT NOT UPDATE WITH EACH PUSH? WE ONLY HAVE 25,000 FREE NODES... BUT GRAPHIFY WAS BECAUSE ANTHROPIC SAID IT WAS BRILLIANT... SO I'M WONDERING WHY CLAUDE DOESN'T FIND IT USEFUL?????"
 MEASURED THIS TURN, all four, before answering:
 1. WE HAVE TWO GRAPHS AND THE WORSE ONE IS THE ONE OUR RULES POINT AT. Local
@@ -64,6 +82,11 @@ STILL OWED, unchanged and still needing his call: RULE 0.5 names the CLI subcomm
 `gx_impact`, `gx_tests_for`, `query_graph`…) — a rule pointing at the wrong surface. Plus the
 UserPromptSubmit hook that injects the ToolSearch line on structural questions, since every
 `mcp__graphify*` tool is DEFERRED while Grep/Read are loaded at turn start.
+
+## 2026-08-11 (Fable 5) — OPERATOR: Gmail link (search "hello@sw…") — "can we get this email build on
+there, as well?" = add the email he's looking at to the /go one-click options. Must OPEN it in his
+Chrome first (signed-in Gmail), identify which email/recipe it is (likely one of ours from
+hello@swfldatagulf.com), then wire its door onto /go.
 
 ## 2026-08-11 (Fable 5) — OPERATOR LAUNCH DIRECTIVE: /go correct → buy domain → LAUNCH. Four parts, verbatim intent:
 1. "Get /go running correctly so I can buy a domain and we can launch." — /go is the launch surface.

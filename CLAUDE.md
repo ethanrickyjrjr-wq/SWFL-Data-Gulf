@@ -30,9 +30,14 @@
    Brew, The Daily Upside and Redfin Data Center — is also written and **has never been run.**
    Run `git status --ignored --short` before ever concluding research does not exist.
 
-0b. **THEN `_RESEARCH/INDEX.md`.** ALL research lives in `_RESEARCH/`,
-   **GITIGNORED — it never ships, so write freely.** Consolidated there 07/20/2026 by operator
-   decree: agent-behavior, audits (was `docs/audits/`), competitor-and-strategy (was
+0b. **THEN `_RESEARCH/INDEX.md`.** ALL research lives in `_RESEARCH/`.
+   **NO LONGER GITIGNORED — 93 files un-ignored and TRACKED 08/11/2026 by operator decree so the
+   hosted graph can index them** (*"make everything not gitignored, we are public anyway"*). This
+   repo is PUBLIC, so research now ships: write it clean, and **no credentials, no client PII, no
+   personal financial notes** — the pre-publish sweep found only a false positive, keep it that way.
+   The upside is the point: research nobody can find governs nothing, and a gitignored file is
+   invisible to graphify on EVERY tier — paying does not fix it, tracking does.
+   Consolidated there 07/20/2026 by operator decree: agent-behavior, audits (was `docs/audits/`), competitor-and-strategy (was
    `docs/steadyapi-research/`), data-and-ingest, deliverable-and-design, email-and-social,
    private (was `_private/`), real-estate-market, voice-and-positioning. `_FABLE5/` stays put
    and is still worth checking. We have already paid for this research and it goes unread —
@@ -55,7 +60,12 @@ Twin of RULE 0.5: **0.5 = read OUR files; 0.4 = research the outside answer.** D
 - Re-install: `uv venv C:\Users\ethan\crawl4ai-venv --python 3.12 && uv pip install --python C:\Users\ethan\crawl4ai-venv crawl4ai && C:\Users\ethan\crawl4ai-venv\Scripts\python.exe -m playwright install chromium`
 - Verify: `C:\Users\ethan\crawl4ai-venv\Scripts\python.exe -c "import crawl4ai; print(crawl4ai.__version__)"`
 
-**crawl4ai files NEVER go to GitHub.** The `.gitignore` pattern `*crawl4ai*` covers everything — source, tests, audit dumps, scraped docs, specs, plans, cache. If you create a crawl4ai file, it stays local. Never `git add` anything matching `*crawl4ai*`.
+**REVERSED 08/11/2026 — crawl4ai OUTPUT now ships like the rest of our research.** The blanket
+`*crawl4ai*` ignore is gone with the all-in-on-graphify decree: a crawled vendor doc that stays local
+is a fact the graph cannot see, which is the exact failure this whole rule exists to prevent. Crawl
+output, findings, and audit dumps get committed under `_RESEARCH/` with their source URL and date.
+**Still never commit:** the venv itself (it lives at `C:\Users\ethan\crawl4ai-venv\`, outside the
+repo), and any crawl that captured a credential, a client's data, or a paywalled body verbatim.
 
 **FULL-SCOPE-FIRST (locked 07/14/2026).** Before writing or extending any ingest pipeline against a
 source, enumerate the FULL field/column list the source actually exposes (its schema/metadata
@@ -70,11 +80,49 @@ sat unused in the same already-open response.
 
 ---
 
-# RULE 0.5 — PROBE FIRST: CODE, THEN SPEC
+# RULE 0.5 — PROBE FIRST: THE GRAPH, THEN THE FILE, THEN THE SPEC
 
 **Before answering or speccing anything, look at the actual code.** Memory is wrong. Files are right.
 
-Use graphify when `graphify-out/graph.json` exists: `graphify query`, `graphify path`, `graphify explain`. Fall back to `Grep`/`Glob`/`Read` otherwise. Never answer without opening something. Never spec a new dependency without first confirming we don't already have it. Subagents follow this rule too.
+**ALL IN ON GRAPHIFY HOSTED — operator decree 08/11/2026.** Verbatim: *"we only use graphify, no
+grepping… there is no way we make it with our current path."* **The graph is the FIRST reach for any
+structural question, and grep is the fallback — not the other way round.**
+
+**THE TOOLS ARE DEFERRED.** Every `mcp__graphify*` tool is name-only until a `ToolSearch` round-trip
+loads it, while `Grep`/`Read` are loaded at turn start. That asymmetry — not a judgment about
+quality — is the entire documented reason the graph went unqueried while it sat wired in `.mcp.json`.
+Pay the round-trip. Load them in ONE call:
+`ToolSearch("select:mcp__graphify__gx_rank_files,mcp__graphify__gx_callers,mcp__graphify__gx_impact,mcp__graphify__gx_trace,mcp__graphify__gx_tests_for,mcp__graphify__gx_find")`
+
+**USE THE HOSTED GRAPH (`repository_id: ethanrickyjrjr-wq/SWFL-Data-Gulf`), NOT THE LOCAL FILE.**
+Measured 08/11/2026: `graphify-out/graph.json` stamps `built_at_commit ee2c074c` = 07/08/2026 and is
+MISSING symbols shipped since (no `bakedAreaRead` node); the hosted index answered at HEAD and
+resolved that same symbol with its caller. The local artifact is now gitignored as a build product.
+
+**The tool names are these — the old `graphify query`/`path`/`explain` are CLI subcommands and were
+the wrong surface to name here:**
+- `gx_rank_files` — a prose question → ranked files. Start here when you don't know where to look.
+- `gx_callers` / `gx_callees` — resolved call edges. **This is the "who actually reads this" answer**
+  that grep only approximates, and the dark-consumer failure is our most repeated one.
+- `gx_impact` — blast radius before a change. `gx_trace` — directed path between two symbols.
+- `gx_tests_for` — which tests cover a symbol or file. `gx_find` — symbol by substring.
+- `query_graph` / `shortest_path` / `get_neighbors` / `god_nodes` — broader traversal.
+
+**WHY THE GRAPH BEATS GREP, stated precisely so it isn't mistaken for a tie:** grep only ever returns
+what you already hypothesized — it is capped by what you thought to type. The graph returns what you
+had no reason to type. **All of its value sits in the unknown-unknown, which means it is most
+valuable exactly when you are most confident you already know the answer.** Postmortem 08/11/2026:
+grep found `updateSession` (Supabase middleware boilerplate, in the vendor's own docs, worth ~nothing
+to be told); the graph found `lib/project/refresh-on-access.ts` — 92 lines that silently rewrite
+metric values on project open and email blast, one caller, carrying a documented key-drift landmine.
+
+**Grep is still legal as the FALLBACK** (string literals, config values, a symbol the graph missed,
+non-code text) — but a structural question answered by grep ALONE, with no graph call in the
+transcript, is the defect this rule exists to stop. `check-four-searches.mjs` counts graphify MCP
+traversals as the CODE lane as of `7fc8c44b`.
+
+Never answer without opening something. Never spec a new dependency without first confirming we
+don't already have it. Subagents follow this rule too.
 
 ---
 
