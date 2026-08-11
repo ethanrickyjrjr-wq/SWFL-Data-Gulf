@@ -495,7 +495,7 @@
     "scheduled": true,
     "timeout_minutes": 30,
     "cancel_in_progress": false,
-    "paid": true,
+    "paid": false,
     "should_be_dark": true,
     "disabled": true
   },

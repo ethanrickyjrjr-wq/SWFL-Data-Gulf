@@ -1,3 +1,35 @@
+## 2026-08-11 (Opus 5) — CI GREEN AGAIN: 4 red gates run to ground (1 type error, 2 stale pins, 1 process-global mock leak)
+
+Operator: "WHY IS GITHUB FUCKING RED" — main had been red for 12 straight runs since 08/10 17:10.
+Four failures, all real, 4 of 4 fixed:
+(1) TYPECHECK — `app/email-lab/grid/EmailLabGridClient.tsx` referenced `knownProjects` (declared in
+the props type, passed by `page.tsx`) but never destructured it. `bunx tsc --noEmit` exit 0 after.
+(2) `lib/landing/home-spine.static.test.ts` pinned bar→map→doors→guides; fc30342f deliberately
+demoted the map below doors+guides ("lead with the product") and 53edae83 kept it. The SHIPPED
+order was right, the pin was stale — re-pinned to bar→doors→guides→map→pricing→faq.
+(3) `app/api/user/brand/route.test.ts` asserted the GET body was exactly `{color_palettes: []}`;
+`account_email` has ridden on every GET since 2a3d952f and `AccountBrandEditor` seeds
+`contact_email` from it. Test updated to expect it (null for the mocked user).
+(4) The two `checkUsageLimit` failures were a PROCESS-GLOBAL MOCK LEAK, not a code bug.
+`app/api/segments/route.test.ts` installs `mock.module("@/lib/billing/effective-tier", …)`
+returning `{tier:"free",degraded:false}` and never hands the module back. CI walk order runs it at
+file #621 and `lib/email/__tests__/usage.test.ts` at #731 — 110 files later usage got the fake
+resolver, so its pass-lift case saw "free" instead of "starter" and its fail-open case saw
+`degraded:false` → allowed false / sent 200. Both received values match that mock exactly.
+NOT REPRODUCIBLE LOCALLY: our Windows walk order puts usage.test.ts FIRST — I replayed the exact
+CI file order (extracted from the run log, 862 files) and it still passed here, so the ONLY proof
+of this one is a green CI run, not a local pass. Fixed all three hijackers of that module
+(`segments`, `segments/preview`, `export/[surface]`) to capture the real namespace at file-eval
+time and re-install it in `afterAll`.
+EVIDENCE: `bunx tsc --noEmit` exit 0 · `bunx eslint` on all 7 touched files exit 0 · the 7 touched
+test files 67 pass / 0 fail · full `bun test` 9076 pass / 9 fail, the same 9 env-gated live-path
+failures that were failing before this session (comps live path, campaign chrome, getAnthropic
+wrapper — all pass in CI where the keys exist) and none of the 4 CI reds.
+OPEN, NOT CLOSED: the leak SHAPE is only fixed for one module. 38 test files hijack
+`@/utils/supabase/service-role` the same way with no restore. Registered in `_ASSISTANT/STRIKES.md`
+as `green-locally-red-in-ci-mock-leak` at 3 strikes, guard OWED, check `test_mock_leak_restore_lint`
+opened. Net checks this session: +1 opened, 0 closed.
+
 ## 2026-08-10 (Fable 5) — "FIX IT ALL": old-emails-out decree COMPLETE — hosts wired, sidebar thumbnails killed, compat removed
 
 Operator: "FIX IT ALL!!!" — full authorization on the claim-blocked remainder of the entry below.

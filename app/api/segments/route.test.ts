@@ -1,5 +1,5 @@
 // app/api/segments/route.test.ts
-import { describe, expect, it, mock } from "bun:test";
+import { afterAll, describe, expect, it, mock } from "bun:test";
 
 // Route.authed() calls `createClient(await cookies())`; `cookies()` from
 // next/headers throws outside a request scope (bun test has none). Mock it to
@@ -12,10 +12,23 @@ mock.module("next/headers", () => ({ cookies: async () => ({}) }));
 // service-role fake to feed the REAL resolveEffectiveTier makes this file's
 // result depend on which test ran before it. This file happened to run before
 // the export-route test that hijacks the module; that was luck, not a guard.
+// ...AND it must HAND THE MODULE BACK when this file is done. `mock.module` is
+// process-global and never unwinds on its own, so the hijack above owned this
+// module for every file that ran after it. CI 08/11/2026: this "free, not
+// degraded" resolver reached lib/email/__tests__/usage.test.ts 110 files later
+// (CI walk order: this file #621, usage #731) and turned its pass-lift case
+// ("starter" → got "free") and its fail-open case (degraded false → allowed
+// false, sent 200) red — green on every machine whose walk order put usage
+// first, red on Linux for 12 straight runs. Declaring the dependency is only
+// half the guard; RELEASING it is the other half.
+const REAL_EFFECTIVE_TIER = { ...(await import("@/lib/billing/effective-tier")) };
 mock.module("@/lib/billing/effective-tier", () => ({
   resolveEffectiveTier: async () => ({ tier: "free", degraded: false }),
   PAID_TIERS: new Set(["starter", "growth", "pro"]),
 }));
+afterAll(() => {
+  mock.module("@/lib/billing/effective-tier", () => REAL_EFFECTIVE_TIER);
+});
 
 function mockSupabase(user: { id: string } | null, insertResult: unknown) {
   mock.module("@/utils/supabase/server", () => ({

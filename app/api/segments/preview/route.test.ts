@@ -1,5 +1,5 @@
 // app/api/segments/preview/route.test.ts
-import { describe, expect, it, mock } from "bun:test";
+import { afterAll, describe, expect, it, mock } from "bun:test";
 
 // Route calls `createClient(await cookies())`; `cookies()` from next/headers
 // throws outside a request scope (bun test has none). Mock it to an inert value
@@ -16,10 +16,17 @@ mock.module("next/headers", () => ({ cookies: async () => ({}) }));
 // 403 branch entirely, fell through to resolveSegment, and died on
 // `db.from is not a function`. Green alone, red in CI, for 5 straight runs.
 // Declaring the dependency here makes the test independent of file order.
+// Declaring the dependency is HALF the guard; releasing it is the other half —
+// this file's own hijack is a landmine for whatever runs after it, exactly like
+// the export-route one described above. Capture the real module, hand it back.
+const REAL_EFFECTIVE_TIER = { ...(await import("@/lib/billing/effective-tier")) };
 mock.module("@/lib/billing/effective-tier", () => ({
   resolveEffectiveTier: async () => ({ tier: "free", degraded: false }),
   PAID_TIERS: new Set(["starter", "growth", "pro"]),
 }));
+afterAll(() => {
+  mock.module("@/lib/billing/effective-tier", () => REAL_EFFECTIVE_TIER);
+});
 
 describe("POST /api/segments/preview", () => {
   it("403s a paid-only filter for a free-tier caller", async () => {

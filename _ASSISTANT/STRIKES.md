@@ -9,6 +9,12 @@ is banned as the response — that session builds the mechanism and flips the gu
 Format contract (the printer parses this, keep it):
 `## shape: <slug>` then one `guard: <OWED | BUILT <what, date>>` line, then `- strike:` lines.
 
+## shape: green-locally-red-in-ci-mock-leak
+guard: OWED — a lint/test that fails when a test file installs a process-global `mock.module` for an in-repo module (`@/lib/*`, `@/utils/*`) without handing the real module back in `afterAll`; 38 files mock `@/utils/supabase/service-role` this way today, so it needs a sweep, not a one-file edit. Check open: test_mock_leak_restore_lint. The 3 effective-tier hijackers were fixed in place 08/11/2026.
+- strike: 07/?? "kill a global test-mock leak" (73952249)
+- strike: 08/?? export-route tier mock hijacked segments/preview — 5 red runs
+- strike: 08/11 segments mock reached usage.test.ts 110 files later — 12 red runs
+
 ## shape: fixed-but-not-live
 guard: BUILT — pre-push Gate 15 capture-freshness (08/10/2026): email-surface code can't push without a re-baked capture
 - strike: 07/20 same surface fixed five times, never driven live

@@ -37,12 +37,15 @@ describe("homepage spine (static pins)", () => {
     expect(normalized).not.toContain("replaces the dead-end waitlist");
   });
 
-  test("the spine is bar → map → doors → guides → pricing → faq", () => {
+  // The map is DEMOTED below the doors + guides (fc30342f, "lead with the
+  // product") — the product doors come before the data toy. Pinned in the
+  // shipped order, not the original one-bar order.
+  test("the spine is bar → doors → guides → map → pricing → faq", () => {
     const order = [
       "<HeroBar",
-      "<Hero ",
       "<SiteDoors",
       "<GuidesStrip",
+      "<Hero ",
       "<PricingStrip",
       "<ObjectionFaq",
     ].map((tag) => page.indexOf(tag));

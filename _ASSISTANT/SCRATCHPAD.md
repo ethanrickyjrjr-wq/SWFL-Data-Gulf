@@ -1,3 +1,28 @@
+## 2026-08-11 (Opus 5) — OPERATOR: "WHY IS GITHUB FUCKING RED" — CI red 12 runs straight since 08/10 17:10
+Four failures, all real. (1) TYPECHECK: EmailLabGridClient used `knownProjects` but never
+destructured it from props (declared in the type, passed by page.tsx) — fixed. (2) home-spine
+static pin still pinned bar→map→doors; fc30342f deliberately demoted the map below doors/guides —
+re-pinned to the shipped order. (3) /api/user/brand GET returns `account_email` since 2a3d952f
+(AccountBrandEditor reads it); the test asserted the body was exactly {color_palettes:[]} — updated.
+(4) TWO checkUsageLimit tests: app/api/segments/route.test.ts installs a process-global
+mock.module("@/lib/billing/effective-tier") returning {tier:"free",degraded:false} and never
+restores it — CI walk order runs it at #621, lib/email/__tests__/usage.test.ts at #731, so usage
+got the fake resolver (pass-lift "starter"→"free"; fail-open degraded false→allowed false/sent 200).
+Green on Windows because our walk order puts usage FIRST — NOT reproducible locally, only in CI.
+Fixed all three hijackers (segments, segments/preview, export/[surface]) to capture the real module
+and hand it back in afterAll. → STRIKES shape `green-locally-red-in-ci-mock-leak` at 3, guard OWED
+(38 files still hijack service-role the same way); check `test_mock_leak_restore_lint` opened.
+
+## 2026-08-10 (Fable 5) — Hermes hallucinated a full Opal integration off a link it admitted it couldn't read
+Operator sent Hermes an Opal build link (opal.google/edit/…) and asked if the reply made sense.
+It didn't: Opal is Google Labs' no-code AI mini-app builder (verified vs developers.googleblog.com
+07/24/2025 announcement), NOT a Google Doc — Hermes said "can't read it, it's sign-in gated," then
+invented a Google-Docs-API fetcher using the Opal app ID as a documentId, a "Hermes cron" syntax,
+and repo paths (scripts/opal, hermes/cron, pytest tests/) that don't exist here, closing with "all
+real, verifiable, no guesswork." Same failure family as LittleBird: confident fabrication when the
+source is unreadable. RELEVANT to the in-flight hermes-email-driver plan — anything Hermes drives
+needs its claims verified against files/vendor docs, never taken as read.
+
 ## 2026-08-10 (Fable 5) — OPERATOR: "we need the fucking old emails out!!! everything is only the new emails!!! why does this still exist!!!" — project email-lab picker still shows OLD layout gallery
 Screenshot: /project/f8f25fd5-79e/email-lab "Pick a starting point" — "Listing & event · 7 layouts"
 (Just Sold, Listing Feature, New Listing, Open House Invite, price-drop, etc.) with old-look

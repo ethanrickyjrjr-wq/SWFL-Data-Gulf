@@ -69,7 +69,9 @@ test("GET no profile → 200 empty palette library", async () => {
   scenario.profile = null;
   const res = await GET(req("GET"));
   expect(res.status).toBe(200);
-  expect(await res.json()).toEqual({ color_palettes: [] });
+  // account_email rides on every GET (the read-only auth email the Brand editor
+  // seeds contact_email from) — null when the mocked user carries none.
+  expect(await res.json()).toEqual({ color_palettes: [], account_email: null });
 });
 
 test("GET with profile → 200 returns selected fields", async () => {

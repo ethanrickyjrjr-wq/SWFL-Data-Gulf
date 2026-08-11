@@ -42,6 +42,14 @@ mock.module("@/utils/supabase/service-role", () => ({
     },
   }),
 }));
+// This hijack leaves `tierResult` wherever the last test left it — a PAID tier —
+// and `mock.module` never unwinds on its own, so every file that runs after this
+// one inherits it. That already cost 5 red runs (see segments/preview). Capture
+// the real module and hand it back when this file's tests finish.
+const REAL_EFFECTIVE_TIER = { ...(await import("@/lib/billing/effective-tier")) };
+afterAll(() => {
+  mock.module("@/lib/billing/effective-tier", () => REAL_EFFECTIVE_TIER);
+});
 mock.module("@/lib/billing/effective-tier", () => ({
   resolveEffectiveTier: async () => {
     if (tierThrows) throw new Error("billing outage");
