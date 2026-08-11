@@ -7,7 +7,7 @@
 
 Markers: **[ORPHAN]** nothing in the repo points at this file — it is invisible unless you come through this index, and it is a DELETION CANDIDATE. **[weak]** reachable only by bare filename, which leads nowhere.
 
-Reachability at generation: 820 by path · 530 by name only · 229 orphaned. Re-measure with `node scripts/doc-reachability.mjs`.
+Reachability at generation: 821 by path · 530 by name only · 228 orphaned. Re-measure with `node scripts/doc-reachability.mjs`.
 
 ## docs/superpowers — 827
 
@@ -306,7 +306,7 @@ Reachability at generation: 820 by path · 530 by name only · 229 orphaned. Re-
 - `docs/superpowers/plans/2026-08-06-precomputed-commentary-plan.md` — Precomputed, pre-checked commentary for the builder — the plan — is checked before it hits builder and builder can just add a CTA and a little extra commentary."
 - `docs/superpowers/plans/2026-08-06-week-in-review-plan.md` — Week in Review — Implementation Plan — measurement and every sourced structural choice lives there. Do not re-derive.
 - `docs/superpowers/plans/2026-08-10-go-one-click-apify-handoff.md` — HANDOFF — /go one-click: any address → email lab → COMPLETED email via Apify — works. we don't need ui or words or anything but putting in any address and ending up in email
-- `docs/superpowers/plans/2026-08-10-hermes-email-driver.md` **[ORPHAN]** — Hermes Email-Builder Driver Implementation Plan
+- `docs/superpowers/plans/2026-08-10-hermes-email-driver.md` — Hermes Email-Builder Driver Implementation Plan
 - `docs/superpowers/plans/2026-08-10-sentence-banks.md` **[ORPHAN]** — Sentence Banks Implementation Plan — typed fill-in slots, model prose reduced to gated connective.
 - `docs/superpowers/plans/_FINISHED/2026-05-17-dlt-faf5-ingest.md` **[ORPHAN]** — FAF5 dlt Ingest Pipeline — Implementation Plan — Create these six files, each empty:
 - `docs/superpowers/plans/_FINISHED/2026-05-17-ingest-pipelines.md` **[ORPHAN]** — Ingest Pipelines Implementation Plan — No TDD — these are infra steps. Do these before any pipeline code.
