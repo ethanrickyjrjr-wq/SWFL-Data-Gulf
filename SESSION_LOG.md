@@ -1,3 +1,18 @@
+## 2026-08-10 (Fable 5) — "FIX IT ALL": old-emails-out decree COMPLETE — hosts wired, sidebar thumbnails killed, compat removed
+
+Operator: "FIX IT ALL!!!" — full authorization on the claim-blocked remainder of the entry below.
+The parallel session's commit b23c2283 had ALREADY bundled + pushed this session's picker work
+(TemplateGallery/new-email-captures/NewEmails/guides/webps rode along with its lab-entry work —
+noted, not fought: same decree, same destination). THIS commit finishes the rest, 7 of 7:
+(1) ProjectEmailLabClient gallery pick → recipeDestination(RECIPES[key],{projectId}) with
+guard.bypass(), old seed-pick handler + planSeedStart import gone; (2) EmailLabGridClient gallery
+pick → recipeDestination into the confirmed target project; (3) EmailLabGridShell "Start from a
+layout" rail = name-only tiles, SEED_PREVIEWS import deleted — the last surface rendering the
+purged-era capture imagery; (4) TemplateGallery interim compat (deprecated onPick prop + useParams
+self-nav fallback) REMOVED — onPickRecipe required, one lane. EVIDENCE: bunx next build ✓ Compiled
+successfully (exit 0); bun test gallery+guides 13 pass / 0 fail. Checks closed same push:
+old_emails_picker_host_cleanup, gridshell_seed_thumbnails_old_look.
+
 ## 2026-08-10 (Fable 5) — OLD EMAILS OUT OF THE IN-PROJECT PICKER: first-run gallery now shows ONLY the new-email registry
 
 Operator (screenshot, /project/f8f25fd5-79e/email-lab): "we need the fucking old emails out!!!

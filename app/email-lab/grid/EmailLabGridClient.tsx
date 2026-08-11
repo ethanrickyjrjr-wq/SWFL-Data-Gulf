@@ -15,8 +15,8 @@ import {
   type BrandNeed,
   type ShowcaseRecipe,
 } from "@/lib/showcase/recipe";
-import { isRecipeKey } from "@/lib/deliverable/recipes";
-import { openSeed, projectEmailLabBase } from "@/lib/lab-entry/destination";
+import { isRecipeKey, RECIPES } from "@/lib/deliverable/recipes";
+import { openSeed, projectEmailLabBase, recipeDestination } from "@/lib/lab-entry/destination";
 import { planArrival } from "@/lib/lab-entry/arrival";
 import { reconcileAddress } from "@/lib/lab-entry/address-reconcile";
 import { listingProjectRequestBody } from "@/lib/lab-entry/create-listing-project";
@@ -42,6 +42,7 @@ export function EmailLabGridClient({
   refCode,
   signedIn,
   offeredProject,
+  knownProjects,
 }: {
   seedDoc?: EmailDoc | null;
   zip?: string | null;
@@ -349,7 +350,13 @@ export function EmailLabGridClient({
             </button>
           </div>
           <TemplateGallery
-            onPick={(seed) => window.location.assign(openSeed(targetProject.id, seed.id))}
+            // Old-emails-out decree 08/10/2026: a pick is a REGISTRY EMAIL —
+            // route into the chosen project's lab carrying the recipe.
+            onPickRecipe={(key) =>
+              window.location.assign(
+                recipeDestination(RECIPES[key], { projectId: targetProject.id }),
+              )
+            }
             onStartBlank={() =>
               // blank:true — an explicit Start-blank must land the raw layout, not
               // the in-project capture popup (spec 2026-07-16).

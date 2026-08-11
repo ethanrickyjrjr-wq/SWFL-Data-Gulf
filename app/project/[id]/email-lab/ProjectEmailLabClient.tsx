@@ -18,11 +18,11 @@ import {
 } from "@/lib/showcase/recipe";
 import { MUST_KEYS, PREFILL_KEYS, typableProfileGaps } from "@/lib/brand/profile-ledger";
 import { planArrival } from "@/lib/lab-entry/arrival";
-import { planSeedStart } from "@/lib/lab-entry/seed-start";
 import { seedFillPrompt } from "@/lib/lab-entry/seed-fill-prompt";
 import { reconcileAddress, addressItem } from "@/lib/lab-entry/address-reconcile";
 import { AddressPopup } from "@/components/lab-entry/AddressPopup";
-import { projectEmailLabBase } from "@/lib/lab-entry/destination";
+import { projectEmailLabBase, recipeDestination } from "@/lib/lab-entry/destination";
+import { RECIPES } from "@/lib/deliverable/recipes";
 import { useAutosave, makeAutosaveScheduler } from "@/lib/lab-entry/use-autosave";
 import { useLeaveGuard } from "@/lib/lab-entry/use-leave-guard";
 import { useLastDid } from "../LastDidContext";
@@ -214,7 +214,9 @@ export function ProjectEmailLabClient({
         ? { choice: true }
         : null,
   );
-  const [activeSeed, setActiveSeed] = useState<SeedDoc | null>(arrivalSeed);
+  // Setter died with the gallery seed-pick handler (old-emails-out decree) —
+  // the only remaining seed source is the ?seed= URL arrival, fixed at mount.
+  const [activeSeed] = useState<SeedDoc | null>(arrivalSeed);
 
   // Live branding for THIS lane's popups (fill-once spec 2026-07-16 §F). Starts
   // from the project blob, then the account profile blank-fills in (same merge
@@ -646,25 +648,13 @@ export function ProjectEmailLabClient({
       {showGallery ? (
         <div className="min-h-[calc(100dvh-3.5rem)]">
           <TemplateGallery
-            onPick={(seed: SeedDoc) => {
-              // Same matrix as the URL door (spec 2026-07-16): the picked layout
-              // lands on the canvas, then capture / skip-and-build / choice.
-              seedCanvas(seed.build());
-              setActiveSeed(seed);
-              const sp = planSeedStart({
-                subject: seed.subject,
-                knownAddress: subjectAddress ?? null,
-                knownArea: subjectArea ?? null,
-                blankChosen: false,
-              });
-              if (sp.mode === "build") {
-                setBuildPrompt(seedFillPrompt(seed, sp.subjectValue));
-                setBuildKey((k) => k + 1);
-              } else if (sp.mode === "ask") {
-                setSeedAsk({ inputKind: sp.inputKind });
-              } else if (sp.mode === "choice") {
-                setSeedAsk({ choice: true });
-              }
+            // Old-emails-out decree 08/10/2026: a pick is a REGISTRY EMAIL, and
+            // it enters the recipe build lane via the ONE nav root. Full page
+            // load on purpose — the arrival plan is mount-time state, so a
+            // same-route client nav would build against a stale plan.
+            onPickRecipe={(key) => {
+              guard.bypass();
+              window.location.assign(recipeDestination(RECIPES[key], { projectId }));
             }}
             onStartBlank={() => seedCanvas(defaultDoc())}
             heroSlot={

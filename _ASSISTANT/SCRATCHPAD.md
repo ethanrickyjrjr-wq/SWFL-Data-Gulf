@@ -5,6 +5,9 @@ thumbnails (brown/orange/navy headers). Same shape as "WE JUST DELETED ALL OTHER
 NEW EMAILS WE MADE" (dead-style-reenters-through-unwatched-door / didnt-delete-everywhere): the
 old skeleton/template gallery still feeds the in-project picker. Fixing this session: picker must
 surface ONLY the new-email registry.
+OPERATOR, same session: "FIX IT ALL!!!" — full authorization to finish the claim-blocked
+remainder (release the parallel sessions' claims, wire the hosts, kill the sidebar thumbnails)
+and ship it.
 STATUS same session: FIXED IN TREE, NOT PUSHED (per-push approval). TemplateGallery rewritten to
 the 16 registry emails off ONE shared module (lib/email/new-email-captures.ts, also feeds
 /showcase NewEmails); picks navigate the recipe build lane via recipeDestination; guides' old

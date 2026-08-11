@@ -12,10 +12,7 @@
 // recipeDestination (the ONE nav root) into the recipe build lane. Nothing
 // here seeds a doc or builds — pure UI.
 import type { ReactNode } from "react";
-import { useParams } from "next/navigation";
 import { RECIPES, type RecipeKey } from "@/lib/deliverable/recipes";
-import type { SeedDoc } from "@/lib/email/doc/default-docs";
-import { recipeDestination } from "@/lib/showcase/recipe";
 import { NEW_EMAIL_CATEGORIES, NEW_EMAIL_FILE_FOR_KEY } from "@/lib/email/new-email-captures";
 
 function RecipeCard({
@@ -80,27 +77,14 @@ export function TemplateGallery({
 }: {
   /** The host navigates via recipeDestination(RECIPES[key], …) — full page
    *  load, so the arrival plan re-runs with the recipe (same reason the
-   *  standalone lab uses window.location.assign). When omitted, the gallery
-   *  self-navigates using the /project/[id] route param (interim: both hosts
-   *  were claimed by live parallel sessions at rewrite time, 08/10/2026). */
-  onPickRecipe?: (key: RecipeKey) => void;
+   *  standalone lab uses window.location.assign). */
+  onPickRecipe: (key: RecipeKey) => void;
   onStartBlank: () => void;
-  /** DEPRECATED, ignored — the old seed-gallery pick. Accepted only so the
-   *  claimed hosts keep compiling until their invocations are updated. */
-  onPick?: (seed: SeedDoc) => void;
   /** Rendered between the page header and the email rows — the Listing Campaign
    *  hero (spec 2026-07-15-gallery-listing-hero-design.md) uses this; the
    *  gallery itself stays decoupled from listing specifics. */
   heroSlot?: ReactNode;
 }) {
-  // Fallback pick lane while hosts still pass the deprecated onPick: navigate
-  // through the ONE nav root, scoped to the project when the route carries one.
-  const params = useParams<{ id?: string }>();
-  const pick =
-    onPickRecipe ??
-    ((key: RecipeKey) => {
-      window.location.assign(recipeDestination(RECIPES[key], { projectId: params?.id ?? null }));
-    });
   return (
     <div className="mx-auto w-full max-w-5xl px-6 py-10">
       <div className="flex flex-wrap items-end justify-between gap-3">
@@ -132,7 +116,7 @@ export function TemplateGallery({
           </h2>
           <div className="mt-3 flex flex-wrap gap-4">
             {cat.keys.map((key) => (
-              <RecipeCard key={key} recipeKey={key} onPick={pick} />
+              <RecipeCard key={key} recipeKey={key} onPick={onPickRecipe} />
             ))}
           </div>
         </section>

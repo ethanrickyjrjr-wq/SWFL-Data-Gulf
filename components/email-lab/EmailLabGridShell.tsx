@@ -27,7 +27,6 @@ import type {
 } from "@/lib/email/doc/types";
 import { EmailDocSchema, mintBlockId } from "@/lib/email/doc/schema";
 import { SEED_DOCS, createBlock } from "@/lib/email/doc/default-docs";
-import { SEED_PREVIEWS } from "@/lib/email/doc/seed-previews";
 import { GRID_COLS, WIDTH_PRESETS, widthPresetLabel } from "@/lib/email/grid-schema";
 import {
   initHistory,
@@ -2298,33 +2297,24 @@ export function EmailLabGridShell({
               </button>
               {showSeeds && (
                 <div className="mt-2 grid grid-cols-2 gap-1.5">
-                  {/* Filled-preview thumbnails (committed captures — the same
-                      tiles /showcase browses); picking still commits the honest
-                      slot-rule skeleton via pickSeed → seed.build(). */}
-                  {GRID_SEEDS.map((s) => {
-                    const thumb = SEED_PREVIEWS.find((p) => p.id === s.id)?.image;
-                    return (
-                      <button
-                        key={s.id}
-                        onClick={() => pickSeed(s.id)}
-                        title={s.description}
-                        className="overflow-hidden rounded-md border border-white/8 bg-white/4 text-left transition-colors hover:border-white/25 hover:bg-white/8"
-                      >
-                        {thumb && (
-                          // eslint-disable-next-line @next/next/no-img-element -- committed static capture, top crop
-                          <img
-                            src={thumb}
-                            alt=""
-                            className="h-24 w-full object-cover object-top"
-                            loading="lazy"
-                          />
-                        )}
-                        <span className="block px-2 py-1.5 text-[10px] font-medium leading-tight text-white/75">
-                          {s.name}
-                        </span>
-                      </button>
-                    );
-                  })}
+                  {/* Name-only tiles. The seed-preview capture thumbnails were
+                      the OLD purged-era email look and are gone by operator
+                      decree 08/10/2026 ("old emails out — everything is only
+                      the new emails"); picking still commits the honest
+                      slot-rule skeleton via pickSeed → seed.build(). Never
+                      re-add SEED_PREVIEWS imagery here. */}
+                  {GRID_SEEDS.map((s) => (
+                    <button
+                      key={s.id}
+                      onClick={() => pickSeed(s.id)}
+                      title={s.description}
+                      className="overflow-hidden rounded-md border border-white/8 bg-white/4 text-left transition-colors hover:border-white/25 hover:bg-white/8"
+                    >
+                      <span className="block px-2 py-1.5 text-[10px] font-medium leading-tight text-white/75">
+                        {s.name}
+                      </span>
+                    </button>
+                  ))}
                 </div>
               )}
             </div>
