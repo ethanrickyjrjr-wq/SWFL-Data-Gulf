@@ -258,8 +258,12 @@ export interface EmailLabGridShellProps {
   projectPhotos?: { storage_path: string; signedUrl: string; caption?: string }[];
   initialBranding?: Record<string, string>;
   /** Cockpit D2: reports every committed/live-edited doc so the canvas toggle
-   *  can detect in-flight edits (unsaved-switch dialog). */
-  onDocChange?: (doc: EmailDoc) => void;
+   *  can detect in-flight edits (unsaved-switch dialog). `userEdit` is false for
+   *  the canvas's own auto-height/line-wrap corrections — they fire on an
+   *  UNTOUCHED mount, and a host that counts them as edits arms its leave guard
+   *  against a doc the user never touched (native "Leave site?" on a blank
+   *  skeleton, operator screenshot 08/10/2026). */
+  onDocChange?: (doc: EmailDoc, userEdit: boolean) => void;
   /** Fires with the recipe key whose builder produced the doc, every time a build
    *  succeeds. For hosts that persist the doc through a path other than `onSave`
    *  (the anonymous send-to-self funnel), so build provenance reaches their write

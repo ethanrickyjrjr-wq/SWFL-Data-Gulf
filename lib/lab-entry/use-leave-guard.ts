@@ -10,8 +10,18 @@
 //      prompt. Firefox drops pages with a live beforeunload from the bfcache, so it
 //      must stay off while clean. Uses the maintained fork (not the unmaintained
 //      LayerX package), which supports Next 16.2+.
-import { useEffect, useRef } from "react";
+import { useCallback, useEffect, useRef } from "react";
 import { useNavigationGuard } from "nextjs-nav-guard";
+
+/** The ONE predicate for the nav-guard's `enabled` option, pure so it's testable.
+ *  `type === "beforeunload"` is ALWAYS declined: the provider registers its own
+ *  page-unload listener (useInterceptPageUnload) that `bypass()` cannot reach —
+ *  it kept throwing the native "Leave site?" dialog at our own confirmed hops
+ *  after the 08/10/2026 fix silenced only OUR listener (operator screenshot
+ *  08/10 22:31). Our dirty-only listener below owns that layer and honors bypass. */
+export function navGuardEnabled(type: string, bypass: boolean, dirty: boolean): boolean {
+  return type !== "beforeunload" && !bypass && dirty;
+}
 
 export interface LeaveGuardHandle {
   active: boolean;
@@ -27,6 +37,12 @@ export interface LeaveGuardHandle {
 
 export function useLeaveGuard(opts: { dirty: boolean }): LeaveGuardHandle {
   const bypassRef = useRef(false);
+  // The `enabled` callback below must read the CURRENT dirty value without
+  // changing identity every render (a fresh function re-registers the guard).
+  const dirtyRef = useRef(opts.dirty);
+  useEffect(() => {
+    dirtyRef.current = opts.dirty;
+  }, [opts.dirty]);
 
   // beforeunload — only while dirty (sticky-activation + bfcache hygiene).
   useEffect(() => {
@@ -42,7 +58,15 @@ export function useLeaveGuard(opts: { dirty: boolean }): LeaveGuardHandle {
 
   // Internal App Router nav — custom-dialog mode (no confirm callback → async;
   // the caller renders a dialog on `active` and calls accept/reject).
-  const nav = useNavigationGuard({ enabled: opts.dirty });
+  // `enabled` is a FUNCTION, not the boolean: the provider consults it for its
+  // own beforeunload layer too, and navGuardEnabled declines that type so the
+  // package can never re-raise the native dialog our bypass() just disarmed.
+  const enabled = useCallback(
+    ({ type }: { to: string; type: string }) =>
+      navGuardEnabled(type, bypassRef.current, dirtyRef.current),
+    [],
+  );
+  const nav = useNavigationGuard({ enabled });
   return {
     ...nav,
     bypass: () => {

@@ -55,6 +55,12 @@
     // the _FINISHED subtree only (not all of docs/**) so a real .ts/.mts file dropped
     // elsewhere under docs/ (docs/sql/, docs/standards/, etc.) still gets caught.
     "docs/superpowers/plans/_FINISHED/**",
+    // The design-reference UI kits (12 .jsx files) — REFERENCE, never imported. They
+    // became visible to knip when docs/design-reference/ was un-gitignored 08/06/2026 so
+    // CLAUDE.md RULE 0.4 could point sessions at colors_and_type.css by path; that flipped
+    // this gate red on every push afterwards. Their own README says take the direction and
+    // re-implement in our stack — "no importer" is the CORRECT state for them, not a gap.
+    "docs/design-reference/**",
     // Claude harness workflow prose (piece1-shell-review.js et al.) — invoked by the
     // agent harness, not imported as code.
     ".claude/workflows/**",
