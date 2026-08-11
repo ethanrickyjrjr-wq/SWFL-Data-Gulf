@@ -404,8 +404,12 @@ export function ProjectEmailLabClient({
     : "Southwest Florida";
   const effectiveScope = scope ?? { kind: "region", value: "swfl" };
 
-  function handleDocChange(doc: EmailDoc) {
+  function handleDocChange(doc: EmailDoc, userEdit?: boolean) {
     currentDocRef.current = doc;
+    // Auto-height/line-wrap corrections (userEdit false) fire on an untouched
+    // mount — they must not arm the leave guard or schedule a save; the ref
+    // above still tracks them so a real save persists the corrected doc.
+    if (userEdit === false) return;
     dirtyRef.current = true;
     setDirty(true);
     if (savedId) autosave.current.schedule(); // debounced silent save (spec §D)

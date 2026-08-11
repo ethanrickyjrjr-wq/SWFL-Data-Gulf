@@ -367,6 +367,17 @@ export function EmailLabGridClient({
             heroSlot={<ListingCampaignHero subjectAddress={null} />}
           />
         </div>
+      ) : addressFirst && (addressOpen || creating) ? (
+        // ADDRESS-FIRST (decree 08/10/2026): the lab NEVER renders before the
+        // address. A bare surface hosts the popup; the lab the user lands in is
+        // the PROJECT's, already building. Mounting the canvas here (a) read as
+        // "we're in the email lab before the address" and (b) armed the leave
+        // guard off the canvas's own mount-time corrections, so our confirmed
+        // hop threw the native "Leave site?" dialog (operator screenshots
+        // 08/10/2026). Cancel falls through to the plain lab below.
+        <div className="flex min-h-[calc(100dvh-3.5rem)] items-center justify-center">
+          {creating && <p className="text-sm text-white/50">Setting up your project…</p>}
+        </div>
       ) : (
         <EmailLabGridShell
           key={buildKey}
@@ -380,9 +391,12 @@ export function EmailLabGridClient({
           initialBranding={Object.keys(arrivalBrand).length > 0 ? arrivalBrand : undefined}
           // The popup owns the blank now; don't also seed it into the Build box.
           initialRecipe={build || plan.addressPopup ? null : initialRecipe}
-          onDocChange={(d) => {
+          onDocChange={(d, userEdit?: boolean) => {
             currentDocRef.current = d;
-            setDirty(true);
+            // The canvas's own auto-height corrections fire on an untouched
+            // mount (userEdit false) — arming the leave guard off them threw
+            // "Leave site?" at a user who never touched the doc (08/10/2026).
+            if (userEdit !== false) setDirty(true);
           }}
           // Which recipe's builder produced the doc — carried to claim-and-send so
           // the anonymous funnel's deliverable records how it was built.

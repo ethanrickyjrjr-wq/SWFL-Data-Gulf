@@ -590,7 +590,12 @@ export function scarcityStats(s: Scarcity): StatItem[] {
   return [
     spec(count(s.activeHomes), `Active homes · ${s.scopeLabel}`),
     spec(count(s.inBand), `Priced ${usdShort(s.bandLo)}–${usdShort(s.bandHi)}`),
-    spec(count(s.comparable), `…that also match beds + size`),
+    // "HOMES that…", never a bare "…that also match beds + size": under a small count
+    // ("6") a label whose first legible words are "MATCH BEDS + SIZE" reads as a BEDROOM
+    // figure sitting one row beneath the subject's real bed count — the operator misread
+    // it exactly that way, live, 08/10/2026 ("5 bedrooms at the top and 6 bedrooms in the
+    // row below"). The count is HOMES; the label says so before it says "beds".
+    spec(count(s.comparable), `…homes that also match beds + size`),
   ];
 }
 

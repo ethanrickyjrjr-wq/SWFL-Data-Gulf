@@ -5,8 +5,20 @@ FL $13,000,000", a stats row (5 BEDS / +Add BATHS / 5,400 SQFT / $2,407 / Single
 row, a filled CAN-SPAM footer, and a FULL pre-written agent bio ("I have sold Southwest Florida for
 seventeen years…"). Operator: (1) why is there writing before we build; (2) why pre-filled with gaps
 everywhere; (3) where are BATHS; (4) 5 bedrooms at top vs 6 in the row below — HOW; (5) "I don't
-even think I built coming soon." Investigating this session — root-causing the pre-fill source, the
-bed contradiction, and whether coming-soon was ever a walked build vs a skeleton that leaked.
+even think I built coming soon." RUN TO GROUND same session, all five: (1) Coming Soon IS built and
+walked (08/05, §2.2) — the build DID run tonight (project "12798 Dennis Dr" auto-created 22:30:52
+off the address-first popup, build fired on arrival); what he saw was the CANVAS, not a pre-fill.
+(2) "Gaps" = canvas edit placeholders: the RIBBON hero offered "$—/Label/Add a sentence…" slots for
+fields a ribbon never prints — FIXED (HeroBlock ribbonOnly no longer forces the full body under
+scope; same family as the 07/19 bare-KICKER fix). (3) BATHS: free spine NULL for this listing
+(baths null on 59% of active Lee rows — 9,201/22,598 measured), NO paid row held for
+12798DENNISDR:33908 → open slot is the ladder being honest. (4) 5-vs-6 is NOT a contradiction: 6 =
+comparable HOMES (counts reproduce live: 15,190/10/6) — but the label read as bedrooms, so it's now
+"…homes that also match beds + size" (+test pin). (5) Footer mid-doc with content below it =
+static:true footer pinned at server y while mount height-measurement grows bio/chart blocks →
+non-static blocks reflow past it. NOT fixed here — the live parallel session owns those files
+(EmailLabGridClient/ProjectEmailLabClient dirty in tree); check opened:
+canvas_static_footer_midpage_reflow. Canvas fixes verified by test only, not yet driven in the lab.
 Screenshot (08/10 22:31): Chrome's native "Leave site? Changes you made may not be saved." over an
 UNTOUCHED blank skeleton. The 08/10 bypass fix (26f71943, deployed 21:41) fixed the WRONG LAYER and
 was never driven: nextjs-nav-guard's provider registers its OWN beforeunload listener

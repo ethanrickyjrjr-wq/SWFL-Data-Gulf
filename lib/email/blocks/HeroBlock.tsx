@@ -187,7 +187,14 @@ export function HeroBlock({
   // "◆ NEW LISTING ◆" bar BETWEEN the header and the photo — the band is a design element
   // in its own right, not a caption stapled to a number. Without this, the ribbon can only
   // appear wherever the price happens to be, and the layout can never match.
-  const ribbonOnly = Boolean(ribbon) && !props.value && !props.label && !props.prose && !scope;
+  // ON THE CANVAS TOO (`scope` used to force the full body): a ribbon block holds no
+  // value, label, or prose — those live on the campaign's OTHER hero — so offering their
+  // three empty edit slots here painted "$— / Label / Add a sentence…" directly under the
+  // band. A freshly built Coming Soon read as a half-empty template ("THERE ARE FUCKING
+  // GAPS EVERYWHERE", operator, 08/10/2026). Same defect family and same fix as the bare
+  // "KICKER" placeholder over the address (07/19/2026, comment above): an edit affordance
+  // for a field this block will never print is broken chrome, not a feature.
+  const ribbonOnly = Boolean(ribbon) && !props.value && !props.label && !props.prose;
   if (ribbonOnly) return ribbon;
 
   const body = ribbon ? (

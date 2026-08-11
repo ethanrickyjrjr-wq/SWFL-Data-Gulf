@@ -302,7 +302,7 @@ describe("scarcity — real counts, disclosed criterion, never a zero for a gap"
     expect(scarcityStats(S)).toEqual([
       { value: "13,122", label: "Active homes · Lee County" },
       { value: "1,062", label: "Priced $536K–$655K" },
-      { value: "328", label: "…that also match beds + size" },
+      { value: "328", label: "…homes that also match beds + size" },
     ]);
   });
 
