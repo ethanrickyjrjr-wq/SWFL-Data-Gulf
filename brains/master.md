@@ -1,9 +1,9 @@
-<!-- FRESHNESS: v136 | Token: SWFL-7421-v136-20260811-7f3a42e2 -->
+<!-- FRESHNESS: v137 | Token: SWFL-7421-v137-20260811-63c088e6 -->
 ---
 brain_id: master
-version: 136
-refined_at: 2026-08-11T05:48:29Z
-freshness_token: SWFL-7421-v136-20260811-7f3a42e2
+version: 137
+refined_at: 2026-08-11T14:55:00Z
+freshness_token: SWFL-7421-v137-20260811-63c088e6
 ttl_seconds: 604800
 pack_hash: be8f0d44e0e6
 context_type: user_saved_reference
@@ -91,7 +91,7 @@ s39 | home-values-swfl brain — https://www.swfldatagulf.com/api/b/home-values-
   {"id":"f017","topic":"upstream :: safety-swfl","fact":"Upstream snapshot — safety-swfl (neutral, magnitude 0.00, confidence 1.00)","value":"safety-swfl as of 2026-07-19: direction neutral, magnitude 0.00, confidence 1.00, trust tier T1, 8 key metric(s). SWFL property crime: 6.8 Part I offenses per 1,000 residents (2025 UCR), -18.7% YoY. Lee (8.0/1k) runs 3.1 points above Collier (4.8/1k).","src":"s01","date":"2026-08-11"},
   {"id":"f018","topic":"upstream :: labor-demand-swfl","fact":"Upstream snapshot — labor-demand-swfl (bullish, magnitude 0.78, confidence 1.00)","value":"labor-demand-swfl as of 2026-07-19: direction bullish, magnitude 0.78, confidence 1.00, trust tier T1, 10 key metric(s). BLS OEWS May 2025 — SWFL workforce. Lee (Cape Coral-Fort Myers MSA): top sector: Office and Administrative Support Occupations (37,050), Construction 2.17× national, employment +1.5% YoY. Collier (Naples MSA): top sector: Food Preparation and Serving Related Occupations (25,250), Construction 1.88× national, employment +1.6% YoY. Source: BLS Occupational Employment and Wage Statistics.","src":"s01","date":"2026-08-11"},
   {"id":"f019","topic":"upstream :: econ-dev-swfl","fact":"Upstream snapshot — econ-dev-swfl (neutral, magnitude 0.30, confidence 0.80)","value":"econ-dev-swfl as of 2026-08-11: direction neutral, magnitude 0.30, confidence 0.80, trust tier T2, 2 key metric(s). SWFL Inc. logged 1 economic development announcement in the last 90 days. Source: SWFL Inc. (swflinc.com/blog/), the official Lee County economic development organization.","src":"s01","date":"2026-08-11"},
-  {"id":"f020","topic":"upstream :: city-pulse-swfl","fact":"Upstream snapshot — city-pulse-swfl (neutral, magnitude 0.00, confidence 0.80)","value":"city-pulse-swfl as of 2026-08-11: direction neutral, magnitude 0.00, confidence 0.80, trust tier T2, 8 key metric(s). SWFL city pulse as of 2026-08-11: 114 live current-events signals across 11 cities — Cape Coral (25), Fort Myers (28), Naples (33), North Naples (5), Marco Island (5), Sanibel (4), Estero (4), Bonita Springs (4), Fort Myers Beach (4), Lehigh Acres (1), Golden Gate (1). Most current: Cape Coral — The only privately owned land on Buck Key Island — roughly 14 acres — is listed for $13 million in Lee County as of Aug. 7, 2026. These are current cited facts only; the cross-vertical read and any direction call live downstream in master.","src":"s01","date":"2026-08-11"},
+  {"id":"f020","topic":"upstream :: city-pulse-swfl","fact":"Upstream snapshot — city-pulse-swfl (neutral, magnitude 0.00, confidence 0.80)","value":"city-pulse-swfl as of 2026-08-11: direction neutral, magnitude 0.00, confidence 0.80, trust tier T2, 8 key metric(s). SWFL city pulse as of 2026-08-11: 117 live current-events signals across 11 cities — Fort Myers (30), Cape Coral (25), Naples (33), North Naples (5), Marco Island (5), Sanibel (4), Estero (5), Bonita Springs (4), Fort Myers Beach (4), Lehigh Acres (1), Golden Gate (1). Most current: Fort Myers — A long-vacant Fort Myers building sold for $2.25 million, as reported Aug. 10, 2026. These are current cited facts only; the cross-vertical read and any direction call live downstream in master.","src":"s01","date":"2026-08-11"},
   {"id":"f021","topic":"upstream :: rsw-airport","fact":"Upstream snapshot — rsw-airport (bullish, magnitude 0.16, confidence 1.00)","value":"rsw-airport as of 2026-08-09: direction bullish, magnitude 0.16, confidence 1.00, trust tier T1, 9 key metric(s). LCPA Aviation April 2026 — RSW 1,152,669 total passengers (-2.2% YoY), trailing-12-mo 11,197,951 (+2.4% vs prior year — the direction basis), 512,534 arrivals / 640,135 departures, 10,797 aircraft operations, 3,463,896 lbs air freight. Source: Lee County Port Authority (flylcpa.com/about-lcpa/reports-and-statistics/).","src":"s01","date":"2026-08-11"},
   {"id":"f022","topic":"upstream :: news-swfl","fact":"Upstream snapshot — news-swfl (neutral, magnitude 0.30, confidence 0.80)","value":"news-swfl as of 2026-08-11: direction neutral, magnitude 0.30, confidence 0.80, trust tier T2, 9 key metric(s). DBPR issued 0 SWFL-relevant press releases in the last 90 days. 6 individual enforcement notices active in Lee and Collier counties (4 construction unlicensed, 0 ABT/hospitality). Sources: FL DBPR press releases (www2.myfloridalicense.com/press-releases/) and public enforcement notices (www2.myfloridalicense.com/public-notices/).","src":"s01","date":"2026-08-11"},
   {"id":"f023","topic":"upstream :: freshness-pulse","fact":"Upstream snapshot — freshness-pulse (neutral, magnitude 0.00, confidence 0.80)","value":"freshness-pulse as of 2026-08-11: direction neutral, magnitude 0.00, confidence 0.80, trust tier T2, 4 key metric(s). Today's sourced snapshot — SWFL 30-year fixed mortgage rate (as of 2026-08-06) 6.69%; Cape Coral median asking price (as of 2026-08-11) $399,900; Fort Myers median asking price (as of 2026-08-11) $325,000; Naples median asking price (as of 2026-08-11) $650,000. These are cited current facts only; the direction call lives downstream in master.","src":"s01","date":"2026-08-11"},
@@ -116,9 +116,9 @@ s39 | home-values-swfl brain — https://www.swfldatagulf.com/api/b/home-values-
 --- OUTPUT ---
 {
   "brain_id": "master",
-  "version": 136,
-  "refined_at": "2026-08-11T05:48:29Z",
-  "expires": "2026-08-18T05:48:29Z",
+  "version": 137,
+  "refined_at": "2026-08-11T14:55:00Z",
+  "expires": "2026-08-18T14:55:00Z",
   "ttl_seconds": 604800,
   "direction": "bearish",
   "magnitude": 0.85,
@@ -612,15 +612,15 @@ s39 | home-values-swfl brain — https://www.swfldatagulf.com/api/b/home-values-
     },
     {
       "metric": "signal_transactions_1",
-      "value": "Cape Coral: The only privately owned land on Buck Key Island — roughly 14 acres — is listed for $13 million in Lee County as of Aug. 7, 2026.",
+      "value": "Fort Myers: A long-vacant Fort Myers building sold for $2.25 million, as reported Aug. 10, 2026.",
       "direction": "stable",
-      "label": "Cape Coral — transactions",
+      "label": "Fort Myers — transactions",
       "variable_type": "categorical",
       "source": {
-        "url": "https://www.news-press.com/story/money/companies/2026/08/07/rare-buck-key-island-offering-listed-for-13-million-in-lee-county/91189530007/",
-        "fetched_at": "2026-08-11T05:48:08Z",
+        "url": "https://www.businessobserverfl.com/news/2026/aug/10/long-vacant-fort-myers-building-sells/",
+        "fetched_at": "2026-08-11T14:54:39Z",
         "tier": 2,
-        "citation": "Rare Buck Key Island offering listed for $13 million in Lee County: \"[](https://www.news-press.com/)\n[](https://subscribe.news-press.com/rr/nanobar?gps-source=CPTILELEFT&itm_campaign=2026ENTJULBAU&itm_medium=ONSITE&success-url=https%3A%2F%2Fwww.news-press.com%2Fstory%2Fmoney%2Fcompanies%2F2026%2F08%2F07%2Frare-buck-key-island-offering-listed-for-13-million-in-lee-county%2F91189530007%2F)\n[](https://subscribe.news-press.com/rr/masthead?gps-source=CPMASTHEAD&itm_campaign=2026ENTJULBAU&itm_medium=ONSITE&success-url=https%3A%2F%2Fwww.news-press.com%2Fstory%2Fmoney%2Fcompanies%2F2026%2F08%2F07%2Frare-buck-key-island-offering-listed-for-13-million-in-lee-county%2F91189530007%2F)\n[News](https://www.news-press.com/news/) [Cape Coral](https://www.news-press.com/news/cape-coral/) [Sports](https://www.news-press.com/sports/) [Restaurants](https://www.news-press.com/taste/) [Real Estate](https://www.news-press.com/real-estate) [Advertise](https://advertising.usatoday.com/advertise-with-us/?cid=Web_LiQ_Network_AdvertiseWithUs_AdvertiseInquiry&publication=the_news_press&utm_source=local_publication&utm_medium=menu&utm_campaign=advertise_with_us) [Obituaries](https://www.news-press.com/obituaries) [eNewspaper](https://user.news-press.com/user/enewspaper) [Legals](https://www.news-press.com/public-notices)\n[](https://www.news-press.com/search/ \"Search\")\n[](https://www.news-press.com/weather/ \"Weather in Fort Myers: 75°F Mostly Clear\") [](https://subscribe.news-press.com/rr/navsub?gps-source=CPTOPNAVBAR&itm_campaign=2026ENTJULBAU&itm_medium=ONSITE&success-url=https%3A%2F%2Fwww.news-press.com%2Fstory%2Fmoney%2Fcompanies%2F2026%2F08%2F07%2Frare-buck-key-island-offering-listed-for-13-million-in-lee-county%2F91189530007%2F)\n[](https://login.news-press.com/PFTM-GUP/authenticate/?success-url=https%3A%2F%2Fwww.news-press.com%2Fstory%2Fmoney%2Fcompanies%2F2026%2F08%2F07%2Frare-buck-key-island-offering-listed-for-13-million-in-lee-county%2F91189530007%2F&cancel-url=https%3A%2F%2Fwww.news-press.com%2Fstory%2Fmoney%2Fcompanies%2F2026%2F08%2F07%2Frare-buck-key-island-offering-listed-for-13-million-in-lee-county%2F91189530007%2F)\n[](https://www.news-press.com/) [](https://www.news-press.com/)\nCOMPANIES\n# Exclusive: Last 'puzzle piece' on Buck Key Island hits market for $13M\n[![Portrait of Laura Layden](https://www.news-press.com/gcdn/authoring/authoring-images/2024/02/08/PNDN/72524348007-ndn-jh-20240126-laura-0001.JPG?crop=3313,3312,x1506,y0&width=48&height=48&format=pjpg&auto=webp) Laura Layden](https://www.naplesnews.com/staff/2647080001/laura-layden/)\nFort Myers News-Press & Naples Daily News\nUpdated Aug. 7, 2026, 10:13 a.m. ET\nThe only privately owned land on Buck Key Island is back on the market.\nOver the decades, the roughly 14-acre property has been on and off the market — and it has been considered for conservation.\nYet, it has remained under the same ownership for more than 50 years.\n[](https://www.news-press.com/)\n[Help](https://help.news-press.com) [Accessibility](https://cm.news-press.com/accessibility/) [Sitemap](https://www.news-\""
+        "citation": "Long-vacant Fort Myers building sells for $2.25 million | Business Observer: \"![Spinner: White decorative](https://cdn.userway.org/widgetapp/images/spin_wh.svg)\n![](https://cdn.userway.org/widgetapp/images/body_wh.svg)\n![Spinner: White decorative](https://cdn.userway.org/widgetapp/images/spin_wh.svg)\n  * ![Alternate Text](https://observermediagroup.media.clients.ellingtoncms.com/static-4/assets/images/bob-logo-header.svg)\n  * Loading\n\n\n  * [Newsletters](https://marketing.businessobserverfl.com/newsletters)\n  * [Podcast](https://www.businessobserverfl.com/podcasts/corner-office/?utm_source=header&utm_medium=sitenav)\n  * [Public Notices](https://legals.businessobserverfl.com/)\n  * [40 Under 40 Nomination](https://www.businessobserverfl.com/submit-40-under-40-2026/)\n  * [Mobile App](https://businessobserver.pressreader.com/)\n  * [Subscribe](https://marketing.businessobserverfl.com/subscribe)\n  * [Login](https://www.businessobserverfl.com/accounts/login/?next=/news/2026/aug/10/long-vacant-fort-myers-building-sells/)\n\n\n  * [](https://www.facebook.com/BusinessObserverFL)\n  * [](https://x.com/BizObserverFL)\n  * [](https://www.linkedin.com/company/businessobserverfl)\n  * [ ](https://www.instagram.com/businessobserverfl/)\n\n\n[![](https://observermediagroup.media.clients.ellingtoncms.com/static-4/assets/images/bob-logo-header.svg)](https://www.businessobserverfl.com/)\n[![](https://observermediagroup.media.clients.ellingtoncms.com/static-4/assets/images/bob-logo-sticky.svg)](https://www.businessobserverfl.com/)\n[![](https://observermediagroup.media.clients.ellingtoncms.com/static-4/assets/images/bob-logo-header.svg)](https://www.businessobserverfl.com/)\n  * [News](https://www.businessobserverfl.com/news/all/)\n  * [Strategies](https://www.businessobserverfl.com/news/strategies/)\n  * [Entrepreneurs](https://www.businessobserverfl.com/news/entrepreneurs/)\n  * [M&A](https://www.businessobserverfl.com/news/mergers-acquisitions/)\n  * [Leadership](https://www.businessobserverfl.com/news/leadership/)\n  * [Regions](https://www.businessobserverfl.com/news/2026/aug/10/long-vacant-fort-myers-building-sells/)\n    * [Tampa Bay-Lakeland](https://www.businessobserverfl.com/news/tampa-bay-lakeland/)\n    * [Manatee-Sarasota](https://www.businessobserverfl.com/news/manatee-sarasota/)\n    * [Charlotte-Lee-Collier](https://www.businessobserverfl.com/news/charlotte-lee-collier/)\n    * [Florida](https://www.businessobserverfl.com/news/florida/)\n  * [Industries](https://www.businessobserverfl.com/news/2026/aug/10/long-vacant-fort-myers-building-sells/)\n    * [Business Support](https://www.businessobserverfl.com/news/industries/business-support/)\n    * [Commercial Real Estate](https://www.businessobserverfl.com/news/industries/commercial-real-estate/)\n    * [Residential Real Estate](https://www.businessobserverfl.com/news/industries/residential-real-estate/)\n    * [Development](https://www.businessobserverfl.com/news/industries/development/)\n    * [Finance](https://www.businessobserverfl.com/news/industries/finance/)\n    * [Food-Beverage](https://www.business\""
       },
       "suggestions": [
         "What's driving signal transactions 1?",
@@ -765,7 +765,7 @@ s39 | home-values-swfl brain — https://www.swfldatagulf.com/api/b/home-values-
     "1 of 3 announcements in the last 90 days matched qualifying categories (relocation, expansion, grant, infrastructure); the rest are general chamber/policy posts excluded from the momentum count.",
     "Investment and job figures reflect disclosures at announcement time; actual outcomes may vary as projects develop.",
     "SWFL Inc. covers primarily Lee County projects; Collier County coverage depends on cross-county partnerships and co-announcements.",
-    "106 additional live signals not surfaced here (cap 8); the full set is in data_lake.city_pulse.",
+    "109 additional live signals not surfaced here (cap 8); the full set is in data_lake.city_pulse.",
     "Each signal is dated current-events context with a per-signal source; freshness is TTL-bounded by topic (breaking 1d → structural 90d).",
     "Construction enforcement split: public notices = confirmed individual actions (hard-parsed violation_type); press releases = announced sweeps (Sonnet-inferred affected_industries). Do not sum them.",
     "Polarity: rising construction notices = bullish (recovery-driven unlicensed activity). Rising ABT notices = bearish (hospitality compliance stress).",
@@ -890,8 +890,8 @@ s39 | home-values-swfl brain — https://www.swfldatagulf.com/api/b/home-values-
   "upstream_count": 39,
   "relevance": {
     "decay_curve": "weeks",
-    "half_life_hours": 720.0000000000002,
-    "computed_at": "2026-08-11T05:48:29.000Z"
+    "half_life_hours": 720.0000000000005,
+    "computed_at": "2026-08-11T14:55:00.000Z"
   },
   "exogenous_signals": [],
   "conditional_claims": [
