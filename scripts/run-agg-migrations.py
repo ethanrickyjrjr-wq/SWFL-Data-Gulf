@@ -29,7 +29,9 @@ def load_pg_creds():
 MIGRATIONS = [
     "20260623_census_cbp_fl_agg_by_naics_view.sql",
     "20260623_fdot_aadt_county_year_view.sql",
-    "20260623_usgs_caloosahatchee_stage_latest_view.sql",
+    # 20260623_usgs_caloosahatchee_stage_latest_view.sql REMOVED 08/11/2026 — the view it
+    # creates was dropped (confirmed orphan, zero dependents); re-running this list must not
+    # recreate it.
     "20260623_fema_nfip_county_year_view.sql",
     "20260623_fema_nfip_zip_window_agg_view.sql",
 ]

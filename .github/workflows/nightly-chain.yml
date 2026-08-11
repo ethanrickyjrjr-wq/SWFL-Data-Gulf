@@ -115,18 +115,10 @@ jobs:
   # each matrix leg is its own runner (its own IP), so requests never ACCUMULATE
   # against one IP the way a single all-county pass would. Do not collapse these
   # into one all-county call.
-  listings:
-    name: ingest · active listings
-    needs: [guard]
-    if: needs.guard.outputs.should_run == 'true'
-    strategy:
-      fail-fast: false          # a Collier 403 must never discard Lee's landed rows
-      matrix:
-        county: [Lee, Collier]
-    uses: ./.github/workflows/active-listings-daily.yml
-    with:
-      county: ${{ matrix.county }}
-      dry_run: ${{ inputs.dry_run == true }}
+  # RETIRED 08/11/2026 — `listings` job removed. data_lake.active_listings_residential (the
+  # table active-listings-daily.yml wrote) fed nothing live: confirmed dead duplicate of
+  # listing_lifecycle -> data_lake.listing_state -> listing_active_stats. Table + zip_stats
+  # view dropped, active-listings-daily.yml deleted, cadence_registry.yaml entry retired.
     secrets: inherit
 
   lifecycle:
@@ -167,7 +159,7 @@ jobs:
   # This is a normal job (not a `uses:`), so timeout-minutes IS supported here.
   row-gate:
     name: gate · assert_landed
-    needs: [guard, listings, lifecycle, pulse, live-search]
+    needs: [guard, lifecycle, pulse, live-search]
     # always() so a partial ingest is still JUDGED, not silently skipped — but
     # AND the guard output back in, or a skipped-by-guard night falls through
     # `always()` into a row-gate run against rows a DIFFERENT run already landed.

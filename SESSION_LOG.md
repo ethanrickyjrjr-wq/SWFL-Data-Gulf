@@ -1,3 +1,37 @@
+## 2026-08-11 (Sonnet 5) — confirmed-dead corpses from the graphify audit REMOVED: 5 ingest pipelines, 3 orphan views (SQL staged, operator must run it), active_listings table+view, 6 dead landing components
+
+Operator: "TAKE IT ALL OUT ONCE CONFIRMED NOT NEEDED." Acted only on items confirmed dead by 2+
+independent passes (07/18 P7-corpse-deletelist.md + 08/11 this session), NOT the single-grep
+provisional items from the failed graph re-verify (redfin_city_swfl desk-hero claim, reportToEmailHtml
+4th send pipe, lib/social/CLAUDE.md staleness) — those stay open pending a fresh-session graph re-run.
+
+**Removed (files, this commit):**
+- 5 dead ingest pipelines + their GHA crons: `census_vip`, `fred_g17`, `fred_laus_alfred`,
+  `fred_listing_swfl` (all self-reported `consuming_pack: none`, zero code reader confirmed both
+  audits), `active_listings` (confirmed dead duplicate — live path is listing_lifecycle ->
+  listing_state -> listing_active_stats, proof at active-listings-residential-source.mts:27).
+  `cadence_registry.yaml` entries retired to short RETIRED-stub comments (not deleted outright —
+  preserves the paper trail). `nightly-chain.yml`'s `listings` job + its `row-gate needs:` entry
+  removed.
+- 3 orphan Postgres views' SQL definitions (`fema_nfip_claims_swfl`, `fdot_aadt_swfl_yearly`,
+  `usgs_caloosahatchee_stage_latest` — each self-documented "analyst convenience, not the brain's
+  read path," zero pg_depend dependents confirmed live 07/18). Removed from `scripts/lake-probe.mts`
+  probe list and `scripts/run-agg-migrations.py`'s one-shot MIGRATIONS list.
+- 6 landing components confirmed orphaned by BOTH `knip.jsonc` and grep (`Capabilities.tsx`,
+  `Charts.tsx`, `ComparisonSection.tsx`, `DeliverableShowcase.tsx`, `ProofStrip.tsx`,
+  `WeeklyReadCapture.tsx`) + `app/api/landing-data/route.ts` (the hardcoded-freshness route the
+  07/18 audit flagged highest-harm — now fully dead since its only 2 callers were the deleted
+  components; `app/page.tsx`'s 08/10 redesign never wired either back in).
+
+**NOT removed — actually DB-destructive, blocked by the auto-mode classifier:** the DROP TABLE/VIEW
+migration (`migrations/20260811_drop_confirmed_dead_corpses.sql` — drops the 3 orphan views +
+`data_lake.active_listings_residential` + its zip_stats view, RESTRICT-only, no CASCADE) is staged
+but NOT run. Operator must run `bun scripts/run-migration.ts
+migrations/20260811_drop_confirmed_dead_corpses.sql` directly.
+
+Checks closed: `active_listings_ship_or_delete` (DELETE), `fred_listing_swfl_wrong_source_url`
+(moot — pipeline deleted).
+
 ## 2026-08-11 (Sonnet 5) — graphify deep-dive fan-out found: custom subagent types CANNOT reach ToolSearch/graphify this session; `.claude/agents/*.md` tool grants fixed for next session
 
 Operator asked for a deep-dive audit (orphans / duplicates / missing wiring) fanned out across

@@ -432,64 +432,19 @@ pipelines:
         source_url: "https://ops.fhwa.dot.gov/freight/freight_analysis/faf/"
         source_label: "FHWA/BTS Freight Analysis Framework 5"
 
-  - name: fred_g17
-    workflow: ingest-fred-g17.yml
-    consuming_pack: none
-    lane: tier-1
-    cadence_days: 30
-    tolerance_multiplier: 2.0
-    inventory_id: lake-tier1/macro/fred_g17/
-    inventory_key_type: prefix
-    # First run: 2026-05-27 (workflow_dispatch) ✓
-    source_scope:
-      confirmed_total:
-        summary: "G.17 industrial production/capacity utilization, national series only"
-        source: "our ingest"
-      source_ceiling:
-        summary: "FRED also publishes real Lee/Collier county-level annual series with confirmed series IDs — house price index, county GDP, per-capita income, median household income, poverty rate, building permits — none pulled today. Vendor ceiling: MSA-level GDP was discontinued by BEA/FRED in 2023; unemployment claims never publish finer than statewide."
-        as_of: "07/08/2026"
-        source_url: "https://fred.stlouisfed.org/"
-        source_label: "FRED (St. Louis Fed)"
+  # RETIRED 08/11/2026 — fred_g17 (lake-tier1/macro/fred_g17/) DELETED. Confirmed zero code
+  # reader across two independent audits (07/18 P7-corpse-deletelist, 08/11 graphify deep-dive).
+  # Cron .github/workflows/ingest-fred-g17.yml removed, pipeline ingest/pipelines/fred_g17/
+  # retired, Storage prefix flagged for manual delete (operator/CLI action, not scriptable here).
 
-  - name: fred_laus_alfred
-    workflow: fred-laus-alfred-monthly.yml
-    consuming_pack: none
-    lane: tier-1
-    cadence_days: 30
-    tolerance_multiplier: 2.0
-    inventory_id: lake-tier1/macro/fred_laus_alfred/
-    inventory_key_type: prefix
-    # First run: <fill on first successful workflow_dispatch>.
-    source_scope:
-      source_ceiling:
-        summary: "Vendor ceiling: LAUS has no sub-state demographic breakdown at any vintage — not something ALFRED's vintage history can add."
-        as_of: "07/07/2026"
-        source_url: "https://alfred.stlouisfed.org/"
-        source_label: "FRED ALFRED (vintage LAUS)"
+  # RETIRED 08/11/2026 — fred_laus_alfred (lake-tier1/macro/fred_laus_alfred/) DELETED. Same
+  # confirmed-zero-consumer basis as fred_g17. Cron .github/workflows/fred-laus-alfred-monthly.yml
+  # removed, pipeline retired, Storage prefix flagged for manual delete.
 
-  - name: fred_listing_swfl
-    workflow: ingest-fred-listing-swfl.yml
-    consuming_pack: none
-    lane: tier-1
-    cadence_days: 30
-    tolerance_multiplier: 2.0
-    inventory_id: lake-tier1/market/fred_listing_swfl/
-    inventory_key_type: prefix
-    # 8 Realtor.com monthly series: active listings, DOM, list price, new listings
-    # for Lee MSA (15980) and Collier MSA (34940). Starts Jul 2016. MSA grain only (no ZIP).
-    # First run: <fill on first successful workflow_dispatch>.
-    # BUG (see check fred_listing_swfl_wrong_source_url): constants.py SOURCE_URL points at
-    # fred.stlouisfed.org/categories/32287, which live-resolves to a Singapore/International-Data
-    # category, not the real Realtor.com release (rid=462) — wrong citation persisted every run.
-    source_scope:
-      confirmed_total:
-        summary: "active_listing_count, median_days_on_market, median_list_price, new_listing_count x 2 MSAs (Lee 15980, Collier 34940), monthly since Jul 2016 — 4 metrics x 2 MSAs = 8 series"
-        source: "our ingest"
-      source_ceiling:
-        summary: "Same FRED release, same MSAs, confirmed-live series we don't pull: Avg Listing Price, Median Listing Price per Sqft, Median Listing Sqft (home size), Pending Listing Count (raw — we only infer via ratio elsewhere), Price Increase Count, Price Reduced Count (raw), Total Listing Count (active+pending), plus every metric's M/M and Y/Y percent-change companion series — all same-cost FRED API calls."
-        as_of: "07/08/2026"
-        source_url: "https://fred.stlouisfed.org/release?rid=462"
-        source_label: "FRED — Housing Inventory Core Metrics (Realtor.com)"
+  # RETIRED 08/11/2026 — fred_listing_swfl (lake-tier1/market/fred_listing_swfl/) DELETED. Same
+  # confirmed-zero-consumer basis. Cron .github/workflows/ingest-fred-listing-swfl.yml removed,
+  # pipeline retired, Storage prefix flagged for manual delete. The wrong-SOURCE_URL bug this
+  # entry carried (check fred_listing_swfl_wrong_source_url) is now moot — pipeline doesn't run.
 
   - name: market_heat_swfl
     workflow: ingest-market-heat-swfl.yml
@@ -569,24 +524,10 @@ pipelines:
         source_url: "https://www.bls.gov/sae/"
         source_label: "BLS CES/SAE"
 
-  - name: census_vip
-    workflow: ingest-census-vip.yml
-    consuming_pack: none
-    lane: tier-1
-    cadence_days: 30
-    tolerance_multiplier: 2.0
-    inventory_id: lake-tier1/macro/census_vip/
-    inventory_key_type: prefix
-    # First run: 2026-05-27 (workflow_dispatch) ✓
-    source_scope:
-      confirmed_total:
-        summary: "Census Value of Construction Put in Place, monthly, 10-year window — 4 collapsed categories only (total, residential, nonresidential, manufacturing), seasonally-adjusted value only, national grain"
-        source: "our ingest"
-      source_ceiling:
-        summary: "Same VIP survey publishes dozens of sub-categories we collapse away: residential new single-family/multi-family/improvements split separately; nonresidential broken into lodging, office, full commercial detail, health care, ~10 educational sub-types, religious, public safety, recreation, transportation, communication, power, and 13 named manufacturing sub-sectors (vs. our single bucket). Also unused: non-seasonally-adjusted series. Confirmed vendor ceiling: VIP is national-only, no state/county cut exists for this survey — not a grain gap."
-        as_of: "07/08/2026"
-        source_url: "https://www.census.gov/construction/c30/c30index.html"
-        source_label: "Census Bureau Construction Spending (VIP/C30)"
+  # RETIRED 08/11/2026 — census_vip (lake-tier1/macro/census_vip/) DELETED. Confirmed zero code
+  # reader across two independent audits (07/18 P7-corpse-deletelist, 08/11 graphify deep-dive).
+  # Cron .github/workflows/ingest-census-vip.yml removed, pipeline ingest/pipelines/census_vip/
+  # retired, Storage prefix flagged for manual delete (operator/CLI action, not scriptable here).
 
   - name: city_pulse
     workflow: city-pulse-daily.yml
@@ -1937,36 +1878,13 @@ pipelines:
         as_of: "07/26/2026"
         source_label: "winknews.com, gulfcoastnewsnow.com, wgcu.org/news, capecoralbreeze.com, floridaweekly.com"
 
-  - name: active_listings
-    workflow: active-listings-daily.yml
-    consuming_pack: none
-    # NOT nightly-gated, despite a daily cron (08h D7 / index correction). This pipeline's table,
-    # data_lake.active_listings_residential, FEEDS NOTHING LIVE: the note below claims
-    # refinery/packs/active-listings-swfl.mts as consumer, but that pack reads
-    # data_lake.listing_active_stats — a view over listing_state, written by listing_lifecycle.
-    # Proof: active-listings-residential-source.mts:27 `const VIEW = "listing_active_stats"`;
-    # lib/email/sole-spine.test.ts:8 `const DEAD_VIEW = "active_listings_residential"`;
-    # lib/landing/load-home-map-data.ts:13. Gating this would guard a corpse while the real table
-    # silently empties. SHIP-OR-DELETE decision: check active_listings_ship_or_delete.
-    lane: tier-2
-    cadence_days: 1
-    tolerance_multiplier: 3.0
-    freshness_table: data_lake.active_listings_residential
-    freshness_column: scraped_at
-    source_name: active_listings_seed  # neutral source identifier (migrated 2026-06-25)
-    expected_rows_min: 2000 # Collier alone yielded 2,292 in proof (run 28254764976); raise to ~0.9*full-county after the first scheduled all-county cron
-    note: "Region-wide SWFL residential active listings (Collier/Lee/Charlotte/Sarasota) scraped from the configured listings source (base URL via the LISTINGS_SOURCE_BASE_URL secret — not committed) via crawl4ai HTTP strategy. The 'for now' seed before a licensed feed lands — same table, source_name swaps in. CRON LIVE 2026-06-26: runner IP WAF-proven (116+ Collier pages, 0 403s, 2,292 listings, run 28254764976); daily 09:00 UTC. Check listings_runner_ip_waf_proof CLOSED."
-    # SQL migration: docs/sql/20260625_active_listings_residential.sql (applied 2026-06-25).
-    # Pipeline: ingest/pipelines/active_listings/. Workflow: .github/workflows/active-listings-daily.yml.
-    # Consumer brain: refinery/packs/active-listings-swfl.mts.
-    source_scope:
-      confirmed_total:
-        summary: "mls_id, list_price, street_address, city, community, beds, baths, sqft, acres, days_on_market, status, property_type, listing_type, zip_code, county, state, listing_url — card-level HTML scrape of an undisclosed regional brokerage site (base URL is a GHA secret, not committed), region-wide SWFL, daily"
-        source: "our ingest"
-      source_ceiling:
-        summary: "Per-listing DETAIL PAGES (one fetch per listing, deliberately skipped to keep the index scrape light) would carry year built, garage, pool/waterfront features, listing agent/office contact, photo count, virtual tour link, open house schedule, price-change history, and listing remarks/description — none captured. CORRECTED 07/30/2026: this line previously also claimed HOA FEE. A live probe on 07/14/2026 of both a single-family and a condo detail page found NO HOA fee on the page — see check listing_detail_no_hoa_fee. HOA/fee remains unsourced in every lane we hold, so it must never be rendered as a figure. The rest of this list is still code/design-doc sourced and NOT live-probed (operational-security posture, secret withheld) — treat every remaining item as unverified until someone probes a real detail page."
-        as_of: "07/08/2026"
-        source_label: "regional listings source (base URL undisclosed by design)"
+  # RETIRED 08/11/2026 — active_listings / data_lake.active_listings_residential DELETED
+  # (table + zip_stats view dropped, pipeline retired, .github/workflows/active-listings-daily.yml
+  # removed from nightly-chain.yml). Confirmed dead duplicate: the live path is listing_lifecycle
+  # -> data_lake.listing_state -> listing_active_stats view, read by active-listings-swfl.mts.
+  # Decision executed per P7-corpse-deletelist.md item 6 + check active_listings_ship_or_delete
+  # (closed DELETE). Pipeline code left in ingest/pipelines/active_listings/ for git history only —
+  # not run, not registered.
 
   - name: listing_lifecycle
     workflow: listing-lifecycle-daily.yml
