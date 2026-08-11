@@ -127,4 +127,60 @@ describe("POST /api/agent-feed/test-inject", () => {
     expect(res.status).toBe(400);
     expect(insertedRow).toBeNull();
   });
+
+  // Round 2 review fix: pipeline.py:65-70 (_keyed_scan) forces state="active" on every
+  // scanned row, so "new"/"coming_soon"/"back_on_market" are NEVER actually written as a
+  // to_state -- transitions.py:22's _LIVE_STATES is a membership-test set, not a write list.
+  // The real to_state vocabulary shrank to {active, holding, sold, withdrawn}.
+  test("to_state 'new' (never a real pipeline to_state -- see VALID_TO_STATES comment) -> 400, never inserts", async () => {
+    insertedRow = null;
+    const res = await POST(req({ address: "123 Demo Ln, Fort Myers, FL 33901", to_state: "new" }));
+    expect(res.status).toBe(400);
+    expect(insertedRow).toBeNull();
+  });
+
+  test("from_state 'new' (not in the from_state allowlist either) -> 400, never inserts", async () => {
+    insertedRow = null;
+    const res = await POST(
+      req({ address: "123 Demo Ln, Fort Myers, FL 33901", from_state: "new", to_state: "active" }),
+    );
+    expect(res.status).toBe(400);
+    expect(insertedRow).toBeNull();
+  });
+
+  // The two realistic rehearsal shapes the transition->recipe map (Task 6) needs: NULL
+  // from_state is the deliberate new-listing signal (transitions.py:54-57), and
+  // holding->active is the deliberate back-on-market/relist signal (transitions.py:73-85).
+  // Both must pass the from_state/to_state allowlists cleanly.
+  test("from_state:null, to_state:'active' (new-listing rehearsal shape) -> 201", async () => {
+    insertedRow = null;
+    insertedId = 301;
+    const res = await POST(
+      req({
+        address: "123 Demo Ln, Fort Myers, FL 33901",
+        from_state: null,
+        to_state: "active",
+      }),
+    );
+    const body = await res.json();
+    expect(res.status).toBe(201);
+    expect(body).toEqual({ id: 301 });
+    expect(insertedRow).toMatchObject({ from_state: null, to_state: "active" });
+  });
+
+  test("from_state:'holding', to_state:'active' (back-on-market/relist rehearsal shape) -> 201", async () => {
+    insertedRow = null;
+    insertedId = 302;
+    const res = await POST(
+      req({
+        address: "123 Demo Ln, Fort Myers, FL 33901",
+        from_state: "holding",
+        to_state: "active",
+      }),
+    );
+    const body = await res.json();
+    expect(res.status).toBe(201);
+    expect(body).toEqual({ id: 302 });
+    expect(insertedRow).toMatchObject({ from_state: "holding", to_state: "active" });
+  });
 });
