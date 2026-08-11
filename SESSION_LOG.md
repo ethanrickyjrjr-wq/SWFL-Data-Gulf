@@ -1,3 +1,28 @@
+## 2026-08-11 (Fable 5) — HERMES EMAIL DRIVER: built, reviewed, rehearsed, LANDED — the always-on agent that pre-builds lifecycle emails
+
+Operator brainstorm → spec → plan → subagent-driven build with advisor review gates ("SUB W
+ADVISOR AND YOU"), all 6 tasks complete on wt/hermes-email-driver (14 commits landed this push).
+The shape: server detects listing transitions (existing ingest, untouched) → cursor feed
+GET /api/agent-feed/transitions (per-source keyset cursor atISO|id|r:|t:, seed-filtered,
+addresses= scoping) + demo-scoped POST test-inject → single-phase POST /api/agent/build
+(claimOnce-idempotent on the transition natural key, strict 5-field schema, no send path —
+verified across all 271 transitive imports) → Hermes on the operator box (skill + pull/advance
+scripts + fail-closed pre_tool_call shell hook; machine-local, never in repo). 3 scoped tokens
+live in user_api_tokens (feed-read + test-inject under operator, build under demo account —
+token-owner scoping IS the demo isolation). Rehearsal green end-to-end vs live DB: inject →
+pull → build 200 → duplicate:true replay → cursor advance → [SILENT]; 1 ledger row, 1 demo
+deliverable, 0 sends. Review machinery earned it: 9 fix rounds + final whole-branch review
+caught a fabricated-evidence report (twice), a cursor wedge on >50-same-date rows, unquoted
+PostgREST or() reserved chars (silent empty feed), seed rows served as live, first-match ZIP
+regex corrupting address_key on 5-digit house numbers, a recipe map keyed on to_state values
+the pipeline NEVER writes (real vocabulary {active,holding,sold,withdrawn}; new-listing =
+from_state NULL — pipeline.py:65 hardcodes every scan "active"), a collapse rule eating price
+cuts, a cross-source date-grain cursor shadow, and a mock leak that reds bare bun test. Checks:
+hermes_email_driver_live_verify OPEN (closes on first REAL unprompted transition draft —
+operator step), agent_build_key_tenant_gate + agent_build_metering_before_schedule OPEN
+(multi-tenant + scheduling gates). Full trail: .superpowers/sdd/2026-08-10-hermes-email-driver/
+(gitignored) + docs/superpowers/specs+plans/2026-08-10-hermes-email-driver-*.
+
 ## 2026-08-11 (Opus 5) — CI GREEN AGAIN: 4 red gates run to ground (1 type error, 2 stale pins, 1 process-global mock leak)
 
 Operator: "WHY IS GITHUB FUCKING RED" — main had been red for 12 straight runs since 08/10 17:10.
