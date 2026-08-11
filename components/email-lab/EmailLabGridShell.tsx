@@ -75,6 +75,7 @@ const FilerobotModal = dynamic(() => import("./FilerobotModal").then((m) => m.Fi
 });
 import { BrandingBlock } from "@/components/brand/BrandingBlock";
 import { AddressPopup, type SavedLayoutOffer } from "@/components/lab-entry/AddressPopup";
+import { holdArrivalForPopup } from "@/lib/lab-entry/arrival";
 import { LoginModal } from "@/components/landing/LoginModal";
 import { registerBrandPanel, pulseBrandPanel } from "@/lib/brand/reveal-brand-panel";
 import { campaignFollowUpForPrompt, campaignKeyForPrompt } from "@/lib/campaigns";
@@ -430,6 +431,9 @@ export function EmailLabGridShell({
   // any brand fields the recipe prints) that the click used to swallow silently.
   const [startRecipe, setStartRecipe] = useState<ShowcaseRecipe | null>(null);
   const brandPrefillAttempted = useRef(false);
+  // true iff /api/user/brand answered 200 — the signed-in signal the arrival
+  // gap-gate reads. A 401 (signed out) or 5xx leaves it false: build-first.
+  const brandAuthedRef = useRef(false);
   // Arrival brand gate: the account brand has been read (or failed to read), and the
   // fields the arriving recipe prints that we still don't have. The mount build waits
   // on the first and is held by the second.
@@ -742,7 +746,16 @@ export function EmailLabGridShell({
     )
       return;
     const gaps = typableGaps(autoBuildNeeds ?? [], brandingRef.current);
-    if (gaps.length > 0 || savedLayoutOffer) {
+    // Signed-out arrivals never hold for the "Sign this email" ask (launch
+    // decree 08/11/2026 — /go is popup-free; slots stay open, sign-in collects
+    // identity on save/send). Gate logic pinned in lib/lab-entry/arrival.ts.
+    if (
+      holdArrivalForPopup({
+        gapCount: gaps.length,
+        hasSavedLayoutOffer: Boolean(savedLayoutOffer),
+        brandAuthed: brandAuthedRef.current,
+      })
+    ) {
       setAutoBuildGaps(gaps); // may be [] — the popup then carries ONLY the layout ask
       setAiLoading(false); // the spinner must not sit under the popup
       return;
@@ -1535,7 +1548,10 @@ export function EmailLabGridShell({
     if (brandPrefillAttempted.current) return;
     brandPrefillAttempted.current = true;
     fetch("/api/user/brand")
-      .then((r) => (r.ok ? r.json() : {}))
+      .then((r) => {
+        brandAuthedRef.current = r.ok;
+        return r.ok ? r.json() : {};
+      })
       .then((data: Record<string, unknown>) => {
         setPalettes(sanitizePalettes(data.color_palettes));
         setBranding((prev) => {

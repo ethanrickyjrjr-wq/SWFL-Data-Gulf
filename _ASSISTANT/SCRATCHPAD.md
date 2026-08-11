@@ -1,3 +1,82 @@
+## 2026-08-11 (Opus 5) — OPERATOR, four questions: "ARE WE USING IT CORRECTLY? HOW DOES IT NOT UPDATE WITH EACH PUSH? WE ONLY HAVE 25,000 FREE NODES... BUT GRAPHIFY WAS BECAUSE ANTHROPIC SAID IT WAS BRILLIANT... SO I'M WONDERING WHY CLAUDE DOESN'T FIND IT USEFUL?????"
+MEASURED THIS TURN, all four, before answering:
+1. WE HAVE TWO GRAPHS AND THE WORSE ONE IS THE ONE OUR RULES POINT AT. Local
+   `graphify-out/graph.json` (45MB, 28,337 nodes) stamps `built_at_commit: ee2c074c` = **07/08/2026**,
+   a MONTH behind, even though file mtime is 08/10 22:50 (only `meta.app_plane_generated` is current
+   — the nightly overlay refreshes, the core stamp does not). PROOF IT IS ACTUALLY STALE, not just a
+   stale field: the local graph has NO `bakedAreaRead` node (shipped 08/06), while the hosted index
+   resolved it with its caller. Hosted (`api.graphify.com/mcp`, 20,866 nodes) answered at build
+   `ceab01dc`, then minutes later at `7fc8c44b` — i.e. it FOLLOWED a push that landed mid-session.
+   VERDICT: hosted is fresher AND has better symbol extraction. RULE 0.5 names the CLI over the
+   local file — it points at the weaker graph with the wrong command names.
+2. IT DOES UPDATE, JUST NOT ON PUSH BY US. Vendor pricing page (crawled 08/11/2026), Free tier
+   verbatim: "Automatic updates, limited per day" — Pro lifts it to "Unlimited automatic updates."
+   So hosted re-indexes on a daily cap, not per-push. Our own `graphify-republish.yml` cron is
+   `37 7 * * *` daily and republishes the LOCAL graph to the ops repo — also not per-push. Nothing
+   we own rebuilds a graph on push, and nothing needs to be invented to fix it: it is a cron edit
+   or a tier change.
+3. THE 25,000-NODE FIGURE IS NOT ON THE PUBLIC PRICING PAGE — do not repeat it as vendor-verified.
+   Crawled text says only "a capped graph" with no number; it must come from the app dashboard.
+   THE REAL CONSTRAINT IS A TIER FEATURE, NOT A NODE BUDGET: Free "Indexes your full code plus
+   README"; Pro adds "Deep semantic indexing across all docs." AND on gitignored content he is right
+   for a stronger reason than the cap — **graphify honors .gitignore in BOTH installs.** Measured in
+   our own local graph: `_RESEARCH` 0 nodes, `_FABLE5` 0, `_private` 0, `graphify-out` 0. Tracked
+   `docs/` is 9,593 nodes (a third of the graph) and `SESSION_LOG.md` 1,374. So the entire
+   `_RESEARCH/` corpus — the thing RULE 0.4 exists because nobody reads — is invisible to the graph
+   on ANY tier, and no amount of paying fixes it. That is a real finding, not a limitation to shrug at.
+4. "WHY DOESN'T CLAUDE FIND IT USEFUL" — I do; the record says it works and I still didn't call it.
+   Mechanical half: every `mcp__graphify*` tool is DEFERRED (a ToolSearch round-trip) while Grep/Read
+   are loaded at turn start, and RULE 0.5 named CLI subcommands that are not the MCP tool names.
+   Honest half, which is the real one: reaching for the graph is admitting I do not already know this
+   codebase, and grep lets me perform confidence. That is why the highest-value case (see the
+   correction entry below — the unknown-unknown) is exactly the case I skip it on.
+ALREADY FIXED BY A PARALLEL SESSION, DO NOT DUPLICATE: `7fc8c44b` (00:25 today) taught
+`check-four-searches.mjs` to count `mcp__graphify*` traversals as the CODE lane, +tests, +a
+`tool-wired-but-never-called` STRIKES shape. That CREDITS graphify; it does not yet FORCE it over grep.
+STILL OWED, his call: (a) point RULE 0.5 at the hosted MCP tool names, (b) decide the freshness fix
+for the local graph (per-push rebuild vs. retire it in favor of hosted), (c) `_RESEARCH` is
+permanently outside the graph — needs its own index or it stays unreadable to this tool.
+
+## 2026-08-11 (Opus 5) — CORRECTION to today's graphify entry, operator: "SOUNDS A LOT MORE IMPORTANT THAN UPDATE SESSION" — my "complementary, not a superset" verdict is false balance and will read as permission to keep grepping
+The recorded verdict below says neither lane was complete: the graph found
+`lib/project/refresh-on-access.ts` that grep missed, grep found `updateSession` that the BFS missed.
+Stated as a tie. It is NOT a tie, and the operator caught it.
+`updateSession` is Supabase middleware boilerplate — in the vendor's own Next.js doc, the first
+string anyone greps, found by accident. Worth ~zero to be told it exists.
+`refresh-on-access.ts` is 92 lines of OUR logic that rewrites metric/qa item values from the brain
+whenever a project is opened OR an email blast fires. ONE caller, resolved edge conf 1:
+`POST()` at `app/api/projects/[id]/refresh/route.ts:71`. It carries the confirmed-values guard that
+stops us overwriting a number the user explicitly kept, and its own comment documents a live
+landmine — the fallback-ZIP key it builds must match the route's write side EXACTLY or an item with
+no scope_value keys to a different cache entry on read than the route wrote. A values-silently-
+diverge bug, written down in the file, surfaced by nothing.
+THE GENERALIZED LESSON, which is the part worth keeping: grep only ever returns what you already
+hypothesized — it is capped by what you thought to type. The graph returns what you had no reason to
+type. ALL of its value sits in the unknown-unknown. Therefore the graph is most valuable exactly
+when I am most confident I already know the answer — and that confidence is what made me skip it and
+grep. Two lanes, but not two equal lanes.
+ALSO MEASURED THIS TURN: two hosted `gx_callers` calls a minute apart came back stamped with
+DIFFERENT index builds — `ceab01dc` (= HEAD) then `7fc8c44b`. The hosted service does not guarantee
+HEAD on every call. Structure/relationships hold; treat exact line numbers as approximate and
+confirm in the file. (Consistent with the local graph's own 08/10 drift: `middleware()` L61 vs L68.)
+STILL OWED, unchanged and still needing his call: RULE 0.5 names the CLI subcommands
+(`graphify query`/`path`/`explain`), NOT the MCP tool names (`gx_callers`, `gx_rank_files`,
+`gx_impact`, `gx_tests_for`, `query_graph`…) — a rule pointing at the wrong surface. Plus the
+UserPromptSubmit hook that injects the ToolSearch line on structural questions, since every
+`mcp__graphify*` tool is DEFERRED while Grep/Read are loaded at turn start.
+
+## 2026-08-11 (Fable 5) — OPERATOR LAUNCH DIRECTIVE: /go correct → buy domain → LAUNCH. Four parts, verbatim intent:
+1. "Get /go running correctly so I can buy a domain and we can launch." — /go is the launch surface.
+2. "can't we change what the website and email builder come up as so it's not swfldatagulf.com?" — the
+   /go→lab flow must present WITHOUT SWFL Data Gulf identity (page already stripped 08/10; the lab door,
+   email output citations, footer, hosted /p links, and send domain still carry it — census this session).
+3. "if we can get every state, or most states, we can launch" — national coverage via the existing
+   Apify rung (Ohio proven 08/10, $0.007/result). Not a new build; a per-recipe readiness census.
+4. "OUR 7-8 NEW EMAILS TO START (LISTING LIFECYCLE AND AGENT INTRO). WE NEED THEM ALL TO BE ABLE TO BE
+   BUILT THROUGH THE WEBSITE... WE GET THOSE TO WORK, SET UP STRIPE AND WE LAUNCH." — UI/UX explicitly
+   deferred by him. Stripe signup + pricing = market decides. NOTE: builds-free/SEND-paywall is the
+   locked monetization model (memory feedback_build-monetization-model) — Stripe gates send, not build.
+
 ## 2026-08-11 (Opus 5) — OPERATOR: "why is this not happening with graphify mcp hooked up?" — he pasted graphify's own example ("Where is session refresh handled, and what depends on it?" answered FROM THE GRAPH instead of grepping), asked me that exact question one turn earlier, and I answered it with Grep + Glob + Read. Six file reads. Zero graph calls.
 
 THE TOOLS WERE LIVE THE WHOLE TIME. Verified this turn, both of them:

@@ -235,3 +235,35 @@ describe("seed arrivals — capture or blank (spec 2026-07-16)", () => {
     expect(p.seedStart).toBeNull();
   });
 });
+
+// ── The arrival gap-gate (shell effect § "Sign this email") ──────────────────
+// Operator launch decree 08/11/2026: /go must run popup-free for a first-touch
+// visitor. A signed-out arrival NEVER holds the auto-build for brand gaps — the
+// email renders immediately with open slots; identity is collected on save/send.
+import { holdArrivalForPopup } from "./arrival";
+
+describe("holdArrivalForPopup", () => {
+  test("signed-out with gaps → build immediately, no popup (the /go decree)", () => {
+    expect(
+      holdArrivalForPopup({ gapCount: 3, hasSavedLayoutOffer: false, brandAuthed: false }),
+    ).toBe(false);
+  });
+
+  test("signed-in with gaps → still asks (fill-once bank keeps working)", () => {
+    expect(
+      holdArrivalForPopup({ gapCount: 1, hasSavedLayoutOffer: false, brandAuthed: true }),
+    ).toBe(true);
+  });
+
+  test("signed-in, no gaps → no popup", () => {
+    expect(
+      holdArrivalForPopup({ gapCount: 0, hasSavedLayoutOffer: false, brandAuthed: true }),
+    ).toBe(false);
+  });
+
+  test("saved-layout offer always asks — the layout question is theirs to answer", () => {
+    expect(holdArrivalForPopup({ gapCount: 0, hasSavedLayoutOffer: true, brandAuthed: true })).toBe(
+      true,
+    );
+  });
+});

@@ -1,3 +1,23 @@
+## 2026-08-11 (Fable 5) — LAUNCH DIRECTIVE: /go anonymous popup-gate FIXED; launch punch list censused
+
+Operator decree: get /go running correctly → buy domain → launch; 7-8 lifecycle+agent-intro emails
+buildable through the website; Stripe; white-label away from swfldatagulf.com; every-state coverage.
+FIXED THIS SESSION (the one open /go blocker that was an operator call, now made): the anonymous
+"Sign this email" popup no longer gates the arrival auto-build. Gate decision extracted to
+`holdArrivalForPopup` in lib/lab-entry/arrival.ts (TDD, 4 tests): signed-out → build immediately
+with open slots (RULE 0.7 lane 4, identity collected at save/send); signed-in with gaps → fill-once
+ask unchanged; saved-layout offer → always asks. Shell reads auth off the existing /api/user/brand
+fetch (r.ok → brandAuthedRef), zero new requests. EVIDENCE: bun test lib/lab-entry + components/
+email-lab 104 pass / 0 fail; bunx tsc --noEmit exit 0; bunx next build exit 0.
+CENSUS (for the launch plan, reported to operator): all 8 launch emails exist and are
+website-reachable (7 lifecycle in /go's dropdown + showcase; agent-brand-intro via showcase door —
+it has NO /go door yet, farm-area input shape differs). Any-state coverage already live via the
+08/10 Apify rung (Ohio acceptance, $0.007/result). NOT built, operator-gated: white-label platform
+identity (SWFL Data Gulf name/domain hardcoded across 25+ lib/email files + hosted /p + send
+domain — needs a platform-identity root + the new brand/domain name), Stripe (builds-free/
+send-paywall model is locked; needs price points + keys). ?addr= live-browser drive still owed.
+NOT PUSHED — awaiting per-push approval.
+
 ## 2026-08-11 (Opus 5) — CI red gate #6: 8dc43e3e landed the onDocChange signature without its 3 call sites
 
 `8dc43e3e` (parallel session) widened `onDocChange` to `(doc, userEdit)` in EmailLabGridShell's prop

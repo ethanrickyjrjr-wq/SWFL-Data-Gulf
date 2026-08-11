@@ -158,3 +158,21 @@ export function planArrival(input: ArrivalInput): ArrivalPlan {
     seedStart: null,
   };
 }
+
+/** The arrival gap-gate (the shell's "Sign this email" hold before an arrival
+ *  auto-build). Operator launch decree 08/11/2026 ("get /go running correctly",
+ *  no popups on the one-click flow): a SIGNED-OUT arrival never holds the build
+ *  for brand gaps — there is no account brand to bank into, and the first-touch
+ *  visitor must see their email, not a form. The doc renders with open labelled
+ *  slots (RULE 0.7 lane 4); identity is collected on save/send, where sign-in
+ *  already happens. Signed-in users with real gaps still get the fill-once ask,
+ *  and a saved-layout offer always asks — that question is theirs to answer. */
+export function holdArrivalForPopup(input: {
+  gapCount: number;
+  hasSavedLayoutOffer: boolean;
+  /** true iff /api/user/brand answered 200 (a signed-in account brand read). */
+  brandAuthed: boolean;
+}): boolean {
+  if (input.hasSavedLayoutOffer) return true;
+  return input.brandAuthed && input.gapCount > 0;
+}
