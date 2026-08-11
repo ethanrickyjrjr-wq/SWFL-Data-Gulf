@@ -6,6 +6,7 @@ import { heroDestination } from "@/lib/lab-entry/destination";
 import { areaFromGoQuery } from "@/lib/lab-entry/area-from-query";
 import { RECIPES, type RecipeKey } from "@/lib/deliverable/recipes";
 import type { AddressSuggestion } from "@/lib/geo/search-box";
+import { GO_BRAND } from "./brand";
 
 /**
  * The /go one-click page (operator decree 08/10/2026): a Google-simple hero —
@@ -37,13 +38,10 @@ const LIFECYCLE_KEYS: readonly RecipeKey[] = [
  *  bar holds — a full listing address still works. */
 const AREA_KEYS: readonly RecipeKey[] = ["listings-digest"];
 
-// Brand row for ethanrickyjrjr@gmail.com (user_brand_profiles, read 08/10/2026).
-const BRAND = {
-  primary: "#0F1D24",
-  accent: "#3DC9C0",
-  text: "#1A2B33",
-  surface: "#F7F9FA",
-};
+// The palette moved to ./brand.ts on 08/11/2026 so the top bar and the hero read
+// ONE root — a color can no longer drift between them. Alias kept so the JSX below
+// is untouched.
+const BRAND = GO_BRAND;
 
 export default function OneClickHero() {
   const [query, setQuery] = useState("");
@@ -130,10 +128,7 @@ export default function OneClickHero() {
   };
 
   return (
-    <main
-      className="flex min-h-[100dvh] flex-col items-center bg-white px-4"
-      style={{ color: BRAND.text }}
-    >
+    <main className="flex grow flex-col items-center bg-white px-4" style={{ color: BRAND.text }}>
       <div className="flex w-full max-w-2xl grow flex-col items-center justify-center pb-24">
         <h1
           className="mt-4 text-center font-bold"
@@ -153,7 +148,7 @@ export default function OneClickHero() {
         <div className="relative mt-10 w-full">
           <div
             className="flex w-full items-center rounded-full border bg-white py-2 pl-6 pr-2 shadow-sm focus-within:shadow-md"
-            style={{ borderColor: "#D8E0E3" }}
+            style={{ borderColor: BRAND.hairline }}
           >
             <input
               className="w-full bg-transparent text-base outline-none placeholder:text-slate-400"
@@ -182,7 +177,7 @@ export default function OneClickHero() {
           {suggestions.length > 0 && (
             <ul
               className="absolute left-0 right-0 top-full z-20 mt-2 overflow-hidden rounded-2xl border bg-white shadow-lg"
-              style={{ borderColor: "#D8E0E3" }}
+              style={{ borderColor: BRAND.hairline }}
               role="listbox"
               aria-label="Address suggestions"
             >
@@ -208,7 +203,7 @@ export default function OneClickHero() {
           {menuOpen && suggestions.length === 0 && (
             <div
               className="absolute left-0 right-0 top-full z-20 mt-2 overflow-hidden rounded-2xl border bg-white shadow-lg"
-              style={{ borderColor: "#D8E0E3" }}
+              style={{ borderColor: BRAND.hairline }}
               role="menu"
               aria-label="New Listing lifecycle emails"
             >

@@ -5,6 +5,7 @@
 // APIs with the main site, no layout coupling.
 import type { Metadata } from "next";
 import { Montserrat, Lato } from "next/font/google";
+import GoTopBar from "@/components/go/GoTopBar";
 import OneClickHero from "@/components/go/OneClickHero";
 
 // The operator's brand row (user_brand_profiles): Montserrat display, Lato body.
@@ -25,7 +26,10 @@ export const metadata: Metadata = {
 
 export default function GoPage() {
   return (
-    <div className={`${lato.className} ${montserrat.variable}`}>
+    <div
+      className={`${lato.className} ${montserrat.variable} flex min-h-[100dvh] flex-col bg-white`}
+    >
+      <GoTopBar />
       <OneClickHero />
     </div>
   );

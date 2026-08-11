@@ -1,50 +1,3 @@
-## 2026-08-11 (Opus 5) — completion handoff for the five-item re-verify + ledger burned DOWN (1 closed, 3 corrected with live evidence, 0 opened)
-
-Operator: "close checks and give me handoff to complete what we need to complete all the way to
-finish." Both delivered on top of `a803c51f`.
-
-**LEDGER — net negative, per RULE 0.85. Opened 0.**
-- **CLOSED `redfin_city_null_filter_dropped_no_paging`** — the defect it describes is gone: both
-  defenses are present at `lib/desk/loaders.ts:170` (`selectAllPaged`) and `:181`
-  (`.not(median_sale_price, is, null)`), documented as exactly that pair in the docstring
-  `:150-160`. Fix was a foreign session's; closed on pasted evidence, not authorship.
-- **UPDATED `redfin_city_swfl_not_swfl`** — still REAL and it has GROWN: **896 statewide regions
-  when filed 07/13/2026 → 952 live 08/11/2026.** Current consumer is safe (`loadSoldSeries` filters
-  `.in("area", CITY_DEFS)`); the risk is any NEW unfiltered reader.
-- **UPDATED `identity_live_red_baseline`** — its `redfin_city_swfl` clause ("table never landed") is
-  now FALSE: 403,565 rows, live consumer. Its other THREE clauses (`fgcu_reri_indicators`,
-  `dbpr_re_licensees`, `news_swfl`) were NOT re-probed and stay open — said so in the detail rather
-  than quietly closing the whole row.
-- **UPDATED `cre_figures_build_cron_cadence`** — re-scoped: the REGISTRY half is already done
-  (`cadence_registry.yaml:1624`); only the cron + a consumer remain.
-
-**HANDOFF: `docs/handoff/2026-08-11-five-item-reverify-completion-handoff.md`** (indexed via
-`doc-index.mjs` — 1,633 docs). Six items, ordered, each with file+line+live number, and each tagged
-`[FIXABLE NOW]` vs `[NEEDS OPERATOR DECISION]` so the next session does not stall on the wrong one:
-1. **`cre_figures` — WIRE IT** (biggest gap). Blocked on ONE unanswered C1/C2 call open since
-   07/18: does it REPLACE `marketbeat_swfl` as the CRE authority? Wiring a consumer first creates
-   the second-root problem RULE 0.55 exists to stop.
-2. **The dark-roots classifier is WRONG** — `consuming_pack` only answers "does a BRAIN PACK read
-   this," so a page/route/SQL consumer is invisible and the root reads as dark. It mis-flagged
-   `redfin_city_swfl`, which is **rung 1 of the desk hero**. The remaining 5 flagged roots are
-   NOT re-verified for non-pack consumers — `cb803b1c` deleted 5 pipelines on this same signal.
-3. **RULE 0.5 carve-out** — the graph's false negative needs two named exceptions (value /
-   default-parameter refs; any `data_lake.*` question) + a re-index trigger. Operator's wording.
-4. **`reportToEmailHtml`** — finish the half-done convergence plan (its own goldens exist to prove
-   the collapse is behavior-preserving) or leave the 4th path gated. Phase D also hits the open
-   `applyBrand is browser-only` defect.
-5. **`redfin_city_swfl` scope guard** — pin the SWFL area set so a new reader cannot get statewide.
-6. **Residual:** the 3 un-probed `identity_live_red_baseline` clauses.
-
-**PARALLEL-SESSION INCIDENT, caught and repaired — safe-push DROPPED a concurrent session's
-uncommitted work.** `safe-push.mjs` stashed the other session's 10 modified files, rebased, and the
-stash ended DROPPED (`52416ee`) — `git status` came back clean of all 10. Recovered with
-`git stash apply 52416ee` (the object survives until gc); verified both sessions' content intact
-afterwards (my committed entries + their `/go` address-door and blank-canvas work). **This is the
-documented `safe-push carries/loses foreign work` landmine firing for real, not theoretically** —
-worth a guard, because the only reason it was caught is that I diffed `git status` after the push
-instead of trusting "Done."
-
 ## 2026-08-11 (Opus 5) — the 5 held-back provisional items re-verified: 4 of 5 claims were WRONG, 6 stale doc lines corrected, and the hosted graph produced a false negative on the one question RULE 0.5 says it wins
 
 Operator: "LOOK INTO THESE" — the five items the failed graph re-verify left single-pass/provisional.
@@ -137,6 +90,52 @@ live consumer and quoted 07/18 row counts without touching the source):**
 `docs/audit/2026-07-11-pipeline-problems/08a-spine-identity.md`). Checks opened: 0. Closed: 0.
 **Operator decisions NOT taken unasked:** wiring a `cre_figures` consumer + its cron; reclassifying
 the dark-roots list so a page-consumer counts; the RULE 0.5 grep carve-out.
+
+## 2026-08-11 (Opus 5) — /go gets a top bar: My Brand + Sign up, NO logo, no name — and an honest read that "wired" is not "working"
+
+Operator: "how far are we on /go working? we need to get brand and sign up up top." Then, same
+session: the button says **My Brand** and opens a popup; anyone who does not fill it in gets our
+colors and logo; "no SWFL DATA GULF name any where" except inside the email. Then: "i still want
+sign up!!!" Then: "DO NOT PUT THE FUCKING LOGO ON THE [/go] PAGE OR CHANGE ANYTHING ABOUT THE
+FUCKING LOOK."
+
+**SHIPPED:** `components/go/GoTopBar.tsx` — a server-component header built INSIDE `components/go`
+(never via `CHROME_FREE_PREFIXES`; touching that list would drag the whole site nav back onto the
+page). Left slot EMPTY. Right: **My Brand** (outline) -> `/account/brand`, which the existing
+intercepting route `app/@accountModal/(.)account/brand/page.tsx` opens as the popup over
+`AccountBrandEditor` -> `BrandingBlock`, the ONE brand form — no second form written. Then **Sign
+up** (filled) -> `/login?next=%2Fgo`; `postLoginDestination` routes a profile with no brand saved
+to `BRAND_WELCOME_PATH`. Non-branded users keep the house brand with no work needed: `applyBrand`
+only OVERLAYS when a token exists, and `apply-brand.ts:35` already forbids house-logo pixels under
+a client's own name. `components/go/brand.ts` holds the palette so the bar and hero cannot drift.
+
+**TWO OPERATOR CORRECTIONS ON THE RECORD, both mine:**
+1. He said ADD "My Brand"; I SWAPPED it in and deleted "Sign up." A follow-up that adds detail to
+   one element is not a decree to delete the others — the spec is EXACTLY the contents, no more
+   and NO LESS. Both buttons ship.
+2. His "logo is fine" was scoped to the EMAIL; I put the logo on the page. Removed. /go carries no
+   company identity of any kind.
+
+**IDENTITY RULE, now split by artifact (unblocks the naming half of `launch_whitelabel_stripe_gate`):**
+the NAME "SWFL Data Gulf" is legal ONLY inside a rendered email — sender identity, CAN-SPAM footer,
+and the data citation line that 40+ `lib/` files emit. Never on /go, in site chrome, or in the tab
+title. The logo is legal in the email, NOT on /go.
+
+**GUARD (TDD, each test named for its failure mode):** `components/go/go-identity.test.ts` — FM1 the
+name never appears in any `components/go` source, FM2 no logo/mark/image of any kind renders on /go,
+FM3 the bar stays exactly My Brand + Sign up (copy-creep raged at twice on 08/10). 3 pass / 0 fail.
+
+**STATUS ANSWER — the honest half.** /go is live and wired end to end: bar -> 8 options (7 lifecycle
++ Listings Digest) -> `heroDestination` -> `/email-lab/grid?recipe&rkey&addr` -> auto-build ->
+rendered finished email; serif seed fixed 08/10, anonymous popup gate fixed 08/11 (`11f017d7`). It
+has NEVER been driven end to end in a live browser, and that `?addr=` drive has been logged as owed
+since before the popup gate changed the anonymous path. Wired is not working, and "8 emails
+website-reachable" is a reachability census, NOT proof 8 emails build. Also open: agent-brand-intro
+has no /go door, `apify_lookup_miss_memo`, white-label name/domain + Stripe (operator-gated).
+
+**MY OWN DEFECT THIS SESSION, not hidden:** I rebuilt while a server still held the prior build and
+pasted the resulting stylesheet-less render to the operator as if it were the page. A screenshot off
+a stale serve is not evidence — verify the serve before showing anyone the picture.
 
 ## 2026-08-11 (Opus 5) — the nightly chain has been red since 07/22, and it was ONE working guard misreporting itself: bake exit-code fixed + the half-deleted `listings:` job that broke YAML parsing this morning
 
