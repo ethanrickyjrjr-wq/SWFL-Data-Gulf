@@ -1,3 +1,30 @@
+## 2026-08-11 (Opus 5) — CI red gate #5: knip blocked on the un-gitignored design-reference kits
+
+With the type error, the two stale pins and the mock leak fixed (entry below, landed as 22750cc8),
+CI got PAST typecheck/lint/bun test/node:test for the first time in 12 runs and died at the next
+gate: knip "Unused files (12)", every one of them `docs/design-reference/ui_kits/**/*.jsx`. Those
+became visible to knip when `docs/design-reference/` was un-gitignored on 08/06/2026 so CLAUDE.md
+RULE 0.4 could point sessions at `colors_and_type.css` BY PATH — the doc fix quietly armed a
+blocking code gate. They are reference kits whose own README says re-implement in our stack, so
+"no importer" is their CORRECT state: added `docs/design-reference/**` to knip.jsonc `ignore`,
+next to the same-reasoned `app/_design/**` and `docs/superpowers/plans/_FINISHED/**` entries.
+ALSO FIXED in the prior commit: `.github/_watch-manifest.json` was stale — `ingest-crexi-listings`
+lost its Anthropic key env on 08/06/2026 (verified zero paid model calls) so it now computes
+`paid: false`, and nobody regenerated. That drift guard runs in the node:test step AFTER `bun test`,
+so it had been invisible behind the red suite. Regenerated with `build-watch-lists.mjs`.
+EVIDENCE, every CI gate run locally after this change: `bunx tsc --noEmit` 0 · `bunx eslint` 0 ·
+`bun test` 9076 pass / 9 fail (the same env-gated live-path 9 that need keys CI has) ·
+`node --test` 270 pass / 0 fail · `bunx --bun knip` exit 0 · `check-lake-reads` 0 ("31 known raw
+read(s), no new ones") · `check-registry-identity --static` 0 ("every registry↔workflow↔code
+identity resolves").
+
+## 2026-08-11 (Fable 5) — hermes-email-driver: the 14 feature commits LAND on main (operator: "LAND IT AND PUSH")
+
+The branch push itself — wt/hermes-email-driver rebased onto main (through the CI-fix and the
+parallel session's push that carried the previous entry), fast-forwarded, pushed via safe-push
+with per-push operator approval. Details in the entry below; next = operator's live-verify
+(first REAL unprompted transition draft closes hermes_email_driver_live_verify).
+
 ## 2026-08-11 (Fable 5) — HERMES EMAIL DRIVER: built, reviewed, rehearsed, LANDED — the always-on agent that pre-builds lifecycle emails
 
 Operator brainstorm → spec → plan → subagent-driven build with advisor review gates ("SUB W
