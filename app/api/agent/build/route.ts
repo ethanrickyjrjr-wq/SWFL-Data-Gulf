@@ -24,10 +24,21 @@
 // releasing after an ambiguous failure here is a duplicate DRAFT on retry, never a duplicate
 // send. Every failure path after a won claim below releases it for exactly this reason.
 //
-// TOKEN-OWNER CONSEQUENCE FOR TASK 6 (found during this task's recon, not a code change):
-// findProjectId scopes the project search to requireScope's own userId -- the OWNER of the
-// agent_build bearer token making this call. A demo-account rehearsal (Task 6 Step 4,
-// "draft visible in demo project") therefore needs an agent_build token MINTED UNDER THE
+// ORPHANED-CLAIM RECOVERY (H1 fix, hermes-email-driver review round). If the process dies
+// between winning a claim and linking its draft to the ledger row (recordDraftOnLedger), a
+// naive claim-lost reply would 500 "duplicate_pending" FOREVER -- there is no draft to find
+// and no process left to finish building one. On a claim-lost reply with no linked draft,
+// this route now reads the ledger row's own `created_at` (findLedgerClaim): younger than
+// ORPHAN_THRESHOLD_MS is treated as a genuine in-progress build (unchanged: plain
+// duplicate_pending, the winner is almost certainly still running); older releases the claim
+// (releaseClaim -- already exists in lib/email/idempotency.ts, reused rather than adding a
+// second delete helper, RULE 0.5) and replies `retryable:true` so the next Hermes tick
+// re-claims and actually builds it.
+//
+// TOKEN-OWNER CONSEQUENCE FOR TASK 6 (found during Task 5's recon, not a code change):
+// `findProjectId` scopes the project search to `requireScope`'s own `userId` -- the OWNER of
+// the `agent_build` bearer token making this call. A demo-account rehearsal (Task 6 Step 4,
+// "draft visible in demo project") therefore needs an `agent_build` token MINTED UNDER THE
 // DEMO ACCOUNT, not the operator's own account -- an operator-account token can only ever
 // resolve projects the operator owns. Searching every user's projects by address instead
 // would be a write-into-a-stranger's-project hole, so this scoping is not optional.
@@ -40,16 +51,27 @@ import { recipeByKey } from "@/lib/deliverable/recipes";
 import { resolveSubject } from "@/lib/deliverable/recipes/shared";
 import { defaultDoc } from "@/lib/email/doc/default-docs";
 import { normalizedAddressKey } from "@/lib/agent-feed/test-inject-source";
+// L4 fix (review round): the to_state/sale_or_rent vocabulary used to be duplicated here AND
+// in app/api/agent-feed/test-inject/route.ts. Extracted to ONE authority.
+import { VALID_TO_STATES, VALID_SALE_OR_RENT } from "@/lib/agent-feed/event-vocab";
 import {
   findProjectId,
   insertDraft,
   recordDraftOnLedger,
   lookupDuplicateDraft,
+  findLedgerClaim,
 } from "@/lib/agent-build/persist";
 
 export const runtime = "nodejs";
+// Every sibling LLM-build route declares this (the recipe pipe can run a narrator call) --
+// removes the fluid-compute default-duration dependency flagged in review.
+export const maxDuration = 300;
 
 const BASE_URL = process.env.NEXT_PUBLIC_SITE_URL ?? "https://www.swfldatagulf.com";
+
+// A claim with no linked draft OLDER than this is treated as orphaned (the process that won
+// it is gone), not mid-build -- see the H1 header note above.
+const ORPHAN_CLAIM_MS = 10 * 60 * 1000;
 
 // STRICT SCHEMA (design doc failure mode 4 -- "Hermes local model invents content or
 // numbers, happened 08/09"): exactly these five fields, nothing else. A free-text/prose
@@ -71,14 +93,6 @@ const ALLOWED_RECIPE_KEYS = new Set([
   "coming-soon",
   "open-house",
 ]);
-
-// The real ingest pipeline's to_state vocabulary (traced pipeline.py:65-70 / transitions.py
-// during Task 4 -- every scanned row is state="active"; the only OTHER values ever written
-// are holding/sold/withdrawn). Mirrors app/api/agent-feed/test-inject/route.ts's
-// VALID_TO_STATES verbatim -- one authority for this vocabulary would be better than two
-// copies, but the sibling module is not exported for reuse; noted, not fixed here.
-const VALID_TO_STATES = new Set(["active", "holding", "sold", "withdrawn"]);
-const VALID_SALE_OR_RENT = new Set(["sale", "rent"]);
 
 function badRequest(error: string): Response {
   return NextResponse.json({ error }, { status: 400 });
@@ -109,8 +123,8 @@ export async function POST(req: Request) {
   const recipeKey = typeof record.recipe_key === "string" ? record.recipe_key : "";
   if (!ALLOWED_RECIPE_KEYS.has(recipeKey)) return badRequest("invalid_field:recipe_key");
 
-  const address = typeof record.address === "string" ? record.address.trim() : "";
-  if (!address) return badRequest("missing_field:address");
+  const rawAddress = typeof record.address === "string" ? record.address.trim() : "";
+  if (!rawAddress) return badRequest("missing_field:address");
 
   const saleOrRent = typeof record.sale_or_rent === "string" ? record.sale_or_rent : "";
   if (!VALID_SALE_OR_RENT.has(saleOrRent)) return badRequest("invalid_field:sale_or_rent");
@@ -128,11 +142,20 @@ export async function POST(req: Request) {
   if (!at || !Number.isFinite(Date.parse(at))) return badRequest("invalid_field:at");
 
   // Which project does this draft belong to? Scoped to the CALLING TOKEN'S OWNER (see the
-  // header comment's Task-6 note) -- never searched across every account.
-  const projectId = await findProjectId(scoped.userId, address);
-  if (!projectId) {
-    return NextResponse.json({ error: "no_matching_project" }, { status: 404 });
+  // header comment's Task-6 note) -- never searched across every account. H2a fix: the 404
+  // body carries a machine-distinguishable `skippable:true` field so the Task 6 skill can
+  // advance the cursor past a transition with no matching project on a FIELD, not by parsing
+  // the HTTP status.
+  const projectMatch = await findProjectId(scoped.userId, rawAddress);
+  if (!projectMatch) {
+    return NextResponse.json({ error: "no_matching_project", skippable: true }, { status: 404 });
   }
+  // L2 fix: once matched, use the project's OWN stored subject_address for everything
+  // downstream (the idempotency key, resolveSubject, the response's built_from.address) --
+  // never the caller's raw request string. They normalize to the SAME address_key (that is
+  // how the match above succeeded), but the project's canonical spelling is what every other
+  // draft on this listing already carries, and what the rendered doc should carry too.
+  const address = projectMatch.subjectAddress;
 
   // Plan-locked idempotency key: agent-build:<address_key>:<sale_or_rent>:<to_state>:<at> --
   // the transition's own natural key (mirrors the listing_transitions UNIQUE constraint),
@@ -151,26 +174,32 @@ export async function POST(req: Request) {
 
   if (!won) {
     const dup = await lookupDuplicateDraft(key);
-    if (!dup) {
-      // Not corruption -- the far more common cause is a genuine race: the WINNING call is
-      // still mid-build (resolveSubject + the narrator can take seconds) and has not linked
-      // its draft to the ledger row yet. The cursor does not advance on a non-200, so Hermes
-      // retries and, by then, the winner has almost always finished.
-      return NextResponse.json({ error: "duplicate_pending" }, { status: 500 });
-    }
-    return NextResponse.json(
-      {
-        draft_id: dup.draftId,
-        preview_url: previewUrlFor(dup.draftId),
-        built_from: {
-          recipe_key: dup.recipeKey ?? recipeKey,
-          address,
-          transition_at: at,
+    if (dup) {
+      return NextResponse.json(
+        {
+          draft_id: dup.draftId,
+          preview_url: previewUrlFor(dup.draftId),
+          built_from: {
+            recipe_key: dup.recipeKey ?? recipeKey,
+            address,
+            transition_at: at,
+          },
+          duplicate: true,
         },
-        duplicate: true,
-      },
-      { status: 200 },
-    );
+        { status: 200 },
+      );
+    }
+
+    // H1: no linked draft yet. Distinguish "the winner is still mid-build" (the ordinary,
+    // frequent shape of this race -- resolveSubject + the narrator can take seconds) from
+    // "the winner died and this claim is orphaned forever" by the ledger row's own age.
+    const claim = await findLedgerClaim(key);
+    const ageMs = claim ? Date.now() - Date.parse(claim.createdAt) : null;
+    if (claim && ageMs != null && Number.isFinite(ageMs) && ageMs > ORPHAN_CLAIM_MS) {
+      await releaseClaim(db, key);
+      return NextResponse.json({ error: "duplicate_pending", retryable: true }, { status: 500 });
+    }
+    return NextResponse.json({ error: "duplicate_pending" }, { status: 500 });
   }
 
   // WON THE CLAIM -- build + persist. See the header comment: every failure path below
@@ -198,7 +227,7 @@ export async function POST(req: Request) {
     }
 
     const draftId = await insertDraft({
-      projectId,
+      projectId: projectMatch.projectId,
       userId: scoped.userId,
       recipeKey,
       doc: built,
@@ -210,7 +239,8 @@ export async function POST(req: Request) {
 
     // Best-effort link so a FUTURE claim-lost reply can find this draft (persist.ts's
     // recordDraftOnLedger doc). A failure here is logged there, not fatal -- the draft is
-    // real and already returned below.
+    // real and already returned below; only a future duplicate lookup degrades (and, if it
+    // stays unlinked past ORPHAN_CLAIM_MS, the H1 path above recovers it anyway).
     await recordDraftOnLedger(key, draftId);
 
     return NextResponse.json(

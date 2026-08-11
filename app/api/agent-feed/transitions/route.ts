@@ -21,6 +21,13 @@
 // bounded loosely by date; isAfterCursor here is a defense-in-depth re-check, not the
 // primary filter.
 //
+// ADDRESS SCOPING (H2b fix, hermes-email-driver review round). The spec's own
+// `addresses=<optional scope>` query param (design doc Piece 2), never wired by Task 3.
+// Comma-separated address_keys, parsed here and pushed down to
+// fetchTransitionCandidates -- which applies `.in("address_key", keys)` on BOTH sources
+// BEFORE the page cap (transitions-source.ts), so a scoped caller's 50-row cap counts only
+// rows relevant to it. Omitted -- unscoped, exactly today's region-wide behavior.
+//
 // The Supabase client (untyped -- data_lake schema access, see transitions-source.ts's
 // KNOWN-DEBT comment) is created INSIDE fetchTransitionCandidates, not here, so this route
 // carries no direct dependency on the untyped hatch (mirrors lib/back-on-market/relist-fact.ts's
@@ -47,6 +54,18 @@ function parseCursor(raw: string): Cursor {
   return { at: raw.slice(0, sep), id: Number.isFinite(id) ? id : -Infinity };
 }
 
+/** Comma-separated address_keys -- trimmed, empties dropped. Absent/empty param -> undefined
+ *  (unscoped), never an empty array (an empty .in() filter would match zero rows, which is
+ *  the opposite of "no scope"). */
+function parseAddresses(raw: string | null): string[] | undefined {
+  if (!raw) return undefined;
+  const keys = raw
+    .split(",")
+    .map((k) => k.trim())
+    .filter(Boolean);
+  return keys.length > 0 ? keys : undefined;
+}
+
 /** Strictly-greater tuple compare on (at, id) -- matches the DB-level keyset predicate. */
 function isAfterCursor(ev: TransitionEvent, cursor: Cursor): boolean {
   if (ev.at > cursor.at) return true;
@@ -67,8 +86,9 @@ export async function GET(req: Request) {
   const url = new URL(req.url);
   const cursorParam = url.searchParams.get("cursor") ?? "";
   const cursor = parseCursor(cursorParam);
+  const addressKeys = parseAddresses(url.searchParams.get("addresses"));
 
-  const candidates = await fetchTransitionCandidates(cursor, PAGE_CAP);
+  const candidates = await fetchTransitionCandidates(cursor, PAGE_CAP, addressKeys);
 
   const page = candidates
     .filter((ev) => isAfterCursor(ev, cursor))

@@ -14,6 +14,7 @@ interface FakeProjectRow {
   user_id: string;
   kind: string;
   subject_address: string | null;
+  updated_at: string;
 }
 interface FakeDeliverableRow {
   id: string;
@@ -24,6 +25,7 @@ interface FakeDeliverableRow {
 interface FakeLedgerRow {
   idempotency_key: string;
   broadcast_id: string | null;
+  created_at: string;
 }
 interface FakeDb {
   projects: FakeProjectRow[];
@@ -41,8 +43,15 @@ class ThenableQuery<T> implements PromiseLike<{ data: T; error: null }> {
   }
 }
 
+// L1 fix coverage: findProjectId now chains .order() + .limit() onto the projects query
+// (PostgREST max-rows truncation guard). This fake models both as real, order-respecting
+// operations (not no-ops) so a regression that drops the ordering, or shrinks the effective
+// limit below the fixture size, would show up as a wrong/missing match here.
 class FakeProjectsQuery {
   private filters: Array<(r: FakeProjectRow) => boolean> = [];
+  private orderCol: keyof FakeProjectRow | null = null;
+  private orderAsc = true;
+  private limitN: number | undefined;
   constructor(private rows: FakeProjectRow[]) {}
   select(_cols: string) {
     return this;
@@ -51,11 +60,28 @@ class FakeProjectsQuery {
     this.filters.push((r) => r[col] === val);
     return this;
   }
+  order(col: keyof FakeProjectRow, opts: { ascending: boolean }) {
+    this.orderCol = col;
+    this.orderAsc = opts.ascending;
+    return this;
+  }
+  limit(n: number) {
+    this.limitN = n;
+    return this;
+  }
   then<TResult1 = { data: FakeProjectRow[]; error: null }, TResult2 = never>(
     onfulfilled?:
       ((value: { data: FakeProjectRow[]; error: null }) => TResult1 | PromiseLike<TResult1>) | null,
   ): PromiseLike<TResult1 | TResult2> {
-    const result = this.rows.filter((r) => this.filters.every((f) => f(r)));
+    let result = this.rows.filter((r) => this.filters.every((f) => f(r)));
+    if (this.orderCol) {
+      const col = this.orderCol;
+      result = [...result].sort((a, b) => {
+        const cmp = String(a[col]) < String(b[col]) ? -1 : String(a[col]) > String(b[col]) ? 1 : 0;
+        return this.orderAsc ? cmp : -cmp;
+      });
+    }
+    if (this.limitN != null) result = result.slice(0, this.limitN);
     const resolved = { data: result, error: null };
     return Promise.resolve(onfulfilled ? onfulfilled(resolved) : (resolved as unknown as TResult1));
   }
@@ -95,6 +121,11 @@ class FakeLedgerTable {
     return new FakeLedgerSelect(this.db.ledger);
   }
 }
+// L3 fix coverage: a real PostgREST UPDATE that matches zero rows returns `error: null` too
+// -- it is not an error to update nothing. The fake now models `.select()` chained after
+// `.update()` (as persist.ts's recordDraftOnLedger does) by returning ONLY the rows that
+// actually matched the filter, so a test can distinguish "I linked 1 row" from "I matched 0
+// rows and silently did nothing" -- the exact gap the fix closes.
 class FakeLedgerUpdate {
   private filters: Array<(r: FakeLedgerRow) => boolean> = [];
   constructor(
@@ -105,6 +136,11 @@ class FakeLedgerUpdate {
     this.filters.push((r) => r[col] === val);
     return this;
   }
+  select(_cols: string) {
+    return new FakeLedgerUpdateThenSelect(this.rows, this.filters, this.patch);
+  }
+  // Support calling recordDraftOnLedger-shaped code that awaits WITHOUT .select() too
+  // (not used by persist.ts today, but keeps the fake honest about the real API shape).
   then<TResult1 = { error: null }, TResult2 = never>(
     onfulfilled?: ((value: { error: null }) => TResult1 | PromiseLike<TResult1>) | null,
   ): PromiseLike<TResult1 | TResult2> {
@@ -112,6 +148,27 @@ class FakeLedgerUpdate {
       if (this.filters.every((f) => f(row))) Object.assign(row, this.patch);
     }
     const resolved = { error: null };
+    return Promise.resolve(onfulfilled ? onfulfilled(resolved) : (resolved as unknown as TResult1));
+  }
+}
+class FakeLedgerUpdateThenSelect implements PromiseLike<{ data: FakeLedgerRow[]; error: null }> {
+  constructor(
+    private rows: FakeLedgerRow[],
+    private filters: Array<(r: FakeLedgerRow) => boolean>,
+    private patch: Partial<FakeLedgerRow>,
+  ) {}
+  then<TResult1 = { data: FakeLedgerRow[]; error: null }, TResult2 = never>(
+    onfulfilled?:
+      ((value: { data: FakeLedgerRow[]; error: null }) => TResult1 | PromiseLike<TResult1>) | null,
+  ): PromiseLike<TResult1 | TResult2> {
+    const matched: FakeLedgerRow[] = [];
+    for (const row of this.rows) {
+      if (this.filters.every((f) => f(row))) {
+        Object.assign(row, this.patch);
+        matched.push(row);
+      }
+    }
+    const resolved = { data: matched, error: null };
     return Promise.resolve(onfulfilled ? onfulfilled(resolved) : (resolved as unknown as TResult1));
   }
 }
@@ -146,11 +203,11 @@ mock.module("@/utils/supabase/service-role", () => ({
   createServiceRoleClientUntyped: () => makeFakeClient(fakeDb),
 }));
 
-const { findProjectId, insertDraft, recordDraftOnLedger, lookupDuplicateDraft } =
+const { findProjectId, insertDraft, recordDraftOnLedger, lookupDuplicateDraft, findLedgerClaim } =
   await import("./persist");
 
 describe("findProjectId (real function, fake Supabase client)", () => {
-  test("matches a listing project owned by userId whose subject_address normalizes the same", async () => {
+  test("matches a listing project owned by userId whose subject_address normalizes the same, returns projectId + the stored subjectAddress", async () => {
     fakeDb = {
       projects: [
         {
@@ -158,13 +215,38 @@ describe("findProjectId (real function, fake Supabase client)", () => {
           user_id: "user-1",
           kind: "listing",
           subject_address: "1275 Carlene Ave, Fort Myers, FL 33901",
+          updated_at: "2026-08-01T00:00:00Z",
         },
       ],
       deliverables: [],
       ledger: [],
     };
-    const id = await findProjectId("user-1", "1275 Carlene Ave, Fort Myers, FL 33901");
-    expect(id).toBe("proj-1");
+    const match = await findProjectId("user-1", "1275 Carlene Ave, Fort Myers, FL 33901");
+    expect(match).toEqual({
+      projectId: "proj-1",
+      subjectAddress: "1275 Carlene Ave, Fort Myers, FL 33901",
+    });
+  });
+
+  // L2 fix coverage: the returned subjectAddress is the PROJECT'S OWN stored value, not a
+  // copy of whatever string the caller searched with -- proven by searching with a
+  // cosmetically different (but address_key-equivalent) string.
+  test("L2: returns the PROJECT'S stored subject_address even when the search string differs cosmetically", async () => {
+    fakeDb = {
+      projects: [
+        {
+          id: "proj-1",
+          user_id: "user-1",
+          kind: "listing",
+          subject_address: "1275 Carlene Ave, Fort Myers, FL 33901",
+          updated_at: "2026-08-01T00:00:00Z",
+        },
+      ],
+      deliverables: [],
+      ledger: [],
+    };
+    const match = await findProjectId("user-1", "1275 Carlene Avenue, Fort Myers, FL 33901");
+    expect(match?.subjectAddress).toBe("1275 Carlene Ave, Fort Myers, FL 33901");
   });
 
   test("never matches a project owned by a DIFFERENT userId, even with the same address", async () => {
@@ -175,19 +257,56 @@ describe("findProjectId (real function, fake Supabase client)", () => {
           user_id: "someone-else",
           kind: "listing",
           subject_address: "1275 Carlene Ave, Fort Myers, FL 33901",
+          updated_at: "2026-08-01T00:00:00Z",
         },
       ],
       deliverables: [],
       ledger: [],
     };
-    const id = await findProjectId("user-1", "1275 Carlene Ave, Fort Myers, FL 33901");
-    expect(id).toBeNull();
+    const match = await findProjectId("user-1", "1275 Carlene Ave, Fort Myers, FL 33901");
+    expect(match).toBeNull();
   });
 
   test("no matching project -> null, never guesses", async () => {
     fakeDb = { projects: [], deliverables: [], ledger: [] };
-    const id = await findProjectId("user-1", "1 Nowhere Rd, Fort Myers, FL 33901");
-    expect(id).toBeNull();
+    const match = await findProjectId("user-1", "1 Nowhere Rd, Fort Myers, FL 33901");
+    expect(match).toBeNull();
+  });
+
+  // L1 fix coverage: the query is ordered + bounded (PROJECT_SCAN_LIMIT), not an unbounded
+  // scan -- a match still succeeds correctly with several candidate rows present, and the
+  // fake's .order()/.limit() are real (not no-ops), so a regression that drops either call
+  // would still need to keep the OTHER row(s) from accidentally matching instead.
+  test("L1: matches correctly among several other listing projects, with .order()/.limit() on the query", async () => {
+    fakeDb = {
+      projects: [
+        {
+          id: "proj-old",
+          user_id: "user-1",
+          kind: "listing",
+          subject_address: "1 Old St, Fort Myers, FL 33901",
+          updated_at: "2026-01-01T00:00:00Z",
+        },
+        {
+          id: "proj-1",
+          user_id: "user-1",
+          kind: "listing",
+          subject_address: "1275 Carlene Ave, Fort Myers, FL 33901",
+          updated_at: "2026-08-01T00:00:00Z",
+        },
+        {
+          id: "proj-other-kind",
+          user_id: "user-1",
+          kind: "general",
+          subject_address: "1275 Carlene Ave, Fort Myers, FL 33901",
+          updated_at: "2026-08-01T00:00:00Z",
+        },
+      ],
+      deliverables: [],
+      ledger: [],
+    };
+    const match = await findProjectId("user-1", "1275 Carlene Ave, Fort Myers, FL 33901");
+    expect(match?.projectId).toBe("proj-1");
   });
 });
 
@@ -225,6 +344,74 @@ describe("insertDraft (real function, fake Supabase client)", () => {
   });
 });
 
+describe("recordDraftOnLedger (real function, fake Supabase client)", () => {
+  test("matching key -> updates the row and returns linked:true", async () => {
+    fakeDb = {
+      projects: [],
+      deliverables: [],
+      ledger: [
+        {
+          idempotency_key: "agent-build:KEY:sale:sold:AT",
+          broadcast_id: null,
+          created_at: "2026-08-10T12:00:00.000Z",
+        },
+      ],
+    };
+    const linked = await recordDraftOnLedger("agent-build:KEY:sale:sold:AT", "draft-1");
+    expect(linked).toBe(true);
+    expect(fakeDb.ledger[0].broadcast_id).toBe("draft-1");
+  });
+
+  // L3 fix coverage: a key with NO matching ledger row updates zero rows. Before the fix,
+  // this returned true (a bare `!error` check, and a zero-row UPDATE has no error). Now it
+  // must return false -- a real assertion that a link happened, not an error-absence guess.
+  test("L3: key matches ZERO ledger rows -> returns linked:false (not a false-positive true)", async () => {
+    fakeDb = { projects: [], deliverables: [], ledger: [] };
+    const linked = await recordDraftOnLedger("agent-build:NOPE:sale:sold:AT", "draft-1");
+    expect(linked).toBe(false);
+  });
+});
+
+describe("findLedgerClaim (real function, fake Supabase client) -- H1 fix", () => {
+  test("returns broadcast_id + created_at for an existing ledger row", async () => {
+    fakeDb = {
+      projects: [],
+      deliverables: [],
+      ledger: [
+        {
+          idempotency_key: "agent-build:KEY:sale:sold:AT",
+          broadcast_id: "draft-1",
+          created_at: "2026-08-10T12:00:00.000Z",
+        },
+      ],
+    };
+    const claim = await findLedgerClaim("agent-build:KEY:sale:sold:AT");
+    expect(claim).toEqual({ broadcastId: "draft-1", createdAt: "2026-08-10T12:00:00.000Z" });
+  });
+
+  test("no ledger row for the key -> null", async () => {
+    fakeDb = { projects: [], deliverables: [], ledger: [] };
+    const claim = await findLedgerClaim("agent-build:NOPE:sale:sold:AT");
+    expect(claim).toBeNull();
+  });
+
+  test("row exists but was never linked -> broadcastId null, createdAt still returned", async () => {
+    fakeDb = {
+      projects: [],
+      deliverables: [],
+      ledger: [
+        {
+          idempotency_key: "agent-build:KEY:sale:sold:AT",
+          broadcast_id: null,
+          created_at: "2026-08-10T00:00:00.000Z",
+        },
+      ],
+    };
+    const claim = await findLedgerClaim("agent-build:KEY:sale:sold:AT");
+    expect(claim).toEqual({ broadcastId: null, createdAt: "2026-08-10T00:00:00.000Z" });
+  });
+});
+
 describe("recordDraftOnLedger + lookupDuplicateDraft round trip (real functions, fake client)", () => {
   test("linking a draft then looking it up returns the draft id + recipe_key", async () => {
     fakeDb = {
@@ -234,6 +421,7 @@ describe("recordDraftOnLedger + lookupDuplicateDraft round trip (real functions,
         {
           idempotency_key: "agent-build:KEY:sale:sold:2026-08-10T12:00:00.000Z",
           broadcast_id: null,
+          created_at: "2026-08-10T12:00:00.000Z",
         },
       ],
     };
@@ -256,7 +444,13 @@ describe("recordDraftOnLedger + lookupDuplicateDraft round trip (real functions,
     fakeDb = {
       projects: [],
       deliverables: [],
-      ledger: [{ idempotency_key: "agent-build:KEY:sale:sold:AT", broadcast_id: null }],
+      ledger: [
+        {
+          idempotency_key: "agent-build:KEY:sale:sold:AT",
+          broadcast_id: null,
+          created_at: "2026-08-10T12:00:00.000Z",
+        },
+      ],
     };
     const dup = await lookupDuplicateDraft("agent-build:KEY:sale:sold:AT");
     expect(dup).toBeNull();
@@ -268,7 +462,13 @@ describe("recordDraftOnLedger + lookupDuplicateDraft round trip (real functions,
       deliverables: [
         { id: "draft-1", recipe_key: "just-sold", deleted_at: "2026-08-10T00:00:00Z" },
       ],
-      ledger: [{ idempotency_key: "agent-build:KEY:sale:sold:AT", broadcast_id: "draft-1" }],
+      ledger: [
+        {
+          idempotency_key: "agent-build:KEY:sale:sold:AT",
+          broadcast_id: "draft-1",
+          created_at: "2026-08-10T12:00:00.000Z",
+        },
+      ],
     };
     const dup = await lookupDuplicateDraft("agent-build:KEY:sale:sold:AT");
     expect(dup).toBeNull();

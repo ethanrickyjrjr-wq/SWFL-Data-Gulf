@@ -22,6 +22,15 @@ import {
   insertTestEvent,
   normalizedAddressKey,
 } from "@/lib/agent-feed/test-inject-source";
+// L4 fix (hermes-email-driver review round): this vocabulary used to be defined locally
+// here AND duplicated in app/api/agent/build/route.ts. Extracted to ONE authority,
+// lib/agent-feed/event-vocab.ts -- both routes import it. Full provenance (which ingest
+// source file/line justifies each value) now lives in that module's header comment.
+import {
+  VALID_TO_STATES,
+  VALID_FROM_STATES,
+  VALID_SALE_OR_RENT,
+} from "@/lib/agent-feed/event-vocab";
 
 export const runtime = "nodejs";
 
@@ -33,52 +42,6 @@ const ALLOWED_FIELDS = new Set([
   "price_delta",
   "at",
 ]);
-
-// Real to_state vocabulary the ingest pipeline actually writes (RULE 0.5 -- read
-// ingest/pipelines/listing_lifecycle/transitions.py AND pipeline.py before allowlisting a
-// single value here, never invented from the plan's shorthand). Round 1 of this review
-// (correctly) traced transitions.py's _LIVE_STATES = {"active","new","coming_soon",
-// "back_on_market"} (transitions.py:22) but that set is a MEMBERSHIP TEST, not a write list --
-// it decides which prior states count as "was live" for the absence->holding branch, it does
-// not mean every member is ever assigned as a row's `state`. The FINALIZING site is
-// pipeline.py:65-70 (_keyed_scan): "Source B is the active for-sale feed, so every card is
-// state='active'" -- every scanned row is hardcoded state="active" before diff_states ever
-// runs, and no vendor flag feeds any other value into `state`. So "new"/"coming_soon"/
-// "back_on_market" are NEVER actually written as a to_state -- only "active" is, and the
-// real literal to_state vocabulary the pipeline writes is exactly:
-//   - "active" -- every appearance/re-appearance/same-state price move (pipeline.py:65-70
-//     forces state="active" on every scanned row).
-//   - "holding" (transitions.py:135-137 HOLDING="holding") -- the ambiguous-departure state
-//     (a listing left the active market; sold/pending/withdrawn is unresolved until the
-//     off-market hook probes it).
-//   - "sold" / "withdrawn" (transitions.py:135-136 SOLD/WITHDRAWN) -- the two terminal
-//     resolutions of a holding row.
-// The NEW-LISTING signal is from_state IS NULL (transitions.py:54-57 -- `prev is None` ->
-// `_transition(addr, sor, None, state, ...)`), never a "new" to_state value. A RELIST/
-// back-on-market is from_state="holding" -> to_state="active" (transitions.py:73-85's STATE
-// CHANGE branch, reached when a holding row reappears with the forced state="active"). A
-// price cut/raise is represented by an UNCHANGED to_state ("active"->"active") carrying a
-// non-null price_delta (transitions.py:63-72) -- "price_reduced" is NEVER itself a to_state
-// value. "pending"/"contingent"/"under_contract"/"withdrawn"/"delisted" etc. (extract_api.py
-// PENDING_STATUSES/OFF_MARKET_STATUSES, lines 88-94) are RAW VENDOR statuses the internal
-// sold-capture resolver matches against to decide whether a "holding" row resolves to
-// sold/withdrawn -- they are never written to listing_transitions.to_state itself.
-const VALID_TO_STATES = new Set(["active", "holding", "sold", "withdrawn"]);
-
-// from_state is drawn from the SAME 4-value vocabulary as to_state, when present -- but
-// from_state may also be entirely absent/null, which is itself meaningful: NULL is the
-// new-listing signal (see VALID_TO_STATES comment above), never a value to validate against
-// this set. A rehearsal injects {from_state: null, to_state: "active"} for "new listing" or
-// {from_state: "holding", to_state: "active"} for "back on market" -- both realistic
-// transitions.py shapes, both must pass this allowlist.
-const VALID_FROM_STATES = VALID_TO_STATES;
-
-// sale_or_rent vocabulary: the current lifecycle pipeline only ever writes "sale"
-// (ingest/pipelines/listing_lifecycle/extract.py:144 -- "Source B is for-sale only -- no
-// rent class exists"; extract_api.py:185 hardcodes "sale" too), but the column itself
-// (address_key.py:5, the migration's own default) treats sale_or_rent as a real two-value
-// category -- "rent" is a legitimate future value, not an invented one.
-const VALID_SALE_OR_RENT = new Set(["sale", "rent"]);
 
 function badRequest(error: string): Response {
   return NextResponse.json({ error }, { status: 400 });
@@ -119,7 +82,7 @@ export async function POST(req: Request) {
   if (!VALID_SALE_OR_RENT.has(saleOrRent)) {
     return badRequest(`invalid_field:sale_or_rent`);
   }
-  // NULL is the deliberate new-listing signal (see VALID_TO_STATES comment) -- only a
+  // NULL is the deliberate new-listing signal (see event-vocab.ts's header) -- only a
   // present, NON-NULL from_state is checked against the vocabulary.
   if ("from_state" in record && record.from_state !== null) {
     if (typeof record.from_state !== "string" || !VALID_FROM_STATES.has(record.from_state)) {

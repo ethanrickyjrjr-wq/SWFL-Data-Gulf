@@ -10,15 +10,31 @@
 //
 // `deliverables` and `email_send_ledger` are BOTH public-schema and typed in
 // database-generated.types.ts (recipe_key/data_as_of/deleted_at at lines ~1098-1124,
-// broadcast_id/idempotency_key at ~1383-1414) -- unlike the data_lake.* reads elsewhere in
-// this feature, no untyped hatch is needed here; createServiceRoleClient() (typed) is used
-// throughout.
+// broadcast_id/idempotency_key/created_at at ~1383-1414) -- unlike the data_lake.* reads
+// elsewhere in this feature, no untyped hatch is needed here; createServiceRoleClient()
+// (typed) is used throughout.
 import { createServiceRoleClient } from "@/utils/supabase/service-role";
 import { normalizedAddressKey } from "@/lib/agent-feed/test-inject-source";
 import { EmailDocSchema } from "@/lib/email/doc/schema";
 import type { EmailDoc } from "@/lib/email/doc/types";
 
 const EMPTY_NARRATIVE = { exec_summary: "", sections: [], inference_notes: [] };
+
+// L1 fix (hermes-email-driver review round): PostgREST truncates an unbounded/default-max
+// result set silently -- a project owner with more listing projects than that ceiling could
+// see a real project MISS the scan and 404 as "no_matching_project" even though the row
+// exists. Bounded explicitly + ordered so truncation, if it ever happens, drops the
+// LEAST-recently-touched rows first rather than an arbitrary unordered slice. 1000 listing
+// projects for one account is far beyond any real usage today; raise this only alongside
+// evidence an account is actually near it.
+const PROJECT_SCAN_LIMIT = 1000;
+
+export interface ProjectMatch {
+  projectId: string;
+  /** The project's OWN stored subject_address -- the canonical spelling downstream code
+   *  should use (L2 fix), never the caller's raw request string once a match is found. */
+  subjectAddress: string;
+}
 
 /**
  * The listing project this build's draft belongs to -- the OWNER's own project whose
@@ -32,19 +48,21 @@ const EMPTY_NARRATIVE = { exec_summary: "", sections: [], inference_notes: [] };
  * Fails CLOSED on any miss (no such project, any query error) -- null, never a guess. The
  * caller 404s rather than inventing a destination project.
  */
-export async function findProjectId(userId: string, address: string): Promise<string | null> {
+export async function findProjectId(userId: string, address: string): Promise<ProjectMatch | null> {
   const db = createServiceRoleClient();
   const { data, error } = await db
     .from("projects")
-    .select("id, subject_address")
+    .select("id, subject_address, updated_at")
     .eq("kind", "listing")
-    .eq("user_id", userId);
+    .eq("user_id", userId)
+    .order("updated_at", { ascending: false })
+    .limit(PROJECT_SCAN_LIMIT);
   if (error || !data) return null;
   const target = normalizedAddressKey(address);
   const hit = data.find(
     (row) => row.subject_address && normalizedAddressKey(row.subject_address) === target,
   );
-  return hit?.id ?? null;
+  return hit ? { projectId: hit.id, subjectAddress: hit.subject_address as string } : null;
 }
 
 export interface DraftInsert {
@@ -93,34 +111,65 @@ export async function insertDraft(input: DraftInsert): Promise<string | null> {
 }
 
 /**
- * Link a won claim to the draft it produced -- BEST EFFORT, called AFTER `insertDraft`
- * succeeds (the draft id doesn't exist before then, so this can never be folded into the
- * claim itself). `email_send_ledger` carries no `draft_id` column; `broadcast_id` (free-text,
- * "Resend broadcast id when known" per its own DDL comment) is repurposed as the generic
- * "external id this claim produced" slot -- confirmed safe by grep: every OTHER reader of a
- * `broadcast_id` column in this repo (webhooks/resend, campaign-click-alert, blast-events)
- * queries `email_sends`/webhook payloads, never `email_send_ledger`; this table's
- * `broadcast_id` has no reader today except `lookupDuplicateDraft` below.
- *
- * A failure here is logged, not fatal -- the draft is already real and already returned to
- * the caller; only a FUTURE claim-lost reply degrades (see lookupDuplicateDraft's
- * `duplicate_pending` note). Never thrown into the request.
+ * L3 fix (hermes-email-driver review round). The original version trusted a bare `!error`
+ * as proof of a successful link -- but a Postgres/PostgREST UPDATE with a WHERE clause that
+ * matches ZERO rows returns `error: null` too (it isn't an error to match nothing). Without
+ * `.select()` on the update, there was no way to tell "I linked the draft" apart from "I
+ * quietly updated nothing" -- so `linked === true` never actually proved a row changed.
+ * `.select("idempotency_key")` makes PostgREST return the rows it actually touched; `linked`
+ * is now `updated row count > 0`, a real assertion instead of an error-absence assumption.
  */
 export async function recordDraftOnLedger(
   idempotencyKey: string,
   draftId: string,
 ): Promise<boolean> {
   const db = createServiceRoleClient();
-  const { error } = await db
+  const { data, error } = await db
     .from("email_send_ledger")
     .update({ broadcast_id: draftId })
-    .eq("idempotency_key", idempotencyKey);
+    .eq("idempotency_key", idempotencyKey)
+    .select("idempotency_key");
   if (error) {
     console.warn(
       `[agent-build/persist] recordDraftOnLedger("${idempotencyKey}" -> "${draftId}") failed: ${error.message}`,
     );
+    return false;
   }
-  return !error;
+  const linked = (data?.length ?? 0) > 0;
+  if (!linked) {
+    console.warn(
+      `[agent-build/persist] recordDraftOnLedger("${idempotencyKey}") matched 0 ledger rows -- link not recorded`,
+    );
+  }
+  return linked;
+}
+
+export interface LedgerClaim {
+  broadcastId: string | null;
+  /** ISO timestamp string -- email_send_ledger.created_at, DB-server-stamped at claim time. */
+  createdAt: string;
+}
+
+/**
+ * H1 fix (hermes-email-driver review round). The raw ledger row for a claimed key, exposing
+ * `createdAt` -- the piece `lookupDuplicateDraft` alone can't answer: "is this claim just
+ * mid-build, or did the process that won it die before ever linking a draft?" The route uses
+ * this to decide whether a claim-lost-with-no-draft reply is a genuine, still-in-progress
+ * race (return duplicate_pending, unchanged) or an ORPHANED claim old enough that nothing is
+ * plausibly still building it (release + retryable:true, so the next tick can re-claim).
+ *
+ * Returns null on no row / any query error -- the caller treats a missing row as "not stale"
+ * (nothing to release) rather than guessing an age it cannot compute.
+ */
+export async function findLedgerClaim(idempotencyKey: string): Promise<LedgerClaim | null> {
+  const db = createServiceRoleClient();
+  const { data, error } = await db
+    .from("email_send_ledger")
+    .select("broadcast_id, created_at")
+    .eq("idempotency_key", idempotencyKey)
+    .maybeSingle();
+  if (error || !data) return null;
+  return { broadcastId: data.broadcast_id, createdAt: data.created_at };
 }
 
 export interface DuplicateDraft {
@@ -132,25 +181,22 @@ export interface DuplicateDraft {
  * On a lost claim, resolve the draft the WINNING call produced -- reads the PERSISTED row,
  * never echoes the replaying caller's own request body (a caller could post a different
  * recipe_key for the same transition natural key; the honest answer is what actually got
- * built). Two reads: the ledger row for the linked draft id (see recordDraftOnLedger), then
- * the deliverables row itself so a soft-trashed draft (`deleted_at` -- live on this table,
- * checked the same way `app/api/deliverables/[id]/preview-html/route.ts` does) is never
- * handed back as if it still existed.
+ * built). Built on `findLedgerClaim` (H1 fix -- one authority for reading the ledger row,
+ * not two separate queries drifting apart) plus a `deliverables` lookup so a soft-trashed
+ * draft (`deleted_at` -- live on this table, checked the same way
+ * `app/api/deliverables/[id]/preview-html/route.ts` does) is never handed back as if it
+ * still existed.
  *
  * Returns null when: the ledger row is missing, `broadcast_id` was never linked (the WINNING
  * call is still mid-build, or its link update failed -- a legitimate race, not corruption;
  * the caller maps this to `duplicate_pending`, not a 4xx), or the linked draft was trashed.
  */
 export async function lookupDuplicateDraft(idempotencyKey: string): Promise<DuplicateDraft | null> {
-  const db = createServiceRoleClient();
-  const { data: ledgerRow, error: ledgerError } = await db
-    .from("email_send_ledger")
-    .select("broadcast_id")
-    .eq("idempotency_key", idempotencyKey)
-    .maybeSingle();
-  if (ledgerError || !ledgerRow?.broadcast_id) return null;
+  const claim = await findLedgerClaim(idempotencyKey);
+  if (!claim?.broadcastId) return null;
 
-  const draftId = ledgerRow.broadcast_id;
+  const db = createServiceRoleClient();
+  const draftId = claim.broadcastId;
   const { data: draftRow, error: draftError } = await db
     .from("deliverables")
     .select("id, recipe_key, deleted_at")

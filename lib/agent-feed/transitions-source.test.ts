@@ -467,3 +467,116 @@ describe("fetchTransitionCandidates (real DB-query construction, via fake PostgR
     expect(events.map((e) => e.address_key)).toEqual(["after-cursor"]);
   });
 });
+
+// ── H2b fix (hermes-email-driver review round): addresses=<comma-separated address_keys> ──
+// The spec's `addresses=<optional scope>` query param (design doc Piece 2), never wired by
+// Task 3. fetchTransitionCandidates now takes an optional third `addressKeys` argument and
+// pushes it down as `.in("address_key", keys)` on BOTH source queries BEFORE `.limit()` --
+// this describe block proves that at the REAL DB-query-construction level (the fake builder
+// already supports `.in()`, reused verbatim from the finding-4 address-join tests above; the
+// route-level wiring/parsing is proven separately in
+// app/api/agent-feed/transitions/route.test.ts).
+describe("fetchTransitionCandidates address scoping (H2b fix, real DB-query construction)", () => {
+  test("addressKeys filters the REAL source to only matching address_key rows", async () => {
+    fakeDb = {
+      tables: {
+        listing_transitions: [
+          realRow({ id: 1, address_key: "wanted", at: "2026-08-01" }),
+          realRow({ id: 2, address_key: "not-wanted", at: "2026-08-01" }),
+        ],
+        listing_state: [],
+      },
+      dateCols: { listing_transitions: new Set(["at"]) },
+    };
+    const events = await fetchTransitionCandidates(BEGINNING, 50, ["wanted"]);
+    expect(events.map((e) => e.address_key)).toEqual(["wanted"]);
+  });
+
+  test("addressKeys filters the TEST source to only matching address_key rows too", async () => {
+    fakeDb = {
+      tables: {
+        listing_transitions: [],
+        listing_state: [],
+        agent_feed_test_events: [
+          {
+            id: 1,
+            address: "wanted addr",
+            address_key: "wanted",
+            sale_or_rent: "sale",
+            from_state: "active",
+            to_state: "pending",
+            price_delta: null,
+            at: "2026-08-01T12:00:00.000Z",
+          },
+          {
+            id: 2,
+            address: "not wanted addr",
+            address_key: "not-wanted",
+            sale_or_rent: "sale",
+            from_state: "active",
+            to_state: "pending",
+            price_delta: null,
+            at: "2026-08-01T12:00:00.000Z",
+          },
+        ],
+      },
+      dateCols: { listing_transitions: new Set(["at"]) },
+    };
+    const events = await fetchTransitionCandidates(BEGINNING, 50, ["wanted"]);
+    expect(events.map((e) => e.address_key)).toEqual(["wanted"]);
+  });
+
+  test("the page cap counts only the FILTERED set -- a large IRRELEVANT candidate pool never displaces relevant rows", async () => {
+    // 60 rows on the real source, only 5 match the scope. limit(10) is comfortably above the
+    // 5 relevant rows but well below the 60 total -- if the cap were applied BEFORE the
+    // address filter (the H2b bug), the DB-level .limit(10) could return 10 rows that are
+    // ALL irrelevant, and every one of the 5 wanted rows would be silently lost. Pushing
+    // .in() down before .limit() (production order in fetchRealTransitions) means the fake's
+    // OWN filter-then-limit order is what's under test here.
+    const wanted = Array.from({ length: 5 }, (_, i) =>
+      realRow({ id: i + 1, address_key: `wanted-${i + 1}`, at: "2026-08-01" }),
+    );
+    const noise = Array.from({ length: 55 }, (_, i) =>
+      realRow({ id: i + 100, address_key: `noise-${i + 1}`, at: "2026-08-01" }),
+    );
+    fakeDb = {
+      tables: { listing_transitions: [...noise, ...wanted], listing_state: [] },
+      dateCols: { listing_transitions: new Set(["at"]) },
+    };
+    const events = await fetchTransitionCandidates(
+      BEGINNING,
+      10,
+      wanted.map((r) => r.address_key as string),
+    );
+    expect(events.length).toBe(5);
+    expect(events.map((e) => e.address_key).sort()).toEqual(
+      wanted.map((r) => r.address_key as string).sort(),
+    );
+  });
+
+  test("omitted addressKeys -> unscoped, byte-identical to calling without the third argument", async () => {
+    fakeDb = {
+      tables: {
+        listing_transitions: [realRow({ id: 1, address_key: "any-row", at: "2026-08-01" })],
+        listing_state: [],
+      },
+      dateCols: { listing_transitions: new Set(["at"]) },
+    };
+    const withThirdArgUndefined = await fetchTransitionCandidates(BEGINNING, 50, undefined);
+    const withoutThirdArg = await fetchTransitionCandidates(BEGINNING, 50);
+    expect(withThirdArgUndefined.map((e) => e.address_key)).toEqual(["any-row"]);
+    expect(withoutThirdArg.map((e) => e.address_key)).toEqual(["any-row"]);
+  });
+
+  test("an empty addressKeys array is also treated as unscoped, never a zero-match filter", async () => {
+    fakeDb = {
+      tables: {
+        listing_transitions: [realRow({ id: 1, address_key: "any-row", at: "2026-08-01" })],
+        listing_state: [],
+      },
+      dateCols: { listing_transitions: new Set(["at"]) },
+    };
+    const events = await fetchTransitionCandidates(BEGINNING, 50, []);
+    expect(events.map((e) => e.address_key)).toEqual(["any-row"]);
+  });
+});

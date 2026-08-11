@@ -43,6 +43,13 @@
 // the operand to date, truncating the time-of-day back off -- so gt/eq against the real
 // table behave as "later calendar day" / "same calendar day", exactly the semantics a date
 // column needs, while the timestamptz test table gets the full precision compare it needs.
+//
+// ADDRESS SCOPING (H2b fix, hermes-email-driver review round). An OPTIONAL `addressKeys`
+// filter, applied as `.in("address_key", keys)` on BOTH source queries BEFORE `.limit()` --
+// the spec's `addresses=<optional scope>` query param (design doc Piece 2) that Task 3
+// shipped without. Pushed down at the DB level, not filtered in memory after the fetch, so
+// the page cap counts only rows relevant to the caller's scope -- an unscoped caller (Hermes,
+// which wants everything) omits it and behavior is byte-identical to before this fix.
 import type { SupabaseClient } from "@supabase/supabase-js";
 // KNOWN-DEBT(data_lake): listing_transitions/listing_state live in the data_lake schema,
 // which the typed Supabase client intentionally does not cover (see
@@ -128,6 +135,7 @@ async function fetchRealTransitions(
   db: SupabaseClient,
   cursor: Cursor,
   limit: number,
+  addressKeys?: string[],
 ): Promise<TransitionEvent[]> {
   let query = db
     .schema("data_lake")
@@ -138,6 +146,11 @@ async function fetchRealTransitions(
     .order("at", { ascending: true })
     .order("id", { ascending: true })
     .limit(limit);
+  // Address scoping is applied BEFORE .limit() above (the query builder call order doesn't
+  // matter to PostgREST -- every .eq/.in/.or clause combines into one WHERE before LIMIT
+  // executes) -- so a scoped caller's page cap counts only rows that pass the filter, never
+  // rows the filter will discard.
+  if (addressKeys && addressKeys.length > 0) query = query.in("address_key", addressKeys);
   const filter = keysetFilter(cursor);
   if (filter) query = query.or(filter);
 
@@ -187,6 +200,7 @@ async function fetchTestEvents(
   db: SupabaseClient,
   cursor: Cursor,
   limit: number,
+  addressKeys?: string[],
 ): Promise<TransitionEvent[]> {
   let query = db
     .from("agent_feed_test_events")
@@ -194,6 +208,7 @@ async function fetchTestEvents(
     .order("at", { ascending: true })
     .order("id", { ascending: true })
     .limit(limit);
+  if (addressKeys && addressKeys.length > 0) query = query.in("address_key", addressKeys);
   const filter = keysetFilter(cursor);
   if (filter) query = query.or(filter);
 
@@ -216,15 +231,20 @@ async function fetchTestEvents(
 
 /** Candidate rows from BOTH sources, each already filtered strictly-after `cursor` AT THE
  *  DB LEVEL (keyset pushdown, not a loose bound) and normalized to full-ISO `at`. Unsorted
- *  across sources -- the route does the final (at,id) merge sort and page cap. */
+ *  across sources -- the route does the final (at,id) merge sort and page cap.
+ *
+ *  `addressKeys`, when given (H2b fix), scopes BOTH source queries to that set via
+ *  `.in("address_key", keys)` BEFORE `.limit()` -- so `limit` bounds relevant rows only.
+ *  Omitted/empty -- unscoped, identical to the pre-fix behavior. */
 export async function fetchTransitionCandidates(
   cursor: Cursor,
   limit: number,
+  addressKeys?: string[],
 ): Promise<TransitionEvent[]> {
   const db = createServiceRoleClientUntyped();
   const [real, test] = await Promise.all([
-    fetchRealTransitions(db, cursor, limit),
-    fetchTestEvents(db, cursor, limit),
+    fetchRealTransitions(db, cursor, limit, addressKeys),
+    fetchTestEvents(db, cursor, limit, addressKeys),
   ]);
   return [...real, ...test];
 }
