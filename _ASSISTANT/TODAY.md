@@ -92,7 +92,7 @@
 - [google_oauth_brand_verification_live] Google OAuth brand verification passes after og:site_name + JSON-LD deploy — operator clicks Verify; add hero naming-line if describe-purpose still trips (due 2026-07-19)
 
 ## Last Session
-- 2026-08-11 (Fable 5) — LAUNCH DIRECTIVE: /go anonymous popup-gate FIXED; launch punch list censused
+- 2026-08-11 (Fable 5) — CI red 11+ runs: mock leak found, fixed, and GUARDED (mock-restore ratchet shipped, strike shape closed)
 
 ## Spec Health
 - 299 specs total · 0 candidates for archive
