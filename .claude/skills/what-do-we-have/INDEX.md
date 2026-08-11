@@ -7,7 +7,7 @@
 
 Markers: **[ORPHAN]** nothing in the repo points at this file — it is invisible unless you come through this index, and it is a DELETION CANDIDATE. **[weak]** reachable only by bare filename, which leads nowhere.
 
-Reachability at generation: 861 by path · 537 by name only · 240 orphaned. Re-measure with `node scripts/doc-reachability.mjs`.
+Reachability at generation: 862 by path · 537 by name only · 239 orphaned. Re-measure with `node scripts/doc-reachability.mjs`.
 
 ## docs/superpowers — 840
 
@@ -1066,8 +1066,8 @@ Reachability at generation: 861 by path · 537 by name only · 240 orphaned. Re-
 - `docs/handoff/2026-07-26-issue-001-compose-handoff.md` — HANDOFF — Compose Insiders Edition Issue No. 001 (written 07/26/2026, pre-press session) — You are composing the FIRST issue. Everything is collected; nothing is written. This doc is the
 - `docs/handoff/2026-07-30-inside-perimeter-data-opportunities.md` — HANDOFF — data opportunities already inside our perimeter (brain-platform only) — subjects and forwarded two false claims. Split per operator decree 07/30/2026.
 - `docs/handoff/2026-08-11-actionlint-gate-and-persistence-finding.md` — Handoff — 08/11/2026 — two open items: the workflow-lint gate, and the direction calls that are a coin flip by — Written after the session that took the nightly chain from 20 days red to green
+- `docs/handoff/2026-08-11-direction-call-what-remains.md` — Handoff — 08/11/2026 — direction calls: live half SHIPPED, backtest half still open — Written after 51975c39 (validation built + wired) and the corrections that followed.
 - `docs/handoff/2026-08-11-five-item-reverify-completion-handoff.md` **[ORPHAN]** — Handoff — finishing what the 08/11/2026 five-item re-verify opened — settled against the tree AND a live lake probe; six stale doc lines were corrected in place. This
-- `docs/handoff/PENDING-MERGE-2026-08-11-persistence-correction.md` **[ORPHAN]** — PENDING MERGE — correction blocks for two files held by a live session (08/11/2026) — landed — docs/handoff/2026-08-11-actionlint-gate-and-persistence-finding.md and
 - `docs/handoff/assets/2026-07-11-socials/brand-kit.md` *[weak]* — SWFL Data Gulf — brand kit for the socials elevation — Everything Claude Design needs to keep mockups in-brand AND recreatable in the renderer. Read alongside the brief (docs/handoff/2026-07-11-socials-design-elevation-brief.md).
 
 ## docs/audit — 58
