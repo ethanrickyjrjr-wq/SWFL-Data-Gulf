@@ -9,6 +9,12 @@ is banned as the response — that session builds the mechanism and flips the gu
 Format contract (the printer parses this, keep it):
 `## shape: <slug>` then one `guard: <OWED | BUILT <what, date>>` line, then `- strike:` lines.
 
+## shape: decree-in-prose-code-never-walked-it
+guard: BUILT — Gate 17 strikes-guard (08/10/2026, .claude/hooks/lib/strikes-guard{,.test}.mjs): a shape at 3+ strikes whose guard is OWED with no open-check key BLOCKS EVERY PUSH until the mechanism ships or is tracked — recurrence can no longer age in markdown, which is this shape's failure mode. Built the same night the operator asked "what is the fucking point of updating strikes if no one does anything." Tonight's instance also shipped its own specific guard: lane-3b spec-gap trigger + 3 red-first tests (recipes/shared.ts).
+- strike: 08/06 fontFamily unguarded while the doc said typography decided
+- strike: 08/05 §1.16 prose-width rule written, "no lint enforces this yet"
+- strike: 08/10 0.7a ladder decreed 08/06, resolved-subject builds never walked to the paid rung until caught live (baths "+ Add" on Dennis Dr)
+
 ## shape: green-locally-red-in-ci-mock-leak
 guard: OWED — a lint/test that fails when a test file installs a process-global `mock.module` for an in-repo module (`@/lib/*`, `@/utils/*`) without handing the real module back in `afterAll`; 38 files mock `@/utils/supabase/service-role` this way today, so it needs a sweep, not a one-file edit. Check open: test_mock_leak_restore_lint. The 3 effective-tier hijackers were fixed in place 08/11/2026.
 - strike: 07/?? "kill a global test-mock leak" (73952249)

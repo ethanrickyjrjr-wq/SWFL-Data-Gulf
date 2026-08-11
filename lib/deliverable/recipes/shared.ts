@@ -249,21 +249,34 @@ export async function resolveSubject(
   const paid = await fillFromPaidRecord(facts).catch(() => ({ ...NO_FILL }));
 
   // LANE 3b — THE LIVE BY-ADDRESS BUY (storefront decree 08/10/2026: ANY address,
-  // filled through the Apify rung). Reached ONLY when the free spine missed AND no
-  // already-bought row exists — rung 3 of RULE 0.7a, never a routine step for a
-  // house we already hold. One call, one result, behind the spend switch
-  // (OPERATOR_APPROVED_PAID_RUN); the row saves through the ONE write root, so the
-  // NEXT build of this address is a cache READ above — one pull per address. The
-  // fresh row may fill the moving facts (ask, DOM) precisely because it is seconds
-  // old; the cached lane's never-fill-price contract stands untouched.
-  if (!hit && !paid.rowFound) {
+  // filled through the Apify rung). Reached when the free spine missed AND no
+  // already-bought row exists — OR (amended same night, operator: "THAT IS EXACTLY
+  // WHEN APIFY SHOULD FUCKING RUN", on a Coming Soon that shipped "+ Add" for
+  // baths on a house the feed otherwise held) when the subject RESOLVED but the
+  // spec strip still has a hole (beds, baths, or sqft) after the free spine and
+  // the cached row. That is rung 3 of RULE 0.7a read precisely: one call for one
+  // NAMED missing field, never a routine step — a subject with a full strip never
+  // reaches this line, and a cached row that exists but lacks the field does not
+  // re-buy (bought once, read forever). One call, one result, behind the spend
+  // switch (OPERATOR_APPROVED_PAID_RUN); the row saves through the ONE write
+  // root, so the NEXT build of this address is a cache READ above. On a miss the
+  // fresh row may fill the moving facts (ask, DOM) precisely because it is
+  // seconds old; on a resolved subject every fill below is gap-only
+  // (fillFactsFromFreshRow rides fillFromPaidRecord's fill-only contract, and
+  // price fills only when absent), so the live feed's ask can never be clobbered
+  // by the vendor's.
+  const specGap = !facts.beds || !facts.baths || !facts.sqft;
+  if (!paid.rowFound && (!hit || specGap)) {
     const lookup = seams.lookupPaidRecord ?? fetchApifyPropertyByAddress;
     const fresh = await lookup(address).catch(() => null);
     if (fresh) {
+      const heroBefore = facts.photos[0];
       await fillFactsFromFreshRow(facts, fresh).catch(() => undefined);
       // The pull's hero is a vendor CDN URL — mirror it like every other lane's
       // hero, so a re-send months later doesn't depend on the vendor keeping it.
-      if (facts.photos[0]) {
+      // Only a hero the FRESH ROW just contributed: a resolved subject's hero was
+      // mirrored above already, and re-mirroring a mirror is a wasted write.
+      if (facts.photos[0] && facts.photos[0] !== heroBefore) {
         const mirroredHero = await mirrorHeroPhoto(facts.photos[0]).catch(() => null);
         if (mirroredHero) facts.photos[0] = mirroredHero;
       }

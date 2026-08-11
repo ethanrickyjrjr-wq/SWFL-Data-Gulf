@@ -64,6 +64,7 @@ import {
   baselineJson,
   ALLOWED_CLASSES,
 } from "./lib/coverage-ratchet.mjs";
+import { parseStrikes, unguardedShapes } from "./lib/strikes-guard.mjs";
 
 const BANNER = "=".repeat(72);
 
@@ -451,6 +452,17 @@ process.stdin.on("end", () => {
   // 5/30... i just had it fucking fixed yesterday"). Gate 15 covers email
   // captures; this covers the ingest half of the same shape.
   ingestDispatchGate(changed);
+
+  // ---- Gate 17: the strike registry has teeth ------------------------------
+  // Operator, 08/10/2026, minutes after a session wrote a THIRD strike and left
+  // its guard line OWED with nothing behind it: "what is the fucking point of
+  // updating strikes if no one does anything". RULE 2 §0b bans a third strike
+  // entry as the response — the printer painted it red, and red print is not a
+  // mechanism. This is: any shape at 3+ strikes whose guard is OWED and names no
+  // open tracking key blocks EVERY push, every session, regardless of what the
+  // diff touches, until the mechanism is built or its check is opened and named.
+  // Rules + positive controls (incl. the live registry): lib/strikes-guard{,.test}.mjs.
+  strikesGuardGate();
 
   // ---- Gate 8: ZIP scope root (Lee + Collier, 57) ---------------------------
   // Coverage has ONE root (isCoreScope, refinery/lib/core-scope.mts) and the leak
@@ -1374,6 +1386,43 @@ function captureFreshnessGate(changed) {
     );
   } catch {
     // never wedge a push on a guard bug — fail open
+  }
+}
+
+// Gate 17 body. Fail-OPEN on internal error (a broken guard must never wedge
+// every push), BLOCK on violation. Escape ALLOW_UNGUARDED_STRIKES=1 — legitimate
+// ONLY for shipping the very push that builds a shape's mechanism when flipping
+// the guard line races another session's edit; say which shape in the message.
+function strikesGuardGate() {
+  try {
+    if (process.env.ALLOW_UNGUARDED_STRIKES === "1") {
+      process.stdout.write(
+        `\n[pre-push gate] OVERRIDE: ALLOW_UNGUARDED_STRIKES=1 — a 3-strike shape is\n` +
+          `shipping unguarded (logged). Name the shape in the push message.\n`,
+      );
+      return;
+    }
+    const path = join(REPO_CWD, "_ASSISTANT", "STRIKES.md");
+    if (!existsSync(path)) return;
+    const bad = unguardedShapes(parseStrikes(readFileSync(path, "utf8")));
+    if (bad.length === 0) return;
+    block(
+      "STRIKE REGISTRY — a 3-strike shape has no mechanism and no tracked check (Gate 17)",
+      `RULE 2 §0b: at three strikes the response is a MECHANISM, not another entry.\n` +
+        `These shapes are at the threshold with a guard that is neither BUILT nor\n` +
+        `pointing at an open checks key:\n\n` +
+        bad
+          .map((s) => `  - ${s.slug} (${s.strikes} strikes) — guard: ${s.guard || "(missing)"}`)
+          .join("\n") +
+        `\n\nFix, in order of preference:\n` +
+        `  1. Build the mechanism (hook/lint/test/gate) and flip the guard line to\n` +
+        `     "BUILT — <what, date>".\n` +
+        `  2. If it is genuinely out of reach this session (RULE 0.85 §2), open the\n` +
+        `     check and NAME it in the guard line: "check open: <key>".\n` +
+        `Nothing ships until the registry stops carrying an unanswered third strike.`,
+    );
+  } catch {
+    // fail open — never wedge a push on this gate's own bug
   }
 }
 

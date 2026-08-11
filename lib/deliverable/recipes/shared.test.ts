@@ -13,10 +13,13 @@ afterAll(() => {
 });
 
 let communityResult: unknown = { matched: false, reason: "no_parcel_at_address" };
+// What the free spine "resolves" — null = a miss (the file's original fixed value);
+// lane-3b gap tests set a real hit here and restore it after.
+let nextListingHit: unknown = null;
 
 mock.module("@/lib/listings/resolve-subject", () => ({
   ...realResolveSubject,
-  resolveSubjectListing: async () => null,
+  resolveSubjectListing: async () => nextListingHit,
 }));
 mock.module("@/lib/listings/community-lookup", () => ({
   ...realCommunityLookup,
@@ -148,6 +151,91 @@ test("FAILURE: a throwing lookup must not fail the build (RULE 0.7)", async () =
     },
   });
   expect(facts.address).toContain("Brixton");
+});
+
+// ── LANE 3b, GAP-TRIGGERED (operator decree 08/10/2026: "THAT IS EXACTLY WHEN
+// APIFY SHOULD RUN") — a RESOLVED subject whose spec strip still has a hole after
+// the free spine and the cached row is precisely the moment the by-address buy
+// fires. One named missing field, gap-fill only, never a clobber of live facts.
+
+const HIT_MISSING_BATHS = {
+  address: "12798 Dennis Dr, Fort Myers, FL 33908",
+  city: "Fort Myers",
+  state: "FL",
+  zip: "33908",
+  price: "$13,000,000",
+  beds: "5",
+  sqft: "5,400",
+  propertyType: "single_family",
+  photos: [],
+  sourceUrl: "https://www.swfldatagulf.com",
+};
+
+test("a resolved subject missing baths reaches the by-address buy, which fills ONLY the gap", async () => {
+  communityResult = { matched: false, reason: "no_parcel_at_address" };
+  nextListingHit = { ...HIT_MISSING_BATHS, photos: [] };
+  try {
+    const calls: string[] = [];
+    const { facts, resolved } = await resolveSubject("12798 Dennis Dr, Fort Myers, FL 33908", "", {
+      lookupPaidRecord: async (addr) => {
+        calls.push(String(addr));
+        return {
+          address_key: "12798 dennis dr fort myers",
+          street: "12798 Dennis Dr",
+          city: "Fort Myers",
+          state: "FL",
+          zip_code: "33908",
+          status: "for_sale",
+          list_price: 12500000, // vendor disagrees with the live feed — must NOT win
+          baths_total: 6.5,
+          beds: 5,
+          sqft: 5400,
+          alt_photos: [],
+          raw: {},
+        } as never;
+      },
+    });
+    expect(calls).toEqual(["12798 Dennis Dr, Fort Myers, FL 33908"]);
+    expect(resolved).toBe(true);
+    expect(facts.baths).toBe("6.5"); // the one missing field, filled
+    expect(facts.price).toBe("$13,000,000"); // the live feed's ask survives the fresh row
+    expect(facts.beds).toBe("5");
+  } finally {
+    nextListingHit = null;
+  }
+});
+
+test("a resolved subject with a FULL spec strip never calls the by-address buy", async () => {
+  communityResult = { matched: false, reason: "no_parcel_at_address" };
+  nextListingHit = { ...HIT_MISSING_BATHS, baths: "6", photos: [] };
+  try {
+    let calls = 0;
+    const { resolved } = await resolveSubject("12798 Dennis Dr, Fort Myers, FL 33908", "", {
+      lookupPaidRecord: async () => {
+        calls++;
+        return null;
+      },
+    });
+    expect(resolved).toBe(true);
+    expect(calls).toBe(0); // we already hold the house — the paid rung is never routine
+  } finally {
+    nextListingHit = null;
+  }
+});
+
+test("FAILURE: a gap-triggered lookup that misses keeps the resolved subject and the open slot", async () => {
+  communityResult = { matched: false, reason: "no_parcel_at_address" };
+  nextListingHit = { ...HIT_MISSING_BATHS, photos: [] };
+  try {
+    const { facts, resolved } = await resolveSubject("12798 Dennis Dr, Fort Myers, FL 33908", "", {
+      lookupPaidRecord: async () => null,
+    });
+    expect(resolved).toBe(true); // the free-spine hit still counts
+    expect(facts.baths).toBeUndefined(); // honest open slot, never a zero
+    expect(facts.price).toBe("$13,000,000");
+  } finally {
+    nextListingHit = null;
+  }
 });
 
 test("FAVORABLE_FRAMING_POLICY states the priority sentence first", () => {
