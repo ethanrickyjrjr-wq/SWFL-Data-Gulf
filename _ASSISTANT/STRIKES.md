@@ -16,10 +16,11 @@ guard: BUILT — Gate 17 strikes-guard (08/10/2026, .claude/hooks/lib/strikes-gu
 - strike: 08/10 0.7a ladder decreed 08/06, resolved-subject builds never walked to the paid rung until caught live (baths "+ Add" on Dennis Dr)
 
 ## shape: green-locally-red-in-ci-mock-leak
-guard: OWED — a lint/test that fails when a test file installs a process-global `mock.module` for an in-repo module (`@/lib/*`, `@/utils/*`) without handing the real module back in `afterAll`; 38 files mock `@/utils/supabase/service-role` this way today, so it needs a sweep, not a one-file edit. Check open: test_mock_leak_restore_lint. The 3 effective-tier hijackers were fixed in place 08/11/2026.
+guard: BUILT 08/11/2026 — `lib/testing/mock-restore-ratchet.test.ts`, a shrink-only ratchet in the plain `bun test` run: any test file calling `mock.module()` on an in-repo specifier without an `afterAll` restore fails CI unless it is on the frozen 45-file whitelist; fixed/deleted files must come OFF the list. Check test_mock_leak_restore_lint closed same day. The 45 whitelisted offenders still owe the per-file snapshot-restore sweep — but no NEW leaker can land, and the list can only shrink.
 - strike: 07/?? "kill a global test-mock leak" (73952249)
 - strike: 08/?? export-route tier mock hijacked segments/preview — 5 red runs
 - strike: 08/11 segments mock reached usage.test.ts 110 files later — 12 red runs
+- strike: 08/11 agent-build route.test.ts default-docs mock → frozen-occurrence red 11+ CI runs, green locally (Linux vs Windows file order); leaker fixed with snapshot-restore + guard built (this line)
 
 ## shape: fixed-but-not-live
 guard: BUILT — pre-push Gate 15 capture-freshness (08/10/2026): email-surface code can't push without a re-baked capture

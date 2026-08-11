@@ -1,3 +1,25 @@
+## 2026-08-11 (Fable 5) — CI red 11+ runs: mock leak found, fixed, and GUARDED (mock-restore ratchet shipped, strike shape closed)
+
+WHY CI STAYED RED WHILE EVERY LOCAL RUN WAS GREEN: `app/api/agent/build/route.test.ts` (landed
+last night with the agent-driver work) wholesale-mocks `@/lib/email/doc/default-docs` with a junk
+doc and never restores it. bun's `mock.module` is process-global; on CI's Linux file order that
+file runs BEFORE `lib/email/sequence/__tests__/frozen-occurrence.test.ts`, whose fixture is built
+from `defaultDoc()` → junk fails `EmailDocSchema` parse → `buildFrozenOccurrence` returns null →
+2 tests red, every run since 01:38. Windows traverses files in a different order, so local was
+green — the exact `green-locally-red-in-ci-mock-leak` STRIKES shape (was 3 strikes, guard OWED).
+
+SHIPPED:
+- Fix: route.test.ts now snapshots all 8 mocked modules before mocking and restores them in
+  `afterAll` (agent-brand-intro idiom). 19/19 pass.
+- Guard (the owed mechanism): `lib/testing/mock-restore-ratchet.test.ts` — shrink-only ratchet in
+  the plain `bun test` run. In-repo `mock.module` with no `afterAll` fails unless on the frozen
+  45-file whitelist; fixed/deleted files must come off the list. Green at ship (2 pass).
+- STRIKES.md shape flipped to BUILT; check `test_mock_leak_restore_lint` closed with evidence.
+
+STILL OPEN: the 45 whitelisted files owe the per-file snapshot-restore sweep (list can only
+shrink now). Local-only order-dependent failures exist in OTHER leakers (getAnthropic wrapper ×3,
+campaign-chrome ×1 on Windows order) — same disease, covered by the whitelist sweep.
+
 ## 2026-08-11 (Opus 5) — ALL IN ON GRAPHIFY HOSTED: 150 files un-ignored so the graph can see them; RULE 0.5 repointed from the stale local file to the hosted index
 
 OPERATOR DECREE, verbatim: *"make everything not gitignored, we are public anyway, we only use

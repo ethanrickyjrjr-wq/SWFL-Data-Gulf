@@ -12,7 +12,7 @@
 // network call (address-key.ts is plain string math; the module's own Supabase client lives
 // inside separate exported functions this route never calls), and the "claimOnce called with
 // the exact key" assertions below would be tautological against a stubbed identity function.
-import { describe, expect, test, mock } from "bun:test";
+import { afterAll, describe, expect, test, mock } from "bun:test";
 
 let scopeResult: { userId: string } | Response = { userId: "hermes-1" };
 let projectMatchResult: { projectId: string; subjectAddress: string } | null = {
@@ -35,6 +35,30 @@ let insertDraftCalls: unknown[] = [];
 let recordDraftCalls: { key: string; draftId: string }[] = [];
 let duplicateResult: { draftId: string; recipeKey: string | null } | null = null;
 let ledgerClaimResult: { broadcastId: string | null; createdAt: string } | null = null;
+
+// mock.module is PROCESS-GLOBAL in bun — without these restores the default-docs
+// stub below leaks into whatever file runs next (on CI's Linux file order that was
+// lib/email/sequence/__tests__/frozen-occurrence.test.ts, whose fixture then failed
+// schema parse — red CI 08/11/2026 while green locally). Snapshot every real module
+// BEFORE mocking it, hand it back in afterAll. Same idiom as agent-brand-intro.test.ts.
+const realScopes = { ...(await import("@/lib/api-tokens/scopes")) };
+const realIdempotency = { ...(await import("@/lib/email/idempotency")) };
+const realServiceRole = { ...(await import("@/utils/supabase/service-role")) };
+const realRecipesShared = { ...(await import("@/lib/deliverable/recipes/shared")) };
+const realRecipes = { ...(await import("@/lib/deliverable/recipes")) };
+const realRecipesIndex = { ...(await import("@/lib/deliverable/recipes/index")) };
+const realDefaultDocs = { ...(await import("@/lib/email/doc/default-docs")) };
+const realPersist = { ...(await import("@/lib/agent-build/persist")) };
+afterAll(() => {
+  mock.module("@/lib/api-tokens/scopes", () => realScopes);
+  mock.module("@/lib/email/idempotency", () => realIdempotency);
+  mock.module("@/utils/supabase/service-role", () => realServiceRole);
+  mock.module("@/lib/deliverable/recipes/shared", () => realRecipesShared);
+  mock.module("@/lib/deliverable/recipes", () => realRecipes);
+  mock.module("@/lib/deliverable/recipes/index", () => realRecipesIndex);
+  mock.module("@/lib/email/doc/default-docs", () => realDefaultDocs);
+  mock.module("@/lib/agent-build/persist", () => realPersist);
+});
 
 mock.module("@/lib/api-tokens/scopes", () => ({
   requireScope: async () => scopeResult,
