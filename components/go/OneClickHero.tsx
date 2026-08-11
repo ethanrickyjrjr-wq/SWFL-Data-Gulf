@@ -3,6 +3,7 @@
 
 import { useEffect, useRef, useState } from "react";
 import { heroDestination } from "@/lib/lab-entry/destination";
+import { areaFromGoQuery } from "@/lib/lab-entry/area-from-query";
 import { RECIPES, type RecipeKey } from "@/lib/deliverable/recipes";
 import type { AddressSuggestion } from "@/lib/geo/search-box";
 
@@ -29,6 +30,12 @@ const LIFECYCLE_KEYS: readonly RecipeKey[] = [
   "under-contract",
   "just-sold",
 ];
+
+/** Area-keyed options after the lifecycle 7 (operator decree 08/11/2026: the
+ *  "28 homes in Fort Myers" listings digest gets a /go door too). These fill
+ *  the recipe's [[your city or ZIP]] with the CITY sliced from whatever the
+ *  bar holds — a full listing address still works. */
+const AREA_KEYS: readonly RecipeKey[] = ["listings-digest"];
 
 // Brand row for ethanrickyjrjr@gmail.com (user_brand_profiles, read 08/10/2026).
 const BRAND = {
@@ -108,8 +115,17 @@ export default function OneClickHero() {
   };
 
   const build = (key: RecipeKey) => {
+    const recipe = RECIPES[key];
+    const raw = query.trim();
+    // Area-keyed options (Listings Digest) fill with the city sliced from the
+    // bar; address options carry the bar verbatim. Empty/unsliceable text keeps
+    // the [[blank]] so the lab asks instead of building unscoped.
+    const area = recipe.subject === "area";
     window.location.assign(
-      heroDestination({ input: "address", recipe: RECIPES[key] }, { filled: query.trim() }),
+      heroDestination(
+        { input: area ? "area" : "address", recipe },
+        { filled: area ? areaFromGoQuery(raw) : raw },
+      ),
     );
   };
 
@@ -196,7 +212,7 @@ export default function OneClickHero() {
               role="menu"
               aria-label="New Listing lifecycle emails"
             >
-              {LIFECYCLE_KEYS.map((key) => (
+              {[...LIFECYCLE_KEYS, ...AREA_KEYS].map((key) => (
                 <button
                   key={key}
                   type="button"

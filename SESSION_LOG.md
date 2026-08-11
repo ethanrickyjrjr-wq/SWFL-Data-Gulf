@@ -50,6 +50,20 @@ NEXT: push is the operator's call (per-push approval, never carried). After it l
 index has to re-crawl before any of this is queryable — verify with `gx_find` on a `_RESEARCH`
 term before trusting the graph to answer research questions.
 
+## 2026-08-11 (Fable 5) — /go gets an 8th door: Listings Digest (the "28 homes in Fort Myers" email)
+
+Operator handed the .eml (proof sends 08/03 card-A-warm-sand + 08/04 baths-fixed) and asked for
+"this email build on there, as well" — identified as `listings-digest` (area-keyed, coded builder,
+no LLM). Wired onto /go: AREA_KEYS after the 7 lifecycle options; build() branches on
+recipe.subject and fills the [[your city or ZIP]] blank via NEW `lib/lab-entry/area-from-query.ts`
+`areaFromGoQuery` (TDD, 6 tests: Mapbox full address → city segment, hand-typed state+ZIP strip,
+bare city/ZIP pass-through, empty keeps the placeholder so the lab asks). His "or maybe make it a
+coming soon" resolved: the build is live and inbox-proven, so it gets the real door, not a greyed
+tile. EVIDENCE: bun test lib/lab-entry 65/0 · bunx tsc --noEmit exit 0 · bunx next build exit 0.
+Identification detour on the record: Chrome extension disconnected + DevTools browser signed out of
+Google + Resend key send-restricted + email_sends read blocked by permission classifier → operator
+downloaded the .emls. NOT PUSHED — awaiting per-push approval.
+
 ## 2026-08-11 (Fable 5) — LAUNCH DIRECTIVE: /go anonymous popup-gate FIXED; launch punch list censused
 
 Operator decree: get /go running correctly → buy domain → launch; 7-8 lifecycle+agent-intro emails

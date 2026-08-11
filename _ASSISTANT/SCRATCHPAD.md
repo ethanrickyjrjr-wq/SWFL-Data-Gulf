@@ -87,6 +87,9 @@ UserPromptSubmit hook that injects the ToolSearch line on structural questions, 
 there, as well?" = add the email he's looking at to the /go one-click options. Must OPEN it in his
 Chrome first (signed-in Gmail), identify which email/recipe it is (likely one of ours from
 hello@swfldatagulf.com), then wire its door onto /go.
+RESOLVED same session: he downloaded the .emls — it's the LISTINGS DIGEST ("28 homes in Fort Myers",
+proof sends b6eb6798/card-A-warm-sand 08/03 + baths-fixed 08/04). "or maybe make it a coming soon"
+read as: get it on /go, area-keyed. Wired as the 8th /go option this session.
 
 ## 2026-08-11 (Fable 5) — OPERATOR LAUNCH DIRECTIVE: /go correct → buy domain → LAUNCH. Four parts, verbatim intent:
 1. "Get /go running correctly so I can buy a domain and we can launch." — /go is the launch surface.
