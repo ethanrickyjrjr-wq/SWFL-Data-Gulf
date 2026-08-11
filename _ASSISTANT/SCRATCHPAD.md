@@ -1,3 +1,47 @@
+## 2026-08-11 (Opus 5) — OPERATOR: "whenever you have to put in an address or choose, NO NEW PROJECT, it fucks everything up" + "every first land at email labs needs to be fucking BLANK"
+Two screenshots, two live defects on the address-first door we shipped 08/10 — i.e. the SAME surface
+broken again the next morning (`fixed-but-not-live`, 4th strike; the ?addr= live-browser drive was
+logged as OWED in SESSION_LOG 08/11 and never run — that omission is the root cause of this).
+1. **THE PROJECT QUESTION MUST NOT EXIST ON AN ADDRESS ARRIVAL.** Screenshot 10:45 — "Build this in
+   13529 Island Rd Fort Myers, FL 33905?" / "No — new project". Cause found in `planArrival`
+   (lib/lab-entry/arrival.ts): `addressFirst` is gated on `addressPopup`, and `addressPopup` is FALSE
+   when `?addr=` is already filled — so the /go hero door (which pre-fills addr) falls through to
+   `projectConfirm` and offers the LAST-TOUCHED project, which is a DIFFERENT address. The address is
+   the project; when we hold one there is no question to ask.
+2. **BLANK MEANS BLANK.** Both shots land on `skeleton-clean-white` (header/photo/kicker/stats/text/
+   button/footer) which the code calls "the blank skeleton". Operator: "we can't have builds starting
+   out on prefilled canvases — this moves parts of the build." First land renders nothing.
+Also visible in the 08/10 22:44 shot: the native "Leave site?" over our own hop. `guard.bypass()` is
+in `intoProject` now — any NEW auto-route path has to call it too or that returns.
+
+## 2026-08-11 (Opus 5) — OPERATOR, IDENTITY RULE CLARIFIED (supersedes the 08/10 blanket strip): "no SWFL DATA GULF name any where… logo is fine, address is fine and all cam spam… just make our name SWFL Data Gulf in email. we will use it there but no mention anywhere else."
+**THE RULE, split by artifact — this unblocks `launch_whitelabel_stripe_gate`'s naming half:**
+- The NAME "SWFL Data Gulf" is legal **IN THE EMAIL ONLY** — sender identity, CAN-SPAM footer, and
+  the data citation line (40+ `lib/` files cite it as the source; memory
+  `feedback_listing-citations-say-swfl-data-gulf` stands). Nowhere else — not on /go, not in site
+  chrome, not in the tab title.
+- The LOGO is fine everywhere, including /go's top-left mark. Address + CAN-SPAM fine.
+- So the 08/10 "no identity" strip is now NAME-only, not logo-only. Do not re-strip the logo.
+**BUILD DIRECTIVE, same message:** the /go top-bar button says **"My Brand"** (not "Sign up") and
+opens a popup where a user fills in their brand. **Anyone who does not fill it in gets OUR colors
+and OUR logo** — the house default, which is already what `applyBrand` falls through to (it only
+overlays when a token exists; `apply-brand.ts:35` already forbids house-logo pixels under a
+client's own name). The ONE brand form is `components/brand/BrandingBlock` via
+`AccountBrandEditor`, and the popup already exists as the intercepting route
+`app/@accountModal/(.)account/brand/page.tsx` — wire the door, never write a second brand form.
+
+## 2026-08-11 (Opus 5) — OPERATOR: "how far are we on /go working? we need to get brand and sign up up top."
+Status asked + a build directive. `/go` is LIVE (prod 200) and the flow is wired end to end: bar →
+8 options (7 lifecycle + Listings Digest) → `heroDestination` → `/email-lab/grid?recipe&rkey&addr`
+→ auto-build → rendered finished email (serif seed fixed 08/10, anonymous popup gate fixed 08/11
+`11f017d7`). STILL OWED before "working" is provable: the ?addr= LIVE-BROWSER drive (logged as owed
+in SESSION_LOG 08/11 and never run), agent-brand-intro has no /go door, `apify_lookup_miss_memo`.
+THE DIRECTIVE: the page today has NO header at all — it was stripped bare on 08/10 by his own decree
+("just get rid of swfl data gulf and logo"). "brand and sign up up top" = put a brand mark + a
+sign-up door back in a top bar. **The reversal is deliberate and is now the standing state** — but
+WHICH brand is still blocked on him: SWFL Data Gulf is banned on this page, and the white-label
+name/domain does not exist yet (`launch_whitelabel_stripe_gate`). Asked; do not guess a name.
+
 ## 2026-08-11 (Opus 5) — OPERATOR: "Ha. One green build. Claude fucking sucks."
 Earned. The 08/11 cleanup commit (cb803b1c) deleted the `listings:` job from `nightly-chain.yml`
 and LEFT ITS TRAILING `    secrets: inherit` BEHIND at line 122 — an orphan key under a comment
