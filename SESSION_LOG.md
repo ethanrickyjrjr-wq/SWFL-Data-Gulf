@@ -1,3 +1,31 @@
+## 2026-08-11 (Sonnet 5) — /go standalone carve-out: planning session, handoff written, no code changed
+
+Operator decree: spin /go off into its own project — new folder, new repo, new free Supabase
+project, Apify-only feeder, nothing shared with swfldatagulf except copied code and rebuilt rules.
+Session was planning + investigation only; nothing built, nothing copied, no new folder created yet.
+
+Triaged the prior artifacts: `_GO/` (321-file closure) is scrap — its own handoff admits the entry
+list is wrong. `docs/carve-out/EMAIL-BUILDER-CARVE-OUT.md`'s audit findings are reusable (its
+CSV/XLSX parser section is not — we're Apify-fed, not upload-fed). `docs/standards/go-playbook.md`
+PARTS 0-4/6 travel to the new repo; PART 5 ("lane not route") is overturned by this decree.
+
+Corrected two claims made mid-session before they shipped: (1) `new-listing.ts` is NOT a chrome
+holdout — `buildListingFlyer` is itself a thin call into `buildLifecycleEmail`; (2) `_GO/HANDOFF.md`'s
+claim that the lab's build button never calls `resolveSubject` could not be reproduced — traced
+route.ts -> authorDoc -> recipeByKey/builderFor -> the real recipe builder -> the shared chrome, 3
+layers deep at current HEAD, and it dispatches correctly when `recipeKey` is present. One real,
+unconfirmed risk flagged instead: `activeRecipeKey` inits once at mount and can go null on
+re-entry, falling through to `default-grid` (no chrome) on a prompt-match miss — not verified live,
+Supabase MCP query blocked on interactive OAuth.
+
+The operator's actual complaint was narrower than the investigation: /go's arrival was landing on a
+pre-filled 7-block skeleton instead of blank — already documented once (SCRATCHPAD 08/11, "BLANK
+MEANS BLANK"), status unverified ("may have been fixed by now, who knows"). Locked as a day-0
+acceptance requirement for the new project regardless of brain-platform's current state.
+
+Full findings, corrections, and the 9-step next-session order:
+`docs/handoff/2026-08-11-go-standalone-carve-out-handoff.md`.
+
 ## 2026-08-11 (Opus 5) — corrections LANDED in both target files, parking file deleted, handoff written
 
 Follow-up to `51975c39`. Operator: *"take over the session you need."* The claim on both files
