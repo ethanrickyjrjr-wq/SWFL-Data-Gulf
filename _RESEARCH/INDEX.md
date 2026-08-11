@@ -330,7 +330,13 @@ personal financial notes.
   DB-backed cache pattern (`lib/figures/sourced.ts`). Recommends starting with cron + API route
   (zero new dependency) over adopting Workflows at this call volume.
 
-**email-and-social/** — email + social pipeline, platform safe zones, first-party verification (13)
+**email-and-social/** — email + social pipeline, platform safe zones, first-party verification (14)
+- `2026-08-11-freakonomics-seller-insights-crawl4ai-research.md` — pure-ideation crawl4ai sweep
+  (4 parallel agents) on non-obvious seller-psychology angles: SWFL-buildable DOM-vs-price-cut
+  correlation (real, zero new ingest), real per-property carrying-cost math, price-band
+  search-filter boundary check, plus 20+ cited external findings (FHFA rate lock-in paper, Naples
+  cash-buyer price-band breakdown, Zonda renovation ROI, Realtor.com/Zillow seasonality reports).
+  Tags every finding buildable-now vs. cited-external vs. genuine gap. No build chosen yet.
 - `2026-08-09-merge-tag-fallback-vendor-docs.md` — merge-tag/personalization fallback behavior at Mailchimp/HubSpot/Klaviyo, fetched live — unfilled tokens ship literal blanks (documented MC+HS); grounds the sentence-bank drop/block rule
 - `2026-08-06-just-sold-craft-and-agent-email-voice.md` — the CRAFT half of a Just Sold email, and
   how an agent email should SPEAK. Forced by the operator on the first render: *"this is the worst
