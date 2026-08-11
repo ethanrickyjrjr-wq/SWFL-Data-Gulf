@@ -201,4 +201,4 @@ write-time-vs-source-health blindness (§1–2); do BOTH: cap the window AND add
 - [ ] Pin FEMA's real WHERE filter in the probe (§2 table row 5) — 1=1 504s.
 - [ ] Spec the registry `source_liveness:` block + `check_source_liveness()` in check_freshness.py (C2 extend). New check.
 - [ ] Close `active_listing_median_land_blend` — already live in prod (33972 $359k/403, 33974 $325k/655).
-- [ ] **Kill any in-flight Lee-from-FDOR ingest** (§4). Lee = LeePA. Do not add a second Lee parcel source.
+- [x] ~~**Kill any in-flight Lee-from-FDOR ingest** (§4). Lee = LeePA. Do not add a second Lee parcel source.~~ **SUPERSEDED 07/18/2026 — resolved the OTHER way, DO NOT ACT ON THIS LINE.** Operator ratified **KEEP BOTH**: the Lee-from-FDOR ingest was not killed, it LANDED (`lee_parcels`, 556,083 parcels / 104 cols, 07/18/2026) and `leepa_parcels` stays as the appraiser cross-check. See `docs/handoff/2026-07-18-parcel-consolidation.md:24` and `docs/standards/data-roots.md` §PARCELS. Verified 08/11/2026.

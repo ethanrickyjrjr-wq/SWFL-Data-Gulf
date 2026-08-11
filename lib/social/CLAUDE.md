@@ -286,15 +286,30 @@ Don't take those numbers on faith and don't re-derive them from memory — `syst
 every one across every role × format × theme × surface. Re-tune a brand color and it tells you which
 rule broke.
 
-## Two systems, still unwired — know which one you're in
+## Two systems, PARTLY wired — know which one you're in
 
 1. **`lib/social/`** — the complete publish/schedule engine (OAuth, `social_schedules`, 5 channel
    adapters, cron). `render-social-image.ts` rasterizes brain-data cards via resvg.
 2. **`lib/email/social-calendar/`** — the lab's "Generate Week," which composes posts as `EmailDoc`.
 
-The seam is `SocialModel` vs `EmailDoc`. They are not connected. Publishable (5 platforms) ≠
-displayable (8) — gate a platform picker off the `Platform` union in `channels/index.ts`, **not**
-`lib/email/social/platforms.ts`.
+**CORRECTED 08/11/2026 — this section said "still unwired / they are not connected" and that was
+STALE.** Re-verified in the tree: `lib/social/` holds **8 value (runtime) imports** from
+`lib/email/`, not type-only aliases. The load-bearing one is `design/author.ts:23-27`, which imports
+`SOCIAL_SOURCING_RULES`, `PUBLISHABLE_PLATFORMS` and **`buildVariants`** from
+`@/lib/email/social-calendar/build-week` — the AI social author calls system 2's own week builder.
+The others: `chart-image.ts:12` `hostEmailPng` · `chart-svg.ts:6` `renderChart` ·
+`design/chart-attach.ts:11` `svgToPng` · `design/system.ts:63` `legibleInk` ·
+`design/author.ts:17-19` `resolveEmailModel`, `brandingToTokens`, `fetchLakeParts` +
+`refreshStaleLakeContext`. `author.ts` even documents the relationship in its own header ("Mirrors
+`lib/email/social-calendar/build-canvas-fill.ts`").
+
+**What is still TRUE and still the thing to watch:** the *model* seam. `SocialModel` and `EmailDoc`
+remain distinct shapes — the wiring above shares builders, renderers and tokens, it does NOT unify
+the two documents. And publishable (5 platforms) ≠ displayable (8): gate a platform picker off the
+`Platform` union in `channels/index.ts`, **not** `lib/email/social/platforms.ts`.
+
+Treat "these two are independent" as false. Before you duplicate a helper on the assumption the
+other system can't reach it, grep — it probably already imports it.
 
 ## Still-open forks (checks, not folklore)
 

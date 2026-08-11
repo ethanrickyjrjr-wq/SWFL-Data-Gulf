@@ -162,8 +162,21 @@ frozen output measures font sizes 13/10/11/12/15/44px and weights 700/800/900 ag
 defines seven sizes and three legal weights (measured 08/03/2026 off
 `lib/email/__fixtures__/golden/branded.html`).
 
-`reportToEmailHtml` (`lib/email/activation/render.ts`) is its thin wrapper and has **ZERO live
-callers** — only its own tests keep it compiling.
+`reportToEmailHtml` (`lib/email/activation/render.ts`) is its thin wrapper. **CORRECTION
+08/11/2026 — the previous line here said "ZERO live callers — only its own tests keep it
+compiling." That is FALSE.** Walked in the tree: `lib/email/activation/sequence.ts:22` imports it
+and uses it as the DEFAULT renderer at `:123` and `:181` (`deps.render ?? reportToEmailHtml`), and
+`sequence.ts` is driven by `scripts/email/run-activation.mts` + `scripts/email/enroll-prospect.mts`,
+the first of which is invoked by a real workflow — `.github/workflows/activation-sequence.yml:41`.
+That is a **4th render path**, outside the documented 5-stop pipe.
+
+**It renders; it cannot send.** Confirmed in the CODE, not just the workflow's own comment:
+`run-activation.mts:28` defaults `DRY_RUN` true (`process.env.DRY_RUN !== "false"`), `:41-44`
+exits 1 on a non-dry run, and `deps.send` is `liveSendNotWired()` which throws (`:32-38`). The
+workflow is `workflow_dispatch` only — deliberately no schedule cron — and live send is gated on
+Phase D (1:1 send mechanism chosen + verified against Resend, CAN-SPAM address swapped, secrets
+set). So: a live, reachable, compiling render path that is hard-gated against delivery — **not**
+dead code, and not a sending pipe either. Anyone flipping Phase D on inherits this renderer.
 
 A convergence plan for exactly this merge exists and was abandoned half-done:
 `docs/superpowers/plans/2026-06-16-deliverable-convergence/`. The spine was extracted and ten

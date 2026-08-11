@@ -1,3 +1,96 @@
+## 2026-08-11 (Opus 5) — the 5 held-back provisional items re-verified: 4 of 5 claims were WRONG, 6 stale doc lines corrected, and the hosted graph produced a false negative on the one question RULE 0.5 says it wins
+
+Operator: "LOOK INTO THESE" — the five items the failed graph re-verify left single-pass/provisional.
+**5 of 5 resolved.** Verified against the tree because the hosted graph build (`149f4f6f`) is **8
+commits behind HEAD** — it predates today's deletion commit `cb803b1c`.
+
+**THE BIGGEST FINDING IS ABOUT THE GRAPH ITSELF, not any of the five.** `gx_callers` returned 0
+AND `gx_references` returned 0 for `reportToEmailHtml`, while the tree has an `import` at
+`lib/email/activation/sequence.ts:22` and two uses at `:123`/`:181`. An import statement IS a
+reference — this is a **false negative on "who reads this,"** the exact question RULE 0.5 says the
+graph beats grep at, one day after the all-in-on-graphify decree. Companion gap: `gx_find
+"cre_figures"` → **0 nodes**, because table names are not code symbols — so **lake-wiring questions
+are not graph-answerable at all**. Neither is a reason to abandon the graph; both are reasons the
+"grep is only the fallback" line needs a stated carve-out for (a) value/default-parameter
+references and (b) any `data_lake.*` question. Not edited into RULE 0.5 unasked.
+
+**THE FIVE, each with what the provisional claim said vs. what the code says:**
+
+1. **`redfin_city_swfl` desk-hero — CLAIM WAS RIGHT, and stronger than claimed.** It is the
+   **PRIMARY** hero series, not a nice-to-have: `lib/desk/loaders.ts:167` `loadSoldSeries()` →
+   `:174` `.from("redfin_city_swfl")` → called `:906` → hero ladder `:930-933` where
+   `buildHeroFromSold` is rung **1**, ahead of asking (2) and `zhvi_pivoted` (3). Loaders' own
+   comment `:926`: *"Sold LEADS now (it trailed the 2-day asking lane until 07/14/2026)."* Tested
+   at `loaders.test.ts:208`. The 07/11 audit line claiming *"NO code in the repo reads
+   data_lake.redfin_city_swfl … zero hits"* is FALSE — corrected in place. Its registry
+   `consuming_pack: none` is literally true (no BRAIN pack) but a live PAGE reads it, which is why
+   the SessionStart **DARK ROOTS list mis-flags it. NOT a deletion candidate.**
+2. **`reportToEmailHtml` 4th send pipe — BOTH prior claims were wrong, in opposite directions.**
+   `docs/standards/emails.md:165`'s *"ZERO live callers — only its own tests keep it compiling"* is
+   FALSE: chain is `render.ts` ← `sequence.ts:22` (default renderer, `deps.render ??`) ←
+   `scripts/email/run-activation.mts` ← `.github/workflows/activation-sequence.yml:41`. A real 4th
+   render path outside the documented 5-stop pipe. **But "live send pipe" is also wrong — walked
+   the CODE, not the YAML comment** (`decree-in-prose-code-never-walked-it`, 3 strikes):
+   `run-activation.mts:28` defaults DRY_RUN true, `:41-44` exits 1 on non-dry, `deps.send =
+   liveSendNotWired()` throws `:32-38`, workflow is `workflow_dispatch` with **no cron**. Truth:
+   **renders, cannot send, hard-gated on Phase D.** Corrected in `emails.md`.
+3. **`lib/social/CLAUDE.md` "two systems, still unwired" — STALE, and worse than claimed.**
+   `lib/social/` holds **8 VALUE (runtime) imports** from `lib/email/`, not type aliases. The
+   load-bearing one: `design/author.ts:23-27` imports `SOCIAL_SOURCING_RULES`,
+   `PUBLISHABLE_PLATFORMS`, **`buildVariants`** from `@/lib/email/social-calendar/build-week` — the
+   social author calls system 2's own week builder. Plus `hostEmailPng`, `renderChart`, `svgToPng`,
+   `legibleInk`, `resolveEmailModel`, `brandingToTokens`, `fetchLakeParts`. Section rewritten; the
+   one thing still TRUE (the `SocialModel` vs `EmailDoc` MODEL seam) preserved and separated.
+4. **`cre_figures` — operator's read confirmed: WIRING, not deletion.** Registry half is now FIXED
+   (real entry `cadence_registry.yaml:1624`), contra `repo-inventory-audit.md:124`'s "neither
+   `pipelines:` nor `coverage_exempt:`" — corrected. **Two gaps remain:** `consuming_pack: none`
+   (zero readers; writer `scripts/build-cre-figures.mjs` + derivation
+   `refinery/lib/derived/cre-figures.mts` both exist), and **no GHA cron** (`grep -rn
+   "build-cre-figures" .github/` = nothing). Open check `cre_figures_build_cron_cadence`, 24d
+   untouched. **1,078 / 985 are 07/18/2026 census figures, NOT re-probed — do not quote as current.**
+5. **Parcels leepa vs FDOR — the two disagreeing docs FOUND, and the stale side is dangerous.**
+   STALE side: `docs/audit/2026-07-11-open-issues-after-triage.md:423` (*"Lee=LeePA, full stop. Kill
+   any in-flight Lee-from-FDOR ingest"*) + `docs/handoff/2026-07-11-source-liveness-and-collier-handoff.md:204`
+   (same). CURRENT side: `docs/handoff/2026-07-18-parcel-consolidation.md:24` **operator ratified
+   KEEP BOTH**; `lee_parcels` (FDOR) **LANDED 07/18/2026, 556,083 parcels / 104 cols**, live with
+   `lee_parcels_summary`. **Obeying the 07/11 line today would delete a live ratified root.** Both
+   lines struck in place with the supersession stamp. Checked the LEDGER, not just the doc:
+   `lee_no_second_parcel_source` is **not an open row** in `public.checks` — so this was doc-only
+   staleness, no ledger action owed.
+
+**BONUS, found while verifying #1 — a check whose defect is already fixed in code:**
+`redfin_city_null_filter_dropped_no_paging` (open, 28d) says a foreign session dropped the
+not-null filter without paging. Both defenses are present today: `selectAllPaged` at
+`loaders.ts:170` AND `.not("median_sale_price","is",null)` at `:181`, with the docstring `:150-160`
+describing them as exactly that fix. Closeable with evidence — flagged to the operator, not closed
+unilaterally since the fix wasn't mine.
+
+**LIVE LANE (read-only lake probe, 08/11/2026 — the four-lane gate caught that I had asserted a
+live consumer and quoted 07/18 row counts without touching the source):**
+- `data_lake.cre_figures` = **1,078** · `cre_figures_confidence` = **985** — **byte-identical to the
+  07/18 census, 24 days later.** Not reassurance: with no cron the table has not moved one row
+  since the day it was built. Upgrades the caveat above from "don't quote as current" to a
+  measured fact, and is itself the evidence for the missing-cron gap.
+- `data_lake.redfin_city_swfl` = **403,565 rows / 952 areas / newest period_end 2026-06-30**
+  (`All Residential` slice: 143,029 rows, 952 areas). **This kills the 07/11 audit's NEVER_LANDED
+  finding outright** — that doc said the relation did not exist in `information_schema.tables`. It
+  exists and it is full. **Two ledger consequences:** (a) open check `identity_live_red_baseline`
+  still asserts *"redfin_city_swfl ghost_target+dlt_never_landed (table never landed)"* — **STALE,
+  the table holds 403,565 rows**; (b) open check `redfin_city_swfl_not_swfl` (statewide scope
+  despite the `_swfl` name) is **REAL and has GROWN — 896 regions when filed 07/13, 952 live
+  today.** Anything trusting the table name for SWFL scope is still wrong, and more wrong than when
+  it was filed.
+- `data_lake.lee_parcels` = **556,083** · `data_lake.leepa_parcels` = **548,798** — both live,
+  exactly matching the docs. Confirms item 5 at the source: the struck 07/11 "kill the
+  Lee-from-FDOR ingest" line would have deleted a live 556,083-row root.
+
+**6 stale doc lines corrected** (`lib/social/CLAUDE.md`, `docs/standards/emails.md`,
+`docs/standards/repo-inventory-audit.md`, `docs/audit/2026-07-11-open-issues-after-triage.md`,
+`docs/handoff/2026-07-11-source-liveness-and-collier-handoff.md`,
+`docs/audit/2026-07-11-pipeline-problems/08a-spine-identity.md`). Checks opened: 0. Closed: 0.
+**Operator decisions NOT taken unasked:** wiring a `cre_figures` consumer + its cron; reclassifying
+the dark-roots list so a page-consumer counts; the RULE 0.5 grep carve-out.
+
 ## 2026-08-11 (Opus 5) — the nightly chain has been red since 07/22, and it was ONE working guard misreporting itself: bake exit-code fixed + the half-deleted `listings:` job that broke YAML parsing this morning
 
 Operator: "Ha. One green build. Claude fucking sucks" → "WHY WOULD ANYTHING STILL FAIL???"

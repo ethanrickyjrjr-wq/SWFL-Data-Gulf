@@ -1,5 +1,7 @@
 # 08a — The Spine: per-pipeline identity records + Phase-2 drift fixtures
 
+> **Recommended model:** ⚡ Sonnet — keywords: schema
+
 **As-of:** 07/11/2026 · **Source:** research fan-out for `docs/superpowers/specs/2026-07-11-data-contracts-doctor-design.md` §13 (25 opus + 2 sonnet agents, read-only).
 **Status:** evidence for Fable 5's build. Every claim below was produced by an agent that read the live files / queried the live DB (SELECT-only) / fetched live vendor docs. Numbers anchored to `03-lake-live-state.md` as the canonical 07/11/2026 fixture.
 
@@ -329,7 +331,7 @@ dlt pipeline_name literal at resources.py:177 = 'redfin_lee', matches registry d
 ### `redfin_city_swfl`
 
 - NEVER_LANDED: registry claims expected_rows_min 1700 / '1917 confirmed 07/11/2026 via live dry-run' (cadence_registry.yaml:692) but DB side has NO table — data_lake.redfin_city_swfl does not exist in information_schema.tables (03-lake-live-state §1a + §3, TABLE MISSING). A dlt dry-run writes nothing; the pipeline has never landed a row in prod. Registry side: exists/confirmed; DB side: relation does not exist.
-- consumer drift: registry comment (cadence_registry.yaml:694) names an intended consumer — 'the monthly source-faithful SOLD anchor beneath the daily ASKING line on the desk hero (daily-price-dual-signal)' — but NO code in the repo reads data_lake.redfin_city_swfl (grep of refinery/, app/, lib/, components/, scripts/, docs/sql = zero hits). Registry side: consumer named; code side: consumer unbuilt.
+- ~~consumer drift: registry comment (cadence_registry.yaml:694) names an intended consumer — 'the monthly source-faithful SOLD anchor beneath the daily ASKING line on the desk hero (daily-price-dual-signal)' — but NO code in the repo reads data_lake.redfin_city_swfl (grep of refinery/, app/, lib/, components/, scripts/, docs/sql = zero hits). Registry side: consumer named; code side: consumer unbuilt.~~ **STALE AS OF 08/11/2026 — the consumer WAS built, and it is the PRIMARY hero source, not a nice-to-have.** `lib/desk/loaders.ts:167` `loadSoldSeries()` reads `data_lake.redfin_city_swfl` (`:174`), is called at `:906`, and feeds the hero ladder at `:930-933` — where `buildHeroFromSold(...)` is rung **1**, ahead of `buildHeroFromAsking` (rung 2) and `buildHeroFromZhvi` (rung 3, the `zhvi_pivoted` fallback that `P5-undocumented-consumers.md:316` names). The loaders' own comment at `:926` records the change: *"Sold LEADS now (it trailed the 2-day asking lane until 07/14/2026)."* Covered by `lib/desk/loaders.test.ts:208`. Two SQL readers exist too (`docs/sql/20260718_realtor_geo_medians.sql:48`, `20260718_redfin_metro_sold_pivoted.sql:28`). **Do not treat this table as a dark/orphan root.** Its registry `consuming_pack: none` is literally true — no BRAIN pack reads it — but a live PAGE does, which is why the dark-roots list mis-flags it.
 - env-vs-code over-provision (non-blocking): SUPABASE_URL + SUPABASE_SERVICE_KEY in env: (redfin-city-swfl-monthly.yml:37-38) but pipeline reads only DESTINATION__POSTGRES__CREDENTIALS
 
 dlt pipeline_name literal at resources.py:174 = 'redfin_city_swfl' matches registry dlt_schema_name STATICALLY, so a --static identity check passes — but the source is a phantom: never landed (root-cause-1 'green != data' exemplar per 00-DIAGNOSIS) and has no live consumer. count_table data_lake.redfin_city_swfl (also missing). ~1 GB gz city tracker, 45-min timeout to stream it. No source_tag literal.
@@ -620,4 +622,3 @@ Keep these out of the Phase-2 static fixtures; they belong to Phase-3 manifest /
 3. **All consumer-side `refinery/sources/*.mts` line cites** — outside the static check's file set (registry + pipeline `.py` + workflow `.yml`). Consumer edges are `--live` mode's job. I verified none of them independently; F3's `usgs_sites` read is the one I'd re-confirm first.
 
 **Input-quality note (why I re-derived rather than trusted):** the assembled table's line-cites are *close but not reliable* — `collier_parcels` cites `resources.py:97` for the `pipeline_name` literal; it is actually at **`:99`**. Literal present and matching, so no pipeline drift — but it means fixtures must be built by opening the file, never by transcribing the record. One bad line-cite baked into an expected-RED fixture would make the Phase-2 suite itself the next thing that drifts.
-

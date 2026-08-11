@@ -121,9 +121,21 @@ Pipeline code exists, **no registry entry, no GHA cron** — see [`orphan_ingest
 - `corridor_grounded` — Anthropic `web_search_20250305` → NDJSON to lake-tier1, no PG table, no cadence
 - `community_profiles` — crawl4ai distill → `data_lake.community_profiles` (69 rows), unregistered
 
-Live table in neither `pipelines:` nor `coverage_exempt:` — see [`cre_figures_unregistered`](#checks):
+~~Live table in neither `pipelines:` nor `coverage_exempt:` — see [`cre_figures_unregistered`](#checks):
 `data_lake.cre_figures` (1,078 rows) + `cre_figures_confidence` (985 rows), written by
-`scripts/build-cre-figures.mjs`, no cadence entry.
+`scripts/build-cre-figures.mjs`, no cadence entry.~~ **PARTLY STALE — re-verified 08/11/2026.** The
+REGISTRY half is fixed: `cre_figures` now has a real entry at `ingest/cadence_registry.yaml:1624`
+(`dispatch_only: true`, `freshness_table: data_lake.cre_figures`, with `cre_figures_confidence`
+documented as the secondary table from the same build). **Two gaps remain, both real:** (1) still
+`consuming_pack: none` — zero readers, the writer `scripts/build-cre-figures.mjs` and the
+derivation `refinery/lib/derived/cre-figures.mts` exist but nothing consumes the materialized
+tables; (2) still **no GHA cron** — `grep -rn "build-cre-figures" .github/` returns nothing, so it
+refreshes only on a manual `bun scripts/build-cre-figures.mjs`. Open check:
+`cre_figures_build_cron_cadence` (24d untouched as of 08/11/2026). **Row counts RE-PROBED LIVE
+08/11/2026: `cre_figures` = 1,078, `cre_figures_confidence` = 985 — byte-identical to the
+07/18/2026 census, 24 days later.** That is not reassurance, it is the proof of gap (2): with no
+cron the table has not moved a single row since the day it was built. **This needs WIRING, not
+deletion.**
 
 Stale registry entry — see [`stale_registry_usgs_sites`](#checks): `coverage_exempt` still lists
 `data_lake.usgs_sites`; the table was dropped 07/19/2026
