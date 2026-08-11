@@ -1,3 +1,26 @@
+## 2026-08-11 (Fable 5) — OPERATOR: "WHY IS THERE WRITING ON THE EMAIL BEFORE IT IS EVEN BUILT" — Coming Soon skeleton lands PRE-FILLED with gaps + 5-vs-6 bed contradiction + no baths
+Screenshots (08/10 22:39/22:40): picking Coming Soon drops the user on a canvas that is HALF built,
+half placeholder — "$—/Label/Add a sentence…" empty slots sitting next to a real photo, "Fort Myers,
+FL $13,000,000", a stats row (5 BEDS / +Add BATHS / 5,400 SQFT / $2,407 / Single Family), a comps
+row, a filled CAN-SPAM footer, and a FULL pre-written agent bio ("I have sold Southwest Florida for
+seventeen years…"). Operator: (1) why is there writing before we build; (2) why pre-filled with gaps
+everywhere; (3) where are BATHS; (4) 5 bedrooms at top vs 6 in the row below — HOW; (5) "I don't
+even think I built coming soon." Investigating this session — root-causing the pre-fill source, the
+bed contradiction, and whether coming-soon was ever a walked build vs a skeleton that leaked.
+Screenshot (08/10 22:31): Chrome's native "Leave site? Changes you made may not be saved." over an
+UNTOUCHED blank skeleton. The 08/10 bypass fix (26f71943, deployed 21:41) fixed the WRONG LAYER and
+was never driven: nextjs-nav-guard's provider registers its OWN beforeunload listener
+(useInterceptPageUnload) that `guard.bypass()` never reaches — our bypassed listener stood down, the
+package's fired anyway. Second defect: the shell's patchPresentDoc (auto line-wrap/height
+correction) calls onDocChange during mount, so an untouched canvas reads as "changes you made."
+Third (the decree itself): the address-first door mounts the LAB under the popup — "what do we end
+up in email lab for before we put in the address." FIXING this session: (1) nav-guard `enabled` as
+a function that always declines type:"beforeunload" (our own dirty-only listener owns that layer,
+honors bypass) and honors bypass on internal nav; (2) onDocChange carries userEdit — auto-height
+patches never set dirty; (3) addressFirst arrival renders the popup on a bare surface, lab never
+mounts pre-address. Same family as open 07/20 item "fixed five times without being driven live" —
+the 08/10 fix shipped without reproducing the dialog once.
+
 ## 2026-08-11 (Opus 5) — OPERATOR: "WHY IS GITHUB FUCKING RED" — CI red 12 runs straight since 08/10 17:10
 Four failures, all real. (1) TYPECHECK: EmailLabGridClient used `knownProjects` but never
 destructured it from props (declared in the type, passed by page.tsx) — fixed. (2) home-spine
