@@ -14,6 +14,13 @@
 import { createClient } from "@supabase/supabase-js";
 import { resolveGradeConfig } from "../vocab/loader.mts";
 import { computeDirection } from "../grade/grade-predictions.mts";
+import { fitLine } from "../../lib/charts/fit-line";
+import {
+  applyDirectionValidation,
+  pointsAsOf,
+  validateDirection,
+  type DirectionVerdict,
+} from "./direction-validation.mts";
 import type { BrainOutput, ConditionalClaim } from "../types/brain-output.mts";
 
 /** Pack id that triggers the log. Master is the only synthesizer today. */
@@ -31,6 +38,12 @@ export interface PredictionMetadata {
   /** Top key_metrics — bounded to keep the JSONB row size honest. */
   top_key_metrics: BrainOutput["key_metrics"];
   version: BrainOutput["version"];
+  /**
+   * The authored direction checked against a fitted trend (operator decision
+   * 08/11/2026). ABSENT on every row logged before that date — absent reads as
+   * `unvalidated` via `readVerdict`, never as a check that passed.
+   */
+  direction_validation?: DirectionVerdict;
 }
 
 /**
@@ -161,6 +174,40 @@ export function buildPredictionRow(brainOutput: BrainOutput): PredictionRow {
   };
 }
 
+/**
+ * Check the AUTHORED direction against a fitted trend over the slug's own history,
+ * and stamp the verdict on the row. Operator decision 08/11/2026: *"Authored the
+ * direction validated against a fitted trend."*
+ *
+ * FAIL-SOFT, ONE DIRECTION ONLY. Any failure — no slug, no config, a read error, a
+ * thin series — lands on `unvalidated`, which leaves the row exactly as it was.
+ * A failure can never produce `agree`, and can never promote an ungradeable row.
+ * The only structural change this can make is `no_direction` removing a call from
+ * scoring, which is the crawled standard's §4.1 requirement.
+ *
+ * A telemetry read must never abort a refine that already wrote its .md — same
+ * decision as `logPrediction`'s error handling.
+ */
+export function withDirectionValidation(
+  row: PredictionRow,
+  observations: ReadonlyArray<{ observed_at: string; value: number }> | null,
+): PredictionRow {
+  const slug = row.gradeable_slug;
+  const authored = row.predicted_direction;
+  if (!slug || !authored) return row;
+
+  const cfg = resolveGradeConfig(slug);
+  if (!cfg?.gradeable) return row;
+
+  // `null` = the read failed or returned nothing. `pointsAsOf([])` → `fitLine(null)`
+  // → `unvalidated`, which leaves the row untouched. A failed check is never a
+  // passed one.
+  const fit = fitLine(pointsAsOf(observations ?? [], row.refined_at));
+  const verdict: DirectionVerdict = validateDirection(authored, fit, cfg);
+
+  return applyDirectionValidation(row, verdict);
+}
+
 export type LogResult =
   | { kind: "skipped"; reason: "not-master" | "no-supabase-env" }
   | { kind: "inserted"; row: PredictionRow }
@@ -190,10 +237,36 @@ export async function logPrediction(opts: LogPredictionOpts): Promise<LogResult>
   if (!url || !key) {
     return { kind: "skipped", reason: "no-supabase-env" };
   }
-  const row = buildPredictionRow(opts.brainOutput);
   const sb = createClient(url, key, {
     auth: { persistSession: false, autoRefreshToken: false },
   });
+  const base = buildPredictionRow(opts.brainOutput);
+
+  // Fetch the slug's own history to check the authored call against a fitted trend.
+  // DESCENDING + limit: PostgREST truncates at db-max-rows, and ascending would
+  // silently hand back the OLDEST page of a long series. `fitLine` sorts its own
+  // input, so newest-first costs nothing and keeps the window honest.
+  // A telemetry read must never abort a refine that already wrote its .md — any
+  // failure leaves `observations` null, which resolves to `unvalidated`.
+  let observations: Array<{ observed_at: string; value: number }> | null = null;
+  if (base.gradeable_slug && base.predicted_direction) {
+    try {
+      const { data, error: obsError } = await sb
+        .from("metric_observations")
+        .select("observed_at, value")
+        .eq("slug", base.gradeable_slug)
+        .lte("observed_at", base.refined_at)
+        .order("observed_at", { ascending: false })
+        .limit(1000);
+      if (!obsError && data) {
+        observations = data as Array<{ observed_at: string; value: number }>;
+      }
+    } catch {
+      observations = null;
+    }
+  }
+
+  const row = withDirectionValidation(base, observations);
   const { error } = await sb.from("predictions").insert(row);
   if (error) {
     return { kind: "error", message: error.message };

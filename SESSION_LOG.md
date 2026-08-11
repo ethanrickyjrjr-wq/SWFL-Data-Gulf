@@ -1,3 +1,123 @@
+## 2026-08-11 (Opus 5) — direction validation BUILT + WIRED (17 red-first tests, one real bug caught red); Lee permits needed nothing — that reason was stale
+
+Operator decision, verbatim: **"Authored the direction validated against a fitted trend."** Built it.
+
+**SHIPPED —** `refinery/lib/direction-validation.mts` (pure: no I/O, no clock) + wired into
+`refinery/lib/predictions-log.mts` `logPrediction`. Four verdicts persisted to
+`predictions.metadata.direction_validation`, no migration: `agree` · `disagree` (still logged,
+still gradeable — operator call, disagreement recorded so authored-vs-fitted becomes measurable)
+· `no_direction` (CI straddles zero → DOWNGRADES to ungradeable, per the crawled standard §4.1
+"must be allowed to return NO DIRECTION" + §6) · `unvalidated` (no fit — row unchanged, never
+`agree`). `deriveGradeFields` stays pure/sync. Polarity is NOT re-implemented — `computeDirection`
+already owns the `lower_is_bullish` inversion, called in sign basis with epsilon 0 because
+`established` is the significance gate. Spec + failure modes:
+`docs/superpowers/specs/2026-08-11-direction-validation-design.md`.
+
+**A REAL BUG CAUGHT RED, not a formality.** `metric-observations-log.mts:11-13` says master's
+re-surfaced copy of a leaf slug coexists with the leaf's own row at the SAME `observed_at`.
+Feeding both to the fitter doubles n, shrinks the confidence interval, and can flip `established`
+from false to TRUE — manufacturing a trend out of a bookkeeping artifact. The test failed
+`3 !== 2` before the dedupe fix landed.
+
+```
+bun test refinery/lib/direction-validation.test.mts   ->  17 pass, 0 fail
+bun test refinery/lib refinery/grade                  ->  695 pass, 0 fail across 52 files
+bun run refinery:typecheck                            ->  193 errors (was 194) — net -1
+```
+My files contribute 4, all of two classes that already exist repo-wide: the extensionless
+cross-boundary import (`chart-adapter.mts:13`, `speaker.mts:52` emit the identical TS2835 — I
+matched the existing convention deliberately) and `bun:test` types, which every test file reports.
+
+**LEE PERMITS — APPROVED, THEN FOUND UNNECESSARY.** Operator approved adding the grade block
+"if it doesn't mess anything up". It is ALREADY THERE. Probed via `resolveGradeConfig`:
+`permits_lee_corridor_z`, `permits_lee_zip_z`, `permits_lee_saturation_index` (basis=delta) and
+`permits_lee_capital_flow_z` (basis=sign) all resolve **gradeable=true**, polarity set,
+window=180d; only categorical `permits_lee_top_heating_cooling` is ungradeable, correctly.
+The backtest tool's EXCLUDED reason ("the vocab slug has no grade block") was **STALE**. Corrected
+the comment in place; edited NO vocab, so the vocab-touch gate never needed to fire. The real
+remaining blocker for permits is vintage depth, not config — `metric_observations` stamps
+`observed_at` = the brain's refine vintage, so a PIT series only accrues forward.
+`bun refinery/tools/grade-config-sweep.mts --check` → "§3 pin green; committed artifact matches
+fresh sweep". Backtest re-ran unchanged: 144 calls, lift −6.5 pp.
+
+**MEASURED, answering "how do we get more to grade".** Live sweep: 330 slugs, **208 gradeable**,
+moat-fuel down to 11 — the 167-slug polarity backlog from the 06/29 plan IS drained. Coverage is
+no longer the constraint. Two things are: (1) the sweep's 11 "vintage-clean" slugs and the
+backtest's 2 are **DISJOINT SETS** — check `backtestable_two_disjoint_definitions`; (2) vintage
+depth is a clock — `data_lake.view_vintages` holds 2723 rows, oldest 06/26/2026, newest
+07/26/2026, August 0 and NOT late (monthly, due ~08/26). The tool wants ~9 captures; 2 banked
+→ roughly Feb/Mar 2027. That cannot be compressed or backfilled.
+
+**STRIKE 8 on `didnt-read-what-we-hold`, with a guard gap worth naming.** I asked the operator a
+question our own crawl4ai research had answered hours earlier the same day (§4.1 + §6). The
+four-lane gate PASSED — all four lanes were searched — because it fires before ANSWERING a data
+question and nothing fires before ASKING him one.
+## 2026-08-11 (Opus 5) — the persistence finding was WRONG in the operator-facing direction: lift is −6.5 pp, not +0.0, and the "144 of 144" test was a tautology. Plus: a source flagged for irreversible delete still has a live consumer.
+
+Picked up the direction-call work cold. Verified the prior session's two "done" deliverables were
+**not on disk** — no `§5b` in the research file, no correction block in the handoff, both clean at
+HEAD. Re-derived from the producers instead of trusting the handoff.
+
+**1. THE HEADLINE NUMBER IN THE HANDOFF IS WRONG, AND IT MOVED THE WRONG WAY.**
+`docs/handoff/2026-08-11-actionlint-gate-and-persistence-finding.md` ITEM 2 reports
+"system 58/138 · persistence null 58/138 · **lift +0.0**". Re-ran the instrument live:
+
+```
+bun refinery/tools/flywheel-backtest.mts --dry-run     # snapshot=2026-06 lookback=180d grid-step=3mo
+CORPUS: 144 graded calls across 2 slugs   GRADES: hit=59 miss=81 neutral=4
+   scored N (non-first, non-neutral target) = 138  | families = 2
+   system accuracy      = 42.0% (N=138)
+   persistence accuracy = 48.6% (N=138)
+   LIFT (system − naive)= -6.5 pp
+   BEATS NAIVE? NO — the call logic needs work before weighting does
+```
+
+System numerator matches (42.0% × 138 = 58). **Persistence does not — the tool measures 67, not
+58.** The call does not tie the naive baseline; it **loses to it by 6.5 points.**
+
+**2. "PREDICTED == PERSISTENCE ON 144 OF 144, ZERO DISAGREEMENTS" IS A TAUTOLOGY.**
+That test compared the call against `sign(current − prior)` — the formula that produced it
+(`refinery/lib/backtest/decision-fn.mts:80`). The instrument's actual null is
+`predict_t = observed_{t-1}` (`refinery/lib/backtest/skill-baseline.mts:67-78`) — the previous
+*realized outcome* direction, not the last delta in the value series. Two different estimators over
+one shared 138-row denominator, which is exactly why they score 58 vs 67. Nine rows of divergence
+falsifies "zero disagreements." The handoff says outright *"So I computed the lift, using that
+file's documented in-set rule"* — the baseline was hand-reimplemented instead of read off the tool.
+**That is the whole defect.** Instrument was right; the hand-check was wrong.
+
+**3. TWO PRODUCERS, NOT ONE — the root-cause paragraph is scoped to the backtest only.**
+- Backtest / 144 rows — `decision-fn.mts:80` `computeDirection(as_of_value, prior_value, cfg)`.
+  `grade_basis` governs this. Arithmetic.
+- Live / 40 gradeable rows — `refinery/lib/predictions-log.mts:100-101` reads
+  `claim.then_direction`, the brain's **authored** claim. No delta. **`grade_basis` never touches
+  the live prediction.**
+
+Editing `GradeBasis` as originally planned would have fixed the backtest, reported as done, and left
+the live path — the one with the **08/30/2026** deadline — untouched. Stopped one command short of
+that. The live path's real defect is different: authored directions, never graded once (0 outcomes).
+
+**4. A SOURCE FLAGGED FOR IRREVERSIBLE DELETE STILL HAS A LIVE CONSUMER.**
+`ingest/cadence_registry.yaml` retired `fred_laus_alfred` in `cb803b1c` on a "confirmed-zero-consumer
+basis", Storage prefix "flagged for manual delete". **False.** `refinery/tools/flywheel-backtest.mts:258`
+reads `s3://lake-tier1/macro/fred_laus_alfred/${snapshot}.parquet`; `docs/standards/data-roots.md:1623`
+names that consumer plus `ian-retrodiction-demo.mts` and calls it "Not a corpse". The dry-run above
+**proves the data is intact** — FLLEEC7URN 1538 vintages, FLCOLL0URN 1562. It is the only
+point-in-time-honest series in the repo (`flywheel-backtest.mts:18`). Deleting it makes the corpus
+permanently unreproducible and kills the skill instrument at the exact moment it is the open
+question. **Corrected the registry block in place — DO NOT EXECUTE THAT DELETE.**
+Sibling retirements re-checked and both stand: `fred_g17` (test fixtures only) and
+`fred_listing_swfl` (provenance comment over hardcoded values, `generate-seed-preview-charts.mts:239,262`).
+Note all three pipeline dirs are still on disk, so "pipeline retired" overstates what happened.
+
+**WHAT I DID NOT DO, and why.** The `fitLine()` promotion, the Pesaran–Timmermann test, and the
+backtest re-run with writes are **not started**. The first two are a RULE 3.5 build (brainstorm +
+failure-modes + TDD) not begun. The third is deliberate: `backtest_grades` still holds the
+06/08/2026 corpus and overwriting a stored derived-signal corpus is an operator call, not a side
+effect of verification — it is stale relative to the dry-run above.
+
+**BLOCKED ON A LIVE SESSION.** The correction blocks for the handoff and the research file are
+written but **not landed** — both files are claimed by active session `c973b055` (claimed ~14 min
+before the attempt). Did not override. Checks opened below.
 ## 2026-08-11 (Opus 5) — the 5 held-back provisional items re-verified: 4 of 5 claims were WRONG, 6 stale doc lines corrected, and the hosted graph produced a false negative on the one question RULE 0.5 says it wins
 
 Operator: "LOOK INTO THESE" — the five items the failed graph re-verify left single-pass/provisional.

@@ -356,3 +356,66 @@ test("filterByCadence: drops a slug that already has an open prediction; keeps f
   );
   assert.equal(filterByCadence(derived, new Set<string>()).length, 1);
 });
+
+// ── withDirectionValidation — the COMPOSITION seam ─────────────────────────────
+// The pieces are covered in direction-validation.test.mts. This covers the wire
+// itself: the cfg?.gradeable early return and the null-observations branch, which
+// is where a failed read could silently take the wrong path.
+import { withDirectionValidation } from "./predictions-log.mts";
+import { readVerdict } from "./direction-validation.mts";
+
+function predRow(over: Record<string, unknown> = {}) {
+  return {
+    brain_id: "master",
+    refined_at: "2026-08-01T00:00:00Z",
+    conclusion: "c",
+    confidence: 0.8,
+    prediction_window: null,
+    conditional_claims: [],
+    gradeable_slug: "permits_lee_corridor_z",
+    baseline_value: 1,
+    predicted_direction: "bullish" as const,
+    window_end_date: "2026-10-01",
+    grade_status: "gradeable" as const,
+    grade_method: "machine" as const,
+    metadata: { version: 3 },
+    ...over,
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  } as any;
+}
+
+test("wire — a failed read (null observations) yields unvalidated and leaves the row gradeable", () => {
+  const out = withDirectionValidation(predRow(), null);
+
+  assert.equal(readVerdict(out.metadata), "unvalidated");
+  assert.equal(out.grade_status, "gradeable");
+});
+
+test("wire — a rising series AGREES with a bullish call on a higher_is_bullish slug", () => {
+  const obs = Array.from({ length: 24 }, (_, i) => ({
+    observed_at: new Date(Date.UTC(2025, i, 1)).toISOString(),
+    value: 100 + i * 5,
+  }));
+
+  const out = withDirectionValidation(predRow(), obs);
+
+  assert.equal(readVerdict(out.metadata), "agree");
+});
+
+test("wire — a row with no gradeable_slug is returned UNTOUCHED, with no verdict stamped", () => {
+  const out = withDirectionValidation(predRow({ gradeable_slug: null }), null);
+
+  assert.equal(out.metadata.direction_validation, undefined);
+});
+
+test("wire — look-ahead: observations after refined_at cannot reach the fit", () => {
+  // 24 points, but every one of them is AFTER the refine instant.
+  const future = Array.from({ length: 24 }, (_, i) => ({
+    observed_at: new Date(Date.UTC(2027, i, 1)).toISOString(),
+    value: 100 + i * 5,
+  }));
+
+  const out = withDirectionValidation(predRow(), future);
+
+  assert.equal(readVerdict(out.metadata), "unvalidated", "future rows were fitted");
+});

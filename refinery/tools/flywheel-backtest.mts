@@ -78,7 +78,16 @@ const EXCLUDED: Array<{ signal: string; reason: string }> = [
   {
     signal: "Lee building permits",
     reason:
-      "issue-date is immutable but the vocab slug has no grade block (ungradeable) + thin live window",
+      "issue-date is immutable AND the grade blocks now EXIST — this reason was stale. " +
+      "Re-probed 08/11/2026 via resolveGradeConfig: permits_lee_corridor_z, permits_lee_zip_z, " +
+      "permits_lee_saturation_index (all basis=delta) and permits_lee_capital_flow_z (basis=sign) " +
+      "resolve gradeable=true, polarity set, window=180d; only the categorical " +
+      "permits_lee_top_heating_cooling is ungradeable, correctly. THE CONFIG BLOCKER IS GONE. " +
+      "What actually remains: no retained point-in-time permit vintages (metric_observations " +
+      "stamps observed_at = the brain's refine vintage, so a usable PIT series only accrues " +
+      "forward from first capture) + a thin live window. Promoting this to BACKTESTABLE needs a " +
+      "vintage-depth check first, not a vocab edit — flipping it on near-zero N is the same " +
+      "phantom-grade trap called out for ZHVI/ZORI below.",
   },
   {
     signal: "ZHVI home values / ZORI rents",

@@ -437,9 +437,35 @@ pipelines:
   # Cron .github/workflows/ingest-fred-g17.yml removed, pipeline ingest/pipelines/fred_g17/
   # retired, Storage prefix flagged for manual delete (operator/CLI action, not scriptable here).
 
-  # RETIRED 08/11/2026 — fred_laus_alfred (lake-tier1/macro/fred_laus_alfred/) DELETED. Same
-  # confirmed-zero-consumer basis as fred_g17. Cron .github/workflows/fred-laus-alfred-monthly.yml
-  # removed, pipeline retired, Storage prefix flagged for manual delete.
+  # ⚠️ RETIREMENT CORRECTED 08/11/2026 (same day) — fred_laus_alfred is NOT zero-consumer.
+  # DO NOT EXECUTE THE MANUAL STORAGE DELETE. The prefix lake-tier1/macro/fred_laus_alfred/
+  # is still READ TODAY by refinery/tools/flywheel-backtest.mts:258
+  # (s3://lake-tier1/macro/fred_laus_alfred/${snapshot}.parquet) and by
+  # refinery/tools/ian-retrodiction-demo.mts. docs/standards/data-roots.md:1623 names both
+  # consumers explicitly and calls it "Not a corpse".
+  #
+  # PROVED LIVE 08/11/2026: `bun refinery/tools/flywheel-backtest.mts --dry-run` read the
+  # 2026-06 snapshot successfully — FLLEEC7URN 1538 vintages / FLCOLL0URN 1562 vintages,
+  # 315 obs each, 144 graded calls. The data is intact and the consumer works.
+  #
+  # WHY IT MATTERS: this is the ONLY point-in-time-honest series in the repo
+  # (flywheel-backtest.mts:18 — "Only point-in-time-honest series. ALFRED LAUS only.").
+  # Deleting the prefix makes the 144-row backtest_grades corpus permanently
+  # unreproducible and kills the instrument that measures direction-call skill at the
+  # exact moment that measurement is the open question (handoff
+  # docs/handoff/2026-08-11-actionlint-gate-and-persistence-finding.md ITEM 2, deadline
+  # 08/30/2026).
+  #
+  # The cron .github/workflows/fred-laus-alfred-monthly.yml WAS removed by cb803b1c and
+  # ingest/pipelines/fred_laus_alfred/ + ingest/tests/pipelines/fred_laus_alfred/ are both
+  # still on disk — so "pipeline retired" overstates what happened. Whether to restore the
+  # monthly cron (vintages stop accruing without it) is an operator call; the storage
+  # delete is the irreversible half and is what this block blocks.
+  #
+  # Sibling retirements re-checked in the same pass: fred_g17 (test fixtures only) and
+  # fred_listing_swfl (provenance comment over hardcoded values in
+  # scripts/generate-seed-preview-charts.mts:239,262) — both genuinely zero-consumer,
+  # those two retirements stand.
 
   # RETIRED 08/11/2026 — fred_listing_swfl (lake-tier1/market/fred_listing_swfl/) DELETED. Same
   # confirmed-zero-consumer basis. Cron .github/workflows/ingest-fred-listing-swfl.yml removed,

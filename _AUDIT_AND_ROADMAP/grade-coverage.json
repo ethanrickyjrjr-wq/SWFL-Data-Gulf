@@ -1,12 +1,12 @@
 {
-  "generated_at": "2026-07-20",
+  "generated_at": "2026-08-11",
   "spec": "docs/superpowers/plans/2026-06-03-row-tier/sweep-spec.md",
   "note": "Regenerable artifact — never hand-edit. Regenerate: bun refinery/tools/grade-config-sweep.mts. Adjudications live in the `checks` ledger, not here.",
   "summary": {
     "unregistered": 0,
     "invalid-polarity": 0,
     "row-candidate": 45,
-    "gradeable": 206,
+    "gradeable": 208,
     "reviewed-display": 43,
     "moat-fuel": 11,
     "needs-window": 23,
@@ -4235,6 +4235,27 @@
       "backtest_clean": null
     },
     {
+      "slug": "median_annual_tax_swfl",
+      "concept_id": "median_annual_tax_swfl",
+      "bucket": "gradeable",
+      "gateVector": {
+        "slug": "median_annual_tax_swfl",
+        "concept_id": "median_annual_tax_swfl",
+        "registered": true,
+        "polarity_state": "valid_directional",
+        "window_ok": true,
+        "numeric_ok": true,
+        "raw_polarity": "lower_is_bullish",
+        "category": "real-estate",
+        "value_type": "currency",
+        "window_days": 180,
+        "reviewed_non_directional": false
+      },
+      "gradeable": true,
+      "reason": null,
+      "backtest_clean": false
+    },
+    {
       "slug": "median_dom_yoy_days",
       "concept_id": "median_dom_yoy_days",
       "bucket": "gradeable",
@@ -5472,6 +5493,27 @@
       "gradeable": false,
       "reason": "no direction_polarity declared (slug-only, never inherited)",
       "backtest_clean": null
+    },
+    {
+      "slug": "recent_price_cuts_count_swfl",
+      "concept_id": "recent_price_cuts_count_swfl",
+      "bucket": "gradeable",
+      "gateVector": {
+        "slug": "recent_price_cuts_count_swfl",
+        "concept_id": "recent_price_cuts_count_swfl",
+        "registered": true,
+        "polarity_state": "valid_directional",
+        "window_ok": true,
+        "numeric_ok": true,
+        "raw_polarity": "lower_is_bullish",
+        "category": "real-estate",
+        "value_type": "count",
+        "window_days": 180,
+        "reviewed_non_directional": false
+      },
+      "gradeable": true,
+      "reason": null,
+      "backtest_clean": false
     },
     {
       "slug": "rental_rent_index_zori",

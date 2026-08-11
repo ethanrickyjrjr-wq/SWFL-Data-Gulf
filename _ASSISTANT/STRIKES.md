@@ -39,6 +39,13 @@ guard: BUILT — four-lane gate (07/22/2026) + RULE 0.95 + what-do-we-have skill
 - strike: 08/06 "did you even look anything up"
 - strike: 08/09 "which fucking playbook are you looking at"
 - strike: 08/10 paid $0.05 re-proving §3.3.1 R1 before reading it
+- strike: 08/11 ASKED THE OPERATOR a question our own crawl4ai research had answered HOURS EARLIER,
+  same day, same file: _RESEARCH/data-and-ingest/2026-08-11-direction-call-forecast-evaluation-standard.md
+  §4.1 ("it must be allowed to return NO DIRECTION") + §6 ("a slope whose CI includes zero returns no
+  direction ... the gradeable count FALLS ... that is the correct outcome"). NOTE THE GUARD GAP: the
+  four-lane gate PASSED — all four lanes were searched — because it fires before ANSWERING a data
+  question, and nothing fires before ASKING the operator one. Asking him what we already hold is the
+  same failure wearing a question mark, and it costs him more than a wrong answer does.
 - strike: 08/11 "we have fucking graphify in this repo and swfldatagulf-ops" — framed a vendor
   email around their signup funnel; never checked the sibling ops repo (it renders the graph at
   app/graph/page.tsx off a published brain-graph.json) before talking about what we'd "get"
