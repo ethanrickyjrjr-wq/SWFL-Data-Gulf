@@ -1,3 +1,41 @@
+## 2026-08-11 (Opus 5) — OPERATOR: "why is this not happening with graphify mcp hooked up?" — he pasted graphify's own example ("Where is session refresh handled, and what depends on it?" answered FROM THE GRAPH instead of grepping), asked me that exact question one turn earlier, and I answered it with Grep + Glob + Read. Six file reads. Zero graph calls.
+
+THE TOOLS WERE LIVE THE WHOLE TIME. Verified this turn, both of them:
+`graphify-local` (stdio, `py -3.14 -m graphify.serve graphify-out/graph.json`) → graph_stats returns
+28,336 nodes / 44,606 edges / 2,374 communities, 98% EXTRACTED. `graphify` (http api.graphify.com/mcp)
+→ list_repositories returns ethanrickyjrjr-wq/SWFL-Data-Gulf, status ready, queryable, 20,865 nodes.
+Both were added to `.mcp.json` LAST SESSION, on his decree. Next session did not touch them.
+
+WHY IT DIDN'T HAPPEN — the honest mechanics, not an excuse:
+1. **The graphify tools are DEFERRED.** Grep/Glob/Read are loaded in the tool list at turn start;
+   every `mcp__graphify*` tool is name-only and needs a `ToolSearch` round-trip before it can be
+   called. The default reach is the loaded tool. That is the whole failure in one sentence.
+2. **CLAUDE.md RULE 0.5 already says to use it** — "Use graphify when graphify-out/graph.json
+   exists" — and names `graphify query` / `path` / `explain`, which are the CLI subcommands, NOT the
+   MCP tool names (`query_graph`, `shortest_path`, `gx_callers`, `get_node`…). A rule in a doc is
+   not a rule; a rule naming the wrong surface is worse.
+3. **The four-lane gate passed while this happened.** Grepping satisfies its CODE lane, so no
+   mechanism we own noticed the graph went unqueried. That is why the existing BUILT guard on
+   didnt-read-what-we-hold did not catch it — this is a different shape, logged as its own.
+
+WHAT THE GRAPH ACTUALLY GAVE WHEN I FINALLY RAN IT (measured, not asserted): it surfaced a FOURTH
+refresh root my grep pattern never matched — `lib/project/refresh-on-access.ts` (`applyRefresh` L42,
+`refreshKey` L29, `dayKey` L83) with its edges into `lib/signals/confirmed-values.ts` and
+`lib/project/items.ts`. My grep found `updateSession` and the OAuth token refresh; the graph found
+the per-day project refresh I missed. Conversely the depth-3 BFS on his literal question did NOT
+surface `updateSession` — it seeded on the `Session` type and refresh-on-access and never reached
+the middleware. A second, keyword-targeted query did find `updateSession()` / `middleware()` /
+`cookieAdapter()` in community 661, but the BFS bled into email-doc nodes and truncated at budget.
+VERDICT: the graph is COMPLEMENTARY, not a superset. Neither lane alone was complete. The defect is
+that I ran one of two lanes and presented it as the answer — not that grep is worthless.
+ALSO NOTE: graph puts `middleware()` at middleware.ts:L61, the file has it at L68 — 08/10 bake drift.
+
+MECHANISM OWED (not built this turn — a UserPromptSubmit classifier fires on every prompt in every
+session and RULE 11/C2 say that needs his call, not mine): a hook that detects a structural-code
+question ("where is X handled", "what depends on", "who calls", "what breaks if", "blast radius")
+and injects the literal ToolSearch + query_graph call line, so the deferred tool costs one line of
+context instead of a round-trip nobody takes. Proposed to him in the answer; not shipped unasked.
+
 ## 2026-08-11 (Opus 5) — OPERATOR: "we have fucking graphify in this repo and swfldatagulf-ops you fucking idiot" — a vendor email got answered from the vendor's funnel instead of from our two live installs
 He forwarded a Graphify launch email. I verified the vendor's claims live (105,034 stars via the
 GitHub API, formal verification real but TypeScript-unsupported, headline features Enterprise-only)

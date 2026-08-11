@@ -41,6 +41,10 @@ guard: BUILT — four-lane gate (07/22/2026) + RULE 0.95 + what-do-we-have skill
   email around their signup funnel; never checked the sibling ops repo (it renders the graph at
   app/graph/page.tsx off a published brain-graph.json) before talking about what we'd "get"
 
+## shape: tool-wired-but-never-called
+guard: OWED — a UserPromptSubmit classifier that detects a structural-code question ("where is X handled", "what depends on", "who calls", "what breaks if", "blast radius") and injects the literal ToolSearch + `mcp__graphify-local__query_graph` call line. Root cause is mechanical, not attitudinal: every `mcp__graphify*` tool is DEFERRED (name-only, needs a ToolSearch round-trip) while Grep/Glob/Read are pre-loaded, so the default reach is always the loaded tool. Distinct from didnt-read-what-we-hold — that shape's four-lane gate PASSES here, because a grep satisfies its CODE lane. Needs operator sign-off (fires every prompt, every session — RULE 11 + RULE 3 C2). Check open: graphify_first_reach_hook
+- strike: 08/11 answered "where is session refresh handled, and what depends on it" with 6 greps/reads, one day after both graphify MCP servers were added to .mcp.json on his decree; graph held a 4th refresh root (lib/project/refresh-on-access.ts) the grep pattern never matched
+
 ## shape: stale-source-served-silently
 guard: OWED — fleet-wide source-staleness tripwire; pattern exists on redfin_swfl only (ed0b2efd 07/17/2026); check open: stale_source_tripwire_fleet
 - strike: 07/22 deed fetch was manual, "WHY IS THIS MANUAL"

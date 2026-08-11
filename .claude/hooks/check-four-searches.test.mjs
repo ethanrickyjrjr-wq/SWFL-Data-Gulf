@@ -139,6 +139,32 @@ describe("lane classification", () => {
     assert.strictEqual(laneFor("Bash", { command: "bun -e 'fetch(\"https://x\")'" }), "live");
   });
 
+  test("a graphify MCP traversal counts as CODE — same probe as the CLI, new transport", () => {
+    // RULE 0.5 names graphify as the preferred code probe. The Bash arm already credited
+    // the CLI; both MCP servers in .mcp.json (hosted `graphify`, stdio `graphify-local`)
+    // scored zero until 08/11/2026.
+    assert.strictEqual(
+      laneFor("mcp__graphify__query_graph", { query: "who reads zip_code" }),
+      "code",
+    );
+    assert.strictEqual(laneFor("mcp__graphify__gx_callers", { symbol: "updateSession" }), "code");
+    assert.strictEqual(laneFor("mcp__graphify-local__get_neighbors", { node: "x" }), "code");
+  });
+
+  test("graphify METADATA and WRITES earn no lane — a lookup is not a search", () => {
+    // Defect (b) guard: crediting these would let `list_repositories` stand in for the
+    // tree-wide search the code lane exists to force.
+    assert.strictEqual(laneFor("mcp__graphify__list_repositories", {}), null);
+    assert.strictEqual(laneFor("mcp__graphify__graph_stats", { repository_id: "x" }), null);
+    assert.strictEqual(laneFor("mcp__graphify__remember", { text: "x" }), null);
+  });
+
+  test("a graphify traversal is CODE, never LIVE — a derived index is not the source", () => {
+    // The graph is an index OF OUR TREE. It cannot satisfy the lane whose whole point is
+    // "a parser's shape is not the source's shape."
+    assert.notStrictEqual(laneFor("mcp__graphify__query_graph", { query: "x" }), "live");
+  });
+
   test("an unrelated call earns NO lane — running tests is not research", () => {
     assert.strictEqual(laneFor("Bash", { command: "bun test lib/assistant" }), null);
     assert.strictEqual(laneFor("Edit", { file_path: "lib/foo.ts" }), null);

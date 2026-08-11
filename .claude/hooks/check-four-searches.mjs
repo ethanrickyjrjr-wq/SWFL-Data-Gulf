@@ -150,11 +150,24 @@ export function laneFor(name, input) {
   //      header above IS that exact shape — `grep steadyGet lib/listings/steadyapi.ts`,
   //      one file, called "everything we call". The gate would have waved it through on
   //      the very lane it exists to enforce. A single-file pattern now earns nothing.
+  //
+  //  (c) UNDER-CREDIT, THE MCP FORM. ADDED 08/11/2026. The Bash arm below has credited
+  //      the `graphify` CLI since (a), but graphify now also reaches us as MCP servers
+  //      (`graphify` hosted, `graphify-local` stdio — both in .mcp.json), and every one
+  //      of those traversals scored zero. Same defect as (a), same tool, new transport.
+  //      TRAVERSALS ONLY, on purpose: `graph_stats` / `list_repositories` are metadata
+  //      about the graph, and `remember` / `ingest_turns` are writes — crediting those
+  //      would be defect (b) again, a lookup wearing a search's clothes.
+  const graphifyTraversal =
+    /^mcp__graphify(-local)?__(query_graph|shortest_path|get_node|get_neighbors|get_community|god_nodes|gx_(find|find_seeds|callers|callees|impact|trace|references|expand|node|file_neighbors|rank_files|tests_for|imports_exports))$/.test(
+      n,
+    );
   const searchesTheTree =
     /^(Grep|Glob)$/.test(n) ||
     /^mcp__serena__(search_for_pattern|find_symbol|find_referencing_symbols|get_symbols_overview)$/.test(
       n,
     ) ||
+    graphifyTraversal ||
     (/^(Bash|PowerShell)$/.test(n) && /\b(grep|rg|ripgrep|graphify|Select-String)\b/.test(cmd));
   if (searchesTheTree) {
     // One named file with an extension and no glob is a READ wearing a search's clothes.
