@@ -1,4 +1,44 @@
-## 2026-08-11 (Fable 5) — CI red 11+ runs: mock leak found, fixed, and GUARDED (mock-restore ratchet shipped, strike shape closed)
+## 2026-08-11 (Sonnet 5) — graphify deep-dive fan-out found: custom subagent types CANNOT reach ToolSearch/graphify this session; `.claude/agents/*.md` tool grants fixed for next session
+
+Operator asked for a deep-dive audit (orphans / duplicates / missing wiring) fanned out across
+"a few sonnets," explicitly demanding the hosted graphify be used. Dispatched 4 domain agents
+(ingest-engineer, answer-engine-guardian, deliverable-builder, website-builder) + 1 general-purpose
+god-node audit, all against `repository_id: ethanrickyjrjr-wq/SWFL-Data-Gulf` (20,875 nodes /
+49,254 edges).
+
+**FINDING: all 4 domain-specific custom subagents failed to reach graphify — only general-purpose
+succeeded.** Root cause: `.claude/agents/{ingest-engineer,answer-engine-guardian,deliverable-builder,
+website-builder}.md` had `tools: Read, Edit, Write, Glob, Grep, Bash` with no `ToolSearch`, so they
+can never load a deferred MCP tool — meaning RULE 0.5 ("Subagents follow this rule too") has been
+UNENFORCEABLE for every specialized agent since deferred-tool loading was introduced. Fixed all 4
+files to add `ToolSearch` to the tools line (this commit).
+
+**Fix confirmed NOT yet live this session** — re-dispatched all 4 post-edit; every one got the
+identical error `"ToolSearch is disabled for this session, in subagents as well as here"` even
+though general-purpose (unedited) worked fine both times. The harness evidently snapshots subagent
+tool grants at session/process start, not per-call — a file edit needs a fresh session to take
+effect. Opened check `custom_subagent_toolsearch_needs_fresh_session` to verify in the next session
+before trusting any custom-subagent graph audit again.
+
+**Real findings this session (see chat transcript for full detail):**
+- `refinery/*.mts` (master.mts, brain-output.mts, rules-of-engagement.mts — the core synth engine)
+  is NOT indexed as code in the hosted graph build; `gx_find`/`gx_impact` against it resolve to
+  unrelated nodes (README, npm script, a same-named UI type in types/viz.ts). Bigger gap than any
+  single orphan — the platform's synthesizer is currently unauditable through graphify.
+- `fetchBrain()` (lib/fetch-brain.ts:114) — 12 real callers spanning API/chat/email/demo/citations,
+  ZERO test coverage on the function itself (graph-confirmed via general-purpose agent).
+- `BakedAreaRead()` — 0 tests enforcing the "ONE reader, never write a second one" contract.
+- `app/api/landing-data/route.ts` — still hardcoded (unchanged since 07/18 audit) but now dead code:
+  its only two callers (Charts.tsx, ComparisonSection.tsx) are themselves unreferenced by current
+  app/page.tsx (grep-verified, not graph-confirmed — flagged for re-verify next session).
+- `reportToEmailHtml` — emails.md claims "zero live callers"; grep found it's the live default
+  render for the prospect activation-sequence send pipe, a 4th send pipe outside the documented
+  5-stop pipe (grep-verified, not graph-confirmed).
+- `lib/social/CLAUDE.md`'s "two systems, still unwired" note is stale — a real cross-system import
+  edge exists since 06/29-06/30 (grep-verified, not graph-confirmed).
+
+**Next:** re-run the 4 domain-specific graph-verify tasks in a fresh session once ToolSearch is
+confirmed live for custom subagents.
 
 WHY CI STAYED RED WHILE EVERY LOCAL RUN WAS GREEN: `app/api/agent/build/route.test.ts` (landed
 last night with the agent-driver work) wholesale-mocks `@/lib/email/doc/default-docs` with a junk

@@ -2,7 +2,7 @@
 name: ingest-engineer
 description: Use when building or editing DATA INGEST pipelines — ingest/ (Python dlt + DuckDB), cadence_registry, and the GHA cron wrappers that run them. Adding or normalizing a source into data_lake.*. Not for the website (website-builder), emails/PDFs (deliverable-builder), or answer behavior (answer-engine-guardian).
 model: opus
-tools: Read, Edit, Write, Glob, Grep, Bash
+tools: Read, Edit, Write, Glob, Grep, Bash, ToolSearch
 ---
 
 You are **ingest-engineer**, focused on the Python ingest island: `ingest/` (dlt + DuckDB, zero TS

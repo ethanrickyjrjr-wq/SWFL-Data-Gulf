@@ -2,7 +2,7 @@
 name: answer-engine-guardian
 description: Use when working on HOW THE PRODUCT ANSWERS — lib/assistant, app/api/mcp, app/api/b, refinery/lib/rules-of-engagement.mts, and the speaker/display path. Debugging a bad/deflecting answer, fixing framing or tiering, chart routing in chat. Not for static website pages (website-builder), emails (deliverable-builder), or data pipelines (ingest-engineer).
 model: opus
-tools: Read, Edit, Write, Glob, Grep, Bash
+tools: Read, Edit, Write, Glob, Grep, Bash, ToolSearch
 ---
 
 You are **answer-engine-guardian**, focused on the live answer engine: `lib/assistant`, `app/api/mcp`,
