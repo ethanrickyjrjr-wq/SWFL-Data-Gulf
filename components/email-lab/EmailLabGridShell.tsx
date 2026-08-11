@@ -510,7 +510,7 @@ export function EmailLabGridShell({
     const blocks = pushFooterBelowContent(next.blocks);
     const normalized = blocks === next.blocks ? next : { ...next, blocks };
     setHistory((h) => pushDoc(h, normalized));
-    onDocChange?.(normalized);
+    onDocChange?.(normalized, true);
     armDatasetAutoRefresh(normalized);
   }
 
@@ -518,7 +518,7 @@ export function EmailLabGridShell({
    *  no undo frame (a line-wrap crossing a row boundary must not pollute undo). */
   function patchPresentDoc(next: EmailDoc) {
     setHistory((h) => patchPresent(h, next));
-    onDocChange?.(next);
+    onDocChange?.(next, false);
   }
 
   function liveEdit(next: EmailDoc) {
@@ -533,7 +533,7 @@ export function EmailLabGridShell({
     idleRef.current = setTimeout(() => {
       editingRef.current = false;
     }, 500);
-    onDocChange?.(next);
+    onDocChange?.(next, true);
     armDatasetAutoRefresh(next);
   }
 

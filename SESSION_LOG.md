@@ -1,3 +1,20 @@
+## 2026-08-11 (Opus 5) — CI red gate #6: 8dc43e3e landed the onDocChange signature without its 3 call sites
+
+`8dc43e3e` (parallel session) widened `onDocChange` to `(doc, userEdit)` in EmailLabGridShell's prop
+type but pushed without the three call sites inside that same file — Typecheck died on TS2554 x3
+(lines 513/521/536). The completing edit was already written and sitting UNCOMMITTED in this shared
+tree, and that session still holds the claim, so this commit takes ONLY
+`components/email-lab/EmailLabGridShell.tsx` — the three `onDocChange?.(next)` → `(next, true|false)`
+lines CI names — and leaves their in-progress consumer work in EmailLabGridClient /
+ProjectEmailLabClient untouched. Not my change; landing it because main is red on it.
+EVIDENCE: `bunx tsc --noEmit` exit 0 on the tree.
+ALSO NOTE, for the mock-leak guard owed below: `bun test --isolate` is NOT available to us as the
+one-flag fix. Bun's live doc names this exact class ("clears the ESM and CommonJS module
+registries", "makes 'passes alone, fails in the full suite' bugs go away"), but running it here
+CRASHES bun 1.3.14 — a hard native-addon crash in duckdb.node (bun.report crash trace, exit 3), because
+`--isolate` re-evaluates every import per file and the native addon cannot be re-loaded. `--parallel`
+implies `--isolate`, so that door is shut too. The guard has to be a lint, not a runner flag.
+
 ## 2026-08-11 (Opus 5) — CI red gate #5: knip blocked on the un-gitignored design-reference kits
 
 With the type error, the two stale pins and the mock leak fixed (entry below, landed as 22750cc8),
