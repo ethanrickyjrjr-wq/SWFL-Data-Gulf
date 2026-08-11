@@ -150,9 +150,26 @@ persistence, and on the only two families measured they don't."
    currently is — it should stop being logged as a prediction and stop being
    graded as one. That is honest and cheap.
 2. **If it is meant to be a forecast**, the call needs an input that is not
-   `sign(current − prior)`. That is a real design change to how direction is
-   computed, and it should be brainstormed under RULE 3.5 with a failure-modes
-   section before any code.
+   `sign(current − prior)`. **AND WE ALREADY BUILT THAT INPUT — it is trapped in
+   the wrong layer.** `lib/charts/fit-line.ts` (`fitLine()`, shipped, tested) is a
+   real least-squares OLS fit returning `{slope, intercept, r2, n, established}`,
+   where `established` = the 95% confidence interval on the slope excludes zero.
+   Its own header states the rule outright: *"If `established` is false, THE SIGN
+   OF THE SLOPE MAY NOT BE READ."* That is precisely a direction call that is NOT
+   a carry-forward — it is a fitted trend with a significance gate and an explicit
+   "no direction" answer.
+
+   It lives in the charts layer and the grading layer does not import it. Design
+   spec: `docs/superpowers/specs/2026-07-13-trend-fit-engine-design.md`; phase 2
+   handoff: `docs/superpowers/specs/2026-07-14-trend-fit-phase2-handoff.md`.
+
+   So the recommendation is concrete, not open-ended: **promote `fitLine()` into
+   the direction-call path** rather than designing something new. Note what this
+   changes — a slope whose CI includes zero returns NO direction, which would move
+   calls from "wrong 58% of the time" into the honest ungradeable bucket. Expect
+   the gradeable count to FALL and the remaining calls to actually mean something.
+   Still brainstorm it under RULE 3.5 with a failure-modes section, but the math
+   is written and does not need to be rewritten (RULE 0.5 — we already have it).
 3. **Re-run the backtest across all gradeable slugs before generalizing.** One run,
    two families, two months ago is not a corpus. `refinery/tools/flywheel-backtest.mts`
    exists; the backtestable set per the 06/03 handoff is SBA outcomes, TDT
