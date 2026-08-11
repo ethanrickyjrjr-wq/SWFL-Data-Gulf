@@ -7,7 +7,7 @@
 
 Markers: **[ORPHAN]** nothing in the repo points at this file — it is invisible unless you come through this index, and it is a DELETION CANDIDATE. **[weak]** reachable only by bare filename, which leads nowhere.
 
-Reachability at generation: 858 by path · 537 by name only · 237 orphaned. Re-measure with `node scripts/doc-reachability.mjs`.
+Reachability at generation: 857 by path · 537 by name only · 238 orphaned. Re-measure with `node scripts/doc-reachability.mjs`.
 
 ## docs/superpowers — 839
 
@@ -578,7 +578,7 @@ Reachability at generation: 858 by path · 537 by name only · 237 orphaned. Re-
 - `docs/superpowers/specs/2026-06-24-pdf-capabilities-map.md` — PDF Capabilities Map — Problems, Use Cases & Library Decisions — pdftoppm is a CLI binary from the Poppler library that rasterizes PDF pages to images (PNG/PPM/JPEG). You call it like pdftoppm -png input.pdf output and it writes output-1.png, output-2.png
 - `docs/superpowers/specs/2026-06-24-project-marketing-hub-design.md` — Project Marketing Hub — Design Spec — A Project Marketing Hub — the project workspace becomes a property-level media library where every marketing material for a listing (emails, PDFs, market reports, one-pagers) lives as a froz
 - `docs/superpowers/specs/2026-06-24-zip-report-rebuild-design.md` — ZIP Report Rebuild — Phase 0 (bugs) + Phase 1 (layout + crawl-fed summary) — Design — The ZIP page the homepage map + hero search land on must (a) look like the card design the
-- `docs/superpowers/specs/2026-06-25-active-listings-residential-design.md` — active residential listings Active Residential Listings — pipeline + brain (design) — Land region-wide SWFL residential active listings from active residential listings (the incumbent
+- `docs/superpowers/specs/2026-06-25-active-listings-residential-design.md` **[ORPHAN]** — active residential listings Active Residential Listings — pipeline + brain (design) — Land region-wide SWFL residential active listings from active residential listings (the incumbent
 - `docs/superpowers/specs/2026-06-25-email-socials-branding-design.md` — Email Socials & Branding — Design Spec — The break was NOT in the rendering layer — FooterBlock, applyBrand, and the email-lab token bridge were fully wired and ready. The data never reached them because of three upstream gaps:
 - `docs/superpowers/specs/2026-06-25-market-heat-swfl-design.md` — market-heat-swfl — design spec — A deterministic, ZIP-grain Tier-1 reporter brain that reads realtor.com's free public-S3
 - `docs/superpowers/specs/2026-06-25-mls-reso-integration-design.md` *[weak]* — MLS / RESO Integration — Design Spec — Bridge and Trestle issue one Bearer token per board to us as a registered vendor.
