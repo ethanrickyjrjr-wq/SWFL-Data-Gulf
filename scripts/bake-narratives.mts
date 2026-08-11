@@ -24,6 +24,7 @@ import { inputsHash } from "../lib/narratives/hash";
 import { buildNarrativePrompt, NARRATIVE_MAX_TOKENS } from "../lib/narratives/prompt";
 import { validateNarrative } from "../lib/narratives/validate";
 import { loadInputsHashes, upsertNarrative } from "../lib/narratives/store";
+import { bakeExitCode, resolveFailRatio, formatFailureAnnotation } from "./bake-exit.mts";
 import {
   persistPendingBatch,
   loadPendingBatches,
@@ -425,7 +426,21 @@ async function main(): Promise<number> {
   console.log(
     `[bake] done — surface=${args.surface} baked=${t.baked} skipped=${t.skipped} failed=${t.failed} (submit estimate $${estimatedUsd.toFixed(3)} at batch rates; real spend logs per result)`,
   );
-  return t.failed > 0 || t.failures.length > 0 ? 1 : 0;
+
+  // GREEN BUT LOUD. A validator rejection means the guard WORKED and the previous
+  // row was kept — it is not a pipeline failure, and treating it as one reddened
+  // the nightly chain (and silently skipped prediction grading) from 07/22/2026.
+  // But a green run must never hide a stale surface, so every failure is annotated
+  // by name and a systemic break still exits 1. Rule lives in ./bake-exit.mts.
+  for (const line of formatFailureAnnotation(t.failures)) console.log(line);
+
+  const code = bakeExitCode(t, resolveFailRatio(process.env));
+  if (code === 1) {
+    console.error(
+      `[bake] FAILING the run — baked=${t.baked} failed=${t.failed} exceeds the systemic-break threshold (BAKE_FAIL_RATIO=${resolveFailRatio(process.env)}). This is not ordinary validator noise.`,
+    );
+  }
+  return code;
 }
 
 process.exit(await main());

@@ -119,7 +119,6 @@ jobs:
   # table active-listings-daily.yml wrote) fed nothing live: confirmed dead duplicate of
   # listing_lifecycle -> data_lake.listing_state -> listing_active_stats. Table + zip_stats
   # view dropped, active-listings-daily.yml deleted, cadence_registry.yaml entry retired.
-    secrets: inherit
 
   lifecycle:
     name: ingest · listing lifecycle

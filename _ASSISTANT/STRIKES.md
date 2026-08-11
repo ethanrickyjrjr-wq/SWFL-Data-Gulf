@@ -21,6 +21,7 @@ guard: BUILT 08/11/2026 — `lib/testing/mock-restore-ratchet.test.ts`, a shrink
 - strike: 08/?? export-route tier mock hijacked segments/preview — 5 red runs
 - strike: 08/11 segments mock reached usage.test.ts 110 files later — 12 red runs
 - strike: 08/11 agent-build route.test.ts default-docs mock → frozen-occurrence red 11+ CI runs, green locally (Linux vs Windows file order); leaker fixed with snapshot-restore + guard built (this line)
+- strike: 08/11 nightly-chain.yml `listings:` job deleted, its trailing `secrets: inherit` left orphaned (cb803b1c) → GitHub rejects the file, 2 runs with ZERO jobs. PyYAML parses it fine (glues the orphan onto `guard:`), so a local yaml check is green while the real gate is red. SAME MECHANISM, NEW SURFACE: the BUILT guard above only covers test-mock leaks; nothing validates workflow YAML against the real parser. Guard owed: actionlint over changed `.github/workflows/*.yml` in the existing pre-push gate.
 
 ## shape: fixed-but-not-live
 guard: BUILT — pre-push Gate 15 capture-freshness (08/10/2026): email-surface code can't push without a re-baked capture

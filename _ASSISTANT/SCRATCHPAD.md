@@ -1,3 +1,22 @@
+## 2026-08-11 (Opus 5) — OPERATOR: "Ha. One green build. Claude fucking sucks."
+Earned. The 08/11 cleanup commit (cb803b1c) deleted the `listings:` job from `nightly-chain.yml`
+and LEFT ITS TRAILING `    secrets: inherit` BEHIND at line 122 — an orphan key under a comment
+block. GitHub Actions rejects the whole file: the last two chain runs produced ZERO jobs
+("this run likely failed because of a workflow file issue"). The delete was half-done and shipped.
+WORSE THAN THE TYPO — THE VERIFICATION WAS THE WRONG INSTRUMENT. PyYAML parses that file fine
+(it silently glues the orphan `secrets:` onto the `guard:` job), so any local "yaml parses OK"
+check passes while the real gate rejects it. Same mechanism as green-locally-red-in-ci: verified
+with a more permissive parser than the one that actually decides. Strike logged there.
+CONTEXT HE IS REACTING TO — the chain has been RED EVERY NIGHT SINCE 07/22/2026, before this
+morning's parse break. It dies at `bake · narratives` (the ledgered 07/26 no-invention-validator
+defect). Ingest, row-gate, rebuild, parity all pass. Nobody had connected that filed defect to
+the fact that it also gates prediction grading — grader last ran 07/22, skipped ~20 nights since.
+FIXED THIS TURN: line 122 removed, 9 jobs parse, no dangling `needs:`, no stray key on `guard`.
+NOT fixed: the bake. That is the actual "one green build" and it is the next thing.
+GUARD OWED: nothing validates a touched `.github/workflows/*.yml` against the REAL parser before
+push. Extend the existing pre-push gate (RULE 3 C2 — extend the seam, do not add a hook) with
+actionlint over changed workflow files. Needs his sign-off; not built unasked.
+
 ## 2026-08-11 (Opus 5) — OPERATOR DECREE, LOCKED: ALL IN ON GRAPHIFY HOSTED. "make everything not gitignored, we are public anyway, we only use graphify, no grepping… there is no way we make it with our current path."
 DONE THIS SESSION (full detail in SESSION_LOG, not duplicated here): `.gitignore` rewritten, 150
 files newly tracked (93 `_RESEARCH/`, 54 `docs/`, +3), secret-swept clean before staging, RULE 0.5

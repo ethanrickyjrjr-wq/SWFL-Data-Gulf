@@ -1,3 +1,52 @@
+## 2026-08-11 (Opus 5) — the nightly chain has been red since 07/22, and it was ONE working guard misreporting itself: bake exit-code fixed + the half-deleted `listings:` job that broke YAML parsing this morning
+
+Operator: "Ha. One green build. Claude fucking sucks" → "WHY WOULD ANYTHING STILL FAIL???"
+
+**MEASURED, not asserted.** Last night's chain (run 31461980901): 11 of 12 jobs GREEN — guard, live
+search, active listings Lee + Collier, city pulse, lifecycle Lee/Collier/Hendry, row gate, brain
+rebuild, parity. ONE job red: `bake · narratives`, tally `baked=60 skipped=66 failed=9`. The 9 were
+the no-invention validator catching invented numbers ("50", "60", "32") and jargon leaks, keeping the
+previous rows. Nothing invented shipped. **The guard worked and the exit code lied about it.**
+
+**TWO SEPARATE BREAKS, both fixed here:**
+
+1. **`bake-narratives.mts:428` returned 1 on ANY validation rejection.** A successful bake was
+   reported as a dead pipeline every night from 07/22/2026. Blast radius nobody had connected:
+   `grade-predictions.yml` success-gates on the chain, so prediction grading was SKIPPED ~20 nights
+   (grader's last successful run = 07/22, verified via `gh run list`: 81 successes, then all skipped).
+   FIX: rule extracted to `scripts/bake-exit.mts` + `bake-exit.test.mts` (TDD, red-first, 10 pass /
+   0 fail, each test named after its failure mode). Green-but-LOUD: every rejected surface emits a
+   named GitHub warning annotation + a count line, so green can never hide a stale surface — that
+   counter-failure (`stale-source-served-silently`, 5 strikes, guard OWED) is explicitly tested
+   against. Exit 1 only on a hard error, zero-baked-with-attempts, or majority failure.
+   **SELF-CORRECTION SAME TURN:** first pass set the ceiling at 0.25 = only ~2x the observed 13.0%
+   (9/69) noise rate, so a noisy night could redden the chain by chance — reintroducing the exact
+   failure being removed. Operator caught it ("WHY WOULD ANYTHING STILL FAIL"). Raised to 0.50 =
+   "failed more surfaces than it baked", with a dedicated regression test (FM5b) pinning that a
+   ~2x-noise night stays green. Replayed against the real 60/9/66 tally: exits 0.
+
+2. **This morning's cleanup (cb803b1c) shipped a half-deleted job.** The `listings:` block was
+   removed from `nightly-chain.yml` but its trailing `    secrets: inherit` was left orphaned at
+   line 122. GitHub rejects the whole file — the last 2 runs produced ZERO jobs ("workflow file
+   issue"). PyYAML parses it fine (it silently glues the orphan onto `guard:`), so a local YAML
+   check is green while the real gate is red. Line removed; 9 jobs parse, no dangling `needs:`,
+   no stray key on `guard`. Strike logged under `green-locally-red-in-ci` — SAME MECHANISM, NEW
+   SURFACE: that shape's BUILT guard only covers test-mock leaks.
+
+**GUARD OWED (not built unasked, needs sign-off):** nothing validates a touched
+`.github/workflows/*.yml` against the real parser before push. Extend the existing pre-push gate
+with actionlint over changed workflow files (RULE 3 C2 — extend the seam, don't add a hook).
+
+**ALSO MEASURED THIS SESSION (arXiv 2511.08571 "Forecast-to-Fill" prompted it):** `predictions` 147
+rows, `outcomes` 0, `backtest_grades` 144, `metric_observations` 13,857, `confidence_calibration` 0.
+Zero outcomes is CORRECT — earliest gradeable window closes 08/30/2026, none have matured. But the
+144 retrodicted grades (LAUS Lee + Collier, single run 06/08/2026) read 42.1% raw accuracy (59 hit /
+81 miss), and the direction call equals a persistence carry-forward on **144 of 144 rows** — lift
++0.0. Root cause: `grade_basis` defaults to `"delta"` for nearly every value type, and a delta-basis
+call IS the sign of (current − prior), i.e. the naive baseline by construction. Needs an operator
+design decision; caveat that this is 2 slugs of 30+, so the MECHANISM claim is the defensible part,
+not a verdict on the whole system. **19 days to 08/30 — a red chain that day means the first
+forward-graded outcome never lands.**
 ## 2026-08-11 (Sonnet 5) — confirmed-dead corpses from the graphify audit REMOVED: 5 ingest pipelines, 3 orphan views (SQL staged, operator must run it), active_listings table+view, 6 dead landing components
 
 Operator: "TAKE IT ALL OUT ONCE CONFIRMED NOT NEEDED." Acted only on items confirmed dead by 2+
