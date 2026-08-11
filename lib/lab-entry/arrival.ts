@@ -129,11 +129,28 @@ export function planArrival(input: ArrivalInput): ArrivalPlan {
     // param already answers it). The hero slices its typed address INTO the
     // prompt before navigating, so a real hero arrival has no remaining blank.
     const addressPopup = input.recipeHasBlank && !addrPreFilled;
-    // ADDRESS-FIRST (decree 08/10/2026): scoped to ADDRESS-subject recipes only —
-    // an area/ZIP recipe's subject is not a project identity, so it keeps the
-    // confirm-then-ask flow. Suppresses the confirm: the ONE question is the address.
+    // ADDRESS-FIRST (decree 08/10/2026, WIDENED 08/11/2026): scoped to
+    // ADDRESS-subject recipes only — an area/ZIP recipe's subject is not a project
+    // identity, so it keeps the confirm-then-ask flow.
+    //
+    // IT NO LONGER REQUIRES THE POPUP. It used to read `addressPopup && …`, which
+    // meant the door that ALREADY KNOWS the address — the /go hero, which slices the
+    // typed address into the prompt and carries ?addr= — fell straight through to
+    // `projectConfirm` and got asked "Build this in <last project you touched>?" over
+    // a different listing's name (operator screenshot 08/11/2026 10:45: *"whenever
+    // you have to put in an address or choose, no new project, it fucks everything
+    // up… the project name is the address and once put in, whatever build you had
+    // chosen will start building"*). Knowing the address is MORE reason to skip the
+    // question, not less: the address IS the project (title + kind:listing +
+    // subject_address), so there is nothing left to ask. The client routes into the
+    // project that already owns that address, else creates one titled by it, and
+    // builds. addressPopup stays the flag for "we still have to ASK"; addressFirst is
+    // now the flag for "the address decides the project, ask or no ask".
     const addressFirst =
-      addressPopup && input.signedIn && !input.insideProject && input.recipeInputKind === "address";
+      (addressPopup || addrPreFilled) &&
+      input.signedIn &&
+      !input.insideProject &&
+      input.recipeInputKind === "address";
     return {
       doc: { kind: "blank" },
       projectConfirm: projectConfirm && !addressFirst,

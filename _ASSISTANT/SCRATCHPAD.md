@@ -57,6 +57,21 @@ logged as OWED in SESSION_LOG 08/11 and never run — that omission is the root 
 Also visible in the 08/10 22:44 shot: the native "Leave site?" over our own hop. `guard.bypass()` is
 in `intoProject` now — any NEW auto-route path has to call it too or that returns.
 
+## 2026-08-11 (Opus 5) — OPERATOR: "why can't all new pages be /go and not be bringing in everything from current site like AI? i don't want all this other garbage seen… so claude doesn't get confused like it always does"
+ANSWERED, NOT BUILT (he said "tell me, don't just do"). THE MECHANISM, measured this session: the
+site is **opt-OUT, not opt-IN**. `app/` has **ZERO route groups** — one 159-line root layout wraps
+every page, so a new page inherits nav, footer, the AI pill and the selection highlighter by
+default. To go bare you must add the path to **4 separate lists across 2 files**:
+`SHELL_HIDDEN_PREFIXES` + `CHROME_FREE_PREFIXES` (components/nav/nav-config.ts),
+`AI_CHROME_FREE_PREFIXES` + `HIGHLIGHTER_FREE_PREFIXES` (lib/briefcase/pill-mount.ts). /go is in
+three. Miss one and that surface silently leaks onto the page — and NOTHING in the page's own files
+says it is bare, which is exactly the confusion he named.
+THE FIX HE IS DESCRIBING IS A ROUTE GROUP — `app/(bare)/` with its own minimal layout; a page moved
+in inherits nothing and a future bare page is a folder drop, no lists to remember. Half a day.
+The 4 lists CANNOT be deleted (they still govern /email-lab, /for-agents, /billing, /login).
+NOT a live defect on /go today — verified the AI pill renders on /login and NOT on /go. This
+prevents the NEXT page from leaking, it does not repair this one. **Awaiting his go-ahead.**
+
 ## 2026-08-11 (Opus 5) — OPERATOR: "i still want sign up!!!!!!!!!!!!!!" — I SWAPPED when he said ADD
 He asked for "brand and sign up up top", I shipped Sign up, he then specified the My Brand button
 and its popup — and I READ THE SECOND MESSAGE AS A REPLACEMENT and deleted Sign up. He never said

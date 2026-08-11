@@ -118,6 +118,74 @@ describe("planArrival", () => {
     expect(p.autoBuildAfterConfirm).toBe(true);
   });
 
+  // ── THE ADDRESS IS THE PROJECT — NEVER ASK WHICH PROJECT (operator 08/11/2026) ──
+  // "whenever you have to put in an address or choose, no new project, it fucks
+  // everything up… the project name is the address and once put in, whatever build
+  // you had chosen will start building." The /go hero pre-fills ?addr=, which made
+  // addressPopup false, which made addressFirst false, which let projectConfirm fire
+  // and offer the LAST-TOUCHED project (a different address) — screenshot 08/11 10:45.
+
+  test("FAILURE MODE project-confirm-on-known-address: hero addr + address recipe → address-first, NO project confirm", () => {
+    const p = planArrival({
+      ...base,
+      params: { recipe: "Just listed 123 Palm Ave", addr: "123 Palm Ave" },
+      recipeHasBlank: false,
+      recipeInputKind: "address",
+    });
+    expect(p.addressFirst).toBe(true);
+    expect(p.projectConfirm).toBe(false);
+    // Nothing left to ask: the client routes/creates by this address and builds.
+    expect(p.addressPopup).toBe(false);
+  });
+
+  test("FAILURE MODE project-confirm-on-known-address: addr + a recipe STILL holding its blank → still address-first, still no confirm", () => {
+    const p = planArrival({
+      ...base,
+      params: { recipe: "Just listed [[your listing address]]", addr: "123 Palm Ave" },
+      recipeHasBlank: true,
+      recipeInputKind: "address",
+    });
+    expect(p.addressFirst).toBe(true);
+    expect(p.projectConfirm).toBe(false);
+    expect(p.addressPopup).toBe(false);
+  });
+
+  test("an AREA recipe carrying ?addr= is NOT address-first (an area is not a project identity)", () => {
+    const p = planArrival({
+      ...base,
+      params: { recipe: "Farm email about Cape Coral", addr: "Cape Coral" },
+      recipeHasBlank: false,
+      recipeInputKind: "area",
+    });
+    expect(p.addressFirst).toBe(false);
+    expect(p.projectConfirm).toBe(true);
+  });
+
+  test("anonymous addr arrival never goes address-first (no account to hold a project)", () => {
+    const p = planArrival({
+      ...base,
+      signedIn: false,
+      offeredProject: null,
+      params: { recipe: "Just listed 123 Palm Ave", addr: "123 Palm Ave" },
+      recipeHasBlank: false,
+      recipeInputKind: "address",
+    });
+    expect(p.addressFirst).toBe(false);
+    expect(p.projectConfirm).toBe(false);
+  });
+
+  test("in-project addr arrival never goes address-first (already in the project)", () => {
+    const p = planArrival({
+      ...base,
+      insideProject: true,
+      params: { recipe: "Just listed 123 Palm Ave", addr: "123 Palm Ave" },
+      recipeHasBlank: false,
+      recipeInputKind: "address",
+    });
+    expect(p.addressFirst).toBe(false);
+    expect(p.projectConfirm).toBe(false);
+  });
+
   test("recipe still holding a blank → address popup, NOT auto-build", () => {
     const p = planArrival({
       ...base,

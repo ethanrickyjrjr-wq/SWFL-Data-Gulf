@@ -1,11 +1,12 @@
 "use client";
 
-import { useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { EmailLabGridShell } from "@/components/email-lab/EmailLabGridShell";
 import { SendToSelfModal } from "@/components/email-lab/SendToSelfModal";
 import { TemplateGallery } from "@/components/email-lab/TemplateGallery";
 import { ListingCampaignHero } from "@/components/email-lab/ListingCampaignHero";
 import { seedById, SEED_DOCS } from "@/lib/email/doc/default-docs";
+import { blankCanvasDoc } from "@/lib/email/doc/blank-canvas";
 import { DEFAULT_H } from "@/components/email-lab/GridCanvas";
 import { ensureGridLayouts } from "@/lib/email/doc/grid-layouts";
 import type { EmailDoc } from "@/lib/email/doc/types";
@@ -95,8 +96,19 @@ export function EmailLabGridClient({
       recipeHasBlank: Boolean(recipeBlank),
       // The recipe's DECLARED subject kind (address vs area), not a hardcoded
       // "address" — the planner's address-first decision depends on it.
-      recipeInputKind:
-        recipeBlank && initialRecipe ? (inputKindForRecipe(initialRecipe) ?? "address") : null,
+      // NOT gated on `recipeBlank` any more (08/11/2026): inputKindForRecipe reads
+      // the subject off the recipe KEY, so it answers perfectly well for a prompt
+      // whose blank the hero already filled. Gating it on the blank meant every
+      // ?addr= arrival reported kind=null, which sank addressFirst and handed the
+      // arrival to the project-confirm popup — the defect this file's address-first
+      // block exists to prevent, re-entering through the back door.
+      // The "address" fallback stays scoped to the blank-carrying case it was
+      // written for: with no blank AND no declared subject (a keyless legacy link)
+      // we know nothing, and guessing "address" there would mint a listing project
+      // titled with whatever string rode in — including an area name.
+      recipeInputKind: initialRecipe
+        ? (inputKindForRecipe(initialRecipe) ?? (recipeBlank ? "address" : null))
+        : null,
       seedSubject: arrivalSeed?.subject ?? null,
       seedBlankChosen: Boolean(seedBlankChosen),
       // Signed-in + no recipe/zip/seed/did = a plain "New Campaign" open — show the gallery
@@ -118,11 +130,12 @@ export function EmailLabGridClient({
         DEFAULT_H,
       );
     if (plan.doc.kind === "zip" && seedDoc) return seedDoc;
-    if (plan.doc.kind === "blank")
-      return ensureGridLayouts(
-        (seedById("skeleton-clean-white") ?? SEED_DOCS[0]).build(),
-        DEFAULT_H,
-      );
+    // BLANK MEANS BLANK (operator 08/11/2026): the house style and nothing in it.
+    // This used to open `skeleton-clean-white`'s seven placeholder blocks, which the
+    // arrival build then landed its own blocks alongside — "this moves parts of the
+    // build". The build engine seats its own skeleton server-side; the canvas does
+    // not need to hold one for a build to come out right.
+    if (plan.doc.kind === "blank") return ensureGridLayouts(blankCanvasDoc(), DEFAULT_H);
     return seedDoc ?? (seedById("luxury-market-report") ?? SEED_DOCS[0]).build();
   });
 
@@ -162,6 +175,20 @@ export function EmailLabGridClient({
   // planArrival (the ONE controller, spec §A2), which already suppresses
   // projectConfirm for this door.
   const addressFirst = plan.addressFirst;
+  // AUTO-ROUTE (operator 08/11/2026): address-first WITHOUT a question to ask — the
+  // arrival already carries ?addr=. There is nothing to popup, so we route straight
+  // into the project that owns the address (or create one titled by it) and let the
+  // in-project arrival build. Seeded into state at FIRST PAINT, not set by the effect
+  // below, because a canvas that mounts for even one frame arms the leave guard off
+  // its own mount-time corrections and throws the native "Leave site?" dialog at our
+  // own hop (the 08/10 screenshot). guard.bypass() in intoProject is the backstop;
+  // never painting the canvas is the fix.
+  const autoRouteAddress = addressFirst && !plan.addressPopup ? (addr ?? "").trim() : "";
+  // Clearable, NOT a const: the route can fail (project POST 500s, offline, null
+  // id). Without the setter this surface has no exit — "Setting up your project…"
+  // forever, no canvas, no popup. create-listing-project.ts already names that
+  // hazard in its own docstring; this is the same one, one layer up.
+  const [autoRouting, setAutoRouting] = useState(Boolean(autoRouteAddress));
   const [confirmOpen, setConfirmOpen] = useState(
     showGallery ? offeredProject != null : plan.projectConfirm || signedInSeedHop,
   );
@@ -224,7 +251,9 @@ export function EmailLabGridClient({
   // a listing project named by the address (subject_address persisted so every
   // return visit keeps the comps/campaign lanes) and hop in carrying ?addr= —
   // the in-project arrival builds immediately, no second popup.
-  async function buildSignedInWithAddress(address: string) {
+  /** Returns false when nothing navigated, so an auto-route caller can drop its
+   *  bare "Setting up…" surface and fall through to the lab instead of hanging. */
+  async function buildSignedInWithAddress(address: string): Promise<boolean> {
     setAddressOpen(false);
     setCreating(true);
     try {
@@ -249,19 +278,38 @@ export function EmailLabGridClient({
           }).catch(() => {});
         }
         intoProject(owned.id, address);
-        return;
+        return true;
       }
       const res = await fetch("/api/projects", {
         method: "POST",
         headers: { "content-type": "application/json" },
         body: JSON.stringify(listingProjectRequestBody(address)),
-      });
-      const data = (await res.json().catch(() => null)) as { id?: string } | null;
-      if (data?.id) intoProject(data.id, address);
+      }).catch(() => null);
+      const data = (await res?.json().catch(() => null)) as { id?: string } | null;
+      if (!data?.id) return false;
+      intoProject(data.id, address);
+      return true;
     } finally {
       setCreating(false);
     }
   }
+
+  // Fire the auto-route once, on mount. Ref-guarded: buildSignedInWithAddress
+  // hard-navigates, and a double fire would POST two identical projects.
+  const autoRouteFired = useRef(false);
+  useEffect(() => {
+    if (!autoRouting || autoRouteFired.current) return;
+    autoRouteFired.current = true;
+    void buildSignedInWithAddress(autoRouteAddress).then((routed) => {
+      // Nothing navigated → drop the bare surface and land the lab with the
+      // address popup, instead of a permanent "Setting up your project…".
+      if (!routed) {
+        setAutoRouting(false);
+        setAddressOpen(true);
+      }
+    });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [autoRouting, autoRouteAddress]);
 
   async function createAndEnter(name: string) {
     setCreating(true);
@@ -367,7 +415,7 @@ export function EmailLabGridClient({
             heroSlot={<ListingCampaignHero subjectAddress={null} />}
           />
         </div>
-      ) : addressFirst && (addressOpen || creating) ? (
+      ) : addressFirst && (addressOpen || creating || autoRouting) ? (
         // ADDRESS-FIRST (decree 08/10/2026): the lab NEVER renders before the
         // address. A bare surface hosts the popup; the lab the user lands in is
         // the PROJECT's, already building. Mounting the canvas here (a) read as
@@ -375,8 +423,13 @@ export function EmailLabGridClient({
         // guard off the canvas's own mount-time corrections, so our confirmed
         // hop threw the native "Leave site?" dialog (operator screenshots
         // 08/10/2026). Cancel falls through to the plain lab below.
+        // `autoRouting` (08/11/2026) covers the no-question case: ?addr= already
+        // answered it, so this surface is the whole visible step between the hero
+        // and the project's own lab.
         <div className="flex min-h-[calc(100dvh-3.5rem)] items-center justify-center">
-          {creating && <p className="text-sm text-white/50">Setting up your project…</p>}
+          {(creating || autoRouting) && (
+            <p className="text-sm text-white/50">Setting up your project…</p>
+          )}
         </div>
       ) : (
         <EmailLabGridShell

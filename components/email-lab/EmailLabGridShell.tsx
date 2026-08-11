@@ -43,6 +43,7 @@ import { GridCanvas, DEFAULT_H } from "./GridCanvas";
 import { BlockInspector } from "./BlockInspector";
 import { BLOCK_MENU } from "./AddBlockPanel";
 import { applyBrand } from "@/lib/email/brand/apply-brand";
+import { seatForBuild } from "@/lib/email/doc/blank-canvas";
 import { auditDocLinks, subjectListingUrl, type LinkAsk } from "@/lib/email/link-audit";
 import { brandWebsiteUrl } from "@/lib/email/inject-photo";
 import { LinkAskModal } from "./LinkAskModal";
@@ -162,6 +163,17 @@ const GRID_SEEDS = SEED_DOCS.filter((s) => s.build().blocks.every((b) => b.layou
  * footer, the agent card — those must always be current), and give the saved layout's
  * `globalStyle` back. Their grid, their colors; our brand chrome, still current.
  */
+/**
+ * The doc a build is POSTed. Identity for any canvas the user actually has blocks
+ * on — branding it here would overwrite header/footer text they typed themselves.
+ * ONLY the substituted seat (empty first-land canvas, 08/11/2026) gets applyBrand,
+ * because it was minted seconds ago and carries no user intent to overwrite.
+ */
+function brandedSeat(doc: EmailDoc, branding: Record<string, string>): EmailDoc {
+  const seat = seatForBuild(doc);
+  return seat === doc ? doc : applyBrand(seat, brandingToTokens(branding));
+}
+
 function keepSavedStyle(
   branded: EmailDoc,
   fromServer: EmailDoc,
@@ -561,7 +573,10 @@ export function EmailLabGridShell({
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           prompt: trimmed,
-          doc,
+          // BLANK ON SCREEN ≠ BLANK IN THE PAYLOAD (08/11/2026): a first-land canvas
+          // now holds no blocks, and builders read brand off canvas header/footer.
+          // seatForBuild swaps in the branded skeleton when the canvas is empty.
+          doc: brandedSeat(doc, branding),
           scope,
           build: true,
           chartType: chartType === "auto" ? undefined : chartType,
@@ -660,7 +675,9 @@ export function EmailLabGridShell({
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           prompt: (initialAiPrompt ?? "").trim(),
-          doc: brandPatch ? applyBrand(doc, brandingToTokens(nextBranding)) : doc,
+          doc: brandPatch
+            ? applyBrand(seatForBuild(doc), brandingToTokens(nextBranding))
+            : brandedSeat(doc, nextBranding),
           scope,
           build: true,
           recipeId: resolveVoice(nextBranding.preferred_recipe),

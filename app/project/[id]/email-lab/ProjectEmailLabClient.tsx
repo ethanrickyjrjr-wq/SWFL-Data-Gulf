@@ -5,7 +5,8 @@ import { useEffect, useRef, useState } from "react";
 import { EmailLabGridShell } from "@/components/email-lab/EmailLabGridShell";
 import { DEFAULT_H } from "@/components/email-lab/GridCanvas";
 import { ensureGridLayouts } from "@/lib/email/doc/grid-layouts";
-import { defaultDoc, seedById, SEED_DOCS, type SeedDoc } from "@/lib/email/doc/default-docs";
+import { defaultDoc, SEED_DOCS, type SeedDoc } from "@/lib/email/doc/default-docs";
+import { blankCanvasDoc } from "@/lib/email/doc/blank-canvas";
 import type { EmailDoc } from "@/lib/email/doc/types";
 import { TemplateGallery } from "@/components/email-lab/TemplateGallery";
 import { ArcStrip, type ArcSequence } from "@/components/email-lab/ArcStrip";
@@ -165,8 +166,10 @@ export function ProjectEmailLabClient({
   // did/seed/zip already resolved initialDoc server-side.
   const [doc0] = useState<EmailDoc>(() => {
     if (initialDoc) return initialDoc;
-    if (plan.doc.kind === "blank")
-      return (seedById("skeleton-clean-white") ?? SEED_DOCS[0]).build();
+    // BLANK MEANS BLANK (operator 08/11/2026) — the same landing root the standalone
+    // lab uses. Fixing only the standalone side would have left the skeleton on
+    // screen at the END of the hop, which is where he actually lands.
+    if (plan.doc.kind === "blank") return blankCanvasDoc();
     return defaultDoc();
   });
   // The doc the grid canvas mount was seeded with (updated on gallery pick).
