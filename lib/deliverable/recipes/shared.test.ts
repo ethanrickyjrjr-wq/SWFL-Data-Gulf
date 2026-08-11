@@ -94,6 +94,62 @@ test("resolveSubject leaves communityStats undefined when the address string car
   expect(facts.communityStats).toBeUndefined();
 });
 
+// ── LANE 3b — the live by-address buy (storefront decree 08/10/2026) ──────────
+// resolveSubjectListing is mocked to null above, so every resolve here is a free-
+// spine MISS; the injected lookup seam stands in for the guarded live runner.
+
+test("a free+cache miss reaches the by-address lookup and the fresh row fills price and specs", async () => {
+  communityResult = { matched: false, reason: "no_parcel_at_address" };
+  const calls: string[] = [];
+  const { facts, resolved } = await resolveSubject("2255 Brixton Rd, Columbus, OH 43221", "", {
+    lookupPaidRecord: async (addr) => {
+      calls.push(String(addr));
+      return {
+        address_key: "2255 brixton rd columbus",
+        street: "2255 Brixton Rd",
+        city: "Columbus",
+        state: "OH",
+        zip_code: "43221",
+        status: "for_sale",
+        list_price: 1000000,
+        beds: 4,
+        sqft: 2600,
+        year_built: 1995,
+        description: "A brick colonial on a quiet street.",
+        alt_photos: [],
+        raw: { property_type: "single_family" },
+      } as never;
+    },
+  });
+  expect(calls).toEqual(["2255 Brixton Rd, Columbus, OH 43221"]);
+  expect(resolved).toBe(true); // a fresh fill is a resolve, not an address-only skeleton
+  expect(facts.price).toBe("$1,000,000");
+  expect(facts.beds).toBe("4");
+  expect(facts.remarks).toContain("brick colonial");
+  expect(facts.propertyType).toBe("single_family");
+});
+
+test("FAILURE: the lookup returning null keeps the honest open-slot skeleton (build never refused)", async () => {
+  communityResult = { matched: false, reason: "no_parcel_at_address" };
+  const { facts, resolved } = await resolveSubject("2255 Brixton Rd, Columbus, OH 43221", "", {
+    lookupPaidRecord: async () => null,
+  });
+  expect(resolved).toBe(false);
+  expect(facts.price).toBeUndefined();
+  // The typed-text seed still ran, so a later cached row CAN join (one pull per address).
+  expect(facts.city).toBe("Columbus");
+});
+
+test("FAILURE: a throwing lookup must not fail the build (RULE 0.7)", async () => {
+  communityResult = { matched: false, reason: "no_parcel_at_address" };
+  const { facts } = await resolveSubject("2255 Brixton Rd, Columbus, OH 43221", "", {
+    lookupPaidRecord: async () => {
+      throw new Error("vendor down");
+    },
+  });
+  expect(facts.address).toContain("Brixton");
+});
+
 test("FAVORABLE_FRAMING_POLICY states the priority sentence first", () => {
   const bodyAfterTag = FAVORABLE_FRAMING_POLICY.split("<favorable_framing_policy>")[1] ?? "";
   const priorityIdx = bodyAfterTag.indexOf("cited facts");

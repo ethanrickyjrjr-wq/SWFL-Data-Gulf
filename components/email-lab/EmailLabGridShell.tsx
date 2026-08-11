@@ -323,6 +323,17 @@ export function EmailLabGridShell({
   );
   // The AI's last "what I just did" line, shown in the panel ("Built the whole email…").
   const [aiStatus, setAiStatus] = useState<string | null>(null);
+  // ── THE FINISHED EMAIL COMES FIRST (operator, 08/10/2026: "I SAW SPACES IN BETWEEN
+  // COLORS LIKE THE OLD EMAILS"). The arrival auto-build used to END on the builder
+  // canvas — react-grid-layout, GRID_MARGIN [8,8], every block a separate card with
+  // the canvas showing through the gutters — which reads as a pile of blocks, not an
+  // email. The build was never wrong; the terminal SURFACE was. When the arrival
+  // build lands, the doc goes through the REAL render engine (the same HTML a send
+  // carries) and that flush email fills the center pane; the grid sits one click
+  // behind "Edit this email". Null = canvas (every non-arrival path, and any render
+  // miss — a broken preview must never block the build). Cleared by commit(), so a
+  // stale snapshot can never sit over a doc it no longer matches.
+  const [arrivalPreviewHtml, setArrivalPreviewHtml] = useState<string | null>(null);
   // Post-build link asks: click-promising slots (labeled button / listing card /
   // link-label) the build left with no destination. One dismissible modal; the
   // send-time fallback ladder is the floor, so skipping is always safe.
@@ -484,6 +495,11 @@ export function EmailLabGridShell({
   function commit(next: EmailDoc) {
     userInteractedRef.current = true;
     editingRef.current = false;
+    // Any real mutation outdates the arrival's rendered snapshot — drop it so a
+    // stale preview can never sit over a doc it no longer matches. (The arrival
+    // build's own commit runs BEFORE its render resolves, so this never eats the
+    // preview it is about to show.)
+    setArrivalPreviewHtml(null);
     if (idleRef.current) clearTimeout(idleRef.current);
     // Footer-last invariant at the ONE write chokepoint: whatever an add, drag,
     // AI build, or dataset load produced, nothing is ever saved sitting under
@@ -684,6 +700,17 @@ export function EmailLabGridShell({
           layoutBaselineRef.current = JSON.stringify(normalized);
           layoutSubjectRef.current = data.listing?.subject ?? layoutSubjectRef.current;
           setSelectedId(null);
+          // Show the FINISHED email, not the machinery: the arrival's terminal
+          // surface is the doc through the real render engine — flush bands, the
+          // exact HTML a send carries. A render miss keeps the canvas; the build
+          // is never blocked on its preview.
+          void renderDocHtml(normalized)
+            .then((html) => {
+              if (!html) return;
+              setArrivalPreviewHtml(html);
+              setPhoneTab("preview");
+            })
+            .catch(() => {});
         } else {
           // Same honesty rule as runAuthor: a malformed build must never read as
           // "nothing happened".
@@ -1814,7 +1841,7 @@ export function EmailLabGridShell({
             Desktop-only furniture: precision width-picking is a fine-pointer job
             (web.dev interaction: pointer:coarse ≠ smaller mouse UI) and the row ate a
             third of the phone screen. Phone keeps tap-select + per-block AI. */}
-        {mode === "email" && (
+        {mode === "email" && arrivalPreviewHtml === null && (
           <div className="hidden shrink-0 items-center gap-3 border-b border-[#dde3e8] bg-white px-5 py-2 text-xs lg:flex">
             <span className="text-xs font-semibold text-[#0a1419]">Selected block width</span>
             <div className="flex items-center gap-1">
@@ -1844,7 +1871,27 @@ export function EmailLabGridShell({
 
         {/* the real grid (email) ↔ the social composer */}
         <div className="min-h-0 flex-1">
-          {mode === "email" ? (
+          {mode === "email" && arrivalPreviewHtml !== null ? (
+            /* THE FINISHED EMAIL — the real render, flush bands, no grid gutters.
+               One affordance only (the /go copy decree: a spec is a ceiling):
+               the way back into the builder. */
+            <div className="flex h-full min-h-0 flex-col">
+              <div className="flex shrink-0 items-center justify-end border-b border-[#dde3e8] bg-white px-5 py-2">
+                <button
+                  type="button"
+                  onClick={() => setArrivalPreviewHtml(null)}
+                  className="rounded-md border border-gray-400 bg-white px-2.5 py-1 text-xs font-semibold text-[#0a1419] transition-colors hover:border-gray-600"
+                >
+                  Edit this email
+                </button>
+              </div>
+              <iframe
+                title="Your finished email"
+                srcDoc={arrivalPreviewHtml}
+                className="min-h-0 w-full flex-1 border-0 bg-white"
+              />
+            </div>
+          ) : mode === "email" ? (
             <GridCanvas
               doc={doc}
               selectedId={selectedId}
@@ -1856,7 +1903,11 @@ export function EmailLabGridShell({
                 setSelectedId(id);
               }}
               onChangeDoc={(next, opts) =>
-                opts?.autoHeightOnly ? patchPresentDoc(next) : commit(next)
+                // `programmatic` = RGL's mount compaction — geometry applies, but it
+                // must NOT count as user interaction (commit sets that flag), or the
+                // arrival auto-build cancels itself on every non-compaction-stable
+                // skeleton (the /go stuck-spinner, 08/10/2026).
+                opts?.autoHeightOnly || opts?.programmatic ? patchPresentDoc(next) : commit(next)
               }
               onDuplicate={duplicateBlock}
               onAddBlock={() => setShowBlocks(true)}

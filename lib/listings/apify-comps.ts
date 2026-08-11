@@ -33,7 +33,7 @@
 
 import { compPhotoKey } from "./comp-photos";
 import { saveApifyRecords } from "./apify-record-store";
-import { requestSpend, refusalMessage } from "./apify-spend-guard";
+import { runGuardedApifyActor } from "./apify-run";
 
 /** The subset of the vendor record we read. The FULL ceiling is catalogued in the
  *  design doc §5 and cadence_registry `source_scope` — this is what we consume. */
@@ -277,67 +277,17 @@ export async function fetchApifyComps(
 
 const ACTOR_ID = "moving_beacon-owner1~realtor-com-property-scraper";
 
-/** The live call. Kept tiny and behind the injectable seam above so every test
- *  runs offline and no test can ever spend money.
- *
- *  *** THIS FUNCTION IS THE ONLY PLACE IN THE TREE WHERE MONEY LEAVES THE PROCESS,
- *      WHICH IS WHY THE SPEND GUARD SITS HERE AND NOT IN A CALLER. *** Callers inject
- *      `deps.runActor` to stay offline, so a guard in `fetchApifyComps` could be routed
- *      around by any future caller that brings its own runner. Guarding the bottom means
- *      no caller can opt out — deliberately or by accident. See apify-spend-guard.ts for
- *      the $14.37 afternoon that forced it. */
+/** The live call — a thin binding onto the ONE guarded runner (apify-run.ts),
+ *  where the spend switch, the process budget, the token read and the loud
+ *  vendor-refusal handling all live. Kept behind the injectable seam above so
+ *  every test runs offline and no test can ever spend money. `requestedResults`
+ *  is the input's OWN cap field, per the runner's caller contract. */
 async function runApifyActor(input: ApifyActorInput): Promise<unknown[]> {
-  // ── THE SWITCH AND THE BUDGET, BEFORE THE FETCH ────────────────────────────
-  // Charged on the REQUESTED cap, before the call: a run that returns 200 records has
-  // already been billed for them, so a budget that counts what came back learns the
-  // price only after paying it.
-  const verdict = requestSpend(input.max_results_per_location);
-  if (!verdict.allowed) {
-    // LOUD, and worded so it can never be read as a market fact. This is the third
-    // time this file has had to make a silent [] speak up (the APIFY_KEY name mismatch,
-    // then the 403 hard limit); it is not becoming a pattern quietly.
-    console.warn(refusalMessage(verdict.reason!, input.max_results_per_location));
-    return [];
-  }
-
-  // BOTH names are read on purpose. `.env.local` has carried `APIFY_KEY` all along;
-  // this function only ever looked for `APIFY_TOKEN`, so the lane silently returned []
-  // on every call and read to me as "no token configured" (operator, 08/03/2026:
-  // "APIFY KEY IN .ENV.LOCAL THOUGH"). Renaming the operator's variable would have been
-  // the wrong fix — the code reads what is actually there.
-  const token = process.env.APIFY_TOKEN ?? process.env.APIFY_KEY;
-  if (!token) {
-    // A silent [] here is indistinguishable from "no comps found", which is exactly how
-    // a name mismatch survived undetected. Say it out loud.
-    console.warn("[apify-comps] no APIFY_TOKEN / APIFY_KEY in env — comp enrichment skipped");
-    return [];
-  }
-  const res = await fetch(
-    `https://api.apify.com/v2/acts/${ACTOR_ID}/run-sync-get-dataset-items?token=${token}`,
-    {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(input),
-    },
-  );
-  if (!res.ok) {
-    // *** A VENDOR REFUSAL IS NOT "THIS ZIP HAS NO SOLD HOMES." ***
-    // Measured live 08/04/2026: three identical dated pulls on ZIP 33908 returned 200
-    // records, then 101, then 0 — and the 0 was an HTTP 403
-    // `{"type":"platform-feature-disabled","message":"Monthly usage hard limit exceeded"}`.
-    // Returning a bare [] made an exhausted ACCOUNT look exactly like an empty MARKET,
-    // and the email quietly shipped with open photo slots as though no photos existed.
-    // Same silent-zero shape as the APIFY_KEY name mismatch above; same fix — say it.
-    const body = await res.text().catch(() => "");
-    console.error(
-      `[apify-comps] VENDOR CALL FAILED ${res.status} ${res.statusText} — this is NOT ` +
-        `"no results". Photo/link slots will be empty for a reason that has nothing to do ` +
-        `with the houses: ${body.slice(0, 300)}`,
-    );
-    return [];
-  }
-  const json = await res.json();
-  return Array.isArray(json) ? json : [];
+  return runGuardedApifyActor({
+    actorId: ACTOR_ID,
+    input: input as unknown as Record<string, unknown>,
+    requestedResults: input.max_results_per_location,
+  });
 }
 
 // ── KEYING ONTO THE EXISTING COMP SET ────────────────────────────────────────

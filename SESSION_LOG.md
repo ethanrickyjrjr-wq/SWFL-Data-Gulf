@@ -1,3 +1,68 @@
+## 2026-08-10 (Fable 5) — /go SHIPPED THE OLD EMAIL LOOK: serif seed + wrong terminal surface, both fixed and driven live
+
+Operator: "HOW ARE WE STILL DESIGNING EMAILS DIFFERENTLY... I SAW SPACES IN BETWEEN COLORS LIKE THE
+OLD EMAILS." Two stacked defects, both proven by driving the real dispatch on the Ohio address:
+(1) skeleton-clean-white — THE blank canvas every recipe arrival lands on — carried
+displayFontFamily PLAYFAIR_SERIF + primaryColor #111827; the build keeps canvas globalStyle by
+doctrine, so every /go email wore the deleted editorial serif (3rd resurrection → new strike shape
+dead-style-reenters-through-unwatched-door). FIXED: seed stripped to house default;
+lib/email/doc/default-docs.style.test.ts pins it (99 pass / 0 fail across 8 email suites).
+(2) The arrival ended on the builder canvas (GRID_MARGIN 8px gutters = "spaces between colors"),
+never on the rendered email. FIXED: EmailLabGridShell arrival auto-build now renders through
+/api/email-lab/render (the ONE EmailDoc→HTML root sends use) and lands on the flush finished email;
+"Edit this email" reveals the grid; commit() clears the snapshot. Playbook line ~2653 corrected
+(defaultDoc() ≠ skeleton-clean-white — the conflation that hid this). EVIDENCE: bunx next build
+exit 0; repro render off the real arrival canvas = 21 Inter / 0 Playfair-Georgia-Times; driven
+live on a prod build (localhost:3210): /go → Melbury Ohio → New Listing → finished flush email
+screenshot. NOT pushed — awaiting per-push approval. Open: STRIKES.md line pending another
+session's live claim; cached-row price-fill policy still the operator's call.
+
+Operator: "why the fuck is this still 5/30... i just had it fucking fixed yesterday on /desk."
+Diagnosis: the retarget (9b020426, 08/10 13:11) was real and on main, but the pipeline NEVER RAN —
+last run 07/18 on the old frozen file, cron fires monthly on the 18th, so the fix would have sat
+dark 8 more days. Strike 6 of fixed-but-not-live. FIXED: workflow_dispatched
+redfin-city-swfl-monthly (run 31448652778, success), lake probed — all 3 desk cities now top out
+at period_end 2026-06-30 (Cape Coral $369,799 / Fort Myers $334,818 / Naples $1,449,211); /desk
+revalidate=300 picks it up live. JULY/AUGUST ANSWERED WITH EVIDENCE, not shrug: vendor file
+Last-Modified 08/10/2026 11:52 GMT (refreshed TODAY) and its newest period IS 06/30 — Redfin
+publishes closed-sale months ~5-6 weeks behind; July lands with the vendor's next refresh (our
+08/18 cron catches it). The August numbers elsewhere on the desk are OUR daily asking/inventory
+lanes — different statistic, no lag. MECHANISM (§0b, strike 6 > 3): Gate 16 ingestDispatchGate in
+check-prepush-gate.mjs — a push touching ingest/pipelines/*/(constants|resources|pipeline).py
+blocks unless INGEST_RUN_DISPATCHED=1 (run id in message) or ALLOW_NO_DISPATCH=1 (reason in
+message); node --check clean. STRIKES.md guard-line flip blocked by parallel-session claim
+(background wait armed). OPTION ON THE TABLE (not built): our own deed lane
+(lee_deed_official_records/LEEPA) could compute a July/August city sold median ahead of Redfin —
+that's a data-roots decision for the operator.
+
+Executed the 08/10 handoff (go-one-click-apify-handoff.md). THREE real defects found and fixed:
+(1) THE STUCK SPINNER — every /go arrival wedged forever: react-grid-layout's mount compaction
+fired onLayoutChange with a "changed" layout on the non-compaction-stable skeleton, routed through
+commit(), which set userInteractedRef and silently cancelled the arrival auto-build (proven by
+fiber hook-dump: brandLoaded true, autoBuildFired false, userInteracted TRUE, zero clicks). Fix:
+layout events count as USER interaction only after a real pointerdown on a drag/resize handle
+(GridCanvas gesture flag + `programmatic` opt → patchPresentDoc). (2) NO DATA LANE FOR ANY
+non-SWFL ADDRESS — resolve-subject hard-gates to Lee/Collier and nothing ever called Apify by
+address. Built lib/listings/apify-property-lookup.ts: one-api~realtor-property-scraper via
+property_inputs (input schema verified live; $0.007/result), through a NEW shared guarded runner
+lib/listings/apify-run.ts (spend switch + budget at ONE bottom, apify-comps repointed), records
+normalized onto the existing ApifyRecord shape → toRow/saveApifyRecords (ONE write root) →
+fillFromPaidRecord via injection (ONE gap-fill lane). Wired into resolveSubject as rung 3
+(free spine → cached row → live one-pull → open slots); fresh-row-only fill of ask/DOM (cached
+never-fill-price contract untouched). (3) THE RE-BUY — Mapbox writes "Melbury Drive", vendor
+stores "Melbury Dr"; both cache keys kept the suffix so the SAME house was re-bought next build
+(vendor run counter 9→10). Fix: canonStreet-folded rung in fetchCachedRecordLoose (unit-guarded).
+ACCEPTANCE (real prod build, spend armed): /go → "3166 Melbury Drive, Columbus, Ohio" (real
+$849K listing) → New Listing → completed email: mirrored hero photo, $849,000, 3/3.5/3,613 sqft/
+0.1 ac/$235/sqft/2003/HOA $175/Single Family, full MLS description, working realtor.com CTA —
+EXACTLY ONE vendor run (counter 8→9), row landed in apify_property_records; rebuild + Coming Soon
+build both ZERO new runs (counter pinned at 10 across both). Tests: 1,583 pass (lib/listings +
+lib/deliverable), bunx next build green. OPEN: the anonymous "Sign this email" popup still gates
+the auto-build (operator call — decree says no popups); cached rebuilds show an open price slot
+(never-fill-price policy vs the pass bar); playbook §3.3 update blocked by parallel-session claim
+(check opened); nonexistent-address builds re-pull per build, needs a miss-memo (check opened).
+NOT PUSHED — awaiting per-push approval.
+
 ## 2026-08-10 (Fable 5) — /go ONE-CLICK PAGE: hero + bar + 7 lifecycle options into the lab door, then STRIPPED after copy-creep rage
 
 Built the standalone /go page (operator decree: "Address to email in one click," Google-simple,

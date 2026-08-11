@@ -18,6 +18,7 @@ import {
 import { isRecipeKey } from "@/lib/deliverable/recipes";
 import { openSeed, projectEmailLabBase } from "@/lib/lab-entry/destination";
 import { planArrival } from "@/lib/lab-entry/arrival";
+import { reconcileAddress } from "@/lib/lab-entry/address-reconcile";
 import { seedFillPrompt } from "@/lib/lab-entry/seed-fill-prompt";
 import { useLeaveGuard } from "@/lib/lab-entry/use-leave-guard";
 import { ProjectConfirmPopup } from "@/components/lab-entry/ProjectConfirmPopup";
@@ -142,8 +143,22 @@ export function EmailLabGridClient({
   // 07/20/2026 — a real, unrelated project got overwritten this way). The gallery still
   // shows underneath, but now requires the same explicit confirm/change/new-project
   // choice as every other arrival before any write can happen.
+  // ADDRESS-FIRST (operator decree 08/10/2026): a signed-in recipe arrival that
+  // needs an address gets ONE question — the address. It IS the project name
+  // (title + kind:listing + subject_address), and the hop carries ?addr= so the
+  // in-project arrival auto-builds with no second popup. The old flow asked for
+  // a generic "project name", then asked for the address AGAIN inside the
+  // project — the address was typed twice for one build.
+  // Scoped to ADDRESS-subject recipes only — an area/ZIP recipe's subject is not
+  // a project identity, so it keeps the confirm-then-ask flow.
+  const addressFirst =
+    signedIn &&
+    plan.addressPopup &&
+    (initialRecipe ? (inputKindForRecipe(initialRecipe) ?? "address") : null) === "address";
   const [confirmOpen, setConfirmOpen] = useState(
-    showGallery ? offeredProject != null : plan.projectConfirm || signedInSeedHop,
+    showGallery
+      ? offeredProject != null
+      : (plan.projectConfirm || signedInSeedHop) && !addressFirst,
   );
   const [targetProject, setTargetProject] = useState(offeredProject);
   // ASK FOR THE ADDRESS, ALWAYS. This used to be `plan.addressPopup && !signedIn` on
@@ -171,7 +186,7 @@ export function EmailLabGridClient({
   // Route into the chosen project carrying the recipe + the hero's typed address
   // (+ zip) so the in-project build uses the right scope/comps. projectEmailLabBase
   // keeps the path in the root; the query is composed here (no raw lab literal).
-  function intoProject(projectId: string) {
+  function intoProject(projectId: string, addrOverride?: string) {
     const params = new URLSearchParams();
     if (initialRecipe) {
       params.set("recipe", initialRecipe.prompt);
@@ -180,7 +195,8 @@ export function EmailLabGridClient({
       if (initialRecipe.key) params.set("rkey", initialRecipe.key);
       if (initialRecipe.needs.length > 0) params.set("recipeNeeds", initialRecipe.needs.join(","));
     }
-    if (addr) params.set("addr", addr);
+    const effectiveAddr = addrOverride ?? addr;
+    if (effectiveAddr) params.set("addr", effectiveAddr);
     if (zip) params.set("zip", zip);
     // A template pick survives the hop — the in-project arrival runs its
     // capture-or-blank (spec 2026-07-16).
@@ -189,10 +205,38 @@ export function EmailLabGridClient({
       if (seedBlankChosen) params.set("blank", "1");
     }
     const q = params.toString();
+    // This hop is user-confirmed — disarm the beforeunload layer or the browser
+    // throws its native "Leave site?" dialog at our own navigation.
+    guard.bypass();
     // assign(), not `location.href =` — same hard navigation (the server must re-read
     // the session cookie), but an assignment to a global trips react-hooks/immutability
     // and would block any commit that touches this file.
     window.location.assign(`${projectEmailLabBase(projectId)}${q ? `?${q}` : ""}`);
+  }
+
+  // ADDRESS-FIRST Build (decree 08/10/2026): the typed address IS the project.
+  // Offered project already titled this address → ride into it; otherwise create
+  // a listing project named by the address (subject_address persisted so every
+  // return visit keeps the comps/campaign lanes) and hop in carrying ?addr= —
+  // the in-project arrival builds immediately, no second popup.
+  async function buildSignedInWithAddress(address: string) {
+    setAddressOpen(false);
+    setCreating(true);
+    try {
+      if (offeredProject && reconcileAddress(address, offeredProject.title).kind === "match") {
+        intoProject(offeredProject.id, address);
+        return;
+      }
+      const res = await fetch("/api/projects", {
+        method: "POST",
+        headers: { "content-type": "application/json" },
+        body: JSON.stringify({ title: address, kind: "listing", subject_address: address }),
+      });
+      const data = (await res.json().catch(() => null)) as { id?: string } | null;
+      if (data?.id) intoProject(data.id, address);
+    } finally {
+      setCreating(false);
+    }
   }
 
   async function createAndEnter(name: string) {
@@ -411,7 +455,12 @@ export function EmailLabGridClient({
           inputKind={inputKindForRecipe(initialRecipe) ?? "address"}
           initialValue={addr ?? ""}
           gaps={arrivalGaps}
-          onBuild={buildWithAddress}
+          // Signed-in: the address is the project (decree 08/10/2026) — create/route
+          // and build in there. Anonymous: build right here on the standalone grid.
+          onBuild={(value, brandPatch) => {
+            if (addressFirst) void buildSignedInWithAddress(value);
+            else buildWithAddress(value, brandPatch);
+          }}
           onCancel={() => setAddressOpen(false)}
         />
       )}

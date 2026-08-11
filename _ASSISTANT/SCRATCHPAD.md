@@ -1,3 +1,61 @@
+## 2026-08-10 (Fable 5) — OPERATOR: "HOW FUCKING LONG DOES IT TAKE TO BUILD A FUCKING EMAIL????? IT'S BEEN 7 FUCKING MINUTES"
+Screenshot: 326 Shore Dr, Fort Myers 33905 New Listing build stuck on "Working…" with a still-empty
+skeleton canvas after 7 minutes. Diagnosing where the wall-clock goes in the lab AI build path
+(app/api/email-lab/ai + the new apify property-lookup lane) this session — a build must either
+finish in seconds or fail loudly; a silent 7-minute spinner is a defect regardless of what it's
+waiting on.
+
+## 2026-08-10 (Fable 5) — OPERATOR: "we need to get the fucking address BEFORE we land on email lab. address IS the project name. build → address → enter → built, in the lab. THAT'S IT."
+Showcase-build → New Listing asked for a generic "project name" (he typed the address), then a
+native "Leave site?" dialog fired on OUR OWN confirmed hop into the project, then the project lab
+asked for the address AGAIN in a second popup. Three interruptions where the decree allows one.
+Root causes: (1) ProjectConfirmPopup's new-project input is a name, not the address, and
+createAndEnter never persisted subject_address nor carried ?addr= on the hop; (2) the in-project
+planArrival call omits `addr` from params so ?addr= never suppresses the popup (the planner already
+supports it); (3) useLeaveGuard's beforeunload fires on window.location.assign hops we initiated
+from our own confirm dialog. DECREE FLOW: recipe-with-address arrival, signed in → ONE popup (the
+listing address) → project auto-created titled the address (kind listing, subject_address set), or
+routed into the offered project when the address matches its title → land in project lab with
+?addr= → auto-build, zero further questions, no leave dialog.
+
+## 2026-08-10 (Fable 5) — OPERATOR: "why the fuck is this still 5/30... i just had it fucking fixed yesterday on /desk" — redfin city retarget committed, pipeline NEVER DISPATCHED
+The desk hero still showed sold medians "as of 05/31/2026" hours after the retarget fix (9b020426,
+08/10 13:11) landed on main. Root cause: the fix is CODE — the ingest run that lands the data was
+never dispatched, and the cron only fires on the 18th (next: 08/18). Last actual run: 07/18, on
+the OLD frozen file. Shape: fixed-but-not-live, strike 6 — Gate 15 guards email captures but has
+NO coverage for ingest-source changes, so a retarget can push green and sit dark for 8 days.
+FIXED THIS SESSION: workflow_dispatched redfin-city-swfl-monthly (run 31448652778), verified rows;
+mechanism extended — pre-push gate now catches ingest source-file changes without a dispatch ack.
+CEILING NOTE, so nobody "fixes" this again: the NEW feed's newest PERIOD END is 06/30/2026 —
+Redfin publishes monthly with ~6wk lag. After this run the chart reads June, NOT August. June IS
+current for this source.
+The /go make-it-work slice (unpushed, 2h of work) produced a COMPLETED New Listing email whose
+layout differs from the correct playbook layout — the reference is the Ohio $1M test artifact in
+Downloads (ohio-million-dollar-new-listing.html: dark header, teal ribbon, hero, stat strip,
+2-up Built/Type, agent card + CTA columns). "WE JUST DELETED ALL OTHER EMAILS BUT THE NEW EMAILS
+WE MADE" — one page, one layout was the whole point.
+DIAGNOSED (same session, proven by driving the real dispatch on the Ohio address) — TWO defects
+stacked, and the first diagnosis (surface only) was INCOMPLETE until the operator's screenshot
+(serif "Jane Rivera" masthead) forced the second look:
+(1) THE SERIF SEED — skeleton-clean-white, THE blank canvas every recipe arrival lands on
+    (/go, campaign buttons, project email tab, build-doc fallback seat), carried
+    displayFontFamily PLAYFAIR_SERIF + primaryColor #111827. The build engine keeps the canvas
+    doc's globalStyle by doctrine, so every /go email shipped the deleted editorial serif look.
+    THIRD serif resurrection (1: EDITORIAL_STYLE in lifecycle-chrome, deleted; 2: brand-profile
+    backup restore, playbook §2.2 defect 1; 3: this seed) — strike shape, mechanism owed beyond
+    the per-door pin. FIXED: seed stripped to house default; guard test
+    lib/email/doc/default-docs.style.test.ts pins it (99 tests green across 8 email suites).
+    My first repro missed it by using defaultDoc() (= market-spotlight, house style) — the
+    playbook line 2653 claiming defaultDoc() returns skeleton-clean-white is WRONG/stale;
+    correction owed, file claimed by session 6962feb1 at edit time.
+(2) THE SURFACE — the arrival ends on the BUILDER CANVAS (react-grid-layout, GRID_MARGIN [8,8],
+    blocks as cards, gutters showing through = "SPACES IN BETWEEN COLORS"), never on the rendered
+    email. FIXED: arrival auto-build now renders through /api/email-lab/render (the ONE
+    EmailDoc→HTML root shared with blast/scheduled send) and lands on the flush finished email;
+    "Edit this email" reveals the grid; any commit clears the snapshot.
+PROOF: repro off the REAL arrival canvas renders 21 Inter / 0 Playfair-Georgia-Times, exact
+playbook spine. bunx next build pending at entry-write time.
+
 ## 2026-08-10 (Fable 5) — OPERATOR: "YOU SAY NOTHING ELSE WRITTEN, BUT THEN WRITE MORE BESIDES WHAT I TOLD YOU" — /go page copy creep
 Decree was a Google-simple page: hero "Address to email in one click" + search bar, NOTHING else.
 I shipped it with three extra written lines nobody asked for: a "SWFL DATA GULF" wordmark label, a

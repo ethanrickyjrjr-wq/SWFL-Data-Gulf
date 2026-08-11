@@ -443,6 +443,15 @@ process.stdin.on("end", () => {
   // STILL THE SAME on the site", 08/10/2026).
   captureFreshnessGate(changed);
 
+  // ---- Gate 16: ingest dispatch ack — a pipeline source change is not live ---
+  // until its run lands rows. Strike 6 of `fixed-but-not-live` (08/10/2026): the
+  // redfin_city_swfl retarget (9b020426) pushed green at 13:11, its cron fires
+  // monthly on the 18th, nobody dispatched the run, and the operator found the
+  // desk hero still serving May closes that night ("why the fuck is this still
+  // 5/30... i just had it fucking fixed yesterday"). Gate 15 covers email
+  // captures; this covers the ingest half of the same shape.
+  ingestDispatchGate(changed);
+
   // ---- Gate 8: ZIP scope root (Lee + Collier, 57) ---------------------------
   // Coverage has ONE root (isCoreScope, refinery/lib/core-scope.mts) and the leak
   // still reopened twice, because nothing FORCED a new surface to call it: the
@@ -1362,6 +1371,51 @@ function captureFreshnessGate(changed) {
         `commit the refreshed capture in the SAME push.\n` +
         `Legitimate exceptions (pure refactor with identical bytes, capture blocked by a\n` +
         `parallel session's claim): ALLOW_STALE_CAPTURE=1 and say why in the message.`,
+    );
+  } catch {
+    // never wedge a push on a guard bug — fail open
+  }
+}
+
+// Gate 16 body. Fail-OPEN on internal error, BLOCK on violation. A change to an
+// ingest pipeline's source-defining files (constants/resources/pipeline) only
+// becomes real data when the workflow RUNS — and most of these crons are monthly,
+// so a fix can sit dark for weeks while looking shipped. Two legal outs:
+//   INGEST_RUN_DISPATCHED=1 — the run was dispatched this session (gh workflow run
+//     or a live local run); say the run id/url in the push message.
+//   ALLOW_NO_DISPATCH=1 — deliberately not running it (dry-run-only change, source
+//     not live yet, cron imminent); say why in the push message.
+function ingestDispatchGate(changed) {
+  try {
+    if (process.env.INGEST_RUN_DISPATCHED === "1") {
+      process.stdout.write(
+        `\n[pre-push gate] Gate 16: INGEST_RUN_DISPATCHED=1 — ingest source change\n` +
+          `ships with its run dispatched (logged).\n`,
+      );
+      return;
+    }
+    if (process.env.ALLOW_NO_DISPATCH === "1") {
+      process.stdout.write(
+        `\n[pre-push gate] OVERRIDE: ALLOW_NO_DISPATCH=1 — ingest source change is\n` +
+          `shipping WITHOUT a dispatched run (logged; reason belongs in the message).\n`,
+      );
+      return;
+    }
+    const isSourceFile = (f) =>
+      /^ingest\/pipelines\/[^/]+\/(constants|resources|pipeline)\.py$/.test(f);
+    const touched = changed.filter(isSourceFile);
+    if (touched.length === 0) return;
+    block(
+      "INGEST DISPATCH — pipeline source changed but no run was dispatched (Gate 16)",
+      `This push edits what an ingest pipeline FETCHES or WRITES, but nothing here\n` +
+        `says the pipeline actually ran. Strike 6 of "fixed-but-not-live"\n` +
+        `(_ASSISTANT/STRIKES.md): the redfin_city retarget pushed green, its cron was\n` +
+        `8 days out, and the desk served May closes into August.\n\n` +
+        `Pipeline source files in this push:\n` +
+        touched.map((f) => `  - ${f}`).join("\n") +
+        `\n\nFix: dispatch the workflow (gh workflow run <workflow>.yml), verify rows\n` +
+        `landed, then push with INGEST_RUN_DISPATCHED=1 and the run id in the message.\n` +
+        `Deliberately not running it? ALLOW_NO_DISPATCH=1 and say why.`,
     );
   } catch {
     // never wedge a push on a guard bug — fail open

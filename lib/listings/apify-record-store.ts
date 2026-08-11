@@ -27,6 +27,7 @@
 // regenerated — the table shape is fixed and catalogued in data-roots.md.
 import { createServiceRoleClientUntyped } from "@/utils/supabase/service-role";
 import { listingAddressKey } from "./apify-baths";
+import { canonStreet } from "./resolve-subject";
 import type { ApifyRecord } from "./apify-comps";
 
 /** The vendor's "no value" sentinels arrive as literal strings, not nulls. */
@@ -335,11 +336,30 @@ export async function fetchCachedRecordLoose(
       (r) => looseAddressKey(String(r.street ?? ""), String(r.city ?? "")) === want,
     );
     if (hit) return hit;
+    // THE SUFFIX SEAM (08/10/2026, measured live): a typed/Mapbox subject writes
+    // "3166 Melbury Drive"; the vendor row stores "3166 Melbury Dr". Both keys
+    // above keep the suffix, so the already-bought row was invisible and the SAME
+    // house was re-bought on the very next build — the RULE 0.7a one-pull-per-
+    // address defect, caught by the vendor's own run counter (9 → 10 on a
+    // rebuild). canonStreet is the ONE existing folder for exactly this
+    // (Court/Ct, Drive/Dr, directionals). Guarded to unit-less subjects and
+    // unit-less rows only: canonStreet strips unit tokens, and a folded match
+    // across units would lend one condo another condo's facts.
+    const { core, unit } = splitUnitFromStreet(street);
+    if (!unit) {
+      const wantCanon = looseAddressKey(canonStreet(street), city);
+      const canonHit = rows.find(
+        (r) =>
+          !unitTokenOf(r.unit) &&
+          looseAddressKey(canonStreet(String(r.street ?? "")), String(r.city ?? "")) === wantCanon,
+      );
+      if (canonHit) return canonHit;
+      return undefined;
+    }
     // THE UNIT SEAM (see splitUnitFromStreet). Only when the subject street carries a
     // unit token: compare the bare street, and require the row's own unit column to
     // agree. A row with no unit is NEVER matched to a unit-bearing subject — in a condo
     // building that would be a guess, and a wrong condo's facts are wrong facts.
-    const { core, unit } = splitUnitFromStreet(street);
     if (!unit) return undefined;
     const wantCore = looseAddressKey(core, city);
     return rows.find(

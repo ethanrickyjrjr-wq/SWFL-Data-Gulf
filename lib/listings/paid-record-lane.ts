@@ -129,6 +129,11 @@ export function acresFromLotSqft(lotSqft: unknown): string | null {
 
 /** What the paid row actually contributed, for the source line and for tests. */
 export interface PaidLaneFill {
+  /** Was a cached row FOUND at all? Distinct from "did it fill anything" — a row
+   *  can be present with nothing left to add. The live by-address pull keys off
+   *  this: rowFound=false is the ONLY state in which buying the record is not a
+   *  re-buy of a house we already hold (RULE 0.7a, one pull per address). */
+  rowFound: boolean;
   description: boolean;
   photosAdded: number;
   baths: boolean;
@@ -141,6 +146,7 @@ export interface PaidLaneFill {
 }
 
 export const NO_FILL: PaidLaneFill = {
+  rowFound: false,
   description: false,
   photosAdded: 0,
   baths: false,
@@ -200,7 +206,7 @@ export async function fillFromPaidRecord(
   }
   if (!row) return { ...NO_FILL };
 
-  const fill: PaidLaneFill = { ...NO_FILL };
+  const fill: PaidLaneFill = { ...NO_FILL, rowFound: true };
 
   // THE DESCRIPTION — the biggest copy-quality lever in a listing email, and it does
   // NOT count against the 50–125 word budget (playbook §1.9 carve-out). Fill-only:

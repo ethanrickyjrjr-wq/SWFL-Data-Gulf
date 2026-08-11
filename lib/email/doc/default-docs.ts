@@ -706,13 +706,20 @@ export const SEED_DOCS: SeedDoc[] = [
     subject: "none",
     name: "Clean White",
     description: "Crisp white background, photo placeholder up top, open content area below.",
+    // ⛔ NO FONT OR PALETTE OVERRIDES HERE — the house default only. This seed is not
+    // just a gallery template: it is THE BLANK CANVAS every recipe arrival lands on
+    // (/go, campaign buttons, the project email tab, build-doc.ts's fallback seat),
+    // and the build engine keeps the canvas doc's globalStyle by doctrine ("the brand
+    // on the doc is the brand that renders", lifecycle-chrome.ts). Until 08/10/2026
+    // this carried `displayFontFamily: "PLAYFAIR_SERIF"` + `primaryColor: "#111827"`,
+    // so every recipe email built on a blank canvas shipped a serif masthead in an
+    // off-house dark — the deleted editorial look (playbook §2.1.6 defect 1),
+    // resurrected through a seed. Operator, on a /go build: "I SAW THE OLD STYLE
+    // EMAILS." Guard: default-docs.test.ts pins this seed's style to the default.
     build: () => ({
       globalStyle: {
         ...style(),
         backdropColor: "#ffffff",
-        primaryColor: "#111827",
-        accentColor: "#3DC9C0",
-        displayFontFamily: "PLAYFAIR_SERIF",
       },
       blocks: [
         seedBlock("header", { companyName: "", tagline: "" }),

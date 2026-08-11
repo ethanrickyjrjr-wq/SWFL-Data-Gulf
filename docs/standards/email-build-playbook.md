@@ -2650,7 +2650,11 @@ things against the rendered bytes:
 
 **One real defect the walk found, fixed in the harness script, not the recipe:** the acceptance
 script's canvas (`applyBrand(defaultDoc(), BRAND)`) carried no `agent-card` block, because
-`skeleton-clean-white` (what `defaultDoc()` returns) ships none and `applyBrand` only ever
+the underlying seed ships none and `applyBrand` only ever
+(CORRECTED 08/10/2026: this line used to say `skeleton-clean-white` is "what `defaultDoc()`
+returns" — FALSE. `defaultDoc()` = `SEED_DOCS[0]` = `market-spotlight`, house style;
+`skeleton-clean-white` is the separate blank canvas recipe ARRIVALS land on. That conflation
+hid the serif the skeleton carried — see §2.1.6 defect 1's third recurrence, 08/10/2026.)
 overlays an EXISTING block's props — it never creates one. `brandHeadshot`/`brandAgentName`
 (agent-brand-intro.ts) read the account's photo/name off `currentDoc` DURING the build, so without
 seeding an agent-card first, the up-front headshot and the "Meet your agent — `<Name>`" hero both

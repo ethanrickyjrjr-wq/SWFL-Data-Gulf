@@ -364,9 +364,16 @@ export function GridCanvas({
   doc: EmailDoc;
   selectedId: string | null;
   onSelectBlock: (id: string | null) => void;
-  /** `autoHeightOnly` marks a content-measured height correction — the shell patches
+  /** `programmatic` marks a machine-made doc change (RGL's mount compaction) — the
+   *  shell must apply it WITHOUT counting it as user interaction, or the arrival
+   *  auto-build cancels itself on every door whose skeleton isn't compaction-stable
+   *  (found 08/10/2026: every /go arrival wedged on a spinner forever).
+   *  `autoHeightOnly` marks a content-measured height correction — the shell patches
    *  it in place (no undo frame); user actions omit it and push a normal frame. */
-  onChangeDoc: (next: EmailDoc, opts?: { autoHeightOnly?: boolean }) => void;
+  onChangeDoc: (
+    next: EmailDoc,
+    opts?: { autoHeightOnly?: boolean; programmatic?: boolean },
+  ) => void;
   /** Duplicate a block (shell mints the id + places the copy on the grid). */
   onDuplicate?: (id: string) => void;
   /** Click the "add here" tile → shell adds a block on the grid. */
@@ -430,7 +437,22 @@ export function GridCanvas({
 
   // RGL fires onLayoutChange once on mount (after compaction) and after every
   // drag/resize. Commit ONLY a real geometry change vs the baseline we fed in.
+  //
+  // A COMPACTION FIRE IS NOT THE USER. RGL emits onLayoutChange on mount, again
+  // after width measurement, and after every internal compaction pass — and when
+  // the doc's stored geometry isn't compaction-stable (a gap RGL closes), those
+  // events carry a "real" change with nobody touching anything. They used to
+  // route through the same commit as a drag, which set the shell's
+  // userInteracted flag and silently cancelled the arrival auto-build: every /go
+  // arrival sat on a spinner forever (verified live 08/10/2026, hook-state dump —
+  // brandLoaded true, autoBuildFired false, userInteracted TRUE, zero clicks).
+  //
+  // The honest signal is the GESTURE: a real drag/resize begins with a
+  // pointerdown on RGL's drag handle or a resize handle. A layout event without
+  // one is machine noise — its geometry still applies, marked `programmatic`.
+  const layoutGestureRef = useRef(false);
   function handleLayoutChange(next: Layout) {
+    const fromGesture = layoutGestureRef.current;
     const baseline = new Map(layout.map((it) => [it.i, it]));
     let changed = false;
     const blocks = doc.blocks.map((b) => {
@@ -450,7 +472,7 @@ export function GridCanvas({
       };
       return { ...b, layout: nextLayout };
     });
-    if (changed) onChangeDoc({ ...doc, blocks });
+    if (changed) onChangeDoc({ ...doc, blocks }, fromGesture ? undefined : { programmatic: true });
   }
 
   function remove(id: string) {
@@ -473,6 +495,16 @@ export function GridCanvas({
     <div
       className="h-full overflow-y-auto bg-gray-100 px-4 py-8"
       onClick={() => onSelectBlock(null)}
+      // Arms the layout-gesture flag (see handleLayoutChange): only a pointerdown
+      // on RGL's drag handle or a resize handle makes the next layout commits
+      // count as USER interaction. Sticky on purpose — once they have really
+      // dragged, every later layout commit is legitimately theirs.
+      onPointerDownCapture={(e) => {
+        const t = e.target as HTMLElement | null;
+        if (t?.closest?.(".drag-handle, .react-resizable-handle")) {
+          layoutGestureRef.current = true;
+        }
+      }}
     >
       <div className="mx-auto w-[600px] max-w-full" onClick={(e) => e.stopPropagation()}>
         <div className="overflow-hidden rounded-lg bg-white shadow-sm ring-1 ring-gray-200">

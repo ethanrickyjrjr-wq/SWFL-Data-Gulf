@@ -20,6 +20,11 @@ import { EMAIL_MODEL_SONNET } from "@/lib/email/model-router";
 import { resolveSubjectListing } from "@/lib/listings/resolve-subject";
 import { mirrorHeroPhoto } from "@/lib/media/hero-photo";
 import { fillFromPaidRecord, NO_FILL } from "@/lib/listings/paid-record-lane";
+import {
+  fetchApifyPropertyByAddress,
+  fillFactsFromFreshRow,
+  seedFactsLocationFromAddress,
+} from "@/lib/listings/apify-property-lookup";
 import { listingDescriptionFromPrompt } from "@/lib/email/listing-intent";
 
 import { auditClaims, numeralsIn, CLAIM_PROHIBITION } from "@/lib/deliverable/claims";
@@ -160,13 +165,28 @@ function zip5From(address: string): string {
   return m ? m[1] : "";
 }
 
-export async function resolveSubject(address: string, prompt: string): Promise<ResolvedSubject> {
+export interface ResolveSubjectSeams {
+  /** Injectable so tests never reach the guarded live runner. Default is the
+   *  real by-address buy (lib/listings/apify-property-lookup.ts). */
+  lookupPaidRecord?: typeof fetchApifyPropertyByAddress;
+}
+
+export async function resolveSubject(
+  address: string,
+  prompt: string,
+  seams: ResolveSubjectSeams = {},
+): Promise<ResolvedSubject> {
   const zip = zip5From(address);
   const [hit, communityForListing] = await Promise.all([
     resolveSubjectListing(address).catch(() => null),
     zip ? resolveCommunityForListing(address, zip).catch(() => null) : Promise.resolve(null),
   ]);
   const facts: ListingFacts = hit ?? { address, photos: [], sourceUrl: BASE_URL };
+  // A resolve miss leaves BARE facts — no city, no ZIP — and the paid-cache key
+  // below needs street + city to exist at all. Seed absent cells from the typed
+  // text, or the already-bought row for a non-SWFL address is invisible and
+  // every rebuild of the same address re-buys it (the RULE 0.7a defect).
+  seedFactsLocationFromAddress(facts);
   if (communityForListing && (communityForListing as { matched: boolean }).matched) {
     const c = communityForListing as {
       matched: true;
@@ -226,9 +246,36 @@ export async function resolveSubject(address: string, prompt: string): Promise<R
   // was bought already — and it runs LAST so neither the live record nor the agent's
   // own pasted words can be overwritten by it. Runs after the mirror on purpose: the
   // hero stays our mirrored copy and the vendor gallery lands behind it.
-  await fillFromPaidRecord(facts).catch(() => NO_FILL);
+  const paid = await fillFromPaidRecord(facts).catch(() => ({ ...NO_FILL }));
 
-  return { facts, resolved: Boolean(hit) };
+  // LANE 3b — THE LIVE BY-ADDRESS BUY (storefront decree 08/10/2026: ANY address,
+  // filled through the Apify rung). Reached ONLY when the free spine missed AND no
+  // already-bought row exists — rung 3 of RULE 0.7a, never a routine step for a
+  // house we already hold. One call, one result, behind the spend switch
+  // (OPERATOR_APPROVED_PAID_RUN); the row saves through the ONE write root, so the
+  // NEXT build of this address is a cache READ above — one pull per address. The
+  // fresh row may fill the moving facts (ask, DOM) precisely because it is seconds
+  // old; the cached lane's never-fill-price contract stands untouched.
+  if (!hit && !paid.rowFound) {
+    const lookup = seams.lookupPaidRecord ?? fetchApifyPropertyByAddress;
+    const fresh = await lookup(address).catch(() => null);
+    if (fresh) {
+      await fillFactsFromFreshRow(facts, fresh).catch(() => undefined);
+      // The pull's hero is a vendor CDN URL — mirror it like every other lane's
+      // hero, so a re-send months later doesn't depend on the vendor keeping it.
+      if (facts.photos[0]) {
+        const mirroredHero = await mirrorHeroPhoto(facts.photos[0]).catch(() => null);
+        if (mirroredHero) facts.photos[0] = mirroredHero;
+      }
+      return { facts, resolved: true };
+    }
+  }
+
+  // `resolved` documents "not an address-only skeleton". A cached paid row that
+  // joined THIS address settles identity and fills the spec cells, so it counts —
+  // otherwise a rebuild of a bought address would re-trigger every "paste your
+  // listing link" fallback its first build already answered.
+  return { facts, resolved: Boolean(hit) || paid.rowFound };
 }
 
 /** Drop an unfilled chart slot, AND CLOSE THE HOLE IT LEAVES.
