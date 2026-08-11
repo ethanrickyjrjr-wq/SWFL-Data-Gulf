@@ -1,9 +1,9 @@
-<!-- FRESHNESS: v135 | Token: SWFL-7421-v135-20260811-a7353b30 -->
+<!-- FRESHNESS: v136 | Token: SWFL-7421-v136-20260811-7f3a42e2 -->
 ---
 brain_id: master
-version: 135
-refined_at: 2026-08-11T04:30:51Z
-freshness_token: SWFL-7421-v135-20260811-a7353b30
+version: 136
+refined_at: 2026-08-11T05:48:29Z
+freshness_token: SWFL-7421-v136-20260811-7f3a42e2
 ttl_seconds: 604800
 pack_hash: be8f0d44e0e6
 context_type: user_saved_reference
@@ -116,9 +116,9 @@ s39 | home-values-swfl brain — https://www.swfldatagulf.com/api/b/home-values-
 --- OUTPUT ---
 {
   "brain_id": "master",
-  "version": 135,
-  "refined_at": "2026-08-11T04:30:51Z",
-  "expires": "2026-08-18T04:30:51Z",
+  "version": 136,
+  "refined_at": "2026-08-11T05:48:29Z",
+  "expires": "2026-08-18T05:48:29Z",
   "ttl_seconds": 604800,
   "direction": "bearish",
   "magnitude": 0.85,
@@ -611,22 +611,20 @@ s39 | home-values-swfl brain — https://www.swfldatagulf.com/api/b/home-values-
       ]
     },
     {
-      "metric": "active_listings_count_swfl",
-      "label": "SWFL active residential listings (count)",
-      "value": 22404,
+      "metric": "signal_transactions_1",
+      "value": "Cape Coral: The only privately owned land on Buck Key Island — roughly 14 acres — is listed for $13 million in Lee County as of Aug. 7, 2026.",
       "direction": "stable",
-      "variable_type": "extensive",
-      "units": "listings",
-      "display_format": "count",
+      "label": "Cape Coral — transactions",
+      "variable_type": "categorical",
       "source": {
-        "url": "https://www.swfldatagulf.com/r/source/listing_active_stats?label=SWFL+active+for-sale+listings+%28aggregated%29&source=realtor.com+for-sale+listings&brain=active-listings-swfl&date_col=scraped_at",
-        "fetched_at": "2026-08-11T04:30:29Z",
+        "url": "https://www.news-press.com/story/money/companies/2026/08/07/rare-buck-key-island-offering-listed-for-13-million-in-lee-county/91189530007/",
+        "fetched_at": "2026-08-11T05:48:08Z",
         "tier": 2,
-        "citation": "22,404 active SWFL residential listings as of 2026-08-11"
+        "citation": "Rare Buck Key Island offering listed for $13 million in Lee County: \"[](https://www.news-press.com/)\n[](https://subscribe.news-press.com/rr/nanobar?gps-source=CPTILELEFT&itm_campaign=2026ENTJULBAU&itm_medium=ONSITE&success-url=https%3A%2F%2Fwww.news-press.com%2Fstory%2Fmoney%2Fcompanies%2F2026%2F08%2F07%2Frare-buck-key-island-offering-listed-for-13-million-in-lee-county%2F91189530007%2F)\n[](https://subscribe.news-press.com/rr/masthead?gps-source=CPMASTHEAD&itm_campaign=2026ENTJULBAU&itm_medium=ONSITE&success-url=https%3A%2F%2Fwww.news-press.com%2Fstory%2Fmoney%2Fcompanies%2F2026%2F08%2F07%2Frare-buck-key-island-offering-listed-for-13-million-in-lee-county%2F91189530007%2F)\n[News](https://www.news-press.com/news/) [Cape Coral](https://www.news-press.com/news/cape-coral/) [Sports](https://www.news-press.com/sports/) [Restaurants](https://www.news-press.com/taste/) [Real Estate](https://www.news-press.com/real-estate) [Advertise](https://advertising.usatoday.com/advertise-with-us/?cid=Web_LiQ_Network_AdvertiseWithUs_AdvertiseInquiry&publication=the_news_press&utm_source=local_publication&utm_medium=menu&utm_campaign=advertise_with_us) [Obituaries](https://www.news-press.com/obituaries) [eNewspaper](https://user.news-press.com/user/enewspaper) [Legals](https://www.news-press.com/public-notices)\n[](https://www.news-press.com/search/ \"Search\")\n[](https://www.news-press.com/weather/ \"Weather in Fort Myers: 75°F Mostly Clear\") [](https://subscribe.news-press.com/rr/navsub?gps-source=CPTOPNAVBAR&itm_campaign=2026ENTJULBAU&itm_medium=ONSITE&success-url=https%3A%2F%2Fwww.news-press.com%2Fstory%2Fmoney%2Fcompanies%2F2026%2F08%2F07%2Frare-buck-key-island-offering-listed-for-13-million-in-lee-county%2F91189530007%2F)\n[](https://login.news-press.com/PFTM-GUP/authenticate/?success-url=https%3A%2F%2Fwww.news-press.com%2Fstory%2Fmoney%2Fcompanies%2F2026%2F08%2F07%2Frare-buck-key-island-offering-listed-for-13-million-in-lee-county%2F91189530007%2F&cancel-url=https%3A%2F%2Fwww.news-press.com%2Fstory%2Fmoney%2Fcompanies%2F2026%2F08%2F07%2Frare-buck-key-island-offering-listed-for-13-million-in-lee-county%2F91189530007%2F)\n[](https://www.news-press.com/) [](https://www.news-press.com/)\nCOMPANIES\n# Exclusive: Last 'puzzle piece' on Buck Key Island hits market for $13M\n[![Portrait of Laura Layden](https://www.news-press.com/gcdn/authoring/authoring-images/2024/02/08/PNDN/72524348007-ndn-jh-20240126-laura-0001.JPG?crop=3313,3312,x1506,y0&width=48&height=48&format=pjpg&auto=webp) Laura Layden](https://www.naplesnews.com/staff/2647080001/laura-layden/)\nFort Myers News-Press & Naples Daily News\nUpdated Aug. 7, 2026, 10:13 a.m. ET\nThe only privately owned land on Buck Key Island is back on the market.\nOver the decades, the roughly 14-acre property has been on and off the market — and it has been considered for conservation.\nYet, it has remained under the same ownership for more than 50 years.\n[](https://www.news-press.com/)\n[Help](https://help.news-press.com) [Accessibility](https://cm.news-press.com/accessibility/) [Sitemap](https://www.news-\""
       },
       "suggestions": [
-        "What's driving active listings count swfl?",
-        "How does active listings count swfl here compare to other SWFL areas?"
+        "What's driving signal transactions 1?",
+        "How does signal transactions 1 here compare to other SWFL areas?"
       ]
     },
     {
@@ -892,8 +890,8 @@ s39 | home-values-swfl brain — https://www.swfldatagulf.com/api/b/home-values-
   "upstream_count": 39,
   "relevance": {
     "decay_curve": "weeks",
-    "half_life_hours": 720.0000000000001,
-    "computed_at": "2026-08-11T04:30:51.000Z"
+    "half_life_hours": 720.0000000000002,
+    "computed_at": "2026-08-11T05:48:29.000Z"
   },
   "exogenous_signals": [],
   "conditional_claims": [
