@@ -1,5 +1,4 @@
 {
-  "active_listings": ["raw_landing_class"],
   "airdna_str_swfl": ["raw_landing_class"],
   "bls_laus": ["raw_landing_class"],
   "bls_oews_swfl": ["raw_landing_class"],
@@ -9,7 +8,6 @@
   "brevitas_listings": ["raw_landing_class"],
   "census_acs": ["raw_landing_class"],
   "census_cbp": ["raw_landing_class"],
-  "census_vip": ["raw_landing_class"],
   "city_pulse": ["raw_landing_class"],
   "city_pulse_corridors": ["raw_landing_class"],
   "city_pulse_corridors_tier2": ["raw_landing_class", "source_ceiling", "source_scope"],
@@ -33,9 +31,6 @@
   "fl_dor_sales_tax": ["raw_landing_class"],
   "fl_dor_tdt": ["raw_landing_class"],
   "fmb_recovery": ["raw_landing_class"],
-  "fred_g17": ["raw_landing_class"],
-  "fred_laus_alfred": ["raw_landing_class"],
-  "fred_listing_swfl": ["raw_landing_class"],
   "hurdat2_fl": ["raw_landing_class"],
   "land_manufactured_swfl": ["raw_landing_class"],
   "lee_associates_swfl": ["raw_landing_class"],
