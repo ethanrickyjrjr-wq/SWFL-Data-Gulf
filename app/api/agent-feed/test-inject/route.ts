@@ -34,6 +34,40 @@ const ALLOWED_FIELDS = new Set([
   "at",
 ]);
 
+// Real to_state vocabulary the ingest pipeline actually writes (RULE 0.5 -- read
+// ingest/pipelines/listing_lifecycle/transitions.py before allowlisting a single value here,
+// never invented from the plan's shorthand). Task 6's plan doc names to_state values
+// (new/pending/under_contract/sold/back_on_market) that read like recipe-selection shorthand,
+// not the literal strings the diff engine writes -- verified against transitions.py directly:
+//   - _LIVE_STATES = {"active","new","coming_soon","back_on_market"} (line 22).
+//   - SOLD="sold", WITHDRAWN="withdrawn", HOLDING="holding" (lines 135-137) -- HOLDING is the
+//     one ambiguous-departure state (a listing left the active market; sold/pending/withdrawn
+//     is unresolved until the off-market hook probes it), not "pending" or "gone".
+//   - A price cut/raise is represented by an UNCHANGED to_state (e.g. "active"->"active")
+//     carrying a non-null price_delta (transitions.py lines 63-72) -- "price_reduced" is
+//     NEVER itself a to_state value; Task 6's price_delta<0 recipe rule reads price_delta,
+//     not this field.
+//   - "pending"/"contingent"/"under_contract"/"withdrawn"/"delisted" etc. (extract_api.py
+//     PENDING_STATUSES/OFF_MARKET_STATUSES, lines 88-94) are RAW VENDOR statuses the internal
+//     sold-capture resolver matches against to decide whether a "holding" row resolves to
+//     sold/withdrawn -- they are never written to listing_transitions.to_state itself.
+const VALID_TO_STATES = new Set([
+  "new",
+  "active",
+  "coming_soon",
+  "back_on_market",
+  "holding",
+  "sold",
+  "withdrawn",
+]);
+
+// sale_or_rent vocabulary: the current lifecycle pipeline only ever writes "sale"
+// (ingest/pipelines/listing_lifecycle/extract.py:144 -- "Source B is for-sale only -- no
+// rent class exists"; extract_api.py:185 hardcodes "sale" too), but the column itself
+// (address_key.py:5, the migration's own default) treats sale_or_rent as a real two-value
+// category -- "rent" is a legitimate future value, not an invented one.
+const VALID_SALE_OR_RENT = new Set(["sale", "rent"]);
+
 function badRequest(error: string): Response {
   return NextResponse.json({ error }, { status: 400 });
 }
@@ -62,9 +96,16 @@ export async function POST(req: Request) {
 
   const toState = typeof record.to_state === "string" ? record.to_state.trim() : "";
   if (!toState) return badRequest("missing_field:to_state");
+  if (!VALID_TO_STATES.has(toState)) {
+    return badRequest(`invalid_field:to_state`);
+  }
 
   if ("sale_or_rent" in record && typeof record.sale_or_rent !== "string") {
     return badRequest("invalid_field:sale_or_rent");
+  }
+  const saleOrRent = typeof record.sale_or_rent === "string" ? record.sale_or_rent : "sale";
+  if (!VALID_SALE_OR_RENT.has(saleOrRent)) {
+    return badRequest(`invalid_field:sale_or_rent`);
   }
   if (
     "from_state" in record &&
@@ -93,7 +134,7 @@ export async function POST(req: Request) {
   const id = await insertTestEvent({
     address,
     address_key: normalizedAddressKey(address),
-    sale_or_rent: typeof record.sale_or_rent === "string" ? record.sale_or_rent : "sale",
+    sale_or_rent: saleOrRent,
     from_state: typeof record.from_state === "string" ? record.from_state : null,
     to_state: toState,
     price_delta: typeof record.price_delta === "number" ? record.price_delta : null,

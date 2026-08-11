@@ -40,7 +40,7 @@ function req(body: unknown): Request {
 describe("POST /api/agent-feed/test-inject", () => {
   test("wrong-scope token (feed-read) -> 403 passthrough from requireScope", async () => {
     scopeResult = new Response(JSON.stringify({ error: "forbidden" }), { status: 403 });
-    const res = await POST(req({ address: "1 A St, Fort Myers, FL 33901", to_state: "pending" }));
+    const res = await POST(req({ address: "1 A St, Fort Myers, FL 33901", to_state: "holding" }));
     expect(res.status).toBe(403);
     scopeResult = { userId: "hermes-1" };
   });
@@ -48,7 +48,7 @@ describe("POST /api/agent-feed/test-inject", () => {
   test("real-account address (not in demo projects) -> 403, never inserts", async () => {
     demoScoped = false;
     insertedRow = null;
-    const res = await POST(req({ address: "1 A St, Fort Myers, FL 33901", to_state: "pending" }));
+    const res = await POST(req({ address: "1 A St, Fort Myers, FL 33901", to_state: "holding" }));
     expect(res.status).toBe(403);
     expect(insertedRow).toBeNull();
     demoScoped = true;
@@ -62,7 +62,7 @@ describe("POST /api/agent-feed/test-inject", () => {
         address: "123 Demo Ln, Fort Myers, FL 33901",
         sale_or_rent: "sale",
         from_state: "active",
-        to_state: "pending",
+        to_state: "holding",
         price_delta: -5000,
       }),
     );
@@ -74,7 +74,7 @@ describe("POST /api/agent-feed/test-inject", () => {
       address_key: "KEY:123 Demo Ln, Fort Myers, FL 33901",
       sale_or_rent: "sale",
       from_state: "active",
-      to_state: "pending",
+      to_state: "holding",
       price_delta: -5000,
       created_by: "hermes-1",
     });
@@ -83,7 +83,7 @@ describe("POST /api/agent-feed/test-inject", () => {
   test("extra field prose:'hi' -> 400, never inserts", async () => {
     insertedRow = null;
     const res = await POST(
-      req({ address: "123 Demo Ln, Fort Myers, FL 33901", to_state: "pending", prose: "hi" }),
+      req({ address: "123 Demo Ln, Fort Myers, FL 33901", to_state: "holding", prose: "hi" }),
     );
     expect(res.status).toBe(400);
     expect(insertedRow).toBeNull();
@@ -97,7 +97,34 @@ describe("POST /api/agent-feed/test-inject", () => {
   });
 
   test("missing address -> 400", async () => {
-    const res = await POST(req({ to_state: "pending" }));
+    const res = await POST(req({ to_state: "holding" }));
     expect(res.status).toBe(400);
+  });
+
+  // Review fix (MEDIUM): to_state/sale_or_rent must match the REAL vocabulary the ingest
+  // pipeline writes (route.ts's VALID_TO_STATES/VALID_SALE_OR_RENT, sourced from
+  // ingest/pipelines/listing_lifecycle/transitions.py -- RULE 0.5, not invented). Task 6's
+  // transition->recipe map keys on exact values; an unlisted to_state can never resolve to a
+  // recipe downstream, so it must be rejected here, never silently written.
+  test("to_state 'pending' (not a real pipeline state -- see VALID_TO_STATES comment) -> 400, never inserts", async () => {
+    insertedRow = null;
+    const res = await POST(
+      req({ address: "123 Demo Ln, Fort Myers, FL 33901", to_state: "pending" }),
+    );
+    expect(res.status).toBe(400);
+    expect(insertedRow).toBeNull();
+  });
+
+  test("sale_or_rent 'lease' (not in {sale,rent}) -> 400, never inserts", async () => {
+    insertedRow = null;
+    const res = await POST(
+      req({
+        address: "123 Demo Ln, Fort Myers, FL 33901",
+        to_state: "holding",
+        sale_or_rent: "lease",
+      }),
+    );
+    expect(res.status).toBe(400);
+    expect(insertedRow).toBeNull();
   });
 });

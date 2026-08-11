@@ -35,7 +35,15 @@ import { addressKey } from "@/lib/listings/address-key";
 
 const DEMO_ACCOUNT_EMAIL = process.env.DEMO_ACCOUNT_EMAIL ?? "allstatecoop@gmail.com";
 
-/** Street line = text before the first comma; ZIP = the last 5-digit run in the string
+/** Street line = text before the first comma; ZIP = the LAST 5-digit run in the string
+ *  MUST take the LAST match, not the first (review fix, was MEDIUM-HIGH). SWFL house
+ *  numbers commonly run 5 digits (Cape Coral, Golden Gate Estates grids) -- a single
+ *  non-global .match() on "12345 Ocean Blvd, Naples, FL 34102" returns the HOUSE
+ *  NUMBER (12345), not the ZIP (34102), silently computing the wrong address_key.
+ *  That corrupts every downstream consumer keyed on it: Task 3's feed payload and
+ *  Task 5's claimOnce idempotency key both trust this value verbatim. matchAll (not
+ *  .match) walks every 5-digit run; the LAST one wins because a ZIP always trails
+ *  street/city/state while a 5-digit house number always leads.
  *  (a trailing +4 is tolerated and dropped, matching address-key.ts's own ZIP
  *  normalization). Deterministic, no network call -- both the posted address and each demo
  *  project's stored subject_address run through this SAME function, so surface differences
@@ -43,8 +51,9 @@ const DEMO_ACCOUNT_EMAIL = process.env.DEMO_ACCOUNT_EMAIL ?? "allstatecoop@gmail
 export function normalizedAddressKey(address: string): string {
   const raw = String(address ?? "");
   const street = raw.split(",")[0]?.trim() ?? "";
-  const zipMatch = raw.match(/\b(\d{5})(?:-\d{4})?\b/);
-  return addressKey(street, zipMatch?.[1] ?? "");
+  const zipMatches = [...raw.matchAll(/\b(\d{5})(?:-\d{4})?\b/g)];
+  const zip = zipMatches.length > 0 ? zipMatches[zipMatches.length - 1]![1] : "";
+  return addressKey(street, zip ?? "");
 }
 
 /** Paginate auth.admin.listUsers for an exact (case-insensitive) email match. Mirrors
