@@ -44,13 +44,25 @@ async function findTokenRow(
   return row;
 }
 
-/** `Authorization: Bearer sdg_…` → the owning user_id, or null. */
+/**
+ * `Authorization: Bearer sdg_…` → the owning user_id, or null.
+ *
+ * F3 fix (hermes-email-driver final review, MEDIUM): a row whose `scope` IS NOT NULL is an
+ * agent-driver token (agent_feed_read / agent_build / agent_test_inject -- see
+ * migrations/20260810_agent_driver.sql) and must NOT open this legacy door -- the
+ * contacts/listings import routes that call resolveTokenUser were never audited against an
+ * agent-scoped token's narrow blast radius, and letting one in here would silently widen it.
+ * A legacy (pre-agent-driver) token always has `scope IS NULL` (verified live) and is
+ * completely unaffected -- this only closes a door that no real legacy token could ever have
+ * opened anyway.
+ */
 export async function resolveTokenUser(
   admin: SupabaseClient<Database>,
   authHeader: string | null,
 ): Promise<string | null> {
   const row = await findTokenRow(admin, authHeader);
-  return row?.user_id ?? null;
+  if (!row || row.scope !== null) return null;
+  return row.user_id;
 }
 
 /**

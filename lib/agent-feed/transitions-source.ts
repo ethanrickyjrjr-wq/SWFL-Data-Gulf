@@ -50,6 +50,25 @@
 // shipped without. Pushed down at the DB level, not filtered in memory after the fetch, so
 // the page cap counts only rows relevant to the caller's scope -- an unscoped caller (Hermes,
 // which wants everything) omits it and behavior is byte-identical to before this fix.
+//
+// PER-SOURCE CURSOR THRESHOLD (F1 fix, hermes-email-driver final review, was HIGH). The
+// PRECISION fix above stops the two sources from comparing at incompatible GRAINS, but the
+// keyset filter still shared ONE (at, id) pair across both source queries -- and `id` is
+// drawn from whichever source last advanced the cursor. A test row's own bigserial id has
+// no relationship to listing_transitions' IDENTITY sequence; pairing a real-table fetch's
+// `id.gt.` clause against a TEST row's id is comparing two unrelated sequences. Worse: a
+// same-CALENDAR-DATE real row that lands AFTER a test event already advanced the cursor
+// normalizes to that date's midnight -- lexically BEFORE the test event's later
+// time-of-day -- so even where the DB-level keyset happened to still return it, the route's
+// in-memory isAfterCursor (string compare on full-ISO `at`) silently dropped it, and once
+// the cursor moved past that date it was gone forever. `Cursor.realId`/`Cursor.testId`
+// (below) track each source's OWN last-served id; `keysetFilter` now takes an explicit
+// `(at, sourceId)` pair instead of reading a shared cursor, and each fetcher passes its OWN
+// source's id (falling back to the legacy shared `id` when the caller never populated a
+// per-source value -- exactly the "old cursor.json on disk" transition case). The matching
+// in-memory half of this fix (isAfterCursor's DATE-GRAIN compare for "real" events) lives in
+// the route (app/api/agent-feed/transitions/route.ts), which is where every event actually
+// gets re-checked before shipping.
 import type { SupabaseClient } from "@supabase/supabase-js";
 // KNOWN-DEBT(data_lake): listing_transitions/listing_state live in the data_lake schema,
 // which the typed Supabase client intentionally does not cover (see
@@ -61,7 +80,17 @@ import { pgOrValue } from "@/lib/supabase/pg-or-value";
 
 export interface Cursor {
   at: string;
+  /** Legacy shared id -- kept for display/back-compat (the first two `at|id` segments of
+   *  the wire-format cursor string) and as the FALLBACK threshold when a caller hasn't
+   *  populated the per-source fields below. No longer load-bearing for filter correctness
+   *  once realId/testId are set -- see the F1 fix note above. */
   id: number;
+  /** The last REAL-origin (listing_transitions) id actually served. Undefined -- falls
+   *  back to `id` (F1 fix: the legacy-cursor parse rule). */
+  realId?: number;
+  /** The last TEST-origin (agent_feed_test_events) id actually served. Undefined -- falls
+   *  back to `id`. */
+  testId?: number;
 }
 
 export interface TransitionEvent {
@@ -111,24 +140,29 @@ function toFullIso(raw: string): string {
   return Number.isNaN(d.getTime()) ? raw : d.toISOString();
 }
 
-/** The keyset predicate for "strictly after this cursor", PostgREST .or() syntax:
- *  at > cursor.at  OR  (at = cursor.at AND id > cursor.id). Undefined (no filter) when the
- *  cursor is the beginning-of-time sentinel or otherwise unusable -- the caller fetches from
- *  the start in that case.
+/** The keyset predicate for "strictly after this (at, sourceId) position", PostgREST .or()
+ *  syntax: at > at OR (at = at AND id > sourceId). Undefined (no filter) when `at` is the
+ *  beginning-of-time sentinel or `sourceId` is non-finite -- the caller fetches from the
+ *  start in that case.
  *
- *  QUOTING (review fix, round 2, was CRITICAL). cursor.at is a full ISO-8601 timestamp
+ *  F1 fix: takes an explicit `(at, sourceId)` pair instead of reading a shared `Cursor` --
+ *  each fetcher below supplies its OWN source's last-served id (falling back to the legacy
+ *  shared `Cursor.id` only when the caller never set a per-source value), so a real-table
+ *  fetch is never thresholded against a test row's unrelated id sequence, or vice versa.
+ *
+ *  QUOTING (review fix, round 2, was CRITICAL). `at` is a full ISO-8601 timestamp
  *  ("2026-08-01T00:00:00.000Z") -- it always contains the `:` and `.` characters PostgREST
  *  reserves inside .or() filters (url_grammar reserved-characters). Splicing it in unquoted
  *  breaks the filter's parse silently; both fetchers below swallow query errors
  *  (`if (error || !data) return []`), so the production failure mode was a SILENT EMPTY
  *  FEED on every cursored call -- worse than the original unpushed-down wedge it replaced.
- *  `id` is a plain integer (no reserved chars, never quoted). Reuses pgOrValue
+ *  `sourceId` is a plain integer (no reserved chars, never quoted). Reuses pgOrValue
  *  (lib/supabase/pg-or-value.ts, itself extracted from lib/project/feed.ts:100's original --
  *  that file solved this exact problem first) rather than re-deriving the quoting rule. */
-function keysetFilter(cursor: Cursor): string | undefined {
-  if (!cursor.at || !Number.isFinite(cursor.id)) return undefined;
-  const at = pgOrValue(cursor.at);
-  return `at.gt.${at},and(at.eq.${at},id.gt.${cursor.id})`;
+function keysetFilter(at: string, sourceId: number): string | undefined {
+  if (!at || !Number.isFinite(sourceId)) return undefined;
+  const q = pgOrValue(at);
+  return `at.gt.${q},and(at.eq.${q},id.gt.${sourceId})`;
 }
 
 async function fetchRealTransitions(
@@ -151,7 +185,8 @@ async function fetchRealTransitions(
   // executes) -- so a scoped caller's page cap counts only rows that pass the filter, never
   // rows the filter will discard.
   if (addressKeys && addressKeys.length > 0) query = query.in("address_key", addressKeys);
-  const filter = keysetFilter(cursor);
+  // F1 fix: this source's OWN last-served id, never the other source's.
+  const filter = keysetFilter(cursor.at, cursor.realId ?? cursor.id);
   if (filter) query = query.or(filter);
 
   const { data, error } = await query;
@@ -209,7 +244,8 @@ async function fetchTestEvents(
     .order("id", { ascending: true })
     .limit(limit);
   if (addressKeys && addressKeys.length > 0) query = query.in("address_key", addressKeys);
-  const filter = keysetFilter(cursor);
+  // F1 fix: this source's OWN last-served id, never the other source's.
+  const filter = keysetFilter(cursor.at, cursor.testId ?? cursor.id);
   if (filter) query = query.or(filter);
 
   const { data, error } = await query;
@@ -230,8 +266,10 @@ async function fetchTestEvents(
 }
 
 /** Candidate rows from BOTH sources, each already filtered strictly-after `cursor` AT THE
- *  DB LEVEL (keyset pushdown, not a loose bound) and normalized to full-ISO `at`. Unsorted
- *  across sources -- the route does the final (at,id) merge sort and page cap.
+ *  DB LEVEL (per-source keyset pushdown -- F1 fix -- not a loose bound and not a shared
+ *  cross-source id) and normalized to full-ISO `at`. Unsorted across sources -- the route
+ *  does the final (at,id) merge sort, the origin-aware isAfterCursor re-check, and the page
+ *  cap.
  *
  *  `addressKeys`, when given (H2b fix), scopes BOTH source queries to that set via
  *  `.in("address_key", keys)` BEFORE `.limit()` -- so `limit` bounds relevant rows only.

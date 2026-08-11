@@ -580,3 +580,97 @@ describe("fetchTransitionCandidates address scoping (H2b fix, real DB-query cons
     expect(events.map((e) => e.address_key)).toEqual(["any-row"]);
   });
 });
+
+// ── F1 fix (hermes-email-driver final review, was HIGH): per-source cursor threshold ──────
+// keysetFilter now takes an explicit (at, sourceId) pair -- fetchRealTransitions passes
+// cursor.realId (falling back to cursor.id when unset), fetchTestEvents passes
+// cursor.testId. This describe block proves that at the REAL DB-query-construction level
+// (same fake PostgREST builder used above, which already models date-casting via `dateCols`
+// and rejects an unquoted reserved character in .or()): the real fetch's id.gt. threshold
+// tracks ONLY cursor.realId, never cursor.id or cursor.testId, and vice versa for the test
+// fetch. The route-level in-memory half of this fix (isAfterCursor's origin-aware compare)
+// is proven separately in app/api/agent-feed/transitions/route.test.ts.
+describe("fetchTransitionCandidates per-source cursor threshold (F1 fix, real DB-query construction)", () => {
+  test("real fetch uses cursor.realId as its id.gt. threshold, NOT the shared cursor.id (which may carry a test-table id)", async () => {
+    // cursor.id (shared/legacy) is 9999 -- as if a test row's own id had last advanced the
+    // shared display pair. cursor.realId is the TRUE real-table threshold: 2. A real row
+    // with id 5 (> realId, but < the shared id) must still be fetched.
+    fakeDb = {
+      tables: {
+        listing_transitions: [realRow({ id: 5, address_key: "real-row", at: "2026-08-10" })],
+        listing_state: [],
+      },
+      dateCols: { listing_transitions: new Set(["at"]) },
+    };
+    const cursor = { at: "2026-08-10T00:00:00.000Z", id: 9999, realId: 2, testId: 9999 };
+    const events = await fetchTransitionCandidates(cursor, 50);
+    expect(events.map((e) => e.address_key)).toEqual(["real-row"]);
+  });
+
+  test("real fetch correctly EXCLUDES an already-served real row (id <= realId), even when the shared cursor.id is much lower", async () => {
+    // Inverse of the above: shared cursor.id is LOW (2), but this source's OWN realId is
+    // HIGH (10) -- a real row with id 5 (<= realId) must be excluded, proving the real
+    // fetch does not fall back to the lower shared id either.
+    fakeDb = {
+      tables: {
+        listing_transitions: [realRow({ id: 5, address_key: "already-served", at: "2026-08-10" })],
+        listing_state: [],
+      },
+      dateCols: { listing_transitions: new Set(["at"]) },
+    };
+    const cursor = { at: "2026-08-10T00:00:00.000Z", id: 2, realId: 10, testId: 2 };
+    const events = await fetchTransitionCandidates(cursor, 50);
+    expect(events.map((e) => e.address_key)).toEqual([]);
+  });
+
+  test("test fetch uses cursor.testId as its id.gt. threshold, NOT cursor.realId", async () => {
+    fakeDb = {
+      tables: {
+        listing_transitions: [],
+        listing_state: [],
+        agent_feed_test_events: [
+          {
+            id: 5,
+            address: "test row",
+            address_key: "test-row",
+            sale_or_rent: "sale",
+            from_state: "active",
+            to_state: "pending",
+            price_delta: null,
+            at: "2026-08-10T12:00:00.000Z",
+          },
+        ],
+      },
+      dateCols: { listing_transitions: new Set(["at"]) },
+    };
+    // cursor.realId is huge (9999); cursor.testId (2) is this source's true threshold.
+    const cursor = { at: "2026-08-10T12:00:00.000Z", id: 9999, realId: 9999, testId: 2 };
+    const events = await fetchTransitionCandidates(cursor, 50);
+    expect(events.map((e) => e.address_key)).toEqual(["test-row"]);
+  });
+
+  test("legacy cursor (realId/testId both undefined) falls back to the shared cursor.id for BOTH fetches", async () => {
+    fakeDb = {
+      tables: {
+        listing_transitions: [realRow({ id: 10, address_key: "real-after", at: "2026-08-10" })],
+        listing_state: [],
+        agent_feed_test_events: [
+          {
+            id: 10,
+            address: "test after",
+            address_key: "test-after",
+            sale_or_rent: "sale",
+            from_state: "active",
+            to_state: "pending",
+            price_delta: null,
+            at: "2026-08-10T12:00:00.000Z",
+          },
+        ],
+      },
+      dateCols: { listing_transitions: new Set(["at"]) },
+    };
+    const legacyCursor = { at: "2026-08-10T00:00:00.000Z", id: 9 }; // no realId/testId at all
+    const events = await fetchTransitionCandidates(legacyCursor, 50);
+    expect(events.map((e) => e.address_key).sort()).toEqual(["real-after", "test-after"]);
+  });
+});
