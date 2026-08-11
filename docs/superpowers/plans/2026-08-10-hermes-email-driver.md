@@ -73,7 +73,7 @@ CREATE TABLE IF NOT EXISTS public.agent_feed_test_events (
 
 **Interfaces:**
 - Consumes: `requireScope(req,"agent_feed_read")` (Task 2).
-- Produces JSON: `{ events: [{origin:"real"|"test", address, address_key, sale_or_rent, from_state, to_state, price_delta, at, source_name}], next_cursor: string }`. Cursor = `<at ISO>|<id>` strictly-greater paging, page cap 50. UNION of `data_lake.listing_transitions` (origin real, source_name from row) and `agent_feed_test_events` (origin test, source_name `"test-inject"`), ordered by at.
+- Produces JSON: `{ events: [{origin:"real"|"test", address, address_key, sale_or_rent, from_state, to_state, price_delta, at, source_name}], next_cursor: string }`. Cursor = `<at ISO>|<id>` strictly-greater paging, page cap 50. (AMENDED 08/10/2026 by final whole-branch review F1: the real table's `at` is DATE grain while test events are timestamptz, so a shared (at,id) cursor shadows late-arriving same-date real rows; the cursor gains OPAQUE per-source suffixes `|r:<lastRealId>|t:<lastTestId>`, each source keysets on its own (at, own-id) at its own grain; legacy 2-segment cursors parse compatibly. Consumers always treat the cursor as opaque.) UNION of `data_lake.listing_transitions` (origin real, source_name from row) and `agent_feed_test_events` (origin test, source_name `"test-inject"`), ordered by at.
 
 - [ ] **Step 1: Failing tests** — empty feed → `{events:[],next_cursor:<same>}`; rows after cursor only; test rows stamped origin test; wrong-scope token → 403.
 - [ ] **Step 2: Run, fail. Step 3: Implement route. Step 4: Green.**
