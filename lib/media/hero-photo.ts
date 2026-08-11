@@ -43,9 +43,16 @@ export interface MirrorHeroDeps {
   upload?: (key: string, buf: Buffer, contentType: string) => Promise<string>;
 }
 
+/** A hero download that stalls must not stall the BUILD — this mirror sits inline
+ *  in every listing email's build path (twice, in the worst case), and an unbounded
+ *  fetch against a third-party CDN was one of the ways a lab build could sit on
+ *  "Working…" for minutes (operator, 08/10/2026). Deadline hit → null → the caller
+ *  keeps the original remote URL, the exact degrade this module already promises. */
+const FETCH_TIMEOUT_MS = 8_000;
+
 async function defaultFetchImage(url: string): Promise<FetchedImage | null> {
   try {
-    const res = await fetch(url);
+    const res = await fetch(url, { signal: AbortSignal.timeout(FETCH_TIMEOUT_MS) });
     if (!res.ok) return null;
     const contentType = res.headers.get("content-type") ?? "";
     if (!contentType.startsWith("image/")) return null;

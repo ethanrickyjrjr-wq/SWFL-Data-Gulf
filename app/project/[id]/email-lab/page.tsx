@@ -217,6 +217,7 @@ export default async function ProjectEmailLabPage({
         (seqRow as import("@/components/email-lab/ArcStrip").ArcSequence | null) ?? null
       }
       arcStep={arcStep}
+      arrivalAddr={arrivalAddr}
       subjectAddress={project.subject_address ?? null}
       subjectArea={project.subject_area ?? null}
       seedId={seedId}

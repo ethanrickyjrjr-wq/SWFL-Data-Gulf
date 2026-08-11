@@ -19,6 +19,7 @@ import { isRecipeKey } from "@/lib/deliverable/recipes";
 import { openSeed, projectEmailLabBase } from "@/lib/lab-entry/destination";
 import { planArrival } from "@/lib/lab-entry/arrival";
 import { reconcileAddress } from "@/lib/lab-entry/address-reconcile";
+import { listingProjectRequestBody } from "@/lib/lab-entry/create-listing-project";
 import { seedFillPrompt } from "@/lib/lab-entry/seed-fill-prompt";
 import { useLeaveGuard } from "@/lib/lab-entry/use-leave-guard";
 import { ProjectConfirmPopup } from "@/components/lab-entry/ProjectConfirmPopup";
@@ -57,6 +58,11 @@ export function EmailLabGridClient({
   refCode?: string | null;
   signedIn: boolean;
   offeredProject: { id: string; title: string } | null;
+  /** The signed-in account's recent projects (id/title/subject_address) — the
+   *  address-first door routes a typed address into the project that already
+   *  owns it instead of minting a duplicate row (the confirm popup that used to
+   *  let the user redirect is suppressed on that door). */
+  knownProjects?: { id: string; title: string | null; subject_address: string | null }[];
 }) {
   const initialRecipe: ShowcaseRecipe | null = recipe
     ? {
@@ -86,7 +92,10 @@ export function EmailLabGridClient({
       subjectAddress: null,
       subjectArea: null,
       recipeHasBlank: Boolean(recipeBlank),
-      recipeInputKind: recipeBlank ? "address" : null,
+      // The recipe's DECLARED subject kind (address vs area), not a hardcoded
+      // "address" — the planner's address-first decision depends on it.
+      recipeInputKind:
+        recipeBlank && initialRecipe ? (inputKindForRecipe(initialRecipe) ?? "address") : null,
       seedSubject: arrivalSeed?.subject ?? null,
       seedBlankChosen: Boolean(seedBlankChosen),
       // Signed-in + no recipe/zip/seed/did = a plain "New Campaign" open — show the gallery
@@ -148,17 +157,12 @@ export function EmailLabGridClient({
   // (title + kind:listing + subject_address), and the hop carries ?addr= so the
   // in-project arrival auto-builds with no second popup. The old flow asked for
   // a generic "project name", then asked for the address AGAIN inside the
-  // project — the address was typed twice for one build.
-  // Scoped to ADDRESS-subject recipes only — an area/ZIP recipe's subject is not
-  // a project identity, so it keeps the confirm-then-ask flow.
-  const addressFirst =
-    signedIn &&
-    plan.addressPopup &&
-    (initialRecipe ? (inputKindForRecipe(initialRecipe) ?? "address") : null) === "address";
+  // project — the address was typed twice for one build. The decision lives in
+  // planArrival (the ONE controller, spec §A2), which already suppresses
+  // projectConfirm for this door.
+  const addressFirst = plan.addressFirst;
   const [confirmOpen, setConfirmOpen] = useState(
-    showGallery
-      ? offeredProject != null
-      : (plan.projectConfirm || signedInSeedHop) && !addressFirst,
+    showGallery ? offeredProject != null : plan.projectConfirm || signedInSeedHop,
   );
   const [targetProject, setTargetProject] = useState(offeredProject);
   // ASK FOR THE ADDRESS, ALWAYS. This used to be `plan.addressPopup && !signedIn` on
@@ -223,14 +227,33 @@ export function EmailLabGridClient({
     setAddressOpen(false);
     setCreating(true);
     try {
-      if (offeredProject && reconcileAddress(address, offeredProject.title).kind === "match") {
-        intoProject(offeredProject.id, address);
+      // Route into the project that already owns this address — matched on
+      // subject_address first (the real belief), then title (projects are titled
+      // by address on this door). Without this, every rebuild for a known address
+      // would mint a duplicate project row.
+      const owned = (knownProjects ?? []).find(
+        (p) =>
+          reconcileAddress(address, p.subject_address).kind === "match" ||
+          reconcileAddress(address, p.title).kind === "match",
+      );
+      if (owned) {
+        // Title matched but subject_address was never persisted (a project named
+        // by address in the old generic form) — backfill it so the comps/campaign
+        // lanes work on the NEXT visit too, not just while ?addr= rides.
+        if (!owned.subject_address) {
+          void fetch(`/api/projects/${owned.id}`, {
+            method: "PATCH",
+            headers: { "content-type": "application/json" },
+            body: JSON.stringify({ subject_address: address }),
+          }).catch(() => {});
+        }
+        intoProject(owned.id, address);
         return;
       }
       const res = await fetch("/api/projects", {
         method: "POST",
         headers: { "content-type": "application/json" },
-        body: JSON.stringify({ title: address, kind: "listing", subject_address: address }),
+        body: JSON.stringify(listingProjectRequestBody(address)),
       });
       const data = (await res.json().catch(() => null)) as { id?: string } | null;
       if (data?.id) intoProject(data.id, address);

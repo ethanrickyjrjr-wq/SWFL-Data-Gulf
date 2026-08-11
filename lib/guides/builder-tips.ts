@@ -1,6 +1,10 @@
 import { EMAIL_LAB_LANDING } from "@/lib/lab-entry/destination";
-import { SEED_PREVIEWS } from "@/lib/email/doc/seed-previews";
+import { NEW_EMAIL_CATEGORIES } from "@/lib/email/new-email-captures";
 import type { GuideDef, GuideSection } from "./types";
+
+// Every email in the one registry-backed showcase (decree 08/10/2026 — the old
+// seed-layout gallery is gone; /showcase and the lab picker show ONLY these).
+const EMAIL_COUNT = NEW_EMAIL_CATEGORIES.reduce((n, c) => n + c.keys.length, 0);
 
 /**
  * Guide 3 — hidden builder features (spec §5, strand 3). Every tip verified in
@@ -66,11 +70,11 @@ const TIPS: GuideSection[] = [
   },
   {
     id: "starting-layouts",
-    heading: `${SEED_PREVIEWS.length} starting layouts, already filled`,
+    heading: `${EMAIL_COUNT} emails, already built with real data`,
     body: [
-      "The showcase holds every layout filled with live Southwest Florida figures, so you see what each becomes before you pick it. Start from one and the AI refills it with your area, your brand, your voice.",
+      "The showcase holds every email we build, rendered exactly as it sends — real Southwest Florida figures at every step. Pick one and the AI rebuilds it with your listing, your brand, your voice.",
     ],
-    tryIt: { label: "Browse the layouts", href: "/showcase" },
+    tryIt: { label: "Browse the emails", href: "/showcase" },
   },
   {
     id: "undo-redo",
@@ -94,7 +98,7 @@ export const BUILDER_TIPS: GuideDef = {
   kind: "tips",
   description:
     "Small features that don't get a tour — image links, self-previews, PDF twins, and more.",
-  cardImage: "/showcase/seed-previews/agent-spotlight.webp",
+  cardImage: "/new-emails/agent-brand-intro-email.webp",
   hook: "The builder does a lot quietly. These are the features people find in week three and wish they'd known on day one.",
   expect: [],
   sections: TIPS,

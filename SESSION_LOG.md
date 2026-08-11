@@ -1,3 +1,56 @@
+## 2026-08-10 (Fable 5) — OLD EMAILS OUT OF THE IN-PROJECT PICKER: first-run gallery now shows ONLY the new-email registry
+
+Operator (screenshot, /project/f8f25fd5-79e/email-lab): "we need the fucking old emails out!!!
+everything is only the fucking new emails!!! why does this still exist!!!" The "Pick a starting
+point" gallery was the LAST user-visible surface of the purged-era email designs — the 08/10
+/showcase purge kept public/showcase/seed-previews/** as "lab template-picker thumbnails," which
+is exactly the door the old look survived through. FIXED (5 of 7 parts; NOT pushed — per-push
+approval): (1) NEW ONE-ROOT module lib/email/new-email-captures.ts (key→/new-emails/*.html
+capture map + categories) now feeds BOTH /showcase NewEmails and the picker — the two can't
+drift again. (2) TemplateGallery rewritten: 16 registry emails (8 lifecycle / 7 agent&community /
+1 recurring), iframe capture thumbnails, keys without captures get labelled holders; picks
+navigate the recipe build lane via recipeDestination (?recipe&rkey&recipeNeeds — the page already
+handles the arrival). SEED_DOCS/seed-previews cards GONE. (3) Guides: email-design's 3 figures +
+3 guide cardImages were old-email screenshots — replaced with FRESH webp captures of the real
+registry artifacts (public/new-emails/{new-listing,just-sold,market-pulse,agent-brand-intro}
+-email.webp, baked off the prod build at true 600px); stale "N starting layouts" tip rewritten to
+the registry count. EVIDENCE: bunx next build exit 0; bun test gallery 5/5 + guides 8/8 +
+seed-previews 4/4; /showcase driven live on prod build (localhost:3241) — new emails only.
+NOT DONE (claim-blocked, live parallel sessions hold the files; checks opened):
+old_emails_picker_host_cleanup (ProjectEmailLabClient + EmailLabGridClient still pass the
+deprecated onPick — an interim compat prop + useParams self-nav fallback in TemplateGallery keeps
+them compiling AND picking correctly meanwhile; signed-in picker screenshot also owed, browser
+profile locked) and gridshell_seed_thumbnails_old_look (EmailLabGridShell "Start from a layout"
+rail still renders old-look SEED_PREVIEWS thumbnails; name-only-tile fix ready). Session net:
++2 checks opened, 0 closed — both name a live-session file claim as the specific blocker.
+
+## 2026-08-10 (Fable 5) — ADDRESS-FIRST LAB ARRIVAL: "address IS the project name" decree wired end to end
+
+Operator (screenshots): showcase → New Listing asked for a generic "project name" (he typed the
+address), a native "Leave site?" fired on OUR OWN hop into the project, then the project lab asked
+for the address AGAIN. Decree: build → address → enter → built, in the lab. THAT'S IT.
+FIXED (6 files): (1) planArrival gains addressFirst — signed-in standalone + address-subject recipe
+suppresses projectConfirm; the ONE popup is the address (lib/lab-entry/arrival.ts, the ONE
+controller, so the decision is planner-tested, not component-inlined). (2) EmailLabGridClient:
+AddressPopup Build routes the typed address into the recent project that already owns it (matched
+on subject_address then title across knownProjects, backfilling a NULL subject_address) or creates
+a listing project titled by the address via the existing listingProjectRequestBody root; hop
+carries ?addr=. (3) useLeaveGuard gains bypass() — our own confirmed hard hops no longer raise the
+browser's "Leave site?". (4) project email-lab page passes ?addr= into planArrival (it always
+supported addr; it was never passed) so the second popup dies, and buildPrompt initializes filled
+→ the shell auto-builds on first mount. (5) grid/page.tsx: zero-project accounts with an
+address-recipe get the same address-first door instead of AutoCreateProject's untitled
+kind:general row; passes knownProjects (last 50). (6) lab-entry-root plan doc amended.
+EVIDENCE: bun test lib/lab-entry 52 pass / 0 fail (3 new planner tests incl. area-recipe unchanged
++ in-project ?addr= no-popup); bunx next build exit 0 (first round; second round pending at
+entry-write time). Second-order audit ran (agent a75d6b24): dup-project + subject_address-backfill
++ zero-project findings FIXED above; deferred with check addr_arrival_autobuild_leaveguard = mount
+auto-build re-arms Leave-site one page downstream (needs auto-save-vs-skip-dirty decision + shell
+held by parallel session). Known: reload of a ?addr= URL re-fires one build (kept — stripping the
+param would strand an unsaved built email); ?addr= flow NOT yet driven in a live browser.
+Checks: +1 open (addr_arrival_autobuild_leaveguard), 0 closed — net +1, the deferral is real:
+operator decision + contested file. NOT pushed — awaiting operator confirmation.
+
 ## 2026-08-10 (Fable 5) — /go SHIPPED THE OLD EMAIL LOOK: serif seed + wrong terminal surface, both fixed and driven live
 
 Operator: "HOW ARE WE STILL DESIGNING EMAILS DIFFERENTLY... I SAW SPACES IN BETWEEN COLORS LIKE THE

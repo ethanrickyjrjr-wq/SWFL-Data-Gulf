@@ -53,14 +53,34 @@ export async function runGuardedApifyActor(run: GuardedApifyRun): Promise<unknow
     return [];
   }
 
-  const res = await fetch(
-    `https://api.apify.com/v2/acts/${run.actorId}/run-sync-get-dataset-items?token=${token}`,
-    {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(run.input),
-    },
-  );
+  // ── THE DEADLINE ─────────────────────────────────────────────────────────────
+  // run-sync holds the HTTP line open until the actor finishes — the vendor caps
+  // that at ~300s, and this fetch used to wait it out with no bound of its own,
+  // which is how a lab build sat on "Working…" for 7 minutes (operator, 08/10/2026)
+  // with nothing on screen and nothing in the logs. `timeout=` caps the RUN on the
+  // vendor's side; the abort signal caps OUR wait a beat longer so the two can't
+  // deadlock. A deadline hit degrades to [] LOUDLY, same contract as every other
+  // failure here — never a silent multi-minute hang inside an interactive build.
+  const RUN_TIMEOUT_SECS = 90;
+  let res: Response;
+  try {
+    res = await fetch(
+      `https://api.apify.com/v2/acts/${run.actorId}/run-sync-get-dataset-items?token=${token}&timeout=${RUN_TIMEOUT_SECS}`,
+      {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(run.input),
+        signal: AbortSignal.timeout((RUN_TIMEOUT_SECS + 15) * 1000),
+      },
+    );
+  } catch (err) {
+    console.error(
+      `[apify-run] VENDOR CALL DID NOT COMPLETE within ${RUN_TIMEOUT_SECS}s (${run.actorId}) — ` +
+        `aborted so the build can finish instead of hanging. This is NOT "no results": ` +
+        `${err instanceof Error ? err.message : String(err)}`,
+    );
+    return [];
+  }
   if (!res.ok) {
     // *** A VENDOR REFUSAL IS NOT "NO RESULTS." *** Measured live 08/04/2026: an
     // HTTP 403 monthly-hard-limit returned as a bare [] made an exhausted ACCOUNT

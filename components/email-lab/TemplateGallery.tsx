@@ -1,65 +1,114 @@
 "use client";
-// components/email-lab/TemplateGallery.tsx — Lane E first-run empty state.
+// components/email-lab/TemplateGallery.tsx — Lane E first-run picker.
 //
-// Full-pane pick-a-template gallery shown by ProjectEmailLabClient when the
-// Email tool opens with no doc and no built deliverable. Cards are the SAME
-// committed filled-preview captures /showcase browses (SEED_PREVIEWS manifest,
-// job-grouped) — a new-project user sees what each template BECOMES, then
-// picking commits the honest slot-rule skeleton via onPick → seed.build().
-// Drift is guarded mechanically: seed-previews.test.ts fails when a template
-// edit ships without a re-capture. Pure UI state — nothing is persisted; once
-// a deliverable exists the client never shows this again.
+// THE OLD SEED GALLERY IS GONE — operator decree 08/10/2026: "we need the old
+// emails out — everything is only the new emails." This picker surfaces the
+// SAME registry emails /showcase shows (lib/email/new-email-captures.ts, the
+// re-baked public/new-emails/*.html captures) — one registry, one look. Never
+// re-add SEED_DOCS / seed-previews cards here; that gallery was the last
+// user-visible surface of the purged-era email designs.
+//
+// Picking hands the RECIPE KEY to the host, which navigates through
+// recipeDestination (the ONE nav root) into the recipe build lane. Nothing
+// here seeds a doc or builds — pure UI.
 import type { ReactNode } from "react";
-import { SEED_DOCS, type SeedDoc } from "@/lib/email/doc/default-docs";
-import { SEED_PREVIEW_GROUPS, seedPreviewsFor } from "@/lib/email/doc/seed-previews";
+import { useParams } from "next/navigation";
+import { RECIPES, type RecipeKey } from "@/lib/deliverable/recipes";
+import type { SeedDoc } from "@/lib/email/doc/default-docs";
+import { recipeDestination } from "@/lib/showcase/recipe";
+import { NEW_EMAIL_CATEGORIES, NEW_EMAIL_FILE_FOR_KEY } from "@/lib/email/new-email-captures";
 
-function SeedCard({
-  seed,
-  image,
+function RecipeCard({
+  recipeKey,
   onPick,
 }: {
-  seed: SeedDoc;
-  image: string;
-  onPick: (seed: SeedDoc) => void;
+  recipeKey: RecipeKey;
+  onPick: (k: RecipeKey) => void;
 }) {
+  const label = RECIPES[recipeKey].label;
+  const src = NEW_EMAIL_FILE_FOR_KEY[recipeKey];
   return (
     <button
       type="button"
-      onClick={() => onPick(seed)}
-      className="group w-full overflow-hidden rounded-xl border border-white/10 bg-white/[0.02] text-left transition-all hover:border-gulf-teal/60 hover:bg-gulf-teal/[0.06] focus:outline-none focus:ring-2 focus:ring-gulf-teal/40"
+      onClick={() => onPick(recipeKey)}
+      className="group w-64 shrink-0 snap-start overflow-hidden rounded-xl border border-white/10 bg-white/[0.02] text-left transition-all hover:border-gulf-teal/60 hover:bg-gulf-teal/[0.06] focus:outline-none focus:ring-2 focus:ring-gulf-teal/40"
     >
-      {/* eslint-disable-next-line @next/next/no-img-element -- committed static capture, top crop */}
-      <img src={image} alt="" className="h-52 w-full object-cover object-top" loading="lazy" />
+      {src ? (
+        <div className="relative h-48 w-full overflow-hidden bg-white">
+          {/* scrolling="no" is load-bearing: without it, content taller than the
+              iframe grows a scrollbar that steals ~17px of the 600px canvas and
+              re-wraps the spec strips (which fit 600 EXACTLY). The thumbnail
+              must be the sent email, not a squeezed variant (operator, 08/09/2026). */}
+          <iframe
+            src={src}
+            title={label}
+            tabIndex={-1}
+            scrolling="no"
+            style={{
+              width: "600px",
+              height: "1600px",
+              transform: "scale(0.4267)",
+              transformOrigin: "top left",
+              pointerEvents: "none",
+              border: "none",
+              overflow: "hidden",
+            }}
+          />
+        </div>
+      ) : (
+        // No rendered capture yet — the recipe is real and builds (RECIPE_BUILDERS
+        // has all 17); a labelled holder, never a fabricated preview.
+        <div className="flex h-48 w-full flex-col items-center justify-center bg-white/[0.03] px-3 text-center">
+          <span className="text-[10px] uppercase tracking-[0.15em] text-white/30">
+            Preview coming
+          </span>
+        </div>
+      )}
       <div className="border-t border-white/10 px-3 py-2.5">
         <p className="text-sm font-medium leading-tight text-white/85 group-hover:text-white">
-          {seed.name}
+          {label}
         </p>
-        <p className="mt-0.5 text-xs leading-snug text-white/40">{seed.description}</p>
       </div>
     </button>
   );
 }
 
 export function TemplateGallery({
-  onPick,
+  onPickRecipe,
   onStartBlank,
   heroSlot,
 }: {
-  onPick: (seed: SeedDoc) => void;
+  /** The host navigates via recipeDestination(RECIPES[key], …) — full page
+   *  load, so the arrival plan re-runs with the recipe (same reason the
+   *  standalone lab uses window.location.assign). When omitted, the gallery
+   *  self-navigates using the /project/[id] route param (interim: both hosts
+   *  were claimed by live parallel sessions at rewrite time, 08/10/2026). */
+  onPickRecipe?: (key: RecipeKey) => void;
   onStartBlank: () => void;
-  /** Rendered between the page header and the template groups — the Listing Campaign hero
-   *  (spec 2026-07-15-gallery-listing-hero-design.md) uses this; the gallery itself stays
-   *  decoupled from listing specifics. */
+  /** DEPRECATED, ignored — the old seed-gallery pick. Accepted only so the
+   *  claimed hosts keep compiling until their invocations are updated. */
+  onPick?: (seed: SeedDoc) => void;
+  /** Rendered between the page header and the email rows — the Listing Campaign
+   *  hero (spec 2026-07-15-gallery-listing-hero-design.md) uses this; the
+   *  gallery itself stays decoupled from listing specifics. */
   heroSlot?: ReactNode;
 }) {
+  // Fallback pick lane while hosts still pass the deprecated onPick: navigate
+  // through the ONE nav root, scoped to the project when the route carries one.
+  const params = useParams<{ id?: string }>();
+  const pick =
+    onPickRecipe ??
+    ((key: RecipeKey) => {
+      window.location.assign(recipeDestination(RECIPES[key], { projectId: params?.id ?? null }));
+    });
   return (
     <div className="mx-auto w-full max-w-5xl px-6 py-10">
       <div className="flex flex-wrap items-end justify-between gap-3">
         <div>
           <h1 className="text-xl font-semibold text-white">Pick a starting point</h1>
           <p className="mt-1 text-sm text-white/50">
-            Shown filled with live Southwest Florida data — you start from the clean layout and the
-            AI fills it with your area&rsquo;s real figures.
+            Every email we build, shown as it actually sends — pick one and the AI builds it with
+            your listing&rsquo;s real figures.
           </p>
         </div>
         <button
@@ -73,28 +122,21 @@ export function TemplateGallery({
 
       {heroSlot}
 
-      {SEED_PREVIEW_GROUPS.map((g) => {
-        const previews = seedPreviewsFor(g.key);
-        if (previews.length === 0) return null;
-        return (
-          <section key={g.key} className="mt-10 first-of-type:mt-6">
-            <h2 className="text-sm font-semibold text-white/85">
-              {g.title}
-              <span className="ml-2 text-xs font-normal text-white/40">
-                {previews.length} {previews.length === 1 ? "layout" : "layouts"}
-              </span>
-            </h2>
-            <p className="mt-0.5 text-xs text-white/40">{g.pitch}</p>
-            <div className="mt-3 grid grid-cols-2 gap-4 md:grid-cols-3 xl:grid-cols-4">
-              {previews.map((p) => {
-                const seed = SEED_DOCS.find((s) => s.id === p.id);
-                if (!seed) return null;
-                return <SeedCard key={p.id} seed={seed} image={p.image} onPick={onPick} />;
-              })}
-            </div>
-          </section>
-        );
-      })}
+      {NEW_EMAIL_CATEGORIES.map((cat) => (
+        <section key={cat.id} className="mt-10 first-of-type:mt-6">
+          <h2 className="text-sm font-semibold text-white/85">
+            {cat.title}
+            <span className="ml-2 text-xs font-normal text-white/40">
+              {cat.keys.length} {cat.keys.length === 1 ? "email" : "emails"}
+            </span>
+          </h2>
+          <div className="mt-3 flex flex-wrap gap-4">
+            {cat.keys.map((key) => (
+              <RecipeCard key={key} recipeKey={key} onPick={pick} />
+            ))}
+          </div>
+        </section>
+      ))}
     </div>
   );
 }

@@ -46,6 +46,12 @@ export interface ArrivalPlan {
   doc: DocChoice;
   projectConfirm: boolean;
   addressPopup: boolean;
+  /** ADDRESS-FIRST (operator decree 08/10/2026): a signed-in standalone arrival
+   *  with an address-subject recipe gets ONE question — the address, which IS
+   *  the project (title + kind:listing + subject_address). Suppresses the
+   *  project confirm; the client routes/creates by address and hops carrying
+   *  ?addr= so the in-project arrival builds with no second popup. */
+  addressFirst: boolean;
   autoBuildAfterConfirm: boolean;
   legacyAutoGenerate: false;
   /** Capture-or-blank verdict for a seed arrival (spec 2026-07-16); null on
@@ -65,6 +71,7 @@ export function planArrival(input: ArrivalInput): ArrivalPlan {
       doc: { kind: "load-did", did: params.did! },
       projectConfirm: false,
       addressPopup: false,
+      addressFirst: false,
       ...dead,
       seedStart: null,
     };
@@ -86,6 +93,7 @@ export function planArrival(input: ArrivalInput): ArrivalPlan {
       doc: { kind: "seed", seedId: params.seed! },
       projectConfirm: false,
       addressPopup: seedStart?.mode === "ask",
+      addressFirst: false,
       autoBuildAfterConfirm: seedStart?.mode === "build",
       legacyAutoGenerate: false,
       seedStart,
@@ -108,6 +116,7 @@ export function planArrival(input: ArrivalInput): ArrivalPlan {
       doc: { kind: "zip", zip: params.zip! },
       projectConfirm,
       addressPopup: false,
+      addressFirst: false,
       ...dead,
       seedStart: null,
     };
@@ -120,10 +129,16 @@ export function planArrival(input: ArrivalInput): ArrivalPlan {
     // param already answers it). The hero slices its typed address INTO the
     // prompt before navigating, so a real hero arrival has no remaining blank.
     const addressPopup = input.recipeHasBlank && !addrPreFilled;
+    // ADDRESS-FIRST (decree 08/10/2026): scoped to ADDRESS-subject recipes only —
+    // an area/ZIP recipe's subject is not a project identity, so it keeps the
+    // confirm-then-ask flow. Suppresses the confirm: the ONE question is the address.
+    const addressFirst =
+      addressPopup && input.signedIn && !input.insideProject && input.recipeInputKind === "address";
     return {
       doc: { kind: "blank" },
-      projectConfirm,
+      projectConfirm: projectConfirm && !addressFirst,
       addressPopup,
+      addressFirst,
       // Ready to build the moment the project is confirmed: a recipe with no
       // remaining blank (hero pre-filled, or the recipe never had one). A recipe
       // still holding a blank waits for the popup's Build instead.
@@ -138,6 +153,7 @@ export function planArrival(input: ArrivalInput): ArrivalPlan {
     doc: input.firstRunGalleryEligible ? { kind: "gallery" } : { kind: "blank" },
     projectConfirm: false,
     addressPopup: false,
+    addressFirst: false,
     ...dead,
     seedStart: null,
   };

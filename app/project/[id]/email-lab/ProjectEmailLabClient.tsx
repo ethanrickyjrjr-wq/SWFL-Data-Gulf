@@ -63,6 +63,11 @@ interface Props {
   initialSequence?: ArcSequence | null;
   /** ?arcStep= — a save in this lab session records its deliverable on that step. */
   arcStep?: string | null;
+  /** ?addr= — the address the arrival already collected (grid address-first door,
+   *  hero, differ→new hop). Suppresses the address popup and builds immediately:
+   *  asking again for an address typed one page earlier was the 08/10/2026 decree
+   *  violation ("we need the address BEFORE we land on email lab"). */
+  arrivalAddr?: string | null;
   /** Listing projects (subject_address set) get the arm CTA when no arc exists. */
   subjectAddress?: string | null;
   /** The project's remembered market area (projects.subject_area) — area twin of
@@ -93,6 +98,7 @@ export function ProjectEmailLabClient({
   projectPhotos,
   initialSequence,
   arcStep,
+  arrivalAddr,
   subjectAddress,
   subjectArea,
   seedId,
@@ -139,6 +145,9 @@ export function ProjectEmailLabClient({
         did: deliverableId,
         seed: arrivalSeedId,
         recipe: initialRecipe?.prompt ?? null,
+        // The planner already treats a pre-answered address as "no popup" — this
+        // param was simply never passed in-project, so ?addr= arrivals re-asked.
+        addr: arrivalAddr ?? null,
       },
       signedIn: true,
       offeredProject: { id: projectId, title: projectTitle },
@@ -180,7 +189,18 @@ export function ProjectEmailLabClient({
   // Remount-build: the grid shell fires ONE build off initialAiPrompt on mount.
   // To build a filled recipe (the address popup's Build), we set buildPrompt and
   // bump buildKey to remount the grid shell with autoGenerate.
-  const [buildPrompt, setBuildPrompt] = useState<string | null>(null);
+  // An arrival that already carries the address (?addr= — grid address-first door,
+  // hero, differ→new) fills the blank NOW: the first mount builds, no popup, no
+  // second ask (decree 08/10/2026).
+  const [buildPrompt, setBuildPrompt] = useState<string | null>(() => {
+    const v = (arrivalAddr ?? "").trim();
+    if (!v || !initialRecipe || !recipeBlank) return null;
+    return (
+      initialRecipe.prompt.slice(0, recipeBlank.start) +
+      v +
+      initialRecipe.prompt.slice(recipeBlank.end)
+    );
+  });
   const [buildKey, setBuildKey] = useState(0);
   // Capture-or-blank (spec 2026-07-16): what the picked template still needs
   // before it can build — the subject ask or the fill-or-blank choice. The seed
@@ -371,6 +391,9 @@ export function ProjectEmailLabClient({
       if (initialRecipe.needs.length > 0) params.set("recipeNeeds", initialRecipe.needs.join(","));
     }
     params.set("addr", address);
+    // User-confirmed hop — disarm beforeunload so the browser doesn't throw its
+    // native "Leave site?" dialog at our own navigation.
+    guard.bypass();
     window.location.href = `${projectEmailLabBase(data.id)}?${params.toString()}`;
   }
 

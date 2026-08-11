@@ -1,9 +1,33 @@
+## 2026-08-10 (Fable 5) — OPERATOR: "we need the fucking old emails out!!! everything is only the new emails!!! why does this still exist!!!" — project email-lab picker still shows OLD layout gallery
+Screenshot: /project/f8f25fd5-79e/email-lab "Pick a starting point" — "Listing & event · 7 layouts"
+(Just Sold, Listing Feature, New Listing, Open House Invite, price-drop, etc.) with old-look
+thumbnails (brown/orange/navy headers). Same shape as "WE JUST DELETED ALL OTHER EMAILS BUT THE
+NEW EMAILS WE MADE" (dead-style-reenters-through-unwatched-door / didnt-delete-everywhere): the
+old skeleton/template gallery still feeds the in-project picker. Fixing this session: picker must
+surface ONLY the new-email registry.
+STATUS same session: FIXED IN TREE, NOT PUSHED (per-push approval). TemplateGallery rewritten to
+the 16 registry emails off ONE shared module (lib/email/new-email-captures.ts, also feeds
+/showcase NewEmails); picks navigate the recipe build lane via recipeDestination; guides' old
+email screenshots swapped for fresh new-email webp captures; stale "45 starting layouts" tip
+rewritten. bunx next build exit 0; /showcase driven live clean. Claim-blocked remainder (2 live
+parallel sessions hold the 3 host files) → checks old_emails_picker_host_cleanup +
+gridshell_seed_thumbnails_old_look (the sidebar "Start from a layout" rail still shows old-look
+thumbnails until f9b79556 releases EmailLabGridShell.tsx).
+
 ## 2026-08-10 (Fable 5) — OPERATOR: "HOW FUCKING LONG DOES IT TAKE TO BUILD A FUCKING EMAIL????? IT'S BEEN 7 FUCKING MINUTES"
 Screenshot: 326 Shore Dr, Fort Myers 33905 New Listing build stuck on "Working…" with a still-empty
 skeleton canvas after 7 minutes. Diagnosing where the wall-clock goes in the lab AI build path
 (app/api/email-lab/ai + the new apify property-lookup lane) this session — a build must either
 finish in seconds or fail loudly; a silent 7-minute spinner is a defect regardless of what it's
 waiting on.
+FOLLOW-UP, same night: "why would we have a paid photo run for photos we already fucking have????"
+— my report said "paid" and "photo" in the same breath and read as a rung-skip. CLARIFIED: there is
+NO paid photo fetch. The slow step was the FREE copy of the listing's own photo into our storage
+(so re-sends don't depend on the vendor's image host), now capped at 8s. The only paid call in the
+lane is the by-address record buy from the 08/10 storefront decree, fires ONLY when our free data
+missed AND no already-bought row exists, and is behind the spend switch (off locally — it refused
+instantly on his run). Ladder intact: free first, cache second, paid last. Lesson for reports:
+never let "paid" and "photo" share a sentence unless money actually moved.
 
 ## 2026-08-10 (Fable 5) — OPERATOR: "we need to get the fucking address BEFORE we land on email lab. address IS the project name. build → address → enter → built, in the lab. THAT'S IT."
 Showcase-build → New Listing asked for a generic "project name" (he typed the address), then a

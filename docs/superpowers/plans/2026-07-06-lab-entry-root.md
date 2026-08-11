@@ -5,6 +5,15 @@
 
 **Goal:** Give every door into the email lab one arrival path — blank skeleton → (signed-in) project confirm → address/area popup → Build — and make in-lab work impossible to lose silently.
 
+> **AMENDED 08/10/2026 (operator decree — "address IS the project name"):** for a signed-in
+> standalone arrival with an ADDRESS-subject recipe, the project confirm is SUPPRESSED
+> (`planArrival` returns `addressFirst: true`, `projectConfirm: false`). The ONE question is the
+> address popup; the typed address becomes the project (title + kind:listing + subject_address, or
+> routes into the recent project that already owns it, matched on subject_address/title), and the
+> hop carries `?addr=` so the in-project arrival auto-builds with no second popup. `useLeaveGuard`
+> gained `bypass()` so our own confirmed hard hops never raise the native "Leave site?" dialog.
+> Area-subject recipes, seeds, gallery, hero, and anonymous arrivals keep the flow described below.
+
 **Architecture:** Two pure-logic modules under `lib/lab-entry/` are the root: `destination.ts` (the ONE URL builder every navigating door calls) and `arrival.ts` (the ONE pure planner both lab clients call to decide doc + popups + auto-build). Two shared popup components (`ProjectConfirmPopup`, `AddressPopup`) are driven by the arrival plan and mounted by both clients. Save safety is three cooperating pieces: debounced autosave, a `pagehide`/`visibilitychange` flush, and a leave guard combining `nextjs-nav-guard` (internal App Router nav) with a dirty-only `beforeunload` (tab close). Everything routes `"both"` in the tier dial — free and paid get identical entry + safety.
 
 **Tech Stack:** Next.js 16.2.9 App Router (RSC + client components), React 19.2.7, TypeScript, Zod v4, Bun test, `nextjs-nav-guard` (new dep), Tailwind, Supabase.

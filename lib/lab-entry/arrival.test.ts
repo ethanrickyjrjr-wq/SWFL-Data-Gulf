@@ -59,7 +59,7 @@ describe("planArrival", () => {
     expect(p.autoBuildAfterConfirm).toBe(true);
   });
 
-  test("?recipe= signed-in standalone → BLANK skeleton + confirm + address popup", () => {
+  test("?recipe= signed-in standalone, ADDRESS subject → ADDRESS-FIRST: one popup, NO project confirm (decree 08/10/2026)", () => {
     const p = planArrival({
       ...base,
       params: { recipe: "Just listed [[your listing address]]" },
@@ -67,10 +67,37 @@ describe("planArrival", () => {
       recipeInputKind: "address",
     });
     expect(p.doc).toEqual({ kind: "blank" });
-    expect(p.projectConfirm).toBe(true);
+    // The address IS the project name — the generic project-name confirm is
+    // suppressed; the client routes/creates by the typed address.
+    expect(p.projectConfirm).toBe(false);
+    expect(p.addressFirst).toBe(true);
     expect(p.addressPopup).toBe(true);
     expect(p.autoBuildAfterConfirm).toBe(false);
     expect(p.legacyAutoGenerate).toBe(false);
+  });
+
+  test("?recipe= signed-in standalone, AREA subject → confirm-then-ask flow unchanged (not address-first)", () => {
+    const p = planArrival({
+      ...base,
+      params: { recipe: "Farm email about [[your city or ZIP]]" },
+      recipeHasBlank: true,
+      recipeInputKind: "area",
+    });
+    expect(p.projectConfirm).toBe(true);
+    expect(p.addressFirst).toBe(false);
+    expect(p.addressPopup).toBe(true);
+  });
+
+  test("?recipe= + ?addr= in-project → NO popup (the address already answered upstream)", () => {
+    const p = planArrival({
+      ...base,
+      params: { recipe: "Just listed [[your listing address]]", addr: "326 Shore Dr" },
+      insideProject: true,
+      recipeHasBlank: true,
+      recipeInputKind: "address",
+    });
+    expect(p.addressPopup).toBe(false);
+    expect(p.addressFirst).toBe(false);
   });
 
   test("recipe never yields the fake-fill default doc", () => {
@@ -189,6 +216,7 @@ describe("seed arrivals — capture or blank (spec 2026-07-16)", () => {
       doc: { kind: "seed", seedId: "just-sold" },
       projectConfirm: false,
       addressPopup: false,
+      addressFirst: false,
       autoBuildAfterConfirm: false,
       legacyAutoGenerate: false,
       seedStart: { mode: "blank" },

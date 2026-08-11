@@ -3,6 +3,7 @@ import { createClient } from "@/utils/supabase/server";
 import { buildZipSeedDoc } from "@/lib/email/zip-seed";
 import { seedById } from "@/lib/email/doc/default-docs";
 import { AutoCreateProject } from "../AutoCreateProject";
+import { findPlaceholder } from "@/lib/showcase/recipe";
 import { EmailLabGridClient } from "./EmailLabGridClient";
 
 export const runtime = "nodejs";
@@ -45,13 +46,25 @@ export default async function EmailLabGridPage({
   } = await supabase.auth.getUser();
 
   if (user) {
+    // The full recent list (not just [0]) rides to the client so the address-first
+    // door can route a typed address into the project that already owns it
+    // (matched on title OR subject_address) instead of minting a duplicate row —
+    // the confirm popup that used to let the user redirect is suppressed on that
+    // door, so the match has to be automatic (second-order audit 08/10/2026).
     const { data } = await supabase
       .from("projects")
-      .select("id, title")
+      .select("id, title, subject_address")
       .order("updated_at", { ascending: false })
-      .limit(1);
-    const row = (data as { id: string; title: string | null }[] | null)?.[0];
-    if (!row) {
+      .limit(50);
+    const rows =
+      (data as { id: string; title: string | null; subject_address: string | null }[] | null) ?? [];
+    const row = rows[0];
+    // ADDRESS-FIRST also for the very first project (decree 08/10/2026 — "address
+    // IS the project name"): a zero-project account arriving with an address-blank
+    // recipe gets the address popup and a project titled by it, NOT AutoCreateProject's
+    // untitled kind:"general" row that would then re-ask the address in-project.
+    const recipeNeedsAddressPopup = Boolean(recipe && findPlaceholder(recipe) && !addr);
+    if (!row && !recipeNeedsAddressPopup) {
       // Zero projects: make one and carry the recipe/zip/addr/seed into it, where
       // the in-project client runs the same arrival (capture-or-blank included).
       return (
@@ -83,7 +96,12 @@ export default async function EmailLabGridPage({
         seedId={seedId}
         seedBlankChosen={seedBlankChosen}
         signedIn
-        offeredProject={{ id: row.id, title: row.title ?? "your project" }}
+        offeredProject={row ? { id: row.id, title: row.title ?? "your project" } : null}
+        knownProjects={rows.map((r) => ({
+          id: r.id,
+          title: r.title,
+          subject_address: r.subject_address,
+        }))}
       />
     );
   }

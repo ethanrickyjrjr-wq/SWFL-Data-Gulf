@@ -5,61 +5,16 @@ import { createPortal } from "react-dom";
 import Link from "next/link";
 import { RECIPES, type RecipeKey } from "@/lib/deliverable/recipes";
 import { recipeDestination } from "@/lib/lab-entry/destination";
-
-/** A real rendered HTML file, or null when this recipe has no capture yet
- *  (the recipe still builds — see the placeholder card below). */
-const FILE_FOR_KEY: Partial<Record<RecipeKey, string>> = {
-  "coming-soon": "/new-emails/coming-soon-email.html",
-  "new-listing": "/new-emails/new-listing-email.html",
-  "open-house": "/new-emails/open-house-email.html",
-  "market-comps": "/new-emails/market-comps-email.html",
-  "price-reduced": "/new-emails/price-reduced-email.html",
-  "under-contract": "/new-emails/under-contract-email.html",
-  "just-sold": "/new-emails/just-sold-email.html",
-  "back-on-market": "/new-emails/back-on-market-email.html",
-  "agent-brand-intro": "/new-emails/agent-brand-intro-email.html",
-  "market-pulse": "/new-emails/market-pulse-email.html",
-};
-
-/** Lifecycle first, every key a real `RECIPES` entry. Keys with no file yet
- *  render as a labelled blank holder. THIS IS THE ONE EMAIL SHOWCASE — every
- *  old-email surface (CampaignRows, seed gallery, story overlays, dev-emails)
- *  and public/showcase/** captures were deleted 08/10/2026 by operator decree
- *  ("old emails off the website, no path to them"); never re-add one. */
-const NEW_EMAIL_CATEGORIES: { id: string; title: string; keys: RecipeKey[] }[] = [
-  {
-    id: "listing-lifecycle",
-    title: "Listing Lifecycle",
-    keys: [
-      "coming-soon",
-      "new-listing",
-      "open-house",
-      "market-comps",
-      "price-reduced",
-      "under-contract",
-      "just-sold",
-      "back-on-market",
-    ],
-  },
-  {
-    id: "agent-community",
-    title: "Agent & Community",
-    keys: [
-      "agent-brand-intro",
-      "agent-launch",
-      "sphere-weekly",
-      "review-reply",
-      "community-info",
-      "listings-showcase",
-      "listings-digest",
-    ],
-  },
-  {
-    id: "recurring",
-    title: "Recurring",
-    keys: ["market-pulse"],
-  },
-];
+// THE ONE capture map + category list (decree 08/10/2026: "old emails out, no
+// path to them") — shared with the in-lab first-run picker (TemplateGallery).
+// Keys with no file yet render as a labelled blank holder. THIS IS THE ONE
+// EMAIL SHOWCASE — every old-email surface (CampaignRows, seed gallery, story
+// overlays, dev-emails) and public/showcase/** captures were deleted
+// 08/10/2026 by operator decree; never re-add one.
+import {
+  NEW_EMAIL_CATEGORIES,
+  NEW_EMAIL_FILE_FOR_KEY as FILE_FOR_KEY,
+} from "@/lib/email/new-email-captures";
 
 /** Real rendered emails, in send-order rows, left-to-right scroll per category
  *  (lifecycle first). Click a card → full preview + a Build button. A key with

@@ -14,7 +14,10 @@ export const EMAIL_DESIGN: GuideDef = {
   kind: "guide",
   description:
     "AI-built emails famously drift toward the same generic look. Ours structurally can't — here's the design system that prevents it.",
-  cardImage: "/showcase/seed-previews/magazine-issue.webp",
+  // Card + figures are NEW-EMAIL captures (public/new-emails/*.webp, baked off
+  // the registry artifacts 08/10/2026) — the old seed-preview screenshots were
+  // the purged email look (operator decree: "old emails out, no path to them").
+  cardImage: "/new-emails/new-listing-email.webp",
   hook: "Published research on AI design tools found their output reverts to generic defaults unless something mechanically prevents it. We took that finding literally: our layout rules are enforced in code, so the polish isn't a matter of taste on a given day — it's structural.",
   expect: [
     "Why every layout sits on a 12-column grid with a short list of allowed proportions",
@@ -33,11 +36,11 @@ export const EMAIL_DESIGN: GuideDef = {
         "Constraint is where the polish comes from. Proportions that read as intentional are the only proportions on offer, which is why two emails built by two different agents both still look finished.",
       ],
       figure: {
-        src: "/showcase/seed-previews/just-sold-grid.webp",
+        src: "/new-emails/just-sold-email.webp",
         alt: "A just-sold email laid out on the 12-column grid",
         caption: "A just-sold layout on the grid, filled with cited Southwest Florida figures.",
         provenance: "SWFL Data Gulf builder output",
-        asOf: "07/09/2026",
+        asOf: "08/10/2026",
       },
     },
     {
@@ -48,12 +51,12 @@ export const EMAIL_DESIGN: GuideDef = {
         "The figure your reader cares about leads the email; the story follows it. Most emails get a skim, not a read — structure for the skim and the read takes care of itself.",
       ],
       figure: {
-        src: "/showcase/seed-previews/weekly-pulse.webp",
-        alt: "A weekly market email leading with headline figures and charts",
+        src: "/new-emails/market-pulse-email.webp",
+        alt: "A monthly market email leading with headline figures and a chart",
         caption:
-          "A weekly market read: headline figures first, then the story — every number cited.",
+          "A monthly market read: headline figures first, then the story — every number cited.",
         provenance: "SWFL Data Gulf builder output",
-        asOf: "07/09/2026",
+        asOf: "08/10/2026",
       },
     },
     {
@@ -73,11 +76,11 @@ export const EMAIL_DESIGN: GuideDef = {
         "Property photos default to the standard listing ratio (3:2, with 4:3 and square a click away) and headshots hold portrait framing (4:5), so nothing gets stretched, squashed, or awkwardly cropped on the way in.",
       ],
       figure: {
-        src: "/showcase/seed-previews/listing-feature.webp",
-        alt: "A listing feature email with full-width property photography",
-        caption: "Listing photography held at standard ratios in a feature layout.",
+        src: "/new-emails/new-listing-email.webp",
+        alt: "A new-listing email with full-width property photography",
+        caption: "Listing photography held at standard ratios in a new-listing layout.",
         provenance: "SWFL Data Gulf builder output",
-        asOf: "07/09/2026",
+        asOf: "08/10/2026",
       },
     },
     {

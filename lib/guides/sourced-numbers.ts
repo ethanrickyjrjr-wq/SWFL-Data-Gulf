@@ -13,7 +13,7 @@ export const SOURCED_NUMBERS: GuideDef = {
   kind: "guide",
   description:
     "The four places a figure in your email can come from — and why an invented one can't happen.",
-  cardImage: "/showcase/seed-previews/weekly-pulse.webp",
+  cardImage: "/new-emails/market-pulse-email.webp",
   hook: "One made-up number in a client email can cost the relationship. So the whole system is built around a single rule: every figure names a real source, or it doesn't ship.",
   expect: [
     "The four places a number can come from, and the order we try them",
