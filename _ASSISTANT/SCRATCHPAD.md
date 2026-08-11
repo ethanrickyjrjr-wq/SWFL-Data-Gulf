@@ -1,3 +1,27 @@
+## 2026-08-11 (Opus 5) — OPERATOR: "we have fucking graphify in this repo and swfldatagulf-ops you fucking idiot" — a vendor email got answered from the vendor's funnel instead of from our two live installs
+He forwarded a Graphify launch email. I verified the vendor's claims live (105,034 stars via the
+GitHub API, formal verification real but TypeScript-unsupported, headline features Enterprise-only)
+and I did read this repo's install — but I never opened the SIBLING repo before talking about what
+we'd "get" from signing up. What we actually hold, both repos: brain-platform runs graphify 0.8.46
+with a 45MB graphify-out/graph.json rebuilt 08/10, four package scripts, and
+.github/workflows/graphify-republish.yml; swfldatagulf-ops renders it at app/graph/page.tsx off a
+published app/graph/brain-graph.json. Strike logged under didnt-read-what-we-hold (guard BUILT).
+
+SECOND ERROR, SAME TURN, CORRECTED IN PLACE: I then told him that ops page was serving 07/25 data
+and the republish job was "0-for-2, dead on a REBUILD_PAT scope gap." BOTH FALSE. I read a stale
+comment block inside graphify-republish.yml plus my own local clone's file mtime (my ops checkout
+is 6 commits behind) and reported them as live state. The truth, re-derived: `gh run list` shows
+8 of 8 recent scheduled runs GREEN, latest 08/10/2026 in 2m42s, and `git log origin/main` shows it
+pushed 7616626 "chore(graph): republish — 2026-08-10". The PAT was re-minted 07/16/2026 16:09Z.
+Fixed the lying comment in the workflow the same session. LESSON, already a memory line: a map is
+never evidence for its territory — a code comment is a map, and mtime on a stale clone is a map.
+THE ANSWER HE WAS OWED: the MCP server is a LOCAL stdio server over the graph.json we already have
+— 10 tools — and our .mcp.json (serena, swfl, supabase, ezhomesearch, chrome-devtools, designlang,
+figma) has never had graphify in it, so no session can query the graph as a tool. Installed 0.8.46
+has NO serve/mcp subcommand (verified: graphify --help); that shipped in 0.9.39.
+NEXT: he decreed `claude mcp add --transport http graphify https://api.graphify.com/mcp` — running
+it. Endpoint is live and 401s with OAuth discovery (scope graphify:query), so it needs a /mcp login.
+
 ## 2026-08-11 (Fable 5) — CLARIFIED, operator: "on eac fucking build yu dumbass" — the paid rung belongs IN THE PRODUCT, firing automatically on each build that needs it; me hand-running scripts is the thing he did NOT want
 The gap-fill buy must run inside every product build path (lab /api/email-lab/ai, project builds,
 Hermes) whenever the subject has a missing spec cell — automatically, no operator hand on it. Code

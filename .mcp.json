@@ -20,6 +20,14 @@
         "clientId": "aNx3H5VIPeDIfUgY4wA4yRlqY1_UK1q0JPaO2cyqhzY"
       }
     },
+    "graphify": {
+      "type": "http",
+      "url": "https://api.graphify.com/mcp"
+    },
+    "graphify-local": {
+      "command": "py",
+      "args": ["-3.14", "-m", "graphify.serve", "graphify-out/graph.json"]
+    },
     "chrome-devtools": {
       "command": "cmd",
       "args": ["/c", "npx", "-y", "chrome-devtools-mcp@latest"]

@@ -37,6 +37,9 @@ guard: BUILT — four-lane gate (07/22/2026) + RULE 0.95 + what-do-we-have skill
 - strike: 08/06 "did you even look anything up"
 - strike: 08/09 "which fucking playbook are you looking at"
 - strike: 08/10 paid $0.05 re-proving §3.3.1 R1 before reading it
+- strike: 08/11 "we have fucking graphify in this repo and swfldatagulf-ops" — framed a vendor
+  email around their signup funnel; never checked the sibling ops repo (it renders the graph at
+  app/graph/page.tsx off a published brain-graph.json) before talking about what we'd "get"
 
 ## shape: stale-source-served-silently
 guard: OWED — fleet-wide source-staleness tripwire; pattern exists on redfin_swfl only (ed0b2efd 07/17/2026); check open: stale_source_tripwire_fleet

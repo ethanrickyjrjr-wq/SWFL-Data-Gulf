@@ -21,11 +21,20 @@ on:
         description: "Build the graph but skip commit+push to the ops repo"
         required: false
         default: "false"
-  # Reusable entry point for the nightly chain — but the chain's graphify leg is
+  # Reusable entry point for the nightly chain — the chain's graphify leg is still
   # GATED OFF by default (see nightly-chain.yml's `if: vars.CHAIN_GRAPHIFY_ENABLED`).
-  # This workflow has NEVER succeeded: 0-for-2, both runs dead at "Checkout
-  # swfldatagulf-ops" — the cross-repo REBUILD_PAT scope gap its own comment above
-  # predicted. Flip the repo variable to 'true' only once it has one green run.
+  #
+  # STATUS CORRECTED 08/11/2026 — the "NEVER succeeded: 0-for-2" note that stood here
+  # was stale by three weeks and got repeated to the operator as live state. It described
+  # the pre-re-mint era only: REBUILD_PAT was re-minted 07/16/2026 16:09Z with the ops
+  # grant, and the scheduled job has been green ever since — 8 of the last 8 runs, most
+  # recently run 31372545273 on 08/10/2026 (2m42s), which pushed commit 7616626
+  # "chore(graph): republish — 2026-08-10" into the ops repo. The unblock condition this
+  # comment named ("one green run") is long since met; flipping CHAIN_GRAPHIFY_ENABLED is
+  # now an operator call, not a blocked one.
+  #
+  # Re-derive before trusting this block again: `gh run list --workflow=graphify-republish.yml`.
+  # A comment is a map, never the territory.
   workflow_call:
 
 concurrency:
