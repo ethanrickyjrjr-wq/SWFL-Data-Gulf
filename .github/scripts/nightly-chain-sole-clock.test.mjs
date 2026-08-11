@@ -19,9 +19,13 @@ const WF = resolve(dirname(fileURLToPath(import.meta.url)), "../workflows");
  *  `schedule:` — two clocks re-create the independent-drift bug the chain exists
  *  to kill (each member paid +45m to +5h29m of its own drift; the effective
  *  execution order was random). graphify is EXCLUDED: its chain leg is gated off
- *  by vars.CHAIN_GRAPHIFY_ENABLED, so it legitimately still needs its own cron. */
+ *  by vars.CHAIN_GRAPHIFY_ENABLED, so it legitimately still needs its own cron.
+ *
+ *  active-listings-daily.yml was REMOVED from this list 08/11/2026: commit cb803b1c
+ *  retired the `listings` chain job and DELETED that workflow (see nightly-chain.yml
+ *  lines 118-121 — data_lake.active_listings_residential fed nothing live), which left
+ *  this guard crashing with ENOENT on main instead of asserting anything. */
 const CHAINED = [
-  "active-listings-daily.yml",
   "listing-lifecycle-daily.yml",
   "city-pulse-daily.yml",
   "live-search-daily.yml",

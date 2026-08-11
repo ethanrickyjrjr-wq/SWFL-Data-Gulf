@@ -1,3 +1,13 @@
+## 2026-08-11 (Opus 5) — OPERATOR: "SO WHAT DO WE FUCKING NEED?????????"
+Three answers on the persistence finding — /desk vs ops /glass vs the refinery call path, live row
+counts, catalog lanes — and **not one of them ended with the ask.** He had to shout to get the one
+sentence that mattered: *one decision from him (is a direction call a forecast or a label on the
+last move), then a basis change in `refinery/vocab/loader.mts` + a `fitLine` wire in
+`deriveGradeFields`, before the 08/30/2026 window closes on 40 already-baked rows.*
+Analysis is not the deliverable. The ask is the deliverable; the analysis is what justifies it.
+Shape: `analysis-without-the-ask` — NEW shape opened in STRIKES.md, strike 1. Not
+`distance-speak-not-person-speak`; that guard governs mileage phrasing in email copy, not answers.
+
 ## 2026-08-11 (Opus 5) — OPERATOR: "WE HAVE HOSTED GRAPHIFY!!!!!!!!!" + "CHECK MCP"
 I spent a whole answer on whether to flip `vars.CHAIN_GRAPHIFY_ENABLED` — **and that switch has
 nothing to do with the graph we actually query.** Two different things share the word "graphify":
@@ -40,6 +50,19 @@ the control `gx_find "SESSION_LOG"` and `"data-roots"` ALSO returned 0 — that 
 SYMBOL labels only, so a null from it was never evidence about docs. The rank-files test is the
 one that carries. Falsifier if anyone re-checks: a markdown path appearing in `gx_rank_files`.
 DECISION IS THE OPERATOR'S (spend): Pro is the lever for both halves. Check opened.
+**THIRD FINDING, operator pasted the Agent-Memory page: `remember`/`recall` EXIST, are LIVE, and we
+have NEVER written one fact.** Live proof: `recall` → `{"facts":[],"turns":[],
+"last_consolidated_at":null,"graph_version":null}`. Tree-wide grep for `remember` returns exactly
+TWO hits, both `.claude/hooks/check-four-searches.mjs` + its test, where it is classified as a
+WRITE that earns no search lane — i.e. the only time we ever mentioned the tool was to tell a hook
+to ignore it. Zero call sites. The property we don't have anywhere else: facts anchor to graph
+nodes and RE-ANCHOR on rebuild, and a dead anchor is FLAGGED, never silently dropped — which is
+the exact defect that produced today's stale `CHAIN_GRAPHIFY_ENABLED` comment and the stale local
+graph. Our MEMORY.md has the opposite property (it warns you to go verify a named file yourself).
+CAVEAT BEFORE ANY WRITE, and it is why I did not just start writing: anchors resolve against a
+graph that is Free-tier, CODE-ONLY and 14 commits stale, so doc/research facts cannot anchor at
+all; and **no `forget`/delete tool is exposed** (only `remember`, `recall`, `ingest_turns`) — a
+first write is one-way from our side. Operator decision pending.
 
 ## 2026-08-11 (Opus 5) — OPERATOR: "whenever you have to put in an address or choose, NO NEW PROJECT, it fucks everything up" + "every first land at email labs needs to be fucking BLANK"
 Two screenshots, two live defects on the address-first door we shipped 08/10 — i.e. the SAME surface

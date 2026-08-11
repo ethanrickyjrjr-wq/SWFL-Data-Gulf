@@ -205,13 +205,26 @@ jobs:
     secrets: inherit
 
   # ── T5: warm + parity, in parallel ────────────────────────────────────────
-  # graphify has NEVER succeeded (0-for-2, both dead at the cross-repo checkout —
-  # REBUILD_PAT has no scope on swfldatagulf-ops). `continue-on-error` is NOT a
-  # supported keyword on a calling job (re-verified against live GitHub docs
-  # 07/12/2026), so it cannot be quarantined that way — a chained graphify would
-  # redden the chain EVERY NIGHT. `if:` IS supported, so the leg is declared but
-  # gated OFF by default. Flip vars.CHAIN_GRAPHIFY_ENABLED to 'true' the day the
-  # PAT scope is fixed and it has one green run. Zero edits here.
+  # WHY THIS LEG IS GATED: `continue-on-error` is NOT a supported keyword on a
+  # calling job (re-verified against live GitHub docs 07/12/2026), so a chained
+  # graphify could not be quarantined if it went red — it would redden the chain
+  # EVERY NIGHT. `if:` IS supported, so the leg is declared but switched OFF.
+  #
+  # STATUS CORRECTED 08/11/2026 — the "NEVER succeeded: 0-for-2, REBUILD_PAT has no
+  # scope on swfldatagulf-ops" text that stood here was stale by three weeks and got
+  # repeated to the operator as live state. REBUILD_PAT was re-minted 07/16/2026
+  # 16:09Z WITH the ops grant; the scheduled job has been green ever since — 8 of the
+  # last 8 runs, most recently run 31372545273 on 08/10/2026 (2m42s), which pushed
+  # commit 7616626 into the ops repo. The unblock condition this comment named ("one
+  # green run") is long since met, so flipping vars.CHAIN_GRAPHIFY_ENABLED to 'true'
+  # is now an OPERATOR CALL, not a blocked one. Mirrors graphify-republish.yml:27-37.
+  #
+  # SCOPE, so nobody re-learns this the hard way: this leg republishes the LOCAL
+  # graph as a static app/graph/brain-graph.json in the ops repo (the ops /graph
+  # page). It does NOT refresh the HOSTED index at api.graphify.com that RULE 0.5
+  # points sessions at — that one is hooked separately and updates on push.
+  #
+  # Re-derive before trusting this block: `gh run list --workflow=graphify-republish.yml`.
   warm:
     name: warm · graphify republish
     needs: [rebuild]

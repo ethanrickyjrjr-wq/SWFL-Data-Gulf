@@ -97,8 +97,18 @@ index never mentioned. A grep of `_RESEARCH/` is not a search of our research.
 is the most recent pass on parcels, authority ratification, unmapped tables, zombie/bypass
 tables, and undocumented consumers. Also 07/18 site-audit, opus-pass, fanout-fix-log.
 
-**competitor-and-strategy/** — competitor + strategy research, local-only per the 07/17/2026
-decree covering real company names and strategic analysis (16)
+**competitor-and-strategy/** — competitor + strategy research covering real company names and
+strategic analysis (25). **NOT local-only as of 08/11/2026** — the all-in-on-graphify decree
+un-ignored `_RESEARCH/` and these files are TRACKED and ship publicly. The 07/17/2026 local-only
+decree that this line used to cite is SUPERSEDED. Write clean: no credentials, no client PII, no
+personal financial notes.
+- `2026-08-11-standing-technology-rejections.md` — **READ BEFORE PROPOSING OR EVALUATING ANY
+  TOOL/VENDOR/TECHNIQUE.** The standing "should we adopt X?" verdicts in one findable place:
+  LangChain/LangGraph, CrewAI, Langflow, Dify, RAGFlow, n8n, Open WebUI, Gemini CLI, Llama,
+  DeepSeek, Omnigent, dbt, DuckLake, k-means, RentCast, ATTOM, Firecrawl, plus the product-scope
+  nos. Each carries its reason, its date, and its evidence path. Written because the LangChain
+  verdict was buried at line 6351 of the scratchpad and got asked twice; to overturn one you must
+  name what CHANGED.
 - `STEADY-PAINS.md` — the distilled pain reference; fold every new round into it
 - `2026-08-10-homepage-lead-with-emails-research.md` — operator decree "we look like a search
   site": homepage must lead with EMAIL BUILDING; Mailchimp + Figma heroes crawled live (category

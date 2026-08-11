@@ -82,6 +82,10 @@ guard: BUILT — MAX_SPOKEN_DISTANCES=2 structural cap + communityHasGolf in-gat
 - strike: 08/10 "0.57 miles" grocery — quarters and halves decree
 - strike: 08/10 three mileage clauses in a row + golf-community told golf is 3/4 mi away
 
+## shape: analysis-without-the-ask
+guard: OWED — an answer to "what is going on" must END with the decision needed and the named next action, not with findings
+- strike: 08/11 persistence finding — three answers (surfaces, live counts, catalog lanes), operator had to shout "SO WHAT DO WE FUCKING NEED" to get the one sentence
+
 ## shape: partial-reported-as-whole
 guard: BUILT — RULE 0.8 count-and-prove (07/30/2026) + RULE 0.85 fix-don't-file (08/06/2026)
 - strike: 07/30 "all four lanes on the record" — one never opened
