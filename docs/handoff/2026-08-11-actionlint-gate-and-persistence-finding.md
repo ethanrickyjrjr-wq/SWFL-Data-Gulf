@@ -9,6 +9,69 @@ Session evidence for everything here: `SESSION_LOG.md` entry dated 08/11/2026.
 
 ---
 
+## ⚠️ CORRECTION — 08/11/2026, same day, by a later session. READ BEFORE ACTING ON ITEM 2.
+
+ITEM 2 below is **wrong in three specific ways**. The direction of the recommended fix
+(promote `fitLine()`) is unchanged and is now better justified, but do not quote its
+numbers and do not act on its root-cause paragraph as written.
+
+**1. The lift number is wrong, and it moved the WRONG WAY.**
+ITEM 2 reports "system: 58 / 138 · persistence null: 58 / 138 · **lift: +0.0 points**."
+Re-run live 08/11/2026 — `bun refinery/tools/flywheel-backtest.mts --dry-run`
+(snapshot 2026-06, lookback 180d, grid-step 3mo):
+
+    system accuracy      = 42.0% (N=138)
+    persistence accuracy = 48.6% (N=138)
+    LIFT (system − naive)= -6.5 pp
+    BEATS NAIVE? NO — the call logic needs work before weighting does
+
+System numerator matches (42.0% × 138 = 58). **The persistence numerator does not — the
+tool measures 67, not 58.** The call does not tie the naive baseline. It **loses to it by
+6.5 points.**
+
+**2. "The predicted direction equals the persistence carry-forward on 144 of 144 rows,
+zero disagreements" is a tautology, not a finding.**
+That test compared `predicted_direction` against `sign(current − prior)` — which *is* the
+formula that produced it (`decision-fn.mts:80` → `computeDirection(as_of_value,
+prior_value, cfg)`). It was never compared against the instrument's actual null.
+`skill-baseline.mts:67-78` defines the persistence null as **`predict_t = observed_{t-1}`**
+— the previous *realized outcome* direction, not the last delta in the value series. Two
+different estimators over one shared 138-row denominator, which is exactly why they score
+58 vs 67. Nine rows of divergence by itself falsifies "zero disagreements." ITEM 2 says
+outright "*So I computed the lift, using that file's documented in-set rule*" — the
+baseline was re-implemented by hand instead of read off the tool. That is the whole defect.
+
+**3. The root-cause paragraph applies to the BACKTEST path only — two producers, not one.**
+
+- **Backtest / 144 rows** — `refinery/lib/backtest/decision-fn.mts:80` calls
+  `computeDirection(as_of_value, prior_value, cfg)`. `grade_basis` governs this. Arithmetic.
+- **Live / 40 gradeable rows** — `refinery/lib/predictions-log.mts:100-101` reads
+  `claim.then_direction`, the brain's own **authored** claim. No delta, no arithmetic.
+  **`grade_basis` never touches the live prediction** — it only governs `computeDirection`
+  on the *outcome* at grading time.
+
+Changing `GradeBasis` therefore fixes the backtest corpus and leaves the live path — the
+one carrying the **08/30/2026 deadline** — completely untouched. A change shipped on ITEM 2
+as written would have reported as done and not been live.
+
+**RESOLVED for the live path (08/11/2026).** Operator decision, verbatim: *"Authored the
+direction validated against a fitted trend."* Built, wired and pushed in `51975c39` —
+`refinery/lib/direction-validation.mts` + `logPrediction`. Spec:
+`docs/superpowers/specs/2026-08-11-direction-validation-design.md`.
+
+**What is unchanged:** raw accuracy is still the wrong headline; lift over persistence is
+still the right metric; `fitLine()` is still the right input to promote into the BACKTEST
+path — and a call that *loses* to naive is a stronger argument for it than a call that ties.
+That half is still open: check `fit_basis_backtest_decision_fn`.
+
+**Also corrected same day —** `ingest/cadence_registry.yaml` retired `fred_laus_alfred` on a
+"confirmed-zero-consumer" basis and flagged its Storage prefix for manual delete. That claim
+is false: `refinery/tools/flywheel-backtest.mts:258` reads it, and the dry-run above proves
+the data is intact (1538 / 1562 vintages). It is the only point-in-time-honest series in the
+repo. **Do not execute that delete** — check `fred_laus_alfred_storage_delete_must_not_run`.
+
+---
+
 ## ITEM 1 — Nothing validates a GitHub workflow file before it ships
 
 ### What happened

@@ -1,3 +1,32 @@
+## 2026-08-11 (Opus 5) — corrections LANDED in both target files, parking file deleted, handoff written
+
+Follow-up to `51975c39`. Operator: *"take over the session you need."* The claim on both files
+had cleared (release returned 0 held), so the two correction blocks are now IN their targets
+rather than parked:
+
+- `docs/handoff/2026-08-11-actionlint-gate-and-persistence-finding.md` — correction block above
+  ITEM 2: lift is **−6.5 pp, not +0.0**; the "144 of 144" test was a tautology against
+  `sign(current − prior)`, not against the instrument's null `predict_t = observed_{t-1}`;
+  and the root cause is scoped to the BACKTEST path only (two producers, not one).
+- `_RESEARCH/data-and-ingest/2026-08-11-direction-call-forecast-evaluation-standard.md` §5 —
+  same numeric correction, plus a flag on §3 (its "PT would not be meaningful" caveat rests on
+  the same conflation) and a note that the live half now meets its own §4 contract.
+- `docs/handoff/PENDING-MERGE-2026-08-11-persistence-correction.md` **deleted** — it existed only
+  because the files were claimed. Check `persistence_correction_merge_blocked` CLOSED.
+
+**Handoff for the remainder:** `docs/handoff/2026-08-11-direction-call-what-remains.md` — the
+five open checks in priority order, what was deliberately not done and why, and the vintage
+clock (~Feb/Mar 2027) that no amount of work compresses.
+
+**Gate 11 note for whoever restores fred_laus_alfred:** the coverage ratchet baseline was shrunk
+78 → 73 in `70bce3e0` because the retirement removed those five registry entries. The ratchet
+only shrinks — un-retiring that source will block the push until `raw_landing_class` is filled
+on its returning entry. Not a reason to leave it retired; a step to expect.
+
+**Ledger this session: 4 opened, 1 closed.** Net +3, and that is a reportable outcome, not a
+neutral one. Open: `fred_laus_alfred_storage_delete_must_not_run` (irreversible, operator
+decision owed), `backtestable_two_disjoint_definitions`, `grade_coverage_artifact_served_stale`,
+`direction_validation_live_verify` (closes after 08/30/2026).
 ## 2026-08-11 (Opus 5) — direction validation BUILT + WIRED (17 red-first tests, one real bug caught red); Lee permits needed nothing — that reason was stale
 
 Operator decision, verbatim: **"Authored the direction validated against a fitted trend."** Built it.

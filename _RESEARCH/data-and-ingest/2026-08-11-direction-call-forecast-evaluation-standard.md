@@ -110,6 +110,36 @@ the precise, external justification for the `fitLine()` promotion.
 
 ## 5. What we do today, measured against that contract
 
+> **⚠️ MEASURED CORRECTION — 08/11/2026, later same day.** The finding that prompted this
+> crawl ("our predicted direction equals the persistence carry-forward on 144 of 144 rows,
+> lift +0.0") is **wrong**. Re-run live: `bun refinery/tools/flywheel-backtest.mts --dry-run`
+> (snapshot 2026-06) reports **system 42.0%, persistence 48.6%, N=138, LIFT −6.5 pp, "BEATS
+> NAIVE? NO"**. The system does not tie the naive baseline — it **loses** to it.
+>
+> The "144 of 144" test compared the call against `sign(current − prior)`, which is the
+> formula that produced it — a tautology. The instrument's actual null is
+> `predict_t = observed_{t-1}` (`refinery/lib/backtest/skill-baseline.mts:67-78`), the
+> previous *realized outcome* direction. Two different estimators; that is why they score
+> 58 vs 67 over the same 138 rows.
+>
+> **This strengthens §4 rather than weakening it.** A call that loses to naive is a harder
+> argument for promoting `fitLine()` than a call that ties. But it retires the phrase "lift
+> is pinned at zero by construction" — lift is not pinned, it is measured, and it is negative.
+>
+> **Correction to §3's caveat:** the claim that Pesaran–Timmermann "would not be a meaningful
+> test" because our forecast *is* the lagged series rests on the same conflation. The call is
+> `sign(last delta)` — a deterministic function of past values, but **not** the persistence
+> null it is scored against. PT against the independence null is therefore informative on the
+> current calls, not degenerate. It remains unbuilt either way.
+>
+> **Scope:** all of the above is the *backtest* path (`decision-fn.mts:80`). The live path
+> (`refinery/lib/predictions-log.mts:100`) reads the brain's authored `claim.then_direction`
+> — no delta, no `grade_basis`. Two producers, not one. **The live half is now BUILT** to
+> this file's §4 contract (operator decision: *"Authored the direction validated against a
+> fitted trend"*) — `refinery/lib/direction-validation.mts`, shipped in `51975c39`, including
+> §4.1's "must be allowed to return NO DIRECTION" as a real verdict that downgrades the row.
+> The backtest half is still open.
+
 - Produced from `sign(current − prior)` — `refinery/vocab/loader.mts:150-175` defaults
   `grade_basis: "delta"` for eleven value types (percentage, ratio, rate, bps, percentile, count,
   integer, currency, index, days, depth_in). **Fails item 1**, and cannot return "no direction."
