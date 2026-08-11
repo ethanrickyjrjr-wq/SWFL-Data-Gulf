@@ -12,7 +12,15 @@
 // have landed silently and surfaced later as someone else's mystery break.
 import assert from "node:assert";
 import { describe, test } from "node:test";
-import { isDataTurn, isInjected, laneFor, missingLanes, readTurn } from "./check-four-searches.mjs";
+import {
+  graphFirstGap,
+  isDataTurn,
+  isInjected,
+  isStructuralTurn,
+  laneFor,
+  missingLanes,
+  readTurn,
+} from "./check-four-searches.mjs";
 
 const u = (text) => JSON.stringify({ type: "user", message: { content: text } });
 const a = (calls) =>
@@ -262,5 +270,112 @@ describe("tuning — measured against live transcripts", () => {
     // …while the five real 07/22 failures still fire.
     assert.strictEqual(isDataTurn("ok, just make sure we have beds and baths"), true);
     assert.strictEqual(isDataTurn("check this / where are we wiring to??"), true);
+  });
+});
+
+// ─────────────────────────────────────────────────────────────────────────────
+// GRAPH-FIRST GATE — added 08/11/2026.
+//
+// OPERATOR, verbatim: "ARE WE USING GRAPHIFY ON EVERY SESSSION OR NOT????????"
+// Measured answer that day: NO. RULE 0.5 was amended 08/11/2026 to say the graph is the
+// FIRST reach and grep the FALLBACK, and this gate was amended the same day to CREDIT
+// graphify traversals — but crediting is not requiring. `searchesTheTree` is an OR: a
+// plain Grep satisfied the code lane exactly as well as a graph traversal, so nothing
+// noticed a session doing the reverse of the rule. Third strike on
+// `decree-in-prose-code-never-walked-it`, so RULE 2 §0b makes this the mechanism.
+//
+// Each test is named for the failure mode it guards.
+// ─────────────────────────────────────────────────────────────────────────────
+describe("graph-first gate", () => {
+  const GRAPH_CALL = { name: "mcp__graphify__gx_callers", input: { symbol: "x" } };
+  const GREP_CALL = { name: "Grep", input: { pattern: "reportToEmailHtml" } };
+
+  test("FM4 under-trigger: the structural shapes RULE 0.5 is about must actually fire", () => {
+    assert.strictEqual(isStructuralTurn("who calls reportToEmailHtml?"), true);
+    assert.strictEqual(isStructuralTurn("what reads active_listings_residential"), true);
+    assert.strictEqual(isStructuralTurn("is anything consuming this table"), true);
+    assert.strictEqual(isStructuralTurn("what breaks if I change planArrival"), true);
+    assert.strictEqual(isStructuralTurn("blast radius of deleting that view"), true);
+    assert.strictEqual(isStructuralTurn("is this dead code"), true);
+    assert.strictEqual(isStructuralTurn("does anything still use bakedAreaRead"), true);
+    assert.strictEqual(isStructuralTurn("who depends on the email doc renderer"), true);
+  });
+
+  test("FM1 over-trigger: ordinary prose must not become a structural question", () => {
+    // RULE 11 — a gate that fires on ordinary sentences is ignored on the turn that
+    // matters. Each of these carries a code-ish word and no SHAPE.
+    assert.strictEqual(isStructuralTurn("call me when the build is green"), false);
+    assert.strictEqual(isStructuralTurn("make the button blue"), false);
+    assert.strictEqual(isStructuralTurn("read the playbook before you touch emails"), false);
+    assert.strictEqual(isStructuralTurn("use the paid row we already bought"), false);
+    assert.strictEqual(isStructuralTurn("this is a dead end, back it out"), false);
+    assert.strictEqual(isStructuralTurn(""), false);
+  });
+
+  test("FM: grep alone no longer satisfies a structural question", () => {
+    // THE WHOLE POINT. Before this these two were interchangeable.
+    assert.strictEqual(graphFirstGap("who calls reportToEmailHtml?", [GREP_CALL]), true);
+    assert.strictEqual(graphFirstGap("who calls reportToEmailHtml?", [GRAPH_CALL]), false);
+  });
+
+  test("FM: a graph ATTEMPT satisfies it — the gate never demands a graph ANSWER", () => {
+    // Measured 08/11/2026: gx_callers AND gx_references both returned 0 for
+    // reportToEmailHtml while the tree had a real import at
+    // lib/email/activation/sequence.ts:22. A gate requiring a non-empty result would
+    // wedge on exactly that false negative.
+    assert.strictEqual(
+      graphFirstGap("who calls reportToEmailHtml?", [GRAPH_CALL, GREP_CALL]),
+      false,
+    );
+    // The CLI form counts — same tool, different transport.
+    assert.strictEqual(
+      graphFirstGap("who calls X?", [{ name: "Bash", input: { command: 'graphify query "X"' } }]),
+      false,
+    );
+    // Local stdio counts: stale beats unconsulted, and the ladder still ends at grep.
+    assert.strictEqual(
+      graphFirstGap("who calls X?", [{ name: "mcp__graphify-local__query_graph", input: {} }]),
+      false,
+    );
+  });
+
+  test("FM: a grep FOR the word graphify is not a probe OF the graph", () => {
+    // Decoy-Grep, the shape defect (a) already cost us once.
+    assert.strictEqual(
+      graphFirstGap("who calls X?", [{ name: "Bash", input: { command: "grep -rn graphify ." } }]),
+      true,
+    );
+  });
+
+  test("FM2 wedge: the operator's opt-out must beat this gate too", () => {
+    // If the graph is down or he just wants an answer, he keeps the ability to say so —
+    // otherwise a vendor outage makes the turn unendable.
+    assert.strictEqual(graphFirstGap("who calls X? no probe", [GREP_CALL]), false);
+    assert.strictEqual(graphFirstGap("no search — who reads this table", [GREP_CALL]), false);
+  });
+
+  test("FM: metadata and writes must not satisfy it (defect (b), new lane)", () => {
+    assert.strictEqual(
+      graphFirstGap("who calls X?", [{ name: "mcp__graphify__graph_stats", input: {} }]),
+      true,
+    );
+    assert.strictEqual(
+      graphFirstGap("who calls X?", [{ name: "mcp__graphify__remember", input: { text: "x" } }]),
+      true,
+    );
+  });
+
+  test("FM3 loop: this gate's own block message must read as an injection", () => {
+    // The four-lane gate learned this the hard way — a user-role message that is really
+    // harness output silently RESET the tool-call window. Ours must be recognized too,
+    // or a blocked turn re-reads as a fresh structural question forever.
+    assert.strictEqual(isInjected("⛔ GRAPH-FIRST GATE — this is a structural question"), true);
+    assert.strictEqual(isInjected("Stop hook feedback:\n⛔ GRAPH-FIRST GATE"), true);
+  });
+
+  test("the four-lane gate is untouched by any of this", () => {
+    // Regression fence: graph-first is an ADDITIONAL requirement on structural turns,
+    // never a relaxation of the four lanes.
+    assert.deepStrictEqual(missingLanes([GRAPH_CALL]), ["research", "catalog", "live"]);
   });
 });

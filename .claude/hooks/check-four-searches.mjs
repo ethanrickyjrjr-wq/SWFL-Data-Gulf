@@ -96,6 +96,92 @@ export function isDataTurn(text) {
   return SUBJECT.test(t) && ASKING.test(t);
 }
 
+/**
+ * The graphify MCP tools that TRAVERSE the graph. Module scope 08/11/2026 so `laneFor`
+ * (which CREDITS a traversal) and `graphFirstGap` (which REQUIRES one on a structural
+ * turn) can never drift — two copies would silently mean two definitions of "consulted
+ * the graph".
+ */
+const GRAPH_TRAVERSAL =
+  /^mcp__graphify(-local)?__(query_graph|shortest_path|get_node|get_neighbors|get_community|god_nodes|gx_(find|find_seeds|callers|callees|impact|trace|references|expand|node|file_neighbors|rank_files|tests_for|imports_exports))$/;
+
+/**
+ * Is this a STRUCTURAL question — "who touches this?" — as opposed to a value lookup?
+ *
+ * ADDED 08/11/2026. Operator, verbatim: "ARE WE USING GRAPHIFY ON EVERY SESSSION OR
+ * NOT????????". Measured answer that day: no, and nothing made us. RULE 0.5 had been
+ * amended hours earlier to say the graph is the FIRST reach and grep the FALLBACK, and
+ * `laneFor` had been amended the same day to CREDIT graphify traversals — but
+ * `searchesTheTree` is an OR, so a plain Grep satisfied the code lane exactly as well as
+ * a traversal. CREDITING IS NOT REQUIRING. Third strike on the registry shape
+ * `decree-in-prose-code-never-walked-it`, so RULE 2 §0b forbids another scratchpad entry
+ * and demands the mechanism instead.
+ *
+ * WHY A SHAPE AND NOT A NOUN LIST. Grep only returns what you already hypothesized; the
+ * graph returns what you had no reason to type. That difference only matters for
+ * questions about EDGES — who calls, what reads, what breaks. A value lookup ("what's in
+ * the sold table") is answered fine by grep and is deliberately NOT gated: RULE 11 says a
+ * gate that fires on ordinary prose gets ignored on the turn that matters. `laneFor`'s
+ * defect (b) taught us what over-crediting costs; over-TRIGGERING is the same error
+ * pointed the other way.
+ */
+export function isStructuralTurn(text) {
+  const t = String(text || "");
+  if (!t.trim()) return false;
+
+  // "who/what/anything <relationship verb> <thing>" — the edge question.
+  const TOUCHES =
+    /\b(who|what|anything|any other|nothing)\b[^.?!\n]{0,60}\b(calls?|calling|reads?|reading|uses?|using|consumes?|consuming|touch(?:es|ing)?|depends? on|imports?|importing|references?|referencing|wired to|writes? to)\b/i;
+  // "and then what?" asked about a change — RULE 12's own question.
+  const IMPACT =
+    /\bwhat (?:breaks|happens) if\b|\bblast radius\b|\bimpact of (?:changing|deleting|removing)\b/i;
+  // The dark-consumer question: is anything on the other end of this at all?
+  const DEAD =
+    /\bdead code\b|\b(?:is|are) (?:this|that|these|it) dead\b|\bstill (?:used|wired|live)\b/i;
+
+  return TOUCHES.test(t) || IMPACT.test(t) || DEAD.test(t);
+}
+
+/**
+ * Did a real graph probe happen? TRAVERSALS ONLY — the same line `laneFor` draws and for
+ * the same reason: `graph_stats` / `list_repositories` are metadata ABOUT the graph and
+ * `remember` / `ingest_turns` are writes. Crediting those would let a session satisfy
+ * graph-first without traversing an edge — defect (b) in a new lane.
+ */
+function isGraphProbe(name, input) {
+  const n = String(name || "");
+  const cmd = String((input && input.command) || "");
+  if (GRAPH_TRAVERSAL.test(n)) return true;
+  // The CLI form. Grep-shaped commands excluded on purpose: `grep -rn graphify .` is a
+  // search FOR the word, not a probe OF the graph, and crediting it would reopen the
+  // decoy-Grep hole this gate exists to close.
+  return (
+    /^(Bash|PowerShell)$/.test(n) &&
+    /\bgraphify\b/.test(cmd) &&
+    !/\b(grep|rg|ripgrep|Select-String)\b/.test(cmd)
+  );
+}
+
+/**
+ * TRUE when the turn asks a structural question and no graph probe was made.
+ *
+ * FALL-THROUGH IS DELIBERATE and is what keeps this from being worse than no gate: an
+ * ATTEMPT satisfies it, it never requires the graph to ANSWER. Measured 08/11/2026 —
+ * `gx_callers` and `gx_references` both returned 0 for `reportToEmailHtml` while the tree
+ * carried a real import at lib/email/activation/sequence.ts:22, and the hosted index is
+ * code-only and often many commits behind HEAD. A gate demanding a non-empty result would
+ * wedge on exactly that false negative. Consult the graph first, then fall down the
+ * ladder to grep precisely as RULE 0.5 already says.
+ */
+export function graphFirstGap(text, calls) {
+  const t = String(text || "");
+  if (!isStructuralTurn(t)) return false;
+  // The operator's opt-out beats this gate too, or a vendor outage makes a turn
+  // unendable. Same phrases isDataTurn honors — he keeps "just tell me".
+  if (/\b(no search|skip search|no probe)\b/i.test(t)) return false;
+  return !(calls || []).some((c) => isGraphProbe(c?.name, c?.input));
+}
+
 /** Classify ONE tool call into a lane, or null. Pure. */
 export function laneFor(name, input) {
   const n = String(name || "");
@@ -158,10 +244,7 @@ export function laneFor(name, input) {
   //      TRAVERSALS ONLY, on purpose: `graph_stats` / `list_repositories` are metadata
   //      about the graph, and `remember` / `ingest_turns` are writes — crediting those
   //      would be defect (b) again, a lookup wearing a search's clothes.
-  const graphifyTraversal =
-    /^mcp__graphify(-local)?__(query_graph|shortest_path|get_node|get_neighbors|get_community|god_nodes|gx_(find|find_seeds|callers|callees|impact|trace|references|expand|node|file_neighbors|rank_files|tests_for|imports_exports))$/.test(
-      n,
-    );
+  const graphifyTraversal = GRAPH_TRAVERSAL.test(n);
   const searchesTheTree =
     /^(Grep|Glob)$/.test(n) ||
     /^mcp__serena__(search_for_pattern|find_symbol|find_referencing_symbols|get_symbols_overview)$/.test(
@@ -214,7 +297,7 @@ export function textOf(content) {
  * one of these words is unaffected.
  */
 export function isInjected(text) {
-  return /^\s*(<task-notification|\[SYSTEM NOTIFICATION|Base directory for this skill:|<command-name>|<local-command|<system-reminder|Caveat: The messages below were generated by the user|This session is being continued from a previous conversation|Stop hook feedback:|⛔ FOUR-LANE READ GATE)/i.test(
+  return /^\s*(<task-notification|\[SYSTEM NOTIFICATION|Base directory for this skill:|<command-name>|<local-command|<system-reminder|Caveat: The messages below were generated by the user|This session is being continued from a previous conversation|Stop hook feedback:|⛔ FOUR-LANE READ GATE|⛔ GRAPH-FIRST GATE)/i.test(
     String(text || ""),
   );
 }
@@ -296,6 +379,28 @@ function main() {
   }
 
   const { text, calls } = readTurn(lines);
+
+  // GRAPH-FIRST GATE — checked BEFORE the four-lane gate and INDEPENDENTLY of it.
+  // Independent on purpose: `isDataTurn` requires a data NOUN, and the structural
+  // questions RULE 0.5 is actually about often carry none — "what reads this?" names no
+  // dataset. Gating graph-first behind isDataTurn would fire it only on the overlap and
+  // miss the exact turns the rule exists for.
+  if (graphFirstGap(text, calls)) {
+    process.stderr.write(
+      `\n⛔ GRAPH-FIRST GATE — this is a structural question and the graph was never asked.\n\n` +
+        `RULE 0.5 (08/11/2026): the graph is the FIRST reach; grep is the FALLBACK.\n` +
+        `Operator: "ARE WE USING GRAPHIFY ON EVERY SESSSION OR NOT????????"\n\n` +
+        `Grep only returns what you already thought to type. The graph returns what you had\n` +
+        `no reason to type — which is why it matters most exactly when you are most sure you\n` +
+        `already know the answer. Load the tools in ONE call, then traverse:\n` +
+        `  ToolSearch("select:mcp__graphify__gx_rank_files,mcp__graphify__gx_callers,mcp__graphify__gx_impact,mcp__graphify__gx_trace,mcp__graphify__gx_tests_for,mcp__graphify__gx_find")\n\n` +
+        `An ATTEMPT satisfies this gate — a graph that answers nothing is fine, and you then\n` +
+        `fall through to grep. What is not fine is never asking it.\n` +
+        `Genuinely not a structural question, or the graph is down? Say "no probe".\n`,
+    );
+    process.exit(2);
+  }
+
   if (!isDataTurn(text)) process.exit(0);
 
   const missing = missingLanes(calls);
