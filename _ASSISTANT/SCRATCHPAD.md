@@ -18,6 +18,28 @@ we have no wire to. Refresh mechanism NOT yet verified (their service side — R
 `graphify-out/graph.json` — a queryable MCP server serving the 07/08 snapshot RULE 0.5 explicitly
 says is missing symbols. A stale answer from it is indistinguishable from a fresh one.
 Shape: `didnt-read-what-we-hold` + `stale-source-served-silently`. Name collision was the carrier.
+**RUN TO GROUND, same session — "make sure we are hooked."** WE ARE HOOKED; the hook is not the
+problem, the TIER is. Evidence: SESSION_LOG 08/11 records hosted following a mid-session push
+(answered at `ceab01dc`, then minutes later at `7fc8c44b`) — a disconnected repo cannot do that.
+Repo webhooks (`gh api repos/…/hooks`): exactly ONE, the ops `/api/revalidate` push hook, active,
+last response 200. No graphify webhook exists to add — the hosted connection is a GitHub App, and
+I could NOT read the installation record (`user/installations` → 403, `repos/…/installation` → 401,
+gh token lacks app scope) and could NOT open `app.graphify.com/swfl-data-gulf` (Chrome extension
+not connected — 2nd session today). So "hooked" is proven by BEHAVIOR, not by an install record.
+**THE REAL FINDING — THE 150 UN-IGNORED RESEARCH FILES ARE NOT IN THE GRAPH.** `gx_rank_files`
+asked a pure research question ("agent behavior, anti-drift steering, model routing across
+vendors") → 12 ranked files, **every one of them code** (.ts/.tsx/.py/.sql/.json/.js), zero
+`_RESEARCH/`, zero `docs/`. It keyword-matched "drift"/"routing" against code symbols. Vendor
+side agrees (graphify.com/pricing, re-crawled 08/11/2026): Free indexes **"your full code plus
+README"**; **"Deep semantic indexing across all docs" is a PRO line**, as is "Unlimited automatic
+updates" + "Higher monthly indexing allowance". So commit `149f4f6f` un-ignored 150 files so the
+graph could see them, and at our tier the graph does not read them. The 14-commit lag is the same
+cause: Free = "Automatic updates, **limited per day**."
+METHOD NOTE, caught before it shipped: I first "proved" this with `gx_find` on `omnigent` → 0, but
+the control `gx_find "SESSION_LOG"` and `"data-roots"` ALSO returned 0 — that tool matches code
+SYMBOL labels only, so a null from it was never evidence about docs. The rank-files test is the
+one that carries. Falsifier if anyone re-checks: a markdown path appearing in `gx_rank_files`.
+DECISION IS THE OPERATOR'S (spend): Pro is the lever for both halves. Check opened.
 
 ## 2026-08-11 (Opus 5) — OPERATOR: "whenever you have to put in an address or choose, NO NEW PROJECT, it fucks everything up" + "every first land at email labs needs to be fucking BLANK"
 Two screenshots, two live defects on the address-first door we shipped 08/10 — i.e. the SAME surface
