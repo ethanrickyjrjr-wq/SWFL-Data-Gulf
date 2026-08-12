@@ -252,6 +252,18 @@ personal financial notes.
   BoomTown, Real Geeks) done in this pass — scoped to FUB only per operator's confirmed target.
 
 **data-and-ingest/** — sources, backfills, pipeline findings (20)
+- `2026-08-12-deed-parcel-strap-join-fix.md` — **THE LEE DEED→PARCEL JOIN IS NOT BROKEN.** It was
+  measured against `lee_parcels.state_parcel_id` (0 rows, correctly). The right column is
+  `lee_parcels.parcel_id` — the same 17-char STRAP, separators stripped, section zero-padded — a
+  fact already written 07/18/2026 in `audits/2026-07-18-data-consolidation/P1-parcel-consolidation.md`
+  line 63 and never connected to this feed. **LIVE ROOT: `data_lake.lee_records_addressed_v`** —
+  10,461 recorded documents resolved to a STREET ADDRESS across 31 doc types (DEED 4,535 = 85% of
+  all deeds, MORTGAGE 1,846, NOTICE OF COMMENCEMENT 1,278, LIEN 313). Sale price + exact recording
+  day + address, answering T10's month-grain/7-week-lag complaint. **Also closes the LeePA↔FDOR
+  crosswalk the 07/18 audit called nonexistent: `leepa_parcels.strap` = `lee_parcels.parcel_id`,
+  542,445 of 548,798 = 98.8%** (826 dup straps LeePA-side, dedupe). Collier joins clean too but only
+  39% of its deeds carry a parcel id; its wider route is `legal_description` (68%) + the NABOR
+  subdivision code list. Closes TASK 1 of `docs/handoff/2026-08-12-lee-deed-data-investigation-queue.md`.
 - `2026-08-12-lee-deed-doc-type-catalog.md` — full 32-type catalog from a live LandMarkWeb export,
   each type defined against Florida recording statute and ranked for real-estate-grading value.
   Ranked add-list beyond DEED: LIS PENDENS + CERTIFICATE OF TITLE + JUDGMENT + LIEN (foreclosure
@@ -613,6 +625,16 @@ personal financial notes.
   by the Apify cap. Feeds the open-house recipe; pair it with
   `docs/handoff/2026-08-12-open-house-and-build-ai-grounding-handoff.md`. Cost record and the
   measured spend: `docs/handoff/2026-08-12-apify-spend-incident-and-research-handoff.md`.
+  **§7 added, same date, second crawl4ai pass:** what the RSVP button's destination should actually
+  DO — map (caniemail.com confirms iframe has zero email-client support, so "map" can only be a
+  static image or a plain link, never a live embed), add-to-phone (no marketing-use vCard precedent
+  found; the real mechanism is the add-to-calendar link's `LOCATION` field, which OS calendar apps
+  make tappable into the phone's own maps app — converges with §4's Shape 3, not a new build), and
+  QR-in-email (usebouncer.com names "QR code when a button would work better" as the #1 documented
+  mistake, matching the operator's own same-device objection; no real-estate open-house email
+  precedent found using one — QR's real home stays the yard sign / on-site sign-in, per §2c and §7a).
+  Two AI-content-farm pages (office.alibaba.com, events-places.com) were crawled, identified as
+  fabricated/keyword-stuffed, and excluded from evidence rather than cited.
 
 **private/** — personal/strategy notes outside the platform (3, stocks architecture)
 

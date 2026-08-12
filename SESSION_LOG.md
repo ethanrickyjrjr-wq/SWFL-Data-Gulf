@@ -1,3 +1,61 @@
+## 2026-08-12 (Opus 5) — Records→ADDRESS is LIVE. The join was never broken; it was measured against the wrong column.
+
+**Shipped `data_lake.lee_records_addressed_v`** (`docs/sql/20260812_lee_records_addressed_v.sql`,
+applied + verified via `bun scripts/apply-lee-records-addressed-view.mts`, exit 0):
+**10,461 Lee recorded documents resolved to a STREET ADDRESS across 31 doc types**, 07/13–08/11/2026
+— DEED 4,535 (85% of all 5,353 deeds), MORTGAGE 1,846, NOTICE OF COMMENCEMENT 1,278, LIEN 313,
+2,850 carrying a sale price. Real row: `08/11/2026 · $350,000 · 2806 SE 17TH AVE`. This is
+**sale price + exact recording day + street address**, against T10's standing month-grain/7-week-lag
+complaint. Two guards baked in: `sale_price_usd` is NULL off an arm's-length DEED by construction
+(`consideration_usd` is non-null on 100% of all rows incl. DEATH CERTIFICATE, so the >$100 floor is
+meaningless elsewhere), and `lee_parcels.parcel_id` is verified unique (556,083/556,083) so there is
+no fan-out. Consumers must still dedupe on `(record_date, strap17)` — two deeds can share one
+address on one day (observed: 1111 FLORENCE ST E, twice, 08/11/2026).
+
+**The fix was one normalization.** `parcel_strap` → strip `-` and `.`, LPAD the section field to 2
+digits → `lee_parcels.parcel_id`. `data-roots.md` said BROKEN in two places; that 0-row measurement
+was correct but was taken against `state_parcel_id`. Both lines corrected this commit.
+
+**Also closes the LeePA↔FDOR crosswalk the 07/18 audit declared nonexistent:**
+`leepa_parcels.strap` = `lee_parcels.parcel_id`, **542,445 of 548,798 = 98.8%** (826 dup straps
+LeePA-side, dedupe). Evidence: `_RESEARCH/data-and-ingest/2026-08-12-deed-parcel-strap-join-fix.md`
+(+ INDEX line, same commit). Closes TASK 1 of the 08/12 lee-deed investigation queue.
+
+**Collier records actually loaded** — 12,441 docs / 23 days / 34 doc types, brain rebuilt (v2) and
+reporting live. It had been reported DONE at 0 rows: the "107 rows" was a `--dry-run` (which skips
+the write), restated in `cadence_registry.yaml` as "first live day-partial pull." Table did not
+exist; no migration; workflow had never run once.
+
+**Three wrong claims in the written record in one day, every right answer already on disk** — the
+join called broken (right column documented 07/18, 25 days unused), the crosswalk called missing
+(same key, two column names), Collier called live (it was a dry-run). Full account + the mechanism:
+`docs/handoff/2026-08-12-records-to-address-wired-and-why-we-kept-missing-it.md`.
+
+**PART 4 correction, made before pushing:** I first wrote "nothing checks that a table has rows,
+we should build it." **Both halves were wrong.** `ingest/scripts/assert_landed.py` already does
+exactly this and is already wired into `nightly-chain.yml` as a hard gate. It did not fire because
+it is **opt-in** and Collier never set `nightly: true` — despite the entry already carrying
+`count_table` and `expected_rows_min: 100`. Measured: **5 entries carry `nightly: true`, 19 carry a
+`count_table`** — fourteen countable pipelines sit outside a gate built to cover them. Fix is one
+registry line, not a new hook (RULE 3 C2). NOT done this commit — the other thirteen need an
+operator review, not a guess.
+
+**My own failures this session, on the record:** reported a backfill "running fine" that had crashed
+to zero rows (piped through `grep`/`tail`, so the exit code was `tail`'s 0, not Python's 1 — the
+trap already in memory from 08/05); told the operator Collier's parcel field was empty on every row
+when it is 939/12,441 (measured on 2 days, stated as all); and led with 91% (of the strap-carrying
+subset) when the honest all-deeds figure is 85%.
+
+**Carried, not mine — and why only half:** this push carries a parallel session's SESSION_LOG entry
+(graphify community labeling, R7) because it sits in this same file and cannot be split. I first
+staged its `scripts/graphify-name-communities.mjs` too, so the entry would not describe an
+uncommitted file (RULE 0 §5) — **the pre-commit lint rejected it** (`'prefix' is assigned a value
+but never used`, max-warnings 0) and reverted cleanly. Their code is still in flight, so I dropped
+it rather than edit another session's work to force my own commit through. Their entry therefore
+lands ahead of its script; that is their file to ship. Five other foreign files were already in the
+index before I started (`.claude/settings.json.graphify-bak`, four open-house plans) and were NOT
+committed — this used `git commit -- <explicit paths>`, which ignores the index for everything else.
+
 ## 2026-08-12 (Opus 5) — Zombie crons: the guard exempted the one that mattered. 2 of 2 closed.
 
 **No hook prints a red CI verdict, and that is not a gap I invented — I checked before saying it.**
@@ -40,9 +98,9 @@ Evidence: `gh api .../actions/workflows` (4 disabled) · freshness-probe run 316
 Manifest regenerated `--with-state`, which also corrected 3 stale `disabled` flags
 (collier-permits, dbpr-sirs, crexi — all re-enabled since the last stamp).
 
-## 2026-08-12 (Opus 5) — RULE 0.5b leftovers: 2 of 4 run. R3 and R6 done; R5's "needs a DSN" was false.
+## 2026-08-12 (Opus 5) — RULE 0.5b leftovers: 3 of 4 run. R7 done for ZERO spend after the operator asked why it cost anything.
 
-Enumerated N=4 before starting (RULE 0.8). **2 of 4 executed, 2 blocked on an operator decision.**
+Enumerated N=4 before starting (RULE 0.8). **3 of 4 executed. Only R5 is left, and only on spend.**
 
 **R3 — correction loop: RUN.** Both false negatives filed through the tool instead of only into
 prose: `reportToEmailHtml` (zero callers vs six real call sites) and `OPS_TARGET` (empty
@@ -67,21 +125,97 @@ on `extract`, the FULL AST **+ semantic LLM** pass over ~43,700 nodes, not a sch
 Open question logged for the operator: whether `--code-only --postgres` composes into a free path
 (UNVERIFIED), and that `extract` writes `graphify-out/` so the doc plane needs backing up first.
 
-**R7 — labeling pass: still not run, and the command in the rule is a trap.** Measured:
-`.graphify_labels.json` has 4,069 labels for 4,069 communities and **zero literal `Community N`
-placeholders**, so `label --missing-only` names nothing — a bad auto-label is not a missing one.
-Real cost, as a number rather than "costs model calls": full pass = ~41 LLM calls at batch 100.
-**1,434 of the 4,069 are singletons and only 369 are size ≥25**, and `label` has no size filter —
-so most of that spend is waste by node count.
+**R7 — labeling pass: DONE, for zero API spend.** First measured that `label --missing-only` is a
+dead end: all 4,069 communities already carry an auto-label (the biggest node's name) and none
+matches the `Community N` placeholder pattern, so it names nothing — a bad label is not a missing
+one. Then priced the full pass at ~41 LLM calls and handed it up as a spend decision. **Operator:
+*"Why does this take api calls. Why can't you just do it?????"* He was right.** `graphify label`
+shells out to a separate metered LLM backend, but the member lists are plain text in
+`.graphify_analysis.json` and the session model was already reading them. Built
+`scripts/graphify-name-communities.mjs`: **all 369 communities of size ≥25 named — 78 hand-written,
+291 derived from dominant path prefix with its share, 0 unmapped, $0.** `pack.mts` →
+`refinery — source adapters`; `Full ranked list` (a markdown heading that ranks as a top-16 hub) →
+`research — competitor & strategy docs (A)`.
+
+The find inside that: **18 size-≥25 communities carry `api_route:` / `brain:` / `slug:` / `package_`
+ids instead of file paths**, so no directory heuristic reaches them — and they hold the **brain
+dependency graph** (CRE corridor, macro & credit, logistics & labor slugs) plus CLAUDE.md's own
+rules as a cluster. Hand-named.
+
+**Also corrected: "4,069 communities" was one surface quoted as if it were the number.** Three
+exist — local analysis **4,069** over 43,723 nodes; the local report shows **2,458** and says so on
+its own line 7 (`1611 thin omitted`); the **hosted index 1,920** over 21,878 nodes at `3592ee0f`.
+And these are CODE clusters, not `communities-swfl` (real subdivisions, 81 profiles vs ~20,400
+subdivisions) — a word collision I let run for a dozen messages.
+
+**LIVE lane caught the hosted index MOVING mid-session, which corrects the number above.**
+`graph_stats` read `commitSha 3592ee0f` (buildId `7ad693a2`) at ~14:45; a `gx_rank_files` call
+~20 minutes later read `commitSha f97f03c1` (buildId `32b8cb0e`) — a different build of a later
+commit. So **the "1,920 communities / 21,878 nodes" figure is stamped to `3592ee0f` and is already
+stale.** More usefully: CLAUDE.md RULE 0.5 records the hosted index found 24 commits behind on
+08/12. **It is not frozen — it advanced on its own inside one session.** "Hosted is stale" is a
+per-moment measurement, never a standing property. (Local HEAD has since moved again to `e82615b5`
+from a parallel session, so hosted is currently one commit back, not 24.)
+
+**RESEARCH lane — what the 369 names do and do not deliver against the original ask.** The operator's
+verbatim request behind all of this (`_RESEARCH/agent-behavior/2026-08-11-graphify-community-structure-crawl4ai-research.md`)
+was *"Email design goes with email design, email sending with email sending… easier for Claude to
+work in the area it is supposed to be in and easier for me to see when we have too many routes for
+one thing."* The names I wrote serve exactly that read — `email — send path & API routes`,
+`email — lab blocks & preview routes`, `deliverable — recipes & shared helpers`. **But be precise
+about the gap: that research's PART 7 proposed a DECLARED ~26-compartment partition, and this is
+369 named DETECTED communities.** Different granularity, different artifact. Naming makes the
+detected partition legible; it does not build the declared one, which is still unbuilt and still
+needs sign-off. Do not let this session's ✅ be read as closing PART 7.
+
+**A backgrounded CODE-lane grep landed after I'd called the naming done, and it found a real defect
+in it.** Two things: (1) nothing in this tree reads `.graphify_labels.json` — the only consumer is
+graphify's own report/wiki generation, outside the repo, so `scripts/graphify-compartments-report.mjs`
+does NOT surface the names and arguably should. (2) The grep surfaced
+`docs/superpowers/specs/2026-08-11-graph-compartments-design.md`, **a spec I never opened, whose F3
+is exactly the failure mode of what I built**: labels re-attach by node overlap (`cli.py:1824`), so
+a membership shift can land a stale name on the wrong group — the mechanism that makes names durable
+is the one that makes them mis-attach. Its guard is that the label sit next to its dominant folder
+and purity. My 291 derived names already carried that (`email · 84%`); **the 78 hand-written ones did
+not, and those are precisely the ones that mis-attach silently.** Fixed — every name now carries its
+purity, restored from backup and re-run. It fired on the first pass: `refinery — brain-output
+contract & constitution · 21%` and `refinery — CRE corridor pack & sources · 31%` are mixed groups
+my names only partly describe, now visibly so. **Also noted and NOT satisfied: the spec says
+"re-label only after values are pinned" and this pass did not wait.**
+
+Did NOT run `graphify cluster-only` to refresh the report: `graph-compartments.md` §2.1/§2.2
+documents it drops the app plane, refuses to write on net node loss, prints a plausible count
+anyway, exits 1, and ignores `--force` there. My script's own closing hint pointed at that trap and
+was fixed in the same pass.
 
 Diff: CLAUDE.md (R3/R5/R6/R7 + the RULE 0.5 "stale by definition" line, which my own R6 install
 falsified — local now rebuilds per-commit and can be FRESHER than hosted; hosted stays first reach)
 and `.gitattributes` (+1 line, `graphify-out/graph.json merge=graphify`). Honest limit on that one:
 `graphify-out/` is gitignored, so the merge driver has no committed file to merge and is inert.
 
-Checks: 0 opened, 0 closed. Deliberately net-zero — R5 and R7 are legal RULE 0.85 §2 checks
-(blocked on an operator decision), but both are being put to the operator in the same breath, and a
-ledger row would be the disguise RULE 0.85 exists to stop.
+Checks: 0 opened, 0 closed. Deliberately net-zero — R5 is a legal RULE 0.85 §2 check (blocked on a
+spend decision) but it is being put to the operator in the same breath, and a ledger row would be
+the disguise RULE 0.85 exists to stop.
+
+**A RESEARCH-lane check found the index itself out of sync — fix drafted, BLOCKED on a file lock.**
+`_RESEARCH/agent-behavior/` holds 14 files; its `INDEX.md` header declares **12**, and
+`2026-08-12-crawl4ai-four-lane-strategy.md` appears nowhere in the index. RULE 0.4 §2: unindexed
+research does not exist. That file's headline is worth surfacing on its own — **lane 4 (live
+mid-conversation crawl4ai) is a NON-BUILD because the capability already shipped on another vendor
+tool**: `lib/assistant/gap-fill.ts` + `web-fallback.ts` run Anthropic's hosted
+`web_search_20250305` live on any conversational answer, gated by verbatim digit-match against the
+citation span plus a domain allowlist. **`_RESEARCH/INDEX.md` is held by session `9db5b8a2`** — the
+one actively adding the open-house entries, which may be writing this line already. Index text is
+drafted; add it and correct the header count to 14 when the lock frees. (One correction to my own
+earlier read in this session: the 08/11 graphify community-structure research IS indexed — my first
+grep window was too narrow to see it. I said otherwise mid-session and it was wrong.)
+
+**One thing OWED and not done:** the `paid-before-free` strike in `_ASSISTANT/STRIKES.md` (its 6th).
+`repolith` reports the file held by another live session (`6a516485`) and force-releasing over live
+work is not worth a counter line. Text is drafted in the scratchpad entry; add it when the file
+frees. Worth noting the shape is marked guard: BUILT but the guard covers paid DATA surfaces and the
+spend switch — **it does not cover paying for INFERENCE we can perform ourselves**, which is exactly
+what happened here. That gap is real and unguarded.
 
 ## 2026-08-12 (Opus 5) — ALL GREEN on 3592ee0f, verified per workflow. Closing the loop on the afternoon's red.
 
