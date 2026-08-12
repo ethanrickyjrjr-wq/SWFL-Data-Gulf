@@ -134,23 +134,72 @@ is connected.
 
 ---
 
+## 4b. Pass 2 — SQL extractor installed, rebuilt, re-measured. Singleton floor got WORSE, not better.
+
+**Installed and confirmed:** `graphifyy 0.9.39` (the `C:\Users\ethan\AppData\Local\Python\pythoncore-3.14-64`
+interpreter graphify actually runs on — NOT the repo's default `python`/`pip`, which is a separate 3.11
+env with no `tree_sitter_sql`) already had the extractor; `import tree_sitter_sql` succeeds there.
+Ran the exact reproduce recipe from §6: `graphify update . --force` (code plane only), then
+`graphify cluster-only . --resolution 1.0 --no-viz` (default config, the §3 winner), then
+`node scripts/graphify-app-nodes.mjs` to restore the merged committed state (43,814 nodes / 73,490
+edges — matches the in-session claim of 43,811/73,485 within normal rebuild drift).
+
+Measured directly off the written `graphify-out/graph.json` (community-size histogram + edge
+source/target community lookup — same method as the §3 table: singleton = community size 1,
+cross% = share of edges whose endpoints sit in different communities):
+
+    metric              pre-SQL (§3)   post-SQL (pass 2)   delta
+    code-plane nodes    43,129         43,723              +594
+    communities         3,769          4,069               +300 (worse)
+    singletons          1,270          1,434                +164 (worse, +12.9%)
+    cross-community %   17.2           16.7                 -0.5 (marginal improvement)
+
+**The SQL fix worked exactly as documented — 553 SQL-derived nodes now exist that were previously
+zero (confirms §4's "262 .sql files contributed NOTHING") — but it did not lower the singleton
+floor. It raised it.** Breakdown of the 1,434 singletons by source-file extension: `.ts` 618, `.tsx`
+324, **`.sql` 171**, `.py` 103, `.yaml` 102, no-extension 67, `.json` 19, `.mts` 14, others 12. Of the
+553 total SQL nodes now in the graph, 171 (31%) landed as singletons — accounting for nearly the
+entire 164-node increase. **Newly-extracted SQL symbols mostly have no resolved cross-file edges**
+(nothing in the TS/Python layer references them back), so making them visible to the graph converted
+them from "absent" to "present but disconnected" rather than "present and compartmented."
+
+**Read correctly, this is not a wasted fix.** RULE 0.5's stated reason for the hosted-index push is
+that SQL entities should be *queryable* (`gx_find`, `gx_callers`) at all — that's now true for 553
+nodes that weren't in the graph a session ago. It is simply a DIFFERENT lever from the one this whole
+pass exists to move (community count / cross-community share). Edge coverage and compartmentalization
+are not the same problem: fixing "the file produces no node" does not imply "the node has an edge."
+The real remaining lever, unexamined until now, is SQL-to-code edge resolution (e.g. a Python/TS
+`SELECT * FROM table_x` or ORM reference should produce a `references`/`queries` edge into the
+`.sql` node for `table_x`) — nobody has checked whether graphify's extractor even attempts that kind
+of cross-language edge, and it's now the next open question, not resolution/hub-exclusion.
+
+**Do not re-run this measurement again without a specific new lever to test** — the same "±0.2% noise"
+caveat from §2.3 applies; a repeat run would cost ~90s of compute to learn the same thing twice.
+
+---
+
 ## 5. State, and what is NOT done
 
 - **Step 0 (hosted-index probe) — NOT STARTED.** Whether `.graphifyignore` reaches the hosted index
   at `api.graphify.com/mcp` is still UNKNOWN. It needs its own push and a later `gx_find` check.
   RULE 0.5 makes the hosted graph every session's first reach, so this is the step that decides
   whether Step 1 helped the tool anyone actually uses.
+- **Step 2 pass 2 (SQL-extractor install + re-measure) — DONE, see §4b.** Result: singleton floor
+  moved from 1,270 to 1,434 (worse), community count worsened, cross-community % improved 0.5pt.
+  New lever identified (SQL-to-code edge resolution), not yet tested.
 - **Step 3 (TDD report script + `docs/standards/graph-compartments.md`) — NOT STARTED.**
 - **Check `graph_compartments_live_verify` — re-scope, do not close.** Its premise (calibrate the two
-  knobs) is answered and negative; the open question is now edge coverage.
+  knobs) is answered and negative; §4b closes the "install the SQL extractor" sub-question with
+  another negative; the open question is now SQL-to-code edge resolution, not resolution/hubs.
 - **`package.json` unchanged. Graph artifacts are gitignored build products** — the graph state
   described here lives on this box only; a fresh clone must run
-  `graphify update . --force && node scripts/graphify-app-nodes.mjs`.
+  `graphify update . --force && graphify cluster-only . --resolution 1.0 --no-viz && node scripts/graphify-app-nodes.mjs`.
+  Current on-disk state (this session): 43,814 nodes / 73,490 edges, 4,069 code-plane communities.
 - Snapshot restore point from before any of this: `C:\Users\ethan\.cache\graphify-brain-platform\snapshot.tar.zst`
   (`bun scripts/graphify-snapshot.mjs restore`).
 
-**2 of 4 steps.** Step 1 shipped and verified; Step 2 executed and returned a negative result;
-Steps 0 and 3 untouched.
+**2.5 of 4 steps.** Step 1 shipped and verified; Step 2 executed and returned a negative result, its
+pass-2 follow-up also executed and also came back negative (see §4b); Steps 0 and 3 untouched.
 
 ---
 

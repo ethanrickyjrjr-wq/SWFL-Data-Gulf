@@ -1,3 +1,21 @@
+## 2026-08-12 (Sonnet 5) — Graph compartments pass 2: SQL-extractor fix installed+measured, singleton floor got WORSE not better
+
+Continuation of `docs/handoff/2026-08-12-graph-compartments-step2-negative-result.md` §4's "recommended
+pass 2." Confirmed `tree_sitter_sql` installed in the interpreter graphify actually runs on
+(`pythoncore-3.14-64`, not the repo's default python). Ran the exact §6 reproduce recipe
+(`graphify update . --force` → `cluster-only . --resolution 1.0 --no-viz` → `graphify-app-nodes.mjs`)
+and measured the rebuilt `graph.json` directly (community-size histogram + edge community-crossing,
+same method as the original §3 table). Result: singletons rose 1,270 → 1,434 (+12.9%, worse),
+communities rose 3,769 → 4,069 (worse), cross-community% improved marginally (17.2 → 16.7). 553 new
+SQL nodes now exist (previously zero — the SQL fix itself worked exactly as documented), but 171 of
+them (31%) landed as singletons because they have no resolved cross-file edges back from the TS/Python
+layer that references them. Wrote the full breakdown into the handoff §4b, updated §5's step count to
+2.5/4, and re-scoped (not closed) `graph_compartments_live_verify` to the new open question: does
+graphify resolve a SQL-to-code edge at all, not resolution/hub-exclusion (both knobs are now exhausted
+across two independent negative results). Local graph state: 43,814 nodes / 73,490 edges, 4,069
+code-plane communities — gitignored build product, this box only. Next: Step 0 (hosted-index probe,
+still not started) or Step 3 (report script + standards doc) — operator's call on which.
+
 ## 2026-08-12 (Sonnet 5) — collier_first_lake_ingestion gate CLEARED — geocoder fix confirmed live
 
 Follow-up to the geocoder timeout fix (bba5ca43). Re-ran the real ingestion (`gh run 31567459230`,
