@@ -1,3 +1,18 @@
+## 2026-08-12 (Sonnet 5) — wf-78 (Stripe) landed too — all 5 salvage worktrees resolved
+
+Follow-up to the entry below (same session). Operator confirmed the retry-refinement approach for
+`wf-78` rather than leaving it or dropping it. Landed as `dd2ff062`: `isResourceMissing()` added to
+`lib/billing/stripe-client.ts` (unchanged from the worktree, tested — 6 cases), wired at the webhook
+route's outer `catch` around `normalizeEvent` rather than inside `fetchSubscription` itself, because
+`normalizeEvent`'s documented contract ("MUST reject, never resolve null") would have broken if the
+worktree's original approach (return `null` on `resource_missing`) had been copied verbatim — that
+contract exists specifically because of the 08/06/2026 `sa0718_...` fix this had to reconcile with.
+34/34 billing tests pass. `check.mjs close stale_workflow_worktrees_recoverable_fixes` filed with
+evidence. All `.claude/worktrees/wf_80061966-e13-*` entries are now gone (`git worktree list`
+confirmed empty). Commits this session, in order: `df653980`, `90d504d2`, `20a87820`, `249da851`
+(restored another session's commit my own `git reset --soft` accidentally undid — see that entry's
+own note on the `20a87820` mislabeling), `c9dd5a77`, `dd2ff062`. Nothing pushed yet.
+
 ## 2026-08-12 (Sonnet 5) — 29 dead Workflow worktrees removed, 3 real abandoned fixes recovered and landed
 
 Operator flagged 3 duplicate files under `.claude/worktrees/`; actual scope was 35 leftover worktrees
