@@ -1,3 +1,80 @@
+## 2026-08-11 (Sonnet 5) — /go carve-out follow-up: the "empty build" bug is not a bug, it's the spend guard doing its job — and that breaks the whole /go plan as designed
+
+Operator: "we need it all one way. The right way. Which was confirmed to be right for all new
+builds, but now we have yet another 'bug'." Traced the contradiction between `_GO/HANDOFF.md`
+(claimed the lab's build route "never calls resolveSubject") and the carve-out handoff (traced 3
+layers deep, claimed it dispatches fine) all the way to ground truth, live in code, not more
+static tracing.
+
+**Both were half-right.** `app/api/email-lab/ai/route.ts` really doesn't call `resolveSubject`
+directly — but it passes `recipeKey` into `authorDoc` (`lib/email/build-doc.ts`), which DOES
+resolve `keyedRecipe`/`keyedBuilder` and DOES call `resolveSubject` when a valid key is present.
+`_GO/HANDOFF.md` stopped at `route.ts`'s 236 lines and never followed the call one level deeper.
+The carve-out handoff's correction stands.
+
+**The actual reason the Nashville test came back `$—` with six "+ Add" chips: `resolveSubject`
+(`lib/deliverable/recipes/shared.ts`) tried the free lake spine (nothing — Nashville isn't
+Lee/Collier), had no already-bought paid row, then reached LANE 3b — the live Apify
+by-address buy — which calls `fetchApifyPropertyByAddress`. That function is gated by
+`lib/listings/apify-spend-guard.ts`, OFF BY DEFAULT, and refuses loudly unless
+`OPERATOR_APPROVED_PAID_RUN=1` is set for that process** (built 08/05/2026 after a real $14.08
+burn on one test walk — repeated re-buys of the same ZIP month). No wiring is broken. The system
+did exactly what RULE 0.7 demands: no record found, no spend approved, ship empty slots instead
+of inventing data.
+
+**Why this is bigger than a resolved contradiction: /go's whole design is Apify-ONLY, no lake
+fallback at all** (carve-out handoff §1). If that same manual, off-by-default env-flag guard ships
+unchanged into the new project, EVERY production build for EVERY visitor comes back empty unless
+someone manually sets an env var per request — which no live product can do. The guard's own
+comments say it's deliberately process-scoped and meant to be armed by a human per CLI run, never
+as a routine build step (RULE 0.7a). That's correct for SWFL's rare 0.4%-of-properties gap-fill. It
+is not a workable policy for a product whose only data source is this same paid lookup on every
+single build.
+
+**This is the actual day-0 blocker for the /go carve-out, ahead of folder names or the new
+Supabase account:** decide the real spend-authorization model for a live, Apify-only product
+(per-request budget tied to a paying user? a session/day cap instead of a manual flag? something
+else?) before porting any of this code forward. Not decided this session — operator call.
+
+## 2026-08-11 (Opus 5) — OPERATOR: "one big yarn ball of paths" + "I still find out we build different ways or have different ways of building so don't tell me we are doing all we can"
+
+He asked for compartments in graphify: email design with email design, email sending with email
+sending, website design broken down by page type — so Claude works in the right area and HE can see
+when we have too many routes for one thing or data connected to nothing.
+
+**He is right and it is measurable. Measured 08/11/2026 on `graphify-out/graph.json` (48,777 nodes,
+83,716 edges): 3,740 communities. 1,266 singletons. 2,093 connected components — the largest holds
+only 51% of nodes. The two biggest communities in the whole repo are `SESSION_LOG.md` (1,370 + 672
+nodes). `_ASSISTANT/SCRATCHPAD.md` is another 313. FIVE more of the top communities (~1,480 nodes)
+are ONE downloaded vendor file, `app/_design/assets/reference-builds/pudding-happy-map-page-component.beauty.js`,
+plus `meteo-ashwyn-bundle.beauty.js` — beautified reference bundles, AST-parsed as first-class
+symbols. Email is fractured across at least seven communities (c2, c7, c11, c14, c17, c20, c23,
+c1899) at 19–92% folder purity.**
+
+**Root cause is ours, not graphify's:** no `.graphifyignore`, default Leiden resolution 1.0, no
+`--exclude-hubs`, and no declared intended partition to check the detected one against. Graphify
+already ships every knob (`--resolution`, `--exclude-hubs`, persistent `.graphify_labels.json`,
+`god-nodes`, `affected`, `prs --conflicts`, `save-result`/`reflect`) — two of the three tuning flags
+are undocumented on graphify.com and only visible in the installed `cli.py`.
+
+**STRIKE — new shape `architecture-drift-no-detector` opened in STRIKES.md.** The "we build
+different ways" complaint has no mechanism behind it: nothing compares `docs/section-map.md`'s five
+declared sections + the eight area `CLAUDE.md` files against how the code is actually wired. Per
+RULE 2 §0b the answer is the mechanism, not another entry — the owed mechanism is a declared-vs-
+detected partition diff regenerated on every graph rebuild.
+
+**HONEST CAVEAT HE MUST HAVE:** the `--resolution` / `--exclude-hubs` flags act on the LOCAL
+`graphify-out/graph.json` and on the ops `/graph` snapshot built from it (`.github/workflows/
+graphify-republish.yml` → `bun run graphify:publish`). They do NOT reach the HOSTED graphify MCP
+index (`ethanrickyjrjr-wq/SWFL-Data-Gulf`) that RULE 0.5 tells sessions to query first. Whether
+`.graphifyignore` propagates to the hosted index is UNVERIFIED. Tuning without answering that is a
+fix to an artifact nothing queries.
+
+Research + the proposed compartment list:
+`_RESEARCH/agent-behavior/2026-08-11-graphify-community-structure-crawl4ai-research.md`
+
+---
+
 ## 2026-08-11 (Opus 5) — OPERATOR: "We aren't being racists towards houses" + "there is a fucking system for similar square footage and extra bedroom and pool. What the fuck are you talking about grouping????"
 
 Two errors in one answer, both mine.
