@@ -1,3 +1,59 @@
+## 2026-08-12 (Sonnet 5) — OPERATOR: "there are two fucking handoffs right there and research!!!!!!!!!!!!!!!!!!!!!!!!!!!"
+
+New session opened with `/model` output showing three file references in plain view — two handoff
+docs and one research file, all dated 08/11: `docs\handoff\2026-08-11-listing-grade-sonnet-work-queue.md`,
+`docs\handoff\2026-08-11-listing-grade-crawl4ai-research-brief.md`,
+`_RESEARCH\data-and-ingest\2026-08-11-agent-site-listing-crawl-feasibility.md`. I answered "No task
+in your message yet — let me know what you want to work on" — ignored the files sitting right there
+in the tool output and asked him to repeat himself. **Same shape as RULE 0.95/0.4: files named in
+the visible context are not optional reading just because they arrived as command output instead of
+prose.** Fix in progress: reading all three now before doing anything else.
+
+## 2026-08-11 (Sonnet 5) — OPERATOR, immediately after the Nashville live-verify report: "that is WRONG!!!!!!!!!!!!!!!!!!! WHAT THE FUCKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKK"
+
+**CONFIRMED, part 1 of what's wrong (operator: "YES, THAT IS PART OF IT. GOOD FIND."):**
+`fillFactsFromFreshRow` (`lib/listings/apify-property-lookup.ts:293-296`) builds the printed address
+from `[row.street, row.city, row.state, row.zip_code]` and never reads `row.unit` — even though
+`normalizeOneApiItem` captures it (`unit: str(addr.unit)`, line 116) and the free-lake spine's own
+convention is to embed the unit IN the street line ("8521 Oakshade Cir #422", per
+`apify-record-store.ts:267-268`'s own comment). The Nashville flyer printed "4400 Belmont Park
+Terrace" with no unit while the sourced record was Apt 173. A real, silent address-fidelity bug on
+every multi-unit property bought through the fresh-Apify-pull lane.
+
+**Part 2, follow-up message with a screenshot** (`Screenshot 2026-08-10 211405.png`, a prior REAL
+build for 12281 McGregor Palms Dr, Fort Myers): "WHERE IS THE AGENT NAME AND COMPANY AND PHOTO...
+FONT IS WRONG AT THE BOTTOM... HOW IS IT POSSIBLE WE BUILD DIFFERENT FROM THE SAME FUCKING PROFILE
+EVERY FUCKING TIME." That reference build shows a full agent header card (Marisa Delgado / SWFL
+Data Gulf). My Nashville build's header showed only the bare logo mark — no agent name, no company,
+no photo. **Self-caught, not operator-caught first: my own dev server log already showed
+`GET /api/user/brand 401` — I was running anonymous, not signed in, and reported "same code, only
+spend changed" without disclosing or even noticing I'd also changed the auth/brand-profile state.**
+That overclaim is the root failure here, independent of whichever rendering bug turns out to
+explain the operator's own repeated live observation of the SAME signed-in profile producing
+inconsistent agent-card output.
+
+**BOTH BUGS FIXED AND TESTED, committed `863214f4`:**
+1. `fillFactsFromFreshRow` (`lib/listings/apify-property-lookup.ts`) now folds `row.unit` into the
+   printed street the same way the free-lake spine already does ("2287 Somerset Pl #173, ..."). Was
+   silently dropping the unit on every fresh Apify pull. 2 new tests
+   (`apify-property-lookup.test.ts`).
+2. New `lib/email/brand/fetch-account-brand.ts` — `fetchAccountBrand()` retries the `/api/user/brand`
+   prefill ONCE on anything that isn't a confirmed 401 before falling back to unbranded. A 401
+   (genuinely signed out) still returns instantly; a 500/timeout/thrown error no longer gets treated
+   identically to "this account has no brand." Wired into `EmailLabGridShell.tsx`'s prefill effect.
+   5 new tests. This is the best evidence-backed explanation for "same profile, different results
+   every time" — a transient failure on ONE fetch, previously indistinguishable from "no brand
+   saved," with zero retry.
+
+**NOT independently verified — the font question.** "IT SEEMS LIKE THE FONT IS WRONG AT THE BOTTOM"
+was never confirmed against my own build's actual footer render (my earlier screenshot was cut off
+before the footer, and the dev server was stopped before this second message arrived). Did not
+re-spend Apify money or re-render just to chase this visually this session — flagged here, not
+fixed, not claimed either way. `[applybrand_no_server_side_caller]` (TODAY.md, browser-only send
+paths ship unbranded) is a RELATED but DISTINCT gap from bug 2 above — that one is about non-Lab
+send paths never calling applyBrand server-side at all; bug 2 is about the Lab's OWN prefill silently
+degrading on a fetch hiccup. Both real, neither the same mechanism.
+
 ## 2026-08-11 (Sonnet 5) — LIVE VERIFIED, spend authorized: the exact Nashville test now builds real, end to end
 
 Operator authorized spend to settle this for real, not from more code tracing. Ran `bun run dev`
