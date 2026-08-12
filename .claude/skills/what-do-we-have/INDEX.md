@@ -7,7 +7,7 @@
 
 Markers: **[ORPHAN]** nothing in the repo points at this file — it is invisible unless you come through this index, and it is a DELETION CANDIDATE. **[weak]** reachable only by bare filename, which leads nowhere.
 
-Reachability at generation: 874 by path · 537 by name only · 240 orphaned. Re-measure with `node scripts/doc-reachability.mjs`.
+Reachability at generation: 874 by path · 538 by name only · 239 orphaned. Re-measure with `node scripts/doc-reachability.mjs`.
 
 ## docs/superpowers — 842
 
@@ -1401,7 +1401,7 @@ Reachability at generation: 874 by path · 537 by name only · 240 orphaned. Re-
 - `_RESEARCH/data-and-ingest/2026-08-11-agent-site-listing-crawl-feasibility.md` — Agent-site listing crawl — feasibility + field census (Q1 of the listing-grade brief) — per-house record we currently buy.
 - `_RESEARCH/data-and-ingest/2026-08-11-direction-call-forecast-evaluation-standard.md` — What a direction call SHOULD be — the outside standard, crawled 08/11/2026 — Operator ask, verbatim: "crawl4ai what this should be" — following the finding that our
 - `_RESEARCH/data-and-ingest/2026-08-12-agent-site-crawl-luxury-presence.md` *[weak]* — Luxury Presence agent-site crawl — feasibility + field census (Task 4 of the listing-grade queue) — no Firecrawl · Rule: RULE 0.4
-- `_RESEARCH/data-and-ingest/2026-08-12-agent-site-crawl-sierra-interactive.md` **[ORPHAN]** — Agent-site listing crawl — Sierra Interactive (Task 2 of the listing-grade Sonnet queue) — platform = Sierra Interactive.
+- `_RESEARCH/data-and-ingest/2026-08-12-agent-site-crawl-sierra-interactive.md` *[weak]* — Agent-site listing crawl — Sierra Interactive (Task 2 of the listing-grade Sonnet queue) — platform = Sierra Interactive.
 
 ## .agents/skills — 17
 
