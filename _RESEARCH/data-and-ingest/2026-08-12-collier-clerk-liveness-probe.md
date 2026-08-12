@@ -40,21 +40,52 @@ arm's-length DEEDs/business-day is a small slice of Lee's own ~32 doc types in t
 — Collier's default search likely spans more doc types by default, consistent with the doc-type
 catalog finding that DEED is a minority of any clerk's daily recording volume.
 
-## What is NOT yet proven — the honest gap
+## Follow-up same session — burst-repeat test + full output schema (RULE 0.4 full-scope-first)
 
-- **Automatability, not just crawlability.** A single interactive probe succeeding does not prove a
-  scheduled, unattended daily pull will keep working — Lee's own feed initially looked reachable too
-  before Akamai's behavioral fingerprinting kicked in on repeated/scheduled access. The real test is
-  a sustained, scheduled pull, not one manual session.
-- **Full field/doc-type scope not yet enumerated.** RULE 0.4 full-scope-first requires listing every
-  field the export/search UI exposes before writing ingest code — this probe confirmed the search
-  form's INPUT fields, not the full set of OUTPUT columns per result row, nor whether an export
-  button (like Lee's newly-found clean XLSX export, `_RESEARCH/data-and-ingest/
-  2026-08-12-lee-deed-doc-type-catalog.md`) exists here too.
-- **No parcel_strap / join-key equivalent confirmed.** Lee's pipeline depends on a derived
-  `parcel_strap`; Collier's form has a bare `ParcelNumber` field (labeled "Not part of the Official
-  Record" in the UI) — whether Collier deeds carry the join key needed to replicate Lee's
-  cash-vs-financed pattern is unconfirmed.
+Operator asked to push past the single-probe result and confirm this actually holds up. Ran 7 total
+automated searches this session (the 1 above + 6 more, different date ranges), back-to-back, no
+pacing — **zero CAPTCHA, zero rate-limit signal, zero block, across all 7.** This is not the same
+as surviving a real multi-day cron (see below), but it does rule out the cheapest failure mode:
+immediate behavioral-fingerprint blocking on repeat automated access, which is exactly how Lee's
+Akamai wall would have reacted to this same test.
+
+**Caught a real bug in my OWN test script along the way, not a Collier-side issue:** the date
+fields are native HTML5 `<input type="date">`, which only accept ISO `YYYY-MM-DD` — my first burst
+test fed `MM/DD/YYYY` and got silently rejected (the field keeps its default value), which is why 3
+different requested ranges all returned nearly the same count. Fixed the format and reran; results
+now scale sensibly with range size:
+
+- 3 days (08/10-08/12): 1,227 items
+- 7 days (08/05-08/11): 2,858 items
+- 1 month (07/13-08/12): 12,524 items
+- 2 months (06/13-08/12): 23,747 items
+
+That's a consistent ~400-420 documents/day across ALL doc types (not DEED-only) — real, sane,
+internally-consistent volume, not an artifact.
+
+**Full output schema, from the actual results table** (RULE 0.4 requires this before any ingest
+code, not just the fields an immediate use case needs): `Party Names`, `Recorded` (date), `Doc Type`,
+`Instrument` (number), `Book`, `Page`, `#Pgs`, `Legal Description/Comments`, `Parcel IDs`. Sample row:
+grantor/grantee prefixed `F:`/`T:` inside the single Party Names cell (same convention as Lee's
+grantor/grantee lists), Doc Type rendered as a short code (`NC` in the sample — not yet decoded to
+its full name; Collier's UI does not expose the code→label mapping in the DOM the way Lee's export
+button does, so this is a genuine open item, not solved here). **`Parcel IDs` can be blank per-row**
+(confirmed in the sample row) — the same join-key-coverage caveat Lee has (not every doc carries a
+resolvable parcel key), degree unmeasured yet.
+
+## What is STILL NOT proven — the honest gap, updated after the burst test
+
+- **True multi-day scheduled durability.** 7 back-to-back searches in one session is real evidence
+  against immediate bot-fingerprint blocking, but it cannot substitute for a real cron running over
+  real elapsed days — Lee's own feed looked fine at first too. This needs an actual GHA scheduled
+  workflow left running, not something one session can fabricate by compressing time.
+- **Doc Type short-code decoding.** Results render codes (`NC`, etc.), not full names — Collier's UI
+  does not expose a code→label map in the DOM the way Lee's export button's spelled-out doc types do.
+  Needs either a docs page, an export-button path (unchecked — does Collier have one?), or manual
+  decoding against known F.S. instrument types.
+- **`Parcel IDs` per-row coverage percentage.** Confirmed the column exists and CAN be blank (one
+  sample), but the true fill-rate (Lee's DEED rows are ~94% strap-covered against a ~44% table-wide
+  average) is unmeasured here — needs a real sample across doc types, not one row.
 
 ## Recommended next step
 

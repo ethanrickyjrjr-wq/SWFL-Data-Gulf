@@ -23,8 +23,19 @@ enumerated, parcel_strap-equivalent join key unconfirmed):
 disconnected in this environment (Claude-in-Chrome unavailable) — used crawl4ai's real Chromium
 session directly instead, same evidentiary weight.
 
-Next (not done this session): a short scheduled-pull durability test before scoping a full ODD
-pipeline for Collier.
+**Follow-up, same session:** operator said "let's get it." Ran 7 total automated searches
+back-to-back (burst-repeat test) — zero blocks, zero rate-limit signal, rules out the cheapest
+failure mode. Caught a bug in my OWN test methodology along the way (not Collier's): date fields
+are native `<input type="date">`, ISO format only — my first burst test fed `MM/DD/YYYY` and got
+silently rejected, making 3 different date ranges look identical. Fixed, reran, results now scale
+sensibly (1,227 / 2,858 / 12,524 / 23,747 items across 3-day/7-day/1-month/2-month ranges — a
+consistent ~400-420 docs/day). Pulled the full output schema (RULE 0.4): 9 columns (`Party Names`,
+`Recorded`, `Doc Type`, `Instrument`, `Book`, `Page`, `#Pgs`, `Legal Description/Comments`,
+`Parcel IDs`). Two genuine open items, not solved: Doc Type ships as an undecoded short code
+(`NC` seen), and `Parcel IDs` per-row fill-rate is unmeasured (confirmed it CAN be blank on one
+sample row). Full writeup updated in the same research file. True multi-day cron durability still
+cannot be proven in one sitting — that needs a real scheduled workflow left running over actual
+days, which is the next real build if the operator wants it (not done this session).
 
 ## 2026-08-12 (Sonnet 5) — crawl4ai four-lane strategy: research fan-out, filed
 
