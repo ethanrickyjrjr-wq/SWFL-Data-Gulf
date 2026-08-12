@@ -1,13 +1,27 @@
-## 2026-08-12 (Sonnet 5) — OPERATOR: "there are two fucking handoffs right there and research!!!!!!!!!!!!!!!!!!!!!!!!!!!"
+## 2026-08-12 (Sonnet 5) — RESOLVED same session: "there are two fucking handoffs right there and research!!!!!!!!!!!!!!!!!!!!!!!!!!!"
 
 New session opened with `/model` output showing three file references in plain view — two handoff
-docs and one research file, all dated 08/11: `docs\handoff\2026-08-11-listing-grade-sonnet-work-queue.md`,
-`docs\handoff\2026-08-11-listing-grade-crawl4ai-research-brief.md`,
-`_RESEARCH\data-and-ingest\2026-08-11-agent-site-listing-crawl-feasibility.md`. I answered "No task
-in your message yet — let me know what you want to work on" — ignored the files sitting right there
-in the tool output and asked him to repeat himself. **Same shape as RULE 0.95/0.4: files named in
-the visible context are not optional reading just because they arrived as command output instead of
-prose.** Fix in progress: reading all three now before doing anything else.
+docs and one research file, all dated 08/11. I answered "No task in your message yet" — ignored the
+files sitting right there in the tool output and asked him to repeat himself. **Same shape as RULE
+0.95/0.4: files named in the visible context are not optional reading just because they arrived as
+command output instead of prose.**
+
+**Fix, same session:** read all three files, confirmed scope with the operator (per the
+ask-before-subagent-waves rule, since this meant a 9-agent wave), then ran the full 9-task Sonnet
+work queue from `docs/handoff/2026-08-11-listing-grade-sonnet-work-queue.md` in parallel. All 9
+completed and indexed into `_RESEARCH/INDEX.md`. Headline findings: (1) 4 more agent-site platforms
+crawled (kvCore/BoldTrail browser-only, Sierra Interactive/Real Geeks/Luxury Presence parseable) —
+Real Geeks' URL uses the bare MLS number as the whole path, cleanest join key found; (2) confirmed no
+competitor combines county-record facts + live market behavior + copy critique in one artifact —
+open ground; (3) Florida legal quotes gathered for appraisal/BPO licensing (caught the brief's own
+mis-cited statute, FS 475.6295, and sourced the correct one), seller disclosure duty, and buyer-agent
+post-settlement duties (this one came back NOT FOUND — "sourced offer reasoning" isn't a documented
+pain point, the real one is the compensation conversation); (4) **roof age is FREE and already
+landed** — `data_lake.steadyapi_property_permits` has 79,281 rows/12,946 properties parsed 08/03-04,
+contradicting the 08/02 file that called it "still unbuilt," and Collier's parked pipeline already
+clean-IDs roof permits with $ value on 94.2% of rows — no records request needed, just an unrun
+dry-run. Also caught a live cross-source discrepancy: two agent sites list the same MLS number
+(226028911) but disagree on property subtype (Condo vs Residential) — flagged, not resolved.
 
 ## 2026-08-11 (Sonnet 5) — OPERATOR, immediately after the Nashville live-verify report: "that is WRONG!!!!!!!!!!!!!!!!!!! WHAT THE FUCKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKK"
 
