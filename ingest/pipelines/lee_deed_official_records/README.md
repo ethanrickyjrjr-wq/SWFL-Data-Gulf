@@ -107,6 +107,31 @@ rejected one real-Chromium-via-CDP attempt outright.
 claude-in-chrome), not a GHA script. This is architecturally different from every other pipeline
 in this repo and needs to stay that way until/unless a stealth-browser test succeeds.
 
+## Delivery mechanism update (08/12/2026) + backfill status
+
+The search page's own **Export button** gives clean named columns (no positional `"0".."26"`
+decode) but still leaks `legalfield_` prefixes on Lot/Block/Unit/Subdivision/Section/Township/Range
+and does not expose `internal_doc_id` (only in the raw XHR response) — `clerk_file_number`
+substitutes as the merge key instead (real, unique, permanent public instrument id; `constants.py`
+already named it as the fallback). Caps at 2,000 rows/pull; a single day of ALL doc types runs
+~1,000–1,800 rows observed, comfortably under the cap on its own.
+
+**`sync_all_exports.py` is the real tool** — sweeps every `_ExportResults_*.xlsx` in Downloads,
+unions rows by `clerkFileNumber` across all files for a date PLUS whatever `raw/<date>.json`
+already has, so a capped multi-day file and a later clean single-day re-pull combine instead of one
+overwriting the other. Run it, then `python -m ingest.pipelines.lee_deed_official_records.pipeline`.
+
+**Backfill status 08/12/2026 (corrected):** every Lee Clerk business day 07/13–08/11/2026 loaded,
+each from its own clean single-day pull (confirmed live via the Clerk's own hours page: Mon–Fri
+only, no weekend recording; no observed holiday in this window). 28,186 rows / 22 dates, unfiltered
+(every doc type present that day, not just DEED — the consuming pack still filters to DEED only).
+**The 2,000-row-cap risk flagged earlier was real and confirmed**: the original capped 07/13+07/14
+combined export gave 07/14 only 744 rows; the clean single-day re-pull found 1,462 — the cap had cut
+07/14 nearly in half. 07/13 matched exactly (1,256 both times) — the cap happened to fall after it
+was already fully captured. Lesson: a multi-day capped pull is not trustworthy for its LAST date in
+range without a same-day re-pull to check against. Catalog + ranked doc-type add-list:
+`_RESEARCH/data-and-ingest/2026-08-12-lee-deed-doc-type-catalog.md`.
+
 ## How to pull the next day (repeatable steps)
 
 1. Open `https://or.leeclerk.org/LandMarkWeb/search/index?theme=.blue&section=searchCriteriaDocuments&quickSearchSelection=`

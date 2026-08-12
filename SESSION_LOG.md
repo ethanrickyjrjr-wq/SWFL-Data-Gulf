@@ -1,3 +1,33 @@
+## 2026-08-12 (Sonnet 5) — lee_deed_official_records: first real data ever loaded, 21 business days, 26,322 rows; new Export-button delivery mechanism found and tooled
+
+Started from "are we still getting deeds daily" — answer was no, table had never had a real load
+(LOAD cron shipped 07/20/2026 but stayed commented out). Operator ran manual browser pulls via the
+LandMarkWeb Export button (claude-in-chrome wasn't connected this session, so operator drove it by
+hand); I converted and loaded them.
+
+**Real finding: the Export button beats our documented XHR-capture method** — clean named columns,
+no positional `"0".."26"` decode — but still leaks `legalfield_` prefixes and doesn't expose
+`internal_doc_id` (substituted `clerk_file_number`, a real unique public instrument id, already
+named as the fallback key in `constants.py`). Caps at 2,000 rows/pull. Built
+`ingest/pipelines/lee_deed_official_records/{convert_export_xlsx.py,sync_all_exports.py}` — the
+latter sweeps every export in Downloads and unions by date so a capped multi-day file and a later
+single-day re-pull combine instead of clobbering each other.
+
+**Backfill: every Lee Clerk business day 07/17–08/11/2026 loaded**, plus bonus days 07/13/07/14/07/16
+— 26,322 rows, 21 dates. Verified live (crawl4ai, leeclerk.org hours page) that the office is
+Mon–Fri only and no observed holiday falls in this window, so weekday coverage is genuinely complete,
+not assumed. One known gap: 07/13 and 07/14 came only from a 2,000-row-capped combined export, no
+clean single-day re-pull — may be undercounted, everything else has an under-cap pull on its own.
+
+**Bonus: raw capture is now unfiltered** — all 32+ doc types land (verified 28–36 distinct types per
+day), not just DEED, closing most of what `_RESEARCH/data-and-ingest/2026-08-12-lee-deed-doc-type-
+catalog.md` flagged as missing. The consuming pack (`lee-deed-records-source.mts`) still hard-filters
+`doc_type='DEED'` — remaining work is a consumer for the other types (foreclosure timeline, probate,
+equity), not more ingest. Checks: `lee_deed_export_button_vs_xhr_capture` (closed, evidenced),
+`lee_deed_doc_types_beyond_deed_wire` (open, updated with current state). Not yet committed/pushed —
+operator hasn't confirmed. Next: re-pull 07/13/07/14 individually; decide whether Task Scheduler +
+claude-in-chrome (not CDP — CDP is what Akamai catches) can make this unattended.
+
 ## 2026-08-12 (Sonnet 5) — picked up the listing-grade Sonnet queue handoff: resolved the MLS subtype discrepancy, found+fixed the real Collier permits blocker (not Akamai — a crawl4ai vendor-contract bug), re-pointed the stale check
 
 Operator pointed at `docs/handoff/2026-08-12-listing-grade-sonnet-queue-results.md`'s two open threads.

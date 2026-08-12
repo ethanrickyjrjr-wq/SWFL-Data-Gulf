@@ -226,7 +226,14 @@ personal financial notes.
   free annually). SOC 3 + SOC 2 Type 2 + CASA Tier 2 certified. No competitor sweep (kvCORE,
   BoomTown, Real Geeks) done in this pass — scoped to FUB only per operator's confirmed target.
 
-**data-and-ingest/** — sources, backfills, pipeline findings (19)
+**data-and-ingest/** — sources, backfills, pipeline findings (20)
+- `2026-08-12-lee-deed-doc-type-catalog.md` — full 32-type catalog from a live LandMarkWeb export,
+  each type defined against Florida recording statute and ranked for real-estate-grading value.
+  Ranked add-list beyond DEED: LIS PENDENS + CERTIFICATE OF TITLE + JUDGMENT + LIEN (foreclosure
+  timeline) → PROBATE + DEATH CERTIFICATE (inheritance) → MORTGAGE + SATISFACTION (equity) →
+  NOTICE OF COMMENCEMENT (SWFL rebuild activity). Superseded by the 08/12 backfill (28,186 rows,
+  22 business days, all unfiltered) — see `SESSION_LOG.md` and `docs/handoff/
+  2026-08-12-lee-deed-data-investigation-queue.md` for what to do with it.
 - `2026-08-04-steadyapi-leepa-sale-grain-proportion-call.md` — the sale-grain proportion call owed
   by the lean-verifier ledger, run live 08/04. **Outcome: DEFINITIONAL WATCH, not a kill.** Join
   lane exists (68.57% of 9,654 Lee properties); on 6,186 unambiguous pairs price agrees exactly on

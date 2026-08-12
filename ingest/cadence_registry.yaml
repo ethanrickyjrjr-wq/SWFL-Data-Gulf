@@ -2298,7 +2298,7 @@ not_yet_running:
     cadence_days: 1 # the LOAD is automatable daily; the FETCH (manual) sets true content cadence
     tolerance_multiplier: 2.0
     parked: true # shows yellow on ops, not red — manual-fetch ODD source, by design
-    note: "Parked ODD source: LOAD automatable (daily merge of committed raw/*.json — cron COMMENTED until migration applied + first green manual load), FETCH manual — Akamai blocks unattended access to or.leeclerk.org (crawl4ai + CDP Chromium + curl + curl_cffi-Chrome-TLS all failed 07/20/2026). Consumer lee-deed-records-swfl ships empty-tolerant. Backfill a little at a time per operator 07/20/2026; promote to pipelines: (freshness_column: record_date) once a backfill cadence is set."
+    note: "Parked ODD source: LOAD automatable (cron still COMMENTED, but first real load ran manually 08/12/2026), FETCH manual — Akamai blocks unattended access to or.leeclerk.org (crawl4ai + CDP Chromium + curl + curl_cffi-Chrome-TLS all failed 07/20/2026; only claude-in-chrome / a human gets through). 08/12/2026 backfill: 28,186 rows / 22 business days (07/13-08/11/2026), unfiltered — every doc type, not just DEED (see README 'Delivery mechanism update'). Consumer lee-deed-records-swfl still hard-filters doc_type=DEED, ships empty-tolerant on the rest. Investigation queue: docs/handoff/2026-08-12-lee-deed-data-investigation-queue.md. Promote to pipelines: (freshness_column: record_date) once a backfill cadence is set."
     # Idempotent merge key: internal_doc_id (stable numeric doc id, README idx 25).
     source_scope:
       confirmed_total:
