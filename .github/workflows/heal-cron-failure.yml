@@ -24,6 +24,7 @@ on:
       - "BLS QCEW quarterly"
       - "Census ACS annual"
       - "Census CBP annual"
+      - "Collier County permits monthly"
       - "Collier parcels annual (FDOR cadastral)"
       - "DBPR Press Releases weekly"
       - "DBPR Public Notices — Weekly SWFL"

@@ -22,6 +22,7 @@ on:
       - "Census ACS annual"
       - "Census CBP annual"
       - "Chief of staff nightly"
+      - "Collier County permits monthly"
       - "Collier parcels annual (FDOR cadastral)"
       - "DBPR Press Releases weekly"
       - "DBPR Public Notices — Weekly SWFL"

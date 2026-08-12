@@ -142,7 +142,7 @@
   {
     "name": "Collier County permits monthly",
     "file": "collier-permits-monthly.yml",
-    "scheduled": false,
+    "scheduled": true,
     "timeout_minutes": 30,
     "cancel_in_progress": false,
     "paid": false,
