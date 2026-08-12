@@ -1,3 +1,32 @@
+## 2026-08-12 (Sonnet 5) — 29 dead Workflow worktrees removed, 3 real abandoned fixes recovered and landed
+
+Operator flagged 3 duplicate files under `.claude/worktrees/`; actual scope was 35 leftover worktrees
+from a single Workflow-tool run on 07/22/2026 that never cleaned up (three base commits ~1h apart).
+29 were confirmed-superseded duplicates (zero diff, or a diff byte-identical to work already shipped
+through normal commits — verified `wf-71`'s `dedupeCoreZipRows` against live `d01dbab4`) — removed
+via `git worktree remove --force` + `git branch -D`. 5 held real unlanded work; triaged each against
+current `main` (2 had drifted since 07/22) and landed 3 as separate commits:
+- `df653980` — `lib/brand/global-save-message.ts`: fixes ledger item `branding_global_save_ux`
+  (brand "Save" silently reported success even when the account-level PATCH failed).
+- `90d504d2` — `app/api/mcp/route.ts`: adds CORS headers to POST/DELETE (only GET/OPTIONS had them).
+  Its own test can't run here — `mcp-handler` unconditionally imports the optional `redis` peer dep,
+  which isn't installed (pre-existing gap).
+- `20a87820` — `/contacts` split into a server-gated `page.tsx` + `ContactsClient.tsx` (redirects
+  signed-out visitors; `/api/contacts` already 401'd server-side so no live data leak, but the page
+  shell itself was ungated). Hand-rebased onto main's `tier`/CSV-export addition, which postdated the
+  worktree. **Mislabeled**: another session's SESSION_LOG note (4 unrelated files, since restored as
+  `249da851`) landed inside this same commit via a hook race — content verified byte-intact, not lost.
+- `wf-101` discarded (operator confirmed) — test file referenced `pageQuotesCurrentAsOf`, a function
+  that was never actually written into `scripts/smoke-prod.mts`; half-finished, not salvageable as-is.
+- `wf-78` (Stripe webhook `resource_missing` vs. transient-error fix) held, not landed — its target
+  file drifted since 07/22 (main shipped a related but different fix 08/06/2026, `sa0718_...`, that
+  changed retry semantics); applying `-78` cleanly now requires a real merge decision on webhook
+  retry behavior, not a copy — flagged to operator, awaiting direction before touching payments code.
+Also found this repo's `node_modules` missing several packages entirely (`prettier` bin, `redis`,
+`sharp`, `@resvg/resvg-js`, `@react-pdf/renderer`) — looked like an interrupted install, not caused by
+this session; ran `bun install` to complete it (additive only, zero `bun.lock` drift, verified).
+Check `stale_workflow_worktrees_recoverable_fixes` opened, still open pending the `wf-78` call.
+
 ## 2026-08-12 (Sonnet 5) — Closed the 08/12 research filing debt (4th file was never written) + parallel-Sonnet build handoff
 
 Prior sessions had committed 3 of 4 same-day research files + 2 handoffs (commit `870199ec`) but the
