@@ -1,0 +1,10 @@
+[
+  { "instrument_number": "6861770", "record_date": "2026-08-12", "doc_type": "NC" },
+  { "instrument_number": "6861746", "record_date": "2026-08-12", "doc_type": "NC" },
+  { "instrument_number": "6861743", "record_date": "2026-08-12", "doc_type": "NC" },
+  { "instrument_number": "6861700", "record_date": "2026-08-11", "doc_type": "DEED" },
+  { "instrument_number": "6861650", "record_date": "2026-08-10", "doc_type": "DEED" },
+  { "instrument_number": "6861600", "record_date": "2026-08-09", "doc_type": "MTGE" },
+  { "instrument_number": "6861500", "record_date": "2026-08-08", "doc_type": "LP" },
+  { "instrument_number": "6861400", "record_date": "2026-08-07", "doc_type": "SATIS" }
+]

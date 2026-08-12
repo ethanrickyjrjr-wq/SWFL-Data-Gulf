@@ -376,4 +376,14 @@ export const BRAIN_CATALOG: ReadonlyArray<BrainCatalogEntry> = [
       "Lee County recorded-deed activity from the Clerk of Courts official records (LandMarkWeb) — deed recording velocity and the arm's-length vs nominal-transfer mix. Reports counts as fact; does not infer market direction or a sale-price median from deed counts.",
     ttl_seconds: 86400,
   },
+  {
+    // Scope DUPLICATED VERBATIM from collierOfficialRecordsSwfl.scope in
+    // collier-official-records-swfl.mts. Gate 5 (catalog.test.mts) checks catalog
+    // ⇆ PER_PACK_REGISTRY parity on id/domain/scope/ttl — edit both strings together.
+    id: "collier-official-records-swfl",
+    domain: "real-estate",
+    scope:
+      "Collier County recorded-document activity from the Clerk of Courts official records (COR Access) — ALL 37 document types, recording velocity, and the DEED / Notice of Commencement breakdown. No consideration/sale-price data is available from this source.",
+    ttl_seconds: 86400,
+  },
 ];

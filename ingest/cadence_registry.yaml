@@ -1039,6 +1039,27 @@ pipelines:
         source_url: "https://gis-fdot.opendata.arcgis.com/"
         source_label: "FDOT GIS Open Data"
 
+  - name: collier_official_records
+    workflow: ingest-collier-official-records.yml
+    consuming_pack: collier-official-records-swfl
+    lane: tier-2
+    cadence_days: 1
+    tolerance_multiplier: 3.0 # brand-new source, no durability track record yet — generous floor
+    expected_rows_min: 100 # measured ~400/day, all 37 doc types; floor well below to survive quiet days
+    count_table: data_lake.collier_official_records
+    note: "Fully automated FETCH+LOAD (unlike lee_deed_official_records, no Akamai/bot wall found — verified live 08/12/2026, 7 back-to-back automated searches, zero blocks). Pulls ALL 37 doc types from day one (no doc-type filter), not a DEED-only slice. Instrument-number merge key. Cron enabled 08/12/2026, first live day-partial pull 107 rows same day. See _RESEARCH/data-and-ingest/2026-08-12-collier-clerk-liveness-probe.md for the full probe."
+    source_scope:
+      confirmed_total:
+        value: 9
+        summary: "9 output columns per document, ALL 37 doc types pulled: Party Names (split into grantors[]/grantees[] on the F:/T: prefix), Recorded date, Doc Type code, Instrument number, Book, Page, #Pgs, Legal Description/Comments, Parcel IDs. No consideration/sale-price column exists in this UI (unlike Lee's) — cash-vs-financed style analysis is not buildable from this source alone."
+        source: "our ingest (ingest/pipelines/collier_official_records)"
+      source_ceiling:
+        value: 9
+        summary: "Confirmed via the live results grid header row 08/12/2026 — 9 columns is the full width the UI exposes; no export/API surface found with more fields. Two known gaps, not yet resolved: Doc Type ships as an undecoded short code for types beyond the 37 already labeled from the UI's own multiselect, and Parcel IDs fill-rate is unmeasured (confirmed it CAN be blank)."
+        as_of: "08/12/2026"
+        source_url: "https://cor.collierclerk.com/search/document"
+        source_label: "Collier County Clerk of the Circuit Court & Comptroller — Official Records Search (COR Access)"
+
   - name: lee_permits
     workflow: lee-permits-weekly.yml
     consuming_pack: permits-swfl

@@ -1,0 +1,65 @@
+name: collier-official-records ingest
+
+# Fully automated FETCH + LOAD — unlike lee-deed-official-records.yml (LOAD only,
+# manual FETCH, Akamai-blocked), Collier's cor.collierclerk.com has no CAPTCHA/
+# bot wall on any tested step (verified live 08/12/2026, 7 back-to-back automated
+# searches, zero blocks — see
+# _RESEARCH/data-and-ingest/2026-08-12-collier-clerk-liveness-probe.md). This is
+# the "does it survive a real scheduled cron" test that a single interactive
+# session cannot answer on its own.
+#
+# Pulls ALL 37 document types by default (no doc-type filter) — not a DEED-only
+# slice. Default window is yesterday only (~400 docs / ~20 pages), matching a
+# small daily cron rather than an ever-growing backfill.
+
+on:
+  schedule:
+    - cron: "37 11 * * *"   # 11:37 UTC daily — offset from the Lee deed load (11:17)
+  workflow_dispatch:
+    inputs:
+      dry_run:
+        description: "Dry run — fetch and normalize only; skip the dlt write"
+        required: false
+        default: "true"
+
+permissions:
+  contents: read
+
+jobs:
+  ingest:
+    if: ${{ vars.ENGINE_ENABLED != 'false' || github.event_name == 'workflow_dispatch' }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v6
+
+      - name: Setup Python
+        uses: actions/setup-python@v6
+        with:
+          python-version: "3.12"
+
+      - name: Install ingest dependencies
+        run: pip install -r ingest/requirements.txt
+
+      - name: Install crawl4ai browsers
+        run: crawl4ai-setup
+
+      - name: crawl4ai preflight
+        run: crawl4ai-doctor
+
+      - name: Run Collier official records pipeline
+        env:
+          SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+          SUPABASE_SERVICE_KEY: ${{ secrets.SUPABASE_SERVICE_KEY }}
+          DESTINATION__POSTGRES__CREDENTIALS: ${{ secrets.DESTINATION__POSTGRES__CREDENTIALS }}
+        # No fixed window: default is yesterday only (pipeline.py), so a skipped
+        # run just leaves a one-day gap rather than compounding — narrower scope
+        # than Lee permits' self-healing lookback, appropriate for a brand-new,
+        # not-yet-durability-proven source.
+        run: |
+          if [ "${{ github.event.inputs.dry_run }}" = "true" ]; then
+            python -m ingest.pipelines.collier_official_records.pipeline --dry-run
+          else
+            python -m ingest.pipelines.collier_official_records.pipeline
+          fi

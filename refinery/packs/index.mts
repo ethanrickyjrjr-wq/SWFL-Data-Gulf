@@ -61,6 +61,7 @@ import { marketTemperatureSwfl } from "./market-temperature-swfl.mts";
 import { activeRentalsSwfl } from "./active-rentals-swfl.mts";
 import { communitiesSwfl } from "./communities-swfl.mts";
 import { leeDeedRecordsSwfl } from "./lee-deed-records-swfl.mts";
+import { collierOfficialRecordsSwfl } from "./collier-official-records-swfl.mts";
 
 // SCAFFOLD INSERTS REGISTRY ENTRIES BELOW THIS LINE — do not move or remove this marker
 export const PER_PACK_REGISTRY: Record<string, PackDefinition> = {
@@ -108,4 +109,5 @@ export const PER_PACK_REGISTRY: Record<string, PackDefinition> = {
   [activeRentalsSwfl.id]: activeRentalsSwfl,
   [communitiesSwfl.id]: communitiesSwfl,
   [leeDeedRecordsSwfl.id]: leeDeedRecordsSwfl,
+  [collierOfficialRecordsSwfl.id]: collierOfficialRecordsSwfl,
 };

@@ -1,3 +1,54 @@
+## 2026-08-12 (Sonnet 5) — collier_official_records BUILT: full automated pipeline, ALL 37 doc types, real brain, live-tested
+
+Operator: "scaffold. are we bringing in as much data as we can like LEE?" — confirmed via a screenshot
+of Lee's own doc-type codes that `NC` = Notice of Commencement (Collier's own UI independently
+confirms this — see below). Built the real thing, not a stub, TDD-gated (RULE 3.5):
+
+1. **Full doc-type scope pulled live** — opened the Kendo/Syncfusion multiselect popup and read all
+   37 codes with their spelled-out labels directly off Collier's own UI (no external decoding needed,
+   unlike Lee): `_ingest/pipelines/collier_official_records/constants.py` `DOC_TYPE_LABELS`. Confirms
+   `NC : Notice of Commencement`.
+2. **Pagination mechanism found** — standard Kendo UI for Blazor Grid Pager,
+   `button[title="Go to the next page"]`, "page X of Y" in the nav `aria-label`. A single 12-day
+   probe showed 194 pages; per-day volume is ~400-420 documents / ~20 pages, matching the burst-test
+   numbers from the prior entry.
+3. **TDD'd the row parser against REAL captured markup**, not invented shape —
+   `normalize.py` + `test_normalize.py`, 6 tests, all green first run. Caught the concatenation bug
+   live before it ever hit code: flattening stacked `<span>F: NAME</span>` siblings with
+   `get_text(strip=True)` produces unparseable joined text; reading the real `<span>` children fixes
+   it. Also confirmed the `type="date"` ISO-format lesson from the burst test carries into the
+   scraper's date-submission JS.
+4. **Full pipeline built**: `scraper.py` (crawl4ai automation + pagination + a first-row-Instrument
+   safety check that aborts loud if a page doesn't advance, same discipline as `lee_permits`),
+   `resources.py` (dlt merge on `instrument_number`), `pipeline.py` (CLI, defaults to yesterday-only
+   to keep each run to ~1 day's volume). 12 tests total, all green.
+5. **Real live end-to-end dry-run, not just fixtures**: `python -m
+   ingest.pipelines.collier_official_records.pipeline --dry-run --start 2026-08-12 --end 2026-08-12`
+   returned 107 real rows (partial day) with a real grantor→grantee pair, zero errors.
+6. **GHA workflow shipped**: `ingest-collier-official-records.yml`, daily 11:37 UTC, fully automated
+   (no manual-fetch split needed, unlike Lee's Akamai-blocked lane) — this is the real multi-day
+   durability test that no single session can fake; it starts accruing evidence the moment this
+   pushes to main.
+7. **Brain pack built and wired**: `collier-official-records-swfl` — 4 metrics (total loaded, 30d
+   velocity, DEED 30d, Notice of Commencement 30d — the construction-pipeline signal), explicitly NO
+   sale-price metric (this source has no consideration column, unlike Lee — the pack's own caveat
+   says so and a test asserts no metric name matches /price|consideration|sale/i). Registered in
+   `refinery/packs/index.mts` AND the parallel `catalog.mts` registry (Gate 5 requires both in sync —
+   missed this the first pass, vocab-coverage tool doesn't audit unbuild brains so it looked clean
+   until `catalog.test.mts` caught it). Vocab: 4 new slugs in `brain-vocabulary.json`, same commit.
+8. **cadence_registry.yaml + data-roots.md updated** — new pipeline entry (not parked, `cadence_days:
+   1`, `expected_rows_min: 100`), and data-roots.md's "Sale DATE" row now documents the new root
+   alongside Lee's, explicitly flagging it is NOT a sale-price root (no consideration column exists
+   on this source at all).
+
+**Full test suite: 492 pack tests + 12 Python pipeline tests, all green, zero regressions.**
+
+Not done this session: the real multi-day cron durability proof (starts accruing the moment this
+pushes and the schedule fires), Doc Type short-code decoding beyond the 37 now-labeled codes (not
+needed — Collier's own UI already spells them all out), Parcel IDs fill-rate measurement, and no
+consideration/sale-price analog exists on this source at all (confirmed, not just unmeasured) — so a
+Collier cash-vs-financed build like Lee's is not possible off this feed alone.
+
 ## 2026-08-12 (Sonnet 5) — crawl4ai action items #1 and #2 EXECUTED (design crawl run, Collier Clerk proven live)
 
 Operator: "GET THESE DONE. THEN TELL ME COLLIER DOESN'T FUCKING WORK." Both done, same session.
