@@ -1,3 +1,18 @@
+## 2026-08-12 (Sonnet 5) — crawl4ai four-lane strategy: research fan-out, filed
+
+Operator asked to plan crawl4ai ideas across 4 angles (vendor ground-truth, competitor/design,
+new data sources, live answer-time). Dispatched 4 parallel Sonnet agents, each read existing
+`_RESEARCH/` coverage first. Synthesis + all 4 findings:
+`_RESEARCH/agent-behavior/2026-08-12-crawl4ai-four-lane-strategy.md`. Headline: lane 4 (live
+crawl4ai at answer-time) is a NON-BUILD — `lib/assistant/web-fallback.ts` already does live cited
+web lookups on every conversational answer via `web_search_20250305`, not crawl4ai; extending
+crawl4ai into the serverless answer path would be hand-rolled infra RULE 0.9 warns against.
+Real next action, cheapest first: `ingest/pipelines/report_design_research/crawl_report_designs.py`
+has been written and never run since 07/01 — zero new code. Next: Collier Clerk deed feed liveness
+probe (Lee's twin, independently confirmed crawlable 07/22 where Lee failed 4 ways to Akamai).
+Not yet built: the proposed `_RESEARCH/scouting-registry.yaml` (one registry, not the two the
+agents separately proposed).
+
 ## 2026-08-12 (Sonnet 5) — deed cash-vs-financed split PUSHED to main, brain rebuild dispatched
 
 Follow-up to the entry below (same session). `6dfea815` on `origin/main` — feature + doc-index +
