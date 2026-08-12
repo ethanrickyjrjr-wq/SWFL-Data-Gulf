@@ -251,6 +251,17 @@ export interface EmailLabGridShellProps {
    *  still catches the unfilled [[blank]] instead of authoring garbage from
    *  the literal placeholder. */
   initialRecipe?: ShowcaseRecipe | null;
+  /** THE IDENTITY, independent of whether `initialRecipe` itself is passed. A host
+   *  nulls `initialRecipe` on arrivals where an auto-build is about to fire (so the
+   *  Build box doesn't also show a pending-pick pill) — but the key it identifies
+   *  still has to seed `activeRecipeKey`, or the very first auto-build request goes
+   *  out with no recipeKey at all and the server dispatches on prompt-text matching
+   *  alone (silently wrong for any recipe whose filled prompt doesn't uniquely
+   *  match — caught live 08/11/2026: listings-digest's anonymous /go auto-build
+   *  reported back `recipeKey: "default-grid"`, the terminal fallback, not the
+   *  digest builder). Falls back to `initialRecipe?.key` so a caller that never
+   *  needed the split keeps working unchanged. */
+  initialRecipeKey?: string | null;
   headerSlot: ReactNode;
   aiPlaceholder?: string;
   /** Save the doc as a deliverable. `campaignKey` = quick-start campaign
@@ -293,6 +304,7 @@ export function EmailLabGridShell({
   autoGenerate,
   autoBuildNeeds,
   initialRecipe,
+  initialRecipeKey,
   headerSlot,
   aiPlaceholder = "Describe the whole email — the AI lays it out on the grid with real SWFL numbers…",
   onSave,
@@ -364,7 +376,9 @@ export function EmailLabGridShell({
   // that gets cleared the moment a build starts — but the build still needs to know
   // WHICH deliverable it is. This is what the builder dispatches on, so a user typing
   // their address over the [[blank]] can no longer reroute the build to another recipe.
-  const [activeRecipeKey, setActiveRecipeKey] = useState<string | null>(initialRecipe?.key ?? null);
+  const [activeRecipeKey, setActiveRecipeKey] = useState<string | null>(
+    initialRecipeKey ?? initialRecipe?.key ?? null,
+  );
   // WHAT ACTUALLY BUILT THE DOC ON THE CANVAS — persisted as `deliverables.recipe_key`
   // so "every email runs one pipe" is checkable in the product and a build is
   // reproducible from its row. NOT `activeRecipeKey`: that is the key the DOOR asked

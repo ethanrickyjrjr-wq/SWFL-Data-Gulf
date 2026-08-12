@@ -444,6 +444,16 @@ export function EmailLabGridClient({
           initialBranding={Object.keys(arrivalBrand).length > 0 ? arrivalBrand : undefined}
           // The popup owns the blank now; don't also seed it into the Build box.
           initialRecipe={build || plan.addressPopup ? null : initialRecipe}
+          // THE IDENTITY survives the null above. Nulling `initialRecipe` here is a
+          // Build-box DISPLAY choice (don't show a pending-pick pill while an
+          // auto-build is already firing, or while the address popup still owns the
+          // blank) — it must not also erase which recipe's builder the request
+          // dispatches on. Before this, an anonymous auto-build (any recipe whose
+          // [[blank]] the door pre-filled, e.g. /go's area-keyed Listings Digest)
+          // sent NO recipeKey at all, and the server fell back to text-matching the
+          // prompt — silently wrong whenever that match misses (confirmed live
+          // 08/11/2026: listings-digest reported back `recipeKey: "default-grid"`).
+          initialRecipeKey={initialRecipe?.key ?? null}
           onDocChange={(d, userEdit?: boolean) => {
             currentDocRef.current = d;
             // The canvas's own auto-height corrections fire on an untouched

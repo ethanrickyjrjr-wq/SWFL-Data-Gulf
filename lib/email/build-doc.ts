@@ -1277,7 +1277,24 @@ export async function authorDoc({
       currentDoc,
       facts: resolvedSubject?.facts ?? null,
       resolved: resolvedSubject?.resolved ?? false,
-      zip: scope?.kind === "zip" ? scope.value : undefined,
+      // An explicit ZIP-door scope always wins. Otherwise, for an AREA-subject
+      // recipe only (listings-digest, market-pulse, ...), fall back to the place
+      // named in the prompt text — same crosswalk resolution the default-grid
+      // fallback already applies below (~line 1443). This is the /go one-click
+      // door's only path to a zip: heroDestination deliberately carries no zip
+      // param (abfa1691, 07/07/2026 — "address is the subject, ZIP is derived"),
+      // so an area-keyed pick ("28 homes in Fort Myers") reached this builder
+      // with zip always undefined and buildListingsDigest returned null on
+      // every call, silently falling through to the wrong (default-grid) email.
+      // Scoped to subject:"area" only — an address-subject recipe's prompt can
+      // legitimately contain a city name as part of a full street address, and
+      // that must not be mistaken for an area scope.
+      zip:
+        scope?.kind === "zip"
+          ? scope.value
+          : keyedRecipe.subject === "area"
+            ? zipFromPromptPlace(prompt)?.zip
+            : undefined,
       voice,
     }).catch(() => null);
 

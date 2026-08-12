@@ -1,3 +1,28 @@
+## 2026-08-12 (Sonnet 5) — /go → Listings Digest fixed: two stacked bugs, both live-verified, no browser needed
+
+Continued from the 08/12 handoff (`docs/handoff/2026-08-12-listings-digest-zip-wiring-handoff.md`),
+whose own "carry a zip through the URL" plan turned out to rest on a wrong premise (`recipeDestination`
+never had zip support — grep found zero hits; `heroDestination` deliberately dropped its zip param
+07/07/2026, commit abfa1691). Live Mapbox check (4 real retrieves) confirmed city/locality picks never
+carry `postcode` at all — settling the handoff's open §3 question as a hard no, not an ambiguity.
+
+Real fix was two lines, both in the existing prompt-text-to-ZIP mechanism (`zipFromPromptPlace`,
+already wired for the default-grid fallback): `lib/email/build-doc.ts:1280` now falls back to it for
+`subject:"area"` keyed recipes when no explicit zip scope is present. Second, independently-diagnosed
+bug (`listings_digest_recipekey_dropped_on_area_arrival`, opened by an earlier session) — the recipe
+KEY itself never reached the builder because `EmailLabGridClient.tsx:446` nulled `initialRecipe` (and
+with it `activeRecipeKey`'s only seed) on any anonymous auto-build arrival. Fixed by adding an
+`initialRecipeKey` prop to `EmailLabGridShell` that survives that null.
+
+Verified live against the real dev server pipe with the exact `runAutoBuild()` payload shape
+(`authorDoc()` direct call, gitignored tmp script, deleted after use): `recipeKey: "listings-digest"`
+(was `"default-grid"`), 5 real `listing-grid` blocks, live SteadyAPI photos, "Fort Myers, FL — 30 homes
+for sale right now". `bunx next build` clean; 33/33 existing tests pass. claude-in-chrome wasn't
+connected this session, so this is the closest live proof available, not an actual `/go` click-through.
+
+Both checks closed with evidence: `listings_digest_zip_wiring_gap`, `listings_digest_recipekey_dropped_on_area_arrival`.
+Files: `lib/email/build-doc.ts`, `components/email-lab/EmailLabGridShell.tsx`, `app/email-lab/grid/EmailLabGridClient.tsx`.
+
 ## 2026-08-12 (Opus 5) — graph compartments STEP 2: nine calibration runs, NEGATIVE RESULT — the two knobs do not compartment this repo
 
 Handoff: `docs/handoff/2026-08-12-graph-compartments-step2-negative-result.md`. Step 1 shipped in

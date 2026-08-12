@@ -1,3 +1,42 @@
+## 2026-08-12 (Sonnet 5) — RESOLVED same session: /go → Listings Digest fixed and live-verified — both the recipeKey drop AND the zip wiring gap
+
+The handoff below turned out to have its own wrong premise: it claimed `recipeDestination` "already
+accepts carry.zip" (a whole-file grep found zero `zip` references there) and proposed adding a `zip`
+URL param to `heroDestination` — which had DELIBERATELY dropped its zip param on 07/07/2026 (commit
+abfa1691: "address is the subject, ZIP is derived"). Re-adding it would have reverted a considered fix.
+
+**Live Mapbox check first (settles §3's open question):** 4 real retrieves via
+`api.mapbox.com/search/searchbox/v1/retrieve` — `place`/`locality`-type city picks (Fort Myers, Cape
+Coral, Fort Myers Shores) NEVER carry a `postcode` in `context`, structurally absent every time, not
+"ambiguous for multi-ZIP cities." A street address (2210 Main St) DOES carry `postcode:33901`. So the
+whole "carry a zip through the URL" framing was solving the wrong layer for a bare-city /go pick.
+
+**The real mechanism already exists:** `zipFromPromptPlace()` (`lib/email/place-from-prompt.ts`)
+resolves a place NAME inside prompt text to its full multi-ZIP crosswalk — already wired into
+`build-doc.ts`'s default-grid terminal fallback, but NOT into the keyed-recipe dispatch two lines
+above it, which only read `scope.kind==="zip"`. Fixed `build-doc.ts:1280` to fall back to
+`zipFromPromptPlace(prompt)?.zip` when `keyedRecipe.subject==="area"` — scoped to area-subject only so
+an address recipe's full-address prompt (which can itself contain a city name) never gets mistaken for
+an area scope.
+
+**Second, more proximate bug, already diagnosed to the line by an earlier session
+(`listings_digest_recipekey_dropped_on_area_arrival`, commit 8a274c3c):**
+`EmailLabGridClient.tsx:446` nulls `initialRecipe` on any anonymous auto-build arrival — and
+`EmailLabGridShell`'s `activeRecipeKey` had NO OTHER seed, so the very first `/api/email-lab/ai`
+request for `/go`'s area door carried no `recipeKey` at all. Fixed by adding a new `initialRecipeKey`
+prop to `EmailLabGridShell` (seeds `activeRecipeKey` independently of whether `initialRecipe` itself
+is nulled for Build-box display) and always passing `initialRecipe?.key` through it.
+
+**Verified live, both fixes together:** `bunx next build` clean; `bun test` on
+`listings-digest.test.ts` + `place-from-prompt.wrong-city.test.ts` (33/33 pass); a gitignored
+`tmp-verify-go-listings-digest.mts` called `authorDoc()` against the real running dev server with the
+EXACT payload shape `runAutoBuild()` now sends — `recipeKey: "listings-digest"` (was `"default-grid"`),
+`applied: true`, 5 real `listing-grid` blocks with live SteadyAPI photos, hero "Fort Myers, FL — 30
+homes for sale right now". Could not drive an actual browser click-through — claude-in-chrome extension
+not connected this session — so this is the closest available live proof, not a `/go` screenshot.
+
+Both checks closed with evidence: `listings_digest_zip_wiring_gap`, `listings_digest_recipekey_dropped_on_area_arrival`.
+
 ## 2026-08-12 (Sonnet 5) — OPERATOR CORRECTION: "no ZIP resolver exists" was WRONG — grepped the wrong layer
 
 Told the operator no city-to-ZIP resolver existed anywhere in `lib/`. He was skeptical ("which
