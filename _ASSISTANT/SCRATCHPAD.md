@@ -1,3 +1,25 @@
+## 2026-08-12 (Opus 5) — OPERATOR CORRECTION: "this whole thing is not about gitignored files, never was. We needed those no matter what" + "why don't we just use the inhouse graphify to carry prose?"
+
+Two corrections and he is right on both.
+
+**1. I mis-stated his motive for un-ignoring `_RESEARCH/`.** I framed the 08/11 un-ignore as aimed at
+the hosted index and therefore as having "bought nothing" once I measured that hosted carries no
+prose. Wrong frame. Tracking those files was the point on its own — a public repo, research that
+ships, no credentials. Whether any graph indexes them is a separate question. Never re-litigate the
+un-ignore as if it were a failed graph optimization.
+
+**2. The in-house graphify ALREADY carries prose and is ALREADY wired — nobody calls it.**
+`.mcp.json:27` `graphify-local` serves `graphify-out/graph.json` via `graphify.serve`. Measured live
+this session: the same question that returned 14 code files and zero markdown from hosted returned
+`docs/standards/data-roots.md` L149 ("Data Roots — THE one place") and L287, plus handoff and spec
+docs, from local. Local graph holds 19,717 markdown nodes and all 110 tracked research files;
+hosted holds 20,798 nodes total and answered two prose questions with pure code.
+
+This is the `tool-wired-but-never-called` shape, and RULE 0.5's own text is the cause: it names the
+hosted tools and says use them first, so the local server sat unused. The gap was never capability.
+Owed: RULE 0.5 amended to route documentary questions to `graphify-local`, and the local artifact
+put on a rebuild a session can trust (13 commits behind as of this session).
+
 ## 2026-08-12 (Opus 5) — OPERATOR: "30 seconds??? i pushed the shit before i even opened you you fucking liar"
 
 He is right and the correction is on the record. Reporting the CLAUDE.md row (done, `7a2b1ee9`), I
