@@ -67,7 +67,13 @@ agent-network badge.
 - `data_lake.listing_dom` view — the DOM authority: `dom_days`, `dom_is_floor`, `cdom_days`,
   pass-through listing columns. De-floored by the 07/18 `backfill_listed_date` run (in flight at
   spec time; ~98% vendor-date hit rate past the miss-head).
-  **⚠️ SUPERSEDED 07/20/2026 — live probe.** That backfill was WIPED. Live: 33,373 active rows,
+  **⚠️ SUPERSEDED AGAIN 08/11/2026 — LIVE PROBE. THE FLOOR IS ESSENTIALLY GONE.** `listing_dom`
+  live 08/11/2026: **35,839 rows, 2,685 floored (7.5%), 33,154 real (92.5%)** — **Lee 91.9%
+  (23,139/25,184), Collier 93.6% (8,797/9,402), Hendry 97.2% (1,218/1,253)**. The "ship Lee-first,
+  Collier area reads suppressed on coverage" consequence below is **OBSOLETE**; suppress on sample
+  size only, per the normal convention. The 07/20 paragraph is kept as record, not as a reading.
+
+  **STALE — 07/20/2026, do not quote:** That backfill was WIPED. Live: 33,373 active rows,
   **18,098 floored (54.2%)**, 15,275 real (45.8%). **Collier is only 14.0% covered** (1,214 of
   8,667); Lee is 58.9% (13,893 of 23,579); Hendry 14.9% (168 of 1,127). Not recoverable from
   `listing_week` (0 of 18,098 — probed 07/20). Only fix is the parked `dom_backfill_repull_17k`

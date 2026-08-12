@@ -1,3 +1,56 @@
+## 2026-08-11 (Opus 5) — Listing grade, both sides: agent sites ARE crawlable (2 platforms proven live), the DOM-floor objection was 3 weeks stale, and a Sonnet queue for the rest
+
+Operator direction: grade listings and email agents observations; then *"Both. We are reading both
+sides… there will always be an answer for someone."*
+
+**THREE CORRECTIONS I OWED, all logged in `_ASSISTANT/SCRATCHPAD.md` + `STRIKES.md`:**
+1. Quoted **"listing_dom 54.2% floored, Collier 14.0%"** off a 07/20 plan as a live constraint and
+   built a product caution on it. **Live 08/11/2026: 2,685 floored of 35,839 = 7.5%; Lee 91.9%,
+   Collier 93.6%, Hendry 97.2% real.** The backfill landed weeks ago. Both stale doc lines corrected
+   in-place (spec + plan); strike added to `stale-source-served-silently`.
+2. Defended deterministic-only prose as a principle when it is a per-surface COST choice — the
+   07/19 spec lists "No LLM narrative" as a v1 non-goal. New strike shape opened:
+   `muzzled-ai-reasoning-refused-by-default`. The ban is on INVENTING a number, never on REASONING.
+3. Misapplied the DOJ v. Meta Fair-Housing finding to COMP SELECTION. That research governs ad
+   targeting to people, not which houses are comparable. Rule written into the scratchpad.
+
+**CRAWL4AI, LIVE — Q1 of the brief ANSWERED for 2 of 6 platforms**
+(`_RESEARCH/data-and-ingest/2026-08-11-agent-site-listing-crawl-feasibility.md`, indexed):
+- **johnrwood.com — PARSEABLE, server-rendered, no JS, no IDX iframe.** robots allows `/listing/*`.
+  URL = `/listing/{mls_number}/{slug}` — **MLS number is a path segment = direct join to our spine's
+  `mls_number`, no address-key fuzzing.** ~30 fields off ONE free page incl. **Subdivision +
+  Neighborhood + "On Golf Course"** (closes the golf-to-golf gap; our spine has subdivision on
+  **298 of 36,137 rows = 0.8%**, 0 in 33909, measured live), Year Built, Roof TYPE, Taxes, days on
+  market, named schools, 17 amenities, HOA fee INCLUSIONS (not the amount), listing agent + phone,
+  and **~2,400 chars of remarks** — richer than the ~26-row paid record.
+- **royalshellrealestate.com — PARSEABLE, browser-only.** `curl` → **HTTP 403 WAF reject**;
+  identical URL through crawl4ai (Playwright) → full content. **Operational rule now written down:
+  a curl 403 is NOT evidence a site is blocked.** URL = `/{property-type}/swl/{mls_number}/{slug}` —
+  MLS number again, plus property TYPE in the path (the field our spine collapses to single_family).
+
+**FOUND, NOT BUILT:** the `/property-tax-history` endpoint we ALREADY pay for on the DOM backfill
+returns **`building_permits[]`** (recorded 08/02/2026 as "should-get #2, still unbuilt"). We persist
+one field (`listed_date`). **Roof age may be inside a call we already buy and discard** — same shape
+as the photo we already owned. Task 9 of the Sonnet queue now starts there, report-only, with the
+`_ENRICH_ONLY_COLS` wipe trap flagged.
+
+**ALSO MEASURED LIVE:** `public.user_listings` = **0 rows** (no agent has imported a listing);
+1,162 sold events in 120d, 707 priced; Lee sold comps run through 06/2026 with beds/baths/pool/sqft/
+year_built; ~247 sales in 33909 since 02/2026. **57 files across `lib/{offer-check,should-i-sell,
+why-not-selling,buyer-leverage}` and ZERO references from `lib/email`** — every diagnostic we own is
+consumer-web only and unreachable from any agent-facing send.
+
+**SHIPPED (docs only, no code):** `docs/handoff/2026-08-11-listing-grade-crawl4ai-research-brief.md`
+(9 crawl questions incl. the RIGHT legal one — FL Ch. 475 / BPO-CMA licensing — plus the both-sides
+verdict shape and the operator's low-price guard: priced-below AND sitting means we are MISSING a
+variable, never call it a deal) and `docs/handoff/2026-08-11-listing-grade-sonnet-work-queue.md`
+(9 bounded tasks, 8 hard rules, explicit not-for-Sonnet list). Check opened:
+`collier_permit_roof_age_request` — and the catalog says `collier_permits` is a PARKED pipeline
+(monthly Issued XLSX, 23 cols), so a records-request email may not be needed at all.
+
+⬜ **Next:** remaining 4 platform tests · FL licensing quotes · the `building_permits[]` probe ·
+then the 33909 pilot. **No code written this session.**
+
 ## 2026-08-11 (Sonnet 5) — Freakonomics seller-insight research: 5-agent crawl4ai sweep closes the target handoff
 
 Ran the 10-target research handoff (`docs/handoff/2026-08-11-crawl4ai-freakonomics-research-targets-handoff.md`)

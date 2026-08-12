@@ -61,6 +61,7 @@ guard: OWED — fleet-wide source-staleness tripwire; pattern exists on redfin_s
 - strike: 08/06 crons red for weeks, nobody looked
 - strike: 08/10 desk chart from May — vendor froze file, runs stayed green
 - strike: 08/10 121 baked narratives, some 4 weeks stale, served as current
+- strike: 08/11 quoted "listing_dom 54.2% floored, Collier 14.0%" off a 07/20 plan as a live constraint and built a product caution on it; live probe same day: 7.5% floored, Collier 93.6%. The backfill had landed weeks earlier. A doc's own "live probe" stamp is evidence of a measurement, never of the CURRENT value — re-measure before a number gates a decision
 
 ## shape: paid-before-free
 guard: BUILT — RULE 0.7a ladder (08/06/2026) + spend switch OFF-by-default + $3 process budget + Gate 15's cousin check-no-new-paid-surface
@@ -93,8 +94,17 @@ guard: BUILT — MAX_SPOKEN_DISTANCES=2 structural cap + communityHasGolf in-gat
 guard: OWED — an answer to "what is going on" must END with the decision needed and the named next action, not with findings
 - strike: 08/11 persistence finding — three answers (surfaces, live counts, catalog lanes), operator had to shout "SO WHAT DO WE FUCKING NEED" to get the one sentence
 
+## shape: muzzled-ai-reasoning-refused-by-default
+guard: OWED — the ban is on INVENTING/COMPUTING a number, never on REASONING over numbers we hold. A session that answers "why can't the AI just think about our data" by citing determinism as a principle has committed this. Deterministic-only is a per-surface COST choice and must be named as one.
+- strike: 08/11 "Our AI is stupid... we could have ai telling an agent what their listing should do based on price and comps and time of year and everything we have data on"
+- strike: 08/11 (same day) I wrote "the numbers are computed in code and the sentences are deterministic — that's the mechanism that makes it credible", quoting a v1 cost non-goal back to him as a law. Operator: "Have I not been saying this for 4 months????"
+
 ## shape: partial-reported-as-whole
 guard: BUILT — RULE 0.8 count-and-prove (07/30/2026) + RULE 0.85 fix-don't-file (08/06/2026)
 - strike: 07/30 "all four lanes on the record" — one never opened
 - strike: 07/30 research "filed" with no index line
 - strike: 08/09 "§2.7 written this session" — false on disk
+
+## shape: architecture-drift-no-detector
+guard: OWED — nothing anywhere compares our DECLARED module boundaries (docs/section-map.md's 5 sections, the 8 area CLAUDE.md files) against how the code is ACTUALLY wired. The graph has held the answer since 06/2026 and no report reads it. Mechanism owed: a declared-vs-detected partition diff (purity / NMI) regenerated on every graph rebuild, so "we build different ways" becomes a number that moves instead of a thing he notices months later. Research: _RESEARCH/agent-behavior/2026-08-11-graphify-community-structure-crawl4ai-research.md
+- strike: 08/11 "I still find out we build different ways or have different ways of building so don't tell me we are doing all we can" — asking for compartments in graphify

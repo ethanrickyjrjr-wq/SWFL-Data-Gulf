@@ -42,7 +42,15 @@ building signals — it is giving the built ones a consumer.
   relists are `from_state='holding' → to_state='active'`.
 - **`listing_dom`** — per-listing `dom_days` / `cdom_days` / `dom_is_floor`. Wording authority is
   `lib/listings/dom.ts formatDom` — never compose DOM strings locally.
-  **CORRECTION 07/20/2026 (live probe, supersedes the sell-odds spec's "9.9% floored" line):**
+  **⚠️ SUPERSEDED 08/11/2026 — LIVE PROBE. THE BACKFILL LANDED AND HELD; THE FLOOR IS ESSENTIALLY
+  GONE.** `data_lake.listing_dom` live 08/11/2026: **35,839 rows, 2,685 floored (7.5%), 33,154 real
+  (92.5%)**. County split: **Lee 23,139 of 25,184 (91.9%)**, **Collier 8,797 of 9,402 (93.6%)**,
+  **Hendry 1,218 of 1,253 (97.2%)**. Spine: 31,672 `listing_state` rows carry `listed_date`, 4,465
+  do not. **Every "Lee-first / suppress Collier on coverage" instruction below is OBSOLETE** — the
+  coverage argument that produced it no longer holds. `dom_backfill_repull_17k` is moot as written.
+  The paragraph that follows is kept as the 07/20 record, NOT as a current reading.
+
+  **STALE — 07/20/2026 reading, do not quote (live probe that day, superseded above):**
   33,373 active rows, **18,098 floored (54.2%)**, **15,275 with real DOM (45.8%)**. The 07/18
   backfill landed and was then wiped — the parked check `dom_backfill_repull_17k` (17,127 wiped
   `listed_date`s, ~17.2k vendor re-probe calls, awaiting operator go) accounts for essentially all
