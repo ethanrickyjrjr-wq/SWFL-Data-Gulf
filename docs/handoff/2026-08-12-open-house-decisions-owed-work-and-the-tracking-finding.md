@@ -2,8 +2,9 @@
 
 **Written 08/12/2026.** This session started as "fan out sonnets and get plans going" on the four
 Open House work packages and ended somewhere else entirely — a settled RSVP design, a correction to
-how our own click tracking works, and a guard gap. **Nothing in this session was committed.** This
-document exists so none of it has to be rediscovered.
+how our own click tracking works, and a guard gap. **Shipped in `daef619d` / `bb6335b8` / `120ff167`
+on 08/12/2026** — the four plans, both handoffs, the research, and the RULE 0.5 sharpening are all on
+`main`. This document exists so none of it has to be rediscovered.
 
 **Read order for a session picking this up:**
 1. This file — the decisions and the owed list.
@@ -168,12 +169,16 @@ hedges, a numeric base and a 20+ char falsifier (`lib/narratives/types.ts:17-22`
 
 ## 5. OWED — nothing here is done. Each names what blocks it.
 
-1. **`_ASSISTANT/STRIKES.md` — two strike lines owed** on the new shape
-   `handed-the-operator-my-design-choice` (text drafted in `_ASSISTANT/SCRATCHPAD.md`'s
-   08/12 entry). **Blocked:** file held under another session's repolith claim all session; not
-   overridden.
-2. **`_ASSISTANT/STRIKES.md` — the 5th `paid-before-free` strike line**, owed since before this
-   session (Package 5 of the split doc). Same block.
+1. **`_ASSISTANT/STRIKES.md` — TWO NEW SHAPES OWED.** Exact text in the Second Appendix below —
+   one paste, no rewriting. **Blocked:** the file was held by THREE different sessions across this
+   one (claims at 27 min, 1 min, then 14+ min) and was never free. **Not overridden** — a parallel
+   session was actively appending to it (it added the 5th `paid-before-free` line while this session
+   ran, so item 2 below is already DONE by someone else). **Finding worth keeping:** a backgrounded
+   `claim wait` **exited 0 without granting the claim** — the subsequent edit was still denied. Exit
+   0 is NOT proof you hold the file; re-check `claim list` before trusting it. That matters directly
+   to the apply-on-release queue idea in §7, whose whole trigger would be "the wait fired."
+2. ~~**`_ASSISTANT/STRIKES.md` — 5th `paid-before-free` line**~~ — ✅ **DONE by a parallel session**
+   during this one (the 08/12 Apify gap-fill-lane strike). Verified present; not duplicated.
 3. ~~**`CLAUDE.md` RULE 0.5 sharpening**~~ — ✅ **DONE 08/12/2026.** Applied after a backgrounded
    `claim wait` acquired the file on release; anchor re-verified before the edit. See the Appendix.
 4. **`docs/standards/data-roots.md`** — no engagement/click root exists (§2b). Needs an operator
@@ -267,3 +272,24 @@ Twin failure, same session, same root: **when two placements of the same functio
 choice, the choice is usually wrong — reach for the keyed one-root registry we already use three
 times (`lib/email/social/platforms.ts`, `lib/email/lab/capabilities.ts`, `apply-brand.ts:74-109`)
 instead of handing the operator a menu.**
+
+---
+
+## SECOND APPENDIX — THE TWO STRIKE SHAPES, EXACT TEXT. NOT YET APPLIED.
+
+**Where it goes:** `_ASSISTANT/STRIKES.md`, immediately BEFORE the line
+`## shape: architecture-drift-no-detector`. Verify that anchor still exists before pasting — the file
+changed hands three times on 08/12/2026.
+
+---
+
+## shape: handed-the-operator-my-design-choice
+guard: OWED — a menu of implementations is legitimate ONLY when the options are genuinely equivalent and the choice is taste, cost, or product direction. When one option is "the right structure" and it has not been found yet, presenting two wrong ones offloads the design onto him and reads as the system being harder than it is. Before offering a choice between two placements of the same function, check whether this repo already solves the shape with a keyed one-root registry — `lib/email/social/platforms.ts` (8 platforms), `lib/email/lab/capabilities.ts` (tier dial, routing DERIVED not hand-kept), `apply-brand.ts:74-109` (destinations by ROLE). Three existing instances; reach for the pattern instead of the menu. Written into RULE 0.5's 08/12/2026 sharpening as the twin failure.
+- strike: 08/12 invitation validator — offered "sibling export in lib/narratives" vs "local to recipes/shared.ts". He answered with the registry ("TAG IT... ALL OTHER THINGS THAT NEED IT IN THE FUTURE ARE WIRED INTO IT") and "WHY IS THIS SO HARD?????????????????"
+- strike: 08/12 (same exchange) two-button question — offered one-CTA / amend-the-test / conditional-button. He answered "CAN'T WE ADD A LINK TO THE LISTING AT THE BOTTOM?" A text link is not a `button` block, so `campaign-coherence.test.ts:123` passes untouched and no guard needs amending. The option was in the code the whole time and was not on my menu.
+
+## shape: claimed-our-behavior-without-opening-the-file
+guard: BUILT (rule) / OWED (hook) — RULE 0.5 sharpened 08/12/2026: before any sentence asserting how one of OUR subsystems behaves, the file that owns that behavior must have been opened IN THAT TURN; otherwise the honest sentence is "I have not read X yet." `check-four-searches` does NOT cover this — it verifies TOPIC coverage, never CLAIM coverage, and PASSED on the turn carrying the worst instance. Hook still owed, pending operator sign-off on the hook point: a Stop-hook in the `answer-fix-proof` family that blocks when an answer asserts our own system's behavior and no source-file read appears in that turn's transcript.
+- strike: 08/12 told him the RSVP landing page was what bought us click tracking. One read of `lib/email/campaign-click-alert.ts` shows the click event already carries the exact URL, the recipient and the campaign — every link tracks, the page was never the mechanism. He caught it by asking "click button and appears or links are tracking clicks?"
+- strike: 08/12 (same session) told him the session-start banner's `repolith claim list` hint was stale and the CLI had no such command. The PATH binary lacks it; `bun run ws/src/cli.ts claim list` has it, plus `wait` and `waits`. Never ran the CLI's own `--help` before saying it.
+- strike: 08/12 (same session) operator: "How much fucking time does Claude waste guessing the wrong thing instead of looking?? We have 79999900 guards."
