@@ -27,6 +27,7 @@ export const NEW_EMAIL_FILE_FOR_KEY: Partial<Record<RecipeKey, string>> = {
   "back-on-market": "/new-emails/back-on-market-email.html",
   "agent-brand-intro": "/new-emails/agent-brand-intro-email.html",
   "market-pulse": "/new-emails/market-pulse-email.html",
+  "listings-digest": "/new-emails/listings-digest-email.html",
 };
 
 /** Lifecycle first, every key a real `RECIPES` entry, in send order. */
