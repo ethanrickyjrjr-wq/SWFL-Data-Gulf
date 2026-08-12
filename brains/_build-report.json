@@ -1,8 +1,8 @@
 {
   "target": "master",
   "timestamps": {
-    "started": "2026-08-11T14:54:38.341Z",
-    "finished": "2026-08-11T14:55:01.144Z"
+    "started": "2026-08-12T04:30:10.916Z",
+    "finished": "2026-08-12T04:31:08.712Z"
   },
   "source": "live",
   "outcomes": [
@@ -58,8 +58,1559 @@
     },
     {
       "packId": "env-swfl",
-      "status": "skipped-fresh",
-      "written": false
+      "status": "built",
+      "version": 28,
+      "written": true,
+      "brainOutput": {
+        "brain_id": "env-swfl",
+        "version": 28,
+        "refined_at": "2026-08-12T04:30:42Z",
+        "expires": "2026-09-11T04:30:42Z",
+        "ttl_seconds": 2592000,
+        "direction": "bearish",
+        "magnitude": 0.8,
+        "drivers": [],
+        "overrides": [],
+        "conclusion": "Barrier-island SWFL ZIPs carry order-of-magnitude higher flood loss: 33957 (Lee County) runs $40,342/yr per insured property (100th percentile across SWFL ZIPs with claims in window), vs the Lee-mainland median of $13,530/yr per insured property. CRE translation: +50-70 bps cap-rate adjustment for barrier-island flood exposure; imputed flood insurance runs 347.3% of NOI at an 8% cap. Geography is the entire signal — flood risk for a Lee County address is a property of the ZIP, not the metro.",
+        "key_metrics": [
+          {
+            "metric": "swfl_sfha_pct_area_weighted",
+            "value": 0.4901,
+            "direction": "stable",
+            "label": "SWFL area-weighted Special Flood Hazard Area coverage",
+            "variable_type": "intensive",
+            "units": "ratio",
+            "display_format": "ratio",
+            "source": {
+              "url": "https://hazards.fema.gov/arcgis/rest/services/public/NFHL/MapServer/28",
+              "fetched_at": "2026-08-12T04:30:16Z",
+              "tier": 1,
+              "citation": "FEMA NFHL Flood Hazard Zones (Layer 28 / S_FLD_HAZ_AR), area-weighted aggregate across 3 SWFL counties: Collier (12021), Hendry (12051), Lee (12071)."
+            },
+            "suggestions": [
+              "What's driving swfl sfha pct area weighted?",
+              "How does swfl sfha pct area weighted here compare to other SWFL areas?"
+            ]
+          },
+          {
+            "metric": "swfl_ve_zone_pct_area_weighted",
+            "value": 0.039,
+            "direction": "stable",
+            "label": "SWFL area-weighted coastal high-hazard (V/VE) zone coverage",
+            "variable_type": "intensive",
+            "units": "ratio",
+            "display_format": "ratio",
+            "source": {
+              "url": "https://hazards.fema.gov/arcgis/rest/services/public/NFHL/MapServer/28",
+              "fetched_at": "2026-08-12T04:30:16Z",
+              "tier": 1,
+              "citation": "FEMA NFHL Flood Hazard Zones (Layer 28 / S_FLD_HAZ_AR), area-weighted aggregate across 3 SWFL counties: Collier (12021), Hendry (12051), Lee (12071)."
+            },
+            "suggestions": [
+              "What's driving swfl ve zone pct area weighted?",
+              "How does swfl ve zone pct area weighted here compare to other SWFL areas?"
+            ]
+          },
+          {
+            "metric": "swfl_ve_zone_polygon_count",
+            "value": 484,
+            "direction": "stable",
+            "label": "SWFL count of distinct coastal high-hazard (V/VE) polygons",
+            "variable_type": "extensive",
+            "units": "polygons",
+            "display_format": "count",
+            "source": {
+              "url": "https://hazards.fema.gov/arcgis/rest/services/public/NFHL/MapServer/28",
+              "fetched_at": "2026-08-12T04:30:16Z",
+              "tier": 1,
+              "citation": "FEMA NFHL Flood Hazard Zones (Layer 28 / S_FLD_HAZ_AR), area-weighted aggregate across 3 SWFL counties: Collier (12021), Hendry (12051), Lee (12071)."
+            },
+            "suggestions": [
+              "What's driving swfl ve zone polygon count?",
+              "How does swfl ve zone polygon count here compare to other SWFL areas?"
+            ]
+          },
+          {
+            "metric": "lee_county_sfha_pct_area_weighted",
+            "value": 0.3852,
+            "direction": "stable",
+            "label": "Lee County area-weighted SFHA coverage (Fort Myers Beach context)",
+            "variable_type": "intensive",
+            "units": "ratio",
+            "display_format": "ratio",
+            "source": {
+              "url": "https://hazards.fema.gov/arcgis/rest/services/public/NFHL/MapServer/28/query?where=1%3D1&geometry=-82.32%2C26.32%2C-81.57%2C26.91&geometryType=esriGeometryEnvelope&inSR=4326&spatialRel=esriSpatialRelIntersects&groupByFieldsForStatistics=FLD_ZONE&outStatistics=%5B%7B%22statisticType%22%3A%22count%22%2C%22onStatisticField%22%3A%22OBJECTID%22%2C%22outStatisticFieldName%22%3A%22polygon_count%22%7D%2C%7B%22statisticType%22%3A%22sum%22%2C%22onStatisticField%22%3A%22Shape__Area%22%2C%22outStatisticFieldName%22%3A%22area_total%22%7D%5D&f=json",
+              "fetched_at": "2026-08-12T04:30:16Z",
+              "tier": 1,
+              "citation": "FEMA NFHL Flood Hazard Zones (Layer 28 / S_FLD_HAZ_AR), groupBy FLD_ZONE with sum(Shape__Area), bbox -82.32,26.32,-81.57,26.91 (Lee County, FIPS 12071)."
+            },
+            "suggestions": [
+              "What's driving lee county sfha pct area weighted?",
+              "How does lee county sfha pct area weighted here compare to other SWFL areas?"
+            ]
+          },
+          {
+            "metric": "lee_county_ve_zone_pct_area_weighted",
+            "value": 0.0575,
+            "direction": "stable",
+            "label": "Lee County area-weighted coastal high-hazard (V/VE) coverage",
+            "variable_type": "intensive",
+            "units": "ratio",
+            "display_format": "ratio",
+            "source": {
+              "url": "https://hazards.fema.gov/arcgis/rest/services/public/NFHL/MapServer/28/query?where=1%3D1&geometry=-82.32%2C26.32%2C-81.57%2C26.91&geometryType=esriGeometryEnvelope&inSR=4326&spatialRel=esriSpatialRelIntersects&groupByFieldsForStatistics=FLD_ZONE&outStatistics=%5B%7B%22statisticType%22%3A%22count%22%2C%22onStatisticField%22%3A%22OBJECTID%22%2C%22outStatisticFieldName%22%3A%22polygon_count%22%7D%2C%7B%22statisticType%22%3A%22sum%22%2C%22onStatisticField%22%3A%22Shape__Area%22%2C%22outStatisticFieldName%22%3A%22area_total%22%7D%5D&f=json",
+              "fetched_at": "2026-08-12T04:30:16Z",
+              "tier": 1,
+              "citation": "FEMA NFHL Flood Hazard Zones (Layer 28 / S_FLD_HAZ_AR), groupBy FLD_ZONE with sum(Shape__Area), bbox -82.32,26.32,-81.57,26.91 (Lee County, FIPS 12071)."
+            },
+            "suggestions": [
+              "What's driving lee county ve zone pct area weighted?",
+              "How does lee county ve zone pct area weighted here compare to other SWFL areas?"
+            ]
+          },
+          {
+            "metric": "collier_county_sfha_pct_area_weighted",
+            "value": 0.6066,
+            "direction": "stable",
+            "label": "Collier County area-weighted SFHA coverage (Naples / Marco Island context)",
+            "variable_type": "intensive",
+            "units": "ratio",
+            "display_format": "ratio",
+            "source": {
+              "url": "https://hazards.fema.gov/arcgis/rest/services/public/NFHL/MapServer/28/query?where=1%3D1&geometry=-81.91%2C25.79%2C-80.85%2C26.5&geometryType=esriGeometryEnvelope&inSR=4326&spatialRel=esriSpatialRelIntersects&groupByFieldsForStatistics=FLD_ZONE&outStatistics=%5B%7B%22statisticType%22%3A%22count%22%2C%22onStatisticField%22%3A%22OBJECTID%22%2C%22outStatisticFieldName%22%3A%22polygon_count%22%7D%2C%7B%22statisticType%22%3A%22sum%22%2C%22onStatisticField%22%3A%22Shape__Area%22%2C%22outStatisticFieldName%22%3A%22area_total%22%7D%5D&f=json",
+              "fetched_at": "2026-08-12T04:30:16Z",
+              "tier": 1,
+              "citation": "FEMA NFHL Flood Hazard Zones (Layer 28 / S_FLD_HAZ_AR), groupBy FLD_ZONE with sum(Shape__Area), bbox -81.91,25.79,-80.85,26.5 (Collier County, FIPS 12021)."
+            },
+            "suggestions": [
+              "What's driving collier county sfha pct area weighted?",
+              "How does collier county sfha pct area weighted here compare to other SWFL areas?"
+            ]
+          },
+          {
+            "metric": "collier_county_ve_zone_pct_area_weighted",
+            "value": 0.0345,
+            "direction": "stable",
+            "label": "Collier County area-weighted coastal high-hazard (V/VE) coverage",
+            "variable_type": "intensive",
+            "units": "ratio",
+            "display_format": "ratio",
+            "source": {
+              "url": "https://hazards.fema.gov/arcgis/rest/services/public/NFHL/MapServer/28/query?where=1%3D1&geometry=-81.91%2C25.79%2C-80.85%2C26.5&geometryType=esriGeometryEnvelope&inSR=4326&spatialRel=esriSpatialRelIntersects&groupByFieldsForStatistics=FLD_ZONE&outStatistics=%5B%7B%22statisticType%22%3A%22count%22%2C%22onStatisticField%22%3A%22OBJECTID%22%2C%22outStatisticFieldName%22%3A%22polygon_count%22%7D%2C%7B%22statisticType%22%3A%22sum%22%2C%22onStatisticField%22%3A%22Shape__Area%22%2C%22outStatisticFieldName%22%3A%22area_total%22%7D%5D&f=json",
+              "fetched_at": "2026-08-12T04:30:16Z",
+              "tier": 1,
+              "citation": "FEMA NFHL Flood Hazard Zones (Layer 28 / S_FLD_HAZ_AR), groupBy FLD_ZONE with sum(Shape__Area), bbox -81.91,25.79,-80.85,26.5 (Collier County, FIPS 12021)."
+            },
+            "suggestions": [
+              "What's driving collier county ve zone pct area weighted?",
+              "How does collier county ve zone pct area weighted here compare to other SWFL areas?"
+            ]
+          },
+          {
+            "metric": "swfl_storm_year_claims_usd",
+            "value": 5042892332.66,
+            "direction": "stable",
+            "label": "SWFL cumulative NFIP paid claims (B+C+ICO) across named storm years (Charley 2004, Wilma 2005, Irma 2017, Ian 2022, Helene 2024, Milton 2024)",
+            "variable_type": "extensive",
+            "units": "USD",
+            "display_format": "currency",
+            "source": {
+              "url": "https://www.fema.gov/api/open/v2/FimaNfipClaims",
+              "fetched_at": "2026-08-12T04:30:30Z",
+              "tier": 1,
+              "citation": "OpenFEMA FimaNfipClaims via data_lake.fema_nfip_claims, FL state, 3 SWFL core counties (FIPS 12071+12021+12051), storm-list reviewed 2026-05-17."
+            },
+            "suggestions": [
+              "What's driving swfl storm year claims usd?",
+              "How does swfl storm year claims usd here compare to other SWFL areas?"
+            ]
+          },
+          {
+            "metric": "swfl_nonstorm_claims_baseline",
+            "value": 181105.62,
+            "direction": "stable",
+            "label": "SWFL non-storm-year annual NFIP paid claims (median across all non-storm years in the archive)",
+            "variable_type": "extensive",
+            "units": "USD/year",
+            "display_format": "currency",
+            "source": {
+              "url": "https://www.fema.gov/api/open/v2/FimaNfipClaims",
+              "fetched_at": "2026-08-12T04:30:30Z",
+              "tier": 1,
+              "citation": "OpenFEMA FimaNfipClaims via data_lake.fema_nfip_claims, FL state, 3 SWFL core counties (FIPS 12071+12021+12051), storm-list reviewed 2026-05-17."
+            },
+            "suggestions": [
+              "What's driving swfl nonstorm claims baseline?",
+              "How does swfl nonstorm claims baseline here compare to other SWFL areas?"
+            ]
+          },
+          {
+            "metric": "swfl_storm_frequency",
+            "value": 5,
+            "direction": "stable",
+            "label": "SWFL named-storm-year count since 2000",
+            "variable_type": "extensive",
+            "units": "years",
+            "display_format": "count",
+            "source": {
+              "url": "https://www.fema.gov/api/open/v2/FimaNfipClaims",
+              "fetched_at": "2026-08-12T04:30:30Z",
+              "tier": 1,
+              "citation": "OpenFEMA FimaNfipClaims via data_lake.fema_nfip_claims, FL state, 3 SWFL core counties (FIPS 12071+12021+12051), storm-list reviewed 2026-05-17."
+            },
+            "suggestions": [
+              "What's driving swfl storm frequency?",
+              "How does swfl storm frequency here compare to other SWFL areas?"
+            ]
+          },
+          {
+            "metric": "swfl_post_ian_claims_ratio",
+            "value": 0,
+            "direction": "stable",
+            "label": "SWFL latest-year NFIP claims ÷ non-storm baseline (numerator = 2026 SWFL total)",
+            "variable_type": "intensive",
+            "units": "ratio",
+            "display_format": "ratio",
+            "source": {
+              "url": "https://www.fema.gov/api/open/v2/FimaNfipClaims",
+              "fetched_at": "2026-08-12T04:30:30Z",
+              "tier": 1,
+              "citation": "OpenFEMA FimaNfipClaims via data_lake.fema_nfip_claims, FL state, 3 SWFL core counties (FIPS 12071+12021+12051), storm-list reviewed 2026-05-17."
+            },
+            "suggestions": [
+              "What's driving swfl post ian claims ratio?",
+              "How does swfl post ian claims ratio here compare to other SWFL areas?"
+            ]
+          },
+          {
+            "metric": "swfl_sw_stage_caloosahatchee_ft",
+            "value": 3.19,
+            "direction": "stable",
+            "label": "Caloosahatchee surface stage at gage local zero — latest reading (2026-08-09)",
+            "variable_type": "intensive",
+            "units": "ft",
+            "display_format": "raw",
+            "source": {
+              "url": "https://waterservices.usgs.gov/nwis/dv/?stateCd=FL&parameterCd=00065&siteStatus=active&format=json",
+              "fetched_at": "2026-08-12T04:30:42Z",
+              "tier": 1,
+              "citation": "USGS Water Services daily values via Tier-1 Parquet usgs_water_swfl.parquet (dual-read with usgs_water_swfl_sites.parquet, refreshed monthly), parameterCd 00065, latest dv read on 2026-08-09, HUC 03090205 (Caloosahatchee), sites: 02292010,02292490,02292740,02292780,02292900,02293230,02293262."
+            },
+            "suggestions": [
+              "What's driving swfl sw stage caloosahatchee ft?",
+              "How does swfl sw stage caloosahatchee ft here compare to other SWFL areas?"
+            ]
+          },
+          {
+            "metric": "swfl_rainfall_annual_in",
+            "value": 39.72,
+            "direction": "stable",
+            "label": "SWFL annual rainfall (2025) — average across 3 Lee + Collier GHCN-Daily stations",
+            "variable_type": "intensive",
+            "units": "in",
+            "display_format": "raw",
+            "source": {
+              "url": "https://registry.opendata.aws/noaa-ghcn/",
+              "fetched_at": "2026-08-12T04:30:42Z",
+              "tier": 1,
+              "citation": "NOAA GHCN-Daily via AWS Open Data (s3://noaa-ghcn-pds/csv/by_year/). Lee+Collier anchor stations (USW00012835 Page Field, USW00012894 RSW, USW00012897 Naples Muni, USC00086078 Naples COOP); 3 stations in latest complete year (2025); average of station annual totals (VALUE/254, QC-passed days only)."
+            },
+            "suggestions": [
+              "What's driving swfl rainfall annual in?",
+              "How does swfl rainfall annual in here compare to other SWFL areas?"
+            ]
+          },
+          {
+            "metric": "swfl_zip_33957_flood_aal_usd_per_insured_property",
+            "value": 40342.22,
+            "direction": "stable",
+            "label": "33957 (Lee County) per-insured-property NFIP AAL — 10-year window ending 2026",
+            "variable_type": "intensive",
+            "units": "USD/year",
+            "display_format": "currency",
+            "source": {
+              "url": "https://www.fema.gov/api/open/v2/FimaNfipClaims",
+              "fetched_at": "2026-08-12T04:30:30Z",
+              "tier": 1,
+              "citation": "OpenFEMA FimaNfipClaims via data_lake.fema_nfip_claims, ZIP 33957 (Lee County, FIPS 12071), AAL window = last 10 years ending 2026, 5673 claims in window, 2020 ACS population estimate 7,000 × 24.25% FEMA NFIP residential penetration rate for Lee County (as of 2026-08-03, v2)."
+            },
+            "suggestions": [
+              "What's driving swfl zip 33957 flood aal usd per insured property?",
+              "How does swfl zip 33957 flood aal usd per insured property here compare to other SWFL areas?"
+            ]
+          },
+          {
+            "metric": "swfl_zip_33957_flood_aal_pct_swfl_rank",
+            "value": 100,
+            "direction": "stable",
+            "label": "33957 percentile rank by per-insured-property AAL across SWFL ZIPs with ≥1 claim in window",
+            "variable_type": "intensive",
+            "units": "percentile",
+            "display_format": "raw",
+            "source": {
+              "url": "https://www.fema.gov/api/open/v2/FimaNfipClaims",
+              "fetched_at": "2026-08-12T04:30:30Z",
+              "tier": 1,
+              "citation": "OpenFEMA FimaNfipClaims via data_lake.fema_nfip_claims, ZIP 33957 (Lee County, FIPS 12071), AAL window = last 10 years ending 2026, 5673 claims in window, 2020 ACS population estimate 7,000 × 24.25% FEMA NFIP residential penetration rate for Lee County (as of 2026-08-03, v2)."
+            },
+            "suggestions": [
+              "What's driving swfl zip 33957 flood aal pct swfl rank?",
+              "How does swfl zip 33957 flood aal pct swfl rank here compare to other SWFL areas?"
+            ]
+          },
+          {
+            "metric": "swfl_zip_33957_barrier_island_score",
+            "value": 1,
+            "direction": "stable",
+            "label": "33957 barrier-island classification (1.0 barrier / 0.5 coastal-mainland / 0.0 inland)",
+            "variable_type": "intensive",
+            "units": "score",
+            "display_format": "raw",
+            "source": {
+              "url": "internal://refinery/lib/swfl-geo.mts",
+              "fetched_at": "2026-08-12T04:30:30Z",
+              "tier": 1,
+              "citation": "Static SWFL barrier-island classification table (refinery/lib/swfl-geo.mts): ZIP 33957 → barrier."
+            },
+            "suggestions": [
+              "What's driving swfl zip 33957 barrier island score?",
+              "How does swfl zip 33957 barrier island score here compare to other SWFL areas?"
+            ]
+          },
+          {
+            "metric": "swfl_zip_33957_flood_cap_rate_adj_bps",
+            "value": 60,
+            "direction": "stable",
+            "label": "33957 flood cap-rate adjustment (+50-70 bps)",
+            "variable_type": "intensive",
+            "units": "bps",
+            "display_format": "raw",
+            "source": {
+              "url": "internal://refinery/lib/swfl-geo.mts",
+              "fetched_at": "2026-08-12T04:30:30Z",
+              "tier": 1,
+              "citation": "swfl-geo capRateBpsFor(1) midpoint; range +50-70 bps. Calibrated against ULI/LaSalle 2024 \"+25-50 bps for elevated physical risk\" stratified by exposure intensity."
+            },
+            "suggestions": [
+              "What's driving swfl zip 33957 flood cap rate adj bps?",
+              "How does swfl zip 33957 flood cap rate adj bps here compare to other SWFL areas?"
+            ]
+          },
+          {
+            "metric": "swfl_zip_33957_insurance_pct_typical_noi",
+            "value": 3.472783962371349,
+            "direction": "stable",
+            "label": "33957 imputed flood insurance as fraction of NOI (8% cap on median building value)",
+            "variable_type": "intensive",
+            "units": "ratio",
+            "display_format": "ratio",
+            "source": {
+              "url": "https://www.fema.gov/api/open/v2/FimaNfipClaims",
+              "fetched_at": "2026-08-12T04:30:30Z",
+              "tier": 1,
+              "citation": "Computed: (AAL × 2) ÷ (median_building_property_value × 0.08). AAL = $40,342 USD/yr; median building value = $290,417 USD; 8% cap-rate assumption. Source: OpenFEMA FimaNfipClaims via data_lake.fema_nfip_claims, ZIP 33957 (Lee County, FIPS 12071), AAL window = last 10 years ending 2026, 5673 claims in window, 2020 ACS population estimate 7,000 × 24.25% FEMA NFIP residential penetration rate for Lee County (as of 2026-08-03, v2)."
+            },
+            "suggestions": [
+              "What's driving swfl zip 33957 insurance pct typical noi?",
+              "How does swfl zip 33957 insurance pct typical noi here compare to other SWFL areas?"
+            ]
+          },
+          {
+            "metric": "swfl_zip_33931_flood_aal_usd_per_insured_property",
+            "value": 38731.11,
+            "direction": "stable",
+            "label": "33931 (Lee County) per-insured-property NFIP AAL — 10-year window ending 2026",
+            "variable_type": "intensive",
+            "units": "USD/year",
+            "display_format": "currency",
+            "source": {
+              "url": "https://www.fema.gov/api/open/v2/FimaNfipClaims",
+              "fetched_at": "2026-08-12T04:30:30Z",
+              "tier": 1,
+              "citation": "OpenFEMA FimaNfipClaims via data_lake.fema_nfip_claims, ZIP 33931 (Lee County, FIPS 12071), AAL window = last 10 years ending 2026, 4114 claims in window, 2020 ACS population estimate 7,000 × 24.25% FEMA NFIP residential penetration rate for Lee County (as of 2026-08-03, v2)."
+            },
+            "suggestions": [
+              "What's driving swfl zip 33931 flood aal usd per insured property?",
+              "How does swfl zip 33931 flood aal usd per insured property here compare to other SWFL areas?"
+            ]
+          },
+          {
+            "metric": "swfl_zip_33931_flood_aal_pct_swfl_rank",
+            "value": 98.21,
+            "direction": "stable",
+            "label": "33931 percentile rank by per-insured-property AAL across SWFL ZIPs with ≥1 claim in window",
+            "variable_type": "intensive",
+            "units": "percentile",
+            "display_format": "raw",
+            "source": {
+              "url": "https://www.fema.gov/api/open/v2/FimaNfipClaims",
+              "fetched_at": "2026-08-12T04:30:30Z",
+              "tier": 1,
+              "citation": "OpenFEMA FimaNfipClaims via data_lake.fema_nfip_claims, ZIP 33931 (Lee County, FIPS 12071), AAL window = last 10 years ending 2026, 4114 claims in window, 2020 ACS population estimate 7,000 × 24.25% FEMA NFIP residential penetration rate for Lee County (as of 2026-08-03, v2)."
+            },
+            "suggestions": [
+              "What's driving swfl zip 33931 flood aal pct swfl rank?",
+              "How does swfl zip 33931 flood aal pct swfl rank here compare to other SWFL areas?"
+            ]
+          },
+          {
+            "metric": "swfl_zip_33931_barrier_island_score",
+            "value": 1,
+            "direction": "stable",
+            "label": "33931 barrier-island classification (1.0 barrier / 0.5 coastal-mainland / 0.0 inland)",
+            "variable_type": "intensive",
+            "units": "score",
+            "display_format": "raw",
+            "source": {
+              "url": "internal://refinery/lib/swfl-geo.mts",
+              "fetched_at": "2026-08-12T04:30:30Z",
+              "tier": 1,
+              "citation": "Static SWFL barrier-island classification table (refinery/lib/swfl-geo.mts): ZIP 33931 → barrier."
+            },
+            "suggestions": [
+              "What's driving swfl zip 33931 barrier island score?",
+              "How does swfl zip 33931 barrier island score here compare to other SWFL areas?"
+            ]
+          },
+          {
+            "metric": "swfl_zip_33931_flood_cap_rate_adj_bps",
+            "value": 60,
+            "direction": "stable",
+            "label": "33931 flood cap-rate adjustment (+50-70 bps)",
+            "variable_type": "intensive",
+            "units": "bps",
+            "display_format": "raw",
+            "source": {
+              "url": "internal://refinery/lib/swfl-geo.mts",
+              "fetched_at": "2026-08-12T04:30:30Z",
+              "tier": 1,
+              "citation": "swfl-geo capRateBpsFor(1) midpoint; range +50-70 bps. Calibrated against ULI/LaSalle 2024 \"+25-50 bps for elevated physical risk\" stratified by exposure intensity."
+            },
+            "suggestions": [
+              "What's driving swfl zip 33931 flood cap rate adj bps?",
+              "How does swfl zip 33931 flood cap rate adj bps here compare to other SWFL areas?"
+            ]
+          },
+          {
+            "metric": "swfl_zip_33931_insurance_pct_typical_noi",
+            "value": 3.9884407528082018,
+            "direction": "stable",
+            "label": "33931 imputed flood insurance as fraction of NOI (8% cap on median building value)",
+            "variable_type": "intensive",
+            "units": "ratio",
+            "display_format": "ratio",
+            "source": {
+              "url": "https://www.fema.gov/api/open/v2/FimaNfipClaims",
+              "fetched_at": "2026-08-12T04:30:30Z",
+              "tier": 1,
+              "citation": "Computed: (AAL × 2) ÷ (median_building_property_value × 0.08). AAL = $38,731 USD/yr; median building value = $242,771 USD; 8% cap-rate assumption. Source: OpenFEMA FimaNfipClaims via data_lake.fema_nfip_claims, ZIP 33931 (Lee County, FIPS 12071), AAL window = last 10 years ending 2026, 4114 claims in window, 2020 ACS population estimate 7,000 × 24.25% FEMA NFIP residential penetration rate for Lee County (as of 2026-08-03, v2)."
+            },
+            "suggestions": [
+              "What's driving swfl zip 33931 insurance pct typical noi?",
+              "How does swfl zip 33931 insurance pct typical noi here compare to other SWFL areas?"
+            ]
+          },
+          {
+            "metric": "swfl_zip_33921_flood_aal_usd_per_insured_property",
+            "value": 19662.5,
+            "direction": "stable",
+            "label": "33921 (Lee County) per-insured-property NFIP AAL — 10-year window ending 2026",
+            "variable_type": "intensive",
+            "units": "USD/year",
+            "display_format": "currency",
+            "source": {
+              "url": "https://www.fema.gov/api/open/v2/FimaNfipClaims",
+              "fetched_at": "2026-08-12T04:30:30Z",
+              "tier": 1,
+              "citation": "OpenFEMA FimaNfipClaims via data_lake.fema_nfip_claims, ZIP 33921 (Lee County, FIPS 12071), AAL window = last 10 years ending 2026, 732 claims in window, 2020 ACS population estimate 1,000 × 24.25% FEMA NFIP residential penetration rate for Lee County (as of 2026-08-03, v2)."
+            },
+            "suggestions": [
+              "What's driving swfl zip 33921 flood aal usd per insured property?",
+              "How does swfl zip 33921 flood aal usd per insured property here compare to other SWFL areas?"
+            ]
+          },
+          {
+            "metric": "swfl_zip_33921_flood_aal_pct_swfl_rank",
+            "value": 96.43,
+            "direction": "stable",
+            "label": "33921 percentile rank by per-insured-property AAL across SWFL ZIPs with ≥1 claim in window",
+            "variable_type": "intensive",
+            "units": "percentile",
+            "display_format": "raw",
+            "source": {
+              "url": "https://www.fema.gov/api/open/v2/FimaNfipClaims",
+              "fetched_at": "2026-08-12T04:30:30Z",
+              "tier": 1,
+              "citation": "OpenFEMA FimaNfipClaims via data_lake.fema_nfip_claims, ZIP 33921 (Lee County, FIPS 12071), AAL window = last 10 years ending 2026, 732 claims in window, 2020 ACS population estimate 1,000 × 24.25% FEMA NFIP residential penetration rate for Lee County (as of 2026-08-03, v2)."
+            },
+            "suggestions": [
+              "What's driving swfl zip 33921 flood aal pct swfl rank?",
+              "How does swfl zip 33921 flood aal pct swfl rank here compare to other SWFL areas?"
+            ]
+          },
+          {
+            "metric": "swfl_zip_33921_barrier_island_score",
+            "value": 1,
+            "direction": "stable",
+            "label": "33921 barrier-island classification (1.0 barrier / 0.5 coastal-mainland / 0.0 inland)",
+            "variable_type": "intensive",
+            "units": "score",
+            "display_format": "raw",
+            "source": {
+              "url": "internal://refinery/lib/swfl-geo.mts",
+              "fetched_at": "2026-08-12T04:30:30Z",
+              "tier": 1,
+              "citation": "Static SWFL barrier-island classification table (refinery/lib/swfl-geo.mts): ZIP 33921 → barrier."
+            },
+            "suggestions": [
+              "What's driving swfl zip 33921 barrier island score?",
+              "How does swfl zip 33921 barrier island score here compare to other SWFL areas?"
+            ]
+          },
+          {
+            "metric": "swfl_zip_33921_flood_cap_rate_adj_bps",
+            "value": 60,
+            "direction": "stable",
+            "label": "33921 flood cap-rate adjustment (+50-70 bps)",
+            "variable_type": "intensive",
+            "units": "bps",
+            "display_format": "raw",
+            "source": {
+              "url": "internal://refinery/lib/swfl-geo.mts",
+              "fetched_at": "2026-08-12T04:30:30Z",
+              "tier": 1,
+              "citation": "swfl-geo capRateBpsFor(1) midpoint; range +50-70 bps. Calibrated against ULI/LaSalle 2024 \"+25-50 bps for elevated physical risk\" stratified by exposure intensity."
+            },
+            "suggestions": [
+              "What's driving swfl zip 33921 flood cap rate adj bps?",
+              "How does swfl zip 33921 flood cap rate adj bps here compare to other SWFL areas?"
+            ]
+          },
+          {
+            "metric": "swfl_zip_33921_insurance_pct_typical_noi",
+            "value": 1.636526012128395,
+            "direction": "stable",
+            "label": "33921 imputed flood insurance as fraction of NOI (8% cap on median building value)",
+            "variable_type": "intensive",
+            "units": "ratio",
+            "display_format": "ratio",
+            "source": {
+              "url": "https://www.fema.gov/api/open/v2/FimaNfipClaims",
+              "fetched_at": "2026-08-12T04:30:30Z",
+              "tier": 1,
+              "citation": "Computed: (AAL × 2) ÷ (median_building_property_value × 0.08). AAL = $19,663 USD/yr; median building value = $300,370 USD; 8% cap-rate assumption. Source: OpenFEMA FimaNfipClaims via data_lake.fema_nfip_claims, ZIP 33921 (Lee County, FIPS 12071), AAL window = last 10 years ending 2026, 732 claims in window, 2020 ACS population estimate 1,000 × 24.25% FEMA NFIP residential penetration rate for Lee County (as of 2026-08-03, v2)."
+            },
+            "suggestions": [
+              "What's driving swfl zip 33921 insurance pct typical noi?",
+              "How does swfl zip 33921 insurance pct typical noi here compare to other SWFL areas?"
+            ]
+          },
+          {
+            "metric": "swfl_zip_33908_flood_aal_usd_per_insured_property",
+            "value": 13530.06,
+            "direction": "stable",
+            "label": "33908 (Lee County) per-insured-property NFIP AAL — 10-year window ending 2026",
+            "variable_type": "intensive",
+            "units": "USD/year",
+            "display_format": "currency",
+            "source": {
+              "url": "https://www.fema.gov/api/open/v2/FimaNfipClaims",
+              "fetched_at": "2026-08-12T04:30:30Z",
+              "tier": 1,
+              "citation": "OpenFEMA FimaNfipClaims via data_lake.fema_nfip_claims, ZIP 33908 (Lee County, FIPS 12071), AAL window = last 10 years ending 2026, 8043 claims in window, 2020 ACS population estimate 27,000 × 24.25% FEMA NFIP residential penetration rate for Lee County (as of 2026-08-03, v2)."
+            },
+            "suggestions": [
+              "What's driving swfl zip 33908 flood aal usd per insured property?",
+              "How does swfl zip 33908 flood aal usd per insured property here compare to other SWFL areas?"
+            ]
+          },
+          {
+            "metric": "swfl_zip_33908_flood_aal_pct_swfl_rank",
+            "value": 94.64,
+            "direction": "stable",
+            "label": "33908 percentile rank by per-insured-property AAL across SWFL ZIPs with ≥1 claim in window",
+            "variable_type": "intensive",
+            "units": "percentile",
+            "display_format": "raw",
+            "source": {
+              "url": "https://www.fema.gov/api/open/v2/FimaNfipClaims",
+              "fetched_at": "2026-08-12T04:30:30Z",
+              "tier": 1,
+              "citation": "OpenFEMA FimaNfipClaims via data_lake.fema_nfip_claims, ZIP 33908 (Lee County, FIPS 12071), AAL window = last 10 years ending 2026, 8043 claims in window, 2020 ACS population estimate 27,000 × 24.25% FEMA NFIP residential penetration rate for Lee County (as of 2026-08-03, v2)."
+            },
+            "suggestions": [
+              "What's driving swfl zip 33908 flood aal pct swfl rank?",
+              "How does swfl zip 33908 flood aal pct swfl rank here compare to other SWFL areas?"
+            ]
+          },
+          {
+            "metric": "swfl_zip_33908_barrier_island_score",
+            "value": 0,
+            "direction": "stable",
+            "label": "33908 barrier-island classification (1.0 barrier / 0.5 coastal-mainland / 0.0 inland)",
+            "variable_type": "intensive",
+            "units": "score",
+            "display_format": "raw",
+            "source": {
+              "url": "internal://refinery/lib/swfl-geo.mts",
+              "fetched_at": "2026-08-12T04:30:30Z",
+              "tier": 1,
+              "citation": "Static SWFL barrier-island classification table (refinery/lib/swfl-geo.mts): ZIP 33908 → inland."
+            },
+            "suggestions": [
+              "What's driving swfl zip 33908 barrier island score?",
+              "How does swfl zip 33908 barrier island score here compare to other SWFL areas?"
+            ]
+          },
+          {
+            "metric": "swfl_zip_33908_flood_cap_rate_adj_bps",
+            "value": 0,
+            "direction": "stable",
+            "label": "33908 flood cap-rate adjustment (no flood cap-rate adjustment)",
+            "variable_type": "intensive",
+            "units": "bps",
+            "display_format": "raw",
+            "source": {
+              "url": "internal://refinery/lib/swfl-geo.mts",
+              "fetched_at": "2026-08-12T04:30:30Z",
+              "tier": 1,
+              "citation": "swfl-geo capRateBpsFor(0) midpoint; range no flood cap-rate adjustment. Calibrated against ULI/LaSalle 2024 \"+25-50 bps for elevated physical risk\" stratified by exposure intensity."
+            },
+            "suggestions": [
+              "What's driving swfl zip 33908 flood cap rate adj bps?",
+              "How does swfl zip 33908 flood cap rate adj bps here compare to other SWFL areas?"
+            ]
+          },
+          {
+            "metric": "swfl_zip_33908_insurance_pct_typical_noi",
+            "value": 1.3359538846167518,
+            "direction": "stable",
+            "label": "33908 imputed flood insurance as fraction of NOI (8% cap on median building value)",
+            "variable_type": "intensive",
+            "units": "ratio",
+            "display_format": "ratio",
+            "source": {
+              "url": "https://www.fema.gov/api/open/v2/FimaNfipClaims",
+              "fetched_at": "2026-08-12T04:30:30Z",
+              "tier": 1,
+              "citation": "Computed: (AAL × 2) ÷ (median_building_property_value × 0.08). AAL = $13,530 USD/yr; median building value = $253,191 USD; 8% cap-rate assumption. Source: OpenFEMA FimaNfipClaims via data_lake.fema_nfip_claims, ZIP 33908 (Lee County, FIPS 12071), AAL window = last 10 years ending 2026, 8043 claims in window, 2020 ACS population estimate 27,000 × 24.25% FEMA NFIP residential penetration rate for Lee County (as of 2026-08-03, v2)."
+            },
+            "suggestions": [
+              "What's driving swfl zip 33908 insurance pct typical noi?",
+              "How does swfl zip 33908 insurance pct typical noi here compare to other SWFL areas?"
+            ]
+          },
+          {
+            "metric": "swfl_zip_33924_flood_aal_usd_per_insured_property",
+            "value": 12293.32,
+            "direction": "stable",
+            "label": "33924 (Lee County) per-insured-property NFIP AAL — 10-year window ending 2026",
+            "variable_type": "intensive",
+            "units": "USD/year",
+            "display_format": "currency",
+            "source": {
+              "url": "https://www.fema.gov/api/open/v2/FimaNfipClaims",
+              "fetched_at": "2026-08-12T04:30:30Z",
+              "tier": 1,
+              "citation": "OpenFEMA FimaNfipClaims via data_lake.fema_nfip_claims, ZIP 33924 (Lee County, FIPS 12071), AAL window = last 10 years ending 2026, 994 claims in window, 2020 ACS population estimate 1,000 × 24.25% FEMA NFIP residential penetration rate for Lee County (as of 2026-08-03, v2)."
+            },
+            "suggestions": [
+              "What's driving swfl zip 33924 flood aal usd per insured property?",
+              "How does swfl zip 33924 flood aal usd per insured property here compare to other SWFL areas?"
+            ]
+          },
+          {
+            "metric": "swfl_zip_33924_flood_aal_pct_swfl_rank",
+            "value": 92.86,
+            "direction": "stable",
+            "label": "33924 percentile rank by per-insured-property AAL across SWFL ZIPs with ≥1 claim in window",
+            "variable_type": "intensive",
+            "units": "percentile",
+            "display_format": "raw",
+            "source": {
+              "url": "https://www.fema.gov/api/open/v2/FimaNfipClaims",
+              "fetched_at": "2026-08-12T04:30:30Z",
+              "tier": 1,
+              "citation": "OpenFEMA FimaNfipClaims via data_lake.fema_nfip_claims, ZIP 33924 (Lee County, FIPS 12071), AAL window = last 10 years ending 2026, 994 claims in window, 2020 ACS population estimate 1,000 × 24.25% FEMA NFIP residential penetration rate for Lee County (as of 2026-08-03, v2)."
+            },
+            "suggestions": [
+              "What's driving swfl zip 33924 flood aal pct swfl rank?",
+              "How does swfl zip 33924 flood aal pct swfl rank here compare to other SWFL areas?"
+            ]
+          },
+          {
+            "metric": "swfl_zip_33924_barrier_island_score",
+            "value": 1,
+            "direction": "stable",
+            "label": "33924 barrier-island classification (1.0 barrier / 0.5 coastal-mainland / 0.0 inland)",
+            "variable_type": "intensive",
+            "units": "score",
+            "display_format": "raw",
+            "source": {
+              "url": "internal://refinery/lib/swfl-geo.mts",
+              "fetched_at": "2026-08-12T04:30:30Z",
+              "tier": 1,
+              "citation": "Static SWFL barrier-island classification table (refinery/lib/swfl-geo.mts): ZIP 33924 → barrier."
+            },
+            "suggestions": [
+              "What's driving swfl zip 33924 barrier island score?",
+              "How does swfl zip 33924 barrier island score here compare to other SWFL areas?"
+            ]
+          },
+          {
+            "metric": "swfl_zip_33924_flood_cap_rate_adj_bps",
+            "value": 60,
+            "direction": "stable",
+            "label": "33924 flood cap-rate adjustment (+50-70 bps)",
+            "variable_type": "intensive",
+            "units": "bps",
+            "display_format": "raw",
+            "source": {
+              "url": "internal://refinery/lib/swfl-geo.mts",
+              "fetched_at": "2026-08-12T04:30:30Z",
+              "tier": 1,
+              "citation": "swfl-geo capRateBpsFor(1) midpoint; range +50-70 bps. Calibrated against ULI/LaSalle 2024 \"+25-50 bps for elevated physical risk\" stratified by exposure intensity."
+            },
+            "suggestions": [
+              "What's driving swfl zip 33924 flood cap rate adj bps?",
+              "How does swfl zip 33924 flood cap rate adj bps here compare to other SWFL areas?"
+            ]
+          },
+          {
+            "metric": "swfl_zip_33924_insurance_pct_typical_noi",
+            "value": 1.2077661280181087,
+            "direction": "stable",
+            "label": "33924 imputed flood insurance as fraction of NOI (8% cap on median building value)",
+            "variable_type": "intensive",
+            "units": "ratio",
+            "display_format": "ratio",
+            "source": {
+              "url": "https://www.fema.gov/api/open/v2/FimaNfipClaims",
+              "fetched_at": "2026-08-12T04:30:30Z",
+              "tier": 1,
+              "citation": "Computed: (AAL × 2) ÷ (median_building_property_value × 0.08). AAL = $12,293 USD/yr; median building value = $254,464 USD; 8% cap-rate assumption. Source: OpenFEMA FimaNfipClaims via data_lake.fema_nfip_claims, ZIP 33924 (Lee County, FIPS 12071), AAL window = last 10 years ending 2026, 994 claims in window, 2020 ACS population estimate 1,000 × 24.25% FEMA NFIP residential penetration rate for Lee County (as of 2026-08-03, v2)."
+            },
+            "suggestions": [
+              "What's driving swfl zip 33924 insurance pct typical noi?",
+              "How does swfl zip 33924 insurance pct typical noi here compare to other SWFL areas?"
+            ]
+          },
+          {
+            "metric": "swfl_zip_34102_flood_aal_usd_per_insured_property",
+            "value": 6736.6,
+            "direction": "stable",
+            "label": "34102 (Collier County) per-insured-property NFIP AAL — 10-year window ending 2026",
+            "variable_type": "intensive",
+            "units": "USD/year",
+            "display_format": "currency",
+            "source": {
+              "url": "https://www.fema.gov/api/open/v2/FimaNfipClaims",
+              "fetched_at": "2026-08-12T04:30:30Z",
+              "tier": 1,
+              "citation": "OpenFEMA FimaNfipClaims via data_lake.fema_nfip_claims, ZIP 34102 (Collier County, FIPS 12021), AAL window = last 10 years ending 2026, 2872 claims in window, 2020 ACS population estimate 17,000 × 29.55% FEMA NFIP residential penetration rate for Collier County (as of 2026-08-03, v2)."
+            },
+            "suggestions": [
+              "What's driving swfl zip 34102 flood aal usd per insured property?",
+              "How does swfl zip 34102 flood aal usd per insured property here compare to other SWFL areas?"
+            ]
+          },
+          {
+            "metric": "swfl_zip_34102_flood_aal_pct_swfl_rank",
+            "value": 91.07,
+            "direction": "stable",
+            "label": "34102 percentile rank by per-insured-property AAL across SWFL ZIPs with ≥1 claim in window",
+            "variable_type": "intensive",
+            "units": "percentile",
+            "display_format": "raw",
+            "source": {
+              "url": "https://www.fema.gov/api/open/v2/FimaNfipClaims",
+              "fetched_at": "2026-08-12T04:30:30Z",
+              "tier": 1,
+              "citation": "OpenFEMA FimaNfipClaims via data_lake.fema_nfip_claims, ZIP 34102 (Collier County, FIPS 12021), AAL window = last 10 years ending 2026, 2872 claims in window, 2020 ACS population estimate 17,000 × 29.55% FEMA NFIP residential penetration rate for Collier County (as of 2026-08-03, v2)."
+            },
+            "suggestions": [
+              "What's driving swfl zip 34102 flood aal pct swfl rank?",
+              "How does swfl zip 34102 flood aal pct swfl rank here compare to other SWFL areas?"
+            ]
+          },
+          {
+            "metric": "swfl_zip_34102_barrier_island_score",
+            "value": 0.5,
+            "direction": "stable",
+            "label": "34102 barrier-island classification (1.0 barrier / 0.5 coastal-mainland / 0.0 inland)",
+            "variable_type": "intensive",
+            "units": "score",
+            "display_format": "raw",
+            "source": {
+              "url": "internal://refinery/lib/swfl-geo.mts",
+              "fetched_at": "2026-08-12T04:30:30Z",
+              "tier": 1,
+              "citation": "Static SWFL barrier-island classification table (refinery/lib/swfl-geo.mts): ZIP 34102 → coastal-mainland."
+            },
+            "suggestions": [
+              "What's driving swfl zip 34102 barrier island score?",
+              "How does swfl zip 34102 barrier island score here compare to other SWFL areas?"
+            ]
+          },
+          {
+            "metric": "swfl_zip_34102_flood_cap_rate_adj_bps",
+            "value": 27.5,
+            "direction": "stable",
+            "label": "34102 flood cap-rate adjustment (+20-35 bps)",
+            "variable_type": "intensive",
+            "units": "bps",
+            "display_format": "raw",
+            "source": {
+              "url": "internal://refinery/lib/swfl-geo.mts",
+              "fetched_at": "2026-08-12T04:30:30Z",
+              "tier": 1,
+              "citation": "swfl-geo capRateBpsFor(0.5) midpoint; range +20-35 bps. Calibrated against ULI/LaSalle 2024 \"+25-50 bps for elevated physical risk\" stratified by exposure intensity."
+            },
+            "suggestions": [
+              "What's driving swfl zip 34102 flood cap rate adj bps?",
+              "How does swfl zip 34102 flood cap rate adj bps here compare to other SWFL areas?"
+            ]
+          },
+          {
+            "metric": "swfl_zip_34102_insurance_pct_typical_noi",
+            "value": 0.29005188262900694,
+            "direction": "stable",
+            "label": "34102 imputed flood insurance as fraction of NOI (8% cap on median building value)",
+            "variable_type": "intensive",
+            "units": "ratio",
+            "display_format": "ratio",
+            "source": {
+              "url": "https://www.fema.gov/api/open/v2/FimaNfipClaims",
+              "fetched_at": "2026-08-12T04:30:30Z",
+              "tier": 1,
+              "citation": "Computed: (AAL × 2) ÷ (median_building_property_value × 0.08). AAL = $6,737 USD/yr; median building value = $580,638 USD; 8% cap-rate assumption. Source: OpenFEMA FimaNfipClaims via data_lake.fema_nfip_claims, ZIP 34102 (Collier County, FIPS 12021), AAL window = last 10 years ending 2026, 2872 claims in window, 2020 ACS population estimate 17,000 × 29.55% FEMA NFIP residential penetration rate for Collier County (as of 2026-08-03, v2)."
+            },
+            "suggestions": [
+              "What's driving swfl zip 34102 insurance pct typical noi?",
+              "How does swfl zip 34102 insurance pct typical noi here compare to other SWFL areas?"
+            ]
+          }
+        ],
+        "detail_tables": [
+          {
+            "id": "storm_timeline",
+            "title": "SWFL Named-Storm NFIP Paid Claims (B+C+ICO)",
+            "grain": "storm",
+            "columns": [
+              {
+                "id": "year",
+                "label": "Landfall year",
+                "display_format": "count",
+                "units": "year"
+              },
+              {
+                "id": "paid_usd",
+                "label": "NFIP paid claims (B+C+ICO)",
+                "display_format": "currency",
+                "units": "USD"
+              },
+              {
+                "id": "date",
+                "label": "Landfall date"
+              }
+            ],
+            "rows": [
+              {
+                "key": "Charley",
+                "label": "Charley",
+                "cells": {
+                  "year": 2004,
+                  "paid_usd": 46936212.65,
+                  "date": "2004-08-13"
+                }
+              },
+              {
+                "key": "Wilma",
+                "label": "Wilma",
+                "cells": {
+                  "year": 2005,
+                  "paid_usd": 7431851.18,
+                  "date": "2005-10-24"
+                }
+              },
+              {
+                "key": "Irma",
+                "label": "Irma",
+                "cells": {
+                  "year": 2017,
+                  "paid_usd": 127925217.4,
+                  "date": "2017-09-10"
+                }
+              },
+              {
+                "key": "Ian",
+                "label": "Ian",
+                "cells": {
+                  "year": 2022,
+                  "paid_usd": 4313283416.44,
+                  "date": "2022-09-28"
+                }
+              },
+              {
+                "key": "Helene",
+                "label": "Helene",
+                "cells": {
+                  "year": 2024,
+                  "paid_usd": 232421348.18,
+                  "date": "2024-09-26"
+                }
+              },
+              {
+                "key": "Milton",
+                "label": "Milton",
+                "cells": {
+                  "year": 2024,
+                  "paid_usd": 314894286.81,
+                  "date": "2024-10-09"
+                }
+              }
+            ],
+            "source": {
+              "url": "https://www.fema.gov/api/open/v2/FimaNfipClaims",
+              "fetched_at": "2026-08-12T04:30:30Z",
+              "tier": 1,
+              "citation": "OpenFEMA FimaNfipClaims via data_lake.fema_nfip_claims, FL, SWFL core counties (FIPS 12071+12021+12051). Per-named-storm paid totals (building + contents + ICO). 2024 storms split by date_of_loss at Milton landfall (2024-10-09); null-date 2024 claims are excluded from per-storm rows. Storm-list reviewed 2026-05-17."
+            },
+            "note": "Per-storm NFIP paid claims. For 2024, Helene (2024-09-26) and Milton (2024-10-09) are attributed by date_of_loss cutoff. Claims with null date_of_loss in 2024 are excluded from per-storm rows but included in the combined swfl_storm_year_claims_usd metric."
+          },
+          {
+            "id": "flood_by_zip",
+            "title": "SWFL flood loss by ZIP — NFIP per-insured-property AAL",
+            "grain": "zip",
+            "columns": [
+              {
+                "id": "aal_usd_per_insured_property",
+                "label": "Avg annual flood loss per insured home",
+                "display_format": "currency",
+                "units": "USD/year"
+              },
+              {
+                "id": "pct_rank",
+                "label": "SWFL percentile rank",
+                "display_format": "raw",
+                "units": "percentile"
+              },
+              {
+                "id": "claim_count_in_window",
+                "label": "Claims in 10-year window",
+                "display_format": "count",
+                "units": "claims"
+              },
+              {
+                "id": "county",
+                "label": "County"
+              }
+            ],
+            "rows": [
+              {
+                "key": "33957",
+                "label": "33957",
+                "cells": {
+                  "aal_usd_per_insured_property": 40342.22,
+                  "pct_rank": 100,
+                  "claim_count_in_window": 5673,
+                  "county": "Lee"
+                }
+              },
+              {
+                "key": "33931",
+                "label": "33931",
+                "cells": {
+                  "aal_usd_per_insured_property": 38731.11,
+                  "pct_rank": 98.21,
+                  "claim_count_in_window": 4114,
+                  "county": "Lee"
+                }
+              },
+              {
+                "key": "33921",
+                "label": "33921",
+                "cells": {
+                  "aal_usd_per_insured_property": 19662.5,
+                  "pct_rank": 96.43,
+                  "claim_count_in_window": 732,
+                  "county": "Lee"
+                }
+              },
+              {
+                "key": "33908",
+                "label": "33908",
+                "cells": {
+                  "aal_usd_per_insured_property": 13530.06,
+                  "pct_rank": 94.64,
+                  "claim_count_in_window": 8043,
+                  "county": "Lee"
+                }
+              },
+              {
+                "key": "33924",
+                "label": "33924",
+                "cells": {
+                  "aal_usd_per_insured_property": 12293.32,
+                  "pct_rank": 92.86,
+                  "claim_count_in_window": 994,
+                  "county": "Lee"
+                }
+              },
+              {
+                "key": "34102",
+                "label": "34102",
+                "cells": {
+                  "aal_usd_per_insured_property": 6736.6,
+                  "pct_rank": 91.07,
+                  "claim_count_in_window": 2872,
+                  "county": "Collier"
+                }
+              },
+              {
+                "key": "34103",
+                "label": "34103",
+                "cells": {
+                  "aal_usd_per_insured_property": 4524.65,
+                  "pct_rank": 89.29,
+                  "claim_count_in_window": 1493,
+                  "county": "Collier"
+                }
+              },
+              {
+                "key": "34134",
+                "label": "34134",
+                "cells": {
+                  "aal_usd_per_insured_property": 4345.27,
+                  "pct_rank": 87.5,
+                  "claim_count_in_window": 1940,
+                  "county": "Lee"
+                }
+              },
+              {
+                "key": "33904",
+                "label": "33904",
+                "cells": {
+                  "aal_usd_per_insured_property": 3463.29,
+                  "pct_rank": 85.71,
+                  "claim_count_in_window": 2392,
+                  "county": "Lee"
+                }
+              },
+              {
+                "key": "33914",
+                "label": "33914",
+                "cells": {
+                  "aal_usd_per_insured_property": 2766.44,
+                  "pct_rank": 83.93,
+                  "claim_count_in_window": 3387,
+                  "county": "Lee"
+                }
+              },
+              {
+                "key": "33917",
+                "label": "33917",
+                "cells": {
+                  "aal_usd_per_insured_property": 2732.08,
+                  "pct_rank": 82.14,
+                  "claim_count_in_window": 1683,
+                  "county": "Lee"
+                }
+              },
+              {
+                "key": "34108",
+                "label": "34108",
+                "cells": {
+                  "aal_usd_per_insured_property": 2239.55,
+                  "pct_rank": 80.36,
+                  "claim_count_in_window": 1326,
+                  "county": "Collier"
+                }
+              },
+              {
+                "key": "33919",
+                "label": "33919",
+                "cells": {
+                  "aal_usd_per_insured_property": 2111.39,
+                  "pct_rank": 78.57,
+                  "claim_count_in_window": 1416,
+                  "county": "Lee"
+                }
+              },
+              {
+                "key": "33905",
+                "label": "33905",
+                "cells": {
+                  "aal_usd_per_insured_property": 2028.24,
+                  "pct_rank": 76.79,
+                  "claim_count_in_window": 1407,
+                  "county": "Lee"
+                }
+              },
+              {
+                "key": "33903",
+                "label": "33903",
+                "cells": {
+                  "aal_usd_per_insured_property": 1846.47,
+                  "pct_rank": 75,
+                  "claim_count_in_window": 1262,
+                  "county": "Lee"
+                }
+              },
+              {
+                "key": "34135",
+                "label": "34135",
+                "cells": {
+                  "aal_usd_per_insured_property": 1387.89,
+                  "pct_rank": 73.21,
+                  "claim_count_in_window": 1006,
+                  "county": "Lee"
+                }
+              },
+              {
+                "key": "33956",
+                "label": "33956",
+                "cells": {
+                  "aal_usd_per_insured_property": 1224.73,
+                  "pct_rank": 71.43,
+                  "claim_count_in_window": 1378,
+                  "county": "Lee"
+                }
+              },
+              {
+                "key": "34104",
+                "label": "34104",
+                "cells": {
+                  "aal_usd_per_insured_property": 1027.48,
+                  "pct_rank": 69.64,
+                  "claim_count_in_window": 844,
+                  "county": "Collier"
+                }
+              },
+              {
+                "key": "33928",
+                "label": "33928",
+                "cells": {
+                  "aal_usd_per_insured_property": 993.75,
+                  "pct_rank": 67.86,
+                  "claim_count_in_window": 411,
+                  "county": "Lee"
+                }
+              },
+              {
+                "key": "34145",
+                "label": "34145",
+                "cells": {
+                  "aal_usd_per_insured_property": 933.85,
+                  "pct_rank": 66.07,
+                  "claim_count_in_window": 1741,
+                  "county": "Collier"
+                }
+              },
+              {
+                "key": "34112",
+                "label": "34112",
+                "cells": {
+                  "aal_usd_per_insured_property": 848.16,
+                  "pct_rank": 64.29,
+                  "claim_count_in_window": 1331,
+                  "county": "Collier"
+                }
+              },
+              {
+                "key": "33901",
+                "label": "33901",
+                "cells": {
+                  "aal_usd_per_insured_property": 794.31,
+                  "pct_rank": 62.5,
+                  "claim_count_in_window": 423,
+                  "county": "Lee"
+                }
+              },
+              {
+                "key": "33993",
+                "label": "33993",
+                "cells": {
+                  "aal_usd_per_insured_property": 700.19,
+                  "pct_rank": 60.71,
+                  "claim_count_in_window": 796,
+                  "county": "Lee"
+                }
+              },
+              {
+                "key": "34110",
+                "label": "34110",
+                "cells": {
+                  "aal_usd_per_insured_property": 578.3,
+                  "pct_rank": 58.93,
+                  "claim_count_in_window": 737,
+                  "county": "Collier"
+                }
+              },
+              {
+                "key": "34113",
+                "label": "34113",
+                "cells": {
+                  "aal_usd_per_insured_property": 454.75,
+                  "pct_rank": 57.14,
+                  "claim_count_in_window": 491,
+                  "county": "Collier"
+                }
+              },
+              {
+                "key": "34134",
+                "label": "34134",
+                "cells": {
+                  "aal_usd_per_insured_property": 397.51,
+                  "pct_rank": 55.36,
+                  "claim_count_in_window": 356,
+                  "county": "Collier"
+                }
+              },
+              {
+                "key": "33916",
+                "label": "33916",
+                "cells": {
+                  "aal_usd_per_insured_property": 266.55,
+                  "pct_rank": 53.57,
+                  "claim_count_in_window": 248,
+                  "county": "Lee"
+                }
+              },
+              {
+                "key": "33922",
+                "label": "33922",
+                "cells": {
+                  "aal_usd_per_insured_property": 263.26,
+                  "pct_rank": 51.79,
+                  "claim_count_in_window": 525,
+                  "county": "Lee"
+                }
+              },
+              {
+                "key": "34105",
+                "label": "34105",
+                "cells": {
+                  "aal_usd_per_insured_property": 202.45,
+                  "pct_rank": 50,
+                  "claim_count_in_window": 130,
+                  "county": "Collier"
+                }
+              },
+              {
+                "key": "33920",
+                "label": "33920",
+                "cells": {
+                  "aal_usd_per_insured_property": 200.22,
+                  "pct_rank": 48.21,
+                  "claim_count_in_window": 178,
+                  "county": "Lee"
+                }
+              },
+              {
+                "key": "34139",
+                "label": "34139",
+                "cells": {
+                  "aal_usd_per_insured_property": 156.7,
+                  "pct_rank": 46.43,
+                  "claim_count_in_window": 205,
+                  "county": "Collier"
+                }
+              },
+              {
+                "key": "33991",
+                "label": "33991",
+                "cells": {
+                  "aal_usd_per_insured_property": 85.63,
+                  "pct_rank": 44.64,
+                  "claim_count_in_window": 225,
+                  "county": "Lee"
+                }
+              },
+              {
+                "key": "34140",
+                "label": "34140",
+                "cells": {
+                  "aal_usd_per_insured_property": 81.19,
+                  "pct_rank": 42.86,
+                  "claim_count_in_window": 203,
+                  "county": "Collier"
+                }
+              },
+              {
+                "key": "33967",
+                "label": "33967",
+                "cells": {
+                  "aal_usd_per_insured_property": 76.77,
+                  "pct_rank": 41.07,
+                  "claim_count_in_window": 249,
+                  "county": "Lee"
+                }
+              },
+              {
+                "key": "34114",
+                "label": "34114",
+                "cells": {
+                  "aal_usd_per_insured_property": 67.81,
+                  "pct_rank": 39.29,
+                  "claim_count_in_window": 313,
+                  "county": "Collier"
+                }
+              },
+              {
+                "key": "33990",
+                "label": "33990",
+                "cells": {
+                  "aal_usd_per_insured_property": 54.39,
+                  "pct_rank": 37.5,
+                  "claim_count_in_window": 211,
+                  "county": "Lee"
+                }
+              },
+              {
+                "key": "33907",
+                "label": "33907",
+                "cells": {
+                  "aal_usd_per_insured_property": 54.11,
+                  "pct_rank": 35.71,
+                  "claim_count_in_window": 142,
+                  "county": "Lee"
+                }
+              },
+              {
+                "key": "33912",
+                "label": "33912",
+                "cells": {
+                  "aal_usd_per_insured_property": 41.2,
+                  "pct_rank": 33.93,
+                  "claim_count_in_window": 104,
+                  "county": "Lee"
+                }
+              },
+              {
+                "key": "34109",
+                "label": "34109",
+                "cells": {
+                  "aal_usd_per_insured_property": 19.13,
+                  "pct_rank": 32.14,
+                  "claim_count_in_window": 96,
+                  "county": "Collier"
+                }
+              },
+              {
+                "key": "34117",
+                "label": "34117",
+                "cells": {
+                  "aal_usd_per_insured_property": 15.19,
+                  "pct_rank": 30.36,
+                  "claim_count_in_window": 91,
+                  "county": "Collier"
+                }
+              },
+              {
+                "key": "34138",
+                "label": "34138",
+                "cells": {
+                  "aal_usd_per_insured_property": 12.61,
+                  "pct_rank": 28.57,
+                  "claim_count_in_window": 39,
+                  "county": "Collier"
+                }
+              },
+              {
+                "key": "34119",
+                "label": "34119",
+                "cells": {
+                  "aal_usd_per_insured_property": 12.53,
+                  "pct_rank": 26.79,
+                  "claim_count_in_window": 107,
+                  "county": "Collier"
+                }
+              },
+              {
+                "key": "33973",
+                "label": "33973",
+                "cells": {
+                  "aal_usd_per_insured_property": 12.04,
+                  "pct_rank": 25,
+                  "claim_count_in_window": 12,
+                  "county": "Lee"
+                }
+              },
+              {
+                "key": "34142",
+                "label": "34142",
+                "cells": {
+                  "aal_usd_per_insured_property": 9.79,
+                  "pct_rank": 23.21,
+                  "claim_count_in_window": 35,
+                  "county": "Collier"
+                }
+              },
+              {
+                "key": "33966",
+                "label": "33966",
+                "cells": {
+                  "aal_usd_per_insured_property": 8.45,
+                  "pct_rank": 21.43,
+                  "claim_count_in_window": 43,
+                  "county": "Lee"
+                }
+              },
+              {
+                "key": "34120",
+                "label": "34120",
+                "cells": {
+                  "aal_usd_per_insured_property": 5.43,
+                  "pct_rank": 19.64,
+                  "claim_count_in_window": 138,
+                  "county": "Collier"
+                }
+              },
+              {
+                "key": "34116",
+                "label": "34116",
+                "cells": {
+                  "aal_usd_per_insured_property": 4.86,
+                  "pct_rank": 17.86,
+                  "claim_count_in_window": 103,
+                  "county": "Collier"
+                }
+              },
+              {
+                "key": "33913",
+                "label": "33913",
+                "cells": {
+                  "aal_usd_per_insured_property": 1.48,
+                  "pct_rank": 16.07,
+                  "claim_count_in_window": 33,
+                  "county": "Lee"
+                }
+              },
+              {
+                "key": "34141",
+                "label": "34141",
+                "cells": {
+                  "aal_usd_per_insured_property": 0.79,
+                  "pct_rank": 14.29,
+                  "claim_count_in_window": 7,
+                  "county": "Collier"
+                }
+              },
+              {
+                "key": "33976",
+                "label": "33976",
+                "cells": {
+                  "aal_usd_per_insured_property": 0.68,
+                  "pct_rank": 12.5,
+                  "claim_count_in_window": 1,
+                  "county": "Lee"
+                }
+              },
+              {
+                "key": "33936",
+                "label": "33936",
+                "cells": {
+                  "aal_usd_per_insured_property": 0.6,
+                  "pct_rank": 10.71,
+                  "claim_count_in_window": 15,
+                  "county": "Lee"
+                }
+              },
+              {
+                "key": "33909",
+                "label": "33909",
+                "cells": {
+                  "aal_usd_per_insured_property": 0.42,
+                  "pct_rank": 8.93,
+                  "claim_count_in_window": 20,
+                  "county": "Lee"
+                }
+              },
+              {
+                "key": "33972",
+                "label": "33972",
+                "cells": {
+                  "aal_usd_per_insured_property": 0.4,
+                  "pct_rank": 7.14,
+                  "claim_count_in_window": 18,
+                  "county": "Lee"
+                }
+              },
+              {
+                "key": "33971",
+                "label": "33971",
+                "cells": {
+                  "aal_usd_per_insured_property": 0.36,
+                  "pct_rank": 5.36,
+                  "claim_count_in_window": 3,
+                  "county": "Lee"
+                }
+              },
+              {
+                "key": "34137",
+                "label": "34137",
+                "cells": {
+                  "aal_usd_per_insured_property": 0.03,
+                  "pct_rank": 3.57,
+                  "claim_count_in_window": 1,
+                  "county": "Collier"
+                }
+              },
+              {
+                "key": "33974",
+                "label": "33974",
+                "cells": {
+                  "aal_usd_per_insured_property": 0.03,
+                  "pct_rank": 1.79,
+                  "claim_count_in_window": 3,
+                  "county": "Lee"
+                }
+              },
+              {
+                "key": "34119",
+                "label": "34119",
+                "cells": {
+                  "aal_usd_per_insured_property": 0,
+                  "pct_rank": 0,
+                  "claim_count_in_window": 1,
+                  "county": "Lee"
+                }
+              }
+            ],
+            "source": {
+              "url": "https://www.fema.gov/api/open/v2/FimaNfipClaims",
+              "fetched_at": "2026-08-12T04:30:30Z",
+              "tier": 1,
+              "citation": "OpenFEMA FimaNfipClaims via data_lake.fema_nfip_claims — every SWFL ZIP with ≥1 claim in the 10-year rolling window; per-insured-property AAL, 2020 ACS population × county-measured FEMA NFIP residential penetration rate (v2, as of 2026-08-03) denominator."
+            },
+            "note": "NFIP policyholder claims only — uninsured flood loss is not in the archive. Percentile rank is across all SWFL ZIPs with ≥1 claim in window."
+          }
+        ],
+        "caveats": [
+          "Area aggregates are in square decimal degrees (WGS84 / EPSG:4326), not projected meters. Ratios across zones within the same county are accurate; absolute areas are NOT physical units and are never propagated.",
+          "Bbox-intersect queries include polygons that touch the county envelope, so edge polygons may belong to neighboring counties. The DFIRM_ID on each polygon is the authoritative county affiliation; v1 surfaces the bbox-aggregate without re-attributing edge polygons.",
+          "FEMA NFHL is queried live on every refinery run (v1). LOMR-based cache invalidation (Layer 1, EFF_DATE) is documented in docs/env-swfl-spike-findings.md and reserved for v2 once a hot-path issue is observed.",
+          "NFIP claims are policyholder-only. Uninsured properties and parcels outside NFIP participation are NOT in the archive — true SWFL flood loss is materially larger than what these numbers show.",
+          "Storm-year list (Charley 2004, Wilma 2005, Irma 2017, Ian 2022, Helene 2024, Milton 2024) was last reviewed 2026-05-17. Requires update in refinery/sources/fema-nfip-source.mts when a new named storm hits SWFL.",
+          "Per-ZIP AAL denominator uses 2020 ACS population × each ZIP's county's real FEMA NFIP residential penetration rate (v2, as of 2026-08-03) — Lee 24.3%, Collier 29.5%, Hendry 4.4%. Rates refresh quarterly at FEMA; re-pull before a build if this snapshot predates the current quarter.",
+          "USGS surface stage metric includes both Approved (A) and Provisional (P) qualifiers — magnitudes may revise as USGS approves provisional readings over the 6-12 month review window. For approval-only reads, brain-level consumers should filter on the qualifiers column directly.",
+          "GHCN-Daily rainfall is gauge precipitation at the station point — not areal interpolation. The 4-station Lee+Collier average smooths station-level micro-climate but may diverge from PRISM or radar QPE in high-gradient convective events."
+        ],
+        "contradicts": [],
+        "confidence": 1,
+        "joint_integrity": 1,
+        "confidence_dispersion": 0,
+        "chain_depth": 0,
+        "trust_tier": 1,
+        "upstream_count": 0,
+        "relevance": {
+          "decay_curve": "weeks",
+          "half_life_hours": 720,
+          "computed_at": "2026-08-12T04:30:42Z"
+        },
+        "exogenous_signals": []
+      }
     },
     {
       "packId": "logistics-swfl",
@@ -114,19 +1665,19 @@
     {
       "packId": "city-pulse-swfl",
       "status": "built",
-      "version": 61,
+      "version": 62,
       "written": true,
       "brainOutput": {
         "brain_id": "city-pulse-swfl",
-        "version": 61,
-        "refined_at": "2026-08-11T14:54:39Z",
-        "expires": "2026-08-12T14:54:39Z",
+        "version": 62,
+        "refined_at": "2026-08-12T04:30:43Z",
+        "expires": "2026-08-13T04:30:43Z",
         "ttl_seconds": 86400,
         "direction": "neutral",
         "magnitude": 0,
         "drivers": [],
         "overrides": [],
-        "conclusion": "SWFL city pulse as of 2026-08-11: 117 live current-events signals across 11 cities — Fort Myers (30), Cape Coral (25), Naples (33), North Naples (5), Marco Island (5), Sanibel (4), Estero (5), Bonita Springs (4), Fort Myers Beach (4), Lehigh Acres (1), Golden Gate (1). Most current: Fort Myers — A long-vacant Fort Myers building sold for $2.25 million, as reported Aug. 10, 2026. These are current cited facts only; the cross-vertical read and any direction call live downstream in master.",
+        "conclusion": "SWFL city pulse as of 2026-08-12: 117 live current-events signals across 11 cities — Fort Myers (30), Cape Coral (25), Naples (33), North Naples (5), Marco Island (5), Sanibel (4), Estero (5), Bonita Springs (4), Fort Myers Beach (4), Lehigh Acres (1), Golden Gate (1). Most current: Fort Myers — A long-vacant Fort Myers building sold for $2.25 million, as reported Aug. 10, 2026. These are current cited facts only; the cross-vertical read and any direction call live downstream in master.",
         "key_metrics": [
           {
             "metric": "signal_transactions_1",
@@ -136,7 +1687,7 @@
             "variable_type": "categorical",
             "source": {
               "url": "https://www.businessobserverfl.com/news/2026/aug/10/long-vacant-fort-myers-building-sells/",
-              "fetched_at": "2026-08-11T14:54:39Z",
+              "fetched_at": "2026-08-12T04:30:43Z",
               "tier": 2,
               "citation": "Long-vacant Fort Myers building sells for $2.25 million | Business Observer: \"![Spinner: White decorative](https://cdn.userway.org/widgetapp/images/spin_wh.svg)\n![](https://cdn.userway.org/widgetapp/images/body_wh.svg)\n![Spinner: White decorative](https://cdn.userway.org/widgetapp/images/spin_wh.svg)\n  * ![Alternate Text](https://observermediagroup.media.clients.ellingtoncms.com/static-4/assets/images/bob-logo-header.svg)\n  * Loading\n\n\n  * [Newsletters](https://marketing.businessobserverfl.com/newsletters)\n  * [Podcast](https://www.businessobserverfl.com/podcasts/corner-office/?utm_source=header&utm_medium=sitenav)\n  * [Public Notices](https://legals.businessobserverfl.com/)\n  * [40 Under 40 Nomination](https://www.businessobserverfl.com/submit-40-under-40-2026/)\n  * [Mobile App](https://businessobserver.pressreader.com/)\n  * [Subscribe](https://marketing.businessobserverfl.com/subscribe)\n  * [Login](https://www.businessobserverfl.com/accounts/login/?next=/news/2026/aug/10/long-vacant-fort-myers-building-sells/)\n\n\n  * [](https://www.facebook.com/BusinessObserverFL)\n  * [](https://x.com/BizObserverFL)\n  * [](https://www.linkedin.com/company/businessobserverfl)\n  * [ ](https://www.instagram.com/businessobserverfl/)\n\n\n[![](https://observermediagroup.media.clients.ellingtoncms.com/static-4/assets/images/bob-logo-header.svg)](https://www.businessobserverfl.com/)\n[![](https://observermediagroup.media.clients.ellingtoncms.com/static-4/assets/images/bob-logo-sticky.svg)](https://www.businessobserverfl.com/)\n[![](https://observermediagroup.media.clients.ellingtoncms.com/static-4/assets/images/bob-logo-header.svg)](https://www.businessobserverfl.com/)\n  * [News](https://www.businessobserverfl.com/news/all/)\n  * [Strategies](https://www.businessobserverfl.com/news/strategies/)\n  * [Entrepreneurs](https://www.businessobserverfl.com/news/entrepreneurs/)\n  * [M&A](https://www.businessobserverfl.com/news/mergers-acquisitions/)\n  * [Leadership](https://www.businessobserverfl.com/news/leadership/)\n  * [Regions](https://www.businessobserverfl.com/news/2026/aug/10/long-vacant-fort-myers-building-sells/)\n    * [Tampa Bay-Lakeland](https://www.businessobserverfl.com/news/tampa-bay-lakeland/)\n    * [Manatee-Sarasota](https://www.businessobserverfl.com/news/manatee-sarasota/)\n    * [Charlotte-Lee-Collier](https://www.businessobserverfl.com/news/charlotte-lee-collier/)\n    * [Florida](https://www.businessobserverfl.com/news/florida/)\n  * [Industries](https://www.businessobserverfl.com/news/2026/aug/10/long-vacant-fort-myers-building-sells/)\n    * [Business Support](https://www.businessobserverfl.com/news/industries/business-support/)\n    * [Commercial Real Estate](https://www.businessobserverfl.com/news/industries/commercial-real-estate/)\n    * [Residential Real Estate](https://www.businessobserverfl.com/news/industries/residential-real-estate/)\n    * [Development](https://www.businessobserverfl.com/news/industries/development/)\n    * [Finance](https://www.businessobserverfl.com/news/industries/finance/)\n    * [Food-Beverage](https://www.business\""
             },
@@ -153,7 +1704,7 @@
             "variable_type": "categorical",
             "source": {
               "url": "https://www.news-press.com/story/money/companies/2026/08/07/rare-buck-key-island-offering-listed-for-13-million-in-lee-county/91189530007/",
-              "fetched_at": "2026-08-11T14:54:39Z",
+              "fetched_at": "2026-08-12T04:30:43Z",
               "tier": 2,
               "citation": "Rare Buck Key Island offering listed for $13 million in Lee County: \"[](https://www.news-press.com/)\n[](https://subscribe.news-press.com/rr/nanobar?gps-source=CPTILELEFT&itm_campaign=2026ENTJULBAU&itm_medium=ONSITE&success-url=https%3A%2F%2Fwww.news-press.com%2Fstory%2Fmoney%2Fcompanies%2F2026%2F08%2F07%2Frare-buck-key-island-offering-listed-for-13-million-in-lee-county%2F91189530007%2F)\n[](https://subscribe.news-press.com/rr/masthead?gps-source=CPMASTHEAD&itm_campaign=2026ENTJULBAU&itm_medium=ONSITE&success-url=https%3A%2F%2Fwww.news-press.com%2Fstory%2Fmoney%2Fcompanies%2F2026%2F08%2F07%2Frare-buck-key-island-offering-listed-for-13-million-in-lee-county%2F91189530007%2F)\n[News](https://www.news-press.com/news/) [Cape Coral](https://www.news-press.com/news/cape-coral/) [Sports](https://www.news-press.com/sports/) [Restaurants](https://www.news-press.com/taste/) [Real Estate](https://www.news-press.com/real-estate) [Advertise](https://advertising.usatoday.com/advertise-with-us/?cid=Web_LiQ_Network_AdvertiseWithUs_AdvertiseInquiry&publication=the_news_press&utm_source=local_publication&utm_medium=menu&utm_campaign=advertise_with_us) [Obituaries](https://www.news-press.com/obituaries) [eNewspaper](https://user.news-press.com/user/enewspaper) [Legals](https://www.news-press.com/public-notices)\n[](https://www.news-press.com/search/ \"Search\")\n[](https://www.news-press.com/weather/ \"Weather in Fort Myers: 75°F Mostly Clear\") [](https://subscribe.news-press.com/rr/navsub?gps-source=CPTOPNAVBAR&itm_campaign=2026ENTJULBAU&itm_medium=ONSITE&success-url=https%3A%2F%2Fwww.news-press.com%2Fstory%2Fmoney%2Fcompanies%2F2026%2F08%2F07%2Frare-buck-key-island-offering-listed-for-13-million-in-lee-county%2F91189530007%2F)\n[](https://login.news-press.com/PFTM-GUP/authenticate/?success-url=https%3A%2F%2Fwww.news-press.com%2Fstory%2Fmoney%2Fcompanies%2F2026%2F08%2F07%2Frare-buck-key-island-offering-listed-for-13-million-in-lee-county%2F91189530007%2F&cancel-url=https%3A%2F%2Fwww.news-press.com%2Fstory%2Fmoney%2Fcompanies%2F2026%2F08%2F07%2Frare-buck-key-island-offering-listed-for-13-million-in-lee-county%2F91189530007%2F)\n[](https://www.news-press.com/) [](https://www.news-press.com/)\nCOMPANIES\n# Exclusive: Last 'puzzle piece' on Buck Key Island hits market for $13M\n[![Portrait of Laura Layden](https://www.news-press.com/gcdn/authoring/authoring-images/2024/02/08/PNDN/72524348007-ndn-jh-20240126-laura-0001.JPG?crop=3313,3312,x1506,y0&width=48&height=48&format=pjpg&auto=webp) Laura Layden](https://www.naplesnews.com/staff/2647080001/laura-layden/)\nFort Myers News-Press & Naples Daily News\nUpdated Aug. 7, 2026, 10:13 a.m. ET\nThe only privately owned land on Buck Key Island is back on the market.\nOver the decades, the roughly 14-acre property has been on and off the market — and it has been considered for conservation.\nYet, it has remained under the same ownership for more than 50 years.\n[](https://www.news-press.com/)\n[Help](https://help.news-press.com) [Accessibility](https://cm.news-press.com/accessibility/) [Sitemap](https://www.news-\""
             },
@@ -170,7 +1721,7 @@
             "variable_type": "categorical",
             "source": {
               "url": "https://www.news-press.com/story/money/companies/2026/08/07/rare-buck-key-island-offering-listed-for-13-million-in-lee-county/91189530007/",
-              "fetched_at": "2026-08-11T14:54:39Z",
+              "fetched_at": "2026-08-12T04:30:43Z",
               "tier": 2,
               "citation": "Rare Buck Key Island offering listed for $13 million in Lee County: \"[](https://www.news-press.com/)\n[](https://subscribe.news-press.com/rr/nanobar?gps-source=CPTILELEFT&itm_campaign=2026ENTJULBAU&itm_medium=ONSITE&success-url=https%3A%2F%2Fwww.news-press.com%2Fstory%2Fmoney%2Fcompanies%2F2026%2F08%2F07%2Frare-buck-key-island-offering-listed-for-13-million-in-lee-county%2F91189530007%2F)\n[](https://subscribe.news-press.com/rr/masthead?gps-source=CPMASTHEAD&itm_campaign=2026ENTJULBAU&itm_medium=ONSITE&success-url=https%3A%2F%2Fwww.news-press.com%2Fstory%2Fmoney%2Fcompanies%2F2026%2F08%2F07%2Frare-buck-key-island-offering-listed-for-13-million-in-lee-county%2F91189530007%2F)\n[News](https://www.news-press.com/news/) [Cape Coral](https://www.news-press.com/news/cape-coral/) [Sports](https://www.news-press.com/sports/) [Restaurants](https://www.news-press.com/taste/) [Real Estate](https://www.news-press.com/real-estate) [Advertise](https://advertising.usatoday.com/advertise-with-us/?cid=Web_LiQ_Network_AdvertiseWithUs_AdvertiseInquiry&publication=the_news_press&utm_source=local_publication&utm_medium=menu&utm_campaign=advertise_with_us) [Obituaries](https://www.news-press.com/obituaries) [eNewspaper](https://user.news-press.com/user/enewspaper) [Legals](https://www.news-press.com/public-notices)\n[](https://www.news-press.com/search/ \"Search\")\n[](https://www.news-press.com/weather/ \"Weather in Fort Myers: 75°F Mostly Clear\") [](https://subscribe.news-press.com/rr/navsub?gps-source=CPTOPNAVBAR&itm_campaign=2026ENTJULBAU&itm_medium=ONSITE&success-url=https%3A%2F%2Fwww.news-press.com%2Fstory%2Fmoney%2Fcompanies%2F2026%2F08%2F07%2Frare-buck-key-island-offering-listed-for-13-million-in-lee-county%2F91189530007%2F)\n[](https://login.news-press.com/PFTM-GUP/authenticate/?success-url=https%3A%2F%2Fwww.news-press.com%2Fstory%2Fmoney%2Fcompanies%2F2026%2F08%2F07%2Frare-buck-key-island-offering-listed-for-13-million-in-lee-county%2F91189530007%2F&cancel-url=https%3A%2F%2Fwww.news-press.com%2Fstory%2Fmoney%2Fcompanies%2F2026%2F08%2F07%2Frare-buck-key-island-offering-listed-for-13-million-in-lee-county%2F91189530007%2F)\n[](https://www.news-press.com/) [](https://www.news-press.com/)\nCOMPANIES\n# Exclusive: Last 'puzzle piece' on Buck Key Island hits market for $13M\n[![Portrait of Laura Layden](https://www.news-press.com/gcdn/authoring/authoring-images/2024/02/08/PNDN/72524348007-ndn-jh-20240126-laura-0001.JPG?crop=3313,3312,x1506,y0&width=48&height=48&format=pjpg&auto=webp) Laura Layden](https://www.naplesnews.com/staff/2647080001/laura-layden/)\nFort Myers News-Press & Naples Daily News\nUpdated Aug. 7, 2026, 10:13 a.m. ET\nThe only privately owned land on Buck Key Island is back on the market.\nOver the decades, the roughly 14-acre property has been on and off the market — and it has been considered for conservation.\nYet, it has remained under the same ownership for more than 50 years.\n[](https://www.news-press.com/)\n[Help](https://help.news-press.com) [Accessibility](https://cm.news-press.com/accessibility/) [Sitemap](https://www.news-\""
             },
@@ -187,7 +1738,7 @@
             "variable_type": "categorical",
             "source": {
               "url": "https://www.news-press.com/story/money/companies/2026/08/07/rare-buck-key-island-offering-listed-for-13-million-in-lee-county/91189530007/",
-              "fetched_at": "2026-08-11T14:54:39Z",
+              "fetched_at": "2026-08-12T04:30:43Z",
               "tier": 2,
               "citation": "Rare Buck Key Island offering listed for $13 million in Lee County: \"[](https://www.news-press.com/)\n[](https://subscribe.news-press.com/rr/nanobar?gps-source=CPTILELEFT&itm_campaign=2026ENTJULBAU&itm_medium=ONSITE&success-url=https%3A%2F%2Fwww.news-press.com%2Fstory%2Fmoney%2Fcompanies%2F2026%2F08%2F07%2Frare-buck-key-island-offering-listed-for-13-million-in-lee-county%2F91189530007%2F)\n[](https://subscribe.news-press.com/rr/masthead?gps-source=CPMASTHEAD&itm_campaign=2026ENTJULBAU&itm_medium=ONSITE&success-url=https%3A%2F%2Fwww.news-press.com%2Fstory%2Fmoney%2Fcompanies%2F2026%2F08%2F07%2Frare-buck-key-island-offering-listed-for-13-million-in-lee-county%2F91189530007%2F)\n[News](https://www.news-press.com/news/) [Cape Coral](https://www.news-press.com/news/cape-coral/) [Sports](https://www.news-press.com/sports/) [Restaurants](https://www.news-press.com/taste/) [Real Estate](https://www.news-press.com/real-estate) [Advertise](https://advertising.usatoday.com/advertise-with-us/?cid=Web_LiQ_Network_AdvertiseWithUs_AdvertiseInquiry&publication=the_news_press&utm_source=local_publication&utm_medium=menu&utm_campaign=advertise_with_us) [Obituaries](https://www.news-press.com/obituaries) [eNewspaper](https://user.news-press.com/user/enewspaper) [Legals](https://www.news-press.com/public-notices)\n[](https://www.news-press.com/search/ \"Search\")\n[](https://www.news-press.com/weather/ \"Weather in Fort Myers: 75°F Mostly Clear\") [](https://subscribe.news-press.com/rr/navsub?gps-source=CPTOPNAVBAR&itm_campaign=2026ENTJULBAU&itm_medium=ONSITE&success-url=https%3A%2F%2Fwww.news-press.com%2Fstory%2Fmoney%2Fcompanies%2F2026%2F08%2F07%2Frare-buck-key-island-offering-listed-for-13-million-in-lee-county%2F91189530007%2F)\n[](https://login.news-press.com/PFTM-GUP/authenticate/?success-url=https%3A%2F%2Fwww.news-press.com%2Fstory%2Fmoney%2Fcompanies%2F2026%2F08%2F07%2Frare-buck-key-island-offering-listed-for-13-million-in-lee-county%2F91189530007%2F&cancel-url=https%3A%2F%2Fwww.news-press.com%2Fstory%2Fmoney%2Fcompanies%2F2026%2F08%2F07%2Frare-buck-key-island-offering-listed-for-13-million-in-lee-county%2F91189530007%2F)\n[](https://www.news-press.com/) [](https://www.news-press.com/)\nCOMPANIES\n# Exclusive: Last 'puzzle piece' on Buck Key Island hits market for $13M\n[![Portrait of Laura Layden](https://www.news-press.com/gcdn/authoring/authoring-images/2024/02/08/PNDN/72524348007-ndn-jh-20240126-laura-0001.JPG?crop=3313,3312,x1506,y0&width=48&height=48&format=pjpg&auto=webp) Laura Layden](https://www.naplesnews.com/staff/2647080001/laura-layden/)\nFort Myers News-Press & Naples Daily News\nUpdated Aug. 7, 2026, 10:13 a.m. ET\nThe only privately owned land on Buck Key Island is back on the market.\nOver the decades, the roughly 14-acre property has been on and off the market — and it has been considered for conservation.\nYet, it has remained under the same ownership for more than 50 years.\n[](https://www.news-press.com/)\n[Help](https://help.news-press.com) [Accessibility](https://cm.news-press.com/accessibility/) [Sitemap](https://www.news-\""
             },
@@ -204,7 +1755,7 @@
             "variable_type": "categorical",
             "source": {
               "url": "https://www.businessobserverfl.com/news/2026/aug/08/celebrity-entrepreneur-buys-naples-apartments/",
-              "fetched_at": "2026-08-11T14:54:39Z",
+              "fetched_at": "2026-08-12T04:30:43Z",
               "tier": 2,
               "citation": "South Florida celebrity entrepreneur buys Naples apartments for $90M | Business Observer: \"* ![Alternate Text](https://observermediagroup.media.clients.ellingtoncms.com/static-4/assets/images/bob-logo-header.svg)\n  * Loading\n\n\n  * [Newsletters](https://marketing.businessobserverfl.com/newsletters)\n  * [Podcast](https://www.businessobserverfl.com/podcasts/corner-office/?utm_source=header&utm_medium=sitenav)\n  * [Public Notices](https://legals.businessobserverfl.com/)\n  * [40 Under 40 Nomination](https://www.businessobserverfl.com/submit-40-under-40-2026/)\n  * [Mobile App](https://businessobserver.pressreader.com/)\n  * [Subscribe](https://marketing.businessobserverfl.com/subscribe)\n  * [Login](https://www.businessobserverfl.com/accounts/login/?next=/news/2026/aug/08/celebrity-entrepreneur-buys-naples-apartments/)\n\n\n  * [](https://www.facebook.com/BusinessObserverFL)\n  * [](https://x.com/BizObserverFL)\n  * [](https://www.linkedin.com/company/businessobserverfl)\n  * [ ](https://www.instagram.com/businessobserverfl/)\n\n\n[![](https://observermediagroup.media.clients.ellingtoncms.com/static-4/assets/images/bob-logo-header.svg)](https://www.businessobserverfl.com/)\n[![](https://observermediagroup.media.clients.ellingtoncms.com/static-4/assets/images/bob-logo-sticky.svg)](https://www.businessobserverfl.com/)\n[![](https://observermediagroup.media.clients.ellingtoncms.com/static-4/assets/images/bob-logo-header.svg)](https://www.businessobserverfl.com/)\n  * [News](https://www.businessobserverfl.com/news/all/)\n  * [Strategies](https://www.businessobserverfl.com/news/strategies/)\n  * [Entrepreneurs](https://www.businessobserverfl.com/news/entrepreneurs/)\n  * [M&A](https://www.businessobserverfl.com/news/mergers-acquisitions/)\n  * [Leadership](https://www.businessobserverfl.com/news/leadership/)\n  * [Regions](https://www.businessobserverfl.com/news/2026/aug/08/celebrity-entrepreneur-buys-naples-apartments/)\n    * [Tampa Bay-Lakeland](https://www.businessobserverfl.com/news/tampa-bay-lakeland/)\n    * [Manatee-Sarasota](https://www.businessobserverfl.com/news/manatee-sarasota/)\n    * [Charlotte-Lee-Collier](https://www.businessobserverfl.com/news/charlotte-lee-collier/)\n    * [Florida](https://www.businessobserverfl.com/news/florida/)\n  * [Industries](https://www.businessobserverfl.com/news/2026/aug/08/celebrity-entrepreneur-buys-naples-apartments/)\n    * [Business Support](https://www.businessobserverfl.com/news/industries/business-support/)\n    * [Commercial Real Estate](https://www.businessobserverfl.com/news/industries/commercial-real-estate/)\n    * [Residential Real Estate](https://www.businessobserverfl.com/news/industries/residential-real-estate/)\n    * [Development](https://www.businessobserverfl.com/news/industries/development/)\n    * [Finance](https://www.businessobserverfl.com/news/industries/finance/)\n    * [Food-Beverage](https://www.businessobserverfl.com/news/industries/food-beverage/)\n    * [Healthcare](https://www.businessobserverfl.com/news/industries/health-care/)\n    * [Manufacturing](https://www.businessobserverfl.com/news/industr\""
             },
@@ -221,7 +1772,7 @@
             "variable_type": "categorical",
             "source": {
               "url": "https://www.news-press.com/story/money/business/local/2026/08/03/builder-cancels-auction-for-luxury-north-naples-florida-estate/91127240007/",
-              "fetched_at": "2026-08-11T14:54:39Z",
+              "fetched_at": "2026-08-12T04:30:43Z",
               "tier": 2,
               "citation": "Builder cancels auction for luxury North Naples estate: \"[](https://www.news-press.com/)\n[](https://subscribe.news-press.com/rr/nanobar?gps-source=CPTILELEFT&itm_campaign=2026ENTJULBAU&itm_medium=ONSITE&success-url=https%3A%2F%2Fwww.news-press.com%2Fstory%2Fmoney%2Fbusiness%2Flocal%2F2026%2F08%2F03%2Fbuilder-cancels-auction-for-luxury-north-naples-florida-estate%2F91127240007%2F)\n[](https://subscribe.news-press.com/rr/masthead?gps-source=CPMASTHEAD&itm_campaign=2026ENTJULBAU&itm_medium=ONSITE&success-url=https%3A%2F%2Fwww.news-press.com%2Fstory%2Fmoney%2Fbusiness%2Flocal%2F2026%2F08%2F03%2Fbuilder-cancels-auction-for-luxury-north-naples-florida-estate%2F91127240007%2F)\n[News](https://www.news-press.com/news/) [Cape Coral](https://www.news-press.com/news/cape-coral/) [Sports](https://www.news-press.com/sports/) [Restaurants](https://www.news-press.com/taste/) [Real Estate](https://www.news-press.com/real-estate) [Advertise](https://advertising.usatoday.com/advertise-with-us/?cid=Web_LiQ_Network_AdvertiseWithUs_AdvertiseInquiry&publication=the_news_press&utm_source=local_publication&utm_medium=menu&utm_campaign=advertise_with_us) [Obituaries](https://www.news-press.com/obituaries) [eNewspaper](https://user.news-press.com/user/enewspaper) [Legals](https://www.news-press.com/public-notices)\n[](https://www.news-press.com/search/ \"Search\")\n[](https://www.news-press.com/weather/ \"Weather in Fort Myers: 75°F Cloudy\") [](https://subscribe.news-press.com/rr/navsub?gps-source=CPTOPNAVBAR&itm_campaign=2026ENTJULBAU&itm_medium=ONSITE&success-url=https%3A%2F%2Fwww.news-press.com%2Fstory%2Fmoney%2Fbusiness%2Flocal%2F2026%2F08%2F03%2Fbuilder-cancels-auction-for-luxury-north-naples-florida-estate%2F91127240007%2F)\n[](https://login.news-press.com/PFTM-GUP/authenticate/?success-url=https%3A%2F%2Fwww.news-press.com%2Fstory%2Fmoney%2Fbusiness%2Flocal%2F2026%2F08%2F03%2Fbuilder-cancels-auction-for-luxury-north-naples-florida-estate%2F91127240007%2F&cancel-url=https%3A%2F%2Fwww.news-press.com%2Fstory%2Fmoney%2Fbusiness%2Flocal%2F2026%2F08%2F03%2Fbuilder-cancels-auction-for-luxury-north-naples-florida-estate%2F91127240007%2F)\n[](https://www.news-press.com/) [](https://www.news-press.com/)\nLOCAL BUSINESS\n# Builder cancels auction for luxury waterfront estate in North Naples\n[![Portrait of Laura Layden](https://www.news-press.com/gcdn/authoring/authoring-images/2024/02/08/PNDN/72524348007-ndn-jh-20240126-laura-0001.JPG?crop=3313,3312,x1506,y0&width=48&height=48&format=pjpg&auto=webp) Laura Layden](https://www.naplesnews.com/staff/2647080001/laura-layden/)\nFort Myers News-Press & Naples Daily News\nAug. 3, 2026, 4:11 p.m. ET\nA highly publicized auction for a newly built, move-in-ready waterfront estate in North Naples didn't happen.\nWhile the auction generated interest, the seller decided not to move forward with it.\nNaples-based Elite Auctions was [hired to handle the no-reserve auction](https://www.news-press.com/story/money/business/local/2026/07/10/north-naples-waterfront-estate-to-sell-at-no-reserve-auction/90861406007/) for\""
             },
@@ -238,7 +1789,7 @@
             "variable_type": "categorical",
             "source": {
               "url": "https://www.news-press.com/story/money/business/local/2026/08/03/builder-cancels-auction-for-luxury-north-naples-florida-estate/91127240007/",
-              "fetched_at": "2026-08-11T14:54:39Z",
+              "fetched_at": "2026-08-12T04:30:43Z",
               "tier": 2,
               "citation": "Builder cancels auction for luxury North Naples estate: \"[](https://www.news-press.com/)\n[](https://subscribe.news-press.com/rr/nanobar?gps-source=CPTILELEFT&itm_campaign=2026ENTJULBAU&itm_medium=ONSITE&success-url=https%3A%2F%2Fwww.news-press.com%2Fstory%2Fmoney%2Fbusiness%2Flocal%2F2026%2F08%2F03%2Fbuilder-cancels-auction-for-luxury-north-naples-florida-estate%2F91127240007%2F)\n[](https://subscribe.news-press.com/rr/masthead?gps-source=CPMASTHEAD&itm_campaign=2026ENTJULBAU&itm_medium=ONSITE&success-url=https%3A%2F%2Fwww.news-press.com%2Fstory%2Fmoney%2Fbusiness%2Flocal%2F2026%2F08%2F03%2Fbuilder-cancels-auction-for-luxury-north-naples-florida-estate%2F91127240007%2F)\n[News](https://www.news-press.com/news/) [Cape Coral](https://www.news-press.com/news/cape-coral/) [Sports](https://www.news-press.com/sports/) [Restaurants](https://www.news-press.com/taste/) [Real Estate](https://www.news-press.com/real-estate) [Advertise](https://advertising.usatoday.com/advertise-with-us/?cid=Web_LiQ_Network_AdvertiseWithUs_AdvertiseInquiry&publication=the_news_press&utm_source=local_publication&utm_medium=menu&utm_campaign=advertise_with_us) [Obituaries](https://www.news-press.com/obituaries) [eNewspaper](https://user.news-press.com/user/enewspaper) [Legals](https://www.news-press.com/public-notices)\n[](https://www.news-press.com/search/ \"Search\")\n[](https://www.news-press.com/weather/ \"Weather in Fort Myers: 75°F Cloudy\") [](https://subscribe.news-press.com/rr/navsub?gps-source=CPTOPNAVBAR&itm_campaign=2026ENTJULBAU&itm_medium=ONSITE&success-url=https%3A%2F%2Fwww.news-press.com%2Fstory%2Fmoney%2Fbusiness%2Flocal%2F2026%2F08%2F03%2Fbuilder-cancels-auction-for-luxury-north-naples-florida-estate%2F91127240007%2F)\n[](https://login.news-press.com/PFTM-GUP/authenticate/?success-url=https%3A%2F%2Fwww.news-press.com%2Fstory%2Fmoney%2Fbusiness%2Flocal%2F2026%2F08%2F03%2Fbuilder-cancels-auction-for-luxury-north-naples-florida-estate%2F91127240007%2F&cancel-url=https%3A%2F%2Fwww.news-press.com%2Fstory%2Fmoney%2Fbusiness%2Flocal%2F2026%2F08%2F03%2Fbuilder-cancels-auction-for-luxury-north-naples-florida-estate%2F91127240007%2F)\n[](https://www.news-press.com/) [](https://www.news-press.com/)\nLOCAL BUSINESS\n# Builder cancels auction for luxury waterfront estate in North Naples\n[![Portrait of Laura Layden](https://www.news-press.com/gcdn/authoring/authoring-images/2024/02/08/PNDN/72524348007-ndn-jh-20240126-laura-0001.JPG?crop=3313,3312,x1506,y0&width=48&height=48&format=pjpg&auto=webp) Laura Layden](https://www.naplesnews.com/staff/2647080001/laura-layden/)\nFort Myers News-Press & Naples Daily News\nAug. 3, 2026, 4:11 p.m. ET\nA highly publicized auction for a newly built, move-in-ready waterfront estate in North Naples didn't happen.\nWhile the auction generated interest, the seller decided not to move forward with it.\nNaples-based Elite Auctions was [hired to handle the no-reserve auction](https://www.news-press.com/story/money/business/local/2026/07/10/north-naples-waterfront-estate-to-sell-at-no-reserve-auction/90861406007/) for\""
             },
@@ -255,7 +1806,7 @@
             "variable_type": "categorical",
             "source": {
               "url": "https://www.news-press.com/story/money/companies/2026/07/24/fort-myers-beach-condo-sells-for-2-million-a-new-record-in-the-sand/90999859007/",
-              "fetched_at": "2026-08-11T14:54:39Z",
+              "fetched_at": "2026-08-12T04:30:43Z",
               "tier": 2,
               "citation": "Fort Myers Beach condo sells for $2 million, a new record in the sand: \"[](https://www.news-press.com/)\n[](https://subscribe.news-press.com/rr/nanobar?gps-source=CPTILELEFT&itm_campaign=2026ENTJULBAU&itm_medium=ONSITE&success-url=https%3A%2F%2Fwww.news-press.com%2Fstory%2Fmoney%2Fcompanies%2F2026%2F07%2F24%2Ffort-myers-beach-condo-sells-for-2-million-a-new-record-in-the-sand%2F90999859007%2F)\n[](https://subscribe.news-press.com/rr/masthead?gps-source=CPMASTHEAD&itm_campaign=2026ENTJULBAU&itm_medium=ONSITE&success-url=https%3A%2F%2Fwww.news-press.com%2Fstory%2Fmoney%2Fcompanies%2F2026%2F07%2F24%2Ffort-myers-beach-condo-sells-for-2-million-a-new-record-in-the-sand%2F90999859007%2F)\n[News](https://www.news-press.com/news/) [Cape Coral](https://www.news-press.com/news/cape-coral/) [Sports](https://www.news-press.com/sports/) [Restaurants](https://www.news-press.com/taste/) [Real Estate](https://www.news-press.com/real-estate) [Advertise](https://advertising.usatoday.com/advertise-with-us/?cid=Web_LiQ_Network_AdvertiseWithUs_AdvertiseInquiry&publication=the_news_press&utm_source=local_publication&utm_medium=menu&utm_campaign=advertise_with_us) [Obituaries](https://www.news-press.com/obituaries) [eNewspaper](https://user.news-press.com/user/enewspaper) [Legals](https://www.news-press.com/public-notices)\n[](https://www.news-press.com/search/ \"Search\")\n[](https://www.news-press.com/weather/ \"Weather in Fort Myers: 77°F Mostly Cloudy\") [](https://subscribe.news-press.com/rr/navsub?gps-source=CPTOPNAVBAR&itm_campaign=2026ENTJULBAU&itm_medium=ONSITE&success-url=https%3A%2F%2Fwww.news-press.com%2Fstory%2Fmoney%2Fcompanies%2F2026%2F07%2F24%2Ffort-myers-beach-condo-sells-for-2-million-a-new-record-in-the-sand%2F90999859007%2F)\n[](https://login.news-press.com/PFTM-GUP/authenticate/?success-url=https%3A%2F%2Fwww.news-press.com%2Fstory%2Fmoney%2Fcompanies%2F2026%2F07%2F24%2Ffort-myers-beach-condo-sells-for-2-million-a-new-record-in-the-sand%2F90999859007%2F&cancel-url=https%3A%2F%2Fwww.news-press.com%2Fstory%2Fmoney%2Fcompanies%2F2026%2F07%2F24%2Ffort-myers-beach-condo-sells-for-2-million-a-new-record-in-the-sand%2F90999859007%2F)\n[](https://www.news-press.com/) [](https://www.news-press.com/)\nCOMPANIES\n# A big deal: Fort Myers Beach condo sells for record $2 million\n[![Portrait of Laura Layden](https://www.news-press.com/gcdn/authoring/authoring-images/2024/02/08/PNDN/72524348007-ndn-jh-20240126-laura-0001.JPG?crop=3313,3312,x1506,y0&width=48&height=48&format=pjpg&auto=webp) Laura Layden](https://www.naplesnews.com/staff/2647080001/laura-layden/)\nFort Myers News-Press & Naples Daily News\nJuly 24, 2026, 5:06 a.m. ET\nA waterfront condominium on Fort Myers Beach fetched $2 million, setting a new record on the island.\nIt's the highest price paid for an existing — or resale — condo on the sand in the town — ever, according to the seller's agent.\n[](https://www.news-press.com/)\n[Help](https://help.news-press.com) [Accessibility](https://cm.news-press.com/accessibility/) [Sitemap](https://www.news-press.com/sitemap/) [Terms of Service](htt\""
             },
@@ -313,10 +1864,10 @@
                 "key": "34102",
                 "label": "34102",
                 "cells": {
-                  "items": 3,
-                  "latest_fact": "Barneys New York is making a comeback with its first store planned for Naples, coming to Bayfront, a mixed-use development overlooking Naples.",
-                  "latest_place": "Bayfront",
-                  "latest_source": "https://www.naplesnews.com/story/money/business/local/2026/08/04/bayfront-in-naples-florida-is-getting-more-than-a-barneys-see-whats-coming/91105441007/"
+                  "items": 4,
+                  "latest_fact": "Coconut Point's owners said they explored converting the mall to a data center before making a decision to keep it as a mall.",
+                  "latest_place": "Coconut Point",
+                  "latest_source": "https://www.news-press.com/story/money/2026/08/10/data-center-or-a-mall-a-major-southwest-florida-owner-made-a-decision-coconut-point-estero-naples/91186206007/"
                 }
               },
               {
@@ -332,7 +1883,7 @@
             ],
             "source": {
               "url": "https://www.swfldatagulf.com/r/source/city_pulse",
-              "fetched_at": "2026-08-11T14:54:39Z",
+              "fetched_at": "2026-08-12T04:30:43Z",
               "tier": 2,
               "citation": "Distilled, citation-backed SWFL news signals; each ZIP's items carry per-item source URLs in data_lake.city_pulse."
             },
@@ -353,7 +1904,7 @@
         "relevance": {
           "decay_curve": "weeks",
           "half_life_hours": 720,
-          "computed_at": "2026-08-11T14:54:39Z"
+          "computed_at": "2026-08-12T04:30:43Z"
         },
         "exogenous_signals": []
       }
@@ -370,8 +1921,119 @@
     },
     {
       "packId": "freshness-pulse",
-      "status": "skipped-fresh",
-      "written": false
+      "status": "built",
+      "version": 40,
+      "written": true,
+      "brainOutput": {
+        "brain_id": "freshness-pulse",
+        "version": 40,
+        "refined_at": "2026-08-12T04:30:43Z",
+        "expires": "2026-08-13T04:30:43Z",
+        "ttl_seconds": 86400,
+        "direction": "neutral",
+        "magnitude": 0,
+        "drivers": [],
+        "overrides": [],
+        "conclusion": "Today's sourced snapshot — SWFL 30-year fixed mortgage rate (as of 2026-08-06) 6.69%; Cape Coral median asking price (as of 2026-08-12) $399,900; Fort Myers median asking price (as of 2026-08-12) $325,000; Naples median asking price (as of 2026-08-12) $650,000. These are cited current facts only; the direction call lives downstream in master.",
+        "key_metrics": [
+          {
+            "metric": "freshness_mortgage_30yr_fixed_pct",
+            "value": 6.69,
+            "direction": "stable",
+            "label": "SWFL 30-year fixed mortgage rate (as of 2026-08-06)",
+            "variable_type": "intensive",
+            "units": "percent",
+            "display_format": "percent",
+            "source": {
+              "url": "https://fred.stlouisfed.org/series/MORTGAGE30US",
+              "fetched_at": "2026-08-12T04:24:01.902235+00:00",
+              "tier": 2,
+              "citation": "FRED — current 30-year fixed mortgage rate for SWFL, sourced 2026-08-06"
+            },
+            "suggestions": [
+              "What's driving freshness mortgage 30yr fixed pct?",
+              "How does freshness mortgage 30yr fixed pct here compare to other SWFL areas?"
+            ]
+          },
+          {
+            "metric": "freshness_median_asking_price_cape_coral_usd",
+            "value": 399900,
+            "direction": "stable",
+            "label": "Cape Coral median asking price (as of 2026-08-12)",
+            "variable_type": "extensive",
+            "units": "USD",
+            "display_format": "currency",
+            "source": {
+              "url": "https://www.swfldatagulf.com/desk",
+              "fetched_at": "2026-08-12T04:24:01.902235+00:00",
+              "tier": 2,
+              "citation": "SWFL Data Gulf active-listing inventory — current median asking price for Cape Coral, sourced 2026-08-12"
+            },
+            "suggestions": [
+              "Chart asking rents across the corridors",
+              "What's driving freshness median asking price cape coral usd?",
+              "How does freshness median asking price cape coral usd here compare to other SWFL areas?"
+            ]
+          },
+          {
+            "metric": "freshness_median_asking_price_fort_myers_usd",
+            "value": 325000,
+            "direction": "stable",
+            "label": "Fort Myers median asking price (as of 2026-08-12)",
+            "variable_type": "extensive",
+            "units": "USD",
+            "display_format": "currency",
+            "source": {
+              "url": "https://www.swfldatagulf.com/desk",
+              "fetched_at": "2026-08-12T04:24:01.902235+00:00",
+              "tier": 2,
+              "citation": "SWFL Data Gulf active-listing inventory — current median asking price for Fort Myers, sourced 2026-08-12"
+            },
+            "suggestions": [
+              "Chart asking rents across the corridors",
+              "What's driving freshness median asking price fort myers usd?",
+              "How does freshness median asking price fort myers usd here compare to other SWFL areas?"
+            ]
+          },
+          {
+            "metric": "freshness_median_asking_price_naples_usd",
+            "value": 650000,
+            "direction": "stable",
+            "label": "Naples median asking price (as of 2026-08-12)",
+            "variable_type": "extensive",
+            "units": "USD",
+            "display_format": "currency",
+            "source": {
+              "url": "https://www.swfldatagulf.com/desk",
+              "fetched_at": "2026-08-12T04:24:01.902235+00:00",
+              "tier": 2,
+              "citation": "SWFL Data Gulf active-listing inventory — current median asking price for Naples, sourced 2026-08-12"
+            },
+            "suggestions": [
+              "Chart asking rents across the corridors",
+              "What's driving freshness median asking price naples usd?",
+              "How does freshness median asking price naples usd here compare to other SWFL areas?"
+            ]
+          }
+        ],
+        "detail_tables": [],
+        "caveats": [
+          "Each county-grain number is a single grounded source's current figure, provenance-gated to a real source URL; held anomalies and unsourced (model-memory) numbers are excluded by design."
+        ],
+        "contradicts": [],
+        "confidence": 0.8,
+        "joint_integrity": 1,
+        "confidence_dispersion": 0,
+        "chain_depth": 0,
+        "trust_tier": 2,
+        "upstream_count": 0,
+        "relevance": {
+          "decay_curve": "weeks",
+          "half_life_hours": 720,
+          "computed_at": "2026-08-12T04:30:43Z"
+        },
+        "exogenous_signals": []
+      }
     },
     {
       "packId": "seller-stress-swfl",
@@ -430,8 +2092,737 @@
     },
     {
       "packId": "active-listings-swfl",
-      "status": "skipped-fresh",
-      "written": false
+      "status": "built",
+      "version": 27,
+      "written": true,
+      "brainOutput": {
+        "brain_id": "active-listings-swfl",
+        "version": 27,
+        "refined_at": "2026-08-12T04:30:47Z",
+        "expires": "2026-08-14T04:30:47Z",
+        "ttl_seconds": 172800,
+        "direction": "neutral",
+        "magnitude": 0,
+        "drivers": [],
+        "overrides": [],
+        "conclusion": "22,479 active SWFL residential listings, median asking $414,900, avg 141 days on market (active residential listings, as of 2026-08-12). By county: Lee 16,207 (median $369,900), Collier 6,272 (median $649,900), Lee 1 (median $314,900).",
+        "key_metrics": [
+          {
+            "metric": "active_listings_count_swfl",
+            "label": "SWFL active residential listings (count)",
+            "value": 22479,
+            "direction": "stable",
+            "variable_type": "extensive",
+            "units": "listings",
+            "display_format": "count",
+            "source": {
+              "url": "https://www.swfldatagulf.com/r/source/listing_active_stats?label=SWFL+active+for-sale+listings+%28aggregated%29&source=realtor.com+for-sale+listings&brain=active-listings-swfl&date_col=scraped_at",
+              "fetched_at": "2026-08-12T04:30:47Z",
+              "tier": 2,
+              "citation": "22,479 active SWFL residential listings as of 2026-08-12"
+            },
+            "suggestions": [
+              "What's driving active listings count swfl?",
+              "How does active listings count swfl here compare to other SWFL areas?"
+            ]
+          },
+          {
+            "metric": "median_list_price_swfl",
+            "label": "SWFL median asking price (active residential)",
+            "value": 414900,
+            "direction": "stable",
+            "variable_type": "intensive",
+            "units": "USD",
+            "display_format": "currency",
+            "source": {
+              "url": "https://www.swfldatagulf.com/r/source/listing_active_stats?label=SWFL+active+for-sale+listings+%28aggregated%29&source=realtor.com+for-sale+listings&brain=active-listings-swfl&date_col=scraped_at",
+              "fetched_at": "2026-08-12T04:30:47Z",
+              "tier": 2,
+              "citation": "median asking price across 22,479 active SWFL listings: $414,900"
+            },
+            "suggestions": [
+              "What's driving median list price swfl?",
+              "How does median list price swfl here compare to other SWFL areas?"
+            ]
+          },
+          {
+            "metric": "recent_price_cuts_count_swfl",
+            "label": "SWFL listings with a price cut in the last 90 days",
+            "value": 6160,
+            "direction": "stable",
+            "variable_type": "extensive",
+            "units": "listings",
+            "display_format": "count",
+            "source": {
+              "url": "https://www.swfldatagulf.com/r/source/listing_active_stats?label=SWFL+active+for-sale+listings+%28aggregated%29&source=realtor.com+for-sale+listings&brain=active-listings-swfl&date_col=scraped_at",
+              "fetched_at": "2026-08-12T04:30:47Z",
+              "tier": 2,
+              "citation": "6,160 SWFL listings took at least one price cut in the trailing 90 days, median cut $10,900"
+            },
+            "suggestions": [
+              "What's driving recent price cuts count swfl?",
+              "How does recent price cuts count swfl here compare to other SWFL areas?"
+            ]
+          },
+          {
+            "metric": "median_annual_tax_swfl",
+            "label": "SWFL median vendor-reported annual property tax",
+            "value": 4008,
+            "direction": "stable",
+            "variable_type": "intensive",
+            "units": "USD",
+            "display_format": "currency",
+            "source": {
+              "url": "https://www.swfldatagulf.com/r/source/listing_active_stats?label=SWFL+active+for-sale+listings+%28aggregated%29&source=realtor.com+for-sale+listings&brain=active-listings-swfl&date_col=scraped_at",
+              "fetched_at": "2026-08-12T04:30:47Z",
+              "tier": 2,
+              "citation": "Median vendor-reported annual property tax across 16,514 SWFL properties with tax history: $4,008"
+            },
+            "suggestions": [
+              "What's driving median annual tax swfl?",
+              "How does median annual tax swfl here compare to other SWFL areas?"
+            ]
+          },
+          {
+            "metric": "avg_days_on_market_swfl",
+            "label": "SWFL average days on market (active residential)",
+            "value": 141,
+            "direction": "stable",
+            "variable_type": "intensive",
+            "units": "days",
+            "display_format": "count",
+            "source": {
+              "url": "https://www.swfldatagulf.com/r/source/listing_active_stats?label=SWFL+active+for-sale+listings+%28aggregated%29&source=realtor.com+for-sale+listings&brain=active-listings-swfl&date_col=scraped_at",
+              "fetched_at": "2026-08-12T04:30:47Z",
+              "tier": 2,
+              "citation": "average days on market across active SWFL listings: 141 days"
+            },
+            "suggestions": [
+              "What's driving avg days on market swfl?",
+              "How does avg days on market swfl here compare to other SWFL areas?"
+            ]
+          }
+        ],
+        "detail_tables": [
+          {
+            "id": "active_listings_by_county",
+            "title": "SWFL active residential listings by county",
+            "grain": "county",
+            "columns": [
+              {
+                "id": "listing_count",
+                "label": "Active listings",
+                "display_format": "count",
+                "units": "listings"
+              },
+              {
+                "id": "median_list_price",
+                "label": "Median asking price",
+                "display_format": "currency",
+                "units": "USD"
+              },
+              {
+                "id": "avg_days_on_market",
+                "label": "Avg days on market",
+                "display_format": "count",
+                "units": "days"
+              }
+            ],
+            "rows": [
+              {
+                "key": "Lee",
+                "label": "Lee",
+                "cells": {
+                  "listing_count": 16207,
+                  "median_list_price": 369900,
+                  "avg_days_on_market": 140
+                }
+              },
+              {
+                "key": "Collier",
+                "label": "Collier",
+                "cells": {
+                  "listing_count": 6272,
+                  "median_list_price": 649900,
+                  "avg_days_on_market": 142
+                }
+              },
+              {
+                "key": "Lee",
+                "label": "Lee",
+                "cells": {
+                  "listing_count": 1,
+                  "median_list_price": 314900,
+                  "avg_days_on_market": null
+                }
+              }
+            ],
+            "source": {
+              "url": "https://www.swfldatagulf.com/r/source/listing_active_stats?label=SWFL+active+for-sale+listings+%28aggregated%29&source=realtor.com+for-sale+listings&brain=active-listings-swfl&date_col=scraped_at",
+              "fetched_at": "2026-08-12T04:30:47Z",
+              "tier": 2,
+              "citation": "Active SWFL residential listings, aggregated per grain in SQL (listing_active_stats) as of 2026-08-12"
+            }
+          },
+          {
+            "id": "active_listings_by_zip",
+            "title": "SWFL active residential listings by ZIP",
+            "grain": "zip",
+            "columns": [
+              {
+                "id": "listing_count",
+                "label": "Active listings",
+                "display_format": "count",
+                "units": "listings"
+              },
+              {
+                "id": "median_list_price",
+                "label": "Median asking price",
+                "display_format": "currency",
+                "units": "USD"
+              },
+              {
+                "id": "avg_days_on_market",
+                "label": "Avg days on market",
+                "display_format": "count",
+                "units": "days"
+              }
+            ],
+            "rows": [
+              {
+                "key": "33993",
+                "label": "33993 (Lee)",
+                "cells": {
+                  "listing_count": 1128,
+                  "median_list_price": 392950,
+                  "avg_days_on_market": 129
+                }
+              },
+              {
+                "key": "33908",
+                "label": "33908 (Lee)",
+                "cells": {
+                  "listing_count": 1005,
+                  "median_list_price": 330000,
+                  "avg_days_on_market": 163
+                }
+              },
+              {
+                "key": "33914",
+                "label": "33914 (Lee)",
+                "cells": {
+                  "listing_count": 858,
+                  "median_list_price": 525000,
+                  "avg_days_on_market": 134
+                }
+              },
+              {
+                "key": "33917",
+                "label": "33917 (Lee)",
+                "cells": {
+                  "listing_count": 824,
+                  "median_list_price": 199900,
+                  "avg_days_on_market": 137
+                }
+              },
+              {
+                "key": "33909",
+                "label": "33909 (Lee)",
+                "cells": {
+                  "listing_count": 783,
+                  "median_list_price": 339900,
+                  "avg_days_on_market": 114
+                }
+              },
+              {
+                "key": "34135",
+                "label": "34135 (Lee)",
+                "cells": {
+                  "listing_count": 759,
+                  "median_list_price": 459000,
+                  "avg_days_on_market": 140
+                }
+              },
+              {
+                "key": "33974",
+                "label": "33974 (Lee)",
+                "cells": {
+                  "listing_count": 729,
+                  "median_list_price": 322000,
+                  "avg_days_on_market": 102
+                }
+              },
+              {
+                "key": "34120",
+                "label": "34120 (Collier)",
+                "cells": {
+                  "listing_count": 700,
+                  "median_list_price": 638500,
+                  "avg_days_on_market": 117
+                }
+              },
+              {
+                "key": "33904",
+                "label": "33904 (Lee)",
+                "cells": {
+                  "listing_count": 656,
+                  "median_list_price": 420000,
+                  "avg_days_on_market": 130
+                }
+              },
+              {
+                "key": "33913",
+                "label": "33913 (Lee)",
+                "cells": {
+                  "listing_count": 620,
+                  "median_list_price": 469000,
+                  "avg_days_on_market": 120
+                }
+              },
+              {
+                "key": "33971",
+                "label": "33971 (Lee)",
+                "cells": {
+                  "listing_count": 620,
+                  "median_list_price": 319900,
+                  "avg_days_on_market": 119
+                }
+              },
+              {
+                "key": "34114",
+                "label": "34114 (Collier)",
+                "cells": {
+                  "listing_count": 603,
+                  "median_list_price": 549000,
+                  "avg_days_on_market": 134
+                }
+              },
+              {
+                "key": "33931",
+                "label": "33931 (Lee)",
+                "cells": {
+                  "listing_count": 592,
+                  "median_list_price": 675000,
+                  "avg_days_on_market": 180
+                }
+              },
+              {
+                "key": "33928",
+                "label": "33928 (Lee)",
+                "cells": {
+                  "listing_count": 583,
+                  "median_list_price": 539000,
+                  "avg_days_on_market": 118
+                }
+              },
+              {
+                "key": "33903",
+                "label": "33903 (Lee)",
+                "cells": {
+                  "listing_count": 560,
+                  "median_list_price": 147000,
+                  "avg_days_on_market": 156
+                }
+              },
+              {
+                "key": "34112",
+                "label": "34112 (Collier)",
+                "cells": {
+                  "listing_count": 556,
+                  "median_list_price": 339999,
+                  "avg_days_on_market": 144
+                }
+              },
+              {
+                "key": "33919",
+                "label": "33919 (Lee)",
+                "cells": {
+                  "listing_count": 525,
+                  "median_list_price": 248000,
+                  "avg_days_on_market": 139
+                }
+              },
+              {
+                "key": "33905",
+                "label": "33905 (Lee)",
+                "cells": {
+                  "listing_count": 511,
+                  "median_list_price": 355000,
+                  "avg_days_on_market": 126
+                }
+              },
+              {
+                "key": "34145",
+                "label": "34145 (Collier)",
+                "cells": {
+                  "listing_count": 498,
+                  "median_list_price": 949000,
+                  "avg_days_on_market": 139
+                }
+              },
+              {
+                "key": "33991",
+                "label": "33991 (Lee)",
+                "cells": {
+                  "listing_count": 468,
+                  "median_list_price": 450000,
+                  "avg_days_on_market": 126
+                }
+              },
+              {
+                "key": "33972",
+                "label": "33972 (Lee)",
+                "cells": {
+                  "listing_count": 459,
+                  "median_list_price": 355000,
+                  "avg_days_on_market": 111
+                }
+              },
+              {
+                "key": "33976",
+                "label": "33976 (Lee)",
+                "cells": {
+                  "listing_count": 459,
+                  "median_list_price": 329000,
+                  "avg_days_on_market": 126
+                }
+              },
+              {
+                "key": "33936",
+                "label": "33936 (Lee)",
+                "cells": {
+                  "listing_count": 458,
+                  "median_list_price": 245000,
+                  "avg_days_on_market": 109
+                }
+              },
+              {
+                "key": "34134",
+                "label": "34134 (Lee)",
+                "cells": {
+                  "listing_count": 436,
+                  "median_list_price": 799000,
+                  "avg_days_on_market": 176
+                }
+              },
+              {
+                "key": "34102",
+                "label": "34102 (Collier)",
+                "cells": {
+                  "listing_count": 431,
+                  "median_list_price": 3195000,
+                  "avg_days_on_market": 212
+                }
+              },
+              {
+                "key": "34119",
+                "label": "34119 (Collier)",
+                "cells": {
+                  "listing_count": 426,
+                  "median_list_price": 687000,
+                  "avg_days_on_market": 128
+                }
+              },
+              {
+                "key": "34110",
+                "label": "34110 (Collier)",
+                "cells": {
+                  "listing_count": 414,
+                  "median_list_price": 675000,
+                  "avg_days_on_market": 146
+                }
+              },
+              {
+                "key": "34108",
+                "label": "34108 (Collier)",
+                "cells": {
+                  "listing_count": 406,
+                  "median_list_price": 1297000,
+                  "avg_days_on_market": 158
+                }
+              },
+              {
+                "key": "34113",
+                "label": "34113 (Collier)",
+                "cells": {
+                  "listing_count": 405,
+                  "median_list_price": 525000,
+                  "avg_days_on_market": 146
+                }
+              },
+              {
+                "key": "33957",
+                "label": "33957 (Lee)",
+                "cells": {
+                  "listing_count": 376,
+                  "median_list_price": 954500,
+                  "avg_days_on_market": 221
+                }
+              },
+              {
+                "key": "33990",
+                "label": "33990 (Lee)",
+                "cells": {
+                  "listing_count": 350,
+                  "median_list_price": 399000,
+                  "avg_days_on_market": 115
+                }
+              },
+              {
+                "key": "34103",
+                "label": "34103 (Collier)",
+                "cells": {
+                  "listing_count": 335,
+                  "median_list_price": 1495000,
+                  "avg_days_on_market": 158
+                }
+              },
+              {
+                "key": "34142",
+                "label": "34142 (Collier)",
+                "cells": {
+                  "listing_count": 328,
+                  "median_list_price": 435298,
+                  "avg_days_on_market": 104
+                }
+              },
+              {
+                "key": "33912",
+                "label": "33912 (Lee)",
+                "cells": {
+                  "listing_count": 303,
+                  "median_list_price": 349000,
+                  "avg_days_on_market": 139
+                }
+              },
+              {
+                "key": "34109",
+                "label": "34109 (Collier)",
+                "cells": {
+                  "listing_count": 284,
+                  "median_list_price": 747000,
+                  "avg_days_on_market": 126
+                }
+              },
+              {
+                "key": "33907",
+                "label": "33907 (Lee)",
+                "cells": {
+                  "listing_count": 281,
+                  "median_list_price": 182000,
+                  "avg_days_on_market": 141
+                }
+              },
+              {
+                "key": "34104",
+                "label": "34104 (Collier)",
+                "cells": {
+                  "listing_count": 276,
+                  "median_list_price": 387450,
+                  "avg_days_on_market": 125
+                }
+              },
+              {
+                "key": "33916",
+                "label": "33916 (Lee)",
+                "cells": {
+                  "listing_count": 263,
+                  "median_list_price": 300000,
+                  "avg_days_on_market": 355
+                }
+              },
+              {
+                "key": "33901",
+                "label": "33901 (Lee)",
+                "cells": {
+                  "listing_count": 261,
+                  "median_list_price": 310000,
+                  "avg_days_on_market": 158
+                }
+              },
+              {
+                "key": "33967",
+                "label": "33967 (Lee)",
+                "cells": {
+                  "listing_count": 227,
+                  "median_list_price": 396999,
+                  "avg_days_on_market": 108
+                }
+              },
+              {
+                "key": "33920",
+                "label": "33920 (Lee)",
+                "cells": {
+                  "listing_count": 221,
+                  "median_list_price": 426053,
+                  "avg_days_on_market": 114
+                }
+              },
+              {
+                "key": "33973",
+                "label": "33973 (Lee)",
+                "cells": {
+                  "listing_count": 210,
+                  "median_list_price": 471000,
+                  "avg_days_on_market": 119
+                }
+              },
+              {
+                "key": "34105",
+                "label": "34105 (Collier)",
+                "cells": {
+                  "listing_count": 197,
+                  "median_list_price": 395000,
+                  "avg_days_on_market": 128
+                }
+              },
+              {
+                "key": "34117",
+                "label": "34117 (Collier)",
+                "cells": {
+                  "listing_count": 172,
+                  "median_list_price": 749950,
+                  "avg_days_on_market": 124
+                }
+              },
+              {
+                "key": "33966",
+                "label": "33966 (Lee)",
+                "cells": {
+                  "listing_count": 170,
+                  "median_list_price": 319750,
+                  "avg_days_on_market": 116
+                }
+              },
+              {
+                "key": "33924",
+                "label": "33924 (Lee)",
+                "cells": {
+                  "listing_count": 132,
+                  "median_list_price": 1499500,
+                  "avg_days_on_market": 229
+                }
+              },
+              {
+                "key": "33922",
+                "label": "33922 (Lee)",
+                "cells": {
+                  "listing_count": 117,
+                  "median_list_price": 485000,
+                  "avg_days_on_market": 163
+                }
+              },
+              {
+                "key": "33956",
+                "label": "33956 (Lee)",
+                "cells": {
+                  "listing_count": 104,
+                  "median_list_price": 583750,
+                  "avg_days_on_market": 177
+                }
+              },
+              {
+                "key": "34116",
+                "label": "34116 (Collier)",
+                "cells": {
+                  "listing_count": 90,
+                  "median_list_price": 582000,
+                  "avg_days_on_market": 107
+                }
+              },
+              {
+                "key": "33921",
+                "label": "33921 (Lee)",
+                "cells": {
+                  "listing_count": 44,
+                  "median_list_price": 3985000,
+                  "avg_days_on_market": 220
+                }
+              },
+              {
+                "key": "34138",
+                "label": "34138 (Collier)",
+                "cells": {
+                  "listing_count": 31,
+                  "median_list_price": 185000,
+                  "avg_days_on_market": 402
+                }
+              },
+              {
+                "key": "34139",
+                "label": "34139 (Collier)",
+                "cells": {
+                  "listing_count": 30,
+                  "median_list_price": 349000,
+                  "avg_days_on_market": 225
+                }
+              },
+              {
+                "key": "34140",
+                "label": "34140 (Collier)",
+                "cells": {
+                  "listing_count": 15,
+                  "median_list_price": 530000,
+                  "avg_days_on_market": 307
+                }
+              },
+              {
+                "key": "34137",
+                "label": "34137 (Collier)",
+                "cells": {
+                  "listing_count": 2,
+                  "median_list_price": 290000,
+                  "avg_days_on_market": 94
+                }
+              },
+              {
+                "key": "34141",
+                "label": "34141 (Collier)",
+                "cells": {
+                  "listing_count": 2,
+                  "median_list_price": 269500,
+                  "avg_days_on_market": 112
+                }
+              }
+            ],
+            "source": {
+              "url": "https://www.swfldatagulf.com/r/source/listing_active_stats?label=SWFL+active+for-sale+listings+%28aggregated%29&source=realtor.com+for-sale+listings&brain=active-listings-swfl&date_col=scraped_at",
+              "fetched_at": "2026-08-12T04:30:47Z",
+              "tier": 2,
+              "citation": "Active SWFL residential listings, aggregated per grain in SQL (listing_active_stats) as of 2026-08-12"
+            }
+          }
+        ],
+        "caveats": [
+          "List-side only: asking prices and days-on-market for ACTIVE listings — not sold/closed prices (that is the closed-sale records lane).",
+          "Median asking price spans ALL active listings INCLUDING vacant land/lots — in lot-heavy areas this pulls the median well below typical home prices. Use the property_type field or the per-county/ZIP detail to separate homes from land.",
+          "Daily snapshot — broad SWFL coverage but not comprehensive. Direction is neutral on any one day; the day-over-day diff is what reads the inventory trend.",
+          "Source is realtor.com for-sale listings; a direct licensed MLS/IDX feed can swap into the same table when credentialed.",
+          "Price-cut counts cover only listings we have probed (listed/sold history), not every active listing region-wide — a per-property depth signal, not a full-book statistic.",
+          "Annual property tax is vendor-reported (not a county tax bill) and not yet validated against county appraiser records — treat as directional, not authoritative. Covers only properties we have probed, not the full tax roll."
+        ],
+        "contradicts": [],
+        "confidence": 0.8,
+        "joint_integrity": 1,
+        "confidence_dispersion": 0,
+        "chain_depth": 0,
+        "trust_tier": 2,
+        "upstream_count": 0,
+        "relevance": {
+          "decay_curve": "weeks",
+          "half_life_hours": 720,
+          "computed_at": "2026-08-12T04:30:47Z"
+        },
+        "exogenous_signals": [],
+        "grain_boundary": {
+          "not_available": [
+            "Sold / closed sale prices — active asking prices only, not closed transactions",
+            "Per-listing history or price-cut events — current snapshot only",
+            "Rental listings — sale listings only"
+          ],
+          "finest_grain": "zip-snapshot"
+        }
+      }
     },
     {
       "packId": "active-rentals-swfl",
@@ -454,13 +2845,13 @@
     {
       "packId": "master",
       "status": "built",
-      "version": 137,
+      "version": 138,
       "written": true,
       "brainOutput": {
         "brain_id": "master",
-        "version": 137,
-        "refined_at": "2026-08-11T14:55:00Z",
-        "expires": "2026-08-18T14:55:00Z",
+        "version": 138,
+        "refined_at": "2026-08-12T04:31:08Z",
+        "expires": "2026-08-19T04:31:08Z",
         "ttl_seconds": 604800,
         "direction": "bearish",
         "magnitude": 0.85,
@@ -639,7 +3030,7 @@
             "display_format": "ratio",
             "source": {
               "url": "https://hazards.fema.gov/arcgis/rest/services/public/NFHL/MapServer/28",
-              "fetched_at": "2026-08-11T04:30:04Z",
+              "fetched_at": "2026-08-12T04:30:16Z",
               "tier": 1,
               "citation": "FEMA NFHL Flood Hazard Zones (Layer 28 / S_FLD_HAZ_AR), area-weighted aggregate across 3 SWFL counties: Collier (12021), Hendry (12051), Lee (12071)."
             },
@@ -953,20 +3344,22 @@
             ]
           },
           {
-            "metric": "signal_transactions_1",
-            "value": "Fort Myers: A long-vacant Fort Myers building sold for $2.25 million, as reported Aug. 10, 2026.",
+            "metric": "active_listings_count_swfl",
+            "label": "SWFL active residential listings (count)",
+            "value": 22479,
             "direction": "stable",
-            "label": "Fort Myers — transactions",
-            "variable_type": "categorical",
+            "variable_type": "extensive",
+            "units": "listings",
+            "display_format": "count",
             "source": {
-              "url": "https://www.businessobserverfl.com/news/2026/aug/10/long-vacant-fort-myers-building-sells/",
-              "fetched_at": "2026-08-11T14:54:39Z",
+              "url": "https://www.swfldatagulf.com/r/source/listing_active_stats?label=SWFL+active+for-sale+listings+%28aggregated%29&source=realtor.com+for-sale+listings&brain=active-listings-swfl&date_col=scraped_at",
+              "fetched_at": "2026-08-12T04:30:47Z",
               "tier": 2,
-              "citation": "Long-vacant Fort Myers building sells for $2.25 million | Business Observer: \"![Spinner: White decorative](https://cdn.userway.org/widgetapp/images/spin_wh.svg)\n![](https://cdn.userway.org/widgetapp/images/body_wh.svg)\n![Spinner: White decorative](https://cdn.userway.org/widgetapp/images/spin_wh.svg)\n  * ![Alternate Text](https://observermediagroup.media.clients.ellingtoncms.com/static-4/assets/images/bob-logo-header.svg)\n  * Loading\n\n\n  * [Newsletters](https://marketing.businessobserverfl.com/newsletters)\n  * [Podcast](https://www.businessobserverfl.com/podcasts/corner-office/?utm_source=header&utm_medium=sitenav)\n  * [Public Notices](https://legals.businessobserverfl.com/)\n  * [40 Under 40 Nomination](https://www.businessobserverfl.com/submit-40-under-40-2026/)\n  * [Mobile App](https://businessobserver.pressreader.com/)\n  * [Subscribe](https://marketing.businessobserverfl.com/subscribe)\n  * [Login](https://www.businessobserverfl.com/accounts/login/?next=/news/2026/aug/10/long-vacant-fort-myers-building-sells/)\n\n\n  * [](https://www.facebook.com/BusinessObserverFL)\n  * [](https://x.com/BizObserverFL)\n  * [](https://www.linkedin.com/company/businessobserverfl)\n  * [ ](https://www.instagram.com/businessobserverfl/)\n\n\n[![](https://observermediagroup.media.clients.ellingtoncms.com/static-4/assets/images/bob-logo-header.svg)](https://www.businessobserverfl.com/)\n[![](https://observermediagroup.media.clients.ellingtoncms.com/static-4/assets/images/bob-logo-sticky.svg)](https://www.businessobserverfl.com/)\n[![](https://observermediagroup.media.clients.ellingtoncms.com/static-4/assets/images/bob-logo-header.svg)](https://www.businessobserverfl.com/)\n  * [News](https://www.businessobserverfl.com/news/all/)\n  * [Strategies](https://www.businessobserverfl.com/news/strategies/)\n  * [Entrepreneurs](https://www.businessobserverfl.com/news/entrepreneurs/)\n  * [M&A](https://www.businessobserverfl.com/news/mergers-acquisitions/)\n  * [Leadership](https://www.businessobserverfl.com/news/leadership/)\n  * [Regions](https://www.businessobserverfl.com/news/2026/aug/10/long-vacant-fort-myers-building-sells/)\n    * [Tampa Bay-Lakeland](https://www.businessobserverfl.com/news/tampa-bay-lakeland/)\n    * [Manatee-Sarasota](https://www.businessobserverfl.com/news/manatee-sarasota/)\n    * [Charlotte-Lee-Collier](https://www.businessobserverfl.com/news/charlotte-lee-collier/)\n    * [Florida](https://www.businessobserverfl.com/news/florida/)\n  * [Industries](https://www.businessobserverfl.com/news/2026/aug/10/long-vacant-fort-myers-building-sells/)\n    * [Business Support](https://www.businessobserverfl.com/news/industries/business-support/)\n    * [Commercial Real Estate](https://www.businessobserverfl.com/news/industries/commercial-real-estate/)\n    * [Residential Real Estate](https://www.businessobserverfl.com/news/industries/residential-real-estate/)\n    * [Development](https://www.businessobserverfl.com/news/industries/development/)\n    * [Finance](https://www.businessobserverfl.com/news/industries/finance/)\n    * [Food-Beverage](https://www.business\""
+              "citation": "22,479 active SWFL residential listings as of 2026-08-12"
             },
             "suggestions": [
-              "What's driving signal transactions 1?",
-              "How does signal transactions 1 here compare to other SWFL areas?"
+              "What's driving active listings count swfl?",
+              "How does active listings count swfl here compare to other SWFL areas?"
             ]
           },
           {
@@ -1011,7 +3404,7 @@
           }
         ],
         "caveats": [
-          "flood-barrier-mode-1 active: 4 barrier ZIPs, worst-case AAL $32,610/insured property",
+          "flood-barrier-mode-1 active: 4 barrier ZIPs, worst-case AAL $40,342/insured property",
           "Override \"storm-history-modifier\" fired (priority 70)",
           "Override \"rising-rates-dominance\" forced bearish (priority 70)",
           "No figures published: this source has not yet received its first real SBA FOIA load. A synthetic development sample exists for offline testing only and is never shipped.",
@@ -1063,7 +3456,7 @@
           "FEMA NFHL is queried live on every refinery run (v1). LOMR-based cache invalidation (Layer 1, EFF_DATE) is documented in docs/env-swfl-spike-findings.md and reserved for v2 once a hot-path issue is observed.",
           "NFIP claims are policyholder-only. Uninsured properties and parcels outside NFIP participation are NOT in the archive — true SWFL flood loss is materially larger than what these numbers show.",
           "Storm-year list (Charley 2004, Wilma 2005, Irma 2017, Ian 2022, Helene 2024, Milton 2024) was last reviewed 2026-05-17. Requires update in refinery/sources/fema-nfip-source.mts when a new named storm hits SWFL.",
-          "Per-ZIP AAL denominator uses 2020 ACS population × 0.3 NSI-coverage proxy for insured-property count (v1). Replace with the live OpenFEMA NFIP Policies insured count in v2 before treating per-ZIP magnitudes as policy-grade — current numbers compress toward each other when actual NFIP penetration in a ZIP diverges from the 30% proxy.",
+          "Per-ZIP AAL denominator uses 2020 ACS population × each ZIP's county's real FEMA NFIP residential penetration rate (v2, as of 2026-08-03) — Lee 24.3%, Collier 29.5%, Hendry 4.4%. Rates refresh quarterly at FEMA; re-pull before a build if this snapshot predates the current quarter.",
           "USGS surface stage metric includes both Approved (A) and Provisional (P) qualifiers — magnitudes may revise as USGS approves provisional readings over the 6-12 month review window. For approval-only reads, brain-level consumers should filter on the qualifiers column directly.",
           "GHCN-Daily rainfall is gauge precipitation at the station point — not areal interpolation. The 4-station Lee+Collier average smooths station-level micro-climate but may diverge from PRISM or radar QPE in high-gradient convective events.",
           "Scope is inbound domestic only (dms_dest=129 AND trade_type=1). Imports (trade_type=2), exports (trade_type=3), and outbound flows (dms_orig=129) are intentionally excluded — separate brains would own those scopes if built.",
@@ -1176,7 +3569,7 @@
           "~50% of SWFL buyers (≈70% for condos) pay cash and insulate the luxury tier — a holding or rising top tier is part of the K-shape, not a bullish signal on its own.",
           "Covers 50 SWFL ZIPs holding BOTH a starter and a luxury tier; ZIPs lacking one tier are excluded from the divergence.",
           "Upstream brain 'active-rentals-swfl' was stale at build time (expired 2026-07-19).",
-          "Upstream brain 'active-rentals-swfl' failed to rebuild on 2026-08-11; using last good read from 2026-07-11 (v3)."
+          "Upstream brain 'active-rentals-swfl' failed to rebuild on 2026-08-12; using last good read from 2026-07-11 (v3)."
         ],
         "contradicts": [
           "macro-us (bearish) vs labor-demand-swfl (bullish)",
@@ -1232,8 +3625,8 @@
         "upstream_count": 39,
         "relevance": {
           "decay_curve": "weeks",
-          "half_life_hours": 720.0000000000005,
-          "computed_at": "2026-08-11T14:55:00.000Z"
+          "half_life_hours": 719.9999999999994,
+          "computed_at": "2026-08-12T04:31:08.000Z"
         },
         "exogenous_signals": [],
         "conditional_claims": [
