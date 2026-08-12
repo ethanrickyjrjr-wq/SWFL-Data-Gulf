@@ -1,3 +1,73 @@
+## 2026-08-12 (Opus 5) — deed data: stale catalog fixed, LOAD cron enabled, cash-vs-financed specced + its 3 measurable failure modes measured
+
+Operator: "fix and get best one planned out." Three parts, all done.
+
+**1. `docs/standards/data-roots.md` was lying about this data.** Line 86 and trap T10 both said
+`lee_deed_official_records.record_date` is EMPTY / "never cite it as served" — written when the table
+held 0 rows. It holds 28,186 (07/13–08/11/2026, 22 business days, all 32 doc types). Both corrected
+to 🟡 with the real span, the arm's-length/nominal split (3,229 / 2,124), and the still-broken parcel
+join stated inline (`parcel_strap` `0-44-27-02-00012.0130` vs `lee_parcels.state_parcel_id`
+`C46-000-502-7399-4`, 0 rows on a direct join). This is the catalog every session reads first, so a
+stale 🔴 there is how the data stays unused.
+
+**2. LOAD cron enabled** in `.github/workflows/ingest-lee-deed-official-records.yml` (daily 11:17
+UTC). All three preconditions its own comment named were verified live against the DB this session,
+not asserted: `_ingested_at` present among 28 columns (so the migration created the table, not dlt's
+auto-create — the exact failure the block guarded), `service_role` holds SELECT (brain can read it),
+and 28,186 rows is well past the 191-row bar. FETCH stays manual — Akamai. The job is a MERGE on
+`internal_doc_id`, so a day with no human drop is a no-op, which is why `parked_but_scheduled` is
+the intended state and not drift.
+
+**3. Best idea planned: cash-vs-financed purchase split** —
+`docs/superpowers/specs/2026-08-12-deed-cash-financed-split-design.md`, check
+`deed_cash_financed_split_live_verify` opened via `new-build.mjs`. Chosen because it needs NO parcel
+join (deed-strap to deed-strap, inside one table) while every other high-value deed idea is blocked
+on the broken normalization, and because it is a market statistic with no identity/contactability
+lane — outside the Fork-A exposure `_RESEARCH/.../2026-07-22-predictive-analytics-and-lead-mining.md`
+§6 documents.
+
+Step 1 of that plan (measure before building) was run this session, and it killed the doc's own
+biggest failure mode. Pairing-window sensitivity, deed side deduped per FM-3 (3,031 rows):
+same-day 1,179 · +1d 1,179 · +3d 1,182 · +7d 1,182 · −3/+14d 1,182. **Flat — widening to a 17-day
+window adds 3 pairs of 3,031 (0.1%), so the window is not load-bearing and same-day is correct.**
+Financed 1,182/3,031 = **39.0%**, no-recorded-financing **61.0%**. FM-2 measured: 180/3,229 = 5.57%
+unclassifiable (inside the 15% floor). FM-3 measured: 3,049 raw → 3,031 deduped, 0.6% double-count.
+Entity-buyer share also measured in passing: 774 of 3,229 arm's-length deeds = **24.0%**, with 7.0%
+of party lists hitting the source-side truncation marker.
+
+Not done, stated plainly: no code written for the build itself — TDD, view, pack extension and vocab
+slug are steps 2–6 in the spec and remain open under the check. Two open questions for the operator
+are at the bottom of the spec.
+
+## 2026-08-12 (Sonnet 5) — Graph compartments Step 0: hosted index is 24 commits stale, corrects a live RULE 0.5 claim
+
+Ran the hosted-index probe the handoff called for. `graph_stats` on the hosted repo
+(`e230749f-4a5e-44a6-8524-481ebe89d711`) returned `commitSha 658c25ba`, dated 00:06:32 -0400 08/12 —
+BEFORE the `.graphifyignore` commit (`0daaaffb`, 00:38:35) and 24 commits behind current HEAD.
+`git merge-base --is-ancestor` confirms it. Checked for a repo-local trigger:
+`.github/workflows/graphify-republish.yml` only rebuilds the LOCAL CLI graph and republishes it into
+the sibling ops repo's static `/graph` visualization — a different artifact from the hosted MCP index
+at `api.graphify.com/mcp`. Nothing here controls hosted reindex cadence; it's Graphify-Labs' own
+infrastructure. So Step 0's answer is genuinely "not yet determinable," not a failure — the ignore
+file's effect can't be observed until the hosted index catches up.
+
+This also caught a stale claim in root CLAUDE.md's RULE 0.5 ("the hosted index answered at HEAD,"
+measured 08/11) — true when written, false as of this check less than a day later. Corrected it
+in-place (added a dated caveat, kept hosted-over-local as the default) rather than leave a
+disproven claim standing for the next session to trust blindly.
+
+Also corrected the handoff doc's own commit citation: `1c6c38b2` (cited for Step 1) is a dangling
+pre-rebase local SHA — `safe-push.mjs` rebases onto `origin/main` before pushing, so the actual
+pushed hash is `0daaaffb`. Verified `1c6c38b2` is not reachable from `main`.
+
+Wrote Step 3 (report script + `docs/standards/graph-compartments.md`) up as a spec with a
+failure-modes section (RULE 3.5 gate) instead of building it rushed at the end of a long session —
+scope, TDD unit target, and four named failure modes are all in the handoff §4d, ready for the next
+session to implement without re-deriving anything. Full detail:
+`docs/handoff/2026-08-12-graph-compartments-step2-negative-result.md` §4c/§4d. Step count now 3.5/4
+(Steps 1, 2, and 2-pass-2 done; Step 0 run and answered "not yet determinable" with cause; Step 3
+spec'd, not built).
+
 ## 2026-08-12 (Sonnet 5) — CI still red after the fixture fix: stale watch-manifest, third occurrence today
 
 Pushed the `isLocalModule` fixture fix (2193221c), watched `gh run watch` on the new commit — still

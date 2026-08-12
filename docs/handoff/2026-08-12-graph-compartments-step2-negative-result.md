@@ -5,7 +5,9 @@
 **Plan:** `docs/superpowers/plans/2026-08-11-graph-compartments.md`
 **Research:** `_RESEARCH/agent-behavior/2026-08-11-graphify-community-structure-crawl4ai-research.md`
 **Check:** `graph_compartments_live_verify` — needs RE-SCOPING, not closing (see §5)
-**Commits:** `1c6c38b2` (Step 1)
+**Commits:** `0daaaffb` (Step 1 — corrected 08/12/2026; `1c6c38b2` in the original write-up was the
+pre-rebase local SHA, `safe-push.mjs` rebases onto `origin/main` before pushing so the pushed hash
+differs; `1c6c38b2` is not reachable from `main`), `02c8cafa` (Step 2 pass 2, §4b)
 
 ---
 
@@ -178,19 +180,99 @@ caveat from §2.3 applies; a repeat run would cost ~90s of compute to learn the 
 
 ---
 
+## 4c. Step 0 — hosted-index probe. Answer: NOT YET DETERMINABLE, and here's why.
+
+Queried the hosted index directly (`mcp__graphify__list_repositories` →
+`e230749f-4a5e-44a6-8524-481ebe89d711` → `graph_stats`): **20,798 nodes / 49,152 edges / 792
+communities, stamped `commitSha 658c25ba`.**
+
+Checked that commit's place in history: `658c25ba` is dated 2026-08-12 00:06:32 -0400 — **before**
+the `.graphifyignore` commit (`0daaaffb`, 00:38:35) and **24 commits behind current HEAD**
+(`972f4bd3`). `git merge-base --is-ancestor 0daaaffb 658c25ba` confirms the hosted commit does not
+contain Step 1 at all.
+
+**So the honest answer to "does `.graphifyignore` reach the hosted index" is: can't tell yet — the
+hosted index hasn't rebuilt past the commit that introduced the file.** This is not a failure of
+Step 1; it's a freshness gap in a system we don't control the cadence of. Checked whether this repo
+has any lever over hosted reindex timing: `.github/workflows/graphify-republish.yml` only regenerates
+the LOCAL CLI graph and republishes it into the **ops repo's** `brain-graph.json` (a static
+visualization snapshot for `/graph` on swfldatagulf-ops) — a completely different artifact from the
+hosted MCP index at `api.graphify.com/mcp`. Nothing in this repo triggers or schedules that hosted
+rebuild; it's Graphify-Labs' own SaaS infrastructure, presumably driven by their own GitHub App
+watching the repo on push. **No repo-local script or workflow can force it.**
+
+**This also corrects a stale claim in root `CLAUDE.md`'s RULE 0.5**, which states "the hosted index
+answered at HEAD" as a measured fact from 08/11/2026. That was true when measured. It is not true
+right now — the hosted index is 24 commits stale as of this check (08/12/2026, ~02:10am). RULE 0.5's
+underlying point (hosted > local artifact) still holds — the local `graphify-out/graph.json` file is
+gitignored and even more stale by definition — but "the hosted index is at HEAD" is a snapshot claim
+that ages, not a standing guarantee, and this session is the evidence.
+
+**What this means for Step 0's original question:** re-probe `gx_find`/`graph_stats` later (no fixed
+interval known — there's no visible SLA on hosted reindex cadence) and diff `commitSha` against
+`git log` HEAD. When the hosted `commitSha` is a descendant of `0daaaffb`, check whether a term unique
+to an ignored file (e.g. a distinctive `SESSION_LOG.md` phrase) is absent from `gx_find` results —
+that's the actual pass/fail test for "does `.graphifyignore` reach the hosted index," and it cannot
+be run before then.
+
+---
+
+## 4d. Step 3 spec — report script + standards doc (NOT BUILT — next session picks this up)
+
+**Scope, so the next session doesn't re-derive it:**
+
+1. `scripts/graphify-compartments-report.mjs` — reads `graphify-out/graph.json`, prints the same
+   metrics table as §3/§4b (nodes, edges, communities, singletons, cross-community %, plus a
+   by-extension singleton breakdown like §4b's). Pure function of the graph on disk — no LLM call, no
+   network. This is what `graph_compartments_live_verify`'s eventual signal should call.
+2. `docs/standards/graph-compartments.md` — the standards doc. Content already exists, scattered
+   across this handoff; the doc's job is to be the ONE place a future session reads instead of
+   re-deriving: the two exhausted knobs (resolution, `--exclude-hubs` — both proven not to compartment
+   this repo, §3), the `cluster-only` ordering trap and `--force` behavior difference (§2.1–2.2), the
+   reproduce recipe (§6), and the open lever (SQL-to-code, and any language pair like it — §4b).
+
+**Failure-modes section (RULE 3.5 gate — must be answered before implementation starts, not after):**
+
+- *Script drifts from the metric definitions used in this handoff* → guard: the script's own
+  docstring/comment should name the exact formula (singleton = community size 1; cross% = share of
+  edges whose endpoints sit in different communities) so a future re-read can verify it still matches
+  what produced the §3/§4b numbers, not a silently-changed metric.
+- *Report runs against a stale/wrong graph.json* (e.g. code-plane-only before app merge, or a graph
+  built without `--force` that silently kept old data) → guard: print `nodes`/`edges` count and
+  compare against the count graphify itself reported on the last rebuild (visible in its own stdout);
+  flag if they don't match.
+- *Someone reads "singletons: 1,434" from a report run against an unmerged code-plane graph and
+  compares it to the merged 43,814-node figure from SESSION_LOG* → guard: the report should print
+  which plane it measured (code-only vs merged) directly in its header, not assume the reader knows.
+- *Standards doc goes stale the next time someone finds a lever that moves the floor* → guard: date-
+  stamp the "exhausted knobs" list and say explicitly what would falsify it (a run that changes the
+  1,270/1,434 singleton count without adding/removing files), so a future session knows to update
+  rather than trust a frozen table forever.
+
+**TDD unit target:** the community-size histogram / cross-edge-share computation is pure and
+deterministic given a fixed nodes+links array — write it as an importable function
+(`computeCompartmentMetrics(graph)`), test it against a small hand-built fixture graph (3 communities,
+known singleton count, known cross-edge count) before wiring it to the real 43k-node file. That's the
+actual unit under test; parsing `graph.json` and printing are not.
+
+---
+
 ## 5. State, and what is NOT done
 
-- **Step 0 (hosted-index probe) — NOT STARTED.** Whether `.graphifyignore` reaches the hosted index
-  at `api.graphify.com/mcp` is still UNKNOWN. It needs its own push and a later `gx_find` check.
-  RULE 0.5 makes the hosted graph every session's first reach, so this is the step that decides
-  whether Step 1 helped the tool anyone actually uses.
+- **Step 0 (hosted-index probe) — RUN, answer is NOT YET DETERMINABLE, see §4c.** The hosted index
+  is 24 commits stale (stamped `658c25ba`, before the `.graphifyignore` commit `0daaaffb`) and no
+  repo-local mechanism controls its rebuild cadence. Also corrects a stale RULE 0.5 claim in root
+  `CLAUDE.md` ("the hosted index answered at HEAD") — true when measured 08/11, not true now.
 - **Step 2 pass 2 (SQL-extractor install + re-measure) — DONE, see §4b.** Result: singleton floor
   moved from 1,270 to 1,434 (worse), community count worsened, cross-community % improved 0.5pt.
   New lever identified (SQL-to-code edge resolution), not yet tested.
-- **Step 3 (TDD report script + `docs/standards/graph-compartments.md`) — NOT STARTED.**
+- **Step 3 (TDD report script + `docs/standards/graph-compartments.md`) — SPEC'D, not built (see §4d).
+  Deliberately not rushed: it's real build work under RULE 3.5 (TDD-mandatory), and this session's
+  context was already past the compaction threshold when Step 0 closed out.**
 - **Check `graph_compartments_live_verify` — re-scope, do not close.** Its premise (calibrate the two
   knobs) is answered and negative; §4b closes the "install the SQL extractor" sub-question with
-  another negative; the open question is now SQL-to-code edge resolution, not resolution/hubs.
+  another negative; §4c closes "does Step 1 reach the hosted index" as not-yet-checkable; the open
+  build work is Step 3 (§4d) and the open research question is SQL-to-code edge resolution.
 - **`package.json` unchanged. Graph artifacts are gitignored build products** — the graph state
   described here lives on this box only; a fresh clone must run
   `graphify update . --force && graphify cluster-only . --resolution 1.0 --no-viz && node scripts/graphify-app-nodes.mjs`.
@@ -198,8 +280,10 @@ caveat from §2.3 applies; a repeat run would cost ~90s of compute to learn the 
 - Snapshot restore point from before any of this: `C:\Users\ethan\.cache\graphify-brain-platform\snapshot.tar.zst`
   (`bun scripts/graphify-snapshot.mjs restore`).
 
-**2.5 of 4 steps.** Step 1 shipped and verified; Step 2 executed and returned a negative result, its
-pass-2 follow-up also executed and also came back negative (see §4b); Steps 0 and 3 untouched.
+**3.5 of 4 steps.** Step 1 shipped and verified; Step 2 and its pass-2 follow-up both executed and
+returned negative results (§3, §4b); Step 0 executed and returned a not-yet-determinable result with
+a real cause identified (§4c); Step 3 is spec'd with a failure-modes section but not built (§4d) —
+next session's starting point, no re-derivation needed.
 
 ---
 

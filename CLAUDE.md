@@ -98,6 +98,13 @@ Pay the round-trip. Load them in ONE call:
 Measured 08/11/2026: `graphify-out/graph.json` stamps `built_at_commit ee2c074c` = 07/08/2026 and is
 MISSING symbols shipped since (no `bakedAreaRead` node); the hosted index answered at HEAD and
 resolved that same symbol with its caller. The local artifact is now gitignored as a build product.
+**"At HEAD" is a snapshot claim that ages, not a standing guarantee — corrected 08/12/2026:** a
+same-day recheck (`graph_stats`) found the hosted index stamped 24 commits behind actual HEAD, still
+on a commit from *before* that day's `.graphifyignore` push (details:
+`docs/handoff/2026-08-12-graph-compartments-step2-negative-result.md` §4c). Nothing in this repo
+controls the hosted reindex cadence. Hosted-over-local still holds as the default (the local file is
+stale by definition, being gitignored and never rebuilt on a schedule) — just don't assume the hosted
+copy is current without checking `graph_stats`' `commitSha` against `git log` first.
 
 **The tool names are these — the old `graphify query`/`path`/`explain` are CLI subcommands and were
 the wrong surface to name here:**
