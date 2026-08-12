@@ -1,3 +1,52 @@
+## 2026-08-12 (Opus 5) — I built a monitor the ops site already had. The ops path in CLAUDE.md 404s, and that is why.
+
+**Operator: *"We have a fucking ops repo with all the fucking data!!! We have fan outs. We do this
+over and over."* He was right.** `https://swfldatagulf-ops.vercel.app/coverage`, fetched live
+08/12/2026 20:18 UTC, already reports **73 pipelines — 60 fresh · 3 stale/short · 4 empty/missing ·
+8 act-now · 5 parked**, per-pipeline source/brain/rows/freshness/missing plus a verb
+(GRAB/FIX/FIND/ROUTE), **and a "Copy chase list" button that emits a work order meant to be pasted
+into a Claude session.** 73 is the same number I re-derived by hand from the registry an hour
+earlier. 19 ops pages exist (`/coverage`, `/data-inventory`, `/db-health` (hourly Postgres vitals),
+`/census`, `/checks`, `/queue`, `/spend`, `/wire-map`, `/graph`, `/goals`, `/targets`, …) and
+**CLAUDE.md names none of them.**
+
+**ROOT CAUSE OF THE UNREAD-NESS, and it is a one-word bug:** `CLAUDE.md` line 75 and
+`cadence_registry.yaml` line 107 both point at **`/ops/census`, which 404s**. The real route is
+**`/census`** — the "/ops" on those pages is a back-link label, not a path. Verified live: `/` =
+200, `/ops/census` = 404, `/census` = 200. Every session that followed that instruction hit a dead
+page and moved on. **NOT FIXED THIS COMMIT — `CLAUDE.md` is held by another session's file claim
+and I would not override it. Owed, one line, both files.**
+
+**Shipped anyway (`ingest/scripts/landed_watch.py`)** — walks every registry entry declaring a table
+(`count_table`, falling back to `freshness_table`: 18 → 44 of 73 covered), then sweeps `data_lake`
+itself so an undeclared pipeline cannot hide. Reports MISSING / EMPTY / LOW. Zero LLM tokens, always
+exits 0, silent when healthy. Registered as a Hermes cron (`landed-watch`, 08:00 daily, telegram,
+no-agent) and run. **Proved it detects rather than trusting silence** — pointed at a non-existent
+table and an empty one alongside a healthy control; caught both, passed the control.
+
+**Honest overlap:** this duplicates most of `/coverage`. The one real difference — `/coverage`
+measures YEAR RANGE present, so a table that DOES NOT EXIST reads identically to one with rows but
+no parseable year, which is exactly how `collier_official_records` sat "live" in four documents with
+no table. Row-existence ≠ year-coverage. Narrow, and not a reason to have skipped looking first.
+
+**Also corrected mid-session:** my first sweep covered `public` too and emitted **39 "empty" tables,
+37 of which are app tables** (email_events, social_posts, user_listings) legitimately empty until the
+product has users. That is the alert-fatigue failure `gha_red_watch.py` already grew a 24h cooldown
+to avoid — rebuilt inside a tool meant to prevent rebuilt mistakes. Scoped to `data_lake`: 2 real
+empties (`user_mls_listings`, `user_mls_stats`).
+
+**Hermes inventory, for the record** (nobody had written this down): 4 pre-existing jobs, all
+no-agent/zero-token, all delivering to telegram — `gha-red-watch` (30m, CI, 24h cooldown per
+workflow), `morning-digest` (08:00), `records-request-nag` (09:00), `swfl-morning-market-watch`
+(07:30 weekdays). Ran all four. **Digest: 908 checks open, 8 GHA failures in 24h, "Lake: live,
+fresh"** — that last line asks whether the API answers, which is why it read healthy all day while
+Collier's table did not exist. **Nag: 4 records requests gone quiet — DBPR 32d, FL DOR 21d,
+`lee_or_bulk_extract` 20d, Lee permits 17d.** That third one is the bulk pull of the very records we
+hand-scraped today.
+
+Memory updated (machine-local, not in this repo): `reference_ops-site-19-pages-...` and
+`feedback_built-not-wired-is-the-failure-mode`.
+
 ## 2026-08-12 (Opus 5) — CORRECTION to b2edd782, same session: R6's hook is installed and its rebuild REFUSES TO WRITE. And R6 degrades R7.
 
 Found by opening `~/.cache/graphify-rebuild.log` while checking something else. `hook status` says
