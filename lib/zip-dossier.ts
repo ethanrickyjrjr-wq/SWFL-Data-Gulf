@@ -204,10 +204,13 @@ export const BRAIN_GEO: Record<string, BrainGeo> = {
   // failure mode as the active-listings-swfl/market-heat-swfl incidents above).
   "communities-swfl": { grains: ["county"], covers: LEE_COLLIER },
   // Lee County recorded-deed velocity + arm's-length/nominal mix, Clerk of Courts
-  // official records. LEE ONLY (Collier's clerk feed is a separate, unbuilt problem) —
-  // county grain (the table carries no zip/city field yet; parcel_strap is a lee_parcels
-  // join key, not a ZIP).
+  // official records. LEE ONLY — county grain (the table carries no zip/city field
+  // yet; parcel_strap is a lee_parcels join key, not a ZIP).
   "lee-deed-records-swfl": { grains: ["county"], covers: [LEE] },
+  // Collier County recorded-document velocity (all 37 doc types) + DEED/Notice-of-
+  // Commencement mix, Clerk of Courts official records (cor.collierclerk.com). Built
+  // 08/12/2026 — COLLIER ONLY, county grain (no zip/city field on this source either).
+  "collier-official-records-swfl": { grains: ["county"], covers: [COLLIER] },
 };
 
 /**
