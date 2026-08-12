@@ -1,6 +1,7 @@
 // Positive controls for Gate 17's rules — including the REAL registry, so the
 // gate's view of _ASSISTANT/STRIKES.md can never drift from what ships.
-import { test, expect } from "bun:test";
+import { test } from "node:test";
+import assert from "node:assert/strict";
 import { readFileSync } from "node:fs";
 import { join, dirname } from "node:path";
 import { fileURLToPath } from "node:url";
@@ -38,29 +39,35 @@ guard: OWED — not yet at the threshold
 
 test("parseStrikes counts shapes, guards, and strike lines", () => {
   const shapes = parseStrikes(FIXTURE);
-  expect(shapes.map((s) => s.slug)).toEqual([
-    "built-and-done",
-    "owed-but-tracked",
-    "owed-untracked-three",
-    "owed-untracked-two",
-    "malformed-no-guard-line",
-  ]);
-  expect(shapes[0].strikes).toBe(3);
-  expect(shapes[3].strikes).toBe(2);
-  expect(shapes[4].guard).toBe("");
+  assert.deepStrictEqual(
+    shapes.map((s) => s.slug),
+    [
+      "built-and-done",
+      "owed-but-tracked",
+      "owed-untracked-three",
+      "owed-untracked-two",
+      "malformed-no-guard-line",
+    ],
+  );
+  assert.strictEqual(shapes[0].strikes, 3);
+  assert.strictEqual(shapes[3].strikes, 2);
+  assert.strictEqual(shapes[4].guard, "");
 });
 
 test("BUILT and OWED-with-open-check are tracked; bare OWED is not", () => {
-  expect(guardIsTracked("BUILT — Gate 15 (08/10/2026)")).toBe(true);
-  expect(guardIsTracked("OWED — sweep needed; check open: key_name")).toBe(true);
-  expect(guardIsTracked("OWED — sweep needed; Check open: Key_Name9")).toBe(true);
-  expect(guardIsTracked("OWED — someone should do something")).toBe(false);
-  expect(guardIsTracked("")).toBe(false);
+  assert.strictEqual(guardIsTracked("BUILT — Gate 15 (08/10/2026)"), true);
+  assert.strictEqual(guardIsTracked("OWED — sweep needed; check open: key_name"), true);
+  assert.strictEqual(guardIsTracked("OWED — sweep needed; Check open: Key_Name9"), true);
+  assert.strictEqual(guardIsTracked("OWED — someone should do something"), false);
+  assert.strictEqual(guardIsTracked(""), false);
 });
 
 test("unguardedShapes fires ONLY at 3+ strikes with an untracked guard", () => {
   const bad = unguardedShapes(parseStrikes(FIXTURE));
-  expect(bad.map((s) => s.slug)).toEqual(["owed-untracked-three", "malformed-no-guard-line"]);
+  assert.deepStrictEqual(
+    bad.map((s) => s.slug),
+    ["owed-untracked-three", "malformed-no-guard-line"],
+  );
 });
 
 test("THE REAL REGISTRY passes — every 3-strike shape is BUILT or tracked", () => {
@@ -69,5 +76,8 @@ test("THE REAL REGISTRY passes — every 3-strike shape is BUILT or tracked", ()
   // shape's guard line (build it, or open the check and name it), never this test.
   const repoRoot = join(dirname(fileURLToPath(import.meta.url)), "..", "..", "..");
   const md = readFileSync(join(repoRoot, "_ASSISTANT", "STRIKES.md"), "utf8");
-  expect(unguardedShapes(parseStrikes(md)).map((s) => s.slug)).toEqual([]);
+  assert.deepStrictEqual(
+    unguardedShapes(parseStrikes(md)).map((s) => s.slug),
+    [],
+  );
 });

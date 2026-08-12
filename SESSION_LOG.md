@@ -1,3 +1,24 @@
+## 2026-08-12 (Sonnet 5) — fix github: main CI red on `.github scripts (node:test)`, two independent causes
+
+Operator: "fix github". `gh run list` showed `main` CI failing on every push (run 31562232827 and the
+in-progress 31562775632) at the "Test .github scripts (node:test)" step, blocking the four downstream
+steps (knip, lake-read ratchet, registry identity). Two unrelated defects, both current on HEAD:
+
+1. `.claude/hooks/lib/strikes-guard.test.mjs` imported `bun:test`, the only file in that directory
+   written for Bun's runner — every sibling uses `node:test`. CI's `node --test .claude/hooks/lib/*.test.mjs`
+   glob picked it up and threw `ERR_UNSUPPORTED_ESM_URL_SCHEME` on the `bun:` scheme. Converted to
+   `node:test` + `node:assert/strict`, same assertions, no behavior change. 4/4 pass under `node --test`.
+2. `.github/_watch-manifest.json` was stale: it still listed 5 cron jobs (`ingest-active-listings`,
+   `FRED ALFRED LAUS monthly`, `census-vip monthly`, `fred-g17 monthly`, `fred-listing-swfl monthly`)
+   whose workflow YAML files no longer exist on disk — `watch-manifest-drift.test.mjs` diffs the
+   manifest against a live scan of `.github/workflows/` and failed on the mismatch (3 assertions).
+   Ran the test's own prescribed fix: `node scripts/build-watch-lists.mjs --write --write-watchers`,
+   which pruned the 5 ghost entries from the manifest and from the watched-workflow lists in
+   `log-cron-incident.yml` and `heal-cron-failure.yml`.
+
+**Evidence.** `node --test .github/scripts/*.test.mjs scripts/lib/*.test.mjs .claude/hooks/*.test.mjs
+.claude/hooks/lib/*.test.mjs` → 292 passed, 0 failed (was 10 `not ok` across the two defects before).
+
 ## 2026-08-12 (Opus 5) — four-lane gate: the LIVE lane now sees the installed vendor surface; measured, and it RECLASSIFIES rather than adds
 
 Picked up the 08/11 handoff (session 5d1fc000) which found the defect and could not apply it. Operator

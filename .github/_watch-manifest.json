@@ -10,16 +10,6 @@
     "disabled": false
   },
   {
-    "name": "ingest-active-listings",
-    "file": "active-listings-daily.yml",
-    "scheduled": false,
-    "timeout_minutes": 30,
-    "cancel_in_progress": false,
-    "paid": false,
-    "should_be_dark": false,
-    "disabled": false
-  },
-  {
     "name": "Airtable checks sync",
     "file": "airtable-checks-sync.yml",
     "scheduled": true,
@@ -380,16 +370,6 @@
     "disabled": false
   },
   {
-    "name": "FRED ALFRED LAUS monthly",
-    "file": "fred-laus-alfred-monthly.yml",
-    "scheduled": true,
-    "timeout_minutes": 15,
-    "cancel_in_progress": false,
-    "paid": false,
-    "should_be_dark": false,
-    "disabled": false
-  },
-  {
     "name": "Pipeline freshness probe (daily)",
     "file": "freshness-probe-daily.yml",
     "scheduled": true,
@@ -480,16 +460,6 @@
     "disabled": false
   },
   {
-    "name": "census-vip monthly",
-    "file": "ingest-census-vip.yml",
-    "scheduled": true,
-    "timeout_minutes": 15,
-    "cancel_in_progress": false,
-    "paid": false,
-    "should_be_dark": false,
-    "disabled": false
-  },
-  {
     "name": "ingest-crexi-listings",
     "file": "ingest-crexi-listings.yml",
     "scheduled": true,
@@ -512,26 +482,6 @@
   {
     "name": "FL DBPR contractor licenses monthly",
     "file": "ingest-fl-dbpr-licenses.yml",
-    "scheduled": true,
-    "timeout_minutes": 15,
-    "cancel_in_progress": false,
-    "paid": false,
-    "should_be_dark": false,
-    "disabled": false
-  },
-  {
-    "name": "fred-g17 monthly",
-    "file": "ingest-fred-g17.yml",
-    "scheduled": true,
-    "timeout_minutes": 15,
-    "cancel_in_progress": false,
-    "paid": false,
-    "should_be_dark": false,
-    "disabled": false
-  },
-  {
-    "name": "fred-listing-swfl monthly",
-    "file": "ingest-fred-listing-swfl.yml",
     "scheduled": true,
     "timeout_minutes": 15,
     "cancel_in_progress": false,
