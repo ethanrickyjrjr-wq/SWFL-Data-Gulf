@@ -1,4 +1,26 @@
-## 2026-08-12 (Opus 5) — Graph compartments Step 3 BUILT (report script + standards doc); found graph.json's two-edge-array trap
+## 2026-08-12 (Opus 5) — closed the owed CLAUDE.md row: `graph-compartments.md` is no longer orphaned
+
+The one part the previous entry declared NOT DONE (blocked on session 2b1d04a1's claim on `CLAUDE.md`).
+The claim is gone — working tree clean, in sync with `origin/main` at `68a31d42`. Verified the row was
+still missing before writing it: the only `graph-compartments` hit in `CLAUDE.md` was line 104's handoff
+citation inside RULE 0.5, not a pointer to the standards doc.
+
+**1. Reference-index row added** for `docs/standards/graph-compartments.md`, carrying the three things
+a session needs before it turns a knob: the sweep is exhausted (default wins), singletons are an
+edge-sparsity floor rather than a clustering outcome, and the two-edge-array split (`links` 16.7% vs
+`edges` 19.5% cross-community on the same graph). Numbers copied verbatim from the doc, not re-derived.
+
+**2. Fixed a contradiction inside `CLAUDE.md` while in the file (RULE 0.85).** Its bottom `## graphify`
+section still presented `graphify query|path|explain` as the graph surface — the exact framing RULE 0.5
+calls out as "the wrong surface to name here" ~450 lines above it, since the hosted MCP tools are the
+first reach and the CLI drives the local artifact. A reader landing on the bottom section alone got the
+superseded instruction with no signal it was superseded. That section now states the hosted-MCP-first
+ordering, labels `graphify-out/` a gitignored build product that is stale by definition, and points at
+the standards doc before any clustering change.
+
+No code touched, no scripts changed, nothing added to `package.json`. `graph_compartments_live_verify`
+stays OPEN and unchanged — it asks whether graphify resolves SQL-to-code edges at all, which a
+documentation row does not answer.
 
 Picked up `docs/handoff/2026-08-12-graph-compartments-step2-negative-result.md` §4d, the one part
 that was spec'd but not built. 3 of 3 parts built, 1 follow-on blocked (below).

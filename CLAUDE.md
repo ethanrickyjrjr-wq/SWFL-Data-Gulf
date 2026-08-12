@@ -526,6 +526,7 @@ Locked 07/07/2026 (operator correction — this line previously overclaimed "6-c
 | **★ EMAILS — START AT THE PLAYBOOK. ONE FILE.** | `docs/standards/email-build-playbook.md` — **the ONE map for every email build (operator decree 08/04/2026: "stop fucking reading 6 documents").** PART 0 = the pipe (5 stops) + 3 dials; PART 1 = every universal rule (type scale, 8px grid, 600px canvas, body 50–125 words, chart policy, Outlook/dark-mode/102KB, CAN-SPAM) written out verbatim; PART 2 = jump to YOUR email's section only — its §0.4 table says which of the 17 are walked. Conflict order: code root > playbook > everything else, incl. `emails.md` (older map, kept for §0 research citations) |
 | **Data & Build Bible** | `docs/standards/data-and-build-bible.md` |
 | Infrastructure (13 layers) | `docs/standards/infrastructure-playbook.md` — per-layer status + remediation playbook + what NOT to build; two layers are NO-OP BY DESIGN, don't "fix" them |
+| **Graph compartments — READ BEFORE TURNING A CLUSTERING KNOB** | `docs/standards/graph-compartments.md` — resolution + `--exclude-hubs` are EXHAUSTED (9 measured runs, the default wins); singletons are an edge-sparsity floor, not a clustering outcome; `graph.json` carries TWO edge arrays (`links` = code plane 16.7% cross, `edges` = merged 19.5%) that answer the same question differently. Reproduce with `node scripts/graphify-compartments-report.mjs` |
 | Ontology + roadmap | `docs/ontology-and-roadmap.md` |
 | Data Tier Policy | `docs/API_BLUEPRINTS.md` |
 | Pipeline-freshness | `docs/standards/pipeline-freshness.md` |
@@ -554,10 +555,19 @@ Locked 07/07/2026 (operator correction — this line previously overclaimed "6-c
 
 ## graphify
 
-Graph at `graphify-out/` — gitignored, regenerate with `bun run graphify:update`. Falls back to `Grep`/`Glob`/`Read` if absent.
+**First reach for a structural question is the HOSTED graph's MCP tools (RULE 0.5), not this local
+CLI.** The commands below are the local-artifact surface: use them to REBUILD or inspect
+`graphify-out/`, not as a substitute for `gx_callers` / `gx_impact` / `gx_rank_files`.
+
+Graph at `graphify-out/` — gitignored build product, regenerate with `bun run graphify:update`. Stale
+by definition (nothing rebuilds it on a schedule). Falls back to `Grep`/`Glob`/`Read` if absent.
 
 - `graphify query "<question>"` — scoped subgraph
 - `graphify path "<A>" "<B>"` — relationship
 - `graphify explain "<concept>"` — focused breakdown
+
+**Before changing any clustering parameter, read `docs/standards/graph-compartments.md`** — the knobs
+are exhausted, and `graph.json`'s two edge arrays (`links` vs `edges`) give different cross-community
+percentages for the same graph.
 
 Update / publish / snapshot commands (incl. worktree warm-start): `scripts/CLAUDE.md`.
