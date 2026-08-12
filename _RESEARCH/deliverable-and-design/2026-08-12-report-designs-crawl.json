@@ -1,0 +1,118 @@
+{
+  "sources": [
+    {
+      "label": "Chartr / Sherwood Snacks",
+      "url": "https://sherwood.news/snacks/",
+      "design": {
+        "section_order": ["Snacks Archive", "Recent Newsletters"],
+        "hero_pattern": "Date-stamped headline with emoji icon and punchy title phrase.",
+        "chart_placement": "Not determinable from provided text structure.",
+        "single_focus": true,
+        "cta_text": null,
+        "cta_position": null,
+        "palette_hexes": [],
+        "typography": "Sans-serif, mixed weight with emoji accents creating visual rhythm.",
+        "takeaways": [
+          "Use date stamps with emoji icons to create scannable, personality-driven newsletter archive entries",
+          "Deploy punchy, curiosity-driven headlines (e.g., 'If you haven't looked at Ford lately, look again') as topic anchors",
+          "Stack chronological entries vertically with consistent micro-formatting for fast browsing",
+          "Footer clusters legal/editorial links horizontally for compact information hierarchy"
+        ]
+      }
+    },
+    {
+      "label": "Axios Markets",
+      "url": "https://www.axios.com/newsletters/axios-markets",
+      "error": "step failed for https://www.axios.com/newsletters/axios-markets: Blocked by anti-bot protection: Cloudflare JS challenge"
+    },
+    {
+      "label": "Morning Brew",
+      "url": "https://www.morningbrew.com/daily/issues/latest",
+      "design": {
+        "section_order": [
+          "Markets snapshot",
+          "Lead story: Solar eclipse tourism",
+          "Sponsored content: Miso Robotics",
+          "World headlines roundup",
+          "AI watermarking story",
+          "Sponsored content: State Street",
+          "University grading policy story",
+          "Reader poll",
+          "Sam's stock of the week",
+          "Sponsored content: Mejuri",
+          "Brief news items",
+          "Recs and trivia",
+          "Footer navigation"
+        ],
+        "hero_pattern": "A bold headline with context-setting subheading followed by explanatory body text and supporting details.",
+        "chart_placement": "Market data sits at top in tabular format; featured stories include embedded images placed above or alongside text blocks.",
+        "single_focus": true,
+        "cta_text": "Subscribe / Sign Up",
+        "cta_position": "Header and multiple footer locations",
+        "palette_hexes": [],
+        "typography": "Clean sans-serif with strong weight hierarchy; large bold section headlines contrasting against smaller body text and labels.",
+        "takeaways": [
+          "Lead with high-impact stat or market snapshot in tabular format before diving into narrative stories",
+          "Pair each major story with a single supporting image and keep text scannable with subheadings and bold callouts",
+          "Integrate native sponsored content as full story blocks rather than sidebars, maintaining visual consistency with editorial content",
+          "Conclude with lightweight engagement (polls, trivia, recommendations) to reduce cognitive load and encourage interaction"
+        ]
+      }
+    },
+    {
+      "label": "The Daily Upside",
+      "url": "https://www.thedailyupside.com/",
+      "design": {
+        "section_order": [
+          "Header/Navigation",
+          "Hero Lead Stat",
+          "Primary Articles Grid",
+          "Category-Filtered Content Sections",
+          "Pagination",
+          "Footer/Subscription CTA"
+        ],
+        "hero_pattern": "Single lead statistic paired with a brief headline and accompanying image (e.g., '1 in 5 Financial Advice Seekers Are Turning to AI').",
+        "chart_placement": "No charts visible; articles use thumbnail photography placed left of headline/summary text in card layout.",
+        "single_focus": true,
+        "cta_text": "Subscribe / Get more than news. Get insights.",
+        "cta_position": "Prominent header bar and repeated throughout footer",
+        "palette_hexes": [],
+        "typography": "Sans-serif, moderate weight, clear hierarchy with larger headlines (18-24px) and smaller body text (14-16px) for scanability.",
+        "takeaways": [
+          "Lead story pattern: headline + 1-2 sentence summary + read time + photo creates rapid scanability and encourages clicks",
+          "Grid layout with category tags above headlines enables both browsing and topic-focused reading",
+          "Consistent card design (photo + category label + headline + summary + read time) provides predictable information architecture across 15+ articles",
+          "Multiple CTA placements ('Subscribe', 'Get insights') in header and footer with emphasis on free value proposition builds newsletter conversions"
+        ]
+      }
+    },
+    {
+      "label": "Redfin Data Center",
+      "url": "https://www.redfin.com/news/data-center/",
+      "design": {
+        "section_order": [
+          "Navigation & Header",
+          "Hero/Intro",
+          "Data Center Dashboards",
+          "Individual Data Products",
+          "Footer Navigation",
+          "Regional Search Links",
+          "Legal & Privacy"
+        ],
+        "hero_pattern": "Bold headline introducing downloadable housing market data followed by a single call-to-action button.",
+        "chart_placement": "Charts and data products are presented as individual card/module entries below descriptive text.",
+        "single_focus": true,
+        "cta_text": "Download the data",
+        "cta_position": "Directly below the hero headline",
+        "palette_hexes": [],
+        "typography": "Clean sans-serif with moderate weight contrast between headers and body text; hierarchical sizing from hero to product descriptions.",
+        "takeaways": [
+          "Grid-based product card layout with consistent update cadence shown for each dataset (weekly/monthly/quarterly)",
+          "Modular product cards with title, description, and update frequency stacked vertically for easy scanning",
+          "Extensive regional and category link structure in footer supports SEO and navigation discovery pathways",
+          "Hero section uses directional language ('Explore', 'Download') with minimal friction to primary action"
+        ]
+      }
+    }
+  ]
+}

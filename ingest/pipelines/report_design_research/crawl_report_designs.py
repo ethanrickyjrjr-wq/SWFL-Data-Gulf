@@ -70,7 +70,7 @@ async def _scrape(label: str, url: str) -> str:
     async with Crawl4aiSession(session_id=sid) as sess:
         await sess.step(url, wait_for="css:body", delay_after=3.0)
         # one scroll to trigger lazy content, then capture
-        html = await sess.step("", js_before=_SCROLL_JS, js_only=True, delay_after=2.0)
+        html = await sess.step(url, js_before=_SCROLL_JS, js_only=True, delay_after=2.0)
     soup = BeautifulSoup(html, "html.parser")
     for tag in soup(["script", "style", "noscript"]):
         tag.decompose()

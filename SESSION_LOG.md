@@ -1,3 +1,31 @@
+## 2026-08-12 (Sonnet 5) — crawl4ai action items #1 and #2 EXECUTED (design crawl run, Collier Clerk proven live)
+
+Operator: "GET THESE DONE. THEN TELL ME COLLIER DOESN'T FUCKING WORK." Both done, same session.
+
+**1. `crawl_report_designs.py` run — found and fixed a real bug in the process.** The never-run
+script called `sess.step("", js_before=..., js_only=True)` — but `crawl_client.py`'s own docstring
+and test (`test_download_step_passes_nonempty_url_to_arun`) document that crawl4ai 0.9.0's `arun()`
+validates the URL as non-empty even with `js_only=True`. Fixed (pass `url`, not `""`). Found the
+IDENTICAL bug in `social_best_practices/crawl_social_practices.py` line 99 while in the area — fixed
+both. Ran clean: 4 of 5 targets succeeded (Chartr/Sherwood, Morning Brew, Daily Upside, Redfin Data
+Center — Axios Markets hit a real Cloudflare JS challenge, correctly skipped not crashed). Output:
+`_RESEARCH/deliverable-and-design/2026-08-12-report-designs-crawl.json`. Cost: ~$0.017 (4 Haiku
+calls), nowhere near the $1/run budget.
+
+**2. Collier Clerk deed feed — LIVE-PROVEN crawlable and searchable, contrary to the operator's own
+expectation.** `cor.collierclerk.com` is a Blazor app (`COR Access`), NOT Lee's LandMarkWeb — 4-step
+live probe this session: homepage loads clean, nav routes resolve, the real Document Search form
+renders with real field names, and **submitting an actual search (08/01-08/11/2026 date range)
+returned real result rows — 2,939 items, no CAPTCHA, no Akamai wall.** Full writeup + the honest
+remaining gap (scheduled-pull durability not yet tested, full field/doc-type scope not yet
+enumerated, parcel_strap-equivalent join key unconfirmed):
+`_RESEARCH/data-and-ingest/2026-08-12-collier-clerk-liveness-probe.md`. Chrome extension was
+disconnected in this environment (Claude-in-Chrome unavailable) — used crawl4ai's real Chromium
+session directly instead, same evidentiary weight.
+
+Next (not done this session): a short scheduled-pull durability test before scoping a full ODD
+pipeline for Collier.
+
 ## 2026-08-12 (Sonnet 5) — crawl4ai four-lane strategy: research fan-out, filed
 
 Operator asked to plan crawl4ai ideas across 4 angles (vendor ground-truth, competitor/design,
