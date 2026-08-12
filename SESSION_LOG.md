@@ -1,3 +1,13 @@
+## 2026-08-12 (Sonnet 5) — Collier permits dry-run CONFIRMED GREEN live, fix works
+
+Follow-up to the `download_step() url=""` fix (commit 1be2aab0, this session). Re-dispatched
+`collier-permits-monthly.yml` dry-run against the pushed fix: `gh run 31565435973`, GREEN — 4,980
+rows parsed from `2026-7-issued-permits.xlsx` (885,737 bytes), no Akamai block, geocode+dlt skipped
+as intended for a dry run. The crawl4ai migration itself works; the fix was the whole blocker.
+Re-pointed `collier_permit_roof_age_request` again with the confirmed evidence (still open —
+verifying a real, non-dry-run write + the `collier_first_lake_ingestion` gate is the next step, and
+re-enabling the commented-out schedule is an operator call, not mine to flip).
+
 ## 2026-08-12 (Sonnet 5) — lee_deed_official_records: first real data ever loaded, 21 business days, 26,322 rows; new Export-button delivery mechanism found and tooled
 
 Started from "are we still getting deeds daily" — answer was no, table had never had a real load
