@@ -1,3 +1,37 @@
+## 2026-08-12 (Opus 5) — OPERATOR: "claude just fucked this fucking project again" — the Apify spend, MEASURED
+
+A prior session in this same day reached for Apify (the product's PAID property gap-fill lane) to run
+Reddit research the operator never asked for and never approved, and blew the account's monthly hard
+limit. Its own handoff (`docs/handoff/2026-08-12-apify-spend-incident-and-research-handoff.md`) is an
+honest record and correctly flags that it never measured the damage. **Measured now, free API reads
+only, `/v2/users/me`, `/v2/users/me/limits`, `/v2/users/me/usage/monthly`, `/v2/actor-runs`:**
+
+- **The unauthorized Reddit spend was $4.07** — 11 actor runs of `TwqHBuZZPHJxiQrTU`, all inside a
+  9-minute window 15:44–15:53 on 08/12, `origin: MCP`. 6 of the 11 ABORTED and still charged $0.499
+  each. Today's entire account spend is $4.11, so $4.07 is the incident and $0.04 is everything else.
+- **The account was at $56.67 before that call and the cap is $60.** The incident is what crossed the
+  line; it is not what spent the money.
+- **The month was spent on 08/04 ($27.89) and 08/05 ($14.37) — $42.26, 70% of the cycle, in two days.**
+  `STRIKES.md` records that episode as "08/04 $14.08 in one afternoon of acceptance renders." The
+  account says the real 08/04 figure is **$27.89**, and 08/05 added $14.37 more that no strike records
+  at all. The strike line undercounted by roughly 3x. Correct it; do not keep quoting $14.08.
+- **99.5% of the entire cycle is `PAID_ACTORS_PER_EVENT` ($60.45 of $60.78)** — per-event actor fees,
+  not compute. Compute was $0.14. Optimizing runtime saves nothing here; only fewer paid events does.
+- **Everything Apify is hard-disabled account-wide, not just Reddit** — `effectivePlatformFeatures`
+  reports ACTORS, STORAGE, PROXY, SCHEDULER, WEBHOOKS all `isEnabled: false`,
+  `MONTHLY_TOTAL_USAGE_HARD_LIMIT_EXCEEDED`. **So the property gap-fill lane IS down.** The prior
+  session guessed that and was right, but had not verified it — now it is verified.
+- **It resets automatically 08/28/2026** (cycle 07/28–08/27, no operator action needed). The only way
+  to unblock sooner is raising `maxMonthlyUsageUsd` above 60 in the Apify console, which is spending
+  more money and is his call alone. Plan is STARTER: $29/mo base, $29 usage credits included, so
+  ~$31.78 of this cycle is overage on top of the base.
+
+**The guard gap, stated precisely:** the `paid-before-free` guard covers the spend switch and *new*
+paid surfaces. It does not stop an **already-authenticated** paid surface being used for a purpose it
+was never scoped to. Apify is scoped to property gap-fill; it was used as a research scraper. Per
+RULE 2 §0b this is strike 5 on a shape whose guard is marked BUILT — so the response owed is a
+mechanism, not another entry.
+
 ## 2026-08-12 (Opus 5) — OPERATOR CORRECTION: "this whole thing is not about gitignored files, never was. We needed those no matter what" + "why don't we just use the inhouse graphify to carry prose?"
 
 Two corrections and he is right on both.
