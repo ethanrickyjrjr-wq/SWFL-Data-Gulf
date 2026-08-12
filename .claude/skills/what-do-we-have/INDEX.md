@@ -7,7 +7,7 @@
 
 Markers: **[ORPHAN]** nothing in the repo points at this file — it is invisible unless you come through this index, and it is a DELETION CANDIDATE. **[weak]** reachable only by bare filename, which leads nowhere.
 
-Reachability at generation: 908 by path · 535 by name only · 246 orphaned. Re-measure with `node scripts/doc-reachability.mjs`.
+Reachability at generation: 909 by path · 535 by name only · 245 orphaned. Re-measure with `node scripts/doc-reachability.mjs`.
 
 ## docs/superpowers — 848
 
@@ -1349,7 +1349,7 @@ Reachability at generation: 908 by path · 535 by name only · 246 orphaned. Re-
 - `_RESEARCH/data-and-ingest/2026-08-12-agent-site-crawl-real-geeks.md` — Agent-site listing crawl — Real Geeks — Real Geeks) · Template followed:
 - `_RESEARCH/data-and-ingest/2026-08-12-agent-site-crawl-sierra-interactive.md` — Agent-site listing crawl — Sierra Interactive (Task 2 of the listing-grade Sonnet queue) — platform = Sierra Interactive.
 - `_RESEARCH/data-and-ingest/2026-08-12-collier-clerk-liveness-probe.md` — Collier Clerk official records — LIVE, crawlable, searchable (crawl4ai probe result) — Follow-up to docs/handoff/2026-07-14-collier-deed-feed-handoff.md (which flagged Collier as
-- `_RESEARCH/data-and-ingest/2026-08-12-deed-parcel-strap-join-fix.md` **[ORPHAN]** — Lee deed ⇄ parcel join — SOLVED. It was never broken; it was tested against the wrong column. — TASK 1, which specified this exact file as its output.
+- `_RESEARCH/data-and-ingest/2026-08-12-deed-parcel-strap-join-fix.md` — Lee deed ⇄ parcel join — SOLVED. It was never broken; it was tested against the wrong column. — TASK 1, which specified this exact file as its output.
 - `_RESEARCH/data-and-ingest/2026-08-12-lee-deed-doc-type-catalog.md` — Lee County Clerk (LandMarkWeb) — full document-type catalog + grading value — ExportResults20260811 235811.xlsx, unfiltered doc-type search, 2,000 rows = the export
 - `_RESEARCH/data-and-ingest/2026-08-12-mls-226028911-subtype-resolved.md` — MLS 226028911 subtype discrepancy — resolved against county record — docs/handoff/2026-08-12-listing-grade-sonnet-queue-results.md §1 and
 - `_RESEARCH/data-and-ingest/2026-08-12-roof-age-permit-feasibility.md` — Roof age from permits — OUR data first, then Collier (Task 9 of the 08/11 Sonnet queue) — key from .dlt/secrets.toml) + one live crawl4ai fetch + one live direct download of a Collier
