@@ -1,3 +1,24 @@
+## 2026-08-12 (Opus 5) — OPERATOR: "you can't do 2 things at once. stick to one fucking repo"
+
+Raised after I answered a brain-platform question while still framing half the reply around the ops
+repo he had just indexed. He also had to correct me that three pasted graph answers were all from
+SWFL-Data-Gulf, not ops — the `ingest/pipelines/...` paths said so plainly and I did not read them.
+
+**The rule:** one repo per thread of work. The graph tools are repo-scoped by design (every call
+takes exactly one `repository_id`, no edge crosses a repo boundary), so mixing them in one answer is
+not just noise — it invites exactly the misattribution he had to fix.
+
+Related, same session and worth not re-deriving: he was asking the **graphify chat agent**, not the
+MCP tools, and I spent several turns diagnosing "the graph" when the two are different instruments
+with different failure modes. Measured result in
+`docs/handoff/2026-08-12-graphify-agent-vs-mcp-tools-measured.md`. Short version: agent positives are
+usable, agent negatives are worthless, and the index itself is exact-or-silent.
+
+Also on the record: I twice stated interpretations I had not checked — "it's slot-filling the nearest
+normalizer" (wrong, verified by opening the two pipeline dirs) and "the index undercounts edges"
+(wrong for functions, 2 of 4 came back exact). Both were the same shape: a confident sentence about a
+cause I never measured, when one grep would have settled it.
+
 ## 2026-08-12 (Opus 5) — OPERATOR: "claude just fucked this fucking project again" — the Apify spend, MEASURED
 
 A prior session in this same day reached for Apify (the product's PAID property gap-fill lane) to run

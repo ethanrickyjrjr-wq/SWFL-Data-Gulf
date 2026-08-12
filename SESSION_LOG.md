@@ -1,3 +1,34 @@
+## 2026-08-12 (Opus 5) — graphify: the CHAT AGENT and the MCP TOOLS measured separately. Index exact-or-silent; agent overclaims negatives.
+
+Operator pasted graph answers all session and asked "are we talking about the same thing?" We were
+not. Four symbols measured three ways — tree-wide grep, `gx_callers` against the hosted index, and
+what the vendor's chat agent had said. Handoff:
+`docs/handoff/2026-08-12-graphify-agent-vs-mcp-tools-measured.md`.
+
+- **Index exact on 2 of 4:** `normalize_result_row` 4/4 (incl. production caller `providers.py:113`),
+  `is_swfl_relevant` 2/2 **including the cross-file edge** at `fetcher.py:108` — which kills the
+  guess that file distance is the weak axis.
+- **Two false negatives, neither a freshness artifact:** `reportToEmailHtml` returns `n:0` while six
+  call sites sit in `render.test.ts` (first seen 08/11, REPRODUCED live today at build `998f2531` /
+  commit `2410f795`); `OPS_TARGET` returns empty callers+callees while `writeFileSync(OPS_TARGET,…)`
+  is at L193 of the same file. Pushed blob `f9b851d5` is byte-identical to the working tree, so the
+  extractor saw the line and made no edge. **Exact when it answers, silent when it fails, never
+  over-reports.**
+- **The chat agent is a separate, worse instrument.** Never fabricated a symbol — every name/file it
+  gave was real — but said "no callers" once and "one caller" twice against index truth of 2 and 4,
+  writing complete-sounding negatives over a partial slice. **Positives usable, negatives worthless.**
+- Corrected two of my own claims in-session: the agent was NOT "slot-filling" (it named the right
+  symbols; verified by opening both pipeline dirs), and the index does NOT undercount generally.
+- Also traced end to end for the first time: local `graphify-out/graph.json` → `graphify-publish.mjs`
+  L193 → ops `app/graph/brain-graph.json` → ops `app/graph/page.tsx` (react-force-graph). Confirmed
+  live: ops file is 430,765 bytes with a daily republish commit, today's at 08:52 UTC.
+- Hosted index reindexed TWICE during the session (`2e0f6087` → `2410f795`). Cadence is not ours.
+
+**Owed, in the handoff §7:** `graph-compartments.md` §6b still overclaims and was BLOCKED — the file
+was claimed by another live session and not overridden (check `graph_compartments_6b_correction`);
+RULE 0.5's pending amendment must not ship without the never-trust-a-negative caveat; five
+`.claude/worktrees/wf_*` full tree copies remain, operator decision needed.
+
 ## 2026-08-12 (Sonnet 5) — wf-78 (Stripe) landed too — all 5 salvage worktrees resolved
 
 Follow-up to the entry below (same session). Operator confirmed the retry-refinement approach for
