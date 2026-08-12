@@ -1,3 +1,13 @@
+## 2026-08-12 (Sonnet 5) — collier_first_lake_ingestion gate CLEARED — geocoder fix confirmed live
+
+Follow-up to the geocoder timeout fix (bba5ca43). Re-ran the real ingestion (`gh run 31567459230`,
+green) against the fix. Verified directly against `data_lake.collier_building_permits`: July's
+geocode fill recovered from 0/4,886 to 2,311/4,886 (47.3%), now matching April's baseline (2,238/
+4,831 = 46.3%) almost exactly — confirms the fix, not a fluke. Both conditions the workflow's
+held-schedule comment named are now genuinely met (dry-run green + a real live run confirmed clean).
+Re-pointed `collier_permit_roof_age_request` a final time with this evidence — left OPEN, since
+re-enabling the commented-out cron in `collier-permits-monthly.yml` is the operator's call.
+
 ## 2026-08-12 (Sonnet 5) — Collier permits real ingestion ran; found+fixed a THIRD bug (geocoder silently drops a whole batch on timeout)
 
 Operator: "let's see if we can get [the collier_first_lake_ingestion gate to clear]." Ran the real
