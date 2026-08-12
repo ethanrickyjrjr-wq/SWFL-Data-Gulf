@@ -9070,3 +9070,33 @@ test, claim refreshed mid-work. Did not override. Still standing on that file:
 NOT DONE: Windows/POSIX hook-path class -> `docs/cron-rebuild-failures.md`; signal backfill
 on the 100 verify-class checks; absolute-claim lint. Also found: `.github/scripts/heal-cron-failure.mjs`
 reads `FIRECRAWL_API_KEY` — we do not use Firecrawl (crawl4ai only). Dead or wrong.
+
+## 2026-08-12 (Sonnet 5) — OPERATOR: real editorial preference on Open House narrator prose — specific/enumerated beats generic filler
+Comparing two live-generated Open House invitation paragraphs (same address, 9340 Vittoria Ct):
+GOOD: "The outdoor living space — pool, spa, fire features, covered lanai — all looking out over
+the golf course is something you really have to see in person." (specific, enumerates real features)
+SUCKS: "The golf course views from the lanai are something else." (generic AI-cliché filler —
+"is something else" states nothing). Both were real Sonnet calls off the same real description,
+not hand-written. Open item: `open-house.ts`'s narrator prompt (`authorListingNarrative`,
+`invitation: true` framing block) has no guard against generic/vague closers like "is something
+else" — worth a banned-phrase check alongside the existing claim gate, same family as other
+recipes' cliché guards. Not fixed this session — flagging for whoever picks this up.
+
+## 2026-08-12 (Sonnet 5) — OPERATOR: Open House real requirements list — this recipe was never actually walked
+Verbatim acknowledgment: "i guess we didn't walk this fully :)" — confirms Open House (§2.6) needs
+a real walk, not just the bugfix this session did. Requirements stated, none built yet:
+1. Open house date/time must be captured BEFORE build (currently only reachable via CLI args on
+   the acceptance script — no UI path prompts for it pre-build).
+2. Move RSVP button to sit beside the date/time card, on its right (currently a separate button
+   block elsewhere in the layout — see dateTimeCard() in open-house.ts:124).
+3. Bottom button destination, FOR NOW: the realtor.com listing link ("More about this property").
+   Ties into button_destinations gap found earlier this session (never wired into
+   PROJECT_CARRY_KEYS in lib/brand/profile-ledger.ts — real decreed feature, silently dropped
+   on account→project carry).
+4. UNRESOLVED, operator's own words "we have to figure out": what does the RSVP button actually
+   DO — what does it supply to the person who clicks (confirmation? add-to-calendar? a form?) and
+   to the person who sent it (a notification? a lead capture?). No data model decided yet.
+5. Operator also raised, unresolved: why does the narrator have to be this constrained — asked
+   directly whether loosening AI's latitude here is worth exploring. Not answered by fiat this
+   session, needs its own real conversation.
+Not built this session — logged so the next session doesn't re-derive it from scratch.
