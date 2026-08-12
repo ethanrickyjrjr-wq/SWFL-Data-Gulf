@@ -164,6 +164,24 @@
             "command": "node .claude/hooks/check-no-apify-actor-run.mjs"
           }
         ]
+      },
+      {
+        "matcher": "Bash|Grep",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "C:/Users/ethan/AppData/Local/Python/pythoncore-3.14-64/Scripts/graphify.EXE hook-guard search"
+          }
+        ]
+      },
+      {
+        "matcher": "Read|Glob",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "C:/Users/ethan/AppData/Local/Python/pythoncore-3.14-64/Scripts/graphify.EXE hook-guard read"
+          }
+        ]
       }
     ],
     "PostToolUse": [

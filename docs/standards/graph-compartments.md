@@ -169,6 +169,58 @@ descendant of `0daaaffb`, then check that a term unique to an ignored file (a di
 
 ---
 
+## 6b. A MISSING EDGE IS NOT A MISSING RELATIONSHIP — the singleton floor, felt at the answer layer
+
+§2/§4's singleton count (1,270 pre-SQL, 1,434 post) is not just a clustering statistic. It is the
+reason the graph will confidently tell you two things are unrelated when the code wires them
+together on one line.
+
+**Measured 08/12/2026, the worked example.** Asked whether `scripts/graphify-publish.mjs` connects
+the local graph to the ops repo's `brain-graph.json`, the hosted index answered that the two are
+"independently produced" with "no call, import, or write relationship" and "no traced edge." The
+file itself:
+
+    L102  const graph  = JSON.parse(readFileSync(GRAPH_PATH, "utf8"));
+    L192  const output = { nodes: outNodes, edges: outEdges };
+    L193  writeFileSync(OPS_TARGET, JSON.stringify(output, null, 2));
+
+It is a straight pipe, stated in the file's own header comment at L4-13. `gx_node('OPS_TARGET')`
+returns `callees: []`, `callers: []`, and exactly one `contains` edge from the file — a module-level
+const indexed as an isolated node, with the `writeFileSync` at L193 never resolved as an edge to it.
+The graph was reporting its own index truthfully and the code relationship wrongly.
+
+**The rule that follows:** the graph is authoritative on *what exists* (§RULE 0.5's unknown-unknown
+case — it finds nodes grep would never have been asked for). It is NOT authoritative on *what does
+not connect*. Module-level consts, config objects, and path literals are exactly the node class that
+lands in the singleton floor, so a data-FLOW question ("does A feed B?") answered "no edge found"
+must be confirmed by reading the file before it is repeated. Absence of an edge is evidence about
+the index, not about the code — the same shape as a `Grep` miss on a gitignored file (RULE 0.95).
+
+**The innocent explanation is ruled out.** The indexed content was not stale or different: the
+pushed blob for `scripts/graphify-publish.mjs` is `f9b851d5`, 8,341 bytes — byte-identical to the
+working tree (`git hash-object`). The extractor saw line 193 and did not produce the edge.
+
+**How often this can bite, in one number.** The 08/11/2026 measurement of the then-unscoped graph
+(`_RESEARCH/agent-behavior/2026-08-11-graphify-community-structure-crawl4ai-research.md`, PART 3)
+found **2,093 connected components, with the largest holding only 51.1% of nodes** — plus 308
+degree-0 nodes. Roughly half the graph was not edge-reachable from the other half. That is the
+structural reason a negative edge answer is untrustworthy, and it is a bigger effect than the
+singleton count alone suggests. (Measured pre-`.graphifyignore` on 48,777 nodes; re-measure with
+`node scripts/graphify-compartments-report.mjs` before quoting it as current.)
+
+**Generalize by code SHAPE, not by file.** `graphify-publish.mjs` declares only three functions
+(`nodeColor` L54, `transformNode` L65, `transformEdge` L84); everything else is top-level module
+code, and the one call edge the index holds for the whole file is `transformNode → nodeColor`. That
+is the shape the extractor handles worst — a script whose real work happens at module scope rather
+than inside functions. Our `scripts/` tree is largely that shape, so treat graph answers about
+`scripts/*.mjs` data flow as the weakest case, not a typical one.
+
+Falsifier for this section: a rebuild in which `gx_node('OPS_TARGET')` returns a non-empty
+`callers`/`callees`. That would mean the extractor started resolving const-to-callsite edges and
+this caveat can be narrowed.
+
+---
+
 ## 7. Reproduce
 
     graphify update . --force                            # --force mandatory, see 2.3
