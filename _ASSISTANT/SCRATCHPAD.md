@@ -1,3 +1,32 @@
+## 2026-08-11 (Sonnet 5) — LIVE VERIFIED, spend authorized: the exact Nashville test now builds real, end to end
+
+Operator authorized spend to settle this for real, not from more code tracing. Ran `bun run dev`
+with `OPERATOR_APPROVED_PAID_RUN=1` armed for the process, drove the real /go door in a live
+browser (chrome-devtools MCP — claude-in-chrome extension wasn't connected), typed the SAME address
+`_GO/HANDOFF.md` used (4400 Belmont Park Terrace, Nashville, TN 37215), picked New Listing.
+
+**Result: a complete, correctly sourced flyer.** Real price $699,900, 2 bed / 2.5 bath / 1,800 sq ft
+/ 0.02 ac lot / $389 per sq ft / 20 DOM, a full MLS-style description, hero photo mirrored to our
+own Supabase storage, sourced back to the live realtor.com listing, built 1973, HOA $535/mo,
+Townhouse. `POST /api/email-lab/ai` took 9.5s server-side — consistent with a real outbound vendor
+call, not a cache hit. Screenshot saved (not sent, internal proof):
+`C:\Users\ethan\AppData\Local\Temp\claude\...\scratchpad\go-verify-nashville-build.png`.
+
+**This closes the mechanism question for good.** Same code, same address, only variable changed
+was the spend switch — empty before, fully real after. `go_apify_spend_model_undecided` stays OPEN:
+this proves the pipe works, it does not answer how a live /go product authorizes this spend on every
+real visitor's request instead of a developer's manual env flag.
+
+**Side finding, not yet a check:** arrival did NOT render blank — the build auto-fired the instant
+the recipe was picked, before any "Build the email" click. That contradicts the carve-out handoff
+§4's locked "first landing renders BLANK" requirement. Not filed as a check yet because the result
+here was a GOOD real build, not the broken placeholder skeleton the operator originally described —
+worth a decision (should arrival auto-build or wait for a click?) before the new project locks its
+own behavior, but it is not on fire the way the spend model is.
+
+Dev server stopped after the test (PID 37556 + launcher 62972) — the paid lane does not stay armed
+between sessions.
+
 ## 2026-08-11 (Sonnet 5) — /go carve-out follow-up: the "empty build" bug is not a bug, it's the spend guard doing its job — and that breaks the whole /go plan as designed
 
 Operator: "we need it all one way. The right way. Which was confirmed to be right for all new
