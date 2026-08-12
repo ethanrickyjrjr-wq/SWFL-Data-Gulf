@@ -34,6 +34,7 @@ import {
   schemeHasColor,
   schemesEqual,
 } from "@/lib/brand/palette";
+import { resolveBrandGlobalSave } from "@/lib/brand/global-save-message";
 import { ConnectMcpBlock } from "./workspace/ConnectMcpBlock";
 import { ThisWeek } from "./workspace/ThisWeek";
 import type { ThisWeekState } from "@/lib/project/this-week";
@@ -406,15 +407,23 @@ export function ProjectWorkspace({
       ];
       setPalettes(nextPalettes);
     }
-    // Fire the user-level brand save in parallel — best-effort (failure is silent;
-    // the project save is the authoritative gate for the OK/close signal). Sends
-    // the agent + color fields (in `branding`) plus the palette library.
-    void fetch("/api/user/brand", {
-      method: "PATCH",
-      headers: { "content-type": "application/json" },
-      body: JSON.stringify({ ...branding, color_palettes: nextPalettes }),
+    // Fire the user-level brand save in parallel — the project save stays the
+    // authoritative gate for the OK/close signal (best-effort: never blocks or
+    // reverts the project save). But a failure here is no longer silent — see
+    // resolveBrandGlobalSave (branding_global_save_ux). Sends the agent + color
+    // fields (in `branding`) plus the palette library.
+    return resolveBrandGlobalSave({
+      saveProject: () => patch({ branding }, "Branding saved"),
+      syncAccount: () =>
+        fetch("/api/user/brand", {
+          method: "PATCH",
+          headers: { "content-type": "application/json" },
+          body: JSON.stringify({ ...branding, color_palettes: nextPalettes }),
+        })
+          .then((res) => res.ok)
+          .catch(() => false),
+      setMessage: setSavedMsg,
     });
-    return patch({ branding }, "Branding saved");
   }
 
   async function saveBrandProjectOnly(): Promise<boolean> {
