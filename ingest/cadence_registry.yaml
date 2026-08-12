@@ -1042,6 +1042,7 @@ pipelines:
   - name: collier_official_records
     workflow: ingest-collier-official-records.yml
     consuming_pack: collier-official-records-swfl
+    raw_landing_class: scrape_fragile # crawl4ai-driven Kendo/Blazor grid scrape -- a markup change breaks the parser, free to re-fetch (public records, no vendor cost) but not resilient by construction
     lane: tier-2
     cadence_days: 1
     tolerance_multiplier: 3.0 # brand-new source, no durability track record yet — generous floor
