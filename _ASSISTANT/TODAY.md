@@ -92,7 +92,7 @@
 - [google_oauth_brand_verification_live] Google OAuth brand verification passes after og:site_name + JSON-LD deploy — operator clicks Verify; add hero naming-line if describe-purpose still trips (due 2026-07-19)
 
 ## Last Session
-- 2026-08-11 (Opus 5) — graphify compartments: research + spec + plan written, NOTHING built, nothing pushed
+- 2026-08-12 (Sonnet 5) — Listing Grade: ran the full 9-task Sonnet work queue, headline finding is roof age is FREE and already landed
 
 ## Spec Health
 - 301 specs total · 0 candidates for archive

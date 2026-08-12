@@ -10,7 +10,9 @@ const {
   aggregateZipRollupTop6,
   aggregateStormTotalsLive,
   AAL_WINDOW_YEARS,
-  INSURED_PENETRATION_FACTOR,
+  INSURED_PENETRATION_FACTOR_BY_COUNTY,
+  INSURED_PENETRATION_RATE_AS_OF,
+  penetrationFactorFor,
   ZIP_POPULATION_2020,
   SWFL_ZIP_POPULATION_DEFAULT,
 } = await import("./fema-nfip-source.mts");
@@ -223,6 +225,27 @@ test("assertClaimsNonEmpty is a no-op on non-empty input", async () => {
 });
 
 // ---------------------------------------------------------------------
+// INSURED_PENETRATION_FACTOR_BY_COUNTY — v2 real per-county NFIP penetration
+// rates (replaces the v1 flat 0.30 NSI-proxy guess). Sourced live from
+// https://www.fema.gov/api/open/v1/NfipResidentialPenetrationRates
+// (fipsCode eq '12071'/'12021'/'12051'), data as-of 2026-08-03.
+// ---------------------------------------------------------------------
+
+test("INSURED_PENETRATION_FACTOR_BY_COUNTY carries the real FEMA-measured rate for all 3 SWFL core counties", () => {
+  assert.equal(INSURED_PENETRATION_FACTOR_BY_COUNTY.get("12071"), 0.2425, "Lee");
+  assert.equal(INSURED_PENETRATION_FACTOR_BY_COUNTY.get("12021"), 0.2955, "Collier");
+  assert.equal(INSURED_PENETRATION_FACTOR_BY_COUNTY.get("12051"), 0.044, "Hendry");
+  assert.equal(INSURED_PENETRATION_RATE_AS_OF, "2026-08-03");
+});
+
+test("penetrationFactorFor throws on a county not in the SWFL core set rather than silently defaulting", () => {
+  assert.throws(
+    () => penetrationFactorFor("12086"), // Miami-Dade — out of scope
+    /no NFIP penetration rate for county_code=12086/,
+  );
+});
+
+// ---------------------------------------------------------------------
 // NfipZipAggregate — per-ZIP AAL$/yr per insured property, top-6 rollup.
 // Group B Step 2 of docs/superpowers/plans/2026-05-19-env-swfl-flood-restructure.md.
 // ---------------------------------------------------------------------
@@ -395,14 +418,15 @@ test("aggregateZipRollupTop6 callable directly with synthetic ClaimRow[] — unk
   const unknown = out.find((a) => a.zip === "33555");
   assert.ok(known, "known ZIP 33931 should be in output");
   assert.ok(unknown, "unknown ZIP 33555 should be in output (no silent drop)");
-  // Known ZIP uses table population.
-  const expectedKnownDenom = (ZIP_POPULATION_2020.get("33931") ?? 0) * INSURED_PENETRATION_FACTOR;
+  // Known ZIP uses table population. Both synthetic rows are Lee County (12071).
+  const leeFactor = INSURED_PENETRATION_FACTOR_BY_COUNTY.get("12071")!;
+  const expectedKnownDenom = (ZIP_POPULATION_2020.get("33931") ?? 0) * leeFactor;
   assert.ok(
     Math.abs(known!.insured_denominator - expectedKnownDenom) < 0.01,
     `known ZIP denom should be ${expectedKnownDenom}, got ${known!.insured_denominator}`,
   );
   // Unknown ZIP uses fallback.
-  const expectedUnknownDenom = SWFL_ZIP_POPULATION_DEFAULT * INSURED_PENETRATION_FACTOR;
+  const expectedUnknownDenom = SWFL_ZIP_POPULATION_DEFAULT * leeFactor;
   assert.ok(
     Math.abs(unknown!.insured_denominator - expectedUnknownDenom) < 0.01,
     `unknown ZIP denom should be ${expectedUnknownDenom}, got ${unknown!.insured_denominator}`,

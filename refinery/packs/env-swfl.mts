@@ -20,7 +20,8 @@ import {
   SWFL_STORM_YEARS_LAST_REVIEWED,
   HELENE_MILTON_SPLIT_DATE,
   AAL_WINDOW_YEARS,
-  INSURED_PENETRATION_FACTOR,
+  INSURED_PENETRATION_FACTOR_BY_COUNTY,
+  INSURED_PENETRATION_RATE_AS_OF,
   type NfipSwflAggregate,
   type NfipZipAggregate,
   type NfipZipWindowFull,
@@ -1082,8 +1083,10 @@ function envSwflOutputProducer(_out: PackOutput): BrainOutputProducerResult {
     );
   }
   if (snapshot.zipAggregates.length > 0) {
+    const pct = (fips: string) =>
+      `${(INSURED_PENETRATION_FACTOR_BY_COUNTY.get(fips)! * 100).toFixed(1)}%`;
     caveats.push(
-      `Per-ZIP AAL denominator uses 2020 ACS population × ${INSURED_PENETRATION_FACTOR} NSI-coverage proxy for insured-property count (v1). Replace with the live OpenFEMA NFIP Policies insured count in v2 before treating per-ZIP magnitudes as policy-grade — current numbers compress toward each other when actual NFIP penetration in a ZIP diverges from the 30% proxy.`,
+      `Per-ZIP AAL denominator uses 2020 ACS population × each ZIP's county's real FEMA NFIP residential penetration rate (v2, as of ${INSURED_PENETRATION_RATE_AS_OF}) — Lee ${pct("12071")}, Collier ${pct("12021")}, Hendry ${pct("12051")}. Rates refresh quarterly at FEMA; re-pull before a build if this snapshot predates the current quarter.`,
     );
   }
   if (snapshot.hydro && snapshot.hydro.sw_stage_caloosahatchee_ft !== null) {
@@ -1195,7 +1198,8 @@ function envSwflOutputProducer(_out: PackOutput): BrainOutputProducerResult {
         citation:
           `OpenFEMA FimaNfipClaims via data_lake.fema_nfip_claims — every SWFL ZIP with ≥1 ` +
           `claim in the ${AAL_WINDOW_YEARS}-year rolling window; per-insured-property AAL, ` +
-          `2020 ACS population × ${INSURED_PENETRATION_FACTOR} NSI proxy denominator (v1).`,
+          `2020 ACS population × county-measured FEMA NFIP residential penetration rate ` +
+          `(v2, as of ${INSURED_PENETRATION_RATE_AS_OF}) denominator.`,
       },
       note: "NFIP policyholder claims only — uninsured flood loss is not in the archive. Percentile rank is across all SWFL ZIPs with ≥1 claim in window.",
     });

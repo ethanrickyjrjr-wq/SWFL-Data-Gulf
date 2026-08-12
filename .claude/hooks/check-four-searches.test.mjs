@@ -379,3 +379,91 @@ describe("graph-first gate", () => {
     assert.deepStrictEqual(missingLanes([GRAPH_CALL]), ["research", "catalog", "live"]);
   });
 });
+
+// ─────────────────────────────────────────────────────────────────────────────
+// THE INSTALLED VENDOR SURFACE — added 08/12/2026.
+//
+// The live matcher credited crawl4ai, curl, a URL, and Bun.SQL, but had no notion of
+// "run the installed binary and read what it really does." So on 08/11/2026 a session
+// that probed the graphify CLI directly — and found two of its three tuning flags
+// UNDOCUMENTED on graphify.com, a finding only the installed artifact could produce —
+// scored zero on the lane that finding belongs to, and the gate fired four times.
+//
+// This is defect (a) — UNDER-CREDIT, the repo's own canonical probe path scoring nothing
+// — for the third time in this file, after the graphify-CLI miss and the psql/Bun.SQL
+// miss documented directly above the arm this pass extends.
+//
+// THE LINE, and it is a fine one: using an installed tool to search OUR TREE is the CODE
+// lane; asking that tool what IT is, or reading it as shipped, is the LIVE lane. RULE 0.4
+// is why — "the plan says X" and "I remember X" are not verification, and neither is a
+// vendor's own docs page when the installed artifact disagrees with it.
+// ─────────────────────────────────────────────────────────────────────────────
+describe("installed vendor surface — the live lane", () => {
+  test("FM: reading the installed package as shipped is a LIVE probe, not nothing", () => {
+    // The 08/11/2026 finding came from this exact call and it earned no lane at all:
+    // `Read` matches neither the research arm (not _RESEARCH/docs) nor searchesTheTree.
+    assert.strictEqual(
+      laneFor("Read", {
+        file_path: "C:/Users/ethan/crawl4ai-venv/Lib/site-packages/graphify/cli.py",
+      }),
+      "live",
+    );
+    assert.strictEqual(
+      laneFor("Read", { file_path: "node_modules/resend/dist/index.d.ts" }),
+      "live",
+    );
+    // Windows separators — the box this runs on.
+    assert.strictEqual(
+      laneFor("Read", {
+        file_path: "C:\\Users\\ethan\\dev\\brain-platform\\node_modules\\dlt\\x.py",
+      }),
+      "live",
+    );
+  });
+
+  test("FM: a vendor's OWN docs dir must not be eaten by the research lane", () => {
+    // Ordering guard. The research arm matches any path containing `docs/`, so
+    // node_modules/**/docs/** would score "research" — our writing — when it is in fact
+    // the vendor's shipped text. The installed-package arm has to run FIRST.
+    assert.strictEqual(laneFor("Read", { file_path: "node_modules/eve/docs/README.md" }), "live");
+  });
+
+  test("FM: asking a binary what it is counts as LIVE", () => {
+    assert.strictEqual(laneFor("Bash", { command: "graphify --help" }), "live");
+    assert.strictEqual(laneFor("Bash", { command: "gh --version" }), "live");
+    assert.strictEqual(
+      laneFor("Bash", {
+        command:
+          'C:\\Users\\ethan\\crawl4ai-venv\\Scripts\\python.exe -c "import crawl4ai; print(crawl4ai.__version__)"',
+      }),
+      "live",
+    );
+    assert.strictEqual(laneFor("Bash", { command: "pip show crawl4ai" }), "live");
+  });
+
+  test("THE LINE: `graphify query` is CODE, `graphify --help` is LIVE", () => {
+    // A derived index OF OUR TREE cannot satisfy the lane whose whole point is "a
+    // parser's shape is not the source's shape" — but the CLI's own contract can. This
+    // distinction is subtle enough to get collapsed by the next session; both halves are
+    // asserted together so collapsing either one reddens here.
+    assert.strictEqual(laneFor("Bash", { command: 'graphify query "sale dates"' }), "code");
+    assert.strictEqual(laneFor("Bash", { command: "graphify --help" }), "live");
+    assert.notStrictEqual(laneFor("mcp__graphify__query_graph", { query: "x" }), "live");
+  });
+
+  test("FM: defect (b) in the new lane — a search tool's own flags are not a probe", () => {
+    // If `--help|--version` alone earned LIVE, then `rg --version` would satisfy the lane
+    // that exists to force a real source read. Search binaries are excluded by name, the
+    // same exclusion `isGraphProbe` already draws for the decoy-Grep shape.
+    assert.strictEqual(laneFor("Bash", { command: "rg --version" }), "code");
+    assert.strictEqual(laneFor("Bash", { command: "grep --help" }), "code");
+  });
+
+  test("FM: ordinary flags are not contract probes — `-h` and `-v` stay out", () => {
+    // `du -h`, `sort -h`, `curl -v` are everyday usage. Crediting short flags would make
+    // the lane satisfiable by accident, which is how a gate stops meaning anything.
+    assert.strictEqual(laneFor("Bash", { command: "du -h ." }), null);
+    assert.strictEqual(laneFor("Bash", { command: "bun test lib/assistant" }), null);
+    assert.strictEqual(laneFor("Edit", { file_path: "node_modules/x/y.js" }), null);
+  });
+});

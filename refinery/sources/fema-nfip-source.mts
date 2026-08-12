@@ -140,14 +140,25 @@ const STORM_CLAIM_COLUMNS =
  *
  * AAL = sum(paid B+C+ICO over the last AAL_WINDOW_YEARS calendar years) /
  *       AAL_WINDOW_YEARS / insured_denominator(zip).
- * insured_denominator(zip) = ZIP_POPULATION_2020[zip] * INSURED_PENETRATION_FACTOR.
+ * insured_denominator(zip) = ZIP_POPULATION_2020[zip] * penetrationFactorFor(zip's county).
  *
- * The 0.30 penetration factor is the NSI (National Structure Inventory) proxy
- * for NFIP coverage rate — replaced in v2 with the live OpenFEMA NFIP Policies
- * insured-property count. Population estimates are 2020 ACS rounded to the
- * nearest 1000. Unknown ZIPs fall back to SWFL_ZIP_POPULATION_DEFAULT and the
- * fragment's insured_denominator_basis surfaces "ZIP not in coverage table"
- * so downstream caveats can flag the gap.
+ * v2 (2026-08-12): the 0.30 flat guess is retired. Denominator now uses each
+ * ZIP's COUNTY's real measured NFIP residential penetration rate — FEMA's
+ * "NFIP Residential Penetration Rates" OpenFEMA dataset (contracts-in-force /
+ * total residential structures), pulled live via
+ * https://www.fema.gov/api/open/v1/NfipResidentialPenetrationRates
+ * (data as-of 2026-08-03, dataset refreshed 2026-08-04, quarterly cadence).
+ * Research trail: _RESEARCH/email-and-social/2026-08-11-freakonomics-research-
+ * targets-crawl4ai-results.md Priority 2. The flat 0.30 guess overstated Lee's
+ * real rate (24.25%) by ~6 points and was off by >5x for Hendry (4.4%) — see
+ * INSURED_PENETRATION_FACTOR_BY_COUNTY below. This is a hardcoded snapshot
+ * (like ZIP_POPULATION_2020 below), not a live ingest pipeline — re-pull the
+ * three rates from the API above if this file predates a new FEMA quarter.
+ *
+ * Population estimates are 2020 ACS rounded to the nearest 1000. Unknown ZIPs
+ * fall back to SWFL_ZIP_POPULATION_DEFAULT and the fragment's
+ * insured_denominator_basis surfaces "ZIP not in coverage table" so downstream
+ * caveats can flag the gap.
  *
  * The barrier-island classification table in refinery/lib/swfl-geo.mts carries
  * the same population estimate for the 12 classified ZIPs; this map exists as
@@ -155,7 +166,25 @@ const STORM_CLAIM_COLUMNS =
  * archive ZIPs frequently sit outside the barrier-island sub-table).
  */
 export const AAL_WINDOW_YEARS = 10;
-export const INSURED_PENETRATION_FACTOR = 0.3;
+export const INSURED_PENETRATION_RATE_AS_OF = "2026-08-03";
+/** county FIPS → resPenetrationRate (contracts-in-force / total residential structures). */
+export const INSURED_PENETRATION_FACTOR_BY_COUNTY: ReadonlyMap<string, number> = new Map([
+  ["12071", 0.2425], // Lee — 84,120 / 346,951
+  ["12021", 0.2955], // Collier — 51,467 / 174,174
+  ["12051", 0.044], // Hendry — 657 / 14,936
+]);
+/** Looks up a SWFL core county's real NFIP penetration rate. Throws rather than
+ *  silently defaulting — every caller filters to SWFL_FIPS first, so a miss
+ *  here means a county leaked past that filter, not a genuine gap to paper over. */
+export function penetrationFactorFor(countyCode: string): number {
+  const rate = INSURED_PENETRATION_FACTOR_BY_COUNTY.get(countyCode);
+  if (rate == null) {
+    throw new Error(
+      `fema-nfip-source: no NFIP penetration rate for county_code=${countyCode} — expected one of ${SWFL_FIPS.join(",")}`,
+    );
+  }
+  return rate;
+}
 export const SWFL_ZIP_POPULATION_DEFAULT = 25000;
 export const ZIP_POPULATION_2020: ReadonlyMap<string, number> = new Map([
   // Classified by swfl-geo (12 ZIPs) — same population estimates kept in sync.
@@ -622,11 +651,14 @@ export function aggregateZipRollupTop6(rows: ClaimRow[], topN: number = 6): Nfip
     const paid = bucket.reduce((s, r) => s + paidTotal(r), 0);
     const bvs = bucket.map((r) => toNum(r.building_property_value)).filter((v) => v > 0);
     const medianBV = median(bvs);
+    const county_code = bucket[0].county_code as string;
+    const factor = penetrationFactorFor(county_code);
     const known = ZIP_POPULATION_2020.has(zip);
     const pop = ZIP_POPULATION_2020.get(zip) ?? SWFL_ZIP_POPULATION_DEFAULT;
-    const denom = pop * INSURED_PENETRATION_FACTOR;
+    const denom = pop * factor;
     const aal = paid / AAL_WINDOW_YEARS / denom;
-    const county_code = bucket[0].county_code as string;
+    const countyName = COUNTY_NAME_BY_FIPS.get(county_code) ?? county_code;
+    const pctLabel = `${(factor * 100).toFixed(2)}%`;
     raw.push({
       zip,
       county_code,
@@ -635,8 +667,8 @@ export function aggregateZipRollupTop6(rows: ClaimRow[], topN: number = 6): Nfip
       median_bv: Math.round(medianBV * 100) / 100,
       insured_denominator: Math.round(denom * 100) / 100,
       insured_denominator_basis: known
-        ? `2020 ACS population estimate ${pop.toLocaleString()} × ${INSURED_PENETRATION_FACTOR} NSI proxy (v1)`
-        : `SWFL median population estimate ${SWFL_ZIP_POPULATION_DEFAULT.toLocaleString()} × ${INSURED_PENETRATION_FACTOR} NSI proxy (v1; ZIP not in coverage table)`,
+        ? `2020 ACS population estimate ${pop.toLocaleString()} × ${pctLabel} FEMA NFIP residential penetration rate for ${countyName} County (as of ${INSURED_PENETRATION_RATE_AS_OF}, v2)`
+        : `SWFL median population estimate ${SWFL_ZIP_POPULATION_DEFAULT.toLocaleString()} × ${pctLabel} FEMA NFIP residential penetration rate for ${countyName} County (as of ${INSURED_PENETRATION_RATE_AS_OF}, v2; ZIP not in coverage table)`,
       aal: Math.round(aal * 100) / 100,
       window_end_year: maxYear,
     });
@@ -691,10 +723,13 @@ function buildZipFragmentsFromView(rows: ZipWindowViewRow[], topN: number = 6): 
 
   const enriched: Enriched[] = rows.map((r) => {
     const paid = Number(r.paid_total_in_window_usd);
+    const factor = penetrationFactorFor(r.county_code);
     const known = ZIP_POPULATION_2020.has(r.zip);
     const pop = ZIP_POPULATION_2020.get(r.zip) ?? SWFL_ZIP_POPULATION_DEFAULT;
-    const denom = pop * INSURED_PENETRATION_FACTOR;
+    const denom = pop * factor;
     const aal = paid / AAL_WINDOW_YEARS / denom;
+    const countyName = COUNTY_NAME_BY_FIPS.get(r.county_code) ?? r.county_code;
+    const pctLabel = `${(factor * 100).toFixed(2)}%`;
     return {
       zip: r.zip,
       county_code: r.county_code,
@@ -704,8 +739,8 @@ function buildZipFragmentsFromView(rows: ZipWindowViewRow[], topN: number = 6): 
       window_end_year: Number(r.window_end_year),
       insured_denominator: Math.round(denom * 100) / 100,
       insured_denominator_basis: known
-        ? `2020 ACS population estimate ${pop.toLocaleString()} × ${INSURED_PENETRATION_FACTOR} NSI proxy (v1)`
-        : `SWFL median population estimate ${SWFL_ZIP_POPULATION_DEFAULT.toLocaleString()} × ${INSURED_PENETRATION_FACTOR} NSI proxy (v1; ZIP not in coverage table)`,
+        ? `2020 ACS population estimate ${pop.toLocaleString()} × ${pctLabel} FEMA NFIP residential penetration rate for ${countyName} County (as of ${INSURED_PENETRATION_RATE_AS_OF}, v2)`
+        : `SWFL median population estimate ${SWFL_ZIP_POPULATION_DEFAULT.toLocaleString()} × ${pctLabel} FEMA NFIP residential penetration rate for ${countyName} County (as of ${INSURED_PENETRATION_RATE_AS_OF}, v2; ZIP not in coverage table)`,
       aal: Math.round(aal * 100) / 100,
     };
   });

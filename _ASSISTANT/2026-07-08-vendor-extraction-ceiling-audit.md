@@ -14,7 +14,7 @@
 3. **FDLE crime — city/offense breakdown** — we already fetch Fort Myers/Cape Coral/Naples PD detail, sum it to a county total, and discard the breakdown. Sitting in a variable we already compute.
 4. **CRE — Cushman & Wakefield Medical Office sector** — same PDF pipeline as retail/industrial/office; the sector list is hardcoded and Medical Office was never added.
 5. **NOAA storm-history — Flood/Waterspout event types** — absent from the allowlist, unlike Drought/Frost-Freeze which are excluded on purpose. Real gap for a Florida product.
-6. **FEMA NFIP penetration rate** — our code uses a static guess (`INSURED_PENETRATION_FACTOR = 0.3`) where FEMA publishes a real cited "NFIP Residential Penetration Rates" dataset.
+6. **FEMA NFIP penetration rate** — ✅ CLOSED 08/12/2026. Was a static guess (`INSURED_PENETRATION_FACTOR = 0.3`); code now uses `INSURED_PENETRATION_FACTOR_BY_COUNTY` (fema-nfip-source.mts), real per-county rates pulled live from FEMA's "NFIP Residential Penetration Rates" dataset (Lee 24.25%, Collier 29.55%, Hendry 4.4%, as of 08/03/2026).
 7. **NOAA rainfall pipeline** — the yearly file we already fetch also carries temperature/wind/humidity/pressure at zero extra cost; we only extract precipitation.
 8. **USGS gauges** — same 60 sites, same fetch, also carry streamflow/discharge, water temp, salinity, dissolved oxygen, pH; we extract 4 parameters.
 9. **Zillow** — ZHVF (forecast), bedroom/type-cut ZHVI, seasonally-adjusted ZORI: same ZIP grain, all free, unwired.

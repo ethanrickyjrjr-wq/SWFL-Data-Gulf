@@ -1,7 +1,4 @@
-import { cookies } from "next/headers";
-import { redirect } from "next/navigation";
 import type { Metadata } from "next";
-import { createClient } from "@/utils/supabase/server";
 import { AccountBrandEditor } from "@/components/account/AccountBrandEditor";
 
 export const runtime = "nodejs";
@@ -15,11 +12,9 @@ export default async function AccountBrandPage({
 }: {
   searchParams: Promise<{ welcome?: string }>;
 }) {
-  const supabase = createClient(await cookies());
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
-  if (!user) redirect("/login?next=/account/brand");
+  // Filling out the brand form needs NO login (operator, 08/11/2026: "My Brand does
+  // not have to have email to log in to fill out"). Anonymous visitors can open and
+  // edit; AccountBrandEditor's save path is what still needs an identity.
   // First-login landing (post-login routing sends new accounts here with
   // ?welcome=1). One line of copy, no stored state — harmless on revisit.
   const { welcome } = await searchParams;

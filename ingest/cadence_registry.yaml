@@ -769,9 +769,9 @@ pipelines:
         as_of: "2026-05-31"
         source: "our ingest (claims data)"
       source_ceiling:
-        summary: "FEMA publishes 'NFIP Residential Penetration Rates' as a real cited dataset. Our code uses a static guess (INSURED_PENETRATION_FACTOR = 0.3) as a stand-in for exactly that number — directly swappable for the real one. FEMA also publishes a Policies-in-Force dataset and the Community Status Book, neither pulled."
-        as_of: "07/07/2026"
-        source_url: "https://www.fema.gov/about/openfema/data-sets"
+        summary: "FEMA 'NFIP Residential Penetration Rates' — swapped in 08/12/2026 (refinery/sources/fema-nfip-source.mts INSURED_PENETRATION_FACTOR_BY_COUNTY), replacing the old flat 0.3 guess with real per-county rates: Lee 24.25%, Collier 29.55%, Hendry 4.4%. Hardcoded snapshot, not a live ingest pipeline yet — re-pull quarterly from the API. FEMA also publishes a Policies-in-Force dataset and the Community Status Book, neither pulled."
+        as_of: "08/03/2026"
+        source_url: "https://www.fema.gov/api/open/v1/NfipResidentialPenetrationRates"
         source_label: "FEMA OpenFEMA"
 
   - name: leepa

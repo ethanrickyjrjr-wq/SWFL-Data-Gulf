@@ -182,6 +182,26 @@ export function graphFirstGap(text, calls) {
   return !(calls || []).some((c) => isGraphProbe(c?.name, c?.input));
 }
 
+/**
+ * A path INSIDE an installed dependency — the vendor's code as actually shipped to this
+ * box, not our tree and not our writing about it.
+ */
+const INSTALLED_PKG =
+  /[/\\](?:site-packages|dist-packages|node_modules|Cellar|\.venv|[\w.-]*-venv)[/\\]|\.cargo[/\\]registry[/\\]/i;
+
+/**
+ * A command asking a binary to describe ITSELF — its real flags, its real version.
+ *
+ * SHORT FLAGS ARE DELIBERATELY ABSENT. `-h` is `du -h` / `sort -h`, `-v` is `curl -v`;
+ * crediting them would make this lane satisfiable by accident, and a lane satisfied by
+ * accident is defect (b) — the over-credit failure this file has already paid for twice.
+ */
+const SELF_DESCRIBE =
+  /(?:^|\s)--(?:help|version)\b|\b__version__\b|\bpip3?\s+(?:show|list)\b|\bnpm\s+(?:ls|list|view)\b|\bbun\s+pm\s+ls\b/i;
+
+/** Search binaries, excluded from SELF_DESCRIBE — `rg --version` probes nothing. */
+const SEARCH_BINARY = /\b(grep|rg|ripgrep|Select-String|findstr|ack|ag)\b/i;
+
 /** Classify ONE tool call into a lane, or null. Pure. */
 export function laneFor(name, input) {
   const n = String(name || "");
