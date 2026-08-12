@@ -1,3 +1,32 @@
+## 2026-08-12 (Sonnet 5) — deed cash-vs-financed split BUILT and live-verified (steps 1-5 of the handoff)
+
+Picked up `docs/handoff/2026-08-12-deed-cash-financed-split-build-handoff.md` on direct operator
+instruction ("JUST BUILD IT"). All 5 remaining steps done, TDD-gated (RULE 3.5).
+
+1. **TDD classifier** — `refinery/lib/deed-financing-classifier.mts` + `.test.mts`, 6 tests, one
+   per failure mode (FM-1 pairing-window monotonicity, FM-2 15% suppression floor x2, FM-3
+   double-count x2, denominator scope). Watched RED (module didn't exist) before implementing GREEN.
+   Caught and fixed a real bug along the way: the first draft deduped no-strap deeds against each
+   other by `(record_date, null)`, which would have silently undercounted the unclassifiable
+   population — building the SQL view side-by-side is what surfaced it.
+2. **View shipped** — `docs/sql/20260812_lee_deed_purchase_financing_v.sql`, applied live via
+   `scripts/apply_deed_purchase_financing_view.py` (ingest venv, psycopg3). Live counts:
+   financed 1,179 · no_recorded_financing 1,852 · unclassifiable 180 (3,031 classifiable + 180 =
+   3,211 total, matching the spec's FM-2/FM-3 measurements exactly). **Correction to the spec's own
+   headline:** it quoted 1,182/3,031=39.0% financed, but its own same-day pairing table said 1,179 —
+   1,182 was actually the +3-day number. Same-day (the chosen window) is 1,179/3,031 = 38.9% financed,
+   61.1% no recorded financing. Immaterial (0.1pt), but the discrepancy is real and now corrected.
+3. **Source + pack + vocab, one commit** — two new metrics on `lee-deed-records-swfl`:
+   `deed_arms_length_paired_mortgage_lee` (count, always emitted) and
+   `deed_no_recorded_financing_share_lee` (ratio, omitted entirely when suppressed — FM-2). Fixture
+   path now runs the same tested classifier as the live SQL view, so both branches share one
+   algorithm. Vocab slugs registered in `refinery/vocab/brain-vocabulary.json` same commit;
+   `check-vocab-coverage.mts --all` and the `catalog.test.mts` mirror both pass.
+4. Brain rebuild + live-verify: see the follow-up entry below (same session).
+
+Still open: whether this number faces customers now or stays internal — operator said "no one uses
+the fucking site, I will get more data," read as: ship it, don't gate on customer-facing polish.
+
 ## 2026-08-12 (Opus 5) — closed the owed CLAUDE.md row: `graph-compartments.md` is no longer orphaned
 
 The one part the previous entry declared NOT DONE (blocked on session 2b1d04a1's claim on `CLAUDE.md`).

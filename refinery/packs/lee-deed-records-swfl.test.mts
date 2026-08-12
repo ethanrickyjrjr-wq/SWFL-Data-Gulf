@@ -18,6 +18,9 @@ function summaryFragment(s: Partial<DeedRecordsSummary>): RawFragment {
     deed_nominal_30d_lee: 0,
     latest_record_date_lee: null,
     earliest_record_date_lee: null,
+    deed_financing_financed_lee: 0,
+    deed_financing_no_recorded_lee: 0,
+    deed_financing_unclassifiable_lee: 0,
     fetched_at: "2026-07-20T00:00:00Z",
     ...s,
   };
@@ -73,6 +76,52 @@ test("outputProducer: counts + nominal-transfer share are computed exactly", () 
     assert.equal(m.source.tier, 1);
     assert.ok(m.source.citation.length > 0);
   }
+});
+
+test("outputProducer: cash-vs-financed metrics are computed exactly", () => {
+  leeDeedRecordsSwfl.corpusSummary!([
+    summaryFragment({
+      deed_records_total_lee: 28186,
+      deed_records_30d_lee: 500,
+      deed_arms_length_30d_lee: 300,
+      deed_nominal_30d_lee: 200,
+      latest_record_date_lee: "2026-08-11",
+      earliest_record_date_lee: "2026-07-13",
+      deed_financing_financed_lee: 1179,
+      deed_financing_no_recorded_lee: 1852,
+      deed_financing_unclassifiable_lee: 180,
+    }),
+  ]);
+  const out = leeDeedRecordsSwfl.outputProducer!({} as never);
+  const byMetric = new Map(out.key_metrics.map((m) => [m.metric, m.value]));
+
+  assert.equal(byMetric.get("deed_arms_length_paired_mortgage_lee"), 1179);
+  // 1852 / (1179 + 1852) = 1852 / 3031 = 0.61102... -> rounds to 0.611
+  assert.equal(byMetric.get("deed_no_recorded_financing_share_lee"), 0.611);
+  assert.ok(out.caveats.some((c) => c.includes("2026-07-13 to 2026-08-11")));
+});
+
+test("outputProducer: cash-vs-financed share suppresses over the 15% unclassifiable floor", () => {
+  leeDeedRecordsSwfl.corpusSummary!([
+    summaryFragment({
+      deed_records_total_lee: 100,
+      deed_records_30d_lee: 100,
+      deed_arms_length_30d_lee: 80,
+      deed_nominal_30d_lee: 20,
+      latest_record_date_lee: "2026-08-11",
+      earliest_record_date_lee: "2026-07-13",
+      deed_financing_financed_lee: 40,
+      deed_financing_no_recorded_lee: 40,
+      deed_financing_unclassifiable_lee: 20, // 20 / 100 = 20% > 15% floor
+    }),
+  ]);
+  const out = leeDeedRecordsSwfl.outputProducer!({} as never);
+  const byMetric = new Map(out.key_metrics.map((m) => [m.metric, m.value]));
+
+  assert.equal(byMetric.has("deed_no_recorded_financing_share_lee"), false);
+  // The count metric is still safe to publish — it isn't a biased ratio.
+  assert.equal(byMetric.get("deed_arms_length_paired_mortgage_lee"), 40);
+  assert.ok(out.caveats.some((c) => c.includes("suppressed")));
 });
 
 test("outputProducer: empty table -> clean-empty, neutral, no metrics", () => {

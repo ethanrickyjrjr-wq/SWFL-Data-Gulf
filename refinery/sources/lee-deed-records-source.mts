@@ -7,6 +7,7 @@ import { getSupabase } from "./supabase.mts";
 import { fragmentId } from "../lib/ids.mts";
 import { isoTimestamp, expiresDate } from "../lib/dates.mts";
 import { buildSourceCitationUrl } from "../lib/citation-url.mts";
+import { classifyPurchaseFinancing } from "../lib/deed-financing-classifier.mts";
 
 /**
  * lee-deed-records source connector — Lee County Clerk of Courts recorded-DEED
@@ -66,6 +67,12 @@ export interface DeedRecordsSummary {
   latest_record_date_lee: string | null;
   /** MIN(record_date) — how far the backfill reaches (ISO date or null). */
   earliest_record_date_lee: string | null;
+  /** Arm's-length deeds paired to a same-day mortgage on the same parcel_strap (ALL loaded history). */
+  deed_financing_financed_lee: number;
+  /** Arm's-length deeds with no same-day recorded financing on the same strap (ALL loaded history). */
+  deed_financing_no_recorded_lee: number;
+  /** Arm's-length deeds with no parcel_strap — cannot be classified (ALL loaded history). */
+  deed_financing_unclassifiable_lee: number;
   fetched_at: string;
 }
 
@@ -132,6 +139,30 @@ async function fetchLiveSummary(): Promise<DeedRecordsSummary> {
   throwOnError("latest record_date", latestRes.error);
   throwOnError("earliest record_date", earliestRes.error);
 
+  // Cash-vs-financed split (docs/superpowers/specs/2026-08-12-deed-cash-financed-split-design.md).
+  // ALL loaded history, not a 30d window — with 22 business days total, a rolling
+  // window buys nothing and the metric's own caveat states the real span (FM-5/FM-6).
+  // Classification (same-day pairing, dedup, unclassifiable) is computed in the view
+  // (docs/sql/20260812_lee_deed_purchase_financing_v.sql); this is a count-per-class
+  // aggregation, never a row haul.
+  const [rFinanced, rNoRecorded, rUnclassifiable] = await Promise.all([
+    sb
+      .from("lee_deed_purchase_financing_v")
+      .select("*", { count: "exact", head: true })
+      .eq("financing_class", "financed"),
+    sb
+      .from("lee_deed_purchase_financing_v")
+      .select("*", { count: "exact", head: true })
+      .eq("financing_class", "no_recorded_financing"),
+    sb
+      .from("lee_deed_purchase_financing_v")
+      .select("*", { count: "exact", head: true })
+      .eq("financing_class", "unclassifiable"),
+  ]);
+  throwOnError("financing: financed count", rFinanced.error);
+  throwOnError("financing: no_recorded_financing count", rNoRecorded.error);
+  throwOnError("financing: unclassifiable count", rUnclassifiable.error);
+
   return {
     kind: "lee-deed-records-summary",
     deed_records_total_lee: rTotal.count ?? 0,
@@ -140,6 +171,9 @@ async function fetchLiveSummary(): Promise<DeedRecordsSummary> {
     deed_nominal_30d_lee: rNominal.count ?? 0,
     latest_record_date_lee: (latestRes.data?.[0]?.record_date as string | undefined) ?? null,
     earliest_record_date_lee: (earliestRes.data?.[0]?.record_date as string | undefined) ?? null,
+    deed_financing_financed_lee: rFinanced.count ?? 0,
+    deed_financing_no_recorded_lee: rNoRecorded.count ?? 0,
+    deed_financing_unclassifiable_lee: rUnclassifiable.count ?? 0,
     fetched_at,
   };
 }
@@ -150,6 +184,7 @@ interface FixtureRow {
   doc_type?: string;
   consideration_usd?: number | null;
   record_date?: string | null;
+  parcel_strap?: string | null;
 }
 
 async function fetchFixtureSummary(): Promise<DeedRecordsSummary> {
@@ -171,6 +206,21 @@ async function fetchFixtureSummary(): Promise<DeedRecordsSummary> {
   );
   const recordDates = dated.map((r) => r.record_date as string).sort();
 
+  // Cash-vs-financed split — same classifier the SQL view mirrors, so the fixture
+  // and live paths agree on the algorithm (deed-financing-classifier.test.mts).
+  const deedRowsAllTime = deeds
+    .filter((r) => typeof r.record_date === "string" && r.record_date)
+    .map((r) => ({
+      record_date: r.record_date as string,
+      parcel_strap: r.parcel_strap ?? null,
+      consideration_usd: r.consideration_usd ?? 0,
+    }));
+  const mortgageRowsAllTime = rows
+    .filter((r) => (r.doc_type ?? "").toUpperCase().startsWith("MORTGAGE"))
+    .filter((r) => typeof r.record_date === "string" && r.record_date)
+    .map((r) => ({ record_date: r.record_date as string, parcel_strap: r.parcel_strap ?? null }));
+  const financing = classifyPurchaseFinancing(deedRowsAllTime, mortgageRowsAllTime, 0);
+
   return {
     kind: "lee-deed-records-summary",
     deed_records_total_lee: deeds.length,
@@ -179,6 +229,9 @@ async function fetchFixtureSummary(): Promise<DeedRecordsSummary> {
     deed_nominal_30d_lee: nominal.length,
     latest_record_date_lee: recordDates.length ? recordDates[recordDates.length - 1] : null,
     earliest_record_date_lee: recordDates.length ? recordDates[0] : null,
+    deed_financing_financed_lee: financing.financed,
+    deed_financing_no_recorded_lee: financing.no_recorded_financing,
+    deed_financing_unclassifiable_lee: financing.unclassifiable,
     fetched_at,
   };
 }

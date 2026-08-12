@@ -25,6 +25,27 @@ function nominalShare(s: DeedRecordsSummary): number | null {
   return denom > 0 ? s.deed_nominal_30d_lee / denom : null;
 }
 
+// Cash-vs-financed split (docs/superpowers/specs/2026-08-12-deed-cash-financed-split-design.md
+// FM-2): mirrors refinery/lib/deed-financing-classifier.mts's suppression floor. Deterministic
+// math on already-classified counts from the view — no row-level logic duplicated here.
+const UNCLASSIFIABLE_SUPPRESSION_FLOOR = 0.15;
+
+function financingShare(s: DeedRecordsSummary): {
+  share: number | null;
+  unclassifiableShare: number;
+  suppressed: boolean;
+} {
+  const classifiable = s.deed_financing_financed_lee + s.deed_financing_no_recorded_lee;
+  const total = classifiable + s.deed_financing_unclassifiable_lee;
+  const unclassifiableShare = total > 0 ? s.deed_financing_unclassifiable_lee / total : 0;
+  const suppressed = unclassifiableShare > UNCLASSIFIABLE_SUPPRESSION_FLOOR;
+  return {
+    share: !suppressed && classifiable > 0 ? s.deed_financing_no_recorded_lee / classifiable : null,
+    unclassifiableShare,
+    suppressed,
+  };
+}
+
 function makeSource(citation: string, fetched_at: string): BrainOutputMetric["source"] {
   return {
     url: "https://or.leeclerk.org/LandMarkWeb/search/index?theme=.blue&section=searchCriteriaDocuments&quickSearchSelection=",
@@ -110,6 +131,21 @@ function leeDeedRecordsOutputProducer(_out: PackOutput): BrainOutputProducerResu
     "Deed-grade median sale price is not yet emitted (needs a Postgres percentile view/RPC; PostgREST count queries cannot compute a median). Tracked by check lee_deed_median_consideration_metric.",
   );
 
+  const financing = financingShare(s);
+  const financingSpan =
+    s.earliest_record_date_lee && s.latest_record_date_lee
+      ? `${s.earliest_record_date_lee} to ${s.latest_record_date_lee}`
+      : "an unstated span";
+  // FM-5: never say "today" — the metric states the real span it covers.
+  caveats.push(
+    `Cash-vs-financed classification covers all recorded deeds loaded so far (${financingSpan}); it is not a rolling window and does not advance until the next manual FETCH lands. Method: an arm's-length deed is "financed" only if a mortgage-family document records against the same parcel on the same day (same-day pairing measured 08/12/2026 to be as accurate as any wider window). "No recorded financing" is therefore an upper bound on the true cash-purchase share, not the share itself.`,
+  );
+  if (financing.suppressed) {
+    caveats.push(
+      `Cash-vs-financed share suppressed: ${fmtPct(financing.unclassifiableShare)} of arm's-length deeds carry no parcel_strap and cannot be classified, over the 15% floor.`,
+    );
+  }
+
   const key_metrics: BrainOutputMetric[] = [
     {
       metric: "deed_records_total_lee",
@@ -163,7 +199,35 @@ function leeDeedRecordsOutputProducer(_out: PackOutput): BrainOutputProducerResu
         fetchedAt,
       ),
     },
+    {
+      metric: "deed_arms_length_paired_mortgage_lee",
+      label: "Arm's-Length Deeds Paired to Same-Day Financing — Lee County",
+      value: s.deed_financing_financed_lee,
+      direction: "stable",
+      variable_type: "extensive",
+      units: "deeds",
+      display_format: "count",
+      source: makeSource(
+        `Arm's-length Lee deeds (${financingSpan}) with a mortgage-family document recorded the same day against the same parcel: ${fmtN(s.deed_financing_financed_lee)} of ${fmtN(s.deed_financing_financed_lee + s.deed_financing_no_recorded_lee)} classifiable (${fmtN(s.deed_financing_unclassifiable_lee)} unclassifiable, no parcel_strap).`,
+        fetchedAt,
+      ),
+    },
   ];
+  if (financing.share !== null) {
+    key_metrics.push({
+      metric: "deed_no_recorded_financing_share_lee",
+      label: "No Recorded Same-Day Financing Share — Lee County",
+      value: Math.round(financing.share * 10000) / 10000,
+      direction: "stable",
+      variable_type: "intensive",
+      units: "ratio",
+      display_format: "ratio",
+      source: makeSource(
+        `Share of classifiable arm's-length Lee deeds (${financingSpan}) with no mortgage-family document recorded the same day against the same parcel: ${fmtPct(financing.share)} (${fmtN(s.deed_financing_no_recorded_lee)} of ${fmtN(s.deed_financing_financed_lee + s.deed_financing_no_recorded_lee)}). Upper bound on the true cash-purchase share, not the share itself — see caveats.`,
+        fetchedAt,
+      ),
+    });
+  }
 
   const conclusion =
     `Lee County recorded ${fmtN(s.deed_records_30d_lee)} deed(s) in the trailing 30 days ` +

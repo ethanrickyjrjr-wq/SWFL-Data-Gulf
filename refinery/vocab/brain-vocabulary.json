@@ -7138,6 +7138,66 @@
       "status": "active",
       "scope_note": "Share of trailing-30d Lee County recorded deeds with consideration <= $100 (nominal / non-arm's-length transfers) out of all classifiable trailing-30d deeds. A high share means headline deed counts overstate genuine market sales; reported as fact, no directional polarity assigned."
     },
+    "deed_arms_length_paired_mortgage_lee": {
+      "id": "deed_arms_length_paired_mortgage_lee",
+      "grade": {
+        "direction_polarity": "none",
+        "reviewed_non_directional": true
+      },
+      "prefLabel": "Arm's-Length Deeds Paired to Same-Day Financing — Lee County",
+      "altLabels": [
+        "Lee financed purchase count",
+        "Lee same-day mortgage-paired deeds"
+      ],
+      "raw_slugs": [
+        "deed_arms_length_paired_mortgage_lee"
+      ],
+      "category": "real-estate",
+      "domain": [
+        "real-estate",
+        "macro"
+      ],
+      "source_brains": [
+        "lee-deed-records-swfl"
+      ],
+      "value_type": "count",
+      "unit": "deeds",
+      "direction_concept": "qual_metric_trajectory",
+      "status": "active",
+      "scope_note": "Count of arm's-length Lee County recorded DEEDs (all loaded history) with a mortgage-family document (MORTGAGE / MORTGAGE WITHOUT INTANGIBLE TAX / MORTGAGE WITHOUT TAX) recorded the SAME DAY against the same parcel — the purchase-money-financing signal. Deed-strap deduped, EXISTS-paired (never a join fan-out). Reported as fact, no directional polarity assigned."
+    },
+    "deed_no_recorded_financing_share_lee": {
+      "id": "deed_no_recorded_financing_share_lee",
+      "grade": {
+        "direction_polarity": "none",
+        "reviewed_non_directional": true
+      },
+      "prefLabel": "No Recorded Same-Day Financing Share — Lee County",
+      "altLabels": [
+        "Lee cash-purchase upper bound",
+        "Lee no-recorded-financing deed share"
+      ],
+      "raw_slugs": [
+        "deed_no_recorded_financing_share_lee"
+      ],
+      "category": "real-estate",
+      "domain": [
+        "real-estate",
+        "macro"
+      ],
+      "source_brains": [
+        "lee-deed-records-swfl"
+      ],
+      "value_type": "ratio",
+      "unit": "ratio",
+      "value_range": [
+        0,
+        1
+      ],
+      "direction_concept": "qual_metric_trajectory",
+      "status": "active",
+      "scope_note": "Share of classifiable arm's-length Lee County recorded deeds (all loaded history) with NO mortgage-family document recorded the same day against the same parcel. An upper bound on the true cash-purchase share (a next-day/split-timing mortgage recording is undercounted as cash), not the cash share itself. Suppressed (metric omitted) when the strap-absent/unclassifiable share exceeds 15%. Reported as fact, no directional polarity assigned."
+    },
     "licenses_cbc_share_swfl": {
       "id": "licenses_cbc_share_swfl",
       "grade": {
