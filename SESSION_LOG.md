@@ -1,3 +1,27 @@
+## 2026-08-12 (Sonnet 5) — Closed the 08/12 research filing debt (4th file was never written) + parallel-Sonnet build handoff
+
+Prior sessions had committed 3 of 4 same-day research files + 2 handoffs (commit `870199ec`) but the
+4th piece — Outlines/Self-Refine/CRITIC + Anthropic grounding/caching research, trapped only inside
+`docs/handoff/2026-08-12-open-house-and-build-ai-grounding-handoff.md` §3 — was still unfiled ("0 of 2"
+per that handoff's §6). Wrote it as
+`_RESEARCH/agent-behavior/2026-08-12-build-time-ai-grounding-outlines-critic-context-caching.md`,
+indexed it (and corrected the `agent-behavior/` header count, stale independent of this session), and
+added the owed 5th `paid-before-free` strike line on `_ASSISTANT/STRIKES.md` (guard gap: an
+already-authenticated paid surface used for an out-of-scope purpose — the Apify incident). Both files
+were under other sessions' claims; claims had stopped refreshing (33min/8min old) so released and
+edited, verified via `git diff` that nothing else in either file was touched.
+
+Also wrote `docs/handoff/2026-08-12-open-house-build-plan-parallel-sonnet-assignments.md` — splits the
+source handoff's §4 build plan into 4 file-disjoint work packages (date/time capture UI, RSVP
+layout, ONE-AI-TWO-FEEDS grounding, narrator validator) so multiple Sonnet sessions can run at once
+without colliding, plus a 5th tiny filing package and an explicit "not startable" flag on RSVP
+behavior (blocked on the operator's choice of mailto/lead-capture/calendar-invite).
+
+**Landed inside `20a87820`** (another session's unrelated `refactor(contacts)` commit) — staged 4
+files, ran `git commit`, and by the time it executed another session's broad add/commit had already
+swept them in. Verified via `git show 20a87820:<path>` that content is byte-intact; not a loss, just
+a mislabeled commit message this note exists to correct.
+
 ## 2026-08-12 (Opus 5) — Apify spend MEASURED + the MCP-edge money guard that was missing, and the 08/12 research finally committed
 
 The 08/12 Apify incident, measured from the account instead of guessed (free GETs only, cap untouched):
