@@ -7,7 +7,7 @@
     "invalid-polarity": 0,
     "row-candidate": 45,
     "gradeable": 208,
-    "reviewed-display": 45,
+    "reviewed-display": 49,
     "moat-fuel": 11,
     "needs-window": 23,
     "backtest_clean": 11
@@ -113,6 +113,90 @@
         "value_type": "categorical",
         "window_days": 120,
         "reviewed_non_directional": false
+      },
+      "gradeable": false,
+      "reason": "no direction_polarity declared (slug-only, never inherited)",
+      "backtest_clean": null
+    },
+    {
+      "slug": "collier_deed_30d",
+      "concept_id": "collier_deed_30d",
+      "bucket": "reviewed-display",
+      "gateVector": {
+        "slug": "collier_deed_30d",
+        "concept_id": "collier_deed_30d",
+        "registered": true,
+        "polarity_state": "none",
+        "window_ok": true,
+        "numeric_ok": true,
+        "raw_polarity": "none",
+        "category": "real-estate",
+        "value_type": "count",
+        "window_days": 180,
+        "reviewed_non_directional": true
+      },
+      "gradeable": false,
+      "reason": "no direction_polarity declared (slug-only, never inherited)",
+      "backtest_clean": null
+    },
+    {
+      "slug": "collier_notice_of_commencement_30d",
+      "concept_id": "collier_notice_of_commencement_30d",
+      "bucket": "reviewed-display",
+      "gateVector": {
+        "slug": "collier_notice_of_commencement_30d",
+        "concept_id": "collier_notice_of_commencement_30d",
+        "registered": true,
+        "polarity_state": "none",
+        "window_ok": true,
+        "numeric_ok": true,
+        "raw_polarity": "none",
+        "category": "real-estate",
+        "value_type": "count",
+        "window_days": 180,
+        "reviewed_non_directional": true
+      },
+      "gradeable": false,
+      "reason": "no direction_polarity declared (slug-only, never inherited)",
+      "backtest_clean": null
+    },
+    {
+      "slug": "collier_records_30d",
+      "concept_id": "collier_records_30d",
+      "bucket": "reviewed-display",
+      "gateVector": {
+        "slug": "collier_records_30d",
+        "concept_id": "collier_records_30d",
+        "registered": true,
+        "polarity_state": "none",
+        "window_ok": true,
+        "numeric_ok": true,
+        "raw_polarity": "none",
+        "category": "real-estate",
+        "value_type": "count",
+        "window_days": 180,
+        "reviewed_non_directional": true
+      },
+      "gradeable": false,
+      "reason": "no direction_polarity declared (slug-only, never inherited)",
+      "backtest_clean": null
+    },
+    {
+      "slug": "collier_records_total",
+      "concept_id": "collier_records_total",
+      "bucket": "reviewed-display",
+      "gateVector": {
+        "slug": "collier_records_total",
+        "concept_id": "collier_records_total",
+        "registered": true,
+        "polarity_state": "none",
+        "window_ok": true,
+        "numeric_ok": true,
+        "raw_polarity": "none",
+        "category": "real-estate",
+        "value_type": "count",
+        "window_days": 180,
+        "reviewed_non_directional": true
       },
       "gradeable": false,
       "reason": "no direction_polarity declared (slug-only, never inherited)",
