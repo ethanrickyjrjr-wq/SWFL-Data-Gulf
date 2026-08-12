@@ -1,3 +1,38 @@
+## 2026-08-12 (Opus 5) — CI red for 6+ runs: two causes, both from other sessions' landed commits. Both fixed.
+
+CI (`build` job) failed on every run from 15:58 to 17:14 — `7 fail / 5 errors` across 904 files.
+Read the actual log (`gh run view 31621597077 --log-failed`); the two causes:
+
+- **`lib/highlighter/reach-coverage.test.ts`** — `collier-official-records-swfl` entered
+  `BRAIN_CATALOG` in `47ec04c9` with no `TOPIC_TO_SLUG` rule and no `INTENTIONALLY_UNROUTED`
+  reason. Excused with a real reason, not routed: the deed rule above it is county-blind and
+  already sends ALL deed phrasing to `lee-deed-records-swfl`. Splitting deed questions by county
+  is a routing DESIGN decision — a naive `naples|collier` + `recorded` regex steals permit and
+  housing questions. Flagged to the operator; not guessed at.
+- **`app/contacts/page.test.tsx`** (added `20a87820`) — leaked mocks TWO ways, and it accounts for
+  the "5 errors" as well as one of the fails:
+  - in-repo `@/utils/supabase/server` mocked with no restore → tripped the
+    `mock-restore-ratchet` guard. Fixed with the snapshot idiom, NOT a whitelist entry.
+  - **`mock.module("next/navigation", () => ({ redirect }))` deleted `notFound`, `useRouter` and
+    `usePathname` process-wide** — a factory REPLACES a module, it does not patch it. Five files
+    that ran after it died with `SyntaxError: Export named 'notFound' not found`
+    (`components/project/MaterialRow.test.tsx`, `components/briefcase/AiBriefcasePill.test.tsx`,
+    `app/r/[slug]/raw-fallback.test.tsx`, +2). **The ratchet's regex only matches `@/` and
+    relative specifiers, so a vendor-module wholesale mock is invisible to it** — that is a real
+    hole in the guard, same failure shape it was built for.
+  - Swept the tree: `page.test.tsx` was the ONLY unrestored `next/navigation` mock. 22 files
+    still wholesale-mock `next/headers` with no restore (all pre-existing, all already on the
+    ratchet whitelist, all stubbing only `cookies`) — left alone.
+
+Evidence: `bun test app/contacts/page.test.tsx lib/highlighter/reach-coverage.test.ts
+lib/testing/mock-restore-ratchet.test.ts` → `8 pass / 0 fail`. Full local `bun test` is NOT a
+usable signal on Windows (89 fail / 83 errors before AND after, pre-existing file-order divergence);
+CI is the authority. The fix moved local errors 88 → 83 — exactly the 5 `next/navigation` files.
+
+Did NOT commit: foreign staged work sitting in the shared index from sessions `bacce58e` and
+`d2e44a19` (docs/standards/*, TODAY.md, the county-records spec, the lee-deed raw JSON), plus a
+stray 241-byte `master.json` at repo root that nothing in the tree writes.
+
 ## 2026-08-12 (Opus 5) — graphify: the CHAT AGENT and the MCP TOOLS measured separately. Index exact-or-silent; agent overclaims negatives.
 
 Operator pasted graph answers all session and asked "are we talking about the same thing?" We were

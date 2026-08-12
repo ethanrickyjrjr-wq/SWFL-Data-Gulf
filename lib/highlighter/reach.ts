@@ -227,6 +227,8 @@ export const INTENTIONALLY_UNROUTED: Record<string, string> = {
     "SBA sector charge-offs; no natural chat phrasing observed yet — promote deliberately",
   "logistics-swfl":
     "historical FAF5 flows; logistics-swfl-nowcast is the current-state entry and carries FAF5 as context",
+  "collier-official-records-swfl":
+    "the deed rule above is county-blind and already routes ALL deed phrasing to lee-deed-records-swfl; splitting it by county needs a designed rule (a naive `naples|collier` + `recorded` regex steals permit and housing questions), not a regex guess — promote deliberately",
 };
 
 const SYNTHESIS =
