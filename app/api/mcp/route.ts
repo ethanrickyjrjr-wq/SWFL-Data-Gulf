@@ -102,16 +102,32 @@ export async function GET(): Promise<Response> {
   );
 }
 
+// mcp-handler's `handler(request)` returns a plain Response with no CORS
+// headers of its own (only GET/OPTIONS above set them). Without this, a
+// cross-origin MCP client's preflight (OPTIONS) succeeds, but the browser
+// then blocks the JS from reading the real POST/DELETE response.
+function withCors(response: Response): Response {
+  const headers = new Headers(response.headers);
+  for (const [key, value] of Object.entries(CORS_HEADERS)) {
+    headers.set(key, value);
+  }
+  return new Response(response.body, {
+    status: response.status,
+    statusText: response.statusText,
+    headers,
+  });
+}
+
 export async function POST(request: Request): Promise<Response> {
   const denied = await unauthorizedResponse(request);
   if (denied) return denied;
-  return handler(request);
+  return withCors(await handler(request));
 }
 
 export async function DELETE(request: Request): Promise<Response> {
   const denied = await unauthorizedResponse(request);
   if (denied) return denied;
-  return handler(request);
+  return withCors(await handler(request));
 }
 
 export async function OPTIONS(): Promise<Response> {
