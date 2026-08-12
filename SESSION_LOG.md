@@ -1,3 +1,16 @@
+## 2026-08-12 (Sonnet 5) — CI still red after the fixture fix: stale watch-manifest, third occurrence today
+
+Pushed the `isLocalModule` fixture fix (2193221c), watched `gh run watch` on the new commit — still
+red, but a DIFFERENT failure (tests 184-186): `.github/_watch-manifest.json` out of sync with
+`.github/workflows/`. Cause: the parallel session's collier-permits cron re-enable (1619ca76) edited
+a workflow trigger without regenerating the manifest. Ran `node scripts/build-watch-lists.mjs --write
+--write-watchers` (regenerates `_watch-manifest.json` + `log-cron-incident.yml` / `heal-cron-failure.yml`
+watch lists from source), verified `node --test .github/scripts/watch-manifest-drift.test.mjs` green
+(4/4), pushed as a6337edb. Worth flagging: `gh log` shows this exact drift shape fixed twice more in
+the last 2h by other sessions (22d6c6a7, eab2a3d9) plus once 27h ago (22750cc8) — a real STRIKES
+candidate (workflow schedule edits not regenerating the manifest in the same commit) but out of scope
+for this push; noted, not built.
+
 ## 2026-08-12 (Sonnet 5) — CI red on `build` fixed: stale-fixture test, unrelated to Vercel
 
 Operator asked why GitHub was red and Vercel "not building" after a push neither was mine.
