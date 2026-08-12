@@ -1,3 +1,25 @@
+## 2026-08-12 (Sonnet 5) — OPERATOR CORRECTION: "no ZIP resolver exists" was WRONG — grepped the wrong layer
+
+Told the operator no city-to-ZIP resolver existed anywhere in `lib/`. He was skeptical ("which
+makes no sense") and right to be — `/api/address-retrieve` already resolves a real ZIP via
+Mapbox's `context.postcode` (`lib/geo/search-box.ts` `parseRetrieve`), and the URL-param
+zip-carry plumbing (`heroDestination`, `recipeDestination`, `anonymousLabArrival`) already exists
+and is used elsewhere (homepage ZIP-report clicks). **I grepped `lib/geo/` for a resolver function
+by name and stopped there — never checked the actual address-retrieve API route, where the real
+answer was already sitting, already wired, already used by other doors.** Same failure shape as
+the font/`_RESEARCH/` postmortem this repo already has a rule about: searched one plausible place,
+found nothing, reported absence instead of exhausting the lanes (RULE 0.95). The gap is real but
+much narrower than reported: `OneClickHero.tsx` reads the retrieve response and discards `.zip`,
+`heroDestination` has nowhere to carry it even if captured, and a third gate in
+`EmailLabGridClient.tsx` (`plan.doc.kind === "zip"`) is unverified for this arrival shape. Full
+corrected handoff: `docs/handoff/2026-08-12-listings-digest-zip-wiring-handoff.md`. Check
+`listings_digest_zip_resolution_missing` closed (wrong claim), reopened as
+`listings_digest_zip_wiring_gap` with the accurate diagnosis.
+
+Also scope-corrected: this was never about `/go` specifically ("i never said go had it") — it's
+about swfldatagulf's normal build flow; `/go` is just one caller of the same shared door
+(`heroDestination`), so the fix is generic, not `/go`-only.
+
 ## 2026-08-12 (Sonnet 5) — listings-digest /go bug: corrected root cause, real fix not yet built
 
 Follow-up to the earlier `listings_digest_recipekey_dropped_on_area_arrival` entry. Reproduced
