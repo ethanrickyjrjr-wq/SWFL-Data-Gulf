@@ -1,3 +1,22 @@
+## 2026-08-12 (Sonnet 5) — Collier permits real ingestion ran; found+fixed a THIRD bug (geocoder silently drops a whole batch on timeout)
+
+Operator: "let's see if we can get [the collier_first_lake_ingestion gate to clear]." Ran the real
+(non-dry-run) `collier-permits-monthly.yml` on top of the crawl4ai fix (1be2aab0) — `gh run
+31566832140`, GREEN, 9,717 rows now live in `data_lake.collier_building_permits` (merge on
+`permit_number`). But green ≠ clean: the July batch (4,886 addresses, one POST) timed out against
+Census's batch geocoder at 120s and `except RequestException: continue` silently dropped lat/lon/
+zip_code for the ENTIRE batch — 0% fill, no error surfaced, no existing guard catches field-level
+fill collapse (only row count / freshness). Verified directly against the table
+(`has_lat: 2238/9717` overall, `0/4886` for the July load specifically).
+
+Fixed test-first: `ingest/pipelines/collier_permits/geocoder.py` — timeout 120s→300s, plus a
+single-level split-in-half retry (`_post_chunk`) so one oversized chunk timing out costs two smaller
+requests instead of losing the month. 43/43 pass. Commit `bba5ca43`. `lee_permits/geocoder.py` has
+the identical pattern — opened `lee_permits_geocoder_same_timeout_bug` rather than porting blind
+(its actual batch sizes haven't been checked for the same failure). Next: re-run collier_permits
+once more against the geocoder fix and confirm July's fill rate actually recovers before calling
+`collier_first_lake_ingestion` clean.
+
 ## 2026-08-12 (Sonnet 5) — /go → Listings Digest fixed: two stacked bugs, both live-verified, no browser needed
 
 Continued from the 08/12 handoff (`docs/handoff/2026-08-12-listings-digest-zip-wiring-handoff.md`),
