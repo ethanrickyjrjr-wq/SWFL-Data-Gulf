@@ -7,7 +7,7 @@
 
 Markers: **[ORPHAN]** nothing in the repo points at this file — it is invisible unless you come through this index, and it is a DELETION CANDIDATE. **[weak]** reachable only by bare filename, which leads nowhere.
 
-Reachability at generation: 874 by path · 543 by name only · 240 orphaned. Re-measure with `node scripts/doc-reachability.mjs`.
+Reachability at generation: 874 by path · 544 by name only · 239 orphaned. Re-measure with `node scripts/doc-reachability.mjs`.
 
 ## docs/superpowers — 842
 
@@ -1379,7 +1379,7 @@ Reachability at generation: 874 by path · 543 by name only · 240 orphaned. Re-
 - `_RESEARCH/data-and-ingest/2026-08-11-direction-call-forecast-evaluation-standard.md` — What a direction call SHOULD be — the outside standard, crawled 08/11/2026 — Operator ask, verbatim: "crawl4ai what this should be" — following the finding that our
 - `_RESEARCH/data-and-ingest/2026-08-12-agent-site-crawl-kvcore-boldtrail.md` *[weak]* — Agent-site listing crawl — kvCore / BoldTrail (Task 1 of the 08/11/2026 Sonnet queue) — tasks (kvCore/BoldTrail). Template/method: RESEARCH/data-and-ingest/2026-08-11-agent-site-listing-crawl-feasibility.md.
 - `_RESEARCH/data-and-ingest/2026-08-12-agent-site-crawl-luxury-presence.md` *[weak]* — Luxury Presence agent-site crawl — feasibility + field census (Task 4 of the listing-grade queue) — no Firecrawl · Rule: RULE 0.4
-- `_RESEARCH/data-and-ingest/2026-08-12-agent-site-crawl-real-geeks.md` **[ORPHAN]** — Agent-site listing crawl — Real Geeks — Real Geeks) · Template followed:
+- `_RESEARCH/data-and-ingest/2026-08-12-agent-site-crawl-real-geeks.md` *[weak]* — Agent-site listing crawl — Real Geeks — Real Geeks) · Template followed:
 - `_RESEARCH/data-and-ingest/2026-08-12-agent-site-crawl-sierra-interactive.md` *[weak]* — Agent-site listing crawl — Sierra Interactive (Task 2 of the listing-grade Sonnet queue) — platform = Sierra Interactive.
 
 ## docs/_FINISHED — 21
