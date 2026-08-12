@@ -153,14 +153,18 @@ class Crawl4aiSession:
     async def download_step(
         self,
         *,
+        url: str,
         click_js: str,
         wait_seconds: float = 10.0,
     ) -> bytes:
         """Click a download anchor in the current session page and return file bytes.
 
         Must be called after a step() that navigated to the page containing the anchor.
-        Uses js_only=True — the page is NOT re-navigated. The browser clicks the anchor
-        and the file lands in self._downloads_dir (set at __init__ time).
+        `url` must be that same page's URL — js_only=True skips re-navigation, but
+        crawl4ai 0.9.0's arun() still validates url as a non-empty string unconditionally
+        (verified against the pinned venv source, async_webcrawler.py arun(), which raises
+        ValueError on url="" regardless of js_only). Same convention lee_permits/scraper.py
+        already uses for its js_only=True pagination steps.
 
         Guard: raises Crawl4aiError if downloaded_files is empty after wait_seconds.
         The caller must have opened this session with accept_downloads=True.
@@ -174,7 +178,7 @@ class Crawl4aiSession:
             page_timeout=int(wait_seconds * 1_000) + 10_000,
             delay_before_return_html=wait_seconds,
         )
-        r = await self._crawler.arun(url="", config=cfg)
+        r = await self._crawler.arun(url=url, config=cfg)
         files = getattr(r, "downloaded_files", None) or []
         if not files:
             raise Crawl4aiError(

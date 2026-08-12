@@ -60,7 +60,7 @@ def test_download_step_returns_file_bytes_when_files_present(tmp_path: Path) -> 
     xlsx.write_bytes(b"PK\x03\x04" + b"\x00" * 10)
 
     session = _make_session_with_mock_crawler([str(xlsx)])
-    result = asyncio.run(session.download_step(click_js="(() => {})()", wait_seconds=1.0))
+    result = asyncio.run(session.download_step(url="https://example.com", click_js="(() => {})()", wait_seconds=1.0))
 
     assert result[:4] == b"PK\x03\x04"
 
@@ -68,13 +68,31 @@ def test_download_step_returns_file_bytes_when_files_present(tmp_path: Path) -> 
 def test_download_step_raises_crawl4ai_error_when_no_files() -> None:
     session = _make_session_with_mock_crawler([])
     with pytest.raises(Crawl4aiError, match="no file in downloaded_files"):
-        asyncio.run(session.download_step(click_js="(() => {})()", wait_seconds=1.0))
+        asyncio.run(session.download_step(url="https://example.com", click_js="(() => {})()", wait_seconds=1.0))
 
 
 def test_download_step_raises_when_downloaded_files_is_none() -> None:
     session = _make_session_with_mock_crawler(None)
     with pytest.raises(Crawl4aiError, match="no file in downloaded_files"):
-        asyncio.run(session.download_step(click_js="(() => {})()", wait_seconds=1.0))
+        asyncio.run(session.download_step(url="https://example.com", click_js="(() => {})()", wait_seconds=1.0))
+
+
+def test_download_step_passes_nonempty_url_to_arun(tmp_path: Path) -> None:
+    # crawl4ai 0.9.0's arun() raises ValueError on url="" even with js_only=True
+    # (verified against the pinned venv source, async_webcrawler.py L251-253) — download_step
+    # must forward the caller's page url, never hardcode "".
+    xlsx = tmp_path / "test.xlsx"
+    xlsx.write_bytes(b"PK\x03\x04" + b"\x00" * 10)
+    session = _make_session_with_mock_crawler([str(xlsx)])
+
+    asyncio.run(
+        session.download_step(
+            url="https://example.com/reports", click_js="(() => {})()", wait_seconds=1.0
+        )
+    )
+
+    _, call_kwargs = session._crawler.arun.call_args
+    assert call_kwargs["url"] == "https://example.com/reports"
 
 
 # ─── build 07: after_goto anti-bot gate (default OFF) ────────────────────────

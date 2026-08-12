@@ -117,7 +117,7 @@ async def _download_async(hit: MonthlyReport) -> bytes:
     async with Crawl4aiSession(session_id="collier_download", accept_downloads=True) as s:
         await s.step(LISTING_PAGE_URL)
         click_js = _build_click_js(hit.url)
-        return await s.download_step(click_js=click_js, wait_seconds=10.0)
+        return await s.download_step(url=LISTING_PAGE_URL, click_js=click_js, wait_seconds=10.0)
 
 
 # ---------------------------------------------------------------------------

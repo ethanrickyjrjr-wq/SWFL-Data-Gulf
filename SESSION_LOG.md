@@ -1,3 +1,40 @@
+## 2026-08-12 (Sonnet 5) — picked up the listing-grade Sonnet queue handoff: resolved the MLS subtype discrepancy, found+fixed the real Collier permits blocker (not Akamai — a crawl4ai vendor-contract bug), re-pointed the stale check
+
+Operator pointed at `docs/handoff/2026-08-12-listing-grade-sonnet-queue-results.md`'s two open threads.
+
+**1. MLS-226028911 subtype discrepancy — resolved against county record.** Queried
+`data_lake.collier_parcels` (the properties-collier-value root) for 425 Wildwood LN, Naples 34105:
+`dor_uc='004'` (FDOR Condominiums), `legal_description='BEAR'S PAW CONDOMINIUM I'`. johnrwood.com's
+"Condominium" was correct; Real Geeks' "Residential" was wrong. Also flagged a secondary, unresolved
+discrepancy: MLS-listed 2,230 sqft vs. the county record's 1,661 sqft for the same parcel. Written up:
+`_RESEARCH/data-and-ingest/2026-08-12-mls-226028911-subtype-resolved.md`.
+
+**2. Collier permits dry-run dispatched — real finding was a crawl4ai vendor bug, not Akamai.** The
+handoff said the only blocker was an unrun dry-run probe; dispatched `collier-permits-monthly.yml`
+(gh run 31562954092, `dry_run=true`) after re-enabling it (was `disabled_manually`). It failed — but
+NOT on the Akamai bot-wall the workflow was gated on: `ingest/lib/crawl_client.py`'s `download_step()`
+called `crawler.arun(url="", config=cfg)` unconditionally. Verified live against the pinned venv's
+actual installed source (`C:\Users\ethan\crawl4ai-venv\...\async_webcrawler.py` L251-253, crawl4ai
+0.9.0): `arun()` raises `ValueError` on an empty url string even with `js_only=True` — there is no
+same-page-reuse exception. `ingest/pipelines/lee_permits/scraper.py` already uses the correct pattern
+(passes the real page URL with `js_only=True`); `download_step()` was the one caller hardcoding `""`.
+
+Fixed with a failing-test-first pass: added `test_download_step_passes_nonempty_url_to_arun` (red),
+made `url` a required kwarg on `download_step()`, wired `fetcher.py`'s `_download_async` to pass
+`LISTING_PAGE_URL`. 61/61 pass (`ingest/.venv` — the crawl4ai-venv lacks `dlt`, wrong venv for the
+pipeline-level tests). **Two other callers pass `url=""` with `js_only=True` and will hit the same
+bug if ever run** — `ingest/pipelines/social_best_practices/crawl_social_practices.py` and
+`ingest/pipelines/report_design_research/crawl_report_designs.py` — neither has a GHA cron wrapper
+(not scheduled/live), left unfixed as out-of-scope; flagging here so it isn't rediscovered cold.
+
+**3. Re-pointed `collier_permit_roof_age_request`** (`node scripts/check.mjs update`) — the blocker
+was never "need a records request," it's now "need the crawl4ai fix to actually land + the dry-run to
+go green." Not closed — dry-run re-dispatch after this push is the next verification step.
+
+**Not yet done:** re-run the dry-run against the fix (next action, this session); the Collier
+`collier_first_lake_ingestion` gate (schedule stays commented out regardless — separate gate, per the
+workflow file's own held-schedule comment).
+
 ## 2026-08-12 (Sonnet 5) — fix github: main CI red on `.github scripts (node:test)`, two independent causes
 
 Operator: "fix github". `gh run list` showed `main` CI failing on every push (run 31562232827 and the

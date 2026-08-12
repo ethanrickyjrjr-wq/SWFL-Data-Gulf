@@ -300,6 +300,11 @@ personal financial notes.
   only blocker is an unrun dry-run on the parked `collier-permits-monthly.yml` cron, not a records
   request. Recommends re-pointing (not closing) check `collier_permit_roof_age_request` — operator
   decision, not actioned by the research agent.
+- `2026-08-12-mls-226028911-subtype-resolved.md` — closes the discrepancy above: queried
+  `data_lake.collier_parcels` for 425 Wildwood LN, Naples 34105 directly (`dor_uc='004'` FDOR
+  Condominiums, `legal_description='BEAR'S PAW CONDOMINIUM I'`). **johnrwood.com's "Condominium" is
+  correct; Real Geeks' "Residential" is wrong** for this listing. Flags a second, unresolved
+  discrepancy: MLS-listed 2,230 sqft vs. the county record's 1,661 sqft for the same parcel.
 - `2026-08-03-neighborhood-amenities-full-scope.md` — FULL-SCOPE-FIRST live probe of SteadyAPI
   `/neighborhood-amenities` (200 OK, one call): propertyId is the ONLY input; returns the NAMED
   vendor neighborhood **with boundary polygon + centroid** (the listings↔community pairing key
