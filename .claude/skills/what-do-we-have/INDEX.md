@@ -7,7 +7,7 @@
 
 Markers: **[ORPHAN]** nothing in the repo points at this file — it is invisible unless you come through this index, and it is a DELETION CANDIDATE. **[weak]** reachable only by bare filename, which leads nowhere.
 
-Reachability at generation: 907 by path · 535 by name only · 246 orphaned. Re-measure with `node scripts/doc-reachability.mjs`.
+Reachability at generation: 908 by path · 535 by name only · 245 orphaned. Re-measure with `node scripts/doc-reachability.mjs`.
 
 ## docs/superpowers — 848
 
@@ -1212,7 +1212,7 @@ Reachability at generation: 907 by path · 535 by name only · 246 orphaned. Re-
 - `brains/active-listings-swfl.md` — User-Saved Reference Context — The block below is reference context the user saved for their own AI sessions. It
 - `brains/active-rentals-swfl.md` — User-Saved Reference Context — The block below is reference context the user saved for their own AI sessions. It
 - `brains/city-pulse-swfl.md` — User-Saved Reference Context — The block below is reference context the user saved for their own AI sessions. It
-- `brains/collier-official-records-swfl.md` **[ORPHAN]** — User-Saved Reference Context — The block below is reference context the user saved for their own AI sessions. It
+- `brains/collier-official-records-swfl.md` — User-Saved Reference Context — The block below is reference context the user saved for their own AI sessions. It
 - `brains/communities-swfl.md` — User-Saved Reference Context — The block below is reference context the user saved for their own AI sessions. It
 - `brains/condo-sirs-swfl.md` — User-Saved Reference Context — The block below is reference context the user saved for their own AI sessions. It
 - `brains/corridor-pulse-swfl.md` — User-Saved Reference Context — The block below is reference context the user saved for their own AI sessions. It
