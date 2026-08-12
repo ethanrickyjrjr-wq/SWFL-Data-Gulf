@@ -346,7 +346,9 @@ test("isFreshnessProbe — only the probe slug", () => {
 });
 
 test("isLocalModule — a real pipeline dir is local; a PyPI name is not", () => {
-  // Runs from repo root in CI/local; ingest/pipelines/fred_g17 exists.
-  assert.equal(isLocalModule("fred_g17"), true);
+  // Runs from repo root in CI/local; ingest/pipelines/bls_laus is tracked in git.
+  // (fred_g17 was retired from git in cb803b1c but a stale gitignored leftover of
+  // the dir kept this test green on dev boxes while it failed on every fresh CI checkout.)
+  assert.equal(isLocalModule("bls_laus"), true);
   assert.equal(isLocalModule("beautifulsoup4"), false);
 });

@@ -1,3 +1,18 @@
+## 2026-08-12 (Sonnet 5) — CI red on `build` fixed: stale-fixture test, unrelated to Vercel
+
+Operator asked why GitHub was red and Vercel "not building" after a push neither was mine.
+Diagnosed via `gh run view --log-failed` on the failing `build` check (commit a1128ce9): one test
+of 292 in `.github/scripts/classify-cron-failure.test.mjs` — `isLocalModule("fred_g17")` asserted
+`ingest/pipelines/fred_g17` exists. That pipeline was deleted from git in `cb803b1c` ("retire
+confirmed-dead ingest pipelines") but the test was never updated; a stale gitignored leftover
+(`__pycache__` only) still sits on this dev box so it passed locally while failing on every fresh
+CI checkout — a green-locally/red-in-CI stale-fixture mismatch, not a real classifier regression.
+Vercel was NOT actually broken: GitHub's commit-status API showed Vercel's own check as
+`state: success` ("Deployment has completed") on that same commit, and the live site answered 200
+— GHA's `build` job doesn't gate the Vercel deploy. Fix: swapped the fixture to `bls_laus`
+(confirmed tracked in git, `git ls-tree -r origin/main`), verified green via
+`node --test .github/scripts/classify-cron-failure.test.mjs` (43/43 pass) before pushing.
+
 ## 2026-08-12 (Sonnet 5) — Collier permits cron RE-ENABLED — both held conditions closed out
 
 Operator: "flip if guards are up and cron is set to run next time." Confirmed guards live in
