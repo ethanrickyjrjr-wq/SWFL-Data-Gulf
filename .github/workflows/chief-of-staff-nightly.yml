@@ -7,8 +7,20 @@ name: Chief of staff nightly
 # Kill switch (repo Settings -> Variables): CHIEF_OF_STAFF_ENABLED = "false"
 
 on:
-  schedule:
-    - cron: "47 8 * * *" # 08:47 UTC = 4:47 AM ET; off-hour minute (GH :00 congestion)
+  # KILLED 08/06/2026 — operator ran `gh workflow disable` himself; the API reads
+  # `disabled_manually`. It hit claude-code-action's 30-turn ceiling and died on EVERY
+  # run 08/02–08/06 (verbatim `Reached maximum number of turns (30)`), burning a full
+  # PAID agent budget (~12 min wall clock) nightly for three weeks and writing nothing;
+  # `morning_brief_no_consumer` separately recorded zero human engagement even when it
+  # succeeded. NEVER re-enable without Ricky AND without first fixing the turn ceiling.
+  #
+  # THE CRON IS COMMENTED OUT, not just disabled (08/12/2026). Disabling at the API is
+  # one `gh workflow enable` away from resuming a paid nightly burn, and until today
+  # tripwire printed this workflow GREEN (`PULSE DARK`) because `zombieCrons` exempted
+  # anything declared in SHOULD_BE_DARK — a written reason is not a guard. Same
+  # belt-and-suspenders shape as corridor-pulse-weekly.yml. Reverting is one uncomment.
+  # schedule:
+    # - cron: "47 8 * * *" # 08:47 UTC = 4:47 AM ET; off-hour minute (GH :00 congestion)
   workflow_dispatch: {}
 
 permissions:

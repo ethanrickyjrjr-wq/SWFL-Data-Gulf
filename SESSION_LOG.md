@@ -1,3 +1,88 @@
+## 2026-08-12 (Opus 5) — Zombie crons: the guard exempted the one that mattered. 2 of 2 closed.
+
+**No hook prints a red CI verdict, and that is not a gap I invented — I checked before saying it.**
+`check-prepush-gate.mjs` and `check-answer-fix-proof.mjs` name CI ~15 times but only ever
+PREDICT it ("CI goes red on this"); neither reads a run conclusion. `print-kickoff`,
+`print-desk-status`, `print-closeable-checks` shell out to no `gh` at all. The only hook that
+prints RED/YELLOW/green verdicts is **SessionStart -> `scripts/tripwire-scan.mjs`** (7th
+SessionStart entry in `.claude/settings.json`), and CI is not in its red set — its 9 `reds.push`
+sites are spend ceiling, PULSE ACTIVE, MANUAL PAID DISPATCH, guard-file integrity, quarantine,
+stale worktree, egress. A red CI reaches us through `WATCH_PUSH_TRIGGERED` -> the cron-incident
+logger instead (`ci.yml` is LOG-only, never healed, `watch-manifest.mjs:63`).
+
+**The two zombie crons — both closed in-session, and the detector that missed one is fixed.**
+Live API state: 4 workflows `disabled_manually`; exactly 2 still carried an uncommented cron.
+
+1. **`chief-of-staff-nightly.yml`** (cron `47 8 * * *` live). Tripwire printed it **green**
+   (`PULSE DARK`) because `zombieCrons()` filtered `&& !e.should_be_dark`. That conflated two
+   INDEPENDENT properties: "we meant to disable this" and "it cannot come back by accident."
+   Only the second is a guard. This is the workflow KILLED 08/06 for burning a paid
+   `claude-code-action` on its 30-turn ceiling nightly for three weeks — one `gh workflow enable`
+   from resuming. Cron commented out; `should_be_dark` no longer exempts (TDD: failing test
+   "a DECLARED-DARK workflow whose cron is still live is STILL a zombie", then green, 19/19).
+   Cross-check: `ingest/scripts/doctor.py:175` already graded it this way
+   (`"red" if cron_in_source else "yellow"`) — the doctor was right and tripwire was lenient.
+2. **`neighborhood-amenities-daily.yml`** (cron `30 9 * * *` live) — tripwire's lone YELLOW.
+   Cron commented out. Re-enable is now deliberately two steps. NOT re-enabled: the daily
+   500-call paid SteadyAPI sweep is an operator spend decision and
+   `amenities_area_name_is_road_corridor_not_community` is still open (the vendor area name is
+   a ROAD at 18,013 of 21,008 paired listings).
+
+**Two checks carried a FALSE blocker; corrected, not filed.** Both
+`amenities_pairing_drain_remaining_13876` and `neighborhood_amenities_first_scheduled_fire`
+said the drain was blocked on `ENGINE_ENABLED=false`. It is `"true"` (since 08/04 00:13 UTC)
+and the gate is `!= 'false'` — the var has blocked nothing for a week. Real blocker written in:
+the workflow is disabled at the API, and the road-name defect gates re-enable.
+
+Evidence: `gh api .../actions/workflows` (4 disabled) · freshness-probe run 31609526013
+(`neighborhood_amenities | STALE | DISABLED | red`) · tripwire after:
+`ZOMBIE CRON — none: every disabled workflow also has its cron commented out`, 4 RED -> 3 YELLOW.
+Manifest regenerated `--with-state`, which also corrected 3 stale `disabled` flags
+(collier-permits, dbpr-sirs, crexi — all re-enabled since the last stamp).
+
+## 2026-08-12 (Opus 5) — RULE 0.5b leftovers: 2 of 4 run. R3 and R6 done; R5's "needs a DSN" was false.
+
+Enumerated N=4 before starting (RULE 0.8). **2 of 4 executed, 2 blocked on an operator decision.**
+
+**R3 — correction loop: RUN.** Both false negatives filed through the tool instead of only into
+prose: `reportToEmailHtml` (zero callers vs six real call sites) and `OPS_TARGET` (empty
+callers/callees vs a `writeFileSync` on line 193 of its own file), each `--outcome corrected`.
+`graphify reflect` → `2 memories (0 useful, 0 dead ends, 2 corrected)` into
+`graphify-out/reflections/LESSONS.md`. **Caveat recorded in CLAUDE.md, not rounded up:** both were
+MEASURED against the HOSTED index, but `save-result` writes LOCAL. This is not demonstrated to
+surface at hosted-query time.
+
+**R6 — git hooks: INSTALLED.** post-commit · post-checkout · merge driver, all confirmed by `hook
+status`. The hazard was real and was checked, not assumed: `.git/hooks/post-commit` already ran
+repolith's `claim release --committed` with 51 live cross-session claims riding on it. Backed the
+hook and `.git/config` up first, installed, diffed — the vendor block APPENDS after line 2 inside
+`graphify-hook-start/end` markers; repolith's line survives. The block is also worktree-safe (exits
+when git-dir ≠ git-common-dir), which matters under RULE 1.5. `check-update .` returned silent =
+nothing pending.
+
+**R5 — postgres extract: still not run, but the stated blocker was wrong.** "Needs a DSN" is a
+RULE 0.95 absence claim nobody checked: `.dlt/secrets.toml` `[destination.postgres.credentials]`
+holds host/port/database/username/password. The only real blocker is spend — `--postgres` is a flag
+on `extract`, the FULL AST **+ semantic LLM** pass over ~43,700 nodes, not a schema-only sidecar.
+Open question logged for the operator: whether `--code-only --postgres` composes into a free path
+(UNVERIFIED), and that `extract` writes `graphify-out/` so the doc plane needs backing up first.
+
+**R7 — labeling pass: still not run, and the command in the rule is a trap.** Measured:
+`.graphify_labels.json` has 4,069 labels for 4,069 communities and **zero literal `Community N`
+placeholders**, so `label --missing-only` names nothing — a bad auto-label is not a missing one.
+Real cost, as a number rather than "costs model calls": full pass = ~41 LLM calls at batch 100.
+**1,434 of the 4,069 are singletons and only 369 are size ≥25**, and `label` has no size filter —
+so most of that spend is waste by node count.
+
+Diff: CLAUDE.md (R3/R5/R6/R7 + the RULE 0.5 "stale by definition" line, which my own R6 install
+falsified — local now rebuilds per-commit and can be FRESHER than hosted; hosted stays first reach)
+and `.gitattributes` (+1 line, `graphify-out/graph.json merge=graphify`). Honest limit on that one:
+`graphify-out/` is gitignored, so the merge driver has no committed file to merge and is inert.
+
+Checks: 0 opened, 0 closed. Deliberately net-zero — R5 and R7 are legal RULE 0.85 §2 checks
+(blocked on an operator decision), but both are being put to the operator in the same breath, and a
+ledger row would be the disguise RULE 0.85 exists to stop.
+
 ## 2026-08-12 (Opus 5) — ALL GREEN on 3592ee0f, verified per workflow. Closing the loop on the afternoon's red.
 
 Every run on `3592ee0f`, read off `conclusion`, not a watch exit code:

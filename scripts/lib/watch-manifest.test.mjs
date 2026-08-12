@@ -223,6 +223,25 @@ test("zombieCrons — API-disabled while an uncommented cron still sits in sourc
   );
 });
 
+// REGRESSION 08/12/2026. `zombieCrons` used to carry `&& !e.should_be_dark`, which
+// conflated two INDEPENDENT properties: "we meant to disable this" and "its cron is
+// commented out". chief-of-staff-nightly.yml was declared dark (KILLED 08/06/2026,
+// a paid claude-code-action job that died on its 30-turn ceiling every night) while
+// `- cron: "47 8 * * *"` sat uncommented in source — so tripwire printed it GREEN
+// (`PULSE DARK`) even though one `gh workflow enable` resumed the paid nightly burn.
+// A declaration is not a guard. corridor-pulse-weekly.yml is the correct shape:
+// declared dark AND cron commented out.
+test("zombieCrons — a DECLARED-DARK workflow whose cron is still live is STILL a zombie", () => {
+  const entries = [
+    { file: "chief-of-staff-nightly.yml", scheduled: true, disabled: true, should_be_dark: true },
+    { file: "corridor-pulse-weekly.yml", scheduled: false, disabled: true, should_be_dark: true },
+  ];
+  assert.deepEqual(
+    zombieCrons(entries).map((e) => e.file),
+    ["chief-of-staff-nightly.yml"],
+  );
+});
+
 test("darkDrift — a workflow we declared dark that is ENABLED at the API", () => {
   const entries = [
     { file: "corridor-pulse-weekly.yml", should_be_dark: true, disabled: false },

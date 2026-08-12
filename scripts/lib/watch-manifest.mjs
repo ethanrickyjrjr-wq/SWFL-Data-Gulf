@@ -241,9 +241,19 @@ export function rewriteWorkflowList(yamlText, names) {
  * guard. Phase 2 CANNOT see this class (`--static` reads files, `--live` reads
  * data_lake; neither reads workflow state) — this manifest is the only artifact that
  * can. Live 07/11/2026: 4 members, orphaning 6 registry entries (08e §1, 08h §3).
+ *
+ * `should_be_dark` DELIBERATELY DOES NOT EXEMPT (corrected 08/12/2026). It used to:
+ * `&& !e.should_be_dark` treated a written-down reason as if it were a guard. It is not.
+ * A SHOULD_BE_DARK entry says "we meant to disable this"; a commented-out cron says
+ * "and it cannot come back by accident." Those are independent, and the one that
+ * actually holds is the cron. chief-of-staff-nightly.yml proved it: KILLED 08/06/2026
+ * on a paid claude-code-action that died on its 30-turn ceiling nightly, declared dark,
+ * and printed GREEN by tripwire while `- cron: "47 8 * * *"` sat live in source — one
+ * `gh workflow enable` from resuming the burn. corridor-pulse-weekly.yml is the shape
+ * we want: declared dark AND cron commented out, so it is a zombie under neither test.
  */
 export function zombieCrons(entries) {
-  return entries.filter((e) => e.scheduled && e.disabled === true && !e.should_be_dark);
+  return entries.filter((e) => e.scheduled && e.disabled === true);
 }
 
 /** A workflow we DECLARED dark that is ENABLED at the API — what checkPulseDark exists to catch. */

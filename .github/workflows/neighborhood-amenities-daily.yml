@@ -10,8 +10,21 @@ name: neighborhood-amenities-daily
 # First manual chunked run executed 08/03/2026 (session, 250-call batch).
 
 on:
-  schedule:
-    - cron: "30 9 * * *"   # daily 09:30 UTC, after the listing-lifecycle daily lands new property_ids
+  # DISABLED 08/04/2026 — `gh workflow disable neighborhood-amenities-daily.yml`, API reads
+  # `disabled_manually`. It was wired onto a daily schedule the operator never approved, and
+  # the gate is `if: vars.ENGINE_ENABLED != 'false'` with ENGINE_ENABLED = "true", so the next
+  # 09:30 tick would have spent up to 500 paid SteadyAPI calls unattended.
+  #
+  # CRON COMMENTED OUT 08/12/2026 (was live-in-source while the workflow sat disabled — the
+  # zombie class scripts/lib/watch-manifest.mjs zombieCrons() names, and the reason
+  # `neighborhood_amenities` grades 🔴 red rather than 🟡 yellow on the daily doctor:
+  # ingest/scripts/doctor.py:175 reds a DISABLED workflow precisely when its cron is still
+  # in source). Re-enabling is deliberately TWO steps now: uncomment here AND
+  # `gh workflow enable`. Do not do either until `amenities_area_name_is_road_corridor_not_
+  # community` is resolved — the vendor "neighborhood" name is a ROAD at 18,013 of 21,008
+  # paired listings, so draining the remaining 13,876 pairs road names into more listings.
+  # schedule:
+    # - cron: "30 9 * * *"   # daily 09:30 UTC, after the listing-lifecycle daily lands new property_ids
   workflow_dispatch:
     inputs:
       dry_run:
