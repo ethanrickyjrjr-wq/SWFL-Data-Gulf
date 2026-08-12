@@ -1,3 +1,36 @@
+## 2026-08-12 (Opus 5) — CI IS GREEN (run 31624182243, conclusion success, 1f01c91a). And the "canvas flake" is not a flake — measured.
+
+**The green claim, stated the only way it survives:** `gh run view 31624182243 --json conclusion`
+→ `success | completed | 1f01c91a | feat(gate): Gate 1.6…`, single job `build` → `success`.
+Read off `conclusion`, not off a watch command's exit code — `gh run watch … | tail` returns
+tail's status, and it printed `EXIT=0` for a run that had FAILED earlier in this same session.
+
+**I called canvas a flake one entry ago on one data point. That was wrong and I went and counted.**
+5 of the last 30 workflow runs died at `Install dependencies` on
+`install script from "canvas" exited with 1` — runs `31624358035`, `31624358015`, `31623927501`,
+`31623500297`, `31621041184`. Roughly one run in six, across CI AND Smoke — Prod. `prebuild-install`
+misses its prebuilt binary, falls back to node-gyp, and the runner has no `libpixman-1-dev`.
+**Intermittent is why it has never been fixed:** a rerun clears it, so every session that hits it
+writes it off, exactly as I just did.
+
+What is actually true about the dependency, checked rather than assumed:
+- `canvas@3.2.3` sits in **devDependencies**.
+- **ZERO direct imports** anywhere in `lib/ app/ components/ scripts/ refinery/`.
+- We already ship `@napi-rs/canvas` — prebuilt for every platform, no system libs.
+- `react-konva` is the likely reason it was added, and it is explicitly browser-only:
+  `components/email-lab/social/SocialComposer.tsx:10` — *"react-konva is browser-only (it touches
+  `window`); never server-render it."*
+
+So it looks like dead weight kept alive for a jsdom `getContext('2d')` path nobody has confirmed —
+but "looks like" is not proof, and the fix is either a dependency removal or an edit to every
+workflow that runs `bun install`. Neither is a drive-by. Check opened with all three candidates:
+`canvas_install_flake_pixman`.
+
+**Score, not rounded up.** CI: green, proven. `Smoke — Prod` and `Rollback on red — Prod` on the
+same SHA: RED, and their failure is this canvas install, not the diff. So "GitHub green" is true of
+CI and false of the run list as a whole, and it will stay intermittently false until the canvas
+decision is made.
+
 ## 2026-08-12 (Opus 5) — pin the ratchet's new scope with a red-first test; correct the STRIKES guard line
 
 Two follow-ups on the widening, both caught in review of my own pass:
