@@ -238,6 +238,12 @@
       "pack": "master",
       "accepted_on": "07/22/2026",
       "note": "Operator decree 07/22/2026: first rebuild since 07/20 after egress triage — burner verified caged, storage log clean, rebuild cleared as not-the-burner (overage was 07/21, after rebuilds went dark). Attribution watched live via storage log. (decreed dispatch via scripts/dispatch-rebuild.mjs)"
+    },
+    {
+      "run_url": "https://github.com/ethanrickyjrjr-wq/SWFL-Data-Gulf/actions/runs/31606980553",
+      "pack": "lee-deed-records-swfl",
+      "accepted_on": "08/12/2026",
+      "note": "operator decree: build the cash-vs-financed split, deed_cash_financed_split_live_verify (decreed dispatch via scripts/dispatch-rebuild.mjs)"
     }
   ]
 }
