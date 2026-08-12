@@ -1,3 +1,10 @@
+## 2026-08-12 (Sonnet 5) — push: email-playbook correction + ingest/lockfile refresh (commit board cleanup, part 2)
+
+Pushing `c5d6da78` (email-build-playbook WALKED/WRITTEN correction) and `46706166` (lee_deed raw
+snapshot + uv.lock refresh) — the graphify-install commit from the same cleanup pass already reached
+origin via the parallel session's own push. `master.json` and `.claude/settings.json.graphify-bak`
+left untouched, staged under that session's claim.
+
 ## 2026-08-12 (Sonnet 5) — Commit board cleanup: graphify install landed, email-playbook WALKED/WRITTEN correction, graph-compartments §6b, and memory updated for all of it.
 
 Committed working-tree state that had sat uncommitted while a parallel session (`9db5b8a2...`) was
