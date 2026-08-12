@@ -89,7 +89,6 @@ on:
       - "listing-week-weekly"
       - "market-heat-swfl monthly"
       - "marketbeat-pdf-ingest"
-      - "neighborhood-amenities-daily"
       - "notion-sync-weekly"
       - "realtor-geo-trends-monthly"
       - "social-pulse-scan"

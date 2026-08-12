@@ -8,10 +8,15 @@
 //     "Daily Brain Rebuild" here at the 07/12/2026 cron cutover — the rebuild's
 //     cron retired, so it left the watched lists entirely (it stays in
 //     HEAL_EXCLUDED_NAMES as defense in depth).
-//   - "Chief of staff nightly" — propose-only Sonnet workflow with its own kill
-//     switch (CHIEF_OF_STAFF_ENABLED); an L0 auto-rerun is an unattended paid
-//     LLM call on failure. Its plan (2026-07-10-chief-of-staff-nightly.md Task 5)
-//     deliberately wires the incident LOGGER only, never the healer.
+//   - "Chief of staff nightly" — REMOVED from EXCLUDED 08/12/2026, exactly as
+//     "Daily Brain Rebuild" was above and for the same reason: its cron is gone,
+//     so it left BOTH watched lists and there is no logger-minus-healer delta
+//     left to assert. It was propose-only Sonnet with its own kill switch
+//     (CHIEF_OF_STAFF_ENABLED) and its plan (2026-07-10-chief-of-staff-nightly.md
+//     Task 5) wired the LOGGER only, never the healer — an L0 auto-rerun is an
+//     unattended paid LLM call. That workflow was KILLED 08/06/2026 (30-turn
+//     ceiling, died nightly) and its cron commented out 08/12; the name stays in
+//     HEAL_EXCLUDED_NAMES as defense in depth if the cron ever returns.
 //
 // This catches the real future-drift failure mode: a new pipeline added to one
 // trigger list but not the other (a healer that silently stops watching a cron,
@@ -54,7 +59,7 @@ const log = extractWorkflowList(readFileSync(WF("log-cron-incident.yml"), "utf8"
 // LOGGED, never HEALED: an auto-rerun cannot fix a deterministic compile or test
 // failure, and a flake that passes on retry makes a real red look transient —
 // which is how CI stayed red for 42 runs 08/02–08/04 2026 without anyone noticing.
-const EXCLUDED = ["Nightly Chain", "Chief of staff nightly", "CI", "factuality-gate", "deptry"];
+const EXCLUDED = ["Nightly Chain", "CI", "factuality-gate", "deptry"];
 
 test("trigger lists parsed (guard against a silent empty-list false pass)", () => {
   assert.ok(heal.length > 5, `heal watched set looks empty/unparsed: ${heal.length}`);
