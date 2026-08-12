@@ -7,7 +7,7 @@
 
 Markers: **[ORPHAN]** nothing in the repo points at this file — it is invisible unless you come through this index, and it is a DELETION CANDIDATE. **[weak]** reachable only by bare filename, which leads nowhere.
 
-Reachability at generation: 893 by path · 536 by name only · 242 orphaned. Re-measure with `node scripts/doc-reachability.mjs`.
+Reachability at generation: 894 by path · 536 by name only · 241 orphaned. Re-measure with `node scripts/doc-reachability.mjs`.
 
 ## docs/superpowers — 843
 
@@ -1593,7 +1593,7 @@ Reachability at generation: 893 by path · 536 by name only · 242 orphaned. Re-
 - `_RESEARCH/agent-behavior/2026-08-10-hermes-skills-hooks-blueprints-research.md` — Hermes skills, hooks, and automation blueprints — the driver surface for the email-builder agent (researched l — Operator decree: "brainstorm so we get it right after you crawl4ai ideas and skills for hermes."
 - `_RESEARCH/agent-behavior/2026-08-10-instagram-improvement-harvest.md` — Instagram + GitHub improvement harvest — first run (08/10/2026) — Operator decree: "build an Instagram apify that finds skills to make us better at not sucking,
 - `_RESEARCH/agent-behavior/2026-08-11-graphify-community-structure-crawl4ai-research.md` — Graphify community structure — what we want, in CS terms, and what we measured — are mostly related together together. Email design goes with email design, email sending with email
-- `_RESEARCH/agent-behavior/2026-08-12-crawl4ai-four-lane-strategy.md` **[ORPHAN]** — crawl4ai — four-lane strategy (vendor ground-truth, competitor/design, new data sources, live answer-time) — make our AI more knowledgable." Dispatched 4 parallel Sonnet agents, one per lane, each required to
+- `_RESEARCH/agent-behavior/2026-08-12-crawl4ai-four-lane-strategy.md` — crawl4ai — four-lane strategy (vendor ground-truth, competitor/design, new data sources, live answer-time) — make our AI more knowledgable." Dispatched 4 parallel Sonnet agents, one per lane, each required to
 
 ## .claude/agents — 9
 
