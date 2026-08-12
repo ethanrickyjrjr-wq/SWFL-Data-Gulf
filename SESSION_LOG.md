@@ -98,6 +98,29 @@ CLAUDE.md's RULE 0.5b R6 block and the RULE 0.5 amendment both now overclaim and
 correction. Not made in this pass because `CLAUDE.md` currently carries another live session's
 uncommitted rule edit, and committing the file would carry their work.
 
+## 2026-08-12 (Opus 5) — `claim wait` can exit 0 WITHOUT granting the claim. Two strike shapes staged, not applied.
+
+Follow-on to the entry below. `_ASSISTANT/STRIKES.md` was held by **three different sessions** across
+this one (27 min, then 1 min, then 14+ min) and was never free. **The claim was never overridden** —
+a parallel session was actively appending to it, and in fact added the 5th `paid-before-free` line
+itself while this session ran, so that owed item closed without me.
+
+**The finding worth inheriting: a backgrounded `claim wait` EXITED 0 and the subsequent edit was
+still DENIED.** Exit 0 is not proof you hold the file — re-check `claim list` before trusting it.
+This matters beyond today: the operator proposed an apply-on-release edit queue (write the intended
+edit, drain it when the lock frees) and **its entire trigger would be "the wait fired,"** which this
+shows is not reliable on its own. Any such queue must re-verify BOTH that it holds the claim AND that
+the anchor still exists exactly once, then flag rather than force. Half of it already exists: `claim
+wait` holds the queue position with no polling; only the unattended apply is missing.
+
+Two new strike shapes are staged verbatim with their insertion anchor in
+`docs/handoff/2026-08-12-open-house-decisions-owed-work-and-the-tracking-finding.md` (Second
+Appendix) — `handed-the-operator-my-design-choice` and `claimed-our-behavior-without-opening-the-file`.
+One paste when the file frees. **Owed, not done.**
+
+Also corrected in that handoff: it claimed "nothing in this session was committed," which stopped
+being true at `daef619d`.
+
 ## 2026-08-12 (Opus 5) — Open House: 4 plans, 5 operator decisions, and the click-tracking claim I got wrong
 
 **Four parallel Sonnets wrote the four Open House package plans** (`docs/superpowers/plans/2026-08-12-open-house-pkg{1,2,3,4}-*.md`),
