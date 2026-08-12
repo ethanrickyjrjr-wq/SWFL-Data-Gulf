@@ -1,3 +1,23 @@
+## 2026-08-12 (Sonnet 5) — Lee/Collier parity handoff written; corrected my own wrong claim on the record
+
+Operator caught me: I'd said "Lee only pulls DEED" — wrong. The TABLE holds all 32 doc types
+(confirmed 28,186 rows/22 business days already in data-roots.md); it's the BRAIN
+(`lee-deed-records-swfl`) that hard-filters `.eq("doc_type", "DEED")` on every query, never emitting
+an all-types number. Corrected in-conversation, then wrote the real deliverable:
+`docs/handoff/2026-08-12-lee-collier-deed-records-parity-and-routing-handoff.md` — the full
+asymmetry table (ingest scope now even, brain scope is the real gap, price data is a PERMANENT
+Collier gap not a build gap — Collier's UI has no consideration column at all, confirmed live), a
+5-step parity plan (all arithmetic on data already loaded, no new ingest), and the routing answer:
+grepped `master.mts` — neither brain is wired in; the ONE comment referencing Lee's brain
+("moot while its table is empty") is now factually stale since this morning's load. Named the real
+destinations: `_RESEARCH/data-and-ingest/2026-07-22-predictive-analytics-and-lead-mining.md`'s
+already-researched distress-signal lane (LIS PENDENS/JUDGMENT/PROBATE/NOC), and the already-live
+`why-isnt-it-selling` surface as the closest real consumer, not a hypothetical one.
+
+Not built this session: the actual parity fixes (Lee all-types metric, Lee NOC metric) or the
+master-wiring — this is a handoff, operator said "same-session follow-up, not a new project" when
+asked to proceed.
+
 ## 2026-08-12 (Sonnet 5) — collier_official_records: 3 push-gate fixes before it could ship
 
 Follow-up to the entry below (same session). Three real gates caught real gaps in the first pass:
