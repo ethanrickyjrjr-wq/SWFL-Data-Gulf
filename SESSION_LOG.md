@@ -1,3 +1,41 @@
+## 2026-08-12 (Opus 5) — Apify spend MEASURED + the MCP-edge money guard that was missing, and the 08/12 research finally committed
+
+The 08/12 Apify incident, measured from the account instead of guessed (free GETs only, cap untouched):
+`/v2/users/me`, `/v2/users/me/limits`, `/v2/users/me/usage/monthly`, `/v2/actor-runs`.
+
+- **Unauthorized Reddit run = $4.07** — 11 runs of `TwqHBuZZPHJxiQrTU`, 15:44–15:53, `origin: MCP`;
+  6 ABORTED and still charged $0.499 each. Per-run sum $4.066 reconciles against the day's
+  `PAID_ACTORS_PER_EVENT` of $4.113 (two independent endpoints agreeing).
+- **The account was at $56.67 of a $60 cap before that call.** It crossed the line; it did not spend
+  the month. **08/04 = $27.89 and 08/05 = $14.37 — $42.26, 70% of the cycle, in two days.**
+  `_ASSISTANT/STRIKES.md` records 08/04 as "$14.08"; the account says otherwise and 08/05 is
+  recorded nowhere. **Stop quoting $14.08.**
+- **99.5% of the cycle ($60.45 of $60.78) is `PAID_ACTORS_PER_EVENT`**, not compute (compute: $0.14).
+  Faster runs save nothing; fewer paid events is the only lever.
+- **VERIFIED (was an open guess): the property gap-fill lane IS down.** `effectivePlatformFeatures`
+  has ACTORS/STORAGE/PROXY/SCHEDULER/WEBHOOKS all `isEnabled: false`,
+  `MONTHLY_TOTAL_USAGE_HARD_LIMIT_EXCEEDED`. Auto-resets 08/28/2026 (cycle 07/28–08/27), no operator
+  action needed. Raising `maxMonthlyUsageUsd` is the only faster path and is spend — operator's call.
+- NOT claimed: only today's 11 runs were inspected. Earlier-cycle Apify-for-Reddit use is unchecked.
+
+**The guard gap, mechanically:** every money guard here (`check-no-paid-dispatch`,
+`check-no-new-paid-surface`) is wired on the **Bash** matcher. An Apify call through the MCP plugin
+never touches a shell, so none of them could see it. `check-no-apify-actor-run.mjs` (matcher
+`mcp__plugin_apify_apify__*`) blocks `call-actor` + `apify--rag-web-browser`, releases on
+`OPERATOR_APPROVED_PAID_RUN=1`. Proven live: blocks both spend paths (exit 2), allows free reads,
+docs, and `abort-actor-run`; settings.json parses. `mcp__serena__*` already in settings is the
+precedent that MCP-name matchers fire. **Scope, stated in the file:** covers the agent MCP path
+(what failed); does NOT cover Apify called from our own Python/TS code.
+
+**Filing debt closed 3 of 3 research files** — the three 08/12 research files are committed with
+`_RESEARCH/INDEX.md` lines, honestly labelled (crawl4ai halves solid; Reddit halves thin-to-unusable
+from a `sort:top`+`timeframe:year` query-design error, not just the cap). Both 08/12 handoffs are
+committed too — **they had been sitting untracked on disk, which is why they were unfindable.**
+
+Check opened: `reddit_free_lane_credential_decision` (operator decision — free script-app creds vs
+dropping the lane). **Owed and NOT done: the 5th `paid-before-free` strike line** — another live
+session holds `_ASSISTANT/STRIKES.md` and it was not clobbered.
+
 ## 2026-08-12 (Sonnet 5) — Lee/Collier parity handoff written; corrected my own wrong claim on the record
 
 Operator caught me: I'd said "Lee only pulls DEED" — wrong. The TABLE holds all 32 doc types

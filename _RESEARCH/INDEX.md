@@ -103,6 +103,22 @@ index never mentioned. A grep of `_RESEARCH/` is not a search of our research.
   in the repo are SESSION_LOG.md, and ~1,480 more nodes are ONE downloaded vendor .beauty.js.**
   Carries the proposed compartment list + the caveat that the tuning flags do NOT reach the hosted
   MCP index.
+- `2026-08-12-validator-in-the-loop-generation.md` — generate-then-check loops: how a validator sits
+  in the generation path rather than after it. 9 of 10 sites crawled + 23 of 40 Reddit queries; the
+  rest died with the Apify cap (see the spend incident below). **crawl4ai half is solid and cited;
+  the Reddit half is thin and partly unusable** — a `sort:top` + `timeframe:year` query design ranks
+  by global Reddit score and returns viral noise, not topical signal. Read the crawl half, discount
+  the Reddit half.
+- `2026-08-12-grounding-abstention-and-context-injection.md` — when a model should refuse to answer
+  vs. answer from injected context, and how context gets injected. 13 sites crawled (over target).
+  **Zero usable Reddit signal** — 20 of 40 queries, all defeated by the same loose-keyword problem;
+  the scoped retry was killed by the cap. The crawled half stands on its own.
+- Both of the above, plus the open-house file under `email-and-social/`, came out of the 08/12/2026
+  Apify spend incident — three research agents run against a paid surface nobody approved.
+  `docs/handoff/2026-08-12-apify-spend-incident-and-research-handoff.md` is the honest record; the
+  measured numbers ($4.07 for the run, $42.26 spent on 08/04–08/05, cap resets 08/28/2026) are in
+  `_ASSISTANT/SCRATCHPAD.md`. The research is real and worth reading. What it cost is on the record
+  next to it.
 
 
 **audits/** — dated deep-pass audits (14). The 07/18 data-consolidation set (P1–P10 + BLOCKERS)
@@ -581,6 +597,13 @@ personal financial notes.
   not bound** — their own words: "non-deterministic… may vary across runs, even with identical
   inputs", no chart-type parameters, and a label like `$100` "may be interpreted as data". We bind
   (`pickFramesForData` + `bindFrameSpec`). Wedge: Gamma prompts charts, we bind them.
+- `2026-08-12-open-house-invitation-craft.md` — how an open-house invitation is actually written:
+  subject lines, the one-glance detail block, what agents put above the fold. **10 of 10 sites
+  crawled, 9 usable — this is the strongest of the three 08/12 files.** Its Reddit half issued 80
+  queries and most came back unusable on the same loose-keyword problem; the scoped retry was killed
+  by the Apify cap. Feeds the open-house recipe; pair it with
+  `docs/handoff/2026-08-12-open-house-and-build-ai-grounding-handoff.md`. Cost record and the
+  measured spend: `docs/handoff/2026-08-12-apify-spend-incident-and-research-handoff.md`.
 
 **private/** — personal/strategy notes outside the platform (3, stocks architecture)
 
