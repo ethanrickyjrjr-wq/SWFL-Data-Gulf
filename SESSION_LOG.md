@@ -1,3 +1,52 @@
+## 2026-08-12 (Opus 5) — killed the canvas install failure at the root: ONE composite action, 26 call sites, apt only on the recovery path
+
+Operator: *"I CAN'T PUSH, SO YOU WILL HAVE TO TAKE CARE OF IT ALL."* This is the piece that was
+still reddening runs after CI itself went green.
+
+**Root cause, quoted from the run, not inferred:** `prebuild-install warn install socket hang up`.
+node-canvas tries to download its prebuilt binary, the download dies on a transient socket error,
+prebuild-install falls back to a node-gyp source build, and the runner image has no Cairo/pixman
+headers — `Package 'pixman-1', required by 'virtual:world', not found`. 5 of the last 30 runs, in
+CI **and** Smoke — Prod.
+
+**canvas is NOT removable, checked before assuming it was.** `pdf-to-img`'s Node render path needs
+it and does not declare it; `lib/pdf/__tests__/visual-parity-deps.smoke.test.ts` exists precisely to
+isolate this failure and calls `createCanvas` directly. It is a devDependency with no direct imports
+elsewhere — which is what made "just drop it" look right at a glance, and it would have broken the
+PDF visual-parity suite.
+
+**The fix.** New composite action `.github/actions/bun-install`. All **26 of 26** workflows that ran
+`bun install --frozen-lockfile` now call it — zero raw installs remain. It installs, and ONLY IF
+THAT FAILS installs the node-canvas build deps and retries once. Five runs in six download the
+prebuilt binary fine and pay nothing; the sixth recovers instead of going red. The second attempt is
+the real verdict — if it fails, the run still goes red, no swallowing.
+
+Package list is verbatim from node-canvas's own wiki (crawl4ai, read 08/12/2026):
+`build-essential libcairo2-dev libpango1.0-dev libjpeg-dev libgif-dev librsvg2-dev`. libpixman
+arrives as a dependency of libcairo2-dev. Not from memory — RULE 0.4.
+
+**Blast radius checked before shipping, because a local `uses:` path has real ways to break:**
+- **Checkout ordering** — a local action does not exist until `actions/checkout` runs. Parsed all
+  26 workflows and asserted checkout precedes the install step in every job: **26 jobs, 0 problems.**
+- **Sparse checkout** would omit `.github/actions/` — grepped, **none in the repo.**
+- **Self-hosted runners** (2 workflows on `[self-hosted, swfl-local]`) would choke on `sudo apt-get`
+  — **neither calls bun-install**, and the apt block is `RUNNER_OS = Linux` guarded anyway.
+- **YAML validity** — strict `Bun.YAML.parse` over all 27 changed files: **0 bad.** Not PyYAML,
+  which STRIKES records as too lenient to catch what GitHub rejects.
+- **Manifest consumers** — `build-watch-lists.mjs` re-parsed all 110 workflows clean and the
+  manifest did not move (the `uses:`-for-`run:` swap changes no name, cron, or timeout).
+- `node --test` over `.github/scripts`, `scripts/lib`, `.claude/hooks`: **292 pass / 0 fail.**
+
+Also swept `master.json` — a 241-byte `/api/b/master?view=speak` dump that had been staged into the
+repo root by some session. Nothing in the tree writes it and it is trivially refetched.
+
+**Still not mine to touch, and named so nobody assumes the board is empty:** four files modified by
+`bacce58e` (`_ASSISTANT/TODAY.md`, `docs/standards/email-build-playbook.md`,
+`docs/standards/graph-compartments.md`, the lee-deed raw JSON) and five untracked by `d2e44a19` /
+`9db5b8a2` (`brains/collier-official-records-swfl.md` + four open-house plan docs). All belong to
+sessions that are still live and holding claims. Committing another session's in-progress work under
+my message is the exact thing RULE 1.5 exists to stop.
+
 ## 2026-08-12 (Opus 5) — CI IS GREEN (run 31624182243, conclusion success, 1f01c91a). And the "canvas flake" is not a flake — measured.
 
 **The green claim, stated the only way it survives:** `gh run view 31624182243 --json conclusion`

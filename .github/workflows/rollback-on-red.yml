@@ -42,7 +42,7 @@ jobs:
         with:
           bun-version: "1.3.14"
 
-      - run: bun install --frozen-lockfile
+      - uses: ./.github/actions/bun-install
 
       - name: Smoke → confirm → rollback decision
         env:

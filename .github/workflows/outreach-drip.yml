@@ -35,7 +35,7 @@ jobs:
         with:
           bun-version: "1.3.14"
       - name: Install dependencies
-        run: bun install --frozen-lockfile
+        uses: ./.github/actions/bun-install
       - name: Run outreach drip
         env:
           # DRY_RUN defaults true on manual dispatch; the (paused) schedule will run live.

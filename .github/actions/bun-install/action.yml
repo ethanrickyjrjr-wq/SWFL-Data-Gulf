@@ -1,0 +1,50 @@
+name: Install dependencies (canvas-hardened)
+description: >
+  bun install --frozen-lockfile, with a one-shot recovery for node-canvas.
+
+  WHY THIS EXISTS (measured 08/12/2026): 5 of 30 consecutive workflow runs died at
+  `Install dependencies` — CI 31623927501, 31623500297, 31621041184 and Smoke — Prod
+  31624358035, 31624358015 — all on `install script from "canvas" exited with 1`.
+  The log names the mechanism exactly: `prebuild-install warn install socket hang up`.
+  node-canvas tries to download its prebuilt binary, the download dies on a transient
+  socket error, prebuild-install falls back to a node-gyp source build, and the runner
+  image has no Cairo/pixman headers — `Package 'pixman-1', required by 'virtual:world',
+  not found`.
+
+  Because it is INTERMITTENT it survived: a rerun clears it, so every session that hit
+  it wrote it off as flake instead of counting. Roughly one run in six was red for a
+  reason that had nothing to do with the diff.
+
+  canvas is NOT removable — pdf-to-img's Node render path needs it and does not declare
+  it (see lib/pdf/__tests__/visual-parity-deps.smoke.test.ts, which exists to isolate
+  exactly this failure). So the fix is to make the fallback path actually work.
+
+  The apt install is deliberately on the RECOVERY path, not the happy path: five runs in
+  six download the prebuilt binary fine and should not pay ~20s of apt for a problem they
+  do not have. Package list is verbatim from node-canvas's own wiki
+  (https://github.com/Automattic/node-canvas/wiki/Installation:-Ubuntu-and-other-Debian-based-systems),
+  read 08/12/2026 — libpixman arrives as a dependency of libcairo2-dev.
+
+runs:
+  using: composite
+  steps:
+    - name: bun install (with node-canvas recovery)
+      shell: bash
+      run: |
+        set -uo pipefail
+        if bun install --frozen-lockfile; then
+          exit 0
+        fi
+        echo "::warning title=bun install retry::First install failed. Retrying once with node-canvas build dependencies present (see .github/actions/bun-install/action.yml)."
+        if [ "${RUNNER_OS:-}" = "Linux" ]; then
+          sudo apt-get update -qq
+          sudo apt-get install -y -qq \
+            build-essential \
+            libcairo2-dev \
+            libpango1.0-dev \
+            libjpeg-dev \
+            libgif-dev \
+            librsvg2-dev
+        fi
+        # Second attempt is the real verdict — if this fails the run SHOULD go red.
+        bun install --frozen-lockfile

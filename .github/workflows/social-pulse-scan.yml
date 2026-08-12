@@ -22,7 +22,7 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - uses: oven-sh/setup-bun@v2
-      - run: bun install --frozen-lockfile
+      - uses: ./.github/actions/bun-install
       - name: Run pulse scan
         env:
           SUPABASE_URL: ${{ secrets.SUPABASE_URL }}

@@ -74,7 +74,7 @@ jobs:
 
       - name: Install bun dependencies
         working-directory: brain-platform
-        run: bun install --frozen-lockfile
+        uses: ./.github/actions/bun-install
 
       - name: Setup Python (for the graphify CLI)
         uses: actions/setup-python@v6
