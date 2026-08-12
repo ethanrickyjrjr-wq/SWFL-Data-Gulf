@@ -183,6 +183,65 @@ Whichever session is free first does this — five-minute task, no design judgme
 
 ---
 
+## COORDINATION — added 08/12/2026 after all 4 plans were written. READ BEFORE STARTING ANY PACKAGE.
+
+All four plans are on disk (`docs/superpowers/plans/2026-08-12-open-house-pkg{1,2,3,4}-*.md`). Each
+was written against the real code, and four things in THIS document turned out to be wrong or
+incomplete. Fix them here rather than rediscovering them per-session:
+
+1. **The "why these 4 packages don't collide" table has a hole: `lib/email/build-doc.ts` is owned by
+   NO package and is required by TWO.** Package 1 needs `BuildScope` (`:100–107`) plus a 4-line
+   insert inside `authorDoc` (after `:1272`) — it is the only server-side point where a captured
+   date/time can reach `facts` before `buildOpenHouse` runs. Package 3 needs `contentPatchSystem`
+   (`:446`) and its two call sites (`:576` in `authorAddedSlots`, `:895` in `fillSkeletonResult`) —
+   the AI route only dispatches; the system prompt the model actually reads is assembled there.
+   The regions do not overlap, so git will merge them, but two sessions editing one file on plain
+   `main` is the RULE 1.5 case. **Sequence them, or the second one isolates via
+   `scripts/worktree.mjs`.**
+2. **Assertion numbering in `scripts/email/render-open-house.mts` is double-claimed.** Package 2's
+   plan claims 9 and 10; Package 4's claims 9. Whichever lands second renumbers off the live
+   `checks` array length — never off a hardcoded literal.
+3. **A stale-project hazard found by Package 3 lives in Package 1's file.** `EmailLabGridShell` is
+   keyed `grid-${buildKey}`, not `grid-${id}-${buildKey}`, at the embedded mount — a client-side
+   move between two projects' email-lab pages could serve a stale `projectId` closure, which is
+   exactly the confidently-wrong-project failure Package 3's guard exists to prevent. Unverified
+   without a live browser trace. **Package 1 owns the one-line key fix**; Package 3 must not reach
+   into that file for it.
+4. **The graph WAS available this session** — `mcp__graphify__gx_callers` / `graph_stats` load
+   normally via `ToolSearch`. Package 2 reported them missing and fell back to Grep; its
+   one-caller/one-callee finding for `dateTimeCard()` happened to be correct, but it is
+   Grep-verified, not graph-verified. Don't record "the graph was unavailable" as a repo fact.
+
+Two claims in this document that the plans DISPROVED against real code — do not act on them:
+
+- **Package 2's `applyBrand` "single global `website_url` override" failure mode is dead code.**
+  `lib/email/brand/apply-brand.ts:74–109` resolves destinations by ROLE (fixed 08/03/2026; the old
+  blanket rewrite survives only as a comment). The live risk is the opposite shape: a NEW button
+  that omits `props.role` inherits the primary-CTA website fallback.
+- **Package 4's "reuse `validateNarrative()`" is blocked as literally written.** Its input type
+  mandates a 1–3 item `outlook` array carrying `[INFERENCE]` tags, hedge language, a numeric base
+  and a 20+ char falsifier (`lib/narratives/types.ts:17–22`, hard-failed at
+  `lib/narratives/validate.ts:109–111`). A two-sentence invite has none of that. The real choice is
+  an additive sibling export inside `lib/narratives` vs. a recipe-local checker — an operator call,
+  not a fork.
+
+**Package 2 is BLOCKED on an operator decision, not just under-specified.** The literal two-button
+ask fails `lib/deliverable/campaign-coherence.test.ts:123` ("exactly ONE call to action", asserted
+across every lifecycle email), contradicts `email-build-playbook.md:812–813`, and the bottom button
+pointing at the listing is the exact anti-pattern named in `lib/email/lifecycle-chrome.ts:144–145`
+("never point at what the reader is already looking at"). This session's own research measured the
+cost of multi-CTA (`_RESEARCH/email-and-social/2026-08-12-open-house-invitation-craft.md` §2a). Do
+not implement the second button until Ricky rules on it.
+
+**Also unresolved and now blocking more than one package:** the 15–35 word invitation band
+(`lib/deliverable/recipes/shared.ts:602`) vs. the 50–125 body band (`email-build-playbook.md:397`,
+encoded at `lib/narratives/length.ts:29–36`). Package 4 needs it for assertion 9; Package 3 needs it
+because the grounded AI will be TOLD which one is true, and citing the wrong one is itself the
+constraint-drift failure that package exists to prevent. Neither package picked a number. Don't
+average them.
+
+---
+
 ## NOT startable — blocked on the operator
 
 **Step 5 of the source plan (build the RSVP behavior)** cannot start until Ricky answers source

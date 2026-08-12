@@ -147,6 +147,40 @@ traversals as the CODE lane as of `7fc8c44b`.
 Never answer without opening something. Never spec a new dependency without first confirming we
 don't already have it. Subagents follow this rule too.
 
+**SHARPENED 08/12/2026 — "OPENING SOMETHING" IS NOT THE BAR. OPEN THE FILE THAT OWNS *THIS
+SENTENCE*.** Operator: *"How much fucking time does Claude waste guessing the wrong thing instead of
+looking?? We have 79999900 guards."* Three structural claims in ONE session were made before opening
+the file that owned them, and **all three were caught by him asking a question, not by any guard** —
+including a turn where `check-four-searches` PASSED. That gate verifies TOPIC coverage (did you
+search the subject), never CLAIM coverage (did you read the file that owns the specific sentence).
+**Passing it is not evidence the sentence is true.**
+
+**The failure shape, so it is recognizable:** a sentence describing how one of OUR OWN subsystems
+behaves — what a page is for, what a guard checks, where data lands, what a button does — spoken
+from the SHAPE of the system rather than from its code. Not a memory failure; answering at the wrong
+altitude. The tell is a load-bearing "because": *"the landing page is what gives you the tracking."*
+One read of `lib/email/campaign-click-alert.ts` showed the click event already carries the exact URL,
+the recipient and the campaign — so **every link tracks and the page was never the mechanism.** The
+operator got there by asking; the guards did not.
+
+**THE BAR: before any sentence asserting how our system behaves, the file that owns that behavior
+must have been opened IN THIS TURN.** Not a sibling file, not the doc describing it, not the same
+subsystem last week. If it has not been opened, the honest sentence is "I have not read X yet" —
+then go read it. One tool call, always cheaper than him finding it.
+
+**WHY NOT AN 18th GUARD:** nearly every guard we own is a PRE-PUSH gate on an ARTIFACT. All three
+failures happened in CONVERSATION, where nothing gates anything — nothing wrong was ever pushed.
+Adding guards is not the fix; the ratio of process-shaped guards to claim-shaped ones is. Candidate
+mechanism, pending operator sign-off on the hook point: a Stop-hook in the `answer-fix-proof` family
+that blocks when an answer asserts our own system's behavior and no source-file read appears in that
+turn's transcript. Full postmortem:
+`docs/handoff/2026-08-12-open-house-decisions-owed-work-and-the-tracking-finding.md` §6.
+
+Twin failure, same session, same root: **when two placements of the same function look like the
+choice, the choice is usually wrong — reach for the keyed one-root registry we already use three
+times (`lib/email/social/platforms.ts`, `lib/email/lab/capabilities.ts`, `apply-brand.ts:74-109`)
+instead of handing the operator a menu.**
+
 ---
 
 # RULE 0.5b — USE THE WHOLE TOOL. THE VENDOR ALREADY COMPUTED IT.

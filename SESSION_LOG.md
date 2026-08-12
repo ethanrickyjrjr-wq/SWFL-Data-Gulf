@@ -1,3 +1,96 @@
+## 2026-08-12 (Opus 5) — CORRECTION to b2edd782, same session: R6's hook is installed and its rebuild REFUSES TO WRITE. And R6 degrades R7.
+
+Found by opening `~/.cache/graphify-rebuild.log` while checking something else. `hook status` says
+installed; that is not the same as working, and I shipped b2edd782 saying R6 was done.
+
+**1. THE POST-COMMIT REBUILD IS A NO-OP FOR `graph.json`.** Every run in the log ends:
+`WARNING: new graph has 43,707 nodes but existing graph.json has 43,818. Refusing to overwrite —
+you may be missing chunk files from a previous session. Pass --force to override.` **The vendor's
+hook does not pass `--force`.** This is the SAME node-loss refusal `docs/standards/graph-compartments.md`
+§2.1 documents for `cluster-only` and §2.3 documents for the npm scripts — it also governs the
+hook, which §2.3's "left UNCHANGED deliberately" reasoning never considered. So RULE 0.5b R6's
+"freshness is a command, not a caveat" is HALF TRUE: the command runs on every commit and then
+declines to write. **The `stale by definition` line I amended in RULE 0.5 on the strength of this
+hook needs re-amending — local `graph.json` is NOT reliably refreshing.**
+
+Do not fix this by bolting `--force` into the hook without a decision: §2.3 already refused that for
+the npm scripts because force-overwriting on every routine run is a different failure (it makes a
+genuine chunk-loss invisible). This is an operator call, not a patch.
+
+**2. R6 ACTIVELY DEGRADES R7 — the two things I shipped in one commit fight each other.** The same
+log: `community set changed since labeling (4,069 saved labels, 4,059 communities now; renamed 288
+community(ies) by their hub). Run 'graphify label' to refresh names with the LLM.` Community count
+churned 4,069 → 4,064 → 4,059 → 4,055 across runs, and each re-cluster **renames 270–303 communities
+back to their hub node's name** — undoing exactly what `scripts/graphify-name-communities.mjs`
+wrote. This is the F3 drift from `docs/superpowers/specs/2026-08-11-graph-compartments-design.md`
+observed live, and it is the concrete reason that spec says **"re-label only after values are
+pinned."** I re-labelled before pinning and then installed the thing that unpins them.
+
+Measured after the churn: 420 labels still carry the `·` purity stamp and every spot-check survived
+(`364`, `3742`, `1`, `290`, `1518`), so this run did not eat the names — but the mechanism is live
+and the script must be re-run after any re-cluster. That is already written into RULE 0.5b R7.
+
+**3. Smaller, honest: the purity stamp is meaningless for the 18 app-plane communities.** Their ids
+are `api_route:/api/assistant`-shaped, which my `_`-splitting prefix function cannot segment, so
+they stamp at ~3% (`API routes — assistant & brain endpoints · 3%`) regardless of how coherent the
+group is. The error direction is fail-safe — it says "distrust this name" when the name is fine —
+but the number is an artifact, not a measurement, and should not be read as drift.
+
+**R5 NOT RUN, and the reason changed.** The spend blocker is GONE: reading the installed CLI
+(`site-packages/graphify/cli.py`) shows `--code-only` gates the semantic LLM pass at line 3127
+("a code-only corpus is pure local AST and must not require" a key) while `--postgres` runs
+`introspect_postgres` in an independent branch at line 3595. **They compose, and the combination
+needs no API key — `extract . --code-only --postgres <DSN>` is free.** The DSN is in
+`.dlt/secrets.toml`. I did not run it because finding 1 means the graph is mid-churn and refusing
+writes; extracting into that state would produce a result nobody could trust. Sequence it after the
+`--force` decision.
+
+CLAUDE.md's RULE 0.5b R6 block and the RULE 0.5 amendment both now overclaim and are OWED a
+correction. Not made in this pass because `CLAUDE.md` currently carries another live session's
+uncommitted rule edit, and committing the file would carry their work.
+
+## 2026-08-12 (Opus 5) — Open House: 4 plans, 5 operator decisions, and the click-tracking claim I got wrong
+
+**Four parallel Sonnets wrote the four Open House package plans** (`docs/superpowers/plans/2026-08-12-open-house-pkg{1,2,3,4}-*.md`),
+each against real code. They found three things the split doc had wrong, now written into its new
+COORDINATION section: `lib/email/build-doc.ts` is owned by NO package and needed by TWO (Package 1
+wants `BuildScope` :100-107 + an insert after `authorDoc` :1272; Package 3 wants `contentPatchSystem`
+:446 and its call sites :576/:895 — non-overlapping regions, so sequence or worktree); Packages 2
+and 4 both claimed assertion 9 in `render-open-house.mts`; and a stale-project hazard Package 3 found
+lives in Package 1's file (`EmailLabGridShell` keyed `grid-${buildKey}`, not `grid-${id}-${buildKey}`).
+Two handoff claims were DISPROVED against code: `applyBrand`'s "single global website_url override"
+is dead code (`apply-brand.ts:74-109` resolves by ROLE since 08/03), and `validateNarrative()` cannot
+literally accept an invitation (its type mandates a 1-3 item `outlook` array with `[INFERENCE]` tags,
+hard-failed at `validate.ts:109-111`).
+
+**Five operator decisions, all recorded in `docs/handoff/2026-08-12-open-house-decisions-owed-work-and-the-tracking-finding.md`:**
+ONE CTA with the listing as a plain text LINK (a link is not a `button` block, so
+`campaign-coherence.test.ts:123` passes untouched — no guard amended); RSVP = CALENDAR; the QR
+appears AFTER the click, never in the email; invitation copy band ~60-70 words; and the invitation
+validator is a KEYED REGISTRY, not a file-placement choice.
+
+**THE CORRECTION THAT MATTERS: I told him the landing page was what bought us click tracking. Wrong.**
+`lib/email/campaign-click-alert.ts` shows the click event already carries the exact URL, the
+recipient and the campaign — **every link tracks; the page was never the mechanism.** He caught it by
+asking. Chasing it surfaced a bigger finding: `app/api/webhooks/resend/route.ts` writes engagement
+into **five tables** (`market_alert_engagement` :266, `campaign_click_events` :322, `outreach_events`
+:406, `buyer_intent_events` :612-659, and `email_events` upserted from three lanes) under four keying
+schemes, and **`docs/standards/data-roots.md` has no engagement root at all.** `email_events` is the
+obvious single root. Decide before the RSVP click becomes the sixth variant.
+
+**Calendar link formats crawled and recorded VERBATIM** (research §8): Google
+`calendar/render?action=TEMPLATE&…&location=`, Outlook Live/365 `calendar/deeplink/compose`, Yahoo
+`?v=60&…&in_loc=`. The LOCATION field is the whole answer to both "a map" and "add address to phone."
+**NOT verified, do not code from memory:** the `.ics`/RFC 5545 field spec, Outlook's parameter names,
+whether click tracking is ON for our domain, and which send lane the Open House email uses.
+
+**RULE 0.5 SHARPENED** after three structural claims this session were made before opening the file
+that owned them — all three caught by the operator, one in a turn where `check-four-searches` PASSED.
+That gate verifies TOPIC coverage, never CLAIM coverage. New bar: the file that owns the behavior
+must be opened IN THAT TURN, or say "I have not read X yet." Applied via a backgrounded `claim wait`
+after `CLAUDE.md` sat under another session's claim for 40+ minutes — **the claim was never
+overridden**, and the anchor was re-grepped before the edit.
+
 ## 2026-08-12 (Opus 5) — Records→ADDRESS is LIVE. The join was never broken; it was measured against the wrong column.
 
 **Shipped `data_lake.lee_records_addressed_v`** (`docs/sql/20260812_lee_records_addressed_v.sql`,

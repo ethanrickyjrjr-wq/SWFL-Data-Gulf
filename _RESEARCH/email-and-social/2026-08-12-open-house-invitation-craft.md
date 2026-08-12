@@ -16,6 +16,9 @@ r/realtorsuccess, r/Emailmarketing, r/copywriting) never executed at all. That c
 not query-level, and did not clear during this session — it is a new DO NOT TRY entry for future
 sessions this month, on top of the four already logged in the calling prompt.**
 
+**ADDENDUM, same date, second crawl4ai pass — §7 added, filling the map/add-to-phone/QR-in-email gap
+§4 left open. See §7's own count line for that pass's sourcing.**
+
 **What failed and why:** the first 40 general-search queries (no `subredditName`) defaulted to
 `sort: "top", timeframe: "year"` per my own mistake overriding the actor's true default
 (`sort: "relevance"`). That combination ranks by GLOBAL Reddit score, so a query like "open house
@@ -308,6 +311,204 @@ still short), or something else. That is the operator's call per the calling bri
 
 ---
 
+## 7. THE RSVP CTA'S DESTINATION — map, add-to-phone, and QR-in-email, crawled per operator's three
+   named hypotheses ("I think it's probably a map and way to add address to phone. Maybe a QR code
+   appears?")
+
+Second crawl4ai pass, same date, filling the specific gap §4 left open: not which SHAPE (reply/
+form/.ics) but what the button, once tapped, actually SHOWS or DOES for the recipient. crawl4ai
+only; no search-engine API exists for the tool, so DuckDuckGo's server-rendered HTML result page
+(`html.duckduckgo.com/html/?q=...`) was crawled as a discovery step, then the real articles it
+surfaced were crawled directly — same tool, same evidence rules, just used as its own index.
+
+**COUNT LINE: 3 of 3 hypotheses addressed below (map, add-to-phone, QR-in-email). 8 URLs crawled
+this pass: 1 authoritative reference site, 2 vendor blogs (deliverability, link-shortener/calendar),
+2 AI-content-farm pages identified and excluded from evidence, 1 QR-vendor page, 2 DuckDuckGo result
+pages used for discovery only (not cited as sources).**
+
+### 7a. Hypothesis 1 — "a map"
+
+**What's technically possible, from an authoritative non-vendor source:** [caniemail.com](https://www.caniemail.com/)
+is the HTML-email compatibility reference — community-maintained, cited industry-wide the way
+caniuse.com is cited for browsers, no product to sell either direction. Searching it for `iframe`
+returns **"No results found"** — iframe isn't even tracked as a feature there, because it isn't
+supported anywhere email renders. [caniemail.com/search/?s=iframe] **That settles the technical
+ceiling: a live, interactive, pannable map embedded in the email itself is not possible in any
+mail client.** The only two things that can appear where a "map" is wanted are (a) a static image
+(a screenshot or a Static-Maps-API-generated PNG) or (b) a plain `<a href>` link that leaves the
+email and opens a maps app or site. Both are ordinary, zero-risk HTML-email primitives — an image
+and a link — neither is a novel build.
+
+**Two AI-content-farm pages surfaced by the DDG search and explicitly EXCLUDED as evidence, flagged
+the way the calling file already flags low-credibility Reddit posts:**
+- `office.alibaba.com/officesoftware/how-to-embed-a-map-in-outlook-email` — invents a "Microsoft
+  surveys show 68%... 17%" statistic with no citation, a fabricated five-star reliability table, and
+  a fake author bio, on a domain (Alibaba's "office productivity" content vertical) with no actual
+  authority over Outlook. Templated title pattern ("What Most People Miss About X") repeated across
+  dozens of unrelated Office topics on the same site — a content-mill signature. **Do not treat the
+  68%/17% figures as real.**
+- `events-places.com/en/how-to-include-an-access-map-in-an-invitation/` — a French event-venue
+  directory's English blog, keyword-stuffs "access map in an invitation" dozens of times, and its
+  own "related posts" are about relationship advice, unrelated to events. Same AI-content-farm
+  signature as the calling file's flagged Reddit post, just as a full article instead of a low-score
+  comment.
+- **The one transferable idea from the excluded events-places page, held to opinion status because
+  the source itself is not credible:** it repeatedly pairs "a simple map image" with "a QR code or
+  clickable link for live navigation" as complementary, not competing — consistent with what usebouncer
+  (§7c, a genuinely credible source) says independently about QR needing a fallback, for what that
+  convergence is worth from a non-credible source.
+
+**Real, if generic, real-estate-adjacent evidence for the "map" idea being just a directions link:**
+QR-vendor page `qrwink.com/qr-code-for-google-maps` states real estate agents already put Google Maps
+QR codes on **yard signs and flyers** — physical, on-site collateral — so a buyer "driving through a
+neighborhood... can scan it to save the location, get directions for a return visit, or navigate to
+a nearby open house." Vendor-published (QRWink sells QR generation), and about **physical signage,
+not email** — directly consistent with the calling file's existing r/realtors finding (§2c: the Google
+Form + QR pattern is also for on-site, not for the pre-event email) and with usebouncer's independent
+finding in §7c below. **No source in either research pass found a real-estate open-house EMAIL using
+a map image or a maps deep-link.** That is a real gap, not a resolved answer.
+
+### 7b. Hypothesis 2 — "a way to add address to phone"
+
+**What was searched and found NOT to be the real-world pattern:** vCard (`.vcf`) is a real, working
+mechanism — Microsoft's own support docs confirm Outlook can attach a contact as a `.vcf` file that
+imports into Gmail, Apple Mail, and "many other mail programs"
+[support.microsoft.com/en-us/outlook/send-and-save-contacts-as-vcards-vcf-files]. But every source
+found for it describes **sharing a PERSON'S contact card** (a business card exchange between two
+people composing email manually) — none describe a marketing/event use case of a vCard carrying a
+VENUE's address as a call-to-action inside a bulk-sent invitation. That absence is real: it was
+searched for directly and not found, so it is reported as a gap, not assumed away.
+
+**The mechanism that actually IS documented for this, and that connects directly back to §4's Shape
+3 (the .ics / add-to-calendar candidate already in this file):** Flyn's guide to add-to-calendar
+links [flyn.to/blog/add-to-calendar-links-for-events] — a link-shortener/analytics vendor, flag the
+bias — states the calendar event's **location field** is what should carry the address, and that
+"calendar apps make the location tappable, so attendees can jump straight from the calendar reminder"
+to it. Their example is a Zoom join URL for virtual events, but the mechanism is address-agnostic:
+whatever string sits in an .ics `LOCATION` field or a Google/Outlook calendar-link's `location`
+parameter becomes a tap-target inside the recipient's native calendar app once saved, and on both
+iOS and Android that tap opens the device's default maps app with the address already loaded — this
+is standard OS-level calendar behavior, not something the email itself has to build.
+
+**What this means for the operator's two hypotheses together:** "a map" and "a way to add address to
+phone" are not two separate features to build. **They converge on the SAME mechanism already
+identified in §4 as Shape 3** — an add-to-calendar link (or its .ics fallback) with the property
+address in the `LOCATION` field. One tap saves the event; a second tap on the saved calendar entry's
+location field is what hands the address to the phone's maps app, on the OS's own rails. A dedicated
+vCard, a separate "add to contacts" button, or a standalone static map image would each be a second,
+redundant mechanism for a job the calendar link's location field is already positioned to do — a
+build-cost argument, not a rendering one, since §4 already flagged the .ics rendering risk (Gmail
+blank boxes, "four to seven steps" on some clients) as real and unresolved.
+
+### 7c. Hypothesis 3 — "maybe a QR code appears"
+
+**Direct answer to the operator's own stated objection** ("most opens are ON the phone that would
+scan it"): usebouncer.com's `QR Codes in Email Marketing: Best Practices, Use Cases, and Mistakes to
+Avoid` [usebouncer.com/qr-codes-in-email-marketing-best-practices-use-cases-and-mistakes-to-avoid/]
+— an email-deliverability vendor, not a QR vendor, so less motivated to oversell QR specifically —
+names that exact objection as the **#1 documented mistake**, verbatim: **"The most common mistake is
+using a QR code when a button would work better. If the subscriber is already on mobile, asking them
+to scan a QR code from the same device creates friction. Always include a clickable link or
+button."** And separately, as one of ten numbered best practices: **"Some subscribers may open the
+email on the same phone they would need to scan with... In email marketing, a QR code should support
+the CTA, not replace it."** Every QR-code email, per the same source, should ALSO include: a
+clickable button, a short URL or visible destination, alt text, and a plain-text fallback — QR is
+additive, never the sole mechanism.
+
+**Where the source says QR in email DOES work:** desktop-to-mobile handoffs (someone reads on a
+laptop, scans to continue on their phone), in-store/offline redemptions, event check-in at a
+different device than the one used to read the email, and app-download flows — i.e., exactly the
+cases where the scanning device is NOT the reading device. An open-house invite read primarily on a
+phone (the operator's own framing, and consistent with real-estate email being disproportionately
+mobile-opened per general email-open-rate data already in this research area) is close to the worst
+case for QR-in-email, not a good one.
+
+**Corroboration from the real-estate side, both already-documented and freshly found this pass:** the
+calling file's own §2c (Google Form + QR) and this section's §7a (qrwink.com's yard-sign QR) both
+place real-estate QR use ON PHYSICAL, ON-SITE collateral — never inside the pre-event email itself.
+**No source in either crawl4ai pass found a currently-published real-estate open-house EMAIL that
+contains a QR code.** Two independent lines of evidence (a deliverability vendor's named mistake, and
+the total absence of any real-estate email example using one) point the same direction without
+either one being a controlled study.
+
+### WHAT THIS MEANS FOR OUR BUTTON
+
+**Build:** the RSVP CTA should be a single add-to-calendar link (or, per §4, a plain reply as the
+even-lower-risk fallback) with the real property address filled into the event's location field. That
+one button does the calendar save AND is the honest answer to "a map / a way to add address to
+phone" — the address becomes tappable inside the recipient's own calendar app once saved, using the
+phone's native maps integration, not a second widget this build has to construct. Whichever of Shape
+1 (reply) vs Shape 3 (calendar link) the operator picks per §4's unresolved question, the location
+field is what carries the address either way — it is not an alternative to §4's decision, it is one
+more argument for making that field real regardless of which shape wins.
+
+**Do NOT build:** a standalone static map image (technically possible — no email client renders live
+maps, so it would have to be a screenshot or Static Maps API PNG — but no currently-published
+real-estate open-house email was found using one, so it would be a novel element with no precedent
+in this research); a dedicated vCard/add-to-contacts button (real mechanism, but every source found
+for it is personal contact-sharing between two people, not an event-invite pattern — building it
+would be inventing a use case, not following one); or a QR code inside the email (a named,
+documented mistake for exactly the same-device reason the operator raised, corroborated by the total
+absence of any real-estate email precedent using one — QR's real home in this domain is the yard
+sign and the on-site sign-in sheet, both already covered in §2c and §7a).
+
+**The trade-off, stated plainly and not resolved past what the evidence supports:** an add-to-
+calendar link is more capable (it's the one candidate that can honestly satisfy "map" AND "add to
+phone" at once) but it is also the shape §4 already flagged as carrying the most real rendering risk
+across clients (Gmail blank boxes, Outlook hijacking, four-to-seven mobile steps for a raw .ics). A
+bare reply link (Shape 1) is the lowest-risk, most-precedented option but does neither of the
+operator's two asks — it hands the recipient nothing to save or navigate by, only a promise that a
+human will follow up. Nothing crawled in either pass resolves that trade-off with a measured number;
+it is the same unresolved shape-decision §4 already named, now with the added fact that picking
+Shape 3 is also implicitly picking to build the map/address answer, and picking Shape 1 is implicitly
+deferring it to the human reply.
+
+---
+
+## 8. OPERATOR DECIDED: CALENDAR. The verbatim link formats, crawled 08/12/2026.
+
+Operator ruling this session: *"Calendar."* Plus: QR appears AFTER the click (on the landing page,
+never in the email — consistent with §7c), the CLICK is the tracked event, and the landing page may
+offer everything else. His question: *"how does it hook up with users calendar? Only if their email
+is linked to calendar?"*
+
+**Answer: there is no hook-up. No OAuth, no integration, no account link to us.** Two mechanisms,
+both plain URLs or a file:
+
+- **Web deep link** — opens the recipient's calendar provider in a browser with the event
+  pre-filled; they are already signed in there; they press save. Nothing touches us.
+- **`.ics` download** — the OS hands the file to whatever calendar app is default (Apple Calendar,
+  desktop Outlook). No account involved at all.
+
+So *"most people probably have all this hooked up, I just don't"* has no prerequisite to satisfy —
+being signed into the provider in that browser, or owning any calendar app, is the whole requirement.
+
+**Verbatim formats, crawled from `add-event-to-calendar-docs`
+(github.com/InteractionDesignFoundation/add-event-to-calendar-docs, 459 stars, the de-facto
+reference — Google's own docs cover only the v3 API, not the template URL):**
+
+- **Google** — `https://calendar.google.com/calendar/render?action=TEMPLATE&text=<title>&dates=<YYYYMMDDTHHmmSSZ>/<YYYYMMDDTHHmmSSZ>&details=<desc>&location=<address>`
+  (`action=TEMPLATE` required; alternate base `https://calendar.google.com/calendar/r/eventedit`
+  does not need it). [services/google.md]
+- **Outlook Live** — `https://outlook.live.com/calendar/deeplink/compose` ·
+  **Office 365** — `https://outlook.office.com/calendar/deeplink/compose`. No official vendor
+  documentation exists. [services/outlook-web.md]
+- **Yahoo** — `https://calendar.yahoo.com/?v=60&TITLE=<title>&ST=<start>&ET=<end>&DESC=<desc>&in_loc=<address>`
+  (`v=60` required). No official documentation. [services/yahoo.md]
+
+**THE ADDRESS-IN-PHONE ANSWER IS THE LOCATION PARAMETER** — Google `location=`, Yahoo `in_loc=`,
+`.ics` `LOCATION`. §7b already established that once the event is saved, calendar apps render that
+field tappable straight into the phone's maps app. **That one field is the entire answer to both
+"map" and "add address to phone" — no vCard, no static map image, no separate directions build.**
+
+**NOT VERIFIED THIS SESSION — do not code from memory (RULE 0.4):**
+1. The `.ics` / RFC 5545 `VEVENT` field spec was NOT crawled. Apple Calendar and desktop Outlook
+   depend on it, and it is the one variant that is a FILE rather than a URL.
+2. Only the Outlook deeplink BASE URL was read — its parameter names (subject/body/startdt/enddt/
+   location) were not confirmed. Crawl `services/outlook-web.md` in full before writing them.
+
+---
+
 ## Sources
 
 **crawl4ai, this session, 08/12/2026 (9 of 10 yielded content):**
@@ -327,3 +528,19 @@ still short), or something else. That is the operator's call per the calling bri
 - 8 of 40 planned subreddit-scoped queries against r/realtors — usable, cited throughout §2c
 - 32 of 40 subreddit-scoped queries (r/RealEstate, r/realtorsuccess, r/Emailmarketing,
   r/copywriting) never ran — Apify account hard monthly-usage cap hit mid-session
+
+**crawl4ai, second pass (§7 — map / add-to-phone / QR-in-email), same date, 08/12/2026 (6 of 8 usable,
+2 identified as AI-content-farm and excluded from evidence, cited in §7 as such rather than dropped
+silently):**
+11. caniemail.com/search/?s=iframe — authoritative, non-vendor, cited in §7a
+12. usebouncer.com/qr-codes-in-email-marketing-best-practices-use-cases-and-mistakes-to-avoid/ —
+    email-deliverability vendor (not a QR vendor), cited in §7c
+13. flyn.to/blog/add-to-calendar-links-for-events — link-shortener/analytics vendor, cited in §7b
+14. qrwink.com/qr-code-for-google-maps — QR vendor, cited in §7a and §7c
+15. office.alibaba.com/officesoftware/how-to-embed-a-map-in-outlook-email — EXCLUDED, AI-content-farm
+    (fabricated statistics, no real authority), see §7a
+16. events-places.com/en/how-to-include-an-access-map-in-an-invitation/ — EXCLUDED, AI-content-farm
+    (keyword-stuffed, unrelated related-posts), see §7a
+- 2 DuckDuckGo HTML result pages (html.duckduckgo.com/html/?q=...) used for URL discovery only, not
+  cited as evidence sources themselves — crawl4ai has no native search subcommand, so DDG's
+  server-rendered results page was crawled the same as any other URL to find real articles to crawl.
