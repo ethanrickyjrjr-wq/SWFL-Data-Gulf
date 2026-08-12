@@ -1,3 +1,31 @@
+## 2026-08-12 (Opus 5) — OPERATOR: "WHY IS THIS SO HARD?????????????????"
+
+Raised on the invitation-validator question. I asked him to pick between two implementations —
+"sibling export in `lib/narratives`" vs "local to `recipes/shared.ts`" — and he answered with the
+design I should have brought him: *"HOW CAN WE NOT JUST TAG IT OR CONNECT IT WITH OPEN HOUSE EMAILS
+AND ALL OTHER THINGS THAT NEED IT IN THE FUTURE ARE WIRED INTO IT?"*
+
+He is right and the binary was the error. Both options I offered are file-placement questions that
+answer "where do I put this one function." His answer is the actual architecture: **a validator
+keyed by SHAPE that surfaces register into** — open house declares "I am an invitation," the next
+recipe declares its own, and nothing forks. That is the same one-root pattern already used for
+social platforms (`lib/email/social/platforms.ts`), the tier dial (`lib/email/lab/capabilities.ts`),
+and button destinations by ROLE (`apply-brand.ts:74-109`). We have the pattern three times over and
+I did not reach for it.
+
+**Second signal in the same exchange, same failure:** on the two-button question I offered
+one-CTA / amend-the-test / conditional-button. He answered *"JUST DO 1. CAN'T WE ADD A LINK TO THE
+LISTING AT THE BOTTOM?"* — a text link is not a `button` block, so it passes
+`campaign-coherence.test.ts:123` untouched and needs no test exception at all. That option was
+available in the code the whole time and was not among the three I presented.
+
+Both are one shape: **I converted a design problem into a menu and handed him the menu.** A menu of
+implementations is only legitimate when the options are genuinely equivalent and the choice is
+taste or cost. When one option is "the right structure" and I have not found it yet, presenting two
+wrong ones is offloading the design, and it reads to him as the system being harder than it is.
+
+New strike shape opened: `handed-the-operator-my-design-choice`, guard OWED.
+
 ## 2026-08-12 (Opus 5) — OPERATOR: "can we get the commits board clear and github green if it is not / actually fucking look"
 
 He had to say "actually fucking look" because CI had been red for SIX CONSECUTIVE RUNS —
