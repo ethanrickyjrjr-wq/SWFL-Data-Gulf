@@ -102,9 +102,25 @@ resolved that same symbol with its caller. The local artifact is now gitignored 
 same-day recheck (`graph_stats`) found the hosted index stamped 24 commits behind actual HEAD, still
 on a commit from *before* that day's `.graphifyignore` push (details:
 `docs/handoff/2026-08-12-graph-compartments-step2-negative-result.md` §4c). Nothing in this repo
-controls the hosted reindex cadence. Hosted-over-local still holds as the default (the local file is
-stale by definition, being gitignored and never rebuilt on a schedule) — just don't assume the hosted
-copy is current without checking `graph_stats`' `commitSha` against `git log` first.
+controls the hosted reindex cadence. Hosted-over-local still holds as the default — just don't assume
+the hosted copy is current without checking `graph_stats`' `commitSha` against `git log` first.
+
+**Amended again, later on 08/12/2026 — THE HOSTED INDEX IS NOT FROZEN, AND WE WATCHED IT MOVE.**
+Two calls twenty minutes apart in one session read `commitSha 3592ee0f` (buildId `7ad693a2`) and
+then `commitSha f97f03c1` (buildId `32b8cb0e`). The "24 commits behind" finding above was a
+MEASUREMENT AT A MOMENT, not a property of the hosted index — it reindexes on a cadence we do not
+control and do not have to wait on. **Practical consequence: any community/node COUNT you quote off
+the hosted index must carry the `commitSha` it came from, because the next call can legitimately
+disagree with it.** (Measured that day: 1,920 communities over 21,878 nodes @ `3592ee0f` — versus
+4,069 over 43,723 in the local analysis file. Those are different graphs, not a contradiction.)
+
+**Amended 08/12/2026 — drop the "stale by definition" half of that parenthetical.** It used to read
+"the local file is gitignored and never rebuilt on a schedule," which was true only because RULE
+0.5b R6's hook was uninstalled. **It is installed now**, so local `graph.json` rebuilds on every
+post-commit and post-checkout. Local can now be FRESHER than hosted. That does not flip the default —
+hosted is still first reach, because it answers at whatever commit it was indexed at and carries
+resolution the local file has historically missed — but "local is stale" is no longer a fact you may
+assert without looking. Check both stamps.
 
 **The tool names are these — the old `graphify query`/`path`/`explain` are CLI subcommands and were
 the wrong surface to name here:**
@@ -184,6 +200,15 @@ on line 193 of its own file) and wrote them into a handoff document that nothing
 time. The tool has a feedback loop with a decay curve. **A correction filed only as prose is a
 correction the next query cannot see.**
 
+✅ **BOTH FILED 08/12/2026** — `graphify-out/memory/query_20260812_183139_who_calls_reporttoemailhtml.md`
+and `..._183205_who_calls___what_does_ops_target_call.md`, each `--outcome corrected`; `graphify
+reflect` aggregated them (`2 memories, 0 useful, 0 dead ends, 2 corrected`) into
+`graphify-out/reflections/LESSONS.md`. **Scope caveat, do not overstate it:** both false negatives
+were MEASURED against the HOSTED index via `gx_callers`, but `save-result` writes to LOCAL
+`graphify-out/memory/`. So the correction is where local `reflect` can aggregate it; it is NOT
+demonstrated to surface at hosted-query time. Better than prose-only — that is R3's whole point —
+but it is not a fix to the hosted index.
+
 ## R4 — A "NO EDGE FOUND" ANSWER IS NOT REPEATABLE UNTIL `diagnose multigraph` HAS RUN.
 
     graphify diagnose multigraph --json
@@ -207,7 +232,23 @@ Two things the same run surfaced that ARE live:
 **Why:** six registry entries have `consuming_pack: none` (data lands, nothing reads it) and
 `docs/standards/data-roots.md` is hand-maintained. Table-to-code edges make "who actually consumes
 this root" a traversal instead of a promise. Column-level detail is NOT represented — do not claim
-it is. Not yet run; needs the spend/DSN decision, so it is a proposal, not a measured result.
+it is. Not yet run, so it is a proposal, not a measured result.
+
+**Corrected 08/12/2026 — "needs a DSN" was wrong, and repeating it is a RULE 0.95 absence claim
+nobody checked.** We hold every part of it: `.dlt/secrets.toml` `[destination.postgres.credentials]`
+carries `host` / `port` / `database` / `username` / `password`. **The ONLY blocker is the spend
+decision, and the spend is bigger than the flag looks:** `--postgres` is a flag on `extract`, which
+is the FULL headless extraction — AST **plus the semantic LLM pass** over a ~43,700-node repo. It is
+not a cheap schema-only sidecar.
+
+Two things to settle before running it, neither yet answered:
+- **Is `extract --code-only --postgres` the free path?** `--code-only` is documented as local AST,
+  no API key. If it composes with `--postgres`, the lake lands in the graph for zero spend — and
+  RULE 0.5b's god-node finding wants `--code-only` anyway (four of the top sixteen "hubs" are
+  markdown headings). UNVERIFIED — do not state it works until measured.
+- **`extract` WRITES `graphify-out/`.** A code-only run may clobber the doc plane of the current
+  `graph.json`. Back the file up first; it is a build product, but rebuilding the semantic pass is
+  exactly the spend we are trying to avoid.
 
 ## R6 — FRESHNESS IS A COMMAND, NOT A CAVEAT.
 
@@ -215,8 +256,30 @@ it is. Not yet run; needs the spend/DSN decision, so it is a proposal, not a mea
     graphify check-update .   # cron-safe staleness notification
 
 **Why:** this file has stated "stale by definition — nothing rebuilds it on a schedule" as though it
-were physics. It is an uninstalled hook. (The HOSTED index cadence is still not ours — RULE 0.5's
+were physics. It was an uninstalled hook. (The HOSTED index cadence is still not ours — RULE 0.5's
 `commitSha` check stands unchanged.)
+
+✅ **INSTALLED 08/12/2026.** `hook status` reads post-commit installed · post-checkout installed ·
+merge driver registered. Three things worth knowing before anyone debugs it:
+
+- **It APPENDED, it did not clobber.** `.git/hooks/post-commit` already ran repolith's
+  `claim release --committed`; the vendor block went in after it inside `# graphify-hook-start/end`
+  markers, verified by diffing against a pre-install backup. Line 2 survives. Any future re-install
+  gets the same check — 51 live cross-session claims ride on that one line.
+- **It is worktree-safe** (matters under RULE 1.5): the block exits early when `git rev-parse
+  --git-dir` differs from `--git-common-dir`, so `wt/*` worktrees do not each fire a rebuild. It
+  also skips rebase/merge/cherry-pick, skips graphify-out-only commits, pins `PYTHONHASHSEED=0` for
+  reproducible clustering, forces `GRAPHIFY_MAX_WORKERS=1` on Windows, and detaches the rebuild
+  (log: `~/.cache/graphify-rebuild.log`) so `git commit` returns immediately. Escape hatch:
+  `GRAPHIFY_SKIP_HOOK=1`.
+- **The merge driver added the ONE tracked line this produced** — `.gitattributes` gained
+  `graphify-out/graph.json merge=graphify`, plus a `[merge "graphify"]` section in `.git/config`
+  (untracked). Note the honest limit: `graphify-out/` is GITIGNORED here, so that driver has no
+  committed file to merge — it is inert until/unless the graph is ever tracked.
+
+`check-update .` also ran and returned silent = nothing pending. **What this does NOT buy:** the
+rebuild refreshes the LOCAL `graphify-out/graph.json`, which is gitignored build output. Hosted
+reindex cadence is untouched, so RULE 0.5's `commitSha`-vs-`git log` check is still mandatory.
 
 ## R7 — COMMUNITIES GET HUMAN NAMES, AND THE NAMES SURVIVE.
 
@@ -227,6 +290,58 @@ were physics. It is an uninstalled hook. (The HOSTED index cadence is still not 
 claim-and-send: that IS "email — sending & blast", it just isn't called that, so nobody scanning
 the report finds it. `.graphify_labels.json` re-attaches by node overlap, so a hand-written name is
 durable, not cosmetic.
+
+⚠️ **MEASURED 08/12/2026 — `--missing-only` IS A NO-OP HERE, AND THE COMMAND LINE ABOVE IS A TRAP.**
+`.graphify_labels.json` holds **4,069 labels for 4,069 communities — zero of them a literal
+`Community N` placeholder.** Every community already carries an auto-label, so `--missing-only`
+finds nothing missing and names nothing. The defect this rule describes is REAL (`packs/cre-swfl.mts`,
+`speaker.mts`, `$` are node names masquerading as community names) but `--missing-only` cannot fix it
+by definition — a bad label is not a missing one.
+
+**The real cost, so it can be approved as a number instead of an adjective:** a full `graphify label .`
+covers all 4,069 communities at `--batch-size 100` = **~41 LLM calls** (~21 at `--batch-size 200`).
+**But 1,434 of those communities are singletons and 3,700 are under size 25 — naming a one-node
+community is pure burn, and there is NO size-filter flag on `label`.** The 369 communities of size
+≥25 are the only ones worth a human name. **Do not run the full vendor pass on the assumption it is
+cheap-and-harmless; it is mostly waste by node count — and as of the ✅ block below you do not need
+it at all.**
+
+✅ **DONE 08/12/2026 FOR ZERO API SPEND — `scripts/graphify-name-communities.mjs`.** Operator:
+*"Why does this take api calls. Why can't you just do it?????"* He was right, and the answer is the
+whole point of this entry: **`graphify label` shells out to a SEPARATE metered LLM backend, but the
+member lists are plain text in `.graphify_analysis.json` and the session model is already reading
+them.** Naming a cluster from its members is reading, not inference-for-hire. **All 369 communities
+of size ≥25 now carry real names — 78 hand-written, 291 derived from the dominant path prefix with
+its share (e.g. `email · 84%`), 0 unmapped.** `pack.mts` → `refinery — source adapters`;
+`isCoreScope` → `refinery — packs & core SWFL scope`; `Full ranked list` (a markdown heading) →
+`research — competitor & strategy docs (A)`.
+
+**The app plane is where the real find was.** Eighteen size-≥25 communities carry `api_route:` /
+`brain:` / `slug:` / `package_` ids instead of file paths, so no directory heuristic reaches them —
+and they include the **brain dependency graph** (`brain graph — CRE corridor slugs`, `— macro &
+credit slugs`, `— logistics & labor slugs`) and CLAUDE.md's own rules as a cluster. Those are hand-
+named in the script's `HAND_NAMED` map.
+
+**EVERY name carries its dominant-folder purity (`· 88%`) and that is a GUARD, not decoration.**
+`docs/superpowers/specs/2026-08-11-graph-compartments-design.md` F3: labels re-attach by node
+overlap (`cli.py:1824`), so after a membership shift **a stale name can land on the wrong group** —
+the same mechanism that makes names durable makes them mis-attach. The spec's guard is that the
+label sit next to its dominant folder and purity "so a wrong name is visibly wrong rather than
+quietly trusted." **A low percentage means DISTRUST THE NAME.** It fired immediately on first run:
+community 3761 is `refinery — brain-output contract & constitution · 21%` and community 1 is
+`refinery — CRE corridor pack & sources · 31%` — both genuinely mixed groups whose hand-written
+names cover a fifth to a third of the members. That is the guard working, not a bug to paper over.
+
+⚠️ **The same spec says "re-label only after values are pinned," and this pass did NOT wait.** If the
+compartment work ever removes nodes (F3 is written against a 5,980-node removal), re-run the script
+rather than trusting the surviving names.
+
+**Re-run it after any re-cluster** (`.graphify_labels.json` re-attaches by node overlap, so names
+survive, but new communities arrive unnamed). **Do NOT run `graphify cluster-only` to make the
+report show them** — `graph-compartments.md` §2.1/§2.2 documents that it drops the app plane,
+refuses to write on the net node loss, prints a plausible count anyway, exits 1, and ignores
+`--force` on that subcommand. The R6 post-commit hook rebuilds via `graphify update`, which is the
+path that honors it.
 
 ## What the commands returned on 08/12/2026 (so nobody re-runs them cold)
 
@@ -703,7 +818,8 @@ report · `wiki/` = navigation · `manifest.json` / `cache/` = build state.
 **Commands beyond query/path/explain** — `affected "X" --depth N` (reverse blast radius) ·
 `god-nodes --json` · `diagnose multigraph` (edge-collapse; measured clean 08/12/2026, R4) ·
 `tree` (D3 hierarchy HTML) · `export callflow-html` (Mermaid) · `save-result` / `reflect` (the
-correction loop, R3) · `label --missing-only` (R7) · `hook install` + `check-update` (R6) ·
+correction loop, R3 — RUN 08/12/2026) · `label --missing-only` (R7 — measured a NO-OP, see R7) ·
+`hook install` + `check-update` (R6 — INSTALLED 08/12/2026) ·
 `extract --postgres <DSN>` (R5) · `extract --code-only` (drops prose hubs) · `merge-graphs` /
 `global add` (cross-repo) · `benchmark`.
 

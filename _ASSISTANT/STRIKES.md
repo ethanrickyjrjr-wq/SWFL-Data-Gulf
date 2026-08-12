@@ -79,6 +79,15 @@ guard: BUILT — RULE 0.7a ladder (08/06/2026) + spend switch OFF-by-default + $
   agent" crawl4ai+Reddit work never approved for it — guard covers new paid surfaces and the spend
   switch, not an existing authenticated surface used for an out-of-scope purpose. Account hit its
   monthly hard cap mid-run. Guard gap named in `docs/handoff/2026-08-12-apify-spend-incident-and-research-handoff.md`.
+- strike: 08/12 priced `graphify label` at "~41 API calls" and handed it up as a spend decision, when
+  the community member lists are plain text in `.graphify_analysis.json` and the session model was
+  already reading them. Operator: *"Why does this take api calls. Why can't you just do it?????"*
+  **NEW GUARD GAP — the ladder governs buying DATA and says nothing about buying INFERENCE we can
+  perform ourselves.** A vendor subcommand that shells out to a metered LLM backend is rung 3 wearing
+  a CLI's clothes; rung 1 is "the file is open, read it." Closed for this case by
+  `scripts/graphify-name-communities.mjs` (369 communities named, $0), but the general rule is
+  unguarded: nothing stops the next session quoting a vendor's LLM-call count as if it were the only
+  path. **Ask of any priced vendor step: is it selling us data, or selling us reading?**
 
 ## shape: leaked-internals-into-output
 guard: BUILT — artifact-level scaffolding guard (08/09/2026) + narrator drop logging + voice guard

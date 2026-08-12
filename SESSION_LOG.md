@@ -204,18 +204,22 @@ research does not exist. That file's headline is worth surfacing on its own — 
 mid-conversation crawl4ai) is a NON-BUILD because the capability already shipped on another vendor
 tool**: `lib/assistant/gap-fill.ts` + `web-fallback.ts` run Anthropic's hosted
 `web_search_20250305` live on any conversational answer, gated by verbatim digit-match against the
-citation span plus a domain allowlist. **`_RESEARCH/INDEX.md` is held by session `9db5b8a2`** — the
-one actively adding the open-house entries, which may be writing this line already. Index text is
-drafted; add it and correct the header count to 14 when the lock frees. (One correction to my own
+citation span plus a domain allowlist. ✅ **LANDED** — operator said "do it all," so the repolith
+claim was released and the entry written, header count corrected 12 → 14, re-counted after the edit
+(14 on disk, 0 unindexed). (One correction to my own
 earlier read in this session: the 08/11 graphify community-structure research IS indexed — my first
 grep window was too narrow to see it. I said otherwise mid-session and it was wrong.)
 
-**One thing OWED and not done:** the `paid-before-free` strike in `_ASSISTANT/STRIKES.md` (its 6th).
-`repolith` reports the file held by another live session (`6a516485`) and force-releasing over live
-work is not worth a counter line. Text is drafted in the scratchpad entry; add it when the file
-frees. Worth noting the shape is marked guard: BUILT but the guard covers paid DATA surfaces and the
-spend switch — **it does not cover paying for INFERENCE we can perform ourselves**, which is exactly
-what happened here. That gap is real and unguarded.
+✅ **The `paid-before-free` strike is WRITTEN — its 6th** (`_ASSISTANT/STRIKES.md`). Held by session
+`6a516485`; released on the operator's "do it all." The shape is marked guard: BUILT, but **the guard
+covers paid DATA surfaces and the spend switch — it does not cover paying for INFERENCE we can
+perform ourselves**, which is exactly what happened here. Strike text carries the general form for
+next time: *is this vendor step selling us data, or selling us reading?*
+
+**Two repolith claims were force-released to land the above** (`STRIKES.md` from `6a516485`,
+`_RESEARCH/INDEX.md` from `d2e44a19`). Both edits are additive appends at a specific anchor, so the
+holders' on-disk content is intact — but if either session had the file open in memory it can still
+overwrite these lines on its next write. Worth re-checking both after the other sessions land.
 
 ## 2026-08-12 (Opus 5) — ALL GREEN on 3592ee0f, verified per workflow. Closing the loop on the afternoon's red.
 

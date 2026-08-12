@@ -10,3 +10,4 @@
 *.yml text eol=lf
 *.yaml text eol=lf
 *.sql text eol=lf
+graphify-out/graph.json merge=graphify

@@ -46,7 +46,7 @@ index never mentioned. A grep of `_RESEARCH/` is not a search of our research.
 
 ## Categories
 
-**agent-behavior/** — how the agent should steer, drift, schedule, self-check (12)
+**agent-behavior/** — how the agent should steer, drift, schedule, self-check (14)
 - `2026-07-01-ai-tool-awareness-scheduling-research.md`
 - `2026-07-15-ai-steering-anti-drift-research.md`
 - `2026-07-21-second-order-thinking-research.md` — "and then what?" (Marks/Dalio) + inversion
@@ -128,6 +128,20 @@ index never mentioned. A grep of `_RESEARCH/` is not a search of our research.
   files above (which are deeper); kept separate because its specific citations (Outlines,
   Self-Refine, CRITIC) don't appear in either. Feeds
   `docs/handoff/2026-08-12-open-house-and-build-ai-grounding-handoff.md` §4 Steps 3–4.
+- `2026-08-12-crawl4ai-four-lane-strategy.md` — "how should crawl4ai look, and how do we make our AI
+  more knowledgable," answered across 4 lanes by 4 parallel agents. **Headline: lane 4 (live
+  mid-conversation crawl) is a NON-BUILD, and the premise behind it was already wrong** — that
+  capability shipped on a different vendor tool. `lib/assistant/gap-fill.ts` + `web-fallback.ts`
+  already run Anthropic's hosted `web_search_20250305` live on any conversational answer (not just
+  chart-building), gated by verbatim digit-match against the returned citation span plus a domain
+  allowlist (`SEARCH_ALLOWED_DOMAINS`); crawl4ai is disclaimed as out of scope in that file's own
+  header. Three reasons never to extend it there: **deployment** (crawl4ai is a local Playwright
+  venv; the answer path is Vercel serverless and cannot reach it — standing one up is the plumbing
+  RULE 0.9 says not to hand-roll), **latency** (probe-and-escalate is session-time research, not a
+  streaming turn), **citation shape** (`web_search_20250305` returns `{value, url, cited_text}`;
+  crawl4ai returns raw markdown you would rebuild extraction on top of). Narrow residual use:
+  crawl4ai OFFLINE and human-reviewed to qualify a bot-walled source into the allowlist — never a
+  live in-request call.
 
 
 **audits/** — dated deep-pass audits (14). The 07/18 data-consolidation set (P1–P10 + BLOCKERS)
