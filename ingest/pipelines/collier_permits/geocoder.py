@@ -82,6 +82,75 @@ def _extract_zip_from_matched_addr(matched_addr: str) -> str | None:
     return None
 
 
+def _post_chunk(
+    chunk: list[str],
+    http: requests.Session,
+    result: dict[str, tuple[float, float, str | None] | None],
+    *,
+    label: str,
+    allow_split: bool = True,
+) -> None:
+    """POST one chunk to the Census batch geocoder and fill matches into `result`.
+
+    On timeout/error with >1 address and allow_split=True, splits the chunk in half
+    and retries each half once (not recursively) before giving up on either — a
+    single large chunk exceeding the timeout must not wipe out the whole batch's
+    geocoding. Real 08/12/2026 incident: a 4,886-address chunk timed out at 120s
+    and the entire month landed with zero lat/lon/zip_code.
+    """
+    csv_lines = []
+    for i, addr in enumerate(chunk):
+        street, city = _split_site_address(addr)
+        # id, street address, city, state, zip (zip omitted — Census infers from city+state)
+        csv_lines.append(f"{i},{street},{city},FL,")
+    payload = "\n".join(csv_lines)
+
+    try:
+        r = http.post(
+            CENSUS_GEOCODER_URL,
+            data={
+                "benchmark": "Public_AR_Current",
+                "returntype": "locations",
+            },
+            files={"addressFile": ("addresses.csv", payload.encode("utf-8"), "text/plain")},
+            timeout=300,
+        )
+        r.raise_for_status()
+    except requests.RequestException as exc:
+        if allow_split and len(chunk) > 1:
+            mid = len(chunk) // 2
+            print(
+                f"[geocoder] Census API error for {label} ({len(chunk)} addresses): {exc} — "
+                "retrying as two halves"
+            )
+            _post_chunk(chunk[:mid], http, result, label=f"{label}a", allow_split=False)
+            _post_chunk(chunk[mid:], http, result, label=f"{label}b", allow_split=False)
+        else:
+            print(f"[geocoder] Census API error for {label} ({len(chunk)} addresses): {exc}")
+        return
+
+    # Response CSV: id, input_addr, match, match_type, matched_addr, lon_lat, tiger_id, side
+    # matched_addr (col 4): "3390 27TH AVE NE, NAPLES, FL, 34120" — ZIP is last segment.
+    reader = csv.reader(io.StringIO(r.text))
+    for row in reader:
+        if len(row) < 6:
+            continue
+        idx_str = row[0].strip()
+        match_status = row[2].strip().lower()
+        matched_addr = row[4].strip() if len(row) > 4 else ""
+        coords = row[5].strip() if len(row) > 5 else ""
+
+        if match_status != "match" or not coords:
+            continue
+        try:
+            lon_str, lat_str = coords.split(",")
+            lat, lon = float(lat_str.strip()), float(lon_str.strip())
+            zip_code = _extract_zip_from_matched_addr(matched_addr)
+            result[chunk[int(idx_str)]] = (lat, lon, zip_code)
+        except (ValueError, IndexError):
+            continue
+
+
 def geocode_batch(
     addresses: list[str],
     session: requests.Session | None = None,
@@ -91,7 +160,8 @@ def geocode_batch(
     Returns {address: (lat, lon, zip_code) | None}. Addresses that don't match
     return None. zip_code is the 5-digit site ZIP extracted from matched_addr
     (column 4 of the Census CSV response); None when not parseable.
-    Deduplicates before sending; chunks at CENSUS_BATCH_SIZE.
+    Deduplicates before sending; chunks at CENSUS_BATCH_SIZE. A chunk that times
+    out retries once as two halves (see _post_chunk) instead of dropping silently.
     """
     unique = list(dict.fromkeys(a for a in addresses if a))
     result: dict[str, tuple[float, float, str | None] | None] = {a: None for a in unique}
@@ -102,48 +172,6 @@ def geocode_batch(
 
     for start in range(0, len(unique), CENSUS_BATCH_SIZE):
         chunk = unique[start : start + CENSUS_BATCH_SIZE]
-
-        csv_lines = []
-        for i, addr in enumerate(chunk):
-            street, city = _split_site_address(addr)
-            # id, street address, city, state, zip (zip omitted — Census infers from city+state)
-            csv_lines.append(f"{i},{street},{city},FL,")
-        payload = "\n".join(csv_lines)
-
-        try:
-            r = http.post(
-                CENSUS_GEOCODER_URL,
-                data={
-                    "benchmark": "Public_AR_Current",
-                    "returntype": "locations",
-                },
-                files={"addressFile": ("addresses.csv", payload.encode("utf-8"), "text/plain")},
-                timeout=120,
-            )
-            r.raise_for_status()
-        except requests.RequestException as exc:
-            print(f"[geocoder] Census API error for chunk {start}-{start+len(chunk)}: {exc}")
-            continue
-
-        # Response CSV: id, input_addr, match, match_type, matched_addr, lon_lat, tiger_id, side
-        # matched_addr (col 4): "3390 27TH AVE NE, NAPLES, FL, 34120" — ZIP is last segment.
-        reader = csv.reader(io.StringIO(r.text))
-        for row in reader:
-            if len(row) < 6:
-                continue
-            idx_str = row[0].strip()
-            match_status = row[2].strip().lower()
-            matched_addr = row[4].strip() if len(row) > 4 else ""
-            coords = row[5].strip() if len(row) > 5 else ""
-
-            if match_status != "match" or not coords:
-                continue
-            try:
-                lon_str, lat_str = coords.split(",")
-                lat, lon = float(lat_str.strip()), float(lon_str.strip())
-                zip_code = _extract_zip_from_matched_addr(matched_addr)
-                result[chunk[int(idx_str)]] = (lat, lon, zip_code)
-            except (ValueError, IndexError):
-                continue
+        _post_chunk(chunk, http, result, label=f"chunk {start}-{start+len(chunk)}")
 
     return result

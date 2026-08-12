@@ -12,6 +12,7 @@ from unittest.mock import MagicMock, patch
 
 import pandas as pd
 import pytest
+import requests
 
 pytest.importorskip("crawl4ai")  # .pipeline -> .fetcher needs the pinned crawl4ai venv
 
@@ -334,6 +335,45 @@ def test_scope_gate_excludes_out_of_scope_zip():
 def test_geocode_batch_empty_input():
     result = geocode_batch([])
     assert result == {}
+
+
+def test_geocode_batch_splits_chunk_in_half_on_timeout():
+    # Live incident 08/12/2026: a ~4,886-address chunk timed out at 120s and the whole
+    # batch silently landed with zero geocoding (gh run 31566832140). One large POST
+    # timing out must not wipe out the entire month — split once and retry each half
+    # before giving up on either.
+    addresses = [f"{i} Main St, Naples" for i in range(4)]
+    ok_resp = MagicMock()
+    ok_resp.raise_for_status = MagicMock()
+
+    def _matched_row(addr_index: str) -> str:
+        return (
+            f'{addr_index},"addr",Match,Exact,'
+            '"123 MAIN ST, NAPLES, FL, 34102","-81.764000,26.120000",123456789,R\n'
+        )
+
+    call_log: list[int] = []
+
+    def _post(*args, **kwargs):
+        payload = kwargs["files"]["addressFile"][1].decode()
+        n_rows = payload.count("\n") + 1
+        call_log.append(n_rows)
+        if n_rows > 2:
+            raise requests.exceptions.Timeout("simulated Census timeout on large chunk")
+        resp = MagicMock()
+        resp.raise_for_status = MagicMock()
+        resp.text = "".join(_matched_row(str(i)) for i in range(n_rows))
+        return resp
+
+    with patch("ingest.pipelines.collier_permits.geocoder.requests.Session") as MockSession:
+        mock_session = MockSession.return_value
+        mock_session.post.side_effect = _post
+
+        result = geocode_batch(addresses, session=mock_session)
+
+    # First call (all 4) times out; must retry as two halves of 2, both succeeding.
+    assert call_log == [4, 2, 2]
+    assert all(result[a] is not None for a in addresses)
 
 
 def test_geocode_batch_deduplicates():
