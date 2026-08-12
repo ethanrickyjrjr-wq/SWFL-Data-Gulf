@@ -105,6 +105,10 @@ guard: BUILT — RULE 0.8 count-and-prove (07/30/2026) + RULE 0.85 fix-don't-fil
 - strike: 07/30 research "filed" with no index line
 - strike: 08/09 "§2.7 written this session" — false on disk
 
+## shape: narrated-a-cause-i-never-measured
+guard: OWED — an actor, a duration, or a causal chain stated in an answer must come from a command in the transcript, exactly as RULE 0.8 §4 requires of completion claims. "A parallel session did X" and "N seconds later" are measurements, not connective tissue. If the actor was not identified, the sentence is "something pushed it and I have not identified what."
+- strike: 08/12 told him a parallel session's push carried my commit "about thirty seconds" after committing. Never identified any actor; never measured the gap. Real gap from `git reflog show origin/main`: 11 seconds (commit 09:52:52, push 09:53:03). Quoted 09:48:16 and 09:52:52 in the same answer, which are 4m36s apart — the operator caught that "thirty seconds" reconciled with nothing. He had pushed 68a31d42 himself at 09:49:11 before opening the session, so the story also fingered him for something he did not do.
+
 ## shape: architecture-drift-no-detector
 guard: OWED — nothing anywhere compares our DECLARED module boundaries (docs/section-map.md's 5 sections, the 8 area CLAUDE.md files) against how the code is ACTUALLY wired. The graph has held the answer since 06/2026 and no report reads it. Mechanism owed: a declared-vs-detected partition diff (purity / NMI) regenerated on every graph rebuild, so "we build different ways" becomes a number that moves instead of a thing he notices months later. Research: _RESEARCH/agent-behavior/2026-08-11-graphify-community-structure-crawl4ai-research.md
 - strike: 08/11 "I still find out we build different ways or have different ways of building so don't tell me we are doing all we can" — asking for compartments in graphify

@@ -1,3 +1,22 @@
+## 2026-08-12 (Opus 5) — OPERATOR: "30 seconds??? i pushed the shit before i even opened you you fucking liar"
+
+He is right and the correction is on the record. Reporting the CLAUDE.md row (done, `7a2b1ee9`), I
+volunteered a causal story I had never measured: "a parallel session pushed about thirty seconds after
+my commit and carried it." I had identified no actor and timed nothing. In the same answer I quoted
+09:48:16 and 09:52:52 — 4m36s apart — so "thirty seconds" matched neither timestamp I had just given
+him, which is what he caught. Measured afterward with `git reflog show origin/main`: origin/main moved
+to my commit at 09:53:03, 11 seconds after the 09:52:52 commit. His own push was 68a31d42 at 09:49:11,
+before this session opened — so my story also implied he did something he did not do.
+
+The unexplained fact is real and still unexplained: I ran no push, the post-commit hook
+(`ws claim release --committed`) contains no `git push`, and origin/main moved to my commit anyway 11s
+later. Correct sentence: "something pushed it 11 seconds after the commit and I have not identified
+what." Not a named actor.
+
+New STRIKES shape opened: `narrated-a-cause-i-never-measured` (guard OWED). This is RULE 0.8 §4 —
+evidence before a claim — applied to causes and durations, not just to completion counts. Nothing about
+the delivered work was wrong; the invented explanation wrapped around it is what cost his trust.
+
 ## 2026-08-12 (Sonnet 5) — RESOLVED same session: /go → Listings Digest fixed and live-verified — both the recipeKey drop AND the zip wiring gap
 
 The handoff below turned out to have its own wrong premise: it claimed `recipeDestination` "already
