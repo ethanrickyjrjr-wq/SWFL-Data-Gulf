@@ -21,7 +21,11 @@
 // This is a RATCHET: the whitelist below is the 45 offenders that existed when
 // the guard shipped. New offenders fail. A whitelisted file that gets fixed (or
 // deleted) also fails, with instructions to remove its entry — the list only
-// ever shrinks.
+// ever shrinks; never add a line to excuse a new test file.
+//
+// The 08/12/2026 widening cost ZERO new whitelist entries (measured): all 22
+// files that mock a vendor module with no restore stub only `next/headers`,
+// and every one of them was already listed for an in-repo mock as well.
 
 import { describe, expect, test } from "bun:test";
 import { Glob } from "bun";
@@ -29,11 +33,21 @@ import { join } from "node:path";
 
 const ROOT = join(import.meta.dir, "..", "..");
 
-// Detection heuristic (same one used for the shipping sweep): the file installs
-// a mock for an in-repo module and never mentions afterAll. `afterAll` presence
-// is a weak proxy for a real restore — good enough to ratchet on; the per-file
-// fix is the snapshot idiom above, not a decorative afterAll.
-const MOCKS_IN_REPO_MODULE = /mock\.module\(\s*["'](@\/|\.{1,2}\/)/;
+// Detection heuristic: the file installs a mock for ANY module and never
+// mentions afterAll. `afterAll` presence is a weak proxy for a real restore —
+// good enough to ratchet on; the per-file fix is the snapshot idiom above, not
+// a decorative afterAll.
+//
+// WIDENED 08/12/2026 — this used to read `["'](@\/|\.{1,2}\/)`, i.e. in-repo
+// specifiers only, and that hole cost 6 red CI runs. `app/contacts/
+// page.test.tsx` did `mock.module("next/navigation", () => ({ redirect }))`;
+// a factory REPLACES the module rather than patching it, so `notFound`,
+// `useRouter` and `usePathname` stopped existing for every file that ran
+// after it — 5 files died on `SyntaxError: Export named 'notFound' not found`.
+// The leak mechanism is identical for a vendor module; only the regex was
+// narrower than the failure. The second half of the fix lives in the offending
+// file: spread the real module into the stub so untouched exports survive.
+const MOCKS_A_MODULE = /mock\.module\(\s*["']/;
 const HAS_AFTER_ALL = /\bafterAll\b/;
 
 const WHITELIST = new Set([
@@ -90,7 +104,7 @@ async function scan(): Promise<{ offenders: string[]; cleaned: string[] }> {
   for await (const rel of glob.scan({ cwd: ROOT })) {
     const posix = rel.replaceAll("\\", "/");
     const src = await Bun.file(join(ROOT, rel)).text();
-    if (MOCKS_IN_REPO_MODULE.test(src) && !HAS_AFTER_ALL.test(src)) offending.add(posix);
+    if (MOCKS_A_MODULE.test(src) && !HAS_AFTER_ALL.test(src)) offending.add(posix);
   }
   return {
     offenders: [...offending].filter((f) => !WHITELIST.has(f)).sort(),

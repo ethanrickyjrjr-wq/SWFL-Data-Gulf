@@ -460,6 +460,16 @@
     "disabled": false
   },
   {
+    "name": "collier-official-records ingest",
+    "file": "ingest-collier-official-records.yml",
+    "scheduled": true,
+    "timeout_minutes": 30,
+    "cancel_in_progress": false,
+    "paid": false,
+    "should_be_dark": false,
+    "disabled": null
+  },
+  {
     "name": "ingest-crexi-listings",
     "file": "ingest-crexi-listings.yml",
     "scheduled": true,
@@ -502,7 +512,7 @@
   {
     "name": "lee-deed-official-records load",
     "file": "ingest-lee-deed-official-records.yml",
-    "scheduled": false,
+    "scheduled": true,
     "timeout_minutes": 15,
     "cancel_in_progress": false,
     "paid": false,

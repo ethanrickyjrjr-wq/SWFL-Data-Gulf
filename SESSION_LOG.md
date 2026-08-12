@@ -1,3 +1,34 @@
+## 2026-08-12 (Opus 5) — CI round 2: stale watch manifest, and the ratchet hole that let round 1 through
+
+Round 1 (`ca39f056`) turned the `bun test` step green — verified in run `31623320902`: the `Test`
+step no longer appears in `--log-failed` at all. A DIFFERENT step was still red, so this is not a
+retraction of that fix, it is the next layer.
+
+- **`Test .github scripts (node:test)` — 3 of 292 failing.** `.github/_watch-manifest.json` went
+  stale when `ingest-collier-official-records.yml` landed; the logger/heal watcher lists drifted
+  with it. The failure message names the fix verbatim. Ran
+  `node scripts/build-watch-lists.mjs --write --write-watchers` → 110 workflows, 80 scheduled,
+  14 paid; logger 81 watched, heal 76. `node --test .github/scripts/*.test.mjs scripts/lib/*.test.mjs
+  .claude/hooks/*.test.mjs .claude/hooks/lib/*.test.mjs` → **292 pass / 0 fail.**
+  Regeneration also surfaced two ZOMBIE_CRONs, untouched here and not mine to decide:
+  `collier-permits-monthly.yml` and `neighborhood-amenities-daily.yml` are disabled at the GitHub
+  API while their crons sit live in source — one `gh workflow enable` resumes them.
+
+- **Widened the mock-restore ratchet** (`lib/testing/mock-restore-ratchet.test.ts`). It was built
+  08/11 for precisely the leak that broke round 1 and it did not fire, because its detector read
+  `mock\.module\(\s*["'](@\/|\.{1,2}\/)` — in-repo specifiers only. The leak mechanism is identical
+  for a vendor module. Now `mock\.module\(\s*["']`, any specifier. **Measured before changing it:
+  22 files mock a vendor module with no restore, all 22 stub only `next/headers`, and every one was
+  already on the whitelist for an in-repo mock — so the widening added ZERO entries.** The narrow
+  regex was never buying anything. Ratchet: 2 pass / 0 fail.
+
+**The finding worth more than all three fixes:** every cause was caught by a guard we already own
+and stated in plain English in the run log, and CI still sat red for six runs across three
+concurrent sessions. Seventeen gates block what happens before code leaves; the verdict afterwards
+blocks nothing and prints nowhere. Opened strike shape `pushed-then-never-checked-the-run` (guard
+OWED) with a cheap candidate — `gh run list --workflow=CI --limit 1` printed red at SessionStart or
+Stop. Which hook point is an operator call, so it is written down, not guessed at.
+
 ## 2026-08-12 (Opus 5) — CI red for 6+ runs: two causes, both from other sessions' landed commits. Both fixed.
 
 CI (`build` job) failed on every run from 15:58 to 17:14 — `7 fail / 5 errors` across 904 files.
