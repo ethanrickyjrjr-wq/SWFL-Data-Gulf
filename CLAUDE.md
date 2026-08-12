@@ -133,6 +133,132 @@ don't already have it. Subagents follow this rule too.
 
 ---
 
+# RULE 0.5b — USE THE WHOLE TOOL. THE VENDOR ALREADY COMPUTED IT.
+
+**Locked 08/12/2026 by operator decree.** Verbatim: *"YOU HAVE THE FUCKING MCP, YOU HAVE THE FUCKING
+JSON. WHAT MORE CAN YOU FUCKING DO?"* — raised after a session answered a question about graph drift
+by describing a metric we would have to BUILD, while cohesion scores, hub rankings, cross-community
+bridges and seven generated questions sat unread in `graphify-out/`, regenerated on every run.
+
+RULE 0.5 says query the graph. **This rule says the graph is not the only thing the tool gives us,
+and the parts we ignore are the parts that answer the questions we keep proposing to build.**
+
+## R1 — THE VENDOR'S OWN OUTPUT IS THE FIRST LANE, BEFORE ANY METRIC YOU PROPOSE TO BUILD.
+
+Before writing a script that measures our own codebase, open `graphify-out/` and check whether the
+tool already computed it. Four artifacts are written on EVERY run and had never been opened before
+08/12/2026:
+
+- **`.graphify_analysis.json`** (3.7 MB) — `communities` (every community's member list),
+  `cohesion` (per community), `gods` (hubs + degree), `surprises` (cross-community bridges, each
+  with a written `why`), `questions` (generated, e.g. *"Should `packs/cre-swfl.mts` be split into
+  smaller, more focused modules?"* with the cohesion score behind it).
+- **`.graphify_labels.json`** — one name per community, persisted across re-clustering by node
+  overlap, so a hand-written name survives a rebuild.
+- **`GRAPH_REPORT.md`** (973 KB) — Summary, Community Hubs navigation index, God Nodes, Surprising
+  Connections, Import Cycles, and the community blocks written out with cohesion + members.
+- **`graph.json` / `app-graph.json` / `manifest.json` / `wiki/` / dated snapshot folders.**
+
+**Why this is a rule and not a tip:** the four-lane gate PASSED the entire time this failed. Every
+lane names OUR files; none of them names a gitignored build directory holding the VENDOR'S analysis,
+and the `.graphify_*` dotfiles do not appear in a normal listing. Same family as
+`didnt-read-what-we-hold`, one layer out.
+
+## R2 — INSTALL THE VENDOR'S GUARD; DO NOT HAND-ROLL IT.
+
+`graphify claude install` writes the graphify section + a PreToolUse hook into this repo. **Run
+08/12/2026 by the operator** — it overwrote our hand-written `## graphify` section, which is why
+that section below is now a merge and not the vendor default. The hook is the mechanism the
+`graphify_first_reach_hook` check has been carrying as *guard OWED*, whose own stated root cause is
+mechanical (graph tools are DEFERRED, `Grep` is preloaded, the loaded tool always wins). RULE 0.9:
+the plumbing is not ours. **If a vendor ships the guard, install it before speccing one.**
+
+## R3 — A WRONG GRAPH ANSWER GETS RECORDED THROUGH THE TOOL, NOT ONLY INTO A DOC.
+
+    graphify save-result --question "..." --answer "..." --outcome corrected --correction "..."
+    graphify reflect        # aggregates to graphify-out/reflections/LESSONS.md, 30-day half-life
+
+**Why:** on 08/12/2026 we found two false negatives (`reportToEmailHtml` returning zero callers
+against six real call sites; `OPS_TARGET` returning empty callers/callees against a `writeFileSync`
+on line 193 of its own file) and wrote them into a handoff document that nothing reads at query
+time. The tool has a feedback loop with a decay curve. **A correction filed only as prose is a
+correction the next query cannot see.**
+
+## R4 — A "NO EDGE FOUND" ANSWER IS NOT REPEATABLE UNTIL `diagnose multigraph` HAS RUN.
+
+    graphify diagnose multigraph --json
+
+**Ran it 08/12/2026. Result is a clean NEGATIVE and is recorded so nobody re-runs it hoping:** 6
+same-endpoint groups directed / 28 undirected, 0 exact duplicates, 0 dangling endpoints, 7
+self-loops, out of 73,496 candidate edges. **Edge collapse is NOT why `OPS_TARGET` has no callers**
+— §6b of `docs/standards/graph-compartments.md` stands, the extractor simply never made the edge.
+
+Two things the same run surfaced that ARE live:
+- **`effective_directed: false`**, `post_build_graph_type: "Graph"` — `graph.json` carries no
+  `directed` flag, so the diagnostic's post-build simulation treats our edges as UNDIRECTED. That is
+  a statement about the FILE'S FLAG and the diagnostic, not proof about how the hosted index answers
+  direction — do not repeat it as the latter without measuring.
+- **5,550 extraction warnings: 2,775 edges missing `source_file` and 2,775 missing `confidence`.**
+
+## R5 — THE LAKE BELONGS IN THE GRAPH.
+
+    graphify extract . --postgres <DSN>     # tables, views, functions, FK relationships
+
+**Why:** six registry entries have `consuming_pack: none` (data lands, nothing reads it) and
+`docs/standards/data-roots.md` is hand-maintained. Table-to-code edges make "who actually consumes
+this root" a traversal instead of a promise. Column-level detail is NOT represented — do not claim
+it is. Not yet run; needs the spend/DSN decision, so it is a proposal, not a measured result.
+
+## R6 — FRESHNESS IS A COMMAND, NOT A CAVEAT.
+
+    graphify hook install     # post-commit + post-checkout rebuild
+    graphify check-update .   # cron-safe staleness notification
+
+**Why:** this file has stated "stale by definition — nothing rebuilds it on a schedule" as though it
+were physics. It is an uninstalled hook. (The HOSTED index cadence is still not ours — RULE 0.5's
+`commitSha` check stands unchanged.)
+
+## R7 — COMMUNITIES GET HUMAN NAMES, AND THE NAMES SURVIVE.
+
+    graphify label . --missing-only
+
+**Why:** auto-labels are the biggest node's name, not the community's job — `pack.mts`,
+`doc/types.ts`, `$`. Community 17 already holds the blast route, the email-lab render route and
+claim-and-send: that IS "email — sending & blast", it just isn't called that, so nobody scanning
+the report finds it. `.graphify_labels.json` re-attaches by node overlap, so a hand-written name is
+durable, not cosmetic.
+
+## What the commands returned on 08/12/2026 (so nobody re-runs them cold)
+
+**`god-nodes --top 20`** — `createClient()` 239 · `createServiceRoleClient()` 210 · **"Full ranked
+list" 169 (a heading inside a research markdown file)** · `EmailDoc` 156 · `RawFragment` 145 ·
+`master` 143 · `createServiceRoleClientUntyped()` 142 · `getSupabase()` 135 · **a row of `====` from
+a finished plan doc, 101** · `ProjectItem` 98 · `getAnthropic()` 92 · `env` 89 · `fragmentId()` 83 ·
+`expiresDate()` 80 · **the doc-index heading, 79** · `cn()` 77.
+
+**Four of the top sixteen architectural hubs are markdown headings.** `.graphifyignore` removed the
+`SESSION_LOG.md` blobs but prose is still ranking as core abstraction. Either extend the ignore file
+or run `graphify extract . --code-only` for hub/cohesion work — and never quote a god-node list
+without checking whether the entry is a symbol.
+
+## Also corrected on 08/12/2026 — the "yarn ball" finding is DEAD
+
+`_RESEARCH/agent-behavior/2026-08-11-graphify-community-structure-crawl4ai-research.md` PART 3 says
+the two largest communities are `SESSION_LOG.md` (1,370 + 672 nodes) plus ~1,480 nodes of
+`app/_design` reference bundles, and concludes the partition is unusable. **`.graphifyignore` fixed
+that and nobody re-measured.** Post-ignore, on `built_at_commit 2df7e509`: largest community is 426
+nodes at 88% `refinery/sources`, then 266 at 76% `lib/email`, 239 at 75% `scripts/email`, 236 at 68%
+`lib/deliverable`, 141 at 93% and 140 at 91% `lib/deliverable`. **369 communities of size ≥25 cover
+21,027 of 43,723 code-plane nodes.** Cohesion is uniformly low (0.012–0.051) — the edge-sparsity
+floor in `graph-compartments.md` §1 is unchanged. Singletons: 1,434.
+
+**The declared ~26-compartment partition in that research (PART 7) was NEVER built** — verified
+08/12/2026 by grepping the tree for its compartment names and for "declared partition": zero hits
+outside the research file itself. It remains a proposal needing sign-off, and the detected side is
+now much closer to it than that document admits.
+
+---
+
 # RULE 0.55 — DATA ROOTS: ONE CATALOG, LOOK THERE FIRST
 
 **Any question or build that reads a SWFL number starts at `docs/standards/data-roots.md`** — the ONE
@@ -555,19 +681,35 @@ Locked 07/07/2026 (operator correction — this line previously overclaimed "6-c
 
 ## graphify
 
+**This section is a MERGE.** `graphify claude install` (run 08/12/2026, R2) overwrites it with the
+vendor default and drops the three lines below that are ours. If it gets flattened again, restore
+from here — the vendor's four bullets are kept verbatim underneath.
+
 **First reach for a structural question is the HOSTED graph's MCP tools (RULE 0.5), not this local
-CLI.** The commands below are the local-artifact surface: use them to REBUILD or inspect
-`graphify-out/`, not as a substitute for `gx_callers` / `gx_impact` / `gx_rank_files`.
-
-Graph at `graphify-out/` — gitignored build product, regenerate with `bun run graphify:update`. Stale
-by definition (nothing rebuilds it on a schedule). Falls back to `Grep`/`Glob`/`Read` if absent.
-
-- `graphify query "<question>"` — scoped subgraph
-- `graphify path "<A>" "<B>"` — relationship
-- `graphify explain "<concept>"` — focused breakdown
+CLI.** The local commands REBUILD and INSPECT `graphify-out/`; they are not a substitute for
+`gx_callers` / `gx_impact` / `gx_rank_files`.
 
 **Before changing any clustering parameter, read `docs/standards/graph-compartments.md`** — the knobs
-are exhausted, and `graph.json`'s two edge arrays (`links` vs `edges`) give different cross-community
-percentages for the same graph.
+are exhausted, and `graph.json`'s two edge arrays (`links` vs `edges`) give different
+cross-community percentages for the same graph.
 
 Update / publish / snapshot commands (incl. worktree warm-start): `scripts/CLAUDE.md`.
+
+**The artifacts, and what each is FOR (RULE 0.5b R1 — read these before building a metric):**
+`.graphify_analysis.json` = communities + cohesion + gods + surprises + questions ·
+`.graphify_labels.json` = community names, survive re-cluster · `GRAPH_REPORT.md` = full written
+report · `wiki/` = navigation · `manifest.json` / `cache/` = build state.
+
+**Commands beyond query/path/explain** — `affected "X" --depth N` (reverse blast radius) ·
+`god-nodes --json` · `diagnose multigraph` (edge-collapse; measured clean 08/12/2026, R4) ·
+`tree` (D3 hierarchy HTML) · `export callflow-html` (Mermaid) · `save-result` / `reflect` (the
+correction loop, R3) · `label --missing-only` (R7) · `hook install` + `check-update` (R6) ·
+`extract --postgres <DSN>` (R5) · `extract --code-only` (drops prose hubs) · `merge-graphs` /
+`global add` (cross-repo) · `benchmark`.
+
+Vendor default, kept verbatim:
+
+- For codebase questions, first run `graphify query "<question>"` when graphify-out/graph.json exists. Use `graphify path "<A>" "<B>"` for relationships and `graphify explain "<concept>"` for focused concepts. These return a scoped subgraph, usually much smaller than GRAPH_REPORT.md or raw grep output.
+- If graphify-out/wiki/index.md exists, use it for broad navigation instead of raw source browsing.
+- Read graphify-out/GRAPH_REPORT.md only for broad architecture review or when query/path/explain do not surface enough context.
+- After modifying code, run `graphify update .` to keep the graph current (AST-only, no API cost).

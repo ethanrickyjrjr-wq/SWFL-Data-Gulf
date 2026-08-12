@@ -1,5 +1,36 @@
 # Graphify community structure — what we want, in CS terms, and what we measured
 
+> ## ⚠️ CORRECTION 08/12/2026 — PART 3 IS STALE. DO NOT QUOTE IT.
+>
+> PART 3's headline finding — the two largest communities are `SESSION_LOG.md` (1,370 + 672 nodes)
+> plus ~1,480 nodes of `app/_design` reference bundles, therefore "3,740 compartments is not
+> compartmentalization" — was measured on the UNSCOPED corpus. **`.graphifyignore` landed and fixed
+> it.** Re-measured on `built_at_commit 2df7e509`:
+>
+>     largest community    426n   88% refinery/sources
+>                          266n   76% lib/email
+>                          239n   75% scripts/email
+>                          236n   68% lib/deliverable
+>                          141n   93% lib/deliverable
+>                          140n   91% lib/deliverable
+>     communities ≥25 nodes  369   covering 21,027 of 43,723 code-plane nodes
+>     singletons           1,434   cohesion range 0.012–0.051
+>
+> No prose community remains in the top 20 by size. **The detected partition is materially closer to
+> PART 7's declared list than this document claims.** What did NOT change: the edge-sparsity floor
+> (`docs/standards/graph-compartments.md` §1) and low cohesion everywhere.
+>
+> **PART 5 item 4 (the drift number) was never built, and PART 7's ~26 compartments were never
+> written to disk** — verified 08/12/2026 by grepping the tree for the compartment names and for
+> "declared partition": zero hits outside this file.
+>
+> **PART 2 undersold the tool.** It lists the CLI knobs but not the analysis graphify already writes
+> every run — `.graphify_analysis.json` carries per-community cohesion, god nodes, cross-community
+> "surprises" with a written why, and generated questions. That omission is what let a later session
+> propose BUILDING a metric the tool had already computed. See CLAUDE.md RULE 0.5b.
+>
+> Reproduce any number above with `node scripts/graphify-compartments-report.mjs`.
+
 **Date:** 08/11/2026
 **Lane:** RULE 0.4 (ours first, then crawl4ai) + RULE 0.5 (probe the real artifact)
 **Operator ask (verbatim):** *"Instead of one big yarn ball of paths, we need to put the things that

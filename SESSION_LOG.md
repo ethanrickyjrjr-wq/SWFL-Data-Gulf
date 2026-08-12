@@ -1,3 +1,45 @@
+## 2026-08-12 (Opus 5) — RULE 0.5b: use the WHOLE tool. graphify computes cohesion/gods/surprises/questions every run and we had never opened the file.
+
+Operator: *"YOU HAVE THE FUCKING MCP, YOU HAVE THE FUCKING JSON. WHAT MORE CAN YOU FUCKING DO?"* —
+raised after I answered a graph-drift question by describing a metric to BUILD while
+`graphify-out/.graphify_analysis.json` (3.7 MB) already held per-community cohesion, god nodes,
+cross-community "surprises" with a written why, and 7 generated questions. The four-lane gate passed
+the whole time: every lane names OUR files, none names a gitignored build dir holding the VENDOR's
+analysis.
+
+- **CLAUDE.md RULE 0.5b (new)** — R1 vendor output is the first lane · R2 install the vendor's guard
+  (`graphify claude install`, operator ran it) instead of hand-rolling the owed
+  `graphify_first_reach_hook` · R3 `save-result --outcome corrected` + `reflect` for wrong graph
+  answers, not just a handoff doc · R4 no "no edge found" claim until `diagnose multigraph` runs ·
+  R5 `extract --postgres` to put the lake in the graph · R6 `hook install` / `check-update` —
+  "stale by definition" is an uninstalled hook, not physics · R7 `label --missing-only`.
+- **Ran `god-nodes --top 20`:** `createClient()` 239, `createServiceRoleClient()` 210 — but **4 of
+  the top 16 are markdown headings** ("Full ranked list" 169, a `====` rule 101, the doc-index
+  heading 79). `.graphifyignore` killed the session-log blobs; prose still ranks as architecture.
+  Use `extract --code-only` for hub work.
+- **Ran `diagnose multigraph` — clean NEGATIVE, recorded so nobody re-runs it:** 6 same-endpoint
+  groups directed / 28 undirected, 0 duplicates, 0 dangling, 7 self-loops of 73,496 edges. **Edge
+  collapse is NOT why `OPS_TARGET` has no callers.** Live findings: `effective_directed: false`
+  (graph.json carries no directed flag — a claim about the FILE, not about how the hosted index
+  answers direction), and 5,550 extraction warnings (2,775 edges missing `source_file`, 2,775
+  missing `confidence`).
+- **Corrected `_RESEARCH/agent-behavior/2026-08-11-graphify-community-structure-crawl4ai-research.md`
+  in place.** Its PART 3 "yarn ball" headline is DEAD — `.graphifyignore` fixed it and nobody
+  re-measured. On `built_at_commit 2df7e509`: largest community 426n at 88% `refinery/sources`, then
+  266n/76% `lib/email`, 239n/75% `scripts/email`, 236n/68% `lib/deliverable`, 141n/93%, 140n/91%.
+  **369 communities of ≥25 nodes cover 21,027 of 43,723 code-plane nodes.** No prose community left
+  in the top 20. Unchanged: 1,434 singletons, cohesion 0.012–0.051, the edge-sparsity floor.
+- **Answered the operator's direct question: the ~26-compartment declared partition was NEVER
+  built.** Grepped the tree for its compartment names and for "declared partition" — zero hits
+  outside the research file. Still a proposal needing sign-off; the detected side is now much closer
+  to it than that document admits.
+- Restored the `## graphify` section `claude install` flattened (hosted-first framing, the
+  compartments warning, the scripts/CLAUDE.md pointer) as an explicit merge with the vendor default.
+
+**Not done, named:** R5 needs a DSN + spend call (written as a proposal, not a result); R3/R6/R7
+documented but unrun (R7 costs LLM calls). Push carries two foreign commits from a parallel session
+(`5e54318e` CI canvas fix, `6d80492a` doc index) — benign, already on main.
+
 ## 2026-08-12 (Opus 5) — killed the canvas install failure at the root: ONE composite action, 26 call sites, apt only on the recovery path
 
 Operator: *"I CAN'T PUSH, SO YOU WILL HAVE TO TAKE CARE OF IT ALL."* This is the piece that was
