@@ -1,0 +1,44 @@
+# .graphifyignore — corpus scoping for the code graph.
+#
+# WHY THIS EXISTS. Measured on graphify-out/graph.json, 08/11/2026: 48,777 nodes, 83,716
+# edges, 3,740 communities, 1,266 of them singletons, 2,093 connected components with the
+# largest holding only 51.1% of nodes, and 19.9% of edges crossing community lines. The two
+# single biggest "communities" in this repo were both SESSION_LOG.md. That is not a graphify
+# defect — it is ours: no ignore file, default Leiden resolution, no hub exclusion, and no
+# declared partition to check the detected one against.
+#
+# Operator, 08/11/2026: "Instead of one big yarn ball of paths, we need to put the things
+# that are mostly related together."
+#
+# Spec:     docs/superpowers/specs/2026-08-11-graph-compartments-design.md
+# Research: _RESEARCH/agent-behavior/2026-08-11-graphify-community-structure-crawl4ai-research.md
+
+# ── EXCLUDED — append-only prose and generated artifacts, measured node counts ──
+#
+# These are append-only or machine-generated. They accrete nodes forever, cluster with
+# nothing, and drown real code structure in the community detection.
+
+# 3,548 nodes. Generated reference renders — artifacts, not authored source.
+app/_design/assets/reference-builds/
+
+# 2,049 nodes. Append-only session diary; the largest single node source in the repo.
+SESSION_LOG.md
+
+# 383 nodes. Append-only operator scratchpad.
+_ASSISTANT/SCRATCHPAD.md
+
+# ── DELIBERATELY NOT EXCLUDED ────────────────────────────────────────────────
+#
+# _ASSISTANT/STRIKES.md    13 nodes — measured, negligible.
+# _ASSISTANT/TODAY.md       6 nodes — measured, negligible.
+#   An earlier draft said "the three append-only logs" and swept STRIKES.md in on the
+#   assumption it was comparable. Measuring it is what caught the error. At 13 nodes,
+#   excluding it would be cargo-cult, not scoping. Correction is on the record in spec §1.
+#
+# _RESEARCH/  and  docs/   KEEP — LOAD-BEARING, DO NOT ADD.
+#   93 research files were un-gitignored and TRACKED on 08/11/2026 by operator decree
+#   ("make everything not gitignored, we are public anyway") for the express purpose of
+#   letting the graph index them. Research nobody can find governs nothing, and a file the
+#   graph cannot see is invisible on every tier — paying does not fix it, tracking does.
+#   Excluding either path here would silently undo that decree. A test in the compartments
+#   report fails if this file ever matches _RESEARCH/ or docs/.

@@ -19,6 +19,47 @@ steps (knip, lake-read ratchet, registry identity). Two unrelated defects, both 
 **Evidence.** `node --test .github/scripts/*.test.mjs scripts/lib/*.test.mjs .claude/hooks/*.test.mjs
 .claude/hooks/lib/*.test.mjs` → 292 passed, 0 failed (was 10 `not ok` across the two defects before).
 
+## 2026-08-12 (Opus 5) — graph compartments STEP 1 BUILT: corpus scoped, graph rebuilt, 5,982 nodes pruned, research/docs verified intact
+
+Operator: *"where is the handoff??????? what did you actually do?"* — fair. Two sessions had produced
+three documents (research 369 lines, spec 212, plan 108) and ZERO build; I had spent mine on the
+four-lane hook, i.e. the tooling in the way of the work, and reported n-of-8 against that instead of
+against the deliverable. Scratchpad entry filed with the candidate strike shape
+`built-the-tooling-not-the-thing`.
+
+**Step 1 of `docs/superpowers/plans/2026-08-11-graph-compartments.md` is now BUILT and verified.**
+
+`.graphifyignore` created at repo root, tracked, three paths only — `app/_design/assets/reference-builds/`,
+`SESSION_LOG.md`, `_ASSISTANT/SCRATCHPAD.md` — with an inline comment block carrying the measured node
+count behind each, the explicit DO-NOT-EXCLUDE note for `STRIKES.md` (13) and `TODAY.md` (6), and the
+KEEP note for `_RESEARCH/`+`docs/` citing the 08/11 indexing decree.
+
+**Answered from the repo, not from memory:** operator said "graphify we update in ops," which read as a
+conflict with the plan's local rebuild. It is not. `scripts/graphify-publish.mjs` builds HERE and writes
+the transformed graph INTO the sibling ops repo (`../swfldatagulf-ops/app/graph/brain-graph.json`). Ops
+is the publish target, not the build site. Step 1 was unblocked.
+
+**TRAP FOUND, not in the plan:** neither `graphify:update` nor `graphify:publish` in `package.json`
+passes `--force` — both are plain `graphify update .`. On a node DROP the update silently refuses to
+overwrite and leaves the old graph in place, so a routine `bun run graphify:update` would have no-opped
+this scoping and every downstream number would have looked clean while measuring unscoped data. The
+rebuild was run manually with `--force`. The npm scripts are UNCHANGED (adding `--force` there would
+force-overwrite on every routine run — separate decision, not taken).
+
+**Measured.** Baseline 48,778 nodes / 83,717 edges (spec §1 measured 48,777/83,716 on 08/11 — one node
+of drift). Rebuild reported `pruned 5982 node(s) from 11 newly-ignored file(s)` against 5,980 expected.
+After `scripts/graphify-app-nodes.mjs` re-merged the app plane (+79 nodes): **43,179 nodes / 73,146
+edges**. Drop clears the plan's ≥4,000 gate. Snapshot restore point saved first (205.4 MB → 13.8 MB).
+
+**Guardrail verified directly against the rebuilt graph** — `_RESEARCH/` 1,987 nodes and `docs/` 15,613
+nodes both still indexed (the 08/11 decree is intact); `SESSION_LOG` 0, `SCRATCHPAD` 0,
+`reference-builds` 0; `STRIKES.md` 16 and `TODAY.md` 6 deliberately still present.
+
+**Not done:** Step 0 (hosted-index probe, needs its own push), Step 2 (9-run resolution × exclude-hubs
+calibration), Step 3 (the TDD report script + `docs/standards/graph-compartments.md`). Community count
+is still 3,740 at default resolution 1.0 — scoping alone did not compartment anything, which is exactly
+what Step 2 exists to fix. 1 of 4 steps.
+
 ## 2026-08-12 (Opus 5) — four-lane gate: the LIVE lane now sees the installed vendor surface; measured, and it RECLASSIFIES rather than adds
 
 Picked up the 08/11 handoff (session 5d1fc000) which found the defect and could not apply it. Operator
