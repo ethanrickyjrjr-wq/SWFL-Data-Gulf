@@ -113,11 +113,29 @@ async function scan(): Promise<{ offenders: string[]; cleaned: string[] }> {
 }
 
 describe("mock.module restore ratchet", () => {
-  test("no NEW test file wholesale-mocks an in-repo module without an afterAll restore", async () => {
+  // Red-first for the 08/12/2026 widening. The detector used to read
+  // `["'](@\/|\.{1,2}\/)` and a vendor mock walked straight past it — which is
+  // how `next/navigation` cost 6 red CI runs. This pins the SCOPE of the
+  // predicate so it can never be narrowed back without a failing test.
+  test("the detector fires on a VENDOR specifier, not just @/ and relative", () => {
+    const vendorNoRestore = `import { mock } from "bun:test";\nmock.module("next/navigation", () => ({ redirect: () => {} }));\n`;
+    const inRepoNoRestore = `import { mock } from "bun:test";\nmock.module("@/lib/foo", () => ({}));\n`;
+    const vendorWithRestore = `${vendorNoRestore}afterAll(() => {});\n`;
+
+    expect(MOCKS_A_MODULE.test(vendorNoRestore), "a vendor mock must be detected").toBe(true);
+    expect(MOCKS_A_MODULE.test(inRepoNoRestore), "an in-repo mock must still be detected").toBe(
+      true,
+    );
+    // The restore check is what excuses it — never the specifier's origin.
+    expect(HAS_AFTER_ALL.test(vendorNoRestore)).toBe(false);
+    expect(HAS_AFTER_ALL.test(vendorWithRestore)).toBe(true);
+  });
+
+  test("no NEW test file wholesale-mocks a module without an afterAll restore", async () => {
     const { offenders } = await scan();
     expect(
       offenders,
-      `These test files call mock.module() on an in-repo module with no afterAll restore. ` +
+      `These test files call mock.module() with no afterAll restore. ` +
         `bun mocks are process-global — this WILL poison other files in CI's file order ` +
         `even when your local run is green. Snapshot the real module before mocking and ` +
         `restore it in afterAll (idiom at top of ${import.meta.path}).`,

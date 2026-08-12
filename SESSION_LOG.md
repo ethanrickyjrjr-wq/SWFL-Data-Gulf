@@ -1,3 +1,26 @@
+## 2026-08-12 (Opus 5) — pin the ratchet's new scope with a red-first test; correct the STRIKES guard line
+
+Two follow-ups on the widening, both caught in review of my own pass:
+
+- **The widened detector had no test of its own.** `MOCKS_A_MODULE` matches anything, so it is
+  safe today — and nothing stopped a future session narrowing it straight back to
+  `["'](@\/|\.{1,2}\/)`, which is the exact regex that let `next/navigation` through this morning.
+  Added a red-first case that pins the SCOPE: a vendor specifier with no restore MUST be detected,
+  an in-repo one must still be, and `afterAll` presence — never the specifier's origin — is what
+  excuses a file. Ratchet now 3 pass / 0 fail.
+
+- **`STRIKES.md`'s `guard:` line still described the OLD mechanism.** It read "on an in-repo
+  specifier" under a shape whose newest strike is that in-repo-only was too narrow. The registry is
+  the map of which guard answers which shape; a stale scope there sends the next session looking
+  for coverage that does not exist. Rewritten to say BUILT 08/11 / WIDENED 08/12 with the measured
+  zero-entry cost.
+
+Two deferrals promoted out of prose and into the ledger, per RULE 2.4 — both are genuinely blocked
+on an operator decision, which is the only legal case for a check under RULE 0.85:
+`ci_result_visible_to_session` (which hook point should print a red CI verdict) and
+`zombie_crons_collier_permits_amenities` (enable the two workflows, or comment their crons and park
+the registry entries).
+
 ## 2026-08-12 (Opus 5) — Gate 1.6: the watch manifest can no longer reach CI stale. Plus one canvas flake, named not chased.
 
 - **Built the guard the last entry said was owed, one layer down.** `.github/_watch-manifest.json`
