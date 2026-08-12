@@ -850,23 +850,29 @@ gaps.**
 | `market-comps` | Market Comps | 2.3 — WALKED |
 | `under-contract` | Under Contract | 2.4 — WALKED |
 | `just-sold` | Just Sold | 2.5 — WALKED 08/06/2026 |
-| `open-house` | Open House | 2.6 — BUILT (code + `render-open-house.mts` live); playbook section OWED |
+| `open-house` | Open House | 2.6 — **WALKED 08/06/2026** (5 rounds live-render correction w/ operator, `SESSION_LOG.md:1940-1962`); playbook Part 2 write-up OWED |
 | `price-reduced` | Price Improved | 2.7 — WALKED 08/09/2026 (first sentence bank; bank words pending operator reword) |
 | `agent-brand-intro` | Agent Brand Intro | 2.8 — WALKED 08/06/2026 |
-| `agent-launch` | Agent Launch — The Letter | 2.9 — TO BE WALKED |
-| `sphere-weekly` | Weekly Sphere Update | 2.10 — TO BE WALKED |
-| `review-reply` | The REVIEW Reply | 2.11 — TO BE WALKED |
+| `agent-launch` | Agent Launch — The Letter | 2.9 — **WALKED** (shipped live 07/05, prod-verified click-through `SESSION_LOG.md:16306`); playbook Part 2 write-up OWED |
+| `sphere-weekly` | Weekly Sphere Update | 2.10 — TO BE WALKED (no operator-walk evidence found in SESSION_LOG as of 08/12 — genuinely unverified, not confirmed either way) |
+| `review-reply` | The REVIEW Reply | 2.11 — TO BE WALKED (no operator-walk evidence found in SESSION_LOG as of 08/12 — genuinely unverified, not confirmed either way) |
 | `market-pulse` | Monthly Market Pulse | 2.12 — WALKED 08/06/2026 |
 | `back-on-market` | Back on the Market | 2.13 — WALKED 08/06/2026 |
-| `community-info` | Community Info | 2.14 — TO BE WALKED |
-| `listings-showcase` | Listings Showcase | 2.15 — TO BE WALKED |
-| `listings-digest` | Listings Digest | 2.16 — TO BE WALKED |
-| `default-grid` | Market Email (the catch-all) | 2.17 — TO BE WALKED |
+| `community-info` | Community Info | 2.14 — **WALKED** (operator decree + review, `SESSION_LOG.md:6606-6912`); playbook Part 2 write-up OWED |
+| `listings-showcase` | Listings Showcase | 2.15 — **WALKED** (operator review round + 2 real live sends, `SESSION_LOG.md:6472-6602`); playbook Part 2 write-up OWED |
+| `listings-digest` | Listings Digest | 2.16 — TO BE WALKED (08/12 session fixed a real arrival bug and live-verified the builder, but that was a bugfix, not an operator design walk) |
+| `default-grid` | Market Email (the catch-all) | 2.17 — terminal fallback, not a walked recipe by design |
 
-**Live count as of 08/09/2026: 9 sections walked (§2.7 landed with the first sentence bank), 1 more
-built-in-code with its section owed (§2.6), 7 to be walked.** The 9 acceptance scripts under `scripts/email/render-*.mts` are the
-ground truth for what is BUILT; this table is the ground truth for what is WRITTEN. When they
-disagree, a section is owed — do not mark WALKED until the section exists.
+**CORRECTED 08/12/2026 — the table above was wrong, not just stale.** It conflated "has a written
+Part 2 prose section in this doc" with "was walked with the operator," and reported four recipes
+(Open House, Agent Launch, Community Info, Listings Showcase) as unwalked when SESSION_LOG shows
+real operator-driven builds, corrections, and live sends for each. **A prior "9 walked, 7 to be
+walked" count was reported to the operator on this false basis — he had walked Open House himself
+and caught it immediately.** Do not trust this table's WALKED/TO-BE-WALKED column without checking
+SESSION_LOG when the stakes matter — the acceptance scripts under `scripts/email/render-*.mts`
+prove BUILT; only SESSION_LOG proves WALKED. This table proves WRITTEN (has a Part 2 section) and
+that is a third, different thing again. Genuinely unwalked (no evidence either way): Weekly Sphere
+Update, The REVIEW Reply. Bugfixed-but-not-walked: Listings Digest.
 
 `social-pack` and `social-cut` are NOT emails. Different renderer, different contract. They are not
 in this playbook and must never be "fixed" onto email chrome.
