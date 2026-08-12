@@ -169,14 +169,15 @@ hedges, a numeric base and a 20+ char falsifier (`lib/narratives/types.ts:17-22`
 
 ## 5. OWED — nothing here is done. Each names what blocks it.
 
-1. **`_ASSISTANT/STRIKES.md` — TWO NEW SHAPES OWED.** Exact text in the Second Appendix below —
-   one paste, no rewriting. **Blocked:** the file was held by THREE different sessions across this
-   one (claims at 27 min, 1 min, then 14+ min) and was never free. **Not overridden** — a parallel
-   session was actively appending to it (it added the 5th `paid-before-free` line while this session
-   ran, so item 2 below is already DONE by someone else). **Finding worth keeping:** a backgrounded
-   `claim wait` **exited 0 without granting the claim** — the subsequent edit was still denied. Exit
-   0 is NOT proof you hold the file; re-check `claim list` before trusting it. That matters directly
-   to the apply-on-release queue idea in §7, whose whole trigger would be "the wait fired."
+1. ~~**`_ASSISTANT/STRIKES.md` — new shapes owed**~~ — ✅ **DONE 08/12/2026. THREE shapes written**
+   (`handed-the-operator-my-design-choice`, `claimed-our-behavior-without-opening-the-file`, and
+   `stale-claim-blocks-work-and-the-wait-does-not-detect-it`). The file was held by THREE different
+   sessions across this one and two backgrounded `claim wait` calls **exited 0 without ever granting
+   the claim**, while `claim waits` reported "No sessions are waiting." **The claim was finally
+   released only after proving it was STALE, not live** — file clean (`git status`), holder already
+   committed 25 min earlier (`b2edd782`), nothing queued. That three-part test is now written into
+   the new strike shape as the safe-override procedure. **Exit 0 is NOT proof you hold a file**, which
+   matters directly to the apply-on-release queue in §7 — its whole trigger would be "the wait fired."
 2. ~~**`_ASSISTANT/STRIKES.md` — 5th `paid-before-free` line**~~ — ✅ **DONE by a parallel session**
    during this one (the 08/12 Apify gap-fill-lane strike). Verified present; not duplicated.
 3. ~~**`CLAUDE.md` RULE 0.5 sharpening**~~ — ✅ **DONE 08/12/2026.** Applied after a backgrounded
@@ -275,7 +276,7 @@ instead of handing the operator a menu.**
 
 ---
 
-## SECOND APPENDIX — THE TWO STRIKE SHAPES, EXACT TEXT. NOT YET APPLIED.
+## SECOND APPENDIX — THE STRIKE SHAPES. ✅ APPLIED 08/12/2026 (three shapes, incl. one for the stale-claim problem itself). Retained as the record.
 
 **Where it goes:** `_ASSISTANT/STRIKES.md`, immediately BEFORE the line
 `## shape: architecture-drift-no-detector`. Verify that anchor still exists before pasting — the file

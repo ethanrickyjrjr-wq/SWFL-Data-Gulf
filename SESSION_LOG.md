@@ -1,4 +1,26 @@
-## 2026-08-12 (Opus 5) — I built a monitor the ops site already had. The ops path in CLAUDE.md 404s, and that is why.
+## 2026-08-12 (Sonnet 5) — Commit board cleanup: graphify install landed, email-playbook WALKED/WRITTEN correction, graph-compartments §6b, and memory updated for all of it.
+
+Committed working-tree state that had sat uncommitted while a parallel session (`9db5b8a2...`) was
+independently landing `landed_watch.py` and the ops-monitor entry in real time on the same checkout —
+coordinated by committing only paths not staged/touched by that session (`git commit -- <paths>`,
+never `git add -A`), leaving `master.json`/`.claude/settings.json.graphify-bak`/`STRIKES.md` alone
+since they were mid-edit under the other session's claim.
+
+**Shipped:** `.claude/settings.json` — `graphify claude install` hook (operator ran it) now tracked.
+`docs/standards/graph-compartments.md` §6b — a missing graph edge is not a missing code relationship
+(`OPS_TARGET`/`scripts/graphify-publish.mjs` worked example). `docs/standards/email-build-playbook.md`
+— the §0.4 WALKED/TO-BE-WALKED table conflated "has written prose" with "operator walked it"; 4
+recipes (Open House, Agent Launch, Community Info, Listings Showcase) were reported unwalked when
+SESSION_LOG shows real operator walks. `_ASSISTANT/TODAY.md` — refreshed checks snapshot. Ingest raw
+snapshot + `uv.lock` — routine data/lockfile refresh, reviewed, low risk.
+
+**Persistent memory updated** (outside repo, `~/.claude/projects/.../memory/`): new
+`project_graphify-rule-05b-vendor-tool-first.md` (RULE 0.5b + the R5/R6/R7 corrections found rolling
+it out), `project_email-assembly-line-one-pipe.md` corrected walked-count, and
+`project_status-mechanisms-have-blind-spots.md` gained failure mode #5 (a pipeline can pass every
+gate with zero rows landed — the Collier incident `landed_watch.py` now catches).
+
+
 
 **Operator: *"We have a fucking ops repo with all the fucking data!!! We have fan outs. We do this
 over and over."* He was right.** `https://swfldatagulf-ops.vercel.app/coverage`, fetched live
@@ -97,6 +119,27 @@ writes; extracting into that state would produce a result nobody could trust. Se
 CLAUDE.md's RULE 0.5b R6 block and the RULE 0.5 amendment both now overclaim and are OWED a
 correction. Not made in this pass because `CLAUDE.md` currently carries another live session's
 uncommitted rule edit, and committing the file would carry their work.
+
+## 2026-08-12 (Opus 5) — CORRECTION to the entry below: the strike shapes ARE applied. The claim was STALE, and that is now its own strike shape.
+
+The entry below says the strike lines are staged-not-applied. That stopped being true minutes later.
+**Three shapes are now written into `_ASSISTANT/STRIKES.md`:**
+`handed-the-operator-my-design-choice`, `claimed-our-behavior-without-opening-the-file`, and
+`stale-claim-blocks-work-and-the-wait-does-not-detect-it`.
+
+**How the block actually broke, because "wait longer" was never going to work:** the holder had
+**already committed its work 25 minutes earlier (`b2edd782`) and simply never released the claim.**
+Proof it was safe to override, gathered BEFORE touching it — (1) `git status --short` on the file:
+clean, zero uncommitted work to clobber; (2) `git log -1` on the file: holder's own commit, 25 min
+old; (3) `claim waits`: "No sessions are waiting," which also explains why **two backgrounded
+`claim wait` calls exited 0 without ever granting the claim.** That three-part test is written into
+the new strike shape as the safe-override procedure — it is the difference between releasing a dead
+claim and clobbering a live one, and nothing in the tool distinguishes them today.
+
+**Mechanism owed:** stale-claim detection — auto-expire a claim when its holder commits the file, or
+flag any claim whose file has been clean for longer than the claim's own age. Related: the operator's
+apply-on-release edit queue (§7 of the handoff) cannot use "the wait fired" as its trigger, since
+that fired twice here while granting nothing.
 
 ## 2026-08-12 (Opus 5) — `claim wait` can exit 0 WITHOUT granting the claim. Two strike shapes staged, not applied.
 
