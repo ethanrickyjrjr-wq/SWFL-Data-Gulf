@@ -46,7 +46,7 @@ index never mentioned. A grep of `_RESEARCH/` is not a search of our research.
 
 ## Categories
 
-**agent-behavior/** — how the agent should steer, drift, schedule, self-check (7)
+**agent-behavior/** — how the agent should steer, drift, schedule, self-check (12)
 - `2026-07-01-ai-tool-awareness-scheduling-research.md`
 - `2026-07-15-ai-steering-anti-drift-research.md`
 - `2026-07-21-second-order-thinking-research.md` — "and then what?" (Marks/Dalio) + inversion
@@ -119,6 +119,15 @@ index never mentioned. A grep of `_RESEARCH/` is not a search of our research.
   measured numbers ($4.07 for the run, $42.26 spent on 08/04–08/05, cap resets 08/28/2026) are in
   `_ASSISTANT/SCRATCHPAD.md`. The research is real and worth reading. What it cost is on the record
   next to it.
+- `2026-08-12-build-time-ai-grounding-outlines-critic-context-caching.md` — a smaller, separate
+  7-page crawl4ai pass (no Reddit) run inside the Open House / email-lab-AI debugging session, not
+  one of the three spend-incident agents. Outlines (constrained decoding fixes shape, not semantic
+  constraints like "must contain an ask"), Self-Refine, CRITIC (external-feedback beats
+  self-critique), Anthropic's reduce-hallucinations + Sufficient Context (abstain vs. confabulate),
+  and Anthropic's context-engineering + prompt-caching guidance. Overlaps in topic with the two
+  files above (which are deeper); kept separate because its specific citations (Outlines,
+  Self-Refine, CRITIC) don't appear in either. Feeds
+  `docs/handoff/2026-08-12-open-house-and-build-ai-grounding-handoff.md` §4 Steps 3–4.
 
 
 **audits/** — dated deep-pass audits (14). The 07/18 data-consolidation set (P1–P10 + BLOCKERS)
