@@ -1,3 +1,15 @@
+## 2026-08-12 (Sonnet 5) — Collier permits cron RE-ENABLED — both held conditions closed out
+
+Operator: "flip if guards are up and cron is set to run next time." Confirmed guards live in
+`ingest/pipelines/collier_permits/pipeline.py` before touching the schedule: `assert_min_rows`
+(4,477 floor), `assert_content_fresh` (75d), dlt `write_disposition="merge"` on `permit_number`
+(non-destructive), plus this session's geocoder split-retry fix (bba5ca43, live-verified).
+Uncommented the `schedule:` trigger in `.github/workflows/collier-permits-monthly.yml` (cron
+`0 12 15 * *`, 15th of each month) — both conditions the held-schedule comment named (dry-run
+green + a real live run confirmed clean) are now genuinely met and cited inline in the new
+comment. Closed `collier_permit_roof_age_request` — was never a records-request problem, it's
+done: a scheduling fix, live-verified three times over (dry-run, real merge, geocoder re-run).
+
 ## 2026-08-12 (Sonnet 5) — Graph compartments pass 2: SQL-extractor fix installed+measured, singleton floor got WORSE not better
 
 Continuation of `docs/handoff/2026-08-12-graph-compartments-step2-negative-result.md` §4's "recommended

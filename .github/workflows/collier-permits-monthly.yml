@@ -1,12 +1,17 @@
 name: Collier County permits monthly
 
 on:
-  # SCHEDULE HELD (2026-06-16): crawl4ai migration landed. Re-enable after:
-  # (1) GHA dry-run probe passes green (confirms UndetectedAdapter clears Akamai
-  #     from datacenter IP, XLSX download succeeds, size logged).
-  # (2) collier_first_lake_ingestion gate clears (first live run confirmed clean).
-  #   schedule:
-  #     - cron: "0 12 15 * *"
+  # SCHEDULE RE-ENABLED 08/12/2026: both held conditions cleared and live-verified.
+  # (1) GHA dry-run probe passed green (gh run 31565435973 — UndetectedAdapter clears
+  #     Akamai from datacenter IP, XLSX download succeeds).
+  # (2) collier_first_lake_ingestion gate cleared: real merge run landed 9,717 rows in
+  #     data_lake.collier_building_permits (gh run 31566832140), and the geocoder
+  #     timeout-drop bug found in that run was fixed + re-verified live (gh run
+  #     31567459230 — July fill recovered 0%->47.3%, matching April's 46.3% baseline).
+  # Guards live going into the schedule: assert_min_rows (4,477 floor), assert_content_fresh
+  # (75d), dlt merge on permit_number (non-destructive), geocoder split-retry on timeout.
+  schedule:
+    - cron: "0 12 15 * *"
   workflow_dispatch:
     inputs:
       month:
