@@ -1,3 +1,13 @@
+## 2026-08-12 (Sonnet 5) — deed cash-vs-financed split PUSHED to main, brain rebuild dispatched
+
+Follow-up to the entry below (same session). `6dfea815` on `origin/main` — feature + doc-index +
+grade-coverage artifact + a legitimate parallel-session scratchpad append, all in one push, four
+gates fired in sequence (doc-index drift, grade-coverage drift, scratchpad-dirty, session-log) and
+were each fixed and shipped rather than bypassed. `dispatch-rebuild.mjs lee-deed-records-swfl`
+running: https://github.com/ethanrickyjrjr-wq/SWFL-Data-Gulf/actions/runs/31606980553 — tripwire
+acceptance entry committed same session. Next: live-verify the two new metrics in the rebuilt
+brain file and close `deed_cash_financed_split_live_verify`.
+
 ## 2026-08-12 (Sonnet 5) — deed cash-vs-financed split BUILT and live-verified (steps 1-5 of the handoff)
 
 Picked up `docs/handoff/2026-08-12-deed-cash-financed-split-build-handoff.md` on direct operator
