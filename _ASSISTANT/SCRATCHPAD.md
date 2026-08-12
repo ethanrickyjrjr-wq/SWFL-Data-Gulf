@@ -150,6 +150,32 @@ no rule points at it. Candidate: name it in RULE 0.5 beside the MCP tools, and/o
 `scripts/graphify-compartments-report.mjs` print the gods / surprises / questions blocks that are
 already on disk instead of only counting communities.
 
+## 2026-08-12 (Opus 5) — OPERATOR: "How does everything not have a root and a path?!! How do I remember all this shit and you can't even create a list of things we have and don't have?"
+
+The deepest gripe of the day and the correct one. **We have the lists. Three of them were wrong at
+the same time, and every right answer was already on disk:**
+
+- `data-roots.md` said the Lee deed→parcel join was BROKEN, in two places. It worked. The correct
+  column (`lee_parcels.parcel_id` = the STRAP) had been written down **07/18/2026** in
+  `_RESEARCH/audits/2026-07-18-data-consolidation/P1-parcel-consolidation.md` line 63 — 25 days.
+- The same 07/18 audit said the LeePA↔FDOR crosswalk "does not exist yet." It exists — same STRAP,
+  two column names, **98.8%** (542,445 of 548,798).
+- `cadence_registry.yaml` said Collier's cron was live with a "first live pull." It was a dry-run;
+  the table did not exist.
+
+**So the problem is NOT that the list doesn't exist. It is that nothing ever re-tests what the list
+says.** A claim gets measured once, restated slightly wrong, and inherited forever by every reader
+including me. That is why he remembers and the files don't.
+
+**Guard this argues for (cheapest version, would have caught all three):** for every
+`cadence_registry.yaml` entry not marked `parked:`, assert its `count_table` exists and returns > 0
+rows. One query per entry, in the pre-push gate. `check-prepush-gate.mjs` has five gates and not one
+asks "does this table have rows?" Second: a `data-roots.md` claim that names a join should carry the
+query that proves it, so it is re-runnable instead of inherited.
+
+Written up in full: `docs/handoff/2026-08-12-records-to-address-wired-and-why-we-kept-missing-it.md`
+PART 4.
+
 ## 2026-08-12 (Opus 5) — I DID IT AGAIN, SAME TURN: reported a backfill "running fine" that had crashed
 
 Ran the Collier backfill as `python -m ... | grep -v FETCH | tail -30`. **A pipeline's exit code is
