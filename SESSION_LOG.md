@@ -1,3 +1,28 @@
+## 2026-08-12 (Opus 5) — ALL GREEN on 3592ee0f, verified per workflow. Closing the loop on the afternoon's red.
+
+Every run on `3592ee0f`, read off `conclusion`, not a watch exit code:
+
+- **CI — success**
+- **Smoke — Prod — success** (was failing on the canvas install)
+- **Rollback on red — Prod — success**
+- **Log cron incident — success**
+- **graphify-republish — no run at all, which IS the pass.** It has no `push:` trigger; the only
+  reason it appeared on earlier pushes was that GitHub was REJECTING the file and surfacing a
+  zero-job failure against the push. Its absence on this SHA is the evidence the file is accepted
+  again. It was still being rejected on `1aec3ba1`, the last SHA before the fix landed.
+
+Where the afternoon started: CI red for six consecutive runs, three sessions pushing over it, nobody
+having opened the log.
+
+Closed `canvas_install_flake_pixman` with evidence. Still open and each genuinely blocked on an
+operator decision, not on work: `ci_result_visible_to_session` (which hook point prints a red CI
+verdict), `zombie_crons_collier_permits_amenities` (enable the two workflows or comment their crons
+and park the registry entries).
+
+Net for the session: 3 checks opened, 1 closed — net +2, and both survivors are decisions rather
+than tasks. Four guards shipped: Gate 1.6 (watch-manifest drift), the widened mock-restore ratchet
+plus its red-first scope test, and `workflow-step-shape.test.mjs` wired into Gate 1.6.
+
 ## 2026-08-12 (Opus 5) — I broke graphify-republish with my own fix. Caught in 4 minutes, and the guard that would have caught it is now built.
 
 **CI is GREEN: run 31626795591, `conclusion: success`, commit `6d80492a`.** Smoke — Prod and
