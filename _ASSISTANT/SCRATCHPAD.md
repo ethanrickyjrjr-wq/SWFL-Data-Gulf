@@ -261,6 +261,35 @@ no rule points at it. Candidate: name it in RULE 0.5 beside the MCP tools, and/o
 `scripts/graphify-compartments-report.mjs` print the gods / surprises / questions blocks that are
 already on disk instead of only counting communities.
 
+## 2026-08-12 (Opus 5) — OPERATOR: "We have a fucking ops repo with all the fucking data!!! We have fan outs. We do this over and over and over." HE WAS RIGHT. I BUILT A DUPLICATE.
+
+**`https://swfldatagulf-ops.vercel.app/coverage` already does what I spent an hour building.** Live,
+stamped 08/12/2026 20:18 UTC, measured this session:
+
+- **73 total pipelines** — the exact number I "discovered" by parsing the registry myself
+- **60 fresh · 3 stale/short · 4 empty/missing · Act now 8 · Parked 5 · Healthy 60**
+- Per-pipeline rows: source, brain, rows in lake, freshness, what's missing, and a verb (GRAB / FIX
+  / FIND / ROUTE)
+- **A "Copy chase list (8)" button that emits a work order designed to be pasted into a Claude
+  session.** The fan-out he is talking about. It already exists.
+
+`/data-inventory` covers 62 pipelines from the same registry. 19 ops pages total, incl. `/db-health`
+(hourly Postgres vitals), `/census`, `/wire-map`, `/spend`, `/checks`, `/queue`.
+
+**WHY IT GOES UNREAD, and this is a real defect not an excuse: our own `CLAUDE.md` points at
+`/ops/census`. That path 404s. The real path is `/census`** (no `/ops` prefix — that's the site's
+own back-link label, not a route). Every session that has ever tried to follow that instruction hit
+a 404 and moved on. Fix the path in CLAUDE.md.
+
+**What I built anyway:** `ingest/scripts/landed_watch.py` + a Hermes cron. It overlaps `/coverage`
+heavily. The ONE thing it does differently: `/coverage` measures YEAR RANGE present ("no range"),
+so a table that DOES NOT EXIST reads the same as one with rows but no parseable year — which is
+exactly how Collier hid. That is a thin justification and does not excuse not looking first.
+
+**THE RULE THIS ARGUES FOR: before building any monitor/report/list, open the ops site's page index
+first.** Not the repo — the LIVE site. Nineteen pages already answer most "how do I see X" questions
+and nothing in `CLAUDE.md` lists them.
+
 ## 2026-08-12 (Opus 5) — OPERATOR: "How does everything not have a root and a path?!! How do I remember all this shit and you can't even create a list of things we have and don't have?"
 
 The deepest gripe of the day and the correct one. **We have the lists. Three of them were wrong at
