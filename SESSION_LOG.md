@@ -1,3 +1,30 @@
+## 2026-08-12 (Opus 5) — Gate 1.6: the watch manifest can no longer reach CI stale. Plus one canvas flake, named not chased.
+
+- **Built the guard the last entry said was owed, one layer down.** `.github/_watch-manifest.json`
+  went stale FOUR times in 13 hours — `22d6c6a7`, `eab2a3d9`, `a6337edb`, and my own `ae11ad39` —
+  and every one of those was a red CI run somebody else had to chase. `watch-manifest-drift.test.mjs`
+  caught it every time, in CI, long after the author was gone. **Gate 1.6 in
+  `.claude/hooks/check-prepush-gate.mjs`** now mirrors Gate 1.5 exactly: touch a
+  `.github/workflows/*.yml` (excluding the two GENERATED watchers) and the gate runs
+  `node scripts/build-watch-lists.mjs --write --write-watchers`, blocks if the artifact moved, and
+  hands you the `git add` line. Fails closed if the generator itself errors — a generator that
+  can't run is never evidence of freshness (new-project-playbook §4.12). Escape:
+  `ALLOW_STALE_WATCH_MANIFEST=1`. Not cosmetic: `heal-cron-failure` decides what gets auto-retried
+  off this manifest, and Gate 13's money guard reads `paid` from it. `node --check` clean,
+  292/292 node:test pass.
+
+- **CI run `31623927501` failed at `Install dependencies`, and it is NOT the diff.** `canvas@3.2.3`
+  (a long-standing dep, unchanged by anything today) fell back from `prebuild-install` to a
+  node-gyp source build and died on `Package 'pixman-1' … not found`. The run 8 minutes earlier on
+  the parent commit installed the same lockfile fine and reached the test steps. Suspect flake
+  first (RULE 1) — a fresh run is the check, and `gh run rerun` is billing-gated, so this push
+  supplies it rather than an override.
+
+**Running score, so nothing gets rounded up:** the `bun test` step is GREEN (verified — it stopped
+appearing in `--log-failed` after `ca39f056`). The `.github` node:test step is green LOCALLY at
+292/292; its CI proof is still owed because the install step died before reaching it. Nothing else
+in the run has been observed green since. That is 1 of 2 proven in CI, not 2 of 2.
+
 ## 2026-08-12 (Opus 5) — CI round 2: stale watch manifest, and the ratchet hole that let round 1 through
 
 Round 1 (`ca39f056`) turned the `bun test` step green — verified in run `31623320902`: the `Test`

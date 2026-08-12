@@ -189,6 +189,54 @@ process.stdin.on("end", () => {
     }
   }
 
+  // ---- Gate 1.6: watch-manifest drift --------------------------------------
+  // Third instance of Gate 1's shape, and the one that kept reaching CI. A new or
+  // renamed workflow leaves `.github/_watch-manifest.json` — and the watcher lists
+  // inside log-cron-incident.yml / heal-cron-failure.yml, which are GENERATED from
+  // it — describing a repo that no longer exists. `watch-manifest-drift.test.mjs`
+  // catches it, but only in CI, so the author is long gone by the time it goes red.
+  // Measured 08/12/2026: it went stale FOUR times in 13 hours (22d6c6a7, eab2a3d9,
+  // a6337edb, ae11ad39) — every one a red CI run someone else had to chase.
+  // The cost of being wrong is not cosmetic: heal-cron-failure decides what gets
+  // auto-retried off this manifest, and Gate 13's money guard reads `paid` from it.
+  // Escape: ALLOW_STALE_WATCH_MANIFEST=1.
+  const workflowsTouched = changed.some(
+    (f) =>
+      f.startsWith(".github/workflows/") &&
+      (f.endsWith(".yml") || f.endsWith(".yaml")) &&
+      f !== ".github/workflows/log-cron-incident.yml" &&
+      f !== ".github/workflows/heal-cron-failure.yml",
+  );
+  if (workflowsTouched && process.env.ALLOW_STALE_WATCH_MANIFEST !== "1") {
+    const gen = run("node scripts/build-watch-lists.mjs --write --write-watchers");
+    // Same empty-tolerance rule as Gate 1.5: a generator that cannot run is never
+    // silent evidence of freshness.
+    if (gen.ran && gen.code !== 0) {
+      block(
+        "WATCH MANIFEST — the generator failed, so the manifest cannot be trusted",
+        `\`node scripts/build-watch-lists.mjs --write --write-watchers\` exited ${gen.code}.\n\n` +
+          `${truncate(gen.out)}\n\n` +
+          `Fix the generator, or push with ALLOW_STALE_WATCH_MANIFEST=1 if this is unrelated.`,
+      );
+    }
+    const drifted = sh(
+      "git status --porcelain .github/_watch-manifest.json .github/workflows/log-cron-incident.yml .github/workflows/heal-cron-failure.yml",
+    ).trim();
+    if (drifted) {
+      block(
+        "WATCH MANIFEST — a workflow changed but the generated manifest did not ship with it",
+        `You changed .github/workflows/*.yml; the watch manifest and the generated watcher\n` +
+          `lists are now stale and have been REGENERATED for you. Stale is not cosmetic —\n` +
+          `heal-cron-failure decides what gets auto-retried off this manifest, and the\n` +
+          `paid-workflow money guard reads it too.\n\n` +
+          `Fix (the regeneration already ran — just ship it):\n` +
+          `  git add .github/_watch-manifest.json .github/workflows/log-cron-incident.yml .github/workflows/heal-cron-failure.yml\n` +
+          `  git commit -m "chore(ci): regenerate watch manifest"\n` +
+          `then retry the push.`,
+      );
+    }
+  }
+
   // ---- Gate 2: vocab orphans / corridor-alias desync ------------------------
   const vocabTouched = changed.some(
     (f) =>
