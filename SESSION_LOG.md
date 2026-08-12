@@ -1,3 +1,18 @@
+## 2026-08-11 (Sonnet 5) — Freakonomics seller-insight research: 5-agent crawl4ai sweep closes the target handoff
+
+Ran the 10-target research handoff (`docs/handoff/2026-08-11-crawl4ai-freakonomics-research-targets-handoff.md`)
+as 5 parallel agents, one per priority, real crawl4ai pulls only (never Firecrawl). Results filed at
+`_RESEARCH/email-and-social/2026-08-11-freakonomics-research-targets-crawl4ai-results.md`, indexed.
+
+Two real, actionable findings: (1) FEMA's own "NFIP Residential Penetration Rates" dataset is live via
+the OpenFEMA API and directly replaces the hardcoded `INSURED_PENETRATION_FACTOR = 0.3` in
+`refinery/sources/fema-nfip-source.mts:158` — real values Lee ≈24.25%, Collier ≈29.55% — now a scoped
+ingest task, not a research gap; (2) NABOR's own May 2026 press release gives a genuine primary 61%
+cash-buyer figure for Collier County. Lee County's cash-buyer number stays a confirmed, exhausted gap —
+RASM's report template structurally carries no cash/price-band cut, Florida Realtors' county cut is
+membership-gated. No build chosen; pure research, no code touched this session besides the two _RESEARCH
+files above.
+
 ## 2026-08-11 (Sonnet 5) — /go standalone carve-out: planning session, handoff written, no code changed
 
 Operator decree: spin /go off into its own project — new folder, new repo, new free Supabase

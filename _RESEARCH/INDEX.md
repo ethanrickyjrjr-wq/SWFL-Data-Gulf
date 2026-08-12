@@ -46,7 +46,7 @@ index never mentioned. A grep of `_RESEARCH/` is not a search of our research.
 
 ## Categories
 
-**agent-behavior/** — how the agent should steer, drift, schedule, self-check (6)
+**agent-behavior/** — how the agent should steer, drift, schedule, self-check (7)
 - `2026-07-01-ai-tool-awareness-scheduling-research.md`
 - `2026-07-15-ai-steering-anti-drift-research.md`
 - `2026-07-21-second-order-thinking-research.md` — "and then what?" (Marks/Dalio) + inversion
@@ -92,6 +92,18 @@ index never mentioned. A grep of `_RESEARCH/` is not a search of our research.
   blueprints' third trigger = **platform POSTs JSON to a Hermes webhook** (no polling needed);
   `[SILENT]` quiet-tick convention. Design consequence: driver = skill + trigger; build never
   leaves our server (calls the piece2_g1 PROPOSE→CONFIRM seam); send blocked at two layers.
+- `2026-08-11-graphify-community-structure-crawl4ai-research.md` — the operator's "one big yarn ball
+  of paths": the CS vocabulary for what he wants (Leiden community detection, resolution parameter +
+  the Fortunato-Barthelemy RESOLUTION LIMIT, Guimera-Amaral connector-hub cartography for "too many
+  routes for one thing", weakly-connected-components/degree-0 for "connected to nothing", DSM
+  block-diagonal = the Rubik's cube on their homepage, architecture-conformance/NMI for drift), the
+  undocumented graphify knobs read out of the installed `cli.py` (`--resolution`, `--exclude-hubs`,
+  persistent `.graphify_labels.json`, `save-result`/`reflect`), and **the measurement: 3,740
+  communities / 1,266 singletons / 2,093 components on our own graph — the two biggest communities
+  in the repo are SESSION_LOG.md, and ~1,480 more nodes are ONE downloaded vendor .beauty.js.**
+  Carries the proposed compartment list + the caveat that the tuning flags do NOT reach the hosted
+  MCP index.
+
 
 **audits/** — dated deep-pass audits (14). The 07/18 data-consolidation set (P1–P10 + BLOCKERS)
 is the most recent pass on parcels, authority ratification, unmapped tables, zombie/bypass
@@ -232,6 +244,17 @@ personal financial notes.
 - `2026-08-04-lean-verifier-paste-block-steadyapi-leepa.md` — the 4 facts §4 of the close-out handoff
   owes back to lean-verifier (381 triage outcome, condo-gap decision, re-observation bind numbers,
   ordering-rule confirmation), staged as a file for the same cross-project-hook reason as above.
+- `2026-08-11-agent-site-listing-crawl-feasibility.md` — Q1 of the listing-grade brief, answered
+  live: an agent's own site IS crawlable. johnrwood.com is **server-rendered (no JS, no IDX iframe)**,
+  robots allows `/listing/*`, and the URL carries the **MLS number as the first path segment** — a
+  direct join to our spine's `mls_number`, no address fuzzing. One free page yielded ~30 fields
+  incl. **Subdivision + Neighborhood + "On Golf Course"** (closes the 0.8%-subdivision gap that
+  blocks golf-to-golf comping), Year Built, Roof TYPE, Taxes, days on market, schools, 17 amenities,
+  HOA fee INCLUSIONS (not the amount), listing agent + phone, and **~2,400 chars of remarks** —
+  richer than the ~26-row paid record. Renovation recency ("AC/compressor/air handler replaced in
+  2026") lives in the prose and must be labeled agent-stated. Roof AGE still needs the permit lane.
+  **One site only** — kvCore/Sierra/BoomTown/Real Geeks/Luxury Presence/WP+IDX each still need the
+  same 3-page test. ToS unread; robots only.
 - `2026-08-03-neighborhood-amenities-full-scope.md` — FULL-SCOPE-FIRST live probe of SteadyAPI
   `/neighborhood-amenities` (200 OK, one call): propertyId is the ONLY input; returns the NAMED
   vendor neighborhood **with boundary polygon + centroid** (the listings↔community pairing key
@@ -330,13 +353,28 @@ personal financial notes.
   DB-backed cache pattern (`lib/figures/sourced.ts`). Recommends starting with cron + API route
   (zero new dependency) over adopting Workflows at this call volume.
 
-**email-and-social/** — email + social pipeline, platform safe zones, first-party verification (14)
+**email-and-social/** — email + social pipeline, platform safe zones, first-party verification (15)
 - `2026-08-11-freakonomics-seller-insights-crawl4ai-research.md` — pure-ideation crawl4ai sweep
   (4 parallel agents) on non-obvious seller-psychology angles: SWFL-buildable DOM-vs-price-cut
   correlation (real, zero new ingest), real per-property carrying-cost math, price-band
   search-filter boundary check, plus 20+ cited external findings (FHFA rate lock-in paper, Naples
   cash-buyer price-band breakdown, Zonda renovation ROI, Realtor.com/Zillow seasonality reports).
   Tags every finding buildable-now vs. cited-external vs. genuine gap. No build chosen yet.
+- `2026-08-11-freakonomics-research-targets-crawl4ai-results.md` — closes the 10-target handoff
+  (`docs/handoff/2026-08-11-crawl4ai-freakonomics-research-targets-handoff.md`) with a 5-agent
+  parallel sweep, one agent per priority. **Two real, actionable findings:** FEMA's own "NFIP
+  Residential Penetration Rates" dataset is live and directly replaces the hardcoded
+  `INSURED_PENETRATION_FACTOR = 0.3` in `refinery/sources/fema-nfip-source.mts:158` — real values
+  Lee ≈24.25%, Collier ≈29.55%, queried live via the OpenFEMA API; and NABOR's own May 2026 press
+  release gives a genuine primary 61% cash-buyer figure for Collier. **Lee County cash-buyer gap
+  stays open** — RASM's own report template structurally carries no cash/price-band cut at all
+  (exhausted, not under-searched), Florida Realtors' county cut is membership-gated. Also: Citizens
+  Property Insurance county premiums (Lee ~$2,430/yr, Collier ~$3,130/yr, derived from their own
+  PDF), 5 new peer-reviewed papers on listing-price round-number psychology (none prove a hard
+  search-bracket-cutoff mechanism — gap stays named), a competitor sweep showing no seller tool
+  combines DOM-stigma + carrying-cost + price-cut-timing into one calculator (real white space), and
+  a comparable-metro DOM-vs-cut range search that correctly dropped a hallucinated-citation page
+  (a Bonita Springs REALTOR-association AI chatbot synthesis with unlinked sources).
 - `2026-08-09-merge-tag-fallback-vendor-docs.md` — merge-tag/personalization fallback behavior at Mailchimp/HubSpot/Klaviyo, fetched live — unfilled tokens ship literal blanks (documented MC+HS); grounds the sentence-bank drop/block rule
 - `2026-08-06-just-sold-craft-and-agent-email-voice.md` — the CRAFT half of a Just Sold email, and
   how an agent email should SPEAK. Forced by the operator on the first render: *"this is the worst
