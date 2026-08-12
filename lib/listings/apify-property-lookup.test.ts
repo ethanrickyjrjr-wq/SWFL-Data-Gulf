@@ -291,4 +291,21 @@ describe("fillFactsFromFreshRow", () => {
     expect(f.price).toBe("$1,999,999");
     expect(f.beds).toBe("5");
   });
+
+  test("FAILURE: a unit number must never be dropped from the printed address (found live 08/11/2026 — Nashville Apt 173 printed as a bare street)", async () => {
+    const raw = { ...RAW, address: { ...RAW.address, unit: "173" } };
+    const row = await freshRow({ ...ITEM, Raw: JSON.stringify(raw) });
+    const f = bareFacts({ address: "4400 Belmont Park Terrace" });
+    await fillFactsFromFreshRow(f, row);
+    expect(f.address).toContain("#173");
+    expect(f.address).toBe("2287 Somerset Pl #173, Naples, FL, 34120");
+  });
+
+  test("no unit on the record — address prints exactly as before, no stray '#'", async () => {
+    const row = await freshRow();
+    const f = bareFacts({ address: "2287 Somerset Pl" });
+    await fillFactsFromFreshRow(f, row);
+    expect(f.address).not.toContain("#");
+    expect(f.address).toBe("2287 Somerset Pl, Naples, FL, 34120");
+  });
 });

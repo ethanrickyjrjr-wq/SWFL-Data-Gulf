@@ -290,7 +290,16 @@ export async function fillFactsFromFreshRow(
   if (!facts.zip && typeof row.zip_code === "string" && row.zip_code) facts.zip = row.zip_code;
   if (typeof row.latitude === "number" && facts.lat == null) facts.lat = row.latitude;
   if (typeof row.longitude === "number" && facts.lon == null) facts.lon = row.longitude;
-  const full = [row.street, row.city, row.state, row.zip_code]
+  // The unit rides in its OWN column here (row.unit), unlike the free-lake spine's
+  // convention of folding it into the street line ("8521 Oakshade Cir #422" — see
+  // apify-record-store.ts's own comment on this exact split). Match that convention
+  // when printing, or a multi-unit address silently loses which unit it is: found
+  // live 08/11/2026 — a Nashville condo pull resolved Apt 173's price and specs but
+  // the flyer printed the bare building address, ambiguous across every unit there.
+  const streetWithUnit = str(row.street)
+    ? [str(row.street), str(row.unit) ? `#${str(row.unit)}` : null].filter(Boolean).join(" ")
+    : null;
+  const full = [streetWithUnit ?? row.street, row.city, row.state, row.zip_code]
     .filter((v): v is string => typeof v === "string" && v.length > 0)
     .join(", ");
   if (full && !(facts.address ?? "").includes(",")) facts.address = full;

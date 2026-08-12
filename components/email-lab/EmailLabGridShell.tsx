@@ -43,6 +43,7 @@ import { GridCanvas, DEFAULT_H } from "./GridCanvas";
 import { BlockInspector } from "./BlockInspector";
 import { BLOCK_MENU } from "./AddBlockPanel";
 import { applyBrand } from "@/lib/email/brand/apply-brand";
+import { fetchAccountBrand } from "@/lib/email/brand/fetch-account-brand";
 import { seatForBuild } from "@/lib/email/doc/blank-canvas";
 import { auditDocLinks, subjectListingUrl, type LinkAsk } from "@/lib/email/link-audit";
 import { brandWebsiteUrl } from "@/lib/email/inject-photo";
@@ -1561,13 +1562,26 @@ export function EmailLabGridShell({
   //
   // Signed out this 401s → `{}` → every need reads as a gap, which is correct: they
   // have no account brand, so the popup asks. It never throws.
+  //
+  // A 401 and a TRANSIENT failure (500, timeout, a thrown network error) are NOT
+  // the same answer — a 401 means this account has no saved brand; a hiccup means
+  // the check failed. Before `fetchAccountBrand`'s retry, both landed on the same
+  // `branding = {}`, so a signed-in agent with a real saved brand could silently
+  // ship a house-identity build off one flaky fetch. Found live 08/11/2026 —
+  // operator: "HOW IS IT POSSIBLE WE BUILD DIFFERENT FROM THE SAME FUCKING PROFILE
+  // EVERY FUCKING TIME."
   useEffect(() => {
     if (brandPrefillAttempted.current) return;
     brandPrefillAttempted.current = true;
-    fetch("/api/user/brand")
-      .then((r) => {
-        brandAuthedRef.current = r.ok;
-        return r.ok ? r.json() : {};
+    fetchAccountBrand()
+      .then(({ ok, confirmedNoBrand, data }) => {
+        brandAuthedRef.current = ok;
+        if (!ok && !confirmedNoBrand) {
+          console.error(
+            "[brand-prefill] account-brand fetch failed twice (not a 401) — proceeding unbranded, but this was NOT a confirmed no-brand answer.",
+          );
+        }
+        return data;
       })
       .then((data: Record<string, unknown>) => {
         setPalettes(sanitizePalettes(data.color_palettes));
