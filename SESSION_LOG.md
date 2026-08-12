@@ -1,3 +1,33 @@
+## 2026-08-11 (Opus 5) — graphify compartments: research + spec + plan written, NOTHING built, nothing pushed
+
+Operator: "one big yarn ball of paths… put the things that are mostly related together" + "I still
+find out we build different ways so don't tell me we are doing all we can." Measured it instead of
+arguing.
+
+MEASURED on graphify-out/graph.json (48,777 nodes / 83,716 edges): 3,740 communities, 1,266
+singletons, 2,093 connected components with the largest holding 51.1%, 19.9% cross-community edges.
+The two biggest communities in the repo are SESSION_LOG.md. Re-measured per-file node counts (the
+figures that govern — earlier top-N-community estimates in-session were wrong in both directions):
+reference-builds/ 3,548 · SESSION_LOG.md 2,049 · SCRATCHPAD.md 383 · STRIKES.md 13 · TODAY.md 6.
+Exclusion = 5,980 nodes = 12.3%. STRIKES.md and TODAY.md are NOT excluded.
+
+Root cause is ours: no .graphifyignore, default Leiden resolution 1.0, no --exclude-hubs, and no
+declared partition to check the detected one against. Read the installed cli.py directly — two of
+the three tuning flags are undocumented on graphify.com.
+
+LIVE FINDING: graphify.com/mcp says "There is no hosted backend and no telemetry" for the local
+server and documents a hosted docs-search server with one tool. Our .mcp.json points at
+api.graphify.com/mcp exposing gx_rank_files/gx_callers/gx_impact/remember/recall — matching neither.
+So the hosted index RULE 0.5 makes the first reach is real and undocumented publicly, and whether
+.graphifyignore reaches it is UNKNOWN. Check opened: graphify_hosted_index_tuning_reach.
+
+FILED: _RESEARCH/agent-behavior/2026-08-11-graphify-community-structure-crawl4ai-research.md
+(+ INDEX.md line) · spec docs/superpowers/specs/2026-08-11-graph-compartments-design.md · plan
+docs/superpowers/plans/2026-08-11-graph-compartments.md · new strike shape
+architecture-drift-no-detector · scratchpad entry · check graph_compartments_live_verify.
+
+NEXT: a separate session builds pass 1. Step 0 (hosted probe) needs its own push approval.
+
 ## 2026-08-11 (Opus 5) — Listing grade, both sides: agent sites ARE crawlable (2 platforms proven live), the DOM-floor objection was 3 weeks stale, and a Sonnet queue for the rest
 
 Operator direction: grade listings and email agents observations; then *"Both. We are reading both
