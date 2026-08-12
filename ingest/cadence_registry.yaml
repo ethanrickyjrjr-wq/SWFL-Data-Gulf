@@ -2142,6 +2142,15 @@ pipelines:
   # Migration: migrations/20260803_steadyapi_neighborhoods.sql (run 08/03/2026).
   - name: neighborhood_amenities
     workflow: neighborhood-amenities-daily.yml
+    dispatch_only: true # 08/12/2026 — same shape as city_pulse_corridors above, same reason:
+      # spend control. The workflow has been disabled_manually at the API since 08/04 (a daily
+      # 500-call paid SteadyAPI sweep that was scheduled without operator approval) and its cron
+      # is now commented out in source too, so this entry stating an active daily cadence was a
+      # claim the workflow could not keep. cadence_days stays a REAL number (1) per the
+      # lee_parcels note below — a null reads as MISCONFIGURED to check_freshness regardless of
+      # this flag. Re-enable is an operator decision gated behind
+      # `amenities_area_name_is_road_corridor_not_community`; drop this flag in the same commit
+      # the cron comes back.
     consuming_pack: communities-swfl
     lane: tier-2
     raw_landing_class: paid_landed # 08/03/2026 — SteadyAPI neighborhood bodies land via the paid
