@@ -12,7 +12,7 @@
 import { NextResponse } from "next/server";
 import type Stripe from "stripe";
 import { createServiceRoleClient } from "@/utils/supabase/service-role";
-import { getStripe } from "@/lib/billing/stripe-client";
+import { getStripe, isResourceMissing } from "@/lib/billing/stripe-client";
 import { normalizeEvent, type SubscriptionFacts } from "@/lib/billing/normalize-event";
 import { subscriptionMutationFromEvent } from "@/lib/billing/stripe-sync";
 
@@ -64,6 +64,17 @@ export async function POST(request: Request): Promise<Response> {
   try {
     normalized = await normalizeEvent(event, fetchSubscription);
   } catch (err) {
+    if (isResourceMissing(err)) {
+      // Stripe itself says the subscription is gone — retrying a genuine
+      // deletion forever is pointless, so ack instead of asking for retry.
+      // Everything else (network blip, rate limit, Stripe 5xx) still falls
+      // through to the 502 below so Stripe keeps redelivering the event.
+      console.error(
+        `[stripe-webhook] subscription genuinely missing for ${event.type} — acking:`,
+        err,
+      );
+      return NextResponse.json({ received: true, ignored: true });
+    }
     console.error(`[stripe-webhook] normalize failed for ${event.type} — retry requested:`, err);
     return NextResponse.json({ error: "normalize_failed" }, { status: 502 });
   }
