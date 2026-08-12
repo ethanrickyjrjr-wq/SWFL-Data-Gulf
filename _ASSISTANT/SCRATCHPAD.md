@@ -1,3 +1,24 @@
+## 2026-08-12 (Sonnet 5) — listings-digest /go bug: corrected root cause, real fix not yet built
+
+Follow-up to the earlier `listings_digest_recipekey_dropped_on_area_arrival` entry. Reproduced
+LIVE TWICE more (Fort Myers, then Cape Coral, clean tabs, full network capture both times) — same
+result both times: default-grid fallback, ZHVI chart, no listings. Root cause is NOT the recipeKey
+drop I originally chased — `recipeFromPrompt` correctly recovers "listings-digest" from the filled
+prompt text even without a recipeKey (verified directly with a standalone test). **The real blocker:
+`buildListingsDigest` requires `ctx.zip` and returns null without one
+(`lib/deliverable/recipes/listings-digest.ts:210`), and the /go door never sends a ZIP — only a
+typed city STRING ("Fort Myers", "Cape Coral"). `build-doc.ts`'s dispatcher only reads zip from
+`scope?.kind==='zip'`, with no prompt-text fallback — address recipes have `subjectAddressFromPrompt`
+as a fallback, area recipes have no equivalent.** No city-to-ZIP resolver exists anywhere in `lib/`.
+Closed the old check (wrong root cause), opened `listings_digest_zip_resolution_missing` with the
+real one and two candidate fixes. Not implemented — this is real new wiring (Mapbox
+address-retrieve already returns enough to resolve a ZIP; needs threading through
+`heroDestination` -> `EmailLabGridClient` -> `scope`), not a one-line patch, and this session was
+already deep into cost by the time it was fully proven.
+
+**/showcase verified working** — the listings-digest capture committed earlier this session
+(`8f70f58f`) renders correctly in the gallery, confirmed live in a browser.
+
 ## 2026-08-12 (Opus 5) — OPERATOR: "where is the handoff??????? what did you actually do?" — two sessions on graph compartments, THREE documents, ZERO build
 
 Verbatim, after I reported the hook fix as if it were the deliverable: *"i pushed. where is the
