@@ -1,3 +1,41 @@
+## 2026-08-12 (Opus 5) — four-lane gate: the LIVE lane now sees the installed vendor surface; measured, and it RECLASSIFIES rather than adds
+
+Picked up the 08/11 handoff (session 5d1fc000) which found the defect and could not apply it. Operator
+approved the hook edit this session.
+
+`laneFor` in `.claude/hooks/check-four-searches.mjs` knew crawl4ai, curl, a URL and Bun.SQL, but had
+no notion of "run the installed binary and read what it really does." Two arms added ABOVE the research
+arm (ordering matters — `node_modules/**/docs/**` was scoring "research", i.e. the vendor's shipped text
+filed as our writing): a `Read|Grep|Glob` inside an installed package (`site-packages`, `node_modules`,
+`.venv`/`-venv`, `dist-packages`, `Cellar`, cargo registry) → **live**; a `Bash|PowerShell` command asking a
+binary what it is (`--help`, `--version`, `__version__`, `pip show`, `npm ls`) → **live**. Search binaries
+excluded so `rg --version` cannot satisfy the lane — defect (b) pointed at a new lane. Short flags
+deliberately out (`du -h`, `curl -v` are everyday usage).
+
+THE LINE, and it is fine: using an installed tool to search OUR TREE is the CODE lane; asking that tool
+what IT is, or reading it as shipped, is LIVE. Locked by a test asserting both halves together —
+`graphify query` → code, `graphify --help` → live — because the next session will otherwise collapse it.
+
+**Evidence.** `node --test .claude/hooks/check-four-searches.test.mjs` → tests 40, pass 40, fail 0
+(34 pre-existing + 6 new, each named for the failure it guards). TDD: the 6 were written red first.
+
+**MEASURED against the real 08/11 transcript (93 tool calls, 9 operator turns) — and this is the part
+that is NOT a clean win.** 4 real calls flip to `live`: `graphify --help` ×2, a `Get-Command graphify` +
+python import probe, and a Grep over the installed `site-packages/graphify`. But under the OLD matcher
+those same 4 calls were scoring **code** (they carry the word `graphify`, which `searchesTheTree`
+matched). So the fix RECLASSIFIES; it does not add coverage. The turn that got blocked went from
+`MISSING=[live]` to `MISSING=[code]` — it still blocks, on a different lane, because those vendor probes
+were the only thing satisfying "code" and that turn never searched our own tree. The classification is
+now correct; the block is not resolved.
+
+**Two residual false-fires surfaced, NOT fixed — both are `isDataTurn` scope, hand-tuned twice against
+measured fire rates, so operator's call not mine:** (1) a bare `"wait"` fires DOOR 2 with zero tool calls
+and blocks 4-of-4; (2) a vendor-tooling question has no sensible way to satisfy the `catalog` or `code`
+lanes at all. The advisor predicted `catalog` would be the residual — measured, it was not; catalog WAS
+covered on that turn. No check opened yet, pending operator's read.
+
+Nothing else touched. Released a stale repolith claim on the hook file held by 5d1fc000 with zero edits written to it.
+
 ## 2026-08-12 (Sonnet 5) — Listing Grade: ran the full 9-task Sonnet work queue, headline finding is roof age is FREE and already landed
 
 Operator pointed at the 08/11 handoff docs (I'd initially missed them sitting in plain view — logged

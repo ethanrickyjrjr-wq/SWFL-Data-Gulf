@@ -186,8 +186,11 @@ export function graphFirstGap(text, calls) {
  * A path INSIDE an installed dependency — the vendor's code as actually shipped to this
  * box, not our tree and not our writing about it.
  */
+// `(?:^|[/\\])` — NOT a bare separator. A relative path starts AT the segment
+// (`node_modules/eve/docs/README.md`), and requiring a leading slash silently dropped it
+// into the research arm, i.e. filed the vendor's own shipped text as our writing.
 const INSTALLED_PKG =
-  /[/\\](?:site-packages|dist-packages|node_modules|Cellar|\.venv|[\w.-]*-venv)[/\\]|\.cargo[/\\]registry[/\\]/i;
+  /(?:^|[/\\])(?:site-packages|dist-packages|node_modules|Cellar|\.venv|[\w.-]*-venv)[/\\]|\.cargo[/\\]registry[/\\]/i;
 
 /**
  * A command asking a binary to describe ITSELF — its real flags, its real version.
@@ -215,6 +218,31 @@ export function laneFor(name, input) {
   if (/^mcp__swfl__swfl_fetch$/.test(n)) return "live";
   if (/^(WebFetch|WebSearch)$/.test(n)) return "live";
   if (/^(Bash|PowerShell)$/.test(n) && /crawl4ai|curl\s+|https?:\/\/|fetch\(/.test(cmd))
+    return "live";
+
+  // LIVE — THE INSTALLED VENDOR SURFACE, run or read as shipped.
+  //
+  // ADDED 08/12/2026, and this is defect (a) — UNDER-CREDIT, the repo's own canonical
+  // probe path scoring zero — for the THIRD time in this function, after the graphify-CLI
+  // miss and the psql/Bun.SQL miss documented below. The live matcher knew crawl4ai, curl,
+  // a URL and Bun.SQL, but had no notion of "run the installed binary and read what it
+  // really does." Measured 08/11/2026: a session read the installed graphify `cli.py` and
+  // found two of its three tuning flags UNDOCUMENTED on graphify.com — a finding ONLY the
+  // installed artifact could produce — and the call that produced it earned no lane at all,
+  // matching neither the research arm nor `searchesTheTree`. The gate then fired four times.
+  //
+  // THE LINE, and it is fine: using an installed tool to search OUR TREE is the CODE lane;
+  // asking that tool what IT is, or reading it as shipped, is LIVE. RULE 0.4 is the reason
+  // — a vendor's docs page is not verification when the installed artifact disagrees, which
+  // is exactly what the graphify probe found. ORDER MATTERS: this sits ABOVE the research
+  // arm on purpose, or `node_modules/**/docs/**` scores "research" — our writing — when it
+  // is the vendor's own shipped text.
+  if (/^(Read|Grep|Glob)$/.test(n) && INSTALLED_PKG.test(path)) return "live";
+  if (
+    /^(Bash|PowerShell)$/.test(n) &&
+    SELF_DESCRIBE.test(cmd) &&
+    !SEARCH_BINARY.test(cmd) // `rg --version` is not a probe — defect (b), new lane.
+  )
     return "live";
 
   // CATALOG — the one-root registries.
