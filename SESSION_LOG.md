@@ -1,3 +1,47 @@
+## 2026-08-12 (Opus 5) — Graph compartments Step 3 BUILT (report script + standards doc); found graph.json's two-edge-array trap
+
+Picked up `docs/handoff/2026-08-12-graph-compartments-step2-negative-result.md` §4d, the one part
+that was spec'd but not built. 3 of 3 parts built, 1 follow-on blocked (below).
+
+**1. `scripts/graphify-compartments-report.mjs` + `.test.mjs` — TDD, 5 tests, each watched RED first.**
+`computeCompartmentMetrics(graph)` is the pure unit (§4d's stated TDD target); parsing + printing are
+deliberately not under test, same as the spec says. Run against the real 78 MB graph it reproduces
+§4b EXACTLY — communities 4,069, singletons 1,434, cross-community 16.7%, and the same by-extension
+ranking (.ts 618 / .tsx 324 / .sql 171 / .py 103 / .yaml 102).
+
+**2. THE TRAP — `graphify-out/graph.json` carries TWO edge arrays that answer differently.**
+`links` = 70,721 (code plane) gives 16.7% cross. `edges` = 73,490 (links + 2,769 app-plane) gives
+19.5% cross. Same words, 2.8-point spread. Every cross% in the handoff's §3/§4b tables came from
+`links`, while its node/edge TOTALS are merged-plane — so the handoff's own headline mixes planes.
+Both figures are correct; quoting them as one set is not. The report now prints the plane it measured
+in its header, prints both cross% side by side with the warning, flags `CODE PLANE ONLY` when the app
+merge hasn't run, and flags the graph as N commits behind HEAD (currently 10). This was §4d's
+predicted failure mode #3 found live rather than theorised — and it is test-enforced: the fixture's
+code-plane and merged cross% deliberately differ (40% vs 50%), so a report reading the wrong array
+cannot pass.
+
+**3. `docs/standards/graph-compartments.md`** — the ONE place to read before turning a clustering
+knob. Exhausted knobs with the 9-run table plus the explicit falsifier (a run that moves the
+singleton count without adding/removing files), the `cluster-only` ordering trap, the `--force`
+asymmetry, the npm-scripts-omit-`--force` landmine, the wrong-interpreter trap, the two-edge-array
+section, the metric definitions, the open SQL-to-code lever, and the hosted-index cadence caveat.
+Also corrects two things in the handoff: §4b's extension tail reads "others 12" (measured on the
+same graph state it is 16 — .jsx 7, .md 5, .js 2, .mjs 1, 1 other), and **§6's reproduce recipe
+lists `graphify-app-nodes.mjs` BEFORE `cluster-only`** while its own inline comment on that line
+says "app plane merges AFTER clustering" — it contradicts itself, §2.1, and what §4b actually ran.
+Run it as §6 prints it and `cluster-only` refuses to write. The standards doc §7 carries the
+correct order and says outright that §6 is wrong, so a reader hitting both does not let the older
+doc win on seniority.
+
+**NOT DONE — blocked, not deferred:** the `CLAUDE.md` Reference-index row pointing at the new
+standards doc. `CLAUDE.md` is claimed by another live session (2b1d04a1) and I did not override the
+claim. One-line edit, owed the moment it frees — without it the doc is orphaned, which is the exact
+failure the doc exists to stop.
+
+`graph_compartments_live_verify` stays OPEN and correctly re-scoped: Step 3 shipping does not answer
+its live question (does graphify resolve SQL-to-code edges at all). `package.json` untouched — no
+npm script added, so no lockfile gate.
+
 ## 2026-08-12 (Opus 5) — deed data: stale catalog fixed, LOAD cron enabled, cash-vs-financed specced + its 3 measurable failure modes measured
 
 Operator: "fix and get best one planned out." Three parts, all done.
