@@ -1,3 +1,26 @@
+## 2026-08-12 (Sonnet 5) — Listing Grade: ran the full 9-task Sonnet work queue, headline finding is roof age is FREE and already landed
+
+Operator pointed at the 08/11 handoff docs (I'd initially missed them sitting in plain view — logged
+and fixed same session). Confirmed scope, then ran all 9 tasks from
+`docs/handoff/2026-08-11-listing-grade-sonnet-work-queue.md` as parallel agents; every result indexed
+into `_RESEARCH/INDEX.md` as it landed. Roll-up: `docs/handoff/2026-08-12-listing-grade-sonnet-queue-results.md`.
+
+**Biggest finding:** `data_lake.steadyapi_property_permits` (79,281 rows/12,946 properties, parsed
+08/03-04) already answers roof age from our own already-paid vendor call — the 08/02 file calling it
+"still unbuilt" was 3 weeks stale. Collier's parked pipeline also clean-IDs roof permits w/ $ value on
+94.2% of rows off a fresh live pull — no records request needed anywhere, only an unrun dry-run.
+Check `collier_permit_roof_age_request` needs re-pointing (not closing) — operator call, not actioned.
+
+4 more agent-site platforms crawled (kvCore/BoldTrail browser-only; Sierra/Real Geeks/Luxury Presence
+parseable) closing out Q1 of the brief. Competitor scan confirmed the whitespace claim: nobody
+combines county-record facts + live market behavior + copy critique in one artifact. 3 FL legal
+quote-gathering passes done (caught a mis-cited statute in the original brief, FS 475.6295; buyer-agent
+post-settlement duties came back NOT FOUND — "sourced offer reasoning" isn't a documented pain point).
+Also surfaced an unresolved cross-source discrepancy: two agent sites list the same MLS number
+(226028911) but disagree on property subtype (Condo vs Residential).
+
+Research-only — no code, no consumer, no pipeline change. Next: `SESSION_LOG.md` + this push.
+
 ## 2026-08-11 (Opus 5) — graphify compartments: research + spec + plan written, NOTHING built, nothing pushed
 
 Operator: "one big yarn ball of paths… put the things that are mostly related together" + "I still

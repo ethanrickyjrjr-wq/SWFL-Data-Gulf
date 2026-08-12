@@ -110,7 +110,7 @@ is the most recent pass on parcels, authority ratification, unmapped tables, zom
 tables, and undocumented consumers. Also 07/18 site-audit, opus-pass, fanout-fix-log.
 
 **competitor-and-strategy/** — competitor + strategy research covering real company names and
-strategic analysis (25). **NOT local-only as of 08/11/2026** — the all-in-on-graphify decree
+strategic analysis (26). **NOT local-only as of 08/11/2026** — the all-in-on-graphify decree
 un-ignored `_RESEARCH/` and these files are TRACKED and ship publicly. The 07/17/2026 local-only
 decree that this line used to cite is SUPERSEDED. Write clean: no credentials, no client PII, no
 personal financial notes.
@@ -121,6 +121,14 @@ personal financial notes.
   nos. Each carries its reason, its date, and its evidence path. Written because the LangChain
   verdict was buried at line 6351 of the scratchpad and got asked twice; to overturn one you must
   name what CHANGED.
+- `2026-08-12-listing-grade-competitor-scan.md` — Task 5 of the listing-grade queue, 8 products
+  examined. **Nobody combines county-record facts + live market behavior + copy critique in one
+  artifact — confirmed open ground.** Closest: AuditListing.com (FL beta, $49, records + buyer red
+  flags, no market/copy), Listing Oracle (records + comps, no copy). Restb.ai does photo/copy
+  condition scoring (C1-C6/Q1-Q6, Fannie Mae-aligned) and is **confirmed sold to Stellar MLS — our
+  own SWFL MLS**. "Lundy Listing Score" does not exist (Lundy Inc. is a voice-AI vendor, also
+  partnered with Stellar MLS). Inoveo3D publishes a free A-F listing score but France-only. Stellar
+  MLS itself runs compliance rules with no public numeric score.
 - `STEADY-PAINS.md` — the distilled pain reference; fold every new round into it
 - `2026-08-10-homepage-lead-with-emails-research.md` — operator decree "we look like a search
   site": homepage must lead with EMAIL BUILDING; Mailchimp + Figma heroes crawled live (category
@@ -218,7 +226,7 @@ personal financial notes.
   free annually). SOC 3 + SOC 2 Type 2 + CASA Tier 2 certified. No competitor sweep (kvCORE,
   BoomTown, Real Geeks) done in this pass — scoped to FUB only per operator's confirmed target.
 
-**data-and-ingest/** — sources, backfills, pipeline findings (14)
+**data-and-ingest/** — sources, backfills, pipeline findings (19)
 - `2026-08-04-steadyapi-leepa-sale-grain-proportion-call.md` — the sale-grain proportion call owed
   by the lean-verifier ledger, run live 08/04. **Outcome: DEFINITIONAL WATCH, not a kill.** Join
   lane exists (68.57% of 9,654 Lee properties); on 6,186 unambiguous pairs price agrees exactly on
@@ -255,6 +263,43 @@ personal financial notes.
   2026") lives in the prose and must be labeled agent-stated. Roof AGE still needs the permit lane.
   **One site only** — kvCore/Sierra/BoomTown/Real Geeks/Luxury Presence/WP+IDX each still need the
   same 3-page test. ToS unread; robots only.
+- `2026-08-12-agent-site-crawl-luxury-presence.md` — Luxury Presence: PARSEABLE (naplesjamie.com,
+  server-rendered). Neighborhood/subdivision + full remarks + year built all present; roof and HOA
+  fee amount both absent. **Breaks the URL-join pattern** — unlike johnrwood.com/
+  royalshellrealestate.com, the MLS number is NOT in the listing URL; the join key requires parsing
+  the page body's "MLS® ID" field or a CloudFront photo path instead.
+- `2026-08-12-agent-site-crawl-sierra-interactive.md` — Sierra Interactive: PARSEABLE
+  (naplesarearealestate.com), MLS number in URL (3rd path segment). All five flagged fields present
+  — subdivision AND a separate master-community field, ~3 paragraphs remarks, year built, roof type
+  (Shingle). **First site in the queue with an actual HOA fee DOLLAR amount** ($800-$1,275/quarter +
+  itemized fees), not just inclusions. Caveat: the generic AJAX search page didn't render cards in a
+  plain crawl4ai fetch — the dedicated "New Listings" index page did.
+- `2026-08-12-agent-site-crawl-kvcore-boldtrail.md` — kvCore/BoldTrail: BROWSER-ONLY (curl 403s every
+  page but robots.txt; crawl4ai's browser gets full content). MLS number confirmed in URL
+  (`/property/{office}-{mls}-{slug}`). Subdivision, full remarks, year built, roof type all present;
+  HOA fee amount absent (listing has no HOA). **New finds:** a dated price-history table, per-field
+  source attribution ("Appraiser"), a live ZIP-average comp panel on the page itself, and a
+  robots.txt with a trailing blanket `Disallow: /` for unnamed `User-agent: *` crawlers behind named-
+  bot allows — a pattern neither prior platform had.
+- `2026-08-12-agent-site-crawl-real-geeks.md` — Real Geeks: PARSEABLE (swflregroup.com). MLS number
+  IS the entire detail-page URL path (`/property/{mls}/`) — cleanest join key of any platform tested.
+  Subdivision, remarks, year built, roof type present; HOA fee amount fully absent (no field at all,
+  not even inclusions). **⚠️ CROSS-SOURCE DISCREPANCY, needs review:** this site listed the exact
+  same MLS number (226028911) as the johnrwood.com reference file, and the two DISAGREE on property
+  subtype for the identical listing — Condominium (johnrwood.com) vs Residential (swflregroup.com).
+  Neither verified against county records yet. Breadcrumbs found for 3 more platforms while
+  searching: BoomTown and CINC sites identified (unassigned), one more Sierra Interactive site.
+- `2026-08-12-roof-age-permit-feasibility.md` — **roof age is FREE and already landed, no records
+  request needed.** Corrects the 08/02 file's "still unbuilt" note — `building_permits[]` was fully
+  parsed 08/03-08/04/2026 into `data_lake.steadyapi_property_permits` (79,281 rows, 12,946
+  properties, re-verified live), precise-matched to 5,228 properties (40.4%) with an identifiable
+  roof permit; no dollar value in this family. `lee_building_permits` is a thin side-channel (306
+  rows/5.5mo) but roof permits ID cleanly by `permit_id` prefix `ROF`. **Collier's already-loaded
+  4,975 rows PLUS a fresh live June 2026 XLSX (5,505 rows, HTTP 200 today) both clean-ID roof
+  permits (`Permit Type Desc='Reroof'`, 6.1%) with address + dollar value on 94.2% of rows** — the
+  only blocker is an unrun dry-run on the parked `collier-permits-monthly.yml` cron, not a records
+  request. Recommends re-pointing (not closing) check `collier_permit_roof_age_request` — operator
+  decision, not actioned by the research agent.
 - `2026-08-03-neighborhood-amenities-full-scope.md` — FULL-SCOPE-FIRST live probe of SteadyAPI
   `/neighborhood-amenities` (200 OK, one call): propertyId is the ONLY input; returns the NAMED
   vendor neighborhood **with boundary polygon + centroid** (the listings↔community pairing key
@@ -527,8 +572,30 @@ personal financial notes.
 
 **private/** — personal/strategy notes outside the platform (3, stocks architecture)
 
-**real-estate-market/** — market mechanics, listing lifecycle, agent workflows (2)
+**real-estate-market/** — market mechanics, listing lifecycle, agent workflows (5)
 - `2026-07-01-listing-lifecycle-marketing-research.md`
+- `2026-08-12-fl-appraisal-bpo-licensing-quotes.md` — QUOTE-GATHERING ONLY, no interpretation:
+  verbatim FL/federal text on what counts as an appraisal (FS 475.611/475.612, 12 CFR 34.42), what
+  counts as a BPO/CMA and who may issue one (FS 475.612(2)-(3), 475.25(1)(t), 475.01), and what
+  falls outside both (FS 475.612(4)-(7), the federal interagency AVM quality-control rule). **Flags
+  the brief's own citation as wrong** — FS 475.6295 is "Authority to inspect," unrelated to BPO/CMA;
+  correct sourcing substituted FS 475.25(1)(t) + 475.01(1)(a) via Florida Realtors' law-ethics page
+  since FREAB's own landing page carries no BPO/CMA content. All 6 sources fetched, none unreachable.
+- `2026-08-12-buyer-agent-post-settlement-duties.md` — **NOT FOUND, and honest about it:** "sourced
+  reasoning behind this offer" is not a named pain point in any source fetched. NAR's own
+  "Written Buyer Agreements 101" (fetched 08/12) confirms the one mandated written item since
+  08/17/2024 is compensation (specific, capped, negotiable, conspicuously disclosed) — not offer
+  reasoning. The actual survey-measured pain point (Cotality/ResiClub via Inman, 34% of agents) is
+  the compensation-negotiation conversation itself. Coaching sources treat pricing analysis as one
+  line in a "deliverables list," not a reported struggle. **Verdict for the buyer-side wedge: not
+  the stronger commercial argument on this evidence** — two Inman pages + one CMA-tooling page
+  paywalled/unreachable, recorded not guessed.
+- `2026-08-12-fl-seller-disclosure-duty-quotes.md` — QUOTE-GATHERING ONLY, no interpretation: verbatim
+  *Johnson v. Davis* (Fla. 1985) holding (seller's duty to disclose known latent defects materially
+  affecting value), FS 475.278 brokerage-duty text (live statute), case law that "as-is" does NOT
+  waive the disclosure duty (Zoecklein Law citing *Levy v. Creative Const. Services*), and the
+  Florida Realtors seller disclosure form's stated scope (via a secondary source — the form's own PDF
+  wasn't crawl4ai-extractable across 3 attempts, recorded as unreachable, not substituted from memory).
 - `2026-07-22-kmeans-clustering-applicability.md` — we use ZERO k-means, by two documented
   rejections (`market-areas.ts` "never runtime clustering"; ecStat rejected in the trend-fit spec).
   sklearn's own caveats (elongated clusters, local minima, run-to-run instability) + the WI25
