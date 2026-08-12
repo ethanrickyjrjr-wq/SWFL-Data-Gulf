@@ -1,3 +1,35 @@
+## 2026-08-12 (Sonnet 5) — NEW BUG found live while building the Listings Digest reference capture: recipeKey drops on area-keyed /go arrivals
+
+Task: build 8 ("Listings Digest") needs a paying-customer gate with a frozen preview on click. Went to
+build a real reference render (Fort Myers) to freeze, same method as the earlier Nashville New Listing
+verification (dev server, `OPERATOR_APPROVED_PAID_RUN=1`, real browser through /go).
+
+**The build came back wrong** — a generic ZHVI home-values chart email, no listings, no photos, no
+categories. Checked the network request directly (`POST /api/email-lab/ai`): the body carries NO
+`recipeKey` field at all despite the URL correctly showing `rkey=listings-digest`. The server's own
+response confirms it: `"recipeKey":"default-grid"` — the terminal fallback, not the real builder.
+
+**This is NOT the same bug as the Nashville session's dropped-agent-card/unit-number pair** — those are
+fixed and shipped (863214f4). This is new: address-keyed doors (New Listing, verified working twice now)
+correctly carry `recipeKey` through; the ONE area-keyed door (Listings Digest, the only `AREA_KEYS` entry)
+does not. Traced as far as `app/email-lab/grid/EmailLabGridClient.tsx:446` —
+`initialRecipe={build || plan.addressPopup ? null : initialRecipe}` — local `build` state forces
+`initialRecipe` to null, which is what strips the key. Did NOT fully isolate why `build` state (normally
+set by the AddressPopup's submit handler, `buildWithAddress`) fired here when the recipe's `[[blank]]`
+was already filled by the /go door before arrival (URL shows "for Fort Myers", no bracket remaining) —
+`recipeHasBlank` should read false, `plan.addressPopup` should be false, and neither explains it cleanly
+without more tracing than this session's budget allows. Opened
+`listings_digest_recipekey_dropped_on_area_arrival` rather than chase it further mid-task — this is a
+real, separate fix, not a rabbit hole to pull on while building a reference capture.
+
+**Worked around it, did not fix it, for the immediate task:** built the reference capture by calling the
+listings-digest recipe builder directly (new `scripts/email/render-listings-digest.mts`, mirroring the
+existing 9 render scripts — this recipe never had one, matching `_GO/HANDOFF.md`'s original finding that
+"listings-digest has no render script"). That output is verified-correct because it bypasses the broken
+arrival path entirely, not because the arrival bug is fixed. **The live /go → Listings Digest door is
+still broken** and will hand any real visitor the wrong email until `listings_digest_recipekey_dropped_on_area_arrival`
+is closed.
+
 ## 2026-08-12 (Sonnet 5) — RESOLVED same session: "there are two fucking handoffs right there and research!!!!!!!!!!!!!!!!!!!!!!!!!!!"
 
 New session opened with `/model` output showing three file references in plain view — two handoff
