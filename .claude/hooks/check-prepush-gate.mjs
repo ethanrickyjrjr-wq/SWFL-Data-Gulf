@@ -208,6 +208,21 @@ process.stdin.on("end", () => {
       f !== ".github/workflows/heal-cron-failure.yml",
   );
   if (workflowsTouched && process.env.ALLOW_STALE_WATCH_MANIFEST !== "1") {
+    // Structural validity FIRST — a file GitHub rejects produces a run with zero
+    // jobs and no log at all, so it is the single most expensive workflow mistake
+    // to discover remotely. Twice now (08/11 orphaned `secrets: inherit`, 08/12
+    // `working-directory:` on a `uses:` step) a lenient YAML parse was green while
+    // GitHub refused the file. ~200ms.
+    const shape = run("node --test .github/scripts/workflow-step-shape.test.mjs");
+    if (shape.ran && shape.code !== 0) {
+      block(
+        "WORKFLOW SHAPE — a changed workflow is structurally invalid (GitHub would reject the FILE)",
+        `${truncate(shape.out)}\n\n` +
+          `A rejected workflow runs with ZERO jobs and no log — there is nothing to debug\n` +
+          `remotely. Fix the step shape above, then retry the push.`,
+      );
+    }
+
     const gen = run("node scripts/build-watch-lists.mjs --write --write-watchers");
     // Same empty-tolerance rule as Gate 1.5: a generator that cannot run is never
     // silent evidence of freshness.

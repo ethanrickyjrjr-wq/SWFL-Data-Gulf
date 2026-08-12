@@ -1,3 +1,45 @@
+## 2026-08-12 (Opus 5) — I broke graphify-republish with my own fix. Caught in 4 minutes, and the guard that would have caught it is now built.
+
+**CI is GREEN: run 31626795591, `conclusion: success`, commit `6d80492a`.** Smoke — Prod and
+Rollback on red also green on `f141a60d`. But the same push that fixed the install path took
+`graphify-republish.yml` down, and that is mine.
+
+**What I did wrong.** The 26-call-site swap replaced `run: bun install --frozen-lockfile` with
+`uses: ./.github/actions/bun-install`. In `graphify-republish.yml` that step also carried
+`working-directory: brain-platform` on the line ABOVE — and `working-directory` is legal ONLY on a
+`run:` step. GitHub rejected the entire file: zero jobs, `gh run view --log-failed` → "log not
+found", run titled by file path instead of `name:`. That workflow had been green on all 5 prior runs.
+
+**My verification passed it, and that is the part worth writing down.** I ran a strict
+`Bun.YAML.parse` over all 27 changed files and got 0 bad. Valid YAML is not a valid workflow — the
+exact lesson STRIKES already recorded on 08/11 when an orphaned `secrets: inherit` sailed through
+PyYAML and got refused by GitHub. I also checked "does a checkout precede the install step" in all
+26 jobs and never checked what PATH that checkout used, which is the second bug in the same step:
+this job checks the repo out into `brain-platform/`, and a local `uses:` resolves against
+`$GITHUB_WORKSPACE`, so the action path has to be `./brain-platform/.github/actions/bun-install`.
+
+**Both bugs fixed, and the fix is now structural rather than a one-off:**
+- The action takes a `working-directory` input (default `.`), so a caller in a subdirectory passes
+  it under `with:` instead of an illegal step key.
+- `graphify-republish.yml` uses the subdirectory-qualified action path, with the reason in a comment
+  above it so the next person doesn't re-flatten it.
+
+**Guard built, red-first, and proven the only way that counts** —
+`.github/scripts/workflow-step-shape.test.mjs`, three checks:
+1. Real YAML parse of every workflow AND every local `action.yml` (the repo's own `parseWorkflow` is
+   regex-based and deliberately lenient — it is built for name/cron extraction, not validation).
+2. **No step carries a run-only key (`run` / `shell` / `working-directory`) alongside `uses:`.**
+3. Every local `uses: ./…` resolves to a real `action.yml`, INCLUDING the checkout-`path:`
+   subdirectory case.
+
+Proof it is red-first: I re-introduced the exact broken step and ran it — it failed and named BOTH
+defects by job, step index, and step name, then went green again on revert. `node --test` across
+`.github/scripts` + `scripts/lib` + `.claude/hooks` is now **295 pass / 0 fail** (was 292).
+
+**Wired into pre-push Gate 1.6**, so it blocks before a push rather than reporting after one. Chose
+this over the actionlint the 08/11 strike asked for: no new binary, ~200ms, and it names the two
+failures we have actually had instead of a general-purpose linter — RULE 11.
+
 ## 2026-08-12 (Opus 5) — RULE 0.5b: use the WHOLE tool. graphify computes cohesion/gods/surprises/questions every run and we had never opened the file.
 
 Operator: *"YOU HAVE THE FUCKING MCP, YOU HAVE THE FUCKING JSON. WHAT MORE CAN YOU FUCKING DO?"* —

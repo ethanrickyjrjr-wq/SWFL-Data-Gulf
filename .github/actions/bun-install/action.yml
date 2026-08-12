@@ -25,11 +25,22 @@ description: >
   (https://github.com/Automattic/node-canvas/wiki/Installation:-Ubuntu-and-other-Debian-based-systems),
   read 08/12/2026 — libpixman arrives as a dependency of libcairo2-dev.
 
+inputs:
+  working-directory:
+    description: >
+      Directory to install in. Needed because `working-directory:` is INVALID on a
+      `uses:` step — GitHub rejects the whole workflow file, with zero jobs and no
+      log. graphify-republish.yml checks this repo out into a `brain-platform/`
+      subdirectory and hit exactly that on 08/12/2026.
+    required: false
+    default: "."
+
 runs:
   using: composite
   steps:
     - name: bun install (with node-canvas recovery)
       shell: bash
+      working-directory: ${{ inputs.working-directory }}
       run: |
         set -uo pipefail
         if bun install --frozen-lockfile; then

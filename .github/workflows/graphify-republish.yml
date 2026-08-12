@@ -72,9 +72,14 @@ jobs:
         with:
           bun-version: "1.3.14"
 
+      # This job checks brain-platform out into a SUBDIRECTORY (path: brain-platform),
+      # and a local `uses:` resolves against $GITHUB_WORKSPACE — not against the repo.
+      # So the action path carries the subdirectory too. `working-directory:` is not
+      # legal on a `uses:` step (GitHub rejects the file outright), hence the input.
       - name: Install bun dependencies
-        working-directory: brain-platform
-        uses: ./.github/actions/bun-install
+        uses: ./brain-platform/.github/actions/bun-install
+        with:
+          working-directory: brain-platform
 
       - name: Setup Python (for the graphify CLI)
         uses: actions/setup-python@v6
