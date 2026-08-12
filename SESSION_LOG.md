@@ -1,3 +1,40 @@
+## 2026-08-12 (Opus 5) — graph compartments STEP 2: nine calibration runs, NEGATIVE RESULT — the two knobs do not compartment this repo
+
+Handoff: `docs/handoff/2026-08-12-graph-compartments-step2-negative-result.md`. Step 1 shipped in
+`1c6c38b2`; this is Step 2.
+
+**Nine `cluster-only` runs on the scoped code-plane graph (43,129 nodes), resolution {1.0,1.5,2.0} ×
+exclude-hubs {none,99,99.5}. All nine written and verified.** Best config is the DEFAULT we already
+had — resolution 1.0, no hub exclusion: 3,769 communities, 1,270 singletons, 17.2% cross-community
+edges, 0.916 cohesion. `--exclude-hubs` makes every metric worse at every resolution (99 → 6,494
+communities, 3,624 singletons, cohesion collapses 0.916 → 0.466).
+
+**Against the plan's own selection criteria: 1 of 4 met.** Cross-share under 19.9% ✅ (17.2%, and
+Step 1's scoping earned that, not the knobs). Community count in tens-to-low-hundreds ❌ (best 3,769).
+`lib/email`+`lib/deliverable` collapsed to 2–3 ❌ (best 339 — off by two orders of magnitude).
+Cohesion up ✅. Nothing pinned in `package.json` — pinning the default would only imply a decision
+had been made.
+
+**ROOT CAUSE, and the spec was wrong about it.** Singletons sit at EXACTLY 1,270 across all three
+`hubs=none` runs regardless of resolution — resolution cannot merge nodes with no edges to merge
+along. It is a structural floor. The problem is EDGE SPARSITY, not clustering parameters. The
+rebuild's own warnings name the lever: **262 `.sql` files contributed nothing because
+`tree_sitter_sql` is not installed** (`pip install "graphifyy[sql]"`), 189 files produced zero nodes,
+and 3 of our own files are partially extracted from real syntax errors (`BrandingBlock.tsx` L311,
+`CorridorMarketScatter.tsx` L334, `CorridorMap.jsx` L47). Do NOT sweep resolution again until edge
+coverage is fixed.
+
+**THREE TOOL BEHAVIORS THE PLAN GOT WRONG, all measured.** (1) Step 2 as written cannot execute:
+`cluster-only` drops the 79 app-plane nodes, sees net −77 and REFUSES to write while still printing a
+plausible community count and exiting 1 — the first nine attempts all failed this way; calibrate on
+the code plane, merge the app plane once at the end. (2) `--force` does NOT override that refusal on
+`cluster-only` (it does on `graphify update`). (3) Leiden is stochastic — identical params returned
+2,842 then 2,836 communities, so ±0.2% is noise.
+
+Graph left at the winning values with the app plane merged: 43,208 nodes, 73,177 edges, 3,759
+communities. **2 of 4 steps** — Step 0 (hosted-index probe) and Step 3 (TDD report script) untouched;
+check `graph_compartments_live_verify` needs RE-SCOPING to edge coverage, not closing.
+
 ## 2026-08-12 (Sonnet 5) — Collier permits dry-run CONFIRMED GREEN live, fix works
 
 Follow-up to the `download_step() url=""` fix (commit 1be2aab0, this session). Re-dispatched
