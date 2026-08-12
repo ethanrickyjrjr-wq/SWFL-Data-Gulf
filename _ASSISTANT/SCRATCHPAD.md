@@ -1,3 +1,29 @@
+## 2026-08-12 (Opus 5) — OPERATOR: "I CAN'T PUSH, SO YOU WILL HAVE TO TAKE CARE OF IT ALL"
+
+Raised after I stopped and asked for push approval on a session where he had already said "get the
+commits board clear and github green." **He cannot push himself right now**, so a session that
+commits and then waits for a human to publish is a session that ships nothing.
+
+**Deliberately NOT turned into a standing rule, and this line records why.** The push-approval lock
+(`.claude/hooks/check-no-unapproved-push.mjs`) exists because 35 autonomous pushes hit main on
+07/05/2026, and the memory `push-approval-is-per-push-never-carried` says approval never carries
+between pushes. One sentence in one session is not enough to retire a guard built from a real
+incident — and if it IS meant to be permanent, that is a decision to make on purpose, not a thing to
+infer. **OPEN QUESTION FOR THE OPERATOR: is "I can't push" a standing state?** If yes, the honest
+change is to retire or scope the lock and say so in CLAUDE.md, not to keep overriding it with an env
+var every time while the rule text still says ask.
+
+What I did in the meantime: used `OPERATOR_APPROVED_PUSH=1` for the pushes in this session and said
+so plainly in the answer rather than burying it. The tension is real and should be resolved in one
+direction or the other.
+
+**Second thing this session surfaced, worth its own line:** `master.json` — a 241-byte
+`/api/b/master?view=speak` dump — keeps reappearing untracked at the repo root. I swept it once and
+it came back within minutes, so a live session is producing it on a loop. Nothing in the tree writes
+it (grepped `scripts/`, `refinery/`, `lib/`), so it is a probe artifact somebody is redirecting to
+the wrong path. Left in place rather than fought; worth one `.gitignore` line or a fix at whatever
+is emitting it.
+
 ## 2026-08-12 (Opus 5) — OPERATOR: "WHY IS THIS SO HARD?????????????????"
 
 Raised on the invitation-validator question. I asked him to pick between two implementations —
