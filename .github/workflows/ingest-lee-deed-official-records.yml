@@ -17,21 +17,25 @@ name: lee-deed-official-records load
 # would false-RED); tracked by check `lee_deed_load_parked_but_scheduled`.
 
 on:
-  # CRON COMMENTED until the first green load (franchise-outcomes precedent — a
-  # parked source's write path is unproven on a schedule). The migration
-  # (migrations/20260720_lee_deed_official_records.sql) MUST be applied BEFORE the
-  # first scheduled run: ENGINE_ENABLED='true' in this repo, so an uncommented cron
-  # would fire and the dlt role would AUTO-CREATE the table with dlt's own types, no
-  # service_role GRANT (brain can't read it), and no _ingested_at column — and then
-  # CREATE TABLE IF NOT EXISTS is a permanent no-op. Sequence: (1) apply migration,
-  # (2) one green manual load via workflow_dispatch confirms 191 rows, (3) THEN
-  # uncomment the cron below. Uncommenting activates the parked_but_scheduled state
-  # already tracked by known_drift in cadence_registry (check
-  # lee_deed_load_parked_but_scheduled).
+  # CRON ENABLED 08/12/2026. All three preconditions this comment named are now met,
+  # measured live against the DB the same session (not asserted):
+  #   (1) migration applied — data_lake.lee_deed_official_records has 28 columns
+  #       INCLUDING _ingested_at, so the migration created it, NOT dlt's auto-create
+  #       (the failure this block was guarding against: dlt's own types, no
+  #       _ingested_at, and CREATE TABLE IF NOT EXISTS then a permanent no-op);
+  #   (2) service_role holds SELECT on the table — the brain can read it
+  #       (information_schema.role_table_grants: postgres=ALL, service_role=SELECT);
+  #   (3) green loads confirmed well past the 191-row bar — 28,186 rows on file
+  #       across 07/13–08/11/2026, 22 business days, all 32 doc types.
+  # This activates the parked_but_scheduled state already tracked by known_drift in
+  # cadence_registry (check lee_deed_load_parked_but_scheduled). That state is
+  # INTENDED, not drift-to-fix: the job is idempotent (MERGE on internal_doc_id) and
+  # re-merging the same committed raw/*.json on a day with no new human drop is a
+  # no-op, which is exactly why a freshness probe on this source would false-RED.
   #
   # Daily 11:17 UTC — the LOAD is automatable even though the FETCH is not.
-  # schedule:
-  #   - cron: "17 11 * * *"
+  schedule:
+    - cron: "17 11 * * *"
   workflow_dispatch:
     inputs:
       dry_run:
