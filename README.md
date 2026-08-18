@@ -3,215 +3,93 @@
 </p>
 
 <p align="center">
-  <strong>Analyst-grade Southwest Florida data, delivered straight into your AI.</strong><br/>
-  Live at <a href="https://www.swfldatagulf.com">swfldatagulf.com</a> · MCP endpoint at <code>/api/mcp</code>
+  <strong>Verified Southwest Florida market data, turned into client-ready work.</strong><br/>
+  Live at <a href="https://www.swfldatagulf.com">swfldatagulf.com</a>
 </p>
 
 ---
 
-## What it is
+## What this is
 
-SWFL Data Gulf is a multi-brain intelligence platform for Lee and Collier counties. Dozens of live data pipelines feed into a DAG of "brains" — each brain owns one slice of reality and emits a single distilled output block. A master synthesizer reads the whole lake and produces one grounded, falsifiable direction call. Every number is cited, every source linked, confidence decays honestly with staleness.
+SWFL Data Gulf takes the market data that Southwest Florida professionals spend hours hunting down — sale prices, rents, permits, flood risk, traffic, commercial corridors — verifies it against the original sources, and turns it into finished work: branded emails, social posts, charts, and area reports that are ready to send. Every number in every deliverable is cited to a named source and stamped with the date it was true.
 
-The data is served over [Model Context Protocol (MCP)](https://modelcontextprotocol.io), so any MCP-compatible AI (Claude, Cursor, etc.) can query it directly — no copy-paste, no stale PDFs.
+It serves three ways:
+
+- **Build** — produce client-ready emails, posts, charts, and reports in the browser, in minutes.
+- **Ask** — question the data directly on the site and get grounded, cited answers.
+- **Connect** — plug the whole dataset into your own AI assistant and use it there.
 
 ---
 
-## Install the MCP server
+## What you can build
+
+The build studio covers the work a listing actually generates over its life — announcement, open house, price change, under contract, just sold — plus recurring market updates for a ZIP, corridor, or farm area. Each one comes out branded to you, editable before it goes anywhere, and sourced line by line. Social posts render sized for each platform. Charts are drawn from real series — price by ZIP, vacancy by corridor, permit volume over time — never sketched from vibes.
+
+Reports are made to be interrogated, not just read: point at a figure on a report page and ask about it, chart it, or compare it against another area, and the answer comes grounded in that report's own sourced data.
+
+---
+
+## Where every number comes from
+
+Every figure is filled from four lanes, tried in order:
+
+1. **Our own data** — the live Southwest Florida data lake, built from the sources below.
+2. **Your upload** — a document or figure you hand in, used as given and attributed to you.
+3. **A named public source** — fetched live and cited, when neither of the above holds it.
+4. **A value you type in** — labeled as yours.
+
+What never happens is an invented number. That rule is enforced in code at build time — a deliverable with an unsourced figure fails to build. A data gap becomes an honest empty slot or a fetch, never a guess.
+
+---
+
+## Data that behaves honestly
+
+- Every number carries its source and an as-of date.
+- Confidence decays as data ages — nothing pretends to be fresher than it is.
+- Below a minimum sample size, the platform declines to state a figure rather than fabricate one.
+- When sources disagree, the disagreement is surfaced instead of silently averaged.
+- Rates and percentages are quoted as published, never recomputed from raw counts.
+- No AI does arithmetic here. Every calculation is deterministic, tested code; language models only write narrative on top of numbers that are already locked and cited.
+
+---
+
+## The sources
+
+Federal, state, and county records, pulled on schedule by dedicated pipelines: FRED, BLS, Census ACS, SBA, FEMA and NOAA, FBI crime data, FDOT traffic, Florida DBPR licensing, Lee and Collier county property appraisers, recorded deeds, building permits, tourist development tax receipts, RSW passenger traffic, Zillow rent indexes, and a verified inventory of 27 commercial corridors, among others. Each pipeline's freshness is monitored daily.
+
+---
+
+## Use it inside your own AI
+
+The full dataset is served over the [Model Context Protocol](https://modelcontextprotocol.io), so any MCP-compatible assistant (Claude, Cursor, and others) can query it directly:
 
 ```bash
 # Claude Code
 claude mcp add --transport http swfl https://www.swfldatagulf.com/api/mcp
 
-# Claude Desktop / any MCP client
-# Add to your mcp config:
+# Claude Desktop / any MCP client — add to your MCP config:
 # { "swfl": { "type": "http", "url": "https://www.swfldatagulf.com/api/mcp" } }
 ```
 
-Then ask: _"What's the flood-adjusted investment picture for ZIP 33931?"_ and it fetches live data.
+Then ask: _"What's the flood-adjusted investment picture for ZIP 33931?"_ — and your assistant answers from live, cited data. The sourcing rules travel inside every payload, so the answers stay grounded in your AI too: cite or don't claim, mark anything inferred, never fill a gap with a guess.
 
 ---
 
-## What's live
+## Coverage
 
-Two counties, dozens of pipelines, one synthesizer. Each leaf brain below emits a single cited output block; `master` reads all of them and makes the call.
-
-**Economy & labor**
-
-| Brain                | What it covers                                                           |
-| -------------------- | ------------------------------------------------------------------------ |
-| `macro-us`           | US backdrop — FRED policy rates, Treasuries, the Fed read                |
-| `macro-florida`      | Florida-level macro context                                              |
-| `macro-swfl`         | SWFL unemployment (BLS LAUS), labor-force participation, local rate read |
-| `labor-demand-swfl`  | BLS OEWS occupational demand + wages                                     |
-| `econ-dev-swfl`      | Economic-development announcements — jobs + investment, trailing 90 days |
-| `sector-credit-swfl` | SBA loan outcomes and NAICS charge-off rates by sector                   |
-| `franchise-outcomes` | SBA franchise survival + charge-off by brand                             |
-
-**Real estate & development**
-
-| Brain                      | What it covers                                                                          |
-| -------------------------- | --------------------------------------------------------------------------------------- |
-| `housing-swfl`             | Median sale prices, days-on-market, YoY deltas, inventory by ZIP                        |
-| `properties-lee-value`     | Parcel-level Lee County values, Save-Our-Homes gap, sales velocity (LeePA)              |
-| `properties-collier-value` | Parcel-level Collier County values                                                      |
-| `rentals-swfl`             | Observed rents by ZIP (Zillow ZORI)                                                     |
-| `permits-swfl`             | Lee + Collier building permits, geocoded to corridors                                   |
-| `cre-swfl`                 | Commercial corridor pulse — 27 verified corridors (vacancy, rent, absorption, cap rate) |
-| `corridor-pulse-swfl`      | Weekly corridor signal pulse — development + transaction activity                       |
-| `condo-sirs-swfl`          | DBPR condo structural-reserve (SIRS) signals                                            |
-
-**Risk & environment**
-
-| Brain                | What it covers                                                   |
-| -------------------- | ---------------------------------------------------------------- |
-| `env-swfl`           | FEMA flood zones, NFIP average annual loss, storm-surge exposure |
-| `storm-history-swfl` | NOAA storm-event history                                         |
-| `safety-swfl`        | Crime rates from FBI CDE / NIBRS, coverage-matched               |
-
-**Infrastructure & activity**
-
-| Brain                                       | What it covers                                                                              |
-| ------------------------------------------- | ------------------------------------------------------------------------------------------- |
-| `traffic-swfl`                              | FDOT annual average daily traffic by road segment                                           |
-| `logistics-swfl` + `logistics-swfl-nowcast` | Freight flows (FAF5) + a near-term logistics nowcast                                        |
-| `rsw-airport`                               | RSW (Southwest Florida International) passenger traffic                                     |
-| `tourism-tdt`                               | Tourist Development Tax receipts                                                            |
-| `licenses-swfl`                             | FL DBPR business + contractor licenses                                                      |
-| `city-pulse-swfl`                           | Daily city/region pulse — 49+ live signals, top surfaced                                    |
-| `news-swfl`                                 | SWFL business-news signal feed                                                              |
-| `master`                                    | **Synthesizer** — one grounded, conditional, falsifiable direction call over the whole lake |
+Lee County and Collier County, Florida — county, corridor, and ZIP grain. Named towns and beaches (Fort Myers, Cape Coral, Naples, Bonita Springs, Estero, Fort Myers Beach, Marco Island, and the rest) resolve to their ZIPs.
 
 ---
 
-## Point at a fact — ask it or chart it
+## Built with
 
-A report should be something you can interrogate, not just read. Two surfaces on the `/r/` report pages turn the numbers into a conversation:
-
-- **Charts at a glance _(live)_.** Every report auto-renders one chart computed deterministically in code from the brain's own audited numbers — the most comparable series it holds (median price across ZIPs, vacancy across corridors, and so on). No LLM draws it: the bars come straight from the locked key-metrics and detail tables, capped and human-labeled. The same chart block rides the dossier, so any downstream AI can reference or redraw it.
-- **The Highlighter _(rolling out)_.** Point at a specific fact — select it on desktop, tap a chip on mobile — and a popup, grounded **only** in that report's dossier plus the rules-of-engagement block, lets you ask about it or chart it. The answer comes _to_ the fact instead of sending you elsewhere. The engine runs server-side on our own key (`/api/converse`, Claude Haiku 4.5), so every answer is grounded, cite-or-decline, and metered. It can reach past one report: compare any SWFL ZIP already in the dossier, pull a sibling brain or `master`, or hand the whole dossier to your own Claude over MCP. The popup ships behind a flag while it finishes browser-hardening.
+Next.js and TypeScript on Vercel, Supabase Postgres, Python ingest pipelines, DuckDB for analytics, and scheduled GitHub Actions keeping every source fresh. Deterministic math throughout; models write prose, not numbers.
 
 ---
 
-## Architecture
+## License
 
-```
-Sources (FRED, BLS, FEMA, LeePA, FDOT, SBA, NOAA, DBPR…)
-    ↓  Python + dlt ingest pipelines
-data_lake.*  (Supabase Postgres + Parquet on Storage)
-    ↓  Refinery (Bun + TypeScript) — deterministic math, gated synthesis
-Leaf brains  →  master synthesizer  →  predictions ledger → graded outcomes
-    ↓  MCP / REST  (dossier + rules-of-engagement)
-Your AI   ·   /r/ report pages (charts + the Highlighter)
-```
-
-Three tiers:
-
-- **Tier 1 — Reporters:** leaf brains, cited facts only, no opinions
-- **Tier 2 — Synthesizer:** master, the only tier that speculates; conditional IF/THEN calls with a falsifier
-- **Tier 3 — Conversation:** the user's AI reasons over master's dossier without re-fetching
-
----
-
-## The carry contract
-
-The payoff of the three-tier design lands in Tier 3. The master returns a **condensed dossier**, not an essay — and clipped to it is a **lean rules-of-engagement block** (~206 tokens, hard-capped at 210) that rides in every payload: `_meta.rules` over MCP, `?format=json` on `/api/b`. The downstream AI reasons over that bundle to answer follow-ups **without re-fetching** — the conversation stays grounded on a single pull instead of round-tripping the lake on every turn.
-
-Because the rules travel _with_ the data, the model is bound by them at answer time, not just at fetch time:
-
-- **Cite or don't claim** — no source in the payload, no assertion.
-- **Mark inference** — anything past the cited facts is tagged `[INFERENCE]` with a base value and a falsifier.
-- **Answer at the grain held** — a gap is an offer to pull, never an invented number.
-
-One constant defines it — `refinery/lib/rules-of-engagement.mts` — imported by both the MCP server and the JSON route and mirrored to `THE-CONTRACT.md`, with a CI drift test keeping the copies in lockstep.
-
-**Where this is heading.** Grounding keeps a single answer honest; memory is how the system carries judgment across answers. Today a personal vault banks strategic insights, recallable by term and tag. Next it grows into durable working memory — past deals, the issues they surfaced, and how they resolved — so the assistant builds consistent working habits and recognizes when a new situation rhymes with an old one.
-
----
-
-## The flywheel — graded, falsifiable calls
-
-A direction call is only worth something if it can be scored. So every time `master` runs, it writes its prediction to a `predictions` table — the call, its confidence, the date it should be checked, and the exact number that would prove it wrong. As each window closes and the real number lands, a deterministic grader (zero LLM, idempotent, wired to run downstream of the daily rebuild) banks a verdict in `outcomes`.
-
-That turns "78% confident" from decoration into something measurable: over time the system accrues a real, scored track record — plus a calibration curve that tests whether "high confidence" actually means "more often right." To get a read **today** instead of waiting years, a backtest bootstrap replays point-in-time-honest history — vintaged unemployment, immutable property sales, never look-ahead-revised series like rents — to grade hundreds of as-of calls and tune signal weighting against the scorecard.
-
-Two lines stay bright:
-
-- **Replays are tuning fuel, not the headline.** Backtest grades are kept physically separate and stamped "retrodicted"; the public track record only ever comes from **live** calls resolving.
-- **Never a lonely percentage.** Every score travels with its sample size — `68% (N=31)`, not `68%`.
-
-The moat isn't a smarter model — it's a falsifiable record that compounds with time and territory.
-
----
-
-## Design principles
-
-A few invariants hold across every brain:
-
-- **No LLM in the math path.** All scoring, normalization, and direction logic is deterministic TypeScript. The model is never asked to do arithmetic — it only writes narrative on top of numbers that are already locked.
-- **Synthesis is gated, not assumed.** Brains that are pure deterministic rollups skip the synthesis-agent call entirely (`skipSynthesisAgent`). The expensive model runs only where it earns its cost.
-- **Typed, acyclic DAG.** Edges between brains carry a type (`veto` vs `modifier`), and leaf brains never point back to master. The graph is acyclic by construction.
-- **Every claim is falsifiable.** The master never emits an unconditional opinion. Direction calls ship as IF/THEN with an explicit falsifier — the condition under which the call is wrong.
-- **Citations branch on the real source.** A citation reflects where the number actually came from (live table vs fixture), never a hardcoded path. No phantom data.
-- **No magic numbers.** Any constant that touches scoring, thresholds, or normalization carries an inline source or a `SOURCED.md` entry. "Feels right" is not a citation.
-- **Fail open to rebuild.** Content-hashing and caching are cost levers only, never safety gates. When in doubt the system rebuilds rather than serves stale.
-- **Confidence decays with staleness; thin samples are suppressed.** Below a sample-size floor a brain refuses to make a call rather than fabricate one.
-
----
-
-## Correctness & CI
-
-The DAG is policed automatically, not by hand:
-
-- **`facts-only-lint`** — leaf brains may state cited facts only; synthesized or inferred claims are confined to the master tier and must carry an `[INFERENCE]` tag plus a falsifier.
-- **`spec-validator`** — every brain output block is validated against a versioned schema before it can ship.
-- **Daily freshness probes** — every source is checked for staleness and confidence is decayed automatically as data ages.
-- **GitHub Actions** — ingest, rebuild, and freshness run on cron, and every push is gated through a rebase-safe push guard.
-
----
-
-## Tech stack
-
-| Layer              | Tool                                 |
-| ------------------ | ------------------------------------ |
-| Frontend / API     | Next.js 16 (App Router) + TypeScript |
-| Database           | Supabase (Postgres + Storage)        |
-| Refinery / tooling | Bun + TypeScript                     |
-| Ingest pipelines   | Python + dlt                         |
-| Analytics          | DuckDB                               |
-| Deployment         | Vercel                               |
-
----
-
-## Data coverage
-
-Lee County + Collier County, Florida. Grain: county → corridor → ZIP. Named towns and beaches (Fort Myers Beach, Bonita Springs, Naples, Cape Coral, Estero, Marco Island, etc.) resolve to their ZIP.
-
----
-
-## Repo layout
-
-```text
-app/                  Next.js App Router — pages, REST + MCP API
-components/            React UI components
-lib/                  Shared TypeScript helpers
-utils/                Supabase client + server helpers
-types/                Shared TypeScript types
-public/               Static assets (logo, icons)
-refinery/             Brain factory: packs, stages, validators, vocab
-ingest/               Python dlt ingest pipelines, one per source
-brains/               Compiled brain outputs, one .md per brain
-fixtures/             JSON fixtures for deterministic tests
-tools/                Lake MCP server
-scripts/              Operational scripts (safe-push, ledger checks)
-docs/                 Standards, blueprints, plans, specs
-_diagrams/            Architecture + flow diagrams (Mermaid)
-_AUDIT_AND_ROADMAP/   Build queue, roadmap, audit snapshots
-.github/              CI: cron ingest, rebuild, freshness probes
-.claude/              Agent hooks + shared settings
-```
-
-See `docs/section-map.md` for the full section map - the 5 sections, import-coupling, and what's separable vs one organism.
+The source is public to read; it is not open source. All rights reserved — no license is granted to use, copy, modify, or deploy this software or its data products without written permission. See [LICENSE](LICENSE).
 
 ---
 
