@@ -1060,6 +1060,15 @@ the rendered cell on new-listing/back-on-market was the last surface the ruling 
 to. Source mechanics unchanged for the model-visible value: paid row, greater than zero only — a
 vendor `0` is indistinguishable from an unfilled field.
 
+**THE CODE ROOT (08/18/2026, same day, after the operator called the per-recipe walking pattern a
+lie): `lib/deliverable/cell-policy.ts`.** The cost-cell ban no longer lives in recipes at all — it
+is ONE registry (label matchers + the decree verbatim), enforced twice: `buildLifecycleEmail`
+strips banned cells from every stats block it assembles (a banned cell physically cannot render on
+any lifecycle email, including recipes written later), and Gate 18 in the pre-push hook runs the
+fleet test (`lib/deliverable/cell-policy.test.ts`) on every push touching a recipe or the chrome.
+**A new content ruling = one entry in that registry — never a per-recipe edit, never a playbook
+paragraph alone.**
+
 **THE DESCRIPTION — the biggest quality lever in this email.** The agent's own pasted words (lane
 2, and the best source) → the paid row's `description` (20 of 26, measured 368 to 2,983 characters)
 → OPEN. It ships **VERBATIM in its own block**, it does **NOT** count against the 50–125-word

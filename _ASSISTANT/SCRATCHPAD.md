@@ -1,3 +1,31 @@
+## 2026-08-18 (Fable 5, later) — OPERATOR IDEA, for the recipes-as-config brainstorm: quick-swap grids
+
+While approving the cell-policy registry ("remove" on the open-house HOA question), verbatim:
+"since we are making grids, we could possibly have quick replacement grids on the side user can
+choose from. or quick swap." Product shape: the lab canvas offers alternate grid layouts for the
+same email as one-click swaps — same data, different arrangement. Belongs to the recipes-as-config
+amendment to the one-lane plan (2026-08-02): once a recipe is a declarative config over shared
+section builders, an alternate grid is just a second config, and swap = re-render on the other
+config with the same filled cells (human-wins touched-blocks rule from the streaming build applies
+to the swap too). DO NOT build ad hoc before that brainstorm — it needs the config layer to be
+cheap.
+
+## 2026-08-18 (Fable 5, later) — OPERATOR: "THIS IS ALL A FUCKING LIE" — on the "every content rule gets a cell policy in code, same session" claim
+
+Verbatim, on the mechanism claim from the HOA/$-per-sqft fix: "THIS IS ALL A FUCKING LIE. PLEASE
+GO THROUGH ALL CONVOS AND RULES AND BRING ME A PLAN FOR MORE HOOKS AND SEPERATING AREAS OF WORK
+AND WHAT CLAUDE READS WHEN I SEND A MESSAGE, STAYING FOCUSED DURING TASKS. I MEAN, WE ARE WRITING
+FUCKING CODE TO BUILD a fucking email and every fucking email is different. THAT MAKES NO FUCKING
+SENSE!!!"
+
+The commit (24d06a7f) is real and its assertions ran — but the CLAIM "every rule gets walked to
+every surface same session" is structurally unkeepable as built: 10 render scripts + per-recipe
+hand-coded fact rows means every ruling must be manually walked to N surfaces, and the HOA incident
+itself proves the walk doesn't happen (under-contract had the ruling; new-listing didn't). The lie
+is not the artifact — it's promising per-surface discipline on a per-surface architecture. Owed:
+the plan he asked for — one-root cell policy + one engine (kill per-email code), hook plan, area
+separation, context-diet audit of what loads per message.
+
 ## 2026-08-18 (Fable 5) — OPERATOR: "why would we pay supabase when we can do it for free" — on the live AI+human co-editing scope
 
 Correction on the co-editing proposal (salt.md discussion): I reached for Supabase Realtime as

@@ -527,6 +527,16 @@ process.stdin.on("end", () => {
   // Rules + positive controls (incl. the live registry): lib/strikes-guard{,.test}.mjs.
   strikesGuardGate();
 
+  // ---- Gate 18: buyer-facing cell policy — a content ruling is fleet-enforced --
+  // Operator decree 08/18/2026 ("why the fuck do we want HOA costs on there... THIS
+  // IS ALL A FUCKING LIE"): the no-cost-cells ruling was implemented on under-contract
+  // in July while new-listing still rendered the HOA fee — a ruling that lives
+  // per-recipe must be manually walked to every surface, and the walk never happens
+  // (strike shape decree-in-prose-code-never-walked-it). The registry is
+  // lib/deliverable/cell-policy.ts; this gate runs its fleet test on EVERY push that
+  // touches a recipe or the chrome, not just the touched recipe's own tests.
+  cellPolicyGate(changed);
+
   // ---- Gate 8: ZIP scope root (Lee + Collier, 57) ---------------------------
   // Coverage has ONE root (isCoreScope, refinery/lib/core-scope.mts) and the leak
   // still reopened twice, because nothing FORCED a new surface to call it: the
@@ -1447,6 +1457,48 @@ function captureFreshnessGate(changed) {
         `Legitimate exceptions (pure refactor with identical bytes, capture blocked by a\n` +
         `parallel session's claim): ALLOW_STALE_CAPTURE=1 and say why in the message.`,
     );
+  } catch {
+    // never wedge a push on a guard bug — fail open
+  }
+}
+
+// Gate 18 body. Fail-OPEN on internal error, BLOCK on violation. The fleet test is
+// env-safe (pure builders + the chrome — no DB, no network, no model call). Escape
+// ALLOW_CELL_POLICY_FAIL=1 — legitimate ONLY when the fleet test itself is being
+// changed in this push and the red is the old assertion; say so in the push message.
+function cellPolicyGate(changed) {
+  try {
+    if (process.env.ALLOW_CELL_POLICY_FAIL === "1") {
+      process.stdout.write(
+        `\n[pre-push gate] OVERRIDE: ALLOW_CELL_POLICY_FAIL=1 — cell-policy fleet test\n` +
+          `bypassed (logged).\n`,
+      );
+      return;
+    }
+    const touched = changed.some(
+      (f) =>
+        (f.startsWith("lib/deliverable/recipes/") ||
+          f === "lib/deliverable/cell-policy.ts" ||
+          f === "lib/deliverable/cell-policy.test.ts" ||
+          f === "lib/email/lifecycle-chrome.ts") &&
+        !f.endsWith(".md"),
+    );
+    if (!touched) return;
+    const fleet = run("bun test lib/deliverable/cell-policy.test.ts");
+    if (fleet.ran && fleet.code !== 0) {
+      block(
+        "CELL POLICY — a buyer-facing content ruling is violated somewhere in the fleet (Gate 18)",
+        `The cell-policy fleet test failed. A recipe (or the chrome) emits a reader-facing\n` +
+          `cell the operator has banned — the cost family (HOA, taxes, insurance, CDD,\n` +
+          `dues, carrying costs; decree 08/18/2026: the email's job is to get the buyer to\n` +
+          `ARRIVE — cost questions are the agent's, in person).\n\n` +
+          `The ruling lives in ONE root: lib/deliverable/cell-policy.ts. Fix the recipe\n` +
+          `that emits the cell — never by weakening the registry, and never by\n` +
+          `implementing the ban inside the recipe (that is the per-surface walk this\n` +
+          `gate exists to end).\n\n` +
+          truncate(fleet.out),
+      );
+    }
   } catch {
     // never wedge a push on a guard bug — fail open
   }

@@ -228,9 +228,10 @@ export async function buildOpenHouse(ctx: RecipeBuildContext): Promise<EmailDoc 
   // nothing: the asking price is the hero. It is choosing which facts THIS email is about.
   //
   // DAYS ON MARKET AND HOA STAY VISIBLE TO THE MODEL (operator, 08/06/2026: "why would the
-  // model not see HOA????" — right call; both cells are now on the page (the strip, above),
-  // so hiding the underlying figure from the writer while showing it to the reader is
-  // backwards). The bug was never that the model COULD see these numbers — it was the
+  // model not see HOA????" — right call). DOM is also a cell on the page (the strip,
+  // above); the HOA fee is model-visible ONLY — a reader-facing cost cell is banned on
+  // every buyer-facing email (operator decree 08/18/2026, lib/deliverable/cell-policy.ts).
+  // The bug was never that the model COULD see these numbers — it was the
   // DEFAULT system prompt (built for a for-sale PITCH, not an invitation) instructing it to
   // MINE them for leverage: handed both, it wrote *"this home came to market roughly two
   // months ago, which gives a buyer walking through today real room to have a conversation
@@ -278,10 +279,10 @@ export async function buildOpenHouse(ctx: RecipeBuildContext): Promise<EmailDoc 
           "weekend', 'Saturday', 'stop by Sunday'), never place the open house at any " +
           "particular hour.\n") +
       "• DO NOT ARGUE THE PRICE, THE MARKET, OR THE TERMS. This is an invitation, not a " +
-      "price announcement and not a negotiating brief. Even though the days-on-market and " +
-      "HOA figures below are real, do not turn them into leverage or cost analysis — no " +
-      "'room to talk', no 'worth factoring into carrying costs', no reading of what the " +
-      "market has done or what homes like this are worth.\n" +
+      "price announcement and not a negotiating brief. Even though the days-on-market " +
+      "figure below is real and an HOA fee may sit in your sources, do not turn them into " +
+      "leverage or cost analysis — no 'room to talk', no 'worth factoring into carrying " +
+      "costs', no reading of what the market has done or what homes like this are worth.\n" +
       "• DO NOT RESTATE the square footage, the bed count, the bath count, the price per " +
       "square foot, or the days on market. They sit in the strip directly above your " +
       "paragraph; repeating them wastes the only sentences you get.\n" +

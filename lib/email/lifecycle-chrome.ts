@@ -57,6 +57,7 @@
 //
 // Enforced by lifecycle-chrome.test.ts — a recipe that drifts fails the suite.
 
+import { stripBannedCells } from "@/lib/deliverable/cell-policy";
 import { createBlock } from "./doc/default-docs";
 import { finalizeDoc } from "./doc/finalize-doc";
 import type { PlanEntry } from "./doc/finalize-doc";
@@ -393,9 +394,29 @@ export function buildLifecycleEmail(current: EmailDoc, chrome: LifecycleChrome):
   // 10. THE FOOTER — sticky, CAN-SPAM, locked so a drag can't move the unsubscribe.
   entries.push(row(keepOrDefault(current, "footer"), 3, true));
 
+  // THE CELL-POLICY BACKSTOP (operator decree 08/18/2026 — no cost cell on any
+  // buyer-facing email). Every stats block the chrome assembled — the spec strip AND
+  // anything a recipe rode in through `middle`/`tail` — passes through the ONE registry
+  // (lib/deliverable/cell-policy.ts) before layout. A banned cell cannot render on a
+  // lifecycle email, whichever recipe emitted it, including recipes written after this
+  // line. A block the policy empties is dropped whole — never an empty box. Recipes
+  // should still not EMIT banned cells (the fleet test in cell-policy.test.ts enforces
+  // that at authoring level); this is the render-time guarantee that survives a recipe
+  // nobody walked.
+  const swept: PlanEntry[] = [];
+  for (const e of entries) {
+    if (e.type !== "stats") {
+      swept.push(e);
+      continue;
+    }
+    const stats = stripBannedCells((e.props.stats as StatItem[] | undefined) ?? []);
+    if (stats.length === 0) continue;
+    swept.push({ ...e, props: { ...e.props, stats } });
+  }
+
   // THE SEAM. The chrome named the blocks and their heights; the layout root alone decides
   // where they land. This function cannot write an x or a y, and that is the point.
-  return finalizeDoc({ globalStyle, entries });
+  return finalizeDoc({ globalStyle, entries: swept });
 }
 
 /** The chrome's block sequence, for the coherence test. A lifecycle email that does not

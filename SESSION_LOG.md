@@ -1,3 +1,25 @@
+## 2026-08-18 (Fable 5, evening) — "THIS IS ALL A FUCKING LIE" → the cell-policy registry: content rulings stop living per-recipe
+
+**The operator's charge, and it was right:** the "every content rule gets walked to every surface
+same session" promise is structurally unkeepable on 17 hand-coded recipes (22,333 lines in
+lib/deliverable/recipes/) — the HOA ruling itself sat on under-contract since July while
+new-listing rendered the fee. Approved in-session: cell-policy registry + fleet gate, first piece
+of the larger plan (context diet, proof-of-red/claim-read hooks, area fence, recipes-as-config
+amendment to the 08/02 one-lane plan — in that order).
+
+**Shipped (LOCAL):** `lib/deliverable/cell-policy.ts` — ONE root for buyer-facing cell bans (cost
+family: HOA/dues/taxes/insurance/CDD/carrying, each entry carrying the decree verbatim);
+`buildLifecycleEmail` now sweeps EVERY stats block through it before layout (banned cell cannot
+render on any lifecycle email, incl. future recipes; emptied blocks dropped whole); fleet test
+`cell-policy.test.ts` (8 tests — proof-of-red: chrome edit stashed → 2 fail, restored → 0 fail);
+**Gate 18** in check-prepush-gate.mjs runs the fleet test on any push touching recipes/chrome
+(fail-open, escape ALLOW_CELL_POLICY_FAIL=1). Also fixed: open-house's stale narrator line
+claiming "HOA figures below" when no HOA cell is on that page (corrected my own wrong in-session
+claim that it still rendered one — the comment lied, the code didn't). Playbook §HOA now points at
+the code root. Evidence: 8/8 new, `bun test lib/email lib/deliverable` 2971/0, `bunx next build`
+exit 0, `node --check` clean on the hook. Spec: docs/superpowers/specs/2026-08-18-cell-policy-registry-design.md;
+check `cell_policy_registry_live_verify` open pending the gate proving itself on a real push.
+
 ## 2026-08-18 (Fable 5, later) — "Where the fuck is price per square foot" — the ask now serves from the bought row; the HOA cell is banned everywhere
 
 **The defect, measured before designing anything:** the new-listing acceptance render shipped with
