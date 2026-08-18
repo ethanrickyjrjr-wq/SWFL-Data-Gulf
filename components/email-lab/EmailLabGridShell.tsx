@@ -71,6 +71,13 @@ import { formatForClipboard } from "@/lib/email/social-calendar/week";
 import type { CalendarDay, SocialDraft, WeeklyCalendar } from "@/lib/email/social-calendar/types";
 import { capabilitiesFor } from "@/lib/email/lab/capabilities";
 import { initialPhoneTab, type PhoneTab } from "@/lib/email/lab/phone-tabs";
+import { decodeEvents } from "@/lib/email/lab/stream-events";
+import {
+  applyStreamEvent,
+  initialStreamState,
+  markTouched,
+  type StreamCanvasState,
+} from "@/lib/email/lab/consume-stream";
 import dynamic from "next/dynamic";
 const FilerobotModal = dynamic(() => import("./FilerobotModal").then((m) => m.FilerobotModal), {
   ssr: false,
@@ -181,6 +188,77 @@ function keepSavedStyle(
   usedSavedLayout?: boolean,
 ): EmailDoc {
   return usedSavedLayout ? { ...branded, globalStyle: fromServer.globalStyle } : branded;
+}
+
+/**
+ * THE ONE STREAM CONSUMER (spec 2026-08-18 live build streaming). Every
+ * `/api/email-lab/ai` call in this shell goes through here.
+ *
+ * Three things it is deliberately NOT: it holds no merge rules (they all live in
+ * `applyStreamEvent`, tested without a browser), it never touches React state
+ * itself (the caller's `onState` does), and it never assumes it got a stream.
+ *
+ * WHY THE CONTENT-TYPE BRANCH IS LOAD-BEARING (measured, Task 5 §5 concern 2):
+ * three server paths answer `stream: true` with plain JSON anyway — the
+ * showing-prep early return, the legacy no-`doc` path, and the 429 allowance
+ * rejection. Piping any of those into `decodeEvents` would turn a real answer
+ * into "malformed stream line". Same fallback covers a proxy that strips
+ * streaming (spec failure mode 6): no body, or a non-2xx, degrades to exactly
+ * today's JSON behavior.
+ *
+ * `cell` is a shared, MUTABLE state holder rather than a fold-local variable on
+ * purpose: a user editing a block MID-STREAM writes into the same cell
+ * (`noteUserBlockEdit` below), which is the only way `applyStreamEvent`'s
+ * human-wins rule can see the edit while the build is still running.
+ *
+ * Returns the `done` payload (identical to what the JSON branch returns, so
+ * every call site's existing post-build handling keeps working) plus the final
+ * reducer state — `null` when we fell back to JSON.
+ */
+async function runStreamingBuild(
+  body: Record<string, unknown>,
+  cell: { current: StreamCanvasState },
+  onState: (s: StreamCanvasState) => void,
+): Promise<{ payload: Record<string, unknown>; state: StreamCanvasState | null }> {
+  const res = await fetch("/api/email-lab/ai", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ ...body, stream: true }),
+  });
+  const contentType = res.headers.get("content-type") ?? "";
+  if (!res.ok || !res.body || !contentType.includes("application/x-ndjson")) {
+    const json = (await res.json().catch(() => ({}))) as Record<string, unknown> | null;
+    return { payload: json ?? {}, state: null };
+  }
+  const reader = res.body.getReader();
+  const decoder = new TextDecoder();
+  let carry = "";
+  let payload: Record<string, unknown> = {};
+  const drain = (chunk: string) => {
+    const { events, carry: next } = decodeEvents(chunk, carry);
+    carry = next;
+    for (const ev of events) {
+      if (ev.e === "done") payload = (ev.payload ?? {}) as Record<string, unknown>;
+      cell.current = applyStreamEvent(cell.current, ev);
+      onState(cell.current);
+    }
+  };
+  for (;;) {
+    const { value, done } = await reader.read();
+    if (done) break;
+    drain(decoder.decode(value, { stream: true }));
+  }
+  // A last line the server wrote without its trailing newline would otherwise
+  // sit in `carry` forever — flush it rather than silently dropping a `done`.
+  if (carry.trim()) drain("\n");
+  return { payload, state: cell.current };
+}
+
+/** A stream that neither finished nor said `error` was CUT (proxy, timeout —
+ *  this route declares no `maxDuration`). Committing what arrived would ship a
+ *  half-built email as a success, so the shell treats it exactly like `error`. */
+function streamInterrupted(state: StreamCanvasState | null): boolean {
+  return state != null && (state.errorMessage != null || !state.finished);
 }
 
 async function renderDocHtml(doc: EmailDoc): Promise<string> {
@@ -352,6 +430,20 @@ export function EmailLabGridShell({
   );
   // The AI's last "what I just did" line, shown in the panel ("Built the whole email…").
   const [aiStatus, setAiStatus] = useState<string | null>(null);
+  // ── LIVE BUILD STREAM (spec 2026-08-18) ──────────────────────────────────────
+  // What the build is doing RIGHT NOW ("laying out your email"), rendered in the
+  // existing spinner slot in the AI-assistant header. Null when nothing streams.
+  const [buildStatus, setBuildStatus] = useState<string | null>(null);
+  // THE reducer state for the in-flight stream. A ref, not state: it is written
+  // from two places at once — the stream fold AND the user's own block edits
+  // (noteUserBlockEdit) — and the human-wins rule only works if both see the
+  // same cell. Nothing renders off it directly; `buildStatus` and the canvas doc
+  // are the rendered projections.
+  const streamCell = useRef<StreamCanvasState>(initialStreamState());
+  // The canvas doc as it stood BEFORE the current stream painted over it. A cut
+  // or errored stream restores it, so a retry posts the user's real doc instead
+  // of a half-built skeleton.
+  const preStreamDocRef = useRef<EmailDoc | null>(null);
   // ── THE FINISHED EMAIL COMES FIRST (operator, 08/10/2026: "I SAW SPACES IN BETWEEN
   // COLORS LIKE THE OLD EMAILS"). The arrival auto-build used to END on the builder
   // canvas — react-grid-layout, GRID_MARGIN [8,8], every block a separate card with
@@ -568,6 +660,48 @@ export function EmailLabGridShell({
     armDatasetAutoRefresh(next);
   }
 
+  /**
+   * A USER EDIT TO A BLOCK, TOLD TO THE STREAM. Two writes, one cell:
+   * `markTouched` arms the human-wins rule for that id, and `doc` is re-seated
+   * to the doc the user just produced. The second half is not optional — the
+   * reducer treats `state.doc` AS the canvas, so leaving it stale would repaint
+   * the pre-edit block on the very next beat and hand the stale copy back at
+   * `done` (its merge reads the touched block out of `state.doc`).
+   */
+  function noteUserBlockEdit(blockId: string, nextDoc: EmailDoc) {
+    streamCell.current = { ...markTouched(streamCell.current, blockId), doc: nextDoc };
+  }
+
+  /** Arm a fresh stream: nothing carries over from the last build (a block the
+   *  user edited last build must still be re-writable by this one), and the
+   *  current doc becomes the restore point. */
+  function beginStream() {
+    streamCell.current = initialStreamState();
+    preStreamDocRef.current = doc;
+    setBuildStatus(null);
+  }
+
+  /** Blocks landing live. Same transform the final commit applies, so the canvas
+   *  never visibly restyles at `done`; patchPresentDoc, so a build in progress
+   *  doesn't write a dozen undo frames or count as user interaction. */
+  function paintStreamDoc(
+    next: EmailDoc,
+    tokens: Record<string, string> | undefined,
+    useSavedLayout?: boolean,
+  ) {
+    patchPresentDoc(
+      normalizeAuthorHeights(keepSavedStyle(applyBrand(next, tokens), next, useSavedLayout)),
+    );
+  }
+
+  /** A cut or errored stream: put back what was on the canvas, say so where
+   *  every other build failure already speaks. The Build button is the retry. */
+  function reportStreamInterrupted() {
+    if (preStreamDocRef.current) patchPresentDoc(preStreamDocRef.current);
+    setAiStatus(null);
+    setAiMessage("build interrupted — retry");
+  }
+
   // ── AI: Build the whole email (author engine) ───────────────────────────────
   /** `opts.useSavedLayout` is the user's answer to "use the layout you built for 123
    *  Street?" — the server loads THEIR grid (RLS-scoped) and reshapes this build into
@@ -582,11 +716,10 @@ export function EmailLabGridShell({
     setAiLoading(true);
     setAiMessage(null);
     setSuggestions([]);
+    beginStream();
     try {
-      const res = await fetch("/api/email-lab/ai", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
+      const { payload, state } = await runStreamingBuild(
+        {
           prompt: trimmed,
           // BLANK ON SCREEN ≠ BLANK IN THE PAYLOAD (08/11/2026): a first-land canvas
           // now holds no blocks, and builders read brand off canvas header/footer.
@@ -603,9 +736,18 @@ export function EmailLabGridShell({
           // on the default grid (one lane, spec 2026-08-02).
           recipeKey: activeRecipeKey || undefined,
           useSavedLayout: opts.useSavedLayout === true,
-        }),
-      });
-      const data = (await res.json()) as {
+        },
+        streamCell,
+        (s) => {
+          setBuildStatus(s.statusLabel);
+          if (s.doc) paintStreamDoc(s.doc, brandTokens, opts.useSavedLayout);
+        },
+      );
+      if (streamInterrupted(state)) {
+        reportStreamInterrupted();
+        return;
+      }
+      const data = payload as {
         doc?: unknown;
         applied?: boolean;
         message?: string;
@@ -616,14 +758,20 @@ export function EmailLabGridShell({
         recipeKey?: string;
       };
       setSuggestions(data.suggestions ?? []);
+      // THE DOC THAT WINS IS THE REDUCER'S, when there was one: `done`'s payload
+      // is the AI's whole email, and `applyStreamEvent` has already given every
+      // block the user edited mid-build back to the user. `payload.doc` is the
+      // fallback for the JSON path and for a stream that carried no skeleton at
+      // all (the fill lane) — both leave `state.doc` null.
+      const finalDoc = state?.doc ?? data.doc;
       // Only treat it as a real build when the engine actually authored — the
       // author path echoes the INPUT doc with applied:false on a miss, so guarding
       // on `data.doc` alone would falsely report "built" and re-commit the seed.
       if (data.applied === false) {
         setAiStatus(null);
         setAiMessage(data.message ?? "The AI couldn't build the layout — try rephrasing.");
-      } else if (data.doc) {
-        const parsed = EmailDocSchema.safeParse(data.doc);
+      } else if (finalDoc) {
+        const parsed = EmailDocSchema.safeParse(finalDoc);
         if (parsed.success) {
           const normalized = normalizeAuthorHeights(
             keepSavedStyle(applyBrand(parsed.data, brandTokens), parsed.data, opts.useSavedLayout),
@@ -666,6 +814,7 @@ export function EmailLabGridShell({
       setAiMessage("Something went wrong — try again.");
     } finally {
       setAiLoading(false);
+      setBuildStatus(null);
     }
   }
 
@@ -685,11 +834,14 @@ export function EmailLabGridShell({
       ? { ...brandingRef.current, ...brandPatch }
       : brandingRef.current;
     setAiLoading(true);
+    beginStream();
+    // Same tokens the final commit uses (brandTokens is undefined on the
+    // standalone grid) — computed once so the live beats and the finished doc
+    // are branded identically and the canvas never restyles at `done`.
+    const tokens = brandTokens ?? brandingToTokens(nextBranding);
     try {
-      const res = await fetch("/api/email-lab/ai", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
+      const { payload, state } = await runStreamingBuild(
+        {
           prompt: (initialAiPrompt ?? "").trim(),
           doc: brandPatch
             ? applyBrand(seatForBuild(doc), brandingToTokens(nextBranding))
@@ -703,9 +855,24 @@ export function EmailLabGridShell({
           // the IDENTITY, so it has to ride explicitly.
           recipeKey: activeRecipeKey || undefined,
           useSavedLayout,
-        }),
-      });
-      const data = (await res.json()) as {
+        },
+        streamCell,
+        (s) => {
+          setBuildStatus(s.statusLabel);
+          // THE DROP-GUARD MOVES TO THE BEAT. Below, an arrival response is
+          // dropped whole once the visitor started hand-authoring (the /go
+          // incident, 08/10/2026) — with beats painting before the response
+          // resolves, that check has to run per beat or the guard arrives
+          // after the damage. patchPresentDoc never sets the flag itself.
+          if (userInteractedRef.current) return;
+          if (s.doc) paintStreamDoc(s.doc, tokens, useSavedLayout);
+        },
+      );
+      if (streamInterrupted(state)) {
+        reportStreamInterrupted();
+        return;
+      }
+      const data = payload as {
         doc?: unknown;
         applied?: boolean;
         message?: string;
@@ -713,21 +880,21 @@ export function EmailLabGridShell({
         // The recipe whose BUILDER produced this doc (build-doc.ts). Persisted on save.
         recipeKey?: string;
       };
+      const finalDoc = state?.doc ?? data.doc;
       if (data.applied === false) {
         setAiMessage(data.message ?? "The AI couldn't build the layout — try rephrasing.");
         return;
       }
-      if (data.doc) {
+      if (finalDoc) {
         // The fetch above can take a couple seconds; a visitor who clicked into a
         // block or typed a character while it was in flight has already started
         // hand-authoring. Applying this response now would silently replace their
         // doc (new block ids) and deselect whatever they had open — drop it instead.
         if (userInteractedRef.current) return;
-        const parsed = EmailDocSchema.safeParse(data.doc);
+        const parsed = EmailDocSchema.safeParse(finalDoc);
         if (parsed.success) {
-          // brandTokens (the prop) is undefined on the standalone grid, so falling
-          // back to the live brand is what actually signs the built doc.
-          const tokens = brandTokens ?? brandingToTokens(nextBranding);
+          // `tokens` above: brandTokens (the prop) is undefined on the standalone
+          // grid, so falling back to the live brand is what signs the built doc.
           const normalized = normalizeAuthorHeights(
             keepSavedStyle(applyBrand(parsed.data, tokens), parsed.data, useSavedLayout),
           );
@@ -762,6 +929,7 @@ export function EmailLabGridShell({
       setAiMessage("Something went wrong — try again.");
     } finally {
       setAiLoading(false);
+      setBuildStatus(null);
     }
   }
 
@@ -828,11 +996,14 @@ export function EmailLabGridShell({
     setAiLoading(true);
     setAiMessage(null);
     setSuggestions([]);
+    beginStream();
     try {
-      const res = await fetch("/api/email-lab/ai", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
+      // THE FILL LANE STREAMS EXACTLY ONE EVENT — `done` (measured, Task 5 §5
+      // concern 1: `buildContentDoc` accepts onProgress and never calls it). A
+      // beat-less stream is VALID here, not a failure: `state.doc` stays null
+      // and the payload's doc is what commits, same as before.
+      const { payload, state } = await runStreamingBuild(
+        {
           prompt: trimmed,
           doc,
           scope,
@@ -842,16 +1013,23 @@ export function EmailLabGridShell({
           // project around it. Only the id crosses — the row is read server-side
           // under RLS, and an absent id means NO project context (never the last one).
           projectId,
-        }),
-      });
-      const data = (await res.json()) as {
+        },
+        streamCell,
+        (s) => setBuildStatus(s.statusLabel),
+      );
+      if (streamInterrupted(state)) {
+        reportStreamInterrupted();
+        return;
+      }
+      const data = payload as {
         doc?: unknown;
         applied?: boolean;
         message?: string;
         chartNote?: string;
       };
-      if (data.doc) {
-        const parsed = EmailDocSchema.safeParse(data.doc);
+      const finalDoc = state?.doc ?? data.doc;
+      if (finalDoc) {
+        const parsed = EmailDocSchema.safeParse(finalDoc);
         if (parsed.success) {
           commit(parsed.data);
           setLinkAsks(auditDocLinks(parsed.data));
@@ -865,6 +1043,7 @@ export function EmailLabGridShell({
       setAiMessage("Something went wrong — try again.");
     } finally {
       setAiLoading(false);
+      setBuildStatus(null);
     }
   }
 
@@ -993,14 +1172,21 @@ export function EmailLabGridShell({
   async function runBlockAi(block: EmailBlock, prompt: string): Promise<EmailBlock | null> {
     const miniDoc = { globalStyle: doc.globalStyle, blocks: [block] };
     try {
-      const res = await fetch("/api/email-lab/ai", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ prompt, doc: miniDoc, scope, projectId }),
-      });
-      const data = (await res.json()) as { doc?: unknown };
-      if (!data.doc) return null;
-      const parsed = EmailDocSchema.safeParse(data.doc);
+      // ITS OWN CELL, NOT `streamCell`. This lane posts a ONE-BLOCK doc and
+      // hands the block back for the caller to place — it must never paint the
+      // canvas, and sharing the shell's cell would let a per-block ask clobber
+      // the touched set (and the doc) of an author build still in flight.
+      const cell = { current: initialStreamState() };
+      const { payload, state } = await runStreamingBuild(
+        { prompt, doc: miniDoc, scope, projectId },
+        cell,
+        () => {},
+      );
+      if (streamInterrupted(state)) return null;
+      const data = payload as { doc?: unknown };
+      const finalDoc = state?.doc ?? data.doc;
+      if (!finalDoc) return null;
+      const parsed = EmailDocSchema.safeParse(finalDoc);
       if (!parsed.success) return null;
       // Keep the block's grid position — per-block AI rewrites content, not layout.
       const next = parsed.data.blocks[0];
@@ -1014,7 +1200,11 @@ export function EmailLabGridShell({
   const selectedBlock = selectedId ? (doc.blocks.find((b) => b.id === selectedId) ?? null) : null;
 
   function updateBlock(next: EmailBlock) {
-    liveEdit({ ...doc, blocks: doc.blocks.map((b) => (b.id === next.id ? next : b)) });
+    const nextDoc = { ...doc, blocks: doc.blocks.map((b) => (b.id === next.id ? next : b)) };
+    // HUMAN WINS. Every inspector edit tells the in-flight stream which block is
+    // now theirs; from here no `block` beat and no `done` merge may overwrite it.
+    noteUserBlockEdit(next.id, nextDoc);
+    liveEdit(nextDoc);
   }
 
   function deleteSelected() {
@@ -1973,13 +2163,18 @@ export function EmailLabGridShell({
                 if (id !== null) userInteractedRef.current = true;
                 setSelectedId(id);
               }}
-              onChangeDoc={(next, opts) =>
+              onChangeDoc={(next, opts) => {
+                // An inline edit on the canvas (EditableText blur, pill popover)
+                // is the OTHER way a user's words reach a block — it carries the
+                // block id so the stream's human-wins rule covers it too.
+                if (opts?.blockId) noteUserBlockEdit(opts.blockId, next);
                 // `programmatic` = RGL's mount compaction — geometry applies, but it
                 // must NOT count as user interaction (commit sets that flag), or the
                 // arrival auto-build cancels itself on every non-compaction-stable
                 // skeleton (the /go stuck-spinner, 08/10/2026).
-                opts?.autoHeightOnly || opts?.programmatic ? patchPresentDoc(next) : commit(next)
-              }
+                if (opts?.autoHeightOnly || opts?.programmatic) patchPresentDoc(next);
+                else commit(next);
+              }}
               onDuplicate={duplicateBlock}
               onAddBlock={() => setShowBlocks(true)}
               onBlockAi={setSelectedId}
@@ -2003,7 +2198,17 @@ export function EmailLabGridShell({
           <span className="text-gulf-teal">✦</span>
           <span className="text-sm font-semibold text-white/85">AI assistant</span>
           {busy && (
-            <span className="ml-auto inline-block h-3 w-3 animate-spin rounded-full border-2 border-gulf-teal/30 border-t-gulf-teal" />
+            // THE EXISTING SPINNER SLOT, now saying what the build is doing. The
+            // label is the stream's own `status` beat ("laying out your email") —
+            // absent on a non-streaming response, where this reads exactly as it
+            // did before. Failures speak in the amber line below, and the Build
+            // button is the retry.
+            <span className="ml-auto flex min-w-0 items-center gap-2">
+              {buildStatus && (
+                <span className="truncate text-[11px] text-white/50">{buildStatus}</span>
+              )}
+              <span className="inline-block h-3 w-3 shrink-0 animate-spin rounded-full border-2 border-gulf-teal/30 border-t-gulf-teal" />
+            </span>
           )}
         </div>
 

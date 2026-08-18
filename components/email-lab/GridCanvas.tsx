@@ -369,10 +369,14 @@ export function GridCanvas({
    *  auto-build cancels itself on every door whose skeleton isn't compaction-stable
    *  (found 08/10/2026: every /go arrival wedged on a spinner forever).
    *  `autoHeightOnly` marks a content-measured height correction — the shell patches
-   *  it in place (no undo frame); user actions omit it and push a normal frame. */
+   *  it in place (no undo frame); user actions omit it and push a normal frame.
+   *  `blockId` names the block a HUMAN just edited inline (EditableText blur, pill
+   *  popover). The shell can't recover it from the doc alone, and it needs it to
+   *  arm the live-build stream's human-wins rule (spec 2026-08-18): a block the
+   *  user typed into mid-build is never overwritten by an AI beat. */
   onChangeDoc: (
     next: EmailDoc,
-    opts?: { autoHeightOnly?: boolean; programmatic?: boolean },
+    opts?: { autoHeightOnly?: boolean; programmatic?: boolean; blockId?: string },
   ) => void;
   /** Duplicate a block (shell mints the id + places the copy on the grid). */
   onDuplicate?: (id: string) => void;
@@ -426,7 +430,7 @@ export function GridCanvas({
     (blockId, path, text) => {
       const cur = docRef.current;
       const blocks = cur.blocks.map((b) => (b.id === blockId ? applyTextAtPath(b, path, text) : b));
-      onChangeDoc({ ...cur, blocks });
+      onChangeDoc({ ...cur, blocks }, { blockId });
     },
     [onChangeDoc],
   );
