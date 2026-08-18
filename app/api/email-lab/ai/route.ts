@@ -336,8 +336,14 @@ export async function POST(req: NextRequest) {
                 emitter.error(String(outPayload.error ?? "build failed"));
               else emitter.done(outPayload);
             } catch (err) {
+              // The exception text stays in the LOG, never on the wire. The JSON
+              // branch returns a generic message on an unhandled throw and the
+              // stream says the same thing: an internal message reaching the
+              // client is a leak whichever transport carries it. The `error`
+              // event the client CAN act on is the 4xx branch above, which
+              // carries the build's own user-facing string.
               console.error("[email-lab/ai] stream build failed:", err);
-              emitter.error(err instanceof Error ? err.message : "build failed");
+              emitter.error("Something went wrong on the server — check logs.");
             } finally {
               controller.close();
             }

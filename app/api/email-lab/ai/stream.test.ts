@@ -58,12 +58,16 @@ let authorDocCalls = 0;
 /** What the fake build RETURNS — varied per test so the 4xx branch is reachable.
  *  Reset in every test; the beats it streams first never change. */
 let nextResult: BuildResult = { payload: PAYLOAD };
+/** Set to make the fake build THROW mid-stream (the unhandled-error branch).
+ *  The message is deliberately something no user should ever see. */
+let nextThrow: Error | null = null;
 
 mock.module("@/lib/email/build-doc", () => ({
   ...buildDocOrig,
   authorDoc: async (args: BuildArgs): Promise<BuildResult> => {
     authorDocCalls += 1;
     if (args.onProgress) progressPlan(args.onProgress);
+    if (nextThrow) throw nextThrow;
     return nextResult;
   },
 }));
@@ -128,6 +132,7 @@ afterAll(() => {
 test("FM-STREAM-1: stream:true → NDJSON, beats in build order, done carries the JSON branch's payload", async () => {
   authorDocCalls = 0;
   nextResult = { payload: PAYLOAD };
+  nextThrow = null;
   const res = await POST(makeReq(askBody({ stream: true })));
 
   expect(res.headers.get("content-type")).toBe("application/x-ndjson");
@@ -165,6 +170,7 @@ test("FM-STREAM-1: stream:true → NDJSON, beats in build order, done carries th
 test("FM-STREAM-2: a 4xx build terminates the stream with `error`, never `done`", async () => {
   authorDocCalls = 0;
   // The shape buildContentDoc/authorDoc return on an invalid doc.
+  nextThrow = null;
   nextResult = { httpStatus: 400, payload: { error: "Invalid email document." } };
   const res = await POST(makeReq(askBody({ stream: true })));
 
@@ -182,9 +188,33 @@ test("FM-STREAM-2: a 4xx build terminates the stream with `error`, never `done`"
   expect(last.e === "error" && last.message).toBe("Invalid email document.");
 });
 
+test("FM-STREAM-3: an unhandled throw NEVER puts the exception text on the wire", async () => {
+  authorDocCalls = 0;
+  nextResult = { payload: PAYLOAD };
+  // The kind of message an internal failure actually carries: a connection
+  // string, a table name, a stack-adjacent detail. The JSON branch answers a
+  // throw with a generic line; the stream must not be the softer door.
+  nextThrow = new Error("ECONNREFUSED postgres://user:hunter2@10.0.0.7:5432/data_lake");
+  const res = await POST(makeReq(askBody({ stream: true })));
+
+  const events = await readEvents(res);
+  const raw = JSON.stringify(events);
+  expect(raw).not.toContain("ECONNREFUSED");
+  expect(raw).not.toContain("hunter2");
+  expect(raw).not.toContain("data_lake");
+
+  const last = events[events.length - 1];
+  expect(last.e).toBe("error");
+  expect(last.e === "error" && last.message).toBe(
+    "Something went wrong on the server — check logs.",
+  );
+  expect(events.map((e) => e.e)).not.toContain("done");
+});
+
 test("FM-STREAM-6: no `stream` field (an old client) → today's plain JSON, same payload", async () => {
   authorDocCalls = 0;
   nextResult = { payload: PAYLOAD };
+  nextThrow = null;
   const res = await POST(makeReq(askBody()));
 
   expect(res.headers.get("content-type")).toContain("application/json");
