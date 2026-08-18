@@ -1601,7 +1601,7 @@ Reachability at generation: 915 by path · 537 by name only · 247 orphaned. Re-
 - `lib/deliverable/recipes/market-comps.ledger.md` — Enforced — Test: lib/deliverable/recipes/market-comps.test.ts > "the vacant lot never reaches the chart, the table, or the math"
 - `lib/deliverable/recipes/market-pulse.ledger.md` — Enforced — the first delta column sharing a stem)
 - `lib/deliverable/recipes/new-listing.ledger.md` — Enforced — framing guidance per the playbook, not a currently test-checked claim. Verify against
-- `lib/deliverable/recipes/open-house.ledger.md` — Enforced — Test: lib/deliverable/recipes/open-house.test.ts > "the moment is TWO OPEN SLOTS on the canvas, and the label is the instruction"
+- `lib/deliverable/recipes/open-house.ledger.md` — Enforced — Test: lib/deliverable/recipes/open-house.test.ts > "neither date nor time held → NO CARD AT ALL, not an empty one"
 - `lib/deliverable/recipes/price-reduced.ledger.md` — Enforced — Test: lib/deliverable/recipes/price-reduced.test.ts > "previous price = current + cut"
 - `lib/deliverable/recipes/review-reply.ledger.md` — Enforced — (Playbook Part 6), which is a framing choice, not a currently test-checked failure mode. Verify
 - `lib/deliverable/recipes/sphere-weekly.ledger.md` — Enforced — Test: lib/deliverable/recipes/sphere-weekly.test.ts > "THE HEADLINE — a lane-3 fact, or an open slot. Never an invention"
