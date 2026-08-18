@@ -130,8 +130,10 @@ export function isStructuralTurn(text) {
   if (!t.trim()) return false;
 
   // "who/what/anything <relationship verb> <thing>" — the edge question.
+  // `(?<!per )touch` — "per touch" is cadence jargon ("migrate opportunistically per
+  // touch"), not the edge verb; measured false-fire 08/18/2026 on a definitional question.
   const TOUCHES =
-    /\b(who|what|anything|any other|nothing)\b[^.?!\n]{0,60}\b(calls?|calling|reads?|reading|uses?|using|consumes?|consuming|touch(?:es|ing)?|depends? on|imports?|importing|references?|referencing|wired to|writes? to)\b/i;
+    /\b(who|what|anything|any other|nothing)\b[^.?!\n]{0,60}\b(calls?|calling|reads?|reading|uses?|using|consumes?|consuming|(?<!per )touch(?:es|ing)?|depends? on|imports?|importing|references?|referencing|wired to|writes? to)\b/i;
   // "and then what?" asked about a change — RULE 12's own question.
   const IMPACT =
     /\bwhat (?:breaks|happens) if\b|\bblast radius\b|\bimpact of (?:changing|deleting|removing)\b/i;

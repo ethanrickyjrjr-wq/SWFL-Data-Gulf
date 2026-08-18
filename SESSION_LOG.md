@@ -37,6 +37,13 @@ failure the doc exists to stop.
 its live question (does graphify resolve SQL-to-code edges at all). `package.json` untouched — no
 npm script added, so no lockfile gate.
 
+## 2026-08-18 (Fable 5, guard hooks, cont. 3) — graph-first gate false-fire fixed: "per touch" is cadence jargon, not the edge verb
+
+The gate blocked a definitional operator question ("What is opportunistic per touch?") because
+bare "touch" sits in isStructuralTurn's relationship-verb list. Fix: `(?<!per )touch` +
+red-to-green assertion in check-four-searches.test.mjs (40/0; CI's full step command 318/0).
+Same-session fix per RULE 11 — a gate that cries wolf gets ignored on the turn that matters.
+
 ## 2026-08-18 (Fable 5, guard hooks, cont. 2) — main's red CI fixed: the amenities regression test pinned "still scheduled" after the cron was deliberately commented out
 
 CI on main has been RED all day (≥5 runs back to 17:09) on ONE test:

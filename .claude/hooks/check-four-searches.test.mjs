@@ -307,6 +307,10 @@ describe("graph-first gate", () => {
     assert.strictEqual(isStructuralTurn("call me when the build is green"), false);
     assert.strictEqual(isStructuralTurn("make the button blue"), false);
     assert.strictEqual(isStructuralTurn("read the playbook before you touch emails"), false);
+    // MEASURED FALSE-FIRE 08/18/2026: "per touch" is cadence jargon ("migrate
+    // opportunistically per touch"), not the edge verb — the gate blocked a
+    // definitional question about a migration option.
+    assert.strictEqual(isStructuralTurn("What is opportunistic per touch?"), false);
     assert.strictEqual(isStructuralTurn("use the paid row we already bought"), false);
     assert.strictEqual(isStructuralTurn("this is a dead end, back it out"), false);
     assert.strictEqual(isStructuralTurn(""), false);
