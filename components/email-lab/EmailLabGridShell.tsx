@@ -694,12 +694,29 @@ export function EmailLabGridShell({
     );
   }
 
-  /** A cut or errored stream: put back what was on the canvas, say so where
-   *  every other build failure already speaks. The Build button is the retry. */
-  function reportStreamInterrupted() {
-    if (preStreamDocRef.current) patchPresentDoc(preStreamDocRef.current);
+  /**
+   * A cut or errored stream: put back what was on the canvas, say so where every
+   * other build failure already speaks. The Build button is the retry.
+   *
+   * TWO FAILURES, NOT ONE. An `error` event carries the BUILD's own user-facing
+   * string ("Invalid email document.") — the message the client is supposed to
+   * act on, pinned server-side by FM-STREAM-2. Say that, verbatim. "build
+   * interrupted — retry" is for the OTHER case: a stream that just stopped
+   * (proxy, timeout), where retrying is exactly the right advice and no server
+   * message exists.
+   *
+   * AND THE RESTORE IS CONDITIONAL. Putting the pre-stream doc back is right
+   * when the failed build is all that painted — but if the user edited a block
+   * while it ran, that restore would throw their edit away, which is the very
+   * thing the touched set exists to prevent. Touched anything → leave the canvas
+   * alone; the message still tells them what happened.
+   */
+  function reportStreamInterrupted(state: StreamCanvasState | null) {
+    if (preStreamDocRef.current && streamCell.current.touched.size === 0) {
+      patchPresentDoc(preStreamDocRef.current);
+    }
     setAiStatus(null);
-    setAiMessage("build interrupted — retry");
+    setAiMessage(state?.errorMessage ?? "build interrupted — retry");
   }
 
   // ── AI: Build the whole email (author engine) ───────────────────────────────
@@ -744,7 +761,7 @@ export function EmailLabGridShell({
         },
       );
       if (streamInterrupted(state)) {
-        reportStreamInterrupted();
+        reportStreamInterrupted(state);
         return;
       }
       const data = payload as {
@@ -869,7 +886,7 @@ export function EmailLabGridShell({
         },
       );
       if (streamInterrupted(state)) {
-        reportStreamInterrupted();
+        reportStreamInterrupted(state);
         return;
       }
       const data = payload as {
@@ -1018,7 +1035,7 @@ export function EmailLabGridShell({
         (s) => setBuildStatus(s.statusLabel),
       );
       if (streamInterrupted(state)) {
-        reportStreamInterrupted();
+        reportStreamInterrupted(state);
         return;
       }
       const data = payload as {
