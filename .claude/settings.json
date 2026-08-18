@@ -133,6 +133,10 @@
           {
             "type": "command",
             "command": "node .claude/hooks/check-no-env-exfil.mjs"
+          },
+          {
+            "type": "command",
+            "command": "node .claude/hooks/check-proof-of-red-on-push.mjs"
           }
         ]
       },
@@ -146,6 +150,10 @@
           {
             "type": "command",
             "command": "node .claude/hooks/check-playbook-read-before-email-edit.mjs"
+          },
+          {
+            "type": "command",
+            "command": "node .claude/hooks/check-area-fence.mjs"
           }
         ]
       },
@@ -228,6 +236,12 @@
             "command": "node .claude/hooks/check-four-searches.mjs",
             "timeout": 15,
             "statusMessage": "Four-lane read gate..."
+          },
+          {
+            "type": "command",
+            "command": "node .claude/hooks/check-claim-read.mjs",
+            "timeout": 15,
+            "statusMessage": "Claim-read gate..."
           },
           {
             "type": "command",

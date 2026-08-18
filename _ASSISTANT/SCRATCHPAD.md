@@ -28,6 +28,10 @@ config with the same filled cells (human-wins touched-blocks rule from the strea
 to the swap too). DO NOT build ad hoc before that brainstorm — it needs the config layer to be
 cheap.
 
+RESOLVED 2026-08-18 (Fable 5, "get this done" session): the brainstorm is written —
+docs/superpowers/specs/2026-08-18-recipes-as-config-amendment-design.md, quick-swap section
+included verbatim, three operator decision points named. AWAITING HIS REVIEW before any code.
+
 ## 2026-08-18 (Fable 5, later) — OPERATOR: "THIS IS ALL A FUCKING LIE" — on the "every content rule gets a cell policy in code, same session" claim
 
 Verbatim, on the mechanism claim from the HOA/$-per-sqft fix: "THIS IS ALL A FUCKING LIE. PLEASE
@@ -43,6 +47,14 @@ itself proves the walk doesn't happen (under-contract had the ruling; new-listin
 is not the artifact — it's promising per-surface discipline on a per-surface architecture. Owed:
 the plan he asked for — one-root cell policy + one engine (kill per-email code), hook plan, area
 separation, context-diet audit of what loads per message.
+
+RESOLVED 2026-08-18 across two sessions — all five pieces delivered: (1) cell-policy registry +
+Gate 18 (shipped, prior session); (2) context diet — CLAUDE.md 65KB→23KB + ECC/Airtable plugins
+off (shipped, prior session); (3) proof-of-red push gate + claim-read Stop hook (this session);
+(4) area fence — all 8 area CLAUDE.mds enforced, subagent-blind playbook hook fixed via
+read-evidence.mjs family scan (this session); (5) recipes-as-config brainstorm doc awaiting his
+review (this session). Checks: agent_guard_hooks_live_verify open;
+playbook_hook_blind_to_subagents closed.
 
 ## 2026-08-18 (Fable 5) — OPERATOR: "why would we pay supabase when we can do it for free" — on the live AI+human co-editing scope
 

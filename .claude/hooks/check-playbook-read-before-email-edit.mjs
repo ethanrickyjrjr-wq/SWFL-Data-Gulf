@@ -55,6 +55,7 @@
 
 import { readFileSync } from "node:fs";
 import { pathToFileURL } from "node:url";
+import { familyShowsRead } from "./read-evidence.mjs";
 
 /** The file that must have been read. The ONE build file, by operator decree 08/04/2026. */
 export const PLAYBOOK = "docs/standards/email-build-playbook.md";
@@ -129,6 +130,17 @@ function main() {
   }
 
   if (playbookWasRead(collectCalls(lines))) process.exit(0);
+
+  // SUBAGENT BLINDNESS FIX (08/18/2026, check playbook_hook_blind_to_subagents). A
+  // subagent's payload points at the SUBAGENT's own transcript, which never contains the
+  // controller's read — so this hook blocked every delegated email build. The controller's
+  // read now counts via the session family (recent sibling transcripts, shared root:
+  // read-evidence.mjs). Fail open on error.
+  try {
+    if (familyShowsRead(tp, /email-build-playbook\.md/i)) process.exit(0);
+  } catch {
+    /* evidence machinery broke — judged on the payload transcript above alone */
+  }
 
   const msg =
     `\n${BANNER}\n` +

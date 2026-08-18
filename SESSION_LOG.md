@@ -1,3 +1,36 @@
+## 2026-08-18 (Fable 5, guard hooks) — pieces 3–5 of the "THIS IS ALL A FUCKING LIE" plan: proof-of-red + claim-read + area fence hooks BUILT, recipes-as-config brainstorm WRITTEN
+
+**Pieces 3+4 (spec docs/superpowers/specs/2026-08-18-agent-guard-hooks-design.md, check
+`agent_guard_hooks_live_verify` open):** three new hooks, all registered in .claude/settings.json
+same commit. (3a) `check-proof-of-red-on-push.mjs` — a push ADDING a test file blocks unless the
+session's transcript family shows that test red (`N fail` N≥1 / not ok / ✗ / AssertionError /
+pytest FAILED on a line carrying its basename); escape ALLOW_NO_RED_PROOF=1 hoisted from the
+command prefix (the 5f628bbc lesson). (3b) `check-claim-read.mjs` (Stop) — the final message
+naming a repo code path in an unhedged behavior-claim sentence blocks the stop unless that file
+was opened this session (Read/Edit/Write/Serena; Grep does not count; session-wide credit as a
+deliberate RULE-11 softening of THE BAR's per-turn wording). (4) `check-area-fence.mjs` — all 8
+area CLAUDE.mds (FOCUS list) now enforced read-before-edit on area CODE, once per session per
+area; generalizes the playbook hook, which stays. NEW shared root `.claude/hooks/read-evidence.mjs`
+— transcript-FAMILY evidence (payload transcript + recent siblings) — fixes the playbook hook's
+subagent blindness too: check `playbook_hook_blind_to_subagents` CLOSED on unit + live smoke
+evidence (doc read only in a sibling transcript satisfied the fence). Evidence: every suite
+proven RED first (claim-read caught a real bug red — `voice-guard.ts` matched the verb "guards";
+hasRedMarker forced-false 6/1; areaFor broken 6/2), full hook suite `node --test
+.claude/hooks/*.test.mjs` 77/0 incl. registration, `node --check` clean ×5, binaries smoke-run
+both directions with synthetic payloads (block exit 2 / pass exit 0 / loop-guard exit 0).
+
+**Piece 5:** `docs/superpowers/specs/2026-08-18-recipes-as-config-amendment-design.md` —
+brainstorm only, NO code (RULE 3.5 gate). Recommends config-over-shared-builders (B): typed
+JSON-serializable RecipeConfig inside the ONE registry + keyed derivations, migration
+one-recipe-per-touch behind render-parity, quick-swap grids as config families reusing filled
+cells verbatim under the streaming build's human-wins merge. Three operator decision points
+named (migration pace, swap surface, tier routing). Awaiting operator review.
+
+NOT PUSHED — awaiting operator per-push approval. Note for the pushing session: the new
+proof-of-red gate will see this push ADD its own three .test.mjs files — their red runs are in
+THIS session's transcript; if pushed from a later session, use ALLOW_NO_RED_PROOF=1 (documented
+escape, red proof is in this entry).
+
 ## 2026-08-18 (Fable 5, streaming) — live AI build streaming SHIPPED locally: both canvases paint the build as it happens, human wins every race
 
 **The plan executed end-to-end** (docs/superpowers/plans/2026-08-18-live-build-streaming.md, 8 tasks, Opus implementer subagents + controller review per task): NDJSON protocol + codec (`lib/email/lab/stream-events.ts`), validated emitter — nothing unvalidated reaches the wire (`stream-emitter.ts`), pure reducer with the human-wins race rule at ALL THREE beats — block skip, skeleton reseat-merge, done merge (`consume-stream.ts`); `authorDoc` observe-only `onProgress` at the REAL three-lane boundaries (the plan's four-stage list was measured wrong — task-4 report §1); `/api/email-lab/ai` + `/api/email-lab/social/generate` stream behind `stream: true`, old clients byte-identical (deploy-skew tests); grid shell + social composer consume via one helper each with content-type fallback; playbook PART 0 subsection + repo-inventory anchors refreshed. 12 commits f863b2ce..cda3d869. Tests: lib/email 1810/0, lib/social 373/0, route suites 4/0 + 6/0, `bunx next build` ✓.
