@@ -2413,9 +2413,13 @@ export function EmailLabGridShell({
                   Fill
                 </button>
               </div>
-              {social.aiStatus && (
+              {/* ONE element, the composer's existing status slot. While a build is
+                  streaming it carries the live label; when it finishes, the ✓ line it
+                  always showed. The checkmark is deliberately NOT rendered mid-build —
+                  a ✓ on an in-progress line is a claim that isn't true yet. */}
+              {(social.buildStatus ?? social.aiStatus) && (
                 <p className="mt-2.5 rounded-md border border-gulf-teal/20 bg-gulf-teal/10 px-2.5 py-2 text-[11px] text-gulf-teal/90">
-                  ✓ {social.aiStatus}
+                  {social.buildStatus ?? `✓ ${social.aiStatus}`}
                 </p>
               )}
               {social.aiError && (

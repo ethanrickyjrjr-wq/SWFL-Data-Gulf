@@ -15,6 +15,13 @@ import { brandingToTokens } from "@/lib/email/brand/branding-to-tokens";
 import { tokensFromBranding } from "@/lib/social/design/templates";
 import { mintBlockId } from "@/lib/email/doc/schema";
 import { findPlaceholder, type ShowcaseRecipe } from "@/lib/showcase/recipe";
+import { decodeEvents } from "@/lib/email/lab/stream-events";
+import {
+  applySocialStreamEvent,
+  initialSocialStreamState,
+  markTouchedElement,
+  type SocialStreamState,
+} from "@/lib/social/design/consume-stream";
 
 export interface UseSocialComposerArgs {
   scope?: { kind?: string; value?: string };
@@ -53,6 +60,66 @@ export function isExportStale(exported: SocialDesign | null, current: SocialDesi
   return exported !== current;
 }
 
+/** THE ONE streaming helper for this composer (spec 2026-08-18, Phase 2). Both AI
+ *  lanes go through it — a second bespoke fetch path is how the two drift apart.
+ *
+ *  `cell` is a MUTABLE ref, not a local: `markTouchedElement` from the user's edit
+ *  path has to reach the fold that is running RIGHT NOW, or the human-wins rule
+ *  would only apply after the build was already over — i.e. not at all.
+ *
+ *  Returns `{ ok, payload, state }`. `payload` is the `done` payload, which the route
+ *  guarantees is byte-identical to the non-streaming JSON, so every existing
+ *  post-response handler keeps working unchanged; `state` is the final reducer state,
+ *  `null` when we fell back to JSON. */
+async function runStreamingSocialBuild(
+  body: Record<string, unknown>,
+  cell: { current: SocialStreamState },
+  onState: (s: SocialStreamState) => void,
+): Promise<{ ok: boolean; payload: Record<string, unknown>; state: SocialStreamState | null }> {
+  const res = await fetch("/api/email-lab/social/generate", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ ...body, stream: true }),
+  });
+  const contentType = res.headers.get("content-type") ?? "";
+  // The route answers `stream: true` with plain JSON on every path that never reaches
+  // a build (the two 400s), and a proxy can strip streaming entirely. Piping either
+  // into decodeEvents would turn a real answer into "malformed stream line", so the
+  // content-type decides — both degrade to today's behavior with no call-site change.
+  if (!res.ok || !res.body || !contentType.includes("application/x-ndjson")) {
+    const json = (await res.json().catch(() => ({}))) as Record<string, unknown> | null;
+    return { ok: res.ok, payload: json ?? {}, state: null };
+  }
+  const reader = res.body.getReader();
+  const decoder = new TextDecoder();
+  let carry = "";
+  let donePayload: Record<string, unknown> = {};
+  const drain = (chunk: string): void => {
+    const { events, carry: next } = decodeEvents(chunk, carry);
+    carry = next;
+    for (const ev of events) {
+      if (ev.e === "done") donePayload = (ev.payload ?? {}) as Record<string, unknown>;
+      cell.current = applySocialStreamEvent(cell.current, ev);
+      onState(cell.current);
+    }
+  };
+  for (;;) {
+    const { done, value } = await reader.read();
+    if (done) break;
+    drain(decoder.decode(value, { stream: true }));
+  }
+  if (carry.trim()) drain("\n"); // a trailing line the server wrote without a newline
+  return { ok: true, payload: donePayload, state: cell.current };
+}
+
+/** An `error` event OR a body that just ended (proxy cut, platform timeout at this
+ *  route's `maxDuration = 60`). The reducer only sets `errorMessage` on an explicit
+ *  `error`, so a truncated stream finishes `!finished` with a PARTIAL canvas — which
+ *  must be treated exactly like a failure, never committed as a finished post. */
+function socialStreamInterrupted(state: SocialStreamState | null): boolean {
+  return state != null && (state.errorMessage != null || !state.finished);
+}
+
 export function useSocialComposer({
   scope,
   projectId,
@@ -82,6 +149,13 @@ export function useSocialComposer({
   const [aiBusy, setAiBusy] = useState(false);
   const [aiStatus, setAiStatus] = useState<string | null>(null);
   const [aiError, setAiError] = useState<string | null>(null);
+  // What the build is doing RIGHT NOW, straight off the stream ("reading the lake",
+  // "writing the post"). Renders in the composer's existing status slot; null when
+  // nothing is streaming, which is also the non-streaming response's behavior.
+  const [buildStatus, setBuildStatus] = useState<string | null>(null);
+  // The live fold the stream runs over. A ref, not state: the reducer's `touched` set
+  // has to be readable by a fold already in flight (see runStreamingSocialBuild).
+  const streamCell = useRef<SocialStreamState>(initialSocialStreamState(null));
   // "Make this →" recipe flow — mirrors the email lab's pendingRecipe guard
   // (components/email-lab/EmailLabGridShell.tsx handleUseRecipe/
   // placeholderBlocked): a carried recipe's [[blank]] must be filled before
@@ -121,7 +195,32 @@ export function useSocialComposer({
     setDesign((d) => ({ ...d, format }));
   }
 
+  /** THE HUMAN-WINS HOOK. Marking the id is only half of it: the reducer treats
+   *  `state.design` AS the canvas — it repaints from it on every beat and reads the
+   *  human's copy back out of it at `done`. Adding the id to the Set while leaving the
+   *  cell holding the PRE-EDIT element would repaint the edit away on the next beat and
+   *  hand the stale copy back at `done` — the exact failure the touched set exists to
+   *  prevent, wearing the guard as a disguise. This is wiring, not a merge branch; every
+   *  merge rule stays in consume-stream.ts. */
+  function noteUserElementEdit(next: SocialElement) {
+    const cur = streamCell.current;
+    streamCell.current = {
+      ...markTouchedElement(cur, next.id),
+      design: cur.design
+        ? { ...cur.design, elements: cur.design.elements.map((e) => (e.id === next.id ? next : e)) }
+        : cur.design,
+    };
+  }
+
+  /** Reset the fold at the start of every build: an element the user edited during the
+   *  LAST build must still be re-writable by THIS one, or "Build the post" would
+   *  permanently freeze anything ever touched. */
+  function beginStream(base: SocialDesign) {
+    streamCell.current = initialSocialStreamState(base);
+  }
+
   function updateElement(next: SocialElement) {
+    noteUserElementEdit(next);
     setDesign((d) => ({ ...d, elements: d.elements.map((e) => (e.id === next.id ? next : e)) }));
   }
 
@@ -203,24 +302,33 @@ export function useSocialComposer({
     setAiBusy(true);
     setAiError(null);
     setAiStatus(null);
+    setBuildStatus(null);
+    beginStream(design);
     try {
-      const res = await fetch("/api/email-lab/social/generate", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
+      // The author lane streams STATUS ONLY — it reseats the whole canvas with a
+      // template's element ids, so there is no mid-build content beat to paint (route
+      // comment says why). What the stream buys here is the running status line and
+      // the `done` merge, which keeps an element the user edited during the build.
+      const { ok, payload, state } = await runStreamingSocialBuild(
+        {
           author: true,
           scope,
           projectId,
           prompt: trimmed,
           format: design.format,
           branding,
-        }),
-      });
-      if (!res.ok) {
+        },
+        streamCell,
+        (s) => setBuildStatus(s.statusLabel),
+      );
+      // The route's failure payloads are machine tokens (`author_failed`), not copy —
+      // unlike the email lane, whose error events carry the build's own user-facing
+      // string. So this keeps today's wording rather than surfacing the server's.
+      if (!ok || socialStreamInterrupted(state)) {
         setAiError("Couldn't build the post — try rephrasing.");
         return;
       }
-      const data = (await res.json()) as {
+      const data = payload as {
         design?: unknown;
         caption?: string;
         hashtags?: string[];
@@ -230,7 +338,7 @@ export function useSocialComposer({
         setAiError("Couldn't build the post — try rephrasing.");
         return;
       }
-      setDesign(data.design);
+      setDesign(state?.design ?? data.design);
       setSelectedId(null);
       setCaption(data.caption ?? "");
       setHashtags(data.hashtags ?? []);
@@ -240,6 +348,7 @@ export function useSocialComposer({
       setAiError("Something went wrong — try again.");
     } finally {
       setAiBusy(false);
+      setBuildStatus(null);
     }
   }
 
@@ -340,22 +449,35 @@ export function useSocialComposer({
         };
       }
       const skeleton = designToSkeleton(workingDesign);
-      const res = await fetch("/api/email-lab/social/generate", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ scope, skeleton }),
-      });
-      if (!res.ok) {
+      // The canvas already on screen IS the base — the fill lane has no skeleton beat.
+      beginStream(workingDesign);
+      const { ok, payload, state } = await runStreamingSocialBuild(
+        { scope, skeleton },
+        streamCell,
+        (s) => {
+          setBuildStatus(s.statusLabel);
+          if (s.design) setDesign(s.design); // slots land one element at a time
+        },
+      );
+      if (!ok || socialStreamInterrupted(state)) {
         setAiError("Fill failed — try again.");
+        // Put the canvas back where the build found it — but only if the user hasn't
+        // edited anything mid-build, or the restore would throw their edit away (the
+        // one thing the touched set exists to stop). `state == null` means we never
+        // painted at all (JSON fallback), so there is nothing to undo.
+        if (state && streamCell.current.touched.size === 0) setDesign(design);
         return;
       }
-      const data = (await res.json()) as {
+      const data = payload as {
         patch?: Record<string, Record<string, unknown>>;
         caption?: string;
         hashtags?: string[];
         variants?: Record<string, string>;
       };
-      setDesign(applyDesignPatch(workingDesign, data.patch ?? {}));
+      // `state.design` wins when there is one: the reducer's `done` has already handed
+      // every element the user edited mid-build back to the user. `payload.patch` is
+      // the fallback for the plain-JSON path, byte-identical to today.
+      setDesign(state?.design ?? applyDesignPatch(workingDesign, data.patch ?? {}));
       setCaption(data.caption ?? "");
       setHashtags(data.hashtags ?? []);
       setVariants(data.variants ?? {});
@@ -364,6 +486,7 @@ export function useSocialComposer({
       setAiError("Something went wrong — try again.");
     } finally {
       setAiBusy(false);
+      setBuildStatus(null);
     }
   }
 
@@ -485,6 +608,7 @@ export function useSocialComposer({
     aiBusy,
     aiStatus,
     aiError,
+    buildStatus,
     recipeHint,
     // caption
     caption,
