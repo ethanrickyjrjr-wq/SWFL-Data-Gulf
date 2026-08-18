@@ -40,13 +40,25 @@ export type CommunitySlug = string;
  *  "LOT 30 SPYGLASS ISLAND" — the community name sits AFTER the lot number there. Those stay
  *  fragments (tracked as neighborhood_stats_leading_lot_fragments), which beats losing the name. */
 export function normalizeSubdivisionName(raw: string): string {
-  return raw
-    .toUpperCase()
-    .replace(/\b(UNIT|PHASE|TRACT|BLOCK|BLK|REPLAT|AMENDED|ADDITION|ADD|SECTION|SEC)\b.*$/u, "")
-    .replace(/^(.+?)\s*\bLOT\b.*$/u, "$1")
-    .replace(/[^A-Z0-9 ]/gu, " ")
-    .replace(/\s+/gu, " ")
-    .trim();
+  return (
+    raw
+      .toUpperCase()
+      // Trailing \b required a non-word char immediately after the qualifier, so "UNIT82"
+      // (no space before the number — the common FDOR shape) never matched: T and 8 are both
+      // \w, so there is no boundary between them. Live-measured 08/12/2026 against
+      // neighborhood_stats.subdivision_name: this cost 20,368 of 20,369 names their stem — a
+      // near-total no-op. Fixed to accept a qualifier followed by whitespace, a digit, or
+      // end-of-string, so "UNIT82"/"UNIT 82"/bare "UNIT" all stem; "UNITED ..." still does not
+      // match (followed by a letter, none of the three).
+      .replace(
+        /\b(UNIT|PHASE|TRACT|BLOCK|BLK|REPLAT|AMENDED|ADDITION|ADD|SECTION|SEC)(?=\s|\d|$).*$/u,
+        "",
+      )
+      .replace(/^(.+?)\s*\bLOT\b.*$/u, "$1")
+      .replace(/[^A-Z0-9 ]/gu, " ")
+      .replace(/\s+/gu, " ")
+      .trim()
+  );
 }
 
 /** Canonical marketed community -> the normalized platted-name prefixes that roll into it.
