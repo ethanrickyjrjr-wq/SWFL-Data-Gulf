@@ -2,7 +2,13 @@ import { NextRequest, NextResponse } from "next/server";
 import { cookies } from "next/headers";
 import { getAnthropic } from "@/refinery/agents/anthropic.mts";
 import { createClient } from "@/utils/supabase/server";
-import { buildContentDoc, authorDoc, fetchLakeContext } from "@/lib/email/build-doc";
+import {
+  buildContentDoc,
+  authorDoc,
+  fetchLakeContext,
+  type BuildProgressEvent,
+} from "@/lib/email/build-doc";
+import { createBuildEmitter } from "@/lib/email/lab/stream-emitter";
 import { suggestRecipes, suggestionChips } from "@/lib/email/suggest-recipe";
 import { checkBuildAllowance, recordBuild } from "@/lib/email/build-usage";
 import { toPanelItem, type MediaAssetRow } from "@/lib/email/media-assets";
@@ -177,6 +183,10 @@ export async function POST(req: NextRequest) {
     // about the project it was building inside. Only the ID crosses the wire — the row
     // is read server-side under RLS.
     projectId?: string;
+    // LIVE BUILD STREAMING (spec 2026-08-18). Opt-in and opt-in only: absent or
+    // false is byte-identical to the JSON response this route has always sent,
+    // so an old client hitting a new deploy is never handed NDJSON it can't read.
+    stream?: boolean;
   };
   const prompt = body.prompt ?? "";
 
@@ -256,36 +266,89 @@ export async function POST(req: NextRequest) {
         recipe: recipeFeed(body.recipeKey),
       });
 
-      const [built, suggestedKeys] = await Promise.all([
-        isAuthor
-          ? authorDoc({
-              prompt,
-              rawDoc: body.doc,
-              scope: body.scope,
-              mode: body.mode,
-              chartType: body.chartType as ChartType | undefined,
-              assets: caller?.assets,
-              replyEmail: caller?.email,
-              recipeId: body.recipeId,
-              recipeKey: body.recipeKey,
-              savedLayout,
-            })
-          : buildContentDoc({
-              prompt,
-              rawDoc: body.doc,
-              scope: body.scope,
-              mode: body.mode,
-              chartType: body.chartType as ChartType | undefined,
-              // The voice pick reaches the fill lane too — the shell sends it on
-              // both lanes (check voice_presets_not_consumed: it used to stop here).
-              recipeId: body.recipeId,
-              grounding,
-            }),
-        wantSuggestions ? suggestRecipes(prompt) : Promise.resolve([]),
-      ]);
-      const { httpStatus, payload } = built;
-      const chips = wantSuggestions ? suggestionChips(suggestedKeys) : [];
-      const outPayload = chips.length > 0 ? { ...payload, suggestions: chips } : payload;
+      // THE BUILD — declared ONCE and run by both branches below. The streaming
+      // branch is a different TRANSPORT, never a different build: a second copy
+      // of this arg list is how a streamed `done` payload silently drifts from
+      // what a plain POST would have returned. `onProgress` is the only
+      // difference between the two calls, and it is observe-only (Task 4).
+      const runBuild = async (onProgress?: (ev: BuildProgressEvent) => void) => {
+        const [built, suggestedKeys] = await Promise.all([
+          isAuthor
+            ? authorDoc({
+                prompt,
+                rawDoc: body.doc,
+                scope: body.scope,
+                mode: body.mode,
+                chartType: body.chartType as ChartType | undefined,
+                assets: caller?.assets,
+                replyEmail: caller?.email,
+                recipeId: body.recipeId,
+                recipeKey: body.recipeKey,
+                savedLayout,
+                onProgress,
+              })
+            : buildContentDoc({
+                prompt,
+                rawDoc: body.doc,
+                scope: body.scope,
+                mode: body.mode,
+                chartType: body.chartType as ChartType | undefined,
+                // The voice pick reaches the fill lane too — the shell sends it on
+                // both lanes (check voice_presets_not_consumed: it used to stop here).
+                recipeId: body.recipeId,
+                grounding,
+              }),
+          wantSuggestions ? suggestRecipes(prompt) : Promise.resolve([]),
+        ]);
+        const { httpStatus, payload } = built;
+        const chips = wantSuggestions ? suggestionChips(suggestedKeys) : [];
+        const outPayload = chips.length > 0 ? { ...payload, suggestions: chips } : payload;
+        return { httpStatus, outPayload };
+      };
+
+      // ── STREAMING BRANCH (opt-in via `stream: true`) ─────────────────────
+      // NDJSON per lib/email/lab/stream-events.ts. Everything above this line —
+      // auth, the saved layout, the allowance check, the grounding — already ran
+      // exactly once and is shared with the JSON branch below.
+      if (body.stream === true) {
+        const encoder = new TextEncoder();
+        const streamBody = new ReadableStream<Uint8Array>({
+          async start(controller) {
+            // The emitter is the validation gate: nothing unvalidated reaches
+            // the wire, and a bad beat becomes an `error` event rather than a
+            // malformed doc the client would paint.
+            const emitter = createBuildEmitter((s) => controller.enqueue(encoder.encode(s)));
+            try {
+              const { httpStatus, outPayload } = await runBuild((p) => {
+                if (p.stage === "status" && p.label) emitter.status(p.label);
+                // A build can seat a SECOND skeleton (a keyed builder that falls
+                // through reseats the working doc) — forward every one; the
+                // client treats the last as the doc it holds.
+                else if (p.stage === "skeleton") emitter.skeleton(p.doc);
+                else if (p.stage === "block" && p.blockId)
+                  emitter.block(p.doc, p.blockId, p.props ?? {});
+              });
+              // Metering sits exactly where the JSON branch has it: after the
+              // build resolves, never after a throw. Fire-and-forget.
+              if (meteredUid) recordBuild(meteredUid).catch(() => {});
+              // Block beats are pre-`finish()`, so the payload is the authority.
+              if (httpStatus && httpStatus >= 400)
+                emitter.error(String(outPayload.error ?? "build failed"));
+              else emitter.done(outPayload);
+            } catch (err) {
+              console.error("[email-lab/ai] stream build failed:", err);
+              emitter.error(err instanceof Error ? err.message : "build failed");
+            } finally {
+              controller.close();
+            }
+          },
+        });
+        return new Response(streamBody, {
+          headers: { "Content-Type": "application/x-ndjson", "Cache-Control": "no-store" },
+        });
+      }
+
+      const { httpStatus, outPayload } = await runBuild();
       // Metering never blocks a build — fire-and-forget, swallow any DB error.
       if (meteredUid) recordBuild(meteredUid).catch(() => {});
       return httpStatus
