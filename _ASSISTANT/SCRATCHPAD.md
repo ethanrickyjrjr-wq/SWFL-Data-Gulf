@@ -1,3 +1,14 @@
+## 2026-08-18 (Fable 5, night, later) — OPERATOR: "We put together scripts!!!!!!!!!! What is going on?? What playbook are you looking at?????"
+
+On my commentary-has-no-guard scoreboard claim. He's pointing at the SCRIPTS we built — the
+sentence banks (plan 2026-08-10-sentence-banks.md, §2.7 "bank sentences pending operator
+reword") and/or the acceptance render scripts. My "0 narrative asserts" number came from a
+single-line grep (narrative AND assert on the SAME line) — a broken instrument; multi-line
+assertions and bank-based commentary score zero on it. Verbatim: "You need to make sure you
+have all this in order. Claude has fucked so much up. Have you looked into recent convos and
+how it's all supposed to be. This is getting fucking old and it sucks." Owed: re-measure with
+real instruments, reconcile the sentence-bank system into the scoreboard, correct the record.
+
 ## 2026-08-18 (Fable 5, night) — OPERATOR: "we just walked through the first 7 again recently, I don't know why we are doing it again... it obviously didn't work"
 
 Verbatim, on the recipes-as-config plan: "Everything I have complained about over and over and

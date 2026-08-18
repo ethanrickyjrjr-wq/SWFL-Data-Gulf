@@ -37,6 +37,20 @@ failure the doc exists to stop.
 its live question (does graphify resolve SQL-to-code edges at all). `package.json` untouched — no
 npm script added, so no lockfile gate.
 
+## 2026-08-18 (Fable 5, night) — CORRECTION: my "commentary is NOT enforced" scoreboard claim was WRONG — the sentence banks are the mechanism and they exist in code
+
+Operator: "We put together scripts!!!!!!!!!! What is going on?? What playbook are you looking
+at?????" He was right. The banks (spec+plan 08/10/2026) are live: `lib/deliverable/language.ts`
+pure engine · `language-banks.ts` typed registry · banks on just-sold + price-reduced ·
+render-price-reduced.mts pins the bank sentence character-for-character · render-just-sold.mts is
+bank+code-closer with ZERO model calls. My "0 narrative asserts" figure came from a same-line grep
+(narrative AND assert on one line) — a broken instrument — and I never searched for the bank
+system before declaring the gap. Closed my falsely-premised `commentary_fleet_guard` check same
+session (the real remaining gap — 15 recipes unbanked — is the bank ROLLOUT, already tracked:
+`sentence_banks_live_verify`); amendment doc now names banks as the commentary half of
+recipes-as-config (a RecipeConfig carries its bank like it carries its grid). Also recorded this
+turn: quick-swap = paid cycle button (operator decisions 2+3).
+
 ## 2026-08-18 (Fable 5, guard hooks, cont. 3) — graph-first gate false-fire fixed: "per touch" is cadence jargon, not the edge verb
 
 The gate blocked a definitional operator question ("What is opportunistic per touch?") because

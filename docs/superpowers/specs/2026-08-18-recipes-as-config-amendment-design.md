@@ -29,6 +29,14 @@ the cure for the architecture that made the walking necessary.
   chart-slot dropping, favorable-framing policy.
 - `fillSkeletonFromSources` (`lib/email/build-doc.ts:725`) already fills a declarative skeleton
   from the four lanes — the default-grid recipe (08/02) is proof a grid can be data.
+- **The sentence banks (08/10/2026) are already the commentary half of this amendment** —
+  approved words in code (`lib/deliverable/language.ts` pure engine), a typed recipe-key →
+  bank registry (`language-banks.ts`), banks live on just-sold and price-reduced, bank
+  sentences pinned character-for-character by the acceptance scripts, model prose reduced to
+  digit-free connective behind the claim gate. A `RecipeConfig` therefore carries its BANK
+  reference the same way it carries its grid — and rolling banks out to the remaining 15
+  recipes rides the same migration, one recipe per touch (tracked:
+  `sentence_banks_live_verify`).
 - What still differs per recipe, in code: fact-row SELECTION (which cells, in what order — the
   HOA incident lived exactly here), ribbon/subject/CTA copy, the `middle` content (comps chart,
   scarcity funnel), chart policy, narrator prompt + length, and a small set of genuinely
