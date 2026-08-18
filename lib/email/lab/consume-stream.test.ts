@@ -31,14 +31,12 @@ describe("consume-stream race rule — the human wins", () => {
     const touchedId = s.doc!.blocks[0].id;
     s = markTouched(s, touchedId);
     const userProps = s.doc!.blocks[0].props;
-    const finalDoc = skel(); // same ids as the skeleton build for this seed? if not, use structuredClone(s.doc)
     const full = structuredClone(s.doc!) as EmailDoc;
     for (const b of full.blocks) (b.props as Record<string, unknown>).prose = "final";
     s = applyStreamEvent(s, { e: "done", payload: { doc: full } });
     expect(s.finished).toBe(true);
     expect(s.doc!.blocks[0].props).toEqual(userProps); // human's block survives
     expect((s.doc!.blocks[1].props as Record<string, unknown>).prose).toBe("final"); // ai's blocks land
-    void finalDoc;
   });
 
   // A RESEAT IS NOT A LICENCE TO OVERWRITE. The user can edit between the Build

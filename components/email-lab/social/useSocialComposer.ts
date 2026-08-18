@@ -465,7 +465,12 @@ export function useSocialComposer({
         // edited anything mid-build, or the restore would throw their edit away (the
         // one thing the touched set exists to stop). `state == null` means we never
         // painted at all (JSON fallback), so there is nothing to undo.
-        if (state && streamCell.current.touched.size === 0) setDesign(design);
+        // Restore `workingDesign`, NOT `design`: the stream was seeded with
+        // `workingDesign` (beginStream above) and every mid-build repaint came off that
+        // base, so `workingDesign` is what a partial paint has to be undone BACK to. On
+        // an empty canvas the two differ — `workingDesign` carries the seeded text+stat
+        // pair the build was given, and restoring `design` would blank them.
+        if (state && streamCell.current.touched.size === 0) setDesign(workingDesign);
         return;
       }
       const data = payload as {
