@@ -27,6 +27,7 @@
 import { buildNewListing } from "../../lib/deliverable/recipes/new-listing";
 import { resolveSubject } from "../../lib/deliverable/recipes/shared";
 import { listingButtonUrl } from "../../lib/listings/listing-url";
+import { daysSinceListed, resolveSubjectListDate } from "../../lib/listings/list-date";
 import { defaultDoc } from "../../lib/email/doc/default-docs";
 import { applyBrand } from "../../lib/email/brand/apply-brand";
 // THE ONE ACCEPTANCE HARNESS — see `_harness.mts`.
@@ -96,6 +97,15 @@ const doc = applyBrand(built, DEMO_BRAND);
 
 // ── THE PROVENANCE TABLE — every cell, and which lane filled it ──────────────
 const url = listingButtonUrl(facts);
+// DOM IS A TWO-LANE CELL AND THIS TABLE USED TO REPORT ONLY THE FIRST LANE.
+// `new-listing.ts:129-130` resolves it as `facts.daysOnMarket ?? daysSinceListed(...)`,
+// so on 08/12/2026 the rendered email carried "26 DOM" while this table printed
+// "— OPEN SLOT" for the same cell and the footer counted it against "3 open". A
+// provenance table whose whole job is "where did this number come from" reporting a
+// SOURCED cell as unsourced is a lying instrument — the same class as the clipped-URL
+// false alarm documented below. Resolve it here exactly as the recipe does.
+const resolvedDom =
+  facts.daysOnMarket ?? daysSinceListed(await resolveSubjectListDate(facts), new Date());
 const rows: ProvenanceRow[] = [
   ["Asking price", facts.price, "free spine (daily sweep)"],
   ["Address", facts.address, "free spine"],
@@ -104,7 +114,13 @@ const rows: ProvenanceRow[] = [
   ["Square feet", facts.sqft, "free spine → paid row"],
   ["Lot", facts.lotSize, "free spine (acres) → paid row (sq ft ÷ 43,560)"],
   ["Property type", facts.propertyType, "free spine"],
-  ["Days on market", facts.daysOnMarket?.toString(), "our own listing clock (real, not a floor)"],
+  [
+    "Days on market",
+    resolvedDom?.toString(),
+    facts.daysOnMarket != null
+      ? "the subject's own row (free spine)"
+      : "our own listing clock via listed_date (real, not a floor)",
+  ],
   ["Year built", facts.yearBuilt, "paid row ONLY — the free spine has no such column"],
   ["HOA / month", facts.hoaFee ? `$${facts.hoaFee}` : undefined, "paid row, > 0 only"],
   ["Hero photo", facts.photos[0] ? "yes" : undefined, "free spine, mirrored into our storage"],

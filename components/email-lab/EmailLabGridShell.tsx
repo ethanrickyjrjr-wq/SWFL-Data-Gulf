@@ -593,6 +593,7 @@ export function EmailLabGridShell({
           // seatForBuild swaps in the branded skeleton when the canvas is empty.
           doc: brandedSeat(doc, branding),
           scope,
+          projectId,
           build: true,
           chartType: chartType === "auto" ? undefined : chartType,
           // The VOICE preset (stale legacy ids degrade to "plain" — FM4).
@@ -694,6 +695,7 @@ export function EmailLabGridShell({
             ? applyBrand(seatForBuild(doc), brandingToTokens(nextBranding))
             : brandedSeat(doc, nextBranding),
           scope,
+          projectId,
           build: true,
           recipeId: resolveVoice(nextBranding.preferred_recipe),
           // The arrival door never sent the deliverable's identity — it leaned on the
@@ -835,6 +837,11 @@ export function EmailLabGridShell({
           doc,
           scope,
           chartType: chartType === "auto" ? undefined : chartType,
+          // WHICH PROJECT THIS BUILD IS IN. The shell has always held projectId and
+          // never sent it, so the build AI could not answer one question about the
+          // project around it. Only the id crosses — the row is read server-side
+          // under RLS, and an absent id means NO project context (never the last one).
+          projectId,
         }),
       });
       const data = (await res.json()) as {
@@ -989,7 +996,7 @@ export function EmailLabGridShell({
       const res = await fetch("/api/email-lab/ai", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ prompt, doc: miniDoc, scope }),
+        body: JSON.stringify({ prompt, doc: miniDoc, scope, projectId }),
       });
       const data = (await res.json()) as { doc?: unknown };
       if (!data.doc) return null;

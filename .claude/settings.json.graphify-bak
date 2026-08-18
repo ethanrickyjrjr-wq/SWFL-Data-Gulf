@@ -1,0 +1,233 @@
+{
+  "env": {
+    "ECC_DISABLED_HOOKS": "pre:edit-write:gateguard-fact-force",
+    "GATEGUARD_BASH_ROUTINE_DISABLED": "1",
+    "GATEGUARD_EXEMPT_GLOBS": "**/*.test.ts,**/*.test.tsx,**/*.test.mts,**/*.test.mjs,**/*.md,_assistant/**,_research/**,**/scratchpad/**,**/tmp-*,**/tmp/**"
+  },
+  "permissions": {
+    "allow": [
+      "Bash(bun run refinery:typecheck *)",
+      "Bash(bun test *)",
+      "Bash(bun run ledger *)",
+      "Bash(bun run triage *)",
+      "Bash(bun refinery/tools/check-vocab-coverage.mts *)",
+      "Bash(bun test refinery/lib/corridor-aliases.test.mts *)",
+      "Bash(node scripts/check.mjs list)",
+      "Bash(node scripts/check.mjs open *)",
+      "Bash(node scripts/check.mjs close *)",
+      "Bash(graphify query *)",
+      "Bash(graphify explain *)",
+      "Bash(graphify path *)"
+    ]
+  },
+  "agentPushNotifEnabled": true,
+  "enabledPlugins": {
+    "superpowers@claude-plugins-official": true
+  },
+  "hooks": {
+    "UserPromptSubmit": [
+      {
+        "matcher": "",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "node .claude/hooks/inject-focus.mjs"
+          }
+        ]
+      }
+    ],
+    "SessionStart": [
+      {
+        "matcher": "",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "node .claude/hooks/print-session-log.mjs"
+          },
+          {
+            "type": "command",
+            "command": "node .claude/hooks/print-scratchpad.mjs"
+          },
+          {
+            "type": "command",
+            "command": "node .claude/hooks/print-research-index.mjs"
+          },
+          {
+            "type": "command",
+            "command": "node .claude/hooks/print-kickoff.mjs"
+          },
+          {
+            "type": "command",
+            "command": "node .claude/hooks/print-desk-status.mjs"
+          },
+          {
+            "type": "command",
+            "command": "node .claude/hooks/print-closeable-checks.mjs"
+          },
+          {
+            "type": "command",
+            "command": "node scripts/tripwire-scan.mjs"
+          },
+          {
+            "type": "command",
+            "command": "serena-hooks activate --client=claude-code"
+          }
+        ]
+      }
+    ],
+    "PreToolUse": [
+      {
+        "matcher": "Bash|Edit|Write",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "serena-hooks remind --client=claude-code"
+          }
+        ]
+      },
+      {
+        "matcher": "Bash",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "node .claude/hooks/check-session-log-on-push.mjs"
+          },
+          {
+            "type": "command",
+            "command": "node .claude/hooks/check-scratchpad-on-push.mjs"
+          },
+          {
+            "type": "command",
+            "command": "node .claude/hooks/check-no-silent-deferral-on-push.mjs"
+          },
+          {
+            "type": "command",
+            "command": "node .claude/hooks/check-prepush-gate.mjs"
+          },
+          {
+            "type": "command",
+            "command": "node .claude/hooks/check-no-branch-create.mjs"
+          },
+          {
+            "type": "command",
+            "command": "node .claude/hooks/check-no-paid-dispatch.mjs"
+          },
+          {
+            "type": "command",
+            "command": "node .claude/hooks/check-no-new-paid-surface.mjs"
+          },
+          {
+            "type": "command",
+            "command": "node .claude/hooks/check-no-unapproved-push.mjs"
+          },
+          {
+            "type": "command",
+            "command": "node .claude/hooks/check-orphan-pages.mjs"
+          },
+          {
+            "type": "command",
+            "command": "node .claude/hooks/check-answer-fix-proof.mjs"
+          },
+          {
+            "type": "command",
+            "command": "node .claude/hooks/check-no-env-exfil.mjs"
+          }
+        ]
+      },
+      {
+        "matcher": "Edit|Write",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "node .claude/hooks/check-project-path.mjs"
+          },
+          {
+            "type": "command",
+            "command": "node .claude/hooks/check-playbook-read-before-email-edit.mjs"
+          }
+        ]
+      },
+      {
+        "matcher": "mcp__serena__*",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "serena-hooks auto-approve --client=claude-code"
+          }
+        ]
+      },
+      {
+        "matcher": "mcp__plugin_apify_apify__*",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "node .claude/hooks/check-no-apify-actor-run.mjs"
+          }
+        ]
+      }
+    ],
+    "PostToolUse": [
+      {
+        "matcher": "Edit|Write",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "node .claude/hooks/check-odd-surface.mjs"
+          },
+          {
+            "type": "command",
+            "command": "node .claude/hooks/annotate-plan.mjs"
+          }
+        ]
+      },
+      {
+        "matcher": "Edit|Write",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "node .claude/hooks/push-touched-unit-coverage.mjs"
+          }
+        ]
+      },
+      {
+        "matcher": "Bash",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "CMD=$(python3 -c \"import json,sys; d=json.load(sys.stdin); print(d.get('tool_input',d).get('command',''))\" 2>/dev/null || true); case \"$CMD\" in *\"git commit\"*) [ -f graphify-out/graph.json ] && node scripts/graphify-app-nodes.mjs > /dev/null 2>&1 || true ;; esac"
+          }
+        ]
+      }
+    ],
+    "Stop": [
+      {
+        "matcher": "",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "node .claude/hooks/check-four-searches.mjs",
+            "timeout": 15,
+            "statusMessage": "Four-lane read gate..."
+          },
+          {
+            "type": "command",
+            "command": "bash .claude/hooks/session-notes.sh",
+            "timeout": 30,
+            "statusMessage": "Saving session notes..."
+          }
+        ]
+      }
+    ],
+    "SessionEnd": [
+      {
+        "matcher": "",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "serena-hooks cleanup --client=claude-code"
+          }
+        ]
+      }
+    ]
+  }
+}

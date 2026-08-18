@@ -243,6 +243,39 @@ realtor.com URL (`emails.md` §0.1d) → assert the rendered `href`, don't trust
 **Step 3 — Ground the email-lab AI: ONE AI, TWO FEEDS (operator's chosen architecture).**
 Files: `app/api/email-lab/ai/route.ts` + `lib/project/digest.ts:300`.
 
+✅ **BUILT 08/12/2026 (operator: "make it happen"). LOCAL, UNPUSHED.** Root:
+`lib/email/lab/build-grounding.ts` — `projectFeedFor()` (Feed 1 projection + the stale-project
+guard), `recipeFeed()` (Feed 2, DERIVED from the registry + `lengthProfile("area-email")` at
+request time), `buildGroundingPrefix()`. Wiring: `BuildArgs.grounding` →
+`buildContentDoc` → `fillSkeletonResult` → `contentPatchSystem(..., grounding)`, **prepended**
+ahead of the writer instructions so a cache breakpoint can sit behind it. The route composes it
+from a cookie-auth'd (RLS) one-query `projects` read and `buildProjectDigest`; the lab shell now
+sends `projectId` on **all three** `/api/email-lab/ai` fetches — it always held the value and had
+never sent it, which is the whole reason the build AI knew nothing about its project.
+
+**A `second-order` pass caught this change committing the exact defect it was built to prevent** —
+it fed `buildProjectDigest` 3 of 14 inputs and so asserted "no email schedule" for every project
+(live: 2 projects have one) and gave listing projects no scope. Fixed before any push:
+`hasEmailSchedule` is now TRI-STATE (`undefined` = not loaded = say nothing, because an empty
+`schedules` default cannot distinguish none from never-fetched), `subject_address`/`subject_area`
+are loaded (free — same row), `significantChanges` renders real fields instead of
+`[object Object]`, and the absence wording speaks about our INPUTS, not about the world.
+
+**Gates:** `bun test lib/email lib/deliverable` **2,946 pass / 0 fail** (21 new) ·
+`bunx next build` ✓. Guards, each named for its failure mode: every registry key resolves to a
+non-empty constraint set · a digest for a DIFFERENT project is refused · absent id = NO project
+(never the last one) · user-controlled strings clipped (title 60, lines 100) before entering a
+system prompt · lists sliced to 3 · **three end-to-end WIRING tests** in `voice-wiring.test.ts`
+(reaches the model · is prepended · absent grounding leaves the prompt byte-identical) because a
+green composition suite cannot see "built, not wired" — `voice_presets_not_consumed` is the
+precedent.
+
+⬜ **Deliberately NOT done, so nobody reports this as finished:** `authorDoc` (the paid "Build
+with AI" lane) accepts `grounding` and ignores it — the fill lane is the AI the user talks to
+while editing, and that is what was wired. Feed 2 does not yet carry the recipe's acceptance
+assertion names or its data-roots field list (§4's fuller shape); it carries label, positioning,
+subject spine, length band and chart policy.
+
 *Feed 1 — project context, by REUSE.* Call the existing `buildProjectDigest()` from `route.ts` —
 a second caller of a plain aggregation function, not a new system (§1f). Do **not** build a parallel
 context mechanism; do **not** merge the two AI products.

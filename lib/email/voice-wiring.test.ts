@@ -132,3 +132,43 @@ test("stale legacy ids degrade to plain — no voice section, never a throw (FM4
   expect(capturedSystems.length).toBeGreaterThan(0);
   for (const s of capturedSystems) expect(s).not.toContain(VOICE_HEADER);
 });
+
+// ── GROUNDING WIRING (ONE AI, TWO FEEDS — 08/12/2026) ────────────────────────
+// Same claim shape as the voice tests above, for the same reason: a green
+// build-grounding.test.ts proves the PREFIX COMPOSES and says nothing about whether
+// it reaches the model. `voice_presets_not_consumed` is the precedent — recipeId
+// flowed shell → API → stopped, under a fully green unit suite. "Built, not wired"
+// is this repo's most repeated failure; these are the tests that can see it.
+
+test("grounding reaches the fill model's system prompt", async () => {
+  await buildContentDoc({
+    prompt: "a short note about how the season is going",
+    rawDoc: seedDoc(),
+    grounding: "WHAT YOU ARE WORKING ON — GROUNDING_WIRING_MARK",
+  });
+  expect(capturedSystems.length).toBeGreaterThan(0);
+  expect(capturedSystems.some((s) => s.includes("GROUNDING_WIRING_MARK"))).toBe(true);
+});
+
+test("grounding is PREPENDED — it sits ahead of the writer instructions, for caching", async () => {
+  await buildContentDoc({
+    prompt: "a short note about how the season is going",
+    rawDoc: seedDoc(),
+    grounding: "GROUNDING_WIRING_MARK",
+  });
+  const s = capturedSystems.find((x) => x.includes("GROUNDING_WIRING_MARK"))!;
+  expect(s.indexOf("GROUNDING_WIRING_MARK")).toBeLessThan(
+    s.indexOf("You are an email content writer"),
+  );
+});
+
+test("no grounding = byte-identical system prompt (the prefix is additive only)", async () => {
+  await buildContentDoc({
+    prompt: "a short note about how the season is going",
+    rawDoc: seedDoc(),
+  });
+  const without = [...capturedSystems];
+  expect(without.length).toBeGreaterThan(0);
+  for (const s of without) expect(s).not.toContain("WHAT YOU ARE WORKING ON");
+  expect(without.some((s) => s.startsWith("You are an email content writer"))).toBe(true);
+});

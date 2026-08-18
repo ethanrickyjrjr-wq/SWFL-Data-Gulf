@@ -16,6 +16,13 @@ import { SHOWING_PREP_INTRO_NOTE } from "@/lib/email/showing-prep-copy";
 import { EmailDocSchema } from "@/lib/email/doc/schema";
 import { seedById } from "@/lib/email/doc/default-docs";
 import { loadUserLayout } from "@/lib/email/doc/layout-store";
+import { buildProjectDigest } from "@/lib/project/digest";
+import {
+  buildGroundingPrefix,
+  projectFeedFor,
+  recipeFeed,
+  type ProjectFeed,
+} from "@/lib/email/lab/build-grounding";
 
 /** The caller's media library for the author's ASSET MENU (newest 24) plus their
  *  account email (the engine-owned reply-CTA destination — the same address every
@@ -38,6 +45,61 @@ async function loadCaller(): Promise<{ assets: LibraryAsset[]; email?: string }>
     };
   } catch {
     return { assets: [] };
+  }
+}
+
+/**
+ * FEED 1 — the project this build lives in, loaded SERVER-SIDE off the cookie-auth'd
+ * session so RLS decides what the caller may see. Never accepted from the request body
+ * beyond the id: a client that could post a project payload could describe someone
+ * else's project inside its own build.
+ *
+ * The id is REQUIRED and is matched against the digest by `projectFeedFor`. That looks
+ * redundant here — we just loaded that exact row — and it is deliberately kept: it is
+ * the same guard chat runs (`page-context.ts`), it is one comparison, and it means the
+ * projection can never be handed a mismatched digest by a future caller. An absent id
+ * means NO project context, never "whatever project was open last".
+ *
+ * Best-effort by design: any failure returns null and the build proceeds ungrounded but
+ * HONEST — the prefix then states outright that no project is attached (RULE 0.7, a
+ * build is never refused; playbook §1.14, an open slot beats an invented one).
+ */
+async function loadProjectFeed(projectId?: string): Promise<ProjectFeed | null> {
+  if (!projectId) return null;
+  try {
+    const db = createClient(await cookies());
+    // subject_address / subject_area are FREE here — same row, same query — and without
+    // them `inferScopeFromSubject` never runs, so a listing project (an address, zero
+    // filed items) resolves to no scope at all. That is the incident already on record as
+    // `listing_scope_not_in_digest`; loading three more columns is the whole fix.
+    // `email_schedules` is a DIFFERENT table and is deliberately NOT fetched: this is the
+    // interactive lane that defaults to Haiku for speed, one serial DB hop is already
+    // being added, and the honest alternative to a second one is to say nothing about
+    // schedules — which is what `loaded.schedules` omitted means.
+    const { data } = await db
+      .from("projects")
+      .select("id, title, items, subject_address, subject_area")
+      .eq("id", projectId)
+      .maybeSingle();
+    if (!data) return null;
+    const row = data as {
+      id: string;
+      title: string | null;
+      items: unknown;
+      subject_address: string | null;
+      subject_area: string | null;
+    };
+    // ONE digest root (lib/project/digest.ts) — never a parallel scope/freshness fold.
+    const digest = buildProjectDigest({
+      projectId: row.id,
+      title: row.title || "Untitled project",
+      items: (Array.isArray(row.items) ? row.items : []) as never,
+      subjectAddress: row.subject_address,
+      subjectArea: row.subject_area,
+    });
+    return projectFeedFor(projectId, digest);
+  } catch {
+    return null;
   }
 }
 
@@ -110,6 +172,11 @@ export async function POST(req: NextRequest) {
     // We load THEIR saved grid for this recipe and reshape the fresh build into it.
     // Absent/false → the standard coded grid, byte-identical to before this shipped.
     useSavedLayout?: boolean;
+    // WHICH PROJECT THIS BUILD BELONGS TO (Feed 1). The lab shell has always held this
+    // and never sent it, which is why the build AI could not answer a single question
+    // about the project it was building inside. Only the ID crosses the wire — the row
+    // is read server-side under RLS.
+    projectId?: string;
   };
   const prompt = body.prompt ?? "";
 
@@ -167,6 +234,28 @@ export async function POST(req: NextRequest) {
       // gets proposals, computed alongside the build. Advisory navigation only —
       // each chip is a door URL; suggestRecipes never throws and never routes.
       const wantSuggestions = isAuthor && !body.recipeKey;
+
+      // ── THE GROUNDING (ONE AI, TWO FEEDS) ────────────────────────────────
+      // Feed 1 = the project, loaded under RLS and guarded against the stale-project
+      // leak. Feed 2 = this deliverable's own rules, DERIVED from the registry and
+      // lengthProfile at request time so a constraint can never drift from the code
+      // that enforces it. Composed here rather than in the builder because Feed 1
+      // needs the auth'd session; the builder stays a pure, script-runnable root.
+      //
+      // THIS IS A SERIAL HOP, AND AN EARLIER DRAFT OF THIS COMMENT CLAIMED IT WASN'T —
+      // on the line that adds one. The await completes BEFORE the Promise.all starts, on
+      // the lane the model router defaults to Haiku for interactive speed, on top of the
+      // `meterUserId()` round trip already above. Accepted at pre-launch volume per the
+      // handoff's §4 Step 3 ("we will switch to sonnet when we actually have users if we
+      // have to"); DO NOT pre-build a caching layer for it. When there is traffic to
+      // measure, fold this read into the Promise.all or hold one digest per build
+      // session rather than per edit call.
+      const projectFeed = await loadProjectFeed(body.projectId);
+      const grounding = buildGroundingPrefix({
+        project: projectFeed,
+        recipe: recipeFeed(body.recipeKey),
+      });
+
       const [built, suggestedKeys] = await Promise.all([
         isAuthor
           ? authorDoc({
@@ -190,6 +279,7 @@ export async function POST(req: NextRequest) {
               // The voice pick reaches the fill lane too — the shell sends it on
               // both lanes (check voice_presets_not_consumed: it used to stop here).
               recipeId: body.recipeId,
+              grounding,
             }),
         wantSuggestions ? suggestRecipes(prompt) : Promise.resolve([]),
       ]);

@@ -447,6 +447,13 @@ function contentPatchSystem(
   lakeContext: string,
   hasChart: boolean,
   voice: VoicePresetId = "plain",
+  /** THE GROUNDING PREFIX — `lib/email/lab/build-grounding.ts` (ONE AI, TWO FEEDS).
+   *  What this model KNOWS about the project it is building inside and the deliverable
+   *  it is building. It never widens what the model may EMIT: the block rules below
+   *  still win, it still writes prose only, and it still never writes a figure.
+   *  Placed FIRST because it is the most static part of this prompt — the volatile doc
+   *  comes later, so a cache breakpoint can sit behind it. */
+  grounding?: string,
 ): string {
   // The VOICE layer (voice-presets.ts) — the user's explicit pick, threaded from
   // the lab picker / saved preferred_recipe. "plain" appends NOTHING, so a build
@@ -464,7 +471,8 @@ function contentPatchSystem(
   const chartLine = hasChart
     ? `\n- A real market CHART image is ALREADY placed in the doc (an "image" block). Write its caption and refer to the trend in your prose — never say a chart can't be made; one is already there.`
     : `\n- If a chart would help but none is present, express the data in the closest blocks (stats for key numbers, text for a list). Always produce a valid patch; never error out.`;
-  return `You are an email content writer for SWFL Data Gulf, a Southwest Florida real estate intelligence platform.
+  const groundingBlock = grounding ? `${grounding}\n\n---\n\n` : "";
+  return `${groundingBlock}You are an email content writer for SWFL Data Gulf, a Southwest Florida real estate intelligence platform.
 
 You receive an EmailDoc skeleton (block ids + current text) and real lake data. Return ONLY a JSON content patch — a flat object mapping block id → updated text fields. No markdown fences, no commentary outside the JSON object.${dataBlock}
 
@@ -684,6 +692,12 @@ export interface BuildArgs {
    *  this only reshapes its output. Never a gate: an unusable layout degrades to the
    *  standard grid rather than blocking the build. */
   savedLayout?: EmailDoc | null;
+  /** THE GROUNDING PREFIX — composed by the route via `lib/email/lab/build-grounding.ts`
+   *  (ONE AI, TWO FEEDS: the project this build lives in + this recipe's own rules).
+   *  Composed in the ROUTE, not here, because Feed 1 needs the auth'd session to know
+   *  which project the caller is actually in — and inheriting "whatever project was
+   *  open last" is the one failure mode of this build that ships silently. */
+  grounding?: string;
 }
 
 export interface BuildResult {
@@ -700,6 +714,7 @@ export async function buildContentDoc({
   mode,
   chartType,
   recipeId,
+  grounding,
 }: BuildArgs): Promise<BuildResult> {
   const docParsed = EmailDocSchema.safeParse(rawDoc);
   if (!docParsed.success) {
@@ -714,6 +729,7 @@ export async function buildContentDoc({
     mode,
     chartType,
     voice: resolveVoice(recipeId),
+    grounding,
   });
 }
 
@@ -750,6 +766,7 @@ async function fillSkeletonResult({
   mode,
   chartType,
   voice = "plain",
+  grounding,
 }: {
   prompt: string;
   doc: EmailDoc;
@@ -757,6 +774,7 @@ async function fillSkeletonResult({
   mode?: string;
   chartType?: ChartType;
   voice?: VoicePresetId;
+  grounding?: string;
 }): Promise<BuildResult> {
   let doc = inputDoc;
 
@@ -892,7 +910,7 @@ async function fillSkeletonResult({
     msg = await getAnthropic("email_build").messages.create({
       model,
       max_tokens: MAX_TOKENS,
-      system: contentPatchSystem(fullContext, !!chartRes, voice),
+      system: contentPatchSystem(fullContext, !!chartRes, voice, grounding),
       messages: [
         {
           role: "user",

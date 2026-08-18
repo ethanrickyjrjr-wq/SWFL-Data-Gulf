@@ -233,6 +233,37 @@ export function printBrandCarry(profile: Record<string, string | null>): void {
 }
 
 /**
+ * A SECOND RUN MUST NOT OVERWRITE THE FIRST (08/12/2026).
+ *
+ * Nine of the ten acceptance scripts pass `renderAndSave` a HARDCODED filename
+ * ("new-listing-email.html"), so running one against a second address silently replaced the
+ * first artifact — two renders, one file, and the second one looks like the only one that
+ * ever ran. Found while rendering every email twice against two different subjects; the
+ * operator's own framing was "don't build a bunch of the same emails", and a filename that
+ * cannot tell two subjects apart is how a batch turns back into one.
+ *
+ * Only `render-listings-digest.mts` interpolated its subject (the ZIP), which is exactly the
+ * copied-fix shape this file's header is about — so the suffix is derived HERE, once, from the
+ * subject the run was actually given (argv[2]). A filename that already carries the subject is
+ * left alone, so the digest does not become `…-34102-34102.html`.
+ *
+ * No argv[2] = the script's own default house = the original filename, unchanged. Every
+ * existing invocation keeps the name it has always written.
+ */
+function subjectSlug(): string | null {
+  const raw = process.argv[2]?.trim();
+  if (!raw) return null;
+  const slug = raw
+    .toLowerCase()
+    .replace(/^https?:\/\/[^/]+\//, "")
+    .replace(/[^a-z0-9]+/g, "-")
+    .replace(/^-+|-+$/g, "")
+    .slice(0, 52)
+    .replace(/-+$/, "");
+  return slug || null;
+}
+
+/**
  * RENDER THROUGH THE ONE DOOR and save. `renderEmailDocHtml` is the same call a send makes,
  * so what lands on disk is exactly what a send would carry — this is never a preview-only
  * approximation.
@@ -276,7 +307,12 @@ export async function renderAndSave(
   } catch {
     /* EEXIST on Windows even for a recursive mkdir of an existing dir */
   }
-  const file = join(outDir, filename);
+  const slug = subjectSlug();
+  const named =
+    slug && !filename.toLowerCase().includes(slug)
+      ? filename.replace(/\.html$/i, `--${slug}.html`)
+      : filename;
+  const file = join(outDir, named);
   writeFileSync(file, html, "utf8");
   console.log(`\n  SAVED → ${file}\n`);
   return { html, kb };
