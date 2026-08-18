@@ -55,13 +55,16 @@ const progressPlan: (emit: (ev: buildDocNs.BuildProgressEvent) => void) => void 
   });
 };
 let authorDocCalls = 0;
+/** What the fake build RETURNS — varied per test so the 4xx branch is reachable.
+ *  Reset in every test; the beats it streams first never change. */
+let nextResult: BuildResult = { payload: PAYLOAD };
 
 mock.module("@/lib/email/build-doc", () => ({
   ...buildDocOrig,
   authorDoc: async (args: BuildArgs): Promise<BuildResult> => {
     authorDocCalls += 1;
     if (args.onProgress) progressPlan(args.onProgress);
-    return { payload: PAYLOAD };
+    return nextResult;
   },
 }));
 
@@ -124,6 +127,7 @@ afterAll(() => {
 
 test("FM-STREAM-1: stream:true → NDJSON, beats in build order, done carries the JSON branch's payload", async () => {
   authorDocCalls = 0;
+  nextResult = { payload: PAYLOAD };
   const res = await POST(makeReq(askBody({ stream: true })));
 
   expect(res.headers.get("content-type")).toBe("application/x-ndjson");
@@ -158,8 +162,29 @@ test("FM-STREAM-1: stream:true → NDJSON, beats in build order, done carries th
   expect(authorDocCalls).toBe(1); // one build per request, never two
 });
 
+test("FM-STREAM-2: a 4xx build terminates the stream with `error`, never `done`", async () => {
+  authorDocCalls = 0;
+  // The shape buildContentDoc/authorDoc return on an invalid doc.
+  nextResult = { httpStatus: 400, payload: { error: "Invalid email document." } };
+  const res = await POST(makeReq(askBody({ stream: true })));
+
+  // A 4xx BUILD inside a 200 STREAM is the contract — the transport succeeded,
+  // the build did not. Pinned so nobody later "fixes" this into a 400 response
+  // and breaks every client that is already reading the body.
+  expect(res.status).toBe(200);
+  expect(res.headers.get("content-type")).toBe("application/x-ndjson");
+
+  const events = await readEvents(res);
+  const kinds = events.map((e) => e.e);
+  expect(kinds).not.toContain("done"); // a failed build must never look finished
+  const last = events[events.length - 1];
+  expect(last.e).toBe("error");
+  expect(last.e === "error" && last.message).toBe("Invalid email document.");
+});
+
 test("FM-STREAM-6: no `stream` field (an old client) → today's plain JSON, same payload", async () => {
   authorDocCalls = 0;
+  nextResult = { payload: PAYLOAD };
   const res = await POST(makeReq(askBody()));
 
   expect(res.headers.get("content-type")).toContain("application/json");
