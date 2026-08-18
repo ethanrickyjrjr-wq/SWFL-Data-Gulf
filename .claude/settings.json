@@ -22,7 +22,9 @@
   },
   "agentPushNotifEnabled": true,
   "enabledPlugins": {
-    "superpowers@claude-plugins-official": true
+    "superpowers@claude-plugins-official": true,
+    "ecc@ecc": false,
+    "airtable@claude-plugins-official": false
   },
   "hooks": {
     "UserPromptSubmit": [

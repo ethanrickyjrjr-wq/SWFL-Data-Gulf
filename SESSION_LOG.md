@@ -8,6 +8,25 @@
 
 **Known deferred:** `social_slot_stat_unaddressable` (stat = 2 fields, slot event = 1 string; protocol amendment deferred pending look), `playbook_hook_blind_to_subagents` (opened this session — the playbook hook scans only the parent transcript, blocking every subagent write under lib/email until the controller reads it). NOT PUSHED — awaiting operator per-push approval.
 
+## 2026-08-18 (Fable 5, evening, cont.) — Context diet: CLAUDE.md 65KB → 23KB rules-only; ECC + Airtable plugins off for this repo
+
+**Piece 2 of the approved plan (operator: "push and roll").** Measured this session: project
+CLAUDE.md was 64,849 bytes of rules-buried-in-postmortems, and the ECC/Airtable plugin bundles
+injected ~400 irrelevant skills + ~90 agent listings into every session — against our own paid
+anti-drift research ("smallest possible set of high-signal tokens"; "not a laundry list of edge
+cases", `_RESEARCH/agent-behavior/2026-07-15-ai-steering-anti-drift-research.md`).
+
+**Shipped:** (1) `docs/standards/claude-rules-archive-2026-08-18.md` — the pre-diet CLAUDE.md
+preserved VERBATIM, added to the Reference index; (2) CLAUDE.md rewritten rules-only, 22,729
+bytes — every rule number, locked date, load-bearing path/command, the Reference index table, the
+data protocol and brain-factory rules all kept; postmortem bodies moved to the archive; RULE 0 +
+its marker untouched at top; (3) `.claude/settings.json` `enabledPlugins`: `ecc@ecc: false`,
+`airtable@claude-plugins-official: false` (project-level false overrides user-level true;
+superpowers/vercel/apify/mapbox/frontend-design/code-review kept). NOT done: removing the
+graphify Read|Glob per-read nag hook — the permission classifier denied the guard-removal edit;
+operator can drop that matcher via /hooks if wanted. Verified: settings.json parses
+(node JSON.parse), no hook parses CLAUDE.md content (grep: only block-message mentions).
+
 ## 2026-08-18 (Fable 5, evening) — "THIS IS ALL A FUCKING LIE" → the cell-policy registry: content rulings stop living per-recipe
 
 **The operator's charge, and it was right:** the "every content rule gets walked to every surface
