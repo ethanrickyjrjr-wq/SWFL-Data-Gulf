@@ -1185,7 +1185,26 @@ export async function authorDoc({
   // here. The try/catch is the thing that makes "observe-only" true rather than
   // merely intended: a consumer that throws must not become a failed build. It
   // is never awaited, so a slow consumer cannot stall the build either.
+  //
+  // A STATUS LABEL ANNOUNCES A PHASE, AND A PHASE HAPPENS ONCE. Two real paths
+  // reach the same label twice: a keyed builder that MISSES emits its opening
+  // trio and then falls through to the terminal lane, which would emit the same
+  // trio again; and the legacy listing lane announces its author pass BEFORE the
+  // model call and would re-announce it when the authored block beats out. A
+  // repeated label reads to the viewer as progress running backwards, so it is
+  // dropped here — at the one seam every beat crosses — rather than in each lane.
+  //
+  // A REPEATED `skeleton` IS NOT SUPPRESSED, deliberately: it means the working
+  // doc was genuinely RESEATED (the terminal lane seats the user's saved layout
+  // or the blank skeleton, which is not the doc the keyed lane opened with), and
+  // the client must follow that. Consumers treat a mid-stream skeleton as a full
+  // reseat — last one wins.
+  const sentStatus = new Set<string>();
   const emit = (ev: BuildProgressEvent): void => {
+    if (ev.stage === "status" && ev.label) {
+      if (sentStatus.has(ev.label)) return;
+      sentStatus.add(ev.label);
+    }
     try {
       onProgress?.(ev);
     } catch {
@@ -1473,7 +1492,12 @@ export async function authorDoc({
     emit({ stage: "skeleton", doc: flyer });
     emit({ stage: "status", label: "laying out your email" });
     emit({ stage: "status", label: "filling in sourced facts" });
-    emitBuilt(currentDoc, flyer);
+    // NO block beats here, deliberately. The skeleton beat above already carried
+    // every block of `flyer` — and `buildListingFlyer` PREFILLS the text slot with
+    // the raw MLS remarks (that is why the author pass below blanks it first), so
+    // diffing here would bucket 2,000 characters of raw listing copy as prose and
+    // stream it under a "writing commentary" label. The viewer would watch the
+    // wrong body flash in under a correct-sounding status.
 
     // Fill the chart slot IN PLACE (preserve its grid layout). A ZIP home-value index
     // says nothing about a house — the chart an agent actually wants on a listing is

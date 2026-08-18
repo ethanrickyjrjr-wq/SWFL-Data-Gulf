@@ -538,3 +538,33 @@ test("PROGRESS-3: every block beat carries the post-stage working doc — Task 5
   // Process-global mock — restore so nothing added below inherits it.
   mock.module("@/lib/deliverable/recipes/default-grid", () => defaultGridOrig);
 });
+
+test("PROGRESS-4: a builder FALLTHROUGH reaches two lanes but never repeats a phase label", async () => {
+  // The exact FM-TRACK-2 path: the keyed builder misses, so the keyed lane opens
+  // the stream AND the terminal lane seats a new grid. Both announce the same
+  // phases. A repeated "laying out your email" reads as progress running
+  // backwards, so the labels are deduped — while the RESEAT still beats out,
+  // because the working doc genuinely changed and the client must follow it.
+  mock.module("@/lib/deliverable/recipes/default-grid", () => ({
+    buildDefaultGrid: async (ctx: { currentDoc: unknown }) => ctx.currentDoc,
+  }));
+  mock.module("@/lib/deliverable/recipes/index", () => ({
+    ...recipesIndexOrig,
+    builderFor: () => async () => null, // every builder misses
+  }));
+  const current = SEED_DOCS.find((s) => s.id === "market-spotlight")!.build();
+  const beats: { stage: string; label?: string }[] = [];
+  const result = await authorDoc({
+    prompt: "Send a weekly update to my sphere for Cape Coral.",
+    rawDoc: current,
+    recipeKey: "sphere-weekly",
+    onProgress: (ev) => beats.push(ev),
+  });
+  expect(result.payload.recipeKey).toBe("default-grid"); // confirms BOTH lanes ran
+  const labels = beats.filter((b) => b.stage === "status").map((b) => b.label);
+  expect(labels.length).toBe(new Set(labels).size); // no phase announced twice
+  // The reseat is NOT suppressed — two lanes seated two different docs.
+  expect(beats.filter((b) => b.stage === "skeleton").length).toBeGreaterThan(1);
+  mock.module("@/lib/deliverable/recipes/index", () => recipesIndexOrig);
+  mock.module("@/lib/deliverable/recipes/default-grid", () => defaultGridOrig);
+});
