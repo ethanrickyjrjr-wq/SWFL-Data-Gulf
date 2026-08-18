@@ -189,18 +189,104 @@ describe("the paid row we already own", () => {
     ]);
   });
 
-  test("NEVER fills a moving fact — price, status and days on market stay with the live record", async () => {
+  test("status and days on market STILL never fill from a cached row", async () => {
     const f = facts();
     await fillFromPaidRecord(f, {
       readCache: reader(
         row({
           list_price: 899000,
           status: "FOR_SALE",
+          fetched_at: new Date().toISOString(),
           days_on_mls: 12,
         } as Partial<StoredApifyRecord>),
       ),
     });
-    expect(f.price).toBeUndefined();
     expect(f.daysOnMarket).toBeUndefined();
+  });
+});
+
+// ── THE ASK (amended 08/18/2026) ──────────────────────────────────────────────
+// The old contract ("price NEVER fills from a cached row") shipped the operator an
+// email with an HOA fee and NO PRICE AT ALL, while the $689,000 ask sat unread in the
+// same row. The new contract: gap-only, vendor still says for-sale, row fetched within
+// PRICE_MAX_AGE_DAYS. Each test is the failure mode that would un-earn the gate.
+describe("the ask, through the freshness gate", () => {
+  const days = (n: number) => new Date(Date.now() - n * 86_400_000).toISOString();
+  const askRow = (over: Partial<StoredApifyRecord> = {}) =>
+    row({ list_price: 689000, status: "FOR_SALE", fetched_at: days(2), ...over });
+
+  test("a fresh for-sale ask fills, formatted like the spine's ($X,XXX)", async () => {
+    const f = facts();
+    const fill = await fillFromPaidRecord(f, { readCache: reader(askRow()) });
+    expect(f.price).toBe("$689,000");
+    expect(fill.price).toBe(true);
+  });
+
+  test("FAILURE: a stale ask presented as today's — beyond 14 days the slot stays OPEN", async () => {
+    const f = facts();
+    const fill = await fillFromPaidRecord(f, {
+      readCache: reader(askRow({ fetched_at: days(21) })),
+    });
+    expect(f.price).toBeUndefined();
+    expect(fill.price).toBe(false);
+  });
+
+  test("FAILURE: a sold/pending row's price presented as an ask", async () => {
+    for (const status of ["SOLD", "PENDING", "sold", "off_market"]) {
+      const f = facts();
+      await fillFromPaidRecord(f, { readCache: reader(askRow({ status })) });
+      expect(f.price, `status=${status} must not serve an ask`).toBeUndefined();
+    }
+  });
+
+  test("the vendor's casing is not a market state — 'for_sale' and 'FOR_SALE' both serve", async () => {
+    for (const status of ["for_sale", "FOR_SALE", " For_Sale "]) {
+      const f = facts();
+      await fillFromPaidRecord(f, { readCache: reader(askRow({ status })) });
+      expect(f.price, `status=${status} must serve`).toBe("$689,000");
+    }
+  });
+
+  test("FAILURE: the cached ask clobbers the live spine's — gap-only, the live record wins", async () => {
+    const f = facts({ price: "$700,000" });
+    const fill = await fillFromPaidRecord(f, { readCache: reader(askRow()) });
+    expect(f.price).toBe("$700,000");
+    expect(fill.price).toBe(false);
+  });
+
+  test("property type fills from row.style — the vendor's ACTUAL key, probed 08/18/2026", async () => {
+    // The blob has NO `property_type` key; the fresh lane's read of it was dead from
+    // day one. `style` (promoted column) is the real home; raw stays as a fallback.
+    const f = facts();
+    const fill = await fillFromPaidRecord(f, {
+      readCache: reader(askRow({ style: "SINGLE_FAMILY" })),
+    });
+    expect(f.propertyType).toBe("SINGLE_FAMILY"); // shortType maps it at the render edge
+    expect(fill.propertyType).toBe(true);
+
+    const viaRaw = facts();
+    await fillFromPaidRecord(viaRaw, {
+      readCache: reader(askRow({ raw: { property_type: "condo" } })),
+    });
+    expect(viaRaw.propertyType).toBe("condo");
+
+    const held = facts({ propertyType: "condo" });
+    await fillFromPaidRecord(held, {
+      readCache: reader(askRow({ style: "SINGLE_FAMILY" })),
+    });
+    expect(held.propertyType).toBe("condo"); // gap-only, the live record wins
+  });
+
+  test("FAILURE: a 0, absent, or undated price serves anyway", async () => {
+    for (const over of [
+      { list_price: 0 },
+      { list_price: null },
+      { fetched_at: null },
+      { fetched_at: "not-a-date" },
+    ] as Partial<StoredApifyRecord>[]) {
+      const f = facts();
+      await fillFromPaidRecord(f, { readCache: reader(askRow(over)) });
+      expect(f.price, JSON.stringify(over)).toBeUndefined();
+    }
   });
 });

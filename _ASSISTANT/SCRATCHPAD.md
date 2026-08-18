@@ -1,3 +1,31 @@
+## 2026-08-18 (Fable 5) — OPERATOR: "why would we pay supabase when we can do it for free" — on the live AI+human co-editing scope
+
+Correction on the co-editing proposal (salt.md discussion): I reached for Supabase Realtime as
+the transport when the v1 need — one user watching the AI fill their canvas live — is served by
+streaming our OWN API route's response (SSE on the existing connection, our Next.js/Node runtime,
+zero vendor spend, zero quotas). Same shape as paid-before-free, applied to infra: never propose a
+vendor service (even one "included in the plan") before checking whether the transport we already
+own does it. Vendor channels only earn a place for MULTI-CLIENT sync (two browsers on one doc),
+which is not the v1 ask. Scope written this session; he also asked whether it covers social posts.
+
+## 2026-08-18 (Fable 5) — OPERATOR: "where the fuck is price per square foot" + "why the fuck do we want HOA costs on there? We don't want to detour any potential buyers before arriving."
+
+On the new-listing email render: (1) **$/sqft is MISSING** — we hold list price and living area,
+the single most standard listing metric was never computed. (2) **HOA $225/mo IS shown** — a raw
+cost with zero context ("what is a person paying 225 a month for????? is that golf? is there a
+pool?"). His doctrine, stated verbatim: **the email's job is to get the buyer to ARRIVE; cost
+questions are the AGENT'S job to answer, in person.** A naked recurring cost with no amenity story
+attached is a detour, not a disclosure. This is sell-side-favorable-framing applied to fact-row
+SELECTION, not just prose.
+
+**THE META-GRIPE, the real one: "we need to fix claude internally. We can't have rules that load
+every time that claude doesn't read or are for different sections. We don't listen to a god damn
+word i say."** His dictated content preferences live in prose (research docs, playbook sections,
+session transcripts) and NOTHING enforces them at render time. The fix shape he's owed: buyer-
+facing fact-row policy IN CODE (recipe + assertion that goes red), not another paragraph. Fixed
+this instance same session: $/sqft added, HOA row dropped, acceptance assertions added so a
+regression exits 1.
+
 ## 2026-08-12 (Sonnet 5) — OPERATOR: "OK, GO GET IT AND WE WILL FIND COLLIER AND THEN WE WILL FIND EVERYTHING ELSE. MAKE THE FUCKING PLAYYBOOK AND MAE SURE SHITTY CLAUDE READS IT WHEN WORKING ON THIS SHIT. BECAUSE CLAUDE DOESN'T DO IT ANYWERE ELSES"
 
 Session flow: he asked why we haven't built the subdivision→community crosswalk. Investigation

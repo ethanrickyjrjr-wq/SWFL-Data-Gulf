@@ -55,7 +55,7 @@
 - [listing_lifecycle_schedule_live_verify] First unattended scheduled listing-lifecycle runs (Lee 09:00/Collier 12:00 UTC) land clean (due 2026-07-03)
 
 ## Last Session
-- 2026-08-12 (Opus 5) — Email AI combo BUILT (handoff Step 3, "one AI, two feeds") + 2 emails rendered + a lying provenance table fixed
+- 2026-08-18 (Fable 5) — Pushed the 08/12 backlog: email-AI grounding, crosswalk playbook, go-launch/paywall docs
 
 ## Spec Health
 - 305 specs total · 0 candidates for archive

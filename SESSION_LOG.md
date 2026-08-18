@@ -1,3 +1,28 @@
+## 2026-08-18 (Fable 5, later) — "Where the fuck is price per square foot" — the ask now serves from the bought row; the HOA cell is banned everywhere
+
+**The defect, measured before designing anything:** the new-listing acceptance render shipped with
+NO PRICE and an HOA fee. Probed live: the free spine holds NO row for 12281 McGregor Palms (the
+playbook's "asking price — free spine, 100%, no fallback needed" was a coverage claim, not a
+guarantee), while our own bought row held `list_price 689000 · status FOR_SALE · fetched 08/10` —
+`fillFromPaidRecord` refused the one column and served the HOA from the same row. Also dead on
+disk: `style=SINGLE_FAMILY` (Type open) and the fresh lane's `raw.property_type` read (the vendor
+blob has no such key — probed).
+
+**Shipped (LOCAL, this commit):** `paid-record-lane.ts` — ask fills gap-only through a gate
+(`PRICE_MAX_AGE_DAYS=14`, half the documented "three weeks is wrong" failure, still-for-sale only,
+case-insensitive) + property type from `row.style`; `apify-property-lookup.ts` — case-insensitive
+status (stored rows read "FOR_SALE", the compare wanted "for_sale") + dead raw read removed;
+`new-listing.ts` `secondSpecRow` — **HOA cell deleted per decree** ("we don't want to detour any
+potential buyers before arriving — the agent's job is to answer those questions"); under-contract
+had already implemented this ruling, the cell was the unwalked surface. Both render scripts now
+carry RED assertions (no cost cell · held ask reaches the hero · $/sqft renders when both operands
+held) — the old script printed a priceless email and exited 0. Playbook §2.1.2/§2.2.2 corrected;
+memory + STRIKES (didnt-read-what-we-hold #9: three unread fields in one paid row) updated.
+
+**Evidence:** re-render: hero $689,000 · $/Sq Ft $323 · Single Family · NO HOA — 3/3 and 7/7
+acceptance assertions pass; `bun test lib/email lib/deliverable lib/listings` **3392 pass / 0
+fail**. Captures re-baked. NOT pushed — push approval is per-push.
+
 ## 2026-08-18 (Fable 5) — Pushed the 08/12 backlog: email-AI grounding, crosswalk playbook, go-launch/paywall docs
 
 Operator: "commit and push everything." Committed the six-day-old local work in four logical

@@ -38,7 +38,9 @@ import {
   printBrandCarry,
   printProvenance,
   renderAndSave,
+  reportAssertions,
   subjectAddress,
+  type Assertion,
   type ProvenanceRow,
 } from "./_harness.mts";
 
@@ -107,13 +109,17 @@ const url = listingButtonUrl(facts);
 const resolvedDom =
   facts.daysOnMarket ?? daysSinceListed(await resolveSubjectListDate(facts), new Date());
 const rows: ProvenanceRow[] = [
-  ["Asking price", facts.price, "free spine (daily sweep)"],
+  // The price ladder grew its rung-2 read 08/18/2026 after this exact table printed
+  // "— OPEN SLOT · free spine (daily sweep)" for the ask while $689,000 sat in the
+  // bought row (probed live: the spine holds NO row for this address at all — the
+  // playbook's "100%, no fallback needed" was a coverage claim, not a guarantee).
+  ["Asking price", facts.price, "free spine → paid row (≤14d old, still for-sale) → live pull"],
   ["Address", facts.address, "free spine"],
   ["Beds", facts.beds, "free spine → paid row"],
   ["Baths", facts.baths, "free spine → Lee records → nearby-values → paid row"],
   ["Square feet", facts.sqft, "free spine → paid row"],
   ["Lot", facts.lotSize, "free spine (acres) → paid row (sq ft ÷ 43,560)"],
-  ["Property type", facts.propertyType, "free spine"],
+  ["Property type", facts.propertyType, "free spine → paid row style column"],
   [
     "Days on market",
     resolvedDom?.toString(),
@@ -122,7 +128,11 @@ const rows: ProvenanceRow[] = [
       : "our own listing clock via listed_date (real, not a floor)",
   ],
   ["Year built", facts.yearBuilt, "paid row ONLY — the free spine has no such column"],
-  ["HOA / month", facts.hoaFee ? `$${facts.hoaFee}` : undefined, "paid row, > 0 only"],
+  [
+    "HOA / month",
+    facts.hoaFee ? `$${facts.hoaFee}` : undefined,
+    "paid row, > 0 only — MODEL-VISIBLE ONLY, never a rendered cell (decree 08/18/2026)",
+  ],
   ["Hero photo", facts.photos[0] ? "yes" : undefined, "free spine, mirrored into our storage"],
   ["Gallery", facts.photos.length > 1 ? `${facts.photos.length - 1} more` : undefined, "paid row"],
   [
@@ -154,3 +164,44 @@ console.log(`  Button: ${url ? `→ ${url}` : "NONE (no real link — never a ho
 await renderAndSave(doc, "new-listing-email.html");
 printBrandCarry(p);
 if (narratorLog.length) console.log(`  NARRATOR: ${narratorLog.join(" | ")}`);
+
+// ── THE ASSERTIONS — this run is a TEST, not a screenshot (§1.17) ────────────
+// Added 08/18/2026 after this script printed a provenance table, saved an email with
+// NO PRICE and an HOA fee, and exited 0. An acceptance script that cannot go red is
+// a screenshot with extra steps.
+const cellValue = (label: string): string | undefined =>
+  doc.blocks
+    .filter((b) => b.type === "stats")
+    .flatMap((b) => (b.props as { stats?: { label: string; value: string }[] }).stats ?? [])
+    .find((s) => s.label === label)?.value || undefined;
+const heroValue = (
+  doc.blocks.find((b) => b.type === "hero" && !(b.props as { ribbon?: boolean }).ribbon)?.props as
+    { value?: string } | undefined
+)?.value;
+
+const checks: Assertion[] = [
+  {
+    name: "1 · NO COST CELL — no HOA on any buyer-facing email (operator decree 08/18/2026)",
+    pass: cellValue("HOA/mo") === undefined,
+    detail: cellValue("HOA/mo")
+      ? `HOA CELL RENDERED: ${cellValue("HOA/mo")} — costs are the agent's conversation`
+      : "no HOA cell (correct)",
+  },
+  {
+    name: "2 · a held ask REACHES THE HERO — never resolved and then rendered nowhere",
+    pass: !facts.price || heroValue === facts.price,
+    detail: facts.price
+      ? `facts.price ${facts.price} → hero ${heroValue ?? "(EMPTY)"}`
+      : "no ask held (open slot — legal, but check the paid row before accepting it)",
+  },
+  {
+    name: "3 · $/Sq Ft RENDERS whenever both operands are held (operator, 08/18/2026)",
+    pass: !(facts.price && facts.sqft) || Boolean(cellValue("$/Sq Ft")),
+    detail:
+      facts.price && facts.sqft
+        ? `${facts.price} ÷ ${facts.sqft} sq ft → cell ${cellValue("$/Sq Ft") ?? "(MISSING)"}`
+        : "an operand is open — the cell legitimately stays open with it",
+  },
+];
+
+reportAssertions("THE PRICE LEADS — read off the built doc, not off the source", checks);

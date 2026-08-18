@@ -19,8 +19,11 @@
 //      photo-less ZIP grab-bag.) Already resolved for you by the dispatcher.
 //   2. SKELETON — the coded flyer grid (`buildListingFlyer`).
 //   3. CELLS — price · beds · baths · sqft · $/sqft · lot · DOM, then a second row of
-//      year built · HOA · type. Each renders only if sourced; unsourced becomes an OPEN
+//      year built · type. Each renders only if sourced; unsourced becomes an OPEN
 //      SLOT the user can fill, and is absent from the sent email. Never a zero.
+//      NO COST CELLS — no HOA, no taxes, no carrying costs (operator decree 08/18/2026;
+//      see secondSpecRow). The email's job is to get the buyer to ARRIVE; costs are the
+//      agent's conversation.
 //   4. CHART — NONE. Operator ruling, 07/13/2026. This email is about a HOUSE, and
 //      its visual IS the photo. An area index says nothing about the house; a comps
 //      bar turns it into a comps email; price then-vs-now is two bars, which is a
@@ -54,26 +57,29 @@ import type { ListingFacts } from "@/lib/email/listing-scrape";
 import type { EmailDoc, StatItem } from "@/lib/email/doc/types";
 import type { ChromeBlock } from "@/lib/email/lifecycle-chrome";
 
-/** A monthly HOA fee as a reader reads it. Only ever called with a `> 0` value — the
- *  `0` gate lives at the source (`paid-record-lane.ts servableHoaFee`), because a vendor
- *  `0` is indistinguishable from an unfilled field and "$0/mo" is a fabricated figure. */
-function hoaCell(fee: number | undefined): string | undefined {
-  return typeof fee === "number" && fee > 0
-    ? `$${Math.round(fee).toLocaleString("en-US")}`
-    : undefined;
-}
-
 /**
- * THE SECOND SPEC ROW — year built · HOA · property type.
+ * THE SECOND SPEC ROW — year built · property type.
  *
- * These three were being RESOLVED AND THROWN AWAY. The first strip holds six cells and
+ * These were being RESOLVED AND THROWN AWAY. The first strip holds six cells and
  * DOM already takes the last one from Type, so `year_built` (the paid row's, the only
- * source we hold anywhere — the free spine has no such column at all) and `hoa_fee`
- * (12 of 26 rows carry a servable one) reached `ListingFacts` and then rendered nowhere.
+ * source we hold anywhere — the free spine has no such column at all) reached
+ * `ListingFacts` and then rendered nowhere.
  *
- * Emitted ONLY when at least TWO of the three are sourced — three empty cells under a full
- * strip is a wall, and one lone survivor is a full-width 28px orphan (see below).
- * `4+4+4` is a blessed row shape (§1.2).
+ * ⛔ NO HOA CELL — AND NO COST CELL OF ANY KIND (operator decree 08/18/2026: "why the
+ * fuck do we want HOA costs on there? We don't want to detour any potential buyers
+ * before arriving. The agent's job is to answer those questions.") A naked recurring
+ * cost with no amenity story attached — "$225/mo" with nothing saying whether that is
+ * golf, a pool, or a gate — is a detour, not a disclosure. This is the SAME ruling
+ * under-contract already implements (`hoaFee: undefined`, "costs are the realtor's")
+ * and the same family as the narrator's cost prohibitions in shared.ts — the rendered
+ * cell was the last surface it had not been walked to. `facts.hoaFee` still resolves
+ * and the model still SEES it (operator, 08/06/2026: "why would the model not see
+ * HOA????"); it is the READER-facing cell that is banned. Taxes, insurance, carrying
+ * costs: same rule. The one email allowed to print a cost is the one whose story IS
+ * the cost — a price cut on price-reduced, the sale price on just-sold.
+ *
+ * Emitted ONLY when BOTH cells are sourced — one lone survivor is a full-width 28px
+ * orphan (see below).
  */
 export function secondSpecRow(
   facts: ListingFacts,
@@ -81,23 +87,22 @@ export function secondSpecRow(
    *  belongs here; when it did not, Type is already on screen and must not print twice. */
   domTookTypeSlot: boolean,
 ): ChromeBlock[] {
-  // ALL THREE AT THE SAME SIZE. The first cut marked Type `muted`, and the operator's
-  // screenshot of this exact row (08/05/2026) is the argument against it: "1988" and "$1,326"
-  // rendered large while "Single Family" rendered small, so a three-cell row read as two cells
-  // and an afterthought. A row of peers is a row of peers.
+  // BOTH AT THE SAME SIZE. The first cut marked Type `muted`, and the operator's
+  // screenshot of this exact row (08/05/2026) is the argument against it: values at
+  // two sizes made the row read as a cell and an afterthought. A row of peers is a
+  // row of peers.
   const cells: StatItem[] = [
     spec(facts.yearBuilt, "Built"),
-    spec(hoaCell(facts.hoaFee), "HOA/mo"),
     spec(domTookTypeSlot ? shortType(facts.propertyType) || undefined : undefined, "Type"),
   ];
   // A ROW OF PEERS NEEDS PEERS (operator, 08/09/2026: "nor can house type or
   // whatever it is [sit] on its own line"). StatsBlock drops unsourced cells at
   // render, so a row emitted with ONE sourced cell ships as a single full-width
   // 28px orphan — the rendered new-listing capture showed a lone "Residential /
-  // Type" band when Built + HOA both missed. Two sourced cells make a row; one
-  // does not. Type alone is the cell the reader "will never use" (listingSpecs'
-  // own words) and Built/HOA alone read no better, so a lone survivor is dropped,
-  // never enthroned.
+  // Type" band when Built missed. Two sourced cells make a row; one does not.
+  // Type alone is the cell the reader "will never use" (listingSpecs' own words)
+  // and Built alone reads no better, so a lone survivor is dropped, never
+  // enthroned.
   if (cells.filter((c) => c.value.trim().length > 0).length < 2) return [];
   return [
     {
@@ -136,9 +141,9 @@ export async function buildNewListing(ctx: RecipeBuildContext): Promise<EmailDoc
   // `descriptionSlot`, which both narrative passes below skip) and points its single
   // button at the real listing page — or drops the button entirely when we hold no link.
   //
-  // The second spec row carries `year_built` and the HOA fee — two facts we already hold and
-  // were resolving into `ListingFacts` and then rendering NOWHERE, because the six-cell strip
-  // is full and DOM already took Type's slot.
+  // The second spec row carries `year_built` (and Type when DOM displaced it) — facts we
+  // already hold and were resolving into `ListingFacts` and then rendering NOWHERE, because
+  // the six-cell strip is full. Never a cost cell — see secondSpecRow's ban.
   const domTookTypeSlot = daysOnMarket != null && daysOnMarket >= 0;
   let doc = buildListingFlyer(
     facts,

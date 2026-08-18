@@ -369,10 +369,12 @@ async function attemptHouseNarrative(facts: ListingFacts): Promise<string | null
  * quietly means something else. Omitted → Type keeps the slot (`listingSpecs`), so the
  * strip is still six full cells.
  *
- * `secondSpecRow(facts, false)` adds year built · HOA · type when we hold them — MORE
- * sourced house detail, which is literally what *"add the extra stuff, but get the details
- * first"* asks for. **`false` is load-bearing**: with no DOM cell the first strip's sixth
- * slot already IS Type, and passing `true` would print Type twice.
+ * `secondSpecRow(facts, false)` — on THIS email the row is now always empty and the call
+ * is kept for the day a second peer cell exists: HOA was banned from every buyer-facing
+ * cell (operator decree 08/18/2026, see secondSpecRow's ⛔ block), and with no DOM here
+ * Type sits in the first strip, leaving Built alone — a one-cell orphan the row rule
+ * drops. **`false` is load-bearing**: with no DOM cell the first strip's sixth slot
+ * already IS Type, and passing `true` would print Type twice.
  *
  * Never refuses (RULE 0.7): an unsourced cell is an open slot, no description held → no
  * description block, no photo → a dropzone, no listing url → no button, and a failed

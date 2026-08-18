@@ -25,9 +25,19 @@
 // ── WHAT IT MAY AND MAY NOT FILL ─────────────────────────────────────────────
 // ONLY facts that do not move: the description, the photo gallery, the bath count,
 // the HOA fee, and (added 08/05/2026) beds, square feet, lot size and year built.
-// It may NEVER fill list price, status, or days on market from a cached row — a price
-// from three weeks ago presented as today's ask is a wrong number, not a stale one.
-// Those stay with the live record.
+// It may NEVER fill status or days on market from a cached row.
+//
+// THE ASK — amended 08/18/2026, and the amendment keeps the original rule's teeth.
+// The original ban read "it may NEVER fill list price — a price from three weeks ago
+// presented as today's ask is a wrong number, not a stale one." Then the acceptance
+// render shipped the operator an email with NO PRICE AT ALL — and an HOA fee read
+// happily from this very row while the $689,000 ask beside it was refused. Operator:
+// "where the fuck is price per square foot." A missing ask is a worse number than a
+// week-old one. So: price now fills, GAP-ONLY (a live-spine ask always wins), through
+// a gate the original objection sets the ceiling for — three weeks is the named
+// failure, so the window is HALF that (14 days), and only while the vendor still
+// marks the row for-sale. Stale or off-market → the slot stays open for the live
+// pull (shared.ts lane 3b) or the agent, exactly as before.
 //
 // ── WHY THE SPEC RUNGS WERE ADDED — the census, counted live 08/05/2026 ───────
 // Over `data_lake.listing_state` (35,202 rows), the FREE spine carries:
@@ -54,8 +64,12 @@ import { listingAddressKey } from "./apify-baths";
 import type { ListingFacts } from "@/lib/email/listing-scrape";
 
 /** Specs barely move; a description and a gallery move even less. A long window is
- *  correct HERE and would be wrong for price — which this lane never fills. */
+ *  correct HERE and would be wrong for price — which gets its own, much tighter gate. */
 const SPEC_MAX_AGE_DAYS = 365;
+
+/** The ask's freshness ceiling. "Three weeks old" is the documented failure this
+ *  lane's original price ban named; the serve window is half that. See the header. */
+export const PRICE_MAX_AGE_DAYS = 14;
 
 /**
  * THE HOA GATE. Counted live 08/05/2026: 19 of 26 rows carry a non-null `hoa_fee`
@@ -143,6 +157,8 @@ export interface PaidLaneFill {
   lotSize: boolean;
   yearBuilt: boolean;
   listingUrl: boolean;
+  price: boolean;
+  propertyType: boolean;
 }
 
 export const NO_FILL: PaidLaneFill = {
@@ -156,6 +172,8 @@ export const NO_FILL: PaidLaneFill = {
   lotSize: false,
   yearBuilt: false,
   listingUrl: false,
+  price: false,
+  propertyType: false,
 };
 
 export interface PaidLaneDeps {
@@ -296,6 +314,42 @@ export async function fillFromPaidRecord(
     if (yb != null) {
       facts.yearBuilt = String(yb);
       fill.yearBuilt = true;
+    }
+  }
+
+  // THE ASK — the one moving fact this lane serves, through the tight gate the header
+  // documents (08/18/2026): gap-only, still marked for-sale by the vendor, and fetched
+  // within PRICE_MAX_AGE_DAYS. Status compares case-insensitively — the vendor has
+  // shipped both "for_sale" and "FOR_SALE" for the same state, and a casing branch is
+  // not a market state. Without this cell the flyer has no hero price and no $/Sq Ft:
+  // the acceptance house rendered its HOA fee from this row while the ask sat unread.
+  if (!facts.price) {
+    const ask = positiveInt(row.list_price);
+    const forSale =
+      typeof row.status === "string" && row.status.trim().toLowerCase() === "for_sale";
+    const fetchedMs = typeof row.fetched_at === "string" ? Date.parse(row.fetched_at) : NaN;
+    const freshEnough =
+      Number.isFinite(fetchedMs) && Date.now() - fetchedMs <= PRICE_MAX_AGE_DAYS * 86_400_000;
+    if (ask != null && forSale && freshEnough) {
+      facts.price = `$${ask.toLocaleString("en-US")}`;
+      fill.price = true;
+    }
+  }
+
+  // PROPERTY TYPE — a non-moving fact the row has carried since day one and NOBODY
+  // read (08/18/2026, the acceptance house: Type "— OPEN SLOT" with SINGLE_FAMILY on
+  // disk). The vendor's key is `style` — promoted to its own column by toRow — NOT
+  // `property_type`: the fresh-pull lane's `raw.property_type` read was a dead rung
+  // from the day it was written (probed live: no such key in the blob). `style` first,
+  // `raw.property_type` kept as a fallback for any actor shape that does use it.
+  // Same gap-fill contract; `shortType` maps SINGLE_FAMILY at the render edge.
+  if (!facts.propertyType) {
+    const styleCol = typeof row.style === "string" ? row.style.trim() : "";
+    const rawType = (row.raw as Record<string, unknown> | undefined)?.property_type;
+    const t = styleCol || (typeof rawType === "string" ? rawType.trim() : "");
+    if (t) {
+      facts.propertyType = t;
+      fill.propertyType = true;
     }
   }
 

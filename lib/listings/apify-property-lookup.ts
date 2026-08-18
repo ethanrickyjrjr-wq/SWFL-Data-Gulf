@@ -311,7 +311,10 @@ export async function fillFactsFromFreshRow(
     readCache: async (keys) => new Map(keys.map((k) => [k, row])),
   }).catch(() => ({ ...NO_FILL }));
 
-  const status = typeof row.status === "string" ? row.status : null;
+  // Case-insensitive: the vendor has shipped BOTH "for_sale" and "FOR_SALE" for the
+  // same state (a stored row probed live 08/18/2026 reads "FOR_SALE"), and an exact
+  // lowercase compare silently dropped the ask on the uppercase spelling.
+  const status = typeof row.status === "string" ? row.status.trim().toLowerCase() : null;
   const active = status === "for_sale" || status === "pending";
   if (!facts.price && active && positive(row.list_price)) {
     facts.price = usd(row.list_price);
@@ -325,8 +328,7 @@ export async function fillFactsFromFreshRow(
   ) {
     facts.daysOnMarket = row.days_on_mls;
   }
-  if (!facts.propertyType) {
-    const t = str((row.raw as Record<string, unknown> | undefined)?.property_type);
-    if (t) facts.propertyType = t;
-  }
+  // Property type now fills inside fillFromPaidRecord (row.style — the vendor's
+  // actual key; the `raw.property_type` read that used to sit here was a dead rung,
+  // probed live 08/18/2026: the blob has no such key).
 }

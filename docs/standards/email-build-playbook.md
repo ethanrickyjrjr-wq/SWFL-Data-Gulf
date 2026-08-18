@@ -997,7 +997,17 @@ user's brand profile. No data source involved. The postal address is a CAN-SPAM 
 design choice. **The headshot is the field agents most often skip — it must survive being missing.**
 The identity block sits at the TOP (confirmed independently at Zillow, Compass and BoldTrail).
 
-**Asking price · street · city · state · ZIP** — the free spine. 100%. No fallback needed.
+**Asking price** — the free spine → **the paid row we already own, gated**: only when the row was
+fetched within 14 days AND the vendor still marks it for-sale (`PRICE_MAX_AGE_DAYS`,
+`paid-record-lane.ts`) → the live pull (lane 3b) → OPEN. **"The free spine, 100%, no fallback
+needed" was this line until 08/18/2026, and it was a coverage claim wearing a guarantee's clothes:**
+the acceptance house itself had NO spine row at all (probed live), so the email rendered its HOA fee
+from the bought row while refusing the $689,000 ask in the same row — no price, no $/sq ft.
+Operator: *"where the fuck is price per square foot."* The stale-ask objection that justified the
+old ban ("a price from three weeks ago is a wrong number") sets the gate's ceiling: the window is
+half of three weeks, and off-market rows never serve.
+
+**Street · city · state · ZIP** — the free spine, seeded from the typed text on a miss.
 
 **Property type** — the free spine. 100%. Mapped to a display label at the render edge only
 (`shortType`); the lake's `single_family` reached a real inbox once as `single_family`.
@@ -1038,9 +1048,17 @@ as a fact.** A fresh listing reads ONE, not zero.
 **YEAR BUILT** — **the paid row and nothing else.** The free spine has no such column at all. 20 of
 26 rows. → OPEN.
 
-**HOA FEE** — the paid row, **greater than zero ONLY.** 19 of 26 rows are non-null and **seven of
-those are literally `0`**, so real coverage is 12 of 26. A vendor `0` is indistinguishable from a
-field it never filled; rendering "$0/mo" is a fabricated figure. **A `0` is an OPEN SLOT.**
+**HOA FEE — ⛔ NEVER A RENDERED CELL. Operator decree 08/18/2026:** *"why the fuck do we want HOA
+costs on there? We don't want to detour any potential buyers before arriving. The agent's job is to
+answer those questions."* A naked recurring cost with no amenity story — "$225/mo" with nothing
+saying whether that buys golf, a pool, or a gate — is a detour, not a disclosure. The fee still
+RESOLVES into `ListingFacts` (the model may see it; the narrator's cost prohibitions already ban it
+from prose), but no buyer-facing email prints a cost cell — no HOA, no taxes, no carrying costs.
+The one email allowed to print a cost is the one whose story IS the cost (price-reduced's cut,
+just-sold's sale price). Under-contract had already implemented this ("costs are the realtor's");
+the rendered cell on new-listing/back-on-market was the last surface the ruling hadn't been walked
+to. Source mechanics unchanged for the model-visible value: paid row, greater than zero only — a
+vendor `0` is indistinguishable from an unfilled field.
 
 **THE DESCRIPTION — the biggest quality lever in this email.** The agent's own pasted words (lane
 2, and the best source) → the paid row's `description` (20 of 26, measured 368 to 2,983 characters)
@@ -1335,9 +1353,9 @@ That is a live defect, not a ladder rung.**
 
 | Cell | Rung 1 | Rung 2 | Rung 3 | Exhausted |
 |---|---|---|---|---|
-| **Asking price** | free spine (100%) | — | — | never misses |
+| **Asking price** | free spine | paid row ≤14d + still for-sale (08/18/2026 — "100%, never misses" was disproven by the §2.1 acceptance house itself) | live pull | OPEN |
 | **City · state** | free spine (100%) | — | — | `Southwest Florida` (a field: `regionLabel`) |
-| **Property type** | free spine (100%) | — | — | cell keeps its slot |
+| **Property type** | free spine | paid row `raw.property_type` (08/18/2026) | — | cell keeps its slot |
 | **Hero photo** | free spine `photo_url` (98.5%), mirrored to our storage | paid row `primary_photo` | — | OPEN dropzone, alt = the CITY |
 | **Beds** | free spine (73.7%) | paid row | — | OPEN |
 | **Square feet** | free spine (70.6%) | paid row | — | OPEN |

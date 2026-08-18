@@ -135,9 +135,10 @@ if (!built) {
 const doc = applyBrand(built, BRAND);
 
 // ── THE CELLS AS BUILT — read off the doc, never re-derived ──────────────────
-// Scans BOTH stats rows (the strip and `secondSpecRow`'s built/HOA row), because year
-// built and the HOA fee live in the second one. An earlier cut of this file also bound
-// the strip alone and then never read it — the lint caught it.
+// Scans BOTH stats rows. Since 08/18/2026 the second row is EMPTY on this email:
+// the HOA cell is banned everywhere (operator: costs are the agent's conversation,
+// not the email's), and Built alone is a one-cell orphan the row rule drops. The
+// scan stays two-row so a regression that re-adds a cost cell is SEEN here.
 const cell = (label: string): string | undefined =>
   doc.blocks
     .filter((b) => b.type === "stats")
@@ -167,8 +168,12 @@ const rows: ProvenanceRow[] = [
   ["Lot", cell("Lot"), "free spine → paid row"],
   ["$/Sq Ft", cell("$/Sq Ft"), "DERIVED — list price ÷ listed sq ft (both cells two over)"],
   ["Type", cell("Type"), "free spine property_type, mapped at the render edge"],
-  ["Year built", cell("Built"), "paid row ONLY — no other source holds it"],
-  ["HOA / mo", cell("HOA/mo"), "paid row ONLY, and only when > 0"],
+  [
+    "Year built",
+    cell("Built"),
+    "paid row ONLY — but on THIS email it has no peer cell, so the row drops (no orphans)",
+  ],
+  ["HOA / mo", cell("HOA/mo"), "BANNED cell (08/18/2026) — must always read OPEN here"],
   [
     "Seller's description",
     descriptionBlock ? "SHIPS VERBATIM" : undefined,
@@ -274,6 +279,13 @@ const checks: Assertion[] = [
     name: "6 · the CTA never points at our homepage (§1.8 — no real link means no button)",
     pass: !/^https?:\/\/(www\.)?swfldatagulf\.com\/?$/i.test(buttonProps?.url ?? ""),
     detail: buttonProps?.url ?? "(no destination — correct when we hold no listing page)",
+  },
+  {
+    name: "7 · NO COST CELL — no HOA on any buyer-facing email (operator decree 08/18/2026)",
+    pass: cell("HOA/mo") === undefined,
+    detail: cell("HOA/mo")
+      ? `HOA CELL RENDERED: ${cell("HOA/mo")} — costs are the agent's conversation`
+      : "no HOA cell (correct)",
   },
 ];
 

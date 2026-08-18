@@ -55,6 +55,14 @@ guard: BUILT — four-lane gate (07/22/2026) + RULE 0.95 + what-do-we-have skill
 - strike: 08/11 "we have fucking graphify in this repo and swfldatagulf-ops" — framed a vendor
   email around their signup funnel; never checked the sibling ops repo (it renders the graph at
   app/graph/page.tsx off a published brain-graph.json) before talking about what we'd "get"
+- strike: 08/18 "where the fuck is price per square foot" — the new-listing email shipped with NO
+  PRICE while the $689,000 ask sat in our own bought row (`paid-record-lane.ts` refused the one
+  column, rendered the HOA from the same row), the Type cell sat open while `style=SINGLE_FAMILY`
+  sat promoted in the same row, and the fresh lane's `raw.property_type` read was a DEAD KEY from
+  the day it was written (the vendor blob has no such key — probed live). Three unread fields in
+  ONE row we paid for. GUARD GAP: the four-lane gate fires on ANSWERS; nothing fired on a RENDER
+  that quietly left slots open — the acceptance script printed the provenance table and exited 0.
+  Fixed same session: price/style rungs added + the script now carries red assertions (§1.17).
 
 ## shape: tool-wired-but-never-called
 guard: OWED — a UserPromptSubmit classifier that detects a structural-code question ("where is X handled", "what depends on", "who calls", "what breaks if", "blast radius") and injects the literal ToolSearch + `mcp__graphify-local__query_graph` call line. Root cause is mechanical, not attitudinal: every `mcp__graphify*` tool is DEFERRED (name-only, needs a ToolSearch round-trip) while Grep/Glob/Read are pre-loaded, so the default reach is always the loaded tool. Distinct from didnt-read-what-we-hold — that shape's four-lane gate PASSES here, because a grep satisfies its CODE lane. Needs operator sign-off (fires every prompt, every session — RULE 11 + RULE 3 C2). Check open: graphify_first_reach_hook

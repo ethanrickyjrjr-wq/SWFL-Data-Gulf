@@ -525,14 +525,18 @@ describe("PROPERTY mode — a specific listing back on the market", () => {
     expect(await renderEmailDocHtml(doc)).toContain(NARRATIVE);
   });
 
-  test("the SECOND spec row carries year built + HOA when we hold them", async () => {
+  test("NO HOA CELL, EVER — even when the fee is held (operator decree 08/18/2026)", async () => {
+    // "We don't want to detour any potential buyers before arriving. The agent's job is
+    // to answer those questions." The fee still reaches ListingFacts (the model may see
+    // it); the READER-facing cell is banned. See secondSpecRow's ⛔ block.
     const doc = (await buildProperty(RELISTED_HOME_RICH))!;
-    expect(cellNamed(doc, "Built")!.value).toBe("1998");
-    expect(cellNamed(doc, "HOA/mo")!.value).toBe("$145");
-    // `secondSpecRow(facts, false)` — Type already holds the FIRST strip's sixth slot, so
-    // the second row must never print the VALUE again. (It keeps a labelled empty cell:
-    // that is an open slot on the canvas, absent from the sent email — same as new-listing
-    // whenever it has no DOM to displace Type with.)
+    expect(cellNamed(doc, "HOA/mo")).toBeUndefined();
+    // And with HOA gone, this email's second row is Built alone — a one-cell orphan, so
+    // the whole row is dropped (08/09/2026: no cell "on its own line"). Year built shows
+    // only where a peer cell exists to sit beside it (new-listing, when DOM displaces
+    // Type into the second row).
+    expect(cellNamed(doc, "Built")).toBeUndefined();
+    // Type still prints exactly once — in the FIRST strip's sixth slot.
     expect(allCells(doc).filter((c) => c.label === "Type" && c.value)).toHaveLength(1);
   });
 

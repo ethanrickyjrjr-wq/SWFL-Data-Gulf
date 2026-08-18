@@ -131,3 +131,58 @@ describe("THE REAL PATH — a NATURALLY TYPED prompt, not the seed template", ()
     });
   });
 });
+
+// ── THE SECOND SPEC ROW — pure, offline, no build needed ─────────────────────
+// Operator decree 08/18/2026: "why the fuck do we want HOA costs on there? We don't
+// want to detour any potential buyers before arriving. The agent's job is to answer
+// those questions." The reader-facing cost cell is banned; the fee still reaches
+// ListingFacts for the model. These tests are the regression tripwire.
+const { secondSpecRow } = await import("./new-listing");
+
+describe("secondSpecRow — no cost cells, no orphan rows", () => {
+  const cellsOf = (blocks: ReturnType<typeof secondSpecRow>) =>
+    blocks.flatMap((b) => (b.block.props as { stats: { label: string; value: string }[] }).stats);
+
+  test("FAILURE: an HOA cell renders even though the fee is held", () => {
+    const rows = secondSpecRow(
+      {
+        address: "x",
+        photos: [],
+        sourceUrl: "s",
+        yearBuilt: "2003",
+        hoaFee: 225,
+        propertyType: "single_family",
+      },
+      true,
+    );
+    const labels = cellsOf(rows).map((c) => c.label);
+    expect(labels).not.toContain("HOA/mo");
+    expect(labels).toEqual(["Built", "Type"]);
+  });
+
+  test("Built + Type render as peers when DOM displaced Type into this row", () => {
+    const rows = secondSpecRow(
+      {
+        address: "x",
+        photos: [],
+        sourceUrl: "s",
+        yearBuilt: "2003",
+        propertyType: "single_family",
+      },
+      true,
+    );
+    const cells = cellsOf(rows);
+    expect(cells.find((c) => c.label === "Built")?.value).toBe("2003");
+    expect(cells.find((c) => c.label === "Type")?.value).toBe("Single Family");
+  });
+
+  test("FAILURE: Built alone ships as a full-width orphan — one sourced cell drops the row", () => {
+    // Type on the first strip (no DOM) leaves Built with no peer: no row at all.
+    expect(
+      secondSpecRow(
+        { address: "x", photos: [], sourceUrl: "s", yearBuilt: "2003", hoaFee: 225 },
+        false,
+      ),
+    ).toEqual([]);
+  });
+});
