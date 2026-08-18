@@ -41,6 +41,41 @@ describe("consume-stream race rule — the human wins", () => {
     void finalDoc;
   });
 
+  // A RESEAT IS NOT A LICENCE TO OVERWRITE. The user can edit between the Build
+  // click and the first `skeleton` beat — the window is small but it is the one
+  // moment the canvas already holds their doc and the stream has not spoken yet.
+  // Before this, `skeleton` replaced the doc wholesale: the edit was reverted,
+  // its id stayed in `touched` (so every later `block` beat skipped it), and
+  // `done`'s merge then read the SERVER's copy back out of `state.doc` — the
+  // human's words were gone from a lane whose whole promise is that they aren't.
+  test("a skeleton reseat KEEPS a touched block the user edited before it arrived", () => {
+    let s = applyStreamEvent(initialStreamState(), { e: "skeleton", doc: skel() });
+    const touchedId = s.doc!.blocks[0].id;
+    // The user types into a block, and the shell reports it: markTouched + the
+    // doc they produced (exactly what noteUserBlockEdit does in the grid shell).
+    const edited = structuredClone(s.doc!) as EmailDoc;
+    (edited.blocks[0].props as Record<string, unknown>).prose = "the human wrote this";
+    s = { ...markTouched(s, touchedId), doc: edited };
+    // The primary lane's skeleton carries the SAME ids as the canvas doc.
+    const reseat = structuredClone(s.doc!) as EmailDoc;
+    for (const b of reseat.blocks) (b.props as Record<string, unknown>).prose = "server skeleton";
+    s = applyStreamEvent(s, { e: "skeleton", doc: reseat });
+    expect((s.doc!.blocks[0].props as Record<string, unknown>).prose).toBe("the human wrote this");
+    // …and every block they did NOT touch reseats from the server.
+    expect((s.doc!.blocks[1].props as Record<string, unknown>).prose).toBe("server skeleton");
+  });
+
+  test("a skeleton whose ids are all different replaces everything (last one wins)", () => {
+    let s = applyStreamEvent(initialStreamState(), { e: "skeleton", doc: skel() });
+    s = markTouched(s, s.doc!.blocks[0].id);
+    // A builder fallthrough reseats a DIFFERENT doc — fresh ids, nothing to keep.
+    const fresh = skel();
+    expect(fresh.blocks[0].id).not.toBe(s.doc!.blocks[0].id);
+    s = applyStreamEvent(s, { e: "skeleton", doc: fresh });
+    expect(s.doc!.blocks.map((b) => b.id)).toEqual(fresh.blocks.map((b) => b.id));
+    expect(s.doc!.blocks[0].props).toEqual(fresh.blocks[0].props);
+  });
+
   test("status and error update chip state without touching the doc", () => {
     let s = applyStreamEvent(initialStreamState(), { e: "status", label: "pulling comps" });
     expect(s.statusLabel).toBe("pulling comps");
