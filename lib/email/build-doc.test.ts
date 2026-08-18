@@ -7,6 +7,7 @@ import {
   docSkeleton,
   applyPatch,
   unfilledFigureSlots,
+  type BuildResult,
 } from "./build-doc";
 import { BlockContentPatchSchema } from "./doc/schema";
 import type { EmailDoc } from "./doc/types";
@@ -464,4 +465,76 @@ test("docSkeleton SHOWS a list's rows and a multi-column's cards (stats was the 
   expect(skeleton).toContain("525,000 median ask");
   expect(skeleton).toContain("Buyers");
   expect(skeleton).toContain("price to the comps");
+});
+
+// ── LIVE BUILD STREAMING (spec 2026-08-18) — the observe-only progress lane ───
+// `onProgress` exists so the streaming route can paint a build as it happens. The
+// whole contract is that it CANNOT change the build: absent, the build is what it
+// always was; present, it still is. These three tests are what make that claim
+// checkable instead of asserted in a comment.
+
+test("PROGRESS-1: onProgress is OBSERVE-ONLY — the payload is byte-identical with and without it", async () => {
+  const current = SEED_DOCS.find((s) => s.id === "market-spotlight")!.build();
+  const prompt = "Write a friendly market update email with a strong subject line.";
+  const silent = await authorDoc({ prompt, rawDoc: current });
+  const watched = await authorDoc({ prompt, rawDoc: current, onProgress: () => {} });
+  // The seat's block ids are freshly generated per build (`seedById(...).build()`),
+  // so they differ between ANY two runs, watched or not. Normalize them out — what
+  // must match is every byte the build actually decided.
+  const stable = (r: BuildResult) =>
+    JSON.stringify(r.payload).replace(/"block_[0-9a-f]+"/g, '"block_ID"');
+  expect(stable(watched)).toBe(stable(silent));
+  expect(watched.payload.applied).toBe(true);
+});
+
+test("PROGRESS-2: the skeleton beat lands BEFORE any model call, and a THROWING observer never breaks the build", async () => {
+  const current = SEED_DOCS.find((s) => s.id === "market-spotlight")!.build();
+  const seen: string[] = [];
+  const result = await authorDoc({
+    prompt: "Write a friendly market update email with a strong subject line.",
+    rawDoc: current,
+    onProgress: (ev) => {
+      seen.push(ev.stage === "status" ? `status:${ev.label}` : ev.stage);
+      // A consumer that throws is a broken observer, not a failed build.
+      throw new Error("a broken observer");
+    },
+  });
+  expect(result.payload.applied).toBe(true);
+  expect(seen[0]).toBe("skeleton");
+  expect(seen).toContain("status:laying out your email");
+  expect(seen).toContain("status:filling in sourced facts");
+});
+
+test("PROGRESS-3: every block beat carries the post-stage working doc — Task 5 validates against THAT doc", async () => {
+  mock.module("@/lib/deliverable/recipes/default-grid", () => ({
+    buildDefaultGrid: async (ctx: { currentDoc: EmailDoc }) => ({
+      ...ctx.currentDoc,
+      blocks: ctx.currentDoc.blocks.map((b) =>
+        b.type === "text" ? { ...b, props: { ...b.props, body: "STREAMED BODY" } } : b,
+      ),
+    }),
+  }));
+  const current = SEED_DOCS.find((s) => s.id === "market-spotlight")!.build();
+  const beats: { stage: string; label?: string; blockId?: string; doc?: unknown }[] = [];
+  const result = await authorDoc({
+    prompt: "Write a friendly market update email with a strong subject line.",
+    rawDoc: current,
+    onProgress: (ev) => beats.push(ev),
+  });
+  expect(result.payload.applied).toBe(true);
+  const blockBeats = beats.filter((b) => b.stage === "block");
+  expect(blockBeats.length).toBeGreaterThan(0);
+  for (const b of blockBeats) {
+    expect(typeof b.blockId).toBe("string");
+    // THE INTERFACE TASK 5 DEPENDS ON: the working doc rides along on every block
+    // beat, so the route never has to re-derive one to validate the block.
+    const doc = b.doc as EmailDoc;
+    expect(doc?.blocks?.some((x) => x.id === b.blockId)).toBe(true);
+  }
+  // Authored prose is announced before its blocks go out.
+  const proseBeat = beats.findIndex((b) => b.label === "writing commentary");
+  expect(proseBeat).toBeGreaterThan(-1);
+  expect(beats.slice(proseBeat).some((b) => b.stage === "block" && b.doc !== undefined)).toBe(true);
+  // Process-global mock — restore so nothing added below inherits it.
+  mock.module("@/lib/deliverable/recipes/default-grid", () => defaultGridOrig);
 });

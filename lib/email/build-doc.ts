@@ -698,7 +698,23 @@ export interface BuildArgs {
    *  which project the caller is actually in — and inheriting "whatever project was
    *  open last" is the one failure mode of this build that ships silently. */
   grounding?: string;
+  /** Observe-only build progress for the streaming lane. Never alters what the
+   *  build computes; never awaited. */
+  onProgress?: (ev: BuildProgressEvent) => void;
 }
+
+/** One observe-only progress beat (spec 2026-08-18, live build streaming). The
+ *  route translates these into the wire protocol (`lib/email/lab/stream-events.ts`);
+ *  `doc` is route-internal — it rides along on every `block` beat so the streaming
+ *  route can validate the block against the CURRENT working doc without re-deriving
+ *  it, and it never goes on the wire. */
+export type BuildProgressEvent = {
+  stage: "status" | "skeleton" | "block";
+  label?: string;
+  doc?: unknown;
+  blockId?: string;
+  props?: Record<string, unknown>;
+};
 
 export interface BuildResult {
   httpStatus?: number;
@@ -1034,6 +1050,23 @@ function dropEmptyChartSlot(doc: EmailDoc): EmailDoc {
   };
 }
 
+// ── Progress diffing (OBSERVE-ONLY — never reads back into the build) ────────
+/** The chart slot, so a chart beat can be labeled as one. */
+function isChartBlock(b: EmailDoc["blocks"][number]): boolean {
+  return b.type === "image" && b.props.kind === "chart";
+}
+
+/** Blocks in `after` that are NEW or whose props differ from `before`, by block id.
+ *  Used ONLY to decide which `block` progress beats to emit — never to change what
+ *  the build produces. Comparison is `JSON.stringify` on props, so it is key-order
+ *  sensitive: it can over-report (a re-keyed but identical props object counts as
+ *  changed). That is deliberate — on an advisory stream a spurious beat repaints a
+ *  block with its own correct value, while a MISSED beat leaves the client stale. */
+function changedBlocks(before: EmailDoc, after: EmailDoc): EmailDoc["blocks"] {
+  const prior = new Map(before.blocks.map((b) => [b.id, JSON.stringify(b.props)]));
+  return after.blocks.filter((b) => prior.get(b.id) !== JSON.stringify(b.props));
+}
+
 /** Fill the FIRST empty text block (the commentary slot) with the paragraph. */
 function fillNarrative(doc: EmailDoc, body: string): EmailDoc {
   let done = false;
@@ -1137,6 +1170,7 @@ export async function authorDoc({
   recipeKey,
   recipeId,
   savedLayout,
+  onProgress,
 }: BuildArgs): Promise<BuildResult> {
   const docParsed = EmailDocSchema.safeParse(rawDoc);
   if (!docParsed.success) {
@@ -1145,6 +1179,47 @@ export async function authorDoc({
   const placeholderMiss = unfilledPlaceholderMiss(prompt);
   if (placeholderMiss) return placeholderMiss;
   const currentDoc = docParsed.data;
+
+  // ── OBSERVE-ONLY PROGRESS ──────────────────────────────────────────────────
+  // Absent `onProgress` = zero behavior change; every beat below goes through
+  // here. The try/catch is the thing that makes "observe-only" true rather than
+  // merely intended: a consumer that throws must not become a failed build. It
+  // is never awaited, so a slow consumer cannot stall the build either.
+  const emit = (ev: BuildProgressEvent): void => {
+    try {
+      onProgress?.(ev);
+    } catch {
+      /* a broken observer never breaks the build it is watching */
+    }
+  };
+
+  // The post-build beats, in the order the work actually happened inside the
+  // builder: sourced cells, then the chart, then the prose. Each block beat
+  // carries the working doc so the streaming route validates against THIS doc
+  // instead of re-deriving one.
+  const emitBuilt = (before: EmailDoc, after: EmailDoc): void => {
+    if (!onProgress) return; // never pay for the diff when nobody is watching
+    const changed = changedBlocks(before, after);
+    const charts = changed.filter(isChartBlock);
+    const prose = changed.filter((b) => b.type === "text");
+    const sourced = changed.filter((b) => !isChartBlock(b) && b.type !== "text");
+    const beat = (b: EmailDoc["blocks"][number]) =>
+      emit({
+        stage: "block",
+        blockId: b.id,
+        props: b.props as Record<string, unknown>,
+        doc: after,
+      });
+    for (const b of sourced) beat(b);
+    if (charts.length) {
+      emit({ stage: "status", label: "building the chart" });
+      for (const b of charts) beat(b);
+    }
+    if (prose.length) {
+      emit({ stage: "status", label: "writing commentary" });
+      for (const b of prose) beat(b);
+    }
+  };
 
   // The shared post-build tail — the user's-own-grid pour-through, added-slot
   // authoring, and late bio resolution — for BOTH the keyed-recipe branch and
@@ -1289,6 +1364,15 @@ export async function authorDoc({
         : null;
     const resolvedSubject = subject ? await resolveSubject(subject, prompt) : null;
 
+    // The grid the client already holds, with its brand chrome — emitted BEFORE
+    // the builder (and so before any model call) so the stream can paint a real
+    // skeleton immediately. The recipe's own coded grid is assembled INSIDE the
+    // builder, which is one opaque await from here; its blocks arrive as the
+    // post-build beats below.
+    emit({ stage: "skeleton", doc: currentDoc });
+    emit({ stage: "status", label: "laying out your email" });
+    emit({ stage: "status", label: "filling in sourced facts" });
+
     const built = await keyedBuilder({
       recipe: keyedRecipe,
       prompt,
@@ -1339,6 +1423,7 @@ export async function authorDoc({
         );
       }
       if (parsed.success) {
+        emitBuilt(currentDoc, parsed.data);
         return finish(keyedRecipe, parsed.data, resolvedSubject, subject);
       }
       // Invalid builder output falls out to the ONE-LANE terminal fallback below —
@@ -1382,6 +1467,13 @@ export async function authorDoc({
       if (mirrored) facts.photos[0] = mirrored;
     }
     let flyer = buildListingFlyer(facts, currentDoc);
+    // The coded flyer grid EXISTS here, carrying the canvas doc's brand chrome,
+    // and no model has been called yet — the one true skeleton boundary on this
+    // lane. Its sourced cells are already filled, so they beat out immediately.
+    emit({ stage: "skeleton", doc: flyer });
+    emit({ stage: "status", label: "laying out your email" });
+    emit({ stage: "status", label: "filling in sourced facts" });
+    emitBuilt(currentDoc, flyer);
 
     // Fill the chart slot IN PLACE (preserve its grid layout). A ZIP home-value index
     // says nothing about a house — the chart an agent actually wants on a listing is
@@ -1404,8 +1496,12 @@ export async function authorDoc({
     // characters of raw MLS copy instead of email prose. Clear it, then author.
     // No comps context: this email is about the house, and handing the narrator a comp
     // set is what turned the paragraph into a market analysis last round.
+    // A REAL live boundary: the status goes out BEFORE the model call, not after
+    // it, so the reader sees "writing commentary" while the prose is being written.
+    emit({ stage: "status", label: "writing commentary" });
     const narrative = await authorListingNarrative(facts);
     if (narrative) {
+      const preNarrative = flyer;
       flyer = {
         ...flyer,
         blocks: flyer.blocks.map((b) =>
@@ -1413,6 +1509,7 @@ export async function authorDoc({
         ),
       };
       flyer = fillNarrative(flyer, narrative);
+      emitBuilt(preNarrative, flyer);
     }
 
     const parsed = EmailDocSchema.safeParse(flyer);
@@ -1460,6 +1557,14 @@ export async function authorDoc({
     const seat = savedDefault ?? seedById("skeleton-clean-white")?.build() ?? null;
     if (seat) baseDoc = { ...seat, globalStyle: currentDoc.globalStyle };
   }
+  // The seated grid, before any model call. This is the ONE skeleton beat that
+  // carries information the client does not already have: the seat may be the
+  // user's saved `default-grid` layout, loaded server-side just above.
+  emit({ stage: "skeleton", doc: baseDoc });
+  emit({ stage: "status", label: "laying out your email" });
+  // `buildDefaultGrid` IS the sourced fill — it is a one-line wrapper over
+  // `fillSkeletonFromSources` — so this status genuinely precedes that call.
+  emit({ stage: "status", label: "filling in sourced facts" });
 
   const fallbackRecipe = keyedRecipe ?? RECIPES["default-grid"];
   const fallbackBuilt = await buildDefaultGrid({
@@ -1479,6 +1584,7 @@ export async function authorDoc({
   }).catch(() => null);
   const fallbackParsed = fallbackBuilt ? EmailDocSchema.safeParse(fallbackBuilt) : null;
   if (fallbackParsed?.success) {
+    emitBuilt(baseDoc, fallbackParsed.data);
     // `buildDefaultGrid` produced this doc, so `default-grid` is what gets recorded —
     // even when `fallbackRecipe` is the key the caller asked for and whose builder
     // just missed. That difference is the whole signal: a `default-grid` row against
