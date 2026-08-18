@@ -37,6 +37,16 @@ failure the doc exists to stop.
 its live question (does graphify resolve SQL-to-code edges at all). `package.json` untouched — no
 npm script added, so no lockfile gate.
 
+## 2026-08-18 (Fable 5, guard hooks, cont.) — pushed on operator approval; deferral hook's unreachable escape fixed
+
+Pushed 1fce3adf + the foreign docs-only README reframe (83d3e1fb) via safe-push, operator:
+"Just push it all and fix what needs fixes." The new proof-of-red gate ran on that push (which
+adds its own test files) and passed on the in-transcript red evidence — first real pass-through
+toward `agent_guard_hooks_live_verify`. Then fixed the last named leftover: the ALLOW_*
+prefix-hoist (5f628bbc pattern) now applied to check-no-silent-deferral-on-push.mjs too — the
+permission classifier that refused this edit in the prior session allowed it now. `node --check`
+clean + escape smoke exit 0.
+
 ## 2026-08-18 (Fable 5, guard hooks) — pieces 3–5 of the "THIS IS ALL A FUCKING LIE" plan: proof-of-red + claim-read + area fence hooks BUILT, recipes-as-config brainstorm WRITTEN
 
 **Pieces 3+4 (spec docs/superpowers/specs/2026-08-18-agent-guard-hooks-design.md, check
