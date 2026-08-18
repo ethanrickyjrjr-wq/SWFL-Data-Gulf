@@ -1,3 +1,21 @@
+## 2026-08-18 (Fable 5, VoiceStudio) — OPERATOR DECREE: bring in VoiceStudio, test dubbing, then offer it
+
+Verbatim: "Bring it in and we will offer dubbing for other languages after we test it out. We can
+also write emails or posts in other languages if it is correct."
+
+Two product threads born here:
+1. DUBBING SERVICE — install debpalash/VoiceStudio (v0.5.0, signed MSI, the REAL upstream — the
+   mttariqi link he first sent is a stale fork frozen at v0.4.2) locally, test video dubbing
+   quality on real material, then offer dubbing to clients (realtor listing videos → Spanish is
+   the SWFL wedge). Test gate BEFORE offering — his words.
+2. MULTILINGUAL EMAILS/POSTS — "if it is correct." Note: writing emails/posts in other languages
+   is an LLM/text job (our existing pipeline), NOT a VoiceStudio job — VoiceStudio brings AUDIO
+   (dub/clone/TTS). The correctness gate for translated emails needs a native-check lane before
+   any client send. Do not conflate the two when building.
+
+License note: AGPL-3.0 — using the app or calling its local API as a separate process is fine;
+never vendored into our shipped code.
+
 ## 2026-08-18 (Fable 5, later) — OPERATOR IDEA, for the recipes-as-config brainstorm: quick-swap grids
 
 While approving the cell-policy registry ("remove" on the open-house HOA question), verbatim:
