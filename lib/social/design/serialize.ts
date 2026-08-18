@@ -31,11 +31,25 @@ export function deserializeDesign(s: string): SocialDesign | null {
 }
 
 /** Text fields the AI may write, per element type. The ONLY surface the patch can touch. */
-const TEXT_FIELDS: Partial<Record<SocialElement["type"], readonly string[]>> = {
+export const TEXT_FIELDS: Partial<Record<SocialElement["type"], readonly string[]>> = {
   text: ["text"],
   stat: ["value", "label"],
   cta: ["text"],
 };
+
+/** The ONE field a live `slot` event can carry for this element type, or null.
+ *
+ *  The wire protocol pins a slot as `{ e: "slot", id: <elementId>, text }`
+ *  (`docs/superpowers/specs/2026-08-18-live-build-streaming-design.md` §Event protocol) —
+ *  one id, one string. An element with TWO writable fields (`stat`: value + label)
+ *  therefore cannot be addressed by it without inventing an id grammar the protocol
+ *  does not define, so those fill from the full patch at `done` instead. DERIVED from
+ *  TEXT_FIELDS on purpose: a second hand-written list is how the streamed fill and the
+ *  final fill start disagreeing about what the AI is allowed to write. */
+export function slotFieldFor(type: SocialElement["type"]): string | null {
+  const fields = TEXT_FIELDS[type];
+  return fields && fields.length === 1 ? fields[0] : null;
+}
 
 /** element id -> { type, <current text fields> } — matches the email docSkeleton shape. */
 export function designToSkeleton(d: SocialDesign): Record<string, Record<string, string>> {
