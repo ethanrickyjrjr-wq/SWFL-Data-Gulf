@@ -43,9 +43,25 @@ export interface CanvasFillResult {
 export async function buildSocialCanvasFill(
   scope: BuildScope | undefined,
   skeleton: Record<string, Record<string, string>>,
-  opts?: { platforms?: Platform[]; goalTone?: GoalTone },
+  opts?: {
+    platforms?: Platform[];
+    goalTone?: GoalTone;
+    /** Observe-only progress for the streaming lane (spec 2026-08-18), mirroring
+     *  `authorDoc`'s `onProgress`: never awaited, never alters what the build
+     *  computes, and absent = byte-identical to the pre-streaming build. */
+    onStatus?: (label: string) => void;
+  },
 ): Promise<CanvasFillResult | null> {
+  const status = (label: string): void => {
+    try {
+      opts?.onStatus?.(label);
+    } catch {
+      /* a broken observer never breaks the build it is watching */
+    }
+  };
+  status("reading the lake");
   const { figures, dossier } = await fetchLakeParts(scope);
+  status("checking sources");
   const fresh = await refreshStaleLakeContext({
     scope,
     figures,
@@ -57,6 +73,7 @@ export async function buildSocialCanvasFill(
     includeGapProbe: false,
   });
   try {
+    status("writing the post");
     const msg = await getAnthropic("other").messages.create({
       model: resolveEmailModel("interactive"),
       max_tokens: opts?.platforms?.length ? Math.min(512 + opts.platforms.length * 320, 2048) : 700,

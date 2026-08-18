@@ -187,6 +187,13 @@ export interface AuthorSocialOpts {
   filesText?: string;
   platforms?: Platform[];
   goalTone?: GoalTone;
+  /** Observe-only progress for the streaming lane (spec 2026-08-18), mirroring
+   *  `authorDoc`'s `onProgress`: never awaited, never alters what the build
+   *  computes, and absent = byte-identical to the pre-streaming build. The author
+   *  lane emits STATUS ONLY — it reseats the whole canvas with a template's own
+   *  element ids the client has never seen, and the protocol carries no
+   *  social-design event, so there is no honest intermediate content beat here. */
+  onStatus?: (label: string) => void;
 }
 
 export async function authorSocialPost(
@@ -194,12 +201,21 @@ export async function authorSocialPost(
   prompt: string,
   opts?: AuthorSocialOpts,
 ): Promise<AuthorSocialResult | null> {
+  const status = (label: string): void => {
+    try {
+      opts?.onStatus?.(label);
+    } catch {
+      /* a broken observer never breaks the build it is watching */
+    }
+  };
+  status("reading the lake");
   // branding is the RAW project blob (primary_color/accent_color/…). brandingToTokens maps
   // it to the canvas token shape (PRIMARY/ACCENT/TEXT/LOGO_URL) that tokensFromBranding reads —
   // skip this and authored posts silently fall to the gulf defaults and drop the logo (off-brand).
   const tokens = tokensFromBranding(brandingToTokens(opts?.branding ?? {}));
   const today = new Date();
   const { figures, dossier } = await fetchLakeParts(scope);
+  status("checking sources");
   // Lake freshness + the one listings call run in parallel; both degrade gracefully.
   const [fresh, listingCtx] = await Promise.all([
     refreshStaleLakeContext({
@@ -236,6 +252,7 @@ export async function authorSocialPost(
     : `User request: ${prompt}`;
 
   try {
+    status("writing the post");
     const msg = await getAnthropic("other").messages.create({
       model: resolveEmailModel("interactive"),
       max_tokens: opts?.platforms?.length ? Math.min(700 + opts.platforms.length * 320, 2048) : 900,
@@ -266,6 +283,7 @@ export async function authorSocialPost(
       ).stripped;
     }
 
+    status("placing it on the canvas");
     const format = pickFormat(template, parsed.format, opts?.format);
     let design = template.build(tokens, format);
     design = applyDesignPatch(design, parsed.patch);
