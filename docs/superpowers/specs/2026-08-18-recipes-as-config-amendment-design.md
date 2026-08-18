@@ -122,14 +122,16 @@ top of it.
 - **Env hazard** — none: no new tables, no ingest, no `data_lake.*` writes anywhere in this
   amendment.
 
-## Open questions for the operator (decision points, not blockers)
+## Operator decisions (08/18/2026)
 
-1. Migration pace — config-first for new recipes with opportunistic migration (recommended,
-   step 3 above), or a dedicated wave migrating all 17 up front?
-2. Quick-swap surface — rail thumbnails beside the canvas (recommended: matches the
-   Examples-accordion pattern), or a single "Swap layout" cycle button?
-3. Quick-swap tier routing — `"both"` or `"paid-only"` in `lib/email/lab/capabilities.ts`?
-   (Builds are free / send is the paywall suggests `"both"`, but it is a retention feature.)
+1. Migration pace — NOT YET DECIDED. Recommendation stands: config-first for new recipes,
+   opportunistic per-touch migration, then a cleanup wave for stragglers once the layer is
+   proven.
+2. Quick-swap surface — **DECIDED: cycle button** ("Let's try cycle button"). A single
+   "Swap layout" control cycling through the recipe's grid family; no rail thumbnails.
+3. Quick-swap tier — **DECIDED: paid** ("Quick swap is paid"). Route `"paid-only"` in
+   `lib/email/lab/capabilities.ts` — the routing registry derives the rest; never hardcode
+   the tier in a shell.
 
 ## Out of scope
 

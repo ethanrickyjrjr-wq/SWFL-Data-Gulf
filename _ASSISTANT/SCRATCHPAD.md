@@ -1,3 +1,23 @@
+## 2026-08-18 (Fable 5, night) — OPERATOR: "we just walked through the first 7 again recently, I don't know why we are doing it again... it obviously didn't work"
+
+Verbatim, on the recipes-as-config plan: "Everything I have complained about over and over and
+over has been in our convos and should have all been in the one file we were creating to make
+the 7. But it obviously didn't work. Do we have how to be a real estate agent in there? Do we
+have the right way to build? I have no clue where we are at because Claude says it is doing this
+and then does another or one says it's done and then the email has HOA price with no
+information. Or different fonts or no commentary. Over and over and over. So I just want to make
+sure we are actually getting the right."
+
+The charge: the playbook (the ONE file) was supposed to hold every repeated complaint, and
+renders still shipped HOA/wrong fonts/no commentary — so a file alone is not the mechanism. The
+answer owed him is a SCOREBOARD: which of his repeated complaints are CODE-enforced (test/gate
+that goes red) vs. still prose-only — plus a guard for any still-prose item. Do not re-walk the
+7 emails as the response; the config layer exists so walking stops being the mechanism.
+
+DECISIONS, same message (recipes-as-config amendment): quick-swap = CYCLE BUTTON (not rail
+thumbnails) · quick-swap = PAID (route "paid-only" in lib/email/lab/capabilities.ts). Migration
+pace not addressed — recommendation (opportunistic per touch + cleanup wave) stands unconfirmed.
+
 ## 2026-08-18 (Fable 5, VoiceStudio) — OPERATOR DECREE: bring in VoiceStudio, test dubbing, then offer it
 
 Verbatim: "Bring it in and we will offer dubbing for other languages after we test it out. We can
