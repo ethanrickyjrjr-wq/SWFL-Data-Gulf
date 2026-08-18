@@ -37,6 +37,18 @@ failure the doc exists to stop.
 its live question (does graphify resolve SQL-to-code edges at all). `package.json` untouched — no
 npm script added, so no lockfile gate.
 
+## 2026-08-18 (Fable 5, guard hooks, cont. 2) — main's red CI fixed: the amenities regression test pinned "still scheduled" after the cron was deliberately commented out
+
+CI on main has been RED all day (≥5 runs back to 17:09) on ONE test:
+`.claude/hooks/lib/cron-failclosed.test.mjs:159` asserting the neighborhood-amenities
+workflow "is still a scheduled workflow" — but the cron was commented out AT SOURCE on
+08/12/2026 (drain off, two-step re-enable gated on the road-vs-community check). The test
+committed the exact trap its own header warns about, pointed the other way: pinned to a
+file staying SCHEDULED. Fixed: unscheduled (safest state) passes; if a schedule ever
+returns it must be fail-closed; the dedicated-flag/no-ENGINE_ENABLED assertions run in
+both states. CI's exact step command local: 318/0. Note: the knip/ratchet/registry steps
+have been SKIPPED behind this failure all day — their live status surfaces on this run.
+
 ## 2026-08-18 (Fable 5, guard hooks, cont.) — pushed on operator approval; deferral hook's unreachable escape fixed
 
 Pushed 1fce3adf + the foreign docs-only README reframe (83d3e1fb) via safe-push, operator:

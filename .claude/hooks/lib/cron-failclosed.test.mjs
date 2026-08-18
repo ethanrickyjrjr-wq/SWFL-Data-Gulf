@@ -159,11 +159,19 @@ test("cronViolations aggregates and tolerates junk entries", () => {
 test("REGRESSION: the real neighborhood-amenities cron stays fail-closed on its OWN flag", () => {
   const p = ".github/workflows/neighborhood-amenities-daily.yml";
   const text = readFileSync(p, "utf8");
-  // fixture assumptions — if either breaks, this test is testing nothing
-  assert.equal(hasSchedule(text), true, "assumption: still a scheduled workflow");
+  // fixture assumption — if this breaks, this test is testing nothing
   assert.ok(meteredSecretsUsed(text).includes("PHOTOS_API"), "assumption: still spends quota");
 
-  assert.equal(cronViolation(p, text), null, "must be fail-closed");
+  // The workflow has TWO legal states, and this test went red on 08/18/2026 by pinning
+  // one of them — the same trap its header describes, pointed the other way. On
+  // 08/12/2026 the cron was commented OUT at source (drain off; re-enabling is
+  // deliberately two steps, gated on amenities_area_name_is_road_corridor_not_community).
+  // Unscheduled is the SAFEST state and must not fail this gate. What is defended
+  // forever, in both states: if a schedule ever returns, it must be fail-closed; and the
+  // dedicated-flag gate must never be swapped for the shared engine switch.
+  if (hasSchedule(text)) {
+    assert.equal(cronViolation(p, text), null, "must be fail-closed");
+  }
   const conditions = conditionsIn(text);
   assert.ok(
     conditions.some((c) => /AMENITIES_DRAIN_ENABLED\s*==\s*'true'/.test(c)),
