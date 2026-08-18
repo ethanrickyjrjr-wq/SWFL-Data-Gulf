@@ -227,14 +227,23 @@ user-brought data remains `extract-pdf` above (blob lane, unchanged).
 - `app/api/email-lab/ai/route.ts:206` — Email Lab AI assist (legacy token-fill branch) — default callType
 
 ### Deliverable/email build (per user request) {#llm-call-sites-email}
+
+**08/18/2026 — live build streaming added ZERO model calls** (so this audit needn't re-check):
+`authorDoc`'s `onProgress` (`build-doc.ts`) and the social lane's `onStatus`
+(`buildSocialCanvasFill`, `authorSocialPost`) are observe-only callbacks fired at stage boundaries
+that already existed. Call count, callTypes and models below are unchanged. It DID shift line
+anchors — `build-doc.ts` (commit `8c41bc35`) and both social sites (Task 7); the numbers below are
+re-measured at `2ed376ec`. `build-doc.ts`'s previously-cited `552,853,1058` were already stale
+before this work (they were `581,910,1115` at `f863b2ce~1`).
+
 - `lib/deliverable/build.ts:344` — deliverable narrative synthesis — `deliverable_build`, Sonnet
 - `lib/email/data-readiness.ts:227` — grounded lookup / outlier web-confirm during a build — default callType
-- `lib/email/build-doc.ts:552,853,1058` — email document build, 3 call sites (added-slot author, skeleton fill, listing narrative) — `email_build`, Sonnet/Haiku. Was 4: the free-author `callAuthor` site died in the one-lane collapse (spec 2026-08-02)
+- `lib/email/build-doc.ts:581,926,1148` — email document build, 3 call sites (added-slot author, skeleton fill, listing narrative) — `email_build`, Sonnet/Haiku. Was 4: the free-author `callAuthor` site died in the one-lane collapse (spec 2026-08-02)
 - `lib/email/suggest-recipe.ts:54` — suggestion chips: keyless-ask → ≤2 recipe-key proposals (closed-list filtered, navigation only) — `email_build`, Haiku
 - `lib/deliverable/recipes/{under-contract,sphere-weekly,agent-brand-intro,shared,agent-launch,market-comps,market-pulse,review-reply}.ts` — 8 recipe-authoring call sites — `email_build`, Sonnet
 - `lib/email/showing-prep-assemble.ts:87` — showing-prep document build — `email_build`
-- `lib/email/social-calendar/build-canvas-fill.ts:60`, `build-week.ts:250` — social calendar build — default callType
-- `lib/social/design/author.ts:243` — social content authoring — default callType
+- `lib/email/social-calendar/build-canvas-fill.ts:77`, `build-week.ts:250` — social calendar build — default callType
+- `lib/social/design/author.ts:256` — social content authoring — default callType
 
 ### Brain-rebuild pipeline (GHA dispatch, not a live request, not raw ingest) {#llm-call-sites-brain-rebuild}
 - `refinery/agents/triage-agent.mts:163` — cheap classification stage — `triage`, Haiku

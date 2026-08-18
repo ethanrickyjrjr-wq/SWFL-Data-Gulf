@@ -72,6 +72,24 @@ stage. Wrong, and each one re-creates a real bug if you build to it:
                                    Never call the renderer or the compiler directly.
 ```
 
+## THE PIPE CAN BE WATCHED WHILE IT RUNS — landed 08/18/2026, opt-in, nothing above changes
+
+`POST /api/email-lab/ai` with `stream: true` answers in NDJSON — one event per line, protocol in
+`lib/email/lab/stream-events.ts`, shared with the social lane (`/api/email-lab/social/generate`).
+**A caller that doesn't ask gets the same JSON body it always got**, so an old client against a new
+deploy is not a broken client. Three rules govern it, none of them cosmetic:
+
+1. **Nothing unvalidated reaches the wire.** Every content-bearing event — `skeleton` and `block` — is
+   parsed against `EmailDocSchema` before it is written, by applying the props inside a copy of the
+   working doc and re-parsing the whole document; there is deliberately no weaker per-block schema.
+   Each lane owns its emitter (`lib/email/lab/stream-emitter.ts`, `lib/social/design/stream-emitter.ts`).
+2. **The stream PAINTS, it never PERSISTS.** No event writes a row. Saving is still the explicit save.
+3. **The human wins, at all three beats.** A block the user edits mid-build is never overwritten by the
+   AI — `block` skips a touched id, `skeleton` reseats around touched ids present in both docs, and
+   `done` puts the user's copy back over the server's. Enforced in `lib/email/lab/consume-stream.ts`,
+   a pure reducer for exactly that reason. Design:
+   `docs/superpowers/specs/2026-08-18-live-build-streaming-design.md`.
+
 ## THE THREE DIALS — this is the entire difference between one email and another
 
 **DIAL 1 — THE SPINE. What the email is about, resolved once before any layout.**
