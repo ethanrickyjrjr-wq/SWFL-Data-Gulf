@@ -1,3 +1,13 @@
+## 2026-08-18 (Fable 5, streaming) — live AI build streaming SHIPPED locally: both canvases paint the build as it happens, human wins every race
+
+**The plan executed end-to-end** (docs/superpowers/plans/2026-08-18-live-build-streaming.md, 8 tasks, Opus implementer subagents + controller review per task): NDJSON protocol + codec (`lib/email/lab/stream-events.ts`), validated emitter — nothing unvalidated reaches the wire (`stream-emitter.ts`), pure reducer with the human-wins race rule at ALL THREE beats — block skip, skeleton reseat-merge, done merge (`consume-stream.ts`); `authorDoc` observe-only `onProgress` at the REAL three-lane boundaries (the plan's four-stage list was measured wrong — task-4 report §1); `/api/email-lab/ai` + `/api/email-lab/social/generate` stream behind `stream: true`, old clients byte-identical (deploy-skew tests); grid shell + social composer consume via one helper each with content-type fallback; playbook PART 0 subsection + repo-inventory anchors refreshed. 12 commits f863b2ce..cda3d869. Tests: lib/email 1810/0, lib/social 373/0, route suites 4/0 + 6/0, `bunx next build` ✓.
+
+**Fix rounds that mattered:** the stream's catch was about to put raw exception text on the wire (FM-STREAM-3 now pins that an `ECONNREFUSED postgres://user:hunter2@…` never reaches a client); the reducer's skeleton case silently reverted an edit made between Build-click and first beat (now merges around touched same-id blocks, red-to-green).
+
+**RENDER-AND-LOOK (local prod build, 08/18/2026):** real build on /email-lab/grid served chunked `application/x-ndjson` — 1 skeleton + 4 status + 8 block + `done` captured off the wire; skeleton painted instantly, status chip live ("filling in sourced facts"), done committed through the existing link-audit flow. NOT yet verified by hand: the mid-build inline edit (automation can't produce a trusted pointer into EditableText; unit-tested at every beat) and the social composer visuals. `live_build_streaming_live_verify` stays OPEN — closes only after watching it on production post-push.
+
+**Known deferred:** `social_slot_stat_unaddressable` (stat = 2 fields, slot event = 1 string; protocol amendment deferred pending look), `playbook_hook_blind_to_subagents` (opened this session — the playbook hook scans only the parent transcript, blocking every subagent write under lib/email until the controller reads it). NOT PUSHED — awaiting operator per-push approval.
+
 ## 2026-08-18 (Fable 5, evening) — "THIS IS ALL A FUCKING LIE" → the cell-policy registry: content rulings stop living per-recipe
 
 **The operator's charge, and it was right:** the "every content rule gets walked to every surface
