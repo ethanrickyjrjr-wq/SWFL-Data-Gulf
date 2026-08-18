@@ -1,3 +1,82 @@
+## 2026-08-18 (Fable 5) — Pushed the 08/12 backlog: email-AI grounding, crosswalk playbook, go-launch/paywall docs
+
+Operator: "commit and push everything." Committed the six-day-old local work in four logical
+commits (email grounding build · community-crosswalk playbook + CLAUDE.md reference row ·
+go-launch/paywall handoffs + spec · session meta). Re-verified before push: `bun test lib/email
+refinery/lib/subdivision-aliases.test.mts refinery/lib/corridor-aliases.test.mts` → **1809 pass /
+0 fail**. Excluded `master.json` (stray 241-byte speak-view dump at repo root, not JSON — left
+untracked, not shipped). `.claude/settings.json.graphify-bak` reviewed for secrets (clean) and
+committed as the pre-install evidence RULE 0.5b R6 references. The 08/12 entry below said "LOCAL,
+UNPUSHED" — as of this push it is on `main`.
+
+## 2026-08-12 (Opus 5) — Email AI combo BUILT (handoff Step 3, "one AI, two feeds") + 2 emails rendered + a lying provenance table fixed
+
+**Operator: "make it happen"** — executed Step 3 of
+`docs/handoff/2026-08-12-open-house-and-build-ai-grounding-handoff.md`. The build-time email AI is
+now given the project it is building inside and the rules of the deliverable it is building. NOT a
+merge of the two AI products: chat streams prose, the builder emits a schema-validated `EmailDoc`,
+and collapsing those output contracts would be a regression. What is shared is what they KNOW.
+
+**Shipped (LOCAL, UNPUSHED):** `lib/email/lab/build-grounding.ts` (new root — Feed 1 projection +
+stale-project guard, Feed 2 derived from the recipe registry + `lengthProfile` at request time,
+composed prefix) · `BuildArgs.grounding` threaded `buildContentDoc` → `fillSkeletonResult` →
+`contentPatchSystem`, **prepended** so a cache breakpoint can sit behind it ·
+`app/api/email-lab/ai/route.ts` accepts `projectId` and loads the row under RLS ·
+`EmailLabGridShell.tsx` sends `projectId` on all three fetches (it always held it, never sent it —
+the actual reason the build AI knew nothing about its project).
+
+**Gates:** `bun test lib/email lib/deliverable` **2,942/0** (17 new) · `bunx next build` ✓.
+Three of those are END-TO-END WIRING tests in `voice-wiring.test.ts`, added because a green
+composition suite structurally cannot see "built, not wired" (`voice_presets_not_consumed`
+precedent).
+
+**MEASURED, and it is the answer to "does it have all the information on the site":** the builder's
+entire site-data feed was one call to master at `tier=2` = **2,770 bytes live**, under a prompt
+label reading *"FULL SWFL MARKET DOSSIER (all site data)"*. `tier=3` on the same endpoint is
+**102,688 bytes**. `lib/email`/`lib/deliverable` never import `lib/highlighter/reach.ts`, so the
+builder cannot route a prompt to a leaf brain the way `conversation-path.ts:303,374` does. Check
+opened: `email_builder_reads_only_master_tier2` (needs operator sign-off — ask-first surface, >5
+files). NOT fixed by this commit — the grounding closes the PROJECT/RECIPE gap, not the BRAIN gap.
+
+**Also:** rendered New Listing + Just Sold through the real acceptance harness to `~/Downloads`
+(24KB / 20KB, both inside the Gmail clip; just-sold close came off a recorded sale, not a list
+price). Fixed `render-new-listing.mts` — its provenance table read only lane 1 of the two-lane DOM
+cell and printed "OPEN SLOT" over a rendered "26 DOM", miscounting the footer as 14 of 17; now 15
+of 17. Opened `acceptance_renders_mask_real_cta_urls`: acceptance renders inherit the dev origin,
+so saved artifacts carry link destinations that differ from production — a subagent escalated that
+as a prod defect this session and it was not one.
+
+**SECOND-ORDER CAUGHT THE CHANGE COMMITTING ITS OWN DEFECT — fixed before any push.** The
+prefix's entire job is to stop the model confabulating, and the first cut had it asserting things
+it never checked:
+
+- Fed `buildProjectDigest` **3 of its 14 inputs**, so `hasEmailSchedule` computed `false` for
+  every project — a literal "no email schedule" written into a system prompt. **Live probe:
+  `email_schedules` holds 2 rows across 2 projects**, so it was already false for real data.
+  Fixed by making the field TRI-STATE: `undefined` = not loaded = the prefix says nothing.
+  `buildProjectDigest` defaults `schedules` to `[]`, so an empty array cannot distinguish
+  "none" from "never fetched" — only the caller knows, so the caller now says (`loaded.schedules`).
+- Never passed `subjectAddress`/`subjectArea`, so a listing project (an address, zero filed
+  items) resolved to NO scope — re-creating `listing_scope_not_in_digest` on a new surface.
+  **Both columns were already on the row being read** (live-probed `projects`), so the fix cost
+  zero extra queries. `email_schedules` is a separate table and stays unfetched on this
+  Haiku-speed lane, by decision, which is what the tri-state exists to state honestly.
+- `significantChanges` is an **object** array; the code did `String(c)` → `[object Object]`
+  would have shipped into a prompt the moment a caller passed one. The test could not see it:
+  it cast a `string[]` through `as Partial<ProjectDigest>`, suppressing the very type error that
+  would have caught it. Cast removed, real fixture added.
+- Two comments I wrote were **wrong and are corrected on disk, not quietly deleted**: the route
+  claimed the read "must never add a serial hop" on the line that adds one, and the caching
+  rationale ran backwards (per-project content first would COLLAPSE cache hits, not enable them;
+  there is no `cache_control` on this call at all).
+- The absence wording said a build "is not attached to a project" — false for the two callers
+  under `/api/projects/[id]/…` that simply send no id. It now speaks only about its inputs.
+
+Final gates: **2,946 pass / 0 fail** · `bunx next build` ✓.
+
+**Ledger: opened 2, closed 0, fixed 2 in-session** (provenance table; the grounding gap itself).
+Both opens name an operator decision as the blocker.
+
 ## 2026-08-12 (Sonnet 5) — push: email-playbook correction + ingest/lockfile refresh (commit board cleanup, part 2)
 
 Pushing `c5d6da78` (email-build-playbook WALKED/WRITTEN correction) and `46706166` (lee_deed raw

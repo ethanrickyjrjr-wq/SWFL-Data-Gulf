@@ -1,3 +1,89 @@
+## 2026-08-12 (Sonnet 5) — OPERATOR: "OK, GO GET IT AND WE WILL FIND COLLIER AND THEN WE WILL FIND EVERYTHING ELSE. MAKE THE FUCKING PLAYYBOOK AND MAE SURE SHITTY CLAUDE READS IT WHEN WORKING ON THIS SHIT. BECAUSE CLAUDE DOESN'T DO IT ANYWERE ELSES"
+
+Session flow: he asked why we haven't built the subdivision→community crosswalk. Investigation
+live-measured `parcel_subdivision_v` (604,362 rows, 100% subdivision_name), `community_profiles`
+(81 rows), and found the existing crosswalk (`refinery/lib/subdivision-aliases.mts` +
+`fixtures/community-aliases.json`) is a stub — 81 patterns for 81 slugs, 1:1, adds zero coverage.
+Found and fixed a live bug in the stemmer (UNIT82-style no-space plat suffixes never matched
+`\bUNIT\b`), but the real collapse was tiny (23 of 20,369 names) — string matching was never going
+to solve this. He then asked "can't we just look up the communities blueprint... has to be public
+record." Found it live: Lee County's own "Planned Developments" GIS layer — 1,627 real polygons,
+county-recorded PUD/RPD/MPD/CPD zoning cases, free, public
+(`services2.arcgis.com/LvWGAAhHwbCJ2GMP/.../PlannedDevelopments/FeatureServer`,
+`leegov.com/dcd/zoning/pd`). Real geometry beats name-matching — spatial join, not string stem.
+
+**THE STANDING COMPLAINT, not new but sharpened here: a playbook written once does not get read
+by a future session unless it is WIRED into CLAUDE.md's Reference index table — the one mechanism
+proven to work (`email-build-playbook.md`, `data-roots.md`, `graph-compartments.md` all get read
+because they're indexed there; anything NOT in that table gets rebuilt from scratch or ignored).**
+Building the community-crosswalk playbook AND adding its row to the Reference index in the same
+pass — a playbook that exists but isn't indexed is exactly the `built-not-wired` failure shape.
+
+## 2026-08-12 (Sonnet 5) — OPERATOR: "we can't even build emails yet and you are worried about all these dettails"
+
+Asked to plan /go paywall + build limits. Went deep for ~1.5hrs: 4 research agents, advisor
+consult, found OPERATOR_APPROVED_PAID_RUN live in Vercel prod (2d old), designed a 4-piece gate
+(throttle + global spend cap + email-before-build + a whole new pricing tier in tiers.ts) — all
+before confirming /go can build a real email end-to-end at all. It can't be confirmed: the open
+check `address_first_signedin_live_drive` says the anonymous `?addr=` path has never been driven
+in a real browser. **Designed a paywall for a product that isn't proven to work yet.**
+
+**Why:** same shape as advisor's own "baseline the flow before you gate it" warning, which I
+heard, agreed with, and then didn't act on before continuing to design pricing. Depth without
+checking the floor first.
+
+**How to apply:** when asked to get a half-built surface "up and running," CONFIRM THE CORE FLOW
+WORKS before layering gates/pricing/rate-limits on top of it. A gate on a broken flow is wasted
+work twice — once to build the gate, once to redo it after the flow changes to get fixed.
+
+## 2026-08-12 (Opus 5) — OPERATOR: "no idea how coded emails can come out wrong."
+
+Fair question, and the answer is that **the coded part is mostly right — every defect measured
+today sits at a SEAM where code hands off to something that isn't code.** Four seams, four
+findings from one session:
+
+1. **Code → model.** The grid is deterministic; the narrator paragraph is a live model call with
+   NO output gate in 16 of 17 recipes. `validateNarrative()` exists and works and is wired into
+   ONE (`review-reply.ts`). Handoff §1a: two generations off the same house, one closed with an
+   invitation, one with no ask at all. Nothing checked either.
+2. **Code → environment.** The just-sold CTA rendered as the localhost origin because
+   `NEXT_PUBLIC_SITE_URL` is read with a fallback. Same recipe, same code, different link per env.
+3. **Code → carry list.** `button_destinations` is a real, populated column that
+   `applyUserBrandToProject` silently drops (never in `PROFILE_FIELDS` — handoff §1e, zero git
+   hits ever). The code is right; the list it reads is short.
+4. **Code → its own instrument.** The New Listing provenance table read only lane 1 of a two-lane
+   cell and printed "OPEN SLOT" over a rendered "26 DOM". FIXED this session.
+
+So it is not the grids. It is that a deterministic builder is only as honest as the model call,
+the env var, the carry list, and the report it hands you.
+
+## 2026-08-12 (Opus 5) — OPERATOR: "make it happen" (the email-AI combo)
+
+Executing Step 3 of `docs/handoff/2026-08-12-open-house-and-build-ai-grounding-handoff.md` —
+ONE AI, TWO FEEDS. Architecture already chosen by him, do NOT re-derive or re-propose a merge.
+
+## 2026-08-12 (Opus 5) — OPERATOR: "Project AI and Email AI should be one, basically."
+
+Raised alongside "does it have all information on the site we know to be true since we put it
+there?" Logged before answering. **Measured this session, not asserted:**
+
+- The email builder's whole view of the site's data is `fetchMasterDossier` →
+  `/api/b/master?view=speak&tier=2` = **2,770 bytes live**. It slices at 12,000, so the slice is
+  NOT what limits it — the TIER is. `tier=3` on the same endpoint returns **102,688 bytes**. The
+  builder sees ~2.7% of what the site can say about itself, and the prompt label calls that
+  block **"FULL SWFL MARKET DOSSIER (all site data — choose what's relevant)"** — the label is
+  false, and it is the thing telling the model it has everything.
+- **The email path never imports `lib/highlighter/reach.ts` / `TOPIC_TO_SLUG`** (grepped
+  `lib/email` + `lib/deliverable`, zero hits). That is the chat engine's router into the 42 leaf
+  brains. So chat can reach ANY brain by topic; the builder can only ever see master's summary.
+  This is the structural divergence behind his sentence — not the endpoint count.
+- `bakedAreaRead` is wired in **1 recipe of 17** (`review-reply.ts:390`). 121 baked, validated
+  narratives are invisible to the other 16 — RULE 0.7b's own lane-1 rung, unclimbed.
+
+**Not a refactor this session.** `/api/assistant` is on `app/api/CLAUDE.md`'s ask-first hard
+lines. What is owed is the SHARED DATA ROOT, not one endpoint: chat streams prose, the builder
+emits a schema-validated `EmailDoc` — collapsing those output contracts would be wrong.
+
 ## 2026-08-12 (Opus 5) — RETRACTION of the entry directly below. OPERATOR: "What the fuck???!!"
 
 **The entry below is WRONG. The 08/04 claim it "corrected" was right all along. I retract it, and
