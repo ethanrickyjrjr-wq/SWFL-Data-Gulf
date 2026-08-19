@@ -665,8 +665,17 @@ export async function authorListingNarrative(
     `WORKED EXAMPLE — the same community fact, two ways.\n` +
     `Weak (reads like a machine): "Residents enjoy access to a vibrant gated community ` +
     `boasting numerous amenities, making it perfect for the Florida lifestyle."\n` +
-    `Strong (reads like an agent): "The community has its own pool and clubhouse, and the ` +
-    `gate is staffed." — plain verbs, only what the fact lines actually say.\n\n` +
+    `Strong (reads like an agent): "The community has its own pool and clubhouse." — plain ` +
+    `verbs, only what the fact lines actually say.\n` +
+    // 08/19/2026, caught live on 13501 Brown Bear Run: this example used to end "...and
+    // the gate is staffed", and the model echoed that clause into a real email about a
+    // community whose gate-staffing we hold NO fact for. The claim gate is numeric and
+    // never sees word-only inventions, so the example itself was the leak. An example
+    // sentence may not contain a claim the fact lines don't back — and the line below
+    // fences the ones that remain.
+    `The example above teaches STYLE ONLY — its details are invented for the lesson. ` +
+    `Never copy a detail from an example into your paragraph; your facts come only from ` +
+    `the fact lines you were given.\n\n` +
     `A FACT ALREADY ON THE PAGE IS ALREADY ON THE PAGE. The seller's description and the ` +
     `spec grid sit right above your paragraph. Anything either already states — the ` +
     `community's name and size, the lot, gated status, a pool — you do not say again ` +

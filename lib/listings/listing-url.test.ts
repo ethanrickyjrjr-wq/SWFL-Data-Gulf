@@ -60,18 +60,20 @@ describe("FAILURE: the paid row's listing url is never read", () => {
   });
 });
 
-describe("FAILURE: the seller's description is cut mid-word", () => {
+describe("FAILURE: the seller's description is not the listing's exact bytes", () => {
   it("passes a normal description through untouched", () => {
     const d = "A well-kept home on a corner lot. New roof in 2021.";
     expect(listingDescription(d)).toBe(d);
   });
 
-  it("cuts a long description on a sentence boundary, never mid-word", () => {
+  it("ships a long description WHOLE — operator decree 08/19/2026: EXACT SAME", () => {
+    // The 900-char sentence-boundary window this test used to pin shipped a real
+    // Realtor.com description cut in half (13501 Brown Bear Run, caught by the
+    // operator). The contract is now byte-identity at any length.
     const long = "Sentence number one is here. ".repeat(60).trim();
     const out = listingDescription(long)!;
-    expect(out.length).toBeLessThanOrEqual(900);
-    expect(out.endsWith(".")).toBe(true);
-    // No ellipsis: an "…" on someone else's marketing copy reads as if we edited it.
+    expect(out).toBe(long);
+    // Still no ellipsis: an "…" on someone else's copy reads as if we edited it.
     expect(out).not.toContain("…");
   });
 

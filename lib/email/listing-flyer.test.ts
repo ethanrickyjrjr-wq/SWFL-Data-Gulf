@@ -225,3 +225,19 @@ test("no list date held (a vendor miss) → Type keeps its slot, never a blank c
     expect(cells.map((c) => c.label)).not.toContain("DOM");
   }
 });
+
+// ── The description is the listing's EXACT bytes (operator decree 08/19/2026:
+// "EXACT SAME MEANS THE EXACT SAME") — no 900-char window, no sentence cut. The
+// caught-live case: 13501 Brown Bear Run's ~1,900-char Realtor.com description
+// shipped cut at "separate vanities." and the operator diffed it by hand.
+test("listingDescription ships a long description WHOLE and byte-identical", async () => {
+  const { listingDescription } = await import("./listing-flyer");
+  const long = "The gourmet kitchen is outfitted with stone countertops and abundant cabinetry. "
+    .repeat(40)
+    .trim();
+  expect(long.length).toBeGreaterThan(2000);
+  expect(listingDescription(long)).toBe(long);
+  expect(listingDescription("  short and sweet.  ")).toBe("short and sweet.");
+  expect(listingDescription("")).toBeUndefined();
+  expect(listingDescription(undefined)).toBeUndefined();
+});

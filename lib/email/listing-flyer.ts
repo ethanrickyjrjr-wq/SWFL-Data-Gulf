@@ -224,33 +224,21 @@ export function addressLineOf(facts: ListingFacts): string {
 }
 
 /**
- * THE LISTING'S OWN DESCRIPTION, trimmed to a block a reader will actually finish.
+ * THE LISTING'S OWN DESCRIPTION — the EXACT bytes, WHOLE.
  *
- * It ships VERBATIM — the seller's words, never rewritten into a claim, and §1.9 exempts it
- * from the 50–125-word budget precisely so it can be this long. Measured live 08/05/2026
- * across the paid rows we hold: **368 to 2,983 characters**, so most descriptions pass
- * through untouched and only the longest are cut.
- *
- * A cut lands on a SENTENCE boundary, never mid-word: a description that stops at "the lanai
- * over" reads as a bug, and a trailing "…" on someone else's marketing copy reads as if we
- * edited it. If no sentence ends inside the window we fall back to a word boundary.
+ * Operator decree 08/19/2026, verbatim: "EXACT SAME MEANS THE EXACT SAME." The
+ * 900-char sentence-boundary window that used to live here shipped 13501 Brown Bear
+ * Run's ~1,900-char Realtor.com description cut at "separate vanities." — the
+ * operator diffed it against the listing by hand — while this very comment said
+ * "It ships VERBATIM". Now it actually does: the seller's words, never rewritten,
+ * never cut. The user may edit or delete the block in the lab afterward; §1.9 still
+ * exempts it from the 50–125-word body band. Gmail's ~102KB clip is not a real
+ * bound — the longest remark measured live (08/05/2026) was 2,983 characters.
  */
 export function listingDescription(remarks?: string): string | undefined {
   const raw = remarks?.trim();
-  if (!raw) return undefined;
-  if (raw.length <= DESCRIPTION_MAX_CHARS) return raw;
-  const window = raw.slice(0, DESCRIPTION_MAX_CHARS);
-  const lastStop = Math.max(window.lastIndexOf(". "), window.lastIndexOf("! "));
-  if (lastStop > DESCRIPTION_MIN_CHARS) return window.slice(0, lastStop + 1).trim();
-  const lastSpace = window.lastIndexOf(" ");
-  return (lastSpace > DESCRIPTION_MIN_CHARS ? window.slice(0, lastSpace) : window).trim();
+  return raw || undefined;
 }
-
-/** Long enough that the description is still the seller's pitch, short enough that the
- *  email is not a wall. Sits well inside Gmail's ~102KB clip (§1.12). */
-const DESCRIPTION_MAX_CHARS = 900;
-/** Below this a "clean" cut has thrown away most of the description — take the window. */
-const DESCRIPTION_MIN_CHARS = 300;
 
 /**
  * THE TWO DIALS A SIBLING LIFECYCLE EMAIL MAY TURN — and there are only two.

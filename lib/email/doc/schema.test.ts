@@ -484,3 +484,33 @@ describe("AuthorDocSchema — subject_variants / cta_variants", () => {
     expect(parsed.blocks[0].cta_variants).toEqual(["View Report", "See the Numbers"]);
   });
 });
+
+// ── The description block carries the listing's EXACT bytes at any length ──────
+// Operator decree 08/19/2026 ("EXACT SAME MEANS THE EXACT SAME"): the description
+// ships whole, so the 2,000-char text-body cap must NOT apply to the block that
+// carries vendor remarks (longest measured live 08/05/2026: 2,983 chars). A
+// schema REJECTION here is worse than the old cut — it silently kills the whole
+// flyer (applied: false). Ordinary text blocks keep the cap: the model still may
+// not dump walls of text anywhere else.
+describe("descriptionSlot text blocks are exempt from the 2,000-char body cap", () => {
+  const doc = (body: string, descriptionSlot?: boolean) => ({
+    globalStyle: DEFAULT_GLOBAL_STYLE,
+    blocks: [
+      {
+        id: "block_desc0001",
+        type: "text" as const,
+        props: { body, align: "left" as const, ...(descriptionSlot ? { descriptionSlot } : {}) },
+      },
+    ],
+  });
+  const long = "The gourmet kitchen flows into a breakfast nook with lake views. ".repeat(60);
+
+  it("a 3,900-char vendor description in the marked slot VALIDATES", () => {
+    expect(long.length).toBeGreaterThan(2000);
+    expect(EmailDocSchema.safeParse(doc(long, true)).success).toBe(true);
+  });
+
+  it("an ordinary text block over 2,000 chars still FAILS — the cap survives for authored text", () => {
+    expect(EmailDocSchema.safeParse(doc(long)).success).toBe(false);
+  });
+});

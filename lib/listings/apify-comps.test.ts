@@ -11,7 +11,6 @@ import {
   buildActorInput,
   fetchApifyComps,
   apifyPhotoIndex,
-  DESCRIPTION_CHAR_CAP,
   type ApifyRecord,
 } from "./apify-comps";
 
@@ -47,24 +46,26 @@ describe("F8 · parseAltPhotos", () => {
   });
 });
 
-// ── F2 — a 3,000-char description blows the 20-line / 102KB budget ────────────
-describe("F2 · truncateDescription", () => {
-  const long = "Some waterfront homes impress you the moment you walk in. ".repeat(60);
+// ── F2 — the description is the listing's EXACT bytes, whole ──────────────────
+// Operator decree 08/19/2026: "EXACT SAME MEANS THE EXACT SAME." The 600-char cap,
+// the sentence-boundary cut, and the whitespace reflow are all DEAD. Only the
+// outer trim and the <NA>/empty → null guard remain.
+describe("F2 · truncateDescription — verbatim, whole, never cut", () => {
+  const long = "Some waterfront homes impress you the moment you walk in. ".repeat(60).trim();
 
-  test("a 3,000-char description comes back under the cap", () => {
-    const out = truncateDescription(long)!;
-    expect(out.length).toBeLessThanOrEqual(DESCRIPTION_CHAR_CAP);
-    expect(out.length).toBeGreaterThan(0);
+  test("a 3,000-char description comes back WHOLE and byte-identical", () => {
+    expect(long.length).toBeGreaterThan(2500);
+    expect(truncateDescription(long)).toBe(long);
   });
 
-  test("never ends mid-sentence — the cut lands on a sentence boundary", () => {
-    const out = truncateDescription(long)!;
-    expect(out.trimEnd().endsWith(".")).toBe(true);
-  });
-
-  test("a description already under the cap is returned untouched", () => {
+  test("a short description is returned untouched", () => {
     const short = "Bright three-bedroom pool home on a quiet cul-de-sac.";
     expect(truncateDescription(short)).toBe(short);
+  });
+
+  test("interior spacing is the vendor's own — no whitespace reflow", () => {
+    const spaced = "Stone countertops , stainless steel appliances.";
+    expect(truncateDescription(spaced)).toBe(spaced);
   });
 
   test("<NA> and empty are not descriptions — they yield null, never the literal string", () => {
@@ -74,27 +75,17 @@ describe("F2 · truncateDescription", () => {
   });
 });
 
-// ── F3 — truncation must NOT strip the virtual-staging disclosure ─────────────
-describe("F3 · the virtual-staging disclosure survives truncation", () => {
+// ── F3 — the virtual-staging disclosure ships because EVERYTHING ships ────────
+describe("F3 · the virtual-staging disclosure survives (nothing is cut anymore)", () => {
   const DISCLOSURE = "Some photos have been virtually staged and enhanced using AI.";
 
-  test("a long description whose LAST sentence is the disclosure still carries it", () => {
-    const body = "This waterfront home impresses the moment you walk in. ".repeat(60);
-    const out = truncateDescription(`${body}${DISCLOSURE}`)!;
-    expect(out).toContain(DISCLOSURE);
-    expect(out.length).toBeLessThanOrEqual(DESCRIPTION_CHAR_CAP + DISCLOSURE.length + 2);
-  });
-
-  test("a SHORT description with the disclosure is not duplicated", () => {
-    const short = `Bright pool home. ${DISCLOSURE}`;
-    const out = truncateDescription(short)!;
+  test("a long description whose LAST sentence is the disclosure ships whole, disclosure once", () => {
+    const input = (
+      "This waterfront home impresses the moment you walk in. ".repeat(60) + DISCLOSURE
+    ).trim();
+    const out = truncateDescription(input)!;
+    expect(out).toBe(input);
     expect(out.split(DISCLOSURE).length - 1).toBe(1);
-  });
-
-  test("the disclosure is matched on its meaning, not one exact vendor string", () => {
-    const body = "Lovely home with a big yard. ".repeat(80);
-    const variant = "Photos may be virtually staged.";
-    expect(truncateDescription(`${body}${variant}`)).toContain(variant);
   });
 });
 
@@ -107,22 +98,14 @@ const REAL_REMARKS =
   "Discover the perfect combination of comfort, space, and location in this beautifully maintained 3-bedroom, 2-bath pool home offering 1,983 square feet of living space in one of Southwest Cape Coral's most desirable residential neighborhoods. Situated on a spacious corner lot, this home features a desirable split-bedroom floor plan, vaulted ceilings that enhance the sense of space, abundant natural light, and spacious living areas designed for both everyday living and entertaining. Proudly owned and meticulously cared for by its original owner, this home offers a newer roof, new A/C, new gutters, new carpet, fresh interior paint, and beautifully updated bathrooms, providing peace of mind with major improvements already completed while allowing you to add your own personal touch over time if desired. The spacious kitchen overlooks the pool and flows seamlessly into the dining and family rooms, creating an inviting space for gathering with family and friends. The beautifully renovated primary bathroom offers a spa-inspired retreat with a large walk-in shower, soaking tub, and contemporary finishes. Step outside to your expansive screened lanai featuring a sparkling pool and spa, creating the perfect setting for relaxing, entertaining, and enjoying the Florida lifestyle year-round. A convenient pool bath with direct lanai access, a spacious two-car garage with a side entry door, a sprinkler system, and fully paid city water and sewer assessments add even more value to this exceptional home. Ideally located in a quiet, family-friendly neighborhood near the highly sought-after Oasis Charter Schools, this home is just minutes from parks, shopping, dining, and everyday conveniences. Surrounded by beautifully maintained homes in one of Southwest Cape Coral's most established residential communities, this property offers an exceptional opportunity to enjoy comfort, privacy, and the Southwest Florida lifestyle. Don't miss your chance to make this wonderful home your own! Some photos have been virtually staged and enhanced using AI for illustrative purposes. Furniture and decor shown are not included in the sale.";
 
 describe("F2/F3 · the REAL vendor remarks, end to end", () => {
-  test("2,100 chars of live MLS copy comes back inside the render budget", () => {
+  test("2,100 chars of live MLS copy ships as the vendor's EXACT bytes, whole", () => {
     expect(REAL_REMARKS.length).toBeGreaterThan(2000);
-    const out = truncateDescription(REAL_REMARKS)!;
-    expect(out.length).toBeLessThanOrEqual(DESCRIPTION_CHAR_CAP + 200);
-    expect(out.trim()).toMatch(/[.!?]$/);
+    expect(truncateDescription(REAL_REMARKS)).toBe(REAL_REMARKS.trim());
   });
 
   test("the disclosure is the LAST sentence in the source and it still survives", () => {
     expect(REAL_REMARKS.trimEnd().endsWith("not included in the sale.")).toBe(true);
     expect(truncateDescription(REAL_REMARKS)).toContain("virtually staged");
-  });
-
-  test("nothing is invented — the prose is the vendor's own bytes", () => {
-    const out = truncateDescription(REAL_REMARKS)!;
-    const beforeDisclosure = out.split(" Some photos")[0];
-    expect(REAL_REMARKS).toContain(beforeDisclosure);
   });
 
   test("the vendor's literal <NA> (seen live on half_baths) never prints as prose", () => {

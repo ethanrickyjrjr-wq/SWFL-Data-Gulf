@@ -89,64 +89,28 @@ export function parseAltPhotos(raw: string | string[] | null | undefined): strin
 
 // ── THE DESCRIPTION ──────────────────────────────────────────────────────────
 
-/** Real MLS remarks run to ~3,000 characters. §0.1 of the email rules caps a body
- *  at ~20 lines of text and §0.3 gives Gmail a ~102KB clip with NO `<details>`
- *  support, so an accordion is not available to us. This is the budget for the
- *  description block specifically — it rides OUTSIDE the 50-125 word copy band
- *  (operator carve-out 08/03/2026: "if a home has a description of it, that does
- *  not count towards the word count"), but it is not therefore unbounded. */
-export const DESCRIPTION_CHAR_CAP = 600;
-
-/** The disclosure that MUST survive truncation (handoff §5). Matched on meaning,
- *  not on one exact vendor string — the wording varies by listing. */
-const STAGING_DISCLOSURE = /[^.!?]*virtually staged[^.!?]*[.!?]/i;
-
-/** Split into sentences, keeping their terminators. */
-function sentences(text: string): string[] {
-  return text.match(/[^.!?]+[.!?]+(?:\s|$)|[^.!?]+$/g) ?? [text];
-}
-
 /**
- * The vendor's remarks, cut to fit — ON A SENTENCE BOUNDARY, never mid-word and
- * never mid-number.
+ * The vendor's remarks, EXACT and WHOLE.
  *
- * *** THE VIRTUAL-STAGING DISCLOSURE RIDES ALONG. *** It sits at the END of the
- * remarks, which is exactly where a truncator cuts. Republishing staged-photo
- * copy while dropping the sentence that discloses the staging is the failure this
- * function exists to prevent (handoff §5, operator decree). If the source has it,
- * the output has it — appended after the cut when truncation would have eaten it.
+ * Operator decree 08/19/2026, verbatim: "EXACT SAME MEANS THE EXACT SAME." The
+ * 600-char cap, the sentence-boundary cut, and the whitespace reflow that used to
+ * live here all shipped a Realtor.com description cut in half (caught live on
+ * 13501 Brown Bear Run — the operator diffed it by hand) while the playbook said
+ * "verbatim". The listing's own copy now ships as the listing's own bytes; the
+ * user may edit or delete the block in the lab afterward. This also makes the
+ * virtual-staging disclosure (handoff §5) survive trivially — it was only ever
+ * at risk because we were cutting.
+ *
+ * The 08/03/2026 word-count carve-out still applies (the description rides
+ * OUTSIDE the 50-125 word body band); Gmail's ~102KB clip is not a real bound
+ * here — the longest remark measured live (08/05/2026) was 2,983 chars.
  *
  * Returns null for anything that is not a real description, including the vendor's
  * literal `<NA>` — so a caller can never print the sentinel as prose.
  */
 export function truncateDescription(raw: string | null | undefined): string | null {
   if (!isRealString(raw)) return null;
-  const text = raw.trim().replace(/\s+/g, " ");
-
-  const disclosure = text.match(STAGING_DISCLOSURE)?.[0]?.trim();
-  if (text.length <= DESCRIPTION_CHAR_CAP) return text;
-
-  // Take whole sentences while they fit. The disclosure is handled separately, so
-  // it never consumes the budget it would then be re-appended outside of.
-  const body = disclosure ? text.replace(disclosure, "").trim() : text;
-  let out = "";
-  for (const s of sentences(body)) {
-    if ((out + s).trim().length > DESCRIPTION_CHAR_CAP) break;
-    out += s;
-  }
-  out = out.trim();
-
-  // Not even one sentence fits: hard-cut at the last word boundary and close it.
-  if (!out) {
-    const cut = body.slice(0, DESCRIPTION_CHAR_CAP);
-    out =
-      cut
-        .slice(0, cut.lastIndexOf(" "))
-        .trim()
-        .replace(/[,;:]$/, "") + ".";
-  }
-
-  return disclosure ? `${out} ${disclosure}`.trim() : out;
+  return raw.trim();
 }
 
 // ── THE ACTOR INPUT — where money and correctness are decided ─────────────────

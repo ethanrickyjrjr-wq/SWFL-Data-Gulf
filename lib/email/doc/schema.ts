@@ -133,20 +133,39 @@ const SignalPropsSchema = z.object({
   sectionBg: sectionBg(),
 }) satisfies z.ZodType<SignalProps>;
 
-const TextPropsSchema = z.object({
-  body: z.string().max(2000).optional(),
-  align: z.enum(["left", "center", "right"]).optional(),
-  linkUrl: z.string().optional(),
-  // ENGINE-OWNED marker: this text block is the listing's own vendor-verbatim
-  // description, not a narrator slot. Named OUTSIDE the AI content-patch
-  // allowlist (BlockContentPatchSchema below) on purpose — same discipline as
-  // metricValue/metricLabel and ListingProps' price/beds: a held, non-authored
-  // fact is never AI-writable. Without it here, safeParse would STRIP the marker
-  // and a doc refresh would stack a second description block.
-  descriptionSlot: z.boolean().optional(),
-  paddingY: paddingY(),
-  sectionBg: sectionBg(),
-}) satisfies z.ZodType<TextProps>;
+const TextPropsSchema = z
+  .object({
+    // The 2,000-char cap is enforced in the superRefine below so the DESCRIPTION
+    // block can be exempt: the vendor's remarks ship as the listing's EXACT bytes
+    // at any length (operator decree 08/19/2026 — "EXACT SAME MEANS THE EXACT
+    // SAME"; longest measured live 08/05/2026: 2,983 chars). A plain .max(2000)
+    // here made a full-length description REJECT the whole doc — worse than the
+    // cut it replaced. Ordinary (authorable) text blocks keep the cap.
+    body: z.string().optional(),
+    align: z.enum(["left", "center", "right"]).optional(),
+    linkUrl: z.string().optional(),
+    // ENGINE-OWNED marker: this text block is the listing's own vendor-verbatim
+    // description, not a narrator slot. Named OUTSIDE the AI content-patch
+    // allowlist (BlockContentPatchSchema below) on purpose — same discipline as
+    // metricValue/metricLabel and ListingProps' price/beds: a held, non-authored
+    // fact is never AI-writable. Without it here, safeParse would STRIP the marker
+    // and a doc refresh would stack a second description block.
+    descriptionSlot: z.boolean().optional(),
+    paddingY: paddingY(),
+    sectionBg: sectionBg(),
+  })
+  .superRefine((p, ctx) => {
+    if (!p.descriptionSlot && (p.body?.length ?? 0) > 2000) {
+      ctx.addIssue({
+        code: "too_big",
+        origin: "string",
+        maximum: 2000,
+        inclusive: true,
+        path: ["body"],
+        message: "text body over 2000 chars (only the marked description slot is exempt)",
+      });
+    }
+  }) satisfies z.ZodType<TextProps>;
 
 const ImagePropsSchema = z.object({
   url: z.string().optional(),
