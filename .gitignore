@@ -232,3 +232,7 @@ chief-of-staff-brief.md
 
 # Hermes (local Ollama agent) per-repo context file — machine-local instructions
 .hermes.md
+
+# writ-guard-trio (08/19/2026): human-only approval tokens + hook session state - never committed
+.claude/approvals/
+.claude/hooks/.state/

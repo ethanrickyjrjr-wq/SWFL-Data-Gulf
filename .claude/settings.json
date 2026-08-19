@@ -34,6 +34,10 @@
           {
             "type": "command",
             "command": "node .claude/hooks/inject-focus.mjs"
+          },
+          {
+            "type": "command",
+            "command": "node .claude/hooks/mint-approval-on-prompt.mjs"
           }
         ]
       }
@@ -137,6 +141,10 @@
           {
             "type": "command",
             "command": "node .claude/hooks/check-proof-of-red-on-push.mjs"
+          },
+          {
+            "type": "command",
+            "command": "node .claude/hooks/check-approvals-guard.mjs"
           }
         ]
       },
@@ -154,6 +162,18 @@
           {
             "type": "command",
             "command": "node .claude/hooks/check-area-fence.mjs"
+          },
+          {
+            "type": "command",
+            "command": "node .claude/hooks/check-approvals-guard.mjs"
+          },
+          {
+            "type": "command",
+            "command": "node .claude/hooks/check-red-before-write.mjs"
+          },
+          {
+            "type": "command",
+            "command": "node .claude/hooks/inject-scoped-rules.mjs"
           }
         ]
       },

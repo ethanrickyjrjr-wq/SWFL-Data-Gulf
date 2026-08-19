@@ -37,6 +37,7 @@
 
 import fs from "node:fs";
 import path from "node:path";
+import { consumeToken } from "./lib/approval-token.mjs";
 
 const BANNER = "=".repeat(72);
 const WF_DIR = path.join(process.cwd(), ".github", "workflows");
@@ -63,6 +64,22 @@ process.stdin.on("end", () => {
     process.exit(0); // internal error → fail open
   }
   if (!hit) process.exit(0);
+
+  // Human-typed approval token (writ-guard-trio A, 08/19/2026): the operator typing
+  // `approve paid-dispatch` in chat mints a single-use token only a human keystroke can
+  // create — unlike the env prefix, the agent cannot set it on its own judgment. Only
+  // consumed when a violation was actually found, so innocent gh commands never burn it.
+  try {
+    if (consumeToken("paid-dispatch").ok) {
+      process.stderr.write(
+        "⚠️  paid-dispatch: operator approval token consumed — allowing this run\n",
+      );
+      process.exit(0);
+    }
+  } catch {
+    /* token machinery broke — the block below still stands */
+  }
+
   block(hit.what, hit.detail);
 });
 
@@ -203,7 +220,10 @@ function tokenize(s) {
 }
 
 function block(what, detail) {
-  const msg = `\n${BANNER}\nBLOCKED — ${what}\n${BANNER}\n${detail}\n${BANNER}\n`;
+  const tokenHint =
+    "\nOr, Claude-proof form: the operator types `approve paid-dispatch` in chat\n" +
+    "(mints a single-use 30-min token), then the command is re-run as-is.";
+  const msg = `\n${BANNER}\nBLOCKED — ${what}\n${BANNER}\n${detail}${tokenHint}\n${BANNER}\n`;
   process.stdout.write(msg);
   process.stderr.write(msg);
   process.exit(2);

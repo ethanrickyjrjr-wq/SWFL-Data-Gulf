@@ -1,4 +1,30 @@
-## 2026-08-18 (Fable 5, night) — Pushed the fleet-status page + recipes-as-config specs; STARTING the config collapse ("Push and start")
+## 2026-08-19 (Fable 5, night) — writ-guard-trio BUILT: human-only approval tokens + write-time TDD gate + scoped rule injection (all three Writ steals, operator: "I guess we need them all")
+
+Evaluated infinri/Writ live (README v1.7.0; eval in `_RESEARCH/agent-behavior/2026-08-18-writ-
+governance-runtime-evaluation.md`): verdict do-not-adopt (Docker+Neo4j fails RULE 11), steal three
+mechanisms. Operator greenlit all three. Spec with named failure modes:
+`docs/superpowers/specs/2026-08-19-writ-guard-trio-design.md`. 3 of 3 parts BUILT, TDD (5 test
+files watched RED — "fail 5" — then 35/35 green; full hook suite 203/203 incl. registration):
+
+**A — approval tokens.** `lib/approval-token.mjs` (single-use, atomic rename claim, 30-min TTL,
+JSONL audit) + `mint-approval-on-prompt.mjs` (UserPromptSubmit; mints ONLY from the operator's
+strict whole-prompt `approve <gate>`) + `check-approvals-guard.mjs` (agent locked out of the token
+store + mechanism files; DRIVEN LIVE this session — my own `ls .claude/approvals` was refused,
+exit 2 in transcript). Wired into check-no-paid-dispatch.mjs (env form kept; migration of the
+other ~10 ALLOW_* escapes → check `allow_env_to_token_migration`).
+**B — write-time TDD.** `check-red-before-write.mjs`: session Write-creates a test + writes its
+basename sibling without a red run → write REFUSED (driven live via fabricated transcript,
+exit 2). Identity/red imported from check-proof-of-red-on-push.mjs — one root. Escape: `approve
+tdd-write` token.
+**C — scoped rules.** `inject-scoped-rules.mjs` + `lib/scoped-rules.mjs`: 8 recurring-failure
+rules (h-screen, fontFamily, ZIP gates, deed-vs-list, 0.7a/0.7b ladders, Deno imports, React
+effect-state) delivered at the matching WRITE, once per session (state-file dedupe proven live).
+
+Parallel-session note: released c2ffeb1a's 3h-idle committed-clean claim on settings.json to
+finish registration (its own other claims all read idle-clean/never-dirtied; 5-min re-take bar
+applied). build-queue.md left untouched — claimed live by c2ffeb1a. NOT yet live-proven: an
+actual human mint (needs the operator to type `approve <gate>`; check writ_guard_trio_live_verify
+stays open for it).
 
 Operator decree: "Push and start." Pushing the three commits from tonight's earlier session
 (c18e744f, a150c3a4, ec150c01 — status page + spec + operator decisions) plus this session's
