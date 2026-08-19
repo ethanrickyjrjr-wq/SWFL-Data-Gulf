@@ -47,6 +47,19 @@ failure the doc exists to stop.
 its live question (does graphify resolve SQL-to-code edges at all). `package.json` untouched — no
 npm script added, so no lockfile gate.
 
+## 2026-08-18 (Fable 5, night, wrap) — WAVE HANDOFF written; tidy + push (operator: "Tidy everything up... write the handoff... and push")
+
+`docs/handoff/2026-08-18-recipes-as-config-wave-handoff.md` — the execution brief for one or
+several Fable 5/Opus sessions: locked decisions (lifecycle WAVE · paid cycle-button quick-swap ·
+banks everywhere, words operator-approved), the verified seam map (chrome, registry, banks,
+cell-policy, status page, human-wins merge, /go), phased order (plan → config layer proven on
+under-contract → per-recipe wave, worktree-parallelizable → quick-swap), evidence bar, and the
+live traps (read-first hooks, proof-of-red, per-push approval, >5-file ask-first). Build-queue
+gained the wave at top; doc index regenerated (1,705 docs). Observed, already tracked elsewhere:
+doc-reachability ratchet reads 245 orphans vs 220 baseline — none are today's docs (all
+path-reachable); the burndown check on orphans owns it. Pushing this batch on the same message's
+explicit approval.
+
 ## 2026-08-18 (Fable 5, night, cont.) — the fleet gets ONE generated status page; the simplification is GREENLIT as a lifecycle wave
 
 Operator decree ("how do we not have this documented where we find it in one place" + "simplify

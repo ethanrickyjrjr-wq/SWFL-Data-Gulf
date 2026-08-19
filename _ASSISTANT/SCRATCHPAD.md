@@ -29,6 +29,15 @@ so no gate here is actually Claude-proof. Full eval:
 `_RESEARCH/agent-behavior/2026-08-18-writ-governance-runtime-evaluation.md`. Awaiting his call
 on whether to build any of the three.
 
+## 2026-08-18 (Fable 5, night, wrap) — OPERATOR: "this has been a 2 month or more process for something easy. Tidy everything up... write the handoff we need for one or multiple Fable 5 or Opus to handle and push."
+
+Handoff written: docs/handoff/2026-08-18-recipes-as-config-wave-handoff.md — the execution brief
+for the wave (config layer proven on one recipe → lifecycle migrations, parallelizable → banks
+for all 7 → paid cycle-button quick-swap). Push explicitly approved in the same message. His
+framing to keep: this was SUPPOSED to be easy — 7 emails building the same thing; the wave is the
+simplification, not another system. Bank sentences for the 5 new banks need HIS approval before
+they ship words (price-reduced reword still pending him too — carried into the handoff).
+
 ## 2026-08-18 (Fable 5, night, latest) — OPERATOR DECREE: "Stop writing such dumb fucking code and simplify all of this!!! It's fucking 7 emails!!! That are coded to create the same fucking things over and over basically!!!"
 
 Two decrees in one message: (1) "how do we not have this documented where we find it in one
