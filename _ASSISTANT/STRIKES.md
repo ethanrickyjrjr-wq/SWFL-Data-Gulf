@@ -131,6 +131,9 @@ guard: BUILT — RULE 0.8 count-and-prove (07/30/2026) + RULE 0.85 fix-don't-fil
 - strike: 07/30 "all four lanes on the record" — one never opened
 - strike: 07/30 research "filed" with no index line
 - strike: 08/09 "§2.7 written this session" — false on disk
+- strike: 08/19 audit wave, CLAIM G — recipes_as_config_live_verify framed as a "finished build parked on the operator"; two of three parked builds were real, the third check was hours old. Two-thirds true, stamped whole.
+- strike: 08/19 (SAME DAY, 2nd) sold-event persistence — wrote "the build path was keeping ZERO and re-buying the same house next build" two paragraphs after correctly stating the ingest lane has kept all 64 fields since 08/02. Measured after he pushed back: 18,319 bodies held, 834 landed after 08/03, 36,193 api_feed rows. The true finding was narrow (build-path fetches went unstored; nothing at build time READ the stored bodies) and got written one size larger. Second error in the same sentence: "re-buying" put Apify's per-record economics on SteadyAPI, a flat 50k/month subscription where a duplicate call costs QUOTA, not dollars.
+  GUARD SHARPENED 08/19: the sentence naming a defect must ALSO name its scope — "X is broken FOR Y" — never a bare "X is broken" with the scope living in a different paragraph. Both 08/19 strikes are that exact tell.
 
 ## shape: narrated-a-cause-i-never-measured
 guard: OWED — an actor, a duration, or a causal chain stated in an answer must come from a command in the transcript, exactly as RULE 0.8 §4 requires of completion claims. "A parallel session did X" and "N seconds later" are measurements, not connective tissue. If the actor was not identified, the sentence is "something pushed it and I have not identified what."

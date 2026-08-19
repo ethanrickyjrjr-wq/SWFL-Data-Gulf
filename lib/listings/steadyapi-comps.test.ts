@@ -367,7 +367,16 @@ describe("fetchSoldEvent — empty-tolerant, never throws", () => {
     const out = await fetchSoldEvent("M5493101642", {
       fetchImpl: (async () =>
         new Response(JSON.stringify(body), { status: 200 })) as unknown as typeof fetch,
+      saveBody: async () => true, // offline: the landing seam is exercised in sold-event-store.test.ts
     });
-    expect(out).toEqual({ soldPrice: 415000, soldDate: "2026-05-12", listedDate: null });
+    // Since 08/19/2026 a fetched event also says WHICH copy answered and when we saw it —
+    // the fields exist so a stored fallback can never be rendered as a live read.
+    expect(out).toEqual({
+      soldPrice: 415000,
+      soldDate: "2026-05-12",
+      listedDate: null,
+      provenance: "live",
+      asOf: new Date().toISOString().slice(0, 10),
+    });
   });
 });

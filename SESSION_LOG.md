@@ -1,3 +1,81 @@
+## 2026-08-19 (Opus 5) — THE BUILD PATH NOW KEEPS ITS SOLD EVENTS: TS-side /property-tax-history bodies land in the existing raw root, and answer when the vendor goes quiet
+
+Operator handed back the sold-data paragraph with "fix this". Two-thirds of it was right; the
+forensics in it were wrong, and the correction is what located the real defect.
+
+**Corrected by live probe (four lanes, before any code):** the day-grain close CANNOT have come
+from the nearby-sold comps call — `/nearby-home-values` carries no sale date at all (data-roots
+T9, `comp-helper.ts:409`) — nor from the lake, which is MONTH-grain (`lee_comp_sales_v.sale_month`)
+and holds no Carlene 07/2026 sale. The only day-grain recorded close reachable at build time is
+`/property-tax-history` via `fetchSoldEvent`. Also corrected: that response IS written somewhere —
+18,319 bodies in `data_lake.steadyapi_property_history_raw`, still landing 08/14/2026.
+
+**CORRECTION, same session, operator caught it.** An earlier draft of this entry said the build
+path was "keeping ZERO and re-buying the same house next build." Both halves were wrong and the
+sentence contradicted the paragraph above it.
+1. WE HAVE BEEN SAVING ALL 64 FIELDS SINCE 08/02. Measured live 08/19: 18,319 bodies held, 834 of
+   them landed after 08/03 -- the ingest lane is still writing. This was never broken.
+2. "Re-buying" imported Apify's per-record economics onto a vendor that does not bill that way.
+   SteadyAPI is a flat 50,000/month subscription (burn ~13-16k). A duplicate call costs QUOTA,
+   not dollars.
+THE NARROW TRUE STATEMENT: a body fetched by the BUILD path for a property the ingest lane has not
+probed was not stored, and nothing at build time READ the stored bodies at all. Coverage measured
+live 08/19: 18,319 bodies against 36,193 api_feed rows -- about half the book has one.
+
+**The real hole:** the 08/02 playbook stopped the raw-body discard on the INGEST lane only. The
+TypeScript build path did exactly what Python used to do — read three numbers, drop the body.
+Measured: 33 files name that table, NONE under `lib/` or `app/`. The build path neither wrote nor
+read one row of the 18,319 we already own.
+
+**Shipped (7 parts, all done):**
+1. `lib/listings/sold-event-store.ts` — writer + reader on the SAME root, same `property_id` PK,
+   no second table (RULE 0.55). Null-wipe guard: `address_key`/`county` are OMITTED, never nulled,
+   so a build-path re-probe cannot erase the ingest lane's key.
+2. `lib/listings/steadyapi.ts` — `fetchSoldEvent` lands every 200 verbatim and, when the vendor
+   returns NO body, answers from our copy with `provenance:"stored"` + the capture date, capped at
+   180 days. A 200 carrying no Sold event returns null and never consults the store (retraction
+   guard). `fetchListedDate` lands its body too — write-only by design.
+3. `lib/assistant/comp-helper.ts` — the comp's street/zip/county ride along so the landed row is
+   keyed the way the ingest lane keys it (the body itself carries no address; probed).
+4. 22 new tests, watched RED first (6 failing) then green. Address-key conformance asserts against
+   keys read LIVE out of the table, not invented ones.
+5. `migrations/20260819_steadyapi_history_raw_service_role_write.sql` — **a real defect the unit
+   suite could not see.** The live smoke test failed with `42501 permission denied`: the 08/02
+   migration granted SELECT only, which was enough while the sole writer connected as `postgres`.
+   GRANT INSERT, UPDATE run and verified; smoke row written, read back, then deleted (table back to
+   18,319 exactly).
+6. `docs/standards/data-roots.md` — second-writer + only-reader lane recorded on the root; the
+   "remaining un-landed paid surface" line corrected (it under-counted: TS `/property-tax-history`
+   was un-landed too and nobody had written it down).
+7. `_ASSISTANT/SCRATCHPAD.md` entry + check `sold_event_store_live_verify` opened.
+
+**PROOF the fallback actually works, no vendor call and no injection** (`PHOTOS_API` unset, so
+there is no live lane at all; the DEFAULT reader hits the real table and parses a real production
+body landed by the ingest lane on 08/03):
+
+    [steadyapi] sold event served from our STORED copy for property 6601838911 - vendor returned
+    no body; observed 2026-08-03, sale 2024-07-30.
+    RESULT: {"soldPrice":400000,"soldDate":"2024-07-30","listedDate":"2022-11-07",
+             "provenance":"stored","asOf":"2026-08-03"}
+
+Evidence: `bun test lib/listings lib/assistant lib/email lib/deliverable` -> 3,746 pass / 0 fail.
+`bunx next build` -> exit 0. Live write proven by a synthetic row through `saveHistoryBody`
+(read back with `address_key` = `1229CARLENEAVE:33901`, byte-identical to the ingest lane's
+grammar, then deleted -- table back to 18,319 exactly).
+
+SAY IT PLAINLY -- what is NOT covered. (a) `fetchListedDate` now performs a DB upsert from
+`select.ts`'s DOM-healing path, which was previously write-free: bounded, non-fatal, but it IS a
+new write on a hot lane. (b) `provenance` is on the returned object and logged, but no RENDERER
+reads it -- `RenderComp` has no such field and `compsForAddress` still stamps the block `asOf`
+today, so a stored close renders indistinguishably from a live one. Accepted for this pass and
+named: the sale stays true, what ages is its claim to be the LATEST sale, capped at 180 days.
+(c) A REAL build has not been driven through this yet -- the one remaining check,
+`sold_event_store_build_lands_body`, is now a 2-minute operator step (run one build, confirm a
+fresh `fetched_at` row for that property_id). `sold_event_store_live_verify` closed with the
+evidence above; net checks this session: +1 open, 1 closed.
+TS-side `/nearby-home-values` remains the one un-landed paid surface
+(`steadyapi_raw_land_all_paid_surfaces`, unchanged).
+
 ## 2026-08-19 (Fable 5, night, +push) — recipes-as-config PUSHED (8 commits incl. the parallel session's writ-guard-trio, operator "Push all"); continuation handoff written
 
 `docs/handoff/2026-08-19-recipes-as-config-seam-and-wave.md` — the seam map, the parity-proof

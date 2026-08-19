@@ -16,6 +16,9 @@
 // silently reads as "no data".
 
 import type { Listing } from "./rentcast";
+// Type-only: the store's runtime (and the Supabase client under it) is lazy-imported at
+// the one call site that needs it, so nothing else pays for it.
+import type { HistoryMeta, StoredHistory } from "./sold-event-store";
 
 const BASE = "https://api.steadyapi.com/v1/real-estate";
 
@@ -458,6 +461,13 @@ export async function fetchNearbyValues(
 export interface SoldEvent {
   soldPrice: number;
   soldDate: string;
+  /** Which copy of the vendor body answered: the call we just made, or the one we
+   *  landed earlier. Present so no caller can render a stored observation as a live
+   *  one without saying so (strike shape `stale-source-served-silently`). */
+  provenance?: "live" | "stored";
+  /** ISO date the OBSERVATION was made — today for a live answer, the capture date for
+   *  a stored one. NOT the sale date; that is `soldDate`. */
+  asOf?: string;
   /** Vendor list date of the SOLD spell (most recent "Listed" event ≤ soldDate);
    *  null/absent when the history carries none. Rides the SAME response — free. */
   listedDate?: string | null;
@@ -500,25 +510,108 @@ export function parseListedEvent(body: unknown, at?: string): string | null {
   return best;
 }
 
+/** A sold event that knows which copy of the body it came from. `fetchSoldEvent`
+ *  always fills both fields — the pure parser cannot, which is why they are optional
+ *  on `SoldEvent` and required here. */
+export interface SourcedSoldEvent extends SoldEvent {
+  provenance: "live" | "stored";
+  asOf: string;
+}
+
+/** Seams for the body store, injected so a test never touches the database.
+ *  Defaults are lazy-imported: a caller that never reaches the store never pulls the
+ *  Supabase client into its bundle. */
+export interface HistoryStoreDeps {
+  saveBody?: (propertyId: string, body: unknown, meta: HistoryMeta) => Promise<boolean>;
+  readStored?: (propertyId: string) => Promise<StoredHistory | null>;
+}
+
+const isoDay = (d: Date | string) =>
+  (typeof d === "string" ? new Date(d) : d).toISOString().slice(0, 10);
+
+/** Land the body, best-effort. A write failure is logged inside the store and must
+ *  never surface here — RULE 0.7: a vendor call is not allowed to fail a build. */
+async function landBody(
+  propertyId: string,
+  body: unknown,
+  meta: HistoryMeta,
+  deps: HistoryStoreDeps,
+): Promise<void> {
+  try {
+    const save = deps.saveBody ?? (await import("./sold-event-store")).saveHistoryBody;
+    await save(propertyId, body, meta);
+  } catch {
+    /* the body is insurance, never a dependency */
+  }
+}
+
 /**
  * One `/property-tax-history` call — the exact sold price+date for a chosen comp.
  * `propertyId` is an argument only; it never appears in the return. Empty-tolerant:
  * no key, non-200, no Sold event, or bad body → null, never throws.
+ *
+ * ── THE BODY IS KEPT, AND IT IS THE FALLBACK (08/19/2026) ────────────────────
+ * Every 200 lands VERBATIM in `data_lake.steadyapi_property_history_raw` — the same
+ * root, on the same `property_id` key, that the ingest lane has been filling since
+ * 08/02/2026 (18,319 rows). This path wrote nothing and read nothing from it, so a
+ * close that rendered in one build was simply gone from the next when the vendor
+ * didn't answer, and no other source could cover it: the lake's comp view is
+ * month-grain and `/nearby-home-values` carries no sale date at all (data-roots T9).
+ *
+ * When the vendor gives us NO BODY (no key, non-200, network, bad JSON) we read the
+ * one we already landed and stamp it `provenance: "stored"` with its capture date.
+ * When the vendor gives us a body that carries NO Sold event, that is the source
+ * SAYING there is no recorded sale — the store is not consulted, because answering
+ * from an old copy there would resurrect a fact the current source no longer reports.
+ *
+ * `meta` is what the body itself does not carry (probed live: it holds no address at
+ * all) — pass street+zip where the call site knows them so the row can be keyed the
+ * same way the ingest lane keys it.
  */
 export async function fetchSoldEvent(
   propertyId: string,
-  deps: SteadyFetchDeps = {},
-): Promise<SoldEvent | null> {
+  deps: SteadyFetchDeps & HistoryStoreDeps = {},
+  meta: HistoryMeta = {},
+): Promise<SourcedSoldEvent | null> {
+  if (!propertyId) return null;
+  const stored = async (): Promise<SourcedSoldEvent | null> => {
+    try {
+      const read = deps.readStored ?? (await import("./sold-event-store")).fetchStoredHistory;
+      const hit = await read(propertyId);
+      if (!hit) return null;
+      const ev = parseSoldEvent(hit.body);
+      if (!ev) return null;
+      const asOf = isoDay(hit.fetchedAt);
+      // LOUD, deliberately. The write path already logs its failures; a SILENT fallback
+      // would leave nobody able to tell whether this mechanism ever fires in production —
+      // which is how `built-not-wired` survives. This line is the evidence the live-verify
+      // check closes on. It also states the one thing that CAN go stale here: the sale is
+      // still true, but "latest sale" is only true as of the capture date.
+      console.warn(
+        `[steadyapi] sold event served from our STORED copy for property ${propertyId} — ` +
+          `vendor returned no body; observed ${asOf}, sale ${ev.soldDate}. Latest-sale claim ` +
+          `is only current as of the observation date.`,
+      );
+      return { ...ev, provenance: "stored", asOf };
+    } catch {
+      return null;
+    }
+  };
+
   const key = process.env.PHOTOS_API;
-  if (!key || !propertyId) return null;
+  if (!key) return stored();
   const params = new URLSearchParams({ propertyId });
+  let body: unknown;
   try {
     const res = await steadyGet(`property-tax-history?${params}`, key, deps);
-    if (!res) return null;
-    return parseSoldEvent(await res.json());
+    if (!res) return stored();
+    body = await res.json();
   } catch {
-    return null;
+    return stored();
   }
+  await landBody(propertyId, body, meta, deps);
+  const ev = parseSoldEvent(body);
+  return ev ? { ...ev, provenance: "live", asOf: isoDay(new Date()) } : null;
 }
 
 /**
@@ -529,16 +622,25 @@ export async function fetchSoldEvent(
  */
 export async function fetchListedDate(
   propertyId: string,
-  deps: SteadyFetchDeps = {},
+  deps: SteadyFetchDeps & HistoryStoreDeps = {},
+  meta: HistoryMeta = {},
 ): Promise<string | null> {
   const key = process.env.PHOTOS_API;
   if (!key || !propertyId) return null;
   const params = new URLSearchParams({ propertyId });
+  let body: unknown;
   try {
     const res = await steadyGet(`property-tax-history?${params}`, key, deps);
     if (!res) return null;
-    return parseListedEvent(await res.json());
+    body = await res.json();
   } catch {
     return null;
   }
+  // Same endpoint, same body, same landing — a probe on this lane pays for the whole
+  // response too, and the sold event inside it is exactly what the comp lane later
+  // needs. WRITE ONLY, deliberately: unlike a recorded sale, a list date describes the
+  // CURRENT spell, and answering with a stored one would re-floor DOM with a date the
+  // vendor has since moved (the twice-fired `_ENRICH_ONLY_COLS` shape, playbook §STEP 4).
+  await landBody(propertyId, body, meta, deps);
+  return parseListedEvent(body);
 }

@@ -39,6 +39,7 @@
   "lib/listings/neighborhood-amenities.ts",
   "lib/listings/resolve-subject.ts",
   "lib/listings/select.ts",
+  "lib/listings/sold-event-store.ts",
   "lib/narratives/batch-store.ts",
   "lib/narratives/store.ts",
   "lib/pulse/corridor-nearby.ts",

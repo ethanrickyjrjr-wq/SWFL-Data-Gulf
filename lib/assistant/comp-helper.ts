@@ -95,7 +95,13 @@ export interface CompDeps {
     comps: NearbyComp[];
     degraded: SteadyDegradeReason | null;
   }>;
-  fetchSold?: (propertyId: string) => Promise<SoldEvent | null>;
+  /** `meta` is the street/zip/county the vendor body does not carry — it rides along so
+   *  the landed row is keyed the same way the ingest lane keys it (sold-event-store.ts). */
+  fetchSold?: (
+    propertyId: string,
+    deps?: unknown,
+    meta?: { street?: string | null; zip?: string | null; county?: string | null },
+  ) => Promise<SoldEvent | null>;
   /**
    * Lee-only, our own sold universe (`data_lake.lee_comp_sales_v` — LeePA sale +
    * FDOR characteristics), real dates, zero vendor calls. Tried FIRST for a Lee
@@ -473,9 +479,21 @@ export async function compsForAddress(address: string, deps: CompDeps = {}): Pro
   const fetchSold = deps.fetchSold ?? fetchSoldEvent;
   const targets = surfaced.filter((c) => c.status === "sold" && c.propertyId).slice(0, cap);
   const soldByPid = new Map<string, SoldEvent>();
+  // The county is already established — the out-of-footprint branch returned above.
+  const county = geo.countyFips === "12071" ? "Lee" : "Collier";
   await Promise.all(
     targets.map(async (c) => {
-      const ev = await fetchSold(c.propertyId as string);
+      // The comp's own street+zip travel with the call so the landed body carries the
+      // same address key the ingest lane writes. The body itself holds no address.
+      const ev = await fetchSold(
+        c.propertyId as string,
+        {},
+        {
+          street: c.addressLine,
+          zip: c.zip,
+          county,
+        },
+      );
       if (ev) soldByPid.set(c.propertyId as string, ev);
     }),
   );

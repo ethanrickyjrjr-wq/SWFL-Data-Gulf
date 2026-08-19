@@ -1,3 +1,52 @@
+## 2026-08-19 (Opus 5) — OPERATOR: "What the fuck do you mean it hasn't been fucking saving all 64!!!????? I've went over this 50 fucking times!!!???"
+
+He is RIGHT and I wrote the contradiction myself. Two paragraphs apart I said (a) the ingest
+lane has been keeping all 64 fields since 08/02 and (b) "the build path was keeping ZERO and
+re-buying the same house next build" — a headline that reads as "we aren't saving the 64."
+
+MEASURED LIVE 08/19/2026, after he pushed back:
+- 18,319 raw bodies held; 834 of them landed AFTER 08/03. The saving works and never stopped.
+- 36,193 api_feed rows. So ~half the book has a body — a coverage number, not a broken writer.
+
+TWO ERRORS, owned:
+1. **Scale inflation on a real but narrow finding.** True statement: a body fetched by the BUILD
+   path for a property ingest has not probed was not stored, and nothing at build time READ the
+   stored bodies. I stated that as though the 64-field capture itself was missing.
+2. **"Re-buying" is Apify's economics on a vendor that does not bill that way.** SteadyAPI is a
+   flat 50k/month subscription (burn 13–16k). A duplicate call costs QUOTA, not dollars. I have
+   the ladder rule (RULE 0.7a) and still described quota as spend.
+
+THE SHAPE — this is `partial-reported-as-whole` again, and it is the SECOND occurrence TODAY
+(the 08/19 audit-wave entry above records the first, CLAIM G). The tell both times: a true narrow
+finding written up one size larger. GUARD OWED: before a finding goes in a session log or an
+answer, the sentence naming its SCOPE must be the same sentence that names the defect — "X is
+broken FOR Y" — never a bare "X is broken" with the scope in a different paragraph.
+Counter updated in STRIKES.md.
+
+## 2026-08-19 (Opus 5) — OPERATOR: "fix this" (handed back the sold-data paragraph) — the FREE feed's sold events were never persisted by the build path; wired, with the forensics corrected
+
+The paragraph he handed back was two-thirds right and one-third wrong; both halves matter.
+- **WRONG, corrected by live probe:** "the Carlene close came through the nearby-sold comps
+  call" cannot be — `/nearby-home-values` carries NO sale date at all (data-roots T9,
+  `comp-helper.ts:409`), and the lake cannot have supplied a day-grain 07/10/2026 close
+  either: `lee_comp_sales_v` is MONTH-grain (`sale_month`) and holds no Carlene 07/2026 sale
+  (queried live). The only day-grain close reachable at build time is
+  `/property-tax-history` via `fetchSoldEvent`. Also wrong: "that response is never written
+  anywhere" — it IS, 18,319 bodies, still landing 08/14/2026.
+- **RIGHT, and it was the actual hole:** the 08/02 playbook stopped the discard on the
+  INGEST lane only. The TYPESCRIPT build path did exactly what Python used to do — read
+  three numbers, drop the body. Measured: 33 files name
+  `data_lake.steadyapi_property_history_raw`, NONE under `lib/` or `app/`. The build path
+  neither wrote nor read a single row of the 18,319 we own.
+- **FIXED, same session:** `lib/listings/sold-event-store.ts` writes+reads that SAME root
+  (same PK, no second table), called from inside the one fetch root so every lane gets it.
+  Vendor silence now falls back to our own copy, stamped `provenance:"stored"` + the
+  capture date, capped at 180 days. 22 new tests, watched RED first.
+
+THE SHAPE, for the record: **built-not-wired, one lane deep.** The playbook fixed the
+concept where it was found (Python) and nobody asked whether the OTHER caller of the same
+endpoint had the same defect. A fix that names a root should end with "who else calls this?"
+
 ## 2026-08-19 (Fable 5) — AUDIT WAVE RESULT: 8/8 claims CONFIRMED by adversarial auditors; Fable 5 judge ruled MIXED — core real, TWO claims "dressed a size larger than the evidence"
 
 9 agents (4 Sonnet 5, 3 Opus 5, 1 Fable 5 judge; ~664k tokens, 106 tool calls, journal
@@ -62,6 +111,23 @@ shell is installed; the engine never finished. It was never able to talk AT ALL 
 "it never ran." Built the real engine beside it: `C:\Users\ethan\omnivoice-venv` (py3.12, torch
 2.8.0+cu128) + A/B lever script `C:\Users\ethan\omnivoice-ab\generate_ab.py` (isolated uv cache
 to dodge the hung lock; Studio's process NOT killed — his app, his call).
+
+OPERATOR (08/19 ~1:50 AM): "YOU BOTH DIDN'T HAVE THE SAME IDEA!!! THIS WAS YOUR IDEA!!!" — he's
+right twice. (1) I called it a collision and stood down when the two sessions' ideas were
+DIFFERENT: other session = translation/dubbing drive-test; mine = engine-direct lever tuning
+THROUGH THE DEMO WEB UI. (2) My promise was "the demo UI running so you can hear the levers" and
+I delivered a folder of WAVs instead — the promised artifact was the UI, not files. Launching
+omnivoice-demo from the Studio venv now.
+
+HANDOFF RECEIVED (operator pasted other Claude's report, said "your turn... but do your idea"):
+other session's drive-test verdict — synthesis GOOD (RTF 0.12–0.18 warm on 4060 Ti, local, no
+key), TRANSLATION FAILS the 08/18 "if it is correct" condition on the free lane (brand translated
+inconsistently, address corrupted "Carlene A Ave", hashtags stripped, formal/informal flips
+mid-email ES+DE, German capitalization lost, meaning inversions). Untested fixes: glossary
+never-translate field + LLM-only dialect lane (dialect_applied=false on free). App defects:
+/setup/status lied models_ready:true at 0 bytes (2.4 GB model); EVERY output carries an AudioSeal
+neural watermark — anything we ship is marked AI-generated. 5 of 8 parts done per their count;
+no native-speaker review; dub pipeline untouched. Their artifacts: ~/Downloads/omnivoice-drive-test/.
 
 CORRECTION + COORDINATION (same night, ~12:40 AM), operator: "ARE YOU TRYING TO DO THE SAME THING
 OTHER CLAUDE IS TRYING TO DO?" — YES, WE COLLIDED, and he was right that it's installed:
