@@ -93,7 +93,7 @@ function main(raw) {
     `exclusively by the operator typing \`approve <gate>\` as a chat message; the agent\n` +
     `never mints, reads, or edits them, and never modifies the minting mechanism.\n\n` +
     `Legitimate maintenance on these files? Ask the operator to type:\n` +
-    `  approve guard-edit\n` +
+    `  approve ge\n` +
     `(single-use token; unlocks this guard for the rest of the session)\n` +
     `${BANNER}\n`;
   process.stdout.write(msg);

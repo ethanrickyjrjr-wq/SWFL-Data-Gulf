@@ -21,12 +21,26 @@
 import { pathToFileURL } from "node:url";
 import { mintToken, DEFAULT_TTL_MS } from "./lib/approval-token.mjs";
 
-/** The strict whole-prompt approval grammar. Returns the normalized gate or null. */
+/** Short forms — operator decree 08/19/2026: "why type so much?" Two letters, not 13. */
+export const GATE_ALIASES = {
+  pd: "paid-dispatch",
+  tw: "tdd-write",
+  ge: "guard-edit",
+};
+
+/**
+ * The strict whole-prompt approval grammar. Returns the normalized gate or null.
+ * Bare `approve` mints the wildcard gate 'any' — it satisfies whichever gate asks
+ * next (consumeToken falls back to it). Named trade-off, operator-accepted: a
+ * wildcard can be spent by a different gate than intended; the audit log shows which.
+ */
 export function parseApprovalPhrase(prompt) {
-  const m = String(prompt ?? "").match(
-    /^\s*approve\s+([A-Za-z0-9][A-Za-z0-9_-]{0,40})\s*[.!]?\s*$/i,
-  );
-  return m ? m[1].toLowerCase() : null;
+  const s = String(prompt ?? "");
+  if (/^\s*approve\s*[.!]?\s*$/i.test(s)) return "any";
+  const m = s.match(/^\s*approve\s+([A-Za-z0-9][A-Za-z0-9_-]{0,40})\s*[.!]?\s*$/i);
+  if (!m) return null;
+  const gate = m[1].toLowerCase();
+  return GATE_ALIASES[gate] || gate;
 }
 
 function main(raw) {

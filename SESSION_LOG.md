@@ -37,7 +37,14 @@ legacy builder without migrating the touched slice. Status page gained a generat
 column. Gates: lib/deliverable 1183/0 · lib/email 1810/0 · next build exit 0 · both acceptance
 scripts green. Next: operator push decision + live-verify (`recipes_as_config_live_verify`).
 
-## 2026-08-19 (Fable 5, night) — writ-guard-trio BUILT: human-only approval tokens + write-time TDD gate + scoped rule injection (all three Writ steals, operator: "I guess we need them all")
+## 2026-08-19 (Fable 5, night, +1) — approval short forms: `approve pd/tw/ge` + bare `approve` wildcard (operator: "How am I supposed to remember those and why type so much?")
+
+TDD (4 red → 207/207): aliases in the minter (GATE_ALIASES), bare `approve` mints wildcard
+'any', consumeToken spends the gate's own token before falling back to the wildcard (audit
+records `via`). All three block messages now show the short phrase — the operator types what
+the block shows, never from memory. Live-proved the whole loop in-session: operator typed
+`approve test-drive` (mint chain) and `approve guard-edit` (vault unlock consumed the token to
+allow these very edits). writ_guard_trio_live_verify CLOSED with evidence.
 
 Evaluated infinri/Writ live (README v1.7.0; eval in `_RESEARCH/agent-behavior/2026-08-18-writ-
 governance-runtime-evaluation.md`): verdict do-not-adopt (Docker+Neo4j fails RULE 11), steal three

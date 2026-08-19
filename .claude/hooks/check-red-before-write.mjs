@@ -105,7 +105,7 @@ function main(raw) {
     `A test that has never been red proves only that it compiles. Run it now:\n` +
     `  node --test ${target}   (or bun test)\n` +
     `watch it FAIL, then write the implementation and watch it pass.\n\n` +
-    `Genuinely not the TDD flow? The operator can type:  approve tdd-write\n` +
+    `Genuinely not the TDD flow? The operator can type:  approve tw\n` +
     `(single-use token; stands this gate down for the session)\n` +
     `${BANNER}\n`;
   process.stdout.write(msg);

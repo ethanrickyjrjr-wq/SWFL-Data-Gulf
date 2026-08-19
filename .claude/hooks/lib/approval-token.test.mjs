@@ -51,6 +51,35 @@ test("within TTL the token is honored", () => {
   assert.equal(r.ok, true);
 });
 
+test("a wildcard 'any' token satisfies a specific gate — bare `approve` works", () => {
+  const d = dir();
+  mintToken("any", { dir: d });
+  const r = consumeToken("paid-dispatch", { dir: d });
+  assert.equal(r.ok, true);
+  const again = consumeToken("tdd-write", { dir: d });
+  assert.equal(again.ok, false, "the wildcard is still single-use");
+});
+
+test("a gate's own token is spent before the wildcard — specific beats any", () => {
+  const d = dir();
+  mintToken("any", { dir: d });
+  mintToken("paid-dispatch", { dir: d });
+  assert.equal(consumeToken("paid-dispatch", { dir: d }).ok, true);
+  assert.equal(
+    consumeToken("guard-edit", { dir: d }).ok,
+    true,
+    "the wildcard must still be there for the next gate",
+  );
+});
+
+test("an expired wildcard does not open a gate", () => {
+  const d = dir();
+  const t0 = Date.now();
+  mintToken("any", { dir: d, now: t0 });
+  const r = consumeToken("paid-dispatch", { dir: d, now: t0 + 31 * 60_000 });
+  assert.equal(r.ok, false);
+});
+
 test("mint and consume both leave audit lines — refusals are on the record", () => {
   const d = dir();
   mintToken("paid-dispatch", { dir: d });

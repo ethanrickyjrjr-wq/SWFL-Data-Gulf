@@ -221,7 +221,7 @@ function tokenize(s) {
 
 function block(what, detail) {
   const tokenHint =
-    "\nOr, Claude-proof form: the operator types `approve paid-dispatch` in chat\n" +
+    "\nOr, Claude-proof form: the operator types `approve pd` in chat\n" +
     "(mints a single-use 30-min token), then the command is re-run as-is.";
   const msg = `\n${BANNER}\nBLOCKED — ${what}\n${BANNER}\n${detail}${tokenHint}\n${BANNER}\n`;
   process.stdout.write(msg);

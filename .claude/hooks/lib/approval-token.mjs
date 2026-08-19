@@ -62,29 +62,17 @@ export function mintToken(gate, { dir = APPROVALS_DIR, now = Date.now(), meta } 
   return record;
 }
 
-/**
- * Atomically claim and destroy the token for `gate`.
- * Returns {ok:true, minted_at} or {ok:false, reason:'missing'|'expired'}.
- * The renameSync claim is the whole race story: exactly one caller wins; the loser
- * gets ENOENT and a 'missing' refusal.
- */
-export function consumeToken(
-  gate,
-  { dir = APPROVALS_DIR, ttlMs = DEFAULT_TTL_MS, now = Date.now() } = {},
-) {
-  if (!validGate(gate)) {
-    audit(dir, { event: "refused", gate: String(gate), reason: "invalid-gate" });
-    return { ok: false, reason: "missing" };
-  }
-  const tokenPath = join(dir, `${gate}.token`);
+/** Atomic claim of one named token file. The renameSync is the whole race story:
+ *  exactly one caller wins; the loser gets ENOENT and a 'missing' refusal. */
+function claimOne(dir, name, ttlMs, now) {
+  const tokenPath = join(dir, `${name}.token`);
   const claimed = join(
     dir,
-    `${gate}.token.claimed-${process.pid}-${randomBytes(4).toString("hex")}`,
+    `${name}.token.claimed-${process.pid}-${randomBytes(4).toString("hex")}`,
   );
   try {
     renameSync(tokenPath, claimed);
   } catch {
-    audit(dir, { event: "refused", gate, reason: "missing" });
     return { ok: false, reason: "missing" };
   }
   let record = null;
@@ -99,10 +87,35 @@ export function consumeToken(
     /* already gone — fine */
   }
   const mintedAt = Number(record?.minted_at || 0);
-  if (!mintedAt || now - mintedAt > ttlMs) {
-    audit(dir, { event: "refused", gate, reason: "expired" });
-    return { ok: false, reason: "expired" };
-  }
-  audit(dir, { event: "consume", gate, minted_at: mintedAt });
+  if (!mintedAt || now - mintedAt > ttlMs) return { ok: false, reason: "expired" };
   return { ok: true, minted_at: mintedAt };
+}
+
+/**
+ * Claim and destroy the token for `gate`. The gate's OWN token is spent first;
+ * when it has none, the wildcard minted by a bare `approve` ('any.token') is
+ * claimed instead — operator decree 08/19/2026. Audit records which one paid
+ * (`via`), so a wildcard spent by an unintended gate is always visible.
+ * Returns {ok:true, minted_at} or {ok:false, reason:'missing'|'expired'}.
+ */
+export function consumeToken(
+  gate,
+  { dir = APPROVALS_DIR, ttlMs = DEFAULT_TTL_MS, now = Date.now() } = {},
+) {
+  if (!validGate(gate)) {
+    audit(dir, { event: "refused", gate: String(gate), reason: "invalid-gate" });
+    return { ok: false, reason: "missing" };
+  }
+  let via = gate;
+  let r = claimOne(dir, gate, ttlMs, now);
+  if (!r.ok && r.reason === "missing" && gate !== "any") {
+    via = "any";
+    r = claimOne(dir, "any", ttlMs, now);
+  }
+  if (!r.ok) {
+    audit(dir, { event: "refused", gate, via, reason: r.reason });
+    return r;
+  }
+  audit(dir, { event: "consume", gate, via, minted_at: r.minted_at });
+  return r;
 }

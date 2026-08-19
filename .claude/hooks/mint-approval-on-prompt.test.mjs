@@ -18,9 +18,16 @@ test("the word approve inside a sentence mints NOTHING", () => {
   assert.equal(parseApprovalPhrase("can you approve paid-dispatch for me"), null);
 });
 
-test("approve with no gate mints nothing", () => {
-  assert.equal(parseApprovalPhrase("approve"), null);
-  assert.equal(parseApprovalPhrase("approve   "), null);
+test("short aliases mint their full gate — operator types 2 letters, not 13", () => {
+  assert.equal(parseApprovalPhrase("approve pd"), "paid-dispatch");
+  assert.equal(parseApprovalPhrase("approve tw"), "tdd-write");
+  assert.equal(parseApprovalPhrase("approve ge"), "guard-edit");
+  assert.equal(parseApprovalPhrase("Approve PD!"), "paid-dispatch");
+});
+
+test("bare approve mints the wildcard gate for whichever gate asks next", () => {
+  assert.equal(parseApprovalPhrase("approve"), "any");
+  assert.equal(parseApprovalPhrase("  Approve.  "), "any");
 });
 
 test("multi-line prompts never mint — the phrase must be the whole message", () => {
