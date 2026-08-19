@@ -27,12 +27,15 @@
  *   3. THE HERO CARRIES THE CLOSE CELL VERBATIM — the exact string `heroPrice` returned.
  *      A prefill that gets reformatted on the way to the page is a number the agent no
  *      longer recognizes as their own.
- *   4. A PREFILL DOES NOT DERIVE. `List-to-Sale`, `List Price` and `$/Sq Ft` are ABSENT
- *      from the rendered HTML on a prefilled run (StatsBlock drops empty cells in
+ *   4. A PREFILL DOES NOT DERIVE THE COMPARISONS. `List-to-Sale` and `List Price` are
+ *      ABSENT from the rendered HTML on a prefilled run (StatsBlock drops empty cells in
  *      `emailRender`, so an open cell is a missing cell). `List-to-Sale` is the sharpest
  *      one: from a prefill it would compute 100.0% and render in the accent as the strip's
  *      PRIMARY cell — a fabricated market outcome wearing the most authoritative styling
- *      on the page.
+ *      on the page. `$/Sq Ft` LEFT this list 08/19/2026 by operator decree ("SQ FT IS
+ *      JUST LISTED AS THE LAST PRICE WE HAD"): it rides the hero's own ladder now, so a
+ *      prefilled run SHOWS it (last-held price ÷ sqft) and the send-time confirm
+ *      recomputes it from the agent's answer.
  *   5. NO SOLD-DATE KICKER OVER A PREFILL. `Sold MM/DD/YYYY` is a claim about a recorded
  *      event and it is not editable. (Matched by regex — a bare `Sold` substring test would
  *      fire on the "Just Sold" ribbon itself.)
@@ -180,7 +183,11 @@ const rows: ProvenanceRow[] = [
   ["Beds", filled.beds, "free spine → the subject's own row in its own sold set"],
   ["Baths", filled.baths, "free spine → Lee records → nearby-values → subject row"],
   ["Square feet", filled.sqft, "free spine → subject row"],
-  ["$/Sq Ft", cellOf("$/Sq Ft"), "DERIVED from the RECORDED close ÷ sq ft — never from a prefill"],
+  [
+    "$/Sq Ft",
+    cellOf("$/Sq Ft"),
+    "the hero's ladder ÷ sq ft — recorded close first, else last-held price (decree 08/19/2026)",
+  ],
   [
     "Days on Market",
     cellOf("Days on Market"),
@@ -260,7 +267,8 @@ const lower = html.toLowerCase();
 const zip = String(filled.zip || filled.address || "").match(/\b\d{5}\b/)?.[0] ?? "";
 const imageBlocks = doc.blocks.filter((b) => b.type === "image").length;
 const prefilled = hero.rung === "prefill";
-const DERIVED_LABELS = ["List-to-Sale", "Days on Market", "$/Sq Ft"];
+// $/Sq Ft left this list 08/19/2026 — it rides the hero's ladder now (see header note 4).
+const DERIVED_LABELS = ["List-to-Sale", "Days on Market"];
 const leaked = prefilled ? DERIVED_LABELS.filter((l) => html.includes(l)) : [];
 const priceInProse = /\$\s?[\d,]{3,}/.exec(authored ?? "")?.[0];
 
@@ -288,7 +296,7 @@ const checks: Assertion[] = [
     detail: prefilled
       ? leaked.length
         ? `LEAKED: ${leaked.join(", ")}`
-        : "List-to-Sale / Days on Market / $/Sq Ft all absent ✓"
+        : "List-to-Sale / Days on Market absent ✓ ($/Sq Ft may ship — hero ladder, 08/19/2026)"
       : "n/a — this run holds a RECORDED close, so the derived cells are legitimate",
   },
   {

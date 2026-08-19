@@ -7,8 +7,12 @@
   Test: lib/deliverable/recipes/just-sold.test.ts > "F9 · the prefill is our list price VERBATIM — never reformatted"
 - Claim: nothing held at all is an OPEN SLOT, never a zero
   Test: lib/deliverable/recipes/just-sold.test.ts > "F8 · nothing held at all → an OPEN SLOT, never a zero"
-- Claim: a prefill never reaches a DERIVED cell (`List-to-Sale`, `List Price`, `$/Sq Ft`) or a footnote
-  Test: lib/deliverable/recipes/just-sold.test.ts > "F1/F2/F3 · with a prefill in the hero, the strip's derived cells stay OPEN"
+- Claim: a prefill never reaches a COMPARISON cell (`List-to-Sale`, `List Price`) or a footnote.
+  `$/Sq Ft` LEFT this claim 08/19/2026 by operator decree ("SQ FT IS JUST LISTED AS THE LAST
+  PRICE WE HAD... IT'S SIMPLE MATH"): it rides the hero's own ladder — recorded close first,
+  else the last-held price — and the send-time sale-price confirm recomputes it from the
+  agent's answer.
+  Test: lib/deliverable/recipes/just-sold.test.ts > "F1/F3 · with a prefill in the hero, the COMPARISON cells stay OPEN — but $/Sq Ft fills"
   Test: lib/deliverable/recipes/just-sold.test.ts > "F2 · the footnote claims nothing when nothing was computed"
   Live: scripts/email/render-just-sold.mts assertion 4, read off the rendered HTML
 - Claim: a prefill is never a chart bar — the comps chart anchors on a RECORDED close or is dropped

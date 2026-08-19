@@ -50,6 +50,12 @@ import { brandWebsiteUrl } from "@/lib/email/inject-photo";
 import { LinkAskModal } from "./LinkAskModal";
 import { ContactPickerModal } from "@/components/contacts/ContactPickerModal";
 import { ScheduleSendModal } from "./ScheduleSendModal";
+import { SalePriceConfirmModal } from "./SalePriceConfirmModal";
+import {
+  applySalePrice,
+  needsSalePriceConfirm,
+  salePriceFor,
+} from "@/lib/email/sale-price-confirm";
 import { ScheduleSocialModal } from "./ScheduleSocialModal";
 import { SocialCalendarPanel } from "./SocialCalendarPanel";
 import { SocialComposer } from "./social/SocialComposer";
@@ -524,6 +530,9 @@ export function EmailLabGridShell({
   const [exporting, setExporting] = useState(false);
   const [sendOpen, setSendOpen] = useState(false);
   const [sendId, setSendId] = useState<string | null>(null);
+  // Sale-price confirm (decree 08/19/2026) — non-null = the modal is up, holding
+  // the hero's current price for the agent to confirm or correct before the send.
+  const [salePriceAsk, setSalePriceAsk] = useState<string | null>(null);
   const [scheduleOpen, setScheduleOpen] = useState(Boolean(autoOpenSchedule && deliverableId));
   const [scheduleId, setScheduleId] = useState<string | null>(deliverableId ?? null);
   const [promotingPath, setPromotingPath] = useState<string | null>(null);
@@ -1753,17 +1762,30 @@ export function EmailLabGridShell({
     }
   }
 
-  async function openSend() {
+  async function proceedSend(finalDoc: EmailDoc) {
     let id = deliverableId ?? null;
     if (onSave) {
       await saveBrandIfDirty();
-      const saved = await onSave(doc, aiPrompt, campaignKey, builtRecipeKeyRef.current);
+      const saved = await onSave(finalDoc, aiPrompt, campaignKey, builtRecipeKeyRef.current);
       if (typeof saved === "string") id = saved;
     }
     if (id) {
       setSendId(id);
       setSendOpen(true);
     }
+  }
+
+  async function openSend() {
+    // THE SALE-PRICE CONFIRM (decree 08/19/2026): a Just Sold build asks the agent
+    // to confirm the close before the contacts picker opens. Answer → the price and
+    // $/Sq Ft update (simple math, lib/email/sale-price-confirm.ts) and the send
+    // proceeds; "Send as is" → the prefilled build ships untouched. It can only
+    // ever ADD one click — it never blocks a send.
+    if (needsSalePriceConfirm(builtRecipeKeyRef.current, doc)) {
+      setSalePriceAsk(salePriceFor(doc) ?? "");
+      return;
+    }
+    await proceedSend(doc);
   }
 
   async function openSchedule() {
@@ -2855,6 +2877,23 @@ export function EmailLabGridShell({
         title="Save your brand"
         blurb="Enter your email and we’ll send you a code. Your brand saves to your account so you only type it once — your email stays right where it is."
       />
+
+      {salePriceAsk !== null && (
+        <SalePriceConfirmModal
+          initialPrice={salePriceAsk}
+          onConfirm={(price) => {
+            const next = applySalePrice(doc, price);
+            if (next !== doc) commit(next);
+            setSalePriceAsk(null);
+            void proceedSend(next);
+          }}
+          onSendAsIs={() => {
+            setSalePriceAsk(null);
+            void proceedSend(doc);
+          }}
+          onClose={() => setSalePriceAsk(null)}
+        />
+      )}
 
       {sendOpen && sendId && (
         <ContactPickerModal

@@ -441,9 +441,15 @@ export async function withSubjectPhoto(facts: ListingFacts, street: string): Pro
  * knows both numbers) and NO price cells in the sent email. An element ships with
  * its coherence rule; this is it.
  *
- * $/SQ FT IS THE SALE PRICE ÷ SQUARE FEET — never the ask ÷ square feet. A sold
- * email's $/sq ft is a claim about what the market PAID. Two sourced figures in, one
- * rate out (the same shape as the flyer's), never back-solved from one of them.
+ * $/SQ FT RIDES THE HERO'S OWN LADDER — AMENDED 08/19/2026 BY OPERATOR DECREE:
+ * *"SQ FT IS JUST FUCKING LISTED AS THE LAST FUCKING PRICE WE HAD... THEY ANSWER,
+ * THE MOTHERFUCKING PRICE PER SQUARE FOOTAGE FUCKING CHANGES AUTOMATICALLY SINCE
+ * IT'S SIMPLE FUCKING MATH."* The recorded close still wins when held; with no
+ * close the cell computes from the SAME last-held price the hero prefills — the
+ * agent sees one price and one rate derived from it, edits the price, and the rate
+ * follows. The send-time sale-price confirm is the honesty valve the decree paired
+ * with this. (The 08/09 recorded-only rule survives on the cells where a prefill
+ * genuinely cannot answer: DOM and List-to-Sale below.)
  *
  * DAYS ON MARKET (added 08/09/2026 by operator decree — "INCLUDE % SQ FT / DOM") is
  * playbook §2.5.5 G2 built: the RECORDED closed-spell only (`soldInDays` — sold date −
@@ -464,8 +470,10 @@ export function soldSpecs(
 ): StatItem[] {
   const listPrice = num(facts.price);
   const pair = close && listPrice ? { close: close.price, list: listPrice } : null;
-  // Derived from the CLOSE, or not at all. `pricePerSqft` parses digits out of both.
-  const soldPerSqft = close ? pricePerSqft(usd(close.price), facts.sqft) : undefined;
+  // The hero's ladder: recorded close, else the last price we held (decree 08/19/2026).
+  const soldPerSqft = close
+    ? pricePerSqft(usd(close.price), facts.sqft)
+    : pricePerSqft(facts.price, facts.sqft);
   const dom = close && soldInDays != null && soldInDays > 0 ? String(soldInDays) : undefined;
   return [
     spec(facts.beds, "Beds"),

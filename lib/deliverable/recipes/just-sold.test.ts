@@ -253,12 +253,15 @@ describe("soldSpecs — THE PAIRING RULE (found by looking at the render)", () =
     expect(strip.map((c) => c.value).join()).not.toContain("595,000");
   });
 
-  it("$/Sq Ft is the SALE price ÷ sq ft — never the ask ÷ sq ft", () => {
-    // 613850 / 2847 = $216. The ask would have given $209 — a real number answering
-    // the wrong question, which is this recipe's whole disease.
+  it("$/Sq Ft rides the hero's own ladder — recorded close first, else the last price we had", () => {
+    // Decree 08/19/2026, superseding the recorded-only rule of 08/09: "SQ FT IS JUST
+    // LISTED AS THE LAST PRICE WE HAD... THEY ANSWER, THE PRICE PER SQUARE FOOTAGE
+    // CHANGES AUTOMATICALLY SINCE IT'S SIMPLE MATH." Recorded close wins when held
+    // (613850 / 2847 = $216); with no close the cell fills from the same last-held
+    // price the hero prefills ($595,000 / 2847 = $209) — never an empty cell while
+    // we hold a price and the footage. The send-time confirm is the honesty valve.
     expect(cell(soldSpecs(active, { price: 613_850, date: null }), "$/Sq Ft")?.value).toBe("$216");
-    // No close → no sold $/sq ft. It does NOT quietly fall back to the ask.
-    expect(cell(soldSpecs(active, null), "$/Sq Ft")?.value).toBe("");
+    expect(cell(soldSpecs(active, null), "$/Sq Ft")?.value).toBe("$209");
   });
 
   it("with a close but NO ask (the REAL sold-house case), the comparison cell stays open", () => {
@@ -409,18 +412,19 @@ describe("the prefill NEVER leaks out of the hero cell", () => {
     sourceUrl: "x",
   };
 
-  it("F1/F2/F3 · with a prefill in the hero, the strip's derived cells stay OPEN", () => {
+  it("F1/F3 · with a prefill in the hero, the COMPARISON cells stay OPEN — but $/Sq Ft fills", () => {
     // F1 List-to-Sale would compute 100.0% from the same figure twice and render it in the
     // accent as the strip's PRIMARY cell — a fabricated market outcome, the worst defect
-    // available here. F2 $/Sq Ft would be list-price-per-sqft under a label saying sale.
-    // F3 List Price would print the hero's own number again at a second scale — the exact
-    // bug this recipe's header records ("the HTML greps clean; only the screenshot showed it").
+    // available here. F3 List Price would print the hero's own number again at a second
+    // scale. Both stay recorded-gated. $/Sq Ft is DIFFERENT since the 08/19/2026 decree:
+    // it rides the hero's ladder, so on a prefill it carries last-held-price ÷ sqft and
+    // recomputes when the agent confirms the real close at send.
     expect(heroPrice(active, null).rung).toBe("prefill"); // the hero IS filled…
-    const strip = soldSpecs(active, null, 18); // …and the strip still knows nothing
+    const strip = soldSpecs(active, null, 18);
     const cell = (l: string) => strip.find((c) => c.label === l)?.value;
     expect(cell("List-to-Sale")).toBe("");
-    expect(cell("$/Sq Ft")).toBe("");
-    expect(cell("Days on Market")).toBe(""); // F2's sibling: a spell needs a recorded close
+    expect(cell("$/Sq Ft")).toBe("$209"); // 595000 / 2847 — the hero's own prefill, same ladder
+    expect(cell("Days on Market")).toBe(""); // a spell needs a recorded close
     expect(strip.map((c) => c.value).join()).not.toContain("595,000");
   });
 
