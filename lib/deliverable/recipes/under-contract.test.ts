@@ -19,7 +19,6 @@
 
 import { describe, expect, it } from "bun:test";
 import {
-  buildUnderContract,
   daysToContract,
   SOLD_LANGUAGE,
   speedOpenSlots,
@@ -31,6 +30,7 @@ import {
 } from "./under-contract";
 import { defaultDoc } from "@/lib/email/doc/default-docs";
 import { RECIPES } from "@/lib/deliverable/recipes";
+import { builderFor } from "./index";
 import type { RecipeBuildContext } from "./index";
 import type { EmailDoc, StatItem } from "@/lib/email/doc/types";
 import type { ListingFacts } from "@/lib/email/listing-scrape";
@@ -74,6 +74,15 @@ const ctxFor = (facts: ListingFacts | null): RecipeBuildContext => ({
   facts,
   resolved: Boolean(facts),
 });
+
+/** MIGRATED (recipes-as-config, plan 2026-08-19 Task 5): the build now flows through
+ *  the registry dispatch — config present → the ONE config builder. This suite keeps
+ *  driving the same seam every production caller uses. */
+const buildUnderContract = builderFor("under-contract")!;
+
+/** The config is this recipe's declarative half — several invariants below are now
+ *  assertions on DATA rather than on source text. */
+const CONFIG = RECIPES["under-contract"].config!;
 
 /** The recipe's own source, for the guards that are about what the code MAY NOT READ. */
 const SOURCE = await Bun.file(
@@ -414,30 +423,38 @@ describe("FAILURE MODE: the recipe detects pending instead of being told", () =>
 // ─────────────────────────────────────────────────────────────────────────────
 
 describe("FAILURE MODE: the community is stripped from the writer's fact sheet", () => {
+  // MIGRATED: the strip list is CONFIG DATA now (narratorStrips), applied by the one
+  // config builder — so these invariants read the data, not the source text.
   it("never strips neighborhood or communityStats from narratorFacts", () => {
-    expect(CODE).not.toMatch(/neighborhood:\s*undefined/);
-    expect(CODE).not.toMatch(/communityStats:\s*undefined/);
+    expect(CONFIG.narratorStrips).not.toContain("neighborhood");
+    expect(CONFIG.narratorStrips).not.toContain("communityStats");
+    expect(CONFIG.narratorStrips).not.toContain("community");
+    expect(CONFIG.narratorStrips).not.toContain("insideTheGate");
   });
 
-  it("the writer gates on community material as well as a pasted description", () => {
-    expect(CODE).toContain("hasCommunityMaterial");
+  it("the writer gates on community material as well as a pasted description", async () => {
+    // That gating lives in the ONE config builder now — fleet-wide, read at its source.
+    const builderSource = await Bun.file(
+      new URL("./config-builder.ts", import.meta.url).pathname.replace(/^\/([A-Za-z]:)/, "$1"),
+    ).text();
+    expect(builderSource).toContain("hasCommunityMaterial");
     for (const layer of [
       "facts.community",
       "facts.insideTheGate",
       "facts.communityStats",
       "facts.neighborhood",
     ]) {
-      expect(CODE).toContain(layer);
+      expect(builderSource).toContain(layer);
     }
   });
 
   it("still strips the costs and the stopped clock — the decree is positives, not a firehose", () => {
     // Costs are the realtor's conversation (same-day polish decree), and daysOnMarket /
     // lotSize stay stripped for the claim-gate reasons the recipe documents.
-    expect(CODE).toMatch(/daysOnMarket:\s*undefined/);
-    expect(CODE).toMatch(/lotSize:\s*undefined/);
-    expect(CODE).toMatch(/yearBuilt:\s*undefined/);
-    expect(CODE).toMatch(/hoaFee:\s*undefined/);
+    expect(CONFIG.narratorStrips).toContain("daysOnMarket");
+    expect(CONFIG.narratorStrips).toContain("lotSize");
+    expect(CONFIG.narratorStrips).toContain("yearBuilt");
+    expect(CONFIG.narratorStrips).toContain("hoaFee");
   });
 
   it("a house with neither material still builds — the paragraph stays an open slot", async () => {

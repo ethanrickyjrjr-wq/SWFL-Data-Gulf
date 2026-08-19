@@ -22,7 +22,7 @@ import { buildLifecycleEmail } from "@/lib/email/lifecycle-chrome";
 import { addressLineOf, listingDescription, specFootnote } from "@/lib/email/listing-flyer";
 import { brandWebsiteUrl } from "@/lib/email/inject-photo";
 import { listingButtonUrl } from "@/lib/listings/listing-url";
-import { renderTemplate } from "./config";
+import { renderTemplate, subjectFor } from "./config";
 import { resolveCells } from "./cell-catalog";
 import { runDerivations } from "./derivations";
 import { authorListingNarrative, clearNarrativeSlots, fillNarrative } from "./shared";
@@ -37,36 +37,10 @@ import type { ListingFacts } from "@/lib/email/listing-scrape";
  *  carried; env would ship "http://localhost:3000" into locally-built docs. */
 const SITE = "https://www.swfldatagulf.com";
 
-/**
- * THE SUBJECT LADDER — deterministic, never model-authored. street → city → bare;
- * `suppressAddress` skips the street rung. A bare template whose placeholders all
- * came back empty degrades to the ribbon — a subject always resolves, and
- * "{days} days" with no days must not ship as " days".
- */
-export function subjectFor(
-  config: RecipeConfig,
-  facts: Pick<ListingFacts, "address" | "city">,
-  subjectVars: Record<string, string>,
-): string {
-  const street =
-    String(facts.address ?? "")
-      .split(",")[0]
-      ?.trim() ?? "";
-  if (street && !config.suppressAddress) {
-    return renderTemplate(config.subject.withStreet, { street, ...subjectVars });
-  }
-  const city = facts.city?.trim();
-  if (city) return renderTemplate(config.subject.withCity, { city, ...subjectVars });
-  const bare = renderTemplate(config.subject.bare, subjectVars).trim();
-  // A template that dissolved (all placeholders empty) leaves fragments like "days" —
-  // detect by checking the UNFILLED template had placeholders none of which resolved.
-  const hadPlaceholders = /\{\w+\}/.test(config.subject.bare);
-  const anyVarResolved = Object.keys(subjectVars).some((k) =>
-    config.subject.bare.includes(`{${k}}`),
-  );
-  if (hadPlaceholders && !anyVarResolved) return config.ribbon;
-  return bare || config.ribbon;
-}
+// The subject ladder lives in config.ts (pure over config + facts picks), so recipe
+// compat shims can reach it without importing this builder. Re-exported for callers
+// that think of it as the builder's seam.
+export { subjectFor } from "./config";
 
 /** Banned phrase → the paragraph is DROPPED, never rewritten. A missing paragraph
  *  is honest; a confident false one is not. */

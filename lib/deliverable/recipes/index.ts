@@ -42,7 +42,6 @@ import type { VoicePresetId } from "@/lib/email/voice-presets";
 import { buildNewListing } from "./new-listing";
 import { buildComingSoon } from "./coming-soon";
 import { buildMarketComps } from "./market-comps";
-import { buildUnderContract } from "./under-contract";
 import { buildJustSold } from "./just-sold";
 import { buildOpenHouse } from "./open-house";
 import { buildPriceReduced } from "./price-reduced";
@@ -93,7 +92,8 @@ export const RECIPE_BUILDERS: Partial<Record<RecipeKey, RecipeBuilder>> = {
   "new-listing": buildNewListing, // the reference implementation
   "coming-soon": buildComingSoon, // address SUPPRESSED; scarcity from live county inventory
   "market-comps": buildMarketComps, // the comps bar lives HERE; a comp needs beds AND sqft
-  "under-contract": buildUnderContract, // time on market vs the area's typical
+  // "under-contract" — MIGRATED to recipes-as-config (config on its registry
+  // entry; builderFor dispatches to buildFromConfig). First of the lifecycle wave.
   "just-sold": buildJustSold, // the close among the week's real sales
   "open-house": buildOpenHouse, // a house and a MOMENT; no chart
   "price-reduced": buildPriceReduced, // the cut ABOVE the price, smaller, different color

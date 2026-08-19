@@ -29,8 +29,11 @@ export interface RecipeConfig {
   ribbon: string;
   /** Subject-line templates, deterministic, never model-authored. Placeholders:
    *  {street} {city} plus any derivation subjectVars. Ladder: withStreet →
-   *  withCity → bare (suppressAddress skips the street rung). */
-  subject: { withStreet: string; withCity: string; bare: string };
+   *  withCity → bare (suppressAddress skips the street rung). `bareWithDays` is
+   *  the research's strongest form ("Under contract in 9 days") — used at the bare
+   *  rung ONLY when a derivation resolved {days}; a template must never ship with
+   *  a dissolved placeholder. */
+  subject: { withStreet: string; withCity: string; bare: string; bareWithDays?: string };
   /** Photo alt template. Placeholder: {address}. */
   photoAlt: string;
   /** Ordered spec-strip cells, by catalog key. The HOA incident lived exactly here —
@@ -65,6 +68,33 @@ export interface RecipeConfig {
 /** Template fill: "{street}" → vars.street ?? "". Unknown placeholder → "". */
 export function renderTemplate(tpl: string, vars: Record<string, string>): string {
   return tpl.replace(/\{(\w+)\}/g, (_, k: string) => vars[k] ?? "");
+}
+
+/**
+ * THE SUBJECT LADDER — deterministic, never model-authored. street → city → bare;
+ * `suppressAddress` skips the street rung (coming-soon). At the bare rung,
+ * `bareWithDays` fires only when a derivation actually resolved {days} — a subject
+ * always resolves and never ships a dissolved placeholder. Lives HERE (pure config
+ * + facts picks) so recipe compat shims can reach it without importing the builder.
+ */
+export function subjectFor(
+  config: RecipeConfig,
+  facts: { address?: string; city?: string },
+  subjectVars: Record<string, string>,
+): string {
+  const street =
+    String(facts.address ?? "")
+      .split(",")[0]
+      ?.trim() ?? "";
+  if (street && !config.suppressAddress) {
+    return renderTemplate(config.subject.withStreet, { street, ...subjectVars });
+  }
+  const city = facts.city?.trim();
+  if (city) return renderTemplate(config.subject.withCity, { city, ...subjectVars });
+  if (subjectVars.days && config.subject.bareWithDays) {
+    return renderTemplate(config.subject.bareWithDays, subjectVars);
+  }
+  return renderTemplate(config.subject.bare, subjectVars).trim() || config.ribbon;
 }
 
 /** Every registry entry that carries a config. The fleet tests iterate THIS. */

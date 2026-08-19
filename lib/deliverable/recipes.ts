@@ -265,6 +265,77 @@ export const RECIPES: Record<RecipeKey, Recipe> = {
     prompt:
       "Build an under-contract announcement email for my listing at [[your listing address]] — announce it's under contract, set how fast it went against how long homes in the area have been listed, and point readers to what else is available.",
     needs: ["agent_name", "brokerage", "business_address"],
+    // ── RECIPES-AS-CONFIG: the FIRST migrated recipe (plan 2026-08-19 Task 5). ──
+    // Every value below is a VERBATIM move out of the 08/06 hand-coded builder
+    // (recipes/under-contract.ts, 654 lines at migration). The walked lessons ride
+    // as data: the ribbon wording is UNRATIFIED (operator question, researched
+    // 08/05/2026, three sources failed to settle "under contract" vs "pending");
+    // the CTA is "here's what else," never "get in line" (NAR via Redfin: only 6%
+    // of sales fall through); the narrator strips are the claim-gate architecture
+    // (a fact you hand the writer is a fact it will try to use); the banned
+    // phrases are the SOLD_LANGUAGE root both the builder guard and the acceptance
+    // script's bytes assertion read.
+    config: {
+      key: "under-contract",
+      ribbon: "Under Contract",
+      subject: {
+        withStreet: "Under contract: {street}",
+        withCity: "Under contract in {city}",
+        bare: "Under contract",
+        bareWithDays: "Under contract in {days} days",
+      },
+      photoAlt: "Under contract — {address}",
+      // The shared lifecycle cells WITH the lot: Coming Soon drops the lot to avoid
+      // narrowing a parcel search; that reason evaporates when the address ships.
+      // NO DOM cell — that cell is for ACTIVE listings only; the MLS clock stopped.
+      specs: ["beds", "baths", "sqft", "price-per-sqft", "lot", "type"],
+      includeDescription: true,
+      middle: ["under-contract/speed"],
+      tail: ["under-contract/speed-sources"],
+      ctaLabel: "See What Else Is Available",
+      ctaDestination: "brand-site",
+      bannedNarrativePhrases: ["sold for", "sold price", "closed at", "final sale", "sale price"],
+      narratorStrips: ["daysOnMarket", "lotSize", "yearBuilt", "hoaFee"],
+      params: { minMedianSample: 10 },
+      framing: {
+        withDescription:
+          "AN UNDER-CONTRACT ANNOUNCEMENT. This home has accepted an offer and is under " +
+          "contract. IT HAS NOT SOLD and it has not closed — you must NOT write 'sold', " +
+          "'sold for', 'sold price', 'closed at', 'final sale' or 'sale price', and you " +
+          "must not state or imply any sale figure. " +
+          "The seller's own description is printed IN FULL directly above your " +
+          "paragraph, and the reader has just read it. DO NOT summarise it, restate " +
+          "it, or repeat any fact it already states. Your job is the EXTRA it does " +
+          "not contain: what the community and the location offer, drawn ONLY from " +
+          "the community and neighborhood facts you were given. If those facts and " +
+          "the description overlap, say only what is genuinely new; if you have " +
+          "nothing honest to add, say nothing — a missing paragraph is fine and a " +
+          "redundant one is not. ",
+        withoutDescription:
+          "AN UNDER-CONTRACT ANNOUNCEMENT. This home has accepted an offer and is under " +
+          "contract. IT HAS NOT SOLD and it has not closed — you must NOT write 'sold', " +
+          "'sold for', 'sold price', 'closed at', 'final sale' or 'sale price', and you " +
+          "must not state or imply any sale figure. " +
+          "No seller description is available for this home, so your paragraph is " +
+          "the only body copy the reader gets. Describe what makes this home and " +
+          "its community appealing, drawn ONLY from the facts you were given. ",
+        common:
+          "Never add a room, a layout, a finish, a view, a builder's intention, or any " +
+          "quality your facts do not state. " +
+          "Speak only to the GOOD: what is nearby, what the community offers, what the " +
+          "location puts close at hand. Never frame the location or the home " +
+          "negatively, and never mention any cost, fee, or dollar amount. " +
+          "WRITE PROSE, NOT FIGURES: do not restate the price, the beds, the baths, the " +
+          "square footage, the lot size or any other number that already appears in the " +
+          "email — those cells sit directly above your paragraph and repeating them reads " +
+          "as a spreadsheet export rather than as an agent. " +
+          "Do NOT say how fast it went, how long it was listed, how many offers there " +
+          "were, or how the market is doing — you were not told any of those, the ribbon " +
+          "and the figures already say what is known, and a claim about timing or demand " +
+          "is dropped by the no-invention gate rather than sent. Do NOT invite backup " +
+          "offers or suggest the reader can still buy this home.",
+      },
+    },
   },
   "just-sold": {
     key: "just-sold",

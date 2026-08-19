@@ -14,6 +14,7 @@
 // A config referencing a missing key fails derivations.test.ts at CI. At runtime a
 // derivation that THROWS degrades to no blocks (RULE 0.7): the email ships quieter,
 // never broken, never invented.
+import { underContractSpeed, underContractSpeedSources } from "./under-contract";
 import type { ChromeBlock } from "@/lib/email/lifecycle-chrome";
 import type { RecipeBuildContext } from "./index";
 
@@ -34,7 +35,12 @@ export type Derivation = (
 ) => Promise<DerivationResult>;
 
 /** Keys land here per migration (plan 2026-08-19, Task 5+). */
-export const DERIVATIONS: Record<string, Derivation> = {};
+export const DERIVATIONS: Record<string, Derivation> = {
+  // R4 · UNDER CONTRACT — the speed ladder (middle) + its disclosed-criterion
+  // sources note (tail). One live read per build (memoized in the recipe module).
+  "under-contract/speed": underContractSpeed,
+  "under-contract/speed-sources": underContractSpeedSources,
+};
 
 export async function runDerivations(
   keys: readonly string[],

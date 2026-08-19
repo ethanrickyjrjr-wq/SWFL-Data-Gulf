@@ -56,16 +56,18 @@ describe("subjectFor — the deterministic ladder", () => {
     ).toBe("Under contract in Fort Myers Beach");
   });
 
-  test("derivation subjectVars reach the template", () => {
+  test("bareWithDays fires only when a derivation resolved {days}", () => {
     const cfg: RecipeConfig = {
       ...CFG,
-      subject: { ...CFG.subject, bare: "Under contract in {days} days" },
+      subject: { ...CFG.subject, bareWithDays: "Under contract in {days} days" },
     };
     expect(subjectFor(cfg, {}, { days: "9" })).toBe("Under contract in 9 days");
+    // No days resolved → the plain bare form; a dissolved placeholder never ships.
+    expect(subjectFor(cfg, {}, {})).toBe("Under contract");
   });
 
-  test("a bare template whose vars are absent degrades to the ribbon, never a dangling frame", () => {
-    const cfg: RecipeConfig = { ...CFG, subject: { ...CFG.subject, bare: "{days} days" } };
+  test("an empty bare template degrades to the ribbon — a subject always resolves", () => {
+    const cfg: RecipeConfig = { ...CFG, subject: { ...CFG.subject, bare: "" } };
     expect(subjectFor(cfg, {}, {})).toBe("Under Contract");
   });
 });

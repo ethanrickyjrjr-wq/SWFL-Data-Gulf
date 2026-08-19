@@ -74,12 +74,16 @@
  * run without ANTHROPIC_API_KEY and even that becomes an open slot.
  */
 import {
-  buildUnderContract,
   daysToContract,
   loadSpeed,
   SOLD_LANGUAGE,
   UNDER_CONTRACT_FIELDS,
 } from "../../lib/deliverable/recipes/under-contract";
+// MIGRATED (recipes-as-config, plan 2026-08-19 Task 5): the build flows through the
+// registry dispatch — config present → the ONE config builder. This script now
+// drives the exact seam every production caller uses, which is what an acceptance
+// run is for.
+import { builderFor } from "../../lib/deliverable/recipes/index";
 import { resolveSubject } from "../../lib/deliverable/recipes/shared";
 import { defaultDoc } from "../../lib/email/doc/default-docs";
 import { applyBrand } from "../../lib/email/brand/apply-brand";
@@ -123,6 +127,7 @@ if (!resolved) {
 // The canvas arrives ALREADY BRANDED — the same faithfulness point Coming Soon's script
 // makes. In the product the canvas is a live, already-branded doc; `applyBrand` still runs
 // LAST as the overlay (stop 4 of the five-stop pipe).
+const buildUnderContract = builderFor("under-contract")!;
 const built = await buildUnderContract({
   facts,
   currentDoc: applyBrand(defaultDoc(), BRAND),
