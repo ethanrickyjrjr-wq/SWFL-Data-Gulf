@@ -1,3 +1,11 @@
+## 2026-08-19 (Fable 5, night, +push) — recipes-as-config PUSHED (8 commits incl. the parallel session's writ-guard-trio, operator "Push all"); continuation handoff written
+
+`docs/handoff/2026-08-19-recipes-as-config-seam-and-wave.md` — the seam map, the parity-proof
+procedure, the measured classification of the 5 unmigrated recipes, the continue-here order, and
+the session's landmines (tmp/ typecheck trap, Gate 15 capture re-bake, the derivations import
+direction). Gate 15 satisfied by re-baking under-contract + coming-soon captures through the
+config-builder path (`26c3e4f3`).
+
 ## 2026-08-19 (Fable 5, night) — RECIPES-AS-CONFIG: seam BUILT + 2 of 7 lifecycle emails migrated with render parity; wave re-scoped on measurement
 
 Executing `docs/superpowers/plans/2026-08-19-recipes-as-config.md` (operator: "Push and start").
