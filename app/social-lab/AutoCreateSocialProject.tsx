@@ -19,6 +19,18 @@ export function AutoCreateSocialProject({
   useEffect(() => {
     if (firedRef.current) return;
     firedRef.current = true;
+    // firedRef is per-instance: a remount fired a SECOND create (08/19/2026 husk pairs).
+    // One tab auto-creates at most once per minute; a repeat lands the hub instead.
+    try {
+      const last = Number(sessionStorage.getItem("autocreate-social-fired") ?? 0);
+      if (Date.now() - last < 60_000) {
+        router.replace("/project");
+        return;
+      }
+      sessionStorage.setItem("autocreate-social-fired", String(Date.now()));
+    } catch {
+      /* storage unavailable — fall through to the single-instance guard */
+    }
     const params = new URLSearchParams();
     if (recipe) params.set("recipe", recipe);
     if (recipeNeeds) params.set("recipeNeeds", recipeNeeds);

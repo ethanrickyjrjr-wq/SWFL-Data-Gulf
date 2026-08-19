@@ -1,3 +1,29 @@
+## 2026-08-19 (Fable 5) — OPERATOR: "I DID THAT EMAIL AGAIN AND DIDN'T GET BATHS THIS TIME... HOW DO YOU CONTINUE TO BREAK SHIT" + "THESE ARE ALL FRESH BUILDS"
+
+RUN TO GROUND, MEASURED: **the SteadyAPI subscription is DEAD — raw probe returns 403
+"You do not have an active subscription."** Last successful fetch in our own lake:
+08/14/2026 04:28 UTC (max fetched_at, steadyapi_property_history_raw; listing_dom
+max last_seen same date). FIVE DAYS of silent outage: nightly listing sweep, DOM
+heals, sold events, and the PAID baths fallback all return [] silently (every lane
+catches and continues by design). Baths chain for 767 Parkshore (Naples/COLLIER):
+lake row baths NULL (vendor /search shape carries no baths) -> free LeePA lane is
+LEE-ONLY, can never serve Naples -> paid /nearby-home-values lane = 403. Nothing
+broke in code — the money lane under it died and nothing surfaced it. This is
+strike 7 of stale-source-served-silently (guard OWED since strike 3; check
+stale_source_tripwire_fleet is OPEN). OPERATOR ACTION REQUIRED: re-subscribe at
+steadyapi.com (payment = his hands only). Layout question same session: all 7
+lifecycle emails verified through ONE chrome (5 recipes call buildLifecycleEmail
+directly, under-contract + new-listing via the config builder into the same
+function; lifecycle-chrome.test.ts 10/10 green).
+
+## 2026-08-19 (Fable 5) — OPERATOR: "ARE YOU MAKING SURE ALL EMAILS ARE BUILDING THE SAME WAY FOR THE LAYOUTS????? ALL 7 HAVE THE SAME HEADER AND FOOTERS!!! HOW MANY TIMES DO WE HAVE TO DO THIS"
+
+He wants PROOF the one-layout contract holds across all 7 lifecycle emails, not another
+assurance. This session: enumerate all 7 recipes -> verify each builds through
+buildLifecycleEmail (the ONE layout root, lib/email/lifecycle-chrome.ts), run the pinning
+suite (lifecycle-chrome.test.ts), and diff the actual header/footer HTML across the 9
+acceptance captures. [result appended when run]
+
 ## 2026-08-19 (Fable 5) — OPERATOR: "WHY ARE PROJECTS NOT FUCKING SAVING AS THE ADDRESS I PUT IN TO BUILD?????"
 
 He builds with an address in the Lab; the saved project does not carry that address as its
@@ -10,6 +36,29 @@ SAME MESSAGE, GRIPE 2: "AND WHY THE FUCK ARE THEY NOT SEPERATING INTO THE EMAIL 
 ARE OR GROUPING TOGETHER WITH THEIR OTHER EMAILS?????" — emails don't land grouped under
 the project/address they belong to. Suspected same root: Lab resume path offers most-recent
 project (limit 1) and the build's typed address never participates in project selection.
+
+RUN TO GROUND SAME SESSION (measured in prod DB, not narrated):
+- His 13:43 and 13:47 builds each minted a PAIR of "Untitled project"/subj=NULL/general
+  husks (plus one at 10:23) — and created ZERO deliverables, touched ZERO existing
+  projects. The typed address never reached the DB at all.
+- Cause 1 (mint): app/email-lab/grid/page.tsx + app/social-lab/page.tsx destructured
+  `{ data }` and IGNORED the query error — a transient failure on the "does this user have
+  projects" read is indistinguishable from a brand-new account, so the code auto-creates
+  an untitled husk for a user holding 8 real projects. FIXED: error captured, create
+  branch requires !error at both sites.
+- Cause 2 (pairs): AutoCreateProject/AutoCreateSocialProject firedRef is per-instance; a
+  remount fires a second POST. FIXED: sessionStorage once-per-minute guard, both doors.
+- Cause 3 (grouping, agent lane): findProjectId matched subject_address ONLY and filtered
+  kind='listing' — his address-titled kind=general/subj=NULL projects were invisible
+  twice over. FIXED red-first (lib/agent-build/persist.test.ts): kind filter dropped;
+  DATA REPAIR applied: 2 rows backfilled subject_address from address titles (dry-run
+  shown, 0 remaining).
+- The underlying transient (why the query failed at those minutes) is NOT identified —
+  Vercel runtime-error API 403s from this token. The fix makes any transient harmless
+  (no mint on error). Candidate: DB connection-slot exhaustion (known shape).
+- 4 husks await his word to delete (destructive — RULE 1).
+- SEPARATE, WORSE: prod deploys dead since 11:12 (booking TS error) — parallel session's
+  verified fix 7b57d826 sits UNPUSHED awaiting his word; nothing pushed after 11:06 is live.
 
 ## 2026-08-19 (Fable 5) — OPERATOR: "how the fuck are the emails still being built like this?? WE HAVE ONE FUCKING RECIPE. THERE IS NO FUCKING GAP IN THE RECIPE"
 

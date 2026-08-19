@@ -35,6 +35,19 @@ export function AutoCreateProject({
   useEffect(() => {
     if (firedRef.current) return;
     firedRef.current = true;
+    // firedRef is per-instance: a remount (error re-render, back-nav, double navigation)
+    // gets a fresh ref and fired a SECOND create — the 08/19/2026 husk pairs. One tab
+    // auto-creates at most once per minute; a repeat lands the hub instead.
+    try {
+      const last = Number(sessionStorage.getItem("autocreate-email-fired") ?? 0);
+      if (Date.now() - last < 60_000) {
+        router.replace("/project");
+        return;
+      }
+      sessionStorage.setItem("autocreate-email-fired", String(Date.now()));
+    } catch {
+      /* storage unavailable — fall through to the single-instance guard */
+    }
     const params = new URLSearchParams();
     if (zip && /^\d{5}$/.test(zip)) params.set("zip", zip);
     if (recipe) params.set("recipe", recipe);

@@ -16,6 +16,25 @@ one visible gap is the empty photo dropzone — a doc SAVED before 11:06 never r
 so the decisive test is a NEW price-improved build on 767 Park Shore Dr. Next: operator
 word to push; then re-verify a fresh Lab build on the post-deploy prod.
 
+## 2026-08-19 (Fable 5) — HUSK-MINT BUG: a failed projects query read as "new account" — untitled pairs minted, addresses dropped, nothing saved
+
+Operator (13:50): "WHY ARE PROJECTS NOT SAVING AS THE ADDRESS I PUT IN" + "WHY ARE THEY NOT
+GROUPING WITH THEIR OTHER EMAILS". Measured in the prod DB: his 13:43/13:47 builds each
+minted a PAIR of untitled/subj=NULL husks, created ZERO deliverables, touched ZERO existing
+projects. Three causes, all fixed this session:
+(1) email-lab/grid/page.tsx + social-lab/page.tsx swallowed the projects-query error —
+error ≡ "zero projects" → auto-mint husk. Create branch now requires !error, both sites.
+(2) AutoCreate{Project,SocialProject} firedRef is per-instance → remount = second POST
+(the pairs). sessionStorage once-per-minute guard added, both doors.
+(3) agent-lane findProjectId matched subject_address only AND filtered kind='listing' —
+address-titled general projects invisible twice over. Red-first (lib/agent-build/
+persist.test.ts, 2 tests), kind filter dropped; 21/21 route+persist tests green. Data
+repair applied direct: 2 rows backfilled subject_address from address titles (dry-run
+pasted in session, 0 candidates remaining after).
+Underlying transient NOT identified (Vercel error API 403s); fix makes it harmless.
+Next: push (also carries 7b57d826, the parallel session's verified deploy-pipeline fix —
+prod deploys dead since 11:12); operator word owed on deleting the 4 husk rows.
+
 ## 2026-08-19 (Fable 5) — NORTH STAR #3 executed: rule-diet step two — covered blocks leave the always-loaded CLAUDE.md
 
 Operator asked "what else is holding claude back" → per NORTH STAR, executed the next

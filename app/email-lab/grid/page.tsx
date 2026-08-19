@@ -51,7 +51,10 @@ export default async function EmailLabGridPage({
     // (matched on title OR subject_address) instead of minting a duplicate row —
     // the confirm popup that used to let the user redirect is suppressed on that
     // door, so the match has to be automatic (second-order audit 08/10/2026).
-    const { data } = await supabase
+    // Capture the error: a FAILED query must never read as "zero projects" — on
+    // 08/19/2026 a swallowed error here minted pairs of untitled husk projects for an
+    // account holding 8 real ones (the create branch below requires !projectsErr).
+    const { data, error: projectsErr } = await supabase
       .from("projects")
       .select("id, title, subject_address")
       .order("updated_at", { ascending: false })
@@ -64,7 +67,7 @@ export default async function EmailLabGridPage({
     // recipe gets the address popup and a project titled by it, NOT AutoCreateProject's
     // untitled kind:"general" row that would then re-ask the address in-project.
     const recipeNeedsAddressPopup = Boolean(recipe && findPlaceholder(recipe) && !addr);
-    if (!row && !recipeNeedsAddressPopup) {
+    if (!row && !projectsErr && !recipeNeedsAddressPopup) {
       // Zero projects: make one and carry the recipe/zip/addr/seed into it, where
       // the in-project client runs the same arrival (capture-or-blank included).
       return (

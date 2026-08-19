@@ -50,10 +50,12 @@ export interface ProjectMatch {
  */
 export async function findProjectId(userId: string, address: string): Promise<ProjectMatch | null> {
   const db = createServiceRoleClient();
+  // No kind filter: address-titled projects born through older doors are kind:"general"
+  // with subject_address set (or backfilled 08/19/2026) — a subject_address match IS the
+  // listing signal; filtering kind made every one of those invisible and scattered builds.
   const { data, error } = await db
     .from("projects")
     .select("id, subject_address, updated_at")
-    .eq("kind", "listing")
     .eq("user_id", userId)
     .order("updated_at", { ascending: false })
     .limit(PROJECT_SCAN_LIMIT);

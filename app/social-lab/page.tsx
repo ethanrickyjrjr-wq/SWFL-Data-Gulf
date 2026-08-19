@@ -41,11 +41,14 @@ export default async function SocialLabPage({
     redirect(`/login?next=${encodeURIComponent(`/social-lab${q}`)}`);
   }
 
-  const { data } = await supabase
+  const { data, error } = await supabase
     .from("projects")
     .select("id")
     .order("updated_at", { ascending: false })
     .limit(1);
+  // A FAILED query must never read as "zero projects" (the 08/19/2026 husk-mint bug):
+  // on error, land the hub instead of auto-creating an untitled project.
+  if (error) redirect(`/project${q}`);
   const first = (data as { id: string }[] | null)?.[0];
   if (first) redirect(`/project/${first.id}/social${q}`);
   return <AutoCreateSocialProject recipe={recipe} recipeNeeds={recipeNeeds} />;
