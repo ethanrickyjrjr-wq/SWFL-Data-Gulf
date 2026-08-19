@@ -455,7 +455,15 @@ personal financial notes.
   data." Highest-leverage finding is not a model: five tested `lib/why-not-selling/checks/` have
   zero importers.
 
-**deliverable-and-design/** — deliverable quality, contrast, chart types, design bar (5)
+**deliverable-and-design/** — deliverable quality, contrast, chart types, design bar (6)
+- `2026-08-19-omnivoice-tts-engine-teardown.md` — full repomix teardown of k2-fsa/OmniVoice
+  (the TTS engine BEHIND the OmniVoice-Studio app installed 08/18 — confirmed in the repo's own
+  community-projects list). 600+ language zero-shot TTS, voice clone from a 3–10s clip. The
+  "we suck" quality levers: reference-clip quality/length/language, `num_step` (32 default),
+  `normalize_text` (numbers read digit-by-digit without it — prices!), CMU pronunciation
+  overrides for SWFL place names, LoRA path to a branded voice. Machine verified: RTX 4060 Ti
+  16GB runs it; `omnivoice-venv` is a dead husk. Community `omnivoice-server` = OpenAI-compatible
+  `/v1/audio/speech` if the platform ever speaks.
 - `2026-07-01-ai-deliverable-design-quality-research.md`
 - `2026-07-01-design-quality-BCD-handoff.md`
 - `2026-07-01-taskB-wcag-contrast-verification.md`
