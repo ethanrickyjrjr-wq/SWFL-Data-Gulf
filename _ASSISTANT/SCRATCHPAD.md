@@ -1,3 +1,13 @@
+## 2026-08-19 (Fable 5) — OPERATOR: "send out 15 sonnets to crawl4ai folder structure and implement it so Claude doesn't suck"
+
+Direct command: 15 Sonnet agents research (crawl4ai) how repos should be folder-structured so a
+Claude Code agent performs well, take notes of OUR current structure first, then IMPLEMENT and
+push. Baseline snapshot taken this session: 50+ top-level entries, including `GET DONE`,
+`GO-LIVE`, `SOCIAL BUILD` (spaces), `__scratch__`, `_archive`, `.firecrawl` — the root itself is
+part of why discovery fails. This is the same pain as [[built-not-wired]] and the invisible
+`_RESEARCH/` problem: things exist and can't be found. Wave dispatched; findings + implementation
+recorded in SESSION_LOG this session.
+
 ## 2026-08-19 (Opus 5) — OPERATOR: "What the fuck do you mean it hasn't been fucking saving all 64!!!????? I've went over this 50 fucking times!!!???"
 
 He is RIGHT and I wrote the contradiction myself. Two paragraphs apart I said (a) the ingest

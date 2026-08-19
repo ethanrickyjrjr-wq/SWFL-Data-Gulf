@@ -65,6 +65,7 @@ import {
   ALLOWED_CLASSES,
 } from "./lib/coverage-ratchet.mjs";
 import { parseStrikes, unguardedShapes } from "./lib/strikes-guard.mjs";
+import { newRootViolations } from "./lib/root-allowlist.mjs";
 
 const BANNER = "=".repeat(72);
 
@@ -549,6 +550,39 @@ process.stdin.on("end", () => {
   // lib/deliverable/cell-policy.ts; this gate runs its fleet test on EVERY push that
   // touches a recipe or the chrome, not just the touched recipe's own tests.
   cellPolicyGate(changed);
+
+  // ---- Gate 19: root-entry allowlist — the repo root stays legible ---------
+  // Born 08/19/2026 (folder-structure wave): 'GET DONE', 'GO-LIVE', 'SOCIAL BUILD',
+  // stray crawl outputs and dead fixtures accreted at root for ~2 months and made
+  // the top level unreadable to agent and operator alike. Cleanup done same day;
+  // this keeps it done. Only NEWLY-ADDED tracked top-level entries block; the
+  // rule table + rationale: lib/root-allowlist{,.test}.mjs. PROJECT_MAP.md is the
+  // human-readable twin — a deliberate new root entry updates allowlist + map in
+  // the same commit. Escape: ALLOW_NEW_ROOT_ENTRY=1. Fail-OPEN on git errors.
+  if (process.env.ALLOW_NEW_ROOT_ENTRY !== "1") {
+    try {
+      const added = sh(`git diff --name-only --diff-filter=A ${base}..HEAD`)
+        .split("\n")
+        .map((s) => s.trim())
+        .filter(Boolean);
+      const offenders = newRootViolations(added);
+      if (offenders.length) {
+        block(
+          "ROOT ALLOWLIST — this push creates a new top-level entry",
+          `New top-level entr${offenders.length > 1 ? "ies" : "y"}: ${offenders.join(", ")}\n\n` +
+            `The repo root is a curated surface (PROJECT_MAP.md maps it; the 08/19/2026\n` +
+            `cleanup relocated 'GET DONE'/'GO-LIVE'/'SOCIAL BUILD'-era clutter under docs/).\n` +
+            `Almost everything belongs under an existing root: docs/ (docs, runbooks,\n` +
+            `handoffs, parked, _archive) · _RESEARCH/ (crawl output, per RULE 0.4) ·\n` +
+            `scripts/ · lib/ · _ASSISTANT/ (session surfaces) · tmp/ (scratch, untracked).\n\n` +
+            `Deliberate new root entry? Add it to .claude/hooks/lib/root-allowlist.mjs\n` +
+            `AND PROJECT_MAP.md in this commit, or escape once with ALLOW_NEW_ROOT_ENTRY=1.`,
+        );
+      }
+    } catch {
+      // fail-open: a git quirk must never wedge a push over folder hygiene.
+    }
+  }
 
   // ---- Gate 8: ZIP scope root (Lee + Collier, 57) ---------------------------
   // Coverage has ONE root (isCoreScope, refinery/lib/core-scope.mts) and the leak

@@ -56,8 +56,8 @@ The migration is idempotent (`CREATE OR REPLACE` + idempotent grants) — safe t
 
 ```bash
 # value = the SAME string as Vercel's DIGEST_BROADCAST_SECRET env
-gh secret set DIGEST_BROADCAST_SECRET -R ethanrickyjrjr-wq/brain-platform --body "<vercel-value>"
-gh secret list -R ethanrickyjrjr-wq/brain-platform | grep DIGEST_BROADCAST_SECRET   # confirm present
+gh secret set DIGEST_BROADCAST_SECRET -R ethanrickyjrjr-wq/SWFL-Data-Gulf --body "<vercel-value>"
+gh secret list -R ethanrickyjrjr-wq/SWFL-Data-Gulf | grep DIGEST_BROADCAST_SECRET   # confirm present
 ```
 
 Also confirm Vercel actually has `DIGEST_BROADCAST_SECRET` set (else the route 503s `not_configured`).

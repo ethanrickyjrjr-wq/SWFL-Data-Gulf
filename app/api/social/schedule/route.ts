@@ -1,6 +1,6 @@
 // app/api/social/schedule/route.ts
 //
-// The lab "Schedule this post" write-path. The U2 spec (SOCIAL BUILD/
+// The lab "Schedule this post" write-path. The U2 spec (docs/superpowers/handoffs/social-build/
 // U2-ask-ai-schedule-and-compose.md) called for a "confirm → INSERT social_schedules"
 // flow that was never shipped — nothing in the product wrote the rows the cron worker
 // (scripts/social/run-schedules.mts + social-scheduler.yml) reads. This is that write.

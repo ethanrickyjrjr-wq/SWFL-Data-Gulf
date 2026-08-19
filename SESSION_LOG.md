@@ -1,3 +1,56 @@
+## 2026-08-19 (Fable 5) — FOLDER STRUCTURE: 15-Sonnet research wave → root cleaned, maps verified, nested rules wired, allowlist gate keeps it clean
+
+Operator decree: "send out 15 sonnets to crawl4ai folder structure... take notes of how folders
+are structured first... implement and push." Wave ran (15/15 returned: 5 mapped our tree, 10
+crawled live sources — Anthropic best-practices + memory/skills docs, AGENTS.md spec, Cursor
+rules, Copilot applyTo, anthropics/skills, HumanLayer/claudefa.st, Diataxis, root-hygiene).
+Consensus implemented; every move second-order-audited first (that audit killed one step and
+corrected two — see below). 8 counted parts, 8 done:
+
+1. **Root cleanup (git mv, history kept)** — executed the pre-existing, never-run plan
+   `Operation July/13-relocate-root-clutter.md` (found by grep, not rewritten): `GET DONE`/* →
+   docs/parked/; `GO-LIVE/email-scheduler-unit-f.md` → docs/runbooks/ (ACTIVE runbook — repo
+   name inside fixed to SWFL-Data-Gulf); `SOCIAL BUILD`/* (16) → docs/superpowers/handoffs/
+   social-build/ + the 2 code-comment paths fixed same commit (app/api/social/schedule/route.ts,
+   lib/social/persist-schedule.ts); root `_archive/` → docs/_archive/parked/; `_diagrams/` →
+   docs/_diagrams/; `__snapshots__/` (dead fixtures, zero readers) → docs/_archive/parked/
+   dock-chart-migration-snapshots/; root strays response.html / crawl4ai-email-out.md /
+   prometheus_log.md → _RESEARCH/audits/ (dated names + INDEX lines — they were live RULE 0.4
+   violations). Plan 13 flipped ✅ → Operation-July-DONE/.
+2. **Second-order audit saved us twice**: `content/insiders/issue-2026-07.html` move CANCELLED —
+   `app/insiders/001/route.ts:17` reads it at runtime and fails to a teaser at HTTP 200 (silent
+   prod degradation); `runs/` untrack CANCELLED — already gitignored (line 161), never tracked
+   (the wave agent's "190 tracked files" claim was wrong; measured 0).
+3. **PROJECT_MAP.md rewritten** — the old one named 5 nonexistent dirs (lib/delivery,
+   lib/validation, lib/narrative, cron, public/new_emails — a hallucinated map). Now: verified
+   one-line-per-entry root map, gitignored/invisible dirs flagged, live-route trap on content/
+   documented. Linked from CLAUDE.md's reference index.
+4. **Gate 19: root-entry allowlist** (.claude/hooks/lib/root-allowlist{,.test}.mjs + wire in
+   check-prepush-gate.mjs) — a NEWLY-added tracked top-level entry off the allowlist blocks the
+   push and names where it belongs. Escape ALLOW_NEW_ROOT_ENTRY=1; fail-open on git errors.
+   The guard that keeps the cleanup done. 5/5 tests.
+5. **Built-not-wired closed**: AREA_DIRS in inject-focus.mjs now carries all 15 scoped
+   CLAUDE.md dirs (components/charts, lib/brand, lib/charts, lib/pdf existed unwired) + 3 NEW
+   area files: lib/listings/CLAUDE.md (deed-not-list, size bands, SteadyAPI quota economics),
+   refinery/CLAUDE.md (validators/output-contract/cycle rules outside packs/),
+   components/CLAUDE.md (one-room rule at the door).
+6. **RULE 1 ask-first now delivered at write time**: 3 new SCOPED_RULES entries (pack
+   --- OUTPUT --- shape, ingest data_lake.* writes, app/api/(b|mcp) surface).
+7. **check-four-searches citation regex** now credits _AUDIT_AND_ROADMAP as a research lane
+   (session-kickoff already treats it as live; the gate couldn't see it).
+8. **CLAUDE.md**: reference-index rows for PROJECT_MAP + the scoped-CLAUDE.md census;
+   compaction-preservation line (vendor-documented pattern); AGENTS.md annotated as the
+   Next.js scaffold stub it is (not agent instructions).
+
+Proof: hook suite 216/216 · root-allowlist 5/5 · insiders route 4/4 (live page untouched) ·
+doc index regenerated (1,712 docs) · bunx next build [result in this push's CI if not pasted
+here]. NOT done, flagged for operator: session-start hooks measured ~40.5k tokens/session —
+print-kickoff (~18k) + print-research-index (~15k) dwarf CLAUDE.md (~5.7k); capping them is
+NORTH STAR #3 territory but changes the operator's kickoff surface, so it needs his word.
+Also parked: typography-block dedup across 6 CLAUDE.mds; docs/handoff vs superpowers/handoffs
+merge; .claude/rules/ native paths: migration (kept our content-matching hook instead —
+vendor mechanism can't express content-AND-path).
+
 ## 2026-08-19 (Opus 5) — THE BUILD PATH NOW KEEPS ITS SOLD EVENTS: TS-side /property-tax-history bodies land in the existing raw root, and answer when the vendor goes quiet
 
 Operator handed back the sold-data paragraph with "fix this". Two-thirds of it was right; the

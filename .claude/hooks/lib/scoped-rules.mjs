@@ -68,6 +68,35 @@ export const SCOPED_RULES = [
       "any paid call (docs/standards/email-build-playbook.md §3.3).",
   },
   {
+    // RULE 1 ask-first, delivered at write time (folder-structure wave 08/19/2026:
+    // the ask-first list was the one costly CLAUDE.md rule with zero mechanical
+    // delivery, unlike its siblings 0.55/0.7a which already sit in this table).
+    id: "ask-first-pack-output",
+    path: /(^|\/)refinery\/packs\//i,
+    content: /---\s*OUTPUT\s*---|key_metrics/i,
+    text:
+      "RULE 1 ask-first: brain pack edits that change --- OUTPUT --- shape or key_metrics " +
+      "math need operator sign-off BEFORE the push — this is on the ask-first list, not " +
+      "the just-push list.",
+  },
+  {
+    id: "ask-first-data-lake-write",
+    path: /(^|\/)ingest\//i,
+    content: /data_lake\./i,
+    text:
+      "RULE 1 ask-first: ingest writes to data_lake.* need operator sign-off, and no bulk " +
+      "ingest lands without its consuming brain's PackDefinition in the same PR " +
+      "(brain-first ingest gate).",
+  },
+  {
+    id: "ask-first-live-api-surface",
+    path: /(^|\/)app\/api\/(b|mcp)\//i,
+    content: /[\s\S]/,
+    text:
+      "RULE 1 ask-first: anything touching live /api/b/* or the MCP surface needs operator " +
+      "sign-off before push — consumers read these live.",
+  },
+  {
     id: "react-set-state-in-effect",
     path: /\.(tsx|jsx)$/i,
     content: /useEffect\(/,

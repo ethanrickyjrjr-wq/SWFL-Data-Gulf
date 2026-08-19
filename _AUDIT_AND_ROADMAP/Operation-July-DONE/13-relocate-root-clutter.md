@@ -1,6 +1,6 @@
 # 13 — Relocate root clutter (git mv, not delete)
 
-- **Status:** ⬜ Not started
+- **Status:** ✅ Done 08/19/2026 (folder-structure wave; content/ item skipped — live route reads it, see SESSION_LOG)
 - **Owner:** SESSION
 - **Source:** autopsy §5 (A2, A4) + §8 (relocate list)
 

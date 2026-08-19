@@ -2,7 +2,7 @@
 //
 // Pure builders for the lab "Schedule this post" flow. NO I/O — the route handler
 // (app/api/social/schedule/route.ts) does auth + the DB INSERT. Freezing mirrors the
-// U2 spec (SOCIAL BUILD/U2-ask-ai-schedule-and-compose.md) and the FrozenPost contract
+// U2 spec (docs/superpowers/handoffs/social-build/U2-ask-ai-schedule-and-compose.md) and the FrozenPost contract
 // in lib/social/types.ts. The DRY invariant lives one layer up: persisting a schedule
 // NEVER fires a live post — the cron worker does, gated by SOCIAL_PUBLISH_ENABLED.
 

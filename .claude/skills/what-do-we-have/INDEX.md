@@ -7,9 +7,9 @@
 
 Markers: **[ORPHAN]** nothing in the repo points at this file — it is invisible unless you come through this index, and it is a DELETION CANDIDATE. **[weak]** reachable only by bare filename, which leads nowhere.
 
-Reachability at generation: 929 by path · 538 by name only · 245 orphaned. Re-measure with `node scripts/doc-reachability.mjs`.
+Reachability at generation: 921 by path · 547 by name only · 244 orphaned. Re-measure with `node scripts/doc-reachability.mjs`.
 
-## docs/superpowers — 858
+## docs/superpowers — 874
 
 - `docs/superpowers/AUDIT-GAPS-2026-06-24.md` — Spec / Plan Gap Audit — 2026-06-24 — GlobalHighlighter is mounted at app root, live on every page, flag default ON. Both highlighter specs moved to FINISHED. Minor follow-ons (dossier suggestions type-lift, FactChip→MetricsTabl
 - `docs/superpowers/builds/email-engine/00-INDEX.md` — Email Lab Engine — Build Index
@@ -50,6 +50,22 @@ Reachability at generation: 929 by path · 538 by name only · 245 orphaned. Re-
 - `docs/superpowers/handoffs/2026-08-05-NEW-LISTING-INGREDIENT-CENSUS.md` — NEW LISTING — THE INGREDIENT CENSUS. What, where, how, and how much. Counted live 08/05/2026. — expensive inhouse with paid fall back. crawl4ai what a new listing email entails and make ours
 - `docs/superpowers/handoffs/2026-08-05-UNDER-CONTRACT-BUILD-HANDOFF-V2.md` **[ORPHAN]** — UNDER CONTRACT — HANDOFF. FACTS ONLY. NO CODE IN THIS FILE, BY OPERATOR DECREE. — deleted, or migrated.
 - `docs/superpowers/handoffs/2026-08-05-coming-soon-next-build-handoff.md` — Handoff — COMING SOON (§2.2), next in the playbook walk — built and walked New Listing (§2.1). Read docs/standards/email-build-playbook.md §2.1 first —
+- `docs/superpowers/handoffs/social-build/01-spine-cores-and-go-live-switch.md` *[weak]* — 01 — Spine: tables + claim RPC + pure DI cores + go-live switch — Stand up the channel-agnostic backbone by mirroring the email/outreach engine, and the build-now/flip-to-live switch. Everything downstream codes against lib/social/types.ts. Scoped + code-v
+- `docs/superpowers/handoffs/social-build/02-social-image-rasterizer.md` *[weak]* — 02 — Social image rasterizer (branded PNG per platform) — Turn brain data + a client brand into a branded PNG at platform sizes. Scoped + code-verified: we reuse the existing email-safe SVG chart renderer instead of authoring viz from scratch — but
+- `docs/superpowers/handoffs/social-build/03-platform-adapters-and-token-refresh.md` *[weak]* — 03 — Platform publish adapters + encrypted token store/refresh — Implement the one SocialPublisher seam for the four platforms, plus the encrypted token store + refresh the cron and the connect-flow share. No paid middleman — direct APIs. lib/social/oauth
+- `docs/superpowers/handoffs/social-build/04-cron-worker-and-gha.md` *[weak]* — 04 — Cron worker + GHA (the auto-post engine) — The "connect once → auto-run on schedule" engine. Mirror the proven email worker exactly; each run reads the client's stored, auto-refreshed token and posts on their behalf — DRY until the g
+- `docs/superpowers/handoffs/social-build/05-social-template-and-grain.md` *[weak]* — 05 — "social" deliverable template + grain — Add a "social" deliverable template (single-visual, headline-first) so a post's content assembles from brain data through the SAME pipeline as every other deliverable, at place/county/ZIP gr
+- `docs/superpowers/handoffs/social-build/06-engagement-tracking.md` *[weak]* — 06 — Engagement tracking (the "we track results" half) — Measure what we post. Social metrics are PULL, not push — no webhook for likes/impressions, so we schedule a fetch. Reuse the append-only event-ledger + rollup architecture from outreach.
+- `docs/superpowers/handoffs/social-build/07-go-live-prepost-fixes.md` *[weak]* — 07 — Go-live pre-post fixes (the two flags from Stage 3) — Stage 3 shipped DRY-complete but left two go-live gaps. DRY mode never posts, so neither blocks the push — they block the live flip. Probe-corrected before writing (RULE 0.5).
+- `docs/superpowers/handoffs/social-build/README.md` *[weak]* — SOCIAL BUILD — assignment files (OUR SIDE) — One file = one ultracode Claude's complete job. Hand each file to a separate session.
+- `docs/superpowers/handoffs/social-build/U1-DONE.md` *[weak]* — U1 — DONE (Connect your socials / OAuth) — build handoff — real-tsc 0 (only pre-existing stale .next artifact) · eslint clean · next build ✓ (all 3 routes compiled ƒ dynamic) · 38/38 tests (CSRF reject + no-exchange, X PKCE S256 round-trip, per-plat
+- `docs/superpowers/handoffs/social-build/U1-HANDOFF.md` *[weak]* — U1 — HANDOFF (probe-verified grounding, 2026-06-20) — real-tsc 0 · eslint clean · CSRF state-mismatch reject (no token exchange) · X PKCE S256 round-trip · oauth-config builds the right authorize URL + scope set per platform · callback calls st
+- `docs/superpowers/handoffs/social-build/U1-connect-your-socials-oauth.md` *[weak]* — U1 — Connect your socials (OAuth per platform) — Let a user connect their own social accounts so OUR cron can post on their behalf. Mirror the proven Google-Contacts OAuth precedent exactly — with the one net-new difference that the callba
+- `docs/superpowers/handoffs/social-build/U2-HANDOFF.md` *[weak]* — U2 — HANDOFF (ask-AI schedule + compose, frozen preview) — probe-verified grounding — New files: lib/social/schedule-command.ts (tool + validate + prompt), app/api/social/schedule-command/route.ts, lib/social/compose-caption.ts (the NEW multi-variant step), + tests.
+- `docs/superpowers/handoffs/social-build/U2-ask-ai-schedule-and-compose.md` — U2 — "Just ask AI" schedule + compose (frozen visual preview) — Turn "post my Fort Myers Beach flood card to LinkedIn every Monday" into a scheduled recipe, and show the user the actual branded post (image + ~3 caption options) before they confirm. On co
+- `docs/superpowers/handoffs/social-build/U3-mcp-social-tools.md` *[weak]* — U3 — MCP tools swflsociallist + swflsocialschedule — Expose the same schedule capability over MCP so a user's AI can list + create social schedules by X-Project-Key. Mirror project-tools.ts exactly: authorize → resolve project from the key → r
+- `docs/superpowers/handoffs/social-build/U4-workspace-social-lane.md` *[weak]* — U4 — Workspace "Social posting" lane + connect block — Surface social schedules + account-connection state in the project workspace, mirroring the existing Built/Emailing lanes. Schedule-driven (not post-driven), exactly like emailschedules. Add
+- `docs/superpowers/handoffs/social-build/USER-SIDE-HANDOFF.md` *[weak]* — USER SIDE — Social Campaign Builder (planning handoff) — The "if they connect their socials, will we auto-run their posts?" answer is yes — once connected, OUR cron (build 04) reads the refreshed token and posts. You build the connect UX + callbac
 - `docs/superpowers/plans/2026-06-05-operation-dumbo-drop.md` — Operation Dumbo Drop — the safe-add standard for manual / un-scrapable data — Some of the best SWFL data has no machine-ingestable source: it lives in rotating-URL PDFs (C&W / LSI CRE MarketBeat), paywalled reports, manual county portals, or hand-keyed spreadsheets. A
 - `docs/superpowers/plans/2026-06-13-email-funnel-the-rest.md` — Email funnel — the rest (lean, VERIFIED) — 1. No scope on emailschedules — table stops at templateid (20260612emailproduct.sql L21–36); no scopekind / scopevalue / topic columns.
 - `docs/superpowers/plans/2026-06-13-redfin-lee-county-handoff.md` — Handoff — Redfin Lee County-grain parity build — A LittleBird gap audit claimed "DOM / months-of-supply — Missing Lee Redfin ingest." That is wrong and was retracted by the operator ("little bird made it up"). Verified live from the lake o
@@ -870,8 +886,13 @@ Reachability at generation: 929 by path · 538 by name only · 245 orphaned. Re-
 - `docs/superpowers/specs/_archive/2026-06-29-grid-email-canvas-v2-design.md` *[weak]* — Grid Email Canvas v2 — persistence, friction features, AI sections — The paid grid email lab (/email-lab/grid, EmailLabGridShell) is the north-star surface, but today it:
 - `docs/superpowers/specs/_archive/2026-07-08-email-grid-plan-fill-design.md` *[weak]* — Two-phase plan+fill grid authoring for Email Lab — in isolation. The operator redefined the problem: the model still plans, but
 
-## docs/_archive — 121
+## docs/_archive — 126
 
+- `docs/_archive/parked/2026-06-26-snicklefritz-and-problems-audit/CLAUDE IS STUPID AS FUCK PROBLEMS.md` *[weak]* — CLAUDE IS STUPID AS FUCK — PROBLEMS WITH SOURCED ANSWERS + FAN-OUT PLAN — Each entry: PROBLEM → SOURCED ANSWER → PLAN TASK
+- `docs/_archive/parked/2026-06-26-snicklefritz-and-problems-audit/FUCKCLAUDE.md` *[weak]* — FUCKCLAUDE — Everything: the test the operator wrote, what the system is actually supposed to do, and every
+- `docs/_archive/parked/2026-06-26-snicklefritz-and-problems-audit/PROBLEMS-SCOPED-AGAINST-CODE.md` *[weak]* — PROBLEMS — SCOPED AGAINST CODE (verdict map) — The Email Lab builder now produces a branded, charted email with cited data, end to end — PROVEN by a real Sonnet build (tmp/run-build.ts): "Lee County median sale price $360,000, down 2.1% 
+- `docs/_archive/parked/2026-06-26-snicklefritz-and-problems-audit/PROBLEMS.md` *[weak]* — PROBLEMS — every open issue + every rule/process failure — Written 2026-06-26 after a ~10-hour SNICKLEFRITZ session that failed the operator repeatedly.
+- `docs/_archive/parked/2026-06-26-snicklefritz-and-problems-audit/SNICKLEFRITZ-EMAIL-REQUIREMENTS.md` *[weak]* — SNICKLEFRITZ — WHAT THE EMAILS MUST BE (the tracked list) — The single source of truth for what the operator asked for, pulled verbatim from his own
 - `docs/_archive/parked/chat-charts/2026-06-10-chart-as-of-anchoring.md` *[weak]* — Chart As-Of Anchoring — Spec — buildRentChart bakes the date into the title: "...NNN Asking Rents — Jun 2026". Anchored, but in the wrong place (title reads awkward).
 - `docs/_archive/parked/chat-charts/2026-06-28-chart-ideas-and-dynamic-charts-handoff.md` *[weak]* — Handoff — Build (almost) ANY chart + proactive "Chart Ideas" — docs/superpowers/plans/charts-dynamic-capability.md (it says "4 hardcoded fixture intents" — the live
 - `docs/_archive/parked/chat-charts/README.md` *[weak]* — CHAT CHARTS — WE ARE NOT WORKING ON THIS RIGHT NOW — Parked 2026-07-02 (operator decree). This folder holds every plan/spec for building MORE chart
@@ -1400,7 +1421,7 @@ Reachability at generation: 929 by path · 538 by name only · 245 orphaned. Re-
 - `_RESEARCH/competitor-and-strategy/2026-08-12-listing-grade-competitor-scan.md` — Listing-grade competitor scan — does anyone score/grade/audit a LISTING? (08/12/2026) — product score, grade, or audit a LISTING itself — as opposed to scoring a homeowner's propensity to
 - `_RESEARCH/competitor-and-strategy/STEADY-PAINS.md` — STEADY PAINS — the distilled buyer/seller/agent pain reference (LOCAL ONLY) — Propensity-to-list / seller-stress scoring is proven commercially viable at scale: Homebot
 
-## _AUDIT_AND_ROADMAP/Operation July — 22
+## _AUDIT_AND_ROADMAP/Operation July — 21
 
 - `_AUDIT_AND_ROADMAP/Operation July/02-fix-powershell-pushgate-bypass.md` *[weak]* — 02 — Close the PowerShell push-gate bypass — Pushes through the PowerShell tool bypass all 9 pre-push gates. The hooks block (~line 68 of
 - `_AUDIT_AND_ROADMAP/Operation July/03-push-session-local-fixes.md` *[weak]* — 03 — Review + push the §6 working-tree fixes — The autopsy session left real fixes in the working tree, unpushed. git diff to review, then push
@@ -1413,7 +1434,6 @@ Reachability at generation: 929 by path · 538 by name only · 245 orphaned. Re-
 - `_AUDIT_AND_ROADMAP/Operation July/10-delete-dead-code.md` *[weak]* — 10 — Delete dead code (zero real importers) — Six modules verified with zero real importers. 5 of 6 are already deleted in the current working
 - `_AUDIT_AND_ROADMAP/Operation July/11-delete-dead-docs-plans-specs.md` *[weak]* — 11 — Delete dead docs / plans / specs (zero code refs) — Orphan plans/specs with zero code references. Delete (docs-only = RULE 1 just-push).
 - `_AUDIT_AND_ROADMAP/Operation July/12-delete-phantom-spec-close-check.md` *[weak]* — 12 — Delete the 9-line phantom spec + close its check (A3) — A check was opened against a 9-line empty spec — a phantom obligation that can never close on its
-- `_AUDIT_AND_ROADMAP/Operation July/13-relocate-root-clutter.md` *[weak]* — 13 — Relocate root clutter (git mv, not delete) — Root-level clutter to relocate (git mv — history preserved), plus two live code-comment paths that
 - `_AUDIT_AND_ROADMAP/Operation July/14-reconcile-goal9-sql.md` *[weak]* — 14 — Reconcile the Goal 9 flywheel migration — docs/sql/20260530goal9flywheel.sql — a 2026-05-30 commit claims the Goal 9 row was inserted, but
 - `_AUDIT_AND_ROADMAP/Operation July/15-decide-daily-email-digest-fate.md` *[weak]* — 15 — DECISION: the fate of daily-email-digest.yml (A5) — daily-email-digest.yml is the ONLY live email cron. It:
 - `_AUDIT_AND_ROADMAP/Operation July/16-uncloseable-check-live-proof.md` — 16 — Make a check un-closeable without live prod proof (P1) — signal live) + checksrequireproof DB trigger + proof jsonb column + signal-runner. Spec:
@@ -1511,24 +1531,24 @@ Reachability at generation: 929 by path · 538 by name only · 245 orphaned. Re-
 - `.agents/skills/tdd/refactoring.md` *[weak]* — Refactor Candidates — After TDD cycle, look for:
 - `.agents/skills/tdd/tests.md` *[weak]* — Good and Bad Tests — Characteristics:
 
-## SOCIAL BUILD — 16
+## _RESEARCH/audits — 16
 
-- `SOCIAL BUILD/01-spine-cores-and-go-live-switch.md` *[weak]* — 01 — Spine: tables + claim RPC + pure DI cores + go-live switch — Stand up the channel-agnostic backbone by mirroring the email/outreach engine, and the build-now/flip-to-live switch. Everything downstream codes against lib/social/types.ts. Scoped + code-v
-- `SOCIAL BUILD/02-social-image-rasterizer.md` *[weak]* — 02 — Social image rasterizer (branded PNG per platform) — Turn brain data + a client brand into a branded PNG at platform sizes. Scoped + code-verified: we reuse the existing email-safe SVG chart renderer instead of authoring viz from scratch — but
-- `SOCIAL BUILD/03-platform-adapters-and-token-refresh.md` *[weak]* — 03 — Platform publish adapters + encrypted token store/refresh — Implement the one SocialPublisher seam for the four platforms, plus the encrypted token store + refresh the cron and the connect-flow share. No paid middleman — direct APIs. lib/social/oauth
-- `SOCIAL BUILD/04-cron-worker-and-gha.md` *[weak]* — 04 — Cron worker + GHA (the auto-post engine) — The "connect once → auto-run on schedule" engine. Mirror the proven email worker exactly; each run reads the client's stored, auto-refreshed token and posts on their behalf — DRY until the g
-- `SOCIAL BUILD/05-social-template-and-grain.md` *[weak]* — 05 — "social" deliverable template + grain — Add a "social" deliverable template (single-visual, headline-first) so a post's content assembles from brain data through the SAME pipeline as every other deliverable, at place/county/ZIP gr
-- `SOCIAL BUILD/06-engagement-tracking.md` *[weak]* — 06 — Engagement tracking (the "we track results" half) — Measure what we post. Social metrics are PULL, not push — no webhook for likes/impressions, so we schedule a fetch. Reuse the append-only event-ledger + rollup architecture from outreach.
-- `SOCIAL BUILD/07-go-live-prepost-fixes.md` — 07 — Go-live pre-post fixes (the two flags from Stage 3) — Stage 3 shipped DRY-complete but left two go-live gaps. DRY mode never posts, so neither blocks the push — they block the live flip. Probe-corrected before writing (RULE 0.5).
-- `SOCIAL BUILD/README.md` *[weak]* — SOCIAL BUILD — assignment files (OUR SIDE) — One file = one ultracode Claude's complete job. Hand each file to a separate session.
-- `SOCIAL BUILD/U1-DONE.md` — U1 — DONE (Connect your socials / OAuth) — build handoff — real-tsc 0 (only pre-existing stale .next artifact) · eslint clean · next build ✓ (all 3 routes compiled ƒ dynamic) · 38/38 tests (CSRF reject + no-exchange, X PKCE S256 round-trip, per-plat
-- `SOCIAL BUILD/U1-HANDOFF.md` — U1 — HANDOFF (probe-verified grounding, 2026-06-20) — real-tsc 0 · eslint clean · CSRF state-mismatch reject (no token exchange) · X PKCE S256 round-trip · oauth-config builds the right authorize URL + scope set per platform · callback calls st
-- `SOCIAL BUILD/U1-connect-your-socials-oauth.md` *[weak]* — U1 — Connect your socials (OAuth per platform) — Let a user connect their own social accounts so OUR cron can post on their behalf. Mirror the proven Google-Contacts OAuth precedent exactly — with the one net-new difference that the callba
-- `SOCIAL BUILD/U2-HANDOFF.md` — U2 — HANDOFF (ask-AI schedule + compose, frozen preview) — probe-verified grounding — New files: lib/social/schedule-command.ts (tool + validate + prompt), app/api/social/schedule-command/route.ts, lib/social/compose-caption.ts (the NEW multi-variant step), + tests.
-- `SOCIAL BUILD/U2-ask-ai-schedule-and-compose.md` — U2 — "Just ask AI" schedule + compose (frozen visual preview) — Turn "post my Fort Myers Beach flood card to LinkedIn every Monday" into a scheduled recipe, and show the user the actual branded post (image + ~3 caption options) before they confirm. On co
-- `SOCIAL BUILD/U3-mcp-social-tools.md` *[weak]* — U3 — MCP tools swflsociallist + swflsocialschedule — Expose the same schedule capability over MCP so a user's AI can list + create social schedules by X-Project-Key. Mirror project-tools.ts exactly: authorize → resolve project from the key → r
-- `SOCIAL BUILD/U4-workspace-social-lane.md` *[weak]* — U4 — Workspace "Social posting" lane + connect block — Surface social schedules + account-connection state in the project workspace, mirroring the existing Built/Emailing lanes. Schedule-driven (not post-driven), exactly like emailschedules. Add
-- `SOCIAL BUILD/USER-SIDE-HANDOFF.md` — USER SIDE — Social Campaign Builder (planning handoff) — The "if they connect their socials, will we auto-run their posts?" answer is yes — once connected, OUR cron (build 04) reads the refreshed token and posts. You build the connect UX + callbac
+- `_RESEARCH/audits/2026-07-18-data-consolidation/BLOCKERS.md` — P10 (completeness-critic) — 2026-07-18 — .../data-consolidation/ were empty at write time). P10's critique is therefore of the
+- `_RESEARCH/audits/2026-07-18-data-consolidation/P1-parcel-consolidation.md` — P1 — Lee Parcel Consolidation + Guarded Deletion Plan — Stream: P1-parcel-consolidation. Written 2026-07-18. Read-only analysis; NO repo files edited, NO
+- `_RESEARCH/audits/2026-07-18-data-consolidation/P10-completeness-critic.md` *[weak]* — P10 — Completeness Critic (adversarial last look) — I began this critique against the standing artifacts (data-roots.md + its embedded 3-Sonnet verify,
+- `_RESEARCH/audits/2026-07-18-data-consolidation/P2-frontmatter.md` — READ THIS FIRST — "where's the authority for X?" in 30 seconds — You are about to answer a data question or wire a consumer. Do not grep for a table and read
+- `_RESEARCH/audits/2026-07-18-data-consolidation/P3-authority-ratification.md` — P3 — CONCEPT → AUTHORITY RATIFICATION TABLE — Every root here is a recommendation pending C1/C2 sign-off, never a normative "X IS the authority."
+- `_RESEARCH/audits/2026-07-18-data-consolidation/P4-unmapped-tables.md` — P4 — 13 UNMAPPED-TABLE GAP-FILL (data-roots.md completeness) — This is FILL-IN of that enumerated list, not discovery. Every row-count/column-count below was
+- `_RESEARCH/audits/2026-07-18-data-consolidation/P5-undocumented-consumers.md` — P5 — Undocumented-Consumer Gap-Fill (7 reads) — (docs/handoff/2026-07-18-data-consolidation-execution.md:230-381). For each: (a) confirm
+- `_RESEARCH/audits/2026-07-18-data-consolidation/P6-master-doublevotes.md` — P6 — Master Double-Vote Dedup Resolution — The task's three-way menu is "drop the edge / demote to a labeled cross-check only / keep with justification." The middle option cannot be achieved by a master.mts edge change. Verified in t
+- `_RESEARCH/audits/2026-07-18-data-consolidation/P7-corpse-deletelist.md` — P7 — Platform Corpse Delete List — Stream: P7 (platform corpses). Author: Opus subagent, 2026-07-18. READ-ONLY audit.
+- `_RESEARCH/audits/2026-07-18-data-consolidation/P8-bypass-and-zombie.md` *[weak]* — P8 — USGS Zombie Read + Bypass-Wire Sweep — Stream owner: P8. Probed live 2026-07-18. Every claim below cites a live row-count/column OR a code
+- `_RESEARCH/audits/2026-07-18-data-consolidation/P9-discoverability-wiring.md` — P9 — Discoverability Wiring (PLAN, do NOT apply) — build. Operator's rage: "every fucking Claude knows where to check first."
+- `_RESEARCH/audits/2026-07-18-fanout-fix-log.md` — Site Audit Fix Pass — Fan-out Log (07/18/2026) — Follow-up to docs/audits/2026-07-18-site-audit.md. 10 parallel Sonnet lanes, grouped so no two
+- `_RESEARCH/audits/2026-07-18-opus-pass.md` *[weak]* — Opus Pass — Review of the 07/18 Fan-out Fix Commits (daeb1f6e + eb071f90) — Reviewed at high effort: 8 independent finder angles over both commits, every surviving candidate
+- `_RESEARCH/audits/2026-07-18-site-audit.md` — SWFL Data Gulf — Site Audit (07/18/2026) — Fan-out audit of the whole site + emails + answer engine. Static fan-out — 2 rounds, 30 slices total, Sonnet find → adversarial verify — plus a live-probe track (per-ZIP answers vs lake grou
+- `_RESEARCH/audits/2026-08-08-prometheus-refinement-log.md` *[weak]* — Project Status & Handover Log (Prometheus) — This log serves as the primary state machine for the "Refinement" phase of the project. It ensures that any agent—human or-AIengine-driven—can pick up exactly where the previous one left off
+- `_RESEARCH/audits/2026-08-11-crawl4ai-email-out.md` *[weak]* — Contents — move to sidebar hide
 
 ## docs — 16
 
@@ -1567,23 +1587,6 @@ Reachability at generation: 929 by path · 538 by name only · 245 orphaned. Re-
 - `_RESEARCH/agent-behavior/2026-08-12-validator-in-the-loop-generation.md` — Validators and linters wired into AI generation loops — Source: https://www.anthropic.com/engineering/building-effective-agents (crawled 08/12/2026)
 - `_RESEARCH/agent-behavior/2026-08-18-writ-governance-runtime-evaluation.md` — Writ (infinri/Writ) — governance runtime for Claude Code — adopt or steal? — Python/Docker/Neo4j runtime that sits between Claude Code and the filesystem via hooks. Three claims:
 
-## _RESEARCH/audits — 14
-
-- `_RESEARCH/audits/2026-07-18-data-consolidation/BLOCKERS.md` — P10 (completeness-critic) — 2026-07-18 — .../data-consolidation/ were empty at write time). P10's critique is therefore of the
-- `_RESEARCH/audits/2026-07-18-data-consolidation/P1-parcel-consolidation.md` — P1 — Lee Parcel Consolidation + Guarded Deletion Plan — Stream: P1-parcel-consolidation. Written 2026-07-18. Read-only analysis; NO repo files edited, NO
-- `_RESEARCH/audits/2026-07-18-data-consolidation/P10-completeness-critic.md` *[weak]* — P10 — Completeness Critic (adversarial last look) — I began this critique against the standing artifacts (data-roots.md + its embedded 3-Sonnet verify,
-- `_RESEARCH/audits/2026-07-18-data-consolidation/P2-frontmatter.md` — READ THIS FIRST — "where's the authority for X?" in 30 seconds — You are about to answer a data question or wire a consumer. Do not grep for a table and read
-- `_RESEARCH/audits/2026-07-18-data-consolidation/P3-authority-ratification.md` — P3 — CONCEPT → AUTHORITY RATIFICATION TABLE — Every root here is a recommendation pending C1/C2 sign-off, never a normative "X IS the authority."
-- `_RESEARCH/audits/2026-07-18-data-consolidation/P4-unmapped-tables.md` — P4 — 13 UNMAPPED-TABLE GAP-FILL (data-roots.md completeness) — This is FILL-IN of that enumerated list, not discovery. Every row-count/column-count below was
-- `_RESEARCH/audits/2026-07-18-data-consolidation/P5-undocumented-consumers.md` — P5 — Undocumented-Consumer Gap-Fill (7 reads) — (docs/handoff/2026-07-18-data-consolidation-execution.md:230-381). For each: (a) confirm
-- `_RESEARCH/audits/2026-07-18-data-consolidation/P6-master-doublevotes.md` — P6 — Master Double-Vote Dedup Resolution — The task's three-way menu is "drop the edge / demote to a labeled cross-check only / keep with justification." The middle option cannot be achieved by a master.mts edge change. Verified in t
-- `_RESEARCH/audits/2026-07-18-data-consolidation/P7-corpse-deletelist.md` — P7 — Platform Corpse Delete List — Stream: P7 (platform corpses). Author: Opus subagent, 2026-07-18. READ-ONLY audit.
-- `_RESEARCH/audits/2026-07-18-data-consolidation/P8-bypass-and-zombie.md` *[weak]* — P8 — USGS Zombie Read + Bypass-Wire Sweep — Stream owner: P8. Probed live 2026-07-18. Every claim below cites a live row-count/column OR a code
-- `_RESEARCH/audits/2026-07-18-data-consolidation/P9-discoverability-wiring.md` — P9 — Discoverability Wiring (PLAN, do NOT apply) — build. Operator's rage: "every fucking Claude knows where to check first."
-- `_RESEARCH/audits/2026-07-18-fanout-fix-log.md` — Site Audit Fix Pass — Fan-out Log (07/18/2026) — Follow-up to docs/audits/2026-07-18-site-audit.md. 10 parallel Sonnet lanes, grouped so no two
-- `_RESEARCH/audits/2026-07-18-opus-pass.md` *[weak]* — Opus Pass — Review of the 07/18 Fan-out Fix Commits (daeb1f6e + eb071f90) — Reviewed at high effort: 8 independent finder angles over both commits, every surviving candidate
-- `_RESEARCH/audits/2026-07-18-site-audit.md` — SWFL Data Gulf — Site Audit (07/18/2026) — Fan-out audit of the whole site + emails + answer engine. Static fan-out — 2 rounds, 30 slices total, Sonnet find → adversarial verify — plus a live-probe track (per-ZIP answers vs lake grou
-
 ## ingest/pipelines — 14
 
 - `ingest/pipelines/README.md` *[weak]* — ingest/pipelines — Each subdirectory is one ingest pipeline. Every pipeline must satisfy the
@@ -1618,7 +1621,7 @@ Reachability at generation: 929 by path · 538 by name only · 245 orphaned. Re-
 - `lib/deliverable/recipes/sphere-weekly.ledger.md` — Enforced — Test: lib/deliverable/recipes/sphere-weekly.test.ts > "THE HEADLINE — a lane-3 fact, or an open slot. Never an invention"
 - `lib/deliverable/recipes/under-contract.ledger.md` — Enforced — shipping an estimate when that clock holds no real count (a firstseen floor is not a count).
 
-## (repo root) — 13
+## (repo root) — 11
 
 - `AGENTS.md` — This is NOT the Next.js you know — This version has breaking changes — APIs, conventions, and file structure may all differ from your training data. Read the relevant guide in nodemodules/next/dist/docs/ before writing any co
 - `CLAUDE.md` — RULE 0 — SESSIONLOG.md (NON-REMOVABLE) — 1. Read first. SessionStart hook prints recent entries — trust the log over memory.
@@ -1626,13 +1629,11 @@ Reachability at generation: 929 by path · 538 by name only · 245 orphaned. Re-
 - `DELIVERABLE-ENGINE-BLUEPRINT.md` — DELIVERABLE ENGINE — COMPLETE WIRING BLUEPRINT — The renderer and the send infra both exist. What does not exist is the wire from the built EmailDoc to the scheduler/send path — scripts/email/run-schedules.mts has ZERO reference to EmailDo
 - `DELIVERABLES.md` — DELIVERABLES — the map (start here) — There are TWO ways a deliverable gets rendered. Knowing which one you're in saves hours.
 - `ENGINE-HANDOFF.md` — Engine Turn-On Handoff — 2026-06-20 — Yes. Live + running.
-- `PROJECT_MAP.md` **[ORPHAN]** — Project Map: The Core Navigation for Developers & Agents — This document serves as the primary roadmap for navigating this codebase. It defines the separation between infrastructure, logic, and content to ensure that automated agents (LLMs) can iden
+- `PROJECT_MAP.md` — PROJECT MAP — the repo root, one line per entry (verified 08/19/2026) — The table of contents an agent scans BEFORE opening files or concluding something
 - `README.md` — What this is — SWFL Data Gulf takes the market data that Southwest Florida professionals spend hours hunting down — sale prices, rents, permits, flood risk, traffic, commercial corridors — verifies it agai
 - `SESSION_LOG.md` — Append-only session log — newest entry on top. RULE 0: write before every push.
 - `SOURCED.md` — SOURCED.md — Magic number citations — Every numeric constant in refinery pack code that affects scoring, confidence, or ranking
 - `THE-CONTRACT.md` — THE CONTRACT — what follows the conversation — This is the discipline that travels with every SWFL Data Gulf payload so a
-- `crawl4ai-email-out.md` — Contents — move to sidebar hide
-- `prometheus_log.md` **[ORPHAN]** — Project Status & Handover Log (Prometheus) — This log serves as the primary state machine for the "Refinement" phase of the project. It ensures that any agent—human or-AIengine-driven—can pick up exactly where the previous one left off
 
 ## .claude/agents — 9
 
@@ -1723,14 +1724,6 @@ Reachability at generation: 929 by path · 538 by name only · 245 orphaned. Re-
 - `_RESEARCH/real-estate-market/2026-08-12-fl-appraisal-bpo-licensing-quotes.md` — Florida appraisal / BPO / CMA licensing — verbatim quote gathering — No interpretation, no conclusion, anywhere below. Every quote is verbatim with its source URL and
 - `_RESEARCH/real-estate-market/2026-08-12-fl-seller-disclosure-duty-quotes.md` — Florida seller disclosure duty — quote-gathering only — "Florida Realtors" — no prior hit) and RESEARCH/real-estate-market/ (2 existing files, neither
 
-## _archive/2026-06-26-snicklefritz-and-problems-audit — 5
-
-- `_archive/2026-06-26-snicklefritz-and-problems-audit/CLAUDE IS STUPID AS FUCK PROBLEMS.md` — CLAUDE IS STUPID AS FUCK — PROBLEMS WITH SOURCED ANSWERS + FAN-OUT PLAN — Each entry: PROBLEM → SOURCED ANSWER → PLAN TASK
-- `_archive/2026-06-26-snicklefritz-and-problems-audit/FUCKCLAUDE.md` *[weak]* — FUCKCLAUDE — Everything: the test the operator wrote, what the system is actually supposed to do, and every
-- `_archive/2026-06-26-snicklefritz-and-problems-audit/PROBLEMS-SCOPED-AGAINST-CODE.md` *[weak]* — PROBLEMS — SCOPED AGAINST CODE (verdict map) — The Email Lab builder now produces a branded, charted email with cited data, end to end — PROVEN by a real Sonnet build (tmp/run-build.ts): "Lee County median sale price $360,000, down 2.1% 
-- `_archive/2026-06-26-snicklefritz-and-problems-audit/PROBLEMS.md` *[weak]* — PROBLEMS — every open issue + every rule/process failure — Written 2026-06-26 after a ~10-hour SNICKLEFRITZ session that failed the operator repeatedly.
-- `_archive/2026-06-26-snicklefritz-and-problems-audit/SNICKLEFRITZ-EMAIL-REQUIREMENTS.md` *[weak]* — SNICKLEFRITZ — WHAT THE EMAILS MUST BE (the tracked list) — The single source of truth for what the operator asked for, pulled verbatim from his own
-
 ## docs/design-reference — 5
 
 - `docs/design-reference/README.md` *[weak]* — Design Reference — SWFL Data Gulf Design System — A static design system built by Claude Design to establish:
@@ -1774,6 +1767,12 @@ Reachability at generation: 929 by path · 538 by name only · 245 orphaned. Re-
 - `.claude/hi.md` **[ORPHAN]**
 - `.claude/session-notes.md` — Session Notes — 2026-05-21 — SWFL Intelligence Lake — data protocol (v2.1, always follow):
 
+## _AUDIT_AND_ROADMAP/Operation-July-DONE — 3
+
+- `_AUDIT_AND_ROADMAP/Operation-July-DONE/01-turn-on-send.md` *[weak]* — 01 — Turn on SEND (fire ONE real scheduled email) — The four blockers + dry-run + first live send are one atomic outcome and strictly ordered —
+- `_AUDIT_AND_ROADMAP/Operation-July-DONE/13-relocate-root-clutter.md` *[weak]* — 13 — Relocate root clutter (git mv, not delete) — Root-level clutter to relocate (git mv — history preserved), plus two live code-comment paths that
+- `_AUDIT_AND_ROADMAP/Operation-July-DONE/README.md` *[weak]* — Operation July — DONE — Finished Operation July tasks land here. When a task in ../Operation July/ is complete:
+
 ## _AUDIT_AND_ROADMAP/notion-export — 3
 
 - `_AUDIT_AND_ROADMAP/notion-export/littlebird/audit.md` *[weak]* — SWFL Data Gulf — Project Audit (2026-05-27) — 1. Global ~/.claude/CLAUDE.md: Vendor First, Plan Mode First, Data Provenance, Discrepancy Reporting.
@@ -1815,16 +1814,6 @@ Reachability at generation: 929 by path · 538 by name only · 245 orphaned. Re-
 - `.claude/commands/build-week.md` **[ORPHAN]** — /build-week — You are starting a build-week working session on the v3 synthesis engine. Your job in this command is not to implement anything yet — it is to load the spec, baseline the project against it,
 - `.claude/commands/vault.md` — /vault — Personal Strategic Vault — You are the capture + recall layer over the personalvault.vaultfragments Supabase table. The user (Ricky) is mid-conversation and wants to either bank a thought, recall prior thinking, or ex
 
-## GET DONE — 2
-
-- `GET DONE/TURN SYSTEM ON.md` — TURN SYSTEM ON — Credit Freeze Reversal — Frozen 2026-06-18. Run these in order when ready to launch.
-- `GET DONE/contacts-phone-import.md` — Phone Contact Import — Future Options — Decided 2026-06-18. Phase B ships CSV + manual add from desktop. Add phone import once the contact system has traction.
-
-## _AUDIT_AND_ROADMAP/Operation-July-DONE — 2
-
-- `_AUDIT_AND_ROADMAP/Operation-July-DONE/01-turn-on-send.md` *[weak]* — 01 — Turn on SEND (fire ONE real scheduled email) — The four blockers + dry-run + first live send are one atomic outcome and strictly ordered —
-- `_AUDIT_AND_ROADMAP/Operation-July-DONE/README.md` *[weak]* — Operation July — DONE — Finished Operation July tasks land here. When a task in ../Operation July/ is complete:
-
 ## _FABLE5/collection — 2
 
 - `_FABLE5/collection/2026-07.md` — July 2026 Insiders — raw collection (grows daily until compose) — Operator brief (07/16/2026): a little more planning, a little more data, then a limited-edition
@@ -1837,7 +1826,7 @@ Reachability at generation: 929 by path · 538 by name only · 245 orphaned. Re-
 
 ## components/charts — 2
 
-- `components/charts/CLAUDE.md` *[weak]* — components/charts/ — conventions (loads when you edit here) — 08/06/2026 for exactly this reason:
+- `components/charts/CLAUDE.md` — components/charts/ — conventions (loads when you edit here) — 08/06/2026 for exactly this reason:
 - `components/charts/vendor/bklit/NOTICE.md` — Vendored from bklit-ui — Source: https://github.com/bklit/bklit-ui
 
 ## docs/carve-out — 2
@@ -1849,6 +1838,11 @@ Reachability at generation: 929 by path · 538 by name only · 245 orphaned. Re-
 
 - `docs/contracts/MAKE-CONTRACT-FOLLOW.md` — How to make THE CONTRACT follow every session (Sonnet: install this) — This is the answer to "how can a contract follow on our MCP but not here?" — it CAN. On the MCP, the
 - `docs/contracts/RULE-0.8-no-fabrication-of-verifiable-values.md` **[ORPHAN]** — CONTRACT TO INSERT INTO CLAUDE.md (RULE 0.8) — Paste the block below into CLAUDE.md directly after RULE 0.7 (keep the house style).
+
+## docs/parked — 2
+
+- `docs/parked/contacts-phone-import.md` *[weak]* — Phone Contact Import — Future Options — Decided 2026-06-18. Phase B ships CSV + manual add from desktop. Add phone import once the contact system has traction.
+- `docs/parked/turn-system-on.md` **[ORPHAN]** — TURN SYSTEM ON — Credit Freeze Reversal — Frozen 2026-06-18. Run these in order when ready to launch.
 
 ## lib/pdf — 2
 
@@ -1867,10 +1861,6 @@ Reachability at generation: 929 by path · 538 by name only · 245 orphaned. Re-
 
 - `.github/instructions/mermaid.instructions.md` — Mermaid AI Skills — When the user asks to create, edit, or visualize any diagram, use the Mermaid
 
-## GO-LIVE — 1
-
-- `GO-LIVE/email-scheduler-unit-f.md` — GO-LIVE — Unit F: Multi-Tenant Email Cron Scheduler — A GHA cron (/15, currently commented out) runs scripts/email/run-schedules.mts. Per due
-
 ## _FABLE5/retro — 1
 
 - `_FABLE5/retro/TEMPLATE.md` — Retro — <issue-slug> (sent MM/DD/YYYY) — Did MINDMAP.md lie this month? Fix it in this same commit: yes/no + what.
@@ -1883,10 +1873,6 @@ Reachability at generation: 929 by path · 538 by name only · 245 orphaned. Re-
 
 - `_RESEARCH/hermes-inbox/absorption-source-candidates.md` — Verified Public Sources for SWFL Commercial Net Absorption (sq ft) — The following table lists all public, citably‑verifiable sources that I was able to access during this session and contain a concrete net absorption figure for Lee County or Collier County c
 
-## _diagrams — 1
-
-- `_diagrams/contract-flow.md` *[weak]* — SWFL Data Gulf — Contract Flow — How a user gets answers to: "How is NNN compared to Vanderbilt NNN, and tell me about each area's economic growth since Hurricane Ian?" — and how the contract holds on the follow-up.
-
 ## app/api — 1
 
 - `app/api/CLAUDE.md` — app/api/ — route conventions (loads when you edit here) — 120 route.ts files across ~14 product domains. The annotated per-route map (domain, purpose,
@@ -1895,9 +1881,17 @@ Reachability at generation: 929 by path · 538 by name only · 245 orphaned. Re-
 
 - `cloud-secrets/README.md` *[weak]* — cloud-secrets — encrypted key vault for phone / cloud Claude sessions — vault.enc is an AES-256-GCM-encrypted bundle of this repo's local secret files.
 
+## docs/_diagrams — 1
+
+- `docs/_diagrams/contract-flow.md` *[weak]* — SWFL Data Gulf — Contract Flow — How a user gets answers to: "How is NNN compared to Vanderbilt NNN, and tell me about each area's economic growth since Hurricane Ian?" — and how the contract holds on the follow-up.
+
 ## docs/email-lab — 1
 
 - `docs/email-lab/BUILDER-GUIDE.md` — Email Lab — Builder Guide — What the Email Lab is, how its pieces fit, and what you need to know before adding
+
+## docs/runbooks — 1
+
+- `docs/runbooks/email-scheduler-unit-f.md` *[weak]* — GO-LIVE — Unit F: Multi-Tenant Email Cron Scheduler — A GHA cron (/15, currently commented out) runs scripts/email/run-schedules.mts. Per due
 
 ## docs/sessions — 1
 

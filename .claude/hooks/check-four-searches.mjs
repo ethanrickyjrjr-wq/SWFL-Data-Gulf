@@ -253,7 +253,7 @@ export function laneFor(name, input) {
   // RESEARCH — what we already wrote down.
   if (
     /^(Read|Grep|Glob)$/.test(n) &&
-    /_RESEARCH|docs[/\\]|_FABLE5|SCRATCHPAD|SESSION_LOG/i.test(hay)
+    /_RESEARCH|docs[/\\]|_FABLE5|_AUDIT_AND_ROADMAP|SCRATCHPAD|SESSION_LOG/i.test(hay)
   )
     return "research";
 

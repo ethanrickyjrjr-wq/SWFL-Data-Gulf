@@ -40,13 +40,20 @@ import { isDataTurn, LANES } from "./check-four-searches.mjs";
 /** Directories that carry a location-scoped CLAUDE.md (Class-B conventions). */
 export const AREA_DIRS = [
   "ingest/",
+  "refinery/",
   "refinery/packs/",
   "lib/email/",
   "lib/assistant/",
   "lib/social/",
   "lib/deliverable/",
+  "lib/listings/",
+  "lib/brand/",
+  "lib/charts/",
+  "lib/pdf/",
   "app/api/",
   "scripts/",
+  "components/",
+  "components/charts/",
 ];
 
 /** The Class-A canon — the cross-cutting beliefs the operator repeats. Factual

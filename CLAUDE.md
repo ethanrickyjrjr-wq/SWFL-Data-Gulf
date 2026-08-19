@@ -14,6 +14,9 @@
 
 ---
 
+When compacting, always preserve: the SESSION_LOG entry drafted so far, the open `checks`
+keys touched this session, the list of files modified, and any push/verify command pending.
+
 # RULES — LEAN FORM (dieted 08/18/2026 by operator decree: "we can't have rules that load every time that claude doesn't read")
 
 **Every rule below is normative and unchanged in force. The full postmortems, verbatim decrees,
@@ -285,6 +288,8 @@ crosswalk entry existing (`fixtures/swfl-zip-county.json`) is not the same as ha
 
 | Topic | File |
 |---|---|
+| **★ Root layout — the verified map** | `PROJECT_MAP.md` — one line per top-level dir, gitignored/grep-invisible dirs flagged. Check before creating ANY new top-level dir or concluding a surface doesn't exist |
+| Directory-scoped rules (auto-load on entry) | `CLAUDE.md` files in ingest/, refinery/ (+packs/), lib/{email, assistant, social, deliverable, listings, brand, charts, pdf}/, app/api/, scripts/, components/ (+charts/) — nearest file wins; read on entering the area |
 | **★ Data roots — CHECK FIRST** | `docs/standards/data-roots.md` — the ONE catalog of which table/root feeds each number; any data question or build starts at its top section (one root per concept) |
 | **★ Community crosswalk — READ BEFORE touching subdivisions/communities/HOA/amenities** | `docs/standards/community-crosswalk-playbook.md` — 81-row `community_profiles` vs 20,369 platted names is a real gap; string-stemming measured near-useless; the real fix is PUD/PD boundary geometry (Lee's 1,627-polygon layer verified 08/12/2026). Read before re-deriving |
 | **★ New-project playbook — guards, tracking, anti-drift** | `docs/standards/new-project-playbook.md` — every failure shape this project hit + the guard that stops each; read before any new project or proposed guard |

@@ -151,9 +151,15 @@ index never mentioned. A grep of `_RESEARCH/` is not a search of our research.
   live in-request call.
 
 
-**audits/** — dated deep-pass audits (14). The 07/18 data-consolidation set (P1–P10 + BLOCKERS)
+**audits/** — dated deep-pass audits (17). The 07/18 data-consolidation set (P1–P10 + BLOCKERS)
 is the most recent pass on parcels, authority ratification, unmapped tables, zombie/bypass
 tables, and undocumented consumers. Also 07/18 site-audit, opus-pass, fanout-fix-log.
+- `2026-08-11-crawl4ai-email-out.md` — crawl output relocated from repo root 08/19/2026 (was a
+  live RULE 0.4 violation sitting at root).
+- `2026-08-08-prometheus-refinement-log.md` — one-off "Prometheus" refinement handover log,
+  relocated from repo root 08/19/2026.
+- `2026-07-07-response-debug-capture.html` — stray debug HTML capture, relocated from repo
+  root 08/19/2026.
 
 **competitor-and-strategy/** — competitor + strategy research covering real company names and
 strategic analysis (26). **NOT local-only as of 08/11/2026** — the all-in-on-graphify decree
