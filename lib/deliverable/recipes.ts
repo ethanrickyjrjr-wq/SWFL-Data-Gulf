@@ -207,6 +207,38 @@ export const RECIPES: Record<RecipeKey, Recipe> = {
     prompt:
       "Build a coming-soon teaser email for my listing at [[your listing address]] — hold the street address back, use real county inventory counts to show how scarce homes like it are, and one CTA to join a private preview list.",
     needs: ["agent_name", "brokerage", "business_address"],
+    // ── RECIPES-AS-CONFIG (plan 2026-08-19, wave). Verbatim moves from the 944-line
+    // hand-coded builder. THE ONE THING THIS RECIPE CANNOT GET WRONG — the street
+    // address is SUPPRESSED — is structural three ways: `suppressAddress` empties
+    // the {address} template var; the hero label is the CITY wearing its state; and
+    // the finisher strips/redacts/leak-drops around the narrator (coming-soon.ts).
+    // The lot cell is deliberately absent from `specs`: a lot size plus a city
+    // narrows a parcel search further than a teaser should. No `framing` — the
+    // narrator is the FINISHER (structural, not a prompt string).
+    config: {
+      key: "coming-soon",
+      ribbon: "Coming Soon",
+      subject: {
+        // The street rung is unreachable (suppressAddress skips it); this template
+        // deliberately carries NO {street} so even a misconfigured rung cannot leak.
+        withStreet: "Coming soon — before it hits the market",
+        withCity: "Coming soon in {city} — before it hits the market",
+        bare: "Coming soon — before it hits the market",
+      },
+      photoAlt: "Coming soon — a home in {place}",
+      heroLabel: { withCity: "{city}, {state}", fallback: "{region}" },
+      specs: ["beds", "baths", "sqft", "price-per-sqft", "type"],
+      suppressAddress: true,
+      // The remarks feed the TEASER NARRATOR only (redacted); they never render as
+      // a description block — a teaser prints no seller copy that could locate the house.
+      includeDescription: false,
+      middle: ["coming-soon/scarcity"],
+      tail: ["coming-soon/scarcity-sources"],
+      ctaLabel: "Join the Private Preview List",
+      ctaDestination: "brand-site",
+      finish: ["coming-soon/teaser-narrator"],
+      params: { regionLabel: "Southwest Florida" },
+    },
   },
   "market-comps": {
     key: "market-comps",

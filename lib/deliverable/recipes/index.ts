@@ -40,7 +40,6 @@ import { buildFromConfig } from "./config-builder";
 import type { Recipe, RecipeKey } from "@/lib/deliverable/recipes";
 import type { VoicePresetId } from "@/lib/email/voice-presets";
 import { buildNewListing } from "./new-listing";
-import { buildComingSoon } from "./coming-soon";
 import { buildMarketComps } from "./market-comps";
 import { buildJustSold } from "./just-sold";
 import { buildOpenHouse } from "./open-house";
@@ -90,7 +89,8 @@ export type RecipeBuilder = (ctx: RecipeBuildContext) => Promise<EmailDoc | null
 export const RECIPE_BUILDERS: Partial<Record<RecipeKey, RecipeBuilder>> = {
   // ── The listing lifecycle — ONE resolved house, different hats ──────────────
   "new-listing": buildNewListing, // the reference implementation
-  "coming-soon": buildComingSoon, // address SUPPRESSED; scarcity from live county inventory
+  // "coming-soon" — MIGRATED to recipes-as-config (config on its registry entry;
+  // suppression rides in config + the teaser-narrator finisher).
   "market-comps": buildMarketComps, // the comps bar lives HERE; a comp needs beds AND sqft
   // "under-contract" — MIGRATED to recipes-as-config (config on its registry
   // entry; builderFor dispatches to buildFromConfig). First of the lifecycle wave.

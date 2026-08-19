@@ -14,6 +14,11 @@
 // A config referencing a missing key fails derivations.test.ts at CI. At runtime a
 // derivation that THROWS degrades to no blocks (RULE 0.7): the email ships quieter,
 // never broken, never invented.
+import {
+  comingSoonScarcity,
+  comingSoonScarcitySources,
+  comingSoonTeaserNarrator,
+} from "./coming-soon";
 import { underContractSpeed, underContractSpeedSources } from "./under-contract";
 import type { ChromeBlock } from "@/lib/email/lifecycle-chrome";
 import type { EmailDoc } from "@/lib/email/doc/types";
@@ -41,6 +46,10 @@ export const DERIVATIONS: Record<string, Derivation> = {
   // sources note (tail). One live read per build (memoized in the recipe module).
   "under-contract/speed": underContractSpeed,
   "under-contract/speed-sources": underContractSpeedSources,
+  // R2 · COMING SOON — the scarcity ladder (middle: strip + funnel chart) + its
+  // disclosed-criterion sources note (tail). One live read per build (memoized).
+  "coming-soon/scarcity": comingSoonScarcity,
+  "coming-soon/scarcity-sources": comingSoonScarcitySources,
 };
 
 /** A doc-level pass that runs AFTER layout + the generic narrator — for recipes
@@ -52,7 +61,11 @@ export type Finisher = (
   params: Record<string, number | string>,
 ) => Promise<EmailDoc>;
 
-export const FINISHERS: Record<string, Finisher> = {};
+export const FINISHERS: Record<string, Finisher> = {
+  // R2 · COMING SOON — the teaser narrator: de-identified fact sheet in, street
+  // redacted out, and a paragraph that still leaks is DROPPED to an open slot.
+  "coming-soon/teaser-narrator": comingSoonTeaserNarrator,
+};
 
 export async function runFinishers(
   keys: readonly string[],

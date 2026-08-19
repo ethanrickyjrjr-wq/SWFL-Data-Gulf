@@ -83,22 +83,25 @@
 // 2,847 sq ft · Lee County): 13,122 active Lee County homes · 1,062 priced $536K–$655K ·
 // 328 that also match on beds and size.
 
-import { withCommas } from "@/lib/format-number";
-import { buildLifecycleEmail } from "@/lib/email/lifecycle-chrome";
 import { createBlock } from "@/lib/email/doc/default-docs";
-import { brandWebsiteUrl } from "@/lib/email/inject-photo";
-import { pricePerSqft, shortType, spec, specFootnote } from "@/lib/email/listing-flyer";
+import { spec } from "@/lib/email/listing-flyer";
 import { chartSpecToEmailImage } from "@/lib/email/spec-to-png";
+import { RECIPES } from "@/lib/deliverable/recipes";
+import { renderTemplate } from "./config";
+import { resolveCells } from "./cell-catalog";
 // KNOWN-DEBT(data_lake: listing_state lives in the data_lake schema, which the typed
 // Supabase client intentionally does not cover — see utils/supabase/service-role.ts):
 import { createServiceRoleClientUntyped } from "@/utils/supabase/service-role";
 import zipCounty from "@/fixtures/swfl-zip-county.json";
 import { authorListingNarrative, clearNarrativeSlots, fillNarrative } from "./shared";
+import type { Derivation, Finisher } from "./derivations";
 import type { RecipeBuildContext } from "./index";
-import type { ChromeBlock, LifecycleChrome } from "@/lib/email/lifecycle-chrome";
+import type { ChromeBlock } from "@/lib/email/lifecycle-chrome";
 import type { ListingFacts } from "@/lib/email/listing-scrape";
 import type { ChartSpec } from "@/components/charts/registry/chart-spec";
-import type { EmailDoc, StatItem } from "@/lib/email/doc/types";
+import type { StatItem } from "@/lib/email/doc/types";
+
+const CFG = RECIPES["coming-soon"].config!;
 
 /** The citation + CTA fallback root. HARDCODED, exactly as lib/listings/resolve-subject.ts
  *  hardcodes its `sourceUrl`: a citation always points at SWFL Data Gulf. Reading
@@ -132,26 +135,25 @@ const SITE = "https://www.swfldatagulf.com";
  *    with it — which is the point. They must never drift from the disclosure in `tail`.
  */
 export const COMING_SOON_FIELDS = Object.freeze({
-  /** The chrome's ribbon word. The private-preview promise lives HERE and in `ctaLabel`,
-   *  both written by code — which is why the narrator is forbidden from claiming it. */
-  ribbon: "Coming Soon",
+  // MIGRATED (recipes-as-config): ribbon / ctaLabel / subject / photoAlt / regionLabel
+  // are DERIVED views over the config on the registry entry — one root, can't drift.
+  ribbon: CFG.ribbon,
   /** The one button. The NEXT ACTION, never a restatement of the email. 1–5 words (§1.8). */
-  ctaLabel: "Join the Private Preview List",
-  /** The subject, deterministic and never model-authored, so it cannot smuggle the street.
-   *  30–40 characters is the open-rate target (§1.10); the city form runs long and is kept
-   *  because a named town beats a generic tease for this audience. */
+  ctaLabel: CFG.ctaLabel,
+  /** The subject, deterministic and never model-authored, so it cannot smuggle the street. */
   subject: {
-    withCity: (city: string) => `Coming soon in ${city} — before it hits the market`,
-    noCity: "Coming soon — before it hits the market",
+    withCity: (city: string) => renderTemplate(CFG.subject.withCity, { city }),
+    noCity: CFG.subject.bare,
   },
   /** The hero label when the subject has no city, and the widest honest scope name. */
-  regionLabel: "Southwest Florida",
+  regionLabel: String(CFG.params!.regionLabel),
   /** Photo alt text — read aloud by screen readers and shown by Outlook with images off,
    *  which is why it names the CITY and never the street. */
   photoAlt: (city: string, fields: { regionLabel: string }) =>
-    `Coming soon — a home in ${city || fields.regionLabel}`,
+    renderTemplate(CFG.photoAlt, { place: city || fields.regionLabel }),
   /** The comparison band. ±10% of list price, at least the subject's beds, at least 80% of
-   *  its size. Rounded to these units BEFORE the query so the printed criterion reproduces. */
+   *  its size. Rounded to these units BEFORE the query so the printed criterion reproduces.
+   *  QUERY INPUTS for the scarcity derivation — stays here beside the math that reads it. */
   band: {
     priceLo: 0.9,
     priceHi: 1.1,
@@ -663,104 +665,44 @@ export function teaserWhere(facts: ListingFacts): string {
  *  narrows a parcel search further than a teaser should, and the cell is the only one in
  *  `listingSpecs` that helps locate the house rather than describe it. */
 export function teaserSpecs(facts: ListingFacts): StatItem[] {
-  // ONE WEIGHT ACROSS THE ROW — same rule as the scarcity strip below, and the same defect
-  // the playbook's finish pass already fixed once on New Listing (defects 4 and 5): a
-  // `primary` cell and a `muted` cell in the SAME strip renders three different type sizes
-  // in one horizontal line. Five cells at one size is a spec strip; five cells at three
-  // sizes is noise.
-  return [
-    spec(facts.beds, "Beds"),
-    spec(facts.baths, "Baths"),
-    spec(withCommas(facts.sqft), "Sq Ft"),
-    spec(pricePerSqft(facts.price, facts.sqft), "$/Sq Ft"),
-    spec(shortType(facts.propertyType) || undefined, "Type"),
-  ];
+  // ONE WEIGHT ACROSS THE ROW — and MIGRATED: the cell list is CONFIG data resolved
+  // through the shared catalog (beds · baths · sq ft · $/sq ft · type, NO lot — a lot
+  // size plus a city narrows a parcel search further than a teaser should).
+  return resolveCells(CFG.specs, facts);
 }
 
-export async function buildComingSoon(
-  ctx: RecipeBuildContext,
-  fields: ComingSoonFields = COMING_SOON_FIELDS,
-): Promise<EmailDoc | null> {
-  const { facts, currentDoc } = ctx;
-  // No subject → nothing to tease. Fall through to the generic author rather than
-  // shipping an empty teaser (never refuse a build, but never fake a house either).
-  if (!facts) return null;
+// ── The derivations (registered in derivations.ts — never imported from here) ──
 
-  // THE ONLY GEOGRAPHY THAT SHIPS: the city (hero) and the county (scarcity). Both
-  // written here, in code. `facts.address` is never read into a rendered field.
-  const city = facts.city?.trim() || "";
-  const where = teaserWhere(facts);
-  const county = countyForZip(facts.zip);
+/** ONE scarcity read per build, shared by the middle and the tail derivation. */
+const scarcityMemo = new WeakMap<RecipeBuildContext, Promise<Scarcity | null>>();
 
-  // Live inventory, down the four-rung ladder (crosswalk county → lake county → whole
-  // market → open slots). A miss at every rung → open slots + no chart, never an invented
-  // count. `scopeLabel` on what comes back is what every printed label reads.
-  const scarcity = await loadScarcity(
-    {
+function loadScarcityOnce(ctx: RecipeBuildContext): Promise<Scarcity | null> {
+  let p = scarcityMemo.get(ctx);
+  if (!p) {
+    const facts = ctx.facts!;
+    // Live inventory, down the four-rung ladder (crosswalk county → lake county →
+    // whole market → open slots). A miss at every rung → open slots + no chart,
+    // never an invented count.
+    p = loadScarcity({
       zip: facts.zip,
-      county,
+      county: countyForZip(facts.zip),
       price: num(facts.price),
       beds: num(facts.beds),
       sqft: num(facts.sqft),
-    },
-    fields,
-  ).catch(() => null);
+    }).catch(() => null);
+    scarcityMemo.set(ctx, p);
+  }
+  return p;
+}
 
-  const ctaUrl = brandWebsiteUrl(currentDoc) ?? SITE;
-
-  // The chrome, minus the parts that need a rendered chart. Declared ONCE so the shell
-  // pass below and the real pass cannot drift apart.
-  const chrome: LifecycleChrome = {
-    ribbon: fields.ribbon,
-    // The alt text is the classic leak: buildListingFlyer sets `alt: facts.address`, and
-    // alt text is READ ALOUD by screen readers and shown when images are blocked — which
-    // is most of Outlook. It says the CITY. The link goes to the agent's own site, never
-    // a listing page for this house. No photo → the chrome's dropzone, whose alt is the
-    // heroLabel (the city) — so even the open slot names no street.
-    photo: facts.photos[0]
-      ? {
-          url: facts.photos[0],
-          alt: fields.photoAlt(city, fields),
-          linkUrl: ctaUrl,
-        }
-      : null,
-    // The hero: the CITY over the PRICE. New Listing puts the ADDRESS there; that one
-    // substitution is this deliverable.
-    heroValue: facts.price ?? "",
-    heroLabel: where,
-    specs: teaserSpecs(facts),
-    specFootnote: specFootnote(facts),
-    // The narrator's slot stays EMPTY here and is authored into below — and only from
-    // lane-2 material. See the block comment at the narrator.
-    narrative: "",
-    ctaLabel: fields.ctaLabel,
-    ctaUrl,
-  };
-
-  // THE ACCENT THE EMAIL WILL ACTUALLY WEAR. The chrome owns the brand-or-editorial
-  // decision (a real user brand rides through untouched; a blank house brand gets the
-  // campaign's editorial palette), and the chart PNG has to be tinted with the SAME
-  // accent or the picture is a different brand from the email around it. Re-deriving that
-  // rule here would duplicate a constant the chrome owns and let the two drift, so we ASK
-  // it: one extra call to a pure function, zero I/O.
-  const accent = buildLifecycleEmail(currentDoc, chrome).globalStyle.accentColor;
-
-  // The chart. Only ever rendered from counts that are real; a failure simply means the
-  // block is never pushed. An empty chart box is worse than no chart.
-  const tint = accent.replace(/[^0-9a-fA-F]/g, "").slice(0, 6) || "x";
-  const chart = scarcity
-    ? await chartSpecToEmailImage(
-        scarcityChartSpec(scarcity, fields),
-        accent,
-        `email-charts/coming-soon-${scarcity.county ?? scarcity.grain}-${scarcity.bandLo}-${scarcity.bandHi}-${scarcity.bedFloor}-${scarcity.sqftFloor}-${scarcity.asOfIso}-${tint}.png`,
-        currentDoc.globalStyle.fontFamily,
-      ).catch(() => null)
-    : null;
-
-  // ── MY MIDDLE — the scarcity content ──────────────────────────────────────
-  // A hairline STRIP (never a stacked stat grid — that is the wall the campaign chrome
-  // exists to kill), then the funnel that draws it.
-  const middle: ChromeBlock[] = [
+/** MIDDLE — the scarcity strip (hairline, never a stacked stat grid) + the funnel
+ *  chart. The chart tints with the accent the email will actually wear — the chrome
+ *  copies `currentDoc.globalStyle` verbatim (the editorial palette is dead), so the
+ *  doc's own accent IS the rendered accent. A chart failure simply means the block
+ *  is never pushed: an empty chart box is worse than no chart. */
+export const comingSoonScarcity: Derivation = async (ctx) => {
+  const scarcity = await loadScarcityOnce(ctx);
+  const blocks: ChromeBlock[] = [
     {
       block: {
         id: createBlock("stats").id,
@@ -773,71 +715,76 @@ export async function buildComingSoon(
       height: 3,
     },
   ];
+  const accent = ctx.currentDoc.globalStyle.accentColor;
+  const tint = accent.replace(/[^0-9a-fA-F]/g, "").slice(0, 6) || "x";
+  const chart = scarcity
+    ? await chartSpecToEmailImage(
+        scarcityChartSpec(scarcity),
+        accent,
+        `email-charts/coming-soon-${scarcity.county ?? scarcity.grain}-${scarcity.bandLo}-${scarcity.bandHi}-${scarcity.bedFloor}-${scarcity.sqftFloor}-${scarcity.asOfIso}-${tint}.png`,
+        ctx.currentDoc.globalStyle.fontFamily,
+      ).catch(() => null)
+    : null;
   if (chart) {
-    middle.push({
+    blocks.push({
       block: {
         id: createBlock("image").id,
         type: "image",
-        // NO CAPTION. The rendered chart already draws its own title ("Homes like this
-        // one in Lee County") AND its own source line ("SWFL Data Gulf · as of ...").
-        // Passing chart.caption printed both a SECOND time underneath the image —
-        // title and provenance, stated twice, in the one email that is supposed to be
-        // about scarcity. `alt` still carries the full sentence for screen readers and
-        // for the images-off fallback, which is where that text belongs. Every other
-        // recipe already omits the caption here; this was the one that didn't.
+        // NO CAPTION. The rendered chart already draws its own title AND source line;
+        // a caption printed both a second time. `alt` carries the sentence for screen
+        // readers and the images-off fallback, which is where that text belongs.
         props: { url: chart.url, kind: "chart", alt: chart.alt },
       },
       height: 5,
     });
   }
+  return { blocks };
+};
 
-  // ── MY TAIL — the sources note ────────────────────────────────────────────
-  // The citation AND the methodology, in the collapsed list (rules of engagement: sources
-  // ride in the collapsed list, not inline). This is where the band is DISCLOSED: the
-  // counts are real, and the stated criterion is what makes them checkable rather than a
-  // number we asserted.
-  const tail: ChromeBlock[] = scarcity
-    ? [
-        {
-          block: {
-            id: createBlock("sources").id,
-            type: "sources",
-            props: {
-              sources: [
-                {
-                  // THE THIRD CONSUMER. Same rule as the cells and the chart title: the
-                  // citation names the scope that was actually counted, so the reader can
-                  // re-run it. `scopeLabel`, never `scarcity.county`.
-                  label: `Active for-sale homes, ${scarcity.scopeLabel} — as of ${mdY(scarcity.asOfIso)}`,
-                  url: fields.citation.url,
-                },
-              ],
-              note: `"Like this one" = list price ${usdShort(scarcity.bandLo)}–${usdShort(scarcity.bandHi)}, ${scarcity.bedFloor}+ beds, ${count(scarcity.sqftFloor)}+ sq ft. Vacant land excluded.`.slice(
-                0,
-                fields.noteMaxChars,
-              ),
-            },
+/** TAIL — the sources note: the citation AND the methodology. This is where the band
+ *  is DISCLOSED — the counts are real, and the stated criterion is what makes them
+ *  checkable rather than asserted. `scopeLabel`, never `scarcity.county`. */
+export const comingSoonScarcitySources: Derivation = async (ctx) => {
+  const scarcity = await loadScarcityOnce(ctx);
+  if (!scarcity) return { blocks: [] };
+  const fields = COMING_SOON_FIELDS;
+  return {
+    blocks: [
+      {
+        block: {
+          id: createBlock("sources").id,
+          type: "sources",
+          props: {
+            sources: [
+              {
+                label: `Active for-sale homes, ${scarcity.scopeLabel} — as of ${mdY(scarcity.asOfIso)}`,
+                url: fields.citation.url,
+              },
+            ],
+            note: `"Like this one" = list price ${usdShort(scarcity.bandLo)}–${usdShort(scarcity.bandHi)}, ${scarcity.bedFloor}+ beds, ${count(scarcity.sqftFloor)}+ sq ft. Vacant land excluded.`.slice(
+              0,
+              fields.noteMaxChars,
+            ),
           },
-          height: 3,
         },
-      ]
-    : [];
-
-  let doc: EmailDoc = {
-    ...buildLifecycleEmail(currentDoc, { ...chrome, middle, tail }),
-    // THE SUBJECT LINE. deriveEmailDocSubject falls back to a hero's LABEL, so without
-    // this the subject would be bare geography. Written deterministically from the city —
-    // a model never touches it, so it can never smuggle the street into it.
-    subjectVariants: [city ? fields.subject.withCity(city) : fields.subject.noCity],
+        height: 3,
+      },
+    ],
   };
+};
 
-  // ── The narrator ───────────────────────────────────────────────────────────
-  // It gets a DE-IDENTIFIED fact sheet. authorListingNarrative builds its prompt from
-  // facts.address / facts.city / facts.zip / facts.remarks — hand it raw ctx.facts and
-  // you have literally typed "Address: 326 Shore Dr, Fort Myers, FL 33905" into the
-  // model's context and are relying on a framing sentence to stop it echoing that back.
-  // "It didn't leak the address that time" is luck, not suppression. Strip the fields;
-  // then redact the street out of what comes back anyway.
+/**
+ * THE FINISHER — the teaser narrator, structural suppression intact.
+ *
+ * It gets a DE-IDENTIFIED fact sheet. authorListingNarrative builds its prompt from
+ * facts.address / facts.city / facts.zip / facts.remarks — hand it raw ctx.facts and
+ * you have literally typed the address into the model's context and are relying on a
+ * framing sentence to stop it echoing that back. "It didn't leak the address that
+ * time" is luck, not suppression. Strip the fields; then redact the street out of
+ * what comes back anyway; a paragraph that STILL leaks is DROPPED to an open slot.
+ */
+export const comingSoonTeaserNarrator: Finisher = async (ctx, doc) => {
+  const facts = ctx.facts!;
   const street = streetLineOf(facts.address);
 
   // *** THE NARRATOR RUNS ONLY ON LANE-2 MATERIAL. ***
@@ -938,7 +885,5 @@ export async function buildComingSoon(
   // LANDMINE: fillNarrative SKIPS a text block that already has content. The chrome leaves
   // the commentary slot empty on purpose, but clearNarrativeSlots keeps that true even if
   // a sticky block ever arrives pre-filled.
-  if (narrative) doc = fillNarrative(clearNarrativeSlots(doc), narrative);
-
-  return doc;
-}
+  return narrative ? fillNarrative(clearNarrativeSlots(doc), narrative) : doc;
+};

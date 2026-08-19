@@ -53,11 +53,12 @@
  * ONLY when a description exists — run without ANTHROPIC_API_KEY and it becomes an open
  * slot, which is the designed state.
  */
-import {
-  buildComingSoon,
-  countyForZip,
-  loadScarcity,
-} from "../../lib/deliverable/recipes/coming-soon";
+import { countyForZip, loadScarcity } from "../../lib/deliverable/recipes/coming-soon";
+// MIGRATED (recipes-as-config): the build flows through the registry dispatch —
+// config present → the ONE config builder + the teaser-narrator finisher. This
+// script now drives the exact seam every production caller uses.
+import { builderFor } from "../../lib/deliverable/recipes/index";
+const buildComingSoon = builderFor("coming-soon")!;
 import { resolveSubject } from "../../lib/deliverable/recipes/shared";
 import { defaultDoc } from "../../lib/email/doc/default-docs";
 import { applyBrand } from "../../lib/email/brand/apply-brand";

@@ -22,7 +22,6 @@
 
 import { describe, expect, test } from "bun:test";
 import {
-  buildComingSoon,
   COMING_SOON_FIELDS,
   countyForZip,
   leaksStreet,
@@ -37,7 +36,12 @@ import {
 } from "./coming-soon";
 import { defaultDoc } from "@/lib/email/doc/default-docs";
 import { RECIPES } from "@/lib/deliverable/recipes";
+import { builderFor } from "./index";
 import type { RecipeBuildContext } from "./index";
+
+/** MIGRATED (recipes-as-config): the build flows through the registry dispatch —
+ *  config present → the ONE config builder + this recipe's finisher. */
+const buildComingSoon = builderFor("coming-soon")!;
 import type { EmailBlock, EmailDoc } from "@/lib/email/doc/types";
 import type { ListingFacts } from "@/lib/email/listing-scrape";
 
