@@ -49,8 +49,25 @@ export async function POST(req: NextRequest) {
         : "general";
   const typedAddress =
     typeof body?.subject_address === "string" ? body.subject_address.trim() || null : null;
-  const subject_address =
-    kind !== "general" && !typedAddress && title ? extractAddress(title) : typedAddress;
+  // A general project whose title IS an address (street-number start, ", FL", and the
+  // whole title is the extracted span) still gets its subject filled — older doors
+  // created exactly those rows and the address matchers couldn't see them (08/19/2026
+  // backfill). A title merely CONTAINING an address stays untouched: never guess.
+  const trimmedTitle = title?.trim() ?? null;
+  const titleIsAddress =
+    !!trimmedTitle &&
+    /^\d{1,6}\s/.test(trimmedTitle) &&
+    /, FL/i.test(trimmedTitle) &&
+    extractAddress(trimmedTitle) === trimmedTitle;
+  const subject_address = typedAddress
+    ? typedAddress
+    : kind !== "general"
+      ? title
+        ? extractAddress(title)
+        : null
+      : titleIsAddress
+        ? trimmedTitle
+        : null;
 
   const { error } = await supabase.from("projects").insert({
     id,

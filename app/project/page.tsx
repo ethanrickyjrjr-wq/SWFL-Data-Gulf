@@ -39,7 +39,7 @@ export default async function ProjectListPage() {
   if (!user) redirect("/login?next=/project");
 
   const [
-    { data },
+    { data, error: projectsErr },
     { data: emailSch },
     { data: socialSch },
     { data: delivRows },
@@ -87,6 +87,18 @@ export default async function ProjectListPage() {
     subject_address: string | null;
     subject_area: string | null;
   };
+  // A FAILED projects query must never render the zero-project welcome launchpad —
+  // that invites creating a duplicate of projects that exist but couldn't be read
+  // (the 08/19/2026 husk bug's fourth site). Say so and stop.
+  if (projectsErr) {
+    return (
+      <div className="flex min-h-[calc(100dvh-3.5rem)] items-center justify-center px-6">
+        <p className="text-sm text-white/60">
+          Couldn&apos;t load your projects just now — refresh to try again. Nothing was lost.
+        </p>
+      </div>
+    );
+  }
   const rows = (data as HubProjectRow[] | null) ?? [];
   const contactsCount = contactsRes.count ?? 0;
 

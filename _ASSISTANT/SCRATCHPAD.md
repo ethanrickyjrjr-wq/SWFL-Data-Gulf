@@ -57,6 +57,18 @@ RUN TO GROUND SAME SESSION (measured in prod DB, not narrated):
   Vercel runtime-error API 403s from this token. The fix makes any transient harmless
   (no mint on error). Candidate: DB connection-slot exhaustion (known shape).
 - 4 husks await his word to delete (destructive — RULE 1).
+- SECOND-ORDER AUDIT RAN (rule 12), 12 findings; fixed same session: F1 the error path
+  could still mint an address-titled duplicate via the auto-route (knownProjects now
+  null-on-error, create fails closed against a blind list) · F8 /project hub swallowed the
+  same error and showed the welcome launchpad (error surface added) · F4 the producing
+  door kept regenerating subj=NULL address-titled generals (POST /api/projects now fills
+  subject when the whole title IS an address, ", FL" + street-number start — "never
+  guess" preserved for titles merely containing one) · F3 PROJECT_SCAN_LIMIT comment
+  corrected · F6 fail-closed error test added (fake can now inject a query error).
+  Refuted: F5 (both backfilled rows carry ZIPs — keys complete). Accepted, not fixed:
+  F9 two-tab double-create (per-tab guard by design; server-side idempotency is the real
+  fix, separate), F10 60s cost on failed create, F12 recipe params dropped on the error
+  redirect, layout.tsx rail error-swallow (display-only).
 - SEPARATE, WORSE: prod deploys dead since 11:12 (booking TS error) — parallel session's
   verified fix 7b57d826 sits UNPUSHED awaiting his word; nothing pushed after 11:06 is live.
 

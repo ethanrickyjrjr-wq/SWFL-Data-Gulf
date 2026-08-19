@@ -26,7 +26,9 @@ const EMPTY_NARRATIVE = { exec_summary: "", sections: [], inference_notes: [] };
 // exists. Bounded explicitly + ordered so truncation, if it ever happens, drops the
 // LEAST-recently-touched rows first rather than an arbitrary unordered slice. 1000 listing
 // projects for one account is far beyond any real usage today; raise this only alongside
-// evidence an account is actually near it.
+// evidence an account is actually near it. Since 08/19/2026 the query no longer filters
+// kind, so this caps ALL of the owner's projects (updated_at desc) — an account holding
+// more than this many TOTAL projects could age a real match off the scan window.
 const PROJECT_SCAN_LIMIT = 1000;
 
 export interface ProjectMatch {

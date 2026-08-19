@@ -16,6 +16,22 @@ one visible gap is the empty photo dropzone — a doc SAVED before 11:06 never r
 so the decisive test is a NEW price-improved build on 767 Park Shore Dr. Next: operator
 word to push; then re-verify a fresh Lab build on the post-deploy prod.
 
+## 2026-08-19 (Fable 5) — SECOND-ORDER PASS ON THE HUSK FIX: the error path could still mint a DISGUISED duplicate; closed, plus the producing door
+
+Rule-12 audit on c196bebb returned 12 findings; the ones that survived verification are
+fixed in this commit: (F1) with the list unreadable, the address auto-route would create
+an address-TITLED duplicate — knownProjects now rides as null-on-error and create fails
+closed against a blind list; (F8) /project hub swallowed the same query error and showed
+the zero-project welcome launchpad — error surface added; (F4) POST /api/projects now
+fills subject_address for a general whose whole title IS an address (", FL" + street-
+number start; titles merely containing one stay untouched — "never guess" preserved), so
+the backfilled state stops regenerating; (F3) PROJECT_SCAN_LIMIT comment corrected; (F6)
+fail-closed query-error test added (fake client can now inject an error). 37/37 persist +
+route tests green; bunx next build green. Refuted: F5 (both backfilled rows carry ZIPs).
+Accepted, unfixed, named: two-tab double-create (per-tab guard by design), 60s retry cost
+after a failed create, recipe params dropped on the error redirect, layout rail swallow
+(display-only).
+
 ## 2026-08-19 (Fable 5) — HUSK-MINT BUG: a failed projects query read as "new account" — untitled pairs minted, addresses dropped, nothing saved
 
 Operator (13:50): "WHY ARE PROJECTS NOT SAVING AS THE ADDRESS I PUT IN" + "WHY ARE THEY NOT

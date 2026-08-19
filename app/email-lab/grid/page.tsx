@@ -100,11 +100,15 @@ export default async function EmailLabGridPage({
         seedBlankChosen={seedBlankChosen}
         signedIn
         offeredProject={row ? { id: row.id, title: row.title ?? "your project" } : null}
-        knownProjects={rows.map((r) => ({
-          id: r.id,
-          title: r.title,
-          subject_address: r.subject_address,
-        }))}
+        knownProjects={
+          projectsErr
+            ? null // UNREADABLE ≠ empty: the client must not create against a blind list
+            : rows.map((r) => ({
+                id: r.id,
+                title: r.title,
+                subject_address: r.subject_address,
+              }))
+        }
       />
     );
   }

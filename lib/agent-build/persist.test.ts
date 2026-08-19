@@ -82,10 +82,20 @@ class FakeProjectsQuery {
       });
     }
     if (this.limitN != null) result = result.slice(0, this.limitN);
-    const resolved = { data: result, error: null };
+    // Error injection (08/19/2026 husk-bug coverage): a real PostgREST failure returns
+    // { data: null, error } — findProjectId must fail CLOSED on it, never guess.
+    const resolved = fakeProjectsQueryError
+      ? {
+          data: null as unknown as FakeProjectRow[],
+          error: fakeProjectsQueryError as unknown as null,
+        }
+      : { data: result, error: null };
     return Promise.resolve(onfulfilled ? onfulfilled(resolved) : (resolved as unknown as TResult1));
   }
 }
+
+// Set by a test to make the NEXT projects query fail like a live PostgREST error.
+let fakeProjectsQueryError: { message: string } | null = null;
 
 class FakeDeliverablesTable {
   constructor(private db: FakeDb) {}
@@ -334,6 +344,31 @@ describe("findProjectId (real function, fake Supabase client)", () => {
       projectId: "proj-general",
       subjectAddress: "326 Shore Dr, Fort Myers, FL 33905",
     });
+  });
+
+  // The 08/19/2026 husk bug's invariant, at the one seam this suite can reach: a FAILED
+  // query is not an empty result. findProjectId must return null (fail closed), and the
+  // caller 404s — it must never treat the error as "no such project, mint/guess one".
+  test("query error -> null (fail closed), even when a matching row exists behind the error", async () => {
+    fakeDb = {
+      projects: [
+        {
+          id: "proj-1",
+          user_id: "user-1",
+          kind: "listing",
+          subject_address: "1275 Carlene Ave, Fort Myers, FL 33901",
+          updated_at: "2026-08-01T00:00:00Z",
+        },
+      ],
+      deliverables: [],
+      ledger: [],
+    };
+    fakeProjectsQueryError = { message: "connection slots exhausted" };
+    try {
+      expect(await findProjectId("user-1", "1275 Carlene Ave, Fort Myers, FL 33901")).toBeNull();
+    } finally {
+      fakeProjectsQueryError = null;
+    }
   });
 });
 

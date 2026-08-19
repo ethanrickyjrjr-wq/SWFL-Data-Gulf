@@ -64,7 +64,7 @@ export function EmailLabGridClient({
    *  address-first door routes a typed address into the project that already
    *  owns it instead of minting a duplicate row (the confirm popup that used to
    *  let the user redirect is suppressed on that door). */
-  knownProjects?: { id: string; title: string | null; subject_address: string | null }[];
+  knownProjects?: { id: string; title: string | null; subject_address: string | null }[] | null;
 }) {
   const initialRecipe: ShowcaseRecipe | null = recipe
     ? {
@@ -280,6 +280,11 @@ export function EmailLabGridClient({
         intoProject(owned.id, address);
         return true;
       }
+      // knownProjects === null means the page-level projects query FAILED — the list is
+      // unreadable, not empty. Creating here would mint a plausible, address-titled
+      // duplicate of a project we simply could not see (the disguised form of the
+      // 08/19/2026 husk bug). Fail closed: no create against a blind list.
+      if (knownProjects === null) return false;
       const res = await fetch("/api/projects", {
         method: "POST",
         headers: { "content-type": "application/json" },
