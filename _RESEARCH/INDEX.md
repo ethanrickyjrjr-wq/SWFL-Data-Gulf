@@ -46,7 +46,14 @@ index never mentioned. A grep of `_RESEARCH/` is not a search of our research.
 
 ## Categories
 
-**agent-behavior/** — how the agent should steer, drift, schedule, self-check (14)
+**agent-behavior/** — how the agent should steer, drift, schedule, self-check (15)
+- `2026-08-18-writ-governance-runtime-evaluation.md` — infinri/Writ (governance runtime for Claude
+  Code: Docker+Neo4j, write-time gates, retrieval-scoped rules). **Verdict: do not adopt** — same
+  shape as Omnigent; two governance systems would fight and Neo4j fails RULE 11 at our rulebook
+  size. **Steal three mechanisms:** write-time (not push-time) gating via PreToolUse hard-deny;
+  keyword/path-scoped rule injection instead of the always-loaded rulebook (the 08/18 diet's step
+  two); human-only one-time approval tokens (our `ALLOW_*` env escapes are Claude-settable — a
+  real hole). Their `claude-code-blackbox.md` hook-contract doc is a useful standalone reference.
 - `2026-07-01-ai-tool-awareness-scheduling-research.md`
 - `2026-07-15-ai-steering-anti-drift-research.md`
 - `2026-07-21-second-order-thinking-research.md` — "and then what?" (Marks/Dalio) + inversion

@@ -1,3 +1,13 @@
+## 2026-08-18 (Fable 5, night) — Pushed the fleet-status page + recipes-as-config specs; STARTING the config collapse ("Push and start")
+
+Operator decree: "Push and start." Pushing the three commits from tonight's earlier session
+(c18e744f, a150c3a4, ec150c01 — status page + spec + operator decisions) plus this session's
+scratchpad entries and the Writ governance research file. Status tool verified green this session
+(`bun test scripts/email/status.test.mts` 2/0; regen produced zero diff). Next in this session:
+execute `docs/superpowers/specs/2026-08-19-recipes-as-config-design.md` + its 08/18 amendment.
+Operator suspicion ON RECORD (scratchpad latest+3): the collapse must extend the EXISTING recipe
+registry and delete duplication — net-negative lines, no parallel system.
+
 ## 2026-08-12 (Opus 5) — Graph compartments Step 3 BUILT (report script + standards doc); found graph.json's two-edge-array trap
 
 Picked up `docs/handoff/2026-08-12-graph-compartments-step2-negative-result.md` §4d, the one part

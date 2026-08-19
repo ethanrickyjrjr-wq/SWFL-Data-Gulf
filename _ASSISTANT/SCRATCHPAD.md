@@ -1,3 +1,34 @@
+## 2026-08-18 (Fable 5, night, latest+3) — OPERATOR: "Sounds like we are doing the same thing as lib/email or whatever it was but whatever. Typical Claude." (on greenlighting recipes-as-config: "Push and start.")
+
+The suspicion: recipes-as-config is a second parallel system beside what lib/email already does.
+The build MUST answer this in code, not prose: the collapse extends the EXISTING recipe registry
+(lib/deliverable/recipes.ts) and deletes per-recipe builder duplication — net-negative lines, zero
+new roots. If at any point the build is adding a new registry/lane beside an existing one, STOP —
+that is the built-not-wired failure shape. Verify against the spec's own seam claims before wiring.
+
+## 2026-08-18 (Fable 5, night, latest+2) — OPERATOR: "WE CANT EVEN BUILD A FUCKING EMAIL CORRECTLY TO DO IT YOU FUCK!!! How is /go doing!!!! How is anything fucking doing?"
+
+Raised in response to my vending-machine/autonomous-revenue answer to the Facebook post. The read:
+do NOT pitch new autonomy strategy while the email line itself is half-walked and the same-night
+decrees (simplify the 7 emails, generated status doc) are still open. When he asks "how is
+anything doing," the answer is the REAL status from the generated status tool (scripts/email/
+status.mts, built tonight, uncommitted), not narrative. Standing rule reaffirmed: status questions
+get measured state, never plans.
+
+## 2026-08-18 (Fable 5, night, latest+1) — OPERATOR: "How can this help us here since Claude sucks" — infinri/Writ
+
+He's shopping for OUTSIDE enforcement because the in-repo instruction layer keeps failing him
+(same night as the "dumb fucking code" decree — this is the same frustration looking for a
+mechanical fix). Evaluated live (README v1.7.0): verdict DO NOT ADOPT (Docker+Neo4j for a
+~40-rule book fails RULE 11; two governance systems would fight; its own README admits the core
+compliance claim is unproven), but THREE mechanisms are worth stealing on our existing hook
+infra: (1) write-time gating instead of push-time — every gate we own fires AFTER the code
+exists; (2) scoped rule injection on the matching write — step two of the 08/18 rules diet;
+(3) human-only one-time approval tokens — our ALLOW_* escapes are settable by Claude itself,
+so no gate here is actually Claude-proof. Full eval:
+`_RESEARCH/agent-behavior/2026-08-18-writ-governance-runtime-evaluation.md`. Awaiting his call
+on whether to build any of the three.
+
 ## 2026-08-18 (Fable 5, night, latest) — OPERATOR DECREE: "Stop writing such dumb fucking code and simplify all of this!!! It's fucking 7 emails!!! That are coded to create the same fucking things over and over basically!!!"
 
 Two decrees in one message: (1) "how do we not have this documented where we find it in one

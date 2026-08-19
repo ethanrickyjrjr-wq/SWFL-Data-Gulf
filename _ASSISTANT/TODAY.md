@@ -1,4 +1,4 @@
-# 2026-08-18 Brief
+# 2026-08-19 Brief
 
 ## In Flight
 - **Pre-checked area commentary — the `area-email` bake surface** (plan `docs/superpowers/plans/2026-08-06-precomputed-commentary-plan.md`, checks `precomputed_commentary_live_verify` + `area_email_readthrough_phase2` + `bake_rounding_computed_prompt_fix`) — operator: *"commentary that is checked before it hits builder and builder can just add a CTA and a little extra commentary."* **BAKE SIDE BUILT 08/06/2026 (`d9632d2b`).** Diagnosed the 17-day-red bake by replaying the last real run (07/22): of 11 failures, 3 notation / **5 ROUNDING** (93.7%→93, $399,900→$400,000) / **2 ARITHMETIC** ($400,000−$325,000=$75,000) — 8 of 11 genuine, gate NOT loosened. Root cause: the prompt hands raw values then forbids rounding, and a writer told to write plain English rounds. Shipped `validate.ts` value-aware gate (canonicalNumber + K/M expansion only when the suffix is in the source), `length.ts` (per-surface length read by BOTH prompt and validator), `area-email-inputs.ts` (same data root as zip; top-6 **copy-ready** facts — 25 of 52 live surfaces had ranked a bare ratio into their top 6). Gates: 45/0 narratives, 21/0 downstream, dry-run 52 surfaces × 6 facts, 0 unready. **CORRECTION ON RECORD:** the prior spec targeted `deliverable_build`, DEAD since 07/17 (0 calls/30d, 1 refresh ever) — second occurrence of SCRATCHPAD 0z. ⬜ **Phase 2 NOT BUILT — no recipe reads the baked row yet; no real bake has run.**
@@ -55,8 +55,8 @@
 - [listing_lifecycle_schedule_live_verify] First unattended scheduled listing-lifecycle runs (Lee 09:00/Collier 12:00 UTC) land clean (due 2026-07-03)
 
 ## Last Session
-- 2026-08-18 (Fable 5) — Pushed the 08/12 backlog: email-AI grounding, crosswalk playbook, go-launch/paywall docs
+- 2026-08-12 (Opus 5) — Graph compartments Step 3 BUILT (report script + standards doc); found graph.json's two-edge-array trap
 
 ## Spec Health
-- 305 specs total · 0 candidates for archive
+- 310 specs total · 0 candidates for archive
 - run `node scripts/assistant-weekly.mjs` to clean
