@@ -1,3 +1,34 @@
+## 2026-08-19 (Fable 5, night) — RECIPES-AS-CONFIG: seam BUILT + 2 of 7 lifecycle emails migrated with render parity; wave re-scoped on measurement
+
+Executing `docs/superpowers/plans/2026-08-19-recipes-as-config.md` (operator: "Push and start").
+5 commits local at time of writing, unpushed (approval is per-push):
+
+**1. THE SEAM (4341323b + 59910796):** `RecipeConfig` (JSON-round-trip fleet test = the anti-DSL
+wall) lives INSIDE the one registry (`Recipe.config`); `CELL_CATALOG` (labels checked clean
+against cell-policy at authoring level); `DERIVATIONS` + `FINISHERS` keyed registries;
+`buildFromConfig` = the ONE control flow; `builderFor` dispatches on config-present. 20 new
+tests, watched RED first.
+
+**2. under-contract MIGRATED (3bdef5cd): 654→272 lines (−382).** Config literal (subject
+templates incl. bareWithDays, SOLD_LANGUAGE as config data, narrator strips, framing verbatim)
++ speed-ladder derivations. Acceptance 6/6 PASS through the NEW dispatch (script + tests now
+drive builderFor → buildFromConfig); before/after HTML byte-IDENTICAL after normalizing block
+ids + the one live LLM paragraph.
+
+**3. coming-soon MIGRATED (398a7117): builder+FIELDS deleted.** Suppression STRUCTURAL (config
+empties {address}; teaser narrator = first FINISHER). Acceptance suppression 4/4 ABSENT;
+byte-identical modulo ids/chart-url/LLM paragraph. ⚠ CORRECTION: that commit claimed next-build
+green prematurely — a gitignored tmp/ probe importing the deleted builder broke typecheck;
+fixed same session, build re-verified exit 0.
+
+**4. MEASURED RE-SCOPE (recorded in the plan):** new-listing already thin (180 lines, delegates
+to the shared flyer); open-house migratable at the cost of 4 schema additions; just-sold /
+price-reduced / market-comps are COMPUTATION-MAJORITY — forcing them through config = hooks-not-
+config, net deletion ≈0, the spec's own named failure mode. Fence stands: no feature lands on a
+legacy builder without migrating the touched slice. Status page gained a generated `config`
+column. Gates: lib/deliverable 1183/0 · lib/email 1810/0 · next build exit 0 · both acceptance
+scripts green. Next: operator push decision + live-verify (`recipes_as_config_live_verify`).
+
 ## 2026-08-19 (Fable 5, night) — writ-guard-trio BUILT: human-only approval tokens + write-time TDD gate + scoped rule injection (all three Writ steals, operator: "I guess we need them all")
 
 Evaluated infinri/Writ live (README v1.7.0; eval in `_RESEARCH/agent-behavior/2026-08-18-writ-

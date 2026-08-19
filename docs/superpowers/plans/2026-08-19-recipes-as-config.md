@@ -1,7 +1,7 @@
 # Recipes-as-Config Implementation Plan
 
 > **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:subagent-driven-development (recommended) or superpowers:executing-plans to implement this plan task-by-task. Steps use checkbox (`- [ ]`) syntax for tracking.
-> **Recommended model:** 🧠 Opus — 6 tasks, 11 files, keywords: migration, architecture
+> **Recommended model:** 🧠 Opus — 6 tasks, 11 files, keywords: migration, schema, architecture
 
 **Goal:** Collapse the 7 hand-coded listing-lifecycle recipe builders into JSON-serializable `RecipeConfig` literals consumed by ONE config builder, with the irreducible math in a keyed derivations registry — net-negative lines, behind per-recipe render parity.
 
@@ -646,6 +646,36 @@ Delete `buildUnderContract` and the parts of `under-contract.ts` the config now 
 - [ ] **Step 5: Commit** — `git commit -m "feat(recipes-config): under-contract is a CONFIG — first migration, render-parity proven, -N lines"` with the real net line count in the body.
 
 ---
+
+### ⚠️ MEASURED RE-SCOPE (08/19/2026, after Tasks 5 + coming-soon shipped) — READ BEFORE EXECUTING 6–11
+
+The wave's premise — "the 7 are the same things over and over" — was measured against all seven
+builders in-session, and it is TRUE for the chrome/strip/subject/guard scaffolding (now collapsed)
+and FALSE for the remaining files' majority content. The honest classification:
+
+- **MIGRATED, parity-proven: under-contract (654→272 lines, −382) · coming-soon (944→~770, the
+  builder + FIELDS deleted; suppression structural).** Both were declarative-majority — exactly
+  the spec's predicted shape.
+- **new-listing (180 lines): ALREADY THIN** — delegates to the shared `buildListingFlyer`; its one
+  computed input (lake-first DOM with vendor fallback) would need an async cell. Migration payoff
+  ≈ 0; defer until the flyer itself is configured, or accept it as the reference adapter.
+- **open-house (297): CLOSE BUT NOT FREE** — needs 4 schema additions (a `dom` catalog cell, an
+  "rsvp" CTA destination ladder, a `photoLink: "source"` switch, and a SECOND framing axis:
+  date-present vs date-absent bullets + `invitation: true` narrator mode). Migratable when those
+  extensions earn a second consumer; alone they are schema warts.
+- **just-sold (736) · price-reduced (669) · market-comps (1717): COMPUTATION-MAJORITY.** Their
+  hero/specs/photo/chart/prose all hang off per-recipe data ladders (the comp-call close ladder,
+  the cut derivation, the price-case engine). Forcing them through `buildFromConfig` would need
+  hero-override/photo-override/facts-patch hooks — i.e. re-implementing the builder as keyed
+  hooks, net deletion ≈ 0. That is the spec's own named failure ("config creep toward a DSL")
+  and the operator's "dumb code" complaint reborn. Their DUPLICATED share (chrome, strips via
+  catalog-able cells, subject ladders, guards) is exactly what the seam already owns fleet-wide;
+  what remains in each file is genuinely different math with its own walked lessons.
+
+**Standing fence (unchanged):** `builderFor`'s comment forbids feature additions to a legacy
+hand-coded builder — a session touching just-sold/price-reduced/market-comps content migrates the
+touched SLICE (a cell to the catalog, a guard to the config) in that session, without forcing the
+whole file. The tasks below stay as written for whenever a recipe's classification changes.
 
 ### Task 6–11: The lifecycle WAVE (one recipe per task, one commit per recipe)
 

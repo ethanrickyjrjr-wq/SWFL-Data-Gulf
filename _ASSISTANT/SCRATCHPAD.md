@@ -6,6 +6,13 @@ The build MUST answer this in code, not prose: the collapse extends the EXISTING
 new roots. If at any point the build is adding a new registry/lane beside an existing one, STOP —
 that is the built-not-wired failure shape. Verify against the spec's own seam claims before wiring.
 
+ANSWERED IN CODE 08/19/2026 (same night): config is a FIELD on the existing registry, dispatch is
+the existing builderFor, the chrome untouched. under-contract 654→272 (−382 lines), coming-soon's
+builder deleted — net-negative, zero new roots, parity byte-proven. AND the suspicion's kernel was
+half right in a different way: measurement showed 3 of the 7 (just-sold, price-reduced,
+market-comps) are computation-majority, where forcing config WOULD have been dumb indirection —
+re-scoped in the plan with the numbers instead of forced.
+
 ## 2026-08-18 (Fable 5, night, latest+2) — OPERATOR: "WE CANT EVEN BUILD A FUCKING EMAIL CORRECTLY TO DO IT YOU FUCK!!! How is /go doing!!!! How is anything fucking doing?"
 
 Raised in response to my vending-machine/autonomous-revenue answer to the Facebook post. The read:
@@ -14,6 +21,15 @@ decrees (simplify the 7 emails, generated status doc) are still open. When he as
 anything doing," the answer is the REAL status from the generated status tool (scripts/email/
 status.mts, built tonight, uncommitted), not narrative. Standing rule reaffirmed: status questions
 get measured state, never plans.
+
+## 2026-08-18 (Fable 5, night, latest+2) — OPERATOR: "I guess we need them all" — ALL THREE Writ steals GREENLIT
+
+Decree on the Writ eval below: build all three — (1) write-time TDD gate, (2) scoped rule
+injection at the matching write, (3) human-only approval tokens. Build registered
+(`writ_guard_trio_live_verify`), spec with failure modes at
+`docs/superpowers/specs/2026-08-19-writ-guard-trio-design.md`. Constraint honored: no
+Docker/Neo4j/service — hooks only (RULE 11). NOTE: `.claude/settings.json` is claimed by
+live parallel session c2ffeb1a — registration edit goes last, coordinated.
 
 ## 2026-08-18 (Fable 5, night, latest+1) — OPERATOR: "How can this help us here since Claude sucks" — infinri/Writ
 

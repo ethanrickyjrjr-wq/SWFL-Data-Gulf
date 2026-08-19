@@ -30,6 +30,7 @@ export function rowFor(key: RecipeKey, playbookText: string): string {
   const accept = `scripts/email/render-${key}.mts`;
   const banked = bankFor(key) !== null;
   const inPlaybook = playbookText.includes(`tag \`${key}\``);
+  const configured = r.config != null;
   return [
     key,
     r.target === "social" ? "social" : "email",
@@ -39,6 +40,7 @@ export function rowFor(key: RecipeKey, playbookText: string): string {
     yn(existsSync(accept)),
     yn(banked),
     yn(inPlaybook),
+    yn(configured),
   ].join(" · ");
 }
 
@@ -55,13 +57,14 @@ export function buildStatusDoc(): string {
   lines.push("");
   lines.push("Column order per row:");
   lines.push("key · target · positioning · builder file · unit test · acceptance script ·");
-  lines.push("sentence bank · playbook section");
+  lines.push("sentence bank · playbook section · config");
   lines.push("");
   lines.push("A `—` is a true absence TODAY, not a judgment. The sentence-bank column is the");
   lines.push("commentary mechanism (approved words in code; model limited to digit-free");
   lines.push("connective). Cost-cell bans (HOA family) are fleet-wide via the cell-policy");
-  lines.push("registry + the chrome sweep and are not per-recipe. Recipes-as-config");
-  lines.push("(spec 2026-08-18) is the plan that collapses the per-recipe code itself.");
+  lines.push("registry + the chrome sweep and are not per-recipe. The config column =");
+  lines.push("recipes-as-config MIGRATED (spec 2026-08-18): the recipe is a config literal on");
+  lines.push("its registry entry, built by the ONE config builder; `—` = still hand-coded.");
   lines.push("");
   for (const key of RECIPE_KEYS) {
     lines.push(`- ${rowFor(key, playbookText)}`);
