@@ -24,7 +24,7 @@ import { brandWebsiteUrl } from "@/lib/email/inject-photo";
 import { listingButtonUrl } from "@/lib/listings/listing-url";
 import { renderTemplate, subjectFor } from "./config";
 import { resolveCells } from "./cell-catalog";
-import { runDerivations } from "./derivations";
+import { runDerivations, runFinishers } from "./derivations";
 import { authorListingNarrative, clearNarrativeSlots, fillNarrative } from "./shared";
 import type { CtaDestination, RecipeConfig } from "./config";
 import type { RecipeBuildContext } from "./index";
@@ -83,19 +83,39 @@ export async function buildFromConfig(
   const subjectVars = { ...middle.subjectVars, ...tail.subjectVars };
   const ctaUrl = resolveCtaUrl(config.ctaDestination, currentDoc, facts);
 
+  // THE TEMPLATE VAR PACK. On a suppressed-address recipe the address var is
+  // STRUCTURALLY EMPTY — a config template that mistakenly says {address} renders
+  // nothing rather than leaking the street. {place} = the city, else the region
+  // param — the widest honest scope name (coming-soon's photo alt).
+  const city = facts.city?.trim() ?? "";
+  const region = String(params.regionLabel ?? "");
+  const templateVars: Record<string, string> = {
+    address: config.suppressAddress ? "" : address,
+    city,
+    state: facts.state?.trim() || "FL",
+    region,
+    place: city || region,
+  };
+
+  const heroLabel = config.suppressAddress
+    ? config.heroLabel
+      ? city
+        ? renderTemplate(config.heroLabel.withCity, templateVars)
+        : renderTemplate(config.heroLabel.fallback, templateVars)
+      : city
+    : address;
+
   const chrome: LifecycleChrome = {
     ribbon: config.ribbon,
     photo: facts.photos[0]
       ? {
           url: facts.photos[0],
-          alt: renderTemplate(config.photoAlt, {
-            address: config.suppressAddress ? (facts.city ?? "") : address,
-          }),
+          alt: renderTemplate(config.photoAlt, templateVars),
           ...(ctaUrl ? { linkUrl: ctaUrl } : {}),
         }
       : null,
     heroValue: facts.price ?? "",
-    heroLabel: config.suppressAddress ? (facts.city ?? "") : address,
+    heroLabel,
     specs: resolveCells(config.specs, facts),
     specFootnote: specFootnote(facts),
     description: config.includeDescription ? listingDescription(facts.remarks) : undefined,
@@ -143,6 +163,10 @@ export async function buildFromConfig(
     // pre-filled, and neither touches the reserved descriptionSlot.
     if (clean) doc = fillNarrative(clearNarrativeSlots(doc), clean);
   }
+
+  // FINISHERS — the structural narrators and other doc-level passes (coming-soon's
+  // de-identified teaser writer). Run LAST so they see the laid-out doc.
+  doc = await runFinishers(config.finish ?? [], ctx, doc, params);
 
   return doc;
 }

@@ -41,11 +41,22 @@ export interface RecipeConfig {
   specs: CellKey[];
   /** Suppress the street address everywhere (coming-soon's whole point). */
   suppressAddress?: boolean;
+  /** The hero's LABEL line for a suppressed-address recipe — the CITY wearing its
+   *  state, never the street. Placeholders: {city} {state} {region} {place}
+   *  (place = city, else the region param). Absent → the plain city (or, without
+   *  suppression, the resolved address line — the default every other hat wears). */
+  heroLabel?: { withCity: string; fallback: string };
   /** Render the seller's remarks verbatim in the reserved descriptionSlot. */
   includeDescription: boolean;
   /** The recipe's own MIDDLE and TAIL, as derivation keys, in render order. */
   middle: string[];
   tail: string[];
+  /** FINISHERS — keyed doc-level passes that run LAST, after layout and the generic
+   *  narrator. For the recipes whose narrator is structural rather than a framing
+   *  string (coming-soon's de-identified fact sheet + street redaction + leak-drop).
+   *  A recipe with a finisher usually declares NO `framing`. Keys live in
+   *  derivations.ts's FINISHERS registry. */
+  finish?: string[];
   /** The ONE button. */
   ctaLabel: string;
   ctaDestination: CtaDestination;

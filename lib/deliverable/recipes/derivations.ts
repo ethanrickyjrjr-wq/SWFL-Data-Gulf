@@ -16,6 +16,7 @@
 // never broken, never invented.
 import { underContractSpeed, underContractSpeedSources } from "./under-contract";
 import type { ChromeBlock } from "@/lib/email/lifecycle-chrome";
+import type { EmailDoc } from "@/lib/email/doc/types";
 import type { RecipeBuildContext } from "./index";
 
 export interface DerivationResult {
@@ -41,6 +42,36 @@ export const DERIVATIONS: Record<string, Derivation> = {
   "under-contract/speed": underContractSpeed,
   "under-contract/speed-sources": underContractSpeedSources,
 };
+
+/** A doc-level pass that runs AFTER layout + the generic narrator — for recipes
+ *  whose narrator/suppression is structural (coming-soon). Same degrade rule: a
+ *  finisher that throws leaves the doc exactly as it was. */
+export type Finisher = (
+  ctx: RecipeBuildContext,
+  doc: EmailDoc,
+  params: Record<string, number | string>,
+) => Promise<EmailDoc>;
+
+export const FINISHERS: Record<string, Finisher> = {};
+
+export async function runFinishers(
+  keys: readonly string[],
+  ctx: RecipeBuildContext,
+  doc: EmailDoc,
+  params: Record<string, number | string>,
+): Promise<EmailDoc> {
+  let out = doc;
+  for (const k of keys) {
+    const f = FINISHERS[k];
+    if (!f) continue;
+    try {
+      out = await f(ctx, out, params);
+    } catch {
+      // Degrade quiet — the doc ships as it stood before this pass.
+    }
+  }
+  return out;
+}
 
 export async function runDerivations(
   keys: readonly string[],
