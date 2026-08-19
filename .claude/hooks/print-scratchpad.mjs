@@ -18,9 +18,11 @@
 import { readFileSync } from "node:fs";
 import { resolve } from "node:path";
 import { renderDigest } from "./lib/scratchpad-parse.mjs";
+import { renderNorthStar } from "./lib/north-star.mjs";
 
 const PATH = resolve(process.cwd(), "_ASSISTANT/SCRATCHPAD.md");
 const STRIKES_PATH = resolve(process.cwd(), "_ASSISTANT/STRIKES.md");
+const NORTH_STAR_PATH = resolve(process.cwd(), "_ASSISTANT/NORTH-STAR.md");
 
 // RULE 2 §0b's counter. Parses _ASSISTANT/STRIKES.md (`## shape:` header, one `guard:`
 // line, `- strike:` lines) and renders every shape at 2+ strikes whose guard is still
@@ -99,6 +101,16 @@ let raw = "";
 process.stdin.setEncoding("utf8");
 process.stdin.on("data", (chunk) => (raw += chunk));
 process.stdin.on("end", () => {
+  // NORTH STAR prints FIRST — the standing plan outranks every other section here.
+  // Guard for the 08/19/2026 "always a different answer" shape: sessions re-diagnosed
+  // because nothing put the standing plan in front of them. Same fail-soft contract.
+  try {
+    const northStar = renderNorthStar(readFileSync(NORTH_STAR_PATH, "utf8"));
+    if (northStar) process.stdout.write(northStar);
+  } catch {
+    // File absent (worktree, fresh clone) — the rest of the digest still prints.
+  }
+
   let text = "";
   try {
     text = readFileSync(PATH, "utf8");

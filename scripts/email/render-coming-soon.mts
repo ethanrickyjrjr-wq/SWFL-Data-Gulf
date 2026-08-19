@@ -29,9 +29,11 @@
  *    "the bottom was bare" defect, and it is invisible unless something counts it.
  *
  * DEFAULT HOUSE: 2287 Somerset Pl, Naples 34120 — AND THE DEFAULT IS THE SHOWCASE
- * SUBJECT, which is the load-bearing fact. A bare run of this script is what
- * regenerates `public/new-emails/coming-soon-email.html`, so whatever address sits
- * here is what /showcase ships to prospects.
+ * SUBJECT, which is the load-bearing fact. A bare run writes ONLY to Downloads — it
+ * does NOT touch `public/new-emails/coming-soon-email.html` (proven 08/19/2026: md5
+ * identical before/after a run). Refreshing the /showcase copy is the MANUAL Gate-15
+ * step: copy the Downloads artifact over and commit it. Whatever address sits here
+ * is still what /showcase ships once that copy happens.
  *
  * POSTMORTEM (08/09/2026): the default used to be 16209 Asheboro Ct, Fort Myers —
  * a manufactured home picked 08/05 as a throwaway ACCEPTANCE subject (it beat the

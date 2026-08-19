@@ -456,6 +456,12 @@ personal financial notes.
   zero importers.
 
 **deliverable-and-design/** — deliverable quality, contrast, chart types, design bar (6)
+- `2026-08-19-omnivoice-drive-test-measured-output.md` — the DRIVE TEST of that engine on REAL
+  SWFL copy (Just Sold email body + a real social caption), es/pt/de. **Audio is good and fast**
+  (warm RTF 0.12-0.18 on the 4060 Ti, all output AudioSeal-watermarked); **local Argos translation
+  FAILS** — corrupts the street address, translates the brand to "Golfo de datos SWFL", strips
+  hashtags, flips formal/informal register mid-email, destroys German casing. Also: two status
+  endpoints that report ready when the model is absent. Artifacts in ~/Downloads/omnivoice-drive-test/.
 - `2026-08-19-omnivoice-tts-engine-teardown.md` — full repomix teardown of k2-fsa/OmniVoice
   (the TTS engine BEHIND the OmniVoice-Studio app installed 08/18 — confirmed in the repo's own
   community-projects list). 600+ language zero-shot TTS, voice clone from a 3–10s clip. The
