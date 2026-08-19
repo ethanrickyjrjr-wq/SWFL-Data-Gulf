@@ -55,8 +55,8 @@
 - [listing_lifecycle_schedule_live_verify] First unattended scheduled listing-lifecycle runs (Lee 09:00/Collier 12:00 UTC) land clean (due 2026-07-03)
 
 ## Last Session
-- 2026-08-19 (Fable 5, night, +push) — recipes-as-config PUSHED (8 commits incl. the parallel session's writ-guard-trio, operator "Push all"); continuation handoff written
+- 2026-08-19 (Fable 5) — FOLDER STRUCTURE: 15-Sonnet research wave → root cleaned, maps verified, nested rules wired, allowlist gate keeps it clean
 
 ## Spec Health
-- 311 specs total · 0 candidates for archive
+- 312 specs total · 0 candidates for archive
 - run `node scripts/assistant-weekly.mjs` to clean

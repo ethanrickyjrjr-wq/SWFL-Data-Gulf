@@ -63,6 +63,20 @@ yesterday's "two different products" confusion is dead — the k2-fsa model IS w
 - pyVideoTrans: video translation + dubbing tool with OmniVoice backend — matches the 08/18
   dubbing decree more directly than raw TTS.
 
+## A/B LEVER TEST — RUN 08/19/2026, measured (this machine, Studio venv, omnivoice 0.5.0)
+
+7 of 7 cases generated and signal-verified (24 kHz, RMS 1,699–3,179 — same band as the other
+session's drive test). Model load 4.1s warm from `%LOCALAPPDATA%\OmniVoice\hf_cache`.
+Files: `C:\Users\ethan\omnivoice-ab\out\` · script: `C:\Users\ethan\omnivoice-ab\generate_ab.py`.
+- step16_fast 6.4s audio / RTF 0.149 · step32_default 6.4s / 0.156 · step64_quality 6.5s / 0.311
+  → 16 vs 32 costs NOTHING measurable in time at this clip length; 64 doubles cost. Ear-ranking owed.
+- digits_raw ("$450,000") 3.98s vs digits_spoken ("four hundred fifty thousand dollars") 4.72s —
+  raw is SHORTER, so how it voiced the figure is undetermined until listened to. NOT verified correct.
+- placenames (Matlacha/Estero/Alva/Punta Gorda) 4.76s — pronunciation judgment is operator's ear.
+- auto_voice 7.1s / designed female-american voice both produced.
+API drift found 0.2.1→0.5.0: generate() returns list[torch.Tensor] shape (1, T) (was np.ndarray);
+no `normalize_text` kwarg in 0.5.0 signature. sf.write needs `.squeeze()` or it reads T channels.
+
 ## Verdict
 
 The engine is state-of-the-art and the machine can run it properly. "We suck" is almost
