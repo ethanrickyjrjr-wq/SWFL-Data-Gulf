@@ -263,6 +263,12 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{ id:
   let htmlByVariant: string[] = [];
   let pdfBuffer: Buffer | null = null;
   let linkFallbacks: AppliedFallback[] = [];
+  // The agent's per-role saved button destinations — route scope, not branch scope:
+  // the link ladder inside the block-canvas branch AND the url-lint's allowed-URL
+  // roster after it both read these. Declared any narrower, the lint call cannot
+  // see them (this exact miss shipped 08/19/2026 and broke every prod deploy
+  // until hoisted).
+  let savedDestinations: SavedDestinations = {};
 
   if (deliverable.template === "block-canvas") {
     // Render the SAME block-canvas HTML the Email Lab preview shows — through
@@ -296,10 +302,6 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{ id:
     // Empty-tolerant by contract: no profile row, no tokens, or a parse failure leaves
     // the doc exactly as it arrived. Branding must never block a send.
     let brandedDoc = parsedDoc.data;
-    // The agent's per-role saved button destinations, hoisted OUT of the try so the
-    // link ladder below can use them too — a slot the overlay left empty must still
-    // be fillable from the agent's own saved link rather than from a generic rung.
-    let savedDestinations: SavedDestinations = {};
     try {
       const { data: fullBrand } = await supabase
         .from("user_brand_profiles")

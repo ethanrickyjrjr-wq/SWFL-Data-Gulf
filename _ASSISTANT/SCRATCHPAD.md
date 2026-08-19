@@ -1,3 +1,31 @@
+## 2026-08-19 (Fable 5) — OPERATOR: "WHY ARE PROJECTS NOT FUCKING SAVING AS THE ADDRESS I PUT IN TO BUILD?????"
+
+He builds with an address in the Lab; the saved project does not carry that address as its
+name/identity. Investigating THIS SESSION — prior investigation docs exist
+(_ASSISTANT/investigations/email-build-fix/29-autocreateproject-client-logic.md + 04) and
+lib/agent-build/persist.ts is the suspected write site. RULE 0.5c: enumerate every
+project-create site before fixing. [status updated below when run to ground]
+
+SAME MESSAGE, GRIPE 2: "AND WHY THE FUCK ARE THEY NOT SEPERATING INTO THE EMAIL THAT THEY
+ARE OR GROUPING TOGETHER WITH THEIR OTHER EMAILS?????" — emails don't land grouped under
+the project/address they belong to. Suspected same root: Lab resume path offers most-recent
+project (limit 1) and the build's typed address never participates in project selection.
+
+## 2026-08-19 (Fable 5) — OPERATOR: "how the fuck are the emails still being built like this?? WE HAVE ONE FUCKING RECIPE. THERE IS NO FUCKING GAP IN THE RECIPE"
+
+Screenshot (13:33): Price Improved email in the Lab. RUN TO GROUND SAME SESSION:
+(1) The header/ribbon in his screenshot MATCH the under-contract reference chrome — same
+HeaderBlock, same teal ribbon; the "glyph" on the M is a text caret. The visible gap is the
+EMPTY PHOTO DROPZONE below the ribbon — a skeleton doc again.
+(2) The street-match fix WAS live on prod when he tested (deployed 11:06 ET, success) — but
+a doc SAVED before the fix never re-resolves; only a NEW build exercises it.
+(3) THE REAL FIND: every prod deploy since 11:12 FAILED — the booking commit (4a51ed60,
+pushed 37s after the street fix, no green build of its own) shipped a TS scope error in
+blast/route.ts (`savedDestinations` declared in the block-canvas branch, used at route
+scope). Prod was pinned on 26f9b561 for 2+ hours and NOTHING surFACED the failed deploys.
+Fixed this session (declaration hoisted; 38/38 tests, next build green), awaiting push word.
+Deploy-failure visibility gap → checks entry opened (vercel_deploy_failure_visibility).
+
 ## 2026-08-19 (Fable 5) — OPERATOR: "WE SET IT UP TO START ALL THE SAME... IT'S DOCUMENTED, REPEATED BACK TO ME OVER AND OVER... THIS WON'T WORK EITHER YOU FUCKING LIAR"
 
 He is right on the mechanism: the one-lane architecture WAS already decreed and documented, and

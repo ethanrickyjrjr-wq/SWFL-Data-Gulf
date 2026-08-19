@@ -1,3 +1,21 @@
+## 2026-08-19 (Fable 5) — PROD DEPLOYS WERE SILENTLY DEAD SINCE 11:12 — booking commit shipped a TS scope error; fixed, build green
+
+Operator (13:33, screenshot): "how are the emails still being built like this / IS THIS FIXED
+OR NOT". Run to ground: the street-match fix (26f9b561) DID deploy to prod at 11:06 ET
+(GitHub deployment 5985209437, state success) — but every prod deploy after it FAILED
+(2312ea62 11:15, ca59a242 11:23, 97d26b95 13:11, all state failure), so main stopped
+shipping for 2+ hours and nobody saw it. MEASURED cause (local `bunx next build` repro):
+4a51ed60 (booking) declared `savedDestinations` inside the block-canvas branch of
+app/api/deliverables/[id]/blast/route.ts but used it at route scope in collectAllowedUrls
+— "Cannot find name 'savedDestinations'". That commit was pushed 37s after the street-fix
+commit without its own green build. Fix: declaration hoisted to route scope (one `let`
+moved). Evidence: bun test blast-chain + button-destinations-wiring 38/38 pass; full
+`bunx next build` green (pasted in session). His 13:33 Lab screenshot itself: header +
+ribbon MATCH the under-contract reference chrome (mark on the "M" is a text caret); the
+one visible gap is the empty photo dropzone — a doc SAVED before 11:06 never re-resolves,
+so the decisive test is a NEW price-improved build on 767 Park Shore Dr. Next: operator
+word to push; then re-verify a fresh Lab build on the post-deploy prod.
+
 ## 2026-08-19 (Fable 5) — NORTH STAR #3 executed: rule-diet step two — covered blocks leave the always-loaded CLAUDE.md
 
 Operator asked "what else is holding claude back" → per NORTH STAR, executed the next
