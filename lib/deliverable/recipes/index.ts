@@ -35,6 +35,8 @@
 
 import type { EmailDoc } from "@/lib/email/doc/types";
 import type { ListingFacts } from "@/lib/email/listing-scrape";
+import { RECIPES } from "@/lib/deliverable/recipes";
+import { buildFromConfig } from "./config-builder";
 import type { Recipe, RecipeKey } from "@/lib/deliverable/recipes";
 import type { VoicePresetId } from "@/lib/email/voice-presets";
 import { buildNewListing } from "./new-listing";
@@ -122,8 +124,18 @@ export const RECIPE_BUILDERS: Partial<Record<RecipeKey, RecipeBuilder>> = {
   // "social-pack" / "social-cut" — see the check before wiring either.
 };
 
-/** The builder for a key, or null if this recipe isn't built yet. */
+/** The builder for a key, or null if this recipe isn't built yet.
+ *
+ *  RECIPES-AS-CONFIG (spec 2026-08-18): a MIGRATED recipe carries a `config` on its
+ *  registry entry and builds through the ONE config builder; its hand-coded entry in
+ *  RECIPE_BUILDERS is deleted in the same commit. FENCE (spec migration rule 3):
+ *  never add a feature to a legacy hand-coded builder — migrate it first, then add
+ *  the feature to its config/derivations. */
 export function builderFor(key: RecipeKey): RecipeBuilder | null {
+  const config = RECIPES[key]?.config;
+  if (config) {
+    return (ctx) => buildFromConfig(ctx, config);
+  }
   return RECIPE_BUILDERS[key] ?? null;
 }
 

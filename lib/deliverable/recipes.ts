@@ -168,6 +168,12 @@ export interface Recipe {
   needs: readonly BrandNeed[];
   /** Which builder this recipe seeds. Omitted = email. */
   target?: "email" | "social";
+  /** Recipes-as-config (spec 2026-08-18): the declarative layer consumed by
+   *  `buildFromConfig`. Present = this recipe is MIGRATED — `builderFor` dispatches
+   *  on it and the hand-coded builder entry is deleted. Lives HERE because this file
+   *  is the ONE registry — never a sibling store. Type-only import: erased at
+   *  runtime, so no cycle exists (config.ts value-imports this file, not vice versa). */
+  config?: import("./recipes/config").RecipeConfig;
 }
 
 export const RECIPES: Record<RecipeKey, Recipe> = {
