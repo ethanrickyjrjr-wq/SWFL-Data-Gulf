@@ -39,7 +39,6 @@
 
 import { createBlock, SEED_DOCS } from "@/lib/email/doc/default-docs";
 import { loadMarketFigures, type MarketFigure } from "@/lib/email/market-context";
-import { figureCitations } from "@/lib/email/author-doc";
 import { zipFromPromptPlace } from "@/lib/email/place-from-prompt";
 import { PLACE_ZIP_CROSSWALK } from "@/refinery/lib/geography-gazetteer.mts";
 // KNOWN-DEBT(data_lake: the per-ZIP monthly ZHVI view lives in the data_lake schema,
@@ -539,17 +538,8 @@ function buildGrid(
   // absent from the sent email (TextBlock honors `emailRender`).
   push({ id: createBlock("text").id, type: "text", props: { body: "", align: "left" } }, 3);
 
-  // Citations — the collapsed accordion, seeded from the figures this page actually
-  // rendered. `figureCitations` is the ONE citation root (house style, one entry per
-  // source, carrying its as-of).
-  push(
-    {
-      id: createBlock("sources").id,
-      type: "sources",
-      props: { sources: figureCitations(rendered(figures)) },
-    },
-    2,
-  );
+  // Citations — REMOVED 08/19/2026 by operator decree ("get rid of whatever this
+  // shit is in all emails"); SourcesBlock also renders null on the email paths.
 
   // CTA — the seed's own button, pointed at the agent's site when they have one.
   const seedButton = seed.blocks.find((b) => b.type === "button");

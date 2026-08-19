@@ -358,12 +358,6 @@ export function usdShort(n: number): string {
 
 const count = (n: number): string => n.toLocaleString("en-US");
 
-/** yyyy-mm-dd → MM/DD/YYYY (the operator's as-of format; the raw token is internal). */
-function mdY(iso: string): string {
-  const m = /^(\d{4})-(\d{2})-(\d{2})/.exec(iso);
-  return m ? `${m[2]}/${m[3]}/${m[1]}` : iso;
-}
-
 /**
  * Read the three live counts out of `data_lake.listing_state`.
  *
@@ -741,37 +735,10 @@ export const comingSoonScarcity: Derivation = async (ctx) => {
   return { blocks };
 };
 
-/** TAIL — the sources note: the citation AND the methodology. This is where the band
- *  is DISCLOSED — the counts are real, and the stated criterion is what makes them
- *  checkable rather than asserted. `scopeLabel`, never `scarcity.county`. */
-export const comingSoonScarcitySources: Derivation = async (ctx) => {
-  const scarcity = await loadScarcityOnce(ctx);
-  if (!scarcity) return { blocks: [] };
-  const fields = COMING_SOON_FIELDS;
-  return {
-    blocks: [
-      {
-        block: {
-          id: createBlock("sources").id,
-          type: "sources",
-          props: {
-            sources: [
-              {
-                label: `Active for-sale homes, ${scarcity.scopeLabel} — as of ${mdY(scarcity.asOfIso)}`,
-                url: fields.citation.url,
-              },
-            ],
-            note: `"Like this one" = list price ${usdShort(scarcity.bandLo)}–${usdShort(scarcity.bandHi)}, ${scarcity.bedFloor}+ beds, ${count(scarcity.sqftFloor)}+ sq ft. Vacant land excluded.`.slice(
-              0,
-              fields.noteMaxChars,
-            ),
-          },
-        },
-        height: 3,
-      },
-    ],
-  };
-};
+// The sources-note TAIL derivation was DELETED 08/19/2026 by operator decree ("get
+// rid of whatever this shit is in all emails"). No email prints a Sources/methodology
+// line; SourcesBlock renders null on the email paths as the one-door backstop. The
+// scarcity counts still ship in the strip + funnel chart above, computed as before.
 
 /**
  * THE FINISHER — the teaser narrator, structural suppression intact.

@@ -327,10 +327,9 @@ test("buildAgentLaunch: exactly ONE hard number, sourced, written in code", asyn
   expect(stats[0].props.stats).toEqual([
     { value: "$383,900", label: "Median home value — Cape Coral (33904)" },
   ]);
-  // Cited, collapsed, data-seeded.
-  const sources = byType(doc, "sources")[0];
-  expect(sources.props.sources[0].label).toContain("Zillow ZHVI");
-  expect(sources.props.note).toBe("As of 06/30/2026.");
+  // NO sources block — removed 08/19/2026 by operator decree ("get rid of whatever
+  // this shit is in all emails"); the figure itself stays sourced in code above.
+  expect(byType(doc, "sources")).toHaveLength(0);
   // ...and the ONLY number in the letter's prose is none at all.
   const letter = String(byType(doc, "text")[0].props.body);
   expect(letter).not.toMatch(/\d/);

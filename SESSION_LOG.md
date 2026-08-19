@@ -1,3 +1,23 @@
+## 2026-08-19 (Fable 5) — SOURCES COMMENTARY KILLED IN ALL EMAILS, AT THE ONE DOOR + ALL 8 EMITTERS + A FLEET GUARD
+
+Operator decree (on the good-looking under-contract email): "get rid of whatever this shit is
+in all emails = Sources (1): … / Median days listed = …" + "all fucking emails" share the
+header/footer chrome + "WHERE IS THE FUCKING ROOT?" The root: SourcesBlock now returns null on
+every email render path (BlockRenderer is the one switch both HTML engines dispatch through —
+covers every recipe, the AI author, ZIP digests, AND docs saved before today); all 8 emitters
+removed (under-contract speed-sources + coming-soon scarcity-sources derivations deleted with
+their config tails, market-comps compsTail, agent-brand-intro, review-reply, sphere-weekly,
+agent-launch, author-doc's autofill/append); registry-seam.test.ts now reds on ANY email recipe
+emitting a sources block — that guard immediately caught agent-launch, which the grep sweep
+missed (`block("sources",…)`). Canvas keeps the accordion so old saved docs stay deletable, not
+invisible. Evidence: bun test lib/deliverable lib/email 3015 pass / 0 fail; bunx next build
+exit 0; acceptance scripts under-contract 6/6, coming-soon suppression 4/4 ABSENT,
+agent-brand-intro 6/6; all 4 refreshed public/new-emails artifacts grep-clean of "Sources ("
+and "Median days listed =", chrome contiguous (header→ribbon→photo), 0 empty sections. His 3
+gap-builds today: prod has served a pre-11:12 build ALL DAY — the deploy fix (7b57d826) + 4
+more commits sit unpushed below this one. Next: operator's push word, then a fresh Lab build
+on post-deploy prod.
+
 ## 2026-08-19 (Fable 5) — PROD DEPLOYS WERE SILENTLY DEAD SINCE 11:12 — booking commit shipped a TS scope error; fixed, build green
 
 Operator (13:33, screenshot): "how are the emails still being built like this / IS THIS FIXED

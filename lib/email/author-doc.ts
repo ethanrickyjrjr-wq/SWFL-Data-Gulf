@@ -798,29 +798,13 @@ export function assembleAuthoredDoc(args: AssembleArgs): EmailDoc {
     else entries.splice(footerIdx, 0, entry);
   }
 
-  // Sources accordion — cite the figures the doc actually used (check:
-  // email_sources_accordion_autofill). Data-seeded, never authored: a
-  // model-emitted `sources` block arrives with empty props (buildEntry has no
-  // sources case) and is filled here; otherwise one is appended — Fence 2's
-  // zone sort places it in the close zone, above the footer.
-  const citations = figureCitations(collectUsedFigures(authored, figuresById));
-  if (citations.length > 0) {
-    const existing = entries.find((e) => e.type === "sources");
-    if (existing) {
-      const cur = existing.props.sources as SourceCitation[] | undefined;
-      if (!cur || cur.length === 0) existing.props.sources = citations;
-    } else {
-      entries.push({
-        type: "sources",
-        span: GRID_COLS,
-        newRow: true,
-        props: {
-          ...(defaultPropsFor("sources") as unknown as Record<string, unknown>),
-          sources: citations,
-        },
-      });
-    }
-  }
+  // Sources accordion — REMOVED 08/19/2026 by operator decree ("get rid of whatever
+  // this shit is in all emails"). The AI author no longer appends or fills a sources
+  // block; SourcesBlock also renders null on the email paths as the one-door
+  // backstop. Provenance still governs what may be WRITTEN (the figure gate above);
+  // it no longer prints a citation line to the reader. A model-emitted `sources`
+  // block still arrives with empty props (buildEntry has no sources case) and now
+  // simply renders nothing.
 
   // CAN-SPAM: a footer always survives, even if the model omitted one.
   if (!entries.some((e) => e.type === "footer")) {

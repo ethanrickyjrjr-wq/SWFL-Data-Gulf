@@ -418,6 +418,17 @@ describe("REGISTRY-WIDE — every email recipe key", () => {
 
         const doc = await builder(ctxFor(key));
 
+        // NO SOURCES BLOCK, FLEET-WIDE (operator decree 08/19/2026: "get rid of
+        // whatever this shit is in all emails = Sources (1): …"). Applies to every
+        // key, seam bypasses included — SourcesBlock also renders null on the email
+        // paths, but a recipe must not even EMIT one.
+        if (doc) {
+          expect(
+            doc.blocks.some((b) => b.type === "sources"),
+            `${key} emitted a sources block — banned from all emails by the 08/19/2026 decree`,
+          ).toBe(false);
+        }
+
         // INVERTED — a declared bypass must STILL be broken. Fix the lane and this
         // fails, telling you to delete its SEAM_BYPASS_KNOWN line in the same commit.
         if (SEAM_BYPASS_KNOWN[key]) {

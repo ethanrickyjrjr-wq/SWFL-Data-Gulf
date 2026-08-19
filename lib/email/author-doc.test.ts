@@ -821,42 +821,38 @@ describe("assembleAuthoredDoc — subject/CTA variants", () => {
   });
 });
 
-describe("sources accordion autofill (email_sources_accordion_autofill)", () => {
-  test("an id-selected figure materializes a sources accordion above the footer", () => {
+describe("NO sources accordion in the sent email (operator decree 08/19/2026)", () => {
+  // The autofill this describe used to pin was REMOVED: "get rid of whatever this
+  // shit is in all emails = Sources (1): …". The author never appends a sources
+  // block; SourcesBlock also renders null on the email paths as the one-door
+  // backstop. Provenance still governs what may be WRITTEN — the figure gate and
+  // prose lint above are untouched.
+  test("an id-selected figure does NOT materialize a sources block", () => {
     const doc = assembleAuthoredDoc(
       args({
         blocks: [{ type: "hero", value_figure: "f0", kicker: "Spotlight" }, { type: "footer" }],
       }),
     );
-    const types = doc.blocks.map((b) => b.type);
-    const srcIdx = types.indexOf("sources");
-    const ftrIdx = types.indexOf("footer");
-    expect(srcIdx).toBeGreaterThan(-1);
-    expect(srcIdx).toBeLessThan(ftrIdx);
-    const cites = propsOf(doc.blocks[srcIdx]).sources as Array<{ label?: string }>;
-    expect(cites).toEqual([{ label: "Zillow ZHVI · 06/01/2026" }]);
+    expect(doc.blocks.some((b) => b.type === "sources")).toBe(false);
   });
 
-  test("a prose-cited figure (no id-selection) is attributed and cited", () => {
+  test("a prose-cited figure does NOT materialize a sources block", () => {
     const doc = assembleAuthoredDoc(
       args({
         blocks: [{ type: "text", body: "Homes are averaging 47 days on market right now." }],
       }),
     );
-    const src = doc.blocks.find((b) => b.type === "sources");
-    expect(src).toBeDefined();
-    const labels = (propsOf(src!).sources as Array<{ label?: string }>).map((c) => c.label);
-    expect(labels).toEqual(["MLS active-listings · 06/01/2026"]); // f1 only — f0's value never appears
+    expect(doc.blocks.some((b) => b.type === "sources")).toBe(false);
   });
 
-  test("no figure used → no sources block is added", () => {
+  test("no figure used → still no sources block", () => {
     const doc = assembleAuthoredDoc(
       args({ blocks: [{ type: "text", body: "A quiet week on the water." }] }),
     );
     expect(doc.blocks.some((b) => b.type === "sources")).toBe(false);
   });
 
-  test("a model-authored sources block is FILLED — never duplicated, never empty", () => {
+  test("a model-authored sources block survives structurally but is never FILLED", () => {
     const doc = assembleAuthoredDoc(
       args({
         blocks: [{ type: "hero", value_figure: "f0" }, { type: "sources" }, { type: "footer" }],
@@ -864,47 +860,8 @@ describe("sources accordion autofill (email_sources_accordion_autofill)", () => 
     );
     const sourcesBlocks = doc.blocks.filter((b) => b.type === "sources");
     expect(sourcesBlocks.length).toBe(1);
-    const cites = propsOf(sourcesBlocks[0]).sources as Array<{ label?: string }>;
-    expect(cites).toEqual([{ label: "Zillow ZHVI · 06/01/2026" }]);
-  });
-
-  test("two used figures from the same source dedupe to one citation", () => {
-    const figs: MarketFigure[] = [
-      {
-        key: "zhvi",
-        label: "Median home value",
-        value: "$433,549",
-        source: "Zillow ZHVI",
-        as_of: "05/31/2026",
-      },
-      {
-        key: "zhvi_yoy",
-        label: "Home values YoY",
-        value: "-8.1%",
-        source: "Zillow ZHVI",
-        as_of: "05/31/2026",
-      },
-    ];
-    const menu = buildFigureMenu(figs);
-    const doc = assembleAuthoredDoc({
-      authored: {
-        blocks: [
-          {
-            type: "stats",
-            stats: [
-              { value_figure: "f0", label: "Value" },
-              { value_figure: "f1", label: "YoY" },
-            ],
-          },
-        ],
-      },
-      figuresById: figureMenuById(menu),
-      globalStyle: DEFAULT_GLOBAL_STYLE,
-      anchorNumbers: collectAnchorNumbers(figs),
-    });
-    const src = doc.blocks.find((b) => b.type === "sources");
-    const cites = propsOf(src!).sources as Array<{ label?: string }>;
-    expect(cites).toEqual([{ label: "Zillow ZHVI · 05/31/2026" }]);
+    const cites = propsOf(sourcesBlocks[0]).sources as Array<{ label?: string }> | undefined;
+    expect(cites ?? []).toEqual([]); // arrives empty, stays empty — renders nothing
   });
 });
 

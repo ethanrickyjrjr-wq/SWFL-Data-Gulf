@@ -14,12 +14,8 @@
 // A config referencing a missing key fails derivations.test.ts at CI. At runtime a
 // derivation that THROWS degrades to no blocks (RULE 0.7): the email ships quieter,
 // never broken, never invented.
-import {
-  comingSoonScarcity,
-  comingSoonScarcitySources,
-  comingSoonTeaserNarrator,
-} from "./coming-soon";
-import { underContractSpeed, underContractSpeedSources } from "./under-contract";
+import { comingSoonScarcity, comingSoonTeaserNarrator } from "./coming-soon";
+import { underContractSpeed } from "./under-contract";
 import type { ChromeBlock } from "@/lib/email/lifecycle-chrome";
 import type { EmailDoc } from "@/lib/email/doc/types";
 import type { RecipeBuildContext } from "./index";
@@ -42,14 +38,14 @@ export type Derivation = (
 
 /** Keys land here per migration (plan 2026-08-19, Task 5+). */
 export const DERIVATIONS: Record<string, Derivation> = {
-  // R4 · UNDER CONTRACT — the speed ladder (middle) + its disclosed-criterion
-  // sources note (tail). One live read per build (memoized in the recipe module).
+  // R4 · UNDER CONTRACT — the speed ladder (middle). One live read per build
+  // (memoized in the recipe module). The sources-note tail was REMOVED by operator
+  // decree 08/19/2026 ("get rid of whatever this shit is in all emails") — no email
+  // prints a Sources/methodology line; SourcesBlock also renders null on email.
   "under-contract/speed": underContractSpeed,
-  "under-contract/speed-sources": underContractSpeedSources,
-  // R2 · COMING SOON — the scarcity ladder (middle: strip + funnel chart) + its
-  // disclosed-criterion sources note (tail). One live read per build (memoized).
+  // R2 · COMING SOON — the scarcity ladder (middle: strip + funnel chart). Same
+  // decree: its sources-note tail is gone.
   "coming-soon/scarcity": comingSoonScarcity,
-  "coming-soon/scarcity-sources": comingSoonScarcitySources,
 };
 
 /** A doc-level pass that runs AFTER layout + the generic narrator — for recipes

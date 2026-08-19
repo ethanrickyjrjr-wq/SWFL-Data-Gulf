@@ -529,18 +529,9 @@ export async function buildAgentLaunch(ctx: RecipeBuildContext): Promise<EmailDo
   //    placeholder copy never ships (see signatureCard). No CTA on it: ONE ask per letter.
   row(signatureCard(currentDoc), 4);
 
-  // 7. The citation for the one number — collapsed, never inline (the house rule for
-  //    every citation surface). Data-seeded: there is no author path into it, so a
-  //    send can never show an invented source. No figure → no accordion.
-  if (figure) {
-    row(
-      block("sources", {
-        sources: [{ label: `${figure.label} — ${figure.value} (${figure.source})` }],
-        note: figure.as_of ? `As of ${figure.as_of}.` : undefined,
-      }),
-      2,
-    );
-  }
+  // 7. (deleted) The citation accordion — REMOVED 08/19/2026 by operator decree
+  //    ("get rid of whatever this shit is in all emails"); SourcesBlock also renders
+  //    null on the email paths. The figure gate above still governs what may ship.
 
   // 8. Footer — the agent's CAN-SPAM footer (postal address, socials, unsubscribe).
   row(keep(currentDoc, "footer") ?? createBlock("footer"), 3, { static: true });

@@ -340,11 +340,8 @@ test("it wears the campaign chrome — the SAME shape as every other lifecycle e
     "text", // ← the narrative slot
     "agent-card",
     "button",
-    // MY TAIL. It used to sit above the agent card; the seam's zone fence sorts CLOSE-zone
-    // blocks below the body, so a sources list now lands where the design system always said
-    // it goes — directly above the footer, which is where the AI author has always put it.
-    // One rule, both paths. This is the ONE visual change the layout root made.
-    "sources",
+    // NO sources tail — removed 08/19/2026 by operator decree ("get rid of whatever
+    // this shit is in all emails"); SourcesBlock also renders null on email paths.
     "footer",
   ]);
 });
@@ -603,14 +600,11 @@ test("brand is sticky — a real user brand is never overwritten", () => {
   expect(doc.globalStyle.accentColor).toBe("#FF0000");
 });
 
-test("citations ride in the collapsed accordion, never a vendor name inline", () => {
+test("no sources block ships, and the vendor is never named anywhere in the doc", () => {
+  // The citations accordion was removed 08/19/2026 by operator decree ("get rid of
+  // whatever this shit is in all emails"). The vendor-name ban stands on its own.
   const doc = buildCompsGrid(SUBJECT, HOMES, canvas());
-  const src = doc.blocks.find((b) => b.type === "sources");
-  expect(src?.type === "sources" && src.props.sources.map((s) => s.label)).toEqual([
-    "SWFL Data Gulf",
-    "realtor.com",
-  ]);
-  // The vendor is never named anywhere in the doc.
+  expect(doc.blocks.some((b) => b.type === "sources")).toBe(false);
   expect(JSON.stringify(doc)).not.toContain("SteadyAPI");
 });
 

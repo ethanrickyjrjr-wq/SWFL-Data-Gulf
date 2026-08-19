@@ -83,7 +83,7 @@
 // backstop underneath: any violation and the narrator's paragraph is DROPPED to an open
 // slot — the code-authored verdict still ships, because it is true by construction.
 
-import { compSources, compsForAddress, type RenderComp } from "@/lib/assistant/comp-helper";
+import { compsForAddress, type RenderComp } from "@/lib/assistant/comp-helper";
 import { saleDateLabel } from "@/lib/assistant/comp-rank";
 import { resolveCompPhotos } from "@/lib/listings/comp-photos";
 // NOTE: `fetchApifyComps` / `pickAddressMatch` are deliberately NOT imported here any
@@ -695,26 +695,9 @@ function compsMiddle(
   return blocks;
 }
 
-/** MY TAIL — the collapsed sources accordion. Rules of engagement #1: sources ride in the
- *  collapsed list, never inline in the prose. Domain-level, never a vendor name, never an
- *  MLS id. Empty comp set → no citation to make, so no block. */
-function compsTail(comps: RenderComp[]): ChromeBlock[] {
-  const sources = compSources({ comps, asOf: "", needs: [] });
-  if (!sources.length) return [];
-  return [
-    sized(
-      {
-        id: createBlock("sources").id,
-        type: "sources",
-        props: {
-          sources: sources.map((s) => ({ label: s.label, url: s.url })),
-          note: "Comparable homes near the subject, pulled live. Not adjusted for condition.",
-        },
-      },
-      3,
-    ),
-  ];
-}
+// The sources-accordion TAIL was DELETED 08/19/2026 by operator decree ("get rid of
+// whatever this shit is in all emails") — no email prints a Sources/methodology line;
+// SourcesBlock renders null on the email paths as the one-door backstop.
 
 /**
  * THE COMPS EMAIL, WEARING THE CAMPAIGN'S CHROME.
@@ -771,7 +754,7 @@ export function buildCompsGrid(
     middle: compsMiddle(comps, thumbnails, listingUrls),
     // EMPTY — the narrator fills it (fillNarrative). Unwritten → an open slot.
     narrative: "",
-    tail: compsTail(comps),
+    // NO tail — the sources accordion was removed by operator decree 08/19/2026.
     // "Find Out More" — operator decree, handoff §1 item 6. The LABEL changed; the
     // reasoning under it did not: the ask is still a step toward the agent, never a
     // pointer back at the comps the reader is already looking at. The target is the

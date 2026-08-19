@@ -1223,26 +1223,9 @@ export async function buildAgentBrandIntro(ctx: RecipeBuildContext): Promise<Ema
     );
   }
 
-  // 7. Sources — the collapsed citation list. Seeded from the ONE figure set this email
-  //    actually plots; empty (no chart) → SourcesBlock renders nothing.
-  push(
-    {
-      id: createBlock("sources").id,
-      type: "sources",
-      props: {
-        sources:
-          chart && area
-            ? [
-                {
-                  label: `Active for-sale listings — median asking price by ZIP, ${area.place}`,
-                  url: BASE_URL,
-                },
-              ]
-            : [],
-      },
-    },
-    2,
-  );
+  // 7. (deleted) The sources citation list — REMOVED 08/19/2026 by operator decree
+  //    ("get rid of whatever this shit is in all emails"); SourcesBlock also renders
+  //    null on the email paths as the one-door backstop.
 
   // 8. THE AGENT AND THE ASK — ONE ROW, NOT TWO, RIGHT ABOVE THE FOOTER.
   //    THE SAME `{7,5}` PAIR `lifecycle-chrome.ts` uses for every other listing-lifecycle

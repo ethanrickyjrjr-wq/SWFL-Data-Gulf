@@ -1,10 +1,13 @@
 // lib/email/blocks/sources-block.test.tsx — pins the two faces of SourcesBlock.
 //
-// EMAIL face (emailRender): Gmail replaces <details>/<summary> with <u></u>
-// (caniemail, verified 07/19/2026), so the sent HTML must never rely on the
-// accordion staying closed — it renders ONE compact "Sources (N)" line, linking
-// to viewAllUrl when present. CANVAS face: the native <details> accordion,
-// closed by default (no `open` attribute) — the operator's everywhere-rule.
+// EMAIL face (emailRender): RENDERS NOTHING. Operator decree 08/19/2026 ("get rid
+// of whatever this shit is in all emails = Sources (1): …"): no sent email carries
+// a Sources/methodology line. This return-null is the one-door backstop — both
+// HTML engines dispatch through BlockRenderer, so it covers every recipe, the AI
+// author, the ZIP digests, and docs saved before the emitters were removed.
+// CANVAS face: the native <details> accordion, closed by default (no `open`
+// attribute) — kept so an old saved doc's sources block stays visible and
+// deletable instead of becoming invisible dead space.
 import { describe, expect, it } from "bun:test";
 import { render } from "@react-email/render";
 import { SourcesBlock } from "./SourcesBlock";
@@ -22,8 +25,8 @@ const MANY: SourcesProps = {
   note: "Every figure above comes straight from the source cited.",
 };
 
-describe("SourcesBlock email face (Gmail-safe)", () => {
-  it("renders a compact view-all line, no <details>, when viewAllUrl is set", async () => {
+describe("SourcesBlock email face (decree 08/19/2026: renders NOTHING)", () => {
+  it("renders nothing on the email path, even with viewAllUrl and a note", async () => {
     const html = await render(
       <SourcesBlock
         props={{
@@ -34,23 +37,10 @@ describe("SourcesBlock email face (Gmail-safe)", () => {
         emailRender
       />,
     );
+    expect(html).not.toContain("Sources (");
+    expect(html).not.toContain("SWFL Data Gulf listings data");
+    expect(html).not.toContain("Every figure above comes straight");
     expect(html).not.toContain("<details");
-    expect(html).not.toContain("<summary");
-    expect(html).toContain("Sources (");
-    expect(html).toContain("5");
-    expect(html).toContain("https://www.swfldatagulf.com/r/zip-report/33908#section-sources");
-    // Individual labels stay web-side — the email carries the count + link only.
-    expect(html).not.toContain("FEMA flood zones");
-  });
-
-  it("falls back to a one-line capped label list when there is no viewAllUrl", async () => {
-    const html = await render(
-      <SourcesBlock props={MANY} globalStyle={DEFAULT_GLOBAL_STYLE} emailRender />,
-    );
-    expect(html).not.toContain("<details");
-    expect(html).toContain("SWFL Data Gulf listings data");
-    expect(html).toContain("+ 2 more");
-    expect(html).not.toContain("FEMA flood zones"); // beyond the cap
   });
 });
 

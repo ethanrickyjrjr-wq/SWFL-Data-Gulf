@@ -172,12 +172,6 @@ export function speedOpenSlots(): StatItem[] {
 
 // ── The derivations (registered in derivations.ts — never imported from here) ──
 
-/** yyyy-mm-dd → MM/DD/YYYY (the operator's as-of format; the raw token is internal). */
-function mdY(iso: string): string {
-  const m = /^(\d{4})-(\d{2})-(\d{2})/.exec(iso);
-  return m ? `${m[2]}/${m[3]}/${m[1]}` : iso;
-}
-
 /** ONE speed read per build, shared by the middle and the tail derivation — the
  *  memo is keyed on the build context's identity, so two builds never share it. */
 const speedMemo = new WeakMap<RecipeBuildContext, Promise<Speed | null>>();
@@ -219,42 +213,11 @@ export const underContractSpeed: Derivation = async (ctx, params) => {
   return { blocks, subjectVars };
 };
 
-/** TAIL — the sources note: where the criterion is DISCLOSED so the printed median
- *  is checkable rather than asserted. Emitted only when a median actually shipped —
- *  a note describing a number that is not on the page is noise. */
-export const underContractSpeedSources: Derivation = async (ctx, params) => {
-  const fields = fieldsWith(params);
-  const speed = await loadSpeedOnce(ctx, fields);
-  const shipped =
-    speed != null && speed.medianDom != null && speed.sampleSize >= fields.minMedianSample;
-  if (!shipped) return { blocks: [] };
-  const blocks: ChromeBlock[] = [
-    {
-      block: {
-        id: createBlock("sources").id,
-        type: "sources",
-        props: {
-          sources: [
-            {
-              // The SECOND consumer of scopeLabel — the citation names the scope
-              // that was actually computed over, same rule as the cell.
-              label: `Active for-sale listings, ${speed.scopeLabel} — as of ${mdY(speed.asOfIso)}`,
-              url: fields.citation.url,
-            },
-          ],
-          note:
-            `Median days listed = how long homes currently for sale in ${speed.scopeLabel} have been on the market ` +
-            `(${speed.sampleSize} listings; first-seen floors excluded).`.slice(
-              0,
-              fields.noteMaxChars,
-            ),
-        },
-      },
-      height: 3,
-    },
-  ];
-  return { blocks };
-};
+// The sources-note TAIL derivation was DELETED 08/19/2026 by operator decree ("get
+// rid of whatever this shit is in all emails = Sources (1): … / Median days listed
+// = …"). No email prints a Sources/methodology line; SourcesBlock renders null on
+// the email paths as the one-door backstop. The median itself still ships in the
+// speed strip above, computed exactly as before.
 
 // ── Compat views over the config (one root; these can never drift from it) ─────
 

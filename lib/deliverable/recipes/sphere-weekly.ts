@@ -112,7 +112,7 @@
 
 import { createBlock, HOUSE_BRAND } from "@/lib/email/doc/default-docs";
 import { loadMarketFigures, type MarketFigure } from "@/lib/email/market-context";
-import { figureCitations, resolveBand } from "@/lib/email/author-doc";
+import { resolveBand } from "@/lib/email/author-doc";
 import { zipFromPromptPlace } from "@/lib/email/place-from-prompt";
 import { hostOf } from "@/lib/assistant/web-fallback";
 import {
@@ -130,7 +130,7 @@ import { dropEmptyChartSlot } from "./shared";
 import { finalizeDoc } from "@/lib/email/doc/finalize-doc";
 import type { PlanEntry } from "@/lib/email/doc/finalize-doc";
 import { GRID_COLS } from "@/lib/email/grid-schema";
-import type { EmailBlock, EmailDoc, SourceCitation, StatItem } from "@/lib/email/doc/types";
+import type { EmailBlock, EmailDoc, StatItem } from "@/lib/email/doc/types";
 import type { RecipeBuildContext } from "./index";
 
 // ── 1. THE SUBJECT: one area, resolved once, from the sourced crosswalk ───────
@@ -1001,7 +1001,6 @@ export interface GridInput {
   /** The gap callout. `body` always starts with the code-computed spine; `proseDropped`
    *  says the model's sentences were gated out and the agent gets an open slot instead. */
   read: GapRead | null;
-  citations: SourceCitation[];
 }
 
 /**
@@ -1029,7 +1028,7 @@ export interface GridInput {
  * PURE.
  */
 export function buildGrid(input: GridInput): EmailDoc {
-  const { current, area, headline, here, supporting, read, citations } = input;
+  const { current, area, headline, here, supporting, read } = input;
   const globalStyle = { ...current.globalStyle };
   const band = resolveBand("light", globalStyle);
 
@@ -1175,19 +1174,9 @@ export function buildGrid(input: GridInput): EmailDoc {
     2,
   );
 
-  // Citations — the collapsed accordion. Sources ride here, never inline (rule 1 of the
-  // rules of engagement). `figureCitations` is the ONE citation root for held figures;
-  // the web-verified headline carries its real publisher URL beside them.
-  if (citations.length > 0) {
-    push(
-      {
-        id: createBlock("sources").id,
-        type: "sources",
-        props: { sources: citations },
-      },
-      2,
-    );
-  }
+  // (No citations block — removed 08/19/2026 by operator decree "get rid of whatever
+  // this shit is in all emails"; SourcesBlock also renders null on the email paths.
+  // The sourcing gates above still decide WHAT may ship.)
 
   // Footer — the agent's CAN-SPAM footer (postal address, socials, unsubscribe).
   push(keepOrDefault(current, "footer"), 3, true);
@@ -1218,9 +1207,6 @@ export async function buildSphereWeekly(ctx: RecipeBuildContext): Promise<EmailD
   const here = plan?.here ?? null;
 
   const supporting = supportingCells(figures, area.zip);
-  const supportingFigures = figures.filter((f) =>
-    supporting.some((s) => s.value && s.label === f.label),
-  );
 
   // ── THE CLAIM GATE ──────────────────────────────────────────────────────────
   // The RELATION between the two figures is computed HERE, in code, by integer
@@ -1241,15 +1227,10 @@ export async function buildSphereWeekly(ctx: RecipeBuildContext): Promise<EmailD
     : null;
 
   // Citations: every HELD figure the page renders (house style, one entry per source,
-  // carrying its as-of) plus the web-verified headline WITH its publisher URL.
-  const citations: SourceCitation[] = [
-    ...figureCitations([...(here ? [here] : []), ...supportingFigures]),
-    ...(headline
-      ? [{ label: `${headline.label} — read ${headline.readOn}`, url: headline.url }]
-      : []),
-  ];
+  // (Citations plumbing removed 08/19/2026 with the sources block — the sourcing
+  // gates above still decide WHAT may ship; nothing prints a citation line.)
 
-  let doc = buildGrid({ current: currentDoc, area, headline, here, supporting, read, citations });
+  let doc = buildGrid({ current: currentDoc, area, headline, here, supporting, read });
 
   // NO CHART ON A WEEKLY SPHERE UPDATE (chart policy "none" on the key). The contrast
   // PAIR is the visual — a chart under it would be a third thing competing with the one

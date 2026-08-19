@@ -1,18 +1,17 @@
-// lib/email/blocks/SourcesBlock.tsx — PURE. The "Sources" citation block, two faces:
+// lib/email/blocks/SourcesBlock.tsx — PURE. The "Sources" citation block, ONE face now:
+//
+// EMAIL (emailRender — EmailDocRenderer + compile-grid): RENDERS NOTHING. Operator
+// decree 08/19/2026, on reading a sent under-contract email: "get rid of whatever
+// this shit is in all emails = Sources (1): … / Median days listed = …". The
+// sources/methodology footer text is BANNED from every sent email. This return-null
+// is the ONE-DOOR guarantee: both HTML engines dispatch through BlockRenderer, so
+// it covers every recipe, the AI author, the ZIP digests, AND docs saved before the
+// emitters were removed. Provenance still governs what may be WRITTEN (gateNarrative,
+// figureCitations); it no longer prints a citation line to the reader.
 //
 // CANVAS (browser preview): a native <details>/<summary> accordion, CLOSED until
-// clicked — never a wall of inline text (the operator's everywhere-rule, same as
-// components/CitationList.tsx).
-//
-// EMAIL (emailRender — EmailDocRenderer + compile-grid): Gmail does NOT support
-// <details>/<summary> — caniemail (https://www.caniemail.com, HTML5 semantics,
-// verified in-session 07/19/2026) shows Gmail desktop/iOS/Android REPLACE the tags
-// with <u></u>, so the "closed accordion" shipped as a permanently expanded wall
-// (the 07/19 inbox complaint). No interactive collapse survives Gmail, so the sent
-// email is compact BY CONSTRUCTION: one "Sources (N) — view all" line linking to
-// the web home of the full list (props.viewAllUrl, e.g. the ZIP report's
-// #section-sources accordion); with no URL, the first labels + a "+N more" tail on
-// one line. A prior comment here claimed Gmail honors <details> — it does not.
+// clicked — kept so an old saved doc's sources block stays visible and deletable on
+// the canvas instead of becoming invisible dead space.
 //
 // Labels/links route through the ONE citation root (lib/citations/clean-url) so a
 // source here cleans identically to every other citation surface.
@@ -22,8 +21,6 @@ import type { EmailGlobalStyle, SourcesProps } from "../doc/types";
 import { fontStack, sectionPad, CARD_BG, BORDER, MUTED } from "./styles";
 import { text, space } from "./scale";
 import { legibleInk } from "./on-dark";
-
-const INLINE_LABEL_CAP = 3; // no-URL email fallback: labels shown before "+N more"
 
 export function SourcesBlock({
   props,
@@ -35,6 +32,9 @@ export function SourcesBlock({
   /** True on the sendable-HTML paths — renders the Gmail-safe compact line. */
   emailRender?: boolean;
 }) {
+  // THE SENT EMAIL CARRIES NO SOURCES COMMENTARY. Decree 08/19/2026 — see header.
+  if (emailRender) return null;
+
   const font = fontStack(globalStyle.fontFamily);
   const cited = cleanCitations(props.sources ?? []);
   if (cited.length === 0) return null;
@@ -57,33 +57,6 @@ export function SourcesBlock({
       {props.note}
     </Text>
   ) : null;
-
-  if (emailRender) {
-    const head = `Sources (${cited.length})`;
-    const inlineLabels = cited
-      .slice(0, INLINE_LABEL_CAP)
-      .map((c) => c.label)
-      .join(" · ");
-    const overflow = cited.length - INLINE_LABEL_CAP;
-    return (
-      <Section style={sectionStyle}>
-        <Text style={{ fontFamily: font, ...text("mono"), color: MUTED, margin: 0 }}>
-          {props.viewAllUrl ? (
-            <>
-              {head}
-              {" — "}
-              <Link href={props.viewAllUrl} style={{ color: linkInk }}>
-                view them all &rarr;
-              </Link>
-            </>
-          ) : (
-            `${head}: ${inlineLabels}${overflow > 0 ? ` + ${overflow} more` : ""}`
-          )}
-        </Text>
-        {noteEl}
-      </Section>
-    );
-  }
 
   return (
     <Section style={sectionStyle}>

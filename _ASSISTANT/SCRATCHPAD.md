@@ -1,3 +1,67 @@
+## 2026-08-19 (Fable 5) — OPERATOR: "for the 50th time, make sure all fucking email layouts are this way at the HEADER AND FOOTER. all fucking emails" + "get rid of whatever this shit is in all emails = Sources (1): ..." + "FROM BELOW PRICE TO THE BUTTON AND AGENT IS BASICALLY ONLY PLACES THE FUCKING EMAILS SHOULD CHANGE!!! EXCEPT JUST SOLD (banner)" + "3 emails today with spaces between agent name at top brand color and home picture and one with a giant gap from property description to agent and button" + "WHERE IS THE FUCKING ROOT TO FUCKING FIX?"
+
+Reference = Downloads/under-contract-email.html (he called it good-looking). Decrees: (1) the
+Sources/methodology footer text ("Sources (1): ..." + "Median days listed = ...") is BANNED from
+all emails; (2) chrome is invariant header→ribbon→photo→address/price ... agent+button→footer,
+only the middle varies (just-sold banner exempt); (3) zero vertical gaps between chrome sections.
+The root EXISTS — lib/email/lifecycle-chrome.ts buildLifecycleEmail — so gaps/commentary mean
+either recipes bypassing it or slots/tails it still allows.
+RESOLVED SAME SESSION (code side): (1) SOURCES KILLED AT THE ONE DOOR — SourcesBlock renders
+null on every email path (covers old saved docs too) + all 8 emitters removed (under-contract,
+coming-soon, market-comps, agent-brand-intro, review-reply, sphere-weekly, agent-launch, the AI
+author) + a fleet guard in registry-seam.test.ts that reds on any recipe ever emitting one (the
+guard immediately caught agent-launch, which the grep sweep had missed — block("sources",...)).
+3015/0 tests, next build exit 0, all 4 refreshed artifacts sources-free, chrome contiguous,
+0 empty sections. (2) THE GAPS he saw today: prod served a build from BEFORE 11:12 ALL DAY —
+the deploy-killing TS error was fixed in 7b57d826 but that commit + 4 more sit UNPUSHED locally.
+His 3 gap-builds are consistent with stale prod, not with the current chrome (all 11 committed
+artifacts show zero gaps). OWED HIS WORD: the push (5 prior commits + this session's).
+
+## 2026-08-19 (Fable 5) — OPERATOR: "IT WAS THE SAME HOUSE... WE FILLED THE ENTIRE STEADY API BACKFILL"
+
+Two claims to run down, both measurable: (1) an earlier build TODAY of 767 Park Shore Dr
+ITSELF showed baths — so baths for this house existed somewhere today before a later build
+lost it; (2) the listing_state baths backfill was COMPLETED (my 20%-filled figure was the
+08/03 research, 16 days stale — never quote a coverage number without re-deriving, his own
+rule). If the backfill filled this row and it reads NULL now, something CLOBBERED it — prime
+suspect: the nightly sweep upsert writing the /search row (which carries no baths field)
+over the enriched value.
+RESOLVED — HE IS RIGHT AND THE HISTORY PROVES IT: the backfill WAS filled, and the nightly
+MERGE ERASED IT — distill.py's own comment records the incident: on 07/26/2026, 34,139 of
+34,478 rows were NULL-baths because upsert_state's blanket EXCLUDED overwrite wiped every
+enriched value nightly. Fixed 07/26 (COALESCE on baths + listed_date — enrich-only columns
+survive the merge since). The recovery re-backfill afterward was the BROKEN SAMPLER
+(backfill_baths.py, 08/05 incident: grid-sampling, decayed 5.9->0.6 fills/call, 2,600
+wasted calls) so the book only recovered to 43.0% (13,363/31,088 active-sale, measured
+live 08/19; cohorts 35-83%, none complete). 767 Parkshore first_seen 06/27 = filled in the
+original backfill, WIPED pre-07/26, never re-reached by the sampler. Now permanently
+filled via the bought Apify row (paid store is a separate table the sweep never touches).
+Path to a full book: renew SteadyAPI (403 since 08/14) -> run a RESUMABLE per-property
+backfill (copy backfill_listed_date.py pattern per the 08/05 memory) over the ~17.7k
+nulls; fits inside the 50k/mo quota headroom. Check already open:
+listing_state_baths_backfill_completeness.
+
+## 2026-08-19 (Fable 5) — OPERATOR: "WE ALREADY BROUGHT IN ALL THE STEADY INFORMATION!!! WE HAVE BATHS SOMEWHERE AND IF NOT WE HAVE APIFY!!! HOW MANY TIMES DO I HAVE TO SAY THIS"
+
+He is calling didnt-read-what-we-hold (9 strikes) on my last answer: I declared the baths
+absent after checking listing_dom + listing_state + the DEAD live vendor, without reading
+the HELD stores — steadyapi_api_feed (36,193 rows, 64 fields), steadyapi_property_history_raw
+(18,319 bodies, answers-when-vendor-quiet lane eeaf3756), and the PAID Apify record store
+(gap-fill lane, already bought = a READ not spend). RESOLVED SAME SESSION, HE WAS RIGHT: the Apify lane was the answer and it was already
+wired (shared.ts lane 3 read + lane 3b by-address buy, which fires EXACTLY on a missing
+beds/baths/sqft cell — his 08/10 decree is quoted in the code). MEASURED why prod didn't
+fill: baths exists in NO free root for a Collier house (LeePA lane is Lee-only; vendor
+feed carries no bath field; listing_state.baths NULL; api_feed has no bath column; his
+row's raw tax body mentions no baths) — and the lane-3b BUY is behind
+OPERATOR_APPROVED_PAID_RUN, which is 1 locally but evidently NOT set on Vercel prod, so
+the Lab build could never pull the trigger. Ran the buy locally (ONE record): baths 5.5,
+42 photos, stored under '767 park shore dr naples' in the ONE store (477 rows). Re-ran
+with spend OFF: serves from the store, count stays 477 — every future build incl. prod
+now fills. His 'first build today had baths' = a Lee/Fort Myers build (free county lane);
+Naples = bought row by design. OPERATOR DECISION OWED: set OPERATOR_APPROVED_PAID_RUN=1
+in Vercel prod env so the Lab can auto-buy on a spec gap (storefront decree), or keep
+buys operator-run only.
+
 ## 2026-08-19 (Fable 5) — OPERATOR: "I DID THAT EMAIL AGAIN AND DIDN'T GET BATHS THIS TIME... HOW DO YOU CONTINUE TO BREAK SHIT" + "THESE ARE ALL FRESH BUILDS"
 
 RUN TO GROUND, MEASURED: **the SteadyAPI subscription is DEAD — raw probe returns 403

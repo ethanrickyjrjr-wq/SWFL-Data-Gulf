@@ -233,7 +233,9 @@ export const RECIPES: Record<RecipeKey, Recipe> = {
       // a description block — a teaser prints no seller copy that could locate the house.
       includeDescription: false,
       middle: ["coming-soon/scarcity"],
-      tail: ["coming-soon/scarcity-sources"],
+      // EMPTY tail — operator decree 08/19/2026: no email prints a
+      // Sources/methodology line (SourcesBlock also renders null on email).
+      tail: [],
       ctaLabel: "Join the Private Preview List",
       ctaDestination: "brand-site",
       finish: ["coming-soon/teaser-narrator"],
@@ -323,7 +325,9 @@ export const RECIPES: Record<RecipeKey, Recipe> = {
       specs: ["beds", "baths", "sqft", "price-per-sqft", "lot", "type"],
       includeDescription: true,
       middle: ["under-contract/speed"],
-      tail: ["under-contract/speed-sources"],
+      // EMPTY tail — operator decree 08/19/2026: no email prints a
+      // Sources/methodology line (SourcesBlock also renders null on email).
+      tail: [],
       ctaLabel: "See What Else Is Available",
       ctaDestination: "brand-site",
       bannedNarrativePhrases: ["sold for", "sold price", "closed at", "final sale", "sale price"],
