@@ -2,6 +2,7 @@ import { describe, test, expect } from "bun:test";
 import {
   resolveSubjectListing,
   canonStreet,
+  sameCanonStreet,
   extractRealtorPropertyId,
   type FetchListingsFn,
 } from "./resolve-subject";
@@ -466,6 +467,84 @@ describe("resolveSubjectListing — the ID lane (exact, beats fuzzy street text)
       fetchListings: noLake,
     } as never);
     expect(facts).toBeNull(); // same honest miss as before — never worse than today
+  });
+});
+
+// ── COMPOUND-WORD SPELLING DRIFT — 08/19/2026, the Park Shore repro ──────────
+// Second strike of the Horsecreek shape, this time with NO URL to rescue it: the
+// operator TYPED "767 Park Shore Dr, Naples, FL 34103" into the Lab. The lake held
+// the listing as "767 Parkshore Dr" (one word, property_id 5601341444, $6,999,500,
+// flag_price_reduced, dom_days 134) — the lake fetch RETURNED the row and the street
+// matcher threw it away, so the price-improved email rendered a fully empty skeleton
+// over data we held. The fix: canonical street lines compare space-insensitively
+// (full-string equality only — never a despaced prefix, which would let
+// "767 Park…" swallow a different street).
+describe("resolveSubjectListing — compound street names (Park Shore ≡ Parkshore)", () => {
+  const PARKSHORE = mkListing({
+    id: "5601341444",
+    addressLine1: "767 Parkshore Dr",
+    formattedAddress: "767 Parkshore Dr",
+    city: "Naples",
+    zipCode: "34103",
+    price: 6999500,
+    bedrooms: 5,
+    squareFootage: 4887,
+    lotSize: 0.32,
+    daysOnMarket: 134,
+    photoUrl: "https://ap.rdcpix.com/abc/767.jpg",
+  });
+
+  test("a typed two-word street resolves the lake's one-word spelling", async () => {
+    const facts = await resolveSubjectListing("767 Park Shore Dr, Naples, FL 34103", {
+      fetchNearby: noNearby,
+      geocode: geocodeReturning("34103"),
+      fetchLakeCandidates: async () => [PARKSHORE],
+      fetchListings: noLake,
+    });
+    expect(facts).not.toBeNull();
+    expect(facts!.price).toBe("$6,999,500");
+    expect(facts!.beds).toBe("5");
+    expect(facts!.daysOnMarket).toBe(134);
+    expect(facts!.photos[0]).toBe("https://ap.rdcpix.com/abc/767.jpg");
+  });
+
+  test("the reverse direction too — typed one-word, lake two-word", async () => {
+    const facts = await resolveSubjectListing("4140 Horsecreek Blvd, Fort Myers, FL 33905", {
+      fetchNearby: noNearby,
+      geocode: geocodeReturning("33905"),
+      fetchLakeCandidates: async () => [
+        mkListing({ addressLine1: "4140 Horse Creek Blvd", zipCode: "33905", price: 1220000 }),
+      ],
+      fetchListings: noLake,
+    });
+    expect(facts?.price).toBe("$1,220,000");
+  });
+
+  test("a despaced PREFIX never matches — 767 Park Ave is not 767 Parkshore Dr", async () => {
+    const facts = await resolveSubjectListing("767 Park Ave, Naples, FL 34103", {
+      fetchNearby: noNearby,
+      geocode: geocodeReturning("34103"),
+      fetchLakeCandidates: async () => [PARKSHORE],
+      fetchListings: noLake,
+    });
+    expect(facts).toBeNull();
+  });
+});
+
+describe("sameCanonStreet — the compound-word equality every street compare must use", () => {
+  test("internal spacing folds — Horse Creek ≡ Horsecreek, Park Shore ≡ Parkshore", () => {
+    expect(
+      sameCanonStreet(canonStreet("4140 Horse Creek Blvd"), canonStreet("4140 Horsecreek Blvd")),
+    ).toBe(true);
+    expect(sameCanonStreet(canonStreet("767 Park Shore Dr"), canonStreet("767 Parkshore Dr"))).toBe(
+      true,
+    );
+  });
+  test("full-string only — a despaced prefix never matches, empties never match", () => {
+    expect(sameCanonStreet(canonStreet("767 Park Ave"), canonStreet("767 Parkshore Dr"))).toBe(
+      false,
+    );
+    expect(sameCanonStreet("", "")).toBe(false);
   });
 });
 

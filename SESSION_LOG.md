@@ -1,3 +1,59 @@
+## 2026-08-19 (Fable 5) — PARKSHORE: compound-street matcher fixed at ALL 7 sites, DOM cell seated in price-improved, RULE 0.5c SCOPE-BEFORE-FIX decreed
+
+Operator screenshot: price-improved email for "767 Park Shore Dr, Naples 34103" rendered a
+fully empty skeleton. Root cause: the lake held the house as "767 Parkshore Dr" (one word,
+property_id 5601341444 — $6,999,500 ask, $75,500 cut flagged, 5bd/4,887sf, photo, dom_days
+134) and the canonical street matcher threw the fetched row away ("park shore" ≠ "parkshore")
+— the 08/06 Horsecreek shape again, typed with no URL to rescue it.
+
+Shipped (TDD red-first; 1,639 deliverable+listings tests green; graph-enumerated sweep):
+- `sameCanonStreet` (lib/listings/resolve-subject.ts) — space-insensitive full-equality street
+  compare; wired at ALL 7 compare sites: resolver lake lane, withBaths ×2, just-sold
+  subjectRow + realSaleComps, list-date resolveSubjectListDate (7th, apify-record-store, was
+  already space-blind via looseAddressKey — verified, untouched).
+- DOM cell seated in price-improved (priceStrip passes facts.daysOnMarket; Lot yields when DOM
+  held, 6-cell cap kept; the 07/13 "we never modeled DOM" comment — written 3 days before the
+  07/16 DOM root shipped — rewritten with the true dated history). Playbook §2.7 updated.
+- RULE 0.5c SCOPE BEFORE FIX added to CLAUDE.md (operator decree verbatim: "WE START BROAD AND
+  THEN ZONE IN"); STRIKES shape `fixed-one-surface-never-scoped-the-shape` filed, guard BUILT;
+  memory `feedback_scope-before-fix-start-broad-zone-in` written.
+Known red NOT mine: `bunx next build` fails on app/api/deliverables/[id]/blast/route.ts —
+parallel booking session's uncommitted in-flight edit (47 lines); untouched per RULE 1.5.
+Push authorized by operator this session ("FIX IT AND PUSH YOUR SHIT").
+
+## 2026-08-19 (Fable 5) — BOOKING: 10-Sonnet crawl4ai wave → provider-agnostic booking link wired to cockpit card + email time-offer stack; second-order audit caught a shipped 422 blocker, fixed same session
+
+Operator decree: "Set it up… TDD the project page… add to email and offer different times to
+click in simple way. Send 10 sonnets to Crawl4ai ideas and best practices." All 10 agents
+returned; 10 research files filed + indexed under _RESEARCH/ (cal.com URL params/slots-API/
+embeds/self-host, Calendly, provider landscape, email time-slot patterns, email button HTML,
+realtor scheduling UX, add-to-calendar). Load-bearing finds: cal.com /v2/slots is PUBLIC (no
+key; header cal-api-version: 2024-09-04); cal.com booking URLs read date/month/slot params;
+Calendly cannot deep-link a time; cal.diy = the RENAMED cal.com repo (MIT), self-host honest
+bill-of-materials filed for later.
+
+Built (TDD, red-first throughout; 3,424 affected tests green; bunx next build clean ×2):
+- lib/booking/ NEW: providers.ts (detect/fidelity/deep-link/prefill), calcom-slots.ts (public
+  slots fetch, 8s AbortSignal), time-buttons.ts (3–5 slot buttons + fallback, ET labels),
+  expand-doc.ts (booking button → time stack, one-CTA preserving), offer-times.ts (send-time
+  enrichment, tomorrow→+8d), calendar-links.ts (Google/Outlook zero-provider rung).
+- Brand overlay Guard 3 (apply-brand.ts + isDestinationRefinement): a deep link refining the
+  saved destination survives the overlay (wiring test demonstrates the old stripping).
+- Blast route: send-time expansion (skipped under CTA variant tests — withCtaLabel targets the
+  first button), PDF renders the PRE-expansion doc (no frozen perishable times), block-cap skip
+  now logs.
+- Cockpit BookingCard (aside chrome lifted from ShowingPrepCard) + booking-card.ts model:
+  saved link → open; unset → /account/brand nudge. app/project/page.tsx loads
+  button_destinations server-side.
+- url-lint refinement allowance + savedDestinations allowlist root — fixes the second-order
+  audit BLOCKER: slot deep links failed the exact-string url gate, 422ing every cal.com-equipped
+  blast; pinned by lib/booking/blast-chain.integration.test.ts (expand→ladder→render→lint).
+
+Checks: booking_time_cta_live_verify (new-build), booking_time_offer_scheduled_lanes (N6 +
+frozen-occurrence lanes still plain-button; DI thread + campaign-sim owed),
+booking_public_page_embed (/p page parity + keyless embed — operator call). claim-and-send
+deliberately not enriched (self-send). Render proof: scripts/email/tmp-booking-preview.mts →
+preview sent to operator. Next: operator verify + push decision.
 ## 2026-08-19 (Fable 5) — FOLDER STRUCTURE: 15-Sonnet research wave → root cleaned, maps verified, nested rules wired, allowlist gate keeps it clean
 
 Operator decree: "send out 15 sonnets to crawl4ai folder structure... take notes of how folders

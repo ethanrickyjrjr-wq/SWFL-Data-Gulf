@@ -9,6 +9,12 @@ is banned as the response — that session builds the mechanism and flips the gu
 Format contract (the printer parses this, keep it):
 `## shape: <slug>` then one `guard: <OWED | BUILT <what, date>>` line, then `- strike:` lines.
 
+## shape: fixed-one-surface-never-scoped-the-shape
+guard: BUILT — CLAUDE.md RULE 0.5c SCOPE BEFORE FIX (08/19/2026, operator decree verbatim: "WE START BROAD AND THEN ZONE IN. ONE FUCKING STARTING POINT. FIGURE OUT IF IT'S A GLOBAL PROBLEM OR JUST A COUPLE OR JUST ONE"). The FIRST action on any defect is enumerating every site of the shape — graph callers/impact first, tree-wide grep fallback — and speaking the count (global / N sites named / one) BEFORE editing the first site. A fix touching fewer sites than the enumeration names says why, per site. Proof artifact: the 08/19 Parkshore sweep itself — 7 street-compare sites enumerated via graphify_callers, 6 fixed/1 already-safe in ONE pass, where the morning session had fixed 1 and stopped.
+- strike: 08/06 Horsecreek — compound-word miss "fixed" with the URL-id lane only; the text lane stayed exposed and the comment DECLARED it unfixable instead of enumerating who else compared streets
+- strike: 08/09 DOM-cell decree walked to just-sold only; price-reduced kept a stale "we never modeled DOM" for 10 more days
+- strike: 08/19 Parkshore — resolver fixed first, the other 4 canonStreet compare sites enumerated only after the operator asked "ALL of them, correct??"
+
 ## shape: decree-in-prose-code-never-walked-it
 guard: BUILT — Gate 17 strikes-guard (08/10/2026, .claude/hooks/lib/strikes-guard{,.test}.mjs): a shape at 3+ strikes whose guard is OWED with no open-check key BLOCKS EVERY PUSH until the mechanism ships or is tracked — recurrence can no longer age in markdown, which is this shape's failure mode. Built the same night the operator asked "what is the fucking point of updating strikes if no one does anything." Tonight's instance also shipped its own specific guard: lane-3b spec-gap trigger + 3 red-first tests (recipes/shared.ts).
 - strike: 08/06 fontFamily unguarded while the doc said typography decided

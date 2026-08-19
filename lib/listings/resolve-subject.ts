@@ -276,6 +276,21 @@ export function canonStreet(line: string): string {
     .join(" ");
 }
 
+/**
+ * Space-insensitive canonical-street equality — the compound-word rule the Horsecreek
+ * postmortem said "has no text-normalization fix." It does: an MLS feed spelling
+ * "Horse Creek" as "Horsecreek" (or the operator typing "Park Shore" against the
+ * feed's "Parkshore" — 08/19/2026, property_id 5601341444, a $6.9M listing rendered
+ * as an empty skeleton over data we held) differs ONLY by internal spacing, so two
+ * canonical lines that are equal with spaces removed are the same street line.
+ * FULL-string equality only — a despaced prefix ("767park…") would let Park Ave
+ * swallow Parkshore, so prefix comparisons stay space-faithful.
+ */
+export function sameCanonStreet(a: string, b: string): boolean {
+  if (!a || !b) return false;
+  return a === b || a.replace(/ /g, "") === b.replace(/ /g, "");
+}
+
 /** The street line of a typed address — everything before the first comma. */
 function streetLineOf(address: string): string {
   return (
@@ -413,7 +428,9 @@ export async function resolveSubjectListing(
 
   const matches = (r: Listing): boolean => {
     const rc = canonStreet(r.addressLine1 || r.formattedAddress);
-    return rc === target || rc.startsWith(target + " ") || target.startsWith(rc + " ");
+    return (
+      sameCanonStreet(rc, target) || rc.startsWith(target + " ") || target.startsWith(rc + " ")
+    );
   };
 
   // 0) OUR OWN LAKE — lane 1 of the four-lane order, and since 07/19/2026 the
@@ -512,7 +529,7 @@ async function withBaths(
   if (houseNumber) {
     try {
       const parcels = await fetchLeePa({ houseNumber, zip: facts.zip ?? null });
-      const hits = parcels.filter((p) => canonStreet(p.addressLine) === target);
+      const hits = parcels.filter((p) => sameCanonStreet(canonStreet(p.addressLine), target));
       if (hits.length === 1 && hits[0]!.baths != null) {
         facts.baths = String(hits[0]!.baths);
         return facts;
@@ -525,7 +542,7 @@ async function withBaths(
   if (facts.lat == null || facts.lon == null) return facts;
   try {
     const nearby = await fetchNearby({ lat: facts.lat, lon: facts.lon, limit: 25 });
-    const self = nearby.find((c) => canonStreet(c.addressLine) === target);
+    const self = nearby.find((c) => sameCanonStreet(canonStreet(c.addressLine), target));
     if (self?.baths != null) facts.baths = String(self.baths);
   } catch {
     /* baths stay absent — an empty cell is dropped, never faked */

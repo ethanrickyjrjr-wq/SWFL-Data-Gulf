@@ -90,7 +90,7 @@
 
 import { withCommas } from "@/lib/format-number";
 import { compsForAddress, type RenderComp } from "@/lib/assistant/comp-helper";
-import { canonStreet, commaCity } from "@/lib/listings/resolve-subject";
+import { canonStreet, commaCity, sameCanonStreet } from "@/lib/listings/resolve-subject";
 import { resolveCompPhotos } from "@/lib/listings/comp-photos";
 import { chartSpecToEmailImage } from "@/lib/email/spec-to-png";
 import { chartImageBlock } from "@/lib/email/inject-chart";
@@ -175,7 +175,10 @@ export function realSaleComps(
       c.sqft != null &&
       c.price != null &&
       c.priceKind === "sold" &&
-      (!self || canonStreet(c.addressLine) !== self) &&
+      // Space-insensitive (sameCanonStreet): a feed that compounds the street name
+      // ("Parkshore" for the typed "Park Shore") must not sneak the subject's own
+      // sale into its own comp set — 08/19/2026, the Parkshore repro.
+      (!self || !sameCanonStreet(canonStreet(c.addressLine), self)) &&
       (subjectSqft == null || (c.sqft >= subjectSqft * 0.75 && c.sqft <= subjectSqft * 1.25)),
   );
 }
@@ -186,7 +189,9 @@ export function realSaleComps(
 export function subjectRow(comps: RenderComp[], subjectStreet: string): RenderComp | null {
   const self = canonStreet(subjectStreet);
   if (!self) return null;
-  return comps.find((c) => canonStreet(c.addressLine) === self) ?? null;
+  // Space-insensitive: the subject's own row is the ONLY honest close source, and a
+  // compound-word spelling ("Parkshore" vs "Park Shore") must not hide it (08/19/2026).
+  return comps.find((c) => sameCanonStreet(canonStreet(c.addressLine), self)) ?? null;
 }
 
 /**

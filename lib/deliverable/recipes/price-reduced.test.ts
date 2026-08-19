@@ -346,6 +346,31 @@ describe("every cell is sourced or open", () => {
     ]);
   });
 
+  // ── DOM EARNS ITS SEAT — 08/19/2026. The strip's old comment claimed DOM was cut
+  // because "we never modeled it" (written 07/13, bf77c817). The listing_dom root
+  // shipped 07/16 (d8019515, paid SteadyAPI heal lane) and just-sold seated its DOM
+  // cell 08/09 by operator decree ("INCLUDE % SQ FT / DOM") — this recipe was the
+  // straggler. Same eviction logic as just-sold: the least informative cell yields.
+  // On an email whose subject is TIME NOT MOVING THE PRICE, that is Lot, not DOM.
+  test("a held DOM gets its cell and Lot yields the slot — six cells, never seven", async () => {
+    const doc = (await buildPriceReduced(ctx({ ...SHORE_DR, daysOnMarket: 134 })))!;
+    expect(allCells(doc).map((c) => c.label)).toEqual([
+      "Previous",
+      "Beds",
+      "Baths",
+      "Sq Ft",
+      "$/Sq Ft",
+      "DOM",
+    ]);
+    expect(cellNamed(doc, "DOM")!.value).toBe("134");
+  });
+
+  test("no DOM held → Lot keeps its slot; no empty ghost cell ships", async () => {
+    const doc = (await buildPriceReduced(ctx(SHORE_DR)))!;
+    expect(cellNamed(doc, "Lot")!.value).toBe("0.26 ac");
+    expect(cellNamed(doc, "DOM")).toBeUndefined();
+  });
+
   test("the key specs come from the record", async () => {
     const doc = (await buildPriceReduced(ctx(SHORE_DR)))!;
     expect(cellNamed(doc, "Beds")!.value).toBe("3");

@@ -1,3 +1,68 @@
+## 2026-08-19 (Fable 5) — OPERATOR DECREE (verbatim): "WE START BROAD AND THEN ZONE IN. ONE FUCKING STARTING POINT. FIGURE OUT IF IT'S A GLOBAL PROBLEM OR JUST A COUPLE OR JUST ONE. FIX IT AND PUSH YOUR SHIT"
+
+The method decree, born from the Parkshore session: I fixed the resolver first and only
+enumerated the OTHER 4 compare sites two prompts later, when he asked "all of them, correct?"
+Backwards — the enumeration IS the first step. Encoded same session as CLAUDE.md RULE 0.5c
+(SCOPE BEFORE FIX), STRIKES shape flipped to guard BUILT, memory file written. "3 months of
+Claude never listening" — the fix is the rule being the FIRST action of a defect fix, not a
+follow-up question he has to ask. Pushed on his word this session ("FIX IT AND PUSH").
+
+## 2026-08-19 (Fable 5) — OPERATOR: "WE HAVE FIXED ALL THE EMAILS THAT NEED IT CORRECT?? SINCE WE RUN THROUGH ONE LANE"
+
+He was right to push: the answer was NO until this pass. The graph (not grep) surfaced 6
+canonStreet callers; 3 more exact-compare sites had the same compound-word miss: just-sold
+subjectRow (subject's own close missed → sale price lost), just-sold realSaleComps (subject's
+own sale leaked INTO its comp set), list-date resolveSubjectListDate (DOM/list-date heal
+missed). All three now use sameCanonStreet, TDD'd, 1,639 tests green. The 4th extra site
+(apify-record-store looseAddressKey) was already space-blind — no change. DOM coverage swept
+across all 8 listing emails: 5 render it, 3 omit it by documented correctness design
+(under-contract = days-to-contract, back-on-market = ambiguous relist clock, coming-soon =
+not on market). ONE-LANE note: subject resolution IS one lane (graph: resolveSubjectListing ←
+recipes/shared.ts + showing-prep) but street COMPARISON was not — it lived in 4 files; now
+all ride the one exported sameCanonStreet.
+
+## 2026-08-19 (Fable 5) — OPERATOR: "WHO THE FUCK WOULD SAY WE DON'T USE DOM????" + "WE SPENT 18 HOURS BRINGING IN DOM PAYING STEADYAPI WHICH CLAUDE DELETED AND WE HAD TO DO ALL OVER AGAIN"
+
+Two-part rage, both legitimate: (1) price-reduced.ts carries a comment claiming DOM was cut
+because "we never modeled it" — written AFTER the listing_dom root shipped (spec 07/16, wired
+into resolve-subject 07/19, paid SteadyAPI heal lane). Finding the authoring commit via git
+-S, fixing the comment AND the decision it justified: DOM cell goes into the price-improved
+strip (takes the Lot slot when held, mirroring new-listing's domTookTypeSlot precedent —
+6-cell schema cap forces a swap). (2) He states the DOM ingest work was DELETED once by a
+Claude session and rebuilt — 18 hours. Verify in git/SESSION_LOG if traceable; either way the
+lesson is the same shape as [[didnt-read-what-we-hold]]: a session asserted absence of a thing
+we had paid to build. This entry doubles as strike evidence for that registry.
+
+## 2026-08-19 (Fable 5) — OPERATOR (screenshot, all caps): "WHAT IS THIS SHIT / WHERE IS DOM / WHERE IS ANYTHING"
+
+Screenshot: Lab, price-improved email for 767 Park Shore Dr, Naples 34103. EVERYTHING empty —
+price shows "$—", beds/baths/sqft/lot/$-sqft all "+ Add", photo slot empty, no DOM (days on
+market) anywhere in the spec row. He asked the AI to build with real data ("real data enabled"
+badge on) and got a bare skeleton. Persona shows Marisa Delgado (his own 08/05 female-persona
+decree; real profile backed up + one-command restore via scripts/email/_restore-brand.mts — NOT
+the defect unless he says otherwise). ROOT CAUSE FOUND + FIXED SAME SESSION: the house IS in
+our lake — as "767 Parkshore Dr" (ONE word, property_id 5601341444) with EVERYTHING the email
+needed ($6,999,500 list, $75,500 cut flagged, 5bd/4,887sf/0.32ac, photo, dom_days 134). The
+lake fetch returned the row; the street matcher threw it away — "park shore" ≠ "parkshore".
+SECOND strike of the Horsecreek compound-word shape (08/06), this time typed with no URL to
+rescue it. Fix: `sameCanonStreet` in resolve-subject.ts — canonical street lines compare
+space-insensitively (full equality only, never a despaced prefix). 3 new tests, 447 pass,
+`bunx next build` green, live-driven: the typed address now resolves the full record incl.
+DOM 134. NOT PUSHED — awaiting his word. Open product question for him: the price-improved
+spec strip deliberately dropped its DOM cell on the claim "we never modeled DOM" — stale
+since listing_dom shipped; strip is at the 6-cell schema cap, so DOM-in-strip means swapping
+a cell (his call). DOM does reach the narrator prose via shared.ts anchored facts.
+
+## 2026-08-19 (Fable 5) — OPERATOR: booking widget decree — "Set it up... TDD the project page... add to email and offer different times to click in simple way. Send 10 sonnets to Crawl4ai ideas and best practices"
+
+Direct command, three parts: (1) set up the booking-link path (per this session's cal.diy
+evaluation: `booking_url` in the brand registry, provider-agnostic so a self-hosted cal
+instance later is just another URL — "we will be ready to offer self host when ready");
+(2) TDD the project-page surface; (3) MORE IMPORTANT: emails offer clickable TIMES in a
+simple way. 10-Sonnet crawl4ai wave dispatched this session for site + email best practices.
+Research files land under _RESEARCH/ with INDEX lines; build registered via new-build.mjs.
+No push without his word.
+
 ## 2026-08-19 (Fable 5) — OPERATOR: "send out 15 sonnets to crawl4ai folder structure and implement it so Claude doesn't suck"
 
 Direct command: 15 Sonnet agents research (crawl4ai) how repos should be folder-structured so a

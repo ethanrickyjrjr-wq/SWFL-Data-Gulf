@@ -94,6 +94,18 @@ one-root registry pattern (`lib/email/social/platforms.ts`, `lib/email/lab/capab
   purity % is a guard — low % = distrust the name.
 - God-node lists include markdown headings — never quote one without checking it's a symbol.
 
+# RULE 0.5c — SCOPE BEFORE FIX: START BROAD, THEN ZONE IN
+
+**Locked 08/19/2026, operator verbatim: "WE START BROAD AND THEN ZONE IN. ONE FUCKING STARTING
+POINT. FIGURE OUT IF IT'S A GLOBAL PROBLEM OR JUST A COUPLE OR JUST ONE."** The FIRST action on
+any defect is enumerating every site of its SHAPE — graph callers/impact first (RULE 0.5), tree-
+wide grep fallback — and stating the count (global / N sites, named / one) BEFORE editing the
+first site. Then fix ALL of them in the same pass; a fix touching fewer sites than enumerated
+names why, per site. Fixing the reported site and waiting for the operator to ask "what about
+the rest" is the violation (born: the 08/19 Parkshore sweep — 1 of 7 street-compare sites fixed
+until he asked). Playbooks document per-surface; defects live per-SHAPE — the sweep is the unit
+of fix, never the file the bug was reported on.
+
 # RULE 0.55 — DATA ROOTS: ONE CATALOG, LOOK THERE FIRST
 
 Any question or build reading a SWFL number starts at **`docs/standards/data-roots.md`** top

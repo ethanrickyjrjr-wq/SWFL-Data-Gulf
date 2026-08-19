@@ -305,12 +305,20 @@ function addressLine(facts: ListingFacts): string {
  * an email whose entire subject is A NUMBER THAT MOVED, "Residential" is the one cell a
  * reader will never use. The anchor takes its slot.
  *
- * "Days on Market" — the old grid's second cell — is also gone. We hold no such field:
- * not "the vendor returned null", but "we never modeled it". A permanently-empty ghost in
- * a hairline strip is dead weight on every canvas and absent from every sent email. A cell
- * no lane can ever fill is not an open slot; it is clutter.
+ * "Days on Market" IS BACK (08/19/2026). This paragraph used to say DOM was cut because
+ * "we never modeled it" — TRUE for exactly three days: written 07/13 (bf77c817), and the
+ * `listing_dom` root shipped 07/16 (d8019515, the paid SteadyAPI heal lane included).
+ * Nobody came back, so for a month the ONE email whose whole argument is "time is not
+ * moving the price" omitted the number that says how much time. `resolve-subject`
+ * attaches `facts.daysOnMarket` only when it is a real count (never a first-seen floor),
+ * and `listingSpecs` already seats it in Type's slot — Type is gone here anyway, so on
+ * this strip DOM evicts LOT instead (just-sold's 08/09 decree logic, "INCLUDE % SQ FT /
+ * DOM": the least informative cell yields, and lot acreage is context on an email about
+ * a price that moved). No DOM held → Lot keeps its slot; a ghost cell never ships.
  */
 function priceStrip(facts: ListingFacts, previous?: string): StatItem[] {
+  const shared = listingSpecs(facts, facts.daysOnMarket).filter((c) => c.label !== "Type");
+  const domHeld = shared.some((c) => c.label === "DOM");
   return [
     // "PREVIOUS" — third label on this cell, this time MEASURED, not guessed
     // (08/09/2026). "Previous Price" wrapped its 94px cell (two words + tracking);
@@ -319,7 +327,7 @@ function priceStrip(facts: ListingFacts, previous?: string): StatItem[] {
     // box (text-metrics, run before adoption) and is ONE word, so it cannot wrap
     // in any face. The footnote still states the full derivation.
     spec(previous, "Previous", "muted"),
-    ...listingSpecs(facts).filter((c) => c.label !== "Type"),
+    ...(domHeld ? shared.filter((c) => c.label !== "Lot") : shared),
   ];
 }
 

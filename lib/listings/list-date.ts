@@ -38,7 +38,7 @@
 // on, and folding this in is a separate change with its own blast radius.
 
 import { fetchNearbyValues } from "@/lib/listings/steadyapi";
-import { canonStreet } from "@/lib/listings/resolve-subject";
+import { canonStreet, sameCanonStreet } from "@/lib/listings/resolve-subject";
 
 const STEADY_BASE = "https://api.steadyapi.com/v1/real-estate";
 
@@ -165,7 +165,10 @@ export async function resolveSubjectListDate(facts: {
   if (!target) return null;
   try {
     const nearby = await fetchNearbyValues({ lat: facts.lat, lon: facts.lon, limit: 25 });
-    const self = nearby.find((c) => canonStreet(c.addressLine) === target);
+    // Space-insensitive (sameCanonStreet, 08/19/2026): a compound street name the
+    // vendor spells as one word must not hide the subject's own row — that miss
+    // costs the DOM/list-date cell on every email that rides this lane.
+    const self = nearby.find((c) => sameCanonStreet(canonStreet(c.addressLine), target));
     if (!self?.propertyId) return null;
     return await fetchActiveListDate(self.propertyId);
   } catch {

@@ -2619,6 +2619,16 @@ a reader can check previous − cut = current in their head. `reduced_amount` is
 never the old price (probed live 07/13/2026; the enforced ledger rides the recipe file). Type cell
 dropped by design — a seventh cell fails `EmailDocSchema` and falls through to the generic author.
 
+**DOM CELL SEATED 08/19/2026** (operator: "WHO WOULD SAY WE DON'T USE DOM"). The strip's old
+rationale — "we never modeled DOM" — was written 07/13, three days BEFORE the `listing_dom` root
+shipped (07/16, paid SteadyAPI heal lane), and went stale unrevisited for a month while just-sold
+seated its own DOM cell 08/09. Now: `priceStrip` passes `facts.daysOnMarket` (attached by
+`resolve-subject` only as a real, never-floored count) into `listingSpecs`; when DOM is held it
+takes a seat and LOT yields (just-sold's eviction logic — the least informative cell on an email
+about a price that moved). No DOM held → Lot keeps its slot, no ghost cell. Strip with DOM:
+Previous · Beds · Baths · Sq Ft · $/Sq Ft · DOM. Guarded in `price-reduced.test.ts`
+("a held DOM gets its cell and Lot yields the slot").
+
 **THE SENTENCE BANK (spec `2026-08-10-sentence-banks-design.md` — this email is the FIRST bank).**
 The Voice Card (§1.20) extension for this email, verbatim from
 `lib/deliverable/recipes/price-reduced.language.ts` — **starting set, reword in walk review with

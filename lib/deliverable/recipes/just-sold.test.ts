@@ -80,6 +80,17 @@ describe("realSaleComps — what may sit beside a close", () => {
     expect(out.map((c) => c.addressLine)).toEqual(["330 Shore Dr"]);
   });
 
+  it("drops the subject across compound-word drift — Park Shore never comps itself as Parkshore", () => {
+    // 08/19/2026, the Parkshore repro: the operator types the street as two words, the
+    // MLS feed spells it as one. Exact canonical equality let the subject's own sale
+    // leak INTO its own comp set. Full-string space-insensitive equality (sameCanonStreet).
+    const out = realSaleComps(
+      [comp({ addressLine: "767 Parkshore Dr" }), comp({ addressLine: "780 Parkshore Dr" })],
+      "767 Park Shore Dr",
+    );
+    expect(out.map((c) => c.addressLine)).toEqual(["780 Parkshore Dr"]);
+  });
+
   it("drops an unpriced comp (no price = no row)", () => {
     expect(realSaleComps([comp({ addressLine: "A St", price: null })], SUBJECT)).toEqual([]);
   });
@@ -147,6 +158,16 @@ describe("subjectRow — the subject is the nearest property to its own coordina
 
   it("returns null when the subject is not in the set (it has not sold)", () => {
     expect(subjectRow([comp({ addressLine: "330 Shore Dr" })], SUBJECT)).toBeNull();
+  });
+
+  it("finds the subject across compound-word drift (Park Shore ≡ Parkshore)", () => {
+    // Without this, the just-sold email loses its ONLY honest close source whenever the
+    // feed compounds the street name — same 08/19/2026 defect as the subject resolver's.
+    const rows = [
+      comp({ addressLine: "767 Parkshore Dr" }),
+      comp({ addressLine: "780 Parkshore Dr" }),
+    ];
+    expect(subjectRow(rows, "767 Park Shore Dr")?.addressLine).toBe("767 Parkshore Dr");
   });
 });
 
