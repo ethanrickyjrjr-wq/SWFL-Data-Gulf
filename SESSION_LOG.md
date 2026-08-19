@@ -37,6 +37,19 @@ failure the doc exists to stop.
 its live question (does graphify resolve SQL-to-code edges at all). `package.json` untouched — no
 npm script added, so no lockfile gate.
 
+## 2026-08-18 (Fable 5, night, cont.) — the fleet gets ONE generated status page; the simplification is GREENLIT as a lifecycle wave
+
+Operator decree ("how do we not have this documented where we find it in one place" + "simplify
+all of this — it's 7 emails coded to create the same things over and over"): (1) NEW
+`scripts/email/status.mts` → `docs/standards/email-status.md` — per-recipe truth (builder / unit
+test / acceptance script / sentence bank / playbook section) DERIVED from the registry + bank
+registry + disk, never hand-kept; tripwire `scripts/email/status.test.mts` proven red-first (page
+absent → fail) then green; playbook now opens with the pointer (state lives there, rules live in
+the playbook). Page shows honestly: lifecycle 7 all have builder+test+acceptance; banks on
+just-sold + price-reduced only. (2) Recipes-as-config REGISTERED (`new-build.mjs` → check
+`recipes_as_config_live_verify`; stub points at the amendment); decisions locked: LIFECYCLE WAVE
+migration, quick-swap = paid cycle button. Implementation plan is the next artifact.
+
 ## 2026-08-18 (Fable 5, night) — CORRECTION: my "commentary is NOT enforced" scoreboard claim was WRONG — the sentence banks are the mechanism and they exist in code
 
 Operator: "We put together scripts!!!!!!!!!! What is going on?? What playbook are you looking

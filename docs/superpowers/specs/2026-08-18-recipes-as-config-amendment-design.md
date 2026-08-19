@@ -132,9 +132,12 @@ top of it.
 
 ## Operator decisions (08/18/2026)
 
-1. Migration pace — NOT YET DECIDED. Recommendation stands: config-first for new recipes,
-   opportunistic per-touch migration, then a cleanup wave for stragglers once the layer is
-   proven.
+1. Migration pace — **DECIDED 08/18/2026 (later the same night): WAVE for the listing
+   lifecycle.** Operator: "Stop writing such dumb fucking code and simplify all of this!!!
+   It's fucking 7 emails!!! That are coded to create the same fucking things over and over
+   basically!!!" The lifecycle emails collapse together — they share the chrome already and
+   are the duplication he is naming. Non-lifecycle recipes migrate per-touch after the wave
+   proves the layer. Build registered: check `recipes_as_config_live_verify`.
 2. Quick-swap surface — **DECIDED: cycle button** ("Let's try cycle button"). A single
    "Swap layout" control cycling through the recipe's grid family; no rail thumbnails.
 3. Quick-swap tier — **DECIDED: paid** ("Quick swap is paid"). Route `"paid-only"` in

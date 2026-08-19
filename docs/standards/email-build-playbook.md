@@ -1,5 +1,13 @@
 # THE EMAIL BUILD PLAYBOOK — ONE FILE. START HERE. STOP OPENING SIX DOCUMENTS.
 
+> **⛔ CURRENT FLEET STATE LIVES IN `docs/standards/email-status.md` — GENERATED, NEVER
+> HAND-KEPT. Open it BEFORE stating what any email has or lacks** (builder, test, acceptance
+> script, sentence bank, playbook section — derived from the code; a stale page fails
+> `scripts/email/status.test.mts`). Added 08/18/2026 after a session declared "commentary is
+> not enforced" while the sentence banks sat built on two recipes — operator: "how do we not
+> have this documented where we find it in one place before we talk about it incorrectly?"
+> This playbook stays the RULES; the status page is the STATE.
+
 **Operator decree 08/04/2026, verbatim:** *"I want all the fucking rules on the build for the first
 part at top. Font size, grid size, block sizes, spacing, all the fucking research for the look of
 email that is universal. Any universal rules can go first. We will then list each individual email

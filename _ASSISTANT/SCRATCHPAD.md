@@ -1,3 +1,14 @@
+## 2026-08-18 (Fable 5, night, latest) — OPERATOR DECREE: "Stop writing such dumb fucking code and simplify all of this!!! It's fucking 7 emails!!! That are coded to create the same fucking things over and over basically!!!"
+
+Two decrees in one message: (1) "how do we not have this documented where we find it in one
+place before we talk about it incorrectly?????" — one findable place holding each email's true
+current state; a hand-kept table is how we got here, so the fix is a GENERATED status doc
+derived from the code (registry, banks, acceptance scripts, playbook sections) that cannot rot.
+(2) The simplification is GREENLIT — this reads as approval of the recipes-as-config direction
+and overrides my opportunistic-pace recommendation for the lifecycle emails: he wants the
+duplication collapsed, not dribbled. Combined with earlier this session: quick-swap = paid
+cycle button. Do not re-litigate; execute.
+
 ## 2026-08-18 (Fable 5, night, later) — OPERATOR: "We put together scripts!!!!!!!!!! What is going on?? What playbook are you looking at?????"
 
 On my commentary-has-no-guard scoreboard claim. He's pointing at the SCRIPTS we built — the
