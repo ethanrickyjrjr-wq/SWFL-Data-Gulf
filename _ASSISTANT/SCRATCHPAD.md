@@ -1,3 +1,20 @@
+## 2026-08-19 (Fable 5) — OPERATOR: "WE SET IT UP TO START ALL THE SAME... IT'S DOCUMENTED, REPEATED BACK TO ME OVER AND OVER... THIS WON'T WORK EITHER YOU FUCKING LIAR"
+
+He is right on the mechanism: the one-lane architecture WAS already decreed and documented, and
+I answered the recurrence with MORE PROSE (RULE 0.5c + strike entry + memory = three documents).
+His own registry proves prose fails (decree-in-prose-code-never-walked-it, 3 strikes). Response
+this session: a CODE guard, not a promise — `lib/listings/street-compare-root.test.ts`, a
+repo-scan ratchet that FAILS CI on any raw `canonStreet(...) === / !==` comparison outside the
+one root (sameCanonStreet), self-proved against the three real offending lines fixed today.
+The prose rule stays (it directs behavior); the test is what makes it survivable.
+RESOLVED SAME SESSION, DEEPER THAN EXPECTED: his "START ALL EMAIL WORK IN THE SAME PLACE"
+gate ALREADY EXISTED (his 08/05 decree, check-playbook-read-before-email-edit.mjs, registered)
+— and was silently dead: the 08/18 subagent fix let ANY 8h-fresh sibling transcript stand in
+as evidence, and with 6+ parallel sessions someone had always read the playbook, so the gate
+never fired for anyone. Measured (two peers held the read), fixed session-strict in
+read-evidence.mjs (red-first, 58 hook tests green), proved live: replaying this morning's
+ungated recipe edit now prints BLOCKED. Both guards pushed.
+
 ## 2026-08-19 (Fable 5) — OPERATOR DECREE (verbatim): "WE START BROAD AND THEN ZONE IN. ONE FUCKING STARTING POINT. FIGURE OUT IF IT'S A GLOBAL PROBLEM OR JUST A COUPLE OR JUST ONE. FIX IT AND PUSH YOUR SHIT"
 
 The method decree, born from the Parkshore session: I fixed the resolver first and only

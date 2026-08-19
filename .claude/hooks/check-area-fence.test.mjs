@@ -64,34 +64,45 @@ test("linesShowRead: a Read call line counts; a tool_result mention does not", (
   assert.ok(!linesShowRead([], re));
 });
 
-test("familyTranscriptFiles: payload transcript first, recent siblings follow, stale siblings dropped", () => {
+// SESSION-STRICT REWRITE (08/19/2026). The two tests below previously pinned the
+// "any recent sibling counts" behavior — the accepted-on-record over-credit that
+// MEASURED-FAILED the same week it shipped: two parallel peers' playbook reads
+// satisfied the email gate for a session that had never opened it. The contract
+// now (read-evidence.mjs header + read-evidence.test.mjs): evidence is vertical —
+// own transcript, own subagents (./<stem>/*.jsonl), and for a subagent payload its
+// controller — never a top-level peer, no matter how fresh.
+test("familyTranscriptFiles: own subagents count (stale dropped); top-level peers NEVER do", () => {
   const dir = mkdtempSync(join(tmpdir(), "fence-"));
   const own = join(dir, "own.jsonl");
-  const fresh = join(dir, "sibling-fresh.jsonl");
-  const stale = join(dir, "sibling-stale.jsonl");
-  const sub = join(dir, "subagents");
+  const peer = join(dir, "sibling-fresh.jsonl");
+  const sub = join(dir, "own"); // the payload session's OWN subagent folder
   mkdirSync(sub);
   const child = join(sub, "agent-1.jsonl");
-  for (const p of [own, fresh, stale, child]) writeFileSync(p, "");
+  const staleChild = join(sub, "agent-stale.jsonl");
+  for (const p of [own, peer, child, staleChild]) writeFileSync(p, "");
   const old = (Date.now() - 24 * 60 * 60 * 1000) / 1000;
-  utimesSync(stale, old, old);
+  utimesSync(staleChild, old, old);
 
   const got = familyTranscriptFiles(own);
   assert.equal(got[0], own);
-  assert.ok(got.includes(fresh), "fresh sibling missing");
-  assert.ok(got.includes(child), "subagent transcript missing");
-  assert.ok(!got.includes(stale), "stale sibling should be dropped");
+  assert.ok(got.includes(child), "own subagent transcript missing");
+  assert.ok(!got.includes(peer), "peer session credited — the 08/19 measured failure");
+  assert.ok(!got.includes(staleChild), "stale subagent should be dropped");
 });
 
-test("familyShowsRead: the subagent-blindness fix — evidence in a SIBLING satisfies", () => {
+test("familyShowsRead: the subagent-blindness fix — the CONTROLLER's read satisfies its subagent", () => {
   const dir = mkdtempSync(join(tmpdir(), "fence-"));
-  const own = join(dir, "subagent.jsonl");
-  const parent = join(dir, "parent.jsonl");
+  const sub = join(dir, "parent"); // subagent transcripts live in ./<controller-stem>/
+  mkdirSync(sub);
+  const own = join(sub, "subagent.jsonl");
+  const controller = join(dir, "parent.jsonl");
+  const peer = join(dir, "peer.jsonl");
+  const readLine =
+    '{"message":{"content":[{"type":"tool_use","name":"Read","input":{"file_path":"C:\\\\r\\\\lib\\\\email\\\\CLAUDE.md"}}]}}\n';
   writeFileSync(own, '{"message":{"content":[{"type":"text","text":"editing now"}]}}\n');
-  writeFileSync(
-    parent,
-    '{"message":{"content":[{"type":"tool_use","name":"Read","input":{"file_path":"C:\\\\r\\\\lib\\\\email\\\\CLAUDE.md"}}]}}\n',
-  );
-  assert.ok(familyShowsRead(own, docReadRe("lib/email/CLAUDE.md")));
-  assert.ok(!familyShowsRead(own, docReadRe("ingest/CLAUDE.md")));
+  writeFileSync(controller, readLine);
+  writeFileSync(peer, readLine.replace(/email/g, "ingest"));
+  assert.ok(familyShowsRead(own, docReadRe("lib/email/CLAUDE.md")), "controller read must count");
+  // The peer holds the ingest read — it must NOT leak into this subagent's evidence.
+  assert.ok(!familyShowsRead(own, docReadRe("ingest/CLAUDE.md")), "peer read must not count");
 });

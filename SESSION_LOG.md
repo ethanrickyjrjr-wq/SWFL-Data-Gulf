@@ -6,6 +6,26 @@ self-describing. All 10 acceptance renders re-run before push (10/10 pass, captu
 byte-identical — additive change; ALLOW_STALE_CAPTURE on the record); blast-chain red proof
 re-shown unpiped. Next: operator live-verify per build-queue Booking CTA line.
 
+## 2026-08-19 (Fable 5) — THE PLAYBOOK GATE WAS SILENTLY DEAD: peer-session reads counted as ours; now session-strict + street-compare one-root ratchet
+
+Operator: "WE SET IT UP TO START ALL THE SAME... IT'S DOCUMENTED, REPEATED... THIS WON'T WORK
+EITHER." He was right mechanically: his 08/05 gate (check-playbook-read-before-email-edit)
+exists and is registered, yet THIS session edited lib/deliverable recipe code without ever
+reading the playbook and it stayed silent. MEASURED cause: the 08/18 subagent-blindness fix
+made ANY sibling transcript from the last 8h count as evidence — two parallel peers
+(08042478…, 21b37572…) had read the playbook, so their reads satisfied my gate. With 6+
+concurrent sessions that gate was a no-op every working day.
+
+Shipped (red-first: 3 new session-strict tests failed against old impl, then green; 58 hook
+tests pass; live replay of this morning's ungated edit now prints BLOCKED):
+- read-evidence.mjs familyTranscriptFiles rewritten SESSION-STRICT: own transcript + own
+  subagents (./<sid>/*.jsonl) + (for a subagent payload) its controller — a peer's top-level
+  transcript is NEVER evidence. Old area-fence tests pinning the peer-credit behavior
+  rewritten to the new contract (.claude/hooks/read-evidence.test.mjs is the pin).
+- lib/listings/street-compare-root.test.ts — one-root ratchet: any raw canonStreet equality
+  outside resolve-subject.ts fails CI (proved red by re-introducing the exact 08/19 bug line,
+  then reverted). "A rule only in a doc is not a rule" — this is the code form of 0.5c.
+
 ## 2026-08-19 (Fable 5) — PARKSHORE: compound-street matcher fixed at ALL 7 sites, DOM cell seated in price-improved, RULE 0.5c SCOPE-BEFORE-FIX decreed
 
 Operator screenshot: price-improved email for "767 Park Shore Dr, Naples 34103" rendered a

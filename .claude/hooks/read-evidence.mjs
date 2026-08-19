@@ -5,14 +5,22 @@
 // `playbook_hook_blind_to_subagents` (08/18/2026): a subagent's hook payload points at the
 // SUBAGENT's own transcript, which never contains the controller's reads — so every
 // transcript-evidence gate blocked delegated work. Evidence is therefore searched in the
-// payload transcript FIRST, then in recent sibling transcripts (the session family).
+// payload transcript FIRST, then in the SESSION FAMILY.
 //
-// The sibling scan can over-credit a PARALLEL same-repo session's read. Accepted on the
-// record (spec 2026-08-18-agent-guard-hooks-design.md): blocking every delegated build is
-// the costlier error. All failure paths return false/[] — callers fail OPEN.
+// SESSION-STRICT (08/19/2026 — this replaced "recent .jsonl siblings"). The 08/18 fix
+// accepted over-crediting parallel peer sessions as the cheaper error. MEASURED WRONG the
+// next day: with 6+ concurrent sessions, two peers' playbook reads satisfied the email
+// playbook gate for a session that had never opened it, and it edited recipe code
+// ungated — the exact failure the operator's 08/05 decree built that gate to stop. The
+// family is now strictly vertical:
+//   • main session <dir>/<sid>.jsonl → itself + its own subagents (<dir>/<sid>/*.jsonl);
+//   • subagent <dir>/<sid>/agent.jsonl → itself + subdir siblings + its controller
+//     (<dir>/<sid>.jsonl);
+//   • a PEER's top-level transcript is NEVER evidence, no matter how recent.
+// All failure paths return false/[] — callers fail OPEN.
 
-import { readdirSync, readFileSync, statSync } from "node:fs";
-import { dirname, join } from "node:path";
+import { existsSync, readdirSync, readFileSync, statSync } from "node:fs";
+import { basename, dirname, join } from "node:path";
 
 /** Sibling transcripts are only evidence if touched within this window. */
 export const FAMILY_MAX_AGE_MS = 8 * 60 * 60 * 1000;
@@ -37,22 +45,35 @@ export function linesShowRead(lines, fileRe) {
 }
 
 /**
- * Candidate transcript files for the session family: the payload transcript plus recent
- * `*.jsonl` siblings in its directory and one level of subdirectories (subagent
- * transcripts land in per-session subfolders on some harness versions).
+ * Candidate transcript files for the session family — STRICTLY VERTICAL (see header):
+ * the payload transcript, plus its own subagents' transcripts (./<session-id>/*.jsonl)
+ * when the payload is a main session, plus the controller's transcript and same-subdir
+ * siblings when the payload is itself a subagent. Peer sessions never qualify.
  */
 export function familyTranscriptFiles(transcriptPath, nowMs = Date.now()) {
   const out = [];
   if (!transcriptPath) return out;
   out.push(transcriptPath);
-  let dir;
+  let dir, stem;
   try {
     dir = dirname(transcriptPath);
+    stem = basename(transcriptPath).replace(/\.jsonl$/i, "");
   } catch {
     return out;
   }
   const candidates = [];
-  const scan = (d, depth) => {
+  const consider = (p) => {
+    if (p === transcriptPath) return;
+    try {
+      const st = statSync(p);
+      if (nowMs - st.mtimeMs <= FAMILY_MAX_AGE_MS && st.size <= FAMILY_MAX_BYTES) {
+        candidates.push({ p, mtime: st.mtimeMs });
+      }
+    } catch {
+      /* unreadable — skip */
+    }
+  };
+  const scanDirFiles = (d) => {
     let entries;
     try {
       entries = readdirSync(d, { withFileTypes: true });
@@ -60,23 +81,22 @@ export function familyTranscriptFiles(transcriptPath, nowMs = Date.now()) {
       return;
     }
     for (const e of entries) {
-      const p = join(d, e.name);
-      if (e.isDirectory()) {
-        if (depth > 0) scan(p, depth - 1);
-        continue;
-      }
-      if (!e.name.endsWith(".jsonl") || p === transcriptPath) continue;
-      try {
-        const st = statSync(p);
-        if (nowMs - st.mtimeMs <= FAMILY_MAX_AGE_MS && st.size <= FAMILY_MAX_BYTES) {
-          candidates.push({ p, mtime: st.mtimeMs });
-        }
-      } catch {
-        /* unreadable sibling — skip */
-      }
+      if (!e.isDirectory() && e.name.endsWith(".jsonl")) consider(join(d, e.name));
     }
   };
-  scan(dir, 1);
+  // Main-session payload: its own subagents live in ./<session-id>/.
+  scanDirFiles(join(dir, stem));
+  // Subagent payload: the transcript sits INSIDE a session subdir — the controller is
+  // ../<subdir-name>.jsonl. Only then do subdir siblings (co-subagents) count too.
+  try {
+    const controller = join(dirname(dir), `${basename(dir)}.jsonl`);
+    if (existsSync(controller)) {
+      consider(controller);
+      scanDirFiles(dir);
+    }
+  } catch {
+    /* no controller shape — main-session case, nothing more to add */
+  }
   candidates.sort((a, b) => b.mtime - a.mtime);
   for (const c of candidates.slice(0, FAMILY_MAX_FILES)) out.push(c.p);
   return out;
