@@ -1,3 +1,11 @@
+## 2026-08-19 (Fable 5) — BOOKING push record: 4a51ed60 + 6c7b7a7f landing on main
+
+Operator: "BUILD IT WHEN THEY LAND AND PUSH". The full entry below ("BOOKING: 10-Sonnet
+crawl4ai wave…") rode a parallel session's SESSION_LOG commit; this line makes the push
+self-describing. All 10 acceptance renders re-run before push (10/10 pass, captures
+byte-identical — additive change; ALLOW_STALE_CAPTURE on the record); blast-chain red proof
+re-shown unpiped. Next: operator live-verify per build-queue Booking CTA line.
+
 ## 2026-08-19 (Fable 5) — PARKSHORE: compound-street matcher fixed at ALL 7 sites, DOM cell seated in price-improved, RULE 0.5c SCOPE-BEFORE-FIX decreed
 
 Operator screenshot: price-improved email for "767 Park Shore Dr, Naples 34103" rendered a
