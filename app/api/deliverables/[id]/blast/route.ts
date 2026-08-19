@@ -40,6 +40,7 @@ import { renderEmailDocHtml } from "@/lib/email/render-email-doc";
 import { applyBrand } from "@/lib/email/brand/apply-brand";
 import { brandingToTokens } from "@/lib/email/brand/branding-to-tokens";
 import { roleDestinationsFromBrand, type SavedDestinations } from "@/lib/email/button-destinations";
+import { offerTimesInDoc } from "@/lib/booking/offer-times";
 import { EmailDocSchema } from "@/lib/email/doc/schema";
 import { renderEmailDocToBuffer, pdfFilename } from "@/lib/pdf";
 import { logActivity } from "@/lib/project/activity";
@@ -315,6 +316,36 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{ id:
     } catch (err) {
       console.error("[blast] brand overlay failed — sending as-authored:", err);
     }
+    // ── TIME-OFFER (08/19/2026) ──────────────────────────────────────────────
+    // A booking button becomes the researched slot stack (3 real times + "see
+    // all times") when the agent's saved booking link serves public availability
+    // (cal.com /v2/slots — no credential; lib/booking/offer-times.ts). Send-time
+    // on purpose: availability must be fresh at SEND, not at build. Runs AFTER
+    // the overlay (the deep links are refinements of the saved destination, so a
+    // re-overlay keeps them) and BEFORE the ladder (the stack's URLs are never
+    // empty, so the ladder passes it through). SKIPPED when a CTA variant test
+    // is active — withCtaLabel relabels the FIRST button, which would stamp a
+    // marketing label over a time while keeping that time's deep link.
+    const ctaVariantActive = Boolean(variantTestRaw?.ctas && variantTestRaw.ctas.length > 0);
+    // The PDF renders from THIS doc, not the expanded one: a PDF is a durable
+    // file, and freezing perishable slot times into it leaves the recipient a
+    // permanent artifact with no "see all times" recovery once a slot is taken.
+    // The email's staleness is absorbed by the booking page; a PDF's is not.
+    const preOfferDoc = brandedDoc;
+    if (savedDestinations.booking && !ctaVariantActive) {
+      try {
+        const offered = EmailDocSchema.safeParse(
+          await offerTimesInDoc(brandedDoc, { bookingUrl: savedDestinations.booking }),
+        );
+        if (offered.success) brandedDoc = offered.data;
+        // Net +3 blocks: a doc at 18+ fails the 20-block schema cap here and the
+        // send falls back to the plain button. Log it — the overlay above logs
+        // its equivalent failure, and a silent skip reads as "no availability".
+        else console.error("[blast] time-offer doc failed schema (block cap?) — plain button");
+      } catch (err) {
+        console.error("[blast] time-offer enrichment failed — sending the plain button:", err);
+      }
+    }
     // Dead-link floor: any click-promising slot still empty at send time gets the
     // fallback ladder (listing page → brand site → hosted /p page). Every rung is
     // doc-held or the platform's own webUrl, so the url-lint below still admits
@@ -337,7 +368,17 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{ id:
           : [sendDoc];
     htmlByVariant = await Promise.all(docsToRender.map((d) => renderEmailDocHtml(d)));
     if (includePdf) {
-      pdfBuffer = await renderEmailDocToBuffer(sendDoc);
+      const pdfDoc =
+        preOfferDoc === brandedDoc
+          ? sendDoc // no expansion happened — reuse the laddered send doc as-is
+          : applyLinkFallbacks(preOfferDoc, {
+              listingUrl: subjectListingUrl(parsedDoc.data),
+              brandWebsiteUrl: brandWebsiteUrl(parsedDoc.data),
+              replyMailto: null,
+              hostedUrl: webUrl,
+              savedDestinations,
+            }).doc;
+      pdfBuffer = await renderEmailDocToBuffer(pdfDoc);
     }
   } else {
     // EmailDoc is the ONE email system (operator decree 07/19/2026). A deliverable
@@ -359,6 +400,11 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{ id:
     deliverable.narrative,
     deliverable.branding,
     webUrl,
+    // The agent's ACCOUNT-level saved destinations: the ladder and the
+    // time-offer lane both write these into the HTML, and the account profile
+    // is not part of the deliverable row — without this root, a booking link
+    // absent from the stored doc 422'd the send (second-order audit 08/19/2026).
+    savedDestinations,
   );
   const urlGate = lintCompiledHtml(baseHtml, allowedUrls);
   if (!urlGate.ok) {

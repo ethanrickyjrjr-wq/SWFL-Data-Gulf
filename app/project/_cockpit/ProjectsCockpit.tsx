@@ -25,6 +25,8 @@ import { CalendarCard } from "./CalendarCard";
 import { CampaignsCard } from "./CampaignsCard";
 import { SelectedProjectCard } from "./SelectedProjectCard";
 import { ShowingPrepCard } from "./ShowingPrepCard";
+import { BookingCard } from "./BookingCard";
+import type { BookingCardModel } from "@/lib/project/booking-card";
 
 /**
  * The hub center: MISSION CONTROL (spec 2026-07-16-hub-mission-control-design).
@@ -48,6 +50,7 @@ export function ProjectsCockpit({
   stats,
   initialPreview,
   digests,
+  booking,
 }: {
   projects: CockpitProject[];
   activeCount: number;
@@ -61,6 +64,9 @@ export function ProjectsCockpit({
    *  the context bus on selection change so Project AI actually knows the selected
    *  project on the hub, exactly like an open /project/[id] page. */
   digests: Record<string, ProjectDigest>;
+  /** The agent's saved booking-link state — resolved server-side off the same
+   *  `booking` role destination the email buttons use. */
+  booking: BookingCardModel;
 }) {
   const sel = useSelectedProject();
   const selected = projects.find((p) => p.id === sel?.selectedId) ?? projects[0] ?? null;
@@ -230,6 +236,11 @@ export function ProjectsCockpit({
                 (operator, 07/16/2026). The hub top-strip button row died with this;
                 Contacts moved to the rail's sticky footer the same day. */}
             {!empty && <ShowingPrepCard />}
+
+            {/* Booking — the saved booking-role link (or its setup nudge), same
+                aside-section chrome. Editing stays in /account/brand: one input
+                per destination, never two. */}
+            {!empty && <BookingCard booking={booking} />}
           </div>
         </aside>
       </div>

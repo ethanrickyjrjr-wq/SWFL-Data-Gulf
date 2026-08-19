@@ -6,6 +6,7 @@ import {
   isPlatformDestination,
   needsHouseConfirm,
   roleDestinationsFromBrand,
+  isDestinationRefinement,
 } from "./button-destinations";
 
 const AGENT = "https://myagentsite.com";
@@ -190,5 +191,29 @@ describe("brand round-trip", () => {
   test("a brand with no map at all is empty, never a throw", () => {
     expect(roleDestinationsFromBrand(null)).toEqual({});
     expect(roleDestinationsFromBrand({})).toEqual({});
+  });
+});
+
+describe("isDestinationRefinement — a deep link INTO a destination is still that destination", () => {
+  const BASE = "https://cal.com/jane/tour";
+  test("added query params refine; host and path both match", () => {
+    expect(
+      isDestinationRefinement(`${BASE}?date=2026-08-25&slot=2026-08-25T18%3A00%3A00.000Z`, BASE),
+    ).toBe(true);
+  });
+  test("identical URL refines trivially; trailing slash is cosmetic", () => {
+    expect(isDestinationRefinement(BASE, BASE)).toBe(true);
+    expect(isDestinationRefinement(`${BASE}/?x=1`, BASE)).toBe(true);
+  });
+  test("a different PATH is a different destination — deep pages don't count", () => {
+    expect(isDestinationRefinement("https://cal.com/jane/other?x=1", BASE)).toBe(false);
+  });
+  test("a different host never refines, lookalikes included", () => {
+    expect(isDestinationRefinement("https://cal.com.evil.co/jane/tour?x=1", BASE)).toBe(false);
+  });
+  test("unparseable either side is NOT a refinement — when unsure, the ladder wins", () => {
+    expect(isDestinationRefinement("nope", BASE)).toBe(false);
+    expect(isDestinationRefinement(BASE, "nope")).toBe(false);
+    expect(isDestinationRefinement(undefined, BASE)).toBe(false);
   });
 });

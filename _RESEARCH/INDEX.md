@@ -162,10 +162,39 @@ tables, and undocumented consumers. Also 07/18 site-audit, opus-pass, fanout-fix
   root 08/19/2026.
 
 **competitor-and-strategy/** — competitor + strategy research covering real company names and
-strategic analysis (26). **NOT local-only as of 08/11/2026** — the all-in-on-graphify decree
+strategic analysis (27). **NOT local-only as of 08/11/2026** — the all-in-on-graphify decree
 un-ignored `_RESEARCH/` and these files are TRACKED and ship publicly. The 07/17/2026 local-only
 decree that this line used to cite is SUPERSEDED. Write clean: no credentials, no client PII, no
 personal financial notes.
+- `2026-08-19-cal-diy-scheduling-widget-evaluation.md` — cal.diy (calcom's MIT community fork)
+  evaluated for the agent booking-widget idea. **Verdict: do not self-host** — it's the FULL
+  Cal.com monorepo (README: "strictly recommended for personal, non-production use"), not a
+  widget. Cheap path instead: one `booking_url` field in the brand-profile registry + free
+  hosted cal.com for agents without a link; official Cal.com embed snippet if inline booking is
+  ever wanted. Our projects-hub "schedule" surfaces are SEND schedules, unrelated to booking.
+- `2026-08-19-calcom-api-v2-slots.md` — follow-up to the cal.diy evaluation above: YES, real
+  slots are fetchable server-side. `GET /v2/slots?eventTypeId=<id>&start=&end=` (header
+  `cal-api-version: 2024-09-04`) is a fully unauthenticated public endpoint — no agent credential
+  needed, only their public `username`+`eventTypeSlug` (config, not secret). API keys look
+  self-serve for a free account but that's UNVERIFIED against a "Custom APIs" bullet gated to the
+  paid Teams tier in pricing copy. Platform/managed-user OAuth is DEAD — no new "Platform"
+  signups as of 12/15/2025. Booking-write (`POST /v2/bookings`) is also auth-optional but NOT
+  recommended as a bare email-click POST (link-scanner auto-click risk); route through a
+  confirmation landing step instead. Self-hosted cal.diy ships the identical `/v2/slots` surface.
+- `2026-08-19-booking-link-provider-landscape.md` — the booking-link landscape BEYOND Calendly
+  and Cal.com, for the provider-agnostic `booking_url` brand-profile field: Google Calendar
+  appointment schedules, Acuity Scheduling, TidyCal, SavvyCal, Zoho Bookings, Square Appointments,
+  Microsoft Bookings. Per provider: domain-detection shape, embeddability, URL prefill/deep-link
+  params, free-tier availability. **Acuity is the only provider with a documented exact-time deep
+  link** (`datetime=ISO8601`, no free tier); SavvyCal is next-best (`from=YYYY-MM-DD` date-level
+  deep link + full prefill, also no free tier). TidyCal is the best FREE-tier fidelity (embed +
+  name/email prefill). Google Calendar, Square Appointments, and Zoho Bookings all embed and have
+  free tiers but no documented prefill/deep-link params — Zoho's params are UNVERIFIED because
+  `help.zoho.com` pages returned empty content to crawl4ai (JS-rendered shell). Microsoft Bookings
+  embeds fine but has no standalone free tier (bundled in M365 Business Standard). Recommends
+  domain-sniffing all seven plus `calendly.com`/`cal.com`, building real deep-link construction
+  only for Acuity/SavvyCal, and rendering a plain T3 button for everyone else pending
+  re-verification.
 - `2026-08-11-standing-technology-rejections.md` — **READ BEFORE PROPOSING OR EVALUATING ANY
   TOOL/VENDOR/TECHNIQUE.** The standing "should we adopt X?" verdicts in one findable place:
   LangChain/LangGraph, CrewAI, Langflow, Dify, RAGFlow, n8n, Open WebUI, Gemini CLI, Llama,
@@ -488,7 +517,7 @@ personal financial notes.
   DB-backed cache pattern (`lib/figures/sourced.ts`). Recommends starting with cron + API route
   (zero new dependency) over adopting Workflows at this call volume.
 
-**email-and-social/** — email + social pipeline, platform safe zones, first-party verification (15)
+**email-and-social/** — email + social pipeline, platform safe zones, first-party verification (16)
 - `2026-08-11-freakonomics-seller-insights-crawl4ai-research.md` — pure-ideation crawl4ai sweep
   (4 parallel agents) on non-obvious seller-psychology angles: SWFL-buildable DOM-vs-price-cut
   correlation (real, zero new ingest), real per-property carrying-cost math, price-band
@@ -590,6 +619,25 @@ personal financial notes.
   miss. Closed the suspected X-landscape 1600×900 mismatch (false — 1200×630 is fine). Our 2.5s
   carousel pacing has zero evidence behind it; Baymard's usability research suggests 5-7s. Feeds
   `lib/social/CLAUDE.md` §0.4.
+- `2026-08-19-email-html-button-constraints.md` — laying out **2-4 side-by-side buttons that
+  stack on mobile** (time-slot picker), scoped past the single-CTA `button-link-mechanics.md`
+  below. From `caniemail.com`'s per-client Outlook breakdown: `border-radius`/`display:flex`/
+  `:grid` are **Not supported** only in classic desktop Outlook Windows + the Windows Mail app
+  (needs VML `RoundRect` for round corners there); Outlook macOS/webmail/iOS/Android all support
+  them natively — "New Outlook for Windows" (WebView2) isn't yet tracked by caniemail as its own
+  client, so its behavior is UNVERIFIED. `display:inline-block` and `@media` parsing both work
+  fine in classic Outlook (contrary to folk belief) — the recommended stack-on-mobile technique
+  is free `inline-block` wrapping, no flexbox and no `@media` breakpoint required. Current
+  non-VML button recipe (Mark Robbins/Good Email Code, updated 04/20/2023) verbatim in the file.
+  Dark mode: Gmail iOS does heuristic color INVERSION (not a controlled theme) with no clean
+  escape hatch short of a `mix-blend-mode` hack; Outlook web/mobile dark-mode overrides need
+  `[data-ogsc]`/`[data-ogac]`/`[data-ogsb]`/`[data-ogab]` attribute selectors, not just
+  `prefers-color-scheme` (unreachable in classic Outlook entirely); `color-scheme` CSS property
+  support is only 16.28%. Tap-target 42-72px reused from the companion file below (still the
+  only verified number — WCAG 2.5.8/2.5.5's 24×24/44×44 px could NOT be verified this session,
+  `w3.org` Cloudflare-blocked crawl4ai and the MDN mirror 404'd). Minimal recommended HTML shape
+  given verbatim. No existing multi-button-row component in `lib/email/blocks/` — only the
+  single-CTA `ButtonBlock.tsx`.
 - `2026-08-03-button-link-mechanics.md` — the LINK MECHANICS of a CTA (its companion file below
   covers CTA copy/placement). **Honest source count: 2 of 4 URLs returned content** — Email on Acid
   and Mailgun both 404'd on their URL-shortener articles (blogs folded into Sinch), so the
@@ -676,10 +724,52 @@ personal financial notes.
   precedent found using one — QR's real home stays the yard sign / on-site sign-in, per §2c and §7a).
   Two AI-content-farm pages (office.alibaba.com, events-places.com) were crawled, identified as
   fabricated/keyword-stuffed, and excluded from evidence rather than cited.
+- `2026-08-19-add-to-calendar-and-propose-times.md` — the zero-booking-provider fallback lane:
+  full verbatim Google (`render`/`eventedit`, `action=TEMPLATE`, `ctz`/`stz`/`etz`, structured
+  `location_name`) and Outlook Live/O365 deeplink params (confidence-marked, ~31k-char URL
+  ceiling measured), closing the two gaps the 08/12 file above left open. Adds the RFC 5545
+  `VEVENT` field spec (REQUIRED: `UID`+`DTSTAMP`; `LOCATION` optional, same field as the calendar
+  links' `location=`) and RFC 5546's `METHOD:PUBLISH` vs `METHOD:REQUEST` split (`REQUEST` renders
+  nicer in Outlook.com per a live MS Tech Community thread, but commits to real two-party RSVP
+  semantics — a trade-off, not a free upgrade). **New this pass, not previously checked:** our own
+  `client.batch.send` sends (`lib/email/outreach/send.ts`, `lib/email/weekly-read/send.ts`) can't
+  carry attachments at all per Resend's own docs — a raw `.ics` MIME attachment is a hard no for
+  our bulk sends, so a hosted `.ics` URL (Litmus's own pattern) is the only Resend-compatible
+  shape. Also specs the RFC 6068 `mailto:` "reply with a time" pattern (percent-encoding, not
+  form-encoding; `%0D%0A` line breaks; no-handler-registered fails silently). Pairs with
+  `_RESEARCH/competitor-and-strategy/2026-08-19-cal-diy-scheduling-widget-evaluation.md` as the
+  rung below its `booking_url` → free-hosted-cal.com ladder. Nothing of this is built yet (grep
+  confirmed zero hits for calendar-link/`.ics` shapes anywhere in `lib/` or `app/`).
+- `2026-08-19-email-time-slot-cta-patterns.md` — how Calendly, Mixmax, and HubSpot actually build
+  "clickable meeting times" in email. **Load-bearing finding: none of it is a live widget in the
+  email** — Calendly's own doc says its embed relies on JS/iframes "blocked by most email
+  platforms like Gmail, Outlook, Apple Mail, Mailchimp, HubSpot, and ActiveCampaign," so every
+  vendor generates a hand-picked stack (~3–6) of plain bulletproof `<a>` links in a compose-time
+  tool, then pastes/inserts them — the email itself stays dumb, portable HTML, same shape as our
+  own `ButtonBlock.tsx`. Mixmax documents the stale-slot conflict path directly: double-booking
+  protection shows the recipient a "choose another time" pop-up on click, not a dead link; both
+  Calendly and HubSpot lean on a standing full-scheduling-page link as the fallback rather than
+  promising pasted slots stay fresh forever. Timezone is baked into the HTML at insert time
+  (Mixmax's panel explicitly asks for the recipient's zone and converts before insert; Calendly has
+  a "Displayed time zone" control) — never computed client-side. No vendor published a sourced
+  conversion-rate number for this pattern; none invented here either. §6 translates this into a
+  no-JS, provider-agnostic recommendation for our own emails: 3–5 stacked slot buttons →
+  server-verified confirm page → fallback "see my full calendar" link below the stack.
 
 **private/** — personal/strategy notes outside the platform (3, stocks architecture)
 
-**real-estate-market/** — market mechanics, listing lifecycle, agent workflows (5)
+**real-estate-market/** — market mechanics, listing lifecycle, agent workflows (6)
+- `2026-08-19-showing-scheduling-ux.md` — booking-CTA research for the site+email booking feature:
+  four ask types (showing/tour, buyer consult, seller consult, open-house RSVP — open-house RSVP
+  gets its own post-event follow-up email per Schedly, not a CTA baked into the announcement);
+  CTA copy conventions (direct/benefit/social-proof registers, stage-matched, urgency only if
+  factually grounded — maps to our no-invention gate); CTA placement follows the property/listing
+  card, not a generic footer. ShowingTime/BrokerBay boundary we should NOT imply: MLS-integrated
+  lockbox access and listing-agent approval routing — our CTA should read "request a tour," never
+  "instant showing access." Compliance (sourced directly to nar.realtor + floridarealtors.org,
+  not any SEO blog): a written buyer agreement is required before a buyer *tours* a home (not
+  before a booking request), open-house walk-throughs are exempt until the agent is "working
+  with" that buyer. License-disclosure-near-CTA microcopy: not found, not asserted.
 - `2026-07-01-listing-lifecycle-marketing-research.md`
 - `2026-08-12-fl-appraisal-bpo-licensing-quotes.md` — QUOTE-GATHERING ONLY, no interpretation:
   verbatim FL/federal text on what counts as an appraisal (FS 475.611/475.612, 12 CFR 34.42), what
@@ -768,6 +858,10 @@ touched. Regenerate the full corpus map any time with `node scripts/doc-index.mj
 - `_RESEARCH/audits/2026-07-18-data-consolidation/P7-corpse-deletelist.md` — P7 — Platform Corpse Delete List — Stream: P7 (platform corpses). Author: Opus subagent, 2026-07-18. READ-ONLY audit.
 - `_RESEARCH/audits/2026-07-18-data-consolidation/P9-discoverability-wiring.md` — P9 — Discoverability Wiring (PLAN, do NOT apply) — build. Operator's rage: "every fucking Claude knows where to check first."
 - `_RESEARCH/competitor-and-strategy/2026-08-02-email-enrichment-vendor-scan.md` — B2B contact-enrichment vendor scan — the 9 named in Clay's waterfall (08/02/2026) — Operator asked to crawl4ai each vendor individually: Prospeo, DropContact, Datagma, Hunter,
+- `_RESEARCH/competitor-and-strategy/2026-08-19-calendly-embed-and-params.md` — Calendly embed options + URL parameters for brand-profile booking links — three embed types (inline/pop-up text/pop-up widget), iframe-only fallback works without widget.js but drops prefill/tracking, plain-link prefill params (name/first_name/last_name/email/location/a1-a10/guests) usable in email `<a href>`, hide_event_type_details/hide_gdpr_banner/color params, NO documented date-or-time URL param exists (checked the vendor's own complete prefill-variable table), Meeting Polls appears Free-tier, API availability endpoints need the agent's own PAT/OAuth grant.
+- `_RESEARCH/competitor-and-strategy/2026-08-19-calcom-embed-options.md` — Cal.com official embed options, pulled from source (`calcom/cal.diy` monorepo, docs moved to `cal.com/help/embedding/*`) — three modes (inline / element-click / floating-popup) with the exact loader IIFE + `data-cal-*` snippets; `@calcom/embed-react`'s `<Cal>` component and `getCalApi()` are plain `"use client"` React, drop into Next.js App Router as-is; `Cal("ui", {...})` config verbatim (`theme`, `hideEventTypeDetails`, `layout` BookerLayouts, `cssVarsPerTheme`, `showTimezoneWhenEventDetailsHidden`); NO API key/OAuth anywhere in the embed surface — any pasted `cal.com/<username>` link works as `calLink` (separate from API v2, which does need auth); self-hosted instances supported via `calOrigin` prop / `data-cal-origin` attribute + `embedJsUrl` for a non-default loader URL, only emitted when the origin differs from the hosted default.
+- `_RESEARCH/competitor-and-strategy/2026-08-19-calcom-selfhost-requirements.md` — Cal.diy / Cal.com self-hosting bill of materials, filed for LATER (not building now) — `calcom/cal.com` GitHub repo was RENAMED to `calcom/cal.diy` (confirmed via API, same repo id) — MIT, no EE split, confirmed via live `packages/` and `packages/features/` directory listing (no `ee`/`teams`/`organizations`/`insights`/`workflows` folders); cal.com's own docs site now covers ONLY the hosted API v2, no self-hosting docs survive there — the GitHub README is the sole deploy doc. Docker image ships via `calcom.docker.scarf.sh`, not directly off Docker Hub, whose listing shows zero pushed tags (checked live). Render's one-click deploy points at `calcom/docker`, which is ARCHIVED. Required env: DATABASE_URL, NEXTAUTH_SECRET, CALENDSO_ENCRYPTION_KEY (+ VAPID keys once push notifications are touched). SMTP via nodemailer, Office 365/Gmail configs verified working by the maintainers. Prisma `db-deploy` is the production migration path, no rollback story. Biggest strategic flag: no Teams/Organizations means NO grouping/permission layer between users on one instance — a "many independent agents, one shared install" pitch actually means N flat peer accounts with zero isolation, or N separate installs.
+- `_RESEARCH/competitor-and-strategy/2026-08-19-calcom-booking-url-params.md` — Cal.com plain-`<a href>` booking-page URL params, pulled straight from source (`packages/features/bookings/Booker/store.ts` + sibling hooks, not just prose docs) — `date` (`YYYY-MM-DD`), `month` (`YYYY-MM`), `slot` (ISO-8601 UTC datetime, must land on a real live-availability minute or it won't highlight — seconds ignored per `isSlotEquivalent.ts`) all CONFIRMED read straight off `getQueryParam` on page load, no embed JS needed; prefill params `name`/`email`/`notes`/`guests`/`attendeePhoneNumber`/`location={JSON}`/any custom-question identifier CONFIRMED via `cal.com/help/bookings/prefill-fields`'s own bare-`<a href>` example URL; `duration` (minutes, validated against the event type's own duration options, silently dropped if invalid) CONFIRMED; `theme` (`light|dark|system|auto`, applies directly on booking pages not just embeds) and `layout` (`month_view`/`week_view`/`column_view`, validated against the event's enabled layouts) both CONFIRMED in source; self-hosted instances run the identical `Booker` code path (HIGH confidence, not live-tested against a real self-hosted box). Static crawl4ai fetches of live booking pages came back empty (client-hydrated SPA) — confidence rests on source, not a rendered click-test.
 - `_RESEARCH/competitor-and-strategy/2026-08-04-followupboss-deep-crawl-extra1.md` — Take control of your pipeline and commissions — Start free trial
 - `_RESEARCH/competitor-and-strategy/2026-08-04-followupboss-deep-crawl-extra2.md` — Your dream team: Motivated, accountable & fun — Leaderboard makes it easy to know where everyone stands.
 - `_RESEARCH/competitor-and-strategy/2026-08-04-followupboss-deep-crawl-extra3.md` — Your data is safe and always yours. — We make security our business, so you can focus on yours.

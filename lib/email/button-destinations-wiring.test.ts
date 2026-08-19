@@ -399,3 +399,37 @@ describe("every button EMITTER declares a role", () => {
     expect(roleless).toEqual([]);
   });
 });
+
+// ── booking time-offer deep links (08/19/2026) ──────────────────────────────
+// lib/booking/time-buttons.ts emits engine-set buttons whose URL is the SAVED
+// booking destination plus slot query params (cal.com date/month/slot — the
+// research-verified preselect shape). Without a refinement guard the overlay
+// rewrote them back to the bare saved link, silently stripping the offered time.
+describe("a slot deep link into the saved booking destination survives the overlay", () => {
+  const SAVED = "https://cal.com/jane/tour";
+  const DEEP = `${SAVED}?date=2026-08-25&month=2026-08&slot=2026-08-25T18%3A00%3A00.000Z`;
+
+  test("engine deep link that refines the saved destination is kept, params intact", () => {
+    const out = applyBrand(doc({ role: "booking", label: "Tue · 2:00 PM ET", url: DEEP }), {
+      [destinationTokenKey("booking")]: SAVED,
+    });
+    expect(urlOf(out)).toBe(DEEP);
+  });
+
+  test("an engine URL on a DIFFERENT destination still takes the ladder", () => {
+    const out = applyBrand(
+      doc({ role: "booking", label: "Book", url: "https://stale-old-provider.example/x" }),
+      { [destinationTokenKey("booking")]: SAVED },
+    );
+    expect(urlOf(out)).toBe(SAVED);
+  });
+
+  test("refinement guard is role-agnostic: community deep link survives too", () => {
+    const savedCommunity = "https://agent.example/communities";
+    const deep = `${savedCommunity}?zip=33990`;
+    const out = applyBrand(doc({ role: "community", label: "Explore", url: deep }), {
+      [destinationTokenKey("community")]: savedCommunity,
+    });
+    expect(urlOf(out)).toBe(deep);
+  });
+});

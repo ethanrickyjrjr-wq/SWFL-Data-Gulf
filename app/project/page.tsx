@@ -15,6 +15,7 @@ import { renderEmailDocHtml } from "@/lib/email/render-email-doc";
 import { EmailDocSchema } from "@/lib/email/doc/schema";
 import { ImportDraftOnLogin } from "./_import/ImportDraftOnLogin";
 import { ProjectsCockpit } from "./_cockpit/ProjectsCockpit";
+import { bookingCardModel } from "@/lib/project/booking-card";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
@@ -37,34 +38,48 @@ export default async function ProjectListPage() {
   // Middleware already gates /project, but redirect here too (belt + suspenders).
   if (!user) redirect("/login?next=/project");
 
-  const [{ data }, { data: emailSch }, { data: socialSch }, { data: delivRows }, contactsRes] =
-    await Promise.all([
-      supabase
-        .from("projects")
-        .select(
-          "id, title, kind, items, updated_at, ui_state, branding, subject_address, subject_area",
-        )
-        .order("updated_at", { ascending: false }),
-      supabase
-        .from("email_schedules")
-        .select(
-          "id, project_id, status, cadence, day_of_week, day_of_month, send_hour_et, audience_slug, next_run_at, deliverable_id, scope_kind, scope_value, topic, last_run_at",
-        )
-        .in("status", ["active", "paused"]),
-      supabase
-        .from("social_schedules")
-        .select(
-          "id, project_id, status, cadence, day_of_week, day_of_month, send_hour_et, platform, next_run_at",
-        )
-        .in("status", ["active", "paused"]),
-      // Newest-first so the fold keeps the most-recent block-canvas doc per
-      // project (same tie-break the tool switcher uses).
-      supabase
-        .from("deliverables")
-        .select("id, project_id, template, created_at")
-        .order("data_as_of", { ascending: false }),
-      supabase.from("contacts").select("id", { count: "exact", head: true }),
-    ]);
+  const [
+    { data },
+    { data: emailSch },
+    { data: socialSch },
+    { data: delivRows },
+    contactsRes,
+    brandRes,
+  ] = await Promise.all([
+    supabase
+      .from("projects")
+      .select(
+        "id, title, kind, items, updated_at, ui_state, branding, subject_address, subject_area",
+      )
+      .order("updated_at", { ascending: false }),
+    supabase
+      .from("email_schedules")
+      .select(
+        "id, project_id, status, cadence, day_of_week, day_of_month, send_hour_et, audience_slug, next_run_at, deliverable_id, scope_kind, scope_value, topic, last_run_at",
+      )
+      .in("status", ["active", "paused"]),
+    supabase
+      .from("social_schedules")
+      .select(
+        "id, project_id, status, cadence, day_of_week, day_of_month, send_hour_et, platform, next_run_at",
+      )
+      .in("status", ["active", "paused"]),
+    // Newest-first so the fold keeps the most-recent block-canvas doc per
+    // project (same tie-break the tool switcher uses).
+    supabase
+      .from("deliverables")
+      .select("id, project_id, template, created_at")
+      .order("data_as_of", { ascending: false }),
+    supabase.from("contacts").select("id", { count: "exact", head: true }),
+    // The aside Booking card: the same saved `booking` role destination every
+    // email button resolves through (lib/email/button-destinations.ts).
+    supabase
+      .from("user_brand_profiles")
+      .select("button_destinations")
+      .eq("user_id", user.id)
+      .maybeSingle(),
+  ]);
+  const booking = bookingCardModel(brandRes.data);
 
   type HubProjectRow = ProjectRowInput & {
     ui_state: Record<string, unknown> | null;
@@ -162,6 +177,7 @@ export default async function ProjectListPage() {
         stats={stats}
         initialPreview={initialPreview}
         digests={digests}
+        booking={booking}
       />
     </>
   );

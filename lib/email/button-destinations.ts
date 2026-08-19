@@ -153,6 +153,30 @@ function sameHost(a: unknown, b: unknown): boolean {
   }
 }
 
+/**
+ * A deep link INTO a destination is still that destination. True when `url` and
+ * `base` share host + path and differ only in query/hash — the shape
+ * lib/booking/time-buttons.ts emits (slot params ADDED to the saved booking
+ * link, path untouched, by construction). The brand overlay uses this to keep a
+ * time-offer button's slot params instead of stripping them back to the bare
+ * saved link. A different path is a different promise; anything unparseable is
+ * NOT a refinement — when unsure, the ladder wins.
+ */
+export function isDestinationRefinement(url: unknown, base: unknown): boolean {
+  if (!has(url) || !has(base)) return false;
+  try {
+    const a = new URL(url.trim());
+    const b = new URL(base.trim());
+    const strip = (p: string) => p.replace(/\/+$/, "");
+    return (
+      a.hostname.toLowerCase() === b.hostname.toLowerCase() &&
+      strip(a.pathname) === strip(b.pathname)
+    );
+  } catch {
+    return false;
+  }
+}
+
 /** The brand-blob key the per-role destination map is saved under. snake_case to match
  *  every other branding field (website_url, business_address, …). */
 export const BRAND_DESTINATIONS_KEY = "button_destinations";

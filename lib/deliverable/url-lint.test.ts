@@ -62,3 +62,30 @@ describe("lintTextUrls (captions)", () => {
     expect(r.stripped).toBe("Tour it:  or https://client-site.com/listing");
   });
 });
+
+describe("refinement allowance — a deep link INTO an allowed page is that page (08/19/2026)", () => {
+  // The time-offer lane (lib/booking) appends date/month/slot to the agent's
+  // SAVED booking link. Exact-string membership alone 422'd the whole blast for
+  // exactly the agents with the best setup — found by second-order audit the
+  // day the lane shipped.
+  const BASE = "https://cal.com/jane/tour";
+  const DEEP = `${BASE}?date=2026-08-25&month=2026-08&slot=2026-08-25T18%3A00%3A00.000Z`;
+
+  test("query-only refinement of an allowed URL passes the compiled-HTML gate", () => {
+    const allowed = collectAllowedUrls({ booking: BASE });
+    const html = `<a href="${DEEP.replace(/&/g, "&amp;")}">Tue · 2:00 PM ET</a>`;
+    expect(lintCompiledHtml(html, allowed).ok).toBe(true);
+  });
+
+  test("same host, DIFFERENT path is still minted — the gate holds", () => {
+    const allowed = collectAllowedUrls({ booking: BASE });
+    const html = `<a href="https://cal.com/jane/other?x=1">nope</a>`;
+    expect(lintCompiledHtml(html, allowed).ok).toBe(false);
+  });
+
+  test("a lookalike host refining nothing is still refused", () => {
+    const allowed = collectAllowedUrls({ booking: BASE });
+    const html = `<a href="https://cal.com.evil.co/jane/tour?x=1">nope</a>`;
+    expect(lintCompiledHtml(html, allowed).ok).toBe(false);
+  });
+});

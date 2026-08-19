@@ -9,6 +9,7 @@
 // PURE — no I/O. Callers assemble the allowed set from what they hold:
 //   interactive render → strip + warn;  unattended send → fail the build.
 
+import { isDestinationRefinement } from "@/lib/email/button-destinations";
 import { BRAND_FONTS } from "@/lib/brand/fonts";
 
 export interface UrlViolation {
@@ -124,6 +125,16 @@ function isAllowedUrl(url: string, allowed: ReadonlySet<string>): boolean {
     if (PLATFORM_HOSTS.has(host)) return true;
   } catch {
     return false; // unparseable absolute-ish URL → not allowed
+  }
+  // A deep link INTO an allowed page is that page: same host + path, only
+  // query/hash added (isDestinationRefinement — the same rule the brand
+  // overlay's Guard 3 uses). The time-offer lane (lib/booking) appends
+  // date/month/slot to the agent's SAVED booking link; exact-string membership
+  // alone 422'd the whole blast for exactly the agents with the best setup
+  // (second-order audit, 08/19/2026 — the webfont ENGINE_URLS incident's shape,
+  // one lane over). A different path is a different promise and stays refused.
+  for (const base of allowed) {
+    if (isDestinationRefinement(u, base)) return true;
   }
   return false;
 }

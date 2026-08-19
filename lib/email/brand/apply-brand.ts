@@ -11,6 +11,7 @@
 import { PLATFORMS, platformMeta } from "@/lib/email/social/platforms";
 import { brandGlobalStyle } from "@/lib/email/brand/apply-brand-style";
 import {
+  isDestinationRefinement,
   buttonRoleOf,
   resolveButtonDestination,
   savedDestinationsFromTokens,
@@ -105,7 +106,14 @@ export function applyBrand(doc: EmailDoc, t?: Record<string, string>): EmailDoc 
         // honestly answer (community/listing, per Gmail's "recipients should know
         // what to expect when they click a link") — leaves whatever the engine set.
         // Never blank a live button.
-        if (resolved.url) props.url = resolved.url;
+        //
+        // GUARD 3 — an engine URL that REFINES the resolved destination (same
+        // host+path, only added query params — a time-offer slot deep link,
+        // lib/booking/time-buttons.ts) is kept: rewriting it to the bare saved
+        // link would silently strip the offered time (pinned in wiring test).
+        if (resolved.url && !isDestinationRefinement(url, resolved.url)) {
+          props.url = resolved.url;
+        }
       }
     } else if (b.type === "hero") {
       // Scope dressing (HERO_LABEL = the project's place/ZIP, added by the project
