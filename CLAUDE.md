@@ -266,29 +266,13 @@ Open obligations → `checks` ledger (`scripts/check.mjs`) · build queue →
 `_AUDIT_AND_ROADMAP/build-queue.md` · live signals → `https://swfldatagulf-ops.vercel.app` ·
 Goals 0–8 → Supabase `goals` table → `/ops/goals` (insert-only from sessions).
 
-# Brain Factory — non-negotiable rules
+# Brain Factory + ingest — rules live where the work is
 
-1. **Thin pipe** — downstream reads only `--- OUTPUT ---` of upstream, never branches.
-2. **Deterministic math, narrative prose** — numbers computed in code; LLMs synthesize only.
-3. **Atomic type-lift** — type changes ship with all-pack backfill in one commit.
-4. **`brain-input:*` bypass** forces Stage 2 composite to max.
-5. **Stale-upstream caveat** auto-appends + propagates `min(self, upstream)` confidence.
-6. **Cycle detection** — topological sort throws.
-7. **Validators gate writes** (spec-validator, facts-only-lint, inference-bait-lint,
-   smoothing-lint) — failure aborts, prior file stays intact.
-8. **Freshness token quoted on first response.**
-
-**Brain-first ingest gate:** no bulk ingest to `data_lake.*` without its consuming brain's
-`PackDefinition` in the same PR. **PROBE FIRST (ingest):** run the <1-min probe before any
-multi-minute ingest; guard load-bearing columns before any destructive replace
-(`docs/standards/data-and-build-bible.md` §0.1–0.2). **Pipeline-freshness:** every pipeline
-ships its GHA cron wrapper + `--dry-run` in the same PR (`docs/standards/pipeline-freshness.md`).
-**Operation Dumbo Drop:** source can't auto-ingest → ship the ODD-ready scaffold in the same PR
-(`docs/superpowers/plans/2026-06-05-operation-dumbo-drop.md`).
-
-**ZIP columns — 3 gates:** G1 `zip_code` from site address/lat-lon only (mailing ZIP =
-violation) · G2 derivable now → derive + backfill + wire, else park in deferred · G3 new
-`zip_code` on Tier-2 without consuming brain in same PR = violation.
+Factory non-negotiables (thin pipe · deterministic math · atomic type-lift · brain-input
+bypass · stale caveat · cycle detection · validators · freshness token) → `refinery/CLAUDE.md`,
+auto-loads on entry. Ingest gates (brain-first · probe-first · Gate-4 guards ·
+pipeline-freshness · ODD · ZIP 3 gates) → `ingest/CLAUDE.md`, plus write-time delivery via
+`.claude/hooks/lib/scoped-rules.mjs`. Full text: the archive.
 
 **SCOPE (locked 07/07/2026):** Lee (12071) + Collier (12021) are the core, data-rich counties;
 Hendry (12051) is a small minor addition. Charlotte/Glades/Sarasota are NOT real coverage — a

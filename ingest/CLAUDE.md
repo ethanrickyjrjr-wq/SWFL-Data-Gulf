@@ -44,6 +44,11 @@ This is the Python ingest island (dlt + DuckDB), zero TS coupling. Rules for wor
   SAME PR.
 - **After table creation:** `GRANT SELECT ON ALL TABLES IN SCHEMA data_lake TO service_role; NOTIFY pgrst,'reload schema';`
 - **Pipeline-freshness:** ship the GHA cron wrapper + `--dry-run` in the same PR.
+- **Operation Dumbo Drop:** source can't auto-ingest → ship the ODD-ready scaffold in the same PR
+  (`docs/superpowers/plans/2026-06-05-operation-dumbo-drop.md`).
+- **ZIP 3 gates:** G1 `zip_code` from situs address/lat-lon only (mailing ZIP = violation) ·
+  G2 derivable now → derive + backfill + wire, else park in deferred · G3 new Tier-2 `zip_code`
+  without its consuming brain in the same PR = violation.
 - **Creds** in `.dlt/secrets.toml`. **Migrations** via `new Bun.SQL` (psql is NOT installed), `sslmode=require`.
 - **Deno imports** only in `supabase/functions` (not here, but don't cross them).
 - New pipeline? Start from `ingest/scaffold.py` — fix it to default incremental-aware (it's the root of the replace spread).

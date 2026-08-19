@@ -30,7 +30,8 @@ export const SCOPED_RULES = [
     path: /(^|\/)(ingest|lib|refinery)\//i,
     content: /zip_?code/i,
     text:
-      "ZIP 3 gates (brain-platform CLAUDE.md): G1 situs address/lat-lon only — mailing ZIP is a " +
+      "ZIP 3 gates (ingest/CLAUDE.md + docs/standards/claude-rules-archive-2026-08-18.md): " +
+      "G1 situs address/lat-lon only — mailing ZIP is a " +
       "violation · G2 derivable now → derive+backfill+wire, else park in deferred · G3 new " +
       "Tier-2 zip_code needs its consuming brain in the same PR.",
   },
@@ -95,6 +96,14 @@ export const SCOPED_RULES = [
     text:
       "RULE 1 ask-first: anything touching live /api/b/* or the MCP surface needs operator " +
       "sign-off before push — consumers read these live.",
+  },
+  {
+    id: "sql-migrations-idempotent",
+    path: null,
+    content: /\b(CREATE\s+(TABLE|INDEX|SCHEMA)|ALTER\s+TABLE|DROP\s+(TABLE|INDEX))\b/i,
+    text:
+      "RULE 1 SQL migrations: run directly via `new Bun.SQL` (creds .dlt/secrets.toml; psql is " +
+      "NOT installed), ALWAYS idempotent (IF NOT EXISTS / OR REPLACE), verify row count after.",
   },
   {
     id: "react-set-state-in-effect",

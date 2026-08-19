@@ -1,3 +1,17 @@
+## 2026-08-19 (Fable 5) — NORTH STAR #3 executed: rule-diet step two — covered blocks leave the always-loaded CLAUDE.md
+
+Operator asked "what else is holding claude back" → per NORTH STAR, executed the next
+unfinished line (#3, shrink the always-loaded wall), no fresh diagnosis. Brain Factory
+8-rules + ingest-gates + ZIP-3-gates blocks left root CLAUDE.md (24,279 → 23,191 B); their
+content now lives ONLY where it fires: refinery/CLAUDE.md (+brain-input bypass, stale
+caveat, freshness token), ingest/CLAUDE.md (+ODD, +ZIP 3 gates), and the write-time table
+.claude/hooks/lib/scoped-rules.mjs (zip rule repointed off CLAUDE.md; NEW
+sql-migrations-idempotent rule, red-first, live-driven: DDL payload → rule printed, exit 0).
+111/111 hook tests pass. NOT covered this pass (stated, not rounded up): the RULE 0.x
+reasoning-time wall (~10KB) has no write trigger — needs a different lane than scoped
+injection. Next: operator push approval; then the NORTH STAR operator 5-minute verify list
+still stands (under-contract + coming-soon Lab renders).
+
 ## 2026-08-19 (Fable 5) — BOOKING push record: 4a51ed60 + 6c7b7a7f landing on main
 
 Operator: "BUILD IT WHEN THEY LAND AND PUSH". The full entry below ("BOOKING: 10-Sonnet

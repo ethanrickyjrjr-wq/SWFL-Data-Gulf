@@ -38,6 +38,14 @@ test("an already-fired rule is suppressed — once per session", () => {
   assert.equal(ids(m).includes("h-screen-dvh"), false);
 });
 
+test("DDL written into any file surfaces the idempotent-migration rule", () => {
+  const m = matchScopedRules(
+    "scripts/migrations/2026-08-19-foo.mts",
+    "await sql`CREATE TABLE data_lake.foo (id int)`",
+  );
+  assert.ok(ids(m).includes("sql-migrations-idempotent"));
+});
+
 test("no match → empty, never noise", () => {
   assert.deepEqual(matchScopedRules("lib/util/math.ts", "export const add = 1"), []);
 });
