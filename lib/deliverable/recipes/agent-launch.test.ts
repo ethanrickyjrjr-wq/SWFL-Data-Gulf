@@ -6,7 +6,11 @@ import { EmailDocSchema } from "@/lib/email/doc/schema";
 import { groupRows } from "@/lib/email/doc/row-grouping";
 import { compileGrid } from "@/lib/email/compile-grid";
 import { GRID_COLS } from "@/lib/email/grid-schema";
-import { CLAIM_PROHIBITION, auditClaims } from "@/lib/deliverable/claims";
+import {
+  CLAIM_PROHIBITION,
+  CLAIM_PROHIBITION_PHRASES,
+  auditClaims,
+} from "@/lib/deliverable/claims";
 import { FAVORABLE_FRAMING_POLICY } from "./shared";
 import type { EmailDoc, EmailBlock } from "@/lib/email/doc/types";
 import type { RecipeBuildContext } from "./index";
@@ -239,6 +243,12 @@ test("the narrator is TOLD the exact rule the lint enforces (CLAIM_PROHIBITION i
   await buildAgentLaunch(ctxFor(canvas()));
   expect(systemSeen).toContain(CLAIM_PROHIBITION);
   expect(systemSeen).toContain("NO NUMBERS");
+  // ...AND EVERY SHAPE BY NAME. This recipe is the one with the most to lose from a
+  // silent drift: `gateLetterProse` drops the WHOLE PARAGRAPH on a hit, so a lint shape
+  // the prompt never taught costs the agent their letter, not one clause of it.
+  for (const phrase of CLAIM_PROHIBITION_PHRASES) {
+    expect(systemSeen, `the narrator was never warned about: ${phrase}`).toContain(phrase);
+  }
 });
 
 // ── Task 6: the block stays OUT of this agent-spine recipe ──────────────────

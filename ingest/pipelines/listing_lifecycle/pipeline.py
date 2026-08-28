@@ -18,7 +18,7 @@ import re
 import sys
 from datetime import date, datetime, timezone
 
-from ingest.lib.guards import ContentContractError
+from ingest.lib.guards import ContentContractError, assert_fill_rate
 from ingest.quality.contracts import evaluate_batch
 from ingest.pipelines.listing_lifecycle import distill
 from ingest.pipelines.listing_lifecycle.distill import address_key_to_street
@@ -133,6 +133,14 @@ def run(*, dry_run: bool = False, only_county: str | None = None,
         if streetless_priors:
             print(f"[streetless] {len(streetless_priors)} old street-less-keyed rows held out of "
                   f"the diff — pending the re-key migration", flush=True)
+    # ── FILL BASELINE: stored non-null counts for the enrich-only columns, BEFORE any write.
+    # The 07/26/2026 incident: the nightly MERGE overwrote 34,139 of 34,478 enriched `baths`
+    # with NULL and nothing caught it for days. Every guard in ingest.lib.guards counts ROWS
+    # and stayed green — the row count never moved. contracts.evaluate_batch is blind too: it
+    # is PURE and never opens a DB connection, so it sees only the incoming batch, and the
+    # incoming /search rows are legitimately NULL-baths. Only stored before-vs-after sees it.
+    # Skipped in dry_run (nothing is written, so there is nothing to compare).
+    fill_before = {} if dry_run else distill.count_enrich_nonnull(source_name=src_name)
     totals = {"scanned": 0, "upserts": 0, "transitions": 0, "source_total": 0}
     budget_calls = 0
     sold_budget_remaining = SOLD_CHECK_CAP  # paid /property-tax-history calls left this run (shared across counties)
@@ -316,6 +324,22 @@ def run(*, dry_run: bool = False, only_county: str | None = None,
     if source == "api":
         print(f"[budget] this run = {budget_calls} SteadyAPI calls "
               f"(50,000/mo cap per dashboard 07/16/2026; ~8.6-10.3k/mo scheduled-scan burn)", flush=True)
+    # ── FILL GUARD (raise here, in the orchestrator — the same pattern LOCUS A states above:
+    # the only place that knows what a run is). Placed after the sold-price/listed_date
+    # backfill so it covers every write path in the run, not just upsert_state.
+    if fill_before:
+        fill_after = distill.count_enrich_nonnull(source_name=src_name)
+        for col, before_n in fill_before.items():
+            assert_fill_rate(
+                before_n,
+                fill_after.get(col, 0),
+                tolerance=0.01,
+                table=distill._STATE_TABLE,
+                column=col,
+            )
+        print(f"[fill-guard] enrich columns intact: "
+              + ", ".join(f"{c}={fill_after.get(c, 0):,}" for c in fill_before), flush=True)
+
     print(f"[done] {totals} dry_run={dry_run} source={source}", flush=True)
     if totals["scanned"] == 0:
         print("[fatal] every county returned 0 rows — failing loud (no silent fake-green)", flush=True)

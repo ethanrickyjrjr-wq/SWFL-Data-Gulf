@@ -69,6 +69,14 @@ def address_key_to_street(address_key: str) -> str:
 _STATE_TABLE = "data_lake.listing_state"
 _TRANS_TABLE = "data_lake.listing_transitions"
 _RAW_TABLE = "data_lake.steadyapi_property_history_raw"
+
+# Enrich-only columns: values that arrive from a SEPARATE, opportunistic enrich call and are
+# ABSENT from the nightly /search sweep rows. They survive the MERGE via COALESCE (see
+# upsert_state) — a blanket EXCLUDED overwrite NULLs them on the very next sweep. Module-level
+# and PUBLIC-by-convention because two things key off the one list: the COALESCE set clause AND
+# the post-merge fill guard (ingest.lib.guards.assert_fill_rate) that catches the COALESCE
+# silently breaking. Adding an enrich-only column here gets it BOTH protections at once.
+_ENRICH_ONLY_COLS = ("listed_date", "baths")
 SOURCE_NAME = "lifecycle_seed"  # neutral; never a vendor/board name (real origin lives in the secret)
 
 # Wide state columns the diff engine fills (everything except the SQL-managed first_seen/last_seen/
@@ -129,6 +137,44 @@ def _get_conn():
     if not db_url:
         raise RuntimeError("No DB URL. Set DATABASE_URL or ensure .dlt/secrets.toml is present.")
     return psycopg.connect(db_url)
+
+
+def count_enrich_nonnull(source_name: str = SOURCE_NAME) -> dict[str, int]:
+    """Stored non-null count per enrich-only column, for THIS source. Read-only.
+
+    One round trip: `count(*) FILTER (WHERE col IS NOT NULL)` per column in
+    _ENRICH_ONLY_COLS. Call immediately BEFORE the merge and again AFTER, and hand both
+    dicts to ingest.lib.guards.assert_fill_rate — that pair is the only thing that can see
+    the 07/26/2026 clobber, in which 34,139 of 34,478 enriched `baths` values were
+    overwritten with NULL while the row COUNT (and every volume guard) stayed green.
+
+    Scoped by source_name so a sibling source writing the same table can never mask a
+    collapse in ours. Column identifiers go through psycopg.sql.Identifier — never an
+    f-string — since the list is a module constant read by more than one caller.
+
+    Fails SOFT (returns {}) on any read error: this guard must never be the reason a
+    healthy run dies, and assert_fill_rate treats a missing baseline as BASELINE_UNAVAILABLE.
+    """
+    if not _ENRICH_ONLY_COLS:
+        return {}
+    try:
+        from psycopg import sql as pgsql
+
+        schema, _, tbl = _STATE_TABLE.partition(".")
+        select = pgsql.SQL(", ").join(
+            pgsql.SQL("count(*) FILTER (WHERE {} IS NOT NULL)").format(pgsql.Identifier(c))
+            for c in _ENRICH_ONLY_COLS
+        )
+        q = pgsql.SQL("SELECT {} FROM {} WHERE source_name = %s").format(
+            select, pgsql.Identifier(schema, tbl)
+        )
+        with _get_conn() as conn, conn.cursor() as cur:
+            cur.execute(q, (source_name,))
+            row = cur.fetchone() or ()
+        return {c: int(n or 0) for c, n in zip(_ENRICH_ONLY_COLS, row)}
+    except Exception as e:  # pragma: no cover - read path, fails soft by contract
+        print(f"[fill-guard] baseline read failed ({e}) — guard will skip this run", flush=True)
+        return {}
 
 
 def load_current_state(source_name: str = SOURCE_NAME) -> dict[tuple[str, str], dict[str, Any]]:
@@ -193,7 +239,6 @@ def upsert_state(
     # /property-tax-history backfill (07/18/2026). baths: DID wipe every enriched value nightly —
     # 34,139 of 34,478 rows were NULL-baths on 07/26/2026. COALESCE keeps the stored value unless
     # the incoming row actually has one.
-    _ENRICH_ONLY_COLS = ("listed_date", "baths")
     set_clause = ",\n          ".join(
         f"{c} = COALESCE(EXCLUDED.{c}, listing_state.{c})" if c in _ENRICH_ONLY_COLS
         else f"{c} = EXCLUDED.{c}"

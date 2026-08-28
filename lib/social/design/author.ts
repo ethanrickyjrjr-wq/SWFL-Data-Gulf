@@ -17,7 +17,12 @@ import { getAnthropic } from "@/refinery/agents/anthropic.mts";
 import { resolveEmailModel } from "@/lib/email/model-router";
 import { brandingToTokens } from "@/lib/email/brand/branding-to-tokens";
 import { fetchLakeParts, refreshStaleLakeContext, type BuildScope } from "@/lib/email/build-doc";
-import { loadListingContext, renderListingsBlock, pickFeatured } from "@/lib/listings/select";
+import {
+  loadListingContext,
+  renderListingsBlock,
+  pickFeatured,
+  featuredContextLine,
+} from "@/lib/listings/select";
 import { deriveListingPhoto } from "@/lib/media/listing-photo";
 import type { Listing } from "@/lib/listings/rentcast";
 import {
@@ -34,6 +39,7 @@ import {
 } from "@/lib/social/design/templates";
 import { designToSkeleton, applyDesignPatch } from "@/lib/social/design/serialize";
 import { lintTextUrls, collectAllowedUrls } from "@/lib/deliverable/url-lint";
+import { sourceClaims, gateDesignStats, warnDropped } from "@/lib/social/stat-anchor";
 import { isSocialFormat, type SocialFormat } from "@/lib/social/formats";
 import type { SocialDesign } from "@/lib/social/design/types";
 import type { GoalTone } from "@/lib/email/social-calendar/types";
@@ -96,7 +102,7 @@ ${SOCIAL_SOURCING_RULES}
 ELEMENT FIELD RULES (load-bearing — wrong field names are silently dropped):
 - Fill ONLY the element ids listed for your chosen template.
 - Use ONLY these field names: text/headline/subhead/kicker elements use "text"; stat elements use "value" and "label"; the button (cta) uses "text". No other field names (no prose, body, title, caption, alt).
-- Keep each stat value short (e.g. "$412K", "23 days").`;
+- A stat value must be the figure EXACTLY as the data above prints it ("$412,000", not "$412K") — never rounded, never abbreviated, never a figure the data does not contain. A stat tile has no room for a citation, so an unsourced number in one is dropped to an empty slot. Keep the value to a few words.`;
 }
 
 // ── parser ───────────────────────────────────────────────────────────────────
@@ -287,6 +293,22 @@ export async function authorSocialPost(
     const format = pickFormat(template, parsed.format, opts?.format);
     let design = template.build(tokens, format);
     design = applyDesignPatch(design, parsed.patch);
+
+    // THE STAT GATE (lib/social/stat-anchor.ts). Every numeral the model wrote into a
+    // STAT element must appear in the facts it was handed — a stat tile is baked into a
+    // PNG and cannot carry the inline citation four-lane's lane 3 depends on. Fail-closed
+    // to an OPEN SLOT, never a block: the post still ships, minus the unsourced figure.
+    // The featured listing's own cited figure joins the allow-set because `pickFeatured`
+    // can select a listing outside the top-4 that `renderListingsBlock` prints.
+    const statSources = sourceClaims(
+      lakeContext,
+      opts?.filesText,
+      featured ? featuredContextLine(featured) : null,
+    );
+    const gated = gateDesignStats(design, Object.keys(parsed.patch ?? {}), statSources);
+    warnDropped("social author canvas", gated.dropped);
+    design = gated.design;
+
     if (template.id === "listing-feature" && featured) {
       design = attachListingPhoto(design, featured);
     }

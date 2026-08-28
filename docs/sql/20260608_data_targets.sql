@@ -48,7 +48,10 @@ REVOKE ALL ON public.data_targets FROM anon, authenticated;
 --   • non-neutral target   → observed_direction <> 'neutral'
 --   • a neutral PRIOR is kept and scores as a persistence MISS (prior <> directional
 --     target) — matches computeSkillScore's "neutral prior counts as a persistence
---     miss" pin, making naive carry-forward harder to beat (lift = clean lower bound).
+--     miss" pin. NOTE (corrected 08/27/2026): that forced miss makes naive carry-forward
+--     WEAKER, hence EASIER to beat — lift is biased UPWARD (charitable to the system),
+--     NOT a clean lower bound. Derivation + measured magnitude live in the canonical
+--     scorer, refinery/lib/backtest/skill-baseline.mts. Behavior unchanged.
 CREATE OR REPLACE VIEW public.backtest_skill_by_slug AS
 WITH ordered AS (
   SELECT

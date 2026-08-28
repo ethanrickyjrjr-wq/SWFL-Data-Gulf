@@ -56,6 +56,23 @@ export interface SkillScore {
   n_persistence_correct: number;
   /** Scored denominator partitioned by source_tag (sums to n_calls). */
   n_calls_by_tag: Record<string, number>;
+
+  // ── the PAIRED 2x2 (system × persistence, over the one shared denominator) ─────
+  // `lift` is a difference of two accuracies measured on the SAME rows, so its
+  // uncertainty is a PAIRED question: only the discordant cells (n_system_only,
+  // n_persistence_only) carry information about the difference. The instrument
+  // emits the cells so callers quote uncertainty from the instrument instead of
+  // hand-computing it off n_correct/n_persistence_correct (which loses the
+  // pairing) or omitting it. Exact McNemar runs on the two discordant cells.
+  // The four cells sum to n_calls.
+  /** System correct AND persistence correct. */
+  n_both_correct: number;
+  /** System correct, persistence WRONG (a discordant cell — favors the system). */
+  n_system_only: number;
+  /** Persistence correct, system WRONG (a discordant cell — favors the null). */
+  n_persistence_only: number;
+  /** Both wrong. */
+  n_neither: number;
 }
 
 /**
@@ -89,6 +106,10 @@ export function computeSkillScore(calls: ScoredCall[]): SkillScore {
   let n_persistence_correct = 0;
   let lt_n = 0;
   let lt_correct = 0;
+  let n_both_correct = 0;
+  let n_system_only = 0;
+  let n_persistence_only = 0;
+  let n_neither = 0;
   const n_calls_by_tag: Record<string, number> = {};
 
   // Group by slug.
@@ -112,18 +133,51 @@ export function computeSkillScore(calls: ScoredCall[]): SkillScore {
       const target = ordered[k + 1];
       if (target.observed === "neutral") continue; // inconclusive target — drop, but it stays a prior
 
-      // EDGE (intentional, conservative): when the PRIOR observation was neutral,
-      // preds[k].predicted is "neutral" — so the persistence null predicts neutral
-      // against this directional target and scores as a MISS below (neutral never
-      // equals bullish/bearish). We do NOT skip such persistence predictions. That
-      // makes the naive carry-forward HARDER to beat, so `lift` is a clean lower
-      // bound on system skill rather than an inflated one. Pinned by the
-      // "neutral prior ... counts as a persistence miss" test.
+      // EDGE (intentional, but CHARITABLE to the system — corrected 08/27/2026):
+      // when the PRIOR observation was neutral, preds[k].predicted is "neutral", so
+      // the persistence null predicts neutral against this directional target and
+      // scores as a MISS below (neutral never equals bullish/bearish). We do NOT
+      // skip such rows: the row stays in the SHARED denominator (n_calls++), the
+      // null is structurally unable to score it, and the system scores it at its
+      // own base rate.
+      //
+      // THE PRIOR COMMENT HERE HAD THIS BACKWARDS. A forced miss makes the naive
+      // carry-forward WEAKER, therefore EASIER to beat — it depresses
+      // persistence_accuracy while system_accuracy falls only at its base rate. So
+      // `lift` is biased UPWARD, not downward; it is NOT "a clean lower bound on
+      // system skill." Do not re-invert this.
+      //
+      // It is not a clean bound in EITHER direction. Writing n' for the scored rows
+      // excluding this one, A = (n_correct' - n_persistence_correct') for those
+      // rows, and x ∈ {0,1} for whether the system got THIS row right, including it
+      // raises lift iff n'·x > A. So a single row the system also misses can deflate
+      // lift when the system is already ahead (A > 0). In EXPECTATION it inflates:
+      // with system base rate p and persistence base rate q on the other rows,
+      // n'·p > n'·(p - q) holds whenever the null hits at least once elsewhere.
+      // Direction pinned by the "neutral-prior row biases lift UPWARD" test.
+      //
+      // MAGNITUDE (attributed, not re-measured here): on the reconciled corpus
+      // logged in SESSION_LOG (N=138 / system .4203 / persistence .4855 / lift
+      // -.0652), exactly 1 of 138 scored rows has a neutral prior, and the system
+      // happens to get it right. Excluding it: 57/137 vs 67/137, lift -7.3pp against
+      // the reported -6.5pp. Tiny here, but the sign of the bias is the point — the
+      // published lift flatters the system by ~0.8pp on that corpus.
+      //
+      // Behavior is UNCHANGED by this correction: n_calls semantics are load-bearing
+      // for every historical number and for the SQL mirrors in
+      // docs/sql/20260608_{glass_views,data_targets}.sql. Only the reasoning was
+      // wrong. Also pinned by the "neutral prior ... counts as a persistence miss"
+      // test, which remains correct as a statement of BEHAVIOR.
       n_calls++;
-      n_calls_by_tag[target.source_tag] =
-        (n_calls_by_tag[target.source_tag] ?? 0) + 1;
-      if (target.correct) n_correct++;
-      if (preds[k].predicted === target.observed) n_persistence_correct++;
+      n_calls_by_tag[target.source_tag] = (n_calls_by_tag[target.source_tag] ?? 0) + 1;
+      const sysOk = target.correct;
+      const persOk = preds[k].predicted === target.observed;
+      if (sysOk) n_correct++;
+      if (persOk) n_persistence_correct++;
+      if (sysOk && persOk) n_both_correct++;
+      else if (sysOk) n_system_only++;
+      else if (persOk) n_persistence_only++;
+      else n_neither++;
       if (target.source_tag === "lake_tier1") {
         lt_n++;
         if (target.correct) lt_correct++;
@@ -132,8 +186,7 @@ export function computeSkillScore(calls: ScoredCall[]): SkillScore {
   }
 
   const system_accuracy = n_calls > 0 ? n_correct / n_calls : 0;
-  const persistence_accuracy =
-    n_calls > 0 ? n_persistence_correct / n_calls : 0;
+  const persistence_accuracy = n_calls > 0 ? n_persistence_correct / n_calls : 0;
   const lake_tier1_accuracy = lt_n > 0 ? lt_correct / lt_n : 0;
 
   return {
@@ -146,5 +199,9 @@ export function computeSkillScore(calls: ScoredCall[]): SkillScore {
     n_correct,
     n_persistence_correct,
     n_calls_by_tag,
+    n_both_correct,
+    n_system_only,
+    n_persistence_only,
+    n_neither,
   };
 }

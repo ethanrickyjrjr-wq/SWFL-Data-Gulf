@@ -66,9 +66,16 @@ def _read_raw_files(raw_dir: Path) -> list[dict]:
         "record_date": {"data_type": "date"},
         "consideration_usd": {"data_type": "decimal"},
         # json data_type keeps grantor/grantee lists as a single JSONB column instead
-        # of spawning dlt child tables — preserves the source "..." truncation marker.
+        # of spawning dlt child tables.
         "grantors": {"data_type": "json"},
         "grantees": {"data_type": "json"},
+        # The party lists are ELIDED AT SOURCE past two names (16.07% of rows, measured
+        # 08/27/2026 — see normalize.py's module docstring). normalize.py strips the
+        # literal "..." marker and sets these flags, so a short list is never mistaken
+        # for a complete one. Hinted explicitly because an all-complete raw drop would
+        # otherwise leave dlt unable to infer the type and drop the columns entirely.
+        "grantors_complete": {"data_type": "bool"},
+        "grantees_complete": {"data_type": "bool"},
     },
 )
 def lee_deed_official_records_resource(

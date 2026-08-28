@@ -351,6 +351,15 @@ async function main(): Promise<void> {
   console.log(`   system accuracy      = ${pct(skill.system_accuracy)} (N=${skill.n_calls})`);
   console.log(`   persistence accuracy = ${pct(skill.persistence_accuracy)} (N=${skill.n_calls})`);
   console.log(`   LIFT (system − naive)= ${(skill.lift * 100).toFixed(1)} pp`);
+  // Paired 2x2 straight from the instrument — `lift` is a difference over the SAME
+  // rows, so only the two DISCORDANT cells carry information about it. Quote these
+  // rather than hand-computing uncertainty off the marginals.
+  console.log(
+    `   PAIRED 2x2 (sys×naive): both=${skill.n_both_correct} ` +
+      `system-only=${skill.n_system_only} naive-only=${skill.n_persistence_only} ` +
+      `neither=${skill.n_neither}  → discordant=${skill.n_system_only + skill.n_persistence_only} ` +
+      `(the only rows that move lift; exact McNemar runs on these two)`,
+  );
   console.log(
     `   BEATS NAIVE? ${skill.lift > 0 ? "YES" : skill.lift === 0 ? "TIE" : "NO — the call logic needs work before weighting does"}`,
   );

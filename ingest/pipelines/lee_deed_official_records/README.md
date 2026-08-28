@@ -54,8 +54,8 @@ using the mapping below. `length` can be overridden above the default page size 
 | 3 | status | `V` = verified/active observed |
 | 4 | consideration | raw string e.g. `$304,900.00`; many rows are `$10.00` (non-arm's-length transfer — quitclaim/family/trust) |
 | 5 | (blank in samples) | unconfirmed |
-| 6 | grantor(s) | HTML-joined by `<div class="nameSeperator"></div>`; **truncates to 2 names + literal `"..."` if more than ~3 parties** — a real data-completeness gap, not yet worked around |
-| 7 | grantee(s) | same truncation behavior as grantor |
+| 6 | grantor(s) | HTML-joined by `<div class="nameSeperator"></div>`; **elided at source to 2 names + a literal `"..."` whenever the instrument has MORE THAN TWO parties** — see "The party-list elision" below |
+| 7 | grantee(s) | same elision behavior as grantor, independently |
 | 8 | record date | prefixed `nobreak_` in raw response |
 | 9 | doc type | prefixed `nobreak_` |
 | 10 | book type | e.g. `O` |
@@ -80,6 +80,52 @@ Cleaning needed on every string field: strip `nobreak_` / `hidden_legalfield_` /
 `unclickable_` prefixes; split multi-party fields on the `nameSeperator` div; strip remaining HTML
 tags from the legal field (parcel STRAP sits after the separator, don't truncate it — an early
 version of this extraction did and lost the STRAP for single-parcel legals).
+
+## The party-list elision — MEASURED 08/27/2026, and what we do about it
+
+The grid caps every party list at **TWO** real names and appends a literal `"..."`
+when the instrument has more. An earlier version of this README said "more than ~3
+parties"; **that was wrong** — measurement below. A three-party deed already loses a
+party.
+
+Measured over all 22 committed `raw/*.json` (28,186 rows, 07/13–08/11/2026):
+
+| slice | rows | elided | share |
+|---|---|---|---|
+| all doc types | 28,186 | 4,529 | **16.07%** |
+| grantor side | 28,186 | 3,190 | 11.32% |
+| grantee side | 28,186 | 1,563 | 5.55% |
+| both sides on one row | 28,186 | 224 | 0.79% |
+| **DEED only** (what the consuming pack serves) | 5,353 | 1,390 | **25.97%** |
+
+Shape of the marker: **4,753 elided lists, every one exactly length 3 with `"..."`
+last.** Not one other variant, not one other position, no unicode ellipsis, no name
+merely ending in dots. The source never emits three real names.
+
+**Both capture methods elide identically — the Export path does NOT fix it.** On the
+like-for-like DEED slice: XHR-capture 54/191 = 28.27%, xlsx-Export 1,336/5,162 =
+25.88%. (No instrument appears in both capture methods — zero `clerkFileNumber`
+overlap — so this is a rate comparison, not a row-level one.) "Prefer the export
+path" is a dead lead.
+
+**What the pipeline now does** (`normalize.py` `split_parties`): strips the marker
+from the names array and records the elision as `grantors_complete` /
+`grantees_complete`. The transform is bijective — `["A","B","..."]` ↔ `["A","B"]` +
+`complete=False` — so nothing is lost, and no bogus party literally named `"..."`
+ever ships into the lake or a deliverable. Polarity is `_complete`, not the inverse,
+so a NULL/absent flag reads falsy = "not known complete" = the conservative answer.
+Per-side because the two sides are elided independently.
+
+This makes the loss **legible**. It does not **recover** it — the source never sent
+the missing names, and with FETCH Akamai-blocked there is no second lane to ask.
+Full party lists would need the recorded instrument image itself (a per-document
+lookup), which is not built.
+
+**Not yet live:** `migrations/20260827_lee_deed_party_list_completeness.sql` and the
+matching `docs/sql/20260812_lee_records_addressed_v.sql` update are WRITTEN, NOT RUN.
+Until they are applied and the LOAD pipeline re-runs, the 28,186 rows already in
+`data_lake.lee_deed_official_records` keep the old shape (marker still inside the
+JSONB array, flags NULL).
 
 ## Delivery mechanism — the actual blocker
 
@@ -161,8 +207,12 @@ unattended cron.
 
 ## Open items before this becomes a real pipeline
 
-- Grantor/grantee truncation past ~3 parties (need to check if `Advance Legal` or a raw
-  book/page lookup exposes full party lists, or if this is an accepted gap).
+- ~~Grantor/grantee elision past ~3 parties~~ **MEASURED + MADE LEGIBLE 08/27/2026**
+  (16.07% of rows; the cap is TWO names, not three — see "The party-list elision"
+  above). The elision is now flagged per side instead of stored as if complete.
+  STILL OPEN: actually RECOVERING the missing names would need the recorded
+  instrument image via a per-document lookup — not built, not attempted, and behind
+  the same Akamai wall as the FETCH.
 - `ShowCaptcha=True` behavior at sustained volume — untested beyond a handful of searches in one
   session.
 - Whether Collier's clerk runs the same LandMarkWeb platform (would reopen the Collier deed-feed

@@ -1,3 +1,146 @@
+## 2026-08-28 (Opus 5) — OPERATOR: "Community crosswalk"
+
+He picked the crosswalk lane off my own (wrong) suggestion. Reading the playbook killed my
+suggestion: `docs/standards/community-crosswalk-playbook.md` line 35 says verbatim "don't propose
+a bigger regex. The names genuinely don't carry the relationship." Embeddings + reranker is the
+SAME class of move the playbook already measured dead. The answer is geometry, not similarity.
+STRIKE SHAPE: proposed-a-lane-the-playbook-already-closed — I named the playbook in my own
+CLAUDE.md reference table and still proposed against it before opening it.
+
+MEASURED STATE 08/28/2026 (the playbook's own status list says go check, don't trust it):
+- `community_crosswalk_live_verify` WAS LYING FOR 15 DAYS. It sat in the VERIFY class — the class
+  that means "built, awaiting the operator's 2-minute check" — over an empty spec. It was minted
+  by `scripts/new-build.mjs:103`, which opens `<slug>_live_verify` at SPEC time, before any code.
+  The spec (`docs/superpowers/specs/2026-08-12-community-crosswalk-design.md`) is 7 lines with
+  Problem/Goal/What-we're-building all BLANK. RE-CLASSED to task with the measurement, 08/28.
+  THIS IS A LEDGER-INTEGRITY DEFECT WITH A KNOWN CAUSE, not a one-off: new-build.mjs's own header
+  comment records 251 `*_live_verify` rows ever created and NOT ONE carrying a signal. NORTH STAR
+  #2 hands him a punch list off this class; every spec-time mint in it is a false item that costs
+  him a trip. The guard is minting spec-time rows as `task` and promoting to `verify` only when
+  code lands — NOT another scratchpad line.
+- Ingest: NOT landed. `ingest/pipelines/county_planning_swfl/` is `__pycache__` only (orphan
+  bytecode, already flagged in `corridor_grounded_registry_entry_owed`). No registry entry.
+  No boundary root in `docs/standards/data-roots.md`. No `planned_developments` /
+  `lee_planned_developments` / `pd_boundaries` in `data_lake` (limit-1 probe on the data_lake
+  schema — a head/count probe returns null-without-error and CANNOT prove absence; the public
+  default schema also can't see lake tables, which is the same shape as the broken startup signal).
+- Collier equivalent: still unconfirmed. NOT re-searched today (playbook line 54 forbids
+  re-running it from zero).
+- Spatial join: not built. `lib/geo/ray-cast.ts` EXISTS and is production-wired today for
+  listing-to-vendor-neighborhood polygon pairing — reuse it, don't reach for PostGIS.
+
+SOURCE RE-VERIFIED LIVE 08/28/2026 (Lee DCD PlannedDevelopments FeatureServer):
+  1,629 features total (1,627 on 08/12/2026), 1,207 IMS_STATUS='Approved', esriGeometryPolygon,
+  wkid 2237 = NAD83 FL State Plane West in FEET — reproject to WGS84 before joining our lat/lon.
+  CASE_NAME / ZONING_CATEGORY / INPUTMETHOD / ACRES all present as the playbook documented.
+  Scope caveat stands: unincorporated Lee only — Cape Coral, Fort Myers, Bonita Springs NOT
+  fully covered, so this NEVER becomes "the community answer for Lee."
+
+Nothing built this session. Ingest writes are ask-first (RULE 1); awaiting his word.
+
+## 2026-08-28 (Opus 5) — OPERATOR: "How the fuck are none of these useful in this fucking project"
+
+Re: the "The Real Charts" artifact (HF top-75 models + top-75 datasets, field-audited 08/27).
+He is RIGHT about the artifact and WRONG about the sweep, and I own both halves:
+
+- The artifact was built to answer "what is actually on the charts and why" — a popularity
+  autopsy. It was never a fit-search for us, and nothing in it says so on the page. Handing
+  him a 150-row audit whose usefulness-to-us column does not exist reads as 150 agents spent
+  on nothing. THAT is the defect: a research artifact that does not carry its own "so what for
+  US" column is indistinguishable from waste at a glance.
+- But 4 of the 150 DO land on named, open, measured problems here, and I had to go look to
+  find that — which proves the point above:
+  1. rank 1/4/7/17 (all-MiniLM-L6-v2, bge-small-en-v1.5, bge-m3, bge-reranker-v2-m3) —
+     CORRECTED 08/28 BY RUNNING IT (`bun refinery/tools/verify-pgvector.mts`, exit 0). I said
+     "the receiver sits empty." IT IS NOT EMPTY. Measured live 08/28/2026:
+       - 45 rows, ALL model=voyage-3, ALL embedded_at 2026-05-17T05:27:59Z — ONE run, 103 days
+         ago, never repeated. vocab_schema_version 1.0.0 on every row.
+       - the vocabulary now loads 336 concepts. 45 of 336 embedded = 291 concepts (86.6%) have
+         no vector at all. The paid rung WAS wired once and then went stale, which is worse than
+         never-wired: `npm run triage -- --vector` will happily rank against a 13.4% index.
+       - vocab meta declares concept_count 299 while the loader returns 336 — a stale counter in
+         the vocab file itself, found in passing, NOT yet run to ground.
+     The free-rung case is stronger than I first wrote, because the swap seam already exists:
+     `refinery/lib/embedder.mts` is a 4-member interface (model/dim/embed/similarity) with a
+     documented P4b drop-in (`makeVectorRanker`) and a nullEmbedder that fails loud. A local
+     provider is ONE file implementing that interface.
+     DIM IS THE CONSTRAINT, verified live against the HF API 08/28/2026:
+       - BAAI/bge-m3 — MIT, hidden_size 1024 — EXACT match for the existing vector(1024) column.
+         No schema change. The only one of the four that drops in.
+       - all-MiniLM-L6-v2 (apache-2.0) and bge-small-en-v1.5 (MIT) are both 384-dim — the
+         migration's own comment forbids mixing dims in one column, so either needs a sibling
+         table. Cheaper models, more work.
+       - bge-reranker-v2-m3 — apache-2.0 (reranker; no dim constraint).
+     Licenses above are VERIFIED (huggingface.co/api/models/<id>, 08/28/2026). Still unverified
+     for the Chronos and Qwen-VL picks below.
+  2. same four — community crosswalk. String-stemming was MEASURED near-useless (23 of 20,369
+     collapsed, playbook line 32). Embeddings + a cross-encoder rerank is the untried lane.
+  3. rank 8/56/67 (amazon/chronos-2, chronos-bolt-small) — zero-shot time-series baseline for
+     the direction call that currently LOSES to naive persistence (open check, 42.0% vs 48.6%,
+     N=138). A foundation forecaster is the obvious third arm of that bake-off.
+  4. rank 43/61 (Qwen2.5-VL-7B, Qwen3-VL-8B) — deed/LeePA scan reading; docling already won
+     that lane in the 08/27 sweep, so this is a bake-off contender, not a new direction.
+- LICENSE STATUS: the four embedding/rerank picks in (1) are VERIFIED clean (MIT / apache-2.0,
+  HF API 08/28/2026). Chronos and Qwen-VL are NOT verified. The 08/27 sweep's own top finding is
+  that a downloads ranking hides six distinct license traps — nothing unverified is cleared to wire.
+
+STANDING FIX (not a new plan): every research artifact from here carries a "what open problem
+here does this touch, or NOTHING" column, filled per row. An audit without it costs him a
+session to re-derive.
+
+## 2026-08-27 (Opus 5) — OPERATOR: "Fan out and fix it all"
+
+Answering the 35-agent HF sweep's defect list. N=6 enumerated (the 7th, _RESEARCH/INDEX.md's
+"GITIGNORED / write freely" header sitting on a TRACKED PUBLIC repo, was fixed earlier this session):
+
+  1. marketbeat_swfl GATED DEAD — marketbeat-swfl-source.mts:191 wants verified===true, loader.py
+     never writes it; 261 rows across 3 sources reach the brain NEVER (check ceiling_marketbeat_swfl).
+     DIAGNOSE-FIRST brief: `verified` most likely means "a human checked this number" — mass-flipping
+     it would LAUNDER unverified data into a product that sells cited facts. Agent is forbidden from
+     bulk-flipping the flag or removing the gate; a "this is your decision, here are the options"
+     report is an explicitly complete outcome.
+  2. skill-baseline.mts:115-121 comment INVERTED — a neutral-prior row forces a persistence miss,
+     which INFLATES lift; the comment claims it is "a clean lower bound". 1/138 rows, so tiny in
+     magnitude, but the honest direction-call figure is -7.3pp not -6.5pp. Fix the COMMENT, not the
+     scoring (changing n_calls semantics would silently move every historical number). Plus: make
+     computeSkillScore emit the paired 2x2 so callers quote uncertainty instead of hand-computing it.
+  3. claims.ts COMPARATIVE_PHRASE omits strongest/fastest — "This is the strongest quarter in five
+     years" passes clean (verified by RUNNING auditClaims, not by reading it). Ship ONLY the scoped
+     PERIOD_SUPERLATIVE pattern; bare-word additions are BANNED (measured: three honest,
+     quantity-free sentences go clean -> whole-paragraph dropped, reopening the covered-lanai wound).
+     Also fix the 3 lockstep tests asserting toContain(CLAIM_PROHIBITION) — containment, never
+     CONTENT, so they stay GREEN while the invariant they claim to enforce is false.
+  4. SOCIAL path has NO no-invention gate of any kind (claims.ts:53 self-documents it) — rated
+     HIGHER severity than #3 by the kill pass. Reuse auditClaims; never fork it.
+  5. ingest null-rate assertion (check ingest_null_rate_assertion) — the 34,139-row null clobber of
+     07/26/2026 had no detector. Search for an existing guard BEFORE building one, and WIRE it:
+     "built beside each other and never connected" is this repo's most-repeated failure shape.
+  6. Lee deed grantor/grantee party-list clipping (README line 57) — more than ~3 parties stores
+     2 names plus a literal marker, and reads downstream as a COMPLETE list. We cannot restore what
+     the source never sent; the fix is making it impossible for a consumer to read it as complete.
+     Agents forbidden from touching the county surface (Akamai, settled three ways).
+
+Every brief carries: TDD-first with the RED output pasted, read-the-file-before-asserting (RULE 0.5),
+explicit paths only (6 sibling worktrees are live), NO COMMIT, NO PUSH, no writes to data_lake.*,
+no paid runs, no county fetches.
+## 2026-08-27 (Opus 5) — OPERATOR: "fan out 5 sonnets at a time 7 times and see what we can find on hugging face website that can help us"
+
+NORTH STAR #5 (ADOPT NOTHING NEW FOR 30 DAYS, from 08/19) covers this — day 8 of 30. I raised it
+in ONE sentence and offered three scopes; he chose "Everything on HF, full sweep." FREEZE IS
+LIFTED FOR THE SWEEP ONLY — the deliverable is a shortlist with verdicts; wiring anything is
+still his word, and NORTH STAR #5 otherwise stands for the remaining 22 days.
+Sweep shape (35 sonnets, 5x7): W1 doc/PDF/OCR · W2 entity+address matching/embeddings ·
+W3 tabular+datasets (imputation framing) · W4 open text models vs our Anthropic calls ·
+W5 frameworks/harnesses/memory/eval/Spaces · W6 depth on finalists · W7 adversarial kill pass.
+Two HARD pre-filters in every brief, both learned before dispatch, not after:
+(1) LICENSE — we SELL sends, so `-nc-` is fatal; microsoft/layoutlmv3-base (508 likes, the
+    obvious doc-AI pick) is cc-by-nc-sa-4.0 and was the #2 hit on the very first query.
+(2) HARDWARE — measured this box for the first time: RTX 4060 Ti 16GB VRAM, 32GB RAM,
+    i7-14700KF. Real local-inference capacity; every finding carries runnable-where.
+Evidence contract in every brief: every id must re-fetch at /api/models/<id> or be DROPPED,
+every number quoted from the API response, full candidate lists returned so overlap is
+detectable at merge. Lands in _RESEARCH/ + its INDEX.md line in the SAME pass (RULE 0.4).
+
 ## 2026-08-19 (Fable 5) — OPERATOR: "for the 50th time, make sure all fucking email layouts are this way at the HEADER AND FOOTER. all fucking emails" + "get rid of whatever this shit is in all emails = Sources (1): ..." + "FROM BELOW PRICE TO THE BUTTON AND AGENT IS BASICALLY ONLY PLACES THE FUCKING EMAILS SHOULD CHANGE!!! EXCEPT JUST SOLD (banner)" + "3 emails today with spaces between agent name at top brand color and home picture and one with a giant gap from property description to agent and button" + "WHERE IS THE FUCKING ROOT TO FUCKING FIX?"
 
 Reference = Downloads/under-contract-email.html (he called it good-looking). Decrees: (1) the

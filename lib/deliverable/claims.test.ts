@@ -7,7 +7,15 @@
 // If this gate cannot catch these five, it is theatre.
 
 import { describe, expect, it } from "bun:test";
-import { auditClaims, compareToSet, settledCount, numeralsIn, CLAIM_PROHIBITION } from "./claims";
+import {
+  auditClaims,
+  compareToSet,
+  settledCount,
+  numeralsIn,
+  CLAIM_PROHIBITION,
+  CLAIM_PROHIBITION_SHAPES,
+  CLAIM_PROHIBITION_PHRASES,
+} from "./claims";
 
 describe("the five falsehoods that actually shipped", () => {
   it("catches the INVERTED COMPARISON (market-comps)", () => {
@@ -315,9 +323,39 @@ describe("honest prose survives the gate", () => {
 });
 
 describe("the prompt and the lint stay in lockstep", () => {
+  // THE HAND-LIST THAT USED TO LIVE HERE WAS A FOURTH COPY OF THE VOCABULARY — the
+  // second copy (CLAIM_PROHIBITION) is the defect this whole block exists to police, so
+  // guarding it with a third hand-typed list guaranteed nothing. The list now comes off
+  // `CLAIM_PROHIBITION_SHAPES`, which `satisfies Record<ClaimViolation["kind"], …>`:
+  // a NEW KIND DOES NOT COMPILE until its prose line is named there.
   it("the prohibition names every shape the lint enforces", () => {
-    for (const shape of ["COMPARISON", "TRAJECTORY", "COUNT", "SEQUENCE", "LOCATION", "MOTIVE"]) {
-      expect(CLAIM_PROHIBITION).toContain(shape);
+    expect(CLAIM_PROHIBITION_PHRASES.length).toBeGreaterThan(0);
+    for (const phrase of CLAIM_PROHIBITION_PHRASES) {
+      expect(CLAIM_PROHIBITION, `prompt never names: ${phrase}`).toContain(phrase);
+    }
+  });
+
+  it("a shape the lint fires on is a shape the model was WARNED about", () => {
+    // The lockstep invariant, stated as a behavior rather than a substring: take a
+    // sentence the lint actually drops, read its kind, and demand the prompt names it.
+    // Extend a regex, forget the prose, and this reds — which is the whole point.
+    const probes: [string, keyof typeof CLAIM_PROHIBITION_SHAPES][] = [
+      ["The ask sits below the $213 median.", "comparative"],
+      ["This is the strongest quarter in five years.", "period-superlative"],
+      ["The gap is widening.", "trajectory"],
+      ["Five of those six ZIPs moved lower.", "word-count"],
+      ["The price was cut before a contract was reached.", "sequence"],
+      ["Two sales on Shore Dr closed under the ask.", "spatial"],
+      ["The seller is motivated.", "motive"],
+    ];
+    for (const [prose, kind] of probes) {
+      expect(
+        auditClaims(prose, []).some((v) => v.kind === kind),
+        `the lint no longer fires ${kind} on: ${prose}`,
+      ).toBe(true);
+      const phrase = CLAIM_PROHIBITION_SHAPES[kind];
+      expect(phrase, `${kind} has no prose line`).not.toBeNull();
+      expect(CLAIM_PROHIBITION, `${kind} is enforced but never taught`).toContain(phrase!);
     }
   });
 
@@ -326,5 +364,57 @@ describe("the prompt and the lint stay in lockstep", () => {
     // number invented.
     expect(numeralsIn("$595,000 at 2,847 sq ft is $209")).toEqual(["595000", "2847", "209"]);
     expect(numeralsIn("Square feet: 2847")).toEqual(["2847"]);
+  });
+});
+
+// ── ROUND 3: the RATE/PACE SUPERLATIVE, ranked over a period ────────────────
+//
+// Measured live 08/27/2026 against this very module:
+//   auditClaims("This is the strongest quarter in five years.", [])  →  []
+// It passed CLEAN. Every other rate superlative that shipped ("prices are rising
+// fastest in Cape Coral") was caught only by ACCIDENT — TRAJECTORY matched "rising",
+// not the superlative. Strip the trajectory verb and the claim sails through.
+//
+// A ranking over a NAMED PERIOD is a hard, falsifiable assertion about a HISTORY the
+// narrator was never handed — and it carries no numeral a digit lint can see, because
+// "five" is spelled. Same blind spot as "five of those six ZIPs", one class over.
+describe("a superlative ranked over a PERIOD is a comparison the narrator cannot make", () => {
+  it("catches the RATE SUPERLATIVE that passes clean today", () => {
+    const v = auditClaims("This is the strongest quarter in five years.", []);
+    expect(v.length).toBeGreaterThan(0);
+    expect(v.some((x) => x.kind === "period-superlative")).toBe(true);
+  });
+
+  it("catches the same shape in every register it actually takes", () => {
+    for (const lie of [
+      "Inventory is at its tightest level in three years.",
+      "Homes are selling at the fastest pace in 18 months.",
+      "It was the busiest quarter in a decade.",
+      "The market saw its highest volume in six quarters.",
+    ]) {
+      const v = auditClaims(lie, []);
+      expect(
+        v.some((x) => x.kind === "period-superlative"),
+        `did not catch: ${lie}`,
+      ).toBe(true);
+    }
+  });
+
+  // ── THE PRECISION GUARD. This half matters as much as the half above. ──────
+  //
+  // A BARE superlative is REGISTER, not a claim, and `LETTER_SYSTEM` (agent-launch.ts)
+  // asks for exactly this register — "Plain and warm". `gateLetterProse` drops the WHOLE
+  // PARAGRAPH on any hit, so a gate that fires on these three sentences costs us the
+  // letter and ships an open slot. Measured: adding the bare words to COMPARATIVE_PHRASE
+  // takes all three from clean to dropped. That is the covered-lanai wound reopened.
+  it("does NOT eat a bare superlative in plain, warm, quantity-free prose", () => {
+    for (const honest of [
+      "Reply and I will send it over — the fastest way to get an answer is just to ask.",
+      "The strongest thing I can offer you is a straight answer.",
+      "Saturday is the busiest day for showings, so come early.",
+      "The best thing I can do for you over the next few months is stay in touch.",
+    ]) {
+      expect(auditClaims(honest, []), `ate an honest sentence: ${honest}`).toEqual([]);
+    }
   });
 });

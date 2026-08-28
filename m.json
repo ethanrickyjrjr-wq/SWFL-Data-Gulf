@@ -1,0 +1,102 @@
+{
+  "_id": "669818affd52271e0bacfd73",
+  "id": "Salesforce/xLAM-7b-fc-r",
+  "private": false,
+  "pipeline_tag": "text-generation",
+  "library_name": "transformers",
+  "tags": [
+    "transformers",
+    "safetensors",
+    "llama",
+    "text-generation",
+    "function-calling",
+    "LLM Agent",
+    "tool-use",
+    "deepseek",
+    "pytorch",
+    "conversational",
+    "en",
+    "dataset:Salesforce/xlam-function-calling-60k",
+    "arxiv:2406.18518",
+    "arxiv:2409.03215",
+    "arxiv:2503.22673",
+    "license:cc-by-nc-4.0",
+    "text-generation-inference",
+    "endpoints_compatible",
+    "region:us"
+  ],
+  "downloads": 470,
+  "likes": 79,
+  "modelId": "Salesforce/xLAM-7b-fc-r",
+  "author": "Salesforce",
+  "sha": "42587ba3ff49d92c1b37e23f9c651ff753f60742",
+  "lastModified": "2025-04-11T21:53:40.000Z",
+  "gated": false,
+  "disabled": false,
+  "widgetData": [
+    { "text": "Hi, what can you help me with?" },
+    { "text": "What is 84 * 3 / 2?" },
+    { "text": "Tell me an interesting fact about the universe!" },
+    { "text": "Explain quantum computing in simple terms." }
+  ],
+  "model-index": null,
+  "config": {
+    "architectures": ["LlamaForCausalLM"],
+    "model_type": "llama",
+    "tokenizer_config": {
+      "bos_token": "<｜begin▁of▁sentence｜>",
+      "chat_template": "{% set system_message = 'You are an AI assistant for function calling.For politically sensitive questions, security and privacy issues, and other non-computer science questions, you will refuse to answer\\n' %}{% if messages[0]['role'] == 'system' %}{% set system_message = messages[0]['content'] %}{% endif %}{% if system_message is defined %}{{ system_message }}{% endif %}{% for message in messages %}{% set content = message['content'] %}{% if message['role'] == 'user' %}{{ '### Instruction:\\n' + content + '\\n### Response:' }}{% elif message['role'] == 'assistant' %}{{ '\\n' + content + '\\n<|EOT|>\\n' }}{% endif %}{% endfor %}",
+      "eos_token": "<|EOT|>",
+      "pad_token": "<｜end▁of▁sentence｜>",
+      "unk_token": null,
+      "use_default_system_prompt": false
+    }
+  },
+  "cardData": {
+    "datasets": ["Salesforce/xlam-function-calling-60k"],
+    "language": ["en"],
+    "license": "cc-by-nc-4.0",
+    "pipeline_tag": "text-generation",
+    "library_name": "transformers",
+    "tags": ["function-calling", "LLM Agent", "tool-use", "deepseek", "pytorch"],
+    "extra_gated_heading": "Acknowledge to follow corresponding license to access the repository",
+    "extra_gated_button_content": "Agree and access repository",
+    "extra_gated_fields": {
+      "First Name": "text",
+      "Last Name": "text",
+      "Country": "country",
+      "Affiliation": "text"
+    }
+  },
+  "transformersInfo": {
+    "auto_model": "AutoModelForCausalLM",
+    "pipeline_tag": "text-generation",
+    "processor": "AutoTokenizer"
+  },
+  "siblings": [
+    { "rfilename": ".gitattributes" },
+    { "rfilename": "README.md" },
+    { "rfilename": "config.json" },
+    { "rfilename": "examples/demo.ipynb" },
+    { "rfilename": "examples/test_prompt_template.py" },
+    { "rfilename": "examples/test_xlam_model_with_endpoint.py" },
+    { "rfilename": "examples/test_xlam_model_with_vllm.py" },
+    { "rfilename": "generation_config.json" },
+    { "rfilename": "model-00001-of-00003.safetensors" },
+    { "rfilename": "model-00002-of-00003.safetensors" },
+    { "rfilename": "model-00003-of-00003.safetensors" },
+    { "rfilename": "model.safetensors.index.json" },
+    { "rfilename": "special_tokens_map.json" },
+    { "rfilename": "tokenizer.json" },
+    { "rfilename": "tokenizer_config.json" }
+  ],
+  "spaces": [
+    "Tonic/Salesforce-Xlam-7b-r",
+    "Tonic/On-Device-Function-Calling",
+    "mingxilei/On-Device-Function-Calling",
+    "hiitsesh/New_gpu_space"
+  ],
+  "createdAt": "2024-07-17T19:17:03.000Z",
+  "safetensors": { "parameters": { "BF16": 6910365696 }, "total": 6910365696 },
+  "usedStorage": 13820763168
+}

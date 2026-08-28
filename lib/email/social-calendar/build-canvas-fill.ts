@@ -2,8 +2,16 @@
 //
 // AI fill for the canvas composer. Reuses the shipped four-lane social prompt + parser
 // (socialPostSystem / tryParseSocial) — the patch keyed by element id maps 1:1 onto canvas
-// element ids via applyDesignPatch. The no-invention moat lives in the prompt; nothing is
-// scrubbed here.
+// element ids via applyDesignPatch.
+//
+// CORRECTED 08/27/2026 — this header said "The no-invention moat lives in the prompt;
+// nothing is scrubbed here," and that was the hole `lib/deliverable/claims.ts:53-54`
+// named ("the SOCIAL path has NO no-invention gate of any kind today"). STAT values are
+// now anchored against the facts the model was handed before the patch leaves this
+// function (`lib/social/stat-anchor.ts`) — server-side of the wire, because the route
+// hands `payload.patch` to the CLIENT on both the JSON and NDJSON branches. Captions are
+// still unscrubbed, deliberately: a caption can carry the inline citation four-lane's
+// lane 3 requires, and a stat tile cannot.
 //
 // Note: chart elements render a placeholder today (no v1 chart-from-brain flow exists);
 // full chart support in the canvas is a follow-up task.
@@ -16,6 +24,7 @@ import {
 import { fetchLakeParts, refreshStaleLakeContext, type BuildScope } from "@/lib/email/build-doc";
 import { resolveEmailModel } from "@/lib/email/model-router";
 import type { GoalTone } from "@/lib/email/social-calendar/types";
+import { sourceClaims, gateCanvasFillPatch, warnDropped } from "@/lib/social/stat-anchor";
 import type { Platform } from "@/lib/social/types";
 
 // ADDENDUM pins the exact field names the patch must use — load-bearing because
@@ -24,7 +33,9 @@ import type { Platform } from "@/lib/social/types";
 // cta→["text"]. Without the pin, the model writes body/caption and the patch is silently
 // dropped, leaving elements unfilled.
 const ADDENDUM =
-  'A single social post. Fill the listed ELEMENTS with cited SWFL figures; keep each value short. In your patch, key by the EXACT element ids shown and use ONLY the field names each element lists: text and button elements use "text"; stat elements use "value" and "label". Do NOT use any other field names (no prose, body, title, caption, kicker).';
+  "A single social post. Fill the listed ELEMENTS with cited SWFL figures. " +
+  'A stat value must be the figure EXACTLY as the data above prints it ("$412,000", not "$412K") — never rounded, never abbreviated, never a figure the data does not contain. A stat tile has no room for a citation, so an unsourced number in one is dropped to an empty slot. Keep the value to a few words.' +
+  ' In your patch, key by the EXACT element ids shown and use ONLY the field names each element lists: text and button elements use "text"; stat elements use "value" and "label". Do NOT use any other field names (no prose, body, title, caption, kicker).';
 
 /** The user message: element id -> current text fields (mirrors docSkeleton's shape for the email path). */
 export function canvasFillPrompt(skeleton: Record<string, Record<string, string>>): string {
@@ -83,10 +94,19 @@ export async function buildSocialCanvasFill(
     const txt = msg.content[0]?.type === "text" ? msg.content[0].text : "";
     const parsed = tryParseSocial(txt);
     if (!parsed) return null;
+    // THE STAT GATE — on the PATCH, because the route ships `payload.patch` to the client
+    // and the CLIENT calls applyDesignPatch. Gating here is the one point both the JSON
+    // and the NDJSON branch (and an out-of-date client) pass through.
+    const gated = gateCanvasFillPatch(
+      (parsed.patch as Record<string, Record<string, unknown>>) ?? {},
+      skeleton,
+      sourceClaims(fresh.lakeContext),
+    );
+    warnDropped("social canvas fill", gated.dropped);
     return {
       caption: parsed.caption,
       hashtags: parsed.hashtags,
-      patch: (parsed.patch as Record<string, Record<string, unknown>>) ?? {},
+      patch: gated.patch,
       variants: opts?.platforms?.length
         ? buildVariants(parsed.caption, parsed.variants, opts.platforms)
         : parsed.variants,

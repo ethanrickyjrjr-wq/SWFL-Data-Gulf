@@ -36,6 +36,8 @@ import {
 import type { Listing } from "@/lib/listings/rentcast";
 import { resolveArtifactLink } from "@/lib/listings/artifact-link";
 import { deriveListingPhoto } from "@/lib/media/listing-photo";
+import { sourceClaims, gateContentPatchStats, warnDropped } from "@/lib/social/stat-anchor";
+import type { SettledClaim } from "@/lib/deliverable/claims";
 
 // X (Twitter) hard limit — verified in-session 06/30/2026 against
 // docs.x.com/fundamentals/counting-characters ("Posts on X can contain up to 280 characters").
@@ -128,7 +130,8 @@ Return ONLY valid JSON with exactly these keys (no markdown fences, no prose out
   hashtags: string[]    (5-8 items, NO "#" prefix; mix: 2 local, 2 topical, 1 brand "SWFLDataGulf")
   patch: object         (block id -> updated text fields ONLY, same shape as the email content patch)${variantsKeyLine}
 ${dataBlock}
-Allowed text fields per block: kicker, value, label, prose, title, body, caption, alt, stats (array of AT MOST 3 {value, label}; keep each value short).
+Allowed text fields per block: kicker, value, label, prose, title, body, caption, alt, stats (array of AT MOST 3 {value, label}).
+A stat value must be the figure EXACTLY as the data above prints it ("$412,000", not "$412K") — never rounded, never abbreviated, never a figure the data does not contain. A stat tile has no room for a citation, so an unsourced number in one is dropped to an empty slot. Keep the value to a few words.
 
 ${SOCIAL_SOURCING_RULES}
 
@@ -212,13 +215,32 @@ export function assembleDraft(
     variants?: Partial<Record<Platform, string>>;
   },
   platforms?: readonly Platform[],
+  /** The facts the model was handed. PASSED AT ALL = the STAT GATE runs over the card's
+   *  `value` / `stats[].value` cells (lib/social/stat-anchor.ts). OMITTED = the pre-gate
+   *  behavior, byte-identical, for a caller that holds no source text.
+   *
+   *  The test is `!== undefined`, deliberately NOT `?.length`. An EMPTY array is a caller
+   *  that opted in and found nothing to anchor against (an empty lake — `socialPostSystem`
+   *  has its own `lakeContext ? … : ""` branch, so this really happens), and the honest
+   *  answer there is that NO model-written figure is sourced. Reading empty as "gate off"
+   *  would make the caller disagree with the predicate, which fails closed on `[]`
+   *  (FM-SOCSTAT-6) — and the caller is the one that ships. */
+  sources?: readonly SettledClaim[],
 ): SocialDraft | null {
   const patch = ContentPatchSchema.safeParse(parsed.patch);
   // A patch that fails to parse must reject the draft, not fall back to the unfilled
   // seed card — the seed's hero/signal/text fields are literal authoring-instruction
   // placeholder text (default-docs.ts), not reader-safe copy (see its 07/13 postmortem).
   if (!patch.success) return null;
-  const filledRaw = applyPatch(card, patch.data);
+  // THE STAT GATE. A figure the model wrote into a card cell must appear in the facts it
+  // was given; anything else is blanked to an OPEN SLOT and the draft still ships — the
+  // same fail-closed-but-never-blocking semantics as the deliverable path.
+  const gate =
+    sources !== undefined
+      ? gateContentPatchStats(patch.data as Record<string, Record<string, unknown>>, sources)
+      : { patch: patch.data as Record<string, Record<string, unknown>>, dropped: [] };
+  warnDropped(`social card (${theme.day})`, gate.dropped);
+  const filledRaw = applyPatch(card, gate.patch as typeof patch.data);
   const filled = EmailDocSchema.safeParse(filledRaw);
   if (!filled.success) return null;
   const draft: SocialDraft = {
@@ -261,7 +283,15 @@ export async function buildSocialPost(
     const text = msg.content[0]?.type === "text" ? msg.content[0].text : "";
     const parsed = tryParseSocial(text);
     if (!parsed) return null;
-    const draft = assembleDraft(theme, card, parsed, opts?.platforms);
+    // The anchor allow-set is exactly what this call handed the model: the shared lake
+    // context and this day's addendum (which carries the featured listing's cited figure).
+    const draft = assembleDraft(
+      theme,
+      card,
+      parsed,
+      opts?.platforms,
+      sourceClaims(lakeContext, addendum),
+    );
     if (draft && opts?.featured)
       draft.card = attachFeaturedPhoto(
         draft.card,

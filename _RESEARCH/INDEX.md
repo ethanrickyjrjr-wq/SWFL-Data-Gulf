@@ -1,7 +1,12 @@
 # RESEARCH INDEX — check here BEFORE crawl4ai, and BEFORE answering
 
-**GITIGNORED. Nothing in `_RESEARCH/` ever ships to GitHub.** Consolidated 07/20/2026 by
-operator decree — one folder, categorized, untracked. Write freely; none of it is public.
+**⚠️ TRACKED AND PUBLIC — corrected 08/27/2026. This header said the opposite until today.**
+`_RESEARCH/` is version-controlled (135 files tracked, 0 ignored — `git check-ignore` returns
+NOT ignored) inside a PUBLIC repo, so everything written here ships to GitHub permanently.
+The 07/20/2026 consolidation kept one categorized folder; the 08/11/2026 decree ("make everything
+not gitignored, we are public anyway") made it tracked so graphify can index it — see `.gitignore`,
+which now ignores only credentials. **NEVER write a credential, API key, or client PII here.**
+The old "write freely; none of it is public" line was stale by 16 days and actively dangerous.
 
 **This is the first stop for any outside-answer question.** We already paid for this research
 and it was going unread. Reading it costs nothing; re-deriving it wastes a session and produces
@@ -307,7 +312,23 @@ personal financial notes.
   free annually). SOC 3 + SOC 2 Type 2 + CASA Tier 2 certified. No competitor sweep (kvCORE,
   BoomTown, Real Geeks) done in this pass — scoped to FUB only per operator's confirmed target.
 
-**data-and-ingest/** — sources, backfills, pipeline findings (20)
+**data-and-ingest/** — sources, backfills, pipeline findings (21)
+- `2026-08-27-huggingface-fleet-sweep.md` — **35-agent Hugging Face survey. READ THE LICENSE
+  TAXONOMY BEFORE ADOPTING ANY MODEL FROM ANYWHERE** — 12 distinct trap shapes found, none visible
+  from a downloads ranking: non-commercial weights under an Apache CODE license (README line 1239);
+  one AGPL checkpoint beside a near-identical Apache one; a license that splits by model SIZE
+  (Qwen2.5-1.5B apache vs 3B non-commercial); a repo tagged apache-2.0 whose BASE is gemma-licensed;
+  no-license-at-all = all-rights-reserved (the highest-traction model in three separate lanes);
+  an attribution clause that would put a vendor's name on our output surfaces; the official `zillow`
+  org publishing gpt-4o SYNTHETIC data; and pure vaporware (a card describing our exact problem with
+  ZERO weight files). **Hardware measured for the first time: RTX 4060 Ti 16GB · 32GB RAM.**
+  Findings: docling WINS the deed/PDF lane (MIT code, apache weights, Windows-native confirmed,
+  page+bbox provenance verified in source). Everything else says KEEP DOING WHAT WE DO — the
+  81-vs-20,369 crosswalk is confirmed NOT an ML problem, no HF OCR card publishes field-level
+  accuracy, real-estate data on HF is a dead lane, AVM is ~92% toy/vaporware, forecasting at ZIP
+  grain is unsupported. Two shapes survive the no-invention rule (a comp RANKER, an anomaly FLAG);
+  one zero-cost fix surfaced (a null-rate assertion that would have caught the 34,139-row clobber);
+  one legal exposure flagged for a lawyer (ODbL/OSM lineage under every HF address resource).
 - `2026-08-12-deed-parcel-strap-join-fix.md` — **THE LEE DEED→PARCEL JOIN IS NOT BROKEN.** It was
   measured against `lee_parcels.state_parcel_id` (0 rows, correctly). The right column is
   `lee_parcels.parcel_id` — the same 17-char STRAP, separators stripped, section zero-padded — a

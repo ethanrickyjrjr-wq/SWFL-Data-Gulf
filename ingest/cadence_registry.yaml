@@ -1596,11 +1596,32 @@ pipelines:
     # were never parsed despite the prior note claiming otherwise). Medical Office built + loaded
     # this session (64 rows, Q1 2024/Q3 2024/Q1 2025/Q3 2025/Q1 2026; the oldest Q1 2024 PDF uses
     # a different report layout, not yet parsed). Office and Retail still have no parser.
-    # STANDING GAP (bigger than this table): every cw_marketbeat/colliers_industrial/lee_associates
-    # row in this table has `verified=false` -- refinery/sources/marketbeat-swfl-source.mts and
-    # refinery/packs/cre-swfl.mts both gate on verified=true, so NONE of this data (261 rows across
-    # 3 sources, industrial+medical_office alike) reaches the brain today; only the 48-row annual
-    # MHS Databook does. See check marketbeat_medical_wiring_followup.
+    # STANDING GAP -- CORRECTED 08/27/2026. The previous note here was FALSE: it said "NONE of this
+    # data (261 rows across 3 sources) reaches the brain," a figure computed BEFORE the same-day
+    # 07/15/2026 human-review flip, and it double-counted (261 = colliers 132 + cw industrial 109 +
+    # lee 20, counting ALL cw industrial as unverified and omitting cw medical_office entirely).
+    # LIVE 08/27/2026: 113 cw_marketbeat rows ARE verified=true and DO reach the brain (49 industrial
+    # 2025-Q1..2026-Q1 + 64 medical_office), alongside the 48-row MHS Databook. 216 rows remain dark:
+    # 144 on `verified` alone, and 72 ALSO outside SURFACED_SECTORS (colliers flex 66 + lee
+    # multifamily 6) which review alone would NOT surface.
+    # `verified` means A HUMAN READ THE SOURCE PDF and checked the row field-by-field -- see
+    # docs/sql/20260715_marketbeat_swfl_verify_reviewed_quarters.sql (two independent reviewers; a
+    # real parser bug was found by them). Exactly ONE writer of the flag exists tree-wide: that
+    # migration. There is no automated verification lane, by design.
+    # DO NOT flip `verified` in bulk and DO NOT remove the gate. Removing it was MEASURED as a net
+    # LOSS (+2 unverified cells, -3 verified: three geometry-confirmed MHS cells get displaced by
+    # unverified lee_associates rows winning the latest-per-quarter pick). The gate is 4 sites --
+    # marketbeat-swfl-source.mts:191 plus verified=eq.true inside citation receipt URLs at
+    # cre-swfl.mts:232/:325/:526 -- and they must move in lockstep or a citation stops reproducing
+    # the number it cites.
+    # 60 of the dark cw_marketbeat rows (2024 quarters) are PERMANENTLY unverifiable: their source
+    # PDFs are gone from the live C&W hub. Write them off; they are not a clearable backlog.
+    # Forward path already chosen by the architecture: refinery/lib/derived/cre-figures.mts reads raw
+    # rows with NO verified filter and carries source_verified as a DATA ATTRIBUTE (preference among
+    # corroborating firms, not a gate) -- see open check cre_figures_consumer_wire.
+    # NOTE: checks marketbeat_medical_wiring_followup and marketbeat_pdf_pipeline_audit were both
+    # DROPPED 08/12/2026 while this gap was still live and lee_associates kept loading. New checks:
+    # marketbeat_verified_staleness_on_force, marketbeat_sector_scope_flex_multifamily.
     source_scope:
       confirmed_total:
         value: 173
@@ -2334,11 +2355,11 @@ not_yet_running:
     source_scope:
       confirmed_total:
         value: 20
-        summary: "20 meaningful positional columns decoded per deed row into data_lake.lee_deed_official_records: status, consideration (raw + derived USD), grantors[], grantees[], record_date, doc_type, book_type, book, page, clerk_file_number, legal_full, lot, block, unit, subdivision, phase, section, township, range, internal_doc_id — plus a derived parcel_strap (lee_parcels join key) and ODD provenance columns."
+        summary: "20 meaningful positional columns decoded per deed row into data_lake.lee_deed_official_records: status, consideration (raw + derived USD), grantors[], grantees[], record_date, doc_type, book_type, book, page, clerk_file_number, legal_full, lot, block, unit, subdivision, phase, section, township, range, internal_doc_id — plus a derived parcel_strap (lee_parcels join key), the grantors_complete/grantees_complete source-elision flags, and ODD provenance columns."
         source: "our ingest (LOAD half of ingest/pipelines/lee_deed_official_records)"
       source_ceiling:
         value: 27
-        summary: "The GetSearchResults DataTables response exposes 27 positional columns (idx 0-26; see the README column-mapping table — there is no public vendor API doc). We discard 3 UI-only columns (0 row-counter, 1 viewed-icon HTML, 2 add-to-cart HTML), leave idx 14 (doc-image links) and the blank/unconfirmed idx 5/24/26 unparsed. TWO real SOURCE-side completeness gaps, not our omission: grantor/grantee lists truncate past ~3 parties with a literal '...' marker, and doc types beyond DEED (MORTGAGE, LIEN, CERTIFICATE OF TITLE, PLAT, ...) are available but not currently pulled."
+        summary: "The GetSearchResults DataTables response exposes 27 positional columns (idx 0-26; see the README column-mapping table — there is no public vendor API doc). We discard 3 UI-only columns (0 row-counter, 1 viewed-icon HTML, 2 add-to-cart HTML), leave idx 14 (doc-image links) and the blank/unconfirmed idx 5/24/26 unparsed. TWO real SOURCE-side completeness gaps, not our omission: grantor/grantee lists are elided at source to TWO names with a literal '...' marker (measured 08/27/2026: 4,529 of 28,186 rows = 16.07%, and 25.97% of DEED rows; both the XHR and xlsx-Export capture paths elide identically — normalize.py now strips the marker and sets grantors_complete/grantees_complete rather than storing a short list as complete), and doc types beyond DEED (MORTGAGE, LIEN, CERTIFICATE OF TITLE, PLAT, ...) are available but not currently pulled."
         as_of: "07/16/2026"
         source_url: "https://or.leeclerk.org/LandMarkWeb/search/index?theme=.blue&section=searchCriteriaDocuments&quickSearchSelection="
         source_label: "Lee County Clerk of Courts — Official Records Search (LandMarkWeb)"

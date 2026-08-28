@@ -122,9 +122,11 @@ function leeDeedRecordsOutputProducer(_out: PackOutput): BrainOutputProducerResu
       );
     }
   }
-  // Source-side completeness gap carried forward (README): party lists truncate.
+  // Source-side completeness gap carried forward. MEASURED 08/27/2026 over all 22
+  // committed raw pulls (see the pipeline README "The party-list elision"): the cap
+  // is TWO names, not ~3, and it hits 25.97% of DEED rows — the slice this pack serves.
   caveats.push(
-    "Grantor/grantee lists are truncated at the SOURCE past ~3 parties (a literal '...' marker), so multi-party deeds are not represented completely — this is a Lee Clerk feed limit, not a pipeline omission.",
+    "Grantor/grantee party lists are elided at the SOURCE to two names — measured on 25.97% of Lee recorded DEED rows — so a multi-party deed is not represented completely. This is a Lee Clerk feed limit, not a pipeline omission; the lake now flags each elided list rather than storing it as complete.",
   );
   // Deferred metric — no silent omission of the sale-price signal.
   caveats.push(
@@ -276,7 +278,7 @@ export const leeDeedRecordsSwfl: PackDefinition = {
     "Deed recording velocity is a coincident recording-activity signal, not a leading price signal — the user reads it as volume context.",
     "The nominal-transfer share (<= $100 consideration) separates real arm's-length sales from quitclaim/family/trust transfers; a high nominal share means headline deed counts overstate market sales.",
     "Deed-grade sale price (a median of arm's-length considerations) is the eventual headline but is not emitted yet — do not imply a price read the brain does not compute.",
-    "Grantor/grantee party lists are truncated at the source past ~3 parties; never claim a complete party list.",
+    'Grantor/grantee party lists are elided at the source to two names on about a quarter of recorded deeds; never claim a complete party list, and never name "the parties" off one.',
   ],
   activeProject:
     "lee-deed-records-swfl: report Lee County recorded-deed velocity and arm's-length/nominal mix from the Clerk official-records feed.",

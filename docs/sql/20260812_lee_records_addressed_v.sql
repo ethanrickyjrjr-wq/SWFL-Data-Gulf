@@ -36,6 +36,22 @@
 --   PROBATE                   714            ->   120
 -- Counts grow as future manual raw/*.json captures land (FETCH is Akamai-blocked).
 --
+-- PARTY LISTS ARE ELIDED AT SOURCE. grantors/grantees below are NOT complete party
+-- lists. The Lee Clerk grid caps each list at TWO real names; measured 08/27/2026
+-- across all 22 committed raw pulls, 4,529 of 28,186 rows (16.07%) are elided on at
+-- least one side, and 25.97% of DEED rows are. The two completeness flags added at
+-- the END of the select list (grantors_complete / grantees_complete) are the ONLY
+-- safe way to read those arrays: treat an array as a whole party list only when its
+-- flag is TRUE. NULL means the row predates the 08/27/2026 normalizer fix and its
+-- completeness is unknown (its array may still hold the literal "..." marker).
+-- Base-table columns + measurement: migrations/20260827_lee_deed_party_list_completeness.sql
+--
+-- ⚠️  THE TWO NEW COLUMNS ARE NOT YET LIVE (08/27/2026). This file was updated in the
+--     same pass as that migration and NEITHER was run. CREATE OR REPLACE VIEW can only
+--     APPEND columns, which is why the flags sit last rather than beside the arrays
+--     they qualify. Apply the base-table migration FIRST — this view cannot select
+--     columns the table does not have yet.
+--
 -- Apply: bun scripts/apply-lee-records-addressed-view.mts  (idempotent).
 
 CREATE OR REPLACE VIEW data_lake.lee_records_addressed_v AS
@@ -48,6 +64,8 @@ WITH normalized AS (
     consideration_usd,
     grantors,
     grantees,
+    grantors_complete,
+    grantees_complete,
     legal_full,
     parcel_strap,
     lpad(split_part(parcel_strap, '-', 1), 2, '0')
@@ -74,7 +92,11 @@ SELECT
   n.grantors,
   n.grantees,
   n.legal_full,
-  n.parcel_strap                                          AS parcel_strap_raw
+  n.parcel_strap                                          AS parcel_strap_raw,
+  -- Appended, not inlined next to the arrays: CREATE OR REPLACE VIEW cannot rename or
+  -- reorder existing view columns, only add at the end.
+  n.grantors_complete,
+  n.grantees_complete
 FROM normalized n
 JOIN data_lake.lee_parcels p ON p.parcel_id = n.strap17
 WHERE p.phy_addr1 IS NOT NULL;

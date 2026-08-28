@@ -65,6 +65,77 @@ class ContentContractError(RuntimeError):
     pass
 
 
+class FillRateCollapseError(RuntimeError):
+    """Raised post-merge when a column's stored non-null COUNT collapsed — the merge erased values.
+
+    Distinct from every sibling above, and this is the whole point: those guards all count
+    ROWS. On 07/26/2026 the nightly listing_lifecycle MERGE overwrote 34,139 of 34,478
+    enriched `baths` values with NULL. The row count never moved, so every volume guard
+    stayed green and nobody caught it for days. ContentContractError is blind to it too:
+    contracts.evaluate_batch is PURE and never opens a DB connection, so it sees only the
+    INCOMING batch — and the incoming /search rows are legitimately NULL-baths. The damage
+    is only visible in the STORED table, before vs after.
+
+    On the COUNT, never the ratio: listing_state only grows, and new sweep rows carry the
+    enrich column NULL by design, so the fill PERCENTAGE sags every healthy night. The
+    invariant that actually holds on a COALESCE-protected enrich-only column of a
+    never-deleting table is that the absolute non-null count must not decrease.
+
+    Cron-failure classification: a retry re-runs the SAME clobbering merge and destroys the
+    rows the first run left behind. should_retry = false. Restore from backup, fix the
+    merge's COALESCE, THEN re-run."""
+
+    pass
+
+
+def assert_fill_rate(
+    before_nonnull: int,
+    after_nonnull: int,
+    tolerance: float = 0.01,
+    table: str = "",
+    column: str = "",
+) -> None:
+    """Assert a column's stored non-null count did not collapse across a merge/upsert.
+
+    Caller counts ``SELECT count(*) FILTER (WHERE col IS NOT NULL)`` immediately BEFORE the
+    merge and again immediately AFTER, and passes both ints. Pure and DB-free by design —
+    mirrors ``assert_vs_baseline``'s signature so this module keeps zero driver dependency
+    and stays unit-testable with no database.
+
+    Raises ``FillRateCollapseError`` when ``after < before * (1 - tolerance)``.
+
+    Measured against the BEFORE non-null count, not against total rows: see the class
+    docstring — a ratio-of-rows test false-alarms on every healthy night that adds new rows
+    with the column legitimately NULL.
+
+    Bootstrap: ``before_nonnull == 0`` logs FILL_BASELINE_UNAVAILABLE and returns without
+    raising, so a newly-added enrich column never false-alarms on its first run (same
+    contract as ``assert_vs_baseline``).
+
+    DETECTS, does not PREVENT: it runs after the merge committed, so it fails the job loud
+    on the same run instead of leaking for days. It does not roll the write back.
+    """
+    subject = f"{table}.{column}".strip(".") or "unknown"
+    if before_nonnull <= 0:
+        log.warning(
+            "[fill-guard] FILL_BASELINE_UNAVAILABLE for %s — no prior non-null values; skipping",
+            subject,
+        )
+        return
+    log.info(
+        "[fill-guard] %s: non-null %d -> %d across merge", subject, before_nonnull, after_nonnull
+    )
+    if after_nonnull < int(before_nonnull * (1 - tolerance)):
+        drop_pct = (before_nonnull - after_nonnull) / before_nonnull * 100
+        raise FillRateCollapseError(
+            f"[fill-guard] {subject}: non-null count fell {before_nonnull:,} -> {after_nonnull:,} "
+            f"across the merge (-{drop_pct:.1f}%, tolerance {tolerance:.1%}) — the merge ERASED "
+            f"stored values (a COALESCE survive-the-merge protection has broken). This is the "
+            f"07/26/2026 null-clobber shape. DO NOT RE-RUN: should_retry=false — a retry re-runs "
+            f"the same clobbering merge; restore, fix the merge, then re-run"
+        )
+
+
 def assert_content_fresh(
     newest,
     max_age_days: int,

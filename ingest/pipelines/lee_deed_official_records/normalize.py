@@ -9,9 +9,28 @@ only:
        - record_date (DATE) from the "MM/DD/YYYY" string,
        - parcel_strap (TEXT) from legal_full — README calls this the join key into
          data_lake.lee_parcels,
-  3. preserves grantors/grantees VERBATIM, including the literal "..." truncation
-     marker the SOURCE emits past ~3 parties (README documents this as a real
-     completeness gap — do NOT drop the marker, do NOT claim completeness).
+  3. splits grantors/grantees into a party list PLUS an explicit completeness flag.
+
+THE PARTY-LIST ELISION (measured 08/27/2026, all 22 committed raw/*.json):
+The Lee Clerk grid caps a party list at TWO real names and appends a literal "..."
+when the instrument has more parties. Stored verbatim, that reads downstream as a
+complete two-party list plus a party literally named "..." — a WRONG fact, not a
+missing one. Measured: 4,529 of 28,186 rows (16.07%) carry the marker on at least
+one side (grantor 3,190 / grantee 1,563); 25.97% of the 5,353 DEED rows the
+consuming pack serves. Every one of the 4,753 marked lists is exactly length 3 with
+the marker LAST — the source never emits 3 real names, so the README's "more than
+~3 parties" undercounts the loss: a THREE-party deed already loses a party.
+
+So this module strips the marker and records the elision as `grantors_complete` /
+`grantees_complete`. The transform is bijective — ["A","B","..."] <-> ["A","B"] +
+complete=False — nothing is lost, and no bogus party named "..." ever ships.
+Polarity is deliberate: `_complete` (not `_truncated`) so a consumer reading a NULL
+or absent flag falls to "not complete" and stays conservative. Per-side (not one
+`parties_truncated`) because the two sides are elided independently — 224 rows
+carry the marker on BOTH, so a single flag would lose which side is short.
+
+We still cannot RECOVER the missing names — the source never sent them. This makes
+the loss legible; it does not fill it.
 
 No network, no dlt — pure functions, unit-tested in test_normalize.py.
 """
@@ -95,11 +114,30 @@ def parse_parcel_strap(legal_full: str | None) -> str | None:
     return m.group(1) if m else None
 
 
-def _clean_list(value: Any) -> list[str]:
-    """Grantor / grantee list — keep verbatim (INCLUDING the literal '...' marker)."""
+# The exact string the Lee Clerk grid appends when it elides a party list. Matched on
+# EXACT equality after .strip() — never endswith("..."), which would eat a real party
+# name that happens to end in dots (e.g. "SMITH ET AL...").
+ELISION_MARKER = "..."
+
+
+def split_parties(value: Any) -> tuple[list[str], bool]:
+    """Party list -> (names WITHOUT the elision marker, list_is_complete).
+
+    Returns (names, True) for any list the source gave in full, and (names, False)
+    when the source elided it. A non-list (None, missing key) is ([], True):
+    nothing was elided, there is simply nothing there — distinct from an elided list.
+    """
     if not isinstance(value, list):
-        return []
-    return [str(v) for v in value]
+        return [], True
+    names: list[str] = []
+    complete = True
+    for v in value:
+        s = str(v)
+        if s.strip() == ELISION_MARKER:
+            complete = False
+            continue
+        names.append(s)
+    return names, complete
 
 
 def normalize_row(raw: dict[str, Any], source_file: str | None = None) -> dict[str, Any]:
@@ -112,9 +150,11 @@ def normalize_row(raw: dict[str, Any], source_file: str | None = None) -> dict[s
     for raw_key, col in _KEY_MAP.items():
         out[col] = raw.get(raw_key)
 
-    # Lists preserved verbatim (source truncation "..." kept).
-    out["grantors"] = _clean_list(raw.get("grantors"))
-    out["grantees"] = _clean_list(raw.get("grantees"))
+    # Party lists: marker stripped, elision recorded explicitly. A consumer that
+    # ignores the flag now sees a SHORTER list rather than a fabricated party named
+    # "..." — and one that reads it cannot mistake an elided list for a complete one.
+    out["grantors"], out["grantors_complete"] = split_parties(raw.get("grantors"))
+    out["grantees"], out["grantees_complete"] = split_parties(raw.get("grantees"))
 
     # Derived, load-bearing.
     out["consideration_usd"] = parse_consideration_usd(raw.get("considerationRaw"))

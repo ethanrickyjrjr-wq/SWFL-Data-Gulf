@@ -263,3 +263,97 @@ def test_content_contract_error_docstring_names_the_no_retry_prescription():
     doc = ContentContractError.__doc__ or ""
     assert "should_retry" in doc
     assert "false" in doc.lower()
+
+
+# ── FillRateCollapseError / assert_fill_rate (the 07/26/2026 null-clobber) ──────
+#
+# The incident this suite pins: on 07/26/2026 the nightly listing_lifecycle MERGE
+# overwrote 34,139 of 34,478 enriched `baths` values with NULL, and nothing caught
+# it for days. Every guard above counts ROWS and was green throughout — the row
+# count never moved, only the CONTENT of one column emptied.
+
+
+class TestAssertFillRate:
+    def test_merge_that_nulls_25pct_of_an_enriched_column_raises(self):
+        from ingest.lib.guards import FillRateCollapseError, assert_fill_rate
+
+        with pytest.raises(FillRateCollapseError):
+            assert_fill_rate(34139, 25604, tolerance=0.01,
+                             table="data_lake.listing_state", column="baths")
+
+    def test_merge_that_nulls_half_a_percent_does_not_raise(self):
+        from ingest.lib.guards import assert_fill_rate
+
+        # 0.5% attrition — a handful of rows legitimately losing a value. Under the
+        # 1% tolerance, so it must NOT trip. A guard that fires here gets muted.
+        assert_fill_rate(34139, 33968, tolerance=0.01,
+                         table="data_lake.listing_state", column="baths")
+
+    def test_the_real_incident_raises_and_names_table_column_counts_and_pct(self):
+        from ingest.lib.guards import FillRateCollapseError, assert_fill_rate
+
+        with pytest.raises(FillRateCollapseError) as ei:
+            assert_fill_rate(34139, 339, tolerance=0.01,
+                             table="data_lake.listing_state", column="baths")
+        msg = str(ei.value)
+        assert "listing_state" in msg
+        assert "baths" in msg
+        assert "34,139" in msg          # before
+        assert "339" in msg             # after
+        assert "99" in msg              # the drop percentage
+
+    def test_growth_with_new_null_rows_never_false_alarms(self):
+        """THE TRAP a fill-RATE (percentage-of-rows) guard falls into.
+
+        listing_state only grows, and new /search sweep rows carry baths=NULL by
+        design (baths lands only via the one-shot /nearby-home-values enrich on a
+        listing's first-seen run). So a perfectly healthy night moves the fill
+        RATIO 34139/34478 (99.0%) -> 34139/34978 (97.6%) — a 1.4% ratio drop that
+        would trip a 1% tolerance EVERY NIGHT until someone muted the guard.
+
+        The invariant that actually holds on a COALESCE-protected enrich-only
+        column of a never-deleting table is on the absolute non-null COUNT: it
+        must not decrease. 500 new NULL-baths rows leave it untouched.
+        """
+        from ingest.lib.guards import assert_fill_rate
+
+        assert_fill_rate(34139, 34139, tolerance=0.01,
+                         table="data_lake.listing_state", column="baths")
+
+    def test_bootstrap_zero_before_returns_silently(self):
+        """A newly-added enrich column has no prior fill. Mirrors assert_vs_baseline's
+        BASELINE_UNAVAILABLE contract — never false-alarm a first run."""
+        from ingest.lib.guards import assert_fill_rate
+
+        assert_fill_rate(0, 0, table="data_lake.listing_state", column="new_col")
+        assert_fill_rate(0, 500, table="data_lake.listing_state", column="new_col")
+
+    def test_a_gain_never_raises(self):
+        from ingest.lib.guards import assert_fill_rate
+
+        assert_fill_rate(34139, 34478, table="data_lake.listing_state", column="baths")
+
+    def test_distinct_error_class(self):
+        """Own class so the cron classifier never conflates a content-erasure with a
+        volume collapse. Prescriptively no-retry: a retry re-runs the SAME clobbering
+        merge and destroys the rows the first run left."""
+        from ingest.lib.guards import (
+            ContentContractError,
+            ContentStaleError,
+            FetchHealthError,
+            FillRateCollapseError,
+            VolumeGuardError,
+        )
+
+        assert issubclass(FillRateCollapseError, RuntimeError)
+        for sibling in (VolumeGuardError, ContentStaleError, FetchHealthError,
+                        ContentContractError):
+            assert not issubclass(FillRateCollapseError, sibling)
+            assert not issubclass(sibling, FillRateCollapseError)
+
+    def test_docstring_names_the_no_retry_prescription(self):
+        from ingest.lib.guards import FillRateCollapseError
+
+        doc = FillRateCollapseError.__doc__ or ""
+        assert "should_retry" in doc
+        assert "false" in doc.lower()

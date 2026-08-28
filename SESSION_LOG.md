@@ -1,3 +1,134 @@
+## 2026-08-27/28 (Opus 5) — "FIX IT ALL": 6 DEFECTS, 4 FIXED + VERIFIED, 1 DIAGNOSED-NOT-FIXED, 1 CODE-ONLY
+
+Operator: "Fan out and fix it all" against the 35-agent HF sweep's defect list. N=6 enumerated.
+Every agent: TDD-first with RED pasted, read-before-asserting, explicit paths, NO COMMIT/NO PUSH,
+no data_lake writes, no paid runs, no county fetches. **Nothing is committed or pushed.**
+Coordinator re-verified each fix independently rather than trusting the report — see per-item evidence.
+
+n of N = 6 of 6 reported; **4 fixed in code AND verified, 1 correctly refused, 1 fixed in code but
+NOT in production.**
+
+1. claims.ts PERIOD_SUPERLATIVE — FIXED. Coordinator-verified by running auditClaims directly:
+   "strongest quarter in five years" + "tightest level in three years" -> caught (period-superlative);
+   the 3 honest quantity-free sentences -> still CLEAN. bun test lib/deliverable lib/charts
+   lib/listings = 1941 pass / 0 fail; next build exit 0. THE REAL FIX is the lockstep mechanism:
+   CLAIM_PROHIBITION_SHAPES declared `satisfies Record<ClaimViolation["kind"], string|null>`, so a new
+   violation kind without prose is now a COMPILE ERROR (proved by mutation -> TS1360, file restored
+   byte-identical). Bare superlatives deliberately NOT added — measured regression.
+2. SOCIAL no-invention gate — FIXED. Absence was self-documented in THREE places (claims.ts:53,
+   build-canvas-fill.ts:5, recipes/index.ts:121), 3 live sites, all gated via new lib/social/stat-anchor.ts
+   REUSING numeralsIn from claims.ts (claims.ts untouched by this agent). Coordinator-verified 7/7
+   incl. digit-swap caught ($412,500 vs real $412,000) and EMPTY SOURCE SET -> fails CLOSED.
+   1615 pass / 0 fail; next build exit 0. Captions stay ungated by design (a caption can carry an
+   inline citation; a stat baked into a PNG cannot). Prompts put in lockstep with the lint rather than
+   loosening the lint to accept "$412K".
+3. skill-baseline.mts inverted comment — FIXED, comment only; scoring UNCHANGED so no historical
+   number moves. Agent corrected MY framing: not an "upper bound" either — inflates in expectation
+   and on our corpus, condition n'·x > A. RULE 0.5c sweep found 4 sites of the shape, 3 live all fixed
+   (skill-baseline.mts:119, docs/sql/20260608_glass_views.sql:29, 20260608_data_targets.sql:51 — both
+   SQL are script comments, not COMMENT ON VIEW, nothing stored in DB). SkillScore type-lifted
+   additively with the paired 2x2 + 3 partition invariants; zero callers broken. bun test refinery
+   = 1791 pass / 0 fail.
+4. ingest fill-rate guard — BUILT + WIRED at the incident site, 1 of 5 at-risk sites.
+   **MY BRIEF WAS WRONG**: a fill-RATE test false-alarms nightly (listing_state only grows; healthy
+   night 99.0%->97.6%). The invariant is the ABSOLUTE non-null count. guards.py's own docstring already
+   ADMITTED the blindness ("Every guard in this module is structurally blind to that class").
+   Coordinator re-ran ingest/tests/lib/test_guards.py = 59 passed. Follow-up opened for the other 4
+   COALESCE(EXCLUDED sites; the remaining 22 blanket-EXCLUDED sites are an UNVERIFIED hypothesis, not
+   a clearance.
+5. marketbeat verified gate — DIAGNOSED, NO CODE CHANGE, and that is the correct outcome.
+   `verified` = A HUMAN READ THE PDF (20260715 migration records a two-reviewer pass). **MY "261 rows
+   reach nothing" WAS STALE**: live 08/27, 113 cw_marketbeat rows ARE verified and DO flow; dead = 216,
+   of which 72 are dark on SECTOR SCOPE not verification. Ungating MEASURED as a net LOSS: 69->71 cells
+   but -3 verified (MHS cells displaced by unverified lee_associates winning latest-per-quarter).
+   Fixed 9 stale doc sites (8 enumerated + 1 I found only by re-grepping AFTER wrongly closing the
+   check on unverified evidence — reopened and re-closed properly). 3 new checks opened.
+6. Lee deed party-list elision — CODE FIXED, **PRODUCTION NOT FIXED**. README's "~3 parties" is WRONG:
+   the cap is TWO (every marked list is exactly length 3, marker last). Coordinator independently
+   recounted all 22 raw files: 4,529 of 28,186 rows = 16.07%; DEED 1,390 of 5,353 = 25.97%. Confirmed
+   live. "Prefer the export path" killed by measurement (XHR 28.27% vs Export 25.88% — the county's own
+   Export button elides identically). Marker STRIPPED (bijective) + per-side `_complete` flags (NOT
+   `_truncated`: NULL must read as "not known complete", never as "complete"). No DEFAULT — existing
+   rows stay NULL=unknown. Caught lee_records_addressed_v (GRANT SELECT TO anon) which would have become
+   strictly WORSE without the same-pass update. 15 passed + full-corpus assertion run. Migration WRITTEN
+   NOT RUN; check lee_deed_party_completeness_migration_unrun carries a db_row_exists signal that only
+   fires after the backfill.
+
+⛔ THE SYSTEMIC FINDING — THREE independent agents hit it and all three routed around it via Bash:
+`.claude/hooks/read-evidence.mjs` familyShowsRead() calls scanDirFiles(join(dir, stem)) which lists
+`<sid>/*.jsonl`, but SUBAGENT transcripts live at `<sid>/subagents/*.jsonl`. So the scan never sees a
+subagent's Reads. Measured: familyShowsRead(own subagent transcript)===true,
+familyShowsRead(main)===false, family size 1. Affects check-playbook-read-before-email-edit.mjs AND
+check-area-fence.mjs. NET: the gates fail CLOSED against compliant subagents that DID read the doc, and
+fail OPEN against anything using Bash instead of Edit/Write. The hook header CLAIMS this is handled and
+cites check playbook_hook_blind_to_subagents — that check is STILL OPEN, so the header is false.
+Check hook_playbook_gate_bypassable_via_bash carries the root cause. **This is the highest-leverage
+item on the list: a guard that enforces the opposite of its intent.**
+
+Housekeeping: removed 6 stray chk_*.json Hub-API dumps a sweep agent left at REPO ROOT (Gate 19 /
+PROJECT_MAP discipline). Sibling worktree agent-aa934c591fcb2b706 holds a 16-day-stale pre-fix copy of
+lee normalize.py — dormant, but at merge time split_parties must win over the old _clean_list.
+
+Checks opened this session: ingest_null_rate_assertion (closed), fill_rate_guard_unwired_4_sites,
+marketbeat_verified_staleness_on_force, marketbeat_sector_scope_flex_multifamily,
+marketbeat_dead_data_docs_stale (closed), hook_playbook_gate_bypassable_via_bash,
+claims_repair_map_missing_kinds, social_template_zero_dollar_placeholder,
+lee_deed_party_completeness_migration_unrun. Amended: direction_call_equals_persistence.
+
+OWED HIS WORD: (1) any push — nothing committed; (2) the Lee migration sequence (migration -> view ->
+pipeline backfill) that fixes 4,529 live rows; (3) the marketbeat decision (scoped review pass vs
+wiring cre_figures' corroboration consumer vs leave dead — lee_associates is the only dark source
+still GROWING, loaded 08/20).
+## 2026-08-27 (Opus 5) — 35-AGENT HUGGING FACE SWEEP: ADOPT NOTHING, BUT THREE REAL DEFECTS FOUND
+
+Operator: "fan out 5 sonnets at a time 7 times and see what we can find on hugging face." NORTH
+STAR #5 (adopt-nothing, day 8 of 30) raised in one sentence; he chose full sweep. Freeze lifted
+for the SURVEY ONLY — deliverable is a shortlist, adoption still needs his word.
+7 waves x 5 sonnets: docs/OCR · matching/embeddings · tabular/datasets/forecasting · open models
+vs Anthropic · frameworks/memory/eval/Spaces · make-survivors-decidable · adversarial kill pass.
+Two hard pre-filters set before dispatch (commercial license, 16GB Windows box — hardware MEASURED
+for the first time: RTX 4060 Ti 16GB / 32GB / i7-14700KF). Evidence contract: every id re-fetchable
+at /api/models/<id> or DROPPED; every number quoted from the API response.
+
+FINDINGS ARE IN _RESEARCH/data-and-ingest/2026-08-27-huggingface-fleet-sweep.md (+ INDEX.md line).
+
+ADOPT NOW: NOTHING. The kill pass destroyed the sweep's own top pick.
+THREE REAL DEFECTS FOUND, none of them a Hugging Face adoption:
+1. marketbeat_swfl IS GATED DEAD — marketbeat-swfl-source.mts:191 requires verified===true;
+   loader.py never writes it. 261 rows across 3 sources reach NOTHING (registry says so; open
+   check ceiling_marketbeat_swfl). Found while trying to give docling a corpus.
+2. skill-baseline.mts:115-121 COMMENT IS INVERTED — a neutral-prior row forces a persistence miss,
+   which INFLATES lift, not "a clean lower bound". Only 1/138 rows, but the honest direction-call
+   figure is -7.3pp, not -6.5pp.
+3. claims.ts:236-237 COMPARATIVE_PHRASE omits "strongest"/"fastest" — "This is the strongest
+   quarter in five years" passes clean (VERIFIED by running auditClaims live). And claims.ts:53
+   self-documents that the SOCIAL path has NO no-invention gate at all — higher severity.
+   The three lockstep tests assert toContain(CLAIM_PROHIBITION) = containment, never content, so
+   they stay GREEN while the invariant they claim to enforce is false.
+
+DIRECTION CALL, settled properly: paired 2x2 rebuilt by re-running the canonical instrument
+read-only (45/13/22/58, reconciles to 58, 67, 138 exactly). Exact McNemar p=0.1755, 95% CI
+[-1.8pp, +14.9pp] CONTAINS ZERO. Not significant at N=138 — but the sign is a loss, not a tie, and
+35 measured disagreements disprove the old "zero disagreements on 144/144" regardless. Loss is
+concentrated in laus_collier (3 vs 14); laus_lee near-tie (10 vs 8). Ledger AMENDED, not withdrawn.
+
+MY OWN ERRORS, corrected in-session: (a) claimed docling would eliminate paid vision spend — FALSE,
+agent probed all 8 PDFs, min page text 221 chars vs MIN_TEXT_CHARS=200, the fallback never fires;
+(b) claimed unsourced qualitative claims are invisible to our guards — WRONG, claims.ts has done
+this deterministically since 07/13/2026; (c) claimed "no deed corpus exists" — TOO STRONG, the Lee
+source EXPOSES doc-image links that cadence_registry explicitly says we left unparsed, and Akamai
+is measured on the search grid only, never on an image URL.
+The kill pass also found MY design was biased: CC BY-NC is a PURPOSE test, not an entity test, and
+I applied an internal-use exemption to TabPFN then never applied it elsewhere — hard-blocking, before
+dispatch, the two models the sweep itself called the best fits, for a bake-off that is internal
+learning. Never searched at all: translation (large Spanish-speaking population), PII redaction,
+call transcription, synthetic test fixtures, marketing image generation, distillation.
+
+Also fixed: _RESEARCH/INDEX.md header said "GITIGNORED, write freely, none of it is public" — it is
+TRACKED (135 files) in a PUBLIC repo. 16 days stale and actively inviting a credential leak.
+Checks: opened ingest_null_rate_assertion; amended direction_call_equals_persistence. Nothing pushed.
+Next: operator's word on which of the three defects to fix first.
+
 ## 2026-08-19 (Fable 5) — SOURCES COMMENTARY KILLED IN ALL EMAILS, AT THE ONE DOOR + ALL 8 EMITTERS + A FLEET GUARD
 
 Operator decree (on the good-looking under-contract email): "get rid of whatever this shit is

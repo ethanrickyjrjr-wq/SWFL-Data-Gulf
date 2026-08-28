@@ -26,7 +26,11 @@
 --   (shared denominator, locked Option b): non-first-per-slug (a prior exists) AND
 --   non-neutral observed target (a neutral observed is inconclusive for a directional
 --   call). A neutral PRIOR is kept and scores as a persistence MISS (prior <> directional
---   target) — makes naive carry-forward harder to beat, so lift is a clean lower bound.
+--   target) — this is CHARITABLE to the system, not conservative (corrected 08/27/2026):
+--   a forced miss makes the naive carry-forward WEAKER, hence EASIER to beat, so lift is
+--   biased UPWARD. It is NOT a clean lower bound. See the full derivation and the
+--   measured magnitude at refinery/lib/backtest/skill-baseline.mts (the canonical scorer
+--   this view mirrors). Behavior here is unchanged and still reconciles to that scorer.
 --
 -- Honesty guarantees:
 --   • source column distinguishes 'retrodicted' (§2 seed) from 'live' (outcomes) — never blended

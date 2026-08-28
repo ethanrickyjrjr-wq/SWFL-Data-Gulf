@@ -29,7 +29,7 @@ import {
   settledPulseFacts,
   tally,
 } from "./market-pulse";
-import { CLAIM_PROHIBITION } from "@/lib/deliverable/claims";
+import { CLAIM_PROHIBITION, CLAIM_PROHIBITION_PHRASES } from "@/lib/deliverable/claims";
 import { FAVORABLE_FRAMING_POLICY } from "./shared";
 import type { RecipeBuildContext } from "./index";
 import type { ZipMove } from "./market-pulse";
@@ -375,6 +375,12 @@ describe("the claim gate — CODE counts, and the narrator is never given a set 
     const sys = pulseSystemPrompt(6);
     expect(sys).toContain(CLAIM_PROHIBITION);
     expect(sys).toContain("YOU HAVE NOT BEEN GIVEN THE ZIP ROWS");
+    // ...AND ITS CONTENT. `toContain(CLAIM_PROHIBITION)` alone cannot see the invariant
+    // it guards — extend the lint's regexes without extending the prose and this test
+    // stays green while the model is forbidden a conclusion nobody told it about.
+    for (const phrase of CLAIM_PROHIBITION_PHRASES) {
+      expect(sys, `the narrator was never warned about: ${phrase}`).toContain(phrase);
+    }
   });
 
   // ── Task 6: the block stays OUT of this story-side recipe ──────────────────

@@ -22,7 +22,11 @@ import {
   subjectDims,
 } from "./market-comps";
 import { assertHeroChartCoherence } from "@/lib/deliverable/chart-coherence";
-import { auditClaims, CLAIM_PROHIBITION } from "@/lib/deliverable/claims";
+import {
+  auditClaims,
+  CLAIM_PROHIBITION,
+  CLAIM_PROHIBITION_PHRASES,
+} from "@/lib/deliverable/claims";
 import { FAVORABLE_FRAMING_POLICY } from "./shared";
 import { SEED_DOCS } from "@/lib/email/doc/default-docs";
 import { renderEmailDocHtml } from "@/lib/email/render-email-doc";
@@ -1110,6 +1114,16 @@ test("CLAIM_PROHIBITION is printed into the narrator's system prompt, verbatim",
   // follow an explicit instruction rather than a surprise.
   const { system } = buildNarratorPrompt(SUBJECT, PC);
   expect(system).toContain(CLAIM_PROHIBITION);
+
+  // ...AND ITS CONTENT, NOT JUST THE STRING. Containment of CLAIM_PROHIBITION is blind to
+  // the invariant it is guarding: extend `auditClaims`' regexes without extending the
+  // prose and this test — plus its twins in market-pulse.test.ts and agent-launch.test.ts
+  // — stayed GREEN while the lockstep was FALSE, and the narrator was silently forbidden
+  // a conclusion it had never been warned about. CLAIM_PROHIBITION_PHRASES is derived from
+  // the ClaimViolation kind union, so a new shape reds this until it is taught.
+  for (const phrase of CLAIM_PROHIBITION_PHRASES) {
+    expect(system, `the narrator was never warned about: ${phrase}`).toContain(phrase);
+  }
 });
 
 test("buildNarratorPrompt's system includes FAVORABLE_FRAMING_POLICY verbatim", () => {

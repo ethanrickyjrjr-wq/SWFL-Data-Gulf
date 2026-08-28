@@ -248,8 +248,11 @@ directly by brain + charts + landing + email + desk.
 `crexi`/`brevitas` (parked scaffolds) · `fred_laus_alfred` (backtest-only, intentional) · the 07/18
 `buyer-leverage` module (built this session, correctly held/unwired).
 
-**DARK PAID INGEST (gated out):** CRE brokers (marketbeat/colliers/lee_associates) — 261 rows dropped at
-a `verified=false` gate, only 48 reach the brain · `sba_franchise` — cron fires but brain defaults to
+**PARTIALLY DARK PAID INGEST (corrected 08/27/2026 — the old "261 rows / none reach the brain" line was
+STALE, computed before the 07/15/2026 human-review flip):** CRE brokers (marketbeat/colliers/lee_associates)
+— **216** rows dropped at a `verified=false` gate; **161 reach the brain** (113 human-verified `cw_marketbeat`
++ 48 `mhs_databook`). Of the 216 dark rows, **144 are dark on `verified` alone and 72 are ALSO outside
+SURFACED_SECTORS** (colliers `flex` 66 + lee_associates `multifamily` 6), so review alone would not surface them · `sba_franchise` — cron fires but brain defaults to
 FIXTURE mode (no real figures served).
 
 **HALF-WIRED / RENDERED-NOWHERE:** `dbpr_re_licensees` writes `new_re_agents` but ZERO code reads it (the
@@ -1423,7 +1426,7 @@ Registration is `refinery/packs/catalog.mts`.
 - NOTE: two registry entries carry `source_name='mhs_databook'` off the same annual MHS PDF but write DIFFERENT tables for DIFFERENT brains — this entry → `mhs_permits_swfl` (281 permit rows → permits-commercial-swfl); the `mhs_databook` entry below → `marketbeat_swfl` (48 CRE market rows → cre-swfl). Don't conflate.
 
 ### marketbeat_swfl · cadence 90d · lane tier-2
-- STATUS: **live ingest, DARK to the brain.** Data lands, but the consuming brain reads ZERO of it (verified=false gate) — see NOTE. Cron (marketbeat-pdf-ingest.yml) auto-downloads Industrial only; Medical Office is manual/CLI.
+- STATUS: **live ingest, PARTIALLY REACHING the brain** (corrected 08/27/2026). 113 rows are `verified=true` after the 07/15/2026 two-reviewer pass and FLOW today; the 2024 quarters remain dark — see NOTE. Cron (marketbeat-pdf-ingest.yml) auto-downloads Industrial only; Medical Office is manual/CLI.
 - ROOT: nominal raw base of `cre-swfl` (via `data_lake.marketbeat_swfl`, `source_name='cw_marketbeat'`)
 - DATA WE GET: 173 rows (industrial 109 / 7 quarters + medical_office 64 / 4 quarters) → `data_lake.marketbeat_swfl`.
 - DATA AVAILABLE, unpulled: C&W Fort Myers/Naples hub also publishes Office + Retail (no `extractor.py` parser yet); oldest Q1-2024 medical PDF uses a different layout, unparsed.
@@ -1431,21 +1434,26 @@ Registration is `refinery/packs/catalog.mts`.
   - `refinery/sources/marketbeat-swfl-source.mts` (source_id `marketbeat_swfl`, tier 2) → `data_lake.marketbeat_swfl`, `.in("sector",[retail,industrial,office,medical_office])`, then `selectLatestVerifiedPerSubmarket`.
   - `refinery/packs/cre-swfl.mts:29` `marketbeatSwflSource` → per-submarket + per-sector + parent-rollup CRE key_metrics.
   - cre-swfl → master (critical) → `/r/cre-swfl`, `/api/b/cre-swfl`, embed cards, MCP.
-- NOTE — **KEY FINDING (registry lines 1550-1554, check `marketbeat_medical_wiring_followup`):** `cw_marketbeat` rows hit the `else` branch of `selectLatestVerifiedPerSubmarket` (`marketbeat-swfl-source.mts:188-192`), which requires `verified===true`. Every cw_marketbeat / colliers_industrial / lee_associates row in the table is `verified=false`, so **all 261 rows across those 3 sources are dropped before the brain sees them.** Only the 48-row `mhs_databook` feed (per-field gated) actually reaches cre-swfl.
+- NOTE — **CORRECTED 08/27/2026. The previous version of this note was FALSE.** `cw_marketbeat` rows hit the `else` branch of `selectLatestVerifiedPerSubmarket` (`marketbeat-swfl-source.mts:191`), which requires `verified===true`. **`verified` means a HUMAN read the source PDF and checked the row field-by-field** — see `docs/sql/20260715_marketbeat_swfl_verify_reviewed_quarters.sql`, which records a two-reviewer pass (and a real parser bug found by it). Exactly ONE writer of the flag exists tree-wide: that hand-scoped migration. There is no automated verification lane, by design.
+  **Live as of 08/27/2026: 113 `cw_marketbeat` rows ARE verified and DO reach the brain** (49 industrial 2025-Q1..2026-Q1 + 64 medical_office 2024-Q3..2026-Q1), alongside the 48-row `mhs_databook` feed. 216 rows remain dark.
+  **DO NOT "fix" this by flipping `verified` in bulk or removing the gate.** Flipping it launders unreviewed broker extractions into a product that sells cited facts. Removing the gate was MEASURED as a net LOSS: surfaced cells go 69 → 71, but three geometry-confirmed `mhs_databook` cells are DISPLACED by unverified `lee_associates` rows that win the latest-per-quarter pick — **+2 unverified, −3 verified.**
+  The gate is **4 sites, not 1**: `marketbeat-swfl-source.mts:191` plus `verified=eq.true` embedded in citation receipt URLs at `refinery/packs/cre-swfl.mts:232`, `:325`, `:526`. Any change must move all four in lockstep or a citation link stops reproducing the number it cites.
+  **The architecture already chose the forward path:** `refinery/lib/derived/cre-figures.mts` reads raw rows with NO verified filter and carries `source_verified` as a DATA ATTRIBUTE, feeding `cre-corroboration.mts:92` (`firms.find(f => f.source_verified) ?? firms[0]`) — verification as a PREFERENCE among corroborating firms, not a gate. Check `cre_figures_consumer_wire` is open.
+  **60 of the dark `cw_marketbeat` rows (2024 quarters) are PERMANENTLY unverifiable** — their source PDFs are gone from the live C&W hub. They should be written off, not left looking like a clearable backlog.
 
 ### colliers_industrial · cadence 90d · lane tier-2
 - STATUS: **live ingest, DARK to brain** (same verified=false gate as cw_marketbeat)
 - ROOT: nominal raw base of `cre-swfl` (via `data_lake.marketbeat_swfl`, `source_name='colliers_industrial'`)
 - DATA WE GET: 132 rows (11 quarters × 12), 6 SWFL submarkets × Industrial+Flex → `data_lake.marketbeat_swfl` (inventory_sf, total vacancy %, net absorption current+YTD, deliveries, under construction, asking NNN).
 - DATA AVAILABLE, unpulled: building count + direct-vacancy % (parsed by column position, never stored); Office/Retail/MF unconfirmed (colliers.com Cloudflare/JS-SPA blocked live crawl).
-- ROUTES: lands in `data_lake.marketbeat_swfl` via `marketbeat-pdf-ingest.yml` (same pipeline). Nominally read by `marketbeat-swfl-source.mts` → cre-swfl — but `source_name='colliers_industrial'` → else-branch → `verified===true` required → **all rows dropped** (verified=false). Its `flex` sector is also outside SURFACED_SECTORS. Contributes nothing to the brain today. Part of the 261-row standing gap.
+- ROUTES: lands in `data_lake.marketbeat_swfl` via `marketbeat-pdf-ingest.yml` (same pipeline). Nominally read by `marketbeat-swfl-source.mts` → cre-swfl — but `source_name='colliers_industrial'` → else-branch → `verified===true` required → **all 132 rows dropped** (verified=false). **Its 66 `flex` rows are dark for a SECOND, independent reason — `flex` is outside SURFACED_SECTORS — so a human-review pass would NOT surface them** (check `marketbeat_sector_scope_flex_multifamily`). Contributes nothing to the brain today. Part of the **216**-row standing gap (corrected 08/27/2026 from a stale 261).
 
 ### lee_associates_swfl · cadence 90d · lane tier-2 (probe_mode: odd_window)
 - STATUS: **live ingest, DARK to brain** (verified=false gate) + not-yet-graduated (odd_window)
 - ROOT: nominal raw base of `cre-swfl` (via `data_lake.marketbeat_swfl`, `source_name='lee_associates'`)
-- DATA WE GET: 20 rows (Q1-2025–Q1-2026), Fort Myers only, all 4 sectors (Office/Retail/Industrial/Multifamily): vacancy, asking NNN/mf, absorption, sale $/psf, under-construction, inventory_sf.
+- DATA WE GET: **24 rows** live as of 08/27/2026 (Q1-2025–Q2-2026, last load 08/20/2026 and still growing), Fort Myers only, all 4 sectors (Office/Retail/Industrial/Multifamily): vacancy, asking NNN/mf, absorption, sale $/psf, under-construction, inventory_sf.
 - DATA AVAILABLE, unpulled: Naples/Collier (same URL pattern returns HTTP 200 for all 4 Naples sector PDFs — check `lee_associates_missing_naples`); Cap Rate is parsed into memory but silently dropped (no cap_rate column on `marketbeat_swfl`).
-- ROUTES: same as colliers_industrial — lands in `data_lake.marketbeat_swfl` (`ingest-lee-associates-swfl.yml`), read by `marketbeat-swfl-source.mts` → cre-swfl, but verified=false → **all rows dropped**. `multifamily` sector also outside SURFACED_SECTORS. Part of the 261-row standing gap.
+- ROUTES: same as colliers_industrial — lands in `data_lake.marketbeat_swfl` (`ingest-lee-associates-swfl.yml`), read by `marketbeat-swfl-source.mts` → cre-swfl, but verified=false → **all 24 rows dropped**. Its 6 `multifamily` rows are ALSO outside SURFACED_SECTORS (dark for two reasons). Part of the **216**-row standing gap. **This is the ONLY dark source still GROWING** — loaded 08/20/2026 — so 'leave it dead' has a rising cost here and nowhere else.
 
 ### fmb_recovery · cadence 90d · lane tier-2 (probe_mode: odd_window)
 - STATUS: live-ingest (seed-based, always upserts 8 SEED_ROWS), wired to cre-swfl
@@ -1521,12 +1529,22 @@ Registration is `refinery/packs/catalog.mts`.
 
 ## Cross-cutting findings
 
-1. **cre-swfl's CRE-broker data is almost entirely dark.** Of the marketbeat_swfl table's feeds, only
-   `mhs_databook` (48 rows) reaches the brain. `cw_marketbeat` (173), `colliers_industrial` (132), and
-   `lee_associates` (20) — the registry's "261 rows across 3 sources" — are all `verified=false`, and
-   both `marketbeat-swfl-source.mts` and `cre-swfl.mts` gate the else-branch on `verified===true`. This
-   is a tracked check (`marketbeat_medical_wiring_followup`) but it means most of the CRE ingest effort
-   currently delivers nothing to the answer surface.
+1. **cre-swfl's CRE-broker data is PARTIALLY dark — corrected 08/27/2026, this item used to be wrong.**
+   Live: **161 rows reach the brain** — 113 `cw_marketbeat` rows carrying `verified=true` from the
+   07/15/2026 two-reviewer pass (49 industrial + 64 medical_office), plus `mhs_databook` (48).
+   **216 remain dark:** `colliers_industrial` (132), `cw_marketbeat` 2024 quarters (60),
+   `lee_associates` (24, last loaded 08/20/2026 and still growing). Of those 216, **144 are dark on
+   `verified` alone and 72 are ALSO outside SURFACED_SECTORS** (colliers `flex` 66 + lee `multifamily`
+   6) — review alone would not surface them. The old "261 rows across 3 sources / none reach the brain"
+   figure was computed before the same-day 07/15 flip and double-counted; it is retired.
+   **`verified` = a human read the source PDF and checked the row field-by-field**
+   (`docs/sql/20260715_marketbeat_swfl_verify_reviewed_quarters.sql`); one writer tree-wide, no
+   automated lane, by design. **Do not bulk-flip it and do not remove the gate** — removing it was
+   measured as a NET LOSS (+2 unverified cells, −3 verified). 60 of the dark rows are permanently
+   unverifiable (2024 source PDFs gone from the C&W hub). Forward path: `cre-figures.mts` already treats
+   `source_verified` as a preference among corroborating firms rather than a gate — open check
+   `cre_figures_consumer_wire`. Note both prior trackers (`marketbeat_medical_wiring_followup`,
+   `marketbeat_pdf_pipeline_audit`) were DROPPED 08/12/2026 while the gap was live.
 2. **cre-swfl's alt-listing feeds are pre-graduation.** `crexi_listings` / `brevitas_listings`
    (active_listings_cre) are odd_window, "NOT YET ACTIVATED" — the connector/pack wire is built and
    ready (one connector reads both by city), but no green GHA run has graduated them.

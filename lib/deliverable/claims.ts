@@ -236,6 +236,44 @@ const COMPARATIVE_QUANT = new RegExp(
 const COMPARATIVE_PHRASE =
   /\b(in line with|on par with|at the (low|high) end|out(performs?|paces?)|trails?|lags? behind|the (largest|smallest|biggest|highest|lowest|priciest|cheapest)\b)/i;
 
+/**
+ * A SUPERLATIVE RANKED OVER A NAMED PERIOD — "the strongest quarter in five years",
+ * "the fastest pace in 18 months", "its tightest level in three years".
+ *
+ * ROUND 3, measured live 08/27/2026 against this module:
+ *   auditClaims("This is the strongest quarter in five years.", [])  →  []
+ * It passed CLEAN. The rate superlatives we HAD been catching were caught by ACCIDENT —
+ * "prices are rising fastest in Cape Coral" trips TRAJECTORY on "rising", never on the
+ * superlative. Drop the trajectory verb and the ranking sails straight through, carrying
+ * no numeral a digit lint can see: "five" is SPELLED. That is the same blind spot as
+ * "five of those six ZIPs", one claim-class over.
+ *
+ * THE PERIOD IS THE WHOLE POINT. THIS IS NOT A BARE-WORD LIST AND MUST NEVER BECOME ONE.
+ * A bare superlative is REGISTER, not a claim — and it is the register `LETTER_SYSTEM`
+ * (recipes/agent-launch.ts) explicitly asks for: "Plain and warm". MEASURED: putting
+ * hottest/tightest/busiest/fastest/strongest into COMPARATIVE_PHRASE takes these three
+ * honest, quantity-free sentences from clean to WHOLE-PARAGRAPH-DROPPED by
+ * `gateLetterProse`:
+ *   "Reply and I will send it over — the fastest way to get an answer is just to ask."
+ *   "The strongest thing I can offer you is a straight answer."
+ *   "Saturday is the busiest day for showings, so come early."
+ * That is the covered-lanai wound above, reopened. So the period window is a HARD
+ * CONJUNCT, never an optional group: a superlative counts only when it ranks its subject
+ * against a COUNTED span of time — the shape that needs a history the narrator was never
+ * handed, and the only shape here that is falsifiable by anyone.
+ *
+ * KNOWN RESIDUAL, ON PURPOSE: "the strongest quarter in years", "in a decade or more",
+ * "in recent memory" go uncaught. Widening the count slot to few/several/many is exactly
+ * what eats "the best thing I can do for you over the next few months".
+ */
+const SUPERLATIVE = String.raw`(strongest|weakest|hottest|coolest|coldest|tightest|loosest|busiest|quietest|slowest|fastest|quickest|highest|lowest|biggest|largest|smallest|priciest|cheapest|steepest|sharpest|softest|longest|shortest|best|worst|record)`;
+/** A COUNTED span of time. Real counts only — never few/several/many (see above). */
+const PERIOD_WINDOW = String.raw`\b(in|since|over|for)\s+(the\s+(last|past)\s+)?(\d{1,4}|one|two|three|four|five|six|seven|eight|nine|ten|eleven|twelve|an?)[\s-]+(years?|months?|quarters?|weeks?|decades?)\b`;
+const PERIOD_SUPERLATIVE = new RegExp(
+  String.raw`\b${SUPERLATIVE}\b[^.!?]{0,30}?` + PERIOD_WINDOW,
+  "i",
+);
+
 /** A TRAJECTORY — a claim about MOVEMENT over time. sphere-weekly asserted the gap was
  *  "widening" when it had been given exactly one national LEVEL and no trend at all.
  *  A level is not a direction. You cannot see motion in a single point. */
@@ -373,6 +411,7 @@ function countIsAnchored(
 export interface ClaimViolation {
   kind:
     | "comparative"
+    | "period-superlative"
     | "trajectory"
     | "word-count"
     | "sequence"
@@ -416,6 +455,9 @@ export function auditClaims(prose: string, settled: readonly SettledClaim[]): Cl
     const checks: [ClaimViolation["kind"], RegExp][] = [
       ["comparative", COMPARATIVE_QUANT],
       ["comparative", COMPARATIVE_PHRASE],
+      // A superlative ranked over a COUNTED period — "the strongest quarter in five
+      // years". A bare superlative is register and stays legal; see PERIOD_SUPERLATIVE.
+      ["period-superlative", PERIOD_SUPERLATIVE],
       ["trajectory", TRAJECTORY],
       // A count survives ONLY as a verbatim restatement of a settled sentence (the
       // `settledText.includes` guard above). Any other count — spelled OR in digits — is
@@ -479,6 +521,10 @@ export const CLAIM_PROHIBITION =
   `as a settled fact. If you want to say one number relates to another, you may only ` +
   `restate the settled sentence that says so. You cannot compare two numbers — you were ` +
   `not given two to compare.\n` +
+  `- A PERIOD SUPERLATIVE. Not "the strongest quarter in five years", not "the fastest ` +
+  `pace in 18 months". Ranking anything against a span of time means holding that span's ` +
+  `history. You were handed today. Say a thing is good if you like — never that it is the ` +
+  `best since some year.\n` +
   `- A TRAJECTORY. Not "widening", "cooling", "rebounding", "picking up". A single value is ` +
   `a LEVEL, not a DIRECTION. You cannot see movement in one point in time.\n` +
   `- A COUNT. Not "five of the six", not "most of them", not "all". Counts are computed for ` +
@@ -492,3 +538,40 @@ export const CLAIM_PROHIBITION =
   `Every number you write must appear verbatim in the facts you were given. If a sentence ` +
   `needs something you were not given, CUT THE SENTENCE. A shorter true paragraph beats a ` +
   `longer one that guesses.`;
+
+/**
+ * EVERY SHAPE THE LINT ENFORCES, MAPPED TO THE PHRASE THE PROHIBITION MUST SPELL OUT.
+ *
+ * `CLAIM_PROHIBITION` is a SECOND, hand-maintained copy of this file's vocabulary, pasted
+ * into six narrator prompts. Its docblock says "keep this and `auditClaims` in lockstep" —
+ * and until 08/27/2026 the three tests guarding that invariant asserted
+ * `expect(system).toContain(CLAIM_PROHIBITION)`: containment of the STRING, never its
+ * CONTENT. Extend the regex without extending the prose and all three stayed GREEN while
+ * the invariant was FALSE — the model told not to draw a conclusion it was never warned
+ * about. A test that cannot fail is not a guard.
+ *
+ * So this map is the ONE root: `satisfies Record<ClaimViolation["kind"], …>` means a NEW
+ * KIND DOES NOT COMPILE until its prose line is named here, and the lockstep tests assert
+ * every phrase below appears in the printed prompt.
+ */
+export const CLAIM_PROHIBITION_SHAPES = {
+  comparative: "A COMPARISON",
+  "period-superlative": "A PERIOD SUPERLATIVE",
+  trajectory: "A TRAJECTORY",
+  "word-count": "A COUNT",
+  sequence: "A SEQUENCE",
+  spatial: "A LOCATION relationship",
+  motive: "A MOTIVE",
+  "unanchored-number": "Every number you write must appear verbatim",
+  // NAMED GAPS, not untracked TODOs. The prohibition prose warns about NEITHER of these
+  // two, though the lint drops paragraphs for both. Found 08/27/2026 while building this
+  // map; left as-is deliberately — adding prose changes the text of six live prompts, and
+  // that is a separate decision, not a side effect of closing the superlative hole.
+  "artifact-positional": null,
+  "unsourced-feature": null,
+} satisfies Record<ClaimViolation["kind"], string | null>;
+
+/** The phrases the prompt must actually carry — the lockstep assertion, one line. */
+export const CLAIM_PROHIBITION_PHRASES: readonly string[] = Object.values(
+  CLAIM_PROHIBITION_SHAPES,
+).filter((p): p is string => p !== null);
