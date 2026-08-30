@@ -37,6 +37,10 @@
           },
           {
             "type": "command",
+            "command": "node .claude/hooks/inject-playbooks.mjs"
+          },
+          {
+            "type": "command",
             "command": "node .claude/hooks/mint-approval-on-prompt.mjs"
           }
         ]

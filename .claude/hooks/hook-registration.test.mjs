@@ -41,10 +41,18 @@ export const PARKED = {
   "check-build-context.mjs": "parked by design — 4h intake staleness gate, unused",
 };
 
-/** Every check-*.mjs in the hooks dir that is real runtime code (not a test). */
+/** Every check-*.mjs / inject-*.mjs in the hooks dir that is real runtime code (not a
+ *  test). inject-* added 08/30/2026 (second-order finding on inject-playbooks.mjs): an
+ *  unregistered injector vanishes with zero test failure and no banner — the exact silence
+ *  this file exists to catch. */
 export function hookFiles(dir) {
   return readdirSync(dir)
-    .filter((f) => f.startsWith("check-") && f.endsWith(".mjs") && !f.endsWith(".test.mjs"))
+    .filter(
+      (f) =>
+        (f.startsWith("check-") || f.startsWith("inject-")) &&
+        f.endsWith(".mjs") &&
+        !f.endsWith(".test.mjs"),
+    )
     .sort();
 }
 

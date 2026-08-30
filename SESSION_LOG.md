@@ -1,3 +1,52 @@
+## 2026-08-30 (Fable 5) — PLAYBOOKS: one file per TASK TYPE, steps copied verbatim into the todo list — the per-task-type half of NORTH STAR #3 scoped injection (check `playbooks_per_task_type_live_verify`)
+
+Operator handed https://github.com/cursor/plugins/tree/main/pstack ("how do we get this?"). Crawled it live
+(README, `.cursor-plugin/plugin.json` v0.14.5, `setup-pstack/SKILL.md`): a Cursor-only plugin whose
+load-bearing feature is cross-vendor model panels (Fable / Sol / Grok / Opus 5 per role) — unreachable from
+Claude Code (Agent tool = sonnet/opus/haiku/fable); every non-vendor piece already exists here (superpowers,
+`verify`, `second-order`, `what-do-we-have`). Verdict filed: do not adopt, steal ONE shape
+(`_RESEARCH/agent-behavior/2026-08-30-cursor-pstack-evaluation.md` + INDEX line). Operator on the shape:
+"make it happen now" — the one item lifted from the NORTH STAR #5 freeze, on his words; the freeze stands
+for everything else.
+
+THE BUILD (spec `docs/superpowers/specs/2026-08-30-playbooks-per-task-type-design.md`):
+- `.claude/playbooks/` × 9 — investigation · data-question · bug-fix · feature · ingest-pipeline · refactor ·
+  outside-tool · ship · session-pickup. Each: `name`/`for` frontmatter, numbered steps naming the tool or
+  command that proves each one, a `**Rules carried:**` line (= the CLAUDE.md deletion map), a `**Reply:**`
+  shape, < 4,500 chars. `README.md` carries the contract.
+- `.claude/hooks/inject-playbooks.mjs` (UserPromptSubmit, registered after inject-focus) + `lib/playbooks.mjs`
+  — emits the SAME static index every prompt (name · for · pointer; 1,797 chars measured). The MODEL is the
+  classifier; this is NOT the keyword router inject-focus.mjs rejects. Fail-open but LOUD: unlistable dir →
+  `PLAYBOOKS DEGRADED` banner; a file missing frontmatter is named as dropped.
+- `lib/playbooks.test.mjs` — 12/12 incl. a shape lint over the real directory; hook-registration passes;
+  full hook suite 227/227.
+- pstack's own named failure mode is written into the contract: steps copied VERBATIM as the FIRST todo
+  items, before reasoning; a step not done stays listed with `skip: <reason>`.
+
+NOT DONE, by design: deleting the carried rule bodies from CLAUDE.md. Replacement runs first (RULE 0.55's
+DROP discipline) — check `claude_md_diet_step_three_delete_playbook_covered_rules` opened, blocked on one
+session of live evidence that the hook fires and the steps get copied. Live verify: the PLAYBOOKS block
+appears under FOCUS on the next prompt of any session → close `playbooks_per_task_type_live_verify`.
+
+SECOND-ORDER (10 findings, all with file:line): FIXED NOW — (1) data-question.md restated the four lanes as
+prose → test asserts every `LANES` key from check-four-searches.mjs appears as a lane step; (2) nine files cite
+FOCUS ordinals → test bounds every `FOCUS n` by the live numbered count in `_ASSISTANT/RULES.md`; (4)
+hook-registration.test.mjs only enumerated `check-*` → widened to `inject-*` (mutation-proved: with only
+inject-focus registered it reports inject-playbooks AND inject-scoped-rules); (9) no test measured the
+COMBINED UserPromptSubmit payload → test sums inject-focus + inject-playbooks on an armed data prompt, < 10k;
+(10) a partial stage throws ENOENT in CI → clean assertion naming the three-piece stage; all ten playbook
+files staged with the hooks; (8) Gate 1.5 doc-index drift → `node scripts/doc-index.mjs` run, INDEX staged
+(`.claude/playbooks — 10` section). RESOLVE ON COMMIT — (3) six worktrees lack the dir, (7) graph doesn't
+know the module. (6) hook proven live in-session → `playbooks_per_task_type_live_verify` CLOSED with
+evidence. (5)+INVERSION — no read-enforcement gate for playbooks; the contract is advisory text. This is
+the named blocker on `claude_md_diet_step_three_delete_playbook_covered_rules`: build the
+`playbookWasRead` / `familyShowsRead` shape for `.claude/playbooks/` BEFORE any CLAUDE.md body leaves the
+wall, or hard rules become voluntary ones under a green suite. 15/15 playbook tests; full hook suite green.
+
+Not pushed — awaiting the operator's word (per-push approval). Files: `.claude/settings.json`,
+`.claude/hooks/inject-playbooks.mjs`, `.claude/hooks/lib/playbooks.{mjs,test.mjs}`, `.claude/playbooks/*`,
+the spec.
+
 ## 2026-08-29 (Fable 5) — FAIR HOUSING GATE on every model-written sentence: ONE root in claims.ts, 8 seats wired, voice-guard.ts found DARK (check `voice_guard_unwired`)
 
 Operator handed https://github.com/zillow/compliant-real-estate-chatbot ("can this help our email talk?").
