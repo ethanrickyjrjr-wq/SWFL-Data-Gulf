@@ -7,7 +7,7 @@
 
 Markers: **[ORPHAN]** nothing in the repo points at this file — it is invisible unless you come through this index, and it is a DELETION CANDIDATE. **[weak]** reachable only by bare filename, which leads nowhere.
 
-Reachability at generation: 949 by path · 551 by name only · 248 orphaned. Re-measure with `node scripts/doc-reachability.mjs`.
+Reachability at generation: 950 by path · 550 by name only · 248 orphaned. Re-measure with `node scripts/doc-reachability.mjs`.
 
 ## docs/superpowers — 878
 
@@ -1660,7 +1660,7 @@ Reachability at generation: 949 by path · 551 by name only · 248 orphaned. Re-
 ## .claude/playbooks — 10
 
 - `.claude/playbooks/README.md` — Playbooks — one file per TASK TYPE — The per-task-type half of scoped rule injection (NORTH STAR #3). inject-playbooks.mjs
-- `.claude/playbooks/bug-fix.md` *[weak]* — Bug fix — 1. Scratchpad first if the operator raised it: ASSISTANT/SCRATCHPAD.md entry BEFORE answering (RULE 2 §0). If the shape matches a ## shape: in ASSISTANT/STRIKES.md, add a - strike: line; a T
+- `.claude/playbooks/bug-fix.md` — Bug fix — 1. Scratchpad first if the operator raised it: ASSISTANT/SCRATCHPAD.md entry BEFORE answering (RULE 2 §0). If the shape matches a ## shape: in ASSISTANT/STRIKES.md, add a - strike: line; a T
 - `.claude/playbooks/data-question.md` — Data question — 1. RESEARCH lane — RESEARCH/INDEX.md for the topic; open the hit.
 - `.claude/playbooks/feature.md` — Feature — 1. Research before design: RESEARCH/INDEX.md, then the what-do-we-have skill — the answer is often already written (RULE 0.4). Vendor surfaces (MIME, endpoint, SDK, model id) are verified by
 - `.claude/playbooks/ingest-pipeline.md` **[ORPHAN]** — Ingest pipeline — 1. FULL-SCOPE-FIRST: enumerate the source's complete field list (schema endpoint / docs / live probe — READ the ceiling, not informationschema), write it into the pipeline's sourcescope bloc

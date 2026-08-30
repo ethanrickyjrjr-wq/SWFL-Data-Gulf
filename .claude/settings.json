@@ -60,6 +60,10 @@
           },
           {
             "type": "command",
+            "command": "node .claude/hooks/print-worktree-drift.mjs"
+          },
+          {
+            "type": "command",
             "command": "node .claude/hooks/print-research-index.mjs"
           },
           {

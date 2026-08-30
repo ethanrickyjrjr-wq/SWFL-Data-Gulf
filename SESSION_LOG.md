@@ -1,3 +1,33 @@
+## 2026-08-30 (Fable 5) — LANDED ON MAIN + WORKTREE SWEEP: playbooks, read gate, CLAUDE.md pointer form, the 07/22 four-lane fix; 4 dead worktrees removed; drift line at SessionStart
+
+Operator, on "push": "why would there be 6 other checkouts carrying the old shit CLAUDE.md and not have
+.claude/playbooks????? Just do it all correctly!!!!! Tired of problems not being fixed." Scratchpad entry
+written first. The honest answer: six RULE 1.5 worktrees created by parallel sessions in July (560–808
+commits behind main) — `scripts/worktree.mjs` calls them self-deleting, nobody ever ran `cleanup`, and
+nothing printed the drift. I had REPORTED them as a note instead of fixing them (partial-reported-as-whole).
+
+LANDED ON MAIN (temp worktree `bp-main-land`, cherry-picks, zero conflicts): `2d3ecb17` playbooks +
+inject hook (= e5bb5e5b) with the pstack research files · `cc6fcce7` read gate + CLAUDE.md cut (= 9e066537)
+· `ce7cbc57` = the 07/22 `wt/fourlane-gate-fix` commit (isMeta turns are not the operator speaking) that
+had sat unlanded for 39 days — its test F6 then FAILED on today's code; fixed in this push (see below). The
+condo-baseline changeset stays on `feat/condo-baseline-swfl` (data_lake writes = ask-first).
+
+SWEEP (surveyed each: dirty · ahead/behind origin/main · merged · last commit): REMOVED `wt/ci-ratchets`,
+`wt/rls-project-activity`, `wt/sentry-error-tracking` (all clean, fully merged, 07/21) and
+`wt/fourlane-gate-fix` (landed above); REMOVED the subagent worktree `agent-aa934c591fcb2b706` — its 5
+dirty files (a `planned_developments` pipeline, 08/12) are superseded on main by `lee_planned_developments`
+(pipeline + workflow + registry); copies archived to the session scratchpad before removal. KEPT
+`wt/steadyapi-permits-family-c`: its 08/03 commit (pack + source wiring for
+`listing_recent_permit_activity_stats`, 11 files) is NOT on main by patch-id and main's pack has zero
+permit references — the 79,281-row table is live and DARK. Pack OUTPUT change = ask-first; check
+`steadyapi_permits_family_c_pack_wiring_unlanded` opened with the exact landing command.
+
+THE MECHANISM (so this never needs to be noticed again): `.claude/hooks/print-worktree-drift.mjs` —
+SessionStart, one line per worktree that is DEAD (merged+clean → the cleanup command) / UNLANDED (N commits
+not on main) / DIRTY / STALE / DRIFT (in sync but its CLAUDE.md is not main's). Silent for active in-sync
+work. Pure classification tested 6/6; git plumbing fails open; read-only. Live output at install named
+exactly the two remaining checkouts.
+
 ## 2026-08-30 (Fable 5) — PLAYBOOK READ GATE built, then CLAUDE.md cut to pointer form: 341→190 lines, 23,191→14,013 chars (check `claude_md_diet_step_three_delete_playbook_covered_rules` CLOSED)
 
 Operator: "get on it" — the read-enforcement blocker from the morning's second-order inversion, then step
@@ -10582,6 +10612,28 @@ append a correction; `stop_hook_active` makes it a one-shot nudge; and `scripts/
 never-registered failure has no detector.
 
 ## 2026-07-22 (Opus 4.8 · main) — Full-week failure audit. The four-lane gate was deaf to the exact message that caused failure #1.
+## 2026-07-22 (Sonnet 5 · wt/fourlane-gate-fix) — The four-lane gate was reading a Skill's own returned doc as "the operator speaking," not the actual prompt.
+
+**Live incident, this session.** Asked "get these" (enable three Anthropic plugins). Invoked the
+`update-config` skill mid-turn to edit `settings.json`; its ~154k-char returned doc (full settings
+JSON schema — dense with "schema", "table", "which") landed in the transcript as a synthetic
+`type:"user"` entry stamped `isMeta:true`. `readTurn()` in `.claude/hooks/check-four-searches.mjs`
+only skipped `tool_result`-shaped user turns, not `isMeta:true` ones, so it read that doc as the
+operator's message instead of the real "get these" beneath it — and the gate blocked a plugin-config
+edit as an unsearched "data question." Confirmed against the live transcript (`b55563da-...jsonl`
+line 302: `isMeta:true`, no `origin`/`promptSource`; a real typed prompt at line 289 carries
+`origin:{kind:"human"}` + `promptSource:"typed"`).
+
+**Fix:** `readTurn()` now skips `isMeta:true` entries the same way it already skips `tool_result`
+ones. Regression test `F6` added to `check-four-searches.test.mjs` (fails against the pre-fix code,
+passes after) — reproduces this exact shape rather than a synthetic guess. 18/18 tests pass.
+
+**Coordination note:** `.claude/hooks/check-four-searches.test.mjs` was claimed by another active
+session when this fix started; isolated the whole fix in `wt/fourlane-gate-fix` per RULE 1.5 rather
+than fight the claim or wait blind. This is a THIRD distinct bug found in this same gate today
+(after `ba30a776` wiring it in and `44bd54fe`/`d0ebbff8` widening the classifier) — worth a beat to
+ask whether the gate needs a design pass instead of another one-off patch next time it misfires.
+
 
 **Audit:** `_ASSISTANT/2026-07-22-claude-failure-audit-OPUS.md`. Commissioned by the handoff written
 earlier today; every claim carries a run command, commit hash, or scratchpad item.
