@@ -1,3 +1,47 @@
+## 2026-08-30 (Fable 5) — PLAYBOOK READ GATE built, then CLAUDE.md cut to pointer form: 341→190 lines, 23,191→14,013 chars (check `claude_md_diet_step_three_delete_playbook_covered_rules` CLOSED)
+
+Operator: "get on it" — the read-enforcement blocker from the morning's second-order inversion, then step
+three of the 08/18 diet.
+
+THE GATE (spec `docs/superpowers/specs/2026-08-30-playbook-read-gate-design.md`):
+`.claude/hooks/check-playbook-read-before-write.mjs` — PreToolUse Edit|Write, registered before
+inject-scoped-rules. Blocks a CODE write until the session family shows a real `Read` of
+`.claude/playbooks/<name>.md` (README excluded). Evidence root = `read-evidence.mjs` `familyShowsRead`
+(same as the email playbook gate + area fence; controller's read counts for subagents, peers never); exempt
+paths = `check-area-fence.mjs` `isExemptPath` (docs/config/tests — one root, so editing CLAUDE.md or a
+playbook never blocks). Escape `ALLOW_WRITE_WITHOUT_PLAYBOOK=1` (the approvals guard correctly blocked me
+from touching the token mechanism — human-only). TDD: test written, run RED (module not found), then
+green 9/9. Driven live with real payload + transcript shapes: no-read + code → exit 2 with the block
+message; Read in transcript → exit 0; doc path → exit 0. Honest ceiling written into the header:
+transcript evidence proves *a* playbook was opened, not the *right* one. `playbook_read_gate_live_verify`
+OPEN — closes on the first real observed block.
+
+THE CUT: every rule with a `Rules carried:` carrier → one-line pointer naming its playbook(s) (0.4, 0.5,
+0.5c, 0.55, 0.7/a/b, 0.8, 0.85, 0.9, 0.95, 1, 1.5, 2, 3.5, 3 C2, lake protocol v3). Bodies kept for the three
+with no carrier (0.5b, 0.6, 3 C1). RULE 0 + marker, THE GOAL, factory pointers, reference index, graphify
+merge section untouched. Pre-cut file preserved in the archive lineage (`docs/standards/claude-rules-archive-2026-08-18.md`
+is the verbatim 08/18 form; the 08/18→08/30 lean form is in git at `e5bb5e5b`). Hook suite 239/239.
+
+SECOND-ORDER on the cut (9 findings, file:line each): FIXED NOW — (1) a Read of a playbook that does NOT
+EXIST unlocked the session (tool_use line matched, never the result; probe A: `.claude/playbooks/
+nonexistent-xyz.md` → exit 0) → evidence is now existence-checked against the real dir
+(`lineIsRealPlaybookRead`); (2) the gate's test never opened the directory → test now iterates every real
+playbook and rejects a typo'd/invented name; (4) code written through Bash (heredoc, `>>`, `tee`, `sed -i`)
+never reached the Edit|Write matcher → `bashWriteTargets` + `governedTargets`, hook registered under the
+Bash matcher too; (5) `ingest/cadence_registry.yaml` — FULL-SCOPE-FIRST's own artifact — was exempt as yaml
+→ governed by name; (7) `pack_id=master` fold form dropped from the RULE 1 pointer and ship.md → restored
+in both, plus the 18-gate roster line; `scripts/CLAUDE.md:4,:51` "root keeps the rules" → pointers; (9)
+pre-existing dangling "CLAUDE.md RULE 1 breaker #1/#3" in `.github/scripts/classify-cron-failure.mjs` →
+archive pointer. NOT CHANGED, documented as ceiling — (6) the session family is vertical both ways, so a
+subagent's playbook Read satisfies its controller (read-evidence.mjs's deliberate shape, shared by three
+gates). (8) OPERATOR — six other checkouts (`main` = 341-line CLAUDE.md, three `wt/*` at 301) carry the
+long form and none has `.claude/playbooks/`; whichever merges first decides — this branch also carries
+the condo-baseline changeset, so landing the diet = landing `feat/condo-baseline-swfl` or cherry-picking
+`e5bb5e5b` + this commit onto main. Graphify `claude install` anchor (heading vs offset) UNVERIFIED — the
+section is byte-identical, only moved. Live probes after the fixes, all correct: A fake-read→2 · B
+no-read→2 · C real-read→0 · D registry-yaml no-read→2 · E bash-heredoc no-read→2 · F bash non-code→0 ·
+G bash-heredoc real-read→0. Gate tests 15/15; full hook suite 245/245.
+
 ## 2026-08-30 (Fable 5) — PLAYBOOKS: one file per TASK TYPE, steps copied verbatim into the todo list — the per-task-type half of NORTH STAR #3 scoped injection (check `playbooks_per_task_type_live_verify`)
 
 Operator handed https://github.com/cursor/plugins/tree/main/pstack ("how do we get this?"). Crawled it live
