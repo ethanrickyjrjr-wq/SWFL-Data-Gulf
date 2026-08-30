@@ -807,6 +807,10 @@ const READ_SYSTEM =
 /** What the narrator is told when it breaks a rule — named by SHAPE, so the repair is
  *  the model deleting a claim rather than guessing at what offended us. */
 const REPAIR: Record<string, string> = {
+  "fair-housing":
+    `That describes WHO the home or area is for, or who lives nearby. The Fair Housing Act ` +
+    `reads it as a stated preference, whether or not a fact line said it. Describe the ` +
+    `property, never the people. Delete the sentence.`,
   trajectory:
     `That is a TRAJECTORY — a claim that something is MOVING. You were given ONE reading, ` +
     `for ONE moment. Nothing you know can tell you which way anything is moving. Delete it.`,

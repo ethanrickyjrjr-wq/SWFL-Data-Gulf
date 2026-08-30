@@ -915,3 +915,55 @@ describe("fillEmptySourcesBlock (slot-fill path — template-owned structure, da
     expect(fillEmptySourcesBlock(noBlock, FIGURES)).toBe(noBlock);
   });
 });
+
+import { filterAnchoredVariants as filterAnchoredVariantsFH } from "./author-doc";
+
+describe("fair-housing gate on authored prose (42 U.S.C. § 3604(c))", () => {
+  test("lintAuthoredProse drops the sentence that states a preference about WHO belongs; the rest survives", () => {
+    const doc: EmailDoc = {
+      globalStyle: DEFAULT_GLOBAL_STYLE,
+      blocks: [
+        {
+          id: "b1",
+          type: "hero",
+          props: { prose: "Homes sit 47 days on market. This one is ideal for young couples." },
+          layout: { x: 0, y: 0, w: 12, h: 1 },
+        },
+      ],
+    };
+    const r = lintAuthoredProse(doc, collectAnchorNumbers(FIGURES));
+    const prose = propsOf(r.stripped.blocks[0]).prose as string;
+    expect(prose).toBe("Homes sit 47 days on market.");
+    expect(r.ok).toBe(false);
+  });
+
+  test("a phrase the sentence splitter breaks apart ('St. Leo Catholic Church') drops exactly its fragments — the sourced sentences beside it survive", () => {
+    const doc: EmailDoc = {
+      globalStyle: DEFAULT_GLOBAL_STYLE,
+      blocks: [
+        {
+          id: "b1",
+          type: "hero",
+          props: {
+            prose:
+              "Homes sit 47 days on market. Just steps from St. Leo Catholic Church. The median is $1,250,000.",
+          },
+          layout: { x: 0, y: 0, w: 12, h: 1 },
+        },
+      ],
+    };
+    const r = lintAuthoredProse(doc, collectAnchorNumbers(FIGURES));
+    expect(propsOf(r.stripped.blocks[0]).prose).toBe(
+      "Homes sit 47 days on market. The median is $1,250,000.",
+    );
+    expect(r.ok).toBe(false);
+  });
+
+  test("filterAnchoredVariants drops a subject/CTA variant carrying a fair-housing phrase", () => {
+    const out = filterAnchoredVariantsFH(
+      ["Just listed in Cape Coral", "Perfect for retirees — see it today"],
+      new Set<string>(),
+    );
+    expect(out).toEqual(["Just listed in Cape Coral"]);
+  });
+});

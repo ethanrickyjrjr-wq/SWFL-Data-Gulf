@@ -38,6 +38,8 @@ import { resolveArtifactLink } from "@/lib/listings/artifact-link";
 import { deriveListingPhoto } from "@/lib/media/listing-photo";
 import { sourceClaims, gateContentPatchStats, warnDropped } from "@/lib/social/stat-anchor";
 import type { SettledClaim } from "@/lib/deliverable/claims";
+import { dropFairHousingSentences } from "@/lib/deliverable/claims";
+import { dropFairHousingFields } from "@/lib/email/build-doc";
 
 // X (Twitter) hard limit — verified in-session 06/30/2026 against
 // docs.x.com/fundamentals/counting-characters ("Posts on X can contain up to 280 characters").
@@ -65,7 +67,8 @@ export const SOCIAL_SOURCING_RULES = `DATA SOURCING — four lanes, in order. NE
 2. User's uploaded doc or figure — if the user pasted a number, use it exactly.
 3. Internet / publicly known figure — use it; note the source inline (e.g. "per Realtor.com").
 4. Can't source it at all — write [Need: brief description of the exact figure] so the user can supply it.
-ONLY block: an invented number with no real source. Build is NEVER blocked.`;
+ONLY block: an invented number with no real source. Build is NEVER blocked.
+FAIR HOUSING (42 U.S.C. § 3604(c)): describe the property and the market, never the people. Nothing about who a home or area is "perfect for" or "ideal for" (retirees, couples, singles, seniors, professionals), no "adults only", no "no children", no "safe neighborhood", no religion, ethnicity or nationality of a neighborhood or buyer, no distance to a church, temple or mosque — a listing's own remarks saying it does not make it ours to print. A sentence that does it is DELETED before the post ships.`;
 
 // Per-network caption SHAPE rules (the Buffer "content tailoring" pattern). These change
 // only the shape; figures + citations are reused verbatim — the four-lane moat is untouched.
@@ -232,13 +235,38 @@ export function assembleDraft(
   // seed card — the seed's hero/signal/text fields are literal authoring-instruction
   // placeholder text (default-docs.ts), not reader-safe copy (see its 07/13 postmortem).
   if (!patch.success) return null;
+  // FAIR HOUSING (42 U.S.C. § 3604(c)). Same semantics as the email path: the SENTENCE that
+  // states a preference about WHO belongs is deleted from the caption / each variant and the
+  // post still ships; only a caption with nothing left is no draft (a missing post is
+  // honest; a discriminatory one carries the agent's name). A card CELL that does it is
+  // deleted from the patch. Root: lib/deliverable/claims.ts `dropFairHousingSentences`.
+  const fhCaption = dropFairHousingSentences(parsed.caption);
+  const fhVariants: Partial<Record<Platform, string>> = {};
+  const fhAll = [...fhCaption.hits];
+  for (const [pl, v] of Object.entries(parsed.variants ?? {})) {
+    const r = dropFairHousingSentences(String(v ?? ""));
+    fhAll.push(...r.hits);
+    if (r.kept.trim()) fhVariants[pl as Platform] = r.kept;
+  }
+  if (fhAll.length) {
+    console.warn(
+      `[fair-housing] DELETED sentence(s) from social draft (${theme.day}) — "${[...new Set(fhAll)].join('", "')}"`,
+    );
+  }
+  if (!fhCaption.kept.trim()) {
+    console.warn(
+      `[fair-housing] DROPPED social draft (${theme.day}) — nothing left of the caption`,
+    );
+    return null;
+  }
+  const fhPatch = dropFairHousingFields(patch.data as Record<string, Record<string, unknown>>);
   // THE STAT GATE. A figure the model wrote into a card cell must appear in the facts it
   // was given; anything else is blanked to an OPEN SLOT and the draft still ships — the
   // same fail-closed-but-never-blocking semantics as the deliverable path.
   const gate =
     sources !== undefined
-      ? gateContentPatchStats(patch.data as Record<string, Record<string, unknown>>, sources)
-      : { patch: patch.data as Record<string, Record<string, unknown>>, dropped: [] };
+      ? gateContentPatchStats(fhPatch.patch, sources)
+      : { patch: fhPatch.patch, dropped: [] };
   warnDropped(`social card (${theme.day})`, gate.dropped);
   const filledRaw = applyPatch(card, gate.patch as typeof patch.data);
   const filled = EmailDocSchema.safeParse(filledRaw);
@@ -246,12 +274,12 @@ export function assembleDraft(
   const draft: SocialDraft = {
     day: theme.day,
     theme: theme.label,
-    caption: parsed.caption,
+    caption: fhCaption.kept,
     hashtags: parsed.hashtags,
     card: filled.data,
   };
   if (platforms && platforms.length) {
-    draft.variants = buildVariants(parsed.caption, parsed.variants ?? {}, platforms);
+    draft.variants = buildVariants(fhCaption.kept, fhVariants, platforms);
   }
   return draft;
 }

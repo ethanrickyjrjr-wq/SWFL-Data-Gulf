@@ -454,3 +454,14 @@ test("two DIFFERENT profiles matching the two keys → amenity gate stays SILENT
   nextIdentity = null;
   gateByKey = {};
 });
+
+test("FAIR HOUSING: a paragraph describing WHO the home is for is dropped to an open slot, not shipped", async () => {
+  const { authorListingNarrative } = await import("./shared");
+  nextModelText = "The home just came to market. It is perfect for retirees looking to downsize.";
+  const out = await authorListingNarrative({
+    address: "1 Main St",
+    price: "$500,000",
+    beds: 3,
+  } as never);
+  expect(out).toBeNull();
+});

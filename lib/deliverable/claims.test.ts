@@ -9,6 +9,8 @@
 import { describe, expect, it } from "bun:test";
 import {
   auditClaims,
+  fairHousingHits,
+  dropFairHousingSentences,
   compareToSet,
   settledCount,
   numeralsIn,
@@ -416,5 +418,95 @@ describe("a superlative ranked over a PERIOD is a comparison the narrator cannot
     ]) {
       expect(auditClaims(honest, []), `ate an honest sentence: ${honest}`).toEqual([]);
     }
+  });
+});
+
+// ── FAIR HOUSING (42 U.S.C. § 3604(c)) — describe the property, never the people ─────
+// Word list source: New York Press Association / Oklahoma Press Association "Fair Housing
+// Advertising Word and Phrase List" (fetched 08/29/2026, texaspress.com PDF) — it names
+// AVOID, CAUTION and ACCEPTABLE phrases, so the false-positive cases below are its own.
+describe("fair-housing gate — a stated preference about WHO belongs is dropped", () => {
+  const cases: [string, string][] = [
+    ["familial status, explicit exclusion", "Quiet building, no children."],
+    ["familial status, 'adults only'", "Adults only, please."],
+    ["who-belongs descriptor, age", "A cozy villa perfect for retirees."],
+    ["who-belongs descriptor, marital", "Ideal for young couples starting out."],
+    ["who-belongs descriptor, empty nesters", "Great for empty nesters."],
+    ["religion, proximity to a house of worship", "Just steps from St. Leo Catholic Church."],
+    ["religion, neighborhood composition", "A strong Christian community."],
+    ["national origin / race, neighborhood composition", "Located in a Hispanic neighborhood."],
+    ["disability, exclusion", "Not suitable for the disabled."],
+    ["safe neighborhood (coded)", "A safe neighborhood with wide streets."],
+    ["sex, exclusion", "Female roommate preferred."],
+    ["source of income", "No Section 8."],
+  ];
+  for (const [label, prose] of cases) {
+    it(`catches: ${label} — "${prose}"`, () => {
+      const v = auditClaims(prose, []);
+      expect(v.some((x) => x.kind === "fair-housing")).toBe(true);
+    });
+  }
+
+  it("fires EVEN WHEN the phrase is a verbatim restatement of a settled fact line — the listing's own remarks do not make it legal to print", () => {
+    const line = "Perfect for retirees who want low-maintenance living.";
+    const v = auditClaims(line, [{ sentence: line, anchors: [] }]);
+    expect(v.some((x) => x.kind === "fair-housing")).toBe(true);
+  });
+
+  it("names the matched phrase so the drop log is actionable", () => {
+    const v = auditClaims("A cozy villa perfect for retirees.", []);
+    const hit = v.find((x) => x.kind === "fair-housing");
+    expect(hit?.match.toLowerCase()).toContain("perfect for retirees");
+  });
+
+  // The list's own ACCEPTABLE column. A guard that eats these is a guard that gets
+  // switched off.
+  const acceptable = [
+    "The family room opens to the lanai.",
+    "Kids welcome.",
+    "Great for family gatherings.",
+    "A quiet neighborhood near the golf course.",
+    "The master bedroom has a walk-in closet.",
+    "Near places of worship and public transportation.",
+    "Wheelchair accessible entry.",
+    "Italian marble in the primary bath.",
+    "No smoking.",
+    "In the Lee County school district.",
+    "A 55+ community with a clubhouse.", // HOPA-exempt senior housing is a FACT LINE, not a preference
+    // second-order pass 08/29/2026 — each of these fired on the first cut
+    "Great for growing families.",
+    "Perfect for a large family.",
+    "Designed for active adults.",
+    "An active adult community.",
+    // real subdivision / street names (data_lake.neighborhood_stats, queried live 08/29/2026)
+    "Minutes from Temple Terrace.",
+    "Near Church Street shops.",
+    "Close to Temple Citrus Grove.",
+    "Walking distance to Chapel Ridge.",
+    "In Indian Creek, near White Sands.",
+  ];
+  for (const prose of acceptable) {
+    it(`does NOT fire on the list's ACCEPTABLE phrasing — "${prose}"`, () => {
+      const v = auditClaims(prose, []);
+      expect(v.filter((x) => x.kind === "fair-housing")).toEqual([]);
+    });
+  }
+
+  it("dropFairHousingSentences takes ONLY the sentences a hit spans — a phrase split at 'St.' costs its two fragments, never the sourced sentences beside them", () => {
+    const r = dropFairHousingSentences(
+      "Median price in 33901 is $485,000. Minutes from St. Andrew Chapel. Inventory is 312 homes.",
+    );
+    expect(r.kept).toBe("Median price in 33901 is $485,000. Inventory is 312 homes.");
+    expect(r.dropped).toEqual(["Minutes from St.", "Andrew Chapel."]);
+    expect(r.hits).toEqual(["Minutes from St. Andrew Chapel"]);
+  });
+
+  it("fairHousingHits is the string primitive every non-narrator seat calls", () => {
+    expect(fairHousingHits("Adults only.").length).toBe(1);
+    expect(fairHousingHits("The family room opens to the lanai.")).toEqual([]);
+  });
+
+  it("the prohibition prose warns the model about the shape the lint enforces (lockstep)", () => {
+    expect(CLAIM_PROHIBITION).toContain(CLAIM_PROHIBITION_SHAPES["fair-housing"]);
   });
 });

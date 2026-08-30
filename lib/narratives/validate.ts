@@ -1,5 +1,6 @@
 import type { BakeInputs, NarrativeSectionsData } from "./types";
 import { lengthProfile } from "./length";
+import { fairHousingHits } from "@/lib/deliverable/claims";
 
 /**
  * Deterministic gates a baked narrative must clear before its row is written
@@ -104,6 +105,11 @@ export function validateNarrative(data: NarrativeSectionsData, inputs: BakeInput
   }
   checkNumbers(narration, "narration");
   if (JARGON.test(narration)) errors.push("narration: internal jargon leaked");
+  // FAIR HOUSING (42 U.S.C. § 3604(c)) — a bake is served for weeks; it may not describe WHO
+  // an area is for. Root: lib/deliverable/claims.ts (never a second list here).
+  for (const hit of fairHousingHits(narration)) {
+    errors.push(`narration: fair-housing — "${hit}" states a preference about who belongs`);
+  }
 
   const outlook = data.outlook ?? [];
   if (outlook.length < 1 || outlook.length > 3) {

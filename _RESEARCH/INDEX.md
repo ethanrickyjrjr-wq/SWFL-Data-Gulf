@@ -542,6 +542,7 @@ personal financial notes.
   (zero new dependency) over adopting Workflows at this call volume.
 
 **email-and-social/** — email + social pipeline, platform safe zones, first-party verification (16)
+- `2026-08-29-zillow-compliant-chatbot-and-fair-housing-guardrail-evaluation.md` — Zillow's Llama3-8B "compliant" chat model (gated, by-request, self-disclaims compliance) + its fair-housing-guardrail classifier (weights by request). **Verdict: do not adopt either.** Stole ONE shape and BUILT it same day: the stop-phrase check → `lib/deliverable/claims.ts` `fairHousingHits` + `auditClaims` kind `fair-housing`, wired into every prose gate (voice-guard.ts turned out to be dark — zero importers). Word list: NY/OK Press Association, 42 U.S.C. § 3604(c).
 - `2026-08-11-freakonomics-seller-insights-crawl4ai-research.md` — pure-ideation crawl4ai sweep
   (4 parallel agents) on non-obvious seller-psychology angles: SWFL-buildable DOM-vs-price-cut
   correlation (real, zero new ingest), real per-property carrying-cost math, price-band

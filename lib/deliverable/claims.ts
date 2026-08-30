@@ -408,6 +408,233 @@ function countIsAnchored(
   return settled.some((s) => s.anchors.includes(num) && adjacent.test(s.sentence));
 }
 
+// ── FAIR HOUSING — 42 U.S.C. § 3604(c): "Describe the property, not the people." ──────
+//
+// The Act makes it unlawful to publish any advertisement for the sale or rental of a
+// dwelling "that indicates any preference, limitation, or discrimination" on race, color,
+// religion, sex, disability, familial status or national origin. Florida adds nothing we
+// can lint for; NAR Standard of Practice 10-1 adds "never volunteer the racial, religious
+// or ethnic composition of a neighborhood."
+//
+// WORD LIST SOURCE (fetched 08/29/2026, RULE 0.4 — never typed from memory): the New York /
+// Oklahoma Press Association "Fair Housing Advertising Word and Phrase List"
+// (texaspress.com/sites/texaspress.com/files/pdfs/fairhousingterms.pdf). It carries three
+// columns — AVOID, CAUTION, ACCEPTABLE — and the ACCEPTABLE column is what keeps this
+// guard narrow: "family room", "great for family", "kids welcome", "quiet neighborhood",
+// "master bedroom", "near places of worship", "(school district)" are all fine and MUST
+// NOT fire. HOPA-exempt senior housing ("55+ community") is a FACT LINE about the
+// property, not a preference, and is deliberately outside every pattern below.
+//
+// WHY IT LIVES HERE AND NOT IN voice-guard.ts: a fair-housing phrase is not a tell to be
+// phrase-stripped ("no children allowed" minus "no children" leaves "allowed" — the
+// meaning survives the strip). It is a CLAIM the sentence may not make, so it gets the
+// claim gate's semantics: the SENTENCE is dropped, the paragraph fails closed, and every
+// caller of `auditClaims` inherits it in one edit. Unlike every other shape in this file
+// it fires EVEN ON A VERBATIM RESTATEMENT of a settled line — the listing's own remarks
+// saying "perfect for retirees" do not make it legal for US to print.
+//
+// Prompt-side twin: CLAIM_PROHIBITION's "A PREFERENCE ABOUT WHO BELONGS" line, held in
+// lockstep by CLAIM_PROHIBITION_SHAPES. Zillow's fair-housing-guardrail README (crawled
+// 08/29/2026) found the stop-list AND a prompt rule together beat either alone.
+
+export interface FairHousingTell {
+  pattern: RegExp;
+  /** The protected basis the phrase reads as — for the drop log, never for the artifact. */
+  basis:
+    | "familial-status"
+    | "age"
+    | "religion"
+    | "race-or-national-origin"
+    | "disability"
+    | "sex"
+    | "source-of-income"
+    | "coded";
+}
+
+// "who belongs" nouns — the CAUTION/AVOID people-descriptors. family/families/kids/children
+// are NOT here — in neither alternation (a second-order pass on 08/29/2026 caught them
+// reachable through the adjective branch: "great for growing families" fired): the list's
+// ACCEPTABLE column holds "family, great for" and "kids welcome" (HUD's 1995 guidance:
+// familial-status-INCLUSIVE language is not a preference). "adults"/"active" are out too —
+// "designed for active adults" is HOPA-exempt 55+ marketing, a fact about the property.
+const FH_PEOPLE =
+  "(?:couples?|singles?|retirees?|seniors?|senior citizens?|empty[- ]nesters?|bachelors?|" +
+  "newlyweds|students?|the elderly|elderly|professionals?|executives?|" +
+  "(?:young|mature|retired|older|working|busy|single|married) " +
+  "(?:couples?|singles?|retirees?|seniors?|professionals?|executives?|persons?|people|individuals?|men|women)|" +
+  "older (?:people|persons?|adults?)|mature (?:couples?|individuals?|persons?|adults?))";
+
+const FH_CLASS_ADJ =
+  "(?:christian|catholic|protestant|baptist|jewish|muslim|hindu|mormon|buddhist|hispanic|" +
+  "latino|latina|asian|black|white|caucasian|african[- ]american|chinese|indian|irish|italian|" +
+  "polish|mexican|cuban|haitian|german|russian|integrated|ethnic|mixed)";
+
+export const FAIR_HOUSING_TELLS: readonly FairHousingTell[] = [
+  // "perfect for retirees", "ideal for young couples", "great for empty nesters"
+  {
+    pattern: new RegExp(
+      String.raw`\b(?:perfect|ideal|great|best|suited|suitable|designed|made|geared|tailored)(?: home| place| spot| fit| choice)? for (?:a |an |the )?${FH_PEOPLE}\b`,
+      "i",
+    ),
+    basis: "age",
+  },
+  // explicit exclusion: "no children", "no Section 8", "no wheelchairs"
+  {
+    pattern:
+      /\bno (?:children|child|kids|minors|section 8|(?:housing )?vouchers?|(?:the )?disabled|handicapped|wheelchairs?|group homes?|ssi|social security)\b/i,
+    basis: "familial-status",
+  },
+  {
+    pattern:
+      /\b(?:children|kids|families|students|veterans|the disabled|handicapped|section 8|vouchers?)(?: are)? not (?:allowed|permitted|welcome|accepted)\b/i,
+    basis: "familial-status",
+  },
+  // "adults only", "christians only", "singles preferred"
+  {
+    pattern: new RegExp(
+      String.raw`\b(?:adults?|singles|couples|males?|females?|men|women|gentlemen|ladies|christians?|catholics?|jews|jewish|muslims?|hindus?|whites?|blacks?|asians?|hispanics?|latinos?|americans?|citizens|professionals|students|bachelors?|straights?|gays?|heterosexuals?|homosexuals?|english speakers?|(?:english|spanish)[- ]speaking) (?:only|preferred)\b`,
+      "i",
+    ),
+    basis: "sex",
+  },
+  // "female roommate preferred", "christian roommate wanted"
+  {
+    pattern:
+      /\b(?:male|female|christian|muslim|jewish|catholic|white|black|asian|hispanic|latino|gay|straight|student|professional|mature|older|young)(?: or (?:male|female))? roommates?\b/i,
+    basis: "sex",
+  },
+  // standalone age descriptors the list marks AVOID
+  {
+    pattern: /\b(?:empty[- ]nesters?|golden agers?|mature (?:couples?|individuals?|persons?))\b/i,
+    basis: "age",
+  },
+  // proximity to a named house of worship: "steps from St. Leo Catholic Church", "near the temple"
+  // ("near places of worship" is ACCEPTABLE and does not match — no noun below)
+  {
+    pattern: new RegExp(
+      String.raw`\b(?:near|close to|next to|steps? (?:from|to|away from)|walking distance (?:to|of|from)|minutes? (?:to|from)|across (?:from|the street from)|adjacent to|blocks? (?:from|to)|down the street from) (?:[\w.'’-]+ ){0,4}?(?:church(?:es)?|temple|mosque|synagogue|parish|shrine|cathedral|chapel)\b(?!\s+(?:street|st\b|road|rd\b|ave\b|avenue|terrace|ridge|park|lane|ln\b|drive|dr\b|blvd|boulevard|way|court|ct\b|circle|cir\b|creek|lake|point|pointe|hills?|estates|village|plaza|shops|trail|trl\b|citrus|grove|bay|bayou|pines|woods))`,
+      "i",
+    ),
+    basis: "religion",
+  },
+  // composition of a neighborhood or buyer pool: "Christian community", "Hispanic neighborhood"
+  {
+    pattern: new RegExp(
+      String.raw`\b${FH_CLASS_ADJ} (?:community|neighborhood|neighbourhood|area|enclave|families|family|buyers?|tenants?|residents?|population|crowd)\b`,
+      "i",
+    ),
+    basis: "race-or-national-origin",
+  },
+  // disability
+  {
+    pattern:
+      /\bnot suitable for (?:the |a |an )?(?:disabled|handicapped|wheelchairs?|elderly|children|kids|seniors)\b/i,
+    basis: "disability",
+  },
+  {
+    pattern:
+      /\b(?:able[- ]bodied|physically fit|healthy) (?:only|tenants?|buyers?|persons?|people|individuals?|applicants?)\b/i,
+    basis: "disability",
+  },
+  { pattern: /\bno (?:mentally|physically) (?:ill|disabled)\b/i, basis: "disability" },
+  // coded — "safe neighborhood" (CAUTION on the list; the classic steering signal)
+  {
+    pattern:
+      /\bsafe (?:neighborhood|neighbourhood|area|community|street|part of town|part of the city|side of town)\b/i,
+    basis: "coded",
+  },
+  // language / national origin
+  { pattern: /\benglish only\b/i, basis: "race-or-national-origin" },
+  {
+    pattern:
+      /\b(?:english|spanish)[- ]speaking (?:only|preferred|buyers?|tenants?|neighborhood|community|area)\b/i,
+    basis: "race-or-national-origin",
+  },
+];
+
+/** Every fair-housing hit with its character span — the primitive the sentence-level
+ *  droppers use, so a phrase the sentence splitter breaks apart ("St. Leo Catholic
+ *  Church" splits at "St.") condemns exactly the sentences it spans and nothing else. */
+export function fairHousingRanges(text: string): { hit: string; start: number; end: number }[] {
+  const out: { hit: string; start: number; end: number }[] = [];
+  for (const { pattern } of FAIR_HOUSING_TELLS) {
+    const g = new RegExp(
+      pattern.source,
+      pattern.flags.includes("g") ? pattern.flags : pattern.flags + "g",
+    );
+    let m: RegExpExecArray | null;
+    while ((m = g.exec(text)) !== null) {
+      out.push({ hit: m[0], start: m.index, end: m.index + m[0].length });
+      if (m.index === g.lastIndex) g.lastIndex++;
+    }
+  }
+  return out.sort((a, b) => a.start - b.start);
+}
+
+/** Sentence-level fail-closed drop: every sentence that OVERLAPS a fair-housing hit is
+ *  removed, the rest is kept verbatim. The sentence regex is the one author-doc.ts and
+ *  narrative-lint.ts use, applied with offsets so a hit straddling a false split
+ *  ("Minutes from St. Andrew Chapel.") drops both fragments and NOT the sourced sentences
+ *  beside them. `hits` is deduped, first-seen. */
+export function dropFairHousingSentences(text: string): {
+  kept: string;
+  dropped: string[];
+  hits: string[];
+} {
+  const ranges = fairHousingRanges(text);
+  if (!ranges.length) return { kept: text, dropped: [], hits: [] };
+  const kept: string[] = [];
+  const dropped: string[] = [];
+  const re = /[\s\S]+?(?:[.!?]+(?=\s|$)|$)/g;
+  let m: RegExpExecArray | null;
+  while ((m = re.exec(text)) !== null) {
+    const raw = m[0];
+    if (!raw.trim()) {
+      if (m.index === re.lastIndex) re.lastIndex++;
+      continue;
+    }
+    const start = m.index;
+    const end = start + raw.length;
+    const overlaps = ranges.some((r) => r.start < end && r.end > start);
+    (overlaps ? dropped : kept).push(raw.trim());
+    if (m.index === re.lastIndex) re.lastIndex++;
+  }
+  const seen = new Set<string>();
+  const hits = ranges
+    .map((r) => r.hit)
+    .filter((h) => {
+      const k = h.toLowerCase();
+      if (seen.has(k)) return false;
+      seen.add(k);
+      return true;
+    });
+  return { kept: kept.join(" "), dropped, hits };
+}
+
+/** Every fair-housing phrase in `text` (verbatim matched text, first-seen order, deduped).
+ *  THE string primitive: every seat that is not an `auditClaims` caller — authored-doc
+ *  prose, subject/CTA variants, content patches, social captions — calls this one. */
+export function fairHousingHits(text: string): string[] {
+  const out: string[] = [];
+  const seen = new Set<string>();
+  for (const { pattern } of FAIR_HOUSING_TELLS) {
+    const g = new RegExp(
+      pattern.source,
+      pattern.flags.includes("g") ? pattern.flags : pattern.flags + "g",
+    );
+    let m: RegExpExecArray | null;
+    while ((m = g.exec(text)) !== null) {
+      const key = m[0].toLowerCase();
+      if (!seen.has(key)) {
+        seen.add(key);
+        out.push(m[0]);
+      }
+      if (m.index === g.lastIndex) g.lastIndex++;
+    }
+  }
+  return out;
+}
+
 export interface ClaimViolation {
   kind:
     | "comparative"
@@ -419,7 +646,8 @@ export interface ClaimViolation {
     | "motive"
     | "artifact-positional"
     | "unanchored-number"
-    | "unsourced-feature";
+    | "unsourced-feature"
+    | "fair-housing";
   match: string;
 }
 
@@ -442,6 +670,12 @@ export function auditClaims(prose: string, settled: readonly SettledClaim[]): Cl
   // DOCK, it's a five-minute idle to open water" sailed straight through — the agent's own
   // description said "a five-minute idle to open water" and never once said dock.
   const allowedFeatures = new Set(settled.flatMap((s) => featuresIn(s.sentence)));
+
+  // FAIR HOUSING runs on the WHOLE prose, ahead of the sentence split and OUTSIDE the
+  // restatement allowance: the split below breaks "St. Leo Catholic Church" at "St.",
+  // and a settled line that states a preference about who belongs is still not ours
+  // to print.
+  for (const hit of fairHousingHits(prose)) out.push({ kind: "fair-housing", match: hit });
 
   // Check sentence by sentence, so a settled sentence the narrator restated verbatim
   // does not condemn the paragraph it appears in.
@@ -534,7 +768,12 @@ export const CLAIM_PROHIBITION =
   `- A LOCATION relationship. "Nearby" is the only one we hold. Never "on the same street", ` +
   `never a road name.\n` +
   `- A MOTIVE. You never know why anyone did anything. Not "the seller is motivated", not ` +
-  `"priced to move", not "won't last". Those are your words, not facts.\n\n` +
+  `"priced to move", not "won't last". Those are your words, not facts.\n` +
+  `- A PREFERENCE ABOUT WHO BELONGS. Describe the property, never the people. Not "perfect ` +
+  `for retirees", not "ideal for couples", not "adults only", not "no children", not "safe ` +
+  `neighborhood"; never the religion, ethnicity or nationality of a neighborhood or a buyer; ` +
+  `never the distance to a church, temple or mosque. The Fair Housing Act reads all of it ` +
+  `as a stated preference — and a fact line that says it does not make it legal to print.\n\n` +
   `Every number you write must appear verbatim in the facts you were given. If a sentence ` +
   `needs something you were not given, CUT THE SENTENCE. A shorter true paragraph beats a ` +
   `longer one that guesses.`;
@@ -563,6 +802,7 @@ export const CLAIM_PROHIBITION_SHAPES = {
   spatial: "A LOCATION relationship",
   motive: "A MOTIVE",
   "unanchored-number": "Every number you write must appear verbatim",
+  "fair-housing": "A PREFERENCE ABOUT WHO BELONGS",
   // NAMED GAPS, not untracked TODOs. The prohibition prose warns about NEITHER of these
   // two, though the lint drops paragraphs for both. Found 08/27/2026 while building this
   // map; left as-is deliberately — adding prose changes the text of six live prompts, and

@@ -47,6 +47,7 @@ import {
   RECORDED_CLAIM_RE,
   RECORDED_LABEL_RE,
 } from "@/lib/deliverable/narrative-lint";
+import { fairHousingHits, dropFairHousingSentences } from "@/lib/deliverable/claims";
 
 // ── The data MENU (the email's native cited figures, given selectable ids) ─────
 // MarketFigure already carries a formatted, cited value ("$485,000", "+4.2%",
@@ -552,13 +553,17 @@ export function filterAnchoredVariants(
   anchors: ReadonlySet<string>,
 ): string[] {
   if (!variants) return [];
-  return variants
-    .map((v) => v.trim())
-    .filter(Boolean)
-    .filter((v) => {
-      const nums = extractNumbers(v).filter((t) => !isBareYear(t));
-      return nums.every((t) => anchorsExactly(t, anchors));
-    });
+  return (
+    variants
+      .map((v) => v.trim())
+      .filter(Boolean)
+      // FAIR HOUSING — a subject line or CTA may not state a preference about who belongs.
+      .filter((v) => fairHousingHits(v).length === 0)
+      .filter((v) => {
+        const nums = extractNumbers(v).filter((t) => !isBareYear(t));
+        return nums.every((t) => anchorsExactly(t, anchors));
+      })
+  );
 }
 
 function buildEntry(
@@ -1065,7 +1070,13 @@ export function lintAuthoredProse(
 
   const lintField = (text: string): string => {
     const kept: string[] = [];
-    for (const sentence of splitSentences(text)) {
+    // FAIR HOUSING (42 U.S.C. § 3604(c)) — every sentence that OVERLAPS a hit is dropped,
+    // same as an unanchored number; a hit the splitter breaks apart ("St. Leo Catholic
+    // Church" splits at "St.") takes both fragments and leaves the sourced sentences beside
+    // them standing. Root: lib/deliverable/claims.ts `dropFairHousingSentences`.
+    const fh = dropFairHousingSentences(text);
+    offending.push(...fh.dropped);
+    for (const sentence of splitSentences(fh.kept)) {
       let bad = false;
       for (const tok of extractNumbers(sentence)) {
         if (isBareYear(tok)) continue;

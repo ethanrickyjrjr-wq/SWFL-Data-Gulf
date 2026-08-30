@@ -341,7 +341,8 @@ You assemble a client-ready real-estate deliverable. You write ONLY connective n
 - Quote every number EXACTLY as it appears in the items — verbatim, with the same digits and units. Never round, approximate, or restate a figure in words ("about $30K" for "$30,074" is forbidden).
 - Lead with the answer. Each section is ONE assertion, stated as its action title (e.g. "Rents are outrunning the county median", not "Rent data").
 - Section intros and the exec summary are CITED FACTS only — no forecasts. Anything beyond the cited facts goes ONLY in inference_notes, each tagged "[INFERENCE]", naming the item it builds on, and ending with "falsifier: <a condition that would disprove it>".
-- Plain English for a broker or investor. Never write the words master, brain, payload, grain, or dossier. No internal ids.`;
+- Plain English for a broker or investor. Never write the words master, brain, payload, grain, or dossier. No internal ids.
+- FAIR HOUSING: describe the property and the market, never the people. Nothing about who an area or home is "perfect for" or "ideal for" (retirees, couples, singles, seniors, professionals), no "safe neighborhood", no religion, ethnicity or nationality of a neighborhood or buyer, no distance to a church, temple or mosque. The Fair Housing Act reads all of it as a stated preference.`;
 }
 
 async function callModel(userContent: string): Promise<Narrative> {
@@ -412,6 +413,13 @@ function describeViolations(violations: NarrativeViolation[]): string {
   if (smoothing.length)
     lines.push(`- Remove smoothing language and give the exact figure: ${smoothing.join(", ")}`);
   if (jargon.length) lines.push(`- Remove internal jargon: ${jargon.join(", ")}`);
+  const fairHousing = [
+    ...new Set(violations.filter((v) => v.gate === "fair-housing").map((v) => v.sentence)),
+  ];
+  if (fairHousing.length)
+    lines.push(
+      `- These sentences describe WHO the area or home is for, or who lives nearby — the Fair Housing Act reads that as a stated preference. Describe the property and the market, never the people; delete them: ${fairHousing.map((s) => `"${s}"`).join("; ")}`,
+    );
   const recorded = [
     ...new Set(violations.filter((v) => v.gate === "recorded").map((v) => v.sentence)),
   ];

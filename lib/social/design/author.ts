@@ -44,6 +44,8 @@ import { isSocialFormat, type SocialFormat } from "@/lib/social/formats";
 import type { SocialDesign } from "@/lib/social/design/types";
 import type { GoalTone } from "@/lib/email/social-calendar/types";
 import type { Platform } from "@/lib/social/types";
+import { dropFairHousingSentences } from "@/lib/deliverable/claims";
+import { dropFairHousingFields } from "@/lib/email/build-doc";
 
 // ── prompt ───────────────────────────────────────────────────────────────────
 
@@ -289,10 +291,37 @@ export async function authorSocialPost(
       ).stripped;
     }
 
+    // FAIR HOUSING (42 U.S.C. § 3604(c)) — the SENTENCE that states a preference about WHO
+    // belongs is deleted from the caption / each variant and the post still ships; only a
+    // caption with nothing left is a miss (null). A canvas text element that does it is
+    // deleted from the patch below and the template's own value stands.
+    // Root: lib/deliverable/claims.ts `dropFairHousingSentences`.
+    const fhCaption = dropFairHousingSentences(captionGate.stripped);
+    const fhAll = [...fhCaption.hits];
+    for (const [pl, v] of Object.entries(cleanVariants)) {
+      const r = dropFairHousingSentences(String(v ?? ""));
+      fhAll.push(...r.hits);
+      cleanVariants[pl as keyof typeof cleanVariants] = r.kept.trim() ? r.kept : fhCaption.kept;
+    }
+    if (fhAll.length) {
+      console.warn(
+        `[fair-housing] DELETED sentence(s) from social author caption — "${[...new Set(fhAll)].join('", "')}"`,
+      );
+    }
+    if (!fhCaption.kept.trim()) {
+      console.warn("[fair-housing] DROPPED social author result — nothing left of the caption");
+      return null;
+    }
+    const finalCaption = fhCaption.kept;
+
     status("placing it on the canvas");
     const format = pickFormat(template, parsed.format, opts?.format);
     let design = template.build(tokens, format);
-    design = applyDesignPatch(design, parsed.patch);
+    design = applyDesignPatch(
+      design,
+      dropFairHousingFields((parsed.patch ?? {}) as Record<string, Record<string, unknown>>)
+        .patch as typeof parsed.patch,
+    );
 
     // THE STAT GATE (lib/social/stat-anchor.ts). Every numeral the model wrote into a
     // STAT element must appear in the facts it was handed — a stat tile is baked into a
@@ -314,12 +343,12 @@ export async function authorSocialPost(
     }
 
     const variants = opts?.platforms?.length
-      ? buildVariants(captionGate.stripped, cleanVariants, opts.platforms)
+      ? buildVariants(finalCaption, cleanVariants, opts.platforms)
       : cleanVariants;
 
     return {
       design,
-      caption: captionGate.stripped,
+      caption: finalCaption,
       hashtags: parsed.hashtags,
       variants,
       webSources: fresh.web.verified.map((v) => ({

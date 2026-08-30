@@ -556,6 +556,19 @@ DISPLAY and SEED only; it is never the identity and a build is never routed on i
   decides layout.
 - A derived cell earns a footnote ONLY when the reader can't check it. Never restate arithmetic
   whose operands sit two cells away — that reads as a spreadsheet export, not as an agent.
+- **FAIR HOUSING is the gate's second hard block (built 08/29/2026).** Describe the property, never
+  the people. "Perfect for retirees", "ideal for couples", "adults only", "no children", "safe
+  neighborhood", the religion/ethnicity of a neighborhood, distance to a church or temple — the
+  Fair Housing Act (42 U.S.C. § 3604(c)) reads every one as a stated preference, and the
+  listing's own remarks saying it does not make it ours to print. ONE root:
+  `lib/deliverable/claims.ts` `FAIR_HOUSING_TELLS` / `fairHousingHits` (word list: NY/OK Press
+  Association, its ACCEPTABLE column is the false-positive test set — "family room", "kids
+  welcome", "quiet neighborhood", "55+ community" all pass). Every prose gate calls it: the
+  sentence drops (only the sentences the phrase SPANS — a hit split at "St." costs its two
+  fragments, never the sourced sentence beside them), the recipe narrator's paragraph fails
+  closed, a social caption loses the sentence (no draft only when nothing is left), a patch
+  field is deleted, a bake with a hit is rejected and a pre-gate bake falls through to live.
+  Never a second list.
 
 ## 1.14b Pre-checked commentary — the gate moved BEFORE the build (bake side landed 08/06/2026)
 

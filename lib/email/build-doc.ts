@@ -73,6 +73,7 @@ import { fillEmptySourcesBlock, type LibraryAsset } from "@/lib/email/author-doc
 import { loadAddressCompContext, type AddressCompContext } from "@/lib/email/address-context";
 import { zipFromPromptPlace } from "@/lib/email/place-from-prompt";
 import { findPlaceholder } from "@/lib/showcase/recipe";
+import { fairHousingHits } from "@/lib/deliverable/claims";
 
 /** A recipe's [[blank]] must be FILLED before it reaches the model. If an unfilled
  *  placeholder survives to here — an empty hero fill, a recipe auto-built before its
@@ -610,8 +611,54 @@ export async function authorAddedSlots(
   for (const [id, fields] of Object.entries(patch)) if (allowed.has(id)) scoped[id] = fields;
   if (Object.keys(scoped).length === 0) return doc;
 
-  const parsed = EmailDocSchema.safeParse(applyPatch(doc, scoped));
+  const parsed = EmailDocSchema.safeParse(applyPatch(doc, dropFairHousingFields(scoped).patch));
   return parsed.success ? parsed.data : doc;
+}
+
+/** FAIR HOUSING (42 U.S.C. § 3604(c)) on a content patch: any string field the model
+ *  wrote that states a preference about WHO belongs is DELETED from the patch — the
+ *  template's own value stands (honest by provenance) and the rest of the fill ships.
+ *  Array fields (stats) drop only the offending element. Same delete-not-blank semantics
+ *  as `gateCanvasFillPatch` (lib/social/stat-anchor.ts). The phrase root is
+ *  lib/deliverable/claims.ts `fairHousingHits` — never a second list here. */
+export function dropFairHousingFields<T extends Record<string, object>>(
+  patch: T,
+): { patch: T; dropped: string[] } {
+  const dropped: string[] = [];
+  const out: Record<string, Record<string, unknown>> = {};
+  const hitsIn = (v: unknown): string[] =>
+    typeof v === "string"
+      ? fairHousingHits(v)
+      : v && typeof v === "object"
+        ? Object.values(v as Record<string, unknown>).flatMap(hitsIn)
+        : [];
+  for (const [id, fields] of Object.entries(patch)) {
+    const next: Record<string, unknown> = {};
+    for (const [k, v] of Object.entries((fields ?? {}) as Record<string, unknown>)) {
+      if (Array.isArray(v)) {
+        const kept = v.filter((el) => {
+          const h = hitsIn(el);
+          if (h.length) dropped.push(`${id}.${k}[]: "${h.join('", "')}"`);
+          return h.length === 0;
+        });
+        next[k] = kept;
+        continue;
+      }
+      const h = hitsIn(v);
+      if (h.length) {
+        dropped.push(`${id}.${k}: "${h.join('", "')}"`);
+        continue;
+      }
+      next[k] = v;
+    }
+    out[id] = next;
+  }
+  if (dropped.length) {
+    console.warn(
+      `[fair-housing] DELETED ${dropped.length} model-written field(s) from the patch — ${dropped.join("; ")}`,
+    );
+  }
+  return { patch: out as T, dropped };
 }
 
 export function applyPatch(doc: EmailDoc, patch: ContentPatch): unknown {
@@ -973,7 +1020,7 @@ async function fillSkeletonResult({
     };
   }
 
-  const candidate = applyPatch(doc, patch);
+  const candidate = applyPatch(doc, dropFairHousingFields(patch).patch);
   const reparsed = EmailDocSchema.safeParse(candidate);
   if (!reparsed.success) {
     return {

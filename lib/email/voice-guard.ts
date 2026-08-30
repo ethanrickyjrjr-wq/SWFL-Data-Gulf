@@ -6,6 +6,13 @@
 // today's fast-paced market") that makes an AI-written email read as templated.
 // Derived from the 07/08/2026 social sweep's highest-engagement email finding.
 //
+// ⚠ NOT WIRED (measured 08/29/2026): zero runtime importers. Spec §4's seat — the free
+// author's repair loop in build-doc.ts — was DELETED with the free author on 08/02/2026
+// (ONE LANE), and nothing re-seated this guard on the recipe / skeleton-fill paths. Fair-
+// housing phrases were deliberately NOT added here: they need drop-the-sentence semantics,
+// not a phrase strip, and live in lib/deliverable/claims.ts (`fairHousingHits`) where
+// every prose gate already runs. Re-seating the AI-tell strip: check `voice_guard_unwired`.
+//
 // PURE — no LLM, no I/O — so it composes into build-doc.ts's existing author
 // repair loop with no second round-trip (detection is local; the model only
 // regenerates once, exactly as it already does for an invented number).

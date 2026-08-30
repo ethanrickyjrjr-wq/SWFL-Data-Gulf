@@ -267,3 +267,25 @@ describe("recorded regexes", () => {
     expect(RECORDED_LABEL_RE.test("Median list price")).toBe(false);
   });
 });
+
+describe("fair-housing gate — deliverable narrative", () => {
+  test("a sentence stating a preference about WHO belongs is dropped; its neighbours survive", () => {
+    const n = narr({
+      exec_summary: "Flood AAL is $30,074. The corridor is ideal for young professionals.",
+    });
+    const r = lintDeliverableNarrative(n, SNAPSHOT_NUMBERS);
+    expect(r.violations.some((v) => v.gate === "fair-housing")).toBe(true);
+    expect(r.stripped.exec_summary).toBe("Flood AAL is $30,074.");
+    expect(r.ok).toBe(false);
+  });
+
+  test("a hit the sentence splitter breaks apart drops ONLY its fragments — the sourced sentences beside it survive, and it is ONE violation", () => {
+    const n = narr({
+      exec_summary: "Flood AAL is $30,074. Minutes from St. Andrew Chapel. Asking rent is $28.40.",
+    });
+    const r = lintDeliverableNarrative(n, SNAPSHOT_NUMBERS);
+    expect(r.stripped.exec_summary).toBe("Flood AAL is $30,074. Asking rent is $28.40.");
+    expect(r.violations.filter((v) => v.gate === "fair-housing").length).toBe(2); // two fragments, one hit
+    expect(r.violations.every((v) => v.gate === "fair-housing")).toBe(true);
+  });
+});

@@ -2,6 +2,7 @@ import { loadNarrative } from "./store";
 import { inputsHash } from "./hash";
 import { assembleAreaEmailInputs } from "./area-email-inputs";
 import { assembleZipBakeInputs } from "./zip-inputs";
+import { fairHousingHits } from "@/lib/deliverable/claims";
 
 /**
  * THE EMAIL ↔ NARRATIVE BRIDGE (RULE 0.7b — commentary obeys the ladder).
@@ -102,6 +103,8 @@ export async function bakedAreaRead(
       const text = firstParagraph(narration);
       if (!text) continue;
       if (!isAnchored(text)) continue; // report figure this email doesn't show
+      // FAIR HOUSING — a bake written before the 08/29/2026 gate falls through to live.
+      if (fairHousingHits(text).length) continue;
 
       // A BAKE HAS AN AGE. Same delta gate the bake uses: if the inputs moved,
       // this prose describes a market that no longer exists. Stale → live call.

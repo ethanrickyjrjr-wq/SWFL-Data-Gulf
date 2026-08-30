@@ -39,6 +39,7 @@
 import type { Narrative } from "./templates";
 import { SMOOTHING_TOKENS } from "../../refinery/lib/smoothing-tokens.mts";
 import type { ReconciliationVerdict } from "../reconcile/types";
+import { dropFairHousingSentences } from "./claims";
 
 // ---------------------------------------------------------------------------
 // Number normalization + exact anchoring
@@ -165,7 +166,8 @@ function yearHasTemporalContext(sentence: string, token: string): boolean {
 // Violations
 // ---------------------------------------------------------------------------
 
-export type Gate = "number" | "smoothing" | "grounded" | "jargon" | "ttl" | "recorded";
+export type Gate =
+  "number" | "smoothing" | "grounded" | "jargon" | "ttl" | "recorded" | "fair-housing";
 
 export interface NarrativeViolation {
   gate: Gate;
@@ -213,7 +215,23 @@ function lintFactText(
   const violations: NarrativeViolation[] = [];
   const keptSentences: string[] = [];
 
-  for (const sentence of splitSentences(text)) {
+  // FAIR HOUSING (42 U.S.C. § 3604(c)) — every fact surface, ahead of every other gate.
+  // Sentence-SPAN drop: a hit the splitter breaks apart ("Minutes from St. Andrew Chapel."
+  // splits at "St.") takes exactly the fragments it spans, never the sourced sentences
+  // beside them. Root: lib/deliverable/claims.ts `dropFairHousingSentences`.
+  const fh = dropFairHousingSentences(text);
+  for (const sentence of fh.dropped) {
+    violations.push({
+      gate: "fair-housing",
+      location,
+      sectionIndex,
+      token: fh.hits.join(", "),
+      sentence,
+      reason: `"${fh.hits.join('", "')}" states a preference about who belongs — the Fair Housing Act reads that as discrimination in advertising`,
+    });
+  }
+
+  for (const sentence of splitSentences(fh.kept)) {
     const sentenceViolations: NarrativeViolation[] = [];
 
     if (opts.numbers) {

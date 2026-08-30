@@ -660,8 +660,10 @@ async function authorPulseRead(opts: {
           `these is a claim you invented or a number you may not write:\n` +
           bad.map((b) => `- ${b.kind}: "${b.match}"`).join("\n") +
           `\n\nWrite it again with NO number and NO claim — no count, no comparison, no ` +
-          `direction of travel. Just the meaning. A shorter true sentence beats a longer ` +
-          `one that guesses.`,
+          `direction of travel, and nothing about WHO the area is for (no "perfect for ` +
+          `retirees", no "safe neighborhood", no religion or ethnicity — the Fair Housing ` +
+          `Act reads those as a preference). Just the meaning. A shorter true sentence ` +
+          `beats a longer one that guesses.`,
       );
       const stillBad = retry ? auditConnective(retry) : [{ kind: "motive", match: "no reply" }];
       if (retry && !stillBad.length) connective = retry;

@@ -1,3 +1,46 @@
+## 2026-08-29 (Fable 5) — FAIR HOUSING GATE on every model-written sentence: ONE root in claims.ts, 8 seats wired, voice-guard.ts found DARK (check `voice_guard_unwired`)
+
+Operator handed https://github.com/zillow/compliant-real-estate-chatbot ("can this help our email talk?").
+Crawled both Zillow repos live: the chat model is a gated Llama3-8B fine-tune whose README disclaims
+compliance; its sibling `fair-housing-guardrail` is a stop-list + BERT classifier (weights by request).
+Verdict filed (`_RESEARCH/email-and-social/2026-08-29-zillow-compliant-chatbot-and-fair-housing-guardrail-evaluation.md`):
+adopt neither, steal the stop-phrase shape. Operator: "Go."
+
+THE FINDING ON THE WAY IN: our only fair-housing protection was ONE prompt line (`shared.ts:113`). The
+planned seat, `lib/email/voice-guard.ts` `VOICE_TELLS`, has ZERO runtime importers — its spec §4 seat (the
+free-author repair loop) was deleted 08/02 with ONE LANE and its header still claimed it composed into the
+loop. Strike logged under built-dark-no-consumer; check `voice_guard_unwired` opened.
+
+THE BUILD (RULE 0.5c sweep — 8 seats, one root). `lib/deliverable/claims.ts`: `FAIR_HOUSING_TELLS` (word list
+= NY/OK Press Association "Fair Housing Advertising Word and Phrase List", 42 U.S.C. § 3604(c); its
+ACCEPTABLE column is the false-positive test set), `fairHousingHits`, `fairHousingRanges`,
+`dropFairHousingSentences`, `auditClaims` kind `"fair-housing"` (whole-prose, OUTSIDE the settled-restatement
+allowance — the listing's own remarks saying "perfect for retirees" don't make it ours to print), and the
+lockstep `CLAIM_PROHIBITION` bullet "A PREFERENCE ABOUT WHO BELONGS" (six recipe narrators inherit both the
+lint and the warning). Seats: `lintAuthoredProse` + `filterAnchoredVariants` (author-doc.ts), `lintFactText`
+(narrative-lint.ts, new Gate), `dropFairHousingFields` at BOTH `applyPatch` seats (build-doc.ts), social
+`assembleDraft` (build-week.ts) + the canvas author (design/author.ts) — sentence deleted from the caption,
+no draft only when nothing is left — plus `validateNarrative` (bake writer rejects) and `bakedAreaRead` (a
+pre-gate bake falls through to live). Prompts told at every seat: build.ts `systemPrompt`, the shared
+`SOCIAL_SOURCING_RULES`, sphere-weekly's `REPAIR` map, market-pulse's retry line, build.ts
+`describeViolations`.
+
+SECOND-ORDER PASS CAUGHT FOUR REAL DEFECTS in the first cut, all fixed before commit: (1) "great for growing
+families" fired — families was reachable through the adjective branch despite the header saying otherwise;
+(2) "designed for active adults" fired — HOPA-exempt 55+ marketing; (3) the worship-proximity pattern fired on
+"Temple Terrace" / "Church Street" — LIVE query of `data_lake.neighborhood_stats` found TEMPLE TERRACE and
+TEMPLE CITRUS GROVE as real subdivisions, so a street/place-suffix lookahead was added; (4) a hit the sentence
+splitter breaks at "St." wiped the WHOLE field including sourced numbers — replaced with span-overlap
+sentence drops (`dropFairHousingSentences`), reproduced in tests: "Flood AAL is $30,074. Minutes from St.
+Andrew Chapel. Asking rent is $28.40." keeps both figures. Existing bakes scanned live: 175 rows, 0 hits.
+Inversion finding (drops are console.warn only, false-positive rate unobservable) → check
+`fair_housing_drop_telemetry`.
+
+EVIDENCE: `bun test lib/` → 7613 pass, 0 fail (726 files). Playbook §1.14 carries the rule. Live-verify owed:
+`fair_housing_lint_live_verify` (build a new-listing email in the Lab asking for "perfect for retirees, steps
+from St. Leo Catholic Church" — neither phrase may render). 20 files — RULE 1 >5-file change, push on
+operator's word.
+
 ## 2026-08-29 (Fable 5) — ONE ASK PER LIFECYCLE EMAIL: the signature's factory "Get in touch" is gone from all 7 (check `lifecycle_agent_card_second_cta`, open 24d)
 
 Operator handed two Hugging Face proposals. (1) "reusable ingest workflow root" — evaluated, NOT built: the

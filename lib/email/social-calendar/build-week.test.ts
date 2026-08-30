@@ -131,3 +131,55 @@ test("assembleDraft attaches variants for the requested platforms; omits them wh
   const generic = assembleDraft(monday, card, { caption: "x", hashtags: [], patch: {} });
   expect(generic!.variants).toBeUndefined();
 });
+
+test("FAIR HOUSING: the SENTENCE stating a preference about WHO belongs is deleted from the caption; the post still ships", () => {
+  const card = seedSocialCard(monday);
+  const draft = assembleDraft(monday, card, {
+    caption: "Median hit $485K this week. Perfect for retirees!",
+    hashtags: [],
+    patch: {},
+  });
+  expect(draft).not.toBeNull();
+  expect(draft!.caption).toBe("Median hit $485K this week.");
+});
+
+test("FAIR HOUSING: a caption that is NOTHING BUT the preference is no draft (a missing post is honest)", () => {
+  const card = seedSocialCard(monday);
+  const draft = assembleDraft(monday, card, {
+    caption: "Perfect for retirees!",
+    hashtags: [],
+    patch: {},
+  });
+  expect(draft).toBeNull();
+});
+
+test("FAIR HOUSING: a per-network variant loses only its offending sentence", () => {
+  const card = seedSocialCard(monday);
+  const draft = assembleDraft(
+    monday,
+    card,
+    {
+      caption: "Median hit $485K this week.",
+      hashtags: [],
+      patch: {},
+      variants: { x: "Median hit $485K. Adults only community vibes." },
+    },
+    ["x"],
+  );
+  expect(draft).not.toBeNull();
+  expect(draft!.variants?.x).toBe("Median hit $485K.");
+});
+
+test("FAIR HOUSING: a card cell the model filled with the phrase is deleted from the patch; the draft still ships", () => {
+  const card = seedSocialCard(monday);
+  const heroId = card.blocks[0].id;
+  const draft = assembleDraft(monday, card, {
+    caption: "Median hit $485K this week.",
+    hashtags: [],
+    patch: { [heroId]: { value: "$485K", label: "Perfect for retirees" } },
+  });
+  expect(draft).not.toBeNull();
+  const props = draft!.card.blocks[0].props as { value?: string; label?: string };
+  expect(props.value).toBe("$485K");
+  expect(props.label ?? "").not.toContain("retirees");
+});
