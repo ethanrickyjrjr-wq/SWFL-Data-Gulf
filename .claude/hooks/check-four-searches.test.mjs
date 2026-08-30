@@ -220,8 +220,8 @@ describe("transcript reading", () => {
       }),
     ];
     const { text } = readTurn(lines);
-    expect(text).toBe("get these");
-    expect(isDataTurn(text)).toBe(false);
+    assert.equal(text, "get these");
+    assert.equal(isDataTurn(text), false);
   });
 
   test("malformed lines are skipped, never thrown on", () => {
