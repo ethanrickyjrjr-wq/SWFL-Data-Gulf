@@ -600,6 +600,16 @@
     "disabled": false
   },
   {
+    "name": "Lee Planned Developments quarterly",
+    "file": "lee-planned-developments-quarterly.yml",
+    "scheduled": true,
+    "timeout_minutes": 45,
+    "cancel_in_progress": false,
+    "paid": false,
+    "should_be_dark": false,
+    "disabled": null
+  },
+  {
     "name": "LeePA comparable sales annual",
     "file": "leepa-comparable-sales-annual.yml",
     "scheduled": true,

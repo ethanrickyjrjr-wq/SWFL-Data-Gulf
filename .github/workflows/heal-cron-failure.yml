@@ -47,6 +47,7 @@ on:
       - "HURDAT2 FL annual"
       - "Home-Values + Investor Composite monthly"
       - "Lee County permits weekly"
+      - "Lee Planned Developments quarterly"
       - "LeePA comparable sales annual"
       - "LeePA parcels annual"
       - "Lifecycle-arc nudges (daily)"
