@@ -104,6 +104,10 @@
           },
           {
             "type": "command",
+            "command": "node .claude/hooks/check-playbook-read-before-write.mjs"
+          },
+          {
+            "type": "command",
             "command": "node .claude/hooks/check-scratchpad-on-push.mjs"
           },
           {
@@ -177,6 +181,9 @@
           },
           {
             "type": "command",
+            "command": "node .claude/hooks/check-playbook-read-before-write.mjs"
+          },
+          {
             "command": "node .claude/hooks/inject-scoped-rules.mjs"
           }
         ]

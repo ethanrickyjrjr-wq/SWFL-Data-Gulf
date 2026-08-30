@@ -49,7 +49,7 @@ export function classify(logTail) {
       klass: "LOCKFILE",
       signal: "bun.lock drift",
       suggestedAction:
-        "Run `bun install` locally and commit the updated `bun.lock` in the same push (CI runs `bun install --frozen-lockfile`). See CLAUDE.md RULE 1 breaker #1.",
+        "Run `bun install` locally and commit the updated `bun.lock` in the same push (CI runs `bun install --frozen-lockfile`). See docs/standards/claude-rules-archive-2026-08-18.md RULE 1 (lockfile).",
     };
   }
 
@@ -107,7 +107,7 @@ export function classify(logTail) {
     return {
       klass: "MISSING_SECRET",
       signal: all,
-      suggestedAction: `Secret \`${first}\` is not reaching the pipeline. Confirm it's set (\`gh secret set ${first}\`) AND wired into this workflow's \`env:\` block — both steps are required (CLAUDE.md RULE 1 breaker #3 / "Secret wired in repo but not passed to workflow").`,
+      suggestedAction: `Secret \`${first}\` is not reaching the pipeline. Confirm it's set (\`gh secret set ${first}\`) AND wired into this workflow's \`env:\` block — both steps are required (docs/standards/claude-rules-archive-2026-08-18.md RULE 1 / "Secret wired in repo but not passed to workflow").`,
     };
   }
 

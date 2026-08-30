@@ -1,3 +1,13 @@
+## 2026-08-30 (Fable 5) — OPERATOR: "why would there be 6 other checkouts carrying the old shit Claude.md and not have .Claude/playbooks????? Just do it all correctly!!!!! Tired of problems not being fixed"
+
+Raised on the "push" for the playbook read gate + CLAUDE.md pointer cut. I had REPORTED the six
+stale worktrees (`main` at 341 lines, three `wt/*` at 301, none with `.claude/playbooks/`) as a
+note for him instead of fixing them — the built-not-wired / partial-reported-as-whole shape: a
+change that lands on one branch and is described as "done" while every other checkout still runs
+the old rules. Fix in this session: land on `main`, bring every live worktree to it, remove the
+dead ones. Guard owed if it recurs: a session-start line that names any checkout whose CLAUDE.md
+differs from main's.
+
 ## 2026-08-29 (Fable 5) — FOUND, NOT RAISED BY HIM: PRODUCTION IS DOWN — Vercel `DEPLOYMENT_DISABLED` (402 Payment Required) on BOTH hosts
 
 Found while re-baking a webp figure (the header logo at `https://www.swfldatagulf.com/logo-mark.png`

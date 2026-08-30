@@ -1,7 +1,7 @@
 # scripts/ — operational tooling (loads when you edit or run from here)
 
 114 files; most are one-off build/dev utilities. The tools below are the session loop — canonical
-usage lives HERE (root CLAUDE.md keeps the rules, this file keeps the mechanics).
+usage lives HERE (root CLAUDE.md keeps one-line rule pointers into `.claude/playbooks/` and the archive; this file keeps the mechanics).
 
 ## Session loop
 
@@ -48,7 +48,7 @@ usage lives HERE (root CLAUDE.md keeps the rules, this file keeps the mechanics)
   `docs/superpowers/specs/` + the `<slug>_live_verify` check in one step. slug = short kebab-case id
   (lowercase letters, numbers, hyphens); label = human-readable name.
 
-## GHA rebuild dispatch — mechanics (the DECISION is locked in root RULE 1)
+## GHA rebuild dispatch — mechanics (the DECISION is locked in root RULE 1 → `.claude/playbooks/ship.md` step 9 and the archive)
 
 Preferred form (07/12/2026, closes `tripwire_dispatch_acceptance_ergonomics`):
 
