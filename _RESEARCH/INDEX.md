@@ -51,7 +51,8 @@ index never mentioned. A grep of `_RESEARCH/` is not a search of our research.
 
 ## Categories
 
-**agent-behavior/** — how the agent should steer, drift, schedule, self-check (16)
+**agent-behavior/** — how the agent should steer, drift, schedule, self-check (17)
+- `2026-08-30-cursor-pstack-evaluation.md` — cursor/plugins **pstack** (poteto-mode; MIT, v0.14.5; installs ONLY inside Cursor via `/add-plugin pstack`). Its point is cross-vendor model panels (Fable/Sol/Grok/Opus per role via `~/.cursor/rules/pstack-models.mdc`) — unreachable from Claude Code (Agent tool = sonnet/opus/haiku/fable). **Verdict: do not adopt** — NORTH STAR #5 freeze to 09/18/2026, and every non-vendor piece already exists here (superpowers, `verify`, `second-order`, `what-do-we-have`). Steal-later: the per-task-type playbook table as a shape.
 - `2026-08-29-block-buzz-evaluation.md` — block/buzz (Block's Rust/Nostr team workspace where AI agents are channel members; Apache-2.0, v0.1.0, needs Docker+Postgres+Redis+MinIO). **Verdict: do not adopt, nothing to steal** — a many-humans chat product; our agent audit log is SESSION_LOG + checks + repolith at zero infra; its approval gates are still 🚧; same shape as Writ/Omnigent.
 - `2026-08-18-writ-governance-runtime-evaluation.md` — infinri/Writ (governance runtime for Claude
   Code: Docker+Neo4j, write-time gates, retrieval-scoped rules). **Verdict: do not adopt** — same
