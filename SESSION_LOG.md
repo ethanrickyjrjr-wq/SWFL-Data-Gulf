@@ -41,6 +41,19 @@ EVIDENCE: `bun test lib/` → 7613 pass, 0 fail (726 files). Playbook §1.14 car
 from St. Leo Catholic Church" — neither phrase may render). 20 files — RULE 1 >5-file change, push on
 operator's word.
 
+## 2026-08-29 (Fable 5) — MinerU evaluated: NOT better than what we have — there is nothing for it to be better at
+
+Operator: "is this better than what we have? https://github.com/opendatalab/mineru". Opened our PDF lane
+first: it is PyMuPDF (`marketbeat_pdf/extractor.py`) + pdfplumber (`rsw_airport_monthly/pipeline.py`) on two
+TEXT-PDF feeds that already clear every page (08/27 sweep measured ≥221 chars/page vs MIN_TEXT_CHARS=200;
+the vision fallback is dead code), zero scanned PDFs in the repo, and MarketBeat's output gated dead anyway
+(`ceiling_marketbeat_swfl`). Crawled MinerU's live README + LICENSE.md: 3.1.0+ left AGPLv3 for Apache-2.0
+plus an **online-service attribution clause** (§2, auto-termination §3) — trap shape #7 from the 08/27 HF
+sweep, now confirmed from the vendor's own license. 20GB disk / 16GB RAM / `ray` / Python ≤3.12 on Windows
+to replace two pip packages. Verdict filed: `_RESEARCH/data-and-ingest/2026-08-29-mineru-evaluation.md`
+(+ INDEX line). Re-open only if a scanned corpus ever lands — then docling vs MinerU-Pro bake-off, docling
+ranked first 08/27. NORTH STAR #5 (adopt nothing until 09/18) holds. Nothing else touched.
+
 ## 2026-08-29 (Fable 5) — ONE ASK PER LIFECYCLE EMAIL: the signature's factory "Get in touch" is gone from all 7 (check `lifecycle_agent_card_second_cta`, open 24d)
 
 Operator handed two Hugging Face proposals. (1) "reusable ingest workflow root" — evaluated, NOT built: the
