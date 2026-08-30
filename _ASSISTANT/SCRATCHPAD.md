@@ -1,3 +1,25 @@
+## 2026-08-29 (Fable 5) — FOUND, NOT RAISED BY HIM: PRODUCTION IS DOWN — Vercel `DEPLOYMENT_DISABLED` (402 Payment Required) on BOTH hosts
+
+Found while re-baking a webp figure (the header logo at `https://www.swfldatagulf.com/logo-mark.png`
+would not load). Measured 08/30/2026 01:30 UTC:
+- Vercel edge, hostname pinned (`curl --resolve www.swfldatagulf.com:443:76.76.21.21`): HTTP 402,
+  `X-Vercel-Error: DEPLOYMENT_DISABLED`, body "Payment required". Same on
+  `swfldatagulf-ops.vercel.app` (HTTP 402). Team `ethanrickyjrjr-wqs-projects`, plan shows "pro".
+  Vendor doc (crawled): "disabled due to certain conditions … manual intervention required." TLS is
+  FINE (Let's Encrypt for www, valid to 10/23/2026). Domain is FINE (RDAP: NameCheap, Cloudflare NS,
+  paid to 05/25/2027).
+- SEPARATELY, this machine: the Xfinity gateway transparently intercepts DNS — swfldatagulf.com,
+  1.1.1.1, 8.8.8.8, cloudflare-dns.com and dns.google ALL come back as `high-xdns.xfinity.com`
+  with an EXPIRED Comcast cert (05/15/2026). That is why the session-start hook shows 27 check
+  signals "fetch failed" and the `swfl` MCP server fails "unable to verify the first certificate".
+  vercel.com / rdap.org / github reach fine — it is selective.
+- Blast radius under the 402: every `/api/*` consumer, the MCP endpoint, `vercel.json`'s 2 crons,
+  3 workflows that call the prod host (data-readiness-cron, rollback-on-red, smoke-prod), every
+  sent email's header logo and every button destination. The GHA ingest crons write to Supabase
+  directly and are NOT affected.
+- Opened `prod_deployment_disabled_402` (defect). Operator action: Vercel dashboard → team billing.
+  Nothing in this repo fixes it.
+
 ## 2026-08-28 (Opus 5) — OPERATOR: "Community crosswalk"
 
 RESOLVED 08/28/2026 (Fable 5, "go" on the approved spec): the crosswalk is BUILT + LIVE —

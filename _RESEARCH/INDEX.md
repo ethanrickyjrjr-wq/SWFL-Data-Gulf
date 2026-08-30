@@ -51,7 +51,8 @@ index never mentioned. A grep of `_RESEARCH/` is not a search of our research.
 
 ## Categories
 
-**agent-behavior/** — how the agent should steer, drift, schedule, self-check (15)
+**agent-behavior/** — how the agent should steer, drift, schedule, self-check (16)
+- `2026-08-29-block-buzz-evaluation.md` — block/buzz (Block's Rust/Nostr team workspace where AI agents are channel members; Apache-2.0, v0.1.0, needs Docker+Postgres+Redis+MinIO). **Verdict: do not adopt, nothing to steal** — a many-humans chat product; our agent audit log is SESSION_LOG + checks + repolith at zero infra; its approval gates are still 🚧; same shape as Writ/Omnigent.
 - `2026-08-18-writ-governance-runtime-evaluation.md` — infinri/Writ (governance runtime for Claude
   Code: Docker+Neo4j, write-time gates, retrieval-scoped rules). **Verdict: do not adopt** — same
   shape as Omnigent; two governance systems would fight and Neo4j fails RULE 11 at our rulebook
@@ -312,7 +313,9 @@ personal financial notes.
   free annually). SOC 3 + SOC 2 Type 2 + CASA Tier 2 certified. No competitor sweep (kvCORE,
   BoomTown, Real Geeks) done in this pass — scoped to FUB only per operator's confirmed target.
 
-**data-and-ingest/** — sources, backfills, pipeline findings (21)
+**data-and-ingest/** — sources, backfills, pipeline findings (23)
+- `2026-08-29-hf-reusable-ingest-workflow-evaluation.md` — HF "reusable ingest workflow" proposal evaluated: the root ALREADY exists (`.github/actions/setup-ingest-python`, 07/25) and is wired into 6 of 64 pip workflows; HF draft has 7 verbatim errors (callee `secrets: inherit`, py3.12, `DATABASE_URL`, wrong module root, wrong heartbeat secret). **Verdict: wire the 58, do not build a second root.**
+- `2026-08-29-misikoff-zillow-hf-dataset-and-colab.md` — operator asked "does this work?" on `misikoff/zillow` + its Colab. **NO.** Notebook needs `trust_remote_code` (removed in `datasets` 4.0; PyPI is 5.0.1) and sklearn's dead `squared=` kwarg; data is a 2023 snapshot, `sales` = MSA/national only (zip 0, county 0), `home_values` = state only. We already pull the same upstream (zillow.com/research/data) at ZIP grain. Nothing to add.
 - `2026-08-27-huggingface-fleet-sweep.md` — **35-agent Hugging Face survey. READ THE LICENSE
   TAXONOMY BEFORE ADOPTING ANY MODEL FROM ANYWHERE** — 12 distinct trap shapes found, none visible
   from a downloads ranking: non-commercial weights under an Apache CODE license (README line 1239);

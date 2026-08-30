@@ -2225,7 +2225,17 @@ wrong).
   card **and** the recipe's own button — two asks, against §1.8's *"ONE call to action per email,
   never three."* `agent-launch.ts:402` already names this exact shape as a defect. It is shared
   chrome (`default-docs.ts:129`) and hits **all seven** lifecycle emails, so it was NOT fixed
-  mid-walk. Open as `lifecycle_agent_card_second_cta`.
+  mid-walk. Open as `lifecycle_agent_card_second_cta`. **FIXED 08/29/2026** at the one root:
+  `lifecycle-chrome.ts` drops the signature card's FACTORY label only (`ownSignatureAsk`) — a
+  label the agent typed themselves is brand and rides through (saved-layout.ts doctrine; a
+  scheduled occurrence rebuilds from the saved doc, so an unconditional blank would have
+  erased it silently). The renderers draw the link only on a non-empty label; `apply-brand.ts`
+  still fills the url. The guard that let it live 24 days counted BUTTON BLOCKS —
+  `campaign-coherence.test.ts` now counts ASKS (buttons + any card/hero with a label), pins
+  exactly one per lifecycle email on the seed, AND pins that a hand-typed label survives.
+  Proof is the re-baked `public/new-emails/*-email.html` captures shipped in the same push
+  (Gate 15): "Get in touch" 0 in every lifecycle capture. `market-pulse` is NOT this shape —
+  it emits no button, so its card link is its one ask.
 - **The address prints a comma US convention does not** — `12554 Kellysands Way, Fort Myers, FL,
   33908`. This is §2.3.5 gap 2, pre-existing and shared: the vendor's own `formattedAddress` passed
   through verbatim by `resolve-subject.ts toFacts`. **Now measured on THREE of the seven** (New

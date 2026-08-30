@@ -28,7 +28,7 @@
 import { describe, expect, it } from "bun:test";
 import { RECIPES, type RecipeKey } from "./recipes";
 import { builderFor } from "./recipes/index";
-import { seedById, SEED_DOCS } from "@/lib/email/doc/default-docs";
+import { createBlock, seedById, SEED_DOCS } from "@/lib/email/doc/default-docs";
 import type { EmailDoc } from "@/lib/email/doc/types";
 import type { ListingFacts } from "@/lib/email/listing-scrape";
 
@@ -121,6 +121,78 @@ describe("every email in the listing campaign has the SAME LOOK", () => {
       // Exactly one narrative slot, and exactly one CTA.
       expect(s.filter((x) => x === "text").length, `${key}: one narrative slot`).toBeGreaterThan(0);
       expect(s.filter((x) => x === "button").length, `${key}: exactly ONE call to action`).toBe(1);
+    });
+  }
+
+  // ONE ASK, COUNTED AS ASKS — not as button blocks.
+  //
+  // The assertion above counted `button` blocks and passed for 24 days while every
+  // lifecycle email rendered TWO asks: the recipe's button AND the agent card's
+  // "Get in touch →" link (a `ctaLabel` prop, not a block — invisible to a block count).
+  // Measured live 08/05/2026 (playbook §2.6, check `lifecycle_agent_card_second_cta`);
+  // `agent-launch.ts` `signatureCard()` had already named the shape: "this letter has
+  // exactly ONE ask … a 'Get in touch →' link on the signature is a second one."
+  // A guard that counts the wrong unit is a map, not the territory. This one counts
+  // what the READER sees: a button, or a card/hero link that will render (the renderers
+  // gate on a non-empty label; `apply-brand.ts` supplies the url after the build).
+  for (const key of LIFECYCLE) {
+    it(`${key}: ONE ask — the button; the agent card carries no second CTA`, async () => {
+      const doc = await build(key);
+      expect(doc, `${key}: builder returned null`).not.toBeNull();
+      const asks = doc!.blocks.filter(
+        (b) =>
+          b.type === "button" ||
+          ((b.type === "agent-card" || b.type === "agent-hero") &&
+            String(b.props.ctaLabel ?? "").trim() !== ""),
+      );
+      expect(
+        asks.map((b) => `${b.type}:${"label" in b.props ? b.props.label : b.props.ctaLabel}`),
+        `${key}: the reader must see exactly ONE ask`,
+      ).toHaveLength(1);
+      expect(asks[0]!.type, `${key}: and it is the recipe's button, not the signature`).toBe(
+        "button",
+      );
+    });
+  }
+
+  // …AND THE USER'S OWN SIGNATURE CTA IS BRAND, NOT PLACEHOLDER. The agent card is a
+  // BRAND block (saved-layout.ts BRAND_BLOCK_TYPES: "lifted from currentDoc, never
+  // authored"), and a scheduled occurrence re-runs the builder against the agent's SAVED
+  // doc (emaildoc-occurrence.ts → build-doc.ts → the chrome). A chrome that blanked the
+  // label unconditionally would erase a hand-typed "Text me anytime" on every rebuild
+  // with no diff and no log line — and the seed-built assertion above could never see it.
+  // This case passes a doc with the user's words and pins that they survive.
+  for (const key of LIFECYCLE) {
+    it(`${key}: a hand-typed signature CTA is the agent's own and survives the chrome`, async () => {
+      const recipe = RECIPES[key];
+      const seed = (recipe.skeleton ? seedById(recipe.skeleton) : SEED_DOCS[0])!.build();
+      // Three recipes have no skeleton (their seed carries no card at all) — the canvas
+      // the agent saved does, so give it one, exactly as a user adding the block would.
+      const hasCard = seed.blocks.some((b) => b.type === "agent-card");
+      const own = createBlock("agent-card");
+      const typed: EmailDoc = {
+        ...seed,
+        blocks: hasCard
+          ? seed.blocks.map((b) =>
+              b.type === "agent-card"
+                ? { ...b, props: { ...b.props, ctaLabel: "Text me anytime" } }
+                : b,
+            )
+          : [...seed.blocks, { ...own, props: { ...own.props, ctaLabel: "Text me anytime" } }],
+      };
+      const doc = await builderFor(key)!({
+        recipe,
+        prompt: "",
+        currentDoc: typed,
+        facts: FACTS,
+        resolved: true,
+      });
+      const card = doc!.blocks.find((b) => b.type === "agent-card");
+      expect(card, `${key}: the signature card is still there`).toBeDefined();
+      expect(
+        card!.type === "agent-card" ? card!.props.ctaLabel : "",
+        `${key}: the agent's own words on their own signature are never re-authored`,
+      ).toBe("Text me anytime");
     });
   }
 

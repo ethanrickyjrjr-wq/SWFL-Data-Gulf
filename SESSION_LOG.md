@@ -1,3 +1,42 @@
+## 2026-08-29 (Fable 5) — ONE ASK PER LIFECYCLE EMAIL: the signature's factory "Get in touch" is gone from all 7 (check `lifecycle_agent_card_second_cta`, open 24d)
+
+Operator handed two Hugging Face proposals. (1) "reusable ingest workflow root" — evaluated, NOT built: the
+root already exists (`.github/actions/setup-ingest-python`, 07/25) and is wired into 6 of 64 pip workflows;
+the HF draft carries 7 verbatim errors (callee `secrets: inherit`, py3.12, `DATABASE_URL`, wrong module root,
+wrong heartbeat secret). Filed `_RESEARCH/data-and-ingest/2026-08-29-hf-reusable-ingest-workflow-evaluation.md`.
+Recommendation on the table: wire the 58 (RULE 1 ask — >5 files). (2) "CTA policy" — diagnosis right and
+already ours; its fix (recipe `CtaPolicy` type + `finalizeDoc` throw + per-recipe PRs) rejected: the config
+seam already owns the one button (`config.ts:60`), `finalizeDoc` is the LAYOUT root, and the defect is SHARED
+chrome — one root, one pass. Operator: "fix it."
+
+THE FINDING: `campaign-coherence.test.ts:123` asserted "exactly ONE call to action" by counting BUTTON BLOCKS;
+the agent card's ask is a `ctaLabel` PROP, so the guard passed for 24 days while every lifecycle email rendered
+two asks. THE FIX (2 code files): `lifecycle-chrome.ts` `ownSignatureAsk()` drops the card's FACTORY label only
+(`DEFAULT_BLOCK_PROPS["agent-card"].ctaLabel`) — a hand-typed label survives, because the second-order pass
+found the occurrence/Update chain (`emaildoc-occurrence.ts:111` → `build-doc.ts:1363` → chrome) rebuilds from
+the agent's SAVED doc and an unconditional blank would have erased "Text me anytime" silently on every send
+(saved-layout.ts BRAND_BLOCK_TYPES doctrine). `campaign-coherence.test.ts` now counts ASKS (buttons + card/hero
+with a label) = 1 on the seed, AND pins the hand-typed label surviving (3 of 7 seeds carry no card — the test
+adds one). `market-pulse` is NOT this shape (no button; the card link is its one ask) — left alone.
+Evidence: red 7/7 → green; `bun test lib/email lib/deliverable` 3036 pass / 0 fail; `bunx next build` TypeScript
+clean; all 7 captures re-baked bare (`scripts/email/render-*.mts` → Downloads → `public/new-emails/`, Gate 15):
+"Get in touch" = 0 in every one (was 1); the two guide `.webp` figures (`lib/guides/email-design.ts`) re-baked
+at the original 600px/1x via Playwright+Pillow from the crawl4ai venv (no repo dep added); both viewed.
+Playbook §2.6 entry for the defect annotated FIXED. `docs/standards/email-build-playbook.md` touched.
+
+PRODUCTION IS DOWN (found, not raised): Vercel answers `DEPLOYMENT_DISABLED` / HTTP 402 Payment Required for
+www.swfldatagulf.com AND swfldatagulf-ops.vercel.app (curl --resolve to 76.76.21.21, 08/30/2026 01:30 UTC; TLS
+and domain both valid). The Vercel MCP token sees only `panelforge-gateway` on the team and 403s on deployments.
+Opened `prod_deployment_disabled_402` (defect, P1, http_ok signal on /api/health). SEPARATELY this machine's
+Xfinity gateway hijacks DNS for the domain + public resolvers (`high-xdns.xfinity.com`, expired Comcast cert) —
+the cause of the 27 "fetch failed" check signals and the `swfl` MCP cert error at session start.
+
+NOT DONE / OWED: the check closes on the push that lands this (prod evidence, not dev attestation). The 58
+unwired ingest workflows are an offer, not a change. FOUND, NOT MINE: the 08/28 crosswalk session's 36 files
+(2,276 lines — `lee_planned_developments/`, migrations, its own SESSION_LOG entry) are STAGED and were never
+committed; `origin/main..HEAD` is empty. Its log entry says "BUILT + LIVE" — the lake rows may be live, the
+code is not. Surfaced to the operator; not bundled.
+
 ## 2026-08-28 (Fable 5) — COMMUNITY CROSSWALK BUILT + LIVE: geometry identity for 96,679 Lee parcels
 
 Operator: "go" on the approved spec (docs/superpowers/specs/2026-08-12-community-crosswalk-design.md).

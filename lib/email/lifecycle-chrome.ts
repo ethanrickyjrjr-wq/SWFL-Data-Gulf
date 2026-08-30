@@ -58,7 +58,7 @@
 // Enforced by lifecycle-chrome.test.ts — a recipe that drifts fails the suite.
 
 import { stripBannedCells } from "@/lib/deliverable/cell-policy";
-import { createBlock } from "./doc/default-docs";
+import { createBlock, DEFAULT_BLOCK_PROPS } from "./doc/default-docs";
 import { finalizeDoc } from "./doc/finalize-doc";
 import type { PlanEntry } from "./doc/finalize-doc";
 import { GRID_COLS } from "./grid-schema";
@@ -156,6 +156,13 @@ export interface LifecycleChrome {
 /** Reuse the current doc's block of a type (identity/brand is STICKY), else a fresh one. */
 function keepOrDefault(current: EmailDoc, type: EmailBlock["type"]): EmailBlock {
   return current.blocks.find((b) => b.type === type) ?? createBlock(type);
+}
+
+/** The agent card's CTA label, minus the factory placeholder. "" when it is the
+ *  default ("Get in touch") or blank; the user's own words otherwise. */
+function ownSignatureAsk(label: unknown): string {
+  const v = typeof label === "string" ? label.trim() : "";
+  return v && v !== DEFAULT_BLOCK_PROPS["agent-card"].ctaLabel ? v : "";
 }
 
 // `docIsBlankBrand` is DELETED along with the palette it gated. It answered "may I replace
@@ -352,7 +359,23 @@ export function buildLifecycleEmail(current: EmailDoc, chrome: LifecycleChrome):
   // PAGE. It now passes a REAL listing url or NOTHING, and `role: "listing"` (whose
   // `usesWebsiteDefault` and `usesHouseFallback` are both false) is what guarantees an
   // unresolved slot is never quietly backfilled with our site.
-  entries.push(cell(keepOrDefault(current, "agent-card"), 4, 7, true));
+  // THE SIGNATURE CARRIES NO FACTORY ASK. The button two cells down is this email's ONE
+  // call to action (§1.8 — "never three"); the agent card's factory `ctaLabel` ("Get in
+  // touch", default-docs.ts) is a second one, and it rendered live on all seven lifecycle
+  // emails for 24 days because campaign-coherence counted BUTTON BLOCKS, not asks — the
+  // card's link is a prop. What is dropped is the PLACEHOLDER only: a label the user typed
+  // themselves is brand (saved-layout.ts BRAND_BLOCK_TYPES — "lifted from currentDoc, never
+  // authored"), and an agent who wrote "Text me anytime" on their own signature keeps it —
+  // same `own()` rule `agent-launch.ts` `signatureCard()` applies to name and phone. The
+  // url is left alone: `apply-brand.ts` fills it after the build, and every renderer
+  // (AgentCardBlock / AgentHeroBlock / email-doc-pdf) draws the link only when the LABEL
+  // is non-empty, so a blank label is a link that never existed.
+  const card = keepOrDefault(current, "agent-card");
+  const signature: Omit<EmailBlock, "layout"> =
+    card.type === "agent-card"
+      ? { ...card, props: { ...card.props, ctaLabel: ownSignatureAsk(card.props.ctaLabel) } }
+      : card;
+  entries.push(cell(signature, 4, 7, true));
   entries.push(
     cell(
       {
