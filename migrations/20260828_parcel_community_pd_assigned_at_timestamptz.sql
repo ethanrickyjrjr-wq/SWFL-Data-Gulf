@@ -13,3 +13,21 @@ DROP VIEW IF EXISTS data_lake.parcel_community_pd_summary_v;
 
 ALTER TABLE data_lake.parcel_community_pd
   ALTER COLUMN assigned_at TYPE timestamptz USING assigned_at::timestamptz;
+
+-- 08/30/2026 (found by the first GHA run of lee-planned-developments-quarterly, run 33286533675):
+-- dlt's MERGE loads through data_lake_staging.parcel_community_pd, which was created on the
+-- first run while the column was still text, and dlt never retypes an existing staging
+-- column. The merge then fails with "column assigned_at is of type timestamp with time zone
+-- but expression is of type character varying" and NO rows move. Retype the staging twin too.
+-- Guarded: the staging table may not exist yet on a fresh destination.
+DO $$
+BEGIN
+  IF EXISTS (
+    SELECT 1 FROM information_schema.columns
+    WHERE table_schema = 'data_lake_staging' AND table_name = 'parcel_community_pd'
+      AND column_name = 'assigned_at' AND data_type <> 'timestamp with time zone'
+  ) THEN
+    ALTER TABLE data_lake_staging.parcel_community_pd
+      ALTER COLUMN assigned_at TYPE timestamptz USING assigned_at::timestamptz;
+  END IF;
+END $$;
