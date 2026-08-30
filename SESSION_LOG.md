@@ -31,6 +31,14 @@ Opened `prod_deployment_disabled_402` (defect, P1, http_ok signal on /api/health
 Xfinity gateway hijacks DNS for the domain + public resolvers (`high-xdns.xfinity.com`, expired Comcast cert) —
 the cause of the 27 "fetch failed" check signals and the `swfl` MCP cert error at session start.
 
+PUSH MECHANICS ("push it all"): the crosswalk index landed as its own commit after fixing the lint that had
+silently blocked the 08/28 commit (restricted untyped-client import → allowlist + KNOWN-DEBT, the rule's own
+remedy). Gates regenerated doc index, watch manifest, grade-coverage; Gate 11 filled `raw_landing_class` on the
+two new entries. Gate 16 (ingest dispatch) escaped with ALLOW_NO_DISPATCH=1 because the workflow file is IN
+this push and cannot be dispatched before it exists on origin; live lake counts at push time (Bun.SQL):
+lee_planned_developments 1,627 · parcel_community_pd 104,911 (assigned 08/28 15:08 UTC) · leepa parcels with
+coords 547,724 — identical to the 08/28 entry's numbers. Quarterly workflow dispatched post-push for the record.
+
 NOT DONE / OWED: the check closes on the push that lands this (prod evidence, not dev attestation). The 58
 unwired ingest workflows are an offer, not a change. FOUND, NOT MINE: the 08/28 crosswalk session's 36 files
 (2,276 lines — `lee_planned_developments/`, migrations, its own SESSION_LOG entry) are STAGED and were never
