@@ -62,7 +62,9 @@ is read from the actual pipeline code, not the registry.
 | census_acs | API (Census acs5) | data_lake.census_acs_zcta |
 | usgs_tier2 | ZOMBIE — module deleted, workflow:none | data_lake.usgs_daily — **table does not exist** |
 | fema | API (OpenFEMA) | data_lake.fema_nfip_claims |
-| leepa | ArcGIS REST (gissvr.leepa.org) | data_lake.leepa_parcels |
+| leepa | ArcGIS REST (gissvr.leepa.org) | data_lake.leepa_parcels (+ latitude/longitude from FabricParcels since 08/28/2026) |
+| lee_planned_developments | ArcGIS REST (services2.arcgis.com, Lee DCD Planned Developments) | data_lake.lee_planned_developments (1,627 polygons, WGS84) |
+| parcel_community_pd (derived) | DuckDB spatial join (lee_planned_developments × leepa_parcels coords) | data_lake.parcel_community_pd + parcel_community_pd_summary_v — consumers: communities-swfl pack, lib/listings/community-identity.ts |
 | leepa_comp_sales | ArcGIS REST | data_lake.leepa_comparable_sales — 108,848 rows, zero consumer |
 | redfin_collier | CSV (redfin-public-data S3) | data_lake.redfin_collier_market |
 | redfin_lee | CSV (redfin-public-data S3) | data_lake.redfin_lee_market |

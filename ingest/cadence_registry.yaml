@@ -803,6 +803,63 @@ pipelines:
         source_label: "LeePA ParcelInfo MapServer (+ sibling ParcelsWFS service)"
         summary: "ParcelInfo: 24 layers; we pull 0, 9, 10, 12, 23 (layers 1-8 are cartographic label duplicates of 13-18, not a gap). LAYER 23 'Comparable Sales' PULLED 07/22/2026 by operator decree — see the leepa_comp_sales pipeline entry for its own full field census; it is no longer an unpulled ceiling item. Layers 11/19-22 field schemas CONFIRMED live 07/19/2026 (the 07/08 timeouts did not recur): 11 Qualified Sales Ratios (ORBookPage, Instrument, DoS, Ratio) · 19 Non CT Sales (SaleYear/Month, DeedType, SalePrice) · 21 Delinquent Tax Advertising (10,964 rows: FOLIOID, current_strap, face_value — a seller-stress distress signal, unpulled; check leepa_delinquent_tax_layer_unused) · 22 Cert of Title Sales (foreclosure deeds, same shape as 19) — still unpulled. SIBLING SERVICE ParcelsWFS/MapServer/0 'FabricParcels' (564,339 rows, ~110 fields): PULLED 07/19/2026 = Name (the Lee STRAP, = lee_parcels.parcel_id form) + FolioID, joined onto leepa_parcels.strap as the parcel-grain FDOR crosswalk. Available-unpulled there: Longitude/Latitude/Point_X/Point_Y (parcel coords), DORCode, CondoName, Legal, LandUseCode/Desc, Zoning, TaxingDistrict, AVMMarketArea, AVMNBHD, unit/condo block (BldgNumber/UnitNumber/MaxFloor/PhaseNum), plat Book/Page; owner fields PII-excluded. WARNING: FabricParcels Address*/City/State/ZIP are OWNER-MAILING, never situs (G1) — FDOR phy_zipcd stays the situs-ZIP authority."
 
+  - name: lee_planned_developments
+    workflow: lee-planned-developments-quarterly.yml
+    consuming_pack: [communities-swfl, lib/listings/community-identity]
+    lane: tier-2
+    cadence_days: 92 # county edits the layer continuously; quarterly re-snapshot (a Pending polygon becomes Approved next quarter)
+    tolerance_multiplier: 2.0
+    dlt_schema_name: lee_planned_developments
+    expected_rows_min: 1465 # 90% of 1,629 features, live-counted 08/28/2026
+    count_table: data_lake.lee_planned_developments
+    freshness_sla:
+      warn_after_days: 200
+      error_after_days: 370
+    source_scope:
+      confirmed_total:
+        value: 1629
+        as_of: "08/28/2026"
+        source: "live probe of the FeatureServer (returnCountOnly)"
+      source_ceiling:
+        value: 26
+        as_of: "08/28/2026"
+        source_url: "https://www.leegov.com/dcd/zoning/pd"
+        source_label: "Lee County DCD — Planned Developments (ArcGIS FeatureServer layer 0)"
+        summary: "26 fields: OBJECTID, CASE_NAME, PL_COM, REMARKS, PLANNEDDEVELOPMENTS_AREA, ACRES, PC_ID, TIDEMARK_ID, DATASHEET, INPUTMETHOD, INITIALAPPROVAL, ZONING_CATEGORY, MASTER_NO, INIT_RESOLUTION, IMS_STATUS, TESTFIELD, GlobalID, Source_GlobalID, EDITOR_NAME, EDIT_DATE, created_user, created_date, last_edited_user, last_edited_date, Shape__Area, Shape__Length. We land 10 + normalized name + geometry (WGS84 via outSR=4326 server reprojection from native wkid 2237 State Plane feet); unpulled: PL_COM, REMARKS, TIDEMARK_ID, DATASHEET, INIT_RESOLUTION, TESTFIELD, GlobalID/edit-audit fields, Shape__*. 1,629 features 08/28/2026 (1,627 on 08/12/2026 — the layer grows). IMS_STATUS: Approved 1207 / Rezoned 190 / Withdrawn 86 / Pending 67 / Denied 35 / Other 22 / null 21 / Approved-Pending 1. ZONING_CATEGORY: CPD 749 (COMMERCIAL — never joinable) / RPD 414 / MPD 133 / IPD 133 / CFPD 47 / PUD 47 / MHPD 29 / null 26 / RVPD 18 / smaller. INPUTMETHOD: Legal 1096 / null 368 / MaB 82 / Plats 43 / Parcels 15 / Sketched 15 / Plat 6 / Digital 2 / SDE-Parcels 1 / Bad-Legal 1. Approved AND residential-capable (RPD, PUD, MPD, MHPD, RVPD, CFPD-RPD, CPD-RPD, MHPD-RVPD) = 490 — the honest joinable universe, applied at READ in spatial_join.py, never at ingest. SCOPE: unincorporated Lee only + legacy incorporated polygons; Cape Coral / Fort Myers / Bonita Springs NOT fully covered. Collier equivalent layer UNCONFIRMED (playbook forbids re-searching from zero — check the playbook status first)."
+
+  - name: parcel_community_pd
+    workflow: lee-planned-developments-quarterly.yml
+    consuming_pack: [communities-swfl, lib/listings/community-identity]
+    schema_static: unverifiable # spatial_join.py builds pipeline_name=f"parcel_community_pd_{token_hex(4)}" at runtime
+    lane: tier-2
+    cadence_days: 92
+    tolerance_multiplier: 2.0
+    dlt_schema_name: parcel_community_pd
+    expected_rows_min: 94000 # 90% of 104,911 assignments, first live run 08/28/2026
+    count_table: data_lake.parcel_community_pd
+    # freshness_table (not just freshness_column) is REQUIRED here: check_freshness.py
+    # reads freshness_column ONLY inside its `if "freshness_table" in entry` branch;
+    # without it the probe falls back to _dlt_loads.schema_name = 'parcel_community_pd',
+    # a literal that can never appear (spatial_join.py builds random pipeline names) —
+    # the staleness half of the probe would be structurally inert (second-order audit
+    # finding 7, 08/28/2026).
+    freshness_table: data_lake.parcel_community_pd
+    freshness_column: assigned_at
+    freshness_sla:
+      warn_after_days: 200
+      error_after_days: 370
+    source_scope:
+      confirmed_total:
+        value: 104911
+        as_of: "08/28/2026"
+        source: "our spatial join (DuckDB ST_Contains: 547,724 leepa parcel points x 490 Approved-residential PD polygons); 7,429 ambiguous (flagged, smallest-acres won) + 803 low-trust (Sketched/Bad-Legal) => 96,679 servable across 401 communities (parcel_community_pd_summary_v)"
+      source_ceiling:
+        value: 104911
+        as_of: "08/28/2026"
+        source_url: "https://www.leegov.com/dcd/zoning/pd"
+        source_label: "Derived: Lee DCD PD geometry x LeePA FabricParcels coordinates"
+        summary: "DERIVED table, not a vendor pull — the ceiling is whatever the two inputs support. Collier: 220,875 parcels EXPLICITLY excluded (no coordinates; Lee-only boundary source). Filter criteria recorded per-row in assignment_criteria; consumers must stay silent for input_method Sketched/Bad-Legal and ambiguous=true (lib/listings/community-identity.ts enforces)."
+
   - name: leepa_comp_sales
     workflow: leepa-comparable-sales-annual.yml
     consuming_pack: properties-lee-value

@@ -1,6 +1,10 @@
 # Subdivision-to-community crosswalk via public PUD/PD boundary geometry
 
-**Registered:** 2026-08-12 (stub) · **Designed:** 2026-08-28 · **Status:** approved, not built
+**Registered:** 2026-08-12 (stub) · **Designed:** 2026-08-28 · **Status:** BUILT + LIVE 08/28/2026
+— first run: 104,911 assignments / 409 communities; 96,679 servable across 401
+(`parcel_community_pd_summary_v`); 7,429 ambiguous flagged, 803 low-trust silenced; Collier's
+220,875 parcels explicitly excluded. Pipeline `ingest/pipelines/lee_planned_developments/`,
+consumers `lib/listings/community-identity.ts` + communities-swfl pack.
 
 Every number in this spec was measured live on 08/28/2026. Nothing here is carried from the
 08/12/2026 playbook without re-measurement; where the playbook and a live probe disagreed, the

@@ -1,3 +1,40 @@
+## 2026-08-28 (Fable 5) — COMMUNITY CROSSWALK BUILT + LIVE: geometry identity for 96,679 Lee parcels
+
+Operator: "go" on the approved spec (docs/superpowers/specs/2026-08-12-community-crosswalk-design.md).
+All 4 pieces, TDD-first (61 python + 33 bun tests on the touched surfaces, `bunx next build` green):
+1. leepa fabric pull now lands `latitude`/`longitude` beside strap (same min-Name winning row, never
+   mixed); backfilled live via scripts/backfill_leepa_parcel_coords.py — 547,724/548,798 (99.80%).
+2. NEW ingest/pipelines/lee_planned_developments/ → data_lake.lee_planned_developments, 1,627 rows
+   LIVE (1,629 features − 2 empty names; WGS84 via outSR=4326; bounds-asserted; registry entry with
+   full 26-field census + lee-planned-developments-quarterly.yml in same change).
+3. spatial_join.py (DuckDB ST_Contains, zero hand-written point-in-polygon) → data_lake.
+   parcel_community_pd LIVE: 104,911 assignments / 409 communities; 7,429 ambiguous flagged
+   (smallest-acres won), 803 Sketched/"Bad Legal" low-trust; SERVABLE = 96,679 across 401
+   (parcel_community_pd_summary_v, migration applied). Collier 220,875 explicitly excluded.
+4. Consumers same pass: communities-swfl pack metric parcels_with_pd_community_identity_lee (vocab
+   slug registered, coverage audit OK) + lib/listings/community-identity.ts on the email path
+   (community-lookup carries parcelIds; identity feeds resolveInsideTheGate FIRST — West Bay Club /
+   Shadow Wood Preserve / Wildcat Run profiles verified reachable live; silence for ambiguous/
+   Sketched/"Bad Legal"; unincorporated-Lee scope wording test-enforced).
+Docs: data-roots row, playbook status flipped in place (+ CPD correction), repo-inventory rows,
+spec status → BUILT. check community_crosswalk_live_verify promoted task→verify with real steps.
+SECOND-ORDER AUDIT ran (15 findings) and 8 were FIXED same session, each TDD/measured:
+servable_ naming split (source+pack+citation now speak servable_parcels, never "assigned");
+identity silence rules order-independent over ALL rows (PostgREST has no row order);
+contradiction guard (identity vs the listing page's own stated community → silent);
+gate-disagreement guard (two profiles matching the two keys → amenity gate silent);
+leepa fabric-failure clobber guard (merge of NULLs over 547k stored straps now ABORTS loud
+via FillRateCollapseError; degrade path kept for bootstrap only); freshness probe made real
+(freshness_table added + assigned_at text→timestamptz migration APPLIED — probe returns
+2026-08-28 live, was structurally inert); workflow concurrency group; shared.test.ts now
+exercises the attach + gate ordering (was zero coverage). Measured non-issues: 0 cross-county
+parcel_id collisions, 0 dup parcel_ids. Post-fix: 62 py + 1,690 bun tests green, next build green,
+live re-smoke green. STILL OWED: communities brain rebuild (paid dispatch — metric not served
+until then); GHA dry-run dispatch after push; leepa entry has the same inert-freshness shape
+(pre-existing, annual cadence).
+PRE-EXISTING at HEAD, not this build: 2 cadence-spine test failures (active_listings entry missing;
+4 orphaned fred/census cron comments). Next: operator live-verify; Collier layer still unconfirmed.
+
 ## 2026-08-27/28 (Opus 5) — "FIX IT ALL": 6 DEFECTS, 4 FIXED + VERIFIED, 1 DIAGNOSED-NOT-FIXED, 1 CODE-ONLY
 
 Operator: "Fan out and fix it all" against the 35-agent HF sweep's defect list. N=6 enumerated.

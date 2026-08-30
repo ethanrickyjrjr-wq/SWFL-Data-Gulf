@@ -31,6 +31,11 @@ SALE_ROW_1 = {
 # A Lee STRAP in FDOR form — the shape data_lake.lee_parcels.parcel_id carries.
 STRAP_1 = "01432201010080050"
 
+# A fabric crosswalk row as _fetch_fabric_by_folio returns it: strap + the parcel's
+# own point coordinates (FabricParcels Latitude/Longitude — situs geometry, never
+# the owner-mailing Address* fields, which stay banned per G1).
+FABRIC_1 = {"strap": STRAP_1, "latitude": 26.50, "longitude": -81.80}
+
 
 def _feat(props):
     """Wrap a value row the way paginate_arcgis_keyset yields L12 features (geojson)."""
@@ -152,15 +157,29 @@ class TestJoinLeepa:
     def test_strap_attached_from_crosswalk(self):
         from ingest.pipelines.leepa.resources import _join_leepa
         joined = _join_leepa([USE_ROW_1], [VALUE_ROW_1, VALUE_ROW_2], [SALE_ROW_1],
-                             None, {"F1": STRAP_1})
+                             None, {"F1": FABRIC_1})
         by_folio = {r["folioid"]: r for r in joined}
         assert by_folio["F1"]["strap"] == STRAP_1
         assert by_folio["F2"]["strap"] is None
+
+    def test_coordinates_attached_from_crosswalk(self):
+        # Piece 1 of the community crosswalk: the parcel's own lat/lon rides the
+        # fabric pull we already make (spec 2026-08-12-community-crosswalk-design).
+        from ingest.pipelines.leepa.resources import _join_leepa
+        joined = _join_leepa([USE_ROW_1], [VALUE_ROW_1, VALUE_ROW_2], [SALE_ROW_1],
+                             None, {"F1": FABRIC_1})
+        by_folio = {r["folioid"]: r for r in joined}
+        assert by_folio["F1"]["latitude"] == 26.50
+        assert by_folio["F1"]["longitude"] == -81.80
+        assert by_folio["F2"]["latitude"] is None
+        assert by_folio["F2"]["longitude"] is None
 
     def test_strap_null_when_no_crosswalk(self):
         from ingest.pipelines.leepa.resources import _join_leepa
         joined = _join_leepa([USE_ROW_1], [VALUE_ROW_1], [SALE_ROW_1])
         assert joined[0]["strap"] is None
+        assert joined[0]["latitude"] is None
+        assert joined[0]["longitude"] is None
 
 
 class TestIngestLeepaParcelsValue:
@@ -174,7 +193,7 @@ class TestIngestLeepaParcelsValue:
     """
 
     def _run(self, value_features=None, tabular=None, strap_map=None,
-             strap_raises=False, canonical=2, zip_map=None):
+             strap_raises=False, canonical=2, zip_map=None, stored_straps=0):
         from ingest.pipelines.leepa.resources import ingest_leepa_parcels_value
 
         if value_features is None:
@@ -189,7 +208,9 @@ class TestIngestLeepaParcelsValue:
                    side_effect=tabular) as tab, \
              patch("ingest.pipelines.leepa.resources._zip_by_folio",
                    return_value=zip_map or {}) as zips, \
-             patch("ingest.pipelines.leepa.resources._fetch_strap_by_folio",
+             patch("ingest.pipelines.leepa.resources._stored_strap_count",
+                   return_value=stored_straps), \
+             patch("ingest.pipelines.leepa.resources._fetch_fabric_by_folio",
                    **strap_kwargs) as strap, \
              patch("ingest.pipelines.leepa.resources.upload_csv_gz") as upload, \
              patch("ingest.pipelines.leepa.resources.upsert_inventory_row") as pointer, \
@@ -246,10 +267,11 @@ class TestIngestLeepaParcelsValue:
             raise AssertionError("expected RuntimeError when pagination < 90% canonical")
 
     def test_strap_attached_and_archived(self):
-        m = self._run(strap_map={"F1": STRAP_1}, zip_map={"F1": "33901"})
+        m = self._run(strap_map={"F1": FABRIC_1}, zip_map={"F1": "33901"})
         joined = m["promote"].call_args[0][0]
         by_folio = {r["folioid"]: r for r in joined}
         assert by_folio["F1"]["strap"] == STRAP_1
+        assert by_folio["F1"]["latitude"] == 26.50
         assert by_folio["F2"]["strap"] is None
         # fabric crosswalk archived as the 4th Tier-1 object with its own pointer row
         assert m["upload"].call_count == 4
@@ -258,46 +280,82 @@ class TestIngestLeepaParcelsValue:
         pointer_paths = {call.kwargs["path"] for call in m["pointer"].call_args_list}
         assert any("fabric_strap" in p for p in pointer_paths)
 
-    def test_strap_fetch_failure_degrades_to_null_never_aborts(self):
-        m = self._run(strap_raises=True)
+    def test_strap_fetch_failure_degrades_to_null_ONLY_at_bootstrap(self):
+        # stored_straps=0: no prior fabric values exist, so a NULL-strap promote
+        # loses nothing — the original degrade path, now bootstrap-only.
+        m = self._run(strap_raises=True, stored_straps=0)
         assert m["promote"].called  # the parcel ingest itself must survive
         joined = m["promote"].call_args[0][0]
         assert all(r["strap"] is None for r in joined)
+        assert all(r["latitude"] is None for r in joined)
         assert m["upload"].call_count == 3  # no fabric archive on a failed fetch
 
+    def test_strap_fetch_failure_with_stored_values_ABORTS_before_clobber(self):
+        # dlt merge = delete+insert on folioid: promoting NULL strap/lat/lon over a
+        # table that already holds 547k of them erases them all with every volume
+        # guard green (the 34,139-row baths clobber shape). Fail LOUD pre-merge.
+        from ingest.lib.guards import FillRateCollapseError
+        try:
+            self._run(strap_raises=True, stored_straps=547_724)
+        except FillRateCollapseError as e:
+            assert "fabric" in str(e).lower()
+        else:
+            raise AssertionError("expected FillRateCollapseError before the clobbering merge")
 
-class TestFetchStrapByFolio:
+
+class TestFetchFabricByFolio:
     def _fabric(self, attrs_list):
         return iter([{"attributes": a} for a in attrs_list])
 
-    def test_dedupes_to_min_name_per_folio(self):
-        from ingest.pipelines.leepa.resources import _fetch_strap_by_folio
-        rows = [{"FolioID": 10, "Name": "B"}, {"FolioID": 10, "Name": "A"},
-                {"FolioID": 11, "Name": "C"}]
+    def test_dedupes_to_min_name_per_folio_coords_from_winning_row(self):
+        # The coords MUST come from the same row the min-Name dedupe selected —
+        # mixing rows would attach another artifact row's point to this strap.
+        from ingest.pipelines.leepa.resources import _fetch_fabric_by_folio
+        rows = [
+            {"FolioID": 10, "Name": "B", "Latitude": 26.61, "Longitude": -81.91},
+            {"FolioID": 10, "Name": "A", "Latitude": 26.51, "Longitude": -81.81},
+            {"FolioID": 11, "Name": "C", "Latitude": 26.71, "Longitude": -81.71},
+        ]
         with patch("ingest.pipelines.leepa.resources.paginate_arcgis_keyset",
                    return_value=self._fabric(rows)), \
              patch("ingest.pipelines.leepa.resources.arcgis_count", return_value=3):
-            straps = _fetch_strap_by_folio()
-        assert straps == {"10": "A", "11": "C"}
+            fabric = _fetch_fabric_by_folio()
+        assert fabric["10"] == {"strap": "A", "latitude": 26.51, "longitude": -81.81}
+        assert fabric["11"] == {"strap": "C", "latitude": 26.71, "longitude": -81.71}
+
+    def test_null_coords_stay_null_never_borrowed(self):
+        # 376 of 564,339 fabric rows carry no Latitude (measured 08/28/2026). The
+        # winning row's nulls stay null — never borrowed from a losing row.
+        from ingest.pipelines.leepa.resources import _fetch_fabric_by_folio
+        rows = [
+            {"FolioID": 10, "Name": "A", "Latitude": None, "Longitude": None},
+            {"FolioID": 10, "Name": "B", "Latitude": 26.61, "Longitude": -81.91},
+        ]
+        with patch("ingest.pipelines.leepa.resources.paginate_arcgis_keyset",
+                   return_value=self._fabric(rows)), \
+             patch("ingest.pipelines.leepa.resources.arcgis_count", return_value=2):
+            fabric = _fetch_fabric_by_folio()
+        assert fabric["10"] == {"strap": "A", "latitude": None, "longitude": None}
 
     def test_skips_null_folio_or_name(self):
-        from ingest.pipelines.leepa.resources import _fetch_strap_by_folio
+        from ingest.pipelines.leepa.resources import _fetch_fabric_by_folio
         rows = [{"FolioID": None, "Name": "A"}, {"FolioID": 12, "Name": ""},
-                {"FolioID": 13, "Name": "S13"}]
+                {"FolioID": 13, "Name": "S13", "Latitude": 26.5, "Longitude": -81.8}]
         with patch("ingest.pipelines.leepa.resources.paginate_arcgis_keyset",
                    return_value=self._fabric(rows)), \
              patch("ingest.pipelines.leepa.resources.arcgis_count", return_value=3):
-            straps = _fetch_strap_by_folio()
-        assert straps == {"13": "S13"}
+            fabric = _fetch_fabric_by_folio()
+        assert list(fabric) == ["13"]
+        assert fabric["13"]["strap"] == "S13"
 
     def test_raises_on_truncated_pull(self):
-        from ingest.pipelines.leepa.resources import _fetch_strap_by_folio
-        rows = [{"FolioID": 10, "Name": "A"}]
+        from ingest.pipelines.leepa.resources import _fetch_fabric_by_folio
+        rows = [{"FolioID": 10, "Name": "A", "Latitude": 26.5, "Longitude": -81.8}]
         with patch("ingest.pipelines.leepa.resources.paginate_arcgis_keyset",
                    return_value=self._fabric(rows)), \
              patch("ingest.pipelines.leepa.resources.arcgis_count", return_value=1000):
             try:
-                _fetch_strap_by_folio()
+                _fetch_fabric_by_folio()
             except RuntimeError as e:
                 assert "aborting" in str(e).lower()
             else:
@@ -340,9 +398,12 @@ class TestPromoteLeepaToTier2:
         assert captured["table_name"] == "leepa_parcels"
         assert captured["write_disposition"] == "merge"
         assert "columns" in captured
-        # 17 = folioid + strap + zip_code + the 14 value/use/sale fields.
-        # (This assert sat stale at 15 while zip_code made it 16 — keep it honest.)
-        assert len(captured["columns"]) == 17
+        # 19 = folioid + strap + latitude + longitude + zip_code + the 14
+        # value/use/sale fields. (This assert sat stale at 15 while zip_code made
+        # it 16 — keep it honest.)
+        assert len(captured["columns"]) == 19
+        assert captured["columns"]["latitude"] == {"data_type": "double", "nullable": True}
+        assert captured["columns"]["longitude"] == {"data_type": "double", "nullable": True}
         assert captured["columns"]["folioid"].get("primary_key") is True
         assert captured["columns"]["strap"] == {"data_type": "text", "nullable": True}
 

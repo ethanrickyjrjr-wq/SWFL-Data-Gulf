@@ -46,10 +46,14 @@ export interface ParcelCandidateRow {
   subdivision_name: string | null;
   zip: string | null;
   phy_addr1: string | null;
+  /** FDOR parcel id (the Lee STRAP form) — the key the PD geometry identity layer
+   *  (community-identity.ts, data_lake.parcel_community_pd) joins on. Optional so
+   *  older callers/fixtures without the column keep working. */
+  parcel_id?: string | null;
 }
 
 export type CommunityResolution =
-  | { matched: true; county: string; subdivisionName: string }
+  | { matched: true; county: string; subdivisionName: string; parcelIds: string[] }
   | {
       matched: false;
       reason: "no_parcel_at_address" | "ambiguous_multiple_subdivisions";
@@ -85,7 +89,12 @@ export function matchSubdivision(
     };
   }
   const only = [...distinct.values()][0];
-  return { matched: true, county: only.county, subdivisionName: only.subdivisionName };
+  // The matched group's parcel ids, deduped, order-stable — every candidate is in the
+  // winning (county, subdivision) group at this point (distinct.size === 1).
+  const parcelIds = [
+    ...new Set(candidates.map((r) => r.parcel_id).filter((p): p is string => !!p)),
+  ];
+  return { matched: true, county: only.county, subdivisionName: only.subdivisionName, parcelIds };
 }
 
 /** The leading whitespace-delimited token of a street string. FDOR's phy_addr1 and every
@@ -113,7 +122,7 @@ async function fetchCandidateRows(street: string, zip5: string): Promise<ParcelC
     const { data } = await db
       .schema(SCHEMA)
       .from(PARCEL_TABLE)
-      .select("county, subdivision_name, zip, phy_addr1")
+      .select("county, subdivision_name, zip, phy_addr1, parcel_id")
       .eq("zip", zip5)
       .ilike("phy_addr1", `${escapeLike(token)} %`);
     return Array.isArray(data) ? (data as ParcelCandidateRow[]) : [];
@@ -210,7 +219,12 @@ export async function resolveCommunityStats(
 }
 
 export type CommunityForListing =
-  | ({ matched: true; county: string; subdivisionName: string } & CommunityStats)
+  | ({
+      matched: true;
+      county: string;
+      subdivisionName: string;
+      parcelIds: string[];
+    } & CommunityStats)
   | { matched: false; reason: "no_parcel_at_address" | "ambiguous_multiple_subdivisions" };
 
 /** Convenience: identity + stats in one call. Still not wired into ListingFacts — see
@@ -228,6 +242,7 @@ export async function resolveCommunityForListing(
     matched: true,
     county: resolution.county,
     subdivisionName: canonicalCommunityKey(resolution.subdivisionName),
+    parcelIds: resolution.parcelIds,
     homeCount: stats?.homeCount ?? null,
     countByType: stats?.countByType ?? null,
     medianJustValue: stats?.medianJustValue ?? null,

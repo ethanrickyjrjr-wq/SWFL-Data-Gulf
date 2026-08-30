@@ -26,6 +26,26 @@ mock.module("@/lib/listings/community-lookup", () => ({
   resolveCommunityForListing: async () => communityResult,
 }));
 
+// Geometry identity + inside-the-gate — settable per test, defaulting to a miss so
+// every pre-existing test keeps its original behavior (the real modules also return
+// null in this environment: no DB).
+const realCommunityIdentity = await import("@/lib/listings/community-identity");
+const realInsideTheGate = await import("@/lib/listings/community-inside-the-gate");
+afterAll(() => {
+  mock.module("@/lib/listings/community-identity", () => realCommunityIdentity);
+  mock.module("@/lib/listings/community-inside-the-gate", () => realInsideTheGate);
+});
+let nextIdentity: unknown = null;
+let gateByKey: Record<string, unknown> = {};
+mock.module("@/lib/listings/community-identity", () => ({
+  ...realCommunityIdentity,
+  resolveCommunityIdentity: async () => nextIdentity,
+}));
+mock.module("@/lib/listings/community-inside-the-gate", () => ({
+  ...realInsideTheGate,
+  resolveInsideTheGate: async (key: string) => gateByKey[key] ?? null,
+}));
+
 // Capture the system prompt handed to the model so the test can assert the framing
 // block is pasted in verbatim. mock.module is process-global — set up BEFORE ./shared
 // is imported (the same ordering the two mocks above rely on), restored in afterAll.
@@ -349,4 +369,88 @@ test("median: odd count returns the middle, even count averages the two middle",
   expect(median([1, 3, 2])).toBe(2);
   expect(median([1, 2, 3, 4])).toBe(3); // (2+3)/2 rounded
   expect(median([])).toBeNull();
+});
+
+// ── geometry community identity wiring (second-order audit findings 3, 4, 11) ──────────
+
+const MATCHED_LEE = {
+  matched: true,
+  county: "lee",
+  subdivisionName: "AMAVIDA CONDO PH 1",
+  parcelIds: ["10-45-24-01-00001.0010"],
+  homeCount: 200,
+  medianJustValue: 350000,
+  countByType: { condominium: 200 },
+  sourceUrl: "https://www.swfldatagulf.com/r/source/neighborhood_stats",
+  asOf: "2026-08-28",
+};
+const IDENTITY = {
+  communityName: "West Bay Club",
+  caseNameRaw: "West Bay Club RPD",
+  inputMethod: "Legal",
+  acres: 806.9,
+  assignedAt: "2026-08-28T15:08:05+00:00",
+};
+const gate = (label: string) => ({
+  label,
+  gated: true,
+  golf: true,
+  golfHoles: 18,
+  pool: true,
+  tennis: false,
+  pickleball: false,
+  fitness: false,
+  clubhouse: false,
+  dining: false,
+  marina: false,
+  sourceUrl: "https://example.com/profile",
+  asOf: "07/20/2026",
+});
+
+test("identity attaches off the matched parcels and its name reaches the gate FIRST", async () => {
+  communityResult = MATCHED_LEE;
+  nextIdentity = IDENTITY;
+  gateByKey = { "West Bay Club": gate("West Bay Club") };
+  const { facts } = await resolveSubject("11101 New Moon Ct, Fort Myers, FL 33913", "");
+  expect(facts.communityIdentity?.communityName).toBe("West Bay Club");
+  // The subdivision key alone could never have reached this profile.
+  expect(facts.insideTheGate?.label).toBe("West Bay Club");
+  communityResult = { matched: false, reason: "no_parcel_at_address" };
+  nextIdentity = null;
+  gateByKey = {};
+});
+
+test("identity contradicting the listing page's OWN stated community stays silent", async () => {
+  // Inversion guard: the geometry name may never contradict what the listing itself
+  // says in a sentence the reader takes as the agent's knowledge.
+  nextListingHit = {
+    address: "11101 New Moon Ct",
+    photos: [],
+    sourceUrl: "https://example.com/listing",
+    community: { subdivision: "Pelican Landing" },
+  };
+  communityResult = MATCHED_LEE;
+  nextIdentity = IDENTITY;
+  const { facts } = await resolveSubject("11101 New Moon Ct, Fort Myers, FL 33913", "");
+  expect(facts.communityIdentity).toBeUndefined();
+  nextListingHit = null;
+  communityResult = { matched: false, reason: "no_parcel_at_address" };
+  nextIdentity = null;
+});
+
+test("two DIFFERENT profiles matching the two keys → amenity gate stays SILENT", async () => {
+  // A wrong amenity set is worse than none: when the geometry name and the
+  // subdivision name license two different profiles, neither ships.
+  communityResult = MATCHED_LEE;
+  nextIdentity = IDENTITY;
+  gateByKey = {
+    "West Bay Club": gate("West Bay Club"),
+    "AMAVIDA CONDO PH 1": gate("Amavida"),
+  };
+  const { facts } = await resolveSubject("11101 New Moon Ct, Fort Myers, FL 33913", "");
+  expect(facts.communityIdentity?.communityName).toBe("West Bay Club");
+  expect(facts.insideTheGate).toBeUndefined();
+  communityResult = { matched: false, reason: "no_parcel_at_address" };
+  nextIdentity = null;
+  gateByKey = {};
 });

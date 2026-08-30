@@ -59,6 +59,7 @@ function neighborhood(overrides: Partial<NeighborhoodStatRow>): NeighborhoodStat
 function makeFragment(
   communities: CommunityProfileRow[],
   neighborhoods: NeighborhoodStatRow[],
+  pdIdentity: CommunitiesSwflSummary["pd_identity"] = null,
 ): RawFragment {
   let backbone: CommunitiesSwflSummary["backbone"] = null;
   if (neighborhoods.length > 0) {
@@ -78,9 +79,11 @@ function makeFragment(
     kind: "communities-swfl-summary",
     communities,
     backbone,
+    pd_identity: pdIdentity,
     as_of: "2026-07-05",
     community_source_url: "fixture://community",
     neighborhood_source_url: "fixture://neighborhood",
+    pd_identity_source_url: pdIdentity ? "fixture://pd-identity" : null,
   };
   return {
     fragment_id: "communities_swfl:summary:test",
@@ -143,6 +146,33 @@ test("communities-swfl: both tiers populated → all five headline metrics, ever
     assert.ok(m.source?.url, `metric ${m.metric} must carry a source url`);
     assert.ok(m.source?.citation, `metric ${m.metric} must carry a citation`);
   }
+});
+
+test("communities-swfl: pd geometry identity present → its metric emits, sourced, scope-worded", () => {
+  communitiesSwfl.corpusSummary!([
+    makeFragment([], [neighborhood({})], {
+      servable_parcels: 96679,
+      servable_communities: 401,
+      as_of: "2026-08-28T15:08:05+00:00",
+    }),
+  ]);
+  const result = communitiesSwfl.outputProducer!({} as never);
+  const metric = result.key_metrics.find(
+    (m) => m.metric === "parcels_with_pd_community_identity_lee",
+  );
+  assert.ok(metric, "pd identity metric must emit when the summary carries pd_identity");
+  assert.equal(metric!.value, 96679);
+  // failure mode 7: the citation must state the unincorporated-Lee scope.
+  assert.match(metric!.source.citation, /unincorporated Lee only/);
+});
+
+test("communities-swfl: no pd identity summary → the metric is ABSENT, never a faked 0", () => {
+  communitiesSwfl.corpusSummary!([makeFragment([], [neighborhood({})])]);
+  const result = communitiesSwfl.outputProducer!({} as never);
+  assert.ok(
+    !result.key_metrics.some((m) => m.metric === "parcels_with_pd_community_identity_lee"),
+    "absent upstream suppresses the metric",
+  );
 });
 
 test("communities-swfl: marketed catalog rides in detail_tables keyed by community slug", () => {

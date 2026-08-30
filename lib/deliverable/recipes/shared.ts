@@ -42,6 +42,31 @@ import {
   resolveInsideTheGate,
   insideTheGateSourceLine,
 } from "@/lib/listings/community-inside-the-gate";
+import {
+  resolveCommunityIdentity,
+  communityIdentitySourceLine,
+} from "@/lib/listings/community-identity";
+
+/** Loose same-place test between the geometry community name and the community the
+ *  listing page itself states (`facts.community.subdivision`). Case/punctuation-blind,
+ *  containment either way ("West Bay" vs "West Bay Club" is the SAME place; "Pelican
+ *  Landing" vs "West Bay Club" is a contradiction). No stated community → no conflict. */
+function contradictsStatedCommunity(
+  identityName: string,
+  facts: { community?: { subdivision?: string | null } },
+): boolean {
+  const stated = facts.community?.subdivision;
+  if (!stated) return false;
+  const norm = (v: string) =>
+    v
+      .toUpperCase()
+      .replace(/[^A-Z0-9]+/g, " ")
+      .trim();
+  const a = norm(identityName);
+  const b = norm(stated);
+  if (!a || !b) return false;
+  return !(a === b || a.includes(b) || b.includes(a));
+}
 import type { ListingFacts } from "@/lib/email/listing-scrape";
 import type { EmailDoc } from "@/lib/email/doc/types";
 
@@ -205,6 +230,22 @@ export async function resolveSubject(
       sourceUrl: c.sourceUrl,
       asOf: c.asOf,
     };
+
+    // WHICH COMMUNITY (IDENTITY) — the fourth community layer: the parcel's point
+    // inside a recorded Lee PD boundary (geometry, no name matching). Coverage is
+    // unincorporated Lee only, so a miss is NORMAL and stays silent; Sketched /
+    // "Bad Legal" / ambiguous assignments are silenced inside the resolver.
+    // CONTRADICTION GUARD: if the listing page itself states a community and it is
+    // not the same place, the geometry name stays out — a sentence contradicting
+    // the listing's own words, spoken as the agent's knowledge, is the one harm
+    // this layer could cause. Silence costs nothing.
+    const identityParcelIds = (c as { parcelIds?: string[] }).parcelIds;
+    if (identityParcelIds?.length) {
+      const identity = await resolveCommunityIdentity(identityParcelIds).catch(() => null);
+      if (identity && !contradictsStatedCommunity(identity.communityName, facts)) {
+        facts.communityIdentity = identity;
+      }
+    }
   }
 
   // LANE 2 — the agent's own words. Never overwrites a description the record
@@ -234,8 +275,24 @@ export async function resolveSubject(
   // cannot drift onto a different name for the same place. A miss is NORMAL (81 profiles
   // against 20,400 subdivisions) and a miss keeps the narrator's golf/pool/gate
   // prohibition switched ON, which is the correct default.
-  if (facts.communityStats?.subdivisionName) {
-    const gate = await resolveInsideTheGate(facts.communityStats.subdivisionName).catch(() => null);
+  // The geometry identity name is tried FIRST: for the profiles whose marketed name
+  // never appears in any platted subdivision string, the PD boundary name is the only
+  // key that can reach community_profiles at all. The subdivision stays the fallback.
+  // DISAGREEMENT GUARD: when BOTH keys resolve and they license two DIFFERENT
+  // profiles, neither ships — a wrong amenity set spoken as fact is worse than an
+  // absent one, and nothing here can adjudicate which profile is the house's.
+  const [identityGate, subdivisionGate] = await Promise.all([
+    facts.communityIdentity?.communityName
+      ? resolveInsideTheGate(facts.communityIdentity.communityName).catch(() => null)
+      : Promise.resolve(null),
+    facts.communityStats?.subdivisionName
+      ? resolveInsideTheGate(facts.communityStats.subdivisionName).catch(() => null)
+      : Promise.resolve(null),
+  ]);
+  if (identityGate && subdivisionGate && identityGate.label !== subdivisionGate.label) {
+    // two profiles claim this home — stay silent
+  } else {
+    const gate = identityGate ?? subdivisionGate;
     if (gate) facts.insideTheGate = gate;
   }
 
@@ -514,6 +571,10 @@ export async function authorListingNarrative(
     // on the pasted-URL lane. Same lifting rule: present → the narrator may name golf/pool/
     // gate; absent → the blanket prohibition below stays on.
     insideTheGateSourceLine(facts.insideTheGate),
+    // IDENTITY from geometry — grants the community NAME only (amenities stay gated
+    // behind the inside-the-gate line above); carries its own unincorporated-Lee
+    // scope sentence, test-enforced.
+    communityIdentitySourceLine(facts.communityIdentity),
     neighborhoodStatsSourceLine(facts.communityStats),
     // AROUND the home — nearby businesses in the vendor's radius. The line carries its
     // own prohibition (never "the community has/includes/features", never on-site,

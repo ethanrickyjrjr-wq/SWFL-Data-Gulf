@@ -23,6 +23,7 @@ import type { ListingDetailFacts } from "@/lib/listings/listing-detail";
 import type { ResolvedCommunityStats } from "@/lib/listings/community-lookup";
 import type { ResolvedNeighborhood } from "@/lib/listings/neighborhood-amenities";
 import type { InsideTheGate } from "@/lib/listings/community-inside-the-gate";
+import type { CommunityIdentity } from "@/lib/listings/community-identity";
 
 export interface ListingFacts {
   address?: string;
@@ -96,6 +97,13 @@ export interface ListingFacts {
    *  Different provenance from `community`; never merged into it, never let one impersonate
    *  the other in citation language. */
   communityStats?: ResolvedCommunityStats;
+  /** WHICH COMMUNITY (IDENTITY), from geometry -- the parcel's point tested against Lee
+   *  County's recorded Planned Development boundaries (data_lake.parcel_community_pd; no
+   *  name matching anywhere in the path). A FOURTH provenance: identity ONLY -- the
+   *  marketed community the parcel physically sits inside. Coverage is unincorporated
+   *  Lee only, so absent is the NORMAL case and stays SILENT; amenity claims stay gated
+   *  behind `insideTheGate`, never lifted by this field. */
+  communityIdentity?: CommunityIdentity;
   /** AROUND THIS HOME -- the vendor's named neighborhood for this listing plus the
    *  businesses within its search radius (golf, country clubs, groceries, cafes...),
    *  resolved from the listing's own coordinates against stored boundary polygons.

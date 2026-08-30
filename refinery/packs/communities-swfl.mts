@@ -124,6 +124,31 @@ function communitiesOutputProducer(_out: PackOutput): BrainOutputProducerResult 
     });
   }
 
+  // --- Geometry-identity coverage (parcel_community_pd) ------------------
+  // Lee parcels sitting inside a recorded Planned Development boundary — the
+  // community-IDENTITY layer (point-in-polygon, no name matching). SERVABLE
+  // counts only (ambiguous + Sketched/"Bad Legal" already excluded upstream).
+  // Coverage is UNINCORPORATED Lee only — the source line says so and no copy
+  // may frame it as "Lee County communities" (spec failure mode 7).
+  const pd = summary.pd_identity;
+  if (pd && pd.servable_parcels > 0 && summary.pd_identity_source_url) {
+    const pdAsOf = pd.as_of ? pd.as_of.slice(0, 10) : asOf;
+    key_metrics.push({
+      metric: "parcels_with_pd_community_identity_lee",
+      label: "Lee parcels tied to a marketed community by recorded boundary",
+      value: pd.servable_parcels,
+      direction: "stable",
+      variable_type: "extensive",
+      units: "parcels",
+      display_format: "count",
+      source: makeSource(
+        `${fmtK(pd.servable_parcels)} Lee parcels carry a servable community identity from a recorded Planned Development boundary, across ${fmtK(pd.servable_communities)} named communities (point-in-polygon on Lee County DCD geometry; ambiguous and hand-drawn-boundary assignments excluded; unincorporated Lee only, not a complete county map) as of ${pdAsOf}`,
+        fetchedAt,
+        summary.pd_identity_source_url,
+      ),
+    });
+  }
+
   // --- Tier-2 marketed-community metrics ---------------------------------
   const communities = summary.communities;
   if (communities.length > 0) {

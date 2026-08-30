@@ -1,5 +1,14 @@
 ## 2026-08-28 (Opus 5) — OPERATOR: "Community crosswalk"
 
+RESOLVED 08/28/2026 (Fable 5, "go" on the approved spec): the crosswalk is BUILT + LIVE —
+`data_lake.lee_planned_developments` (1,627 polygons), `leepa_parcels.latitude/longitude`
+backfilled (99.80%), `parcel_community_pd` written (104,911 assignments; 96,679 servable across
+401 communities), consumers wired (communities-swfl pack metric + lib/listings/community-identity.ts
+on the email path). `community_crosswalk_live_verify` promoted back to verify class WITH code
+behind it this time. Still open: Collier layer unconfirmed; SQL stemmer twin; the pre-existing
+cadence-spine test failures (active_listings entry missing at HEAD + 4 orphaned cron comments —
+not from this build).
+
 He picked the crosswalk lane off my own (wrong) suggestion. Reading the playbook killed my
 suggestion: `docs/standards/community-crosswalk-playbook.md` line 35 says verbatim "don't propose
 a bigger regex. The names genuinely don't carry the relationship." Embeddings + reranker is the

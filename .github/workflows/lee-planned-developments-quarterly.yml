@@ -1,0 +1,67 @@
+name: Lee Planned Developments quarterly
+
+on:
+  schedule:
+    # 13:30 UTC on the 2nd of Jan/Apr/Jul/Oct — quarterly. The county edits the
+    # layer continuously (a Pending polygon becomes Approved next quarter), and
+    # the ingest lands ALL features with the residential/Approved filter applied
+    # at read, so a quarterly re-snapshot is enough. Staggered off the 13:00
+    # LeePA annual slot.
+    - cron: "30 13 2 1,4,7,10 *"
+  workflow_dispatch:
+    inputs:
+      dry_run:
+        description: "Dry run — fetch/join and validate only; skip writes"
+        required: false
+        default: "false"
+
+permissions:
+  contents: read
+
+# One run at a time: the spatial join is write-then-stale-sweep on assigned_at, so an
+# overlapping dispatch+schedule pair would have run B's sweep deleting run A's rows
+# while A's chunks are still landing — a torn table served to live email builds.
+concurrency:
+  group: lee-planned-developments
+  cancel-in-progress: false
+
+jobs:
+  ingest:
+    if: ${{ vars.ENGINE_ENABLED != 'false' || github.event_name == 'workflow_dispatch' }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v6
+
+      - name: Setup Python
+        uses: actions/setup-python@v6
+        with:
+          python-version: "3.13"
+
+      - name: Install ingest dependencies
+        run: pip install -r ingest/requirements.txt
+
+      - name: Ingest PD boundaries
+        env:
+          SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+          SUPABASE_SERVICE_KEY: ${{ secrets.SUPABASE_SERVICE_KEY }}
+          DESTINATION__POSTGRES__CREDENTIALS: ${{ secrets.DESTINATION__POSTGRES__CREDENTIALS }}
+        run: |
+          if [ "${{ github.event.inputs.dry_run }}" = "true" ]; then
+            python -m ingest.pipelines.lee_planned_developments.pipeline --dry-run
+          else
+            python -m ingest.pipelines.lee_planned_developments.pipeline
+          fi
+
+      - name: Re-run the parcel→community spatial join
+        env:
+          SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+          SUPABASE_SERVICE_KEY: ${{ secrets.SUPABASE_SERVICE_KEY }}
+          DESTINATION__POSTGRES__CREDENTIALS: ${{ secrets.DESTINATION__POSTGRES__CREDENTIALS }}
+        run: |
+          if [ "${{ github.event.inputs.dry_run }}" = "true" ]; then
+            python -m ingest.pipelines.lee_planned_developments.spatial_join --dry-run
+          else
+            python -m ingest.pipelines.lee_planned_developments.spatial_join
+          fi

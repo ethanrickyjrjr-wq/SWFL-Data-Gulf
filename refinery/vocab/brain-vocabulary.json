@@ -8855,6 +8855,30 @@
       "status": "active",
       "scope_note": "Count of active rental listings across SWFL (Lee + Collier), from SteadyAPI's weekly rentals-search sweep. List-side rental inventory only — not a median rent (see market-temperature-swfl for the source-faithful median) and not the ZORI rent index/trend (see rentals-swfl)."
     },
+    "parcels_with_pd_community_identity_lee": {
+      "id": "parcels_with_pd_community_identity_lee",
+      "prefLabel": "Lee Parcels Tied to a Marketed Community by Recorded Boundary",
+      "altLabels": [
+        "parcels with community identity",
+        "parcels inside a planned development boundary",
+        "PD boundary parcel assignments"
+      ],
+      "raw_slugs": [
+        "parcels_with_pd_community_identity_lee"
+      ],
+      "category": "market-signal",
+      "domain": [
+        "real-estate"
+      ],
+      "source_brains": [
+        "communities-swfl"
+      ],
+      "value_type": "extensive",
+      "unit": "parcels",
+      "direction_concept": "qual_metric_trajectory",
+      "status": "active",
+      "scope_note": "Count of Lee County parcels whose own point falls inside a county-recorded Planned Development boundary (point-in-polygon over Lee DCD geometry x LeePA parcel coordinates; data_lake.parcel_community_pd). Servable assignments only: ambiguous multi-community matches and Sketched/Bad-Legal boundaries are excluded. Coverage is unincorporated Lee County only, never a complete county map."
+    },
     "total_homes_catalogued_swfl": {
       "id": "total_homes_catalogued_swfl",
       "prefLabel": "SWFL Homes Catalogued to a Neighborhood (Lee + Collier)",

@@ -41,6 +41,10 @@ const SOURCE_ID = "communities_swfl";
 const SCHEMA = "data_lake";
 const COMMUNITY_TABLE = "community_profiles";
 const NEIGHBORHOOD_TABLE = "neighborhood_stats";
+// ONE aggregate row over data_lake.parcel_community_pd (the parcel->community PD
+// spatial join, unincorporated Lee only) — aggregate-at-source, never the raw
+// 100k-row assignment table (migrations/20260828_parcel_community_pd_summary_v.sql).
+const PD_SUMMARY_VIEW = "parcel_community_pd_summary_v";
 
 const FIXTURE_PATH = path.join(
   process.cwd(),
@@ -107,9 +111,22 @@ export interface CommunitiesSwflSummary {
     count_by_type: Record<string, number>;
     subdivision_count: number;
   } | null;
+  /** Geometry-derived community IDENTITY coverage (parcel_community_pd — Lee
+   *  parcels inside recorded PD boundaries; unincorporated Lee only). null until
+   *  the spatial join lands. Counts EXCLUDE ambiguous/low-trust assignments so the
+   *  spoken number is the servable universe, not the raw join. */
+  pd_identity: {
+    /** SERVABLE parcels — ambiguous + Sketched/"Bad Legal" already excluded. Named
+     *  servable_, never assigned_: the raw assignment count (104,911 on 08/28/2026)
+     *  is a different number and lives in the registry's source_scope. */
+    servable_parcels: number;
+    servable_communities: number;
+    as_of: string | null;
+  } | null;
   as_of: string | null;
   community_source_url: string;
   neighborhood_source_url: string;
+  pd_identity_source_url: string | null;
 }
 
 interface FixtureShape {
@@ -208,6 +225,8 @@ function summarize(
   neighborhoods: NeighborhoodStatRow[],
   community_source_url: string,
   neighborhood_source_url: string,
+  pdSummaryRow: Record<string, unknown> | null = null,
+  pd_identity_source_url: string | null = null,
 ): CommunitiesSwflSummary {
   let backbone: CommunitiesSwflSummary["backbone"] = null;
   if (neighborhoods.length > 0) {
@@ -232,13 +251,30 @@ function summarize(
       .sort()
       .at(-1) ?? null;
 
+  // Geometry identity coverage — SERVABLE counts only (the view already excludes
+  // ambiguous + Sketched/"Bad Legal", matching community-identity.ts's silence rules).
+  let pd_identity: CommunitiesSwflSummary["pd_identity"] = null;
+  if (pdSummaryRow) {
+    const servable = num(pdSummaryRow.servable_parcels);
+    const servableCommunities = num(pdSummaryRow.servable_communities);
+    if (servable != null && servable > 0 && servableCommunities != null) {
+      pd_identity = {
+        servable_parcels: servable,
+        servable_communities: servableCommunities,
+        as_of: str(pdSummaryRow.assigned_at),
+      };
+    }
+  }
+
   return {
     kind: "communities-swfl-summary",
     communities,
     backbone,
+    pd_identity,
     as_of: asOf,
     community_source_url,
     neighborhood_source_url,
+    pd_identity_source_url,
   };
 }
 
@@ -250,6 +286,7 @@ export const communitiesSwflSource: SourceConnector = {
 
     let communities: CommunityProfileRow[];
     let neighborhoods: NeighborhoodStatRow[];
+    let pdSummaryRow: Record<string, unknown> | null = null;
     if (env.source === "fixture") {
       const fx = await loadFixture();
       communities = fx.communities;
@@ -257,6 +294,8 @@ export const communitiesSwflSource: SourceConnector = {
     } else {
       communities = (await readTable(COMMUNITY_TABLE)).map(mapCommunity);
       neighborhoods = (await readTable(NEIGHBORHOOD_TABLE)).map(mapNeighborhood);
+      // ONE aggregate row (view) — empty-tolerant like every read here.
+      pdSummaryRow = (await readTable(PD_SUMMARY_VIEW))[0] ?? null;
     }
 
     const community_source_url =
@@ -278,11 +317,24 @@ export const communitiesSwflSource: SourceConnector = {
             date_col: "as_of",
           });
 
+    const pd_identity_source_url =
+      env.source === "fixture"
+        ? null
+        : buildSourceCitationUrl(PD_SUMMARY_VIEW, {
+            label: "Lee parcels inside recorded Planned Development boundaries",
+            source:
+              "Lee County DCD Planned Developments (geometry) x LeePA parcel points — unincorporated Lee only",
+            brain: "communities-swfl",
+            date_col: "assigned_at",
+          });
+
     const summary = summarize(
       communities,
       neighborhoods,
       community_source_url,
       neighborhood_source_url,
+      pdSummaryRow,
+      pd_identity_source_url,
     );
     const fragment: RawFragment<CommunitiesSwflSummary> = {
       fragment_id: fragmentId(SOURCE_ID, "summary"),

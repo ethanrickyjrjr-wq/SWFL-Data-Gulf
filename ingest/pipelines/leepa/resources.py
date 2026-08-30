@@ -9,7 +9,7 @@ from ingest.lib.arcgis_paginator import (
     paginate_arcgis_tabular,
 )
 from ingest.lib.coercion import coerce_date as _coerce_esri_date, coerce_float as _coerce_float
-from ingest.lib.guards import assert_vs_canonical
+from ingest.lib.guards import FillRateCollapseError, assert_vs_canonical
 from ingest.lib.storage_uploader import upload_csv_gz, upload_geojson_gz
 from ingest.lib.tier1_inventory import upsert_inventory_row
 from ingest.lib.zcta_assign import zip_by_folio as _zip_by_folio
@@ -34,13 +34,21 @@ def ingest_leepa_parcels(pipeline) -> None:
     )
 
 
-# Tier 2 column hints — pin the 17-column joined parcel row to explicit dlt types so the
+# Tier 2 column hints — pin the 19-column joined parcel row to explicit dlt types so the
 # Postgres table schema is stable across re-ingests. FOLIOID is the parcel key (PK).
 _TIER2_LEEPA_COLUMNS: dict = {
     "folioid":              {"data_type": "text",   "nullable": False, "primary_key": True},
     # Lee STRAP (= FDOR lee_parcels.parcel_id form) via the ParcelsWFS FabricParcels
     # Name<->FolioID crosswalk — the parcel-grain join key to the FDOR state roll.
     "strap":                {"data_type": "text",   "nullable": True},
+    # The parcel's own point coordinates (FabricParcels Latitude/Longitude — situs
+    # geometry, WGS84). Rides the same fabric pull as strap; the input the
+    # parcel→community PD spatial join needs (community crosswalk Piece 1, spec
+    # docs/superpowers/specs/2026-08-12-community-crosswalk-design.md). Snapshot
+    # semantics unchanged: merge on folioid, same as every other fabric-attached
+    # column. NOT the owner-mailing Address* fields — those stay banned (G1).
+    "latitude":             {"data_type": "double", "nullable": True},
+    "longitude":            {"data_type": "double", "nullable": True},
     # Site ZIP (G1: derived from the parcel's own centroid, never a mailing ZIP).
     # An attribute OF the parcel, so it lives on the parcel row — not in a
     # separate 1:1 crosswalk table. Comes free from the L12 pass we already make.
@@ -68,19 +76,21 @@ def _join_leepa(
     value_rows: list[dict],
     sale_rows: list[dict],
     zip_by_folio: dict[str, str | None] | None = None,
-    strap_by_folio: dict[str, str] | None = None,
+    fabric_by_folio: dict[str, dict] | None = None,
 ) -> list[dict]:
     """Left-join three layers on FOLIOID with the value layer as the spine (canonical parcel set).
 
     `zip_by_folio` (folioid -> site ZIP, derived from the L12 geometry in the same
     pass) is attached as a column. Absent/None => zip_code stays NULL; never invented.
-    `strap_by_folio` (folioid -> Lee STRAP from the FabricParcels crosswalk) is attached
-    the same way — absent/None => strap stays NULL, never invented.
+    `fabric_by_folio` (folioid -> {strap, latitude, longitude} from the FabricParcels
+    crosswalk) is attached the same way — absent/None => all three stay NULL, never
+    invented. strap/lat/lon always come from ONE fabric row (the min-Name winner),
+    never mixed across rows.
     """
     use_by_folio = {r.get("FOLIOID"): r for r in use_rows if r.get("FOLIOID")}
     sale_by_folio = {r.get("FOLIOID"): r for r in sale_rows if r.get("FOLIOID")}
     zips = zip_by_folio or {}
-    straps = strap_by_folio or {}
+    fabric = fabric_by_folio or {}
     joined: list[dict] = []
     for v in value_rows:
         folio = v.get("FOLIOID")
@@ -88,9 +98,12 @@ def _join_leepa(
             continue
         u = use_by_folio.get(folio) or {}
         s = sale_by_folio.get(folio) or {}
+        fb = fabric.get(str(folio)) or {}
         joined.append({
             "folioid":              folio,
-            "strap":                straps.get(str(folio)),
+            "strap":                fb.get("strap"),
+            "latitude":             fb.get("latitude"),
+            "longitude":            fb.get("longitude"),
             "zip_code":             zips.get(str(folio)),
             "just_value":           _coerce_float(v.get("Just")),
             "market_value":         _coerce_float(v.get("Market")),
@@ -110,20 +123,50 @@ def _join_leepa(
     return joined
 
 
-def _fetch_strap_by_folio() -> dict[str, str]:
-    """FabricParcels Name (the Lee STRAP, FDOR parcel_id form) keyed by str(FolioID).
+def _stored_strap_count() -> int:
+    """Non-null strap count currently stored in data_lake.leepa_parcels — the value
+    at risk if a fabric-failed run merges NULLs. Defensive: any error (table absent,
+    no creds) returns 0, which keeps the bootstrap degrade path open."""
+    try:
+        from ingest.lib.tier1_inventory import _get_connection
+
+        conn = _get_connection()
+        try:
+            with conn.cursor() as cur:
+                cur.execute("SELECT count(strap) FROM data_lake.leepa_parcels")
+                return int(cur.fetchone()[0])
+        finally:
+            conn.close()
+    except Exception:  # noqa: BLE001 — absence of evidence keeps the degrade path
+        return 0
+
+
+def _coerce_coord(v) -> float | None:
+    # 0.0 can never be a real Lee coordinate (lat ~26, lon ~-81); a (0,0) point is
+    # the null-island artifact shape — store absent, never a fake location.
+    f = _coerce_float(v)
+    return f if f not in (None, 0.0) else None
+
+
+def _fetch_fabric_by_folio() -> dict[str, dict]:
+    """FabricParcels {strap, latitude, longitude} keyed by str(FolioID).
 
     Keyset-paginated — the offset walk silently truncates on this host (the L12
     40,000-row lesson). The fabric carries ~15.5k artifact rows beyond the parcel
-    set, so dedupe to one strap per folio (deterministic min(Name)). A short pull
-    raises via assert_vs_canonical so the caller's degrade path (strap stays NULL)
-    takes over instead of half-attaching a truncated map.
+    set, so dedupe to one row per folio (deterministic min(Name)); latitude/longitude
+    come from that SAME winning row, never mixed across rows (a losing artifact row's
+    point must not be attached to the winning strap). A short pull raises via
+    assert_vs_canonical so the caller's degrade path (all three stay NULL) takes over
+    instead of half-attaching a truncated map.
+
+    Latitude/Longitude are the parcel's OWN point coordinates (situs geometry, WGS84)
+    — community crosswalk Piece 1. The owner-mailing Address* fields stay banned (G1).
     """
-    straps: dict[str, str] = {}
+    fabric: dict[str, dict] = {}
     fetched = 0
     for feature in paginate_arcgis_keyset(
         LEEPA_FABRIC_PARCELS_URL,
-        out_fields="Name,FolioID",
+        out_fields="Name,FolioID,Latitude,Longitude",
         page_size=1000,
         geometry=False,
     ):
@@ -133,11 +176,15 @@ def _fetch_strap_by_folio() -> dict[str, str]:
         if folio is None or not name:
             continue
         key = str(folio)
-        if key not in straps or name < straps[key]:
-            straps[key] = name
+        if key not in fabric or name < fabric[key]["strap"]:
+            fabric[key] = {
+                "strap": name,
+                "latitude": _coerce_coord(attrs.get("Latitude")),
+                "longitude": _coerce_coord(attrs.get("Longitude")),
+            }
     canonical = arcgis_count(LEEPA_FABRIC_PARCELS_URL)
     assert_vs_canonical(fetched, canonical, label="leepa fabric strap")
-    return straps
+    return fabric
 
 
 def _make_leepa_resource(chunk: list[dict]):
@@ -238,21 +285,40 @@ def ingest_leepa_parcels_value(tier1_pipeline) -> None:
     canonical = arcgis_count(LEEPA_JUST_VALUE_URL)
     assert_vs_canonical(len(pulled["just_value"]), canonical, label="leepa just_value")
 
-    # STRAP crosswalk (ParcelsWFS FabricParcels Name<->FolioID) — the parcel-grain key
-    # into the FDOR state roll (data_lake.lee_parcels.parcel_id). Failure must not sink
-    # the parcel ingest — strap stays NULL this run; scripts/backfill_leepa_strap.py
-    # can re-attach out-of-band.
+    # STRAP + parcel-point crosswalk (ParcelsWFS FabricParcels Name<->FolioID +
+    # Latitude/Longitude) — the parcel-grain key into the FDOR state roll
+    # (data_lake.lee_parcels.parcel_id) and the coordinate input the community
+    # spatial join reads. A FETCH failure must not sink the parcel ingest at
+    # BOOTSTRAP (no stored fabric values yet: NULLs lose nothing) — but once the
+    # table holds fabric values, the dlt merge below is delete+insert on folioid,
+    # so promoting NULL strap/lat/lon would ERASE ~547k stored values with every
+    # volume guard green (the listing_lifecycle 34,139-row clobber shape). In that
+    # state the run fails LOUD instead; scripts/backfill_leepa_strap.py /
+    # backfill_leepa_parcel_coords.py re-attach out-of-band.
     try:
-        strap_map = _fetch_strap_by_folio()
-        print(f"leepa strap: {len(strap_map)} folio->strap pairs fetched")
-    except Exception as exc:  # noqa: BLE001 — degrade, never abort the parcel ingest
-        print(f"leepa strap: fabric crosswalk failed ({exc}) — strap will be NULL this run")
+        strap_map = _fetch_fabric_by_folio()
+        print(f"leepa strap: {len(strap_map)} folio->fabric rows fetched")
+    except Exception as exc:  # noqa: BLE001 — degrade decided against STORED state below
+        stored = _stored_strap_count()
+        if stored > 0:
+            raise FillRateCollapseError(
+                f"leepa fabric crosswalk failed ({exc}) while data_lake.leepa_parcels "
+                f"already holds {stored:,} strap values — the merge would overwrite "
+                "them all with NULL. Aborting pre-merge; re-run or backfill out-of-band."
+            ) from exc
+        print(f"leepa strap: fabric crosswalk failed ({exc}) — strap will be NULL this run "
+              "(bootstrap: no stored values at risk)")
         strap_map = {}
     if strap_map:
         try:
-            strap_rows = [{"folioid": k, "strap": v} for k, v in sorted(strap_map.items())]
+            strap_rows = [
+                {"folioid": k, "strap": v["strap"],
+                 "latitude": v["latitude"], "longitude": v["longitude"]}
+                for k, v in sorted(strap_map.items())
+            ]
             object_path = f"leepa/fabric_strap/{today}.csv.gz"
-            upload_csv_gz(TABULAR_BUCKET, object_path, strap_rows, ["folioid", "strap"])
+            upload_csv_gz(TABULAR_BUCKET, object_path, strap_rows,
+                          ["folioid", "strap", "latitude", "longitude"])
             upsert_inventory_row(
                 bucket=TABULAR_BUCKET, path=object_path, vintage=today,
                 byte_size=None, pack_id="properties-lee-value",

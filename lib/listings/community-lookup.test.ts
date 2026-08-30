@@ -102,7 +102,39 @@ test("matchSubdivision matches when many parcels at one address share the SAME s
     matched: true,
     county: "collier",
     subdivisionName: "AVALON AT PELICAN BAY",
+    parcelIds: [],
   });
+});
+
+test("matchSubdivision carries the matched group's parcel ids, deduped — the key the PD geometry identity layer joins on", () => {
+  const rows: ParcelCandidateRow[] = [
+    {
+      county: "lee",
+      subdivision_name: "AMAVIDA CONDO PH 1",
+      zip: "33913",
+      phy_addr1: "11101 NEW MOON CT",
+      parcel_id: "10-45-24-01-00001.0010",
+    },
+    {
+      county: "lee",
+      subdivision_name: "AMAVIDA CONDO PH 1",
+      zip: "33913",
+      phy_addr1: "11101 NEW MOON CT",
+      parcel_id: "10-45-24-01-00001.0010", // same parcel twice → dedupe
+    },
+    {
+      county: "lee",
+      subdivision_name: "AMAVIDA CONDO PH 1",
+      zip: "33913",
+      phy_addr1: "11101 NEW MOON CT",
+      parcel_id: "10-45-24-01-00001.0020",
+    },
+  ];
+  const result = matchSubdivision("11101NEWMOONCT:33913", rows);
+  expect(result.matched).toBe(true);
+  if (result.matched) {
+    expect(result.parcelIds).toEqual(["10-45-24-01-00001.0010", "10-45-24-01-00001.0020"]);
+  }
 });
 
 test("matchSubdivision reports no_parcel_at_address when nothing in the candidate set matches the key", () => {
@@ -159,6 +191,7 @@ test("resolveCommunityForAddress matches through the live query shape end to end
     matched: true,
     county: "collier",
     subdivisionName: "AVALON AT PELICAN BAY",
+    parcelIds: [],
   });
 });
 
@@ -173,7 +206,12 @@ test("resolveCommunityForAddress strips a zip+4 to 5 digits before matching", as
     { county: "lee", subdivision_name: "CAPE CORAL", zip: "33914", phy_addr1: "10 SE 1ST AVE" },
   ];
   const result = await resolveCommunityForAddress("10 SE 1st Ave", "33914-1234");
-  expect(result).toEqual({ matched: true, county: "lee", subdivisionName: "CAPE CORAL" });
+  expect(result).toEqual({
+    matched: true,
+    county: "lee",
+    subdivisionName: "CAPE CORAL",
+    parcelIds: [],
+  });
 });
 
 // ── canonicalCommunityKey (pure, reads the REAL shared fixture) ─────────────────────────
