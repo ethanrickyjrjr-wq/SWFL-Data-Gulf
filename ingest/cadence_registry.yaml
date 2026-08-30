@@ -807,6 +807,7 @@ pipelines:
     workflow: lee-planned-developments-quarterly.yml
     consuming_pack: [communities-swfl, lib/listings/community-identity]
     lane: tier-2
+    raw_landing_class: free_refetchable # 08/29/2026 (Gate 11): Lee GIS ArcGIS FeatureServer, public, no vendor cost; the quarterly pull re-fetches all 1,629 features (bounds-asserted) — nothing to archive.
     cadence_days: 92 # county edits the layer continuously; quarterly re-snapshot (a Pending polygon becomes Approved next quarter)
     tolerance_multiplier: 2.0
     dlt_schema_name: lee_planned_developments
@@ -832,6 +833,7 @@ pipelines:
     consuming_pack: [communities-swfl, lib/listings/community-identity]
     schema_static: unverifiable # spatial_join.py builds pipeline_name=f"parcel_community_pd_{token_hex(4)}" at runtime
     lane: tier-2
+    raw_landing_class: free_refetchable # 08/29/2026 (Gate 11): DERIVED table — DuckDB ST_Contains over our own leepa_parcels lat/lon x lee_planned_developments; rebuild any time via spatial_join.py. Same reading as cre_figures ("archive IS the raw store").
     cadence_days: 92
     tolerance_multiplier: 2.0
     dlt_schema_name: parcel_community_pd
