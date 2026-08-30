@@ -63,3 +63,32 @@ logging spend.
 ## Correction to the 08/27 sweep line
 Wave 1 said "Use the -Pro checkpoint; the sibling is AGPL." Live README 3.1.0+: the whole project
 left AGPLv3; the live constraint is the §2 attribution clause above, not copyleft.
+
+## Addendum (same session) — operator: "what about when a user uploads a pdf? and we get pdfs from ODD"
+
+### Lane: user upload (opened `components/project/UploadDrop.tsx`, `app/api/projects/[id]/extract-pdf/route.ts`, `lib/pdf/extract.ts`)
+- Accepts `application/pdf` ≤10 MB. Route sends the whole PDF as a base64 `document` block to
+  **Claude Haiku 4.5 — PRIMARY**, which reads scanned/image-only PDFs natively (no text layer needed).
+  Fallback is `unpdf` text-layer extraction at zero cost (when the key is absent or vision errors).
+  Output is a free-text `extracted_text` blob on the project item; downstream builds read prose,
+  not cells. Runs on Vercel Node (`maxDuration = 60`).
+- Scanned uploads are therefore ALREADY handled, by one API call. MinerU here would mean standing up
+  a self-hosted 16GB-RAM/20GB-disk parsing server (it cannot run inside a Vercel function) to replace
+  that call — RULE 0.9's highway. Its structured output (tables, bbox) has no consumer on this path;
+  `extracted_text` is prose by design.
+
+### Lane: ODD (Operation Dumbo Drop — manual-drop / non-auto sources)
+PDF pipelines found (all pdfplumber or PyMuPDF on TEXT PDFs, none scanned):
+`marketbeat_pdf` (PyMuPDF + dead vision fallback), `rsw_airport_monthly` (pdfplumber tables),
+`mhs_permits_swfl/extract.py` (pdfplumber), `lee_associates_swfl/extract.py` (pdfplumber, 2-page
+report), `dbpr_public_notices` (pdfplumber → text → Claude summary). No pipeline has an OCR path;
+a raster PDF from any of these vendors fails loudly (marketbeat raises `ValueError`, "Set
+MARKETBEAT_PDF_FORCE_VISION=1"). That failure has never fired.
+- If it ever does, the repo already holds the answer twice: `marketbeat_pdf/extractor.py`
+  `_vision_extract` (page→PNG→Claude) and the upload route's document block. Reuse, don't adopt.
+
+### The one scenario where MinerU/docling earns a seat
+Bulk OCR at volume where per-page API cost dominates — e.g. a records request returning thousands
+of deed IMAGES. Then it's a local bake-off on the RTX 4060 Ti 16GB (docling ranked first 08/27;
+MinerU-Pro second; MinerU's §2 attribution clause applies to "online services based on MinerU" —
+a lawyer question whether an internal ingest step counts). Not a today problem.
