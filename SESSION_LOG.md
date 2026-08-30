@@ -39,6 +39,16 @@ this push and cannot be dispatched before it exists on origin; live lake counts 
 lee_planned_developments 1,627 · parcel_community_pd 104,911 (assigned 08/28 15:08 UTC) · leepa parcels with
 coords 547,724 — identical to the 08/28 entry's numbers. Quarterly workflow dispatched post-push for the record.
 
+POST-PUSH (same session, follow-up commits queued for the next approved push): CI ✓ factuality-gate ✓.
+(a) deptry — red on every push since 08/12 (check `cron_incident_deptry`): one DEP001, `convert_export_xlsx` is a
+same-directory import deptry misread as a package → `known_first_party` (the config's own check_freshness
+precedent); `uvx deptry ingest` clean. (b) The dispatched quarterly PD run 33286533675 FAILED at the spatial
+join: DatatypeMismatch on assigned_at — the 08/28 migration retyped data_lake.parcel_community_pd but dlt merges
+through data_lake_staging.parcel_community_pd, created while the column was text and never retyped. Zero rows
+moved, lake intact. Same migration extended with a guarded DO block for the staging twin, applied live, both
+columns verified timestamptz; re-dispatch 33286722483 SUCCEEDED — 1,627 PD rows · 104,911 assignments ·
+assigned_at 08/30/2026 01:57 UTC from the runner. Gate 16's spirit is now satisfied for real.
+
 NOT DONE / OWED: the check closes on the push that lands this (prod evidence, not dev attestation). The 58
 unwired ingest workflows are an offer, not a change. FOUND, NOT MINE: the 08/28 crosswalk session's 36 files
 (2,276 lines — `lee_planned_developments/`, migrations, its own SESSION_LOG entry) are STAGED and were never
