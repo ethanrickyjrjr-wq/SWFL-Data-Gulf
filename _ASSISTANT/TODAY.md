@@ -54,8 +54,8 @@
 - [steadyapi_source_ceiling_coverage_contracts] Coverage contract per paid endpoint: pinned field-path inventory vs persisted set + untouched-ledger, diffed from raw bodies we already own (zero paid calls); verdicts ACCEPT/VENDOR_ADDED/VENDOR_REMOVED/PERSIST_DRIFT, ERROR_* separate; positive control must trip VENDOR_ADDED (due 2026-08-16)
 - [coverage_contracts_platform_wide] Execute docs/superpowers/handoffs/2026-08-02-coverage-contracts-all-sources-handoff.md: registry gap-fill (Step A), coverage-contract checker w/ positive control (B), raw-landing triage paid/fragile/refetchable (C), pre-push registry lint (D). EXTENDS existing 8 surfaces — any new tracker is the failure repeating (due 2026-08-23)
 - [neighborhood_amenities_first_scheduled_fire] Verify neighborhood_amenities' FIRST clean scheduled fire — gated on the road-name defect, NOT on ENGINE_ENABLED (due 2026-08-10)
-- [rsw_v3_live_verify] Live-verify rsw-airport v3 brain via swfl_fetch / /api/b/rsw-airport after Vercel deploy (due 2026-06-16)
 - [charts_tier_panel_live_verify] Live-verify the luxury vs. starter indexed panel on /charts after Vercel deploy: two near-lockstep lines, as-of Apr 2026, tooltip shows whole-number index, legend toggles work (due 2026-06-16)
+- [rsw_v3_live_verify] Live-verify rsw-airport v3 brain via swfl_fetch / /api/b/rsw-airport after Vercel deploy (due 2026-06-16)
 - [briefcase_email_pdf_deliverable] Briefcase email/PDF deliverable live-verify (due 2026-06-18)
 - [siteflow_b1_shell_verify] Live-verify unified SiteShell + SiteFooter after Vercel deploy (due 2026-06-22)
 - [funnel_arrival_claim_seed_verify] Prod live-verify FINAL BOSS 05 funnel click path (due 2026-06-23)
@@ -63,8 +63,8 @@
 - [listing_lifecycle_schedule_live_verify] First unattended scheduled listing-lifecycle runs (Lee 09:00/Collier 12:00 UTC) land clean (due 2026-07-03)
 
 ## Last Session
-- 2026-08-29 (Fable 5) — ONE ASK PER LIFECYCLE EMAIL: the signature's factory "Get in touch" is gone from all 7 (check `lifecycle_agent_card_second_cta`, open 24d)
+- 2026-08-29 (Fable 5) — FAIR HOUSING GATE on every model-written sentence: ONE root in claims.ts, 8 seats wired, voice-guard.ts found DARK (check `voice_guard_unwired`)
 
 ## Spec Health
-- 312 specs total · 0 candidates for archive
+- 313 specs total · 0 candidates for archive
 - run `node scripts/assistant-weekly.mjs` to clean
