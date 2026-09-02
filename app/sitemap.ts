@@ -4,6 +4,7 @@ import type { MetadataRoute } from "next";
 import { fetchVerifiedCorridorSlugRows, toCorridorLinks } from "./r/cre-swfl/corridors";
 import { SOURCE_PROVENANCE_TABLES } from "./r/source/_tables";
 import { GUIDES } from "@/lib/guides/registry";
+import { CORE_SCOPE_ZIPS } from "@/refinery/lib/core-scope.mts";
 
 const ORIGIN = "https://www.swfldatagulf.com";
 const BRAINS_DIR = path.join(process.cwd(), "brains");
@@ -145,6 +146,19 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     }
   } catch {
     // DB unavailable at build time — omit corridor entries rather than crashing
+  }
+
+  // ── ZIP report pages (/r/zip-report/[zip]) ────────────────────────────────
+  // The core-scope authority (refinery/lib/core-scope.mts) — Lee + Collier, the
+  // 57 ZIPs every ranked ZIP-grain surface counts against — not hand-typed here.
+  // Each page renders live, unique per-ZIP data (metadata.ts, jsonld via
+  // lib/jsonld) but was entirely absent from the sitemap until now.
+  for (const zip of [...CORE_SCOPE_ZIPS].sort()) {
+    entries.push({
+      url: `${ORIGIN}/r/zip-report/${zip}`,
+      changeFrequency: "weekly",
+      priority: 0.7,
+    });
   }
 
   // ── Source-provenance pages (/r/source/[table]) ───────────────────────────
