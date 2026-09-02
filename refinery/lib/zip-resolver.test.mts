@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { resolveZip } from "./zip-resolver.mts";
+import { resolveZip, IN_SCOPE_ZIPS } from "./zip-resolver.mts";
 
 describe("zip-resolver §A spine", () => {
   // ---- Honesty rule: grain is the ZIP; place is human context ----
@@ -141,5 +141,21 @@ describe("zip-resolver §A spine", () => {
     const r = resolveZip("  33931 ");
     expect(r.zip).toBe("33931");
     expect(r.in_scope).toBe(true);
+  });
+
+  // ---- IN_SCOPE_ZIPS mirrors resolveZip().in_scope exactly — the set app/sitemap.ts
+  // reads for the full 6-county /r/zip-report/[zip] sitemap section. If this count
+  // moves, the crosswalk fixture drifted; reconcile before shipping (mirrors the
+  // core-scope.mts self-check pattern, without throwing at import since this module
+  // loads on far more surfaces than sitemap.ts). ----
+  it("IN_SCOPE_ZIPS holds exactly the 100 six-county ZIPs, agreeing with resolveZip().in_scope", () => {
+    expect(IN_SCOPE_ZIPS.size).toBe(100);
+    for (const zip of IN_SCOPE_ZIPS) {
+      expect(resolveZip(zip).in_scope).toBe(true);
+    }
+    // spot-check both directions: a known in-scope ZIP is present, a known
+    // out-of-scope ZIP (Miami) is absent.
+    expect(IN_SCOPE_ZIPS.has("33931")).toBe(true);
+    expect(IN_SCOPE_ZIPS.has("33101")).toBe(false);
   });
 });

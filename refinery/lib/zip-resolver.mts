@@ -67,6 +67,21 @@ const ZIP_COUNTY = new Map<string, ZipCountyEntry>(
   (zipCountyJson.entries as ZipCountyEntry[]).map((e) => [e.zip, e]),
 );
 
+/**
+ * Every ZIP `resolveZip` treats as `in_scope` — the full 6-county SWFL footprint
+ * (Charlotte, Collier, Glades, Hendry, Lee, Sarasota; ~100 ZIPs). Derived from the
+ * SAME `swfl-zip-county.json` crosswalk `ZIP_COUNTY` above is built from, so this
+ * set can never drift from what `resolveZip(zip).in_scope` actually tests
+ * against — never hand-typed by a caller.
+ *
+ * NOT the ranking-denominator authority: `refinery/lib/core-scope.mts`'s
+ * `CORE_SCOPE_ZIPS` is a narrower, Lee+Collier-only (57 ZIP) set used to keep
+ * "of N SWFL ZIPs" honest on ranked display surfaces. This is the raw
+ * geography gate underneath it — every page-existence check should read this
+ * one (or `resolveZip().in_scope` directly), not the ranking set.
+ */
+export const IN_SCOPE_ZIPS: ReadonlySet<string> = new Set(ZIP_COUNTY.keys());
+
 // ---- corridors: place -> pocket -> corridor (Path A) ----
 // Collier's "Naples" lumps three pockets the data didn't split; a Naples ZIP can't
 // be disambiguated to one, so it attaches all three (label "Naples-area").

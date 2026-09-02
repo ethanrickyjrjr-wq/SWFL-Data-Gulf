@@ -65,15 +65,17 @@ export async function generateMetadata({
 }): Promise<Metadata> {
   const { slug } = await params;
   if (!VALID_SLUG.test(slug)) return {};
+  // Titles below are bare — layout.tsx's title.template ("%s — SWFL Data Gulf")
+  // appends the suffix once at render time; baking it in here doubled it.
   try {
     const content = await readFile(path.join(BRAINS_DIR, `${slug}.md`), "utf-8");
     const display = toDisplayBrain(parseBrainMarkdown(content));
     return {
-      title: `${display.title} — SWFL Data Gulf`,
+      title: display.title,
       description: display.scope,
     };
   } catch {
-    return { title: `${displayName(slug)} — SWFL Data Gulf` };
+    return { title: displayName(slug) };
   }
 }
 

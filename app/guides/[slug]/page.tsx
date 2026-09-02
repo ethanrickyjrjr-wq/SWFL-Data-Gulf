@@ -17,7 +17,9 @@ export async function generateMetadata(props: {
   const guide = guideBySlug(slug);
   if (!guide) return {};
   return {
-    title: `${guide.title} — SWFL Data Gulf`,
+    // Bare title — layout.tsx's title.template ("%s — SWFL Data Gulf")
+    // appends the suffix once at render time.
+    title: guide.title,
     description: guide.description,
     openGraph: {
       title: guide.title,

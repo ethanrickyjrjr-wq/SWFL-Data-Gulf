@@ -4,6 +4,8 @@ import type { MetadataRoute } from "next";
 import { fetchVerifiedCorridorSlugRows, toCorridorLinks } from "./r/cre-swfl/corridors";
 import { SOURCE_PROVENANCE_TABLES } from "./r/source/_tables";
 import { GUIDES } from "@/lib/guides/registry";
+import { IN_SCOPE_ZIPS } from "@/refinery/lib/zip-resolver.mts";
+import { isCoreScope } from "@/refinery/lib/core-scope.mts";
 
 const ORIGIN = "https://www.swfldatagulf.com";
 const BRAINS_DIR = path.join(process.cwd(), "brains");
@@ -145,6 +147,22 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     }
   } catch {
     // DB unavailable at build time — omit corridor entries rather than crashing
+  }
+
+  // ── ZIP report pages (/r/zip-report/[zip]) ────────────────────────────────
+  // Every ZIP `resolveZip(zip).in_scope` accepts — the full 6-county SWFL
+  // footprint (refinery/lib/zip-resolver.mts's IN_SCOPE_ZIPS, ~100 ZIPs) — not
+  // hand-typed here. Each page renders live, unique per-ZIP data (metadata.ts,
+  // JSON-LD via lib/jsonld) and returns 200 with no noindex header even
+  // outside the 57 Lee+Collier core-scope ZIPs (spot-checked 09/02/2026), so
+  // it belongs in the sitemap. Priority favors the data-richer core-scope ZIPs
+  // (isCoreScope, refinery/lib/core-scope.mts) without excluding the rest.
+  for (const zip of [...IN_SCOPE_ZIPS].sort()) {
+    entries.push({
+      url: `${ORIGIN}/r/zip-report/${zip}`,
+      changeFrequency: "weekly",
+      priority: isCoreScope(zip) ? 0.7 : 0.5,
+    });
   }
 
   // ── Source-provenance pages (/r/source/[table]) ───────────────────────────
