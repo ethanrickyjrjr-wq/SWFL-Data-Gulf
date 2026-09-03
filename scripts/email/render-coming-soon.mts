@@ -161,13 +161,16 @@ const rows: ProvenanceRow[] = [
     "same query, beds + 80% sqft floor",
   ],
   ["Funnel chart", scarcity ? "rendered" : undefined, "built ONLY from the three real counts"],
-  // `facts.community` is the whole ListingDetailFacts block, not a name — printing it here
-  // put an object in a string column. The community NAME is its `subdivision` field.
-  [
-    "Community (may ship)",
-    facts.community?.subdivision ?? undefined,
-    "our own tax roll / community profiles",
-  ],
+  // NO NAME IN THIS CELL (operator, 09/03/2026: "I don't want the fucking subdivision name").
+  // `facts.community` is the whole ListingDetailFacts block, so the original printed
+  // "[object Object]" here and still counted the cell as sourced. This row answers "did
+  // community facts get sourced at all", which is what `ok` means on that block ("True when
+  // the page yielded at least one community fact") — it is a presence flag, not a label.
+  // Naming the subdivision would ALSO have been wrong twice over: the subdivision is the
+  // LISTING PAGE's own scraped string, while this row's source column claims our tax roll /
+  // community profiles, and a plat/subdivision name is not a community
+  // (memory: fdor-subdivision-rollups-are-not-communities).
+  ["Community (may ship)", facts.community?.ok ? "present" : undefined, "listing page"],
   [
     "Description (narrator fuel)",
     facts.remarks ? `${facts.remarks.length} chars` : undefined,
