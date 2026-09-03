@@ -1,0 +1,24 @@
+{
+  // Root `tsconfig.json` EXCLUDES `scripts` (added 06/25/2026, 6bc7476c: "Bun-only
+  // scripts not compatible with Next.js tsc"). That exclusion is load-bearing for
+  // `next build` / CI's `bunx tsc --noEmit`, but it also meant VS Code's tsserver
+  // opened every file under scripts/ in an INFERRED project — no `@/*` path alias,
+  // no bun/node types — and reported a wall of phantom errors on modules that exist
+  // on disk (22 of them on one file, 09/03/2026). This config gives the editor the
+  // right lens for this directory. It is the `refinery/tsconfig.json` pattern.
+  //
+  // NOT wired into CI. `bunx tsc -p scripts/tsconfig.json --noEmit` currently reports
+  // real errors here; gating on them is an operator decision, not a silent one.
+  "extends": "../tsconfig.json",
+  "compilerOptions": {
+    "noEmit": true
+  },
+  // `next-env.d.ts` is not optional here. It pulls in `next/types/global`, which is
+  // what supplies the styled-jsx `<style jsx>` attribute types and the DOM/node
+  // globals that lib/ and components/ rely on. Scripts import both, so dropping it
+  // manufactures 4 errors in app code that CI does not see (measured 09/03/2026).
+  // `types` is likewise left as the root's `["bun"]` — @types/bun already declares
+  // `process` and the `node:*` builtins.
+  "include": ["../next-env.d.ts", "**/*.ts", "**/*.mts"],
+  "exclude": ["node_modules"]
+}
