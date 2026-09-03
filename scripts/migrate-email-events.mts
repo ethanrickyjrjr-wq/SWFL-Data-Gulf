@@ -11,7 +11,11 @@ const connStr =
 
 const db = new Bun.SQL(connStr);
 
-await db.query(`
+// `db.query(...)` does not exist on Bun.SQL and never has in this repo's Bun — every call
+// below threw `db.query is not a function` on the first statement, so this migration has
+// never actually run. DDL goes through `.unsafe()`, reads through the tagged template, the
+// same shape as migrate-apify-records.mts / migrate-deliverable-recipe-key.mts.
+await db.unsafe(`
   CREATE TABLE IF NOT EXISTS public.email_events (
     id            bigserial PRIMARY KEY,
     resend_email_id text,
@@ -23,21 +27,21 @@ await db.query(`
   );
 `);
 
-await db.query(`CREATE INDEX IF NOT EXISTS email_events_rid_idx ON public.email_events (rid);`);
-await db.query(
+await db.unsafe(`CREATE INDEX IF NOT EXISTS email_events_rid_idx ON public.email_events (rid);`);
+await db.unsafe(
   `CREATE INDEX IF NOT EXISTS email_events_resend_email_id_idx ON public.email_events (resend_email_id);`,
 );
 
 // Dedupe guard: a given (resend_email_id, event) pair is immutable once recorded.
-await db.query(`
+await db.unsafe(`
   CREATE UNIQUE INDEX IF NOT EXISTS email_events_dedupe_idx
     ON public.email_events (resend_email_id, event)
     WHERE resend_email_id IS NOT NULL;
 `);
 
 // RLS — read your own events (via outreach_recipients.rid join); service-role writes.
-await db.query(`ALTER TABLE public.email_events ENABLE ROW LEVEL SECURITY;`);
-await db.query(`
+await db.unsafe(`ALTER TABLE public.email_events ENABLE ROW LEVEL SECURITY;`);
+await db.unsafe(`
   DO $$ BEGIN
     IF NOT EXISTS (
       SELECT 1 FROM pg_policies
@@ -56,11 +60,11 @@ await db.query(`
   END $$;
 `);
 
-await db.query(
+await db.unsafe(
   `GRANT SELECT ON public.email_events TO service_role, authenticated; NOTIFY pgrst, 'reload schema';`,
 );
 
-const rows = await db.query(`SELECT COUNT(*) AS n FROM public.email_events;`);
-console.log("email_events table ready — rows:", rows[0].n);
+const [{ n }] = await db`SELECT COUNT(*)::int AS n FROM public.email_events`;
+console.log("email_events table ready — rows:", n);
 
-db.close();
+await db.close();

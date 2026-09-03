@@ -183,6 +183,16 @@ export async function fetchAndMapFor(
       const r = await seams.fetchGBP(post.platform_post_id, token);
       return mapGBPMetrics(post.platform_post_id, r);
     }
+    case "bluesky": {
+      // REAL GAP, found 09/03/2026 by typechecking scripts/ for the first time: `Platform`
+      // has carried "bluesky" (lib/social/types.ts:27) while this switch never handled it,
+      // so every Bluesky post reaching this dispatcher hit the default and threw
+      // "Unknown platform: bluesky". There is no fetchBluesky seam — no engagement fetcher
+      // was ever written for it. Skipping is the honest behavior and matches the
+      // empty-tolerant contract above; a real reader is owed
+      // (check: bluesky_engagement_fetcher_missing).
+      return [];
+    }
     default: {
       const _never: never = post.platform;
       throw new Error(`Unknown platform: ${String(_never)}`);

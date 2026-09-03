@@ -161,7 +161,13 @@ const rows: ProvenanceRow[] = [
     "same query, beds + 80% sqft floor",
   ],
   ["Funnel chart", scarcity ? "rendered" : undefined, "built ONLY from the three real counts"],
-  ["Community (may ship)", facts.community, "our own tax roll / community profiles"],
+  // `facts.community` is the whole ListingDetailFacts block, not a name — printing it here
+  // put an object in a string column. The community NAME is its `subdivision` field.
+  [
+    "Community (may ship)",
+    facts.community?.subdivision ?? undefined,
+    "our own tax roll / community profiles",
+  ],
   [
     "Description (narrator fuel)",
     facts.remarks ? `${facts.remarks.length} chars` : undefined,

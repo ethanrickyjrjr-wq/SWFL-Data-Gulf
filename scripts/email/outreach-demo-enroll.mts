@@ -27,6 +27,7 @@ import { enrichBrand } from "@/lib/prospects/enrich-brand";
 import { buildArrivalUrl } from "@/lib/prospects/build-arrival-url";
 import type { ActivationBrand } from "@/lib/email/activation/types";
 import { createServiceRoleClient } from "@/utils/supabase/service-role";
+import type { Json } from "@/database.types";
 
 const DRY_RUN = process.env.DRY_RUN !== "false"; // default true — must opt OUT to write
 const SITE_ORIGIN = process.env.SITE_ORIGIN ?? "https://www.swfldatagulf.com";
@@ -210,7 +211,10 @@ async function main(): Promise<void> {
     const patch = {
       name: r.brand?.companyName ?? null,
       zip: r.zip ?? null,
-      brand: r.brand as unknown as Record<string, unknown>,
+      // `Record<string, unknown>` is NOT assignable to the generated `Json` union — Json's
+      // index signature is `Json | undefined`, and `unknown` is wider. The column is jsonb,
+      // so Json is the type the client actually wants.
+      brand: r.brand as unknown as Json,
       brand_source: r.brand_source ?? null,
       brand_confidence: r.brand_confidence ?? null,
       arrival_url: r.arrival_url ?? null,

@@ -25,6 +25,7 @@
 //   1 — top-level fatal only (missing env, claim unreachable, can't build client)
 //   Per-row errors NEVER change the exit code.
 
+import type { SupabaseClient } from "@supabase/supabase-js";
 import { createServiceRoleClient } from "@/utils/supabase/service-role";
 import { computeNextRunAt } from "@/lib/email/schedule-cadence";
 import { claimSocialOnce } from "@/lib/social/idempotency";
@@ -87,7 +88,10 @@ async function main(): Promise<void> {
       if (error) throw new Error(`dry-run select due schedules failed: ${error.message}`);
       return (data ?? []) as SocialSchedule[];
     }
-    const { data, error } = await db.rpc("claim_due_social_schedules", {
+    // KNOWN-DEBT(rpc-untyped): same generator defect as the email runner — the type
+    // generator never introspects functions (`Functions: Record<string, never>`), so a
+    // typed client types .rpc() arguments as `undefined`. The function exists.
+    const { data, error } = await (db as SupabaseClient).rpc("claim_due_social_schedules", {
       p_now: nowIso,
       p_limit: CLAIM_LIMIT,
     });

@@ -39,6 +39,7 @@ import { buildBatchMessages, sendBatches, type BatchSender } from "@/lib/email/o
 import type { ComposedMessage } from "@/lib/email/outreach/campaign";
 import { getMarketingResend } from "@/lib/email/marketing-client";
 import { createServiceRoleClient } from "@/utils/supabase/service-role";
+import type { Json } from "@/database.types";
 
 const DRY_RUN = process.env.DRY_RUN !== "false"; // default true — must opt OUT to send
 const APPROVED = process.env.OUTREACH_DEMO_APPROVED === "1";
@@ -359,7 +360,10 @@ async function main(): Promise<void> {
         next_send_at: cursor.next_send_at,
         trial_sends: cursor.trial_sends,
         ...(s.touch === "t1" && s.snapshot
-          ? { snapshot: s.snapshot as unknown as Record<string, unknown> }
+          ? // jsonb column — the generated Insert/Update type is `Json | null`, and
+            // `Record<string, unknown>` is not assignable to it (Json's index signature is
+            // `Json | undefined`, `unknown` is wider).
+            { snapshot: s.snapshot as unknown as Json }
           : {}),
         updated_at: now.toISOString(),
       })

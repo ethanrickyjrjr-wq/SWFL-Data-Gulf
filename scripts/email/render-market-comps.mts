@@ -136,14 +136,15 @@ const paidAfter = await paidRecordCount();
 type Block = { type: string; props?: Record<string, unknown> };
 const blocks = doc.blocks as unknown as Block[];
 const statsBlock = blocks.find((b) => b.type === "stats");
-const stats = ((statsBlock?.props?.stats ?? []) as { value?: string; label?: string }[]) ?? [];
+// The inner `?? []` already makes this non-nullish; the outer one was dead code.
+const stats = (statsBlock?.props?.stats ?? []) as { value?: string; label?: string }[];
 const statOf = (label: string) => stats.find((s) => s.label === label)?.value || undefined;
 const footnote = (statsBlock?.props?.footnote as string | undefined) || undefined;
 
 const listBlock = blocks.find((b) => b.type === "list");
 const listTitle = (listBlock?.props?.title as string | undefined) ?? "";
 type Row = { lead?: string; text?: string; linkUrl?: string; imageUrl?: string };
-const rowsOut = ((listBlock?.props?.items ?? []) as Row[]) ?? [];
+const rowsOut = (listBlock?.props?.items ?? []) as Row[];
 
 const imageBlocks = blocks.filter((b) => b.type === "image");
 const sourcesBlock = blocks.find((b) => b.type === "sources");

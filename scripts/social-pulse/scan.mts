@@ -3,6 +3,7 @@
 // DRY_RUN=true reads + logs what it WOULD insert and never writes.
 // Exit: clean (incl. zero posts) → 0; top-level fatal (env, client) → 1.
 import { createServiceRoleClient } from "@/utils/supabase/service-role";
+import type { Json } from "@/database.types";
 import { PULSE_TERMS } from "@/lib/social-pulse/terms";
 import { searchPosts, searchHashtags } from "@/lib/social-pulse/steady-client";
 import { runScan, type ScanRowWriter } from "@/lib/social-pulse/scan";
@@ -102,12 +103,20 @@ async function main() {
     });
     const { buildNarrative } = await import("@/lib/social-pulse/narrative");
     const narrative = await buildNarrative(digest);
-    const { error } = await supabase
-      .from("social_pulse_digest")
-      .upsert(
-        { week, digest, narrative, scan_id: result.scanId, built_at: now.toISOString() },
-        { onConflict: "week" },
-      );
+    const { error } = await supabase.from("social_pulse_digest").upsert(
+      {
+        week,
+        // jsonb column: PulseDigest is a concrete interface with no index signature, so
+        // it is not assignable to the generated `Json` union even though it serializes to
+        // exactly that. Same shape as deliverables.doc / social_schedules.frozen_post,
+        // which database.types.ts solves the other way (concrete Row override).
+        digest: digest as unknown as Json,
+        narrative,
+        scan_id: result.scanId,
+        built_at: now.toISOString(),
+      },
+      { onConflict: "week" },
+    );
     if (error) throw new Error(`digest upsert: ${error.message}`);
     console.log(
       `digest upserted for ${week} (scan ${result.scanId}, narrative: ${narrative ? "yes" : "null"})`,

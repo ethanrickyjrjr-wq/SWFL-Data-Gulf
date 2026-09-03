@@ -50,9 +50,24 @@ export type Database = MergeDeep<
           Update: { frozen_post?: FrozenPost | null };
         };
         // IDENTITY-id Insert fix (defect #1 above): re-mark the auto-generated id optional.
+        // The list was 5 tables and was NOT the whole shape. Re-enumerated against live prod
+        // 09/03/2026 — `information_schema.columns WHERE table_schema='public' AND
+        // is_identity='YES' AND column_default IS NULL` returns 12 tables, all
+        // `identity_generation=ALWAYS`. All 12 are listed below; the 7 that were missing had
+        // been failing to typecheck at their insert sites (e.g. scripts/email/run-schedules.mts
+        // email_sends, scripts/social-pulse/scan.mts social_pulse_scans) inside scripts/, a
+        // directory no typechecker looked at until scripts/tsconfig.json. Re-run that query
+        // after any migration that adds an identity table.
         buyer_intent_events: { Insert: { id?: number } };
+        campaign_click_events: { Insert: { id?: number } };
         data_requests: { Insert: { id?: number } };
+        dbpr_press_releases: { Insert: { id?: number } };
+        dbpr_public_notices: { Insert: { id?: number } };
+        email_sends: { Insert: { id?: number } };
+        market_alert_engagement: { Insert: { id?: number } };
+        metric_observations: { Insert: { id?: number } };
         project_feed: { Insert: { id?: number } };
+        social_pulse_scans: { Insert: { id?: number } };
         usage_events: { Insert: { id?: number } };
         welcome_chat_usage: { Insert: { id?: number } };
       };

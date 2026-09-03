@@ -3,7 +3,7 @@ import { describe, expect, test } from "bun:test";
 import { existsSync, readFileSync } from "node:fs";
 import { join } from "node:path";
 import { validateFixture } from "@/lib/email/outreach/brand-fixtures";
-import { mapToCandidateFixture, slugFromDomain, type BrandfetchBrand } from "./pilot-lib";
+import { mapToCandidateFixture, slugFromDomain, type BrandfetchBrand } from "./pilot-lib.mts";
 
 const SAMPLE_PATH = join(import.meta.dir, "__fixtures__", "brandfetch-sample.json");
 const hasSample = existsSync(SAMPLE_PATH);

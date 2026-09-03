@@ -7,6 +7,7 @@
 import { readdirSync, readFileSync, writeFileSync, mkdirSync } from "node:fs";
 import { join } from "node:path";
 import { getAnthropic } from "../refinery/agents/anthropic.mts";
+import type { TextBlock } from "@anthropic-ai/sdk/resources/messages";
 
 const DIRS = ["docs/superpowers/specs", "docs/superpowers/plans"];
 const MODEL = "claude-haiku-4-5";
@@ -64,8 +65,10 @@ for await (const result of await client.messages.batches.results(batch.id)) {
     rows.push({ path: `${d.dir}/${d.file}`, klass: "ERROR", note: result.result.type });
     continue;
   }
+  // A `(b: { type: string })` predicate does not narrow the SDK's ContentBlock union, so
+  // `.text` was read off a union of 12 block types. TextBlock is the only member carrying it.
   const text =
-    result.result.message.content.find((b: { type: string }) => b.type === "text")?.text ?? "";
+    result.result.message.content.find((b): b is TextBlock => b.type === "text")?.text ?? "";
   const m = text.match(/^(LIVE|SHIPPED|SUPERSEDED-BY-\S+|DEAD)\s*—\s*(.*)$/m);
   rows.push({
     path: `${d.dir}/${d.file}`,

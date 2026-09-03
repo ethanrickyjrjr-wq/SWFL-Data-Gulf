@@ -13,7 +13,9 @@ import { existsSync } from "node:fs";
 import { join } from "node:path";
 import { loadBrandFixtures, validateFixture } from "@/lib/email/outreach/brand-fixtures";
 import { splitCsvLine } from "@/lib/email/outreach/targets";
-import { mapToCandidateFixture, slugFromDomain, type BrandfetchBrand } from "./pilot-lib";
+// Extension is required: root tsconfig sets moduleResolution "bundler", which does not
+// substitute `.mts` for an extensionless relative specifier. Bun resolves either form.
+import { mapToCandidateFixture, slugFromDomain, type BrandfetchBrand } from "./pilot-lib.mts";
 
 const BRANDS_DIR = "fixtures/real-estate-brands";
 

@@ -21,6 +21,7 @@
 // claim unreachable, can't construct the client) → process.exit(1) (loud — a GHA
 // failure must be visible). Per-schedule errors NEVER change the exit code.
 
+import type { SupabaseClient } from "@supabase/supabase-js";
 import { createServiceRoleClient } from "@/utils/supabase/service-role";
 import { computeNextRunAt } from "@/lib/email/schedule-cadence";
 import { checkUsageLimit, recordEmailSent } from "@/lib/email/usage";
@@ -137,7 +138,11 @@ async function main(): Promise<void> {
       if (error) throw new Error(`dry-run select due schedules failed: ${error.message}`);
       return (data ?? []) as ScheduleRow[];
     }
-    const { data, error } = await db.rpc("claim_due_email_schedules", {
+    // KNOWN-DEBT(rpc-untyped): scripts/gen-supabase-types.ts hardcodes
+    // `Functions: Record<string, never>` (database.types.ts generator defect #2), so a
+    // typed client types every .rpc() argument as `undefined`. The function exists; the
+    // documented hatch is the un-parameterized client (utils/supabase/service-role.ts).
+    const { data, error } = await (db as SupabaseClient).rpc("claim_due_email_schedules", {
       p_now: nowIso,
       p_limit: CLAIM_LIMIT,
     });

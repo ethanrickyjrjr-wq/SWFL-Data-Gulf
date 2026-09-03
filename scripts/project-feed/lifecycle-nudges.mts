@@ -22,6 +22,7 @@ import { SequenceStepsSchema } from "@/lib/email/sequence/types";
 import {
   decideLifecycleNudges,
   type LifecycleTransition,
+  type NudgeRow,
   type SequenceForNudge,
 } from "@/lib/project/lifecycle-nudge";
 
@@ -56,7 +57,9 @@ async function main(): Promise<number> {
   }
 
   const today = new Date();
-  const toInsert: Record<string, unknown>[] = [];
+  // NudgeRow, not Record<string, unknown> — an interface has no implicit index signature, so
+  // the rows decideLifecycleNudges returns were not assignable to the looser array type.
+  const toInsert: NudgeRow[] = [];
   let skipped = 0;
 
   for (const row of rows) {

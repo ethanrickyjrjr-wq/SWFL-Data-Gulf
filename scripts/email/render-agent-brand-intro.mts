@@ -36,6 +36,7 @@ import {
   type Assertion,
   type ProvenanceRow,
 } from "./_harness.mts";
+import type { BlockOf } from "@/lib/email/doc/types";
 
 const FARM_AREA = process.argv[2] ?? "Fort Myers";
 const PROMPT =
@@ -87,10 +88,16 @@ const strings: string[] = [];
 // the agent-card — name/photo/phone — closes it, same as every other lifecycle email).
 // The farm area now surfaces first in the chart's own title, and the agent's name lives
 // on the agent-card at the bottom of the doc.
-const chartBlock = doc.blocks.find((b) => b.type === "image" && b.props.kind === "chart");
-const agentCardBlock = doc.blocks.find((b) => b.type === "agent-card");
+// Type-guard predicates, not bare `b.type === …`: Array.find does not narrow its RESULT
+// from a boolean predicate, so `chartBlock.props` was the union of all 17 block prop types
+// and every `.props.alt` / `.props.url` / `.props.value` read below was an error. `BlockOf<K>`
+// (lib/email/doc/types.ts) is the repo's existing narrowing helper.
+const chartBlock = doc.blocks.find(
+  (b): b is BlockOf<"image"> => b.type === "image" && b.props.kind === "chart",
+);
+const agentCardBlock = doc.blocks.find((b): b is BlockOf<"agent-card"> => b.type === "agent-card");
 const anchorHeroBlock = doc.blocks.find(
-  (b) => b.type === "hero" && b.props.kicker === "My newest listing",
+  (b): b is BlockOf<"hero"> => b.type === "hero" && b.props.kicker === "My newest listing",
 );
 const areaRead = strings.find((s) => s.length > 80 && s.includes("Asking prices run from"));
 

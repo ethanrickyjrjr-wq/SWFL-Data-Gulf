@@ -169,6 +169,12 @@ function makeScheduleRow(over: Partial<SocialSchedule> = {}): SocialSchedule {
     created_at: "2026-06-20T00:00:00Z",
     updated_at: "2026-06-20T00:00:00Z",
     ...over,
+    // `project_id` and `frozen_post` were absent from the base, so their only source was the
+    // `Partial<SocialSchedule>` spread — which types them `… | undefined` while
+    // SocialSchedule requires `… | null`. Coalescing after the spread keeps overrides working
+    // and makes the fixture a real SocialSchedule.
+    project_id: over.project_id ?? null,
+    frozen_post: over.frozen_post ?? null,
   };
 }
 
@@ -375,10 +381,14 @@ describe("exit-code contract", () => {
       throw new Error("missing env — top-level fatal");
     }
 
-    let exitCode: number | null = null;
-    await main().catch(() => {
-      exitCode = 1;
-    });
+    // Resolve the exit code from the promise instead of assigning to an outer `let` inside
+    // the .catch callback: control-flow analysis does not follow that assignment, so the
+    // variable still read as the narrowed `null` and `toBe(1)` had no matching overload.
+    // Same assertion, same semantics — main() rejecting is what sets the code to 1.
+    const exitCode = await main().then(
+      () => null,
+      () => 1,
+    );
     expect(exitCode).toBe(1);
   });
 });

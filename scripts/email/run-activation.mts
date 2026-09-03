@@ -60,7 +60,10 @@ async function main(): Promise<void> {
     process.exit(1);
   }
 
-  const rows = (data ?? []) as ActivationRow[];
+  // Double cast: the selected `scope`/`brand`/`snapshot` columns come back as the generated
+  // `Json` union, which does not sufficiently overlap ActivationRow's concrete shapes for a
+  // single-step assertion.
+  const rows = (data ?? []) as unknown as ActivationRow[];
   console.log(`[activation] DRY_RUN — ${rows.length} due step-2 row(s) at ${nowIso}.`);
 
   const deps: ActivationDeps = {
@@ -82,7 +85,9 @@ async function main(): Promise<void> {
     const outcome = await processActivationStep(row, deps);
     if ((outcome.kind === "dry-run" || outcome.kind === "sent") && outcome.hadChange) withChange++;
   }
-  console.log(`[activation] DRY_RUN complete — ${withChange}/${rows.length} would surface a real change.`);
+  console.log(
+    `[activation] DRY_RUN complete — ${withChange}/${rows.length} would surface a real change.`,
+  );
 }
 
 main().catch((err) => {
