@@ -1,3 +1,35 @@
+## 2026-09-03 (Opus 5) — PR #195 unblocked: merged origin/main (#194) into seo/title-dedupe-full-scope, conflict resolved to the full-scope superset
+
+Operator: "merge and figure out why we have 22 problems."
+
+PR #195 was OPEN with every check green since 09/02 05:30 UTC, but `gh pr merge` refused — not
+mergeable. Cause: #194 ("list zip-report pages in sitemap, fix doubled page title") was merged to main
+at 09/02 12:51 UTC, AFTER #195 was cut from its parent 225b9c42. Both branches independently added the
+same `/r/zip-report/[zip]` section to `app/sitemap.ts` and both created `app/sitemap.test.ts` — an
+add/add plus a content conflict.
+
+Resolved in `939bfacd` (merge commit on the PR branch, no force-push): #195's side wins in both files
+because it is a strict superset. `app/sitemap.ts` iterates `IN_SCOPE_ZIPS` (the full ~100-ZIP 6-county
+footprint `resolveZip().in_scope` accepts) at priority 0.7 core-scope / 0.5 for the rest, vs main's
+core-scope-only 57-ZIP loop at flat 0.7. `app/sitemap.test.ts` pins both counts (100 in-scope, 57 core)
+and both priority tiers. #194's `app/r/zip-report/[zip]/metadata.ts` title fix auto-merged untouched —
+#195 never edited that file; it fixed the OTHER eight `generateMetadata` sites.
+
+Verified before committing: `bunx bun test app/sitemap.test.ts app/r/zip-report/[zip]/metadata.test.ts
+refinery/lib/zip-resolver.test.mts` → 19 pass, 0 fail, 636 expect() calls.
+
+Next: squash-merge #195, then the title fix is live for /guides/*, /r/housing-swfl,
+/r/should-i-sell/[zip], /r/method/*, /r/[slug], /c/[id], /p/[id], /project/[id] and the sitemap carries
+all ~100 in-scope ZIP reports. PR: https://github.com/ethanrickyjrjr-wq/SWFL-Data-Gulf/pull/195
+
+Also this session (answer, no code yet): the 22 VS Code Problems are all in one untracked file,
+`scripts/email/outreach-first-touch.mts`, and none of them are real — `tsconfig.json` excludes
+`scripts` (added 06/25/2026 in 6bc7476c, "Bun-only scripts not compatible with Next.js tsc"), so
+tsserver opens the file in an inferred project with no `@/*` paths and no bun/node types. Proven: a
+throwaway `tsconfig` extending the root one with that single file included typechecks it at 0 errors.
+The real finding underneath: `bunx tsc --noEmit` in CI uses that same root config, so 111 tracked
+files under `scripts/` are typechecked NOWHERE — measured 30 genuine errors across 16 of them.
+
 ## 2026-08-30 (Fable 5) — LANDED ON MAIN + WORKTREE SWEEP: playbooks, read gate, CLAUDE.md pointer form, the 07/22 four-lane fix; 4 dead worktrees removed; drift line at SessionStart
 
 Operator, on "push": "why would there be 6 other checkouts carrying the old shit CLAUDE.md and not have
