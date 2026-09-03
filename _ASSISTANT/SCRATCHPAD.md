@@ -1,3 +1,23 @@
+## 2026-09-03 (Opus 5) — the acceptance-render instruction is a live purchase, and it does not satisfy the gate it is prescribed for
+
+Gate 15 (capture freshness) blocked a push touching three `scripts/email/render-*.mts` files and
+told me to "re-run the surface's acceptance render and commit the refreshed capture". Running ONE
+of them — `bun scripts/email/render-market-comps.mts` — printed: "paid lane ON
+(OPERATOR_APPROVED_PAID_RUN=1) · results committed 200 (~$2.00 at $0.01/result) · cache rows
+478 -> 480". I did not set that flag; the script reads it out of the local env, so the paid lane
+is ON BY DEFAULT for anyone following the gate's instruction. Two problems in one:
+
+1. A push gate whose remedy costs money will be satisfied by env-var bypass every time, which is
+   the opposite of what it is for.
+2. The render SAVES to `~/Downloads/market-comps-email.html`, not `public/new-emails/*.html` —
+   the very path the gate checks. So following the instruction literally cannot clear the gate.
+   The captures in `public/new-emails/` are produced some other way.
+
+Owed: either the render harness writes the capture to `public/new-emails/` and defaults the paid
+lane OFF for acceptance runs, or Gate 15 stops naming `render-*.mts` as its fix. Not fixed this
+session — it is the email harness's contract, not a one-line change, and the operator was mid-task
+on a different thing.
+
 ## 2026-09-03 (Opus 5) — OPERATOR: "merge and figure out why we have 22 problems"
 
 The 22 in the VS Code Problems panel are ALL in one file, `scripts/email/outreach-first-touch.mts`

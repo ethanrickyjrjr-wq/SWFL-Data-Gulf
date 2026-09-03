@@ -44,6 +44,22 @@ prod and the generator still emits no `Functions` — check `generated_types_sta
 
 Checks opened: bluesky_engagement_fetcher_missing, generated_types_stale_vs_prod. Closed: none.
 
+CAPTURE-FRESHNESS GATE (15) — pushed with `ALLOW_STALE_CAPTURE=1`, and here is why. The three
+email-surface files in `ab6f46bc` are `render-agent-brand-intro.mts`, `render-market-comps.mts`
+and `render-coming-soon.mts`, and their entire diff is: type-guard annotations on three
+`doc.blocks.find(...)` calls, two dead `?? []` after a cast, one console provenance cell, and
+comments. Every one of those sites READS the doc after it is built and branded — nothing in the
+diff can reach the rendered bytes, which is the gate's own stated exception (pure refactor,
+identical output).
+
+UNPLANNED SPEND, reported not hidden: running `bun scripts/email/render-market-comps.mts` once
+to satisfy that gate came back with "paid lane ON (OPERATOR_APPROVED_PAID_RUN=1) · results
+committed 200 (~$2.00) · cache rows 478 -> 480". The flag was NOT set on the command line — the
+script picks the paid lane up from the local env, so an acceptance render is a live purchase by
+default. That is a trap for exactly the "re-run the render" instruction the push gate hands out.
+No further renders were run. The capture also lands in ~/Downloads, not public/new-emails/, so
+the render does not actually satisfy the gate it is prescribed for.
+
 ## 2026-09-03 (Opus 5) — PR #195 unblocked: merged origin/main (#194) into seo/title-dedupe-full-scope, conflict resolved to the full-scope superset
 
 Operator: "merge and figure out why we have 22 problems."
