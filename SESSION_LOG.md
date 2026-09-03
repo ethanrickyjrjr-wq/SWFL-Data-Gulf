@@ -1,3 +1,48 @@
+## 2026-09-03 (Opus 5) — CORRECTION to the entry below: fixing migrate-email-events.mts made it DANGEROUS, and the Bluesky skip was silent
+
+Three follow-ups on the 09/03 push, all found by an adversarial read of my own work, all measured
+against prod before acting.
+
+1. **The migration fix armed a live RLS widening.** `ab6f46bc` turned
+   `scripts/migrate-email-events.mts` from inert (`db.query` does not exist on Bun.SQL — it threw
+   on line 1) into executable. Its RLS block creates a policy `users_read_own_events` guarded by
+   `IF NOT EXISTS (… policyname = 'users_read_own_events')` — guarded on ITS OWN name. Measured
+   against prod 09/03/2026: `public.email_events` carries exactly ONE policy,
+   `email_events_owner_select`, and grants SELECT to `authenticated`. So the guard would have
+   PASSED and added a SECOND SELECT policy with a different predicate; Postgres ORs SELECT
+   policies, so running the "fixed" script would have silently widened read access on email-event
+   data. "It is all IF NOT EXISTS so it is safe" was wrong — a policy guarded by a name that is
+   not the one in prod is not idempotent. The script never ran while broken, so nothing was
+   damaged; the window existed only between that commit and this one.
+   Fixed: the policy block and the `authenticated` grant are gone. What remains is byte-faithful
+   to `migrations/20260628_email_events.sql` (the real source of truth, extended by the three
+   `docs/sql/20260709_email_events_*.sql` files), and the header says so. Kept rather than
+   deleted because two plans cite it as the idempotent Bun.SQL pattern; the header now points
+   those readers at `scripts/migrate-apify-records.mts` instead.
+
+2. **The Bluesky skip was silent, and I mis-enumerated its callers.** My caller grep searched
+   `fetchMetricsFor` — the function is `fetchAndMapFor`. Re-run correctly: two call sites
+   (`scripts/social/poll-engagement.mts:293`, `lib/social/engagement.test.ts`). Behaviour I had
+   changed without saying so: before, a Bluesky post threw and the per-row catch recorded
+   `error:<id>` in the batch summary; after, it returned `[]` and NOTHING was recorded — two of
+   our own guarded strike shapes (stale-source-served-silently, built-dark-no-consumer). Now the
+   skip emits a `console.warn` naming the post id and the check key, and
+   `lib/social/engagement.test.ts` pins it with a test named for the failure mode.
+
+3. **I verified 4 of the 8 title pages and reported all 8.** Live now, suffix exactly once on all
+   six that can be fetched without auth: `/guides/sourced-numbers`, `/r/housing-swfl`,
+   `/r/should-i-sell/33904`, `/r/zip-report/33904`, `/r/method/median-price`, `/r/master`,
+   `/r/active-listings-swfl`. `/c/[id]`, `/p/[id]` and `/project/[id]` are DB-backed and
+   **test-pinned only** — not live-verified. Sitemap: 100 `/r/zip-report/` URLs.
+
+Also noted: `scripts/tsconfig.json` includes `../next-env.d.ts`, which is untracked (Next
+generates it). Root `tsconfig.json` already includes the same file, so this adds no new
+fragility — but on a fresh clone before any build, that config reports 4 lib/components errors
+until `next dev`/`next build` regenerates it.
+
+Verified: `tsc -p scripts/tsconfig.json` 0 errors · root `tsc --noEmit` exit 0 · eslint clean ·
+`bun test lib/social` 391 pass 0 fail.
+
 ## 2026-09-03 (Opus 5) — #195 MERGED; the "22 problems" were phantoms, and the directory behind them had 33 real errors nothing was checking
 
 Operator: "merge and figure out why we have 22 problems." Both done.

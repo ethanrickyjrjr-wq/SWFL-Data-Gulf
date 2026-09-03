@@ -175,6 +175,15 @@ describe("fetchAndMapFor — empty-tolerant dispatch", () => {
     }
   });
 
+  // Named for the failure mode: until 09/03/2026 "bluesky" was in the Platform union
+  // (lib/social/types.ts:27) but not in the dispatch switch, so it fell to the default and
+  // threw "Unknown platform: bluesky". This pins the skip — NOT a throw, and NOT metrics —
+  // until a real reader exists (check: bluesky_engagement_fetcher_missing).
+  it("bluesky does not throw; it yields zero events because no reader exists", async () => {
+    const events = await fetchAndMapFor(post({ platform: "bluesky" }), "tok", nullSeams);
+    expect(events).toEqual([]);
+  });
+
   it("routes X through mapXMetrics on a real response", async () => {
     const seams: FetchSeams = {
       ...nullSeams,

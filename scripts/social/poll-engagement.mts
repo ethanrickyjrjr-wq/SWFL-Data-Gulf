@@ -190,7 +190,12 @@ export async function fetchAndMapFor(
       // "Unknown platform: bluesky". There is no fetchBluesky seam — no engagement fetcher
       // was ever written for it. Skipping is the honest behavior and matches the
       // empty-tolerant contract above; a real reader is owed
-      // (check: bluesky_engagement_fetcher_missing).
+      // (check: bluesky_engagement_fetcher_missing). The warn is not decoration — trading a
+      // throw for a silent [] is how a gap stops being visible (STRIKES:
+      // stale-source-served-silently / built-dark-no-consumer), so the skip says so out loud.
+      console.warn(
+        `[poll-engagement] SKIPPED bluesky post ${post.platform_post_id} — no engagement reader exists (check: bluesky_engagement_fetcher_missing)`,
+      );
       return [];
     }
     default: {
