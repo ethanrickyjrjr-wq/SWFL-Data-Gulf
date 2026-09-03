@@ -1,3 +1,49 @@
+## 2026-09-03 (Opus 5) — #195 MERGED; the "22 problems" were phantoms, and the directory behind them had 33 real errors nothing was checking
+
+Operator: "merge and figure out why we have 22 problems." Both done.
+
+MERGE. #195 squash-merged as `bfda784b` at 17:32 UTC. Two things had to be cleared first.
+(a) #194 landed on main after #195 was cut from its parent and touched the same two files —
+merge `939bfacd` on the PR branch resolved both to #195's full-scope superset (see that
+commit). (b) `gh pr merge` then still refused: ruleset "main protection" (16713869) required a
+status check with the context `CI / build`, and GitHub Actions publishes that check run as
+`build` — nothing ever reports the context the rule names, so EVERY pull request in this repo
+was permanently BLOCKED and #194 had needed a bypass too. With the operator's approval the
+ruleset's required context was changed to `build` (verified after: conditions ~ALL, bypass
+actor, deletion / non_fast_forward / pull_request rules all intact). #195 then merged normally,
+no admin flag. Live for the eight doubled-title pages and the ~100-ZIP sitemap once Vercel
+redeploys main.
+
+THE 22. All in one file, `scripts/email/outreach-first-touch.mts`, and every one a phantom.
+Root `tsconfig.json` has excluded `scripts` since 06/25/2026 (`6bc7476c`, "Bun-only scripts not
+compatible with Next.js tsc"), so tsserver had no project for anything under scripts/ and
+opened them in an inferred project — no `@/*` alias (6x TS2307 on modules that exist), no bun
+types (15x TS2591 on `process` / `node:*`), inferred noImplicitAny (1x TS7006). `f65010c6` adds
+`scripts/tsconfig.json` on the refinery/tsconfig.json pattern; the live editor now reports 0 for
+that file. It deliberately includes `../next-env.d.ts` — dropping it manufactures 4 errors in
+lib/ and components/ that CI never sees.
+
+WHAT WAS UNDERNEATH. CI's `bunx tsc --noEmit` uses that same root config, so 111 tracked files
+under scripts/ were typechecked by nothing. Measured: 33 errors across 18 files. `ab6f46bc`
+takes that to 0 (root `tsc --noEmit` still exits 0; `bun test lib/project lib/social
+lib/email/outreach` -> 886 pass, 0 fail). Three were real bugs, not type noise:
+  - `scripts/migrate-email-events.mts` called `db.query(...)` on every statement. Bun.SQL has
+    no `query`. The migration threw on its first line and has never run.
+  - `scripts/social/poll-engagement.mts` never handled "bluesky" though `Platform` has carried
+    it — every Bluesky post threw "Unknown platform". Its own `const _never: never` guard was
+    reporting this to a typechecker that was never run. Now skipped explicitly; check
+    `bluesky_engagement_fetcher_missing` opened for the real reader.
+  - `scripts/email/render-coming-soon.mts` printed the whole ListingDetailFacts object in the
+    "Community" provenance row instead of `.subdivision`.
+Plus one re-scoped root: database.types.ts's identity-id Insert override listed 5 tables; live
+prod says 12. All 12 are listed now.
+
+NOT DONE, on purpose: CI does not gate on `scripts/tsconfig.json` (operator chose fix-the-33
+over add-the-gate), so this directory can rot again. `database-generated.types.ts` is STALE vs
+prod and the generator still emits no `Functions` — check `generated_types_stale_vs_prod`.
+
+Checks opened: bluesky_engagement_fetcher_missing, generated_types_stale_vs_prod. Closed: none.
+
 ## 2026-09-03 (Opus 5) — PR #195 unblocked: merged origin/main (#194) into seo/title-dedupe-full-scope, conflict resolved to the full-scope superset
 
 Operator: "merge and figure out why we have 22 problems."
