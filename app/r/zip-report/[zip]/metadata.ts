@@ -2,7 +2,12 @@ import type { Metadata } from "next";
 import { resolveZip } from "@/refinery/lib/zip-resolver.mts";
 
 const VALID_ZIP = /^\d{5}$/;
-const FALLBACK: Metadata = { title: "ZIP Report — SWFL Data Gulf" };
+// Bare page title — root layout.tsx's title.template ("%s — SWFL Data Gulf")
+// appends the site suffix at render time. Do NOT append it here too: a title
+// string returned from generateMetadata is fed through that template, so a
+// suffix baked in here would double up ("... — SWFL Data Gulf — SWFL Data
+// Gulf", caught live on /r/zip-report/33904 09/02/2026).
+const FALLBACK: Metadata = { title: "ZIP Report" };
 
 /**
  * Pure metadata builder for /r/zip-report/[zip] — separated from the page so
@@ -19,9 +24,8 @@ export function zipReportMetadata(zip: string): Metadata {
   const place = (res.places.find((p) => p.match === "primary") ?? res.places[0])?.place ?? null;
   const county = res.county_names[0] ?? null;
 
-  const title = place
-    ? `${place} ${zip} Market Report — SWFL Data Gulf`
-    : `ZIP ${zip} Market Report — SWFL Data Gulf`;
+  // No "— SWFL Data Gulf" here — layout.tsx's title.template adds it once.
+  const title = place ? `${place} ${zip} Market Report` : `ZIP ${zip} Market Report`;
   const where = place ? `${place}, ${zip}` : `ZIP ${zip}`;
   const description = `Home values, flood risk, and building permits for ${where}${
     county ? ` in ${county} County, FL` : ""
