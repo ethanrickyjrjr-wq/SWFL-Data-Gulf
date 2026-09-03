@@ -38,7 +38,7 @@ import { createServiceRoleClient } from "@/utils/supabase/service-role";
 import { getMarketingResend } from "@/lib/email/marketing-client";
 import { buildBatchMessages, sendBatches, type BatchSender } from "@/lib/email/outreach/send";
 import { nextStep } from "@/lib/email/outreach/lifecycle";
-import { buildRecipientRow } from "@/lib/email/outreach/recipients";
+import { upsertRecipient } from "@/lib/email/outreach/recipient-upsert";
 
 const DRY_RUN = process.env.DRY_RUN !== "false"; // default true — must opt OUT to send
 const SITE_ORIGIN = process.env.SITE_ORIGIN ?? "https://www.swfldatagulf.com";
@@ -67,53 +67,6 @@ function outreachFrom(): string {
     );
   }
   return `${name} <${email}>`;
-}
-
-/**
- * Select-or-insert the recipient by (campaign_id, lower(email)); return its id. The
- * unique index is on the functional (campaign_id, lower(email)), so we match on the
- * already-normalized email rather than PostgREST onConflict over an expression. A
- * re-run of the same campaign updates the row in place (idempotent).
- */
-async function upsertRecipient(
-  db: ReturnType<typeof createServiceRoleClient>,
-  campaignId: string,
-  m: ComposedMessage,
-): Promise<string> {
-  const row = buildRecipientRow(campaignId, m);
-  const { data: existing, error: selErr } = await db
-    .from("outreach_recipients")
-    .select("id")
-    .eq("campaign_id", campaignId)
-    .eq("email", row.email)
-    .maybeSingle();
-  if (selErr) throw new Error(`select recipient ${row.email}: ${selErr.message}`);
-  if (existing?.id) {
-    const { error: upErr } = await db
-      .from("outreach_recipients")
-      .update({
-        name: row.name,
-        domain: row.domain,
-        zip: row.zip,
-        brand: row.brand,
-        brand_source: row.brand_source,
-        brand_confidence: row.brand_confidence,
-        arrival_url: row.arrival_url,
-        updated_at: new Date().toISOString(),
-      })
-      .eq("id", existing.id as string);
-    if (upErr) throw new Error(`update recipient ${row.email}: ${upErr.message}`);
-    return existing.id as string;
-  }
-  const { data: inserted, error: insErr } = await db
-    .from("outreach_recipients")
-    .insert(row)
-    .select("id")
-    .single();
-  if (insErr || !inserted) {
-    throw new Error(`insert recipient ${row.email}: ${insErr?.message ?? "no row returned"}`);
-  }
-  return inserted.id as string;
 }
 
 /** Live send the ready messages: persist recipients → batch send → events + cursor. */

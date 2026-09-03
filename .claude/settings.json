@@ -188,6 +188,7 @@
             "command": "node .claude/hooks/check-playbook-read-before-write.mjs"
           },
           {
+            "type": "command",
             "command": "node .claude/hooks/inject-scoped-rules.mjs"
           }
         ]
