@@ -1,3 +1,48 @@
+## 2026-09-03 (Opus 5) — OPERATOR: "merge and figure out why we have 22 problems"
+
+The 22 in the VS Code Problems panel are ALL in one file, `scripts/email/outreach-first-touch.mts`
+(the untracked 09/02 first-touch work), and every one of them is a phantom. `tsconfig.json` has
+excluded `scripts` since 06/25/2026 (`6bc7476c`, "Bun-only scripts not compatible with Next.js tsc"),
+so tsserver opens anything under `scripts/` in an INFERRED project — no `@/*` paths (→ 6× TS2307 on
+modules that all exist on disk), no bun/node types (→ 14× TS2591 on `process` and `node:*`), and
+inferred-project noImplicitAny (→ 1× TS7006). Proof: a throwaway tsconfig extending the root one with
+just that file included → 0 errors.
+
+The real finding underneath, which nobody was looking for: CI's `bunx tsc --noEmit` (.github/workflows/
+ci.yml:32) uses that same root config, so **111 tracked files under `scripts/` are typechecked
+nowhere** — not by CI, not by `next build`, not by `refinery:typecheck`. Measured with a probe config:
+30 genuine type errors across 16 script files today, including live send paths
+(`scripts/email/run-schedules.mts`, `outreach-demo-enroll.mts`, `social/run-schedules.mts`).
+
+Guard shape: an exclusion added to make ONE tool quiet silently removed a whole directory from every
+tool. The 06/25 commit message says what it did; nothing said what it cost. Fix in reach is a
+`scripts/tsconfig.json` on the `refinery/tsconfig.json` pattern — it kills the 22 phantoms and makes
+the 30 real ones visible. Operator call owed on whether CI should then gate on them.
+
+## 2026-09-02 (Fable 5.1) — OPERATOR: "you signed it Ricky?"
+
+The first-touch cold email was signed "Ricky", first name only, to a stranger. Took it from the
+ricky-voice skill's rewrite example — which is a note to a teammate, not a cold intro. Playbook
+§1.7: sign-off carries name, phone, team/brokerage. Fix: the validator now requires the body to
+END with "Ricky Cooper" / "SWFL DATA GULF" (his caps, 09/02: "first and last name. COME ON MAN / SWFL DATA GULF") (phone line optional above the company line — none on
+file, do not invent). Guard shape: a voice skill's EXAMPLE is not a sign-off rule for a different
+audience.
+
+## 2026-09-02 (Fable 5.1) — OPERATOR: GTM outreach run — roster given (6 scouts / 2 refuters per prospect / data puller per survivor / ricky-voice drafter / compliance reviewer → 20 first touches); then "we are supposed to be sending out emails from resend. see if you can find the set up and set the can spam address and get them out"
+
+State found before answering: the cold spine is BUILT — `scripts/email/outreach-campaign.mts`
+(DRY_RUN default, live send refuses without `OUTREACH_POSTAL_ADDRESS`), `lib/email/outreach/{targets,
+campaign,build-content,send}.ts`, Resend batch + List-Unsubscribe + rid webhook. `swfldatagulf.com` is
+verified on Resend (live API, 09/02/2026); `OUTREACH_POSTAL_ADDRESS`, `OUTREACH_FROM_EMAIL`,
+`OUTREACH_FROM_NAME` are ALL unset in the local env file; `outreach_recipients` is empty (no prior cold
+run). Two `business_address` rows exist in `user_brand_profiles` (Cape Coral 07/16; Fort Myers 08/04) —
+which is his is a question, not a guess. Issue 001 = `/insiders` (200 live).
+Conflicts to surface ONCE, not re-litigate: (a) Zillow/Realtor.com scouts vs his 08/05 "never fetch
+listing portals" decree; (b) cold via Resend vs his own 07/17 "cold does NOT go through Resend" +
+the AUP-termination finding in `_PROSPECTS_DO_NOT_SEND/send-readiness.md`. Existing spine renders the
+branded chart drip, NOT a 120-word plain first touch — the send needs a thin plain-text variant.
+Guard owed: none yet — this is a first run.
+
 ## 2026-08-30 (Fable 5) — OPERATOR: "why would there be 6 other checkouts carrying the old shit Claude.md and not have .Claude/playbooks????? Just do it all correctly!!!!! Tired of problems not being fixed"
 
 Raised on the "push" for the playbook read gate + CLAUDE.md pointer cut. I had REPORTED the six
