@@ -56,6 +56,8 @@ const WAIVERS = {
     "names census_acs_zcta only in its provenance doc-comment — the actual read routes through lib/zip-report/census-acs-rows.ts (loadCensusAcsZctaRows), which filters via isCoreScope at the shared root",
   "lib/deliverable/recipes/agent-brand-intro.ts":
     "the farm-area ZIP driving the listing_active_stats chart resolves through PLACE_ZIP_CROSSWALK (parseReplyIntent/zipFromPromptPlace), whose PlaceZipEntry.county type is lee|collier only — a single .eq(zip_code) lookup against an in-scope-guaranteed ZIP, never a bulk scan",
+  "scripts/email/render-agent-brand-intro.mts":
+    "names listing_active_stats only in a provenance-table string ('live asking price per ZIP, data_lake.listing_active_stats') — this is the acceptance harness for the recipe, it issues no lake query of its own; the read lives in lib/deliverable/recipes/agent-brand-intro.ts, waived above for the crosswalk-guaranteed single-ZIP lookup",
   "lib/deliverable/recipes/review-reply.ts":
     "zip comes from resolveArea's CROSSWALK_ZIPS, built from the same PLACE_ZIP_CROSSWALK (lee|collier only by type) — a single .eq(zip_code) lookup, never a bulk scan",
 };
