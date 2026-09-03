@@ -1,3 +1,45 @@
+## 2026-09-03 (Opus 5) — the subdivision name comes off the coming-soon provenance cell, and where it ACTUALLY ships is now traced
+
+Pushing the two commits that were sitting unpushed while `origin/main` still carried the cell the
+operator objected to.
+
+**`c703eb4b`** — `scripts/email/render-coming-soon.mts:172`. The "Community (may ship)" row printed
+the whole `ListingDetailFacts` block ("[object Object]") and still counted the cell as SOURCED.
+Earlier today I "fixed" it to `facts.community.subdivision`, which was worse: a scraped
+listing-page string under a source column claiming "our own tax roll / community profiles", on the
+one table whose entire job is provenance. Now a presence flag off `facts.community.ok`, sourced
+"listing page". Operator: "I don't want the fucking subdivision name."
+
+**`adb6f5c7`** — `docs/handoff/2026-09-03-opus5-session-handoff-and-revert.md`, the full account of
+the 09/03 session with a revert path for every piece.
+
+**SCOPE, traced this session (RULE 0.5c) — where the subdivision name can actually reach a reader.**
+The commit above only touches a terminal diagnostic table. The name reaches the SENT EMAIL by a
+separate, deliberate path that was NOT changed:
+
+- `lib/deliverable/recipes/coming-soon.ts:805` re-asserts `community: facts.community` onto
+  `teaserFacts` AFTER address/city/state/zip/lotSize/daysOnMarket are stripped, and the framing at
+  :808-820 tells the model verbatim "YOU MAY name the COMMUNITY and the CITY". Locked 07/14/2026;
+  the file records that stripping it once was judged an over-read of the address rule.
+- That paragraph only exists when `teaserFacts.remarks` is non-empty.
+- `facts.community` has exactly ONE writer: `lib/email/listing-scrape.ts:502-503`, inside
+  `fetchListingFacts(url)` — the pasted-URL lane. A typed-address build can never fill it.
+- `remarks` has THREE sources: the same URL scrape, a bought record's `description`
+  (`lib/listings/paid-record-lane.ts:241-255`), and the agent's own paste
+  (`lib/deliverable/recipes/shared.ts:253-256`). The last two fill the description WITHOUT filling
+  the community — so a true coming-soon with no listing page can get a teaser paragraph and still
+  hand the model no subdivision name.
+- RESIDUAL, not fixed: if the agent's own pasted copy says "coming soon in Bay Colony", that text
+  ships. `redactStreetLine` (`coming-soon.ts:216-225`) matches street patterns only.
+
+Nothing was verified about whether the scraped name is CORRECT. `lib/listings/listing-detail.ts:31`
+defines it as "marketed community/subdivision as the listing states it" — whatever the listing agent
+typed, never cross-checked against parcel data. Parser verified once, 07/14/2026, against one live
+page (8665 Bay Colony Dr, Naples).
+
+**Next:** operator decision owed on whether the community should keep shipping by name in the email
+prose. That reverses a 07/14/2026 locked decision, so it is his call, not a session's.
+
 ## 2026-09-03 (Opus 5) — CORRECTION to the entry below: fixing migrate-email-events.mts made it DANGEROUS, and the Bluesky skip was silent
 
 Three follow-ups on the 09/03 push, all found by an adversarial read of my own work, all measured
