@@ -20,6 +20,13 @@ interface SavedChartRow {
   created_at: string;
 }
 
+/** Pure — the bare `<title>` for a saved chart, no I/O. Exported so bun:test can
+ *  pin the fallback without a live Supabase call (generateMetadata's DB read
+ *  throws outside an environment with SUPABASE_URL/SUPABASE_SERVICE_KEY set). */
+export function chartTitle(chartBlock: ChartBlock | null | undefined): string {
+  return chartBlock?.title ?? "Saved Chart";
+}
+
 export async function generateMetadata({
   params,
 }: {
@@ -28,7 +35,7 @@ export async function generateMetadata({
   const { id } = await params;
   const db = createServiceRoleClient();
   const { data } = await db.from("saved_charts").select("chart_block").eq("id", id).single();
-  const title = (data?.chart_block as ChartBlock | null)?.title ?? "Saved Chart";
+  const title = chartTitle(data?.chart_block as ChartBlock | null);
   const citation = (data?.chart_block as ChartBlock | null)?.source?.citation;
   // OG contract per ogp.me (crawled 07/10/2026): og:title/type/url/image required;
   // width/height/type/alt structured props on the image. Next's Metadata API emits them.
@@ -36,7 +43,10 @@ export async function generateMetadata({
     process.env.NEXT_PUBLIC_SITE_URL?.replace(/\/$/, "") ?? "https://www.swfldatagulf.com";
   const pageTitle = `${title} — SWFL Data Gulf`;
   return {
-    title: pageTitle,
+    // No "— SWFL Data Gulf" on `title` — layout.tsx's title.template ("%s — SWFL
+    // Data Gulf") appends it once. openGraph/twitter titles below are NOT
+    // templated, so `pageTitle` (suffixed) is correct there — keep it.
+    title,
     description: citation ? `Chart · ${citation}` : "A sourced chart from SWFL Data Gulf.",
     metadataBase: new URL(base),
     alternates: { canonical: `/c/${id}` },

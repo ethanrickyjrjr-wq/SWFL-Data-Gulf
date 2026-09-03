@@ -99,16 +99,18 @@ const DIRECTION_LABEL: Record<BrainOutputDirection, string> = {
 
 // ── Metadata ──────────────────────────────────────────────────────────────────
 
+// Titles below are bare — layout.tsx's title.template ("%s — SWFL Data Gulf")
+// appends the suffix once at render time; baking it in here doubled it.
 export async function generateMetadata(): Promise<Metadata> {
   try {
     const content = await readFile(path.join(BRAINS_DIR, "housing-swfl.md"), "utf-8");
     const display = toDisplayBrain(parseBrainMarkdown(content));
     return {
-      title: `${display.title} — SWFL Data Gulf`,
+      title: display.title,
       description: display.scope,
     };
   } catch {
-    return { title: "Housing Market — SWFL Data Gulf" };
+    return { title: "Housing Market" };
   }
 }
 

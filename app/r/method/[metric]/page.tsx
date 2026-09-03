@@ -22,12 +22,14 @@ interface PageProps {
   params: Promise<{ metric: string }>;
 }
 
+// Titles below are bare — layout.tsx's title.template ("%s — SWFL Data Gulf")
+// appends the suffix once at render time; baking it in here doubled it.
 export async function generateMetadata({ params }: PageProps): Promise<Metadata> {
   const { metric } = await params;
   const entry = VALID_SLUG.test(metric) ? resolveMethod(metric) : null;
-  if (!entry) return { title: "Methodology — SWFL Data Gulf" };
+  if (!entry) return { title: "Methodology" };
   return {
-    title: `${entry.label} — how it is computed — SWFL Data Gulf`,
+    title: `${entry.label} — how it is computed`,
     description: entry.measures,
   };
 }

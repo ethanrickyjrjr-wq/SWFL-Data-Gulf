@@ -377,6 +377,13 @@ function renderSlot(slot: Slot, index: number, deliverableId: string): React.Rea
 // generateMetadata
 // ---------------------------------------------------------------------------
 
+/** Pure — the bare `<title>` for a deliverable, no I/O. Exported so bun:test can
+ *  pin the fallback without a live Supabase call (generateMetadata's DB read
+ *  throws outside an environment with SUPABASE_URL/SUPABASE_SERVICE_KEY set). */
+export function deliverableTitle(execSummary: string | null | undefined): string {
+  return execSummary?.split(/[.!?]/)[0]?.trim() ?? "Deliverable";
+}
+
 export async function generateMetadata({
   params,
 }: {
@@ -399,9 +406,10 @@ export async function generateMetadata({
   if (!row || row.status === "revoked" || row.deleted_at) {
     return { title: { absolute: "SWFL Data Gulf" } };
   }
-  const title = row.narrative?.exec_summary?.split(/[.!?]/)[0]?.trim() ?? "Deliverable";
+  // Bare title here too — same template as the revoked branch above appends
+  // "— SWFL Data Gulf" once; baking it in doubled the live <title>.
   return {
-    title: `${title} — SWFL Data Gulf`,
+    title: deliverableTitle(row.narrative?.exec_summary),
   };
 }
 

@@ -83,6 +83,12 @@ function firstSnapshotChart(snapshot: RawDeliverable["items_snapshot"]): ChartBl
   return null;
 }
 
+/** Pure — the bare `<title>` for a project, no I/O. Exported so bun:test can
+ *  pin the fallback without a live Supabase call. */
+export function projectTitle(rawTitle: string | null | undefined): string {
+  return rawTitle || "Project";
+}
+
 export async function generateMetadata({
   params,
 }: {
@@ -91,7 +97,9 @@ export async function generateMetadata({
   const { id } = await params;
   const supabase = createClient(await cookies());
   const { data } = await supabase.from("projects").select("title").eq("id", id).maybeSingle();
-  return { title: `${(data as { title?: string } | null)?.title || "Project"} — SWFL Data Gulf` };
+  // Bare title — layout.tsx's title.template appends " — SWFL Data Gulf" once;
+  // baking it in here too doubled the live <title>.
+  return { title: projectTitle((data as { title?: string } | null)?.title) };
 }
 
 export default async function ProjectPage({
