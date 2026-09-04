@@ -2,8 +2,9 @@ name: Log cron incident
 
 # Listens for completion of all production cron workflows. On `failure`, appends
 # a row to `docs/cron-rebuild-failures.md` and comments on the sticky issue
-# (`vars.CRON_INCIDENT_ISSUE_NUMBER`). On `success` of a scheduled run, flips
-# the most-recent OPEN row for that workflow to `RESOLVED (auto)`.
+# (`vars.CRON_INCIDENT_ISSUE_NUMBER`). On `success` of a scheduled, pushed, or
+# manually dispatched run, flips the most-recent OPEN row for that workflow to
+# `RESOLVED (auto)`.
 #
 # Kill switches (repo Settings -> Variables):
 #   CRON_INCIDENT_LOGGER_ENABLED          = "false"  -> disable everything
@@ -142,12 +143,23 @@ jobs:
         run: node .github/scripts/log-cron-incident.mjs --mode=record-failure
 
   maybe_auto_resolve:
+    # `workflow_dispatch` is admitted here on purpose. record_failure gates on
+    # conclusion alone, so a DISPATCH failure opens an incident — excluding
+    # dispatch successes made that a one-way ratchet that could only ever add
+    # rows. Concretely: #191 was fixed and re-dispatched green (run 33286722483)
+    # and stayed open because its next SCHEDULED run is a quarter out; #111 has
+    # four dispatch successes since its 07-12 failure and is still open.
+    # Keep this event list identical to RESOLVING_EVENTS in
+    # .github/scripts/log-cron-incident.mjs — log-cron-incident-gate-drift.test.mjs
+    # fails the build if the two disagree (they already had: this filter allowed
+    # `push`, the script rejected everything but `schedule`).
     if: >
       vars.CRON_INCIDENT_LOGGER_ENABLED != 'false' &&
       vars.CRON_INCIDENT_AUTO_RESOLVE_ENABLED != 'false' &&
       github.event.workflow_run.conclusion == 'success' &&
       (github.event.workflow_run.event == 'schedule' ||
-      github.event.workflow_run.event == 'push')
+      github.event.workflow_run.event == 'push' ||
+      github.event.workflow_run.event == 'workflow_dispatch')
     runs-on: ubuntu-latest
     timeout-minutes: 10
     steps:
