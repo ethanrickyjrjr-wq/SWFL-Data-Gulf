@@ -1,3 +1,11 @@
+## 2026-09-07 (Sonnet 4.6) — weekly read-only dependency audit
+
+Scheduled task. No code changed. `bun outdated` run against 94 packages; 63 outdated found.
+11 MAJOR bumps identified (typescript 6→7, eslint 9→10, vitest 4→5, motion 12→13,
+mcp-handler 1→2, @types/node 20→26, pdf-to-img 6→7, @vitest/* 4→5,
+@storybook/addon-mcp 0→10, @modelcontextprotocol/inspector 0→2). 37 MINOR, 15 PATCH.
+Operator notified via push notification. TODAY.md date refreshed by startup hook.
+
 ## 2026-09-03 (Opus 5) — the subdivision name comes off the coming-soon provenance cell, and where it ACTUALLY ships is now traced
 
 Pushing the two commits that were sitting unpushed while `origin/main` still carried the cell the

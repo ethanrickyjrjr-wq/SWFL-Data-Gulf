@@ -1,4 +1,4 @@
-# 2026-09-03 Brief
+# 2026-09-07 Brief
 
 ## In Flight
 - **Booking CTA — provider-agnostic booking link: cockpit card + email time-offer stack** (spec `docs/superpowers/specs/2026-08-19-booking-time-cta-design.md`, check `booking_time_cta_live_verify`) — BUILT + PUSHED 08/19/2026 off a 10-Sonnet crawl4ai wave (10 research files under `_RESEARCH/`, all indexed): `lib/booking/` one root (provider detect · cal.com public /v2/slots · slot deep-links · add-to-calendar fallback) · blast route send-time expansion (booking button → 3 real times + "see all times"; skipped under CTA variant tests; PDF keeps the plain button) · cockpit BookingCard (saved link / setup nudge → /account/brand) · overlay Guard 3 + url-lint refinement allowance (second-order audit caught the 422 blocker same session; pinned by `lib/booking/blast-chain.integration.test.ts`). 3,424 affected tests + `bunx next build` green ×2. ⬜ operator live-verify: save a cal.com link in Brand → hub shows the Booking card → blast an email with a booking button and check the inbox shows 3 time buttons → close check. Follow-ups open: `booking_time_offer_scheduled_lanes` · `booking_public_page_embed`.
@@ -49,17 +49,10 @@
 - **Showcase Overlays — 3-company example carousels** (`docs/superpowers/specs/2026-07-02-showcase-overlays-design.md` + plan) — pill panel's 5 text example links replaced by 3 visual showcase cards + near-fullscreen click-through overlay (NNGroup: no auto-advance; Flodesk: artifact-first + repeated CTA). Latitude 26 lifecycle (5 emails, vendored) · Cast & Coast launch-blitz (agent-intro w/ AI-generated Dani Vero portrait + 4-format social pack; anchor = real $620k Savona Pkwy W listing, ZIP medians from 2,551 live Cape listings) · Meridian South market-pulse (ask → pulse email → socials → April/May ZHVI vintage proof). All figures lake-sourced or listing-page-cited; fictional-brand disclosures ride every artifact. Registry + overlay-logic TDD (`lib/showcase/`), capture via local venv Playwright + sharp (committed webps, no runtime browser dep), `?showcase=` deep-link for later homepage mount. Tier slide (no $ until operator sets price) → OTP LoginModal. `/p/example-*` cron builds UNTOUCHED (panel decoupled from EXAMPLE_SCENARIOS). Suite 4432/0 + `next build` green. ⬜ **push pending operator** · ⬜ `showcase_overlays_live_verify` (prod click-through) · follow-ups: watch-it-build GIF slide, /pricing page, homepage mount.
 
 ## Overdue Checks
-- [comps_size_band_chat_lane] Chat comp lane still blind-slices: compHelper has no subject sqft, so comps_no_size_band_guard is closed on offer-check but NOT in chat (due 2026-08-05)
-- [direction_call_equals_persistence] CORRECTED 08/11: direction call LOSES to naive by 6.5pp (system 42.0% vs persistence 48.6%, N=138) — NOT lift +0.0 (due 2026-08-30)
-- [comps_lake_feed_unwired] Lake comp feed is built, tested and live-probed but wired into NOTHING — fetchLeeComps has zero production callers (due 2026-08-05)
-- [steadyapi_source_ceiling_coverage_contracts] Coverage contract per paid endpoint: pinned field-path inventory vs persisted set + untouched-ledger, diffed from raw bodies we already own (zero paid calls); verdicts ACCEPT/VENDOR_ADDED/VENDOR_REMOVED/PERSIST_DRIFT, ERROR_* separate; positive control must trip VENDOR_ADDED (due 2026-08-16)
-- [coverage_contracts_platform_wide] Execute docs/superpowers/handoffs/2026-08-02-coverage-contracts-all-sources-handoff.md: registry gap-fill (Step A), coverage-contract checker w/ positive control (B), raw-landing triage paid/fragile/refetchable (C), pre-push registry lint (D). EXTENDS existing 8 surfaces — any new tracker is the failure repeating (due 2026-08-23)
-- [neighborhood_amenities_first_scheduled_fire] Verify neighborhood_amenities' FIRST clean scheduled fire — gated on the road-name defect, NOT on ENGINE_ENABLED (due 2026-08-10)
-- [redfin_lee_post_first_run] After first live DLT ingest: (1) update expected_rows_min in cadence_registry.yaml from 600 placeholder to 90% of actual row count; (2) re-check lee_homes_sold_zscore against real baseline — fixture z=10.8 is an artifact of homogeneous sample values (std ~330), not a real signal; do not allow a Lee homes-sold bullish reading to stand until verified against live distribution (due 2026-07-01)
-- [listing_lifecycle_schedule_live_verify] First unattended scheduled listing-lifecycle runs (Lee 09:00/Collier 12:00 UTC) land clean (due 2026-07-03)
+- none overdue
 
 ## Last Session
-- 2026-09-03 (Opus 5) — CORRECTION to the entry below: fixing migrate-email-events.mts made it DANGEROUS, and the Bluesky skip was silent
+- 2026-09-03 (Opus 5) — the subdivision name comes off the coming-soon provenance cell, and where it ACTUALLY ships is now traced
 
 ## Spec Health
 - 316 specs total · 0 candidates for archive
