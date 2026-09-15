@@ -24,6 +24,9 @@ which were stranded in the working tree.
 Next in this session: A3 (freshness doctor count_table branch) and A4 (BILLING prescription) are
 running in parallel; chain dispatch for A1 Step 4 / A2 Step 3 after this push.
 
+The parked unattended-LLM legs named in the entry below are carried by the open check
+`llm_legs_parked_credit_wall` - no new deferral is introduced by this push.
+
 ## 2026-09-15 (Opus 5) - Nightly rebuild no longer gated on one empty dataset (plan task A1)
 
 A0 answered by inspection, no dispatch: last night's chain (run 34952735442) shows `rebuild · brains`
