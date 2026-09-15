@@ -872,6 +872,8 @@ pipelines:
     cadence_days: 365
     tolerance_multiplier: 1.5
     count_table: data_lake.leepa_comparable_sales
+    freshness_column: _dlt_load_id # only landing stamp on this table (sale_month is the
+      # EVENT month, not the load); doctor casts it to a timestamp. Verified live 09/15/2026.
     expected_rows_min: 90000 # 90% of 108,881 confirmed live 07/22/2026
     freshness_sla:
       warn_after_days: 540  # mirrors leepa — same source, same annual-ish publish
@@ -1046,6 +1048,9 @@ pipelines:
       # 07/19) predates the view's legal_description re-derivation folding groups — it was a
       # floor the CURRENT population can never reach, i.e. a permanent LOW_VOLUME false-red.
     count_table: data_lake.neighborhood_stats
+    freshness_column: inserted_at # timestamptz, verified live 09/15/2026 (as_of is the data
+      # vintage, not the landing). Explicit, not the code default — the invisible default is
+      # how this entry read NEVER_LANDED for weeks.
     # Not a dlt pipeline — no dlt_schema_name. Reads data_lake.parcel_subdivision_v (the
     # two-county homes-only VIEW over lee_parcels + collier_parcels; repointed 07/19/2026 when
     # the parcel_subdivision table retired) straight through psycopg (see
@@ -1107,6 +1112,8 @@ pipelines:
     tolerance_multiplier: 3.0 # brand-new source, no durability track record yet — generous floor
     expected_rows_min: 100 # measured ~400/day, all 37 doc types; floor well below to survive quiet days
     count_table: data_lake.collier_official_records
+    freshness_column: _dlt_load_id # only landing stamp on this table (record_date is the
+      # EVENT date, not the load); doctor casts it to a timestamp. Verified live 09/15/2026.
     note: "Fully automated FETCH+LOAD (unlike lee_deed_official_records, no Akamai/bot wall found — verified live 08/12/2026, 7 back-to-back automated searches, zero blocks). Pulls ALL 37 doc types from day one (no doc-type filter), not a DEED-only slice. Instrument-number merge key. Cron enabled 08/12/2026, first live day-partial pull 107 rows same day. See _RESEARCH/data-and-ingest/2026-08-12-collier-clerk-liveness-probe.md for the full probe."
     source_scope:
       confirmed_total:

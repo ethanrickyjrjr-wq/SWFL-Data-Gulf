@@ -9,6 +9,7 @@ import pytest
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), "..", "..", ".."))
 
 from ingest.scripts.check_freshness import (
+    _fetch_max_freshness,
     _safe_cadence_days,
     check_odd_window_entry,
     check_tier1_entry,
@@ -336,3 +337,65 @@ def test_odd_window_fresh_when_data_arrived_recently():
     result = check_odd_window_entry(conn, entry, _today=today)
     assert result["status"] == "FRESH"
     assert result["last_run"] == last_run
+
+
+# ── count_table-only entries (no freshness_table, no dlt_schema_name) ──────────
+#
+# 09/15/2026: three real tier-2 entries (leepa_comp_sales, neighborhood_stats,
+# collier_official_records) carry ONLY count_table. _fetch_max_freshness raised
+# KeyError on entry["dlt_schema_name"], the bare `except Exception` swallowed it,
+# and the doctor reported NEVER_LANDED on a 108,848-row table.
+
+
+class _RecordingCursor:
+    """Cursor mock that RECORDS the executed query — MagicMock helpers above don't."""
+
+    def __init__(self, row):
+        self.row = row
+        self.executed = []
+
+    def __enter__(self):
+        return self
+
+    def __exit__(self, *a):
+        return False
+
+    def execute(self, q, params=None):
+        self.executed.append((str(q), params))
+
+    def fetchone(self):
+        return self.row
+
+
+class _RecordingConn:
+    def __init__(self, row):
+        self.cur = _RecordingCursor(row)
+
+    def cursor(self):
+        return self.cur
+
+    def rollback(self):
+        pass
+
+
+def test_count_table_only_entry_reads_freshness_from_count_table():
+    entry = {
+        "name": "leepa_comp_sales",
+        "count_table": "data_lake.leepa_comparable_sales",
+        "freshness_column": "_dlt_load_id",
+    }
+    conn = _RecordingConn(row=(date(2026, 7, 22),))
+    assert _fetch_max_freshness(conn, entry) == date(2026, 7, 22)
+    q = conn.cur.executed[0][0]
+    assert "leepa_comparable_sales" in q and "_dlt_loads" not in q
+
+
+def test_count_table_only_entry_without_freshness_column_defaults_to_inserted_at():
+    entry = {"name": "neighborhood_stats", "count_table": "data_lake.neighborhood_stats"}
+    conn = _RecordingConn(row=(datetime(2026, 8, 24, tzinfo=timezone.utc),))
+    assert _fetch_max_freshness(conn, entry) == date(2026, 8, 24)
+    assert "inserted_at" in conn.cur.executed[0][0]
+
+
+def test_entry_with_no_table_reference_returns_none_not_raise():
+    assert _fetch_max_freshness(_RecordingConn(row=None), {"name": "x"}) is None

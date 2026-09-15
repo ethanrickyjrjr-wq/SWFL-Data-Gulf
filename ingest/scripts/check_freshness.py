@@ -241,7 +241,8 @@ def _to_iso(val) -> str | None:
 def _fetch_max_freshness(conn, entry: dict) -> date | None:
     """Return MAX(freshness_column) for this entry, or None if no rows / table missing.
 
-    Handles both dlt pipelines (_dlt_loads) and non-dlt tables (freshness_table).
+    Resolution order: freshness_table -> dlt_schema_name (_dlt_loads) -> count_table
+    (entries whose dlt schema name is runtime-random or which are not dlt at all).
     Rolls back and returns None on any DB error (e.g. table not yet created for
     ODD scaffolds whose DDL hasn't been applied yet).
     """
@@ -270,13 +271,38 @@ def _fetch_max_freshness(conn, entry: dict) -> date | None:
                             pgsql.Identifier(table),
                         )
                     )
-            else:
+            elif "dlt_schema_name" in entry:
                 schema_name = entry["dlt_schema_name"]
                 cur.execute(
                     "SELECT MAX(inserted_at) FROM data_lake._dlt_loads"
                     " WHERE schema_name = %s AND status = 0",
                     (schema_name,),
                 )
+            elif "count_table" in entry:
+                # count_table-only entries — the dlt schema name is runtime-random
+                # (leepa_comp_sales builds pipeline_name=f"leepa_comp_t2_{token_hex(4)}")
+                # or there is no dlt pipeline at all (neighborhood_stats). Read freshness
+                # straight off the counted table. 09/15/2026: three LIVE tables read
+                # MISSING -> NEVER_LANDED/GAP_SENTINEL for lack of this branch --
+                # entry["dlt_schema_name"] raised KeyError inside the try and the
+                # `except Exception` below swallowed it into None.
+                freshness_col = entry.get("freshness_column", "inserted_at")
+                schema, table = entry["count_table"].split(".", 1)
+                if freshness_col == "_dlt_load_id":
+                    # dlt writes _dlt_load_id as a unix-epoch STRING; cast inside the
+                    # aggregate so MAX is numeric, not lexicographic.
+                    expr = pgsql.SQL("to_timestamp(MAX({}::double precision))").format(
+                        pgsql.Identifier(freshness_col)
+                    )
+                else:
+                    expr = pgsql.SQL("MAX({})").format(pgsql.Identifier(freshness_col))
+                cur.execute(
+                    pgsql.SQL("SELECT {} FROM {}.{}").format(
+                        expr, pgsql.Identifier(schema), pgsql.Identifier(table)
+                    )
+                )
+            else:
+                return None
             row = cur.fetchone()
     except Exception:
         # Table may not exist yet (ODD scaffold DDL not applied), or other transient
