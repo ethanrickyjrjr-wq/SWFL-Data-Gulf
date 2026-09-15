@@ -12,15 +12,27 @@ sources:
   - ingest/cadence_registry.yaml
   - docs/cron-rebuild-failures.md
   - .github/workflows/nightly-chain.yml
+  - https://www.anthropic.com/legal/consumer-terms
+  - https://support.claude.com/en/articles/15036540-use-the-claude-agent-sdk-with-your-claude-plan
+  - https://code.claude.com/docs/en/agent-sdk/overview
+  - https://code.claude.com/docs/en/authentication
+  - https://code.claude.com/docs/en/costs
+  - _RESEARCH/agent-behavior/2026-09-15-max-subscription-vs-api-key-for-pipeline-calls-evaluation.md
+  - refinery/agents/anthropic.mts
+  - _ASSISTANT/NORTH-STAR.md
   - chief-of-staff:wiki/swfl-pipeline-health.md (the full, exhaustive version of this page)
 ---
 # Pipeline health
 
 **Status (2026-09-15):** SteadyAPI is out on Ricky's word — the listing spine reverts to the
 crawl4ai scrape source that ran clean from GitHub's own runners on 2026-07-01 (one flag flip plus
-a dry run). The rebuild can run on the Max subscription (`claude -p`, proved live 09-15) instead of
-API credit, but the nightly GitHub chain still needs `ANTHROPIC_API_KEY` credit until a Fedora
-self-hosted runner carries the Max login. The master brain has not rebuilt since 2026-08-19.
+a dry run). The API key stays the right path for the pipeline: measured spend is trivial ($6.03 in
+the last 30 days, $81.42 lifetime — see Facts), the key just hit a zero balance, and routing the
+customer-facing brain rebuild through Ricky's personal Max login runs into Anthropic's own "not for
+third parties' products" line, not a cost problem. A same-day metering defect is fixable today at
+$0: `claude-sonnet-5`/`claude-opus-5` are missing from the cost table, so recent calls on those
+models log at $0.00 and the spend guard can't see them. The master brain has not rebuilt since
+2026-08-19.
 
 ## What it is
 
@@ -34,13 +46,45 @@ the copy scoped to this product).
 
 ## Facts
 
-- 2026-09-15 — **The rebuild can run on the Max subscription, not just the API key.**
-  `LLM_PROVIDER=claude-code` shells every refinery agent call out to `claude -p` on the machine's
-  claude.ai login instead of the Anthropic API — proved live: Sonnet 4.6, 7.1s, correct output, $0
-  ledger cost, no API key in the environment. Run it as `LLM_PROVIDER=claude-code bun refinery/cli.mts
-  master --resilient` from Ricky's machine or Fedora. GitHub-hosted runners have no claude.ai login,
-  so the *nightly, scheduled* chain still needs API credit until a self-hosted runner on Fedora
-  carries the Max subscription — that's the Fedora job (see Decisions).
+- ~~2026-09-15 — Correction: Max-plan automation is not a ToS violation, `LLM_PROVIDER=claude-code`
+  proved live running the rebuild on Max.~~ SUPERSEDED 2026-09-15, same day, by the two lines below —
+  this page gave three different answers to the same question in one day (Ricky: "WE HAVE MAX PLAN,
+  WHY DO WE NEED CREDITS"; then two sessions ran in parallel on the exact question). Verified by
+  grep: `LLM_PROVIDER` is read by nothing in `refinery/`, `lib/`, `app/`, or `scripts/` — zero hits.
+  `refinery/agents/anthropic.mts:15-17`: `agentsAreMocked() { return !env.anthropicApiKey }` — no
+  key present means the pipeline runs in **deterministic mock mode**, not on the Max login. The
+  "$0 ledger cost, no API key in the environment" result earlier today was the mock path, not proof
+  Max was doing the work. (source: `_RESEARCH/agent-behavior/2026-09-15-max-subscription-vs-api-key-for-pipeline-calls-evaluation.md`)
+- 2026-09-15 — **The real terms question, and it's narrower than "is automation banned."** The
+  Consumer Terms §3(7) bot clause is not the operative one — general Agent SDK/`claude -p` automation
+  is fine, including a named GitHub Actions integration (support.claude.com, updated 2026-06-15).
+  The clause that actually reaches this repo is in the Agent SDK's own developer docs
+  (code.claude.com/docs/en/agent-sdk/overview, verbatim): "Unless previously approved, Anthropic does
+  not allow third party developers to offer claude.ai login or rate limits **for their products**,
+  including agents built on the Claude Agent SDK." The nightly brain rebuild generates the content
+  sold to SWFL Data Gulf's paying customers — that is squarely "their product." Internal dev/CI
+  tooling (e.g. the 3 `claude-code-action` GHA workflows building/testing this repo's own code, not
+  generating customer-facing brain content) is not "their product" and isn't reached by this clause —
+  a separate, narrower, and still-unadopted option (see Decisions; blocked by the standing 30-day
+  freeze regardless, `_ASSISTANT/NORTH-STAR.md` priority 5, runs through 2026-09-18).
+- 2026-09-15 — **What we're actually spending, measured from our own `api_usage_log`** (6,122 rows,
+  07/01–09/08/2026): $81.42 lifetime, $6.03 in the last 30 days across 697 calls, refinery
+  synthesis+triage $12.30 **total, ever**, nothing through the metered refinery path since 08/10.
+  This isn't a cost problem — the console key hit a zero balance on a tiny run rate, not an expensive
+  one. Caveat: this table only records calls routed through `logApiUsage`; the 3 GHA
+  `claude-code-action` workflows and any `SKIP_USAGE_LOG=1` call aren't in it, so this is a floor, not
+  a full invoice. (source: `_RESEARCH/agent-behavior/2026-09-15-max-subscription-vs-api-key-for-pipeline-calls-evaluation.md`)
+- 2026-09-15 — **Live defect: the spend guard is blind to the current models.** `RATES`
+  (`refinery/agents/anthropic.mts:53-64`) has no row for `claude-sonnet-5` or `claude-opus-5`;
+  `computeCostUsd` returns $0 for an unrecognized model by design. Measured: 58 `claude-sonnet-5`
+  calls logged at $0.00, invisible to `checkSpendGuard`'s caps. Same shape as an already-flagged
+  07-30 finding. Fix is two rows in `RATES`, $0 cost, does not touch the freeze (a repair to an
+  existing guard, not a new adoption).
+- 2026-09-15 — **Precedence bug, the reason a naive attempt to use the subscription silently bills
+  the API anyway:** documented auth order puts `ANTHROPIC_API_KEY` ahead of `CLAUDE_CODE_OAUTH_TOKEN`,
+  and in non-interactive `-p` mode the key is always used when present (code.claude.com/docs/en/authentication).
+  Our key lives in the local dotenv file bun loads, which wins over anything set in the shell — any
+  subprocess inheriting `process.env` bills the API regardless of what subscription token is also set.
 - 2026-09-15 — The listing pipeline's pre-SteadyAPI spine still exists: `--source scrape`, a
   crawl4ai walk of the brokerage listings site (host in the `LISTING_LIFECYCLE_BASE_URL` secret).
   Ran clean from GitHub's own runner IPs 2026-07-01 (Lee 21,889 rows, Collier 8,120, zero 403s).
@@ -89,8 +133,9 @@ the copy scoped to this product).
   keep only the listing leg red on its own.
 - 2026-09-15 — **SteadyAPI is out.** Ricky: "Forget the steady api!!!!" Spine reverts to the scrape
   source; SteadyAPI code stays inert, no dashboard check, no renewal.
-- 2026-09-15 — Rebuild order: (0) Ricky puts credit on the Anthropic console key — the only blocker
-  for 16 workflows; (1) flip the listing path to `--source scrape`, dry-run one county, let the
+- 2026-09-15 — Rebuild order: (0) Ricky adds credit on the Anthropic console key for the 16
+  credit-blocked workflows — still the right path (see Facts: ~$6/month measured run rate, this is
+  cheap, not a workaround); (1) flip the listing path to `--source scrape`, dry-run one county, let the
   chain run — the row gate lands and brains rebuild nightly again; (2) fleet hygiene in one session
   (classify credit/429 as BILLING, land or delete the 3 ghost registry entries, fix the
   schema-prefixed signal, add the missing health route, close the 22 stale issues); (3) Fedora
@@ -102,9 +147,22 @@ the copy scoped to this product).
 - 2026-09-15 — Do not move the cron fleet to Fedora. GitHub Actions is free on the public repo and
   already carries the doctor, the incident logger, and the dead-man ping. Fedora's job is the
   residential IP, not the scheduler.
-- 2026-09-15 — Do not route pipeline LLM calls through the Fedora subscription — `claude -p` on Max
+- 2026-09-15 — **Do not route the customer-facing brain rebuild through Ricky's personal Max login.**
+  Not a flat ToS ban (general Agent SDK automation is permitted) — the specific reach is Anthropic's
+  "not for third parties' products" line (see Facts) plus the standing 30-day adopt-nothing-new
+  freeze (`_ASSISTANT/NORTH-STAR.md` priority 5, through 2026-09-18). The API key is the right,
+  cheap path (~$6/month measured). Narrower, separate, still-unadopted option: `CLAUDE_CODE_OAUTH_TOKEN`
+  for the repo's own internal dev/CI GHA workflows (not customer-facing content) — not proposed here,
+  blocked by the freeze regardless, a decision for after 2026-09-18 if Ricky wants it scoped.
+- ~~2026-09-15 — Do not route pipeline LLM calls through the Fedora subscription — `claude -p` on Max
   is Consumer Terms. The API key (with credit) is the only legal path for the unattended nightly
-  chain.
+  chain.~~ SUPERSEDED 2026-09-15 by the Decision line above — right conclusion, wrong reason; corrected
+  same day after two sessions independently checked the actual clause.
+
+- 2026-09-15 — **Fix the $0-rate spend-guard defect now.** Add `claude-sonnet-5` and `claude-opus-5`
+  rows to `RATES` in `refinery/agents/anthropic.mts`. $0 cost, one commit, not an adoption (a repair
+  to an existing guard) — doesn't touch the freeze. This is the concrete "automatic guard" fix
+  available today from Ricky's "rules, guards and repairs automatic" ask.
 
 ## Open questions
 
