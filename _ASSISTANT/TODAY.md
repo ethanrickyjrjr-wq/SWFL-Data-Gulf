@@ -1,4 +1,4 @@
-# 2026-09-14 Brief
+# 2026-09-15 Brief
 
 ## In Flight
 - **Booking CTA — provider-agnostic booking link: cockpit card + email time-offer stack** (spec `docs/superpowers/specs/2026-08-19-booking-time-cta-design.md`, check `booking_time_cta_live_verify`) — BUILT + PUSHED 08/19/2026 off a 10-Sonnet crawl4ai wave (10 research files under `_RESEARCH/`, all indexed): `lib/booking/` one root (provider detect · cal.com public /v2/slots · slot deep-links · add-to-calendar fallback) · blast route send-time expansion (booking button → 3 real times + "see all times"; skipped under CTA variant tests; PDF keeps the plain button) · cockpit BookingCard (saved link / setup nudge → /account/brand) · overlay Guard 3 + url-lint refinement allowance (second-order audit caught the 422 blocker same session; pinned by `lib/booking/blast-chain.integration.test.ts`). 3,424 affected tests + `bunx next build` green ×2. ⬜ operator live-verify: save a cal.com link in Brand → hub shows the Booking card → blast an email with a booking button and check the inbox shows 3 time buttons → close check. Follow-ups open: `booking_time_offer_scheduled_lanes` · `booking_public_page_embed`.
@@ -52,7 +52,7 @@
 - none overdue
 
 ## Last Session
-- 2026-09-07 (Sonnet 4.6) — weekly read-only dependency audit
+- 2026-09-14 (Sonnet 4.6) — weekly read-only dependency audit
 
 ## Spec Health
 - 316 specs total · 0 candidates for archive
