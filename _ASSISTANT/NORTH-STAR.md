@@ -24,9 +24,10 @@ delete one. Deletion beats addition.
 4. LEDGER BANKRUPTCY — DONE 09/15/2026. Operator: "GET RID OF ALL THE OLD CHECKS SO WE CAN
    START FRESH." 436 of 440 open checks moved to state='dropped'; the 4 opened that day stayed.
    Full snapshot with every label and detail: docs/_archive/2026-09-15-checks-ledger-bankruptcy.md
-   — nothing deleted, any key comes back with `scripts/check.mjs reopen`. The ledger is now a
-   live list again; keeping it one is the standing job. Scratchpad (45 open) is NOT done and is
-   the remaining half of this line.
+   — nothing deleted, any key comes back with `scripts/check.mjs reopen`. Second half same turn
+   ("bankrupt it"): the scratchpad's 45 open items -> 0, six OPEN sections moved verbatim to
+   docs/_archive/2026-09-15-scratchpad-bankruptcy.md; the 425 narrative entries untouched. Both
+   lists are live lists again — KEEPING them live is now the standing job, and RULE 2 still binds.
 5. ADOPT NOTHING NEW FOR 30 DAYS (from 08/19/2026) — no new tools, harnesses, or memory
    surfaces. Writ: evaluated, rejected. Omnigent: evaluated, rejected. Every recent "make
    the AI better" lead ended do-not-adopt; the leverage is finishing and deleting, not adding.

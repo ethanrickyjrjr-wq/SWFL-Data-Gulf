@@ -1,3 +1,37 @@
+## 2026-09-15 (Opus 5) - Scratchpad bankrupted too: 45 open items -> 0. NORTH STAR #4 fully closed.
+
+Operator, same session, one word: "bankrupt it." That is the other half of NORTH STAR #4, which had
+named the scratchpad's 45 open items as the remaining piece after the checks ledger.
+
+Done: all six `## OPEN` sections cut out of `_ASSISTANT/SCRATCHPAD.md` and written VERBATIM to
+`docs/_archive/2026-09-15-scratchpad-bankruptcy.md` (1,551 lines). Cut and pasted, not summarized,
+closed items carried along with the open ones. Every item in them was raised 07/20/2026-07/22/2026
+and had gone roughly eight weeks untouched.
+
+Lossless, proven with the repo's OWN parser rather than by eyeballing the diff -
+`.claude/hooks/lib/scratchpad-parse.mjs` `openItems()` run against both files:
+  OPEN ITEMS NOW: 0
+  ARCHIVE open items (proof nothing was dropped): 45
+  scratchpad lines: 9370 | archive lines: 1551
+
+NOT touched: the 425 dated narrative entries. Those are the session record, not a to-do list, and
+`classifySection` calls them `entry`, never `open` - they were never part of the 45.
+
+One deliberate detail, because the mechanism has to keep working: the replacement heading is still
+an `## OPEN` section, just with zero `###` items under it. `print-scratchpad.mjs` (SessionStart) and
+`check-scratchpad-on-push.mjs` (push gate) both count ITEMS inside OPEN sections. Deleting the
+section type outright would have left the file with no OPEN section for the next gripe to land in,
+which is how a cleanup quietly becomes a disabled guard. RULE 2 is unchanged and still binding.
+
+NORTH STAR #4 now reads DONE on both halves, with the standing job restated: keeping both lists
+live is the work, not the one-time clear.
+
+Combined with the entry below, this session took the two ledgers from 440 open checks + 45 open
+scratchpad items to 4 + 0, with every dropped row and every moved item preserved and reversible.
+
+Still blocked, unchanged: A1 Step 4 / A2 Step 3 need the workstream-A commits on main before a
+chain dispatch proves anything. Awaiting the push word.
+
 ## 2026-09-15 (Opus 5) - LEDGER BANKRUPTCY executed: 440 open checks -> 4
 
 Operator, this turn: "GET RID OF ALL THE OLD CHECKS SO WE CAN START FRESH." That is the word
