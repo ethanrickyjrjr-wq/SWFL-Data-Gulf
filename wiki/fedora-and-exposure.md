@@ -143,11 +143,22 @@ Code cloud routines, not GitHub Actions) are actually being looked at.
 
 ## Decisions
 
-- 09/15/2026 — Ricky pushed back on "why do we need Anthropic credits, we have Max" — settled:
-  measured spend is $6.03/30d, $81.42 lifetime; the fix is adding console credit (~$6/month rate),
-  not routing pipeline calls through the Max subscription (Consumer Terms bar it for
-  customer-facing product content, and the standing 30-day no-new-adoption freeze blocks wiring
-  `CLAUDE_CODE_OAUTH_TOKEN` for anything until 09/18/2026 regardless).
+- 09/15/2026 — **SUPERSEDED same day, see below.** ~~Ricky pushed back on "why do we need
+  Anthropic credits, we have Max" — settled: measured spend is $6.03/30d, $81.42 lifetime; the fix
+  is adding console credit (~$6/month rate)~~ — this was this repo's own conclusion earlier today
+  and it is wrong as a course of action: Ricky rejected it again, explicitly, after it was
+  re-raised (this is the 4th+ documented instance since the original 07/26/2026 decree — see
+  `_ASSISTANT/STRIKES.md` shape `re-suggested-anthropic-api-credits-after-refusal`, guard now
+  built as CLAUDE.md RULE 3 C2b: never recommend Anthropic credit top-up again, for any pipeline).
+- 09/15/2026 — **Standing decision, do not re-litigate**: LLM-touching pipeline legs
+  (`city_pulse` distill, `corridor_pulse` distill, `narrative-bake`, `factuality-gate`) that hit
+  the credit wall stay **parked**, not funded. The Consumer-Terms objection to routing them
+  through the Max subscription is real and already researched
+  (`_RESEARCH/agent-behavior/2026-09-15-max-subscription-vs-api-key-for-pipeline-calls-
+  evaluation.md`), so the actual resolution is still open — author affected content interactively
+  in a Max session (the Issue 001 pattern, 07/26/2026 decree) or redesign the pipeline leg to not
+  need an unattended LLM call. Neither is done yet; this page previously said "add credit" and
+  that line was wrong.
 
 ## Open questions
 

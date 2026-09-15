@@ -110,6 +110,20 @@ can't hold, with a concrete reason. If orchestration costs more than the task, j
 Any claim that changes system shape → code audit always; web-refutation only when the claim
 imports an outside best practice. Eloquence ≠ evidence.
 
+# RULE 3 C2b — NO ANTHROPIC API CREDIT SUGGESTIONS
+
+**Decreed 07/26/2026 ("we are on Max plan. do not use API credits. Make it."), re-affirmed
+09/15/2026 at 4th+ strike (operator, caps: "HOW MANY FUCKING TIMES DO WE HAVE TO SAY WE AREN'T
+DOING FUCKING ANTHROPIC API CREDITS").** Never recommend adding or topping up Anthropic console
+credit as the fix for a pipeline, CI check, or brain rebuild — not as one option among several,
+not as "the cheap one," not even once. A pipeline leg that hits the credit wall (`400 credit
+balance too low`) is PARKED, not funded — name it as blocked, do not propose billing action. If
+the underlying capability is genuinely needed, the fix routes through an interactive Max-plan
+session authoring the content directly (the Issue 001 pattern, `_ASSISTANT/SCRATCHPAD.md`
+07/26/2026), or the pipeline leg gets redesigned to not need an unattended LLM call, or it stays
+parked until Ricky raises it himself. See `_ASSISTANT/STRIKES.md` shape
+`re-suggested-anthropic-api-credits-after-refusal` for the full strike history.
+
 ---
 
 # brain-platform — SWFL Data Gulf
