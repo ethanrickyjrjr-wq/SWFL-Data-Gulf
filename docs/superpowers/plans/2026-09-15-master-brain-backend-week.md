@@ -65,7 +65,7 @@ GREEN and `brains/master.md` `refined_at` moved to today → proceed to A1 (the 
 RED on `credit balance is too low` → the rebuild leg makes an unattended LLM call. Do NOT fund it. Open a check and stop this workstream at A1 still (A1 is still correct), then hand Ricky the line: "the rebuild itself needs a live model call; the deterministic path (`agentsAreMocked()` when the key is absent, `refinery/agents/anthropic.mts:15-17`) is the C2b-compliant option this week. Removing `ANTHROPIC_API_KEY` from `daily-rebuild.yml` makes the rebuild run mock-mode nightly; decide." The Max-seat route (`_RESEARCH/agent-behavior/2026-09-15-max-subscription-vs-api-key-for-pipeline-calls-evaluation.md`, verdict flipped to ADOPT-SEQUENCED per `_ASSISTANT/SCRATCHPAD.md` 09/15) is the durable answer but sits behind the 09/18 freeze and needs its own plan; do not start it inside this one.
 
 ```bash
-node scripts/check.mjs open rebuild_leg_needs_llm_call "daily-rebuild.yml 400s on credit; mock-mode nightly is the C2b option — Ricky decides" --kind defect
+node scripts/check.mjs open brain-platform rebuild_leg_needs_llm_call "daily-rebuild.yml 400s on credit; mock-mode nightly is the C2b option — Ricky decides" --class defect
 ```
 
 RED on anything else → paste the failing step and fix it before A1 (it is the actual blocker).
@@ -126,7 +126,7 @@ Expected: `gate · assert_landed  failure` (listing still 0 rows until A2) AND `
 - [ ] **Step 5: Commit + check**
 
 ```bash
-node scripts/check.mjs close nightly_chain_external_clock --note "superseded: rebuild no longer gated; see A1" 2>/dev/null || true
+node scripts/check.mjs close nightly_chain_external_clock "superseded: rebuild no longer gated; see A1" --evidence "job list from Step 4 pasted in SESSION_LOG" 2>/dev/null || true
 git add .github/workflows/nightly-chain.yml
 git commit -m "fix(nightly-chain): rebuild runs on whatever landed; row gate is advisory (Ricky 09/15 lake-first)"
 ```

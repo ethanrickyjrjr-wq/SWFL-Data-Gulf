@@ -11,7 +11,8 @@ Wrote `docs/superpowers/plans/2026-09-15-master-brain-backend-week.md`: 5 workst
 day-routed. A = rebuild again (A0 dispatch daily-rebuild directly to prove the leg; A1 chain
 `rebuild` gets `if: always()` per Ricky's 09/15 lake-first decision; A2 `--source scrape` flag —
 the run step passes no --source today, pipeline.py defaults api; A3 `_fetch_max_freshness`
-count_table fallback for the 3 false NEVER_LANDED; A4 BILLING prescription, parked-not-funded).
+count_table fallback for the 3 false NEVER_LANDED; A4 BILLING prescription, parked-not-funded; opened check `llm_legs_parked_credit_wall` for the
+four unattended-LLM legs).
 B = redfin header (verify live first), usgs Retry adapter, qcew UA + legible failure, dbpr staging
 table repair, home-values REBUILD_PAT (daily-rebuild already has the pattern — no Ricky action
 needed, the brief was wrong on that). C = runner-smoke.yml + SWFL_LOCAL_RUNNER_READY variable on
