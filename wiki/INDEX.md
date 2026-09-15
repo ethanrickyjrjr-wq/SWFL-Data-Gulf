@@ -22,6 +22,15 @@ the compiled, cross-referenced, living version of the parts worth keeping past o
 - [Diversification](diversification.md) — five brains with a buyer outside real estate; condo SIRS
   compliance scoped as the first target (row-level data confirmed in `data_lake.dbpr_sirs_submissions`,
   positive-signal-only caveat); waiting on Ricky's free-vs-gated call · active · 2026-09-15
+- [Pipeline census](pipeline-census.md) — row-per-workflow reference for all 111 GHA workflows
+  (5-bucket fan-out); nightly-chain failing its row-gate for 3+ weeks, home-values-investor's
+  brain push silently blocked by branch protection, the NEVER_LANDED doctor bug resolved
+  (leepa_comp_sales really has 108,848 rows), dark roots and fleet-hygiene backlog named · active
+  · 2026-09-15
+- [Fedora and public exposure](fedora-and-exposure.md) — "the Spectre" = the Fedora box (HP
+  Spectre x360, same machine); runner runbook written but not yet wired; going private would cost
+  ~$9-15/month net; `brains/` exposure fix recommended (private submodule); weekly-dep-scan /
+  weekly-platform-health status genuinely unresolved from in-repo evidence · active · 2026-09-15
 
 ## Related (sister repo)
 

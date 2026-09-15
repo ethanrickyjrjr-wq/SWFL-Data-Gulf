@@ -1,3 +1,33 @@
+## 2026-09-15 (Sonnet 5) - Full pipeline census (111 workflows) + fedora/exposure investigation, 10-agent fan-out
+
+Ricky asked for a complete update on every pipeline, whether weekly-dep-scan/weekly-platform-health
+and GitHub issues are actually watched, and how the Fedora box ("the Spectre") is used. Ran a
+5-bucket census (market/listings, macro/econ, environmental, CRE/permits/parcels,
+deliverables+social+infra) covering all 111 GHA workflows against live `gh run list`/`gh run view`
+state, plus a 5-agent fedora/exposure wave. Findings written to two new wiki pages:
+`wiki/pipeline-census.md` and `wiki/fedora-and-exposure.md` (linked from `wiki/INDEX.md`).
+
+Top findings: `nightly-chain.yml` has failed its row-gate every run for 3+ weeks (Anthropic credit
++ SteadyAPI 0-row nights); `home-values-investor-monthly.yml` fails 3/3 on a branch-protection
+block nobody noticed; the "3 ghost NEVER_LANDED" registry entries are a `check_freshness.py` code
+bug, not missing data (leepa_comp_sales live-verified at 108,848 rows); 22 open cron-failure
+issues sit open because auto-close only fires on a next real success; `gh issue list --label`
+silently returns empty against the renamed-repo redirect (`brain-platform` vs canonical
+`SWFL-Data-Gulf`) - a real trap, caught mid-session. All 11 Dependabot alerts are on `next`
+(16.2.9, 2 CRITICAL RCEs) - flagged for Ricky's go-ahead, not bumped. "The Spectre" = the Fedora
+box, same machine; Chief Of Staff already had a same-day fuller diagnosis of the credit/SteadyAPI
+situation; going private would cost ~$9-15/month net (live-verified GitHub pricing); `brains/`
+exposure has a cleaner fix (private submodule) than going private. Runner runbook written to
+`_ASSISTANT/2026-09-15-fedora-runner-runbook.md`.
+
+Also fixed (committed, not pushed): `claude-sonnet-5`/`claude-opus-5` rows were missing from
+`refinery/agents/anthropic.mts`'s RATES table, pricing those calls at $0 and hiding them from the
+spend guard - re-lands the pricing-table half of 5f6ae7fc, which Ricky reverted (e0eadb0b) for an
+unrelated CI break bundled in the same commit.
+
+Next: push (asked, not yet confirmed); Ricky's word needed on the Next.js bump, the `brains/`
+submodule, repo visibility, and checking claude.ai/code/routines directly.
+
 ## 2026-09-15 (Opus 5) - /connect was DEAD the moment PR 204 merged: a stale 308 shadowed the new page
 
 PR 204 merged as `b790470f` (main CI green, 9652 tests). Then the prod check: `curl
