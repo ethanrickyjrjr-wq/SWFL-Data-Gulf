@@ -7,7 +7,7 @@
 
 Markers: **[ORPHAN]** nothing in the repo points at this file — it is invisible unless you come through this index, and it is a DELETION CANDIDATE. **[weak]** reachable only by bare filename, which leads nowhere.
 
-Reachability at generation: 965 by path · 552 by name only · 247 orphaned. Re-measure with `node scripts/doc-reachability.mjs`.
+Reachability at generation: 966 by path · 551 by name only · 247 orphaned. Re-measure with `node scripts/doc-reachability.mjs`.
 
 ## docs/superpowers — 880
 
@@ -1408,7 +1408,7 @@ Reachability at generation: 965 by path · 552 by name only · 247 orphaned. Re-
 - `_RESEARCH/data-and-ingest/2026-08-29-hf-reusable-ingest-workflow-evaluation.md` — HF "one root: reusable ingest workflow" proposal — evaluated 08/29/2026 — Source handed in: ~/Downloads/swfl-reusable-ingest.md (Hugging Face chat output, not vendor docs).
 - `_RESEARCH/data-and-ingest/2026-08-29-mineru-evaluation.md` — opendatalab/MinerU — "is this better than what we have?" (08/29/2026) — Source: https://github.com/opendatalab/mineru (crawl4ai, 08/29/2026) ·
 - `_RESEARCH/data-and-ingest/2026-08-29-misikoff-zillow-hf-dataset-and-colab.md` *[weak]* — misikoff/zillow (HF) + its Colab example — "does this work?" — evaluated 08/29/2026 — Asked: https://huggingface.co/datasets/misikoff/zillow +
-- `_RESEARCH/data-and-ingest/2026-09-15-satellite-parking-lot-traffic-vendor-evaluation.md` *[weak]* — Satellite/aerial parking-lot occupancy & traffic change detection — vendor evaluation — Date: 09/15/2026. Trigger: Ricky asked how to track parking-lot car counts / traffic
+- `_RESEARCH/data-and-ingest/2026-09-15-satellite-parking-lot-traffic-vendor-evaluation.md` — Satellite/aerial parking-lot occupancy & traffic change detection — vendor evaluation — Date: 09/15/2026. Trigger: Ricky asked how to track parking-lot car counts / traffic
 
 ## _ASSISTANT/investigations — 31
 
