@@ -1,5 +1,5 @@
 /**
- * MCP anonymous usage gate — a daily free-tier cap for keyless callers.
+ * MCP anonymous usage gate — a monthly free-tier cap for keyless callers.
  *
  * swfl_fetch / swfl_reconcile take no key (v1 connect-once design). Any
  * caller presenting X-Account-Key or X-Project-Key (the two auth paths
@@ -16,7 +16,7 @@
 
 import { clientIpFromHeaders } from "@/lib/rate-limit";
 import {
-  FREE_ANON_MCP_REQUESTS_PER_DAY,
+  FREE_ANON_MCP_REQUESTS_PER_MONTH,
   checkMcpUsageAllowance,
   hashIp,
   recordMcpUsage,
@@ -33,9 +33,10 @@ function hasAccountOrProjectKey(headers: Headers): boolean {
 }
 
 /**
- * @returns a 429 `Response` when a keyless caller has exceeded today's free
- *          request cap — the caller returns it verbatim — or `null` when the
- *          request may proceed (including every keyed/authenticated caller).
+ * @returns a 429 `Response` when a keyless caller has exceeded this month's
+ *          free request cap — the caller returns it verbatim — or `null`
+ *          when the request may proceed (including every keyed/authenticated
+ *          caller).
  */
 export async function usageLimitedResponse(request: Request): Promise<Response | null> {
   // Keyed callers (an account, or a project capability key) are never capped
@@ -48,8 +49,8 @@ export async function usageLimitedResponse(request: Request): Promise<Response |
   const { allowed } = await checkMcpUsageAllowance(ipHash);
   if (!allowed) {
     return new Response(
-      `Daily free limit reached (${FREE_ANON_MCP_REQUESTS_PER_DAY} keyless requests/day). ` +
-        `Connect an account at https://www.swfldatagulf.com/connect for unlimited access, or try again tomorrow.`,
+      `Monthly free limit reached (${FREE_ANON_MCP_REQUESTS_PER_MONTH} keyless requests/month). ` +
+        `Connect an account at https://www.swfldatagulf.com/connect for unlimited access, or wait for next month.`,
       { status: 429, headers: DENY_HEADERS },
     );
   }

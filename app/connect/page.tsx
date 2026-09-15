@@ -45,7 +45,7 @@ export default function ConnectPage() {
 
       <h2 className="mt-8 text-sm font-semibold text-white">Connect it</h2>
       <p className="mt-1 text-xs text-gray-500">
-        No signup, no key. 20 free lookups a day per connection —{" "}
+        No signup, no key. 15 free lookups a month —{" "}
         <a
           href="/settings/mcp"
           className="text-gulf-teal underline underline-offset-4 hover:text-gulf-teal/80"
