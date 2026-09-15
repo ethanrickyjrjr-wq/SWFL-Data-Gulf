@@ -52,10 +52,20 @@ export interface UsageLike {
  *  verified via crawl4ai 07/01/2026 — mirrors swfldatagulf-ops/lib/spend.ts. */
 const RATES: Record<string, { in: number; out: number }> = {
   "claude-sonnet-4-6": { in: 3.0, out: 15.0 },
+  // Verified live via crawl4ai 09/15/2026 against platform.claude.com/docs/en/
+  // about-claude/pricing: the $2/$10 introductory rate is now permanent (the
+  // scheduled 09/01/2026 rise to $3/$15 did not occur). Missing this row is the
+  // live defect found in research/agent-behavior/2026-09-15-max-subscription-
+  // vs-api-key-for-pipeline-calls-evaluation.md §6: 58 claude-sonnet-5 calls had
+  // logged at $0.00 and were invisible to checkSpendGuard.
+  "claude-sonnet-5": { in: 2.0, out: 10.0 },
   "claude-haiku-4-5": { in: 1.0, out: 5.0 },
   // Reachable via EMAIL_MODEL_OPUS (lib/email/model-router.ts, "max"/"opus" mode
   // -> email_build call type). Missing this silently priced every Opus call at $0.
   "claude-opus-4-8": { in: 5.0, out: 25.0 },
+  // Same rate as opus-4-8 above. Verified live via crawl4ai 09/15/2026 against
+  // platform.claude.com/docs/en/about-claude/pricing.
+  "claude-opus-5": { in: 5.0, out: 25.0 },
   // Insiders Edition flagship author (insiders_author; refusal fallback target is
   // the opus row above). $/MTok verified 07/10/2026 against platform.claude.com
   // pricing via the claude-api skill reference. Missing this row would price every

@@ -46,6 +46,27 @@ describe("computeCostUsd()", () => {
     assert.equal(cost, 5.0 + 25.0);
   });
 
+  // Regression for the 09/15/2026 live defect (research/agent-behavior/2026-09-15-
+  // max-subscription-vs-api-key-for-pipeline-calls-evaluation.md §6): claude-sonnet-5
+  // and claude-opus-5 had no RATES row, so real calls (e.g. lib/social-pulse/narrative.ts,
+  // which defaults PULSE_NARRATIVE_MODEL to "claude-sonnet-5") priced at $0 and were
+  // invisible to checkSpendGuard.
+  test("Sonnet 5 — exact MTok math, not the invisible-$0 bug", () => {
+    const cost = computeCostUsd("claude-sonnet-5", {
+      input_tokens: 1_000_000,
+      output_tokens: 1_000_000,
+    });
+    assert.equal(cost, 2.0 + 10.0);
+  });
+
+  test("Opus 5 — exact MTok math, not the invisible-$0 bug", () => {
+    const cost = computeCostUsd("claude-opus-5", {
+      input_tokens: 1_000_000,
+      output_tokens: 1_000_000,
+    });
+    assert.equal(cost, 5.0 + 25.0);
+  });
+
   test("Haiku 4.5, no cache — exact MTok math", () => {
     const cost = computeCostUsd("claude-haiku-4-5", {
       input_tokens: 500_000,
