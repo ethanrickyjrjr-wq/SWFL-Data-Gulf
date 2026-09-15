@@ -1,3 +1,18 @@
+
+## 2026-09-15 (Opus 5) — OPERATOR: "GET RID OF ALL THE OLD CHECKS SO WE CAN START FRESH"
+
+RESOLVED SAME TURN. 440 open checks → 4. The 436 old ones are `state='dropped'` with a
+drop_reason pointing at the full snapshot (`docs/_archive/2026-09-15-checks-ledger-bankruptcy.md`,
+every key + label + detail preserved). Nothing deleted; `scripts/check.mjs reopen <project> <key>`
+brings any one back. Kept open: the 4 opened today.
+
+This was NORTH STAR #4, which had sat explicitly "blocked on his word" because mass-archiving his
+obligations is his call. NORTH STAR #4 updated to DONE.
+
+THE OTHER HALF IS STILL OPEN: this scratchpad carries 45 open items and is the same shape of
+problem — a list that only grows is not discipline. He has not said to bankrupt this one, so it
+stands until he does.
+
 ## 2026-09-15 (Opus 5) — OPERATOR: "WE ARE USING THE FUCKING MAX PLAN"
 
 I reported the pay-per-call balance being empty as if it were a finding. It is not a finding, it is

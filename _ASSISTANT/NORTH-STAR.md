@@ -21,10 +21,12 @@ delete one. Deletion beats addition.
    injection (.claude/hooks/inject-scoped-rules.mjs + lib/scoped-rules.mjs already exist —
    extend coverage), then DELETE from CLAUDE.md what scoped injection now covers. A rule
    loaded every session competes with the work every session.
-4. LEDGER BANKRUPTCY — 405 open checks and 45 open scratchpad items is noise wearing the
-   costume of discipline; three live criticals once sat unread in it for days. OPERATOR
-   DECISION OWED: triage to a live ~15, archive the rest with a date. Blocked on his word —
-   mass-archiving his obligations is his call, not a session's.
+4. LEDGER BANKRUPTCY — DONE 09/15/2026. Operator: "GET RID OF ALL THE OLD CHECKS SO WE CAN
+   START FRESH." 436 of 440 open checks moved to state='dropped'; the 4 opened that day stayed.
+   Full snapshot with every label and detail: docs/_archive/2026-09-15-checks-ledger-bankruptcy.md
+   — nothing deleted, any key comes back with `scripts/check.mjs reopen`. The ledger is now a
+   live list again; keeping it one is the standing job. Scratchpad (45 open) is NOT done and is
+   the remaining half of this line.
 5. ADOPT NOTHING NEW FOR 30 DAYS (from 08/19/2026) — no new tools, harnesses, or memory
    surfaces. Writ: evaluated, rejected. Omnigent: evaluated, rejected. Every recent "make
    the AI better" lead ended do-not-adopt; the leverage is finishing and deleting, not adding.

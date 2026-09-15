@@ -1,3 +1,39 @@
+## 2026-09-15 (Opus 5) - LEDGER BANKRUPTCY executed: 440 open checks -> 4
+
+Operator, this turn: "GET RID OF ALL THE OLD CHECKS SO WE CAN START FRESH." That is the word
+NORTH STAR #4 had been explicitly blocked on since 08/19 ("mass-archiving his obligations is his
+call, not a session's").
+
+Done: 436 of 440 open checks are now `state='dropped'` with `resolved_by='operator-decree'` and a
+`drop_reason` naming the decree and pointing at the snapshot. The 4 opened/touched today stayed
+open: `cron_incident_redfin_monthly`, `llm_legs_parked_credit_wall`, `doctor_cannot_see_billing_wall`,
+`area_fence_blind_to_subagents`.
+
+DROPPED, NOT DELETED - every row is still in `public.checks`, and the full snapshot with every key,
+class, open date, label and detail is committed at
+`docs/_archive/2026-09-15-checks-ledger-bankruptcy.md` (779 lines, grouped by project). Any one
+comes back with `node scripts/check.mjs reopen <project> <key> "<label>"`.
+
+Scale of what was in there, by project: brain-platform 209, ingest 100, email 49, insiders 5, ops 6,
+social 6, deliverable 4, data-quality 4, platform 4, refinery 4, email-recipes 4, plus 30 smaller
+buckets.
+
+Verification pasted:
+  node scripts/check.mjs list
+  4 open - 2 defect - 1 task - 1 untriaged
+
+SECOND-ORDER CHECKED BEFORE CALLING IT DONE: Gate 17 (`.claude/hooks/lib/strikes-guard.mjs`) blocks
+every push when a 3+-strike shape has an OWED guard with no tracked check key, and several OWED
+shapes in STRIKES.md name keys I just dropped. It does NOT break: `guardIsTracked` only regex-tests
+the STRIKES.md TEXT for `check open: <key>` and never queries the table.
+`unguardedShapes(parseStrikes(...))` returns 0 after the drop. No push regression.
+
+NORTH STAR #4 updated to DONE, with the remaining half named: the scratchpad still carries 45 open
+items and is the same shape of problem. He has not bankrupted that one, so it stands.
+
+Still blocked, unchanged from the entry below: A1 Step 4 / A2 Step 3 need the workstream-A commits
+on main before a chain dispatch proves anything. Awaiting the push word.
+
 ## 2026-09-15 (Opus 5) - Workstream A closed out: A3 + A4 landed, one shipped C2b violation caught
 
 A3 (`1dafc707`) - `_fetch_max_freshness` gains a `count_table` branch. Three live tables were reading
