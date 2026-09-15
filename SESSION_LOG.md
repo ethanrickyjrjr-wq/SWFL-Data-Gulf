@@ -1,3 +1,37 @@
+## 2026-09-15 (Opus 5) - PR 204 merged: MCP monthly anon cap + /connect, migration applied, red CI fixed
+
+Operator: "MERGE IT" on PR 204 (`mcp-usage-cap-and-connect-page`). It was not mergeable as it
+stood - CI `build` was RED (run 34997406403, 2 of 9652 failing) and both failures came from the
+PR itself. Three things landed before the merge.
+
+**1. The migration is applied to production.** `migrations/20260915_mcp_anon_usage.sql` via
+`bun scripts/run-migration.ts`. Verified over the direct Postgres connection, not attested:
+`public.mcp_anon_usage` exists with 3 columns (ip_hash text NOT NULL, month date NOT NULL,
+request_count integer NOT NULL), `relrowsecurity = true`, 0 rows, check constraint
+`request_count >= 0` + PK (ip_hash, month) present, `increment_mcp_anon_usage(text, date, integer)`
+present with `proacl = {postgres=X/postgres,service_role=X/postgres}` - PUBLIC/anon/authenticated
+EXECUTE revoked as the migration intends. The cap was fail-open until this ran; it now meters.
+
+**2. `311e33f8` - the red CI, root-caused.** Both new test files
+(`app/api/mcp/usage-gate.test.ts`, `lib/mcp/anon-usage.test.ts`) called `mock.module()` with no
+`afterAll` restore. bun's mock.module is process-global, so usage-gate case (5)'s deliberately
+throwing `checkMcpUsageAllowance` stayed installed and killed
+`app/api/mcp/route.test.ts`'s POST CORS assertion in CI's Linux file order while every Windows
+run stayed green. That is exactly the shape `lib/testing/mock-restore-ratchet.test.ts` was built
+to catch (08/11/2026, 3 strikes of green-locally-red-in-CI-mock-leak) - the guard named both
+files and the PR shipped anyway. Fixed with the guard's own documented idiom; no whitelist entry
+added, the ratchet only shrinks. Full suite in one process: 9652 pass, 0 fail, 944 files.
+
+**3. Worktree, not the shared checkout.** A parallel session moved the shared brain-platform
+checkout from this branch onto `main` mid-session (and holds a claim on `_ASSISTANT/TODAY.md`), so
+the fix was done in the `bp-mcp204` worktree with node_modules junctioned. TODAY.md untouched -
+not mine.
+
+**What still has to run:** Vercel redeploys `main` on merge - `/connect` is not live until that
+deploy finishes. The cap's live metering is unproven until a real keyless MCP call puts a row in
+`mcp_anon_usage`; check `mcp_anon_cap_live_meter_verify` is open for that. PR:
+https://github.com/ethanrickyjrjr-wq/SWFL-Data-Gulf/pull/204
+
 ## 2026-09-14 (Sonnet 4.6) — weekly read-only dependency audit
 
 Scheduled task. No code changed. `bun outdated` run against 94 packages; 63 outdated found.

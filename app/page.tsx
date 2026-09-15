@@ -45,7 +45,11 @@ export default async function Home() {
             <a className="final-cta-ask" href="/ask">
               ask the data a question
             </a>{" "}
-            — no account needed.
+            — no account needed, or{" "}
+            <a className="final-cta-ask" href="/connect">
+              connect it to your own AI
+            </a>
+            .
           </p>
         </div>
       </section>
