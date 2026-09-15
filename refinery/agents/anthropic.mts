@@ -53,6 +53,14 @@ export interface UsageLike {
 const RATES: Record<string, { in: number; out: number }> = {
   "claude-sonnet-4-6": { in: 3.0, out: 15.0 },
   "claude-haiku-4-5": { in: 1.0, out: 5.0 },
+  // Missing these two rows silently priced every claude-sonnet-5/claude-opus-5 call at
+  // $0 (58 sonnet-5 calls found logging $0.00, invisible to the spend guard — found
+  // 09/15/2026, _RESEARCH/agent-behavior/2026-09-15-max-subscription-vs-api-key-for-
+  // pipeline-calls-evaluation.md). $/MTok per platform.claude.com/docs pricing, cached
+  // 2026-06-24 (claude-api skill reference; live crawl4ai fetch of the pricing page
+  // returned no table — it's client-rendered JS, not in the static HTML).
+  "claude-sonnet-5": { in: 2.0, out: 10.0 },
+  "claude-opus-5": { in: 5.0, out: 25.0 },
   // Reachable via EMAIL_MODEL_OPUS (lib/email/model-router.ts, "max"/"opus" mode
   // -> email_build call type). Missing this silently priced every Opus call at $0.
   "claude-opus-4-8": { in: 5.0, out: 25.0 },
