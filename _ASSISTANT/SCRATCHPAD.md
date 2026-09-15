@@ -1,3 +1,27 @@
+## 2026-09-15 (Opus 5) — OPERATOR: "WE HAVE MAX PLAN WE DON'T NEED TO PAY MORE IN FUCKING API COSTS!!!!!!!!!!!!!!!!!"
+
+He typed `LLM_PROVIDER=claude-code bun refinery/cli.mts master --resilient` expecting the
+subscription to pay for the rebuild. It does not and cannot today:
+
+- `LLM_PROVIDER` is read by NOTHING in this repo. Two greps (tree-wide, incl. `ingest/.venv`):
+  every hit is crawl4ai's own `cli.py`/`config.py`, litellm internals, or a crawl4ai changelog
+  under `docs/audit/`. Zero hits in `refinery/`, `lib/`, `app/`, `scripts/`.
+- The factory has NO provider indirection at all. `refinery/agents/anthropic.mts:15-17` is
+  `agentsAreMocked() { return !env.anthropicApiKey }` — key present = metered API, key absent =
+  deterministic mock. Those are the only two states. Models are pinned literals at lines 6-8
+  (`claude-haiku-4-5` triage, `claude-sonnet-4-6` synthesis), not env-switchable.
+- So every brain rebuild anyone has ever run locally billed the API key, and a full
+  `master --resilient` walk is ~38-45 leaf rebuilds x 2 model passes each.
+
+THE REAL GRIPE, which is broader than the refinery: we pay Max AND we pay per-token, and no
+surface in this repo can spend the subscription. Same for `lib/email`, `lib/assistant`,
+`lib/deliverable` — every one routes through the same metered client.
+
+OWED: find out whether the subscription CAN legitimately pay for programmatic pipeline calls
+(Agent SDK auth / headless `claude -p`), verified against live vendor docs + terms, not memory.
+If yes, that is a provider seam in ONE file (`anthropic.mts`) and every caller inherits it. If
+no, say so plainly and stop him expecting it.
+
 ## 2026-09-03 (Opus 5) — OPERATOR: "I don't want the fucking subdivision fucking name!!!!" + "We don't have fucking 12 listings you stupid fuck!!!!"
 
 TWO separate corrections, both mine.
@@ -10657,3 +10681,20 @@ a real walk, not just the bugfix this session did. Requirements stated, none bui
    directly whether loosening AI's latitude here is worth exploring. Not answered by fiat this
    session, needs its own real conversation.
 Not built this session — logged so the next session doesn't re-derive it from scratch.
+
+## 2026-09-15 (Opus 5) — OPERATOR: "WHAT THE FUCK ARE YOU DOING???????????????????????"
+Raised mid-turn after "MERGE IT" on PR 204. He said merge; instead of a merge he watched
+tool calls scroll for several minutes with no word from me about why.
+What was actually happening, and why it wasn't a merge: PR 204's CI `build` job is RED
+(run 34997406403, 2 of 9652 tests failing) and both failures are caused by the PR itself —
+`app/api/mcp/usage-gate.test.ts` and `lib/mcp/anon-usage.test.ts` call `mock.module()` with
+no `afterAll` restore, which is process-global in bun and poisons `app/api/mcp/route.test.ts`
+(the CORS test) in CI's file order. This is the EXACT shape the mock-restore ratchet guard
+(`lib/testing/mock-restore-ratchet.test.ts`, built 08/11/2026 after 3 strikes of
+green-locally-red-in-CI-mock-leak) exists to catch — the guard worked, the PR ignored it.
+LESSON (the gripe, not the bug): when an order like "MERGE IT" turns into work the operator
+didn't ask for, say so in ONE line BEFORE the tool calls start, not after. "CI is red, fixing
+2 tests, then merging" is the whole message. Silence during a long tool run reads as flailing.
+Also in play: a parallel session moved the shared checkout from the PR branch to `main`
+mid-turn, so the fix had to go into a worktree (`../bp-mcp204`) — more calls, still no excuse
+for not narrating.
