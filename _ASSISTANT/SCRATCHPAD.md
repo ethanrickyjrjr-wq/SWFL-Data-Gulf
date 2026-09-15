@@ -1,3 +1,15 @@
+## 2026-09-15 (Fable 5.1) — OPERATOR: "fixing all our failures with getting data and not breaking like always"
+
+Raised with the week's brief (`_ASSISTANT/2026-09-15-fable-pipeline-plan-brief.md`), usage nearly
+gone until Saturday, backend-to-master-brain only. Answered with ONE plan, not a diagnosis:
+`docs/superpowers/plans/2026-09-15-master-brain-backend-week.md` — 14 tasks, day-by-day, routed
+Opus/Sonnet, every task ends in a pasted `gh run` result. The "not breaking like always" half is
+D1 (the 6-strike stale-source tripwire, helper + vendor-file pulls only) and D2 (the cloud routine
+that self-approved a push to main on 09/14). A0 is the first move: dispatch `daily-rebuild.yml`
+directly and see whether the rebuild leg itself clears without the chain gate — nobody has proven
+that since 08/12. Ask-first items are at the bottom of the plan (Fedora ssh, Dependabot `next`,
+ruleset bypass, A0's outcome if red on credit).
+
 ## 2026-09-15 (Opus 5) — OPERATOR: "USERS DON'T FUCKING READ THE FUCKING BRAINS!! THEY USE THEIR CLAUDE!! OR AI"
 
 My error, and it was load-bearing. I argued against moving LLM work onto the Max seat partly on the
