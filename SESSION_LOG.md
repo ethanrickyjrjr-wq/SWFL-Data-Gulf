@@ -1,3 +1,29 @@
+## 2026-09-15 (Opus 5) - /connect was DEAD the moment PR 204 merged: a stale 308 shadowed the new page
+
+PR 204 merged as `b790470f` (main CI green, 9652 tests). Then the prod check: `curl
+https://www.swfldatagulf.com/connect` returns **308 Permanent Redirect -> /**. The page never
+renders.
+
+Cause, not a guess: `next.config.ts` has carried `{ source: "/connect", destination: "/",
+permanent: true }` since 05/26/2026 - commit `8eff67af` "feat(site): move /connect content to /
+(homepage); /connect 308s back (#27)". Next.js matches a redirect BEFORE the route, so
+`app/connect/page.tsx` (new in PR 204) was unreachable, and the homepage link PR 204 added
+pointed at a redirect that bounces back to the homepage. Built, not wired - green tests, green
+deploy, dead page, and neither the PR nor its test plan touched next.config.ts.
+
+Fix: the stale redirect is deleted, and the shape is guarded -
+`lib/testing/redirect-shadows-a-route.test.ts` fails whenever a literal redirect source in
+next.config.ts has an `app/**/page.tsx` behind it. Red-first proof against the PRE-FIX config:
+extractor returns `["/connect"]`, `app/connect/page.tsx` exists, guard verdict `true` (would
+have flagged). Green after the fix: 2 pass.
+
+Operator note: a 308 is cached permanently by browsers - after the deploy, test `/connect` in a
+private window or with curl, not in the tab that already followed the redirect.
+
+Still owed: this needs a push + Vercel deploy before `/connect` is reachable, and
+`mcp_anon_cap_live_meter_verify` still wants one real keyless call to put a row in
+`mcp_anon_usage`.
+
 ## 2026-09-15 (Opus 5) - PR 204 merged: MCP monthly anon cap + /connect, migration applied, red CI fixed
 
 Operator: "MERGE IT" on PR 204 (`mcp-usage-cap-and-connect-page`). It was not mergeable as it

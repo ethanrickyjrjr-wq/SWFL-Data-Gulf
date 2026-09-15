@@ -79,15 +79,6 @@ const nextConfig: NextConfig = {
     // lib/charts/chart-fonts.ts header for the landmine).
     "/c/[id]/card": ["./assets/fonts/*.ttf"],
   },
-  async redirects() {
-    return [
-      {
-        source: "/connect",
-        destination: "/",
-        permanent: true,
-      },
-    ];
-  },
   async headers() {
     return [
       {

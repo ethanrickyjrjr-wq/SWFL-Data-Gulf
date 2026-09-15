@@ -1,3 +1,22 @@
+## 2026-09-15 (Opus 5) — OPERATOR: "USERS DON'T FUCKING READ THE FUCKING BRAINS!! THEY USE THEIR CLAUDE!! OR AI"
+
+My error, and it was load-bearing. I argued against moving LLM work onto the Max seat partly on the
+Agent SDK terms line ("Anthropic does not allow third party developers to offer claude.ai login or
+rate limits for their products"), and I applied it by calling the brains "customer-facing content
+that customers read". That is not our product. `docs/THE-GOAL.md:24`, our own words: "The user's AI.
+It reasons over the dossier master hands it ... Everyone has Tier 3." We hand a context bundle to
+the consumer's OWN model on the consumer's OWN plan. No end user touches our inference and nobody
+reads brain prose directly.
+
+With the premise gone the objection goes: our seat would be BUILDING A DATASET, which is ordinary
+developer automation — the same shape as the 35-sonnet sweep (08/27) and the fix fan-out (08/27-28)
+already run on it. Verdict in the research file flipped from DO-NOT-ADOPT to ADOPT-SEQUENCED.
+
+SHAPE OF THE MISTAKE: I read a vendor sentence correctly and then attached it to a product model I
+never checked, in a session where I had already checked four other things. The consumption model is
+written down in the one doc named THE GOAL. Cost him a round of shouting to correct a fact that was
+one grep away.
+
 ## 2026-09-15 (Opus 5) — OPERATOR: "WE HAVE MAX PLAN WE DON'T NEED TO PAY MORE IN FUCKING API COSTS!!!!!!!!!!!!!!!!!"
 
 He typed `LLM_PROVIDER=claude-code bun refinery/cli.mts master --resilient` expecting the
@@ -10698,3 +10717,21 @@ didn't ask for, say so in ONE line BEFORE the tool calls start, not after. "CI i
 Also in play: a parallel session moved the shared checkout from the PR branch to `main`
 mid-turn, so the fix had to go into a worktree (`../bp-mcp204`) — more calls, still no excuse
 for not narrating.
+
+## 2026-09-15 (Opus 5) — OPERATOR, SECOND TIME IN ONE SESSION: "WHAT THE FUCK ARE YOU DOING?????"
+He typed the same thing twice, which is the exact thing RULE 2 exists to prevent. The first
+entry above logged the lesson (narrate in ONE line before a long tool run) and then I did it
+again: PR 204 merged, and instead of saying "merged, now checking it in prod" I went straight
+into curl + next.config archaeology in silence.
+STANDING BEHAVIOR, not a note: the FIRST line of any reply that starts a multi-call stretch
+says what the goal is and how long it runs. After a merge/push completes, the completion gets
+its own sentence BEFORE any follow-up probing starts.
+Worth it, though, and this is the real finding: `/connect` was DEAD in prod the moment it
+merged — `next.config.ts` has redirected `/connect` -> `/` (308 permanent) since 05/26/2026
+(commit 8eff67af, when the connect content was folded into the homepage). Next matches a
+redirect BEFORE a route, so the brand-new page could never render, and the homepage link
+pointed at a redirect back to itself. Built, not wired, again — green tests, green deploy,
+dead page. Fixed by deleting the stale redirect + a guard
+(`lib/testing/redirect-shadows-a-route.test.ts`) that fails whenever a redirect source has a
+real page behind it. NOTE for his browser: a 308 is cached permanently, so test /connect in a
+private window or with curl.
