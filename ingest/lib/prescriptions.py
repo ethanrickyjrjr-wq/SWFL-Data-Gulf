@@ -6,14 +6,20 @@ Shared surface: ingest/scripts/doctor.py assigns a SUBSET; the cron incident han
 A red line NEVER carries an invented diagnosis. It carries a member of this enum, or an
 explicit UNKNOWN with the evidence attached. That is the whole contract.
 
-Doctor's four signals (freshness / volume / content / run-status) cannot reach four of
-the ten members:
+Doctor's four signals (freshness / volume / content / run-status) cannot reach five of
+the eleven members:
   ACTION_VERSION, SECRET_NOT_WIRED, SCHEMA_NAME_DRIFT — produced by Phase 2's
     ingest/tools/check-registry-identity.mts AT PR TIME. It fails the PR and writes no
     ledger row, so there is nothing for doctor to observe. Doctor never assigns them.
   WAF_BLOCK — requires reading a failed run's LOG for the `FetchHealthError` literal that
     ingest/lib/guards.py:34-45 exists to make greppable. That is the incident handler's
     surface, not doctor's. Doctor never assigns it.
+  BILLING — same shape: the ONLY signal is the `credit balance is too low` / `billing_error`
+    literal in the failed run's LOG, and ingest/lib/gh_runs.py:32-34 `_RUN_FIELDS` carries no
+    log text (it is `gh run list --json`, not `gh run view --log-failed`). The handler that
+    DOES read the log already classifies it: .github/scripts/classify-cron-failure.mjs rule 3.
+    Doctor never assigns BILLING — adding it to DOCTOR_ASSIGNABLE would claim a signal doctor
+    cannot see.
 They live here because the handler needs the same literals. DOCTOR_ASSIGNABLE is the
 enforced boundary (ingest/scripts/doctor.py::prescribe never returns outside it).
 """
@@ -27,6 +33,7 @@ GAP_SENTINEL = "GAP_SENTINEL"
 NEVER_LANDED = "NEVER_LANDED"
 ZERO_COVERAGE = "ZERO_COVERAGE"
 WAF_BLOCK = "WAF_BLOCK"
+BILLING = "BILLING"
 TRANSIENT = "TRANSIENT"
 UNKNOWN = "UNKNOWN"
 
@@ -39,6 +46,7 @@ ALL: list[str] = [
     NEVER_LANDED,
     ZERO_COVERAGE,
     WAF_BLOCK,
+    BILLING,
     TRANSIENT,
     UNKNOWN,
 ]
@@ -50,6 +58,8 @@ DOCTOR_ASSIGNABLE: frozenset[str] = frozenset(
 # TRANSIENT is the ONLY retryable class. TIMEOUT_KILL is explicitly false — the money
 # guard: a run that already hit its ceiling re-burns the identical spend on retry (the
 # corridor-pulse burn). WAF_BLOCK is false — a retry storm makes an anti-bot block worse.
+# BILLING is false — the credit wall is not a flake; it returns the identical error on
+# every attempt, and the leg is PARKED (CLAUDE.md RULE 3 C2b), never re-dispatched.
 _SHOULD_RETRY: dict[str, bool] = {TRANSIENT: True}
 
 _FIX_TEMPLATES: dict[str, str] = {
@@ -93,6 +103,14 @@ _FIX_TEMPLATES: dict[str, str] = {
         "Source is blocking the fetch — read the failed run of `.github/workflows/{workflow}` for "
         "the `FetchHealthError` raised by `ingest/lib/guards.py`. DO NOT BLIND-RETRY: "
         "should_retry=false; a retry storm makes an anti-bot block worse."
+    ),
+    BILLING: (
+        "PARKED — `.github/workflows/{workflow}` makes an unattended Anthropic call and the key "
+        "came back `credit balance is too low`. Per CLAUDE.md RULE 3 C2b this leg is PARKED, and "
+        "no billing action is ever the prescription: redesign the leg so it needs no unattended "
+        "model call, or author its content in an interactive Max-plan session (the Issue 001 "
+        "pattern), or leave it parked until the operator raises it. DO NOT RETRY: should_retry="
+        "false — the wall returns the identical error on every attempt."
     ),
     TRANSIENT: (
         "Transient failure in `.github/workflows/{workflow}` — retry up to 2x. If it fails a third "

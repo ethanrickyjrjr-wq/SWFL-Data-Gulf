@@ -68,7 +68,10 @@ export function classify(logTail) {
     };
   }
 
-  // 3. BILLING — Anthropic credit/billing exhaustion (HTTP 402 `billing_error`).
+  // 3. BILLING — the Anthropic credit wall (HTTP 402 `billing_error`). PARKED, never
+  //    retried, and the suggestedAction NEVER proposes a billing action (CLAUDE.md
+  //    RULE 3 C2b, 5 recorded strikes) — this string lands verbatim in the incident
+  //    ledger Root Cause and the GitHub issue body via log-cron-incident.mjs:242.
   //    A credit-exhausted org 402s every messages call, so every AI brain HOLDs
   //    platform-wide during a scheduled-send window. The distinctive signal is the
   //    error body's literal `billing_error` type token (or the "credit balance is
@@ -82,7 +85,7 @@ export function classify(logTail) {
       klass: "BILLING",
       signal: "anthropic billing_error (402)",
       suggestedAction:
-        "Anthropic credit/billing exhaustion (HTTP 402 `billing_error`) — every AI brain HOLDs platform-wide until credits are restored. Top up credits at platform.claude.com (Billing/Plans). This is a payment problem, not a code, dependency, or pipeline-wiring problem — do not retry or reconcile packs.",
+        "PARKED — the Anthropic key returned `billing_error` / `credit balance is too low`, so every unattended AI leg HOLDs platform-wide. Per CLAUDE.md RULE 3 C2b this leg is PARKED and no billing action is ever the prescription: redesign the leg so it needs no unattended model call, or author its content in an interactive Max-plan session (the Issue 001 pattern), or leave it parked until the operator raises it. Do NOT auto-retry — the wall returns the identical error on every attempt — and do not reconcile packs; this is not a code, dependency, or pipeline-wiring problem.",
     };
   }
 

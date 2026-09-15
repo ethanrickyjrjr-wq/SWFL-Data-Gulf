@@ -9,7 +9,7 @@ sys.path.insert(0, os.path.join(os.path.dirname(__file__), "..", "..", ".."))
 from ingest.lib import prescriptions as rx
 
 
-def test_all_ten_members_exist():
+def test_all_eleven_members_exist():
     assert rx.ALL == [
         rx.ACTION_VERSION,
         rx.SECRET_NOT_WIRED,
@@ -19,10 +19,11 @@ def test_all_ten_members_exist():
         rx.NEVER_LANDED,
         rx.ZERO_COVERAGE,
         rx.WAF_BLOCK,
+        rx.BILLING,
         rx.TRANSIENT,
         rx.UNKNOWN,
     ]
-    assert len(set(rx.ALL)) == 10
+    assert len(set(rx.ALL)) == 11
 
 
 # (code, ctx kwargs, tokens that MUST appear in the fix text)
@@ -35,6 +36,7 @@ _CASES = [
     (rx.NEVER_LANDED,       {"workflow": "redfin.yml", "table": "data_lake.redfin_city_swfl"}, ["redfin.yml", "data_lake.redfin_city_swfl", "ingest/cadence_registry.yaml"]),
     (rx.ZERO_COVERAGE,      {"table": "data_lake.parcel_subdivision"},                  ["data_lake.parcel_subdivision", "ingest/cadence_registry.yaml"]),
     (rx.WAF_BLOCK,          {"workflow": "lee-permits-daily.yml"},                      ["lee-permits-daily.yml", "ingest/lib/guards.py"]),
+    (rx.BILLING,            {"workflow": "city-pulse-daily.yml"},                        ["city-pulse-daily.yml", "PARKED", "RULE 3 C2b"]),
     (rx.TRANSIENT,          {"workflow": "zhvi-monthly.yml"},                           ["zhvi-monthly.yml"]),
     (rx.UNKNOWN,            {"subject": "graphify-republish.yml"},                      ["graphify-republish.yml", "ingest/lib/prescriptions.py"]),
 ]
@@ -60,7 +62,7 @@ def test_timeout_kill_never_retries_money_guard():
 def test_doctor_assignable_is_a_strict_subset():
     assert rx.DOCTOR_ASSIGNABLE < set(rx.ALL)
     # Phase-2 / log-reading classes are NOT doctor-observable.
-    for code in (rx.ACTION_VERSION, rx.SECRET_NOT_WIRED, rx.SCHEMA_NAME_DRIFT, rx.WAF_BLOCK):
+    for code in (rx.ACTION_VERSION, rx.SECRET_NOT_WIRED, rx.SCHEMA_NAME_DRIFT, rx.WAF_BLOCK, rx.BILLING):
         assert code not in rx.DOCTOR_ASSIGNABLE
 
 
@@ -72,3 +74,18 @@ def test_unknown_code_raises_rather_than_inventing():
 def test_missing_context_is_stated_not_silently_blank():
     text = rx.fix_text(rx.TIMEOUT_KILL)  # no workflow supplied
     assert "workflow unknown" in text
+
+
+def test_billing_is_parked_never_retried_and_never_says_add_credit():
+    """RULE 3 C2b (5 recorded strikes): a `credit balance is too low` 400/402 is PARKED.
+    Not transient, not retryable, and the fix text NEVER proposes a billing action."""
+    assert rx.BILLING in rx.ALL
+    # Log-derived, like WAF_BLOCK: gh_runs._RUN_FIELDS carries no log text, so doctor's
+    # four signals cannot observe it. It is the incident handler's surface.
+    assert rx.BILLING not in rx.DOCTOR_ASSIGNABLE
+    assert rx.should_retry(rx.BILLING) is False
+    text = rx.fix_text(rx.BILLING, workflow="city-pulse-daily.yml")
+    assert "PARKED" in text and "RULE 3 C2b" in text
+    low = text.lower()
+    for banned in ("add credit", "top up", "top-up", "increase your credit", "fund"):
+        assert banned not in low, f"RULE 3 C2b violation: fix text contains {banned!r}"

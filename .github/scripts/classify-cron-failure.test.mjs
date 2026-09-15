@@ -252,8 +252,19 @@ test("BILLING — Anthropic 402 billing_error is pulled out of the generic HOLD 
     'CRON-DIAG failureClass=deterministic reason=402 {"type":"error","error":{"type":"billing_error","message":"Your credit balance is too low to access the Claude API."}}',
   );
   assert.equal(c.klass, "BILLING");
-  assert.match(c.suggestedAction, /platform\.claude\.com/);
+  assert.match(c.suggestedAction, /PARKED/);
+  assert.match(c.suggestedAction, /RULE 3 C2b/);
   assert.doesNotMatch(c.suggestedAction, /input_brains/);
+  assert.equal(shouldRetry(c.klass), false, "the credit wall is not a flake — never retry");
+});
+
+// RULE 3 C2b (5 recorded strikes): this string is written verbatim into the incident
+// ledger Root Cause and the GitHub issue body. It must never propose a billing action.
+test("BILLING — suggestedAction never proposes a billing action (RULE 3 C2b)", () => {
+  const c = classify("anthropic: credit balance is too low");
+  for (const banned of [/add credit/i, /top[- ]?up/i, /increase your credit/i, /fund/i]) {
+    assert.doesNotMatch(c.suggestedAction, banned, `RULE 3 C2b violation: ${banned}`);
+  }
 });
 
 test("BILLING — wins over TRANSIENT when retry/timeout noise precedes the 402", () => {
