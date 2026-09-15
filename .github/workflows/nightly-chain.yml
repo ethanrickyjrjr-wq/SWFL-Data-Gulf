@@ -156,6 +156,7 @@ jobs:
   # true` source has actually LANDED ROWS TODAY (UTC). A green ingest that wrote
   # zero rows must not produce a green rebuild on yesterday's data.
   # This is a normal job (not a `uses:`), so timeout-minutes IS supported here.
+  # 09/15/2026: the gate reds the chain but NO LONGER blocks `rebuild` — see T3.
   row-gate:
     name: gate · assert_landed
     needs: [guard, lifecycle, pulse, live-search]
@@ -188,10 +189,19 @@ jobs:
         run: python -m ingest.scripts.assert_landed
 
   # ── T3: rebuild ───────────────────────────────────────────────────────────
+  # LAKE FIRST (Ricky 09/15/2026): the row gate still RUNS and still reds this
+  # chain when a nightly source misses, but it no longer BLOCKS the rebuild —
+  # one stale dataset of 77 must not freeze the master brain (34 days stale on
+  # 09/15). Per-dataset staleness still reaches the reader: rebuild_due.py writes
+  # brains/_ingest-freshness.json and caveatIsFresh renders the caveat.
+  # ponytail: always() means a genuinely broken ingest still rebuilds on that
+  # dataset's older rows; the caveat is the guard, not the gate.
+  # The guard condition is kept EXPLICIT — under always(), a skipped or failed
+  # `guard` job leaves should_run empty, so duplicate-fire protection still holds.
   rebuild:
     name: rebuild · brains
-    needs: [row-gate]
-    if: ${{ inputs.dry_run != true }}
+    needs: [guard, row-gate]
+    if: always() && needs.guard.outputs.should_run == 'true' && inputs.dry_run != true
     uses: ./.github/workflows/daily-rebuild.yml
     secrets: inherit
 
