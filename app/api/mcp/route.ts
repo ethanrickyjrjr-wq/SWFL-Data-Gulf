@@ -1,6 +1,7 @@
 import { createMcpHandler } from "mcp-handler";
 import { buildMcpServer } from "./server";
 import { unauthorizedResponse } from "./auth";
+import { usageLimitedResponse } from "./usage-gate";
 import { buildReportIdList } from "./inventory";
 
 /**
@@ -121,6 +122,12 @@ function withCors(response: Response): Response {
 export async function POST(request: Request): Promise<Response> {
   const denied = await unauthorizedResponse(request);
   if (denied) return denied;
+  // Anonymous daily cap — after auth, before the JSON-RPC handler. Keyed
+  // (X-Account-Key / X-Project-Key) callers are never capped here; see
+  // usage-gate.ts. Not applied to DELETE — session termination should
+  // always succeed.
+  const limited = await usageLimitedResponse(request);
+  if (limited) return limited;
   return withCors(await handler(request));
 }
 
