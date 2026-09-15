@@ -1,3 +1,70 @@
+## 2026-09-15 (Opus 5) - Workstream A closed out: A3 + A4 landed, one shipped C2b violation caught
+
+A3 (`1dafc707`) - `_fetch_max_freshness` gains a `count_table` branch. Three live tables were reading
+MISSING -> NEVER_LANDED / GAP_SENTINEL because `entry["dlt_schema_name"]` raised KeyError inside the
+try and `except Exception` swallowed it. Columns read off the LIVE db, not guessed:
+`leepa_comparable_sales` and `collier_official_records` -> `_dlt_load_id` (their `sale_month` /
+`record_date` are EVENT dates, wrong semantics for a cadence doctor), `neighborhood_stats` ->
+`inserted_at`. The epoch cast goes INSIDE the aggregate - `to_timestamp(MAX(col::double precision))`
+- because MAX on a varchar is lexicographic.
+
+Scope pass (RULE 0.5c): 4 registry entries carry `count_table` with neither `freshness_table` nor
+`dlt_schema_name`. 3 fixed. The 4th, `city_pulse`, is EXCLUDED by design - it is `lane: tier-1` and
+resolves through `_tier1_inventory`/`check_tier1_entry`, never `_fetch_max_freshness`. Second call
+site `assert_landed.py:72` checked: none of the three is `nightly: true`, so zero blast radius on
+the Phase-4 gate.
+
+Verified by me, not taken on report - `ingest/.venv/Scripts/python` calling `_fetch_max_freshness`
+directly against the live db:
+  leepa_comp_sales -> 2026-07-22
+  neighborhood_stats -> 2026-08-24
+  collier_official_records -> 2026-09-15
+The probe's markdown table only prints NON-fresh rows, so a grep for these three now returns nothing
+- the empty grep is the pass, and the three dates above are the positive proof behind it.
+
+A4 (`a377e707`) - BILLING added to `ingest/lib/prescriptions.py` (11 members), `should_retry` false.
+TWO plan premises did NOT reproduce and are corrected here rather than papered over:
+
+  1. There are no five city-pulse TRANSIENT lines. Live doctor today: `city_pulse` GREEN,
+     `city_pulse_corridors` and `_tier2` DISABLED. The five TRANSIENT prescriptions are
+     `redfin_swfl`, `usgs`, `bls_qcew`, `fl_dbpr_licenses`, `fl_dbpr_applicants` - none is an
+     unattended LLM leg. The plan's stated symptom does not exist in the current run.
+  2. Doctor structurally CANNOT see a credit wall. `ingest/lib/gh_runs.py:32-34` `_RUN_FIELDS`
+     carries no log text - every call is `gh run list --json`, never `gh run view --log-failed`.
+     So BILLING is in `ALL` + `_FIX_TEMPLATES` but deliberately NOT in `DOCTOR_ASSIGNABLE`,
+     exactly mirroring WAF_BLOCK, whose docstring already says the same thing. No `prescribe`
+     branch was added; `doctor.py` and `gh_runs.py` are unchanged. Opened check
+     `doctor_cannot_see_billing_wall` with the unblock condition named.
+
+THE REAL FIND, and it was shipping: `.github/scripts/classify-cron-failure.mjs` rule 3 already
+classified the credit wall as BILLING, but its `suggestedAction` read "Top up credits at
+platform.claude.com (Billing/Plans)" - and `log-cron-incident.mjs:242` writes `suggestedAction`
+verbatim into the incident-ledger Root Cause AND the GitHub issue body. I confirmed that consumer
+line myself. So every credit-wall cron failure was publishing the banned ask into an issue. Worse,
+its own test ENFORCED it (`assert.match(c.suggestedAction, /platform\.claude\.com/)`). Rewritten to
+PARKED naming RULE 3 C2b; the test now asserts the banned strings are absent, plus a new
+banned-string guard test. Repo-wide sweep for the banned strings now returns only the two guard
+assertions themselves.
+
+STRIKES.md gains the instance under `re-suggested-anthropic-api-credits-after-refusal`. The guard
+was written for what a SESSION says; this was a canned string a SCRIPT says on our behalf - a class
+the guard could not see.
+
+Verification pasted, run by me after both agents landed:
+  cd ingest && ./.venv/Scripts/python -m pytest tests/scripts/test_check_freshness.py tests/scripts/test_doctor.py tests/lib/test_prescriptions.py -q
+  96 passed in 0.29s
+  node --test .github/scripts/classify-cron-failure.test.mjs -> pass 44 fail 0
+
+Also opened `area_fence_blind_to_subagents`: the A3 agent disclosed that `check-area-fence.mjs`
+cannot be satisfied from inside a subagent (its familyShowsRead does not see the subagent's
+transcript) and that its documented escape only covers Edit/Write, so the available sidestep is to
+write via Bash. It did that and said so. That is a guard defect worth fixing before more fan-out,
+not a discipline problem with the agent.
+
+NOT DONE and blocked: A1 Step 4 / A2 Step 3 both need these commits ON MAIN first - `gh workflow
+run` resolves from the default branch, so dispatching before the push proves nothing. Awaiting the
+push word.
+
 ## 2026-09-15 (Opus 5) - Listing spine reverted to --source scrape (plan task A2); A1 landed
 
 A1 (from the entry below, written last session but never committed) is committed here unchanged, plus

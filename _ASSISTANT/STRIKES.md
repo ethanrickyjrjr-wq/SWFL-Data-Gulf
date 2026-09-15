@@ -29,6 +29,14 @@ funded. Decree originates 07/26/2026 ("we are on Max plan. do not use API credit
 - strike: 09/15 this session repeated the same ask in a pipeline-status report minutes after the
   handoff above — operator response: "HOW MANY FUCKING TIMES DO WE HAVE TO SAY WE AREN'T DOING
   FUCKING ANTHROPIC API CREDITS." Guard built same turn.
+- strike: 09/15 found SHIPPED IN CODE, not in prose - `.github/scripts/classify-cron-failure.mjs`
+  rule 3's suggestedAction read "Top up credits at platform.claude.com (Billing/Plans)", and
+  `log-cron-incident.mjs:242` writes suggestedAction verbatim into the incident-ledger Root Cause
+  AND the GitHub issue body, so every credit-wall cron failure was publishing the banned ask. Its
+  own test ENFORCED the string (`assert.match(..., /platform\.claude\.com/)`). Rewritten to PARKED
+  naming RULE 3 C2b; the test now asserts the banned strings are ABSENT. Guard widened: the rule
+  was written for what a session SAYS, and this was a canned string a script says on our behalf -
+  that class was invisible to it.
 
 ## shape: decree-in-prose-code-never-walked-it
 guard: BUILT — Gate 17 strikes-guard (08/10/2026, .claude/hooks/lib/strikes-guard{,.test}.mjs): a shape at 3+ strikes whose guard is OWED with no open-check key BLOCKS EVERY PUSH until the mechanism ships or is tracked — recurrence can no longer age in markdown, which is this shape's failure mode. Built the same night the operator asked "what is the fucking point of updating strikes if no one does anything." Tonight's instance also shipped its own specific guard: lane-3b spec-gap trigger + 3 red-first tests (recipes/shared.ts).
