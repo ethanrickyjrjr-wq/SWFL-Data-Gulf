@@ -113,7 +113,7 @@ async function runPipeline(
 ): Promise<OutputResult> {
   console.log(
     `[refinery] pack=${pack.id} source=${env.source} agents=${
-      agentsAreMocked() ? "MOCK" : "live"
+      agentsAreMocked() ? "MOCK" : `live/${env.llmProvider}`
     }${opts.dryRun ? " (dry-run)" : ""}${opts.strict ? "" : " (no-strict)"}`,
   );
   if (agentsAreMocked()) {

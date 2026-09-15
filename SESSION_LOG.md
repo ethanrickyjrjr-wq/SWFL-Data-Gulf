@@ -1,3 +1,51 @@
+## 2026-09-15 (Fable 5.1, cloud session) — THE REBUILD RUNS ON THE MAX SUBSCRIPTION: `LLM_PROVIDER=claude-code` backend behind the ONE model root
+
+Operator: "Just run the fucking rebuild through a sonnet!! We have Max plan!!! Why do we need
+fucking api credits right now??" The honest answer was that `refinery/agents/anthropic.mts`, the
+one root every agent gets its client from, only knew the `@anthropic-ai/sdk` client, which takes an
+API key and nothing else — and the nightly chain's city-pulse leg had been 400ing for days on
+"Your credit balance is too low to access the Anthropic API" (run 34952735442). So: a second
+backend behind the same root, selected by env, nothing else moves.
+
+**Parts (6 of 6 done):**
+1. `refinery/config/env.mts` — `llmProvider: "api" | "claude-code"` from `LLM_PROVIDER`.
+2. `refinery/agents/claude-code-provider.mts` (NEW) — shells out to `claude -p --model <id>
+   --output-format json --json-schema <forced tool's input_schema> --tools "" --no-session-persistence
+   --system-prompt <system>`, user text on stdin; the CLI's `structured_output` comes back as the
+   `tool_use` block every agent already reads. Five named failure modes, each guarded + test-pinned:
+   `--bare` never emitted (it turns the machine login OFF — the CLI's own help text, and the first
+   probe here failed "Authentication error" for exactly that); `ANTHROPIC_API_KEY`/`AUTH_TOKEN`
+   stripped from the child (an exported key silently turns a subscription seat into billing);
+   unsupported shapes throw instead of narrowing; `is_error`/missing `structured_output` throws with
+   the CLI's text; ledger rows log under `claude-code/<model>` so `computeCostUsd` prices them $0
+   with tokens preserved (subscription usage is not spend — never trips the $25/day cap).
+3. `refinery/agents/anthropic.mts` — `agentsAreMocked()` is false under claude-code; `getAnthropic()`
+   returns `{messages: wrapMessageSurface(claudeCodeSurface)}` so the usage ledger + spend gate still
+   see every call. Only `messages` exists on that client (beta/batches undefined on purpose → loud).
+4. `refinery/cli.mts` banner prints `agents=live/claude-code`.
+5. Tests: `refinery/agents/claude-code-provider.test.mts` (16) — shape narrowing, argv, env strip,
+   result→Message, $0 pricing, error paths. `bun test refinery/agents/` → 46 pass / 0 fail.
+   `tsc --noEmit` 0 errors in refinery/{agents,config,cli}. eslint clean on the touched files.
+6. LIVE PROOF (`scripts/prove-claude-code-provider.mts`, in-repo per the prove-* convention):
+   `LLM_PROVIDER=claude-code SKIP_USAGE_LOG=1 bun scripts/prove-claude-code-provider.mts` →
+   `mocked=false provider=claude-code model=claude-sonnet-4-6` · `elapsed_ms=7120
+   model=claude-code/claude-sonnet-4-6 usage={"input_tokens":1045,"output_tokens":317,
+   "cache_creation_input_tokens":12703}` · two facts, both fragment ids cited, both planted numbers
+   verbatim → `[proof] PASS`. No API key in the environment. That is Sonnet on the subscription.
+
+Also: `.env.example` documents `LLM_PROVIDER`; `refinery/CLAUDE.md` carries the two-backend rule;
+check `claude_code_provider_live_verify` opened via new-build.mjs (no signal yet — the surface is a
+CLI run, not an HTTP body).
+
+**NOT done here (blocked, named):** the actual `master` rebuild. This cloud sandbox has the claude.ai
+login but NOT the Supabase/Postgres credentials (no `.env.local`, no GHA secrets), so Stage 1 cannot
+read the lake. The command, from the operator's machine or the Fedora box (both logged in, both hold
+`.env.local`): `LLM_PROVIDER=claude-code bun refinery/cli.mts master --resilient`. GHA runners have
+no claude.ai login, so the nightly chain stays on the API key until a self-hosted runner carries the
+subscription. Scope note (RULE 0.5c): the SDK-client shape has 4 refinery sites (synthesis, triage,
+corridor-character, cli) — all reach the client through the ONE root, so all four are covered; the
+`lib/assistant/*` sites are the Vercel website and were not touched.
+
 ## 2026-09-14 (Sonnet 4.6) — weekly read-only dependency audit
 
 Scheduled task. No code changed. `bun outdated` run against 94 packages; 63 outdated found.

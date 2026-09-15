@@ -1,6 +1,7 @@
 import Anthropic from "@anthropic-ai/sdk";
 import { createClient } from "@supabase/supabase-js";
 import { env, requireEnv } from "../config/env.mts";
+import { makeClaudeCodeMessageSurface } from "./claude-code-provider.mts";
 
 /** Triage = cheap classification. Haiku 4.5. */
 export const TRIAGE_MODEL = "claude-haiku-4-5";
@@ -13,6 +14,7 @@ export const SYNTHESIS_MODEL = "claude-sonnet-4-6";
  * A real key → real agents.
  */
 export function agentsAreMocked(): boolean {
+  if (env.llmProvider === "claude-code") return false; // subscription seat, real agents
   return !env.anthropicApiKey;
 }
 
@@ -493,6 +495,19 @@ const wrappedByCallType = new Map<CallType, Anthropic>();
 export function getAnthropic(callType: CallType = "other"): Anthropic {
   const existing = wrappedByCallType.get(callType);
   if (existing) return existing;
+  if (env.llmProvider === "claude-code") {
+    // Subscription seat: the ONLY surface is `messages` (create + stream with the
+    // forced-tool shape every refinery agent uses). It still passes through
+    // wrapMessageSurface so the usage ledger and the spend gate see every call;
+    // the row logs under `claude-code/<model>` so computeCostUsd prices it at $0
+    // (unrecognized model → 0, tokens preserved) — subscription usage is not spend.
+    // Any other property (beta, batches, models) is undefined on purpose: an agent
+    // that reaches for one fails loud instead of silently billing an API key.
+    const surface = wrapMessageSurface(makeClaudeCodeMessageSurface(), callType);
+    const wrapped = { messages: surface } as unknown as Anthropic;
+    wrappedByCallType.set(callType, wrapped);
+    return wrapped;
+  }
   const raw = getRawClient();
   const wrappedMessages = wrapMessageSurface(raw.messages, callType);
   const wrappedBetaMessages = wrapMessageSurface(raw.beta.messages, callType);

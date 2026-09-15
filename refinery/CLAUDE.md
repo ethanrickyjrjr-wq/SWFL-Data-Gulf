@@ -17,3 +17,10 @@ The brain-factory non-negotiables that live OUTSIDE packs/:
 - **Rules of engagement** — ONE root: `refinery/lib/rules-of-engagement.mts` (verbatim;
   the FOCUS hook re-injects the gist). Don't create a second copy.
 - Deterministic math in code; LLMs synthesize narrative only.
+- **Two model backends, ONE root** — `refinery/agents/anthropic.mts` hands out the client.
+  `LLM_PROVIDER=api` (default) is the SDK on `ANTHROPIC_API_KEY`; `LLM_PROVIDER=claude-code`
+  is `claude -p` on the machine's claude.ai subscription login (2026-09-15, operator: "run
+  the rebuild through a sonnet, we have Max") — `refinery/agents/claude-code-provider.mts`,
+  forced-tool shape only, API key stripped from the child, ledger rows priced at $0 under
+  `claude-code/<model>`. Never `--bare` (it turns the login off). Proof:
+  `LLM_PROVIDER=claude-code SKIP_USAGE_LOG=1 bun scripts/prove-claude-code-provider.mts`.

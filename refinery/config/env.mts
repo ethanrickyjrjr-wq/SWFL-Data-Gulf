@@ -29,6 +29,15 @@ export interface RefineryEnv {
   supabaseUrl: string | undefined;
   supabaseKey: string | undefined;
   anthropicApiKey: string | undefined;
+  /**
+   * Which backend `getAnthropic()` hands out (2026-09-15, operator: "run the rebuild
+   * through a sonnet, we have Max"). "api" = the Anthropic SDK on ANTHROPIC_API_KEY
+   * (metered, needs Console credit). "claude-code" = the `claude -p` CLI on the
+   * machine's claude.ai subscription login — zero API credit, subscription usage
+   * limits instead. Never both: under "claude-code" the API key is stripped from the
+   * child so an exported key cannot silently turn a subscription run into billing.
+   */
+  llmProvider: "api" | "claude-code";
   firecrawlApiKey: string | undefined;
   fredApiKey: string | undefined;
   /** Voyage AI embedding API key (P4b). Never logged. Used only as Bearer auth. */
@@ -76,6 +85,7 @@ function readEnvSnapshot(): EnvSnapshot {
     supabaseUrl: process.env.SUPABASE_URL ?? process.env.BRAINS_SUPABASE_URL,
     supabaseKey: process.env.SUPABASE_SERVICE_KEY ?? process.env.BRAINS_SUPABASE_SERVICE_KEY,
     anthropicApiKey: process.env.ANTHROPIC_API_KEY,
+    llmProvider: process.env.LLM_PROVIDER === "claude-code" ? "claude-code" : "api",
     firecrawlApiKey: process.env.FIRECRAWL_API_KEY,
     fredApiKey: process.env.FRED_API_KEY,
     voyageKey: process.env.VOYAGE_KEY,
