@@ -1,5 +1,15 @@
-import { describe, it, expect, mock } from "bun:test";
+import { describe, it, expect, mock, afterAll } from "bun:test";
 import { usageLimitedResponse } from "./usage-gate";
+
+// bun's mock.module is PROCESS-GLOBAL and never auto-restored: without this
+// snapshot+restore the throwing stub in case (5) below poisons every file that
+// runs after this one - it took app/api/mcp/route.test.ts's CORS test down in
+// CI (run 34997406403) while every local run was green. Idiom + guard:
+// lib/testing/mock-restore-ratchet.test.ts.
+const realAnonUsage = { ...(await import("@/lib/mcp/anon-usage")) };
+afterAll(() => {
+  mock.module("@/lib/mcp/anon-usage", () => realAnonUsage);
+});
 
 function makeRequest(headers: Record<string, string> = {}): Request {
   return new Request("https://example.com/api/mcp", { method: "POST", headers });

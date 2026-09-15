@@ -4,7 +4,7 @@
  * over @/utils/supabase/service-role, branching on table name via the
  * UNTYPED client only — this module never uses the typed client).
  */
-import { describe, test, expect, mock } from "bun:test";
+import { describe, test, expect, mock, afterAll } from "bun:test";
 import {
   FREE_ANON_MCP_REQUESTS_PER_MONTH,
   mcpUsageMonthKey,
@@ -50,6 +50,15 @@ describe("hashIp", () => {
 // ---------------------------------------------------------------------------
 // checkMcpUsageAllowance — DB-integration cases
 // ---------------------------------------------------------------------------
+
+// bun's mock.module is PROCESS-GLOBAL and never auto-restored - a stub left
+// installed here poisons every file that runs after this one in CI's file
+// order. Snapshot the real module before mocking, hand it back in afterAll.
+// Guard: lib/testing/mock-restore-ratchet.test.ts.
+const realServiceRole = { ...(await import("@/utils/supabase/service-role")) };
+afterAll(() => {
+  mock.module("@/utils/supabase/service-role", () => realServiceRole);
+});
 
 type MaybeSingleResult = { data: unknown; error: unknown };
 
