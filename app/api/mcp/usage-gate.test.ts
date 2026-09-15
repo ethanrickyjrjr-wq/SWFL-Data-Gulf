@@ -7,7 +7,7 @@ function makeRequest(headers: Record<string, string> = {}): Request {
 
 function mockAllowance(allowed: boolean) {
   mock.module("@/lib/mcp/anon-usage", () => ({
-    FREE_ANON_MCP_REQUESTS_PER_DAY: 20,
+    FREE_ANON_MCP_REQUESTS_PER_MONTH: 15,
     hashIp: (ip: string) => `hash:${ip}`,
     checkMcpUsageAllowance: async () => ({ allowed, remaining: allowed ? 5 : 0 }),
     recordMcpUsage: async () => {},
@@ -42,7 +42,7 @@ describe("usageLimitedResponse", () => {
 
   it("(5) never throws when checkMcpUsageAllowance rejects", async () => {
     mock.module("@/lib/mcp/anon-usage", () => ({
-      FREE_ANON_MCP_REQUESTS_PER_DAY: 20,
+      FREE_ANON_MCP_REQUESTS_PER_MONTH: 15,
       hashIp: (ip: string) => `hash:${ip}`,
       checkMcpUsageAllowance: async () => {
         throw new Error("unexpected");

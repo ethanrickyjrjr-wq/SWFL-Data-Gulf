@@ -1,31 +1,35 @@
 /**
- * Unit tests for lib/mcp/anon-usage.ts — daily usage cap for anonymous MCP
+ * Unit tests for lib/mcp/anon-usage.ts — monthly usage cap for anonymous MCP
  * callers. Mirrors lib/email/build-usage.test.ts's mock style (mock.module
  * over @/utils/supabase/service-role, branching on table name via the
  * UNTYPED client only — this module never uses the typed client).
  */
 import { describe, test, expect, mock } from "bun:test";
 import {
-  FREE_ANON_MCP_REQUESTS_PER_DAY,
-  mcpUsageDayKey,
+  FREE_ANON_MCP_REQUESTS_PER_MONTH,
+  mcpUsageMonthKey,
   hashIp,
   checkMcpUsageAllowance,
   recordMcpUsage,
 } from "./anon-usage.ts";
 
-describe("mcpUsageDayKey", () => {
-  test("returns YYYY-MM-DD in UTC", () => {
-    expect(mcpUsageDayKey(new Date("2026-09-15T14:30:00Z"))).toBe("2026-09-15");
+describe("mcpUsageMonthKey", () => {
+  test("returns the first-of-month YYYY-MM-01 in UTC", () => {
+    expect(mcpUsageMonthKey(new Date("2026-09-15T14:30:00Z"))).toBe("2026-09-01");
   });
 
-  test("boundary: last instant of a day stays that day", () => {
-    expect(mcpUsageDayKey(new Date("2026-09-15T23:59:59.999Z"))).toBe("2026-09-15");
+  test("boundary: last instant of a month stays that month", () => {
+    expect(mcpUsageMonthKey(new Date("2026-09-30T23:59:59.999Z"))).toBe("2026-09-01");
+  });
+
+  test("boundary: first instant of next month advances", () => {
+    expect(mcpUsageMonthKey(new Date("2026-10-01T00:00:00Z"))).toBe("2026-10-01");
   });
 });
 
-describe("FREE_ANON_MCP_REQUESTS_PER_DAY", () => {
-  test("is 20", () => {
-    expect(FREE_ANON_MCP_REQUESTS_PER_DAY).toBe(20);
+describe("FREE_ANON_MCP_REQUESTS_PER_MONTH", () => {
+  test("is 15", () => {
+    expect(FREE_ANON_MCP_REQUESTS_PER_MONTH).toBe(15);
   });
 });
 
@@ -61,13 +65,13 @@ function mockDb(resolver: () => Promise<MaybeSingleResult>) {
 }
 
 describe("checkMcpUsageAllowance", () => {
-  test("under the cap (19 today) → allowed", async () => {
-    mockDb(async () => ({ data: { request_count: 19 }, error: null }));
+  test("under the cap (14 this month) → allowed", async () => {
+    mockDb(async () => ({ data: { request_count: 14 }, error: null }));
     expect(await checkMcpUsageAllowance("h1")).toEqual({ allowed: true, remaining: 1 });
   });
 
-  test("at exactly the cap (20 today) → denied", async () => {
-    mockDb(async () => ({ data: { request_count: 20 }, error: null }));
+  test("at exactly the cap (15 this month) → denied", async () => {
+    mockDb(async () => ({ data: { request_count: 15 }, error: null }));
     expect(await checkMcpUsageAllowance("h1")).toEqual({ allowed: false, remaining: 0 });
   });
 
@@ -76,11 +80,11 @@ describe("checkMcpUsageAllowance", () => {
     expect(await checkMcpUsageAllowance("h1")).toEqual({ allowed: false, remaining: 0 });
   });
 
-  test("no row yet today → allowed at full remaining", async () => {
+  test("no row yet this month → allowed at full remaining", async () => {
     mockDb(async () => ({ data: null, error: null }));
     expect(await checkMcpUsageAllowance("h1")).toEqual({
       allowed: true,
-      remaining: FREE_ANON_MCP_REQUESTS_PER_DAY,
+      remaining: FREE_ANON_MCP_REQUESTS_PER_MONTH,
     });
   });
 
@@ -88,7 +92,7 @@ describe("checkMcpUsageAllowance", () => {
     mockDb(async () => ({ data: null, error: { message: "relation does not exist" } }));
     expect(await checkMcpUsageAllowance("h1")).toEqual({
       allowed: true,
-      remaining: FREE_ANON_MCP_REQUESTS_PER_DAY,
+      remaining: FREE_ANON_MCP_REQUESTS_PER_MONTH,
     });
   });
 
@@ -98,7 +102,7 @@ describe("checkMcpUsageAllowance", () => {
     });
     expect(await checkMcpUsageAllowance("h1")).toEqual({
       allowed: true,
-      remaining: FREE_ANON_MCP_REQUESTS_PER_DAY,
+      remaining: FREE_ANON_MCP_REQUESTS_PER_MONTH,
     });
   });
 
@@ -110,7 +114,7 @@ describe("checkMcpUsageAllowance", () => {
     }));
     expect(await checkMcpUsageAllowance("h1")).toEqual({
       allowed: true,
-      remaining: FREE_ANON_MCP_REQUESTS_PER_DAY,
+      remaining: FREE_ANON_MCP_REQUESTS_PER_MONTH,
     });
   });
 });
@@ -157,7 +161,7 @@ describe("recordMcpUsage", () => {
     await expect(recordMcpUsage("h1")).resolves.toBeUndefined();
   });
 
-  test("calls upsert then rpc with the UTC day key on the happy path", async () => {
+  test("calls upsert then rpc with the UTC month key on the happy path", async () => {
     const calls: string[] = [];
     mock.module("@/utils/supabase/service-role", () => ({
       createServiceRoleClientUntyped: () => ({
