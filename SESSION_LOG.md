@@ -1,3 +1,60 @@
+## 2026-09-15 (Opus 5) - Listing spine reverted to --source scrape (plan task A2); A1 landed
+
+A1 (from the entry below, written last session but never committed) is committed here unchanged, plus
+the plan's Step 3 one-liner on the T2 row-gate header: `# 09/15/2026: the gate reds the chain but NO
+LONGER blocks rebuild - see T3.`
+
+A2: `.github/workflows/listing-lifecycle-daily.yml` run step now passes `--source scrape` explicitly.
+Verified before editing, not assumed: `ingest/pipelines/listing_lifecycle/pipeline.py:361` is
+`ap.add_argument("--source", choices=["api","scrape"], default="api", ...)`, so the workflow was
+running the SteadyAPI path by default. The file header's 2026-06-30 SPINE CUTOVER block is replaced by
+a SPINE REVERT 2026-09-15 block; the api path and its PHOTOS_API env stay wired but unreached.
+Plan Step 1 (a dry-run BEFORE the edit) was deliberately NOT run - the plan itself disowns it
+("proves nothing about scrape") and it would have spent paid SteadyAPI calls.
+
+Scrape reuse terms for the Source-B host are unrecorded anywhere in the repo; noting once per the
+plan, Ricky already decided the revert.
+
+Verification pasted: `node --test .github/scripts/workflow-step-shape.test.mjs` -> `pass 3 fail 0`.
+
+Also committed here: the previous session's uncommitted TODAY/SCRATCHPAD/_RESEARCH INDEX edits and
+the new `_RESEARCH/data-and-ingest/2026-09-15-satellite-parking-lot-traffic-vendor-evaluation.md`,
+which were stranded in the working tree.
+
+Next in this session: A3 (freshness doctor count_table branch) and A4 (BILLING prescription) are
+running in parallel; chain dispatch for A1 Step 4 / A2 Step 3 after this push.
+
+## 2026-09-15 (Opus 5) - Nightly rebuild no longer gated on one empty dataset (plan task A1)
+
+A0 answered by inspection, no dispatch: last night's chain (run 34952735442) shows `rebuild · brains`
+**skipped**, not failed — `gate · assert_landed` red because the three listing-lifecycle county legs
+each returned 0 rows. So the rebuild leg has NO recent failure evidence; its last real signal is the
+08/12 direct dispatch, which succeeded. Those two facts stay separate: the gate is what stopped it,
+and the leg's own health today is unproven. The listing spine's emptiness is not a new finding —
+09/15 brief already records no genuine nightly write since 08/14/2026, the vendor being out by
+operator decree.
+
+A1 landed in `.github/workflows/nightly-chain.yml`: job `rebuild` moves from `needs: [row-gate]` /
+`if: inputs.dry_run != true` to `needs: [guard, row-gate]` /
+`if: always() && needs.guard.outputs.should_run == 'true' && inputs.dry_run != true`. The row gate
+still runs and still reds the chain; it no longer blocks the rebuild (Ricky 09/15 lake-first). The
+guard condition is now explicit because under `always()` a skipped/failed `guard` leaves
+`should_run` empty → false, so duplicate-fire protection is preserved rather than dropped.
+
+Verification pasted: `node --test .github/scripts/workflow-step-shape.test.mjs` → `pass 3 fail 0`
+(YAML parses, no run-only key beside `uses:`, every local `uses: ./…` path exists).
+
+CORRECTION TO THE PLAN — A0's RED branch is unsafe and is NOT to be executed. It instructs handing
+Ricky "remove the key so the rebuild runs mock-mode nightly" as the compliant option. Opened
+`refinery/agents/synthesis-agent.mts:79` — `mockSynthesize` emits the literal string
+`Mock synthesized reference fact for fragment <id>` as every fact, and `daily-rebuild.yml:171`
+does `git add brains/` → commit → push. That path publishes fabricated prose to the live site and
+assistant. Option killed, not relayed. Plan file should be amended before Wednesday's session.
+
+NEXT: A2 (listing spine back to `--source scrape`), A3 (freshness false-NEVER_LANDED on the three
+count_table-only entries). Unattended model legs stay parked per standing decision; the durable
+route is the Max seat, which has its own plan and sits behind the 09/18 freeze.
+
 ## 2026-09-15 (Fable 5.1) - Master-brain backend week plan for Opus/Sonnet (09/15-09/19)
 
 Ricky, low on usage until Saturday: "a decent plan Opus and Sonnet can get to work on ... only
