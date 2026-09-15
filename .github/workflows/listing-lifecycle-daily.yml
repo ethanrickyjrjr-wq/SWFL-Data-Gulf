@@ -2,12 +2,10 @@ name: ingest-listing-lifecycle
 
 # Listing-lifecycle state machine -> data_lake.listing_state + data_lake.listing_transitions.
 #
-# SPINE CUTOVER 2026-06-30: pipeline.py now defaults to --source api (SteadyAPI sole spine; RentCast
-# retired). The api path reads the PHOTOS_API key (added to env below) and writes under
-# source_name='api_feed'. The Source-B scrape prose below is RETAINED for history but the daily path is
-# SteadyAPI. PHOTOS_API secret IS set (confirmed via `gh secret list` 2026-06-30/2026-07-01) — the
-# code-level prerequisite for a live run is met. What still gates a live dispatch is operator
-# authorization (paid SteadyAPI calls), not a missing secret.
+# SPINE REVERT 2026-09-15: --source scrape (SteadyAPI retired on operator word; api code stays inert).
+# Supersedes the 2026-06-30 SteadyAPI cutover. pipeline.py still DEFAULTS to --source api, so the run
+# step below passes --source scrape explicitly; the api path and its PHOTOS_API env are left wired but
+# unreached. The Source-B scrape walk (LISTING_LIFECYCLE_BASE_URL) is the live daily path again.
 # Plan: docs/superpowers/plans/2026-06-30-steadyapi-sole-spine/phase-1-inventory-cutover.md
 #
 # GRADUATED 2026-07-01: runner-IP WAF proven clean on both heavyweight counties (Collier 8,120 rows,
@@ -121,4 +119,6 @@ jobs:
           ARGS=()
           if [ -n "$COUNTY_INPUT" ]; then ARGS+=(--county "$COUNTY_INPUT"); fi
           if [ "$DRY_INPUT" = "true" ]; then ARGS+=(--dry-run); fi
-          python -m ingest.pipelines.listing_lifecycle.pipeline "${ARGS[@]}"
+          # SPINE REVERT 09/15/2026 (Ricky: "Forget the steady api"): crawl4ai Source-B walk.
+          # Proven clean from GitHub runner IPs 07/01/2026 (runs 28495956344 / 28496497637).
+          python -m ingest.pipelines.listing_lifecycle.pipeline --source scrape "${ARGS[@]}"
