@@ -1,11 +1,11 @@
-<!-- FRESHNESS: v3 | Token: SWFL-7421-v3-20260805-ea43b1ac -->
+<!-- FRESHNESS: v4 | Token: SWFL-7421-v4-20260915-ddc6cca0 -->
 ---
 brain_id: communities-swfl
-version: 3
-refined_at: 2026-08-05T22:02:14Z
-freshness_token: SWFL-7421-v3-20260805-ea43b1ac
+version: 4
+refined_at: 2026-09-15T23:58:53Z
+freshness_token: SWFL-7421-v4-20260915-ddc6cca0
 ttl_seconds: 15552000
-pack_hash: 1d7dcffa40c2
+pack_hash: 61f7e7e0c6ce
 context_type: user_saved_reference
 scope: Southwest Florida community intelligence (Lee + Collier) — every residential parcel name-joined to its neighborhood with authoritative home count, count-by-type and median just-value (Tier 1), plus the ~300 marketed golf/gated communities profiled with golf structure, HOA fee range, amenities (named-web sources) and drive-times/nearby counts (Mapbox) as a per-community lookup (Tier 2). Deterministic aggregation, no LLM synthesis; neutral reporter (never a market-direction vote).
 ---
@@ -29,43 +29,62 @@ SCOPE: Southwest Florida community intelligence (Lee + Collier) — every reside
 
 --- CITATION TABLE ---
 id  | source                                                            | verified   | expires
-s01 | SWFL Data Gulf — community profiles (parcel + named-web + Mapbox) | 2026-08-05 | 2027-02-01
+s01 | SWFL Data Gulf — community profiles (parcel + named-web + Mapbox) | 2026-09-15 | 2027-03-14
 
 --- SAVED FACTS ---
 [
-  {"id":"f001","topic":"communities_swfl_snapshot","fact":"SWFL community catalogue ","value":"39,504 homes in 1,000 neighborhoods; 81 marketed communities profiled.","src":"s01","date":"2026-08-05"}
+  {"id":"f001","topic":"communities_swfl_snapshot","fact":"SWFL community catalogue ","value":"53,860 homes in 1,000 neighborhoods; 81 marketed communities profiled.","src":"s01","date":"2026-09-15"}
 ]
 
 --- OUTPUT ---
 {
   "brain_id": "communities-swfl",
-  "version": 3,
-  "refined_at": "2026-08-05T22:02:14Z",
-  "expires": "2027-02-01T22:02:14Z",
+  "version": 4,
+  "refined_at": "2026-09-15T23:58:53Z",
+  "expires": "2027-03-14T23:58:53Z",
   "ttl_seconds": 15552000,
   "direction": "neutral",
   "magnitude": 0,
   "drivers": [],
   "overrides": [],
-  "conclusion": "39,504 SWFL homes catalogued across 1,000 neighborhoods (Lee + Collier); 81 marketed golf/gated communities profiled (as of 2026-08-02). Golf-or-not, fees, amenities, home count and drive-times per community ride in the community catalogue for a specific-community lookup.",
+  "conclusion": "53,860 SWFL homes catalogued across 1,000 neighborhoods (Lee + Collier); 81 marketed golf/gated communities profiled (as of 2026-08-24). Golf-or-not, fees, amenities, home count and drive-times per community ride in the community catalogue for a specific-community lookup.",
   "key_metrics": [
     {
       "metric": "total_homes_catalogued_swfl",
       "label": "SWFL homes catalogued to a neighborhood (Lee + Collier)",
-      "value": 39504,
+      "value": 53860,
       "direction": "stable",
       "variable_type": "extensive",
       "units": "homes",
       "display_format": "count",
       "source": {
         "url": "https://www.swfldatagulf.com/r/source/neighborhood_stats?label=SWFL+neighborhood%2Fsubdivision+stats+%28all+homes%2C+Lee+%2B+Collier%29&source=SWFL+Data+Gulf+parcel+name-join+%28Lee+%2B+Collier+tax+rolls%29&brain=communities-swfl&date_col=as_of",
-        "fetched_at": "2026-08-05T22:02:14Z",
+        "fetched_at": "2026-09-15T23:58:51Z",
         "tier": 2,
-        "citation": "39,504 residential parcels across 1,000 SWFL neighborhoods, each assigned by parcel name-join as of 2026-08-02"
+        "citation": "53,860 residential parcels across 1,000 SWFL neighborhoods, each assigned by parcel name-join as of 2026-08-24"
       },
       "suggestions": [
         "What's driving total homes catalogued swfl?",
         "How does total homes catalogued swfl here compare to other SWFL areas?"
+      ]
+    },
+    {
+      "metric": "parcels_with_pd_community_identity_lee",
+      "label": "Lee parcels tied to a marketed community by recorded boundary",
+      "value": 96679,
+      "direction": "stable",
+      "variable_type": "extensive",
+      "units": "parcels",
+      "display_format": "count",
+      "source": {
+        "url": "https://www.swfldatagulf.com/r/source/parcel_community_pd_summary_v?label=Lee+parcels+inside+recorded+Planned+Development+boundaries&source=Lee+County+DCD+Planned+Developments+%28geometry%29+x+LeePA+parcel+points+%E2%80%94+unincorporated+Lee+only&brain=communities-swfl&date_col=assigned_at",
+        "fetched_at": "2026-09-15T23:58:51Z",
+        "tier": 2,
+        "citation": "96,679 Lee parcels carry a servable community identity from a recorded Planned Development boundary, across 401 named communities (point-in-polygon on Lee County DCD geometry; ambiguous and hand-drawn-boundary assignments excluded; unincorporated Lee only, not a complete county map) as of 2026-08-30"
+      },
+      "suggestions": [
+        "What's driving parcels with pd community identity lee?",
+        "How does parcels with pd community identity lee here compare to other SWFL areas?"
       ]
     },
     {
@@ -78,9 +97,9 @@ s01 | SWFL Data Gulf — community profiles (parcel + named-web + Mapbox) | 2026
       "display_format": "count",
       "source": {
         "url": "https://www.swfldatagulf.com/r/source/community_profiles?label=SWFL+marketed+communities+%E2%80%94+golf%2C+fees%2C+amenities%2C+access&source=SWFL+Data+Gulf+community+profiles+%28parcel+%2B+named-web+%2B+Mapbox%29&brain=communities-swfl&date_col=as_of",
-        "fetched_at": "2026-08-05T22:02:14Z",
+        "fetched_at": "2026-09-15T23:58:51Z",
         "tier": 2,
-        "citation": "81 marketed SWFL communities profiled (golf/fee/amenity) as of 2026-08-02"
+        "citation": "81 marketed SWFL communities profiled (golf/fee/amenity) as of 2026-08-24"
       },
       "suggestions": [
         "What's driving marketed communities count swfl?",
@@ -97,9 +116,9 @@ s01 | SWFL Data Gulf — community profiles (parcel + named-web + Mapbox) | 2026
       "display_format": "count",
       "source": {
         "url": "https://www.swfldatagulf.com/r/source/community_profiles?label=SWFL+marketed+communities+%E2%80%94+golf%2C+fees%2C+amenities%2C+access&source=SWFL+Data+Gulf+community+profiles+%28parcel+%2B+named-web+%2B+Mapbox%29&brain=communities-swfl&date_col=as_of",
-        "fetched_at": "2026-08-05T22:02:14Z",
+        "fetched_at": "2026-09-15T23:58:51Z",
         "tier": 2,
-        "citation": "24,267 SWFL homes fall inside a gated marketed community (count of homes whose community carries the gated flag) as of 2026-08-02"
+        "citation": "24,267 SWFL homes fall inside a gated marketed community (count of homes whose community carries the gated flag) as of 2026-08-24"
       },
       "suggestions": [
         "What's driving homes in gated communities swfl?",
@@ -116,9 +135,9 @@ s01 | SWFL Data Gulf — community profiles (parcel + named-web + Mapbox) | 2026
       "display_format": "percent",
       "source": {
         "url": "https://www.swfldatagulf.com/r/source/community_profiles?label=SWFL+marketed+communities+%E2%80%94+golf%2C+fees%2C+amenities%2C+access&source=SWFL+Data+Gulf+community+profiles+%28parcel+%2B+named-web+%2B+Mapbox%29&brain=communities-swfl&date_col=as_of",
-        "fetched_at": "2026-08-05T22:02:14Z",
+        "fetched_at": "2026-09-15T23:58:51Z",
         "tier": 2,
-        "citation": "30 of 47 SWFL golf communities bundle golf into membership (63.8%) as of 2026-08-02"
+        "citation": "30 of 47 SWFL golf communities bundle golf into membership (63.8%) as of 2026-08-24"
       },
       "suggestions": [
         "What's driving golf bundled community share swfl?",
@@ -2341,9 +2360,9 @@ s01 | SWFL Data Gulf — community profiles (parcel + named-web + Mapbox) | 2026
       ],
       "source": {
         "url": "https://www.swfldatagulf.com/r/source/community_profiles?label=SWFL+marketed+communities+%E2%80%94+golf%2C+fees%2C+amenities%2C+access&source=SWFL+Data+Gulf+community+profiles+%28parcel+%2B+named-web+%2B+Mapbox%29&brain=communities-swfl&date_col=as_of",
-        "fetched_at": "2026-08-05T22:02:14Z",
+        "fetched_at": "2026-09-15T23:58:51Z",
         "tier": 2,
-        "citation": "SWFL marketed communities — golf structure, fees, amenities, home count and drive-times per community, as of 2026-08-02"
+        "citation": "SWFL marketed communities — golf structure, fees, amenities, home count and drive-times per community, as of 2026-08-24"
       },
       "note": "One row per marketed community. Golf/fee/amenity from named-web sources; drive-times and nearby counts from Mapbox — each cell carries provenance in community_profiles."
     }
@@ -2363,7 +2382,7 @@ s01 | SWFL Data Gulf — community profiles (parcel + named-web + Mapbox) | 2026
   "relevance": {
     "decay_curve": "weeks",
     "half_life_hours": 720,
-    "computed_at": "2026-08-05T22:02:14Z"
+    "computed_at": "2026-09-15T23:58:53Z"
   },
   "exogenous_signals": [],
   "grain_boundary": {
@@ -2383,5 +2402,5 @@ s01 | SWFL Data Gulf — community profiles (parcel + named-web + Mapbox) | 2026
 - communities-swfl: SWFL community intelligence (Lee + Collier) — universal neighborhood backbone (every home name-joined to its subdivision) + ~300 marketed golf/gated communities profiled with golf/fee/amenity + Mapbox access.
 
 --- RECENT NOTES ---
-- 2026-08-05: pack refined by the Refinery — 1 fact(s) from 1 source(s).
+- 2026-09-15: pack refined by the Refinery — 1 fact(s) from 1 source(s).
 ```

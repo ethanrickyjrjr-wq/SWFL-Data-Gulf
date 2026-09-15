@@ -1,9 +1,9 @@
-<!-- FRESHNESS: v5 | Token: SWFL-7421-v5-20260805-643be84a -->
+<!-- FRESHNESS: v6 | Token: SWFL-7421-v6-20260915-b293217c -->
 ---
 brain_id: market-temperature-swfl
-version: 5
-refined_at: 2026-08-05T22:01:47Z
-freshness_token: SWFL-7421-v5-20260805-643be84a
+version: 6
+refined_at: 2026-09-15T23:58:24Z
+freshness_token: SWFL-7421-v6-20260915-b293217c
 ttl_seconds: 3024000
 pack_hash: 9e83d28b5147
 context_type: user_saved_reference
@@ -29,19 +29,19 @@ SCOPE: Southwest Florida per-ZIP market snapshot (Lee + Collier) from realtor.co
 
 --- CITATION TABLE ---
 id  | source                                     | verified   | expires
-s01 | SWFL per-ZIP market snapshot — realtor.com | 2026-08-05 | 2026-09-09
+s01 | SWFL per-ZIP market snapshot — realtor.com | 2026-09-15 | 2026-10-20
 
 --- SAVED FACTS ---
 [
-  {"id":"f001","topic":"market_temperature_swfl_snapshot","fact":"SWFL sold-to-rent yield snapshot ","value":"median price-to-annual-rent 11.79× (~8.48% gross yield) across 54 ZIPs, as of 2026-08-04.","src":"s01","date":"2026-08-05"}
+  {"id":"f001","topic":"market_temperature_swfl_snapshot","fact":"SWFL sold-to-rent yield snapshot ","value":"median price-to-annual-rent 11.79× (~8.48% gross yield) across 54 ZIPs, as of 2026-08-04.","src":"s01","date":"2026-09-15"}
 ]
 
 --- OUTPUT ---
 {
   "brain_id": "market-temperature-swfl",
-  "version": 5,
-  "refined_at": "2026-08-05T22:01:47Z",
-  "expires": "2026-09-09T22:01:47Z",
+  "version": 6,
+  "refined_at": "2026-09-15T23:58:24Z",
+  "expires": "2026-10-20T23:58:24Z",
   "ttl_seconds": 3024000,
   "direction": "neutral",
   "magnitude": 0,
@@ -59,7 +59,7 @@ s01 | SWFL per-ZIP market snapshot — realtor.com | 2026-08-05 | 2026-09-09
       "display_format": "ratio",
       "source": {
         "url": "https://www.swfldatagulf.com/r/source/market_details_swfl_latest?label=SWFL+per-ZIP+market+snapshot+%28sold-to-rent+yield+%2B+medians%29&source=realtor.com&brain=market-temperature-swfl&date_col=captured_date",
-        "fetched_at": "2026-08-05T22:01:47Z",
+        "fetched_at": "2026-09-15T23:58:24Z",
         "tier": 2,
         "citation": "median price-to-annual-rent multiple across 54 SWFL ZIPs: 11.79 (~8.48% gross yield), as of 2026-08-04"
       },
@@ -943,7 +943,7 @@ s01 | SWFL per-ZIP market snapshot — realtor.com | 2026-08-05 | 2026-09-09
       ],
       "source": {
         "url": "https://www.swfldatagulf.com/r/source/market_details_swfl_latest?label=SWFL+per-ZIP+market+snapshot+%28sold-to-rent+yield+%2B+medians%29&source=realtor.com&brain=market-temperature-swfl&date_col=captured_date",
-        "fetched_at": "2026-08-05T22:01:47Z",
+        "fetched_at": "2026-09-15T23:58:24Z",
         "tier": 2,
         "citation": "SWFL per-ZIP market snapshot (realtor.com monthly ZIP aggregates), as of 2026-08-04"
       }
@@ -968,7 +968,7 @@ s01 | SWFL per-ZIP market snapshot — realtor.com | 2026-08-05 | 2026-09-09
   "relevance": {
     "decay_curve": "weeks",
     "half_life_hours": 720,
-    "computed_at": "2026-08-05T22:01:47Z"
+    "computed_at": "2026-09-15T23:58:24Z"
   },
   "exogenous_signals": [],
   "grain_boundary": {
@@ -985,5 +985,5 @@ s01 | SWFL per-ZIP market snapshot — realtor.com | 2026-08-05 | 2026-09-09
 - market-temperature-swfl: SWFL per-ZIP sold-to-rent yield + full market snapshot from realtor.com monthly ZIP aggregates (one call per ZIP).
 
 --- RECENT NOTES ---
-- 2026-08-05: pack refined by the Refinery — 1 fact(s) from 1 source(s).
+- 2026-09-15: pack refined by the Refinery — 1 fact(s) from 1 source(s).
 ```

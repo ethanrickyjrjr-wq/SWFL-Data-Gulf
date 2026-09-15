@@ -1,9 +1,9 @@
-<!-- FRESHNESS: v7 | Token: SWFL-7421-v7-20260811-1fd595c8 -->
+<!-- FRESHNESS: v8 | Token: SWFL-7421-v8-20260915-7287ddd5 -->
 ---
 brain_id: price-distribution-swfl
-version: 7
-refined_at: 2026-08-11T04:30:26Z
-freshness_token: SWFL-7421-v7-20260811-1fd595c8
+version: 8
+refined_at: 2026-09-15T23:58:24Z
+freshness_token: SWFL-7421-v8-20260915-7287ddd5
 ttl_seconds: 691200
 pack_hash: d2795ba06114
 context_type: user_saved_reference
@@ -29,19 +29,19 @@ SCOPE: Southwest Florida active for-sale listing distribution by $50k price band
 
 --- CITATION TABLE ---
 id  | source                                                         | verified   | expires
-s01 | SWFL for-sale listing distribution by price band — realtor.com | 2026-08-11 | 2026-08-19
+s01 | SWFL for-sale listing distribution by price band — realtor.com | 2026-09-15 | 2026-09-23
 
 --- SAVED FACTS ---
 [
-  {"id":"f001","topic":"price_distribution_swfl_snapshot","fact":"SWFL for-sale listing price distribution ","value":"28,059 active for-sale listings across 2 counties; 44.50% priced under $300k. As of 2026-08-10.","src":"s01","date":"2026-08-11"}
+  {"id":"f001","topic":"price_distribution_swfl_snapshot","fact":"SWFL for-sale listing price distribution ","value":"28,059 active for-sale listings across 2 counties; 44.50% priced under $300k. As of 2026-08-10.","src":"s01","date":"2026-09-15"}
 ]
 
 --- OUTPUT ---
 {
   "brain_id": "price-distribution-swfl",
-  "version": 7,
-  "refined_at": "2026-08-11T04:30:26Z",
-  "expires": "2026-08-19T04:30:26Z",
+  "version": 8,
+  "refined_at": "2026-09-15T23:58:24Z",
+  "expires": "2026-09-23T23:58:24Z",
   "ttl_seconds": 691200,
   "direction": "neutral",
   "magnitude": 0,
@@ -59,7 +59,7 @@ s01 | SWFL for-sale listing distribution by price band — realtor.com | 2026-08
       "display_format": "percent",
       "source": {
         "url": "https://www.swfldatagulf.com/r/source/listing_price_histogram_swfl_latest?label=SWFL+for-sale+listing+count+by+price+band+%28aggregated%29&source=realtor.com&brain=price-distribution-swfl&date_col=captured_date",
-        "fetched_at": "2026-08-11T04:30:26Z",
+        "fetched_at": "2026-09-15T23:58:24Z",
         "tier": 2,
         "citation": "Entry-tier (<$300k) share of listings across 28,059 active SWFL for-sale listings, as of 2026-08-10"
       },
@@ -78,7 +78,7 @@ s01 | SWFL for-sale listing distribution by price band — realtor.com | 2026-08
       "display_format": "percent",
       "source": {
         "url": "https://www.swfldatagulf.com/r/source/listing_price_histogram_swfl_latest?label=SWFL+for-sale+listing+count+by+price+band+%28aggregated%29&source=realtor.com&brain=price-distribution-swfl&date_col=captured_date",
-        "fetched_at": "2026-08-11T04:30:26Z",
+        "fetched_at": "2026-09-15T23:58:24Z",
         "tier": 2,
         "citation": "Mid-tier ($300k–$600k) share of listings across 28,059 active SWFL for-sale listings, as of 2026-08-10"
       },
@@ -97,7 +97,7 @@ s01 | SWFL for-sale listing distribution by price band — realtor.com | 2026-08
       "display_format": "percent",
       "source": {
         "url": "https://www.swfldatagulf.com/r/source/listing_price_histogram_swfl_latest?label=SWFL+for-sale+listing+count+by+price+band+%28aggregated%29&source=realtor.com&brain=price-distribution-swfl&date_col=captured_date",
-        "fetched_at": "2026-08-11T04:30:26Z",
+        "fetched_at": "2026-09-15T23:58:24Z",
         "tier": 2,
         "citation": "Upper-tier ($600k–$1M) share of listings across 28,059 active SWFL for-sale listings, as of 2026-08-10"
       },
@@ -116,7 +116,7 @@ s01 | SWFL for-sale listing distribution by price band — realtor.com | 2026-08
       "display_format": "percent",
       "source": {
         "url": "https://www.swfldatagulf.com/r/source/listing_price_histogram_swfl_latest?label=SWFL+for-sale+listing+count+by+price+band+%28aggregated%29&source=realtor.com&brain=price-distribution-swfl&date_col=captured_date",
-        "fetched_at": "2026-08-11T04:30:26Z",
+        "fetched_at": "2026-09-15T23:58:24Z",
         "tier": 2,
         "citation": "Luxury ($1M+) share of listings across 28,059 active SWFL for-sale listings, as of 2026-08-10"
       },
@@ -197,7 +197,7 @@ s01 | SWFL for-sale listing distribution by price band — realtor.com | 2026-08
       ],
       "source": {
         "url": "https://www.swfldatagulf.com/r/source/listing_price_histogram_swfl_latest?label=SWFL+for-sale+listing+count+by+price+band+%28aggregated%29&source=realtor.com&brain=price-distribution-swfl&date_col=captured_date",
-        "fetched_at": "2026-08-11T04:30:26Z",
+        "fetched_at": "2026-09-15T23:58:24Z",
         "tier": 2,
         "citation": "SWFL for-sale listing distribution by price tier, per county, as of 2026-08-10"
       }
@@ -264,7 +264,7 @@ s01 | SWFL for-sale listing distribution by price band — realtor.com | 2026-08
       ],
       "source": {
         "url": "https://www.swfldatagulf.com/r/source/listing_price_histogram_swfl_latest?label=SWFL+for-sale+listing+count+by+price+band+%28aggregated%29&source=realtor.com&brain=price-distribution-swfl&date_col=captured_date",
-        "fetched_at": "2026-08-11T04:30:26Z",
+        "fetched_at": "2026-09-15T23:58:24Z",
         "tier": 2,
         "citation": "SWFL active $2M+ for-sale listings by price band, per county, as of 2026-08-10"
       }
@@ -286,7 +286,7 @@ s01 | SWFL for-sale listing distribution by price band — realtor.com | 2026-08
   "relevance": {
     "decay_curve": "weeks",
     "half_life_hours": 720,
-    "computed_at": "2026-08-11T04:30:26Z"
+    "computed_at": "2026-09-15T23:58:24Z"
   },
   "exogenous_signals": [],
   "grain_boundary": {
@@ -303,5 +303,5 @@ s01 | SWFL for-sale listing distribution by price band — realtor.com | 2026-08
 - price-distribution-swfl: SWFL for-sale listing count per $50k price band per county from the realtor.com price-histogram aggregate (one call per county).
 
 --- RECENT NOTES ---
-- 2026-08-11: pack refined by the Refinery — 1 fact(s) from 1 source(s).
+- 2026-09-15: pack refined by the Refinery — 1 fact(s) from 1 source(s).
 ```
