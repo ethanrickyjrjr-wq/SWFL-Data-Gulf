@@ -1,3 +1,24 @@
+## 2026-09-15 (Sonnet 5) - Permit-data market landscape: 5 competitors, real pricing, "order model" validated
+
+Follow-up to the HBW scan below: operator asked "what do most people order" and floated an
+order-then-fetch model instead of a maintained feed, noting he wasn't sure on the competition.
+WebSearch for discovery + crawl4ai live per RULE 0.4 on permitmap.org, permitgrab.com (+ Tampa
+city page), shovels.ai (+ pricing), constructionmonitor.com, permitdata.net.
+
+Real pricing found (no invented numbers): PermitMap $79/mo flat-per-county self-serve (22 FL
+counties incl. Lee+Collier); PermitGrab $149/mo Pro (448 cities, 41 states, live per-city stats);
+Shovels.ai $0/$599/$999 tiered (AWS/Google/Redfin/Owens Corning logos, API+CLI+GIS);
+Construction Monitor opaque sales-quote like HBW but sells Pool/Solar permit data as standalone
+SKUs; **PermitData.net is the pure "wait for an order and get it" model already live in this
+market** — scope → per-record Stripe quote → one CSV/Parquet delivery, zero subscription.
+Weekly trade-filtered feeds are the modal product across every vendor; pool + solar are the two
+trades that repeatedly get sold as their own SKU, not just a filter.
+
+Filed `_RESEARCH/competitor-and-strategy/2026-09-15-permit-data-market-landscape.md`. Steal-the-
+shape: PermitMap's free-sample-by-email lead magnet and PermitData.net's quote-then-Stripe flow
+are both buildable directly on our existing live `permits-swfl` pipeline (see entry below) with
+no new ingest work. Next: operator to say whether either shape is worth building.
+
 ## 2026-09-15 (Sonnet 5) - HBW permit-report vendor scan: sourcing + pricing answered
 
 Operator asked how hbweekly.com/permit-reports (HBW Inc) gets its data and why no pricing shows.
