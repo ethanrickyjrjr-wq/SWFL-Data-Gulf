@@ -1,4 +1,47 @@
 
+## 2026-09-15 (Opus 5) — OPERATOR DECISION: listings PARKED, free lanes only
+
+Verbatim: "just mark it as a to-do later. we don't need listings at the moment and we can easily
+catch up later if we need to pay. plus we have apify. lets just track the sales and what we can for
+free."
+
+STANDING until he says otherwise:
+- Do NOT chase `LISTING_LIFECYCLE_BASE_URL`. Do NOT re-fire the listing legs. Do NOT move that
+  pipeline to Fedora. Check `listing_base_url_secret_empty` reclassified task/parked with the quote.
+- The `--source scrape` revert stays in the workflow. Inert without the secret IS the parked state;
+  reverting the revert would just be churn.
+- The listing legs will keep redding the nightly gate. That is now EXPECTED, not a defect to chase.
+  A1 already made the rebuild survive it, which is why parking this is affordable at all.
+- Priority is SALES and free lanes. Sold prices come from the deed/official-records and LEEPA lanes,
+  not from listings — the park does not touch them.
+- Apify is the paid catch-up lane if listings ever resume; already wired, do not rebuild it.
+
+## 2026-09-15 (Opus 5) — OPERATOR: "no idea. what the hell is this for??????????????????????????"
+
+He was asked to set `LISTING_LIFECYCLE_BASE_URL` and does not know the value or what the pipeline
+is for. Both halves are on us, and the second half is a real structural finding.
+
+THE INCOGNITO DECREE HAS A COST NOBODY PRICED. Decree 06/26/2026: "keep any company names out or
+mls or idx reference until we get our own when we get users." Honored everywhere — the host lives
+ONLY in a GitHub secret. But GitHub secrets are WRITE-ONLY; there is no read-back API. So the
+moment that secret's value went empty, the origin became unrecoverable from every lane we hold:
+local environment files, the dlt credentials file, _RESEARCH/, git history, and the lake itself
+(listing_state keeps brokerage but no source URL — the detail URL was only ever used transiently to
+regex the ZIP out, never persisted). A value with exactly one copy, kept in a write-only vault, has
+no backup.
+
+THE SHAPE: a value that exists in exactly one write-only place is a single point of failure, and we
+built one deliberately without ever walking the recovery path. Same family as `built-not-wired` —
+mechanism correct, operational story never walked. Every other `*_BASE_URL` secret here has the
+identical exposure (LISTINGS_SOURCE_BASE_URL at minimum).
+
+OWED: a recovery path for incognito values that does not put them in the public repo — _RESEARCH/
+is gitignored and never ships, which is exactly what the decree protects against. Not built
+tonight; where his secrets live is his call, not a session's.
+
+ALSO: he should never have been handed "set this secret" as a bare checklist item with no statement
+of what the pipeline does or why it is worth unblocking. The ask was right; the framing was wrong.
+
 ## 2026-09-15 (Opus 5) — OPERATOR: "bankrupt it"
 
 DONE SAME TURN. 45 open items -> 0. All six `## OPEN` sections moved VERBATIM to
