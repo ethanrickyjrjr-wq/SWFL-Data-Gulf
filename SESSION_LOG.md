@@ -1,3 +1,29 @@
+## 2026-09-15 (Sonnet 5) - Carbon Arc scan: 2 docs filed, idea backlog started
+
+Operator handed 4 Carbon Arc URLs (carbonarc.co + /research + /prisms + /how-it-works +
+/explore-data + /pricing, api.carbonarc.co, docs.carbonarc.ai), widened past real estate: mine
+for website/product ideas, sort near-term-SWFL vs long-term. Live-crawled all 4 plus follow-ups
+(Tribes/Block/Transcripts/Events/pricing docs) via crawl4ai per RULE 0.4 - no memory, no guessing
+at unread nav items.
+
+Filed `_RESEARCH/competitor-and-strategy/2026-09-15-carbonarc-scan.md` (the dated scan, every
+source URL + what it returned) and `_AUDIT_AND_ROADMAP/potential-website-additions.md` (new
+standing idea backlog, separate from build-queue.md). Near-term picks: a Prisms-style public
+index page (relative-only numbers, safe next to a paid product - pending one check against
+data-inventory.md for series with 13+ months cadence), a public data-catalog page with our
+existing row-count/freshness numbers, selling MCP access instead of just running it (this
+session's own swfl MCP hit its 15-req/month free wall mid-task - the metering gap is real).
+Long-term: consumption pricing, split metering (deterministic vs AI-query), Excel/PPT plugins,
+a structured Entity x Metric x Time query composer. Flagged NOT stealable at our volume: Tribes
+(needs a national card panel) and Block (needs enterprise data-license buyers).
+
+Not done: the `_RESEARCH/INDEX.md` line and a CLAUDE.md pointer to the new backlog - both files
+were locked under active claims from other concurrent sessions (8b1cb2d6, 3fedf23d) all session;
+retry next session. Also note: several "your Bash command modified X" hook warnings this session
+were false attributions to concurrent sessions' own edits (CLAUDE.md, what-do-we-have/INDEX.md,
+a GHA workflow) landing at the same moment as my crawl4ai calls - verified via `git diff` each
+time, nothing of mine touched those files.
+
 ## 2026-09-15 (Opus 5) - Chain fired (run 35037327866): A1 PROVED, A2 blocked on an EMPTY secret
 
 Operator said "pushed. fire." Verified origin/main carried the workstream-A commits (0 ahead / 0
