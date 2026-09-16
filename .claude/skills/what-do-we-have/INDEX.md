@@ -7,7 +7,7 @@
 
 Markers: **[ORPHAN]** nothing in the repo points at this file — it is invisible unless you come through this index, and it is a DELETION CANDIDATE. **[weak]** reachable only by bare filename, which leads nowhere.
 
-Reachability at generation: 974 by path · 549 by name only · 247 orphaned. Re-measure with `node scripts/doc-reachability.mjs`.
+Reachability at generation: 975 by path · 549 by name only · 246 orphaned. Re-measure with `node scripts/doc-reachability.mjs`.
 
 ## docs/superpowers — 880
 
@@ -1376,7 +1376,7 @@ Reachability at generation: 974 by path · 549 by name only · 247 orphaned. Re-
 - `_RESEARCH/competitor-and-strategy/2026-08-19-calcom-selfhost-requirements.md` — Cal.diy / Cal.com self-hosting — the honest bill of materials — ready." This is the go/no-go research pass, not a build plan.
 - `_RESEARCH/competitor-and-strategy/2026-08-19-calendly-embed-and-params.md` — Calendly embed options + URL parameters — for brand-profile booking links — Fetched 08/19/2026 via crawl4ai. Sources (verbatim, live-crawled this session):
 - `_RESEARCH/competitor-and-strategy/2026-09-15-carbonarc-scan.md` — Carbon Arc — live scan, 09/15/2026 — Operator handed four URLs and asked "what can we learn from this," explicitly widened past real
-- `_RESEARCH/competitor-and-strategy/2026-09-15-hbweekly-permit-reports-scan.md` **[ORPHAN]** — HBW Inc (Home Builders Weekly / hbweekly.com) — permit report vendor scan — Date: 09/15/2026. Live-crawled via crawl4ai (pinned venv) per RULE 0.4 — no memory, no guessing.
+- `_RESEARCH/competitor-and-strategy/2026-09-15-hbweekly-permit-reports-scan.md` — HBW Inc (Home Builders Weekly / hbweekly.com) — permit report vendor scan — Date: 09/15/2026. Live-crawled via crawl4ai (pinned venv) per RULE 0.4 — no memory, no guessing.
 - `_RESEARCH/competitor-and-strategy/STEADY-PAINS.md` — STEADY PAINS — the distilled buyer/seller/agent pain reference (LOCAL ONLY) — Propensity-to-list / seller-stress scoring is proven commercially viable at scale: Homebot
 
 ## _RESEARCH/data-and-ingest — 32
