@@ -1,3 +1,29 @@
+## 2026-09-15 (Sonnet 5) - Statewide permit coverage feasibility handoff: 8 SWFL jurisdictions mapped live
+
+Operator: figure out what permits we can get and how hard it is, starting SWFL, eventually all of
+FL; confirm every real way to get each jurisdiction's data and whether historic is bulk-pullable
+or requires manual sign-in-and-copy per order. Brainstormed the permit-site idea first
+(superpowers:brainstorming, architectural path): landed on contractor/trade lead-gen audience,
+order-based self-serve (PermitData.net shape) monetization, new section on swfldatagulf.com,
+Lee+Collier-only geography (matches the locked North Star scope), and "close data gaps before
+launch" as the sequencing call — which is what this handoff scopes.
+
+Live-checked (WebSearch discovery + crawl4ai/direct fetch verification, RULE 0.4, no memory) all
+8 Lee/Collier city+county permitting systems: Lee County (Accela, already live), Collier County
+(monthly XLSX, already live, but ALSO runs CityView per its own site - unconfirmed if that's
+fresher/different), Cape Coral (Tyler EnerGov + a separate ArcGIS Open Data layer that 403'd on a
+plain fetch), Fort Myers + Bonita Springs (also EnerGov), Sanibel (split CityView/EnerGov), Fort
+Myers Beach (mid-migration iWorQ->GovWell), Naples (CityView, likely CAPTCHA-gated per the page's
+own title), Marco Island (public no-login search, records back to 10/01/1998 - real archive depth
+already available). Four different vendor platforms found across just these 8 jurisdictions.
+Confirmed live: PermitData.net's own 35-jurisdiction FL coverage page does NOT include Lee County
+at all - a real gap in a company whose entire business is this.
+
+Filed `docs/handoff/2026-09-15-statewide-permit-coverage-feasibility-handoff.md` with an ordered
+next-steps list. Opened `collier_permits_cityview_vs_xlsx` (highest-value item - touches an
+existing pipeline) alongside the earlier `lee_permits_cape_coral_coverage_gap`. Next: operator
+picks which check to chase first; nothing built yet, this was research + a decision-ready handoff.
+
 ## 2026-09-15 (Sonnet 5) - Permit-data market landscape: 5 competitors, real pricing, "order model" validated
 
 Follow-up to the HBW scan below: operator asked "what do most people order" and floated an
