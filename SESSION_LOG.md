@@ -1,3 +1,23 @@
+## 2026-09-15 (Sonnet 5) - HBW permit-report vendor scan: sourcing + pricing answered
+
+Operator asked how hbweekly.com/permit-reports (HBW Inc) gets its data and why no pricing shows.
+Checked `_RESEARCH/INDEX.md` first (nothing on file), then live-crawled hbweekly.com
+(permit-reports, about-us, coverage-areas, contact-us, cloud-search, home) via crawl4ai per
+RULE 0.4 - no memory, no guessing. Answer: 40+ human reporters work the actual permit-issuing
+offices weekly (labor model, same shape as our own lee_deed_official_records lane, not an
+API/scrape); pricing is fully gated behind a "Complimentary Custom Report" contact form routed
+to named account managers - classic B2B enterprise quote-per-account, no self-serve price list.
+They cover Lee + Collier (our SWFL core) plus most of FL, Atlanta metro, and 4 TX metros.
+
+Filed `_RESEARCH/competitor-and-strategy/2026-09-15-hbweekly-permit-reports-scan.md`
+(DO NOT ADOPT - not a stack tool, a competitor/adjacent vendor; steal-the-shape note: a visible
+price beats their all-contact-form funnel if we ever surface permit data publicly). Also
+corrected a stale memory (`feedback_no-autonomous-push.md`) that still said "never push without
+asking" - superseded by the operator's 2026-09-06 "Claude pushes" decree; marked superseded in
+place rather than deleted, for history.
+
+Next: nothing opened - purely informational scan, no build implied.
+
 ## 2026-09-15 (Sonnet 5) - Carbon Arc scan: 2 docs filed, idea backlog started
 
 Operator handed 4 Carbon Arc URLs (carbonarc.co + /research + /prisms + /how-it-works +
