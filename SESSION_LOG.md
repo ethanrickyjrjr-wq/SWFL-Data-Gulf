@@ -1,3 +1,45 @@
+## 2026-09-15 (Opus 5) - Chain fired (run 35037327866): A1 PROVED, A2 blocked on an EMPTY secret
+
+Operator said "pushed. fire." Verified origin/main carried the workstream-A commits (0 ahead / 0
+behind) before dispatching, then ran the chain live (no dry_run).
+
+A1 IS PROVED, and the proof is the two runs side by side:
+  run 34952735442 (BEFORE A1): gate - assert_landed = failure, rebuild - brains = SKIPPED
+  run 35037327866 (AFTER  A1): gate - assert_landed = failure, rebuild - brains = RAN (failed on its
+                               own unrelated cause, below)
+The gate still reds the chain and no longer blocks the rebuild. That is exactly the lake-first
+change and it behaves as specified.
+
+A2 IS NOT PROVED, and the cause is NOT the 403/WAF the plan anticipated - so plan Step 5 does NOT
+apply and this pipeline does NOT move to the Fedora list. The runner printed its own env block:
+  DATABASE_URL: ***
+  PHOTOS_API: ***
+  LISTING_LIFECYCLE_BASE_URL:
+  CRAWL4AI_PROXY: ***
+Three secrets masked, one blank. So `secrets: inherit` is working and this ONE value is empty.
+`gh secret list` does show LISTING_LIFECYCLE_BASE_URL present, updated 06/27/2026 - the NAME exists,
+the VALUE does not. `ingest/pipelines/listing_lifecycle/extract.py:52` is the only reader; with it
+unset the walk never issues a request, scans 0 rows, and `[fatal] every county returned 0 rows`
+fires on all three counties. Opened check `listing_base_url_secret_empty`.
+
+The A2 code change is correct and stays. It is inert until the secret has a value, and the value is
+the Source-B origin, which by decree lives ONLY in that secret and is not in the repo - so this one
+is genuinely operator-only. There was no scrape attempt at all, so nothing is known about whether
+the WAF changed since 07/01; that question is still open and untested.
+
+The rebuild's own failure is the credit wall, unchanged and unfunded: `400 credit balance is too
+low` from `refinery`. Already carried by `llm_legs_parked_credit_wall`. No billing action proposed,
+per RULE 3 C2b. Noted for later, not chased tonight: the refinery's CRON-DIAG stamped it
+`failureClass=deterministic`, not BILLING - a THIRD classifier beyond the two A4 scoped
+(prescriptions.py and classify-cron-failure.mjs). Also in that leg and unrelated:
+`active-rentals-source: rental_listing_stats fetch failed - canceling statement due to statement
+timeout`.
+
+Also observed and NOT treated as a defect: `listing-lifecycle-daily.yml` is `disabled_manually`
+(since 08/02/2026), which is why a standalone dispatch 422s. That is correct by design - the
+07/12/2026 cutover retired the members' standalone crons so the chain is the single caller, and a
+disabled state does not block a `uses:` reusable-workflow call. Left alone deliberately.
+
 ## 2026-09-15 (Opus 5) - Scratchpad bankrupted too: 45 open items -> 0. NORTH STAR #4 fully closed.
 
 Operator, same session, one word: "bankrupt it." That is the other half of NORTH STAR #4, which had
