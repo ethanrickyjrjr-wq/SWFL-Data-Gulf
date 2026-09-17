@@ -1,8 +1,8 @@
 {
   "target": "master",
   "timestamps": {
-    "started": "2026-09-16T09:24:20.969Z",
-    "finished": "2026-09-16T09:24:54.118Z"
+    "started": "2026-09-17T04:26:04.452Z",
+    "finished": "2026-09-17T04:26:42.968Z"
   },
   "source": "live",
   "outcomes": [
@@ -30,7 +30,7 @@
       "packId": "cre-swfl",
       "status": "missing",
       "failureClass": "deterministic",
-      "reason": "400 {\"type\":\"error\",\"error\":{\"type\":\"invalid_request_error\",\"message\":\"Your credit balance is too low to access the Anthropic API. Please go to Plans & Billing to upgrade or purchase credits.\"},\"request_id\":\"req_011Cf6snfht4H8ECcugu3mTi\"}",
+      "reason": "400 {\"type\":\"error\",\"error\":{\"type\":\"invalid_request_error\",\"message\":\"Your credit balance is too low to access the Anthropic API. Please go to Plans & Billing to upgrade or purchase credits.\"},\"request_id\":\"req_011Cf8NrPADRETyRj1UdyUbs\"}",
       "lastGoodRefinedAt": "2026-08-10T04:46:14Z",
       "written": false
     },
@@ -38,7 +38,7 @@
       "packId": "macro-us",
       "status": "missing",
       "failureClass": "deterministic",
-      "reason": "400 {\"type\":\"error\",\"error\":{\"type\":\"invalid_request_error\",\"message\":\"Your credit balance is too low to access the Anthropic API. Please go to Plans & Billing to upgrade or purchase credits.\"},\"request_id\":\"req_011Cf6snuQtktLH8u4azHyto\"}",
+      "reason": "400 {\"type\":\"error\",\"error\":{\"type\":\"invalid_request_error\",\"message\":\"Your credit balance is too low to access the Anthropic API. Please go to Plans & Billing to upgrade or purchase credits.\"},\"request_id\":\"req_011Cf8NrZ7VnjqfTkhGRGShy\"}",
       "lastGoodRefinedAt": "2026-07-30T06:59:47Z",
       "written": false
     },
@@ -46,7 +46,7 @@
       "packId": "macro-florida",
       "status": "missing",
       "failureClass": "deterministic",
-      "reason": "400 {\"type\":\"error\",\"error\":{\"type\":\"invalid_request_error\",\"message\":\"Your credit balance is too low to access the Anthropic API. Please go to Plans & Billing to upgrade or purchase credits.\"},\"request_id\":\"req_011Cf6soHPEhSE4HNz52qfbr\"}",
+      "reason": "400 {\"type\":\"error\",\"error\":{\"type\":\"invalid_request_error\",\"message\":\"Your credit balance is too low to access the Anthropic API. Please go to Plans & Billing to upgrade or purchase credits.\"},\"request_id\":\"req_011Cf8NsLJbX2wvNyfKpwDex\"}",
       "lastGoodRefinedAt": "2026-07-19T02:28:39Z",
       "written": false
     },
@@ -123,19 +123,19 @@
     {
       "packId": "city-pulse-swfl",
       "status": "built",
-      "version": 67,
+      "version": 68,
       "written": true,
       "brainOutput": {
         "brain_id": "city-pulse-swfl",
-        "version": 67,
-        "refined_at": "2026-09-16T09:24:32Z",
-        "expires": "2026-09-17T09:24:32Z",
+        "version": 68,
+        "refined_at": "2026-09-17T04:26:21Z",
+        "expires": "2026-09-18T04:26:21Z",
         "ttl_seconds": 86400,
         "direction": "neutral",
         "magnitude": 0,
         "drivers": [],
         "overrides": [],
-        "conclusion": "SWFL city pulse as of 2026-09-16: 68 live current-events signals across 10 cities — Naples (26), Fort Myers (17), Golden Gate (1), Cape Coral (15), North Naples (1), Estero (2), Sanibel (2), Bonita Springs (1), Marco Island (2), Fort Myers Beach (1). Most current: Naples — The Waldorf Astoria Hotel & Residences Miami, a 100-story condo-hotel soaring 1,049 feet, is under construction and will be the tallest tower south of Manhattan upon completion in 2028; condo units start at $3.15 million. These are current cited facts only; the cross-vertical read and any direction call live downstream in master.",
+        "conclusion": "SWFL city pulse as of 2026-09-17: 68 live current-events signals across 10 cities — Naples (26), Fort Myers (17), Golden Gate (1), Cape Coral (15), North Naples (1), Estero (2), Sanibel (2), Bonita Springs (1), Marco Island (2), Fort Myers Beach (1). Most current: Naples — The Waldorf Astoria Hotel & Residences Miami, a 100-story condo-hotel soaring 1,049 feet, is under construction and will be the tallest tower south of Manhattan upon completion in 2028; condo units start at $3.15 million. These are current cited facts only; the cross-vertical read and any direction call live downstream in master.",
         "key_metrics": [
           {
             "metric": "signal_development_1",
@@ -145,7 +145,7 @@
             "variable_type": "categorical",
             "source": {
               "url": "https://www.naplesnews.com/story/money/real-estate/2026/09/05/new-100-story-waldorf-astoria-tower-coming-to-miami/91616724007/",
-              "fetched_at": "2026-09-16T09:24:32Z",
+              "fetched_at": "2026-09-17T04:26:21Z",
               "tier": 2,
               "citation": "New 100 story Waldorf Astoria tower coming to Miami: \"[](https://www.naplesnews.com/)\n[](https://subscribe.naplesnews.com/rr/nanobar?gps-source=CPTILELEFT&itm_campaign=2026ENTAUGBAU&itm_medium=ONSITE&success-url=https%3A%2F%2Fwww.naplesnews.com%2Fstory%2Fmoney%2Freal-estate%2F2026%2F09%2F05%2Fnew-100-story-waldorf-astoria-tower-coming-to-miami%2F91616724007%2F)\n[](https://subscribe.naplesnews.com/rr/masthead?gps-source=CPMASTHEAD&itm_campaign=2026ENTAUGBAU&itm_medium=ONSITE&success-url=https%3A%2F%2Fwww.naplesnews.com%2Fstory%2Fmoney%2Freal-estate%2F2026%2F09%2F05%2Fnew-100-story-waldorf-astoria-tower-coming-to-miami%2F91616724007%2F)\n[News](https://www.naplesnews.com/news/) [Sports](https://www.naplesnews.com/sports/) [Real Estate](https://www.naplesnews.com/business/real-estate/) [Restaurants](https://www.naplesnews.com/entertainment/restaurants/) [Opinion](https://www.naplesnews.com/opinion/) [Advertise](https://advertising.usatoday.com/advertise-with-us/?cid=Web_LiQ_Network_AdvertiseWithUs_AdvertiseInquiry&publication=naples_daily_news&utm_source=local_publication&utm_medium=menu&utm_campaign=advertise_with_us) [Obituaries](https://www.naplesnews.com/obituaries) [eNewspaper](https://user.naplesnews.com/user/enewspaper) [Legals](https://www.naplesnews.com/public-notices)\n[](https://www.naplesnews.com/search/ \"Search\")\n[](https://www.naplesnews.com/weather/ \"Weather in Naples: 77°F Partly Cloudy\") [](https://subscribe.naplesnews.com/rr/navsub?gps-source=CPTOPNAVBAR&itm_campaign=2026ENTAUGBAU&itm_medium=ONSITE&success-url=https%3A%2F%2Fwww.naplesnews.com%2Fstory%2Fmoney%2Freal-estate%2F2026%2F09%2F05%2Fnew-100-story-waldorf-astoria-tower-coming-to-miami%2F91616724007%2F)\n[](https://login.naplesnews.com/PNDN-GUP/authenticate/?success-url=https%3A%2F%2Fwww.naplesnews.com%2Fstory%2Fmoney%2Freal-estate%2F2026%2F09%2F05%2Fnew-100-story-waldorf-astoria-tower-coming-to-miami%2F91616724007%2F&cancel-url=https%3A%2F%2Fwww.naplesnews.com%2Fstory%2Fmoney%2Freal-estate%2F2026%2F09%2F05%2Fnew-100-story-waldorf-astoria-tower-coming-to-miami%2F91616724007%2F)\n[](https://www.naplesnews.com/) [](https://www.naplesnews.com/)\nREAL ESTATE\n# Super-sized Florida: A 100 story tower is rising above Miami skyline\n[![Portrait of Clayton Park](https://www.naplesnews.com/gcdn/presto/2020/08/14/NDNJ/ba679e5f-045f-4f50-adeb-cd862be43d88-FLDAY-080920-Clayton_Column_4.jpg?crop=2368,2368,x0,y459&width=48&height=48&format=pjpg&auto=webp) Clayton Park](https://www.news-journalonline.com/staff/5432237002/clayton-park/)\nClayton Park\nSept. 5, 2026, 5:08 a.m. ET\nIf you want a [room with a view](https://www.naplesnews.com/picture-gallery/news/state/2026/07/02/new-homes-apartments-keep-going-up-in-florida-with-more-coming/90774974007/), a swanky, ultra-modern 100-story condo-hotel is going up in Miami that will be the tallest south of Manhattan. But it comes with a steep price tag.\nCondo units at the Waldorf Astoria Hotel & Residences Miami, which will soar 1,049 feet into the sky upon completion in 2028, start at $3.15 million. Its top-f\""
             },
@@ -162,7 +162,7 @@
             "variable_type": "categorical",
             "source": {
               "url": "https://www.naplesnews.com/story/money/business/local/2026/09/03/design-board-gives-a-thumbs-up-to-exclusive-car-and-wine-club-in-naples-but-city-staff-reviewing-it/91560883007/",
-              "fetched_at": "2026-09-16T09:24:32Z",
+              "fetched_at": "2026-09-17T04:26:21Z",
               "tier": 2,
               "citation": "Design board gives a thumbs up to exclusive car and wine club in Naples: \"[](https://www.naplesnews.com/)\n[](https://subscribe.naplesnews.com/rr/nanobar?gps-source=CPTILELEFT&itm_campaign=2026ENTAUGBAU&itm_medium=ONSITE&success-url=https%3A%2F%2Fwww.naplesnews.com%2Fstory%2Fmoney%2Fbusiness%2Flocal%2F2026%2F09%2F03%2Fdesign-board-gives-a-thumbs-up-to-exclusive-car-and-wine-club-in-naples-but-city-staff-reviewing-it%2F91560883007%2F)\n[](https://subscribe.naplesnews.com/rr/masthead?gps-source=CPMASTHEAD&itm_campaign=2026ENTAUGBAU&itm_medium=ONSITE&success-url=https%3A%2F%2Fwww.naplesnews.com%2Fstory%2Fmoney%2Fbusiness%2Flocal%2F2026%2F09%2F03%2Fdesign-board-gives-a-thumbs-up-to-exclusive-car-and-wine-club-in-naples-but-city-staff-reviewing-it%2F91560883007%2F)\n[News](https://www.naplesnews.com/news/) [Sports](https://www.naplesnews.com/sports/) [Real Estate](https://www.naplesnews.com/business/real-estate/) [Restaurants](https://www.naplesnews.com/entertainment/restaurants/) [Opinion](https://www.naplesnews.com/opinion/) [Advertise](https://advertising.usatoday.com/advertise-with-us/?cid=Web_LiQ_Network_AdvertiseWithUs_AdvertiseInquiry&publication=naples_daily_news&utm_source=local_publication&utm_medium=menu&utm_campaign=advertise_with_us) [Obituaries](https://www.naplesnews.com/obituaries) [eNewspaper](https://user.naplesnews.com/user/enewspaper) [Legals](https://www.naplesnews.com/public-notices)\n[](https://www.naplesnews.com/search/ \"Search\")\n[](https://www.naplesnews.com/weather/ \"Weather in Naples: 80°F Partly Cloudy\") [](https://subscribe.naplesnews.com/rr/navsub?gps-source=CPTOPNAVBAR&itm_campaign=2026ENTAUGBAU&itm_medium=ONSITE&success-url=https%3A%2F%2Fwww.naplesnews.com%2Fstory%2Fmoney%2Fbusiness%2Flocal%2F2026%2F09%2F03%2Fdesign-board-gives-a-thumbs-up-to-exclusive-car-and-wine-club-in-naples-but-city-staff-reviewing-it%2F91560883007%2F)\n[](https://login.naplesnews.com/PNDN-GUP/authenticate/?success-url=https%3A%2F%2Fwww.naplesnews.com%2Fstory%2Fmoney%2Fbusiness%2Flocal%2F2026%2F09%2F03%2Fdesign-board-gives-a-thumbs-up-to-exclusive-car-and-wine-club-in-naples-but-city-staff-reviewing-it%2F91560883007%2F&cancel-url=https%3A%2F%2Fwww.naplesnews.com%2Fstory%2Fmoney%2Fbusiness%2Flocal%2F2026%2F09%2F03%2Fdesign-board-gives-a-thumbs-up-to-exclusive-car-and-wine-club-in-naples-but-city-staff-reviewing-it%2F91560883007%2F)\n[](https://www.naplesnews.com/) [](https://www.naplesnews.com/)\n[LOCAL BUSINESS](https://www.naplesnews.com/business/local/)\n# 'Retiree' proposes unique car and wine club in Naples\n[![Portrait of Laura Layden](https://www.naplesnews.com/gcdn/authoring/authoring-images/2024/02/08/PNDN/72524348007-ndn-jh-20240126-laura-0001.JPG?crop=3313,3312,x1506,y0&width=48&height=48&format=pjpg&auto=webp) Laura Layden](https://www.naplesnews.com/staff/2647080001/laura-layden/)\nFort Myers News-Press & Naples Daily News\nSept. 3, 2026, 12:03 p.m. ET\nGeorgios Papadopoulos has a vision for a new kind of exclusive club in Naples.\nThe club would combine two of his passions — cars and [wine](https://www.naplesnews.com/st\""
             },
@@ -179,7 +179,7 @@
             "variable_type": "categorical",
             "source": {
               "url": "https://www.naplesnews.com/story/money/business/local/2026/09/04/fdot-shares-more-about-i-75-widening-and-noise-wall-plans-in-sw-florida-at-virtual-meeting/91587939007/",
-              "fetched_at": "2026-09-16T09:24:32Z",
+              "fetched_at": "2026-09-17T04:26:21Z",
               "tier": 2,
               "citation": "FDOT shares more about I-75 widening and noise wall plans in SW Florida: \"[](https://www.naplesnews.com/)\n[](https://subscribe.naplesnews.com/rr/nanobar?gps-source=CPTILELEFT&itm_campaign=2026ENTAUGBAU&itm_medium=ONSITE&success-url=https%3A%2F%2Fwww.naplesnews.com%2Fstory%2Fmoney%2Fbusiness%2Flocal%2F2026%2F09%2F04%2Ffdot-shares-more-about-i-75-widening-and-noise-wall-plans-in-sw-florida-at-virtual-meeting%2F91587939007%2F)\n[](https://subscribe.naplesnews.com/rr/masthead?gps-source=CPMASTHEAD&itm_campaign=2026ENTAUGBAU&itm_medium=ONSITE&success-url=https%3A%2F%2Fwww.naplesnews.com%2Fstory%2Fmoney%2Fbusiness%2Flocal%2F2026%2F09%2F04%2Ffdot-shares-more-about-i-75-widening-and-noise-wall-plans-in-sw-florida-at-virtual-meeting%2F91587939007%2F)\n[News](https://www.naplesnews.com/news/) [Sports](https://www.naplesnews.com/sports/) [Real Estate](https://www.naplesnews.com/business/real-estate/) [Restaurants](https://www.naplesnews.com/entertainment/restaurants/) [Opinion](https://www.naplesnews.com/opinion/) [Advertise](https://advertising.usatoday.com/advertise-with-us/?cid=Web_LiQ_Network_AdvertiseWithUs_AdvertiseInquiry&publication=naples_daily_news&utm_source=local_publication&utm_medium=menu&utm_campaign=advertise_with_us) [Obituaries](https://www.naplesnews.com/obituaries) [eNewspaper](https://user.naplesnews.com/user/enewspaper) [Legals](https://www.naplesnews.com/public-notices)\n[](https://www.naplesnews.com/search/ \"Search\")\n[](https://www.naplesnews.com/weather/ \"Weather in Naples: 80°F Partly Cloudy\") [](https://subscribe.naplesnews.com/rr/navsub?gps-source=CPTOPNAVBAR&itm_campaign=2026ENTAUGBAU&itm_medium=ONSITE&success-url=https%3A%2F%2Fwww.naplesnews.com%2Fstory%2Fmoney%2Fbusiness%2Flocal%2F2026%2F09%2F04%2Ffdot-shares-more-about-i-75-widening-and-noise-wall-plans-in-sw-florida-at-virtual-meeting%2F91587939007%2F)\n[](https://login.naplesnews.com/PNDN-GUP/authenticate/?success-url=https%3A%2F%2Fwww.naplesnews.com%2Fstory%2Fmoney%2Fbusiness%2Flocal%2F2026%2F09%2F04%2Ffdot-shares-more-about-i-75-widening-and-noise-wall-plans-in-sw-florida-at-virtual-meeting%2F91587939007%2F&cancel-url=https%3A%2F%2Fwww.naplesnews.com%2Fstory%2Fmoney%2Fbusiness%2Flocal%2F2026%2F09%2F04%2Ffdot-shares-more-about-i-75-widening-and-noise-wall-plans-in-sw-florida-at-virtual-meeting%2F91587939007%2F)\n[](https://www.naplesnews.com/) [](https://www.naplesnews.com/)\n[LOCAL BUSINESS](https://www.naplesnews.com/business/local/)\n# Residents hear more, weigh in on massive I-75 expansion plans in SW Florida\n[![Portrait of Laura Layden](https://www.naplesnews.com/gcdn/authoring/authoring-images/2024/02/08/PNDN/72524348007-ndn-jh-20240126-laura-0001.JPG?crop=3313,3312,x1506,y0&width=48&height=48&format=pjpg&auto=webp) Laura Layden](https://www.naplesnews.com/staff/2647080001/laura-layden/)\nFort Myers News-Press & Naples Daily News\nSept. 4, 2026, 5:03 a.m. ET\nA virtual meeting shed more light on the plans to widen Interstate 75 from Golden Gate Parkway to Alico Road.\nDuring the hour-long meeting on Sept. 2, a team with the Florida Department of Tran\""
             },
@@ -196,7 +196,7 @@
             "variable_type": "categorical",
             "source": {
               "url": "https://www.naplesnews.com/story/money/business/local/2026/09/04/fdot-shares-more-about-i-75-widening-and-noise-wall-plans-in-sw-florida-at-virtual-meeting/91587939007/",
-              "fetched_at": "2026-09-16T09:24:32Z",
+              "fetched_at": "2026-09-17T04:26:21Z",
               "tier": 2,
               "citation": "FDOT shares more about I-75 widening and noise wall plans in SW Florida: \"[](https://www.naplesnews.com/)\n[Florida pulls plug on license plate cameras across SW FL roads](https://www.naplesnews.com/story/news/2026/09/04/florida-highway-police-flock-camera-license-plate-removal/91576967007/)\n[](https://subscribe.naplesnews.com/rr/nanobar?gps-source=CPTILELEFT&itm_campaign=2026ENTAUGBAU&itm_medium=ONSITE&success-url=https%3A%2F%2Fwww.naplesnews.com%2Fstory%2Fmoney%2Fbusiness%2Flocal%2F2026%2F09%2F04%2Ffdot-shares-more-about-i-75-widening-and-noise-wall-plans-in-sw-florida-at-virtual-meeting%2F91587939007%2F)\n[](https://subscribe.naplesnews.com/rr/masthead?gps-source=CPMASTHEAD&itm_campaign=2026ENTAUGBAU&itm_medium=ONSITE&success-url=https%3A%2F%2Fwww.naplesnews.com%2Fstory%2Fmoney%2Fbusiness%2Flocal%2F2026%2F09%2F04%2Ffdot-shares-more-about-i-75-widening-and-noise-wall-plans-in-sw-florida-at-virtual-meeting%2F91587939007%2F)\n[News](https://www.naplesnews.com/news/) [Sports](https://www.naplesnews.com/sports/) [Real Estate](https://www.naplesnews.com/business/real-estate/) [Restaurants](https://www.naplesnews.com/entertainment/restaurants/) [Opinion](https://www.naplesnews.com/opinion/) [Advertise](https://advertising.usatoday.com/advertise-with-us/?cid=Web_LiQ_Network_AdvertiseWithUs_AdvertiseInquiry&publication=naples_daily_news&utm_source=local_publication&utm_medium=menu&utm_campaign=advertise_with_us) [Obituaries](https://www.naplesnews.com/obituaries) [eNewspaper](https://user.naplesnews.com/user/enewspaper) [Legals](https://www.naplesnews.com/public-notices)\n[](https://www.naplesnews.com/search/ \"Search\")\n[](https://www.naplesnews.com/weather/ \"Weather in Naples: 78°F Partly Cloudy\") [](https://subscribe.naplesnews.com/rr/navsub?gps-source=CPTOPNAVBAR&itm_campaign=2026ENTAUGBAU&itm_medium=ONSITE&success-url=https%3A%2F%2Fwww.naplesnews.com%2Fstory%2Fmoney%2Fbusiness%2Flocal%2F2026%2F09%2F04%2Ffdot-shares-more-about-i-75-widening-and-noise-wall-plans-in-sw-florida-at-virtual-meeting%2F91587939007%2F)\n[](https://login.naplesnews.com/PNDN-GUP/authenticate/?success-url=https%3A%2F%2Fwww.naplesnews.com%2Fstory%2Fmoney%2Fbusiness%2Flocal%2F2026%2F09%2F04%2Ffdot-shares-more-about-i-75-widening-and-noise-wall-plans-in-sw-florida-at-virtual-meeting%2F91587939007%2F&cancel-url=https%3A%2F%2Fwww.naplesnews.com%2Fstory%2Fmoney%2Fbusiness%2Flocal%2F2026%2F09%2F04%2Ffdot-shares-more-about-i-75-widening-and-noise-wall-plans-in-sw-florida-at-virtual-meeting%2F91587939007%2F)\n[](https://www.naplesnews.com/) [](https://www.naplesnews.com/)\n[LOCAL BUSINESS](https://www.naplesnews.com/business/local/)\n# Residents hear more, weigh in on massive I-75 expansion plans in SW Florida\n[![Portrait of Laura Layden](https://www.naplesnews.com/gcdn/authoring/authoring-images/2024/02/08/PNDN/72524348007-ndn-jh-20240126-laura-0001.JPG?crop=3313,3312,x1506,y0&width=48&height=48&format=pjpg&auto=webp) Laura Layden](https://www.naplesnews.com/staff/2647080001/laura-layden/)\nFort Myers News-Press & Naples Daily News\nSept. 4, 2026, 5:03 a.m. ET\nA virtu\""
             },
@@ -213,7 +213,7 @@
             "variable_type": "categorical",
             "source": {
               "url": "https://www.naplesnews.com/story/money/business/local/2026/09/04/fdot-shares-more-about-i-75-widening-and-noise-wall-plans-in-sw-florida-at-virtual-meeting/91587939007/",
-              "fetched_at": "2026-09-16T09:24:32Z",
+              "fetched_at": "2026-09-17T04:26:21Z",
               "tier": 2,
               "citation": "FDOT shares more about I-75 widening and noise wall plans in SW Florida: \"[](https://www.naplesnews.com/)\n[Florida pulls plug on license plate cameras across SW FL roads](https://www.naplesnews.com/story/news/2026/09/04/florida-highway-police-flock-camera-license-plate-removal/91576967007/)\n[](https://subscribe.naplesnews.com/rr/nanobar?gps-source=CPTILELEFT&itm_campaign=2026ENTAUGBAU&itm_medium=ONSITE&success-url=https%3A%2F%2Fwww.naplesnews.com%2Fstory%2Fmoney%2Fbusiness%2Flocal%2F2026%2F09%2F04%2Ffdot-shares-more-about-i-75-widening-and-noise-wall-plans-in-sw-florida-at-virtual-meeting%2F91587939007%2F)\n[](https://subscribe.naplesnews.com/rr/masthead?gps-source=CPMASTHEAD&itm_campaign=2026ENTAUGBAU&itm_medium=ONSITE&success-url=https%3A%2F%2Fwww.naplesnews.com%2Fstory%2Fmoney%2Fbusiness%2Flocal%2F2026%2F09%2F04%2Ffdot-shares-more-about-i-75-widening-and-noise-wall-plans-in-sw-florida-at-virtual-meeting%2F91587939007%2F)\n[News](https://www.naplesnews.com/news/) [Sports](https://www.naplesnews.com/sports/) [Real Estate](https://www.naplesnews.com/business/real-estate/) [Restaurants](https://www.naplesnews.com/entertainment/restaurants/) [Opinion](https://www.naplesnews.com/opinion/) [Advertise](https://advertising.usatoday.com/advertise-with-us/?cid=Web_LiQ_Network_AdvertiseWithUs_AdvertiseInquiry&publication=naples_daily_news&utm_source=local_publication&utm_medium=menu&utm_campaign=advertise_with_us) [Obituaries](https://www.naplesnews.com/obituaries) [eNewspaper](https://user.naplesnews.com/user/enewspaper) [Legals](https://www.naplesnews.com/public-notices)\n[](https://www.naplesnews.com/search/ \"Search\")\n[](https://www.naplesnews.com/weather/ \"Weather in Naples: 78°F Partly Cloudy\") [](https://subscribe.naplesnews.com/rr/navsub?gps-source=CPTOPNAVBAR&itm_campaign=2026ENTAUGBAU&itm_medium=ONSITE&success-url=https%3A%2F%2Fwww.naplesnews.com%2Fstory%2Fmoney%2Fbusiness%2Flocal%2F2026%2F09%2F04%2Ffdot-shares-more-about-i-75-widening-and-noise-wall-plans-in-sw-florida-at-virtual-meeting%2F91587939007%2F)\n[](https://login.naplesnews.com/PNDN-GUP/authenticate/?success-url=https%3A%2F%2Fwww.naplesnews.com%2Fstory%2Fmoney%2Fbusiness%2Flocal%2F2026%2F09%2F04%2Ffdot-shares-more-about-i-75-widening-and-noise-wall-plans-in-sw-florida-at-virtual-meeting%2F91587939007%2F&cancel-url=https%3A%2F%2Fwww.naplesnews.com%2Fstory%2Fmoney%2Fbusiness%2Flocal%2F2026%2F09%2F04%2Ffdot-shares-more-about-i-75-widening-and-noise-wall-plans-in-sw-florida-at-virtual-meeting%2F91587939007%2F)\n[](https://www.naplesnews.com/) [](https://www.naplesnews.com/)\n[LOCAL BUSINESS](https://www.naplesnews.com/business/local/)\n# Residents hear more, weigh in on massive I-75 expansion plans in SW Florida\n[![Portrait of Laura Layden](https://www.naplesnews.com/gcdn/authoring/authoring-images/2024/02/08/PNDN/72524348007-ndn-jh-20240126-laura-0001.JPG?crop=3313,3312,x1506,y0&width=48&height=48&format=pjpg&auto=webp) Laura Layden](https://www.naplesnews.com/staff/2647080001/laura-layden/)\nFort Myers News-Press & Naples Daily News\nSept. 4, 2026, 5:03 a.m. ET\nA virtu\""
             },
@@ -230,7 +230,7 @@
             "variable_type": "categorical",
             "source": {
               "url": "https://www.news-press.com/story/money/business/local/2026/09/04/fdot-shares-more-about-i-75-widening-and-noise-wall-plans-in-sw-florida-at-virtual-meeting/91587939007/",
-              "fetched_at": "2026-09-16T09:24:32Z",
+              "fetched_at": "2026-09-17T04:26:21Z",
               "tier": 2,
               "citation": "FDOT shares more about I-75 widening and noise wall plans in SW Florida: \"[](https://www.news-press.com/)\n[Florida pulls plug on license plate cameras across SW FL roads](https://www.news-press.com/story/news/2026/09/04/florida-highway-police-flock-camera-license-plate-removal/91576967007/)\n[](https://subscribe.news-press.com/rr/nanobar?gps-source=CPTILELEFT&itm_campaign=2026ENTAUGBAU&itm_medium=ONSITE&success-url=https%3A%2F%2Fwww.news-press.com%2Fstory%2Fmoney%2Fbusiness%2Flocal%2F2026%2F09%2F04%2Ffdot-shares-more-about-i-75-widening-and-noise-wall-plans-in-sw-florida-at-virtual-meeting%2F91587939007%2F)\n[](https://subscribe.news-press.com/rr/masthead?gps-source=CPMASTHEAD&itm_campaign=2026ENTAUGBAU&itm_medium=ONSITE&success-url=https%3A%2F%2Fwww.news-press.com%2Fstory%2Fmoney%2Fbusiness%2Flocal%2F2026%2F09%2F04%2Ffdot-shares-more-about-i-75-widening-and-noise-wall-plans-in-sw-florida-at-virtual-meeting%2F91587939007%2F)\n[News](https://www.news-press.com/news/) [Cape Coral](https://www.news-press.com/news/cape-coral/) [Sports](https://www.news-press.com/sports/) [Restaurants](https://www.news-press.com/taste/) [Real Estate](https://www.news-press.com/real-estate) [Advertise](https://advertising.usatoday.com/advertise-with-us/?cid=Web_LiQ_Network_AdvertiseWithUs_AdvertiseInquiry&publication=the_news_press&utm_source=local_publication&utm_medium=menu&utm_campaign=advertise_with_us) [Obituaries](https://www.news-press.com/obituaries) [eNewspaper](https://user.news-press.com/user/enewspaper) [Legals](https://www.news-press.com/public-notices)\n[](https://www.news-press.com/search/ \"Search\")\n[](https://www.news-press.com/weather/ \"Weather in Fort Myers: 78°F Mostly Cloudy\") [](https://subscribe.news-press.com/rr/navsub?gps-source=CPTOPNAVBAR&itm_campaign=2026ENTAUGBAU&itm_medium=ONSITE&success-url=https%3A%2F%2Fwww.news-press.com%2Fstory%2Fmoney%2Fbusiness%2Flocal%2F2026%2F09%2F04%2Ffdot-shares-more-about-i-75-widening-and-noise-wall-plans-in-sw-florida-at-virtual-meeting%2F91587939007%2F)\n[](https://login.news-press.com/PFTM-GUP/authenticate/?success-url=https%3A%2F%2Fwww.news-press.com%2Fstory%2Fmoney%2Fbusiness%2Flocal%2F2026%2F09%2F04%2Ffdot-shares-more-about-i-75-widening-and-noise-wall-plans-in-sw-florida-at-virtual-meeting%2F91587939007%2F&cancel-url=https%3A%2F%2Fwww.news-press.com%2Fstory%2Fmoney%2Fbusiness%2Flocal%2F2026%2F09%2F04%2Ffdot-shares-more-about-i-75-widening-and-noise-wall-plans-in-sw-florida-at-virtual-meeting%2F91587939007%2F)\n[](https://www.news-press.com/) [](https://www.news-press.com/)\nLOCAL BUSINESS\n# Residents hear more, weigh in on massive I-75 expansion plans in SW Florida\n[![Portrait of Laura Layden](https://www.news-press.com/gcdn/authoring/authoring-images/2024/02/08/PNDN/72524348007-ndn-jh-20240126-laura-0001.JPG?crop=3313,3312,x1506,y0&width=48&height=48&format=pjpg&auto=webp) Laura Layden](https://www.naplesnews.com/staff/2647080001/laura-layden/)\nFort Myers News-Press & Naples Daily News\nSept. 4, 2026, 5:03 a.m. ET\nA virtual meeting shed more light on the plans to widen Interstate 75 f\""
             },
@@ -247,7 +247,7 @@
             "variable_type": "categorical",
             "source": {
               "url": "https://www.news-press.com/story/money/business/local/2026/09/03/design-board-gives-a-thumbs-up-to-exclusive-car-and-wine-club-in-naples-but-city-staff-reviewing-it/91560883007/",
-              "fetched_at": "2026-09-16T09:24:32Z",
+              "fetched_at": "2026-09-17T04:26:21Z",
               "tier": 2,
               "citation": "Design board gives a thumbs up to exclusive car and wine club in Naples: \"[](https://www.news-press.com/)\n[Florida pulls plug on license plate cameras across SW FL roads](https://www.news-press.com/story/news/2026/09/04/florida-highway-police-flock-camera-license-plate-removal/91576967007/)\n[](https://subscribe.news-press.com/rr/nanobar?gps-source=CPTILELEFT&itm_campaign=2026ENTAUGBAU&itm_medium=ONSITE&success-url=https%3A%2F%2Fwww.news-press.com%2Fstory%2Fmoney%2Fbusiness%2Flocal%2F2026%2F09%2F03%2Fdesign-board-gives-a-thumbs-up-to-exclusive-car-and-wine-club-in-naples-but-city-staff-reviewing-it%2F91560883007%2F)\n[](https://subscribe.news-press.com/rr/masthead?gps-source=CPMASTHEAD&itm_campaign=2026ENTAUGBAU&itm_medium=ONSITE&success-url=https%3A%2F%2Fwww.news-press.com%2Fstory%2Fmoney%2Fbusiness%2Flocal%2F2026%2F09%2F03%2Fdesign-board-gives-a-thumbs-up-to-exclusive-car-and-wine-club-in-naples-but-city-staff-reviewing-it%2F91560883007%2F)\n[News](https://www.news-press.com/news/) [Cape Coral](https://www.news-press.com/news/cape-coral/) [Sports](https://www.news-press.com/sports/) [Restaurants](https://www.news-press.com/taste/) [Real Estate](https://www.news-press.com/real-estate) [Advertise](https://advertising.usatoday.com/advertise-with-us/?cid=Web_LiQ_Network_AdvertiseWithUs_AdvertiseInquiry&publication=the_news_press&utm_source=local_publication&utm_medium=menu&utm_campaign=advertise_with_us) [Obituaries](https://www.news-press.com/obituaries) [eNewspaper](https://user.news-press.com/user/enewspaper) [Legals](https://www.news-press.com/public-notices)\n[](https://www.news-press.com/search/ \"Search\")\n[](https://www.news-press.com/weather/ \"Weather in Fort Myers: 78°F Mostly Cloudy\") [](https://subscribe.news-press.com/rr/navsub?gps-source=CPTOPNAVBAR&itm_campaign=2026ENTAUGBAU&itm_medium=ONSITE&success-url=https%3A%2F%2Fwww.news-press.com%2Fstory%2Fmoney%2Fbusiness%2Flocal%2F2026%2F09%2F03%2Fdesign-board-gives-a-thumbs-up-to-exclusive-car-and-wine-club-in-naples-but-city-staff-reviewing-it%2F91560883007%2F)\n[](https://login.news-press.com/PFTM-GUP/authenticate/?success-url=https%3A%2F%2Fwww.news-press.com%2Fstory%2Fmoney%2Fbusiness%2Flocal%2F2026%2F09%2F03%2Fdesign-board-gives-a-thumbs-up-to-exclusive-car-and-wine-club-in-naples-but-city-staff-reviewing-it%2F91560883007%2F&cancel-url=https%3A%2F%2Fwww.news-press.com%2Fstory%2Fmoney%2Fbusiness%2Flocal%2F2026%2F09%2F03%2Fdesign-board-gives-a-thumbs-up-to-exclusive-car-and-wine-club-in-naples-but-city-staff-reviewing-it%2F91560883007%2F)\n[](https://www.news-press.com/) [](https://www.news-press.com/)\nLOCAL BUSINESS\n# 'Retiree' proposes unique car and wine club in Naples\n[![Portrait of Laura Layden](https://www.news-press.com/gcdn/authoring/authoring-images/2024/02/08/PNDN/72524348007-ndn-jh-20240126-laura-0001.JPG?crop=3313,3312,x1506,y0&width=48&height=48&format=pjpg&auto=webp) Laura Layden](https://www.naplesnews.com/staff/2647080001/laura-layden/)\nFort Myers News-Press & Naples Daily News\nSept. 3, 2026, 12:03 p.m. ET\nGeorgios Papadopoulos has a vision for a new ki\""
             },
@@ -264,7 +264,7 @@
             "variable_type": "categorical",
             "source": {
               "url": "https://www.gulfshorebusiness.com/news/alamo-drafthouse-closing-cinema-at-mercato-in-north-naples/article_5ddafea2-23c2-478c-8c3e-28298870a6f4.html",
-              "fetched_at": "2026-09-16T09:24:32Z",
+              "fetched_at": "2026-09-17T04:26:21Z",
               "tier": 2,
               "citation": "Alamo Drafthouse to close Mercato cinema in North Naples | News | gulfshorebusiness.com: \"[Skip to main content](https://www.gulfshorebusiness.com/news/alamo-drafthouse-closing-cinema-at-mercato-in-north-naples/article_5ddafea2-23c2-478c-8c3e-28298870a6f4.html#main-page-container)\nYou have permission to edit this article.\n[ Edit](https://www.gulfshorebusiness.com/tncms/admin/editorial-asset/?edit=5ddafea2-23c2-478c-8c3e-28298870a6f4) Close\n[![site-logo](https://bloximages.chicago2.vip.townnews.com/gulfshorebusiness.com/content/tncms/custom/image/d93231a5-1f68-4d46-b56f-f961242f84a3.png?resize=200%2C53)](https://www.gulfshorebusiness.com/)\n  * [ Facebook ](https://www.facebook.com/GulfshoreBusiness/)\n  * [ LinkedIn ](https://www.linkedin.com/company/gulfshore-business-magazine)\n  * [ Instagram ](https://www.instagram.com/gulfshorebusiness)\n\n\nSite search Search\n  * [ Sign Up ](https://www.gulfshorebusiness.com/users/signup/?referer_url=https%3A%2F%2Fwww.gulfshorebusiness.com%2Fnews%2Falamo-drafthouse-closing-cinema-at-mercato-in-north-naples%2Farticle_5ddafea2-23c2-478c-8c3e-28298870a6f4.html)\n  * [ Log In ](https://www.gulfshorebusiness.com/users/login/?referer_url=https%3A%2F%2Fwww.gulfshorebusiness.com%2Fnews%2Falamo-drafthouse-closing-cinema-at-mercato-in-north-naples%2Farticle_5ddafea2-23c2-478c-8c3e-28298870a6f4.html)\n\n\n  * [ Dashboard ](https://www.gulfshorebusiness.com/users/admin/)\n  * Logout \n\n\n  *     * My Account\n    * [ Dashboard](https://www.gulfshorebusiness.com/users/admin/)\n    * [ Profile](https://www.gulfshorebusiness.com/news/alamo-drafthouse-closing-cinema-at-mercato-in-north-naples/article_5ddafea2-23c2-478c-8c3e-28298870a6f4.html)\n    * [ Saved items](https://www.gulfshorebusiness.com/users/admin/list/)\n    * Logout \n\n\n[Home](https://www.gulfshorebusiness.com/)\n  * [About Us](https://www.gulfshorebusiness.com/site/about.html)\n  * [Contact Us](https://www.gulfshorebusiness.com/site/contact.html)\n  * [Advertise](https://www.gulfshorebusiness.com/site/advertise.html)\n  * [Terms of Use](https://www.gulfshorebusiness.com/site/terms.html)\n  * [Privacy Policy](https://www.gulfshorebusiness.com/site/privacy.html)\n  * [Employment](https://gulfshorelife.applytojob.com/apply)\n\n\n[News](https://www.gulfshorebusiness.com/news/)\n  * [Real Estate](https://www.gulfshorebusiness.com/real_estate)\n  * [Development](https://www.gulfshorebusiness.com/development/)\n  * [Hospitality](https://www.gulfshorebusiness.com/hospitality/)\n  * [Retail](https://www.gulfshorebusiness.com/retail/)\n  * [Tourism](https://www.gulfshorebusiness.com/tourism/)\n  * [Collier County](https://www.gulfshorebusiness.com/collier/)\n  * [Charlotte County](https://www.gulfshorebusiness.com/charlotte/)\n  * [Lee County](https://www.gulfshorebusiness.com/lee/)\n  * [Nonprofit](https://www.gulfshorebusiness.com/nonprofit/)\n  * [Environment](https://www.gulfshorebusiness.com/environment/)\n  * [Innovation](https://www.gulfshorebusiness.com/innovation/)\n  * [Infrastructure](https://www.gulfshorebusiness.com/infrastructure/)\n  * [Education](https://www.gulfshorebusiness.com\""
             },
@@ -321,7 +321,7 @@
             ],
             "source": {
               "url": "https://www.swfldatagulf.com/r/source/city_pulse",
-              "fetched_at": "2026-09-16T09:24:32Z",
+              "fetched_at": "2026-09-17T04:26:21Z",
               "tier": 2,
               "citation": "Distilled, citation-backed SWFL news signals; each ZIP's items carry per-item source URLs in data_lake.city_pulse."
             },
@@ -342,7 +342,7 @@
         "relevance": {
           "decay_curve": "weeks",
           "half_life_hours": 720,
-          "computed_at": "2026-09-16T09:24:32Z"
+          "computed_at": "2026-09-17T04:26:21Z"
         },
         "exogenous_signals": []
       }
@@ -359,8 +359,119 @@
     },
     {
       "packId": "freshness-pulse",
-      "status": "skipped-fresh",
-      "written": false
+      "status": "built",
+      "version": 45,
+      "written": true,
+      "brainOutput": {
+        "brain_id": "freshness-pulse",
+        "version": 45,
+        "refined_at": "2026-09-17T04:26:21Z",
+        "expires": "2026-09-18T04:26:21Z",
+        "ttl_seconds": 86400,
+        "direction": "neutral",
+        "magnitude": 0,
+        "drivers": [],
+        "overrides": [],
+        "conclusion": "Today's sourced snapshot — Cape Coral median asking price (as of 2026-09-17) $399,200; Fort Myers median asking price (as of 2026-09-17) $325,000; Naples median asking price (as of 2026-09-17) $650,000; SWFL 30-year fixed mortgage rate (as of 2026-09-10) 6.76%. These are cited current facts only; the direction call lives downstream in master.",
+        "key_metrics": [
+          {
+            "metric": "freshness_median_asking_price_cape_coral_usd",
+            "value": 399200,
+            "direction": "stable",
+            "label": "Cape Coral median asking price (as of 2026-09-17)",
+            "variable_type": "extensive",
+            "units": "USD",
+            "display_format": "currency",
+            "source": {
+              "url": "https://www.swfldatagulf.com/desk",
+              "fetched_at": "2026-09-17T04:23:31.892007+00:00",
+              "tier": 2,
+              "citation": "SWFL Data Gulf active-listing inventory — current median asking price for Cape Coral, sourced 2026-09-17"
+            },
+            "suggestions": [
+              "Chart asking rents across the corridors",
+              "What's driving freshness median asking price cape coral usd?",
+              "How does freshness median asking price cape coral usd here compare to other SWFL areas?"
+            ]
+          },
+          {
+            "metric": "freshness_median_asking_price_fort_myers_usd",
+            "value": 325000,
+            "direction": "stable",
+            "label": "Fort Myers median asking price (as of 2026-09-17)",
+            "variable_type": "extensive",
+            "units": "USD",
+            "display_format": "currency",
+            "source": {
+              "url": "https://www.swfldatagulf.com/desk",
+              "fetched_at": "2026-09-17T04:23:31.892007+00:00",
+              "tier": 2,
+              "citation": "SWFL Data Gulf active-listing inventory — current median asking price for Fort Myers, sourced 2026-09-17"
+            },
+            "suggestions": [
+              "Chart asking rents across the corridors",
+              "What's driving freshness median asking price fort myers usd?",
+              "How does freshness median asking price fort myers usd here compare to other SWFL areas?"
+            ]
+          },
+          {
+            "metric": "freshness_median_asking_price_naples_usd",
+            "value": 650000,
+            "direction": "stable",
+            "label": "Naples median asking price (as of 2026-09-17)",
+            "variable_type": "extensive",
+            "units": "USD",
+            "display_format": "currency",
+            "source": {
+              "url": "https://www.swfldatagulf.com/desk",
+              "fetched_at": "2026-09-17T04:23:31.892007+00:00",
+              "tier": 2,
+              "citation": "SWFL Data Gulf active-listing inventory — current median asking price for Naples, sourced 2026-09-17"
+            },
+            "suggestions": [
+              "Chart asking rents across the corridors",
+              "What's driving freshness median asking price naples usd?",
+              "How does freshness median asking price naples usd here compare to other SWFL areas?"
+            ]
+          },
+          {
+            "metric": "freshness_mortgage_30yr_fixed_pct",
+            "value": 6.76,
+            "direction": "stable",
+            "label": "SWFL 30-year fixed mortgage rate (as of 2026-09-10)",
+            "variable_type": "intensive",
+            "units": "percent",
+            "display_format": "percent",
+            "source": {
+              "url": "https://fred.stlouisfed.org/series/MORTGAGE30US",
+              "fetched_at": "2026-09-17T04:23:31.892007+00:00",
+              "tier": 2,
+              "citation": "FRED — current 30-year fixed mortgage rate for SWFL, sourced 2026-09-10"
+            },
+            "suggestions": [
+              "What's driving freshness mortgage 30yr fixed pct?",
+              "How does freshness mortgage 30yr fixed pct here compare to other SWFL areas?"
+            ]
+          }
+        ],
+        "detail_tables": [],
+        "caveats": [
+          "Each county-grain number is a single grounded source's current figure, provenance-gated to a real source URL; held anomalies and unsourced (model-memory) numbers are excluded by design."
+        ],
+        "contradicts": [],
+        "confidence": 0.8,
+        "joint_integrity": 1,
+        "confidence_dispersion": 0,
+        "chain_depth": 0,
+        "trust_tier": 2,
+        "upstream_count": 0,
+        "relevance": {
+          "decay_curve": "weeks",
+          "half_life_hours": 720,
+          "computed_at": "2026-09-17T04:26:21Z"
+        },
+        "exogenous_signals": []
+      }
     },
     {
       "packId": "seller-stress-swfl",
