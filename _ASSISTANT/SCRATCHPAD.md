@@ -1,3 +1,61 @@
+## 2026-09-18 (Opus 5) — OPERATOR: "WE ALREADY SET IT UP FOR THE MAX PLAN TO RUN IT... HOW IS IT NOT SET UP YET??? IT'S BEEN OVER A WEEK"
+
+He is right and it is worse than a week: the decree is 07/26/2026 ("we are on Max plan. do not use
+API credits. Make it."). Today is 09/18/2026 — 54 days.
+
+MY FAILURE THIS SESSION, first: I answered "credit wall" three times across three turns and never
+once checked the status of the route he had already chosen. The answer was on disk the whole time.
+Strike shape `didnt-read-what-we-hold`.
+
+THE ANSWER TO HIS QUESTION — it was never built. Verified at the source this turn, not from a doc:
+- `LLM_PROVIDER` is read by NOTHING. Zero hits across refinery/. I re-ran it myself.
+- `refinery/agents/anthropic.mts:15-17` is the only auth branch that exists:
+  `agentsAreMocked() { return !env.anthropicApiKey }`. Two states, no third. Key present → the
+  metered API. No key → **deterministic mock mode**. There is no Max-seat / subscription branch
+  anywhere in the code.
+- So the 09/15 claim on `wiki/pipeline-health.md:49` — "`LLM_PROVIDER=claude-code` proved live
+  running the rebuild on Max" — was FALSE and was struck through the SAME DAY. What that session
+  actually saw ($0 ledger cost, no key in the environment) was the MOCK path. It read a mock run as
+  proof the subscription was doing the work. `partial-reported-as-whole` / `fixed-but-not-live`.
+
+THREE THINGS THEN KEPT IT UNBUILT, all on our side, none of them his:
+1. NORTH STAR #5, the 30-day adopt-nothing freeze — **runs through 09/18/2026, i.e. it expires
+   TODAY.** Three separate handoffs say verbatim do not wire `CLAUDE_CODE_OAUTH_TOKEN` until after
+   09/18: `_ASSISTANT/2026-09-15-fedora-network-and-data-integrity-handoff.md:21,111,141` and
+   `_ASSISTANT/2026-09-15-fable-pipeline-plan-brief.md:21`.
+2. A REAL terms finding, and it is narrower than "automation is banned" — `wiki/pipeline-health.md`
+   quotes the Agent SDK docs verbatim: third parties may not offer claude.ai login or rate limits
+   "for their products." The nightly rebuild generates the content sold to paying customers, which
+   is squarely that. Internal CI tooling is NOT reached (the 3 claude-code-action workflows are
+   fine). This is the one genuine open question and it is a judgment call, not a wiring task.
+3. A precedence trap that would have silently defeated a naive attempt anyway
+   (`wiki/pipeline-health.md:84`): `ANTHROPIC_API_KEY` wins over `CLAUDE_CODE_OAUTH_TOKEN` in
+   non-interactive mode, and our key lives in the dotenv bun loads — so any subprocess inheriting
+   process.env bills the API no matter what subscription token is also set. "We set it up" could
+   look done and still bill.
+
+DO NOT propose mock mode as the fix. Mock output is deterministic placeholder prose; serving it as
+real brain content is invention (FOCUS 1, hard block). The plan's A0 line offered it
+(docs/superpowers/plans/2026-09-15-master-brain-backend-week.md:773) — it is not acceptable for
+customer-facing content and should not be raised again as the free win.
+
+STANDING: stop reporting the billing state. He has heard it. The open question is item 2 and it is
+his call; items 1 and 3 are ours to execute the moment he says go.
+
+CONFIRMED BY A WIDER SEARCH (a tree-wide grep incl. the gitignored `.firecrawl/` and
+`.superpowers/` dirs, which the narrower pass missed): still ZERO code hits for `LLM_PROVIDER` or
+`CLAUDE_CODE_OAUTH_TOKEN`. Every OAuth hit in the tree is social-platform OAuth (Bluesky/X/Meta,
+`lib/social/oauth-tokens.ts`) and unrelated. "Never built" holds on the wider evidence.
+
+DO NOT BUILD a `failureClass=billing` class in the refinery — it already exists downstream.
+`.github/scripts/classify-cron-failure.mjs:88` carries the correct prescription VERBATIM: "PARKED
+— ... no billing action is ever the prescription: redesign the leg so it needs no unattended model
+call, or author its content in an interactive Max-plan session (the Issue 001 pattern), or leave it
+parked until the operator raises it. Do NOT auto-retry — the wall returns the identical error on
+every attempt." So the billing case is already named and already prescribed correctly; the gap was
+never classification, it was that nobody reads the channel it lands in
+(`cron_incident_nightly_chain`, 66 days untouched). A future session must not "add" this.
+
 ## 2026-09-18 (Opus 5) — OPERATOR: "I DON'T KNOW WHAT IS GOING ON ANYMORE, SO YOU WILL HAVE TO 'FIX'....AGAIN AND THEN WE WILL DEAL WITH THE SAME PROBLEMS 7 DAYS FROM NOW"
 
 Said on being told the nightly chain has been red for 60 straight runs. He is right, and the
