@@ -9,6 +9,7 @@ import {
 } from "../intelligence/observation-contract.mts";
 import {
   comparePriorYearPeriods,
+  prepareHistoryComparisonObservations,
   type PeriodAssessment,
   type SeriesPeriodComparison,
 } from "../intelligence/compare-periods.mts";
@@ -79,7 +80,10 @@ export async function buildHistoryComparison(
   window: { from: string; through: string },
 ): Promise<HistoryComparisonPayload> {
   const loaded = await loadObservationManifest(manifestPath);
-  const comparison = comparePriorYearPeriods(loaded.observations, window);
+  const comparison = comparePriorYearPeriods(
+    prepareHistoryComparisonObservations(loaded.observations),
+    window,
+  );
   const unhashed: UnhashedPayload = {
     schema_version: 1,
     manifest: {

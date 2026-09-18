@@ -78,7 +78,7 @@ export interface LoadedObservationManifest {
 const SHA256_RE = /^[a-f0-9]{64}$/;
 const IDENTIFIER_RE = /^[A-Za-z0-9][A-Za-z0-9._:-]*$/;
 const YEAR_MONTH_RE = /^\d{4}-(0[1-9]|1[0-2])$/;
-const UTC_TIMESTAMP_RE = /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}(?:\.\d{1,3})?Z$/;
+const UTC_TIMESTAMP_RE = /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}(?:\.\d{1,6})?(?:Z|\+00:00)$/;
 
 function fail(context: string, message: string): never {
   throw new Error(`${context}: ${message}`);
@@ -157,7 +157,7 @@ function parseCalendarDate(value: unknown, context: string): Date {
 function validateUtcTimestamp(value: string | null, context: string): void {
   if (value === null) return;
   if (!UTC_TIMESTAMP_RE.test(value) || !Number.isFinite(Date.parse(value))) {
-    fail(context, "must be a valid UTC timestamp ending in Z or null");
+    fail(context, "must be a valid UTC timestamp ending in Z or +00:00, or null");
   }
 }
 

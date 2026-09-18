@@ -58,6 +58,98 @@ export interface PriorYearComparisonResult {
   periods: PeriodAssessment[];
 }
 
+const BPS_TOTAL_COMPONENTS = [
+  "residential_one_unit_units",
+  "residential_two_unit_units",
+  "residential_three_four_unit_units",
+  "residential_five_plus_unit_units",
+] as const;
+
+function aggregateStatus(rows: ObservationV1[]): ObservationStatus {
+  if (rows.some((row) => row.status === "suppressed")) return "suppressed";
+  if (rows.some((row) => row.status === "unavailable")) return "unavailable";
+  return "missing";
+}
+
+function deriveBpsTotalUnits(observations: ObservationV1[]): ObservationV1[] {
+  const candidates = observations.filter(
+    (row) =>
+      row.source_id === "census_bps_county" &&
+      BPS_TOTAL_COMPONENTS.includes(row.metric_id as (typeof BPS_TOTAL_COMPONENTS)[number]),
+  );
+  const groups = new Map<string, ObservationV1[]>();
+  for (const row of candidates) {
+    const key = [
+      row.source_id,
+      row.geo_type,
+      row.geo_id,
+      row.period_start,
+      row.period_end,
+      row.vintage_id ?? "<missing-vintage>",
+    ].join("|");
+    const group = groups.get(key) ?? [];
+    group.push(row);
+    groups.set(key, group);
+  }
+
+  const derived: ObservationV1[] = [];
+  for (const rows of groups.values()) {
+    const byMetric = new Map(rows.map((row) => [row.metric_id, row]));
+    if (!BPS_TOTAL_COMPONENTS.every((metric) => byMetric.has(metric))) continue;
+    const components = BPS_TOTAL_COMPONENTS.map((metric) => byMetric.get(metric)!);
+    const first = components[0];
+    if (
+      components.some(
+        (row) =>
+          row.frequency !== first.frequency ||
+          row.unit !== first.unit ||
+          row.source_sha256 !== first.source_sha256 ||
+          row.source_url !== first.source_url,
+      )
+    ) {
+      throw new Error(
+        `Cannot derive BPS total for ${first.geo_id}/${first.period_start}: component provenance, unit, or frequency mismatch`,
+      );
+    }
+    const complete = components.every((row) => row.status === "observed" && row.value !== null);
+    const valueBases = new Set(components.map((row) => row.value_basis));
+    derived.push({
+      ...first,
+      metric_id: "residential_units_authorized_monthly",
+      definition_version: "census_bps_total_units_monthly_v1",
+      value: complete ? components.reduce((sum, row) => sum + row.value!, 0) : null,
+      status: complete ? "observed" : aggregateStatus(components),
+      value_basis: valueBases.size === 1 ? components[0].value_basis : "mixed",
+      quality_flags: [
+        ...new Set([
+          ...components.flatMap((row) => row.quality_flags),
+          "derived_sum_of_four_mutually_exclusive_bps_unit_categories",
+        ]),
+      ].sort(),
+    });
+  }
+  return derived;
+}
+
+export function prepareHistoryComparisonObservations(
+  observations: ObservationV1[],
+): ObservationV1[] {
+  const rsw = observations.filter(
+    (row) =>
+      row.source_id === "rsw_lcpa_monthly" &&
+      row.metric_id === "total_passengers" &&
+      row.geo_type === "airport" &&
+      row.geo_id === "RSW",
+  );
+  const directBps = observations.filter(
+    (row) =>
+      row.source_id === "census_bps_county" &&
+      row.metric_id === "residential_units_authorized_monthly",
+  );
+  const bps = directBps.length > 0 ? directBps : deriveBpsTotalUnits(observations);
+  return [...rsw, ...bps];
+}
+
 function revisionRank(observation: ObservationV1): string {
   const evidenceTime =
     observation.available_at ??

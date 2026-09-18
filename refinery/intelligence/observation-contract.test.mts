@@ -176,6 +176,23 @@ test("observation v1 rejects broken raw references and invented availability tim
   );
 });
 
+test("observation v1 accepts an explicit +00:00 UTC offset from the Python exporter", () => {
+  const timestamp = "2025-02-20T15:00:00.123456+00:00";
+  const validated = validateObservationSet(
+    [
+      observation({
+        published_at: null,
+        first_seen_at: timestamp,
+        retrieved_at: timestamp,
+        available_at: null,
+        availability_basis: "unknown",
+      }),
+    ],
+    { rawFiles: [{ source_id: "rsw_monthly", sha256: "a".repeat(64) }] },
+  );
+  assert.equal(validated[0].first_seen_at, timestamp);
+});
+
 test("manifest loader rejects an invalid observation-file hash", async () => {
   const directory = mkdtempSync(path.join(tmpdir(), "observation-contract-"));
   temporaryDirectories.push(directory);

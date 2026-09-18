@@ -2,7 +2,11 @@ import { test } from "bun:test";
 import assert from "node:assert/strict";
 
 import type { ObservationV1 } from "./observation-contract.mts";
-import { comparePriorYearPeriods, selectLatestVintages } from "./compare-periods.mts";
+import {
+  comparePriorYearPeriods,
+  prepareHistoryComparisonObservations,
+  selectLatestVintages,
+} from "./compare-periods.mts";
 
 function row(overrides: Partial<ObservationV1> = {}): ObservationV1 {
   return {
@@ -187,4 +191,38 @@ test("period assessments distinguish agreement, divergence, and insufficient evi
   );
   assert.equal(optionalMissing.periods[0].classification, "agreement");
   assert.match(optionalMissing.periods[0].gap_reason!, /additional series/);
+});
+
+test("BPS total authorizations sum four mutually exclusive unit categories only when complete", () => {
+  const components = [
+    "residential_one_unit_units",
+    "residential_two_unit_units",
+    "residential_three_four_unit_units",
+    "residential_five_plus_unit_units",
+  ];
+  const complete = components.map((metric_id, index) =>
+    row({
+      source_id: "census_bps_county",
+      metric_id,
+      definition_version: "census_bps_county_monthly_v1",
+      geo_type: "county_fips",
+      geo_id: "12071",
+      value: index + 1,
+      unit: "count",
+      value_basis: "estimated",
+    }),
+  );
+  const derived = prepareHistoryComparisonObservations(complete);
+  assert.equal(derived.length, 1);
+  assert.equal(derived[0].metric_id, "residential_units_authorized_monthly");
+  assert.equal(derived[0].value, 10);
+  assert.equal(derived[0].value_basis, "estimated");
+  assert.ok(
+    derived[0].quality_flags.includes("derived_sum_of_four_mutually_exclusive_bps_unit_categories"),
+  );
+
+  complete[2] = { ...complete[2], value: null, status: "suppressed" };
+  const suppressed = prepareHistoryComparisonObservations(complete);
+  assert.equal(suppressed[0].value, null);
+  assert.equal(suppressed[0].status, "suppressed");
 });

@@ -24,7 +24,7 @@ function sha256(bytes: string | Buffer): string {
 }
 
 function fixtureObservation(
-  sourceId: "rsw_monthly" | "census_bps_county",
+  sourceId: "rsw_lcpa_monthly" | "census_bps_county",
   geoType: "airport" | "county_fips",
   geoId: string,
   period: "2024-01" | "2025-01",
@@ -36,9 +36,7 @@ function fixtureObservation(
     schema_version: 1,
     source_id: sourceId,
     metric_id:
-      sourceId === "rsw_monthly"
-        ? "total_passenger_movements_monthly"
-        : "residential_units_authorized_monthly",
+      sourceId === "rsw_lcpa_monthly" ? "total_passengers" : "residential_units_authorized_monthly",
     definition_version: "1",
     geo_type: geoType,
     geo_id: geoId,
@@ -55,7 +53,7 @@ function fixtureObservation(
     available_at: `${Number(period.slice(0, 4))}-02-20T15:00:00.000Z`,
     availability_basis: "publisher_release",
     source_url:
-      sourceId === "rsw_monthly"
+      sourceId === "rsw_lcpa_monthly"
         ? "https://www.flylcpa.com/example.pdf"
         : "https://www2.census.gov/econ/bps/County/example.txt",
     source_sha256: sourceHash,
@@ -71,7 +69,11 @@ function writeFixtureManifest(): string {
   mkdirSync(path.join(root, "exports"), { recursive: true });
 
   const rawFiles = [
-    { source_id: "rsw_monthly", relative_path: "raw/rsw.pdf", bytes: "rsw-public-release" },
+    {
+      source_id: "rsw_lcpa_monthly",
+      relative_path: "raw/rsw.pdf",
+      bytes: "rsw-public-release",
+    },
     {
       source_id: "census_bps_county",
       relative_path: "raw/bps.txt",
@@ -83,8 +85,8 @@ function writeFixtureManifest(): string {
   }
 
   const observations = [
-    fixtureObservation("rsw_monthly", "airport", "RSW", "2024-01", 100, rawFiles[0].sha256),
-    fixtureObservation("rsw_monthly", "airport", "RSW", "2025-01", 120, rawFiles[0].sha256),
+    fixtureObservation("rsw_lcpa_monthly", "airport", "RSW", "2024-01", 100, rawFiles[0].sha256),
+    fixtureObservation("rsw_lcpa_monthly", "airport", "RSW", "2025-01", 120, rawFiles[0].sha256),
     fixtureObservation(
       "census_bps_county",
       "county_fips",
@@ -108,11 +110,11 @@ function writeFixtureManifest(): string {
   const manifest = {
     schema_version: 1,
     run_id: "TEST-ONLY-history-fixture",
-    source_ids: ["census_bps_county", "rsw_monthly"],
+    source_ids: ["census_bps_county", "rsw_lcpa_monthly"],
     requested_period: { from: "2024-01", through: "2025-01" },
     source_coverage: [
       {
-        source_id: "rsw_monthly",
+        source_id: "rsw_lcpa_monthly",
         frequency: "monthly",
         expected_period: { from: "2024-01", through: "2025-01" },
         observed_period: { from: "2024-01", through: "2025-01" },
@@ -210,7 +212,7 @@ test("builder exposes sources, revisions, coverage gaps, and release caveats", a
     from: "2025-01",
     through: "2025-01",
   });
-  assert.deepEqual(payload.source_ids, ["census_bps_county", "rsw_monthly"]);
+  assert.deepEqual(payload.source_ids, ["census_bps_county", "rsw_lcpa_monthly"]);
   assert.ok(payload.source_links.some((item) => item.url.includes("flylcpa.com")));
   assert.ok(payload.source_links.some((item) => item.url.includes("census.gov")));
   assert.ok(payload.coverage_matrix.some((item) => item.missing_count > 0));
