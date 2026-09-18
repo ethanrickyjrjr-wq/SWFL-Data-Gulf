@@ -86,7 +86,7 @@ is read from the actual pipeline code, not the registry.
 | swfl_inc | scrape (crawl4ai, stealth) | public.swfl_inc_announcements |
 | listing_week | derivation, no external fetch | data_lake.listing_week |
 | dbpr_press_releases | scrape (crawl4ai) + LLM (Sonnet) | public.dbpr_press_releases |
-| rsw_airport_monthly | PDF (pdfplumber) + crawl4ai | public.rsw_airport_monthly |
+| rsw_airport_monthly | PDF (pdfplumber) + crawl4ai; optional local immutable raw/JSONL research capture | public.rsw_airport_monthly (production path unchanged) |
 | dbpr_sirs_submissions | Qlik QIX API via crawl4ai | data_lake.dbpr_sirs_submissions |
 | fl_dbpr_licenses | CSV bulk extract | data_lake.fl_dbpr_licenses |
 | fl_dbpr_applicants | CSV bulk extract | data_lake.fl_dbpr_applicants |
@@ -116,6 +116,14 @@ is read from the actual pipeline code, not the registry.
 | lee_deed_official_records *(parked)* | DuckDB | data_lake.lee_deed_official_records — 0 rows (Akamai blocks unattended fetch) |
 
 ### Orphans & registry drift (found by cross-checking code against the registry both directions)
+
+Local research adapters, intentionally **not** pipeline directories (no lake write, workflow, or
+production consumer):
+
+- `ingest/scripts/census_bps_capture.py` — official Census BPS county monthly text releases;
+  explicit `SWFL_RESEARCH_ROOT` capture only; retains raw bytes and observation-v1 JSONL/manifest
+  for Lee/Collier with reported and estimated cells separate. It must not be promoted by adding a
+  dummy pipeline/workflow; a reviewed production wrapper must reuse this parser.
 
 Pipeline code exists, **no registry entry, no GHA cron** — see [`orphan_ingest_pipelines_unregistered`](#checks):
 - `report_design_research` — crawl4ai + Anthropic → writes a `report-designs.json` file, no DB table, no cadence
