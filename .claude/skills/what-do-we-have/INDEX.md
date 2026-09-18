@@ -7,7 +7,7 @@
 
 Markers: **[ORPHAN]** nothing in the repo points at this file — it is invisible unless you come through this index, and it is a DELETION CANDIDATE. **[weak]** reachable only by bare filename, which leads nowhere.
 
-Reachability at generation: 977 by path · 549 by name only · 246 orphaned. Re-measure with `node scripts/doc-reachability.mjs`.
+Reachability at generation: 978 by path · 549 by name only · 245 orphaned. Re-measure with `node scripts/doc-reachability.mjs`.
 
 ## docs/superpowers — 880
 
@@ -287,7 +287,7 @@ Reachability at generation: 977 by path · 549 by name only · 246 orphaned. Re-
 - `docs/superpowers/plans/2026-07-15-community-stats-deliverable-wiring.md` — Community Stats → Deliverable Wiring Implementation Plan — Append to ingest/lib/testcommunityaliases.py:
 - `docs/superpowers/plans/2026-07-15-gallery-listing-hero.md` — Pick a Starting Point: Gallery-First Routing + Listing Campaign Hero Implementation Plan — of a blank canvas behind a popup, and replace the thin "Start the listing campaign" pill with an
 - `docs/superpowers/plans/2026-07-15-per-unit-coverage-ledgers-push-and-pilot.md` — Per-Unit Coverage Ledgers — Push Mechanism + Deliverables Pilot Implementation Plan — remember to go look them up: (1) a touched ingest pipeline's PULLED/AVAILABLE scope
-- `docs/superpowers/plans/2026-07-15-property-watch-activation.md` **[ORPHAN]** — Property Watch Activation Implementation Plan — reachable and live: a one-click "track a property" entry point, a working digest email send, and both
+- `docs/superpowers/plans/2026-07-15-property-watch-activation.md` — Property Watch Activation Implementation Plan — reachable and live: a one-click "track a property" entry point, a working digest email send, and both
 - `docs/superpowers/plans/2026-07-15-sell-side-favorable-framing-plan.md` — Sell-Side Favorable Framing Implementation Plan — re-derive" record, and two passages below no longer describe the committed code:
 - `docs/superpowers/plans/2026-07-16-brand-fill-once-p1-spine.md` — Brand Fill-Once P1 — Profile Ledger Spine Implementation Plan — Run: bun test lib/brand/profile-ledger.test.ts
 - `docs/superpowers/plans/2026-07-16-competitor-switch-onboarding-p1.md` — Competitor Switch Onboarding — Phase 1 Implementation Plan — Run the migration via the repo's Bun.SQL migration lane (psql is not installed — see referencerun-migrations-via-bun-sql), then verify:
