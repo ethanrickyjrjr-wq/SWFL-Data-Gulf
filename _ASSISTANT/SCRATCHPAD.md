@@ -1,3 +1,32 @@
+## 2026-09-18 (Opus 5) — CORRECTION to the entry below: Property Watch is NOT one word from firing
+
+The four-lane gate forced the RESEARCH lane I had skipped, and it overturned a claim I had
+already made to the operator. `docs/superpowers/plans/2026-07-15-property-watch-activation.md`
+exists — an 8-task activation plan with every line of code pre-authored — and **zero of its
+tasks were ever executed.** Verified by file existence, not by the checkboxes:
+`lib/project/watch-digest-email.ts` MISSING, `lib/project/watch-digest-email.test.ts` MISSING,
+`app/project/TrackPropertyButton.tsx` MISSING, no `pid` branch in `app/api/unsubscribe/route.ts`,
+and `scripts/project-feed/watch-digest.mts:89` still throws verbatim "WATCH_DIGEST_LIVE=1 but
+the live send seam is not wired in this build". `report_watches` has 0 rows and there is no UI
+entry point, so no user can create a watch even if the scan ran.
+
+So Property Watch splits: the SCAN half is real and safe (scripts/project-feed/watch-scan.mts
+exists, writes only public.project_events, zero LLM, zero paid API) but would scan an empty
+watch list. The DIGEST half is six tasks of unwritten code away. My "one operator word from
+firing" was wrong for Property Watch, and it is the exact over-tidy reading the advisor warned
+about — a closed/dropped gate does not mean the work behind it landed.
+
+**Market Area Alerts DOES hold up.** Fully built and verified this session:
+`scripts/email/weekly-read-run.mts` is the real runner, `lib/email/weekly-read/send.ts:92` calls
+`client.batch.send` for real, cadence/issue/send all carry tests, `weekly_read_subscribers` has
+1 row, and line 628 refuses the live send with "operator approval required: review the previews,
+then set WEEKLY_READ_APPROVED=1". That one genuinely is one operator step from sending.
+
+GENERAL LESSON, worth a guard: a parked workflow's YAML comment names a GATE, never the state of
+the work behind it. Both Property Watch workflows read "PARKED until property_watch_live_verify
+passes" identically, and one half is built while the other half does not exist. Reading the
+comment — or the check's state — tells you nothing about which. Only file existence does.
+
 ## 2026-09-18 (Opus 5) — OPERATOR: "look into what The Cull flagged (the disabled-but-never-deleted workflows: Property Watch, Market Area Alerts, the outreach cadences, etc.)"
 
 Asked whether yesterday's Redfin pass covered the rest of The Cull. It did not — yesterday was

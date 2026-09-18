@@ -1,3 +1,22 @@
+## 2026-09-18 (Opus 5) - CORRECTION: the Property Watch activation plan was never executed; Market Area Alerts is the one that is genuinely ready
+
+Correcting the entry below in the same session. The four-lane gate forced the RESEARCH lane I had
+skipped, which surfaced docs/superpowers/plans/2026-07-15-property-watch-activation.md - an 8-task
+plan with all code pre-authored and ZERO tasks executed. Verified by file existence:
+lib/project/watch-digest-email.ts, its test, and app/project/TrackPropertyButton.tsx are all
+MISSING; app/api/unsubscribe/route.ts has no `pid` branch; scripts/project-feed/watch-digest.mts:89
+still throws "the live send seam is not wired in this build"; report_watches has 0 rows and there
+is no UI entry point to create a watch. So Property Watch's scan half is real and its digest half
+is six tasks of unwritten code away - NOT "one operator word from firing" as I told the operator.
+
+Market Area Alerts does hold up: scripts/email/weekly-read-run.mts is a real runner,
+lib/email/weekly-read/send.ts:92 calls client.batch.send, tests exist, weekly_read_subscribers has
+1 row, and the runner refuses a live send only for want of WEEKLY_READ_APPROVED=1.
+
+Lesson: a parked workflow's YAML comment names a GATE, not the state of the work behind it. Both
+Property Watch workflows carry the identical "PARKED until property_watch_live_verify passes"
+comment while one half is built and the other does not exist. Only file existence distinguishes them.
+
 ## 2026-09-18 (Opus 5) - Read The Cull's other 18 "disabled" rows: 6 are chain-driven (chain red 60 straight runs), 7 were never enabled, and 8 of 11 parked workflows are gated by a YAML comment only
 
 Operator asked whether yesterday's Redfin pass covered the rest of The Cull's flags (Property
