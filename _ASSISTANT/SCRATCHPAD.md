@@ -1,4 +1,28 @@
 
+## 2026-09-17 (Sonnet 5) — OPERATOR: "how the fuck do we have 6 fucking crons on redfin, what the fuck is claude doing"
+
+Triggered by "The Cull" artifact (chief-of-staff session, today) noting 7 separate Redfin GHA
+workflows for one vendor. Investigated before touching anything (RULE 0.5c scope-before-fix):
+
+ALL 7 have real, distinct consumers — not duplicates. redfin_swfl (ZIP-grain → housing-swfl),
+redfin_price_drops/contract_cancellations/delistings_relistings (ZIP-grain behavioral →
+seller-stress-swfl), redfin_collier/redfin_lee (county-grain → properties-{collier,lee}-value),
+redfin_city_swfl (city-grain → desk hero SOLD anchor + chart gallery, `lib/desk/loaders.ts` +
+`lib/charts/gallery-loaders.ts` — its `consuming_pack: none` field in cadence_registry.yaml is
+STALE METADATA, not a dark root; real consumption is direct Supabase reads outside the refinery
+pack system).
+
+REAL DEFECT FOUND: redfin_collier and redfin_lee (issues #182, #183, opened 08/18, still open)
+are BROKEN — `ContentStaleError`, pulling from the legacy frozen bucket prefix
+`redfin_market_tracker/county_market_tracker.tsv000.gz` (frozen since ~06/02/2026, same family
+that froze redfin_swfl and redfin_city_swfl, both already retargeted 07/16 and 08/10 to the new
+`redfin_data_center/housing_market/monthly/*.csv` prefix — see
+docs/superpowers/specs/2026-07-17-redfin-datacenter-retarget-design.md). Whoever did those two
+retargets never went back for the county-grain pipelines sharing the identical shape — matches
+strike `fixed-one-surface-never-scoped-the-shape`. Live-verified (curl, 09/17) a county-grain file
+exists at the same new prefix: `redfin_data_center/housing_market/monthly/all_counties.csv`,
+147MB, Last-Modified 09/12/2026 (actively updating). Fixing both pipelines to retarget there.
+
 ## 2026-09-15 (Opus 5) — OPERATOR DECISION: listings PARKED, free lanes only
 
 Verbatim: "just mark it as a to-do later. we don't need listings at the moment and we can easily

@@ -914,7 +914,13 @@ pipelines:
     dlt_schema_name: redfin_collier # VERIFY after first run: SELECT DISTINCT schema_name FROM data_lake._dlt_loads WHERE schema_name LIKE '%redfin_collier%'
     expected_rows_min: 700 # 90% of 782 Collier rows confirmed 2026-06-06 (5 property types x ~13yr monthly)
     count_table: data_lake.redfin_collier_market
-    # Source: Redfin Data Center county market tracker (free public TSV), filtered to "Collier County, FL". Refreshes ~monthly. Consumed by properties-collier-value.
+    # Source: Redfin Data Center county market tracker (free public CSV), filtered to "Collier County, FL". Refreshes ~monthly. Consumed by properties-collier-value.
+    # RETARGETED 09/17/2026: the legacy dump (redfin_market_tracker/county_market_tracker.tsv000.gz)
+    # FROZE at Last-Modified ~06/02/2026, tripping the 55d content-freshness guard since 08/18/2026
+    # (issue #182) while still serving stale 200s. Same freeze family + same fix as redfin_swfl's
+    # 07/16 and redfin_city_swfl's 08/10 retargets — this county-grain pipeline was MISSED in both
+    # passes. Now pulls redfin_data_center/housing_market/monthly/all_counties.csv (all-residential
+    # rollup, no per-property-type split — property_type is stamped "All Residential" at ingest).
     source_scope:
       confirmed_total:
         value: 782
@@ -930,7 +936,13 @@ pipelines:
     dlt_schema_name: redfin_lee # confirmed 2026-06-13
     expected_rows_min: 594 # 90% of 660 confirmed 2026-06-13 (first live DLT run)
     count_table: data_lake.redfin_lee_market
-    # Source: Redfin Data Center county market tracker (free public TSV), filtered to "Lee County, FL". Refreshes ~monthly. Consumed by properties-lee-value.
+    # Source: Redfin Data Center county market tracker (free public CSV), filtered to "Lee County, FL". Refreshes ~monthly. Consumed by properties-lee-value.
+    # RETARGETED 09/17/2026: the legacy dump (redfin_market_tracker/county_market_tracker.tsv000.gz)
+    # FROZE at Last-Modified ~06/02/2026, tripping the 55d content-freshness guard since 08/18/2026
+    # (issue #183) while still serving stale 200s. Same freeze family + same fix as redfin_swfl's
+    # 07/16 and redfin_city_swfl's 08/10 retargets — this county-grain pipeline was MISSED in both
+    # passes. Now pulls redfin_data_center/housing_market/monthly/all_counties.csv (all-residential
+    # rollup, no per-property-type split — property_type is stamped "All Residential" at ingest).
     source_scope:
       confirmed_total:
         value: 660
@@ -939,7 +951,12 @@ pipelines:
 
   - name: redfin_city_swfl
     workflow: redfin-city-swfl-monthly.yml
-    consuming_pack: none
+    # Corrected 09/17/2026 — this was "none" and tripped the DARK ROOTS detector
+    # (.claude/hooks/print-scratchpad.mjs, regex on the literal `consuming_pack: none`)
+    # as a dead pipeline every session. It is NOT dark: consumed directly (Supabase
+    # .from() reads, outside the refinery pack system) by lib/desk/loaders.ts (desk
+    # hero SOLD anchor) and lib/charts/gallery-loaders.ts (chart gallery).
+    consuming_pack: "direct-query: lib/desk/loaders.ts, lib/charts/gallery-loaders.ts"
     lane: tier-2
     cadence_days: 31
     tolerance_multiplier: 2.0

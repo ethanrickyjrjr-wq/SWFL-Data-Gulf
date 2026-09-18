@@ -1,63 +1,75 @@
-"""Tests for the Redfin Lee County market-tracker ingest.
+"""Tests for the Redfin Lee market-tracker ingest (retargeted feed).
 
-No network: requests.get is monkeypatched to return a tiny in-memory gzipped TSV
-so we exercise the real streaming/decompress/filter/coerce path offline.
+No network: requests.get is monkeypatched to return a tiny in-memory CSV in the
+redfin_data_center/housing_market/monthly/all_counties.csv shape (verified
+against the live bytes 09/17/2026), so we exercise the real
+streaming/parse/filter/coerce path offline. The load-bearing cases: (1) Lee
+rows kept, other counties/states excluded; (2) non-County REGION TYPEs
+dropped; (3) literal "NA" coerces to None; (4) YoY percent converts to the
+table's fraction contract; (5) property_type is stamped (rollup feed has no
+per-type split).
 """
 from __future__ import annotations
-
-import gzip
 
 from ingest.pipelines.redfin_lee import pipeline, resources
 from ingest.pipelines.redfin_lee.constants import LEE_REGION
 
-# Header uses the verbatim Redfin column names; iter_lee_rows indexes by name
-# so column ORDER is irrelevant — we include only the columns the loader keeps.
+# Header verbatim from the live feed 09/17/2026 (subset order irrelevant — the
+# parser indexes by name; the full 50-col file just adds ignored columns).
 _HEADER_COLS = [
-    "PERIOD_BEGIN",
-    "PERIOD_END",
-    "REGION",
-    "PROPERTY_TYPE",
-    "MEDIAN_SALE_PRICE",
-    "MEDIAN_SALE_PRICE_YOY",
-    "HOMES_SOLD",
+    "LAST UPDATED",
+    "FREQUENCY",
+    "PERIOD BEGIN",
+    "PERIOD END",
+    "REGION ID",
+    "REGION TYPE",
+    "REGION NAME",
+    "HOMES SOLD",
+    "MEDIAN SALE PRICE NSA ($)",
+    "MEDIAN SALE PRICE NSA YOY (%)",
+    "MEDIAN DAYS ON MARKET (DAYS)",
     "INVENTORY",
-    "MONTHS_OF_SUPPLY",
-    "MEDIAN_DOM",
-    "LAST_UPDATED",
+    "MONTHS OF SUPPLY",
 ]
 
 
-def _line(begin, end, region, ptype, msp, yoy, sold, inv, mos, dom, updated):
-    # Text fields quoted, numerics bare — mirrors the real Redfin TSV.
-    return "\t".join(
+def _line(begin, end, region_id, rtype, region, sold, msp, yoy_pct, dom, inv, mos,
+          updated="2026-09-03"):
+    return ",".join(
         [
+            f'"{updated}"',
+            '"Monthly"',
             f'"{begin}"',
             f'"{end}"',
+            str(region_id),
+            f'"{rtype}"',
             f'"{region}"',
-            f'"{ptype}"',
-            str(msp),
-            str(yoy),
             str(sold),
+            str(msp),
+            str(yoy_pct),
+            str(dom),
             str(inv),
             str(mos),
-            str(dom),
-            f'"{updated}"',
         ]
     )
 
 
-def _gzipped_fixture() -> bytes:
-    header = "\t".join(f'"{c}"' for c in _HEADER_COLS)
-    rows = [
-        _line("2024-12-01", "2024-12-31", LEE_REGION, "All Residential", 410000, 0.020, 7000, 4000, 3.8, 60, "2026-06-13 10:00:00.000 Z"),
-        _line("2024-12-01", "2024-12-31", LEE_REGION, "Condo/Co-op", 280000, -0.015, 2500, 2800, 5.9, 72, "2026-06-13 10:00:00.000 Z"),
-        # Non-Lee row — must be filtered out.
-        _line("2024-12-01", "2024-12-31", "Collier County, FL", "All Residential", 600000, 0.043, 9000, 5100, 4.1, 55, "2026-06-13 10:00:00.000 Z"),
-        # Lee row with empty numerics — coercion must yield None, not crash.
-        _line("2024-11-01", "2024-11-30", LEE_REGION, "All Residential", "", "", "", "", "", "", "2026-06-13 10:00:00.000 Z"),
+def _rows_to_csv(rows: list[str]) -> bytes:
+    header = ",".join(f'"{c}"' for c in _HEADER_COLS)
+    return ("\n".join([header, *rows]) + "\n").encode("utf-8")
+
+
+def _fixture_rows() -> list[str]:
+    return [
+        _line("2026-07-01", "2026-07-31", 471, "County", LEE_REGION, 1844, 355000, 0.68, 84, 8965, 5.0),
+        _line("2026-08-01", "2026-08-31", 471, "County", LEE_REGION, 1678, 358799, 0.5, 79, 8893, 5.5),
+        # Non-Lee county — must be filtered out.
+        _line("2026-08-01", "2026-08-31", 447, "County", "Collier County, FL", 724, 617932, 0.4, 104, 5027, 6.0),
+        # Non-County REGION TYPE for the same name — must be dropped even though the name matches.
+        _line("2026-08-01", "2026-08-31", 999, "Zip", LEE_REGION, 1, 111111, 9.9, 1, 1, 1.0),
+        # Lee row with literal "NA" numerics — coercion must yield None, not crash.
+        _line("2026-05-01", "2026-05-31", 471, "County", LEE_REGION, "NA", "NA", "NA", "NA", "NA", "NA"),
     ]
-    tsv = "\n".join([header, *rows]) + "\n"
-    return gzip.compress(tsv.encode("utf-8"))
 
 
 class _FakeResp:
@@ -75,35 +87,50 @@ class _FakeResp:
         return None
 
 
-def _patch_get(monkeypatch):
-    gz = _gzipped_fixture()
-    monkeypatch.setattr(resources.requests, "get", lambda *a, **k: _FakeResp(gz))
+def _patch_get(monkeypatch, rows: list[str] | None = None):
+    data = _rows_to_csv(_fixture_rows() if rows is None else rows)
+    monkeypatch.setattr(resources.requests, "get", lambda *a, **k: _FakeResp(data))
 
 
-def test_iter_lee_rows_filters_to_lee(monkeypatch):
+def test_iter_lee_rows_filters_to_lee_county_type_only(monkeypatch):
     _patch_get(monkeypatch)
-    rows = list(resources.iter_lee_rows("http://example/redfin.gz"))
-    # Collier row excluded; 3 Lee rows kept.
+    rows = list(resources.iter_lee_rows("http://example/all_counties.csv"))
+    # Collier excluded, the Zip-type Lee lookalike excluded; 3 real Lee rows kept.
     assert {r["region"] for r in rows} == {LEE_REGION}
     assert len(rows) == 3
-    assert {r["property_type"] for r in rows} == {"All Residential", "Condo/Co-op"}
+    assert all(r["median_sale_price"] != 111111 for r in rows)
 
 
-def test_iter_lee_rows_coerces_types(monkeypatch):
+def test_property_type_is_stamped(monkeypatch):
     _patch_get(monkeypatch)
-    rows = list(resources.iter_lee_rows("http://example/redfin.gz"))
-    dec = next(
-        r
-        for r in rows
-        if r["property_type"] == "All Residential" and r["period_end"] == "2024-12-31"
-    )
-    assert dec["homes_sold"] == 7000 and isinstance(dec["homes_sold"], int)
-    assert abs(dec["median_sale_price_yoy"] - 0.020) < 1e-9
-    assert dec["months_of_supply"] == 3.8
-    # Empty numerics -> None
-    empty = next(r for r in rows if r["period_end"] == "2024-11-30")
-    assert empty["homes_sold"] is None
-    assert empty["median_sale_price_yoy"] is None
+    rows = list(resources.iter_lee_rows("http://example/all_counties.csv"))
+    assert {r["property_type"] for r in rows} == {"All Residential"}
+
+
+def test_coerces_types_na_to_none_and_percent_to_fraction(monkeypatch):
+    _patch_get(monkeypatch)
+    rows = list(resources.iter_lee_rows("http://example/all_counties.csv"))
+    aug = next(r for r in rows if r["period_end"] == "2026-08-31")
+    assert aug["homes_sold"] == 1678 and isinstance(aug["homes_sold"], int)
+    # Feed says 0.5 (PERCENT); the table's contract is a FRACTION.
+    assert abs(aug["median_sale_price_yoy"] - 0.005) < 1e-9
+    assert aug["months_of_supply"] == 5.5
+    na = next(r for r in rows if r["period_end"] == "2026-05-31")
+    assert na["homes_sold"] is None
+    assert na["median_sale_price_yoy"] is None
+
+
+def test_thin_pull_raises_below_min_rows(monkeypatch):
+    """A merge write never shrinks the cumulative count_table, so a quiet source
+    (renamed region, moved URL) must be caught on THIS run's row count, not left
+    for the count_table floor to (never) notice."""
+    import pytest
+
+    from ingest.lib.guards import VolumeGuardError
+
+    _patch_get(monkeypatch, _fixture_rows()[:1])  # 1 row, far below MIN_ROWS=150
+    with pytest.raises(VolumeGuardError, match="below MIN_ROWS"):
+        resources.ingest_redfin_lee("http://example/all_counties.csv")
 
 
 def test_dry_run_writes_nothing(monkeypatch, capsys):

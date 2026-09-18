@@ -2,7 +2,7 @@
 
 Run with: python -m ingest.pipelines.redfin_collier.pipeline [--dry-run]
 
-Source: Redfin Data Center county market tracker (free public gzipped TSV).
+Source: Redfin Data Center county market tracker (free public CSV).
 Writes Collier County, FL rows to data_lake.redfin_collier_market (Tier 2).
 """
 from __future__ import annotations

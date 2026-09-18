@@ -1,3 +1,38 @@
+## 2026-09-17 (Sonnet 5) - Retargeted redfin_collier + redfin_lee off the frozen legacy Redfin bucket; fixed stale dark-root flag on redfin_city_swfl
+
+Operator: "how the fuck do we have 6 fucking crons on redfin, what the fuck is claude doing" —
+triggered by a chief-of-staff session's "The Cull" artifact flagging 7 Redfin GHA workflows.
+Investigated before touching anything (RULE 0.5c): all 7 have real, distinct consumers (ZIP/city/
+county grain + price-drops/cancellations/delistings) — no duplicates to delete.
+
+Real defect found: redfin-collier-monthly and redfin-lee-monthly have been broken since 08/18
+(GitHub issues #182, #183 — ContentStaleError, newest content stuck at 2026-05-31) because both
+still pulled from `redfin_market_tracker/county_market_tracker.tsv000.gz`, the same legacy S3
+prefix that froze and was already retargeted for redfin_swfl (07/16) and redfin_city_swfl (08/10)
+— the county-grain pair was missed in both passes. Live-verified (curl) a county-grain file exists
+at the same new prefix: `redfin_data_center/housing_market/monthly/all_counties.csv`, fresh
+through 2026-08-31. Retargeted both pipelines' constants.py/resources.py to the new CSV feed
+(unit conversion for the now-percent YoY field, "NA" null handling, property_type stamped "All
+Residential" since the rollup feed has no per-type split — same pattern as the two prior
+retargets). Confirmed all 3 real consumers (properties-collier-value.mts, properties-lee-value.mts,
+lib/email/market-context.ts) already filter to `All Residential`, so no stale-slice risk. Added a
+per-run MIN_ROWS=150 landing guard to both (advisor catch: the registry's cumulative
+`expected_rows_min` on count_table never shrinks under a merge write, so it would stay green even
+if a future pull went quiet). Rewrote both test suites for the new CSV shape + the new guard (10
+tests). Live dry-run against the real S3 file confirms both now land August 2026 data. Full ingest
+suite: 1070 passed, 4 pre-existing unrelated failures (fred_g17/census_vip/active_listings,
+untouched by this change).
+
+Bonus fix in the same file: `redfin_city_swfl`'s `consuming_pack: none` was tripping the DARK ROOTS
+detector (print-scratchpad.mjs) as a dead pipeline every session start. It isn't dead — it's read
+directly (outside the refinery pack system) by lib/desk/loaders.ts (desk hero SOLD anchor) and
+lib/charts/gallery-loaders.ts (chart gallery). Corrected the field; dark-roots count dropped 6 → 5.
+
+Not live yet: both crons only run monthly (15th/16th) — plan to `workflow_dispatch` both manually
+after this push to prove green today instead of waiting. GitHub issues #182/#183 auto-close via
+log-cron-incident on that first successful run, not touched manually (no matching entry existed in
+the checks ledger — 09/15 bankruptcy wiped it, and these predate that sweep).
+
 ## 2026-09-15 (Sonnet 5) - Statewide permit coverage feasibility handoff: 8 SWFL jurisdictions mapped live
 
 Operator: figure out what permits we can get and how hard it is, starting SWFL, eventually all of
