@@ -40,6 +40,12 @@ def test_capture_checks_disk_floor_before_writing(tmp_path, monkeypatch):
         research_capture.ensure_storage_ready(tmp_path, min_free_bytes=10)
 
 
+def test_capture_stops_before_exceeding_aggregate_archive_budget(tmp_path):
+    (tmp_path / "retained.bin").write_bytes(b"12345")
+    with pytest.raises(research_capture.ResearchCaptureError, match="archive budget"):
+        research_capture.ensure_storage_ready(tmp_path, min_free_bytes=0, max_archive_bytes=6, incoming_bytes=2)
+
+
 def test_jsonl_and_manifest_are_immutable_and_below_root(tmp_path):
     rows = [{"schema_version": 1, "metric_id": "passengers", "value": 0}]
     exported = research_capture.write_observations_and_manifest(

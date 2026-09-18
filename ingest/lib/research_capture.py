@@ -18,6 +18,7 @@ from typing import Any
 
 
 DEFAULT_MIN_FREE_BYTES = 20 * 1024**3
+DEFAULT_MAX_ARCHIVE_BYTES = 10 * 1024**3
 
 
 class ResearchCaptureError(RuntimeError):
@@ -60,12 +61,27 @@ def resolve_capture_root(configured_root: str | Path | None = None, candidate: s
     return resolved
 
 
-def ensure_storage_ready(root: Path, *, min_free_bytes: int = DEFAULT_MIN_FREE_BYTES) -> None:
+def archive_size_bytes(root: Path) -> int:
+    """Count retained archive bytes without following links outside the archive root."""
+    return sum(path.stat().st_size for path in root.rglob("*") if path.is_file() and not path.is_symlink())
+
+
+def ensure_storage_ready(
+    root: Path,
+    *,
+    min_free_bytes: int = DEFAULT_MIN_FREE_BYTES,
+    max_archive_bytes: int = DEFAULT_MAX_ARCHIVE_BYTES,
+    incoming_bytes: int = 0,
+) -> None:
     usage = shutil.disk_usage(root)
     free = usage.free if hasattr(usage, "free") else usage[2]
     if free < min_free_bytes:
         raise ResearchCaptureError(
             f"research capture free-space floor not met: {free} bytes available < {min_free_bytes} required"
+        )
+    if archive_size_bytes(root) + incoming_bytes > max_archive_bytes:
+        raise ResearchCaptureError(
+            f"research capture archive budget exceeded: existing plus incoming bytes exceed {max_archive_bytes}"
         )
 
 
@@ -97,10 +113,11 @@ def _atomic_write(path: Path, content: bytes) -> None:
 
 def store_raw_bytes(root: str | Path, *, source_id: str, original_name: str, content: bytes) -> StoredRaw:
     archive_root = resolve_capture_root(root)
-    ensure_storage_ready(archive_root)
     digest = hashlib.sha256(content).hexdigest()
     filename = f"{digest}-{_safe_name(original_name)}"
     path = archive_root / "raw" / _safe_name(source_id) / digest[:2] / filename
+    if not path.exists():
+        ensure_storage_ready(archive_root, incoming_bytes=len(content))
     _atomic_write(path, content)
     return StoredRaw(
         path=path,
@@ -136,7 +153,6 @@ def write_observations_and_manifest(
     manifest: dict[str, Any],
 ) -> ExportedCapture:
     archive_root = resolve_capture_root(root)
-    ensure_storage_ready(archive_root)
     jsonl = b"".join(_canonical_json(row) + b"\n" for row in observations)
     digest = hashlib.sha256(jsonl).hexdigest()
     observation_path = archive_root / "exports" / _safe_name(source_id) / f"{digest}.jsonl"
@@ -153,6 +169,9 @@ def write_observations_and_manifest(
     manifest_bytes = _canonical_json(manifest_value) + b"\n"
     manifest_digest = hashlib.sha256(manifest_bytes).hexdigest()
     manifest_path = archive_root / "manifests" / _safe_name(source_id) / f"{manifest_digest}.json"
+    incoming_bytes = (0 if observation_path.exists() else len(jsonl)) + (0 if manifest_path.exists() else len(manifest_bytes))
+    if incoming_bytes:
+        ensure_storage_ready(archive_root, incoming_bytes=incoming_bytes)
     _atomic_write(manifest_path, manifest_bytes)
     return ExportedCapture(observation_path, manifest_path, digest, len(observations))
 
