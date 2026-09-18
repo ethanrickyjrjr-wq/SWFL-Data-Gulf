@@ -1,3 +1,25 @@
+## 2026-09-18 (Opus 5) - Read The Cull's other 18 "disabled" rows: 6 are chain-driven (chain red 60 straight runs), 7 were never enabled, and 8 of 11 parked workflows are gated by a YAML comment only
+
+Operator asked whether yesterday's Redfin pass covered the rest of The Cull's flags (Property
+Watch, Market Area Alerts, the outreach cadences). It did not - yesterday was the 7 Redfin rows
+only. Read the artifact itself this session rather than reconstructing its contents.
+
+Read-only investigation, no code change. Full findings in _ASSISTANT/SCRATCHPAD.md (09/18 entry).
+Headlines: (a) six of the 18 are not disabled at all - they are nightly-chain.yml's called
+workflows (crons retired 07/12/2026 by design), and `gh run list` shows the chain has FAILED 60
+consecutive runs back to at least 08/18/2026, with narrative-bake / graphify-republish /
+gate-a-parity SKIPPED every night because the chain dies upstream; (b) seven were born with the
+cron commented out and have never had an active `- cron:` line in any commit, so The Cull's
+"Social Scheduler was scheduled every 15 minutes before someone disabled it" is wrong; (c) of the
+11 parked product workflows, 8 state their re-enable gate in prose only, one names a check that
+is dropped, and activation-sequence.yml:6 hard-gates on `city_pulse_supersession`, a key that has
+never existed as a ledger row; (d) every migration the outreach/social/watch go-live checklists
+name is already applied (live query: all present, all empty bar one weekly_read_subscribers row),
+so the blocker was never schema.
+
+Deliberately did NOT open checks for (c): the 09/15 bankruptcy dropped `property_watch_live_verify`
+on the operator's explicit word two days ago, so re-opening it unasked would override his call.
+
 ## 2026-09-17 (Sonnet 5) - Retargeted redfin_collier + redfin_lee off the frozen legacy Redfin bucket; fixed stale dark-root flag on redfin_city_swfl
 
 Operator: "how the fuck do we have 6 fucking crons on redfin, what the fuck is claude doing" —

@@ -1,3 +1,64 @@
+## 2026-09-18 (Opus 5) — OPERATOR: "look into what The Cull flagged (the disabled-but-never-deleted workflows: Property Watch, Market Area Alerts, the outreach cadences, etc.)"
+
+Asked whether yesterday's Redfin pass covered the rest of The Cull. It did not — yesterday was
+the 7 Redfin rows only. Read the artifact itself this session
+(https://claude.ai/artifact/7F7sFUyJojDPJLysWuHh1W) rather than reconstructing it: it carries
+`live:false` on 18 of 111 rows under the stat "already disabled, never deleted".
+
+Those 18 are NOT one bucket. Verified splits:
+
+**(a) SIX are not disabled — they are the payload of nightly-chain.yml.** city-pulse-daily,
+live-search-daily, listing-lifecycle-daily, daily-rebuild, narrative-bake, gate-a-parity had
+their own crons retired 07/12/2026 on purpose (one head + `needs:` ordering, so the rebuild
+stops consuming yesterday's ingests — nightly-chain.yml:53 holds the cron, :124-248 the calls).
+LIVE STATE (gh, 09/18): the chain fires twice nightly and **has failed 60 consecutive runs back
+to at least 08/18/2026**. Last run 35205487889: live-search SUCCESS · city-pulse FAILURE (credit
+wall) · listing-lifecycle Lee/Collier/Hendry FAILURE (empty LISTING_LIFECYCLE_BASE_URL) ·
+row-gate FAILURE · rebuild FAILURE · narrative-bake + graphify-republish + gate-a-parity SKIPPED,
+never reached. So The Cull's "disabled" is wrong on mechanism and right on outcome for 5 of the
+6 — and the two SKIPPED ones are the worst-tracked state in the repo: not disabled, not failing,
+not running. Already-open checks cover the causes (`cron_incident_nightly_chain` 66d untouched,
+`llm_legs_parked_credit_wall`, `listing_base_url_secret_empty`).
+
+**(b) SEVEN were never turned ON, not turned off.** Checked every version of each file in git
+history — zero active `- cron:` lines, ever: outreach-drip + social-scheduler +
+social-engagement-poll (born 06/20/2026), outreach-demo (07/02), weekly-read / Market Area
+Alerts (07/03), watch-scan-daily + watch-digest-daily / Property Watch (07/06). The Cull's
+"Social Scheduler was scheduled every 15 minutes(!) before someone disabled it" is FALSE — it
+read the commented `*/15 * * * *` and narrated it past-tense. Three others in the set DID run
+first and then get stopped: corridor-pulse-weekly (06/14 success, then 06/21+06/28+07/05
+timeouts, paused 07/05 under the no-paid-web_search-on-a-schedule decree),
+build-example-deliverables (~$0.21/day of real runs, cron killed 07/18 on operator word),
+neighborhood-amenities-daily (manual run 08/03, disabled 08/04 over unapproved paid SteadyAPI
+spend).
+
+**(c) THE REAL DEFECT — a parked workflow's re-enable condition lives only in a YAML comment.**
+Of the 11 parked product workflows, 8 state the gate in prose only ("until go-live (operator
+call)"). One names `property_watch_live_verify` — live ledger says **dropped**. One
+(activation-sequence.yml:6) hard-gates on `city_pulse_supersession`, due 06/15/2026 — that key
+**has never existed as a row in the ledger at all**. A comment appears on no board, in no
+kickoff, in no `check.mjs list`. Strike shape: `decree-in-prose-code-never-walked-it` +
+`stale-claim-blocks-work-and-the-wait-does-not-detect-it`. NOT opening checks for these — the
+09/15 bankruptcy dropped `property_watch_live_verify` on his explicit word two days ago;
+re-opening it unasked overrides his decision. His call which of the 11 become live obligations.
+(`sba_franchise_parked_but_live`, closed done 07/15, is NOT in this count — disabling that cron
+WAS the fix. The system worked there.)
+
+**(d) The go-live checklists are staler than they read.** Every migration the outreach/social/
+watch checklists say to apply is already applied — live query 09/18 returns 200 on
+outreach_events, outreach_recipients, social_accounts/posts/events, report_watches,
+project_events, weekly_read_subscribers. All empty except weekly_read_subscribers (1 row). So
+the blocker was never schema: it is zero prospects, zero connected accounts, zero watches, and
+an unverified outreach sending domain. Also `corridor_pulse_crawl4ai_retrofit` = **dropped**
+while `pulse_crawl4ai_retrofit_live_verify` (the city one) = done — corridor never got the
+retrofit that is its own stated re-enable condition. Same shape as yesterday's Redfin miss.
+
+Cheapest real product in the set: Property Watch scan writes only to public.project_events —
+zero LLM, zero paid API, and its own header says it is safe to schedule. Market Area Alerts'
+runner is a deterministic detector, also zero LLM. Both are one operator word from firing.
+Genuinely deletable: chief-of-staff-nightly.yml (killed 08/06, a different system's job living
+in this repo, `morning_brief_no_consumer` closed done).
+
 
 ## 2026-09-17 (Sonnet 5) — OPERATOR: "how the fuck do we have 6 fucking crons on redfin, what the fuck is claude doing"
 
