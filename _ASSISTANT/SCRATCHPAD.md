@@ -1,3 +1,47 @@
+## 2026-09-18 (Opus 5) — OPERATOR: "I DON'T KNOW WHAT IS GOING ON ANYMORE, SO YOU WILL HAVE TO 'FIX'....AGAIN AND THEN WE WILL DEAL WITH THE SAME PROBLEMS 7 DAYS FROM NOW"
+
+Said on being told the nightly chain has been red for 60 straight runs. He is right, and the
+7-days-from-now prediction is the part to answer, not the "fix".
+
+ROOT CAUSE, one thing, read from the live log (run 35205487889, `gh run view --log-failed`):
+**the Anthropic credit balance is zero, and every one of the 41 brain packs makes an LLM call to
+build.** Verbatim, repeated per pack: `400 {"type":"error","error":{"type":
+"invalid_request_error","message":"Your credit balance is too low to access the Anthropic API..."}}`.
+Not city-pulse. Not listings. Not the row gate. The REBUILD itself, all 41 packs, every night
+since ~08/18/2026.
+
+The cascade, in order, each step verified in code this session:
+1. `refinery/lib/resilient-build.mts:88` `isTransientError` matches network substrings only — a
+   credit-wall 400 matches none, so it is stamped `failureClass=deterministic`.
+2. Deterministic → the refinery reaches for last-good instead. `isEligibleLastGood`
+   (resilient-build.mts:110) caps eligibility at `LAST_GOOD_ABSOLUTE_MAX_DAYS`.
+3. For the first stretch it served last-good under the stale caveat — correct behavior. Once the
+   month elapsed, last-good went INELIGIBLE and the log now reads verbatim
+   `serving NOTHING (no eligible last-good)`.
+4. `rebuild` fails → `bake`, `warm`, `parity` have `needs: [rebuild]` with NO `always()`
+   (nightly-chain.yml:212-248), so narrative-bake, graphify-republish and gate-a-parity have been
+   SKIPPED every night for a month. That is why The Cull saw them as "disabled".
+
+So the brains degraded silently from fresh → stale-with-caveat → empty, and nothing anywhere said
+"billing". `llm_legs_parked_credit_wall` names FOUR legs (city_pulse, corridor_pulse,
+narrative-bake, factuality-gate); the truth is all 41 packs plus master. That check understates
+its own scope by an order of magnitude — and understating it is why this read as four parked
+side-legs rather than "the product is not building".
+
+WHY IT WILL RECUR IN 7 DAYS IF ONLY THE SYMPTOM IS TOUCHED: a billing stop is not in any failure
+class. It is filed as a generic deterministic content defect, which tells the healer "will NOT
+self-heal" (right) but names nothing a human can act on (wrong). `doctor_cannot_see_billing_wall`
+already records the doctor's half of this and calls the fix a cost decision — but the REFINERY
+holds the error object in hand and can classify it for free, at the one root all 41 packs route
+through. That is the durable fix and it is being made this session.
+
+RULE 3 C2b HELD: not proposing credit purchase, not as an option, not as "the cheap one". The
+rule's own legal routes are the Max-plan interactive authoring pattern, redesigning the leg to
+need no unattended call, or staying parked. Worth flagging for his call: refinery/CLAUDE.md:19
+says "deterministic math in code; LLMs synthesize narrative only", and RULE 0.7 names
+`bakedAreaRead()` as the baked-prose lane that runs BEFORE a live model call — so a
+narrative-optional pack path is a real redesign route, not a hypothetical. Not building it unasked.
+
 ## 2026-09-18 (Opus 5) — CORRECTION to the entry below: Property Watch is NOT one word from firing
 
 The four-lane gate forced the RESEARCH lane I had skipped, and it overturned a claim I had

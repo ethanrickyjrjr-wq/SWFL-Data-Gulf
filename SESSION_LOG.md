@@ -1,3 +1,37 @@
+## 2026-09-18 (Opus 5) - Found the single root under the 60-run chain red streak: zero Anthropic credit, all 41 packs, brains now serving EMPTY. Corrected the check that understated it as "four legs"
+
+Operator: "I DON'T KNOW WHAT IS GOING ON ANYMORE, SO YOU WILL HAVE TO 'FIX'....AGAIN AND THEN WE
+WILL DEAL WITH THE SAME PROBLEMS 7 DAYS FROM NOW". Read the live failure log rather than guessing.
+
+ROOT CAUSE (run 35205487889, `gh run view --log-failed`): every one of the 41 brain packs fails on
+`400 invalid_request_error: Your credit balance is too low to access the Anthropic API`. Not
+city-pulse, not listings, not the row gate - the rebuild itself, nightly since ~08/18/2026.
+Cascade verified in code: resilient-build.mts:88 isTransientError matches network substrings only,
+so a credit-wall 400 is stamped failureClass=deterministic; that routes to last-good, but
+isEligibleLastGood (resilient-build.mts:110) caps at LAST_GOOD_ABSOLUTE_MAX_DAYS, so after a month
+the log now reads verbatim "serving NOTHING (no eligible last-good)" - brains went fresh, then
+stale-with-caveat, then EMPTY. rebuild failing then skips bake/warm/parity, which carry
+needs:[rebuild] with no always() (nightly-chain.yml:212-248) unlike rebuild itself - so
+narrative-bake, graphify-republish and gate-a-parity have been skipped nightly for a month, which
+is why The Cull read them as "disabled".
+
+DONE THIS SESSION: corrected `llm_legs_parked_credit_wall` from "four legs" to its real scope (41
+packs + master, with the full cascade and the verbatim log line) and reclassified it defect. The
+next session now reads the right scope instead of learning that four side-legs are parked.
+
+DELIBERATELY NOT BUILT: a `failureClass=billing` class in resilient-build.mts. It improves a signal
+path (cron-diag -> incident logger -> issue) already proven not to reach the operator -
+`cron_incident_nightly_chain` has sat 66 days untouched - and it carries real blast radius on the
+nightly pipeline (classify-cron-failure's DETERMINISTIC_HOLD, the healer, deriveExitCode's 1-vs-2
+escalation) for a label. Not worth it.
+
+OPEN FOR HIS CALL, stated not proposed: RULE 3 C2b forbids a credit-purchase recommendation, so the
+legal routes are Max-plan interactive authoring (Issue 001 pattern), redesign so no unattended LLM
+call is needed (refinery/CLAUDE.md:19 + RULE 0.7's bakedAreaRead() make a narrative-optional pack
+path real, not hypothetical), or it stays parked. Also his call: whether bake/warm/parity should get
+`always()` to match rebuild's 09/15 LAKE-FIRST rationale - three `if:` lines, touches the nightly
+pipeline, independent of billing.
+
 ## 2026-09-18 (Opus 5) - CORRECTION: the Property Watch activation plan was never executed; Market Area Alerts is the one that is genuinely ready
 
 Correcting the entry below in the same session. The four-lane gate forced the RESEARCH lane I had
