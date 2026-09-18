@@ -103,12 +103,13 @@ function deriveBpsTotalUnits(observations: ObservationV1[]): ObservationV1[] {
         (row) =>
           row.frequency !== first.frequency ||
           row.unit !== first.unit ||
+          row.definition_version !== first.definition_version ||
           row.source_sha256 !== first.source_sha256 ||
           row.source_url !== first.source_url,
       )
     ) {
       throw new Error(
-        `Cannot derive BPS total for ${first.geo_id}/${first.period_start}: component provenance, unit, or frequency mismatch`,
+        `Cannot derive BPS total for ${first.geo_id}/${first.period_start}: component provenance, definition version mismatch, unit, or frequency mismatch`,
       );
     }
     const complete = components.every((row) => row.status === "observed" && row.value !== null);
@@ -150,14 +151,26 @@ export function prepareHistoryComparisonObservations(
   return [...rsw, ...bps];
 }
 
-function revisionRank(observation: ObservationV1): string {
+function revisionRank(observation: ObservationV1): [number, string, string] {
   const evidenceTime =
     observation.available_at ??
     observation.published_at ??
     observation.first_seen_at ??
     observation.retrieved_at ??
     "";
-  return [evidenceTime, observation.vintage_id ?? "", observation.source_sha256 ?? ""].join("|");
+  return [
+    evidenceTime === "" ? Number.NEGATIVE_INFINITY : Date.parse(evidenceTime),
+    observation.vintage_id ?? "",
+    observation.source_sha256 ?? "",
+  ];
+}
+
+function compareRevisionRank(left: ObservationV1, right: ObservationV1): number {
+  const [leftTime, leftVintage, leftHash] = revisionRank(left);
+  const [rightTime, rightVintage, rightHash] = revisionRank(right);
+  if (leftTime !== rightTime) return leftTime - rightTime;
+  const vintageComparison = leftVintage.localeCompare(rightVintage);
+  return vintageComparison !== 0 ? vintageComparison : leftHash.localeCompare(rightHash);
 }
 
 function periodSeriesIdentity(observation: ObservationV1): string {
@@ -169,7 +182,7 @@ export function selectLatestVintages(observations: ObservationV1[]): Observation
   for (const observation of observations) {
     const key = periodSeriesIdentity(observation);
     const previous = selected.get(key);
-    if (!previous || revisionRank(observation) > revisionRank(previous)) {
+    if (!previous || compareRevisionRank(observation, previous) > 0) {
       selected.set(key, observation);
     }
   }
@@ -367,7 +380,7 @@ export function comparePriorYearPeriods(
 
   return {
     selection_policy:
-      "latest_evidenced_vintage: max(available_at, published_at, first_seen_at, retrieved_at), then vintage_id and source_sha256 lexical tie-break",
+      "latest_evidenced_vintage: first non-null of available_at, published_at, first_seen_at, retrieved_at; compare instants chronologically, then vintage_id and source_sha256 lexical tie-break",
     series,
     periods: assessPeriods(series),
   };

@@ -131,6 +131,24 @@ test("latest-vintage selection is deterministic and reports the chosen revision"
   assert.equal(selected[0].vintage_id, "release-2");
 });
 
+test("latest-vintage selection compares timestamps chronologically across UTC spellings", () => {
+  const earlier = row({
+    value: 101,
+    vintage_id: "lexically-later-but-chronologically-earlier",
+    available_at: "2025-02-20T16:00:00Z",
+    published_at: "2025-02-20T16:00:00Z",
+  });
+  const later = row({
+    value: 102,
+    vintage_id: "chronologically-later",
+    available_at: "2025-02-20T16:00:00.500Z",
+    published_at: "2025-02-20T16:00:00.500Z",
+    source_sha256: "b".repeat(64),
+  });
+  const selected = selectLatestVintages([earlier, later]);
+  assert.equal(selected[0].value, 102);
+});
+
 test("period assessments distinguish agreement, divergence, and insufficient evidence", () => {
   const bps = (geoId: string, value2024: number, value2025: number): ObservationV1[] => [
     row({
@@ -225,4 +243,29 @@ test("BPS total authorizations sum four mutually exclusive unit categories only 
   const suppressed = prepareHistoryComparisonObservations(complete);
   assert.equal(suppressed[0].value, null);
   assert.equal(suppressed[0].status, "suppressed");
+});
+
+test("BPS total derivation rejects component definition drift", () => {
+  const components = [
+    "residential_one_unit_units",
+    "residential_two_unit_units",
+    "residential_three_four_unit_units",
+    "residential_five_plus_unit_units",
+  ].map((metric_id) =>
+    row({
+      source_id: "census_bps_county",
+      metric_id,
+      definition_version: "census_bps_county_monthly_v1",
+      geo_type: "county_fips",
+      geo_id: "12071",
+      value: 1,
+      unit: "count",
+      value_basis: "estimated",
+    }),
+  );
+  components[3] = { ...components[3], definition_version: "incompatible_v2" };
+  assert.throws(
+    () => prepareHistoryComparisonObservations(components),
+    /definition version mismatch/,
+  );
 });

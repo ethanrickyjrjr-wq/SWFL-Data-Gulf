@@ -223,6 +223,7 @@ test("manifest loader rejects an invalid observation-file hash", async () => {
         parse_failures: [],
       },
     ],
+    geo_coverage: [],
     raw_files: [
       {
         relative_path: "raw/rsw.pdf",
@@ -244,4 +245,117 @@ test("manifest loader rejects an invalid observation-file hash", async () => {
   writeFileSync(manifestPath, JSON.stringify(manifest));
 
   await assert.rejects(() => loadObservationManifest(manifestPath), /SHA-256 mismatch/);
+});
+
+test("manifest loader accepts a root-level combined exporter manifest with an ISO run id", async () => {
+  const directory = mkdtempSync(path.join(tmpdir(), "observation-contract-combined-"));
+  temporaryDirectories.push(directory);
+  mkdirSync(path.join(directory, "raw", "rsw_lcpa_monthly"), { recursive: true });
+  mkdirSync(path.join(directory, "exports", "rsw_lcpa_monthly"), { recursive: true });
+  const rawBytes = "retained source bytes";
+  writeFileSync(path.join(directory, "raw", "rsw_lcpa_monthly", "rsw.pdf"), rawBytes);
+  const row = observation({
+    source_id: "rsw_lcpa_monthly",
+    source_sha256: sha256(rawBytes),
+  });
+  const jsonl = `${JSON.stringify(row)}\n`;
+  writeFileSync(path.join(directory, "exports", "rsw_lcpa_monthly", "rsw.jsonl"), jsonl);
+  const manifest = {
+    schema_version: 1,
+    run_id: "2026-09-18T20:28:53.769758+00:00",
+    source_ids: ["rsw_lcpa_monthly"],
+    requested_period: { from: "2025-01", through: "2025-01" },
+    source_coverage: [
+      {
+        source_id: "rsw_lcpa_monthly",
+        frequency: "monthly",
+        expected_period: { from: "2025-01", through: "2025-01" },
+        observed_period: { from: "2025-01", through: "2025-01" },
+        expected_count: 1,
+        present_count: 1,
+        missing_count: 0,
+        discovery_failures: [],
+        parse_failures: [],
+      },
+    ],
+    geo_coverage: [],
+    raw_files: [
+      {
+        relative_path: "raw/rsw_lcpa_monthly/rsw.pdf",
+        sha256: sha256(rawBytes),
+        byte_size: Buffer.byteLength(rawBytes),
+        source_id: "rsw_lcpa_monthly",
+      },
+    ],
+    observation_files: [
+      {
+        relative_path: "exports/rsw_lcpa_monthly/rsw.jsonl",
+        sha256: sha256(jsonl),
+        row_count: 1,
+        source_id: "rsw_lcpa_monthly",
+      },
+    ],
+  };
+  const manifestPath = path.join(directory, "swfl-history-comparison-manifest-v1.json");
+  writeFileSync(manifestPath, JSON.stringify(manifest));
+
+  const loaded = await loadObservationManifest(manifestPath);
+  assert.equal(loaded.manifest.run_id, manifest.run_id);
+  assert.equal(loaded.observations.length, 1);
+});
+
+test("manifest loader rejects an observation filed under the wrong source", async () => {
+  const directory = mkdtempSync(path.join(tmpdir(), "observation-contract-source-file-"));
+  temporaryDirectories.push(directory);
+  mkdirSync(path.join(directory, "raw"), { recursive: true });
+  mkdirSync(path.join(directory, "exports"), { recursive: true });
+  const rawBytes = "retained source bytes";
+  writeFileSync(path.join(directory, "raw", "rsw.pdf"), rawBytes);
+  const row = observation({ source_sha256: sha256(rawBytes) });
+  const jsonl = `${JSON.stringify(row)}\n`;
+  writeFileSync(path.join(directory, "exports", "rsw.jsonl"), jsonl);
+  const manifest = {
+    schema_version: 1,
+    run_id: "fixture-run",
+    source_ids: ["rsw_monthly", "census_bps_county"],
+    requested_period: { from: "2025-01", through: "2025-01" },
+    source_coverage: ["rsw_monthly", "census_bps_county"].map((source_id) => ({
+      source_id,
+      frequency: "monthly",
+      expected_period: { from: "2025-01", through: "2025-01" },
+      observed_period:
+        source_id === "rsw_monthly"
+          ? { from: "2025-01", through: "2025-01" }
+          : { from: null, through: null },
+      expected_count: source_id === "rsw_monthly" ? 1 : 0,
+      present_count: source_id === "rsw_monthly" ? 1 : 0,
+      missing_count: 0,
+      discovery_failures: [],
+      parse_failures: [],
+    })),
+    geo_coverage: [],
+    raw_files: [
+      {
+        relative_path: "raw/rsw.pdf",
+        sha256: sha256(rawBytes),
+        byte_size: Buffer.byteLength(rawBytes),
+        source_id: "rsw_monthly",
+      },
+    ],
+    observation_files: [
+      {
+        relative_path: "exports/rsw.jsonl",
+        sha256: sha256(jsonl),
+        row_count: 1,
+        source_id: "census_bps_county",
+      },
+    ],
+  };
+  const manifestPath = path.join(directory, "manifest.json");
+  writeFileSync(manifestPath, JSON.stringify(manifest));
+
+  await assert.rejects(
+    () => loadObservationManifest(manifestPath),
+    /contains observation for rsw_monthly/,
+  );
 });

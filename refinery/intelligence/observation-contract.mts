@@ -58,12 +58,25 @@ export interface SourceCoverageEntry {
   parse_failures: string[];
 }
 
+export interface GeographyCoverageEntry {
+  source_id: string;
+  geo_type: string;
+  geo_id: string;
+  expected_period: { from: string; through: string };
+  observed_period: { from: string | null; through: string | null };
+  expected_count: number;
+  present_count: number;
+  missing_count: number;
+  missing_ranges: Array<{ from: string; through: string }>;
+}
+
 export interface ObservationManifestV1 {
   schema_version: 1;
   run_id: string;
   source_ids: string[];
   requested_period: { from: string; through: string };
   source_coverage: SourceCoverageEntry[];
+  geo_coverage: GeographyCoverageEntry[];
   raw_files: Required<RawFileEntry>[];
   observation_files: ObservationFileEntry[];
 }
@@ -447,6 +460,41 @@ function parseManifest(value: unknown): ObservationManifestV1 {
     fail("manifest.source_coverage", "must contain exactly one entry for every declared source_id");
   }
 
+  if (!Array.isArray(manifest.geo_coverage)) {
+    fail("manifest.geo_coverage", "must be an array");
+  }
+  const geoCoverage = manifest.geo_coverage.map((value, index): GeographyCoverageEntry => {
+    const context = `manifest.geo_coverage[${index}]`;
+    const coverage = requireRecord(value, context);
+    const sourceId = requireIdentifier(coverage.source_id, `${context}.source_id`);
+    if (!sourceIds.includes(sourceId)) fail(context, `unknown source_id ${sourceId}`);
+    const expectedCount = requireInteger(coverage.expected_count, `${context}.expected_count`);
+    const presentCount = requireInteger(coverage.present_count, `${context}.present_count`);
+    const missingCount = requireInteger(coverage.missing_count, `${context}.missing_count`);
+    if (presentCount + missingCount !== expectedCount) {
+      fail(context, "present_count + missing_count must equal expected_count");
+    }
+    if (!Array.isArray(coverage.missing_ranges)) {
+      fail(`${context}.missing_ranges`, "must be an array");
+    }
+    return {
+      source_id: sourceId,
+      geo_type: requireIdentifier(coverage.geo_type, `${context}.geo_type`),
+      geo_id: requireIdentifier(coverage.geo_id, `${context}.geo_id`),
+      expected_period: parsePeriodRange(coverage.expected_period, `${context}.expected_period`),
+      observed_period: parseNullablePeriodRange(
+        coverage.observed_period,
+        `${context}.observed_period`,
+      ),
+      expected_count: expectedCount,
+      present_count: presentCount,
+      missing_count: missingCount,
+      missing_ranges: coverage.missing_ranges.map((range, rangeIndex) =>
+        parsePeriodRange(range, `${context}.missing_ranges[${rangeIndex}]`),
+      ),
+    };
+  });
+
   if (!Array.isArray(manifest.raw_files) || manifest.raw_files.length === 0) {
     fail("manifest.raw_files", "must be a non-empty array");
   }
@@ -469,20 +517,23 @@ function parseManifest(value: unknown): ObservationManifestV1 {
   const observationFiles = manifest.observation_files.map((value, index) => {
     const context = `manifest.observation_files[${index}]`;
     const entry = requireRecord(value, context);
+    const sourceId = requireIdentifier(entry.source_id, `${context}.source_id`);
+    if (!sourceIds.includes(sourceId)) fail(context, `unknown source_id ${sourceId}`);
     return {
       relative_path: requireString(entry.relative_path, `${context}.relative_path`),
       sha256: requireSha256(entry.sha256, `${context}.sha256`),
       row_count: requireInteger(entry.row_count, `${context}.row_count`),
-      source_id: requireIdentifier(entry.source_id, `${context}.source_id`),
+      source_id: sourceId,
     };
   });
 
   return {
     schema_version: 1,
-    run_id: requireIdentifier(manifest.run_id, "manifest.run_id"),
+    run_id: requireString(manifest.run_id, "manifest.run_id"),
     source_ids: sourceIds,
     requested_period: parsePeriodRange(manifest.requested_period, "manifest.requested_period"),
     source_coverage: sourceCoverage,
+    geo_coverage: geoCoverage,
     raw_files: rawFiles,
     observation_files: observationFiles,
   };
@@ -570,7 +621,15 @@ export async function loadObservationManifest(
     }
     for (const [lineIndex, line] of lines.entries()) {
       try {
-        unvalidated.push(JSON.parse(line));
+        const parsedRow: unknown = JSON.parse(line);
+        const row = requireRecord(parsedRow, `${entry.relative_path}:${lineIndex + 1}`);
+        if (row.source_id !== entry.source_id) {
+          fail(
+            `${entry.relative_path}:${lineIndex + 1}`,
+            `contains observation for ${String(row.source_id)} but manifest assigns the file to ${entry.source_id}`,
+          );
+        }
+        unvalidated.push(parsedRow);
       } catch (error) {
         fail(
           `${entry.relative_path}:${lineIndex + 1}`,

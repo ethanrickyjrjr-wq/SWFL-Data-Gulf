@@ -44,7 +44,7 @@ function fixtureObservation(
     period_end: end,
     frequency: "monthly",
     value,
-    unit: sourceId === "rsw_monthly" ? "passenger_movements" : "housing_units_authorized",
+    unit: sourceId === "rsw_lcpa_monthly" ? "passenger_movements" : "housing_units_authorized",
     status: "observed",
     value_basis: "reported",
     published_at: `${Number(period.slice(0, 4))}-02-20T15:00:00.000Z`,
@@ -104,8 +104,13 @@ function writeFixtureManifest(): string {
       rawFiles[1].sha256,
     ),
   ];
-  const jsonl = `${observations.map((item) => JSON.stringify(item)).join("\n")}\n`;
-  writeFileSync(path.join(root, "exports/observations.jsonl"), jsonl);
+  const observationExports = ["census_bps_county", "rsw_lcpa_monthly"].map((sourceId) => {
+    const rows = observations.filter((item) => item.source_id === sourceId);
+    const bytes = `${rows.map((item) => JSON.stringify(item)).join("\n")}\n`;
+    const relativePath = `exports/${sourceId}.jsonl`;
+    writeFileSync(path.join(root, relativePath), bytes);
+    return { sourceId, rows, bytes, relativePath };
+  });
 
   const manifest = {
     schema_version: 1,
@@ -136,20 +141,31 @@ function writeFixtureManifest(): string {
         parse_failures: [],
       },
     ],
+    geo_coverage: [
+      {
+        source_id: "census_bps_county",
+        geo_type: "county_fips",
+        geo_id: "12071",
+        expected_period: { from: "2024-01", through: "2025-01" },
+        observed_period: { from: "2024-01", through: "2025-01" },
+        expected_count: 13,
+        present_count: 2,
+        missing_count: 11,
+        missing_ranges: [{ from: "2024-02", through: "2024-12" }],
+      },
+    ],
     raw_files: rawFiles.map((item) => ({
       source_id: item.source_id,
       relative_path: item.relative_path,
       sha256: item.sha256,
       byte_size: Buffer.byteLength(item.bytes),
     })),
-    observation_files: [
-      {
-        source_id: "combined",
-        relative_path: "exports/observations.jsonl",
-        sha256: sha256(jsonl),
-        row_count: observations.length,
-      },
-    ],
+    observation_files: observationExports.map((item) => ({
+      source_id: item.sourceId,
+      relative_path: item.relativePath,
+      sha256: sha256(item.bytes),
+      row_count: item.rows.length,
+    })),
   };
   const manifestPath = path.join(root, "manifest.json");
   writeFileSync(manifestPath, JSON.stringify(manifest, null, 2));
@@ -170,6 +186,7 @@ test("identical input produces an identical analytical payload and hash", async 
   assert.equal(first.analytical_sha256, second.analytical_sha256);
   assert.equal(first.period_assessments[0].classification, "agreement");
   assert.equal(first.coverage_matrix.length, 2);
+  assert.equal(first.geography_coverage[0].missing_count, 11);
 });
 
 test("writer keeps invocation time outside deterministic JSON and Markdown", async () => {
@@ -217,5 +234,6 @@ test("builder exposes sources, revisions, coverage gaps, and release caveats", a
   assert.ok(payload.source_links.some((item) => item.url.includes("census.gov")));
   assert.ok(payload.coverage_matrix.some((item) => item.missing_count > 0));
   assert.ok(payload.caveats.some((item) => item.includes("distinct geographies")));
+  assert.ok(payload.caveats.some((item) => item.includes("geography coverage")));
   assert.ok(payload.series_comparisons.every((item) => item.current_vintage_id));
 });

@@ -6,6 +6,7 @@ import { fileURLToPath } from "node:url";
 import {
   loadObservationManifest,
   type SourceCoverageEntry,
+  type GeographyCoverageEntry,
 } from "../intelligence/observation-contract.mts";
 import {
   comparePriorYearPeriods,
@@ -24,6 +25,7 @@ export interface HistoryComparisonPayload {
   series_comparisons: SeriesPeriodComparison[];
   period_assessments: PeriodAssessment[];
   coverage_matrix: SourceCoverageEntry[];
+  geography_coverage: GeographyCoverageEntry[];
   source_links: Array<{ source_id: string; url: string }>;
   caveats: string[];
 }
@@ -52,7 +54,10 @@ function sourceLinks(
   });
 }
 
-function buildCaveats(coverage: SourceCoverageEntry[]): string[] {
+function buildCaveats(
+  coverage: SourceCoverageEntry[],
+  geographyCoverage: GeographyCoverageEntry[],
+): string[] {
   const caveats = [
     "This is a descriptive latest-evidenced-vintage comparison, not a point-in-time forecast replay.",
     "RSW airport activity and county residential authorizations describe distinct geographies and populations; movements are compared without treating airport counts as county-resident counts.",
@@ -69,6 +74,16 @@ function buildCaveats(coverage: SourceCoverageEntry[]): string[] {
     if (item.missing_count > 0) {
       caveats.push(
         `${item.source_id} coverage reports ${item.missing_count} missing of ${item.expected_count} expected periods/series-periods.`,
+      );
+    }
+  }
+  for (const item of geographyCoverage) {
+    if (item.missing_count > 0) {
+      const ranges = item.missing_ranges
+        .map((range) => `${range.from} through ${range.through}`)
+        .join(", ");
+      caveats.push(
+        `${item.source_id} ${item.geo_type}:${item.geo_id} is missing ${item.missing_count} of ${item.expected_count} expected periods${ranges ? ` (${ranges})` : ""}. Source release coverage does not imply complete geography coverage.`,
       );
     }
   }
@@ -98,8 +113,13 @@ export async function buildHistoryComparison(
     coverage_matrix: [...loaded.manifest.source_coverage].sort((a, b) =>
       a.source_id.localeCompare(b.source_id),
     ),
+    geography_coverage: [...loaded.manifest.geo_coverage].sort((a, b) =>
+      `${a.source_id}|${a.geo_type}|${a.geo_id}`.localeCompare(
+        `${b.source_id}|${b.geo_type}|${b.geo_id}`,
+      ),
+    ),
     source_links: sourceLinks(loaded.observations),
-    caveats: buildCaveats(loaded.manifest.source_coverage),
+    caveats: buildCaveats(loaded.manifest.source_coverage, loaded.manifest.geo_coverage),
   };
   const analyticalHash = sha256(JSON.stringify(unhashed));
   return { ...unhashed, analytical_sha256: analyticalHash };
@@ -175,6 +195,20 @@ export function renderHistoryComparisonMarkdown(payload: HistoryComparisonPayloa
           : "none";
       const notes = [...item.discovery_failures, ...item.parse_failures].join("; ") || "—";
       return `| ${item.source_id} | ${item.expected_period.from} to ${item.expected_period.through} | ${observed} | ${item.expected_count} | ${item.present_count} | ${item.missing_count} | ${escapeCell(notes)} |`;
+    }),
+    "",
+    "## Geography coverage",
+    "",
+    "| Source / geography | Expected range | Observed endpoints | Expected | Present | Missing | Missing ranges |",
+    "| --- | --- | --- | ---: | ---: | ---: | --- |",
+    ...payload.geography_coverage.map((item) => {
+      const observed =
+        item.observed_period.from && item.observed_period.through
+          ? `${item.observed_period.from} to ${item.observed_period.through}`
+          : "none";
+      const missingRanges =
+        item.missing_ranges.map((range) => `${range.from} to ${range.through}`).join("; ") || "—";
+      return `| ${item.source_id} / ${item.geo_type}:${item.geo_id} | ${item.expected_period.from} to ${item.expected_period.through} | ${observed} | ${item.expected_count} | ${item.present_count} | ${item.missing_count} | ${missingRanges} |`;
     }),
     "",
     "## Sources",
