@@ -1,8 +1,8 @@
 {
   "target": "master",
   "timestamps": {
-    "started": "2026-09-19T04:25:48.554Z",
-    "finished": "2026-09-19T04:26:37.708Z"
+    "started": "2026-09-19T08:53:40.596Z",
+    "finished": "2026-09-19T08:54:08.545Z"
   },
   "source": "live",
   "outcomes": [
@@ -30,7 +30,7 @@
       "packId": "cre-swfl",
       "status": "missing",
       "failureClass": "deterministic",
-      "reason": "400 {\"type\":\"error\",\"error\":{\"type\":\"invalid_request_error\",\"message\":\"Your credit balance is too low to access the Anthropic API. Please go to Plans & Billing to upgrade or purchase credits.\"},\"request_id\":\"req_011CfCASw6YA7fKwRswnp1ya\"}",
+      "reason": "400 {\"type\":\"error\",\"error\":{\"type\":\"invalid_request_error\",\"message\":\"Your credit balance is too low to access the Anthropic API. Please go to Plans & Billing to upgrade or purchase credits.\"},\"request_id\":\"req_011CfCWsd9K16oAaFdmSpBzc\"}",
       "lastGoodRefinedAt": "2026-08-10T04:46:14Z",
       "written": false
     },
@@ -38,7 +38,7 @@
       "packId": "macro-us",
       "status": "missing",
       "failureClass": "deterministic",
-      "reason": "400 {\"type\":\"error\",\"error\":{\"type\":\"invalid_request_error\",\"message\":\"Your credit balance is too low to access the Anthropic API. Please go to Plans & Billing to upgrade or purchase credits.\"},\"request_id\":\"req_011CfCAT7DEvpcYE9BA1SBX9\"}",
+      "reason": "400 {\"type\":\"error\",\"error\":{\"type\":\"invalid_request_error\",\"message\":\"Your credit balance is too low to access the Anthropic API. Please go to Plans & Billing to upgrade or purchase credits.\"},\"request_id\":\"req_011CfCWsngYbMSfusXwxp35n\"}",
       "lastGoodRefinedAt": "2026-07-30T06:59:47Z",
       "written": false
     },
@@ -46,7 +46,7 @@
       "packId": "macro-florida",
       "status": "missing",
       "failureClass": "deterministic",
-      "reason": "400 {\"type\":\"error\",\"error\":{\"type\":\"invalid_request_error\",\"message\":\"Your credit balance is too low to access the Anthropic API. Please go to Plans & Billing to upgrade or purchase credits.\"},\"request_id\":\"req_011CfCATQATvUKLFyMGWsJMW\"}",
+      "reason": "400 {\"type\":\"error\",\"error\":{\"type\":\"invalid_request_error\",\"message\":\"Your credit balance is too low to access the Anthropic API. Please go to Plans & Billing to upgrade or purchase credits.\"},\"request_id\":\"req_011CfCWt1NHmLv9AWri6FFpX\"}",
       "lastGoodRefinedAt": "2026-07-19T02:28:39Z",
       "written": false
     },
@@ -87,632 +87,8 @@
     },
     {
       "packId": "properties-lee-value",
-      "status": "built",
-      "version": 25,
-      "written": true,
-      "brainOutput": {
-        "brain_id": "properties-lee-value",
-        "version": 25,
-        "refined_at": "2026-09-19T04:26:15Z",
-        "expires": "2026-10-19T04:26:15Z",
-        "ttl_seconds": 2592000,
-        "direction": "bearish",
-        "magnitude": 0.3602064469528263,
-        "drivers": [],
-        "overrides": [],
-        "conclusion": "Lee County had 35,250 qualified parcel sales recorded for 2025 across 548,798 parcels (64.2 per 1,000). Trailing 3yr baseline (2022-2024) averaged 36490.3 sales/yr; current year sits at z = -1.1 — bearish read on Lee parcel transaction velocity. Median Save-Our-Homes gap across 192,973 homesteaded parcels: 36.71% of just value suppressed for taxation. FHFA Cape Coral-Fort Myers MSA HPI YoY: -5.05% (2026-Q1). Federal benchmark for Lee County repeat-sale price direction — purchase-only, traditional, quarterly. FHFA Florida state HPI YoY: -0.43% (2026-Q1). Statewide baseline — Lee MSA delta vs state signals local over/underperformance.",
-        "key_metrics": [
-          {
-            "metric": "sales_velocity_per_1k",
-            "value": 64.2,
-            "direction": "stable",
-            "label": "Lee sales velocity, year 2025 (qualified sales per 1,000 parcels)",
-            "variable_type": "intensive",
-            "units": "sales per 1,000 parcels",
-            "display_format": "ratio",
-            "source": {
-              "url": "https://jtkdowmrjaxfvwmemxso.supabase.co/rest/v1/leepa_parcels?select=folioid,just_value,taxable_value,cap_difference,last_sale_date,use_code",
-              "fetched_at": "2026-09-19T04:26:00Z",
-              "tier": 2,
-              "citation": "LeePA parcel snapshot via data_lake.leepa_parcels (dlt-ingested from gissvr.leepa.org ParcelInfo/MapServer layers 9+10+12, joined on FOLIOID; Lee County). Snapshot row count: 548,798 parcels. Pre-aggregated through data_lake.leepa_parcels_sales_yearly + data_lake.leepa_parcels_summary."
-            },
-            "suggestions": [
-              "What's driving sales velocity per 1k?",
-              "How does sales velocity per 1k here compare to other SWFL areas?"
-            ]
-          },
-          {
-            "metric": "sales_velocity_zscore",
-            "value": -1.08,
-            "direction": "falling",
-            "label": "Lee sales-velocity z-score, year 2025 vs trailing 3yr (2022-2024)",
-            "variable_type": "intensive",
-            "units": "z-score",
-            "display_format": "ratio",
-            "source": {
-              "url": "https://jtkdowmrjaxfvwmemxso.supabase.co/rest/v1/leepa_parcels?select=folioid,just_value,taxable_value,cap_difference,last_sale_date,use_code",
-              "fetched_at": "2026-09-19T04:26:00Z",
-              "tier": 2,
-              "citation": "LeePA parcel snapshot via data_lake.leepa_parcels (dlt-ingested from gissvr.leepa.org ParcelInfo/MapServer layers 9+10+12, joined on FOLIOID; Lee County). Snapshot row count: 548,798 parcels. Pre-aggregated through data_lake.leepa_parcels_sales_yearly + data_lake.leepa_parcels_summary."
-            },
-            "suggestions": [
-              "What's driving sales velocity zscore?",
-              "How does sales velocity zscore here compare to other SWFL areas?"
-            ]
-          },
-          {
-            "metric": "soh_gap_median_pct",
-            "value": 36.7,
-            "direction": "stable",
-            "label": "Lee Save-Our-Homes gap median (% of just value suppressed for taxation) across 192,973 homesteaded parcels",
-            "variable_type": "intensive",
-            "units": "percent",
-            "display_format": "percent",
-            "source": {
-              "url": "https://jtkdowmrjaxfvwmemxso.supabase.co/rest/v1/leepa_parcels?select=folioid,just_value,taxable_value,cap_difference,last_sale_date,use_code",
-              "fetched_at": "2026-09-19T04:26:00Z",
-              "tier": 2,
-              "citation": "LeePA parcel snapshot via data_lake.leepa_parcels (dlt-ingested from gissvr.leepa.org ParcelInfo/MapServer layers 9+10+12, joined on FOLIOID; Lee County). Snapshot row count: 548,798 parcels. Pre-aggregated through data_lake.leepa_parcels_sales_yearly + data_lake.leepa_parcels_summary."
-            },
-            "suggestions": [
-              "What's driving soh gap median pct?",
-              "How does soh gap median pct here compare to other SWFL areas?"
-            ]
-          },
-          {
-            "metric": "total_parcels",
-            "value": 548798,
-            "direction": "stable",
-            "label": "Lee County parcels in snapshot (data_lake.leepa_parcels)",
-            "variable_type": "extensive",
-            "units": "parcels",
-            "display_format": "count",
-            "source": {
-              "url": "https://jtkdowmrjaxfvwmemxso.supabase.co/rest/v1/leepa_parcels?select=folioid,just_value,taxable_value,cap_difference,last_sale_date,use_code",
-              "fetched_at": "2026-09-19T04:26:00Z",
-              "tier": 2,
-              "citation": "LeePA parcel snapshot via data_lake.leepa_parcels (dlt-ingested from gissvr.leepa.org ParcelInfo/MapServer layers 9+10+12, joined on FOLIOID; Lee County). Snapshot row count: 548,798 parcels. Pre-aggregated through data_lake.leepa_parcels_sales_yearly + data_lake.leepa_parcels_summary."
-            },
-            "suggestions": [
-              "What's driving total parcels?",
-              "How does total parcels here compare to other SWFL areas?"
-            ]
-          },
-          {
-            "metric": "fdor_commercial_parcel_count",
-            "value": 14052,
-            "direction": "stable",
-            "label": "Lee commercial parcel count (FDOR use-code category, cross-check vs LeePA total)",
-            "variable_type": "extensive",
-            "units": "parcels",
-            "display_format": "count",
-            "source": {
-              "url": "https://jtkdowmrjaxfvwmemxso.supabase.co/rest/v1/lee_parcels_summary?select=total_parcels,commercial_parcels,residential_parcels",
-              "fetched_at": "2026-09-19T04:26:00Z",
-              "tier": 2,
-              "citation": "FDOR Statewide Cadastral via data_lake.lee_parcels (ArcGIS FeatureServer, CO_NO=46) — use-code category counted per FDOR's 2025 NAL Data File User's Guide (residential 000-002/004-009, commercial 003+010-039, industrial 040-049, agricultural 050-069, institutional 070-079, governmental 080-089, misc 090-099). Per-ZIP assessed value + SOH gap pre-aggregated through lee_parcels_zip_summary. Cross-check source, separate from LeePA."
-            },
-            "suggestions": [
-              "What's driving fdor commercial parcel count?",
-              "How does fdor commercial parcel count here compare to other SWFL areas?"
-            ]
-          },
-          {
-            "metric": "fhfa_cape_coral_msa_yoy_pct",
-            "value": -5.05,
-            "direction": "falling",
-            "label": "FHFA Cape Coral-Fort Myers MSA HPI YoY (2026-Q1) — Lee County price-level proxy",
-            "variable_type": "intensive",
-            "units": "percent",
-            "display_format": "percent",
-            "source": {
-              "url": "https://www.fhfa.gov/hpi/download/monthly/hpi_master.json",
-              "fetched_at": "2026-09-19T04:26:00Z",
-              "tier": 1,
-              "citation": "FHFA House Price Index via data_lake.fhfa_hpi (purchase-only, traditional, quarterly)"
-            },
-            "suggestions": [
-              "What's driving fhfa cape coral msa yoy pct?",
-              "How does fhfa cape coral msa yoy pct here compare to other SWFL areas?"
-            ]
-          },
-          {
-            "metric": "fhfa_fl_state_yoy_pct",
-            "value": -0.43,
-            "direction": "falling",
-            "label": "FHFA Florida state HPI YoY (2026-Q1) — statewide baseline",
-            "variable_type": "intensive",
-            "units": "percent",
-            "display_format": "percent",
-            "source": {
-              "url": "https://www.fhfa.gov/hpi/download/monthly/hpi_master.json",
-              "fetched_at": "2026-09-19T04:26:00Z",
-              "tier": 1,
-              "citation": "FHFA House Price Index via data_lake.fhfa_hpi (purchase-only, traditional, quarterly)"
-            },
-            "suggestions": [
-              "What's driving fhfa fl state yoy pct?",
-              "How does fhfa fl state yoy pct here compare to other SWFL areas?"
-            ]
-          },
-          {
-            "metric": "lee_homes_sold_zscore",
-            "value": -0.55,
-            "direction": "stable",
-            "label": "Lee homes-sold z-score, year 2025 vs trailing 3yr (2022-2024) — Redfin market-grain",
-            "variable_type": "intensive",
-            "units": "z-score",
-            "display_format": "ratio",
-            "source": {
-              "url": "https://jtkdowmrjaxfvwmemxso.supabase.co/rest/v1/redfin_lee_market?select=region,period_end,property_type,homes_sold,median_sale_price_yoy,months_of_supply&property_type=eq.All%20Residential",
-              "fetched_at": "2026-09-19T04:26:00Z",
-              "tier": 2,
-              "citation": "Redfin Data Center county market tracker via data_lake.redfin_lee_market (free public TSV, filtered to \"Lee County, FL\"; monthly HOMES_SOLD summed to calendar-year velocity)."
-            },
-            "suggestions": [
-              "What's driving lee homes sold zscore?",
-              "How does lee homes sold zscore here compare to other SWFL areas?"
-            ]
-          },
-          {
-            "metric": "lee_homes_sold_per_year",
-            "value": 19466,
-            "direction": "stable",
-            "label": "Lee residential homes sold, year 2025 (Redfin closed sales, All Residential)",
-            "variable_type": "extensive",
-            "units": "home sales",
-            "display_format": "count",
-            "source": {
-              "url": "https://jtkdowmrjaxfvwmemxso.supabase.co/rest/v1/redfin_lee_market?select=region,period_end,property_type,homes_sold,median_sale_price_yoy,months_of_supply&property_type=eq.All%20Residential",
-              "fetched_at": "2026-09-19T04:26:00Z",
-              "tier": 2,
-              "citation": "Redfin Data Center county market tracker via data_lake.redfin_lee_market (free public TSV, filtered to \"Lee County, FL\"; monthly HOMES_SOLD summed to calendar-year velocity)."
-            },
-            "suggestions": [
-              "What's driving lee homes sold per year?",
-              "How does lee homes sold per year here compare to other SWFL areas?"
-            ]
-          },
-          {
-            "metric": "lee_median_sale_price_yoy",
-            "value": 0.5,
-            "direction": "rising",
-            "label": "Lee median sale price YoY (2026-08-31, Redfin All Residential)",
-            "variable_type": "intensive",
-            "units": "percent",
-            "display_format": "percent",
-            "source": {
-              "url": "https://jtkdowmrjaxfvwmemxso.supabase.co/rest/v1/redfin_lee_market?select=region,period_end,property_type,homes_sold,median_sale_price_yoy,months_of_supply&property_type=eq.All%20Residential",
-              "fetched_at": "2026-09-19T04:26:00Z",
-              "tier": 2,
-              "citation": "Redfin Data Center county market tracker via data_lake.redfin_lee_market (free public TSV, filtered to \"Lee County, FL\"; monthly HOMES_SOLD summed to calendar-year velocity)."
-            },
-            "suggestions": [
-              "What's driving lee median sale price yoy?",
-              "How does lee median sale price yoy here compare to other SWFL areas?"
-            ]
-          },
-          {
-            "metric": "lee_months_of_supply",
-            "value": 5.5,
-            "direction": "stable",
-            "label": "Lee months of supply (2026-08-31, Redfin All Residential)",
-            "variable_type": "intensive",
-            "units": "months",
-            "display_format": "ratio",
-            "source": {
-              "url": "https://jtkdowmrjaxfvwmemxso.supabase.co/rest/v1/redfin_lee_market?select=region,period_end,property_type,homes_sold,median_sale_price_yoy,months_of_supply&property_type=eq.All%20Residential",
-              "fetched_at": "2026-09-19T04:26:00Z",
-              "tier": 2,
-              "citation": "Redfin Data Center county market tracker via data_lake.redfin_lee_market (free public TSV, filtered to \"Lee County, FL\"; monthly HOMES_SOLD summed to calendar-year velocity)."
-            },
-            "suggestions": [
-              "What's driving lee months of supply?",
-              "How does lee months of supply here compare to other SWFL areas?"
-            ]
-          },
-          {
-            "metric": "lee_sold_median_homes_only",
-            "value": 355298,
-            "direction": "stable",
-            "label": "Lee homes-only sold median (single-family + condo, recorded deeds, as of 09/19/2026)",
-            "variable_type": "intensive",
-            "units": "USD",
-            "display_format": "currency",
-            "source": {
-              "url": "https://jtkdowmrjaxfvwmemxso.supabase.co/rest/v1/leepa_sold_median_by_zip?select=zip_code,home_sales_n,median_sale,county_fallback",
-              "fetched_at": "2026-09-19T04:26:00Z",
-              "tier": 2,
-              "citation": "Lee County Property Appraiser (recorded deeds) — homes-only (single-family + condo) sold median per ZIP via data_lake.leepa_sold_median_by_zip; each parcel's latest qualified sale 2024+ over $20,000, ZIPs under 20 sales reporting the county median. As of 09/19/2026."
-            },
-            "suggestions": [
-              "What's driving lee sold median homes only?",
-              "How does lee sold median homes only here compare to other SWFL areas?"
-            ]
-          }
-        ],
-        "detail_tables": [
-          {
-            "id": "lee_sold_median_by_zip",
-            "title": "Lee County homes-only sold median by ZIP (recorded deeds)",
-            "grain": "zip",
-            "columns": [
-              {
-                "id": "median_sale",
-                "label": "Homes-only sold median",
-                "display_format": "currency",
-                "units": "USD"
-              },
-              {
-                "id": "home_sales_n",
-                "label": "Qualifying home sales",
-                "display_format": "count",
-                "units": "count"
-              },
-              {
-                "id": "county_fallback",
-                "label": "County fallback (under 20 sales)",
-                "display_format": "raw"
-              }
-            ],
-            "rows": [
-              {
-                "key": "33901",
-                "label": "33901",
-                "cells": {
-                  "median_sale": 269900,
-                  "home_sales_n": 271,
-                  "county_fallback": false
-                }
-              },
-              {
-                "key": "33903",
-                "label": "33903",
-                "cells": {
-                  "median_sale": 289950,
-                  "home_sales_n": 414,
-                  "county_fallback": false
-                }
-              },
-              {
-                "key": "33904",
-                "label": "33904",
-                "cells": {
-                  "median_sale": 340000,
-                  "home_sales_n": 947,
-                  "county_fallback": false
-                }
-              },
-              {
-                "key": "33905",
-                "label": "33905",
-                "cells": {
-                  "median_sale": 319998,
-                  "home_sales_n": 622,
-                  "county_fallback": false
-                }
-              },
-              {
-                "key": "33907",
-                "label": "33907",
-                "cells": {
-                  "median_sale": 190000,
-                  "home_sales_n": 309,
-                  "county_fallback": false
-                }
-              },
-              {
-                "key": "33908",
-                "label": "33908",
-                "cells": {
-                  "median_sale": 320000,
-                  "home_sales_n": 1238,
-                  "county_fallback": false
-                }
-              },
-              {
-                "key": "33909",
-                "label": "33909",
-                "cells": {
-                  "median_sale": 312590,
-                  "home_sales_n": 1067,
-                  "county_fallback": false
-                }
-              },
-              {
-                "key": "33912",
-                "label": "33912",
-                "cells": {
-                  "median_sale": 400000,
-                  "home_sales_n": 490,
-                  "county_fallback": false
-                }
-              },
-              {
-                "key": "33913",
-                "label": "33913",
-                "cells": {
-                  "median_sale": 490000,
-                  "home_sales_n": 1298,
-                  "county_fallback": false
-                }
-              },
-              {
-                "key": "33914",
-                "label": "33914",
-                "cells": {
-                  "median_sale": 470000,
-                  "home_sales_n": 1352,
-                  "county_fallback": false
-                }
-              },
-              {
-                "key": "33916",
-                "label": "33916",
-                "cells": {
-                  "median_sale": 240000,
-                  "home_sales_n": 262,
-                  "county_fallback": false
-                }
-              },
-              {
-                "key": "33917",
-                "label": "33917",
-                "cells": {
-                  "median_sale": 319324,
-                  "home_sales_n": 868,
-                  "county_fallback": false
-                }
-              },
-              {
-                "key": "33919",
-                "label": "33919",
-                "cells": {
-                  "median_sale": 257000,
-                  "home_sales_n": 810,
-                  "county_fallback": false
-                }
-              },
-              {
-                "key": "33920",
-                "label": "33920",
-                "cells": {
-                  "median_sale": 400000,
-                  "home_sales_n": 573,
-                  "county_fallback": false
-                }
-              },
-              {
-                "key": "33921",
-                "label": "33921",
-                "cells": {
-                  "median_sale": 3000000,
-                  "home_sales_n": 45,
-                  "county_fallback": false
-                }
-              },
-              {
-                "key": "33922",
-                "label": "33922",
-                "cells": {
-                  "median_sale": 350000,
-                  "home_sales_n": 116,
-                  "county_fallback": false
-                }
-              },
-              {
-                "key": "33924",
-                "label": "33924",
-                "cells": {
-                  "median_sale": 985000,
-                  "home_sales_n": 73,
-                  "county_fallback": false
-                }
-              },
-              {
-                "key": "33928",
-                "label": "33928",
-                "cells": {
-                  "median_sale": 503750,
-                  "home_sales_n": 1354,
-                  "county_fallback": false
-                }
-              },
-              {
-                "key": "33931",
-                "label": "33931",
-                "cells": {
-                  "median_sale": 540000,
-                  "home_sales_n": 410,
-                  "county_fallback": false
-                }
-              },
-              {
-                "key": "33936",
-                "label": "33936",
-                "cells": {
-                  "median_sale": 250000,
-                  "home_sales_n": 611,
-                  "county_fallback": false
-                }
-              },
-              {
-                "key": "33956",
-                "label": "33956",
-                "cells": {
-                  "median_sale": 519500,
-                  "home_sales_n": 124,
-                  "county_fallback": false
-                }
-              },
-              {
-                "key": "33957",
-                "label": "33957",
-                "cells": {
-                  "median_sale": 875000,
-                  "home_sales_n": 363,
-                  "county_fallback": false
-                }
-              },
-              {
-                "key": "33966",
-                "label": "33966",
-                "cells": {
-                  "median_sale": 362900,
-                  "home_sales_n": 357,
-                  "county_fallback": false
-                }
-              },
-              {
-                "key": "33967",
-                "label": "33967",
-                "cells": {
-                  "median_sale": 375000,
-                  "home_sales_n": 393,
-                  "county_fallback": false
-                }
-              },
-              {
-                "key": "33971",
-                "label": "33971",
-                "cells": {
-                  "median_sale": 309998,
-                  "home_sales_n": 753,
-                  "county_fallback": false
-                }
-              },
-              {
-                "key": "33972",
-                "label": "33972",
-                "cells": {
-                  "median_sale": 345000,
-                  "home_sales_n": 496,
-                  "county_fallback": false
-                }
-              },
-              {
-                "key": "33973",
-                "label": "33973",
-                "cells": {
-                  "median_sale": 280000,
-                  "home_sales_n": 37,
-                  "county_fallback": false
-                }
-              },
-              {
-                "key": "33974",
-                "label": "33974",
-                "cells": {
-                  "median_sale": 305905,
-                  "home_sales_n": 938,
-                  "county_fallback": false
-                }
-              },
-              {
-                "key": "33976",
-                "label": "33976",
-                "cells": {
-                  "median_sale": 310000,
-                  "home_sales_n": 542,
-                  "county_fallback": false
-                }
-              },
-              {
-                "key": "33990",
-                "label": "33990",
-                "cells": {
-                  "median_sale": 340000,
-                  "home_sales_n": 666,
-                  "county_fallback": false
-                }
-              },
-              {
-                "key": "33991",
-                "label": "33991",
-                "cells": {
-                  "median_sale": 400000,
-                  "home_sales_n": 665,
-                  "county_fallback": false
-                }
-              },
-              {
-                "key": "33993",
-                "label": "33993",
-                "cells": {
-                  "median_sale": 350000,
-                  "home_sales_n": 1471,
-                  "county_fallback": false
-                }
-              },
-              {
-                "key": "34110",
-                "label": "34110",
-                "cells": {
-                  "median_sale": 355298,
-                  "home_sales_n": 13,
-                  "county_fallback": true
-                }
-              },
-              {
-                "key": "34119",
-                "label": "34119",
-                "cells": {
-                  "median_sale": 355298,
-                  "home_sales_n": 9,
-                  "county_fallback": true
-                }
-              },
-              {
-                "key": "34134",
-                "label": "34134",
-                "cells": {
-                  "median_sale": 685000,
-                  "home_sales_n": 653,
-                  "county_fallback": false
-                }
-              },
-              {
-                "key": "34135",
-                "label": "34135",
-                "cells": {
-                  "median_sale": 495000,
-                  "home_sales_n": 1510,
-                  "county_fallback": false
-                }
-              }
-            ],
-            "source": {
-              "url": "https://jtkdowmrjaxfvwmemxso.supabase.co/rest/v1/leepa_sold_median_by_zip?select=zip_code,home_sales_n,median_sale,county_fallback",
-              "fetched_at": "2026-09-19T04:26:00Z",
-              "tier": 2,
-              "citation": "Lee County Property Appraiser (recorded deeds) — homes-only (single-family + condo) sold median per ZIP via data_lake.leepa_sold_median_by_zip; each parcel's latest qualified sale 2024+ over $20,000, ZIPs under 20 sales reporting the county median. As of 09/19/2026."
-            },
-            "note": "One row per Lee County ZIP. Homes-only = single-family + condo (vacant land excluded). Median of each parcel's latest qualified sale 2024+ over $20,000 — a stock of most-recent prices, not a transaction-flow median. ZIPs with fewer than 20 qualifying sales report the county median (county fallback = true), never a thin-sample ZIP median. As of 09/19/2026."
-          }
-        ],
-        "caveats": [
-          "Sales-velocity baseline is derived from each parcel's LATEST qualified sale, so re-sales attributed to recent years are subtracted from earlier-year buckets. Current-year z-score is therefore biased UPWARD; treat marginal bullish reads as suggestive rather than confirmatory.",
-          "Qualified-sale-only sample: inheritance, divorce, and non-arms-length transfers do not appear in the velocity counts. The signal measures market-mediated parcel turnover, not total ownership change.",
-          "Lee County only — Collier and Charlotte are NOT included. SWFL-wide reads must be assembled from sibling brains (not yet built).",
-          "FHFA HPI metrics (Cape Coral MSA + FL state) use a repeat-sale methodology and are published quarterly with a ~2-month lag. They measure price-level change, not transaction volume — the LeePA z-score and the FHFA YoY are complementary, not interchangeable.",
-          "Save-Our-Homes gap median is restricted to parcels with cap_difference > 0 (actively benefiting from the SOH cap). Non-homestead and newly-homesteaded parcels are excluded from the median; total_parcels is the full snapshot row count for context.",
-          "fdor_commercial_parcel_count comes from a separate source (FDOR statewide cadastral, data_lake.lee_parcels) than the LeePA-sourced total_parcels above — the two total counts will not match exactly (different snapshot dates, different inclusion rules) and should be read as a cross-check on scale, not reconciled to the parcel.",
-          "Direction thresholds: bullish if z ≥ +1.0σ; bearish if z ≤ -1.0σ; neutral otherwise. Standard deviation is population std over 3 baseline years; if variance is zero (all baseline years identical) z is undefined and direction is neutral."
-        ],
-        "contradicts": [],
-        "confidence": 0.85,
-        "joint_integrity": 1,
-        "confidence_dispersion": 0,
-        "chain_depth": 0,
-        "trust_tier": 2,
-        "upstream_count": 0,
-        "relevance": {
-          "decay_curve": "weeks",
-          "half_life_hours": 720,
-          "computed_at": "2026-09-19T04:26:15Z"
-        },
-        "exogenous_signals": []
-      }
+      "status": "skipped-fresh",
+      "written": false
     },
     {
       "packId": "properties-collier-value",
@@ -747,19 +123,19 @@
     {
       "packId": "city-pulse-swfl",
       "status": "built",
-      "version": 72,
+      "version": 73,
       "written": true,
       "brainOutput": {
         "brain_id": "city-pulse-swfl",
-        "version": 72,
-        "refined_at": "2026-09-19T04:26:16Z",
-        "expires": "2026-09-20T04:26:16Z",
+        "version": 73,
+        "refined_at": "2026-09-19T08:53:47Z",
+        "expires": "2026-09-20T08:53:47Z",
         "ttl_seconds": 86400,
         "direction": "neutral",
         "magnitude": 0,
         "drivers": [],
         "overrides": [],
-        "conclusion": "SWFL city pulse as of 2026-09-19: 66 live current-events signals across 10 cities — Naples (26), Fort Myers (16), Golden Gate (1), Cape Coral (14), North Naples (1), Estero (2), Sanibel (2), Bonita Springs (1), Marco Island (2), Fort Myers Beach (1). Most current: Naples — The Waldorf Astoria Hotel & Residences Miami, a 100-story condo-hotel soaring 1,049 feet, is under construction and will be the tallest tower south of Manhattan upon completion in 2028; condo units start at $3.15 million. These are current cited facts only; the cross-vertical read and any direction call live downstream in master.",
+        "conclusion": "SWFL city pulse as of 2026-09-19: 63 live current-events signals across 10 cities — Naples (24), Fort Myers (15), Golden Gate (1), Cape Coral (14), North Naples (1), Estero (2), Sanibel (2), Bonita Springs (1), Marco Island (2), Fort Myers Beach (1). Most current: Naples — The Waldorf Astoria Hotel & Residences Miami, a 100-story condo-hotel soaring 1,049 feet, is under construction and will be the tallest tower south of Manhattan upon completion in 2028; condo units start at $3.15 million. These are current cited facts only; the cross-vertical read and any direction call live downstream in master.",
         "key_metrics": [
           {
             "metric": "signal_development_1",
@@ -769,7 +145,7 @@
             "variable_type": "categorical",
             "source": {
               "url": "https://www.naplesnews.com/story/money/real-estate/2026/09/05/new-100-story-waldorf-astoria-tower-coming-to-miami/91616724007/",
-              "fetched_at": "2026-09-19T04:26:16Z",
+              "fetched_at": "2026-09-19T08:53:47Z",
               "tier": 2,
               "citation": "New 100 story Waldorf Astoria tower coming to Miami: \"[](https://www.naplesnews.com/)\n[](https://subscribe.naplesnews.com/rr/nanobar?gps-source=CPTILELEFT&itm_campaign=2026ENTAUGBAU&itm_medium=ONSITE&success-url=https%3A%2F%2Fwww.naplesnews.com%2Fstory%2Fmoney%2Freal-estate%2F2026%2F09%2F05%2Fnew-100-story-waldorf-astoria-tower-coming-to-miami%2F91616724007%2F)\n[](https://subscribe.naplesnews.com/rr/masthead?gps-source=CPMASTHEAD&itm_campaign=2026ENTAUGBAU&itm_medium=ONSITE&success-url=https%3A%2F%2Fwww.naplesnews.com%2Fstory%2Fmoney%2Freal-estate%2F2026%2F09%2F05%2Fnew-100-story-waldorf-astoria-tower-coming-to-miami%2F91616724007%2F)\n[News](https://www.naplesnews.com/news/) [Sports](https://www.naplesnews.com/sports/) [Real Estate](https://www.naplesnews.com/business/real-estate/) [Restaurants](https://www.naplesnews.com/entertainment/restaurants/) [Opinion](https://www.naplesnews.com/opinion/) [Advertise](https://advertising.usatoday.com/advertise-with-us/?cid=Web_LiQ_Network_AdvertiseWithUs_AdvertiseInquiry&publication=naples_daily_news&utm_source=local_publication&utm_medium=menu&utm_campaign=advertise_with_us) [Obituaries](https://www.naplesnews.com/obituaries) [eNewspaper](https://user.naplesnews.com/user/enewspaper) [Legals](https://www.naplesnews.com/public-notices)\n[](https://www.naplesnews.com/search/ \"Search\")\n[](https://www.naplesnews.com/weather/ \"Weather in Naples: 77°F Partly Cloudy\") [](https://subscribe.naplesnews.com/rr/navsub?gps-source=CPTOPNAVBAR&itm_campaign=2026ENTAUGBAU&itm_medium=ONSITE&success-url=https%3A%2F%2Fwww.naplesnews.com%2Fstory%2Fmoney%2Freal-estate%2F2026%2F09%2F05%2Fnew-100-story-waldorf-astoria-tower-coming-to-miami%2F91616724007%2F)\n[](https://login.naplesnews.com/PNDN-GUP/authenticate/?success-url=https%3A%2F%2Fwww.naplesnews.com%2Fstory%2Fmoney%2Freal-estate%2F2026%2F09%2F05%2Fnew-100-story-waldorf-astoria-tower-coming-to-miami%2F91616724007%2F&cancel-url=https%3A%2F%2Fwww.naplesnews.com%2Fstory%2Fmoney%2Freal-estate%2F2026%2F09%2F05%2Fnew-100-story-waldorf-astoria-tower-coming-to-miami%2F91616724007%2F)\n[](https://www.naplesnews.com/) [](https://www.naplesnews.com/)\nREAL ESTATE\n# Super-sized Florida: A 100 story tower is rising above Miami skyline\n[![Portrait of Clayton Park](https://www.naplesnews.com/gcdn/presto/2020/08/14/NDNJ/ba679e5f-045f-4f50-adeb-cd862be43d88-FLDAY-080920-Clayton_Column_4.jpg?crop=2368,2368,x0,y459&width=48&height=48&format=pjpg&auto=webp) Clayton Park](https://www.news-journalonline.com/staff/5432237002/clayton-park/)\nClayton Park\nSept. 5, 2026, 5:08 a.m. ET\nIf you want a [room with a view](https://www.naplesnews.com/picture-gallery/news/state/2026/07/02/new-homes-apartments-keep-going-up-in-florida-with-more-coming/90774974007/), a swanky, ultra-modern 100-story condo-hotel is going up in Miami that will be the tallest south of Manhattan. But it comes with a steep price tag.\nCondo units at the Waldorf Astoria Hotel & Residences Miami, which will soar 1,049 feet into the sky upon completion in 2028, start at $3.15 million. Its top-f\""
             },
@@ -786,7 +162,7 @@
             "variable_type": "categorical",
             "source": {
               "url": "https://www.naplesnews.com/story/money/business/local/2026/09/03/design-board-gives-a-thumbs-up-to-exclusive-car-and-wine-club-in-naples-but-city-staff-reviewing-it/91560883007/",
-              "fetched_at": "2026-09-19T04:26:16Z",
+              "fetched_at": "2026-09-19T08:53:47Z",
               "tier": 2,
               "citation": "Design board gives a thumbs up to exclusive car and wine club in Naples: \"[](https://www.naplesnews.com/)\n[](https://subscribe.naplesnews.com/rr/nanobar?gps-source=CPTILELEFT&itm_campaign=2026ENTAUGBAU&itm_medium=ONSITE&success-url=https%3A%2F%2Fwww.naplesnews.com%2Fstory%2Fmoney%2Fbusiness%2Flocal%2F2026%2F09%2F03%2Fdesign-board-gives-a-thumbs-up-to-exclusive-car-and-wine-club-in-naples-but-city-staff-reviewing-it%2F91560883007%2F)\n[](https://subscribe.naplesnews.com/rr/masthead?gps-source=CPMASTHEAD&itm_campaign=2026ENTAUGBAU&itm_medium=ONSITE&success-url=https%3A%2F%2Fwww.naplesnews.com%2Fstory%2Fmoney%2Fbusiness%2Flocal%2F2026%2F09%2F03%2Fdesign-board-gives-a-thumbs-up-to-exclusive-car-and-wine-club-in-naples-but-city-staff-reviewing-it%2F91560883007%2F)\n[News](https://www.naplesnews.com/news/) [Sports](https://www.naplesnews.com/sports/) [Real Estate](https://www.naplesnews.com/business/real-estate/) [Restaurants](https://www.naplesnews.com/entertainment/restaurants/) [Opinion](https://www.naplesnews.com/opinion/) [Advertise](https://advertising.usatoday.com/advertise-with-us/?cid=Web_LiQ_Network_AdvertiseWithUs_AdvertiseInquiry&publication=naples_daily_news&utm_source=local_publication&utm_medium=menu&utm_campaign=advertise_with_us) [Obituaries](https://www.naplesnews.com/obituaries) [eNewspaper](https://user.naplesnews.com/user/enewspaper) [Legals](https://www.naplesnews.com/public-notices)\n[](https://www.naplesnews.com/search/ \"Search\")\n[](https://www.naplesnews.com/weather/ \"Weather in Naples: 80°F Partly Cloudy\") [](https://subscribe.naplesnews.com/rr/navsub?gps-source=CPTOPNAVBAR&itm_campaign=2026ENTAUGBAU&itm_medium=ONSITE&success-url=https%3A%2F%2Fwww.naplesnews.com%2Fstory%2Fmoney%2Fbusiness%2Flocal%2F2026%2F09%2F03%2Fdesign-board-gives-a-thumbs-up-to-exclusive-car-and-wine-club-in-naples-but-city-staff-reviewing-it%2F91560883007%2F)\n[](https://login.naplesnews.com/PNDN-GUP/authenticate/?success-url=https%3A%2F%2Fwww.naplesnews.com%2Fstory%2Fmoney%2Fbusiness%2Flocal%2F2026%2F09%2F03%2Fdesign-board-gives-a-thumbs-up-to-exclusive-car-and-wine-club-in-naples-but-city-staff-reviewing-it%2F91560883007%2F&cancel-url=https%3A%2F%2Fwww.naplesnews.com%2Fstory%2Fmoney%2Fbusiness%2Flocal%2F2026%2F09%2F03%2Fdesign-board-gives-a-thumbs-up-to-exclusive-car-and-wine-club-in-naples-but-city-staff-reviewing-it%2F91560883007%2F)\n[](https://www.naplesnews.com/) [](https://www.naplesnews.com/)\n[LOCAL BUSINESS](https://www.naplesnews.com/business/local/)\n# 'Retiree' proposes unique car and wine club in Naples\n[![Portrait of Laura Layden](https://www.naplesnews.com/gcdn/authoring/authoring-images/2024/02/08/PNDN/72524348007-ndn-jh-20240126-laura-0001.JPG?crop=3313,3312,x1506,y0&width=48&height=48&format=pjpg&auto=webp) Laura Layden](https://www.naplesnews.com/staff/2647080001/laura-layden/)\nFort Myers News-Press & Naples Daily News\nSept. 3, 2026, 12:03 p.m. ET\nGeorgios Papadopoulos has a vision for a new kind of exclusive club in Naples.\nThe club would combine two of his passions — cars and [wine](https://www.naplesnews.com/st\""
             },
@@ -803,7 +179,7 @@
             "variable_type": "categorical",
             "source": {
               "url": "https://www.naplesnews.com/story/money/business/local/2026/09/04/fdot-shares-more-about-i-75-widening-and-noise-wall-plans-in-sw-florida-at-virtual-meeting/91587939007/",
-              "fetched_at": "2026-09-19T04:26:16Z",
+              "fetched_at": "2026-09-19T08:53:47Z",
               "tier": 2,
               "citation": "FDOT shares more about I-75 widening and noise wall plans in SW Florida: \"[](https://www.naplesnews.com/)\n[](https://subscribe.naplesnews.com/rr/nanobar?gps-source=CPTILELEFT&itm_campaign=2026ENTAUGBAU&itm_medium=ONSITE&success-url=https%3A%2F%2Fwww.naplesnews.com%2Fstory%2Fmoney%2Fbusiness%2Flocal%2F2026%2F09%2F04%2Ffdot-shares-more-about-i-75-widening-and-noise-wall-plans-in-sw-florida-at-virtual-meeting%2F91587939007%2F)\n[](https://subscribe.naplesnews.com/rr/masthead?gps-source=CPMASTHEAD&itm_campaign=2026ENTAUGBAU&itm_medium=ONSITE&success-url=https%3A%2F%2Fwww.naplesnews.com%2Fstory%2Fmoney%2Fbusiness%2Flocal%2F2026%2F09%2F04%2Ffdot-shares-more-about-i-75-widening-and-noise-wall-plans-in-sw-florida-at-virtual-meeting%2F91587939007%2F)\n[News](https://www.naplesnews.com/news/) [Sports](https://www.naplesnews.com/sports/) [Real Estate](https://www.naplesnews.com/business/real-estate/) [Restaurants](https://www.naplesnews.com/entertainment/restaurants/) [Opinion](https://www.naplesnews.com/opinion/) [Advertise](https://advertising.usatoday.com/advertise-with-us/?cid=Web_LiQ_Network_AdvertiseWithUs_AdvertiseInquiry&publication=naples_daily_news&utm_source=local_publication&utm_medium=menu&utm_campaign=advertise_with_us) [Obituaries](https://www.naplesnews.com/obituaries) [eNewspaper](https://user.naplesnews.com/user/enewspaper) [Legals](https://www.naplesnews.com/public-notices)\n[](https://www.naplesnews.com/search/ \"Search\")\n[](https://www.naplesnews.com/weather/ \"Weather in Naples: 80°F Partly Cloudy\") [](https://subscribe.naplesnews.com/rr/navsub?gps-source=CPTOPNAVBAR&itm_campaign=2026ENTAUGBAU&itm_medium=ONSITE&success-url=https%3A%2F%2Fwww.naplesnews.com%2Fstory%2Fmoney%2Fbusiness%2Flocal%2F2026%2F09%2F04%2Ffdot-shares-more-about-i-75-widening-and-noise-wall-plans-in-sw-florida-at-virtual-meeting%2F91587939007%2F)\n[](https://login.naplesnews.com/PNDN-GUP/authenticate/?success-url=https%3A%2F%2Fwww.naplesnews.com%2Fstory%2Fmoney%2Fbusiness%2Flocal%2F2026%2F09%2F04%2Ffdot-shares-more-about-i-75-widening-and-noise-wall-plans-in-sw-florida-at-virtual-meeting%2F91587939007%2F&cancel-url=https%3A%2F%2Fwww.naplesnews.com%2Fstory%2Fmoney%2Fbusiness%2Flocal%2F2026%2F09%2F04%2Ffdot-shares-more-about-i-75-widening-and-noise-wall-plans-in-sw-florida-at-virtual-meeting%2F91587939007%2F)\n[](https://www.naplesnews.com/) [](https://www.naplesnews.com/)\n[LOCAL BUSINESS](https://www.naplesnews.com/business/local/)\n# Residents hear more, weigh in on massive I-75 expansion plans in SW Florida\n[![Portrait of Laura Layden](https://www.naplesnews.com/gcdn/authoring/authoring-images/2024/02/08/PNDN/72524348007-ndn-jh-20240126-laura-0001.JPG?crop=3313,3312,x1506,y0&width=48&height=48&format=pjpg&auto=webp) Laura Layden](https://www.naplesnews.com/staff/2647080001/laura-layden/)\nFort Myers News-Press & Naples Daily News\nSept. 4, 2026, 5:03 a.m. ET\nA virtual meeting shed more light on the plans to widen Interstate 75 from Golden Gate Parkway to Alico Road.\nDuring the hour-long meeting on Sept. 2, a team with the Florida Department of Tran\""
             },
@@ -813,50 +189,50 @@
             ]
           },
           {
-            "metric": "signal_development_4",
-            "value": "Fort Myers: FDOT held a virtual meeting on Sept. 4, 2026 to share more about I-75 widening and noise wall plans in SW Florida.",
-            "direction": "stable",
-            "label": "Fort Myers — development",
-            "variable_type": "categorical",
-            "source": {
-              "url": "https://www.naplesnews.com/story/money/business/local/2026/09/04/fdot-shares-more-about-i-75-widening-and-noise-wall-plans-in-sw-florida-at-virtual-meeting/91587939007/",
-              "fetched_at": "2026-09-19T04:26:16Z",
-              "tier": 2,
-              "citation": "FDOT shares more about I-75 widening and noise wall plans in SW Florida: \"[](https://www.naplesnews.com/)\n[Florida pulls plug on license plate cameras across SW FL roads](https://www.naplesnews.com/story/news/2026/09/04/florida-highway-police-flock-camera-license-plate-removal/91576967007/)\n[](https://subscribe.naplesnews.com/rr/nanobar?gps-source=CPTILELEFT&itm_campaign=2026ENTAUGBAU&itm_medium=ONSITE&success-url=https%3A%2F%2Fwww.naplesnews.com%2Fstory%2Fmoney%2Fbusiness%2Flocal%2F2026%2F09%2F04%2Ffdot-shares-more-about-i-75-widening-and-noise-wall-plans-in-sw-florida-at-virtual-meeting%2F91587939007%2F)\n[](https://subscribe.naplesnews.com/rr/masthead?gps-source=CPMASTHEAD&itm_campaign=2026ENTAUGBAU&itm_medium=ONSITE&success-url=https%3A%2F%2Fwww.naplesnews.com%2Fstory%2Fmoney%2Fbusiness%2Flocal%2F2026%2F09%2F04%2Ffdot-shares-more-about-i-75-widening-and-noise-wall-plans-in-sw-florida-at-virtual-meeting%2F91587939007%2F)\n[News](https://www.naplesnews.com/news/) [Sports](https://www.naplesnews.com/sports/) [Real Estate](https://www.naplesnews.com/business/real-estate/) [Restaurants](https://www.naplesnews.com/entertainment/restaurants/) [Opinion](https://www.naplesnews.com/opinion/) [Advertise](https://advertising.usatoday.com/advertise-with-us/?cid=Web_LiQ_Network_AdvertiseWithUs_AdvertiseInquiry&publication=naples_daily_news&utm_source=local_publication&utm_medium=menu&utm_campaign=advertise_with_us) [Obituaries](https://www.naplesnews.com/obituaries) [eNewspaper](https://user.naplesnews.com/user/enewspaper) [Legals](https://www.naplesnews.com/public-notices)\n[](https://www.naplesnews.com/search/ \"Search\")\n[](https://www.naplesnews.com/weather/ \"Weather in Naples: 78°F Partly Cloudy\") [](https://subscribe.naplesnews.com/rr/navsub?gps-source=CPTOPNAVBAR&itm_campaign=2026ENTAUGBAU&itm_medium=ONSITE&success-url=https%3A%2F%2Fwww.naplesnews.com%2Fstory%2Fmoney%2Fbusiness%2Flocal%2F2026%2F09%2F04%2Ffdot-shares-more-about-i-75-widening-and-noise-wall-plans-in-sw-florida-at-virtual-meeting%2F91587939007%2F)\n[](https://login.naplesnews.com/PNDN-GUP/authenticate/?success-url=https%3A%2F%2Fwww.naplesnews.com%2Fstory%2Fmoney%2Fbusiness%2Flocal%2F2026%2F09%2F04%2Ffdot-shares-more-about-i-75-widening-and-noise-wall-plans-in-sw-florida-at-virtual-meeting%2F91587939007%2F&cancel-url=https%3A%2F%2Fwww.naplesnews.com%2Fstory%2Fmoney%2Fbusiness%2Flocal%2F2026%2F09%2F04%2Ffdot-shares-more-about-i-75-widening-and-noise-wall-plans-in-sw-florida-at-virtual-meeting%2F91587939007%2F)\n[](https://www.naplesnews.com/) [](https://www.naplesnews.com/)\n[LOCAL BUSINESS](https://www.naplesnews.com/business/local/)\n# Residents hear more, weigh in on massive I-75 expansion plans in SW Florida\n[![Portrait of Laura Layden](https://www.naplesnews.com/gcdn/authoring/authoring-images/2024/02/08/PNDN/72524348007-ndn-jh-20240126-laura-0001.JPG?crop=3313,3312,x1506,y0&width=48&height=48&format=pjpg&auto=webp) Laura Layden](https://www.naplesnews.com/staff/2647080001/laura-layden/)\nFort Myers News-Press & Naples Daily News\nSept. 4, 2026, 5:03 a.m. ET\nA virtu\""
-            },
-            "suggestions": [
-              "What's driving signal development 4?",
-              "How does signal development 4 here compare to other SWFL areas?"
-            ]
-          },
-          {
-            "metric": "signal_development_5",
-            "value": "Naples: FDOT held a virtual meeting on Sept. 4, 2026, to share more details about I-75 widening and noise wall plans in SW Florida, allowing residents to weigh in.",
-            "direction": "stable",
-            "label": "Naples — development",
-            "variable_type": "categorical",
-            "source": {
-              "url": "https://www.naplesnews.com/story/money/business/local/2026/09/04/fdot-shares-more-about-i-75-widening-and-noise-wall-plans-in-sw-florida-at-virtual-meeting/91587939007/",
-              "fetched_at": "2026-09-19T04:26:16Z",
-              "tier": 2,
-              "citation": "FDOT shares more about I-75 widening and noise wall plans in SW Florida: \"[](https://www.naplesnews.com/)\n[Florida pulls plug on license plate cameras across SW FL roads](https://www.naplesnews.com/story/news/2026/09/04/florida-highway-police-flock-camera-license-plate-removal/91576967007/)\n[](https://subscribe.naplesnews.com/rr/nanobar?gps-source=CPTILELEFT&itm_campaign=2026ENTAUGBAU&itm_medium=ONSITE&success-url=https%3A%2F%2Fwww.naplesnews.com%2Fstory%2Fmoney%2Fbusiness%2Flocal%2F2026%2F09%2F04%2Ffdot-shares-more-about-i-75-widening-and-noise-wall-plans-in-sw-florida-at-virtual-meeting%2F91587939007%2F)\n[](https://subscribe.naplesnews.com/rr/masthead?gps-source=CPMASTHEAD&itm_campaign=2026ENTAUGBAU&itm_medium=ONSITE&success-url=https%3A%2F%2Fwww.naplesnews.com%2Fstory%2Fmoney%2Fbusiness%2Flocal%2F2026%2F09%2F04%2Ffdot-shares-more-about-i-75-widening-and-noise-wall-plans-in-sw-florida-at-virtual-meeting%2F91587939007%2F)\n[News](https://www.naplesnews.com/news/) [Sports](https://www.naplesnews.com/sports/) [Real Estate](https://www.naplesnews.com/business/real-estate/) [Restaurants](https://www.naplesnews.com/entertainment/restaurants/) [Opinion](https://www.naplesnews.com/opinion/) [Advertise](https://advertising.usatoday.com/advertise-with-us/?cid=Web_LiQ_Network_AdvertiseWithUs_AdvertiseInquiry&publication=naples_daily_news&utm_source=local_publication&utm_medium=menu&utm_campaign=advertise_with_us) [Obituaries](https://www.naplesnews.com/obituaries) [eNewspaper](https://user.naplesnews.com/user/enewspaper) [Legals](https://www.naplesnews.com/public-notices)\n[](https://www.naplesnews.com/search/ \"Search\")\n[](https://www.naplesnews.com/weather/ \"Weather in Naples: 78°F Partly Cloudy\") [](https://subscribe.naplesnews.com/rr/navsub?gps-source=CPTOPNAVBAR&itm_campaign=2026ENTAUGBAU&itm_medium=ONSITE&success-url=https%3A%2F%2Fwww.naplesnews.com%2Fstory%2Fmoney%2Fbusiness%2Flocal%2F2026%2F09%2F04%2Ffdot-shares-more-about-i-75-widening-and-noise-wall-plans-in-sw-florida-at-virtual-meeting%2F91587939007%2F)\n[](https://login.naplesnews.com/PNDN-GUP/authenticate/?success-url=https%3A%2F%2Fwww.naplesnews.com%2Fstory%2Fmoney%2Fbusiness%2Flocal%2F2026%2F09%2F04%2Ffdot-shares-more-about-i-75-widening-and-noise-wall-plans-in-sw-florida-at-virtual-meeting%2F91587939007%2F&cancel-url=https%3A%2F%2Fwww.naplesnews.com%2Fstory%2Fmoney%2Fbusiness%2Flocal%2F2026%2F09%2F04%2Ffdot-shares-more-about-i-75-widening-and-noise-wall-plans-in-sw-florida-at-virtual-meeting%2F91587939007%2F)\n[](https://www.naplesnews.com/) [](https://www.naplesnews.com/)\n[LOCAL BUSINESS](https://www.naplesnews.com/business/local/)\n# Residents hear more, weigh in on massive I-75 expansion plans in SW Florida\n[![Portrait of Laura Layden](https://www.naplesnews.com/gcdn/authoring/authoring-images/2024/02/08/PNDN/72524348007-ndn-jh-20240126-laura-0001.JPG?crop=3313,3312,x1506,y0&width=48&height=48&format=pjpg&auto=webp) Laura Layden](https://www.naplesnews.com/staff/2647080001/laura-layden/)\nFort Myers News-Press & Naples Daily News\nSept. 4, 2026, 5:03 a.m. ET\nA virtu\""
-            },
-            "suggestions": [
-              "What's driving signal development 5?",
-              "How does signal development 5 here compare to other SWFL areas?"
-            ]
-          },
-          {
-            "metric": "signal_business_6",
+            "metric": "signal_business_4",
             "value": "Cape Coral: Georgios Papadopoulos proposed a new exclusive car and wine club in Naples; the design board gave it a thumbs up as of Sept. 3, 2026, though city staff are still reviewing it.",
             "direction": "stable",
             "label": "Cape Coral — business",
             "variable_type": "categorical",
             "source": {
               "url": "https://www.news-press.com/story/money/business/local/2026/09/03/design-board-gives-a-thumbs-up-to-exclusive-car-and-wine-club-in-naples-but-city-staff-reviewing-it/91560883007/",
-              "fetched_at": "2026-09-19T04:26:16Z",
+              "fetched_at": "2026-09-19T08:53:47Z",
               "tier": 2,
               "citation": "Design board gives a thumbs up to exclusive car and wine club in Naples: \"[](https://www.news-press.com/)\n[Florida pulls plug on license plate cameras across SW FL roads](https://www.news-press.com/story/news/2026/09/04/florida-highway-police-flock-camera-license-plate-removal/91576967007/)\n[](https://subscribe.news-press.com/rr/nanobar?gps-source=CPTILELEFT&itm_campaign=2026ENTAUGBAU&itm_medium=ONSITE&success-url=https%3A%2F%2Fwww.news-press.com%2Fstory%2Fmoney%2Fbusiness%2Flocal%2F2026%2F09%2F03%2Fdesign-board-gives-a-thumbs-up-to-exclusive-car-and-wine-club-in-naples-but-city-staff-reviewing-it%2F91560883007%2F)\n[](https://subscribe.news-press.com/rr/masthead?gps-source=CPMASTHEAD&itm_campaign=2026ENTAUGBAU&itm_medium=ONSITE&success-url=https%3A%2F%2Fwww.news-press.com%2Fstory%2Fmoney%2Fbusiness%2Flocal%2F2026%2F09%2F03%2Fdesign-board-gives-a-thumbs-up-to-exclusive-car-and-wine-club-in-naples-but-city-staff-reviewing-it%2F91560883007%2F)\n[News](https://www.news-press.com/news/) [Cape Coral](https://www.news-press.com/news/cape-coral/) [Sports](https://www.news-press.com/sports/) [Restaurants](https://www.news-press.com/taste/) [Real Estate](https://www.news-press.com/real-estate) [Advertise](https://advertising.usatoday.com/advertise-with-us/?cid=Web_LiQ_Network_AdvertiseWithUs_AdvertiseInquiry&publication=the_news_press&utm_source=local_publication&utm_medium=menu&utm_campaign=advertise_with_us) [Obituaries](https://www.news-press.com/obituaries) [eNewspaper](https://user.news-press.com/user/enewspaper) [Legals](https://www.news-press.com/public-notices)\n[](https://www.news-press.com/search/ \"Search\")\n[](https://www.news-press.com/weather/ \"Weather in Fort Myers: 78°F Mostly Cloudy\") [](https://subscribe.news-press.com/rr/navsub?gps-source=CPTOPNAVBAR&itm_campaign=2026ENTAUGBAU&itm_medium=ONSITE&success-url=https%3A%2F%2Fwww.news-press.com%2Fstory%2Fmoney%2Fbusiness%2Flocal%2F2026%2F09%2F03%2Fdesign-board-gives-a-thumbs-up-to-exclusive-car-and-wine-club-in-naples-but-city-staff-reviewing-it%2F91560883007%2F)\n[](https://login.news-press.com/PFTM-GUP/authenticate/?success-url=https%3A%2F%2Fwww.news-press.com%2Fstory%2Fmoney%2Fbusiness%2Flocal%2F2026%2F09%2F03%2Fdesign-board-gives-a-thumbs-up-to-exclusive-car-and-wine-club-in-naples-but-city-staff-reviewing-it%2F91560883007%2F&cancel-url=https%3A%2F%2Fwww.news-press.com%2Fstory%2Fmoney%2Fbusiness%2Flocal%2F2026%2F09%2F03%2Fdesign-board-gives-a-thumbs-up-to-exclusive-car-and-wine-club-in-naples-but-city-staff-reviewing-it%2F91560883007%2F)\n[](https://www.news-press.com/) [](https://www.news-press.com/)\nLOCAL BUSINESS\n# 'Retiree' proposes unique car and wine club in Naples\n[![Portrait of Laura Layden](https://www.news-press.com/gcdn/authoring/authoring-images/2024/02/08/PNDN/72524348007-ndn-jh-20240126-laura-0001.JPG?crop=3313,3312,x1506,y0&width=48&height=48&format=pjpg&auto=webp) Laura Layden](https://www.naplesnews.com/staff/2647080001/laura-layden/)\nFort Myers News-Press & Naples Daily News\nSept. 3, 2026, 12:03 p.m. ET\nGeorgios Papadopoulos has a vision for a new ki\""
+            },
+            "suggestions": [
+              "What's driving signal business 4?",
+              "How does signal business 4 here compare to other SWFL areas?"
+            ]
+          },
+          {
+            "metric": "signal_business_5",
+            "value": "Naples: Alamo Drafthouse is closing its cinema at Mercato in North Naples.",
+            "direction": "stable",
+            "label": "Naples — business",
+            "variable_type": "categorical",
+            "source": {
+              "url": "https://www.gulfshorebusiness.com/news/alamo-drafthouse-closing-cinema-at-mercato-in-north-naples/article_5ddafea2-23c2-478c-8c3e-28298870a6f4.html",
+              "fetched_at": "2026-09-19T08:53:47Z",
+              "tier": 2,
+              "citation": "Alamo Drafthouse to close Mercato cinema in North Naples | News | gulfshorebusiness.com: \"[Skip to main content](https://www.gulfshorebusiness.com/news/alamo-drafthouse-closing-cinema-at-mercato-in-north-naples/article_5ddafea2-23c2-478c-8c3e-28298870a6f4.html#main-page-container)\nYou have permission to edit this article.\n[ Edit](https://www.gulfshorebusiness.com/tncms/admin/editorial-asset/?edit=5ddafea2-23c2-478c-8c3e-28298870a6f4) Close\n[![site-logo](https://bloximages.chicago2.vip.townnews.com/gulfshorebusiness.com/content/tncms/custom/image/d93231a5-1f68-4d46-b56f-f961242f84a3.png?resize=200%2C53)](https://www.gulfshorebusiness.com/)\n  * [ Facebook ](https://www.facebook.com/GulfshoreBusiness/)\n  * [ LinkedIn ](https://www.linkedin.com/company/gulfshore-business-magazine)\n  * [ Instagram ](https://www.instagram.com/gulfshorebusiness)\n\n\nSite search Search\n  * [ Sign Up ](https://www.gulfshorebusiness.com/users/signup/?referer_url=https%3A%2F%2Fwww.gulfshorebusiness.com%2Fnews%2Falamo-drafthouse-closing-cinema-at-mercato-in-north-naples%2Farticle_5ddafea2-23c2-478c-8c3e-28298870a6f4.html)\n  * [ Log In ](https://www.gulfshorebusiness.com/users/login/?referer_url=https%3A%2F%2Fwww.gulfshorebusiness.com%2Fnews%2Falamo-drafthouse-closing-cinema-at-mercato-in-north-naples%2Farticle_5ddafea2-23c2-478c-8c3e-28298870a6f4.html)\n\n\n  * [ Dashboard ](https://www.gulfshorebusiness.com/users/admin/)\n  * Logout \n\n\n  *     * My Account\n    * [ Dashboard](https://www.gulfshorebusiness.com/users/admin/)\n    * [ Profile](https://www.gulfshorebusiness.com/news/alamo-drafthouse-closing-cinema-at-mercato-in-north-naples/article_5ddafea2-23c2-478c-8c3e-28298870a6f4.html)\n    * [ Saved items](https://www.gulfshorebusiness.com/users/admin/list/)\n    * Logout \n\n\n[Home](https://www.gulfshorebusiness.com/)\n  * [About Us](https://www.gulfshorebusiness.com/site/about.html)\n  * [Contact Us](https://www.gulfshorebusiness.com/site/contact.html)\n  * [Advertise](https://www.gulfshorebusiness.com/site/advertise.html)\n  * [Terms of Use](https://www.gulfshorebusiness.com/site/terms.html)\n  * [Privacy Policy](https://www.gulfshorebusiness.com/site/privacy.html)\n  * [Employment](https://gulfshorelife.applytojob.com/apply)\n\n\n[News](https://www.gulfshorebusiness.com/news/)\n  * [Real Estate](https://www.gulfshorebusiness.com/real_estate)\n  * [Development](https://www.gulfshorebusiness.com/development/)\n  * [Hospitality](https://www.gulfshorebusiness.com/hospitality/)\n  * [Retail](https://www.gulfshorebusiness.com/retail/)\n  * [Tourism](https://www.gulfshorebusiness.com/tourism/)\n  * [Collier County](https://www.gulfshorebusiness.com/collier/)\n  * [Charlotte County](https://www.gulfshorebusiness.com/charlotte/)\n  * [Lee County](https://www.gulfshorebusiness.com/lee/)\n  * [Nonprofit](https://www.gulfshorebusiness.com/nonprofit/)\n  * [Environment](https://www.gulfshorebusiness.com/environment/)\n  * [Innovation](https://www.gulfshorebusiness.com/innovation/)\n  * [Infrastructure](https://www.gulfshorebusiness.com/infrastructure/)\n  * [Education](https://www.gulfshorebusiness.com\""
+            },
+            "suggestions": [
+              "What's driving signal business 5?",
+              "How does signal business 5 here compare to other SWFL areas?"
+            ]
+          },
+          {
+            "metric": "signal_business_6",
+            "value": "North Naples: Alamo Drafthouse is closing its cinema at Mercato in North Naples.",
+            "direction": "stable",
+            "label": "North Naples — business",
+            "variable_type": "categorical",
+            "source": {
+              "url": "https://www.gulfshorebusiness.com/news/alamo-drafthouse-closing-cinema-at-mercato-in-north-naples/article_5ddafea2-23c2-478c-8c3e-28298870a6f4.html",
+              "fetched_at": "2026-09-19T08:53:47Z",
+              "tier": 2,
+              "citation": "Alamo Drafthouse to close Mercato cinema in North Naples | News | gulfshorebusiness.com: \"[Skip to main content](https://www.gulfshorebusiness.com/news/alamo-drafthouse-closing-cinema-at-mercato-in-north-naples/article_5ddafea2-23c2-478c-8c3e-28298870a6f4.html#main-page-container)\nYou have permission to edit this article.\n[ Edit](https://www.gulfshorebusiness.com/tncms/admin/editorial-asset/?edit=5ddafea2-23c2-478c-8c3e-28298870a6f4) Close\n[![site-logo](https://bloximages.chicago2.vip.townnews.com/gulfshorebusiness.com/content/tncms/custom/image/d93231a5-1f68-4d46-b56f-f961242f84a3.png?resize=200%2C53)](https://www.gulfshorebusiness.com/)\n  * [ Facebook ](https://www.facebook.com/GulfshoreBusiness/)\n  * [ LinkedIn ](https://www.linkedin.com/company/gulfshore-business-magazine)\n  * [ Instagram ](https://www.instagram.com/gulfshorebusiness)\n\n\nSite search Search\n  * [ Sign Up ](https://www.gulfshorebusiness.com/users/signup/?referer_url=https%3A%2F%2Fwww.gulfshorebusiness.com%2Fnews%2Falamo-drafthouse-closing-cinema-at-mercato-in-north-naples%2Farticle_5ddafea2-23c2-478c-8c3e-28298870a6f4.html)\n  * [ Log In ](https://www.gulfshorebusiness.com/users/login/?referer_url=https%3A%2F%2Fwww.gulfshorebusiness.com%2Fnews%2Falamo-drafthouse-closing-cinema-at-mercato-in-north-naples%2Farticle_5ddafea2-23c2-478c-8c3e-28298870a6f4.html)\n\n\n  * [ Dashboard ](https://www.gulfshorebusiness.com/users/admin/)\n  * Logout \n\n\n  *     * My Account\n    * [ Dashboard](https://www.gulfshorebusiness.com/users/admin/)\n    * [ Profile](https://www.gulfshorebusiness.com/news/alamo-drafthouse-closing-cinema-at-mercato-in-north-naples/article_5ddafea2-23c2-478c-8c3e-28298870a6f4.html)\n    * [ Saved items](https://www.gulfshorebusiness.com/users/admin/list/)\n    * Logout \n\n\n[Home](https://www.gulfshorebusiness.com/)\n  * [About Us](https://www.gulfshorebusiness.com/site/about.html)\n  * [Contact Us](https://www.gulfshorebusiness.com/site/contact.html)\n  * [Advertise](https://www.gulfshorebusiness.com/site/advertise.html)\n  * [Terms of Use](https://www.gulfshorebusiness.com/site/terms.html)\n  * [Privacy Policy](https://www.gulfshorebusiness.com/site/privacy.html)\n  * [Employment](https://gulfshorelife.applytojob.com/apply)\n\n\n[News](https://www.gulfshorebusiness.com/news/)\n  * [Real Estate](https://www.gulfshorebusiness.com/real_estate)\n  * [Development](https://www.gulfshorebusiness.com/development/)\n  * [Hospitality](https://www.gulfshorebusiness.com/hospitality/)\n  * [Retail](https://www.gulfshorebusiness.com/retail/)\n  * [Tourism](https://www.gulfshorebusiness.com/tourism/)\n  * [Collier County](https://www.gulfshorebusiness.com/collier/)\n  * [Charlotte County](https://www.gulfshorebusiness.com/charlotte/)\n  * [Lee County](https://www.gulfshorebusiness.com/lee/)\n  * [Nonprofit](https://www.gulfshorebusiness.com/nonprofit/)\n  * [Environment](https://www.gulfshorebusiness.com/environment/)\n  * [Innovation](https://www.gulfshorebusiness.com/innovation/)\n  * [Infrastructure](https://www.gulfshorebusiness.com/infrastructure/)\n  * [Education](https://www.gulfshorebusiness.com\""
             },
             "suggestions": [
               "What's driving signal business 6?",
@@ -864,37 +240,37 @@
             ]
           },
           {
-            "metric": "signal_business_7",
-            "value": "Naples: Alamo Drafthouse is closing its cinema at Mercato in North Naples.",
+            "metric": "signal_structural_7",
+            "value": "Fort Myers: SW Florida Realtors have dubbed the growing Estero-area corridor the 'Coconut Coast Corridor', as reported Sept. 7, 2026.",
             "direction": "stable",
-            "label": "Naples — business",
+            "label": "Fort Myers — structural",
             "variable_type": "categorical",
             "source": {
-              "url": "https://www.gulfshorebusiness.com/news/alamo-drafthouse-closing-cinema-at-mercato-in-north-naples/article_5ddafea2-23c2-478c-8c3e-28298870a6f4.html",
-              "fetched_at": "2026-09-19T04:26:16Z",
+              "url": "https://www.naplesnews.com/story/money/real-estate/2026/09/07/sw-florida-realtors-dub-growing-estero-area-coconut-coast/91600054007/",
+              "fetched_at": "2026-09-19T08:53:47Z",
               "tier": 2,
-              "citation": "Alamo Drafthouse to close Mercato cinema in North Naples | News | gulfshorebusiness.com: \"[Skip to main content](https://www.gulfshorebusiness.com/news/alamo-drafthouse-closing-cinema-at-mercato-in-north-naples/article_5ddafea2-23c2-478c-8c3e-28298870a6f4.html#main-page-container)\nYou have permission to edit this article.\n[ Edit](https://www.gulfshorebusiness.com/tncms/admin/editorial-asset/?edit=5ddafea2-23c2-478c-8c3e-28298870a6f4) Close\n[![site-logo](https://bloximages.chicago2.vip.townnews.com/gulfshorebusiness.com/content/tncms/custom/image/d93231a5-1f68-4d46-b56f-f961242f84a3.png?resize=200%2C53)](https://www.gulfshorebusiness.com/)\n  * [ Facebook ](https://www.facebook.com/GulfshoreBusiness/)\n  * [ LinkedIn ](https://www.linkedin.com/company/gulfshore-business-magazine)\n  * [ Instagram ](https://www.instagram.com/gulfshorebusiness)\n\n\nSite search Search\n  * [ Sign Up ](https://www.gulfshorebusiness.com/users/signup/?referer_url=https%3A%2F%2Fwww.gulfshorebusiness.com%2Fnews%2Falamo-drafthouse-closing-cinema-at-mercato-in-north-naples%2Farticle_5ddafea2-23c2-478c-8c3e-28298870a6f4.html)\n  * [ Log In ](https://www.gulfshorebusiness.com/users/login/?referer_url=https%3A%2F%2Fwww.gulfshorebusiness.com%2Fnews%2Falamo-drafthouse-closing-cinema-at-mercato-in-north-naples%2Farticle_5ddafea2-23c2-478c-8c3e-28298870a6f4.html)\n\n\n  * [ Dashboard ](https://www.gulfshorebusiness.com/users/admin/)\n  * Logout \n\n\n  *     * My Account\n    * [ Dashboard](https://www.gulfshorebusiness.com/users/admin/)\n    * [ Profile](https://www.gulfshorebusiness.com/news/alamo-drafthouse-closing-cinema-at-mercato-in-north-naples/article_5ddafea2-23c2-478c-8c3e-28298870a6f4.html)\n    * [ Saved items](https://www.gulfshorebusiness.com/users/admin/list/)\n    * Logout \n\n\n[Home](https://www.gulfshorebusiness.com/)\n  * [About Us](https://www.gulfshorebusiness.com/site/about.html)\n  * [Contact Us](https://www.gulfshorebusiness.com/site/contact.html)\n  * [Advertise](https://www.gulfshorebusiness.com/site/advertise.html)\n  * [Terms of Use](https://www.gulfshorebusiness.com/site/terms.html)\n  * [Privacy Policy](https://www.gulfshorebusiness.com/site/privacy.html)\n  * [Employment](https://gulfshorelife.applytojob.com/apply)\n\n\n[News](https://www.gulfshorebusiness.com/news/)\n  * [Real Estate](https://www.gulfshorebusiness.com/real_estate)\n  * [Development](https://www.gulfshorebusiness.com/development/)\n  * [Hospitality](https://www.gulfshorebusiness.com/hospitality/)\n  * [Retail](https://www.gulfshorebusiness.com/retail/)\n  * [Tourism](https://www.gulfshorebusiness.com/tourism/)\n  * [Collier County](https://www.gulfshorebusiness.com/collier/)\n  * [Charlotte County](https://www.gulfshorebusiness.com/charlotte/)\n  * [Lee County](https://www.gulfshorebusiness.com/lee/)\n  * [Nonprofit](https://www.gulfshorebusiness.com/nonprofit/)\n  * [Environment](https://www.gulfshorebusiness.com/environment/)\n  * [Innovation](https://www.gulfshorebusiness.com/innovation/)\n  * [Infrastructure](https://www.gulfshorebusiness.com/infrastructure/)\n  * [Education](https://www.gulfshorebusiness.com\""
+              "citation": "SW Florida Realtors dub growing Estero area 'Coconut Coast': \"[](https://www.naplesnews.com/)\n[Fort Myers, Bonita Beach parking limited as hurricane restoration begins 4 years after Ian](https://www.naplesnews.com/story/news/local/2026/09/07/parking-depleted-as-hurricane-restoration-begins-at-fort-myers-bonita-beach/91599217007/)\n[](https://subscribe.naplesnews.com/rr/nanobar?gps-source=CPTILELEFT&itm_campaign=2026ENTAUGBAU&itm_medium=ONSITE&success-url=https%3A%2F%2Fwww.naplesnews.com%2Fstory%2Fmoney%2Freal-estate%2F2026%2F09%2F07%2Fsw-florida-realtors-dub-growing-estero-area-coconut-coast%2F91600054007%2F)\n[](https://subscribe.naplesnews.com/rr/masthead?gps-source=CPMASTHEAD&itm_campaign=2026ENTAUGBAU&itm_medium=ONSITE&success-url=https%3A%2F%2Fwww.naplesnews.com%2Fstory%2Fmoney%2Freal-estate%2F2026%2F09%2F07%2Fsw-florida-realtors-dub-growing-estero-area-coconut-coast%2F91600054007%2F)\n[News](https://www.naplesnews.com/news/) [Sports](https://www.naplesnews.com/sports/) [Real Estate](https://www.naplesnews.com/business/real-estate/) [Restaurants](https://www.naplesnews.com/entertainment/restaurants/) [Opinion](https://www.naplesnews.com/opinion/) [Advertise](https://advertising.usatoday.com/advertise-with-us/?cid=Web_LiQ_Network_AdvertiseWithUs_AdvertiseInquiry&publication=naples_daily_news&utm_source=local_publication&utm_medium=menu&utm_campaign=advertise_with_us) [Obituaries](https://www.naplesnews.com/obituaries) [eNewspaper](https://user.naplesnews.com/user/enewspaper) [Legals](https://www.naplesnews.com/public-notices)\n[](https://www.naplesnews.com/search/ \"Search\")\n[](https://www.naplesnews.com/weather/ \"Weather in Naples: 79°F Partly Sunny w/ T-Storms\") [](https://subscribe.naplesnews.com/rr/navsub?gps-source=CPTOPNAVBAR&itm_campaign=2026ENTAUGBAU&itm_medium=ONSITE&success-url=https%3A%2F%2Fwww.naplesnews.com%2Fstory%2Fmoney%2Freal-estate%2F2026%2F09%2F07%2Fsw-florida-realtors-dub-growing-estero-area-coconut-coast%2F91600054007%2F)\n[](https://login.naplesnews.com/PNDN-GUP/authenticate/?success-url=https%3A%2F%2Fwww.naplesnews.com%2Fstory%2Fmoney%2Freal-estate%2F2026%2F09%2F07%2Fsw-florida-realtors-dub-growing-estero-area-coconut-coast%2F91600054007%2F&cancel-url=https%3A%2F%2Fwww.naplesnews.com%2Fstory%2Fmoney%2Freal-estate%2F2026%2F09%2F07%2Fsw-florida-realtors-dub-growing-estero-area-coconut-coast%2F91600054007%2F)\n[](https://www.naplesnews.com/) [](https://www.naplesnews.com/)\nREAL ESTATE\n# 'Coconut Coast Corridor' emerges in SW Florida. What's new and coming?\n[![Portrait of Phil Fernandez](https://www.naplesnews.com/gcdn/presto/2019/09/14/PNDN/6a77b474-579f-48fa-b56f-a2cc2b9de797-NDN_Phil_Fernandez.jpg?crop=2999,2999,x0,y570&width=48&height=48&format=pjpg&auto=webp) Phil Fernandez](https://www.naplesnews.com/staff/2684114001/phil-fernandez/)\nFort Myers News-Press & Naples Daily News\nSept. 7, 2026, 5:02 a.m. ET\nTime to say hello to [Southwest Florida](https://www.naplesnews.com/story/news/politics/elections/2026/08/24/florida-political-shockwave-in-one-of-bigger-cities-what-it-took-lee-county-c\""
             },
             "suggestions": [
-              "What's driving signal business 7?",
-              "How does signal business 7 here compare to other SWFL areas?"
+              "What's driving signal structural 7?",
+              "How does signal structural 7 here compare to other SWFL areas?"
             ]
           },
           {
-            "metric": "signal_business_8",
-            "value": "North Naples: Alamo Drafthouse is closing its cinema at Mercato in North Naples.",
+            "metric": "signal_structural_8",
+            "value": "Naples: SW Florida Realtors have dubbed the growing Estero area the 'Coconut Coast Corridor' as of Sept. 7, 2026.",
             "direction": "stable",
-            "label": "North Naples — business",
+            "label": "Naples — structural",
             "variable_type": "categorical",
             "source": {
-              "url": "https://www.gulfshorebusiness.com/news/alamo-drafthouse-closing-cinema-at-mercato-in-north-naples/article_5ddafea2-23c2-478c-8c3e-28298870a6f4.html",
-              "fetched_at": "2026-09-19T04:26:16Z",
+              "url": "https://www.naplesnews.com/story/money/real-estate/2026/09/07/sw-florida-realtors-dub-growing-estero-area-coconut-coast/91600054007/",
+              "fetched_at": "2026-09-19T08:53:47Z",
               "tier": 2,
-              "citation": "Alamo Drafthouse to close Mercato cinema in North Naples | News | gulfshorebusiness.com: \"[Skip to main content](https://www.gulfshorebusiness.com/news/alamo-drafthouse-closing-cinema-at-mercato-in-north-naples/article_5ddafea2-23c2-478c-8c3e-28298870a6f4.html#main-page-container)\nYou have permission to edit this article.\n[ Edit](https://www.gulfshorebusiness.com/tncms/admin/editorial-asset/?edit=5ddafea2-23c2-478c-8c3e-28298870a6f4) Close\n[![site-logo](https://bloximages.chicago2.vip.townnews.com/gulfshorebusiness.com/content/tncms/custom/image/d93231a5-1f68-4d46-b56f-f961242f84a3.png?resize=200%2C53)](https://www.gulfshorebusiness.com/)\n  * [ Facebook ](https://www.facebook.com/GulfshoreBusiness/)\n  * [ LinkedIn ](https://www.linkedin.com/company/gulfshore-business-magazine)\n  * [ Instagram ](https://www.instagram.com/gulfshorebusiness)\n\n\nSite search Search\n  * [ Sign Up ](https://www.gulfshorebusiness.com/users/signup/?referer_url=https%3A%2F%2Fwww.gulfshorebusiness.com%2Fnews%2Falamo-drafthouse-closing-cinema-at-mercato-in-north-naples%2Farticle_5ddafea2-23c2-478c-8c3e-28298870a6f4.html)\n  * [ Log In ](https://www.gulfshorebusiness.com/users/login/?referer_url=https%3A%2F%2Fwww.gulfshorebusiness.com%2Fnews%2Falamo-drafthouse-closing-cinema-at-mercato-in-north-naples%2Farticle_5ddafea2-23c2-478c-8c3e-28298870a6f4.html)\n\n\n  * [ Dashboard ](https://www.gulfshorebusiness.com/users/admin/)\n  * Logout \n\n\n  *     * My Account\n    * [ Dashboard](https://www.gulfshorebusiness.com/users/admin/)\n    * [ Profile](https://www.gulfshorebusiness.com/news/alamo-drafthouse-closing-cinema-at-mercato-in-north-naples/article_5ddafea2-23c2-478c-8c3e-28298870a6f4.html)\n    * [ Saved items](https://www.gulfshorebusiness.com/users/admin/list/)\n    * Logout \n\n\n[Home](https://www.gulfshorebusiness.com/)\n  * [About Us](https://www.gulfshorebusiness.com/site/about.html)\n  * [Contact Us](https://www.gulfshorebusiness.com/site/contact.html)\n  * [Advertise](https://www.gulfshorebusiness.com/site/advertise.html)\n  * [Terms of Use](https://www.gulfshorebusiness.com/site/terms.html)\n  * [Privacy Policy](https://www.gulfshorebusiness.com/site/privacy.html)\n  * [Employment](https://gulfshorelife.applytojob.com/apply)\n\n\n[News](https://www.gulfshorebusiness.com/news/)\n  * [Real Estate](https://www.gulfshorebusiness.com/real_estate)\n  * [Development](https://www.gulfshorebusiness.com/development/)\n  * [Hospitality](https://www.gulfshorebusiness.com/hospitality/)\n  * [Retail](https://www.gulfshorebusiness.com/retail/)\n  * [Tourism](https://www.gulfshorebusiness.com/tourism/)\n  * [Collier County](https://www.gulfshorebusiness.com/collier/)\n  * [Charlotte County](https://www.gulfshorebusiness.com/charlotte/)\n  * [Lee County](https://www.gulfshorebusiness.com/lee/)\n  * [Nonprofit](https://www.gulfshorebusiness.com/nonprofit/)\n  * [Environment](https://www.gulfshorebusiness.com/environment/)\n  * [Innovation](https://www.gulfshorebusiness.com/innovation/)\n  * [Infrastructure](https://www.gulfshorebusiness.com/infrastructure/)\n  * [Education](https://www.gulfshorebusiness.com\""
+              "citation": "SW Florida Realtors dub growing Estero area 'Coconut Coast': \"[](https://www.naplesnews.com/)\n[Fort Myers, Bonita Beach parking limited as hurricane restoration begins 4 years after Ian](https://www.naplesnews.com/story/news/local/2026/09/07/parking-depleted-as-hurricane-restoration-begins-at-fort-myers-bonita-beach/91599217007/)\n[](https://subscribe.naplesnews.com/rr/nanobar?gps-source=CPTILELEFT&itm_campaign=2026ENTAUGBAU&itm_medium=ONSITE&success-url=https%3A%2F%2Fwww.naplesnews.com%2Fstory%2Fmoney%2Freal-estate%2F2026%2F09%2F07%2Fsw-florida-realtors-dub-growing-estero-area-coconut-coast%2F91600054007%2F)\n[](https://subscribe.naplesnews.com/rr/masthead?gps-source=CPMASTHEAD&itm_campaign=2026ENTAUGBAU&itm_medium=ONSITE&success-url=https%3A%2F%2Fwww.naplesnews.com%2Fstory%2Fmoney%2Freal-estate%2F2026%2F09%2F07%2Fsw-florida-realtors-dub-growing-estero-area-coconut-coast%2F91600054007%2F)\n[News](https://www.naplesnews.com/news/) [Sports](https://www.naplesnews.com/sports/) [Real Estate](https://www.naplesnews.com/business/real-estate/) [Restaurants](https://www.naplesnews.com/entertainment/restaurants/) [Opinion](https://www.naplesnews.com/opinion/) [Advertise](https://advertising.usatoday.com/advertise-with-us/?cid=Web_LiQ_Network_AdvertiseWithUs_AdvertiseInquiry&publication=naples_daily_news&utm_source=local_publication&utm_medium=menu&utm_campaign=advertise_with_us) [Obituaries](https://www.naplesnews.com/obituaries) [eNewspaper](https://user.naplesnews.com/user/enewspaper) [Legals](https://www.naplesnews.com/public-notices)\n[](https://www.naplesnews.com/search/ \"Search\")\n[](https://www.naplesnews.com/weather/ \"Weather in Naples: 79°F Partly Sunny w/ T-Storms\") [](https://subscribe.naplesnews.com/rr/navsub?gps-source=CPTOPNAVBAR&itm_campaign=2026ENTAUGBAU&itm_medium=ONSITE&success-url=https%3A%2F%2Fwww.naplesnews.com%2Fstory%2Fmoney%2Freal-estate%2F2026%2F09%2F07%2Fsw-florida-realtors-dub-growing-estero-area-coconut-coast%2F91600054007%2F)\n[](https://login.naplesnews.com/PNDN-GUP/authenticate/?success-url=https%3A%2F%2Fwww.naplesnews.com%2Fstory%2Fmoney%2Freal-estate%2F2026%2F09%2F07%2Fsw-florida-realtors-dub-growing-estero-area-coconut-coast%2F91600054007%2F&cancel-url=https%3A%2F%2Fwww.naplesnews.com%2Fstory%2Fmoney%2Freal-estate%2F2026%2F09%2F07%2Fsw-florida-realtors-dub-growing-estero-area-coconut-coast%2F91600054007%2F)\n[](https://www.naplesnews.com/) [](https://www.naplesnews.com/)\nREAL ESTATE\n# 'Coconut Coast Corridor' emerges in SW Florida. What's new and coming?\n[![Portrait of Phil Fernandez](https://www.naplesnews.com/gcdn/presto/2019/09/14/PNDN/6a77b474-579f-48fa-b56f-a2cc2b9de797-NDN_Phil_Fernandez.jpg?crop=2999,2999,x0,y570&width=48&height=48&format=pjpg&auto=webp) Phil Fernandez](https://www.naplesnews.com/staff/2684114001/phil-fernandez/)\nFort Myers News-Press & Naples Daily News\nSept. 7, 2026, 5:02 a.m. ET\nTime to say hello to [Southwest Florida](https://www.naplesnews.com/story/news/politics/elections/2026/08/24/florida-political-shockwave-in-one-of-bigger-cities-what-it-took-lee-county-c\""
             },
             "suggestions": [
-              "What's driving signal business 8?",
-              "How does signal business 8 here compare to other SWFL areas?"
+              "What's driving signal structural 8?",
+              "How does signal structural 8 here compare to other SWFL areas?"
             ]
           }
         ],
@@ -945,7 +321,7 @@
             ],
             "source": {
               "url": "https://www.swfldatagulf.com/r/source/city_pulse",
-              "fetched_at": "2026-09-19T04:26:16Z",
+              "fetched_at": "2026-09-19T08:53:47Z",
               "tier": 2,
               "citation": "Distilled, citation-backed SWFL news signals; each ZIP's items carry per-item source URLs in data_lake.city_pulse."
             },
@@ -953,7 +329,7 @@
           }
         ],
         "caveats": [
-          "58 additional live signals not surfaced here (cap 8); the full set is in data_lake.city_pulse.",
+          "55 additional live signals not surfaced here (cap 8); the full set is in data_lake.city_pulse.",
           "Each signal is dated current-events context with a per-signal source; freshness is TTL-bounded by topic (breaking 1d → structural 90d)."
         ],
         "contradicts": [],
@@ -966,7 +342,7 @@
         "relevance": {
           "decay_curve": "weeks",
           "half_life_hours": 720,
-          "computed_at": "2026-09-19T04:26:16Z"
+          "computed_at": "2026-09-19T08:53:47Z"
         },
         "exogenous_signals": []
       }
@@ -983,119 +359,8 @@
     },
     {
       "packId": "freshness-pulse",
-      "status": "built",
-      "version": 47,
-      "written": true,
-      "brainOutput": {
-        "brain_id": "freshness-pulse",
-        "version": 47,
-        "refined_at": "2026-09-19T04:26:16Z",
-        "expires": "2026-09-20T04:26:16Z",
-        "ttl_seconds": 86400,
-        "direction": "neutral",
-        "magnitude": 0,
-        "drivers": [],
-        "overrides": [],
-        "conclusion": "Today's sourced snapshot — Cape Coral median asking price (as of 2026-09-19) $399,200; Fort Myers median asking price (as of 2026-09-19) $325,000; Naples median asking price (as of 2026-09-19) $650,000; SWFL 30-year fixed mortgage rate (as of 2026-09-17) 6.95%. These are cited current facts only; the direction call lives downstream in master.",
-        "key_metrics": [
-          {
-            "metric": "freshness_median_asking_price_cape_coral_usd",
-            "value": 399200,
-            "direction": "stable",
-            "label": "Cape Coral median asking price (as of 2026-09-19)",
-            "variable_type": "extensive",
-            "units": "USD",
-            "display_format": "currency",
-            "source": {
-              "url": "https://www.swfldatagulf.com/desk",
-              "fetched_at": "2026-09-19T04:23:35.640645+00:00",
-              "tier": 2,
-              "citation": "SWFL Data Gulf active-listing inventory — current median asking price for Cape Coral, sourced 2026-09-19"
-            },
-            "suggestions": [
-              "Chart asking rents across the corridors",
-              "What's driving freshness median asking price cape coral usd?",
-              "How does freshness median asking price cape coral usd here compare to other SWFL areas?"
-            ]
-          },
-          {
-            "metric": "freshness_median_asking_price_fort_myers_usd",
-            "value": 325000,
-            "direction": "stable",
-            "label": "Fort Myers median asking price (as of 2026-09-19)",
-            "variable_type": "extensive",
-            "units": "USD",
-            "display_format": "currency",
-            "source": {
-              "url": "https://www.swfldatagulf.com/desk",
-              "fetched_at": "2026-09-19T04:23:35.640645+00:00",
-              "tier": 2,
-              "citation": "SWFL Data Gulf active-listing inventory — current median asking price for Fort Myers, sourced 2026-09-19"
-            },
-            "suggestions": [
-              "Chart asking rents across the corridors",
-              "What's driving freshness median asking price fort myers usd?",
-              "How does freshness median asking price fort myers usd here compare to other SWFL areas?"
-            ]
-          },
-          {
-            "metric": "freshness_median_asking_price_naples_usd",
-            "value": 650000,
-            "direction": "stable",
-            "label": "Naples median asking price (as of 2026-09-19)",
-            "variable_type": "extensive",
-            "units": "USD",
-            "display_format": "currency",
-            "source": {
-              "url": "https://www.swfldatagulf.com/desk",
-              "fetched_at": "2026-09-19T04:23:35.640645+00:00",
-              "tier": 2,
-              "citation": "SWFL Data Gulf active-listing inventory — current median asking price for Naples, sourced 2026-09-19"
-            },
-            "suggestions": [
-              "Chart asking rents across the corridors",
-              "What's driving freshness median asking price naples usd?",
-              "How does freshness median asking price naples usd here compare to other SWFL areas?"
-            ]
-          },
-          {
-            "metric": "freshness_mortgage_30yr_fixed_pct",
-            "value": 6.95,
-            "direction": "stable",
-            "label": "SWFL 30-year fixed mortgage rate (as of 2026-09-17)",
-            "variable_type": "intensive",
-            "units": "percent",
-            "display_format": "percent",
-            "source": {
-              "url": "https://fred.stlouisfed.org/series/MORTGAGE30US",
-              "fetched_at": "2026-09-19T04:23:35.640645+00:00",
-              "tier": 2,
-              "citation": "FRED — current 30-year fixed mortgage rate for SWFL, sourced 2026-09-17"
-            },
-            "suggestions": [
-              "What's driving freshness mortgage 30yr fixed pct?",
-              "How does freshness mortgage 30yr fixed pct here compare to other SWFL areas?"
-            ]
-          }
-        ],
-        "detail_tables": [],
-        "caveats": [
-          "Each county-grain number is a single grounded source's current figure, provenance-gated to a real source URL; held anomalies and unsourced (model-memory) numbers are excluded by design."
-        ],
-        "contradicts": [],
-        "confidence": 0.8,
-        "joint_integrity": 1,
-        "confidence_dispersion": 0,
-        "chain_depth": 0,
-        "trust_tier": 2,
-        "upstream_count": 0,
-        "relevance": {
-          "decay_curve": "weeks",
-          "half_life_hours": 720,
-          "computed_at": "2026-09-19T04:26:16Z"
-        },
-        "exogenous_signals": []
-      }
+      "status": "skipped-fresh",
+      "written": false
     },
     {
       "packId": "seller-stress-swfl",
