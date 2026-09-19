@@ -1,0 +1,65 @@
+name: condo-baseline-swfl monthly
+
+on:
+  schedule:
+    # Day 3 12:00 UTC — see docs/standards/pipeline-freshness.md §3. Two days after
+    # dbpr-sirs-monthly (Day 1 07:00) so the match stage sees the fresh SIRS rows;
+    # no other workflow holds Day 3. Publisher basis: Lee footprints and the Collier
+    # milestone service are live layers (no release calendar); the Collier PDF is a
+    # periodic snapshot used only as a date enrichment.
+    - cron: "0 12 3 * *"
+  workflow_dispatch:
+    inputs:
+      dry_run:
+        description: "Dry run — fetch and validate only; no DB writes, no match stage"
+        required: false
+        default: "false"
+      skip_llm:
+        description: "Deterministic match only (ambiguous filings → needs_review)"
+        required: false
+        default: "false"
+      stage:
+        description: "fetch | match | all"
+        required: false
+        default: "all"
+
+permissions:
+  contents: read
+
+jobs:
+  ingest:
+    if: ${{ vars.ENGINE_ENABLED != 'false' || github.event_name == 'workflow_dispatch' }}
+    # Self-hosted on the operator's machine for the SAME reason as dbpr-sirs-monthly
+    # plus one more: the match stage's ambiguous band runs on this machine's Ollama
+    # (gpt-oss:20b + gemma4:12b, RTX 4060 Ti 16 GB) at $0. A cloud runner has no
+    # Ollama — there the job must run with skip_llm=true / LOCAL_LLM_DISABLED=1.
+    runs-on: [self-hosted, swfl-local]
+    timeout-minutes: 60
+    env:
+      # Same dedicated venv as dbpr-sirs-monthly (see that file for why the absolute
+      # path). This pipeline additionally needs pymupdf + jsonschema; refresh with:
+      #   uv pip install --python "C:\Users\ethan\sirs-runner-venv\Scripts\python.exe" -r ingest/requirements.txt
+      VENV_PY: 'C:\Users\ethan\sirs-runner-venv\Scripts\python.exe'
+    defaults:
+      run:
+        shell: pwsh
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Run ingest
+        env:
+          SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+          SUPABASE_SERVICE_KEY: ${{ secrets.SUPABASE_SERVICE_KEY }}
+          DESTINATION__POSTGRES__CREDENTIALS: ${{ secrets.DESTINATION__POSTGRES__CREDENTIALS }}
+          LOCAL_LLM_URL: http://localhost:11434
+          LOCAL_LLM_MODEL: gpt-oss:20b
+          LOCAL_LLM_JUDGE: gemma4:12b
+          # CRAWL4AI_PROXY deliberately not wired — see dbpr-sirs-monthly.yml.
+        run: |
+          $pyArgs = @()
+          if ("${{ github.event.inputs.dry_run }}" -eq "true") { $pyArgs += "--dry-run" }
+          if ("${{ github.event.inputs.skip_llm }}" -eq "true") { $pyArgs += "--skip-llm" }
+          $stage = "${{ github.event.inputs.stage }}"
+          if ($stage -and $stage -ne "all") { $pyArgs += @("--stage", $stage) }
+          & "$env:VENV_PY" -m ingest.pipelines.condo_baseline_swfl.pipeline @pyArgs
