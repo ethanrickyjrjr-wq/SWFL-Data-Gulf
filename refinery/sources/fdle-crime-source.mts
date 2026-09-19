@@ -107,9 +107,7 @@ function normalize(row: Record<string, unknown>): FdleCrimeNormalized | null {
 async function loadFixtureRows(): Promise<Record<string, unknown>[]> {
   const raw = await readFile(FIXTURE_PATH, "utf-8");
   const data = JSON.parse(raw) as { rows?: unknown[] } | unknown[];
-  const rows: unknown[] = Array.isArray(data)
-    ? data
-    : ((data as { rows?: unknown[] }).rows ?? []);
+  const rows: unknown[] = Array.isArray(data) ? data : ((data as { rows?: unknown[] }).rows ?? []);
   return rows as Record<string, unknown>[];
 }
 
@@ -123,15 +121,12 @@ async function fetchRows(): Promise<Record<string, unknown>[]> {
   const { data, error } = await getSupabase()
     .from(TABLE)
     .select(
-      "county, period, data_year, burglary, larceny_theft, motor_vehicle_theft, " +
-        "arson, total_property_crimes, population, property_crime_per_1k, source_url",
+      "county, period, data_year, burglary, larceny_theft, motor_vehicle_theft, arson, total_property_crimes, population, property_crime_per_1k, source_url",
     )
     .gte("data_year", minDataYear)
     .order("period", { ascending: false });
   if (error) {
-    throw new Error(
-      `fdle-crime-source: ${TABLE} query failed — ${error.message}`,
-    );
+    throw new Error(`fdle-crime-source: ${TABLE} query failed — ${error.message}`);
   }
   return (data ?? []) as Record<string, unknown>[];
 }
@@ -146,8 +141,7 @@ export const fdleCrimeSource: SourceConnector = {
       env.source === "fixture"
         ? `fixture://refinery/__fixtures__/safety-swfl.sample.json`
         : buildSourceCitationUrl(TABLE, {
-            label:
-              "FBI Crime Data Explorer (NIBRS) — Lee + Collier Property Crime",
+            label: "FBI Crime Data Explorer (NIBRS) — Lee + Collier Property Crime",
             source: "FBI CDE / FDLE",
             brain: "safety-swfl",
             date_col: "period",
@@ -158,10 +152,7 @@ export const fdleCrimeSource: SourceConnector = {
         if (!normalized) return null;
         if (!normalized.source_url) normalized.source_url = receipt;
         return {
-          fragment_id: fragmentId(
-            SOURCE_ID,
-            `${normalized.county}-${normalized.data_year}`,
-          ),
+          fragment_id: fragmentId(SOURCE_ID, `${normalized.county}-${normalized.data_year}`),
           source_id: SOURCE_ID,
           source_trust_tier: 1,
           fetched_at,

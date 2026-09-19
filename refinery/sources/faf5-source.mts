@@ -120,29 +120,24 @@ export const faf5Source: SourceConnector = makeDuckDBSource<FafDuckRow>({
     year: toNum(r["year"]),
   }),
   normalize: (rows, { fetched_at }): RawFragment[] =>
-    rows.map(
-      (r): RawFragment<FafFlowNormalized> => ({
-        fragment_id: fragmentId(
-          SOURCE_ID,
-          `${r.dms_orig}-${r.sctg2}-${r.year}`,
-        ),
-        source_id: SOURCE_ID,
-        source_trust_tier: 1,
-        fetched_at,
-        raw: r,
-        normalized: {
-          kind: "faf5-flow",
-          origin_zone_id: r.dms_orig,
-          origin_zone_name: r.zone_name,
-          origin_state_abbr: r.state_abbr,
-          sctg_code: r.sctg2,
-          commodity_name: r.commodity_name,
-          tons_thousand: r.tons,
-          value_musd: r.value_m,
-          year: r.year,
-        },
-      }),
-    ),
+    rows.map((r): RawFragment<FafFlowNormalized> => ({
+      fragment_id: fragmentId(SOURCE_ID, `${r.dms_orig}-${r.sctg2}-${r.year}`),
+      source_id: SOURCE_ID,
+      source_trust_tier: 1,
+      fetched_at,
+      raw: { ...r },
+      normalized: {
+        kind: "faf5-flow",
+        origin_zone_id: r.dms_orig,
+        origin_zone_name: r.zone_name,
+        origin_state_abbr: r.state_abbr,
+        sctg_code: r.sctg2,
+        commodity_name: r.commodity_name,
+        tons_thousand: r.tons,
+        value_musd: r.value_m,
+        year: r.year,
+      },
+    })),
   citation: (verifiedDate, ttlSeconds): Omit<CitationRow, "id"> => ({
     source: `FAF5.7.1 freight flows (ORNL/FHWA Cold Lane Parquet; single model vintage downloaded ${FAF5_VINTAGE}; years ${HISTORICAL_YEARS.join(",")} are FAF modeled estimates — not independent annual surveys; dms_dest=${SWFL_DEST_ZONE} trade_type=${DOMESTIC_TRADE_TYPE}) — ${FAF5_ORNL_URL}`,
     verified: verifiedDate,

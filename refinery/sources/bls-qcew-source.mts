@@ -32,12 +32,7 @@ const FL_FIPS = "12000";
 const LEE_FIPS = "12071";
 const COLLIER_FIPS = "12021";
 
-const FIXTURE_PATH = path.join(
-  process.cwd(),
-  "refinery",
-  "__fixtures__",
-  "bls-qcew.sample.json",
-);
+const FIXTURE_PATH = path.join(process.cwd(), "refinery", "__fixtures__", "bls-qcew.sample.json");
 
 // ── Types ──────────────────────────────────────────────────────────────────────
 
@@ -115,9 +110,7 @@ function computeAreaSummary(
 ): { summary: AreaSummary; latestQtr: string | null; priorQtr: string | null } {
   const areaRows = rows.filter((r) => r.area_fips === fips);
 
-  const qtrs = [
-    ...new Set(areaRows.map((r) => toQtrString(r.year, r.qtr))),
-  ].sort();
+  const qtrs = [...new Set(areaRows.map((r) => toQtrString(r.year, r.qtr)))].sort();
   const latestQtr = qtrs[qtrs.length - 1] ?? null;
   const priorQtr = qtrs[qtrs.length - 2] ?? null;
 
@@ -125,9 +118,7 @@ function computeAreaSummary(
     if (!qtrStr) return null;
     const [yr, q] = qtrStr.split("-Q");
     return (
-      areaRows.find(
-        (r) => r.year === Number(yr) && r.qtr === q && r.own_code === ownCode,
-      ) ?? null
+      areaRows.find((r) => r.year === Number(yr) && r.qtr === q && r.own_code === ownCode) ?? null
     );
   };
 
@@ -180,45 +171,22 @@ function buildLaborSwflSummary(rows: DbRow[]): LaborSwflSummary {
 // ── Live fetch ─────────────────────────────────────────────────────────────────
 
 const COLS =
-  "area_fips,own_code,industry_code,year,qtr,area_title,own_title," +
-  "qtrly_estabs,month1_emplvl,month2_emplvl,month3_emplvl,total_qtrly_wages,avg_wkly_wage";
+  "area_fips,own_code,industry_code,year,qtr,area_title,own_title,qtrly_estabs,month1_emplvl,month2_emplvl,month3_emplvl,total_qtrly_wages,avg_wkly_wage";
 
 async function fetchLive(): Promise<DbRow[]> {
   const sb = getSupabase().schema(SCHEMA);
 
   const [flResp, leeResp, collierResp] = await Promise.all([
-    sb
-      .from(TABLE)
-      .select(COLS)
-      .eq("area_fips", FL_FIPS)
-      .order("year")
-      .order("qtr"),
-    sb
-      .from(TABLE)
-      .select(COLS)
-      .eq("area_fips", LEE_FIPS)
-      .order("year")
-      .order("qtr"),
-    sb
-      .from(TABLE)
-      .select(COLS)
-      .eq("area_fips", COLLIER_FIPS)
-      .order("year")
-      .order("qtr"),
+    sb.from(TABLE).select(COLS).eq("area_fips", FL_FIPS).order("year").order("qtr"),
+    sb.from(TABLE).select(COLS).eq("area_fips", LEE_FIPS).order("year").order("qtr"),
+    sb.from(TABLE).select(COLS).eq("area_fips", COLLIER_FIPS).order("year").order("qtr"),
   ]);
 
-  if (flResp.error)
-    throw new Error(
-      `bls-qcew-source: FL query failed — ${flResp.error.message}`,
-    );
+  if (flResp.error) throw new Error(`bls-qcew-source: FL query failed — ${flResp.error.message}`);
   if (leeResp.error)
-    throw new Error(
-      `bls-qcew-source: Lee query failed — ${leeResp.error.message}`,
-    );
+    throw new Error(`bls-qcew-source: Lee query failed — ${leeResp.error.message}`);
   if (collierResp.error)
-    throw new Error(
-      `bls-qcew-source: Collier query failed — ${collierResp.error.message}`,
-    );
+    throw new Error(`bls-qcew-source: Collier query failed — ${collierResp.error.message}`);
 
   return [
     ...((flResp.data ?? []) as DbRow[]),
@@ -246,8 +214,7 @@ export const blsQcewSource: SourceConnector = {
   trust_tier: 1,
 
   async fetch(): Promise<RawFragment[]> {
-    const rows =
-      env.source === "fixture" ? await loadFixture() : await fetchLive();
+    const rows = env.source === "fixture" ? await loadFixture() : await fetchLive();
 
     const fetched_at = isoTimestamp();
     const fragments: RawFragment[] = [];
@@ -265,10 +232,7 @@ export const blsQcewSource: SourceConnector = {
         total_qtrly_wages: r.total_qtrly_wages,
       };
       fragments.push({
-        fragment_id: fragmentId(
-          SOURCE_ID,
-          `${r.area_fips}-${r.own_code}-${r.year}-${r.qtr}`,
-        ),
+        fragment_id: fragmentId(SOURCE_ID, `${r.area_fips}-${r.own_code}-${r.year}-${r.qtr}`),
         source_id: SOURCE_ID,
         source_trust_tier: 1,
         fetched_at,
@@ -314,10 +278,7 @@ export const blsQcewSource: SourceConnector = {
 // Windows PowerShell: $env:REFINERY_SOURCE="fixture"; npx tsx refinery/sources/bls-qcew-source.mts
 // bash/zsh:           REFINERY_SOURCE=fixture npx tsx refinery/sources/bls-qcew-source.mts
 
-if (
-  process.argv[1] &&
-  import.meta.url.endsWith(path.basename(process.argv[1]))
-) {
+if (process.argv[1] && import.meta.url.endsWith(path.basename(process.argv[1]))) {
   blsQcewSource.fetch().then((fragments) => {
     const summary = fragments.find(
       (f) => (f.normalized as { kind?: string }).kind === "labor-swfl-summary",

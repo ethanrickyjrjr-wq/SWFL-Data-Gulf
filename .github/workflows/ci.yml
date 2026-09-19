@@ -31,6 +31,9 @@ jobs:
       - name: Typecheck
         run: bunx tsc --noEmit
 
+      - name: Refinery typecheck (including Bun tests)
+        run: bun run refinery:typecheck
+
       - name: Lint
         run: bunx eslint .
 

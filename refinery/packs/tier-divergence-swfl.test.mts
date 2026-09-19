@@ -151,6 +151,8 @@ function row(
     tier_spread_yoy_pct: spread_yoy,
     bottom_tier_yoy_pct: bottom_yoy,
     top_tier_yoy_pct: top_yoy,
+    top_tier_yoy_prior_month_pct: null,
+    bottom_tier_yoy_prior_month_pct: null,
   };
 }
 

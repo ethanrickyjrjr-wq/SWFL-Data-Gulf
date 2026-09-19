@@ -377,6 +377,7 @@ async function main(): Promise<void> {
     }
     outcomes.push(outcome);
     if (outcome.written) {
+      if (!outcome.brainOutput) throw new Error(`${id}: written build has no brain output`);
       entries.push({
         packId: id,
         written: outcome.written,
@@ -457,6 +458,8 @@ async function main(): Promise<void> {
           );
           outcomes.push(masterOutcome);
           if (masterOutcome.written) {
+            if (!masterOutcome.brainOutput)
+              throw new Error("master: written build has no brain output");
             entries.push({
               packId: "master",
               written: masterOutcome.written,

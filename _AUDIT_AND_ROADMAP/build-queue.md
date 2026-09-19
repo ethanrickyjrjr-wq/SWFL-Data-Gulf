@@ -1,5 +1,14 @@
 # Build Queue — the one human input
 
+## Current operator priority — 09/18/2026
+
+- [~] **Terra: free-data evidence supply** — execution brief `docs/superpowers/handoffs/2026-09-18-terra-free-data-builds.md`. T1 RSW discovery/capture and T2 Census county history implemented and integrated; 24 Python tests pass. T3 unattended operation remains unactivated; bounded FDOT qualification remains incomplete. No paid feeds/models or production data writes in this research slice.
+- [~] **Sol: cross-domain evidence and honest evaluation** — execution brief `docs/superpowers/handoffs/2026-09-18-sol-evidence-builds.md`. S1 independently reproduces the real 91-month/273-comparison packet. S2 seasonal-naive forecast contract/scorer and immutable October target implemented; future outcome scoring remains pending. Shared contract: `docs/superpowers/plans/2026-09-18-data-first-intelligence-rebuild.md`. Shipping verification: both typechecks green, 1,820 refinery tests pass; see SESSION_LOG.md.
+
+The existing queue below is preserved. Its historical email/UI priorities do not override these two assignments; do not reopen dropped checks or label these builds complete before executable evidence exists.
+
+## Existing queue and operating notes
+
 > **This is the only hand-maintained status file.** /ops reads it to (1) order the
 > REDs ("next up" = top-to-bottom here) and (2) flag YELLOWs (currently building).
 > Everything else on /ops is derived from real signals.

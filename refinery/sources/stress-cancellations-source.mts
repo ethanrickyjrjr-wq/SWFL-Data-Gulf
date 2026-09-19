@@ -49,7 +49,7 @@ export const stressCancSource: SourceConnector = makeDuckDBSource<CancellationsR
       source_id: SOURCE_ID,
       source_trust_tier: 3,
       fetched_at,
-      raw: r,
+      raw: { ...r },
       normalized: r,
     })),
   citation: (verifiedDate, ttlSeconds): Omit<CitationRow, "id"> => ({

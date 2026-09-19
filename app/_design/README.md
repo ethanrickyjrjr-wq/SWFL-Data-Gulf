@@ -68,3 +68,34 @@ cd _tmp && git sparse-checkout set examples && cd ..
 # v4 docs (substantive pages only — see existing list)
 firecrawl scrape <list of doc URLs> --only-main-content -o app/_design/animejs-docs/
 ```
+
+## Retained Anime.js API references
+
+These are the saved v4 reference pages used with the examples above. They document the retained version; check installed APIs before adopting an example.
+
+### Setup and execution
+
+- [getting started](/app/_design/animejs-docs/animejs.com-documentation-getting-started.md)
+- [getting started module imports](/app/_design/animejs-docs/animejs.com-documentation-getting-started-module-imports.md)
+- [getting started using with vanilla js](/app/_design/animejs-docs/animejs.com-documentation-getting-started-using-with-vanilla-js.md)
+- [engine](/app/_design/animejs-docs/animejs.com-documentation-engine.md)
+- [scope](/app/_design/animejs-docs/animejs.com-documentation-scope.md)
+- [timer](/app/_design/animejs-docs/animejs.com-documentation-timer.md)
+
+### Animation and interaction
+
+- [animation](/app/_design/animejs-docs/animejs.com-documentation-animation.md)
+- [animatable](/app/_design/animejs-docs/animejs.com-documentation-animatable.md)
+- [draggable](/app/_design/animejs-docs/animejs.com-documentation-draggable.md)
+- [eases](/app/_design/animejs-docs/animejs.com-documentation-eases.md)
+- [easings built in easings](/app/_design/animejs-docs/animejs.com-documentation-easings-built-in-easings.md)
+- [utilities](/app/_design/animejs-docs/animejs.com-documentation-utilities.md)
+- [web animation api improvements to the web animation api](/app/_design/animejs-docs/animejs.com-documentation-web-animation-api-improvements-to-the-web-animation-api.md)
+
+### SVG and text
+
+- [svg](/app/_design/animejs-docs/animejs.com-documentation-svg.md)
+- [svg morphto](/app/_design/animejs-docs/animejs.com-documentation-svg-morphto.md)
+- [text](/app/_design/animejs-docs/animejs.com-documentation-text.md)
+- [text scrambletext](/app/_design/animejs-docs/animejs.com-documentation-text-scrambletext.md)
+- [text splittext](/app/_design/animejs-docs/animejs.com-documentation-text-splittext.md)

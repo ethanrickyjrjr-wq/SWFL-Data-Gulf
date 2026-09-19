@@ -1,11 +1,11 @@
 {
   "extends": "../tsconfig.json",
   "compilerOptions": {
-    "module": "nodenext",
-    "moduleResolution": "nodenext",
+    "module": "esnext",
+    "moduleResolution": "bundler",
     "target": "ES2023",
-    "lib": ["ES2023"],
-    "types": ["node"],
+    "lib": ["ES2023", "dom", "dom.iterable"],
+    "types": ["node", "bun", "next"],
     "noEmit": true,
     "allowImportingTsExtensions": true,
     "verbatimModuleSyntax": true,

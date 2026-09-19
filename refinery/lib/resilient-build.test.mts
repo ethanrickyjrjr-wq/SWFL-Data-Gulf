@@ -36,7 +36,7 @@ function minPack(overrides: Partial<PackDefinition> = {}): PackDefinition {
   } as PackDefinition;
 }
 
-function minOutput(refinedAt: string): BrainOutputRead {
+function minOutput(refinedAt: string): Extract<BrainOutputRead, { kind: "ok" }> {
   return {
     kind: "ok",
     output: {

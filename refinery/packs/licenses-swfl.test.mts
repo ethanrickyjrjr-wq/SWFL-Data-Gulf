@@ -6,8 +6,7 @@ import type { DbprLicenseSummary } from "../sources/fl-dbpr-licenses-source.mts"
 process.env["REFINERY_SOURCE"] = "fixture";
 
 const { licensesSwfl } = await import("./licenses-swfl.mts");
-const { flDbprLicensesSource } =
-  await import("../sources/fl-dbpr-licenses-source.mts");
+const { flDbprLicensesSource } = await import("../sources/fl-dbpr-licenses-source.mts");
 
 const NOW = "2026-06-01T10:00:00Z";
 
@@ -45,10 +44,7 @@ test("licenses-swfl: fixture source returns exactly 1 fragment", async () => {
   assert.equal(fragments[0].source_id, "fl_dbpr_licenses");
   const norm = fragments[0].normalized as DbprLicenseSummary;
   assert.equal(norm.kind, "dbpr-license-summary");
-  assert.ok(
-    typeof norm.licenses_active_lee === "number",
-    "licenses_active_lee should be a number",
-  );
+  assert.ok(typeof norm.licenses_active_lee === "number", "licenses_active_lee should be a number");
 });
 
 // ── Test 2: deterministic flags ───────────────────────────────────────────────
@@ -68,10 +64,7 @@ test("licenses-swfl: corpusSummary returns dbpr_licenses_snapshot fact", async (
   const fact = facts[0];
   assert.equal(fact.topic, "dbpr_licenses_snapshot");
   assert.ok(fact.value, "fact should have a value string");
-  assert.ok(
-    Array.isArray(fact.source_fragment_ids),
-    "source_fragment_ids should be an array",
-  );
+  assert.ok(Array.isArray(fact.source_fragment_ids), "source_fragment_ids should be an array");
 });
 
 // ── Test 4: outputProducer returns all 6 slugs ────────────────────────────────
@@ -80,7 +73,7 @@ test("licenses-swfl: outputProducer returns all 6 key_metrics slugs", async () =
   const fragments = await flDbprLicensesSource.fetch();
   licensesSwfl.corpusSummary!(fragments);
   const result = licensesSwfl.outputProducer!(
-    {} as Parameters<typeof licensesSwfl.outputProducer>[0],
+    {} as Parameters<NonNullable<typeof licensesSwfl.outputProducer>>[0],
   );
 
   const expectedSlugs = [
@@ -111,7 +104,7 @@ test("licenses-swfl: bearish direction from high lapse rate (>10%)", () => {
   });
   licensesSwfl.corpusSummary!([frag]);
   const result = licensesSwfl.outputProducer!(
-    {} as Parameters<typeof licensesSwfl.outputProducer>[0],
+    {} as Parameters<NonNullable<typeof licensesSwfl.outputProducer>>[0],
   );
   assert.equal(
     result.direction,
@@ -133,7 +126,7 @@ test("licenses-swfl: bullish direction from low lapse rate (<5%)", () => {
   });
   licensesSwfl.corpusSummary!([frag]);
   const result = licensesSwfl.outputProducer!(
-    {} as Parameters<typeof licensesSwfl.outputProducer>[0],
+    {} as Parameters<NonNullable<typeof licensesSwfl.outputProducer>>[0],
   );
   assert.equal(
     result.direction,
@@ -155,7 +148,7 @@ test("licenses-swfl: neutral direction from mid lapse rate (5–10%)", () => {
   });
   licensesSwfl.corpusSummary!([frag]);
   const result = licensesSwfl.outputProducer!(
-    {} as Parameters<typeof licensesSwfl.outputProducer>[0],
+    {} as Parameters<NonNullable<typeof licensesSwfl.outputProducer>>[0],
   );
   assert.equal(
     result.direction,
@@ -169,7 +162,7 @@ test("licenses-swfl: neutral direction from mid lapse rate (5–10%)", () => {
 test("licenses-swfl: empty fragments returns neutral direction", () => {
   licensesSwfl.corpusSummary!([]);
   const result = licensesSwfl.outputProducer!(
-    {} as Parameters<typeof licensesSwfl.outputProducer>[0],
+    {} as Parameters<NonNullable<typeof licensesSwfl.outputProducer>>[0],
   );
   assert.equal(result.direction, "neutral");
   assert.equal(result.magnitude, 0);

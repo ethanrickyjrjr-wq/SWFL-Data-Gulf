@@ -32,12 +32,7 @@ export const FL_FIPS = "12000";
 export const LEE_FIPS = "12071";
 export const COLLIER_FIPS = "12021";
 
-const FIXTURE_PATH = path.join(
-  process.cwd(),
-  "refinery",
-  "__fixtures__",
-  "bls-laus.sample.json",
-);
+const FIXTURE_PATH = path.join(process.cwd(), "refinery", "__fixtures__", "bls-laus.sample.json");
 
 // ── Types ──────────────────────────────────────────────────────────────────────
 
@@ -75,11 +70,7 @@ export interface LausSwflSummary {
 function latestPeriod(rows: DbRow[]): { year: number; period: string } | null {
   let best: { year: number; period: string } | null = null;
   for (const r of rows) {
-    if (
-      best === null ||
-      r.year > best.year ||
-      (r.year === best.year && r.period > best.period)
-    ) {
+    if (best === null || r.year > best.year || (r.year === best.year && r.period > best.period)) {
       best = { year: r.year, period: r.period };
     }
   }
@@ -96,10 +87,7 @@ function getMeasure(
   return (
     rows.find(
       (r) =>
-        r.area_fips === fips &&
-        r.measure_code === mc &&
-        r.year === year &&
-        r.period === period,
+        r.area_fips === fips && r.measure_code === mc && r.year === year && r.period === period,
     )?.value ?? null
   );
 }
@@ -172,30 +160,15 @@ export function buildLausSwflSummary(rows: DbRow[]): LausSwflSummary {
   const priorPeriod = refPeriod;
 
   const isPrelim = rows.some(
-    (r) =>
-      r.year === refYear && r.period === refPeriod && r.footnote_codes === "P",
+    (r) => r.year === refYear && r.period === refPeriod && r.footnote_codes === "P",
   );
 
   return {
     kind: "laus-swfl-summary",
     reference_month: `${refYear}-${refPeriod}`,
     is_preliminary: isPrelim,
-    fl_state: buildCountyMetrics(
-      rows,
-      FL_FIPS,
-      refYear,
-      refPeriod,
-      priorYear,
-      priorPeriod,
-    ),
-    lee_county: buildCountyMetrics(
-      rows,
-      LEE_FIPS,
-      refYear,
-      refPeriod,
-      priorYear,
-      priorPeriod,
-    ),
+    fl_state: buildCountyMetrics(rows, FL_FIPS, refYear, refPeriod, priorYear, priorPeriod),
+    lee_county: buildCountyMetrics(rows, LEE_FIPS, refYear, refPeriod, priorYear, priorPeriod),
     collier_county: buildCountyMetrics(
       rows,
       COLLIER_FIPS,
@@ -210,8 +183,7 @@ export function buildLausSwflSummary(rows: DbRow[]): LausSwflSummary {
 // ── Live fetch ─────────────────────────────────────────────────────────────────
 
 const COLS =
-  "series_id,area_fips,measure_code,measure_label,year,period,period_name," +
-  "value,footnote_codes,_ingested_at";
+  "series_id,area_fips,measure_code,measure_label,year,period,period_name,value,footnote_codes,_ingested_at";
 
 async function fetchLive(): Promise<DbRow[]> {
   const sb = getSupabase().schema(SCHEMA);
@@ -247,18 +219,11 @@ async function fetchLive(): Promise<DbRow[]> {
       .order("period"),
   ]);
 
-  if (flResp.error)
-    throw new Error(
-      `bls-laus-source: FL query failed — ${flResp.error.message}`,
-    );
+  if (flResp.error) throw new Error(`bls-laus-source: FL query failed — ${flResp.error.message}`);
   if (leeResp.error)
-    throw new Error(
-      `bls-laus-source: Lee query failed — ${leeResp.error.message}`,
-    );
+    throw new Error(`bls-laus-source: Lee query failed — ${leeResp.error.message}`);
   if (collierResp.error)
-    throw new Error(
-      `bls-laus-source: Collier query failed — ${collierResp.error.message}`,
-    );
+    throw new Error(`bls-laus-source: Collier query failed — ${collierResp.error.message}`);
 
   return [
     ...((flResp.data ?? []) as DbRow[]),
@@ -286,8 +251,7 @@ export const blsLausSource: SourceConnector = {
   trust_tier: 1,
 
   async fetch(): Promise<RawFragment[]> {
-    const rows =
-      env.source === "fixture" ? await loadFixture() : await fetchLive();
+    const rows = env.source === "fixture" ? await loadFixture() : await fetchLive();
 
     const fetched_at = isoTimestamp();
     const summary = buildLausSwflSummary(rows);
@@ -324,10 +288,7 @@ export const blsLausSource: SourceConnector = {
 // Windows PowerShell: $env:REFINERY_SOURCE="fixture"; npx tsx refinery/sources/bls-laus-source.mts
 // bash/zsh:           REFINERY_SOURCE=fixture npx tsx refinery/sources/bls-laus-source.mts
 
-if (
-  process.argv[1] &&
-  import.meta.url.endsWith(path.basename(process.argv[1]))
-) {
+if (process.argv[1] && import.meta.url.endsWith(path.basename(process.argv[1]))) {
   blsLausSource.fetch().then((fragments) => {
     const summary = fragments.find(
       (f) => (f.normalized as { kind?: string }).kind === "laus-swfl-summary",

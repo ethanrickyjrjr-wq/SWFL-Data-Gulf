@@ -198,11 +198,14 @@ describe("flushApiUsageLogs()", () => {
       releaseInsert = resolve;
     });
     let inserts = 0;
-    globalThis.fetch = (async () => {
-      inserts++;
-      await insertGate;
-      return new Response("[]", { status: 201 });
-    }) as typeof fetch;
+    globalThis.fetch = Object.assign(
+      async () => {
+        inserts++;
+        await insertGate;
+        return new Response("[]", { status: 201 });
+      },
+      { preconnect: prior.fetch.preconnect },
+    );
     try {
       const fake = {
         create: async () => ({

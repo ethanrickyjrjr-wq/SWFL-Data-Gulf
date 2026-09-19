@@ -36,6 +36,8 @@ function row(
 function makeFragment(regionDom: number | null = null): RawFragment {
   const summary: ActiveListingsResidentialSummary = {
     kind: "active-listings-residential-summary",
+    recent_price_cuts_region: null,
+    recent_tax_paid_region: null,
     region: row(null, null, 10459, 496470, regionDom),
     by_county: [row("Lee", null, 7412, 414900, null), row("Collier", null, 2749, 912000, null)],
     // Two real core ZIPs (33993 Lee, 34120 Collier) + one real non-core SWFL ZIP (33950 Charlotte)
@@ -117,6 +119,8 @@ test("active-listings-swfl: dual-CORE-county ZIP (34134 Lee/Collier) collapses t
   // this identical view for its own /desk consumer).
   const summary: ActiveListingsResidentialSummary = {
     kind: "active-listings-residential-summary",
+    recent_price_cuts_region: null,
+    recent_tax_paid_region: null,
     region: row(null, null, 10459, 496470, null),
     by_county: [row("Lee", null, 7412, 414900, null), row("Collier", null, 2749, 912000, null)],
     by_zip: [row("Lee", "34134", 394, 799000, null), row("Collier", "34134", 87, 1950000, null)],

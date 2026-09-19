@@ -880,29 +880,22 @@ function propertyValueOutputProducer(_out: PackOutput): BrainOutputProducerResul
       `Trailing baseline has zero variance (all ${BASELINE_YEAR_COUNT} years identical), so z-score is undefined; direction is neutral.`,
     );
   }
-  if (fhfa?.cape_coral_msa?.yoy_change_pct != null) {
-    const msa = fhfa.cape_coral_msa;
-    const sign = msa.yoy_change_pct > 0 ? "+" : "";
-    conclusionParts.push(
-      `FHFA Cape Coral-Fort Myers MSA HPI: ${sign}${msa.yoy_change_pct}% YoY (${msa.latest_period}), FL state ${fhfa.fl_state?.yoy_change_pct != null ? `${fhfa.fl_state.yoy_change_pct > 0 ? "+" : ""}${fhfa.fl_state.yoy_change_pct}%` : "n/a"} — federal price-index benchmark for the Lee market.`,
-    );
-  }
+  const msa = fhfa?.cape_coral_msa;
   if (agg.sohGapMedianPct != null) {
     conclusionParts.push(
       `Median Save-Our-Homes gap across ${fmtInt(agg.homesteadedParcels)} homesteaded parcels: ${fmtPct(agg.sohGapMedianPct)} of just value suppressed for taxation.`,
     );
   }
 
-  const exogenous_signals: string[] = [];
-  if (fhfa?.cape_coral_msa?.yoy_change_pct != null) {
-    const msa = fhfa.cape_coral_msa;
-    exogenous_signals.push(
+  // HPI benchmarks are measured context, not external shock events.
+  if (msa?.yoy_change_pct != null) {
+    conclusionParts.push(
       `FHFA Cape Coral-Fort Myers MSA HPI YoY: ${msa.yoy_change_pct > 0 ? "+" : ""}${msa.yoy_change_pct}% (${msa.latest_period}). Federal benchmark for Lee County repeat-sale price direction — purchase-only, traditional, quarterly.`,
     );
   }
-  if (fhfa?.fl_state?.yoy_change_pct != null) {
-    const st = fhfa.fl_state;
-    exogenous_signals.push(
+  const st = fhfa?.fl_state;
+  if (st?.yoy_change_pct != null) {
+    conclusionParts.push(
       `FHFA Florida state HPI YoY: ${st.yoy_change_pct > 0 ? "+" : ""}${st.yoy_change_pct}% (${st.latest_period}). Statewide baseline — Lee MSA delta vs state signals local over/underperformance.`,
     );
   }
@@ -932,7 +925,7 @@ function propertyValueOutputProducer(_out: PackOutput): BrainOutputProducerResul
     drivers: [],
     overrides: [],
     contradicts: [],
-    exogenous_signals,
+    exogenous_signals: [],
   };
 }
 

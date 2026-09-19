@@ -1,3 +1,21 @@
+## 2026-09-18 — first Terra/Sol builds: independent review and joint repair
+
+Operator requested verification of the first builds, next steps, and tools/skills readiness, using crawl4ai and Terra/Sol as needed. Reviewed both isolated worktrees and found actual retained captures at `C:/Users/ethan/SWFL-research-captures`. Reproduced and repaired the broken manifest boundary; also repaired reported-valuation units, revision ordering/source attribution, and the misleading coverage summary hiding Collier's 84 missing county-months. Parent reran 23 Python + 20 Bun tests successfully and independently reproduced the 91-month/273-comparison packet with analytical hash `383ffad48a57ed897e87e3e617992fe1880580cfe6f523c629cde08aa81a3a71`. Dated interpretation is in the archive's `reports/integration-review-final/review-note.md`. Changes remain in the two worktrees; full typecheck remains baseline-red. No production writes, activation, paid calls, commit or push occurred. Crawl4AI live LCPA probe and fresh RSW dry run succeeded; FDOT Guest archive attempt returned a CAPTCHA failure, while the alternate official map exposes annual 2025/AADT context. Local daily traffic remains unqualified. Evidence, tools readiness, and S2/T3 next assignments: `_RESEARCH/data-and-ingest/2026-09-18-first-builds-integration-review.md`.
+
+## 2026-09-18 — SSD setup completed by operator; archive verified ready
+
+Operator ran the guarded sudo setup. Independent SSH checks: Samsung T5 partition is ext4 SWFLDATA, UUID 2742aa90-27aa-4b2e-b24f-8d5b75e72355; srv-swfl.mount enabled+active at /srv/swfl; research/{raw,exports,manifests,reports} owned stanicky mode 0700. About 973 GB available. Cross-machine small-file SHA-256 matched after sync; receipt at /srv/swfl/research/manifests/storage-verification.txt. Collector setting is SWFL_RESEARCH_ROOT=/srv/swfl/research, not yet installed into a collector environment. No pipeline activation occurred. Reboot/reconnect, sustained performance, and second-copy recovery remain unverified. TAILS contents were discarded without backup as authorized; internal NVMe not reformatted. The optimal-I/O alignment warning was nonfatal to formatting/mount/write-read; do not erase again to silence it.
+
+## 2026-09-18 — attached SSD identified; preparation awaits interactive sudo
+
+Operator authorized clearing the newly attached drive. Verified over SSH: Samsung T5 USB SSD, serial S4B0NR0N404686N, 1,000,204,886,016 bytes; only child is an unmounted ~8 GB FAT TAILS partition. Fedora system lives on separate internal NVMe. No erase/format performed: `sudo -n true` requires a password. Staged `/home/stanicky/swfl-storage-setup/prepare-ssd.sh` plus mount unit on Spectre. Bash syntax and non-destructive identity preflight passed. User runs `ssh -t fedora "sudo bash /home/stanicky/swfl-storage-setup/prepare-ssd.sh --apply"`; only then verify ext4 SWFLDATA and `/srv/swfl/research` before configuring collectors. Do not call the archive ready yet. No credentials requested or exposed.
+
+## 2026-09-18 — operator redirects to free-data intelligence; Terra/Sol execution briefs
+
+Operator: focus on free/government data and existing hardware, Hermes and crawl4ai; give Terra and Sol builds to test the cross-domain idea. Updated the existing NORTH-STAR and queue so email work no longer overrides that direction. Briefs: `docs/superpowers/handoffs/2026-09-18-terra-free-data-builds.md` and `2026-09-18-sol-evidence-builds.md`; shared contract in the September 18 data-first plan. No implementation, production data write, schedule activation, model call, or deployment occurred in preparing them.
+
+Read-only hardware correction: `ssh fedora uname -a` succeeded in this local session; Fedora has about 484.6 GB available under /home. Windows has installed local Ollama models and about 736 GB free. Operator then clarified: Spectre is the always-on Fedora box, qBittorrent is on Windows, and the 1 TB SD card will be plugged into Spectre (mount not yet verified). Older cloud-session reachability blockers must not be treated as permanent facts. Hermes installed code supports no-agent script jobs; cloud/provider configuration has not been certified free. Start bounded local captures; do not migrate infrastructure or require an LLM in numeric collection/scoring.
+
 ## 2026-09-18 (Opus 5) — OPERATOR: "WE ALREADY SET IT UP FOR THE MAX PLAN TO RUN IT... HOW IS IT NOT SET UP YET??? IT'S BEEN OVER A WEEK"
 
 He is right and it is worse than a week: the decree is 07/26/2026 ("we are on Max plan. do not use
@@ -9641,3 +9659,6 @@ message WAS operator authorization. That guard's own header says 35 autonomous p
 before it existed; this is the same failure shape finding a new way through. OWED: harden the
 guard so `OPERATOR_APPROVED_PUSH=1` can't be self-set by a routine/session, only supplied by a
 real human action; audit how many of the other 9 weekly-dep-scan runs since 07/13 did the same.
+## 2026-09-18 — finish and push the integrated research work
+
+Operator rejected stopping at local commit d5aa3056 with refinery typecheck and documentation reachability still red. RESOLVED locally 09/18: both typechecks pass; 1,820 refinery and 24 Python tests pass; missing prior-month values and malformed FHFA events have regression tests; documentation reachability is below the unchanged baseline. Existing planning/research edits are preserved in the shipping commit. SESSION_LOG.md records the safe-push receipt and remaining activation/scoring boundaries.

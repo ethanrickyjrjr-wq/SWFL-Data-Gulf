@@ -27,6 +27,8 @@
  * caption is forced to acknowledge ODD (odd_extract) contamination.
  */
 
+import type { SourceTag } from "./decision-fn.mts";
+
 export type Direction = "bullish" | "bearish" | "neutral";
 
 export interface ScoredCall {
@@ -37,7 +39,7 @@ export interface ScoredCall {
   observed: Direction;
   /** Precomputed by the caller — same semantics as the forward grader. */
   correct: boolean;
-  source_tag: "lake_tier1" | "odd_extract" | "fixture";
+  source_tag: SourceTag;
 }
 
 export interface SkillScore {

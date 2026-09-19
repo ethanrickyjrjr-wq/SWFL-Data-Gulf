@@ -13,11 +13,24 @@ const NOW = "2026-05-22T00:00:00Z";
 function msa(area_code: string): OewsMsaSnapshot {
   return {
     area_code,
-    top_groups: [{ occ_title: "Office and Administrative Support", tot_emp: 42_000 } as never],
+    area_name: "Test MSA",
+    ref_year: 2024,
+    total_employment: 100_000,
+    top_groups: [
+      {
+        occ_code: "43-0000",
+        occ_title: "Office and Administrative Support",
+        tot_emp: 42_000,
+        jobs_1000: null,
+        loc_quotient: null,
+        h_median: null,
+        a_median: null,
+      },
+    ],
     construction_loc_q: 2.17,
     healthcare_employment: 38_000,
     construction_median_wage: 24.5,
-  } as OewsMsaSnapshot;
+  };
 }
 
 function makeFragment(): RawFragment {

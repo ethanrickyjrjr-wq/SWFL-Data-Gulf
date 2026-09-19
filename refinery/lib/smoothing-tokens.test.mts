@@ -50,23 +50,18 @@ test("prose_confidence_translation contains the locked v2 tokens", () => {
   ];
   for (const token of expected) {
     assert.ok(
-      (
-        SMOOTHING_TOKENS.prose_confidence_translation as readonly string[]
-      ).includes(token),
+      (SMOOTHING_TOKENS.prose_confidence_translation as readonly string[]).includes(token),
       `expected prose_confidence_translation to include "${token}"`,
     );
   }
 });
 
 test("no spatial group exists (Wave 2A polygons killed in v2)", () => {
-  assert.equal(
-    (SMOOTHING_TOKENS as Record<string, unknown>).spatial_apportionment,
-    undefined,
-  );
+  assert.equal((SMOOTHING_TOKENS as Record<string, unknown>).spatial_apportionment, undefined);
 });
 
 test("every token is a non-empty trimmed string", () => {
-  const groups = Object.values(SMOOTHING_TOKENS) as readonly string[][];
+  const groups = Object.values(SMOOTHING_TOKENS);
   for (const group of groups) {
     for (const token of group) {
       assert.equal(typeof token, "string");

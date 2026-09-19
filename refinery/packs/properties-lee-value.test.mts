@@ -5,6 +5,14 @@ process.env["REFINERY_SOURCE"] = "fixture";
 
 const { directionFromZScore, propertiesLeeValue } = await import("./properties-lee-value.mts");
 
+test("FHFA benchmarks remain narrative context, never malformed exogenous event strings", async () => {
+  const fragments = (await Promise.all(propertiesLeeValue.sources.map((s) => s.fetch()))).flat();
+  propertiesLeeValue.corpusSummary!(fragments);
+  const result = propertiesLeeValue.outputProducer!({} as never);
+  assert.deepEqual(result.exogenous_signals, []);
+  assert.match(result.conclusion, /FHFA/);
+});
+
 // Rule table for properties-lee-value direction derivation.
 // Bullish threshold: z ≥ +1.0. Bearish threshold: z ≤ −1.0. Neutral otherwise.
 // Boundary tests pin behavior at the exact ±1.0 cut-points so future-you

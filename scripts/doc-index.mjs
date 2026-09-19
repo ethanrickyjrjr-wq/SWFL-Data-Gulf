@@ -102,7 +102,7 @@ function hookFor(relPath) {
       .replace(/\[([^\]]+)\]\([^)]*\)/g, "$1")
       .replace(/\s+/g, " ")
       .trim();
-  return { title: clean(title).slice(0, 110), hook: clean(hook).slice(0, 190) };
+  return { title: clean(title).slice(0, 110).trimEnd(), hook: clean(hook).slice(0, 190).trimEnd() };
 }
 
 const r = census();

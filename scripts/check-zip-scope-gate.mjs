@@ -47,6 +47,8 @@ const SCOPE_TOKENS = ["isCoreScope", "CORE_SCOPE_ZIPS", "coreScopeZips"];
  * Each needs a reason. This is the only escape hatch, and it is deliberately loud.
  */
 const WAIVERS = {
+  "refinery/sources/tier-divergence-zip-latest-source.mts":
+    "retains the full vendor view for its 85-row completeness guard; its only production consumer, refinery/packs/tier-divergence-swfl.mts corpusSummary, filters every row through isCoreScope before computing regional metrics or detail tables",
   "app/r/zip-report/[zip]/page.tsx":
     "reads housing_by_zip off the BRAIN payload (a.registryBrains housing-swfl detail_tables), never the lake — brain output is already scope-filtered; the page's lake-grain reads all route through assembleZipReport/candidates.ts, which is isCoreScope-gated",
   "lib/geo/nearest-zips.ts":

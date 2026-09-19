@@ -10,23 +10,23 @@
 ## DAG — order · model · parallel group
 
 **Group 0 — start now (parallel):**
-- `01 doc-contract` — **Sonnet** — deps: none
-- `04 save-photo` — **Sonnet** — deps: none
+- [01 doc-contract](/docs/superpowers/builds/email-engine/01-doc-contract.md) — **Sonnet** — deps: none
+- [04 save-photo](/docs/superpowers/builds/email-engine/04-save-photo.md) — **Sonnet** — deps: none
 
 **Group 1 — after 01 (parallel):**
-- `02 compile-grid` — **Opus** — deps: 01
-- `03 author-engine` — **Opus** — deps: 01
-- `05 listing+multicol blocks` — **Sonnet** — deps: 01
-- `G1 GridCanvas` — **Sonnet (OPERATOR)** — deps: 01
+- [02 compile-grid](/docs/superpowers/builds/email-engine/02-compile-grid.md) — **Opus** — deps: 01
+- [03 author-engine](/docs/superpowers/builds/email-engine/03-author-engine.md) — **Opus** — deps: 01
+- [05 listing+multicol blocks](/docs/superpowers/builds/email-engine/05-listing-multicol-blocks.md) — **Sonnet** — deps: 01
+- [G1 GridCanvas](/docs/superpowers/builds/email-engine/G1-gridcanvas.md) — **Sonnet (OPERATOR)** — deps: 01
 
 **Group 2 — after deps (parallel):**
-- `06 templates` — **Sonnet** — deps: 01, 05
-- `G2 block-toolbar` — **Sonnet (OPERATOR)** — deps: G1
-- `G3 photopea-modal` — **Sonnet (OPERATOR)** — deps: 04
-- `G4 wire-shell` — **Sonnet (OPERATOR)** — deps: G1, 03
+- [06 templates](/docs/superpowers/builds/email-engine/06-templates.md) — **Sonnet** — deps: 01, 05
+- [G2 block-toolbar](/docs/superpowers/builds/email-engine/G2-block-toolbar.md) — **Sonnet (OPERATOR)** — deps: G1
+- [G3 photopea-modal](/docs/superpowers/builds/email-engine/G3-photopea-modal.md) — **Sonnet (OPERATOR)** — deps: 04
+- [G4 wire-shell](/docs/superpowers/builds/email-engine/G4-wire-shell.md) — **Sonnet (OPERATOR)** — deps: G1, 03
 
 **Independent track:**
-- `07 asset-factory` — **Sonnet (ingest)** — deps: none — GHA only, not Vercel
+- [07 asset-factory](/docs/superpowers/builds/email-engine/07-asset-factory.md) — **Sonnet (ingest)** — deps: none — GHA only, not Vercel
 
 ## File-contention chokepoints (do NOT run in parallel on the same tree)
 - `doc/types.ts` + `doc/schema.ts` — touched by 01, 03 (author schema), 05 (block schema). **01 lands first; 03 and 05 serialize on `schema.ts`** (or the main thread owns the shared schema hunk).

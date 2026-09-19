@@ -86,7 +86,9 @@ test("rsw-airport: outputProducer returns the new roster + computes trailing-12 
   const fragments = await rswAirportSource.fetch();
   rswAirport.corpusSummary!(fragments); // populate closure state
 
-  const result = rswAirport.outputProducer!({} as Parameters<typeof rswAirport.outputProducer>[0]);
+  const result = rswAirport.outputProducer!(
+    {} as Parameters<NonNullable<typeof rswAirport.outputProducer>>[0],
+  );
 
   const slugs = result.key_metrics.map((m) => m.metric);
   // The direction driver + headline + decomposition + characterizing must all be present.
@@ -122,7 +124,9 @@ test("rsw-airport: outputProducer returns the new roster + computes trailing-12 
 test("rsw-airport: direction is a valid BrainOutputDirection", async () => {
   const fragments = await rswAirportSource.fetch();
   rswAirport.corpusSummary!(fragments);
-  const result = rswAirport.outputProducer!({} as Parameters<typeof rswAirport.outputProducer>[0]);
+  const result = rswAirport.outputProducer!(
+    {} as Parameters<NonNullable<typeof rswAirport.outputProducer>>[0],
+  );
   assert.ok(
     ["bullish", "bearish", "mixed", "neutral"].includes(result.direction),
     `direction "${result.direction}" is not valid`,
@@ -135,7 +139,9 @@ test("rsw-airport: direction is a valid BrainOutputDirection", async () => {
 test("rsw-airport: bullish from rising trailing-12 total_passengers", () => {
   const frags = tpFragments([...Array(12).fill(110000), ...Array(12).fill(100000)]);
   rswAirport.corpusSummary!(frags);
-  const result = rswAirport.outputProducer!({} as Parameters<typeof rswAirport.outputProducer>[0]);
+  const result = rswAirport.outputProducer!(
+    {} as Parameters<NonNullable<typeof rswAirport.outputProducer>>[0],
+  );
   assert.equal(result.direction, "bullish", "rising trailing-12 should be bullish");
   // +10% / divisor 15 ≈ 0.67.
   assert.ok(
@@ -149,7 +155,9 @@ test("rsw-airport: bullish from rising trailing-12 total_passengers", () => {
 test("rsw-airport: bearish from falling trailing-12 total_passengers", () => {
   const frags = tpFragments([...Array(12).fill(90000), ...Array(12).fill(100000)]);
   rswAirport.corpusSummary!(frags);
-  const result = rswAirport.outputProducer!({} as Parameters<typeof rswAirport.outputProducer>[0]);
+  const result = rswAirport.outputProducer!(
+    {} as Parameters<NonNullable<typeof rswAirport.outputProducer>>[0],
+  );
   assert.equal(result.direction, "bearish", "falling trailing-12 should be bearish");
 });
 
@@ -158,7 +166,9 @@ test("rsw-airport: bearish from falling trailing-12 total_passengers", () => {
 test("rsw-airport: neutral when trailing-12 YoY not computable (<24 months)", () => {
   const frags = tpFragments(Array(12).fill(100000)); // only 12 months → no prior-12
   rswAirport.corpusSummary!(frags);
-  const result = rswAirport.outputProducer!({} as Parameters<typeof rswAirport.outputProducer>[0]);
+  const result = rswAirport.outputProducer!(
+    {} as Parameters<NonNullable<typeof rswAirport.outputProducer>>[0],
+  );
   assert.equal(result.direction, "neutral", "insufficient months → neutral");
   assert.equal(result.magnitude, 0);
 });
@@ -167,7 +177,9 @@ test("rsw-airport: neutral when trailing-12 YoY not computable (<24 months)", ()
 
 test("rsw-airport: empty fragments returns neutral direction", () => {
   rswAirport.corpusSummary!([]);
-  const result = rswAirport.outputProducer!({} as Parameters<typeof rswAirport.outputProducer>[0]);
+  const result = rswAirport.outputProducer!(
+    {} as Parameters<NonNullable<typeof rswAirport.outputProducer>>[0],
+  );
   assert.equal(result.direction, "neutral");
   assert.equal(result.magnitude, 0);
   assert.equal(result.key_metrics.length, 0);

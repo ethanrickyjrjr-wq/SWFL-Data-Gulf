@@ -52,7 +52,7 @@ test("fgcu-reri: corpusSummary extracts indicator rows", async () => {
   const fragments = await fgcuReriSource.fetch();
   const summary = fgcuReri.corpusSummary!(fragments);
   assert.ok(summary.length > 0, "corpusSummary should return rows");
-  const indicators = summary.map((s) => (s as ReriNormalized).indicator);
+  const indicators = summary.map((s) => (s as typeof s & ReriNormalized).indicator);
   assert.ok(indicators.includes("airport_activity"), "should include airport_activity");
   assert.ok(indicators.includes("unemployment_rate"), "should include unemployment_rate");
 });
@@ -63,7 +63,9 @@ test("fgcu-reri: outputProducer returns BrainOutput with key_metrics", async () 
   const fragments = await fgcuReriSource.fetch();
   fgcuReri.corpusSummary!(fragments); // populate closure state
 
-  const result = fgcuReri.outputProducer!({} as Parameters<typeof fgcuReri.outputProducer>[0]);
+  const result = fgcuReri.outputProducer!(
+    {} as Parameters<NonNullable<typeof fgcuReri.outputProducer>>[0],
+  );
 
   assert.ok(result.key_metrics.length > 0, "should have key_metrics");
   const slugs = result.key_metrics.map((m) => m.metric);
@@ -92,7 +94,9 @@ test("fgcu-reri: direction is a valid BrainOutputDirection", async () => {
   const fragments = await fgcuReriSource.fetch();
   fgcuReri.corpusSummary!(fragments);
 
-  const result = fgcuReri.outputProducer!({} as Parameters<typeof fgcuReri.outputProducer>[0]);
+  const result = fgcuReri.outputProducer!(
+    {} as Parameters<NonNullable<typeof fgcuReri.outputProducer>>[0],
+  );
 
   const valid = ["bullish", "bearish", "mixed", "neutral"];
   assert.ok(
@@ -134,7 +138,9 @@ test("fgcu-reri: polarity regression — rising unemployment = mixed, not bullis
   ];
 
   fgcuReri.corpusSummary!(fragments);
-  const result = fgcuReri.outputProducer!({} as Parameters<typeof fgcuReri.outputProducer>[0]);
+  const result = fgcuReri.outputProducer!(
+    {} as Parameters<NonNullable<typeof fgcuReri.outputProducer>>[0],
+  );
 
   assert.equal(
     result.direction,

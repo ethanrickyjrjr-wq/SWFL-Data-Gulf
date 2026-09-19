@@ -97,23 +97,23 @@ async function fetchFromSupabase(): Promise<TierDivergenceZipLatestRow[]> {
   // both-tier ZIP universe → loud deterministic abort, not a silent partial median.
   assertViewRowFloor(SOURCE_ID, data.length, MIN_VIEW_ROWS);
 
-  return data.map(
-    (r): TierDivergenceZipLatestRow => ({
-      zip_code: r.zip_code as string,
-      metro: (r.metro as string | null) ?? null,
-      county_name: (r.county_name as string | null) ?? null,
-      city: (r.city as string | null) ?? null,
-      latest_period: (r.latest_period as string).slice(0, 10),
-      top_tier_value_latest: r.top_tier_value_latest as number,
-      bottom_tier_value_latest: r.bottom_tier_value_latest as number,
-      top_tier_value_3m_avg: r.top_tier_value_3m_avg as number,
-      bottom_tier_value_3m_avg: r.bottom_tier_value_3m_avg as number,
-      tier_spread_ratio: r.tier_spread_ratio as number,
-      tier_spread_yoy_pct: (r.tier_spread_yoy_pct as number | null) ?? null,
-      bottom_tier_yoy_pct: (r.bottom_tier_yoy_pct as number | null) ?? null,
-      top_tier_yoy_pct: (r.top_tier_yoy_pct as number | null) ?? null,
-    }),
-  );
+  return data.map((r): TierDivergenceZipLatestRow => ({
+    zip_code: r.zip_code as string,
+    metro: (r.metro as string | null) ?? null,
+    county_name: (r.county_name as string | null) ?? null,
+    city: (r.city as string | null) ?? null,
+    latest_period: (r.latest_period as string).slice(0, 10),
+    top_tier_value_latest: r.top_tier_value_latest as number,
+    bottom_tier_value_latest: r.bottom_tier_value_latest as number,
+    top_tier_value_3m_avg: r.top_tier_value_3m_avg as number,
+    bottom_tier_value_3m_avg: r.bottom_tier_value_3m_avg as number,
+    tier_spread_ratio: r.tier_spread_ratio as number,
+    tier_spread_yoy_pct: (r.tier_spread_yoy_pct as number | null) ?? null,
+    bottom_tier_yoy_pct: (r.bottom_tier_yoy_pct as number | null) ?? null,
+    top_tier_yoy_pct: (r.top_tier_yoy_pct as number | null) ?? null,
+    top_tier_yoy_prior_month_pct: (r.top_tier_yoy_prior_month_pct as number | null) ?? null,
+    bottom_tier_yoy_prior_month_pct: (r.bottom_tier_yoy_prior_month_pct as number | null) ?? null,
+  }));
 }
 
 async function fetchFromFixture(): Promise<TierDivergenceZipLatestRow[]> {
@@ -130,17 +130,15 @@ export const tierDivergenceZipLatestSource: SourceConnector = {
     const fetched_at = isoTimestamp();
     const rows = env.source === "fixture" ? await fetchFromFixture() : await fetchFromSupabase();
 
-    return rows.map(
-      (r): RawFragment<TierDivergenceZipLatestRow> => ({
-        // One fragment per ZIP (the view is latest-per-ZIP; no period_end in the key).
-        fragment_id: fragmentId(SOURCE_ID, r.zip_code),
-        source_id: SOURCE_ID,
-        source_trust_tier: 3,
-        fetched_at,
-        raw: { zip_code: r.zip_code, latest_period: r.latest_period },
-        normalized: r,
-      }),
-    );
+    return rows.map((r): RawFragment<TierDivergenceZipLatestRow> => ({
+      // One fragment per ZIP (the view is latest-per-ZIP; no period_end in the key).
+      fragment_id: fragmentId(SOURCE_ID, r.zip_code),
+      source_id: SOURCE_ID,
+      source_trust_tier: 3,
+      fetched_at,
+      raw: { zip_code: r.zip_code, latest_period: r.latest_period },
+      normalized: r,
+    }));
   },
   citationMeta(verifiedDate: string, ttlSeconds: number): Omit<CitationRow, "id"> {
     return {
