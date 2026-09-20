@@ -1,3 +1,11 @@
+## 2026-09-20 (Fable 5.1, session 3, part 4) - LeePA comparable-sales dry run PROVED on Fedora; handoff items 1-2 closed
+
+Run 35518297483, `runner=fedora-swfl-local`, success: "114,650 rows fetched / 114,650 canonical",
+"comp_id uniqueness: 114,616 distinct / 114,650 rows (34 collapse on merge)", "all guards passed; no rows written."
+The 3.12 venv on the box carries the LeePA job, as the handoff guessed. What is left from both handoffs is the
+ask-first trio only (DOM YoY unit rename = served-number change; bls_qcew 3 NULL columns = schema change;
+E1 Lee permits from ArcGIS = new data_lake lane, gate is his to waive) plus his two hand edits to the push hook.
+
 ## 2026-09-20 (Fable 5.1, session 3, part 3) - MAIN IS GREEN; first scheduled Fedora runs proven; he does not approve pushes any more
 
 CI on 1ec02ac0: success - first green main since at least 09/18 (two blockers: scratchpad test, spent runner).
