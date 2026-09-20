@@ -1,3 +1,11 @@
+## 2026-09-20 (Fable 5.1, session 2) — OPERATOR: "create a fedora runner so i can stop hearing about this"
+
+The prior entry took "fedora is registered" as his word; GitHub said `total_count: 0` and the box had
+no runner dir, no service, no Listener. The handoff then filed it under "Needs Ricky". It does not
+need Ricky: `ssh fedora` works from this machine and `gh api` can mint the registration token.
+This session stands the runner up itself (systemd --user, no sudo), runs runner-smoke, and only
+then flips SWFL_LOCAL_RUNNER_READY. STANDING: stop listing the runner as an operator to-do.
+
 ## 2026-09-20 (Fable 5.1) — OPERATOR: "fedora is registered. bump next.js and fan out to get all this done. you check all the work. if too much, section it off and leave me a handoff"
 
 Context: asked where the 09/15 Fable "master-brain backend week" plan stood. Verified against repo +
