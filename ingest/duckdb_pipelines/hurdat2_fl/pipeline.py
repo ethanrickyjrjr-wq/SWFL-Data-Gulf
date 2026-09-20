@@ -87,18 +87,18 @@ def _latest_hurdat2_url() -> tuple[str, str, str]:
     return f"{NHC_BASE_URL}{basename}", vintage, basename
 
 
-def run() -> None:
+def run(*, target: str = PARQUET_TARGET) -> None:
     _load_env()
 
     endpoint = (
-        os.environ["SUPABASE_S3_ENDPOINT"]
+        os.environ.get("SUPABASE_S3_ENDPOINT", "")
         .replace("https://", "")
         .replace("http://", "")
     )
 
     print("hurdat2-fl: starting ingest")
     print(f"  source root: {NHC_BASE_URL}")
-    print(f"  target: {PARQUET_TARGET}")
+    print(f"  target: {target}")
 
     source_url, vintage, basename = _latest_hurdat2_url()
     print(f"  picked: {basename} (vintage {vintage})")
@@ -115,14 +115,15 @@ def run() -> None:
 
     con = duckdb.connect()
     con.execute("INSTALL httpfs; LOAD httpfs;")
-    con.execute(f"""
-        SET s3_endpoint='{endpoint}';
-        SET s3_access_key_id='{os.environ["SUPABASE_S3_ACCESS_KEY_ID"]}';
-        SET s3_secret_access_key='{os.environ["SUPABASE_S3_SECRET_ACCESS_KEY"]}';
-        SET s3_region='us-east-1';
-        SET s3_url_style='path';
-        SET s3_use_ssl=true;
-    """)
+    if target.startswith("s3://"):
+        con.execute(f"""
+            SET s3_endpoint='{endpoint}';
+            SET s3_access_key_id='{os.environ["SUPABASE_S3_ACCESS_KEY_ID"]}';
+            SET s3_secret_access_key='{os.environ["SUPABASE_S3_SECRET_ACCESS_KEY"]}';
+            SET s3_region='us-east-1';
+            SET s3_url_style='path';
+            SET s3_use_ssl=true;
+        """)
 
     con.execute("""
         CREATE TEMP TABLE hurdat_raw (
@@ -157,34 +158,56 @@ def run() -> None:
                   AND lon BETWEEN {FL_LON_MIN} AND {FL_LON_MAX}
             )
             ORDER BY storm_id, obs_date, obs_time
-        ) TO '{PARQUET_TARGET}' (FORMAT PARQUET, COMPRESSION ZSTD);
+        ) TO '{target}' (FORMAT PARQUET, COMPRESSION ZSTD);
     """)
 
     # parquet_metadata returns one row per row group; sum gets the whole file's
     # compressed payload bytes (excludes footer; close enough for inventory).
     size_rows = con.execute(
-        f"SELECT SUM(total_compressed_size)::BIGINT FROM parquet_metadata('{PARQUET_TARGET}');"
+        f"SELECT SUM(total_compressed_size)::BIGINT FROM parquet_metadata('{target}');"
     ).fetchall()
     byte_size = int(size_rows[0][0]) if size_rows and size_rows[0][0] is not None else None
     row_count_rows = con.execute(
-        f"SELECT COUNT(*) FROM read_parquet('{PARQUET_TARGET}');"
+        f"SELECT COUNT(*) FROM read_parquet('{target}');"
     ).fetchall()
     row_count = int(row_count_rows[0][0]) if row_count_rows else None
-
-    upsert_inventory_row(
-        bucket=BUCKET,
-        path=PARQUET_PATH,
-        vintage=vintage,
-        byte_size=byte_size,
-        pack_id=PACK_ID,
-        source_url=source_url,
-    )
 
     print("hurdat2-fl: ingest complete")
     print(f"  parquet rows: {row_count:,}" if row_count is not None else "  parquet rows: ?")
     print(f"  parquet bytes (compressed): {byte_size}")
-    print(f"  inventory row upserted: id={BUCKET}/{PARQUET_PATH}")
+
+    if target.startswith("s3://"):
+        upsert_inventory_row(
+            bucket=BUCKET,
+            path=PARQUET_PATH,
+            vintage=vintage,
+            byte_size=byte_size,
+            pack_id=PACK_ID,
+            source_url=source_url,
+        )
+        print(f"  inventory row upserted: id={BUCKET}/{PARQUET_PATH}")
+
+
+def main(argv: list[str] | None = None) -> None:
+    """The workflow has always passed --dry-run on a dispatched dry run, but this module had
+    no argparse, so the flag was silently ignored and the "dry run" did the full S3 write +
+    inventory upsert. run() gates both on an s3:// target, so a dry run is the same fetch
+    against a temp dir (same shape as usgs, b9184668)."""
+    import argparse
+    import tempfile
+
+    parser = argparse.ArgumentParser(description="hurdat2-fl ingest pipeline.")
+    parser.add_argument("--dry-run", action="store_true",
+                        help="Fetch and build Parquet locally; skip the S3 write and inventory upsert.")
+    args = parser.parse_args(argv)
+
+    if args.dry_run:
+        with tempfile.TemporaryDirectory() as tmp:
+            print("hurdat2-fl: --dry-run, writing to a temp dir; no S3, no inventory row.")
+            run(target=f"{tmp}/hurdat2_fl.parquet")
+        return
+    run()
 
 
 if __name__ == "__main__":
-    run()
+    main()

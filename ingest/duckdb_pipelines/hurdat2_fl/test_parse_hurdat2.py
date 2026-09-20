@@ -79,3 +79,34 @@ def test_count_mismatch_raises() -> None:
     bad = "AL012020,            TEST,    2,\n20200101, 0000,   , TD, 20.0N,  60.0W,  30,  999,    0,    0,    0,    0,    0,    0,    0,    0,    0,    0,    0,    0,    0,\n"
     with pytest.raises(ValueError, match="ended mid-storm"):
         list(parse_hurdat2(bad.splitlines()))
+
+
+def test_vendor_line_missing_the_lat_lon_comma_still_parses() -> None:
+    """NHC's 09/12/2026 release (hurdat2-1851-2025-091226.txt) line 30687 reads
+    `63.3N    7.5E` - the comma between lat and lon is missing. One bad line in
+    ~57k killed the whole ingest with `could not convert string to float`."""
+    lines = [
+        "AL111969,            UNNAMED,      1,",
+        "19690929, 0600,  , EX, 63.3N    7.5E,  70, -999, -999, -999, -999, -999, -999, -999, -999, -999, -999, -999, -999, -999, -999",
+    ]
+    (p,) = list(parse_hurdat2(lines))
+    assert (p.lat, p.lon, p.max_wind_kt) == (63.3, 7.5, 70)
+
+
+_GOOD = "19751207, 0600,  , EX, 39.0N,  50.0W,  50, -999, -999, -999, -999, -999, -999, -999, -999, -999, -999, -999, -999, -999, -999"
+_NO_HEMISPHERE = "19751207, 0000,  , EX, 38.83,  51.0W,  50, -999, -999, -999, -999, -999, -999, -999, -999, -999, -999, -999, -999, -999, -999"
+
+
+def test_hemisphere_less_latitude_is_skipped_not_guessed() -> None:
+    """Same release, line 33698: `38.83` where `38.8N` was meant. Guessing the value
+    would invent a coordinate, so the row is dropped and the rest of the storm kept."""
+    lines = ["AL241975,            UNNAMED,      2,", _NO_HEMISPHERE, _GOOD]
+    (p,) = list(parse_hurdat2(lines))
+    assert p.lat == 39.0
+
+
+def test_many_unparseable_lines_still_kill_the_run() -> None:
+    """The skip is for a vendor typo, never for a format change."""
+    lines = ["AL241975,            UNNAMED,      6,"] + [_NO_HEMISPHERE] * 6
+    with pytest.raises(ValueError, match="format changed"):
+        list(parse_hurdat2(lines))

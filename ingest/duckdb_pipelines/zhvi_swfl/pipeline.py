@@ -211,8 +211,23 @@ def run(*, target: str = PARQUET_TARGET, source_csv: str | None = None) -> None:
     print("zhvi-swfl: ingest complete")
 
 
-def main() -> None:
+def main(argv: list[str] | None = None) -> None:
+    """The workflow has always passed --dry-run on a dispatched dry run, but main() had no
+    argparse, so the flag was silently ignored and the "dry run" did the full S3 write +
+    inventory upsert. run() already gates both on an s3:// target (same shape as usgs, b9184668)."""
+    import argparse
+
+    parser = argparse.ArgumentParser(description="zhvi-swfl ingest pipeline.")
+    parser.add_argument("--dry-run", action="store_true",
+                        help="Fetch and build Parquet locally; skip the S3 write and inventory upsert.")
+    args = parser.parse_args(argv)
+
     try:
+        if args.dry_run:
+            with tempfile.TemporaryDirectory() as tmp:
+                print("zhvi-swfl: --dry-run, writing to a temp dir; no S3, no inventory row.")
+                run(target=f"{tmp}/zhvi_swfl.parquet")
+            return
         run()
     except KeyboardInterrupt:
         print("interrupted", file=sys.stderr)

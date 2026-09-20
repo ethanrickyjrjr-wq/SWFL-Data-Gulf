@@ -19,6 +19,7 @@ Layout: alternating header + observation blocks.
 Storm names may be `UNNAMED`. Wind/pressure use -999 for unknown — converted to
 None so downstream SQL (MIN/AVG/MAX) doesn't poison aggregates.
 """
+import re
 from dataclasses import dataclass
 from typing import Iterable, Iterator
 
@@ -89,6 +90,10 @@ def _saffir_category(max_wind_kt: int | None) -> int | None:
     return None
 
 
+_MISSING_LATLON_COMMA = re.compile(r"(\d[NS])\s+(\d)")
+MAX_BAD_OBS = 5  # of ~57k obs; the 09/12/2026 release carries 1 unrepairable line
+
+
 def _parse_header(line: str) -> tuple[str, str, int]:
     parts = [p.strip() for p in line.split(",")]
     if len(parts) < 3:
@@ -100,6 +105,8 @@ def _parse_header(line: str) -> tuple[str, str, int]:
 
 
 def _parse_obs(line: str, storm_id: str, storm_name: str, storm_year: int) -> TrackPoint:
+    # NHC ships the odd line with the lat/lon comma missing (`63.3N    7.5E`, 09/12/2026 release).
+    line = _MISSING_LATLON_COMMA.sub(r"\1, \2", line)
     parts = [p.strip() for p in line.split(",")]
     if len(parts) < 9:
         raise ValueError(f"obs line has <9 fields: {line!r}")
@@ -143,6 +150,7 @@ def parse_hurdat2(lines: Iterable[str]) -> Iterator[TrackPoint]:
     storm_id = ""
     storm_name = ""
     storm_year = 0
+    skipped = 0
 
     for raw in lines:
         line = raw.strip()
@@ -153,8 +161,19 @@ def parse_hurdat2(lines: Iterable[str]) -> Iterator[TrackPoint]:
             # Year is encoded as last 4 chars of the storm_id (e.g. AL092022 -> 2022).
             storm_year = int(storm_id[-4:])
             continue
-        yield _parse_obs(line, storm_id, storm_name, storm_year)
         pending -= 1
+        try:
+            yield _parse_obs(line, storm_id, storm_name, storm_year)
+        except ValueError as exc:
+            # A hemisphere-less coordinate (`38.83` for `38.8N`, 09/12/2026 release) cannot be
+            # repaired without inventing a value, so the one fix is dropped, loudly. More than
+            # MAX_BAD_OBS means the FORMAT changed, not a typo - that still kills the run.
+            skipped += 1
+            print(f"  WARNING hurdat2: skipped unparseable obs in {storm_id}: {line[:60]!r} ({exc})")
+            if skipped > MAX_BAD_OBS:
+                raise ValueError(
+                    f"HURDAT2: {skipped} unparseable obs lines (> {MAX_BAD_OBS}) - format changed?"
+                ) from exc
 
     if pending is not None and pending != 0:
         raise ValueError(

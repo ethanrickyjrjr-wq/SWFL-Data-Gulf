@@ -77,14 +77,14 @@ def _load_env() -> None:
     load_env_local()
 
 
-def run() -> None:
+def run(*, target: str = PARQUET_TARGET) -> None:
     _load_env()
 
-    endpoint = os.environ["SUPABASE_S3_ENDPOINT"].replace("https://", "").replace("http://", "")
+    endpoint = os.environ.get("SUPABASE_S3_ENDPOINT", "").replace("https://", "").replace("http://", "")
 
     print(f"storm-history-swfl: starting ingest")
     print(f"  source: NCEI index at {NOAA_BASE_URL}")
-    print(f"  target: {PARQUET_TARGET}")
+    print(f"  target: {target}")
     print(f"  counties: {SWFL_COUNTIES_CZ}")
 
     urls = _list_noaa_urls(YEAR_RANGE_START, YEAR_RANGE_END)
@@ -94,14 +94,15 @@ def run() -> None:
 
     con = duckdb.connect()
     con.execute("INSTALL httpfs; LOAD httpfs;")
-    con.execute(f"""
-        SET s3_endpoint='{endpoint}';
-        SET s3_access_key_id='{os.environ["SUPABASE_S3_ACCESS_KEY_ID"]}';
-        SET s3_secret_access_key='{os.environ["SUPABASE_S3_SECRET_ACCESS_KEY"]}';
-        SET s3_region='us-east-1';
-        SET s3_url_style='path';
-        SET s3_use_ssl=true;
-    """)
+    if target.startswith("s3://"):
+        con.execute(f"""
+            SET s3_endpoint='{endpoint}';
+            SET s3_access_key_id='{os.environ["SUPABASE_S3_ACCESS_KEY_ID"]}';
+            SET s3_secret_access_key='{os.environ["SUPABASE_S3_SECRET_ACCESS_KEY"]}';
+            SET s3_region='us-east-1';
+            SET s3_url_style='path';
+            SET s3_use_ssl=true;
+        """)
 
     urls_sql_list = ", ".join(f"'{u}'" for u in urls)
     con.execute(f"""
@@ -124,28 +125,50 @@ def run() -> None:
     assert_min_rows(total, MIN_TOTAL_ROWS, "storm_events_swfl total")
     assert_min_rows(hurricane, MIN_HURRICANE_ROWS, "storm_events_swfl hurricane/TS rows")
 
-    con.execute(f"COPY staged TO '{PARQUET_TARGET}' (FORMAT PARQUET, COMPRESSION ZSTD);")
+    con.execute(f"COPY staged TO '{target}' (FORMAT PARQUET, COMPRESSION ZSTD);")
 
     # Get the written file's size for inventory record
     size_rows = con.execute(
-        f"SELECT total_compressed_size FROM parquet_metadata('{PARQUET_TARGET}') LIMIT 1;"
+        f"SELECT total_compressed_size FROM parquet_metadata('{target}') LIMIT 1;"
     ).fetchall()
     byte_size = int(size_rows[0][0]) if size_rows else None
 
-    # Audit-trail row
-    upsert_inventory_row(
-        bucket=BUCKET,
-        path=PARQUET_PATH,
-        vintage=VINTAGE,
-        byte_size=byte_size,
-        pack_id=PACK_ID,
-        source_url=NOAA_URL_GLOB,
-    )
-
     print(f"storm-history-swfl: ingest complete")
     print(f"  parquet bytes (compressed): {byte_size}")
-    print(f"  inventory row upserted: id={BUCKET}/{PARQUET_PATH}")
+
+    # Audit-trail row
+    if target.startswith("s3://"):
+        upsert_inventory_row(
+            bucket=BUCKET,
+            path=PARQUET_PATH,
+            vintage=VINTAGE,
+            byte_size=byte_size,
+            pack_id=PACK_ID,
+            source_url=NOAA_URL_GLOB,
+        )
+        print(f"  inventory row upserted: id={BUCKET}/{PARQUET_PATH}")
+
+
+def main(argv: list[str] | None = None) -> None:
+    """The workflow has always passed --dry-run on a dispatched dry run, but this module had
+    no argparse, so the flag was silently ignored and the "dry run" did the full S3 write +
+    inventory upsert. run() gates both on an s3:// target, so a dry run is the same fetch
+    against a temp dir (same shape as usgs, b9184668)."""
+    import argparse
+    import tempfile
+
+    parser = argparse.ArgumentParser(description="storm-history-swfl ingest pipeline.")
+    parser.add_argument("--dry-run", action="store_true",
+                        help="Fetch and build Parquet locally; skip the S3 write and inventory upsert.")
+    args = parser.parse_args(argv)
+
+    if args.dry_run:
+        with tempfile.TemporaryDirectory() as tmp:
+            print("storm-history-swfl: --dry-run, writing to a temp dir; no S3, no inventory row.")
+            run(target=f"{tmp}/storm_events_swfl.parquet")
+        return
+    run()
 
 
 if __name__ == "__main__":
-    run()
+    main()
