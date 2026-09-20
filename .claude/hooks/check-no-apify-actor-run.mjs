@@ -40,6 +40,8 @@
 
 const BANNER = "=".repeat(72);
 
+import { unattendedMarkers, unattendedRefusal } from "./lib/unattended.mjs";
+
 const SPENDS = new Set(["call-actor", "apify--rag-web-browser"]);
 
 function block(tool, detail) {
@@ -52,7 +54,9 @@ function block(tool, detail) {
 let raw = "";
 process.stdin.on("data", (d) => (raw += d));
 process.stdin.on("end", () => {
-  if (process.env.OPERATOR_APPROVED_PAID_RUN === "1") process.exit(0);
+  const unattended = unattendedMarkers();
+  const hasToken = process.env.OPERATOR_APPROVED_PAID_RUN === "1";
+  if (hasToken && !unattended.length) process.exit(0);
 
   let payload;
   try {
@@ -66,6 +70,7 @@ process.stdin.on("end", () => {
 
   const bare = toolName.slice("mcp__plugin_apify_apify__".length);
   if (!SPENDS.has(bare)) process.exit(0);
+  if (hasToken) block(bare, unattendedRefusal("OPERATOR_APPROVED_PAID_RUN", unattended));
 
   block(
     bare,

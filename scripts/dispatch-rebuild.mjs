@@ -23,6 +23,7 @@ import { execSync } from "node:child_process";
 import fs from "node:fs";
 import path from "node:path";
 import { fileURLToPath, pathToFileURL } from "node:url";
+import { unattendedMarkers, unattendedRefusal } from "../.claude/hooks/lib/unattended.mjs";
 
 const REPO = "ethanrickyjrjr-wq/SWFL-Data-Gulf";
 const WORKFLOW = "daily-rebuild.yml";
@@ -103,6 +104,9 @@ async function main() {
         "Fires the RULE 1 targeted rebuild AND appends the tripwire acceptance entry.",
     );
   }
+  const unattended = unattendedMarkers();
+  if (unattended.length)
+    die("REFUSED — " + unattendedRefusal("OPERATOR_APPROVED_PAID_RUN", unattended));
   if (process.env.OPERATOR_APPROVED_PAID_RUN !== "1") {
     die(
       "REFUSED — this dispatches a PAID run (daily-rebuild spends Sonnet).\n" +

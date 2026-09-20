@@ -22,6 +22,7 @@
 import fs from "node:fs";
 import path from "node:path";
 import { spawnSync } from "node:child_process";
+import { unattendedMarkers, unattendedRefusal } from "../.claude/hooks/lib/unattended.mjs";
 
 const ROOT = path.resolve(import.meta.dirname, "..");
 const ENV_FILE = path.join(ROOT, ".env.local");
@@ -35,6 +36,13 @@ if (args.length === 0) {
   process.exit(1);
 }
 
+const unattended = unattendedMarkers();
+if (unattended.length) {
+  console.error(
+    "\nREFUSED — " + unattendedRefusal("OPERATOR_APPROVED_PAID_RUN", unattended) + "\n",
+  );
+  process.exit(2);
+}
 if (process.env.OPERATOR_APPROVED_PAID_RUN !== "1") {
   console.error(
     "\nREFUSED — paid-run valve requires OPERATOR_APPROVED_PAID_RUN=1.\n" +

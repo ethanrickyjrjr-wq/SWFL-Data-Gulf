@@ -38,6 +38,7 @@
 import fs from "node:fs";
 import path from "node:path";
 import { consumeToken } from "./lib/approval-token.mjs";
+import { unattendedMarkers, unattendedRefusal } from "./lib/unattended.mjs";
 
 const BANNER = "=".repeat(72);
 const WF_DIR = path.join(process.cwd(), ".github", "workflows");
@@ -54,8 +55,11 @@ process.stdin.on("end", () => {
   }
   if (!cmd.trim()) process.exit(0);
 
-  // Deliberate operator opt-in anywhere in the command → allow.
-  if (/\bOPERATOR_APPROVED_PAID_RUN=1\b/.test(cmd)) process.exit(0);
+  // Deliberate operator opt-in anywhere in the command → allow — but only where a human can
+  // have typed it. An unattended session falls through to the normal block below.
+  const unattended = unattendedMarkers();
+  const hasToken = /\bOPERATOR_APPROVED_PAID_RUN=1\b/.test(cmd);
+  if (hasToken && !unattended.length) process.exit(0);
 
   let hit = null;
   try {
@@ -64,6 +68,9 @@ process.stdin.on("end", () => {
     process.exit(0); // internal error → fail open
   }
   if (!hit) process.exit(0);
+  if (hasToken && unattended.length) {
+    block("self-approved paid run", unattendedRefusal("OPERATOR_APPROVED_PAID_RUN", unattended));
+  }
 
   // Human-typed approval token (writ-guard-trio A, 08/19/2026): the operator typing
   // `approve paid-dispatch` in chat mints a single-use token only a human keystroke can

@@ -19,6 +19,8 @@
 //
 // Fail-OPEN on internal errors — a broken guard must never wedge the agent.
 
+import { unattendedMarkers } from "./lib/unattended.mjs";
+
 const BANNER = "=".repeat(72);
 
 let raw = "";
@@ -42,7 +44,7 @@ process.stdin.on("end", () => {
   // live interactive local session 09/20/2026 — so it would block the operator's own push.
   // ponytail: env markers are unsettable-by-prefix (the hook reads ITS env, not the command's),
   // but a session that can edit this file can still gut it; the real wall is GitHub's ruleset.
-  const unattended = ["CLAUDE_CODE_REMOTE", "CI"].filter((k) => process.env[k] === "true");
+  const unattended = unattendedMarkers(); // one root: lib/unattended.mjs
   const hasToken = /\bOPERATOR_APPROVED_PUSH=1\b/.test(cmd);
   if (hasToken && !unattended.length) process.exit(0);
 
