@@ -5,7 +5,7 @@ from datetime import datetime, timezone
 import dlt
 import requests
 
-from .constants import BLS_QCEW_BASE_URL, AREA_FIPS
+from .constants import BLS_QCEW_BASE_URL, AREA_FIPS, BLS_HEADERS
 
 
 _BLS_QCEW_COLUMNS: dict = {
@@ -69,7 +69,7 @@ def bls_qcew_resource(quarters: list[tuple[int, str]]):
     for year, qtr in quarters:
         for _geo_key, fips in AREA_FIPS.items():
             url = f"{BLS_QCEW_BASE_URL}/{year}/{qtr}/area/{fips}.csv"
-            resp = requests.get(url, timeout=60)
+            resp = requests.get(url, timeout=60, headers=BLS_HEADERS)
             resp.raise_for_status()
 
             reader = csv.DictReader(io.StringIO(resp.text))

@@ -199,3 +199,35 @@ def test_rdb_row_to_site_empty_alt_coerced_to_none():
     raw = {"site_no": "02292900", "alt_va": "", "alt_datum_cd": ""}
     site = _rdb_row_to_site(raw, "http://x.com", "2026-05-19T00:00:00+00:00")
     assert site["alt_va"] is None
+
+
+# ── retry session (503 on chunk 1/27 killed the 09/10/2026 monthly run) ──────
+
+
+def test_session_retries_5xx_and_still_raises_after_exhaustion():
+    """waterservices.usgs.gov returned 503 for the 2000 chunk on 09/10/2026 and the
+    whole month died on the first request. Both fetches must go through a session
+    that retries 5xx/429 with backoff — and with raise_on_status=False the exhausted
+    response is still returned, so the existing raise_for_status() keeps raising
+    HTTPError (not RetryError). Verified against a local 503 server: 6 hits, HTTPError.
+    """
+    from ingest.duckdb_pipelines.usgs import fetch
+
+    retry = fetch._SESSION.get_adapter("https://waterservices.usgs.gov").max_retries
+    assert retry.total >= 4
+    assert retry.backoff_factor >= 1
+    for code in (429, 502, 503, 504):
+        assert code in retry.status_forcelist
+    assert retry.raise_on_status is False, "True turns HTTPError into RetryError"
+    assert "POST" not in (retry.allowed_methods or ())
+
+
+def test_both_usgs_fetches_use_the_retry_session():
+    """Guards the 2 call sites: a new requests.get here would silently lose retries."""
+    import inspect
+
+    from ingest.duckdb_pipelines.usgs import fetch
+
+    src = inspect.getsource(fetch)
+    assert src.count("_SESSION.get(") == 2
+    assert "requests.get(" not in src

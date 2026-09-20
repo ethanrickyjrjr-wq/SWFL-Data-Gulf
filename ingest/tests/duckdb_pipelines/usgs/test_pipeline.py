@@ -65,7 +65,7 @@ def _mock_requests_get(url, **kwargs):
 # ── Tests ────────────────────────────────────────────────────────────────────
 
 
-@patch("ingest.duckdb_pipelines.usgs.fetch.requests.get", side_effect=_mock_requests_get)
+@patch("ingest.duckdb_pipelines.usgs.fetch._SESSION.get", side_effect=_mock_requests_get)
 def test_run_writes_both_parquet_files(mock_get, tmp_path):
     from ingest.duckdb_pipelines.usgs.pipeline import run
 
@@ -78,7 +78,7 @@ def test_run_writes_both_parquet_files(mock_get, tmp_path):
     assert Path(sites_out).exists(), "sites Parquet not written"
 
 
-@patch("ingest.duckdb_pipelines.usgs.fetch.requests.get", side_effect=_mock_requests_get)
+@patch("ingest.duckdb_pipelines.usgs.fetch._SESSION.get", side_effect=_mock_requests_get)
 def test_daily_parquet_has_expected_columns(mock_get, tmp_path):
     from ingest.duckdb_pipelines.usgs.pipeline import run
 
@@ -95,7 +95,7 @@ def test_daily_parquet_has_expected_columns(mock_get, tmp_path):
     assert "qualifiers" in cols
 
 
-@patch("ingest.duckdb_pipelines.usgs.fetch.requests.get", side_effect=_mock_requests_get)
+@patch("ingest.duckdb_pipelines.usgs.fetch._SESSION.get", side_effect=_mock_requests_get)
 def test_daily_parquet_row_count(mock_get, tmp_path):
     from ingest.duckdb_pipelines.usgs.pipeline import run
 
@@ -109,7 +109,7 @@ def test_daily_parquet_row_count(mock_get, tmp_path):
     assert count == 8
 
 
-@patch("ingest.duckdb_pipelines.usgs.fetch.requests.get", side_effect=_mock_requests_get)
+@patch("ingest.duckdb_pipelines.usgs.fetch._SESSION.get", side_effect=_mock_requests_get)
 def test_sites_parquet_has_parameter_cds_rollup(mock_get, tmp_path):
     from ingest.duckdb_pipelines.usgs.pipeline import run
 
@@ -127,7 +127,7 @@ def test_sites_parquet_has_parameter_cds_rollup(mock_get, tmp_path):
     assert set(cds) == {"72019", "62610", "00065", "00045"}
 
 
-@patch("ingest.duckdb_pipelines.usgs.fetch.requests.get", side_effect=_mock_requests_get)
+@patch("ingest.duckdb_pipelines.usgs.fetch._SESSION.get", side_effect=_mock_requests_get)
 def test_no_inventory_write_for_local_paths(mock_get, tmp_path):
     """upsert_inventory_row must NOT be called when targets are local file paths."""
     from ingest.duckdb_pipelines.usgs import pipeline
@@ -138,3 +138,20 @@ def test_no_inventory_write_for_local_paths(mock_get, tmp_path):
     with patch("ingest.duckdb_pipelines.usgs.pipeline.upsert_inventory_row") as mock_upsert:
         pipeline.run(end_year=2000, daily_target=daily_out, sites_target=sites_out)
         mock_upsert.assert_not_called()
+
+
+def test_dry_run_never_targets_s3_or_the_inventory_table():
+    """usgs-monthly.yml passes --dry-run; before argparse existed the flag was
+    silently ignored and the "dry run" wrote both Parquet files to S3 and upserted
+    _tier1_inventory. Phase 5 is s3://-gated, so a temp target is the whole fix."""
+    from ingest.duckdb_pipelines.usgs import pipeline as pipeline_mod
+
+    with patch.object(pipeline_mod, "run") as mock_run:
+        pipeline_mod.main(["--dry-run"])
+    kwargs = mock_run.call_args.kwargs
+    assert not kwargs["daily_target"].startswith("s3://")
+    assert not kwargs["sites_target"].startswith("s3://")
+
+    with patch.object(pipeline_mod, "run") as mock_run:
+        pipeline_mod.main([])
+    assert mock_run.call_args.kwargs == {}

@@ -11,8 +11,32 @@ from datetime import datetime, timezone
 from typing import Iterator
 
 import requests
+from requests.adapters import HTTPAdapter
+from urllib3.util.retry import Retry
 
 from .constants import NODATA_SENTINEL, PARAMETER_CDS, SITE_TYPE_GROUPS, USGS_BASE_URL, STATE_CD
+
+
+def _session() -> requests.Session:
+    """One session with backoff for every NWIS call.
+
+    waterservices.usgs.gov returned 503 for chunk 1 of 27 on 09/10/2026 (run
+    34503836892) and the whole monthly load died on the first request with no
+    retry. 6 attempts total, 2s * 2^n backoff (30s max per URL), 5xx/429 only.
+
+    raise_on_status=False is load-bearing: it makes urllib3 return the final
+    failed response instead of raising RetryError, so the raise_for_status()
+    calls below still surface the familiar HTTPError with the URL in it.
+    """
+    s = requests.Session()
+    s.mount("https://", HTTPAdapter(max_retries=Retry(
+        total=5, backoff_factor=2, status_forcelist=(429, 502, 503, 504),
+        allowed_methods=("GET",), raise_on_status=False,
+    )))
+    return s
+
+
+_SESSION = _session()
 
 
 # ── Coercion helpers ────────────────────────────────────────────────────────
@@ -211,7 +235,7 @@ def fetch_daily_rows(
 ) -> list[dict]:
     """Fetch one year-chunk of daily values for one parameterCd. Returns a list of row dicts."""
     url = build_dv_url(parameter_cd, start_dt, end_dt)
-    resp = requests.get(url, timeout=300)
+    resp = _SESSION.get(url, timeout=300)
     resp.raise_for_status()
     return list(parse_dv_response(resp.json(), parameter_cd, url, ingested_at))
 
@@ -226,7 +250,7 @@ def fetch_all_sites() -> list[dict]:
     seen: dict[str, dict] = {}
     for site_type in SITE_TYPE_GROUPS:
         url = build_site_url(site_type)
-        resp = requests.get(url, timeout=120)
+        resp = _SESSION.get(url, timeout=120)
         resp.raise_for_status()
         for raw_row in parse_rdb(resp.text):
             site = _rdb_row_to_site(raw_row, url, refreshed_at)

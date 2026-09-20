@@ -186,9 +186,28 @@ def run(
     print("usgs: ingest complete.")
 
 
-def main() -> None:
+def main(argv: list[str] | None = None) -> None:
+    """usgs-monthly.yml has always passed --dry-run on a dispatched dry run, but this
+    module had no argparse, so the flag was silently ignored and the "dry run" wrote
+    both Parquet files to S3 and upserted _tier1_inventory. run() already takes the
+    targets and skips Phase 5 for non-s3:// paths, so a dry run is the same fetch
+    against a temp dir."""
+    import argparse
     import sys
+    import tempfile
+
+    parser = argparse.ArgumentParser(description="USGS water data ingest pipeline.")
+    parser.add_argument("--dry-run", action="store_true",
+                        help="Fetch and build Parquet locally; skip the S3 write and inventory upsert.")
+    args = parser.parse_args(argv)
+
     try:
+        if args.dry_run:
+            with tempfile.TemporaryDirectory() as tmp:
+                print("usgs: --dry-run, writing to a temp dir; no S3, no inventory row.")
+                run(daily_target=f"{tmp}/usgs_daily.parquet",
+                    sites_target=f"{tmp}/usgs_sites.parquet")
+            return
         run()
     except KeyboardInterrupt:
         print("interrupted", file=sys.stderr)
