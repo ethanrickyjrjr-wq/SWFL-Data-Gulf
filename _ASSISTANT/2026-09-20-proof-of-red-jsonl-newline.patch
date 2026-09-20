@@ -1,0 +1,35 @@
+diff --git a/.claude/hooks/check-proof-of-red-on-push.mjs b/.claude/hooks/check-proof-of-red-on-push.mjs
+index 01726640..001ce580 100644
+--- a/.claude/hooks/check-proof-of-red-on-push.mjs
++++ b/.claude/hooks/check-proof-of-red-on-push.mjs
+@@ -49,7 +49,9 @@ export function isTestFile(p) {
+  * and pytest (`FAILED path::test`).
+  */
+ export function hasRedMarker(text) {
+-  const t = String(text || "");
++  // Transcript lines are JSONL: a newline arrives as the two characters `\n`, whose `n` glues
++  // onto the next token (`nFAILED`, `n3 failed`) and kills every \b below. Un-glue them first.
++  const t = String(text || "").replace(/\\[nrt]/g, " ");
+   if (/\b[1-9]\d*\s+fail(ed|ing|ures?)?\b/i.test(t)) return true;
+   if (/\bnot ok\b/.test(t)) return true;
+   if (/[✗✖]/.test(t)) return true;
+diff --git a/.claude/hooks/check-proof-of-red-on-push.test.mjs b/.claude/hooks/check-proof-of-red-on-push.test.mjs
+index ca1a208b..eef69e19 100644
+--- a/.claude/hooks/check-proof-of-red-on-push.test.mjs
++++ b/.claude/hooks/check-proof-of-red-on-push.test.mjs
+@@ -69,3 +69,15 @@ test("unprovenFiles: empty input never blocks", () => {
+     [],
+   );
+ });
++
++test("red marker survives JSON-escaped newlines (transcript lines are JSONL)", () => {
++  // Found 09/20/2026: a real pytest red run was rejected. In the transcript a newline is the two
++  // characters backslash-n, so `\nFAILED path::t` reads `nFAILED` and `\n3 failed` reads `n3` -
++  // no word boundary, no match. It only ever passed when output happened to contain
++  // "AssertionError" after a space.
++  const line = JSON.stringify({
++    content: "summary\nFAILED ingest/tests/pipelines/test_x.py::test_y[a-b]\n3 failed in 0.10s",
++  });
++  assert.equal(hasRedMarker(line), true);
++  assert.equal(hasRedMarker(JSON.stringify({ content: "ok\n3 passed in 0.04s" })), false);
++});
