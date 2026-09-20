@@ -1,9 +1,9 @@
-<!-- FRESHNESS: v9 | Token: SWFL-7421-v9-20260915-391fad4e -->
+<!-- FRESHNESS: v10 | Token: SWFL-7421-v10-20260920-7b0fc7bb -->
 ---
 brain_id: licenses-swfl
-version: 9
-refined_at: 2026-09-15T23:58:23Z
-freshness_token: SWFL-7421-v9-20260915-391fad4e
+version: 10
+refined_at: 2026-09-20T09:23:49Z
+freshness_token: SWFL-7421-v10-20260920-7b0fc7bb
 ttl_seconds: 2592000
 pack_hash: f5e1ea3e059b
 context_type: user_saved_reference
@@ -31,39 +31,39 @@ SCOPE: SWFL contractor licensing health — FL DBPR Construction Board (06) + El
 
 --- CITATION TABLE ---
 id  | source                                                                                                                                                                                                                                                                   | verified   | expires
-s01 | Florida DBPR Contractor Licenses — Lee (county_code=46) + Collier (county_code=21); Construction Board (06) + Electrical Board (08); monthly bulk extract via https://www2.myfloridalicense.com/instant-public-records/; data_lake.fl_dbpr_licenses + fl_dbpr_applicants | 2026-09-15 | 2026-10-15
+s01 | Florida DBPR Contractor Licenses — Lee (county_code=46) + Collier (county_code=21); Construction Board (06) + Electrical Board (08); monthly bulk extract via https://www2.myfloridalicense.com/instant-public-records/; data_lake.fl_dbpr_licenses + fl_dbpr_applicants | 2026-09-20 | 2026-10-20
 
 --- SAVED FACTS ---
 [
-  {"id":"f001","topic":"dbpr_licenses_snapshot","fact":"FL DBPR contractor license corpus — Lee + Collier","value":"Active: Lee 6,591, Collier 3,386. New last 12mo: 991. Lapse rate: 0.5%. Applicants in SWFL: 8,769.","src":"s01","date":"2026-09-15"}
+  {"id":"f001","topic":"dbpr_licenses_snapshot","fact":"FL DBPR contractor license corpus — Lee + Collier","value":"Active: Lee 6,620, Collier 3,405. New last 12mo: 1,013. Lapse rate: 0.5%. Applicants in SWFL: 8,855.","src":"s01","date":"2026-09-20"}
 ]
 
 --- OUTPUT ---
 {
   "brain_id": "licenses-swfl",
-  "version": 9,
-  "refined_at": "2026-09-15T23:58:23Z",
-  "expires": "2026-10-15T23:58:23Z",
+  "version": 10,
+  "refined_at": "2026-09-20T09:23:49Z",
+  "expires": "2026-10-20T09:23:49Z",
   "ttl_seconds": 2592000,
   "direction": "bullish",
-  "magnitude": 0.046336291525956176,
+  "magnitude": 0.04533020711215319,
   "drivers": [],
   "overrides": [],
-  "conclusion": "FL DBPR contractor licensing in Lee+Collier is healthy — lapse rate below stress threshold. Active licenses: Lee 6,591, Collier 3,386 (9,977 combined). Lapse rate: 0.5% of all licenses. New in last 12 months: 991. Applicants in pipeline: 8,769.",
+  "conclusion": "FL DBPR contractor licensing in Lee+Collier is healthy — lapse rate below stress threshold. Active licenses: Lee 6,620, Collier 3,405 (10,025 combined). Lapse rate: 0.5% of all licenses. New in last 12 months: 1,013. Applicants in pipeline: 8,855.",
   "key_metrics": [
     {
       "metric": "licenses_active_lee",
       "label": "Active Licensed Contractors — Lee County",
-      "value": 6591,
+      "value": 6620,
       "direction": "stable",
       "variable_type": "extensive",
       "units": "licenses",
       "display_format": "count",
       "source": {
         "url": "https://www2.myfloridalicense.com/instant-public-records/",
-        "fetched_at": "2026-09-15T23:58:22Z",
+        "fetched_at": "2026-09-20T09:23:49Z",
         "tier": 1,
-        "citation": "FL DBPR boards 06+08 — Lee County (county_code=46) active licenses (primary_status=C, secondary_status=A): 6,591"
+        "citation": "FL DBPR boards 06+08 — Lee County (county_code=46) active licenses (primary_status=C, secondary_status=A): 6,620"
       },
       "suggestions": [
         "What's driving licenses active lee?",
@@ -73,16 +73,16 @@ s01 | Florida DBPR Contractor Licenses — Lee (county_code=46) + Collier (count
     {
       "metric": "licenses_active_collier",
       "label": "Active Licensed Contractors — Collier County",
-      "value": 3386,
+      "value": 3405,
       "direction": "stable",
       "variable_type": "extensive",
       "units": "licenses",
       "display_format": "count",
       "source": {
         "url": "https://www2.myfloridalicense.com/instant-public-records/",
-        "fetched_at": "2026-09-15T23:58:22Z",
+        "fetched_at": "2026-09-20T09:23:49Z",
         "tier": 1,
-        "citation": "FL DBPR boards 06+08 — Collier County (county_code=21) active licenses (primary_status=C, secondary_status=A): 3,386"
+        "citation": "FL DBPR boards 06+08 — Collier County (county_code=21) active licenses (primary_status=C, secondary_status=A): 3,405"
       },
       "suggestions": [
         "What's driving licenses active collier?",
@@ -92,16 +92,16 @@ s01 | Florida DBPR Contractor Licenses — Lee (county_code=46) + Collier (count
     {
       "metric": "licenses_new_12m_swfl",
       "label": "New Contractor Licenses — SWFL (Trailing 12 Months)",
-      "value": 991,
+      "value": 1013,
       "direction": "rising",
       "variable_type": "extensive",
       "units": "licenses",
       "display_format": "count",
       "source": {
         "url": "https://www2.myfloridalicense.com/instant-public-records/",
-        "fetched_at": "2026-09-15T23:58:22Z",
+        "fetched_at": "2026-09-20T09:23:49Z",
         "tier": 1,
-        "citation": "FL DBPR boards 06+08 — Lee+Collier active licenses with original_licensure_date in trailing 12 months: 991"
+        "citation": "FL DBPR boards 06+08 — Lee+Collier active licenses with original_licensure_date in trailing 12 months: 1,013"
       },
       "suggestions": [
         "What's driving licenses new 12m swfl?",
@@ -111,16 +111,16 @@ s01 | Florida DBPR Contractor Licenses — Lee (county_code=46) + Collier (count
     {
       "metric": "licenses_lapse_rate_swfl",
       "label": "Contractor License Lapse Rate — SWFL",
-      "value": 0.0046,
+      "value": 0.0045,
       "direction": "falling",
       "variable_type": "intensive",
       "units": "ratio",
       "display_format": "ratio",
       "source": {
         "url": "https://www2.myfloridalicense.com/instant-public-records/",
-        "fetched_at": "2026-09-15T23:58:22Z",
+        "fetched_at": "2026-09-20T09:23:49Z",
         "tier": 1,
-        "citation": "FL DBPR boards 06+08 — Lee+Collier lapse rate: 0.5% (lapsed 59 / total 12,733). Bearish threshold >10%, bullish <5%."
+        "citation": "FL DBPR boards 06+08 — Lee+Collier lapse rate: 0.5% (lapsed 58 / total 12,795). Bearish threshold >10%, bullish <5%."
       },
       "suggestions": [
         "What's driving licenses lapse rate swfl?",
@@ -130,16 +130,16 @@ s01 | Florida DBPR Contractor Licenses — Lee (county_code=46) + Collier (count
     {
       "metric": "licenses_cbc_share_swfl",
       "label": "Certified Building Contractor Share — SWFL",
-      "value": 0.1801,
+      "value": 0.1796,
       "direction": "stable",
       "variable_type": "intensive",
       "units": "ratio",
       "display_format": "ratio",
       "source": {
         "url": "https://www2.myfloridalicense.com/instant-public-records/",
-        "fetched_at": "2026-09-15T23:58:22Z",
+        "fetched_at": "2026-09-20T09:23:49Z",
         "tier": 1,
-        "citation": "FL DBPR board 06 (CBC occupation_code) active share of all active licenses in Lee+Collier: 0.18 (1,797 CBC / 9,977 total active)"
+        "citation": "FL DBPR board 06 (CBC occupation_code) active share of all active licenses in Lee+Collier: 0.18 (1,800 CBC / 10,025 total active)"
       },
       "suggestions": [
         "What's driving licenses cbc share swfl?",
@@ -149,16 +149,16 @@ s01 | Florida DBPR Contractor Licenses — Lee (county_code=46) + Collier (count
     {
       "metric": "licenses_applicants_swfl",
       "label": "Contractor License Applicants in Pipeline — SWFL",
-      "value": 8769,
+      "value": 8855,
       "direction": "rising",
       "variable_type": "extensive",
       "units": "applicants",
       "display_format": "count",
       "source": {
         "url": "https://www2.myfloridalicense.com/instant-public-records/",
-        "fetched_at": "2026-09-15T23:58:22Z",
+        "fetched_at": "2026-09-20T09:23:49Z",
         "tier": 1,
-        "citation": "FL DBPR Construction Applicants (constr_app.csv) bulk extract — Lee+Collier county_code rows: 8,769 applicants in pipeline"
+        "citation": "FL DBPR Construction Applicants (constr_app.csv) bulk extract — Lee+Collier county_code rows: 8,855 applicants in pipeline"
       },
       "suggestions": [
         "What's driving licenses applicants swfl?",
@@ -177,7 +177,7 @@ s01 | Florida DBPR Contractor Licenses — Lee (county_code=46) + Collier (count
   "relevance": {
     "decay_curve": "weeks",
     "half_life_hours": 720,
-    "computed_at": "2026-09-15T23:58:23Z"
+    "computed_at": "2026-09-20T09:23:49Z"
   },
   "exogenous_signals": []
 }
@@ -186,5 +186,5 @@ s01 | Florida DBPR Contractor Licenses — Lee (county_code=46) + Collier (count
 - licenses-swfl: track SWFL contractor licensing health as a forward indicator of construction capacity and workforce availability.
 
 --- RECENT NOTES ---
-- 2026-09-15: pack refined by the Refinery — 1 fact(s) from 1 source(s).
+- 2026-09-20: pack refined by the Refinery — 1 fact(s) from 1 source(s).
 ```

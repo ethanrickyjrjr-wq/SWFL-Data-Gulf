@@ -1,9 +1,9 @@
-<!-- FRESHNESS: v38 | Token: SWFL-7421-v38-20260915-4d59bd02 -->
+<!-- FRESHNESS: v39 | Token: SWFL-7421-v39-20260920-21cc69c0 -->
 ---
 brain_id: macro-swfl
-version: 38
-refined_at: 2026-09-15T23:52:23Z
-freshness_token: SWFL-7421-v38-20260915-4d59bd02
+version: 39
+refined_at: 2026-09-20T09:23:31Z
+freshness_token: SWFL-7421-v39-20260920-21cc69c0
 ttl_seconds: 2592000
 pack_hash: d31522e60cf8
 context_type: user_saved_reference
@@ -33,29 +33,29 @@ SCOPE: Regional macro context for Southwest Florida — leaf tier of the three-t
 --- CITATION TABLE ---
 id  | source                                                                                                                                                                                                                                        | verified   | expires
 s01 | macro-florida brain — https://www.swfldatagulf.com/api/b/macro-florida                                                                                                                                                                        | 2026-07-19 | 2026-08-18
-s02 | BLS Local Area Unemployment Statistics (LAUS) via data_lake.bls_laus (https://api.bls.gov/publicAPI/v2/timeseries/data/; series prefixes LAUST12, LAUCN12071, LAUCN12021; measures 03/04/05/06; monthly, not seasonally adjusted)             | 2026-09-15 | 2026-10-15
-s03 | BLS Quarterly Census of Employment and Wages via data_lake.bls_qcew (https://data.bls.gov/cew/data/api/{year}/q{qtr}/area/{fips}.json; FL state + Lee County + Collier County, all industries, all ownership codes, merge-tracked 2 quarters) | 2026-09-15 | 2026-10-15
+s02 | BLS Local Area Unemployment Statistics (LAUS) via data_lake.bls_laus (https://api.bls.gov/publicAPI/v2/timeseries/data/; series prefixes LAUST12, LAUCN12071, LAUCN12021; measures 03/04/05/06; monthly, not seasonally adjusted)             | 2026-09-20 | 2026-10-20
+s03 | BLS Quarterly Census of Employment and Wages via data_lake.bls_qcew (https://data.bls.gov/cew/data/api/{year}/q{qtr}/area/{fips}.json; FL state + Lee County + Collier County, all industries, all ownership codes, merge-tracked 2 quarters) | 2026-09-20 | 2026-10-20
 
 --- SAVED FACTS ---
 [
-  {"id":"f001","topic":"laus_lee_vs_fl","fact":"Lee County unemployment rate vs FL state baseline","value":"Lee County 5.1% vs FL state baseline 4.6% (gap: +0.5pp, 2026-M06, preliminary)","src":"s02","date":"2026-09-15"},
-  {"id":"f002","topic":"laus_collier_vs_fl","fact":"Collier County unemployment rate vs FL state baseline","value":"Collier County 4.8% vs FL state baseline 4.6% (gap: +0.2pp, 2026-M06, preliminary)","src":"s02","date":"2026-09-15"},
-  {"id":"f003","topic":"laus_fl_benchmark","fact":"FL LAUS state rate (denominator benchmark for gap math)","value":"FL state LAUS 4.6% (2026-M06) — macro-florida confidence 1.00","src":"s02","date":"2026-09-15"},
-  {"id":"f004","topic":"qcew_wages","fact":"SWFL private-sector average weekly wage — 2025-Q3","value":"BLS QCEW private-sector wages, 2025-Q3: Lee County $1,173/wk; Collier County $1,293/wk","src":"s02","date":"2026-09-15"}
+  {"id":"f001","topic":"laus_lee_vs_fl","fact":"Lee County unemployment rate vs FL state baseline","value":"Lee County 5.1% vs FL state baseline 4.6% (gap: +0.5pp, 2026-M06, preliminary)","src":"s02","date":"2026-09-20"},
+  {"id":"f002","topic":"laus_collier_vs_fl","fact":"Collier County unemployment rate vs FL state baseline","value":"Collier County 4.8% vs FL state baseline 4.6% (gap: +0.2pp, 2026-M06, preliminary)","src":"s02","date":"2026-09-20"},
+  {"id":"f003","topic":"laus_fl_benchmark","fact":"FL LAUS state rate (denominator benchmark for gap math)","value":"FL state LAUS 4.6% (2026-M06) — macro-florida confidence 1.00","src":"s02","date":"2026-09-20"},
+  {"id":"f004","topic":"qcew_wages","fact":"SWFL private-sector average weekly wage — 2026-Q1","value":"BLS QCEW private-sector wages, 2026-Q1: Lee County $1,230/wk; Collier County $1,429/wk","src":"s02","date":"2026-09-20"}
 ]
 
 --- OUTPUT ---
 {
   "brain_id": "macro-swfl",
-  "version": 38,
-  "refined_at": "2026-09-15T23:52:23Z",
-  "expires": "2026-10-15T23:52:23Z",
+  "version": 39,
+  "refined_at": "2026-09-20T09:23:31Z",
+  "expires": "2026-10-20T09:23:31Z",
   "ttl_seconds": 2592000,
   "direction": "bearish",
   "magnitude": 1,
   "drivers": [],
   "overrides": [],
-  "conclusion": "SWFL labor market, 2026-M06 (preliminary): Lee County at 5.1%, +0.8pp YoY; Collier County at 4.8%, +0.8pp YoY; FL state LAUS 4.6% (benchmark). Private-sector wages in Lee County ran $1,173/wk in 2025-Q3 (+6.6% YoY). Against the FL state macro backdrop (macro-florida, confidence 1.00), SWFL county unemployment is rising faster than the state average.",
+  "conclusion": "SWFL labor market, 2026-M06 (preliminary): Lee County at 5.1%, +0.8pp YoY; Collier County at 4.8%, +0.8pp YoY; FL state LAUS 4.6% (benchmark). Private-sector wages in Lee County ran $1,230/wk in 2026-Q1 (+4.9% YoY). Against the FL state macro backdrop (macro-florida, confidence 1.00), SWFL county unemployment is rising faster than the state average.",
   "key_metrics": [
     {
       "metric": "laus_lee_unemployment_rate",
@@ -67,7 +67,7 @@ s03 | BLS Quarterly Census of Employment and Wages via data_lake.bls_qcew (https
       "display_format": "percent",
       "source": {
         "url": "https://api.bls.gov/publicAPI/v2/timeseries/data/",
-        "fetched_at": "2026-09-15T23:52:23Z",
+        "fetched_at": "2026-09-20T09:23:31Z",
         "tier": 1,
         "citation": "BLS LAUS series LAUCN120710000000003, 2026-M06 = 5.1%"
       },
@@ -86,7 +86,7 @@ s03 | BLS Quarterly Census of Employment and Wages via data_lake.bls_qcew (https
       "display_format": "percent",
       "source": {
         "url": "https://api.bls.gov/publicAPI/v2/timeseries/data/",
-        "fetched_at": "2026-09-15T23:52:23Z",
+        "fetched_at": "2026-09-20T09:23:31Z",
         "tier": 1,
         "citation": "BLS LAUS series LAUCN120210000000003, 2026-M06 = 4.8%"
       },
@@ -105,7 +105,7 @@ s03 | BLS Quarterly Census of Employment and Wages via data_lake.bls_qcew (https
       "display_format": "percent",
       "source": {
         "url": "https://api.bls.gov/publicAPI/v2/timeseries/data/",
-        "fetched_at": "2026-09-15T23:52:23Z",
+        "fetched_at": "2026-09-20T09:23:31Z",
         "tier": 1,
         "citation": "BLS LAUS series LAUST120000000000003, 2026-M06 = 4.6%"
       },
@@ -124,7 +124,7 @@ s03 | BLS Quarterly Census of Employment and Wages via data_lake.bls_qcew (https
       "display_format": "raw",
       "source": {
         "url": "https://api.bls.gov/publicAPI/v2/timeseries/data/",
-        "fetched_at": "2026-09-15T23:52:23Z",
+        "fetched_at": "2026-09-20T09:23:31Z",
         "tier": 1,
         "citation": "BLS LAUS LAUCN120710000000003, YoY delta (prior-year 2026-M06 → 2026-M06) = +0.8pp"
       },
@@ -135,17 +135,17 @@ s03 | BLS Quarterly Census of Employment and Wages via data_lake.bls_qcew (https
     },
     {
       "metric": "qcew_lee_private_avg_wkly_wage",
-      "label": "Lee County Private-Sector Avg Weekly Wage (2025-Q3)",
-      "value": 1173,
+      "label": "Lee County Private-Sector Avg Weekly Wage (2026-Q1)",
+      "value": 1230,
       "direction": "rising",
       "variable_type": "intensive",
       "units": "USD/week",
       "display_format": "currency",
       "source": {
         "url": "https://data.bls.gov/cew/data/api",
-        "fetched_at": "2026-09-15T23:52:23Z",
+        "fetched_at": "2026-09-20T09:23:31Z",
         "tier": 1,
-        "citation": "BLS QCEW private-sector (own_code=5) via data_lake.bls_qcew, area_fips=12071, 2025-Q3: avg_wkly_wage = $1,173/wk"
+        "citation": "BLS QCEW private-sector (own_code=5) via data_lake.bls_qcew, area_fips=12071, 2026-Q1: avg_wkly_wage = $1,230/wk"
       },
       "suggestions": [
         "What's driving qcew lee private avg wkly wage?",
@@ -154,17 +154,17 @@ s03 | BLS Quarterly Census of Employment and Wages via data_lake.bls_qcew (https
     },
     {
       "metric": "qcew_lee_private_avg_wkly_wage_yoy_pct",
-      "label": "Lee County Private-Sector Avg Weekly Wage YoY % (2025-Q3 vs 2024-Q3)",
-      "value": 6.64,
+      "label": "Lee County Private-Sector Avg Weekly Wage YoY % (2026-Q1 vs 2025-Q3)",
+      "value": 4.86,
       "direction": "rising",
       "variable_type": "intensive",
       "units": "%",
       "display_format": "percent",
       "source": {
         "url": "https://data.bls.gov/cew/data/api",
-        "fetched_at": "2026-09-15T23:52:23Z",
+        "fetched_at": "2026-09-20T09:23:31Z",
         "tier": 1,
-        "citation": "BLS QCEW private-sector (own_code=5) via data_lake.bls_qcew, area_fips=12071, 2025-Q3: avg_wkly_wage YoY = +6.64%"
+        "citation": "BLS QCEW private-sector (own_code=5) via data_lake.bls_qcew, area_fips=12071, 2026-Q1: avg_wkly_wage YoY = +4.86%"
       },
       "suggestions": [
         "What's driving qcew lee private avg wkly wage yoy pct?",
@@ -173,17 +173,17 @@ s03 | BLS Quarterly Census of Employment and Wages via data_lake.bls_qcew (https
     },
     {
       "metric": "qcew_collier_private_avg_wkly_wage",
-      "label": "Collier County Private-Sector Avg Weekly Wage (2025-Q3)",
-      "value": 1293,
+      "label": "Collier County Private-Sector Avg Weekly Wage (2026-Q1)",
+      "value": 1429,
       "direction": "rising",
       "variable_type": "intensive",
       "units": "USD/week",
       "display_format": "currency",
       "source": {
         "url": "https://data.bls.gov/cew/data/api",
-        "fetched_at": "2026-09-15T23:52:23Z",
+        "fetched_at": "2026-09-20T09:23:31Z",
         "tier": 1,
-        "citation": "BLS QCEW private-sector (own_code=5) via data_lake.bls_qcew, area_fips=12021, 2025-Q3: avg_wkly_wage = $1,293/wk"
+        "citation": "BLS QCEW private-sector (own_code=5) via data_lake.bls_qcew, area_fips=12021, 2026-Q1: avg_wkly_wage = $1,429/wk"
       },
       "suggestions": [
         "What's driving qcew collier private avg wkly wage?",
@@ -192,17 +192,17 @@ s03 | BLS Quarterly Census of Employment and Wages via data_lake.bls_qcew (https
     },
     {
       "metric": "qcew_collier_private_avg_wkly_wage_yoy_pct",
-      "label": "Collier County Private-Sector Avg Weekly Wage YoY % (2025-Q3 vs 2024-Q3)",
-      "value": 4.53,
+      "label": "Collier County Private-Sector Avg Weekly Wage YoY % (2026-Q1 vs 2025-Q3)",
+      "value": 10.52,
       "direction": "rising",
       "variable_type": "intensive",
       "units": "%",
       "display_format": "percent",
       "source": {
         "url": "https://data.bls.gov/cew/data/api",
-        "fetched_at": "2026-09-15T23:52:23Z",
+        "fetched_at": "2026-09-20T09:23:31Z",
         "tier": 1,
-        "citation": "BLS QCEW private-sector (own_code=5) via data_lake.bls_qcew, area_fips=12021, 2025-Q3: avg_wkly_wage YoY = +4.53%"
+        "citation": "BLS QCEW private-sector (own_code=5) via data_lake.bls_qcew, area_fips=12021, 2026-Q1: avg_wkly_wage YoY = +10.52%"
       },
       "suggestions": [
         "What's driving qcew collier private avg wkly wage yoy pct?",
@@ -211,17 +211,17 @@ s03 | BLS Quarterly Census of Employment and Wages via data_lake.bls_qcew (https
     },
     {
       "metric": "qcew_lee_private_employment",
-      "label": "Lee County Private-Sector Employment (2025-Q3)",
-      "value": 264065,
+      "label": "Lee County Private-Sector Employment (2026-Q1)",
+      "value": 275732,
       "direction": "rising",
       "variable_type": "extensive",
       "units": "jobs",
       "display_format": "count",
       "source": {
         "url": "https://data.bls.gov/cew/data/api",
-        "fetched_at": "2026-09-15T23:52:23Z",
+        "fetched_at": "2026-09-20T09:23:31Z",
         "tier": 1,
-        "citation": "BLS QCEW private-sector (own_code=5) via data_lake.bls_qcew, area_fips=12071, 2025-Q3: month3_emplvl = 264,065 jobs"
+        "citation": "BLS QCEW private-sector (own_code=5) via data_lake.bls_qcew, area_fips=12071, 2026-Q1: month3_emplvl = 275,732 jobs"
       },
       "suggestions": [
         "What's driving qcew lee private employment?",
@@ -230,17 +230,17 @@ s03 | BLS Quarterly Census of Employment and Wages via data_lake.bls_qcew (https
     },
     {
       "metric": "qcew_collier_private_employment",
-      "label": "Collier County Private-Sector Employment (2025-Q3)",
-      "value": 151229,
-      "direction": "falling",
+      "label": "Collier County Private-Sector Employment (2026-Q1)",
+      "value": 161740,
+      "direction": "rising",
       "variable_type": "extensive",
       "units": "jobs",
       "display_format": "count",
       "source": {
         "url": "https://data.bls.gov/cew/data/api",
-        "fetched_at": "2026-09-15T23:52:23Z",
+        "fetched_at": "2026-09-20T09:23:31Z",
         "tier": 1,
-        "citation": "BLS QCEW private-sector (own_code=5) via data_lake.bls_qcew, area_fips=12021, 2025-Q3: month3_emplvl = 151,229 jobs"
+        "citation": "BLS QCEW private-sector (own_code=5) via data_lake.bls_qcew, area_fips=12021, 2026-Q1: month3_emplvl = 161,740 jobs"
       },
       "suggestions": [
         "What's driving qcew collier private employment?",
@@ -251,7 +251,7 @@ s03 | BLS Quarterly Census of Employment and Wages via data_lake.bls_qcew (https
   "caveats": [
     "BLS LAUS data for 2026-M06 is preliminary — subject to revision at next monthly release.",
     "Upstream brain 'macro-florida' was stale at build time (expired 2026-08-18).",
-    "Upstream brain 'macro-florida' failed to rebuild on 2026-09-15; using last good read from 2026-07-19 (v24)."
+    "Upstream brain 'macro-florida' failed to rebuild on 2026-09-20; using last good read from 2026-07-19 (v24)."
   ],
   "contradicts": [],
   "confidence": 1,
@@ -263,7 +263,7 @@ s03 | BLS Quarterly Census of Employment and Wages via data_lake.bls_qcew (https
   "relevance": {
     "decay_curve": "weeks",
     "half_life_hours": 720,
-    "computed_at": "2026-09-15T23:52:23Z"
+    "computed_at": "2026-09-20T09:23:31Z"
   },
   "exogenous_signals": [],
   "degraded_inputs": []
@@ -273,5 +273,5 @@ s03 | BLS Quarterly Census of Employment and Wages via data_lake.bls_qcew (https
 - macro-swfl: BLS LAUS county unemployment + BLS QCEW quarterly wages live for Lee + Collier counties.
 
 --- RECENT NOTES ---
-- 2026-09-15: pack refined by the Refinery — 4 fact(s) from 3 source(s).
+- 2026-09-20: pack refined by the Refinery — 4 fact(s) from 3 source(s).
 ```
