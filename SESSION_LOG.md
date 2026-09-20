@@ -10,7 +10,10 @@ Real usgs-monthly dispatched to land the month the 09/10 503 lost: run 354904023
 confirmed at the time of this entry; check it first next session.
 
 Plan status: 14 of 15 tasks landed and proven except C1/C2 (dark until a runner registers - GitHub
-still reports zero) and A2 (parked on the operator's 09/15 word). E1 + everything else owed:
+still reports zero; opened check `fedora_runner_not_registered_smoke_owed`) and A2 (existing check
+`listing_base_url_secret_empty`, the operator's 09/15 word). E1 -> opened check
+`lee_permits_arcgis_e1_unstarted`. The unconfirmed real USGS run -> opened check
+`usgs_monthly_real_run_confirm`. Full remainder:
 docs/superpowers/handoffs/2026-09-20-backend-week-remainder.md.
 
 ## 2026-09-20 (Fable 5.1) - Backend-week plan, push 2: B1-B4 + D1 landed, B4 PROVED live. 14 of 15 plan tasks now in; handoff written for the rest
