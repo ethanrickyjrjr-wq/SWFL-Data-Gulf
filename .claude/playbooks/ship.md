@@ -4,7 +4,7 @@ for: commit, push, PR, land, "push them", or any request to get work onto main
 ---
 ### Ship
 
-**You own the evidence in the push, not the push itself** — approval is per-push and never carried (memory: push-approval-is-per-push).
+**You own the evidence AND the push.** Operator decree 09/20/2026 ("I DON'T FUCKING PUSH"; global rule 8 "Claude pushes"): your own commits are pushed without asking — `OPERATOR_APPROVED_PUSH=1 node scripts/safe-push.mjs` — then check that commit's CI conclusion. Never end a turn on "Push?". A "do not push" he says about specific work holds that work.
 
 1. Is this the just-push list (docs, CLAUDE.md, SESSION_LOG, hooks, memory, typos, small tooling) or the ASK-FIRST list (pack `--- OUTPUT ---` / key_metrics, `data_lake.*` writes, >5-file refactors, live `/api/b/*` or MCP, anything not revertable in <5 min)? Say which (RULE 1).
 2. Stage explicit paths only — never `git add -A`; commit only files you own (RULE 1.5). Never pipe `git commit` through tail/grep; verify at `git log`.
