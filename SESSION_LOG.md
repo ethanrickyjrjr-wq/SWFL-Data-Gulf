@@ -22,6 +22,12 @@ Scope of "targets swfl-local": 5 workflows + smoke, all fixed in this push.
     / pip / crawl4ai-setup steps run only when runner.environment == 'github-hosted' (verified live
     on docs.github.com contexts page); self-hosted puts the venv on GITHUB_PATH.
 
+Proof on the box, pipelines' own --dry-run over ssh (not yet through GHA): dbpr_sirs "would upsert
+1389 rows"; crexi Estero "29 raw listings, 29 rows would be upserted"; collier records "871 rows for
+2026-09-17..2026-09-19". crexi + collier first FAILED - not a WAF: patchright's own Chromium was
+missing (crawl4ai-setup does not fetch it). `python -m patchright install chromium` fixed both;
+step added to the runbook. Push was BLOCKED by the operator-approval hook - not bypassed.
+
 NEXT (same session, after this push since GitHub runs workflow code from main): smoke re-run,
 dry_run dispatch of each ported workflow, and only then SWFL_LOCAL_RUNNER_READY=true.
 

@@ -166,6 +166,11 @@ already run successfully today (`ingest-collier-official-records.yml`,
 # §2e below falls back to a container instead of hunting for dnf equivalents.
 
 ~/swfl-runner-venv/bin/crawl4ai-doctor
+
+# REQUIRED, found 09/20/2026: crawl4ai-setup + doctor pass WITHOUT this, then every UndetectedAdapter
+# pipeline (crexi, collier) dies on "Executable doesn't exist ... chromium-1234" - patchright ships
+# its own Chromium build that crawl4ai-setup never fetches.
+~/swfl-runner-venv/bin/python -m patchright install chromium
 ```
 **PASS:** ends without a `FAIL` line (mirrors the "crawl4ai preflight" step already green in
 `ingest-collier-official-records.yml`). **FAIL:** any line naming a missing shared library

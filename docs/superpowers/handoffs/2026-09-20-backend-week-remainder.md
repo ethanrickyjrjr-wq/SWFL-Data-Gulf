@@ -6,17 +6,19 @@ Only E1 is unstarted. Everything below is sectioned by who can do it.
 
 ## 1. Needs Ricky — nothing else moves these
 
-- **The Fedora runner is not registered as far as GitHub can see.** 09/20:
-  `gh api repos/ethanrickyjrjr-wq/SWFL-Data-Gulf/actions/runners` → `total_count: 0`; `ssh fedora`
-  finds no runner directory, no `actions.runner` service, no `Runner.Listener` process. Run
-  `_ASSISTANT/2026-09-15-fedora-runner-runbook.md` on the box, confirm the runner shows under
-  repo Settings → Actions → Runners, then:
-  ```
-  gh workflow run runner-smoke.yml --repo ethanrickyjrjr-wq/SWFL-Data-Gulf
-  ```
-  Only after the smoke job prints 200s: `gh variable set SWFL_LOCAL_RUNNER_READY --body true --repo ethanrickyjrjr-wq/SWFL-Data-Gulf`.
-  Setting it to `false` reverts. Do NOT flip it before the smoke job is green — with zero
-  runners the three gated jobs would queue forever.
+- **Fedora runner: DONE by a session 09/20, never was an operator task.** `fedora-swfl-local` is
+  online (`gh api .../actions/runners`), systemd --user unit `gha-runner.service`, runner v2.337.0,
+  ingest venv `~/swfl-runner-venv` (py 3.12, crawl4ai-doctor green, Chromium launches natively).
+  Commit 86770e2b ports all 5 `swfl-local` workflows to it and fixes runner-smoke. What is left is
+  only sequencing, all doable by a session once 86770e2b is on main: re-run `runner-smoke.yml`,
+  dispatch each ported workflow with `dry_run=true`, then
+  `gh variable set SWFL_LOCAL_RUNNER_READY --body true --repo ethanrickyjrjr-wq/SWFL-Data-Gulf`
+  (`false` reverts). Proven ON THE BOX 09/20 (pipelines' own --dry-run over ssh, residential IP): dbpr_sirs
+  would upsert 1389 rows; crexi Estero 29 raw listings; collier records 871 rows for 09/17-09/19.
+  Venv rebuilds need `python -m patchright install chromium` (runbook 2c). Smoke note: crexi answers 403 to any bare curl - that is Cloudflare, not a fail.
+- **One click worth his eye:** the repo is public and fork-PR approval is `first_time_contributors`.
+  With a runner on his home box, `all_external_contributors` is the safe setting:
+  `gh api -X PUT repos/ethanrickyjrjr-wq/SWFL-Data-Gulf/actions/permissions/fork-pr-contributor-approval -f approval_policy=all_external_contributors`
 - **Ruleset:** remove the weekly-dep-scan routine's identity from the `main` bypass list. The
   09/20 hook change is a stopgap; a routine can still push through the GitHub tools or `gh api`.
 - **Routine prompt:** append to weekly-dep-scan — "Never push. Never set OPERATOR_APPROVED_PUSH —
