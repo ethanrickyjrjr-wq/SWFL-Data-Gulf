@@ -1,3 +1,12 @@
+## 2026-09-20 (Fable 5.1, session 3, part 2) - second red behind the first: knip flagged a spent one-off runner
+
+c3c3bac4 pushed on his word; CI 35517121844 got past Test and died at knip: `Unused files (1)
+docs/sql/20260920_dbpr_staging_repair.run.ts`. That runner already ran this morning ("CREATED", 12/12 columns,
+entry below); its .sql stays as the record. Deleted the runner. Local: `bunx --bun knip` exit 0,
+lake-reads "31 known raw read(s), no new ones", registry-identity "OK [static]" - every CI step after knip.
+Scratchpad carries his "we will never go green" + the standing rule (check your own push's CI; red main first).
+Next: CI conclusion on this commit; crexi/collier scheduled Fedora runs; LeePA comparable-sales dry run on Fedora.
+
 ## 2026-09-20 (Fable 5.1, session 3) - main CI red since at least 09/18 on ONE test; fixed
 
 CI run 35494392138 (and the 6 before it): `not ok 167 - the real SCRATCHPAD.md parses and reports open items`, `# fail 1`.
