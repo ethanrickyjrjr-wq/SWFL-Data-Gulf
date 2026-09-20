@@ -1,3 +1,10 @@
+## 2026-09-20 (Fable 5.1, session 4, part 4) - the Lee ArcGIS freeze was ALREADY FOUND on 07/11/2026 and never wired into the registry
+
+The four-lane gate forced the research search I had skipped. docs/handoff/2026-07-11-reliable-sources-findings.md:251 and
+docs/audit/2026-07-11-pipeline-problems/02-known-problems-ledger.md:412 both say the three permit layers are frozen at
+March 2025 and "do NOT retire the Accela cron on this". The registry root line kept saying "could replace" for 10 more
+weeks; the 09/15 plan's E1 was written from it. Root line corrected today (9cd635a2). Scratchpad + spec now cite both docs.
+
 ## 2026-09-20 (Fable 5.1, session 4, part 3) - his "how are we still getting shit wrong": two causes named, sibling claims probed
 
 (1) Mine: the delete line I handed him was bash; his `!` prompt is PowerShell. Folders still on disk; PowerShell line handed over.

@@ -8,6 +8,12 @@ the tool) applies to lines handed to HIM, not only to my own tool calls. STANDIN
 COUNT and never the layer's last-edit date or newest record. A plan task (E1), two handoffs and a check were built
 on it; the layer name itself says _March2025. 73 source_ceiling blocks in the registry, zero carry a
 source-freshness field. A count proves a thing exists, never that it is alive.
+(3) THE WORST ONE, found only when the four-lane gate forced the research search I had skipped: WE ALREADY KNEW.
+docs/handoff/2026-07-11-reliable-sources-findings.md:251 - "all three are frozen at March 2025" - and
+docs/audit/2026-07-11-pipeline-problems/02-known-problems-ledger.md:412 - "do NOT retire the Accela cron on this"
+and "No dedicated check carries this fact". The registry line was never corrected, so the 09/15 plan, two 09/20
+handoffs and today's agent run (153k tokens) re-derived a 10-week-old finding. Built-not-wired, again: the fix is
+always correcting the ROOT line the day the finding lands, never a note beside it.
 
 ## 2026-09-20 (Fable 5.1, session 4) — OPERATOR: "Get this shit done so we can have everything fixed!!! ... Fan out and make sure done correctly"
 

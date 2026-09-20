@@ -4,6 +4,11 @@
 (`docs/superpowers/plans/2026-09-15-master-brain-backend-week.md`) rested on a registry line that
 was never probed for freshness. Operator waived the plan gate 09/20/2026; the live source killed it.
 
+**Already known, never wired:** `docs/handoff/2026-07-11-reliable-sources-findings.md:251` found the same
+freeze on 07/11/2026 and `docs/audit/2026-07-11-pipeline-problems/02-known-problems-ledger.md:412` said "do NOT
+retire the Accela cron on this" - but the registry line stayed uncorrected until 09/20/2026, so the 09/15 plan
+was written from it.
+
 ## What the live source says (probed 09/20/2026, plain GETs, reproducible)
 
 Org `LvWGAAhHwbCJ2GMP`, host `https://services2.arcgis.com/LvWGAAhHwbCJ2GMP/arcgis/rest/services`,
