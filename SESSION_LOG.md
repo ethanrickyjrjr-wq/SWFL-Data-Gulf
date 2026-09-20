@@ -1,3 +1,8 @@
+## 2026-09-20 (Fable 5.1, session 2, addendum) - proof-of-red hook patch applied at the operator's instruction
+
+He issued the `git apply` himself. check-proof-of-red-on-push.test.mjs: 8 pass / 0 fail, including the
+new JSON-escaped-newline case. Closes proof_of_red_hook_jsonl_newline. The handoff's "Needs Ricky" item is done.
+
 ## 2026-09-20 (Fable 5.1, session 2, close) - collier weekend fix PROVED on the Fedora runner; handoff written
 
 Operator: "Push write handoff. No more approvals needed. You run the show." (scratchpad has it verbatim + its limits.)

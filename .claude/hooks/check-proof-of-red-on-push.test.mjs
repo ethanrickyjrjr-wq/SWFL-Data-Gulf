@@ -69,3 +69,15 @@ test("unprovenFiles: empty input never blocks", () => {
     [],
   );
 });
+
+test("red marker survives JSON-escaped newlines (transcript lines are JSONL)", () => {
+  // Found 09/20/2026: a real pytest red run was rejected. In the transcript a newline is the two
+  // characters backslash-n, so `\nFAILED path::t` reads `nFAILED` and `\n3 failed` reads `n3` -
+  // no word boundary, no match. It only ever passed when output happened to contain
+  // "AssertionError" after a space.
+  const line = JSON.stringify({
+    content: "summary\nFAILED ingest/tests/pipelines/test_x.py::test_y[a-b]\n3 failed in 0.10s",
+  });
+  assert.equal(hasRedMarker(line), true);
+  assert.equal(hasRedMarker(JSON.stringify({ content: "ok\n3 passed in 0.04s" })), false);
+});

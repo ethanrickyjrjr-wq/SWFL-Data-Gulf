@@ -49,7 +49,9 @@ export function isTestFile(p) {
  * and pytest (`FAILED path::test`).
  */
 export function hasRedMarker(text) {
-  const t = String(text || "");
+  // Transcript lines are JSONL: a newline arrives as the two characters `\n`, whose `n` glues
+  // onto the next token (`nFAILED`, `n3 failed`) and kills every \b below. Un-glue them first.
+  const t = String(text || "").replace(/\\[nrt]/g, " ");
   if (/\b[1-9]\d*\s+fail(ed|ing|ures?)?\b/i.test(t)) return true;
   if (/\bnot ok\b/.test(t)) return true;
   if (/[✗✖]/.test(t)) return true;
