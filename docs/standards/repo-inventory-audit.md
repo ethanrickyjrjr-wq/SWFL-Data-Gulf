@@ -186,7 +186,8 @@ Measured and confirmed **NOT** free text despite narrative-sounding names:
 `lee_parcels`/`collier_parcels.legal_description` (avg 20-25 chars, abbreviated FDOR code),
 `special_circumstances_text` (0 non-null on both tables), `leepa_parcels.use_description` (avg 21,
 86 distinct — a DOR use-code label), `community_profiles` (all 23 text columns measured, longest
-non-URL value is 34 chars), `bls_qcew.industry_title` (0 non-null), `dbpr_sirs_submissions`/
+non-URL value is 34 chars), `bls_qcew.industry_title` (0 non-null; DROPPED 09/20/2026 with
+`area_title`/`own_title` — the BLS area-slice CSV is codes only), `dbpr_sirs_submissions`/
 `dbpr_re_licensees` name/address fields (proper nouns, not prose).
 
 Structural note: `dbpr_public_notices` and `marketbeat_swfl` never persist the source PDF text at

@@ -44,8 +44,9 @@ surface in the session-start banner instead of waiting to be read. A sample of w
 - **LeePA layer 23 "Comparable Sales"** — 108,881 rows w/ `BedRooms`, `Bathrooms`, `YearBuilt`,
   `GrossArea`, `SHAPE`; joins on `FOLIOID` we already hold. See trap **T10**.
 - **FDOT** — their ArcGIS org runs 1,586 public layers; we use one. Crash/fatality data untouched.
-- **Lee permits** — the county's own ArcGIS has structured permit FeatureServer layers (9,386
-  unincorporated-Lee permits) we don't read.
+- **Lee permits** — the county's ArcGIS permit layers (9,386 unincorporated-Lee rows) are frozen
+  March-2025 snapshots, RES + COM only: a 2003-2025 history backfill, NOT a replacement for the
+  live scrape (probed 09/20/2026).
 - **FEMA** — publishes real NFIP residential penetration rates; our code uses a static 0.3 guess.
 - **FDLE crime** — city-level + offense-type breakdown already sits in a variable we compute.
 - **FRED** — confirmed-live Lee/Collier county series (house price index, county GDP, per-capita
@@ -1396,7 +1397,7 @@ Registration is `refinery/packs/catalog.mts`.
 - STATUS: live
 - ROOT: raw base of `permits-swfl` (which is a critical→master input AND a brain-input into `cre-swfl`)
 - DATA WE GET: Accela Angular-SPA scrape (crawl4ai stealth), ~90d backfill → `data_lake.lee_building_permits`. Columns read by the connector: permit_id, issued_date, permit_type_raw, permit_description_raw, bucket, address, zip_code, lat, lon, declared_value_usd, status.
-- DATA AVAILABLE, unpulled: Lee County ArcGIS FeatureServers could replace the fragile Accela scrape — 9,386 unincorporated permits, 719 commercial, 2,192 Cape Coral residential, plus 93,976-row code-enforcement, 43,000+ manufactured-home lots, 550,454-row parcel table, subdivisions, 8,017-row ZoningCases (registry source_ceiling).
+- DATA AVAILABLE, unpulled: Lee County ArcGIS permit FeatureServers — 9,386 unincorporated, 719 commercial, 2,192 Cape Coral residential — are one-off March-2025 snapshots (newest issued 03/04/2025, RES + COM only, no valuation), so they CANNOT replace the Accela scrape (probed 09/20/2026); usable only as a one-shot 2003-2025 new-construction history with parcel STRAP + situs ZIP + point geocodes. Same org also has a 93,976-row code-enforcement, 43,000+ manufactured-home lots, 550,454-row parcel table, subdivisions, 8,017-row ZoningCases (registry source_ceiling).
 - ROUTES:
   - `refinery/sources/permits-source.mts` (source_id `lee_building_permits`, tier 1) → reads `data_lake.lee_building_permits` via `selectAllPaged` (448-day window, minRows:1).
   - `refinery/packs/permits-swfl.mts:1059` — `sources: [permitsSource, collierPermitsSource]`; corridor + ZIP z-scores; `detail_tables: permits_by_zip` (Lee only); `sidecarProducer` writes `fixtures/corridor-permits.json`.

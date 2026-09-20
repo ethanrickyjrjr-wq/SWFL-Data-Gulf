@@ -1,3 +1,22 @@
+## 2026-09-20 (Fable 5.1, session 4, part 2) - bls_qcew DROP proven in production; Lee permits ArcGIS swap NOT BUILT (source is a frozen March-2025 snapshot)
+
+QCEW: migration ran after 962e2d9e landed. Lake + staging = 18 columns each, 64 rows intact, dlt stored schema cleared.
+Real run on a fresh GitHub runner, 35525818513: success, "Ingesting BLS QCEW: 2026-Q1 + 2025-Q1 for 3 areas... pipeline
+complete"; dlt wrote 1 new _dlt_version row per dataset, new load id 1789925198, still 64 rows. Item closed.
+LEE PERMITS (plan E1, gate waived by him): read-only agent probed, then I re-ran the deciding calls myself.
+All 3 county layers are named _March2025; lastEditDate 03/05 + 03/11/2025; USER_Date_Issued 2003-01-08..2025-03-04;
+records that are neither RES nor COM: 0 on both layers; 930 services, no 2026 successor. Our table same day: 333 rows,
+issued 2026-02-25..2026-09-14, 89 of them RES/COM. Swapping would trade a 6-day-fresh feed of 19 record types for a
+565-day-dead file of 2 - and trip the pipeline's own 14-day freshness guard. No extractor written.
+CHANGED: registry source_ceiling + data-roots (2 places) no longer say the layers "could replace" the scrape; spec
+docs/superpowers/specs/2026-09-20-lee-permits-arcgis-design.md carries the verdict + what the snapshot IS good for
+(2003-2025 new-construction history with STRAP / situs ZIP / geocodes). repo-inventory-audit notes the dropped columns.
+CHECKS: closed lee_permits_arcgis_e1_unstarted + lee_permits_arcgis_live_verify (evidence). Opened
+lee_permits_arcgis_history_backfill (idea; his call, correctness-before-new-sources stands) and
+source_citations_say_firecrawl (defect; served citation text in 10 refinery files, ask-first).
+STILL HIS: `rm -rf ingest/tests/pipelines/census_vip ingest/tests/pipelines/fred_g17` - untracked __pycache__ only; the
+destructive-command guard blocks a session's recursive delete even with his word.
+
 ## 2026-09-20 (Fable 5.1, session 4, part 1) - bls_qcew stops declaring 3 columns BLS never sends; DROP migration written, NOT yet run
 
 Operator gave the word on the rest of the ask-first list (scratchpad, verbatim): qcew schema change GO, Lee permits
