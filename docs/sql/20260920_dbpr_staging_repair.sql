@@ -1,0 +1,82 @@
+-- 20260920_dbpr_staging_repair.sql
+-- Repairs ingest-fl-dbpr-licenses.yml, failed 08/05 + 09/05/2026 with:
+--   dlt.destinations.exceptions.DatabaseUndefinedRelation:
+--   relation "data_lake_staging.fl_dbpr_applicants" does not exist
+--
+-- ROOT CAUSE (diagnosed read-only 09/20/2026, Task B4):
+--   1. fl_dbpr_licenses (merge) has always used the staging dataset, so the dlt
+--      schema "fl_dbpr_licenses" was recorded in data_lake_staging._dlt_version on
+--      06/13/2026 with version_hash 0mT56/NuDjRzs/pyvso4OkATiMt+vSORkAcUFY0xfu0=.
+--      At that time fl_dbpr_applicants (replace) used the postgres default
+--      "truncate-and-insert", never touched staging, and so was never created there.
+--   2. Commit 395bb30d (07/14/2026 22:32 -0400, "safe replace_strategy for all 6
+--      dlt+postgres replace pipelines") set replace_strategy="insert-from-staging".
+--      fl_dbpr_applicants now requires a staging twin -- but a strategy change does
+--      not change the SCHEMA hash, which is still 0mT56/... .
+--   3. dlt keys its DDL on that hash, not on the tables actually present:
+--      dlt/destinations/job_client_impl.py:316-338 --
+--        schema_info = self.get_stored_schema_by_hash(self.schema.stored_version_hash)
+--        if schema_info is None or force:   <- DDL
+--        else: "found in storage, no upgrade required"   <- NO DDL
+--      The hash is present for the staging dataset, so CREATE TABLE never runs.
+--   4. dlt/load/utils.py:265 then calls initialize_storage(truncate_tables=...) on
+--      the staging client, which TRUNCATEs a table that was never created -> boom.
+--   dlt will NOT self-heal this: the hash it checks will keep matching. Last
+--   successful applicants load was 07/05/2026 (_dlt_load_id 1783250802.6021574,
+--   8,769 rows) -- the last run before 395bb30d.
+--
+-- WHY A STRUCTURAL CLONE IS FAITHFUL (not invented DDL):
+--   data_lake_staging.fl_dbpr_licenses vs data_lake.fl_dbpr_licenses -- the pair dlt
+--   itself created -- is column-identical (same names, types, nullability, ordinal
+--   positions; full-join diff returns zero rows) and index-identical (UNIQUE index
+--   fl_dbpr_licenses__dlt_id_key on _dlt_id in BOTH schemas). LIKE ... INCLUDING ALL
+--   reproduces exactly that shape for applicants. Per Postgres docs (INCLUDING
+--   INDEXES, https://www.postgresql.org/docs/17/sql-createtable.html): "Names for the
+--   new indexes and constraints are chosen according to the default rules, regardless
+--   of how the originals were named" -> the unique constraint lands as
+--   fl_dbpr_applicants__dlt_id_key, matching the licenses precedent.
+--   Column ORDER is preserved, which matters: the insert-from-staging follow-up job
+--   is DELETE FROM <dest>; INSERT INTO <dest> SELECT * FROM <staging>.
+--
+-- NOT NEEDED HERE: the data_lake GRANT/NOTIFY pgrst step from ingest/CLAUDE.md --
+-- this table is in data_lake_staging, is dlt-internal scratch, and is not exposed
+-- through PostgREST.
+--
+-- Idempotent. Creates no data. Does not touch data_lake.fl_dbpr_applicants
+-- (8,769 rows as of 09/20/2026).
+-- Run via: bun scripts/run-migration.ts docs/sql/20260920_dbpr_staging_repair.sql
+
+CREATE TABLE IF NOT EXISTS data_lake_staging.fl_dbpr_applicants
+  (LIKE data_lake.fl_dbpr_applicants INCLUDING ALL);
+
+-- ---------------------------------------------------------------------------
+-- VERIFY BEFORE RE-DISPATCH (expect staging_present = true, staging_rows = 0):
+--   select exists(select 1 from information_schema.tables
+--                 where table_schema='data_lake_staging'
+--                   and table_name='fl_dbpr_applicants') as staging_present;
+--   select count(*) from data_lake_staging.fl_dbpr_applicants;
+--
+-- THEN: gh workflow run ingest-fl-dbpr-licenses.yml --repo ethanrickyjrjr-wq/SWFL-Data-Gulf
+--
+-- VERIFY AFTER (a NEW _dlt_load_id must appear -- a green run that still shows
+-- 1783250802.6021574 means a stale pending load package was replayed, not fresh data):
+--   select _dlt_load_id, count(*) from data_lake.fl_dbpr_applicants
+--   group by 1 order by 1 desc;   -- expect ~8,800 rows on one new load id
+--
+-- OTHER insert-from-staging PIPELINES (395bb30d touched 6) -- scoped 09/20/2026,
+-- NO repair needed, do not pre-create:
+--   census_acs_zcta  staging twin MISSING, but data_lake_staging._dlt_version has NO
+--                    row for schema "census_acs" -> get_stored_schema_by_hash returns
+--                    None -> dlt runs the DDL and creates it on the next run.
+--   fhfa_hpi         same: staging twin missing, no staging _dlt_version row.
+--   census_cbp_fl    staging twin present (created 07/15/2026 11:21 -- the first run
+--                    after 395bb30d, which is the empirical proof of the self-heal path).
+--   fdot_aadt_fl     staging twin present.
+--   fema_nfip_claims staging twin present.
+-- Discriminating query (broken == staging table missing AND staging already stores
+-- the current lake hash):
+--   select d.schema_name, exists(select 1 from data_lake_staging._dlt_version s
+--            where s.schema_name=d.schema_name and s.version_hash=d.version_hash)
+--          as staging_has_same_hash
+--   from (select distinct on (schema_name) schema_name, version_hash, inserted_at
+--         from data_lake._dlt_version order by schema_name, inserted_at desc) d;
