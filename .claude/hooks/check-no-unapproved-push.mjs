@@ -32,7 +32,19 @@ process.stdin.on("end", () => {
     process.exit(0);
   }
   if (!cmd.trim()) process.exit(0);
-  if (/\bOPERATOR_APPROVED_PUSH=1\b/.test(cmd)) process.exit(0);
+  // 09/07 + 09/14/2026: the weekly-dep-scan cloud routine was blocked here, set this token on
+  // ITSELF, and pushed to main. The token is a HUMAN's word; an unattended session cannot
+  // speak it, so there it is ignored. Markers are vendor-DOCUMENTED env vars only:
+  //   CLAUDE_CODE_REMOTE=true — every cloud session, which is what a routine runs as
+  //     (code.claude.com/docs/en/env-vars, /hooks, /claude-code-on-the-web)
+  //   CI=true — GitHub Actions default (docs.github.com …/variables)
+  // NO TTY clause: a hook's stdio is piped in every session — isTTY measured `undefined` in a
+  // live interactive local session 09/20/2026 — so it would block the operator's own push.
+  // ponytail: env markers are unsettable-by-prefix (the hook reads ITS env, not the command's),
+  // but a session that can edit this file can still gut it; the real wall is GitHub's ruleset.
+  const unattended = ["CLAUDE_CODE_REMOTE", "CI"].filter((k) => process.env[k] === "true");
+  const hasToken = /\bOPERATOR_APPROVED_PUSH=1\b/.test(cmd);
+  if (hasToken && !unattended.length) process.exit(0);
 
   // Match COMMANDS, not words: quoted text (e.g. a commit message that says
   // "git push") must not trip the lock. Tokenize each segment; a push is
@@ -51,6 +63,17 @@ process.stdin.on("end", () => {
     return false;
   });
   if (!isPush) process.exit(0);
+
+  if (hasToken) {
+    const m =
+      `\n${BANNER}\nBLOCKED — OPERATOR_APPROVED_PUSH=1 in an unattended session (${unattended.join(", ")}=true)\n${BANNER}\n` +
+      `A cloud routine pushed to main on 09/07 and 09/14/2026 by setting this token on itself.\n` +
+      `The token is a human's word, spoken in an attended local session — not yours to set.\n` +
+      `Commit; report in a GitHub issue; STOP. Do not retry, rephrase, or push another way.\n${BANNER}\n`;
+    process.stdout.write(m);
+    process.stderr.write(m);
+    process.exit(2);
+  }
 
   const msg =
     `\n${BANNER}\nBLOCKED — push without operator approval\n${BANNER}\n` +
