@@ -1,3 +1,46 @@
+## 2026-09-20 (Fable 5.1) - Backend-week plan, push 2: B1-B4 + D1 landed, B4 PROVED live. 14 of 15 plan tasks now in; handoff written for the rest
+
+Continues the entry below (same session; nothing was pushed between them - the first push waited
+so a rebase would not stash files out from under agents still editing).
+
+f3a3a5cf B1 - Redfin relabeled DOM MOM/YOY "(%)" -> "(DAYS)" between the 08/15 and 09/15 drops.
+Mechanized diff of the LIVE header vs every pipeline ref: 2 of 46 broken, one file; siblings use
+only the unchanged base column. The 09/15 commit f2bb6d1b had fixed the test fixture and left the
+pipeline broken, so the suite was already red. Exposed a served-number defect -> check
+`redfin_dom_yoy_unit_days_not_pct` (housing-source.mts:97 divides a DAY delta by 100). Not fixed:
+pack output is ask-first.
+
+b9184668 B2/B3 - usgs: one Retry session on both NWIS fetches; 5 test patch targets repointed so CI
+does not hit real USGS. bls_qcew: BOTH plan hypotheses disproven live (200 with or without UA, URL
+layout unchanged) - 08/09 cause UNPROVEN; shipped a legible per-quarter error, a contact UA per
+bls.gov/bls/pss.htm, and a guard against a non-CSV 200 loading zero rows green. Found + fixed:
+both workflows passed --dry-run to modules with no argparse, so every dry run did the production
+write. Same defect open in 3 more -> check `dry_run_flag_ignored_three_pipelines`.
+
+bdcbd5d7 B4 - root cause was NOT a dropped staging table. 395bb30d (07/14) moved fl_dbpr_applicants
+to insert-from-staging; its staging twin never existed and dlt skips DDL because
+data_lake_staging._dlt_version already held the schema hash (sibling licenses table, 06/13), then
+TRUNCATEs a missing table. First run after that commit = 08/05 = first failure. 7 tables checked, 1
+broken; census_acs + fhfa self-heal. The auto-mode classifier denied the parent the CREATE; operator
+ran `bun docs/sql/20260920_dbpr_staging_repair.run.ts` -> "CREATED", 12/12 columns. PROVED: run
+35489537652 success, log "Applicants: dlt replace complete - 8855 rows" off a fresh 104,549-row
+download (table had held 8,769 from a single 07/05 load). Direct DB re-read of the load id failed
+twice on ERR_POSTGRES_CONNECTION_CLOSED; the run log is the evidence.
+
+7cc0ae4e D1 - header-arm staleness tripwire, ingest/lib/source_staleness.py, wired into redfin_lee /
+collier / city at 35d. Finding that governs every future wiring: content_age = header_age +
+publish_lag, so a header gate equal to the content gate never fires. redfin_swfl and the Zillow T1
+pair deliberately NOT wired (reasons in STRIKES.md + the commit). 101 tests green across the touched
+suites. Ingest suite carries 19 PRE-EXISTING failures on an untouched tree - listed in the handoff.
+
+Checks opened: redfin_dom_yoy_unit_days_not_pct, approval_token_self_set_paid_hooks,
+dry_run_flag_ignored_three_pipelines. STRIKES: stale-source guard OWED -> PARTIAL; new shape
+routine-self-approved-push (2 strikes, 09/07 + 09/14).
+
+NEXT: docs/superpowers/handoffs/2026-09-20-backend-week-remainder.md - Fedora runner registration
+(GitHub sees zero), the ruleset + routine prompt, E1. Live dispatches of redfin/usgs/bls follow this
+push and are recorded in the next entry.
+
 ## 2026-09-20 (Fable 5.1) - Backend-week plan resumed by fan-out, push 1 of N: Next 16.3.5 (11 alerts), push-guard hole closed, Fedora wiring landed dark, B5 PROVED
 
 Operator: "fedora is registered. bump next.js and fan out to get all this done. you check all the

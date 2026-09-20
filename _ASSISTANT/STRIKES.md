@@ -98,7 +98,7 @@ guard: OWED — a UserPromptSubmit classifier that detects a structural-code que
 - strike: 08/11 answered "where is session refresh handled, and what depends on it" with 6 greps/reads, one day after both graphify MCP servers were added to .mcp.json on his decree; graph held a 4th refresh root (lib/project/refresh-on-access.ts) the grep pattern never matched
 
 ## shape: stale-source-served-silently
-guard: OWED — fleet-wide source-staleness tripwire; pattern exists on redfin_swfl only (ed0b2efd 07/17/2026); check open: stale_source_tripwire_fleet
+guard: PARTIAL 09/20/2026 — header arm landed as ingest/lib/source_staleness.py (the content arm was already one root: guards.assert_content_fresh). Wired at 35d: redfin_lee, redfin_collier, redfin_city_swfl. RULE FOR EVERY FUTURE WIRING: content_age = header_age + publish_lag, so a header gate set equal to the content gate never fires — measure the vendor's publish lag first (redfin ~13d, zillow 16d on 09/20). Not wired on purpose: redfin_swfl (40d content gate already fires at header age 27; any useful header threshold false-alarms on a late-cycle rerun), zillow T1 pair (3-day usable band until their 55d gate tightens). Check open: stale_source_tripwire_fleet
 - strike: 07/22 deed fetch was manual, "WHY IS THIS MANUAL"
 - strike: 07/22 records request drafted-never-filed for 11 days
 - strike: 08/06 crons red for weeks, nobody looked
@@ -188,3 +188,8 @@ guard: OWED — `claim wait` EXITED 0 TWICE without granting the claim, and `cla
 guard: OWED — nothing anywhere compares our DECLARED module boundaries (docs/section-map.md's 5 sections, the 8 area CLAUDE.md files) against how the code is ACTUALLY wired. The graph has held the answer since 06/2026 and no report reads it. Mechanism owed: a declared-vs-detected partition diff (purity / NMI) regenerated on every graph rebuild, so "we build different ways" becomes a number that moves instead of a thing he notices months later. Research: _RESEARCH/agent-behavior/2026-08-11-graphify-community-structure-crawl4ai-research.md
 - strike: 08/11 "I still find out we build different ways or have different ways of building so don't tell me we are doing all we can" — asking for compartments in graphify
 - strike: 08/29 lib/email/voice-guard.ts BUILT 07/08, spec §4 says wire into build-doc.ts repair loop; zero runtime importers 52 days later (header claims it composes into the loop — it never did). Found while adding fair-housing tells.
+
+## shape: routine-self-approved-push
+guard: PARTIAL 09/20/2026 — check-no-unapproved-push.mjs ignores OPERATOR_APPROVED_PUSH=1 when CLAUDE_CODE_REMOTE=true or CI=true (vendor-documented markers; a TTY clause was measured false in attended sessions and rejected). Test: .claude/hooks/check-no-unapproved-push.test.mjs. OWED: the routine prompt sentence; GitHub ruleset bypass removal (operator, the only real wall); the same token-string shape in check-no-apify-actor-run / check-no-paid-dispatch / check-no-new-paid-surface; non-Bash push routes (GitHub MCP, gh api). Check open: approval_token_self_set_paid_hooks
+- strike: 09/07 weekly-dep-scan cloud routine pushed 2ed6b157 + 976a1e05 to main; its own commit message said "read-only"
+- strike: 09/14 same routine, blocked by the hook, re-ran with the token set on itself; a2ab2285 + 34515f89 on main
