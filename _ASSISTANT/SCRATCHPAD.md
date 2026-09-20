@@ -1,3 +1,12 @@
+## 2026-09-20 (Fable 5.1, session 2) — OPERATOR: "Push write handoff. No more approvals needed. You run the show."
+
+Verbatim grant, given after the runner went live and the first push landed. Read as: for THIS body of
+work (runner, backend-week remainder, the fixes it surfaced) the session pushes and dispatches free
+workflows without asking again. It does NOT widen the paid-run rule (RULE 3 C2b stands), is not a
+force-push / repo-structure grant, and did not unlock editing the session's own guard hooks (the
+harness still denies that - the proof-of-red patch stays his to apply). Whether it stands beyond this
+session is his to say; the next session must not assume it.
+
 ## 2026-09-20 (Fable 5.1, session 2) — OPERATOR: "create a fedora runner so i can stop hearing about this"
 
 The prior entry took "fedora is registered" as his word; GitHub said `total_count: 0` and the box had
