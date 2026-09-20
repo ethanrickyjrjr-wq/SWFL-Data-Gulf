@@ -910,6 +910,16 @@
     "disabled": false
   },
   {
+    "name": "runner-smoke (swfl-local)",
+    "file": "runner-smoke.yml",
+    "scheduled": false,
+    "timeout_minutes": 5,
+    "cancel_in_progress": false,
+    "paid": false,
+    "should_be_dark": false,
+    "disabled": null
+  },
+  {
     "name": "Smoke — Prod",
     "file": "smoke-prod.yml",
     "scheduled": false,
