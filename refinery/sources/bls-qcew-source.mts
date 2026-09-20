@@ -42,8 +42,6 @@ interface DbRow {
   industry_code: string;
   year: number;
   qtr: string;
-  area_title: string | null;
-  own_title: string | null;
   qtrly_estabs: number | null;
   month1_emplvl: number | null;
   month2_emplvl: number | null;
@@ -171,7 +169,7 @@ function buildLaborSwflSummary(rows: DbRow[]): LaborSwflSummary {
 // ── Live fetch ─────────────────────────────────────────────────────────────────
 
 const COLS =
-  "area_fips,own_code,industry_code,year,qtr,area_title,own_title,qtrly_estabs,month1_emplvl,month2_emplvl,month3_emplvl,total_qtrly_wages,avg_wkly_wage";
+  "area_fips,own_code,industry_code,year,qtr,qtrly_estabs,month1_emplvl,month2_emplvl,month3_emplvl,total_qtrly_wages,avg_wkly_wage";
 
 async function fetchLive(): Promise<DbRow[]> {
   const sb = getSupabase().schema(SCHEMA);

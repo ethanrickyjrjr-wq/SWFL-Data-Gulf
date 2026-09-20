@@ -1,3 +1,20 @@
+## 2026-09-20 (Fable 5.1, session 4, part 1) - bls_qcew stops declaring 3 columns BLS never sends; DROP migration written, NOT yet run
+
+Operator gave the word on the rest of the ask-first list (scratchpad, verbatim): qcew schema change GO, Lee permits
+ArcGIS gate waived, recursive delete of the two retired test folders approved. CI on 992beef9: success.
+LIVE: `curl .../cew/data/api/2025/4/area/12071.csv` header = 42 columns, codes only, no *_title. Lake probe:
+64 rows, area_title / own_title / industry_title all 0 non-null, no dependent views.
+CHANGED: resources.py drops the 3 hints + yields; bls-qcew-source.mts stops selecting area_title/own_title (it never
+used them); fixture loses 90 lines. RED FIRST: test_no_declared_column_the_source_never_carries 1 failed -> 12 passed.
+Consumer proof: fixture 30 rows, live 64 rows through the narrower select. `bunx tsc --noEmit` exit 0.
+THE TRAP (reproduced on duckdb, dlt 1.29): a bare DROP COLUMN kills the next quarterly run - dlt builds its merge
+INSERT from its STORED schema ("does not have a column with name area_title"). Drop + delete the schema's
+_dlt_version rows loads clean. migrations/20260920_bls_qcew_drop_phantom_title_columns.sql does both, refuses if any
+value is non-null, idempotent. ORDER: this commit on main first (code is safe while the columns still exist), then the SQL.
+Test folders: tracked files already gone in 8a3e61ac; only untracked __pycache__ remains and the destructive-command
+guard blocks a session's recursive delete regardless of his word - handed to him as one line.
+Next: run the migration + bls_qcew --dry-run; Lee permits ArcGIS full-scope probe is running (read-only agent).
+
 ## 2026-09-20 (Fable 5.1, session 3, part 6) - days-on-market YoY is DAYS end to end (his GO on the ask-first item); NOT LIVE until housing rebuilds
 
 Operator: correctness of what we serve comes before new sources and before prediction tests; "Go if good" on the DOM fix.

@@ -130,3 +130,49 @@ def test_a_200_that_is_not_the_qcew_csv_is_not_accepted_as_a_hit():
         with pytest.raises(RuntimeError) as exc:
             _find_latest_quarter(probe_fips="12071", _now_year=2026, _now_month=8)
     assert "2026Q2=200-empty" in str(exc.value)
+
+
+# The area-slice CSV header, fetched live 09/20/2026 from
+# https://data.bls.gov/cew/data/api/2025/4/area/12071.csv (42 columns). It carries
+# CODES only - the *_title lookups live in separate BLS files, never in this slice.
+_LIVE_HEADER_2026_09_20 = (
+    "area_fips,own_code,industry_code,agglvl_code,size_code,year,qtr,disclosure_code,"
+    "qtrly_estabs,month1_emplvl,month2_emplvl,month3_emplvl,total_qtrly_wages,"
+    "taxable_qtrly_wages,qtrly_contributions,avg_wkly_wage,lq_disclosure_code,"
+    "lq_qtrly_estabs,lq_month1_emplvl,lq_month2_emplvl,lq_month3_emplvl,"
+    "lq_total_qtrly_wages,lq_taxable_qtrly_wages,lq_qtrly_contributions,lq_avg_wkly_wage,"
+    "oty_disclosure_code,oty_qtrly_estabs_chg,oty_qtrly_estabs_pct_chg,"
+    "oty_month1_emplvl_chg,oty_month1_emplvl_pct_chg,oty_month2_emplvl_chg,"
+    "oty_month2_emplvl_pct_chg,oty_month3_emplvl_chg,oty_month3_emplvl_pct_chg,"
+    "oty_total_qtrly_wages_chg,oty_total_qtrly_wages_pct_chg,oty_taxable_qtrly_wages_chg,"
+    "oty_taxable_qtrly_wages_pct_chg,oty_qtrly_contributions_chg,"
+    "oty_qtrly_contributions_pct_chg,oty_avg_wkly_wage_chg,oty_avg_wkly_wage_pct_chg"
+).split(",")
+_OURS = {"id", "_source_url", "_ingested_at"}  # authored by the resource, not by BLS
+
+
+def test_no_declared_column_the_source_never_carries():
+    """data_lake.bls_qcew held area_title / own_title / industry_title at 0 non-null of
+    64 rows from 05/18/2026 to 09/20/2026: the resource declared columns the CSV has
+    never had, row.get() returned None forever, and nothing failed."""
+    from ingest.pipelines.bls_qcew.resources import _BLS_QCEW_COLUMNS
+
+    phantom = set(_BLS_QCEW_COLUMNS) - _OURS - set(_LIVE_HEADER_2026_09_20)
+    assert phantom == set(), f"declared but never in the BLS CSV: {sorted(phantom)}"
+
+
+def test_yielded_row_keys_match_the_declared_columns():
+    from ingest.pipelines.bls_qcew.resources import _BLS_QCEW_COLUMNS, bls_qcew_resource
+
+    body = ",".join(_LIVE_HEADER_2026_09_20) + "\n" + ",".join(
+        {"area_fips": "12071", "own_code": "5", "industry_code": "10", "agglvl_code": "71",
+         "size_code": "0", "year": "2025", "qtr": "4", "avg_wkly_wage": "1296"}.get(c, "")
+        for c in _LIVE_HEADER_2026_09_20
+    ) + "\n"
+    resp = MagicMock(text=body)
+    with patch("ingest.pipelines.bls_qcew.resources.requests.get", return_value=resp), \
+         patch("ingest.pipelines.bls_qcew.resources.AREA_FIPS", {"lee": "12071"}):
+        rows = list(bls_qcew_resource([(2025, "4")]))
+    assert len(rows) == 1
+    assert set(rows[0]) == set(_BLS_QCEW_COLUMNS)
+    assert rows[0]["avg_wkly_wage"] == 1296

@@ -1,3 +1,12 @@
+## 2026-09-20 (Fable 5.1, session 4) — OPERATOR: "Get this shit done so we can have everything fixed!!! ... Fan out and make sure done correctly"
+
+His word on the remaining ask-first trio, pasted back as the list itself: (2) bls_qcew's three permanently
+empty columns - "Drop them or derive them; either way it is a schema change" = GO on the schema change;
+(3) Lee permits from the county's ArcGIS replacing the Accela scrape - "the gate is yours to waive" = the
+parked-rebuild-leg gate is WAIVED for landing the data; (4) recursive delete of
+ingest/tests/pipelines/census_vip/ and ingest/tests/pipelines/fred_g17/ = his word given for the delete guard.
+Fan-out is authorized by him for this body of work. Scope is these three items, nothing wider.
+
 ## 2026-09-20 (Fable 5.1, session 3) — OPERATOR: "we need to have all current data running correctly before we find more data ... or trying to create tests that point certain data at predictions. We need to run correctly first with what we have. ... Go if good"
 
 Ordering decision, his words. The nutshell screenshot was "just updating you/us", NOT a new path. GO given
