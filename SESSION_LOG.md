@@ -1,3 +1,12 @@
+## 2026-09-20 (Fable 5.1, session 2, close) - collier weekend fix PROVED on the Fedora runner; handoff written
+
+Operator: "Push write handoff. No more approvals needed. You run the show." (scratchpad has it verbatim + its limits.)
+Landed 33921281..5b010afc. Collier records dry run on the Fedora runner, run 35494269223: success,
+"collier_official_records dry-run: 0 rows for 2026-09-19..2026-09-19" - a Saturday is zero rows now, not a crash.
+Hook patch still NOT applied: the harness denies a session editing its own gate even with the grant.
+Handoff: docs/superpowers/handoffs/2026-09-20-runner-live-what-is-next.md
+Next: watch the first scheduled runs on Fedora (collier daily 11:37 UTC); one LeePA dry run on Fedora.
+
 ## 2026-09-20 (Fable 5.1, session 2, part 4) - PUSHED 11d91296..33921281; runner proven through Actions; SWFL_LOCAL_RUNNER_READY=true; collier weekend crash fixed
 
 After the operator's Go. Live proof, all via GitHub Actions:
