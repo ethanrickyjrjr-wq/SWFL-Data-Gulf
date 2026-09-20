@@ -30,6 +30,8 @@ const eslintConfig = defineConfig([
     "awesome-claude-code-toolkit/**",
     "out/**",
     "build/**",
+    // Python venvs — `bun run lint` crashed walking ingest/.venv (09/20/2026).
+    "**/.venv/**",
     "next-env.d.ts",
     // Design reference / vendor anime.js examples / beautified bundles —
     // not shipped code, not authored here, intentionally outside lint scope.
@@ -50,6 +52,7 @@ const eslintConfig = defineConfig([
     // covers both patterns); never committed, never shipped, keep them out of
     // lint and the editor Problems panel.
     "tmp/**",
+    "__scratch__/**",
     "scripts/email/tmp-*.mts",
   ]),
   // Fiverr-delivered viz components use Recharts tooltip prop typing
