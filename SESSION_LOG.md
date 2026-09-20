@@ -1,3 +1,18 @@
+## 2026-09-20 (Fable 5.1) - Backend-week: B1/B2/B3 PROVED live on main 5a3e4275; Dependabot open alerts 11 -> 0
+
+Dispatched after the push (GitHub runs workflow code from main, so Gate 16 was passed with
+ALLOW_NO_DISPATCH=1 and the dispatches followed immediately):
+  redfin-monthly      run 35490122939  success - "rows loaded: 20,592 across 126 ZIP codes", inventory row upserted
+  usgs-monthly DRY    run 35490123910  success - "usgs: --dry-run, writing to a temp dir; no S3, no inventory row", 4,744,889 daily rows through the new retry session
+  bls-qcew-quarterly  run 35490124930  success (real path, not dry run)
+`gh api .../dependabot/alerts?state=open -q length` -> 0 (was 11 before the next 16.3.5 bump).
+Real usgs-monthly dispatched to land the month the 09/10 503 lost: run 35490402310 - NOT yet
+confirmed at the time of this entry; check it first next session.
+
+Plan status: 14 of 15 tasks landed and proven except C1/C2 (dark until a runner registers - GitHub
+still reports zero) and A2 (parked on the operator's 09/15 word). E1 + everything else owed:
+docs/superpowers/handoffs/2026-09-20-backend-week-remainder.md.
+
 ## 2026-09-20 (Fable 5.1) - Backend-week plan, push 2: B1-B4 + D1 landed, B4 PROVED live. 14 of 15 plan tasks now in; handoff written for the rest
 
 Continues the entry below (same session; nothing was pushed between them - the first push waited
