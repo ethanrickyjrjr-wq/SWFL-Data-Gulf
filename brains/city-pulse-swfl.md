@@ -1,9 +1,9 @@
-<!-- FRESHNESS: v73 | Token: SWFL-7421-v73-20260919-08f5bc19 -->
+<!-- FRESHNESS: v74 | Token: SWFL-7421-v74-20260920-8e93c463 -->
 ---
 brain_id: city-pulse-swfl
-version: 73
-refined_at: 2026-09-19T08:53:47Z
-freshness_token: SWFL-7421-v73-20260919-08f5bc19
+version: 74
+refined_at: 2026-09-20T04:25:51Z
+freshness_token: SWFL-7421-v74-20260920-8e93c463
 ttl_seconds: 86400
 pack_hash: c204e9cb0f38
 context_type: user_saved_reference
@@ -30,33 +30,33 @@ SCOPE: SWFL (Lee + Collier) daily current-events pulse — dated business openin
 
 --- CITATION TABLE ---
 id  | source                                                                                                                                                                                                                                                                       | verified   | expires
-s01 | SWFL city pulse — daily Anthropic web_search_20250305 current-events facts, LLM-distilled with citation enforcement, via Supabase data_lake.city_pulse (id, city, topic, fact, source_url, source_title, cited_text, captured_at, expires_at, run_at); 7 cities; topic-TTL'd | 2026-09-19 | 2026-09-20
+s01 | SWFL city pulse — daily Anthropic web_search_20250305 current-events facts, LLM-distilled with citation enforcement, via Supabase data_lake.city_pulse (id, city, topic, fact, source_url, source_title, cited_text, captured_at, expires_at, run_at); 7 cities; topic-TTL'd | 2026-09-20 | 2026-09-21
 
 --- SAVED FACTS ---
 [
-  {"id":"f001","topic":"city-pulse:summary","fact":"Live SWFL current-events signals","value":"63 non-expired signals across 10 cities (Naples: 24, Fort Myers: 15, Golden Gate: 1, Cape Coral: 14, North Naples: 1, Estero: 2, Sanibel: 2, Bonita Springs: 1, Marco Island: 2, Fort Myers Beach: 1).","src":"s01","date":"2026-09-19"},
-  {"id":"f002","topic":"city-pulse:development","fact":"Naples — development","value":"The Waldorf Astoria Hotel & Residences Miami, a 100-story condo-hotel soaring 1,049 feet, is under construction and will be the tallest tower south of Manhattan upon completion in 2028; condo units start at $3.15 million. (source: https://www.naplesnews.com/story/money/real-estate/2026/09/05/new-100-story-waldorf-astoria-tower-coming-to-miami/91616724007/)","src":"s01","date":"2026-09-19"},
-  {"id":"f003","topic":"city-pulse:development","fact":"Fort Myers — development","value":"Naples design board gave approval ('thumbs up') to Georgios Papadopoulos's exclusive car and wine club proposal in Naples, as reported Sept. 3, 2026, though city staff is still reviewing it. (source: https://www.naplesnews.com/story/money/business/local/2026/09/03/design-board-gives-a-thumbs-up-to-exclusive-car-and-wine-club-in-naples-but-city-staff-reviewing-it/91560883007/)","src":"s01","date":"2026-09-19"},
-  {"id":"f004","topic":"city-pulse:development","fact":"Golden Gate — development","value":"FDOT held a virtual meeting on Sept. 2, 2026 to share more details on plans to widen Interstate 75 from Golden Gate Parkway to Alico Road. (source: https://www.naplesnews.com/story/money/business/local/2026/09/04/fdot-shares-more-about-i-75-widening-and-noise-wall-plans-in-sw-florida-at-virtual-meeting/91587939007/)","src":"s01","date":"2026-09-19"},
-  {"id":"f005","topic":"city-pulse:business","fact":"Cape Coral — business","value":"Georgios Papadopoulos proposed a new exclusive car and wine club in Naples; the design board gave it a thumbs up as of Sept. 3, 2026, though city staff are still reviewing it. (source: https://www.news-press.com/story/money/business/local/2026/09/03/design-board-gives-a-thumbs-up-to-exclusive-car-and-wine-club-in-naples-but-city-staff-reviewing-it/91560883007/)","src":"s01","date":"2026-09-19"},
-  {"id":"f006","topic":"city-pulse:business","fact":"Naples — business","value":"Alamo Drafthouse is closing its cinema at Mercato in North Naples. (source: https://www.gulfshorebusiness.com/news/alamo-drafthouse-closing-cinema-at-mercato-in-north-naples/article_5ddafea2-23c2-478c-8c3e-28298870a6f4.html)","src":"s01","date":"2026-09-19"},
-  {"id":"f007","topic":"city-pulse:business","fact":"North Naples — business","value":"Alamo Drafthouse is closing its cinema at Mercato in North Naples. (source: https://www.gulfshorebusiness.com/news/alamo-drafthouse-closing-cinema-at-mercato-in-north-naples/article_5ddafea2-23c2-478c-8c3e-28298870a6f4.html)","src":"s01","date":"2026-09-19"},
-  {"id":"f008","topic":"city-pulse:structural","fact":"Fort Myers — structural","value":"SW Florida Realtors have dubbed the growing Estero-area corridor the 'Coconut Coast Corridor', as reported Sept. 7, 2026. (source: https://www.naplesnews.com/story/money/real-estate/2026/09/07/sw-florida-realtors-dub-growing-estero-area-coconut-coast/91600054007/)","src":"s01","date":"2026-09-19"},
-  {"id":"f009","topic":"city-pulse:structural","fact":"Naples — structural","value":"SW Florida Realtors have dubbed the growing Estero area the 'Coconut Coast Corridor' as of Sept. 7, 2026. (source: https://www.naplesnews.com/story/money/real-estate/2026/09/07/sw-florida-realtors-dub-growing-estero-area-coconut-coast/91600054007/)","src":"s01","date":"2026-09-19"}
+  {"id":"f001","topic":"city-pulse:summary","fact":"Live SWFL current-events signals","value":"58 non-expired signals across 8 cities (Naples: 23, Fort Myers: 14, Estero: 2, Cape Coral: 13, Sanibel: 2, Bonita Springs: 1, Marco Island: 2, Fort Myers Beach: 1).","src":"s01","date":"2026-09-20"},
+  {"id":"f002","topic":"city-pulse:development","fact":"Naples — development","value":"The Waldorf Astoria Hotel & Residences Miami, a 100-story condo-hotel soaring 1,049 feet, is under construction and will be the tallest tower south of Manhattan upon completion in 2028; condo units start at $3.15 million. (source: https://www.naplesnews.com/story/money/real-estate/2026/09/05/new-100-story-waldorf-astoria-tower-coming-to-miami/91616724007/)","src":"s01","date":"2026-09-20"},
+  {"id":"f003","topic":"city-pulse:structural","fact":"Fort Myers — structural","value":"SW Florida Realtors have dubbed the growing Estero-area corridor the 'Coconut Coast Corridor', as reported Sept. 7, 2026. (source: https://www.naplesnews.com/story/money/real-estate/2026/09/07/sw-florida-realtors-dub-growing-estero-area-coconut-coast/91600054007/)","src":"s01","date":"2026-09-20"},
+  {"id":"f004","topic":"city-pulse:structural","fact":"Naples — structural","value":"SW Florida Realtors have dubbed the growing Estero area the 'Coconut Coast Corridor' as of Sept. 7, 2026. (source: https://www.naplesnews.com/story/money/real-estate/2026/09/07/sw-florida-realtors-dub-growing-estero-area-coconut-coast/91600054007/)","src":"s01","date":"2026-09-20"},
+  {"id":"f005","topic":"city-pulse:structural","fact":"Estero — structural","value":"SW Florida Realtors dubbed the growing Estero area the 'Coconut Coast Corridor' as of Sept. 7, 2026. (source: https://www.naplesnews.com/story/money/real-estate/2026/09/07/sw-florida-realtors-dub-growing-estero-area-coconut-coast/91600054007/)","src":"s01","date":"2026-09-20"},
+  {"id":"f006","topic":"city-pulse:structural","fact":"Cape Coral — structural","value":"Florida data published Sept. 3, 2026 highlights Naples luxury boating lifestyle culture in SWFL, covering Collier County marinas and yachts. (source: https://www.news-press.com/story/money/2026/09/03/florida-numbers-behind-naples-luxury-boating-lifestyle-culture-in-swfl-collier-county-marinas-yachts/91081829007/)","src":"s01","date":"2026-09-20"},
+  {"id":"f007","topic":"city-pulse:structural","fact":"Cape Coral — structural","value":"Collier County commissioners voted to keep the countywide tax rate steady for the upcoming year, but the decision is not final as of Sept. 4, 2026. (source: https://www.news-press.com/story/money/business/local/2026/09/04/collier-commissioners-weigh-tax-cut-impacting-conservation-collier-by-reducing-its-tax-rate/91607961007/)","src":"s01","date":"2026-09-20"},
+  {"id":"f008","topic":"city-pulse:structural","fact":"Cape Coral — structural","value":"Harold Gene Lucas, a SW Florida criminal connected to a 1976 Bonita Springs shooting, was scheduled for Florida execution on Sept. 1, 2026. (source: https://www.news-press.com/story/news/state/2026/08/31/harold-gene-lucas-is-scheduled-to-be-floridas-next-execution-sept-1-bonita-springs-1976-shooting/91492788007/)","src":"s01","date":"2026-09-20"},
+  {"id":"f009","topic":"city-pulse:structural","fact":"Fort Myers — structural","value":"Collier County commissioners are weighing a cut to the Conservation Collier tax rate, as reported Sept. 4, 2026. (source: https://www.naplesnews.com/story/money/business/local/2026/09/04/collier-commissioners-weigh-tax-cut-impacting-conservation-collier-by-reducing-its-tax-rate/91607961007/)","src":"s01","date":"2026-09-20"}
 ]
 
 --- OUTPUT ---
 {
   "brain_id": "city-pulse-swfl",
-  "version": 73,
-  "refined_at": "2026-09-19T08:53:47Z",
-  "expires": "2026-09-20T08:53:47Z",
+  "version": 74,
+  "refined_at": "2026-09-20T04:25:51Z",
+  "expires": "2026-09-21T04:25:51Z",
   "ttl_seconds": 86400,
   "direction": "neutral",
   "magnitude": 0,
   "drivers": [],
   "overrides": [],
-  "conclusion": "SWFL city pulse as of 2026-09-19: 63 live current-events signals across 10 cities — Naples (24), Fort Myers (15), Golden Gate (1), Cape Coral (14), North Naples (1), Estero (2), Sanibel (2), Bonita Springs (1), Marco Island (2), Fort Myers Beach (1). Most current: Naples — The Waldorf Astoria Hotel & Residences Miami, a 100-story condo-hotel soaring 1,049 feet, is under construction and will be the tallest tower south of Manhattan upon completion in 2028; condo units start at $3.15 million. These are current cited facts only; the cross-vertical read and any direction call live downstream in master.",
+  "conclusion": "SWFL city pulse as of 2026-09-20: 58 live current-events signals across 8 cities — Naples (23), Fort Myers (14), Estero (2), Cape Coral (13), Sanibel (2), Bonita Springs (1), Marco Island (2), Fort Myers Beach (1). Most current: Naples — The Waldorf Astoria Hotel & Residences Miami, a 100-story condo-hotel soaring 1,049 feet, is under construction and will be the tallest tower south of Manhattan upon completion in 2028; condo units start at $3.15 million. These are current cited facts only; the cross-vertical read and any direction call live downstream in master.",
   "key_metrics": [
     {
       "metric": "signal_development_1",
@@ -66,7 +66,7 @@ s01 | SWFL city pulse — daily Anthropic web_search_20250305 current-events fac
       "variable_type": "categorical",
       "source": {
         "url": "https://www.naplesnews.com/story/money/real-estate/2026/09/05/new-100-story-waldorf-astoria-tower-coming-to-miami/91616724007/",
-        "fetched_at": "2026-09-19T08:53:47Z",
+        "fetched_at": "2026-09-20T04:25:51Z",
         "tier": 2,
         "citation": "New 100 story Waldorf Astoria tower coming to Miami: \"[](https://www.naplesnews.com/)\n[](https://subscribe.naplesnews.com/rr/nanobar?gps-source=CPTILELEFT&itm_campaign=2026ENTAUGBAU&itm_medium=ONSITE&success-url=https%3A%2F%2Fwww.naplesnews.com%2Fstory%2Fmoney%2Freal-estate%2F2026%2F09%2F05%2Fnew-100-story-waldorf-astoria-tower-coming-to-miami%2F91616724007%2F)\n[](https://subscribe.naplesnews.com/rr/masthead?gps-source=CPMASTHEAD&itm_campaign=2026ENTAUGBAU&itm_medium=ONSITE&success-url=https%3A%2F%2Fwww.naplesnews.com%2Fstory%2Fmoney%2Freal-estate%2F2026%2F09%2F05%2Fnew-100-story-waldorf-astoria-tower-coming-to-miami%2F91616724007%2F)\n[News](https://www.naplesnews.com/news/) [Sports](https://www.naplesnews.com/sports/) [Real Estate](https://www.naplesnews.com/business/real-estate/) [Restaurants](https://www.naplesnews.com/entertainment/restaurants/) [Opinion](https://www.naplesnews.com/opinion/) [Advertise](https://advertising.usatoday.com/advertise-with-us/?cid=Web_LiQ_Network_AdvertiseWithUs_AdvertiseInquiry&publication=naples_daily_news&utm_source=local_publication&utm_medium=menu&utm_campaign=advertise_with_us) [Obituaries](https://www.naplesnews.com/obituaries) [eNewspaper](https://user.naplesnews.com/user/enewspaper) [Legals](https://www.naplesnews.com/public-notices)\n[](https://www.naplesnews.com/search/ \"Search\")\n[](https://www.naplesnews.com/weather/ \"Weather in Naples: 77°F Partly Cloudy\") [](https://subscribe.naplesnews.com/rr/navsub?gps-source=CPTOPNAVBAR&itm_campaign=2026ENTAUGBAU&itm_medium=ONSITE&success-url=https%3A%2F%2Fwww.naplesnews.com%2Fstory%2Fmoney%2Freal-estate%2F2026%2F09%2F05%2Fnew-100-story-waldorf-astoria-tower-coming-to-miami%2F91616724007%2F)\n[](https://login.naplesnews.com/PNDN-GUP/authenticate/?success-url=https%3A%2F%2Fwww.naplesnews.com%2Fstory%2Fmoney%2Freal-estate%2F2026%2F09%2F05%2Fnew-100-story-waldorf-astoria-tower-coming-to-miami%2F91616724007%2F&cancel-url=https%3A%2F%2Fwww.naplesnews.com%2Fstory%2Fmoney%2Freal-estate%2F2026%2F09%2F05%2Fnew-100-story-waldorf-astoria-tower-coming-to-miami%2F91616724007%2F)\n[](https://www.naplesnews.com/) [](https://www.naplesnews.com/)\nREAL ESTATE\n# Super-sized Florida: A 100 story tower is rising above Miami skyline\n[![Portrait of Clayton Park](https://www.naplesnews.com/gcdn/presto/2020/08/14/NDNJ/ba679e5f-045f-4f50-adeb-cd862be43d88-FLDAY-080920-Clayton_Column_4.jpg?crop=2368,2368,x0,y459&width=48&height=48&format=pjpg&auto=webp) Clayton Park](https://www.news-journalonline.com/staff/5432237002/clayton-park/)\nClayton Park\nSept. 5, 2026, 5:08 a.m. ET\nIf you want a [room with a view](https://www.naplesnews.com/picture-gallery/news/state/2026/07/02/new-homes-apartments-keep-going-up-in-florida-with-more-coming/90774974007/), a swanky, ultra-modern 100-story condo-hotel is going up in Miami that will be the tallest south of Manhattan. But it comes with a steep price tag.\nCondo units at the Waldorf Astoria Hotel & Residences Miami, which will soar 1,049 feet into the sky upon completion in 2028, start at $3.15 million. Its top-f\""
       },
@@ -76,101 +76,101 @@ s01 | SWFL city pulse — daily Anthropic web_search_20250305 current-events fac
       ]
     },
     {
-      "metric": "signal_development_2",
-      "value": "Fort Myers: Naples design board gave approval ('thumbs up') to Georgios Papadopoulos's exclusive car and wine club proposal in Naples, as reported Sept. 3, 2026, though city staff is still reviewing it.",
-      "direction": "stable",
-      "label": "Fort Myers — development",
-      "variable_type": "categorical",
-      "source": {
-        "url": "https://www.naplesnews.com/story/money/business/local/2026/09/03/design-board-gives-a-thumbs-up-to-exclusive-car-and-wine-club-in-naples-but-city-staff-reviewing-it/91560883007/",
-        "fetched_at": "2026-09-19T08:53:47Z",
-        "tier": 2,
-        "citation": "Design board gives a thumbs up to exclusive car and wine club in Naples: \"[](https://www.naplesnews.com/)\n[](https://subscribe.naplesnews.com/rr/nanobar?gps-source=CPTILELEFT&itm_campaign=2026ENTAUGBAU&itm_medium=ONSITE&success-url=https%3A%2F%2Fwww.naplesnews.com%2Fstory%2Fmoney%2Fbusiness%2Flocal%2F2026%2F09%2F03%2Fdesign-board-gives-a-thumbs-up-to-exclusive-car-and-wine-club-in-naples-but-city-staff-reviewing-it%2F91560883007%2F)\n[](https://subscribe.naplesnews.com/rr/masthead?gps-source=CPMASTHEAD&itm_campaign=2026ENTAUGBAU&itm_medium=ONSITE&success-url=https%3A%2F%2Fwww.naplesnews.com%2Fstory%2Fmoney%2Fbusiness%2Flocal%2F2026%2F09%2F03%2Fdesign-board-gives-a-thumbs-up-to-exclusive-car-and-wine-club-in-naples-but-city-staff-reviewing-it%2F91560883007%2F)\n[News](https://www.naplesnews.com/news/) [Sports](https://www.naplesnews.com/sports/) [Real Estate](https://www.naplesnews.com/business/real-estate/) [Restaurants](https://www.naplesnews.com/entertainment/restaurants/) [Opinion](https://www.naplesnews.com/opinion/) [Advertise](https://advertising.usatoday.com/advertise-with-us/?cid=Web_LiQ_Network_AdvertiseWithUs_AdvertiseInquiry&publication=naples_daily_news&utm_source=local_publication&utm_medium=menu&utm_campaign=advertise_with_us) [Obituaries](https://www.naplesnews.com/obituaries) [eNewspaper](https://user.naplesnews.com/user/enewspaper) [Legals](https://www.naplesnews.com/public-notices)\n[](https://www.naplesnews.com/search/ \"Search\")\n[](https://www.naplesnews.com/weather/ \"Weather in Naples: 80°F Partly Cloudy\") [](https://subscribe.naplesnews.com/rr/navsub?gps-source=CPTOPNAVBAR&itm_campaign=2026ENTAUGBAU&itm_medium=ONSITE&success-url=https%3A%2F%2Fwww.naplesnews.com%2Fstory%2Fmoney%2Fbusiness%2Flocal%2F2026%2F09%2F03%2Fdesign-board-gives-a-thumbs-up-to-exclusive-car-and-wine-club-in-naples-but-city-staff-reviewing-it%2F91560883007%2F)\n[](https://login.naplesnews.com/PNDN-GUP/authenticate/?success-url=https%3A%2F%2Fwww.naplesnews.com%2Fstory%2Fmoney%2Fbusiness%2Flocal%2F2026%2F09%2F03%2Fdesign-board-gives-a-thumbs-up-to-exclusive-car-and-wine-club-in-naples-but-city-staff-reviewing-it%2F91560883007%2F&cancel-url=https%3A%2F%2Fwww.naplesnews.com%2Fstory%2Fmoney%2Fbusiness%2Flocal%2F2026%2F09%2F03%2Fdesign-board-gives-a-thumbs-up-to-exclusive-car-and-wine-club-in-naples-but-city-staff-reviewing-it%2F91560883007%2F)\n[](https://www.naplesnews.com/) [](https://www.naplesnews.com/)\n[LOCAL BUSINESS](https://www.naplesnews.com/business/local/)\n# 'Retiree' proposes unique car and wine club in Naples\n[![Portrait of Laura Layden](https://www.naplesnews.com/gcdn/authoring/authoring-images/2024/02/08/PNDN/72524348007-ndn-jh-20240126-laura-0001.JPG?crop=3313,3312,x1506,y0&width=48&height=48&format=pjpg&auto=webp) Laura Layden](https://www.naplesnews.com/staff/2647080001/laura-layden/)\nFort Myers News-Press & Naples Daily News\nSept. 3, 2026, 12:03 p.m. ET\nGeorgios Papadopoulos has a vision for a new kind of exclusive club in Naples.\nThe club would combine two of his passions — cars and [wine](https://www.naplesnews.com/st\""
-      },
-      "suggestions": [
-        "What's driving signal development 2?",
-        "How does signal development 2 here compare to other SWFL areas?"
-      ]
-    },
-    {
-      "metric": "signal_development_3",
-      "value": "Golden Gate: FDOT held a virtual meeting on Sept. 2, 2026 to share more details on plans to widen Interstate 75 from Golden Gate Parkway to Alico Road.",
-      "direction": "stable",
-      "label": "Golden Gate — development",
-      "variable_type": "categorical",
-      "source": {
-        "url": "https://www.naplesnews.com/story/money/business/local/2026/09/04/fdot-shares-more-about-i-75-widening-and-noise-wall-plans-in-sw-florida-at-virtual-meeting/91587939007/",
-        "fetched_at": "2026-09-19T08:53:47Z",
-        "tier": 2,
-        "citation": "FDOT shares more about I-75 widening and noise wall plans in SW Florida: \"[](https://www.naplesnews.com/)\n[](https://subscribe.naplesnews.com/rr/nanobar?gps-source=CPTILELEFT&itm_campaign=2026ENTAUGBAU&itm_medium=ONSITE&success-url=https%3A%2F%2Fwww.naplesnews.com%2Fstory%2Fmoney%2Fbusiness%2Flocal%2F2026%2F09%2F04%2Ffdot-shares-more-about-i-75-widening-and-noise-wall-plans-in-sw-florida-at-virtual-meeting%2F91587939007%2F)\n[](https://subscribe.naplesnews.com/rr/masthead?gps-source=CPMASTHEAD&itm_campaign=2026ENTAUGBAU&itm_medium=ONSITE&success-url=https%3A%2F%2Fwww.naplesnews.com%2Fstory%2Fmoney%2Fbusiness%2Flocal%2F2026%2F09%2F04%2Ffdot-shares-more-about-i-75-widening-and-noise-wall-plans-in-sw-florida-at-virtual-meeting%2F91587939007%2F)\n[News](https://www.naplesnews.com/news/) [Sports](https://www.naplesnews.com/sports/) [Real Estate](https://www.naplesnews.com/business/real-estate/) [Restaurants](https://www.naplesnews.com/entertainment/restaurants/) [Opinion](https://www.naplesnews.com/opinion/) [Advertise](https://advertising.usatoday.com/advertise-with-us/?cid=Web_LiQ_Network_AdvertiseWithUs_AdvertiseInquiry&publication=naples_daily_news&utm_source=local_publication&utm_medium=menu&utm_campaign=advertise_with_us) [Obituaries](https://www.naplesnews.com/obituaries) [eNewspaper](https://user.naplesnews.com/user/enewspaper) [Legals](https://www.naplesnews.com/public-notices)\n[](https://www.naplesnews.com/search/ \"Search\")\n[](https://www.naplesnews.com/weather/ \"Weather in Naples: 80°F Partly Cloudy\") [](https://subscribe.naplesnews.com/rr/navsub?gps-source=CPTOPNAVBAR&itm_campaign=2026ENTAUGBAU&itm_medium=ONSITE&success-url=https%3A%2F%2Fwww.naplesnews.com%2Fstory%2Fmoney%2Fbusiness%2Flocal%2F2026%2F09%2F04%2Ffdot-shares-more-about-i-75-widening-and-noise-wall-plans-in-sw-florida-at-virtual-meeting%2F91587939007%2F)\n[](https://login.naplesnews.com/PNDN-GUP/authenticate/?success-url=https%3A%2F%2Fwww.naplesnews.com%2Fstory%2Fmoney%2Fbusiness%2Flocal%2F2026%2F09%2F04%2Ffdot-shares-more-about-i-75-widening-and-noise-wall-plans-in-sw-florida-at-virtual-meeting%2F91587939007%2F&cancel-url=https%3A%2F%2Fwww.naplesnews.com%2Fstory%2Fmoney%2Fbusiness%2Flocal%2F2026%2F09%2F04%2Ffdot-shares-more-about-i-75-widening-and-noise-wall-plans-in-sw-florida-at-virtual-meeting%2F91587939007%2F)\n[](https://www.naplesnews.com/) [](https://www.naplesnews.com/)\n[LOCAL BUSINESS](https://www.naplesnews.com/business/local/)\n# Residents hear more, weigh in on massive I-75 expansion plans in SW Florida\n[![Portrait of Laura Layden](https://www.naplesnews.com/gcdn/authoring/authoring-images/2024/02/08/PNDN/72524348007-ndn-jh-20240126-laura-0001.JPG?crop=3313,3312,x1506,y0&width=48&height=48&format=pjpg&auto=webp) Laura Layden](https://www.naplesnews.com/staff/2647080001/laura-layden/)\nFort Myers News-Press & Naples Daily News\nSept. 4, 2026, 5:03 a.m. ET\nA virtual meeting shed more light on the plans to widen Interstate 75 from Golden Gate Parkway to Alico Road.\nDuring the hour-long meeting on Sept. 2, a team with the Florida Department of Tran\""
-      },
-      "suggestions": [
-        "What's driving signal development 3?",
-        "How does signal development 3 here compare to other SWFL areas?"
-      ]
-    },
-    {
-      "metric": "signal_business_4",
-      "value": "Cape Coral: Georgios Papadopoulos proposed a new exclusive car and wine club in Naples; the design board gave it a thumbs up as of Sept. 3, 2026, though city staff are still reviewing it.",
-      "direction": "stable",
-      "label": "Cape Coral — business",
-      "variable_type": "categorical",
-      "source": {
-        "url": "https://www.news-press.com/story/money/business/local/2026/09/03/design-board-gives-a-thumbs-up-to-exclusive-car-and-wine-club-in-naples-but-city-staff-reviewing-it/91560883007/",
-        "fetched_at": "2026-09-19T08:53:47Z",
-        "tier": 2,
-        "citation": "Design board gives a thumbs up to exclusive car and wine club in Naples: \"[](https://www.news-press.com/)\n[Florida pulls plug on license plate cameras across SW FL roads](https://www.news-press.com/story/news/2026/09/04/florida-highway-police-flock-camera-license-plate-removal/91576967007/)\n[](https://subscribe.news-press.com/rr/nanobar?gps-source=CPTILELEFT&itm_campaign=2026ENTAUGBAU&itm_medium=ONSITE&success-url=https%3A%2F%2Fwww.news-press.com%2Fstory%2Fmoney%2Fbusiness%2Flocal%2F2026%2F09%2F03%2Fdesign-board-gives-a-thumbs-up-to-exclusive-car-and-wine-club-in-naples-but-city-staff-reviewing-it%2F91560883007%2F)\n[](https://subscribe.news-press.com/rr/masthead?gps-source=CPMASTHEAD&itm_campaign=2026ENTAUGBAU&itm_medium=ONSITE&success-url=https%3A%2F%2Fwww.news-press.com%2Fstory%2Fmoney%2Fbusiness%2Flocal%2F2026%2F09%2F03%2Fdesign-board-gives-a-thumbs-up-to-exclusive-car-and-wine-club-in-naples-but-city-staff-reviewing-it%2F91560883007%2F)\n[News](https://www.news-press.com/news/) [Cape Coral](https://www.news-press.com/news/cape-coral/) [Sports](https://www.news-press.com/sports/) [Restaurants](https://www.news-press.com/taste/) [Real Estate](https://www.news-press.com/real-estate) [Advertise](https://advertising.usatoday.com/advertise-with-us/?cid=Web_LiQ_Network_AdvertiseWithUs_AdvertiseInquiry&publication=the_news_press&utm_source=local_publication&utm_medium=menu&utm_campaign=advertise_with_us) [Obituaries](https://www.news-press.com/obituaries) [eNewspaper](https://user.news-press.com/user/enewspaper) [Legals](https://www.news-press.com/public-notices)\n[](https://www.news-press.com/search/ \"Search\")\n[](https://www.news-press.com/weather/ \"Weather in Fort Myers: 78°F Mostly Cloudy\") [](https://subscribe.news-press.com/rr/navsub?gps-source=CPTOPNAVBAR&itm_campaign=2026ENTAUGBAU&itm_medium=ONSITE&success-url=https%3A%2F%2Fwww.news-press.com%2Fstory%2Fmoney%2Fbusiness%2Flocal%2F2026%2F09%2F03%2Fdesign-board-gives-a-thumbs-up-to-exclusive-car-and-wine-club-in-naples-but-city-staff-reviewing-it%2F91560883007%2F)\n[](https://login.news-press.com/PFTM-GUP/authenticate/?success-url=https%3A%2F%2Fwww.news-press.com%2Fstory%2Fmoney%2Fbusiness%2Flocal%2F2026%2F09%2F03%2Fdesign-board-gives-a-thumbs-up-to-exclusive-car-and-wine-club-in-naples-but-city-staff-reviewing-it%2F91560883007%2F&cancel-url=https%3A%2F%2Fwww.news-press.com%2Fstory%2Fmoney%2Fbusiness%2Flocal%2F2026%2F09%2F03%2Fdesign-board-gives-a-thumbs-up-to-exclusive-car-and-wine-club-in-naples-but-city-staff-reviewing-it%2F91560883007%2F)\n[](https://www.news-press.com/) [](https://www.news-press.com/)\nLOCAL BUSINESS\n# 'Retiree' proposes unique car and wine club in Naples\n[![Portrait of Laura Layden](https://www.news-press.com/gcdn/authoring/authoring-images/2024/02/08/PNDN/72524348007-ndn-jh-20240126-laura-0001.JPG?crop=3313,3312,x1506,y0&width=48&height=48&format=pjpg&auto=webp) Laura Layden](https://www.naplesnews.com/staff/2647080001/laura-layden/)\nFort Myers News-Press & Naples Daily News\nSept. 3, 2026, 12:03 p.m. ET\nGeorgios Papadopoulos has a vision for a new ki\""
-      },
-      "suggestions": [
-        "What's driving signal business 4?",
-        "How does signal business 4 here compare to other SWFL areas?"
-      ]
-    },
-    {
-      "metric": "signal_business_5",
-      "value": "Naples: Alamo Drafthouse is closing its cinema at Mercato in North Naples.",
-      "direction": "stable",
-      "label": "Naples — business",
-      "variable_type": "categorical",
-      "source": {
-        "url": "https://www.gulfshorebusiness.com/news/alamo-drafthouse-closing-cinema-at-mercato-in-north-naples/article_5ddafea2-23c2-478c-8c3e-28298870a6f4.html",
-        "fetched_at": "2026-09-19T08:53:47Z",
-        "tier": 2,
-        "citation": "Alamo Drafthouse to close Mercato cinema in North Naples | News | gulfshorebusiness.com: \"[Skip to main content](https://www.gulfshorebusiness.com/news/alamo-drafthouse-closing-cinema-at-mercato-in-north-naples/article_5ddafea2-23c2-478c-8c3e-28298870a6f4.html#main-page-container)\nYou have permission to edit this article.\n[ Edit](https://www.gulfshorebusiness.com/tncms/admin/editorial-asset/?edit=5ddafea2-23c2-478c-8c3e-28298870a6f4) Close\n[![site-logo](https://bloximages.chicago2.vip.townnews.com/gulfshorebusiness.com/content/tncms/custom/image/d93231a5-1f68-4d46-b56f-f961242f84a3.png?resize=200%2C53)](https://www.gulfshorebusiness.com/)\n  * [ Facebook ](https://www.facebook.com/GulfshoreBusiness/)\n  * [ LinkedIn ](https://www.linkedin.com/company/gulfshore-business-magazine)\n  * [ Instagram ](https://www.instagram.com/gulfshorebusiness)\n\n\nSite search Search\n  * [ Sign Up ](https://www.gulfshorebusiness.com/users/signup/?referer_url=https%3A%2F%2Fwww.gulfshorebusiness.com%2Fnews%2Falamo-drafthouse-closing-cinema-at-mercato-in-north-naples%2Farticle_5ddafea2-23c2-478c-8c3e-28298870a6f4.html)\n  * [ Log In ](https://www.gulfshorebusiness.com/users/login/?referer_url=https%3A%2F%2Fwww.gulfshorebusiness.com%2Fnews%2Falamo-drafthouse-closing-cinema-at-mercato-in-north-naples%2Farticle_5ddafea2-23c2-478c-8c3e-28298870a6f4.html)\n\n\n  * [ Dashboard ](https://www.gulfshorebusiness.com/users/admin/)\n  * Logout \n\n\n  *     * My Account\n    * [ Dashboard](https://www.gulfshorebusiness.com/users/admin/)\n    * [ Profile](https://www.gulfshorebusiness.com/news/alamo-drafthouse-closing-cinema-at-mercato-in-north-naples/article_5ddafea2-23c2-478c-8c3e-28298870a6f4.html)\n    * [ Saved items](https://www.gulfshorebusiness.com/users/admin/list/)\n    * Logout \n\n\n[Home](https://www.gulfshorebusiness.com/)\n  * [About Us](https://www.gulfshorebusiness.com/site/about.html)\n  * [Contact Us](https://www.gulfshorebusiness.com/site/contact.html)\n  * [Advertise](https://www.gulfshorebusiness.com/site/advertise.html)\n  * [Terms of Use](https://www.gulfshorebusiness.com/site/terms.html)\n  * [Privacy Policy](https://www.gulfshorebusiness.com/site/privacy.html)\n  * [Employment](https://gulfshorelife.applytojob.com/apply)\n\n\n[News](https://www.gulfshorebusiness.com/news/)\n  * [Real Estate](https://www.gulfshorebusiness.com/real_estate)\n  * [Development](https://www.gulfshorebusiness.com/development/)\n  * [Hospitality](https://www.gulfshorebusiness.com/hospitality/)\n  * [Retail](https://www.gulfshorebusiness.com/retail/)\n  * [Tourism](https://www.gulfshorebusiness.com/tourism/)\n  * [Collier County](https://www.gulfshorebusiness.com/collier/)\n  * [Charlotte County](https://www.gulfshorebusiness.com/charlotte/)\n  * [Lee County](https://www.gulfshorebusiness.com/lee/)\n  * [Nonprofit](https://www.gulfshorebusiness.com/nonprofit/)\n  * [Environment](https://www.gulfshorebusiness.com/environment/)\n  * [Innovation](https://www.gulfshorebusiness.com/innovation/)\n  * [Infrastructure](https://www.gulfshorebusiness.com/infrastructure/)\n  * [Education](https://www.gulfshorebusiness.com\""
-      },
-      "suggestions": [
-        "What's driving signal business 5?",
-        "How does signal business 5 here compare to other SWFL areas?"
-      ]
-    },
-    {
-      "metric": "signal_business_6",
-      "value": "North Naples: Alamo Drafthouse is closing its cinema at Mercato in North Naples.",
-      "direction": "stable",
-      "label": "North Naples — business",
-      "variable_type": "categorical",
-      "source": {
-        "url": "https://www.gulfshorebusiness.com/news/alamo-drafthouse-closing-cinema-at-mercato-in-north-naples/article_5ddafea2-23c2-478c-8c3e-28298870a6f4.html",
-        "fetched_at": "2026-09-19T08:53:47Z",
-        "tier": 2,
-        "citation": "Alamo Drafthouse to close Mercato cinema in North Naples | News | gulfshorebusiness.com: \"[Skip to main content](https://www.gulfshorebusiness.com/news/alamo-drafthouse-closing-cinema-at-mercato-in-north-naples/article_5ddafea2-23c2-478c-8c3e-28298870a6f4.html#main-page-container)\nYou have permission to edit this article.\n[ Edit](https://www.gulfshorebusiness.com/tncms/admin/editorial-asset/?edit=5ddafea2-23c2-478c-8c3e-28298870a6f4) Close\n[![site-logo](https://bloximages.chicago2.vip.townnews.com/gulfshorebusiness.com/content/tncms/custom/image/d93231a5-1f68-4d46-b56f-f961242f84a3.png?resize=200%2C53)](https://www.gulfshorebusiness.com/)\n  * [ Facebook ](https://www.facebook.com/GulfshoreBusiness/)\n  * [ LinkedIn ](https://www.linkedin.com/company/gulfshore-business-magazine)\n  * [ Instagram ](https://www.instagram.com/gulfshorebusiness)\n\n\nSite search Search\n  * [ Sign Up ](https://www.gulfshorebusiness.com/users/signup/?referer_url=https%3A%2F%2Fwww.gulfshorebusiness.com%2Fnews%2Falamo-drafthouse-closing-cinema-at-mercato-in-north-naples%2Farticle_5ddafea2-23c2-478c-8c3e-28298870a6f4.html)\n  * [ Log In ](https://www.gulfshorebusiness.com/users/login/?referer_url=https%3A%2F%2Fwww.gulfshorebusiness.com%2Fnews%2Falamo-drafthouse-closing-cinema-at-mercato-in-north-naples%2Farticle_5ddafea2-23c2-478c-8c3e-28298870a6f4.html)\n\n\n  * [ Dashboard ](https://www.gulfshorebusiness.com/users/admin/)\n  * Logout \n\n\n  *     * My Account\n    * [ Dashboard](https://www.gulfshorebusiness.com/users/admin/)\n    * [ Profile](https://www.gulfshorebusiness.com/news/alamo-drafthouse-closing-cinema-at-mercato-in-north-naples/article_5ddafea2-23c2-478c-8c3e-28298870a6f4.html)\n    * [ Saved items](https://www.gulfshorebusiness.com/users/admin/list/)\n    * Logout \n\n\n[Home](https://www.gulfshorebusiness.com/)\n  * [About Us](https://www.gulfshorebusiness.com/site/about.html)\n  * [Contact Us](https://www.gulfshorebusiness.com/site/contact.html)\n  * [Advertise](https://www.gulfshorebusiness.com/site/advertise.html)\n  * [Terms of Use](https://www.gulfshorebusiness.com/site/terms.html)\n  * [Privacy Policy](https://www.gulfshorebusiness.com/site/privacy.html)\n  * [Employment](https://gulfshorelife.applytojob.com/apply)\n\n\n[News](https://www.gulfshorebusiness.com/news/)\n  * [Real Estate](https://www.gulfshorebusiness.com/real_estate)\n  * [Development](https://www.gulfshorebusiness.com/development/)\n  * [Hospitality](https://www.gulfshorebusiness.com/hospitality/)\n  * [Retail](https://www.gulfshorebusiness.com/retail/)\n  * [Tourism](https://www.gulfshorebusiness.com/tourism/)\n  * [Collier County](https://www.gulfshorebusiness.com/collier/)\n  * [Charlotte County](https://www.gulfshorebusiness.com/charlotte/)\n  * [Lee County](https://www.gulfshorebusiness.com/lee/)\n  * [Nonprofit](https://www.gulfshorebusiness.com/nonprofit/)\n  * [Environment](https://www.gulfshorebusiness.com/environment/)\n  * [Innovation](https://www.gulfshorebusiness.com/innovation/)\n  * [Infrastructure](https://www.gulfshorebusiness.com/infrastructure/)\n  * [Education](https://www.gulfshorebusiness.com\""
-      },
-      "suggestions": [
-        "What's driving signal business 6?",
-        "How does signal business 6 here compare to other SWFL areas?"
-      ]
-    },
-    {
-      "metric": "signal_structural_7",
+      "metric": "signal_structural_2",
       "value": "Fort Myers: SW Florida Realtors have dubbed the growing Estero-area corridor the 'Coconut Coast Corridor', as reported Sept. 7, 2026.",
       "direction": "stable",
       "label": "Fort Myers — structural",
       "variable_type": "categorical",
       "source": {
         "url": "https://www.naplesnews.com/story/money/real-estate/2026/09/07/sw-florida-realtors-dub-growing-estero-area-coconut-coast/91600054007/",
-        "fetched_at": "2026-09-19T08:53:47Z",
+        "fetched_at": "2026-09-20T04:25:51Z",
         "tier": 2,
         "citation": "SW Florida Realtors dub growing Estero area 'Coconut Coast': \"[](https://www.naplesnews.com/)\n[Fort Myers, Bonita Beach parking limited as hurricane restoration begins 4 years after Ian](https://www.naplesnews.com/story/news/local/2026/09/07/parking-depleted-as-hurricane-restoration-begins-at-fort-myers-bonita-beach/91599217007/)\n[](https://subscribe.naplesnews.com/rr/nanobar?gps-source=CPTILELEFT&itm_campaign=2026ENTAUGBAU&itm_medium=ONSITE&success-url=https%3A%2F%2Fwww.naplesnews.com%2Fstory%2Fmoney%2Freal-estate%2F2026%2F09%2F07%2Fsw-florida-realtors-dub-growing-estero-area-coconut-coast%2F91600054007%2F)\n[](https://subscribe.naplesnews.com/rr/masthead?gps-source=CPMASTHEAD&itm_campaign=2026ENTAUGBAU&itm_medium=ONSITE&success-url=https%3A%2F%2Fwww.naplesnews.com%2Fstory%2Fmoney%2Freal-estate%2F2026%2F09%2F07%2Fsw-florida-realtors-dub-growing-estero-area-coconut-coast%2F91600054007%2F)\n[News](https://www.naplesnews.com/news/) [Sports](https://www.naplesnews.com/sports/) [Real Estate](https://www.naplesnews.com/business/real-estate/) [Restaurants](https://www.naplesnews.com/entertainment/restaurants/) [Opinion](https://www.naplesnews.com/opinion/) [Advertise](https://advertising.usatoday.com/advertise-with-us/?cid=Web_LiQ_Network_AdvertiseWithUs_AdvertiseInquiry&publication=naples_daily_news&utm_source=local_publication&utm_medium=menu&utm_campaign=advertise_with_us) [Obituaries](https://www.naplesnews.com/obituaries) [eNewspaper](https://user.naplesnews.com/user/enewspaper) [Legals](https://www.naplesnews.com/public-notices)\n[](https://www.naplesnews.com/search/ \"Search\")\n[](https://www.naplesnews.com/weather/ \"Weather in Naples: 79°F Partly Sunny w/ T-Storms\") [](https://subscribe.naplesnews.com/rr/navsub?gps-source=CPTOPNAVBAR&itm_campaign=2026ENTAUGBAU&itm_medium=ONSITE&success-url=https%3A%2F%2Fwww.naplesnews.com%2Fstory%2Fmoney%2Freal-estate%2F2026%2F09%2F07%2Fsw-florida-realtors-dub-growing-estero-area-coconut-coast%2F91600054007%2F)\n[](https://login.naplesnews.com/PNDN-GUP/authenticate/?success-url=https%3A%2F%2Fwww.naplesnews.com%2Fstory%2Fmoney%2Freal-estate%2F2026%2F09%2F07%2Fsw-florida-realtors-dub-growing-estero-area-coconut-coast%2F91600054007%2F&cancel-url=https%3A%2F%2Fwww.naplesnews.com%2Fstory%2Fmoney%2Freal-estate%2F2026%2F09%2F07%2Fsw-florida-realtors-dub-growing-estero-area-coconut-coast%2F91600054007%2F)\n[](https://www.naplesnews.com/) [](https://www.naplesnews.com/)\nREAL ESTATE\n# 'Coconut Coast Corridor' emerges in SW Florida. What's new and coming?\n[![Portrait of Phil Fernandez](https://www.naplesnews.com/gcdn/presto/2019/09/14/PNDN/6a77b474-579f-48fa-b56f-a2cc2b9de797-NDN_Phil_Fernandez.jpg?crop=2999,2999,x0,y570&width=48&height=48&format=pjpg&auto=webp) Phil Fernandez](https://www.naplesnews.com/staff/2684114001/phil-fernandez/)\nFort Myers News-Press & Naples Daily News\nSept. 7, 2026, 5:02 a.m. ET\nTime to say hello to [Southwest Florida](https://www.naplesnews.com/story/news/politics/elections/2026/08/24/florida-political-shockwave-in-one-of-bigger-cities-what-it-took-lee-county-c\""
+      },
+      "suggestions": [
+        "What's driving signal structural 2?",
+        "How does signal structural 2 here compare to other SWFL areas?"
+      ]
+    },
+    {
+      "metric": "signal_structural_3",
+      "value": "Naples: SW Florida Realtors have dubbed the growing Estero area the 'Coconut Coast Corridor' as of Sept. 7, 2026.",
+      "direction": "stable",
+      "label": "Naples — structural",
+      "variable_type": "categorical",
+      "source": {
+        "url": "https://www.naplesnews.com/story/money/real-estate/2026/09/07/sw-florida-realtors-dub-growing-estero-area-coconut-coast/91600054007/",
+        "fetched_at": "2026-09-20T04:25:51Z",
+        "tier": 2,
+        "citation": "SW Florida Realtors dub growing Estero area 'Coconut Coast': \"[](https://www.naplesnews.com/)\n[Fort Myers, Bonita Beach parking limited as hurricane restoration begins 4 years after Ian](https://www.naplesnews.com/story/news/local/2026/09/07/parking-depleted-as-hurricane-restoration-begins-at-fort-myers-bonita-beach/91599217007/)\n[](https://subscribe.naplesnews.com/rr/nanobar?gps-source=CPTILELEFT&itm_campaign=2026ENTAUGBAU&itm_medium=ONSITE&success-url=https%3A%2F%2Fwww.naplesnews.com%2Fstory%2Fmoney%2Freal-estate%2F2026%2F09%2F07%2Fsw-florida-realtors-dub-growing-estero-area-coconut-coast%2F91600054007%2F)\n[](https://subscribe.naplesnews.com/rr/masthead?gps-source=CPMASTHEAD&itm_campaign=2026ENTAUGBAU&itm_medium=ONSITE&success-url=https%3A%2F%2Fwww.naplesnews.com%2Fstory%2Fmoney%2Freal-estate%2F2026%2F09%2F07%2Fsw-florida-realtors-dub-growing-estero-area-coconut-coast%2F91600054007%2F)\n[News](https://www.naplesnews.com/news/) [Sports](https://www.naplesnews.com/sports/) [Real Estate](https://www.naplesnews.com/business/real-estate/) [Restaurants](https://www.naplesnews.com/entertainment/restaurants/) [Opinion](https://www.naplesnews.com/opinion/) [Advertise](https://advertising.usatoday.com/advertise-with-us/?cid=Web_LiQ_Network_AdvertiseWithUs_AdvertiseInquiry&publication=naples_daily_news&utm_source=local_publication&utm_medium=menu&utm_campaign=advertise_with_us) [Obituaries](https://www.naplesnews.com/obituaries) [eNewspaper](https://user.naplesnews.com/user/enewspaper) [Legals](https://www.naplesnews.com/public-notices)\n[](https://www.naplesnews.com/search/ \"Search\")\n[](https://www.naplesnews.com/weather/ \"Weather in Naples: 79°F Partly Sunny w/ T-Storms\") [](https://subscribe.naplesnews.com/rr/navsub?gps-source=CPTOPNAVBAR&itm_campaign=2026ENTAUGBAU&itm_medium=ONSITE&success-url=https%3A%2F%2Fwww.naplesnews.com%2Fstory%2Fmoney%2Freal-estate%2F2026%2F09%2F07%2Fsw-florida-realtors-dub-growing-estero-area-coconut-coast%2F91600054007%2F)\n[](https://login.naplesnews.com/PNDN-GUP/authenticate/?success-url=https%3A%2F%2Fwww.naplesnews.com%2Fstory%2Fmoney%2Freal-estate%2F2026%2F09%2F07%2Fsw-florida-realtors-dub-growing-estero-area-coconut-coast%2F91600054007%2F&cancel-url=https%3A%2F%2Fwww.naplesnews.com%2Fstory%2Fmoney%2Freal-estate%2F2026%2F09%2F07%2Fsw-florida-realtors-dub-growing-estero-area-coconut-coast%2F91600054007%2F)\n[](https://www.naplesnews.com/) [](https://www.naplesnews.com/)\nREAL ESTATE\n# 'Coconut Coast Corridor' emerges in SW Florida. What's new and coming?\n[![Portrait of Phil Fernandez](https://www.naplesnews.com/gcdn/presto/2019/09/14/PNDN/6a77b474-579f-48fa-b56f-a2cc2b9de797-NDN_Phil_Fernandez.jpg?crop=2999,2999,x0,y570&width=48&height=48&format=pjpg&auto=webp) Phil Fernandez](https://www.naplesnews.com/staff/2684114001/phil-fernandez/)\nFort Myers News-Press & Naples Daily News\nSept. 7, 2026, 5:02 a.m. ET\nTime to say hello to [Southwest Florida](https://www.naplesnews.com/story/news/politics/elections/2026/08/24/florida-political-shockwave-in-one-of-bigger-cities-what-it-took-lee-county-c\""
+      },
+      "suggestions": [
+        "What's driving signal structural 3?",
+        "How does signal structural 3 here compare to other SWFL areas?"
+      ]
+    },
+    {
+      "metric": "signal_structural_4",
+      "value": "Estero: SW Florida Realtors dubbed the growing Estero area the 'Coconut Coast Corridor' as of Sept. 7, 2026.",
+      "direction": "stable",
+      "label": "Estero — structural",
+      "variable_type": "categorical",
+      "source": {
+        "url": "https://www.naplesnews.com/story/money/real-estate/2026/09/07/sw-florida-realtors-dub-growing-estero-area-coconut-coast/91600054007/",
+        "fetched_at": "2026-09-20T04:25:51Z",
+        "tier": 2,
+        "citation": "SW Florida Realtors dub growing Estero area 'Coconut Coast': \"[](https://www.naplesnews.com/)\n[Fort Myers, Bonita Beach parking limited as hurricane restoration begins 4 years after Ian](https://www.naplesnews.com/story/news/local/2026/09/07/parking-depleted-as-hurricane-restoration-begins-at-fort-myers-bonita-beach/91599217007/)\n[](https://subscribe.naplesnews.com/rr/nanobar?gps-source=CPTILELEFT&itm_campaign=2026ENTAUGBAU&itm_medium=ONSITE&success-url=https%3A%2F%2Fwww.naplesnews.com%2Fstory%2Fmoney%2Freal-estate%2F2026%2F09%2F07%2Fsw-florida-realtors-dub-growing-estero-area-coconut-coast%2F91600054007%2F)\n[](https://subscribe.naplesnews.com/rr/masthead?gps-source=CPMASTHEAD&itm_campaign=2026ENTAUGBAU&itm_medium=ONSITE&success-url=https%3A%2F%2Fwww.naplesnews.com%2Fstory%2Fmoney%2Freal-estate%2F2026%2F09%2F07%2Fsw-florida-realtors-dub-growing-estero-area-coconut-coast%2F91600054007%2F)\n[News](https://www.naplesnews.com/news/) [Sports](https://www.naplesnews.com/sports/) [Real Estate](https://www.naplesnews.com/business/real-estate/) [Restaurants](https://www.naplesnews.com/entertainment/restaurants/) [Opinion](https://www.naplesnews.com/opinion/) [Advertise](https://advertising.usatoday.com/advertise-with-us/?cid=Web_LiQ_Network_AdvertiseWithUs_AdvertiseInquiry&publication=naples_daily_news&utm_source=local_publication&utm_medium=menu&utm_campaign=advertise_with_us) [Obituaries](https://www.naplesnews.com/obituaries) [eNewspaper](https://user.naplesnews.com/user/enewspaper) [Legals](https://www.naplesnews.com/public-notices)\n[](https://www.naplesnews.com/search/ \"Search\")\n[](https://www.naplesnews.com/weather/ \"Weather in Naples: 79°F Partly Sunny w/ T-Storms\") [](https://subscribe.naplesnews.com/rr/navsub?gps-source=CPTOPNAVBAR&itm_campaign=2026ENTAUGBAU&itm_medium=ONSITE&success-url=https%3A%2F%2Fwww.naplesnews.com%2Fstory%2Fmoney%2Freal-estate%2F2026%2F09%2F07%2Fsw-florida-realtors-dub-growing-estero-area-coconut-coast%2F91600054007%2F)\n[](https://login.naplesnews.com/PNDN-GUP/authenticate/?success-url=https%3A%2F%2Fwww.naplesnews.com%2Fstory%2Fmoney%2Freal-estate%2F2026%2F09%2F07%2Fsw-florida-realtors-dub-growing-estero-area-coconut-coast%2F91600054007%2F&cancel-url=https%3A%2F%2Fwww.naplesnews.com%2Fstory%2Fmoney%2Freal-estate%2F2026%2F09%2F07%2Fsw-florida-realtors-dub-growing-estero-area-coconut-coast%2F91600054007%2F)\n[](https://www.naplesnews.com/) [](https://www.naplesnews.com/)\nREAL ESTATE\n# 'Coconut Coast Corridor' emerges in SW Florida. What's new and coming?\n[![Portrait of Phil Fernandez](https://www.naplesnews.com/gcdn/presto/2019/09/14/PNDN/6a77b474-579f-48fa-b56f-a2cc2b9de797-NDN_Phil_Fernandez.jpg?crop=2999,2999,x0,y570&width=48&height=48&format=pjpg&auto=webp) Phil Fernandez](https://www.naplesnews.com/staff/2684114001/phil-fernandez/)\nFort Myers News-Press & Naples Daily News\nSept. 7, 2026, 5:02 a.m. ET\nTime to say hello to [Southwest Florida](https://www.naplesnews.com/story/news/politics/elections/2026/08/24/florida-political-shockwave-in-one-of-bigger-cities-what-it-took-lee-county-c\""
+      },
+      "suggestions": [
+        "What's driving signal structural 4?",
+        "How does signal structural 4 here compare to other SWFL areas?"
+      ]
+    },
+    {
+      "metric": "signal_structural_5",
+      "value": "Cape Coral: Florida data published Sept. 3, 2026 highlights Naples luxury boating lifestyle culture in SWFL, covering Collier County marinas and yachts.",
+      "direction": "stable",
+      "label": "Cape Coral — structural",
+      "variable_type": "categorical",
+      "source": {
+        "url": "https://www.news-press.com/story/money/2026/09/03/florida-numbers-behind-naples-luxury-boating-lifestyle-culture-in-swfl-collier-county-marinas-yachts/91081829007/",
+        "fetched_at": "2026-09-20T04:25:51Z",
+        "tier": 2,
+        "citation": "Florida numbers behind Naples luxury boating lifestyle culture in SWFL: \"[](https://www.news-press.com/)\n[Fort Myers, Bonita Beach parking limited as hurricane restoration begins 4 years after Ian](https://www.news-press.com/story/news/local/2026/09/07/parking-depleted-as-hurricane-restoration-begins-at-fort-myers-bonita-beach/91599217007/)\n[](https://subscribe.news-press.com/rr/nanobar?gps-source=CPTILELEFT&itm_campaign=2026ENTAUGBAU&itm_medium=ONSITE&success-url=https%3A%2F%2Fwww.news-press.com%2Fstory%2Fmoney%2F2026%2F09%2F03%2Fflorida-numbers-behind-naples-luxury-boating-lifestyle-culture-in-swfl-collier-county-marinas-yachts%2F91081829007%2F)\n[](https://subscribe.news-press.com/rr/masthead?gps-source=CPMASTHEAD&itm_campaign=2026ENTAUGBAU&itm_medium=ONSITE&success-url=https%3A%2F%2Fwww.news-press.com%2Fstory%2Fmoney%2F2026%2F09%2F03%2Fflorida-numbers-behind-naples-luxury-boating-lifestyle-culture-in-swfl-collier-county-marinas-yachts%2F91081829007%2F)\n[News](https://www.news-press.com/news/) [Cape Coral](https://www.news-press.com/news/cape-coral/) [Sports](https://www.news-press.com/sports/) [Restaurants](https://www.news-press.com/taste/) [Real Estate](https://www.news-press.com/real-estate) [Advertise](https://advertising.usatoday.com/advertise-with-us/?cid=Web_LiQ_Network_AdvertiseWithUs_AdvertiseInquiry&publication=the_news_press&utm_source=local_publication&utm_medium=menu&utm_campaign=advertise_with_us) [Obituaries](https://www.news-press.com/obituaries) [eNewspaper](https://user.news-press.com/user/enewspaper) [Legals](https://www.news-press.com/public-notices)\n[](https://www.news-press.com/search/ \"Search\")\n[](https://www.news-press.com/weather/ \"Weather in Fort Myers: 82°F Mostly Cloudy\") [](https://subscribe.news-press.com/rr/navsub?gps-source=CPTOPNAVBAR&itm_campaign=2026ENTAUGBAU&itm_medium=ONSITE&success-url=https%3A%2F%2Fwww.news-press.com%2Fstory%2Fmoney%2F2026%2F09%2F03%2Fflorida-numbers-behind-naples-luxury-boating-lifestyle-culture-in-swfl-collier-county-marinas-yachts%2F91081829007%2F)\n[](https://login.news-press.com/PFTM-GUP/authenticate/?success-url=https%3A%2F%2Fwww.news-press.com%2Fstory%2Fmoney%2F2026%2F09%2F03%2Fflorida-numbers-behind-naples-luxury-boating-lifestyle-culture-in-swfl-collier-county-marinas-yachts%2F91081829007%2F&cancel-url=https%3A%2F%2Fwww.news-press.com%2Fstory%2Fmoney%2F2026%2F09%2F03%2Fflorida-numbers-behind-naples-luxury-boating-lifestyle-culture-in-swfl-collier-county-marinas-yachts%2F91081829007%2F)\n[](https://www.news-press.com/) [](https://www.news-press.com/)\nMONEY\n# What new Florida data says about Naples ritzy luxury boating lifestyle\n[![Portrait of Phil Fernandez](https://www.news-press.com/gcdn/presto/2019/09/14/PNDN/6a77b474-579f-48fa-b56f-a2cc2b9de797-NDN_Phil_Fernandez.jpg?crop=2999,2999,x0,y570&width=48&height=48&format=pjpg&auto=webp) Phil Fernandez](https://www.naplesnews.com/staff/2684114001/phil-fernandez/)\nFort Myers News-Press & Naples Daily News\nSept. 3, 2026, 5:01 a.m. ET\n[](https://www.facebook.com/dialog/share?display=popup&app_id=14963106842106\""
+      },
+      "suggestions": [
+        "What's driving signal structural 5?",
+        "How does signal structural 5 here compare to other SWFL areas?"
+      ]
+    },
+    {
+      "metric": "signal_structural_6",
+      "value": "Cape Coral: Collier County commissioners voted to keep the countywide tax rate steady for the upcoming year, but the decision is not final as of Sept. 4, 2026.",
+      "direction": "stable",
+      "label": "Cape Coral — structural",
+      "variable_type": "categorical",
+      "source": {
+        "url": "https://www.news-press.com/story/money/business/local/2026/09/04/collier-commissioners-weigh-tax-cut-impacting-conservation-collier-by-reducing-its-tax-rate/91607961007/",
+        "fetched_at": "2026-09-20T04:25:51Z",
+        "tier": 2,
+        "citation": "Collier tax cut proposal targets conservation funds: \"[](https://www.news-press.com/)\n[](https://subscribe.news-press.com/rr/nanobar?gps-source=CPTILELEFT&itm_campaign=2026ENTAUGBAU&itm_medium=ONSITE&success-url=https%3A%2F%2Fwww.news-press.com%2Fstory%2Fmoney%2Fbusiness%2Flocal%2F2026%2F09%2F04%2Fcollier-commissioners-weigh-tax-cut-impacting-conservation-collier-by-reducing-its-tax-rate%2F91607961007%2F)\n[](https://subscribe.news-press.com/rr/masthead?gps-source=CPMASTHEAD&itm_campaign=2026ENTAUGBAU&itm_medium=ONSITE&success-url=https%3A%2F%2Fwww.news-press.com%2Fstory%2Fmoney%2Fbusiness%2Flocal%2F2026%2F09%2F04%2Fcollier-commissioners-weigh-tax-cut-impacting-conservation-collier-by-reducing-its-tax-rate%2F91607961007%2F)\n[News](https://www.news-press.com/news/) [Cape Coral](https://www.news-press.com/news/cape-coral/) [Sports](https://www.news-press.com/sports/) [Restaurants](https://www.news-press.com/taste/) [Real Estate](https://www.news-press.com/real-estate) [Advertise](https://advertising.usatoday.com/advertise-with-us/?cid=Web_LiQ_Network_AdvertiseWithUs_AdvertiseInquiry&publication=the_news_press&utm_source=local_publication&utm_medium=menu&utm_campaign=advertise_with_us) [Obituaries](https://www.news-press.com/obituaries) [eNewspaper](https://user.news-press.com/user/enewspaper) [Legals](https://www.news-press.com/public-notices)\n[](https://www.news-press.com/search/ \"Search\")\n[](https://www.news-press.com/weather/ \"Weather in Fort Myers: 79°F Mostly Clear\") [](https://subscribe.news-press.com/rr/navsub?gps-source=CPTOPNAVBAR&itm_campaign=2026ENTAUGBAU&itm_medium=ONSITE&success-url=https%3A%2F%2Fwww.news-press.com%2Fstory%2Fmoney%2Fbusiness%2Flocal%2F2026%2F09%2F04%2Fcollier-commissioners-weigh-tax-cut-impacting-conservation-collier-by-reducing-its-tax-rate%2F91607961007%2F)\n[](https://login.news-press.com/PFTM-GUP/authenticate/?success-url=https%3A%2F%2Fwww.news-press.com%2Fstory%2Fmoney%2Fbusiness%2Flocal%2F2026%2F09%2F04%2Fcollier-commissioners-weigh-tax-cut-impacting-conservation-collier-by-reducing-its-tax-rate%2F91607961007%2F&cancel-url=https%3A%2F%2Fwww.news-press.com%2Fstory%2Fmoney%2Fbusiness%2Flocal%2F2026%2F09%2F04%2Fcollier-commissioners-weigh-tax-cut-impacting-conservation-collier-by-reducing-its-tax-rate%2F91607961007%2F)\n[](https://www.news-press.com/) [](https://www.news-press.com/)\nLOCAL BUSINESS\n# Collier commissioners weighing cut to Conservation Collier tax rate\n[![Portrait of Laura Layden](https://www.news-press.com/gcdn/authoring/authoring-images/2024/02/08/PNDN/72524348007-ndn-jh-20240126-laura-0001.JPG?crop=3313,3312,x1506,y0&width=48&height=48&format=pjpg&auto=webp) Laura Layden](https://www.naplesnews.com/staff/2647080001/laura-layden/)\nFort Myers News-Press & Naples Daily News\nSept. 4, 2026, 3:34 p.m. ET\n[Collier County commissioners](https://www.news-press.com/story/news/local/2026/07/14/collier-county-seeks-to-pause-mega-data-center-applications/90913888007/) voted to keep the countywide tax rate steady for the upcoming year.\nHowever, the decision isn't final\""
+      },
+      "suggestions": [
+        "What's driving signal structural 6?",
+        "How does signal structural 6 here compare to other SWFL areas?"
+      ]
+    },
+    {
+      "metric": "signal_structural_7",
+      "value": "Cape Coral: Harold Gene Lucas, a SW Florida criminal connected to a 1976 Bonita Springs shooting, was scheduled for Florida execution on Sept. 1, 2026.",
+      "direction": "stable",
+      "label": "Cape Coral — structural",
+      "variable_type": "categorical",
+      "source": {
+        "url": "https://www.news-press.com/story/news/state/2026/08/31/harold-gene-lucas-is-scheduled-to-be-floridas-next-execution-sept-1-bonita-springs-1976-shooting/91492788007/",
+        "fetched_at": "2026-09-20T04:25:51Z",
+        "tier": 2,
+        "citation": "Harold Gene Lucas is scheduled to be Florida's next execution Sept.1: \"[](https://www.news-press.com/)\n[Death date this week: SW Florida criminal is next on Florida's historic executions timeline](https://www.news-press.com/story/news/state/2026/08/31/harold-gene-lucas-is-scheduled-to-be-floridas-next-execution-sept-1-bonita-springs-1976-shooting/91492788007/)\n[](https://subscribe.news-press.com/rr/nanobar?gps-source=CPTILELEFT&itm_campaign=2026ENTAUGBAU&itm_medium=ONSITE&success-url=https%3A%2F%2Fwww.news-press.com%2Fstory%2Fnews%2Fstate%2F2026%2F08%2F31%2Fharold-gene-lucas-is-scheduled-to-be-floridas-next-execution-sept-1-bonita-springs-1976-shooting%2F91492788007%2F)\n[](https://subscribe.news-press.com/rr/masthead?gps-source=CPMASTHEAD&itm_campaign=2026ENTAUGBAU&itm_medium=ONSITE&success-url=https%3A%2F%2Fwww.news-press.com%2Fstory%2Fnews%2Fstate%2F2026%2F08%2F31%2Fharold-gene-lucas-is-scheduled-to-be-floridas-next-execution-sept-1-bonita-springs-1976-shooting%2F91492788007%2F)\n[News](https://www.news-press.com/news/) [Cape Coral](https://www.news-press.com/news/cape-coral/) [Sports](https://www.news-press.com/sports/) [Restaurants](https://www.news-press.com/taste/) [Real Estate](https://www.news-press.com/real-estate) [Advertise](https://advertising.usatoday.com/advertise-with-us/?cid=Web_LiQ_Network_AdvertiseWithUs_AdvertiseInquiry&publication=the_news_press&utm_source=local_publication&utm_medium=menu&utm_campaign=advertise_with_us) [Obituaries](https://www.news-press.com/obituaries) [eNewspaper](https://user.news-press.com/user/enewspaper) [Legals](https://www.news-press.com/public-notices)\n[](https://www.news-press.com/search/ \"Search\")\n[](https://www.news-press.com/weather/ \"Weather in Fort Myers: 80°F Sunny\") [](https://subscribe.news-press.com/rr/navsub?gps-source=CPTOPNAVBAR&itm_campaign=2026ENTAUGBAU&itm_medium=ONSITE&success-url=https%3A%2F%2Fwww.news-press.com%2Fstory%2Fnews%2Fstate%2F2026%2F08%2F31%2Fharold-gene-lucas-is-scheduled-to-be-floridas-next-execution-sept-1-bonita-springs-1976-shooting%2F91492788007%2F)\n[](https://login.news-press.com/PFTM-GUP/authenticate/?success-url=https%3A%2F%2Fwww.news-press.com%2Fstory%2Fnews%2Fstate%2F2026%2F08%2F31%2Fharold-gene-lucas-is-scheduled-to-be-floridas-next-execution-sept-1-bonita-springs-1976-shooting%2F91492788007%2F&cancel-url=https%3A%2F%2Fwww.news-press.com%2Fstory%2Fnews%2Fstate%2F2026%2F08%2F31%2Fharold-gene-lucas-is-scheduled-to-be-floridas-next-execution-sept-1-bonita-springs-1976-shooting%2F91492788007%2F)\n[](https://www.news-press.com/news/) [](https://www.news-press.com/news/)\nSTATE\n# Death date: SW Florida criminal next on Florida's executions timeline\n[![Portrait of C. A. Bridges](https://www.news-press.com/gcdn/presto/2022/01/12/PIND/c37a50c0-43ea-453e-8cff-1404f2ecc006-acff92bf-b3b2-4e70-b861-9c00de8def9b-2020-07-19_Chris_for_Work_-_Square.jpeg?crop=1712,1712,x0,y0&width=48&height=48&format=pjpg&auto=webp) C. A. Bridges](https://www.news-journalonline.com/staff/5204967002/c-a-bridges/)\nFort Myers News-Press & Naples Daily News\nAug. 31, 20\""
       },
       "suggestions": [
         "What's driving signal structural 7?",
@@ -179,15 +179,15 @@ s01 | SWFL city pulse — daily Anthropic web_search_20250305 current-events fac
     },
     {
       "metric": "signal_structural_8",
-      "value": "Naples: SW Florida Realtors have dubbed the growing Estero area the 'Coconut Coast Corridor' as of Sept. 7, 2026.",
+      "value": "Fort Myers: Collier County commissioners are weighing a cut to the Conservation Collier tax rate, as reported Sept. 4, 2026.",
       "direction": "stable",
-      "label": "Naples — structural",
+      "label": "Fort Myers — structural",
       "variable_type": "categorical",
       "source": {
-        "url": "https://www.naplesnews.com/story/money/real-estate/2026/09/07/sw-florida-realtors-dub-growing-estero-area-coconut-coast/91600054007/",
-        "fetched_at": "2026-09-19T08:53:47Z",
+        "url": "https://www.naplesnews.com/story/money/business/local/2026/09/04/collier-commissioners-weigh-tax-cut-impacting-conservation-collier-by-reducing-its-tax-rate/91607961007/",
+        "fetched_at": "2026-09-20T04:25:51Z",
         "tier": 2,
-        "citation": "SW Florida Realtors dub growing Estero area 'Coconut Coast': \"[](https://www.naplesnews.com/)\n[Fort Myers, Bonita Beach parking limited as hurricane restoration begins 4 years after Ian](https://www.naplesnews.com/story/news/local/2026/09/07/parking-depleted-as-hurricane-restoration-begins-at-fort-myers-bonita-beach/91599217007/)\n[](https://subscribe.naplesnews.com/rr/nanobar?gps-source=CPTILELEFT&itm_campaign=2026ENTAUGBAU&itm_medium=ONSITE&success-url=https%3A%2F%2Fwww.naplesnews.com%2Fstory%2Fmoney%2Freal-estate%2F2026%2F09%2F07%2Fsw-florida-realtors-dub-growing-estero-area-coconut-coast%2F91600054007%2F)\n[](https://subscribe.naplesnews.com/rr/masthead?gps-source=CPMASTHEAD&itm_campaign=2026ENTAUGBAU&itm_medium=ONSITE&success-url=https%3A%2F%2Fwww.naplesnews.com%2Fstory%2Fmoney%2Freal-estate%2F2026%2F09%2F07%2Fsw-florida-realtors-dub-growing-estero-area-coconut-coast%2F91600054007%2F)\n[News](https://www.naplesnews.com/news/) [Sports](https://www.naplesnews.com/sports/) [Real Estate](https://www.naplesnews.com/business/real-estate/) [Restaurants](https://www.naplesnews.com/entertainment/restaurants/) [Opinion](https://www.naplesnews.com/opinion/) [Advertise](https://advertising.usatoday.com/advertise-with-us/?cid=Web_LiQ_Network_AdvertiseWithUs_AdvertiseInquiry&publication=naples_daily_news&utm_source=local_publication&utm_medium=menu&utm_campaign=advertise_with_us) [Obituaries](https://www.naplesnews.com/obituaries) [eNewspaper](https://user.naplesnews.com/user/enewspaper) [Legals](https://www.naplesnews.com/public-notices)\n[](https://www.naplesnews.com/search/ \"Search\")\n[](https://www.naplesnews.com/weather/ \"Weather in Naples: 79°F Partly Sunny w/ T-Storms\") [](https://subscribe.naplesnews.com/rr/navsub?gps-source=CPTOPNAVBAR&itm_campaign=2026ENTAUGBAU&itm_medium=ONSITE&success-url=https%3A%2F%2Fwww.naplesnews.com%2Fstory%2Fmoney%2Freal-estate%2F2026%2F09%2F07%2Fsw-florida-realtors-dub-growing-estero-area-coconut-coast%2F91600054007%2F)\n[](https://login.naplesnews.com/PNDN-GUP/authenticate/?success-url=https%3A%2F%2Fwww.naplesnews.com%2Fstory%2Fmoney%2Freal-estate%2F2026%2F09%2F07%2Fsw-florida-realtors-dub-growing-estero-area-coconut-coast%2F91600054007%2F&cancel-url=https%3A%2F%2Fwww.naplesnews.com%2Fstory%2Fmoney%2Freal-estate%2F2026%2F09%2F07%2Fsw-florida-realtors-dub-growing-estero-area-coconut-coast%2F91600054007%2F)\n[](https://www.naplesnews.com/) [](https://www.naplesnews.com/)\nREAL ESTATE\n# 'Coconut Coast Corridor' emerges in SW Florida. What's new and coming?\n[![Portrait of Phil Fernandez](https://www.naplesnews.com/gcdn/presto/2019/09/14/PNDN/6a77b474-579f-48fa-b56f-a2cc2b9de797-NDN_Phil_Fernandez.jpg?crop=2999,2999,x0,y570&width=48&height=48&format=pjpg&auto=webp) Phil Fernandez](https://www.naplesnews.com/staff/2684114001/phil-fernandez/)\nFort Myers News-Press & Naples Daily News\nSept. 7, 2026, 5:02 a.m. ET\nTime to say hello to [Southwest Florida](https://www.naplesnews.com/story/news/politics/elections/2026/08/24/florida-political-shockwave-in-one-of-bigger-cities-what-it-took-lee-county-c\""
+        "citation": "Collier tax cut proposal targets conservation funds: \"[](https://www.naplesnews.com/)\n[](https://subscribe.naplesnews.com/rr/nanobar?gps-source=CPTILELEFT&itm_campaign=2026ENTAUGBAU&itm_medium=ONSITE&success-url=https%3A%2F%2Fwww.naplesnews.com%2Fstory%2Fmoney%2Fbusiness%2Flocal%2F2026%2F09%2F04%2Fcollier-commissioners-weigh-tax-cut-impacting-conservation-collier-by-reducing-its-tax-rate%2F91607961007%2F)\n[](https://subscribe.naplesnews.com/rr/masthead?gps-source=CPMASTHEAD&itm_campaign=2026ENTAUGBAU&itm_medium=ONSITE&success-url=https%3A%2F%2Fwww.naplesnews.com%2Fstory%2Fmoney%2Fbusiness%2Flocal%2F2026%2F09%2F04%2Fcollier-commissioners-weigh-tax-cut-impacting-conservation-collier-by-reducing-its-tax-rate%2F91607961007%2F)\n[News](https://www.naplesnews.com/news/) [Sports](https://www.naplesnews.com/sports/) [Real Estate](https://www.naplesnews.com/business/real-estate/) [Restaurants](https://www.naplesnews.com/entertainment/restaurants/) [Opinion](https://www.naplesnews.com/opinion/) [Advertise](https://advertising.usatoday.com/advertise-with-us/?cid=Web_LiQ_Network_AdvertiseWithUs_AdvertiseInquiry&publication=naples_daily_news&utm_source=local_publication&utm_medium=menu&utm_campaign=advertise_with_us) [Obituaries](https://www.naplesnews.com/obituaries) [eNewspaper](https://user.naplesnews.com/user/enewspaper) [Legals](https://www.naplesnews.com/public-notices)\n[](https://www.naplesnews.com/search/ \"Search\")\n[](https://www.naplesnews.com/weather/ \"Weather in Naples: 80°F Partly Cloudy\") [](https://subscribe.naplesnews.com/rr/navsub?gps-source=CPTOPNAVBAR&itm_campaign=2026ENTAUGBAU&itm_medium=ONSITE&success-url=https%3A%2F%2Fwww.naplesnews.com%2Fstory%2Fmoney%2Fbusiness%2Flocal%2F2026%2F09%2F04%2Fcollier-commissioners-weigh-tax-cut-impacting-conservation-collier-by-reducing-its-tax-rate%2F91607961007%2F)\n[](https://login.naplesnews.com/PNDN-GUP/authenticate/?success-url=https%3A%2F%2Fwww.naplesnews.com%2Fstory%2Fmoney%2Fbusiness%2Flocal%2F2026%2F09%2F04%2Fcollier-commissioners-weigh-tax-cut-impacting-conservation-collier-by-reducing-its-tax-rate%2F91607961007%2F&cancel-url=https%3A%2F%2Fwww.naplesnews.com%2Fstory%2Fmoney%2Fbusiness%2Flocal%2F2026%2F09%2F04%2Fcollier-commissioners-weigh-tax-cut-impacting-conservation-collier-by-reducing-its-tax-rate%2F91607961007%2F)\n[](https://www.naplesnews.com/) [](https://www.naplesnews.com/)\n[LOCAL BUSINESS](https://www.naplesnews.com/business/local/)\n# Collier commissioners weighing cut to Conservation Collier tax rate\n[![Portrait of Laura Layden](https://www.naplesnews.com/gcdn/authoring/authoring-images/2024/02/08/PNDN/72524348007-ndn-jh-20240126-laura-0001.JPG?crop=3313,3312,x1506,y0&width=48&height=48&format=pjpg&auto=webp) Laura Layden](https://www.naplesnews.com/staff/2647080001/laura-layden/)\nFort Myers News-Press & Naples Daily News\nSept. 4, 2026, 3:34 p.m. ET\n[Collier County commissioners](https://www.naplesnews.com/story/news/local/2026/07/14/collier-county-seeks-to-pause-mega-data-center-applications/90913888007/) voted to keep the countywide tax rat\""
       },
       "suggestions": [
         "What's driving signal structural 8?",
@@ -220,29 +220,19 @@ s01 | SWFL city pulse — daily Anthropic web_search_20250305 current-events fac
       ],
       "rows": [
         {
-          "key": "34116",
-          "label": "34116",
-          "cells": {
-            "items": 1,
-            "latest_fact": "FDOT held a virtual meeting on Sept. 2, 2026 to share more details on plans to widen Interstate 75 from Golden Gate Parkway to Alico Road.",
-            "latest_place": "Golden Gate Parkway",
-            "latest_source": "https://www.naplesnews.com/story/money/business/local/2026/09/04/fdot-shares-more-about-i-75-widening-and-noise-wall-plans-in-sw-florida-at-virtual-meeting/91587939007/"
-          }
-        },
-        {
           "key": "34102",
           "label": "34102",
           "cells": {
-            "items": 4,
-            "latest_fact": "Alamo Drafthouse is closing its cinema at Mercato in North Naples.",
-            "latest_place": "Mercato",
-            "latest_source": "https://www.gulfshorebusiness.com/news/alamo-drafthouse-closing-cinema-at-mercato-in-north-naples/article_5ddafea2-23c2-478c-8c3e-28298870a6f4.html"
+            "items": 2,
+            "latest_fact": "Coconut Point's owners said they explored converting the property to a data center before deciding to keep it as a mall.",
+            "latest_place": "Coconut Point",
+            "latest_source": "https://www.naplesnews.com/story/money/2026/08/10/data-center-or-a-mall-a-major-southwest-florida-owner-made-a-decision-coconut-point-estero-naples/91186206007/"
           }
         }
       ],
       "source": {
         "url": "https://www.swfldatagulf.com/r/source/city_pulse",
-        "fetched_at": "2026-09-19T08:53:47Z",
+        "fetched_at": "2026-09-20T04:25:51Z",
         "tier": 2,
         "citation": "Distilled, citation-backed SWFL news signals; each ZIP's items carry per-item source URLs in data_lake.city_pulse."
       },
@@ -250,7 +240,7 @@ s01 | SWFL city pulse — daily Anthropic web_search_20250305 current-events fac
     }
   ],
   "caveats": [
-    "55 additional live signals not surfaced here (cap 8); the full set is in data_lake.city_pulse.",
+    "50 additional live signals not surfaced here (cap 8); the full set is in data_lake.city_pulse.",
     "Each signal is dated current-events context with a per-signal source; freshness is TTL-bounded by topic (breaking 1d → structural 90d)."
   ],
   "contradicts": [],
@@ -263,7 +253,7 @@ s01 | SWFL city pulse — daily Anthropic web_search_20250305 current-events fac
   "relevance": {
     "decay_curve": "weeks",
     "half_life_hours": 720,
-    "computed_at": "2026-09-19T08:53:47Z"
+    "computed_at": "2026-09-20T04:25:51Z"
   },
   "exogenous_signals": []
 }
@@ -272,5 +262,5 @@ s01 | SWFL city pulse — daily Anthropic web_search_20250305 current-events fac
 - city-pulse-swfl: daily SWFL city-grain current-events reporter over data_lake.city_pulse (TTL'd, citation-backed).
 
 --- RECENT NOTES ---
-- 2026-09-19: pack refined by the Refinery — 9 fact(s) from 1 source(s).
+- 2026-09-20: pack refined by the Refinery — 9 fact(s) from 1 source(s).
 ```
