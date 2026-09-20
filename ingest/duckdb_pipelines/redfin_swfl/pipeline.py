@@ -145,9 +145,11 @@ def _load_and_filter(
     """CREATE TABLE redfin_swfl from the vendor CSV, SWFL rows only.
 
     Columns are stored AS-WRITTEN (percent stays percent, PPTS stays PPTS) with
-    snake_case names carrying the unit suffix. TRY_CAST turns Redfin's literal
-    "NA" into SQL NULL. Full 50-column source scope is pulled — nothing dropped
-    (FULL-SCOPE-FIRST).
+    snake_case names carrying the unit suffix — with ONE known exception:
+    median_dom_mom_pct / median_dom_yoy_pct hold DAYS, not percent (vendor
+    relabel 09/2026, see the comment at those lines). TRY_CAST turns Redfin's
+    literal "NA" into SQL NULL. Full 50-column source scope is pulled — nothing
+    dropped (FULL-SCOPE-FIRST).
     """
     metro_filter = _build_metro_filter()
     print(f"  filtering: {metro_filter}")
@@ -167,8 +169,17 @@ def _load_and_filter(
             TRY_CAST("MEDIAN SALE PRICE NSA MOM (%)" AS DOUBLE)              AS median_sale_price_mom_pct,
             TRY_CAST("MEDIAN SALE PRICE NSA YOY (%)" AS DOUBLE)              AS median_sale_price_yoy_pct,
             TRY_CAST("MEDIAN DAYS ON MARKET (DAYS)" AS DOUBLE)               AS median_dom,
-            TRY_CAST("MEDIAN DAYS ON MARKET MOM (%)" AS DOUBLE)              AS median_dom_mom_pct,
-            TRY_CAST("MEDIAN DAYS ON MARKET YOY (%)" AS DOUBLE)              AS median_dom_yoy_pct,
+            -- Vendor relabeled these two MOM (%)/YOY (%) → MOM (DAYS)/YOY (DAYS)
+            -- between the 08/15 and 09/15/2026 drops (live header re-read
+            -- 09/20/2026). The VALUES never changed — they were always day
+            -- deltas under a wrong label (see _RESEARCH/audits/2026-07-18-site-
+            -- audit.md: median_dom_yoy_pct = -2796.21, impossible as a percent).
+            -- Output names keep the legacy `_pct` suffix because
+            -- refinery/sources/housing-source.mts:130 SELECTs them by that name;
+            -- the suffix is wrong and its ÷100 was always wrong — fixing that is
+            -- a consumer-side change, not this one.
+            TRY_CAST("MEDIAN DAYS ON MARKET MOM (DAYS)" AS DOUBLE)           AS median_dom_mom_pct,
+            TRY_CAST("MEDIAN DAYS ON MARKET YOY (DAYS)" AS DOUBLE)           AS median_dom_yoy_pct,
             TRY_CAST("AVERAGE SALE TO LIST RATIO (%)" AS DOUBLE)             AS avg_sale_to_list_pct,
             TRY_CAST("AVERAGE SALE TO LIST RATIO MOM (PPTS)" AS DOUBLE)      AS avg_sale_to_list_mom_ppts,
             TRY_CAST("AVERAGE SALE TO LIST RATIO YOY (PPTS)" AS DOUBLE)      AS avg_sale_to_list_yoy_ppts,

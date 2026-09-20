@@ -21,7 +21,9 @@ import pytest
 import ingest.duckdb_pipelines.redfin_swfl.pipeline as mod
 from ingest.lib.guards import ContentStaleError, VolumeGuardError
 
-# The real header row of housing_market/monthly/all_zips.csv, read live 07/16/2026.
+# The real header row of housing_market/monthly/all_zips.csv, re-read live
+# 09/20/2026 (50 columns, byte-for-byte). The DOM MOM/YOY pair carries (DAYS),
+# not the (%) it carried through the 08/15/2026 drop — vendor relabel.
 HEADER = (
     '"LAST UPDATED","FREQUENCY","PERIOD BEGIN","PERIOD END","REGION ID","REGION TYPE",'
     '"REGION NAME","METRO","HOMES SOLD","HOMES SOLD MOM (%)","HOMES SOLD YOY (%)",'
