@@ -1,3 +1,11 @@
+## 2026-09-20 (Fable 5.1, session 3) - main CI red since at least 09/18 on ONE test; fixed
+
+CI run 35494392138 (and the 6 before it): `not ok 167 - the real SCRATCHPAD.md parses and reports open items`, `# fail 1`.
+The test demanded open items in the live scratchpad; it has had none since the 09/15 bankruptcy. Dropped that
+assertion (fixtures already prove the OPEN matcher). scratchpad-parse.test.mjs: 13 pass / 0 fail locally.
+Runner `fedora-swfl-local` online at 08:00Z; first scheduled Fedora runs (crexi 11:00Z, collier 11:37Z) not yet fired.
+Next: confirm CI green on this commit; check those two runs after 11:37Z; LeePA comparable-sales dry run on Fedora.
+
 ## 2026-09-20 (Fable 5.1, session 2, addendum) - proof-of-red hook patch applied at the operator's instruction
 
 He issued the `git apply` himself. check-proof-of-red-on-push.test.mjs: 8 pass / 0 fail, including the

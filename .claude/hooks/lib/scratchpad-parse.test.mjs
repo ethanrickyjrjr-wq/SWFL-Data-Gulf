@@ -197,16 +197,16 @@ test("recent top-of-file dated entries are surfaced, not just OPEN sections", ()
 // ---- the live file ---------------------------------------------------------
 // Fixtures prove the detector; this proves it against the tree we actually ship.
 
-test("the real SCRATCHPAD.md parses and reports open items", () => {
+test("the real SCRATCHPAD.md parses", () => {
   const p = join(REPO, "_ASSISTANT", "SCRATCHPAD.md");
   if (!existsSync(p)) return; // parse lib must not require the file to exist
 
   const text = readFileSync(p, "utf8");
   const parsed = parseScratchpad(text);
-  const open = openItems(text);
 
+  // Zero open items is a legal state (ledger bankrupted 09/15/2026) — the fixtures above
+  // prove the OPEN matcher; the live file only has to parse.
   assert.ok(parsed.sections.length > 3, "real file parsed into too few sections");
-  assert.ok(open.length > 0, "real file reported zero open items — parser is not matching");
 
   const digest = renderDigest(text);
   assert.ok(digest.length < 6000, `real digest is ${digest.length} bytes — too big`);
