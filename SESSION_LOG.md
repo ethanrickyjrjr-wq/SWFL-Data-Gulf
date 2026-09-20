@@ -1,3 +1,9 @@
+## 2026-09-20 (Fable 5.1, session 3, part 5) - operator's nutshell definition recorded; main green at eafcd529
+
+CI on eafcd529: success. He sent item "1." - a pickup-truck-sales-before-a-war screenshot: "This is SWFL data
+gulf in a nutshell. Data that we don't usually equate to things that we can easily track to predict."
+Scratchpad has it verbatim (4d16b3ba). More items may follow; the ask-first trio is still waiting on his word.
+
 ## 2026-09-20 (Fable 5.1, session 3, part 4) - LeePA comparable-sales dry run PROVED on Fedora; handoff items 1-2 closed
 
 Run 35518297483, `runner=fedora-swfl-local`, success: "114,650 rows fetched / 114,650 canonical",
