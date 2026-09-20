@@ -1,3 +1,30 @@
+## 2026-09-20 (Fable 5.1, session 2, part 2) - handoff section 3 worked through; test suite was loading PRODUCTION keys
+
+Commits (all local - publication hook wants the operator's word, not bypassed):
+  4ef6c071 --dry-run honored in 4 tier-1 pipelines (handoff said 3; scope scan of 41 found hurdat2_fl).
+           The hurdat2 dry-run then caught a production break before the cron did: NHC's 09/12 file
+           has 2 malformed lines; one repaired losslessly, one skipped loudly, cap of 5 still raises.
+  6c077dae redfin lee/collier/city raise on a renamed vendor column; validated on the LIVE headers.
+  86cded9a paid-run approval token ignored in unattended sessions - 4 sites, one root (unattended.mjs).
+  80c018cf bun run lint exits 0 again.
+  12dea963 ingest suite: could not collect -> 1662 passed / 2 failed.
+
+THE FIND: conftest set INGEST_NO_ENV_LOCAL inside a session fixture, but pytest imports test modules
+at COLLECTION, earlier - so import-time env loads ran unguarded and `test_fetch_steadyapi_no_key_is_a_gap`
+made a real billed SteadyAPI call on every full local run. Probe output: "PHOTOS_API first present
+after: COLLECT/IMPORT of ingest/pipelines/city_pulse/test_pipeline.py". Import check under the guard:
+81 production vars before the fix, 0 after. OWN COST: this session ran the full suite 3 times before
+the fix, so up to 3 real SteadyAPI requests were spent finding it.
+
+Checks: opened apify_spend_switch_honors_token_unattended (5th token site, product spend dial, left
+alone on purpose). Updated, NOT closed (need the push + a GHA dispatch): dry_run_flag_ignored_three_pipelines,
+approval_token_self_set_paid_hooks.
+
+NEEDS THE OPERATOR: (1) the push; (2) OK to delete ingest/tests/pipelines/census_vip/ and
+ingest/tests/pipelines/fred_g17/ (orphans of cb803b1c; the last 2 red tests); (3) fork-PR approval
+setting, command in the handoff. After the push a session does: runner-smoke, dry_run dispatch of the
+5 ported workflows + the 4 dry-run pipelines, then SWFL_LOCAL_RUNNER_READY=true.
+
 ## 2026-09-20 (Fable 5.1, session 2) - Fedora runner STOOD UP by the session (not an operator to-do); 5 swfl-local workflows ported to it
 
 Operator: "create a fedora runner so i can stop hearing about this". The handoff had it under

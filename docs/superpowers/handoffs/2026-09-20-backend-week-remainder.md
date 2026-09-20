@@ -27,7 +27,9 @@ Only E1 is unstarted. Everything below is sectioned by who can do it.
   PowerShell, a script). Commit locally, report the bump list in a GitHub issue titled
   `weekly-dep-scan <date>`, and stop."
 
-## 2. Known Fedora risks, before the first real job runs there
+## 2. Known Fedora risks — RESOLVED by 86770e2b (kept for the record)
+
+Setup steps now run only on github-hosted runners; self-hosted uses `~/swfl-runner-venv`.
 
 All three gated workflows use `actions/setup-python` (downloads Ubuntu-targeted CPython; Fedora is
 not a supported distro) and bare `pip install` with no venv on a persistent box. The Collier
@@ -36,27 +38,32 @@ records workflow also runs `crawl4ai-setup`, whose `playwright install --with-de
 3.12. Expect to pre-install Python + browser libs via `dnf` and gate or replace those steps.
 First real proof after the flip: dispatch ONE of the three with `dry_run=true`.
 
-## 3. One bounded session each — no decision needed
+## 3. One bounded session each — DONE 09/20 session 2 except where named
 
-- **`dry_run_flag_ignored_three_pipelines`** (check open): `storm_history_swfl`, `zhvi_swfl`,
-  `zori_swfl` take `--dry-run` from their workflow, have no argparse, and do the full production
-  write. Copy the shape from `b9184668` (usgs + bls_qcew): argparse + `run()` against a temp dir,
-  one test asserting no S3/lake write.
-- **`approval_token_self_set_paid_hooks`** (check open): the three paid-run hooks share the hole
-  closed on the push hook. Same two-line guard + a test each. Better long-term: route all four
-  through the human-only `approve <gate>` tokens (`.claude/hooks/check-approvals-guard.mjs`).
-- **Live proof still owed for B1/B2/B3** if the 09/20 dispatches were not confirmed in
-  SESSION_LOG: `redfin-monthly.yml`, `usgs-monthly.yml` (dispatch with `dry_run=true` — proves the
-  retry session against real NWIS and the argparse fix in one run), `bls-qcew-quarterly.yml`.
-- **Sibling Redfin pipelines drop a renamed column silently** (`_KEEP` dict lookup in
-  redfin_lee / redfin_collier / redfin_city_swfl). redfin_swfl failed loudly on the 09/15 vendor
-  relabel only because it uses SQL column refs. One guard: assert every `_KEEP` key is present in
-  the header row.
-- **Pre-existing red in the ingest suite, not from this work:** 19 failures on an untouched tree
-  (neighborhood_stats ×9, test_env_local, challenger ×2, supercrawl, census_vip, fred_g17,
-  listing_lifecycle ×2, cadence_registry_spine ×2) plus a collection error on
-  `active_listings.distill` and an empty `fred_laus_alfred` package. Also `bun run lint` crashes
-  walking `ingest/.venv` (missing eslint ignore).
+- **`dry_run_flag_ignored_three_pipelines`** — FIXED 4ef6c071. It was FOUR (scope scan: 41 modules
+  receive `--dry-run`, 4 never read it; `hurdat2_fl` was missed). zori + hurdat2 real dry-runs exit 0,
+  temp target, no inventory row. Check stays open until a GHA `dry_run=true` dispatch prints the
+  "--dry-run, writing to a temp dir" line (needs the push).
+- **hurdat2 was about to break in production** — found by that dry-run. NHC's 09/12/2026 file
+  `hurdat2-1851-2025-091226.txt` has a missing lat/lon comma (line 30687, repaired losslessly) and a
+  hemisphere-less latitude `38.83` (line 33698, skipped loudly; more than 5 bad lines still raises).
+- **`approval_token_self_set_paid_hooks`** — FIXED 86cded9a. Four sites, not three (2 hooks +
+  `dispatch-rebuild.mjs` + `paid-run.mjs`), one root `.claude/hooks/lib/unattended.mjs`, push hook
+  reads it too. A 5th site (the product spend dial) is deliberately untouched →
+  check `apify_spend_switch_honors_token_unattended`.
+- **Live proof B1/B2/B3** — all confirmed; the real usgs-monthly run 35490402310 completed success.
+- **Sibling Redfin `_KEEP` guard** — FIXED 6c077dae. `ingest.lib.guards.assert_header_has` at the
+  header parse in redfin_lee / redfin_collier / redfin_city_swfl. Checked against the LIVE county +
+  city headers 09/20: all required columns present, so nothing breaks today.
+- **Ingest suite** — FIXED 12dea963: it could not even collect; now 1662 passed / 2 failed.
+  The real find: the suite loaded PRODUCTION keys at collection time (conftest set its guard in a
+  fixture; collection imports come first) and the "no key" tests made real billed SteadyAPI calls
+  on every full local run. Guard now sets at conftest import; 4 import-time dotenv sites moved to
+  the guarded loader (81 production vars before, 0 after).
+  **Still red, needs his word (recursive delete is operator-gated):**
+  `ingest/tests/pipelines/census_vip/` and `ingest/tests/pipelines/fred_g17/` (3 files each) —
+  orphan tests of pipelines retired in cb803b1c.
+- **`bun run lint`** — FIXED 80c018cf, exits 0 (ignored `**/.venv/**` and gitignored `__scratch__/`).
 
 ## 4. Ask-first — do not start without his word
 
