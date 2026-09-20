@@ -1,3 +1,12 @@
+## 2026-09-20 (Fable 5.1, session 4, part 3) - his "how are we still getting shit wrong": two causes named, sibling claims probed
+
+(1) Mine: the delete line I handed him was bash; his `!` prompt is PowerShell. Folders still on disk; PowerShell line handed over.
+(2) System: the registry's Lee-ArcGIS line recorded COUNTS, never a last-edit date; 73 source_ceiling blocks, 0 carry source freshness.
+Scoped the same sentence's other claims live (layer editingInfo.lastEditDate): Nuisance violations 09/18/2026, ZoningCases
+09/18/2026, MobileHomeLots 09/20/2026, Subdivisions_and_Condominiums 09/20/2026, ROE_Subdivisions 08/24/2026 = live;
+Mobile_Home_Points 10/19/2022, SubdivisionsGeneral 08/28/2023 = dead. Written into the registry line. Scratchpad has his words.
+Check opened: registry_source_ceiling_no_freshness_field.
+
 ## 2026-09-20 (Fable 5.1, session 4, part 2) - bls_qcew DROP proven in production; Lee permits ArcGIS swap NOT BUILT (source is a frozen March-2025 snapshot)
 
 QCEW: migration ran after 962e2d9e landed. Lake + staging = 18 columns each, 64 rows intact, dlt stored schema cleared.

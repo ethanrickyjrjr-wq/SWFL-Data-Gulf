@@ -1,3 +1,14 @@
+## 2026-09-20 (Fable 5.1, session 4) — OPERATOR: "How the fuck are we still getting shit wrong!!!!?????"
+
+Raised right after he ran the delete line I handed him and after the Lee-permits verdict. TWO wrongs, both ours:
+(1) MINE, this session: the delete line I gave him was bash syntax and his `!` prompt is PowerShell, where the
+bash recursive-force flags are not parameters. The folders are still on disk. Global rule 7 (shell syntax matches
+the tool) applies to lines handed to HIM, not only to my own tool calls. STANDING: a `!` line here is PowerShell.
+(2) THE SYSTEM: the registry line "could replace this fragile Accela scrape entirely" (07/08/2026) recorded a row
+COUNT and never the layer's last-edit date or newest record. A plan task (E1), two handoffs and a check were built
+on it; the layer name itself says _March2025. 73 source_ceiling blocks in the registry, zero carry a
+source-freshness field. A count proves a thing exists, never that it is alive.
+
 ## 2026-09-20 (Fable 5.1, session 4) — OPERATOR: "Get this shit done so we can have everything fixed!!! ... Fan out and make sure done correctly"
 
 His word on the remaining ask-first trio, pasted back as the list itself: (2) bls_qcew's three permanently
