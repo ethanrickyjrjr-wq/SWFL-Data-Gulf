@@ -106,3 +106,29 @@ def test_normalize_row_page_count_missing_or_unparseable_is_none():
     html = ROW_SIMPLE_HTML.replace("<div>1</div>", "<div></div>")
     row = normalize_row(_row(html))
     assert row["page_count"] is None
+
+
+def test_a_day_with_no_recordings_is_zero_rows_not_a_crash():
+    """The daily cron pulls "yesterday only". When yesterday was a weekend or a holiday the
+    clerk's grid returns ONE placeholder row - verbatim from cor.collierclerk.com 09/20/2026
+    for Saturday 09/19 - and normalize_row died on it ("expected 10 <td> cells, got 1").
+    Every scheduled failure 09/06-09/14 was a Sun, a Mon, or the day after Labor Day."""
+    from ingest.pipelines.collier_official_records.resources import normalize_page
+
+    html = (
+        "<table><tr><td>criteria</td></tr></table>"
+        '<table><tr class="k-grid-norecords k-table-row">'
+        '<td class="k-table-td" colspan="11" data-col-index="0" tabindex="0">No records found.</td>'
+        "</tr></table>"
+    )
+    assert normalize_page(html) == []
+
+
+def test_a_malformed_row_that_is_not_the_placeholder_still_raises():
+    """Only the grid's own no-records marker is skipped - a real shape change stays loud."""
+    import pytest
+    from ingest.pipelines.collier_official_records.resources import normalize_page
+
+    html = "<table><tr><td>c</td></tr></table><table><tr><td>only one cell</td></tr></table>"
+    with pytest.raises(ValueError, match="expected 10"):
+        normalize_page(html)

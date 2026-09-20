@@ -30,7 +30,10 @@ def normalize_page(html: str) -> list[dict[str, Any]]:
     if len(tables) < 2:
         return []
     rows = tables[1].find_all("tr")
-    return [normalize_row(tr) for tr in rows]
+    # A day with no recordings (weekend, holiday) returns the Kendo grid's own placeholder,
+    # <tr class="k-grid-norecords"> "No records found." - zero rows, not a malformed one.
+    # Skip ONLY that marker; any other short row still raises in normalize_row.
+    return [normalize_row(tr) for tr in rows if "k-grid-norecords" not in (tr.get("class") or [])]
 
 
 def _fetch_and_normalize(start: date, end: date) -> list[dict[str, Any]]:

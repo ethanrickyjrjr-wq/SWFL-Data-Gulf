@@ -1,3 +1,25 @@
+## 2026-09-20 (Fable 5.1, session 2, part 4) - PUSHED 11d91296..33921281; runner proven through Actions; SWFL_LOCAL_RUNNER_READY=true; collier weekend crash fixed
+
+After the operator's Go. Live proof, all via GitHub Actions:
+  runner-smoke 35493215223 success - host=fedora, egress 71.200.197.70, myfloridalicense 200, cor.collierclerk 302, leepa 200, crexi 403 (expected)
+  dbpr-sirs dry 35493240512 success on the Fedora runner - "would upsert 1389 rows"
+  crexi dry 35493241730 success on the Fedora runner - "29 raw listings, 29 rows would be upserted"
+  storm-history 35493242865 / zhvi-tier1 35493243899 / zori-tier1 35493245075 dry - each prints
+    "--dry-run, writing to a temp dir; no S3, no inventory row." and no inventory-upsert line
+Fork-PR approval set to all_external_contributors. SWFL_LOCAL_RUNNER_READY set true 06:06Z.
+
+First gated run on Fedora (collier records dry 35493363031) FAILED - not the runner: venv step ran,
+the 3 cloud setup steps skipped, preflight green. Cause is pre-existing and runner-independent: the
+cron pulls "yesterday only", and a day with no recordings returns the grid placeholder
+<tr class="k-grid-norecords"> "No records found." (fetched verbatim from Fedora for Sat 09/19), which
+normalize_row rejected. Schedule history matches to the day: every failure 09/06-09/14 was a Sun, a
+Mon, or the Tue after Labor Day. Fix skips ONLY that marker; any other short row still raises.
+
+Hook finding, NOT applied (self-modification correctly denied; hook restored to committed state):
+check-proof-of-red-on-push misses red runs because transcript lines are JSONL and the n of an escaped
+newline glues onto FAILED / "3 failed". Patch for review: _ASSISTANT/2026-09-20-proof-of-red-jsonl-newline.patch
+Gate 16 passed with ALLOW_NO_DISPATCH=1: Actions runs workflow code from main, so dispatch followed the push.
+
 ## 2026-09-20 (Fable 5.1, session 2, part 3) - operator said Go: orphan tests removed, ingest suite fully green, pushing
 
 Operator confirmed the three asks. Removed the 6 orphan test files of census_vip + fred_g17 (retired in
