@@ -1,3 +1,9 @@
+## 2026-09-20 (Fable 5.1, session 2, part 3) - operator said Go: orphan tests removed, ingest suite fully green, pushing
+
+Operator confirmed the three asks. Removed the 6 orphan test files of census_vip + fred_g17 (retired in
+cb803b1c) by explicit path. `pytest ingest` -> 1662 passed, 1 skipped, 0 failed. Next, same session:
+fork-PR approval to all_external_contributors, runner-smoke, dry_run dispatches, then the runner flag.
+
 ## 2026-09-20 (Fable 5.1, session 2, part 2) - handoff section 3 worked through; test suite was loading PRODUCTION keys
 
 Commits (all local - publication hook wants the operator's word, not bypassed):
