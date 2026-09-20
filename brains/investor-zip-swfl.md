@@ -1,9 +1,9 @@
-<!-- FRESHNESS: v5 | Token: SWFL-7421-v5-20260915-c3ecee9a -->
+<!-- FRESHNESS: v6 | Token: SWFL-7421-v6-20260920-f9f54236 -->
 ---
 brain_id: investor-zip-swfl
-version: 5
-refined_at: 2026-09-15T23:58:26Z
-freshness_token: SWFL-7421-v5-20260915-c3ecee9a
+version: 6
+refined_at: 2026-09-20T04:17:51Z
+freshness_token: SWFL-7421-v6-20260920-f9f54236
 ttl_seconds: 3024000
 pack_hash: 5209fc18deb1
 context_type: user_saved_reference
@@ -30,21 +30,21 @@ SCOPE: SWFL ZIP-level investor composite — home value (ZHVI) + long-term rent 
 
 --- CITATION TABLE ---
 id  | source                                                                       | verified   | expires
-s01 | home-values-swfl brain — https://www.swfldatagulf.com/api/b/home-values-swfl | 2026-09-15 | 2026-10-20
+s01 | home-values-swfl brain — https://www.swfldatagulf.com/api/b/home-values-swfl | 2026-09-20 | 2026-10-25
 s02 | rentals-swfl brain — https://www.swfldatagulf.com/api/b/rentals-swfl         | 2026-09-15 | 2026-10-20
-s03 | env-swfl brain — https://www.swfldatagulf.com/api/b/env-swfl                 | 2026-08-12 | 2026-09-11
+s03 | env-swfl brain — https://www.swfldatagulf.com/api/b/env-swfl                 | 2026-09-16 | 2026-10-16
 
 --- SAVED FACTS ---
 [
-  {"id":"f001","topic":"corpus_overview","fact":"SWFL per-ZIP investor composite (value + rent + flood-adjusted yield)","value":"53 ZIP cards (2 with flood overlay). Regional median gross rent yield = 7.07%.","src":"s01","date":"2026-09-15"}
+  {"id":"f001","topic":"corpus_overview","fact":"SWFL per-ZIP investor composite (value + rent + flood-adjusted yield)","value":"53 ZIP cards (2 with flood overlay). Regional median gross rent yield = 7.07%.","src":"s01","date":"2026-09-20"}
 ]
 
 --- OUTPUT ---
 {
   "brain_id": "investor-zip-swfl",
-  "version": 5,
-  "refined_at": "2026-09-15T23:58:26Z",
-  "expires": "2026-10-20T23:58:26Z",
+  "version": 6,
+  "refined_at": "2026-09-20T04:17:51Z",
+  "expires": "2026-10-25T04:17:51Z",
   "ttl_seconds": 3024000,
   "direction": "neutral",
   "magnitude": 0,
@@ -62,7 +62,7 @@ s03 | env-swfl brain — https://www.swfldatagulf.com/api/b/env-swfl            
       "display_format": "count",
       "source": {
         "url": "https://www.swfldatagulf.com/api/b/investor-zip-swfl",
-        "fetched_at": "2026-09-15T23:58:26Z",
+        "fetched_at": "2026-09-20T04:17:51Z",
         "tier": 2,
         "citation": "Deterministic per-ZIP composite computed by investor-zip-swfl from three upstream brains: home value (home-values-swfl, Zillow ZHVI), long-term rent (rentals-swfl, Zillow ZORI), and flood cap-rate adjustment (env-swfl, FEMA/NFIP). Gross rent yield = rent x 12 / home value x 100; flood-adjusted cap rate = gross yield - flood_cap_rate_adj_bps / 100. ZIP scope: Lee + Collier core SWFL scope (fixtures/swfl-zip-county.json)."
       },
@@ -81,7 +81,7 @@ s03 | env-swfl brain — https://www.swfldatagulf.com/api/b/env-swfl            
       "display_format": "count",
       "source": {
         "url": "https://www.swfldatagulf.com/api/b/investor-zip-swfl",
-        "fetched_at": "2026-09-15T23:58:26Z",
+        "fetched_at": "2026-09-20T04:17:51Z",
         "tier": 2,
         "citation": "Deterministic per-ZIP composite computed by investor-zip-swfl from three upstream brains: home value (home-values-swfl, Zillow ZHVI), long-term rent (rentals-swfl, Zillow ZORI), and flood cap-rate adjustment (env-swfl, FEMA/NFIP). Gross rent yield = rent x 12 / home value x 100; flood-adjusted cap rate = gross yield - flood_cap_rate_adj_bps / 100. ZIP scope: Lee + Collier core SWFL scope (fixtures/swfl-zip-county.json)."
       },
@@ -100,7 +100,7 @@ s03 | env-swfl brain — https://www.swfldatagulf.com/api/b/env-swfl            
       "display_format": "percent",
       "source": {
         "url": "https://www.swfldatagulf.com/api/b/investor-zip-swfl",
-        "fetched_at": "2026-09-15T23:58:26Z",
+        "fetched_at": "2026-09-20T04:17:51Z",
         "tier": 2,
         "citation": "Deterministic per-ZIP composite computed by investor-zip-swfl from three upstream brains: home value (home-values-swfl, Zillow ZHVI), long-term rent (rentals-swfl, Zillow ZORI), and flood cap-rate adjustment (env-swfl, FEMA/NFIP). Gross rent yield = rent x 12 / home value x 100; flood-adjusted cap rate = gross yield - flood_cap_rate_adj_bps / 100. ZIP scope: Lee + Collier core SWFL scope (fixtures/swfl-zip-county.json)."
       },
@@ -120,7 +120,7 @@ s03 | env-swfl brain — https://www.swfldatagulf.com/api/b/env-swfl            
       "display_format": "percent",
       "source": {
         "url": "https://www.swfldatagulf.com/api/b/investor-zip-swfl",
-        "fetched_at": "2026-09-15T23:58:26Z",
+        "fetched_at": "2026-09-20T04:17:51Z",
         "tier": 2,
         "citation": "Deterministic per-ZIP composite computed by investor-zip-swfl from three upstream brains: home value (home-values-swfl, Zillow ZHVI), long-term rent (rentals-swfl, Zillow ZORI), and flood cap-rate adjustment (env-swfl, FEMA/NFIP). Gross rent yield = rent x 12 / home value x 100; flood-adjusted cap rate = gross yield - flood_cap_rate_adj_bps / 100. ZIP scope: Lee + Collier core SWFL scope (fixtures/swfl-zip-county.json)."
       },
@@ -139,7 +139,7 @@ s03 | env-swfl brain — https://www.swfldatagulf.com/api/b/env-swfl            
       "display_format": "percent",
       "source": {
         "url": "https://www.swfldatagulf.com/api/b/investor-zip-swfl",
-        "fetched_at": "2026-09-15T23:58:26Z",
+        "fetched_at": "2026-09-20T04:17:51Z",
         "tier": 2,
         "citation": "Deterministic per-ZIP composite computed by investor-zip-swfl from three upstream brains: home value (home-values-swfl, Zillow ZHVI), long-term rent (rentals-swfl, Zillow ZORI), and flood cap-rate adjustment (env-swfl, FEMA/NFIP). Gross rent yield = rent x 12 / home value x 100; flood-adjusted cap rate = gross yield - flood_cap_rate_adj_bps / 100. ZIP scope: Lee + Collier core SWFL scope (fixtures/swfl-zip-county.json)."
       },
@@ -159,7 +159,7 @@ s03 | env-swfl brain — https://www.swfldatagulf.com/api/b/env-swfl            
       "display_format": "percent",
       "source": {
         "url": "https://www.swfldatagulf.com/api/b/investor-zip-swfl",
-        "fetched_at": "2026-09-15T23:58:26Z",
+        "fetched_at": "2026-09-20T04:17:51Z",
         "tier": 2,
         "citation": "Deterministic per-ZIP composite computed by investor-zip-swfl from three upstream brains: home value (home-values-swfl, Zillow ZHVI), long-term rent (rentals-swfl, Zillow ZORI), and flood cap-rate adjustment (env-swfl, FEMA/NFIP). Gross rent yield = rent x 12 / home value x 100; flood-adjusted cap rate = gross yield - flood_cap_rate_adj_bps / 100. ZIP scope: Lee + Collier core SWFL scope (fixtures/swfl-zip-county.json)."
       },
@@ -178,7 +178,7 @@ s03 | env-swfl brain — https://www.swfldatagulf.com/api/b/env-swfl            
       "display_format": "percent",
       "source": {
         "url": "https://www.swfldatagulf.com/api/b/investor-zip-swfl",
-        "fetched_at": "2026-09-15T23:58:26Z",
+        "fetched_at": "2026-09-20T04:17:51Z",
         "tier": 2,
         "citation": "Deterministic per-ZIP composite computed by investor-zip-swfl from three upstream brains: home value (home-values-swfl, Zillow ZHVI), long-term rent (rentals-swfl, Zillow ZORI), and flood cap-rate adjustment (env-swfl, FEMA/NFIP). Gross rent yield = rent x 12 / home value x 100; flood-adjusted cap rate = gross yield - flood_cap_rate_adj_bps / 100. ZIP scope: Lee + Collier core SWFL scope (fixtures/swfl-zip-county.json)."
       },
@@ -198,7 +198,7 @@ s03 | env-swfl brain — https://www.swfldatagulf.com/api/b/env-swfl            
       "display_format": "percent",
       "source": {
         "url": "https://www.swfldatagulf.com/api/b/investor-zip-swfl",
-        "fetched_at": "2026-09-15T23:58:26Z",
+        "fetched_at": "2026-09-20T04:17:51Z",
         "tier": 2,
         "citation": "Deterministic per-ZIP composite computed by investor-zip-swfl from three upstream brains: home value (home-values-swfl, Zillow ZHVI), long-term rent (rentals-swfl, Zillow ZORI), and flood cap-rate adjustment (env-swfl, FEMA/NFIP). Gross rent yield = rent x 12 / home value x 100; flood-adjusted cap rate = gross yield - flood_cap_rate_adj_bps / 100. ZIP scope: Lee + Collier core SWFL scope (fixtures/swfl-zip-county.json)."
       },
@@ -1414,7 +1414,7 @@ s03 | env-swfl brain — https://www.swfldatagulf.com/api/b/env-swfl            
       ],
       "source": {
         "url": "https://www.swfldatagulf.com/api/b/investor-zip-swfl",
-        "fetched_at": "2026-09-15T23:58:26Z",
+        "fetched_at": "2026-09-20T04:17:51Z",
         "tier": 2,
         "citation": "Deterministic per-ZIP composite computed by investor-zip-swfl from three upstream brains: home value (home-values-swfl, Zillow ZHVI), long-term rent (rentals-swfl, Zillow ZORI), and flood cap-rate adjustment (env-swfl, FEMA/NFIP). Gross rent yield = rent x 12 / home value x 100; flood-adjusted cap rate = gross yield - flood_cap_rate_adj_bps / 100. ZIP scope: Lee + Collier core SWFL scope (fixtures/swfl-zip-county.json)."
       },
@@ -1424,9 +1424,7 @@ s03 | env-swfl brain — https://www.swfldatagulf.com/api/b/env-swfl            
   "caveats": [
     "2 ZIP card(s) had a gross yield outside the 2-12% plausibility band — yield and flood-adjusted cap rate suppressed (value/rent indices not comparable in vacation/seasonal markets); raw value, rent, and flood facts retained. Standard residential gross yield thresholds for SWFL (2-12%); values outside indicate high-variance index inputs (ZORI/ZHVI disparity), not a real return.",
     "51 of 53 ZIP cards carry value + rent but no flood overlay — env-swfl surfaces the flood cap-rate adjustment only for its top-AAL ZIPs, so the flood-adjusted cap rate is null for the rest.",
-    "Short-term-rental revenue (str_revenue_est_monthly) is null pending an AirDNA feed — available on request.",
-    "Upstream brain 'env-swfl' was stale at build time (expired 2026-09-11).",
-    "Upstream brain 'env-swfl' failed to rebuild on 2026-09-15; using last good read from 2026-08-12 (v28)."
+    "Short-term-rental revenue (str_revenue_est_monthly) is null pending an AirDNA feed — available on request."
   ],
   "contradicts": [],
   "confidence": 0.78,
@@ -1438,15 +1436,14 @@ s03 | env-swfl brain — https://www.swfldatagulf.com/api/b/env-swfl            
   "relevance": {
     "decay_curve": "weeks",
     "half_life_hours": 720,
-    "computed_at": "2026-09-15T23:58:26Z"
+    "computed_at": "2026-09-20T04:17:51Z"
   },
-  "exogenous_signals": [],
-  "degraded_inputs": []
+  "exogenous_signals": []
 }
 
 --- ACTIVE PROJECTS ---
 - investor-zip-swfl: pair home value + rent + flood economics at ZIP grain so a SWFL investor can read a property's full yield picture no single competitor offers.
 
 --- RECENT NOTES ---
-- 2026-09-15: pack refined by the Refinery — 1 fact(s) from 3 source(s).
+- 2026-09-20: pack refined by the Refinery — 1 fact(s) from 3 source(s).
 ```
