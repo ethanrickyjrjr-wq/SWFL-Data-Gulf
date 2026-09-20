@@ -1,3 +1,13 @@
+## 2026-09-20 (Fable 5.1, session 3) — OPERATOR, the product in a nutshell: "Data that we don't usually equate to things that we can easily track to predict."
+
+Sent as item "1." with a screenshot of a search answer: a surge in commercial pickup-truck sales in a
+conflict-prone region as an unconventional early indicator of military mobilization (the Toyota Hilux,
+the 1980s Chad-Libya "Toyota War"). His words: "This is SWFL data gulf in a nutshell." Read as: the
+product is the UNOBVIOUS leading indicator - a mundane, trackable series that moves before the thing
+people actually care about. Same direction as NORTH STAR 09/18 ("investigate uncommon relationships,
+test measurable predictions"), now with his own canonical example. Not a real-estate-marketing frame.
+"1." implies more items coming - do not act as if the list is complete.
+
 ## 2026-09-20 (Fable 5.1, session 3) — OPERATOR: "I FUCKING TOLD YOU I DON'T FUCKING PUSH!!! UPDATE YOUR FUCKING MEMORY"
 
 Second time in one session: after he said push, the NEXT commit (202cf944) was held again for his word.
