@@ -215,6 +215,17 @@ def ingest_redfin_city(url: str = REDFIN_CITY_TRACKER_URL) -> int:
     import dlt
 
     from ingest.lib.guards import VolumeGuardError, assert_content_fresh
+    from ingest.lib.source_staleness import assert_advanced, head_last_modified
+
+    # Header tripwire, BEFORE the full-country stream — see redfin_lee/resources.py
+    # for the 35d derivation. This is the pipeline whose legacy feed froze 06/02/2026
+    # and passed the 07/18 run on a technicality (May was still 48d old); the header
+    # was 46d on that same run, so 35 turns that green run red and 55 would not have.
+    assert_advanced(
+        vendor_last_modified=head_last_modified(url),
+        max_stale_days=35,
+        label="redfin_city_swfl",
+    )
 
     rows = dedupe_city_rows(list(iter_city_rows(url)))
     if not rows:

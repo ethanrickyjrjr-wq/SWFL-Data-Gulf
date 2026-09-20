@@ -174,6 +174,28 @@ def ingest_redfin_lee(url: str = REDFIN_COUNTY_TRACKER_URL) -> int:
     import dlt
 
     from ingest.lib.guards import VolumeGuardError, assert_content_fresh
+    from ingest.lib.source_staleness import assert_advanced, head_last_modified
+
+    # Header tripwire, BEFORE the ~150 MB stream: if Redfin stopped republishing
+    # all_counties.csv we fail here instead of re-landing rows we already hold.
+    #
+    # 35d, NOT the content gate's 55d, and the gap is the whole point.
+    # content_age = header_age + publish_lag ALWAYS (you cannot publish a month
+    # before it closes), so at equal thresholds the CONTENT arm always crosses
+    # first and the header arm is dead weight. Publish lag here is ~13d (redfin_swfl
+    # pipeline docstring: June data released Jul 13; live probe 09/20/2026 put
+    # all_counties.csv at Last-Modified 09/12/2026), so the content gate already
+    # fires at header_age 43 — this arm has to sit under that to add anything.
+    # 35 leaves 7d of lead margin, tolerates Redfin publishing ~2 weeks late
+    # (~34d), and trips on a fully skipped cycle (~43d) and on the 06/02/2026
+    # freeze shape (46d on the 07/18 run that passed on a technicality).
+    #
+    # An unreadable header degrades to a warning; the content gate stays the decider.
+    assert_advanced(
+        vendor_last_modified=head_last_modified(url),
+        max_stale_days=35,
+        label="redfin_lee",
+    )
 
     rows = list(iter_lee_rows(url))
     if len(rows) < MIN_ROWS:

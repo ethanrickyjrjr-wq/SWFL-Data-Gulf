@@ -109,6 +109,10 @@ class _FakeResp:
 def _patch_get(monkeypatch, rows: list[str] | None = None):
     data = _rows_to_csv(_fixture_rows() if rows is None else rows)
     monkeypatch.setattr(resources.requests, "get", lambda *a, **k: _FakeResp(data))
+    # ingest_redfin_city HEADs the source for the staleness tripwire. None = "could
+    # not read the header" -> degrades to a warning, so every pre-existing case
+    # behaves exactly as it did before the tripwire landed. No network.
+    monkeypatch.setattr("ingest.lib.source_staleness.head_last_modified", lambda *a, **k: None)
 
 
 def test_keeps_every_fl_city_excludes_other_states_and_non_city_types(monkeypatch):
@@ -201,3 +205,22 @@ def test_dry_run_writes_nothing(monkeypatch, capsys):
     assert "dry-run" in out
     assert "10 FL city rows" in out  # 11 parsed − 1 duplicate twin removed
     assert "'cape_coral': 2" in out  # hero counts printed for eyeball verification
+
+
+def test_frozen_vendor_file_raises_before_the_download(monkeypatch):
+    """The 06/02/2026 freeze this pipeline actually survived on a technicality:
+    the 07/18/2026 run went green because May was still 48d old against the 55d
+    content gate. The header read 46d on that same run — which trips the 35d
+    header gate and would NOT trip a 55d one. This is the historical case,
+    replayed, and it fails if anyone loosens the threshold."""
+    from datetime import date, timedelta
+
+    from ingest.lib.guards import ContentStaleError
+
+    frozen = date.today() - timedelta(days=46)
+    _patch_get(monkeypatch)
+    monkeypatch.setattr(
+        "ingest.lib.source_staleness.head_last_modified", lambda *a, **k: frozen
+    )
+    with pytest.raises(ContentStaleError, match="FROZEN"):
+        resources.ingest_redfin_city("http://example/all_cities.csv")

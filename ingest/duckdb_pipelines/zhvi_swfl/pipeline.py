@@ -40,6 +40,15 @@ from .constants import (
 from ingest.lib.tier1_inventory import upsert_inventory_row
 from ingest.lib.env_local import load_env_local
 
+# NO source-staleness header tripwire here, deliberately (09/20/2026). Probed live:
+# Last-Modified 09/16/2026 vs newest period column 2026-08-31 -> a 16d publish lag.
+# The only content gate on this data is the Tier-2 loader's assert_content_fresh(55)
+# (ingest/pipelines/zhvi_swfl/pipeline.py:79), and content_age = header_age + lag, so
+# that gate already fires at header_age 39d. A header gate must sit under 39 to add
+# anything, and over ~36 to survive Zillow publishing a week late — a 3-day band.
+# Blocked on tightening the Tier-2 content gate (55 -> ~45) first; see ingest/lib/
+# source_staleness.py. Wiring it inside that band would red-cron on a late vendor.
+
 
 def _load_env() -> None:
     load_env_local()

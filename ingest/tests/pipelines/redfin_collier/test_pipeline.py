@@ -90,6 +90,10 @@ class _FakeResp:
 def _patch_get(monkeypatch, rows: list[str] | None = None):
     data = _rows_to_csv(_fixture_rows() if rows is None else rows)
     monkeypatch.setattr(resources.requests, "get", lambda *a, **k: _FakeResp(data))
+    # ingest_redfin_collier HEADs the source for the staleness tripwire. None =
+    # "could not read the header" -> degrades to a warning, so every pre-existing
+    # case behaves exactly as it did before the tripwire landed. No network.
+    monkeypatch.setattr("ingest.lib.source_staleness.head_last_modified", lambda *a, **k: None)
 
 
 def test_iter_collier_rows_filters_to_collier_county_type_only(monkeypatch):
@@ -141,3 +145,23 @@ def test_dry_run_writes_nothing(monkeypatch, capsys):
     out = capsys.readouterr().out
     assert "dry-run" in out
     assert "3 Collier County, FL rows" in out
+
+
+def test_frozen_vendor_file_raises_before_the_download(monkeypatch):
+    """The 06/02/2026 freeze shape: the object still serves 200s but Redfin
+    stopped republishing it. 46d is the discriminating age — it trips the 35d
+    header gate and would NOT trip a 55d one, so this fails if anyone loosens
+    the threshold back to the content gate's value. See redfin_lee's twin."""
+    from datetime import date, timedelta
+
+    import pytest
+
+    from ingest.lib.guards import ContentStaleError
+
+    frozen = date.today() - timedelta(days=46)
+    _patch_get(monkeypatch)
+    monkeypatch.setattr(
+        "ingest.lib.source_staleness.head_last_modified", lambda *a, **k: frozen
+    )
+    with pytest.raises(ContentStaleError, match="FROZEN"):
+        resources.ingest_redfin_collier("http://example/all_counties.csv")

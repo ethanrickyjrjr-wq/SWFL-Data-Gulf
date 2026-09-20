@@ -168,6 +168,16 @@ def ingest_redfin_collier(url: str = REDFIN_COUNTY_TRACKER_URL) -> int:
     import dlt
 
     from ingest.lib.guards import VolumeGuardError, assert_content_fresh
+    from ingest.lib.source_staleness import assert_advanced, head_last_modified
+
+    # Header tripwire, BEFORE the ~150 MB stream — see redfin_lee/resources.py for
+    # the threshold reasoning. Same object as redfin_lee (all_counties.csv), so a
+    # cycle costs two HEADs on one file: a few hundred bytes, not worth sharing.
+    assert_advanced(
+        vendor_last_modified=head_last_modified(url),
+        max_stale_days=35,
+        label="redfin_collier",
+    )
 
     rows = list(iter_collier_rows(url))
     if len(rows) < MIN_ROWS:

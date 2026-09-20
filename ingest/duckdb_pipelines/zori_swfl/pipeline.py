@@ -40,6 +40,12 @@ from .constants import (
 from ingest.lib.tier1_inventory import upsert_inventory_row
 from ingest.lib.env_local import load_env_local
 
+# NO source-staleness header tripwire here, deliberately (09/20/2026). Probed live:
+# Last-Modified 09/16/2026 vs newest period column 2026-08-31 -> a 16d publish lag.
+# Same arithmetic as the zhvi twin: the Tier-2 gate's assert_content_fresh(55)
+# already fires at header_age 39d, leaving a 3-day usable band. Blocked on
+# tightening that content gate first; see ingest/lib/source_staleness.py.
+
 
 def _load_env() -> None:
     load_env_local()
