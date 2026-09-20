@@ -31,7 +31,9 @@ const RAW_33904 = {
   pending_sales: 118,
   median_sale_price_yoy_pct: 3.98,
   median_sale_price_mom_pct: null,
-  median_dom_yoy_pct: -13.75,
+  // Live 08/31/2026 row: 60 days now vs 88 a year ago. The vendor column is a DAY delta
+  // under a legacy `_pct` parquet name (relabelled MOM/YOY (DAYS) 09/2026).
+  median_dom_yoy_pct: -28,
   inventory_yoy_pct: -7.45,
   avg_sale_to_list_yoy_ppts: -0.4,
 };
@@ -49,7 +51,6 @@ describe("mapHousingRow — vendor percents → contract fractions", () => {
     assert.ok(Math.abs((r.sold_above_list as number) - 0.0547) < 1e-9);
     assert.ok(Math.abs((r.off_market_in_two_weeks as number) - 0.1457) < 1e-9);
     assert.ok(Math.abs((r.median_sale_price_yoy as number) - 0.0398) < 1e-9);
-    assert.ok(Math.abs((r.median_dom_yoy as number) - -0.1375) < 1e-9);
     assert.ok(Math.abs((r.inventory_yoy as number) - -0.0745) < 1e-9);
     // PPTS ÷ 100 = the absolute delta of the ~1.0 ratio (-0.4 ppts → -0.004)
     assert.ok(Math.abs((r.avg_sale_to_list_yoy as number) - -0.004) < 1e-9);
@@ -57,6 +58,15 @@ describe("mapHousingRow — vendor percents → contract fractions", () => {
     assert.equal(r.inventory, 106);
     assert.equal(r.months_of_supply, 5);
     assert.equal(r.pending_sales, 118);
+  });
+
+  // Failure mode (site audit 07/18/2026; live 09/20/2026): the day delta was divided by 100
+  // as if it were a percent, then re-multiplied and served as "-28.0%" when the truth is
+  // -28 days (-31.8%).
+  test("days-on-market YoY is a DAY delta: passed through as days, never divided by 100", () => {
+    const r = mapHousingRow(RAW_33904);
+    assert.equal(r.median_dom_yoy_days, -28);
+    assert.equal("median_dom_yoy" in r, false);
   });
 
   test("fields without a successor column are null, never a lookalike", () => {
@@ -73,7 +83,7 @@ describe("mapHousingRow — vendor percents → contract fractions", () => {
       median_sale_price: undefined,
     });
     assert.equal(r.avg_sale_to_list, null);
-    assert.equal(r.median_dom_yoy, null);
+    assert.equal(r.median_dom_yoy_days, null);
     assert.equal(r.median_sale_price, null);
   });
 });

@@ -1,3 +1,10 @@
+## 2026-09-20 (Fable 5.1, session 3) — OPERATOR: "we need to have all current data running correctly before we find more data ... or trying to create tests that point certain data at predictions. We need to run correctly first with what we have. ... Go if good"
+
+Ordering decision, his words. The nutshell screenshot was "just updating you/us", NOT a new path. GO given
+for item 1 of the ask-first list: the days-on-market year-over-year fix (a day delta served as a percent).
+STANDING until he says otherwise: correctness of what we already serve and ingest comes BEFORE new sources
+and BEFORE prediction tests. A session proposing a new source while a served number is known-wrong has it backwards.
+
 ## 2026-09-20 (Fable 5.1, session 3) — OPERATOR, the product in a nutshell: "Data that we don't usually equate to things that we can easily track to predict."
 
 Sent as item "1." with a screenshot of a search answer: a surge in commercial pickup-truck sales in a

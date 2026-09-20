@@ -37,7 +37,7 @@ interface HousingSnapshot {
   sold_above_list: number | null;
   off_market_in_two_weeks: number | null;
   median_sale_price_yoy: number | null;
-  median_dom_yoy: number | null;
+  median_dom_yoy_days: number | null; // regional median of per-ZIP YoY day deltas (DAYS)
   inventory_yoy: number | null;
   avg_sale_to_list_yoy: number | null;
   hottest_zips: Array<{ zip: string; metro: string; dom: number }>;
@@ -77,9 +77,13 @@ function metricDirection(delta: number | null): "rising" | "falling" | "stable" 
   return "stable";
 }
 
-// DOM moves inversely to market heat: falling DOM = homes selling faster.
-function domTrendDirection(domYoy: number | null): "rising" | "falling" | "stable" {
-  return metricDirection(domYoy);
+// DOM moves inversely to market heat: falling DOM = homes selling faster. The input is a
+// DAY delta, so the dead band is half a day (metricDirection's 0.005 is for fractions).
+function domTrendDirection(domYoyDays: number | null): "rising" | "falling" | "stable" {
+  if (domYoyDays === null) return "stable";
+  if (domYoyDays > 0.5) return "rising";
+  if (domYoyDays < -0.5) return "falling";
+  return "stable";
 }
 
 // A thin-sample ZIP — fewer than LOW_SAMPLE_FLOOR sales in the latest window.
@@ -121,28 +125,29 @@ export function aggregateMonthsOfSupply(rows: readonly HousingZipRow[]): number 
   return (inv * 3) / sold;
 }
 
-// MEDIAN_DOM_YOY is a DECIMAL FRACTION since the redfin_data_center retarget
-// (see housing-source.mts) — render ×100 exactly ONCE. Successor to the
-// formatDayDelta guard: the legacy feed published absolute days and a percent
-// render shipped "650.0% YoY"; the new feed publishes a percent that the
-// source converts to a fraction. Never render this as days again.
-export function formatDomYoyPct(fraction: number): string {
-  // Round half away from zero (JS Math.round biases toward +∞ on negatives).
-  const r = (Math.sign(fraction) * Math.round(Math.abs(fraction) * 1000)) / 10;
-  const sign = r > 0 ? "+" : "";
-  const txt = Number.isInteger(r) ? String(r) : r.toFixed(1);
-  return `${sign}${txt}%`;
+// Days-on-market YoY is a DAY DELTA (see housing-source.mts for the live proof). It was
+// served as a percent twice - "650.0% YoY", then "-2796.2%" / "-28.0%". It renders as
+// signed days and nothing else.
+// One decimal, rounded half AWAY from zero (JS Math.round biases toward +inf on negatives:
+// -28.25 -> -28.2 but 28.25 -> 28.3). The ONE rounding both the label and the cell use.
+function roundDays(days: number): number {
+  return (Math.sign(days) * Math.round(Math.abs(days) * 10)) / 10;
 }
 
-// A DOM-YoY swing this large only happens when the prior-year median_dom was
-// itself near zero — a real market never moves this much. SUPPRESS it in the
-// per-ZIP detail table the same way monthsOfSupply suppresses a thin-sample
-// derivation above: a null is more honest than a nonsense percent. Threshold
-// per _RESEARCH/audits/2026-07-18-fanout-fix-log.md finding #2 — ZIP 33904
-// served -2796.2%; audit suggested ~150% as the sane bound.
-const DOM_YOY_PCT_SANITY_BOUND = 150;
-export function sanitizeDomYoyPct(pct: number): number | null {
-  return Math.abs(pct) > DOM_YOY_PCT_SANITY_BOUND ? null : pct;
+export function formatDomYoyDays(days: number): string {
+  const r = roundDays(days);
+  const sign = r > 0 ? "+" : "";
+  return `${sign}${r} ${Math.abs(r) === 1 ? "day" : "days"}`;
+}
+
+// Per-ZIP detail cell. The wild values are real arithmetic on a meaningless sample (live
+// 08/31/2026: ZIP 34140, ONE sale, +1404 days), so suppress on the thin-sample rule
+// monthsOfSupply already uses - not a magnitude cutoff, which would also hide a true
+// +85 days on 13 sales (ZIP 34216). A null is more honest than a one-sale median.
+// Rounded: /api/b serves the raw payload, and an unrounded DOUBLE is the long-float leak.
+export function domYoyDaysCell(r: HousingZipRow): number | null {
+  if (r.median_dom_yoy_days === null || isLowSample(r)) return null;
+  return roundDays(r.median_dom_yoy_days);
 }
 
 function rowsFromFragments(fragments: RawFragment[]): HousingZipRow[] {
@@ -213,7 +218,7 @@ export function buildSnapshot(rows: HousingZipRow[]): HousingSnapshot | null {
     sold_above_list: median(rows.map((r) => r.sold_above_list)),
     off_market_in_two_weeks: median(rows.map((r) => r.off_market_in_two_weeks)),
     median_sale_price_yoy: median(rows.map((r) => r.median_sale_price_yoy)),
-    median_dom_yoy: median(rows.map((r) => r.median_dom_yoy)),
+    median_dom_yoy_days: median(rows.map((r) => r.median_dom_yoy_days)),
     inventory_yoy: median(rows.map((r) => r.inventory_yoy)),
     avg_sale_to_list_yoy: median(rows.map((r) => r.avg_sale_to_list_yoy)),
     hottest_zips: hottestZips,
@@ -229,9 +234,9 @@ function classifyDirection(snap: HousingSnapshot): DirectionVerdict {
   const caveats: string[] = [];
 
   // DOM YoY (absolute days): falling = faster sales = bullish
-  if (snap.median_dom_yoy !== null) {
-    if (snap.median_dom_yoy < 0) score += 1;
-    else if (snap.median_dom_yoy > 0) score -= 1;
+  if (snap.median_dom_yoy_days !== null) {
+    if (snap.median_dom_yoy_days < 0) score += 1;
+    else if (snap.median_dom_yoy_days > 0) score -= 1;
   }
 
   // Inventory YoY (fraction): falling = tighter supply = bullish
@@ -380,8 +385,8 @@ function housingOutputProducer(_out: PackOutput): BrainOutputProducerResult {
     key_metrics.push({
       metric: "housing_median_dom_swfl",
       value: Number(snap.median_dom.toFixed(0)),
-      direction: domTrendDirection(snap.median_dom_yoy),
-      label: `SWFL regional median days on market — falling = faster sales${snap.median_dom_yoy !== null ? ` (YoY: ${formatDomYoyPct(snap.median_dom_yoy)})` : ""}`,
+      direction: domTrendDirection(snap.median_dom_yoy_days),
+      label: `SWFL regional median days on market — falling = faster sales${snap.median_dom_yoy_days !== null ? ` (YoY: ${formatDomYoyDays(snap.median_dom_yoy_days)})` : ""}`,
       variable_type: "extensive",
       units: "days",
       display_format: "count",
@@ -498,10 +503,7 @@ function housingOutputProducer(_out: PackOutput): BrainOutputProducerResult {
               ? null
               : Number((r.median_sale_price_yoy * 100).toFixed(1)),
           median_dom: r.median_dom,
-          median_dom_yoy_pct:
-            r.median_dom_yoy === null
-              ? null
-              : sanitizeDomYoyPct(Number((r.median_dom_yoy * 100).toFixed(1))),
+          median_dom_yoy_days: domYoyDaysCell(r),
           avg_sale_to_list_pct:
             r.avg_sale_to_list === null ? null : Number((r.avg_sale_to_list * 100).toFixed(1)),
           months_of_supply: mos === null ? null : Number(mos.toFixed(1)),
@@ -539,10 +541,10 @@ function housingOutputProducer(_out: PackOutput): BrainOutputProducerResult {
               units: "days",
             },
             {
-              id: "median_dom_yoy_pct",
-              label: "Median days-on-market YoY change",
-              display_format: "percent",
-              units: "percent",
+              id: "median_dom_yoy_days",
+              label: "Median days-on-market YoY change (days)",
+              display_format: "count",
+              units: "days",
             },
             {
               id: "avg_sale_to_list_pct",

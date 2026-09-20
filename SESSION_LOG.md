@@ -1,3 +1,25 @@
+## 2026-09-20 (Fable 5.1, session 3, part 6) - days-on-market YoY is DAYS end to end (his GO on the ask-first item); NOT LIVE until housing rebuilds
+
+Operator: correctness of what we serve comes before new sources and before prediction tests; "Go if good" on the DOM fix.
+LIVE PROOF (read-only parquet probe, data through 08/31/2026): 14,918 of 17,904 rows have the vendor column ==
+median_dom minus the same window a year earlier; 33904 = 60 vs 88 = -28. Vendor header re-read today (file
+Last-Modified 09/12/2026): "MEDIAN DAYS ON MARKET YOY (DAYS)". We served that as "-28.0%" (true percent -31.8%).
+The 07/18 audit misdiagnosed it as a near-zero-base swing, which is where the 150% cutoff came from.
+CHANGED: housing-source.mts field median_dom_yoy (pctToFraction) -> median_dom_yoy_days (toNum; parquet column keeps
+its legacy `_pct` name, documented at the read). housing-swfl.mts: formatDomYoyPct -> formatDomYoyDays, the 150 cutoff
+-> domYoyDaysCell (null under 5 sales, the monthsOfSupply rule), 0.5-day dead band (identical verdicts to before),
+detail column median_dom_yoy_pct/percent -> median_dom_yoy_days/count/days, label "(YoY: -28 days)". Fixture + tests.
+RED FIRST: source test 2 fail, pack test import error, then the two second-order guards 2 fail. NOW: 76 pass / 0 fail
+(housing pack+source, catalog mirror, lib/zip-report), `bunx tsc --noEmit` clean, vocab-coverage OK 44 brains.
+SECOND-ORDER (agent, read-only): direction/score arithmetic unchanged; no other pack reads it; chart unchanged; the
+ZIP report's DOM movement line has been DARK since the retarget renamed the column the wrong way (candidates.ts:129
+reads median_dom_yoy_days; served table never had it) - this turns it back on for 50 of 53 ZIPs, 19 of them at the
+ranker's movement cap, so lead signals on /r/zip-report may change. Restored rounding-away-from-zero + 1dp cell cap from it.
+NOT LIVE: needs the housing brain rebuild (pack is skipSynthesisAgent - no model call) + deploy; /api/b caches 1h.
+Not dispatched: the wrapper classes every dispatch as an operator-only paid run. Check redfin_dom_yoy_unit_days_not_pct
+stays OPEN until the served bytes say `median_dom_yoy_days`.
+Verify after rebuild: curl -s https://www.swfldatagulf.com/api/b/housing-swfl | grep -o 'median_dom_yoy[a-z_]*' | sort -u
+
 ## 2026-09-20 (Fable 5.1, session 3, part 5) - operator's nutshell definition recorded; main green at eafcd529
 
 CI on eafcd529: success. He sent item "1." - a pickup-truck-sales-before-a-war screenshot: "This is SWFL data

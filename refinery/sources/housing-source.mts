@@ -17,11 +17,14 @@ import { expiresDate } from "../lib/dates.mts";
 //   avg_sale_to_list_yoy_ppts       → the absolute delta of the ~1.0 ratio
 //                                     (-0.4 ppts → -0.004)
 //
-// MEDIAN_DOM_YOY history — the units bug that keeps trying to ship: the LEGACY
-// feed published it as an ABSOLUTE DAY DIFFERENCE and rendering it ×100 shipped
-// "650.0% YoY" to users (empirically verified 06/03/2026). The NEW feed
-// publishes a PERCENT; here it becomes a decimal fraction like every other YoY.
-// It is NEVER days again — the pack renders it via formatDomYoyPct.
+// DAYS-ON-MARKET YoY IS A DAY DELTA, NOT A PERCENT. It has been served as a percent
+// twice: "650.0% YoY" off the legacy feed (06/03/2026), then "-2796.2%" / "-28.0%" off
+// this one, because the vendor labelled the column "YOY (%)" until they corrected it to
+// "YOY (DAYS)" in 09/2026. Live proof 09/20/2026: 14,918 of 17,904 parquet rows equal
+// median_dom minus the same window a year earlier (33904, 08/31/2026: 60 - 88 = -28).
+// The parquet column keeps its legacy name `median_dom_yoy_pct` (renaming it needs a
+// re-ingest in lockstep with this SELECT); the wrong name stops HERE and the contract
+// field is median_dom_yoy_days. It is the ONE change column that skips pctToFraction.
 //
 // Fields with NO successor column in the new feed stay in the contract as
 // permanent nulls (never mapped from a lookalike):
@@ -52,7 +55,7 @@ export interface HousingZipRow {
   pending_sales: number | null;
   median_sale_price_yoy: number | null; // decimal fraction
   median_sale_price_mom: number | null; // decimal fraction
-  median_dom_yoy: number | null; // decimal fraction (NEVER days — see above)
+  median_dom_yoy_days: number | null; // DAYS (a day delta — never a percent, see above)
   inventory_yoy: number | null; // decimal fraction
   avg_sale_to_list_yoy: number | null; // absolute ratio delta (ppts / 100)
 }
@@ -94,7 +97,7 @@ export function mapHousingRow(raw: Record<string, unknown>): HousingZipRow {
     pending_sales: toNum(raw.pending_sales),
     median_sale_price_yoy: pctToFraction(raw.median_sale_price_yoy_pct),
     median_sale_price_mom: pctToFraction(raw.median_sale_price_mom_pct),
-    median_dom_yoy: pctToFraction(raw.median_dom_yoy_pct),
+    median_dom_yoy_days: toNum(raw.median_dom_yoy_pct), // days as-written; legacy parquet name
     inventory_yoy: pctToFraction(raw.inventory_yoy_pct),
     avg_sale_to_list_yoy: pctToFraction(raw.avg_sale_to_list_yoy_ppts),
   };

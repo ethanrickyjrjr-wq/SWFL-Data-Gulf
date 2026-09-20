@@ -18,7 +18,7 @@
     "pending_sales": 58,
     "median_sale_price_yoy": -0.048,
     "median_sale_price_mom": 0.012,
-    "median_dom_yoy": 0.25,
+    "median_dom_yoy_days": 25,
     "inventory_yoy": 0.41,
     "avg_sale_to_list_yoy": -0.008
   },
@@ -41,7 +41,7 @@
     "pending_sales": 27,
     "median_sale_price_yoy": -0.062,
     "median_sale_price_mom": -0.018,
-    "median_dom_yoy": 0.33,
+    "median_dom_yoy_days": 33,
     "inventory_yoy": 0.55,
     "avg_sale_to_list_yoy": -0.011
   },
@@ -64,7 +64,7 @@
     "pending_sales": 40,
     "median_sale_price_yoy": -0.031,
     "median_sale_price_mom": 0.005,
-    "median_dom_yoy": 0.19,
+    "median_dom_yoy_days": 19,
     "inventory_yoy": 0.38,
     "avg_sale_to_list_yoy": -0.006
   },
@@ -87,7 +87,7 @@
     "pending_sales": 82,
     "median_sale_price_yoy": 0.022,
     "median_sale_price_mom": 0.018,
-    "median_dom_yoy": 0.06,
+    "median_dom_yoy_days": 6,
     "inventory_yoy": 0.12,
     "avg_sale_to_list_yoy": 0.002
   },
@@ -110,7 +110,7 @@
     "pending_sales": 52,
     "median_sale_price_yoy": -0.015,
     "median_sale_price_mom": 0.009,
-    "median_dom_yoy": 0.16,
+    "median_dom_yoy_days": 16,
     "inventory_yoy": 0.33,
     "avg_sale_to_list_yoy": -0.004
   },
@@ -133,7 +133,7 @@
     "pending_sales": 35,
     "median_sale_price_yoy": -0.041,
     "median_sale_price_mom": -0.008,
-    "median_dom_yoy": 0.28,
+    "median_dom_yoy_days": 28,
     "inventory_yoy": 0.48,
     "avg_sale_to_list_yoy": -0.009
   }
