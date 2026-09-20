@@ -5,6 +5,14 @@ import pytest
 
 sys.path.insert(0, os.path.dirname(__file__))
 
+# Set at conftest IMPORT, not inside the fixture below. A session fixture runs at the first
+# test's setup; pytest COLLECTS (imports every test module, and through it every pipeline
+# module with an import-time env load) long before that. Measured 09/20/2026 with a collection
+# probe: PHOTOS_API + CRAWL4AI_PROXY appeared at "COLLECT/IMPORT of city_pulse/test_pipeline.py",
+# so the fixture-only guard never protected anything loaded at import - and the no-key tests
+# made real billed calls on every full local run. Must stay above the first pipeline import.
+os.environ["INGEST_NO_ENV_LOCAL"] = "1"
+
 from ingest.pipelines.listing_lifecycle import extract_api  # noqa: E402
 
 
@@ -21,7 +29,8 @@ def _tests_never_load_production_env():
     silently succeeds against production spends money without ever telling you.
 
     Not Windows-specific: read_text() is UTF-8 on Linux, so CI has always loaded
-    it. Session-scoped so it lands before any pipeline module is imported.
+    it. The switch itself is set at module import above (collection precedes fixtures);
+    this fixture re-asserts it and cleans up at session end.
     """
     os.environ["INGEST_NO_ENV_LOCAL"] = "1"
     yield

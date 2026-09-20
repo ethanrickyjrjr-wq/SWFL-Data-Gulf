@@ -7,9 +7,11 @@ import time
 from pathlib import Path
 
 import requests
-from dotenv import load_dotenv
+# Guarded loader, NOT dotenv: an import-time dotenv load walked past the test suite's
+# INGEST_NO_ENV_LOCAL guard and put production keys into every test process (09/20/2026).
+from ingest.lib.env_local import load_env_local
 
-load_dotenv(Path(__file__).parent.parent / ".env")
+load_env_local(Path(__file__).parent.parent / ".env")
 
 
 def upload_parquet(bucket: str, object_path: str, rows: list[dict]) -> int:

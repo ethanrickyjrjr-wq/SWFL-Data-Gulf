@@ -131,6 +131,10 @@ def test_no_cron_comment_is_the_sole_carrier_of_a_workflow_filename():
         if not line.lstrip().startswith("#") or "cron" not in line.lower():
             continue
         for basename in YML_RE.findall(line):
+            # A tombstone ("Cron .github/workflows/x.yml removed", cb803b1c 08/11/2026) names a
+            # workflow that no longer exists - there is nothing left for a field to carry.
+            if not (_JOBS_WF_DIR / basename).exists():
+                continue
             if basename not in declared:
                 orphans.append(f"{REG_PATH.name}:{lineno} -> {basename}")
     assert not orphans, (
@@ -241,16 +245,14 @@ def test_no_entry_carries_a_min_rows_field():
 
 
 def test_orphan_writers_are_not_nightly_gated():
-    """active_listings' table feeds nothing live (08h D7); market_aggregates_* are
-    weekly/monthly (08h D12). Gating any of them guards a corpse or demands a daily
-    landing that by design never comes."""
+    """market_aggregates_* are weekly/monthly (08h D12): gating them demands a daily landing
+    that by design never comes. active_listings was the third name here until the pipeline and
+    its registry entry were retired (cb803b1c, 08/11/2026) - a retired entry must stay gone,
+    or the nightly gate starts guarding a corpse again."""
     by_name = {e["name"]: e for e in _pipelines()}
-    for name in ("active_listings", "market_aggregates_histogram", "market_aggregates_details"):
+    for name in ("market_aggregates_histogram", "market_aggregates_details"):
         assert by_name[name].get("nightly") is not True, f"{name} must NOT be nightly-gated"
-    assert by_name["active_listings"]["consuming_pack"] == "none", (
-        "active_listings' table (active_listings_residential) has no live consumer -- "
-        "active-listings-swfl reads listing_active_stats over listing_state (08h D7)"
-    )
+    assert "active_listings" not in by_name, "active_listings was retired 08/11/2026 (cb803b1c)"
 
 
 def test_no_entry_carries_a_source_tag_field():

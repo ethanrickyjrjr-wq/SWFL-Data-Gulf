@@ -35,12 +35,14 @@ from pathlib import Path
 from typing import Any
 
 import anthropic
-from dotenv import load_dotenv
+# Guarded loader, NOT dotenv: an import-time dotenv load walked past the test suite's
+# INGEST_NO_ENV_LOCAL guard and put production keys into every test process (09/20/2026).
+from ingest.lib.env_local import load_env_local
 
 # Local dev: load .env.local at repo root before importing helpers that read
 # os.environ at module-init time. GHA injects the same vars as workflow secrets,
 # so this is a no-op on CI.
-load_dotenv(Path(__file__).resolve().parents[3] / ".env.local")
+load_env_local(Path(__file__).resolve().parents[3] / ".env.local")
 
 from ingest.lib.api_usage import log_api_usage, search_count  # noqa: E402
 from ingest.lib.storage_uploader import _upload_bytes  # noqa: E402

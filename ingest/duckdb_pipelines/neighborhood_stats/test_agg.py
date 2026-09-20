@@ -9,13 +9,13 @@ from ingest.duckdb_pipelines.neighborhood_stats.agg import aggregate_stats
 def _seed(con: duckdb.DuckDBPyConnection) -> None:
     con.execute(
         "CREATE TABLE parcel_subdivision(parcel_id TEXT, county TEXT, property_type TEXT, "
-        "just_value DOUBLE, subdivision_name TEXT)"
+        "just_value DOUBLE, subdivision_name TEXT, actual_year_built BIGINT)"
     )
     con.execute("""INSERT INTO parcel_subdivision VALUES
-        ('1','collier','condominium',300000,'HERITAGE BAY'),
-        ('2','collier','condominium',500000,'HERITAGE BAY'),
-        ('3','collier','single-family',900000,'HERITAGE BAY'),
-        ('4','collier','single-family',400000,'LELY RESORT')""")
+        ('1','collier','condominium',300000,'HERITAGE BAY',2004),
+        ('2','collier','condominium',500000,'HERITAGE BAY',2004),
+        ('3','collier','single-family',900000,'HERITAGE BAY',2004),
+        ('4','collier','single-family',400000,'LELY RESORT',0)""")
 
 
 def test_home_count_and_median_by_neighborhood():
@@ -47,9 +47,9 @@ def test_blank_subdivision_name_still_aggregates():
     con = duckdb.connect()
     con.execute(
         "CREATE TABLE parcel_subdivision(parcel_id TEXT, county TEXT, property_type TEXT, "
-        "just_value DOUBLE, subdivision_name TEXT)"
+        "just_value DOUBLE, subdivision_name TEXT, actual_year_built BIGINT)"
     )
-    con.execute("INSERT INTO parcel_subdivision VALUES ('9','collier','single-family',100000,'')")
+    con.execute("INSERT INTO parcel_subdivision VALUES ('9','collier','single-family',100000,'',2004)")
     rows = {(r["county"], r["subdivision_name"]): r for r in aggregate_stats(con)}
     assert rows[("collier", "")]["home_count"] == 1
 
@@ -58,12 +58,12 @@ def test_alias_fold_collapses_two_raw_names_into_one_canonical_row():
     con = duckdb.connect()
     con.execute(
         "CREATE TABLE parcel_subdivision(parcel_id TEXT, county TEXT, property_type TEXT, "
-        "just_value DOUBLE, subdivision_name TEXT)"
+        "just_value DOUBLE, subdivision_name TEXT, actual_year_built BIGINT)"
     )
     con.execute("""INSERT INTO parcel_subdivision VALUES
-        ('1','collier','condominium',300000,'HERITAGE BAY GOLF ESTATES'),
-        ('2','collier','single-family',900000,'HERITAGE BAY GOLF ESTATES'),
-        ('3','collier','single-family',500000,'HERITAGE BAY COUNTRY CLUB')""")
+        ('1','collier','condominium',300000,'HERITAGE BAY GOLF ESTATES',2004),
+        ('2','collier','single-family',900000,'HERITAGE BAY GOLF ESTATES',2004),
+        ('3','collier','single-family',500000,'HERITAGE BAY COUNTRY CLUB',2004)""")
     alias_map = {
         "HERITAGE BAY GOLF ESTATES": "Heritage Bay",
         "HERITAGE BAY COUNTRY CLUB": "Heritage Bay",
@@ -108,3 +108,13 @@ def test_alias_fold_against_the_real_shared_fixture():
     rows = {(r["county"], r["subdivision_name"]): r for r in aggregate_stats(con, label_by_pattern())}
     assert ("collier", "Heritage Bay") in rows
     assert rows[("collier", "Heritage Bay")]["home_count"] == 3
+
+
+def test_median_year_built_ignores_the_vendors_zero_for_unknown():
+    """4b10936f added median_year_built; the parcel feed writes 0 for an unknown year. A 0 in
+    the median would date a neighborhood to the year 1002 - NULLIF keeps it a gap."""
+    con = duckdb.connect()
+    _seed(con)
+    rows = {(r["county"], r["subdivision_name"]): r for r in aggregate_stats(con)}
+    assert rows[("collier", "HERITAGE BAY")]["median_year_built"] == 2004
+    assert rows[("collier", "LELY RESORT")]["median_year_built"] is None

@@ -19,11 +19,14 @@ def test_aggregate_feeds_rows_through_the_real_agg_function():
     path works end to end, not just agg.py's own unit tests."""
     rows = [
         {"parcel_id": "1", "county": "collier", "property_type": "condominium",
-         "just_value": 300000.0, "subdivision_name": "HERITAGE BAY"},
+         "just_value": 300000.0, "subdivision_name": "HERITAGE BAY",
+         "actual_year_built": 2004},
         {"parcel_id": "2", "county": "collier", "property_type": "single-family",
-         "just_value": 900000.0, "subdivision_name": "HERITAGE BAY"},
+         "just_value": 900000.0, "subdivision_name": "HERITAGE BAY",
+         "actual_year_built": 2004},
         {"parcel_id": "3", "county": "lee", "property_type": "single-family",
-         "just_value": 400000.0, "subdivision_name": "CAPE CORAL UNIT 82"},
+         "just_value": 400000.0, "subdivision_name": "CAPE CORAL UNIT 82",
+         "actual_year_built": 2004},
     ]
     stats = {(s["county"], s["subdivision_name"]): s for s in _aggregate(rows)}
     hb = stats[("collier", "Heritage Bay")]  # alias-folded canonical label, not the raw "HERITAGE BAY"
@@ -40,14 +43,18 @@ def test_aggregate_handles_zero_rows():
 def test_load_parcel_subdivision_rows_maps_cursor_to_dicts():
     conn = MagicMock()
     cur = conn.cursor.return_value.__enter__.return_value
-    cur.description = [("parcel_id",), ("county",), ("property_type",), ("just_value",), ("subdivision_name",)]
-    cur.fetchall.return_value = [("1", "lee", "single-family", 400000.0, "CAPE CORAL UNIT 82")]
+    cur.description = [("parcel_id",), ("county",), ("property_type",), ("just_value",),
+                       ("subdivision_name",), ("actual_year_built",)]
+    # The loader streams a named server-side cursor in fetchmany() pages (a plain fetchall() hit
+    # the pooler statement_timeout, 07/20/2026) - one page of rows, then the empty page that ends it.
+    cur.fetchmany.side_effect = [[("1", "lee", "single-family", 400000.0, "CAPE CORAL UNIT 82", 2004)], []]
 
     rows = _load_parcel_subdivision_rows(conn)
 
     assert rows == [{
         "parcel_id": "1", "county": "lee", "property_type": "single-family",
         "just_value": 400000.0, "subdivision_name": "CAPE CORAL UNIT 82",
+        "actual_year_built": 2004,
     }]
 
 
