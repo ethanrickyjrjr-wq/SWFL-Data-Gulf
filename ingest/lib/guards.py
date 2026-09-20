@@ -299,3 +299,19 @@ def assert_fetch_health(
             f"({ratio:.0%} < {floor:.0%} floor) — detail sweep blocked (WAF/429 suspected); "
             f"aborting before merge"
         )
+
+
+def assert_header_has(header: "Iterable[str]", required: "Iterable[str]", label: str = "") -> None:
+    """Raise ContentContractError when a vendor header lacks a column we look up BY NAME.
+
+    A dict lookup on a renamed column returns None, and None coerces to a NULL cell on every
+    row - row count healthy, every volume guard green, the column silently empty. Redfin's
+    09/15/2026 relabel ("(%)" -> "(DAYS)") only failed loudly in the one pipeline that used
+    SQL column refs. Call this the moment the header is parsed, before the first row."""
+    have = {h.strip() for h in header}
+    missing = [c for c in required if c not in have]
+    if missing:
+        raise ContentContractError(
+            f"{label or 'feed'}: header is missing {missing} - vendor renamed or dropped a column. "
+            f"Header has: {sorted(have)}"
+        )

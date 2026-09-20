@@ -30,6 +30,8 @@ from typing import Iterator
 
 import requests
 
+from ingest.lib.guards import assert_header_has
+
 from .constants import (
     DESK_HERO_REGIONS,
     FL_REGION_SUFFIX,
@@ -156,6 +158,7 @@ def iter_city_rows(url: str = REDFIN_CITY_TRACKER_URL) -> Iterator[dict]:
             if not have_header:
                 header = next(csv.reader([line]))
                 idx = {name.strip(): i for i, name in enumerate(header)}
+                assert_header_has(idx, [*_KEEP, "REGION TYPE"], "redfin_city_swfl")
                 have_header = True
                 continue
             if FL_REGION_SUFFIX not in line:  # fast pre-filter

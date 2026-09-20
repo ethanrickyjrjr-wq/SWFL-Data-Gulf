@@ -27,6 +27,8 @@ from typing import Iterator
 
 import requests
 
+from ingest.lib.guards import assert_header_has
+
 from .constants import HEADLINE_PROPERTY_TYPE, LEE_REGION, MIN_ROWS, REDFIN_COUNTY_TRACKER_URL
 
 # dlt is imported lazily inside the write path so the dry-run / streaming reader
@@ -132,6 +134,7 @@ def iter_lee_rows(url: str = REDFIN_COUNTY_TRACKER_URL) -> Iterator[dict]:
             if not have_header:
                 header = next(csv.reader([line]))
                 idx = {name.strip(): i for i, name in enumerate(header)}
+                assert_header_has(idx, [*_KEEP, "REGION TYPE"], "redfin_lee")
                 have_header = True
                 continue
             if LEE_REGION not in line:  # fast pre-filter
