@@ -11,7 +11,11 @@ jobs:
       - run: |
           echo "host=$(hostname) os=$(uname -sr)"
           echo "egress_ip=$(curl -s https://api.ipify.org)"
-          for u in https://www2.myfloridalicense.com/ https://www.crexi.com/ https://apps.collierclerk.com/ https://www.leepa.org/; do
-            printf "%s -> " "$u"; curl -s -o /dev/null -w "%{http_code}\n" -m 20 -A "Mozilla/5.0" "$u"
+          # crexi answers 403 to ANY bare curl (Cloudflare challenge; only a cleared browser page
+          # passes) - that line is a reachability probe, not a pass/fail. `|| true`: bash -e killed
+          # the first run (35490562992) on a hostname that never existed (apps.collierclerk.com);
+          # the pipeline's real host is cor.collierclerk.com.
+          for u in https://www2.myfloridalicense.com/ https://www.crexi.com/ https://cor.collierclerk.com/ https://www.leepa.org/; do
+            printf "%s -> " "$u"; curl -s -o /dev/null -w "%{http_code}\n" -m 20 -A "Mozilla/5.0" "$u" || true
           done
           command -v python3 && python3 --version

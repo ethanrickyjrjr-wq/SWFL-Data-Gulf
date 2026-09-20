@@ -1,3 +1,30 @@
+## 2026-09-20 (Fable 5.1, session 2) - Fedora runner STOOD UP by the session (not an operator to-do); 5 swfl-local workflows ported to it
+
+Operator: "create a fedora runner so i can stop hearing about this". The handoff had it under
+"Needs Ricky"; it did not - `ssh fedora` works from this machine and `gh api` mints the token.
+
+On the box (no sudo; linger was already yes): actions-runner v2.337.0, tarball sha256 checked
+against the release asset digest; `config.sh --name fedora-swfl-local --labels swfl-local`;
+`~/.config/systemd/user/gha-runner.service` enabled, journal "Listening for Jobs".
+`gh api .../actions/runners` -> fedora-swfl-local, online, [self-hosted, Linux, X64, swfl-local].
+Ingest venv `~/swfl-runner-venv` (uv, cpython 3.12.14, ingest/requirements.txt, crawl4ai-setup):
+crawl4ai-doctor passed, headless Chromium 153 launches natively - no podman fallback needed.
+
+First smoke run 35490562992 FAILED on the workflow, not the runner: egress 71.200.197.70
+(residential), myfloridalicense 200, then bash -e died on `apps.collierclerk.com` - a hostname that
+never existed (NXDOMAIN; the pipeline uses cor.collierclerk.com). Fixed host + `|| true`; crexi's
+403 to bare curl is expected (Cloudflare) and is now commented as a reachability probe.
+
+Scope of "targets swfl-local": 5 workflows + smoke, all fixed in this push.
+  dbpr-sirs-monthly, ingest-crexi-listings: were Windows-only (pwsh, C:\ venv paths) and ACTIVE -
+    they would have landed on the Linux runner and died. Now bash + the Fedora venv.
+  ingest-collier-official-records, leepa-comparable-sales-annual, leepa-parcels-annual: setup-python
+    / pip / crawl4ai-setup steps run only when runner.environment == 'github-hosted' (verified live
+    on docs.github.com contexts page); self-hosted puts the venv on GITHUB_PATH.
+
+NEXT (same session, after this push since GitHub runs workflow code from main): smoke re-run,
+dry_run dispatch of each ported workflow, and only then SWFL_LOCAL_RUNNER_READY=true.
+
 ## 2026-09-20 (Fable 5.1) - Backend-week: B1/B2/B3 PROVED live on main 5a3e4275; Dependabot open alerts 11 -> 0
 
 Dispatched after the push (GitHub runs workflow code from main, so Gate 16 was passed with

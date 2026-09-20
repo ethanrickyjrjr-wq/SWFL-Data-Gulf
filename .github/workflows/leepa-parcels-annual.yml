@@ -31,12 +31,21 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v6
 
+      # Self-hosted (Fedora): setup-python ships Ubuntu builds and crawl4ai-setup's --with-deps is
+      # apt-only, so use the box's pre-provisioned venv instead. runner.environment verified live
+      # 09/20/2026 (docs.github.com .../contexts: `github-hosted` | `self-hosted`).
+      - name: Use pre-provisioned venv (self-hosted)
+        if: runner.environment == 'self-hosted'
+        run: echo "$HOME/swfl-runner-venv/bin" >> "$GITHUB_PATH"
+
       - name: Setup Python
+        if: runner.environment == 'github-hosted'
         uses: actions/setup-python@v6
         with:
           python-version: "3.13"
 
       - name: Install ingest dependencies
+        if: runner.environment == 'github-hosted'
         run: pip install -r ingest/requirements.txt
 
       - name: Run leepa pipeline

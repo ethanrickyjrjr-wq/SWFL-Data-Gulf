@@ -29,11 +29,10 @@ jobs:
       # requirements.txt change:
       #   uv pip install --python "C:\Users\ethan\sirs-runner-venv\Scripts\python.exe" -r ingest/requirements.txt
       #   "C:\Users\ethan\sirs-runner-venv\Scripts\python.exe" -m playwright install chromium
-      VENV_PY: 'C:\Users\ethan\sirs-runner-venv\Scripts\python.exe'
-    defaults:
-      run:
-        # PowerShell on the Windows runner — bash hit a Windows app-execution-alias/WSL stub.
-        shell: pwsh
+      # 09/20/2026: the swfl-local runner is now the Fedora box (fedora-swfl-local); the Windows
+      # runner described above was never re-registered. One shared venv, provisioned per
+      # _ASSISTANT/2026-09-15-fedora-runner-runbook.md section 2 (crawl4ai-setup included).
+      VENV_PY: /home/stanicky/swfl-runner-venv/bin/python
 
     steps:
       - uses: actions/checkout@v4
@@ -51,6 +50,6 @@ jobs:
           # With the var absent, qix.py goes direct. Re-add the line only if this moves back to a
           # cloud runner; the secret is still live.
         run: |
-          $pyArgs = @()
-          if ("${{ github.event.inputs.dry_run }}" -eq "true") { $pyArgs += "--dry-run" }
-          & "$env:VENV_PY" -m ingest.pipelines.dbpr_sirs.pipeline @pyArgs
+          args=()
+          if [ "${{ github.event.inputs.dry_run }}" = "true" ]; then args+=(--dry-run); fi
+          "$VENV_PY" -m ingest.pipelines.dbpr_sirs.pipeline "${args[@]}"

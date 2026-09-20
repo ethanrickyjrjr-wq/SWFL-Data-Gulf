@@ -57,12 +57,10 @@ jobs:
       #   uv pip install --python "C:\Users\ethan\crexi-runner-venv\Scripts\python.exe" -r ingest/requirements.txt
       #   & "C:\Users\ethan\crexi-runner-venv\Scripts\crawl4ai-setup.exe"   # installs crawl4ai's browsers (chromium)
       # (fallback if crawl4ai-setup misbehaves: & "...\Scripts\python.exe" -m playwright install chromium)
-      VENV_PY: 'C:\Users\ethan\crexi-runner-venv\Scripts\python.exe'
-    defaults:
-      run:
-        # PowerShell on the Windows runner — bash resolves `python` to a Windows app-execution-alias
-        # / WSL stub (the exact failure dbpr-sirs-monthly.yml documents and fixed the same way).
-        shell: pwsh
+      # 09/20/2026: the swfl-local runner is now the Fedora box (fedora-swfl-local); the Windows
+      # runner described above was never re-registered. One shared venv, provisioned per
+      # _ASSISTANT/2026-09-15-fedora-runner-runbook.md section 2 (crawl4ai-setup included).
+      VENV_PY: /home/stanicky/swfl-runner-venv/bin/python
 
     steps:
       - uses: actions/checkout@v6
@@ -74,7 +72,7 @@ jobs:
         env:
           CORRIDOR: ${{ inputs.corridor }}
         run: |
-          $pyArgs = @()
-          if ("$env:CORRIDOR" -ne "") { $pyArgs += "--corridor"; $pyArgs += "$env:CORRIDOR" }
-          if ("${{ inputs.dry_run }}" -eq "true") { $pyArgs += "--dry-run" }
-          & "$env:VENV_PY" -m ingest.pipelines.crexi_listings.pipeline @pyArgs
+          args=()
+          if [ -n "$CORRIDOR" ]; then args+=(--corridor "$CORRIDOR"); fi
+          if [ "${{ inputs.dry_run }}" = "true" ]; then args+=(--dry-run); fi
+          "$VENV_PY" -m ingest.pipelines.crexi_listings.pipeline "${args[@]}"
