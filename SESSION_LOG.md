@@ -1,3 +1,38 @@
+## 2026-09-20 (Fable 5.1) - Backend-week plan resumed by fan-out, push 1 of N: Next 16.3.5 (11 alerts), push-guard hole closed, Fedora wiring landed dark, B5 PROVED
+
+Operator: "fedora is registered. bump next.js and fan out to get all this done. you check all the
+work." Audit first: the 09/15 Fable plan (docs/superpowers/plans/2026-09-15-master-brain-backend-week.md)
+stood at 4 done / 2 landed-unproven / 9 never started. Seven agents launched, none allowed to
+commit; every diff below was read and re-tested by the parent before commit.
+
+0bb8255a - next + eslint-config-next 16.2.9 -> 16.3.5. `bunx next build` exit 0, no source change.
+All 11 open Dependabot alerts point at package.json (9 need >=16.2.11, 2 critical need >=16.3.3).
+Residual, not an open alert: @react-email/ui carries its own nested next 16.2.6 (dev preview tool).
+`bun run lint` crashes walking ingest/.venv (missing ignore) - pre-existing, not chased here.
+
+9b7b1563 - plan D2. check-no-unapproved-push.mjs now refuses OPERATOR_APPROVED_PUSH=1 when
+CLAUDE_CODE_REMOTE=true or CI=true (both vendor-documented). Audit found the routine pushed main on
+TWO Mondays, 09/07 (2ed6b157, 976a1e05 - its own message said "read-only") and 09/14 (a2ab2285,
+34515f89). The plan's TTY clause was measured: isTTY is undefined in an ATTENDED session too, so it
+would have blocked the operator's own push - not shipped. 5 new tests, red then green. STOPGAP
+ONLY: GitHub MCP push tools, gh api, and editing the hook all still bypass it; the wall is the
+GitHub ruleset bypass list (operator). Same token-string shape sits unfixed in
+check-no-apify-actor-run / check-no-paid-dispatch / check-no-new-paid-surface. Routine prompt NOT
+yet edited.
+
+2aa4c19d - plan C1/C2. runner-smoke.yml + SWFL_LOCAL_RUNNER_READY gate on collier-official-records,
+leepa-parcels-annual, leepa-comparable-sales-annual. Variable unset = ubuntu-latest = today. Watch
+manifest regenerated; 85/85 workflow tests. NOT FLIPPED and must not be yet: `gh api
+.../actions/runners` returns total_count 0 and ssh fedora shows no runner dir, service or listener -
+GitHub does not see the registration the operator reported. Also unproven on Fedora: setup-python
+(Ubuntu builds) and crawl4ai-setup --with-deps (apt-get) in the Collier workflow.
+
+B5 PROVED - dispatched home-values-investor-monthly (run 35488759008): success, and dabcbc5c
+"home-values + investor-zip monthly rebuild 2026-09-20" landed on main. First green after 3/3 GH013.
+
+Still running at this push: B1 redfin header, B2 usgs retry, B3 qcew, B4 dbpr staging (diagnosis
+only, no DB write), D1 staleness helper. E1 sectioned to a handoff.
+
 ## 2026-09-18 (Opus 5) - Found the single root under the 60-run chain red streak: zero Anthropic credit, all 41 packs, brains now serving EMPTY. Corrected the check that understated it as "four legs"
 
 Operator: "I DON'T KNOW WHAT IS GOING ON ANYMORE, SO YOU WILL HAVE TO 'FIX'....AGAIN AND THEN WE
