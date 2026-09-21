@@ -1,3 +1,17 @@
+## 2026-09-21 (Fable 5.1) - status pass: database REST layer DOWN (PGRST002); listing workflow's "proven 07/01" claim corrected
+
+His ask: where are we, are pipes working, forget Anthropic credits. No code behavior changed.
+LIVE: `node scripts/check.mjs list` = 503 PGRST002 4 of 4 tries (~15:30 UTC). Same string as the 07/21 outage whose real
+cause was the egress throttle. Today's red runs are all database timeouts: Project-feed detection 35617620735,
+listing-week 35615531541, SWFL Inc 35614476420 (Storage 544), DB metrics scrape x3 (504), and the 10:01 UTC nightly
+rebuild (cre-swfl "schema cache"; spend-guard sum_api_spend failed OPEN on the same error). Smoke - Prod red x3 since
+04:37 UTC (green 09/20 18:26) - same window, cause not proven. Nightly chain otherwise red only on the parked legs.
+DOM fix confirmed live in served bytes (`median_dom_yoy_days`); its check could not be closed - ledger unreachable.
+CHANGED: listing-lifecycle-daily.yml header + run-step comment and the 09/15 plan line no longer claim the scrape
+path was proven from runners on 07/01 - run 28496497637's [done] line says source=api. Scratchpad has the full state.
+Next: he reads the Supabase Usage page (daily egress rate); when REST is back, close redfin_dom_yoy_unit_days_not_pct
+and re-run the four database-timeout jobs.
+
 ## 2026-09-20 (Fable 5.1, session 5, part 2) - delete-guard bytecode-only exemption INSTALLED (corrects the entry below)
 
 He left auto mode and approved the edit to ~/.claude/hooks/destructive-guard.sh (global, outside this repo). Proof:

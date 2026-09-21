@@ -133,7 +133,7 @@ git commit -m "fix(nightly-chain): rebuild runs on whatever landed; row gate is 
 
 ### Task A2: Listing spine back to `--source scrape`
 
-`listing-lifecycle-daily.yml`'s run step passes no `--source`, and `pipeline.py:361` defaults to `api` (SteadyAPI). The scrape path (`extract.py`, host from `LISTING_LIFECYCLE_BASE_URL`) ran clean from GitHub runners on 07/01/2026 (Lee 21,889 rows, Collier 8,120, zero 403s). Lost on revert: days-on-market and sold events from the SteadyAPI tax probe; Lee sold median already comes from LeePA deeds and Collier's from Redfin county monthly. Reuse terms for scraping the brokerage site are unrecorded anywhere in the repo; Ricky already decided the revert, so note it once in the SESSION_LOG and proceed.
+`listing-lifecycle-daily.yml`'s run step passes no `--source`, and `pipeline.py:361` defaults to `api` (SteadyAPI). The scrape path (`extract.py`, host from `LISTING_LIFECYCLE_BASE_URL`) ran clean from GitHub runners on 07/01/2026 (Lee 21,889 rows, Collier 8,120, zero 403s). [CORRECTION 09/21/2026: FALSE - run 28496497637's own log says `source=api`; those rows came from SteadyAPI. The scrape path has never run green in CI.] Lost on revert: days-on-market and sold events from the SteadyAPI tax probe; Lee sold median already comes from LeePA deeds and Collier's from Redfin county monthly. Reuse terms for scraping the brokerage site are unrecorded anywhere in the repo; Ricky already decided the revert, so note it once in the SESSION_LOG and proceed.
 
 **Files:**
 - Modify: `.github/workflows/listing-lifecycle-daily.yml` (the `Run listing-lifecycle pipeline` step, ~line 118)

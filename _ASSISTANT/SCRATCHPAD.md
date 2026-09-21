@@ -1,3 +1,26 @@
+## 2026-09-21 (Fable 5.1) — OPERATOR: "Where are we at with everything? Forget about getting Anthropic credits. Are pipes working? Have we fixed the issues?"
+
+STANDING (again, his words): forget Anthropic credits. The city-pulse leg is parked, never a billing ask.
+LIVE STATE 09/21 ~15:30 UTC, all from commands this session:
+- THE DATABASE REST LAYER IS DOWN RIGHT NOW. `node scripts/check.mjs list` = 503 PGRST002 "Could not query the
+  database for the schema cache", 4 of 4 tries. Same string as the 07/21 outage, whose real cause was the EGRESS
+  THROTTLE (311% of plan), not a wedged cache - a restart is NOT the first move; the Usage page's DAILY egress rate
+  is. Today's casualties, all database timeouts, none a code bug: Project-feed change detection (PGRST002),
+  listing-week-weekly (statement timeout), SWFL Inc weekly + city-pulse persist (Storage 544 DatabaseTimeout),
+  Supabase DB metrics scrape 3x (504), doctor marks leepa TIMEOUT. Smoke - Prod red 3x since 04:37 UTC after green
+  09/20 18:26 (ZIP summary lost its census.gov line; /p/example-market-overview 404 after 15.5s) - consistent with
+  the same outage, NOT yet proven. /charts is printing "Data unavailable" to visitors. Vendor status page: only an
+  unrelated JWT incident, so it is OUR instance. I cannot see the Usage page; he can.
+- Nightly chain: still red every run. Legs red = listings x3 (PARKED by his 09/15 word, expected) + city pulse
+  (credit wall, parked) + the row gate that counts them. Rebuild leg red on "hard HOLD". live-search green.
+- I RE-DERIVED THE LISTING SECRET FINDING (~10 tool calls) before reaching the 09/15 "Do NOT chase" entry 350 lines
+  down. One new fact came out of it: the workflow header's "proven clean 07/01 (runs 28495956344 / 28496497637)"
+  is FALSE for the scrape path - run 28496497637's own [done] line says source=api. The scrape path has never
+  run green in CI. Header corrected this session.
+- Days-on-market fix IS LIVE: served housing bytes carry `median_dom_yoy_days`. Check
+  redfin_dom_yoy_unit_days_not_pct could not be closed - the ledger is behind the dead REST layer. Close it when up.
+- Doctor (last good run): 2 red / 26 yellow / 49 green of 77. Reds = leepa (timeout) + listing_lifecycle (parked).
+
 ## 2026-09-20 (Fable 5.1, session 5) — OPERATOR: "Fix the guard" — the census_vip / fred_g17 delete took a third session
 
 Folders are GONE now (16 stale .pyc, nothing tracked; deleted file-by-file after his "Confirmed" plus the exact
