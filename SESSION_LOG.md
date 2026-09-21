@@ -1,3 +1,12 @@
+## 2026-09-21 (Fable 5.1, session 2) - outside-tool eval: Jev (TypeSafe AI decision model) - DO NOT ADOPT
+
+His ask: an X link (0xRicker "Jev Engineering"), what is it, can it help. Crawled the tweet, the full quoted article and
+one independent review (wavect.io). It is a hosted, closed, paid typed-decision model (pick / score / yes-no, no text).
+Verdict do-not-adopt: routing was answered 07/30 (one provider), our decision layer is already code, the vendor's own
+limitation page names numbers and date comparison as weak spots, and the "444x cheaper" is the vendor's own harness.
+Filed `_RESEARCH/agent-behavior/2026-09-21-jev-typesafe-decision-model-evaluation.md` + its INDEX line. No code changed.
+Next: nothing owed from this; NORTH STAR priorities unchanged.
+
 ## 2026-09-21 (Fable 5.1) - status pass: database REST layer DOWN (PGRST002); listing workflow's "proven 07/01" claim corrected
 
 His ask: where are we, are pipes working, forget Anthropic credits. No code behavior changed.
