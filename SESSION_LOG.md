@@ -1,3 +1,8 @@
+## 2026-09-20 (Fable 5.1, session 5, part 2) - delete-guard bytecode-only exemption INSTALLED (corrects the entry below)
+
+He left auto mode and approved the edit to ~/.claude/hooks/destructive-guard.sh (global, outside this repo). Proof:
+`bash ~/.claude/hooks/destructive-guard.test.sh` prints 9 ok, exit 0 (was 2 FAIL before the patch). Nothing next on this.
+
 ## 2026-09-20 (Fable 5.1, session 5) - census_vip / fred_g17 test folders deleted; the delete-guard fix is written but NOT installed
 
 Both folders held only stale __pycache__ bytecode (16 .pyc, nothing tracked), so there is no repo diff from the delete itself.

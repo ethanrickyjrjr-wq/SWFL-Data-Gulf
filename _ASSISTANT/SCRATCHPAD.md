@@ -10,6 +10,9 @@ filesystem-inspected, fails closed) but NOT INSTALLED: the auto-mode permission 
 hook as self-modification, including an inactive .proposed copy. The failing test IS on disk:
 ~/.claude/hooks/destructive-guard.test.sh (2 red: the bytecode-only cases; 7 green). The patch text is in the
 session-5 reply. Installing it needs his hand or a permission rule from him - not a rewrite from me.
+UPDATE same session: INSTALLED. He switched the session out of auto mode and approved the edit; the test now
+prints 9 ok, exit 0. STANDING: an auto-mode "Self-Modification" denial is cleared by him leaving auto mode and
+approving the prompt - say that in the FIRST reply, never hand him a patch to paste into a file he cannot find.
 
 ## 2026-09-20 (Fable 5.1, session 4) — OPERATOR: "How the fuck are we still getting shit wrong!!!!?????"
 
