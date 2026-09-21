@@ -1,3 +1,10 @@
+## 2026-09-20 (Fable 5.1, session 5) - census_vip / fred_g17 test folders deleted; the delete-guard fix is written but NOT installed
+
+Both folders held only stale __pycache__ bytecode (16 .pyc, nothing tracked), so there is no repo diff from the delete itself.
+His `!` lines arrive as chat in his client and never run. The global destructive guard cannot record a confirmation; the
+bytecode-only exemption for it is blocked by the permission classifier as self-modification. Failing test on disk at
+~/.claude/hooks/destructive-guard.test.sh. Next: he installs the patch or grants the permission. Scratchpad has the detail.
+
 ## 2026-09-20 (Fable 5.1, session 4, part 4) - the Lee ArcGIS freeze was ALREADY FOUND on 07/11/2026 and never wired into the registry
 
 The four-lane gate forced the research search I had skipped. docs/handoff/2026-07-11-reliable-sources-findings.md:251 and

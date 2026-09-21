@@ -1,3 +1,16 @@
+## 2026-09-20 (Fable 5.1, session 5) — OPERATOR: "Fix the guard" — the census_vip / fred_g17 delete took a third session
+
+Folders are GONE now (16 stale .pyc, nothing tracked; deleted file-by-file after his "Confirmed" plus the exact
+command typed three times). Two facts that cost the rounds, both STANDING:
+(1) In the client he is on, a line starting with `!` arrives as a CHAT MESSAGE - it does not run. Three tries, zero
+executions. Stop handing him `! <command>` lines as the escape hatch; it is not one there.
+(2) ~/.claude/hooks/destructive-guard.sh has no way to record a confirmation, so "let them confirm" is a dead end:
+the retry is blocked identically. Fix written (exempt a LONE recursive delete whose targets hold only *.pyc/*.pyo,
+filesystem-inspected, fails closed) but NOT INSTALLED: the auto-mode permission classifier denies my edit to the
+hook as self-modification, including an inactive .proposed copy. The failing test IS on disk:
+~/.claude/hooks/destructive-guard.test.sh (2 red: the bytecode-only cases; 7 green). The patch text is in the
+session-5 reply. Installing it needs his hand or a permission rule from him - not a rewrite from me.
+
 ## 2026-09-20 (Fable 5.1, session 4) — OPERATOR: "How the fuck are we still getting shit wrong!!!!?????"
 
 Raised right after he ran the delete line I handed him and after the Lee-permits verdict. TWO wrongs, both ours:
