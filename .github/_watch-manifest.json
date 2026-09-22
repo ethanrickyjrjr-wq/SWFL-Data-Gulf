@@ -290,6 +290,16 @@
     "disabled": false
   },
   {
+    "name": "FDIC BankFind annual",
+    "file": "fdic-bankfind-annual.yml",
+    "scheduled": true,
+    "timeout_minutes": 20,
+    "cancel_in_progress": false,
+    "paid": false,
+    "should_be_dark": false,
+    "disabled": null
+  },
+  {
     "name": "FDLE crime quarterly",
     "file": "fdle-crime-quarterly.yml",
     "scheduled": true,

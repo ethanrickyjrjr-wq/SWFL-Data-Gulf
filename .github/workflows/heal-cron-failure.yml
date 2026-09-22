@@ -35,6 +35,7 @@ on:
       - "Deliverables retention sweep (daily)"
       - "Email Scheduler"
       - "FAF5 freight annual (S3 parquet cold lane)"
+      - "FDIC BankFind annual"
       - "FDLE crime quarterly"
       - "FDOT AADT annual"
       - "FEMA NFIP quarterly"
