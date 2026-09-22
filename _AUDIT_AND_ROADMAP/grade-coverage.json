@@ -1,14 +1,14 @@
 {
-  "generated_at": "2026-08-30",
+  "generated_at": "2026-09-22",
   "spec": "docs/superpowers/plans/2026-06-03-row-tier/sweep-spec.md",
   "note": "Regenerable artifact — never hand-edit. Regenerate: bun refinery/tools/grade-config-sweep.mts. Adjudications live in the `checks` ledger, not here.",
   "summary": {
     "unregistered": 0,
     "invalid-polarity": 0,
     "row-candidate": 46,
-    "gradeable": 208,
+    "gradeable": 212,
     "reviewed-display": 49,
-    "moat-fuel": 11,
+    "moat-fuel": 13,
     "needs-window": 23,
     "backtest_clean": 11
   },
@@ -2023,6 +2023,132 @@
         "category": "environmental",
         "value_type": "ratio",
         "window_days": 180,
+        "reviewed_non_directional": false
+      },
+      "gradeable": true,
+      "reason": null,
+      "backtest_clean": false
+    },
+    {
+      "slug": "fdic_collier_bank_branches",
+      "concept_id": "fdic_collier_bank_branches",
+      "bucket": "moat-fuel",
+      "gateVector": {
+        "slug": "fdic_collier_bank_branches",
+        "concept_id": "fdic_collier_bank_branches",
+        "registered": true,
+        "polarity_state": "none",
+        "window_ok": true,
+        "numeric_ok": true,
+        "raw_polarity": "none",
+        "category": "macro",
+        "value_type": "count",
+        "window_days": 90,
+        "reviewed_non_directional": false
+      },
+      "gradeable": false,
+      "reason": "no direction_polarity declared (slug-only, never inherited)",
+      "backtest_clean": null
+    },
+    {
+      "slug": "fdic_collier_branch_deposits_usd",
+      "concept_id": "fdic_collier_branch_deposits_usd",
+      "bucket": "gradeable",
+      "gateVector": {
+        "slug": "fdic_collier_branch_deposits_usd",
+        "concept_id": "fdic_collier_branch_deposits_usd",
+        "registered": true,
+        "polarity_state": "valid_directional",
+        "window_ok": true,
+        "numeric_ok": true,
+        "raw_polarity": "higher_is_bullish",
+        "category": "macro",
+        "value_type": "currency",
+        "window_days": 90,
+        "reviewed_non_directional": false
+      },
+      "gradeable": true,
+      "reason": null,
+      "backtest_clean": false
+    },
+    {
+      "slug": "fdic_collier_branch_deposits_yoy_pct",
+      "concept_id": "fdic_collier_branch_deposits_yoy_pct",
+      "bucket": "gradeable",
+      "gateVector": {
+        "slug": "fdic_collier_branch_deposits_yoy_pct",
+        "concept_id": "fdic_collier_branch_deposits_yoy_pct",
+        "registered": true,
+        "polarity_state": "valid_directional",
+        "window_ok": true,
+        "numeric_ok": true,
+        "raw_polarity": "higher_is_bullish",
+        "category": "macro",
+        "value_type": "percent_change",
+        "window_days": 90,
+        "reviewed_non_directional": false
+      },
+      "gradeable": true,
+      "reason": null,
+      "backtest_clean": false
+    },
+    {
+      "slug": "fdic_lee_bank_branches",
+      "concept_id": "fdic_lee_bank_branches",
+      "bucket": "moat-fuel",
+      "gateVector": {
+        "slug": "fdic_lee_bank_branches",
+        "concept_id": "fdic_lee_bank_branches",
+        "registered": true,
+        "polarity_state": "none",
+        "window_ok": true,
+        "numeric_ok": true,
+        "raw_polarity": "none",
+        "category": "macro",
+        "value_type": "count",
+        "window_days": 90,
+        "reviewed_non_directional": false
+      },
+      "gradeable": false,
+      "reason": "no direction_polarity declared (slug-only, never inherited)",
+      "backtest_clean": null
+    },
+    {
+      "slug": "fdic_lee_branch_deposits_usd",
+      "concept_id": "fdic_lee_branch_deposits_usd",
+      "bucket": "gradeable",
+      "gateVector": {
+        "slug": "fdic_lee_branch_deposits_usd",
+        "concept_id": "fdic_lee_branch_deposits_usd",
+        "registered": true,
+        "polarity_state": "valid_directional",
+        "window_ok": true,
+        "numeric_ok": true,
+        "raw_polarity": "higher_is_bullish",
+        "category": "macro",
+        "value_type": "currency",
+        "window_days": 90,
+        "reviewed_non_directional": false
+      },
+      "gradeable": true,
+      "reason": null,
+      "backtest_clean": false
+    },
+    {
+      "slug": "fdic_lee_branch_deposits_yoy_pct",
+      "concept_id": "fdic_lee_branch_deposits_yoy_pct",
+      "bucket": "gradeable",
+      "gateVector": {
+        "slug": "fdic_lee_branch_deposits_yoy_pct",
+        "concept_id": "fdic_lee_branch_deposits_yoy_pct",
+        "registered": true,
+        "polarity_state": "valid_directional",
+        "window_ok": true,
+        "numeric_ok": true,
+        "raw_polarity": "higher_is_bullish",
+        "category": "macro",
+        "value_type": "percent_change",
+        "window_days": 90,
         "reviewed_non_directional": false
       },
       "gradeable": true,
