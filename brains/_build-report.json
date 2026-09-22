@@ -1,8 +1,8 @@
 {
   "target": "master",
   "timestamps": {
-    "started": "2026-09-22T04:36:50.822Z",
-    "finished": "2026-09-22T04:43:42.180Z"
+    "started": "2026-09-22T09:37:39.078Z",
+    "finished": "2026-09-22T09:41:58.649Z"
   },
   "source": "live",
   "outcomes": [
@@ -42,7 +42,7 @@
       "packId": "macro-us",
       "status": "missing",
       "failureClass": "deterministic",
-      "reason": "400 {\"type\":\"error\",\"error\":{\"type\":\"invalid_request_error\",\"message\":\"Your credit balance is too low to access the Anthropic API. Please go to Plans & Billing to upgrade or purchase credits.\"},\"request_id\":\"req_011CfHrw4xmSncMjeVDBsmUa\"}",
+      "reason": "400 {\"type\":\"error\",\"error\":{\"type\":\"invalid_request_error\",\"message\":\"Your credit balance is too low to access the Anthropic API. Please go to Plans & Billing to upgrade or purchase credits.\"},\"request_id\":\"req_011CfJFhmtfT5MEjEaNF1Dx5\"}",
       "lastGoodRefinedAt": "2026-07-30T06:59:47Z",
       "written": false
     },
@@ -138,11 +138,10 @@
     },
     {
       "packId": "city-pulse-swfl",
-      "status": "degraded",
+      "status": "missing",
       "failureClass": "transient",
       "reason": "city-pulse-source: data_lake.city_pulse fetch failed — Could not query the database for the schema cache. Retrying.",
       "lastGoodRefinedAt": "2026-09-20T09:23:49Z",
-      "version": 75,
       "written": false
     },
     {
@@ -161,39 +160,8 @@
     },
     {
       "packId": "freshness-pulse",
-      "status": "built",
-      "version": 50,
-      "written": true,
-      "brainOutput": {
-        "brain_id": "freshness-pulse",
-        "version": 50,
-        "refined_at": "2026-09-22T04:42:47Z",
-        "expires": "2026-09-23T04:42:47Z",
-        "ttl_seconds": 86400,
-        "direction": "neutral",
-        "magnitude": 0,
-        "drivers": [],
-        "overrides": [],
-        "conclusion": "No fresh sourced snapshot available yet — the daily freshness engine has not landed a verified, in-band number carrying a real source.",
-        "key_metrics": [],
-        "detail_tables": [],
-        "caveats": [
-          "The sourced freshness layer is live but holds no verified rows yet (or every candidate was a held anomaly / unsourced number, both excluded by design)."
-        ],
-        "contradicts": [],
-        "confidence": 0.8,
-        "joint_integrity": 1,
-        "confidence_dispersion": 0,
-        "chain_depth": 0,
-        "trust_tier": 2,
-        "upstream_count": 0,
-        "relevance": {
-          "decay_curve": "weeks",
-          "half_life_hours": 720,
-          "computed_at": "2026-09-22T04:42:47Z"
-        },
-        "exogenous_signals": []
-      }
+      "status": "skipped-fresh",
+      "written": false
     },
     {
       "packId": "seller-stress-swfl",
@@ -252,7 +220,10 @@
     },
     {
       "packId": "active-listings-swfl",
-      "status": "skipped-fresh",
+      "status": "missing",
+      "failureClass": "transient",
+      "reason": "active-listings-residential-source: listing_active_stats fetch failed — Could not query the database for the schema cache. Retrying.",
+      "lastGoodRefinedAt": "2026-09-20T09:23:53Z",
       "written": false
     },
     {
