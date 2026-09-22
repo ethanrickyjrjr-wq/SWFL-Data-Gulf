@@ -57,6 +57,7 @@ is read from the actual pipeline code, not the registry.
 | live_search_daily_mortgage | API + Anthropic web_search | data_lake.daily_truth |
 | bls_laus | API (BLS) | data_lake.bls_laus |
 | bls_qcew | CSV (BLS) | data_lake.bls_qcew |
+| fdic_bankfind | API (FDIC BankFind, no key) | data_lake.fdic_sod + fdic_locations + fdic_institutions (+ view fdic_sod_county_year_v) |
 | bls_oews_swfl | API (BLS) | data_lake.bls_oews_swfl |
 | census_cbp | API (Census) | data_lake.census_cbp_fl |
 | census_acs | API (Census acs5) | data_lake.census_acs_zcta |

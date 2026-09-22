@@ -670,6 +670,37 @@ pipelines:
         source_url: "https://www.bls.gov/cew/"
         source_label: "BLS QCEW"
 
+  - name: fdic_bankfind
+    workflow: fdic-bankfind-annual.yml
+    consuming_pack: macro-swfl
+    lane: tier-2
+    cadence_days: 365
+    tolerance_multiplier: 1.5
+    dlt_schema_name: fdic_bankfind
+    expected_rows_min: 9683 # 90% of 10,759 SOD rows confirmed 09/22/2026
+    count_table: data_lake.fdic_sod # dlt schema_name != table name; sibling tables fdic_locations (298) + fdic_institutions (199)
+    # FDIC BankFind Suite API (https://api.fdic.gov/banks — banks.data.fdic.gov 301s here), NO KEY.
+    # Three datasets, every vendor field kept as-written (lowercased) + ingested_at:
+    #   fdic_sod (merge on id=YEAR_CERT_BRNUM) — Summary of Deposits, one row per branch per year,
+    #     81 fields, 1994-2026, deposits $000s as of June 30; filtered on STCNTYBR (BRANCH county —
+    #     STCNTY is the bank's HQ county and returns 26 rows instead of 160 for Lee 2025).
+    #   fdic_locations (guarded replace, floor 268) — current branch directory, 38 fields.
+    #   fdic_institutions (guarded replace, floor 178) — every bank (CERT) seen in either, 134 fields.
+    # Consumer reads the SQL rollup data_lake.fdic_sod_county_year_v (docs/sql/20260922_...).
+    # SOD publishes once a year (~October); monthly cron retry is idempotent.
+    # First run 09/22/2026 (local): 10,759 + 298 + 199 rows. Spec:
+    # docs/superpowers/specs/2026-09-22-fdic-bankfind-design.md
+    source_scope:
+      confirmed_total:
+        value: 10759
+        as_of: "09/22/2026"
+        source: "our ingest (fdic_sod, Lee 6,160 + Collier 4,297 + Hendry 302, all years 1994-2026)"
+      source_ceiling:
+        summary: "Same API, unpulled: /history (branch open/close/merger events), /failures, /summary (state aggregates), /demographics, /financials (quarterly call-report ratios per CERT). All keyless, same JSON shape, same paging (limit max 10,000)."
+        as_of: "09/22/2026"
+        source_url: "https://banks.data.fdic.gov/docs/"
+        source_label: "FDIC BankFind Suite API"
+
   - name: bls_oews_swfl
     workflow: bls-oews-annual.yml
     consuming_pack: labor-demand-swfl

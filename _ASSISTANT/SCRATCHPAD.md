@@ -9797,3 +9797,8 @@ real human action; audit how many of the other 9 weekly-dep-scan runs since 07/1
 ## 2026-09-18 — finish and push the integrated research work
 
 Operator rejected stopping at local commit d5aa3056 with refinery typecheck and documentation reachability still red. RESOLVED locally 09/18: both typechecks pass; 1,820 refinery and 24 Python tests pass; missing prior-month values and malformed FHFA events have regression tests; documentation reachability is below the unchanged baseline. Existing planning/research edits are preserved in the shipping commit. SESSION_LOG.md records the safe-push receipt and remaining activation/scoring boundaries.
+
+## 2026-09-22 (Fable 5.1) — OPERATOR: "whichever you have an api key to and can actually produce a working pipeline with all the information"
+Context: he asked "what data are we missing that is easy to bring in"; the four-lane answer ranked FDLE city/offense detail, FEMA NFIP rate live, FRED 15-yr, FDIC branch deposits. His pick criterion: a key we HOLD + the source's FULL scope, not a partial. Chosen: FDIC BankFind (needs no key at all; 3 endpoints verified live 08/02 and again 09/22 at api.fdic.gov).
+BUILT + LOADED 09/22: data_lake.fdic_sod 10,759 rows (1994-2026) / fdic_locations 298 / fdic_institutions 199; view fdic_sod_county_year_v; macro-swfl brain rebuilt v40 with the deposits fact + 6 metrics. Found on the way: the 08/02 scout's /sod filter used STCNTY (bank HQ county) instead of STCNTYBR (branch county) — 26 rows vs 160 for Lee 2025; corrected in the scout + INDEX, test-locked.
+Remaining: GHA runner dry-run after push → close fdic_bankfind_live_verify. The other three cheap items (FDLE detail, FEMA rate live, FRED 15-yr) stay unbuilt until he picks.

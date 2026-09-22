@@ -1,0 +1,47 @@
+name: FDIC BankFind annual
+
+on:
+  schedule:
+    # 11:00 UTC on the 20th of every month. The Summary of Deposits is annual (as-of June 30,
+    # published ~October) but the branch/institution directories move continuously and a monthly
+    # idempotent retry (merge on SOD, guarded replace on the directories) keeps one failed GHA
+    # run from orphaning the pipeline for a year. Same shape as census-cbp-annual.yml.
+    - cron: "0 11 20 * *"
+  workflow_dispatch:
+    inputs:
+      dry_run:
+        description: "Dry run — fetch and validate only; skip dlt write"
+        required: false
+        default: "false"
+
+permissions:
+  contents: read
+
+jobs:
+  ingest:
+    if: ${{ vars.ENGINE_ENABLED != 'false' || github.event_name == 'workflow_dispatch' }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v6
+
+      - name: Setup Python
+        uses: actions/setup-python@v6
+        with:
+          python-version: "3.13"
+
+      - name: Install ingest dependencies
+        run: pip install -r ingest/requirements.txt
+
+      - name: Run fdic_bankfind pipeline
+        env:
+          SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+          SUPABASE_SERVICE_KEY: ${{ secrets.SUPABASE_SERVICE_KEY }}
+          DESTINATION__POSTGRES__CREDENTIALS: ${{ secrets.DESTINATION__POSTGRES__CREDENTIALS }}
+        run: |
+          if [ "${{ github.event.inputs.dry_run }}" = "true" ]; then
+            python -m ingest.pipelines.fdic_bankfind.pipeline --dry-run
+          else
+            python -m ingest.pipelines.fdic_bankfind.pipeline
+          fi

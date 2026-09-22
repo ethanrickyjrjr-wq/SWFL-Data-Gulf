@@ -5424,6 +5424,168 @@
       "status": "active",
       "scope_note": "Count of investor cards that also carry the flood-adjusted cap rate - i.e. ZIPs env-swfl surfaces. Sentinel exposing the moat-metric coverage gap (flood overlay reaches only env's top-AAL ZIPs, not all value+rent ZIPs)."
     },
+    "fdic_lee_branch_deposits_usd": {
+      "id": "fdic_lee_branch_deposits_usd",
+      "grade": {
+        "direction_polarity": "higher_is_bullish"
+      },
+      "prefLabel": "Lee County Bank Branch Deposits",
+      "altLabels": [
+        "Lee County bank deposits",
+        "Lee FDIC Summary of Deposits"
+      ],
+      "raw_slugs": [
+        "fdic_lee_branch_deposits_usd",
+        "lee_branch_deposits_usd"
+      ],
+      "category": "macro",
+      "domain": [
+        "macro"
+      ],
+      "source_brains": [
+        "macro-swfl"
+      ],
+      "value_type": "currency",
+      "unit": "USD",
+      "direction_concept": "qual_metric_trajectory",
+      "status": "active",
+      "scope_note": "Sum of FDIC Summary of Deposits branch deposits for every bank branch located in Lee County (branch county STCNTYBR=12071), as of June 30 of the served year. Vendor reports $000s; served in whole USD. Annual; source data_lake.fdic_sod_county_year_v."
+    },
+    "fdic_lee_branch_deposits_yoy_pct": {
+      "id": "fdic_lee_branch_deposits_yoy_pct",
+      "grade": {
+        "direction_polarity": "higher_is_bullish"
+      },
+      "prefLabel": "Lee County Bank Branch Deposits YoY",
+      "altLabels": [
+        "Lee County deposits YoY",
+        "Lee deposit growth"
+      ],
+      "raw_slugs": [
+        "fdic_lee_branch_deposits_yoy_pct",
+        "lee_branch_deposits_yoy_pct"
+      ],
+      "category": "macro",
+      "domain": [
+        "macro"
+      ],
+      "source_brains": [
+        "macro-swfl"
+      ],
+      "value_type": "percent_change",
+      "unit": "%",
+      "direction_concept": "qual_metric_trajectory",
+      "status": "active",
+      "scope_note": "Year-over-year percent change in Lee County bank branch deposits (FDIC Summary of Deposits, June 30 to June 30). Direction threshold ±0.5%."
+    },
+    "fdic_lee_bank_branches": {
+      "id": "fdic_lee_bank_branches",
+      "grade": {
+        "direction_polarity": "none"
+      },
+      "prefLabel": "Lee County Bank Branches",
+      "altLabels": [
+        "Lee County branch count",
+        "Lee bank branches"
+      ],
+      "raw_slugs": [
+        "fdic_lee_bank_branches",
+        "lee_bank_branches"
+      ],
+      "category": "macro",
+      "domain": [
+        "macro"
+      ],
+      "source_brains": [
+        "macro-swfl"
+      ],
+      "value_type": "count",
+      "unit": "branches",
+      "direction_concept": "qual_metric_trajectory",
+      "status": "active",
+      "scope_note": "Count of FDIC-insured bank branches located in Lee County that filed a Summary of Deposits for the served year. Context for the deposit total, not a directional signal."
+    },
+    "fdic_collier_branch_deposits_usd": {
+      "id": "fdic_collier_branch_deposits_usd",
+      "grade": {
+        "direction_polarity": "higher_is_bullish"
+      },
+      "prefLabel": "Collier County Bank Branch Deposits",
+      "altLabels": [
+        "Collier County bank deposits",
+        "Collier FDIC Summary of Deposits"
+      ],
+      "raw_slugs": [
+        "fdic_collier_branch_deposits_usd",
+        "collier_branch_deposits_usd"
+      ],
+      "category": "macro",
+      "domain": [
+        "macro"
+      ],
+      "source_brains": [
+        "macro-swfl"
+      ],
+      "value_type": "currency",
+      "unit": "USD",
+      "direction_concept": "qual_metric_trajectory",
+      "status": "active",
+      "scope_note": "Sum of FDIC Summary of Deposits branch deposits for every bank branch located in Collier County (branch county STCNTYBR=12021), as of June 30 of the served year. Vendor reports $000s; served in whole USD. Annual; source data_lake.fdic_sod_county_year_v."
+    },
+    "fdic_collier_branch_deposits_yoy_pct": {
+      "id": "fdic_collier_branch_deposits_yoy_pct",
+      "grade": {
+        "direction_polarity": "higher_is_bullish"
+      },
+      "prefLabel": "Collier County Bank Branch Deposits YoY",
+      "altLabels": [
+        "Collier County deposits YoY",
+        "Collier deposit growth"
+      ],
+      "raw_slugs": [
+        "fdic_collier_branch_deposits_yoy_pct",
+        "collier_branch_deposits_yoy_pct"
+      ],
+      "category": "macro",
+      "domain": [
+        "macro"
+      ],
+      "source_brains": [
+        "macro-swfl"
+      ],
+      "value_type": "percent_change",
+      "unit": "%",
+      "direction_concept": "qual_metric_trajectory",
+      "status": "active",
+      "scope_note": "Year-over-year percent change in Collier County bank branch deposits (FDIC Summary of Deposits, June 30 to June 30). Direction threshold ±0.5%."
+    },
+    "fdic_collier_bank_branches": {
+      "id": "fdic_collier_bank_branches",
+      "grade": {
+        "direction_polarity": "none"
+      },
+      "prefLabel": "Collier County Bank Branches",
+      "altLabels": [
+        "Collier County branch count",
+        "Collier bank branches"
+      ],
+      "raw_slugs": [
+        "fdic_collier_bank_branches",
+        "collier_bank_branches"
+      ],
+      "category": "macro",
+      "domain": [
+        "macro"
+      ],
+      "source_brains": [
+        "macro-swfl"
+      ],
+      "value_type": "count",
+      "unit": "branches",
+      "direction_concept": "qual_metric_trajectory",
+      "status": "active",
+      "scope_note": "Count of FDIC-insured bank branches located in Collier County that filed a Summary of Deposits for the served year. Context for the deposit total, not a directional signal."
+    },
     "laus_lee_unemployment_rate": {
       "id": "laus_lee_unemployment_rate",
       "grade": {

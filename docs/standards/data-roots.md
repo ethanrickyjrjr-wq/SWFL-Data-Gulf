@@ -1617,6 +1617,15 @@ THE-GOAL tiers: leaf **Reporter** brains → **master** synthesizer → conversa
 - ROUTES: `data_lake.bls_qcew` → `refinery/sources/bls-qcew-source.mts` (3 parallel Supabase queries; per-row `bls-qcew-record` fragments + one `labor-swfl-summary`) → `refinery/packs/macro-swfl.mts:537` (shared with bls_laus) → brain `macro-swfl` → master (`master.mts:286`, critical). Metrics: Lee/Collier private avg weekly wage + YoY %, private employment.
 - NOTES: SHARES its consuming brain (macro-swfl) with bls_laus — one brain, two BLS sources.
 
+### fdic_bankfind · cadence 365d · lane tier-2 (dlt Postgres) — BUILT 09/22/2026
+- STATUS: **live** (first run local 09/22/2026; GHA `fdic-bankfind-annual.yml` cron on the 20th, monthly idempotent retry)
+- ROOT: **THE ONE ROOT for bank branch deposits / branch counts / bank directory** — feeds **macro-swfl** (same brain as bls_laus + bls_qcew) → master
+- DATA WE GET: `data_lake.fdic_sod` 10,759 rows (one per branch per year, 1994–2026, all 81 vendor fields, deposits `depsumbr` in $000s as of June 30) · `data_lake.fdic_locations` 298 rows (current branch directory, 38 fields, lat/lon + situs ZIP `zip`) · `data_lake.fdic_institutions` 199 rows (every bank seen, 134 fields: assets, net income, ROA/ROE, charter, holding company). Rollup view `data_lake.fdic_sod_county_year_v` (county × year: branches, banks, deposits_thousands_usd) is what the connector reads. Live 09/22/2026 (view): Lee 2026 = 162 branches, 34 banks, $21.12B (−5.3% YoY from $22.29B); Collier 2026 = 126 branches, 37 banks, $19.16B (+1.9% from $18.81B); Hendry 2026 = 5 branches, 3 banks, $0.69B.
+- THE TRAP: `/sod` `STCNTY` = the bank's HQ county; `STCNTYBR` = the branch county. Filtering on the former returns 26 Lee rows for 2025 instead of 160 (the 08/02 scout did this). Test-locked.
+- DATA AVAILABLE, unpulled: same keyless API — `/history` (branch open/close/merger events), `/failures`, `/summary`, `/demographics`, `/financials` (quarterly call-report ratios per bank). ZIP-grain rollup is a config-only view over `zipbr` (situs, G1-clean) when a consumer asks.
+- ROUTES: `data_lake.fdic_sod` → view `fdic_sod_county_year_v` (`docs/sql/20260922_fdic_sod_county_year_v.sql`, apply via `bun scripts/apply-fdic-sod-view.mts`) → `refinery/sources/fdic-deposits-source.mts` (one `fdic-deposits-swfl-summary` fragment; serves a year only when its branch count ≥ 80% of the prior year, names the thin one in `partial_year`) → `refinery/packs/macro-swfl.mts` (fact `fdic_deposits`; metrics `fdic_{lee,collier}_branch_deposits_usd`, `_yoy_pct`, `fdic_{lee,collier}_bank_branches`) → brain `macro-swfl` → master.
+- NOTES: spec `docs/superpowers/specs/2026-09-22-fdic-bankfind-design.md`. Institutions/locations are guarded `replace` (insert-from-staging); SOD is `merge` on `id` = YEAR_CERT_BRNUM so history never wipes.
+
 ### census_cbp · cadence 365d · lane tier-2 (dlt Postgres)
 - STATUS: **live**
 - ROOT: feeds **macro-florida** (Reporter, middle tier of macro chain) → master

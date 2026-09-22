@@ -11,6 +11,12 @@ import { makeBrainInputSource, type BrainInputNormalized } from "../sources/brai
 import { blsLausSource, type LausSwflSummary } from "../sources/bls-laus-source.mts";
 import { fmtUsd } from "./lib/number-format.mts";
 import { blsQcewSource, type LaborSwflSummary } from "../sources/bls-qcew-source.mts";
+import {
+  fdicDepositsSource,
+  FDIC_API_URL,
+  type FdicCountyDeposits,
+  type FdicDepositsSwflSummary,
+} from "../sources/fdic-deposits-source.mts";
 
 /**
  * macro-swfl — regional macro context for the Southwest Florida market.
@@ -40,6 +46,8 @@ let lastLausSummary: LausSwflSummary | null = null;
 let lastLausFetchedAt: string | null = null;
 let lastQcewSummary: LaborSwflSummary | null = null;
 let lastQcewFetchedAt: string | null = null;
+let lastFdicSummary: FdicDepositsSwflSummary | null = null;
+let lastFdicFetchedAt: string | null = null;
 
 function brainInputFrom(fragments: RawFragment[], upstreamId: string): BrainOutput | null {
   for (const f of fragments) {
@@ -81,6 +89,46 @@ function qcewFrom(fragments: RawFragment[]): {
     }
   }
   return { summary: null, fetched_at: null };
+}
+
+function fdicFrom(fragments: RawFragment[]): {
+  summary: FdicDepositsSwflSummary | null;
+  fetched_at: string | null;
+  fragment_id: string | null;
+} {
+  for (const f of fragments) {
+    const n = f.normalized as { kind?: string };
+    if (n?.kind === "fdic-deposits-swfl-summary") {
+      return {
+        summary: f.normalized as FdicDepositsSwflSummary,
+        fetched_at: f.fetched_at ?? null,
+        fragment_id: f.fragment_id,
+      };
+    }
+  }
+  return { summary: null, fetched_at: null, fragment_id: null };
+}
+
+// Deposits are an annual June-30 snapshot; ±0.5% keeps rounding and branch churn out of the call.
+function depositDirection(yoyPct: number | null): "rising" | "falling" | "stable" {
+  if (yoyPct == null) return "stable";
+  if (yoyPct > 0.5) return "rising";
+  if (yoyPct < -0.5) return "falling";
+  return "stable";
+}
+
+const fmtYoy = (p: number | null): string =>
+  p == null ? "no prior year" : `${p >= 0 ? "+" : ""}${p.toFixed(1)}% YoY`;
+
+function makeFdicSource(fetched_at: string, d: FdicCountyDeposits): BrainOutputMetricSource {
+  return {
+    url: `${FDIC_API_URL}?filters=STCNTYBR:${d.county_fips}%20AND%20YEAR:${d.year}`,
+    fetched_at,
+    tier: 1,
+    citation:
+      `FDIC Summary of Deposits via data_lake.fdic_sod_county_year_v, branch county ${d.county_fips}, ` +
+      `as of 06/30/${d.year}: ${fmtUsd(d.deposits_usd)} across ${d.branches} branches of ${d.banks} banks (${fmtYoy(d.deposits_yoy_pct)})`,
+  };
 }
 
 // ±0.2pp threshold — see brain docstring for citation.
@@ -141,6 +189,10 @@ function macroSwflCorpusSummary(allFragments: RawFragment[]): SynthesisFact[] {
   const { summary: qcew, fetched_at: qcewAt } = qcewFrom(allFragments);
   lastQcewSummary = qcew;
   lastQcewFetchedAt = qcewAt;
+
+  const { summary: fdic, fetched_at: fdicAt, fragment_id: fdicFragId } = fdicFrom(allFragments);
+  lastFdicSummary = fdic;
+  lastFdicFetchedAt = fdicAt;
 
   if (!laus) {
     if (!macroFl) return [];
@@ -218,6 +270,26 @@ function macroSwflCorpusSummary(allFragments: RawFragment[]): SynthesisFact[] {
         source_fragment_ids: [],
       });
     }
+  }
+
+  if (fdic && (fdic.lee || fdic.collier)) {
+    const line = (name: string, d: FdicCountyDeposits | null): string | null =>
+      d
+        ? `${name} ${fmtUsd(d.deposits_usd)} as of 06/30/${d.year} (${fmtYoy(d.deposits_yoy_pct)}; ${d.branches} branches, ${d.banks} banks)`
+        : null;
+    facts.push({
+      topic: "fdic_deposits",
+      fact: "SWFL bank branch deposits — FDIC Summary of Deposits",
+      value:
+        `FDIC Summary of Deposits, branch deposits by county: ` +
+        [line("Lee County", fdic.lee), line("Collier County", fdic.collier)]
+          .filter(Boolean)
+          .join("; ") +
+        ".",
+      // Empty here would fall back to the brain's first citation row (BLS LAUS) — the $ figure
+      // must cite the FDIC row. Sibling facts above still carry [] (pre-existing).
+      source_fragment_ids: fdicFragId ? [fdicFragId] : [],
+    });
   }
 
   return facts;
@@ -455,6 +527,48 @@ function macroSwflOutputProducer(_out: PackOutput): BrainOutputProducerResult {
     }
   }
 
+  const fdic = lastFdicSummary;
+  const fdicFetchedAt = lastFdicFetchedAt ?? new Date().toISOString().replace(/\.\d{3}Z$/, "Z");
+  const pushDeposits = (slug: string, name: string, d: FdicCountyDeposits | null): void => {
+    if (!d) return;
+    key_metrics.push({
+      metric: `fdic_${slug}_branch_deposits_usd`,
+      label: `${name} Bank Branch Deposits (as of 06/30/${d.year})`,
+      value: d.deposits_usd,
+      direction: depositDirection(d.deposits_yoy_pct),
+      variable_type: "extensive",
+      units: "USD",
+      display_format: "currency",
+      source: makeFdicSource(fdicFetchedAt, d),
+    });
+    if (d.deposits_yoy_pct != null) {
+      key_metrics.push({
+        metric: `fdic_${slug}_branch_deposits_yoy_pct`,
+        label: `${name} Bank Branch Deposits YoY (${d.year - 1}→${d.year})`,
+        value: d.deposits_yoy_pct,
+        direction: depositDirection(d.deposits_yoy_pct),
+        variable_type: "intensive",
+        units: "%",
+        display_format: "percent",
+        source: makeFdicSource(fdicFetchedAt, d),
+      });
+    }
+    key_metrics.push({
+      metric: `fdic_${slug}_bank_branches`,
+      label: `${name} Bank Branches (as of 06/30/${d.year})`,
+      value: d.branches,
+      direction: "stable",
+      variable_type: "extensive",
+      units: "branches",
+      display_format: "count",
+      source: makeFdicSource(fdicFetchedAt, d),
+    });
+  };
+  if (fdic) {
+    pushDeposits("lee", "Lee County", fdic.lee);
+    pushDeposits("collier", "Collier County", fdic.collier);
+  }
+
   // Winning direction: weight Lee most heavily (primary SWFL reference market).
   const leeMetricDir = lausDirection(leDelta);
   const flMetricDir = lausDirection(flDelta);
@@ -489,8 +603,14 @@ function macroSwflOutputProducer(_out: PackOutput): BrainOutputProducerResult {
     wageClause = ` Private-sector wages in Lee County ran ${fmtUsd(w.avg_wkly_wage!)}/wk in ${qcew.latest_quarter}${yoy}.`;
   }
 
+  let depositClause = "";
+  if (fdic?.lee) {
+    const d = fdic.lee;
+    depositClause = ` Bank branch deposits in Lee County stood at ${fmtUsd(d.deposits_usd)} as of 06/30/${d.year} (${fmtYoy(d.deposits_yoy_pct)}).`;
+  }
+
   const conclusion =
-    `SWFL labor market, ${refMonth}${prelim}: ${metricParts}.${wageClause} ` +
+    `SWFL labor market, ${refMonth}${prelim}: ${metricParts}.${wageClause}${depositClause} ` +
     (macroFl
       ? `Against the FL state macro backdrop (macro-florida, confidence ${macroFl.confidence.toFixed(2)}), ` +
         `SWFL county unemployment is ${leeMetricDir === "rising" ? "rising faster than" : leeMetricDir === "falling" ? "improving relative to" : "tracking"} the state average.`
@@ -512,6 +632,22 @@ function macroSwflOutputProducer(_out: PackOutput): BrainOutputProducerResult {
       "BLS QCEW quarterly wage data was not available in this build — private-sector wage metrics are absent. Check data_lake.bls_qcew row count.",
     );
   }
+  if (!fdic) {
+    caveats.push(
+      "FDIC Summary of Deposits was not available in this build — bank deposit metrics are absent. Check data_lake.fdic_sod_county_year_v row count.",
+    );
+  } else {
+    for (const [name, d] of [
+      ["Lee", fdic.lee],
+      ["Collier", fdic.collier],
+    ] as const) {
+      if (d?.partial_year) {
+        caveats.push(
+          `FDIC deposits for ${name} County: ${d.partial_year} is present in the source but too few branches have filed (under 80% of ${d.year}); ${d.year} is served instead.`,
+        );
+      }
+    }
+  }
 
   return {
     conclusion,
@@ -532,9 +668,14 @@ export const macroSwfl: PackDefinition = {
   public_label: "SWFL Macro",
   domain: "macro",
   scope:
-    "Regional macro context for Southwest Florida — leaf tier of the three-tier macro chain (macro-us → macro-florida → macro-swfl). Own sources: BLS LAUS monthly unemployment for Lee + Collier counties; BLS QCEW quarterly private-sector wages + employment for Lee + Collier. Upstream: macro-florida for FL state baseline and confidence propagation.",
-  ttl_seconds: 2592000, // 30 days — BLS LAUS is monthly; QCEW is quarterly (cadence_registry bls_laus=30, bls_qcew=90)
-  sources: [makeBrainInputSource("macro-florida"), blsLausSource, blsQcewSource],
+    "Regional macro context for Southwest Florida — leaf tier of the three-tier macro chain (macro-us → macro-florida → macro-swfl). Own sources: BLS LAUS monthly unemployment for Lee + Collier counties; BLS QCEW quarterly private-sector wages + employment for Lee + Collier; FDIC Summary of Deposits annual bank branch deposits for Lee + Collier. Upstream: macro-florida for FL state baseline and confidence propagation.",
+  ttl_seconds: 2592000, // 30 days — BLS LAUS is monthly; QCEW is quarterly; FDIC SOD is annual (cadence_registry bls_laus=30, bls_qcew=90, fdic_bankfind=365)
+  sources: [
+    makeBrainInputSource("macro-florida"),
+    blsLausSource,
+    blsQcewSource,
+    fdicDepositsSource,
+  ],
   input_brains: [{ id: "macro-florida", edge_type: "input" }],
   fitScore: (): number => 8,
   compositeCutoff: 0,
@@ -548,13 +689,14 @@ export const macroSwfl: PackDefinition = {
     "YoY direction is meaningful when the delta exceeds ±0.2pp (revision noise floor for BLS LAUS county data).",
     "Preliminary data (footnote_codes=P) is labeled as such — it is the most current but subject to revision.",
     "QCEW private-sector wages are the purchasing-power signal; LAUS unemployment rates are the labor-market-health signal. Both are needed for a complete macro read.",
+    "FDIC branch deposits are an annual June-30 snapshot of money held locally — a liquidity signal that moves ahead of lending, not a labor metric. YoY beyond ±0.5% is a real move.",
   ],
   activeProject:
-    "macro-swfl: BLS LAUS county unemployment + BLS QCEW quarterly wages live for Lee + Collier counties.",
+    "macro-swfl: BLS LAUS county unemployment + BLS QCEW quarterly wages + FDIC annual branch deposits live for Lee + Collier counties.",
   prompts: {
     triageContext:
-      "Fragments are a macro-florida brain OUTPUT, a BLS LAUS laus-swfl-summary, and a BLS QCEW labor-swfl-summary. The pack is pure deterministic aggregation with no synthesis or triage agent.",
+      "Fragments are a macro-florida brain OUTPUT, a BLS LAUS laus-swfl-summary, a BLS QCEW labor-swfl-summary, and an FDIC fdic-deposits-swfl-summary. The pack is pure deterministic aggregation with no synthesis or triage agent.",
     synthesisContext:
-      "This pack runs no synthesis agent (skipSynthesisAgent). BrainOutput is built by macroSwflOutputProducer from BLS LAUS county rates + BLS QCEW wages + macro-florida upstream.",
+      "This pack runs no synthesis agent (skipSynthesisAgent). BrainOutput is built by macroSwflOutputProducer from BLS LAUS county rates + BLS QCEW wages + FDIC branch deposits + macro-florida upstream.",
   },
 };

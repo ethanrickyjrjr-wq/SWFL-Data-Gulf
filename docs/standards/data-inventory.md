@@ -112,6 +112,7 @@ family, live, cron-fed.
 | census_acs | `data_lake.census_acs_zcta` | 365d | cron | 100 | 72 kB | zip-summary |
 | bls_laus | `data_lake.bls_laus` | 30d | cron | 364 | 232 kB | macro-swfl |
 | bls_qcew | `data_lake.bls_qcew` | 90d | cron | 32 | 80 kB | macro-swfl |
+| fdic_bankfind | `data_lake.fdic_sod` (+ `fdic_locations` 298, `fdic_institutions` 199, view `fdic_sod_county_year_v`) | 365d | cron (first run 09/22/2026, local) | 10,759 | n/a (not measured) | macro-swfl |
 | bls_oews_swfl | `data_lake.bls_oews_swfl` | 365d | cron | 220 | 192 kB | labor-demand-swfl |
 | rsw_airport_monthly | `public.rsw_airport_monthly` | 30d | cron | 2,580 | 1.7 MB | rsw-airport |
 | fgcu_reri_indicators | `public.fgcu_reri_indicators` | 30d | cron | 17 | 64 kB | fgcu-reri |
@@ -210,7 +211,7 @@ scouts), just never built into a pipeline:
 - **FWC Derelict Vessels** — ArcGIS REST, statewide with a Lee+Collier filter
 - **FWC Marinas** — bulk CSV, statewide with a Lee+Collier filter
 - **FL Sunbiz daily Corporate Data File** — SFTP, zip-filterable, new-business-formation signal
-- **FDIC BankFind API** — no key, deposit dollars by branch
+- ~~**FDIC BankFind API** — no key, deposit dollars by branch~~ **BUILT 09/22/2026** → `fdic_bankfind` row above (3 tables, all vendor fields, 1994–2026).
 - **FLHSMV Annual Vessel Stats by County** — text-layer PDF, Lee/Collier boat registration counts
   back to 2019
 

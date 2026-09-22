@@ -1,0 +1,72 @@
+{
+  "__meta": {
+    "source": "FDIC Summary of Deposits county x year rollup (fixture — not for production analysis)",
+    "verified": "2026-09-22",
+    "note": "Lee branches + deposits for 2024-2026 are the 09/22/2026 live-probe values (STCNTYBR:12071); Lee 2025 banks=33 is live. Every other cell is illustrative. Hendry 2026 is deliberately thin (2 branches) to exercise the partial-year rule."
+  },
+  "records": [
+    {
+      "county_fips": "12071",
+      "year": 2024,
+      "branches": 159,
+      "banks": 33,
+      "deposits_thousands_usd": 22739610
+    },
+    {
+      "county_fips": "12071",
+      "year": 2025,
+      "branches": 160,
+      "banks": 33,
+      "deposits_thousands_usd": 22291867
+    },
+    {
+      "county_fips": "12071",
+      "year": 2026,
+      "branches": 162,
+      "banks": 33,
+      "deposits_thousands_usd": 21115545
+    },
+    {
+      "county_fips": "12021",
+      "year": 2024,
+      "branches": 130,
+      "banks": 30,
+      "deposits_thousands_usd": 19000000
+    },
+    {
+      "county_fips": "12021",
+      "year": 2025,
+      "branches": 128,
+      "banks": 29,
+      "deposits_thousands_usd": 19500000
+    },
+    {
+      "county_fips": "12021",
+      "year": 2026,
+      "branches": 128,
+      "banks": 29,
+      "deposits_thousands_usd": 20000000
+    },
+    {
+      "county_fips": "12051",
+      "year": 2024,
+      "branches": 10,
+      "banks": 4,
+      "deposits_thousands_usd": 500000
+    },
+    {
+      "county_fips": "12051",
+      "year": 2025,
+      "branches": 10,
+      "banks": 4,
+      "deposits_thousands_usd": 520000
+    },
+    {
+      "county_fips": "12051",
+      "year": 2026,
+      "branches": 2,
+      "banks": 1,
+      "deposits_thousands_usd": 90000
+    }
+  ]
+}

@@ -1,3 +1,29 @@
+## 2026-09-22 (Fable 5.1) - FDIC BankFind pipeline BUILT, LOADED, and WIRED: bank branch deposits for Lee/Collier/Hendry, 1994-2026, no key
+
+His ask: "what data are we missing that is easy to bring in" -> four-lane answer (FDLE city/offense detail, FEMA NFIP rate live,
+FRED 15-yr, FDIC deposits); his pick: "whichever you have an api key to and can actually produce a working pipeline with all the
+information". FDIC needs no key. Full scope probed live at api.fdic.gov (banks.data.fdic.gov 301s there): /sod 81 fields,
+/locations 38, /institutions 134; limit max 10,000 (vendor-validated), offset honored.
+THE TRAP: /sod STCNTY = the bank's HQ county; STCNTYBR = the branch county. The 08/02 scout filtered STCNTY and saw 26 Lee rows
+for 2025; the branch filter returns 160. Test-locked (test_sod_filter_uses_branch_county_not_hq_county); scout + INDEX corrected.
+BUILT: ingest/pipelines/fdic_bankfind/ (3 dlt resources: fdic_sod merge on id, fdic_locations + fdic_institutions guarded
+replace insert-from-staging; partial-page + header + min-rows guards), 10 tests RED then GREEN (78 with drift guard);
+.github/workflows/fdic-bankfind-annual.yml; registry entry + source_scope (Gate 10 exit 0); docs/sql/20260922_fdic_sod_county_year_v.sql
+applied via scripts/apply-fdic-sod-view.mts; refinery/sources/fdic-deposits-source.mts (serves a year only when branch count >=80%
+of prior); macro-swfl pack: fact fdic_deposits + 6 key_metrics, vocab registered, catalog mirrored; 3 pack + 5 source tests green.
+PROVEN: dry-run then real run local -> data_lake.fdic_sod 10,759 rows (1994-2026), fdic_locations 298, fdic_institutions 199;
+view verified: Lee 2026 = 162 branches, 34 banks, $21,115,545k (-5.3% YoY); Collier 2026 = $19,159,773k (+1.9%); Hendry $685,788k.
+`bun refinery/cli.mts macro-swfl --target-only`: 68 fragments, 0 orphans, wrote brains/macro-swfl.md v40 with the FDIC fact + metrics.
+Docs: data-roots section, data-inventory row (FDIC struck from "not in DB"), repo-inventory row, spec 2026-09-22-fdic-bankfind-design.md.
+SECOND-ORDER AUDIT (agent, 7 findings) -> fixed 3 in this commit: (1) Gate 4 is per-FILE, so the replace resources moved into
+resources.py beside assert_min_rows (build_resources); (2) the deposits fact cited BLS LAUS (source_fragment_ids [] falls back to s02)
+- now carries the FDIC fragment id, brain v41 shows src s04; (3) fdic_locations/fdic_institutions header guards widened 5->12 fields
+so a vendor rename fails loud. Noted, not fixed: master's rollup reads key_metrics[0..1] only, so the 6 fdic_* slugs reach master as
+conclusion prose, not metrics (house-wide; dropped the false "master" from their vocab source_brains); the two directory tables have
+no reader -> check fdic_directories_no_consumer (idea). Full ingest suite 1,156 passed.
+Next: GHA dry-run on a real runner after push, then close fdic_bankfind_live_verify; ceiling left in registry (/history, /failures,
+/summary, /demographics, /financials). The other three cheap items (FDLE detail, FEMA rate live, FRED 15-yr) are still unbuilt.
+
 ## 2026-09-21 (Fable 5.1, session 2) - outside-tool eval: Jev (TypeSafe AI decision model) - DO NOT ADOPT
 
 His ask: an X link (0xRicker "Jev Engineering"), what is it, can it help. Crawled the tweet, the full quoted article and
