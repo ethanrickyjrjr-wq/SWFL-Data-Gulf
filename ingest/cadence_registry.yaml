@@ -674,6 +674,7 @@ pipelines:
     workflow: fdic-bankfind-annual.yml
     consuming_pack: macro-swfl
     lane: tier-2
+    raw_landing_class: free_refetchable # 09/22/2026 (Gate 11): public FDIC BankFind JSON API, no key, no vendor cost; every run re-fetches the full 3-county scope (all years) — nothing to archive.
     cadence_days: 365
     tolerance_multiplier: 1.5
     dlt_schema_name: fdic_bankfind
