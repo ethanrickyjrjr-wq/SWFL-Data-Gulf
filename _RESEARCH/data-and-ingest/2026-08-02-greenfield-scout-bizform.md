@@ -120,3 +120,16 @@
 ## Buyer-email idea
 
 A community banker or credit-union business-banking manager in Lee/Collier would want a short weekly note that says: "N new LLCs/corps filed in your ZIP footprint this week (Sunbiz), M of them in industries your branch already banks (Census CBP NAICS mix), and here's how your branch's deposit share (FDIC SOD) stacks up against the Q new liquor/restaurant licenses (DBPR) opening near you" — i.e., new-entity formation + industry mix + your own competitive deposit position, stitched into one "who just became a prospect near you" digest instead of four separate government portals they'd never check themselves.
+
+---
+
+## CORRECTION 09/22/2026 — §1 filtered the wrong county field (pipeline now built)
+
+The `/sod` calls above filter on `STCNTY`, which is the **institution's headquarters** county, not the
+branch's. That is why "SOD deposit records, 2025: 26" — those are the branches of the three banks
+chartered in Lee/Collier. The branch county is **`STCNTYBR`**: Lee 2025 = 160 branches across 33 banks
+(6,160 rows 1994–2026); Collier 4,297 rows; Hendry 302. On `/locations` every record is a branch, so
+`STCNTY` there IS the branch county (a Bank of America branch, HQ North Carolina, carries 12071).
+Pipeline: `ingest/pipelines/fdic_bankfind/` (spec `docs/superpowers/specs/2026-09-22-fdic-bankfind-design.md`),
+guarded by `test_sod_filter_uses_branch_county_not_hq_county`. Live totals 09/22/2026: 10,759 SOD rows,
+298 branches, 199 institutions; `limit` max is 10,000 (vendor-validated), `offset` honored.

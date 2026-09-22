@@ -1,3 +1,10 @@
+## 2026-09-22 (Fable 5.1, part 2) - FDIC runner proof + research correction landed
+
+GHA run 35755967549 (fdic-bankfind-annual.yml, dry_run=true) green on ubuntu-latest: 10,759 / 298 / 199 rows from api.fdic.gov.
+Check fdic_bankfind_live_verify CLOSED with that evidence; fdic_directories_no_consumer opened (idea). deptry red on the push
+commit is pre-existing (urllib3 in ingest/duckdb_pipelines/usgs/fetch.py, red since at least 09/20 f29844d1) - not this change.
+This commit: the 08/02 bizform scout's STCNTY->STCNTYBR correction + its INDEX line (tracked _RESEARCH files missed in 3d1e0268).
+
 ## 2026-09-22 (Fable 5.1) - FDIC BankFind pipeline BUILT, LOADED, and WIRED: bank branch deposits for Lee/Collier/Hendry, 1994-2026, no key
 
 His ask: "what data are we missing that is easy to bring in" -> four-lane answer (FDLE city/offense detail, FEMA NFIP rate live,

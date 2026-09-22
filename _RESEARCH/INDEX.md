@@ -485,7 +485,7 @@ personal financial notes.
   by County PDF (18-page text-layer PDF, Lee=49,904 / Collier=25,510 total registered vessels,
   2019-2025 all available). FWC boating-accident stats confirmed PDF-only (no structured layer);
   FLHSMV vehicle-registration CSVs confirmed NOT vessel-specific (dead end, don't re-walk).
-- `2026-08-02-greenfield-scout-bizform.md` — greenfield proof-of-pipeline scout, NOT real estate:
+- `2026-08-02-greenfield-scout-bizform.md` — **CORRECTED 09/22/2026 (appended): its FDIC `/sod` probe filtered STCNTY = bank HQ county; the branch county is STCNTYBR (Lee 2025 = 160 branches, not 26). FDIC pipeline BUILT 09/22/2026: `ingest/pipelines/fdic_bankfind/`.** greenfield proof-of-pipeline scout, NOT real estate:
   new-business-formation / local-banking-signal sources for Lee+Collier, all live-verified this
   session (actual fetches, real row counts, real command output pasted). 4-source pick: FL Sunbiz
   daily Corporate Data File (SFTP, fixed-width 1440-char, zip-filterable, downloaded a real
