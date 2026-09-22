@@ -1,9 +1,9 @@
-<!-- FRESHNESS: v49 | Token: SWFL-7421-v49-20260921-33b37b48 -->
+<!-- FRESHNESS: v50 | Token: SWFL-7421-v50-20260922-7e4ce021 -->
 ---
 brain_id: freshness-pulse
-version: 49
-refined_at: 2026-09-21T04:33:49Z
-freshness_token: SWFL-7421-v49-20260921-33b37b48
+version: 50
+refined_at: 2026-09-22T04:42:47Z
+freshness_token: SWFL-7421-v50-20260922-7e4ce021
 ttl_seconds: 86400
 pack_hash: 588cf8ec5cf3
 context_type: user_saved_reference
@@ -30,7 +30,7 @@ SCOPE: SWFL daily sourced freshness snapshot — today's cited median asking pri
 
 --- CITATION TABLE ---
 id  | source                                                                                                                                                                                                                                                                                                                                                           | verified   | expires
-s01 | SWFL daily freshness layer — one cited current number per (metric, area) from a grounded live search (Gemini grounded → Firecrawl failsafe), provenance-gated to a real source URL, via Supabase data_lake.daily_truth (metric_key, area, period, value, unit, source_url, source_title, source_tag, verified_on_page, agreement_n, anomaly_flag, retrieved_at). | 2026-09-21 | 2026-09-22
+s01 | SWFL daily freshness layer — one cited current number per (metric, area) from a grounded live search (Gemini grounded → Firecrawl failsafe), provenance-gated to a real source URL, via Supabase data_lake.daily_truth (metric_key, area, period, value, unit, source_url, source_title, source_tag, verified_on_page, agreement_n, anomaly_flag, retrieved_at). | 2026-09-22 | 2026-09-23
 
 --- SAVED FACTS ---
 []
@@ -38,9 +38,9 @@ s01 | SWFL daily freshness layer — one cited current number per (metric, area)
 --- OUTPUT ---
 {
   "brain_id": "freshness-pulse",
-  "version": 49,
-  "refined_at": "2026-09-21T04:33:49Z",
-  "expires": "2026-09-22T04:33:49Z",
+  "version": 50,
+  "refined_at": "2026-09-22T04:42:47Z",
+  "expires": "2026-09-23T04:42:47Z",
   "ttl_seconds": 86400,
   "direction": "neutral",
   "magnitude": 0,
@@ -62,7 +62,7 @@ s01 | SWFL daily freshness layer — one cited current number per (metric, area)
   "relevance": {
     "decay_curve": "weeks",
     "half_life_hours": 720,
-    "computed_at": "2026-09-21T04:33:49Z"
+    "computed_at": "2026-09-22T04:42:47Z"
   },
   "exogenous_signals": []
 }
@@ -71,5 +71,5 @@ s01 | SWFL daily freshness layer — one cited current number per (metric, area)
 - freshness-pulse: daily SWFL sourced-freshness reporter over data_lake.daily_truth (cited, provenance-gated, anomaly-screened), feeding master a fresh county-grain snapshot.
 
 --- RECENT NOTES ---
-- 2026-09-21: pack refined by the Refinery — 0 fact(s) from 1 source(s).
+- 2026-09-22: pack refined by the Refinery — 0 fact(s) from 1 source(s).
 ```
