@@ -1,9 +1,9 @@
-<!-- FRESHNESS: v25 | Token: SWFL-7421-v25-20260915-60de0365 -->
+<!-- FRESHNESS: v26 | Token: SWFL-7421-v26-20260923-655f0f79 -->
 ---
 brain_id: corridor-pulse-swfl
-version: 25
-refined_at: 2026-09-15T23:52:13Z
-freshness_token: SWFL-7421-v25-20260915-60de0365
+version: 26
+refined_at: 2026-09-23T04:25:45Z
+freshness_token: SWFL-7421-v26-20260923-655f0f79
 ttl_seconds: 604800
 pack_hash: 9b745295cada
 context_type: user_saved_reference
@@ -30,33 +30,33 @@ SCOPE: SWFL (Lee + Collier) weekly corridor current-events pulse — dated comme
 
 --- CITATION TABLE ---
 id  | source                                                                                                                                                                                                                                                                                                                | verified   | expires
-s01 | SWFL corridor pulse — weekly Anthropic web_search_20250305 / Firecrawl current-events facts, LLM-distilled with citation enforcement, via Supabase data_lake.city_pulse_corridors (id, corridor, topic, fact, source_url, source_title, cited_text, captured_at, expires_at, run_at); SWFL CRE corridors; topic-TTL'd | 2026-09-15 | 2026-09-22
+s01 | SWFL corridor pulse — weekly Anthropic web_search_20250305 / Firecrawl current-events facts, LLM-distilled with citation enforcement, via Supabase data_lake.city_pulse_corridors (id, corridor, topic, fact, source_url, source_title, cited_text, captured_at, expires_at, run_at); SWFL CRE corridors; topic-TTL'd | 2026-09-23 | 2026-09-30
 
 --- SAVED FACTS ---
 [
-  {"id":"f001","topic":"corridor-pulse:summary","fact":"Live SWFL corridor current-events signals","value":"17 non-expired signals across 13 corridors (Coral Pointe (Cape Coral): 2, Cape Coral Pkwy: 2, Colonial East: 1, Joel Blvd: 1, Ben Hill Griffin: 1, Estero / Bonita line: 1, Six Mile Cypress: 2, Airport-Pulling: 1, Collier Blvd: 1, Fort Myers Beach: 1, Pine Island Rd: 1, Cleveland Ave: 2, North Naples (Immokalee Rd): 1).","src":"s01","date":"2026-09-15"},
-  {"id":"f002","topic":"corridor-pulse:structural","fact":"Coral Pointe (Cape Coral) — structural","value":"There were 5,593 listings in Cape Coral as of the end of February, with median list price of $358,500. (source: https://www.businessobserverfl.com/news/2025/mar/27/cape-coral-buyers-market/)","src":"s01","date":"2026-09-15"},
-  {"id":"f003","topic":"corridor-pulse:structural","fact":"Coral Pointe (Cape Coral) — structural","value":"Cape Coral's business incentive grants are no longer available to gas stations, car washes, storage locker facilities, home-based businesses. (source: https://www.gulfshorebusiness.com/lee/cape-coral-changes-business-incentive-grants-eligibility/article_7f22f4bd-1f56-4df0-835d-27ec73aaef57.html)","src":"s01","date":"2026-09-15"},
-  {"id":"f004","topic":"corridor-pulse:structural","fact":"Cape Coral Pkwy — structural","value":"Cape Coral's Community Redevelopment Agency increased its total net position by 19% during fiscal year 25 (source: https://www.gulfshorebusiness.com/gb-daily/cape-coral-cra-net-position-jumps-19-in-fy25/article_ed6b8612-1ac0-4eb7-9523-4f42491f9c1b.html)","src":"s01","date":"2026-09-15"},
-  {"id":"f005","topic":"corridor-pulse:structural","fact":"Colonial East — structural","value":"Lee Health system will close Lee Memorial Hospital when they open the planned acute care hospital on Challenger (source: https://www.gulfshorebusiness.com/lee-health-posts-conversion-mission-agreement-for-public-review-comment/)","src":"s01","date":"2026-09-15"},
-  {"id":"f006","topic":"corridor-pulse:structural","fact":"Joel Blvd — structural","value":"Lee Board of County Commissioners voted to adopt alignment study to expand Sunshine Boulevard to four lanes from State Road 82 to 23rd Street SW in Lehigh Acres (source: https://www.gulfshorebusiness.com/gb_daily/lee-commissioners-approve-transportation-projects-for-lehigh-acres/)","src":"s01","date":"2026-09-15"},
-  {"id":"f007","topic":"corridor-pulse:structural","fact":"Ben Hill Griffin — structural","value":"The ITEC Business Park east of Ben Hill Griffin Parkway has 2.4 million square feet of space; Gulf Landings Logistic Center is just north of Alico Road. (source: https://www.gulfshorebusiness.com/construction-development/different-avenues-the-changing-face-of-alico-road/article_0d777eb5-c261-5da2-a342-4c98903ebacd.html)","src":"s01","date":"2026-09-15"},
-  {"id":"f008","topic":"corridor-pulse:structural","fact":"Estero / Bonita line — structural","value":"Estero's village manager Gibbs expects to start seeing redevelopment of some older developments including Coconut Point mall. (source: https://www.gulfshorebusiness.com/inside-the-magazine/estero-builds-its-future-with-boca-inspired-design-rules/article_2df0eb15-5509-51a1-a2df-7a9c7d078a1b.html)","src":"s01","date":"2026-09-15"},
-  {"id":"f009","topic":"corridor-pulse:structural","fact":"Six Mile Cypress — structural","value":"Manhattan Construction, founded in 1896 by L.H. Rooney and still family-operated, is moving its local headquarters from Naples to a 3.4-acre property just off Daniels Parkway near Six Mile Cypress in Fort Myers. (source: https://www.businessobserverfl.com/news/2026/apr/10/construction-giant-moving-hq-fort-myers/)","src":"s01","date":"2026-09-15"}
+  {"id":"f001","topic":"corridor-pulse:summary","fact":"Live SWFL corridor current-events signals","value":"10 non-expired signals across 9 corridors (Coral Pointe (Cape Coral): 2, Cape Coral Pkwy: 1, Colonial East: 1, Joel Blvd: 1, Ben Hill Griffin: 1, Estero / Bonita line: 1, Six Mile Cypress: 1, Airport-Pulling: 1, Collier Blvd: 1).","src":"s01","date":"2026-09-23"},
+  {"id":"f002","topic":"corridor-pulse:structural","fact":"Coral Pointe (Cape Coral) — structural","value":"There were 5,593 listings in Cape Coral as of the end of February, with median list price of $358,500. (source: https://www.businessobserverfl.com/news/2025/mar/27/cape-coral-buyers-market/)","src":"s01","date":"2026-09-23"},
+  {"id":"f003","topic":"corridor-pulse:structural","fact":"Coral Pointe (Cape Coral) — structural","value":"Cape Coral's business incentive grants are no longer available to gas stations, car washes, storage locker facilities, home-based businesses. (source: https://www.gulfshorebusiness.com/lee/cape-coral-changes-business-incentive-grants-eligibility/article_7f22f4bd-1f56-4df0-835d-27ec73aaef57.html)","src":"s01","date":"2026-09-23"},
+  {"id":"f004","topic":"corridor-pulse:structural","fact":"Cape Coral Pkwy — structural","value":"Cape Coral's Community Redevelopment Agency increased its total net position by 19% during fiscal year 25 (source: https://www.gulfshorebusiness.com/gb-daily/cape-coral-cra-net-position-jumps-19-in-fy25/article_ed6b8612-1ac0-4eb7-9523-4f42491f9c1b.html)","src":"s01","date":"2026-09-23"},
+  {"id":"f005","topic":"corridor-pulse:structural","fact":"Colonial East — structural","value":"Lee Health system will close Lee Memorial Hospital when they open the planned acute care hospital on Challenger (source: https://www.gulfshorebusiness.com/lee-health-posts-conversion-mission-agreement-for-public-review-comment/)","src":"s01","date":"2026-09-23"},
+  {"id":"f006","topic":"corridor-pulse:structural","fact":"Joel Blvd — structural","value":"Lee Board of County Commissioners voted to adopt alignment study to expand Sunshine Boulevard to four lanes from State Road 82 to 23rd Street SW in Lehigh Acres (source: https://www.gulfshorebusiness.com/gb_daily/lee-commissioners-approve-transportation-projects-for-lehigh-acres/)","src":"s01","date":"2026-09-23"},
+  {"id":"f007","topic":"corridor-pulse:structural","fact":"Ben Hill Griffin — structural","value":"The ITEC Business Park east of Ben Hill Griffin Parkway has 2.4 million square feet of space; Gulf Landings Logistic Center is just north of Alico Road. (source: https://www.gulfshorebusiness.com/construction-development/different-avenues-the-changing-face-of-alico-road/article_0d777eb5-c261-5da2-a342-4c98903ebacd.html)","src":"s01","date":"2026-09-23"},
+  {"id":"f008","topic":"corridor-pulse:structural","fact":"Estero / Bonita line — structural","value":"Estero's village manager Gibbs expects to start seeing redevelopment of some older developments including Coconut Point mall. (source: https://www.gulfshorebusiness.com/inside-the-magazine/estero-builds-its-future-with-boca-inspired-design-rules/article_2df0eb15-5509-51a1-a2df-7a9c7d078a1b.html)","src":"s01","date":"2026-09-23"},
+  {"id":"f009","topic":"corridor-pulse:structural","fact":"Six Mile Cypress — structural","value":"Manhattan Construction, founded in 1896 by L.H. Rooney and still family-operated, is moving its local headquarters from Naples to a 3.4-acre property just off Daniels Parkway near Six Mile Cypress in Fort Myers. (source: https://www.businessobserverfl.com/news/2026/apr/10/construction-giant-moving-hq-fort-myers/)","src":"s01","date":"2026-09-23"}
 ]
 
 --- OUTPUT ---
 {
   "brain_id": "corridor-pulse-swfl",
-  "version": 25,
-  "refined_at": "2026-09-15T23:52:13Z",
-  "expires": "2026-09-22T23:52:13Z",
+  "version": 26,
+  "refined_at": "2026-09-23T04:25:45Z",
+  "expires": "2026-09-30T04:25:45Z",
   "ttl_seconds": 604800,
   "direction": "neutral",
   "magnitude": 0,
   "drivers": [],
   "overrides": [],
-  "conclusion": "SWFL corridor pulse as of 2026-09-15: 17 live current-events signals across 13 corridors — Coral Pointe (Cape Coral) (2), Cape Coral Pkwy (2), Colonial East (1), Joel Blvd (1), Ben Hill Griffin (1), Estero / Bonita line (1), Six Mile Cypress (2), Airport-Pulling (1), Collier Blvd (1), Fort Myers Beach (1), Pine Island Rd (1), Cleveland Ave (2), North Naples (Immokalee Rd) (1). Most current: Coral Pointe (Cape Coral) — There were 5,593 listings in Cape Coral as of the end of February, with median list price of $358,500. These are current cited facts only; the corridor read and any direction call live downstream in cre-swfl and master.",
+  "conclusion": "SWFL corridor pulse as of 2026-09-23: 10 live current-events signals across 9 corridors — Coral Pointe (Cape Coral) (2), Cape Coral Pkwy (1), Colonial East (1), Joel Blvd (1), Ben Hill Griffin (1), Estero / Bonita line (1), Six Mile Cypress (1), Airport-Pulling (1), Collier Blvd (1). Most current: Coral Pointe (Cape Coral) — There were 5,593 listings in Cape Coral as of the end of February, with median list price of $358,500. These are current cited facts only; the corridor read and any direction call live downstream in cre-swfl and master.",
   "key_metrics": [
     {
       "metric": "signal_structural_1",
@@ -66,7 +66,7 @@ s01 | SWFL corridor pulse — weekly Anthropic web_search_20250305 / Firecrawl c
       "variable_type": "categorical",
       "source": {
         "url": "https://www.businessobserverfl.com/news/2025/mar/27/cape-coral-buyers-market/",
-        "fetched_at": "2026-09-15T23:52:13Z",
+        "fetched_at": "2026-09-23T04:25:45Z",
         "tier": 2,
         "citation": "Report: Cape Coral tops list of buyer's markets in nation | Business Observer: \"There were 5,593 listings in Cape Coral as of the end of February, according to Zillow, which reports the median list price was $358,500, while the me...\""
       },
@@ -83,7 +83,7 @@ s01 | SWFL corridor pulse — weekly Anthropic web_search_20250305 / Firecrawl c
       "variable_type": "categorical",
       "source": {
         "url": "https://www.gulfshorebusiness.com/lee/cape-coral-changes-business-incentive-grants-eligibility/article_7f22f4bd-1f56-4df0-835d-27ec73aaef57.html",
-        "fetched_at": "2026-09-15T23:52:13Z",
+        "fetched_at": "2026-09-23T04:25:45Z",
         "tier": 2,
         "citation": "Cape Coral modifies business incentive grant rules | Lee County | gulfshorebusiness.com: \"Evan Williams ... Cape Coral’s business incentive grants are no longer available to gas stations, car washes, storage locker facilities, home-based bu...\""
       },
@@ -100,7 +100,7 @@ s01 | SWFL corridor pulse — weekly Anthropic web_search_20250305 / Firecrawl c
       "variable_type": "categorical",
       "source": {
         "url": "https://www.gulfshorebusiness.com/gb-daily/cape-coral-cra-net-position-jumps-19-in-fy25/article_ed6b8612-1ac0-4eb7-9523-4f42491f9c1b.html",
-        "fetched_at": "2026-09-15T23:52:13Z",
+        "fetched_at": "2026-09-23T04:25:45Z",
         "tier": 2,
         "citation": "Cape Coral CRA net position jumps 19% in FY25 | GB Daily | gulfshorebusiness.com: \"Evan Williams · Cape Coral’s Community Redevelopment Agency increased its total net position, a measure of assets minus liabilities, by 19% during fis...\""
       },
@@ -117,7 +117,7 @@ s01 | SWFL corridor pulse — weekly Anthropic web_search_20250305 / Firecrawl c
       "variable_type": "categorical",
       "source": {
         "url": "https://www.gulfshorebusiness.com/lee-health-posts-conversion-mission-agreement-for-public-review-comment/",
-        "fetched_at": "2026-09-15T23:52:13Z",
+        "fetched_at": "2026-09-23T04:25:45Z",
         "tier": 2,
         "citation": "Lee Health posts conversion mission agreement for public review: \"The system will be allowed to continue with current plans to close Lee Memorial Hospital when they open the planned acute care hospital on Challenger ...\""
       },
@@ -134,7 +134,7 @@ s01 | SWFL corridor pulse — weekly Anthropic web_search_20250305 / Firecrawl c
       "variable_type": "categorical",
       "source": {
         "url": "https://www.gulfshorebusiness.com/gb_daily/lee-commissioners-approve-transportation-projects-for-lehigh-acres/",
-        "fetched_at": "2026-09-15T23:52:13Z",
+        "fetched_at": "2026-09-23T04:25:45Z",
         "tier": 2,
         "citation": "Lee Commissioners approve transportation projects for Lehigh Acres - Gulfshore Business: \"The board also voted to adopt an alignment study to expand Sunshine Boulevard to four lanes from State Road 82 to 23rd Street SW in Lehigh Acres to co...\""
       },
@@ -151,7 +151,7 @@ s01 | SWFL corridor pulse — weekly Anthropic web_search_20250305 / Firecrawl c
       "variable_type": "categorical",
       "source": {
         "url": "https://www.gulfshorebusiness.com/construction-development/different-avenues-the-changing-face-of-alico-road/article_0d777eb5-c261-5da2-a342-4c98903ebacd.html",
-        "fetched_at": "2026-09-15T23:52:13Z",
+        "fetched_at": "2026-09-23T04:25:45Z",
         "tier": 2,
         "citation": "Different avenues: The changing face of Alico Road | Construction-development | gulfshorebusiness.com: \"The ITEC Business Park east of Ben Hill Griffin Parkway has 2.4 million square feet of space. Gulf Landings Logistic Center, just north of Alico, hudd...\""
       },
@@ -168,7 +168,7 @@ s01 | SWFL corridor pulse — weekly Anthropic web_search_20250305 / Firecrawl c
       "variable_type": "categorical",
       "source": {
         "url": "https://www.gulfshorebusiness.com/inside-the-magazine/estero-builds-its-future-with-boca-inspired-design-rules/article_2df0eb15-5509-51a1-a2df-7a9c7d078a1b.html",
-        "fetched_at": "2026-09-15T23:52:13Z",
+        "fetched_at": "2026-09-23T04:25:45Z",
         "tier": 2,
         "citation": "Estero builds its future with Boca-inspired design rules | Inside the Magazine | gulfshorebusiness.com: \"Gibbs expects to start seeing redevelopment of some of the older developments including Coconut Point mall.\""
       },
@@ -185,7 +185,7 @@ s01 | SWFL corridor pulse — weekly Anthropic web_search_20250305 / Firecrawl c
       "variable_type": "categorical",
       "source": {
         "url": "https://www.businessobserverfl.com/news/2026/apr/10/construction-giant-moving-hq-fort-myers/",
-        "fetched_at": "2026-09-15T23:52:13Z",
+        "fetched_at": "2026-09-23T04:25:45Z",
         "tier": 2,
         "citation": "Construction giant moving local HQ, jobs from Naples to Fort Myers | Business Observer: \"According to the commercial real estate website Loopnet, the property where the new headquarters is being built is 3.4 acres and just off of Daniels P...\""
       },
@@ -196,7 +196,7 @@ s01 | SWFL corridor pulse — weekly Anthropic web_search_20250305 / Firecrawl c
     }
   ],
   "caveats": [
-    "9 additional live signals are tracked but not surfaced here (cap 8).",
+    "2 additional live signals are tracked but not surfaced here (cap 8).",
     "Each signal is dated current-events context with a per-signal source; freshness is TTL-bounded by topic (breaking 1d → structural 90d)."
   ],
   "contradicts": [],
@@ -209,7 +209,7 @@ s01 | SWFL corridor pulse — weekly Anthropic web_search_20250305 / Firecrawl c
   "relevance": {
     "decay_curve": "weeks",
     "half_life_hours": 720,
-    "computed_at": "2026-09-15T23:52:13Z"
+    "computed_at": "2026-09-23T04:25:45Z"
   },
   "exogenous_signals": []
 }
@@ -218,5 +218,5 @@ s01 | SWFL corridor pulse — weekly Anthropic web_search_20250305 / Firecrawl c
 - corridor-pulse-swfl: weekly SWFL corridor-grain current-events reporter over data_lake.city_pulse_corridors (TTL'd, citation-backed); brain-input edge into cre-swfl.
 
 --- RECENT NOTES ---
-- 2026-09-15: pack refined by the Refinery — 9 fact(s) from 1 source(s).
+- 2026-09-23: pack refined by the Refinery — 9 fact(s) from 1 source(s).
 ```
