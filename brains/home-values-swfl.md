@@ -1,9 +1,9 @@
-<!-- FRESHNESS: v8 | Token: SWFL-7421-v8-20260923-5e1ea137 -->
+<!-- FRESHNESS: v9 | Token: SWFL-7421-v9-20260924-e62349ce -->
 ---
 brain_id: home-values-swfl
-version: 8
-refined_at: 2026-09-23T04:26:07Z
-freshness_token: SWFL-7421-v8-20260923-5e1ea137
+version: 9
+refined_at: 2026-09-24T18:18:20Z
+freshness_token: SWFL-7421-v9-20260924-e62349ce
 ttl_seconds: 3024000
 pack_hash: 8b47d955d2fb
 context_type: user_saved_reference
@@ -30,29 +30,29 @@ SCOPE: SWFL ZIP-level home-value index (Zillow ZHVI), monthly — regional media
 
 --- CITATION TABLE ---
 id  | source                                                                                                                                                                                                                                                                                                                  | verified   | expires
-s01 | Zillow Home Value Index (ZHVI), ZIP-level all-homes (SFR + Condo) middle-tier (0.33-0.67) seasonally-adjusted, latest per-ZIP snapshot from data_lake.zhvi_zip_latest (brain-input pivot view; MAX-within-±7d YoY/MoM). Source: Zillow Research, files.zillowstatic.com. Portal: https://www.zillow.com/research/data/. | 2026-09-23 | 2026-10-28
+s01 | Zillow Home Value Index (ZHVI), ZIP-level all-homes (SFR + Condo) middle-tier (0.33-0.67) seasonally-adjusted, latest per-ZIP snapshot from data_lake.zhvi_zip_latest (brain-input pivot view; MAX-within-±7d YoY/MoM). Source: Zillow Research, files.zillowstatic.com. Portal: https://www.zillow.com/research/data/. | 2026-09-24 | 2026-10-29
 
 --- SAVED FACTS ---
 [
-  {"id":"f001","topic":"corpus_overview","fact":"Zillow ZHVI SWFL home-value-index corpus","value":"53 rows across 53 ZIPs through 2026-07-31. Regional median home value = $361,010, regional median YoY = -4.60%.","src":"s01","date":"2026-09-23"}
+  {"id":"f001","topic":"corpus_overview","fact":"Zillow ZHVI SWFL home-value-index corpus","value":"53 rows across 53 ZIPs through 2026-08-31. Regional median home value = $359,866, regional median YoY = -3.41%.","src":"s01","date":"2026-09-24"}
 ]
 
 --- OUTPUT ---
 {
   "brain_id": "home-values-swfl",
-  "version": 8,
-  "refined_at": "2026-09-23T04:26:07Z",
-  "expires": "2026-10-28T04:26:07Z",
+  "version": 9,
+  "refined_at": "2026-09-24T18:18:20Z",
+  "expires": "2026-10-29T18:18:20Z",
   "ttl_seconds": 3024000,
   "direction": "bearish",
-  "magnitude": 0.3064468399103127,
+  "magnitude": 0.22762050734687067,
   "drivers": [],
   "overrides": [],
-  "conclusion": "SWFL ZHVI home values read bearish at 2026-07-31 — regional median YoY -4.60% on a median value of $361,010 across 53 ZIPs. Fastest-appreciating: 34139 (0.8%), 34145 (-0.9%), 34102 (-1.0%). Coolest: 33973 (-10.5%), 33907 (-9.8%), 33921 (-9.7%).",
+  "conclusion": "SWFL ZHVI home values read bearish at 2026-08-31 — regional median YoY -3.41% on a median value of $359,866 across 53 ZIPs. Fastest-appreciating: 34139 (1.6%), 34102 (0.8%), 33956 (0.7%). Coolest: 33973 (-9.6%), 33907 (-8.8%), 33919 (-7.9%).",
   "key_metrics": [
     {
       "metric": "home_value_yoy_pct_regional_median",
-      "value": -4.6,
+      "value": -3.41,
       "direction": "falling",
       "label": "SWFL regional median ZHVI home-value YoY % (latest period across all covered ZIPs)",
       "variable_type": "intensive",
@@ -60,7 +60,7 @@ s01 | Zillow Home Value Index (ZHVI), ZIP-level all-homes (SFR + Condo) middle-t
       "display_format": "percent",
       "source": {
         "url": "https://files.zillowstatic.com/research/public_csvs/zhvi/Zip_zhvi_uc_sfrcondo_tier_0.33_0.67_sm_sa_month.csv",
-        "fetched_at": "2026-09-23T04:26:06Z",
+        "fetched_at": "2026-09-24T18:18:19Z",
         "tier": 3,
         "citation": "Zillow Home Value Index (ZHVI), ZIP-level all-homes (SFR + Condo) middle-tier (0.33-0.67) seasonally-adjusted. Source: Zillow Research (files.zillowstatic.com); Tier 2 cache: data_lake.zhvi_zip_latest (brain-input pivot view)."
       },
@@ -72,15 +72,15 @@ s01 | Zillow Home Value Index (ZHVI), ZIP-level all-homes (SFR + Condo) middle-t
     },
     {
       "metric": "home_value_zhvi_regional_median",
-      "value": 361010,
+      "value": 359866,
       "direction": "stable",
-      "label": "SWFL regional typical (ZHVI) home value (USD) at 2026-07-31",
+      "label": "SWFL regional typical (ZHVI) home value (USD) at 2026-08-31",
       "variable_type": "extensive",
       "units": "USD",
       "display_format": "currency",
       "source": {
         "url": "https://files.zillowstatic.com/research/public_csvs/zhvi/Zip_zhvi_uc_sfrcondo_tier_0.33_0.67_sm_sa_month.csv",
-        "fetched_at": "2026-09-23T04:26:06Z",
+        "fetched_at": "2026-09-24T18:18:19Z",
         "tier": 3,
         "citation": "Zillow Home Value Index (ZHVI), ZIP-level all-homes (SFR + Condo) middle-tier (0.33-0.67) seasonally-adjusted. Source: Zillow Research (files.zillowstatic.com); Tier 2 cache: data_lake.zhvi_zip_latest (brain-input pivot view)."
       },
@@ -100,7 +100,7 @@ s01 | Zillow Home Value Index (ZHVI), ZIP-level all-homes (SFR + Condo) middle-t
       "display_format": "count",
       "source": {
         "url": "https://files.zillowstatic.com/research/public_csvs/zhvi/Zip_zhvi_uc_sfrcondo_tier_0.33_0.67_sm_sa_month.csv",
-        "fetched_at": "2026-09-23T04:26:06Z",
+        "fetched_at": "2026-09-24T18:18:19Z",
         "tier": 3,
         "citation": "Zillow Home Value Index (ZHVI), ZIP-level all-homes (SFR + Condo) middle-tier (0.33-0.67) seasonally-adjusted. Source: Zillow Research (files.zillowstatic.com); Tier 2 cache: data_lake.zhvi_zip_latest (brain-input pivot view)."
       },
@@ -112,13 +112,13 @@ s01 | Zillow Home Value Index (ZHVI), ZIP-level all-homes (SFR + Condo) middle-t
     },
     {
       "metric": "home_value_yoy_pct_top_appreciating_zips",
-      "value": "34139:0.83%,34145:-0.87%,34102:-1.02%",
+      "value": "34139:1.61%,34102:0.81%,33956:0.70%",
       "direction": "stable",
       "label": "Top-3 SWFL ZIPs by ZHVI home-value YoY % (rank-ordered, appreciating)",
       "variable_type": "categorical",
       "source": {
         "url": "https://files.zillowstatic.com/research/public_csvs/zhvi/Zip_zhvi_uc_sfrcondo_tier_0.33_0.67_sm_sa_month.csv",
-        "fetched_at": "2026-09-23T04:26:06Z",
+        "fetched_at": "2026-09-24T18:18:19Z",
         "tier": 3,
         "citation": "Zillow Home Value Index (ZHVI), ZIP-level all-homes (SFR + Condo) middle-tier (0.33-0.67) seasonally-adjusted. Source: Zillow Research (files.zillowstatic.com); Tier 2 cache: data_lake.zhvi_zip_latest (brain-input pivot view)."
       },
@@ -130,15 +130,15 @@ s01 | Zillow Home Value Index (ZHVI), ZIP-level all-homes (SFR + Condo) middle-t
     },
     {
       "metric": "home_value_yoy_pct_zip_34139",
-      "value": 0.83,
+      "value": 1.61,
       "direction": "rising",
-      "label": "ZHVI home-value YoY % - ZIP 34139 (Everglades), 2026-07-31",
+      "label": "ZHVI home-value YoY % - ZIP 34139 (Everglades), 2026-08-31",
       "variable_type": "intensive",
       "units": "percent",
       "display_format": "percent",
       "source": {
         "url": "https://files.zillowstatic.com/research/public_csvs/zhvi/Zip_zhvi_uc_sfrcondo_tier_0.33_0.67_sm_sa_month.csv",
-        "fetched_at": "2026-09-23T04:26:06Z",
+        "fetched_at": "2026-09-24T18:18:19Z",
         "tier": 3,
         "citation": "Zillow Home Value Index (ZHVI), ZIP-level all-homes (SFR + Condo) middle-tier (0.33-0.67) seasonally-adjusted. Source: Zillow Research (files.zillowstatic.com); Tier 2 cache: data_lake.zhvi_zip_latest (brain-input pivot view)."
       },
@@ -150,15 +150,15 @@ s01 | Zillow Home Value Index (ZHVI), ZIP-level all-homes (SFR + Condo) middle-t
     },
     {
       "metric": "home_value_zhvi_zip_34139",
-      "value": 299870,
+      "value": 300044,
       "direction": "stable",
-      "label": "ZHVI home value (USD) - ZIP 34139 (Everglades), 2026-07-31",
+      "label": "ZHVI home value (USD) - ZIP 34139 (Everglades), 2026-08-31",
       "variable_type": "extensive",
       "units": "USD",
       "display_format": "currency",
       "source": {
         "url": "https://files.zillowstatic.com/research/public_csvs/zhvi/Zip_zhvi_uc_sfrcondo_tier_0.33_0.67_sm_sa_month.csv",
-        "fetched_at": "2026-09-23T04:26:06Z",
+        "fetched_at": "2026-09-24T18:18:19Z",
         "tier": 3,
         "citation": "Zillow Home Value Index (ZHVI), ZIP-level all-homes (SFR + Condo) middle-tier (0.33-0.67) seasonally-adjusted. Source: Zillow Research (files.zillowstatic.com); Tier 2 cache: data_lake.zhvi_zip_latest (brain-input pivot view)."
       },
@@ -169,56 +169,16 @@ s01 | Zillow Home Value Index (ZHVI), ZIP-level all-homes (SFR + Condo) middle-t
       ]
     },
     {
-      "metric": "home_value_yoy_pct_zip_34145",
-      "value": -0.87,
-      "direction": "falling",
-      "label": "ZHVI home-value YoY % - ZIP 34145 (Marco Island), 2026-07-31",
-      "variable_type": "intensive",
-      "units": "percent",
-      "display_format": "percent",
-      "source": {
-        "url": "https://files.zillowstatic.com/research/public_csvs/zhvi/Zip_zhvi_uc_sfrcondo_tier_0.33_0.67_sm_sa_month.csv",
-        "fetched_at": "2026-09-23T04:26:06Z",
-        "tier": 3,
-        "citation": "Zillow Home Value Index (ZHVI), ZIP-level all-homes (SFR + Condo) middle-tier (0.33-0.67) seasonally-adjusted. Source: Zillow Research (files.zillowstatic.com); Tier 2 cache: data_lake.zhvi_zip_latest (brain-input pivot view)."
-      },
-      "suggestions": [
-        "Chart home values over time",
-        "What's driving home value yoy pct zip 34145?",
-        "How does home value yoy pct zip 34145 here compare to other SWFL areas?"
-      ]
-    },
-    {
-      "metric": "home_value_zhvi_zip_34145",
-      "value": 852380,
-      "direction": "stable",
-      "label": "ZHVI home value (USD) - ZIP 34145 (Marco Island), 2026-07-31",
-      "variable_type": "extensive",
-      "units": "USD",
-      "display_format": "currency",
-      "source": {
-        "url": "https://files.zillowstatic.com/research/public_csvs/zhvi/Zip_zhvi_uc_sfrcondo_tier_0.33_0.67_sm_sa_month.csv",
-        "fetched_at": "2026-09-23T04:26:06Z",
-        "tier": 3,
-        "citation": "Zillow Home Value Index (ZHVI), ZIP-level all-homes (SFR + Condo) middle-tier (0.33-0.67) seasonally-adjusted. Source: Zillow Research (files.zillowstatic.com); Tier 2 cache: data_lake.zhvi_zip_latest (brain-input pivot view)."
-      },
-      "suggestions": [
-        "Chart home values over time",
-        "What's driving home value zhvi zip 34145?",
-        "How does home value zhvi zip 34145 here compare to other SWFL areas?"
-      ]
-    },
-    {
       "metric": "home_value_yoy_pct_zip_34102",
-      "value": -1.02,
-      "direction": "falling",
-      "label": "ZHVI home-value YoY % - ZIP 34102 (Naples), 2026-07-31",
+      "value": 0.81,
+      "direction": "rising",
+      "label": "ZHVI home-value YoY % - ZIP 34102 (Naples), 2026-08-31",
       "variable_type": "intensive",
       "units": "percent",
       "display_format": "percent",
       "source": {
         "url": "https://files.zillowstatic.com/research/public_csvs/zhvi/Zip_zhvi_uc_sfrcondo_tier_0.33_0.67_sm_sa_month.csv",
-        "fetched_at": "2026-09-23T04:26:06Z",
+        "fetched_at": "2026-09-24T18:18:19Z",
         "tier": 3,
         "citation": "Zillow Home Value Index (ZHVI), ZIP-level all-homes (SFR + Condo) middle-tier (0.33-0.67) seasonally-adjusted. Source: Zillow Research (files.zillowstatic.com); Tier 2 cache: data_lake.zhvi_zip_latest (brain-input pivot view)."
       },
@@ -230,15 +190,15 @@ s01 | Zillow Home Value Index (ZHVI), ZIP-level all-homes (SFR + Condo) middle-t
     },
     {
       "metric": "home_value_zhvi_zip_34102",
-      "value": 1298081,
+      "value": 1284426,
       "direction": "stable",
-      "label": "ZHVI home value (USD) - ZIP 34102 (Naples), 2026-07-31",
+      "label": "ZHVI home value (USD) - ZIP 34102 (Naples), 2026-08-31",
       "variable_type": "extensive",
       "units": "USD",
       "display_format": "currency",
       "source": {
         "url": "https://files.zillowstatic.com/research/public_csvs/zhvi/Zip_zhvi_uc_sfrcondo_tier_0.33_0.67_sm_sa_month.csv",
-        "fetched_at": "2026-09-23T04:26:06Z",
+        "fetched_at": "2026-09-24T18:18:19Z",
         "tier": 3,
         "citation": "Zillow Home Value Index (ZHVI), ZIP-level all-homes (SFR + Condo) middle-tier (0.33-0.67) seasonally-adjusted. Source: Zillow Research (files.zillowstatic.com); Tier 2 cache: data_lake.zhvi_zip_latest (brain-input pivot view)."
       },
@@ -249,16 +209,56 @@ s01 | Zillow Home Value Index (ZHVI), ZIP-level all-homes (SFR + Condo) middle-t
       ]
     },
     {
-      "metric": "home_value_yoy_pct_zip_33973",
-      "value": -10.47,
-      "direction": "falling",
-      "label": "ZHVI home-value YoY % - ZIP 33973 (Lehigh Acres), 2026-07-31",
+      "metric": "home_value_yoy_pct_zip_33956",
+      "value": 0.7,
+      "direction": "rising",
+      "label": "ZHVI home-value YoY % - ZIP 33956 (Saint James City), 2026-08-31",
       "variable_type": "intensive",
       "units": "percent",
       "display_format": "percent",
       "source": {
         "url": "https://files.zillowstatic.com/research/public_csvs/zhvi/Zip_zhvi_uc_sfrcondo_tier_0.33_0.67_sm_sa_month.csv",
-        "fetched_at": "2026-09-23T04:26:06Z",
+        "fetched_at": "2026-09-24T18:18:19Z",
+        "tier": 3,
+        "citation": "Zillow Home Value Index (ZHVI), ZIP-level all-homes (SFR + Condo) middle-tier (0.33-0.67) seasonally-adjusted. Source: Zillow Research (files.zillowstatic.com); Tier 2 cache: data_lake.zhvi_zip_latest (brain-input pivot view)."
+      },
+      "suggestions": [
+        "Chart home values over time",
+        "What's driving home value yoy pct zip 33956?",
+        "How does home value yoy pct zip 33956 here compare to other SWFL areas?"
+      ]
+    },
+    {
+      "metric": "home_value_zhvi_zip_33956",
+      "value": 430211,
+      "direction": "stable",
+      "label": "ZHVI home value (USD) - ZIP 33956 (Saint James City), 2026-08-31",
+      "variable_type": "extensive",
+      "units": "USD",
+      "display_format": "currency",
+      "source": {
+        "url": "https://files.zillowstatic.com/research/public_csvs/zhvi/Zip_zhvi_uc_sfrcondo_tier_0.33_0.67_sm_sa_month.csv",
+        "fetched_at": "2026-09-24T18:18:19Z",
+        "tier": 3,
+        "citation": "Zillow Home Value Index (ZHVI), ZIP-level all-homes (SFR + Condo) middle-tier (0.33-0.67) seasonally-adjusted. Source: Zillow Research (files.zillowstatic.com); Tier 2 cache: data_lake.zhvi_zip_latest (brain-input pivot view)."
+      },
+      "suggestions": [
+        "Chart home values over time",
+        "What's driving home value zhvi zip 33956?",
+        "How does home value zhvi zip 33956 here compare to other SWFL areas?"
+      ]
+    },
+    {
+      "metric": "home_value_yoy_pct_zip_33973",
+      "value": -9.61,
+      "direction": "falling",
+      "label": "ZHVI home-value YoY % - ZIP 33973 (Lehigh Acres), 2026-08-31",
+      "variable_type": "intensive",
+      "units": "percent",
+      "display_format": "percent",
+      "source": {
+        "url": "https://files.zillowstatic.com/research/public_csvs/zhvi/Zip_zhvi_uc_sfrcondo_tier_0.33_0.67_sm_sa_month.csv",
+        "fetched_at": "2026-09-24T18:18:19Z",
         "tier": 3,
         "citation": "Zillow Home Value Index (ZHVI), ZIP-level all-homes (SFR + Condo) middle-tier (0.33-0.67) seasonally-adjusted. Source: Zillow Research (files.zillowstatic.com); Tier 2 cache: data_lake.zhvi_zip_latest (brain-input pivot view)."
       },
@@ -270,15 +270,15 @@ s01 | Zillow Home Value Index (ZHVI), ZIP-level all-homes (SFR + Condo) middle-t
     },
     {
       "metric": "home_value_zhvi_zip_33973",
-      "value": 274432,
+      "value": 278975,
       "direction": "stable",
-      "label": "ZHVI home value (USD) - ZIP 33973 (Lehigh Acres), 2026-07-31",
+      "label": "ZHVI home value (USD) - ZIP 33973 (Lehigh Acres), 2026-08-31",
       "variable_type": "extensive",
       "units": "USD",
       "display_format": "currency",
       "source": {
         "url": "https://files.zillowstatic.com/research/public_csvs/zhvi/Zip_zhvi_uc_sfrcondo_tier_0.33_0.67_sm_sa_month.csv",
-        "fetched_at": "2026-09-23T04:26:06Z",
+        "fetched_at": "2026-09-24T18:18:19Z",
         "tier": 3,
         "citation": "Zillow Home Value Index (ZHVI), ZIP-level all-homes (SFR + Condo) middle-tier (0.33-0.67) seasonally-adjusted. Source: Zillow Research (files.zillowstatic.com); Tier 2 cache: data_lake.zhvi_zip_latest (brain-input pivot view)."
       },
@@ -290,15 +290,15 @@ s01 | Zillow Home Value Index (ZHVI), ZIP-level all-homes (SFR + Condo) middle-t
     },
     {
       "metric": "home_value_yoy_pct_zip_33907",
-      "value": -9.75,
+      "value": -8.78,
       "direction": "falling",
-      "label": "ZHVI home-value YoY % - ZIP 33907 (Fort Myers), 2026-07-31",
+      "label": "ZHVI home-value YoY % - ZIP 33907 (Fort Myers), 2026-08-31",
       "variable_type": "intensive",
       "units": "percent",
       "display_format": "percent",
       "source": {
         "url": "https://files.zillowstatic.com/research/public_csvs/zhvi/Zip_zhvi_uc_sfrcondo_tier_0.33_0.67_sm_sa_month.csv",
-        "fetched_at": "2026-09-23T04:26:06Z",
+        "fetched_at": "2026-09-24T18:18:19Z",
         "tier": 3,
         "citation": "Zillow Home Value Index (ZHVI), ZIP-level all-homes (SFR + Condo) middle-tier (0.33-0.67) seasonally-adjusted. Source: Zillow Research (files.zillowstatic.com); Tier 2 cache: data_lake.zhvi_zip_latest (brain-input pivot view)."
       },
@@ -310,15 +310,15 @@ s01 | Zillow Home Value Index (ZHVI), ZIP-level all-homes (SFR + Condo) middle-t
     },
     {
       "metric": "home_value_zhvi_zip_33907",
-      "value": 201118,
+      "value": 198758,
       "direction": "stable",
-      "label": "ZHVI home value (USD) - ZIP 33907 (Fort Myers), 2026-07-31",
+      "label": "ZHVI home value (USD) - ZIP 33907 (Fort Myers), 2026-08-31",
       "variable_type": "extensive",
       "units": "USD",
       "display_format": "currency",
       "source": {
         "url": "https://files.zillowstatic.com/research/public_csvs/zhvi/Zip_zhvi_uc_sfrcondo_tier_0.33_0.67_sm_sa_month.csv",
-        "fetched_at": "2026-09-23T04:26:06Z",
+        "fetched_at": "2026-09-24T18:18:19Z",
         "tier": 3,
         "citation": "Zillow Home Value Index (ZHVI), ZIP-level all-homes (SFR + Condo) middle-tier (0.33-0.67) seasonally-adjusted. Source: Zillow Research (files.zillowstatic.com); Tier 2 cache: data_lake.zhvi_zip_latest (brain-input pivot view)."
       },
@@ -329,50 +329,50 @@ s01 | Zillow Home Value Index (ZHVI), ZIP-level all-homes (SFR + Condo) middle-t
       ]
     },
     {
-      "metric": "home_value_yoy_pct_zip_33921",
-      "value": -9.74,
+      "metric": "home_value_yoy_pct_zip_33919",
+      "value": -7.89,
       "direction": "falling",
-      "label": "ZHVI home-value YoY % - ZIP 33921 (Boca Grande), 2026-07-31",
+      "label": "ZHVI home-value YoY % - ZIP 33919 (Fort Myers), 2026-08-31",
       "variable_type": "intensive",
       "units": "percent",
       "display_format": "percent",
       "source": {
         "url": "https://files.zillowstatic.com/research/public_csvs/zhvi/Zip_zhvi_uc_sfrcondo_tier_0.33_0.67_sm_sa_month.csv",
-        "fetched_at": "2026-09-23T04:26:06Z",
+        "fetched_at": "2026-09-24T18:18:19Z",
         "tier": 3,
         "citation": "Zillow Home Value Index (ZHVI), ZIP-level all-homes (SFR + Condo) middle-tier (0.33-0.67) seasonally-adjusted. Source: Zillow Research (files.zillowstatic.com); Tier 2 cache: data_lake.zhvi_zip_latest (brain-input pivot view)."
       },
       "suggestions": [
         "Chart home values over time",
-        "What's driving home value yoy pct zip 33921?",
-        "How does home value yoy pct zip 33921 here compare to other SWFL areas?"
+        "What's driving home value yoy pct zip 33919?",
+        "How does home value yoy pct zip 33919 here compare to other SWFL areas?"
       ]
     },
     {
-      "metric": "home_value_zhvi_zip_33921",
-      "value": 2241705,
+      "metric": "home_value_zhvi_zip_33919",
+      "value": 243729,
       "direction": "stable",
-      "label": "ZHVI home value (USD) - ZIP 33921 (Boca Grande), 2026-07-31",
+      "label": "ZHVI home value (USD) - ZIP 33919 (Fort Myers), 2026-08-31",
       "variable_type": "extensive",
       "units": "USD",
       "display_format": "currency",
       "source": {
         "url": "https://files.zillowstatic.com/research/public_csvs/zhvi/Zip_zhvi_uc_sfrcondo_tier_0.33_0.67_sm_sa_month.csv",
-        "fetched_at": "2026-09-23T04:26:06Z",
+        "fetched_at": "2026-09-24T18:18:19Z",
         "tier": 3,
         "citation": "Zillow Home Value Index (ZHVI), ZIP-level all-homes (SFR + Condo) middle-tier (0.33-0.67) seasonally-adjusted. Source: Zillow Research (files.zillowstatic.com); Tier 2 cache: data_lake.zhvi_zip_latest (brain-input pivot view)."
       },
       "suggestions": [
         "Chart home values over time",
-        "What's driving home value zhvi zip 33921?",
-        "How does home value zhvi zip 33921 here compare to other SWFL areas?"
+        "What's driving home value zhvi zip 33919?",
+        "How does home value zhvi zip 33919 here compare to other SWFL areas?"
       ]
     }
   ],
   "detail_tables": [
     {
       "id": "home_values_by_zip",
-      "title": "SWFL ZHVI home value by ZIP — latest period 2026-07-31",
+      "title": "SWFL ZHVI home value by ZIP — latest period 2026-08-31",
       "grain": "zip",
       "columns": [
         {
@@ -418,10 +418,10 @@ s01 | Zillow Home Value Index (ZHVI), ZIP-level all-homes (SFR + Condo) middle-t
             "metro": "Cape Coral-Fort Myers, FL",
             "county_name": "Lee County",
             "city": "Fort Myers",
-            "latest_period": "2026-07-31",
-            "home_value_zhvi": 259784,
-            "value_yoy_pct": -6.79,
-            "value_mom_pct": -0.34
+            "latest_period": "2026-08-31",
+            "home_value_zhvi": 257066,
+            "value_yoy_pct": -5.44,
+            "value_mom_pct": -0.16
           }
         },
         {
@@ -431,10 +431,10 @@ s01 | Zillow Home Value Index (ZHVI), ZIP-level all-homes (SFR + Condo) middle-t
             "metro": "Cape Coral-Fort Myers, FL",
             "county_name": "Lee County",
             "city": "North Fort Myers",
-            "latest_period": "2026-07-31",
-            "home_value_zhvi": 227163,
-            "value_yoy_pct": -6.8,
-            "value_mom_pct": -0.39
+            "latest_period": "2026-08-31",
+            "home_value_zhvi": 223067,
+            "value_yoy_pct": -5.46,
+            "value_mom_pct": -0.29
           }
         },
         {
@@ -444,10 +444,10 @@ s01 | Zillow Home Value Index (ZHVI), ZIP-level all-homes (SFR + Condo) middle-t
             "metro": "Cape Coral-Fort Myers, FL",
             "county_name": "Lee County",
             "city": "Cape Coral",
-            "latest_period": "2026-07-31",
-            "home_value_zhvi": 339673,
-            "value_yoy_pct": -5.21,
-            "value_mom_pct": -0.16
+            "latest_period": "2026-08-31",
+            "home_value_zhvi": 337791,
+            "value_yoy_pct": -3.85,
+            "value_mom_pct": 0.1
           }
         },
         {
@@ -457,10 +457,10 @@ s01 | Zillow Home Value Index (ZHVI), ZIP-level all-homes (SFR + Condo) middle-t
             "metro": "Cape Coral-Fort Myers, FL",
             "county_name": "Lee County",
             "city": "Fort Myers",
-            "latest_period": "2026-07-31",
-            "home_value_zhvi": 282900,
-            "value_yoy_pct": -5.22,
-            "value_mom_pct": -0.47
+            "latest_period": "2026-08-31",
+            "home_value_zhvi": 281518,
+            "value_yoy_pct": -4.53,
+            "value_mom_pct": -0.35
           }
         },
         {
@@ -470,10 +470,10 @@ s01 | Zillow Home Value Index (ZHVI), ZIP-level all-homes (SFR + Condo) middle-t
             "metro": "Cape Coral-Fort Myers, FL",
             "county_name": "Lee County",
             "city": "Fort Myers",
-            "latest_period": "2026-07-31",
-            "home_value_zhvi": 201118,
-            "value_yoy_pct": -9.75,
-            "value_mom_pct": -0.78
+            "latest_period": "2026-08-31",
+            "home_value_zhvi": 198758,
+            "value_yoy_pct": -8.78,
+            "value_mom_pct": -0.61
           }
         },
         {
@@ -483,10 +483,10 @@ s01 | Zillow Home Value Index (ZHVI), ZIP-level all-homes (SFR + Condo) middle-t
             "metro": "Cape Coral-Fort Myers, FL",
             "county_name": "Lee County",
             "city": "Fort Myers",
-            "latest_period": "2026-07-31",
-            "home_value_zhvi": 321709,
-            "value_yoy_pct": -6.93,
-            "value_mom_pct": -0.34
+            "latest_period": "2026-08-31",
+            "home_value_zhvi": 318987,
+            "value_yoy_pct": -5.6,
+            "value_mom_pct": -0.19
           }
         },
         {
@@ -496,10 +496,10 @@ s01 | Zillow Home Value Index (ZHVI), ZIP-level all-homes (SFR + Condo) middle-t
             "metro": "Cape Coral-Fort Myers, FL",
             "county_name": "Lee County",
             "city": "Cape Coral",
-            "latest_period": "2026-07-31",
-            "home_value_zhvi": 295740,
-            "value_yoy_pct": -5.6,
-            "value_mom_pct": -0.27
+            "latest_period": "2026-08-31",
+            "home_value_zhvi": 293459,
+            "value_yoy_pct": -4.6,
+            "value_mom_pct": -0.17
           }
         },
         {
@@ -509,10 +509,10 @@ s01 | Zillow Home Value Index (ZHVI), ZIP-level all-homes (SFR + Condo) middle-t
             "metro": "Cape Coral-Fort Myers, FL",
             "county_name": "Lee County",
             "city": "Fort Myers",
-            "latest_period": "2026-07-31",
-            "home_value_zhvi": 376998,
-            "value_yoy_pct": -4.15,
-            "value_mom_pct": -0.21
+            "latest_period": "2026-08-31",
+            "home_value_zhvi": 376358,
+            "value_yoy_pct": -3,
+            "value_mom_pct": -0.06
           }
         },
         {
@@ -522,10 +522,10 @@ s01 | Zillow Home Value Index (ZHVI), ZIP-level all-homes (SFR + Condo) middle-t
             "metro": "Cape Coral-Fort Myers, FL",
             "county_name": "Lee County",
             "city": "Fort Myers",
-            "latest_period": "2026-07-31",
-            "home_value_zhvi": 440681,
-            "value_yoy_pct": -3.98,
-            "value_mom_pct": -0.06
+            "latest_period": "2026-08-31",
+            "home_value_zhvi": 439078,
+            "value_yoy_pct": -2.92,
+            "value_mom_pct": 0.1
           }
         },
         {
@@ -535,10 +535,10 @@ s01 | Zillow Home Value Index (ZHVI), ZIP-level all-homes (SFR + Condo) middle-t
             "metro": "Cape Coral-Fort Myers, FL",
             "county_name": "Lee County",
             "city": "Cape Coral",
-            "latest_period": "2026-07-31",
-            "home_value_zhvi": 422036,
-            "value_yoy_pct": -3.74,
-            "value_mom_pct": 0
+            "latest_period": "2026-08-31",
+            "home_value_zhvi": 421223,
+            "value_yoy_pct": -2.4,
+            "value_mom_pct": 0.24
           }
         },
         {
@@ -548,10 +548,10 @@ s01 | Zillow Home Value Index (ZHVI), ZIP-level all-homes (SFR + Condo) middle-t
             "metro": "Cape Coral-Fort Myers, FL",
             "county_name": "Lee County",
             "city": "Fort Myers",
-            "latest_period": "2026-07-31",
-            "home_value_zhvi": 212189,
-            "value_yoy_pct": -6.85,
-            "value_mom_pct": -0.57
+            "latest_period": "2026-08-31",
+            "home_value_zhvi": 209980,
+            "value_yoy_pct": -6.33,
+            "value_mom_pct": -0.44
           }
         },
         {
@@ -561,10 +561,10 @@ s01 | Zillow Home Value Index (ZHVI), ZIP-level all-homes (SFR + Condo) middle-t
             "metro": "Cape Coral-Fort Myers, FL",
             "county_name": "Lee County",
             "city": "North Fort Myers",
-            "latest_period": "2026-07-31",
-            "home_value_zhvi": 292090,
-            "value_yoy_pct": -3.93,
-            "value_mom_pct": -0.18
+            "latest_period": "2026-08-31",
+            "home_value_zhvi": 290196,
+            "value_yoy_pct": -2.83,
+            "value_mom_pct": -0.08
           }
         },
         {
@@ -574,10 +574,10 @@ s01 | Zillow Home Value Index (ZHVI), ZIP-level all-homes (SFR + Condo) middle-t
             "metro": "Cape Coral-Fort Myers, FL",
             "county_name": "Lee County",
             "city": "Fort Myers",
-            "latest_period": "2026-07-31",
-            "home_value_zhvi": 245004,
-            "value_yoy_pct": -9.24,
-            "value_mom_pct": -0.44
+            "latest_period": "2026-08-31",
+            "home_value_zhvi": 243729,
+            "value_yoy_pct": -7.89,
+            "value_mom_pct": -0.36
           }
         },
         {
@@ -587,10 +587,10 @@ s01 | Zillow Home Value Index (ZHVI), ZIP-level all-homes (SFR + Condo) middle-t
             "metro": "Cape Coral-Fort Myers, FL",
             "county_name": "Lee County",
             "city": "Alva",
-            "latest_period": "2026-07-31",
-            "home_value_zhvi": 381641,
-            "value_yoy_pct": -4.7,
-            "value_mom_pct": -0.29
+            "latest_period": "2026-08-31",
+            "home_value_zhvi": 379757,
+            "value_yoy_pct": -3.91,
+            "value_mom_pct": -0.18
           }
         },
         {
@@ -600,10 +600,10 @@ s01 | Zillow Home Value Index (ZHVI), ZIP-level all-homes (SFR + Condo) middle-t
             "metro": "Cape Coral-Fort Myers, FL",
             "county_name": "Lee County",
             "city": "Boca Grande",
-            "latest_period": "2026-07-31",
-            "home_value_zhvi": 2241705,
-            "value_yoy_pct": -9.74,
-            "value_mom_pct": -0.63
+            "latest_period": "2026-08-31",
+            "home_value_zhvi": 2271568,
+            "value_yoy_pct": -7.51,
+            "value_mom_pct": 0.24
           }
         },
         {
@@ -613,9 +613,9 @@ s01 | Zillow Home Value Index (ZHVI), ZIP-level all-homes (SFR + Condo) middle-t
             "metro": "Cape Coral-Fort Myers, FL",
             "county_name": "Lee County",
             "city": "Bokeelia",
-            "latest_period": "2026-07-31",
-            "home_value_zhvi": 361010,
-            "value_yoy_pct": -5.42,
+            "latest_period": "2026-08-31",
+            "home_value_zhvi": 359866,
+            "value_yoy_pct": -3.83,
             "value_mom_pct": 0.16
           }
         },
@@ -626,10 +626,10 @@ s01 | Zillow Home Value Index (ZHVI), ZIP-level all-homes (SFR + Condo) middle-t
             "metro": "Cape Coral-Fort Myers, FL",
             "county_name": "Lee County",
             "city": "Captiva",
-            "latest_period": "2026-07-31",
-            "home_value_zhvi": 1063630,
-            "value_yoy_pct": -5.03,
-            "value_mom_pct": 0.05
+            "latest_period": "2026-08-31",
+            "home_value_zhvi": 1064140,
+            "value_yoy_pct": -2.59,
+            "value_mom_pct": 0.49
           }
         },
         {
@@ -639,10 +639,10 @@ s01 | Zillow Home Value Index (ZHVI), ZIP-level all-homes (SFR + Condo) middle-t
             "metro": "Cape Coral-Fort Myers, FL",
             "county_name": "Lee County",
             "city": "Estero",
-            "latest_period": "2026-07-31",
-            "home_value_zhvi": 474706,
-            "value_yoy_pct": -4.78,
-            "value_mom_pct": -0.21
+            "latest_period": "2026-08-31",
+            "home_value_zhvi": 472249,
+            "value_yoy_pct": -3.57,
+            "value_mom_pct": 0.12
           }
         },
         {
@@ -652,10 +652,10 @@ s01 | Zillow Home Value Index (ZHVI), ZIP-level all-homes (SFR + Condo) middle-t
             "metro": "Cape Coral-Fort Myers, FL",
             "county_name": "Lee County",
             "city": "Fort Myers Beach",
-            "latest_period": "2026-07-31",
-            "home_value_zhvi": 495858,
-            "value_yoy_pct": -3.03,
-            "value_mom_pct": 0.2
+            "latest_period": "2026-08-31",
+            "home_value_zhvi": 486696,
+            "value_yoy_pct": -0.95,
+            "value_mom_pct": 0.18
           }
         },
         {
@@ -665,10 +665,10 @@ s01 | Zillow Home Value Index (ZHVI), ZIP-level all-homes (SFR + Condo) middle-t
             "metro": "Cape Coral-Fort Myers, FL",
             "county_name": "Lee County",
             "city": "Lehigh Acres",
-            "latest_period": "2026-07-31",
-            "home_value_zhvi": 237632,
-            "value_yoy_pct": -7.57,
-            "value_mom_pct": -0.83
+            "latest_period": "2026-08-31",
+            "home_value_zhvi": 236962,
+            "value_yoy_pct": -6.98,
+            "value_mom_pct": -0.79
           }
         },
         {
@@ -678,10 +678,10 @@ s01 | Zillow Home Value Index (ZHVI), ZIP-level all-homes (SFR + Condo) middle-t
             "metro": "Cape Coral-Fort Myers, FL",
             "county_name": "Lee County",
             "city": "Saint James City",
-            "latest_period": "2026-07-31",
-            "home_value_zhvi": 430303,
-            "value_yoy_pct": -1.27,
-            "value_mom_pct": 0.44
+            "latest_period": "2026-08-31",
+            "home_value_zhvi": 430211,
+            "value_yoy_pct": 0.7,
+            "value_mom_pct": 0.67
           }
         },
         {
@@ -691,10 +691,10 @@ s01 | Zillow Home Value Index (ZHVI), ZIP-level all-homes (SFR + Condo) middle-t
             "metro": "Cape Coral-Fort Myers, FL",
             "county_name": "Lee County",
             "city": "Sanibel",
-            "latest_period": "2026-07-31",
-            "home_value_zhvi": 810113,
-            "value_yoy_pct": -4.25,
-            "value_mom_pct": 0.36
+            "latest_period": "2026-08-31",
+            "home_value_zhvi": 794210,
+            "value_yoy_pct": -1.82,
+            "value_mom_pct": 0.38
           }
         },
         {
@@ -704,10 +704,10 @@ s01 | Zillow Home Value Index (ZHVI), ZIP-level all-homes (SFR + Condo) middle-t
             "metro": "Cape Coral-Fort Myers, FL",
             "county_name": "Lee County",
             "city": "Fort Myers",
-            "latest_period": "2026-07-31",
-            "home_value_zhvi": 336022,
-            "value_yoy_pct": -4.02,
-            "value_mom_pct": -0.07
+            "latest_period": "2026-08-31",
+            "home_value_zhvi": 334302,
+            "value_yoy_pct": -3.05,
+            "value_mom_pct": -0.1
           }
         },
         {
@@ -717,10 +717,10 @@ s01 | Zillow Home Value Index (ZHVI), ZIP-level all-homes (SFR + Condo) middle-t
             "metro": "Cape Coral-Fort Myers, FL",
             "county_name": "Lee County",
             "city": "Fort Myers",
-            "latest_period": "2026-07-31",
-            "home_value_zhvi": 356068,
-            "value_yoy_pct": -4.76,
-            "value_mom_pct": -0.3
+            "latest_period": "2026-08-31",
+            "home_value_zhvi": 351980,
+            "value_yoy_pct": -4.19,
+            "value_mom_pct": -0.17
           }
         },
         {
@@ -730,10 +730,10 @@ s01 | Zillow Home Value Index (ZHVI), ZIP-level all-homes (SFR + Condo) middle-t
             "metro": "Cape Coral-Fort Myers, FL",
             "county_name": "Lee County",
             "city": "Lehigh Acres",
-            "latest_period": "2026-07-31",
-            "home_value_zhvi": 285975,
-            "value_yoy_pct": -6.31,
-            "value_mom_pct": -0.55
+            "latest_period": "2026-08-31",
+            "home_value_zhvi": 284698,
+            "value_yoy_pct": -5.52,
+            "value_mom_pct": -0.45
           }
         },
         {
@@ -743,10 +743,10 @@ s01 | Zillow Home Value Index (ZHVI), ZIP-level all-homes (SFR + Condo) middle-t
             "metro": "Cape Coral-Fort Myers, FL",
             "county_name": "Lee County",
             "city": "Lehigh Acres",
-            "latest_period": "2026-07-31",
-            "home_value_zhvi": 309197,
-            "value_yoy_pct": -4.53,
-            "value_mom_pct": -0.44
+            "latest_period": "2026-08-31",
+            "home_value_zhvi": 313454,
+            "value_yoy_pct": -4.09,
+            "value_mom_pct": -0.48
           }
         },
         {
@@ -756,10 +756,10 @@ s01 | Zillow Home Value Index (ZHVI), ZIP-level all-homes (SFR + Condo) middle-t
             "metro": "Cape Coral-Fort Myers, FL",
             "county_name": "Lee County",
             "city": "Lehigh Acres",
-            "latest_period": "2026-07-31",
-            "home_value_zhvi": 274432,
-            "value_yoy_pct": -10.47,
-            "value_mom_pct": -0.42
+            "latest_period": "2026-08-31",
+            "home_value_zhvi": 278975,
+            "value_yoy_pct": -9.61,
+            "value_mom_pct": 0
           }
         },
         {
@@ -769,10 +769,10 @@ s01 | Zillow Home Value Index (ZHVI), ZIP-level all-homes (SFR + Condo) middle-t
             "metro": "Cape Coral-Fort Myers, FL",
             "county_name": "Lee County",
             "city": "Lehigh Acres",
-            "latest_period": "2026-07-31",
-            "home_value_zhvi": 285296,
-            "value_yoy_pct": -6.21,
-            "value_mom_pct": -0.49
+            "latest_period": "2026-08-31",
+            "home_value_zhvi": 287028,
+            "value_yoy_pct": -5.52,
+            "value_mom_pct": -0.5
           }
         },
         {
@@ -782,10 +782,10 @@ s01 | Zillow Home Value Index (ZHVI), ZIP-level all-homes (SFR + Condo) middle-t
             "metro": "Cape Coral-Fort Myers, FL",
             "county_name": "Lee County",
             "city": "Lehigh Acres",
-            "latest_period": "2026-07-31",
-            "home_value_zhvi": 284153,
-            "value_yoy_pct": -7.24,
-            "value_mom_pct": -0.68
+            "latest_period": "2026-08-31",
+            "home_value_zhvi": 283173,
+            "value_yoy_pct": -6.73,
+            "value_mom_pct": -0.65
           }
         },
         {
@@ -795,10 +795,10 @@ s01 | Zillow Home Value Index (ZHVI), ZIP-level all-homes (SFR + Condo) middle-t
             "metro": "Cape Coral-Fort Myers, FL",
             "county_name": "Lee County",
             "city": "Cape Coral",
-            "latest_period": "2026-07-31",
-            "home_value_zhvi": 324077,
-            "value_yoy_pct": -4.56,
-            "value_mom_pct": -0.16
+            "latest_period": "2026-08-31",
+            "home_value_zhvi": 322222,
+            "value_yoy_pct": -3.5,
+            "value_mom_pct": 0.02
           }
         },
         {
@@ -808,10 +808,10 @@ s01 | Zillow Home Value Index (ZHVI), ZIP-level all-homes (SFR + Condo) middle-t
             "metro": "Cape Coral-Fort Myers, FL",
             "county_name": "Lee County",
             "city": "Cape Coral",
-            "latest_period": "2026-07-31",
-            "home_value_zhvi": 360654,
-            "value_yoy_pct": -4.03,
-            "value_mom_pct": 0
+            "latest_period": "2026-08-31",
+            "home_value_zhvi": 359005,
+            "value_yoy_pct": -2.91,
+            "value_mom_pct": 0.2
           }
         },
         {
@@ -821,10 +821,10 @@ s01 | Zillow Home Value Index (ZHVI), ZIP-level all-homes (SFR + Condo) middle-t
             "metro": "Cape Coral-Fort Myers, FL",
             "county_name": "Lee County",
             "city": "Cape Coral",
-            "latest_period": "2026-07-31",
-            "home_value_zhvi": 327791,
-            "value_yoy_pct": -5.49,
-            "value_mom_pct": -0.24
+            "latest_period": "2026-08-31",
+            "home_value_zhvi": 326142,
+            "value_yoy_pct": -4.62,
+            "value_mom_pct": -0.14
           }
         },
         {
@@ -834,10 +834,10 @@ s01 | Zillow Home Value Index (ZHVI), ZIP-level all-homes (SFR + Condo) middle-t
             "metro": "Naples-Marco Island, FL",
             "county_name": "Collier County",
             "city": "Naples",
-            "latest_period": "2026-07-31",
-            "home_value_zhvi": 1298081,
-            "value_yoy_pct": -1.02,
-            "value_mom_pct": 0.13
+            "latest_period": "2026-08-31",
+            "home_value_zhvi": 1284426,
+            "value_yoy_pct": 0.81,
+            "value_mom_pct": 0.46
           }
         },
         {
@@ -847,10 +847,10 @@ s01 | Zillow Home Value Index (ZHVI), ZIP-level all-homes (SFR + Condo) middle-t
             "metro": "Naples-Marco Island, FL",
             "county_name": "Collier County",
             "city": "Naples",
-            "latest_period": "2026-07-31",
-            "home_value_zhvi": 1104769,
-            "value_yoy_pct": -3.77,
-            "value_mom_pct": 0.11
+            "latest_period": "2026-08-31",
+            "home_value_zhvi": 1095782,
+            "value_yoy_pct": -1.81,
+            "value_mom_pct": 0.3
           }
         },
         {
@@ -860,10 +860,10 @@ s01 | Zillow Home Value Index (ZHVI), ZIP-level all-homes (SFR + Condo) middle-t
             "metro": "Naples-Marco Island, FL",
             "county_name": "Collier County",
             "city": "Naples",
-            "latest_period": "2026-07-31",
-            "home_value_zhvi": 350338,
-            "value_yoy_pct": -3.61,
-            "value_mom_pct": -0.08
+            "latest_period": "2026-08-31",
+            "home_value_zhvi": 346901,
+            "value_yoy_pct": -2.65,
+            "value_mom_pct": 0.01
           }
         },
         {
@@ -873,10 +873,10 @@ s01 | Zillow Home Value Index (ZHVI), ZIP-level all-homes (SFR + Condo) middle-t
             "metro": "Naples-Marco Island, FL",
             "county_name": "Collier County",
             "city": "Naples",
-            "latest_period": "2026-07-31",
-            "home_value_zhvi": 451248,
-            "value_yoy_pct": -2.75,
-            "value_mom_pct": -0.15
+            "latest_period": "2026-08-31",
+            "home_value_zhvi": 448271,
+            "value_yoy_pct": -1.92,
+            "value_mom_pct": 0.13
           }
         },
         {
@@ -886,10 +886,10 @@ s01 | Zillow Home Value Index (ZHVI), ZIP-level all-homes (SFR + Condo) middle-t
             "metro": "Naples-Marco Island, FL",
             "county_name": "Collier County",
             "city": "Naples",
-            "latest_period": "2026-07-31",
-            "home_value_zhvi": 994774,
-            "value_yoy_pct": -3.84,
-            "value_mom_pct": 0.33
+            "latest_period": "2026-08-31",
+            "home_value_zhvi": 992688,
+            "value_yoy_pct": -1.88,
+            "value_mom_pct": 0.51
           }
         },
         {
@@ -899,10 +899,10 @@ s01 | Zillow Home Value Index (ZHVI), ZIP-level all-homes (SFR + Condo) middle-t
             "metro": "Naples-Marco Island, FL",
             "county_name": "Collier County",
             "city": "Naples",
-            "latest_period": "2026-07-31",
-            "home_value_zhvi": 580925,
-            "value_yoy_pct": -3.1,
-            "value_mom_pct": -0.1
+            "latest_period": "2026-08-31",
+            "home_value_zhvi": 577772,
+            "value_yoy_pct": -1.94,
+            "value_mom_pct": 0.24
           }
         },
         {
@@ -912,10 +912,10 @@ s01 | Zillow Home Value Index (ZHVI), ZIP-level all-homes (SFR + Condo) middle-t
             "metro": "Naples-Marco Island, FL",
             "county_name": "Collier County",
             "city": "Naples",
-            "latest_period": "2026-07-31",
-            "home_value_zhvi": 601585,
-            "value_yoy_pct": -3.85,
-            "value_mom_pct": -0.09
+            "latest_period": "2026-08-31",
+            "home_value_zhvi": 595496,
+            "value_yoy_pct": -2.51,
+            "value_mom_pct": 0.27
           }
         },
         {
@@ -925,10 +925,10 @@ s01 | Zillow Home Value Index (ZHVI), ZIP-level all-homes (SFR + Condo) middle-t
             "metro": "Naples-Marco Island, FL",
             "county_name": "Collier County",
             "city": "Naples",
-            "latest_period": "2026-07-31",
-            "home_value_zhvi": 330519,
-            "value_yoy_pct": -6.32,
-            "value_mom_pct": -0.17
+            "latest_period": "2026-08-31",
+            "home_value_zhvi": 326267,
+            "value_yoy_pct": -5.15,
+            "value_mom_pct": -0.03
           }
         },
         {
@@ -938,10 +938,10 @@ s01 | Zillow Home Value Index (ZHVI), ZIP-level all-homes (SFR + Condo) middle-t
             "metro": "Naples-Marco Island, FL",
             "county_name": "Collier County",
             "city": "Naples",
-            "latest_period": "2026-07-31",
-            "home_value_zhvi": 497608,
-            "value_yoy_pct": -4.97,
-            "value_mom_pct": -0.07
+            "latest_period": "2026-08-31",
+            "home_value_zhvi": 495415,
+            "value_yoy_pct": -3.77,
+            "value_mom_pct": 0.11
           }
         },
         {
@@ -951,10 +951,10 @@ s01 | Zillow Home Value Index (ZHVI), ZIP-level all-homes (SFR + Condo) middle-t
             "metro": "Naples-Marco Island, FL",
             "county_name": "Collier County",
             "city": "Naples",
-            "latest_period": "2026-07-31",
-            "home_value_zhvi": 516337,
-            "value_yoy_pct": -4.54,
-            "value_mom_pct": 0.1
+            "latest_period": "2026-08-31",
+            "home_value_zhvi": 512747,
+            "value_yoy_pct": -3.09,
+            "value_mom_pct": 0.33
           }
         },
         {
@@ -964,10 +964,10 @@ s01 | Zillow Home Value Index (ZHVI), ZIP-level all-homes (SFR + Condo) middle-t
             "metro": "Naples-Marco Island, FL",
             "county_name": "Collier County",
             "city": "Naples",
-            "latest_period": "2026-07-31",
-            "home_value_zhvi": 451488,
-            "value_yoy_pct": -3.47,
-            "value_mom_pct": -0.18
+            "latest_period": "2026-08-31",
+            "home_value_zhvi": 452137,
+            "value_yoy_pct": -2.61,
+            "value_mom_pct": 0.04
           }
         },
         {
@@ -977,10 +977,10 @@ s01 | Zillow Home Value Index (ZHVI), ZIP-level all-homes (SFR + Condo) middle-t
             "metro": "Naples-Marco Island, FL",
             "county_name": "Collier County",
             "city": "Naples",
-            "latest_period": "2026-07-31",
-            "home_value_zhvi": 560837,
-            "value_yoy_pct": -2.06,
-            "value_mom_pct": -0.2
+            "latest_period": "2026-08-31",
+            "home_value_zhvi": 558883,
+            "value_yoy_pct": -1.28,
+            "value_mom_pct": 0.03
           }
         },
         {
@@ -990,10 +990,10 @@ s01 | Zillow Home Value Index (ZHVI), ZIP-level all-homes (SFR + Condo) middle-t
             "metro": "Naples-Marco Island, FL",
             "county_name": "Collier County",
             "city": "Naples",
-            "latest_period": "2026-07-31",
-            "home_value_zhvi": 649849,
-            "value_yoy_pct": -4.6,
-            "value_mom_pct": -0.07
+            "latest_period": "2026-08-31",
+            "home_value_zhvi": 645244,
+            "value_yoy_pct": -3.41,
+            "value_mom_pct": 0.22
           }
         },
         {
@@ -1003,10 +1003,10 @@ s01 | Zillow Home Value Index (ZHVI), ZIP-level all-homes (SFR + Condo) middle-t
             "metro": "Naples-Marco Island, FL",
             "county_name": "Collier County",
             "city": "Naples",
-            "latest_period": "2026-07-31",
-            "home_value_zhvi": 549381,
-            "value_yoy_pct": -3.8,
-            "value_mom_pct": -0.16
+            "latest_period": "2026-08-31",
+            "home_value_zhvi": 546857,
+            "value_yoy_pct": -3.04,
+            "value_mom_pct": 0.09
           }
         },
         {
@@ -1016,10 +1016,10 @@ s01 | Zillow Home Value Index (ZHVI), ZIP-level all-homes (SFR + Condo) middle-t
             "metro": "Cape Coral-Fort Myers, FL",
             "county_name": "Lee County",
             "city": "Bonita Springs",
-            "latest_period": "2026-07-31",
-            "home_value_zhvi": 634444,
-            "value_yoy_pct": -4.76,
-            "value_mom_pct": 0.02
+            "latest_period": "2026-08-31",
+            "home_value_zhvi": 628786,
+            "value_yoy_pct": -3.04,
+            "value_mom_pct": 0.17
           }
         },
         {
@@ -1029,10 +1029,10 @@ s01 | Zillow Home Value Index (ZHVI), ZIP-level all-homes (SFR + Condo) middle-t
             "metro": "Cape Coral-Fort Myers, FL",
             "county_name": "Lee County",
             "city": "Bonita Springs",
-            "latest_period": "2026-07-31",
-            "home_value_zhvi": 458395,
-            "value_yoy_pct": -4.47,
-            "value_mom_pct": -0.14
+            "latest_period": "2026-08-31",
+            "home_value_zhvi": 456672,
+            "value_yoy_pct": -3.24,
+            "value_mom_pct": 0.09
           }
         },
         {
@@ -1042,10 +1042,10 @@ s01 | Zillow Home Value Index (ZHVI), ZIP-level all-homes (SFR + Condo) middle-t
             "metro": "Naples-Marco Island, FL",
             "county_name": "Collier County",
             "city": "Chokoloskee",
-            "latest_period": "2026-07-31",
-            "home_value_zhvi": 311226,
-            "value_yoy_pct": -6.49,
-            "value_mom_pct": -0.23
+            "latest_period": "2026-08-31",
+            "home_value_zhvi": 310234,
+            "value_yoy_pct": -5.26,
+            "value_mom_pct": 0.21
           }
         },
         {
@@ -1055,10 +1055,10 @@ s01 | Zillow Home Value Index (ZHVI), ZIP-level all-homes (SFR + Condo) middle-t
             "metro": "Naples-Marco Island, FL",
             "county_name": "Collier County",
             "city": "Everglades",
-            "latest_period": "2026-07-31",
-            "home_value_zhvi": 299870,
-            "value_yoy_pct": 0.83,
-            "value_mom_pct": 0.16
+            "latest_period": "2026-08-31",
+            "home_value_zhvi": 300044,
+            "value_yoy_pct": 1.61,
+            "value_mom_pct": 0.05
           }
         },
         {
@@ -1068,10 +1068,10 @@ s01 | Zillow Home Value Index (ZHVI), ZIP-level all-homes (SFR + Condo) middle-t
             "metro": "Naples-Marco Island, FL",
             "county_name": "Collier County",
             "city": "Naples",
-            "latest_period": "2026-07-31",
-            "home_value_zhvi": 587222,
-            "value_yoy_pct": -3.11,
-            "value_mom_pct": -0.47
+            "latest_period": "2026-08-31",
+            "home_value_zhvi": 594099,
+            "value_yoy_pct": -1.9,
+            "value_mom_pct": 0.08
           }
         },
         {
@@ -1081,10 +1081,10 @@ s01 | Zillow Home Value Index (ZHVI), ZIP-level all-homes (SFR + Condo) middle-t
             "metro": "Naples-Marco Island, FL",
             "county_name": "Collier County",
             "city": "Immokalee",
-            "latest_period": "2026-07-31",
-            "home_value_zhvi": 345201,
-            "value_yoy_pct": -4.76,
-            "value_mom_pct": -0.08
+            "latest_period": "2026-08-31",
+            "home_value_zhvi": 341993,
+            "value_yoy_pct": -3.86,
+            "value_mom_pct": -0.14
           }
         },
         {
@@ -1094,16 +1094,16 @@ s01 | Zillow Home Value Index (ZHVI), ZIP-level all-homes (SFR + Condo) middle-t
             "metro": "Naples-Marco Island, FL",
             "county_name": "Collier County",
             "city": "Marco Island",
-            "latest_period": "2026-07-31",
-            "home_value_zhvi": 852380,
-            "value_yoy_pct": -0.87,
-            "value_mom_pct": -0.08
+            "latest_period": "2026-08-31",
+            "home_value_zhvi": 848457,
+            "value_yoy_pct": 0.24,
+            "value_mom_pct": 0.21
           }
         }
       ],
       "source": {
         "url": "https://files.zillowstatic.com/research/public_csvs/zhvi/Zip_zhvi_uc_sfrcondo_tier_0.33_0.67_sm_sa_month.csv",
-        "fetched_at": "2026-09-23T04:26:06Z",
+        "fetched_at": "2026-09-24T18:18:19Z",
         "tier": 3,
         "citation": "Zillow Home Value Index (ZHVI), ZIP-level all-homes (SFR + Condo) middle-tier (0.33-0.67) seasonally-adjusted. Source: Zillow Research (files.zillowstatic.com); Tier 2 cache: data_lake.zhvi_zip_latest (brain-input pivot view)."
       },
@@ -1121,7 +1121,7 @@ s01 | Zillow Home Value Index (ZHVI), ZIP-level all-homes (SFR + Condo) middle-t
   "relevance": {
     "decay_curve": "weeks",
     "half_life_hours": 720,
-    "computed_at": "2026-09-23T04:26:07Z"
+    "computed_at": "2026-09-24T18:18:20Z"
   },
   "exogenous_signals": []
 }
@@ -1130,5 +1130,5 @@ s01 | Zillow Home Value Index (ZHVI), ZIP-level all-homes (SFR + Condo) middle-t
 - home-values-swfl: track SWFL ZIP-level home values via Zillow ZHVI as the market-value input to the investor-yield composite.
 
 --- RECENT NOTES ---
-- 2026-09-23: pack refined by the Refinery — 1 fact(s) from 1 source(s).
+- 2026-09-24: pack refined by the Refinery — 1 fact(s) from 1 source(s).
 ```
