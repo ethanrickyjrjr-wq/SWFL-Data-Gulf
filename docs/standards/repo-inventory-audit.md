@@ -77,6 +77,7 @@ is read from the actual pipeline code, not the registry.
 | fdot | ArcGIS REST | data_lake.fdot_aadt_fl |
 | lee_permits | scrape (crawl4ai, Accela) + CSV | data_lake.lee_building_permits |
 | collier_permits | scrape (crawl4ai) + CSV | data_lake.collier_building_permits |
+| condo_baseline_swfl | ArcGIS REST (Lee gisserver910 footprints layer 8; Collier services2 MilestoneMap/2) + PDF (Collier milestone list, pymupdf) + LOCAL Ollama tiebreak (see LLM call sites) | data_lake.condo_buildings_swfl, data_lake.condo_association_xref, data_lake.condo_compliance_swfl_v — consumer: condo-sirs-swfl pack via refinery/sources/condo-baseline-source.mts (added 08/30/2026) |
 | fl_dor_tdt | API | public.fl_dor_tdt_collections |
 | fl_dor_sales_tax | API | public.fl_dor_sales_tax |
 | fdle_crime_swfl | API (FBI CDE) | public.fdle_crime_swfl |
@@ -273,7 +274,8 @@ before this work (they were `581,910,1115` at `f863b2ce~1`).
 - `refinery/tools/synthesize-corridor-character.mts:467` — operator-run corridor-character synthesis — default callType
 - `lib/prospects/enrich-brand.ts:187` — operator prospect/brand enrichment tool — default callType, injectable client
 
-### Python, ingest time (all 8, meter through `log_api_usage()`) {#llm-call-sites-python-ingest}
+### Python, ingest time (all 9 — 8 Anthropic + 1 local Ollama; all meter through `log_api_usage()`) {#llm-call-sites-python-ingest}
+- `ingest/lib/local_llm.py` (`OllamaClient.chat_json`) — `ingest_condo_xref` via `ingest/pipelines/condo_baseline_swfl/match.py` — **LOCAL** Ollama on the `swfl-local` runner (gpt-oss:20b primary + gemma4:12b judge), closed-set entity-resolution tiebreak; JSON-schema-constrained + re-validated; logged at $0 (model not in RATES → cost 0, row still written). Zero cloud spend by construction; `LOCAL_LLM_DISABLED=1` / `--skip-llm` turns the band off (ambiguous → needs_review). Added 08/30/2026.
 - `ingest/lib/extract_client.py:202` — `ingest_extract` — general document text extraction
 - `ingest/pipelines/corridor_grounded/pipeline.py:183` — `ingest_corridor_grounded` — web-search-grounded corridor facts (orphaned, see above)
 - `ingest/pipelines/city_pulse_corridors/distill.py:216` — `ingest_corridor_pulse_distill` — corridor pulse "fact" rows, Sonnet — currently unscheduled (paused 07/05/2026)
