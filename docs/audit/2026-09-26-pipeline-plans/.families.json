@@ -1,0 +1,227 @@
+[
+  {
+    "n": "01",
+    "slug": "listings-lifecycle",
+    "desc": "SteadyAPI-era listing spine (PARKED legs) + market aggregates + rentals",
+    "items": [
+      "listing_lifecycle",
+      "listing_week",
+      "market_aggregates_histogram",
+      "market_aggregates_details",
+      "rentals_swfl",
+      "land_manufactured_swfl (not_yet_running)"
+    ]
+  },
+  {
+    "n": "02",
+    "slug": "demand-signals",
+    "desc": "search/interest/STR demand + the two live-search daily probes",
+    "items": [
+      "live_search_daily_median_asking",
+      "live_search_daily_mortgage",
+      "realtor_geo_trends",
+      "swfl_search_demand",
+      "airdna_str_swfl (not_yet_running)"
+    ]
+  },
+  {
+    "n": "03",
+    "slug": "zillow",
+    "desc": "ZHVI / ZORI / tier divergence, tier-1 DuckDB + tier-2 pairs",
+    "items": [
+      "zhvi_swfl_duckdb",
+      "zhvi_swfl_tier2",
+      "zori_swfl_duckdb",
+      "zori_swfl_tier2",
+      "tier_divergence_swfl_duckdb",
+      "tier_divergence_swfl_tier2"
+    ]
+  },
+  {
+    "n": "04",
+    "slug": "redfin",
+    "desc": "Redfin data-center monthly files: county, city, seller-stress trio",
+    "items": [
+      "redfin_swfl",
+      "redfin_price_drops",
+      "redfin_contract_cancellations",
+      "redfin_delistings_relistings",
+      "redfin_collier",
+      "redfin_lee",
+      "redfin_city_swfl"
+    ]
+  },
+  {
+    "n": "05",
+    "slug": "weather-env",
+    "desc": "hurricanes, storms, water, rainfall, flood insurance",
+    "items": ["hurdat2_fl", "storm_history_swfl", "usgs", "noaa_ghcn_rainfall", "fema"]
+  },
+  {
+    "n": "06",
+    "slug": "bls",
+    "desc": "BLS PPI / LAUS / QCEW / OEWS (tier-1 + tier-2)",
+    "items": ["bls_ppi", "bls_laus", "bls_qcew", "bls_oews_swfl", "bls_oews_swfl_tier1"]
+  },
+  {
+    "n": "07",
+    "slug": "federal-econ",
+    "desc": "Census CBP/ACS, FDIC deposits, FHFA HPI, FAF5 freight, FDOT AADT",
+    "items": ["census_cbp", "census_acs", "fdic_bankfind", "fhfa", "faf5", "fdot"]
+  },
+  {
+    "n": "08",
+    "slug": "parcels-valuation",
+    "desc": "Lee + Collier parcel layers, LeePA valuation + comparable sales",
+    "items": ["leepa", "leepa_comp_sales", "lee_parcels", "collier_parcels"]
+  },
+  {
+    "n": "09",
+    "slug": "communities",
+    "desc": "planned developments, PD crosswalk, neighborhood stats + amenities",
+    "items": [
+      "lee_planned_developments",
+      "parcel_community_pd",
+      "neighborhood_stats",
+      "neighborhood_amenities"
+    ]
+  },
+  {
+    "n": "10",
+    "slug": "permits-records",
+    "desc": "building permits (Lee Accela, Collier Akamai, MHS) + official records (Collier daily, Lee deeds)",
+    "items": [
+      "lee_permits",
+      "collier_permits",
+      "mhs_permits_swfl",
+      "collier_official_records",
+      "lee_deed_official_records (not_yet_running)"
+    ]
+  },
+  {
+    "n": "11",
+    "slug": "state-institutional",
+    "desc": "FL DOR tax series, FDLE crime, FGCU RERI, RSW airport, SBA franchise",
+    "items": [
+      "fl_dor_tdt",
+      "fl_dor_sales_tax",
+      "fdle_crime_swfl",
+      "fgcu_reri_indicators",
+      "rsw_airport_monthly",
+      "sba_foia_franchise_outcomes (not_yet_running)"
+    ]
+  },
+  {
+    "n": "12",
+    "slug": "dbpr",
+    "desc": "DBPR press releases, public notices, SIRS (Fedora-pinned), licenses, applicants, RE licensees (dark root)",
+    "items": [
+      "dbpr_press_releases",
+      "dbpr_public_notices",
+      "dbpr_sirs_submissions",
+      "fl_dbpr_licenses",
+      "fl_dbpr_applicants",
+      "dbpr_re_licensees"
+    ]
+  },
+  {
+    "n": "13",
+    "slug": "pulse-news",
+    "desc": "city pulse (credit-wall parked), corridors, news, SWFL Inc",
+    "items": [
+      "city_pulse",
+      "city_pulse_corridors",
+      "city_pulse_corridors_tier2",
+      "news_swfl",
+      "swfl_inc"
+    ]
+  },
+  {
+    "n": "14",
+    "slug": "cre-reports",
+    "desc": "CRE PDF/report ingests and local CRE context",
+    "items": [
+      "marketbeat_swfl",
+      "colliers_industrial",
+      "mhs_databook",
+      "cre_figures",
+      "lee_associates_swfl",
+      "estero_edc",
+      "fmb_recovery"
+    ]
+  },
+  {
+    "n": "15",
+    "slug": "cre-listings",
+    "desc": "CRE listing scrapes (Crexi Fedora-pinned, Brevitas) + market heat",
+    "items": ["crexi_listings", "brevitas_listings", "market_heat_swfl"]
+  },
+  {
+    "n": "16",
+    "slug": "ops-chain",
+    "desc": "the nightly chain and every job that gates, rebuilds, probes or grades",
+    "items": [
+      "nightly-chain",
+      "nightly-chain-dispatch (vercel.json)",
+      "daily-rebuild",
+      "narrative-bake",
+      "freshness-probe-daily",
+      "tripwire-hourly",
+      "supabase-metrics-scrape",
+      "gate-a-parity",
+      "data-targets-daily",
+      "reverify-signals-daily",
+      "view-vintages-monthly",
+      "project-feed-change-detection-daily",
+      "home-values-investor-monthly"
+    ]
+  },
+  {
+    "n": "17",
+    "slug": "product-schedulers",
+    "desc": "email / social / outreach / nudges / MLS sync / deliverable builds and sweeps",
+    "items": [
+      "email-scheduler",
+      "social-scheduler",
+      "outreach-drip",
+      "outreach-demo",
+      "lifecycle-nudges-daily",
+      "data-readiness-cron",
+      "mls-sync (vercel.json)",
+      "build-example-deliverables",
+      "deliverables-retention-sweep-daily",
+      "social-engagement-poll",
+      "social-pulse-scan",
+      "weekly-read"
+    ]
+  },
+  {
+    "n": "18",
+    "slug": "repo-hygiene",
+    "desc": "doc ratchet, chief-of-staff nightly, watch scan/digest, airtable, graphify, notion",
+    "items": [
+      "doc-ratchet-daily",
+      "chief-of-staff-nightly",
+      "watch-scan-daily",
+      "watch-digest-daily",
+      "airtable-checks-sync",
+      "graphify-republish",
+      "notion-sync-weekly"
+    ]
+  },
+  {
+    "n": "19",
+    "slug": "fleet-and-boxes",
+    "desc": "CROSS-CUTTING: the runner fleet, Spectre/Fedora + Hermes + Codex + Max lanes, the cron-failure issue filer, the doctor, and the coverage_exempt list",
+    "items": [
+      "fedora-swfl-local runner",
+      "Hermes / scout-a2a on Spectre",
+      "Codex CLI lane",
+      "Max-plan unattended lane (claude -p OAuth, cloud routines)",
+      "classify/heal/log-cron-failure + the cron-failure label",
+      "the doctor",
+      "coverage_exempt (13 tables)",
+      "the 3 claude-code-action workflows"
+    ]
+  }
+]

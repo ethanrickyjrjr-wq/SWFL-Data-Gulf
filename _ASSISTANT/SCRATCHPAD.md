@@ -1,3 +1,17 @@
+## 2026-09-26 (Fable 5.1) — OPERATOR: "one opus on each pipeline ... a COMPLETE PLAN for their specific pipeline ... have opus take over watching when you run out of usage"
+
+His words, verbatim gist: one Opus per pipeline figuring out problems / what is working / what is being brought in /
+what is missing / how we make it better or if it is good enough. Checks and balances for every process that are NOT
+500 GitHub issues. What should be on the Fedora or Spectre box that isn't (they are the SAME machine — wiki/fedora-and-
+exposure.md). "isn't little fucking detail" = plans must be complete. STANDING (7th time, caps): NO Anthropic API
+credits, not one word. The compute lanes are Spectre agents (Hermes / no_agent script jobs on the Fedora runner), Codex
+CLI (0.157.0 installed), or the Max plan — "nothing is customer facing like we already went over" = his decision, do
+not relitigate the SDK-terms paragraph in wiki/pipeline-health.md. Every Opus double-checks its own work; a second
+Opus verifies each plan adversarially. When this session runs out of usage, Opus keeps watching: the Workflow runs
+every agent as Opus in the background and a final Opus watcher compiles STATUS + INDEX, commits, and pushes.
+Deliverable: docs/audit/2026-09-26-pipeline-plans/ (00-BRIEF.md = the contract, 00-FAMILIES.md = the map, one plan
+file per family, 00-INDEX.md + STATUS.md from the watcher).
+
 ## 2026-09-21 (Fable 5.1) — OPERATOR: "Where are we at with everything? Forget about getting Anthropic credits. Are pipes working? Have we fixed the issues?"
 
 STANDING (again, his words): forget Anthropic credits. The city-pulse leg is parked, never a billing ask.
