@@ -65,6 +65,18 @@ Count: 6 pipelines, 6 workflows, 7 base tables plus 1 storage prefix, 7 consumer
 for t in census_cbp_fl census_acs_zcta fdic_sod fdic_locations fdic_institutions fdic_sod_county_year_v fhfa_hpi fdot_aadt_fl "faf5/" faf_flows; do rg -l --no-ignore-vcs -g '!*.md' -g '!graphify-out/**' -g '!_RESEARCH/**' -g '!docs/**' "$t" refinery lib app scripts ingest components; done
 ```
 
+The second Opus re-ran this grep over `refinery lib app components scripts`. It found no reader beyond the list above. The other hits it returned are not data readers:
+
+- `scripts/lake-probe.mts`, a diagnostic listing
+- `scripts/notion-sync.mjs` and `scripts/write_ops_cities.py`, hard-coded status labels. The FHFA line in `notion-sync.mjs` is wrong; see P10.
+- `scripts/check-zip-scope-gate.mjs:36`, a pre-push scope guard that names `census_acs_zcta`
+- `scripts/apply-fdic-sod-view.mts`, the view's DDL applier
+- `refinery/lib/paginate.mts:91`, a comment
+- `refinery/vocab/brain-vocabulary.json`, the vocabulary
+- `refinery/__scratch__/probe-faf5.mts`, a scratch probe
+
+`app/` has no direct reader. The ACS routes read through `lib/zip-report` and `lib/zip-summary`.
+
 ## 2. What is being brought in
 
 All SQL below is read-only. It was run through Bun.SQL using the connection approach in `scripts/apply-fdic-sod-view.mts:15-27` (credentials from `.dlt/secrets.toml`) with `SET SESSION default_transaction_read_only = on`. The queries, re-runnable as written:
@@ -148,7 +160,8 @@ SELECT schema_name, MAX(inserted_at), COUNT(*) FROM data_lake._dlt_loads WHERE s
 - **Cadence:** cron on 03/15 each year (`faf5-annual.yml:8`).
 - **Live storage (`_tier1_inventory`):**
   - `lake-tier1/faf5/year=2020..2024/faf_flows.parquet`, updated 05/20/2026.
-  - Lookups under `faf5/2026-05-19/` and `faf5/2026-05-20/`.
+  - Two dated directories, `faf5/2026-05-19/` and `faf5/2026-05-20/`. Each holds a full wide `faf_flows.parquet` plus the two lookups (`faf_zone_lookup`, `faf_sctg_lookup`). The consumer reads its lookups from the 05-19 directory (`refinery/sources/faf5-source.mts:23`, `FAF5_VINTAGE = "2026-05-19"`).
+  - All 11 inventory rows carry `source_url = https://faf.ornl.gov/faf5/Data/Download_Files/FAF5.7.1.zip` (`SELECT id, source_url, vintage FROM data_lake._tier1_inventory WHERE id LIKE 'lake-tier1/faf5/%'`). Their `vintage` column holds a date or a year, never the FAF version.
 - **Coverage:** no county grain. SWFL sits undifferentiated inside zone 129, "Remainder of Florida" (`registry:427`). The consumer filters on `dms_dest=129` with `trade_type=1`.
 
 ### fdot
@@ -254,7 +267,7 @@ It returned "118 pass, 0 fail, Ran 118 tests across 9 files".
   - The served macro-florida fact reads "Florida CBP 2022: top sectors by establishment count …".
   - `curl -s -o /dev/null -w "%{http_code}" https://api.census.gov/data/2023/cbp.json` returns 200 (metadata `"temporal": "2023/2023"`), and `…/data/2024/cbp.json` returns 404.
   - A keyed data call returns 1,187 rows for Lee with the pipeline's exact field list: `https://api.census.gov/data/2023/cbp?get=NAICS2017,NAICS2017_LABEL,ESTAB,EMP,PAYANN,NAME&for=county:071&in=state:12&key=<elided>`.
-- **Root cause:** `CBP_YEARS = [2017, …, 2022]` is hard-coded at `ingest/pipelines/census_cbp/resources.py:10`. There is also a dead duplicate at `constants.py:2`; nothing imports it.
+- **Root cause:** `CBP_YEARS = [2017, …, 2022]` is hard-coded at `ingest/pipelines/census_cbp/resources.py:10`. There is also a duplicate at `constants.py:2`. The pipeline does not import it, but the test does: `ingest/tests/pipelines/census_cbp/test_resources.py:5` reads `from ingest.pipelines.census_cbp.constants import CBP_YEARS`. So the test checks the duplicate, not the list the pipeline actually uses.
 - **Latent trap:** `resources.py:48-50` answers any non-200 year with `continue`. A new year that returns 400 because a NAICS variable was renamed would vanish silently, since the 230,006 floor (`:18`) only catches losing an existing year.
 - **Severity:** blocks a served number being current. The number is not wrong, because the year is labelled.
 - **First seen:** 09/26/2026, this audit.
@@ -278,6 +291,7 @@ It returned "118 pass, 0 fail, Ran 118 tests across 9 files".
 - **Root cause:**
   - `ACS_LATEST_YEAR = 2022` at `ingest/pipelines/census_acs/constants.py:17`.
   - The registry itself calls it "a MANUAL one-line bump per vintage" (`ingest/cadence_registry.yaml:762`).
+  - The code comment disagrees. `constants.py:16` says "the GHA cron bumps this one line", but nothing in `census-acs-annual.yml` edits the file. The registry line is verified; the code comment needs correcting (item 4 replaces it).
 - **Severity:** blocks a served number being current. ZIP report and email numbers are 2018-2022 estimates, correctly labelled.
 - **First seen:** 09/26/2026.
 
@@ -309,7 +323,8 @@ It returned "118 pass, 0 fail, Ran 118 tests across 9 files".
 ### P7. FAF5 has never landed from Actions on the current code path, and its dry-run is a no-op
 
 - **Symptom:**
-  - 4 runs: 3 red on 05/26/2026 on the retired dlt path. The classifier returns `SCHEMA_DRIFT` on 26459292357 ("relation data_lake.faf_sctg_lookup does not exist"), and 26455970691 was a DNS failure.
+  - 4 runs: 3 red on 05/26/2026 on the retired dlt path. The classifier returns `SCHEMA_DRIFT` on 26459292357 and 26457902767 ("relation data_lake.faf_sctg_lookup does not exist").
+  - 26455970691 was not a transient DNS blip. Its log reads `could not translate host name "aws-0-<us-east-1>.pooler.supabase.com" to address`: the Postgres credential secret held a literal template placeholder at the time. `classify()` returns `UNKNOWN` on that log (`node -e "import('./.github/scripts/classify-cron-failure.mjs')…"` on the `gh run view 26455970691 --log-failed` output). UNKNOWN is the class that routes to the heal L2 model leg (§10 Leg 2).
   - 1 green, 27491047049, which is a dry-run whose log reads "Dry run — skipping write."
   - `docs/cron-rebuild-failures.md:35` marks the incident RESOLVED on the strength of that green. X verified: the old path is retired. Y needs review: the new path has never been exercised in Actions.
 - **Root cause:**
@@ -332,6 +347,7 @@ It returned "118 pass, 0 fail, Ran 118 tests across 9 files".
 - **Symptom:** the landing times all look healthy:
   - `_dlt_loads` shows census_cbp last good at 09/15/2026 and fdot_aadt_tier2 at 09/15/2026, so both read FRESH.
   - But the CBP data year is 2022, the ACS year is 2022 and the FHFA quarter is 2026Q1.
+  - The doctor agrees with the landing clock. Today's freshness-probe run 36259690113 prints all six rows as `FRESH | OK | NO_CONTRACT | GREEN` (`gh run view 36259690113 --log | grep -E "census_cbp|census_acs|fdic_bankfind|fhfa|faf5|fdot"`). So on the ops surface, three stale vintages read green today.
 - **Root cause:**
   - `ingest/scripts/check_freshness.py:274-279` reads `MAX(inserted_at) FROM data_lake._dlt_loads` by schema name.
   - None of the six registry entries has a `freshness_sla` or any vintage field.
@@ -349,6 +365,7 @@ Registry, found with `grep -n` on `ingest/cadence_registry.yaml`:
 
 - `:1119,1124` say FHFA confirmed 133,226 rows, but the live count is 184,817. The floor of 119,903 is now 65% of live, so a 30% partial pull would pass.
 - `:1148` says FDOT is "statewide filtered to Lee/Collier", but the table holds 67 counties unfiltered.
+- `:1120` (FHFA) and `:1142` (FDOT) both read "Verified: MAX(inserted_at) = 2026-05-18". The live `_dlt_loads` maxima are 07/08/2026 (fhfa_hpi) and 09/15/2026 (fdot_aadt_tier2). This is the same stale-confidence shape as `:739`.
 - `:424` says "data_lake.faf_flows is a cache", but no `faf%` table exists in data_lake (information_schema query).
 - `:739` reads "Verified: MAX(inserted_at) = 2026-05-20"; the live value is 09/15/2026.
 - `:758`: the ACS floor is 90 in the registry but 80 in code (`census_acs/constants.py:43`).
@@ -356,6 +373,8 @@ Registry, found with `grep -n` on `ingest/cadence_registry.yaml`:
 Code:
 
 - `fhfa/resources.py:41,72` say "~13 MB"; the 09/26 download was 60,272,522 bytes.
+- `fhfa/pipeline.py:8` prints "~133k records"; the source has 186,011 rows and the table has 184,817.
+- `scripts/notion-sync.mjs:1223` says `data_lake.fhfa_hpi` feeds "housing-swfl + master". The real readers are properties-lee-value and properties-collier-value (`fhfa-hpi-source.mts`, registry `:1114`).
 
 Severity: cosmetic, apart from the FHFA floor, which weakens a guard.
 
@@ -398,6 +417,11 @@ Severity: cosmetic, apart from the FHFA floor, which weakens a guard.
 
 - **Against the source ceiling:** `/history`, `/failures`, `/summary`, `/demographics` and `/financials` (`registry:700`).
 - **Missing consumers:** the directory tables (P13).
+- **Hendry is computed but not served:**
+  - The source builds a Hendry rollup (`refinery/sources/fdic-deposits-source.mts:36,111`), but macro-swfl emits only Lee and Collier (`refinery/packs/macro-swfl.mts:568-569`, the two `pushDeposits` calls).
+  - The served page carries `fdic_lee_*` and `fdic_collier_*` and no `fdic_hendry_*` (`curl -s https://www.swfldatagulf.com/api/b/macro-swfl | grep -o 'fdic_[a-z]*_[a-z_]*' | sort -u`).
+  - The lake has the data: Hendry 2026 shows 5 branches and 685,788 thousand USD.
+  - Adding a metric changes key_metrics, so this is ASK-FIRST (§12 question 4), not a DO item.
 - **Proof of a real GHA write:** the first scheduled real write happens on 10/20/2026.
 
 ### fhfa
@@ -471,7 +495,7 @@ curl -s https://www.swfldatagulf.com/api/b/macro-florida | sed -n 3,6p
   - In `ingest/pipelines/census_cbp/resources.py`, replace the hard-coded `CBP_YEARS` (`:10`) with discovery: probe `https://api.census.gov/data/{y}/cbp.json` upward from 2017 until the first 404.
   - For each discovered year, read `…/data/{y}/cbp/variables.json` and pick the `NAICS20xx` variable present there. No NAICS variable is a hard error.
   - Change `:48-50` so a non-200 for a **discovered** year raises instead of `continue`.
-  - Delete the dead `constants.py`.
+  - Repoint `ingest/tests/pipelines/census_cbp/test_resources.py:5` at the discovery function in `resources.py`, then delete the duplicate `constants.py`. Deleting it first breaks test collection, because that line imports `CBP_YEARS` from it.
   - After the first land, reset `_MIN_ROWS` (`:18`) and `expected_rows_min` (`registry:737`) to 90% of the landed count.
   - Tests: discovery stops at 404; a missing NAICS variable raises; the existing floor tests stay green.
 - **Lane:** D.
@@ -521,8 +545,9 @@ SELECT DISTINCT acs_year FROM data_lake.census_acs_zcta;   -- expect 2024 after 
 
 - **What:**
   - Change `fhfa-hpi-quarterly.yml:7` to `0 13 6 3,6,9,12 *`. Day 6 has no other job: `node scripts/schedule-catalog.mjs` lists day-4/5 jobs only (fema-nfip, fgcu-reri, fl-dbpr-licenses, market-aggregates-details, noaa-ghcn, realtor-geo-trends).
-  - The new slot lands one to two weeks after FHFA's last-Tuesday-of-Feb/May/Aug/Nov quarterly release.
+  - The new slot lands 6 to 12 days after FHFA's last-Tuesday-of-Feb/May/Aug/Nov quarterly release. From the crawled calendar: 11/24/2026 → 12/06, 02/23/2027 → 03/06, 05/25/2027 → 06/06, 08/31/2027 → 09/06.
   - Update the comment at `:5-6`.
+  - **Sequencing trap:** the current cron's next run is 10/08/2026, and that run would pick up 2026Q2. The new cron's first run after today is 12/06/2026. If the edit lands before 10/08 and nothing else happens, 2026Q2 arrives two months later than it would have. So land the edit after the 10/08 run succeeds, or follow it with one `workflow_dispatch` (a real run, not `dry_run`). That dispatch is prescribed here and not performed by this audit.
 - **Lane:** D.
 - **Effort:** S.
 - **Proof:**
@@ -589,7 +614,7 @@ bun test refinery/sources/fdot-source.test.mts refinery/packs/traffic-swfl.test.
     - The dry-run (`:110-112`) must download, parse and run the floor check, printing row counts with no upload.
     - Delete the unused `dlt.pipeline` (`:125-129`).
     - Discover the newest regional mid-range zip from `https://faf.ornl.gov/faf5/`: the link text is "Regional database for …(mid-range estimates only)" and the file is `FAF5.x.y.zip`. Derive `FAF5_YEARS` and `HISTORICAL_YEARS` from that file's column headers, not constants.
-    - Write the version string into `_tier1_inventory.vintage` for the lookup rows.
+    - Keep writing the discovered zip URL into `_tier1_inventory.source_url`. The script already does this at `:140` and `:157`, and all 11 rows carry `FAF5.7.1.zip` today, so the item 10 signal reads the version from there. Leave `vintage` as it is: the year rows write `str(year)` at `:156`, so that column can never hold a version.
   - In `refinery/sources/faf5-source.mts`, derive the year list from the inventory (`id LIKE 'lake-tier1/faf5/year=%'`) instead of the constants at `:23,33`.
   - Change `faf5-annual.yml:8` to monthly at `0 13 17 * *`. Day 17 has no job in `node scripts/schedule-catalog.mjs`; day 16 has `ingest-bls-ppi.yml` at `0 14 16 * *`. The script exits 0 without uploading when the discovered version equals the landed one.
   - Add tests in `ingest/tests/pipelines/faf5/`: version discovery from a saved page, the header→years parse, and the floor.
@@ -628,7 +653,8 @@ On today's lake, this should list census_cbp, census_acs and fhfa as lagging.
 ### Item 11. Registry and doc hygiene — DO
 
 - **What:**
-  - Correct `registry:424,739,1148`.
+  - Correct `registry:424,739,1120,1142,1148`.
+  - Fix the "~133k records" print at `fhfa/pipeline.py:8`, and the FHFA consumer line at `scripts/notion-sync.mjs:1223`.
   - Reset FHFA `confirmed_total` to the live 184,817 and the floor to 166,335 (184,817 × 0.9 = 166,335.3), both at `registry:1119,1124` and at `fhfa/resources.py:80`.
   - Fix the "~13 MB" comments at `fhfa/resources.py:41,72`.
   - Add a correcting entry on top of `docs/cron-rebuild-failures.md` for row 35: the 06/14 "success" was a no-op dry-run.
@@ -697,11 +723,13 @@ One signal per pipeline. It fires only when a served number is behind the source
 - **Seam 1, the registry.** Each entry gets a `vintage:` block, read by `ingest/scripts/check_freshness.py`, which already runs daily from `freshness-probe-daily.yml` (`0 14 * * *`).
 - **Seam 2, the checks ledger.** The probe opens and auto-closes `vintage_lag_<pipeline>` checks with the same code shape as `sync_gap_checks`. That code inserts on a new gap, re-opens a check marked `done` if the gap returns, never re-flags a human `dropped`, and auto-closes with `resolved_by='freshness-probe (auto)'` (`check_freshness.py:646-712`).
 - **Not a pipeline gate.** This is post-hoc observability. It adds no pre-materialization step, so it stays inside RULE 3 C2.
-- **No exit code.** The signal must not use `freshness_sla.error_after_days`. That path makes the whole daily probe exit 1 (`check_freshness.py:1044-1045`), which would redden the probe every day a vintage lags.
+- **No exit code.** The signal must not use `freshness_sla.error_after_days`. That path makes the check_freshness step exit 1 (`check_freshness.py:1044-1045`), which would redden that step every day a vintage lags.
+- **Read the signal in the ledger, not in the workflow conclusion.** `freshness-probe-daily.yml` has already concluded `failure` on each of its last 10 scheduled runs, 09/17 through 09/26 (`gh run list --workflow freshness-probe-daily.yml --limit 10`). In run 36259690113 the only failed step is "doctor (pipeline health — gating)" (`python -m ingest.scripts.doctor --cron --fail-on red`, `freshness-probe-daily.yml:71`). The check_freshness step itself passes. The open check `cron_incident_freshness_probe_daily` and issue #110 track that red, and it belongs to family 19.
+- **The doctor is the third seam, and it is blind here.** The doctor (`ingest/scripts/doctor`) prints all six family rows as `FRESH | OK | NO_CONTRACT | GREEN` in run 36259690113 (see P9). The vintage checks do not feed the doctor's `--fail-on red`. Keeping them out of that gate is deliberate: a vintage lag is a check to act on, not a reason to fail the daily probe.
 
 ### The integer-year trap
 
-Do not point `freshness_column` at an integer year column. `_to_date` (`check_freshness.py:216-221`) raises `ValueError` on an int. It is called after `_fetch_max_freshness`'s try/except has closed (the except is at `:307`, the call at `:318`), so the error escapes to `run_probe`. There, the per-entry backstop (`:726-745`) catches it and reports that entry as MISCONFIGURED. The rest of the probe survives, but the pipeline loses its landing-freshness row. The `vintage:` block therefore needs its own evaluator, which turns year, quarter or June-30 values into a date and leaves `freshness_column` alone.
+Do not point `freshness_column` at an integer year column. `_to_date` (`check_freshness.py:214-219`) raises `ValueError` on an int. It is called after `_fetch_max_freshness`'s try/except has closed (the except is at `:307`, the call at `:318`), so the error escapes to `run_probe`. There, the per-entry backstop (`:726-745`) catches it and reports that entry as MISCONFIGURED. The rest of the probe survives, but the pipeline loses its landing-freshness row. The `vintage:` block therefore needs its own evaluator, which turns year, quarter or June-30 values into a date and leaves `freshness_column` alone.
 
 ### What the signal compares
 
@@ -730,9 +758,9 @@ Every probe below was run keyless on 09/26/2026.
   - 165 days sits past the release (quarter end plus about 55 days) and past item 5's new cron (quarter end plus about 68 days), so a fire means we missed a scheduled release.
   - 06/30 + 165 = 12/12, which clears the Q3 release (11/24) and the cron (12/06). Today, 2026Q1 gives 03/31 + 165 = 09/12, so the check is open, correctly: 2026Q2 is published.
 - **faf5:**
-  - Config: `vintage: {table: data_lake._tier1_inventory, column: vintage, where: "id LIKE 'lake-tier1/faf5/%'", source_probe: html_regex, probe_url: "https://faf.ornl.gov/faf5/", regex: "FAF5\\.[0-9]+\\.[0-9]+\\.zip"}`.
-  - It compares the newest regional zip named on the page with the landed version, which item 9 writes into `vintage`.
-  - Today the page names `FAF5.7.1.zip` and the landed file is 5.7.1 (`ingest/pipelines/faf5/constants.py:2`), so the check stays closed.
+  - Config: `vintage: {table: data_lake._tier1_inventory, column: source_url, extract: "FAF5\\.[0-9]+\\.[0-9]+\\.zip", where: "id LIKE 'lake-tier1/faf5/year=%'", source_probe: html_regex, probe_url: "https://faf.ornl.gov/faf5/", regex: "FAF5\\.[0-9]+\\.[0-9]+\\.zip"}`.
+  - It compares the newest regional zip named on the page with the zip named in the landed rows' `source_url`. It must not read the `vintage` column, which holds `2020`…`2024` for the year rows and `2026-05-19` / `2026-05-20` for the dated rows (§2), so it never holds a version.
+  - Today the page names `FAF5.7.1.zip`. The regex matches only the bare regional file, not the `_State`, `_HiLoForecasts` or `_access` variants (`curl -s https://faf.ornl.gov/faf5/ | grep -o "FAF5\.[0-9]*\.[0-9]*[A-Za-z_]*\.zip"` lists 8 files, and 1 of them matches). All 11 landed rows carry `…/FAF5.7.1.zip`, so the check stays closed.
 - **fdot:**
   - Config: `vintage: {table: data_lake.fdot_aadt_fl, column: yearx, source_probe: json_max, probe_url: "https://gis.fdot.gov/arcgis/rest/services/FTO/fto_PROD/MapServer/7/query?where=1%3D1&outStatistics=%5B%7B%22statisticType%22%3A%22max%22%2C%22onStatisticField%22%3A%22YEAR_%22%2C%22outStatisticFieldName%22%3A%22maxy%22%7D%5D&f=json", json_path: "features[0].attributes.maxy"}`.
   - Today the probe returns `maxy: 2025`, which equals the lake max of 2025, so the check stays closed.
@@ -761,7 +789,14 @@ P1 is not covered. A consumer brain can expire in place: macro-florida sat past 
 
 ### What already covers a run that fails outright
 
-- **Per-run failure:** keep it, but only as the sticky row. `log-cron-incident.yml` appends a row and comments on the one sticky issue (`vars.CRON_INCIDENT_ISSUE_NUMBER`, `log-cron-incident.yml:3-6`). It never opens an issue per run. All six workflows are on its list and on heal's list (grep of the workflow names).
+- **Per-run failure:** `log-cron-incident.yml` appends a row and comments on the one sticky issue (`vars.CRON_INCIDENT_ISSUE_NUMBER`, `log-cron-incident.yml:3-6`). It also does more than that:
+  - On a failure it opens one `cron_incident_<workflow>` check (`log-cron-incident.mjs:56`) and one `[cron-failure:<workflow>] <CLASS> · …` issue labelled `cron-failure` (`openIncidentIssue`, `log-cron-incident.mjs:218-281`).
+  - The issue is de-duplicated per workflow, not per run.
+  - It closes only when the next **scheduled** run succeeds (`closeIncidentIssue`, `:283-297`). A dispatch success does not close it.
+  - For this family that means a red FAF5 run (cron 03/15 only) keeps its issue open for up to 12 months, and a red ACS run keeps it until the next Nov-Jan window.
+  - Today zero `cron-failure` issues are open for the six workflows (`gh issue list --label cron-failure --state open`).
+  - All six workflows are on the incident logger's list and on heal's list (grep of the workflow display names).
+  - Keep this path as it is. It is per-workflow and self-closing. Its one weakness here, the long dwell on annual crons, is a family 19 knob (auto-resolve on a green dispatch), not something to rebuild for this family.
 - **Floor:** `expected_rows_min` plus `count_table` via `check_volume_entry` (`check_freshness.py:431-489`) stays as it is.
 - **`assert_landed.py`:** not needed for these six. Each pipeline guards its own replace before writing (`census_cbp/resources.py:78`, `census_acs/resources.py:124`, `fdic_bankfind/resources.py:117-125`, `fhfa/resources.py:80`, `fdot/resources.py:122`, `faf5_to_parquet.py:117`).
 - **Ops site:** `https://swfldatagulf-ops.vercel.app/coverage` should show the `vintage_lag_*` checks through the checks feed it already reads. I did not open the ops repo, so whether it renders new check keys without a change is could-not-verify.
@@ -770,11 +805,14 @@ P1 is not covered. A consumer brain can expire in place: macro-florida sat past 
 
 - **Stale confidence lines in the registry** (`:739`, `:1119/1124`, `:1148`, `:424`). They read as verification and are not (item 11).
 - **The L2 LLM diagnosis leg on these six workflows** (`heal-cron-failure.yml:186-192`).
-  - The deterministic classifier already classifies their known failure shapes: TRANSIENT on the CBP read-timeout and SCHEMA_DRIFT on FAF5.
+  - The deterministic classifier classifies 4 of this family's 5 recorded reds: TRANSIENT on both CBP read-timeouts (26455961452, 26459317423) and SCHEMA_DRIFT on two FAF5 runs (26459292357, 26457902767).
+  - The fifth, FAF5 26455970691 (a placeholder host in the credential secret), comes back UNKNOWN, and UNKNOWN is exactly what triggers the L2 leg.
+  - The fix is a deterministic rule rather than a model call. Add `could not translate host name` with a `<…>` placeholder in the host to the classifier as a config-error class. That is the family 19 file, landing together with item 12.
   - When no key is set, `heal-cron-failure.mjs:214-215` already posts a deterministic-only diagnosis.
   - The shared switch `CRON_HEAL_DIAGNOSE_ENABLED` belongs to family 19; recommend it to them rather than editing it here.
 - **The false RESOLVED on FAF5** (`docs/cron-rebuild-failures.md:35`): correct it with a new top entry (item 11).
 - **Nothing to close** in `node scripts/check.mjs list` for this family. `fdic_directories_no_consumer` is a real dark root. `llm_legs_parked_credit_wall` should not gain macro-florida or macro-us, because item 1 removes those legs rather than parking them.
+- **Related open check, not closeable here:** `registry_source_ceiling_no_freshness_field` ("73 source_ceiling blocks record a count, none record the source's last-edit / newest-record date"). Item 10's `vintage:` block gives six of those entries a live, probe-checked newest-vintage reading. That check spans the whole registry, so it stays open; item 10 is the pattern it can copy.
 
 ### What not to add
 
@@ -861,7 +899,10 @@ It returned nothing (exit 1). Six of the seven consumer packs set both `skipTria
 - **What it does:** it fires on a red run of any of the six workflows when the deterministic classifier returns UNKNOWN. It writes an LLM narrative comment (`heal-cron-failure.yml:186-192` → `.github/scripts/heal-cron-failure.mjs:218-231`, model `claude-haiku-4-5`).
 - **Current auth:** API key (`heal-cron-failure.yml:191`).
 - **Status:** could-not-verify. Of the last 30 heal runs, 27 were skipped and 3 succeeded, with no failed run to read (`gh run list --workflow heal-cron-failure.yml --limit 30`).
-- **Replacement lane:** Lane D for this family. The classifier already resolves this family's recorded failures deterministically, and the script already falls back to a deterministic-only diagnosis without a key (`heal-cron-failure.mjs:214-215`).
+- **Replacement lane:** Lane D for this family.
+  - The classifier resolves 4 of this family's 5 recorded reds deterministically.
+  - The fifth, FAF5 26455970691 (a placeholder host in the credential secret), classifies UNKNOWN, which is a live trigger path for this leg. The Lane D fix is a classifier rule for that config-error shape (§8 noise list), not a model.
+  - The script already falls back to a deterministic-only diagnosis without a key (`heal-cron-failure.mjs:214-215`).
   - If a narrative is still wanted for UNKNOWN shapes, the permitted route is Lane M: an unattended `claude -p` on the Fedora runner under the operator's Max login (`CLAUDE_CODE_OAUTH_TOKEN`).
   - These pipelines are internal and not customer-facing, so Max is an allowed lane per the operator's standing decision.
   - Owner: family 19 (cross-cutting). Named here because it fires on this family's workflows.
@@ -922,7 +963,7 @@ Every numbered claim was re-run after drafting, with the SQL batch, the `gh run 
 - macro-us failure in the same run · verified.
 - Only macro-florida and macro-us skip synthesis but not triage · loop over `refinery/packs/*.mts` · verified.
 - `2-triage.mts:40-45`, `scoring.mts:10-16` (all positive), `macro-florida.mts:406-408`, `macro-us.mts:225-227` · `grep -n` / `sed -n` · verified.
-- `check_freshness.py:216-221` (`_to_date`), `:274-279` (the `_dlt_loads` path), `:646-712` (`sync_gap_checks`) · `sed -n` · verified.
+- `check_freshness.py:214-219` (`_to_date`, corrected from 216-221 by the second Opus), `:274-279` (the `_dlt_loads` path), `:646-712` (`sync_gap_checks`) · `sed -n` · verified.
 - Draft claim: an int `freshness_column` would blank the whole daily probe · re-read of `run_probe` (`check_freshness.py:714-750`) · **corrected**. The per-entry backstop at `:726-745` reports only that entry as MISCONFIGURED. The try/except in `_fetch_max_freshness` ends at `:307` and `_to_date` is called at `:318`. The §8 trap paragraph was rewritten.
 - The exit-1 line for SLA errors · `grep -n "if sla_errors and not"` · **corrected** from `:1045-1046` to `:1044-1045`; §8 updated.
 - The census_cbp threshold date, 12/31/2023 + 1,095 days · python `date + timedelta` · **corrected** from 12/31/2026 to 12/30/2026; §8 updated.
@@ -975,3 +1016,132 @@ Every numbered claim was re-run after drafting, with the SQL batch, the `gh run 
 1. **Collier's price-index benchmark.** FHFA does not publish a purchase-only index for Naples-Marco Island. Should the Collier value brain serve the Naples **all-transactions** index, labelled as including refinance appraisals, or should it serve no FHFA number and drop the citation? (Item 7.) This is product shape: it changes a served metric.
 2. **Drop the corpse view `data_lake.fdot_aadt_swfl_yearly`?** It was marked delete-safest on 07/18 and nothing reads it. (Item 13.) This is a schema change.
 3. **CBP at county grain.** 14,849 Lee, Collier and Hendry CBP rows land every month and nothing reads them. Should macro-swfl gain 6-digit-NAICS establishment counts next to its QCEW numbers, or should CBP stay a statewide denominator only? This adds served metrics, so it is a product call.
+4. **Hendry bank deposits.** The FDIC rollup already computes Hendry: 2026 shows 5 branches, 3 banks and 685,788 thousand USD in `fdic_sod_county_year_v`, and the source builds it at `fdic-deposits-source.mts:111`. macro-swfl serves only Lee and Collier (`macro-swfl.mts:568-569`). Should Hendry's three `fdic_hendry_*` metrics be served? That changes key_metrics, so it is ASK-FIRST. If yes, the build is one `pushDeposits("hendry", …)` line plus a test.
+
+## 13. Second-Opus verification
+
+Run 09/26/2026 by the second Opus for family 07. Every command below was re-run in this session. The SQL went through a read-only Bun.SQL script in the scratchpad (connection copied from `scripts/apply-fdic-sod-view.mts:15-27`, with `SET SESSION default_transaction_read_only = on`). `graphify query "federal-econ pipeline"` ran first.
+
+### Claims checked: 268
+
+Grouped by lane, each group re-run or re-opened this session:
+
+- **22 registry line citations.**
+  - The six `name:` lines (730, 751, 673, 1112, 415, 1133).
+  - Lines 424, 427, 430, 677, 681, 700, 737, 739, 746, 758, 762, 770, 1119, 1124, 1128, 1148 and 1150.
+  - Method: `grep -n` / `sed -n`.
+- **14 workflow facts.** Six cron lines, six `runs-on: ubuntu-latest` lines, and the timeouts at faf5 :23 and fdot :26. Method: `grep -n "cron\|runs-on\|timeout-minutes"`.
+- **17 run-history facts.**
+  - Six run counts: CBP 8 (6 green / 2 red), ACS 2 / 0, FDIC 1, FHFA 3 / 0, FAF5 1 / 3, FDOT 5 / 0 / 1 cancelled.
+  - Four newest-green ids: 34982220418, 29354332608, 28953913464, 34983321273.
+  - Two dry-run log lines: 35755967549 "fdic_bankfind sod 12071: 6,160 rows", and 27491047049 "Dry run — skipping write."
+  - The five red causes: two CBP read-timeouts, two FAF5 `faf_sctg_lookup does not exist`, and one FAF5 placeholder host.
+  - Method: `gh run list --limit 15` and `gh run view --log-failed`.
+- **4 classifier facts.** `classify()` gives TRANSIENT/"429" on 26459317423 and SCHEMA_DRIFT on 26459292357. The regexes sit at `:199` (`\b429\b`) and `:204` (bare `429`).
+- **60 live-table numbers.**
+  - census_cbp_fl: 255,563 rows; 09/15 14:32; 2017-2022; 67 counties; 14,849 SWFL rows; 2022 counts 1,181 / 1,070 / 291.
+  - census_acs_zcta: 100 rows; 07/14; 2022; 5 NULL incomes; 35 / 22 / 3 / 24 / 13 / 3.
+  - fdic_sod: 10,759 rows; 09/22 16:08; 1994-2026; 6,160 / 4,297 / 302. Locations 298, institutions 199. The 2026 rollup matches all 9 values.
+  - fhfa_hpi: 184,817 rows; 07/08; 1975-2026; series counts 179 / 141 / 141 / 168 / 141; max period 2026Q1.
+  - fdot_aadt_fl: 103,662 rows; 2021-2025; 67 counties; load 09/15 14:46; 2025 counts 534 / 215 / 68.
+  - `_tier1_inventory` dates for FAF5 and the FDOT raw archive.
+  - `_dlt_loads`: census_cbp 10 loads, fdot_aadt_tier2 5 (05/18, 07/03, 07/15, 08/15, 09/15), fhfa_hpi 2, census_acs 2, fdic_bankfind 1.
+  - information_schema: no `faf%` table exists, and `fdot_aadt_swfl_yearly` exists as a VIEW.
+- **17 source probes.**
+  - Census status codes: 2023 cbp 200, 2024 cbp 404, 2023 and 2024 acs5 200, 2025 acs5 404, 2022 cbp.html 200, and the keyless NAICS2022 URL 302.
+  - FDIC probe: `YEAR` 2026. FDOT probe: `maxy` 2025.
+  - The ORNL page (fetched with curl, because crawl4ai hit its 60s navigation timeout on faf.ornl.gov): `FAF5.7.1.zip`, "August 15, 2025", and "Regional database for 2017-2024".
+  - `hpi_master.json`: 60,272,522 bytes, 186,011 rows, latest period 2026Q2 for 15980 and 34940, and no purchase-only series for 34940.
+  - The FHFA release calendar, via crawl4ai of `fhfa.gov/data/hpi`: "Tuesday, November 24 … 2026Q3".
+- **13 served-brain facts.**
+  - Nine `refined_at` values: macro-florida 07/19, macro-us 07/30, macro-swfl 09/26, lee-value 09/19, collier-value 09/23, logistics, traffic and nowcast 09/15, master 08/14.
+  - 5 citations with `NAICS2022`. 0 `fhfa_naples*` metrics. `fhfa_cape_coral_msa_yoy_pct` is present. The `fdic_lee_*` and `fdic_collier_*` metrics are present.
+- **38 ingest-code line citations.** These cover census_cbp, census_acs, fdic_bankfind, fhfa, fdot and the faf5 script and constants, at every file:line quoted in §2-§5, §7 and §8. Method: `cat -n` / `sed -n`.
+- **30 refinery and workflow line citations.** These cover P1's root-cause lines, the fhfa, fdot and faf5 consumer pins, the master, macro-swfl and sector-credit input edges, `fdic-deposits-source.mts:28,84`, the six packs' skip flags, `daily-rebuild.yml:122` and `nightly-chain.yml:205`.
+- **7 check_freshness.py ranges.**
+- **4 heal / log-cron-incident facts.** `heal-cron-failure.yml:186-192` and `:191`, `heal-cron-failure.mjs:214-215`, and `log-cron-incident.yml:3-6`.
+- **11 test facts.**
+  - pytest: "39 passed in 0.92s", with per-file counts 1 / 8 / 2 / 8 / 1 / 18 / 1.
+  - bun: "118 pass, 0 fail, Ran 118 tests across 9 files".
+  - There is no `ingest/tests/pipelines/census_acs/`, and `faf5/` holds only `__init__.py`.
+- **12 research and doc citations.** `P7-corpse-deletelist.md:30,116`, `P4-unmapped-tables.md:151`, `_RESEARCH/INDEX.md:319,320,469,494`, `data-roots.md:282,1226,1231` and `cron-rebuild-failures.md:20,35`.
+- **3 schedule facts.** Day 6 and day 17 are free, and day 16 is `ingest-bls-ppi.yml` (the schedule catalog filtered by day-of-month).
+- **3 checks-ledger facts.** 21 open; `llm_legs_parked_credit_wall` names four other legs; `fdic_directories_no_consumer` is open.
+- **7 remaining facts.**
+  - The fixture's Naples purchase-only lines at 1589, 1601, 1613, 1625 and 1637.
+  - `lib/zip-summary/load.ts:40-44`, `lib/email/market-context.ts:162,167` and `lib/zip-report/census-acs-rows.ts:51`.
+  - The CBP view SQL takes `MAX(year)` (`:5-8`).
+  - Heal runs: 27 skipped and 3 success in the last 30.
+- **2 LLM greps.** Re-run over the six pipeline dirs, the faf5 script, the six workflows, and the consumer sources plus `lib/email/market-context.ts` and `refinery/tools/build-corridor-fact-pack.mts`. The only hits are the 3 non-call lines already listed in §10.
+- **4 durations.** 2m54s, 1m45s, 1m36s and 6m13s: `createdAt` from `gh run list` against the `_dlt_loads` `inserted_at`.
+
+### Corrections (applied in place)
+
+1. **CBP `constants.py` is not dead** (P2 and item 2).
+   - Wrong: "nothing imports it" and "delete the dead constants.py".
+   - Right: `ingest/tests/pipelines/census_cbp/test_resources.py:5` imports `CBP_YEARS` from it. Item 2 now repoints that test before deleting the file.
+   - Evidence: `rg -n "census_cbp.constants" ingest`.
+2. **FAF5 run 26455970691** (P7).
+   - Wrong: "a DNS failure".
+   - Right: the host was the literal placeholder `aws-0-<us-east-1>.pooler.supabase.com` in the credential secret, and `classify()` returns UNKNOWN.
+   - Evidence: `gh run view 26455970691 --log-failed`, plus `classify()` on that log.
+3. **The classifier's coverage** (§8 noise list, §10 Leg 2).
+   - Wrong: "the classifier already resolves this family's recorded failures deterministically".
+   - Right: 4 of 5. The fifth is UNKNOWN, a live trigger for the heal L2 model leg. The Lane D fix is a classifier rule, noted for family 19 alongside item 12.
+   - Evidence: `classify()` on all five red logs.
+4. **FAF5 vintage signal** (§8 and item 9).
+   - Wrong: the evaluator compared the page's zip name with `_tier1_inventory.vintage`, and item 9 would write the version there. That column holds `2020`…`2024` and `2026-05-19` / `2026-05-20`, and `faf5_to_parquet.py:156` writes `str(year)`, so the "stays closed today" negative test was false as configured.
+   - Right: the evaluator reads the zip name out of `source_url`. All 11 rows carry `…/FAF5.7.1.zip`, and the script already writes it at `:140,:157`.
+   - Evidence: `SELECT id, source_url, vintage FROM data_lake._tier1_inventory WHERE id LIKE 'lake-tier1/faf5/%'`.
+5. **FAF5 storage layout** (§2).
+   - Wrong: "Lookups under faf5/2026-05-19/ and faf5/2026-05-20/".
+   - Right: each dated directory also holds a full `faf_flows.parquet`, for 11 inventory rows in all.
+   - Evidence: the same query.
+6. **Incident issues** (§8, "Per-run failure").
+   - Wrong: "comments on the one sticky issue … never opens an issue per run", which is incomplete.
+   - Right: it also opens one de-duplicated `[cron-failure:<workflow>]` issue and one `cron_incident_<workflow>` check per failing workflow. Only the next scheduled success closes them, so a red annual FAF5 run keeps its issue open up to 12 months. Zero are open for the six today.
+   - Evidence: `log-cron-incident.mjs:56,218-281,283-297`, and `gh issue list --label cron-failure --state open`.
+7. **`_to_date` location** (§8 trap paragraph, §11).
+   - Wrong: `check_freshness.py:216-221`.
+   - Right: `:214-219`.
+   - Evidence: `sed -n 214,222p ingest/scripts/check_freshness.py`.
+8. **Item 5's timing** (item 5).
+   - Wrong: the cron "lands one to two weeks after" each release, and landing it at any time was treated as unblocking P6.
+   - Right: it lands 6 to 12 days after (11/24 → 12/06, 02/23 → 03/06, 05/25 → 06/06, 08/31 → 09/06). Landing it before the 10/08 run delays 2026Q2 until 12/06, so the edit lands after 10/08 or is followed by one real dispatch.
+   - Evidence: crawl4ai of `fhfa.gov/data/hpi`, and `fhfa-hpi-quarterly.yml:7`.
+9. **The freshness probe's health** (§8).
+   - Wrong: the probe was implied to be a healthy daily seam.
+   - Right: `freshness-probe-daily.yml` concluded failure on each of its last 10 scheduled runs, 09/17-09/26. The failing step is the doctor's `--fail-on red` gate; the check_freshness step passes. The signal must be read in the checks ledger.
+   - Evidence: `gh run list --workflow freshness-probe-daily.yml --limit 10`, and the job-step view of 36259690113.
+10. **Stale claims P10 missed** (P10, item 11).
+    - Wrong: the list was incomplete.
+    - Right: added registry `:1120` and `:1142` ("Verified: MAX(inserted_at) = 2026-05-18", while live is 07/08 and 09/15), `fhfa/pipeline.py:8` ("~133k records"), and `scripts/notion-sync.mjs:1223` (names housing-swfl + master as the FHFA consumers).
+    - Evidence: `sed -n`, plus the `_dlt_loads` query.
+11. **The ACS vintage bump** (P4).
+    - Wrong: the code comment `census_acs/constants.py:16` says "the GHA cron bumps this one line".
+    - Right: nothing in `census-acs-annual.yml` edits it. The registry `:762` "MANUAL" line is the true one, recorded as "X verified, Y needs review".
+    - Evidence: `grep -n "sed \|git commit\|contents: write" .github/workflows/census-acs-annual.yml` (only the `:8` MANUAL note matches).
+
+### Unverifiable claims
+
+- **The keyed Census data calls** in P2 and P4: CBP 2023 Lee returning 1,187 rows, the keyed NAICS2022 call returning 400, and the ACS 2024 ZCTA 33901 values. Not re-run, because the key lives only in secret stores and this pass did not read one. The keyless metadata probes that carry the conclusion (2023 CBP live, 2024 ACS live) were re-run and hold.
+- **The FDIC dry-run duration of 1m07s.** The run's `updatedAt` was not fetched. The log's last pipeline line is at 16:44:14, which is consistent.
+- **Whether ops `/coverage` renders new check keys.** The ops repo was not opened, same as the first pass.
+- **Whether the heal L2 leg is live or dead.** There are 27 skipped and 3 success runs and no failed run to read. The UNKNOWN trigger path now exists, per correction 3.
+- **The ORNL page via crawl4ai.** It timed out at 60s. Its content was verified with curl instead, which is a weaker lane for a page that could render client-side. The zip names and dates came through in the raw HTML.
+
+### Gaps filled
+
+- The doctor is now named in §8 as a seam. In run 36259690113 it rates all six pipelines `FRESH | OK | NO_CONTRACT | GREEN`, which is also added as direct evidence under P9.
+- **Hendry FDIC is computed but not served:** `fdic-deposits-source.mts:36,111` against `macro-swfl.mts:568-569`. Added to §5 and as §12 question 4 (ASK-FIRST, because it changes key_metrics).
+- The related open check `registry_source_ceiling_no_freshness_field` is added to §8. Item 10 is the pattern it can copy; this family cannot close it.
+- The consumer-grep non-reader hits are listed in §1. No reader was missed and no claimed reader is absent.
+- A classifier rule for the placeholder-host config error is added (§8 noise list, §10 Leg 2) as the Lane D route off the L2 model leg.
+- Coverage check: every section 2, 3, 4, 6, 7, 8 and 9 names all six pipelines (census_cbp, census_acs, fdic_bankfind, fhfa, faf5, fdot).
+  - §4 has a problem for each pipeline: P2/P3 cbp, P4 acs, P13 fdic, P5/P6 fhfa, P7 faf5, P8/P11 fdot.
+  - §9 gives every pipeline a placement and a reason. No move to Fedora is proposed, so no `SWFL_LOCAL_RUNNER_READY` gate or runs-on label applies.
+  - §8 gives every pipeline exactly one named `vintage_lag_<name>` signal on the existing check_freshness + checks-ledger seams, and files no issue per run.
+
+### Credit-suggestion count: 0
+
+`grep -n -i "credit\|top up\|top-up\|console balance\|api key\|billing\|purchase credits"` over sections 1-12 returns 11 lines. Every one describes the existing wall, or the key a leg currently reads, or is part of the pack name "sector-credit-swfl". None proposes, prices or hints at adding funds. The legs on the wall are rerouted to Lane D (item 1 deletes the triage call; the heal fallback) or to Lane M, the Max-plan `claude -p` on the Fedora runner.

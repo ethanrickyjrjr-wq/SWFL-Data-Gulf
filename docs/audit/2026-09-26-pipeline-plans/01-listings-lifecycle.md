@@ -6,10 +6,12 @@ Verdict: no new source observation has entered this family since 08/14/2026. Thr
 - The listing spine is parked on the operator's word. It still reds the nightly gate every night, and even the scrape revert could not turn the gate green if the secret came back.
 - The histogram, details and rentals crons still call a vendor the operator retired on 09/15. Every run since 08/17 exits 0 with `rows=0`.
 - listing_week keeps re-stamping a frozen spine into its training panel.
+- The active-rentals-swfl brain serves nothing at all. It expired 07/19/2026, and every rebuild since fails because its view, `data_lake.rental_listing_stats`, cannot finish inside a statement timeout (P12, E13). It is not serving a dated snapshot.
 
 The plan:
 - Park the whole family honestly: schedules off, `dispatch_only: true` on each entry (entries stay under `pipelines:` so the doctor keeps an honest yellow STALE row), the listing legs pulled out of the nightly chain.
 - Make a zero-row run fail loud.
+- Rewrite the one rentals view that times out, so the rentals brain can build its dated snapshot again (item 15).
 - Retire land_manufactured_swfl.
 - List the un-park prerequisites so nobody has to re-derive them.
 
@@ -75,6 +77,24 @@ select c.relname, pg_get_viewdef(c.oid) like '%api_feed%' from pg_class c join p
 $f = rg -l "listing_active_stats|market_details_swfl|rental_listing_stats|listing_price_histogram_swfl|listing_momentum_stats|listing_active_homes|listing_price_bands|listing_pulse_daily" lib app -g '!*.test.*'; foreach ($x in $f) { rg -q -i "captured_date|scraped_at|asOf|as_of|freshness" -- "$x"; if ($LASTEXITCODE -ne 0) { "NO-DATE: $x" } }
 ```
 - E12 LLM grep, the full list is in section 10.
+- E13 in-family brain rebuilds inside the chain (added by the second Opus). The log was saved first, then grepped:
+```
+gh run view 36232679167 --log > chain.log
+grep -E "upstream (price-distribution|market-temperature|active-listings|active-rentals|listing-momentum)-swfl|BUILD FAILED|rental_listing_stats" chain.log
+```
+- E14 the rentals view's cost, read-only on the E5 session (second Opus):
+```
+explain select county, zip_code, rental_listing_count from data_lake.rental_listing_stats;
+explain (analyze, timing off, summary on) select county, zip_code, rental_listing_count from data_lake.rental_listing_stats;
+explain analyze select county, max(captured_date) from data_lake.rental_listings_swfl group by 1;
+select pg_get_viewdef('data_lake.rental_listings_swfl_latest'::regclass);
+select rolname, rolconfig from pg_roles where rolname in ('service_role','authenticator','anon','authenticated');
+```
+- E15 consumers of every family table and view (second Opus):
+```
+rg -l "\b<table>\b" refinery/sources refinery/packs lib app -g '!*.test.*'
+grep -n "listing-momentum" refinery/packs/master.mts
+```
 
 Pipelines, 6 in total (E1). Five are under `pipelines:` and one is under `not_yet_running:` (`ingest/cadence_registry.yaml:2329`).
 
@@ -83,6 +103,8 @@ listing_lifecycle, `ingest/cadence_registry.yaml:2073`
 - `gh workflow list --all` shows it `disabled_manually`, yet it still runs every night through `workflow_call`.
 - Tables: `data_lake.listing_state`, `listing_transitions`, `steadyapi_property_history_raw`, `steadyapi_search_raw`, and the parsed families `steadyapi_listing_events`, `steadyapi_tax_history`, `steadyapi_property_permits` (registry comment `:2113-2140`).
 - Consumer pack: active-listings-swfl, which feeds master (`refinery/packs/master.mts:268,355`).
+- Second consumer pack, missing from the registry and from the first draft (E15): listing-momentum-swfl. `refinery/sources/listing-momentum-source.mts:26` reads `listing_momentum_stats`, one of the 5 `api_feed` views over `listing_state` (E10), and master takes it as an input (`master.mts:265,346`). It builds with no LLM (`listing-momentum-swfl.mts:213-214`). E13: the 09/26 chain skipped it as "fresh (expires 2026-10-02)", so it re-stamps the frozen 08/14 spine on its own TTL.
+- Direct lib/app readers (E15, files that name the table): 29 name `listing_state` and 16 name `listing_transitions`. Some are comments, not queries. The parsed families have their own readers: `lib/listings/listing-events.ts:228` (`steadyapi_listing_events_v`), `lib/listings/property-tax-history.ts:3` (`steadyapi_tax_history_v`) and `lib/listings/sold-event-store.ts:40` (`steadyapi_property_history_raw`).
 
 listing_week, `:1419`
 - Workflow `listing-week-weekly.yml`. Table `data_lake.listing_week`.
@@ -99,7 +121,8 @@ market_aggregates_details, `:2174`
 
 rentals_swfl, `:2240`
 - Workflow `ingest-rentals.yml`. Tables `data_lake.rental_listings_swfl` and `steadyapi_rentals_search_raw`.
-- Consumer pack: active-rentals-swfl, which feeds master (`master.mts:269,362`).
+- Consumer pack: active-rentals-swfl, which feeds master (`master.mts:269,362`). It reads the view `data_lake.rental_listing_stats` (`refinery/sources/active-rentals-source.mts:27,64-75`). That view has no other direct reader (E15). The zip-report tile "Active Rental Listings" reads the pack by id (`lib/zip-report/candidates.ts:267-273`).
+- The pack is MISSING, not frozen (E13, P12).
 
 land_manufactured_swfl, `:2424`
 - `workflow: none`, `parked: true` (`:2431`), no code and no table.
@@ -129,7 +152,7 @@ listing_week
 - Live (E5): 310,860 rows, week_start 06/29/2026 to 09/07/2026, `MAX(built_at)` = 09/14/2026 14:51 UTC.
 - By county: Lee 218,882, Collier 81,005, Hendry 10,973 (sum 310,860).
 - Weeks present (E5): 06/29, 07/06, 07/13, 07/20, 08/03, 08/10, 08/17, 08/24, 09/07.
-- Missing weeks: 07/27 (run 30809680320 skipped on 08/03, E2) and 08/31 (run 34130970473 failed on 09/07, E2).
+- Missing weeks: 07/27 (run 30809680320 skipped on 08/03, E2), 08/31 (run 34130970473 failed on 09/07, E2) and 09/14 (run 35615531541 failed on 09/21, E2). On 09/26 the last completed week is 09/14 (`listing_week/pipeline.py:27`), and it is absent from E5. The next scheduled run builds only 09/21, so 09/14 is lost for good (P5).
 - Every week from 08/10 on holds exactly 36,216 rows (E5).
 - Cadence: weekly, Monday 08:00 UTC (`listing-week-weekly.yml:12`).
 
@@ -181,6 +204,7 @@ The replacement lanes named below were checked for health instead (E7, same doct
 - listing_week's pure builder and its fatal-on-zero guard (`listing_week/pipeline.py:56-59`) are sound. 7 of the last 10 runs are green (E2: 07/20, 07/27, 08/10, 08/17, 08/24, 08/31, 09/14; red 09/07 and 09/21; skipped 08/03).
 - The details content contract (`market_aggregates/pipeline.py:120-130`) shows PASS on the doctor (E7).
 - Served surfaces label their dates. `lib/landing/load-home-map-data.ts:133-145` and `:167-181` stamp `asOf` from captured_date/latest_scraped_at, and the four refinery sources carry captured_date or scraped_at (`refinery/sources/price-distribution-source.mts:108-114`, `market-temperature-source.mts:92-100`, `active-rentals-source.mts:86-97`, `active-listings-residential-source.mts:154-163`).
+  - Correction (second Opus): active-rentals-source's date stamping is moot today, because its pack cannot build (P12). "Working" holds for the other three sources only.
 - Last real landings, the proof the code paths worked while the vendor did (E3 plus E5):
   - Histogram run 31385160828 on 08/10/2026 (`rows=80`).
   - Details run 30923149871 on 08/04/2026 (`rows=54`).
@@ -243,7 +267,7 @@ P4. listing_week labels: NULL means both "censored" and "nothing happened"
 - First seen: 07/19/2026 backfill.
 
 P5. listing_week skips a missed week permanently
-- Symptom (E5): week_start 07/27 and 08/31 are absent. Week 07/20's labels are all NULL (34,204 of 34,204), because the run that should have filled them (08/03) was skipped.
+- Symptom (E5): week_start 07/27, 08/31 and 09/14 are absent. Week 07/20's labels are all NULL (34,204 of 34,204), because the run that should have filled them (08/03) was skipped.
 - Root cause: `listing_week/pipeline.py:27-28` builds only `last_completed`. There is no catch-up from `MAX(week_start)+7`.
 - Severity: blocks a consumer.
 - First seen: 08/03/2026 (run 30809680320, skipped, ENGINE_ENABLED off).
@@ -255,6 +279,8 @@ P6. listing_week DB failures classify as UNKNOWN
 - Both classify `UNKNOWN` (E9). Issue #213 is open, and its "Auto-diagnosis" carries only "Unrecognised failure shape — needs diagnosis."
 - Root cause: `.github/scripts/classify-cron-failure.mjs` has no pattern for Postgres statement timeouts or dropped connections. The 09/21 run fell inside the 09/21 REST/DB outage (`_ASSISTANT/SCRATCHPAD.md` 09/21 entry).
 - Severity: cosmetic, but it adds noise. An UNKNOWN is routed to the LLM narrative leg (section 10), and the doctor already calls the same failure TRANSIENT (E7: `listing_week — TRANSIENT (should_retry=true)`).
+- The doctor row itself is red (E7: `listing_week | table | FRESH | OK | NO_CONTRACT | RED | 🔴 red`). The Run column reads RED because the newest run failed (`ingest/lib/gh_runs.py:147-148`, mapped to red at `ingest/scripts/doctor.py:158`). Two of the doctor's 3 red rows today belong to this family: listing_lifecycle and listing_week.
+- A parked workflow whose last run failed stays RED until it runs green. Commenting out the cron (item 4) does not clear it. Disabling the workflow at the API does: the state becomes DISABLED (`gh_runs.py:124-125`), which maps to yellow when no cron is in source (`doctor.py:173-175`). Item 4 now carries that step.
 - First seen: 09/07/2026.
 
 P7. The parked listing legs red the nightly chain every night
@@ -297,6 +323,7 @@ P10. Four served readers of frozen roots print no date
   - `lib/week-in-review/load.ts`
   - `lib/email/doc/seed-chart-series.ts`
 - This is a grep heuristic: a caller may stamp the date elsewhere. It needs a read per file before it is called a defect.
+- One of the four was read (second Opus). `lib/zip-report/candidates.ts` reads the packs by id, not the views. Two of its tiles label frozen family data as current: "Active Rental Listings" with sub-label "For-rent inventory, live count" (`:272-273`, from active-rentals-swfl, which is MISSING per P12), and "Median Asking Rent" with "Current realtor.com listing median — micro snapshot" (`:259-260`, from market-temperature-swfl, last capture 08/04/2026 per E5). Whether the zip-report page prints the pack's as-of date next to the tile was not read.
 - Severity: may block a served number (an undated 08/2026 figure).
 - First seen: 09/26/2026, this audit.
 
@@ -310,8 +337,25 @@ P11. land_manufactured_swfl's registry text contradicts itself
 
 Discrepancy with the brief
 - The brief says the rebuild is "stalled behind" the gate. `nightly-chain.yml` T3 (comment above the rebuild job, 09/15/2026) says the gate "no longer BLOCKS the rebuild".
-- Today's `rebuild · brains` in run 36232679167 did run, and failed on packs outside this family: `BUILD FAILED — pack=cre-swfl`, `pack=macro-us`, `pack=macro-florida` at 09:27:13-09:27:19 UTC, each on its unattended LLM leg. Those packs belong to other families.
+- Today's `rebuild · brains` in run 36232679167 did run. It failed on three packs outside this family (`BUILD FAILED — pack=cre-swfl`, `pack=macro-us`, `pack=macro-florida` at 09:27:13-09:27:19 UTC, each on its unattended LLM leg; other families own them) and on one pack inside it: `BUILD FAILED — pack=active-rentals-swfl status=missing` at 09:27:41 UTC (E13, P12). The first draft missed that fourth failure.
 - Chain verified: the rebuild is not stalled behind this family's gate. The brief line needs review.
+
+P12. The active-rentals-swfl brain serves nothing: its view cannot finish (added by the second Opus)
+- Symptom (E13, run 36232679167, 09/26/2026):
+  - `[refinery] upstream active-rentals-swfl: stale (expired 2026-07-19) — rebuilding`
+  - then `BUILD FAILED — pack=active-rentals-swfl status=missing failureClass=transient (self-heals next run) — serving NOTHING (no eligible last-good)`
+  - then `error: active-rentals-source: rental_listing_stats fetch failed — canceling statement due to statement timeout`
+  - then `active-rentals-swfl: MISSING (transient) — downstream packs will build against a HOLE`
+- The same "expired 2026-07-19 — rebuilding" line appears in chain runs 35433117190 (09/19), 35709915342 (09/22), 35980809253 (09/24), 36119722779 (09/25) and 36217671353 (09/26 04:23). On 09/22 the error text was the REST-outage one ("Could not query the database for the schema cache"). Every other run shows the statement timeout. The "transient" label is wrong: this does not self-heal.
+- Root cause (E14):
+  - `data_lake.rental_listings_swfl_latest` keeps a row when `captured_date = (SELECT max(r2.captured_date) FROM data_lake.rental_listings_swfl r2 WHERE r2.county = r.county)`. That is a correlated subquery, run once per row.
+  - The table has one index, the primary key `(property_id, captured_date)`, so each subquery run is a sequential scan. Planner cost for the stats view is 46,578,234. A read-only `explain analyze` of it hit the session's 90-second statement timeout.
+  - The same per-county max as one grouped aggregate runs in 16.389 ms (`explain analyze ... group by 1`).
+  - The REST roles run with `statement_timeout=8s` (`authenticator` and `authenticated`, per `pg_roles`). The refinery reads through PostgREST (`active-rentals-source.mts:64-75`), so the view can never answer it.
+- When it started: the per-county form came in with the 07/18/2026 completeness fix (`docs/sql/20260701_rentals_swfl_table.sql:35-38`, commit e8f38964 dated 07/18/2026), and the pack expired the next day, 07/19/2026 (E13).
+- Scope of the shape (RULE 0.5c): a scan of every `data_lake` view definition for a `max()` subquery with a correlated `WHERE` found this one view only. `market_details_swfl_latest` and `listing_price_histogram_swfl_latest` use an uncorrelated global max, which runs once. The scan was a regex over `pg_get_viewdef`, so it is a heuristic.
+- Severity: blocks a served number. The master input and the zip-report "Active Rental Listings" tile get nothing. This holds whatever the vendor does, because the data landed through 08/10/2026 is readable and the view is what fails.
+- First seen: 07/19/2026 (pack expiry, E13). It was not in any ledger before this audit.
 
 ## 5. What is missing
 
@@ -323,13 +367,14 @@ Discrepancy with the brief
 - Against what the consumers need: every consumer pack is frozen at its last capture. The free lanes that already exist and are green (E7) cover part of it.
   - market_heat_swfl (realtor.com Economic Research Data Library, registry `:475-497`, the same realtor.com origin as details) already carries these ZIP-grain fields that market_aggregates_details served: median listing price, median days on market, median listing price per sqft, hotness score, active listing count, price_reduced_share.
   - The details fields NOT covered by any free lane: median_sold_price, median_rent_price, sold_to_rent_ratio, list_to_sold_ratio_pct. The operator's 09/15 order routes sold prices to the deed/official-records and LEEPA lanes (SCRATCHPAD 09/15, "Sold prices come from the deed/official-records and LEEPA lanes"). Those belong to families 08 and 10.
-  - Rent level: `zori_swfl_tier2` (green, E7) is a smoothed rent index, not inventory. `docs/handoff/2026-07-11-reliable-sources-findings.md:235-236` found no free structured rental-listing source, so rental inventory grain has no free replacement.
+  - Rent level: `zori_swfl_tier2` (green, E7) is a smoothed rent index, not inventory. For rental inventory grain, no free replacement is known, but none has been looked for. `docs/handoff/2026-07-11-reliable-sources-findings.md:235-236` says no free structured rental-listing source "was found or searched for deeply this session", and `grep -n -i "rental" _RESEARCH/INDEX.md` lists no rental-source research. "No free source exists" is unproven (RULE 0.95); item 16 owes the search.
   - The price histogram has no free replacement. `data_lake.listing_price_bands` derives bands from `listing_state`, which is frozen too.
 - Against data-roots:
   - `docs/standards/data-roots.md:75` still marks `market_details_swfl_latest.median_sold_price` 🟢 as the per-ZIP sold root.
   - `:82` names `rentals_swfl` as the own-inventory rent root.
   - `:503` names `market_aggregates_histogram` 🟡 as the price-band root.
   - All three roots have been frozen since 08/2026 and none says so.
+- Consumers that exist and cannot read: active-rentals-swfl has been MISSING since 07/19/2026 (P12), so the rentals root has served nothing for its last 3 captures (07/20, 08/05, 08/10 per E5).
 - Consumers that should exist and do not:
   - listing_week has no registered consumer. The sell-odds Phase 1/2 jobs named in registry `:1421-1423` do not exist in code; the only reader is `ingest/analysis/challenger.py`:
 ```
@@ -351,7 +396,7 @@ grep -n -i "exit\|rows=0\|SystemExit" ingest/tests/pipelines/market_aggregates/*
 - listing_week — PARK. Its only input has been frozen since 08/14/2026, and every run adds 36,216 replay rows (E5). The number that changes it: `MAX(listing_state.scraped_at)` newer than the week being built.
 - market_aggregates_histogram — PARK. The vendor is retired, and the code stays inert per the operator ("SteadyAPI code stays inert", `wiki/pipeline-health.md:134-135`). The number that changes it: a non-zero `rows=` on a real run from a permitted source.
 - market_aggregates_details — PARK. Same reason. The free replacement for 6 of its fields already runs (market_heat_swfl). The number that changes it: an operator decision to repoint market-temperature-swfl (section 12).
-- rentals_swfl — PARK. Same vendor. No free replacement exists (findings `:235-236`). The number that changes it: one free structured rental-listing source found.
+- rentals_swfl — PARK. Same vendor. The view it feeds still needs a repair (item 15). No free replacement is known, but none has been searched for (findings `:235-236`, item 16). The view fix (item 15) is independent of the vendor: the 38,620 rows already landed (E5) can serve a dated 08/10/2026 snapshot again. The number that changes the PARK: one free structured rental-listing source found by item 16.
 - land_manufactured_swfl — RETIRE. It has no code and its premise is a retired vendor. The number that changes it: none. The free question it wanted to answer (manufactured-home and land stock) already has a live free lane recorded at registry `:1195` (Lee ArcGIS `MobileHomeLots`, lastEditDate 09/20/2026) plus parcel DOR use codes; both belong to families 08 and 10.
 
 ## 7. The plan
@@ -399,9 +444,11 @@ gh run view <next-chain-id> --json jobs --jq '.jobs[].name'
 
 4. Park listing_week with its upstream. DO.
    - What: comment out `listing-week-weekly.yml:11-12` and add `dispatch_only: true` to the `listing_week` entry (`:1419`), same pattern as item 2.
-   - Where: those two files.
+   - Also disable the workflow at the API (`gh workflow disable listing-week-weekly.yml`), as the precedent entry did (`neighborhood_amenities`, "disabled_manually at the API", registry `:2281-2283`). Without it the doctor row stays red, because the newest run (09/21) failed and a parked workflow never runs green again (P6). DISABLED plus no cron in source reads yellow (`doctor.py:173-175`).
+   - Pause the Healthchecks.io check `listing-week-weekly` (created by the ping at `listing-week-weekly.yml:52-56`), or it goes late on its own and alerts about a park. That ping also fires under `if: always()` with no `/fail` suffix, so it reports success on a failed run. Family 16 owns the fix to that shape (`16-ops-chain.md:204`, item 7). Its item names 4 sites and not this one, and `grep -ln "hc-ping" .github/workflows/*.yml | wc -l` returns 11 workflows, so family 16 should re-scope.
+   - Where: those two files, plus the one `gh` call and the Healthchecks project.
    - Lane: D. Effort: S.
-   - Proof: no `listing-week-weekly` run after 09/28/2026 (`gh run list --workflow listing-week-weekly.yml --limit 1`), and `bun ingest/tools/check-registry-identity.mts --static` exits 0.
+   - Proof: no `listing-week-weekly` run after 09/28/2026 (`gh run list --workflow listing-week-weekly.yml --limit 1`), `bun ingest/tools/check-registry-identity.mts --static` exits 0, `gh workflow list --all --limit 300 | grep listing-week` shows `disabled_manually`, and the doctor row for listing_week is yellow.
    - Unblocks: stops adding 36,216 replay rows a week (E5). Issue #213 can be closed by hand, citing this plan (it will not auto-close with no next run).
 
 5. Add an observed-week guard to listing_week. DO.
@@ -478,8 +525,24 @@ ingest/.venv/Scripts/python.exe -m pytest -q ingest/tests/pipelines/market_aggre
 14. Un-park prerequisites for listing_lifecycle, recorded only. ASK-FIRST, operator's lane.
     - The source_name coupling (P8): write scrape rows as `api_feed`, or repoint 5 views, 11 code files and the registry.
     - The secret value and its recovery path (checks `listing_base_url_secret_empty`, `incognito_secrets_have_no_recovery_path`).
-    - Reuse terms for scraping the brokerage site (`wiki/pipeline-health.md:93-94`, "unresolved").
+    - Reuse terms for scraping the brokerage site (`wiki/pipeline-health.md:94-95`, "unresolved").
     - Apify is the paid catch-up lane if listings resume (SCRATCHPAD 09/15). Nothing is built here.
+
+Items 15 and 16 were added by the second Opus. By value, item 15 belongs second in the order, right after item 1. It is numbered last only so the cross-references above stay stable.
+
+15. Rewrite `data_lake.rental_listings_swfl_latest` so the rentals view can finish. DO (a SQL migration that writes no rows).
+    - What: replace the correlated subquery with a grouped per-county max joined back, for example `WITH m AS (SELECT county, max(captured_date) AS d FROM data_lake.rental_listings_swfl GROUP BY county) SELECT r.* FROM data_lake.rental_listings_swfl r JOIN m ON m.county = r.county AND m.d = r.captured_date`. The output columns stay the same, and so do the 07/18/2026 per-county semantics (`docs/sql/20260701_rentals_swfl_table.sql:35-38`). Put it in a new dated `docs/sql/` file, `CREATE OR REPLACE VIEW`, idempotent, then `NOTIFY pgrst, 'reload schema'` as `scripts/apply-fdic-sod-view.mts:37` does.
+    - A failing check first: a script that runs `explain analyze select * from data_lake.rental_listing_stats` and exits 1 if execution takes 8 s or more (the REST role's `statement_timeout`, E14).
+    - Where: a new `docs/sql/2026MMDD_rental_listings_latest_fix.sql` and its apply script under `scripts/`.
+    - Lane: D. Effort: S.
+    - Proof: E14's `explain analyze` on `rental_listing_stats` finishes in under 8 s and returns rows for Lee and Collier. Then the next chain log (E13) shows no `BUILD FAILED — pack=active-rentals-swfl` line.
+    - Unblocks: the active-rentals-swfl brain builds again, as a dated 08/10/2026 snapshot (its `captured_date` is carried per county, `active-rentals-source.mts:86-97`). It also clears the MISSING hole in master's inputs and in the zip-report tile. Question 1 in section 12 still decides whether master keeps it. This fix is correct either way.
+
+16. Search for a free rental-inventory source, once, and file it. DO.
+    - What: one interactive Max-plan session (Lane M, the Issue 001 pattern) runs the operator's discovery rule. That means at least three candidates found by live search, each one's terms or README crawled with crawl4ai, and the result written to `_RESEARCH/data-and-ingest/` and indexed in `_RESEARCH/INDEX.md`. No code and no ingest.
+    - Lane: M (interactive). Effort: S.
+    - Proof: `grep -n -i "rental" _RESEARCH/INDEX.md` returns the new line.
+    - Unblocks: rentals_swfl's verdict either gets a real replacement or a documented "none exists" (section 6).
 
 ## 8. Checks and balances
 
@@ -498,11 +561,14 @@ listing_week
 - Signal: registry `freshness_column: week_start` (item 5) plus the observed-week guard.
   - Freshness reads the content week, so a frozen spine turns it STALE instead of FRESH-by-replay. The entry stays under `pipelines:` with `dispatch_only: true` (item 4), so this signal works as soon as item 5 lands, even while parked: max week_start 09/07/2026 is 19 days old against a 14-day threshold (7 × 2.0).
   - The guard makes a real run exit 1, so `log-cron-incident` records it once and closes it on the next green (`log-cron-incident.mjs:173,292`).
-- Noise to delete: issue #213 (close by hand when parked, item 4).
+- Noise to delete:
+  - Issue #213 (close by hand when parked, item 4).
+  - The doctor's red Run column (P6), cleared by disabling the workflow in item 4.
+  - The Healthchecks.io check `listing-week-weekly`, paused in item 4. It is a dead-man switch with no fail ping (`listing-week-weekly.yml:52-56`), so it cannot be this pipeline's signal.
 
 market_aggregates_histogram
-- Signal: the zero-row fatal exit (item 8). A green run now means rows landed. On un-park, add `expected_rows_min: 72` (90% of 80 bands a capture per E5) with a `count_filter` scoped to the newest captured_date.
-- Only if the latest-capture scope exists: `check_freshness.py:431-490` counts the whole table (`SELECT count(*) ... WHERE source_name`), and this table is append-only, so a total-row floor at 400 would never trip. If no such filter exists, the fatal exit stands alone.
+- Signal: the zero-row fatal exit (item 8). A green run now means rows landed.
+- No row floor. The first draft proposed `expected_rows_min: 72` with a `count_filter` scoped to the newest captured_date. No such scope exists. `count_filter` is a literal `column = value` match, and only `assert_landed.py:107-110` reads it, for nightly entries. `check_freshness.py:431-490` (the volume check for weekly entries) has no filter at all: it counts the whole table, `WHERE source_name` at most. The table is append-only, so a floor on the 400-row total would never trip. The fatal exit stands alone.
 - While parked, its yellow STALE doctor row IS the signal: served and frozen, no page, no issue. Keep it.
 
 market_aggregates_details
@@ -512,6 +578,7 @@ market_aggregates_details
 rentals_swfl
 - Signal: the fatal exit (item 8). On un-park, also a per-county non-zero check, because the 07/13/2026 partial (Lee 1 call) landed Collier only and read green. That is one line in `rentals/pipeline.py` after `per_county`: exit 1 if any county produced 0 rows.
 - While parked, its yellow STALE row is the signal. Keep it.
+- The rentals brain's own failure (P12) never reached the doctor. The doctor watches the table, and the table is fine. The only trace was a `BUILD FAILED ... serving NOTHING` line inside a chain that is red for other reasons, so it ran 69 days with no signal (07/19 to 09/26/2026). Item 15 removes the cause. A fleet signal for "pack MISSING with no last-good" belongs on the rebuild seam that family 16 owns, not a new per-pipeline alert here. Tell family 16.
 
 land_manufactured_swfl
 - Signal: none (retired, item 10).
@@ -527,12 +594,13 @@ Family-wide
 
 - listing_lifecycle — stays where it is (GHA, parked). The operator's standing order is explicit: "Do NOT move that pipeline to Fedora" (SCRATCHPAD 09/15, "listings PARKED" entry).
   - On un-park, the scrape leg is the one part of this family with a real Fedora reason: a brokerage site behind a WAF, where a residential IP matters.
-  - That is a decision for un-park day, after the secret and source_name questions (item 14). It is not made here.
+  - That is a decision for un-park day, after the secret and source_name questions (item 14). It is not made here. If it is made, the move is `runs-on: [self-hosted, swfl-local]` behind the `SWFL_LOCAL_RUNNER_READY` gate, which is how collier records is gated (brief, standing facts). `listing-lifecycle-daily.yml:78` would change and nothing else would, because the chain calls it with `uses:` (`nightly-chain.yml:131`).
 - listing_week — stays on GHA `ubuntu-latest`. It is a pure SQL derivation over our own lake with a 15-minute timeout (`listing-week-weekly.yml:28`). It needs no WAF bypass, no browser, no SSD archive and no local model.
   - Its two red runs were DB-side (P6), which a different box would not change.
 - market_aggregates_histogram, market_aggregates_details, rentals_swfl — stay on GHA, schedules off (item 1).
   - They are vendor API calls with a bearer token and no WAF problem (`market_aggregates/steady_client.py:36-42`). Jobs run 10-15 minutes (timeouts at `:25`, `:26`, `:27` of each file).
   - None needs the SSD, a browser or a local model.
+- The rentals view fix (item 15) is a database change. It needs no box; the refinery build that reads the view stays wherever the chain's rebuild runs.
 - land_manufactured_swfl — no box (retired).
 - Already on the box that should not be: nothing from this family. The Fedora runner's proven jobs are dbpr-sirs, crexi and collier records (brief, standing facts).
 
@@ -548,6 +616,14 @@ Results:
 - First grep: 2 hits, both non-calls. `market_aggregates/constants.py:74` mentions "CLAUDE.md" in a docstring. `listing-week-weekly.yml:7` says "no LLM".
 - Second grep: only comments that say "no LLM" (`active-listings-swfl.mts:26,30`, `price-distribution-swfl.mts:25,303`, `market-temperature-swfl.mts:31,268`, `active-rentals-swfl.mts:33,197`).
 - All four packs set `skipSynthesisAgent: true` and `skipTriageAgent: true` (`active-listings-swfl.mts:292-293`, `price-distribution-swfl.mts:311-312`, `market-temperature-swfl.mts:276-277`, `active-rentals-swfl.mts:205-206`).
+
+- Third grep (second Opus), over the consumer pack the first draft missed and the chain that hosts the lifecycle leg:
+```
+grep -n -i -E "anthropic|claude|openai|llm|sonnet|haiku|opus|ollama|generateText|messages\.create" refinery/packs/listing-momentum-swfl.mts refinery/sources/listing-momentum-source.mts
+grep -n -i -E "anthropic|claude|openai|refinery" .github/workflows/nightly-chain.yml
+```
+  It returns 2 comment hits that say "no LLM" (`listing-momentum-swfl.mts:25,205`), plus `skipSynthesisAgent: true` / `skipTriageAgent: true` at `:213-214`. `nightly-chain.yml` returns 0 hits. The chain's LLM-backed packs are built by the rebuild job that other families own.
+- The E13 log line `pack=active-rentals-swfl source=live agents=live` is a mode banner, not a model call. The pack sets `skipSynthesisAgent: true` (`active-rentals-swfl.mts:205-206`), and its failure is the view timeout (P12), not a model.
 
 LLM legs in this family: none.
 
@@ -618,7 +694,25 @@ I re-read the file top to bottom. Each claim is listed with what verifies it and
 - Section 8's `count_filter` for histogram · `check_freshness.py:431-490` read shows a count only by source_name · verified that no latest-capture scope exists in that function. The plan conditions the floor on it.
 - No sentence proposes or mentions paying a model vendor · a grep of this file for the terms forbidden by `00-BRIEF.md` rule 2 · verified 0 hits.
 
-Corrections applied above, 15 in total. Each has a "· corrected" line in this log.
+Claims added by the second Opus. The first Opus's claims above were re-run; section 13 has the result.
+- active-rentals-swfl "stale (expired 2026-07-19)", BUILD FAILED on a statement timeout in 5 chain runs (36232679167, 36217671353, 36119722779, 35980809253, 35433117190), and on the schema-cache error in 35709915342 · E13 per run · verified.
+- Planner cost 46,578,234 for the stats view. The read-only `explain analyze` timed out at 90 s. The grouped max runs in 16.389 ms. REST roles `statement_timeout=8s` · E14 · verified.
+- rental_listings_swfl has 1 index (the PK) · `select indexname from pg_indexes where schemaname='data_lake' and tablename='rental_listings_swfl'` · verified.
+- One correlated-max view in data_lake · regex scan over `pg_get_viewdef` (E14 session) · verified, heuristic.
+- The per-county view form dates to 07/18/2026 · `git log -- docs/sql/20260701_rentals_swfl_table.sql` (e8f38964, 2026-07-18) plus the file's comment at `:35-38` · verified.
+- 69 days with no signal: 07/19 to 07/31 = 12, plus August 31, plus September 26 = 69 · arithmetic · verified.
+- listing-momentum-swfl is a master input (`master.mts:265,346`) that reads `listing_momentum_stats` (`listing-momentum-source.mts:26`), fresh until 10/02/2026 · E15 and E13 · verified.
+- 29 files name listing_state and 16 name listing_transitions · E15 with `-g '!*.md'` · verified (these are name mentions, not proven queries).
+- Missing week 09/14 · E2 (run 35615531541 failure) plus E5 week list · verified.
+- Doctor listing_week row `RED | 🔴 red`, and 3 red rows in total · E7 · verified.
+- gh_runs RED at `:147-148`, DISABLED at `:124-125`, doctor mapping at `:158` and `:173-175` · `sed -n` on both files · verified.
+- 11 workflows ping hc-ping, and the listing-week ping sits at `listing-week-weekly.yml:52-56` · `grep -ln "hc-ping" .github/workflows/*.yml | wc -l` plus `sed -n 44,60p` · verified.
+- `count_filter` is read only by `assert_landed.py:107-110`, and `check_freshness.py` has none · `grep -rn "count_filter" ingest/scripts/*.py` · verified.
+- zip-report tile labels at `candidates.ts:259-260` and `:272-273` · `grep -n -A8 'packId: ...'` · verified.
+- Findings `:235-236` say "found or searched for deeply", and `_RESEARCH/INDEX.md` has no rental-source line · `sed -n 235,236p` plus `grep -n -i rental _RESEARCH/INDEX.md` · verified.
+- Wiki reuse-terms lines are `:94-95` · `sed -n 86,96p wiki/pipeline-health.md` · corrected (the first draft said `:93-94`).
+
+The first Opus's own corrections, 15 in total. Each has a "· corrected" line in the first part of this log. The second Opus's corrections are listed in section 13.
 - Registry line numbers for listing_lifecycle's fields.
 - Other registry line numbers.
 - Client and resources line numbers.
@@ -637,6 +731,46 @@ Corrections applied above, 15 in total. Each has a "· corrected" line in this l
 
 ## 12. Questions for the operator
 
-1. Three packs (price-distribution-swfl, market-temperature-swfl, active-rentals-swfl) sit in master's `input_brains` (`refinery/packs/master.mts:345-362`) and serve an 08/04 to 08/10/2026 snapshot with no path to refresh. Keep them serving the dated snapshot, or pull them from master?
+1. Five packs from this family sit in master's `input_brains` (`refinery/packs/master.mts:345-362`) with no path to refresh.
+   - Four serve a dated snapshot: price-distribution-swfl (08/10/2026), market-temperature-swfl (08/04/2026), active-listings-swfl and listing-momentum-swfl (both on the 08/14/2026 spine).
+   - The fifth, active-rentals-swfl, serves nothing until item 15 lands (P12).
+   - Keep them serving the dated snapshot, or pull them from master? Item 15 is worth doing under either answer.
 2. The homepage map's "Median Sold Price" (`lib/landing/load-home-map-data.ts:117-145`) reads the frozen realtor.com per-ZIP figure. Repoint it to the deed/LEEPA sold lanes (a different statistic that has to be labeled as such, `data-roots.md:75`), or keep the dated realtor.com figure?
 3. Delete the 108,648 replay rows from `data_lake.listing_week` (item 6)? It is a data_lake write, so it needs your word.
+
+## 13. Second-Opus verification
+
+What was re-run (09/26/2026): E1, E2 on all 5 workflows, E3 on 15 run ids, E4 on all 15 chain runs, E5 in full (read-only Bun.SQL), E6, E7, E8 (46 passed; 202 passed; collection 19 / 16 / 11 / 194), E9 on fresh log tails, E10, E11, the section 10 greps, and every `path:line` the file cites, opened one by one. New evidence was added as E13-E15 in section 1.
+
+Claims checked: 72. That is the first Opus's 56 double-check-log claims, each re-run or re-opened, plus the 16 new claims this pass added to section 11.
+
+Corrections (what was wrong → what is right → evidence):
+1. The rebuild discrepancy note said today's rebuild failed only on packs outside this family → it also failed on active-rentals-swfl, which is in this family (`BUILD FAILED — pack=active-rentals-swfl status=missing` at 09:27:41 UTC) → E13 on run 36232679167.
+2. Question 1 and the summary treated active-rentals-swfl as serving an 08/04-08/10/2026 snapshot → it serves nothing. It expired 07/19/2026, and every rebuild fails on a `rental_listing_stats` statement timeout → E13 on 6 chain runs, E14; now P12.
+3. Scope named only active-listings-swfl as listing_lifecycle's consumer pack → listing-momentum-swfl also reads the spine (through `listing_momentum_stats`) and is a master input → `master.mts:265,346`, `listing-momentum-source.mts:26`.
+4. Missing listing_week weeks were 07/27 and 08/31 → also 09/14, after run 35615531541 failed on 09/21 and no catch-up exists → E2 plus the E5 week list.
+5. The plan never reported that listing_week is red on the doctor, and item 4 as written would have left it red forever: a parked workflow whose last run failed stays RED → item 4 now also disables the workflow at the API (DISABLED with no cron reads yellow) → E7 row, `gh_runs.py:124-125,147-148`, `doctor.py:158,173-175`.
+6. "No free rental-inventory source exists" → none has been searched for. The finding it cited says "found or searched for deeply", and `_RESEARCH/INDEX.md` has no rental-source line → `reliable-sources-findings.md:235-236`; item 16 added.
+7. Section 8 proposed a histogram floor "with a `count_filter` scoped to the newest captured_date" → no such scope exists. `count_filter` is a literal `column = value` match read only by `assert_landed.py:107-110`, and `check_freshness.py` has no filter, so the floor was dropped → `grep -rn count_filter ingest/scripts/*.py`.
+8. The reuse-terms citation `wiki/pipeline-health.md:93-94` → `:94-95` → `sed -n 86,96p`.
+9. Section 3 counted active-rentals-source's date stamping as working → moot while the pack cannot build → E13.
+10. P10 treated `lib/zip-report/candidates.ts` as a view reader with no date → it reads packs by id, and it labels frozen family data "live count" (`:272-273`) and "Current realtor.com listing median" (`:259-260`) → file read.
+
+Unverifiable claims, and why:
+- Whether the zip-report page prints a pack as-of date beside those tiles. The page component was not read, so P10 still says so.
+- How the ops `/coverage` page renders a parked entry. `curl` returned 200; the rendered page was not inspected (unchanged from the first Opus).
+- That item 15's rewritten view runs under 8 s. A view cannot be created from a read-only session. The grouped per-county max it is built on runs in 16.389 ms (E14), so the claim is inferred.
+- Where Healthchecks.io alerts are routed. The project was not accessible from this session.
+- The doctor states after items 3 and 4 (yellow). They are reasoned from the code paths cited, not observed.
+
+Gaps filled:
+- P12, item 15 (the rentals view rewrite) and item 16 (a one-time rental-source search, Lane M interactive).
+- The listing-week Healthchecks ping. It reports success on a failed run (`listing-week-weekly.yml:52-56`) and would alert on a park; pausing it is now in item 4, and family 16 is told to re-scope (11 workflows ping).
+- The section 9 un-park sentence now names `runs-on: [self-hosted, swfl-local]` and the `SWFL_LOCAL_RUNNER_READY` gate.
+- Section 10 now has a third grep over listing-momentum-swfl and `nightly-chain.yml`: no LLM leg, and the list stays at none.
+- Consumers now include the parsed-family readers and the file-mention counts (29 for `listing_state`, 16 for `listing_transitions`).
+- Section 11 has 16 more claim lines.
+- Coverage check: all 6 pipelines appear in sections 2, 3, 4, 6, 7, 8 and 9. land_manufactured_swfl's section 3 entry is covered by section 2's "nothing is brought in".
+- Section 8 check: no per-run issue filing survives. `log-cron-incident.mjs:218-229` keeps one open issue per workflow, and this plan adds none. Each pipeline has one named signal on an existing seam. The noise list names issues #178 and #213, the doctor reds, and the Healthchecks check.
+
+Brief rule-2 suggestion count: 0. A case-insensitive grep of this file for the nine terms that brief rule 2 forbids returned no lines before the edits and none after.

@@ -20,7 +20,7 @@ Count: 4 pipelines, 3 workflow files, 6 lake tables + 1 view, 1 leaf brain, 6 li
 Reader scope pass for the 1,000-row truncation shape (RULE 0.5c), over every non-test reader above:
 - 2 truncate: `communities-swfl-source.mts:215` and `communities.ts:165`. Both do `.select("*")` with no range against 20,400 rows.
 - 1 names a column that does not exist: `community-info.ts:174-175`.
-- 1 reads the wrong schema: `app/r/source/[table]/page-data.ts:42-44, :50` (P12). It is not the truncation shape, but it is a seventh reader and it serves a wrong row count.
+- 1 reads the wrong schema: `app/r/source/[table]/page-data.ts:42-44, :50` (P12). It is not the truncation shape. It is the reader the first pass missed, and it serves a wrong row count.
 - 5 are safe:
   - `community-lookup.ts:190` (eq on county + name)
   - `community-identity.ts:56` (in-list)
@@ -226,7 +226,7 @@ P12. The public provenance page says neighborhood_stats is empty. (Added by the 
 - Scope: 4 of the 5 allowlisted tables in `app/r/source/_tables.ts` live in `data_lake`, and all 4 render "Rows 0": neighborhood_stats, community_profiles, parcel_subdivision_v, marketbeat_swfl (curl of each page). The one `public` table, fl_dor_tdt_collections, renders "Rows 666" (`information_schema.tables` confirms the schemas). The defect is in the shared route, so the fix is cross-family (family 19 or the route owner).
 - [INFERENCE: why the status is "empty" rather than "count_error". A HEAD count against a relation missing from `public` seems to return a null count with no error, so `rowCount` becomes 0 at `:47-48`. The public-vs-data_lake split above is the evidence; the client internals were not traced.]
 - Severity: blocks a consumer. It is the citation target of every neighborhood_stats row (`agg.py:87`) and of the brain's neighborhood citation, and it tells a reader the table is empty.
-- First seen: the 09/26 probe. The page cache is hourly (`page-data.ts:67`, `revalidate: 3600`).
+- First seen: 07/06/2026, when neighborhood_stats became an allowlisted citation target on this route (`git log -S'neighborhood_stats: {' -- app/r/source/_tables.ts` → 6aeff4a9 2026-07-06). Observed live on the 09/26 probe. The page cache is hourly (`page-data.ts:67`, `revalidate: 3600`).
 
 P13. The brain's 96,679 PD metric cites a page that refuses it. (Added by the second Opus.)
 - Symptom: `brains/communities-swfl.md:80` cites `https://www.swfldatagulf.com/r/source/parcel_community_pd_summary_v?...`. That page returns 200 with "Not a published source ... This table is not exposed via the public provenance route" (curl, 09/26/2026).
@@ -327,7 +327,7 @@ Ordered. Every item is lane D (deterministic, no model). Nothing in this family 
     - Unblocks: stops the next reader from "fixing" neighborhood_stats by adding a redundant `freshness_table`.
 12. DO — Stop the neighborhood_amenities schedule surface (4 files).
     - Delete `.github/workflows/neighborhood-amenities-daily.yml`.
-    - Retire the hook regression test that reads that file from disk: `.claude/hooks/lib/cron-failclosed.test.mjs:159-161` (`readFileSync(".github/workflows/neighborhood-amenities-daily.yml")`). It fails with ENOENT the moment the workflow is deleted. Keep the synthetic-fixture case at :190-194, which carries the same guard without the real file. (Found by the second Opus: `rg -l "neighborhood_amenities|neighborhood-amenities-daily" --hidden --glob '!docs/**'` over the whole repo.)
+    - Retire the hook regression test that reads that file from disk: `.claude/hooks/lib/cron-failclosed.test.mjs:159-161` (`readFileSync(".github/workflows/neighborhood-amenities-daily.yml")`). It fails with ENOENT the moment the workflow is deleted. Keep the inline-fixture positive control at :187-197, which carries the same guard without the real file. (Found by the second Opus: `rg -l "neighborhood_amenities|neighborhood-amenities-daily" --hidden --glob '!docs/**'` over the whole repo.)
     - Move the registry entry (:2263-2322) out of `pipelines:` into a RETIRED comment block, the same shape as the `parcel_subdivision` retirement at :1075-1085.
     - Regenerate `.github/_watch-manifest.json`, the only other generated reference (`.claude/hooks/check-prepush-gate.mjs:1399` and `.claude/hooks/lib/cron-failclosed.mjs:6` name it only in comments) (`rg -l "neighborhood-amenities-daily|neighborhood_amenities" .github scripts ingest refinery lib`; the lib hits are comment paths in `community-info.ts`, `neighborhood-amenities.ts` and `ray-cast.ts`).
     - Keep the three tables and their two readers.
@@ -352,6 +352,18 @@ Ordered. Every item is lane D (deterministic, no model). Nothing in this family 
 16. ASK-FIRST (cross-family, parcels family) — Land the FDOR centroid point geometry as lat/lon on `collier_parcels`. The layer is `esriGeometryPoint`; section 5 has the evidence. It changes a data_lake write shape in another family's pipeline. Lane D. Effort M. Proof: `select count(latitude) from data_lake.collier_parcels`. Unblocks: the Collier half of the spatial join, once item 15 finds a boundary layer.
 17. ASK-FIRST — Fix the SQL stemmer twin in `migrations/20260719_parcel_subdivision_v.sql:38-40` (`\y` → the `(?=\s|\d|$)` fix the TS twin got). It is a live-view DDL on data_lake. Lane D. Effort S. Proof: `select count(distinct subdivision_name) from data_lake.parcel_subdivision_v` before/after, plus the neighborhood_stats row count on the next run. Unblocks: small name-collapse gains (section 5).
 18. ASK-FIRST — Delete `ingest/pipelines/neighborhood_amenities/` (6 files: `__init__.py`, `pipeline.py`, `distill.py`, `test_pipeline.py`, `test_distill.py`, `fixtures/amenities_naples_6588181567.json`). Together with item 12 this passes RULE 1's more-than-5-files bar. It also breaks the hook positive control `.claude/hooks/lib/table-consumer.test.mjs:60-66`, which reads `ingest/pipelines/neighborhood_amenities/pipeline.py` from disk. Move that control to an inline fixture in the same commit. The code is dead with the vendor and item 12 removes its only runner. Lane D. Effort S. Proof: `ls ingest/pipelines | grep neighborhood_amenities` → nothing, and the ingest suite passes. Unblocks: removes code that can make paid calls if anyone runs it by hand.
+19. DO (cross-family, hand to family 19 / the `/r/source` route owner) — Read each provenance table from its own schema.
+    - Where: add a `schema` field to every `SOURCE_PROVENANCE_TABLES` entry in `app/r/source/_tables.ts` ("data_lake" for neighborhood_stats, community_profiles, parcel_subdivision_v, marketbeat_swfl; "public" for fl_dor_tdt_collections). In `app/r/source/[table]/page-data.ts:42-44` and `:50`, call `.schema(entry.schema)` before `.from(table)` for both the count and the sample. Do not switch the whole route to `data_lake`: that would break the one page that works today (fl_dor_tdt_collections, public, "Rows 666").
+    - Add one test: every allowlist entry's schema matches `information_schema.tables` in a fixture. Or the minimum: a data_lake entry without `.schema("data_lake")` fails.
+    - Lane D. Effort S.
+    - Proof: `curl -s https://www.swfldatagulf.com/r/source/neighborhood_stats` shows a Rows figure near 20,400 (`count: "estimated"` returns the planner estimate; `pg_class.reltuples` read 20,400 on 09/26). The page is cached for an hour (`page-data.ts:67`), so check more than an hour after the deploy before calling a stale "Rows 0" a failed fix.
+    - Unblocks: P12, and the same defect on the community_profiles and parcel_subdivision_v pages (communities-swfl inputs with no registry pipeline in `00-FAMILIES.md`) and on marketbeat_swfl (family 14, `00-FAMILIES.md:115`).
+20. DO — Publish the PD summary view on the provenance route, and guard the citation set.
+    - Where: add `parcel_community_pd_summary_v` to `SOURCE_PROVENANCE_TABLES` (`app/r/source/_tables.ts`), with `brain: "communities-swfl"`, `date_col: "assigned_at"` and schema "data_lake" (item 19). It is a one-row aggregate view, with no parcel rows exposed.
+    - Add a test in `refinery/packs/communities-swfl.test.mts`: every table name passed to `buildSourceCitationUrl` in `refinery/sources/communities-swfl-source.mts` (:304, :313, :323) is a key of `SOURCE_PROVENANCE_TABLES`. The failing case today is `parcel_community_pd_summary_v`.
+    - Lane D. Effort S.
+    - Proof: the new test is green, and `curl -s "https://www.swfldatagulf.com/r/source/parcel_community_pd_summary_v"` no longer contains "Not a published source".
+    - Unblocks: P13.
 
 ## 8. Checks and balances
 
@@ -376,14 +388,19 @@ Which channel carries a per-pipeline signal: the doctor row, not the probe's exi
     - The newest build-report commit is 09/22/2026 (`git log -- brains/_build-report.json`), where communities-swfl reads `skipped-fresh` on its 180-day TTL.
     - So the regression test from item 1, which runs in CI on every PR, is the standing guard. The build-time assertion is the backstop when a build happens.
     - A degraded build keeps the last good brain (`written: false` in the build report). Today that brain is the 1,000-row one, so item 4 must succeed once before this guard protects anything.
-  - Landing health: the doctor row, STALE at 46 days after item 10 (547 today), LOW_VOLUME under the existing `expected_rows_min: 18360`.
-- neighborhood_amenities. Signal: none. After item 12 there is no ingest to watch. The frozen tables are dated on every page they reach (`neighborhood-amenities.ts:293`, `community-info.ts:139`).
+  - Not a second signal: the doctor row every registry entry already has stays the landing baseline. It goes STALE at 46 days after item 10 (547 today) and LOW_VOLUME under the existing `expected_rows_min: 18360`.
+- neighborhood_amenities.
+  - Signal: the existing CI test `lib/listings/neighborhood-amenities.test.ts:388` ("writes as-of MM/DD/YYYY"). It runs on every PR and fails if the frozen 08/04/2026 data could reach a page undated.
+  - After item 12 there is no ingest to watch. The frozen tables are dated on every page they reach (`neighborhood-amenities.ts:293`, `community-info.ts:139`).
+- Citation pages (P12, P13): no runtime signal. The guard is the item 20 test, which fails in CI when a cited table is not allowlisted. That is on the existing PR test seam, and nothing is filed per run.
 
 Noise to delete:
 - GitHub issue #191 (item 13).
 - The daily yellow `neighborhood_amenities | STALE | DISABLED` doctor row (item 12).
 - The asymmetric incident open/close rule that keeps dispatch-failure issues open for a quarter (item 14, family 19).
 - The PD `NO_RUNS_IN_WINDOW` yellows (P10): if family 19 confirms the alphabetical 40-cap at `doctor.py:544`, the fix is to sort the backfill list by cadence or raise the cap. Not a new signal.
+
+Per-run issue filing: none survives for these three workflows. The shared logger is idempotent per workflow: `openIncidentIssue` searches for an open `[cron-failure:<workflow>]` issue and returns without creating one if it finds it (`.github/scripts/log-cron-incident.mjs:217-231`, tag at :53). One open issue per failing workflow is the ceiling, and #191 is this family's only one. The standing defect is the close side (item 14), not the open side. Verified by the second Opus.
 
 Nothing to add in `node scripts/check.mjs`: no open check is in this family, and none should be opened per run. `heal-cron-failure.mjs` needs nothing for these three workflows.
 
@@ -396,7 +413,7 @@ Nothing to add in `node scripts/check.mjs`: no open check is in this family, and
   - Its input `leepa_parcels` is refreshed by `leepa-parcels-annual.yml`, which already runs on Fedora when `SWFL_LOCAL_RUNNER_READY` is true (`leepa-parcels-annual.yml:28`). That does not require the join to follow it.
 - neighborhood_stats: stays on GHA `ubuntu-latest`.
   - It reads and writes only our own Postgres, needs no residential IP, and took 23 minutes against 45.
-  - If item 9 shows the read phase crossing about 35 minutes, the fix is materializing the view read (workflow :27), not moving the box. A home box does not make a pooler faster.
+  - The measured 09/24 split (P6: read + aggregate about 4 min, write about 19 min) makes the fix the batched insert of item 9, not a box move. A home box would not remove 20,400 round trips to the same pooler; it would only change their latency.
 - neighborhood_amenities: goes nowhere; it is retired (item 12). It would have needed nothing from the box anyway (a vendor REST API, 15-minute cap).
 - Already on the box that should not be: none from this family. `rg -l "swfl-local" .github/workflows` lists dbpr-sirs, collier-official-records, leepa-comparable-sales, crexi, leepa-parcels, runner-smoke. None of the three workflows here is among them.
 
@@ -412,7 +429,17 @@ rg -n -i "anthropic|claude|openai|ANTHROPIC_API_KEY|refinery|ollama|llm|gpt" .gi
 - The consumer brain runs no model: `refinery/packs/communities-swfl.mts:397-398` sets `skipSynthesisAgent: true` and `skipTriageAgent: true`.
 - `rg -n -i "anthropic|callClaude|messages\.create|openai|generateText"` over the pack, the source, community-identity, neighborhood-amenities and community-info returns only those two flags and the `:435` description.
 - community-info composes its paragraph from the vendor's own score sentences in code (`community-info.ts:20-23`).
-- Every leg is lane D today and stays lane D.
+- Every pipeline leg is lane D today and stays lane D.
+
+A consumer-side model call, recorded so it is not mistaken for a missed pipeline leg. The second Opus found it by tracing `neighborhoodAmenitiesSourceLine` into its caller.
+- `lib/deliverable/recipes/shared.ts:804`: `getAnthropic("email_build").messages.create` with `EMAIL_MODEL_SONNET`, inside `authorListingNarrative` (:461). Three of this family's lines reach it as settled facts:
+  - `communityIdentitySourceLine` (parcel_community_pd)
+  - `neighborhoodStatsSourceLine` (neighborhood_stats)
+  - `neighborhoodAmenitiesSourceLine` (the steadyapi tables)
+  - These are at `shared.ts:577-588`.
+- Auth: the SDK client at `refinery/agents/anthropic.mts:337`.
+- It runs at request time inside the customer-facing email builder. It is not an unattended pipeline leg, so this family's plan proposes no lane for it; it belongs to the email builder's own plan.
+- What this family owes it is already true, and plan items 1-3 keep it true: every line handed over is computed in code and dated.
 
 ## 11. Double-check log
 
@@ -480,7 +507,49 @@ I re-read the file top to bottom. The last query batch was re-run after writing 
   - playbook "23 of 20,369" :31 → :32
 - Correction applied: a first-draft sentence called the classifier's 07/20 class wrong. The class (TRANSIENT) is right; only the signal field is wrong (P11 reworded).
 - Re-run 09/26/2026 · `bun q.mts q11.sql` → PD 1,627 rows, 0 initialapproval non-null; parcel_community_pd 104,911; neighborhood_stats 20,400 rows / 604,362 homes; steadyapi_property_neighborhood 21,008 · verified, nothing moved during the session.
+- Second-Opus pass 09/26/2026: every claim above was re-run or re-opened. The corrections were applied in sections 1-10 and are itemized in section 13.
+  - P6 write-phase split · `select min(inserted_at), max(inserted_at), count(distinct inserted_at) from data_lake.neighborhood_stats` → one value, 09/24 18:55:53.076 UTC, plus `migrations/20260706_neighborhood_stats.sql:19` DEFAULT now() · verified.
+  - P12 provenance page Rows 0 · curl of 5 `/r/source/*` pages + `information_schema.tables` for schemas · verified.
+  - P13 PD citation "Not a published source" · curl + `grep -n parcel_community_pd app/r/source/_tables.ts` (empty) + `git log -S'PD_SUMMARY_VIEW'` → dce476ed 08/29/2026 · verified.
+  - No data_lake view depends on the columns items 6 and 17 touch · `select count(*) from information_schema.view_column_usage where table_schema='data_lake' and table_name in (...)` → 0 · verified.
 
 ## 12. Questions for the operator
 
 1. The SteadyAPI subscription is dead and the vendor is out. Should the community-info email and the address-spine "nearby amenities" line keep serving the frozen 08/04/2026 neighborhood scores and amenity counts? They are dated on the page. The alternative is dropping that lane from the product, which would then let the three `steadyapi_*` tables be removed.
+
+## 13. Second-Opus verification
+
+Run 09/26/2026. Evidence came from read-only SQL over Bun.SQL (the `scripts/apply-fdic-sod-view.mts:10-30` connection, in a scratchpad script with `default_transaction_read_only = on`), `gh run list/view`, `gh api`, curl against the live source and the production site, `rg`/`sed` on every cited file:line, and the family test suites. Nothing was written to data_lake, no workflow was dispatched, no issue was opened.
+
+Claims checked: 74. That is every number and file:line in sections 1-12, grouped where one command proves several: 19 SQL claims, 4 ArcGIS source claims, 12 run/issue/ledger claims, 32 file:line claims (incl. the incident-logger dedupe and the P12 first-seen commit), 2 test-count claims, 3 production-page claims, 2 greps (LLM legs, the brief's rule-2 forbidden-lane wording).
+
+Corrections (wrong → right → evidence):
+- Section 1 reader list: 5 app/lib readers → 6. The public provenance page `app/r/source/[table]/page-data.ts:42-50` reads neighborhood_stats and was missing. Evidence: `rg -n neighborhood_stats app` → `app/r/source/_tables.ts:48`.
+- Section 3 "the brain carries the servable metric correctly" → the number (96,679) is right, but its citation link renders "Not a published source" (new P13). Evidence: curl of `/r/source/parcel_community_pd_summary_v`; `_tables.ts` has no such key.
+- P6 "the log cannot say where" plus [INFERENCE: DB/pooler slowness] on the read → the 09/24 split is measured: read + aggregate about 4 min 8 s, DELETE + 20,400 single-row INSERTs about 18 min 49 s. Evidence: `inserted_at` DEFAULT now() (`migrations/20260706_neighborhood_stats.sql:19`) holds one value, 18:55:53.076 UTC, against step times 18:51:45 → 19:14:42 (`gh run view 36044060884 --json jobs`).
+- Item 9 fallback "materialize the view read" → batch the insert (`executemany` or COPY in the same transaction, `pipeline.py:104-108`). The view read is the fast phase (same evidence as P6).
+- Section 9 neighborhood_stats "if the read phase crosses about 35 minutes, materialize the view read" → the fix is item 9's batched write. Same evidence.
+- Section 2 "`gh variable list` shows only ENGINE_ENABLED and SWFL_LOCAL_RUNNER_READY" → it returns 12 variables, none named AMENITIES_DRAIN_ENABLED. The conclusion (drain flag unset) stands. Evidence: `gh variable list`.
+- Item 11 "keep freshness_table (it is still correct)" gave no reason, and the comment's premise is stale → it is still required because the entry carries `dlt_schema_name: parcel_community_pd` (registry :871), and `check_freshness.py` tests `dlt_schema_name` (:273) before `count_table` (:281). Evidence: sed of both files.
+- Item 12 "3 files" → 4 files. Deleting the workflow makes `.claude/hooks/lib/cron-failclosed.test.mjs:159-161` fail, because it reads `.github/workflows/neighborhood-amenities-daily.yml` from disk. Evidence: `rg -l "neighborhood_amenities|neighborhood-amenities-daily" --hidden --glob '!docs/**'`.
+- Item 18 touch list was incomplete → deleting the pipeline dir also breaks the positive control `.claude/hooks/lib/table-consumer.test.mjs:60-66`, which reads `ingest/pipelines/neighborhood_amenities/pipeline.py`. Same rg.
+- Section 1 `build_master_list.py:171` pointed at the line before the query → `:172-174`. Evidence: sed -n 165,175p.
+- Section 8 neighborhood_stats named two signals (the completeness assertion + a "landing health" doctor row) → one signal, the completeness assertion. The doctor row is the baseline every entry already has. Section 8 neighborhood_amenities "Signal: none" → the existing CI test `lib/listings/neighborhood-amenities.test.ts:388` ("writes as-of MM/DD/YYYY").
+
+Unverifiable claims (and why):
+- P10 root cause (the alphabetical 40-cap on the doctor backfill). `ingest/scripts/doctor.py:544` does cap at `max_backfill` with RED rechecks first, and `ingest/lib/gh_runs.py:199` sorts alphabetically. But proving that lee-planned-developments-quarterly fell past slot 40 needs the doctor's own summaries, i.e. running the doctor, which this pass did not do. It stays worded as a candidate.
+- The PostgREST 1,000-row cap was not probed directly: the service key sits behind the blocked env file. It is strongly corroborated. The brain says "1,000 neighborhoods". The five largest subdivisions 404 while the three physically-first rows return 200 (curl, re-run 09/26).
+- P12's mechanism (a null count with no error on a HEAD request to a relation missing from `public`) is marked INFERENCE. The public-vs-data_lake split across all five allowlisted pages is the verified part.
+- `information_schema.view_column_usage` lists only views owned by roles the connection can see. The 0 result for items 6 and 17 is therefore strong but not absolute.
+
+Gaps filled:
+- P12 (new): the provenance page renders "Rows 0" for neighborhood_stats and for the other data_lake entries community_profiles, parcel_subdivision_v and marketbeat_swfl. The fix is item 19 (cross-family, per-table schema, not a blanket data_lake switch).
+- P13 (new): the brain's PD metric cites a page that refuses it. The fix is item 20, with a CI test tying `buildSourceCitationUrl` tables to the allowlist.
+- Section 10: the consumer-side model call at `lib/deliverable/recipes/shared.ts:804` that receives this family's three source lines. It is recorded as a request-time email-builder call, not a pipeline leg, and no lane is proposed for it here.
+- Section 8: a named signal for neighborhood_amenities, and a CI guard for the citation pages.
+- Items 12 and 18: the hook tests that read the files being deleted.
+- Coverage check: all four pipelines (lee_planned_developments, parcel_community_pd, neighborhood_stats, neighborhood_amenities) appear in sections 2, 3, 4, 6, 7, 8 and 9. Section 4 covers them through P4/P9/P10 (PD), P5/P10/P13 (parcel_community_pd), P1-P3/P5-P7/P11/P12 (stats) and P8 (amenities). All 13 original section headings are present and unchanged.
+
+Forbidden-lane wording (the brief's rule 2): the task's step-4 wording grep over this file → 0 suggestions before the edits and 0 after. The vendor name appears only in the section 10 LLM-leg grep commands and the consumer-call record, and neither proposes spend.
+
+Grade: PASS-WITH-CORRECTIONS. The plan's verdicts stand (IMPROVE / IMPROVE / REPAIR / RETIRE). Its order stands too, with items 19 and 20 added and item 9 re-aimed at the write phase.

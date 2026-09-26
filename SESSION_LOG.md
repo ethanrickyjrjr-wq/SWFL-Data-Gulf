@@ -1,3 +1,23 @@
+## 2026-09-26 (Opus watcher, pipeline plans wave) — 19 pipeline-family plans written + second-Opus verified; INDEX + STATUS compiled
+
+His ask (09/26): one Opus per pipeline with a complete plan, double-checked, checks and balances that are not 500 GitHub issues,
+what belongs on the Fedora/Spectre box, model legs only on Spectre agents / Codex / the Max plan, and Opus watching when
+the main session is out of usage.
+This commit lands the wave's output under docs/audit/2026-09-26-pipeline-plans/ (workflow run wf_58e90cd5-d11):
+- 4 new family plans (03-zillow, 17-product-schedulers, 18-repo-hygiene, 19-fleet-and-boxes) and second-Opus edits to the
+  15 plans committed in 2009685d (01, 02, 04-16). Every one of the 19 now ends with "## 13. Second-Opus verification";
+  all 19 graded PASS-WITH-CORRECTIONS, none needed a rewrite.
+- 00-INDEX.md: per family the verdicts, top three problems, DO / ASK-FIRST counts, grade and corrections; roll-up of the
+  112 registry rows (GOOD ENOUGH 14, IMPROVE 37, REPAIR 32, PARK 21, RETIRE 8), dark roots and their fate, the box move
+  list (19 §7b) and every LLM leg with its lane (19 §7c).
+- STATUS.md: 257 DO checkboxes, each with its proof command, ordered chain-and-alarms, served numbers, dark roots, box
+  moves, lane setup, then the rest; a Gated block; 64 deduplicated ASK-FIRST decisions numbered (source 19 §7d); dated
+  deadlines at the top (09/28 retired-vendor crons, 10/02 INITIALAPPROVAL, 10/04 geo-trends, 10/05 FEMA v3).
+- Also carries the parallel session's SCRATCHPAD note of his "100 sonnets in groups of 5" ask (not this wave's work).
+No code changed, no workflow dispatched, no issue opened, no data_lake write. Nothing in the plans is executed yet.
+Next: STATUS.md phase 1 (16 items 1-4 plus 01 items 1-4 and 15, the incident seam 19 items 1-7). The Opus watch
+routine is 19 item 16 in phase 5 and is NOT live. Master stays held until he answers ASK #1 (cre-swfl prose, A or B).
+
 ## 2026-09-22 (Fable 5.1, part 2) - FDIC runner proof + research correction landed
 
 GHA run 35755967549 (fdic-bankfind-annual.yml, dry_run=true) green on ubuntu-latest: 10,759 / 298 / 199 rows from api.fdic.gov.

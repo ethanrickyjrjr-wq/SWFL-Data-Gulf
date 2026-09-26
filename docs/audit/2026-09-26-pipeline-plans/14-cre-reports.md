@@ -14,7 +14,7 @@ Seven pipelines, counted from `docs/audit/2026-09-26-pipeline-plans/00-FAMILIES.
 - estero_edc. Registry `:1988`. Workflow `.github/workflows/ingest-local-cre-context.yml` (step at `:42-49`). Code `ingest/pipelines/estero_edc/pipeline.py`. Table `data_lake.local_cre_context`, `source_name='estero_edc'`. Consumer: cre-swfl caveats via `refinery/sources/local-cre-context-source.mts` (`cre-swfl.mts:35`, used at `:2012-2019`).
 - fmb_recovery. Registry `:2011`. Same workflow (step at `:51-58`). Code `ingest/pipelines/fmb_recovery/pipeline.py`. Table `data_lake.local_cre_context`, `source_name='fmb_planning'`. Consumer: same cre-swfl caveat path.
 
-Other readers of `data_lake.marketbeat_swfl` that are not the brain (from [R2]): `app/r/source/_tables.ts:39` (the public provenance page `/r/source/marketbeat_swfl`), `refinery/tools/build-corridor-fact-pack.mts`, `refinery/tools/run-corridor-character-preview.mts:183`, `refinery/tools/verify-corridor-chart-blocks.mts:78`, `refinery/lib/cre-submarket-crosswalk.mts`.
+Other readers of `data_lake.marketbeat_swfl` that are not the brain (from [R2], each confirmed by a `.from(` / SQL `FROM` at the cited line): `app/r/source/_tables.ts:39` (the public provenance page `/r/source/marketbeat_swfl`, queried at `app/r/source/[table]/page-data.ts:50`), `refinery/tools/run-corridor-character-preview.mts:183`, `refinery/tools/verify-corridor-chart-blocks.mts:78`, and `scripts/build-cre-figures.mjs:86` (the cre_figures builder). Two files the first draft listed as readers are not: `refinery/tools/build-corridor-fact-pack.mts` is pure (it imports only the `MarketbeatSwflNormalized` type at `:41`; `rg -n "\.from\(|fetch\(|rest/v1" refinery/tools/build-corridor-fact-pack.mts` returns nothing) and `refinery/lib/cre-submarket-crosswalk.mts` is a static vocabulary map (imports at `:23-25` are core-scope, aliases and places only; the same rg returns nothing). The three `rest/v1/marketbeat_swfl?...` strings in `refinery/packs/cre-swfl.mts:232`, `:325`, `:526` are citation URLs printed into metric sources, not reads. `data_lake.local_cre_context` has one reader (`refinery/sources/local-cre-context-source.mts:64-71`) and `data_lake.cre_figures` / `cre_figures_confidence` have none outside the builder.
 
 ### Evidence commands (referenced as [Qn], [Gn], [Cn], [Tn], [Rn], [Bn], [Kn] below)
 
@@ -34,6 +34,8 @@ Every SQL ran read-only through a throwaway Bun.SQL script in the session scratc
 - [Q12] `select call_type, count(*), max(created_at) from public.api_usage_log where call_type ilike '%marketbeat%' group by 1`, then `select count(*) from public.api_usage_log`
 - [Q13] the proposed contract SQL from section 8, evaluated live
 - [Q14] `select source_name, array_agg(distinct submarket order by submarket) from data_lake.marketbeat_swfl group by 1`
+- [Q15] (second Opus) `select source_name, count(*) filter (where source_url is null) as nourl, count(*) as n from data_lake.marketbeat_swfl group by 1`, the same over `local_cre_context` and `cre_figures`, and `select sector, quarter, source_url is null from data_lake.marketbeat_swfl where source_name='lee_associates' order by 1,2`
+- [Q16] (second Opus) `select check_key, project, state, updated_at from public.checks where check_key like 'contract_fail%' or project='data-quality' order by updated_at desc limit 15`
 - [G1] `gh run list --workflow <file> --limit 15 --json databaseId,status,conclusion,createdAt,event`, run for marketbeat-pdf-ingest.yml, ingest-lee-associates-swfl.yml and ingest-local-cre-context.yml
 - [G2] `gh run view 29411199476 --log`, grepped for the download and process lines
 - [G3] `gh run view 32358484270 --log`, grepped for `Downloading|quarters extracted|Total:|Upserted`
@@ -107,6 +109,13 @@ fmb_recovery (Fort Myers Beach recovery projects)
 - Geography: Fort Myers Beach (Lee) only.
 
 Family-wide: Hendry 0 rows in every table ([Q10], [Q3]).
+
+Workflow runtime facts (added by the second Opus; `rg -n "timeout-minutes|secrets\." <the three workflow files>`):
+- `marketbeat-pdf-ingest.yml`: `timeout-minutes: 20` (`:27`); secrets `ANTHROPIC_API_KEY` (`:29`, the dead vision leg, deleted by item 7) and `DESTINATION__POSTGRES__CREDENTIALS` exported as `MARKETBEAT_DB_URL` (`:30`).
+- `ingest-lee-associates-swfl.yml`: `timeout-minutes: 15` (`:31`); `DESTINATION__POSTGRES__CREDENTIALS` exported as `DATABASE_URL` (`:36`).
+- `ingest-local-cre-context.yml`: `timeout-minutes: 15` (`:24`); `DESTINATION__POSTGRES__CREDENTIALS` exported as `DATABASE_URL` (`:29`).
+
+Provenance column (added by the second Opus) [Q15] `select source_name, count(*) filter (where source_url is null) as nourl, count(*) as n from data_lake.marketbeat_swfl group by 1`: cw_marketbeat 173 of 173 null, colliers_industrial 132 of 132 null, lee_associates 4 of 24 null (exactly the four 2026-Q2 rows the 08/20 cron inserted), mhs_databook 0 of 48 null. Total 309 of 377. `data_lake.local_cre_context` 0 of 14 null; `data_lake.cre_figures` 0 of 1,078 null (the builder synthesizes a citation URL, `build-cre-figures.mjs:53`). See problem 22.
 
 ## 3. What is working
 
@@ -199,14 +208,16 @@ Family-wide: Hendry 0 rows in every table ([Q10], [Q3]).
     - Root cause: tier-2 threshold `int(cadence_days * tolerance_multiplier)` (`check_freshness.py:498-499`) = 365 x 1.5 = 547 days from 06/05/2026, which is 12/04/2027. Registry `:1789` claims "probe alerts ~March 2027". That is false.
     - Severity: blocks a served number. The 2026 book would be served until 12/2027 with no alarm.
     - First seen: 09/26/2026 (this audit).
-15. The doctor paints five entries yellow. Four are healthy; the fifth (estero) is yellow because of problem 6.
+15. The doctor paints five entries yellow. Four are healthy; the fifth (estero) is yellow on odd-window arithmetic.
     - [G7], 09/26 run 36259690113: `marketbeat_swfl ... NO_RUNS_IN_WINDOW ... yellow`, `colliers_industrial ... NO_RUNS_IN_WINDOW ... yellow`, `mhs_databook ... NO_WORKFLOW ... yellow`, `cre_figures ... NO_WORKFLOW ... yellow`, `estero_edc ... WINDOW_OPEN ... yellow`.
-    - Root cause: `doctor.py:157` and `:169` (plus `gh_runs.py:130`). `rg -n dispatch_only ingest/scripts/doctor.py ingest/lib/gh_runs.py` returns nothing, so a stated manual source is always yellow. The estero yellow repeats every month because of the re-stamp in problem 6.
+    - Root cause, NO_WORKFLOW (mhs, cre_figures): `ingest/scripts/doctor.py:169` returns `("NO_WORKFLOW", "yellow")` for any entry with no workflow summary. `rg -n dispatch_only ingest/scripts/doctor.py ingest/lib/gh_runs.py` returns nothing, so a stated manual source is always yellow.
+    - Root cause, NO_RUNS_IN_WINDOW (marketbeat, colliers), corrected by the second Opus: this is NOT a missing rule. The doctor already runs a targeted backfill for every NO_RUNS_IN_WINDOW workflow (`doctor.py:533-553`), and `gh_runs.apply_backfill` (`ingest/lib/gh_runs.py:232-262`) re-classifies with the fetched runs, which yields GREEN when the newest run succeeded (`gh_runs.py:110-133`; marketbeat's newest run 29411199476 is a success). The backfill is not taking effect: the same 09/26 table shows 23 rows in NO_RUNS_IN_WINDOW platform-wide (`grep -c "NO_RUNS_IN_WINDOW | "` on the saved run log). Why is not verified. The two code paths that leave a row yellow are the `[:max_backfill]` cap of 40 (`doctor.py:544`, `:516`) and a swallowed `GhUnavailable` (`doctor.py:549-553`). The fix is shared doctor code (item 19), not family code.
+    - Root cause, WINDOW_OPEN (estero), corrected by the second Opus: `doctor.py:78` maps WINDOW_OPEN to yellow. `check_odd_window_entry` (`ingest/scripts/check_freshness.py:543-587`) opens a ±5-day window (`:529-535`, cadence 30) around last_run + 30 days, so the entry shows yellow for the days around each monthly run (09/26 is 5 days before the 10/01 expected date). The monthly re-stamp in problem 6 is what flips it back to FRESH after each run instead of OVERDUE. It does not cause the yellow.
     - Severity: cosmetic (it trains the operator to ignore yellow).
     - First seen: 09/26/2026.
 16. The vision fallback is a dead LLM leg that still carries a key.
     - `extractor.py:482-535` calls `claude-haiku-4-5-20251001` (`:491`) when page text is short, and the workflow exports `ANTHROPIC_API_KEY` (`marketbeat-pdf-ingest.yml:29`).
-    - [Q12]: 0 rows with `call_type ilike '%marketbeat%'` among 6,122 logged calls, so the leg has never fired.
+    - [Q12]: 0 rows with `call_type ilike '%marketbeat%'` among 6,122 logged calls. The leg logs `call_type="ingest_marketbeat"` (`extractor.py:505`), which the filter matches. Corrected by the second Opus: that proves no logged call, not no call. `log_api_usage` writes only when `DESTINATION__POSTGRES__CREDENTIALS` is in the environment and otherwise prints `UNLOGGED` (`ingest/lib/api_usage.py:95-98`); the workflow exports the DB secret only as `MARKETBEAT_DB_URL` (`marketbeat-pdf-ingest.yml:30`), so a CI vision call would never reach the ledger. For CI: 29411199476 processed no PDF [G2], so it made no call; 27213582576's log has expired, so that run could not be verified. The conclusion (dead leg, delete it) stands either way.
     - `extractor.py:586` tells the operator to set `MARKETBEAT_PDF_FORCE_VISION=1`, which nothing reads (`rg -n FORCE_VISION ingest .github` finds only `:586`).
     - Severity: cosmetic (dead code, but an unattended key path).
     - First seen: 07/05/2026 (`pipeline.py:120` operator-guard comment).
@@ -239,6 +250,12 @@ Family-wide: Hendry 0 rows in every table ([Q10], [Q3]).
     - `classify-cron-failure.mjs` classifies from a log tail (`:3`), so with no log there is no class. Zero-job push runs are the shape GitHub produces when it rejects a workflow file at push time. No red since.
     - Severity: cosmetic (historical).
     - First seen: 06/09/2026.
+22. No ingest writes `source_url`, so 309 of 377 broker rows carry no link to their PDF (found by the second Opus).
+    - Symptom [Q15]: cw_marketbeat 173/173 null, colliers_industrial 132/132 null, lee_associates 4/24 null, mhs_databook 0/48 null. The four null Lee rows are exactly the 2026-Q2 rows first inserted by scheduled run 32358484270; the 20 older Lee rows carry a URL that no code in the repo writes (`rg -n source_url ingest/pipelines/lee_associates_swfl ingest/pipelines/marketbeat_pdf` returns nothing, and no `docs/sql/` file mentioning lee_associates sets it), so their origin is a hand write that could not be traced.
+    - Root cause: `source_url` is absent from the MarketBeat loader's column list (`ingest/pipelines/marketbeat_pdf/loader.py:21-39`) and from the Lee INSERT (`ingest/pipelines/lee_associates_swfl/pipeline.py:74-83`). Both loaders know the URL at fetch time (`downloader.py` resolves the hub PDF URL; Lee builds it at `pipeline.py:124-126`). 2 sites, one shape.
+    - Consumer effect: cre-swfl falls back to `row.source_url ?? marketbeatReceiptUrl()` (`refinery/sources/marketbeat-swfl-source.mts:281`), so every served C&W number (all 113 verified rows are null) cites our own table receipt, not the broker's PDF. The number is still right; the citation cannot be traced to the publisher (global rule 3, data provenance).
+    - Severity: blocks a consumer (provenance of served numbers), not a wrong served number.
+    - First seen: 06/09/2026 (the first C&W/Colliers `_ingested_at` [Q1]).
 
 Run-count note: the brief asks for the last 15 runs. [G1] returns only 9 for marketbeat-pdf-ingest (2 green, 7 red, 0 cancelled; newest green 07/15/2026), 3 for ingest-lee-associates-swfl (3 green, 0 red; newest green 08/20/2026) and 3 for ingest-local-cre-context (3 green, 0 red; newest green 09/01/2026). The Lee and local-context workflows have zero reds.
 
@@ -255,7 +272,8 @@ Run-count note: the brief asks for the last 15 runs. [G1] returns only 9 for mar
 - Consumers that should exist: cre_figures has none (problem 12). The architecture already named it the forward path for unverified firms (`docs/standards/data-roots.md` marketbeat NOTE; registry `:1735-1736`).
 - Verification throughput: the only writer of `verified` is a dated hand migration (`docs/sql/20260715_marketbeat_swfl_verify_reviewed_quarters.sql`, registry `:1722-1725`). There is no review packet, so every new quarter lands dark until someone opens the PDF by hand.
 - Raw landing: no durable archive of any source PDF (problem 18).
-- Tests: zero Python tests for any of the four ingest pipelines [T2]. The refinery side has 76 tests across the 5 files in [T1] (22 + 6 + 8 + 1 + 39).
+- Tests: zero Python tests for any of the four ingest pipelines [T2]. The refinery side has 76 tests across the 5 files in [T1] (22 + 6 + 8 + 1 + 39). The one reader of `local_cre_context`, `refinery/sources/local-cre-context-source.mts`, has no test file at all (`ls refinery/sources/local-cre-context-source.test.mts` fails; `rg -l "local-cre-context-source|localCreContextSource" --glob "*.test.*"` returns nothing), which is why item 2's age guard must create one.
+- Publisher provenance: the broker PDF URL for 309 of 377 rows (problem 22). The source publishes it; we fetch it and throw it away.
 
 ## 6. Verdict per pipeline
 
@@ -355,7 +373,7 @@ Ordered by what protects a served number first. DO items ship on the normal push
     - Proof: `rg -n "cre_figures" refinery/packs refinery/sources` finds a reader, and the cre-swfl build prints the new metric count.
     - Unblocks: 216 dark rows ([Q2] 377 minus 161 served) reach a consumer, labelled.
 15. DO. Automate the cre_figures rebuild.
-    - What: let the builder accept `DESTINATION__POSTGRES__CREDENTIALS` first (the same approach as `scripts/apply-fdic-sod-view.mts:15-17`). Append a `bun scripts/build-cre-figures.mjs` step to the end of both `marketbeat-pdf-ingest.yml` and `ingest-lee-associates-swfl.yml`, gated on the ingest step succeeding. Set registry `workflow:` to the Lee workflow and drop `dispatch_only`. It rebuilds an existing derived table with its existing script and guard (`build-cre-figures.mjs:5-9`, refuses an empty build), so the write shape is unchanged.
+    - What: let the builder accept `DESTINATION__POSTGRES__CREDENTIALS` first (the same approach as `scripts/apply-fdic-sod-view.mts:15-17`). Append a `bun scripts/build-cre-figures.mjs` step to the end of both `marketbeat-pdf-ingest.yml` and `ingest-lee-associates-swfl.yml`, gated on the ingest step succeeding. The appended step must export the secret under that exact name (`DESTINATION__POSTGRES__CREDENTIALS: ${{ secrets.DESTINATION__POSTGRES__CREDENTIALS }}`), because both workflows currently expose it only as `DATABASE_URL` (`ingest-lee-associates-swfl.yml:36`) or `MARKETBEAT_DB_URL` (`marketbeat-pdf-ingest.yml:30`), and it needs `oven-sh/setup-bun` since both jobs are Python-only today. Set registry `workflow:` to the Lee workflow and drop `dispatch_only`. It rebuilds an existing derived table with its existing script and guard (`build-cre-figures.mjs:5-9`, refuses an empty build), so the write shape is unchanged.
     - Where: `scripts/build-cre-figures.mjs:61-70`, both workflow files, registry `:1808-1831`.
     - Lane: D. Effort: S.
     - Proof: `select max(built_at) from data_lake.cre_figures` is at or after `select max(_ingested_at) from data_lake.marketbeat_swfl` after the next Lee run, and `select count(*) from data_lake.cre_figures` returns the dry-run figure.
@@ -379,8 +397,9 @@ Ordered by what protects a served number first. DO items ship on the normal push
     - Proof: `python -m ingest.scripts.check_data_quality --dry-run` lists the contracts. Its dry-run is documented read-only for the ledger (`check_data_quality.py:26-29`).
     - Unblocks: the one-signal-per-pipeline design.
 19. DO. Kill the doctor's yellow noise.
-    - What: in `run_severity`, return green for `NO_WORKFLOW` when the registry entry has `dispatch_only: true`. Return green for `NO_RUNS_IN_WINDOW` when the targeted backfill (`doctor.py:535-553`) finds a run inside `cadence_days x tolerance_multiplier`.
-    - Where: `ingest/scripts/doctor.py:153-176`, `:535-553`.
+    - What: in `run_severity`, return green for `NO_WORKFLOW` when the registry entry has `dispatch_only: true`. For `NO_RUNS_IN_WINDOW` (corrected by the second Opus): the promotion to GREEN already exists in the targeted backfill (`doctor.py:533-553` feeding `gh_runs.apply_backfill`, `ingest/lib/gh_runs.py:232-262`). The job is to find why it does not land on 23 of 78 rows on 09/26: log the backfill's `need` list length against the 40 cap (`doctor.py:544`) and log, instead of silently swallowing, a `GhUnavailable` (`:549-553`). Then raise the cap or page the fetch. Do not add a second promotion rule beside the existing one.
+    - Where: `ingest/scripts/doctor.py:153-176`, `:516-553`.
+    - Owner note: this is shared doctor code. It clears yellow noise in every family (23 rows on 09/26), so it should land once, from whichever family plan executes first.
     - Lane: D. Effort: S.
     - Proof: the next freshness-probe run's doctor table shows mhs_databook, cre_figures, marketbeat_swfl and colliers_industrial green, and `pytest -q ingest/tests/scripts/test_doctor.py` passes.
     - Unblocks: problem 15 (and the same noise in other families).
@@ -427,8 +446,20 @@ Ordered by what protects a served number first. DO items ship on the normal push
     - Effort: M.
     - Proof: `select count(*) from data_lake.marketbeat_swfl where source_name='mhs_databook' and sector='multifamily'` returns at least 1.
     - Unblocks: the MHS source_ceiling gap.
+27. DO (added by the second Opus). Loaders write the publisher PDF URL.
+    - What: add `source_url` to the MarketBeat loader's column list and on-conflict update (`loader.py:21-45`), set it from the URL the downloader fetched; add it to both the Lee INSERT and its ON CONFLICT update (`lee_associates_swfl/pipeline.py:74-93`) from the URL built at `:124-126`. A manual or CLI drop with no known URL writes NULL (the served fallback at `marketbeat-swfl-source.mts:281` still applies), never a guessed URL. Pairs with item 8: add `test_loaders_write_source_url` to the same test directory.
+    - Where: `ingest/pipelines/marketbeat_pdf/loader.py`, `ingest/pipelines/marketbeat_pdf/pipeline.py` (pass the URL through), `ingest/pipelines/lee_associates_swfl/pipeline.py`.
+    - Lane: D. Effort: S.
+    - Proof: after the next Lee run, `select count(*) from data_lake.marketbeat_swfl where source_name='lee_associates' and source_url is null` drops from 4 to 0 (the 2026-Q2 rows get re-upserted by the 2026-Q3 PDF's five-quarter window).
+    - Unblocks: problem 22 for every row landed from now on.
+28. ASK-FIRST (added by the second Opus). Backfill the 305 existing null URLs on C&W and Colliers rows.
+    - What: a dated migration that sets `source_url` on the 173 cw_marketbeat and 132 colliers_industrial rows only where the PDF's URL is known for that (sector, quarter), from the 8 local C&W PDFs' origin and the hub listing [C1]; rows whose PDF left the hub stay NULL. This is a `data_lake.*` write, so it needs the operator's word.
+    - Where: new `docs/sql/` migration.
+    - Lane: D. Effort: S.
+    - Proof: `select source_name, count(*) filter (where source_url is null) from data_lake.marketbeat_swfl group by 1` shows cw_marketbeat below 173.
+    - Unblocks: served C&W citations point at the broker's PDF instead of our receipt.
 
-Count: 26 items, 21 DO and 5 ASK-FIRST (11, 14, 16, 23, 24).
+Count: 28 items, 22 DO and 6 ASK-FIRST (11, 14, 16, 23, 24, 28).
 
 ## 8. Checks and balances
 
@@ -438,7 +469,9 @@ Design rules:
 - It auto-closes when green.
 - No GitHub issue per run, ever.
 
-The carrier is `content_contracts` of `type: sql_expectation`, `locus: probe`, `severity: error` in `ingest/quality/quality_registry.yaml`. `check_data_quality.py` runs daily inside `freshness-probe-daily.yml` (`rg -l check_data_quality .github/workflows`). It opens exactly one `public.checks` row keyed `contract_fail_<table>_<name>` (`check_data_quality.py:335-336`, `:364-370`) and auto-closes it when the contract passes again (`:21`).
+The carrier is `content_contracts` of `type: sql_expectation`, `locus: probe`, `severity: error` in `ingest/quality/quality_registry.yaml`. `check_data_quality.py` runs daily inside `freshness-probe-daily.yml` (`rg -l check_data_quality .github/workflows`). It opens exactly one `public.checks` row (project `data-quality`, `check_data_quality.py:57`) keyed `contract_fail_<slug(table)>_<name>` (`check_data_quality.py:335-336`, `:364-370`) and auto-closes it when the contract passes again (`:21`, `:407-426`). Corrected by the second Opus: `_slug` (`ingest/scripts/check_freshness.py:621-623`) turns every non-alphanumeric run into a hyphen, so `data_lake.marketbeat_swfl` becomes `data-lake-marketbeat-swfl`. The live ledger confirms the shape: [Q16] returns `contract_fail_data-lake-listing-state_listing_state_home_price_floor`. The keys below are written in that exact form. The step runs every day before the gating doctor and succeeds (`gh run view 36259690113 --json jobs`: `Data-quality probe (value tests + schema drift): success`, then `doctor (pipeline health — gating): failure`), and `node scripts/check.mjs list` reads every open row with no project filter (`scripts/check.mjs:196`), so a data-quality row does reach the operator's list.
+
+Trap two, found by the second Opus: a DROPPED contract row never reopens. The sync reopens only rows in state `done` and leaves `open` or `dropped` as-is (`check_data_quality.py:398-406`). The live proof is [Q16]: `contract_fail_data-lake-listing-state_listing_state_home_price_floor` has been `dropped` since 07/14/2026, while the 09/26 probe reports that same contract failing with 22 rows (run 36259690113, doctor line `listing_state_home_price_floor (error) — 22 failing rows`). Nobody sees it. So the rule for this family's three contracts is: close them only by letting them pass, never `check.mjs close --drop`. If one is dropped by mistake (a ledger bankruptcy like 09/15), `node scripts/check.mjs reopen data-quality <key> "<label>"` restores the signal.
 
 Trap, verified in code: the probe reads the contract's result as `failing = cur.fetchone()[0]` and passes only when that value is 0 (`check_data_quality.py:170-182`).
 - A query that returns no rows makes `fetchone()` None. The exception is caught and the contract is reported SKIP, never FAIL (`:173-179`).
@@ -449,7 +482,7 @@ Why a checks row and not a doctor line: the daily probe has failed every day thi
 
 Known bleed: the doctor keys content results by table (`doctor.py:139`). Any contract failing on `data_lake.marketbeat_swfl` reddens all four entries that share that table in the doctor view. The per-pipeline signal is therefore the named checks row, not the doctor color. The contract name carries the pipeline.
 
-- marketbeat_swfl. Signal: `contract_fail_data_lake_marketbeat_swfl_cw_served_quarter_stale`. It fires when the newest verified cw_marketbeat quarter ended more than 200 days ago. That is the consumer-reads-stale condition, whatever the cause: publisher silence (problem 3), a cron miss (problem 1) or an unreviewed quarter.
+- marketbeat_swfl. Signal: `contract_fail_data-lake-marketbeat-swfl_cw_served_quarter_stale`. It fires when the newest verified cw_marketbeat quarter ended more than 200 days ago. That is the consumer-reads-stale condition, whatever the cause: publisher silence (problem 3), a cron miss (problem 1) or an unreviewed quarter. Run failure is not a second family signal: `marketbeat-pdf-ingest` is listed in the shared cron-incident logger (`.github/workflows/log-cron-incident.yml:93`), so a red run already opens `cron_incident_marketbeat_pdf_ingest` (key rule `log-cron-incident.mjs:56-58`), one per episode, auto-closed on the next scheduled green. That shared seam exists for every workflow and this plan adds nothing to it.
   ```
   SELECT count(*) FROM (
     SELECT max(quarter) AS q FROM data_lake.marketbeat_swfl WHERE source_name='cw_marketbeat' AND verified
@@ -463,8 +496,8 @@ Known bleed: the doctor keys content results by table (`doctor.py:139`). Any con
   - With `DATE '2026-10-18'`: count 1.
   - With the verified set forced empty (`AND false`): count 1.
   It first fires on 10/18/2026 if 2026-Q2 is not landed and verified by then.
-- colliers_industrial. Signal: none that opens a row, by design while PARKED. Nothing served reads Colliers (the verified gate at `marketbeat-swfl-source.mts:191` drops all 132). If question 1 wires cre_figures, add `colliers_newest_quarter_stale` (the same shape as above over all Colliers rows) in that same change.
-- mhs_databook. Signal: `contract_fail_data_lake_marketbeat_swfl_mhs_annual_drop_overdue`. It replaces the 547-day tier-2 threshold that would stay silent until 12/04/2027 (problem 14).
+- colliers_industrial. Signal: the existing tier-2 freshness line in the doctor, no checks row, by design while PARKED. Nothing served reads Colliers (the verified gate at `marketbeat-swfl-source.mts:191` drops all 132). Named precisely (second Opus): registry `cadence_days: 90` x `tolerance_multiplier: 2.5` (`:1755-1756`) = 225 days, compared as `age_days > threshold` (`ingest/scripts/check_freshness.py:499`, `:516`), from `_ingested_at` 06/09/2026 [Q1] gives last FRESH day 01/20/2027 (python `date(2026,6,9)+timedelta(225)`), so the line turns STALE (doctor yellow, `doctor.py:79`) on 01/21/2027 and tells the operator the park is now also a data gap. If question 1 wires cre_figures, add `colliers_newest_quarter_stale` (the same shape as the cw contract over all Colliers rows) in that same change.
+- mhs_databook. Signal: `contract_fail_data-lake-marketbeat-swfl_mhs_annual_drop_overdue`. It replaces the 547-day tier-2 threshold that would stay silent until 12/04/2027 (problem 14).
   ```
   SELECT count(*) FROM (
     SELECT coalesce(max(quarter), '0000-Q0') AS q FROM data_lake.marketbeat_swfl WHERE source_name='mhs_databook'
@@ -473,7 +506,7 @@ Known bleed: the doctor keys content results by table (`doctor.py:139`). Any con
     AND current_date > make_date(extract(year from current_date)::int, 4, 15)
   ```
   [Q13] results: count 0 on 09/26; count 0 with `DATE '2027-04-15'`; count 1 with `DATE '2027-04-16'`. It first fires on 04/16/2027 if no 2027 book has been dropped. The 2026 book was published 03/13 (registry `:1783`).
-- cre_figures. Signal: `contract_fail_data_lake_cre_figures_behind_upstream`. `severity: warn` until item 14 wires a reader, then `error`.
+- cre_figures. Signal: `contract_fail_data-lake-cre-figures_behind_upstream`. `severity: warn` until item 14 wires a reader, then `error`. Corrected by the second Opus: at `warn` the contract opens NO checks row, because the sync opens rows only for `severity == "error"` and `FAIL` (`check_data_quality.py:364-365`). While warn, it shows only in the probe's step summary and the doctor's content column, which is correct for a table nobody reads (no consumer can read stale). The checks row starts the day item 14 flips it to `error`.
   ```
   SELECT count(*) FROM (
     SELECT (SELECT max(built_at) FROM data_lake.cre_figures) AS built,
@@ -486,7 +519,7 @@ Known bleed: the doctor keys content results by table (`doctor.py:139`). Any con
   - What the logger also does: it opens one incident issue per workflow failure episode. It checks for an open one first (`.github/scripts/log-cron-incident.mjs:224-228`, "incident issue already open ... not duplicating") before `gh issue create` (`:257`), and the issue auto-closes on the next scheduled success. That is one per episode, not one per run. It is the shared ops-chain seam, and this family adds nothing to it.
   - The pipeline exits 1 on any sector error (`pipeline.py:154-158`) and on zero rows (`:140-145`), so every failure shape is red. The zero-row message `ERROR: No rows extracted from any sector.` already matches the classifier's DATA_EMPTY pattern (`no rows`, `classify-cron-failure.mjs:167-168`), so a Lee red gets a deterministic class.
   - Lee serves nothing today (0 verified [Q1]), so a data-age contract would be noise until item 14 lands.
-- estero_edc. Signal: none, after item 3 retires the job. The served text expires on its own through item 2's 365-day guard, so no human is needed to catch it.
+- estero_edc. Signal (named by the second Opus, so the entry is not left without one): the CI test `drops_local_context_older_than_365_days` that item 2 creates, running in the existing CI `bun test` step (`.github/workflows/ci.yml:60`) on every push. After item 3 retires the job there is no runtime signal to own: the only failure left is a year-old row being served, and that test is what keeps it impossible. The served text expires on its own through item 2's 365-day guard.
 - fmb_recovery. Signal: the shared cron-incident row `cron_incident_ingest_local_cre_context` (`log-cron-incident.yml:85` lists `ingest-local-cre-context`). It starts firing once item 4 makes a 200 page with 0 parsed projects exit 1, with the message `0 projects returned`. That wording is a DATA_EMPTY token (`0 \w+ ... returned`, `classify-cron-failure.mjs:167-168`), so the red never falls to UNKNOWN. The served-age half is item 2's guard.
 - Every deliberate red in this family must carry a DATA_EMPTY token. Items 4 and 7 change their error text to do so (`0 projects returned`, `0 rows extracted`). An UNKNOWN red routes to the heal workflow's model leg (section 10, leg 4).
 
@@ -510,10 +543,10 @@ The ops site `/coverage` stays the human view. It needs no change for this famil
 
 ## 9. Box placement
 
-- marketbeat_swfl moves to the Fedora runner (`runs-on: [self-hosted, swfl-local]`, gated by `SWFL_LOCAL_RUNNER_READY`).
+- marketbeat_swfl moves to the Fedora runner (`runs-on: [self-hosted, swfl-local]`, gated by `SWFL_LOCAL_RUNNER_READY`). Exact line (second Opus), copied from the proven gated pattern at `.github/workflows/ingest-collier-official-records.yml:31`: `runs-on: ${{ vars.SWFL_LOCAL_RUNNER_READY == 'true' && fromJSON('["self-hosted","swfl-local"]') || 'ubuntu-latest' }}`, replacing `marketbeat-pdf-ingest.yml:26`. On the ubuntu fallback the archive copy (item 20) no-ops because `SWFL_RESEARCH_ROOT` is unset, so the fallback still lands rows. The job's `actions/setup-python@v5` step (`marketbeat-pdf-ingest.yml:35`) and `crawl4ai-setup` (`:43-44`) must be checked against the crexi job, which already runs Python on this runner (`ingest-crexi-listings.yml:30`, notes at `:44` and `:60`).
   - Reason: it needs the SSD archive. The C&W hub lists only its current PDFs [C1], and 60 rows are already unverifiable because a PDF vanished (problem 18). The job must write every PDF to `SWFL_RESEARCH_ROOT=/srv/swfl/research` in the same run that downloads it.
   - No WAF reason exists. The hub fetch works from this workstation [C1]. Whether it works from GHA is unproven, because the only scheduled run predates the hub code [G2].
-- colliers_industrial is PARKED, and its download step is deleted unless item 21's browser probe on Fedora clears Cloudflare. Plain curl from Fedora's residential IP is 403 [C3]. If the probe clears, it runs on Fedora, because it needs a browser plus the residential IP.
+- colliers_industrial is PARKED, and its download step is deleted unless item 21's browser probe on Fedora clears Cloudflare. Plain curl from Fedora's residential IP is 403 [C3]. If the probe clears, it runs on Fedora, because it needs a browser plus the residential IP. Pin it hard to `runs-on: [self-hosted, swfl-local]` (the dbpr-sirs / crexi pattern, `dbpr-sirs-monthly.yml:21`, `ingest-crexi-listings.yml:30`), not the `SWFL_LOCAL_RUNNER_READY` fallback, because on `ubuntu-latest` it can only 403 [C3]; with MarketBeat already gated to the same runner, the whole job moves together.
 - mhs_databook stays manual. It is an annually bought PDF (registry `:1803`, "same annual cost") that returns 403 on auto-fetch (registry `:1783`). Its one box need is the archive copy in item 20. No runner job.
 - cre_figures goes to GHA `ubuntu-latest` as a step appended to the Lee and MarketBeat jobs (item 15). It is DB-only and deterministic, needs no residential IP, and runs in seconds. On the MarketBeat job it runs on Fedora because the parent job moves there.
 - lee_associates_swfl stays on GHA `ubuntu-latest`. Run 32358484270 downloaded all four PDFs from GHA without a block [G3]. The URLs stay live for old quarters (2025-Q4 still 200 [C2]), so an archive is a convenience, not a need. Item 20's copy is a no-op there.
@@ -529,7 +562,7 @@ The grep that proves the ingest-side list is [R1]. Its only LLM hits are `extrac
 1. MarketBeat vision fallback (in this family).
    - Code: `ingest/pipelines/marketbeat_pdf/extractor.py:482-535`, model `claude-haiku-4-5-20251001` (`:491`).
    - What it does: when a page has under 200 characters of text (`:479`), it sends the page image and asks for the submarket table as JSON.
-   - Current auth: the `ANTHROPIC_API_KEY` repo secret, exported at `marketbeat-pdf-ingest.yml:29`. It has never been used: 0 logged calls [Q12].
+   - Current auth: the `ANTHROPIC_API_KEY` repo secret, exported at `marketbeat-pdf-ingest.yml:29`. 0 logged calls [Q12]; a CI call would not have been logged (problem 16), and the one CI run with a surviving log processed no PDF [G2]. Status: dead in practice, deleted by item 7.
    - Replacement lane: none, because the leg is deleted (item 7). All sources in this family are text PDFs. The only per-page text evidence here is the parsed outputs [Q1] and [C6], plus `_RESEARCH/INDEX.md:323`, which records zero scanned PDFs in the repo.
    - If a future layout defeats the text parsers, the run goes red and a Lane M interactive session extends `extractor.py`. No unattended model is involved.
 2. Corridor character synthesizer (consumer-side, outside this family's ingest).
@@ -590,7 +623,7 @@ I re-read the file top to bottom. Each numbered claim below is listed with the c
 34. The doctor has no `dispatch_only` handling · `rg -n dispatch_only ingest/scripts/doctor.py ingest/lib/gh_runs.py` returned nothing · verified.
 35. The doctor keys content by table · `doctor.py:135-139` · verified.
 36. The contract check key shape and auto-close · `check_data_quality.py:60`, `:335-336`, `:364-370` · verified.
-37. The vision leg never fired: 0 of 6,122 · [Q12] · verified.
+37. The vision leg never fired: 0 of 6,122 · [Q12] · corrected by the second Opus to "0 logged calls". CI calls would go unlogged (`api_usage.py:95-98` needs `DESTINATION__POSTGRES__CREDENTIALS`, and the workflow sets only `MARKETBEAT_DB_URL`), so for 27213582576 it could not be verified.
 38. `FORCE_VISION` is read nowhere · `rg -n FORCE_VISION ingest .github` (only `extractor.py:586`) · verified.
 39. `_source_model` default `spark-1-mini`, 329 rows · [Q6], [Q8] (132 + 173 + 24) · verified.
 40. 8 local PDFs, all C&W · `ls ingest/drops/marketbeat_pdf | wc -l` = 8 and the listing · verified.
@@ -602,8 +635,8 @@ I re-read the file top to bottom. Each numbered claim below is listed with the c
 46. The log-cron-incident workflow lists the Lee and local-cre workflows · `log-cron-incident.yml:84-85`, `:93` · verified.
 47. Lee Q1-2026 industrial NNN 13.67, not 12.20 as the registry note says · [Q7] (2026-Q1 query) · verified.
 48. None of the family's registry-named checks is in the 09/26 open list · [K1] (21 open, none of the six names) · verified.
-49. Plan item count: 26, with 21 DO and 5 ASK-FIRST · counted in section 7 · verified.
-50. Problem count: 21 · counted in section 4 · verified.
+49. Plan item count: 26, with 21 DO and 5 ASK-FIRST · counted in section 7 · verified; the second Opus added items 27 (DO) and 28 (ASK-FIRST), so it is now 28, with 22 DO and 6 ASK-FIRST.
+50. Problem count: 21 · counted in section 4 · verified; the second Opus added problem 22, so it is now 22.
 51. Registry `name:` line anchors (`:1690`, `:1751`, `:1776`, `:1808`, `:1962`, `:1988`, `:2011`) · `grep -n "name: <x>" ingest/cadence_registry.yaml` · verified.
 52. The Lee workflow `runs-on` line · `ingest-lee-associates-swfl.yml:30` · verified. The MarketBeat workflow `:26` · verified. The local-cre workflow `:23` · verified.
 53. MarketBeat red cause "workflow-file rejected at push" · inferred from `jobs=0` + `event=push` [G5] · could-not-verify from a log (expired). Stated as a shape, not a classification.
@@ -638,7 +671,33 @@ I re-read the file top to bottom. Each numbered claim below is listed with the c
 67. Problem 15's count · [G7] shows five yellow family lines · corrected. The heading said four.
 68. The Section 10 leg count is 4 · the three greps in section 10 · verified.
 
-Totals: 68 claims checked. 26 corrections applied: 14 line anchors in claim 55, plus claims 10, 12, 31, 56, 57, 58, 59, 60, 62, 64, 66 and 67. 4 claims could not be fully verified: 19, 53 and 54, and the untried browser path in 24.
+Added by the second Opus (each re-run on 09/26/2026):
+
+69. 309 of 377 marketbeat_swfl rows have NULL source_url (cw 173, colliers 132, lee 4, mhs 0) · [Q15] · verified.
+70. The 4 null Lee rows are the four 2026-Q2 rows · [Q15] per-row query · verified.
+71. local_cre_context 0 of 14 and cre_figures 0 of 1,078 null source_url · [Q15] · verified.
+72. Neither ingest writes source_url · `rg -n source_url ingest/pipelines/lee_associates_swfl ingest/pipelines/marketbeat_pdf` returns nothing; `loader.py:21-39` column list · verified.
+73. Served C&W rows fall back to a receipt URL · `marketbeat-swfl-source.mts:281` · verified.
+74. Contract check keys use hyphens (`data-lake-marketbeat-swfl`) · `check_freshness.py:621-623`, [Q16] live key `contract_fail_data-lake-listing-state_listing_state_home_price_floor` · verified; corrected in section 8.
+75. A dropped contract row never reopens · `check_data_quality.py:398-406`; [Q16] shows that row `dropped` since 07/14/2026 while the 09/26 probe log shows it failing with 22 rows · verified.
+76. Warn-severity contracts open no checks row · `check_data_quality.py:364-365` · verified; a warn FAIL is doctor yellow · `doctor.py:142-147` · verified.
+77. The data-quality step runs before the gating doctor and succeeded on 09/26 · `gh run view 36259690113 --json jobs` · verified.
+78. The daily probe failed on 09/22, 09/23, 09/24, 09/25 and 09/26 · `gh run list --workflow freshness-probe-daily.yml --limit 5` (35764000817, 35901290367, 36039806011, 36172136389, 36259690113, all failure) · verified.
+79. 23 of 78 doctor rows show NO_RUNS_IN_WINDOW on 09/26 · `grep -c "NO_RUNS_IN_WINDOW | "` on the saved `gh run view 36259690113 --log`; header `3 red · 38 yellow · 37 green of 78 datasets` · verified.
+80. The NO_RUNS_IN_WINDOW promotion already exists · `doctor.py:533-553`, `gh_runs.py:110-133`, `:232-262` · verified; the cause of it not landing could not be verified.
+81. Estero's yellow is odd-window arithmetic, ±5 days · `check_freshness.py:529-535`, `:585-587`, `doctor.py:78` · verified.
+82. The Colliers freshness line turns STALE on 01/21/2027 · 90 x 2.5 = 225 (`registry :1755-1756`); python `date(2026,6,9)+timedelta(225)` = 2027-01-20; `age_days > threshold` at `check_freshness.py:516` · verified.
+83. MHS stays FRESH through 12/04/2027 and first reads STALE on 12/05/2027 · the same `>` at `check_freshness.py:516` and python `date(2026,6,5)+timedelta(547)` = 2027-12-04 · verified; this is consistent with "silent until 12/04/2027" in problem 14.
+84. Workflow timeouts 20 / 15 / 15 and secret names · `rg -n "timeout-minutes|secrets\."` on the three workflows · verified.
+85. `build-corridor-fact-pack.mts` and `cre-submarket-crosswalk.mts` do not read the table · `rg -n "\.from\(|fetch\(|rest/v1"` over both returns nothing · verified; corrected in section 1.
+86. `local-cre-context-source.mts` has no test · `rg -l "local-cre-context-source|localCreContextSource" --glob "*.test.*"` returns nothing · verified.
+87. The 07/15 C&W hub code landed after the 07/15 scheduled run · `git show -s --format=%cI aac7d3b4` = 2026-07-15T16:49:54-04:00 (20:49 UTC) vs run 29411199476 created 11:18:59 UTC · verified (supports section 9's "predates the hub code").
+88. The vision leg's call_type is `ingest_marketbeat` · `extractor.py:505` · verified.
+89. The gated runs-on expression · `ingest-collier-official-records.yml:31` · verified.
+90. `ci.yml:60` runs `bun test` · `rg -n "bun test" .github/workflows/ci.yml` · verified.
+91. Re-runs of the first Opus's numbers: [Q1] through [Q14], [G1] through [G8], [T1], [B1] (377 rows, 1,097 / 1,004, tiers 911 / 45 / 48, the 549,585 spread), the Lee/Estero/FMB curls in [C2]/[C4] (2025/01 404, 2026/01 200 at 1,562,900 bytes, Naples 200 at 2,605,844, 2026/10 404, Estero 404, FMB 200, `/cdbg-dr` 404), and [C1] via the downloader's own regex (2025-Q4 retail, 2026-Q1 industrial, medical, office) · all verified, same values.
+
+Totals: 91 claims checked (68 by the first Opus, 23 added by the second). First-Opus corrections: 26 (14 line anchors in claim 55, plus claims 10, 12, 31, 56, 57, 58, 59, 60, 62, 64, 66 and 67). Second-Opus corrections: listed in section 13. Claims that could not be fully verified: 19, 53, 54, the untried browser path in 24, the CI half of 37, and the cause in 80.
 
 Corrections applied above: claims 10, 12, 31, 53, 55 through 60, 62, 64, 66 and 67 changed the text of sections 2 through 10. The section 8 contracts were rewritten to the `count(*)` form, with the empty-set case and the 10/18 date. Leg 4 was added to section 10. The Lee multifamily jump was removed from the problem list and moved to section 3 as proof the parse is faithful. The cap_rate "dropped" claim moved from the missing list to problem 20 (stale claim). The marketbeat red was worded as a shape, not a class. The line anchors listed in 55 were fixed in place.
 
@@ -646,3 +705,40 @@ Corrections applied above: claims 10, 12, 31, 53, 55 through 60, 62, 64, 66 and 
 
 1. cre_figures: wire it into cre-swfl as a labelled, corroboration-scored source for the firms and quarters the verified gate drops (item 14; it changes cre-swfl's output), or retire the table and its builder? It has 0 readers today, and it is the only way the 216 dark rows ever reach a customer.
 2. Should anything other than your own read of the PDF ever count as `verified` for a broker row? For example, a two-parser agreement, or Codex doing an independent second reading. Today it means a human read the PDF (registry `:1722-1729`). Item 17 keeps that meaning and only speeds up your read. Changing it changes what "verified" promises a customer.
+
+## 13. Second-Opus verification
+
+Run on 09/26/2026 against the live lake (read-only Bun.SQL through a scratchpad script, every statement inside `sql.begin("read only", ...)`), `gh`, `rg`, `bun test`, the read-only `bun scripts/build-cre-figures.mjs --dry-run`, curl and the downloader's own crawl4ai regex. No code changed, no issue opened, no workflow dispatched, nothing pushed.
+
+Claims checked: 91 (the 68 in section 11 re-run, plus 23 new ones logged as claims 69-91).
+
+Corrections (what was wrong → what is right → evidence):
+1. Section 1 listed `refinery/tools/build-corridor-fact-pack.mts` and `refinery/lib/cre-submarket-crosswalk.mts` as readers of `data_lake.marketbeat_swfl` → neither reads it (one is pure over a passed-in type, the other a static crosswalk); the real non-brain readers are `app/r/source` (page-data.ts:50), `run-corridor-character-preview.mts:183`, `verify-corridor-chart-blocks.mts:78` and `scripts/build-cre-figures.mjs:86` → `rg -n "\.from\(|fetch\(|rest/v1"` over both files returns nothing.
+2. Section 8 check keys were written `contract_fail_data_lake_<table>_<name>` → the probe slugs with hyphens: `contract_fail_data-lake-marketbeat-swfl_cw_served_quarter_stale`, `contract_fail_data-lake-marketbeat-swfl_mhs_annual_drop_overdue`, `contract_fail_data-lake-cre-figures_behind_upstream` → `check_freshness.py:621-623`, `check_data_quality.py:335-336`, and the live key in [Q16].
+3. Section 8 called the `severity: warn` cre_figures contract a signal without saying what it opens → at warn it opens no checks row, only a doctor yellow and a step-summary line; the row starts when item 14 makes it `error` → `check_data_quality.py:364-365`, `doctor.py:142-147`.
+4. Problem 15 said the NO_RUNS_IN_WINDOW yellow comes from a missing rule, and item 19 proposed adding a backfill-based green → the promotion already exists (`doctor.py:533-553`, `gh_runs.py:232-262`) and is not landing on 23 of 78 rows on 09/26; item 19 is re-scoped to find why (40 cap at `doctor.py:544`, or a swallowed `GhUnavailable` at `:549-553`) → run 36259690113 log.
+5. Problem 15 said estero's yellow comes from the problem 6 re-stamp → it is the odd-window WINDOW_OPEN state (±5 days around the monthly expected date); the re-stamp is what keeps it from going OVERDUE → `check_freshness.py:529-535`, `:585-587`, `doctor.py:78`.
+6. Problem 16 and section 10 leg 1 said the vision leg "has never fired" from 0 ledger rows → 0 logged calls only; a CI call would go unlogged because `log_api_usage` needs `DESTINATION__POSTGRES__CREDENTIALS` and the workflow sets only `MARKETBEAT_DB_URL` → `ingest/lib/api_usage.py:95-98`, `marketbeat-pdf-ingest.yml:30`.
+7. Section 7 item 15 did not say how the builder gets credentials in CI → the appended step must export `DESTINATION__POSTGRES__CREDENTIALS` by that name and add a Bun setup, since both jobs are Python-only and expose the secret as `DATABASE_URL` / `MARKETBEAT_DB_URL` → `ingest-lee-associates-swfl.yml:36`, `:41`; `marketbeat-pdf-ingest.yml:30`, `:35`.
+8. Section 7 count "26 items, 21 DO and 5 ASK-FIRST" and section 11 claims 49/50 → 28 items, 22 DO and 6 ASK-FIRST, and 22 problems, after the additions below → counted in sections 4 and 7.
+
+Unverifiable claims (why):
+- 27213582576 (06/09 dispatch): its log has expired (`gh run view 27213582576 --log` returns 1 line), so neither the landed row count nor whether the vision leg fired can be checked.
+- Why the doctor's backfill leaves 23 rows NO_RUNS_IN_WINDOW: the probe prints no backfill diagnostics, and the two candidate paths (the cap and the swallowed exception) leave the same trace.
+- The origin of the 20 Lee rows that do carry a `source_url`: no repo code or `docs/sql/` file writes it.
+- The C&W publisher cause (affiliate acquisition) and the Colliers browser path: unchanged from the first Opus's could-not-verify list.
+
+Gaps filled:
+- Problem 22 (new): no ingest writes `source_url`, so 309 of 377 rows, including all 113 served C&W rows, cite our receipt instead of the broker PDF. Plan items 27 (DO: loaders write the URL) and 28 (ASK-FIRST: backfill the 305 C&W and Colliers nulls). Section 5 bullet added.
+- Section 8 trap two (new): a dropped contract row never reopens, proven live by the listing_state contract that has failed for weeks under a `dropped` row. Rule added: close these contracts only by passing, never `--drop`, and `check.mjs reopen` if dropped.
+- Section 8: named a signal for colliers_industrial (the tier-2 freshness line, STALE on 01/21/2027) and estero_edc (the item 2 CI test), so every pipeline carries exactly one. Noted that marketbeat's run failures ride the shared cron-incident row, not a second family signal.
+- Section 8: confirmed the carrier actually executes (the data-quality step runs and succeeds before the gating doctor) and that `check.mjs list` shows `data-quality` rows (no project filter, `scripts/check.mjs:196`).
+- Section 9: the exact gated `runs-on` expression for MarketBeat (from `ingest-collier-official-records.yml:31`), the hard pin for Colliers if its probe clears, and the Python/crawl4ai setup check against the crexi job.
+- Section 2: workflow timeouts and secret names for all three workflows; the provenance column counts.
+- Section 5: `local-cre-context-source.mts` has no test file.
+
+Section-by-section coverage check: all seven pipelines (marketbeat_swfl, colliers_industrial, mhs_databook, cre_figures, lee_associates_swfl, estero_edc, fmb_recovery) appear in sections 2, 3, 4, 6, 7, 8 and 9. Section 8: no per-run issue filing survives (item 6 deletes `marketbeat-pdf-ingest.yml:87-124`; the shared logger dedups per episode, `log-cron-incident.mjs:224-228`), and the noise list names issues #85 and #124 (both open, `gh issue list --label odd-manual-drop --state all`) and label `odd-manual-drop` (only user `.github/workflows/marketbeat-pdf-ingest.yml` per `rg -l odd-manual-drop .github scripts ingest`). Section 10: my own `rg -n -i "anthropic|claude|openai|refinery"` over the three workflows, the four pipeline dirs, both download scripts, the builder and the two derived modules returns only `extractor.py:12`, `:28-32`, `:110` (comment), `:466`, `:483`, `:489`, `:491`, `:586`, `marketbeat-pdf-ingest.yml:29`, and the non-LLM `refinery` imports at `build-cre-figures.mjs:6`, `:11-13`. Every hit is in section 10. The heal (`heal-cron-failure.yml:84`, `:85`, `:93`, key `:191`) and log-cron-incident workflows are the only other workflows naming the family's workflows (`rg -l` over `.github/workflows`), and leg 4 covers the heal one; `log-cron-incident` makes no model call.
+
+Credit-suggestion count: 0. `grep -n -i -E "credit|top up|top-up|console balance|api key funding|billing|fund"` over this file returned no line before my edits, and my additions only name the existing key as current auth and route every leg to deletion (Lane D) or Lane M.
+
+Verdict: the plan stands with these corrections. None of them changes a pipeline verdict in section 6.

@@ -87,6 +87,7 @@ airdna_str_swfl
 ## 3. What is working
 
 - The live-search leg itself runs green every night. `gh run view <id> --json jobs` over the last 15 `nightly-chain.yml` runs (09/19 08:51 UTC to 09/26 09:24 UTC) shows "ingest · live search / run success" in 15 of 15. Newest example: job 108378684140 in run 36232679167.
+  - The chain run as a whole concluded `failure` in 15 of 15 (`gh run list --workflow nightly-chain.yml --limit 15`). In run 36232679167 the red jobs are city pulse, the three listing-lifecycle legs, `gate · assert_landed` (job 108378910402, red on `listing_lifecycle — STALE`) and `rebuild · brains`. None of those is this family's leg. The consequence for this family: freshness-pulse does not rebuild, so the leg's rows land but the brain that serves them is stalled (brief, standing facts).
 - The row gate reads both live_search entries correctly by metric. `gh run view --job 108378910402 --log` printed:
   - "`live_search_daily_median_asking` — **LANDED** — 214 rows >= floor 1"
   - "`live_search_daily_mortgage` — **LANDED** — 15 rows >= floor 1"
@@ -98,10 +99,14 @@ airdna_str_swfl
   - `ingest/tests/test_cadence_registry_live_search.py`: 2 passed
   - `ingest/tests/scripts/test_assert_landed.py`: 16 passed
   - `ingest/pipelines/swfl_search_demand`: 12 passed
-  - `ingest/tests/pipelines/market_aggregates`: 16 passed
+  - `ingest/tests/pipelines/market_aggregates`: 16 passed. These are NOT evidence for realtor_geo_trends: Grep for `geo_trends|parse_geo_trends|realtor_geo` over `ingest/**/test_*.py` finds 0 hits in these files (the only hit is `ingest/tests/quality/test_contract_registry.py`). The geo-trends resource (`resources.py:186-195`, `pipeline.py:137-175`) has no unit test, including its silent non-200 branch (P3).
   - `bun test refinery/tools/search-demand.test.mts refinery/packs/freshness-pulse.test.mts`: 22 pass, 0 fail
 - swfl_search_demand landed green twice. `gh run list --workflow swfl-search-demand-monthly.yml --limit 15` shows 28610554610 (07/02) success and 30757977334 (08/02) success.
 - realtor_geo_trends landed real rows once on a scheduled run: 30927939651 (08/04) success, with 9 rows in SQL for 08/04. The 07/18 first run does not appear in `gh run list`, which shows only 2 runs. Its 9 rows exist in SQL, so the run that wrote them could not be verified from gh.
+- airdna_str_swfl (added by the second Opus): nothing runs, by design, and that design holds:
+  - `grep -rli airdna .github/workflows ingest/pipelines ingest/duckdb_pipelines` returns nothing (exit 1), so there is no code.
+  - The declared consumer ships empty-tolerant with `str_revenue_est_monthly: null` and `str_source_tag: "available_on_request"` (`refinery/packs/investor-zip-swfl.mts:245-246`).
+  - The `not_yet_running:` probe exclusion works: airdna is absent from the 09/26 `doctor --json` output, so it raises no false STALE or LOW_VOLUME.
 - Incident dedup already works: one issue per workflow, not per run. `.github/scripts/log-cron-incident.mjs:228` logs "incident issue already open ... not duplicating" and auto-closes on the next green run (`:283`).
 
 ## 4. Problems
@@ -115,7 +120,7 @@ P1. The /desk "Live asking median" is a frozen number dated today.
   - `lib/desk/loaders.ts:782-793` renders it as "Live asking median" with `asOf: mdY(liveAsking.period)`, which reads 09/26/2026.
   - The inventory stopped because the listings legs are parked by his word. That is the premise, not the defect.
 - Severity: blocks a served number (live /desk).
-- First seen: 08/16/2026 (first period more than 2 days past the 08/14 scrape, SQL).
+- First seen: 08/16/2026 (the first period more than 1 calendar day past the 08/14 scrape; the P1 SQL cut `period > max(scraped_at)::date + 1` starts there).
 
 P2. The gate and the doctor cannot see P1 or a dead mortgage feed.
 - Freshness is table-wide:
@@ -139,14 +144,17 @@ P3. realtor_geo_trends goes green while writing nothing, against a vendor that i
 
 P4. swfl_search_demand dead on a vendor account balance.
 - Symptom: `gh run view 33672286964 --log-failed` printed "location metro:cape-coral-fort-myers ('Fort Myers,Florida,United States') failed: 402 Client Error: Unknown for url: https://api.dataforseo.com/v3/keywords_data/google_ads/search_volume/live", the same for the other 2 locations, then "RuntimeError: swfl_search_demand: every location returned 0 rows".
-- Cause: DataForSEO account balance (a separate vendor, not a code bug). Already recorded in `wiki/pipeline-census.md:76-77`.
+- Cause: DataForSEO account balance (a separate vendor, not a code bug). Already recorded in `wiki/pipeline-census.md:76-77`. [INFERENCE] The log itself says only "402 Client Error: Unknown". The pipeline's own RuntimeError names three candidates ("check creds, location names, and the DataForSEO account balance"). HTTP 402 is Payment Required, which points at the balance, but no vendor response body was logged to prove it.
 - Severity: blocks a consumer (the operator digest reads a table stuck at 06/2026 data).
 - First seen: 09/02/2026.
 
 P5. The DataForSEO 402 is misclassified and was routed to a model.
 - Running `classify()` from `.github/scripts/classify-cron-failure.mjs:42` on the 09/02 log tail returned "DATA_EMPTY | returned 0 | needsLlm= true | retry= false".
 - The only 402 branch is Anthropic-specific (`:71-88`, keyed on `billing_error`), so a vendor 402 falls to DATA_EMPTY (`:166-176`). `needsLlm` (`:261-263`) then sends it to the model narrative at `.github/scripts/heal-cron-failure.mjs:218-231`.
-- Issue #196 ("[cron-failure:swfl-search-demand-monthly] DATA_EMPTY", opened 09/02, still OPEN per `gh issue list --label cron-failure --state all`) carries a model-written diagnosis comment and a "dead/changed URL" suggested action that is wrong for a billing 402.
+- Issue #196 ("[cron-failure:swfl-search-demand-monthly] DATA_EMPTY", opened 09/02, still OPEN per `gh issue list --label cron-failure --state open`) carries wrong advice for a vendor-payment 402. The wrong text is deterministic, not the model's (corrected by the second Opus; the first draft blamed the model comment):
+  - The issue body's "Suggested action: Source returned no data — likely a dead/changed URL..." (`gh issue view 196 --json body`, body line 8) is the classifier's DATA_EMPTY `suggestedAction` (`classify-cron-failure.mjs:170-175`).
+  - The comment's "Source URL to check — a 0-row failure is usually a dead or moved source" block comes from `heal-cron-failure.mjs:298`, which runs for DATA_EMPTY only (`:261`).
+  - The model-written part of the same comment is correct: it reads "DataForSEO account has insufficient balance or expired subscription; the API is rejecting requests with HTTP 402" (`gh issue view 196 --json comments`).
 - Severity: cosmetic, but it is misrouted work.
 - First seen: 09/02/2026.
 
@@ -183,6 +191,17 @@ P11. Doc drift.
 - The AirDNA prices at `ingest/cadence_registry.yaml:2369`, `:2385`, `:2388`, `:2392` and `docs/standards/data-inventory.md:177` do not match the 09/26 crawl.
 - Severity: cosmetic.
 
+P12. The doctor calls both dead monthly pipelines healthy-enough, and cannot see any of this family's runs. (Added by the second Opus.)
+- Symptom: `ingest/.venv/Scripts/python.exe -m ingest.scripts.doctor --json`, run locally 09/26 (read-only per `doctor.py:17-20`), printed:
+  - `swfl_search_demand` freshness FRESH, age_days 55, last_run 2026-08-02, even though run 33672286964 failed 09/02
+  - `realtor_geo_trends` freshness FRESH, age_days 53, last_run 2026-08-04, even though run 33900241402 wrote 0 rows
+  - run status `NO_RUNS_IN_WINDOW` with last_conclusion null for all four active entries (asking, mortgage, search demand, realtor)
+- Root cause, freshness: the threshold is `int(cadence * tolerance)` = 30 × 2.0 = 60 days (`ingest/scripts/check_freshness.py:499`, fields at `ingest/cadence_registry.yaml:1850-1851` and `:2215-2216`), and STALE needs `age_days > threshold` (`check_freshness.py:515-516`). So search demand first reads STALE on 10/02/2026 (08/02 + 61) and realtor on 10/04/2026 (08/04 + 61). That is arithmetic on the code and fields, not an observed flip.
+- Root cause, run pillar: live-search has had no run of its own since 07/12 (`gh run list --workflow live-search-daily.yml` newest is 29193543702 on 07/12), because it runs as a `workflow_call` inside the chain, so the doctor never sees the chain's leg. For the two monthly workflows, which do have 3 and 2 runs, the cause is not verified. The status is assigned at `ingest/lib/gh_runs.py:130`, and the targeted backfill lives at `ingest/scripts/doctor.py:516-560`. The `max_backfill=40` cap does not explain it, because the same doctor JSON has only 22 workflows in NO_RUNS_IN_WINDOW. The CI doctor may differ from this local run.
+- It cannot turn red on its own. The doctor maps freshness STALE to yellow (`ingest/scripts/doctor.py:74-79`) and returns red only when an entry breaches its own `freshness_sla` (`:90-95`). Neither entry has a `freshness_sla` (`ingest/cadence_registry.yaml:1846-1871`, `:2211-2228`). So after 10/02 and 10/04 both entries stay yellow.
+- Severity: blocks a consumer (a monitoring consumer: the gating doctor reads yellow instead of red for a failed monthly and a zero-row monthly).
+- First seen: this audit, 09/26.
+
 ## 5. What is missing
 
 live_search_daily_median_asking
@@ -193,6 +212,7 @@ live_search_daily_median_asking
 live_search_daily_mortgage
 - `MORTGAGE15US` is in the same FRED release (`ingest/cadence_registry.yaml:207`). The FRED page crawled 09/26 links it as a related series. It is not pulled.
 - The freshness-pulse metric list is fixed at four keys (`refinery/packs/freshness-pulse.mts:109`), so adding one is a key_metrics change. That is ASK-FIRST per RULE 1.
+- Interior-hole backfill (added by the second Opus). `_fred_latest` asks FRED for `limit: 1` (`engine.py:145-159`). If the leg misses every run for a full week, that week's observation is never fetched. The item 3 contract checks only the newest period, so it would not catch an interior hole. None exists today (15 of 15 weekly periods, SQL). Plan item 13 fetches the last few observations instead of one.
 
 realtor_geo_trends
 - Nothing worth adding; the vendor is OUT.
@@ -263,7 +283,9 @@ Ordered. Each item gives what, where, lane, effort, proof, and what it unblocks.
    - Comment out the schedule at `.github/workflows/realtor-geo-trends-monthly.yml:16-17`, keeping `workflow_dispatch`.
    - Move the registry block `ingest/cadence_registry.yaml:2198-2228` under `not_yet_running:` with `parked: true` and a note ("RETIRED 09/26/2026: SteadyAPI OUT 09/15; last rows 08/04; 09/04 run 33900241402 green with 0 rows").
    - Comment the `data_lake.realtor_redfin_median_overlap` contract block at `ingest/quality/quality_registry.yaml:555` onward.
-   - Remove the three tests that pin it in the same commit: `ingest/tests/quality/test_contract_registry.py:232`, `:241` and `:251`, which look contracts up by name via `_by_name`.
+   - In the same commit, remove every test site that pins it in `ingest/tests/quality/test_contract_registry.py`. There are five (`grep -n "realtor" ingest/tests/quality/test_contract_registry.py`; the second Opus corrected this from three):
+     - `:232`, `:241` and `:251` look contracts up by name via `_by_name`, so they fail once the block is commented out.
+     - `:262` (`test_realtor_redfin_overlap_is_probe_only...`) and the `"data_lake.realtor_redfin_median_overlap"` parametrize entry at `:277` would still pass, but only vacuously, because `load_contracts` returns [] (`ingest/quality/contracts.py:190`). Dead tests that stay green are noise; delete them too.
    - Correct `docs/standards/data-roots.md:75`, `:516` and `docs/standards/data-inventory.md:80`.
    - Keep the 18 rows and the table; they cost nothing and no drop is asked.
    - Lane D. Effort S.
@@ -293,6 +315,7 @@ Ordered. Each item gives what, where, lane, effort, proof, and what it unblocks.
     - Test in `.github/scripts/classify-cron-failure.test.mjs` using the 09/02 log line.
     - Lane D. Effort S.
     - Proof: `node --test .github/scripts/classify-cron-failure.test.mjs`, and re-running `classify()` on the 09/02 tail no longer returns DATA_EMPTY.
+    - This removes BOTH pieces of wrong dead-URL text from P5 (second-Opus clarification). The issue-body suggestedAction becomes the new class's prescription. The "Source URL to check" comment block (`heal-cron-failure.mjs:298`) returns early for any class other than DATA_EMPTY (`:261`), so it stops firing with no edit to that file.
     - Unblocks: this family's failure path never reaches a model.
 11. ASK-FIRST (freshness-pulse key_metrics shape, RULE 1). Q3.
     - Add `MORTGAGE15US` as a second api-mode metric: a new registry entry mirroring `ingest/cadence_registry.yaml:172-210`, and a registered metric in `refinery/packs/freshness-pulse.mts:102-117`.
@@ -304,7 +327,15 @@ Ordered. Each item gives what, where, lane, effort, proof, and what it unblocks.
     - Lane D. Effort S.
     - Proof: `rg -n "19.95|40-100|20-100" ingest/cadence_registry.yaml docs/standards/data-inventory.md` returns nothing.
 
-Counted: 12 items. 9 DO (1, 3, 4, 5, 6, 8, 9, 10, 12) and 3 ASK-FIRST (2, 7, 11).
+13. DO (added by the second Opus). Make the FRED fetch self-healing for interior holes.
+    - Where: `ingest/pipelines/live_search/engine.py:145-159` (`_fred_latest`). Request the last 4 observations instead of `limit: 1`, and return all non-"." values. In `resolve_metric_api`, emit one row per observation; the existing `ON CONFLICT (metric_key, area, period, source_tag)` upsert (`pipeline.py:22-34`) makes the re-writes idempotent.
+    - Add a failing test first in `ingest/pipelines/live_search/tests`, named for the failure mode: a missed week is backfilled on the next run.
+    - Lane D. Effort S.
+    - Proof: `ingest/.venv/Scripts/python.exe -m pytest -q ingest/pipelines/live_search/tests`, then SQL `select count(*) from data_lake.daily_truth where metric_key='mortgage_30yr_fixed' and value is not null` stays at 15 or more with no new NULL rows after a chain run.
+    - Unblocks: the item 3 newest-period contract becomes sufficient, since a hole now heals within 3 weeks.
+    - Watch `assert_landed`: it counts `count(value)` all-time (`assert_landed.py:107-120`), so the floor is unaffected.
+
+Counted: 13 items. 10 DO (1, 3, 4, 5, 6, 8, 9, 10, 12, 13) and 3 ASK-FIRST (2, 7, 11). (The first draft had 12 items with 9 DO; the second Opus added item 13.)
 
 ## 8. Checks and balances
 
@@ -316,7 +347,8 @@ The design rule: ONE signal per pipeline. It fires only when a served number is 
 Signals:
 - `live_search_daily_median_asking`: contract `daily_truth_asking_outlives_inventory` (item 3). It fires when any non-null asking row is dated more than 1 day after the inventory's last scrape. That is exactly the served-number-wrong condition. Today it gives 124, so it opens on the first probe after item 3 lands and closes after items 1 and 2.
 - `live_search_daily_mortgage`: contract `daily_truth_mortgage_period_stale` (item 3). It fires when the newest non-null FRED period is more than 10 days old, so one missed weekly release plus slack. Today it gives 0.
-- `swfl_search_demand`: contract `swfl_search_demand_newest_month_stale` (item 9), only if restored. If parked, no signal: parked entries sit under `not_yet_running:`, which the probe does not read (`ingest/cadence_registry.yaml:2374-2375` comment; `assert_landed.py:57-63`).
+- `swfl_search_demand`: contract `swfl_search_demand_newest_month_stale` (item 9), only if restored. If parked, no signal: parked entries sit under `not_yet_running:`, which the probe does not read (`ingest/cadence_registry.yaml:2374-2375` comment; `assert_landed.py:57-63`). Direct evidence that the doctor honors this: `airdna_str_swfl` is absent from the 09/26 `doctor --json` output, which lists the other four family entries.
+- Timing (added by the second Opus, P12): if items 6 and 7 have not landed, the doctor's freshness pillar turns search demand STALE on 10/02/2026 and realtor on 10/04/2026. STALE is yellow, not red, for entries without a `freshness_sla` (`doctor.py:74-79`, `:90-95`), so this adds yellow noise to the doctor summary but does not newly fail the gating step. Land item 6 before the 10/04 14:00 UTC cron anyway, since that is a live SteadyAPI call. Land item 7's branch before 10/02, so the doctor's list holds only the designed signals.
 - `realtor_geo_trends`: none, retired (item 6).
 - `airdna_str_swfl`: none, parked.
 
@@ -329,6 +361,7 @@ Noise to delete or correct:
 - Issue #196: close by hand on the item 7 park branch. On the restore branch it auto-closes on the next green run.
 - Contract `data_lake.realtor_redfin_median_overlap` (`ingest/quality/quality_registry.yaml:555`): comment it out (item 6). No new realtor rows will ever arrive, so it can only go stale-green.
 - The doctor's misleading "landed 294" on both live_search rows: fixed by item 4, not deleted.
+- The doctor's `NO_RUNS_IN_WINDOW` yellow on all four active entries (P12). It is a blind spot, not a signal. Nothing in this family's design reads the doctor's run pillar: the chain gate and the content contracts carry the signals. The monthly-backfill cause belongs to the doctor's owner (family 19). No new check is opened for it here.
 - The 63 retired `median_sale_price` NULL rows: item 2.
 - The P5 misroute: item 10.
 - The Healthchecks ping at `live-search-daily.yml:63-67` is `if: always()` and proves only that the leg ran. It is not a data signal and must never be read as one. It is kept only because `nightly-chain.yml` has no heartbeat of its own (`grep -n "hc-ping" .github/workflows/nightly-chain.yml` returns nothing).
@@ -345,7 +378,8 @@ Registry fields: none new. The moves in items 6 and 7 use the existing `not_yet_
 - `swfl_search_demand`: stays on `ubuntu-latest` (`swfl-search-demand-monthly.yml:25`). Reasons: it is a paid JSON API with Basic auth; the 09/02 failure was a 402 balance, not a block, which a residential IP would not change; `timeout-minutes: 15`.
 - `realtor_geo_trends`: moves nowhere; its cron is retired (item 6). Reason: vendor OUT.
 - `airdna_str_swfl`: nowhere. There is no code and it is parked. Revisit only if he buys a subscription; a manual export drop would then be a candidate for the SSD at `/srv/swfl` (runbook `_ASSISTANT/2026-09-15-fedora-runner-runbook.md`), not before.
-- Already on the box that should not be: none from this family. `grep -rln "swfl-local" .github/workflows` lists dbpr-sirs, collier-official-records, crexi, leepa-comparable-sales, leepa-parcels and runner-smoke only (matches `docs/superpowers/handoffs/2026-09-20-runner-live-what-is-next.md:8-16`).
+- Already on the box that should not be: none from this family. `grep -rln "swfl-local" .github/workflows` lists dbpr-sirs, collier-official-records, crexi, leepa-comparable-sales, leepa-parcels and runner-smoke only. The handoff names the first three at `docs/superpowers/handoffs/2026-09-20-runner-live-what-is-next.md:8-16` and the two LeePA annuals at `:47-49` (citation corrected by the second Opus). The two LeePA files gate on `vars.SWFL_LOCAL_RUNNER_READY` (`leepa-parcels-annual.yml:28`, `leepa-comparable-sales-annual.yml:37`).
+- No pipeline in this family moves to the Fedora runner, so no `SWFL_LOCAL_RUNNER_READY` gate or `[self-hosted, swfl-local]` label is proposed. If one ever did, it would copy the gated `runs-on` expression at `leepa-parcels-annual.yml:28`.
 
 ## 10. Compute lane per LLM leg
 
@@ -353,12 +387,18 @@ LLM calls inside this family's pipelines: none. Proof, run 09/26:
 - `grep -n -i -E "anthropic|claude|ANTHROPIC_API_KEY|openai|gemini|refinery|llm|ollama"` over the 3 workflow files returned nothing.
 - `grep -rn -i -E "anthropic|claude|ANTHROPIC_API_KEY|openai|gemini|ollama|messages\.create"` over `ingest/pipelines/live_search`, `ingest/pipelines/swfl_search_demand` and `ingest/pipelines/market_aggregates` returned only docstring and comment lines: `engine.py:11`, `:15`, `:16` describe the retired search mode, and `market_aggregates/constants.py:74` names CLAUDE.md.
 - Consumers `refinery/packs/freshness-pulse.mts`, `refinery/sources/daily-truth-source.mts`, `refinery/tools/search-demand.mts`, `refinery/lib/swfl_taxonomy.mts` and `refinery/packs/investor-zip-swfl.mts` have no model call. The same grep found only the stale citation text at `daily-truth-source.mts:180`, which is P8 and a string, not a call.
+- Second-Opus re-run, 09/26:
+  - `grep -n -i -E "anthropic|claude|openai|refinery|gemini|ollama|llm"` over the 3 family workflow YAMLs returned nothing. That includes `refinery`, so no family workflow rebuilds a brain.
+  - The same grep over `ingest/pipelines/{live_search,swfl_search_demand,market_aggregates}` `*.py` returned only `engine.py:11`, `:15`, `:16` and `market_aggregates/constants.py:74`, all docstrings.
+  - Extended to the `lib/` readers (`lib/desk/loaders.ts`, `lib/charts/gallery-loaders.ts`, `lib/concoctions/defs/asking-price-trend.ts`, `lib/signals/change-evaluator.ts`): no hit. The freshness-pulse hits are "no LLM" comments (`freshness-pulse.mts:10`, `:123`, `:158`), and `investor-zip-swfl.mts:44`, `:629` say the math never sees a model.
+  - `grep -n -i -E "anthropic|ANTHROPIC_API_KEY|claude" .github/workflows/nightly-chain.yml`, the caller, returned nothing.
+  - Result: the list is complete. Zero LLM legs in family 02; one adjacent leg (below).
 
 One adjacent leg is reachable from this family's failures:
 - What it does: `.github/scripts/heal-cron-failure.mjs:218-231` writes a narrative diagnosis with model `claude-haiku-4-5` and comments it on the incident issue.
   - It fires for this family when a DataForSEO 402 is classified DATA_EMPTY (P5).
   - `gh issue view 196` shows it posted a diagnosis comment for the 09/02 failure.
-- Current auth: an API-key environment variable (`:214`). With no key set it falls back to a deterministic diagnosis (`:214-216`).
+- Current auth: an API-key environment variable (`:214`). With no key set it falls back to a deterministic diagnosis (`:214-216`). This describes the file as it is. Nothing here proposes keeping, adding or funding that key: this family's route out of the leg is item 10 (Lane D).
 - Replacement lane: Lane D. Item 10 adds a deterministic vendor-payment class, so a vendor 402 never reaches the model. No model is needed for any failure this family can produce.
   - The remaining fuzzy classes (DATA_EMPTY, SCHEMA_DRIFT, UNKNOWN) belong to family 19's plan for the classifier. If a narrative is still wanted there, the permitted lanes are Lane M (Max plan) or Lane L as draft-only, and that is their call.
 
@@ -420,10 +460,94 @@ I re-read this file top to bottom and re-ran each numbered claim against its com
 41. The ops coverage page claim. Corrected. I never read the ops repo, so section 8 now says it was not verified instead of asserting behavior.
 42. Section 2 carries a source-freshness line for every pipeline. Corrected: swfl_search_demand had none, and one is now added from the 09/02 402 plus the SQL month lag.
 
-Totals: 42 claims checked. 7 corrected in the sections above: claims 5, 37, 38, 39, 40, 41 and 42. 2 could not be verified: claim 11, and part of claim 22.
+First-draft totals: 42 claims checked. 7 corrected in the sections above: claims 5, 37, 38, 39, 40, 41 and 42. 2 could not be verified: claim 11, and part of claim 22.
+
+Second-Opus extension, 09/26. These are numbers and claims the first log did not cover, plus the second Opus's corrections, each re-run:
+
+43. 275 seeds × 3 locations. Check: `ingest/cadence_registry.yaml:1865` summary text, `constants.py:38-42` (3 entries), and SQL 06/2026 = 275 rows per location. Verified.
+44. 123 no-volume keywords per location. Check: SQL `count(*) where avg_monthly_searches is null group by captured_month, location` = 123 in each of 06, 07 and 08/2026. Verified.
+45. `timeout-minutes: 25` for live-search and 15 for search demand. Check: `grep -n timeout-minutes` gives `live-search-daily.yml:35` and `swfl-search-demand-monthly.yml:26`. Verified.
+46. Realtor cron `"0 14 4 * *"`, next fire 10/04/2026 14:00 UTC. Check: `realtor-geo-trends-monthly.yml:17`. Verified.
+47. Live-search's own cron retired 07/12. Check: `live-search-daily.yml:4-11`, and `gh run list --workflow live-search-daily.yml` newest run 29193543702 on 07/12. Verified.
+48. P6 first seen 06/03. Check: SQL `min(inserted_at)` of the 06/2026 NULL rows = 06/03/2026 19:27 UTC. Verified.
+49. Issue #178 is the open nightly-chain incident. Check: `gh issue view 178` shows OPEN "[cron-failure:nightly-chain] DATA_EMPTY · Nightly Chain — 2026-08-15". Verified.
+50. 127 vs 124. Check: SQL `period >= '2026-08-15'` = 127 and `period > '2026-08-15'` = 124, so the difference is the 3 rows dated 08/15. Verified.
+51. Job 108378684140 is the live-search leg in run 36232679167. Check: `gh run view 36232679167 --json jobs`. Verified.
+52. Inventory medians 399200 / 325000 / 650000. Check: SQL `percentile_cont(0.5)` over `listing_active_homes` by city, n = 4254 / 4087 / 5300, max scraped_at 08/14 04:28 UTC. Verified.
+53. Mortgage retrieved_at pattern (newest-only fetch). Check: SQL per-period retrieved_at, plus `engine.py:145-159` `limit: 1`. Corrected the section 2 wording.
+54. Charts gallery reads mortgage. Check: `lib/charts/gallery-loaders.ts:180-183` and Grep `mortgage` in that file. Corrected: it does not.
+55. Missed downstream reader. Check: Grep `freshness_mortgage_30yr_fixed_pct` finds `lib/signals/change-evaluator.ts:84`. Gap filled in section 1.
+56. market_aggregates tests as realtor evidence. Check: Grep `geo_trends|parse_geo_trends|realtor_geo` over `ingest/**/test_*.py` gives 1 file, the contract registry test only. Corrected in section 3.
+57. Who wrote #196's wrong advice. Check: `gh issue view 196 --json body,comments`, `classify-cron-failure.mjs:170-175`, `heal-cron-failure.mjs:261`, `:298`. Corrected in P5.
+58. Realtor contract test sites. Check: `grep -n "realtor" ingest/tests/quality/test_contract_registry.py` gives :232, :241, :251, :262, :277, plus `contracts.py:190` returning []. Corrected item 6 from 3 sites to 5.
+59. Runner handoff citation. Check: `grep -n -i leepa docs/superpowers/handoffs/2026-09-20-runner-live-what-is-next.md` gives :47-49. Corrected in section 9.
+60. P1 first-seen wording. Check: 08/16 - 08/14 = 2 days, matching SQL cut `> scrape_date + 1`. Corrected ("more than 1 calendar day").
+61. P4 cause certainty. Check: `gh run view 33672286964 --log-failed` shows only "402 Client Error: Unknown" plus the three-candidate RuntimeError. Corrected: tagged [INFERENCE].
+62. Doctor freshness and run pillar (P12). Check: local `python -m ingest.scripts.doctor --json` 09/26: search demand FRESH age 55, realtor FRESH age 53, NO_RUNS_IN_WINDOW on 4 entries, 22 workflows NO_RUNS_IN_WINDOW overall; `check_freshness.py:499`, `:515-516`. Gap filled. The run-pillar cause is not verified.
+63. STALE dates 10/02 and 10/04. Check: `age_days > int(30 * 2.0)` from `check_freshness.py:499`, `:515-516`. Verified as arithmetic.
+64. airdna absent from the doctor output. Check: the same doctor JSON walk printed 4 family entries, none of them airdna. Verified.
+65. Realtor overlap contract stale-green. Check: SQL on `data_lake.realtor_redfin_median_overlap` gives 5 rows with non-null redfin (realtor_as_of 08/04, redfin period_end 08/31), so `realtor_redfin_overlap_coverage_floor` returns 0. Verified.
+66. Item 12 proof command. Check: `rg -n "19.95|40-100|20-100"` today hits exactly `data-inventory.md:177` and registry `:2369`, `:2385`, `:2388`, `:2392`. Verified: the proof can reach "nothing".
+67. Item 10 also silences the heal-cron source-URL block. Check: `heal-cron-failure.mjs:261` `if (c.klass !== "DATA_EMPTY") return null`. Verified.
+68. The item 4 and item 10 proof test files exist. Check: `ls ingest/tests/scripts/` gives test_check_freshness.py and test_doctor.py, and `ls .github/scripts/classify-cron-failure.test.mjs`. Verified.
+69. FRED and AirDNA pages. Check: crawl4ai re-run 09/26: FRED "Updated: Sep 24, 2026 11:02 AM CDT", "Next Release Date: Oct 1, 2026"; AirDNA "Market Research ... $125 / month ... $34/ month billed $400 annually", Adapt "$20/month per listing". Verified.
+70. Test counts. Check: re-run 9 / 2 / 16 / 12 / 16 passed and bun 22 pass 0 fail. Verified.
+71. Chain overall conclusion. Check: `gh run list --workflow nightly-chain.yml --limit 15` shows 15 failures, and run 36232679167 jobs show the red legs. Gap filled in section 3.
+72. LLM greps extended to lib readers and the caller chain. Check: the section 10 greps. Verified, zero hits.
+73. Doctor severity of freshness STALE. Check: `ingest/scripts/doctor.py:74-79` (`"STALE": "yellow"`) and `:90-95` (red only on a `freshness_sla` breach), plus `sed -n` over both registry blocks, which gives 0 `freshness_sla` lines. Verified. The second Opus's own first wording ("red lines") was corrected before it shipped.
+74. airdna has no pipeline code. Check: `grep -rli airdna .github/workflows ingest/pipelines ingest/duckdb_pipelines` returns nothing. Verified.
+
+Totals after the second Opus: 74 entries. Of the first 42, the second Opus re-ran or re-opened 41; claim 41 (the ops coverage page) was not re-checked. 32 new entries (43-74) were re-run. Corrections applied in sections 1-9: 8 (entries 53, 54, 56, 57, 58, 59, 60, 61). Gaps filled: entries 55, 62, 64, 71, 72, 73 and 74, plus the section 5 interior-hole line with plan item 13, the section 8 10/02 and 10/04 timing, and the section 3 airdna line. Could not verify: claim 11, part of claim 22, claim 41, and the P12 run-pillar cause.
 
 ## 12. Questions for the operator
 
-- Q1 (money). The DataForSEO account behind `swfl_search_demand` returned 402 on all three locations on 09/02. That is that vendor's own account balance, not ours to decide. Restore it and keep the monthly keyword pull, or park the pipeline (item 7)?
+- Q1 (money). The DataForSEO account behind `swfl_search_demand` returned 402 on all three locations on 09/02. That is that vendor's own account balance, not ours to decide. Restore it and keep the monthly keyword pull, or park the pipeline (item 7)? An answer before 10/02/2026 keeps the doctor from turning it STALE (P12).
 - Q2 (a `data_lake` write). The /desk "Live asking median" has shown the 08/14 inventory median dated as today since 08/16. May I NULL those 124 rows and delete the 63 dead `median_sale_price` NULL rows (item 2), so /desk shows the last true reading with its real date?
 - Q3 (brain output shape). Add the FRED 15-year fixed rate (`MORTGAGE15US`, same release, same call) to freshness-pulse as a fifth metric (item 11), or leave the 30-year alone?
+
+## 13. Second-Opus verification
+
+Run 09/26/2026 by the second Opus against live sources: `gh run list` / `gh run view` / `gh issue view`, read-only Bun.SQL SELECTs (scratchpad script, connection copied from `scripts/apply-fdic-sod-view.mts:15-27`), the pytest and bun suites, crawl4ai on FRED and AirDNA, the read-only doctor, and every file:line cited.
+
+Claims checked: 73
+- 41 of the first draft's 42 double-check claims were re-run or re-opened. Claim 41 (the ops coverage page) was not re-checked.
+- 32 new entries (section 11, entries 43-74) were re-run.
+
+Corrections (8), each one line: what was wrong → what is right → evidence
+- Section 1: the charts gallery was listed as a mortgage consumer → it reads only `median_asking_price` → `lib/charts/gallery-loaders.ts:180-183`; Grep `mortgage` in that file returns nothing.
+- Section 2: mortgage "re-upserted daily" implied every row is refreshed → only the newest observation is fetched (`limit: 1`) and re-upserted; older rows keep the retrieved_at of their last day as newest → `engine.py:145-159`; SQL shows period 06/18 retrieved 06/25.
+- Section 3: the 16 market_aggregates tests were offered as realtor_geo_trends evidence → 0 of them touch geo_trends, and the resource has no unit test → Grep `geo_trends|parse_geo_trends|realtor_geo` over `ingest/**/test_*.py` hits only the contract-registry test.
+- P1: first seen "more than 2 days past the 08/14 scrape" → 08/16 is exactly 2 days, i.e. more than 1 calendar day, matching the SQL cut → `period > max(scraped_at)::date + 1`.
+- P4: DataForSEO account balance was stated as fact → it is an [INFERENCE] from HTTP 402 plus the pipeline's three-candidate error text → `gh run view 33672286964 --log-failed`.
+- P5: blamed the model comment on #196 for the dead-URL advice → the model's diagnosis is correct (402, balance), and the wrong text is deterministic: the classifier's DATA_EMPTY suggestedAction (issue body line 8) and the heal-cron "Source URL to check" block → `gh issue view 196 --json body,comments`, `classify-cron-failure.mjs:170-175`, `heal-cron-failure.mjs:261`, `:298`.
+- Item 6: said to remove 3 test sites → there are 5: `:232`, `:241` and `:251` fail, and `:262` plus the `:277` parametrize entry pass vacuously → `grep -n realtor ingest/tests/quality/test_contract_registry.py`, `ingest/quality/contracts.py:190`.
+- Section 9: cited handoff `:8-16` for all five runner workflows → the LeePA annuals are at `:47-49` → `grep -n -i leepa docs/superpowers/handoffs/2026-09-20-runner-live-what-is-next.md`.
+
+Unverifiable claims (why)
+- Which run wrote the 07/18 realtor rows (claim 11). `gh run list --workflow realtor-geo-trends-monthly.yml` shows only 2 runs (08/04, 09/04).
+- Whether an AirDNA Market Research plan exports SWFL ZIP-level data (claim 22). The pricing page does not say, and an answer would need an account.
+- The ops coverage page's behavior (claim 41). The ops repo was not read in either pass.
+- Why the doctor's targeted backfill leaves the two monthly workflows at NO_RUNS_IN_WINDOW (P12). The `max_backfill=40` cap is ruled out (22 workflows in that state), and the path was not traced further. The CI doctor may also differ from the local run.
+- The DataForSEO balance itself. No vendor response body is logged, so this cannot be checked without a billed call (P7).
+
+Gaps filled
+- Section 1: the downstream reader `lib/signals/change-evaluator.ts:84` of the freshness-pulse mortgage slug.
+- Section 3: the chain concluded failure in 15 of 15 runs; the family's leg was green in all 15, and the red legs belong to other families.
+- Section 4: new P12, where the doctor reads FRESH at ages 55 and 53 for a failed and a zero-row monthly, with a 60-day window (`check_freshness.py:499`, `:515-516`) and a blind run pillar.
+- Section 5 and plan item 13 (DO, Lane D, S): the FRED `limit: 1` interior-hole gap. The plan is now 13 items: 10 DO, 3 ASK-FIRST.
+- Section 7 item 10: made explicit that the new class also silences the heal-cron source-URL block (`heal-cron-failure.mjs:261`), so both wrong texts go.
+- Section 3: an airdna line. There is no code (`grep -rli airdna` over workflows and pipeline dirs is empty), the consumer ships empty-tolerant (`investor-zip-swfl.mts:245-246`), and airdna is absent from the doctor JSON.
+- Section 8: the 10/02 (search demand) and 10/04 (realtor) STALE timing for items 6 and 7. STALE is yellow for entries with no `freshness_sla` (`doctor.py:74-79`, `:90-95`), so it adds yellow noise rather than a new red. Also direct doctor-JSON evidence that `not_yet_running:` entries are excluded (airdna absent).
+- Section 9: an explicit statement that no family pipeline moves to the Fedora runner, so no `SWFL_LOCAL_RUNNER_READY` gate or `[self-hosted, swfl-local]` label is proposed.
+- Section 10: the LLM grep extended to the 4 `lib/` readers and the caller `nightly-chain.yml`, with zero hits. The list stands at 0 in-family legs and 1 adjacent leg.
+
+Coverage: all five pipelines (live_search_daily_median_asking, live_search_daily_mortgage, realtor_geo_trends, swfl_search_demand, airdna_str_swfl) appear in sections 2, 3 (airdna line added by the second Opus), 4 (airdna: P11 doc drift only), 6, 7 (airdna: item 12's price-line fix), 8 and 9. None is missing.
+
+Section 8 audit: no per-run GitHub issue filing survives. Every signal is a probe content contract that opens and closes one `public.checks` row (`check_data_quality.py:339-368`). Incident issues stay one per workflow (`log-cron-incident.mjs:228`). Each active pipeline has exactly one named signal: `daily_truth_asking_outlives_inventory`, `daily_truth_mortgage_period_stale`, and `swfl_search_demand_newest_month_stale` (restore branch only). Realtor is retired and airdna parked, both with none. The noise list is concrete: issue #196, contract block `data_lake.realtor_redfin_median_overlap` (`quality_registry.yaml:555`), the 63 `median_sale_price` NULL rows, the doctor's "landed 294", and the five realtor test sites.
+
+Credit-suggestion count: 0.
+- `grep -n -i -E "credit|top up|top-up|console balance|api key|api-key|balance|fund|billing"` over this file hits lines about the DataForSEO vendor balance (P4, section 6, item 7, item 10's prescription, section 9, Q1). All of them are the operator's vendor-money decision, not Anthropic credit.
+- It also hits the Anthropic `billing_error` classifier branch (P5), which describes code, and the section 10 line on heal-cron-failure's current auth. That line now says explicitly that nothing proposes keeping or funding the key.
+- Two lines were tightened to remove any misreading: P5's "billing 402" became "vendor-payment 402", and the section 10 auth line.
+
+Grade: PASS-WITH-CORRECTIONS. The plan stands after the edits above; no rewrite is needed.

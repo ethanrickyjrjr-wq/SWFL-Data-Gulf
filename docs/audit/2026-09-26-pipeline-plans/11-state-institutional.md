@@ -21,7 +21,41 @@ Consumer grep:
 grep -rln "<table>" refinery lib app scripts components | grep -v -E "\.test\.|__tests__|/tests/"
 ```
 
-Every table has a live reader. There is no DARK ROOT in this family. The stale-consumer case is fgcu-reri: its brain has not been rebuilt since 07/12 (section 4, P6).
+Every table has a live reader. There is no DARK ROOT in this family. The stale-consumer case is fgcu-reri: its brain has not been rebuilt since 07/12 (section 4, P6). The committed tourism-tdt and sector-credit-swfl snapshots also passed their expiry on 09/22/2026 (P6).
+
+Readers the grep above surfaces beyond the pack chains (second-Opus additions, 09/26):
+- `scripts/notion-sync.mjs:297,916` names `fl_dor_tdt_collections` and records its origin as "Lee County Clerk Doc 328" in premise-engine's Supabase. This is a documentation reader, not a data reader, but it explains P3's Lee Clerk rows.
+- Brain-id readers (`grep -rln '"<brain-id>"' refinery/packs refinery/lib lib app`):
+  - `lib/zip-dossier.ts:176` (fgcu-reri) and `:198` (franchise-outcomes).
+  - `lib/highlighter/reach.ts:191` (franchise-outcomes) and `:218` (fgcu-reri).
+  - `refinery/packs/catalog.mts:252,352`.
+  - `refinery/lib/synth.mts:345` (franchise-outcomes).
+  - `refinery/packs/sector-credit-swfl.mts:295,721,726`: sector-credit-swfl takes franchise-outcomes as a brain INPUT. It is not only master.
+  - fgcu-reri is therefore more than the standalone `/api/b/fgcu-reri`: it is also registered in the zip-dossier grain map.
+- `refinery/tools/run-rsw-forecast-experiment.mts:21` reads the RSW local capture (`source_id === "rsw_lcpa_monthly"`), not the table. Its output sits in `/srv/swfl/research/archive-20260918/forecasts/` (ssh read-only find). This is the concrete consumer for item 4's raw retention.
+
+Workflow facts per pipeline (`grep -n -E "cron|runs-on|timeout|secrets\." .github/workflows/<file>`). Every job is gated by `vars.ENGINE_ENABLED != 'false'`, and `ENGINE_ENABLED` is `true` (`gh variable list`).
+- fl-dor-tdt-monthly.yml
+  - runs-on `ubuntu-latest` (`:27`), timeout 20 min (`:28`), cron `0 10 20 * *` (`:9`).
+  - Secret: `DESTINATION__POSTGRES__CREDENTIALS`.
+- fl-dor-sales-tax-monthly.yml
+  - runs-on `ubuntu-latest` (`:25`), timeout 20 (`:26`), cron `0 11 15 * *` (`:7`).
+  - Secret: `DESTINATION__POSTGRES__CREDENTIALS`.
+- fdle-crime-quarterly.yml
+  - runs-on `ubuntu-latest` (`:29`), timeout 15 (`:30`), cron `0 12 1 1,4,7,10 *` (`:11`).
+  - Secrets: `DESTINATION__POSTGRES__CREDENTIALS`, `SUPABASE_URL`, `SUPABASE_SERVICE_KEY`, `FBI_CDE_API_KEY` (`:45-48`).
+- fgcu-reri-monthly.yml
+  - runs-on `ubuntu-latest` (`:22`), timeout 10 (`:23`), cron `0 14 5 * *` (`:8`).
+  - `crawl4ai-setup` and `crawl4ai-doctor` (`:37,41`).
+  - Secret: `DESTINATION__POSTGRES__CREDENTIALS`.
+- rsw-airport-monthly.yml
+  - runs-on `ubuntu-latest` (`:22`), timeout 10 (`:23`), cron `0 15 8 * *` (`:8`).
+  - Python 3.12 (`:31`), crawl4ai setup and doctor (`:37,41`).
+  - Secret: `DESTINATION__POSTGRES__CREDENTIALS`.
+- franchise-outcomes-quarterly.yml
+  - runs-on `ubuntu-latest` (`:29`), timeout 45 (`:30`). The cron `0 8 15 1,4,7,10 *` is commented out (`:15`).
+  - Secrets: `DESTINATION__POSTGRES__CREDENTIALS`, `SUPABASE_URL`, `SUPABASE_SERVICE_KEY`, and the three `SUPABASE_S3_*` (`:45-50`).
+  - `gh workflow view franchise-outcomes-quarterly.yml` prints "Total runs 0".
 
 ## 2. What is being brought in
 
@@ -29,6 +63,8 @@ Every table has a live reader. There is no DARK ROOT in this family. The stale-c
   - Live data: 666 rows; Lee 334 (07/01/1998 to 04/01/2026), Collier 332 (07/01/1998 to 02/01/2026); MAX(inserted_at) 09/20/2026.
   - Hendry: 0 rows.
   - Lee 03/2026 and 04/2026 carry `source_url = https://www.leeclerk.org/home/showpublisheddocument/328`, inserted 05/15/2026 (section 4, P3).
+  - DOR-sourced rows end on the SAME month for both counties. `select county, count(*), max(period) ... where source_url like '%F3FY2026%' group by 1` returns Lee 8 rows to 02/01/2026 and Collier 8 rows to 02/01/2026. `... where source_url like '%floridarevenue%'` gives max 02/01/2026 for both. There is no Collier lag inside DOR Form 3; the apparent 2-month lag is the two Lee Clerk rows.
+  - `select source_url, count(*) ... group by 1` returns 2 rows for the Lee Clerk URL. Every other row carries a DOR Form 3 URL (24 per FY file; 16 for FY2026).
 
 ```
 select county, count(*), min(period), max(period), max(inserted_at) from public.fl_dor_tdt_collections group by rollup(county);
@@ -90,7 +126,8 @@ select path, vintage, updated_at from data_lake._tier1_inventory where path ilik
   - Collier 2025 is a real, complete year: a CDE probe (below) shows Collier Sheriff reporting all 12 months of 2025 (sum 1,884).
   - Tests: 0.
 - fgcu_reri_indicators: 3 of 3 green: 33978472293 (09/05), 31023293818 (08/05), 27027003275 (06/05). Each run parsed and upserted rows; the 08/05 run's printed rows carry report_month 2026-08-01. Tests: 0.
-- rsw_airport_monthly: 6 green and 1 red in the window.
+- Pack-level tests exist for three of the consumers, and the ingest-only counts above leave them out. `bun test refinery/packs/fgcu-reri.test.mts refinery/packs/rsw-airport.test.mts refinery/packs/tourism-tdt.test.mts` printed "30 pass, 0 fail". Per file, counted by `grep -c -E '^\s*(it|test)\('`: tourism-tdt 17, rsw-airport 8, fgcu-reri 5. No `tourism-tdt.test.mts` case feeds a one-county latest month: its `combined` tests at `:56-101` all use two-county fixtures. That gap is why P3's label defect is untested.
+- rsw_airport_monthly: 6 green and 1 red in the window. There is no 07/08 scheduled run at all: the list jumps from 27484730507 (06/14 dispatch) to 31264265982 (08/08). `gh api ".../actions/runs?created=2026-07-08&event=schedule"` returns total_count 56 for other workflows that day. This is the same dropped-schedule shape as FGCU's 07/05.
   - The discovery fix (commit 76a8c999, 09/18) works on HEAD. A read-only dry-run today discovered all five July PDFs under `www.flylcpa.com/app/uploads/2026/08/`, parsed 519 rows per metric (2,595 total), and printed max_observation_month 2026-07-01 for every metric, ending with "--dry-run, skipping DB write" (`pipeline.py:569`). The dry-run is read-only by code: `run()` returns at `:569-571` before `upsert_rows`.
 
 ```
@@ -135,6 +172,7 @@ P2. RSW has served April 2026 since at least 06/14 while May, June and July were
 - Remaining defect: the legacy fallback is still on by default (`discover_pdf_url(..., allow_fallback=True)` at `:216`, called at `:501`). A `fallback_observed` state (`:528`) still upserts and exits 0, so the next page change reproduces a silent stall. `run()` also keeps going when a single metric fails (`:499-535`), so one metric can freeze alone.
 - Severity: blocks a served number. Committed snapshot `brains/rsw-airport.md:52`: "LCPA Aviation April 2026 — RSW 1,152,669 total passengers". Live crawl4ai of the reports page today lists `.../2026/08/Total-Passengers-July-2026.pdf`, and the dry-run proves 2026-07.
 - First seen: 2,580 rows was already the count on 06/14 (registry `:1478` comment), and every run since has re-upserted 516 rows per metric.
+- Also: the 07/08 scheduled run never fired (section 3; no run in `gh run list` between 06/14 and 08/08). The cause could not be determined. It changed nothing, because the fallback would have served April anyway.
 
 P3. TDT source stall, with a mislabeled served number.
 - Symptom: the DOR files have not changed since spring:
@@ -144,14 +182,18 @@ curl -sI "https://floridarevenue.com/dataPortal/GTA/Form%203/F3FY2026.xlsx"   # 
 curl -sI "https://floridarevenue.com/dataPortal/GTA/Form%203/F3FY2027.xlsx"   # 404
 ```
 
-- Our table therefore ends at Collier 02/2026. Lee's 03/2026 and 04/2026 rows did not come from DOR. They came from `https://www.leeclerk.org/home/showpublisheddocument/328`, inserted 05/15/2026. That is an unregistered second writer: `git log --all -S "showpublisheddocument/328"` returns nothing, and no code in this repo writes that URL (grep for `leeclerk.org` hits only the lee_deed pipeline and docs).
+- DOR data therefore ends at 02/2026 for BOTH counties (section 2 source_url query). Lee's 03/2026 and 04/2026 rows did not come from DOR. They came from `https://www.leeclerk.org/home/showpublisheddocument/328`, inserted 05/15/2026.
+- That writer is outside this repo but it is documented. `git log --all -S "showpublisheddocument/328"` returns nothing, and no code here writes the URL. But `docs/_FINISHED/arsenal-master-stack.md:595` says the table "already lives in the premise-engine Supabase ... sourced from Lee County Clerk Doc 328". `docs/_archive/superseded/audit-and-roadmap/audit-2026-05-27.md:117` and `scripts/notion-sync.mjs:297` say the same.
+- So the writer is premise-engine's legacy Lee Clerk lane, which predates our DOR pipeline (first run 05/28, registry `:1232`). Our DOR upserts overwrote every other row it wrote. Only the 2 months DOR does not have survive.
+- premise-engine is not checked out on this box (`ls /c/Users/ethan/dev`), so whether its writer still runs is could-not-verify. Its last write is 05/15/2026.
+- A false claim rides on these two rows. Registry `:1233` ("~2 month lag vs Lee") and the served caveat at `refinery/packs/tourism-tdt.mts:768` ("Collier data lags Lee by ~2 months") state a Collier lag that DOR does not have. The "lag" is the mixed provenance.
 - Newer data exists:
   - The RERI homepage today reads "Tourist Tax Revenues / Up 13.6 percent from June 2025 to June 2026" (crawl4ai of `https://www.fgcu.edu/cob/reri/`).
   - The Lee Clerk "Tourist Development Tax Collections.pdf" returns Last-Modified: Wed, 09 Sep 2026 08:31:52 GMT through crawl4ai. curl gets 403 on the same URL.
 - Second defect, in the served number: `refinery/packs/tourism-tdt.mts:336,356,738` label the latest month "Lee + Collier combined" even when `county_count` is 1. The committed snapshot `brains/tourism-tdt.md:59` reads "SWFL TDT collections (Lee + Collier combined) for 2026-04 (shoulder season): $9.03M". The table's 04/2026 row is Lee only (9,028,029.34). The caveat at `tourism-tdt.mts:767-769` is present in the snapshot (`grep -c "reflects only 1 of 2" brains/tourism-tdt.md` returns 1), but the headline contradicts it.
 - The trailing-12 figure ($89.00M through 2026-04, `brains/tourism-tdt.md:39`) spans two Lee-only months. [INFERENCE] It is understated by the missing Collier March and April.
 - Severity: blocks a served number.
-- First seen: the source stall per Last-Modified 04/20/2026; the Lee Clerk rows 05/15/2026.
+- First seen: the source stall per Last-Modified 04/20/2026; the Lee Clerk rows 05/15/2026. The label defect was already caught on 07/17/2026 as check `tourism_tdt_combined_masks_collier_lag` ("equals the Lee-only April value to the penny"). It was bulk-dropped 08/12/2026 in the ledger bankruptcy, unfixed (`select check_key, state, created_at, resolved_at from public.checks where check_key = ...`).
 
 P4. Sales tax source stall, plus a year-pair defect that will hide 2026 data.
 - Symptom: the table ends 12/2025. `F10_txsales_cy2425.xlsx` returns Last-Modified: Thu, 05 Mar 2026. `F10_txsales_cy2627.xlsx` returns 404, and so does the portal's "Most Recent Month (preliminary)" link `https://www.floridarevenue.com/taxes/tables/f10_current.xlsx` (crawl4ai of `dataPortal/Pages/otr2.aspx`, then curl -sI).
@@ -174,7 +216,7 @@ curl -s -o /dev/null -w "%{http_code} %{size_download}" https://www.fgcu.edu/cob
 
 - Second defect: the September homepage phrases home prices as "Up between 2.5 and 11.1 percent from July 2025 to July 2026." That sentence has no " in " and matches neither branch (`pipeline.py:186`, `_SIMPLE_RE` at `:61-65`), so home prices are dropped again. This is the regression the 08/02 registry comment named (`:1368-1373`).
 - Severity: blocks a consumer (months missing, home prices missing).
-- First seen: 07/05/2026 (the missing run). The homepage never shows old months, so without item 6 they stay lost.
+- First seen: 07/05/2026 (the missing run). The homepage never shows old months, so without item 6 they stay lost. The home-price regression was caught on 07/14/2026 as check `fgcu_reri_home_prices_range_parse_regression`, which was bulk-dropped 08/12/2026 unfixed (checks query as in P3).
 
 P6. fgcu-reri brain is expired and nothing rebuilds it.
 - Symptom: committed snapshot `brains/fgcu-reri.md` has refined_at 2026-07-12T04:18:08Z and expires 2026-08-11T04:18:08Z. It still serves "YoY, 2026-05" facts (`:36-38`), although August rows landed on 08/05.
@@ -182,6 +224,11 @@ P6. fgcu-reri brain is expired and nothing rebuilds it.
 - Severity: blocks a consumer (`/api/b/fgcu-reri`).
 - First seen: 08/11/2026 (expiry).
 - Caveat: `brains/*.md` are committed snapshots. The swfl MCP returned 429 this session, so served bytes were not fetched.
+- The stall is family-wide, not only fgcu-reri (`grep -n '"expires"' brains/<id>.md`, second-Opus 09/26):
+  - tourism-tdt (`brains/tourism-tdt.md:53`) and sector-credit-swfl (`brains/sector-credit-swfl.md:67`) both expired 2026-09-22T23:52:24Z. They were refined 09/15.
+  - franchise-outcomes expires 2026-10-01 (`:43`), rsw-airport 2026-10-15 (`:46`), safety-swfl 2026-10-17 (`:45`).
+  - safety-swfl was last committed 07/19 (`git log -1 -- brains/safety-swfl.md`).
+  - These brains reach master, whose rebuild path is stalled behind nightly-chain (brief, standing facts). Each needs the same `pack_id=<brain-id>` targeted rebuild that item 14 names for fgcu-reri.
 
 P7. FDLE Lee rate silently changed geography and includes a partial year.
 - Symptom: Lee's covered population fell from 867,715 (2024, 3 agencies) to 622,446 (2025, 2 agencies), per the run 28526483952 log.
@@ -204,6 +251,7 @@ P8. SBA source is gone and the pipeline has never run.
 - Symptom: all three `asof-260331` CSV URLs (`constants.py:31-40`) return 404, and so do the `asof-260630` variant, the citation page `https://data.sba.gov/en/dataset/7-a-504-foia` (`constants.py:44`) and `https://data.sba.gov/dataset/7-a-504-foia` (crawl4ai status 404 on each).
 - The crawl4ai'd dataset index `https://data.sba.gov/dataset` lists 10 slugs (ppp-foia, rrf-foia, ...) and no 7(a) FOIA dataset.
 - The pipeline has zero runs ever. The schedule has been commented out since 07/14 (`franchise-outcomes-quarterly.yml:4-15`).
+- The source did exist recently. `SOURCED.md:243-248` records "SBA 7(a) FOIA — Lee + Collier franchise row counts (verified 2026-06-14, full-file reads)" from `https://data.sba.gov/en/dataset/7-a-504-foia` (453 rows, registry `:2359-2362`). SBA therefore moved or pulled the files between 06/14 and 09/26. A re-source search, not a retirement, is the first move if the operator wants the brain.
 - Severity: blocks a consumer. The brain is a master input (`master.mts:228`, `:289`) publishing a placeholder.
 - First seen: never ran. The known-problems ledger tracked "franchise_foia_first_run" (`docs/audit/2026-07-11-pipeline-problems/02-known-problems-ledger.md:61`, `:182-184`).
 
@@ -212,12 +260,14 @@ P9. Stale claims in the docs and registry (cosmetic, but they mislead the next a
 - `docs/standards/data-roots.md:1690` says fgcu-reri feeds master at `master.mts:329`; `master.mts:257-262,336` shows it was dropped. The 07/22 wire map is right (`_RESEARCH/data-and-ingest/2026-07-22-lake-wire-map.md:70`).
 - Registry `:1275` says "6 rows expected"; the table has 8.
 - Registry `:1286-1290` source_ceiling, `docs/standards/data-inventory.md:105` and `data-roots.md:51` say the FDLE city and offense breakdown is "already computed, then discarded". The FIBRS parser did compute it (`pipeline.py:139-260`), but the live CDE path does not: `cde.py:21-24` leaves the four offense columns null, and the breakdown needs sibling endpoints (new calls).
-- Registry `:2344-2347` `known_drift: parked_but_scheduled` points at check `sba_franchise_parked_but_live`, which is not in the 21-open list (`node scripts/check.mjs list`). Its condition has been false since the schedule was commented out 07/14.
+- Registry `:2344-2347` `known_drift: parked_but_scheduled` points at check `sba_franchise_parked_but_live`. That check exists and is `done`, resolved 07/15/2026 (checks query). Its condition has been false since the schedule was commented out 07/14. The registry note at `:2354` ("first quarterly cron fires 07/15/2026") is stale for the same reason.
+- Registry `:1233` ("Collier ... ~2 month lag vs Lee") and `refinery/packs/tourism-tdt.mts:768` state a Collier lag that DOR does not have (P3).
 - The registry says RERI yields 8 indicators; the parser yields 7 single-value rows plus 0-3 home-price rows.
 - `docs/standards/data-roots.md:1661,1669,1677` cite master edges at `master.mts:288`, `:287` and `:302`. `grep -n` on `master.mts` shows the input_brains entries at `:295` (tourism-tdt), `:294` (sector-credit-swfl) and `:309` (rsw-airport). This is line drift; the edges themselves exist.
 
 P10. Zero tests for four of six pipelines.
-- fl_dor_tdt, fl_dor_sales_tax, fdle_crime_swfl and fgcu_reri_indicators have no tests. `ls ingest/tests/pipelines/` shows only `rsw_airport_monthly`, and `grep -rl` over `ingest/tests` hits none of these modules.
+- fl_dor_tdt, fl_dor_sales_tax, fdle_crime_swfl and fgcu_reri_indicators have no ingest tests. `ls ingest/tests/pipelines/ | grep -E "rsw|fdle|reri|dor|franchise"` returns only `rsw_airport_monthly`; the directory holds many other families' tests. `grep -rl` over `ingest/tests` hits none of these modules.
+- Pack tests exist for tourism-tdt, rsw-airport and fgcu-reri (30 pass, section 3). There are none for sector-credit-swfl, safety-swfl or franchise-outcomes (`find refinery -name "*.test.mts"`).
 - Severity: blocks nothing today; it is why P4, P5 and P7 were never caught.
 
 ## 5. What is missing
@@ -246,7 +296,7 @@ P10. Zero tests for four of six pipelines.
 
 ## 6. Verdict per pipeline
 
-- fl_dor_tdt: REPAIR. The pipeline is fine; its source route is dead and the served headline mislabels a Lee-only month as combined. The number that would flip it to GOOD ENOUGH: Collier MAX(period) at or after 2026-06-01 on the next run.
+- fl_dor_tdt: REPAIR. The pipeline is fine; its source route is dead and the served headline mislabels a Lee-only month as combined. The number that would flip it to GOOD ENOUGH: the DOR-sourced MAX(period) for BOTH counties at or after 2026-06-01 on the next run. Today it is 02/01/2026 for both (section 2).
 - fl_dor_sales_tax: REPAIR. The source route is unknown and the code will not request cy2627 in 2026. The number that would change the verdict: any 2026 period in `public.fl_dor_sales_tax`.
 - fdle_crime_swfl: IMPROVE. It is current (2025 landed 07/01), but the Lee 2025 rate covers a different geography and the 2024 rate includes a 10-month agency. The number that would change the verdict: Cape Coral PD 2025 participated_population > 0 in CDE.
 - fgcu_reri_indicators: REPAIR. The timing loses months and the brain is expired. The number that would change the verdict: 4 consecutive report months present after the cron moves and the PDF backfill lands.
@@ -275,8 +325,13 @@ Ordered. Lane D unless stated. Every item is code or registry. None dispatches, 
    - Unblocks: NORTH STAR #1 (TERRA) is closed on production evidence.
 4. DO. Retain raw RSW PDFs on the cron path with one job owner.
    - What: switch `rsw-airport-monthly.yml` to the gated form already used at `.github/workflows/ingest-collier-official-records.yml:31` (`runs-on: ${{ vars.SWFL_LOCAL_RUNNER_READY == 'true' && fromJSON('["self-hosted","swfl-local"]') || 'ubuntu-latest' }}`). Add a first step `python -m ingest.pipelines.rsw_airport_monthly.pipeline --capture-local` with `SWFL_RESEARCH_ROOT=/srv/swfl/research`, guarded by `if: vars.SWFL_LOCAL_RUNNER_READY == 'true'`, so a fall back to `ubuntu-latest` skips the capture (no `/srv/swfl` there, and `resolve_capture_root` raises without a root, `ingest/lib/research_capture.py:50-52`) and the upsert step still runs.
+   - Root correction (second-Opus, 09/26): name ONE capture root, and make it the existing one.
+     - `research_capture.py:114-133` resolves `raw/`, `metadata/`, `exports/` and `manifests/` directly under `SWFL_RESEARCH_ROOT`.
+     - The 09/18 capture and the forecast tool's output live under `/srv/swfl/research/archive-20260918/{raw,metadata,exports,manifests,forecasts}` (ssh read-only find). That path is the root the 09/18 capture used.
+     - A cron at `/srv/swfl/research` would start a second archive root. `first_seen_for_release` (`:130-133`) looks for `metadata/<source_id>/<sha>.json` under its own root only, so an unchanged PDF captured 09/18 would be re-dated to 10/08, and `refinery/tools/run-rsw-forecast-experiment.mts:21` would read a split history.
+     - So set `SWFL_RESEARCH_ROOT=/srv/swfl/research/archive-20260918` in the capture step, or rename that directory to a permanent root name once and point the step there. Do not use the bare `/srv/swfl/research`.
    - Effort: S.
-   - Proof: `ssh fedora "find /srv/swfl/research/raw/rsw_lcpa_monthly -newer /srv/swfl/research/archive-20260918 -name '*.pdf'"` lists the 10/08 files (layout `raw/<source_id>/<sha[:2]>/<sha>-<name>` per `research_capture.py:118`), and `gh run view <id>` shows both steps green.
+   - Proof: `ssh fedora "find /srv/swfl/research/archive-20260918/raw/rsw_lcpa_monthly -newermt 2026-10-08 -name '*.pdf'"` lists the 10/08 files (layout `raw/<source_id>/<sha[:2]>/<sha>-<name>` per `research_capture.py:118`), and `gh run view <id>` shows both steps green.
    - Unblocks: publication-vintage history for the Sol forecast (NORTH STAR #2-3).
 5. DO. Move the FGCU cron after RERI's observed publish day.
    - What: change `0 14 5 * *` to `0 14 12 * *`.
@@ -307,10 +362,12 @@ Ordered. Lane D unless stated. Every item is code or registry. None dispatches, 
    - Effort: M.
    - Proof: Lee MAX(period) at or after 2026-06-01.
    - ASK-FIRST because it changes the provenance of a served number.
-10. ASK-FIRST. Decide the fate of the two Lee Clerk rows (03/2026 and 04/2026, inserted 05/15/2026) written by an unknown writer: keep and document, or delete and re-ingest through item 9. This is a data write.
-11. ASK-FIRST. Fix the tourism-tdt headline and trailing sum.
-   - What: when `county_count < 2`, label the latest month "Lee only" and compute trailing 12 over both-county months.
-   - Where: `refinery/packs/tourism-tdt.mts:336,356,738`.
+   - Ordering: a Lee-only leg recreates a one-county latest month on every cycle until Collier catches up. Item 11 must therefore land with or before item 9.
+10. ASK-FIRST. Decide the fate of the two Lee Clerk rows (03/2026 and 04/2026, inserted 05/15/2026). They were written by premise-engine's legacy Lee Clerk Doc 328 lane (P3; `docs/_FINISHED/arsenal-master-stack.md:595`). Options: keep and document, or delete and re-ingest through item 9. This is a data write. Also confirm premise-engine no longer writes this table; that repo is not on this box.
+11. ASK-FIRST. Fix the tourism-tdt headline, the trailing sum and the false lag caveat.
+   - What: when `county_count < 2`, label the latest month "Lee only" and compute trailing 12 over both-county months. Reword the caveat at `:768`: the gap is a provenance mix, not a Collier reporting lag (P3).
+   - Add one `tourism-tdt.test.mts` case with a one-county latest month (section 3 found none).
+   - Where: `refinery/packs/tourism-tdt.mts:336,356,738,768`.
    - Effort: S.
    - Proof: rebuild with `pack_id=tourism-tdt`; `brains/tourism-tdt.md` no longer says "combined" for a one-county month.
    - ASK-FIRST because it changes a served key_metric label.
@@ -327,17 +384,25 @@ Ordered. Lane D unless stated. Every item is code or registry. None dispatches, 
    - Proof: rebuild with `pack_id=safety-swfl`; the conclusion has no "-18.7% YoY".
    - ASK-FIRST because it is served output.
 14. ASK-FIRST. Give fgcu-reri a rebuild path or retire it.
-   - Option A: after item 6, append a step to `fgcu-reri-monthly.yml` that calls `daily-rebuild.yml` with `pack_id=fgcu-reri` (never master, never `--force`).
-   - Option B: retire `/api/b/fgcu-reri`.
+   - Option A: after item 6, append a step to `fgcu-reri-monthly.yml` that dispatches `gh workflow run daily-rebuild.yml -f pack_id=fgcu-reri` (never master, never `--force`). The job needs `permissions: actions: write` and `GH_TOKEN`.
+     - Mechanism correction (second-Opus): a `uses: ./.github/workflows/daily-rebuild.yml` call does NOT work. Its `workflow_call:` trigger (`daily-rebuild.yml:30`) declares no inputs, and `:23-25` says `pack_id` is "empty under workflow_call, so PACK falls back to 'master'".
+     - The dispatch path reads `github.event.inputs.pack_id` (`:141`). Whether a GITHUB_TOKEN-initiated `workflow_dispatch` starts a run must be checked against the live GitHub Actions docs before implementing (Vendor First).
+     - The alternative is to add a `pack_id` input to the `workflow_call:` block and read `inputs.pack_id`.
+   - Option B: retire `/api/b/fgcu-reri`. That also means removing its entries at `lib/zip-dossier.ts:176`, `lib/highlighter/reach.ts:218` and `refinery/packs/catalog.mts:252`.
+   - The same leaf-rebuild tail fits tourism-tdt (after the TDT ingest) and sector-credit-swfl (after the sales-tax ingest). Both expired 09/22 (P6) while master's chain is stalled. Each rebuild uses `pack_id=<brain-id>` only, and never master `--force`.
    - Effort: S.
-   - Proof: `grep refined_at brains/fgcu-reri.md` shows a date after the next ingest.
+   - Proof: `grep refined_at brains/fgcu-reri.md brains/tourism-tdt.md brains/sector-credit-swfl.md` shows dates after the next ingest.
 15. ASK-FIRST. Retire sba_foia_franchise_outcomes.
-   - What: remove the franchise-outcomes edges `master.mts:228` and `:289` in one commit, delete the registry block `:2330-2365`, and keep the pipeline code in git history.
-   - Alternative: re-source it if the operator knows the new SBA 7(a) FOIA location.
-   - Effort: S.
-   - Proof: `node scripts/schedule-catalog.mjs` has no franchise row, and Gate 10 passes.
+   - What: remove every franchise-outcomes reference in one commit, delete the registry block `:2330-2365`, and keep the pipeline code in git history. The first draft named only the master edges. The full set:
+     - `master.mts:228` and `:289`.
+     - `refinery/packs/sector-credit-swfl.mts:721` (source) and `:726` (edge). Also the fact and caveat text that cite the brain: `:295` (`brainInputFrom`), `:338`, `:389-392` and `:556`.
+     - `lib/zip-dossier.ts:198`, `lib/highlighter/reach.ts:191`, `refinery/packs/catalog.mts:352` and `refinery/lib/synth.mts:345`.
+     - If only the master edge goes, sector-credit-swfl keeps an input edge to a retired brain.
+   - Alternative: re-source it. The files existed on 06/14 (`SOURCED.md:243-248`), so a crawl4ai search of data.sba.gov for the moved 7(a) FOIA resource (Lane D) comes before retiring.
+   - Effort: M (was S). It touches 7 files: master, sector-credit-swfl, zip-dossier, reach, catalog, synth and the registry. That is over RULE 1's >5-file line, so it is ASK-FIRST on size as well as on product shape.
+   - Proof: `node scripts/schedule-catalog.mjs` has no franchise row, `grep -rn "franchise-outcomes" refinery lib app --include=*.mts --include=*.ts` returns only history comments, and Gate 10 passes.
 16. DO. Registry and doc hygiene for P9.
-   - What: fix `cadence_registry.yaml:1480` (Firecrawl) and `:1275` (6 rows); delete `:2344-2347` known_drift; correct the FDLE ceiling text at `:1286-1290`, `data-inventory.md:105` and `data-roots.md:51,1690`.
+   - What: fix `cadence_registry.yaml:1480` (Firecrawl), `:1275` (6 rows), `:1233` (the false Collier lag) and `:2354` (the stale 07/15 note). Delete `:2344-2347` known_drift. Correct the FDLE ceiling text at `:1286-1290`, `data-inventory.md:105` and `data-roots.md:51,1690`.
    - Effort: S.
    - Proof: `grep -n "Scrapes via Firecrawl" ingest/cadence_registry.yaml` is empty, and Gate 10 passes.
 17. DO. Add parser tests where none exist.
@@ -361,18 +426,26 @@ Design: one signal per pipeline. Each signal is a `sql_expectation` content cont
 Production evidence for the open path: `public.checks` holds `contract_fail_data-lake-listing-state_listing_state_home_price_floor`, created 07/12/2026 by this probe. That is the only `contract_fail_%` row ever (`select count(*) from public.checks where check_key like 'contract_fail_%'` returns 1). It was dropped on 08/12/2026 and stays dropped, because `:405` never re-opens a `dropped` row, even though that contract still fails (probe run 36259690113: "22 failing rows"). The auto-close path for contracts is code-read only; no contract check has ever auto-closed in production. The rule for these five is therefore: never `--drop` a `contract_fail_` check. Close it by fixing the data, or it goes silent forever. The runner is table-key agnostic (it runs the raw SQL), so `public.*` tables work.
 
 Why not the other seams:
-- The freshness-probe-daily workflow has been red for 6 straight days for reasons outside this family. Run 36259690113 failed on `listing_lifecycle` and `swfl_inc` rows. A workflow conclusion therefore signals nothing; the check row is the signal.
+- The freshness-probe-daily workflow has been red for at least 7 straight days (7 of 7 from 09/20 to 09/26, `gh run list --workflow freshness-probe-daily.yml --limit 7`) for reasons outside this family. Run 36259690113 failed on `listing_lifecycle` and `swfl_inc` rows. A workflow conclusion therefore signals nothing; the check row is the signal.
 - Flipping `freshness_column` to the period column (`check_freshness.py:254`) is rejected. With cadence_days 30 and tolerance 2.0-2.5, the thresholds are 60-75 days, and normal publication lag already exceeds that for TDT and sales tax, so the ops `/coverage` page would sit red permanently.
 - `freshness_column` stays `inserted_at`, and its meaning is restated honestly as "the job ran".
+
+Consequence of `severity: error`, and how it squares with rejecting the freshness_column flip (second-Opus reconciliation, 09/26):
+- `doctor.py:144-145` maps an error-severity contract FAIL to red. The probe's doctor step runs `--fail-on red` (`freshness-probe-daily.yml:71`). So while a source is truly stuck, these contracts hold the probe red, exactly as the rejected freshness_column flip would.
+- The difference is WHEN it goes red. The freshness_column flip at 60-75 days would be red during NORMAL publication lag. These thresholds sit above the normal lag (arithmetic per pipeline below), so red means stuck.
+- `warn` is not an option. Only error-severity FAILs open a check row (`check_data_quality.py:365`), and `warn` only yellows the doctor (`doctor.py:146-147`). The one signal would be lost.
+- No new GitHub issue results. `log-cron-incident.yml:55` does list "Pipeline freshness probe (daily)", but `openIncidentIssue` is one-per-workflow idempotent (`log-cron-incident.mjs:218-228`). Issue #110 ("[cron-failure:freshness-probe-daily]", open since 07/12, `gh issue list --label cron-failure --state open`) already absorbs every probe red.
+- The accepted cost: a source-side stall we cannot fix (DOR frozen, and item 9 declined) keeps the probe red. The rule for that case: downgrade that ONE contract to `warn` in `quality_registry.yaml` with a dated comment naming the operator's decision. Never `--drop` its check (a dropped `contract_fail_` never re-opens, see above).
 
 Proposed thresholds. Each is derived from observed publication lag, with the arithmetic shown per pipeline; none is a measured SLA. Each fires today only where the data is really stuck (verified by running all five SQLs read-only, section 11).
 
 - fl_dor_tdt, contract `tdt_source_period_lag`.
-  - Lag arithmetic: the workflow comment says the 20th of month M captures M-2 (`fl-dor-tdt-monthly.yml:6-8`), so the worst normal age before the next capture is about 110 days. The registry says Collier lags Lee by about 2 months (`:1233-1234`), so Collier gets 60 more.
-  - Today: Lee 178 and Collier 237, so it fires.
+  - Lag arithmetic: the workflow comment says the 20th of month M captures M-2 (`fl-dor-tdt-monthly.yml:6-8`), so the worst normal age before the next capture is about 110 days. The threshold is 120 days for both counties.
+  - Correction (second-Opus): the first draft gave Collier 180 days, on the registry's "Collier lags Lee by ~2 months" (`:1233`). DOR Form 3 ends both counties on the same month (section 2 source_url query: 02/01/2026 for both), so there is no Collier allowance to grant. The lag was the premise-engine Lee rows (P3).
+  - Today: Lee 178 and Collier 237, so it fires. The revised SQL returned 1 when run read-only on 09/26.
 
 ```
-SELECT CASE WHEN bool_or((county='Lee' AND current_date - mp > 120) OR (county='Collier' AND current_date - mp > 180)) THEN 1 ELSE 0 END
+SELECT CASE WHEN max(current_date - mp) > 120 THEN 1 ELSE 0 END
 FROM (SELECT county, max(period)::date mp FROM public.fl_dor_tdt_collections GROUP BY county) t
 ```
 
@@ -409,9 +482,12 @@ SELECT CASE WHEN current_date - max(report_month)::date > 50 THEN 1 ELSE 0 END F
 SELECT CASE WHEN current_date - min(mp) > 130 THEN 1 ELSE 0 END FROM (SELECT max(report_month)::date mp FROM public.rsw_airport_monthly GROUP BY metric) t
 ```
 
-- sba_foia_franchise_outcomes: no signal while it is parked. This is stated explicitly, not an oversight. If item 15 goes the re-source way, add a Tier-1 check on `data_lake._tier1_inventory.max_period_end` at that point.
+- sba_foia_franchise_outcomes: its one signal is the registry's `parked: true` flag (`cadence_registry.yaml:2353`, "shows yellow on ops, not red"). It fires no check and no issue.
+  - `ingest/scripts/landed_watch.py:84,100,137` reads `not_yet_running:` and tags the entry "[parked]".
+  - The ops `/coverage` rendering is in the separate swfldatagulf-ops repo and was not opened here: could-not-verify. `landed_watch.py` has no workflow caller (`grep -n landed_watch .github/workflows/*.yml` is empty).
+  - It is therefore a manual signal until item 15 decides. If item 15 goes the re-source way, add a Tier-1 check on `data_lake._tier1_inventory.max_period_end` at that point.
 
-Red runs are already covered, with no change needed. All five live workflows are listed in `log-cron-incident.yml:16-97`, so a red run opens or reopens `cron_incident_<workflow>` and auto-closes on the next green scheduled run (`log-cron-incident.mjs:156,173`). `classify-cron-failure.mjs` classifies correctly: RSW's only red run, 27156970463 (06/08), classifies as `{"klass":"MISSING_DEP","signal":"pdfplumber"}` from its log line "RuntimeError: pdfplumber not installed", and `ingest/requirements.txt:41` has since carried `pdfplumber>=0.10`.
+Red runs are already covered, with no change needed. All five live workflows are listed in `log-cron-incident.yml:16-98` (`:36,39,42,43,57`), so a red run opens or reopens `cron_incident_<workflow>` and auto-closes on the next green scheduled run (`log-cron-incident.mjs:156,173`). `classify-cron-failure.mjs` classifies correctly: RSW's only red run, 27156970463 (06/08), classifies as `{"klass":"MISSING_DEP","signal":"pdfplumber"}` from its log line "RuntimeError: pdfplumber not installed", and `ingest/requirements.txt:41` has since carried `pdfplumber>=0.10`.
 
 Noise to delete:
 - Registry `:2344-2347` `known_drift: parked_but_scheduled` for SBA. Its schedule has been commented out since 07/14, and the named check is not in the open list.
@@ -423,11 +499,11 @@ Noise to delete:
 
 The runner is live: `gh api repos/{owner}/{repo}/actions/runners` shows `fedora-swfl-local online self-hosted,Linux,X64,swfl-local`, and `SWFL_LOCAL_RUNNER_READY=true` was set 09/20. The open check `fedora_runner_not_registered_smoke_owed` is therefore stale; that is family 19's to close.
 
-- fl_dor_tdt: the DOR leg stays on GHA `ubuntu-latest`. It is a plain HTTPS xlsx: curl returned 200 with no WAF, and run 35514996047 took 74 seconds end to end (startedAt 13:57:07Z, updatedAt 13:58:21Z via `gh run view 35514996047 --json startedAt,updatedAt`). The proposed Lee Clerk leg (item 9) starts on the Fedora runner. Reason: curl gets 403 (WAF shape), while a crawl4ai browser fetch from a residential IP gets 200. A GHA-IP fetch is untested; move it back to GHA only if a GHA run proves 200.
+- fl_dor_tdt: the DOR leg stays on GHA `ubuntu-latest`. It is a plain HTTPS xlsx: curl returned 200 with no WAF, and run 35514996047 took 74 seconds end to end (startedAt 13:57:07Z, updatedAt 13:58:21Z via `gh run view 35514996047 --json startedAt,updatedAt`). The proposed Lee Clerk leg (item 9) starts on the Fedora runner as its own job, with `runs-on: ${{ vars.SWFL_LOCAL_RUNNER_READY == 'true' && fromJSON('["self-hosted","swfl-local"]') || 'ubuntu-latest' }}` (the gated form at `ingest-collier-official-records.yml:31`). Reason: curl gets 403 (WAF shape; re-run 09/26 returned 403), while a crawl4ai browser fetch from a residential IP gets 200. crawl4ai is already proven on that runner: `ingest-crexi-listings.yml` and `ingest-collier-official-records.yml` both run `crawl4ai-setup` and both carry `swfl-local` (`grep -l swfl-local .github/workflows/*.yml`). A GHA-IP fetch is untested; move it back to GHA only if a GHA run proves 200.
 - fl_dor_sales_tax: stays on GHA. Plain HTTPS xlsx, 1.2 MB, no WAF.
 - fdle_crime_swfl: stays on GHA. It is a keyed public API (api.data.gov), needs no browser, and is quarterly.
 - fgcu_reri_indicators: stays on GHA. crawl4ai works there (3 of 3 green), and the PDF archive returns 200 to curl.
-- rsw_airport_monthly: moves to the Fedora runner (item 4). Reason: it needs the SSD archive (`SWFL_RESEARCH_ROOT=/srv/swfl/research`) so one job both upserts and retains the raw PDFs. That is NORTH STAR #4's "one job owner per source". There is no Hermes duplicate: `systemctl --user list-timers` on fedora shows no RSW timer, only the one-off `archive-20260918` capture. The GHA fallback stays via the `SWFL_LOCAL_RUNNER_READY` gate. The SSD's backup and reboot tests are still untested, so the lake write remains primary.
+- rsw_airport_monthly: moves to the Fedora runner (item 4), with `runs-on: ${{ vars.SWFL_LOCAL_RUNNER_READY == 'true' && fromJSON('["self-hosted","swfl-local"]') || 'ubuntu-latest' }}`, gated by `vars.SWFL_LOCAL_RUNNER_READY` (`true` since 2026-09-20T06:06:19Z, `gh variable list`). Reason: it needs the SSD archive, so one job both upserts and retains the raw PDFs. Set `SWFL_RESEARCH_ROOT` to the existing root `/srv/swfl/research/archive-20260918`, not the bare `/srv/swfl/research` (item 4 root correction). That is NORTH STAR #4's "one job owner per source". There is no Hermes duplicate: `systemctl --user list-timers` on fedora shows no RSW timer, only the one-off `archive-20260918` capture. The GHA fallback stays via the `SWFL_LOCAL_RUNNER_READY` gate. The SSD's backup and reboot tests are still untested, so the lake write remains primary.
 - sba_foia_franchise_outcomes: stays where it is (dispatch-only, parked) pending item 15. If it is re-sourced, its 50-200 MB CSVs (`pipeline.py:6-7`) are a Fedora SSD candidate for vintage retention.
 - Already on the box that should not be: nothing from this family. The fedora user timers (loopholewatch, market-*, scout, datawatch, toolwatch and others) belong to other projects or families.
 
@@ -441,6 +517,11 @@ grep -rn -i -E "anthropic|callClaude|messages\.create|llm" refinery/packs/{touri
 ```
 
 The first grep's only hits are two comments in `franchise_outcomes/constants.py:11,53` naming a refinery file path. The second returns nothing. `ingest/lib/crawl_client.py` (used by FGCU and RSW) mentions Anthropic only in its docstring history (`:13`). `fetch_page_markdown` (`:287`) is the zero-LLM crawl4ai path.
+
+Second-Opus re-check (09/26):
+- `grep -rn -i -E "anthropic|claude|openai|refinery"` over the six pipeline dirs and six workflow YAMLs returns only the same two `constants.py:11,53` comments.
+- `grep -n -i "anthropic\|claude" ingest/lib/crawl_client.py` returns only `:13`. That line says the email data-readiness ladder moved to Anthropic web_search. It is a different subsystem, and `fetch_page_markdown` does not call it (`grep -n "web_search\|import anthropic" ingest/lib/crawl_client.py` is empty).
+- All six consumer packs are deterministic by declaration (`grep -n skipSynthesisAgent`): `tourism-tdt.mts:814`, `sector-credit-swfl.mts:741`, `safety-swfl.mts:500`, `fgcu-reri.mts:268`, `rsw-airport.mts:435` and `franchise-outcomes.mts:335`, each `skipSynthesisAgent: true`.
 
 All planned work stays in Lane D: fetch, parse, count and compare. Nothing needs a model. The brain-level narrative bake for these brains is a cross-family leg that is already parked and owned outside this family (`narrative-bake.yml`); it is not planned here. Local models (Lane L) have no role: every figure here is numeric extraction.
 
@@ -471,7 +552,7 @@ I re-read the file top to bottom and re-ran every numbered claim against its sou
 - The five section 8 contract SQLs, run read-only through the Bun.SQL script, return tdt 1, sales tax 1, fdle 0, fgcu 1 and rsw 1 (at threshold 130). That matches item 2's proof of 4 FAIL and 1 PASS. Verified.
   - Correction applied in section 8: the RSW threshold was first drafted at 105 days. On re-read, the August PDFs were still absent on 09/26, so the publication lag is not reliably one month, and 105 would false-fire. It is now 130.
 - Freshness probe 36259690113 shows FRESH or GREEN rows for all five. Saved log grep. Verified.
-- The freshness probe was red 6 of 6 runs from 09/21 to 09/26. `gh run list --workflow freshness-probe-daily.yml --limit 6`. Verified.
+- The freshness probe was red 6 of 6 runs from 09/21 to 09/26. `gh run list --workflow freshness-probe-daily.yml --limit 6`. Verified. Second-Opus: `--limit 7` shows 09/20 red too, so it is at least 7 of 7; section 8 now says so.
 - Upsert lines rewrite inserted_at: `tdt:209`, `sales:286`, `fgcu:292`, `rsw:474`, `fdle:426`. grep -n. Verified.
   - Correction applied: a review note during drafting gave `rsw:472`; `grep -n inserted_at` shows 474, and the file uses 474.
 - `check_freshness.py:254` defaults to inserted_at. Read. Verified.
@@ -485,13 +566,13 @@ I re-read the file top to bottom and re-ran every numbered claim against its sou
 - The runner is online, and `SWFL_LOCAL_RUNNER_READY` was set 09/20. gh api and gh variable list. Verified.
 - No RSW job exists on fedora; the archive-20260918 RSW capture exists. ssh read-only. Verified.
 - Hendry 0 rows in 4 tables. Union count query. Verified. RSW is not county-cut and SBA has no table, so neither was counted.
-- Tests: RSW 8 passed, SBA 1 passed, 0 for the other four. pytest, ls and grep. Verified.
+- Tests: RSW 8 passed, SBA 1 passed, 0 ingest tests for the other four. pytest, ls and grep. Verified (second-Opus re-run: 9 passed in 1.16s). Section 3 now adds the pack tests: 30 pass across tourism-tdt, rsw-airport and fgcu-reri.
 - Registry line numbers 1224, 1247, 1268, 1361, 1471, 2341, 1275, 1478, 1480, 2347. grep -n. Verified.
   - Corrections applied in sections 4, 5 and 7 after `sed -n` on the registry. known_drift is `:2344-2347` (was 2345-2348). The FDLE source_ceiling is `:1286-1290` (was 1281-1286 and 1268-1290). The TDT ceiling is `:1241-1245` (was 1239-1243). The sales-tax ceiling is `:1262-1266` (was 1261). The FGCU ceiling is `:1386-1390` (was 1382-1386). The SBA block is `:2330-2365` (was 2330-2372; 2367 starts the AirDNA block).
 - tourism-tdt label lines 336, 356, 738 and the caveat 767-769. grep -n. Verified.
 - safety-swfl guard `:250-268` and caveat `:442-452`. sed read. Verified.
 - rsw `:216` (allow_fallback), `:501` (the call), `:528` (fallback_observed), `:564` and `:569` (capture and dry-run returns). grep -n. Verified.
-  - Corrections applied after `grep -n "^def "` on the RSW pipeline. `parse_pdf` is at `:293` (was 338). The discovery fix spans `:175-229` (was 163-229). The crawl_client import is `:238-243` (was 238-241). The run() metric loop is `:499-535` (was 495-531 and 503-521). The sales-tax SKIP is `:315-316` (was 315-317). The FDLE agency loop is `cde.py:132-142` (was 130-142). The log-cron-incident workflow list is `:16-97` (was 16-96).
+  - Corrections applied after `grep -n "^def "` on the RSW pipeline. `parse_pdf` is at `:293` (was 338). The discovery fix spans `:175-229` (was 163-229). The crawl_client import is `:238-243` (was 238-241). The run() metric loop is `:499-535` (was 495-531 and 503-521). The sales-tax SKIP is `:315-316` (was 315-317). The FDLE agency loop is `cde.py:132-142` (was 130-142). The log-cron-incident workflow list is `:16-98` (was 16-96, then 16-97; second-Opus `sed -n 95,99p` shows the last entry at 98).
 - FGCU cron `:8`; home-price branch `:186`. grep -n. Verified. `_SIMPLE_RE` at `:61-65`: read. Verified.
 - `ingest/requirements.txt:41` pdfplumber. grep -n. Verified.
 - Every "[INFERENCE]" tag marks arithmetic or judgment, not a measured value: the Lee 2024 understatement and the TDT trailing-12 understatement. Left as inference on purpose.
@@ -511,6 +592,64 @@ I re-read the file top to bottom and re-ran every numbered claim against its sou
 
 ## 12. Questions for the operator
 
-- SBA franchise-outcomes: retire it, removing the master edge and the registry block, or do you know where SBA moved the 7(a) FOIA files? Every URL crawled today, and the dataset page, is 404. This is product shape: the brain is a master input that has served a placeholder since 07/03.
+- SBA franchise-outcomes: retire it, removing the master and sector-credit-swfl edges plus the 4 lib/catalog references and the registry block (item 15), or do you know where SBA moved the 7(a) FOIA files? Every URL crawled today, and the dataset page, is 404, yet `SOURCED.md:243-248` shows the files were read in full on 06/14/2026. This is product shape: the brain is a master input that has served a placeholder since 07/03.
 - fgcu-reri: keep it as a standalone brain with its own monthly rebuild, or retire `/api/b/fgcu-reri`? It has been expired since 08/11 because master dropped it on 07/18, and the RERI series duplicates primaries we already own. This is product shape.
-- Lee TDT provenance: may Lee's served TDT come from the Lee Clerk's own collections PDF (Last-Modified 09/09/2026; its latest month is not yet parsed) instead of DOR Form 3 (frozen since 04/20/2026)? Lee self-administers, so the Clerk is the primary source. It changes the citation on a served number. The same answer settles what to do with the two rows an unknown writer put there on 05/15.
+- Lee TDT provenance: may Lee's served TDT come from the Lee Clerk's own collections PDF (Last-Modified 09/09/2026; its latest month is not yet parsed) instead of DOR Form 3 (frozen since 04/20/2026)? Lee self-administers, so the Clerk is the primary source. It changes the citation on a served number. The same answer settles what to do with the two rows premise-engine's legacy Lee Clerk lane put there on 05/15 (P3).
+
+## 13. Second-Opus verification
+
+Run 09/26/2026. Every command in sections 1-11 was re-run, except those listed under "Unverifiable claims" below. Every cited file:line was opened. Every live number was re-queried through a throwaway Bun.SQL script copied from `scripts/apply-fdic-sod-view.mts:10-30`, with `default_transaction_read_only = on`.
+
+Claims checked: 199. The tally by category:
+- Run ids and per-workflow counts: 27.
+- Registry line cites: 17.
+- master.mts line cites: 12.
+- Live SQL figures: 55.
+- Code and workflow file:line cites: 35.
+- Committed brain snapshot cites: 9.
+- Source URL status and size checks: 11.
+- Run-log quotes: 7.
+- Monitoring-seam cites: 15.
+- Runner, box and issue facts: 6.
+- Test counts: 2.
+- LLM greps: 3.
+
+Every figure in sections 2 and 3 re-matched the live source. That covers the TDT 666/334/332 rows and dates, sales tax 40,140/21,013/19,127 with 83 kinds, the eight FDLE rows and rates with 0 of 8 offense columns non-null, FGCU 17/10/7, RSW 2,580/516, the ages 178/237/299/178/56, the five contract results 1/1/0/1/1, and all run ids and conclusions.
+
+Corrections (what was wrong, then what is right, then the evidence):
+- The Lee Clerk rows were called an "unregistered" or "unknown" writer. They are premise-engine's legacy Lee County Clerk Doc 328 lane, which predates our DOR pipeline. Evidence: `docs/_FINISHED/arsenal-master-stack.md:595`, `docs/_archive/superseded/audit-and-roadmap/audit-2026-05-27.md:117`, `scripts/notion-sync.mjs:297`. Fixed in P3, item 10 and question 3.
+- The plan took "Collier lags Lee by ~2 months" at face value, in the section 8 Collier 180-day branch and the verdict number. DOR Form 3 ends both counties at 02/01/2026; the lag is the provenance mix. Evidence: `select county, count(*), max(period) ... where source_url like '%F3FY2026%'` returns 8 rows each, both to 02/01/2026. The section 8 TDT contract is now one 120-day threshold (it re-ran as 1 today). Registry `:1233` and `tourism-tdt.mts:768` were added to P9 and items 11 and 16.
+- P10 said "`ls ingest/tests/pipelines/` shows only rsw_airport_monthly". The directory holds many families' tests; only rsw is from this family. Evidence: `ls ingest/tests/pipelines/ | grep -E "rsw|fdle|reri|dor|franchise"`.
+- Section 3 counted ingest tests only, so tourism-tdt and fgcu-reri read as untested. Pack tests show 30 pass: tourism-tdt 17, rsw-airport 8, fgcu-reri 5. Evidence: `bun test refinery/packs/{fgcu-reri,rsw-airport,tourism-tdt}.test.mts`.
+- The RSW run window did not mention a missing 07/08 scheduled run. No run exists between 06/14 and 08/08, and 56 other scheduled runs fired that day. Evidence: `gh run list --workflow rsw-airport-monthly.yml`, `gh api ".../actions/runs?created=2026-07-08&event=schedule"`.
+- Section 8 said the freshness probe was red for 6 straight days. It is at least 7 of 7, 09/20 to 09/26. Evidence: `gh run list --workflow freshness-probe-daily.yml --limit 7`.
+- P9 said `sba_franchise_parked_but_live` was "not in the 21-open list". It exists with state done, resolved 07/15/2026, and the registry note at `:2354` is stale. Evidence: `select check_key, state, resolved_at from public.checks`.
+- P6 treated fgcu-reri as the only expired brain. tourism-tdt and sector-credit-swfl snapshots expired 2026-09-22 too. Evidence: `grep -n '"expires"' brains/*.md`. P6 and item 14 now cover them.
+- Item 15 would have removed only the master edges. sector-credit-swfl takes franchise-outcomes as an input (`sector-credit-swfl.mts:295,721,726`). `lib/zip-dossier.ts:198`, `lib/highlighter/reach.ts:191`, `catalog.mts:352` and `synth.mts:345` also reference it. The item is now 7 files, effort M, and ASK-FIRST on size.
+- Item 4 set `SWFL_RESEARCH_ROOT=/srv/swfl/research`, which starts a second archive root. It now reuses `/srv/swfl/research/archive-20260918`, the 09/18 capture's own root. Evidence: `research_capture.py:114-133` resolves `raw/` and `metadata/` under the root; the 09/18 capture and forecast live under `archive-20260918/` (ssh read-only listing). `first_seen_for_release` cannot see a second root. `ssh fedora "ls /srv/swfl/research"` shows only `archive-20260918`, `manifests` (storage-verification.txt) and `recovery-tests`, with no top-level `raw/` or `metadata/`. So `archive-20260918` is the only live capture root.
+- Item 14 said to "call `daily-rebuild.yml` with pack_id". A workflow_call rebuilds master, because `daily-rebuild.yml:23-30` declares no workflow_call inputs and PACK falls back to master. The item now names a `gh workflow run ... -f pack_id=<id>` dispatch, or a new workflow_call input.
+- The log-cron-incident list was cited as `:16-97`. It is `:16-98`, and the family entries are at `:36,39,42,43,57`. Evidence: `grep -n` and `sed -n 95,99p .github/workflows/log-cron-incident.yml`.
+- Section 8 rejected the freshness_column flip as "permanently red", but its own error-severity contracts also turn the gating doctor red. A reconciliation paragraph is added. Red now means stuck, not lagging. No new issue results, because issue #110 already absorbs probe reds (`log-cron-incident.mjs:218-228`). An accepted source-side stall downgrades that one contract to warn, never `--drop`. Evidence: `doctor.py:144-147`, `freshness-probe-daily.yml:71`, `check_data_quality.py:365`.
+- P3 and P5 first-seen dates missed earlier catches. `tourism_tdt_combined_masks_collier_lag` was opened 07/17/2026 and `fgcu_reri_home_prices_range_parse_regression` 07/14/2026. Both were bulk-dropped 08/12/2026 unfixed. Evidence: public.checks query.
+- Item 11 missed the false served caveat at `tourism-tdt.mts:768`, a test gap, and its ordering against item 9. All three are added.
+- Section 1 missed readers. Added: `lib/zip-dossier.ts:176,198`, `lib/highlighter/reach.ts:191,218`, `catalog.mts:252,352`, `synth.mts:345`, the sector-credit-swfl franchise input, `scripts/notion-sync.mjs:297,916`, and `refinery/tools/run-rsw-forecast-experiment.mts:21`. Evidence: grep of refinery, lib, app and scripts for each table and brain id.
+
+Unverifiable claims, and why:
+- The CDE per-agency month detail cannot be re-checked: Cape Coral 2024 at 10 months summing to 1,809, Cape Coral 2025 participated 0, Collier Sheriff 2025 at 12 months summing to 1,884. The re-run of the Cape Coral 2024 call returned OVER_RATE_LIMIT on DEMO_KEY. The run log of 28526483952 does corroborate the agency counts (Lee 3 then 2) and the covered populations (867,715 and 622,446), and Collier 2025's 1,934 total is consistent with 1,884 plus a second agency.
+- These were not re-crawled: the RERI homepage quotes (Sept report 09/09, "Up between 2.5 and 11.1", June TDT +13.6%, March taxable sales -13.0%), the Lee Clerk PDF Last-Modified 09/09/2026 (curl re-run returns 403; the crawl4ai 200 is not re-run), the LCPA July PDFs, and the SBA dataset index's 10 slugs. The RERI PDFs (200, 851,561 to 873,272 bytes), the DOR Last-Modified headers and 404s, and the SBA dataset-page 404 were re-confirmed by curl.
+- The RSW dry-run (519 per metric, 2,595 rows, max 2026-07-01) was not re-run. Its read-only nature is confirmed by code at `pipeline.py:569-571`, which returns before `upsert_rows` at `:577`.
+- Served bytes cannot be fetched (swfl MCP 429). Committed snapshots only.
+- Whether premise-engine still writes `fl_dor_tdt_collections` is unknown: the repo is not checked out on this box. Its last write is 05/15/2026.
+- The ops `/coverage` rendering of `parked: true` lives in the separate ops repo, which was not opened.
+
+Gaps filled:
+- Section 1: per-workflow runs-on, timeout, cron and secrets for all six, plus the missing readers.
+- Section 3: the pack test counts, and RSW's missing 07/08 run.
+- Section 4: family-wide brain expiry (P6), the SBA source existing on 06/14 (P8, `SOURCED.md:243-248`), and first-seen check dates (P3, P5).
+- Section 8: SBA now has a named signal (registry `parked: true` at `:2353`, read by `landed_watch.py:84,100,137`; manual until item 15). The severity and issue reconciliation is added.
+- Section 9: the Lee Clerk leg and rsw now name the `SWFL_LOCAL_RUNNER_READY` gate and the `["self-hosted","swfl-local"]` label inline, and crawl4ai is shown as already proven on that runner.
+- Section 10: `skipSynthesisAgent: true` evidence for all six packs, and the crawl_client `:13` web_search note placed outside this family.
+
+Coverage check: all six pipelines, including sba_foia_franchise_outcomes (not_yet_running), appear in sections 2, 3, 4, 6, 7, 8 and 9. Section 8 keeps one signal per pipeline and no per-run issue filing. The noise list names registry `:2344-2347`, issue #44's per-incident companion via `log-cron-incident.mjs:257`, the `cron-failure` label path, and the rsw doctor yellow.
+
+Credit-suggestion count: 0. `grep -n -i -E "credit|top up|top-up|console balance|api key funding|billing|anthropic"` on this file hits only three things: the brain name sector-credit-swfl, the section 10 grep commands, and the crawl_client docstring note. None proposes, prices or hints at API credit.

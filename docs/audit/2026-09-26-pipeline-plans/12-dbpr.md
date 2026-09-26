@@ -46,6 +46,7 @@ Six pipelines, five workflow files, six tables plus one view, and three consumer
   - Pipeline dir: `ingest/pipelines/dbpr_re_licensees/`.
   - Table: `public.dbpr_re_licensees`, plus view `public.new_re_agents` (`docs/sql/20260711_dbpr_re_licensees.sql:56`).
   - Consumer: none. A repo-wide Grep for `dbpr_re_licensees|new_re_agents` over non-markdown files hits only the ingest code, SQL, generated types, hooks and the identity tool. Nothing under `app/`, `lib/` or `refinery/` reads it. DARK ROOT, confirmed.
+- Downstream of the brains (added by the second Opus): `lib/zip-dossier.ts:190-196` registers all three leaf brains in the ZIP dossier map ("news-swfl" region grain, "licenses-swfl" county grain, "condo-sirs-swfl" county grain, all covering Lee and Collier). So a wrong leaf number (P1, P2) does not stop at master; it also reaches whatever reads that map. Table-level readers re-checked 09/26 with `grep -rln "dbpr_press_releases|dbpr_public_notices|dbpr_sirs_submissions|fl_dbpr_licenses|fl_dbpr_applicants|dbpr_re_licensees|new_re_agents" refinery/sources refinery/packs lib app`: only the four `refinery/sources/*dbpr*` files and the three packs (plus their tests). No reader in `lib/` or `app/` touches a table directly.
 
 Registry fields, all six `lane: tier-2`:
 - dbpr_press_releases: `cadence_days: 7`, `tolerance_multiplier: 3.0`, `freshness_column: scraped_at`, `expected_rows_min: 135` (`cadence_registry.yaml:1441-1451`).
@@ -119,7 +120,7 @@ fl_dbpr_licenses
 
 fl_dbpr_applicants
 - Source: `constr_app.csv` (15 columns), Lee and Collier. It lands in the same run as licenses.
-- Fields: occupation_code, first/last name, city/state/zip, county_code, county, phone (`resources.py:85-99`).
+- Fields: occupation_code, first/last name, city/state/zip, county_code, county, phone (`resources.py:86-100`).
 - Live:
   ```
   select count(*), max(_ingested_at) from data_lake.fl_dbpr_applicants;
@@ -156,7 +157,7 @@ dbpr_press_releases
 dbpr_public_notices
 - 15 runs: 13 success, 1 skipped (30815035542, 08/03), 1 failure (27557476514, 06/15, before the 07/05 re-enable).
 - The fetch path works from GHA. Run 30267388098 (07/27) found 4 SWFL notices and upserted 4.
-- Newest red: 27557476514 (06/15). Its cause was not re-derived this session. The blind greens since 08/10 are the real defect (P1).
+- Newest red: 27557476514 (06/15). Cause (`gh run view 27557476514 --log-failed`): "[dbpr-notices] ERROR: empty index response — aborting", the existing empty-page guard at `pipeline.py:88-90` firing on a blank fetch. That guard works; it cannot see a non-empty page whose markup changed. The blind greens since 08/10 are the real defect (P1).
 - Tests: 23 parser tests pass (`ingest/.venv/Scripts/python.exe -m pytest -q ingest/pipelines/dbpr_public_notices/test_parse.py`). They pass only against the old markup (P1).
 
 dbpr_sirs_submissions
@@ -169,13 +170,13 @@ dbpr_sirs_submissions
 fl_dbpr_licenses and fl_dbpr_applicants
 - 10 runs exist: 7 success, 3 failure (26737829191 on 06/01, 31003259921 on 08/05, 33968117027 on 09/05).
 - Repaired 09/20 by `docs/sql/20260920_dbpr_staging_repair.sql`. Proven by dispatch run 35489537652: "11665 license rows, 8855 applicant rows".
-- Newest red: 33968117027 (09/05). Issue #172, opened for the identical 08/05 failure, carries the classifier label `SCHEMA_DRIFT`. Log line from both runs: `relation "data_lake_staging.fl_dbpr_applicants" does not exist`.
+- Newest red: 33968117027 (09/05). Issue #172, opened for the identical 08/05 failure, carries the classifier class `SCHEMA_DRIFT` in its title; its only label is `cron-failure` (`gh issue list --state open --search "dbpr OR sirs OR licensee" --json number,title,labels`). Log line from both runs: `relation "data_lake_staging.fl_dbpr_applicants" does not exist`.
 - Tests: 10 pass (`ingest/tests/pipelines/fl_dbpr_licenses/test_resources.py`).
 - The in-pipeline applicant volume guard exists (`resources.py:233`, floors at `:64-66`).
 
 dbpr_re_licensees
 - 12 runs exist: 9 success, 1 skipped (30822020923), 2 cancelled (29747928723 on 07/20, 30273914780 on 07/27).
-- 8 straight scheduled greens, 08/10 through 09/21.
+- 7 straight scheduled greens, 08/10 through 09/21: 31389620892, 32029682936, 32727328681, 33425229694, 34145297674, 34873803101, 35632280304 (`gh run list --workflow ingest-dbpr-re-licensees.yml --limit 15`). The 08/03 scheduled run 30822020923 was skipped and the 08/02 green 30766167329 was a dispatch.
 - Newest red: 30273914780 (07/27), cancelled at the old 15-minute timeout. The workflow comment calls it TIMEOUT_KILL with 0 rows landed (`ingest-dbpr-re-licensees.yml:23-27`).
 - The volume guards live in the pipeline (`pipeline.py:135-141`).
 - Tests: 23 pass (21 in `test_parse.py`, 2 in `test_dry_run.py`).
@@ -209,8 +210,9 @@ P1. The notices parser is blind to the live page. Every weekly run since 08/10 f
 - Header-based assignment is fragile even with a looser regex. I tested `^\s*(?:#+\s+)?\*{0,2}([A-Za-z .'-]+?)\s*(?:County|COUNTY)\s*[✓✔]?\*{0,2}\s*$` against the saved crawl:
   - It matched 64 headers and 4 SWFL notices.
   - It mis-assigned 9 non-SWFL PDFs. "**Miami Dade✓**" has no "County" word, so 5 Miami-Dade PDFs landed under Martin. "**Out of State✓**" sent 4 PDFs to Washington.
-  - The PDF filename carries the county instead. Every one of the 55 URLs has the shape `/public-notices/<County>-<case>.pdf`, and by prefix 4 are SWFL (Lee 3, Manatee 1).
-- Origin: the local crawl4ai matches the pin (0.9.0, pinned 06/22 per `git log -S` on `ingest/requirements.txt`, commit 8274bf8a). [INFERENCE] So DBPR's HTML changed, not our tooling, sometime between 07/27 and 08/10.
+  - The PDF filename carries the county instead. All 55 URLs sit under `/OGC/public-notices/` with the shape `<County>-<case>[-<case>…].pdf`: 9 name more than one case number and 13 carry a URL-encoded space (`Palm%20Beach`, `Out%20of%20State`), and St. Lucie appears both as `St%20Lucie` and `St.%20Lucie`. By decoded prefix, 4 are SWFL (Lee 3, Manatee 1).
+  - Re-proven by the second Opus from its own fetch, not the first Opus's saved file: `fetch_page_markdown('https://www2.myfloridalicense.com/public-notices/')` (the pipeline's own fetcher, `ingest/lib/crawl_client.py`) saved to the scratchpad as `dbpr12v2/notices_0926.md`, 14,121 chars. `parse_index_markdown` returned 0; 55 PDF links, 55 unique; decoded prefixes Lee 3, Manatee 1; 9 multi-case; 13 with `%20`.
+- Origin: the local crawl4ai matches the pin (0.9.0). `git log -S "crawl4ai==0.9.0" -- ingest/requirements.txt` shows it introduced 06/21 by 24dfbf1b ("crawl4ai 0.9.0 bump"); 8274bf8a (06/22) only added a comment that names the pin. [INFERENCE] So DBPR's HTML changed, not our tooling, sometime between 07/27 and 08/10.
 - The run stays green because `pipeline.py:95-97` exits 0 on "no SWFL notices this week".
 - Severity: blocks a served number. news-swfl dbpr_notices_lee_90d and its siblings read an old table: 5 Lee rows, all with deadlines on or before 08/10. The live Lee notices are absent.
 - First seen: 08/10/2026 (run 31381200763).
@@ -231,6 +233,11 @@ P2. Served active contractor-license counts include rows no longer in DBPR's ext
   - Board 06 file rows fell from 270,168 (run 31003259921, 08/05) to 260,247 (run 35489537652, 09/20).
 - Root cause: `resources.py:167-168` is `write_disposition="merge"` on license_number with no delete. The consumer counts every row (`refinery/sources/fl-dbpr-licenses-source.mts:85-96`). The served lapse rate is non-"C" rows over all rows (counts at `fl-dbpr-licenses-source.mts:108-119`, ratio at `refinery/packs/licenses-swfl.mts:53`), so a license that disappears instead of flipping status is never counted as lapsed. The lapse rate stays at 0.5% through a 1,173-license expiry wave. `brains/licenses-swfl.md:27` calls that rate "the headline signal".
 - Severity: blocks a served number. licenses_active_lee is overstated by 646 and licenses_active_collier by 314. licenses_lapse_rate_swfl misses the 08/31 lapse wave.
+- The same stale rows also sit inside the other served counts (second Opus, 09/26):
+  ```
+  select (_dlt_load_id = (select max(_dlt_load_id) from data_lake.fl_dbpr_licenses)) in_latest, count(*) filter (where primary_status='C' and secondary_status='A' and original_licensure_date >= (current_date - interval '1 year')) new12m, count(*) filter (where occupation_code='CBC' and primary_status='C' and secondary_status='A') cbc_active, count(*) filter (where primary_status <> 'C') lapsed, count(*) total from data_lake.fl_dbpr_licenses where county_code in ('46','21') group by 1;
+  ```
+  Result: older loads new12m 37, cbc_active 174, lapsed 8, total 1,226; latest load new12m 956, cbc_active 1,626, lapsed 50, total 11,569. So the new-last-12-months count (`fl-dbpr-licenses-source.mts:99-106`, served as 1,013 on 09/20 at `brains/licenses-swfl.md:38`) carries 37 stale rows today, and the CBC count behind the CBC share (`:121-128`) carries 174. The lapse-rate denominator carries all 1,226.
 - First seen: 08/05/2026. That load (1785930850.0594614) still owns 1,098 rows.
 
 P3. Applicants freshness read green through two red months.
@@ -249,6 +256,7 @@ P3. Applicants freshness read green through two red months.
 P4. The press-release LLM leg can silently undercount served numbers.
 - `ingest/pipelines/dbpr_press_releases/enricher.py:164-165` catches each row's exception, prints "WARNING: enrichment failed", and the run stays green.
 - The row keeps geographic_mentions NULL. The pack maps it to no county (`news-swfl.mts:130-139`), so dbpr_swfl_releases_90d drops it until a later run succeeds.
+- A second silent path (second Opus): when the key is absent, `enricher.py:137-140` prints "ERROR: ANTHROPIC_API_KEY not set — cannot enrich." and returns 0, and `pipeline.py:209-214` still returns 0. The whole leg can go dark with a green run. Item 3 deletes the leg, which closes both paths.
 - Severity: blocks a served number, latent. Today 0 of 152 rows are un-enriched.
 - First seen: not yet fired.
 
@@ -267,7 +275,7 @@ P6. SIRS has not written since 08/06/2026.
 - First seen: 09/01/2026.
 
 P7. Merge-without-delete, the same shape as P2, in two more places.
-- SIRS: the upsert at `pipeline.py:116-135` never deletes. The pre-July app fell from 6,284 engine rows (run 31127278359) to 6,086 (run 35493240512). Whether removed SWFL rows sit in the table can only be measured after a real write. could-not-verify.
+- SIRS: the upsert at `pipeline.py:116-135` never deletes. The pre-July app fell from 6,284 engine rows (run 31127278359) to 6,086 (run 35493240512), and its SWFL rows fell from 739 to 710 in the same two logs. Corrected by the second Opus: the shape is already measurable today. `select scraped_at::date, database_period, county_normalized, count(*) from data_lake.dbpr_sirs_submissions group by 1,2,3` shows 1 row (july_2025_plus, LEE) still stamped 2026-06-08, which the 08/06 write did not touch; the other 1,365 carry 2026-08-06. So 1 row the source no longer lists is already counted. The pre-July SWFL pull shrank by a net 29 rows (739 − 710). How many rows the 10/01 write actually leaves behind is known only after it lands (item 7), because rows can also enter.
 - RE licensees: 138 rows are not in the latest run.
   ```
   select (last_seen_at >= '2026-09-21') in_latest, primary_status, count(*) from public.dbpr_re_licensees group by 1,2;
@@ -285,8 +293,8 @@ P8. RE licensees runtime is close to its ceiling.
 - First seen: 07/20/2026 (the 15-minute kills).
 
 P9. Registry, doc and code claims that are wrong. X verified, Y needs review.
-- Press releases: the registry note says "the SOURCE went quiet: newest DBPR release is dated 02/07/2025" (`cadence_registry.yaml:1460`, `:1466`; `docs/standards/data-roots.md:1917`, `:1919`). The live page shows "August 19, 2026", and table max(published_date) is 2026-08-19. The source is alive. This is a live instance of open check `registry_source_ceiling_no_freshness_field` (`node scripts/check.mjs list`): the ceiling records no newest-record date, so nobody re-read it.
-- Notices model: the registry note (`:1601`) and `data-roots.md:1929` say the summary moved to Haiku. But `summarize.py:8` defaults to `claude-sonnet-4-6`, and `pipeline.py:112` passes no model. Commit 1a29bd7d (07/05) switched the DBPR distill to Sonnet by operator decree, so the registry text, the doc text and the stale comment at `summarize.py:6-7` are all wrong.
+- Press releases: the registry note says "the SOURCE went quiet: newest DBPR release is dated 02/07/2025" (`cadence_registry.yaml:1460`, `:1466`, and the freshness_column comment at `:1448`, which the first draft missed; `docs/standards/data-roots.md:1917`, `:1919`). The live page shows "August 19, 2026", and table max(published_date) is 2026-08-19. The source is alive. This is a live instance of open check `registry_source_ceiling_no_freshness_field` (`node scripts/check.mjs list`): the ceiling records no newest-record date, so nobody re-read it.
+- Notices model: the registry note (`:1601`) and `data-roots.md:1929` say the summary moved to Haiku. But `summarize.py:8` defaults to `claude-sonnet-4-6`, and `pipeline.py:112` passes no model. Commit 1a29bd7d (07/05) switched the DBPR distill to Sonnet by operator decree, so the registry text, the doc text, the stale comment at `summarize.py:6-7` and the workflow header comment at `dbpr-public-notices-weekly.yml:4-5` (missed by the first draft) are all wrong.
 - SIRS schedule: the registry comment says "first Monday of month" (`:1518`). The workflow cron is `0 7 1 * *`, the 1st of the month.
 - SIRS truncation: the registry comment says "result_truncated=true on all rows is expected" (`:1516-1517`). Live: 1,365 false, 1 true (`select result_truncated, count(*) from data_lake.dbpr_sirs_submissions group by 1`).
 - RE first run: the registry reads "First run: <fill in after Task 7's live run>" (`:1627`). min(first_seen_at) is 2026-07-13T14:10:11Z.
@@ -300,6 +308,12 @@ P10. Stale incident noise.
 - #172 is `[cron-failure:ingest-fl-dbpr-licenses] SCHEMA_DRIFT`. It was fixed 09/20.
 - Auto-close fires only on a SCHEDULED green (`.github/scripts/log-cron-incident.mjs:131`), and it closes one issue per green (`:283-293`, `--limit 1`). So the 10/01 SIRS green closes one of the four, and the 10/05 licenses green closes #172.
 - Severity: cosmetic.
+
+P11. SIRS rows collapse on the row hash (added by the second Opus). 48 verified, whether they are duplicates or distinct filings needs review.
+- Symptom: run 31127278359 (08/06) logged "pre_july_2025: … 739 SWFL", "july_2025_plus: … 674 SWFL" and "upserted 1413 rows". The table holds 1,365 rows stamped 2026-08-06: pre_july LEE 348 + COLLIER 354 = 702, july_2025_plus LEE 259 + COLLIER 404 = 663 (`select scraped_at::date, database_period, county_normalized, count(*) from data_lake.dbpr_sirs_submissions group by 1,2,3`). So 37 pre-July and 11 July-plus pulled rows, 48 in all, landed on a key another row already held.
+- Root cause: the key is `(row_hash, database_period)` (`pipeline.py:124`), and row_hash is SHA256 of project_name, association_name, zip and county (`pipeline.py:23`, `:56-64`). The write is one `cur.execute` per row (`pipeline.py:188-189`), so "upserted 1413" counts statements, not rows.
+- Severity: blocks a served number if the 48 are distinct filings. condo-sirs-swfl counts table rows (`refinery/sources/dbpr-sirs-source.mts:61-72`), so its SWFL total sits 48 below DBPR's own SWFL listing. If the Qlik cube repeats rows, the collapse is correct dedup. could-not-verify this session: it needs the raw 08/06 or 10/01 matrix, which is not stored.
+- First seen: 08/06/2026 (the first QIX write).
 
 ## 5. What is missing
 
@@ -321,7 +335,11 @@ P10. Stale incident noise.
 - dbpr_re_licensees:
   - A consumer.
   - Email, which is not in the source. Only a Chapter 119 records request can supply it (`:1634`).
-- Hendry (12051): every table in this family has 0 Hendry rows. Whether DBPR carries Hendry license rows that we filter out: could-not-verify this session.
+- Hendry (12051): every table in this family has 0 Hendry rows.
+  - RE licensees: answered by the second Opus. `ingest/pipelines/dbpr_re_licensees/constants.py:11-16` records a 07/11/2026 byte-range probe that found Hendry rows in `RE_rgn7.csv`; the Lee + Collier filter drops them on purpose (SCOPE lock).
+  - SIRS: the pull is statewide and `pipeline.py:35` keeps only LEE and COLLIER, so any Hendry filings are dropped at ingest. Their count is not logged. could-not-verify.
+  - Licenses and applicants: the extracts are statewide with a 2-digit county code, and `ingest/pipelines/fl_dbpr_licenses/constants.py:36-37` keeps only "21" and "46". Hendry's code and row count were not read this session. could-not-verify.
+  - Hendry is a "small minor addition" in scope (`CLAUDE.md` SCOPE), so none of these is a defect. Adding it is a data_lake scope change and would be the operator's call.
 
 ## 6. Verdict per pipeline
 
@@ -332,7 +350,7 @@ P10. Stale incident noise.
   - Reason: the parser returns 0 on a live page that holds 3 Lee notices (P1).
   - The number that changes it: SWFL notices the pipeline returns on the live page versus SWFL PDFs by filename prefix. 0 versus 4 on 09/26. Equal makes it GOOD ENOUGH.
 - dbpr_sirs_submissions: IMPROVE.
-  - Reason: the right box and a working pull, but no write since 08/06, and a one-app failure is swallowed (P5, P6).
+  - Reason: the right box and a working pull, but no write since 08/06, and a one-app failure is swallowed (P5, P6). 48 pulled rows collapse on the row hash, and whether they are real filings is unresolved (P11, item 15).
   - The number that changes it: max(scraped_at) after the 10/01/2026 07:00 UTC run. On or after 10/01, plus P5 fixed, makes it GOOD ENOUGH. Still 2026-08-06 makes it REPAIR.
 - fl_dbpr_licenses: REPAIR.
   - Reason: 960 stale "Current/Active" rows are in the served active counts, and the lapse rate is blind to 1,173 licenses that expired 08/31 (P2).
@@ -350,8 +368,9 @@ Ordered. No item files an issue or dispatches a workflow. Each item is a code or
 
 1. DO. Take the notice county from the PDF filename, and guard that the page parsed.
    - What:
-     - In `parse_index_markdown` (`parse.py:93-124`), collect every PDF link on the page. Take the county from the filename prefix (`/public-notices/<County>-<case>.pdf`, up to the first `-` followed by digits) instead of from the heading above it. Keep SWFL filtering on that prefix.
+     - In `parse_index_markdown` (`parse.py:93-124`), collect every PDF link on the page. Take the county from the filename prefix (`/OGC/public-notices/<County>-<case>[-<case>…].pdf`, up to the first `-` followed by digits) instead of from the heading above it. URL-decode the prefix first (`Palm%20Beach`) and normalize punctuation (`St Lucie` and `St. Lucie` both appear). Keep SWFL filtering on that prefix.
      - In `pipeline.py`, before line 95, exit 1 when the page yields 0 PDF links statewide. There were 55 on 09/26. [INFERENCE] An empty statewide index is implausible, so zero means the page shape changed.
+     - Sharpening (second Opus): also exit 1 when links exist but 0 of their prefixes resolve to a Florida county name or "Out of State". That catches a future filename-scheme change, which the 0-links guard cannot see.
      - Add a fixture from the 09/26 live shape to `test_parse.py`, covering `**Lee County✓**`, `**Miami Dade✓**` and `**Out of State✓**`. The failing tests are named `test_county_from_pdf_prefix_not_heading` and `test_zero_pdf_links_is_a_shape_break`.
    - Where: `ingest/pipelines/dbpr_public_notices/parse.py`, `pipeline.py`, `test_parse.py`.
    - Lane D, effort S.
@@ -373,7 +392,7 @@ Ordered. No item files an issue or dispatches a workflow. Each item is a code or
    - Unblocks: the notices job needs no model and no model secret.
 3. DO. Replace the press-release Sonnet enrichment with deterministic classification.
    - What:
-     - `refinery/sources/dbpr-press-releases-source.mts:99-104` also selects title and body_text.
+     - `refinery/sources/dbpr-press-releases-source.mts:99-104` also selects body_text. It already selects title (`:101`).
      - The pack runs `coreCountyForMentions` (`news-swfl.mts:119-128`) over [title, body_text] instead of the LLM's geographic_mentions.
      - topics and affected_industries come from a keyword map over the same fixed 10-tag list the LLM uses (`enricher.py:42-44`).
      - Then delete `enricher.py`, the auto-enrich call (`pipeline.py:209-211`) and `ANTHROPIC_API_KEY` (`dbpr-press-releases-weekly.yml:51`).
@@ -387,7 +406,7 @@ Ordered. No item files an issue or dispatches a workflow. Each item is a code or
    - Unblocks: closes P4 and removes the last model dependency in the family. It reaches served numbers on the next `pack_id=news-swfl` rebuild.
 4. DO. Count only the current extract for active licenses.
    - What: in `refinery/sources/fl-dbpr-licenses-source.mts:83-126`, filter every active, new-license and CBC count to the latest `_dlt_load_id` of the licenses table. Read it once with `select max(_dlt_load_id)`.
-   - Metric names stay the same. On today's data, the values drop by 646 (Lee) and 314 (Collier).
+   - Metric names stay the same. On today's data, the values drop by 646 (Lee) and 314 (Collier). The new-last-12-months count drops by 37 and the active CBC count by 174 (P2, second-Opus query).
    - Lane D, effort S.
    - Proof:
      - `bun test refinery/packs/licenses-swfl.test.mts` passes, with a fixture test named `license_absent_from_latest_extract_not_counted_active`.
@@ -426,14 +445,15 @@ Ordered. No item files an issue or dispatches a workflow. Each item is a code or
    - Unblocks: headroom under the 45-minute ceiling, and a measured answer to where the time goes.
 9. DO. Correct the claims in P9.
    - Where:
-     - `cadence_registry.yaml`: the press note `:1460` and ceiling `:1466`, the notices note `:1601`, SIRS `:1516-1518`, RE `:1627`.
+     - `cadence_registry.yaml`: the press freshness comment `:1448`, note `:1460` and ceiling `:1466`, the notices note `:1601`, SIRS `:1516-1518`, RE `:1627`.
+     - The `dbpr-public-notices-weekly.yml:4-5` header comment ("summaries moved to Haiku").
      - `docs/standards/data-roots.md:1917`, `:1919`, `:1929`.
      - The `dbpr-sirs-monthly.yml:24-31` comment.
      - `wiki/pipeline-census.md:126`.
      - Add an `as_of` newest-record date to the press-release source_ceiling. That is the fix shape `registry_source_ceiling_no_freshness_field` asks for.
    - Lane D, effort S.
    - Proof:
-     - `rg -n "02/07/2025|Haiku" ingest/cadence_registry.yaml docs/standards/data-roots.md` has no DBPR hits.
+     - `rg -n "02/07/2025|Haiku" ingest/cadence_registry.yaml docs/standards/data-roots.md .github/workflows/dbpr-public-notices-weekly.yml ingest/pipelines/dbpr_public_notices` has no DBPR hits.
      - `bun ingest/tools/check-registry-identity.mts --static` exits 0.
    - Unblocks: nobody plans on a dead press-release source again. It is one instance toward closing `registry_source_ceiling_no_freshness_field`.
 10. DO. Add the three content contracts in section 8: press releases, licenses, applicants.
@@ -447,7 +467,7 @@ Ordered. No item files an issue or dispatches a workflow. Each item is a code or
     - Proof: `gh issue list --state open --search "dbpr in:title" --json number` shows only #101 and #172 until those greens land.
     - Unblocks: the open-issue list for this family shows only live incidents.
 12. ASK-FIRST. Pull the dropped address columns into license and applicant data. This changes data_lake write shape: new columns on `data_lake.fl_dbpr_licenses` and `data_lake.fl_dbpr_applicants`.
-    - What: add `CONSTRUCTIONLICENSE_1.csv` columns 5-10 and `constr_app.csv` Address 1/2/3 to the dlt column maps (`resources.py:70-99`).
+    - What: add `CONSTRUCTIONLICENSE_1.csv` columns 5-10 and `constr_app.csv` Address 1/2/3 to the dlt column maps (`resources.py:70-100`).
     - Lane D, effort M.
     - Proof: `select count(*) filter (where zip is not null) from data_lake.fl_dbpr_licenses` returns a count above 0.
     - Unblocks: ZIP-grain license counts.
@@ -460,8 +480,13 @@ Ordered. No item files an issue or dispatches a workflow. Each item is a code or
     - Lane D, effort S.
     - Proof: a licenses-swfl test named `license_leaving_extract_counts_as_lapsed`, then a rebuild whose lapse rate reflects the 08/31 wave.
     - Unblocks: the "headline signal" measures real lapses.
+15. DO (added by the second Opus). Make the SIRS write report rows, not statements, and name its collisions (P11).
+    - What: in `ingest/pipelines/dbpr_sirs/pipeline.py:186-192`, count distinct `(row_hash, database_period)` in `all_rows` before the write, and print that count plus each colliding key's project_name, association_name and zip, with `flush=True`. Add `test_row_hash_collisions_are_reported` to `test_pipeline.py`.
+    - Lane D, effort S.
+    - Proof: `pytest -q ingest/pipelines/dbpr_sirs/test_pipeline.py`; then the 10/01 log shows "N distinct keys, M collisions" and the collision list.
+    - Unblocks: settles P11 from one run's log. A collision means project_name, association_name, zip and county all match. If the colliding pre-July rows carry different dbpr_id values, they are distinct filings, and widening the key is a data_lake write-shape change (ASK-FIRST at that point). If the rows are identical, P11 closes as correct dedup.
 
-Count: 11 DO, 3 ASK-FIRST.
+Count: 12 DO, 3 ASK-FIRST.
 
 ## 8. Checks and balances
 
@@ -505,18 +530,23 @@ Noise to delete:
 
 Nothing here adds a label, a per-run issue or a new workflow.
 
+Second-Opus check of the cron-incident path this section leans on (notices, SIRS, RE licensees):
+- All five family workflows are in its trigger list: `.github/workflows/log-cron-incident.yml:26-29` (press, notices, RE, SIRS) and `:41` (licenses).
+- The path is not issue-free. On a failure, `openIncidentIssue` (`.github/scripts/log-cron-incident.mjs:218-222`) opens one GitHub issue per workflow and dedups it: run 33628879010 logged "incident issue already open for dbpr-sirs-monthly; not duplicating". So a red run makes at most one open issue per workflow, never one per run. That meets the design rule. Deleting the issue half is the family 19 question named above; the plan does not depend on the answer.
+
 ## 9. Box placement
 
 The runner facts come from `docs/superpowers/handoffs/2026-09-20-runner-live-what-is-next.md:8-14` and the brief.
 
 - dbpr_press_releases: stays on GHA `ubuntu-latest`.
   - Reason: the crawl4ai fetch works from a datacenter IP. 14 of 15 runs were green, and 35618957635 fetched both pages. That job ran 5m56s (15:26:36 → 15:32:32, `gh run view 35618957635 --json jobs`). No WAF, no archive, no local model.
-  - If the item 3 fallback (Lane M) is ever used, the enrich step moves to the Fedora runner, because `claude -p` needs the box's Max login.
+  - If the item 3 fallback (Lane M) is ever used, the enrich step moves to the Fedora runner, because `claude -p` needs the box's Max login. It goes in its own job with `runs-on: [self-hosted, swfl-local]` and `if: vars.SWFL_LOCAL_RUNNER_READY == 'true'`, not the gated ternary. An `ubuntu-latest` fallback has no Max login, so with the gate off the job must skip. The press contract in section 8 then fires on the un-enriched rows.
 - dbpr_public_notices: stays on GHA `ubuntu-latest`.
   - Reason: the index and the PDFs fetch from GHA; 07/27 run 30267388098 upserted 4. The job ran 1m51s (35623040755). With the summary leg deleted, it needs nothing the box has.
 - dbpr_sirs_submissions: stays on the Fedora runner (`runs-on: [self-hosted, swfl-local]`, `dbpr-sirs-monthly.yml:21`).
   - Reason: DBPR's Qlik host drops GitHub datacenter IPs (`dbpr-sirs-monthly.yml:17-20`), and the QIX harvest drives a real browser through Playwright (`pipeline.py:16-17`). Both are listed reasons.
   - It is already correctly placed. The first scheduled run on the box is 10/01.
+  - Gate note (second Opus): SIRS is hard-pinned, not behind `SWFL_LOCAL_RUNNER_READY`. The gated workflows use `runs-on: ${{ vars.SWFL_LOCAL_RUNNER_READY == 'true' && fromJSON('["self-hosted","swfl-local"]') || 'ubuntu-latest' }}` (for example `ingest-collier-official-records.yml:31`). `dbpr-sirs-monthly.yml:21` is a literal `[self-hosted, swfl-local]`. That is correct here, because an `ubuntu-latest` fallback would hit the WAF. The cost is that a box-off month queues and then cancels (09/01 run 33506639728), and the cron-incident check is the signal for it (section 8).
 - fl_dbpr_licenses and fl_dbpr_applicants: stay on GHA `ubuntu-latest`.
   - Reason: plain CSV downloads from www2.myfloridalicense.com. The job ran 1m06s (04:35:48 → 04:36:54, 35489537652).
 - dbpr_re_licensees: stays on GHA `ubuntu-latest`.
@@ -535,6 +565,15 @@ rg -n "import anthropic|messages\.create|web_search|anthropic" ingest/lib/crawl_
 ```
 
 The first grep finds model calls only in `enricher.py` and `summarize.py`. The second hits only a comment at `crawl_client.py:13`, so the shared fetch path makes no model call. SIRS, licenses, applicants and RE licensees have no LLM leg.
+
+Second-Opus re-grep, 09/26, which adds the licenses test dir the first grep skipped:
+```
+rg -n -i "anthropic|claude|openai|refinery" ingest/pipelines/dbpr_press_releases ingest/pipelines/dbpr_public_notices ingest/pipelines/dbpr_sirs ingest/pipelines/fl_dbpr_licenses ingest/pipelines/dbpr_re_licensees ingest/tests/pipelines/fl_dbpr_licenses .github/workflows/dbpr-press-releases-weekly.yml .github/workflows/dbpr-public-notices-weekly.yml .github/workflows/dbpr-sirs-monthly.yml .github/workflows/ingest-fl-dbpr-licenses.yml .github/workflows/ingest-dbpr-re-licensees.yml
+```
+Every hit belongs to the two legs below or is not a model call:
+- Model-call lines: `enricher.py:16`, `:84`, `:137-142`; `constants.py:56-57` (press); `summarize.py:1`, `:8`, `:13`, `:29`; `pipeline.py:8`, `:11` (notices docstring); `dbpr-press-releases-weekly.yml:51`, `dbpr-public-notices-weekly.yml:11`, `:43`; press `pipeline.py:20` (docstring).
+- Not model calls: `fl_dbpr_licenses/resources.py:94` (a comment naming the refinery source file) and `dbpr_re_licensees/constants.py:16` (the word "CLAUDE.md" in a scope comment).
+- No leg was missed.
 
 Two legs:
 
@@ -573,7 +612,7 @@ I re-read this file top to bottom. For each numbered claim: the claim, what veri
 - Looser regex: 64 headers, 4 SWFL, 9 mis-assigned (5 Miami-Dade under Martin, 4 Out of State under Washington). Throwaway `rx.py` over the saved crawl. It printed 10 mismatches; 1 (St. Lucie) was my own prefix-normalization artifact. Verified.
 - Filename prefix over 55 PDFs gives SWFL 4 (Lee 3, Manatee 1). A Python `Counter` over the URLs. Verified.
 - Corrected: the first draft's notices guard floor was "60 county headers", set against `grep -c "County"`. Section 6, item 1 and section 8 now use the filename prefix and a 0-PDF-links guard.
-- crawl4ai is 0.9.0 locally and pinned since 8274bf8a (06/22). The version module plus `git log -S`. Verified.
+- crawl4ai is 0.9.0 locally and pinned. The version module plus `git log -S`. Corrected by the second Opus: the pin was introduced 06/21 by 24dfbf1b; 8274bf8a (06/22) only added a comment naming it.
 - Press table: 152 rows, max scraped 09/21, max published 2026-08-19, 0 un-enriched, 24 relevant, 6 undated. SQL. Verified. 152 − 6 = 146 dated rows for the item 3 gate. Corrected: the first draft's 180-day gate covered only 1 row.
 - Newest release on the page is "August 19, 2026". Crawl file line 27. Verified.
 - Notices table: 14 rows, max last_seen 07/27, county split. SQL. Verified.
@@ -605,9 +644,24 @@ I re-read this file top to bottom. For each numbered claim: the claim, what veri
 - Licenses contract floors. Corrected: the first draft had unmeasured 5,000 and 2,500. Now 6,144 and 3,110, which are 80% of the SQL latest-load 7,681 and 3,888. 7,681 + 3,888 = 11,569. The 8.7% drop is (12,552 − 11,455) / 12,552.
 - Item 4's "truthful lapse rate" claim. Corrected: item 4 fixes only the active counts, and the lapse definition moved to ASK-FIRST item 14.
 - Code line cites for coreCountyForMentions and the licenses counts. Re-read both files. Corrected: `news-swfl.mts:121-130` to `:119-128`, lapse lines `:109-113` to `:108-119`, item 4 range `:85-107` to `:83-126`.
-- Hendry presence in DBPR source files. could-not-verify.
+- Hendry presence in DBPR source files. RE: answered, Hendry is in `RE_rgn7.csv` and dropped (`dbpr_re_licensees/constants.py:11-16`). SIRS, licenses and applicants: could-not-verify.
 - Notices PDF discrete penalty fields. could-not-verify.
-- SIRS rows removed at the source. could-not-verify until the 10/01 write.
+- SIRS rows removed at the source. Corrected by the second Opus: 1 row is already stale (scraped_at 2026-06-08, untouched by the 08/06 write). The size of the 10/01 residue stays could-not-verify until that write.
+- Second-Opus additions to this log, each re-run 09/26:
+  - RE scheduled-green streak is 7, not 8. `gh run list --workflow ingest-dbpr-re-licensees.yml --limit 15`. Corrected in section 3.
+  - #172's SCHEMA_DRIFT is in the title; its label is `cron-failure`. `gh issue list … --json number,title,labels`. Corrected in section 3.
+  - Notices URL shape: 55 under `/OGC/public-notices/`, 9 multi-case, 13 `%20`, prefixes Lee 3 and Manatee 1, parser 0. Own fetch saved as `dbpr12v2/notices_0926.md`. Verified; shape wording corrected in P1 and item 1.
+  - Notices 06/15 red: "ERROR: empty index response — aborting". `gh run view 27557476514 --log-failed`. Gap filled in section 3.
+  - Licenses stale rows inside new-12mo (37), CBC active (174), lapsed (8) and total (1,226). SQL in P2. Added.
+  - Served active 6,620 and 3,405, and 58 non-C rows (the lapse numerator). `select county, count(*) filter (where primary_status='C' and secondary_status='A') …` and `select count(*) … where primary_status <> 'C'`. Verified; 58 / 12,795 rounds to the served 0.5%.
+  - `_dlt_load_id` and `_ingested_at >= '2026-09-20'` select the same rows: 0 rows sit on an older load id with a 09/20 timestamp. SQL. Verified, so item 4's load-id filter reproduces P2's split.
+  - SIRS by scrape date: 1 row at 2026-06-08, 1,365 at 2026-08-06; 48 pulled rows collapsed (739 + 674 = 1,413 statements vs 1,365 rows). SQL plus the 31127278359 log. Added as P11.
+  - Press rows published in the last 90 days: 1, with 0 missing geographic_mentions. SQL. Verified, P4 stays latent.
+  - Enrichment last fired 08/24: run 32712302088 logged "enriching 1 rows via claude-sonnet-4-6" and "updated 1 rows". Verified, the leg worked as of that date.
+  - Applicant file rows 104,020 / 104,354 / 104,549, and matched licenses 12,552 / 11,455 / 11,665. Three run logs. Verified.
+  - Five family workflows are in `log-cron-incident.yml:26-29`, `:41`, and the issue half dedups per workflow (`log-cron-incident.mjs:218-222`, run 33628879010 log). Verified; added to section 8.
+  - `pytest` 62 passed and `bun test` 23 pass across 3 files. Re-run. Verified.
+  - Doctor run 36259690113 (09/26 17:37Z): notices 🟡, the other five 🟢. `gh run view 36259690113 --log`. Verified.
 
 ## 12. Questions for the operator
 
@@ -617,3 +671,52 @@ I re-read this file top to bottom. For each numbered claim: the claim, what veri
    - park the cron until outreach is back.
 2. Items 12 and 13 change what lands in data_lake: the license and applicant address/ZIP columns, and the Community Association Managers board. Yes or no on each.
 3. Item 14 redefines licenses_lapse_rate_swfl as "left DBPR's file since the last load". Today's 0.5% cannot see the 1,173 licenses that expired 08/31/2026. Yes or no.
+
+## 13. Second-Opus verification
+
+Run 09/26/2026 by the second Opus. Method: re-ran every `gh run list` and `gh run view` the file cites, re-ran every SQL through a read-only Bun.SQL session (`SET SESSION default_transaction_read_only = on`, connection built from `.dlt/secrets.toml` per `scripts/apply-fdic-sod-view.mts`, throwaway kept in the scratchpad under `dbpr12v2/`), re-ran both test suites and the freshness probe dry-run, re-fetched the notices index with the pipeline's own `fetch_page_markdown`, and opened or grep-confirmed each file:line cite.
+
+Claims checked: 361.
+- 18 run-list counts across the five workflows.
+- 48 values read from run logs, run durations and job timestamps.
+- 111 values from SQL on the six tables, the view, `_dlt_loads` and the catalog.
+- 159 distinct file:line cites in sections 1 to 10 (`grep -o` over the file). Each was opened or grep-confirmed.
+- 2 test totals, 7 probe and doctor rows, 7 issue facts (#98 to #101, #172, the labels, the dedup log line), 5 commit facts (525da974, 9f0bd151, 667ddc9e, 1a29bd7d, 24dfbf1b / 8274bf8a), and 4 values from the re-crawl.
+
+Corrections (each one line: what was wrong → what is right → evidence):
+1. "8 straight scheduled greens, 08/10 through 09/21" → 7 → `gh run list --workflow ingest-dbpr-re-licensees.yml --limit 15` lists 31389620892, 32029682936, 32727328681, 33425229694, 34145297674, 34873803101, 35632280304.
+2. #172 "carries the classifier label SCHEMA_DRIFT" → the class is in the title, and the only label is `cron-failure` → `gh issue list --state open --search "dbpr OR sirs OR licensee" --json number,title,labels`.
+3. crawl4ai "pinned 06/22 … commit 8274bf8a" → introduced 06/21 by 24dfbf1b; 8274bf8a only added a comment → `git log -S "crawl4ai==0.9.0" -- ingest/requirements.txt` and `git show 8274bf8a -- ingest/requirements.txt`.
+4. Notice URL shape `/public-notices/<County>-<case>.pdf` → `/OGC/public-notices/<County>-<case>[-<case>…].pdf`, with 9 multi-case names, 13 URL-encoded spaces, and both `St%20Lucie` and `St.%20Lucie`. Item 1 must URL-decode and normalize → own fetch `dbpr12v2/notices_0926.md`.
+5. Item 3 "source also selects title and body_text" → it already selects title; only body_text is new → `refinery/sources/dbpr-press-releases-source.mts:101`.
+6. Applicant column map `resources.py:85-99` → `:86-100`, and item 12 `:70-99` → `:70-100` → `sed -n 62,100p ingest/pipelines/fl_dbpr_licenses/resources.py`.
+7. P7 SIRS "can only be measured after a real write, could-not-verify" → measurable now: 1 row still stamped 2026-06-08 that the 08/06 write did not touch → `select scraped_at::date, database_period, county_normalized, count(*) from data_lake.dbpr_sirs_submissions group by 1,2,3`.
+8. P9 press sites missed the registry freshness comment → add `cadence_registry.yaml:1448` ("newest release 02/07/2025") to P9 and item 9 → `grep -rn "02/07/2025"`.
+9. P9 notices-model sites missed the workflow header → add `dbpr-public-notices-weekly.yml:4-5` ("summaries moved to Haiku") to P9, item 9 and item 9's proof command → `grep -n -i haiku .github/workflows/dbpr-*`.
+10. P2 named only the two active counts as overstated → new-last-12-months also carries 37 stale rows, active CBC 174, lapsed 8, and the total 1,226; item 4's "values drop" line now names them → P2 split query.
+11. Scope said the three brains feed master only → `lib/zip-dossier.ts:190-196` also registers all three leaf brains, so a wrong leaf number reaches that map too → `grep -n -i dbpr lib/zip-dossier.ts`.
+12. Section 3 notices "cause not re-derived" → "[dbpr-notices] ERROR: empty index response — aborting" (`pipeline.py:88-90`) → `gh run view 27557476514 --log-failed`.
+
+Unverifiable claims (why):
+- P11: whether the 48 collapsed SIRS rows are true duplicates or distinct filings. The raw QIX matrix is not stored; item 15 makes the 10/01 run log answer it.
+- Hendry rows in the SIRS pull and in the license and applicant extracts. Not logged, and nothing was downloaded this session. RE is answered (`dbpr_re_licensees/constants.py:11-16`).
+- Discrete penalty or statute fields in the notice PDFs. No PDF was parsed.
+- The size of the SIRS stale residue after the 10/01 write. It needs that write.
+- The 08/31 biennial-renewal mechanism behind the 1,173 missing licenses. The removal is proven; the mechanism stays [INFERENCE].
+- Item 10's "status PASS on today's data" and item 8's "under 15 minutes". The contracts and the batched upsert do not exist yet, so neither can run.
+
+Gaps filled:
+- P11 (SIRS row-hash collapse, 48 rows) and its DO item 15. The count is now 12 DO, 3 ASK-FIRST.
+- P4: the key-absent silent path (`enricher.py:137-140`).
+- Section 5: the Hendry answer for RE, and the SIRS and licenses filter lines.
+- Section 8: the five workflows are in the cron-incident trigger list, and the issue half dedups per workflow (not per run).
+- Section 9: SIRS is hard-pinned rather than gated. The Lane M fallback job uses `runs-on: [self-hosted, swfl-local]` plus `if: vars.SWFL_LOCAL_RUNNER_READY == 'true'`.
+- Section 10: re-grep including `ingest/tests/pipelines/fl_dbpr_licenses`. Every hit is classified; no LLM leg was missed.
+- Item 1 sharpening: exit 1 when links exist but no prefix resolves to a county.
+
+Coverage check: all six pipelines (dbpr_press_releases, dbpr_public_notices, dbpr_sirs_submissions, fl_dbpr_licenses, fl_dbpr_applicants, dbpr_re_licensees) appear in sections 2, 3, 4, 6, 7, 8 and 9.
+- Section 4 has a problem for each: P4 and P9 press; P1 notices; P5, P6, P7 and P11 SIRS; P2 and P7-shape licenses; P3 applicants; P7 and P8 RE.
+- Section 8 names one signal per pipeline on an existing seam. No per-run GitHub issue filing survives. The noise-to-delete list names #98, #99 and #100, plus the `openIncidentIssue` half for family 19.
+- Section 9 gives each pipeline a placement and a reason. The only Fedora placement (SIRS) names `runs-on: [self-hosted, swfl-local]` and states how it relates to the `SWFL_LOCAL_RUNNER_READY` gate.
+
+API-credit suggestion count: 0. `grep -n -i -E "credit|top up|top-up|topup|console balance|api key funding|billing|fund"` over the first Opus's file returned nothing. None of this pass's edits adds any.

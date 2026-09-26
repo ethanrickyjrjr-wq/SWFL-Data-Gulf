@@ -7,7 +7,7 @@ The verdict is that two pipelines face a vendor deadline and are quietly heading
 - FEMA's endpoint is removed on 10/15/2026, and the pipeline exits 0 even when it lands nothing.
 - USGS WaterServices is decommissioned in Q1 2027.
 
-One pipeline is a full hurricane season behind its source (HURDAT2). One is capped at 2025 by a hardcoded year (storm events). Rainfall works but serves a number with no baseline.
+One pipeline is a full hurricane season behind its source (HURDAT2): NHC posted the 2025-season file `hurdat2-1851-2025-02272026.txt` on 03/05/2026, and the pipeline's filename regex cannot parse its 8-digit date suffix, so the 06/01/2026 run silently re-landed the 2024 file (second-Opus finding, §4 P5). One is capped at 2025 by a hardcoded year (storm events). Rainfall works but serves a number with no baseline. Tier-1 freshness in this family cannot see either lag, because the inventory's `updated_at` is stamped `now()` on every run (`ingest/lib/tier1_inventory.py:67`).
 
 Verdicts:
 - fema: REPAIR
@@ -20,7 +20,7 @@ Nothing in this family needs the Fedora box. Nothing in this family needs a mode
 
 ## 1. Scope
 
-Count: 5 pipelines, 5 workflow files, 4 Tier-1 Parquet objects plus 2 `data_lake` tables, 3 consumer brains plus 3 non-brain readers.
+Count: 5 pipelines, 5 workflow files, 4 Tier-1 Parquet objects plus 2 `data_lake` tables, 3 consumer brains plus 4 non-brain readers (the fourth, `lib/concoctions/defs/nfip-storm-years.ts`, was added by the second Opus).
 
 - `hurdat2_fl`
   - Registry: `ingest/cadence_registry.yaml:355`, lane tier-1-duckdb, cadence_days 365, tolerance 1.5.
@@ -58,6 +58,8 @@ Count: 5 pipelines, 5 workflow files, 4 Tier-1 Parquet objects plus 2 `data_lake
     - `lib/demo/live-loaders.ts:153` (live count filtered to core FIPS).
     - `refinery/tools/build-corridor-fact-pack.mts:776`.
     - `lib/charts/hurricane-series.ts:105`, a hardcoded snapshot pulled once from this table.
+    - `lib/concoctions/defs/nfip-storm-years.ts:39`, which reads the view `data_lake.fema_nfip_county_year` for the "NFIP flood claims by county and year" concoction (registered via `lib/concoctions/registry.ts`). Found by `grep -rln fema_nfip_county_year refinery lib app scripts`.
+    - Not counted: `scripts/lake-probe.mts:19` (a diagnostic probe, not a served surface).
 
 No consumer is missing. Every table in the family has a reader, so there is no DARK ROOT here. The weak case is USGS: 2 of its 4 parameters are fetched and never read (see §4 P14).
 
@@ -115,7 +117,7 @@ The Tier-1 figures below come from a read-only DuckDB probe of each Parquet over
 - County coverage:
   - Sites Parquet: 861 sites, all state_cd '12'. Of those, 29 have county_cd 071 (Lee), 31 have 021 (Collier) and 20 have 051 (Hendry).
   - Joining daily readings to those three counties gives 170,208 rows, all 00065, from 23 sites.
-  - The consumer's Caloosahatchee filter (`huc_cd LIKE '03090205%'`, `usgs-water-source.mts:180`) matches 22 catalog sites. 7 of them have 00065 readings on the latest date, 09/18/2026.
+  - The consumer's Caloosahatchee filter (`huc_cd LIKE '03090205%'`, `usgs-water-source.mts:180`) matches 22 catalog sites. 7 of them have ever reported 00065. 6 of them have a non-null 00065 reading on the latest date, 09/18/2026; 7 reported on 09/12 through 09/14 (second-Opus DuckDB probe: `select obs_date, count(distinct site_no) ... where huc_cd like '03090205%' and parameter_cd='00065' and obs_date>=DATE '2026-09-12' group by 1`). The consumer serves the median of whichever gages report on the max date (`usgs-water-source.mts:103-133`, query at `:176-193`).
 
 ### noaa_ghcn_rainfall
 
@@ -130,6 +132,7 @@ The Tier-1 figures below come from a read-only DuckDB probe of each Parquet over
   - 2025: 38.26 in, 39.16 in and 41.73 in, each over 365 days.
 - Freshness: `_ingested_at` 09/05/2026 16:20Z. `_dlt_loads` shows loads on 06/05, 07/05, 08/05 and 09/05/2026.
 - County coverage: Lee and Collier. Hendry has no station.
+- The fourth anchor, Naples COOP (USC00086078), has never landed a row. Run 33977468020 (09/05/2026) logged it DROPPED at day_count 275 for 2024 and 205 for 2025 (`gh run view 33977468020 --log | grep DROPPED`). Collier is therefore served by one station, Naples Muni.
 
 ### fema
 
@@ -234,6 +237,7 @@ Result: 103 passed in 4.50s.
   - `ingest/pipelines/fema/pipeline.py:12-15` wraps the entire ingest in `except Exception` and prints a warning.
   - `ingest/pipelines/fema/resources.py:255-256` returns silently when zero rows come back.
 - Severity: blocks detection. Every failure is invisible to log-cron-incident, heal-cron and the doctor's run-status.
+- The swallow also catches the pipeline's own guards. `assert_min_rows` and `assert_vs_canonical` at `resources.py:261-264` and the shape guards at `resources.py:124-157` raise, and `pipeline.py:14` catches every `Exception`. A guard trip therefore protects the table (it raises before the replace) but still produces a green run. Second-Opus finding.
 - First seen: 08/02/2026 (that run).
 
 ### P3. Two latent traps in the v3 migration
@@ -249,27 +253,31 @@ Result: 103 passed in 4.50s.
 
 ### P5. HURDAT2 lake is one season behind the source
 
-- Symptom: NHC's index lists `hurdat2-1851-2025-091226.txt` (published 09/12/2026). The inventory still says vintage `1851-2024`.
-- Root cause:
-  - The workflow is a June-1-only cron (`hurdat2-annual.yml:9`). Its comment assumes NHC publishes in March or April. This year it published in September.
-  - Commit 4ef6c071 (09/20/2026) fixed the parser against the new file, but no real run was dispatched. `gh run list` shows no run after 06/01.
+- Symptom: NHC's index lists two 2025-season files. `hurdat2-1851-2025-02272026.txt` was posted 03/05/2026 16:03, and `hurdat2-1851-2025-091226.txt` was posted 09/17/2026 21:02 (index listing and `curl -sI` Last-Modified; the `091226` suffix encodes 09/12/26, but the file went up on 09/17). The inventory still says vintage `1851-2024`, source `hurdat2-1851-2024-040425.txt`.
+- Root cause (corrected by the second Opus):
+  - `_HURDAT2_FILE_RE` (`ingest/duckdb_pipelines/hurdat2_fl/pipeline.py:48-50`) requires exactly 6 suffix digits (`(\d{6})`). NHC named the March file with an 8-digit MMDDYYYY suffix, so the regex never matched it. Check: `python -c "from ingest.duckdb_pipelines.hurdat2_fl.pipeline import _HURDAT2_FILE_RE as R; print(bool(R.search('hurdat2-1851-2025-02272026.txt')))"` prints `False`, while the `091226` and `040425` names print `True`.
+  - The 06/01/2026 scheduled run (26774116273) therefore ran after the 2025 file had been up for 88 days, silently picked `040425`, and exited green. The inventory row it wrote (`source_url ...hurdat2-1851-2024-040425.txt`, updated_at 06/01/2026 18:33Z) is the proof.
+  - The June-1-only cron (`hurdat2-annual.yml:9`) is not the cause. The first draft said NHC "published in September"; it published in March, and the September file is a revision.
+  - Commit 4ef6c071 (09/20/2026) fixed the parser against the `091226` file's typos, which the new 6-digit name lets the regex see. No real run has been dispatched since; `gh run list` shows no run after 06/01.
+  - Nothing can see the lag: tier-1 freshness reads `_tier1_inventory.updated_at`, which `ingest/lib/tier1_inventory.py:67` sets to `now()` on every upsert, whatever vintage landed.
 - Severity: blocks a served number. hurricane-tracks-fl's landfall counts, closest-pass and per-storm NFIP exposure omit the 2025 season. The next scheduled refresh is 06/01/2027.
-- First seen: 09/20/2026 (that commit).
+- First seen: 06/01/2026, the first run that should have picked up the 03/05/2026 file.
 
 ### P6. hurricane-tracks-fl brain has not been rebuilt since 07/15/2026
 
-- Symptom: `brains/hurricane-tracks-fl.md:4` reads `refined_at: 2026-07-15T06:52:19Z`, ttl 31536000.
+- Symptom: `brains/hurricane-tracks-fl.md:5` reads `refined_at: 2026-07-15T06:52:19Z`, ttl 31536000.
 - Root cause: `daily-rebuild.yml` last ran on 08/12/2026 (`gh run list --workflow daily-rebuild.yml --limit 5`). Family 16 owns that stall.
 - Severity: blocks a consumer. Fixing P5 is not live until this brain rebuilds.
 
 ### P7. HURDAT2 staleness does not go red until 11/30/2027
 
 - Root cause: 365 x 1.5 = 547 days from 06/01/2026 (`check_freshness.py:362-363`, `:418`).
+- A shorter cadence alone does not fix this. Every run rewrites `updated_at` to `now()` (`tier1_inventory.py:67`), so a monthly run that keeps re-landing the old vintage reads FRESH forever. The 06/01 run was exactly that case (P5). `max_period_end` exists on the inventory row (`tier1_inventory.py:81`) but is null on all 4 family rows (`select id, max_period_end from data_lake._tier1_inventory where id like 'lake-tier1/environmental/%'`), and `check_freshness.py` does not read it. The same blindness applies to storm_history_swfl (P8) and usgs.
 - Severity: blocks detection.
 
 ### P8. Storm events are capped at 2025 by a hardcoded year
 
-- Symptom: NCEI publishes `StormEvents_details-ftp_v1.0_d2026_c20260918.csv.gz`, which holds events 202601 to 202606. It has 20 county rows for Lee, Collier and Hendry (DuckDB probe of that file). The Parquet stops at 202510.
+- Symptom: NCEI publishes `StormEvents_details-ftp_v1.0_d2026_c20260918.csv.gz`, which holds events 202601 to 202606. The first draft said it "has 20 county rows for Lee, Collier and Hendry"; the second Opus could not reproduce 20. Measured (local DuckDB over the downloaded file, applying the pipeline's own `swfl_filter_sql()`): the current filter keeps 10 rows from it (9 Lee county rows plus 1 Charlotte county row). 38 raw Florida rows name Lee, Collier or Hendry across all zone and event types. The Parquet stops at 202510.
 - Root cause: `ingest/duckdb_pipelines/storm_history_swfl/constants.py:7` sets `YEAR_RANGE_END = 2025` and says "bump annually". `pipeline.py:90` filters the index to that range.
 - Severity: blocks a served number. The storm-history-swfl 10-year counts miss 2026.
 - First seen: this pass.
@@ -280,6 +288,7 @@ Result: 103 passed in 4.50s.
 - Root cause:
   - `constants.py:15` lists LEE, COLLIER and CHARLOTTE.
   - The zone regex (`constants.py:41`) only matches `COASTAL|INLAND <county>`, but NCEI names the Hendry zone bare `HENDRY`. The 2026 file shows `('HENDRY','Z',...)` rows, and 2025 has 4 C rows and 5 Z rows for Hendry.
+  - Measured effect of fixing it (second Opus): the 2026 Hendry zone rows are Wildfire (2), Drought (6) and Frost/Freeze (2), and the 2025 zone rows are Drought (5). None is in `HAZARD_ZONE_EVENT_TYPES` (`constants.py:20-28`), so the regex widening adds 0 rows from those two years. Adding `HENDRY` to the county list adds 1 row from 2026 (Funnel Cloud) and 4 from 2025 (Hail). Earlier Hendry hurricane zone rows are not measured.
   - The consumer also gates on `["LEE", "COLLIER"]` (`storm-history-source.mts:51`).
 - Severity: scope. Hendry is an in-scope minor county.
 - First seen: the ledger flagged the opposite leak, Charlotte (`docs/audit/2026-07-11-pipeline-problems/02-known-problems-ledger.md:89`).
@@ -290,6 +299,7 @@ Result: 103 passed in 4.50s.
 - What is verified: the Parquet holds Flood (74 county rows) and Waterspout (58 county rows) (event-type probe). That part of the claim needs review.
 - The real gap: `Flood` is absent from the consumer's `MAJOR_EVENT_TYPES` (`storm-history-source.mts:52-58`).
 - Also, data-roots says Charlotte was "removed 07/07/2026". The ingest still pulls it (`constants.py:15`); only the consumer drops it.
+- data-roots also says "~1,178 live rows" (`docs/standards/data-roots.md:1813`), and the floor comment says "live corpus is ~1,178 county rows" (`storm_history_swfl/constants.py:31`). The live Parquet holds 1,106 rows in total, 991 of them county rows (451 + 348 + 192, §2 probe). Second-Opus finding.
 - Severity: cosmetic, but it misdirects the next person.
 
 ### P11. Tier-1 inventory byte sizes are wrong
@@ -322,7 +332,7 @@ Result: 103 passed in 4.50s.
 ### P14. USGS pulls far more than it serves, and the registry overstates what lands
 
 - What the pipeline pulls: 4,744,886 statewide rows every month.
-- What the consumer reads: only 00065 at the Caloosahatchee HUC. That is 7 sites on the latest date.
+- What the consumer reads: only 00065 at the Caloosahatchee HUC. That is 6 sites on the latest date, 09/18/2026 (7 on 09/12 through 09/14).
 - Dead parameters:
   - 72019 is 1 site that ended 08/31/2005.
   - 62610 is 0 rows.
@@ -347,6 +357,7 @@ Result: 103 passed in 4.50s.
   - The table holds 6 rows covering only 2024 and 2025 (the rolling window at `constants.py:40`).
   - env-swfl serves "39.72 in (2025)" with no normal to compare against.
   - RSW's 2024 total (57.92 in over 314 days) clears the 300-day floor. The two full-year Lee and Collier stations read 80.46 in and 65.96 in that year.
+  - Naples COOP (USC00086078) is dropped every year (day_count 275 in 2024 and 205 in 2025, run 33977468020 log). Collier's side of the average is one airport station.
 - Severity: product thinness. Nothing is wrong, but the number is weak.
 
 ### P17. GHCN downloads about 3.4 GB each month to read 4 stations
@@ -366,10 +377,23 @@ Result: 103 passed in 4.50s.
   - `fema-nfip-source.mts:69`.
   - `hurricane-tracks-fl.mts:153`.
   - `lib/demo/live-loaders.ts:153-155`.
-- Two runs were killed by timeouts (07/05 and 07/14) on the full-state pull.
+- Two runs were killed by timeouts. 07/05 (28744412719) hit the 30-minute ceiling with no visible log (`fema-nfip-quarterly.yml:21-27`). 07/14 (29359639709) hit the 45-minute ceiling, but not on the pull: its log shows the fetch finished in about 3 minutes (`fetched 10,000` at 18:53:51, `fetched 448,425` at 18:56:52), then "Promoting 448,425 rows" ran from 18:57:01 until the kill at 19:38. Second-Opus correction: the first draft said both kills were "on the full-state pull". The workflow comment at `:28-32` attributes it to retry math; the log says the 448,425-row write. Narrowing to the 3 counties cuts that write to about 63,000 rows.
 - Severity: efficiency. It is mitigated by the 90-minute ceiling (`fema-nfip-quarterly.yml:33`).
 
-Problems counted: 18.
+### P19. Served FEMA citations point at the v2 endpoint that dies 10/15/2026
+
+- Symptom: `grep -rn "FimaNfipClaims\|fima-nfip-redacted-claims-v2" refinery lib app` finds v2 source URLs in served provenance: `refinery/packs/env-swfl.mts:518` and `:1241` (`FEMA_NFIP_TABLE_URL` / `_FOR_ZIP` = `.../api/open/v2/FimaNfipClaims`), `refinery/tools/build-corridor-fact-pack.mts:775` and `:805`, and `lib/charts/hurricane-series.ts:108` (the `fima-nfip-redacted-claims-v2` page).
+- Root cause: the URLs are hardcoded strings, separate from `ingest/pipelines/fema/constants.py:1`.
+- Severity: blocks a consumer's provenance. After 10/15 every citation link on those surfaces is dead, even once item 2 lands v3 data.
+- First seen: this pass (second Opus).
+
+### P20. A dropped view is still live
+
+- Symptom: `data_lake.fema_nfip_claims_swfl` exists as a VIEW (`select table_name, table_type from information_schema.tables where table_schema='data_lake' and table_name like 'fema_nfip%'`), yet `migrations/20260811_drop_confirmed_dead_corpses.sql:8` drops it. No code reads it; the only mention is a comment at `refinery/sources/fema-nfip-source.mts:35`.
+- Severity: cosmetic.
+- First seen: this pass (second Opus).
+
+Problems counted: 20.
 
 ## 5. What is missing
 
@@ -398,6 +422,8 @@ Problems counted: 18.
 - Year-to-date 2026 rainfall. The partial year is dropped by the 300-day floor.
 - TMAX and TMIN are in the same files at zero extra cost (`cadence_registry.yaml:1666`).
 - A Hendry station.
+- A working second Collier station. Naples COOP never clears the 300-day floor (§2).
+- A consumer test. There is no `refinery/sources/noaa-ghcn-rainfall-source.test.mts` and no `refinery/sources/usgs-water-source.test.mts` (`ls refinery/sources | grep -iE "ghcn|usgs"`). The other three family sources and packs have one (`storm-history-source.test.mts`, `fema-nfip-source.test.mts`, `env-swfl.test.mts`, `hurricane-tracks-fl.test.mts`, `storm-history-swfl.test.mts`).
 
 ### fema
 
@@ -423,7 +449,7 @@ Problems counted: 18.
   - Reason: the endpoint is removed on 10/15/2026, and the pipeline hides failures behind exit 0.
   - Number that would change the verdict: a v3 landing with a 3-county count of at least 63,401 and `max(date_of_loss)` on or after 08/23/2026.
 - `hurdat2_fl`: REPAIR.
-  - Reason: a season behind the source, with no scheduled catch-up until 06/01/2027.
+  - Reason: a season behind the source because the filename regex cannot see NHC's 8-digit-suffix files (P5), with no scheduled catch-up until 06/01/2027.
   - Number that would change the verdict: inventory vintage `1851-2025`.
 - `usgs`: REPAIR.
   - Reason: working today on a service with a published Q1 2027 shutdown and possible degradation before then. It also has no volume floor.
@@ -453,9 +479,12 @@ Items are ordered by deadline. Every lane below is Lane D unless stated otherwis
      - `resources.py:72` becomes `str(raw.get("id"))`.
      - Keep `state eq 'FL'` and the 16-field `$select`. All 16 names appear on the v3 page. The 403,542 floor stays valid against v3's 448,618.
      - Update `cadence_registry.yaml:787-805` (source_url, confirmed_total).
+     - Repoint the served citation URLs to v3 in the same change (P19): `refinery/packs/env-swfl.mts:518` and `:1241` become `https://www.fema.gov/api/open/v3/NfipClaims`, and `refinery/tools/build-corridor-fact-pack.mts:775`, `:805` and `lib/charts/hurricane-series.ts:108` become `https://www.fema.gov/openfema-data-page/nfip-redacted-claims-v3` (the `depNewUrl` the live v2 payload names). Provenance text that says "FimaNfipClaims" becomes "NfipClaims".
+     - Time one full v3 page in the dry run before the 10/05 cron. The first draft measured a `$top=10000` FL page at 14.3s; the second Opus's probe with the pipeline's exact 16-field `$select` was still downloading at the 90s curl limit (1,884,160 bytes). One sample each, so no conclusion about v3 speed; the per-request `timeout=240` (`resources.py:215`) and the 90-minute job ceiling must be checked against a real page time.
    - Lane: D, plus a Lane C review. Effort: M.
    - Proof:
      - Dispatch with `dry_run=true` (read-only by code, `pipeline.py:24-32`), then a real dispatch.
+     - `grep -rn "FimaNfipClaims\|fima-nfip-redacted-claims-v2" refinery lib app ingest` returns nothing outside tests.
      - Then run `select county_code, count(*), max(date_of_loss) from data_lake.fema_nfip_claims where county_code in ('12071','12021','12051') group by 1` and expect a sum of at least 63,401 and a max of 08/23/2026 or later.
    - Unblocks: P1, P3, and fresh claims for env-swfl and hurricane-tracks-fl.
 3. FEMA cadence to monthly. DO.
@@ -465,13 +494,16 @@ Items are ordered by deadline. Every lane below is Lane D unless stated otherwis
    - Unblocks: P4.
 4. HURDAT2 catch-up and monthly self-probe. DO.
    - What:
-     - Dispatch `hurdat2-annual.yml` for real now. The parser fix is already on main (4ef6c071).
-     - Change the cron to `0 13 1 * *`. The run itself is the source probe, because `_latest_hurdat2_url` always takes the newest file. Cost is one index GET plus one file download per month; the full run took about 1m16s on 06/01 (26774116273).
-     - Set `cadence_days: 30` at `cadence_registry.yaml:359`.
+     - Fix the filename regex first (second-Opus correction). At `hurdat2_fl/pipeline.py:48-50` accept both suffix forms, `(\d{6}|\d{8})`, and in `_latest_hurdat2_url` (`:58-87`) parse 6 digits as MMDDYY and 8 digits as MMDDYYYY. Then make it fail loud: if any link in the index matches the loose pattern `hurdat2-1851-\d{4}-\d+\.txt` but not the strict one, raise. A new naming shape then turns the run red instead of silently re-landing an old vintage. Add both names (`...-02272026.txt`, `...-091226.txt`) to `test_parse_hurdat2.py`.
+     - Then dispatch `hurdat2-annual.yml` for real. The parser fix for the `091226` typos is already on main (4ef6c071). With both files visible, the sort key (end_year, publish date) picks `091226` (09/12/2026) over `02272026` (02/27/2026).
+     - Change the cron to `0 13 1 * *`. After the regex fix, the run is the source probe: `_latest_hurdat2_url` takes the newest file it can parse, and the loose-pattern raise covers the files it cannot. The first draft's claim that it "always takes the newest file" was false before this fix (P5). Cost is one index GET plus one file download per month; the full run took about 1m16s on 06/01 (26774116273 createdAt 18:31:59Z, updatedAt 18:33:15Z).
+     - Set `cadence_days: 30` at `cadence_registry.yaml:359` and `tolerance_multiplier: 2.0` at `:360` (currently 1.5; §8 relies on 30 x 2 = 60 days).
+     - Pass `max_period_end=f"{end_year}-12-31"` to `upsert_inventory_row` (existing parameter, `ingest/lib/tier1_inventory.py:81`), so the inventory row shows which season landed.
      - Add a floor before the `COPY` at `pipeline.py:151`, not after it (the current `row_count` at `:170-173` is read after the overwrite). Count the filtered set with `SELECT count(*) FROM hurdat_raw WHERE storm_id IN (<same FL-bbox subquery>)`, then call `assert_min_rows(n, 12500, ...)`. 12,500 is about 90% of today's 13,907.
      - Change the cron only. Keep the file name `hurdat2-annual.yml` and `name: HURDAT2 FL annual`, for the same reasons as item 3.
    - Lane: D. Effort: S.
    - Proof: `select vintage, updated_at from data_lake._tier1_inventory where id='lake-tier1/environmental/hurdat2_fl.parquet'` returns `1851-2025`.
+   - Proof (regex): `ingest/.venv/Scripts/python.exe -m pytest -q ingest/duckdb_pipelines/hurdat2_fl/test_parse_hurdat2.py` passes with new cases asserting that `hurdat2-1851-2025-02272026.txt` parses and that an unparseable `hurdat2-1851-*` link raises.
    - Unblocks: P5 and P7.
 5. Rebuild hurricane-tracks-fl. DO, after item 4.
    - What: `gh workflow run daily-rebuild.yml -f pack_id=hurricane-tracks-fl`. This is one brain only: never `master --force`.
@@ -483,11 +515,13 @@ Items are ordered by deadline. Every lane below is Lane D unless stated otherwis
    - What:
      - `constants.py:7` becomes `YEAR_RANGE_END = datetime.now(timezone.utc).year`, with VINTAGE derived from it.
      - `_list_noaa_urls` already takes the newest compile date per year (`pipeline.py:56`). Two-digit year parsing in the consumer already maps 26 to 2026 (`storm-history-source.mts:181-184`).
+     - Add the content guard that makes this monitorable (second Opus): after the staged count (`pipeline.py:125-126`), call `assert_content_fresh(<max BEGIN_YEARMONTH as YYYY-MM-01>, 270, "storm_events_swfl")` from `ingest/lib/guards.py:139`. NCEI's current-year file runs about 3 months behind (the 09/18/2026 compile holds events through 202606), so 270 days trips only when a whole year is missed. Also pass `max_period_end` to the inventory upsert.
    - Lane: D. Effort: S.
    - Proof: DuckDB `select max(BEGIN_YEARMONTH) from read_parquet('s3://lake-tier1/environmental/storm_events_swfl.parquet')` returns 202606 or later.
    - Unblocks: P8.
 7. Storm events land Hendry. DO.
-   - What: add `HENDRY` to `constants.py:15`, and widen the zone regex at `constants.py:41` to `^((COASTAL|INLAND) )?(LEE|COLLIER|HENDRY)( COUNTY)?$`. Leave Charlotte, since the consumer already filters it.
+   - What: add `HENDRY` to `constants.py:15`, and widen the zone regex at `constants.py:41` to `^((COASTAL|INLAND) )?(LEE|COLLIER|CHARLOTTE|HENDRY)( COUNTY)?$`. Leave Charlotte, since the consumer already filters it. (Second-Opus correction: the first draft's regex dropped CHARLOTTE, which would have deleted the 27 Charlotte zone rows while saying it left Charlotte alone.)
+   - Expected yield from the two newest files: +1 Hendry row from 2026 and +4 from 2025, all county rows (P9). Zone rows add nothing from those years.
    - Lane: D. Effort: S.
    - Proof: `select count(*) from read_parquet(...) where CZ_NAME like '%HENDRY%'` returns more than 0.
    - Unblocks: item 8.
@@ -497,6 +531,7 @@ Items are ordered by deadline. Every lane below is Lane D unless stated otherwis
    - Proof: `bun test refinery/sources/storm-history-source.test.mts`, then a `pack_id=storm-history-swfl` rebuild.
 9. USGS volume floor. DO.
    - What: before `COPY usgs_daily` (`usgs/pipeline.py:130`), fail if `daily_count` is under 90% of the previous Parquet's `count(*)`. Read the previous count with the same DuckDB connection, and use `ingest/lib/guards.py` `assert_vs_canonical`, as fema already does.
+   - Also before the COPY (second Opus): `assert_content_fresh(<max(obs_date) where parameter_cd='00065'>, 21, "usgs 00065")` from `ingest/lib/guards.py:139`. The 09/20 run's newest reading was 09/18, 2 days old. A service that answers 200 with stale or empty 00065 then fails the run. Pass the same date as `max_period_end` to the inventory upsert at `usgs/pipeline.py:164-171`.
    - Lane: D. Effort: S.
    - Proof: a new unit test with a mocked empty parameter raises `VolumeGuardError`, run with `pytest -q ingest/tests/duckdb_pipelines/usgs`.
    - Unblocks: P13.
@@ -505,7 +540,7 @@ Items are ordered by deadline. Every lane below is Lane D unless stated otherwis
       - Rewrite `usgs/fetch.py` against `https://api.waterdata.usgs.gov/ogcapi/v1/collections/daily` and `/monitoring-locations`.
       - Map fields per the migration guide: `monitoring_location_number` to site_no, `parameter_code`, `statistic_id`, `county_code`, `hydrologic_unit_code`.
       - Pass the key via the `X-Api-Key` header from a new GHA secret.
-      - Keep the Parquet schema identical, so `usgs-water-source.mts` does not change.
+      - Keep the Parquet schema identical, so the query in `usgs-water-source.mts` does not change. The first draft said the file needs no change at all. That is wrong: its served provenance string (`usgs-water-source.mts:258`) interpolates `API_BASE = "https://waterservices.usgs.gov/nwis"` (`:44`). Repoint both in the same change, along with the inventory `source_url` literals at `usgs/pipeline.py:170` and `:183`.
       - Replace the 27-year full refetch with an incremental last-N-days pull merged into the existing Parquet, if the paging math under the rate limit requires it. Measure it first with one dry run.
     - Lane: D, plus a Lane C review. Effort: L.
     - Proof: a green scheduled run with the inventory `source_url` on api.waterdata.usgs.gov, and env-swfl's `swfl_sw_stage_caloosahatchee_ft` date within 3 days of the run.
@@ -522,7 +557,7 @@ Items are ordered by deadline. Every lane below is Lane D unless stated otherwis
 13. Classify vendor 5xx as TRANSIENT. DO. The file is owned by family 19; this family supplies the failure shape.
     - What: add `50[234] Server Error|Service Unavailable|Bad Gateway|Gateway Time-?out` to the regex at `.github/scripts/classify-cron-failure.mjs:199`. A vendor 503 then gets the L0 retry and never reaches the model narrative.
     - Lane: D. Effort: S.
-    - Proof: a classifier test fed the 09/10 log line `requests.exceptions.HTTPError: 503 Server Error` returns `TRANSIENT`: `node --test .github/scripts/`.
+    - Proof: a classifier test fed the 09/10 log line `requests.exceptions.HTTPError: 503 Server Error` returns `TRANSIENT`: `node --test .github/scripts/classify-cron-failure.test.mjs` (the run line in that file's own header, line 2).
     - Unblocks: part of P15.
 14. Close the stale noise. DO.
     - What:
@@ -536,6 +571,7 @@ Items are ordered by deadline. Every lane below is Lane D unless stated otherwis
       - Rewrite usgs `confirmed_total` and `source_ceiling` (`:403-408`): 2 live parameters, statewide, 23 sites in the 3 counties with data.
       - Fix the fema comment at `:796`. It cites `inserted_at`, which the table does not have; freshness keys on `_dlt_loads`.
       - Add matching lines to `docs/standards/data-roots.md` (usgs, storm_history_swfl, fema) and to `docs/standards/data-inventory.md:126` (fema source now v3).
+      - Replace "~1,178 live rows" at `docs/standards/data-roots.md:1813` and the "~1,178 county rows" comment at `storm_history_swfl/constants.py:31` with the measured 1,106 total and 991 county rows (P10).
     - Lane: D. Effort: S.
     - Proof: `git diff --stat` on the three files, and a `grep -n "Waterspout" ingest/cadence_registry.yaml` that no longer says "excludes".
 16. GHCN per-station fetch plus history backfill. DO. The row shape is unchanged; the table gains older years.
@@ -544,6 +580,7 @@ Items are ordered by deadline. Every lane below is Lane D unless stated otherwis
       - Request `includeAttributes=true&units=metric`. The service then returns `PRCP_ATTRIBUTES` as `mflag,qflag,sflag,obstime` in millimetres, so the existing Q-flag drop and 300-day floor carry over unchanged. Divide by 25.4, not 254.
       - Keep the 300-day floor and the merge disposition.
       - Backfill station-years from 1991 once.
+      - During the backfill, print Naples COOP's (USC00086078) per-year day counts. If it stays under 300 as in 2024 and 2025 (§2), drop it from `ANCHOR_STATIONS` (`constants.py:17-22`), so the lake stops fetching a station that never lands, and note that Collier has one anchor.
     - Lane: D. Effort: M.
     - Proof:
       - Parity first: each station's 2025 total must equal the current rows (38.26, 39.16, 41.73 in), with day_count 365. One station has already been checked: a live pull for USW00012835 over 2025 with Q-flagged days dropped gave 365 days and 38.26 in, matching the lake row.
@@ -558,8 +595,18 @@ Items are ordered by deadline. Every lane below is Lane D unless stated otherwis
     - What: a second small resource in `ingest/pipelines/fema/` pulls `https://www.fema.gov/api/open/v1/NfipResidentialPenetrationRates` for the 3 counties. `fema-nfip-source.mts:171` then reads the table instead of the hardcoded map.
     - Lane: D. Effort: M.
     - Proof: `select * from data_lake.fema_nfip_penetration_rates where county_fips in ('12071','12021','12051')`.
+19. Consumer tests for the two untested sources. DO. Added by the second Opus.
+    - What: add `refinery/sources/noaa-ghcn-rainfall-source.test.mts` and `refinery/sources/usgs-water-source.test.mts`. Assert the served number from a fixture: the 3-station 2025 mean (39.72 in) and the latest-date median across Caloosahatchee gages. Add these before items 10, 16 and 17 change the rows.
+    - Lane: D. Effort: S.
+    - Proof: `bun test refinery/sources/noaa-ghcn-rainfall-source.test.mts refinery/sources/usgs-water-source.test.mts`.
+    - Unblocks: parity proof for items 10 and 16.
+20. Drop the orphan view `data_lake.fema_nfip_claims_swfl`. ASK-FIRST, because it is a schema drop. Added by the second Opus.
+    - What: re-apply `migrations/20260811_drop_confirmed_dead_corpses.sql:8`, which is idempotent (`DROP VIEW IF EXISTS`).
+    - Lane: D. Effort: S.
+    - Proof: `select count(*) from information_schema.tables where table_schema='data_lake' and table_name='fema_nfip_claims_swfl'` returns 0.
+    - Unblocks: P20.
 
-Totals: 14 DO (items 1–7, 9, 10, 12–16) and 4 ASK-FIRST (items 8, 11, 17, 18).
+Totals: 15 DO (items 1–7, 9, 10, 12–16, 19) and 5 ASK-FIRST (items 8, 11, 17, 18, 20).
 
 ## 8. Checks and balances
 
@@ -572,22 +619,26 @@ The incident issue is one per workflow, not one per run. `log-cron-incident.mjs:
 - Signal: the run's own exit code (after item 1) feeds the existing `log-cron-incident` → `cron_incident_fema_nfip_quarterly` check.
 - It auto-closes on the next scheduled green (`log-cron-incident.mjs:143-173`).
 - Registry change: `cadence_days: 30` (item 3). The freshness probe then goes STALE 60 days after the last `_dlt_loads` row, not 180. No new field is needed.
-- The existing guards are enough to protect the served number: the zip and flood-zone null-rate guards (`resources.py:124-157`), `expected_rows_min: 403542`, and `assert_vs_canonical` at 0.95.
+- The existing guards protect the table: the zip and flood-zone null-rate guards (`resources.py:124-157`), `expected_rows_min: 403542`, and `assert_vs_canonical` at 0.95. They raise before the replace. Second-Opus qualifier: until item 1 lands, the swallow at `pipeline.py:12-15` also catches their raises, so a guard trip is a green run and the signal never fires (P2). The guards are a sufficient signal only after item 1.
 
 ### hurdat2_fl
 
-- Signal: the existing tier-1 freshness on `_tier1_inventory.updated_at`, with `cadence_days: 30` and `tolerance_multiplier: 2.0` (item 4).
-- The monthly run always re-reads NHC's newest file, so "stale" now also means "a newer vintage went unread for 60 days".
+- Signal (corrected by the second Opus): the run's own exit code, feeding the existing `log-cron-incident` path and the `cron_incident_hurdat2_annual` check (key derived at `log-cron-incident.mjs:56-59` from the file name). Item 4 makes the run fail on three things: an index link it cannot parse, a volume floor miss, and a parser error.
+- Why not tier-1 freshness: it reads `_tier1_inventory.updated_at`, which `tier1_inventory.py:67` stamps `now()` on every upsert. It proved the 06/01 run executed, not that it landed the newest vintage, and it read FRESH while a 2025-season file sat unread for 88 days. The first draft's line that "stale now also means a newer vintage went unread for 60 days" was false and is removed.
+- Freshness (`cadence_days: 30`, `tolerance_multiplier: 2.0`, item 4) stays only as the backstop for "the run did not happen at all". It is not a second signal.
+- `max_period_end` (item 4) makes the landed season visible on the inventory row, and so on the ops coverage page, without a new field.
 - The volume floor sits inside the pipeline, because `check_freshness.py:451` skips tier-1 volume.
 
 ### storm_history_swfl
 
-- Signal: the existing tier-1 freshness (30 x 2), plus the in-pipeline `assert_min_rows` floors (`pipeline.py:125-126`). Both already exist.
-- The only change: item 6 removes the manual year bump that could not be monitored.
+- Signal (corrected by the second Opus): the run's exit code, feeding `cron_incident_storm_history_monthly` via `log-cron-incident`. The run fails on the existing `assert_min_rows` floors (`pipeline.py:125-126`) plus the new `assert_content_fresh` guard on `max(BEGIN_YEARMONTH)` (item 6).
+- Tier-1 freshness (30 x 2) stays as the did-it-run backstop. It could not see the 2025 cap, for the same `updated_at = now()` reason as hurdat2. Before item 6 the guard would have tripped: the Parquet's newest month, 202510, is about 360 days old on 09/26/2026.
+- Item 6 also removes the manual year bump.
 
 ### usgs
 
-- Signal: the existing tier-1 freshness (30 x 2), plus the new in-pipeline floor (item 9). A partial pull then fails the run instead of silently replacing the Parquet.
+- Signal: the run's exit code, feeding `cron_incident_usgs_monthly`. After item 9 the run fails on the volume floor or on a stale `max(obs_date)` for 00065. A partial or stale pull then fails the run instead of silently replacing the Parquet.
+- Tier-1 freshness (30 x 2) stays as the did-it-run backstop only (same `updated_at` limitation).
 - Vendor 5xx gets one L0 retry (item 13) before any check opens.
 
 ### noaa_ghcn_rainfall
@@ -624,7 +675,7 @@ All five stay on GHA `ubuntu-latest`. None is on the Fedora box today (`runs-on:
   - The 503s at skip=0 on 08/02 were FEMA-side: the same URL family answered 200 from this Windows box today, and our 08/02 research saw v3 503 as well. A residential IP is not shown to help.
   - The 90-minute ceiling fits GHA.
 
-Nothing already on the box belongs to this family.
+Nothing already on the box belongs to this family (`grep -ln "swfl-local" .github/workflows/*.yml | xargs grep -liE "fema|hurdat|storm|usgs|ghcn|rainfall|nfip"` returns nothing). No pipeline moves, so the `SWFL_LOCAL_RUNNER_READY` gate and the `[self-hosted, swfl-local]` label do not apply to this family.
 
 ## 10. Compute lane per LLM leg
 
@@ -638,7 +689,7 @@ grep -rniE "anthropic|claude|ANTHROPIC_API_KEY|openai|refinery|llm|ollama" inges
 
 Result: three hits, all the word "refinery" in paths and comments. The hits are at `storm_history_swfl/make_fixture.py:1`, `:16` and `noaa_ghcn_rainfall/resources.py:170`. There are zero model calls.
 
-The `anthropic` and `openai` packages in `ingest/requirements.txt` are installed on every run, but they are package installs, not calls.
+The `anthropic` package (`anthropic>=0.49.0`, `ingest/requirements.txt:8`) is installed on every run; run 30766166374's log shows `Downloading anthropic-0.120.2`. It is a package install, not a call. The first draft also named `openai`; `grep -niE openai ingest/requirements.txt` returns nothing, so that was corrected by the second Opus. The same requirements file also installs `crawl4ai==0.9.0` (`:19`) on every run, which this family never imports.
 
 ### Consumer brains
 
@@ -651,7 +702,8 @@ The `anthropic` and `openai` packages in `ingest/requirements.txt` are installed
 This leg does not live in the family:
 
 - What: `heal-cron-failure.mjs --mode=diagnose` writes a Haiku narrative on any failure classified UNKNOWN (`.github/scripts/heal-cron-failure.mjs:7`, `:214-231`; `heal-cron-failure.yml:191`).
-- Current auth: the ANTHROPIC_API_KEY secret, with a deterministic-diagnosis fallback when the key is absent (`heal-cron-failure.mjs:214-215`).
+- Current auth: an API-key secret wired at `heal-cron-failure.yml:191`. Any model error, or a missing key, degrades to the deterministic comment (`heal-cron-failure.mjs:166-169` catches the error and posts `buildComment` without the narrative; `:214-215` skips the call when the key is absent).
+- Permitted lane for this family: Lane D, meaning that deterministic comment path, which already exists and needs no model. Nothing in family 05 needs the narrative.
 - Replacement for this family: none needed. Item 13 makes this family's only observed UNKNOWN shape (a vendor 503) deterministic TRANSIENT, so the leg stops firing for family 05.
 - The leg's lane for the other families belongs to family 19.
 
@@ -690,8 +742,8 @@ Each numbered claim was re-verified this session; the command or file for each i
 
 ### Source-side facts
 
-- NHC `hurdat2-1851-2025-091226.txt` exists: `curl -s https://www.nhc.noaa.gov/data/hurdat/ | grep -oE 'hurdat2-...'`. Verified.
-- NCEI 2026 file `c20260918`, 202601–202606, 20 core-county rows, Hendry zone name `HENDRY`: `curl` of the index plus a DuckDB `read_csv_auto` of that file. Verified.
+- NHC `hurdat2-1851-2025-091226.txt` exists: `curl -s https://www.nhc.noaa.gov/data/hurdat/ | grep -oE 'hurdat2-...'`. Verified. The second Opus found the same index also lists `hurdat2-1851-2025-02272026.txt` (posted 03/05/2026), which the first draft missed; P5 is corrected.
+- NCEI 2026 file `c20260918`, 202601–202606, Hendry zone name `HENDRY`: `curl` of the index plus a DuckDB `read_csv_auto` of that file. Verified. The first draft's "20 core-county rows" was corrected to 10 rows under the current filter by the second Opus (see §13).
 - FEMA v2 deprecation 10/15/2026 and frozen as of 06/01/2026: `curl ...v2/FimaNfipClaims?$top=1...` metadata. Verified.
 - FEMA v3 endpoint, monthly refresh, all 16 fields present, FL count 448,618, 3-county count 63,401, newest loss 08/23/2026, id an integer, key `NfipClaims`: crawl4ai of `nfip-redacted-claims-v3` plus `curl ...v3/NfipClaims`. Verified.
 - USGS decommission Q1 2027, no degradation before August 2026, Campaign 3 from 11/2026 to 02/2027: crawl4ai of `waterservices.usgs.gov` and the decommission blog. Verified.
@@ -727,7 +779,226 @@ Each numbered claim was re-verified this session; the command or file for each i
 
 Totals: 36 claims checked (the top-level bullets in this section minus the 2 method bullets), 10 corrections applied (the fema green, the usgs county codes, the usgs v0/v1 URL, the GHCN 2024 size, the per-file line numbers, the registry/resources citations, the unmeasured HURDAT2 size, the HURDAT2 floor order, the classifier regex, the rename option), 2 could not be verified (the FEMA 07/15 origin and the 05/26 FEMA log).
 
+### Second-Opus re-run (09/26/2026)
+
+Method: the first Opus's read-only scripts, re-run unchanged:
+
+- `w05_weather_q.mts`: Bun.SQL with `default_transaction_read_only = on`, credentials from `.dlt/secrets.toml` as in `scripts/apply-fdic-sod-view.mts:15-27`.
+- `w05_parquet_probe.py`: DuckDB over S3.
+
+New throwaway probes, all in the scratchpad and never committed:
+
+- `v05_probe.py` and `v05_probe2.py`.
+- `v05_ncei2.py`: a local DuckDB read of the two downloaded NCEI files through the pipeline's own `swfl_filter_sql()`.
+
+- Registry, 12 claims. Verified with `grep -n "name: ..." ingest/cadence_registry.yaml` plus `sed -n`:
+  - the name lines 355, 374, 393, 787 and 1639;
+  - lane, cadence_days and tolerance for all five;
+  - fema `expected_rows_min: 403542` and `count_table`;
+  - ghcn `expected_rows_min: 6`.
+- Workflows, 11 claims. Verified with `grep -nE "cron:|runs-on|timeout-minutes"`:
+  - 5 crons;
+  - 5 `runs-on: ubuntu-latest` lines (hurdat2 :23, storm :23, usgs :22, ghcn :23, fema :20);
+  - the fema timeout of 90 at `:33`.
+- Run tallies, 5 claims. Verified with `gh run list --workflow <file> --limit 15 --json databaseId,status,conclusion,createdAt,event`:
+  - hurdat2: 4 runs (2 green, 2 red).
+  - storm: 10 (8, 2).
+  - usgs: 9 (6, 3).
+  - ghcn: 4 of 4.
+  - fema: 9 (2 success, 3 cancelled, 4 failed).
+- Run log lines, 12 claims. Verified with `gh run view <id> --log | grep`:
+  - 30766166374: 503 retries 1/5 to 5/5, then "Skipping."
+  - 34503836892: `503 Server Error:  for url: https://waterservices.usgs.gov/nwis/dv/?stateCd=FL&parameterCd=72019...`
+  - 35490402310: 4,744,886 daily rows and 861 sites.
+  - 35490123910 and 35493242865: the dry-run temp-dir lines.
+  - 34507606815: "staged rows: 1,106 (hurricane/TS: 62)".
+  - 26457898517 and 26457889327: `KeyError: 'SUPABASE_S3_ENDPOINT'`.
+  - 27480901331: 448,425 rows fetched, 99.7% zip non-null, "Tier 2 load complete."
+  - 29359639709: fetched 448,425, then "Promoting".
+  - 33977468020: Naples COOP DROPPED at 275 and 205 days.
+- Run durations, 5 claims. Verified with `gh run view <id> --json createdAt,updatedAt`:
+  - 26774116273: 1m16s.
+  - 27480901331: 5m36s.
+  - 34507606815: 1m44s.
+  - 33977468020: 5m06s.
+  - The 07/05 and 07/14 FEMA kills: 30m and 45m. The 07/14 cause is corrected in P18.
+- Lake, 14 claims. Verified:
+  - FEMA: 448,425 rows, loss dates 01/01/1978 to 05/31/2026, 1 distinct load.
+  - FEMA by county: 48,455 / 14,761 / 132 rows, with latest losses 04/10/2026, 04/26/2026 and 09/26/2024. The sum is 63,348.
+  - FEMA `_dlt_loads` load 1784083386.742025 at 07/15/2026 04:09Z.
+  - GHCN: 6 rows with the listed values, the 4 monthly loads, and `_ingested_at` 09/05/2026 16:20Z.
+  - Inventory: vintages `1851-2024` / `1996-2025` / `2000-2026`; updated_at 06/01 18:33Z, 09/10 17:22Z and 09/20 05:09Z; byte sizes 797 and 2112.
+  - The first query's unaliased `count` and `max` columns collided in the JSON output, so it was re-run with aliases.
+- Parquet, 12 claims. Verified, with one correction:
+  - hurdat2: 13,907 rows, 447 storms, 1851–2024. The byte sum of 66,673 matches its inventory row.
+  - storm: 1,106 rows, 199602–202510, with the county and type splits. Flood 74 C and Waterspout 58 C. Hurricane plus TS is 21 + 41 = 62. Hendry 0. The byte sum is 177,514 against a LIMIT-1 value of 797.
+  - usgs: 4,744,886 rows, 583 sites, 01/01/2000 to 09/18/2026, and the per-parameter split. The byte sum is 8,564,272.
+  - usgs sites: 861 in total, 29 / 31 / 20 in the 3 counties. 170,208 rows come from 23 sites. There are 22 Caloosahatchee catalog sites.
+  - Corrected: 6 Caloosahatchee sites report on 09/18/2026, not 7.
+- Source side, 17 claims. Commands: `curl`, `curl -sI`, a local DuckDB probe and `codex --help`. Verified, except the 3 items listed as unverifiable in §13:
+  - FEMA v2: the deprecation block (depDate 10/15/2026, "frozen as of 06/01/2026"); FL count 448,425.
+  - FEMA v3: FL count 448,618; 3-county count 63,401; newest loss 08/23/2026 (id 7729927, Collier); integer ids; key `NfipClaims`; all 16 `$select` fields accepted.
+  - NHC index: files `040425`, `02272026` and `091226`, posted 04/04/2025, 03/05/2026 and 09/17/2026.
+  - NCEI: `d2026_c20260918` covers 202601–202606; `d2025_c20260819` is the newest 2025 file; 2025 has 4 Hendry C rows and 5 Hendry Z rows.
+  - GHCN file sizes: 1,336,457,184 / 1,261,318,513 / 818,788,575 bytes.
+  - Per-station parity: USW00012835 for 2025 gives 365 days and 38.26 in.
+  - USGS: the blog's 3 decommission phrases, and OGC v1 `daily` answers 200.
+  - `codex-cli 0.157.0` has `review`.
+- Code citations, 64 claims. Every `file:line` in §1–§10 was opened with `sed -n`. All verified except one: `brains/hurricane-tracks-fl.md:4` is really `:5`.
+  - fema (11): `pipeline.py:12-15` and `:24-32`; `resources.py:72`, `:124-157`, `:161`, `:176`, `:199-214`, `:239`, `:255-256` and `:261-264`; `constants.py:1`.
+  - hurdat2 (4): `:58`, `:151`, `:167`, `:170-173`.
+  - storm (9): constants `:7`, `:15`, `:20-28`, `:41`; pipeline `:56`, `:90`, `:108-117`, `:125-126`, `:132`.
+  - usgs (9): constants `:5`, `:38`; fetch `:20-36`, `:80`; pipeline `:100`, `:113`, `:126-130`, `:162`, `:175`.
+  - ghcn (7): constants `:6`, `:17`, `:36`, `:40`; pipeline `:37-54`; resources `:62-76`, `:123-143`.
+  - Freshness: `check_freshness.py:362-363`, `:418`, `:451`.
+  - Classifier: `classify-cron-failure.mjs:193-197`, `:199`, `:214-217`.
+  - Incident path: `log-cron-incident.mjs:56`, `:131`, `:143-173`, `:217-227`; `lib/cron-run.mjs:11-17`.
+  - heal-cron: `heal-cron-failure.mjs:7`, `:214-215`; `heal-cron-failure.yml:191`.
+  - The 13 cited consumer lines: fema-nfip-source `:53-55`, `:69`, `:171`; hurricane-tracks-fl `:35`, `:151-154`; storm-history-source `:36`, `:51`, `:52-58`, `:181-184`; usgs-water-source `:42-43`, `:180`; ghcn-source `:26`; live-loaders `:153`.
+- Consumers, 5 claims. `grep -rln <table> refinery/sources refinery/packs refinery/tools lib app scripts` was run for all 7 table and view names. It found 1 missed reader, `lib/concoctions/defs/nfip-storm-years.ts:39`, and confirmed that the other claimed readers exist. Corrected in §1.
+- Docs and ledgers, 14 claims. Verified:
+  - Registry text: `cadence_registry.yaml:369`, `:388`, `:403-408`, `:796`, `:804`, `:1653-1660`, `:1666`.
+  - data-roots `:1771` ("~580 sites").
+  - data-roots `:1813` (Charlotte "removed 07/07/2026", "~1,178 live rows").
+  - data-roots `:1814` ("silently excludes Flood and Waterspout").
+  - `data-inventory.md:126`.
+  - `02-known-problems-ledger.md:89`.
+  - `cron-rebuild-failures.md:58` and `:65`.
+  - `_RESEARCH/data-and-ingest/2026-08-02-greenfield-scout-reliable-apis.md:54-76`.
+- Brains and rebuilds, 8 claims. Verified:
+  - refined_at: hurricane-tracks-fl 07/15/2026, storm-history-swfl 09/15/2026, env-swfl 09/20/2026.
+  - env-swfl serves 3.14 (`brains/env-swfl.md:270`) and 39.72 (`:289`).
+  - daily-rebuild last ran 08/12/2026 (`gh run list --workflow daily-rebuild.yml --limit 3`).
+  - The skip flags are set in the 3 packs, and the stages honor them at `2-triage.mts:40` and `3-synthesis.mts:26`.
+- Tests, 7 claims. Verified with `pytest -q ...` and `pytest -q --collect-only <path>`: 103 passed, split by path as 9 + 11 + 40 + 8 + 20 + 15.
+- Noise and LLM, 5 claims. Verified, with the `openai` claim corrected:
+  - `gh issue view 200` is OPEN with the label `cron-failure`.
+  - `node scripts/check.mjs list` shows `usgs_monthly_real_run_confirm` open.
+  - The family LLM grep returns 3 "refinery" hits and no call.
+  - `fema_nfip_claims` has no `inserted_at` column (`information_schema.columns`).
+  - `requirements.txt` has no `openai`.
+
+Second-pass total: 12 + 11 + 5 + 12 + 5 + 14 + 12 + 17 + 64 + 5 + 14 + 8 + 7 + 5 = 191 claims checked.
+
 ## 12. Questions for the operator
 
 1. A free USGS Water Data API key is required for the WaterServices migration (item 10). api.data.gov emails the key to whoever signs up at `https://api.waterdata.usgs.gov/signup`. Which address should own it? Once you have it, set it with `gh secret set USGS_WATERDATA_API_KEY`.
-2. The USGS lake copy is statewide, 4,744,886 rows, while the product serves one Caloosahatchee number from 7 gauges. Should the stored copy shrink to Lee, Collier, Hendry and the Caloosahatchee basin during the migration (item 11)? Or do you want the statewide water history kept for a future product?
+2. The USGS lake copy is statewide, 4,744,886 rows, while the product serves one Caloosahatchee number from 6 gauges (on 09/18/2026). Should the stored copy shrink to Lee, Collier, Hendry and the Caloosahatchee basin during the migration (item 11)? Or do you want the statewide water history kept for a future product?
+
+---
+
+## 13. Second-Opus verification
+
+Claims checked: 191. They are itemized in §11, under "Second-Opus re-run".
+
+### Corrections
+
+Each entry reads: what was wrong → what is right → evidence.
+
+1. P5 root cause.
+   - Wrong: the first draft blamed the June-only cron and a September publish.
+   - Right: NHC posted `hurdat2-1851-2025-02272026.txt` on 03/05/2026. `_HURDAT2_FILE_RE` (`hurdat2_fl/pipeline.py:48-50`) accepts only a 6-digit suffix, so the 06/01/2026 run silently re-landed `040425`.
+   - Evidence: the NHC index listing; `curl -sI` Last-Modified 03/05/2026 16:03:11 GMT; the regex test printing `False`; the inventory `source_url` ending in `...-040425.txt`.
+   - Also fixed in the intro, P5's first-seen date, P7, §6, item 4, §8 and §11.
+2. The `091226` file's date.
+   - Wrong: "published 09/12/2026".
+   - Right: posted 09/17/2026 21:02. The suffix encodes 09/12.
+   - Evidence: the index listing and `curl -sI` Last-Modified.
+3. Item 4's newest-file claim.
+   - Wrong: "`_latest_hurdat2_url` always takes the newest file".
+   - Right: that holds only once the regex accepts 8 digits and raises on unparsed links. Item 4 now does both.
+   - Evidence: the same regex test.
+4. Tolerance mismatch between item 4 and §8.
+   - Wrong: §8 said the 30 x 2.0 threshold came from item 4. Item 4 never set it, and the registry has 1.5 at `:360`.
+   - Right: item 4 now sets `tolerance_multiplier: 2.0`.
+   - Evidence: `grep -n tolerance_multiplier ingest/cadence_registry.yaml`.
+5. §8 signal for hurdat2, storm and usgs.
+   - Wrong: "tier-1 freshness catches a stale vintage".
+   - Right: it cannot. `tier1_inventory.py:67` sets `updated_at = now()` on every upsert. The signal is now the run's exit code from in-pipeline guards (`assert_content_fresh`, `guards.py:139`), feeding `cron_incident_<workflow>`.
+   - Evidence: `tier1_inventory.py:55-67`, and `max_period_end` is null on all 4 rows (SQL).
+6. §8 FEMA guards.
+   - Wrong: "the existing guards are enough".
+   - Right: only after item 1, because `pipeline.py:12-15` also swallows the guards' raises.
+   - Evidence: `pipeline.py:14` catches `Exception`, and the guards at `resources.py:261-264` raise.
+7. Caloosahatchee site count (§2, P14, §12 Q2).
+   - Wrong: "7 sites on the latest date".
+   - Right: 6 on 09/18/2026; 7 reported on 09/12 through 09/14.
+   - Evidence: DuckDB `select obs_date, count(distinct site_no) ... group by 1`.
+8. NCEI 2026 file rows (P8).
+   - Wrong: "20 county rows for Lee, Collier and Hendry".
+   - Right: 10 rows pass the current filter (9 Lee C plus 1 Charlotte C). 38 raw rows name one of the three counties.
+   - Evidence: `v05_ncei2.py` applying `swfl_filter_sql()`.
+9. Item 7 regex.
+   - Wrong: the regex dropped CHARLOTTE while the item said it left Charlotte alone.
+   - Right: `^((COASTAL|INLAND) )?(LEE|COLLIER|CHARLOTTE|HENDRY)( COUNTY)?$`.
+   - Evidence: `constants.py:41` against the item text.
+10. §10 packages.
+    - Wrong: "`anthropic` and `openai` packages".
+    - Right: only `anthropic>=0.49.0`, at `ingest/requirements.txt:8`.
+    - Evidence: `grep -niE openai ingest/requirements.txt` returns nothing.
+11. §1 reader count.
+    - Wrong: "3 non-brain readers".
+    - Right: 4. The missed one is `lib/concoctions/defs/nfip-storm-years.ts:39`, which reads `fema_nfip_county_year`.
+    - Evidence: `grep -rln fema_nfip_county_year refinery lib app scripts`.
+12. P6 citation.
+    - Wrong: `brains/hurricane-tracks-fl.md:4`.
+    - Right: `:5`.
+    - Evidence: `grep -n refined_at brains/hurricane-tracks-fl.md`.
+13. Item 10 scope.
+    - Wrong: "usgs-water-source.mts does not change".
+    - Right: its served provenance string (`:258`) interpolates the WaterServices `API_BASE` (`:44`), and `usgs/pipeline.py:170` and `:183` hardcode the same host.
+    - Evidence: `grep -n API_BASE refinery/sources/usgs-water-source.mts`.
+14. P18 timeouts.
+    - Wrong: "both timeouts on the full-state pull".
+    - Right: the 07/14 run finished its fetch in about 3 minutes and was killed during the 448,425-row promote (18:57:01 to 19:38).
+    - Evidence: `gh run view 29359639709 --log | grep -E "fetched 448|Promoting"`, and `fema-nfip-quarterly.yml:28-29`.
+15. Item 13 proof command.
+    - Wrong: `node --test .github/scripts/`.
+    - Right: `node --test .github/scripts/classify-cron-failure.test.mjs`.
+    - Evidence: the run line in that file's header, line 2.
+16. §11 first-pass NCEI bullet.
+    - Wrong: "20 core-county rows".
+    - Right: annotated with the corrected figure from correction 8.
+
+Also removed: a "Recommended model" blockquote and a "Parallel Safety" table that a PostToolUse formatter hook appended to this file during the pass. Both break the brief's no-blockquote, no-table rule.
+
+### Unverifiable claims (why)
+
+- The FEMA v3 `$top=10000` page taking 14.3s at 4,493,463 bytes.
+  - The second probe used the pipeline's exact 16-field `$select`. It was still downloading at the 90s curl limit, at 1,884,160 bytes.
+  - Timing varies from call to call, so item 2 now requires timing a real page in the dry run.
+- The USGS keys doc's `X-RateLimit-Limit: 1000`.
+  - An anonymous `curl -sI` of the OGC `daily` endpoint returned 200 with no rate-limit header.
+  - The keys doc was not re-crawled.
+- The OpenFEMA v3 page's "Last Data Refresh: 09-09-2026".
+  - Not re-crawled.
+  - The live v3 payload's `asOfDate` of 2026-09-08 is consistent with it.
+- Carried over from the first pass:
+  - The origin of the 07/15/2026 FEMA load. No GHA run matches it.
+  - The 05/26 FEMA failure log. It returns HTTP 410 (expired).
+
+### Gaps filled
+
+- P19 (new): served FEMA citations point at v2 URLs that die on 10/15/2026.
+  - The sites: `env-swfl.mts:518` and `:1241`, `build-corridor-fact-pack.mts:775` and `:805`, and `hurricane-series.ts:108`.
+  - Folded into item 2.
+- P20 (new): `data_lake.fema_nfip_claims_swfl` is still live, although `migrations/20260811_drop_confirmed_dead_corpses.sql:8` drops it.
+  - New item 20, ASK-FIRST because it is a schema drop.
+- P2 extended: the swallow hides guard trips too.
+- P7 extended: tier-1 freshness is blind to vintage in all 3 tier-1 pipelines. `max_period_end` exists and is unused.
+- P9 extended: the measured yield of the Hendry fix.
+- P10 extended: data-roots says `~1,178` rows against 1,106 live. Folded into item 15.
+- §2 and P16: Naples COOP never lands (275 and 205 days). Folded into item 16.
+- §5: there are no consumer tests for `noaa-ghcn-rainfall-source` or `usgs-water-source`. New item 19 (DO).
+- Items 6 and 9 gain `assert_content_fresh` guards and `max_period_end`.
+- §9 now states that no pipeline moves, so `SWFL_LOCAL_RUNNER_READY` and `[self-hosted, swfl-local]` do not apply. It includes the grep showing that nothing from this family is on the box.
+- §10 now names Lane D for the heal-cron leg in this family: the existing deterministic comment path at `heal-cron-failure.mjs:166-169`. It also notes that every run installs `crawl4ai==0.9.0`, which this family never uses.
+
+### Coverage and rule checks
+
+- All 5 pipelines (hurdat2_fl, storm_history_swfl, usgs, noaa_ghcn_rainfall, fema) appear in §2, §3, §4, §6, §7, §8 and §9. In §4, noaa_ghcn_rainfall is covered by P16 and P17, and storm_history_swfl by P8 through P11.
+- §8 has no per-run GitHub issue filing. `log-cron-incident.mjs:217-227` keeps one open issue per workflow.
+- Each pipeline has one signal on an existing seam: the `cron_incident_<workflow>` check, fed by the run's exit code.
+- The noise-to-delete list is concrete: issue #200, check `usgs_monthly_real_run_confirm`, and the UNKNOWN path for vendor 5xx.
+- The §10 LLM grep was re-run over the 5 pipeline dirs and 5 workflow YAMLs (`anthropic|claude|ANTHROPIC|openai|refinery`). It returned 3 hits, all the word "refinery", and no model call.
+- The credit-suggestion search (`grep -niE "credit|top up|top-up|console balance|api key funding|billing"`) found 0 sentences, so 0 were deleted or rerouted.

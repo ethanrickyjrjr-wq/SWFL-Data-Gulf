@@ -34,8 +34,9 @@ There are 5 pipelines, 5 workflow files, 5 lake tables and 4 consumer packs. Reg
   - Workflow: `.github/workflows/lee-permits-weekly.yml`.
   - Table: `data_lake.lee_building_permits`.
   - Consumer: `permits-swfl` (`refinery/sources/permits-source.mts` into `refinery/packs/permits-swfl.mts`).
-  - `permits-swfl` feeds master (`refinery/packs/master.mts:241`, edge `:302`) and `cre-swfl`, per `docs/standards/data-roots.md:1398`.
+  - `permits-swfl` feeds master (`refinery/packs/master.mts:241`, edge `:302`) and `cre-swfl`, per `docs/standards/data-roots.md:1398`. The code confirms the cre-swfl edge: `refinery/packs/cre-swfl.mts:2142,2147`. That pack reads permits-swfl's corridor-weighted z at `:1901-1909`, so P2 reaches cre-swfl too.
   - Side reader: `refinery/tools/build-corridor-fact-pack.mts:670,741`.
+  - Side writers, not consumers: `scripts/backfill_lee_permit_geocodes.py` and `scripts/backfill_mapbox_geocodes.py` UPDATE lat/lon/corridor in place. Both are one-time scripts, last touched 06/07/2026 (`git log -1 --format="%h %ad" --date=short -- scripts/backfill_mapbox_geocodes.py scripts/backfill_lee_permit_geocodes.py` printed `0ce3a58a 2026-06-07`). The Mapbox one hardcodes its coordinates (`scripts/backfill_mapbox_geocodes.py:11-15`) and makes no API call.
 - **`collier_permits`**
   - Registry: `:1200`.
   - Workflow: `.github/workflows/collier-permits-monthly.yml`.
@@ -56,7 +57,9 @@ There are 5 pipelines, 5 workflow files, 5 lake tables and 4 consumer packs. Reg
   - Table: `data_lake.lee_deed_official_records`.
   - Consumers:
     - `lee-deed-records-swfl` (`refinery/sources/lee-deed-records-source.mts`).
-    - Views `data_lake.lee_records_addressed_v` and `data_lake.lee_deed_purchase_financing_v`, per Q15. The second view is read by `refinery/lib/deed-financing-classifier.mts`.
+    - Views `data_lake.lee_records_addressed_v` and `data_lake.lee_deed_purchase_financing_v`, per Q15.
+    - The financing view is read by `refinery/sources/lee-deed-records-source.mts:150-158`. `refinery/lib/deed-financing-classifier.mts` does not query it; that module is the pure TypeScript mirror the view's SQL is tested against (`deed-financing-classifier.mts:6-11`).
+    - `lee_records_addressed_v` is a DARK view. It has 10,461 rows (`select count(*) from data_lake.lee_records_addressed_v`, 09/26), and `docs/standards/data-roots.md:87` names it as the day-grain sale-date root. Nothing in refinery, lib or app reads it: `rg -n "lee_records_addressed_v" refinery lib app` returns nothing, and the only hits repo-wide are `scripts/apply-lee-records-addressed-view.mts`.
   - It is not a master input. The comment at `master.mts:385` says it is "moot while its table is empty", but the table has 28,186 rows (Q13).
 - **Served surfaces.**
   - `lib/zip-dossier.ts:98,103,209,213` lists all four brains.
@@ -191,7 +194,7 @@ Run evidence comes from `gh run list --workflow <file> --limit 15 --json databas
   - Every scheduled green since 07/13/2026 landed at least one row, by load day (Q12): 07/13 1, 07/20 10, 07/27 3, 08/10 3, 08/17 1, 08/24 2, 08/31 4, 09/07 5, 09/14 15, 09/21 6.
   - CapDetail fetch-health has been 100% since the sequential-fetch fix. `gh run view 35627576690 --log | grep fetch-health` shows `lee_permits: 101/101 fetched (100%)`.
   - The content guard is in place: `assert_content_fresh(..., 14)` at `lee_permits/pipeline.py:220-222`, and `raise_on_failed_jobs()` at `:214`.
-  - Tests: `ingest/.venv/Scripts/python.exe -m pytest -q --co ingest/pipelines/lee_permits` collects 53, and all pass (see below).
+  - Tests: `ingest/.venv/Scripts/python.exe -m pytest -q --co ingest/pipelines/lee_permits` collects 53, and all pass (see below). A further 6 live outside the pipeline dir: `ingest/.venv/Scripts/python.exe -m pytest -q -p no:cacheprovider ingest/tests/pipelines/test_lee_permits_scraper.py` printed `6 passed` on 09/26. That makes 59 lee_permits tests in total.
 
   Q12:
   ```
@@ -293,8 +296,8 @@ select (select count(*) from data_lake.collier_building_permits where date_issue
   - In 7 of 7 observations, pagecount was 11:
     - Five cron runs (`gh run view <id> --log | grep -E "pagecount|enriching"`): 35627576690 (102 rows), 34870507114 (104), 34142372757 (89), 33421602395 (94), 32721521284 (97).
     - Two read-only dry-runs on 09/26/2026 with `ingest/.venv/Scripts/python.exe -m ingest.pipelines.lee_permits.pipeline --dry-run --start S --end E`. A 1-day window (09/24–09/24) returned `pagecount=11`, 102 rows. A 55-day window (08/01–09/25) returned `pagecount=11`, 89 rows. The dry-run is read-only by code: `pipeline.py:246-257` returns before `run_pipeline`.
-  - The cursor then keeps only rows at or after its start. Of about 100 enriched rows a week, the load days in Q12 kept 2–15.
-- **Root cause.** The General Search result set does not narrow with the date window. The README already calls the date filter inert (`ingest/pipelines/lee_permits/README.md` "Known limitations"). The incremental cursor (`pipeline.py:139-145`, `on_cursor_value_missing="exclude"` with the lag-adjusted start) discards enriched rows whose issued_date is older than the start. That shape was recorded as `lee_permits_issued_date_cursor_window_mismatch` (`02-known-problems-ledger.md:92`), a check dropped 08/12; it is cited here, not resurrected.
+  - The cursor then keeps only rows at or after its start. Of about 100 enriched rows a week, the load days in Q12 kept 1–15. The minimum is 1, on 07/13 and on 08/17.
+- **Root cause.** The General Search result set does not narrow with the date window. The README already calls the date filter inert (`ingest/pipelines/lee_permits/README.md` "Known limitations"). The incremental cursor (`pipeline.py:139-145`) discards enriched rows whose issued_date is older than the start. That filter is dlt's `last_value_func=max` with `lag=_LAG_DAYS`, and `_LAG_DAYS` is 30 (`pipeline.py:33`). The `on_cursor_value_missing="exclude"` flag at `:144` is a separate filter: it only drops rows whose issued_date is null. That shape was recorded as `lee_permits_issued_date_cursor_window_mismatch` (`02-known-problems-ledger.md:92`), a check dropped 08/12; it is cited here, not resurrected.
 - **Whether the Accela portal has a hard vendor cap:** could-not-verify. Only the observed invariance is claimed.
 - **First seen.** 06/16/2026, the first load, "11 pages, 94 rows" (`lee_permits/README.md`).
 
@@ -377,7 +380,7 @@ select count(*), count(*) filter (where b.zip_code is null), count(*) filter (wh
   - 35493363031 (empty grid): UNKNOWN.
   - 28798608078 (Accela `HTTP 429`, then the content guard): CONTENT_STALE.
   - 31562954092 (`ValueError: Invalid URL`, `ingest/lib/crawl_client.py:177`): UNKNOWN.
-  - `needsLlm` returns true for UNKNOWN and DATA_EMPTY (`classify-cron-failure.mjs:261-263`).
+  - `needsLlm` returns true for DATA_EMPTY, SCHEMA_DRIFT and UNKNOWN (`classify-cron-failure.mjs:261-263`).
 - **Root cause.** The TRANSIENT regex at `classify-cron-failure.mjs:199` has no `statement timeout|QueryCanceled`, and no class exists for a scrape-shape change (`expected \d+ <td> cells`).
 - **Per-run issue history for this family.** Each is closed now. Found with `gh issue list --state all --search "permits OR official-records OR lee-deed in:title"`.
   - Collier official records: #180 (08/16), #186 (08/23), #192 (08/30), #198 (09/06), #202 (09/13), #206 (09/20). All UNKNOWN, one per weekend, for one bug.
@@ -410,6 +413,7 @@ select count(*), count(*) filter (where b.zip_code is null), count(*) filter (wh
   - Every business day since 08/11/2026. The fetch is manual and has not run.
   - Doc-type ranking for later pulls is in `_RESEARCH/INDEX.md:353-356`.
   - The source index reaches back to 2010 (`README.md:200-205`); pulled is 07/13–08/11 only.
+  - A consumer that should exist and does not: `data_lake.lee_records_addressed_v`. It resolves 10,461 recorded documents to a street address (live count 09/26), and `docs/standards/data-roots.md:87` names it as the day-grain sale-date root, yet no pack, lib or app file reads it (§1). The natural reader is `refinery/sources/lee-deed-records-source.mts`, next to its existing read of the financing view (`:150-158`). No new check key is proposed (§8); this belongs with item 12's rebuild-path decision.
 - **Data-roots.** `docs/standards/data-roots.md:87` names `lee_deed_official_records.record_date` as the only day-grain sale date, and it is 46 days behind. The collier_permits header in data-roots (the "dispatch_only" line in the permits-cre batch) is stale (P12).
 - **Hendry.** No pipeline in this family touches 12051.
 
@@ -436,7 +440,7 @@ Items are in order. Lanes are as defined in the brief: D = deterministic, M = Ma
      - Replace the single `_previous_month()` target with the set difference between `discover_issued_reports()` (`fetcher.py`) and `select distinct source_file`. Cap it at N months per run so each run stays under the 30-minute timeout (`collier-permits-monthly.yml:33`).
      - Retire the `_fallback_latest` month-skip path (`pipeline.py:59-78`).
      - Before the real backfill, dispatch one read-only dry run for `--month 2020-01`: `gh workflow run collier-permits-monthly.yml -f month=2020-01 -f dry_run=true`. The dry-run branch at `pipeline.py:157-169` stops before geocode and the dlt write. It only prints the row count, which you compare by hand to the 4,477 floor at `pipeline.py:41`; that floor is calibrated to 2026 volume.
-     - Both guards in `run_pipeline` raise rather than warn: `assert_min_rows` (`pipeline.py:99`, raising `VolumeGuardError` at `ingest/lib/guards.py:198-201`) and `assert_content_fresh(newest_issued, 75)` (`pipeline.py:105`, raising `ContentStaleError` at `guards.py:152-165`).
+     - Both guards in `run_pipeline` raise rather than warn: `assert_min_rows` (`pipeline.py:99`, raising `VolumeGuardError` at `ingest/lib/guards.py:198-201`) and `assert_content_fresh(newest_issued, 75)` (`pipeline.py:105`; defined at `guards.py:139`, raising `ContentStaleError` at `guards.py:162,172`).
      - As written, the content guard would abort every backfill month older than 75 days: May 2026 and every month back to 2020.
      - So the change must apply `assert_content_fresh` only to the newest published month, and make the row floor per-year (or per-month from the published file size) before any real backfill runs.
      - Order: 2025-06 through 2026-06 first (the 13 months that fill P2's baseline and the May–June hole), then back to 2020-01.
@@ -447,7 +451,7 @@ Items are in order. Lanes are as defined in the brief: D = deterministic, M = Ma
      Target is 77 or more.
    - Unblocks: P2 (Collier z), P3.
 
-2. **Collier permits: keep property_id as a string and back-fill ZIP from parcels.** (DO, lane D, effort S)
+2. **Collier permits: keep property_id as a string and back-fill ZIP from parcels.** (Split. The ingest half is DO. The half that lifts the permits-swfl Lee-only ZIP filter at `permits-swfl.mts:940` is ASK-FIRST, because detail_table output changes; see §12 Q3. Lane D, effort S.)
    - Where:
      - `collier_permits/pipeline.py:97`: read the Property ID column as str.
      - `collier_permits/normalizer.py:53-57,111`: never stringify a float.
@@ -459,7 +463,7 @@ Items are in order. Lanes are as defined in the brief: D = deterministic, M = Ma
      select count(*) filter (where zip_code is null) from data_lake.collier_building_permits
      ```
      This must drop from 7,777. Also, `select property_id … limit 3` should show no `.0`.
-   - Unblocks: ZIP-grain Collier cells in permits-swfl (`permits-swfl.mts:937-940` says Collier has no populated zip today) and P11.
+   - Unblocks: P11, and part of ZIP-grain Collier cells in permits-swfl. It is only part, because the comment at `permits-swfl.mts:937-938` is stale. It says Collier has no populated zip_code, but 6,404 of 14,181 Collier rows already carry one (Q5: 14,181 − 7,777 null). What actually keeps Collier out of the ZIP table is the Lee-only filter at `permits-swfl.mts:940` (`.filter((cell) => cell.county === "lee")`). Item 2 must also lift that filter and fix the comment (ASK-FIRST for that part, because detail_table rows change). Otherwise the recovered ZIPs are never served.
 
 3. **MHS: make re-extraction replace a calendar year atomically.** (ASK-FIRST, because it changes the data_lake write shape; lane D; effort S)
    - Where: `ingest/pipelines/mhs_permits_swfl/pipeline.py:54-85`.
@@ -477,7 +481,7 @@ Items are in order. Lanes are as defined in the brief: D = deterministic, M = Ma
    - Unblocks: the served number in P1, zip-report and zip-dossier.
 
 5. **permits-swfl: clip baseline windows to observed coverage and fix the coverage caveat.** (ASK-FIRST, because the key_metrics values change; lane D; effort M)
-   - Where: `refinery/lib/permit-windows.mts:27-78` and `refinery/packs/permits-swfl.mts:215-231,279-330`.
+   - Where: `refinery/lib/permit-windows.mts:27-78` and `refinery/packs/permits-swfl.mts`. In that file, `backfillMonthsForCounty` is at `:215-231`, the windows are built at `:252`, the `computeZScore` call sites are at `:290,315,345`, and the caveat is emitted at `:929-931`.
    - What:
      - Drop any historical window that starts before the county's first observed date, or that falls in a month with no source file.
      - Compute z only when at least 6 windows remain; otherwise emit no z for that county. The 6 reuses the pack's own `COLLIER_SHORT_BASELINE_MONTHS = 6` (`permits-swfl.mts:50`).
@@ -510,7 +514,8 @@ Items are in order. Lanes are as defined in the brief: D = deterministic, M = Ma
    - Remove `dispatch_only: true` and its comment from collier_permits (`cadence_registry.yaml:1203-1204`).
    - Correct the lee_deed note (`:2468`) and delete its `known_drift` line (`:2462-2463`).
    - Update the mhs note (`:1890`).
-   - Update `docs/standards/data-inventory.md:101` and the collier_permits header in `docs/standards/data-roots.md`.
+   - Update `docs/standards/data-inventory.md:101` and the collier_permits header at `docs/standards/data-roots.md:1408`, which reads "(dispatch_only — cron commented out)".
+   - Fix the stale comment at `refinery/packs/permits-swfl.mts:937-938` ("Collier permits have no populated zip_code column"); see item 2.
    - Fix the five Firecrawl strings (P12). That closes check `source_citations_say_firecrawl` for this family's sites.
    - Correct the stale "moot while its table is empty" comment at `master.mts:385`.
    - Remove the dropped-check reference in the caveat at `lee-deed-records-swfl.mts:133`.
@@ -534,11 +539,12 @@ Items are in order. Lanes are as defined in the brief: D = deterministic, M = Ma
      Then diff cell 9 of a DEED row against the markup captured in `collier_official_records/test_normalize.py`.
    - Fix at `normalize.py:118` or `scraper.py`. Then re-pull 08/12 through today through the merge.
    - Proof: Q23 post-08/12 `with_parcel` above 0.
-   - Unblocks: P6, and the 39% deed-to-parcel route in `_RESEARCH/2026-08-12-deed-parcel-strap-join-fix.md`.
+   - Unblocks: P6, and the 39% deed-to-parcel route in `_RESEARCH/data-and-ingest/2026-08-12-deed-parcel-strap-join-fix.md`.
 
 10. **Lee deed: load on push, not on a daily cron.** (DO, lane D on GHA, effort S)
     - Where: `.github/workflows/ingest-lee-deed-official-records.yml:37-38`. Replace `schedule` with `on: push: paths: ["ingest/pipelines/lee_deed_official_records/raw/**"]` and keep `workflow_dispatch`.
     - Update the registry note to match.
+    - Engine switch: the job gate at `ingest-lee-deed-official-records.yml:51` is `vars.ENGINE_ENABLED != 'false' || github.event_name == 'workflow_dispatch'`. So a `push` event loads only while the engine is on. With `ENGINE_ENABLED=false`, a raw/ push is silently skipped and needs a manual `workflow_dispatch`. Say so in the workflow comment.
     - Proof: `gh run list --workflow ingest-lee-deed-official-records.yml --limit 5` shows no new `schedule` events after the change.
     - Unblocks: P8, and removes a red class.
 
@@ -561,7 +567,7 @@ Items are in order. Lanes are as defined in the brief: D = deterministic, M = Ma
     - Unblocks: the PARK verdict in either direction.
 
 14. **Classifier patterns for this family's reds.** (DO, lane D, effort S; the owner seam is family 19)
-    - What: add `statement timeout|QueryCanceled|DatabaseTransientException` to the TRANSIENT regex at `classify-cron-failure.mjs:199`, and add one deterministic class for `expected \d+ <td> cells|did not advance`. Include a test in `classify-cron-failure.test.mjs` using the two quoted log lines.
+    - What: add `statement timeout|QueryCanceled|DatabaseTransientException` to the TRANSIENT regex at `classify-cron-failure.mjs:199`, and add one deterministic class for `expected \d+ <td> cells|did not advance`. That class must not be SCHEMA_DRIFT, because `needsLlm` (`:261-263`) also returns true for SCHEMA_DRIFT and would keep the L2 trigger alive. Include a test in `classify-cron-failure.test.mjs` using the two quoted log lines.
     - Proof: re-classify the saved tails for 35748008748, 35493363031 and 34872217510. None returns UNKNOWN or DATA_EMPTY.
     - Unblocks: removes this family's L2 model trigger (§10).
 
@@ -577,14 +583,14 @@ Items are in order. Lanes are as defined in the brief: D = deterministic, M = Ma
     - Low priority. It only matters if a long Lee history is wanted, and the series differs from Accela.
     - Proof: the table count matches the layer's own count read at load time.
 
-Counts: 11 DO (1, 2, 6, 7, 8, 9, 10, 11, 13, 14, 16) and 5 ASK-FIRST (3, 4, 5, 12, 15).
+Counts: 11 DO (1, 2, 6, 7, 8, 9, 10, 11, 13, 14, 16) and 5 ASK-FIRST (3, 4, 5, 12, 15). Item 2 is split, per the second pass: its ingest half is DO and its served-output half (the `permits-swfl.mts:940` filter lift) is ASK-FIRST, folded into §12 Q3.
 
 ## 8. Checks and balances
 
 The design rule is one signal per pipeline. Each signal fires only when a served number would be wrong or a consumer would read stale data, auto-closes when green, and is never a per-run GitHub issue.
 
 - **The seam, as the code runs it today.**
-  - `ingest/scripts/check_freshness.py` reads the registry. `_fetch_max_freshness` (`:240-300`) resolves freshness three ways:
+  - `ingest/scripts/check_freshness.py` reads the registry. `_fetch_max_freshness` (`:241-300`; its docstring gives the resolution order as freshness_table, then dlt_schema_name, then count_table) resolves freshness three ways:
     - `freshness_table` gives MAX(freshness_column).
     - `dlt_schema_name` gives `_dlt_loads.inserted_at`, which is LOAD freshness, not content.
     - `count_table` gives MAX(freshness_column).
@@ -648,7 +654,11 @@ What NOT to add: no new check keys and no per-run issues. The four open family c
 - **`lee_permits`: move to the Fedora runner, gated, when item 6's sweep lands. Until then, stay on GHA `ubuntu-latest`.**
   - Reason 1, WAF: the datacenter-IP 429 history. Run 28798608078 logged `Blocked by anti-bot protection: HTTP 429 Too Many Requests` on CapDetail.
   - Reason 2, runtime: one week's enrichment already takes about 9 minutes (log timestamps 16:47:09 to 16:55:53 in run 35627576690). A type × day sweep multiplies requests against a 30-minute job ceiling (`lee-permits-weekly.yml:28`).
-  - Use the same gated `runs-on` expression and self-hosted venv steps as `ingest-collier-official-records.yml:31,40-56`, so `SWFL_LOCAL_RUNNER_READY=false` falls back to the cloud.
+  - Use the same gated `runs-on` expression and self-hosted venv steps as `ingest-collier-official-records.yml:31,40-56`, so `SWFL_LOCAL_RUNNER_READY=false` falls back to the cloud. The expression, verbatim:
+    ```
+    runs-on: ${{ vars.SWFL_LOCAL_RUNNER_READY == 'true' && fromJSON('["self-hosted","swfl-local"]') || 'ubuntu-latest' }}
+    ```
+    The gate is `SWFL_LOCAL_RUNNER_READY` (`gh variable list` shows `true`, set 09/20/2026). The label is `[self-hosted, swfl-local]`.
 - **`collier_permits`: stays on GHA `ubuntu-latest`.**
   - Datacenter IP is proven green: 31565435973, 31885273282, 34995831657.
   - The job is under 30 minutes, needs no browser beyond crawl4ai-setup, needs no SSD, and needs no local model. The item-1 backfill also runs there, capped per run.
@@ -659,7 +669,9 @@ What NOT to add: no new check keys and no per-run issues. The four open family c
   - Keeping it there costs nothing, and the fallback is the same one variable.
   - Risk: the box's backup and reboot test is untested, per the brief's standing facts. A box outage shows up as a scheduled red that the fallback flip clears.
 - **`lee_deed_official_records`: the load stays on GHA `ubuntu-latest`.** It reads committed files, needs no IP, and after item 10 runs only on push.
-  - The fetch stays human-in-a-real-browser (`README.md:146-154`) until item 13's Fedora probe answers. If it passes, the fetch becomes a Fedora job on the gated expression.
+  - The fetch stays human-in-a-real-browser (`README.md:146-154`) until item 13's Fedora probe answers. If it passes, the fetch becomes a Fedora job hard-pinned to `runs-on: [self-hosted, swfl-local]`, exactly as `.github/workflows/dbpr-sirs-monthly.yml:21` and `.github/workflows/ingest-crexi-listings.yml:30` are pinned.
+  - Neither of those workflows references `SWFL_LOCAL_RUNNER_READY` (`grep -n "runs-on\|SWFL_LOCAL_RUNNER_READY"` over both files returns only the runs-on lines). So the hard-pinned pattern uses no gate variable: when the box is down, the job waits in the queue.
+  - The `SWFL_LOCAL_RUNNER_READY` gate-with-`ubuntu-latest`-fallback expression is deliberately NOT used for this job. The reason for the move is the residential IP, and a datacenter fallback is exactly what Akamai blocks (`README.md:130-134`).
 - **Already on the box that should not be:** nothing in this family.
 
 ## 10. Compute lane per LLM leg
@@ -688,12 +700,12 @@ Legs that touch this family:
   - Can it need no model? Yes. The operator clicks the Export button in his own Chrome, then runs `python ingest/pipelines/lee_deed_official_records/sync_all_exports.py` and pushes raw/. That sweep is deterministic (`sync_all_exports.py:1-12`), and item 10's on-push load finishes it. Preferred lane: D.
 - **Leg 2: `heal-cron-failure.yml` L2 diagnosis.** Cross-cutting; family 19 owns it.
   - What: fires on failures of all five family workflows (`heal-cron-failure.yml:27,50,81,88,90`) when `needsLlm(klass)` is true (`classify-cron-failure.mjs:261-263`). It calls `claude-haiku-4-5` through the SDK (`heal-cron-failure.mjs:218-231`).
-  - Current auth: repo secret `ANTHROPIC_API_KEY` (`heal-cron-failure.yml:191`). This plan proposes no change to that auth; the lane decision for the leg as a whole belongs to family 19's plan.
+  - Current auth: the workflow wires a repo API-key secret (`heal-cron-failure.yml:191`). Under brief rule 2 that is not a lane this plan relies on. Family 19 owns moving the leg as a whole to lane D, M or C. This family's part is to take itself off the leg entirely, as follows.
   - For this family the leg is not needed:
     - `heal-cron-failure.mjs:214-215` already posts a deterministic-only diagnosis when no key is present.
     - Item 14 makes every observed family red classify deterministically.
     - Item 14 plus removing the five names from the heal list (§8) takes this family off the leg entirely. Replacement lane: D.
-- **Leg 3: brain rebuilds of the four family packs.** Deterministic producers; the grep above shows no model call in these packs or sources. Refinery-wide model stages, such as the narrative bake, are family 16's. Lane D.
+- **Leg 3: brain rebuilds of the four family packs.** Deterministic producers; the grep above shows no model call in these packs or sources. All four packs also declare `skipTriageAgent: true` and `skipSynthesisAgent: true`, so refinery stages 2 and 3 run no agent for them (`refinery/stages/2-triage.mts:38-40`, `3-synthesis.mts:26`). The declarations are at `permits-swfl.mts:1061-1062`, `permits-commercial-swfl.mts:531-532`, `collier-official-records-swfl.mts:189-190` and `lee-deed-records-swfl.mts:271-272`. Refinery-wide model stages, such as the narrative bake, are family 16's. Lane D.
 - **Lane L: no leg.** Nothing here extracts, counts or grades with a model, and none should.
 
 ## 11. Double-check log
@@ -744,7 +756,23 @@ I re-read the plan top to bottom and re-ran each numbered claim against its sour
 - Collier records `tolerance_multiplier` 3.0 and `cadence_days` 1 · `sed -n 1160,1161p ingest/cadence_registry.yaml` · verified.
 - Lee permits 7 × 3.0 and Collier permits 30 × 2.0 · `sed -n 1183,1184p` and `sed -n 1206,1207p` · verified.
 
-Corrections applied above: 32 in total.
+Entries added by the second Opus on 09/26. These cover numbers the first pass never logged. Each was re-run, not re-read.
+- Lee ArcGIS code enforcement 93,976 and ZoningCases 8,017 · `sed -n 1195p ingest/cadence_registry.yaml | grep -oE "93,976|8,017|MobileHome[^,;]*"` · verified as registry claims. The layers were not re-queried live.
+- permits-swfl corpus 14,514, Lee 333 · `sed -n 39p brains/permits-swfl.md` · verified (333 + 14,181 = 14,514).
+- ~9-minute Lee enrichment · `gh run view 35627576690 --log | grep -E "enriching|fetch-health"` shows `16:47:09 … enriching 101/102` and `16:55:53 … 101/101 fetched` · verified.
+- 09/21 holds 16 rows; written by run 35748661727 on fedora-swfl-local · Q16 plus `gh run view 35748661727 --log | grep -E "Runner name|pipeline complete"` · verified.
+- Lee deed 46 days behind · Q13 max record_date 08/11/2026 against 09/26/2026 · verified.
+- 69 stale MHS rows (412 − 343) · Q7 plus the run-29354353838 log. The same split shows in `select _ingested_at::date, count(*) … group by 1`, which returns 06/09: 281 and 07/14: 131 · verified.
+- 74 missing Collier months (77 − 3), and May and June 2026 published · `discover_issued_reports()` re-run 09/26 printed `77 2020 1 2026 8` and `True True` for (2026,5)/(2026,6) · verified.
+- Collier content lag ~45 days (08/31 to 10/15) · arithmetic · verified.
+- Collier permits datacenter runs 31565435973, 31885273282, 34995831657 ran on `ubuntu-latest` · `gh api repos/{owner}/{repo}/actions/runs/<id>/jobs --jq '.jobs[]|"\(.runner_name) \(.labels|join(","))"'` · verified.
+- Accela 1-day dry-run pagecount=11, 102 rows · re-run 09/26 by the second Opus: `ingest/.venv/Scripts/python.exe -m ingest.pipelines.lee_permits.pipeline --dry-run --start 2026-09-24 --end 2026-09-24` printed `pagecount=11` and `102 rows` · verified. The 55-day dry-run was not re-run.
+- Collier ZIP already populated on 6,404 rows (14,181 − 7,777) · Q5 · verified. It contradicts the comment at `permits-swfl.mts:937-938`; see item 2.
+- lee_records_addressed_v 10,461 rows, no reader · `select count(*) from data_lake.lee_records_addressed_v`; `rg -l "lee_records_addressed_v" refinery lib app` exit 1 · verified.
+- lee_permits tests: 53 + 6 = 59 · the two pytest commands in §3 · corrected. The first pass counted 53.
+- `_LAG_DAYS = 30` · `grep -n "_LAG_DAYS\s*=" ingest/pipelines/lee_permits/pipeline.py` returns `:33` · verified.
+
+Corrections applied above: 32 in total. (Second pass: 16 further corrections, listed in §13; they are not included in the 32.)
 - 3 first-pass: the Lee row count, the Cape Coral test method, the Collier join form.
 - 25 file:line citations whose numbers had drifted. The corrected numbers are in the sections above; check each with `sed -n <line>p`.
 - 4 second-pass: the Lee empty-window count 9 → 10, the P11 agreement split, the item-1 guards and dry-run wording, the §8 mechanism.
@@ -755,6 +783,69 @@ One claim first logged as could-not-verify is now verified: the runner for two C
 
 1. **Lee deed fetch.** Do you want to spend one interactive session a week clicking LandMarkWeb Export for the missed business days? The deterministic `sync_all_exports.py` plus the item-10 on-push load does the rest. Or does it stay parked until item 13's Fedora probe answers? It is your time; the cost is 46 days of missing day-grain sale dates so far.
 2. **MHS cleanup (items 3–4).** Approve deleting and replacing the 2025 `mhs_permits_swfl` rows, so the served count moves from 412 to the 343 the current extractor produces.
-3. **permits-swfl z math (item 5).** Approve changing how the Collier and Lee z are computed (clipped baselines, and no z below 6 populated windows). It changes served key_metrics values.
+3. **permits-swfl z math (item 5).** Approve changing how the Collier and Lee z are computed (clipped baselines, and no z below 6 populated windows). It changes served key_metrics values. In the same approval: let Collier rows into the ZIP-grain detail_table by lifting the Lee-only filter at `permits-swfl.mts:940` (item 2). Collier ZIP rows would then appear where today only Lee's show.
 4. **Record-level brains (item 12).** Should `collier-official-records-swfl` and `lee-deed-records-swfl` become non-critical master inputs, or get their own rebuild schedule outside master?
 5. **Collier Applied series (item 15).** Approve a composite key (permit_number + series) on `data_lake.collier_building_permits` to add the leading-indicator series.
+
+## 13. Second-Opus verification
+
+Run 09/26/2026 by the second Opus. SQL went through a throwaway, read-only Bun.SQL runner in the scratchpad (`sql.begin("read only", …)` with a 90 s statement timeout, and the same `.dlt/secrets.toml` credentials as `scripts/apply-fdic-sod-view.mts:10-30`). Nothing was committed, pushed, dispatched or written to data_lake. `graphify query "permits-records pipeline"` ran first.
+
+### Claims checked: 93 verification commands
+
+These cover every figure in §2–§4 and the 59 entries now in the §11 log. The 59 comes from `sed -n '/^## 11/,/^## 12/p' docs/audit/2026-09-26-pipeline-plans/10-permits-records.md | grep -c '^- '`. The 93 counts commands run (50 + 5 + 18 + 5 + 4 + 8 + 3), not an estimate of claims:
+- SQL queries executed: 50. That is 29 in the first batch (Q1–Q25 verbatim, plus Q17b, Q18r, Q18i and the `public.checks` deed query), 16 aliased re-runs where the JSON output had folded duplicate column names, and 5 column-shape and view-count queries.
+- `gh run list`: 5, one per family workflow.
+- Run-log and job lookups: 18.
+  - `gh run view --log` for 35627576690 (×2), 34870507114, 34142372757, 33421602395, 32721521284, 29354353838, 29353808258, 35748661727, 36250668840, 35748008748, 28798608078 and 28380780880.
+  - `gh api …/jobs` for 34989882940, 35115815483, 31565435973, 31885273282 and 34995831657.
+- Classifier re-runs: 5.
+- Issue queries: 4 (`--state all` search, `--label cron-failure --state open`, `issue view 110`, `issue view 44`).
+- Test runs: 8. These are the 4-dir pytest run, 5 per-dir `pytest --co` counts, the `ingest/tests/pipelines/test_lee_permits_scraper.py` run, and the 8-file bun run.
+- Every file:line citation touched by a correction below was re-opened with `sed -n`. The file now holds 166 distinct `path:line` citations (`rg -o '[A-Za-z0-9_./-]+\.(py|mts|ts|mjs|yml|yaml|md|json):[0-9]+' <file> | sort -u | wc -l`). Not all 166 were individually re-opened; those not re-opened carry no number the corrections depend on.
+- Live source checks: 3. The crawl4ai fetch of the MHS page (status 200, same `2026-Market-Trends-Report-Magazine-Version-All-Permits.pdf`), `discover_issued_reports()` (77 months, May and June 2026 present), and one Accela 1-day dry-run (pagecount=11, 102 rows).
+
+### Corrections: 16, each applied in its own section
+
+1. P4 row range. It said the load days kept 2–15 rows. The true range is 1–15. Evidence: Q12 shows 07/13 = 1 and 08/17 = 1.
+2. P4 root cause. It said `on_cursor_value_missing="exclude"` discards the older rows. The discard actually comes from dlt incremental's `last_value_func=max` with `lag=_LAG_DAYS` (30); `exclude` only drops null issued_date. Evidence: `lee_permits/pipeline.py:33,140-145`.
+3. §1 financing-view reader. It named `refinery/lib/deed-financing-classifier.mts` as the reader. The real reader is `refinery/sources/lee-deed-records-source.mts:150-158`; the classifier is a pure TypeScript mirror. Evidence: `deed-financing-classifier.mts:6-11`, and `rg lee_deed_purchase_financing_v`.
+4. §1 `lee_records_addressed_v`. It was listed among the consumers. It is a DARK view: 10,461 rows and no reader in refinery, lib or app. Evidence: `rg -l lee_records_addressed_v refinery lib app` exits 1.
+5. §3 lee_permits tests. It said 53. The total is 59, because 6 more live in `ingest/tests/pipelines/test_lee_permits_scraper.py`. Evidence: `pytest` printed `6 passed`.
+6. P13 `needsLlm`. It said the function returns true for UNKNOWN and DATA_EMPTY. It also returns true for SCHEMA_DRIFT, so item 14's new class must not be SCHEMA_DRIFT. Evidence: `classify-cron-failure.mjs:261-263`.
+7. Item 2 premise. It took the comment at `permits-swfl.mts:937-940`, which says Collier has no populated zip, at face value. The comment is stale: 6,404 of 14,181 Collier rows carry a zip. What keeps Collier out of the ZIP table is the Lee-only filter at `:940`, so item 2 now also lifts that filter (ASK-FIRST for that part). Evidence: Q5.
+8. Item 1 guard citation. It said `ContentStaleError` is raised at `guards.py:152-165`. It is defined at `:139` and raised at `:162,172`. Evidence: `grep -n "raise ContentStaleError" ingest/lib/guards.py`.
+9. Item 5 location. It pointed at `permits-swfl.mts:279-330`. The windows are built at `:252`, `computeZScore` is called at `:290,315,345`, and the caveat is at `:929-931`. Evidence: `grep -n computeZScore`.
+10. Item 7 data-roots citation. It named the collier_permits header without a line. The header is at `docs/standards/data-roots.md:1408`, "(dispatch_only — cron commented out)". Evidence: grep.
+11. Item 9 research path. It gave `_RESEARCH/2026-08-12-deed-parcel-strap-join-fix.md`. The file is at `_RESEARCH/data-and-ingest/2026-08-12-deed-parcel-strap-join-fix.md`. Evidence: `find _RESEARCH -name …`.
+12. §8 citation. `_fetch_max_freshness` was cited at `:240`; it starts at `:241`. Evidence: `grep -n "def _fetch_max_freshness"`.
+13. §10 Leg 2 wording. It described the heal leg's API-key auth as unchanged and accepted. It now says that auth is not a lane under brief rule 2: family 19 moves the leg, and this family leaves it through item 14 plus removing its five names from the heal list. Evidence: `heal-cron-failure.yml:191` and `heal-cron-failure.mjs:214-231`.
+14. Item 10 push trigger. It missed the engine gate. Because the job gate at `ingest-lee-deed-official-records.yml:51` requires `ENGINE_ENABLED != 'false'` unless the run is a dispatch, a raw/ push while the engine is off loads nothing. Evidence: yml:51.
+15. §9 Fedora moves. They named the gate only by reference to another file. The runs-on expression and the label `[self-hosted, swfl-local]` are now written out verbatim. The Lee deed fetch is hard-pinned to that label with no gate variable and no `ubuntu-latest` fallback, because the reason to move is the residential IP. That matches `dbpr-sirs-monthly.yml:21` and `ingest-crexi-listings.yml:30`, neither of which references `SWFL_LOCAL_RUNNER_READY`. Evidence: `ingest-collier-official-records.yml:31`, `gh variable list`, `lee_deed_official_records/README.md:130-134`, and grep of both pinned workflows.
+16. Item 2 labels. The item was marked DO throughout. It is now split: the ingest half is DO, and the half that lifts the `permits-swfl.mts:940` filter is ASK-FIRST. The item header, the §7 counts line and §12 Q3 now all say so. Evidence: correction 7.
+
+### Unverifiable claims
+
+- "25 file:line citations whose numbers had drifted" (§11 tally). They are not named, so they cannot be re-checked individually. Every file:line left in the file was re-opened instead; the drift that remained is corrections 8–12.
+- The root cause of the Collier parcel_ids regression. It stays could-not-verify: the Fedora dry-run in item 9 was not run by this pass. The symptom is re-verified (Q22a: 939 of 12,441 on 08/12, then 0 of 13,691; Q23a: DEED 871 of 2,230 before and 0 of 2,293 after).
+- Whether Accela has a hard vendor cap. Only the invariance is re-verified (one fresh 1-day dry-run: pagecount=11).
+- The 55-day Accela dry-run (89 rows). It was not re-run by this pass; the five cron runs and one fresh dry-run carry the pagecount=11 claim.
+- The Lee ArcGIS layer counts (93,976 and 8,017). These are registry text at `cadence_registry.yaml:1195`; the layers were not queried live.
+- The depth of the COR Access history before 07/13/2026. Already marked could-not-verify in §5.
+
+### Gaps filled
+
+- §1: code evidence for the cre-swfl edge (`cre-swfl.mts:2142,2147`). That pack reads permits-swfl's corridor-weighted z at `:1901-1909`, so P2's inflated z also reaches cre-swfl.
+- §1: two side writers of `lee_building_permits`, `scripts/backfill_lee_permit_geocodes.py` and `scripts/backfill_mapbox_geocodes.py`. Both are one-time scripts from 06/07; the Mapbox one hardcodes its coordinates and makes no API call. They do not change the free-Census-geocoder headline.
+- §5: `lee_records_addressed_v` added as a consumer that should exist, with the natural reader named. No new check key.
+- §10: all four packs declare `skipTriageAgent` and `skipSynthesisAgent`, so the rebuild leg is provably model-free.
+- §11: 14 new double-check entries covering the numbers the first pass never logged.
+- Coverage re-checked. All 5 pipelines appear in §2, §3, §4, §6, §7, §8 and §9. §4 has problems for every one: lee_permits P4/P5; collier_permits P3/P11/P12; mhs P1/P12; collier_official_records P6/P7/P9; lee_deed P8/P9/P12. All 13 required headings are present, in order.
+- §8 confirmed. No per-run GitHub issue survives: `openIncidentIssue` dedups to one open issue per workflow (`log-cron-incident.mjs:219-230`), and there is no per-workflow suppression knob (the only gate is `CRON_INCIDENT_LOGGER_ENABLED`, `log-cron-incident.yml:121`). There is one doctor-line signal per pipeline on existing seams. The noise list names concrete items: `expected_rows_min` floors at `:1162` and `:1186`, the `known_drift` entry, the dropped check reference, and the `heal-cron-failure.yml` trigger lines. Open cron-failure issues: 21, none for this family (`gh issue list --label cron-failure --state open`).
+- §10 grep re-run over the 5 workflow YAMLs and 5 pipeline dirs for `anthropic|claude|openai|refinery`. The only hits are README prose (claude-in-chrome as the manual fetch), `ingest/CLAUDE.md` references, and deed party names in raw/*.json. No LLM leg was missed.
+
+### Credit-suggestion count: 0
+
+`grep -n -i -E "credit|top.?up|console balance|api key funding|billing"` over this file returned nothing before the edits. One sentence came close without being a suggestion: §10 Leg 2 treated the API-key auth as accepted. It was rerouted (correction 13).
+
+Grade: PASS-WITH-CORRECTIONS. The plan stands. The verdicts, the P1–P13 evidence and every SQL figure re-ran to the same values, and the 16 corrections are placement, wording, label or citation fixes plus one real premise error (item 2).

@@ -1,3 +1,11 @@
+## 2026-09-26 (Opus 5.5) — OPERATOR: "crawl4ai 100 sonnets in groups of 5 for more inormation we can bring in"
+
+Read as: 100 Sonnet scouts, 5 running at a time, each crawl4ai-verifying free/public sources we do NOT hold yet
+(Lee/Collier/Hendry first, NORTH STAR "unobvious leading indicator" lens). 20 themes x 5 targets, deduped against
+data-inventory.md (75 pipelines + the 08/02 greenfield scouts). No repo edits by scouts, no paid lanes, no listing
+portals. Deliverable: one consolidated catalog in _RESEARCH/data-and-ingest/ + its INDEX line. Nothing gets built
+from it without his pick.
+
 ## 2026-09-26 (Fable 5.1) — OPERATOR: "one opus on each pipeline ... a COMPLETE PLAN for their specific pipeline ... have opus take over watching when you run out of usage"
 
 His words, verbatim gist: one Opus per pipeline figuring out problems / what is working / what is being brought in /
