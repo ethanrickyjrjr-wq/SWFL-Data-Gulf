@@ -6,7 +6,7 @@ data-inventory.md (75 pipelines + the 08/02 greenfield scouts). No repo edits by
 portals. Deliverable: one consolidated catalog in _RESEARCH/data-and-ingest/ + its INDEX line. Nothing gets built
 from it without his pick.
 RESOLVED 09/26/2026 (same session): _RESEARCH/data-and-ingest/2026-09-26-free-data-100-scout-catalog.md. All 100
-scouts returned: 257 datasets, 216 scout-verified, 11 re-probed by the session, all 200. Picks are his; nothing built.
+scouts returned: 309 datasets, 250 scout-verified (35 double runs merged), 11 re-probed by the session, all 200. Picks are his; nothing built.
 Check opened: workflow_subagent_placeholder_structured_output. 3 scouts submitted "test" output that passed the schema.
 
 ## 2026-09-26 (Fable 5.1) — OPERATOR: "one opus on each pipeline ... a COMPLETE PLAN for their specific pipeline ... have opus take over watching when you run out of usage"

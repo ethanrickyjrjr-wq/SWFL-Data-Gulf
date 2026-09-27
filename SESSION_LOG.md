@@ -1,3 +1,13 @@
+## 2026-09-26 (Opus 5.5, part 3) - scout catalog re-rendered: 35 scouts ran twice, runs merged; counts CORRECTED
+
+Correction to the two entries below. Retrying scout #65 via Workflow resume re-ran every scout after it (#66-#100, about
+4.4M extra tokens) because resume re-runs from the first changed agent() call onward. The earlier render mixed first and
+second runs. Re-rendered from all journals, merging each scout's usable runs (datasets deduped by data-URL host and path):
+309 datasets, 250 scout-verified, 43 scored 5/5. That replaces 257 / 216 / 38. #98's second run was placeholder filler (the
+fourth instance), so 34 scouts carry merged runs. The double run showed scores are unstable (#67 went 3 then 0, #80 3 then 5).
+The catalog says so. Updated check `workflow_subagent_placeholder_structured_output` with the fourth instance and the
+resume lesson. The 11 session re-probes are unchanged.
+
 ## 2026-09-26 (Opus 5.5, part 2) - scout catalog labels corrected; placeholder-output check opened
 
 Re-searched by NAME (not URL) across docs/, _RESEARCH/, _AUDIT_AND_ROADMAP/, _ASSISTANT/, the doc index, the registry and
