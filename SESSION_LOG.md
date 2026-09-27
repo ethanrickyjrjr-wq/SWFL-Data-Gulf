@@ -5,7 +5,8 @@ the 72-ceiling dry run. Three picks labelled "first-time find" were known before
 (docs/API_BLUEPRINTS.md), FDOR SDF (07/18 spec, PARKED), Lee Development Orders (07/26 scratchpad, unverified). Labels fixed
 in the catalog and INDEX line. "About $3.44B" is now sourced to the IRS users guide ("AGI is reported in thousands of
 dollars"). The Collier 21 and Hendry 36 SDF files were probed (both 200). Opened check
-workflow_subagent_placeholder_structured_output (defect). Scratchpad entry marked RESOLVED.
+`workflow_subagent_placeholder_structured_output` (defect). "PARKED" above quotes the 07/18 spec's own status; this
+session parked nothing new, and every catalog pick waits on his choice. Scratchpad entry marked RESOLVED.
 Next: unchanged. He picks from the catalog.
 
 ## 2026-09-26 (Opus 5.5) - 100-scout free-data sweep filed: 257 datasets, 11 re-probed live; nothing built
