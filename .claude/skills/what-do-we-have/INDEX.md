@@ -7,7 +7,7 @@
 
 Markers: **[ORPHAN]** nothing in the repo points at this file — it is invisible unless you come through this index, and it is a DELETION CANDIDATE. **[weak]** reachable only by bare filename, which leads nowhere.
 
-Reachability at generation: 1037 by path · 562 by name only · 211 orphaned. Re-measure with `node scripts/doc-reachability.mjs`.
+Reachability at generation: 1036 by path · 562 by name only · 212 orphaned. Re-measure with `node scripts/doc-reachability.mjs`.
 
 ## docs/superpowers — 889
 
@@ -390,7 +390,7 @@ Reachability at generation: 1037 by path · 562 by name only · 211 orphaned. Re
 - `docs/superpowers/plans/_FINISHED/2026-06-08-source-links-methodology.md` *[weak]* — Source Links + Methodology Surface — Implementation Plan — Tasks 1 ‖ 2 run in parallel. After Task 1: Tasks 3 ‖ 4 run in parallel. Task 5 last. Each task is an independent commit; nothing leaves the tree half-broken.
 - `docs/superpowers/plans/_FINISHED/2026-06-09-cron-healing-followups-4-7-8.md` *[weak]* — Cron self-healing — follow-up build plan (items 4, 7, 8) — These are the three items deferred from the audit as "real features, own pass." Quick wins (1, 2, 5, 6) already shipped; Gap 2 was deleted (no bug — checkout@v6 is vendor-current and repo-st
 - `docs/superpowers/plans/_FINISHED/2026-06-09-highlighter-iteration.md` *[weak]* — /r/ Highlighter AI — live-testing iteration (2026-06-09) — Working doc for the in-page Highlighter on /r/[slug] reports (drag-select →
-- `docs/superpowers/plans/_FINISHED/2026-06-09-naples-msa-fhfa-hpi.md` — Naples MSA FHFA HPI — Implementation Plan — The fixture currently has 132 rows, all Cape Coral, FL State, and other MSAs — zero Naples rows. The loadFixture() filter in fhfa-hpi-source.mts already passes SWFLMSANAMES.has(r.placename),
+- `docs/superpowers/plans/_FINISHED/2026-06-09-naples-msa-fhfa-hpi.md` **[ORPHAN]** — Naples MSA FHFA HPI — Implementation Plan — The fixture currently has 132 rows, all Cape Coral, FL State, and other MSAs — zero Naples rows. The loadFixture() filter in fhfa-hpi-source.mts already passes SWFLMSANAMES.has(r.placename),
 - `docs/superpowers/plans/_FINISHED/2026-06-09-universal-location-search/01-spine.md` *[weak]* — §A — The spine: resolveZip(zip) — Read README.md §0 first (shared types + guards G1/G6/G7 + verified anchors).
 - `docs/superpowers/plans/_FINISHED/2026-06-09-universal-location-search/02-dispatcher.md` *[weak]* — §B — Dispatcher: resolveLocation(input) — Read README.md §0 first. §A must be merged before this is testable end-to-end.
 - `docs/superpowers/plans/_FINISHED/2026-06-09-universal-location-search/03-fanout.md` *[weak]* — §C — Grain registry + fan-out: assembleLocationDossier — Read README.md §0 first (guards G2 + G5 are the heart of this section).
