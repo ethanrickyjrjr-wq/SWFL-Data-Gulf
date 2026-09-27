@@ -7,7 +7,7 @@
 
 Markers: **[ORPHAN]** nothing in the repo points at this file — it is invisible unless you come through this index, and it is a DELETION CANDIDATE. **[weak]** reachable only by bare filename, which leads nowhere.
 
-Reachability at generation: 1036 by path · 562 by name only · 212 orphaned. Re-measure with `node scripts/doc-reachability.mjs`.
+Reachability at generation: 1037 by path · 562 by name only · 211 orphaned. Re-measure with `node scripts/doc-reachability.mjs`.
 
 ## docs/superpowers — 889
 
@@ -808,7 +808,7 @@ Reachability at generation: 1036 by path · 562 by name only · 212 orphaned. Re
 - `docs/superpowers/specs/2026-07-17-should-i-sell-design.md` — Should I Sell — seller decision read (area stress score + market snapshot + sell-now-vs-wait spread) — /r/back-on-market (finding #7) answers an evaluative question about a listing that returned to
 - `docs/superpowers/specs/2026-07-18-buyer-leverage-report-design.md` — Buyer Leverage Report — /r/how-long-has-it-sat — A buyer negotiating a home has no packaged, honest source telling them how long a
 - `docs/superpowers/specs/2026-07-18-dom-backfill-listed-date-design.md` **[ORPHAN]** — One-time /property-tax-history backfill of listeddate to de-floor active DOM (desk-safe: updatelisteddate only — listingdomfromfirstseen, assistantpropertyurgencytaxhistorywiring
-- `docs/superpowers/specs/2026-07-18-fdor-sdf-sold-prices-design.md` **[ORPHAN]** — FL DOR Sale Data File (SDF) — PARKED (confirmed downloadable, not built) — datalake.marketdetailsswfl.mediansoldprice into loadMarketFigures instead
+- `docs/superpowers/specs/2026-07-18-fdor-sdf-sold-prices-design.md` — FL DOR Sale Data File (SDF) — PARKED (confirmed downloadable, not built) — datalake.marketdetailsswfl.mediansoldprice into loadMarketFigures instead
 - `docs/superpowers/specs/2026-07-18-leaf-ingest-freshness-design.md` **[ORPHAN]** — Rebuild a leaf brain when its ingest lands fresher than its last build — Master already re-synthesizes the moment any upstream brain moves: masterIsStaleVsUpstreams
 - `docs/superpowers/specs/2026-07-18-r-brain-page-lift-design.md` **[ORPHAN]** — Lift /r/ brain report pages to ZIP-report bar (commentary + sources accordion + charts) — Emails and the assistant link readers to /r/<brain> pages (housing-swfl, cre-swfl,
 - `docs/superpowers/specs/2026-07-19-lee-zip-assessed-soh-design.md` — Lee per-ZIP assessed value + SOH gap (FDOR cadastral) into properties-lee-value + zip-report — lake queries this session — not memory. No new outside surface is consumed: the mirror reads FDOR
