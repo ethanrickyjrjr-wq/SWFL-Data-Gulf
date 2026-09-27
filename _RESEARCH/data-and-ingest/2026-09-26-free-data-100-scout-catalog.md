@@ -29,7 +29,8 @@ the workflow journal, not retyped.
   verified. The same scout found the HUD USPS vacancy data is licensed to governmental and non-profit users only,
   with no resale or distribution, so it is closed to us.
 - Correction to the scout brief: the Florida DOR county code for Hendry is 36, not 26. The live file name is
-  "Hendry 36 Preliminary SDF 2026". Lee 46 and Collier 21 were right.
+  "Hendry 36 Preliminary SDF 2026". The session re-probed all three 2026 preliminary SDF files, all 200: Lee 46
+  (2,031,283 bytes), Collier 21 (1,091,834) and Hendry 36 (101,837).
 - Correction to the 08/02 bizform scout: Census Business Formation Statistics now publishes annual business
   applications by county (#83). The 08/02 pass saw only US and state grain.
 - **Found before, never built.** These are not new discoveries; they are now live-checked:
@@ -38,6 +39,18 @@ the workflow journal, not retyped.
   - QWI, ZIP Business Patterns, EIA, NASS and OpenSky: marked SOURCE KNOWN in `docs/data-sources/data-intel.md`.
   - LODES: called a gap in `docs/vertical-plays/05-non-re-monetization-sweep-2026-07-18.md`.
   - The Lee County Nuisance violations layer: already known live from the 09/20/2026 session.
+  - IRS SOI county-to-county migration: named in `docs/API_BLUEPRINTS.md` (section "Substitute for pums_migration")
+    as the source for wealth-weighted migration. Never built.
+  - FDOR Sale Data File: `docs/superpowers/specs/2026-07-18-fdor-sdf-sold-prices-design.md` (PARKED, "confirmed
+    downloadable, not built"). Also named in the archived 05/30/2026 event-study spec.
+  - Lee County Development Orders: the layer title came up once in a search on 07/26/2026, recorded in
+    `_ASSISTANT/SCRATCHPAD.md` as UNVERIFIED. It was never opened or built. This run verified it.
+  - HUD USPS vacancy: the archived 05/30/2026 event-study spec lists it as a "free add". #9's license finding
+    (government and non-profit only) corrects that.
+- **Lanes behind the label "not found in our docs".** On 09/26/2026 the session ran name searches (not URL
+  searches) across `docs/`, `_RESEARCH/`, `_AUDIT_AND_ROADMAP/`, `_ASSISTANT/`, the doc index
+  (`.claude/skills/what-do-we-have/INDEX.md`), `ingest/cadence_registry.yaml` and the recorded ceilings
+  (`scripts/ceilings-to-checks.mjs` dry run). Any pick not listed above came back with nothing in those lanes.
 
 ## Re-probed by this session (09/26/2026 evening, one request each, all returned HTTP 200)
 
@@ -46,19 +59,20 @@ the workflow journal, not retyped.
    - Re-probe: 200, 56,405 bytes, a real XLSX.
    - Scout's read of the August 2026 tab: Lee 2,614 new and 683 removed; Collier 1,137 and 277; Hendry 72 and 34.
    - Why it matters: new households arriving, by county, every month. That is a year or more ahead of the Census and
-     IRS migration files. First-time find.
+     IRS migration files. Not found in our docs.
 2. **CMS Medicare Monthly Enrollment by county.** Keyless API,
    `https://data.cms.gov/data-api/v1/dataset/d7fabe1e-d19b-4333-9eff-e80e0643f2fd/data`.
    - Re-probe: 200. Lee rows start in 2013; the 2013 annual row shows 151,213 total beneficiaries.
    - The scout saw monthly rows through 2026-06.
-   - Why it matters: a proxy for retirees moving in. First-time find.
+   - Why it matters: a proxy for retirees moving in. Not found in our docs.
 3. **IRS SOI county-to-county migration.** `https://www.irs.gov/pub/irs-soi/countyinflow2223.csv`, with an
    outflow twin.
    - Re-probe: 200, 4,571,970 bytes, 259 rows with Lee as the destination.
-   - Lee's 2022-23 total inflow: 27,809 returns, 46,714 people, and 3,439,840 in AGI (IRS reports AGI in thousands,
-     so about $3.44B).
+   - Lee's 2022-23 total inflow: 27,809 returns, 46,714 people, and 3,439,840 in AGI. The IRS users guide
+     (`irs.gov/pub/irs-soi/2223inpublicmigdoc.pdf`) says "AGI is reported in thousands of dollars", so that is about
+     $3.44B.
    - Annual with roughly a two-year lag, but it is the only source that says WHERE people come from, by origin
-     county. First-time find.
+     county. Named in `docs/API_BLUEPRINTS.md`, never built.
 4. **HMDA, FFIEC data browser API.**
    - Re-probe: Lee 2024 originated loans = 22,228 loans, sum 7.38245E9.
    - Tract-level loan purpose and occupancy: investor and second-home share.
@@ -71,34 +85,36 @@ the workflow journal, not retyped.
    - Re-probe: 182 pending applications with city Fort Myers, Naples or Cape Coral. The session's filter was
      city-name only, so this is not a county total.
    - Hypothesis: a wetland or stormwater permit is filed before site work, so it could lead construction by one to
-     two years. Untested. First-time find.
+     two years. Untested. Not found in our docs.
 7. **Lee County Development Orders.** ArcGIS layer,
    `https://services2.arcgis.com/LvWGAAhHwbCJ2GMP/ArcGIS/rest/services/DevelopmentOrders/FeatureServer/0`.
    - Re-probe: 18,064 records, layer last edited 09/26/2026, so it is live.
    - Scout-verified siblings: Lee ZoningCases (8,103) and Collier CityView development-review projects (2,300).
-     First-time find for both.
+   - The Development Orders layer title came up once, unverified, on 07/26/2026. Collier's CityView projects layer
+     was not found in our docs.
 8. **Florida DOR Sale Data File, Lee 2026 preliminary.**
    - Re-probe: 200, 2,031,283-byte ZIP.
    - It holds every recorded sale with price and qualification code.
    - Sibling: the DOR New Construction Report (`floridarevenue.com/property/Documents/new_construction.xlsx`),
      county new-construction just and taxable value back to 1997 per the scout, last modified 08/04/2026.
-   - The 06/13 doc named the assessment roll and sales report in general terms.
+   - Parked since the 07/18/2026 SDF spec ("confirmed downloadable, not built"). The New Construction Report was
+     not found in our docs.
 9. **Collier County Sheriff calls for service.** `https://www2.colliersheriff.org/callsforservice/crimedata.zip`.
    - Re-probe: 200, 40,341 bytes, last modified 09/26/2026 22:08 GMT.
    - The scout found it is replaced every 3 hours and the server keeps no history.
-   - History exists only from the day we start capturing. First-time find.
+   - History exists only from the day we start capturing. Not found in our docs.
 10. **DBPR Hotels & Restaurants lodging extract, District 7.**
     `https://www2.myfloridalicense.com/sto/file_download/extracts/hrlodge7.csv`.
     - Re-probe: 200, 8,526,955 bytes, last modified 09/21/2026.
     - Scout counts: Lee 9,258 lodging licenses (5,195 vacation-rental dwellings, 3,498 condo units, 86 hotels,
       75 motels) and Collier 5,053.
-    - This is the short-term-rental SUPPLY count that AirDNA was priced for, free by license. First-time find.
+    - This is the short-term-rental SUPPLY count that AirDNA was priced for, free by license. Not found in our docs.
 
 11. **FRED county series, Equifax Subprime Credit Population for Lee County** (`EQFXSUBPRIME012071`, via the FRED
     key we hold).
     - Re-probe: 200. Quarterly, 2018-01-01 to 2026-04-01, last updated 08/10/2026.
     - #33 catalogued the rest of the county series FRED carries for Lee, Collier and Hendry: BEA income, SAIPE
-      income and poverty, SNAP, and homeownership. First-time find.
+      income and poverty, SNAP, and homeownership. Not found in our docs.
 
 ## The literal "pickup-truck" series
 

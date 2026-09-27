@@ -1,3 +1,13 @@
+## 2026-09-26 (Opus 5.5, part 2) - scout catalog labels corrected; placeholder-output check opened
+
+Re-searched by NAME (not URL) across docs/, _RESEARCH/, _AUDIT_AND_ROADMAP/, _ASSISTANT/, the doc index, the registry and
+the 72-ceiling dry run. Three picks labelled "first-time find" were known before and never built: IRS SOI migration
+(docs/API_BLUEPRINTS.md), FDOR SDF (07/18 spec, PARKED), Lee Development Orders (07/26 scratchpad, unverified). Labels fixed
+in the catalog and INDEX line. "About $3.44B" is now sourced to the IRS users guide ("AGI is reported in thousands of
+dollars"). The Collier 21 and Hendry 36 SDF files were probed (both 200). Opened check
+workflow_subagent_placeholder_structured_output (defect). Scratchpad entry marked RESOLVED.
+Next: unchanged. He picks from the catalog.
+
 ## 2026-09-26 (Opus 5.5) - 100-scout free-data sweep filed: 257 datasets, 11 re-probed live; nothing built
 
 His ask: "crawl4ai 100 sonnets in groups of 5 for more inormation we can bring in". Workflow wf_3f6af0df-cac: 100 Sonnet
