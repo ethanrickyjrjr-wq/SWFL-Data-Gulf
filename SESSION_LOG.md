@@ -1,3 +1,15 @@
+## 2026-09-26 (Opus 5.5) - 100-scout free-data sweep filed: 257 datasets, 11 re-probed live; nothing built
+
+His ask: "crawl4ai 100 sonnets in groups of 5 for more inormation we can bring in". Workflow wf_3f6af0df-cac: 100 Sonnet
+scouts, 20 themes x 5, 5 at a time, briefed with what we already hold and banned from repo edits, paid lanes and listing portals.
+99 returned; #65 failed its output schema and was re-run. Three more (#9, #33, #66) submitted placeholder text as their final
+answer and were re-run in wf_2f12a05e-4e6. All 100 are now real. Session re-probed 11 top picks itself (all 200) and grepped the
+catalog for both key values (0 hits each). Catalog rendered by script from the journals:
+_RESEARCH/data-and-ingest/2026-09-26-free-data-100-scout-catalog.md + INDEX line. Scratchpad entry for this ask was carried
+into f758a6ed by the parallel pipeline-plans watcher (shared index), so it is already on main.
+Next: he picks. The session's suggested order is in the catalog (migration trio, development-pipeline trio, Collier Sheriff
+capture, DBPR lodging, HMDA + Citizens).
+
 ## 2026-09-26 (Opus watcher, pipeline plans wave) — 19 pipeline-family plans written + second-Opus verified; INDEX + STATUS compiled
 
 His ask (09/26): one Opus per pipeline with a complete plan, double-checked, checks and balances that are not 500 GitHub issues,
