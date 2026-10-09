@@ -1,9 +1,9 @@
-<!-- FRESHNESS: v5 | Token: SWFL-7421-v5-20260915-17b20301 -->
+<!-- FRESHNESS: v6 | Token: SWFL-7421-v6-20261009-332f376d -->
 ---
 brain_id: market-heat-swfl
-version: 5
-refined_at: 2026-09-15T23:58:22Z
-freshness_token: SWFL-7421-v5-20260915-17b20301
+version: 6
+refined_at: 2026-10-09T04:27:14Z
+freshness_token: SWFL-7421-v6-20261009-332f376d
 ttl_seconds: 3024000
 pack_hash: a6ef49a3e65a
 context_type: user_saved_reference
@@ -31,38 +31,38 @@ SCOPE: SWFL market-heat directional call per ZIP from realtor.com's free public-
 
 --- CITATION TABLE ---
 id  | source                                                                                                                                                                                                | verified   | expires
-s01 | Data provided by Realtor.com — Economic Research Data Library, Core Inventory Metrics (ZIP, monthly). Attribution-only license. https://www.realtor.com/research/data/                                | 2026-09-15 | 2026-10-20
-s02 | Data provided by Realtor.com — Economic Research Data Library, Market Hotness Metrics (ZIP, monthly). Relative cross-sectional rank. Attribution-only license. https://www.realtor.com/research/data/ | 2026-09-15 | 2026-10-20
+s01 | Data provided by Realtor.com — Economic Research Data Library, Core Inventory Metrics (ZIP, monthly). Attribution-only license. https://www.realtor.com/research/data/                                | 2026-10-09 | 2026-11-13
+s02 | Data provided by Realtor.com — Economic Research Data Library, Market Hotness Metrics (ZIP, monthly). Relative cross-sectional rank. Attribution-only license. https://www.realtor.com/research/data/ | 2026-10-09 | 2026-11-13
 
 --- SAVED FACTS ---
 [
-  {"id":"f001","topic":"market_heat_summary","fact":"realtor.com SWFL market-heat composite","value":"40 ZIPs scored (16 suppressed), SWFL median tilt = 0.34 (display 67/100), latest month = 202608.","src":"s01","date":"2026-09-15"}
+  {"id":"f001","topic":"market_heat_summary","fact":"realtor.com SWFL market-heat composite","value":"42 ZIPs scored (14 suppressed), SWFL median tilt = 0.30 (display 65/100), latest month = 202609.","src":"s01","date":"2026-10-09"}
 ]
 
 --- OUTPUT ---
 {
   "brain_id": "market-heat-swfl",
-  "version": 5,
-  "refined_at": "2026-09-15T23:58:22Z",
-  "expires": "2026-10-20T23:58:22Z",
+  "version": 6,
+  "refined_at": "2026-10-09T04:27:14Z",
+  "expires": "2026-11-13T04:27:14Z",
   "ttl_seconds": 3024000,
   "direction": "bullish",
-  "magnitude": 0.34,
+  "magnitude": 0.3,
   "drivers": [],
   "overrides": [],
-  "conclusion": "SWFL market heat is tightening (bullish) at 67/100. Inventory down 17.0% Y/Y, DOM down 9.9% Y/Y across 40 ZIPs. Tightest: 33990 (84), 33928 (82), 34145 (81). [INFERENCE] Forward read anchors on the pending ratio (median 0.25), the leading demand edge: a sustained rise points to firming prices. Falsified if the pending ratio falls for 2+ consecutive months while active inventory rises.",
+  "conclusion": "SWFL market heat is tightening (bullish) at 65/100. Inventory down 13.0% Y/Y, DOM down 8.4% Y/Y across 42 ZIPs. Tightest: 34138 (85), 33990 (80), 34145 (77). [INFERENCE] Forward read anchors on the pending ratio (median 0.24), the leading demand edge: a sustained rise points to firming prices. Falsified if the pending ratio falls for 2+ consecutive months while active inventory rises.",
   "key_metrics": [
     {
       "metric": "market_heat_tilt_swfl",
-      "value": 66.9,
+      "value": 64.8,
       "direction": "rising",
-      "label": "SWFL market-heat tilt (0-100, 50 = balanced; >50 = tightening/seller-favoring) at 202608 — 40 ZIPs scored",
+      "label": "SWFL market-heat tilt (0-100, 50 = balanced; >50 = tightening/seller-favoring) at 202609 — 42 ZIPs scored",
       "variable_type": "intensive",
       "units": "score (0-100)",
       "display_format": "raw",
       "source": {
         "url": "https://www.realtor.com/research/data/",
-        "fetched_at": "2026-09-15T23:58:20Z",
+        "fetched_at": "2026-10-09T04:27:11Z",
         "tier": 3,
         "citation": "Data provided by Realtor.com — Economic Research Data Library (ZIP-grain Core Inventory + Market Hotness, monthly). Attribution-only license. Hotness is a relative cross-sectional rank, not the vote driver."
       },
@@ -73,7 +73,7 @@ s02 | Data provided by Realtor.com — Economic Research Data Library, Market Ho
     },
     {
       "metric": "market_heat_inventory_yy_swfl",
-      "value": -17,
+      "value": -13,
       "direction": "falling",
       "label": "SWFL median active-listing count, year-over-year change — the lead tightening signal (falling = bullish)",
       "variable_type": "intensive",
@@ -81,7 +81,7 @@ s02 | Data provided by Realtor.com — Economic Research Data Library, Market Ho
       "display_format": "percent",
       "source": {
         "url": "https://www.realtor.com/research/data/",
-        "fetched_at": "2026-09-15T23:58:20Z",
+        "fetched_at": "2026-10-09T04:27:11Z",
         "tier": 3,
         "citation": "Data provided by Realtor.com — Economic Research Data Library (ZIP-grain Core Inventory + Market Hotness, monthly). Attribution-only license. Hotness is a relative cross-sectional rank, not the vote driver."
       },
@@ -92,7 +92,7 @@ s02 | Data provided by Realtor.com — Economic Research Data Library, Market Ho
     },
     {
       "metric": "market_heat_dom_yy_swfl",
-      "value": -9.9,
+      "value": -8.4,
       "direction": "falling",
       "label": "SWFL median days-on-market, year-over-year change (falling = homes selling faster = bullish)",
       "variable_type": "intensive",
@@ -100,7 +100,7 @@ s02 | Data provided by Realtor.com — Economic Research Data Library, Market Ho
       "display_format": "percent",
       "source": {
         "url": "https://www.realtor.com/research/data/",
-        "fetched_at": "2026-09-15T23:58:20Z",
+        "fetched_at": "2026-10-09T04:27:11Z",
         "tier": 3,
         "citation": "Data provided by Realtor.com — Economic Research Data Library (ZIP-grain Core Inventory + Market Hotness, monthly). Attribution-only license. Hotness is a relative cross-sectional rank, not the vote driver."
       },
@@ -111,7 +111,7 @@ s02 | Data provided by Realtor.com — Economic Research Data Library, Market Ho
     },
     {
       "metric": "market_heat_pending_ratio_swfl",
-      "value": 0.247,
+      "value": 0.244,
       "direction": "rising",
       "label": "SWFL median pending ratio (pending ÷ active listings) — the leading demand edge (rising = bullish)",
       "variable_type": "intensive",
@@ -119,7 +119,7 @@ s02 | Data provided by Realtor.com — Economic Research Data Library, Market Ho
       "display_format": "ratio",
       "source": {
         "url": "https://www.realtor.com/research/data/",
-        "fetched_at": "2026-09-15T23:58:20Z",
+        "fetched_at": "2026-10-09T04:27:11Z",
         "tier": 3,
         "citation": "Data provided by Realtor.com — Economic Research Data Library (ZIP-grain Core Inventory + Market Hotness, monthly). Attribution-only license. Hotness is a relative cross-sectional rank, not the vote driver."
       },
@@ -130,7 +130,7 @@ s02 | Data provided by Realtor.com — Economic Research Data Library, Market Ho
     },
     {
       "metric": "market_heat_price_cut_share_swfl",
-      "value": 15.7,
+      "value": 15.1,
       "direction": "falling",
       "label": "SWFL median share of active listings with a price reduction — coincident context (rising = softening)",
       "variable_type": "intensive",
@@ -138,7 +138,7 @@ s02 | Data provided by Realtor.com — Economic Research Data Library, Market Ho
       "display_format": "percent",
       "source": {
         "url": "https://www.realtor.com/research/data/",
-        "fetched_at": "2026-09-15T23:58:20Z",
+        "fetched_at": "2026-10-09T04:27:11Z",
         "tier": 3,
         "citation": "Data provided by Realtor.com — Economic Research Data Library (ZIP-grain Core Inventory + Market Hotness, monthly). Attribution-only license. Hotness is a relative cross-sectional rank, not the vote driver."
       },
@@ -151,7 +151,7 @@ s02 | Data provided by Realtor.com — Economic Research Data Library, Market Ho
   "detail_tables": [
     {
       "id": "market_heat_by_zip",
-      "title": "SWFL market heat by ZIP — 202608 (realtor.com list-side metrics)",
+      "title": "SWFL market heat by ZIP — 202609 (realtor.com list-side metrics)",
       "grain": "zip",
       "columns": [
         {
@@ -231,40 +231,40 @@ s02 | Data provided by Realtor.com — Economic Research Data Library, Market Ho
       ],
       "rows": [
         {
-          "key": "33990",
-          "label": "33990",
+          "key": "34138",
+          "label": "34138",
           "cells": {
-            "market_heat_score": 84.3,
-            "active_listing_count": 177,
-            "inventory_yy": -33.7,
-            "median_dom": 72,
-            "dom_yy": -22.2,
-            "pending_ratio": 0.339,
-            "pending_ratio_yy": 9.6,
-            "new_listing_count": 60,
-            "price_reduced_share": 22.6,
-            "hotness_score": 32.877697841726615,
-            "hotness_rank": 10104,
-            "month": "202608",
+            "market_heat_score": 84.9,
+            "active_listing_count": 2,
+            "inventory_yy": -42.9,
+            "median_dom": 157,
+            "dom_yy": -11.3,
+            "pending_ratio": 0.5,
+            "pending_ratio_yy": 21.4,
+            "new_listing_count": 2,
+            "price_reduced_share": 0,
+            "hotness_score": null,
+            "hotness_rank": null,
+            "month": "202609",
             "suppressed_reason": null
           }
         },
         {
-          "key": "33928",
-          "label": "33928",
+          "key": "33990",
+          "label": "33990",
           "cells": {
-            "market_heat_score": 82.2,
-            "active_listing_count": 315,
-            "inventory_yy": -30.2,
-            "median_dom": 89,
-            "dom_yy": -16,
-            "pending_ratio": 0.3429,
-            "pending_ratio_yy": 11.9,
-            "new_listing_count": 84,
-            "price_reduced_share": 18,
-            "hotness_score": 29.20503597122302,
-            "hotness_rank": 10810,
-            "month": "202608",
+            "market_heat_score": 79.8,
+            "active_listing_count": 175,
+            "inventory_yy": -28.4,
+            "median_dom": 72,
+            "dom_yy": -21.6,
+            "pending_ratio": 0.3171,
+            "pending_ratio_yy": 3.7,
+            "new_listing_count": 62,
+            "price_reduced_share": 25.2,
+            "hotness_score": 38.14320045236076,
+            "hotness_rank": 9185,
+            "month": "202609",
             "suppressed_reason": null
           }
         },
@@ -272,113 +272,18 @@ s02 | Data provided by Realtor.com — Economic Research Data Library, Market Ho
           "key": "34145",
           "label": "34145",
           "cells": {
-            "market_heat_score": 80.8,
-            "active_listing_count": 404,
-            "inventory_yy": -27.6,
-            "median_dom": 104,
-            "dom_yy": -17.8,
-            "pending_ratio": 0.2525,
-            "pending_ratio_yy": 10,
-            "new_listing_count": 76,
-            "price_reduced_share": 10.7,
-            "hotness_score": 33.356115107913666,
-            "hotness_rank": 10016,
-            "month": "202608",
-            "suppressed_reason": null
-          }
-        },
-        {
-          "key": "33905",
-          "label": "33905",
-          "cells": {
-            "market_heat_score": 76,
-            "active_listing_count": 266,
-            "inventory_yy": -17.1,
-            "median_dom": 78,
-            "dom_yy": -21.2,
-            "pending_ratio": 0.3083,
-            "pending_ratio_yy": 8.4,
-            "new_listing_count": 72,
-            "price_reduced_share": 17.6,
-            "hotness_score": 41.20863309352518,
-            "hotness_rank": 8357,
-            "month": "202608",
-            "suppressed_reason": null
-          }
-        },
-        {
-          "key": "33991",
-          "label": "33991",
-          "cells": {
-            "market_heat_score": 75.5,
-            "active_listing_count": 279,
-            "inventory_yy": -19.1,
-            "median_dom": 81,
-            "dom_yy": -11.5,
-            "pending_ratio": 0.3548,
-            "pending_ratio_yy": 15.2,
-            "new_listing_count": 84,
-            "price_reduced_share": 27.5,
-            "hotness_score": 31.327338129496404,
-            "hotness_rank": 10418,
-            "month": "202608",
-            "suppressed_reason": null
-          }
-        },
-        {
-          "key": "34116",
-          "label": "34116",
-          "cells": {
-            "market_heat_score": 75.2,
-            "active_listing_count": 60,
-            "inventory_yy": -31.8,
-            "median_dom": 88,
-            "dom_yy": 2.3,
-            "pending_ratio": 0.45,
-            "pending_ratio_yy": 17.7,
-            "new_listing_count": 16,
-            "price_reduced_share": 17,
-            "hotness_score": 25.09712230215827,
-            "hotness_rank": 11557,
-            "month": "202608",
-            "suppressed_reason": null
-          }
-        },
-        {
-          "key": "34104",
-          "label": "34104",
-          "cells": {
-            "market_heat_score": 73.6,
-            "active_listing_count": 193,
-            "inventory_yy": -22.2,
-            "median_dom": 96,
-            "dom_yy": -14.7,
-            "pending_ratio": 0.3057,
-            "pending_ratio_yy": 5.6,
-            "new_listing_count": 40,
-            "price_reduced_share": 15.9,
-            "hotness_score": 12.56474820143885,
-            "hotness_rank": 13187,
-            "month": "202608",
-            "suppressed_reason": null
-          }
-        },
-        {
-          "key": "33904",
-          "label": "33904",
-          "cells": {
-            "market_heat_score": 73.3,
-            "active_listing_count": 411,
-            "inventory_yy": -24.3,
-            "median_dom": 99,
-            "dom_yy": -7.5,
-            "pending_ratio": 0.2433,
-            "pending_ratio_yy": 10.2,
-            "new_listing_count": 104,
-            "price_reduced_share": 16.6,
-            "hotness_score": 33.16187050359712,
-            "hotness_rank": 10058,
-            "month": "202608",
+            "market_heat_score": 76.8,
+            "active_listing_count": 413,
+            "inventory_yy": -19.6,
+            "median_dom": 100,
+            "dom_yy": -24.3,
+            "pending_ratio": 0.1976,
+            "pending_ratio_yy": 4.4,
+            "new_listing_count": 94,
+            "price_reduced_share": 11.9,
+            "hotness_score": 33.23084534916596,
+            "hotness_rank": 10232,
+            "month": "202609",
             "suppressed_reason": null
           }
         },
@@ -386,208 +291,18 @@ s02 | Data provided by Realtor.com — Economic Research Data Library, Market Ho
           "key": "34108",
           "label": "34108",
           "cells": {
-            "market_heat_score": 73.2,
-            "active_listing_count": 330,
-            "inventory_yy": -21.6,
-            "median_dom": 129,
-            "dom_yy": -10.4,
-            "pending_ratio": 0.197,
-            "pending_ratio_yy": 9.7,
-            "new_listing_count": 32,
-            "price_reduced_share": 7.8,
-            "hotness_score": 12.597122302158274,
-            "hotness_rank": 13185,
-            "month": "202608",
-            "suppressed_reason": null
-          }
-        },
-        {
-          "key": "34105",
-          "label": "34105",
-          "cells": {
-            "market_heat_score": 72.5,
-            "active_listing_count": 168,
-            "inventory_yy": -27.6,
-            "median_dom": 98,
-            "dom_yy": -12.5,
-            "pending_ratio": 0.1845,
-            "pending_ratio_yy": 0.4,
-            "new_listing_count": 28,
-            "price_reduced_share": 12.4,
-            "hotness_score": 11.859712230215827,
-            "hotness_rank": 13264,
-            "month": "202608",
-            "suppressed_reason": null
-          }
-        },
-        {
-          "key": "34119",
-          "label": "34119",
-          "cells": {
-            "market_heat_score": 71.5,
-            "active_listing_count": 313,
-            "inventory_yy": -24.6,
-            "median_dom": 99,
-            "dom_yy": -2,
-            "pending_ratio": 0.3546,
-            "pending_ratio_yy": 12.1,
+            "market_heat_score": 76,
+            "active_listing_count": 295,
+            "inventory_yy": -26.6,
+            "median_dom": 120,
+            "dom_yy": -12.8,
+            "pending_ratio": 0.2203,
+            "pending_ratio_yy": 7.4,
             "new_listing_count": 64,
-            "price_reduced_share": 15.4,
-            "hotness_score": 19.28776978417266,
-            "hotness_rank": 12430,
-            "month": "202608",
-            "suppressed_reason": null
-          }
-        },
-        {
-          "key": "33913",
-          "label": "33913",
-          "cells": {
-            "market_heat_score": 70.9,
-            "active_listing_count": 379,
-            "inventory_yy": -20.5,
-            "median_dom": 94,
-            "dom_yy": -8.3,
-            "pending_ratio": 0.3193,
-            "pending_ratio_yy": 8.7,
-            "new_listing_count": 88,
-            "price_reduced_share": 17.7,
-            "hotness_score": 23.363309352517987,
-            "hotness_rank": 11831,
-            "month": "202608",
-            "suppressed_reason": null
-          }
-        },
-        {
-          "key": "34135",
-          "label": "34135",
-          "cells": {
-            "market_heat_score": 70.7,
-            "active_listing_count": 431,
-            "inventory_yy": -23,
-            "median_dom": 94,
-            "dom_yy": -10.5,
-            "pending_ratio": 0.2668,
-            "pending_ratio_yy": 3.8,
-            "new_listing_count": 92,
-            "price_reduced_share": 11.6,
-            "hotness_score": 24.10431654676259,
-            "hotness_rank": 11709,
-            "month": "202608",
-            "suppressed_reason": null
-          }
-        },
-        {
-          "key": "33908",
-          "label": "33908",
-          "cells": {
-            "market_heat_score": 70.5,
-            "active_listing_count": 629,
-            "inventory_yy": -22.1,
-            "median_dom": 114,
-            "dom_yy": -8.8,
-            "pending_ratio": 0.1669,
-            "pending_ratio_yy": 6,
-            "new_listing_count": 68,
-            "price_reduced_share": 17.2,
-            "hotness_score": 15.16906474820144,
-            "hotness_rank": 12933,
-            "month": "202608",
-            "suppressed_reason": null
-          }
-        },
-        {
-          "key": "34113",
-          "label": "34113",
-          "cells": {
-            "market_heat_score": 70.3,
-            "active_listing_count": 308,
-            "inventory_yy": -20.4,
-            "median_dom": 122,
-            "dom_yy": -6.1,
-            "pending_ratio": 0.25,
-            "pending_ratio_yy": 10,
-            "new_listing_count": 56,
-            "price_reduced_share": 10.8,
-            "hotness_score": 20.823741007194247,
-            "hotness_rank": 12222,
-            "month": "202608",
-            "suppressed_reason": null
-          }
-        },
-        {
-          "key": "34114",
-          "label": "34114",
-          "cells": {
-            "market_heat_score": 69.8,
-            "active_listing_count": 365,
-            "inventory_yy": -18,
-            "median_dom": 100,
-            "dom_yy": -12.3,
-            "pending_ratio": 0.2356,
-            "pending_ratio_yy": 5.4,
-            "new_listing_count": 60,
-            "price_reduced_share": 13.8,
-            "hotness_score": 16.258992805755394,
-            "hotness_rank": 12802,
-            "month": "202608",
-            "suppressed_reason": null
-          }
-        },
-        {
-          "key": "33901",
-          "label": "33901",
-          "cells": {
-            "market_heat_score": 69.6,
-            "active_listing_count": 176,
-            "inventory_yy": -12.9,
-            "median_dom": 97,
-            "dom_yy": -19.5,
-            "pending_ratio": 0.2216,
-            "pending_ratio_yy": 2.9,
-            "new_listing_count": 32,
-            "price_reduced_share": 15.7,
-            "hotness_score": 17.345323741007196,
-            "hotness_rank": 12682,
-            "month": "202608",
-            "suppressed_reason": null
-          }
-        },
-        {
-          "key": "34112",
-          "label": "34112",
-          "cells": {
-            "market_heat_score": 68.4,
-            "active_listing_count": 369,
-            "inventory_yy": -15.6,
-            "median_dom": 96,
-            "dom_yy": -16.5,
-            "pending_ratio": 0.1951,
-            "pending_ratio_yy": 1,
-            "new_listing_count": 68,
-            "price_reduced_share": 14.6,
-            "hotness_score": 13.942446043165468,
-            "hotness_rank": 13051,
-            "month": "202608",
-            "suppressed_reason": null
-          }
-        },
-        {
-          "key": "33956",
-          "label": "33956",
-          "cells": {
-            "market_heat_score": 68.1,
-            "active_listing_count": 75,
-            "inventory_yy": -19.3,
-            "median_dom": 117,
-            "dom_yy": -12.4,
-            "pending_ratio": 0.16,
-            "pending_ratio_yy": 1,
-            "new_listing_count": 12,
-            "price_reduced_share": 14,
-            "hotness_score": 16.399280575539567,
-            "hotness_rank": 12782,
-            "month": "202608",
+            "price_reduced_share": 7.6,
+            "hotness_score": 14.15040995193667,
+            "hotness_rank": 13299,
+            "month": "202609",
             "suppressed_reason": null
           }
         },
@@ -595,94 +310,189 @@ s02 | Data provided by Realtor.com — Economic Research Data Library, Market Ho
           "key": "34103",
           "label": "34103",
           "cells": {
-            "market_heat_score": 67.8,
-            "active_listing_count": 286,
-            "inventory_yy": -14.4,
-            "median_dom": 124,
-            "dom_yy": -13,
-            "pending_ratio": 0.1538,
-            "pending_ratio_yy": 4.6,
-            "new_listing_count": 28,
-            "price_reduced_share": 7.1,
-            "hotness_score": 8.859712230215827,
-            "hotness_rank": 13524,
-            "month": "202608",
+            "market_heat_score": 75.6,
+            "active_listing_count": 264,
+            "inventory_yy": -19.4,
+            "median_dom": 126,
+            "dom_yy": -17.8,
+            "pending_ratio": 0.1629,
+            "pending_ratio_yy": 9,
+            "new_listing_count": 48,
+            "price_reduced_share": 6.8,
+            "hotness_score": 14.217557251908397,
+            "hotness_rank": 13290,
+            "month": "202609",
             "suppressed_reason": null
           }
         },
         {
-          "key": "33922",
-          "label": "33922",
+          "key": "33928",
+          "label": "33928",
           "cells": {
-            "market_heat_score": 66.1,
-            "active_listing_count": 82,
-            "inventory_yy": 2.5,
-            "median_dom": 98,
-            "dom_yy": -26.9,
-            "pending_ratio": 0.1463,
-            "pending_ratio_yy": 4.6,
-            "new_listing_count": 8,
-            "price_reduced_share": 18.4,
-            "hotness_score": 20.888489208633096,
-            "hotness_rank": 12213,
-            "month": "202608",
+            "market_heat_score": 75.4,
+            "active_listing_count": 309,
+            "inventory_yy": -29.1,
+            "median_dom": 81,
+            "dom_yy": -3.6,
+            "pending_ratio": 0.3517,
+            "pending_ratio_yy": 13,
+            "new_listing_count": 100,
+            "price_reduced_share": 14.6,
+            "hotness_score": 31.28357364998586,
+            "hotness_rank": 10603,
+            "month": "202609",
             "suppressed_reason": null
           }
         },
         {
-          "key": "33993",
-          "label": "33993",
+          "key": "34119",
+          "label": "34119",
           "cells": {
-            "market_heat_score": 66,
-            "active_listing_count": 738,
-            "inventory_yy": -11.7,
-            "median_dom": 84,
-            "dom_yy": -16.8,
-            "pending_ratio": 0.2304,
-            "pending_ratio_yy": 0.2,
-            "new_listing_count": 180,
-            "price_reduced_share": 26.5,
-            "hotness_score": 17.798561151079134,
-            "hotness_rank": 12614,
-            "month": "202608",
+            "market_heat_score": 73.9,
+            "active_listing_count": 281,
+            "inventory_yy": -29.9,
+            "median_dom": 92,
+            "dom_yy": -0.5,
+            "pending_ratio": 0.3886,
+            "pending_ratio_yy": 12.6,
+            "new_listing_count": 86,
+            "price_reduced_share": 12.9,
+            "hotness_score": 22.377721232683065,
+            "hotness_rank": 12220,
+            "month": "202609",
             "suppressed_reason": null
           }
         },
         {
-          "key": "34120",
-          "label": "34120",
+          "key": "34105",
+          "label": "34105",
           "cells": {
-            "market_heat_score": 65.8,
-            "active_listing_count": 494,
-            "inventory_yy": -4.8,
-            "median_dom": 86,
-            "dom_yy": -13.1,
-            "pending_ratio": 0.3138,
-            "pending_ratio_yy": 10.6,
-            "new_listing_count": 120,
-            "price_reduced_share": 15.6,
-            "hotness_score": 24.41726618705036,
-            "hotness_rank": 11651,
-            "month": "202608",
+            "market_heat_score": 73.8,
+            "active_listing_count": 163,
+            "inventory_yy": -28.7,
+            "median_dom": 97,
+            "dom_yy": -10.8,
+            "pending_ratio": 0.2031,
+            "pending_ratio_yy": 3.2,
+            "new_listing_count": 46,
+            "price_reduced_share": 8.8,
+            "hotness_score": 13.16793893129771,
+            "hotness_rank": 13402,
+            "month": "202609",
             "suppressed_reason": null
           }
         },
         {
-          "key": "34109",
-          "label": "34109",
+          "key": "33904",
+          "label": "33904",
           "cells": {
-            "market_heat_score": 65.8,
-            "active_listing_count": 218,
+            "market_heat_score": 73.4,
+            "active_listing_count": 395,
+            "inventory_yy": -21.3,
+            "median_dom": 96,
+            "dom_yy": -12.9,
+            "pending_ratio": 0.2418,
+            "pending_ratio_yy": 7.8,
+            "new_listing_count": 98,
+            "price_reduced_share": 17,
+            "hotness_score": 31.969182923381396,
+            "hotness_rank": 10476,
+            "month": "202609",
+            "suppressed_reason": null
+          }
+        },
+        {
+          "key": "34104",
+          "label": "34104",
+          "cells": {
+            "market_heat_score": 72.7,
+            "active_listing_count": 191,
             "inventory_yy": -16.8,
-            "median_dom": 101,
-            "dom_yy": -4.7,
-            "pending_ratio": 0.2752,
-            "pending_ratio_yy": 6.9,
-            "new_listing_count": 40,
-            "price_reduced_share": 13.8,
-            "hotness_score": 14.676258992805755,
-            "hotness_rank": 12986,
-            "month": "202608",
+            "median_dom": 92,
+            "dom_yy": -20.1,
+            "pending_ratio": 0.3097,
+            "pending_ratio_yy": 3.9,
+            "new_listing_count": 54,
+            "price_reduced_share": 16.4,
+            "hotness_score": 11.584676279332768,
+            "hotness_rank": 13565,
+            "month": "202609",
+            "suppressed_reason": null
+          }
+        },
+        {
+          "key": "33973",
+          "label": "33973",
+          "cells": {
+            "market_heat_score": 72,
+            "active_listing_count": 15,
+            "inventory_yy": -14.3,
+            "median_dom": 56,
+            "dom_yy": -50.7,
+            "pending_ratio": 0.2667,
+            "pending_ratio_yy": -4.8,
+            "new_listing_count": 4,
+            "price_reduced_share": 30.8,
+            "hotness_score": 34.46070115917444,
+            "hotness_rank": 9977,
+            "month": "202609",
+            "suppressed_reason": null
+          }
+        },
+        {
+          "key": "33917",
+          "label": "33917",
+          "cells": {
+            "market_heat_score": 71.4,
+            "active_listing_count": 272,
+            "inventory_yy": -8.4,
+            "median_dom": 88,
+            "dom_yy": -12.2,
+            "pending_ratio": 0.3996,
+            "pending_ratio_yy": 17.9,
+            "new_listing_count": 48,
+            "price_reduced_share": 15.2,
+            "hotness_score": 22.86542267458298,
+            "hotness_rank": 12138,
+            "month": "202609",
+            "suppressed_reason": null
+          }
+        },
+        {
+          "key": "33901",
+          "label": "33901",
+          "cells": {
+            "market_heat_score": 71.3,
+            "active_listing_count": 173,
+            "inventory_yy": -10.8,
+            "median_dom": 87,
+            "dom_yy": -22.4,
+            "pending_ratio": 0.263,
+            "pending_ratio_yy": 5.2,
+            "new_listing_count": 36,
+            "price_reduced_share": 13.4,
+            "hotness_score": 17.868249929318633,
+            "hotness_rank": 12841,
+            "month": "202609",
+            "suppressed_reason": null
+          }
+        },
+        {
+          "key": "33908",
+          "label": "33908",
+          "cells": {
+            "market_heat_score": 71.3,
+            "active_listing_count": 569,
+            "inventory_yy": -23.1,
+            "median_dom": 119,
+            "dom_yy": -9,
+            "pending_ratio": 0.181,
+            "pending_ratio_yy": 6.3,
+            "new_listing_count": 106,
+            "price_reduced_share": 15.8,
+            "hotness_score": 17.6915465083404,
+            "hotness_rank": 12871,
+            "month": "202609",
             "suppressed_reason": null
           }
         },
@@ -690,18 +500,151 @@ s02 | Data provided by Realtor.com — Economic Research Data Library, Market Ho
           "key": "34134",
           "label": "34134",
           "cells": {
-            "market_heat_score": 64.5,
-            "active_listing_count": 327,
-            "inventory_yy": -24.6,
-            "median_dom": 137,
-            "dom_yy": 1.5,
-            "pending_ratio": 0.2202,
-            "pending_ratio_yy": 2.9,
-            "new_listing_count": 56,
-            "price_reduced_share": 8.7,
-            "hotness_score": 11.697841726618705,
-            "hotness_rank": 13282,
-            "month": "202608",
+            "market_heat_score": 70.8,
+            "active_listing_count": 317,
+            "inventory_yy": -18.8,
+            "median_dom": 109,
+            "dom_yy": -14.5,
+            "pending_ratio": 0.2413,
+            "pending_ratio_yy": 4.2,
+            "new_listing_count": 92,
+            "price_reduced_share": 8.3,
+            "hotness_score": 17.302798982188296,
+            "hotness_rank": 12933,
+            "month": "202609",
+            "suppressed_reason": null
+          }
+        },
+        {
+          "key": "33913",
+          "label": "33913",
+          "cells": {
+            "market_heat_score": 70.8,
+            "active_listing_count": 383,
+            "inventory_yy": -20.1,
+            "median_dom": 80,
+            "dom_yy": -9.3,
+            "pending_ratio": 0.2863,
+            "pending_ratio_yy": 7.9,
+            "new_listing_count": 118,
+            "price_reduced_share": 16.6,
+            "hotness_score": 26.593864857223636,
+            "hotness_rank": 11492,
+            "month": "202609",
+            "suppressed_reason": null
+          }
+        },
+        {
+          "key": "34135",
+          "label": "34135",
+          "cells": {
+            "market_heat_score": 70.1,
+            "active_listing_count": 413,
+            "inventory_yy": -23.9,
+            "median_dom": 93,
+            "dom_yy": -4.9,
+            "pending_ratio": 0.2994,
+            "pending_ratio_yy": 7.4,
+            "new_listing_count": 114,
+            "price_reduced_share": 13.6,
+            "hotness_score": 25.43115634718688,
+            "hotness_rank": 11691,
+            "month": "202609",
+            "suppressed_reason": null
+          }
+        },
+        {
+          "key": "33956",
+          "label": "33956",
+          "cells": {
+            "market_heat_score": 69.6,
+            "active_listing_count": 75,
+            "inventory_yy": -20.7,
+            "median_dom": 108,
+            "dom_yy": -13.4,
+            "pending_ratio": 0.1074,
+            "pending_ratio_yy": 1.2,
+            "new_listing_count": 16,
+            "price_reduced_share": 14.1,
+            "hotness_score": 17.684478371501275,
+            "hotness_rank": 12873,
+            "month": "202609",
+            "suppressed_reason": null
+          }
+        },
+        {
+          "key": "33993",
+          "label": "33993",
+          "cells": {
+            "market_heat_score": 65.7,
+            "active_listing_count": 735,
+            "inventory_yy": -8.4,
+            "median_dom": 82,
+            "dom_yy": -23.5,
+            "pending_ratio": 0.2172,
+            "pending_ratio_yy": -3.5,
+            "new_listing_count": 136,
+            "price_reduced_share": 29.3,
+            "hotness_score": 20.04877014418999,
+            "hotness_rank": 12557,
+            "month": "202609",
+            "suppressed_reason": null
+          }
+        },
+        {
+          "key": "34109",
+          "label": "34109",
+          "cells": {
+            "market_heat_score": 65.6,
+            "active_listing_count": 209,
+            "inventory_yy": -14,
+            "median_dom": 101,
+            "dom_yy": -11,
+            "pending_ratio": 0.2512,
+            "pending_ratio_yy": 3.1,
+            "new_listing_count": 50,
+            "price_reduced_share": 10.1,
+            "hotness_score": 18.15804353972293,
+            "hotness_rank": 12805,
+            "month": "202609",
+            "suppressed_reason": null
+          }
+        },
+        {
+          "key": "33991",
+          "label": "33991",
+          "cells": {
+            "market_heat_score": 65.3,
+            "active_listing_count": 289,
+            "inventory_yy": -13.2,
+            "median_dom": 81,
+            "dom_yy": -7.7,
+            "pending_ratio": 0.2993,
+            "pending_ratio_yy": 6.7,
+            "new_listing_count": 88,
+            "price_reduced_share": 20.2,
+            "hotness_score": 35.35835453774385,
+            "hotness_rank": 9784,
+            "month": "202609",
+            "suppressed_reason": null
+          }
+        },
+        {
+          "key": "34114",
+          "label": "34114",
+          "cells": {
+            "market_heat_score": 64.3,
+            "active_listing_count": 355,
+            "inventory_yy": -17.4,
+            "median_dom": 105,
+            "dom_yy": -4.1,
+            "pending_ratio": 0.2465,
+            "pending_ratio_yy": 4.2,
+            "new_listing_count": 88,
+            "price_reduced_share": 9.8,
+            "hotness_score": 20.0381679389313,
+            "hotness_rank": 12558,
+            "month": "202609",
             "suppressed_reason": null
           }
         },
@@ -709,18 +652,18 @@ s02 | Data provided by Realtor.com — Economic Research Data Library, Market Ho
           "key": "33967",
           "label": "33967",
           "cells": {
-            "market_heat_score": 62.9,
-            "active_listing_count": 120,
-            "inventory_yy": -9.8,
-            "median_dom": 67,
-            "dom_yy": -6.9,
-            "pending_ratio": 0.35,
-            "pending_ratio_yy": 6.4,
-            "new_listing_count": 36,
-            "price_reduced_share": 18.1,
-            "hotness_score": 27.823741007194243,
-            "hotness_rank": 11070,
-            "month": "202608",
+            "market_heat_score": 64.2,
+            "active_listing_count": 113,
+            "inventory_yy": -20.2,
+            "median_dom": 64,
+            "dom_yy": -1.9,
+            "pending_ratio": 0.3644,
+            "pending_ratio_yy": 3.5,
+            "new_listing_count": 34,
+            "price_reduced_share": 19.5,
+            "hotness_score": 42.56078597681651,
+            "hotness_rank": 8224,
+            "month": "202609",
             "suppressed_reason": null
           }
         },
@@ -728,18 +671,18 @@ s02 | Data provided by Realtor.com — Economic Research Data Library, Market Ho
           "key": "33957",
           "label": "33957",
           "cells": {
-            "market_heat_score": 62.6,
-            "active_listing_count": 263,
-            "inventory_yy": -22.4,
-            "median_dom": 162,
-            "dom_yy": 4.5,
-            "pending_ratio": 0.1331,
-            "pending_ratio_yy": 4.8,
-            "new_listing_count": 12,
-            "price_reduced_share": 6.4,
-            "hotness_score": 20.57913669064748,
-            "hotness_rank": 12261,
-            "month": "202608",
+            "market_heat_score": 63.9,
+            "active_listing_count": 230,
+            "inventory_yy": -22.7,
+            "median_dom": 158,
+            "dom_yy": -2.5,
+            "pending_ratio": 0.1043,
+            "pending_ratio_yy": -0.1,
+            "new_listing_count": 28,
+            "price_reduced_share": 5.9,
+            "hotness_score": 22.76646875883517,
+            "hotness_rank": 12153,
+            "month": "202609",
             "suppressed_reason": null
           }
         },
@@ -747,113 +690,18 @@ s02 | Data provided by Realtor.com — Economic Research Data Library, Market Ho
           "key": "34110",
           "label": "34110",
           "cells": {
-            "market_heat_score": 62.4,
-            "active_listing_count": 324,
-            "inventory_yy": -10.5,
-            "median_dom": 115,
-            "dom_yy": -11.2,
-            "pending_ratio": 0.2099,
-            "pending_ratio_yy": 0.6,
-            "new_listing_count": 64,
-            "price_reduced_share": 10.4,
-            "hotness_score": 21.91007194244604,
-            "hotness_rank": 12056,
-            "month": "202608",
-            "suppressed_reason": null
-          }
-        },
-        {
-          "key": "33909",
-          "label": "33909",
-          "cells": {
-            "market_heat_score": 61.7,
-            "active_listing_count": 421,
-            "inventory_yy": -7.3,
-            "median_dom": 78,
-            "dom_yy": -9.3,
-            "pending_ratio": 0.3705,
-            "pending_ratio_yy": 4.5,
-            "new_listing_count": 124,
-            "price_reduced_share": 26.3,
-            "hotness_score": 28.989208633093526,
-            "hotness_rank": 10861,
-            "month": "202608",
-            "suppressed_reason": null
-          }
-        },
-        {
-          "key": "33971",
-          "label": "33971",
-          "cells": {
-            "market_heat_score": 61.2,
-            "active_listing_count": 358,
-            "inventory_yy": -15.2,
-            "median_dom": 83,
-            "dom_yy": -2.9,
-            "pending_ratio": 0.2458,
-            "pending_ratio_yy": 2.1,
-            "new_listing_count": 84,
-            "price_reduced_share": 24.8,
-            "hotness_score": 8.20503597122302,
-            "hotness_rank": 13572,
-            "month": "202608",
-            "suppressed_reason": null
-          }
-        },
-        {
-          "key": "33931",
-          "label": "33931",
-          "cells": {
-            "market_heat_score": 60.3,
-            "active_listing_count": 387,
-            "inventory_yy": -14.9,
-            "median_dom": 130,
-            "dom_yy": -0.4,
-            "pending_ratio": 0.0853,
-            "pending_ratio_yy": 3.3,
-            "new_listing_count": 44,
-            "price_reduced_share": 10.5,
-            "hotness_score": 9.58273381294964,
-            "hotness_rank": 13475,
-            "month": "202608",
-            "suppressed_reason": null
-          }
-        },
-        {
-          "key": "33912",
-          "label": "33912",
-          "cells": {
-            "market_heat_score": 59.3,
-            "active_listing_count": 153,
-            "inventory_yy": -11.6,
-            "median_dom": 102,
-            "dom_yy": -0.5,
-            "pending_ratio": 0.2614,
-            "pending_ratio_yy": 4.8,
-            "new_listing_count": 28,
-            "price_reduced_share": 12.1,
-            "hotness_score": 22.406474820143885,
-            "hotness_rank": 11990,
-            "month": "202608",
-            "suppressed_reason": null
-          }
-        },
-        {
-          "key": "33903",
-          "label": "33903",
-          "cells": {
-            "market_heat_score": 59.1,
-            "active_listing_count": 174,
-            "inventory_yy": -13.4,
+            "market_heat_score": 63.5,
+            "active_listing_count": 309,
+            "inventory_yy": -12.8,
             "median_dom": 110,
-            "dom_yy": -1.3,
-            "pending_ratio": 0.2299,
-            "pending_ratio_yy": 1.6,
-            "new_listing_count": 36,
-            "price_reduced_share": 16.3,
-            "hotness_score": 14.989208633093524,
-            "hotness_rank": 12958,
-            "month": "202608",
+            "dom_yy": -10.6,
+            "pending_ratio": 0.2026,
+            "pending_ratio_yy": 0.9,
+            "new_listing_count": 64,
+            "price_reduced_share": 15.4,
+            "hotness_score": 24.067005937234946,
+            "hotness_rank": 11930,
+            "month": "202609",
             "suppressed_reason": null
           }
         },
@@ -861,56 +709,170 @@ s02 | Data provided by Realtor.com — Economic Research Data Library, Market Ho
           "key": "34102",
           "label": "34102",
           "cells": {
-            "market_heat_score": 58,
-            "active_listing_count": 371,
-            "inventory_yy": -3.4,
-            "median_dom": 134,
-            "dom_yy": -13.5,
-            "pending_ratio": 0.1509,
-            "pending_ratio_yy": -2.6,
-            "new_listing_count": 40,
-            "price_reduced_share": 6.9,
-            "hotness_score": 16.56834532374101,
-            "hotness_rank": 12767,
-            "month": "202608",
-            "suppressed_reason": null
-          }
-        },
-        {
-          "key": "33936",
-          "label": "33936",
-          "cells": {
-            "market_heat_score": 53.9,
-            "active_listing_count": 271,
-            "inventory_yy": 8.8,
-            "median_dom": 71,
-            "dom_yy": -11.2,
-            "pending_ratio": 0.2472,
-            "pending_ratio_yy": 4.6,
-            "new_listing_count": 60,
-            "price_reduced_share": 23.3,
-            "hotness_score": 16.845323741007192,
-            "hotness_rank": 12739,
-            "month": "202608",
-            "suppressed_reason": null
-          }
-        },
-        {
-          "key": "33972",
-          "label": "33972",
-          "cells": {
-            "market_heat_score": 52.3,
-            "active_listing_count": 298,
-            "inventory_yy": -2.3,
-            "median_dom": 82,
-            "dom_yy": 7.9,
-            "pending_ratio": 0.2651,
-            "pending_ratio_yy": 9.8,
+            "market_heat_score": 61.7,
+            "active_listing_count": 361,
+            "inventory_yy": 0.3,
+            "median_dom": 121,
+            "dom_yy": -22.3,
+            "pending_ratio": 0.1567,
+            "pending_ratio_yy": -0.9,
             "new_listing_count": 72,
-            "price_reduced_share": 18.9,
-            "hotness_score": 10.859712230215827,
-            "hotness_rank": 13359,
-            "month": "202608",
+            "price_reduced_share": 6.7,
+            "hotness_score": 21.713316369804918,
+            "hotness_rank": 12322,
+            "month": "202609",
+            "suppressed_reason": null
+          }
+        },
+        {
+          "key": "33922",
+          "label": "33922",
+          "cells": {
+            "market_heat_score": 61.4,
+            "active_listing_count": 71,
+            "inventory_yy": -11.8,
+            "median_dom": 109,
+            "dom_yy": -6,
+            "pending_ratio": 0.1197,
+            "pending_ratio_yy": 2.7,
+            "new_listing_count": 14,
+            "price_reduced_share": 13.5,
+            "hotness_score": 20.896946564885496,
+            "hotness_rank": 12434,
+            "month": "202609",
+            "suppressed_reason": null
+          }
+        },
+        {
+          "key": "34112",
+          "label": "34112",
+          "cells": {
+            "market_heat_score": 58.1,
+            "active_listing_count": 369,
+            "inventory_yy": -9.9,
+            "median_dom": 99,
+            "dom_yy": -6.4,
+            "pending_ratio": 0.206,
+            "pending_ratio_yy": -1.7,
+            "new_listing_count": 84,
+            "price_reduced_share": 13,
+            "hotness_score": 17.29926491376873,
+            "hotness_rank": 12934,
+            "month": "202609",
+            "suppressed_reason": null
+          }
+        },
+        {
+          "key": "33971",
+          "label": "33971",
+          "cells": {
+            "market_heat_score": 57.7,
+            "active_listing_count": 365,
+            "inventory_yy": -10.3,
+            "median_dom": 86,
+            "dom_yy": -2.8,
+            "pending_ratio": 0.2222,
+            "pending_ratio_yy": 0.7,
+            "new_listing_count": 72,
+            "price_reduced_share": 27.5,
+            "hotness_score": 9.163839411931015,
+            "hotness_rank": 13761,
+            "month": "202609",
+            "suppressed_reason": null
+          }
+        },
+        {
+          "key": "34120",
+          "label": "34120",
+          "cells": {
+            "market_heat_score": 57.4,
+            "active_listing_count": 483,
+            "inventory_yy": -4.5,
+            "median_dom": 84,
+            "dom_yy": -0.3,
+            "pending_ratio": 0.3016,
+            "pending_ratio_yy": 8.6,
+            "new_listing_count": 122,
+            "price_reduced_share": 15.3,
+            "hotness_score": 26.37475261521063,
+            "hotness_rank": 11533,
+            "month": "202609",
+            "suppressed_reason": null
+          }
+        },
+        {
+          "key": "33931",
+          "label": "33931",
+          "cells": {
+            "market_heat_score": 57.2,
+            "active_listing_count": 361,
+            "inventory_yy": -12.6,
+            "median_dom": 124,
+            "dom_yy": 0.8,
+            "pending_ratio": 0.0804,
+            "pending_ratio_yy": 1.1,
+            "new_listing_count": 46,
+            "price_reduced_share": 9.4,
+            "hotness_score": 10.80364715860899,
+            "hotness_rank": 13631,
+            "month": "202609",
+            "suppressed_reason": null
+          }
+        },
+        {
+          "key": "33920",
+          "label": "33920",
+          "cells": {
+            "market_heat_score": 57.2,
+            "active_listing_count": 121,
+            "inventory_yy": -5.5,
+            "median_dom": 92,
+            "dom_yy": 0.6,
+            "pending_ratio": 0.3223,
+            "pending_ratio_yy": 8,
+            "new_listing_count": 28,
+            "price_reduced_share": 15.1,
+            "hotness_score": 13.517811704834607,
+            "hotness_rank": 13367,
+            "month": "202609",
+            "suppressed_reason": null
+          }
+        },
+        {
+          "key": "33909",
+          "label": "33909",
+          "cells": {
+            "market_heat_score": 55.7,
+            "active_listing_count": 424,
+            "inventory_yy": 0.6,
+            "median_dom": 76,
+            "dom_yy": -9.2,
+            "pending_ratio": 0.3408,
+            "pending_ratio_yy": 1.6,
+            "new_listing_count": 108,
+            "price_reduced_share": 28.4,
+            "hotness_score": 27.74243709358213,
+            "hotness_rank": 11301,
+            "month": "202609",
+            "suppressed_reason": null
+          }
+        },
+        {
+          "key": "33912",
+          "label": "33912",
+          "cells": {
+            "market_heat_score": 55.1,
+            "active_listing_count": 147,
+            "inventory_yy": -10.6,
+            "median_dom": 100,
+            "dom_yy": 3.9,
+            "pending_ratio": 0.2585,
+            "pending_ratio_yy": 2.5,
+            "new_listing_count": 40,
+            "price_reduced_share": 15.2,
+            "hotness_score": 24.950523042126097,
+            "hotness_rank": 11771,
+            "month": "202609",
             "suppressed_reason": null
           }
         },
@@ -918,37 +880,94 @@ s02 | Data provided by Realtor.com — Economic Research Data Library, Market Ho
           "key": "33974",
           "label": "33974",
           "cells": {
-            "market_heat_score": 46.8,
-            "active_listing_count": 422,
-            "inventory_yy": -7.2,
-            "median_dom": 92,
-            "dom_yy": 13.6,
-            "pending_ratio": 0.2536,
-            "pending_ratio_yy": 0.5,
-            "new_listing_count": 96,
+            "market_heat_score": 54.3,
+            "active_listing_count": 415,
+            "inventory_yy": -10.9,
+            "median_dom": 83,
+            "dom_yy": 4.7,
+            "pending_ratio": 0.2497,
+            "pending_ratio_yy": 1.6,
+            "new_listing_count": 110,
             "price_reduced_share": 20.6,
-            "hotness_score": 5.068345323741007,
-            "hotness_rank": 13765,
-            "month": "202608",
+            "hotness_score": 5.580294034492508,
+            "hotness_rank": 13979,
+            "month": "202609",
             "suppressed_reason": null
           }
         },
         {
-          "key": "34117",
-          "label": "34117",
+          "key": "33903",
+          "label": "33903",
           "cells": {
-            "market_heat_score": 42.6,
-            "active_listing_count": 132,
-            "inventory_yy": -19,
-            "median_dom": 89,
-            "dom_yy": 30.2,
-            "pending_ratio": 0.2348,
-            "pending_ratio_yy": -2.3,
-            "new_listing_count": 20,
-            "price_reduced_share": 15.2,
-            "hotness_score": 28.471223021582734,
-            "hotness_rank": 10954,
-            "month": "202608",
+            "market_heat_score": 53.7,
+            "active_listing_count": 186,
+            "inventory_yy": -5.6,
+            "median_dom": 114,
+            "dom_yy": -1.1,
+            "pending_ratio": 0.1887,
+            "pending_ratio_yy": 0,
+            "new_listing_count": 40,
+            "price_reduced_share": 23.1,
+            "hotness_score": 15.65592309867119,
+            "hotness_rank": 13133,
+            "month": "202609",
+            "suppressed_reason": null
+          }
+        },
+        {
+          "key": "33972",
+          "label": "33972",
+          "cells": {
+            "market_heat_score": 53.4,
+            "active_listing_count": 294,
+            "inventory_yy": -2.6,
+            "median_dom": 82,
+            "dom_yy": 3.1,
+            "pending_ratio": 0.2606,
+            "pending_ratio_yy": 6.7,
+            "new_listing_count": 56,
+            "price_reduced_share": 21.4,
+            "hotness_score": 12.20667232117614,
+            "hotness_rank": 13496,
+            "month": "202609",
+            "suppressed_reason": null
+          }
+        },
+        {
+          "key": "33936",
+          "label": "33936",
+          "cells": {
+            "market_heat_score": 49.5,
+            "active_listing_count": 266,
+            "inventory_yy": 9.2,
+            "median_dom": 73,
+            "dom_yy": -9.9,
+            "pending_ratio": 0.2387,
+            "pending_ratio_yy": -1.6,
+            "new_listing_count": 50,
+            "price_reduced_share": 22.8,
+            "hotness_score": 21.197342380548488,
+            "hotness_rank": 12391,
+            "month": "202609",
+            "suppressed_reason": null
+          }
+        },
+        {
+          "key": "33921",
+          "label": "33921",
+          "cells": {
+            "market_heat_score": 42.9,
+            "active_listing_count": 26,
+            "inventory_yy": 4,
+            "median_dom": 169,
+            "dom_yy": 8.3,
+            "pending_ratio": 0.0962,
+            "pending_ratio_yy": -0.4,
+            "new_listing_count": 2,
+            "price_reduced_share": 0,
+            "hotness_score": 11.782584110828386,
+            "hotness_rank": 13538,
+            "month": "202609",
             "suppressed_reason": null
           }
         },
@@ -956,18 +975,18 @@ s02 | Data provided by Realtor.com — Economic Research Data Library, Market Ho
           "key": "33976",
           "label": "33976",
           "cells": {
-            "market_heat_score": 40.8,
-            "active_listing_count": 277,
-            "inventory_yy": 5.3,
-            "median_dom": 82,
-            "dom_yy": 13.9,
-            "pending_ratio": 0.2816,
-            "pending_ratio_yy": 2.7,
-            "new_listing_count": 76,
-            "price_reduced_share": 27.4,
-            "hotness_score": 8.874100719424462,
-            "hotness_rank": 13523,
-            "month": "202608",
+            "market_heat_score": 42.3,
+            "active_listing_count": 280,
+            "inventory_yy": -1.2,
+            "median_dom": 79,
+            "dom_yy": 23.5,
+            "pending_ratio": 0.2661,
+            "pending_ratio_yy": 8.4,
+            "new_listing_count": 54,
+            "price_reduced_share": 29.1,
+            "hotness_score": 11.789652247667515,
+            "hotness_rank": 13537,
+            "month": "202609",
             "suppressed_reason": null
           }
         },
@@ -975,27 +994,46 @@ s02 | Data provided by Realtor.com — Economic Research Data Library, Market Ho
           "key": "34142",
           "label": "34142",
           "cells": {
-            "market_heat_score": 33.6,
-            "active_listing_count": 256,
-            "inventory_yy": 18,
-            "median_dom": 93,
-            "dom_yy": 9.4,
-            "pending_ratio": 0.1719,
-            "pending_ratio_yy": -2.2,
-            "new_listing_count": 40,
-            "price_reduced_share": 13.9,
-            "hotness_score": 8.848920863309353,
-            "hotness_rank": 13525,
-            "month": "202608",
+            "market_heat_score": 39.3,
+            "active_listing_count": 252,
+            "inventory_yy": 17.8,
+            "median_dom": 90,
+            "dom_yy": -3.2,
+            "pending_ratio": 0.159,
+            "pending_ratio_yy": -4.7,
+            "new_listing_count": 36,
+            "price_reduced_share": 20.4,
+            "hotness_score": 9.78936952219395,
+            "hotness_rank": 13715,
+            "month": "202609",
             "suppressed_reason": null
           }
         },
         {
-          "key": "33907",
-          "label": "33907",
+          "key": "34117",
+          "label": "34117",
+          "cells": {
+            "market_heat_score": 36.2,
+            "active_listing_count": 130,
+            "inventory_yy": -11.9,
+            "median_dom": 98,
+            "dom_yy": 37.8,
+            "pending_ratio": 0.2394,
+            "pending_ratio_yy": -6.7,
+            "new_listing_count": 30,
+            "price_reduced_share": 13.8,
+            "hotness_score": 35.59513712185468,
+            "hotness_rank": 9725,
+            "month": "202609",
+            "suppressed_reason": null
+          }
+        },
+        {
+          "key": "33905",
+          "label": "33905",
           "cells": {
             "market_heat_score": null,
-            "active_listing_count": 200,
+            "active_listing_count": 269,
             "inventory_yy": null,
             "median_dom": null,
             "dom_yy": null,
@@ -1003,9 +1041,28 @@ s02 | Data provided by Realtor.com — Economic Research Data Library, Market Ho
             "pending_ratio_yy": null,
             "new_listing_count": null,
             "price_reduced_share": null,
-            "hotness_score": 13.726618705035971,
-            "hotness_rank": 13074,
-            "month": "202608",
+            "hotness_score": 41.75501837715578,
+            "hotness_rank": 8382,
+            "month": "202609",
+            "suppressed_reason": "quality_flag"
+          }
+        },
+        {
+          "key": "33907",
+          "label": "33907",
+          "cells": {
+            "market_heat_score": null,
+            "active_listing_count": 192,
+            "inventory_yy": null,
+            "median_dom": null,
+            "dom_yy": null,
+            "pending_ratio": null,
+            "pending_ratio_yy": null,
+            "new_listing_count": null,
+            "price_reduced_share": null,
+            "hotness_score": 15.281311846197342,
+            "hotness_rank": 13183,
+            "month": "202609",
             "suppressed_reason": "quality_flag"
           }
         },
@@ -1014,7 +1071,7 @@ s02 | Data provided by Realtor.com — Economic Research Data Library, Market Ho
           "label": "33914",
           "cells": {
             "market_heat_score": null,
-            "active_listing_count": 541,
+            "active_listing_count": 522,
             "inventory_yy": null,
             "median_dom": null,
             "dom_yy": null,
@@ -1022,9 +1079,9 @@ s02 | Data provided by Realtor.com — Economic Research Data Library, Market Ho
             "pending_ratio_yy": null,
             "new_listing_count": null,
             "price_reduced_share": null,
-            "hotness_score": 27.18705035971223,
-            "hotness_rank": 11188,
-            "month": "202608",
+            "hotness_score": 29.626095561210064,
+            "hotness_rank": 10952,
+            "month": "202609",
             "suppressed_reason": "quality_flag"
           }
         },
@@ -1033,7 +1090,7 @@ s02 | Data provided by Realtor.com — Economic Research Data Library, Market Ho
           "label": "33916",
           "cells": {
             "market_heat_score": null,
-            "active_listing_count": 161,
+            "active_listing_count": 176,
             "inventory_yy": null,
             "median_dom": null,
             "dom_yy": null,
@@ -1041,28 +1098,9 @@ s02 | Data provided by Realtor.com — Economic Research Data Library, Market Ho
             "pending_ratio_yy": null,
             "new_listing_count": null,
             "price_reduced_share": null,
-            "hotness_score": 14.89928057553957,
-            "hotness_rank": 12968,
-            "month": "202608",
-            "suppressed_reason": "quality_flag"
-          }
-        },
-        {
-          "key": "33917",
-          "label": "33917",
-          "cells": {
-            "market_heat_score": null,
-            "active_listing_count": 280,
-            "inventory_yy": null,
-            "median_dom": null,
-            "dom_yy": null,
-            "pending_ratio": null,
-            "pending_ratio_yy": null,
-            "new_listing_count": null,
-            "price_reduced_share": null,
-            "hotness_score": 20.805755395683455,
-            "hotness_rank": 12223,
-            "month": "202608",
+            "hotness_score": 18.85072094995759,
+            "hotness_rank": 12712,
+            "month": "202609",
             "suppressed_reason": "quality_flag"
           }
         },
@@ -1079,47 +1117,9 @@ s02 | Data provided by Realtor.com — Economic Research Data Library, Market Ho
             "pending_ratio_yy": null,
             "new_listing_count": null,
             "price_reduced_share": null,
-            "hotness_score": 21.859712230215827,
-            "hotness_rank": 12062,
-            "month": "202608",
-            "suppressed_reason": "quality_flag"
-          }
-        },
-        {
-          "key": "33920",
-          "label": "33920",
-          "cells": {
-            "market_heat_score": null,
-            "active_listing_count": 124,
-            "inventory_yy": null,
-            "median_dom": null,
-            "dom_yy": null,
-            "pending_ratio": null,
-            "pending_ratio_yy": null,
-            "new_listing_count": null,
-            "price_reduced_share": null,
-            "hotness_score": 12.266187050359711,
-            "hotness_rank": 13213,
-            "month": "202608",
-            "suppressed_reason": "quality_flag"
-          }
-        },
-        {
-          "key": "33921",
-          "label": "33921",
-          "cells": {
-            "market_heat_score": null,
-            "active_listing_count": 26,
-            "inventory_yy": null,
-            "median_dom": null,
-            "dom_yy": null,
-            "pending_ratio": null,
-            "pending_ratio_yy": null,
-            "new_listing_count": null,
-            "price_reduced_share": null,
-            "hotness_score": 5.762589928057554,
-            "hotness_rank": 13721,
-            "month": "202608",
+            "hotness_score": 20.564744133446425,
+            "hotness_rank": 12484,
+            "month": "202609",
             "suppressed_reason": "quality_flag"
           }
         },
@@ -1128,7 +1128,7 @@ s02 | Data provided by Realtor.com — Economic Research Data Library, Market Ho
           "label": "33924",
           "cells": {
             "market_heat_score": null,
-            "active_listing_count": 123,
+            "active_listing_count": 113,
             "inventory_yy": null,
             "median_dom": null,
             "dom_yy": null,
@@ -1136,9 +1136,9 @@ s02 | Data provided by Realtor.com — Economic Research Data Library, Market Ho
             "pending_ratio_yy": null,
             "new_listing_count": null,
             "price_reduced_share": null,
-            "hotness_score": 7.079136690647482,
-            "hotness_rank": 13649,
-            "month": "202608",
+            "hotness_score": 7.718405428329092,
+            "hotness_rank": 13865,
+            "month": "202609",
             "suppressed_reason": "quality_flag"
           }
         },
@@ -1166,7 +1166,7 @@ s02 | Data provided by Realtor.com — Economic Research Data Library, Market Ho
           "label": "33966",
           "cells": {
             "market_heat_score": null,
-            "active_listing_count": 96,
+            "active_listing_count": 99,
             "inventory_yy": null,
             "median_dom": null,
             "dom_yy": null,
@@ -1174,28 +1174,9 @@ s02 | Data provided by Realtor.com — Economic Research Data Library, Market Ho
             "pending_ratio_yy": null,
             "new_listing_count": null,
             "price_reduced_share": null,
-            "hotness_score": 16.28776978417266,
-            "hotness_rank": 12799,
-            "month": "202608",
-            "suppressed_reason": "quality_flag"
-          }
-        },
-        {
-          "key": "33973",
-          "label": "33973",
-          "cells": {
-            "market_heat_score": null,
-            "active_listing_count": 17,
-            "inventory_yy": null,
-            "median_dom": null,
-            "dom_yy": null,
-            "pending_ratio": null,
-            "pending_ratio_yy": null,
-            "new_listing_count": null,
-            "price_reduced_share": null,
-            "hotness_score": 19.992805755395683,
-            "hotness_rank": 12339,
-            "month": "202608",
+            "hotness_score": 18.606870229007633,
+            "hotness_rank": 12744,
+            "month": "202609",
             "suppressed_reason": "quality_flag"
           }
         },
@@ -1219,11 +1200,11 @@ s02 | Data provided by Realtor.com — Economic Research Data Library, Market Ho
           }
         },
         {
-          "key": "34138",
-          "label": "34138",
+          "key": "34113",
+          "label": "34113",
           "cells": {
             "market_heat_score": null,
-            "active_listing_count": 3,
+            "active_listing_count": 313,
             "inventory_yy": null,
             "median_dom": null,
             "dom_yy": null,
@@ -1231,9 +1212,28 @@ s02 | Data provided by Realtor.com — Economic Research Data Library, Market Ho
             "pending_ratio_yy": null,
             "new_listing_count": null,
             "price_reduced_share": null,
-            "hotness_score": null,
-            "hotness_rank": null,
-            "month": "202608",
+            "hotness_score": 17.984874187164266,
+            "hotness_rank": 12826,
+            "month": "202609",
+            "suppressed_reason": "quality_flag"
+          }
+        },
+        {
+          "key": "34116",
+          "label": "34116",
+          "cells": {
+            "market_heat_score": null,
+            "active_listing_count": 68,
+            "inventory_yy": null,
+            "median_dom": null,
+            "dom_yy": null,
+            "pending_ratio": null,
+            "pending_ratio_yy": null,
+            "new_listing_count": null,
+            "price_reduced_share": null,
+            "hotness_score": 24.653661294882667,
+            "hotness_rank": 11831,
+            "month": "202609",
             "suppressed_reason": "quality_flag"
           }
         },
@@ -1242,7 +1242,7 @@ s02 | Data provided by Realtor.com — Economic Research Data Library, Market Ho
           "label": "34139",
           "cells": {
             "market_heat_score": null,
-            "active_listing_count": 16,
+            "active_listing_count": 14,
             "inventory_yy": null,
             "median_dom": null,
             "dom_yy": null,
@@ -1250,9 +1250,9 @@ s02 | Data provided by Realtor.com — Economic Research Data Library, Market Ho
             "pending_ratio_yy": null,
             "new_listing_count": null,
             "price_reduced_share": null,
-            "hotness_score": 6.133093525179857,
-            "hotness_rank": 13705,
-            "month": "202608",
+            "hotness_score": 5.1809443030817075,
+            "hotness_rank": 13994,
+            "month": "202609",
             "suppressed_reason": "quality_flag"
           }
         },
@@ -1261,7 +1261,7 @@ s02 | Data provided by Realtor.com — Economic Research Data Library, Market Ho
           "label": "34140",
           "cells": {
             "market_heat_score": null,
-            "active_listing_count": 12,
+            "active_listing_count": 11,
             "inventory_yy": null,
             "median_dom": null,
             "dom_yy": null,
@@ -1269,9 +1269,9 @@ s02 | Data provided by Realtor.com — Economic Research Data Library, Market Ho
             "pending_ratio_yy": null,
             "new_listing_count": null,
             "price_reduced_share": null,
-            "hotness_score": 7.633093525179857,
-            "hotness_rank": 13608,
-            "month": "202608",
+            "hotness_score": 6.990387333898783,
+            "hotness_rank": 13906,
+            "month": "202609",
             "suppressed_reason": "quality_flag"
           }
         },
@@ -1280,7 +1280,7 @@ s02 | Data provided by Realtor.com — Economic Research Data Library, Market Ho
           "label": "34141",
           "cells": {
             "market_heat_score": null,
-            "active_listing_count": 1,
+            "active_listing_count": 4,
             "inventory_yy": null,
             "median_dom": null,
             "dom_yy": null,
@@ -1290,14 +1290,14 @@ s02 | Data provided by Realtor.com — Economic Research Data Library, Market Ho
             "price_reduced_share": null,
             "hotness_score": null,
             "hotness_rank": null,
-            "month": "202608",
+            "month": "202609",
             "suppressed_reason": "quality_flag"
           }
         }
       ],
       "source": {
         "url": "https://www.realtor.com/research/data/",
-        "fetched_at": "2026-09-15T23:58:20Z",
+        "fetched_at": "2026-10-09T04:27:11Z",
         "tier": 3,
         "citation": "Data provided by Realtor.com — Economic Research Data Library (ZIP-grain Core Inventory + Market Hotness, monthly). Attribution-only license. Hotness is a relative cross-sectional rank, not the vote driver."
       }
@@ -1331,16 +1331,6 @@ s02 | Data provided by Realtor.com — Economic Research Data Library, Market Ho
         }
       ],
       "rows": [
-        {
-          "key": "202309",
-          "label": "202309",
-          "cells": {
-            "month": "202309",
-            "region_median_active_listings": 155.5,
-            "region_median_dom": 65.5,
-            "region_median_pending_ratio": 0.4169
-          }
-        },
         {
           "key": "202310",
           "label": "202310",
@@ -1690,11 +1680,21 @@ s02 | Data provided by Realtor.com — Economic Research Data Library, Market Ho
             "region_median_dom": 97.5,
             "region_median_pending_ratio": 0.2472
           }
+        },
+        {
+          "key": "202609",
+          "label": "202609",
+          "cells": {
+            "month": "202609",
+            "region_median_active_listings": 267.5,
+            "region_median_dom": 94.5,
+            "region_median_pending_ratio": 0.24414999999999998
+          }
         }
       ],
       "source": {
         "url": "https://www.realtor.com/research/data/",
-        "fetched_at": "2026-09-15T23:58:20Z",
+        "fetched_at": "2026-10-09T04:27:11Z",
         "tier": 3,
         "citation": "Data provided by Realtor.com — Economic Research Data Library (ZIP-grain Core Inventory + Market Hotness, monthly). Attribution-only license. Hotness is a relative cross-sectional rank, not the vote driver."
       }
@@ -1706,7 +1706,8 @@ s02 | Data provided by Realtor.com — Economic Research Data Library, Market Ho
     "~50% of SWFL transactions are all-cash (Lee County, ATTOM 2024) — national rate-sensitive thresholds are muted; read the YoY tightening, not absolute DOM cutoffs.",
     "Hurricane Ian (Sept 2022) is a labeled event — inventory/DOM dislocations Oct 2022–Mar 2023 are forced, not organic demand.",
     "Data provided by Realtor.com.",
-    "16 ZIPs suppressed (insufficient signals or realtor quality_flag)."
+    "14 ZIPs suppressed (insufficient signals or realtor quality_flag).",
+    "Falsifier watch: 2 scored ZIPs currently show the bearish pattern (pending ratio falling 2+ months while inventory rises)."
   ],
   "contradicts": [],
   "confidence": 0.6,
@@ -1718,7 +1719,7 @@ s02 | Data provided by Realtor.com — Economic Research Data Library, Market Ho
   "relevance": {
     "decay_curve": "weeks",
     "half_life_hours": 720,
-    "computed_at": "2026-09-15T23:58:22Z"
+    "computed_at": "2026-10-09T04:27:14Z"
   },
   "exogenous_signals": []
 }
@@ -1727,5 +1728,5 @@ s02 | Data provided by Realtor.com — Economic Research Data Library, Market Ho
 - market-heat-swfl: deterministic ZIP-grain market-tightening call from realtor.com Core + Hotness Tier-1 parquets.
 
 --- RECENT NOTES ---
-- 2026-09-15: pack refined by the Refinery — 1 fact(s) from 2 source(s).
+- 2026-10-09: pack refined by the Refinery — 1 fact(s) from 2 source(s).
 ```
