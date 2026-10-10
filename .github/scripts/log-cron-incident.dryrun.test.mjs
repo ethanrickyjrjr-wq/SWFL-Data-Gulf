@@ -88,3 +88,35 @@ test("record-failure dry-run still opens an incident for a plain failure (no reg
   const out = runDryRun("record-failure", FRESHNESS_FAIL);
   assert.match(out, /would open check cron_incident_freshness_probe_daily/);
 });
+
+// --- Auto-resolve trigger events. record-failure gates on conclusion alone, so a
+// --- DISPATCH failure opens an incident; if only SCHEDULED successes could close
+// --- one, the ledger is a one-way ratchet. Real casualties: #191 (fixed and
+// --- re-dispatched green as run 33286722483, quarterly so the next scheduled run
+// --- is months out) and #111 (four dispatch successes since its 07-12 failure).
+
+const FRESHNESS_OK_DISPATCH = { ...FRESHNESS_OK, id: 125, event: "workflow_dispatch" };
+const FRESHNESS_OK_PUSH = { ...FRESHNESS_OK, id: 126, event: "push" };
+const FRESHNESS_OK_PR = { ...FRESHNESS_OK, id: 127, event: "pull_request" };
+
+test("maybe-resolve dry-run resolves on a DISPATCH success (the ratchet that stuck #191/#111)", () => {
+  const out = runDryRun("maybe-resolve", FRESHNESS_OK_DISPATCH);
+  assert.match(out, /would close check cron_incident_freshness_probe_daily/);
+});
+
+test("maybe-resolve dry-run resolves on a PUSH success (the yml already allowed it; the script did not)", () => {
+  const out = runDryRun("maybe-resolve", FRESHNESS_OK_PUSH);
+  assert.match(out, /would close check cron_incident_freshness_probe_daily/);
+});
+
+test("maybe-resolve dry-run still SKIPS an unrelated trigger (pull_request)", () => {
+  const out = runDryRun("maybe-resolve", FRESHNESS_OK_PR);
+  assert.doesNotMatch(out, /would close check/);
+  assert.match(out, /skip: trigger is pull_request/);
+});
+
+test("maybe-resolve dry-run still SKIPS a non-success conclusion (no regression)", () => {
+  const out = runDryRun("maybe-resolve", FRESHNESS_FAIL);
+  assert.doesNotMatch(out, /would close check/);
+  assert.match(out, /skip: conclusion is failure/);
+});
