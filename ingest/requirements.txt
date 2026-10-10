@@ -40,3 +40,7 @@ openpyxl>=3.1
 python-dateutil>=2.9
 pdfplumber>=0.10
 pymupdf>=1.23
+# jsonschema re-validates every local-model reply in ingest/lib/local_llm.py (Ollama's
+# `format` constraint is the belt; this is the braces). Present transitively via dlt, but
+# imported DIRECTLY, so it is declared — same rule as websockets/playwright above.
+jsonschema>=4.20
