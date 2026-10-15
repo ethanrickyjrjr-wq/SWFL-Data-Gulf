@@ -82,9 +82,7 @@ describe("condo-sirs-swfl pack", async () => {
   it("categorical metric has no units and string value", () => {
     condoSirsSwfl.corpusSummary!([fullFixture]);
     const result = condoSirsSwfl.outputProducer!({} as never);
-    const m = result.key_metrics.find(
-      (k) => k.metric === "sirs_result_truncated",
-    );
+    const m = result.key_metrics.find((k) => k.metric === "sirs_result_truncated");
     expect(m).toBeDefined();
     expect(m!.units).toBeUndefined();
     expect(m!.variable_type).toBe("categorical");
@@ -106,10 +104,7 @@ describe("condo-sirs-swfl pack", async () => {
     const result = condoSirsSwfl.outputProducer!({} as never);
     for (const m of result.key_metrics) {
       expect(m.source.url, `${m.metric} missing source.url`).toBeTruthy();
-      expect(
-        m.source.citation,
-        `${m.metric} missing source.citation`,
-      ).toBeTruthy();
+      expect(m.source.citation, `${m.metric} missing source.citation`).toBeTruthy();
       expect(m.source.tier).toBe(1);
     }
   });
@@ -118,6 +113,70 @@ describe("condo-sirs-swfl pack", async () => {
     condoSirsSwfl.corpusSummary!([fullFixture]);
     const result = condoSirsSwfl.outputProducer!({} as never);
     expect(result.conclusion).toContain("239");
+  });
+
+  const baselineFixture: RawFragment = {
+    fragment_id: "condo_baseline_swfl:summary:test",
+    source_id: "condo_baseline_swfl",
+    source_trust_tier: 1,
+    fetched_at: "2026-08-30T00:00:00Z",
+    raw: { kind: "condo-baseline-summary", buildings_lee: 1426, buildings_collier: 926 },
+    normalized: {
+      kind: "condo-baseline-summary",
+      buildings_lee: 1426,
+      buildings_collier: 926,
+      buildings_with_sirs_lee: 900,
+      buildings_with_sirs_collier: 700,
+      collier_delinquent: 18,
+      collier_cycle_completed: 553,
+      collier_not_due: 353,
+      xref_total: 1366,
+      xref_accepted: 1000,
+      xref_llm_tiebreak: 120,
+      xref_needs_review: 60,
+      xref_unmatched: 306,
+      latest_scraped_at: "2026-08-30T05:23:52Z",
+      fetched_at: "2026-08-30T00:00:00Z",
+    },
+  };
+
+  it("with the building baseline: 11 metrics, lower-bound shares, baseline caveats", () => {
+    const facts = condoSirsSwfl.corpusSummary!([fullFixture, baselineFixture]);
+    expect(facts).toHaveLength(2);
+    expect(facts[0].topic).toBe("dbpr_sirs_snapshot");
+    expect(facts[1].topic).toBe("condo_baseline_snapshot");
+
+    const result = condoSirsSwfl.outputProducer!({} as never);
+    expect(result.key_metrics).toHaveLength(11);
+    const lee = result.key_metrics.find((k) => k.metric === "sirs_matched_share_lee");
+    expect(lee!.value).toBeCloseTo(900 / 1426, 4);
+    expect(lee!.units).toBe("ratio");
+    const review = result.key_metrics.find((k) => k.metric === "sirs_xref_needs_review");
+    expect(review!.value).toBe(60);
+    for (const m of result.key_metrics) {
+      expect(m.source.url, `${m.metric} missing source.url`).toBeTruthy();
+      expect(m.source.citation, `${m.metric} missing source.citation`).toBeTruthy();
+    }
+    expect(result.caveats.some((c) => c.includes("LOWER BOUND"))).toBe(true);
+    expect(result.caveats.some((c) => c.includes("PROGRAM-REGISTERED"))).toBe(true);
+    expect(result.caveats.some((c) => c.includes("cannot be derived"))).toBe(false);
+    expect(result.conclusion).toContain("lower bound");
+    expect(result.conclusion).toContain("1,426");
+  });
+
+  it("an empty baseline fragment does not unlock baseline metrics", () => {
+    const empty: RawFragment = {
+      ...baselineFixture,
+      normalized: {
+        ...(baselineFixture.normalized as object),
+        buildings_lee: 0,
+        buildings_collier: 0,
+      },
+    };
+    condoSirsSwfl.corpusSummary!([fullFixture, empty]);
+    const result = condoSirsSwfl.outputProducer!({} as never);
+    expect(result.key_metrics).toHaveLength(5);
+    expect(result.caveats.some((c) => c.includes("cannot be derived"))).toBe(true);
   });
 
   it("low count triggers 4th caveat", () => {
