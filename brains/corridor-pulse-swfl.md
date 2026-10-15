@@ -1,9 +1,9 @@
-<!-- FRESHNESS: v28 | Token: SWFL-7421-v28-20261007-3be81447 -->
+<!-- FRESHNESS: v29 | Token: SWFL-7421-v29-20261015-f03f5ffc -->
 ---
 brain_id: corridor-pulse-swfl
-version: 28
-refined_at: 2026-10-07T11:11:47Z
-freshness_token: SWFL-7421-v28-20261007-3be81447
+version: 29
+refined_at: 2026-10-15T04:26:18Z
+freshness_token: SWFL-7421-v29-20261015-f03f5ffc
 ttl_seconds: 604800
 pack_hash: 9b745295cada
 context_type: user_saved_reference
@@ -30,7 +30,7 @@ SCOPE: SWFL (Lee + Collier) weekly corridor current-events pulse — dated comme
 
 --- CITATION TABLE ---
 id  | source                                                                                                                                                                                                                                                                                                                | verified   | expires
-s01 | SWFL corridor pulse — weekly Anthropic web_search_20250305 / Firecrawl current-events facts, LLM-distilled with citation enforcement, via Supabase data_lake.city_pulse_corridors (id, corridor, topic, fact, source_url, source_title, cited_text, captured_at, expires_at, run_at); SWFL CRE corridors; topic-TTL'd | 2026-10-07 | 2026-10-14
+s01 | SWFL corridor pulse — weekly Anthropic web_search_20250305 / Firecrawl current-events facts, LLM-distilled with citation enforcement, via Supabase data_lake.city_pulse_corridors (id, corridor, topic, fact, source_url, source_title, cited_text, captured_at, expires_at, run_at); SWFL CRE corridors; topic-TTL'd | 2026-10-15 | 2026-10-22
 
 --- SAVED FACTS ---
 []
@@ -38,9 +38,9 @@ s01 | SWFL corridor pulse — weekly Anthropic web_search_20250305 / Firecrawl c
 --- OUTPUT ---
 {
   "brain_id": "corridor-pulse-swfl",
-  "version": 28,
-  "refined_at": "2026-10-07T11:11:47Z",
-  "expires": "2026-10-14T11:11:47Z",
+  "version": 29,
+  "refined_at": "2026-10-15T04:26:18Z",
+  "expires": "2026-10-22T04:26:18Z",
   "ttl_seconds": 604800,
   "direction": "neutral",
   "magnitude": 0,
@@ -61,7 +61,7 @@ s01 | SWFL corridor pulse — weekly Anthropic web_search_20250305 / Firecrawl c
   "relevance": {
     "decay_curve": "weeks",
     "half_life_hours": 720,
-    "computed_at": "2026-10-07T11:11:47Z"
+    "computed_at": "2026-10-15T04:26:18Z"
   },
   "exogenous_signals": []
 }
@@ -70,5 +70,5 @@ s01 | SWFL corridor pulse — weekly Anthropic web_search_20250305 / Firecrawl c
 - corridor-pulse-swfl: weekly SWFL corridor-grain current-events reporter over data_lake.city_pulse_corridors (TTL'd, citation-backed); brain-input edge into cre-swfl.
 
 --- RECENT NOTES ---
-- 2026-10-07: pack refined by the Refinery — 0 fact(s) from 1 source(s).
+- 2026-10-15: pack refined by the Refinery — 0 fact(s) from 1 source(s).
 ```
