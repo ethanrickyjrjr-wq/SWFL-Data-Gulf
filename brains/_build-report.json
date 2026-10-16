@@ -1,8 +1,8 @@
 {
   "target": "master",
   "timestamps": {
-    "started": "2026-10-15T09:16:14.075Z",
-    "finished": "2026-10-15T09:16:55.644Z"
+    "started": "2026-10-16T04:25:44.086Z",
+    "finished": "2026-10-16T04:26:32.303Z"
   },
   "source": "live",
   "outcomes": [
@@ -30,7 +30,7 @@
       "packId": "cre-swfl",
       "status": "missing",
       "failureClass": "deterministic",
-      "reason": "400 {\"type\":\"error\",\"error\":{\"type\":\"invalid_request_error\",\"message\":\"Your credit balance is too low to access the Anthropic API. Please go to Plans & Billing to upgrade or purchase credits.\"},\"request_id\":\"req_011Cg3mdCX2m6zptgDiWYiVg\"}",
+      "reason": "400 {\"type\":\"error\",\"error\":{\"type\":\"invalid_request_error\",\"message\":\"Your credit balance is too low to access the Anthropic API. Please go to Plans & Billing to upgrade or purchase credits.\"},\"request_id\":\"req_011Cg5HHJHEniDu7qsCFvJbF\"}",
       "lastGoodRefinedAt": "2026-08-10T04:46:14Z",
       "written": false
     },
@@ -38,7 +38,7 @@
       "packId": "macro-us",
       "status": "missing",
       "failureClass": "deterministic",
-      "reason": "400 {\"type\":\"error\",\"error\":{\"type\":\"invalid_request_error\",\"message\":\"Your credit balance is too low to access the Anthropic API. Please go to Plans & Billing to upgrade or purchase credits.\"},\"request_id\":\"req_011Cg3mdYDgr3d5qCM9m6KaQ\"}",
+      "reason": "400 {\"type\":\"error\",\"error\":{\"type\":\"invalid_request_error\",\"message\":\"Your credit balance is too low to access the Anthropic API. Please go to Plans & Billing to upgrade or purchase credits.\"},\"request_id\":\"req_011Cg5HHTuBgceQaatE55Cs8\"}",
       "lastGoodRefinedAt": "2026-07-30T06:59:47Z",
       "written": false
     },
@@ -46,7 +46,7 @@
       "packId": "macro-florida",
       "status": "missing",
       "failureClass": "deterministic",
-      "reason": "400 {\"type\":\"error\",\"error\":{\"type\":\"invalid_request_error\",\"message\":\"Your credit balance is too low to access the Anthropic API. Please go to Plans & Billing to upgrade or purchase credits.\"},\"request_id\":\"req_011Cg3meEX6fXzAP8f3Ucamm\"}",
+      "reason": "400 {\"type\":\"error\",\"error\":{\"type\":\"invalid_request_error\",\"message\":\"Your credit balance is too low to access the Anthropic API. Please go to Plans & Billing to upgrade or purchase credits.\"},\"request_id\":\"req_011Cg5HHoUQS6AtwxLakAMGk\"}",
       "lastGoodRefinedAt": "2026-07-19T02:28:39Z",
       "written": false
     },
@@ -72,18 +72,485 @@
     },
     {
       "packId": "logistics-swfl",
-      "status": "skipped-fresh",
-      "written": false
+      "status": "built",
+      "version": 22,
+      "written": true,
+      "brainOutput": {
+        "brain_id": "logistics-swfl",
+        "version": 22,
+        "refined_at": "2026-10-16T04:26:02Z",
+        "expires": "2026-11-15T04:26:02Z",
+        "ttl_seconds": 2592000,
+        "direction": "neutral",
+        "magnitude": 0.5,
+        "drivers": [],
+        "overrides": [],
+        "conclusion": "In FAF5 year 2024, SWFL (FAF zone 129) absorbed 1226969.1K tons of inbound domestic freight worth $614894.8M across 12 origin zones and 40 commodity classes. Top origin zones by tonnage: Remainder of Florida (835272.9K tons), Jacksonville (125669.1K tons), Orlando (96882.9K tons) — the freight base loads into SWFL primarily from these corridors. Top commodity classes by tonnage: Natural sands (206809.8K tons), Gravel and crushed stone (155970.1K tons), Natural gas and other fuels (153589.7K tons).",
+        "key_metrics": [
+          {
+            "metric": "inbound_freight_tons_swfl",
+            "value": 1226969.1,
+            "direction": "stable",
+            "label": "Total inbound domestic freight to SWFL, year 2024 (thousand tons)",
+            "variable_type": "extensive",
+            "units": "thousand tons/year",
+            "display_format": "count",
+            "source": {
+              "url": "https://faf.ornl.gov/faf5/",
+              "fetched_at": "2026-10-16T04:26:02Z",
+              "tier": 1,
+              "citation": "FAF5.7.1 inbound domestic freight flows (ORNL/FHWA Cold Lane Parquet; dms_dest=129 trade_type=1, year 2024). Aggregate: 3430 origin × commodity flow rows summing to 1226969.1K tons ($614894.8M) across 12 origin zones and 40 commodity classes."
+            },
+            "suggestions": [
+              "What's driving inbound freight tons swfl?",
+              "How does inbound freight tons swfl here compare to other SWFL areas?"
+            ]
+          },
+          {
+            "metric": "inbound_freight_value_swfl_musd",
+            "value": 614894.8,
+            "direction": "stable",
+            "label": "Total inbound domestic freight value to SWFL, year 2024 (millions USD)",
+            "variable_type": "extensive",
+            "units": "million USD/year",
+            "display_format": "currency",
+            "source": {
+              "url": "https://faf.ornl.gov/faf5/",
+              "fetched_at": "2026-10-16T04:26:02Z",
+              "tier": 1,
+              "citation": "FAF5.7.1 inbound domestic freight flows (ORNL/FHWA Cold Lane Parquet; dms_dest=129 trade_type=1, year 2024). Aggregate: 3430 origin × commodity flow rows summing to 1226969.1K tons ($614894.8M) across 12 origin zones and 40 commodity classes."
+            },
+            "suggestions": [
+              "What's driving inbound freight value swfl musd?",
+              "How does inbound freight value swfl musd here compare to other SWFL areas?"
+            ]
+          }
+        ],
+        "caveats": [
+          "Scope is inbound domestic only (dms_dest=129 AND trade_type=1). Imports (trade_type=2), exports (trade_type=3), and outbound flows (dms_orig=129) are intentionally excluded — separate brains would own those scopes if built.",
+          "Year scope is 2024 (latest historical FAF5 year). FAF5 forecast years are deliberately not consumed here; bump LATEST_HISTORICAL_FAF_YEAR in refinery/sources/faf5-source.mts when ORNL publishes the next vintage.",
+          "v1 emits no direction/magnitude vote — the brain reports a point-in-time snapshot, not a time series. Direction reads require a multi-year retro (planned for v2 once a second FAF5 vintage is ingested)."
+        ],
+        "contradicts": [],
+        "confidence": 1,
+        "joint_integrity": 1,
+        "confidence_dispersion": 0,
+        "chain_depth": 0,
+        "trust_tier": 1,
+        "upstream_count": 0,
+        "relevance": {
+          "decay_curve": "weeks",
+          "half_life_hours": 720,
+          "computed_at": "2026-10-16T04:26:02Z"
+        },
+        "exogenous_signals": []
+      }
     },
     {
       "packId": "logistics-swfl-nowcast",
-      "status": "skipped-fresh",
-      "written": false
+      "status": "built",
+      "version": 19,
+      "written": true,
+      "brainOutput": {
+        "brain_id": "logistics-swfl-nowcast",
+        "version": 19,
+        "refined_at": "2026-10-16T04:26:03Z",
+        "expires": "2026-11-15T04:26:03Z",
+        "ttl_seconds": 2592000,
+        "direction": "neutral",
+        "magnitude": 0.1443375672974064,
+        "drivers": [
+          {
+            "brain_id": "logistics-swfl",
+            "edge_type": "input"
+          }
+        ],
+        "overrides": [],
+        "conclusion": "FAF5 audited annual inbound freight: 1,226,969,100 tons (CY2026). This is a flow metric; the deviation below is an activity metric from FDOT segment counts. Current freight activity (annualized from 615 freight-coded FDOT segments) is 625,226,130,376 tons/year against a 357,374,931,643 tons/year rolling baseline (21-day window, σ = 309,287,923,382) — deviation z = 0.87 (74.9%). Shock-state: normal. Baseline-validity flag: valid. Consecutive breach days: 0.",
+        "key_metrics": [
+          {
+            "metric": "faf5_inbound_flow_tons_year",
+            "value": 1226969100,
+            "direction": "stable",
+            "label": "FAF5 audited annual inbound freight FLOW to SWFL (CONTEXT — not the math anchor; the deviation z below is computed against FDOT's own rolling history)",
+            "variable_type": "extensive",
+            "units": "tons/year",
+            "display_format": "count",
+            "source": {
+              "url": "https://www.swfldatagulf.com/api/b/logistics-swfl",
+              "fetched_at": "2026-10-16T04:26:02Z",
+              "tier": 1,
+              "citation": "Upstream brain logistics-swfl (confidence 1.00, refined 2026-10-16) — supplies the FAF5 inbound-flow CONTEXT number (not the math anchor under Path B)."
+            },
+            "suggestions": [
+              "What's driving faf5 inbound flow tons year?",
+              "How does faf5 inbound flow tons year here compare to other SWFL areas?"
+            ]
+          },
+          {
+            "metric": "current_activity_tons_year",
+            "value": 625226130376,
+            "direction": "rising",
+            "label": "Current-state freight ACTIVITY proxy from FDOT AADT × tfctr × payload × 365 (annualized tons crossing the freight-coded corpus)",
+            "variable_type": "extensive",
+            "units": "tons/year",
+            "display_format": "count",
+            "source": {
+              "url": "https://jtkdowmrjaxfvwmemxso.supabase.co/rest/v1/fdot_aadt_fl?select=year_,county,roadway,desc_frm,desc_to,aadt,tfctr,shape_length&county=in.(LEE,COLLIER)&year_=eq.2025",
+              "fetched_at": "2026-10-16T04:26:02Z",
+              "tier": 2,
+              "citation": "FDOT AADT freight-coded segments (data_lake.fdot_aadt_fl filtered to I-* + US-* roadways, Lee + Collier, year 2025) — 615 segments contributed to the annualized current-activity tonnage proxy."
+            },
+            "suggestions": [
+              "Chart asking rents across the corridors",
+              "What's driving current activity tons year?",
+              "How does current activity tons year here compare to other SWFL areas?"
+            ]
+          },
+          {
+            "metric": "rolling_mean_activity_tons_year",
+            "value": 357374931643,
+            "direction": "stable",
+            "label": "Rolling-mean baseline (last 21 of up to 24 prior runs) — the actual math anchor for the deviation z below",
+            "variable_type": "extensive",
+            "units": "tons/year",
+            "display_format": "count",
+            "source": {
+              "url": "https://jtkdowmrjaxfvwmemxso.supabase.co/rest/v1/fdot_aadt_fl?select=year_,county,roadway,desc_frm,desc_to,aadt,tfctr,shape_length&county=in.(LEE,COLLIER)&year_=eq.2025",
+              "fetched_at": "2026-10-16T04:26:02Z",
+              "tier": 2,
+              "citation": "FDOT AADT freight-coded segments (data_lake.fdot_aadt_fl filtered to I-* + US-* roadways, Lee + Collier, year 2025) — 615 segments contributed to the annualized current-activity tonnage proxy."
+            },
+            "suggestions": [
+              "What's driving rolling mean activity tons year?",
+              "How does rolling mean activity tons year here compare to other SWFL areas?"
+            ]
+          },
+          {
+            "metric": "rolling_stddev_activity_tons_year",
+            "value": 309287923382,
+            "direction": "stable",
+            "label": "Rolling-stddev baseline (population stddev over the same window) — denominator of the deviation z below",
+            "variable_type": "extensive",
+            "units": "tons/year",
+            "display_format": "count",
+            "source": {
+              "url": "https://jtkdowmrjaxfvwmemxso.supabase.co/rest/v1/fdot_aadt_fl?select=year_,county,roadway,desc_frm,desc_to,aadt,tfctr,shape_length&county=in.(LEE,COLLIER)&year_=eq.2025",
+              "fetched_at": "2026-10-16T04:26:02Z",
+              "tier": 2,
+              "citation": "FDOT AADT freight-coded segments (data_lake.fdot_aadt_fl filtered to I-* + US-* roadways, Lee + Collier, year 2025) — 615 segments contributed to the annualized current-activity tonnage proxy."
+            },
+            "suggestions": [
+              "What's driving rolling stddev activity tons year?",
+              "How does rolling stddev activity tons year here compare to other SWFL areas?"
+            ]
+          },
+          {
+            "metric": "history_days_observed",
+            "value": 21,
+            "direction": "stable",
+            "label": "Count of prior shock-log rows with non-null activity in the rolling window — must be ≥ 6 for z computation to proceed",
+            "variable_type": "extensive",
+            "units": "days",
+            "display_format": "count",
+            "source": {
+              "url": "https://jtkdowmrjaxfvwmemxso.supabase.co/rest/v1/fdot_aadt_fl?select=year_,county,roadway,desc_frm,desc_to,aadt,tfctr,shape_length&county=in.(LEE,COLLIER)&year_=eq.2025",
+              "fetched_at": "2026-10-16T04:26:02Z",
+              "tier": 2,
+              "citation": "FDOT AADT freight-coded segments (data_lake.fdot_aadt_fl filtered to I-* + US-* roadways, Lee + Collier, year 2025) — 615 segments contributed to the annualized current-activity tonnage proxy."
+            },
+            "suggestions": [
+              "What's driving history days observed?",
+              "How does history days observed here compare to other SWFL areas?"
+            ]
+          },
+          {
+            "metric": "deviation_z",
+            "value": 0.87,
+            "direction": "rising",
+            "label": "Deviation z-score: (current_activity − rolling_mean) / rolling_stddev",
+            "variable_type": "intensive",
+            "units": "z-score",
+            "display_format": "ratio",
+            "source": {
+              "url": "https://jtkdowmrjaxfvwmemxso.supabase.co/rest/v1/fdot_aadt_fl?select=year_,county,roadway,desc_frm,desc_to,aadt,tfctr,shape_length&county=in.(LEE,COLLIER)&year_=eq.2025",
+              "fetched_at": "2026-10-16T04:26:02Z",
+              "tier": 2,
+              "citation": "FDOT AADT freight-coded segments (data_lake.fdot_aadt_fl filtered to I-* + US-* roadways, Lee + Collier, year 2025) — 615 segments contributed to the annualized current-activity tonnage proxy."
+            },
+            "suggestions": [
+              "What's driving deviation z?",
+              "How does deviation z here compare to other SWFL areas?"
+            ]
+          },
+          {
+            "metric": "deviation_pct",
+            "value": 74.9,
+            "direction": "rising",
+            "label": "Deviation as percent of rolling_mean",
+            "variable_type": "intensive",
+            "units": "percent",
+            "display_format": "percent",
+            "source": {
+              "url": "https://jtkdowmrjaxfvwmemxso.supabase.co/rest/v1/fdot_aadt_fl?select=year_,county,roadway,desc_frm,desc_to,aadt,tfctr,shape_length&county=in.(LEE,COLLIER)&year_=eq.2025",
+              "fetched_at": "2026-10-16T04:26:02Z",
+              "tier": 2,
+              "citation": "FDOT AADT freight-coded segments (data_lake.fdot_aadt_fl filtered to I-* + US-* roadways, Lee + Collier, year 2025) — 615 segments contributed to the annualized current-activity tonnage proxy."
+            },
+            "suggestions": [
+              "What's driving deviation pct?",
+              "How does deviation pct here compare to other SWFL areas?"
+            ]
+          },
+          {
+            "metric": "shock_state",
+            "value": "normal",
+            "direction": "stable",
+            "label": "Shock-state classifier (normal | anomaly | structural_break | insufficient_history)",
+            "variable_type": "categorical",
+            "source": {
+              "url": "https://jtkdowmrjaxfvwmemxso.supabase.co/rest/v1/fdot_aadt_fl?select=year_,county,roadway,desc_frm,desc_to,aadt,tfctr,shape_length&county=in.(LEE,COLLIER)&year_=eq.2025",
+              "fetched_at": "2026-10-16T04:26:02Z",
+              "tier": 2,
+              "citation": "FDOT AADT freight-coded segments (data_lake.fdot_aadt_fl filtered to I-* + US-* roadways, Lee + Collier, year 2025) — 615 segments contributed to the annualized current-activity tonnage proxy."
+            },
+            "suggestions": [
+              "What's driving shock state?",
+              "How does shock state here compare to other SWFL areas?"
+            ]
+          },
+          {
+            "metric": "baseline_validity_flag",
+            "value": "valid",
+            "direction": "stable",
+            "label": "Baseline-validity flag (valid | stale-structural, sticky once stale)",
+            "variable_type": "categorical",
+            "source": {
+              "url": "https://jtkdowmrjaxfvwmemxso.supabase.co/rest/v1/fdot_aadt_fl?select=year_,county,roadway,desc_frm,desc_to,aadt,tfctr,shape_length&county=in.(LEE,COLLIER)&year_=eq.2025",
+              "fetched_at": "2026-10-16T04:26:02Z",
+              "tier": 2,
+              "citation": "FDOT AADT freight-coded segments (data_lake.fdot_aadt_fl filtered to I-* + US-* roadways, Lee + Collier, year 2025) — 615 segments contributed to the annualized current-activity tonnage proxy."
+            },
+            "suggestions": [
+              "What's driving baseline validity flag?",
+              "How does baseline validity flag here compare to other SWFL areas?"
+            ]
+          },
+          {
+            "metric": "consecutive_breach_days",
+            "value": 0,
+            "direction": "stable",
+            "label": "Consecutive prior refines (incl. this one) where |z| > 3 with matching sign — cold-start runs do not progress the counter",
+            "variable_type": "extensive",
+            "units": "days",
+            "display_format": "count",
+            "source": {
+              "url": "https://jtkdowmrjaxfvwmemxso.supabase.co/rest/v1/fdot_aadt_fl?select=year_,county,roadway,desc_frm,desc_to,aadt,tfctr,shape_length&county=in.(LEE,COLLIER)&year_=eq.2025",
+              "fetched_at": "2026-10-16T04:26:02Z",
+              "tier": 2,
+              "citation": "FDOT AADT freight-coded segments (data_lake.fdot_aadt_fl filtered to I-* + US-* roadways, Lee + Collier, year 2025) — 615 segments contributed to the annualized current-activity tonnage proxy."
+            },
+            "suggestions": [
+              "What's driving consecutive breach days?",
+              "How does consecutive breach days here compare to other SWFL areas?"
+            ]
+          },
+          {
+            "metric": "freight_segment_count",
+            "value": 615,
+            "direction": "stable",
+            "label": "Freight-coded FDOT segments contributing to current_activity",
+            "variable_type": "extensive",
+            "units": "segments",
+            "display_format": "count",
+            "source": {
+              "url": "https://jtkdowmrjaxfvwmemxso.supabase.co/rest/v1/fdot_aadt_fl?select=year_,county,roadway,desc_frm,desc_to,aadt,tfctr,shape_length&county=in.(LEE,COLLIER)&year_=eq.2025",
+              "fetched_at": "2026-10-16T04:26:02Z",
+              "tier": 2,
+              "citation": "FDOT AADT freight-coded segments (data_lake.fdot_aadt_fl filtered to I-* + US-* roadways, Lee + Collier, year 2025) — 615 segments contributed to the annualized current-activity tonnage proxy."
+            },
+            "suggestions": [
+              "What's driving freight segment count?",
+              "How does freight segment count here compare to other SWFL areas?"
+            ]
+          },
+          {
+            "metric": "avg_payload_tons_per_truck",
+            "value": 16,
+            "direction": "stable",
+            "label": "Assumed combination-truck average payload — FHWA Highway Statistics 2023, Table VM-1",
+            "variable_type": "intensive",
+            "units": "tons/truck",
+            "display_format": "raw",
+            "source": {
+              "url": "https://www.fhwa.dot.gov/policyinformation/statistics/2023/vm1.cfm",
+              "fetched_at": "2026-10-16T04:26:02Z",
+              "tier": 1,
+              "citation": "FHWA Highway Statistics 2023, Table VM-1 — combination-truck average payload assumption (16.0 tons)."
+            },
+            "suggestions": [
+              "What's driving avg payload tons per truck?",
+              "How does avg payload tons per truck here compare to other SWFL areas?"
+            ]
+          }
+        ],
+        "caveats": [
+          "Path B (post-commit 297ad23): deviation math compares CURRENT FDOT segment-count activity (Σ AADT × tfctr × payload × 365) against the rolling mean/stddev of the same quantity in the last 24 days of shock-log history. The FAF5 number above is preserved as audited CONTEXT but is no longer the math anchor — the prior v1 design comparing FDOT activity to FAF5 flow had dimensional + population mismatches.",
+          "Daily-cadence shock detection uses a synthetic per-day denominator (annual tons_per_year ÷ 365) because Tier 2 carries only annual FDOT AADT. 30d / 90d escalation thresholds will rarely fire from current Tier 2 data alone — true daily AADT-equivalent (FDOT continuous-count stations) is reserved for v2 ingest.",
+          "Conversion math: activity_tons_per_year_per_segment = AADT × tfctr × 16 × 365. The 16.0 tons/truck payload is FHWA HS 2023 Table VM-1 (combination trucks); commodity-mix shifts (heavy gravel vs light electronics) are not modeled in v1.",
+          "Path B over-counts pass-through traffic (one truck traversing five segments contributes to five segment counts) — the over-count is constant across days and cancels in the z-score, but the headline tons/year number should NOT be compared directly to FAF5 flow.",
+          "Scheduled FDOT construction closures look mathematically identical to genuine slowdowns; v1 has no calendar-aware filter to separate the two."
+        ],
+        "contradicts": [],
+        "confidence": 0.91,
+        "joint_integrity": 1,
+        "confidence_dispersion": 0,
+        "chain_depth": 1,
+        "trust_tier": 2,
+        "upstream_count": 1,
+        "relevance": {
+          "decay_curve": "weeks",
+          "half_life_hours": 720,
+          "computed_at": "2026-10-16T04:26:03Z"
+        },
+        "exogenous_signals": []
+      }
     },
     {
       "packId": "traffic-swfl",
-      "status": "skipped-fresh",
-      "written": false
+      "status": "built",
+      "version": 14,
+      "written": true,
+      "brainOutput": {
+        "brain_id": "traffic-swfl",
+        "version": 14,
+        "refined_at": "2026-10-16T04:26:03Z",
+        "expires": "2026-11-15T04:26:03Z",
+        "ttl_seconds": 2592000,
+        "direction": "neutral",
+        "magnitude": 0.0887312834438772,
+        "drivers": [],
+        "overrides": [],
+        "conclusion": "SWFL (Lee + Collier) length-weighted AADT in 2025 averaged 21,138 vehicles/day across 749 FDOT segments. Cohort-matched YoY 2024→2025: 0.9% over 684 segments — neutral read on corridor demand. 5-year CAGR 2021→2025: 3.3% per year. Coastal post-Ian recovery (Lee + Collier + Charlotte, 2025/2022): 108.1 — above pre-storm baseline.",
+        "key_metrics": [
+          {
+            "metric": "aadt_swfl_avg",
+            "value": 21138,
+            "direction": "stable",
+            "label": "SWFL length-weighted average AADT, year 2025 (vehicles/day)",
+            "variable_type": "extensive",
+            "units": "vehicles/day",
+            "display_format": "count",
+            "source": {
+              "url": "https://jtkdowmrjaxfvwmemxso.supabase.co/rest/v1/fdot_aadt_fl?select=year_,county,roadway,desc_frm,desc_to,aadt,aadtflg,tfctr,shape_length&county=in.(LEE,COLLIER,CHARLOTTE)",
+              "fetched_at": "2026-10-16T04:26:03Z",
+              "tier": 2,
+              "citation": "FDOT AADT segments via data_lake.fdot_aadt_fl (dlt-ingested from FDOT FTO_PROD/MapServer/7) — counties Lee + Collier (Charlotte added for the post-Ian recovery exception), years 2021-2025, non-null AADT only. Aggregate: 749 latest-year segments contributing to the length-weighted corridor average."
+            },
+            "suggestions": [
+              "What's driving aadt swfl avg?",
+              "How does aadt swfl avg here compare to other SWFL areas?"
+            ]
+          },
+          {
+            "metric": "aadt_yoy_pct",
+            "value": 0.9,
+            "direction": "rising",
+            "label": "SWFL AADT YoY change 2024→2025, cohort-matched (%)",
+            "variable_type": "intensive",
+            "units": "percent",
+            "display_format": "percent",
+            "source": {
+              "url": "https://jtkdowmrjaxfvwmemxso.supabase.co/rest/v1/fdot_aadt_fl?select=year_,county,roadway,desc_frm,desc_to,aadt,aadtflg,tfctr,shape_length&county=in.(LEE,COLLIER,CHARLOTTE)",
+              "fetched_at": "2026-10-16T04:26:03Z",
+              "tier": 2,
+              "citation": "FDOT AADT segments via data_lake.fdot_aadt_fl (dlt-ingested from FDOT FTO_PROD/MapServer/7) — counties Lee + Collier (Charlotte added for the post-Ian recovery exception), years 2021-2025, non-null AADT only. Aggregate: 749 latest-year segments contributing to the length-weighted corridor average."
+            },
+            "suggestions": [
+              "What's driving aadt yoy pct?",
+              "How does aadt yoy pct here compare to other SWFL areas?"
+            ]
+          },
+          {
+            "metric": "aadt_5yr_cagr",
+            "value": 3.3,
+            "direction": "rising",
+            "label": "SWFL AADT 5-year CAGR (2021 → 2025, %)",
+            "variable_type": "intensive",
+            "units": "percent/year",
+            "display_format": "percent",
+            "source": {
+              "url": "https://jtkdowmrjaxfvwmemxso.supabase.co/rest/v1/fdot_aadt_fl?select=year_,county,roadway,desc_frm,desc_to,aadt,aadtflg,tfctr,shape_length&county=in.(LEE,COLLIER,CHARLOTTE)",
+              "fetched_at": "2026-10-16T04:26:03Z",
+              "tier": 2,
+              "citation": "FDOT AADT segments via data_lake.fdot_aadt_fl (dlt-ingested from FDOT FTO_PROD/MapServer/7) — counties Lee + Collier (Charlotte added for the post-Ian recovery exception), years 2021-2025, non-null AADT only. Aggregate: 749 latest-year segments contributing to the length-weighted corridor average."
+            },
+            "suggestions": [
+              "What's driving aadt 5yr cagr?",
+              "How does aadt 5yr cagr here compare to other SWFL areas?"
+            ]
+          },
+          {
+            "metric": "truck_share_median",
+            "value": 7.4,
+            "direction": "stable",
+            "label": "SWFL median truck factor (TFCTR × 100), year 2025",
+            "variable_type": "intensive",
+            "units": "percent",
+            "display_format": "percent",
+            "source": {
+              "url": "https://jtkdowmrjaxfvwmemxso.supabase.co/rest/v1/fdot_aadt_fl?select=year_,county,roadway,desc_frm,desc_to,aadt,aadtflg,tfctr,shape_length&county=in.(LEE,COLLIER,CHARLOTTE)",
+              "fetched_at": "2026-10-16T04:26:03Z",
+              "tier": 2,
+              "citation": "FDOT AADT segments via data_lake.fdot_aadt_fl (dlt-ingested from FDOT FTO_PROD/MapServer/7) — counties Lee + Collier (Charlotte added for the post-Ian recovery exception), years 2021-2025, non-null AADT only. Aggregate: 749 latest-year segments contributing to the length-weighted corridor average."
+            },
+            "suggestions": [
+              "What's driving truck share median?",
+              "How does truck share median here compare to other SWFL areas?"
+            ]
+          },
+          {
+            "metric": "post_ian_recovery",
+            "value": 108.1,
+            "direction": "rising",
+            "label": "Coastal SWFL (Lee + Collier + Charlotte) post-Ian recovery index, 2025 ÷ 2022 × 100",
+            "variable_type": "intensive",
+            "units": "index (2022=100)",
+            "display_format": "ratio",
+            "source": {
+              "url": "https://jtkdowmrjaxfvwmemxso.supabase.co/rest/v1/fdot_aadt_fl?select=year_,county,roadway,desc_frm,desc_to,aadt,aadtflg,tfctr,shape_length&county=in.(LEE,COLLIER,CHARLOTTE)",
+              "fetched_at": "2026-10-16T04:26:03Z",
+              "tier": 2,
+              "citation": "FDOT AADT segments via data_lake.fdot_aadt_fl (dlt-ingested from FDOT FTO_PROD/MapServer/7) — counties Lee + Collier (Charlotte added for the post-Ian recovery exception), years 2021-2025, non-null AADT only. Aggregate: 749 latest-year segments contributing to the length-weighted corridor average."
+            },
+            "suggestions": [
+              "What's driving post ian recovery?",
+              "How does post ian recovery here compare to other SWFL areas?"
+            ]
+          }
+        ],
+        "caveats": [
+          "Length-weighting uses shape_length (auto-generated geometry length in the layer projection). The shape_leng attribute is not consulted — it may be stale after route realignments.",
+          "Cohort-matched YoY identifies segments by (roadway, desc_frm, desc_to). If FDOT changes any of those three fields between years for the same physical segment, that segment drops from the cohort silently — small cohort sizes (< 100) should be read with skepticism.",
+          "Truck factor metric reports a length-weighted MEAN of per-county MEDIANS rather than a true cross-county median (true median would require raw segment access, defeating the source aggregation). Treat the value as a county-mix-aware estimate, not an exact statistic.",
+          "Year scope is 2021-2025. Bump LATEST_FDOT_YEAR in refinery/sources/fdot-source.mts when FDOT publishes the next vintage.",
+          "Post-Ian recovery index DELIBERATELY uses a wider 3-county set (Lee + Collier + Charlotte) than the brain's standard 2-county scope — Charlotte sat in Ian's eye-wall path and must be included for the storm signal to be honest. The other 4 metrics stay 2-county.",
+          "Direction thresholds: bullish ≥ +3% YoY; bearish ≤ -3% YoY; neutral otherwise."
+        ],
+        "contradicts": [],
+        "confidence": 0.8,
+        "joint_integrity": 1,
+        "confidence_dispersion": 0,
+        "chain_depth": 0,
+        "trust_tier": 2,
+        "upstream_count": 0,
+        "relevance": {
+          "decay_curve": "weeks",
+          "half_life_hours": 720,
+          "computed_at": "2026-10-16T04:26:03Z"
+        },
+        "exogenous_signals": []
+      }
     },
     {
       "packId": "properties-lee-value",
@@ -102,8 +569,1079 @@
     },
     {
       "packId": "housing-swfl",
-      "status": "skipped-fresh",
-      "written": false
+      "status": "built",
+      "version": 18,
+      "written": true,
+      "brainOutput": {
+        "brain_id": "housing-swfl",
+        "version": 18,
+        "refined_at": "2026-10-16T04:26:05Z",
+        "expires": "2026-11-20T04:26:05Z",
+        "ttl_seconds": 3024000,
+        "direction": "mixed",
+        "magnitude": 0.25,
+        "drivers": [],
+        "overrides": [],
+        "conclusion": "SWFL housing reads mixed (data through 2026-09-30) across 55 ZIPs — regional median sale price $424,875 (-1.4% YoY), DOM 86 days, 5.5 months of supply, 95.1% sale-to-list. Fastest-moving ZIPs: 34139 (16 days), 34116 (32 days), 33990 (51 days). Priciest ZIPs: 33921 ($3,748,898), 34102 ($2,474,273), 34141 ($1,600,000).",
+        "key_metrics": [
+          {
+            "metric": "housing_median_sale_price_swfl",
+            "value": 424875,
+            "direction": "falling",
+            "label": "SWFL regional median sale price (all property types), data through 2026-09-30 (-1.4% YoY)",
+            "variable_type": "extensive",
+            "units": "USD",
+            "display_format": "currency",
+            "source": {
+              "url": "https://www.redfin.com/news/data-center/",
+              "fetched_at": "2026-10-16T04:26:05Z",
+              "tier": 3,
+              "citation": "Redfin Data Center — ZIP-level monthly housing metrics (all property types), SWFL MSAs. Updated monthly ~mid-month."
+            },
+            "suggestions": [
+              "What's driving housing median sale price swfl?",
+              "How does housing median sale price swfl here compare to other SWFL areas?",
+              "How does flood risk affect housing median sale price swfl in this ZIP?"
+            ]
+          },
+          {
+            "metric": "housing_median_dom_swfl",
+            "value": 86,
+            "direction": "falling",
+            "label": "SWFL regional median days on market — falling = faster sales (YoY: -11.5 days)",
+            "variable_type": "extensive",
+            "units": "days",
+            "display_format": "count",
+            "source": {
+              "url": "https://www.redfin.com/news/data-center/",
+              "fetched_at": "2026-10-16T04:26:05Z",
+              "tier": 3,
+              "citation": "Redfin Data Center — ZIP-level monthly housing metrics (all property types), SWFL MSAs. Updated monthly ~mid-month."
+            },
+            "suggestions": [
+              "What's driving housing median dom swfl?",
+              "How does housing median dom swfl here compare to other SWFL areas?",
+              "How does flood risk affect housing median dom swfl in this ZIP?"
+            ]
+          },
+          {
+            "metric": "housing_months_of_supply_swfl",
+            "value": 5.5,
+            "direction": "stable",
+            "label": "SWFL regional median months of supply — derived from inventory over the 90-day sales pace (< 3 = seller's market, > 6 = buyer's market)",
+            "variable_type": "intensive",
+            "units": "months",
+            "display_format": "raw",
+            "source": {
+              "url": "https://www.redfin.com/news/data-center/",
+              "fetched_at": "2026-10-16T04:26:05Z",
+              "tier": 3,
+              "citation": "Redfin Data Center — ZIP-level monthly housing metrics (all property types), SWFL MSAs. Updated monthly ~mid-month."
+            },
+            "suggestions": [
+              "What's driving housing months of supply swfl?",
+              "How does housing months of supply swfl here compare to other SWFL areas?",
+              "How does flood risk affect housing months of supply swfl in this ZIP?"
+            ]
+          },
+          {
+            "metric": "housing_avg_sale_to_list_swfl",
+            "value": 95.1,
+            "direction": "falling",
+            "label": "SWFL regional median sale-to-list ratio (> 100% = homes selling above ask)",
+            "variable_type": "intensive",
+            "units": "percent",
+            "display_format": "percent",
+            "source": {
+              "url": "https://www.redfin.com/news/data-center/",
+              "fetched_at": "2026-10-16T04:26:05Z",
+              "tier": 3,
+              "citation": "Redfin Data Center — ZIP-level monthly housing metrics (all property types), SWFL MSAs. Updated monthly ~mid-month."
+            },
+            "suggestions": [
+              "What's driving housing avg sale to list swfl?",
+              "How does housing avg sale to list swfl here compare to other SWFL areas?",
+              "How does flood risk affect housing avg sale to list swfl in this ZIP?"
+            ]
+          },
+          {
+            "metric": "housing_sold_above_list_pct_swfl",
+            "value": 3.6,
+            "direction": "stable",
+            "label": "SWFL regional median % of homes sold above list price",
+            "variable_type": "intensive",
+            "units": "percent",
+            "display_format": "percent",
+            "source": {
+              "url": "https://www.redfin.com/news/data-center/",
+              "fetched_at": "2026-10-16T04:26:05Z",
+              "tier": 3,
+              "citation": "Redfin Data Center — ZIP-level monthly housing metrics (all property types), SWFL MSAs. Updated monthly ~mid-month."
+            },
+            "suggestions": [
+              "What's driving housing sold above list pct swfl?",
+              "How does housing sold above list pct swfl here compare to other SWFL areas?",
+              "How does flood risk affect housing sold above list pct swfl in this ZIP?"
+            ]
+          },
+          {
+            "metric": "housing_off_market_in_two_weeks_pct_swfl",
+            "value": 15.8,
+            "direction": "stable",
+            "label": "SWFL regional median % of homes going off-market within 2 weeks",
+            "variable_type": "intensive",
+            "units": "percent",
+            "display_format": "percent",
+            "source": {
+              "url": "https://www.redfin.com/news/data-center/",
+              "fetched_at": "2026-10-16T04:26:05Z",
+              "tier": 3,
+              "citation": "Redfin Data Center — ZIP-level monthly housing metrics (all property types), SWFL MSAs. Updated monthly ~mid-month."
+            },
+            "suggestions": [
+              "What's driving housing off market in two weeks pct swfl?",
+              "How does housing off market in two weeks pct swfl here compare to other SWFL areas?",
+              "How does flood risk affect housing off market in two weeks pct swfl in this ZIP?"
+            ]
+          }
+        ],
+        "detail_tables": [
+          {
+            "id": "housing_by_zip",
+            "title": "SWFL housing by ZIP — latest rolling 3-month window, data through 2026-09-30",
+            "grain": "zip",
+            "columns": [
+              {
+                "id": "metro",
+                "label": "Metro area"
+              },
+              {
+                "id": "median_sale_price",
+                "label": "Median sale price",
+                "display_format": "currency",
+                "units": "USD"
+              },
+              {
+                "id": "median_sale_price_yoy_pct",
+                "label": "Median sale price YoY",
+                "display_format": "percent",
+                "units": "percent"
+              },
+              {
+                "id": "median_dom",
+                "label": "Median days on market",
+                "display_format": "count",
+                "units": "days"
+              },
+              {
+                "id": "median_dom_yoy_days",
+                "label": "Median days-on-market YoY change (days)",
+                "display_format": "count",
+                "units": "days"
+              },
+              {
+                "id": "avg_sale_to_list_pct",
+                "label": "Sale-to-list ratio",
+                "display_format": "percent",
+                "units": "percent"
+              },
+              {
+                "id": "months_of_supply",
+                "label": "Months of supply",
+                "display_format": "raw",
+                "units": "months"
+              },
+              {
+                "id": "homes_sold",
+                "label": "Homes sold (90-day)",
+                "display_format": "count",
+                "units": "count"
+              },
+              {
+                "id": "inventory",
+                "label": "Active inventory",
+                "display_format": "count",
+                "units": "count"
+              },
+              {
+                "id": "low_sample",
+                "label": "Thin sample (under 5 sales this window)"
+              }
+            ],
+            "rows": [
+              {
+                "key": "33901",
+                "label": "33901",
+                "cells": {
+                  "metro": "Cape Coral, FL metro area",
+                  "median_sale_price": 299912,
+                  "median_sale_price_yoy_pct": 7.1,
+                  "median_dom": 58,
+                  "median_dom_yoy_days": -33,
+                  "avg_sale_to_list_pct": 91.8,
+                  "months_of_supply": 8.8,
+                  "homes_sold": 57,
+                  "inventory": 164,
+                  "low_sample": false
+                }
+              },
+              {
+                "key": "33903",
+                "label": "33903",
+                "cells": {
+                  "metro": "Cape Coral, FL metro area",
+                  "median_sale_price": 314907,
+                  "median_sale_price_yoy_pct": 10.5,
+                  "median_dom": 99,
+                  "median_dom_yoy_days": -8,
+                  "avg_sale_to_list_pct": 94.4,
+                  "months_of_supply": 6.6,
+                  "homes_sold": 81,
+                  "inventory": 173,
+                  "low_sample": false
+                }
+              },
+              {
+                "key": "33904",
+                "label": "33904",
+                "cells": {
+                  "metro": "Cape Coral, FL metro area",
+                  "median_sale_price": 417377,
+                  "median_sale_price_yoy_pct": 22.8,
+                  "median_dom": 62,
+                  "median_dom_yoy_days": -38,
+                  "avg_sale_to_list_pct": 95.3,
+                  "months_of_supply": 5.2,
+                  "homes_sold": 227,
+                  "inventory": 384,
+                  "low_sample": false
+                }
+              },
+              {
+                "key": "33905",
+                "label": "33905",
+                "cells": {
+                  "metro": "Cape Coral, FL metro area",
+                  "median_sale_price": 352396,
+                  "median_sale_price_yoy_pct": 7.6,
+                  "median_dom": 78,
+                  "median_dom_yoy_days": 7,
+                  "avg_sale_to_list_pct": 95.8,
+                  "months_of_supply": 5.5,
+                  "homes_sold": 182,
+                  "inventory": 327,
+                  "low_sample": false
+                }
+              },
+              {
+                "key": "33907",
+                "label": "33907",
+                "cells": {
+                  "metro": "Cape Coral, FL metro area",
+                  "median_sale_price": 164952,
+                  "median_sale_price_yoy_pct": -13.2,
+                  "median_dom": 80,
+                  "median_dom_yoy_days": -26,
+                  "avg_sale_to_list_pct": 93,
+                  "months_of_supply": 6.1,
+                  "homes_sold": 95,
+                  "inventory": 190,
+                  "low_sample": false
+                }
+              },
+              {
+                "key": "33908",
+                "label": "33908",
+                "cells": {
+                  "metro": "Cape Coral, FL metro area",
+                  "median_sale_price": 343899,
+                  "median_sale_price_yoy_pct": -4.9,
+                  "median_dom": 104,
+                  "median_dom_yoy_days": -23,
+                  "avg_sale_to_list_pct": 93.7,
+                  "months_of_supply": 6.7,
+                  "homes_sold": 251,
+                  "inventory": 549,
+                  "low_sample": false
+                }
+              },
+              {
+                "key": "33909",
+                "label": "33909",
+                "cells": {
+                  "metro": "Cape Coral, FL metro area",
+                  "median_sale_price": 324905,
+                  "median_sale_price_yoy_pct": 1.5,
+                  "median_dom": 70,
+                  "median_dom_yoy_days": 4,
+                  "avg_sale_to_list_pct": 98,
+                  "months_of_supply": 4.6,
+                  "homes_sold": 305,
+                  "inventory": 456,
+                  "low_sample": false
+                }
+              },
+              {
+                "key": "33912",
+                "label": "33912",
+                "cells": {
+                  "metro": "Cape Coral, FL metro area",
+                  "median_sale_price": 394884,
+                  "median_sale_price_yoy_pct": -2,
+                  "median_dom": 80,
+                  "median_dom_yoy_days": -29,
+                  "avg_sale_to_list_pct": 93.6,
+                  "months_of_supply": 4.4,
+                  "homes_sold": 105,
+                  "inventory": 150,
+                  "low_sample": false
+                }
+              },
+              {
+                "key": "33913",
+                "label": "33913",
+                "cells": {
+                  "metro": "Cape Coral, FL metro area",
+                  "median_sale_price": 464863,
+                  "median_sale_price_yoy_pct": 1.1,
+                  "median_dom": 75,
+                  "median_dom_yoy_days": -30,
+                  "avg_sale_to_list_pct": 96.1,
+                  "months_of_supply": 4.3,
+                  "homes_sold": 259,
+                  "inventory": 360,
+                  "low_sample": false
+                }
+              },
+              {
+                "key": "33914",
+                "label": "33914",
+                "cells": {
+                  "metro": "Cape Coral, FL metro area",
+                  "median_sale_price": 501353,
+                  "median_sale_price_yoy_pct": 11.5,
+                  "median_dom": 72,
+                  "median_dom_yoy_days": -28,
+                  "avg_sale_to_list_pct": 96,
+                  "months_of_supply": 4.7,
+                  "homes_sold": 335,
+                  "inventory": 510,
+                  "low_sample": false
+                }
+              },
+              {
+                "key": "33916",
+                "label": "33916",
+                "cells": {
+                  "metro": "Cape Coral, FL metro area",
+                  "median_sale_price": 271920,
+                  "median_sale_price_yoy_pct": -1.1,
+                  "median_dom": 89,
+                  "median_dom_yoy_days": 6,
+                  "avg_sale_to_list_pct": 94.9,
+                  "months_of_supply": 11,
+                  "homes_sold": 49,
+                  "inventory": 176,
+                  "low_sample": false
+                }
+              },
+              {
+                "key": "33917",
+                "label": "33917",
+                "cells": {
+                  "metro": "Cape Coral, FL metro area",
+                  "median_sale_price": 329903,
+                  "median_sale_price_yoy_pct": -2.7,
+                  "median_dom": 69,
+                  "median_dom_yoy_days": -15,
+                  "avg_sale_to_list_pct": 95.5,
+                  "months_of_supply": 5.4,
+                  "homes_sold": 148,
+                  "inventory": 259,
+                  "low_sample": false
+                }
+              },
+              {
+                "key": "33919",
+                "label": "33919",
+                "cells": {
+                  "metro": "Cape Coral, FL metro area",
+                  "median_sale_price": 257674,
+                  "median_sale_price_yoy_pct": -7.6,
+                  "median_dom": 86,
+                  "median_dom_yoy_days": -20,
+                  "avg_sale_to_list_pct": 93.8,
+                  "months_of_supply": 6.3,
+                  "homes_sold": 169,
+                  "inventory": 347,
+                  "low_sample": false
+                }
+              },
+              {
+                "key": "33920",
+                "label": "33920",
+                "cells": {
+                  "metro": "Cape Coral, FL metro area",
+                  "median_sale_price": 369891,
+                  "median_sale_price_yoy_pct": -13,
+                  "median_dom": 55,
+                  "median_dom_yoy_days": -40,
+                  "avg_sale_to_list_pct": 97.1,
+                  "months_of_supply": 5.7,
+                  "homes_sold": 52,
+                  "inventory": 96,
+                  "low_sample": false
+                }
+              },
+              {
+                "key": "33921",
+                "label": "33921",
+                "cells": {
+                  "metro": "Cape Coral, FL metro area",
+                  "median_sale_price": 3748898,
+                  "median_sale_price_yoy_pct": 33.9,
+                  "median_dom": 55,
+                  "median_dom_yoy_days": -79,
+                  "avg_sale_to_list_pct": 90.8,
+                  "months_of_supply": 3,
+                  "homes_sold": 13,
+                  "inventory": 13,
+                  "low_sample": false
+                }
+              },
+              {
+                "key": "33922",
+                "label": "33922",
+                "cells": {
+                  "metro": "Cape Coral, FL metro area",
+                  "median_sale_price": 396883,
+                  "median_sale_price_yoy_pct": 10.3,
+                  "median_dom": 118,
+                  "median_dom_yoy_days": 21,
+                  "avg_sale_to_list_pct": 95.3,
+                  "months_of_supply": 6.7,
+                  "homes_sold": 31,
+                  "inventory": 67,
+                  "low_sample": false
+                }
+              },
+              {
+                "key": "33924",
+                "label": "33924",
+                "cells": {
+                  "metro": "Cape Coral, FL metro area",
+                  "median_sale_price": 1034696,
+                  "median_sale_price_yoy_pct": 5,
+                  "median_dom": 200,
+                  "median_dom_yoy_days": 34,
+                  "avg_sale_to_list_pct": 91.1,
+                  "months_of_supply": 10,
+                  "homes_sold": 15,
+                  "inventory": 50,
+                  "low_sample": false
+                }
+              },
+              {
+                "key": "33928",
+                "label": "33928",
+                "cells": {
+                  "metro": "Cape Coral, FL metro area",
+                  "median_sale_price": 517348,
+                  "median_sale_price_yoy_pct": 4.5,
+                  "median_dom": 68,
+                  "median_dom_yoy_days": -40,
+                  "avg_sale_to_list_pct": 95.8,
+                  "months_of_supply": 4.4,
+                  "homes_sold": 225,
+                  "inventory": 323,
+                  "low_sample": false
+                }
+              },
+              {
+                "key": "33931",
+                "label": "33931",
+                "cells": {
+                  "metro": "Cape Coral, FL metro area",
+                  "median_sale_price": 497354,
+                  "median_sale_price_yoy_pct": -23.5,
+                  "median_dom": 163,
+                  "median_dom_yoy_days": 15,
+                  "avg_sale_to_list_pct": 92.8,
+                  "months_of_supply": 11.5,
+                  "homes_sold": 86,
+                  "inventory": 322,
+                  "low_sample": false
+                }
+              },
+              {
+                "key": "33936",
+                "label": "33936",
+                "cells": {
+                  "metro": "Cape Coral, FL metro area",
+                  "median_sale_price": 227433,
+                  "median_sale_price_yoy_pct": -15.8,
+                  "median_dom": 74,
+                  "median_dom_yoy_days": 12,
+                  "avg_sale_to_list_pct": 96.6,
+                  "months_of_supply": 5.4,
+                  "homes_sold": 141,
+                  "inventory": 246,
+                  "low_sample": false
+                }
+              },
+              {
+                "key": "33956",
+                "label": "33956",
+                "cells": {
+                  "metro": "Cape Coral, FL metro area",
+                  "median_sale_price": 549838,
+                  "median_sale_price_yoy_pct": -1.8,
+                  "median_dom": 148,
+                  "median_dom_yoy_days": -54,
+                  "avg_sale_to_list_pct": 94.8,
+                  "months_of_supply": 7.3,
+                  "homes_sold": 27,
+                  "inventory": 63,
+                  "low_sample": false
+                }
+              },
+              {
+                "key": "33957",
+                "label": "33957",
+                "cells": {
+                  "metro": "Cape Coral, FL metro area",
+                  "median_sale_price": 880741,
+                  "median_sale_price_yoy_pct": 4.4,
+                  "median_dom": 196,
+                  "median_dom_yoy_days": 69,
+                  "avg_sale_to_list_pct": 92.3,
+                  "months_of_supply": 7.5,
+                  "homes_sold": 69,
+                  "inventory": 170,
+                  "low_sample": false
+                }
+              },
+              {
+                "key": "33966",
+                "label": "33966",
+                "cells": {
+                  "metro": "Cape Coral, FL metro area",
+                  "median_sale_price": 317657,
+                  "median_sale_price_yoy_pct": -9.2,
+                  "median_dom": 83,
+                  "median_dom_yoy_days": -9,
+                  "avg_sale_to_list_pct": 96.1,
+                  "months_of_supply": 4,
+                  "homes_sold": 82,
+                  "inventory": 107,
+                  "low_sample": false
+                }
+              },
+              {
+                "key": "33967",
+                "label": "33967",
+                "cells": {
+                  "metro": "Cape Coral, FL metro area",
+                  "median_sale_price": 362394,
+                  "median_sale_price_yoy_pct": -7,
+                  "median_dom": 59,
+                  "median_dom_yoy_days": 24,
+                  "avg_sale_to_list_pct": 96.3,
+                  "months_of_supply": 3.8,
+                  "homes_sold": 108,
+                  "inventory": 133,
+                  "low_sample": false
+                }
+              },
+              {
+                "key": "33971",
+                "label": "33971",
+                "cells": {
+                  "metro": "Cape Coral, FL metro area",
+                  "median_sale_price": 304910,
+                  "median_sale_price_yoy_pct": -7.2,
+                  "median_dom": 78,
+                  "median_dom_yoy_days": -2,
+                  "avg_sale_to_list_pct": 98.4,
+                  "months_of_supply": 5.1,
+                  "homes_sold": 209,
+                  "inventory": 351,
+                  "low_sample": false
+                }
+              },
+              {
+                "key": "33972",
+                "label": "33972",
+                "cells": {
+                  "metro": "Cape Coral, FL metro area",
+                  "median_sale_price": 339900,
+                  "median_sale_price_yoy_pct": -2.9,
+                  "median_dom": 67,
+                  "median_dom_yoy_days": -21,
+                  "avg_sale_to_list_pct": 97.4,
+                  "months_of_supply": 5.6,
+                  "homes_sold": 158,
+                  "inventory": 287,
+                  "low_sample": false
+                }
+              },
+              {
+                "key": "33973",
+                "label": "33973",
+                "cells": {
+                  "metro": "Cape Coral, FL metro area",
+                  "median_sale_price": 394884,
+                  "median_sale_price_yoy_pct": -14.2,
+                  "median_dom": 91,
+                  "median_dom_yoy_days": 26,
+                  "avg_sale_to_list_pct": 98.1,
+                  "months_of_supply": 8.1,
+                  "homes_sold": 56,
+                  "inventory": 148,
+                  "low_sample": false
+                }
+              },
+              {
+                "key": "33974",
+                "label": "33974",
+                "cells": {
+                  "metro": "Cape Coral, FL metro area",
+                  "median_sale_price": 299912,
+                  "median_sale_price_yoy_pct": -5.2,
+                  "median_dom": 94,
+                  "median_dom_yoy_days": 23,
+                  "avg_sale_to_list_pct": 98.7,
+                  "months_of_supply": 5.4,
+                  "homes_sold": 266,
+                  "inventory": 470,
+                  "low_sample": false
+                }
+              },
+              {
+                "key": "33976",
+                "label": "33976",
+                "cells": {
+                  "metro": "Cape Coral, FL metro area",
+                  "median_sale_price": 309909,
+                  "median_sale_price_yoy_pct": -5.4,
+                  "median_dom": 89,
+                  "median_dom_yoy_days": 25,
+                  "avg_sale_to_list_pct": 98.7,
+                  "months_of_supply": 5.4,
+                  "homes_sold": 152,
+                  "inventory": 265,
+                  "low_sample": false
+                }
+              },
+              {
+                "key": "33990",
+                "label": "33990",
+                "cells": {
+                  "metro": "Cape Coral, FL metro area",
+                  "median_sale_price": 354896,
+                  "median_sale_price_yoy_pct": -1.4,
+                  "median_dom": 51,
+                  "median_dom_yoy_days": -12,
+                  "avg_sale_to_list_pct": 97.2,
+                  "months_of_supply": 4,
+                  "homes_sold": 159,
+                  "inventory": 207,
+                  "low_sample": false
+                }
+              },
+              {
+                "key": "33991",
+                "label": "33991",
+                "cells": {
+                  "metro": "Cape Coral, FL metro area",
+                  "median_sale_price": 414878,
+                  "median_sale_price_yoy_pct": -0.8,
+                  "median_dom": 67,
+                  "median_dom_yoy_days": -29,
+                  "avg_sale_to_list_pct": 97.4,
+                  "months_of_supply": 4.7,
+                  "homes_sold": 201,
+                  "inventory": 306,
+                  "low_sample": false
+                }
+              },
+              {
+                "key": "33993",
+                "label": "33993",
+                "cells": {
+                  "metro": "Cape Coral, FL metro area",
+                  "median_sale_price": 359894,
+                  "median_sale_price_yoy_pct": 2.8,
+                  "median_dom": 86,
+                  "median_dom_yoy_days": -2,
+                  "avg_sale_to_list_pct": 97.5,
+                  "months_of_supply": 5.9,
+                  "homes_sold": 362,
+                  "inventory": 693,
+                  "low_sample": false
+                }
+              },
+              {
+                "key": "34102",
+                "label": "34102",
+                "cells": {
+                  "metro": "Naples, FL metro area",
+                  "median_sale_price": 2474273,
+                  "median_sale_price_yoy_pct": 26.5,
+                  "median_dom": 132,
+                  "median_dom_yoy_days": -17,
+                  "avg_sale_to_list_pct": 92.2,
+                  "months_of_supply": 11.5,
+                  "homes_sold": 83,
+                  "inventory": 310,
+                  "low_sample": false
+                }
+              },
+              {
+                "key": "34103",
+                "label": "34103",
+                "cells": {
+                  "metro": "Naples, FL metro area",
+                  "median_sale_price": 1099677,
+                  "median_sale_price_yoy_pct": 4.7,
+                  "median_dom": 145,
+                  "median_dom_yoy_days": -16,
+                  "avg_sale_to_list_pct": 92.7,
+                  "months_of_supply": 7.7,
+                  "homes_sold": 101,
+                  "inventory": 252,
+                  "low_sample": false
+                }
+              },
+              {
+                "key": "34104",
+                "label": "34104",
+                "cells": {
+                  "metro": "Naples, FL metro area",
+                  "median_sale_price": 424875,
+                  "median_sale_price_yoy_pct": 15,
+                  "median_dom": 62,
+                  "median_dom_yoy_days": -36,
+                  "avg_sale_to_list_pct": 95.1,
+                  "months_of_supply": 4.7,
+                  "homes_sold": 120,
+                  "inventory": 183,
+                  "low_sample": false
+                }
+              },
+              {
+                "key": "34105",
+                "label": "34105",
+                "cells": {
+                  "metro": "Naples, FL metro area",
+                  "median_sale_price": 484858,
+                  "median_sale_price_yoy_pct": 16.8,
+                  "median_dom": 81,
+                  "median_dom_yoy_days": -32,
+                  "avg_sale_to_list_pct": 94.4,
+                  "months_of_supply": 6.2,
+                  "homes_sold": 81,
+                  "inventory": 162,
+                  "low_sample": false
+                }
+              },
+              {
+                "key": "34108",
+                "label": "34108",
+                "cells": {
+                  "metro": "Naples, FL metro area",
+                  "median_sale_price": 1024699,
+                  "median_sale_price_yoy_pct": -2.4,
+                  "median_dom": 130,
+                  "median_dom_yoy_days": 1,
+                  "avg_sale_to_list_pct": 92.8,
+                  "months_of_supply": 5.6,
+                  "homes_sold": 150,
+                  "inventory": 274,
+                  "low_sample": false
+                }
+              },
+              {
+                "key": "34109",
+                "label": "34109",
+                "cells": {
+                  "metro": "Naples, FL metro area",
+                  "median_sale_price": 567333,
+                  "median_sale_price_yoy_pct": -9.2,
+                  "median_dom": 88,
+                  "median_dom_yoy_days": -2,
+                  "avg_sale_to_list_pct": 94.7,
+                  "months_of_supply": 4.6,
+                  "homes_sold": 139,
+                  "inventory": 209,
+                  "low_sample": false
+                }
+              },
+              {
+                "key": "34110",
+                "label": "34110",
+                "cells": {
+                  "metro": "Naples, FL metro area",
+                  "median_sale_price": 799765,
+                  "median_sale_price_yoy_pct": 28.4,
+                  "median_dom": 108,
+                  "median_dom_yoy_days": -22,
+                  "avg_sale_to_list_pct": 93.1,
+                  "months_of_supply": 6.6,
+                  "homes_sold": 138,
+                  "inventory": 298,
+                  "low_sample": false
+                }
+              },
+              {
+                "key": "34112",
+                "label": "34112",
+                "cells": {
+                  "metro": "Naples, FL metro area",
+                  "median_sale_price": 364893,
+                  "median_sale_price_yoy_pct": 6.7,
+                  "median_dom": 89,
+                  "median_dom_yoy_days": -10,
+                  "avg_sale_to_list_pct": 94.3,
+                  "months_of_supply": 7.2,
+                  "homes_sold": 159,
+                  "inventory": 374,
+                  "low_sample": false
+                }
+              },
+              {
+                "key": "34113",
+                "label": "34113",
+                "cells": {
+                  "metro": "Naples, FL metro area",
+                  "median_sale_price": 649809,
+                  "median_sale_price_yoy_pct": 10.9,
+                  "median_dom": 114,
+                  "median_dom_yoy_days": -24,
+                  "avg_sale_to_list_pct": 94.1,
+                  "months_of_supply": 6.3,
+                  "homes_sold": 160,
+                  "inventory": 330,
+                  "low_sample": false
+                }
+              },
+              {
+                "key": "34114",
+                "label": "34114",
+                "cells": {
+                  "metro": "Naples, FL metro area",
+                  "median_sale_price": 594825,
+                  "median_sale_price_yoy_pct": -4.1,
+                  "median_dom": 109,
+                  "median_dom_yoy_days": -13,
+                  "avg_sale_to_list_pct": 94.5,
+                  "months_of_supply": 6.5,
+                  "homes_sold": 169,
+                  "inventory": 361,
+                  "low_sample": false
+                }
+              },
+              {
+                "key": "34116",
+                "label": "34116",
+                "cells": {
+                  "metro": "Naples, FL metro area",
+                  "median_sale_price": 451367,
+                  "median_sale_price_yoy_pct": -1.3,
+                  "median_dom": 32,
+                  "median_dom_yoy_days": -11,
+                  "avg_sale_to_list_pct": 96.3,
+                  "months_of_supply": 5,
+                  "homes_sold": 49,
+                  "inventory": 80,
+                  "low_sample": false
+                }
+              },
+              {
+                "key": "34117",
+                "label": "34117",
+                "cells": {
+                  "metro": "Naples, FL metro area",
+                  "median_sale_price": 596825,
+                  "median_sale_price_yoy_pct": -6.9,
+                  "median_dom": 63,
+                  "median_dom_yoy_days": -4,
+                  "avg_sale_to_list_pct": 96.2,
+                  "months_of_supply": 5.2,
+                  "homes_sold": 73,
+                  "inventory": 124,
+                  "low_sample": false
+                }
+              },
+              {
+                "key": "34119",
+                "label": "34119",
+                "cells": {
+                  "metro": "Naples, FL metro area",
+                  "median_sale_price": 633564,
+                  "median_sale_price_yoy_pct": -8.8,
+                  "median_dom": 81,
+                  "median_dom_yoy_days": -7,
+                  "avg_sale_to_list_pct": 95.1,
+                  "months_of_supply": 3.4,
+                  "homes_sold": 239,
+                  "inventory": 268,
+                  "low_sample": false
+                }
+              },
+              {
+                "key": "34120",
+                "label": "34120",
+                "cells": {
+                  "metro": "Naples, FL metro area",
+                  "median_sale_price": 579830,
+                  "median_sale_price_yoy_pct": 1.7,
+                  "median_dom": 87,
+                  "median_dom_yoy_days": 0,
+                  "avg_sale_to_list_pct": 96.4,
+                  "months_of_supply": 5.4,
+                  "homes_sold": 281,
+                  "inventory": 491,
+                  "low_sample": false
+                }
+              },
+              {
+                "key": "34134",
+                "label": "34134",
+                "cells": {
+                  "metro": "Cape Coral, FL metro area",
+                  "median_sale_price": 687298,
+                  "median_sale_price_yoy_pct": -9,
+                  "median_dom": 123,
+                  "median_dom_yoy_days": -13,
+                  "avg_sale_to_list_pct": 93.7,
+                  "months_of_supply": 6.9,
+                  "homes_sold": 139,
+                  "inventory": 310,
+                  "low_sample": false
+                }
+              },
+              {
+                "key": "34135",
+                "label": "34135",
+                "cells": {
+                  "metro": "Cape Coral, FL metro area",
+                  "median_sale_price": 443870,
+                  "median_sale_price_yoy_pct": -3.5,
+                  "median_dom": 76,
+                  "median_dom_yoy_days": -6,
+                  "avg_sale_to_list_pct": 95.1,
+                  "months_of_supply": 4.9,
+                  "homes_sold": 261,
+                  "inventory": 417,
+                  "low_sample": false
+                }
+              },
+              {
+                "key": "34139",
+                "label": "34139",
+                "cells": {
+                  "metro": "Naples, FL metro area",
+                  "median_sale_price": 464863,
+                  "median_sale_price_yoy_pct": null,
+                  "median_dom": 16,
+                  "median_dom_yoy_days": null,
+                  "avg_sale_to_list_pct": 96.2,
+                  "months_of_supply": 6.4,
+                  "homes_sold": 2,
+                  "inventory": 4,
+                  "low_sample": true
+                }
+              },
+              {
+                "key": "34140",
+                "label": "34140",
+                "cells": {
+                  "metro": "Naples, FL metro area",
+                  "median_sale_price": 424875,
+                  "median_sale_price_yoy_pct": null,
+                  "median_dom": 846,
+                  "median_dom_yoy_days": null,
+                  "avg_sale_to_list_pct": 98.8,
+                  "months_of_supply": 6.4,
+                  "homes_sold": 2,
+                  "inventory": 4,
+                  "low_sample": true
+                }
+              },
+              {
+                "key": "34141",
+                "label": "34141",
+                "cells": {
+                  "metro": "Naples, FL metro area",
+                  "median_sale_price": 1600000,
+                  "median_sale_price_yoy_pct": null,
+                  "median_dom": 465,
+                  "median_dom_yoy_days": null,
+                  "avg_sale_to_list_pct": 88.9,
+                  "months_of_supply": null,
+                  "homes_sold": 1,
+                  "inventory": null,
+                  "low_sample": true
+                }
+              },
+              {
+                "key": "34142",
+                "label": "34142",
+                "cells": {
+                  "metro": "Naples, FL metro area",
+                  "median_sale_price": 398383,
+                  "median_sale_price_yoy_pct": 2.1,
+                  "median_dom": 109,
+                  "median_dom_yoy_days": 26,
+                  "avg_sale_to_list_pct": 96.4,
+                  "months_of_supply": 8.8,
+                  "homes_sold": 90,
+                  "inventory": 258,
+                  "low_sample": false
+                }
+              },
+              {
+                "key": "34145",
+                "label": "34145",
+                "cells": {
+                  "metro": "Naples, FL metro area",
+                  "median_sale_price": 834755,
+                  "median_sale_price_yoy_pct": -24.1,
+                  "median_dom": 112,
+                  "median_dom_yoy_days": -24,
+                  "avg_sale_to_list_pct": 93.8,
+                  "months_of_supply": 5.4,
+                  "homes_sold": 229,
+                  "inventory": 404,
+                  "low_sample": false
+                }
+              }
+            ],
+            "source": {
+              "url": "https://www.redfin.com/news/data-center/",
+              "fetched_at": "2026-10-16T04:26:05Z",
+              "tier": 3,
+              "citation": "Redfin Data Center — ZIP-level monthly housing metrics (all property types), SWFL MSAs. Updated monthly ~mid-month."
+            },
+            "note": "One row per SWFL ZIP, each its latest Redfin 90-day window. Months of supply is derived (inventory over the 90-day sales pace); Redfin does not publish it at ZIP grain. When low_sample is true the row rests on fewer than 5 sales — quote its median as a thin, indicative read rather than a stable one, and its months of supply is omitted."
+          }
+        ],
+        "caveats": [],
+        "contradicts": [],
+        "confidence": 0.6,
+        "joint_integrity": 1,
+        "confidence_dispersion": 0,
+        "chain_depth": 0,
+        "trust_tier": 3,
+        "upstream_count": 0,
+        "relevance": {
+          "decay_curve": "weeks",
+          "half_life_hours": 720,
+          "computed_at": "2026-10-16T04:26:05Z"
+        },
+        "exogenous_signals": []
+      }
     },
     {
       "packId": "safety-swfl",
@@ -123,19 +1661,19 @@
     {
       "packId": "city-pulse-swfl",
       "status": "built",
-      "version": 121,
+      "version": 122,
       "written": true,
       "brainOutput": {
         "brain_id": "city-pulse-swfl",
-        "version": 121,
-        "refined_at": "2026-10-15T09:16:29Z",
-        "expires": "2026-10-16T09:16:29Z",
+        "version": 122,
+        "refined_at": "2026-10-16T04:26:05Z",
+        "expires": "2026-10-17T04:26:05Z",
         "ttl_seconds": 86400,
         "direction": "neutral",
         "magnitude": 0,
         "drivers": [],
         "overrides": [],
-        "conclusion": "SWFL city pulse as of 2026-10-15: 36 live current-events signals across 4 cities — Fort Myers (10), Naples (15), Estero (1), Cape Coral (10). Most current: Fort Myers — SW Florida Realtors have dubbed the growing Estero-area corridor the 'Coconut Coast Corridor', as reported Sept. 7, 2026. These are current cited facts only; the cross-vertical read and any direction call live downstream in master.",
+        "conclusion": "SWFL city pulse as of 2026-10-16: 36 live current-events signals across 4 cities — Fort Myers (10), Naples (15), Estero (1), Cape Coral (10). Most current: Fort Myers — SW Florida Realtors have dubbed the growing Estero-area corridor the 'Coconut Coast Corridor', as reported Sept. 7, 2026. These are current cited facts only; the cross-vertical read and any direction call live downstream in master.",
         "key_metrics": [
           {
             "metric": "signal_structural_1",
@@ -145,7 +1683,7 @@
             "variable_type": "categorical",
             "source": {
               "url": "https://www.naplesnews.com/story/money/real-estate/2026/09/07/sw-florida-realtors-dub-growing-estero-area-coconut-coast/91600054007/",
-              "fetched_at": "2026-10-15T09:16:29Z",
+              "fetched_at": "2026-10-16T04:26:05Z",
               "tier": 2,
               "citation": "SW Florida Realtors dub growing Estero area 'Coconut Coast': \"[](https://www.naplesnews.com/)\n[Fort Myers, Bonita Beach parking limited as hurricane restoration begins 4 years after Ian](https://www.naplesnews.com/story/news/local/2026/09/07/parking-depleted-as-hurricane-restoration-begins-at-fort-myers-bonita-beach/91599217007/)\n[](https://subscribe.naplesnews.com/rr/nanobar?gps-source=CPTILELEFT&itm_campaign=2026ENTAUGBAU&itm_medium=ONSITE&success-url=https%3A%2F%2Fwww.naplesnews.com%2Fstory%2Fmoney%2Freal-estate%2F2026%2F09%2F07%2Fsw-florida-realtors-dub-growing-estero-area-coconut-coast%2F91600054007%2F)\n[](https://subscribe.naplesnews.com/rr/masthead?gps-source=CPMASTHEAD&itm_campaign=2026ENTAUGBAU&itm_medium=ONSITE&success-url=https%3A%2F%2Fwww.naplesnews.com%2Fstory%2Fmoney%2Freal-estate%2F2026%2F09%2F07%2Fsw-florida-realtors-dub-growing-estero-area-coconut-coast%2F91600054007%2F)\n[News](https://www.naplesnews.com/news/) [Sports](https://www.naplesnews.com/sports/) [Real Estate](https://www.naplesnews.com/business/real-estate/) [Restaurants](https://www.naplesnews.com/entertainment/restaurants/) [Opinion](https://www.naplesnews.com/opinion/) [Advertise](https://advertising.usatoday.com/advertise-with-us/?cid=Web_LiQ_Network_AdvertiseWithUs_AdvertiseInquiry&publication=naples_daily_news&utm_source=local_publication&utm_medium=menu&utm_campaign=advertise_with_us) [Obituaries](https://www.naplesnews.com/obituaries) [eNewspaper](https://user.naplesnews.com/user/enewspaper) [Legals](https://www.naplesnews.com/public-notices)\n[](https://www.naplesnews.com/search/ \"Search\")\n[](https://www.naplesnews.com/weather/ \"Weather in Naples: 79°F Partly Sunny w/ T-Storms\") [](https://subscribe.naplesnews.com/rr/navsub?gps-source=CPTOPNAVBAR&itm_campaign=2026ENTAUGBAU&itm_medium=ONSITE&success-url=https%3A%2F%2Fwww.naplesnews.com%2Fstory%2Fmoney%2Freal-estate%2F2026%2F09%2F07%2Fsw-florida-realtors-dub-growing-estero-area-coconut-coast%2F91600054007%2F)\n[](https://login.naplesnews.com/PNDN-GUP/authenticate/?success-url=https%3A%2F%2Fwww.naplesnews.com%2Fstory%2Fmoney%2Freal-estate%2F2026%2F09%2F07%2Fsw-florida-realtors-dub-growing-estero-area-coconut-coast%2F91600054007%2F&cancel-url=https%3A%2F%2Fwww.naplesnews.com%2Fstory%2Fmoney%2Freal-estate%2F2026%2F09%2F07%2Fsw-florida-realtors-dub-growing-estero-area-coconut-coast%2F91600054007%2F)\n[](https://www.naplesnews.com/) [](https://www.naplesnews.com/)\nREAL ESTATE\n# 'Coconut Coast Corridor' emerges in SW Florida. What's new and coming?\n[![Portrait of Phil Fernandez](https://www.naplesnews.com/gcdn/presto/2019/09/14/PNDN/6a77b474-579f-48fa-b56f-a2cc2b9de797-NDN_Phil_Fernandez.jpg?crop=2999,2999,x0,y570&width=48&height=48&format=pjpg&auto=webp) Phil Fernandez](https://www.naplesnews.com/staff/2684114001/phil-fernandez/)\nFort Myers News-Press & Naples Daily News\nSept. 7, 2026, 5:02 a.m. ET\nTime to say hello to [Southwest Florida](https://www.naplesnews.com/story/news/politics/elections/2026/08/24/florida-political-shockwave-in-one-of-bigger-cities-what-it-took-lee-county-c\""
             },
@@ -162,7 +1700,7 @@
             "variable_type": "categorical",
             "source": {
               "url": "https://www.naplesnews.com/story/money/real-estate/2026/09/07/sw-florida-realtors-dub-growing-estero-area-coconut-coast/91600054007/",
-              "fetched_at": "2026-10-15T09:16:29Z",
+              "fetched_at": "2026-10-16T04:26:05Z",
               "tier": 2,
               "citation": "SW Florida Realtors dub growing Estero area 'Coconut Coast': \"[](https://www.naplesnews.com/)\n[Fort Myers, Bonita Beach parking limited as hurricane restoration begins 4 years after Ian](https://www.naplesnews.com/story/news/local/2026/09/07/parking-depleted-as-hurricane-restoration-begins-at-fort-myers-bonita-beach/91599217007/)\n[](https://subscribe.naplesnews.com/rr/nanobar?gps-source=CPTILELEFT&itm_campaign=2026ENTAUGBAU&itm_medium=ONSITE&success-url=https%3A%2F%2Fwww.naplesnews.com%2Fstory%2Fmoney%2Freal-estate%2F2026%2F09%2F07%2Fsw-florida-realtors-dub-growing-estero-area-coconut-coast%2F91600054007%2F)\n[](https://subscribe.naplesnews.com/rr/masthead?gps-source=CPMASTHEAD&itm_campaign=2026ENTAUGBAU&itm_medium=ONSITE&success-url=https%3A%2F%2Fwww.naplesnews.com%2Fstory%2Fmoney%2Freal-estate%2F2026%2F09%2F07%2Fsw-florida-realtors-dub-growing-estero-area-coconut-coast%2F91600054007%2F)\n[News](https://www.naplesnews.com/news/) [Sports](https://www.naplesnews.com/sports/) [Real Estate](https://www.naplesnews.com/business/real-estate/) [Restaurants](https://www.naplesnews.com/entertainment/restaurants/) [Opinion](https://www.naplesnews.com/opinion/) [Advertise](https://advertising.usatoday.com/advertise-with-us/?cid=Web_LiQ_Network_AdvertiseWithUs_AdvertiseInquiry&publication=naples_daily_news&utm_source=local_publication&utm_medium=menu&utm_campaign=advertise_with_us) [Obituaries](https://www.naplesnews.com/obituaries) [eNewspaper](https://user.naplesnews.com/user/enewspaper) [Legals](https://www.naplesnews.com/public-notices)\n[](https://www.naplesnews.com/search/ \"Search\")\n[](https://www.naplesnews.com/weather/ \"Weather in Naples: 79°F Partly Sunny w/ T-Storms\") [](https://subscribe.naplesnews.com/rr/navsub?gps-source=CPTOPNAVBAR&itm_campaign=2026ENTAUGBAU&itm_medium=ONSITE&success-url=https%3A%2F%2Fwww.naplesnews.com%2Fstory%2Fmoney%2Freal-estate%2F2026%2F09%2F07%2Fsw-florida-realtors-dub-growing-estero-area-coconut-coast%2F91600054007%2F)\n[](https://login.naplesnews.com/PNDN-GUP/authenticate/?success-url=https%3A%2F%2Fwww.naplesnews.com%2Fstory%2Fmoney%2Freal-estate%2F2026%2F09%2F07%2Fsw-florida-realtors-dub-growing-estero-area-coconut-coast%2F91600054007%2F&cancel-url=https%3A%2F%2Fwww.naplesnews.com%2Fstory%2Fmoney%2Freal-estate%2F2026%2F09%2F07%2Fsw-florida-realtors-dub-growing-estero-area-coconut-coast%2F91600054007%2F)\n[](https://www.naplesnews.com/) [](https://www.naplesnews.com/)\nREAL ESTATE\n# 'Coconut Coast Corridor' emerges in SW Florida. What's new and coming?\n[![Portrait of Phil Fernandez](https://www.naplesnews.com/gcdn/presto/2019/09/14/PNDN/6a77b474-579f-48fa-b56f-a2cc2b9de797-NDN_Phil_Fernandez.jpg?crop=2999,2999,x0,y570&width=48&height=48&format=pjpg&auto=webp) Phil Fernandez](https://www.naplesnews.com/staff/2684114001/phil-fernandez/)\nFort Myers News-Press & Naples Daily News\nSept. 7, 2026, 5:02 a.m. ET\nTime to say hello to [Southwest Florida](https://www.naplesnews.com/story/news/politics/elections/2026/08/24/florida-political-shockwave-in-one-of-bigger-cities-what-it-took-lee-county-c\""
             },
@@ -179,7 +1717,7 @@
             "variable_type": "categorical",
             "source": {
               "url": "https://www.naplesnews.com/story/money/real-estate/2026/09/07/sw-florida-realtors-dub-growing-estero-area-coconut-coast/91600054007/",
-              "fetched_at": "2026-10-15T09:16:29Z",
+              "fetched_at": "2026-10-16T04:26:05Z",
               "tier": 2,
               "citation": "SW Florida Realtors dub growing Estero area 'Coconut Coast': \"[](https://www.naplesnews.com/)\n[Fort Myers, Bonita Beach parking limited as hurricane restoration begins 4 years after Ian](https://www.naplesnews.com/story/news/local/2026/09/07/parking-depleted-as-hurricane-restoration-begins-at-fort-myers-bonita-beach/91599217007/)\n[](https://subscribe.naplesnews.com/rr/nanobar?gps-source=CPTILELEFT&itm_campaign=2026ENTAUGBAU&itm_medium=ONSITE&success-url=https%3A%2F%2Fwww.naplesnews.com%2Fstory%2Fmoney%2Freal-estate%2F2026%2F09%2F07%2Fsw-florida-realtors-dub-growing-estero-area-coconut-coast%2F91600054007%2F)\n[](https://subscribe.naplesnews.com/rr/masthead?gps-source=CPMASTHEAD&itm_campaign=2026ENTAUGBAU&itm_medium=ONSITE&success-url=https%3A%2F%2Fwww.naplesnews.com%2Fstory%2Fmoney%2Freal-estate%2F2026%2F09%2F07%2Fsw-florida-realtors-dub-growing-estero-area-coconut-coast%2F91600054007%2F)\n[News](https://www.naplesnews.com/news/) [Sports](https://www.naplesnews.com/sports/) [Real Estate](https://www.naplesnews.com/business/real-estate/) [Restaurants](https://www.naplesnews.com/entertainment/restaurants/) [Opinion](https://www.naplesnews.com/opinion/) [Advertise](https://advertising.usatoday.com/advertise-with-us/?cid=Web_LiQ_Network_AdvertiseWithUs_AdvertiseInquiry&publication=naples_daily_news&utm_source=local_publication&utm_medium=menu&utm_campaign=advertise_with_us) [Obituaries](https://www.naplesnews.com/obituaries) [eNewspaper](https://user.naplesnews.com/user/enewspaper) [Legals](https://www.naplesnews.com/public-notices)\n[](https://www.naplesnews.com/search/ \"Search\")\n[](https://www.naplesnews.com/weather/ \"Weather in Naples: 79°F Partly Sunny w/ T-Storms\") [](https://subscribe.naplesnews.com/rr/navsub?gps-source=CPTOPNAVBAR&itm_campaign=2026ENTAUGBAU&itm_medium=ONSITE&success-url=https%3A%2F%2Fwww.naplesnews.com%2Fstory%2Fmoney%2Freal-estate%2F2026%2F09%2F07%2Fsw-florida-realtors-dub-growing-estero-area-coconut-coast%2F91600054007%2F)\n[](https://login.naplesnews.com/PNDN-GUP/authenticate/?success-url=https%3A%2F%2Fwww.naplesnews.com%2Fstory%2Fmoney%2Freal-estate%2F2026%2F09%2F07%2Fsw-florida-realtors-dub-growing-estero-area-coconut-coast%2F91600054007%2F&cancel-url=https%3A%2F%2Fwww.naplesnews.com%2Fstory%2Fmoney%2Freal-estate%2F2026%2F09%2F07%2Fsw-florida-realtors-dub-growing-estero-area-coconut-coast%2F91600054007%2F)\n[](https://www.naplesnews.com/) [](https://www.naplesnews.com/)\nREAL ESTATE\n# 'Coconut Coast Corridor' emerges in SW Florida. What's new and coming?\n[![Portrait of Phil Fernandez](https://www.naplesnews.com/gcdn/presto/2019/09/14/PNDN/6a77b474-579f-48fa-b56f-a2cc2b9de797-NDN_Phil_Fernandez.jpg?crop=2999,2999,x0,y570&width=48&height=48&format=pjpg&auto=webp) Phil Fernandez](https://www.naplesnews.com/staff/2684114001/phil-fernandez/)\nFort Myers News-Press & Naples Daily News\nSept. 7, 2026, 5:02 a.m. ET\nTime to say hello to [Southwest Florida](https://www.naplesnews.com/story/news/politics/elections/2026/08/24/florida-political-shockwave-in-one-of-bigger-cities-what-it-took-lee-county-c\""
             },
@@ -196,7 +1734,7 @@
             "variable_type": "categorical",
             "source": {
               "url": "https://www.news-press.com/story/money/2026/09/03/florida-numbers-behind-naples-luxury-boating-lifestyle-culture-in-swfl-collier-county-marinas-yachts/91081829007/",
-              "fetched_at": "2026-10-15T09:16:29Z",
+              "fetched_at": "2026-10-16T04:26:05Z",
               "tier": 2,
               "citation": "Florida numbers behind Naples luxury boating lifestyle culture in SWFL: \"[](https://www.news-press.com/)\n[Fort Myers, Bonita Beach parking limited as hurricane restoration begins 4 years after Ian](https://www.news-press.com/story/news/local/2026/09/07/parking-depleted-as-hurricane-restoration-begins-at-fort-myers-bonita-beach/91599217007/)\n[](https://subscribe.news-press.com/rr/nanobar?gps-source=CPTILELEFT&itm_campaign=2026ENTAUGBAU&itm_medium=ONSITE&success-url=https%3A%2F%2Fwww.news-press.com%2Fstory%2Fmoney%2F2026%2F09%2F03%2Fflorida-numbers-behind-naples-luxury-boating-lifestyle-culture-in-swfl-collier-county-marinas-yachts%2F91081829007%2F)\n[](https://subscribe.news-press.com/rr/masthead?gps-source=CPMASTHEAD&itm_campaign=2026ENTAUGBAU&itm_medium=ONSITE&success-url=https%3A%2F%2Fwww.news-press.com%2Fstory%2Fmoney%2F2026%2F09%2F03%2Fflorida-numbers-behind-naples-luxury-boating-lifestyle-culture-in-swfl-collier-county-marinas-yachts%2F91081829007%2F)\n[News](https://www.news-press.com/news/) [Cape Coral](https://www.news-press.com/news/cape-coral/) [Sports](https://www.news-press.com/sports/) [Restaurants](https://www.news-press.com/taste/) [Real Estate](https://www.news-press.com/real-estate) [Advertise](https://advertising.usatoday.com/advertise-with-us/?cid=Web_LiQ_Network_AdvertiseWithUs_AdvertiseInquiry&publication=the_news_press&utm_source=local_publication&utm_medium=menu&utm_campaign=advertise_with_us) [Obituaries](https://www.news-press.com/obituaries) [eNewspaper](https://user.news-press.com/user/enewspaper) [Legals](https://www.news-press.com/public-notices)\n[](https://www.news-press.com/search/ \"Search\")\n[](https://www.news-press.com/weather/ \"Weather in Fort Myers: 82°F Mostly Cloudy\") [](https://subscribe.news-press.com/rr/navsub?gps-source=CPTOPNAVBAR&itm_campaign=2026ENTAUGBAU&itm_medium=ONSITE&success-url=https%3A%2F%2Fwww.news-press.com%2Fstory%2Fmoney%2F2026%2F09%2F03%2Fflorida-numbers-behind-naples-luxury-boating-lifestyle-culture-in-swfl-collier-county-marinas-yachts%2F91081829007%2F)\n[](https://login.news-press.com/PFTM-GUP/authenticate/?success-url=https%3A%2F%2Fwww.news-press.com%2Fstory%2Fmoney%2F2026%2F09%2F03%2Fflorida-numbers-behind-naples-luxury-boating-lifestyle-culture-in-swfl-collier-county-marinas-yachts%2F91081829007%2F&cancel-url=https%3A%2F%2Fwww.news-press.com%2Fstory%2Fmoney%2F2026%2F09%2F03%2Fflorida-numbers-behind-naples-luxury-boating-lifestyle-culture-in-swfl-collier-county-marinas-yachts%2F91081829007%2F)\n[](https://www.news-press.com/) [](https://www.news-press.com/)\nMONEY\n# What new Florida data says about Naples ritzy luxury boating lifestyle\n[![Portrait of Phil Fernandez](https://www.news-press.com/gcdn/presto/2019/09/14/PNDN/6a77b474-579f-48fa-b56f-a2cc2b9de797-NDN_Phil_Fernandez.jpg?crop=2999,2999,x0,y570&width=48&height=48&format=pjpg&auto=webp) Phil Fernandez](https://www.naplesnews.com/staff/2684114001/phil-fernandez/)\nFort Myers News-Press & Naples Daily News\nSept. 3, 2026, 5:01 a.m. ET\n[](https://www.facebook.com/dialog/share?display=popup&app_id=14963106842106\""
             },
@@ -213,7 +1751,7 @@
             "variable_type": "categorical",
             "source": {
               "url": "https://www.news-press.com/story/money/business/local/2026/09/04/collier-commissioners-weigh-tax-cut-impacting-conservation-collier-by-reducing-its-tax-rate/91607961007/",
-              "fetched_at": "2026-10-15T09:16:29Z",
+              "fetched_at": "2026-10-16T04:26:05Z",
               "tier": 2,
               "citation": "Collier tax cut proposal targets conservation funds: \"[](https://www.news-press.com/)\n[](https://subscribe.news-press.com/rr/nanobar?gps-source=CPTILELEFT&itm_campaign=2026ENTAUGBAU&itm_medium=ONSITE&success-url=https%3A%2F%2Fwww.news-press.com%2Fstory%2Fmoney%2Fbusiness%2Flocal%2F2026%2F09%2F04%2Fcollier-commissioners-weigh-tax-cut-impacting-conservation-collier-by-reducing-its-tax-rate%2F91607961007%2F)\n[](https://subscribe.news-press.com/rr/masthead?gps-source=CPMASTHEAD&itm_campaign=2026ENTAUGBAU&itm_medium=ONSITE&success-url=https%3A%2F%2Fwww.news-press.com%2Fstory%2Fmoney%2Fbusiness%2Flocal%2F2026%2F09%2F04%2Fcollier-commissioners-weigh-tax-cut-impacting-conservation-collier-by-reducing-its-tax-rate%2F91607961007%2F)\n[News](https://www.news-press.com/news/) [Cape Coral](https://www.news-press.com/news/cape-coral/) [Sports](https://www.news-press.com/sports/) [Restaurants](https://www.news-press.com/taste/) [Real Estate](https://www.news-press.com/real-estate) [Advertise](https://advertising.usatoday.com/advertise-with-us/?cid=Web_LiQ_Network_AdvertiseWithUs_AdvertiseInquiry&publication=the_news_press&utm_source=local_publication&utm_medium=menu&utm_campaign=advertise_with_us) [Obituaries](https://www.news-press.com/obituaries) [eNewspaper](https://user.news-press.com/user/enewspaper) [Legals](https://www.news-press.com/public-notices)\n[](https://www.news-press.com/search/ \"Search\")\n[](https://www.news-press.com/weather/ \"Weather in Fort Myers: 79°F Mostly Clear\") [](https://subscribe.news-press.com/rr/navsub?gps-source=CPTOPNAVBAR&itm_campaign=2026ENTAUGBAU&itm_medium=ONSITE&success-url=https%3A%2F%2Fwww.news-press.com%2Fstory%2Fmoney%2Fbusiness%2Flocal%2F2026%2F09%2F04%2Fcollier-commissioners-weigh-tax-cut-impacting-conservation-collier-by-reducing-its-tax-rate%2F91607961007%2F)\n[](https://login.news-press.com/PFTM-GUP/authenticate/?success-url=https%3A%2F%2Fwww.news-press.com%2Fstory%2Fmoney%2Fbusiness%2Flocal%2F2026%2F09%2F04%2Fcollier-commissioners-weigh-tax-cut-impacting-conservation-collier-by-reducing-its-tax-rate%2F91607961007%2F&cancel-url=https%3A%2F%2Fwww.news-press.com%2Fstory%2Fmoney%2Fbusiness%2Flocal%2F2026%2F09%2F04%2Fcollier-commissioners-weigh-tax-cut-impacting-conservation-collier-by-reducing-its-tax-rate%2F91607961007%2F)\n[](https://www.news-press.com/) [](https://www.news-press.com/)\nLOCAL BUSINESS\n# Collier commissioners weighing cut to Conservation Collier tax rate\n[![Portrait of Laura Layden](https://www.news-press.com/gcdn/authoring/authoring-images/2024/02/08/PNDN/72524348007-ndn-jh-20240126-laura-0001.JPG?crop=3313,3312,x1506,y0&width=48&height=48&format=pjpg&auto=webp) Laura Layden](https://www.naplesnews.com/staff/2647080001/laura-layden/)\nFort Myers News-Press & Naples Daily News\nSept. 4, 2026, 3:34 p.m. ET\n[Collier County commissioners](https://www.news-press.com/story/news/local/2026/07/14/collier-county-seeks-to-pause-mega-data-center-applications/90913888007/) voted to keep the countywide tax rate steady for the upcoming year.\nHowever, the decision isn't final\""
             },
@@ -230,7 +1768,7 @@
             "variable_type": "categorical",
             "source": {
               "url": "https://www.news-press.com/story/news/state/2026/08/31/harold-gene-lucas-is-scheduled-to-be-floridas-next-execution-sept-1-bonita-springs-1976-shooting/91492788007/",
-              "fetched_at": "2026-10-15T09:16:29Z",
+              "fetched_at": "2026-10-16T04:26:05Z",
               "tier": 2,
               "citation": "Harold Gene Lucas is scheduled to be Florida's next execution Sept.1: \"[](https://www.news-press.com/)\n[Death date this week: SW Florida criminal is next on Florida's historic executions timeline](https://www.news-press.com/story/news/state/2026/08/31/harold-gene-lucas-is-scheduled-to-be-floridas-next-execution-sept-1-bonita-springs-1976-shooting/91492788007/)\n[](https://subscribe.news-press.com/rr/nanobar?gps-source=CPTILELEFT&itm_campaign=2026ENTAUGBAU&itm_medium=ONSITE&success-url=https%3A%2F%2Fwww.news-press.com%2Fstory%2Fnews%2Fstate%2F2026%2F08%2F31%2Fharold-gene-lucas-is-scheduled-to-be-floridas-next-execution-sept-1-bonita-springs-1976-shooting%2F91492788007%2F)\n[](https://subscribe.news-press.com/rr/masthead?gps-source=CPMASTHEAD&itm_campaign=2026ENTAUGBAU&itm_medium=ONSITE&success-url=https%3A%2F%2Fwww.news-press.com%2Fstory%2Fnews%2Fstate%2F2026%2F08%2F31%2Fharold-gene-lucas-is-scheduled-to-be-floridas-next-execution-sept-1-bonita-springs-1976-shooting%2F91492788007%2F)\n[News](https://www.news-press.com/news/) [Cape Coral](https://www.news-press.com/news/cape-coral/) [Sports](https://www.news-press.com/sports/) [Restaurants](https://www.news-press.com/taste/) [Real Estate](https://www.news-press.com/real-estate) [Advertise](https://advertising.usatoday.com/advertise-with-us/?cid=Web_LiQ_Network_AdvertiseWithUs_AdvertiseInquiry&publication=the_news_press&utm_source=local_publication&utm_medium=menu&utm_campaign=advertise_with_us) [Obituaries](https://www.news-press.com/obituaries) [eNewspaper](https://user.news-press.com/user/enewspaper) [Legals](https://www.news-press.com/public-notices)\n[](https://www.news-press.com/search/ \"Search\")\n[](https://www.news-press.com/weather/ \"Weather in Fort Myers: 80°F Sunny\") [](https://subscribe.news-press.com/rr/navsub?gps-source=CPTOPNAVBAR&itm_campaign=2026ENTAUGBAU&itm_medium=ONSITE&success-url=https%3A%2F%2Fwww.news-press.com%2Fstory%2Fnews%2Fstate%2F2026%2F08%2F31%2Fharold-gene-lucas-is-scheduled-to-be-floridas-next-execution-sept-1-bonita-springs-1976-shooting%2F91492788007%2F)\n[](https://login.news-press.com/PFTM-GUP/authenticate/?success-url=https%3A%2F%2Fwww.news-press.com%2Fstory%2Fnews%2Fstate%2F2026%2F08%2F31%2Fharold-gene-lucas-is-scheduled-to-be-floridas-next-execution-sept-1-bonita-springs-1976-shooting%2F91492788007%2F&cancel-url=https%3A%2F%2Fwww.news-press.com%2Fstory%2Fnews%2Fstate%2F2026%2F08%2F31%2Fharold-gene-lucas-is-scheduled-to-be-floridas-next-execution-sept-1-bonita-springs-1976-shooting%2F91492788007%2F)\n[](https://www.news-press.com/news/) [](https://www.news-press.com/news/)\nSTATE\n# Death date: SW Florida criminal next on Florida's executions timeline\n[![Portrait of C. A. Bridges](https://www.news-press.com/gcdn/presto/2022/01/12/PIND/c37a50c0-43ea-453e-8cff-1404f2ecc006-acff92bf-b3b2-4e70-b861-9c00de8def9b-2020-07-19_Chris_for_Work_-_Square.jpeg?crop=1712,1712,x0,y0&width=48&height=48&format=pjpg&auto=webp) C. A. Bridges](https://www.news-journalonline.com/staff/5204967002/c-a-bridges/)\nFort Myers News-Press & Naples Daily News\nAug. 31, 20\""
             },
@@ -247,7 +1785,7 @@
             "variable_type": "categorical",
             "source": {
               "url": "https://www.naplesnews.com/story/money/business/local/2026/09/04/collier-commissioners-weigh-tax-cut-impacting-conservation-collier-by-reducing-its-tax-rate/91607961007/",
-              "fetched_at": "2026-10-15T09:16:29Z",
+              "fetched_at": "2026-10-16T04:26:05Z",
               "tier": 2,
               "citation": "Collier tax cut proposal targets conservation funds: \"[](https://www.naplesnews.com/)\n[](https://subscribe.naplesnews.com/rr/nanobar?gps-source=CPTILELEFT&itm_campaign=2026ENTAUGBAU&itm_medium=ONSITE&success-url=https%3A%2F%2Fwww.naplesnews.com%2Fstory%2Fmoney%2Fbusiness%2Flocal%2F2026%2F09%2F04%2Fcollier-commissioners-weigh-tax-cut-impacting-conservation-collier-by-reducing-its-tax-rate%2F91607961007%2F)\n[](https://subscribe.naplesnews.com/rr/masthead?gps-source=CPMASTHEAD&itm_campaign=2026ENTAUGBAU&itm_medium=ONSITE&success-url=https%3A%2F%2Fwww.naplesnews.com%2Fstory%2Fmoney%2Fbusiness%2Flocal%2F2026%2F09%2F04%2Fcollier-commissioners-weigh-tax-cut-impacting-conservation-collier-by-reducing-its-tax-rate%2F91607961007%2F)\n[News](https://www.naplesnews.com/news/) [Sports](https://www.naplesnews.com/sports/) [Real Estate](https://www.naplesnews.com/business/real-estate/) [Restaurants](https://www.naplesnews.com/entertainment/restaurants/) [Opinion](https://www.naplesnews.com/opinion/) [Advertise](https://advertising.usatoday.com/advertise-with-us/?cid=Web_LiQ_Network_AdvertiseWithUs_AdvertiseInquiry&publication=naples_daily_news&utm_source=local_publication&utm_medium=menu&utm_campaign=advertise_with_us) [Obituaries](https://www.naplesnews.com/obituaries) [eNewspaper](https://user.naplesnews.com/user/enewspaper) [Legals](https://www.naplesnews.com/public-notices)\n[](https://www.naplesnews.com/search/ \"Search\")\n[](https://www.naplesnews.com/weather/ \"Weather in Naples: 80°F Partly Cloudy\") [](https://subscribe.naplesnews.com/rr/navsub?gps-source=CPTOPNAVBAR&itm_campaign=2026ENTAUGBAU&itm_medium=ONSITE&success-url=https%3A%2F%2Fwww.naplesnews.com%2Fstory%2Fmoney%2Fbusiness%2Flocal%2F2026%2F09%2F04%2Fcollier-commissioners-weigh-tax-cut-impacting-conservation-collier-by-reducing-its-tax-rate%2F91607961007%2F)\n[](https://login.naplesnews.com/PNDN-GUP/authenticate/?success-url=https%3A%2F%2Fwww.naplesnews.com%2Fstory%2Fmoney%2Fbusiness%2Flocal%2F2026%2F09%2F04%2Fcollier-commissioners-weigh-tax-cut-impacting-conservation-collier-by-reducing-its-tax-rate%2F91607961007%2F&cancel-url=https%3A%2F%2Fwww.naplesnews.com%2Fstory%2Fmoney%2Fbusiness%2Flocal%2F2026%2F09%2F04%2Fcollier-commissioners-weigh-tax-cut-impacting-conservation-collier-by-reducing-its-tax-rate%2F91607961007%2F)\n[](https://www.naplesnews.com/) [](https://www.naplesnews.com/)\n[LOCAL BUSINESS](https://www.naplesnews.com/business/local/)\n# Collier commissioners weighing cut to Conservation Collier tax rate\n[![Portrait of Laura Layden](https://www.naplesnews.com/gcdn/authoring/authoring-images/2024/02/08/PNDN/72524348007-ndn-jh-20240126-laura-0001.JPG?crop=3313,3312,x1506,y0&width=48&height=48&format=pjpg&auto=webp) Laura Layden](https://www.naplesnews.com/staff/2647080001/laura-layden/)\nFort Myers News-Press & Naples Daily News\nSept. 4, 2026, 3:34 p.m. ET\n[Collier County commissioners](https://www.naplesnews.com/story/news/local/2026/07/14/collier-county-seeks-to-pause-mega-data-center-applications/90913888007/) voted to keep the countywide tax rat\""
             },
@@ -264,7 +1802,7 @@
             "variable_type": "categorical",
             "source": {
               "url": "https://www.news-press.com/story/money/business/local/2026/09/04/collier-commissioners-weigh-tax-cut-impacting-conservation-collier-by-reducing-its-tax-rate/91607961007/",
-              "fetched_at": "2026-10-15T09:16:29Z",
+              "fetched_at": "2026-10-16T04:26:05Z",
               "tier": 2,
               "citation": "Collier tax cut proposal targets conservation funds: \"[](https://www.news-press.com/)\n[](https://subscribe.news-press.com/rr/nanobar?gps-source=CPTILELEFT&itm_campaign=2026ENTAUGBAU&itm_medium=ONSITE&success-url=https%3A%2F%2Fwww.news-press.com%2Fstory%2Fmoney%2Fbusiness%2Flocal%2F2026%2F09%2F04%2Fcollier-commissioners-weigh-tax-cut-impacting-conservation-collier-by-reducing-its-tax-rate%2F91607961007%2F)\n[](https://subscribe.news-press.com/rr/masthead?gps-source=CPMASTHEAD&itm_campaign=2026ENTAUGBAU&itm_medium=ONSITE&success-url=https%3A%2F%2Fwww.news-press.com%2Fstory%2Fmoney%2Fbusiness%2Flocal%2F2026%2F09%2F04%2Fcollier-commissioners-weigh-tax-cut-impacting-conservation-collier-by-reducing-its-tax-rate%2F91607961007%2F)\n[News](https://www.news-press.com/news/) [Cape Coral](https://www.news-press.com/news/cape-coral/) [Sports](https://www.news-press.com/sports/) [Restaurants](https://www.news-press.com/taste/) [Real Estate](https://www.news-press.com/real-estate) [Advertise](https://advertising.usatoday.com/advertise-with-us/?cid=Web_LiQ_Network_AdvertiseWithUs_AdvertiseInquiry&publication=the_news_press&utm_source=local_publication&utm_medium=menu&utm_campaign=advertise_with_us) [Obituaries](https://www.news-press.com/obituaries) [eNewspaper](https://user.news-press.com/user/enewspaper) [Legals](https://www.news-press.com/public-notices)\n[](https://www.news-press.com/search/ \"Search\")\n[](https://www.news-press.com/weather/ \"Weather in Fort Myers: 79°F Mostly Clear\") [](https://subscribe.news-press.com/rr/navsub?gps-source=CPTOPNAVBAR&itm_campaign=2026ENTAUGBAU&itm_medium=ONSITE&success-url=https%3A%2F%2Fwww.news-press.com%2Fstory%2Fmoney%2Fbusiness%2Flocal%2F2026%2F09%2F04%2Fcollier-commissioners-weigh-tax-cut-impacting-conservation-collier-by-reducing-its-tax-rate%2F91607961007%2F)\n[](https://login.news-press.com/PFTM-GUP/authenticate/?success-url=https%3A%2F%2Fwww.news-press.com%2Fstory%2Fmoney%2Fbusiness%2Flocal%2F2026%2F09%2F04%2Fcollier-commissioners-weigh-tax-cut-impacting-conservation-collier-by-reducing-its-tax-rate%2F91607961007%2F&cancel-url=https%3A%2F%2Fwww.news-press.com%2Fstory%2Fmoney%2Fbusiness%2Flocal%2F2026%2F09%2F04%2Fcollier-commissioners-weigh-tax-cut-impacting-conservation-collier-by-reducing-its-tax-rate%2F91607961007%2F)\n[](https://www.news-press.com/) [](https://www.news-press.com/)\nLOCAL BUSINESS\n# Collier commissioners weighing cut to Conservation Collier tax rate\n[![Portrait of Laura Layden](https://www.news-press.com/gcdn/authoring/authoring-images/2024/02/08/PNDN/72524348007-ndn-jh-20240126-laura-0001.JPG?crop=3313,3312,x1506,y0&width=48&height=48&format=pjpg&auto=webp) Laura Layden](https://www.naplesnews.com/staff/2647080001/laura-layden/)\nFort Myers News-Press & Naples Daily News\nSept. 4, 2026, 3:34 p.m. ET\n[Collier County commissioners](https://www.news-press.com/story/news/local/2026/07/14/collier-county-seeks-to-pause-mega-data-center-applications/90913888007/) voted to keep the countywide tax rate steady for the upcoming year.\nHowever, the decision isn't final\""
             },
@@ -311,7 +1849,7 @@
             ],
             "source": {
               "url": "https://www.swfldatagulf.com/r/source/city_pulse",
-              "fetched_at": "2026-10-15T09:16:29Z",
+              "fetched_at": "2026-10-16T04:26:05Z",
               "tier": 2,
               "citation": "Distilled, citation-backed SWFL news signals; each ZIP's items carry per-item source URLs in data_lake.city_pulse."
             },
@@ -332,7 +1870,7 @@
         "relevance": {
           "decay_curve": "weeks",
           "half_life_hours": 720,
-          "computed_at": "2026-10-15T09:16:29Z"
+          "computed_at": "2026-10-16T04:26:05Z"
         },
         "exogenous_signals": []
       }
@@ -349,13 +1887,1086 @@
     },
     {
       "packId": "freshness-pulse",
-      "status": "skipped-fresh",
-      "written": false
+      "status": "built",
+      "version": 74,
+      "written": true,
+      "brainOutput": {
+        "brain_id": "freshness-pulse",
+        "version": 74,
+        "refined_at": "2026-10-16T04:26:05Z",
+        "expires": "2026-10-17T04:26:05Z",
+        "ttl_seconds": 86400,
+        "direction": "neutral",
+        "magnitude": 0,
+        "drivers": [],
+        "overrides": [],
+        "conclusion": "Today's sourced snapshot — Cape Coral median asking price (as of 2026-10-16) $399,200; Fort Myers median asking price (as of 2026-10-16) $325,000; Naples median asking price (as of 2026-10-16) $650,000; SWFL 30-year fixed mortgage rate (as of 2026-10-15) 7.4%. These are cited current facts only; the direction call lives downstream in master.",
+        "key_metrics": [
+          {
+            "metric": "freshness_median_asking_price_cape_coral_usd",
+            "value": 399200,
+            "direction": "stable",
+            "label": "Cape Coral median asking price (as of 2026-10-16)",
+            "variable_type": "extensive",
+            "units": "USD",
+            "display_format": "currency",
+            "source": {
+              "url": "https://www.swfldatagulf.com/desk",
+              "fetched_at": "2026-10-16T04:23:33.296632+00:00",
+              "tier": 2,
+              "citation": "SWFL Data Gulf active-listing inventory — current median asking price for Cape Coral, sourced 2026-10-16"
+            },
+            "suggestions": [
+              "Chart asking rents across the corridors",
+              "What's driving freshness median asking price cape coral usd?",
+              "How does freshness median asking price cape coral usd here compare to other SWFL areas?"
+            ]
+          },
+          {
+            "metric": "freshness_median_asking_price_fort_myers_usd",
+            "value": 325000,
+            "direction": "stable",
+            "label": "Fort Myers median asking price (as of 2026-10-16)",
+            "variable_type": "extensive",
+            "units": "USD",
+            "display_format": "currency",
+            "source": {
+              "url": "https://www.swfldatagulf.com/desk",
+              "fetched_at": "2026-10-16T04:23:33.296632+00:00",
+              "tier": 2,
+              "citation": "SWFL Data Gulf active-listing inventory — current median asking price for Fort Myers, sourced 2026-10-16"
+            },
+            "suggestions": [
+              "Chart asking rents across the corridors",
+              "What's driving freshness median asking price fort myers usd?",
+              "How does freshness median asking price fort myers usd here compare to other SWFL areas?"
+            ]
+          },
+          {
+            "metric": "freshness_median_asking_price_naples_usd",
+            "value": 650000,
+            "direction": "stable",
+            "label": "Naples median asking price (as of 2026-10-16)",
+            "variable_type": "extensive",
+            "units": "USD",
+            "display_format": "currency",
+            "source": {
+              "url": "https://www.swfldatagulf.com/desk",
+              "fetched_at": "2026-10-16T04:23:33.296632+00:00",
+              "tier": 2,
+              "citation": "SWFL Data Gulf active-listing inventory — current median asking price for Naples, sourced 2026-10-16"
+            },
+            "suggestions": [
+              "Chart asking rents across the corridors",
+              "What's driving freshness median asking price naples usd?",
+              "How does freshness median asking price naples usd here compare to other SWFL areas?"
+            ]
+          },
+          {
+            "metric": "freshness_mortgage_30yr_fixed_pct",
+            "value": 7.4,
+            "direction": "stable",
+            "label": "SWFL 30-year fixed mortgage rate (as of 2026-10-15)",
+            "variable_type": "intensive",
+            "units": "percent",
+            "display_format": "percent",
+            "source": {
+              "url": "https://fred.stlouisfed.org/series/MORTGAGE30US",
+              "fetched_at": "2026-10-16T04:23:33.296632+00:00",
+              "tier": 2,
+              "citation": "FRED — current 30-year fixed mortgage rate for SWFL, sourced 2026-10-15"
+            },
+            "suggestions": [
+              "What's driving freshness mortgage 30yr fixed pct?",
+              "How does freshness mortgage 30yr fixed pct here compare to other SWFL areas?"
+            ]
+          }
+        ],
+        "detail_tables": [],
+        "caveats": [
+          "Each county-grain number is a single grounded source's current figure, provenance-gated to a real source URL; held anomalies and unsourced (model-memory) numbers are excluded by design."
+        ],
+        "contradicts": [],
+        "confidence": 0.8,
+        "joint_integrity": 1,
+        "confidence_dispersion": 0,
+        "chain_depth": 0,
+        "trust_tier": 2,
+        "upstream_count": 0,
+        "relevance": {
+          "decay_curve": "weeks",
+          "half_life_hours": 720,
+          "computed_at": "2026-10-16T04:26:05Z"
+        },
+        "exogenous_signals": []
+      }
     },
     {
       "packId": "seller-stress-swfl",
-      "status": "skipped-fresh",
-      "written": false
+      "status": "built",
+      "version": 11,
+      "written": true,
+      "brainOutput": {
+        "brain_id": "seller-stress-swfl",
+        "version": 11,
+        "refined_at": "2026-10-16T04:26:11Z",
+        "expires": "2026-11-15T04:26:11Z",
+        "ttl_seconds": 2592000,
+        "direction": "bearish",
+        "magnitude": 0.55,
+        "drivers": [],
+        "overrides": [],
+        "conclusion": "SWFL seller stress is elevated at 62/100 (bearish threshold: ≥65). 52 of 55 ZIPs scored vs 2019–2021 baseline. Highest-stress ZIPs: 33924 (100), 33957 (83), 33921 (76). Leading signal: 17.2% median delistings rate.",
+        "key_metrics": [
+          {
+            "metric": "seller_stress_score_swfl",
+            "value": 61.8,
+            "direction": "rising",
+            "label": "SWFL median seller stress score (0-100) at 2026-07-01 — 52 ZIPs scored vs 2019–2021 baseline",
+            "variable_type": "intensive",
+            "units": "score (0-100)",
+            "display_format": "raw",
+            "source": {
+              "url": "https://www.redfin.com/news/data-center/",
+              "fetched_at": "2026-10-16T04:26:06Z",
+              "tier": 3,
+              "citation": "Redfin Data Center — price_drops, contract_cancellations, delistings_relistings ZIP-level monthly rolling-3-month data for SWFL MSAs."
+            },
+            "suggestions": [
+              "What's driving seller stress score swfl?",
+              "How does seller stress score swfl here compare to other SWFL areas?"
+            ]
+          },
+          {
+            "metric": "seller_stress_delistings_rate_swfl",
+            "value": 17.244999999999997,
+            "direction": "rising",
+            "label": "SWFL median delistings rate (share of listings pulled off market without selling) — leading indicator",
+            "variable_type": "intensive",
+            "units": "%",
+            "display_format": "percent",
+            "source": {
+              "url": "https://www.redfin.com/news/data-center/",
+              "fetched_at": "2026-10-16T04:26:06Z",
+              "tier": 3,
+              "citation": "Redfin Data Center — price_drops, contract_cancellations, delistings_relistings ZIP-level monthly rolling-3-month data for SWFL MSAs."
+            },
+            "suggestions": [
+              "What's driving seller stress delistings rate swfl?",
+              "How does seller stress delistings rate swfl here compare to other SWFL areas?"
+            ]
+          },
+          {
+            "metric": "seller_stress_price_drops_rate_swfl",
+            "value": 35.38,
+            "direction": "stable",
+            "label": "SWFL median share of active listings with a price reduction — coincident indicator",
+            "variable_type": "intensive",
+            "units": "%",
+            "display_format": "percent",
+            "source": {
+              "url": "https://www.redfin.com/news/data-center/",
+              "fetched_at": "2026-10-16T04:26:06Z",
+              "tier": 3,
+              "citation": "Redfin Data Center — price_drops, contract_cancellations, delistings_relistings ZIP-level monthly rolling-3-month data for SWFL MSAs."
+            },
+            "suggestions": [
+              "What's driving seller stress price drops rate swfl?",
+              "How does seller stress price drops rate swfl here compare to other SWFL areas?"
+            ]
+          },
+          {
+            "metric": "seller_stress_cancellation_rate_swfl",
+            "value": 15.08,
+            "direction": "rising",
+            "label": "SWFL median contract cancellation rate (% of pending sales cancelled) — lagging ~30-60 days",
+            "variable_type": "intensive",
+            "units": "%",
+            "display_format": "percent",
+            "source": {
+              "url": "https://www.redfin.com/news/data-center/",
+              "fetched_at": "2026-10-16T04:26:06Z",
+              "tier": 3,
+              "citation": "Redfin Data Center — price_drops, contract_cancellations, delistings_relistings ZIP-level monthly rolling-3-month data for SWFL MSAs."
+            },
+            "suggestions": [
+              "What's driving seller stress cancellation rate swfl?",
+              "How does seller stress cancellation rate swfl here compare to other SWFL areas?"
+            ]
+          },
+          {
+            "metric": "seller_stress_avg_drop_depth_swfl",
+            "value": 4.279999999999999,
+            "direction": "rising",
+            "label": "SWFL median average price reduction size among listings that received a cut — lagging indicator",
+            "variable_type": "intensive",
+            "units": "%",
+            "display_format": "percent",
+            "source": {
+              "url": "https://www.redfin.com/news/data-center/",
+              "fetched_at": "2026-10-16T04:26:06Z",
+              "tier": 3,
+              "citation": "Redfin Data Center — price_drops, contract_cancellations, delistings_relistings ZIP-level monthly rolling-3-month data for SWFL MSAs."
+            },
+            "suggestions": [
+              "What's driving seller stress avg drop depth swfl?",
+              "How does seller stress avg drop depth swfl here compare to other SWFL areas?"
+            ]
+          }
+        ],
+        "detail_tables": [
+          {
+            "id": "seller_stress_by_zip",
+            "title": "SWFL seller stress by ZIP — 2026-07-01 (vs 2019–2021 baseline)",
+            "grain": "zip",
+            "columns": [
+              {
+                "id": "seller_stress_score",
+                "label": "Stress Score (0-100)",
+                "display_format": "raw",
+                "units": "score"
+              },
+              {
+                "id": "share_delisted_pct",
+                "label": "Delistings Rate",
+                "display_format": "percent",
+                "units": "%"
+              },
+              {
+                "id": "pct_active_with_drops",
+                "label": "Price Drop Rate",
+                "display_format": "percent",
+                "units": "%"
+              },
+              {
+                "id": "cancellation_rate_pct",
+                "label": "Cancellation Rate",
+                "display_format": "percent",
+                "units": "%"
+              },
+              {
+                "id": "avg_price_drop_pct",
+                "label": "Avg Drop Depth",
+                "display_format": "percent",
+                "units": "%"
+              },
+              {
+                "id": "share_relisted_pct",
+                "label": "Relisting Rate",
+                "display_format": "percent",
+                "units": "%"
+              },
+              {
+                "id": "periods_scored",
+                "label": "Periods Scored",
+                "display_format": "count",
+                "units": "months"
+              },
+              {
+                "id": "baseline_suppressed",
+                "label": "Baseline Suppressed"
+              }
+            ],
+            "rows": [
+              {
+                "key": "33924",
+                "label": "33924",
+                "cells": {
+                  "seller_stress_score": 100,
+                  "share_delisted_pct": 30.35,
+                  "pct_active_with_drops": 35,
+                  "cancellation_rate_pct": 48.42,
+                  "avg_price_drop_pct": 5.77,
+                  "share_relisted_pct": 9.13,
+                  "periods_scored": 12,
+                  "baseline_suppressed": false
+                }
+              },
+              {
+                "key": "33957",
+                "label": "33957",
+                "cells": {
+                  "seller_stress_score": 83.4,
+                  "share_delisted_pct": 35.59,
+                  "pct_active_with_drops": 18.74,
+                  "cancellation_rate_pct": 13.41,
+                  "avg_price_drop_pct": 7.36,
+                  "share_relisted_pct": 6.59,
+                  "periods_scored": 12,
+                  "baseline_suppressed": false
+                }
+              },
+              {
+                "key": "33921",
+                "label": "33921",
+                "cells": {
+                  "seller_stress_score": 76.2,
+                  "share_delisted_pct": 61.85,
+                  "pct_active_with_drops": 9.65,
+                  "cancellation_rate_pct": 0,
+                  "avg_price_drop_pct": 9.19,
+                  "share_relisted_pct": 4.83,
+                  "periods_scored": 12,
+                  "baseline_suppressed": false
+                }
+              },
+              {
+                "key": "33973",
+                "label": "33973",
+                "cells": {
+                  "seller_stress_score": 72.3,
+                  "share_delisted_pct": 17.81,
+                  "pct_active_with_drops": 40.08,
+                  "cancellation_rate_pct": 17.49,
+                  "avg_price_drop_pct": 4.37,
+                  "share_relisted_pct": 5.54,
+                  "periods_scored": 12,
+                  "baseline_suppressed": false
+                }
+              },
+              {
+                "key": "34114",
+                "label": "34114",
+                "cells": {
+                  "seller_stress_score": 71.6,
+                  "share_delisted_pct": 13.97,
+                  "pct_active_with_drops": 30.32,
+                  "cancellation_rate_pct": 12.51,
+                  "avg_price_drop_pct": 4.77,
+                  "share_relisted_pct": 7.45,
+                  "periods_scored": 12,
+                  "baseline_suppressed": false
+                }
+              },
+              {
+                "key": "33901",
+                "label": "33901",
+                "cells": {
+                  "seller_stress_score": 71.3,
+                  "share_delisted_pct": 22.65,
+                  "pct_active_with_drops": 35.58,
+                  "cancellation_rate_pct": 24.9,
+                  "avg_price_drop_pct": 4.85,
+                  "share_relisted_pct": 8.6,
+                  "periods_scored": 12,
+                  "baseline_suppressed": false
+                }
+              },
+              {
+                "key": "33971",
+                "label": "33971",
+                "cells": {
+                  "seller_stress_score": 70.3,
+                  "share_delisted_pct": 18.18,
+                  "pct_active_with_drops": 44.17,
+                  "cancellation_rate_pct": 22.51,
+                  "avg_price_drop_pct": 3.26,
+                  "share_relisted_pct": 5.04,
+                  "periods_scored": 12,
+                  "baseline_suppressed": false
+                }
+              },
+              {
+                "key": "33976",
+                "label": "33976",
+                "cells": {
+                  "seller_stress_score": 69.2,
+                  "share_delisted_pct": 14.92,
+                  "pct_active_with_drops": 45.3,
+                  "cancellation_rate_pct": 20.97,
+                  "avg_price_drop_pct": 3.29,
+                  "share_relisted_pct": 4.85,
+                  "periods_scored": 12,
+                  "baseline_suppressed": false
+                }
+              },
+              {
+                "key": "33912",
+                "label": "33912",
+                "cells": {
+                  "seller_stress_score": 68.3,
+                  "share_delisted_pct": 17.59,
+                  "pct_active_with_drops": 31.14,
+                  "cancellation_rate_pct": 20.33,
+                  "avg_price_drop_pct": 4.27,
+                  "share_relisted_pct": 7.09,
+                  "periods_scored": 12,
+                  "baseline_suppressed": false
+                }
+              },
+              {
+                "key": "34120",
+                "label": "34120",
+                "cells": {
+                  "seller_stress_score": 67.7,
+                  "share_delisted_pct": 17.13,
+                  "pct_active_with_drops": 32.28,
+                  "cancellation_rate_pct": 11.04,
+                  "avg_price_drop_pct": 3.67,
+                  "share_relisted_pct": 8.84,
+                  "periods_scored": 12,
+                  "baseline_suppressed": false
+                }
+              },
+              {
+                "key": "34140",
+                "label": "34140",
+                "cells": {
+                  "seller_stress_score": 67.2,
+                  "share_delisted_pct": 31.31,
+                  "pct_active_with_drops": 65.95,
+                  "cancellation_rate_pct": 32.28,
+                  "avg_price_drop_pct": 6.99,
+                  "share_relisted_pct": null,
+                  "periods_scored": 12,
+                  "baseline_suppressed": false
+                }
+              },
+              {
+                "key": "34102",
+                "label": "34102",
+                "cells": {
+                  "seller_stress_score": 67,
+                  "share_delisted_pct": 28.66,
+                  "pct_active_with_drops": 21.81,
+                  "cancellation_rate_pct": 13.49,
+                  "avg_price_drop_pct": 5.58,
+                  "share_relisted_pct": 9.25,
+                  "periods_scored": 12,
+                  "baseline_suppressed": false
+                }
+              },
+              {
+                "key": "33931",
+                "label": "33931",
+                "cells": {
+                  "seller_stress_score": 66.2,
+                  "share_delisted_pct": 28,
+                  "pct_active_with_drops": 28.84,
+                  "cancellation_rate_pct": 16.74,
+                  "avg_price_drop_pct": 5.45,
+                  "share_relisted_pct": 9.4,
+                  "periods_scored": 12,
+                  "baseline_suppressed": false
+                }
+              },
+              {
+                "key": "33908",
+                "label": "33908",
+                "cells": {
+                  "seller_stress_score": 65.9,
+                  "share_delisted_pct": 21.47,
+                  "pct_active_with_drops": 35.49,
+                  "cancellation_rate_pct": 17.21,
+                  "avg_price_drop_pct": 4.41,
+                  "share_relisted_pct": 8.12,
+                  "periods_scored": 12,
+                  "baseline_suppressed": false
+                }
+              },
+              {
+                "key": "33922",
+                "label": "33922",
+                "cells": {
+                  "seller_stress_score": 65.3,
+                  "share_delisted_pct": 24.54,
+                  "pct_active_with_drops": 38.32,
+                  "cancellation_rate_pct": 25.83,
+                  "avg_price_drop_pct": 4.1,
+                  "share_relisted_pct": 7.13,
+                  "periods_scored": 12,
+                  "baseline_suppressed": false
+                }
+              },
+              {
+                "key": "33907",
+                "label": "33907",
+                "cells": {
+                  "seller_stress_score": 65.1,
+                  "share_delisted_pct": 19.1,
+                  "pct_active_with_drops": 35.88,
+                  "cancellation_rate_pct": 12.77,
+                  "avg_price_drop_pct": 5.77,
+                  "share_relisted_pct": 6.37,
+                  "periods_scored": 12,
+                  "baseline_suppressed": false
+                }
+              },
+              {
+                "key": "33919",
+                "label": "33919",
+                "cells": {
+                  "seller_stress_score": 64.6,
+                  "share_delisted_pct": 17.72,
+                  "pct_active_with_drops": 35.69,
+                  "cancellation_rate_pct": 15.08,
+                  "avg_price_drop_pct": 5.16,
+                  "share_relisted_pct": 8.88,
+                  "periods_scored": 12,
+                  "baseline_suppressed": false
+                }
+              },
+              {
+                "key": "34145",
+                "label": "34145",
+                "cells": {
+                  "seller_stress_score": 64.1,
+                  "share_delisted_pct": 13.14,
+                  "pct_active_with_drops": 28.78,
+                  "cancellation_rate_pct": 14.04,
+                  "avg_price_drop_pct": 5.07,
+                  "share_relisted_pct": 6.53,
+                  "periods_scored": 12,
+                  "baseline_suppressed": false
+                }
+              },
+              {
+                "key": "34142",
+                "label": "34142",
+                "cells": {
+                  "seller_stress_score": 63.4,
+                  "share_delisted_pct": 16.53,
+                  "pct_active_with_drops": 36.93,
+                  "cancellation_rate_pct": 13.84,
+                  "avg_price_drop_pct": 4.25,
+                  "share_relisted_pct": 7.12,
+                  "periods_scored": 12,
+                  "baseline_suppressed": false
+                }
+              },
+              {
+                "key": "33904",
+                "label": "33904",
+                "cells": {
+                  "seller_stress_score": 63.2,
+                  "share_delisted_pct": 18.2,
+                  "pct_active_with_drops": 35.27,
+                  "cancellation_rate_pct": 21.4,
+                  "avg_price_drop_pct": 4.46,
+                  "share_relisted_pct": 9.07,
+                  "periods_scored": 12,
+                  "baseline_suppressed": false
+                }
+              },
+              {
+                "key": "33913",
+                "label": "33913",
+                "cells": {
+                  "seller_stress_score": 63.1,
+                  "share_delisted_pct": 17.44,
+                  "pct_active_with_drops": 37.19,
+                  "cancellation_rate_pct": 14.46,
+                  "avg_price_drop_pct": 3.23,
+                  "share_relisted_pct": 8.28,
+                  "periods_scored": 12,
+                  "baseline_suppressed": false
+                }
+              },
+              {
+                "key": "34110",
+                "label": "34110",
+                "cells": {
+                  "seller_stress_score": 62.9,
+                  "share_delisted_pct": 20.9,
+                  "pct_active_with_drops": 27.99,
+                  "cancellation_rate_pct": 14.49,
+                  "avg_price_drop_pct": 5.26,
+                  "share_relisted_pct": 8.55,
+                  "periods_scored": 12,
+                  "baseline_suppressed": false
+                }
+              },
+              {
+                "key": "33903",
+                "label": "33903",
+                "cells": {
+                  "seller_stress_score": 62.8,
+                  "share_delisted_pct": 16.11,
+                  "pct_active_with_drops": 43.32,
+                  "cancellation_rate_pct": 18.22,
+                  "avg_price_drop_pct": 4.97,
+                  "share_relisted_pct": 10.47,
+                  "periods_scored": 12,
+                  "baseline_suppressed": false
+                }
+              },
+              {
+                "key": "33916",
+                "label": "33916",
+                "cells": {
+                  "seller_stress_score": 62.6,
+                  "share_delisted_pct": 15.28,
+                  "pct_active_with_drops": 38.08,
+                  "cancellation_rate_pct": 22.23,
+                  "avg_price_drop_pct": 4.71,
+                  "share_relisted_pct": 10.99,
+                  "periods_scored": 12,
+                  "baseline_suppressed": false
+                }
+              },
+              {
+                "key": "33905",
+                "label": "33905",
+                "cells": {
+                  "seller_stress_score": 62.2,
+                  "share_delisted_pct": 16.85,
+                  "pct_active_with_drops": 37.19,
+                  "cancellation_rate_pct": 17.76,
+                  "avg_price_drop_pct": 3.89,
+                  "share_relisted_pct": 8.5,
+                  "periods_scored": 12,
+                  "baseline_suppressed": false
+                }
+              },
+              {
+                "key": "34117",
+                "label": "34117",
+                "cells": {
+                  "seller_stress_score": 61.9,
+                  "share_delisted_pct": 13.83,
+                  "pct_active_with_drops": 37.16,
+                  "cancellation_rate_pct": 19.67,
+                  "avg_price_drop_pct": 4.95,
+                  "share_relisted_pct": 6.03,
+                  "periods_scored": 12,
+                  "baseline_suppressed": false
+                }
+              },
+              {
+                "key": "33993",
+                "label": "33993",
+                "cells": {
+                  "seller_stress_score": 61.7,
+                  "share_delisted_pct": 16.44,
+                  "pct_active_with_drops": 42.04,
+                  "cancellation_rate_pct": 19.86,
+                  "avg_price_drop_pct": 3.43,
+                  "share_relisted_pct": 5.74,
+                  "periods_scored": 12,
+                  "baseline_suppressed": false
+                }
+              },
+              {
+                "key": "33914",
+                "label": "33914",
+                "cells": {
+                  "seller_stress_score": 60,
+                  "share_delisted_pct": 15.79,
+                  "pct_active_with_drops": 38.7,
+                  "cancellation_rate_pct": 18.52,
+                  "avg_price_drop_pct": 3.83,
+                  "share_relisted_pct": 8.21,
+                  "periods_scored": 12,
+                  "baseline_suppressed": false
+                }
+              },
+              {
+                "key": "33917",
+                "label": "33917",
+                "cells": {
+                  "seller_stress_score": 59.7,
+                  "share_delisted_pct": 17.15,
+                  "pct_active_with_drops": 36.13,
+                  "cancellation_rate_pct": 17.72,
+                  "avg_price_drop_pct": 4.55,
+                  "share_relisted_pct": 5.67,
+                  "periods_scored": 12,
+                  "baseline_suppressed": false
+                }
+              },
+              {
+                "key": "33956",
+                "label": "33956",
+                "cells": {
+                  "seller_stress_score": 59.3,
+                  "share_delisted_pct": 23.96,
+                  "pct_active_with_drops": 33.31,
+                  "cancellation_rate_pct": 24.99,
+                  "avg_price_drop_pct": 4.02,
+                  "share_relisted_pct": 7.07,
+                  "periods_scored": 12,
+                  "baseline_suppressed": false
+                }
+              },
+              {
+                "key": "34103",
+                "label": "34103",
+                "cells": {
+                  "seller_stress_score": 58.9,
+                  "share_delisted_pct": 24.58,
+                  "pct_active_with_drops": 18.71,
+                  "cancellation_rate_pct": 12.68,
+                  "avg_price_drop_pct": 4.57,
+                  "share_relisted_pct": 11.79,
+                  "periods_scored": 12,
+                  "baseline_suppressed": false
+                }
+              },
+              {
+                "key": "34134",
+                "label": "34134",
+                "cells": {
+                  "seller_stress_score": 57.5,
+                  "share_delisted_pct": 26.51,
+                  "pct_active_with_drops": 23.14,
+                  "cancellation_rate_pct": 9.54,
+                  "avg_price_drop_pct": 4.99,
+                  "share_relisted_pct": 14.96,
+                  "periods_scored": 12,
+                  "baseline_suppressed": false
+                }
+              },
+              {
+                "key": "33991",
+                "label": "33991",
+                "cells": {
+                  "seller_stress_score": 56.3,
+                  "share_delisted_pct": 11.67,
+                  "pct_active_with_drops": 40.53,
+                  "cancellation_rate_pct": 18.81,
+                  "avg_price_drop_pct": 3.61,
+                  "share_relisted_pct": 7.3,
+                  "periods_scored": 12,
+                  "baseline_suppressed": false
+                }
+              },
+              {
+                "key": "34113",
+                "label": "34113",
+                "cells": {
+                  "seller_stress_score": 56.3,
+                  "share_delisted_pct": 18.5,
+                  "pct_active_with_drops": 28.37,
+                  "cancellation_rate_pct": 10.76,
+                  "avg_price_drop_pct": 4.51,
+                  "share_relisted_pct": 10.21,
+                  "periods_scored": 12,
+                  "baseline_suppressed": false
+                }
+              },
+              {
+                "key": "33990",
+                "label": "33990",
+                "cells": {
+                  "seller_stress_score": 56,
+                  "share_delisted_pct": 16.76,
+                  "pct_active_with_drops": 38.69,
+                  "cancellation_rate_pct": 16.87,
+                  "avg_price_drop_pct": 3.66,
+                  "share_relisted_pct": 5.97,
+                  "periods_scored": 12,
+                  "baseline_suppressed": false
+                }
+              },
+              {
+                "key": "33936",
+                "label": "33936",
+                "cells": {
+                  "seller_stress_score": 55.2,
+                  "share_delisted_pct": 17.73,
+                  "pct_active_with_drops": 42.19,
+                  "cancellation_rate_pct": 18.25,
+                  "avg_price_drop_pct": 4.29,
+                  "share_relisted_pct": 5.33,
+                  "periods_scored": 12,
+                  "baseline_suppressed": false
+                }
+              },
+              {
+                "key": "34108",
+                "label": "34108",
+                "cells": {
+                  "seller_stress_score": 54.2,
+                  "share_delisted_pct": 24.52,
+                  "pct_active_with_drops": 18.82,
+                  "cancellation_rate_pct": 9.76,
+                  "avg_price_drop_pct": 5.38,
+                  "share_relisted_pct": 8.54,
+                  "periods_scored": 12,
+                  "baseline_suppressed": false
+                }
+              },
+              {
+                "key": "33909",
+                "label": "33909",
+                "cells": {
+                  "seller_stress_score": 53.8,
+                  "share_delisted_pct": 13.3,
+                  "pct_active_with_drops": 44.13,
+                  "cancellation_rate_pct": 17.9,
+                  "avg_price_drop_pct": 3.4,
+                  "share_relisted_pct": 5.83,
+                  "periods_scored": 12,
+                  "baseline_suppressed": false
+                }
+              },
+              {
+                "key": "34104",
+                "label": "34104",
+                "cells": {
+                  "seller_stress_score": 53.2,
+                  "share_delisted_pct": 14.95,
+                  "pct_active_with_drops": 31.79,
+                  "cancellation_rate_pct": 12.52,
+                  "avg_price_drop_pct": 3.83,
+                  "share_relisted_pct": 5.94,
+                  "periods_scored": 12,
+                  "baseline_suppressed": false
+                }
+              },
+              {
+                "key": "33972",
+                "label": "33972",
+                "cells": {
+                  "seller_stress_score": 52.5,
+                  "share_delisted_pct": 15.05,
+                  "pct_active_with_drops": 40.8,
+                  "cancellation_rate_pct": 17.72,
+                  "avg_price_drop_pct": 3.46,
+                  "share_relisted_pct": 6.76,
+                  "periods_scored": 12,
+                  "baseline_suppressed": false
+                }
+              },
+              {
+                "key": "33974",
+                "label": "33974",
+                "cells": {
+                  "seller_stress_score": 51.6,
+                  "share_delisted_pct": 17.56,
+                  "pct_active_with_drops": 37.87,
+                  "cancellation_rate_pct": 19.91,
+                  "avg_price_drop_pct": 3.44,
+                  "share_relisted_pct": 6.84,
+                  "periods_scored": 12,
+                  "baseline_suppressed": false
+                }
+              },
+              {
+                "key": "34116",
+                "label": "34116",
+                "cells": {
+                  "seller_stress_score": 51.1,
+                  "share_delisted_pct": 17.02,
+                  "pct_active_with_drops": 27.24,
+                  "cancellation_rate_pct": 12.63,
+                  "avg_price_drop_pct": 3.49,
+                  "share_relisted_pct": 5.73,
+                  "periods_scored": 12,
+                  "baseline_suppressed": false
+                }
+              },
+              {
+                "key": "34112",
+                "label": "34112",
+                "cells": {
+                  "seller_stress_score": 50.4,
+                  "share_delisted_pct": 16.42,
+                  "pct_active_with_drops": 28.34,
+                  "cancellation_rate_pct": 12.42,
+                  "avg_price_drop_pct": 4.88,
+                  "share_relisted_pct": 8.73,
+                  "periods_scored": 12,
+                  "baseline_suppressed": false
+                }
+              },
+              {
+                "key": "33928",
+                "label": "33928",
+                "cells": {
+                  "seller_stress_score": 48.9,
+                  "share_delisted_pct": 15.36,
+                  "pct_active_with_drops": 32.2,
+                  "cancellation_rate_pct": 10.9,
+                  "avg_price_drop_pct": 3.35,
+                  "share_relisted_pct": 9.51,
+                  "periods_scored": 12,
+                  "baseline_suppressed": false
+                }
+              },
+              {
+                "key": "34109",
+                "label": "34109",
+                "cells": {
+                  "seller_stress_score": 48.1,
+                  "share_delisted_pct": 14.55,
+                  "pct_active_with_drops": 28.49,
+                  "cancellation_rate_pct": 12.38,
+                  "avg_price_drop_pct": 4.19,
+                  "share_relisted_pct": 3.49,
+                  "periods_scored": 12,
+                  "baseline_suppressed": false
+                }
+              },
+              {
+                "key": "33920",
+                "label": "33920",
+                "cells": {
+                  "seller_stress_score": 47.2,
+                  "share_delisted_pct": 14.49,
+                  "pct_active_with_drops": 36.03,
+                  "cancellation_rate_pct": 12.11,
+                  "avg_price_drop_pct": 4.78,
+                  "share_relisted_pct": 7.33,
+                  "periods_scored": 12,
+                  "baseline_suppressed": false
+                }
+              },
+              {
+                "key": "33966",
+                "label": "33966",
+                "cells": {
+                  "seller_stress_score": 45.4,
+                  "share_delisted_pct": 14.19,
+                  "pct_active_with_drops": 31.94,
+                  "cancellation_rate_pct": 8.92,
+                  "avg_price_drop_pct": 4.17,
+                  "share_relisted_pct": 7.73,
+                  "periods_scored": 12,
+                  "baseline_suppressed": false
+                }
+              },
+              {
+                "key": "33967",
+                "label": "33967",
+                "cells": {
+                  "seller_stress_score": 44.4,
+                  "share_delisted_pct": 13.69,
+                  "pct_active_with_drops": 33.64,
+                  "cancellation_rate_pct": 12.11,
+                  "avg_price_drop_pct": 3.67,
+                  "share_relisted_pct": 7.21,
+                  "periods_scored": 12,
+                  "baseline_suppressed": false
+                }
+              },
+              {
+                "key": "34135",
+                "label": "34135",
+                "cells": {
+                  "seller_stress_score": 43.4,
+                  "share_delisted_pct": 15.45,
+                  "pct_active_with_drops": 29.19,
+                  "cancellation_rate_pct": 8.6,
+                  "avg_price_drop_pct": 3.84,
+                  "share_relisted_pct": 9.96,
+                  "periods_scored": 12,
+                  "baseline_suppressed": false
+                }
+              },
+              {
+                "key": "34119",
+                "label": "34119",
+                "cells": {
+                  "seller_stress_score": 43,
+                  "share_delisted_pct": 17.34,
+                  "pct_active_with_drops": 30.2,
+                  "cancellation_rate_pct": 8.18,
+                  "avg_price_drop_pct": 3.68,
+                  "share_relisted_pct": 6.33,
+                  "periods_scored": 12,
+                  "baseline_suppressed": false
+                }
+              },
+              {
+                "key": "34105",
+                "label": "34105",
+                "cells": {
+                  "seller_stress_score": 39.7,
+                  "share_delisted_pct": 14.89,
+                  "pct_active_with_drops": 25.74,
+                  "cancellation_rate_pct": 9.97,
+                  "avg_price_drop_pct": 4.23,
+                  "share_relisted_pct": 4.42,
+                  "periods_scored": 12,
+                  "baseline_suppressed": false
+                }
+              },
+              {
+                "key": "34139",
+                "label": "34139",
+                "cells": {
+                  "seller_stress_score": 38.8,
+                  "share_delisted_pct": 37.57,
+                  "pct_active_with_drops": 39.57,
+                  "cancellation_rate_pct": null,
+                  "avg_price_drop_pct": 3.29,
+                  "share_relisted_pct": null,
+                  "periods_scored": 12,
+                  "baseline_suppressed": false
+                }
+              },
+              {
+                "key": "34101",
+                "label": "34101",
+                "cells": {
+                  "seller_stress_score": null,
+                  "share_delisted_pct": null,
+                  "pct_active_with_drops": null,
+                  "cancellation_rate_pct": null,
+                  "avg_price_drop_pct": null,
+                  "share_relisted_pct": null,
+                  "periods_scored": 0,
+                  "baseline_suppressed": true
+                }
+              },
+              {
+                "key": "34138",
+                "label": "34138",
+                "cells": {
+                  "seller_stress_score": null,
+                  "share_delisted_pct": null,
+                  "pct_active_with_drops": null,
+                  "cancellation_rate_pct": null,
+                  "avg_price_drop_pct": null,
+                  "share_relisted_pct": null,
+                  "periods_scored": 12,
+                  "baseline_suppressed": true
+                }
+              },
+              {
+                "key": "34141",
+                "label": "34141",
+                "cells": {
+                  "seller_stress_score": null,
+                  "share_delisted_pct": null,
+                  "pct_active_with_drops": null,
+                  "cancellation_rate_pct": null,
+                  "avg_price_drop_pct": null,
+                  "share_relisted_pct": null,
+                  "periods_scored": 7,
+                  "baseline_suppressed": true
+                }
+              }
+            ],
+            "source": {
+              "url": "https://www.redfin.com/news/data-center/",
+              "fetched_at": "2026-10-16T04:26:06Z",
+              "tier": 3,
+              "citation": "Redfin Data Center — price_drops, contract_cancellations, delistings_relistings ZIP-level monthly rolling-3-month data for SWFL MSAs."
+            }
+          }
+        ],
+        "caveats": [
+          "~50% of SWFL transactions are all-cash (Lee County, Attom 2024) — rate-sensitive national thresholds do not apply; this score is calibrated to SWFL's own 2019–2021 baseline.",
+          "Hurricane Ian (Sept 2022) produced a natural spike; scores from Oct 2022–Mar 2023 reflect forced delistings, not organic seller stress — treat as a labeled distress event, not a trend.",
+          "Condo segment is not separated in this score; SB 4-D special assessment delistings inflate stress in condo-heavy ZIPs (e.g., Marco Island corridor). See `condo-sirs-swfl` for the condo-specific read.",
+          "3 ZIPs suppressed (insufficient baseline data in 2019–2021 or no recent observations)."
+        ],
+        "contradicts": [],
+        "confidence": 0.6,
+        "joint_integrity": 1,
+        "confidence_dispersion": 0,
+        "chain_depth": 0,
+        "trust_tier": 3,
+        "upstream_count": 0,
+        "relevance": {
+          "decay_curve": "weeks",
+          "half_life_hours": 720,
+          "computed_at": "2026-10-16T04:26:11Z"
+        },
+        "exogenous_signals": []
+      }
     },
     {
       "packId": "market-heat-swfl",
@@ -409,737 +3020,8 @@
     },
     {
       "packId": "active-listings-swfl",
-      "status": "built",
-      "version": 43,
-      "written": true,
-      "brainOutput": {
-        "brain_id": "active-listings-swfl",
-        "version": 43,
-        "refined_at": "2026-10-15T09:16:34Z",
-        "expires": "2026-10-17T09:16:34Z",
-        "ttl_seconds": 172800,
-        "direction": "neutral",
-        "magnitude": 0,
-        "drivers": [],
-        "overrides": [],
-        "conclusion": "22,650 active SWFL residential listings, median asking $412,000, avg 203 days on market (active residential listings, as of 2026-08-14). By county: Lee 16,394 (median $369,900), Collier 6,256 (median $649,900), Lee 1 (median $314,900).",
-        "key_metrics": [
-          {
-            "metric": "active_listings_count_swfl",
-            "label": "SWFL active residential listings (count)",
-            "value": 22650,
-            "direction": "stable",
-            "variable_type": "extensive",
-            "units": "listings",
-            "display_format": "count",
-            "source": {
-              "url": "https://www.swfldatagulf.com/r/source/listing_active_stats?label=SWFL+active+for-sale+listings+%28aggregated%29&source=realtor.com+for-sale+listings&brain=active-listings-swfl&date_col=scraped_at",
-              "fetched_at": "2026-10-15T09:16:34Z",
-              "tier": 2,
-              "citation": "22,650 active SWFL residential listings as of 2026-08-14"
-            },
-            "suggestions": [
-              "What's driving active listings count swfl?",
-              "How does active listings count swfl here compare to other SWFL areas?"
-            ]
-          },
-          {
-            "metric": "median_list_price_swfl",
-            "label": "SWFL median asking price (active residential)",
-            "value": 412000,
-            "direction": "stable",
-            "variable_type": "intensive",
-            "units": "USD",
-            "display_format": "currency",
-            "source": {
-              "url": "https://www.swfldatagulf.com/r/source/listing_active_stats?label=SWFL+active+for-sale+listings+%28aggregated%29&source=realtor.com+for-sale+listings&brain=active-listings-swfl&date_col=scraped_at",
-              "fetched_at": "2026-10-15T09:16:34Z",
-              "tier": 2,
-              "citation": "median asking price across 22,650 active SWFL listings: $412,000"
-            },
-            "suggestions": [
-              "What's driving median list price swfl?",
-              "How does median list price swfl here compare to other SWFL areas?"
-            ]
-          },
-          {
-            "metric": "recent_price_cuts_count_swfl",
-            "label": "SWFL listings with a price cut in the last 90 days",
-            "value": 1720,
-            "direction": "stable",
-            "variable_type": "extensive",
-            "units": "listings",
-            "display_format": "count",
-            "source": {
-              "url": "https://www.swfldatagulf.com/r/source/listing_active_stats?label=SWFL+active+for-sale+listings+%28aggregated%29&source=realtor.com+for-sale+listings&brain=active-listings-swfl&date_col=scraped_at",
-              "fetched_at": "2026-10-15T09:16:34Z",
-              "tier": 2,
-              "citation": "1,720 SWFL listings took at least one price cut in the trailing 90 days, median cut $10,000"
-            },
-            "suggestions": [
-              "What's driving recent price cuts count swfl?",
-              "How does recent price cuts count swfl here compare to other SWFL areas?"
-            ]
-          },
-          {
-            "metric": "median_annual_tax_swfl",
-            "label": "SWFL median vendor-reported annual property tax",
-            "value": 4008,
-            "direction": "stable",
-            "variable_type": "intensive",
-            "units": "USD",
-            "display_format": "currency",
-            "source": {
-              "url": "https://www.swfldatagulf.com/r/source/listing_active_stats?label=SWFL+active+for-sale+listings+%28aggregated%29&source=realtor.com+for-sale+listings&brain=active-listings-swfl&date_col=scraped_at",
-              "fetched_at": "2026-10-15T09:16:34Z",
-              "tier": 2,
-              "citation": "Median vendor-reported annual property tax across 16,514 SWFL properties with tax history: $4,008"
-            },
-            "suggestions": [
-              "What's driving median annual tax swfl?",
-              "How does median annual tax swfl here compare to other SWFL areas?"
-            ]
-          },
-          {
-            "metric": "avg_days_on_market_swfl",
-            "label": "SWFL average days on market (active residential)",
-            "value": 203,
-            "direction": "stable",
-            "variable_type": "intensive",
-            "units": "days",
-            "display_format": "count",
-            "source": {
-              "url": "https://www.swfldatagulf.com/r/source/listing_active_stats?label=SWFL+active+for-sale+listings+%28aggregated%29&source=realtor.com+for-sale+listings&brain=active-listings-swfl&date_col=scraped_at",
-              "fetched_at": "2026-10-15T09:16:34Z",
-              "tier": 2,
-              "citation": "average days on market across active SWFL listings: 203 days"
-            },
-            "suggestions": [
-              "What's driving avg days on market swfl?",
-              "How does avg days on market swfl here compare to other SWFL areas?"
-            ]
-          }
-        ],
-        "detail_tables": [
-          {
-            "id": "active_listings_by_county",
-            "title": "SWFL active residential listings by county",
-            "grain": "county",
-            "columns": [
-              {
-                "id": "listing_count",
-                "label": "Active listings",
-                "display_format": "count",
-                "units": "listings"
-              },
-              {
-                "id": "median_list_price",
-                "label": "Median asking price",
-                "display_format": "currency",
-                "units": "USD"
-              },
-              {
-                "id": "avg_days_on_market",
-                "label": "Avg days on market",
-                "display_format": "count",
-                "units": "days"
-              }
-            ],
-            "rows": [
-              {
-                "key": "Lee",
-                "label": "Lee",
-                "cells": {
-                  "listing_count": 16394,
-                  "median_list_price": 369900,
-                  "avg_days_on_market": 202
-                }
-              },
-              {
-                "key": "Collier",
-                "label": "Collier",
-                "cells": {
-                  "listing_count": 6256,
-                  "median_list_price": 649900,
-                  "avg_days_on_market": 205
-                }
-              },
-              {
-                "key": "Lee",
-                "label": "Lee",
-                "cells": {
-                  "listing_count": 1,
-                  "median_list_price": 314900,
-                  "avg_days_on_market": null
-                }
-              }
-            ],
-            "source": {
-              "url": "https://www.swfldatagulf.com/r/source/listing_active_stats?label=SWFL+active+for-sale+listings+%28aggregated%29&source=realtor.com+for-sale+listings&brain=active-listings-swfl&date_col=scraped_at",
-              "fetched_at": "2026-10-15T09:16:34Z",
-              "tier": 2,
-              "citation": "Active SWFL residential listings, aggregated per grain in SQL (listing_active_stats) as of 2026-08-14"
-            }
-          },
-          {
-            "id": "active_listings_by_zip",
-            "title": "SWFL active residential listings by ZIP",
-            "grain": "zip",
-            "columns": [
-              {
-                "id": "listing_count",
-                "label": "Active listings",
-                "display_format": "count",
-                "units": "listings"
-              },
-              {
-                "id": "median_list_price",
-                "label": "Median asking price",
-                "display_format": "currency",
-                "units": "USD"
-              },
-              {
-                "id": "avg_days_on_market",
-                "label": "Avg days on market",
-                "display_format": "count",
-                "units": "days"
-              }
-            ],
-            "rows": [
-              {
-                "key": "33993",
-                "label": "33993 (Lee)",
-                "cells": {
-                  "listing_count": 1146,
-                  "median_list_price": 393950,
-                  "avg_days_on_market": 191
-                }
-              },
-              {
-                "key": "33908",
-                "label": "33908 (Lee)",
-                "cells": {
-                  "listing_count": 1008,
-                  "median_list_price": 330000,
-                  "avg_days_on_market": 227
-                }
-              },
-              {
-                "key": "33914",
-                "label": "33914 (Lee)",
-                "cells": {
-                  "listing_count": 867,
-                  "median_list_price": 525000,
-                  "avg_days_on_market": 197
-                }
-              },
-              {
-                "key": "33917",
-                "label": "33917 (Lee)",
-                "cells": {
-                  "listing_count": 833,
-                  "median_list_price": 205900,
-                  "avg_days_on_market": 200
-                }
-              },
-              {
-                "key": "33909",
-                "label": "33909 (Lee)",
-                "cells": {
-                  "listing_count": 794,
-                  "median_list_price": 339900,
-                  "avg_days_on_market": 177
-                }
-              },
-              {
-                "key": "34135",
-                "label": "34135 (Lee)",
-                "cells": {
-                  "listing_count": 771,
-                  "median_list_price": 458560,
-                  "avg_days_on_market": 202
-                }
-              },
-              {
-                "key": "33974",
-                "label": "33974 (Lee)",
-                "cells": {
-                  "listing_count": 735,
-                  "median_list_price": 322000,
-                  "avg_days_on_market": 165
-                }
-              },
-              {
-                "key": "34120",
-                "label": "34120 (Collier)",
-                "cells": {
-                  "listing_count": 704,
-                  "median_list_price": 636500,
-                  "avg_days_on_market": 178
-                }
-              },
-              {
-                "key": "33904",
-                "label": "33904 (Lee)",
-                "cells": {
-                  "listing_count": 665,
-                  "median_list_price": 420000,
-                  "avg_days_on_market": 192
-                }
-              },
-              {
-                "key": "33913",
-                "label": "33913 (Lee)",
-                "cells": {
-                  "listing_count": 626,
-                  "median_list_price": 469000,
-                  "avg_days_on_market": 183
-                }
-              },
-              {
-                "key": "33971",
-                "label": "33971 (Lee)",
-                "cells": {
-                  "listing_count": 624,
-                  "median_list_price": 319900,
-                  "avg_days_on_market": 182
-                }
-              },
-              {
-                "key": "34114",
-                "label": "34114 (Collier)",
-                "cells": {
-                  "listing_count": 610,
-                  "median_list_price": 549000,
-                  "avg_days_on_market": 196
-                }
-              },
-              {
-                "key": "33931",
-                "label": "33931 (Lee)",
-                "cells": {
-                  "listing_count": 596,
-                  "median_list_price": 675000,
-                  "avg_days_on_market": 243
-                }
-              },
-              {
-                "key": "33928",
-                "label": "33928 (Lee)",
-                "cells": {
-                  "listing_count": 595,
-                  "median_list_price": 539000,
-                  "avg_days_on_market": 180
-                }
-              },
-              {
-                "key": "33903",
-                "label": "33903 (Lee)",
-                "cells": {
-                  "listing_count": 563,
-                  "median_list_price": 148000,
-                  "avg_days_on_market": 219
-                }
-              },
-              {
-                "key": "34112",
-                "label": "34112 (Collier)",
-                "cells": {
-                  "listing_count": 558,
-                  "median_list_price": 339999,
-                  "avg_days_on_market": 205
-                }
-              },
-              {
-                "key": "33919",
-                "label": "33919 (Lee)",
-                "cells": {
-                  "listing_count": 533,
-                  "median_list_price": 249000,
-                  "avg_days_on_market": 201
-                }
-              },
-              {
-                "key": "33905",
-                "label": "33905 (Lee)",
-                "cells": {
-                  "listing_count": 519,
-                  "median_list_price": 354000,
-                  "avg_days_on_market": 189
-                }
-              },
-              {
-                "key": "34145",
-                "label": "34145 (Collier)",
-                "cells": {
-                  "listing_count": 493,
-                  "median_list_price": 949000,
-                  "avg_days_on_market": 202
-                }
-              },
-              {
-                "key": "33991",
-                "label": "33991 (Lee)",
-                "cells": {
-                  "listing_count": 477,
-                  "median_list_price": 450000,
-                  "avg_days_on_market": 188
-                }
-              },
-              {
-                "key": "33972",
-                "label": "33972 (Lee)",
-                "cells": {
-                  "listing_count": 466,
-                  "median_list_price": 355000,
-                  "avg_days_on_market": 174
-                }
-              },
-              {
-                "key": "33936",
-                "label": "33936 (Lee)",
-                "cells": {
-                  "listing_count": 465,
-                  "median_list_price": 245000,
-                  "avg_days_on_market": 171
-                }
-              },
-              {
-                "key": "33976",
-                "label": "33976 (Lee)",
-                "cells": {
-                  "listing_count": 463,
-                  "median_list_price": 329000,
-                  "avg_days_on_market": 189
-                }
-              },
-              {
-                "key": "34134",
-                "label": "34134 (Lee)",
-                "cells": {
-                  "listing_count": 439,
-                  "median_list_price": 799000,
-                  "avg_days_on_market": 239
-                }
-              },
-              {
-                "key": "34102",
-                "label": "34102 (Collier)",
-                "cells": {
-                  "listing_count": 432,
-                  "median_list_price": 3200000,
-                  "avg_days_on_market": 275
-                }
-              },
-              {
-                "key": "34119",
-                "label": "34119 (Collier)",
-                "cells": {
-                  "listing_count": 424,
-                  "median_list_price": 689000,
-                  "avg_days_on_market": 189
-                }
-              },
-              {
-                "key": "34110",
-                "label": "34110 (Collier)",
-                "cells": {
-                  "listing_count": 410,
-                  "median_list_price": 684900,
-                  "avg_days_on_market": 208
-                }
-              },
-              {
-                "key": "34108",
-                "label": "34108 (Collier)",
-                "cells": {
-                  "listing_count": 406,
-                  "median_list_price": 1299000,
-                  "avg_days_on_market": 220
-                }
-              },
-              {
-                "key": "34113",
-                "label": "34113 (Collier)",
-                "cells": {
-                  "listing_count": 402,
-                  "median_list_price": 522450,
-                  "avg_days_on_market": 208
-                }
-              },
-              {
-                "key": "33957",
-                "label": "33957 (Lee)",
-                "cells": {
-                  "listing_count": 378,
-                  "median_list_price": 954500,
-                  "avg_days_on_market": 284
-                }
-              },
-              {
-                "key": "33990",
-                "label": "33990 (Lee)",
-                "cells": {
-                  "listing_count": 354,
-                  "median_list_price": 399000,
-                  "avg_days_on_market": 177
-                }
-              },
-              {
-                "key": "34103",
-                "label": "34103 (Collier)",
-                "cells": {
-                  "listing_count": 332,
-                  "median_list_price": 1495000,
-                  "avg_days_on_market": 222
-                }
-              },
-              {
-                "key": "34142",
-                "label": "34142 (Collier)",
-                "cells": {
-                  "listing_count": 326,
-                  "median_list_price": 435748,
-                  "avg_days_on_market": 165
-                }
-              },
-              {
-                "key": "33912",
-                "label": "33912 (Lee)",
-                "cells": {
-                  "listing_count": 308,
-                  "median_list_price": 349900,
-                  "avg_days_on_market": 201
-                }
-              },
-              {
-                "key": "33907",
-                "label": "33907 (Lee)",
-                "cells": {
-                  "listing_count": 285,
-                  "median_list_price": 184000,
-                  "avg_days_on_market": 203
-                }
-              },
-              {
-                "key": "34109",
-                "label": "34109 (Collier)",
-                "cells": {
-                  "listing_count": 281,
-                  "median_list_price": 745000,
-                  "avg_days_on_market": 190
-                }
-              },
-              {
-                "key": "34104",
-                "label": "34104 (Collier)",
-                "cells": {
-                  "listing_count": 271,
-                  "median_list_price": 390000,
-                  "avg_days_on_market": 190
-                }
-              },
-              {
-                "key": "33916",
-                "label": "33916 (Lee)",
-                "cells": {
-                  "listing_count": 266,
-                  "median_list_price": 302450,
-                  "avg_days_on_market": 415
-                }
-              },
-              {
-                "key": "33901",
-                "label": "33901 (Lee)",
-                "cells": {
-                  "listing_count": 264,
-                  "median_list_price": 315000,
-                  "avg_days_on_market": 220
-                }
-              },
-              {
-                "key": "33967",
-                "label": "33967 (Lee)",
-                "cells": {
-                  "listing_count": 230,
-                  "median_list_price": 399000,
-                  "avg_days_on_market": 170
-                }
-              },
-              {
-                "key": "33920",
-                "label": "33920 (Lee)",
-                "cells": {
-                  "listing_count": 223,
-                  "median_list_price": 426053,
-                  "avg_days_on_market": 177
-                }
-              },
-              {
-                "key": "33973",
-                "label": "33973 (Lee)",
-                "cells": {
-                  "listing_count": 211,
-                  "median_list_price": 472000,
-                  "avg_days_on_market": 183
-                }
-              },
-              {
-                "key": "34105",
-                "label": "34105 (Collier)",
-                "cells": {
-                  "listing_count": 197,
-                  "median_list_price": 390000,
-                  "avg_days_on_market": 191
-                }
-              },
-              {
-                "key": "33966",
-                "label": "33966 (Lee)",
-                "cells": {
-                  "listing_count": 174,
-                  "median_list_price": 319750,
-                  "avg_days_on_market": 177
-                }
-              },
-              {
-                "key": "34117",
-                "label": "34117 (Collier)",
-                "cells": {
-                  "listing_count": 170,
-                  "median_list_price": 772499,
-                  "avg_days_on_market": 187
-                }
-              },
-              {
-                "key": "33924",
-                "label": "33924 (Lee)",
-                "cells": {
-                  "listing_count": 133,
-                  "median_list_price": 1499000,
-                  "avg_days_on_market": 291
-                }
-              },
-              {
-                "key": "33922",
-                "label": "33922 (Lee)",
-                "cells": {
-                  "listing_count": 118,
-                  "median_list_price": 482450,
-                  "avg_days_on_market": 226
-                }
-              },
-              {
-                "key": "33956",
-                "label": "33956 (Lee)",
-                "cells": {
-                  "listing_count": 105,
-                  "median_list_price": 588500,
-                  "avg_days_on_market": 239
-                }
-              },
-              {
-                "key": "34116",
-                "label": "34116 (Collier)",
-                "cells": {
-                  "listing_count": 91,
-                  "median_list_price": 589000,
-                  "avg_days_on_market": 169
-                }
-              },
-              {
-                "key": "33921",
-                "label": "33921 (Lee)",
-                "cells": {
-                  "listing_count": 44,
-                  "median_list_price": 3985000,
-                  "avg_days_on_market": 284
-                }
-              },
-              {
-                "key": "34138",
-                "label": "34138 (Collier)",
-                "cells": {
-                  "listing_count": 31,
-                  "median_list_price": 185000,
-                  "avg_days_on_market": 466
-                }
-              },
-              {
-                "key": "34139",
-                "label": "34139 (Collier)",
-                "cells": {
-                  "listing_count": 29,
-                  "median_list_price": 349000,
-                  "avg_days_on_market": 288
-                }
-              },
-              {
-                "key": "34140",
-                "label": "34140 (Collier)",
-                "cells": {
-                  "listing_count": 16,
-                  "median_list_price": 525000,
-                  "avg_days_on_market": 352
-                }
-              },
-              {
-                "key": "34137",
-                "label": "34137 (Collier)",
-                "cells": {
-                  "listing_count": 2,
-                  "median_list_price": 290000,
-                  "avg_days_on_market": 158
-                }
-              },
-              {
-                "key": "34141",
-                "label": "34141 (Collier)",
-                "cells": {
-                  "listing_count": 2,
-                  "median_list_price": 269500,
-                  "avg_days_on_market": 176
-                }
-              }
-            ],
-            "source": {
-              "url": "https://www.swfldatagulf.com/r/source/listing_active_stats?label=SWFL+active+for-sale+listings+%28aggregated%29&source=realtor.com+for-sale+listings&brain=active-listings-swfl&date_col=scraped_at",
-              "fetched_at": "2026-10-15T09:16:34Z",
-              "tier": 2,
-              "citation": "Active SWFL residential listings, aggregated per grain in SQL (listing_active_stats) as of 2026-08-14"
-            }
-          }
-        ],
-        "caveats": [
-          "List-side only: asking prices and days-on-market for ACTIVE listings — not sold/closed prices (that is the closed-sale records lane).",
-          "Median asking price spans ALL active listings INCLUDING vacant land/lots — in lot-heavy areas this pulls the median well below typical home prices. Use the property_type field or the per-county/ZIP detail to separate homes from land.",
-          "Daily snapshot — broad SWFL coverage but not comprehensive. Direction is neutral on any one day; the day-over-day diff is what reads the inventory trend.",
-          "Source is realtor.com for-sale listings; a direct licensed MLS/IDX feed can swap into the same table when credentialed.",
-          "Price-cut counts cover only listings we have probed (listed/sold history), not every active listing region-wide — a per-property depth signal, not a full-book statistic.",
-          "Annual property tax is vendor-reported (not a county tax bill) and not yet validated against county appraiser records — treat as directional, not authoritative. Covers only properties we have probed, not the full tax roll."
-        ],
-        "contradicts": [],
-        "confidence": 0.8,
-        "joint_integrity": 1,
-        "confidence_dispersion": 0,
-        "chain_depth": 0,
-        "trust_tier": 2,
-        "upstream_count": 0,
-        "relevance": {
-          "decay_curve": "weeks",
-          "half_life_hours": 720,
-          "computed_at": "2026-10-15T09:16:34Z"
-        },
-        "exogenous_signals": [],
-        "grain_boundary": {
-          "not_available": [
-            "Sold / closed sale prices — active asking prices only, not closed transactions",
-            "Per-listing history or price-cut events — current snapshot only",
-            "Rental listings — sale listings only"
-          ],
-          "finest_grain": "zip-snapshot"
-        }
-      }
+      "status": "skipped-fresh",
+      "written": false
     },
     {
       "packId": "active-rentals-swfl",
