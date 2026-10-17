@@ -8,7 +8,7 @@
 // Modes:
 //   --mode=record-failure   On workflow_run.conclusion === 'failure'
 //   --mode=maybe-resolve    On workflow_run.conclusion === 'success'
-//                           AND workflow_run.event === 'schedule'
+//                           AND workflow_run.event in RESOLVING_EVENTS
 //
 // Flags:
 //   --dry-run               Print intended actions; open no issue, no check, no side effects.
@@ -57,6 +57,22 @@ const checkKey = cronIncidentCheckKey(workflowName);
 function cronIncidentCheckKey(name) {
   return `cron_incident_${name.replace(/[^a-z0-9]+/gi, "_").toLowerCase()}`;
 }
+
+// A success on ANY of these clears the incident. `record-failure` gates on
+// conclusion alone (no event filter), so a DISPATCH failure opens an incident —
+// but the old `=== "schedule"` gate in maybeResolve meant a dispatch success
+// could never close it. That asymmetry is a one-way ratchet, and it manufactured
+// a fake backlog: issue #191 (lee-planned-developments-quarterly) was fixed and
+// re-dispatched green as run 33286722483 five minutes after the failure, and
+// stayed open anyway because the next SCHEDULED run is a quarter away. #111
+// (daily-rebuild) is the same shape — four dispatch successes since the 07-12
+// failure, never resolved. Declared HERE, above the dispatch below, not beside
+// maybeResolve: that call runs at module top level and a `const` further down
+// the file is still in its temporal dead zone when it fires.
+// Keep in sync with the `maybe_auto_resolve` job filter in
+// .github/workflows/log-cron-incident.yml — log-cron-incident-gate-drift.test.mjs
+// fails the build if the two disagree.
+const RESOLVING_EVENTS = new Set(["schedule", "push", "workflow_dispatch"]);
 
 if (mode === "record-failure") recordFailure();
 else maybeResolve();
@@ -128,7 +144,8 @@ function recordFailure() {
 
 function maybeResolve() {
   if (conclusion !== "success") return log(`skip: conclusion is ${conclusion}`);
-  if (triggerEvent !== "schedule") return log(`skip: trigger is ${triggerEvent}, not schedule`);
+  if (!RESOLVING_EVENTS.has(triggerEvent))
+    return log(`skip: trigger is ${triggerEvent}, not one of ${[...RESOLVING_EVENTS].join("/")}`);
 
   if (dryRun) {
     log(`DRY-RUN: would close check ${checkKey}`);
@@ -140,7 +157,7 @@ function maybeResolve() {
   closeIncidentCheck();
   if (issueNumber)
     postComment(
-      `✅ **${workflowName}** auto-resolved — ${today}\n\nNext scheduled run succeeded: ${runUrl}`,
+      `✅ **${workflowName}** auto-resolved — ${today}\n\nA later run succeeded (\`${triggerEvent}\`): ${runUrl}`,
     );
   closeIncidentIssue();
 }
@@ -165,12 +182,14 @@ function closeIncidentCheck() {
   // close patches 0 rows when the key is absent/already closed; sh throws only on
   // a real error — swallow either way so a resolve never reddens the listener.
   // The incident check is signal-less (manual tier), so the proof gate needs
-  // --evidence: the succeeding scheduled-run URL is exactly that recorded pointer.
+  // --evidence: the succeeding run's URL is exactly that recorded pointer. The
+  // trigger event is carried into the evidence string so a resolve is auditable —
+  // a dispatch-driven close reads differently from a scheduled one.
   // (When workflow_success graduates from recognized-but-next, this can become a
   // stored signal that check.mjs re-verifies at close instead.)
   try {
     sh(
-      `node scripts/check.mjs close ${checkKey} --evidence "next scheduled run succeeded ${runUrl}"`,
+      `node scripts/check.mjs close ${checkKey} --evidence "later run succeeded (${triggerEvent}) ${runUrl}"`,
     );
     log(`closed check ${checkKey}`);
   } catch (e) {
@@ -248,7 +267,7 @@ function openIncidentIssue(logTail, cls, suggestedAction) {
     "```",
     `</details>`,
     ``,
-    `_Auto-opened by log-cron-incident. Will auto-close when the next scheduled run succeeds._`,
+    `_Auto-opened by log-cron-incident. Will auto-close when a later run of this workflow succeeds (scheduled, pushed, or manually dispatched)._`,
   ].join("\n");
   const tmp = resolve(process.cwd(), `_incident-issue-body.md`);
   writeFileSync(tmp, body, "utf8");
@@ -289,7 +308,9 @@ function closeIncidentIssue() {
     const issues = JSON.parse(out.trim() || "[]");
     if (!issues.length) return log(`no open incident issue for ${workflowName}`);
     const num = issues[0].number;
-    sh(`gh issue close ${num} --comment "Auto-resolved: next scheduled run succeeded ${runUrl}"`);
+    sh(
+      `gh issue close ${num} --comment "Auto-resolved: a later run succeeded (${triggerEvent}) ${runUrl}"`,
+    );
     log(`closed incident issue #${num}`);
   } catch (e) {
     log(`could not close incident issue: ${e.message}`);
