@@ -1,9 +1,9 @@
-<!-- FRESHNESS: v12 | Token: SWFL-7421-v12-20261009-5d429fd6 -->
+<!-- FRESHNESS: v13 | Token: SWFL-7421-v13-20261019-58a141fc -->
 ---
 brain_id: properties-collier-value
-version: 12
-refined_at: 2026-10-09T04:27:08Z
-freshness_token: SWFL-7421-v12-20261009-5d429fd6
+version: 13
+refined_at: 2026-10-19T04:26:48Z
+freshness_token: SWFL-7421-v13-20261019-58a141fc
 ttl_seconds: 2592000
 pack_hash: 8c0ad7a233ae
 context_type: user_saved_reference
@@ -30,35 +30,35 @@ SCOPE: Collier County (FL) real-estate read — homes-sold velocity z-score (cur
 
 --- CITATION TABLE ---
 id  | source                                                                                                                                                                                                                                                                                                                                                                                     | verified   | expires
-s01 | Redfin Data Center county market tracker via data_lake.redfin_collier_market (free public TSV, filtered to "Collier County, FL"; monthly HOMES_SOLD summed to calendar-year velocity) — https://jtkdowmrjaxfvwmemxso.supabase.co/rest/v1/redfin_collier_market?select=region,period_end,property_type,homes_sold,median_sale_price_yoy,months_of_supply&property_type=eq.All%20Residential | 2026-10-09 | 2026-11-08
-s02 | FDOR Statewide Cadastral — Collier County parcels via data_lake.collier_parcels (ArcGIS FeatureServer, CO_NO=21; Save-Our-Homes gap pre-aggregated through collier_parcels_summary) — https://jtkdowmrjaxfvwmemxso.supabase.co/rest/v1/collier_parcels_summary?select=total_parcels,soh_homesteaded_parcels,soh_gap_median_pct                                                             | 2026-10-09 | 2026-11-08
-s03 | FHFA House Price Index via data_lake.fhfa_hpi (loaded from https://www.fhfa.gov/hpi/download/monthly/hpi_master.json; SWFL MSAs + FL state, quarterly purchase-only traditional)                                                                                                                                                                                                           | 2026-10-09 | 2026-11-08
-s04 | Collier County Property Appraiser (FDOR tax roll, recorded deeds) — homes-only sold median per ZIP via data_lake.collier_sold_median_by_zip — https://jtkdowmrjaxfvwmemxso.supabase.co/rest/v1/collier_sold_median_by_zip?select=zip_code,home_sales_n,median_sale,county_fallback                                                                                                         | 2026-10-09 | 2026-11-08
+s01 | Redfin Data Center county market tracker via data_lake.redfin_collier_market (free public TSV, filtered to "Collier County, FL"; monthly HOMES_SOLD summed to calendar-year velocity) — https://jtkdowmrjaxfvwmemxso.supabase.co/rest/v1/redfin_collier_market?select=region,period_end,property_type,homes_sold,median_sale_price_yoy,months_of_supply&property_type=eq.All%20Residential | 2026-10-19 | 2026-11-18
+s02 | FDOR Statewide Cadastral — Collier County parcels via data_lake.collier_parcels (ArcGIS FeatureServer, CO_NO=21; Save-Our-Homes gap pre-aggregated through collier_parcels_summary) — https://jtkdowmrjaxfvwmemxso.supabase.co/rest/v1/collier_parcels_summary?select=total_parcels,soh_homesteaded_parcels,soh_gap_median_pct                                                             | 2026-10-19 | 2026-11-18
+s03 | FHFA House Price Index via data_lake.fhfa_hpi (loaded from https://www.fhfa.gov/hpi/download/monthly/hpi_master.json; SWFL MSAs + FL state, quarterly purchase-only traditional)                                                                                                                                                                                                           | 2026-10-19 | 2026-11-18
+s04 | Collier County Property Appraiser (FDOR tax roll, recorded deeds) — homes-only sold median per ZIP via data_lake.collier_sold_median_by_zip — https://jtkdowmrjaxfvwmemxso.supabase.co/rest/v1/collier_sold_median_by_zip?select=zip_code,home_sales_n,median_sale,county_fallback                                                                                                         | 2026-10-19 | 2026-11-18
 
 --- SAVED FACTS ---
 [
-  {"id":"f001","topic":"corpus_overview","fact":"Collier County market snapshot — Redfin county tracker (All Residential)","value":"Collier County, FL closed-sale velocity from Redfin, monthly homes-sold summed to calendar years. Baseline window 2022-2024, current year 2025. Latest period observed: 2026-08-31.","src":"s03","date":"2026-10-09"},
-  {"id":"f002","topic":"metric:homes_sold_per_year","fact":"Collier homes sold (year 2025)","value":"9,195 residential closings recorded by Redfin for Collier County in 2025.","src":"s03","date":"2026-10-09"},
-  {"id":"f003","topic":"metric:homes_sold_zscore","fact":"Collier homes-sold z-score (current year vs trailing 3yr)","value":"Baseline counts 2022=11,145, 2023=9,716, 2024=8,865; mean 9908.7, population std 940.7. Current 9,195. z = -0.8.","src":"s03","date":"2026-10-09"},
-  {"id":"f004","topic":"metric:median_sale_price_yoy","fact":"Collier median sale price YoY (2026-08-31)","value":"+0.40% year-over-year (Redfin median sale price, All Residential).","src":"s03","date":"2026-10-09"},
-  {"id":"f005","topic":"metric:months_of_supply","fact":"Collier months of supply (2026-08-31)","value":"6.0 months of supply — inventory vs sales pace (lower = tighter, seller-favorable).","src":"s03","date":"2026-10-09"},
-  {"id":"f006","topic":"metric:soh_gap_median","fact":"Collier Save-Our-Homes gap median across homesteaded parcels","value":"Median (jv_hmstd - av_hmstd)/jv_hmstd across 107,030 homesteaded parcels: 36.47% of homestead just value suppressed by the SOH cap (FDOR cadastral).","src":"s03","date":"2026-10-09"},
-  {"id":"f007","topic":"metric:total_parcels","fact":"Collier total parcel count (FDOR cadastral snapshot)","value":"290,973 parcels in data_lake.collier_parcels (FDOR Statewide Cadastral, CO_NO=21).","src":"s03","date":"2026-10-09"},
-  {"id":"f008","topic":"metric:collier_sold_median_homes_only","fact":"Collier homes-only sold median (recorded deeds, as of 10/09/2026)","value":"Median of 9,251 single-family + condo sales recorded 2024+ (over $20,000): $615,000. A SOLD median from recorded deeds — the homes-only counterpart to the active-listing asking median. Per-ZIP detail in the sold-median-by-ZIP table; ZIPs under 20 qualifying sales report this county median rather than a thin-sample number.","src":"s03","date":"2026-10-09"}
+  {"id":"f001","topic":"corpus_overview","fact":"Collier County market snapshot — Redfin county tracker (All Residential)","value":"Collier County, FL closed-sale velocity from Redfin, monthly homes-sold summed to calendar years. Baseline window 2022-2024, current year 2025. Latest period observed: 2026-09-30.","src":"s03","date":"2026-10-19"},
+  {"id":"f002","topic":"metric:homes_sold_per_year","fact":"Collier homes sold (year 2025)","value":"9,197 residential closings recorded by Redfin for Collier County in 2025.","src":"s03","date":"2026-10-19"},
+  {"id":"f003","topic":"metric:homes_sold_zscore","fact":"Collier homes-sold z-score (current year vs trailing 3yr)","value":"Baseline counts 2022=11,145, 2023=9,716, 2024=8,866; mean 9909.0, population std 940.4. Current 9,197. z = -0.8.","src":"s03","date":"2026-10-19"},
+  {"id":"f004","topic":"metric:median_sale_price_yoy","fact":"Collier median sale price YoY (2026-09-30)","value":"+3.30% year-over-year (Redfin median sale price, All Residential).","src":"s03","date":"2026-10-19"},
+  {"id":"f005","topic":"metric:months_of_supply","fact":"Collier months of supply (2026-09-30)","value":"6.2 months of supply — inventory vs sales pace (lower = tighter, seller-favorable).","src":"s03","date":"2026-10-19"},
+  {"id":"f006","topic":"metric:soh_gap_median","fact":"Collier Save-Our-Homes gap median across homesteaded parcels","value":"Median (jv_hmstd - av_hmstd)/jv_hmstd across 107,030 homesteaded parcels: 36.47% of homestead just value suppressed by the SOH cap (FDOR cadastral).","src":"s03","date":"2026-10-19"},
+  {"id":"f007","topic":"metric:total_parcels","fact":"Collier total parcel count (FDOR cadastral snapshot)","value":"290,973 parcels in data_lake.collier_parcels (FDOR Statewide Cadastral, CO_NO=21).","src":"s03","date":"2026-10-19"},
+  {"id":"f008","topic":"metric:collier_sold_median_homes_only","fact":"Collier homes-only sold median (recorded deeds, as of 10/19/2026)","value":"Median of 9,251 single-family + condo sales recorded 2024+ (over $20,000): $615,000. A SOLD median from recorded deeds — the homes-only counterpart to the active-listing asking median. Per-ZIP detail in the sold-median-by-ZIP table; ZIPs under 20 qualifying sales report this county median rather than a thin-sample number.","src":"s03","date":"2026-10-19"}
 ]
 
 --- OUTPUT ---
 {
   "brain_id": "properties-collier-value",
-  "version": 12,
-  "refined_at": "2026-10-09T04:27:08Z",
-  "expires": "2026-11-08T04:27:08Z",
+  "version": 13,
+  "refined_at": "2026-10-19T04:26:48Z",
+  "expires": "2026-11-18T04:26:48Z",
   "ttl_seconds": 2592000,
   "direction": "neutral",
-  "magnitude": 0.25287871895338476,
+  "magnitude": 0.2523873612131279,
   "drivers": [],
   "overrides": [],
-  "conclusion": "Collier County had 9,195 residential closings recorded by Redfin for 2025. Trailing 3yr baseline (2022-2024) averaged 9908.7 sales/yr; current year sits at z = -0.8 — neutral read on Collier transaction velocity. Median sale price +0.40% YoY (2026-08-31), 6.0 months of supply. Parcel base: 290,973 Collier parcels (FDOR cadastral), median Save-Our-Homes gap 36.47% across 107,030 homesteaded.",
+  "conclusion": "Collier County had 9,197 residential closings recorded by Redfin for 2025. Trailing 3yr baseline (2022-2024) averaged 9909.0 sales/yr; current year sits at z = -0.8 — neutral read on Collier transaction velocity. Median sale price +3.30% YoY (2026-09-30), 6.2 months of supply. Parcel base: 290,973 Collier parcels (FDOR cadastral), median Save-Our-Homes gap 36.47% across 107,030 homesteaded.",
   "key_metrics": [
     {
       "metric": "collier_homes_sold_zscore",
@@ -70,7 +70,7 @@ s04 | Collier County Property Appraiser (FDOR tax roll, recorded deeds) — home
       "display_format": "ratio",
       "source": {
         "url": "https://jtkdowmrjaxfvwmemxso.supabase.co/rest/v1/redfin_collier_market?select=period_end,homes_sold,median_sale_price_yoy,months_of_supply&property_type=eq.All%20Residential",
-        "fetched_at": "2026-10-09T04:26:56Z",
+        "fetched_at": "2026-10-19T04:26:36Z",
         "tier": 2,
         "citation": "Redfin Data Center county market tracker via data_lake.redfin_collier_market (free public TSV filtered to \"Collier County, FL\"; monthly homes-sold summed to calendar-year velocity, \"All Residential\" property type)."
       },
@@ -81,7 +81,7 @@ s04 | Collier County Property Appraiser (FDOR tax roll, recorded deeds) — home
     },
     {
       "metric": "collier_homes_sold_per_year",
-      "value": 9195,
+      "value": 9197,
       "direction": "stable",
       "label": "Collier residential homes sold, year 2025 (Redfin closed sales, All Residential)",
       "variable_type": "extensive",
@@ -89,7 +89,7 @@ s04 | Collier County Property Appraiser (FDOR tax roll, recorded deeds) — home
       "display_format": "count",
       "source": {
         "url": "https://jtkdowmrjaxfvwmemxso.supabase.co/rest/v1/redfin_collier_market?select=period_end,homes_sold,median_sale_price_yoy,months_of_supply&property_type=eq.All%20Residential",
-        "fetched_at": "2026-10-09T04:26:56Z",
+        "fetched_at": "2026-10-19T04:26:36Z",
         "tier": 2,
         "citation": "Redfin Data Center county market tracker via data_lake.redfin_collier_market (free public TSV filtered to \"Collier County, FL\"; monthly homes-sold summed to calendar-year velocity, \"All Residential\" property type)."
       },
@@ -100,15 +100,15 @@ s04 | Collier County Property Appraiser (FDOR tax roll, recorded deeds) — home
     },
     {
       "metric": "collier_median_sale_price_yoy",
-      "value": 0.4,
+      "value": 3.3,
       "direction": "rising",
-      "label": "Collier median sale price YoY (2026-08-31, Redfin All Residential)",
+      "label": "Collier median sale price YoY (2026-09-30, Redfin All Residential)",
       "variable_type": "intensive",
       "units": "percent",
       "display_format": "percent",
       "source": {
         "url": "https://jtkdowmrjaxfvwmemxso.supabase.co/rest/v1/redfin_collier_market?select=period_end,homes_sold,median_sale_price_yoy,months_of_supply&property_type=eq.All%20Residential",
-        "fetched_at": "2026-10-09T04:26:56Z",
+        "fetched_at": "2026-10-19T04:26:36Z",
         "tier": 2,
         "citation": "Redfin Data Center county market tracker via data_lake.redfin_collier_market (free public TSV filtered to \"Collier County, FL\"; monthly homes-sold summed to calendar-year velocity, \"All Residential\" property type)."
       },
@@ -119,15 +119,15 @@ s04 | Collier County Property Appraiser (FDOR tax roll, recorded deeds) — home
     },
     {
       "metric": "collier_months_of_supply",
-      "value": 6,
+      "value": 6.2,
       "direction": "stable",
-      "label": "Collier months of supply (2026-08-31, Redfin All Residential)",
+      "label": "Collier months of supply (2026-09-30, Redfin All Residential)",
       "variable_type": "intensive",
       "units": "months",
       "display_format": "ratio",
       "source": {
         "url": "https://jtkdowmrjaxfvwmemxso.supabase.co/rest/v1/redfin_collier_market?select=period_end,homes_sold,median_sale_price_yoy,months_of_supply&property_type=eq.All%20Residential",
-        "fetched_at": "2026-10-09T04:26:56Z",
+        "fetched_at": "2026-10-19T04:26:36Z",
         "tier": 2,
         "citation": "Redfin Data Center county market tracker via data_lake.redfin_collier_market (free public TSV filtered to \"Collier County, FL\"; monthly homes-sold summed to calendar-year velocity, \"All Residential\" property type)."
       },
@@ -146,7 +146,7 @@ s04 | Collier County Property Appraiser (FDOR tax roll, recorded deeds) — home
       "display_format": "percent",
       "source": {
         "url": "https://jtkdowmrjaxfvwmemxso.supabase.co/rest/v1/collier_parcels_summary?select=total_parcels,soh_homesteaded_parcels,soh_gap_median_pct",
-        "fetched_at": "2026-10-09T04:26:56Z",
+        "fetched_at": "2026-10-19T04:26:36Z",
         "tier": 2,
         "citation": "FDOR Statewide Cadastral — Collier County parcels via data_lake.collier_parcels (CO_NO=21; SOH gap = median (jv_hmstd - av_hmstd)/jv_hmstd over homesteaded parcels)."
       },
@@ -165,7 +165,7 @@ s04 | Collier County Property Appraiser (FDOR tax roll, recorded deeds) — home
       "display_format": "count",
       "source": {
         "url": "https://jtkdowmrjaxfvwmemxso.supabase.co/rest/v1/collier_parcels_summary?select=total_parcels,soh_homesteaded_parcels,soh_gap_median_pct",
-        "fetched_at": "2026-10-09T04:26:56Z",
+        "fetched_at": "2026-10-19T04:26:36Z",
         "tier": 2,
         "citation": "FDOR Statewide Cadastral — Collier County parcels via data_lake.collier_parcels (CO_NO=21; SOH gap = median (jv_hmstd - av_hmstd)/jv_hmstd over homesteaded parcels)."
       },
@@ -178,15 +178,15 @@ s04 | Collier County Property Appraiser (FDOR tax roll, recorded deeds) — home
       "metric": "collier_sold_median_homes_only",
       "value": 615000,
       "direction": "stable",
-      "label": "Collier homes-only sold median (single-family + condo, recorded deeds, as of 10/09/2026)",
+      "label": "Collier homes-only sold median (single-family + condo, recorded deeds, as of 10/19/2026)",
       "variable_type": "intensive",
       "units": "USD",
       "display_format": "currency",
       "source": {
         "url": "https://jtkdowmrjaxfvwmemxso.supabase.co/rest/v1/collier_sold_median_by_zip?select=zip_code,home_sales_n,median_sale,county_fallback",
-        "fetched_at": "2026-10-09T04:26:56Z",
+        "fetched_at": "2026-10-19T04:26:36Z",
         "tier": 2,
-        "citation": "Collier County Property Appraiser (FDOR tax roll, recorded deeds) — homes-only (single-family + condo) sold median per ZIP via data_lake.collier_sold_median_by_zip; each parcel's latest recorded sale 2024+ over $20,000, ZIPs under 20 sales reporting the county median. As of 10/09/2026."
+        "citation": "Collier County Property Appraiser (FDOR tax roll, recorded deeds) — homes-only (single-family + condo) sold median per ZIP via data_lake.collier_sold_median_by_zip; each parcel's latest recorded sale 2024+ over $20,000, ZIPs under 20 sales reporting the county median. As of 10/19/2026."
       },
       "suggestions": [
         "What's driving collier sold median homes only?",
@@ -411,11 +411,11 @@ s04 | Collier County Property Appraiser (FDOR tax roll, recorded deeds) — home
       ],
       "source": {
         "url": "https://jtkdowmrjaxfvwmemxso.supabase.co/rest/v1/collier_sold_median_by_zip?select=zip_code,home_sales_n,median_sale,county_fallback",
-        "fetched_at": "2026-10-09T04:26:56Z",
+        "fetched_at": "2026-10-19T04:26:36Z",
         "tier": 2,
-        "citation": "Collier County Property Appraiser (FDOR tax roll, recorded deeds) — homes-only (single-family + condo) sold median per ZIP via data_lake.collier_sold_median_by_zip; each parcel's latest recorded sale 2024+ over $20,000, ZIPs under 20 sales reporting the county median. As of 10/09/2026."
+        "citation": "Collier County Property Appraiser (FDOR tax roll, recorded deeds) — homes-only (single-family + condo) sold median per ZIP via data_lake.collier_sold_median_by_zip; each parcel's latest recorded sale 2024+ over $20,000, ZIPs under 20 sales reporting the county median. As of 10/19/2026."
       },
-      "note": "One row per Collier County ZIP. Homes-only = single-family + condo (vacant land excluded). Median of each parcel's latest recorded sale 2024+ over $20,000 — a stock of most-recent prices, not a transaction-flow median. ZIPs with fewer than 20 qualifying sales report the county median (county fallback = true), never a thin-sample ZIP median. Situs ZIP comes native from the FDOR roll (no centroid-to-ZCTA derivation). As of 10/09/2026."
+      "note": "One row per Collier County ZIP. Homes-only = single-family + condo (vacant land excluded). Median of each parcel's latest recorded sale 2024+ over $20,000 — a stock of most-recent prices, not a transaction-flow median. ZIPs with fewer than 20 qualifying sales report the county median (county fallback = true), never a thin-sample ZIP median. Situs ZIP comes native from the FDOR roll (no centroid-to-ZCTA derivation). As of 10/19/2026."
     }
   ],
   "caveats": [
@@ -436,7 +436,7 @@ s04 | Collier County Property Appraiser (FDOR tax roll, recorded deeds) — home
   "relevance": {
     "decay_curve": "weeks",
     "half_life_hours": 720,
-    "computed_at": "2026-10-09T04:27:08Z"
+    "computed_at": "2026-10-19T04:26:48Z"
   },
   "exogenous_signals": []
 }
@@ -445,5 +445,5 @@ s04 | Collier County Property Appraiser (FDOR tax roll, recorded deeds) — home
 - properties-collier-value: standing snapshot of Collier County real-estate market direction — homes-sold velocity z-score + price YoY + months of supply, leaf brain feeding master.
 
 --- RECENT NOTES ---
-- 2026-10-09: pack refined by the Refinery — 8 fact(s) from 4 source(s).
+- 2026-10-19: pack refined by the Refinery — 8 fact(s) from 4 source(s).
 ```
