@@ -1,8 +1,8 @@
 {
   "target": "master",
   "timestamps": {
-    "started": "2026-10-21T04:33:42.634Z",
-    "finished": "2026-10-21T04:36:50.387Z"
+    "started": "2026-10-21T09:40:28.191Z",
+    "finished": "2026-10-21T09:46:54.756Z"
   },
   "source": "live",
   "outcomes": [
@@ -38,7 +38,7 @@
       "packId": "macro-us",
       "status": "missing",
       "failureClass": "deterministic",
-      "reason": "400 {\"type\":\"error\",\"error\":{\"type\":\"invalid_request_error\",\"message\":\"Your credit balance is too low to access the Anthropic API. Please go to Plans & Billing to upgrade or purchase credits.\"},\"request_id\":\"req_011CgEkyh2W6XRRKcuLx8ivJ\"}",
+      "reason": "400 {\"type\":\"error\",\"error\":{\"type\":\"invalid_request_error\",\"message\":\"Your credit balance is too low to access the Anthropic API. Please go to Plans & Billing to upgrade or purchase credits.\"},\"request_id\":\"req_011CgFAR7ghqTy29JHyPtNgz\"}",
       "lastGoodRefinedAt": "2026-07-30T06:59:47Z",
       "written": false
     },
@@ -52,7 +52,10 @@
     },
     {
       "packId": "macro-swfl",
-      "status": "skipped-fresh",
+      "status": "missing",
+      "failureClass": "deterministic",
+      "reason": "bls-laus-source: FL query failed — Could not query the database for the schema cache. Retrying.",
+      "lastGoodRefinedAt": "2026-09-26T04:26:02Z",
       "written": false
     },
     {
@@ -62,7 +65,11 @@
     },
     {
       "packId": "tourism-tdt",
-      "status": "skipped-fresh",
+      "status": "degraded",
+      "failureClass": "transient",
+      "reason": "tourism-tdt-source: fl_dor_tdt_collections fetch failed — Could not query the database for the schema cache. Retrying.",
+      "lastGoodRefinedAt": "2026-10-15T04:26:31Z",
+      "version": 41,
       "written": false
     },
     {
@@ -92,12 +99,19 @@
     },
     {
       "packId": "properties-collier-value",
-      "status": "skipped-fresh",
+      "status": "degraded",
+      "failureClass": "deterministic",
+      "reason": "collier-market-source: data_lake.redfin_collier_market query failed — Could not query the database for the schema cache. Retrying.",
+      "lastGoodRefinedAt": "2026-10-19T04:26:48Z",
+      "version": 13,
       "written": false
     },
     {
       "packId": "rentals-swfl",
-      "status": "skipped-fresh",
+      "status": "missing",
+      "failureClass": "transient",
+      "reason": "zori_zip_latest fetch failed: Could not query the database for the schema cache. Retrying.",
+      "lastGoodRefinedAt": "2026-09-23T04:26:05Z",
       "written": false
     },
     {
@@ -122,7 +136,11 @@
     },
     {
       "packId": "city-pulse-swfl",
-      "status": "skipped-fresh",
+      "status": "degraded",
+      "failureClass": "transient",
+      "reason": "city-pulse-source: data_lake.city_pulse fetch failed — Could not query the database for the schema cache. Retrying.",
+      "lastGoodRefinedAt": "2026-10-20T09:32:47Z",
+      "version": 131,
       "written": false
     },
     {
@@ -137,39 +155,8 @@
     },
     {
       "packId": "freshness-pulse",
-      "status": "built",
-      "version": 79,
-      "written": true,
-      "brainOutput": {
-        "brain_id": "freshness-pulse",
-        "version": 79,
-        "refined_at": "2026-10-21T04:34:44Z",
-        "expires": "2026-10-22T04:34:44Z",
-        "ttl_seconds": 86400,
-        "direction": "neutral",
-        "magnitude": 0,
-        "drivers": [],
-        "overrides": [],
-        "conclusion": "No fresh sourced snapshot available yet — the daily freshness engine has not landed a verified, in-band number carrying a real source.",
-        "key_metrics": [],
-        "detail_tables": [],
-        "caveats": [
-          "The sourced freshness layer is live but holds no verified rows yet (or every candidate was a held anomaly / unsourced number, both excluded by design)."
-        ],
-        "contradicts": [],
-        "confidence": 0.8,
-        "joint_integrity": 1,
-        "confidence_dispersion": 0,
-        "chain_depth": 0,
-        "trust_tier": 2,
-        "upstream_count": 0,
-        "relevance": {
-          "decay_curve": "weeks",
-          "half_life_hours": 720,
-          "computed_at": "2026-10-21T04:34:44Z"
-        },
-        "exogenous_signals": []
-      }
+      "status": "skipped-fresh",
+      "written": false
     },
     {
       "packId": "seller-stress-swfl",
