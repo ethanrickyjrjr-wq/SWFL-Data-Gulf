@@ -1,9 +1,9 @@
-<!-- FRESHNESS: v140 | Token: SWFL-7421-v140-20260814-617078a0 -->
+<!-- FRESHNESS: v141 | Token: SWFL-7421-v141-20261022-e6c38e62 -->
 ---
 brain_id: master
-version: 140
-refined_at: 2026-08-14T04:30:21Z
-freshness_token: SWFL-7421-v140-20260814-617078a0
+version: 141
+refined_at: 2026-10-22T09:33:20Z
+freshness_token: SWFL-7421-v141-20261022-e6c38e62
 ttl_seconds: 604800
 pack_hash: be8f0d44e0e6
 context_type: user_saved_reference
@@ -30,98 +30,98 @@ SCOPE: SWFL Intelligence Lake — master synthesizer over the verified Franchise
 
 --- CITATION TABLE ---
 id  | source                                                                                       | verified   | expires
-s01 | franchise-outcomes brain — https://www.swfldatagulf.com/api/b/franchise-outcomes             | 2026-07-03 | 2026-10-01
-s02 | cre-swfl brain — https://www.swfldatagulf.com/api/b/cre-swfl                                 | 2026-08-10 | 2026-08-17
-s03 | macro-us brain — https://www.swfldatagulf.com/api/b/macro-us                                 | 2026-07-30 | 2026-08-29
-s04 | macro-florida brain — https://www.swfldatagulf.com/api/b/macro-florida                       | 2026-07-19 | 2026-08-18
-s05 | macro-swfl brain — https://www.swfldatagulf.com/api/b/macro-swfl                             | 2026-07-26 | 2026-08-25
-s06 | sector-credit-swfl brain — https://www.swfldatagulf.com/api/b/sector-credit-swfl             | 2026-08-14 | 2026-08-21
-s07 | tourism-tdt brain — https://www.swfldatagulf.com/api/b/tourism-tdt                           | 2026-08-14 | 2026-08-21
-s08 | env-swfl brain — https://www.swfldatagulf.com/api/b/env-swfl                                 | 2026-08-12 | 2026-09-11
-s09 | logistics-swfl brain — https://www.swfldatagulf.com/api/b/logistics-swfl                     | 2026-08-05 | 2026-09-04
-s10 | logistics-swfl-nowcast brain — https://www.swfldatagulf.com/api/b/logistics-swfl-nowcast     | 2026-07-19 | 2026-08-18
-s11 | traffic-swfl brain — https://www.swfldatagulf.com/api/b/traffic-swfl                         | 2026-07-19 | 2026-08-18
-s12 | properties-lee-value brain — https://www.swfldatagulf.com/api/b/properties-lee-value         | 2026-07-19 | 2026-08-18
-s13 | properties-collier-value brain — https://www.swfldatagulf.com/api/b/properties-collier-value | 2026-07-22 | 2026-08-21
-s14 | permits-swfl brain — https://www.swfldatagulf.com/api/b/permits-swfl                         | 2026-08-13 | 2026-08-20
-s15 | rentals-swfl brain — https://www.swfldatagulf.com/api/b/rentals-swfl                         | 2026-07-22 | 2026-08-26
-s16 | housing-swfl brain — https://www.swfldatagulf.com/api/b/housing-swfl                         | 2026-07-23 | 2026-08-27
-s17 | safety-swfl brain — https://www.swfldatagulf.com/api/b/safety-swfl                           | 2026-07-19 | 2026-10-17
-s18 | labor-demand-swfl brain — https://www.swfldatagulf.com/api/b/labor-demand-swfl               | 2026-07-19 | 2026-10-17
-s19 | econ-dev-swfl brain — https://www.swfldatagulf.com/api/b/econ-dev-swfl                       | 2026-08-11 | 2026-08-18
-s20 | city-pulse-swfl brain — https://www.swfldatagulf.com/api/b/city-pulse-swfl                   | 2026-08-14 | 2026-08-15
-s21 | rsw-airport brain — https://www.swfldatagulf.com/api/b/rsw-airport                           | 2026-08-09 | 2026-09-08
-s22 | news-swfl brain — https://www.swfldatagulf.com/api/b/news-swfl                               | 2026-08-11 | 2026-08-18
-s23 | freshness-pulse brain — https://www.swfldatagulf.com/api/b/freshness-pulse                   | 2026-08-14 | 2026-08-15
-s24 | seller-stress-swfl brain — https://www.swfldatagulf.com/api/b/seller-stress-swfl             | 2026-07-18 | 2026-08-17
-s25 | market-heat-swfl brain — https://www.swfldatagulf.com/api/b/market-heat-swfl                 | 2026-08-09 | 2026-09-13
-s26 | storm-history-swfl brain — https://www.swfldatagulf.com/api/b/storm-history-swfl             | 2026-08-11 | 2027-08-11
-s27 | hurricane-tracks-fl brain — https://www.swfldatagulf.com/api/b/hurricane-tracks-fl           | 2026-07-15 | 2027-07-15
-s28 | licenses-swfl brain — https://www.swfldatagulf.com/api/b/licenses-swfl                       | 2026-08-05 | 2026-09-04
-s29 | condo-sirs-swfl brain — https://www.swfldatagulf.com/api/b/condo-sirs-swfl                   | 2026-08-07 | 2026-09-06
+s01 | franchise-outcomes brain — https://www.swfldatagulf.com/api/b/franchise-outcomes             | 2026-10-02 | 2026-12-31
+s02 | cre-swfl brain — https://www.swfldatagulf.com/api/b/cre-swfl                                 | 2026-10-22 | 2026-10-29
+s03 | macro-us brain — https://www.swfldatagulf.com/api/b/macro-us                                 | 2026-10-22 | 2026-11-21
+s04 | macro-florida brain — https://www.swfldatagulf.com/api/b/macro-florida                       | 2026-10-22 | 2026-11-21
+s05 | macro-swfl brain — https://www.swfldatagulf.com/api/b/macro-swfl                             | 2026-10-22 | 2026-11-21
+s06 | sector-credit-swfl brain — https://www.swfldatagulf.com/api/b/sector-credit-swfl             | 2026-10-22 | 2026-10-29
+s07 | tourism-tdt brain — https://www.swfldatagulf.com/api/b/tourism-tdt                           | 2026-10-22 | 2026-10-29
+s08 | env-swfl brain — https://www.swfldatagulf.com/api/b/env-swfl                                 | 2026-10-14 | 2026-11-13
+s09 | logistics-swfl brain — https://www.swfldatagulf.com/api/b/logistics-swfl                     | 2026-10-16 | 2026-11-15
+s10 | logistics-swfl-nowcast brain — https://www.swfldatagulf.com/api/b/logistics-swfl-nowcast     | 2026-10-16 | 2026-11-15
+s11 | traffic-swfl brain — https://www.swfldatagulf.com/api/b/traffic-swfl                         | 2026-10-16 | 2026-11-15
+s12 | properties-lee-value brain — https://www.swfldatagulf.com/api/b/properties-lee-value         | 2026-10-19 | 2026-11-18
+s13 | properties-collier-value brain — https://www.swfldatagulf.com/api/b/properties-collier-value | 2026-10-22 | 2026-11-21
+s14 | permits-swfl brain — https://www.swfldatagulf.com/api/b/permits-swfl                         | 2026-10-20 | 2026-10-27
+s15 | rentals-swfl brain — https://www.swfldatagulf.com/api/b/rentals-swfl                         | 2026-10-22 | 2026-11-26
+s16 | housing-swfl brain — https://www.swfldatagulf.com/api/b/housing-swfl                         | 2026-10-16 | 2026-11-20
+s17 | safety-swfl brain — https://www.swfldatagulf.com/api/b/safety-swfl                           | 2026-10-02 | 2026-12-31
+s18 | labor-demand-swfl brain — https://www.swfldatagulf.com/api/b/labor-demand-swfl               | 2026-10-17 | 2027-01-15
+s19 | econ-dev-swfl brain — https://www.swfldatagulf.com/api/b/econ-dev-swfl                       | 2026-10-20 | 2026-10-27
+s20 | city-pulse-swfl brain — https://www.swfldatagulf.com/api/b/city-pulse-swfl                   | 2026-10-22 | 2026-10-23
+s21 | rsw-airport brain — https://www.swfldatagulf.com/api/b/rsw-airport                           | 2026-10-09 | 2026-11-08
+s22 | news-swfl brain — https://www.swfldatagulf.com/api/b/news-swfl                               | 2026-10-20 | 2026-10-27
+s23 | freshness-pulse brain — https://www.swfldatagulf.com/api/b/freshness-pulse                   | 2026-10-22 | 2026-10-23
+s24 | seller-stress-swfl brain — https://www.swfldatagulf.com/api/b/seller-stress-swfl             | 2026-10-16 | 2026-11-15
+s25 | market-heat-swfl brain — https://www.swfldatagulf.com/api/b/market-heat-swfl                 | 2026-10-09 | 2026-11-13
+s26 | storm-history-swfl brain — https://www.swfldatagulf.com/api/b/storm-history-swfl             | 2026-10-11 | 2027-10-11
+s27 | hurricane-tracks-fl brain — https://www.swfldatagulf.com/api/b/hurricane-tracks-fl           | 2026-10-06 | 2027-10-06
+s28 | licenses-swfl brain — https://www.swfldatagulf.com/api/b/licenses-swfl                       | 2026-10-06 | 2026-11-05
+s29 | condo-sirs-swfl brain — https://www.swfldatagulf.com/api/b/condo-sirs-swfl                   | 2026-10-02 | 2026-11-01
 s30 | permits-commercial-swfl brain — https://www.swfldatagulf.com/api/b/permits-commercial-swfl   | 2026-07-19 | 2027-07-19
-s31 | price-distribution-swfl brain — https://www.swfldatagulf.com/api/b/price-distribution-swfl   | 2026-08-11 | 2026-08-19
-s32 | listing-momentum-swfl brain — https://www.swfldatagulf.com/api/b/listing-momentum-swfl       | 2026-08-09 | 2026-08-17
-s33 | market-temperature-swfl brain — https://www.swfldatagulf.com/api/b/market-temperature-swfl   | 2026-08-05 | 2026-09-09
-s34 | investor-zip-swfl brain — https://www.swfldatagulf.com/api/b/investor-zip-swfl               | 2026-07-17 | 2026-08-21
-s35 | active-listings-swfl brain — https://www.swfldatagulf.com/api/b/active-listings-swfl         | 2026-08-14 | 2026-08-16
+s31 | price-distribution-swfl brain — https://www.swfldatagulf.com/api/b/price-distribution-swfl   | 2026-10-19 | 2026-10-27
+s32 | listing-momentum-swfl brain — https://www.swfldatagulf.com/api/b/listing-momentum-swfl       | 2026-10-19 | 2026-10-27
+s33 | market-temperature-swfl brain — https://www.swfldatagulf.com/api/b/market-temperature-swfl   | 2026-10-22 | 2026-11-26
+s34 | investor-zip-swfl brain — https://www.swfldatagulf.com/api/b/investor-zip-swfl               | 2026-09-24 | 2026-10-29
+s35 | active-listings-swfl brain — https://www.swfldatagulf.com/api/b/active-listings-swfl         | 2026-10-22 | 2026-10-24
 s36 | active-rentals-swfl brain — https://www.swfldatagulf.com/api/b/active-rentals-swfl           | 2026-07-11 | 2026-07-19
-s37 | communities-swfl brain — https://www.swfldatagulf.com/api/b/communities-swfl                 | 2026-08-05 | 2027-02-01
-s38 | tier-divergence-swfl brain — https://www.swfldatagulf.com/api/b/tier-divergence-swfl         | 2026-07-23 | 2026-08-27
-s39 | home-values-swfl brain — https://www.swfldatagulf.com/api/b/home-values-swfl                 | 2026-07-24 | 2026-08-28
+s37 | communities-swfl brain — https://www.swfldatagulf.com/api/b/communities-swfl                 | 2026-10-03 | 2027-04-01
+s38 | tier-divergence-swfl brain — https://www.swfldatagulf.com/api/b/tier-divergence-swfl         | 2026-09-23 | 2026-10-28
+s39 | home-values-swfl brain — https://www.swfldatagulf.com/api/b/home-values-swfl                 | 2026-09-24 | 2026-10-29
 
 --- SAVED FACTS ---
 [
-  {"id":"f001","topic":"upstream :: franchise-outcomes","fact":"Upstream snapshot — franchise-outcomes (neutral, magnitude 0.00, confidence 1.00)","value":"franchise-outcomes as of 2026-07-03: direction neutral, magnitude 0.00, confidence 1.00, trust tier T1, 0 key metric(s). Franchise loan outcomes: awaiting the first live SBA FOIA data load (quarterly pipeline). No survival figures are published from this brain until real loan-level data lands.","src":"s01","date":"2026-08-14"},
-  {"id":"f002","topic":"upstream :: cre-swfl","fact":"Upstream snapshot — cre-swfl (mixed, magnitude 0.30, confidence 0.87)","value":"cre-swfl as of 2026-08-10: direction mixed, magnitude 0.30, confidence 0.87, trust tier T2, 241 key metric(s). The SWFL CRE pack covers 27 verified corridors across Lee and Collier counties. Quantified reads: median cap rate 6.7% (rising); median vacancy 2.9% (falling); median net absorption 6,397 sqft (rising); median asking rent $27.15/sqft NNN (rising). Submarket signals split between landlord-market and distress reads — no consensus direction at the SWFL CRE level. Common driver: asking rent rising alongside vacancy rising (asking-price stickiness, not pricing power). Corridor Factor: 44/100 (neutral) — composite of cap rate, vacancy, and asking rent across 10 of 10 submarkets. Permit capital flow: Lee County corridor-weighted z = 0.44 (above baseline).","src":"s01","date":"2026-08-14"},
-  {"id":"f003","topic":"upstream :: macro-us","fact":"Upstream snapshot — macro-us (bearish, magnitude 1.00, confidence 1.00)","value":"macro-us as of 2026-07-30: direction bearish, magnitude 1.00, confidence 1.00, trust tier T1, 2 key metric(s). As of the latest reported periods, the national macro backdrop reads: SOFR at 3.7% and rising, headline CPI at 3.5% YoY and rising. This brain is the root of the macro chain (macro-us → macro-florida → macro-swfl). State and regional brains read the funding-cost and inflation backdrop through here.","src":"s01","date":"2026-08-14"},
-  {"id":"f004","topic":"upstream :: macro-florida","fact":"Upstream snapshot — macro-florida (bearish, magnitude 0.50, confidence 1.00)","value":"macro-florida as of 2026-07-19: direction bearish, magnitude 0.50, confidence 1.00, trust tier T1, 7 key metric(s). As of the latest reported periods, the Florida state-level labor market reads: Florida unemployment at 4.8% (rising), labor force participation at 57.6%. Read against the national backdrop (macro-us, confidence 1.00): SOFR at 3.6% (stable). Regional brains (macro-swfl, future macro-tampa/macro-jax) use this brain as the state baseline for gap math.","src":"s01","date":"2026-08-14"},
-  {"id":"f005","topic":"upstream :: macro-swfl","fact":"Upstream snapshot — macro-swfl (bearish, magnitude 1.00, confidence 1.00)","value":"macro-swfl as of 2026-07-26: direction bearish, magnitude 1.00, confidence 1.00, trust tier T1, 10 key metric(s). SWFL labor market, 2026-M05 (preliminary): Lee County at 4.9%, +1.1pp YoY; Collier County at 4.5%, +1pp YoY; FL state LAUS 4.4% (benchmark). Private-sector wages in Lee County ran $1,173/wk in 2025-Q3 (+6.6% YoY). Against the FL state macro backdrop (macro-florida, confidence 1.00), SWFL county unemployment is rising faster than the state average.","src":"s01","date":"2026-08-14"},
-  {"id":"f006","topic":"upstream :: sector-credit-swfl","fact":"Upstream snapshot — sector-credit-swfl (bearish, magnitude 0.39, confidence 1.00)","value":"sector-credit-swfl as of 2026-08-14: direction bearish, magnitude 0.39, confidence 1.00, trust tier T1, 18 key metric(s). For SWFL lenders, the three lowest-risk 2-digit NAICS sectors by SBA resolved-loan charge-off rate are: Arts, Entertainment & Recreation (0% [thin sample: only 7 resolved loans, directional not confident]), Finance & Insurance (0% [thin sample: only 14 resolved loans, directional not confident]), Real Estate, Rental & Leasing (0% [thin sample: only 6 resolved loans, directional not confident]). The three highest-risk sectors are: Transportation & Warehousing (57.1% [thin sample: only 7 resolved loans, directional not confident]), Retail Trade (44.4% [thin sample: only 9 resolved loans, directional not confident]), Other Services (Personal & Repair) (21.2%). Read these rates against the current SOFR of 3.7% (rising) — funding-cost direction sets the appetite for charge-off risk. Cross-validate any sector-level call against the named brand outcomes in the franchise-outcomes brain before underwriting a specific borrower.","src":"s01","date":"2026-08-14"},
-  {"id":"f007","topic":"upstream :: tourism-tdt","fact":"Upstream snapshot — tourism-tdt (neutral, magnitude 0.40, confidence 1.00)","value":"tourism-tdt as of 2026-08-14: direction neutral, magnitude 0.40, confidence 1.00, trust tier T1, 8 key metric(s). SWFL TDT collections (Lee + Collier combined) for 2026-04 (shoulder season): $9.03M. Trailing 12 months stand at 78% of the strongest pre-Hurricane-Ian annual run. Hospitality / accommodation operators should weight forward decisions against this SWFL seasonal pulse; the cross-vertical read lives downstream in master.","src":"s01","date":"2026-08-14"},
-  {"id":"f008","topic":"upstream :: env-swfl","fact":"Upstream snapshot — env-swfl (bearish, magnitude 0.80, confidence 1.00)","value":"env-swfl as of 2026-08-12: direction bearish, magnitude 0.80, confidence 1.00, trust tier T1, 43 key metric(s). Barrier-island SWFL ZIPs carry order-of-magnitude higher flood loss: 33957 (Lee County) runs $40,342/yr per insured property (100th percentile across SWFL ZIPs with claims in window), vs the Lee-mainland median of $13,530/yr per insured property. CRE translation: +50-70 bps cap-rate adjustment for barrier-island flood exposure; imputed flood insurance runs 347.3% of NOI at an 8% cap. Geography is the entire signal — flood risk for a Lee County address is a property of the ZIP, not the metro.","src":"s01","date":"2026-08-14"},
-  {"id":"f009","topic":"upstream :: logistics-swfl","fact":"Upstream snapshot — logistics-swfl (neutral, magnitude 0.50, confidence 1.00)","value":"logistics-swfl as of 2026-08-05: direction neutral, magnitude 0.50, confidence 1.00, trust tier T1, 2 key metric(s). In FAF5 year 2024, SWFL (FAF zone 129) absorbed 1226969.1K tons of inbound domestic freight worth $614894.8M across 12 origin zones and 40 commodity classes. Top origin zones by tonnage: Remainder of Florida (835272.9K tons), Jacksonville (125669.1K tons), Orlando (96882.9K tons) — the freight base loads into SWFL primarily from these corridors. Top commodity classes by tonnage: Natural sands (206809.8K tons), Gravel and crushed stone (155970.1K tons), Natural gas and other fuels (153589.7K tons).","src":"s01","date":"2026-08-14"},
-  {"id":"f010","topic":"upstream :: logistics-swfl-nowcast","fact":"Upstream snapshot — logistics-swfl-nowcast (neutral, magnitude 0.16, confidence 0.91)","value":"logistics-swfl-nowcast as of 2026-07-19: direction neutral, magnitude 0.16, confidence 0.91, trust tier T2, 12 key metric(s). FAF5 audited annual inbound freight: 1,226,969,100 tons (CY2026). This is a flow metric; the deviation below is an activity metric from FDOT segment counts. Current freight activity (annualized from 615 freight-coded FDOT segments) is 625,226,130,376 tons/year against a 329,180,068,619 tons/year rolling baseline (19-day window, σ = 312,059,949,158) — deviation z = 0.95 (89.9%). Shock-state: normal. Baseline-validity flag: valid. Consecutive breach days: 0.","src":"s01","date":"2026-08-14"},
-  {"id":"f011","topic":"upstream :: traffic-swfl","fact":"Upstream snapshot — traffic-swfl (neutral, magnitude 0.09, confidence 0.80)","value":"traffic-swfl as of 2026-07-19: direction neutral, magnitude 0.09, confidence 0.80, trust tier T2, 5 key metric(s). SWFL (Lee + Collier) length-weighted AADT in 2025 averaged 21,138 vehicles/day across 749 FDOT segments. Cohort-matched YoY 2024→2025: 0.9% over 684 segments — neutral read on corridor demand. 5-year CAGR 2021→2025: 3.3% per year. Coastal post-Ian recovery (Lee + Collier + Charlotte, 2025/2022): 108.1 — above pre-storm baseline.","src":"s01","date":"2026-08-14"},
-  {"id":"f012","topic":"upstream :: properties-lee-value","fact":"Upstream snapshot — properties-lee-value (bearish, magnitude 0.36, confidence 0.85)","value":"properties-lee-value as of 2026-07-19: direction bearish, magnitude 0.36, confidence 0.85, trust tier T2, 12 key metric(s). Lee County had 35,250 qualified parcel sales recorded for 2025 across 548,798 parcels (64.2 per 1,000). Trailing 3yr baseline (2022-2024) averaged 36490.3 sales/yr; current year sits at z = -1.1 — bearish read on Lee parcel transaction velocity. FHFA Cape Coral-Fort Myers MSA HPI: -5.05% YoY (2026-Q1), FL state -0.43% — federal price-index benchmark for the Lee market. Median Save-Our-Homes gap across 192,973 homesteaded parcels: 36.71% of just value suppressed for taxation.","src":"s01","date":"2026-08-14"},
-  {"id":"f013","topic":"upstream :: properties-collier-value","fact":"Upstream snapshot — properties-collier-value (neutral, magnitude 0.26, confidence 0.86)","value":"properties-collier-value as of 2026-07-22: direction neutral, magnitude 0.26, confidence 0.86, trust tier T2, 7 key metric(s). Collier County had 9,172 residential closings recorded by Redfin for 2025. Trailing 3yr baseline (2022-2024) averaged 9893.7 sales/yr; current year sits at z = -0.8 — neutral read on Collier transaction velocity. Median sale price +1.60% YoY (2026-05-31), 5.3 months of supply. Parcel base: 290,973 Collier parcels (FDOR cadastral), median Save-Our-Homes gap 36.47% across 107,030 homesteaded.","src":"s01","date":"2026-08-14"},
-  {"id":"f014","topic":"upstream :: permits-swfl","fact":"Upstream snapshot — permits-swfl (bullish, magnitude 0.44, confidence 1.00)","value":"permits-swfl as of 2026-08-13: direction bullish, magnitude 0.44, confidence 1.00, trust tier T1, 194 key metric(s). SWFL permit flow reads bullish (SWFL-weighted z = 1.33, 13% of corridors saturated at z >= +2 in commercial buckets). Lee z = 0.32, Naples z = 1.34. Highest commercial-alteration heat: waterside-shops. Coolest: waterside-shops.","src":"s01","date":"2026-08-14"},
-  {"id":"f015","topic":"upstream :: rentals-swfl","fact":"Upstream snapshot — rentals-swfl (bearish, magnitude 0.16, confidence 0.60)","value":"rentals-swfl as of 2026-07-22: direction bearish, magnitude 0.16, confidence 0.60, trust tier T3, 16 key metric(s). SWFL ZORI rents read bearish at 2026-06-30 — regional median YoY -1.57% on a median rent of $2,039/month across 45 ZIPs. Hottest: 34145 (10.0%), 34103 (6.4%), 34119 (4.2%). Coolest: 33966 (-4.6%), 33973 (-4.5%), 33909 (-4.5%).","src":"s01","date":"2026-08-14"},
-  {"id":"f016","topic":"upstream :: housing-swfl","fact":"Upstream snapshot — housing-swfl (mixed, magnitude 0.25, confidence 0.60)","value":"housing-swfl as of 2026-07-23: direction mixed, magnitude 0.25, confidence 0.60, trust tier T3, 6 key metric(s). SWFL housing reads mixed (data through 2026-06-30) across 55 ZIPs — regional median sale price $443,650 (-3.3% YoY), DOM 70 days, 4.5 months of supply, 94.9% sale-to-list. Fastest-moving ZIPs: 34116 (31 days), 33909 (48 days), 33967 (49 days). Priciest ZIPs: 33921 ($3,299,254), 34102 ($2,249,492), 34141 ($1,599,639).","src":"s01","date":"2026-08-14"},
-  {"id":"f017","topic":"upstream :: safety-swfl","fact":"Upstream snapshot — safety-swfl (neutral, magnitude 0.00, confidence 1.00)","value":"safety-swfl as of 2026-07-19: direction neutral, magnitude 0.00, confidence 1.00, trust tier T1, 8 key metric(s). SWFL property crime: 6.8 Part I offenses per 1,000 residents (2025 UCR), -18.7% YoY. Lee (8.0/1k) runs 3.1 points above Collier (4.8/1k).","src":"s01","date":"2026-08-14"},
-  {"id":"f018","topic":"upstream :: labor-demand-swfl","fact":"Upstream snapshot — labor-demand-swfl (bullish, magnitude 0.78, confidence 1.00)","value":"labor-demand-swfl as of 2026-07-19: direction bullish, magnitude 0.78, confidence 1.00, trust tier T1, 10 key metric(s). BLS OEWS May 2025 — SWFL workforce. Lee (Cape Coral-Fort Myers MSA): top sector: Office and Administrative Support Occupations (37,050), Construction 2.17× national, employment +1.5% YoY. Collier (Naples MSA): top sector: Food Preparation and Serving Related Occupations (25,250), Construction 1.88× national, employment +1.6% YoY. Source: BLS Occupational Employment and Wage Statistics.","src":"s01","date":"2026-08-14"},
-  {"id":"f019","topic":"upstream :: econ-dev-swfl","fact":"Upstream snapshot — econ-dev-swfl (neutral, magnitude 0.30, confidence 0.80)","value":"econ-dev-swfl as of 2026-08-11: direction neutral, magnitude 0.30, confidence 0.80, trust tier T2, 2 key metric(s). SWFL Inc. logged 1 economic development announcement in the last 90 days. Source: SWFL Inc. (swflinc.com/blog/), the official Lee County economic development organization.","src":"s01","date":"2026-08-14"},
-  {"id":"f020","topic":"upstream :: city-pulse-swfl","fact":"Upstream snapshot — city-pulse-swfl (neutral, magnitude 0.00, confidence 0.80)","value":"city-pulse-swfl as of 2026-08-14: direction neutral, magnitude 0.00, confidence 0.80, trust tier T2, 8 key metric(s). SWFL city pulse as of 2026-08-14: 110 live current-events signals across 11 cities — Fort Myers (29), Cape Coral (22), Naples (32), Estero (5), Marco Island (5), Sanibel (3), Bonita Springs (4), Fort Myers Beach (4), North Naples (4), Lehigh Acres (1), Golden Gate (1). Most current: Fort Myers — A long-vacant Fort Myers building sold for $2.25 million, as reported Aug. 10, 2026. These are current cited facts only; the cross-vertical read and any direction call live downstream in master.","src":"s01","date":"2026-08-14"},
-  {"id":"f021","topic":"upstream :: rsw-airport","fact":"Upstream snapshot — rsw-airport (bullish, magnitude 0.16, confidence 1.00)","value":"rsw-airport as of 2026-08-09: direction bullish, magnitude 0.16, confidence 1.00, trust tier T1, 9 key metric(s). LCPA Aviation April 2026 — RSW 1,152,669 total passengers (-2.2% YoY), trailing-12-mo 11,197,951 (+2.4% vs prior year — the direction basis), 512,534 arrivals / 640,135 departures, 10,797 aircraft operations, 3,463,896 lbs air freight. Source: Lee County Port Authority (flylcpa.com/about-lcpa/reports-and-statistics/).","src":"s01","date":"2026-08-14"},
-  {"id":"f022","topic":"upstream :: news-swfl","fact":"Upstream snapshot — news-swfl (neutral, magnitude 0.30, confidence 0.80)","value":"news-swfl as of 2026-08-11: direction neutral, magnitude 0.30, confidence 0.80, trust tier T2, 9 key metric(s). DBPR issued 0 SWFL-relevant press releases in the last 90 days. 6 individual enforcement notices active in Lee and Collier counties (4 construction unlicensed, 0 ABT/hospitality). Sources: FL DBPR press releases (www2.myfloridalicense.com/press-releases/) and public enforcement notices (www2.myfloridalicense.com/public-notices/).","src":"s01","date":"2026-08-14"},
-  {"id":"f023","topic":"upstream :: freshness-pulse","fact":"Upstream snapshot — freshness-pulse (neutral, magnitude 0.00, confidence 0.80)","value":"freshness-pulse as of 2026-08-14: direction neutral, magnitude 0.00, confidence 0.80, trust tier T2, 4 key metric(s). Today's sourced snapshot — Cape Coral median asking price (as of 2026-08-14) $399,750; Fort Myers median asking price (as of 2026-08-14) $325,000; Naples median asking price (as of 2026-08-14) $650,000; SWFL 30-year fixed mortgage rate (as of 2026-08-13) 6.67%. These are cited current facts only; the direction call lives downstream in master.","src":"s01","date":"2026-08-14"},
-  {"id":"f024","topic":"upstream :: seller-stress-swfl","fact":"Upstream snapshot — seller-stress-swfl (bearish, magnitude 0.56, confidence 0.60)","value":"seller-stress-swfl as of 2026-07-18: direction bearish, magnitude 0.56, confidence 0.60, trust tier T3, 5 key metric(s). SWFL seller stress is elevated at 63/100 (bearish threshold: ≥65). 52 of 55 ZIPs scored vs 2019–2021 baseline. Highest-stress ZIPs: 33903 (86), 33924 (80), 34145 (78). Leading signal: 18.7% median delistings rate.","src":"s01","date":"2026-08-14"},
-  {"id":"f025","topic":"upstream :: market-heat-swfl","fact":"Upstream snapshot — market-heat-swfl (bullish, magnitude 0.33, confidence 0.60)","value":"market-heat-swfl as of 2026-08-09: direction bullish, magnitude 0.33, confidence 0.60, trust tier T3, 5 key metric(s). SWFL market heat is tightening (bullish) at 66/100. Inventory down 18.5% Y/Y, DOM down 6.5% Y/Y across 40 ZIPs. Tightest: 34105 (84), 33990 (82), 34116 (80). [INFERENCE] Forward read anchors on the pending ratio (median 0.26), the leading demand edge: a sustained rise points to firming prices. Falsified if the pending ratio falls for 2+ consecutive months while active inventory rises.","src":"s01","date":"2026-08-14"},
-  {"id":"f026","topic":"upstream :: storm-history-swfl","fact":"Upstream snapshot — storm-history-swfl (bearish, magnitude 0.50, confidence 1.00)","value":"storm-history-swfl as of 2026-08-11: direction bearish, magnitude 0.50, confidence 1.00, trust tier T1, 9 key metric(s). Southwest Florida storm history (LEE + COLLIER) — 887 total NOAA Storm Events across the 1996-2025 modern-schema vintage, 17 qualifying as major storms (damage >= $1M AND event_type in {Hurricane, Tropical Storm, Tornado, Flash Flood, Storm Surge/Tide}). Most recent billion-dollar event in scope: Hurricane Ian on 2022-09-28. Trailing 10-year window: 70 property-damage events, 12 distinct tropical cyclones — bearish read on near-term physical risk.","src":"s01","date":"2026-08-14"},
-  {"id":"f027","topic":"upstream :: hurricane-tracks-fl","fact":"Upstream snapshot — hurricane-tracks-fl (neutral, magnitude 0.20, confidence 1.00)","value":"hurricane-tracks-fl as of 2026-07-15: direction neutral, magnitude 0.20, confidence 1.00, trust tier T1, 6 key metric(s). Southwest Florida hurricane impact history (HURDAT2 × NFIP cross-tier join, 3 core counties: Collier + Hendry + Lee) — 7 distinct named storms made landfall in a SWFL county over the trailing 30-year window, 2 of those were Cat-3+ on Saffir-Simpson at any point in their lifetime. Realized NFIP exposure per (storm × county) landfall row averages $116,788,824, with the worst single (storm × county) on record at $3,389,600,145.37. Most recent landfall in scope: IAN 2022-09-28. Closest pass in the trailing 5-year window: 18 statute miles from a SWFL county centroid.","src":"s01","date":"2026-08-14"},
-  {"id":"f028","topic":"upstream :: licenses-swfl","fact":"Upstream snapshot — licenses-swfl (bullish, magnitude 0.05, confidence 1.00)","value":"licenses-swfl as of 2026-08-05: direction bullish, magnitude 0.05, confidence 1.00, trust tier T1, 6 key metric(s). FL DBPR contractor licensing in Lee+Collier is healthy — lapse rate below stress threshold. Active licenses: Lee 6,507, Collier 3,341 (9,848 combined). Lapse rate: 0.5% of all licenses. New in last 12 months: 1,002. Applicants in pipeline: 8,769.","src":"s01","date":"2026-08-14"},
-  {"id":"f029","topic":"upstream :: condo-sirs-swfl","fact":"Upstream snapshot — condo-sirs-swfl (neutral, magnitude 1.00, confidence 1.00)","value":"condo-sirs-swfl as of 2026-08-07: direction neutral, magnitude 1.00, confidence 1.00, trust tier T1, 5 key metric(s). DBPR confirms 1,366 SWFL condominium and cooperative associations have submitted their Structural Integrity Reserve Study as of 2026-08-06. Lee County: 608, Collier County: 758. Of these, 664 filed under the HB 913 compliance push (July 2025+ database). This is a positive-signal-only registry: presence confirms SIRS filing; absence cannot be interpreted without a baseline count of all SWFL 3-story+ condominiums.","src":"s01","date":"2026-08-14"},
-  {"id":"f030","topic":"upstream :: permits-commercial-swfl","fact":"Upstream snapshot — permits-commercial-swfl (neutral, magnitude 0.30, confidence 1.00)","value":"permits-commercial-swfl as of 2026-07-19: direction neutral, magnitude 0.30, confidence 1.00, trust tier T1, 3 key metric(s). SWFL issued 412 commercial building permits in 2025 (Maxwell, Hendry & Simmons Data Book), totaling $2.91B in declared value and 12.73M sf of building area across 12 submarkets. Top submarkets by permit value: fort-myers ($1.02B, 46 permits); lee-county-unincorp ($564.5M, 96 permits); collier-county-unincorp ($496.4M, 67 permits). Single-year snapshot — direction is stable until a second annual book enables a year-over-year read; master synthesizes the cross-vertical CRE context downstream.","src":"s01","date":"2026-08-14"},
-  {"id":"f031","topic":"upstream :: price-distribution-swfl","fact":"Upstream snapshot — price-distribution-swfl (neutral, magnitude 0.00, confidence 0.80)","value":"price-distribution-swfl as of 2026-08-11: direction neutral, magnitude 0.00, confidence 0.80, trust tier T2, 4 key metric(s). Of 28,059 active SWFL for-sale listings (as of 2026-08-10), 44.50% are priced under $300k, 31.50% $300k–$600k, 11.60% $600k–$1M, and 12.40% at $1M or above. By county: Lee 20,894, Collier 7,165.","src":"s01","date":"2026-08-14"},
-  {"id":"f032","topic":"upstream :: listing-momentum-swfl","fact":"Upstream snapshot — listing-momentum-swfl (neutral, magnitude 0.00, confidence 0.80)","value":"listing-momentum-swfl as of 2026-08-09: direction neutral, magnitude 0.00, confidence 0.80, trust tier T2, 2 key metric(s). Across 30,781 active SWFL for-sale listings (as of 2026-08-09), 14.70% currently carry a price cut and 8.70% are newly listed. By county: Lee 15.30% cut / 9.00% new, Collier 13.40% cut / 7.50% new, Hendry 11.00% cut / 8.30% new.","src":"s01","date":"2026-08-14"},
-  {"id":"f033","topic":"upstream :: market-temperature-swfl","fact":"Upstream snapshot — market-temperature-swfl (neutral, magnitude 0.00, confidence 0.80)","value":"market-temperature-swfl as of 2026-08-05: direction neutral, magnitude 0.00, confidence 0.80, trust tier T2, 1 key metric(s). Across 54 SWFL ZIPs (as of 2026-08-04), the median home sells for 11.79× its annual rent — an implied gross rental yield near 8.48%. Highest-yield ZIPs: 33972 (20.16%), 34113 (15.48%), 33903 (13.95%). The full per-ZIP sold/list/rent/DOM snapshot is in the table below.","src":"s01","date":"2026-08-14"},
-  {"id":"f034","topic":"upstream :: investor-zip-swfl","fact":"Upstream snapshot — investor-zip-swfl (neutral, magnitude 0.00, confidence 0.78)","value":"investor-zip-swfl as of 2026-07-17: direction neutral, magnitude 0.00, confidence 0.78, trust tier T4, 8 key metric(s). SWFL investor composite: 53 ZIP cards pairing home value (ZHVI) with long-term rent (ZORI) at a regional median gross rent yield of 7.19%. 2 carry the flood-adjusted cap rate — the value + rent + flood-and-NFIP-percentile read no other source pairs at ZIP grain.","src":"s01","date":"2026-08-14"},
-  {"id":"f035","topic":"upstream :: active-listings-swfl","fact":"Upstream snapshot — active-listings-swfl (neutral, magnitude 0.00, confidence 0.80)","value":"active-listings-swfl as of 2026-08-14: direction neutral, magnitude 0.00, confidence 0.80, trust tier T2, 5 key metric(s). 22,650 active SWFL residential listings, median asking $412,000, avg 141 days on market (active residential listings, as of 2026-08-14). By county: Lee 16,394 (median $369,900), Collier 6,256 (median $649,900), Lee 1 (median $314,900).","src":"s01","date":"2026-08-14"},
-  {"id":"f036","topic":"upstream :: active-rentals-swfl","fact":"Upstream snapshot — active-rentals-swfl (neutral, magnitude 0.00, confidence 0.80)","value":"active-rentals-swfl as of 2026-07-11: direction neutral, magnitude 0.00, confidence 0.80, trust tier T2, 1 key metric(s). 7,059 active SWFL rental listings, asking prices observed from $485 to $17,000/mo (as of 2026-07-06). By county: Lee 3,927, Collier 3,132.","src":"s01","date":"2026-08-14"},
-  {"id":"f037","topic":"upstream :: communities-swfl","fact":"Upstream snapshot — communities-swfl (neutral, magnitude 0.00, confidence 0.80)","value":"communities-swfl as of 2026-08-05: direction neutral, magnitude 0.00, confidence 0.80, trust tier T2, 4 key metric(s). 39,504 SWFL homes catalogued across 1,000 neighborhoods (Lee + Collier); 81 marketed golf/gated communities profiled (as of 2026-08-02). Golf-or-not, fees, amenities, home count and drive-times per community ride in the community catalogue for a specific-community lookup.","src":"s01","date":"2026-08-14"},
-  {"id":"f038","topic":"upstream :: tier-divergence-swfl","fact":"Upstream snapshot — tier-divergence-swfl (bearish, magnitude 0.13, confidence 0.60)","value":"tier-divergence-swfl as of 2026-07-23: direction bearish, magnitude 0.13, confidence 0.60, trust tier T3, 12 key metric(s). SWFL price tiers read bearish at 2026-05-31 — luxury -5.12% YoY vs starter -6.42% YoY, a median spread of 2.56x moving 1.32% YoY. 0 of 50 ZIPs are in a K-shape (luxury holding, starter falling). Widest fractures: 34105 (8.76%, 5.2x), 33907 (7.81%, 2.5x), 33919 (7.23%, 2.7x).","src":"s01","date":"2026-08-14"},
-  {"id":"f039","topic":"upstream :: home-values-swfl","fact":"Upstream snapshot — home-values-swfl (bearish, magnitude 0.38, confidence 0.60)","value":"home-values-swfl as of 2026-07-24: direction bearish, magnitude 0.38, confidence 0.60, trust tier T3, 16 key metric(s). SWFL ZHVI home values read bearish at 2026-06-30 — regional median YoY -5.65% on a median value of $361,089 across 53 ZIPs. Fastest-appreciating: 34139 (0.1%), 34145 (-1.7%), 34117 (-2.6%). Coolest: 33921 (-11.1%), 33907 (-10.7%), 33919 (-10.6%).","src":"s01","date":"2026-08-14"}
+  {"id":"f001","topic":"upstream :: franchise-outcomes","fact":"Upstream snapshot — franchise-outcomes (neutral, magnitude 0.00, confidence 1.00)","value":"franchise-outcomes as of 2026-10-02: direction neutral, magnitude 0.00, confidence 1.00, trust tier T1, 0 key metric(s). Franchise loan outcomes: awaiting the first live SBA FOIA data load (quarterly pipeline). No survival figures are published from this brain until real loan-level data lands.","src":"s01","date":"2026-10-22"},
+  {"id":"f002","topic":"upstream :: cre-swfl","fact":"Upstream snapshot — cre-swfl (mixed, magnitude 0.30, confidence 0.87)","value":"cre-swfl as of 2026-10-22: direction mixed, magnitude 0.30, confidence 0.87, trust tier T2, 240 key metric(s). The SWFL CRE pack covers 27 verified corridors across Lee and Collier counties. Quantified reads: median cap rate 6.7% (rising); median vacancy 2.9% (falling); median net absorption 6,397 sqft (rising); median asking rent $27.15/sqft NNN (rising). Submarket signals split between landlord-market and distress reads — no consensus direction at the SWFL CRE level. Common driver: asking rent rising alongside vacancy rising (asking-price stickiness, not pricing power). Corridor Factor: 44/100 (neutral) — composite of cap rate, vacancy, and asking rent across 10 of 10 submarkets. Permit capital flow: Lee County corridor-weighted z = 0.41 (above baseline).","src":"s01","date":"2026-10-22"},
+  {"id":"f003","topic":"upstream :: macro-us","fact":"Upstream snapshot — macro-us (bearish, magnitude 0.50, confidence 1.00)","value":"macro-us as of 2026-10-22: direction bearish, magnitude 0.50, confidence 1.00, trust tier T1, 2 key metric(s). As of the latest reported periods, the national macro backdrop reads: SOFR at 3.9% and stable, headline CPI at 3.7% YoY and rising. This brain is the root of the macro chain (macro-us → macro-florida → macro-swfl). State and regional brains read the funding-cost and inflation backdrop through here.","src":"s01","date":"2026-10-22"},
+  {"id":"f004","topic":"upstream :: macro-florida","fact":"Upstream snapshot — macro-florida (bullish, magnitude 0.50, confidence 1.00)","value":"macro-florida as of 2026-10-22: direction bullish, magnitude 0.50, confidence 1.00, trust tier T1, 7 key metric(s). As of the latest reported periods, the Florida state-level labor market reads: Florida unemployment at 4.4% (falling), labor force participation at 57.3%. Read against the national backdrop (macro-us, confidence 1.00): SOFR at 3.9% (stable). Regional brains (macro-swfl, future macro-tampa/macro-jax) use this brain as the state baseline for gap math.","src":"s01","date":"2026-10-22"},
+  {"id":"f005","topic":"upstream :: macro-swfl","fact":"Upstream snapshot — macro-swfl (bearish, magnitude 1.00, confidence 1.00)","value":"macro-swfl as of 2026-10-22: direction bearish, magnitude 1.00, confidence 1.00, trust tier T1, 16 key metric(s). SWFL labor market, 2026-M07 (preliminary): Lee County at 5.2%, +0.6pp YoY; Collier County at 5%, +0.6pp YoY; FL state LAUS 4.6% (benchmark). Private-sector wages in Lee County ran $1,230/wk in 2026-Q1 (+4.9% YoY). Bank branch deposits in Lee County stood at $21,115,545,000 as of 06/30/2026 (-5.3% YoY). Against the FL state macro backdrop (macro-florida, confidence 1.00), SWFL county unemployment is rising faster than the state average.","src":"s01","date":"2026-10-22"},
+  {"id":"f006","topic":"upstream :: sector-credit-swfl","fact":"Upstream snapshot — sector-credit-swfl (bearish, magnitude 0.39, confidence 1.00)","value":"sector-credit-swfl as of 2026-10-22: direction bearish, magnitude 0.39, confidence 1.00, trust tier T1, 18 key metric(s). For SWFL lenders, the three lowest-risk 2-digit NAICS sectors by SBA resolved-loan charge-off rate are: Arts, Entertainment & Recreation (0% [thin sample: only 7 resolved loans, directional not confident]), Finance & Insurance (0% [thin sample: only 14 resolved loans, directional not confident]), Real Estate, Rental & Leasing (0% [thin sample: only 6 resolved loans, directional not confident]). The three highest-risk sectors are: Transportation & Warehousing (57.1% [thin sample: only 7 resolved loans, directional not confident]), Retail Trade (44.4% [thin sample: only 9 resolved loans, directional not confident]), Other Services (Personal & Repair) (21.2%). Read these rates against the current SOFR of 3.7% (rising) — funding-cost direction sets the appetite for charge-off risk. Cross-validate any sector-level call against the named brand outcomes in the franchise-outcomes brain before underwriting a specific borrower.","src":"s01","date":"2026-10-22"},
+  {"id":"f007","topic":"upstream :: tourism-tdt","fact":"Upstream snapshot — tourism-tdt (neutral, magnitude 0.40, confidence 1.00)","value":"tourism-tdt as of 2026-10-22: direction neutral, magnitude 0.40, confidence 1.00, trust tier T1, 8 key metric(s). SWFL TDT collections (Lee + Collier combined) for 2026-04 (shoulder season): $9.03M. Trailing 12 months stand at 78% of the strongest pre-Hurricane-Ian annual run. Hospitality / accommodation operators should weight forward decisions against this SWFL seasonal pulse; the cross-vertical read lives downstream in master.","src":"s01","date":"2026-10-22"},
+  {"id":"f008","topic":"upstream :: env-swfl","fact":"Upstream snapshot — env-swfl (bearish, magnitude 0.80, confidence 1.00)","value":"env-swfl as of 2026-10-14: direction bearish, magnitude 0.80, confidence 1.00, trust tier T1, 43 key metric(s). Barrier-island SWFL ZIPs carry order-of-magnitude higher flood loss: 33957 (Lee County) runs $40,342/yr per insured property (100th percentile across SWFL ZIPs with claims in window), vs the Lee-mainland median of $13,530/yr per insured property. CRE translation: +50-70 bps cap-rate adjustment for barrier-island flood exposure; imputed flood insurance runs 347.3% of NOI at an 8% cap. Geography is the entire signal — flood risk for a Lee County address is a property of the ZIP, not the metro.","src":"s01","date":"2026-10-22"},
+  {"id":"f009","topic":"upstream :: logistics-swfl","fact":"Upstream snapshot — logistics-swfl (neutral, magnitude 0.50, confidence 1.00)","value":"logistics-swfl as of 2026-10-16: direction neutral, magnitude 0.50, confidence 1.00, trust tier T1, 2 key metric(s). In FAF5 year 2024, SWFL (FAF zone 129) absorbed 1226969.1K tons of inbound domestic freight worth $614894.8M across 12 origin zones and 40 commodity classes. Top origin zones by tonnage: Remainder of Florida (835272.9K tons), Jacksonville (125669.1K tons), Orlando (96882.9K tons) — the freight base loads into SWFL primarily from these corridors. Top commodity classes by tonnage: Natural sands (206809.8K tons), Gravel and crushed stone (155970.1K tons), Natural gas and other fuels (153589.7K tons).","src":"s01","date":"2026-10-22"},
+  {"id":"f010","topic":"upstream :: logistics-swfl-nowcast","fact":"Upstream snapshot — logistics-swfl-nowcast (neutral, magnitude 0.14, confidence 0.91)","value":"logistics-swfl-nowcast as of 2026-10-16: direction neutral, magnitude 0.14, confidence 0.91, trust tier T2, 12 key metric(s). FAF5 audited annual inbound freight: 1,226,969,100 tons (CY2026). This is a flow metric; the deviation below is an activity metric from FDOT segment counts. Current freight activity (annualized from 615 freight-coded FDOT segments) is 625,226,130,376 tons/year against a 357,374,931,643 tons/year rolling baseline (21-day window, σ = 309,287,923,382) — deviation z = 0.87 (74.9%). Shock-state: normal. Baseline-validity flag: valid. Consecutive breach days: 0.","src":"s01","date":"2026-10-22"},
+  {"id":"f011","topic":"upstream :: traffic-swfl","fact":"Upstream snapshot — traffic-swfl (neutral, magnitude 0.09, confidence 0.80)","value":"traffic-swfl as of 2026-10-16: direction neutral, magnitude 0.09, confidence 0.80, trust tier T2, 5 key metric(s). SWFL (Lee + Collier) length-weighted AADT in 2025 averaged 21,138 vehicles/day across 749 FDOT segments. Cohort-matched YoY 2024→2025: 0.9% over 684 segments — neutral read on corridor demand. 5-year CAGR 2021→2025: 3.3% per year. Coastal post-Ian recovery (Lee + Collier + Charlotte, 2025/2022): 108.1 — above pre-storm baseline.","src":"s01","date":"2026-10-22"},
+  {"id":"f012","topic":"upstream :: properties-lee-value","fact":"Upstream snapshot — properties-lee-value (bearish, magnitude 0.36, confidence 0.85)","value":"properties-lee-value as of 2026-10-19: direction bearish, magnitude 0.36, confidence 0.85, trust tier T2, 12 key metric(s). Lee County had 35,250 qualified parcel sales recorded for 2025 across 548,798 parcels (64.2 per 1,000). Trailing 3yr baseline (2022-2024) averaged 36490.3 sales/yr; current year sits at z = -1.1 — bearish read on Lee parcel transaction velocity. Median Save-Our-Homes gap across 192,973 homesteaded parcels: 36.71% of just value suppressed for taxation. FHFA Cape Coral-Fort Myers MSA HPI YoY: +0.34% (2026-Q2). Federal benchmark for Lee County repeat-sale price direction — purchase-only, traditional, quarterly. FHFA Florida state HPI YoY: +0.91% (2026-Q2). Statewide baseline — Lee MSA delta vs state signals local over/underperformance.","src":"s01","date":"2026-10-22"},
+  {"id":"f013","topic":"upstream :: properties-collier-value","fact":"Upstream snapshot — properties-collier-value (neutral, magnitude 0.25, confidence 0.86)","value":"properties-collier-value as of 2026-10-22: direction neutral, magnitude 0.25, confidence 0.86, trust tier T2, 7 key metric(s). Collier County had 9,197 residential closings recorded by Redfin for 2025. Trailing 3yr baseline (2022-2024) averaged 9909.0 sales/yr; current year sits at z = -0.8 — neutral read on Collier transaction velocity. Median sale price +3.30% YoY (2026-09-30), 6.2 months of supply. Parcel base: 294,148 Collier parcels (FDOR cadastral), median Save-Our-Homes gap 29.53% across 108,444 homesteaded.","src":"s01","date":"2026-10-22"},
+  {"id":"f014","topic":"upstream :: permits-swfl","fact":"Upstream snapshot — permits-swfl (bullish, magnitude 0.34, confidence 1.00)","value":"permits-swfl as of 2026-10-20: direction bullish, magnitude 0.34, confidence 1.00, trust tier T1, 202 key metric(s). SWFL permit flow reads bullish (SWFL-weighted z = 1.03, 20% of corridors saturated at z >= +2 in commercial buckets). Lee z = 0.41, Naples z = 1.03. Highest commercial-alteration heat: waterside-shops. Coolest: waterside-shops.","src":"s01","date":"2026-10-22"},
+  {"id":"f015","topic":"upstream :: rentals-swfl","fact":"Upstream snapshot — rentals-swfl (neutral, magnitude 0.05, confidence 0.60)","value":"rentals-swfl as of 2026-10-22: direction neutral, magnitude 0.05, confidence 0.60, trust tier T3, 16 key metric(s). SWFL ZORI rents read neutral at 2026-09-30 — regional median YoY 0.51% on a median rent of $2,059/month across 46 ZIPs. Hottest: 34145 (29.3%), 34103 (9.9%), 33913 (7.1%). Coolest: 33916 (-5.6%), 33973 (-4.9%), 33936 (-3.9%).","src":"s01","date":"2026-10-22"},
+  {"id":"f016","topic":"upstream :: housing-swfl","fact":"Upstream snapshot — housing-swfl (mixed, magnitude 0.25, confidence 0.60)","value":"housing-swfl as of 2026-10-16: direction mixed, magnitude 0.25, confidence 0.60, trust tier T3, 6 key metric(s). SWFL housing reads mixed (data through 2026-09-30) across 55 ZIPs — regional median sale price $424,875 (-1.4% YoY), DOM 86 days, 5.5 months of supply, 95.1% sale-to-list. Fastest-moving ZIPs: 34139 (16 days), 34116 (32 days), 33990 (51 days). Priciest ZIPs: 33921 ($3,748,898), 34102 ($2,474,273), 34141 ($1,600,000).","src":"s01","date":"2026-10-22"},
+  {"id":"f017","topic":"upstream :: safety-swfl","fact":"Upstream snapshot — safety-swfl (neutral, magnitude 0.00, confidence 1.00)","value":"safety-swfl as of 2026-10-02: direction neutral, magnitude 0.00, confidence 1.00, trust tier T1, 8 key metric(s). SWFL property crime: 6.8 Part I offenses per 1,000 residents (2025 UCR), -18.7% YoY. Lee (8.0/1k) runs 3.1 points above Collier (4.8/1k).","src":"s01","date":"2026-10-22"},
+  {"id":"f018","topic":"upstream :: labor-demand-swfl","fact":"Upstream snapshot — labor-demand-swfl (bullish, magnitude 0.78, confidence 1.00)","value":"labor-demand-swfl as of 2026-10-17: direction bullish, magnitude 0.78, confidence 1.00, trust tier T1, 10 key metric(s). BLS OEWS May 2025 — SWFL workforce. Lee (Cape Coral-Fort Myers MSA): top sector: Office and Administrative Support Occupations (37,050), Construction 2.17× national, employment +1.5% YoY. Collier (Naples MSA): top sector: Food Preparation and Serving Related Occupations (25,250), Construction 1.88× national, employment +1.6% YoY. Source: BLS Occupational Employment and Wage Statistics.","src":"s01","date":"2026-10-22"},
+  {"id":"f019","topic":"upstream :: econ-dev-swfl","fact":"Upstream snapshot — econ-dev-swfl (neutral, magnitude 0.35, confidence 0.80)","value":"econ-dev-swfl as of 2026-10-20: direction neutral, magnitude 0.35, confidence 0.80, trust tier T2, 2 key metric(s). SWFL Inc. logged 1 economic development announcement in the last 90 days. Momentum: flat vs prior 90-day window. Source: SWFL Inc. (swflinc.com/blog/), the official Lee County economic development organization.","src":"s01","date":"2026-10-22"},
+  {"id":"f020","topic":"upstream :: city-pulse-swfl","fact":"Upstream snapshot — city-pulse-swfl (neutral, magnitude 0.00, confidence 0.80)","value":"city-pulse-swfl as of 2026-10-22: direction neutral, magnitude 0.00, confidence 0.80, trust tier T2, 8 key metric(s). SWFL city pulse as of 2026-10-22: 53 live current-events signals across 4 cities — Naples (21), Fort Myers (17), Cape Coral (14), Estero (1). Most current: Naples — Two Naples men were sentenced to prison for wire fraud on Oct. 20, 2026. These are current cited facts only; the cross-vertical read and any direction call live downstream in master.","src":"s01","date":"2026-10-22"},
+  {"id":"f021","topic":"upstream :: rsw-airport","fact":"Upstream snapshot — rsw-airport (bullish, magnitude 0.16, confidence 1.00)","value":"rsw-airport as of 2026-10-09: direction bullish, magnitude 0.16, confidence 1.00, trust tier T1, 9 key metric(s). LCPA Aviation April 2026 — RSW 1,152,669 total passengers (-2.2% YoY), trailing-12-mo 11,197,951 (+2.4% vs prior year — the direction basis), 512,534 arrivals / 640,135 departures, 10,797 aircraft operations, 3,463,896 lbs air freight. Source: Lee County Port Authority (flylcpa.com/about-lcpa/reports-and-statistics/).","src":"s01","date":"2026-10-22"},
+  {"id":"f022","topic":"upstream :: news-swfl","fact":"Upstream snapshot — news-swfl (neutral, magnitude 0.30, confidence 0.80)","value":"news-swfl as of 2026-10-20: direction neutral, magnitude 0.30, confidence 0.80, trust tier T2, 9 key metric(s). DBPR issued 1 SWFL-relevant press release in the last 90 days. 2 individual enforcement notices active in Lee and Collier counties (2 construction unlicensed, 0 ABT/hospitality). Top press release topics: ABT, licensing, enforcement. Sources: FL DBPR press releases (www2.myfloridalicense.com/press-releases/) and public enforcement notices (www2.myfloridalicense.com/public-notices/).","src":"s01","date":"2026-10-22"},
+  {"id":"f023","topic":"upstream :: freshness-pulse","fact":"Upstream snapshot — freshness-pulse (neutral, magnitude 0.00, confidence 0.80)","value":"freshness-pulse as of 2026-10-22: direction neutral, magnitude 0.00, confidence 0.80, trust tier T2, 3 key metric(s). Today's sourced snapshot — Cape Coral median asking price (as of 2026-10-22) $399,200; Fort Myers median asking price (as of 2026-10-22) $325,000; Naples median asking price (as of 2026-10-22) $650,000. These are cited current facts only; the direction call lives downstream in master.","src":"s01","date":"2026-10-22"},
+  {"id":"f024","topic":"upstream :: seller-stress-swfl","fact":"Upstream snapshot — seller-stress-swfl (bearish, magnitude 0.55, confidence 0.60)","value":"seller-stress-swfl as of 2026-10-16: direction bearish, magnitude 0.55, confidence 0.60, trust tier T3, 5 key metric(s). SWFL seller stress is elevated at 62/100 (bearish threshold: ≥65). 52 of 55 ZIPs scored vs 2019–2021 baseline. Highest-stress ZIPs: 33924 (100), 33957 (83), 33921 (76). Leading signal: 17.2% median delistings rate.","src":"s01","date":"2026-10-22"},
+  {"id":"f025","topic":"upstream :: market-heat-swfl","fact":"Upstream snapshot — market-heat-swfl (bullish, magnitude 0.30, confidence 0.60)","value":"market-heat-swfl as of 2026-10-09: direction bullish, magnitude 0.30, confidence 0.60, trust tier T3, 5 key metric(s). SWFL market heat is tightening (bullish) at 65/100. Inventory down 13.0% Y/Y, DOM down 8.4% Y/Y across 42 ZIPs. Tightest: 34138 (85), 33990 (80), 34145 (77). [INFERENCE] Forward read anchors on the pending ratio (median 0.24), the leading demand edge: a sustained rise points to firming prices. Falsified if the pending ratio falls for 2+ consecutive months while active inventory rises.","src":"s01","date":"2026-10-22"},
+  {"id":"f026","topic":"upstream :: storm-history-swfl","fact":"Upstream snapshot — storm-history-swfl (bearish, magnitude 0.50, confidence 1.00)","value":"storm-history-swfl as of 2026-10-11: direction bearish, magnitude 0.50, confidence 1.00, trust tier T1, 9 key metric(s). Southwest Florida storm history (LEE + COLLIER) — 887 total NOAA Storm Events across the 1996-2025 modern-schema vintage, 17 qualifying as major storms (damage >= $1M AND event_type in {Hurricane, Tropical Storm, Tornado, Flash Flood, Storm Surge/Tide}). Most recent billion-dollar event in scope: Hurricane Ian on 2022-09-28. Trailing 10-year window: 68 property-damage events, 10 distinct tropical cyclones — bearish read on near-term physical risk.","src":"s01","date":"2026-10-22"},
+  {"id":"f027","topic":"upstream :: hurricane-tracks-fl","fact":"Upstream snapshot — hurricane-tracks-fl (neutral, magnitude 0.20, confidence 1.00)","value":"hurricane-tracks-fl as of 2026-10-06: direction neutral, magnitude 0.20, confidence 1.00, trust tier T1, 6 key metric(s). Southwest Florida hurricane impact history (HURDAT2 × NFIP cross-tier join, 3 core counties: Collier + Hendry + Lee) — 7 distinct named storms made landfall in a SWFL county over the trailing 30-year window, 2 of those were Cat-3+ on Saffir-Simpson at any point in their lifetime. Realized NFIP exposure per (storm × county) landfall row averages $116,788,824, with the worst single (storm × county) on record at $3,389,600,145.37. Most recent landfall in scope: IAN 2022-09-28. Closest pass in the trailing 5-year window: 18 statute miles from a SWFL county centroid.","src":"s01","date":"2026-10-22"},
+  {"id":"f028","topic":"upstream :: licenses-swfl","fact":"Upstream snapshot — licenses-swfl (bullish, magnitude 0.05, confidence 1.00)","value":"licenses-swfl as of 2026-10-06: direction bullish, magnitude 0.05, confidence 1.00, trust tier T1, 6 key metric(s). FL DBPR contractor licensing in Lee+Collier is healthy — lapse rate below stress threshold. Active licenses: Lee 6,643, Collier 3,407 (10,050 combined). Lapse rate: 0.5% of all licenses. New in last 12 months: 1,009. Applicants in pipeline: 8,863.","src":"s01","date":"2026-10-22"},
+  {"id":"f029","topic":"upstream :: condo-sirs-swfl","fact":"Upstream snapshot — condo-sirs-swfl (neutral, magnitude 1.00, confidence 1.00)","value":"condo-sirs-swfl as of 2026-10-02: direction neutral, magnitude 1.00, confidence 1.00, trust tier T1, 5 key metric(s). DBPR confirms 1,366 SWFL condominium and cooperative associations have submitted their Structural Integrity Reserve Study as of 2026-10-01. Lee County: 608, Collier County: 758. Of these, 664 filed under the HB 913 compliance push (July 2025+ database). This is a positive-signal-only registry: presence confirms SIRS filing; absence cannot be interpreted without a baseline count of all SWFL 3-story+ condominiums.","src":"s01","date":"2026-10-22"},
+  {"id":"f030","topic":"upstream :: permits-commercial-swfl","fact":"Upstream snapshot — permits-commercial-swfl (neutral, magnitude 0.30, confidence 1.00)","value":"permits-commercial-swfl as of 2026-07-19: direction neutral, magnitude 0.30, confidence 1.00, trust tier T1, 3 key metric(s). SWFL issued 412 commercial building permits in 2025 (Maxwell, Hendry & Simmons Data Book), totaling $2.91B in declared value and 12.73M sf of building area across 12 submarkets. Top submarkets by permit value: fort-myers ($1.02B, 46 permits); lee-county-unincorp ($564.5M, 96 permits); collier-county-unincorp ($496.4M, 67 permits). Single-year snapshot — direction is stable until a second annual book enables a year-over-year read; master synthesizes the cross-vertical CRE context downstream.","src":"s01","date":"2026-10-22"},
+  {"id":"f031","topic":"upstream :: price-distribution-swfl","fact":"Upstream snapshot — price-distribution-swfl (neutral, magnitude 0.00, confidence 0.80)","value":"price-distribution-swfl as of 2026-10-19: direction neutral, magnitude 0.00, confidence 0.80, trust tier T2, 4 key metric(s). Of 28,059 active SWFL for-sale listings (as of 2026-08-10), 44.50% are priced under $300k, 31.50% $300k–$600k, 11.60% $600k–$1M, and 12.40% at $1M or above. By county: Lee 20,894, Collier 7,165.","src":"s01","date":"2026-10-22"},
+  {"id":"f032","topic":"upstream :: listing-momentum-swfl","fact":"Upstream snapshot — listing-momentum-swfl (neutral, magnitude 0.00, confidence 0.80)","value":"listing-momentum-swfl as of 2026-10-19: direction neutral, magnitude 0.00, confidence 0.80, trust tier T2, 2 key metric(s). Across 31,086 active SWFL for-sale listings (as of 2026-08-14), 14.70% currently carry a price cut and 8.90% are newly listed. By county: Lee 15.20% cut / 9.10% new, Collier 13.30% cut / 8.00% new, Hendry 12.10% cut / 9.00% new.","src":"s01","date":"2026-10-22"},
+  {"id":"f033","topic":"upstream :: market-temperature-swfl","fact":"Upstream snapshot — market-temperature-swfl (neutral, magnitude 0.00, confidence 0.80)","value":"market-temperature-swfl as of 2026-10-22: direction neutral, magnitude 0.00, confidence 0.80, trust tier T2, 1 key metric(s). Across 54 SWFL ZIPs (as of 2026-08-04), the median home sells for 11.79× its annual rent — an implied gross rental yield near 8.48%. Highest-yield ZIPs: 33972 (20.16%), 34113 (15.48%), 33903 (13.95%). The full per-ZIP sold/list/rent/DOM snapshot is in the table below.","src":"s01","date":"2026-10-22"},
+  {"id":"f034","topic":"upstream :: investor-zip-swfl","fact":"Upstream snapshot — investor-zip-swfl (neutral, magnitude 0.00, confidence 0.78)","value":"investor-zip-swfl as of 2026-09-24: direction neutral, magnitude 0.00, confidence 0.78, trust tier T4, 10 key metric(s). SWFL investor composite: 53 ZIP cards pairing home value (ZHVI) with long-term rent (ZORI) at a regional median gross rent yield of 7.10%. 3 carry the flood-adjusted cap rate — the value + rent + flood-and-NFIP-percentile read no other source pairs at ZIP grain.","src":"s01","date":"2026-10-22"},
+  {"id":"f035","topic":"upstream :: active-listings-swfl","fact":"Upstream snapshot — active-listings-swfl (neutral, magnitude 0.00, confidence 0.80)","value":"active-listings-swfl as of 2026-10-22: direction neutral, magnitude 0.00, confidence 0.80, trust tier T2, 5 key metric(s). 22,650 active SWFL residential listings, median asking $412,000, avg 210 days on market (active residential listings, as of 2026-08-14). By county: Lee 16,394 (median $369,900), Collier 6,256 (median $649,900), Lee 1 (median $314,900).","src":"s01","date":"2026-10-22"},
+  {"id":"f036","topic":"upstream :: active-rentals-swfl","fact":"Upstream snapshot — active-rentals-swfl (neutral, magnitude 0.00, confidence 0.80)","value":"active-rentals-swfl as of 2026-07-11: direction neutral, magnitude 0.00, confidence 0.80, trust tier T2, 1 key metric(s). 7,059 active SWFL rental listings, asking prices observed from $485 to $17,000/mo (as of 2026-07-06). By county: Lee 3,927, Collier 3,132.","src":"s01","date":"2026-10-22"},
+  {"id":"f037","topic":"upstream :: communities-swfl","fact":"Upstream snapshot — communities-swfl (neutral, magnitude 0.00, confidence 0.80)","value":"communities-swfl as of 2026-10-03: direction neutral, magnitude 0.00, confidence 0.80, trust tier T2, 5 key metric(s). 29,903 SWFL homes catalogued across 1,000 neighborhoods (Lee + Collier); 81 marketed golf/gated communities profiled (as of 2026-09-24). Golf-or-not, fees, amenities, home count and drive-times per community ride in the community catalogue for a specific-community lookup.","src":"s01","date":"2026-10-22"},
+  {"id":"f038","topic":"upstream :: tier-divergence-swfl","fact":"Upstream snapshot — tier-divergence-swfl (bearish, magnitude 0.16, confidence 0.60)","value":"tier-divergence-swfl as of 2026-09-23: direction bearish, magnitude 0.16, confidence 0.60, trust tier T3, 12 key metric(s). SWFL price tiers read bearish at 2026-08-31 — luxury -0.92% YoY vs starter -3.46% YoY, a median spread of 2.59x moving 1.58% YoY. 7 of 50 ZIPs are in a K-shape (luxury holding, starter falling). Widest fractures: 34105 (10.22%, 5.5x), 33907 (10.17%, 2.6x), 33919 (7.04%, 2.8x).","src":"s01","date":"2026-10-22"},
+  {"id":"f039","topic":"upstream :: home-values-swfl","fact":"Upstream snapshot — home-values-swfl (bearish, magnitude 0.23, confidence 0.60)","value":"home-values-swfl as of 2026-09-24: direction bearish, magnitude 0.23, confidence 0.60, trust tier T3, 16 key metric(s). SWFL ZHVI home values read bearish at 2026-08-31 — regional median YoY -3.41% on a median value of $359,866 across 53 ZIPs. Fastest-appreciating: 34139 (1.6%), 34102 (0.8%), 33956 (0.7%). Coolest: 33973 (-9.6%), 33907 (-8.8%), 33919 (-7.9%).","src":"s01","date":"2026-10-22"}
 ]
 
 --- OUTPUT ---
 {
   "brain_id": "master",
-  "version": 140,
-  "refined_at": "2026-08-14T04:30:21Z",
-  "expires": "2026-08-21T04:30:21Z",
+  "version": 141,
+  "refined_at": "2026-10-22T09:33:20Z",
+  "expires": "2026-10-29T09:33:20Z",
   "ttl_seconds": 604800,
-  "direction": "bearish",
-  "magnitude": 0.85,
+  "direction": "mixed",
+  "magnitude": 0.45668373403948664,
   "drivers": [
     {
       "brain_id": "franchise-outcomes",
@@ -264,10 +264,6 @@ s39 | home-values-swfl brain — https://www.swfldatagulf.com/api/b/home-values-
       "edge_type": "input"
     },
     {
-      "brain_id": "active-rentals-swfl",
-      "edge_type": "input"
-    },
-    {
       "brain_id": "communities-swfl",
       "edge_type": "input"
     },
@@ -282,28 +278,46 @@ s39 | home-values-swfl brain — https://www.swfldatagulf.com/api/b/home-values-
   ],
   "overrides": [
     "flood-barrier-mode-1",
-    "storm-history-modifier",
-    "rising-rates-dominance"
+    "storm-history-modifier"
   ],
-  "conclusion": "Read is bearish (high magnitude). Driven by: franchise-outcomes, cre-swfl, macro-us, macro-florida, macro-swfl, sector-credit-swfl, tourism-tdt, env-swfl, logistics-swfl, logistics-swfl-nowcast, traffic-swfl, properties-lee-value, properties-collier-value, permits-swfl, rentals-swfl, housing-swfl, safety-swfl, labor-demand-swfl, econ-dev-swfl, city-pulse-swfl, rsw-airport, news-swfl, freshness-pulse, seller-stress-swfl, market-heat-swfl, storm-history-swfl, hurricane-tracks-fl, licenses-swfl, condo-sirs-swfl, permits-commercial-swfl, price-distribution-swfl, listing-momentum-swfl, market-temperature-swfl, investor-zip-swfl, active-listings-swfl, active-rentals-swfl, communities-swfl, tier-divergence-swfl, home-values-swfl. Overrides: flood-barrier-mode-1, storm-history-modifier, rising-rates-dominance. Note conflicts: macro-us (bearish) vs permits-swfl (bullish). Combined confidence 0.86, trust tier T4, based on 39 upstream brains.",
+  "conclusion": "Read is mixed (moderate magnitude). Driven by: franchise-outcomes, cre-swfl, macro-us, macro-florida, macro-swfl, sector-credit-swfl, tourism-tdt, env-swfl, logistics-swfl, logistics-swfl-nowcast, traffic-swfl, properties-lee-value, properties-collier-value, permits-swfl, rentals-swfl, housing-swfl, safety-swfl, labor-demand-swfl, econ-dev-swfl, city-pulse-swfl, rsw-airport, news-swfl, freshness-pulse, seller-stress-swfl, market-heat-swfl, storm-history-swfl, hurricane-tracks-fl, licenses-swfl, condo-sirs-swfl, permits-commercial-swfl, price-distribution-swfl, listing-momentum-swfl, market-temperature-swfl, investor-zip-swfl, active-listings-swfl, communities-swfl, tier-divergence-swfl, home-values-swfl. Overrides: flood-barrier-mode-1, storm-history-modifier. Note conflicts: macro-us (bearish) vs macro-florida (bullish). Combined confidence 0.87, trust tier T4, based on 38 upstream brains.",
   "key_metrics": [
     {
-      "metric": "best_naics_survival",
-      "value": 100,
-      "direction": "stable",
-      "label": "Arts, Entertainment & Recreation (NAICS 71) — best SWFL SBA survival rate [thin sample: only 7 resolved loans, directional not confident]",
+      "metric": "fl_unemployment",
+      "value": 4.4,
+      "direction": "falling",
+      "label": "Florida unemployment rate",
       "variable_type": "intensive",
       "units": "percent",
       "display_format": "percent",
       "source": {
-        "url": "https://jtkdowmrjaxfvwmemxso.supabase.co/rest/v1/sba_loans_by_naics_county?select=*&project_county=in.(LEE,COLLIER)&approval_fy=gte.2020&naics_code=like.71%25",
-        "fetched_at": "2026-08-14T04:29:53Z",
+        "url": "https://api.stlouisfed.org/fred/series/observations?series_id=FLUR&units=lin&file_type=json&sort_order=desc&limit=24",
+        "fetched_at": "2026-10-22T09:32:28Z",
         "tier": 1,
-        "citation": "SBA 7(a)/504 loan outcomes (Lee + Collier counties, FY 2020+); federal source: Small Business Administration loan-status reporting — Arts, Entertainment & Recreation (NAICS 71): 0 charged off of 7 resolved loans (63 total approved across 10 sub-industries; $41.3M gross approved capital)."
+        "citation": "FRED Florida Unemployment Rate (series_id FLUR) — latest observation 4.4 percent for period 2026-09-01, falling vs prior 6 periods. Florida unemployment is the headline labor-tightness read for SWFL operators — tourism and construction absorb new entrants when this stays low."
       },
       "suggestions": [
-        "What's driving best naics survival?",
-        "How does best naics survival here compare to other SWFL areas?"
+        "What's driving fl unemployment?",
+        "How does fl unemployment here compare to other SWFL areas?"
+      ]
+    },
+    {
+      "metric": "sofr_rate",
+      "value": 3.88,
+      "direction": "stable",
+      "label": "SOFR (Secured Overnight Financing Rate)",
+      "variable_type": "intensive",
+      "units": "percent",
+      "display_format": "percent",
+      "source": {
+        "url": "https://api.stlouisfed.org/fred/series/observations?series_id=SOFR&units=lin&file_type=json&sort_order=desc&limit=24",
+        "fetched_at": "2026-10-22T09:32:23Z",
+        "tier": 1,
+        "citation": "FRED Secured Overnight Financing Rate (series_id SOFR) — latest observation 3.88 percent_annualized for period 2026-10-20, stable vs prior 6 periods. SOFR is the floor for floating-rate CRE debt — direction of travel sets how repricing pressure runs through SWFL portfolios."
+      },
+      "suggestions": [
+        "What's driving sofr rate?",
+        "How does sofr rate here compare to other SWFL areas?"
       ]
     },
     {
@@ -316,7 +330,7 @@ s39 | home-values-swfl brain — https://www.swfldatagulf.com/api/b/home-values-
       "display_format": "currency",
       "source": {
         "url": "https://www.swfldatagulf.com/r/source/fl_dor_tdt_collections?label=Florida+DOR+%E2%80%94+Tourist+Development+Tax+collections&source=Florida+DOR&brain=tourism-tdt&date_col=period",
-        "fetched_at": "2026-08-14T04:29:54Z",
+        "fetched_at": "2026-10-22T04:35:24Z",
         "tier": 1,
         "citation": "Florida DOR Tourist Development Tax — SWFL (Lee + Collier) (666 monthly collection records: 1998-07 → 2026-04); source: Florida Department of Revenue Form 3 XLSX (monthly, ~6-week lag) — SWFL combined 2026-04 = $9.03M (FY 2026, post_ian=true)."
       },
@@ -326,8 +340,46 @@ s39 | home-values-swfl brain — https://www.swfldatagulf.com/api/b/home-values-
       ]
     },
     {
+      "metric": "best_naics_survival",
+      "value": 100,
+      "direction": "stable",
+      "label": "Arts, Entertainment & Recreation (NAICS 71) — best SWFL SBA survival rate [thin sample: only 7 resolved loans, directional not confident]",
+      "variable_type": "intensive",
+      "units": "percent",
+      "display_format": "percent",
+      "source": {
+        "url": "https://jtkdowmrjaxfvwmemxso.supabase.co/rest/v1/sba_loans_by_naics_county?select=*&project_county=in.(LEE,COLLIER)&approval_fy=gte.2020&naics_code=like.71%25",
+        "fetched_at": "2026-10-22T04:35:23Z",
+        "tier": 1,
+        "citation": "SBA 7(a)/504 loan outcomes (Lee + Collier counties, FY 2020+); federal source: Small Business Administration loan-status reporting — Arts, Entertainment & Recreation (NAICS 71): 0 charged off of 7 resolved loans (63 total approved across 10 sub-industries; $41.3M gross approved capital)."
+      },
+      "suggestions": [
+        "What's driving best naics survival?",
+        "How does best naics survival here compare to other SWFL areas?"
+      ]
+    },
+    {
+      "metric": "laus_lee_unemployment_rate",
+      "label": "Lee County Unemployment Rate",
+      "value": 5.2,
+      "direction": "rising",
+      "variable_type": "intensive",
+      "units": "%",
+      "display_format": "percent",
+      "source": {
+        "url": "https://api.bls.gov/publicAPI/v2/timeseries/data/",
+        "fetched_at": "2026-10-22T04:35:21Z",
+        "tier": 1,
+        "citation": "BLS LAUS series LAUCN120710000000003, 2026-M07 = 5.2%"
+      },
+      "suggestions": [
+        "What's driving laus lee unemployment rate?",
+        "How does laus lee unemployment rate here compare to other SWFL areas?"
+      ]
+    },
+    {
       "metric": "permits_swfl_county_weighted_avg_corridor_z",
-      "value": 1.328,
+      "value": 1.027,
       "direction": "rising",
       "label": "SWFL permits - corridor-weighted z-score across Lee + Collier, current 90d vs trailing-365d (rate-normalized)",
       "variable_type": "intensive",
@@ -335,13 +387,51 @@ s39 | home-values-swfl brain — https://www.swfldatagulf.com/api/b/home-values-
       "display_format": "ratio",
       "source": {
         "url": "https://aca-prod.accela.com/LEECO/Cap/CapHome.aspx?module=Permitting&TabName=Permitting",
-        "fetched_at": "2026-08-13T04:29:21Z",
+        "fetched_at": "2026-10-20T04:25:43Z",
         "tier": 1,
         "citation": "Lee + Collier County Building Permits (SWFL rollup) — Lee: Accela; Collier: colliercountyfl.gov monthly XLSX."
       },
       "suggestions": [
         "What's driving permits swfl county weighted avg corridor z?",
         "How does permits swfl county weighted avg corridor z here compare to other SWFL areas?"
+      ]
+    },
+    {
+      "metric": "lee_top_occupation_employment",
+      "label": "Lee (Cape Coral-Fort Myers) Largest Workforce Sector",
+      "value": 37050,
+      "direction": "stable",
+      "variable_type": "extensive",
+      "units": "workers",
+      "display_format": "count",
+      "source": {
+        "url": "https://www.bls.gov/oes/tables.htm",
+        "fetched_at": "2026-10-17T04:26:02Z",
+        "tier": 1,
+        "citation": "BLS OEWS May 2025 — Lee (Cape Coral-Fort Myers) — Office and Administrative Support Occupations: 37,050 workers"
+      },
+      "suggestions": [
+        "What's driving lee top occupation employment?",
+        "How does lee top occupation employment here compare to other SWFL areas?"
+      ]
+    },
+    {
+      "metric": "inbound_freight_tons_swfl",
+      "value": 1226969.1,
+      "direction": "stable",
+      "label": "Total inbound domestic freight to SWFL, year 2024 (thousand tons)",
+      "variable_type": "extensive",
+      "units": "thousand tons/year",
+      "display_format": "count",
+      "source": {
+        "url": "https://faf.ornl.gov/faf5/",
+        "fetched_at": "2026-10-16T04:26:02Z",
+        "tier": 1,
+        "citation": "FAF5.7.1 inbound domestic freight flows (ORNL/FHWA Cold Lane Parquet; dms_dest=129 trade_type=1, year 2024). Aggregate: 3430 origin × commodity flow rows summing to 1226969.1K tons ($614894.8M) across 12 origin zones and 40 commodity classes."
+      },
+      "suggestions": [
+        "What's driving inbound freight tons swfl?",
+        "How does inbound freight tons swfl here compare to other SWFL areas?"
       ]
     },
     {
@@ -354,7 +444,7 @@ s39 | home-values-swfl brain — https://www.swfldatagulf.com/api/b/home-values-
       "display_format": "ratio",
       "source": {
         "url": "https://hazards.fema.gov/arcgis/rest/services/public/NFHL/MapServer/28",
-        "fetched_at": "2026-08-12T04:30:16Z",
+        "fetched_at": "2026-10-14T04:26:23Z",
         "tier": 1,
         "citation": "FEMA NFHL Flood Hazard Zones (Layer 28 / S_FLD_HAZ_AR), area-weighted aggregate across 3 SWFL counties: Collier (12021), Hendry (12051), Lee (12071)."
       },
@@ -365,7 +455,7 @@ s39 | home-values-swfl brain — https://www.swfldatagulf.com/api/b/home-values-
     },
     {
       "metric": "storm_property_damage_events_10yr",
-      "value": 70,
+      "value": 68,
       "direction": "stable",
       "label": "SWFL property-damage event count (trailing 10-year window)",
       "variable_type": "extensive",
@@ -373,7 +463,7 @@ s39 | home-values-swfl brain — https://www.swfldatagulf.com/api/b/home-values-
       "display_format": "count",
       "source": {
         "url": "s3://lake-tier1/environmental/storm_events_swfl.parquet",
-        "fetched_at": "2026-08-11T04:29:56Z",
+        "fetched_at": "2026-10-11T04:25:54Z",
         "tier": 1,
         "citation": "NOAA Storm Events Database via data_lake._tier1_inventory[lake-tier1/environmental/storm_events_swfl.parquet] (SWFL counties: LEE+COLLIER; vintage 1996-2025 modern-schema; ingested by ingest/duckdb_pipelines/storm_history_swfl/pipeline.py)."
       },
@@ -392,13 +482,51 @@ s39 | home-values-swfl brain — https://www.swfldatagulf.com/api/b/home-values-
       "display_format": "raw",
       "source": {
         "url": "https://s3.wasabisys.com/cdn.flylcpa.com/app/uploads/2024/11/21145013/Total-Passengers-2026.pdf",
-        "fetched_at": "2026-08-09T04:30:17Z",
+        "fetched_at": "2026-10-09T04:27:09Z",
         "tier": 1,
         "citation": "Lee County Port Authority Aviation Statistics — RSW trailing-12-mo total passengers ending 2026-04 vs prior 12 mo: +2.4%"
       },
       "suggestions": [
         "What's driving rsw trailing 12mo total passengers yoy?",
         "How does rsw trailing 12mo total passengers yoy here compare to other SWFL areas?"
+      ]
+    },
+    {
+      "metric": "hurricane_landfalls_30yr",
+      "value": 7,
+      "direction": "stable",
+      "label": "SWFL hurricane landfalls — distinct named storms landfalling in any of the SWFL core counties, trailing 30yr window",
+      "variable_type": "extensive",
+      "units": "storms",
+      "display_format": "count",
+      "source": {
+        "url": "s3://lake-tier1/environmental/hurdat2_fl.parquet",
+        "fetched_at": "2026-10-06T04:31:24Z",
+        "tier": 1,
+        "citation": "NOAA HURDAT2 (Atlantic best-track, s3://lake-tier1/environmental/hurdat2_fl.parquet) × OpenFEMA NFIP (data_lake.fema_nfip_claims) — pre-joined in DuckDB via makeDuckDBSource. HURDAT2 file: latest from https://www.nhc.noaa.gov/data/hurdat/ via ingest/duckdb_pipelines/hurdat2_fl/pipeline.py."
+      },
+      "suggestions": [
+        "What's driving hurricane landfalls 30yr?",
+        "How does hurricane landfalls 30yr here compare to other SWFL areas?"
+      ]
+    },
+    {
+      "metric": "licenses_active_lee",
+      "label": "Active Licensed Contractors — Lee County",
+      "value": 6643,
+      "direction": "stable",
+      "variable_type": "extensive",
+      "units": "licenses",
+      "display_format": "count",
+      "source": {
+        "url": "https://www2.myfloridalicense.com/instant-public-records/",
+        "fetched_at": "2026-10-06T04:31:24Z",
+        "tier": 1,
+        "citation": "FL DBPR boards 06+08 — Lee County (county_code=46) active licenses (primary_status=C, secondary_status=A): 6,643"
+      },
+      "suggestions": [
+        "What's driving licenses active lee?",
+        "How does licenses active lee here compare to other SWFL areas?"
       ]
     },
     {
@@ -411,7 +539,7 @@ s39 | home-values-swfl brain — https://www.swfldatagulf.com/api/b/home-values-
       "display_format": "count",
       "source": {
         "url": "https://dbpr-publicrecords.myfloridalicense.com/qpr/single/",
-        "fetched_at": "2026-08-07T04:33:17Z",
+        "fetched_at": "2026-10-02T04:26:34Z",
         "tier": 1,
         "citation": "DBPR SIRS Reporting Database — pre-July 2025 app (14f1ed21) + July 2025+ app (d217126f); Lee + Collier county_normalized; confirmed SIRS filings: 1,366"
       },
@@ -421,79 +549,22 @@ s39 | home-values-swfl brain — https://www.swfldatagulf.com/api/b/home-values-
       ]
     },
     {
-      "metric": "licenses_active_lee",
-      "label": "Active Licensed Contractors — Lee County",
-      "value": 6507,
+      "metric": "safety_property_crime_per_1k_lee",
+      "value": 7.98,
       "direction": "stable",
-      "variable_type": "extensive",
-      "units": "licenses",
-      "display_format": "count",
-      "source": {
-        "url": "https://www2.myfloridalicense.com/instant-public-records/",
-        "fetched_at": "2026-08-05T22:01:46Z",
-        "tier": 1,
-        "citation": "FL DBPR boards 06+08 — Lee County (county_code=46) active licenses (primary_status=C, secondary_status=A): 6,507"
-      },
-      "suggestions": [
-        "What's driving licenses active lee?",
-        "How does licenses active lee here compare to other SWFL areas?"
-      ]
-    },
-    {
-      "metric": "inbound_freight_tons_swfl",
-      "value": 1226969.1,
-      "direction": "stable",
-      "label": "Total inbound domestic freight to SWFL, year 2024 (thousand tons)",
-      "variable_type": "extensive",
-      "units": "thousand tons/year",
-      "display_format": "count",
-      "source": {
-        "url": "https://faf.ornl.gov/faf5/",
-        "fetched_at": "2026-08-05T22:01:45Z",
-        "tier": 1,
-        "citation": "FAF5.7.1 inbound domestic freight flows (ORNL/FHWA Cold Lane Parquet; dms_dest=129 trade_type=1, year 2024). Aggregate: 3430 origin × commodity flow rows summing to 1226969.1K tons ($614894.8M) across 12 origin zones and 40 commodity classes."
-      },
-      "suggestions": [
-        "What's driving inbound freight tons swfl?",
-        "How does inbound freight tons swfl here compare to other SWFL areas?"
-      ]
-    },
-    {
-      "metric": "sofr_rate",
-      "value": 3.65,
-      "direction": "rising",
-      "label": "SOFR (Secured Overnight Financing Rate)",
+      "label": "Lee County property crime rate — 2025 UCR, Part I offenses per 1,000 residents",
       "variable_type": "intensive",
-      "units": "percent",
-      "display_format": "percent",
+      "units": "per 1,000 population",
+      "display_format": "raw",
       "source": {
-        "url": "https://api.stlouisfed.org/fred/series/observations?series_id=SOFR&units=lin&file_type=json&sort_order=desc&limit=24",
-        "fetched_at": "2026-07-30T06:59:44Z",
+        "url": "https://cde.ucr.cjis.gov/",
+        "fetched_at": "2026-10-02T04:26:33.832Z",
         "tier": 1,
-        "citation": "FRED Secured Overnight Financing Rate (series_id SOFR) — latest observation 3.65 percent_annualized for period 2026-07-28, rising vs prior 6 periods. SOFR is the floor for floating-rate CRE debt — direction of travel sets how repricing pressure runs through SWFL portfolios."
+        "citation": "FBI Crime Data Explorer (NIBRS) — property crime by county, 2025 annual data. Florida agencies reported via FDLE to the FBI UCR program; coverage-matched county rate."
       },
       "suggestions": [
-        "What's driving sofr rate?",
-        "How does sofr rate here compare to other SWFL areas?"
-      ]
-    },
-    {
-      "metric": "laus_lee_unemployment_rate",
-      "label": "Lee County Unemployment Rate",
-      "value": 4.9,
-      "direction": "rising",
-      "variable_type": "intensive",
-      "units": "%",
-      "display_format": "percent",
-      "source": {
-        "url": "https://api.bls.gov/publicAPI/v2/timeseries/data/",
-        "fetched_at": "2026-07-26T03:57:49Z",
-        "tier": 1,
-        "citation": "BLS LAUS series LAUCN120710000000003, 2026-M05 = 4.9%"
-      },
-      "suggestions": [
-        "What's driving laus lee unemployment rate?",
-        "How does laus lee unemployment rate here compare to other SWFL areas?"
+        "What's driving safety property crime per 1k lee?",
+        "How does safety property crime per 1k lee here compare to other SWFL areas?"
       ]
     },
     {
@@ -516,128 +587,54 @@ s39 | home-values-swfl brain — https://www.swfldatagulf.com/api/b/home-values-
       ]
     },
     {
-      "metric": "safety_property_crime_per_1k_lee",
-      "value": 7.98,
-      "direction": "stable",
-      "label": "Lee County property crime rate — 2025 UCR, Part I offenses per 1,000 residents",
-      "variable_type": "intensive",
-      "units": "per 1,000 population",
-      "display_format": "raw",
-      "source": {
-        "url": "https://cde.ucr.cjis.gov/",
-        "fetched_at": "2026-07-19T02:29:01.835Z",
-        "tier": 1,
-        "citation": "FBI Crime Data Explorer (NIBRS) — property crime by county, 2025 annual data. Florida agencies reported via FDLE to the FBI UCR program; coverage-matched county rate."
-      },
-      "suggestions": [
-        "What's driving safety property crime per 1k lee?",
-        "How does safety property crime per 1k lee here compare to other SWFL areas?"
-      ]
-    },
-    {
-      "metric": "lee_top_occupation_employment",
-      "label": "Lee (Cape Coral-Fort Myers) Largest Workforce Sector",
-      "value": 37050,
-      "direction": "stable",
-      "variable_type": "extensive",
-      "units": "workers",
-      "display_format": "count",
-      "source": {
-        "url": "https://www.bls.gov/oes/tables.htm",
-        "fetched_at": "2026-07-19T02:29:01Z",
-        "tier": 1,
-        "citation": "BLS OEWS May 2025 — Lee (Cape Coral-Fort Myers) — Office and Administrative Support Occupations: 37,050 workers"
-      },
-      "suggestions": [
-        "What's driving lee top occupation employment?",
-        "How does lee top occupation employment here compare to other SWFL areas?"
-      ]
-    },
-    {
-      "metric": "fl_unemployment",
-      "value": 4.8,
+      "metric": "cap_rate_median",
+      "value": 6.7,
       "direction": "rising",
-      "label": "Florida unemployment rate",
+      "label": "Median SWFL CRE cap rate (9 of 10 submarkets)",
       "variable_type": "intensive",
       "units": "percent",
       "display_format": "percent",
       "source": {
-        "url": "https://api.stlouisfed.org/fred/series/observations?series_id=FLUR&units=lin&file_type=json&sort_order=desc&limit=24",
-        "fetched_at": "2026-07-19T02:28:15Z",
-        "tier": 1,
-        "citation": "FRED Florida Unemployment Rate (series_id FLUR) — latest observation 4.8 percent for period 2026-05-01, rising vs prior 6 periods. Florida unemployment is the headline labor-tightness read for SWFL operators — tourism and construction absorb new entrants when this stays low."
-      },
-      "suggestions": [
-        "What's driving fl unemployment?",
-        "How does fl unemployment here compare to other SWFL areas?"
-      ]
-    },
-    {
-      "metric": "hurricane_landfalls_30yr",
-      "value": 7,
-      "direction": "stable",
-      "label": "SWFL hurricane landfalls — distinct named storms landfalling in any of the SWFL core counties, trailing 30yr window",
-      "variable_type": "extensive",
-      "units": "storms",
-      "display_format": "count",
-      "source": {
-        "url": "s3://lake-tier1/environmental/hurdat2_fl.parquet",
-        "fetched_at": "2026-07-15T06:52:19Z",
-        "tier": 1,
-        "citation": "NOAA HURDAT2 (Atlantic best-track, s3://lake-tier1/environmental/hurdat2_fl.parquet) × OpenFEMA NFIP (data_lake.fema_nfip_claims) — pre-joined in DuckDB via makeDuckDBSource. HURDAT2 file: latest from https://www.nhc.noaa.gov/data/hurdat/ via ingest/duckdb_pipelines/hurdat2_fl/pipeline.py."
-      },
-      "suggestions": [
-        "What's driving hurricane landfalls 30yr?",
-        "How does hurricane landfalls 30yr here compare to other SWFL areas?"
-      ]
-    },
-    {
-      "metric": "active_listings_count_swfl",
-      "label": "SWFL active residential listings (count)",
-      "value": 22650,
-      "direction": "stable",
-      "variable_type": "extensive",
-      "units": "listings",
-      "display_format": "count",
-      "source": {
-        "url": "https://www.swfldatagulf.com/r/source/listing_active_stats?label=SWFL+active+for-sale+listings+%28aggregated%29&source=realtor.com+for-sale+listings&brain=active-listings-swfl&date_col=scraped_at",
-        "fetched_at": "2026-08-14T04:30:00Z",
+        "url": "https://jtkdowmrjaxfvwmemxso.supabase.co/rest/v1/corridor_profiles?select=*&verification_status=eq.verified&deleted_at=is.null&submarket=not.is.null&cap_rate_pct=not.is.null",
+        "fetched_at": "2026-10-22T04:26:28Z",
         "tier": 2,
-        "citation": "22,650 active SWFL residential listings as of 2026-08-14"
+        "citation": "SWFL CRE corridor profiles (editorially verified) — median across 9 submarkets reporting cap rate (21 corridors mapped): Bonita Springs; Cape Coral; City of Fort Myers; and 6 more. Rent/vacancy/cap figures are C&W MarketBeat submarket values stamped onto member corridors, so the submarket is the honest denominator."
       },
       "suggestions": [
-        "What's driving active listings count swfl?",
-        "How does active listings count swfl here compare to other SWFL areas?"
+        "What's driving cap rate median?",
+        "How does cap rate median here compare to other SWFL areas?"
       ]
     },
     {
-      "metric": "signal_transactions_1",
-      "value": "Fort Myers: A long-vacant Fort Myers building sold for $2.25 million, as reported Aug. 10, 2026.",
+      "metric": "collier_homes_sold_zscore",
+      "value": -0.76,
       "direction": "stable",
-      "label": "Fort Myers — transactions",
-      "variable_type": "categorical",
+      "label": "Collier homes-sold z-score, year 2025 vs trailing 3yr (2022-2024)",
+      "variable_type": "intensive",
+      "units": "z-score",
+      "display_format": "ratio",
       "source": {
-        "url": "https://www.businessobserverfl.com/news/2026/aug/10/long-vacant-fort-myers-building-sells/",
-        "fetched_at": "2026-08-14T04:29:54Z",
+        "url": "https://jtkdowmrjaxfvwmemxso.supabase.co/rest/v1/redfin_collier_market?select=period_end,homes_sold,median_sale_price_yoy,months_of_supply&property_type=eq.All%20Residential",
+        "fetched_at": "2026-10-22T04:35:24Z",
         "tier": 2,
-        "citation": "Long-vacant Fort Myers building sells for $2.25 million | Business Observer: \"![Spinner: White decorative](https://cdn.userway.org/widgetapp/images/spin_wh.svg)\n![](https://cdn.userway.org/widgetapp/images/body_wh.svg)\n![Spinner: White decorative](https://cdn.userway.org/widgetapp/images/spin_wh.svg)\n  * ![Alternate Text](https://observermediagroup.media.clients.ellingtoncms.com/static-4/assets/images/bob-logo-header.svg)\n  * Loading\n\n\n  * [Newsletters](https://marketing.businessobserverfl.com/newsletters)\n  * [Podcast](https://www.businessobserverfl.com/podcasts/corner-office/?utm_source=header&utm_medium=sitenav)\n  * [Public Notices](https://legals.businessobserverfl.com/)\n  * [40 Under 40 Nomination](https://www.businessobserverfl.com/submit-40-under-40-2026/)\n  * [Mobile App](https://businessobserver.pressreader.com/)\n  * [Subscribe](https://marketing.businessobserverfl.com/subscribe)\n  * [Login](https://www.businessobserverfl.com/accounts/login/?next=/news/2026/aug/10/long-vacant-fort-myers-building-sells/)\n\n\n  * [](https://www.facebook.com/BusinessObserverFL)\n  * [](https://x.com/BizObserverFL)\n  * [](https://www.linkedin.com/company/businessobserverfl)\n  * [ ](https://www.instagram.com/businessobserverfl/)\n\n\n[![](https://observermediagroup.media.clients.ellingtoncms.com/static-4/assets/images/bob-logo-header.svg)](https://www.businessobserverfl.com/)\n[![](https://observermediagroup.media.clients.ellingtoncms.com/static-4/assets/images/bob-logo-sticky.svg)](https://www.businessobserverfl.com/)\n[![](https://observermediagroup.media.clients.ellingtoncms.com/static-4/assets/images/bob-logo-header.svg)](https://www.businessobserverfl.com/)\n  * [News](https://www.businessobserverfl.com/news/all/)\n  * [Strategies](https://www.businessobserverfl.com/news/strategies/)\n  * [Entrepreneurs](https://www.businessobserverfl.com/news/entrepreneurs/)\n  * [M&A](https://www.businessobserverfl.com/news/mergers-acquisitions/)\n  * [Leadership](https://www.businessobserverfl.com/news/leadership/)\n  * [Regions](https://www.businessobserverfl.com/news/2026/aug/10/long-vacant-fort-myers-building-sells/)\n    * [Tampa Bay-Lakeland](https://www.businessobserverfl.com/news/tampa-bay-lakeland/)\n    * [Manatee-Sarasota](https://www.businessobserverfl.com/news/manatee-sarasota/)\n    * [Charlotte-Lee-Collier](https://www.businessobserverfl.com/news/charlotte-lee-collier/)\n    * [Florida](https://www.businessobserverfl.com/news/florida/)\n  * [Industries](https://www.businessobserverfl.com/news/2026/aug/10/long-vacant-fort-myers-building-sells/)\n    * [Business Support](https://www.businessobserverfl.com/news/industries/business-support/)\n    * [Commercial Real Estate](https://www.businessobserverfl.com/news/industries/commercial-real-estate/)\n    * [Residential Real Estate](https://www.businessobserverfl.com/news/industries/residential-real-estate/)\n    * [Development](https://www.businessobserverfl.com/news/industries/development/)\n    * [Finance](https://www.businessobserverfl.com/news/industries/finance/)\n    * [Food-Beverage](https://www.business\""
+        "citation": "Redfin Data Center county market tracker via data_lake.redfin_collier_market (free public TSV filtered to \"Collier County, FL\"; monthly homes-sold summed to calendar-year velocity, \"All Residential\" property type)."
       },
       "suggestions": [
-        "What's driving signal transactions 1?",
-        "How does signal transactions 1 here compare to other SWFL areas?"
+        "What's driving collier homes sold zscore?",
+        "How does collier homes sold zscore here compare to other SWFL areas?"
       ]
     },
     {
       "metric": "housing_median_sale_price_swfl",
-      "value": 443650,
+      "value": 424875,
       "direction": "falling",
-      "label": "SWFL regional median sale price (all property types), data through 2026-06-30 (-3.3% YoY)",
+      "label": "SWFL regional median sale price (all property types), data through 2026-09-30 (-1.4% YoY)",
       "variable_type": "extensive",
       "units": "USD",
       "display_format": "currency",
       "source": {
         "url": "https://www.redfin.com/news/data-center/",
-        "fetched_at": "2026-07-23T06:48:30Z",
+        "fetched_at": "2026-10-16T04:26:05Z",
         "tier": 3,
         "citation": "Redfin Data Center — ZIP-level monthly housing metrics (all property types), SWFL MSAs. Updated monthly ~mid-month."
       },
@@ -649,15 +646,15 @@ s39 | home-values-swfl brain — https://www.swfldatagulf.com/api/b/home-values-
     },
     {
       "metric": "rental_rent_index_zori_regional_median",
-      "value": 2039,
+      "value": 2059,
       "direction": "stable",
-      "label": "SWFL regional median ZORI rent index (USD/month) at 2026-06-30",
+      "label": "SWFL regional median ZORI rent index (USD/month) at 2026-09-30",
       "variable_type": "extensive",
       "units": "USD/month",
       "display_format": "currency",
       "source": {
         "url": "https://files.zillowstatic.com/research/public_csvs/zori/Zip_zori_uc_sfrcondomfr_sm_month.csv",
-        "fetched_at": "2026-07-22T22:12:59Z",
+        "fetched_at": "2026-10-22T04:35:36Z",
         "tier": 3,
         "citation": "Zillow Observed Rent Index (ZORI), ZIP-level all-homes monthly composite (SFR + Condo + Multifamily). Source: Zillow Research (files.zillowstatic.com); Tier 2 cache: data_lake.zori_zip_latest (brain-input pivot view)."
       },
@@ -671,7 +668,7 @@ s39 | home-values-swfl brain — https://www.swfldatagulf.com/api/b/home-values-
   "caveats": [
     "flood-barrier-mode-1 active: 4 barrier ZIPs, worst-case AAL $40,342/insured property",
     "Override \"storm-history-modifier\" fired (priority 70)",
-    "Override \"rising-rates-dominance\" forced bearish (priority 70)",
+    "active-rentals-swfl excluded from synthesis (relevance 0.092, below floor 0.1)",
     "No figures published: this source has not yet received its first real SBA FOIA load. A synthetic development sample exists for offline testing only and is never shipped.",
     "Construction-cost PPI metrics (construction_cost_ppi_industrial, construction_cost_ppi_warehouse, construction_cost_ppi_office, construction_cost_ppi_medical_office, construction_cost_ppi_trade_concrete, construction_cost_ppi_trade_roofing, construction_cost_ppi_trade_electrical, construction_cost_ppi_trade_plumbing_hvac) are national BLS series — no SWFL-specific or Lee/Collier breakout exists at BLS for any of them. They ship a real month-over-month direction (unlike MarketBeat's schema-required \"stable\" fallback) but BLS can revise recent observations within ~30 days of first publication.",
     "vacancy_rate_marketbeat_swfl: 15 submarkets report a point-in-time value; v1 does not compute quarter-over-quarter direction, so the \"stable\" label is a schema-required fallback, not a measured trend.",
@@ -692,8 +689,8 @@ s39 | home-values-swfl brain — https://www.swfldatagulf.com/api/b/home-values-
     "MHS Databook The Islands submarket reports a value but 0 of its 0 mapped corridors are in the verified corpus this run — metric ships but cannot be tied to specific corridors.",
     "Broker-survey (MarketBeat) coverage is incomplete for some areas this build — those areas are not reflected in the survey-backed rent and vacancy metrics.",
     "corridor_factor: direction ships as \"stable\" — v1 does not compute period-over-period index change; the label is a schema-required fallback, not a measured trend.",
-    "Fort Myers Beach CRE metrics derived from active Crexi listings (8 listings as of 2026-08-09); no broker aggregate survey covers this submarket. Available sqft reflects listed inventory only — not total corridor inventory. Direction=stable is a schema-required fallback, not a measured trend.",
-    "Estero CRE metrics derived from active Crexi listings (15 listings as of 2026-08-09); no broker aggregate survey covers this submarket. Available sqft reflects listed inventory only — not total corridor inventory. Direction=stable is a schema-required fallback, not a measured trend.",
+    "Fort Myers Beach CRE metrics derived from active Crexi listings (10 listings as of 2026-10-18); no broker aggregate survey covers this submarket. Available sqft reflects listed inventory only — not total corridor inventory. Direction=stable is a schema-required fallback, not a measured trend.",
+    "Estero CRE metrics derived from active Crexi listings (15 listings as of 2026-10-18); no broker aggregate survey covers this submarket. Available sqft reflects listed inventory only — not total corridor inventory. Direction=stable is a schema-required fallback, not a measured trend.",
     "Fort Myers Beach local context [fmb_planning (2026-05-01)]: Beach Renourishment -- 41,655 CY placed, started mid-May 2026 — Fort Myers Beach coastal renourishment project: 41,655 cubic yards of sand placed beginning mid-May 2026. Restores beach width destroyed by Hurricane Ian, directly supporting tourism recovery and beac",
     "Fort Myers Beach local context [fmb_planning (2026-04-08)]: Times Square Pier -- $11.7M contract awarded Apr 8, 2026 — Town of Fort Myers Beach awarded $11.7M contract for Times Square Pier reconstruction on April 8, 2026. Pier was destroyed by Hurricane Ian. Reconstruction is the primary catalyst for Times Square com",
     "Fort Myers Beach local context [fmb_planning (2026-01-01)]: Matanzas Pass Bridge -- improvements underway 2026 — Matanzas Pass Bridge improvements underway in 2026. Improves the primary northern gateway to Fort Myers Beach island, critical for construction-phase traffic management and eventual tourist return.",
@@ -701,19 +698,23 @@ s39 | home-values-swfl brain — https://www.swfldatagulf.com/api/b/home-values-
     "Estero local context [estero_edc (2026-01-01)]: Corkscrew Rd Widening Phase 2 -- ~$27M, est. completion end-2026 — Corkscrew Road Widening Phase 2, approximately $27M project, estimated completion end of 2026. Expands capacity on the primary east-west commercial spine through Estero.",
     "Fort Myers Beach local context [fmb_planning (2026-01-01)]: Newton Beach Park -- design phase 2026 — Newton Beach Park redesign in design phase as of 2026. Part of broader FMB public-space recovery program following Hurricane Ian.",
     "Fort Myers Beach local context [fmb_planning (2026-01-01)]: CDBG-DR allocation -- $1.107B total for FMB recovery — Fort Myers Beach has received $1.107 billion in CDBG-DR (Community Development Block Grant - Disaster Recovery) funding from HUD via the State of Florida for Hurricane Ian recovery. Covers infrastruct",
-    "Estero local context [estero_edc (2025-12-01)]: Walmart Supercenter expansion -- Estero — Walmart Supercenter expansion permit issued in Estero. Continues US-41 corridor big-box retail densification in the Coconut Point area.",
-    "Estero local context [estero_edc (2025-12-01)]: High 5 Entertainment -- 9000 Williams Rd — New 40,000 SF entertainment venue at 9000 Williams Rd, Estero. Permit value ~$1.1M. Approved 2025. Anchors Williams Rd commercial corridor.",
-    "Fort Myers Beach local context [fmb_planning (2025-12-01)]: Times Square District -- plans to permits phase 2025-2026 — Times Square commercial district moving from planning to permitting phase. Multiple commercial rebuilds in queue. Pier contract ($11.7M, Apr 2026) is the anchor catalyst; full district recovery projec",
-    "Estero local context [estero_edc (2025-12-01)]: Aldi grocery -- 11906 Newbridge Court — New Aldi grocery store at 11906 Newbridge Court, Estero. Part of continued Estero retail infill along US-41 / Corkscrew Rd corridors.",
     "Estero local context [estero_edc (2025-12-01)]: Corkscrew Village mini-warehouse -- 75,910 SF — Corkscrew Village self-storage / mini-warehouse, 75,910 SF, along Corkscrew Rd corridor. Reflects growing demand for last-mile industrial in the Estero-Bonita Springs submarket.",
     "Estero local context [estero_edc (2025-12-01)]: Home2 Suites by Hilton -- approved 2025 — New Home2 Suites extended-stay hotel approved in Estero. Adds extended-stay inventory to the US-41 / Miromar/Coconut Point hospitality cluster.",
+    "Fort Myers Beach local context [fmb_planning (2025-12-01)]: Times Square District -- plans to permits phase 2025-2026 — Times Square commercial district moving from planning to permitting phase. Multiple commercial rebuilds in queue. Pier contract ($11.7M, Apr 2026) is the anchor catalyst; full district recovery projec",
+    "Estero local context [estero_edc (2025-12-01)]: Walmart Supercenter expansion -- Estero — Walmart Supercenter expansion permit issued in Estero. Continues US-41 corridor big-box retail densification in the Coconut Point area.",
+    "Estero local context [estero_edc (2025-12-01)]: High 5 Entertainment -- 9000 Williams Rd — New 40,000 SF entertainment venue at 9000 Williams Rd, Estero. Permit value ~$1.1M. Approved 2025. Anchors Williams Rd commercial corridor.",
+    "Estero local context [estero_edc (2025-12-01)]: Aldi grocery -- 11906 Newbridge Court — New Aldi grocery store at 11906 Newbridge Court, Estero. Part of continued Estero retail infill along US-41 / Corkscrew Rd corridors.",
     "Fort Myers Beach local context [fmb_planning (2025-08-01)]: Bay Oaks Park -- reconstruction completed ~Aug 2025 — Bay Oaks Recreation Center and Park reconstruction completed approximately August 2025. Restores key community and tourism amenity destroyed by Hurricane Ian.",
     "FRED can revise recent observations within ~30 days of first publication — treat the most recent reading as directional, not final.",
     "Census CBP data is an annual snapshot; establishment and employment counts may lag up to 18 months behind current conditions.",
-    "BLS LAUS data for 2026-M05 is preliminary — subject to revision at next monthly release.",
+    "BLS LAUS data for 2026-M07 is preliminary — subject to revision at next monthly release.",
+    "Upstream brain 'macro-florida' was stale at build time (expired 2026-08-18).",
+    "Upstream brain 'macro-florida' failed to rebuild on 2026-10-22; using last good read from 2026-07-19 (v24).",
     "Charge-off rates use the resolved-loan denominator (n_chargeoffs / (n_chargeoffs + n_paid_in_full)); the materialized view's `chargeoff_pct` is intentionally ignored because it understates risk on still-active loans.",
     "Sectors with fewer than 5 resolved loans are not ranked — small-sample charge-off rates are directional, not actionable.",
     "Worst-sector charge-off 57.1% (Transportation & Warehousing, NAICS 48) above 30% bearish threshold — sector-level credit risk is elevated.",
+    "Upstream brain 'macro-us' was stale at build time (expired 2026-08-29).",
+    "Upstream brain 'macro-us' failed to rebuild on 2026-10-22; using last good read from 2026-07-30 (v20).",
     "Florida DOR Form 3 may revise recent months for ~60 days after first publication — treat the latest month as directional, not final.",
     "Latest month 2026-04 reflects only 1 of 2 expected counties (Collier data lags Lee by ~2 months). YoY comparison is suppressed to avoid apples-to-oranges inflation. Use per-county metrics or trailing_12mo_collections_usd for the cross-county read.",
     "Area aggregates are in square decimal degrees (WGS84 / EPSG:4326), not projected meters. Ratios across zones within the same county are accurate; absolute areas are NOT physical units and are never propagated.",
@@ -751,25 +752,26 @@ s39 | home-values-swfl brain — https://www.swfldatagulf.com/api/b/home-values-
     "Velocity is monthly Redfin HOMES_SOLD summed to calendar years; the current-year count is final only after the year closes and Redfin's revisions settle (recent months are revised upward as late-recorded sales land — treat the most recent year as a soft floor).",
     "Not directly comparable to properties-lee-value's velocity: Lee counts LeePA qualified parcel sales; Collier counts Redfin closed sales. Compare direction (z-score sign/magnitude), not raw counts.",
     "Direction thresholds: bullish if z ≥ +1.0σ; bearish if z ≤ -1.0σ; neutral otherwise. Standard deviation is population std over 3 baseline years; if variance is zero z is undefined and direction is neutral.",
-    "Lee permit history only reaches back 169d (< 365d) - the historical baseline is incomplete; the rate-of-change reads above are indicative, not robust.",
-    "38 of 47 (corridor x bucket) cells have n < 10 in the current 90d window — z-scores on those cells are computed against small samples.",
-    "Collier z-scores are based on 4 months of data; signal stabilizes after 6+ months. Treat Collier values as directional only.",
-    "3 of 45 ZIPs lack a 12-month look-back; YoY excludes them.",
+    "Lee permit history only reaches back 237d (< 365d) - the historical baseline is incomplete; the rate-of-change reads above are indicative, not robust.",
+    "41 of 50 (corridor x bucket) cells have n < 10 in the current 90d window — z-scores on those cells are computed against small samples.",
+    "Collier z-scores are based on 5 months of data; signal stabilizes after 6+ months. Treat Collier values as directional only.",
+    "Sub-inflation rent growth — real-terms decline.",
+    "3 of 46 ZIPs lack a 12-month look-back; YoY excludes them.",
     "Property crime data is annual (2025) with ~6–9 month publication lag; quarterly incident granularity is not available at county level.",
     "Rate is per 1,000 residents covered by the agencies reporting NIBRS to the FBI that year (the denominator is the sum of those agencies' participated populations). Lee coverage is near-complete from 2022; in Collier, Naples PD does not report, so the Collier rate reflects the Sheriff + Marco Island footprint.",
-    "Lee's NIBRS reporting footprint changed >10% from 2024 to 2025 (covered population 867,715 → 622,446); an agency entered or left the roster, so the Lee year-over-year direction is suppressed (reported as neutral).",
+    "Lee's NIBRS reporting footprint changed >10% from 2024 to 2025 (covered population 867,715 → 628,797); an agency entered or left the roster, so the Lee year-over-year direction is suppressed (reported as neutral).",
     "BLS OEWS data is annual (May survey); released ~April of the following year. Counts are employment estimates, not job openings.",
     "Some wage and employment cells are suppressed by BLS to protect employer confidentiality when sample size is insufficient (marked * in source). Suppressed values are stored as null and excluded from all aggregates — never zeroed.",
-    "1 of 3 announcements in the last 90 days matched qualifying categories (relocation, expansion, grant, infrastructure); the rest are general chamber/policy posts excluded from the momentum count.",
+    "1 of 8 announcements in the last 90 days matched qualifying categories (relocation, expansion, grant, infrastructure); the rest are general chamber/policy posts excluded from the momentum count.",
     "Investment and job figures reflect disclosures at announcement time; actual outcomes may vary as projects develop.",
     "SWFL Inc. covers primarily Lee County projects; Collier County coverage depends on cross-county partnerships and co-announcements.",
-    "102 additional live signals not surfaced here (cap 8); the full set is in data_lake.city_pulse.",
+    "45 additional live signals not surfaced here (cap 8); the full set is in data_lake.city_pulse.",
     "Each signal is dated current-events context with a per-signal source; freshness is TTL-bounded by topic (breaking 1d → structural 90d).",
     "Construction enforcement split: public notices = confirmed individual actions (hard-parsed violation_type); press releases = announced sweeps (Sonnet-inferred affected_industries). Do not sum them.",
     "Polarity: rising construction notices = bullish (recovery-driven unlicensed activity). Rising ABT notices = bearish (hospitality compliance stress).",
     "Relevance in press releases is determined by Lee/Collier geographic mentions (county or place names) — releases without an explicit place name may be undercounted.",
     "Scope is the Lee + Collier core: enforcement records attributed to other counties in the scrape (Charlotte, Sarasota, Manatee, Hendry, Monroe) are excluded from every count.",
-    "0 of 0 recent releases were statewide with no Lee/Collier geographic mention.",
+    "0 of 1 recent releases were statewide with no Lee/Collier geographic mention.",
     "Each county-grain number is a single grounded source's current figure, provenance-gated to a real source URL; held anomalies and unsourced (model-memory) numbers are excluded by design.",
     "~50% of SWFL transactions are all-cash (Lee County, Attom 2024) — rate-sensitive national thresholds do not apply; this score is calibrated to SWFL's own 2019–2021 baseline.",
     "Hurricane Ian (Sept 2022) produced a natural spike; scores from Oct 2022–Mar 2023 reflect forced delistings, not organic seller stress — treat as a labeled distress event, not a trend.",
@@ -780,7 +782,8 @@ s39 | home-values-swfl brain — https://www.swfldatagulf.com/api/b/home-values-
     "~50% of SWFL transactions are all-cash (Lee County, ATTOM 2024) — national rate-sensitive thresholds are muted; read the YoY tightening, not absolute DOM cutoffs.",
     "Hurricane Ian (Sept 2022) is a labeled event — inventory/DOM dislocations Oct 2022–Mar 2023 are forced, not organic demand.",
     "Data provided by Realtor.com.",
-    "16 ZIPs suppressed (insufficient signals or realtor quality_flag).",
+    "14 ZIPs suppressed (insufficient signals or realtor quality_flag).",
+    "Falsifier watch: 2 scored ZIPs currently show the bearish pattern (pending ratio falling 2+ months while inventory rises).",
     "NOAA modernized the Storm Events schema in 1996; this brain reads the modern-schema vintage only (1996+). Pre-1996 records use an incompatible column layout and are excluded by construction.",
     "damage_property strings are parsed best-effort (regex matches \"1.5M\" / \"10K\" / \"2B\" / plain numbers). 6 events in this corpus had unparseable damage strings and are excluded from damage-based metrics (counted but not summed).",
     "Vintage end year is 2025 — bump YEAR_RANGE_END in ingest/duckdb_pipelines/storm_history_swfl/constants.py and re-run the ingest when NCEI publishes the next yearly file.",
@@ -810,8 +813,8 @@ s39 | home-values-swfl brain — https://www.swfldatagulf.com/api/b/home-values-
     "Source is realtor.com per-ZIP market aggregates.",
     "Suppressed an implausible List-to-sold (realtor.com) value for 6 ZIP(s) (33974, 33972, 33920, 33971, 33993, 33909) — outside a plausible 30%-200% band, a known vendor data-quality issue at ZIP grain. Shown as n/a rather than a fabricated-looking figure.",
     "Excluded 1 ZIP(s) from the \"Highest-yield\" ranking (33974) — their median sold price implies under 500 sqft at the ZIP's own price/sqft, meaning the sale mix is dominated by land/mobile-home lots rather than homes, which would inflate the implied yield past any realistic reading. Still in the full table below.",
-    "2 ZIP card(s) had a gross yield outside the 2-12% plausibility band — yield and flood-adjusted cap rate suppressed (value/rent indices not comparable in vacation/seasonal markets); raw value, rent, and flood facts retained. Standard residential gross yield thresholds for SWFL (2-12%); values outside indicate high-variance index inputs (ZORI/ZHVI disparity), not a real return.",
-    "51 of 53 ZIP cards carry value + rent but no flood overlay — env-swfl surfaces the flood cap-rate adjustment only for its top-AAL ZIPs, so the flood-adjusted cap rate is null for the rest.",
+    "1 ZIP card(s) had a gross yield outside the 2-12% plausibility band — yield and flood-adjusted cap rate suppressed (value/rent indices not comparable in vacation/seasonal markets); raw value, rent, and flood facts retained. Standard residential gross yield thresholds for SWFL (2-12%); values outside indicate high-variance index inputs (ZORI/ZHVI disparity), not a real return.",
+    "50 of 53 ZIP cards carry value + rent but no flood overlay — env-swfl surfaces the flood cap-rate adjustment only for its top-AAL ZIPs, so the flood-adjusted cap rate is null for the rest.",
     "Short-term-rental revenue (str_revenue_est_monthly) is null pending an AirDNA feed — available on request.",
     "List-side only: asking prices and days-on-market for ACTIVE listings — not sold/closed prices (that is the closed-sale records lane).",
     "Median asking price spans ALL active listings INCLUDING vacant land/lots — in lot-heavy areas this pulls the median well below typical home prices. Use the property_type field or the per-county/ZIP detail to separate homes from land.",
@@ -819,11 +822,6 @@ s39 | home-values-swfl brain — https://www.swfldatagulf.com/api/b/home-values-
     "Source is realtor.com for-sale listings; a direct licensed MLS/IDX feed can swap into the same table when credentialed.",
     "Price-cut counts cover only listings we have probed (listed/sold history), not every active listing region-wide — a per-property depth signal, not a full-book statistic.",
     "Annual property tax is vendor-reported (not a county tax bill) and not yet validated against county appraiser records — treat as directional, not authoritative. Covers only properties we have probed, not the full tax roll.",
-    "Inventory COUNT and observed asking-price RANGE only — not a median rent. The observed min/max is the plain MIN/MAX of each listing's own posted price range, not a computed average; for the source-faithful median rent per ZIP, see market-temperature-swfl (realtor.com monthly ZIP aggregates).",
-    "Each row can be a multi-unit community (one property_id spans a range of unit types/prices), not one apartment — counts are LISTINGS, not units.",
-    "This is live FOR-RENT inventory, distinct from rentals-swfl (the Zillow ZORI rent INDEX — a monthly trend/direction read, not a listing count).",
-    "Weekly snapshot — direction is neutral on any one week; a second sweep is what would read inventory rising/falling.",
-    "Source is realtor.com rental listings.",
     "Neighborhood home counts are authoritative from our parcel name-join (Lee + Collier tax rolls); a built-out single-name community can differ ~7% from a marketed-community source because a marketed community spans several platted subdivisions.",
     "Golf structure, HOA fee ranges and amenities are cited to named real-estate sources (naplesgolfguy / 55places / realtyofnaples); drive-times and nearby counts are computed by Mapbox. Each carries its own source and as-of.",
     "Marketed-community coverage is the ~300 branded golf/gated communities, not every neighborhood — a non-branded neighborhood still resolves to its parcel-derived stats.",
@@ -832,19 +830,23 @@ s39 | home-values-swfl brain — https://www.swfldatagulf.com/api/b/home-values-
     "~50% of SWFL buyers (≈70% for condos) pay cash and insulate the luxury tier — a holding or rising top tier is part of the K-shape, not a bullish signal on its own.",
     "Covers 50 SWFL ZIPs holding BOTH a starter and a luxury tier; ZIPs lacking one tier are excluded from the divergence.",
     "Upstream brain 'active-rentals-swfl' was stale at build time (expired 2026-07-19).",
-    "Upstream brain 'active-rentals-swfl' failed to rebuild on 2026-08-14; using last good read from 2026-07-11 (v3)."
+    "Upstream brain 'active-rentals-swfl' failed to rebuild on 2026-10-22; using last good read from 2026-07-11 (v3)."
   ],
   "contradicts": [
+    "macro-us (bearish) vs macro-florida (bullish)",
     "macro-us (bearish) vs permits-swfl (bullish)",
     "macro-us (bearish) vs labor-demand-swfl (bullish)",
     "macro-us (bearish) vs rsw-airport (bullish)",
     "macro-us (bearish) vs market-heat-swfl (bullish)",
     "macro-us (bearish) vs licenses-swfl (bullish)",
-    "macro-florida (bearish) vs permits-swfl (bullish)",
-    "macro-florida (bearish) vs labor-demand-swfl (bullish)",
-    "macro-florida (bearish) vs rsw-airport (bullish)",
-    "macro-florida (bearish) vs market-heat-swfl (bullish)",
-    "macro-florida (bearish) vs licenses-swfl (bullish)",
+    "macro-florida (bullish) vs macro-swfl (bearish)",
+    "macro-florida (bullish) vs sector-credit-swfl (bearish)",
+    "macro-florida (bullish) vs env-swfl (bearish)",
+    "macro-florida (bullish) vs properties-lee-value (bearish)",
+    "macro-florida (bullish) vs seller-stress-swfl (bearish)",
+    "macro-florida (bullish) vs storm-history-swfl (bearish)",
+    "macro-florida (bullish) vs tier-divergence-swfl (bearish)",
+    "macro-florida (bullish) vs home-values-swfl (bearish)",
     "macro-swfl (bearish) vs permits-swfl (bullish)",
     "macro-swfl (bearish) vs labor-demand-swfl (bullish)",
     "macro-swfl (bearish) vs rsw-airport (bullish)",
@@ -865,15 +867,10 @@ s39 | home-values-swfl brain — https://www.swfldatagulf.com/api/b/home-values-
     "properties-lee-value (bearish) vs rsw-airport (bullish)",
     "properties-lee-value (bearish) vs market-heat-swfl (bullish)",
     "properties-lee-value (bearish) vs licenses-swfl (bullish)",
-    "permits-swfl (bullish) vs rentals-swfl (bearish)",
     "permits-swfl (bullish) vs seller-stress-swfl (bearish)",
     "permits-swfl (bullish) vs storm-history-swfl (bearish)",
     "permits-swfl (bullish) vs tier-divergence-swfl (bearish)",
     "permits-swfl (bullish) vs home-values-swfl (bearish)",
-    "rentals-swfl (bearish) vs labor-demand-swfl (bullish)",
-    "rentals-swfl (bearish) vs rsw-airport (bullish)",
-    "rentals-swfl (bearish) vs market-heat-swfl (bullish)",
-    "rentals-swfl (bearish) vs licenses-swfl (bullish)",
     "labor-demand-swfl (bullish) vs seller-stress-swfl (bearish)",
     "labor-demand-swfl (bullish) vs storm-history-swfl (bearish)",
     "labor-demand-swfl (bullish) vs tier-divergence-swfl (bearish)",
@@ -896,11 +893,11 @@ s39 | home-values-swfl brain — https://www.swfldatagulf.com/api/b/home-values-
   "confidence_dispersion": 0.14,
   "chain_depth": 3,
   "trust_tier": 4,
-  "upstream_count": 39,
+  "upstream_count": 38,
   "relevance": {
     "decay_curve": "weeks",
-    "half_life_hours": 719.9999999999998,
-    "computed_at": "2026-08-14T04:30:21.000Z"
+    "half_life_hours": 719.9999999999999,
+    "computed_at": "2026-10-22T09:33:20.000Z"
   },
   "exogenous_signals": [],
   "conditional_claims": [
@@ -909,8 +906,8 @@ s39 | home-values-swfl brain — https://www.swfldatagulf.com/api/b/home-values-
       "then_direction": "mixed",
       "basis": "upstream brains are pulling in opposite directions; no single direction clears the agreement threshold",
       "basis_refs": [
-        "permits-swfl",
-        "env-swfl"
+        "labor-demand-swfl",
+        "macro-swfl"
       ],
       "falsifier": "one side's weight clears 60% of the total on the next refine, breaking the tie"
     }
@@ -919,12 +916,12 @@ s39 | home-values-swfl brain — https://www.swfldatagulf.com/api/b/home-values-
     "not_available": [
       "Outcomes for a specific named business or street address — the lake holds sector- and corridor-level aggregates, not individual firms.",
       "Geography finer than what an upstream explicitly publishes (most reads are Lee/Collier county level).",
-      "Sub-monthly timing on most series — the synthesized read moves at a monthly grain."
+      "Sub-monthly timing on most series — the synthesized read moves at a monthly grain.",
+      "1 upstream read(s) fell below the relevance floor and are not reflected here."
     ],
     "finest_grain": "county-month",
     "routes": [
       "Flood risk is tracked per ZIP — want it for a specific ZIP or address?",
-      "Recent commercial real-estate current events — leasing, sales, openings and closings — are tracked per area; want the latest for a specific area?",
       "Housing prices, days on market and supply are tracked per ZIP — want it for a specific ZIP or town?",
       "Golf-or-not, HOA fees, amenities, home count and drive-times are tracked per community — and every home rolls up to a neighborhood with real counts; want a specific community, neighborhood or address?"
     ]
@@ -937,5 +934,5 @@ s39 | home-values-swfl brain — https://www.swfldatagulf.com/api/b/home-values-
 - swfl-intelligence-lake: master synthesizer over the verified SWFL upstream brains enumerated in input_brains.
 
 --- RECENT NOTES ---
-- 2026-08-14: pack refined by the Refinery — 39 fact(s) from 39 source(s).
+- 2026-10-22: pack refined by the Refinery — 39 fact(s) from 39 source(s).
 ```
