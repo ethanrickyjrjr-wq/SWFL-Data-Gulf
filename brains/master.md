@@ -1,9 +1,9 @@
-<!-- FRESHNESS: v142 | Token: SWFL-7421-v142-20261023-c532abb5 -->
+<!-- FRESHNESS: v143 | Token: SWFL-7421-v143-20261023-b0f11c0f -->
 ---
 brain_id: master
-version: 142
-refined_at: 2026-10-23T04:26:32Z
-freshness_token: SWFL-7421-v142-20261023-c532abb5
+version: 143
+refined_at: 2026-10-23T09:27:50Z
+freshness_token: SWFL-7421-v143-20261023-b0f11c0f
 ttl_seconds: 604800
 pack_hash: be8f0d44e0e6
 context_type: user_saved_reference
@@ -91,7 +91,7 @@ s39 | home-values-swfl brain — https://www.swfldatagulf.com/api/b/home-values-
   {"id":"f017","topic":"upstream :: safety-swfl","fact":"Upstream snapshot — safety-swfl (neutral, magnitude 0.00, confidence 1.00)","value":"safety-swfl as of 2026-10-02: direction neutral, magnitude 0.00, confidence 1.00, trust tier T1, 8 key metric(s). SWFL property crime: 6.8 Part I offenses per 1,000 residents (2025 UCR), -18.7% YoY. Lee (8.0/1k) runs 3.1 points above Collier (4.8/1k).","src":"s01","date":"2026-10-23"},
   {"id":"f018","topic":"upstream :: labor-demand-swfl","fact":"Upstream snapshot — labor-demand-swfl (bullish, magnitude 0.78, confidence 1.00)","value":"labor-demand-swfl as of 2026-10-17: direction bullish, magnitude 0.78, confidence 1.00, trust tier T1, 10 key metric(s). BLS OEWS May 2025 — SWFL workforce. Lee (Cape Coral-Fort Myers MSA): top sector: Office and Administrative Support Occupations (37,050), Construction 2.17× national, employment +1.5% YoY. Collier (Naples MSA): top sector: Food Preparation and Serving Related Occupations (25,250), Construction 1.88× national, employment +1.6% YoY. Source: BLS Occupational Employment and Wage Statistics.","src":"s01","date":"2026-10-23"},
   {"id":"f019","topic":"upstream :: econ-dev-swfl","fact":"Upstream snapshot — econ-dev-swfl (neutral, magnitude 0.35, confidence 0.80)","value":"econ-dev-swfl as of 2026-10-20: direction neutral, magnitude 0.35, confidence 0.80, trust tier T2, 2 key metric(s). SWFL Inc. logged 1 economic development announcement in the last 90 days. Momentum: flat vs prior 90-day window. Source: SWFL Inc. (swflinc.com/blog/), the official Lee County economic development organization.","src":"s01","date":"2026-10-23"},
-  {"id":"f020","topic":"upstream :: city-pulse-swfl","fact":"Upstream snapshot — city-pulse-swfl (neutral, magnitude 0.00, confidence 0.80)","value":"city-pulse-swfl as of 2026-10-23: direction neutral, magnitude 0.00, confidence 0.80, trust tier T2, 8 key metric(s). SWFL city pulse as of 2026-10-23: 60 live current-events signals across 5 cities — Fort Myers (20), Cape Coral (17), Naples (20), Sanibel (1), Estero (2). Most current: Fort Myers — Former Ruby Tuesday near Fort Myers hospitals sells for $2.2M These are current cited facts only; the cross-vertical read and any direction call live downstream in master.","src":"s01","date":"2026-10-23"},
+  {"id":"f020","topic":"upstream :: city-pulse-swfl","fact":"Upstream snapshot — city-pulse-swfl (neutral, magnitude 0.00, confidence 0.80)","value":"city-pulse-swfl as of 2026-10-23: direction neutral, magnitude 0.00, confidence 0.80, trust tier T2, 8 key metric(s). SWFL city pulse as of 2026-10-23: 62 live current-events signals across 5 cities — Naples (22), Fort Myers (20), Sanibel (1), Cape Coral (17), Estero (2). Most current: Naples — New roads, new homes and new investments reshaping SW FL as of Oct. 22, 2026, with post-hurricane milestones reported across Southwest Florida including Naples. These are current cited facts only; the cross-vertical read and any direction call live downstream in master.","src":"s01","date":"2026-10-23"},
   {"id":"f021","topic":"upstream :: rsw-airport","fact":"Upstream snapshot — rsw-airport (bullish, magnitude 0.16, confidence 1.00)","value":"rsw-airport as of 2026-10-09: direction bullish, magnitude 0.16, confidence 1.00, trust tier T1, 9 key metric(s). LCPA Aviation April 2026 — RSW 1,152,669 total passengers (-2.2% YoY), trailing-12-mo 11,197,951 (+2.4% vs prior year — the direction basis), 512,534 arrivals / 640,135 departures, 10,797 aircraft operations, 3,463,896 lbs air freight. Source: Lee County Port Authority (flylcpa.com/about-lcpa/reports-and-statistics/).","src":"s01","date":"2026-10-23"},
   {"id":"f022","topic":"upstream :: news-swfl","fact":"Upstream snapshot — news-swfl (neutral, magnitude 0.30, confidence 0.80)","value":"news-swfl as of 2026-10-20: direction neutral, magnitude 0.30, confidence 0.80, trust tier T2, 9 key metric(s). DBPR issued 1 SWFL-relevant press release in the last 90 days. 2 individual enforcement notices active in Lee and Collier counties (2 construction unlicensed, 0 ABT/hospitality). Top press release topics: ABT, licensing, enforcement. Sources: FL DBPR press releases (www2.myfloridalicense.com/press-releases/) and public enforcement notices (www2.myfloridalicense.com/public-notices/).","src":"s01","date":"2026-10-23"},
   {"id":"f023","topic":"upstream :: freshness-pulse","fact":"Upstream snapshot — freshness-pulse (neutral, magnitude 0.00, confidence 0.80)","value":"freshness-pulse as of 2026-10-23: direction neutral, magnitude 0.00, confidence 0.80, trust tier T2, 4 key metric(s). Today's sourced snapshot — Cape Coral median asking price (as of 2026-10-23) $399,200; SWFL 30-year fixed mortgage rate (as of 2026-10-22) 7.32%; Fort Myers median asking price (as of 2026-10-23) $325,000; Naples median asking price (as of 2026-10-23) $650,000. These are cited current facts only; the direction call lives downstream in master.","src":"s01","date":"2026-10-23"},
@@ -116,9 +116,9 @@ s39 | home-values-swfl brain — https://www.swfldatagulf.com/api/b/home-values-
 --- OUTPUT ---
 {
   "brain_id": "master",
-  "version": 142,
-  "refined_at": "2026-10-23T04:26:32Z",
-  "expires": "2026-10-30T04:26:32Z",
+  "version": 143,
+  "refined_at": "2026-10-23T09:27:50Z",
+  "expires": "2026-10-30T09:27:50Z",
   "ttl_seconds": 604800,
   "direction": "mixed",
   "magnitude": 0.4610050701831471,
@@ -668,7 +668,7 @@ s39 | home-values-swfl brain — https://www.swfldatagulf.com/api/b/home-values-
   "caveats": [
     "flood-barrier-mode-1 active: 4 barrier ZIPs, worst-case AAL $40,342/insured property",
     "Override \"storm-history-modifier\" fired (priority 70)",
-    "active-rentals-swfl excluded from synthesis (relevance 0.091, below floor 0.1)",
+    "active-rentals-swfl excluded from synthesis (relevance 0.090, below floor 0.1)",
     "No figures published: this source has not yet received its first real SBA FOIA load. A synthetic development sample exists for offline testing only and is never shipped.",
     "Construction-cost PPI metrics (construction_cost_ppi_industrial, construction_cost_ppi_warehouse, construction_cost_ppi_office, construction_cost_ppi_medical_office, construction_cost_ppi_trade_concrete, construction_cost_ppi_trade_roofing, construction_cost_ppi_trade_electrical, construction_cost_ppi_trade_plumbing_hvac) are national BLS series — no SWFL-specific or Lee/Collier breakout exists at BLS for any of them. They ship a real month-over-month direction (unlike MarketBeat's schema-required \"stable\" fallback) but BLS can revise recent observations within ~30 days of first publication.",
     "vacancy_rate_marketbeat_swfl: 15 submarkets report a point-in-time value; v1 does not compute quarter-over-quarter direction, so the \"stable\" label is a schema-required fallback, not a measured trend.",
@@ -765,7 +765,7 @@ s39 | home-values-swfl brain — https://www.swfldatagulf.com/api/b/home-values-
     "1 of 8 announcements in the last 90 days matched qualifying categories (relocation, expansion, grant, infrastructure); the rest are general chamber/policy posts excluded from the momentum count.",
     "Investment and job figures reflect disclosures at announcement time; actual outcomes may vary as projects develop.",
     "SWFL Inc. covers primarily Lee County projects; Collier County coverage depends on cross-county partnerships and co-announcements.",
-    "52 additional live signals not surfaced here (cap 8); the full set is in data_lake.city_pulse.",
+    "54 additional live signals not surfaced here (cap 8); the full set is in data_lake.city_pulse.",
     "Each signal is dated current-events context with a per-signal source; freshness is TTL-bounded by topic (breaking 1d → structural 90d).",
     "Construction enforcement split: public notices = confirmed individual actions (hard-parsed violation_type); press releases = announced sweeps (Sonnet-inferred affected_industries). Do not sum them.",
     "Polarity: rising construction notices = bullish (recovery-driven unlicensed activity). Rising ABT notices = bearish (hospitality compliance stress).",
@@ -897,7 +897,7 @@ s39 | home-values-swfl brain — https://www.swfldatagulf.com/api/b/home-values-
   "relevance": {
     "decay_curve": "weeks",
     "half_life_hours": 720.0000000000001,
-    "computed_at": "2026-10-23T04:26:32.000Z"
+    "computed_at": "2026-10-23T09:27:50.000Z"
   },
   "exogenous_signals": [],
   "conditional_claims": [
