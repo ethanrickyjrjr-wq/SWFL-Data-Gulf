@@ -1,8 +1,8 @@
 {
   "target": "master",
   "timestamps": {
-    "started": "2026-10-23T09:27:28.785Z",
-    "finished": "2026-10-23T09:27:50.287Z"
+    "started": "2026-10-24T04:25:56.106Z",
+    "finished": "2026-10-24T04:26:19.342Z"
   },
   "source": "live",
   "outcomes": [
@@ -114,19 +114,19 @@
     {
       "packId": "city-pulse-swfl",
       "status": "built",
-      "version": 135,
+      "version": 136,
       "written": true,
       "brainOutput": {
         "brain_id": "city-pulse-swfl",
-        "version": 135,
-        "refined_at": "2026-10-23T09:27:28Z",
-        "expires": "2026-10-24T09:27:28Z",
+        "version": 136,
+        "refined_at": "2026-10-24T04:25:56Z",
+        "expires": "2026-10-25T04:25:56Z",
         "ttl_seconds": 86400,
         "direction": "neutral",
         "magnitude": 0,
         "drivers": [],
         "overrides": [],
-        "conclusion": "SWFL city pulse as of 2026-10-23: 62 live current-events signals across 5 cities — Naples (22), Fort Myers (20), Sanibel (1), Cape Coral (17), Estero (2). Most current: Naples — New roads, new homes and new investments reshaping SW FL as of Oct. 22, 2026, with post-hurricane milestones reported across Southwest Florida including Naples. These are current cited facts only; the cross-vertical read and any direction call live downstream in master.",
+        "conclusion": "SWFL city pulse as of 2026-10-24: 64 live current-events signals across 5 cities — Naples (23), Fort Myers (20), Cape Coral (18), Sanibel (1), Estero (2). Most current: Naples — New roads, new homes and new investments reshaping SW FL as of Oct. 22, 2026, with post-hurricane milestones reported across Southwest Florida including Naples. These are current cited facts only; the cross-vertical read and any direction call live downstream in master.",
         "key_metrics": [
           {
             "metric": "signal_breaking_1",
@@ -136,7 +136,7 @@
             "variable_type": "categorical",
             "source": {
               "url": "https://www.news-press.com/story/money/2026/10/22/from-roads-to-rooftops-florida-hits-wave-of-post-hurricane-milestones-sanibel-fort-myers-naples-swfl/92256346007/",
-              "fetched_at": "2026-10-23T09:27:28Z",
+              "fetched_at": "2026-10-24T04:25:56Z",
               "tier": 2,
               "citation": "From roads to rooftops, Florida hits wave of post-hurricane milestones: \"[](https://www.news-press.com/)\n[SWFL Football Week 10 high school game previews and predictions](https://www.news-press.com/story/sports/high-school/football/2026/10/22/high-school-football-sw-florida-fhsaa-oct-23-previews-predictions/92308109007/)\n[](https://subscribe.news-press.com/rr/nanobar?gps-source=CPTILELEFT&itm_campaign=2026ENTQ4BAU2026&itm_medium=ONSITE&success-url=https%3A%2F%2Fwww.news-press.com%2Fstory%2Fmoney%2F2026%2F10%2F22%2Ffrom-roads-to-rooftops-florida-hits-wave-of-post-hurricane-milestones-sanibel-fort-myers-naples-swfl%2F92256346007%2F)\n[](https://subscribe.news-press.com/rr/masthead?gps-source=CPMASTHEAD&itm_campaign=2026ENTQ4BAU2026&itm_medium=ONSITE&success-url=https%3A%2F%2Fwww.news-press.com%2Fstory%2Fmoney%2F2026%2F10%2F22%2Ffrom-roads-to-rooftops-florida-hits-wave-of-post-hurricane-milestones-sanibel-fort-myers-naples-swfl%2F92256346007%2F)\n[News](https://www.news-press.com/news/) [Cape Coral](https://www.news-press.com/news/cape-coral/) [Sports](https://www.news-press.com/sports/) [Restaurants](https://www.news-press.com/taste/) [Real Estate](https://www.news-press.com/real-estate) [Advertise](https://advertising.usatoday.com/advertise-with-us/?cid=Web_LiQ_Network_AdvertiseWithUs_AdvertiseInquiry&publication=the_news_press&utm_source=local_publication&utm_medium=menu&utm_campaign=advertise_with_us) [Obituaries](https://www.news-press.com/obituaries) [eNewspaper](https://user.news-press.com/user/enewspaper) [Legals](https://www.news-press.com/public-notices)\n[](https://www.news-press.com/search/ \"Search\")\n[](https://www.news-press.com/weather/ \"Weather in Fort Myers: 65°F Mostly Cloudy\") [](https://subscribe.news-press.com/rr/navsub?gps-source=CPTOPNAVBAR&itm_campaign=2026ENTQ4BAU2026&itm_medium=ONSITE&success-url=https%3A%2F%2Fwww.news-press.com%2Fstory%2Fmoney%2F2026%2F10%2F22%2Ffrom-roads-to-rooftops-florida-hits-wave-of-post-hurricane-milestones-sanibel-fort-myers-naples-swfl%2F92256346007%2F)\n[](https://login.news-press.com/PFTM-GUP/authenticate/?success-url=https%3A%2F%2Fwww.news-press.com%2Fstory%2Fmoney%2F2026%2F10%2F22%2Ffrom-roads-to-rooftops-florida-hits-wave-of-post-hurricane-milestones-sanibel-fort-myers-naples-swfl%2F92256346007%2F&cancel-url=https%3A%2F%2Fwww.news-press.com%2Fstory%2Fmoney%2F2026%2F10%2F22%2Ffrom-roads-to-rooftops-florida-hits-wave-of-post-hurricane-milestones-sanibel-fort-myers-naples-swfl%2F92256346007%2F)\n[](https://www.news-press.com/) [](https://www.news-press.com/)\n[MONEY](https://www.news-press.com/business/)\n# New roads, new homes and new investments reshaping SW FL this week\n[![Portrait of Phil Fernandez](https://www.news-press.com/gcdn/presto/2019/09/14/PNDN/6a77b474-579f-48fa-b56f-a2cc2b9de797-NDN_Phil_Fernandez.jpg?crop=2999,2999,x0,y570&width=48&height=48&format=pjpg&auto=webp) Phil Fernandez](https://www.naplesnews.com/staff/2684114001/phil-fernandez/)\nFort Myers News-Press & Naples Daily News\nOct. 22, 2026, 5:06 a.m. ET\nAs [Southwest Florida](https://www.news-press.com/s\""
             },
@@ -153,7 +153,7 @@
             "variable_type": "categorical",
             "source": {
               "url": "https://www.businessobserverfl.com/news/2026/oct/20/naples-men-sentenced-wire-fraud/",
-              "fetched_at": "2026-10-23T09:27:28Z",
+              "fetched_at": "2026-10-24T04:25:56Z",
               "tier": 2,
               "citation": "Two Naples men sentenced to prison for wire fraud | Business Observer: \"![Spinner: White decorative](https://cdn.userway.org/widgetapp/images/spin_wh.svg)\n![](https://cdn.userway.org/widgetapp/images/body_wh.svg)\n![Spinner: White decorative](https://cdn.userway.org/widgetapp/images/spin_wh.svg)\n  * ![Alternate Text](https://observermediagroup.media.clients.ellingtoncms.com/static-4/assets/images/bob-logo-header.svg)\n  * Loading\n\n\n  * [Newsletters](https://marketing.businessobserverfl.com/newsletters)\n  * [Podcast](https://www.businessobserverfl.com/podcasts/corner-office/?utm_source=header&utm_medium=sitenav)\n  * [Public Notices](https://legals.businessobserverfl.com/)\n  * [Big Book](https://www.businessobserverfl.com/big-book-of-business/2026/)\n  * [40 Under 40](https://www.businessobserverfl.com/40-under-40/)\n  * [Mobile App](https://businessobserver.pressreader.com/)\n  * [Subscribe](https://marketing.businessobserverfl.com/subscribe)\n  * [Login](https://www.businessobserverfl.com/accounts/login/?next=/news/2026/oct/20/naples-men-sentenced-wire-fraud/)\n\n\n  * [](https://www.facebook.com/BusinessObserverFL)\n  * [](https://x.com/BizObserverFL)\n  * [](https://www.linkedin.com/company/businessobserverfl)\n  * [ ](https://www.instagram.com/businessobserverfl/)\n\n\n[![](https://observermediagroup.media.clients.ellingtoncms.com/static-4/assets/images/bob-logo-header.svg)](https://www.businessobserverfl.com/)\n[![](https://observermediagroup.media.clients.ellingtoncms.com/static-4/assets/images/bob-logo-sticky.svg)](https://www.businessobserverfl.com/)\n[![](https://observermediagroup.media.clients.ellingtoncms.com/static-4/assets/images/bob-logo-header.svg)](https://www.businessobserverfl.com/)\n  * [News](https://www.businessobserverfl.com/news/all/)\n  * [Strategies](https://www.businessobserverfl.com/news/strategies/)\n  * [Entrepreneurs](https://www.businessobserverfl.com/news/entrepreneurs/)\n  * [Leadership](https://www.businessobserverfl.com/news/leadership/)\n  * [Regions](https://www.businessobserverfl.com/news/2026/oct/20/naples-men-sentenced-wire-fraud/)\n    * [Tampa Bay-Lakeland](https://www.businessobserverfl.com/news/tampa-bay-lakeland/)\n    * [Manatee-Sarasota](https://www.businessobserverfl.com/news/manatee-sarasota/)\n    * [Charlotte-Lee-Collier](https://www.businessobserverfl.com/news/charlotte-lee-collier/)\n    * [Florida](https://www.businessobserverfl.com/news/florida/)\n  * [Industries](https://www.businessobserverfl.com/news/2026/oct/20/naples-men-sentenced-wire-fraud/)\n    * [Business Support](https://www.businessobserverfl.com/news/industries/business-support/)\n    * [Commercial Real Estate](https://www.businessobserverfl.com/news/industries/commercial-real-estate/)\n    * [Residential Real Estate](https://www.businessobserverfl.com/news/industries/residential-real-estate/)\n    * [Development](https://www.businessobserverfl.com/news/industries/development/)\n    * [Finance](https://www.businessobserverfl.com/news/industries/finance/)\n    * [Food-Beverage](https://www.businessobserverfl.com/news/industries/food-\""
             },
@@ -164,15 +164,15 @@
           },
           {
             "metric": "signal_transactions_3",
-            "value": "Fort Myers: Former Ruby Tuesday near Fort Myers hospitals sells for $2.2M",
+            "value": "Naples: A gulf-front Naples mansion sold for $71M in an off-market sale, as reported Oct. 22, 2026.",
             "direction": "stable",
-            "label": "Fort Myers — transactions",
+            "label": "Naples — transactions",
             "variable_type": "categorical",
             "source": {
-              "url": "https://www.businessobserverfl.com/news/2026/oct/19/former-ruby-tuesday-fort-myers-sells/",
-              "fetched_at": "2026-10-23T09:27:28Z",
+              "url": "https://www.businessobserverfl.com/news/2026/oct/22/gulf-front-naples-mansion-sale/",
+              "fetched_at": "2026-10-24T04:25:56Z",
               "tier": 2,
-              "citation": "Former Ruby Tuesday near Fort Myers hospitals sells for $2.2M | Business Observer: \"![Spinner: White decorative](https://cdn.userway.org/widgetapp/images/spin_wh.svg)\n![](https://cdn.userway.org/widgetapp/images/body_wh.svg)\n![Spinner: White decorative](https://cdn.userway.org/widgetapp/images/spin_wh.svg)\n  * ![Alternate Text](https://observermediagroup.media.clients.ellingtoncms.com/static-4/assets/images/bob-logo-header.svg)\n  * Loading\n\n\n  * [Newsletters](https://marketing.businessobserverfl.com/newsletters)\n  * [Podcast](https://www.businessobserverfl.com/podcasts/corner-office/?utm_source=header&utm_medium=sitenav)\n  * [Public Notices](https://legals.businessobserverfl.com/)\n  * [Big Book](https://www.businessobserverfl.com/big-book-of-business/2026/)\n  * [40 Under 40](https://www.businessobserverfl.com/40-under-40/)\n  * [Mobile App](https://businessobserver.pressreader.com/)\n  * [Subscribe](https://marketing.businessobserverfl.com/subscribe)\n  * [Login](https://www.businessobserverfl.com/accounts/login/?next=/news/2026/oct/19/former-ruby-tuesday-fort-myers-sells/)\n\n\n  * [](https://www.facebook.com/BusinessObserverFL)\n  * [](https://x.com/BizObserverFL)\n  * [](https://www.linkedin.com/company/businessobserverfl)\n  * [ ](https://www.instagram.com/businessobserverfl/)\n\n\n[![](https://observermediagroup.media.clients.ellingtoncms.com/static-4/assets/images/bob-logo-header.svg)](https://www.businessobserverfl.com/)\n[![](https://observermediagroup.media.clients.ellingtoncms.com/static-4/assets/images/bob-logo-sticky.svg)](https://www.businessobserverfl.com/)\n[![](https://observermediagroup.media.clients.ellingtoncms.com/static-4/assets/images/bob-logo-header.svg)](https://www.businessobserverfl.com/)\n  * [News](https://www.businessobserverfl.com/news/all/)\n  * [Strategies](https://www.businessobserverfl.com/news/strategies/)\n  * [Entrepreneurs](https://www.businessobserverfl.com/news/entrepreneurs/)\n  * [Leadership](https://www.businessobserverfl.com/news/leadership/)\n  * [Regions](https://www.businessobserverfl.com/news/2026/oct/19/former-ruby-tuesday-fort-myers-sells/)\n    * [Tampa Bay-Lakeland](https://www.businessobserverfl.com/news/tampa-bay-lakeland/)\n    * [Manatee-Sarasota](https://www.businessobserverfl.com/news/manatee-sarasota/)\n    * [Charlotte-Lee-Collier](https://www.businessobserverfl.com/news/charlotte-lee-collier/)\n    * [Florida](https://www.businessobserverfl.com/news/florida/)\n  * [Industries](https://www.businessobserverfl.com/news/2026/oct/19/former-ruby-tuesday-fort-myers-sells/)\n    * [Business Support](https://www.businessobserverfl.com/news/industries/business-support/)\n    * [Commercial Real Estate](https://www.businessobserverfl.com/news/industries/commercial-real-estate/)\n    * [Residential Real Estate](https://www.businessobserverfl.com/news/industries/residential-real-estate/)\n    * [Development](https://www.businessobserverfl.com/news/industries/development/)\n    * [Finance](https://www.businessobserverfl.com/news/industries/finance/)\n    * [Food-Beverage](https://www.businessobserverfl.com/news/i\""
+              "citation": "Gulf-front Naples mansion sells for $71M in off-market sale | Business Observer: \"* ![Alternate Text](https://observermediagroup.media.clients.ellingtoncms.com/static-4/assets/images/bob-logo-header.svg)\n  * Loading\n\n\n  * [Newsletters](https://marketing.businessobserverfl.com/newsletters)\n  * [Podcast](https://www.businessobserverfl.com/podcasts/corner-office/?utm_source=header&utm_medium=sitenav)\n  * [Public Notices](https://legals.businessobserverfl.com/)\n  * [Big Book](https://www.businessobserverfl.com/big-book-of-business/2026/)\n  * [40 Under 40](https://www.businessobserverfl.com/40-under-40/)\n  * [Mobile App](https://businessobserver.pressreader.com/)\n  * [Subscribe](https://marketing.businessobserverfl.com/subscribe)\n  * [Login](https://www.businessobserverfl.com/accounts/login/?next=/news/2026/oct/22/gulf-front-naples-mansion-sale/)\n\n\n  * [](https://www.facebook.com/BusinessObserverFL)\n  * [](https://x.com/BizObserverFL)\n  * [](https://www.linkedin.com/company/businessobserverfl)\n  * [ ](https://www.instagram.com/businessobserverfl/)\n\n\n[![](https://observermediagroup.media.clients.ellingtoncms.com/static-4/assets/images/bob-logo-header.svg)](https://www.businessobserverfl.com/)\n[![](https://observermediagroup.media.clients.ellingtoncms.com/static-4/assets/images/bob-logo-sticky.svg)](https://www.businessobserverfl.com/)\n[![](https://observermediagroup.media.clients.ellingtoncms.com/static-4/assets/images/bob-logo-header.svg)](https://www.businessobserverfl.com/)\n  * [News](https://www.businessobserverfl.com/news/all/)\n  * [Strategies](https://www.businessobserverfl.com/news/strategies/)\n  * [Entrepreneurs](https://www.businessobserverfl.com/news/entrepreneurs/)\n  * [Leadership](https://www.businessobserverfl.com/news/leadership/)\n  * [Regions](https://www.businessobserverfl.com/news/2026/oct/22/gulf-front-naples-mansion-sale/)\n    * [Tampa Bay-Lakeland](https://www.businessobserverfl.com/news/tampa-bay-lakeland/)\n    * [Manatee-Sarasota](https://www.businessobserverfl.com/news/manatee-sarasota/)\n    * [Charlotte-Lee-Collier](https://www.businessobserverfl.com/news/charlotte-lee-collier/)\n    * [Florida](https://www.businessobserverfl.com/news/florida/)\n  * [Industries](https://www.businessobserverfl.com/news/2026/oct/22/gulf-front-naples-mansion-sale/)\n    * [Business Support](https://www.businessobserverfl.com/news/industries/business-support/)\n    * [Commercial Real Estate](https://www.businessobserverfl.com/news/industries/commercial-real-estate/)\n    * [Residential Real Estate](https://www.businessobserverfl.com/news/industries/residential-real-estate/)\n    * [Development](https://www.businessobserverfl.com/news/industries/development/)\n    * [Finance](https://www.businessobserverfl.com/news/industries/finance/)\n    * [Food-Beverage](https://www.businessobserverfl.com/news/industries/food-beverage/)\n    * [Healthcare](https://www.businessobserverfl.com/news/industries/health-care/)\n    * [Manufacturing](https://www.businessobserverfl.com/news/industries/manufacturing/)\n    * [Retail](https://www.businessobserver\""
             },
             "suggestions": [
               "What's driving signal transactions 3?",
@@ -180,33 +180,33 @@
             ]
           },
           {
-            "metric": "signal_development_4",
-            "value": "Fort Myers: New roads, new homes and new investments are reshaping SW FL as of the week of Oct. 22, 2026, per a post-hurricane milestones report published Oct. 22, 2026, 5:06 a.m. ET.",
+            "metric": "signal_transactions_4",
+            "value": "Fort Myers: Former Ruby Tuesday near Fort Myers hospitals sells for $2.2M",
             "direction": "stable",
-            "label": "Fort Myers — development",
+            "label": "Fort Myers — transactions",
             "variable_type": "categorical",
             "source": {
-              "url": "https://www.naplesnews.com/story/money/2026/10/22/from-roads-to-rooftops-florida-hits-wave-of-post-hurricane-milestones-sanibel-fort-myers-naples-swfl/92256346007/",
-              "fetched_at": "2026-10-23T09:27:28Z",
+              "url": "https://www.businessobserverfl.com/news/2026/oct/19/former-ruby-tuesday-fort-myers-sells/",
+              "fetched_at": "2026-10-24T04:25:56Z",
               "tier": 2,
-              "citation": "From roads to rooftops, Florida hits wave of post-hurricane milestones: \"[](https://www.naplesnews.com/)\n[SWFL Football Week 10 high school game previews and predictions](https://www.naplesnews.com/story/sports/high-school/football/2026/10/22/high-school-football-sw-florida-fhsaa-oct-23-previews-predictions/92308109007/)\n[](https://subscribe.naplesnews.com/rr/nanobar?gps-source=CPTILELEFT&itm_campaign=2026ENTQ4BAU2026&itm_medium=ONSITE&success-url=https%3A%2F%2Fwww.naplesnews.com%2Fstory%2Fmoney%2F2026%2F10%2F22%2Ffrom-roads-to-rooftops-florida-hits-wave-of-post-hurricane-milestones-sanibel-fort-myers-naples-swfl%2F92256346007%2F)\n[](https://subscribe.naplesnews.com/rr/masthead?gps-source=CPMASTHEAD&itm_campaign=2026ENTQ4BAU2026&itm_medium=ONSITE&success-url=https%3A%2F%2Fwww.naplesnews.com%2Fstory%2Fmoney%2F2026%2F10%2F22%2Ffrom-roads-to-rooftops-florida-hits-wave-of-post-hurricane-milestones-sanibel-fort-myers-naples-swfl%2F92256346007%2F)\n[News](https://www.naplesnews.com/news/) [Sports](https://www.naplesnews.com/sports/) [Real Estate](https://www.naplesnews.com/business/real-estate/) [Restaurants](https://www.naplesnews.com/entertainment/restaurants/) [Opinion](https://www.naplesnews.com/opinion/) [Advertise](https://advertising.usatoday.com/advertise-with-us/?cid=Web_LiQ_Network_AdvertiseWithUs_AdvertiseInquiry&publication=naples_daily_news&utm_source=local_publication&utm_medium=menu&utm_campaign=advertise_with_us) [Obituaries](https://www.naplesnews.com/obituaries) [eNewspaper](https://user.naplesnews.com/user/enewspaper) [Legals](https://www.naplesnews.com/public-notices)\n[](https://www.naplesnews.com/search/ \"Search\")\n[](https://www.naplesnews.com/weather/ \"Weather in Naples: 68°F Mostly Cloudy\") [](https://subscribe.naplesnews.com/rr/navsub?gps-source=CPTOPNAVBAR&itm_campaign=2026ENTQ4BAU2026&itm_medium=ONSITE&success-url=https%3A%2F%2Fwww.naplesnews.com%2Fstory%2Fmoney%2F2026%2F10%2F22%2Ffrom-roads-to-rooftops-florida-hits-wave-of-post-hurricane-milestones-sanibel-fort-myers-naples-swfl%2F92256346007%2F)\n[](https://login.naplesnews.com/PNDN-GUP/authenticate/?success-url=https%3A%2F%2Fwww.naplesnews.com%2Fstory%2Fmoney%2F2026%2F10%2F22%2Ffrom-roads-to-rooftops-florida-hits-wave-of-post-hurricane-milestones-sanibel-fort-myers-naples-swfl%2F92256346007%2F&cancel-url=https%3A%2F%2Fwww.naplesnews.com%2Fstory%2Fmoney%2F2026%2F10%2F22%2Ffrom-roads-to-rooftops-florida-hits-wave-of-post-hurricane-milestones-sanibel-fort-myers-naples-swfl%2F92256346007%2F)\n[](https://www.naplesnews.com/) [](https://www.naplesnews.com/)\n[MONEY](https://www.naplesnews.com/business/)\n# New roads, new homes and new investments reshaping SW FL this week\n[![Portrait of Phil Fernandez](https://www.naplesnews.com/gcdn/presto/2019/09/14/PNDN/6a77b474-579f-48fa-b56f-a2cc2b9de797-NDN_Phil_Fernandez.jpg?crop=2999,2999,x0,y570&width=48&height=48&format=pjpg&auto=webp) Phil Fernandez](https://www.naplesnews.com/staff/2684114001/phil-fernandez/)\nFort Myers News-Press & Naples Daily News\nOct. 22, 2026, 5:06 a.m. ET\nAs [Southwest Florida](https://ww\""
+              "citation": "Former Ruby Tuesday near Fort Myers hospitals sells for $2.2M | Business Observer: \"![Spinner: White decorative](https://cdn.userway.org/widgetapp/images/spin_wh.svg)\n![](https://cdn.userway.org/widgetapp/images/body_wh.svg)\n![Spinner: White decorative](https://cdn.userway.org/widgetapp/images/spin_wh.svg)\n  * ![Alternate Text](https://observermediagroup.media.clients.ellingtoncms.com/static-4/assets/images/bob-logo-header.svg)\n  * Loading\n\n\n  * [Newsletters](https://marketing.businessobserverfl.com/newsletters)\n  * [Podcast](https://www.businessobserverfl.com/podcasts/corner-office/?utm_source=header&utm_medium=sitenav)\n  * [Public Notices](https://legals.businessobserverfl.com/)\n  * [Big Book](https://www.businessobserverfl.com/big-book-of-business/2026/)\n  * [40 Under 40](https://www.businessobserverfl.com/40-under-40/)\n  * [Mobile App](https://businessobserver.pressreader.com/)\n  * [Subscribe](https://marketing.businessobserverfl.com/subscribe)\n  * [Login](https://www.businessobserverfl.com/accounts/login/?next=/news/2026/oct/19/former-ruby-tuesday-fort-myers-sells/)\n\n\n  * [](https://www.facebook.com/BusinessObserverFL)\n  * [](https://x.com/BizObserverFL)\n  * [](https://www.linkedin.com/company/businessobserverfl)\n  * [ ](https://www.instagram.com/businessobserverfl/)\n\n\n[![](https://observermediagroup.media.clients.ellingtoncms.com/static-4/assets/images/bob-logo-header.svg)](https://www.businessobserverfl.com/)\n[![](https://observermediagroup.media.clients.ellingtoncms.com/static-4/assets/images/bob-logo-sticky.svg)](https://www.businessobserverfl.com/)\n[![](https://observermediagroup.media.clients.ellingtoncms.com/static-4/assets/images/bob-logo-header.svg)](https://www.businessobserverfl.com/)\n  * [News](https://www.businessobserverfl.com/news/all/)\n  * [Strategies](https://www.businessobserverfl.com/news/strategies/)\n  * [Entrepreneurs](https://www.businessobserverfl.com/news/entrepreneurs/)\n  * [Leadership](https://www.businessobserverfl.com/news/leadership/)\n  * [Regions](https://www.businessobserverfl.com/news/2026/oct/19/former-ruby-tuesday-fort-myers-sells/)\n    * [Tampa Bay-Lakeland](https://www.businessobserverfl.com/news/tampa-bay-lakeland/)\n    * [Manatee-Sarasota](https://www.businessobserverfl.com/news/manatee-sarasota/)\n    * [Charlotte-Lee-Collier](https://www.businessobserverfl.com/news/charlotte-lee-collier/)\n    * [Florida](https://www.businessobserverfl.com/news/florida/)\n  * [Industries](https://www.businessobserverfl.com/news/2026/oct/19/former-ruby-tuesday-fort-myers-sells/)\n    * [Business Support](https://www.businessobserverfl.com/news/industries/business-support/)\n    * [Commercial Real Estate](https://www.businessobserverfl.com/news/industries/commercial-real-estate/)\n    * [Residential Real Estate](https://www.businessobserverfl.com/news/industries/residential-real-estate/)\n    * [Development](https://www.businessobserverfl.com/news/industries/development/)\n    * [Finance](https://www.businessobserverfl.com/news/industries/finance/)\n    * [Food-Beverage](https://www.businessobserverfl.com/news/i\""
             },
             "suggestions": [
-              "What's driving signal development 4?",
-              "How does signal development 4 here compare to other SWFL areas?"
+              "What's driving signal transactions 4?",
+              "How does signal transactions 4 here compare to other SWFL areas?"
             ]
           },
           {
             "metric": "signal_development_5",
-            "value": "Sanibel: New roads, new homes and new investments are reshaping SW FL as of the week of Oct. 22, 2026, with Sanibel among the areas hitting post-hurricane milestones.",
+            "value": "Cape Coral: A $500M Florida hurricane redevelopment plan linked to Bimini East is taking shape approximately 4 years after Hurricane Ian, with Cape Coral saying yes.",
             "direction": "stable",
-            "label": "Sanibel — development",
+            "label": "Cape Coral — development",
             "variable_type": "categorical",
             "source": {
-              "url": "https://www.naplesnews.com/story/money/2026/10/22/from-roads-to-rooftops-florida-hits-wave-of-post-hurricane-milestones-sanibel-fort-myers-naples-swfl/92256346007/",
-              "fetched_at": "2026-10-23T09:27:28Z",
+              "url": "https://www.naplesnews.com/story/money/2026/10/22/monster-florida-waterfront-fix-takes-shape-4-years-after-hurricane-ian/92385548007/",
+              "fetched_at": "2026-10-24T04:25:56Z",
               "tier": 2,
-              "citation": "From roads to rooftops, Florida hits wave of post-hurricane milestones: \"[](https://www.naplesnews.com/)\n[SWFL Football Week 10 high school game previews and predictions](https://www.naplesnews.com/story/sports/high-school/football/2026/10/22/high-school-football-sw-florida-fhsaa-oct-23-previews-predictions/92308109007/)\n[](https://subscribe.naplesnews.com/rr/nanobar?gps-source=CPTILELEFT&itm_campaign=2026ENTQ4BAU2026&itm_medium=ONSITE&success-url=https%3A%2F%2Fwww.naplesnews.com%2Fstory%2Fmoney%2F2026%2F10%2F22%2Ffrom-roads-to-rooftops-florida-hits-wave-of-post-hurricane-milestones-sanibel-fort-myers-naples-swfl%2F92256346007%2F)\n[](https://subscribe.naplesnews.com/rr/masthead?gps-source=CPMASTHEAD&itm_campaign=2026ENTQ4BAU2026&itm_medium=ONSITE&success-url=https%3A%2F%2Fwww.naplesnews.com%2Fstory%2Fmoney%2F2026%2F10%2F22%2Ffrom-roads-to-rooftops-florida-hits-wave-of-post-hurricane-milestones-sanibel-fort-myers-naples-swfl%2F92256346007%2F)\n[News](https://www.naplesnews.com/news/) [Sports](https://www.naplesnews.com/sports/) [Real Estate](https://www.naplesnews.com/business/real-estate/) [Restaurants](https://www.naplesnews.com/entertainment/restaurants/) [Opinion](https://www.naplesnews.com/opinion/) [Advertise](https://advertising.usatoday.com/advertise-with-us/?cid=Web_LiQ_Network_AdvertiseWithUs_AdvertiseInquiry&publication=naples_daily_news&utm_source=local_publication&utm_medium=menu&utm_campaign=advertise_with_us) [Obituaries](https://www.naplesnews.com/obituaries) [eNewspaper](https://user.naplesnews.com/user/enewspaper) [Legals](https://www.naplesnews.com/public-notices)\n[](https://www.naplesnews.com/search/ \"Search\")\n[](https://www.naplesnews.com/weather/ \"Weather in Naples: 68°F Mostly Cloudy\") [](https://subscribe.naplesnews.com/rr/navsub?gps-source=CPTOPNAVBAR&itm_campaign=2026ENTQ4BAU2026&itm_medium=ONSITE&success-url=https%3A%2F%2Fwww.naplesnews.com%2Fstory%2Fmoney%2F2026%2F10%2F22%2Ffrom-roads-to-rooftops-florida-hits-wave-of-post-hurricane-milestones-sanibel-fort-myers-naples-swfl%2F92256346007%2F)\n[](https://login.naplesnews.com/PNDN-GUP/authenticate/?success-url=https%3A%2F%2Fwww.naplesnews.com%2Fstory%2Fmoney%2F2026%2F10%2F22%2Ffrom-roads-to-rooftops-florida-hits-wave-of-post-hurricane-milestones-sanibel-fort-myers-naples-swfl%2F92256346007%2F&cancel-url=https%3A%2F%2Fwww.naplesnews.com%2Fstory%2Fmoney%2F2026%2F10%2F22%2Ffrom-roads-to-rooftops-florida-hits-wave-of-post-hurricane-milestones-sanibel-fort-myers-naples-swfl%2F92256346007%2F)\n[](https://www.naplesnews.com/) [](https://www.naplesnews.com/)\n[MONEY](https://www.naplesnews.com/business/)\n# New roads, new homes and new investments reshaping SW FL this week\n[![Portrait of Phil Fernandez](https://www.naplesnews.com/gcdn/presto/2019/09/14/PNDN/6a77b474-579f-48fa-b56f-a2cc2b9de797-NDN_Phil_Fernandez.jpg?crop=2999,2999,x0,y570&width=48&height=48&format=pjpg&auto=webp) Phil Fernandez](https://www.naplesnews.com/staff/2684114001/phil-fernandez/)\nFort Myers News-Press & Naples Daily News\nOct. 22, 2026, 5:06 a.m. ET\nAs [Southwest Florida](https://ww\""
+              "citation": "Monster Florida waterfront fix takes shape 4 years after Hurricane Ian: \"[](https://www.naplesnews.com/)\n[Today's Trump rally in SW Florida: These 18 items are on Secret Service's forbidden list for ticket holders](https://www.naplesnews.com/story/news/local/2026/10/23/what-are-secret-services-prohibited-items-at-trumps-florida-rally-fgcu-midterm-election-campaign/92393268007/)\n[](https://subscribe.naplesnews.com/rr/nanobar?gps-source=CPTILELEFT&itm_campaign=2026ENTQ4BAU2026&itm_medium=ONSITE&success-url=https%3A%2F%2Fwww.naplesnews.com%2Fstory%2Fmoney%2F2026%2F10%2F22%2Fmonster-florida-waterfront-fix-takes-shape-4-years-after-hurricane-ian%2F92385548007%2F)\n[](https://subscribe.naplesnews.com/rr/masthead?gps-source=CPMASTHEAD&itm_campaign=2026ENTQ4BAU2026&itm_medium=ONSITE&success-url=https%3A%2F%2Fwww.naplesnews.com%2Fstory%2Fmoney%2F2026%2F10%2F22%2Fmonster-florida-waterfront-fix-takes-shape-4-years-after-hurricane-ian%2F92385548007%2F)\n[News](https://www.naplesnews.com/news/) [Sports](https://www.naplesnews.com/sports/) [Real Estate](https://www.naplesnews.com/business/real-estate/) [Restaurants](https://www.naplesnews.com/entertainment/restaurants/) [Opinion](https://www.naplesnews.com/opinion/) [Advertise](https://advertising.usatoday.com/advertise-with-us/?cid=Web_LiQ_Network_AdvertiseWithUs_AdvertiseInquiry&publication=naples_daily_news&utm_source=local_publication&utm_medium=menu&utm_campaign=advertise_with_us) [Obituaries](https://www.naplesnews.com/obituaries) [eNewspaper](https://user.naplesnews.com/user/enewspaper) [Legals](https://www.naplesnews.com/public-notices)\n[](https://www.naplesnews.com/search/ \"Search\")\n[](https://www.naplesnews.com/weather/ \"Weather in Naples: 66°F Partly Cloudy\") [](https://subscribe.naplesnews.com/rr/navsub?gps-source=CPTOPNAVBAR&itm_campaign=2026ENTQ4BAU2026&itm_medium=ONSITE&success-url=https%3A%2F%2Fwww.naplesnews.com%2Fstory%2Fmoney%2F2026%2F10%2F22%2Fmonster-florida-waterfront-fix-takes-shape-4-years-after-hurricane-ian%2F92385548007%2F)\n[](https://login.naplesnews.com/PNDN-GUP/authenticate/?success-url=https%3A%2F%2Fwww.naplesnews.com%2Fstory%2Fmoney%2F2026%2F10%2F22%2Fmonster-florida-waterfront-fix-takes-shape-4-years-after-hurricane-ian%2F92385548007%2F&cancel-url=https%3A%2F%2Fwww.naplesnews.com%2Fstory%2Fmoney%2F2026%2F10%2F22%2Fmonster-florida-waterfront-fix-takes-shape-4-years-after-hurricane-ian%2F92385548007%2F)\n[](https://www.naplesnews.com/) [](https://www.naplesnews.com/)\nMONEY\n# $500M Florida hurricane redevelopment plan. Cape Coral says yes please\n[![Portrait of Phil Fernandez](https://www.naplesnews.com/gcdn/presto/2019/09/14/PNDN/6a77b474-579f-48fa-b56f-a2cc2b9de797-NDN_Phil_Fernandez.jpg?crop=2999,2999,x0,y570&width=48&height=48&format=pjpg&auto=webp) Phil Fernandez](https://www.naplesnews.com/staff/2684114001/phil-fernandez/)\nFort Myers News-Press & Naples Daily News\nOct. 22, 2026, 6:17 p.m. ET\nThe [Cape Coral](https://www.naplesnews.com/story/money/2026/06/29/why-big-johns-is-emerging-as-southwest-florida-redevelopment-target/90697042007/) City Council\""
             },
             "suggestions": [
               "What's driving signal development 5?",
@@ -215,15 +215,15 @@
           },
           {
             "metric": "signal_development_6",
-            "value": "Cape Coral: Southwest Florida is hitting a wave of post-hurricane milestones spanning roads, rooftops, and new investments, including new roads, new homes, and new investments reshaping SW FL, as reported Oct. 22, 2026.",
+            "value": "Naples: Naples City Council unanimously rejected a request for a wall-height waiver for a secretive family compound in Port Royal on Oct. 22, 2026.",
             "direction": "stable",
-            "label": "Cape Coral — development",
+            "label": "Naples — development",
             "variable_type": "categorical",
             "source": {
-              "url": "https://www.news-press.com/story/money/2026/10/22/from-roads-to-rooftops-florida-hits-wave-of-post-hurricane-milestones-sanibel-fort-myers-naples-swfl/92256346007/",
-              "fetched_at": "2026-10-23T09:27:28Z",
+              "url": "https://www.news-press.com/story/money/business/local/2026/10/22/naples-council-rejects-wall-waiver-for-mystery-family-compound-11-foot-walls-to-protect-privacy/92365490007/",
+              "fetched_at": "2026-10-24T04:25:56Z",
               "tier": 2,
-              "citation": "From roads to rooftops, Florida hits wave of post-hurricane milestones: \"[](https://www.news-press.com/)\n[SWFL Football Week 10 high school game previews and predictions](https://www.news-press.com/story/sports/high-school/football/2026/10/22/high-school-football-sw-florida-fhsaa-oct-23-previews-predictions/92308109007/)\n[](https://subscribe.news-press.com/rr/nanobar?gps-source=CPTILELEFT&itm_campaign=2026ENTQ4BAU2026&itm_medium=ONSITE&success-url=https%3A%2F%2Fwww.news-press.com%2Fstory%2Fmoney%2F2026%2F10%2F22%2Ffrom-roads-to-rooftops-florida-hits-wave-of-post-hurricane-milestones-sanibel-fort-myers-naples-swfl%2F92256346007%2F)\n[](https://subscribe.news-press.com/rr/masthead?gps-source=CPMASTHEAD&itm_campaign=2026ENTQ4BAU2026&itm_medium=ONSITE&success-url=https%3A%2F%2Fwww.news-press.com%2Fstory%2Fmoney%2F2026%2F10%2F22%2Ffrom-roads-to-rooftops-florida-hits-wave-of-post-hurricane-milestones-sanibel-fort-myers-naples-swfl%2F92256346007%2F)\n[News](https://www.news-press.com/news/) [Cape Coral](https://www.news-press.com/news/cape-coral/) [Sports](https://www.news-press.com/sports/) [Restaurants](https://www.news-press.com/taste/) [Real Estate](https://www.news-press.com/real-estate) [Advertise](https://advertising.usatoday.com/advertise-with-us/?cid=Web_LiQ_Network_AdvertiseWithUs_AdvertiseInquiry&publication=the_news_press&utm_source=local_publication&utm_medium=menu&utm_campaign=advertise_with_us) [Obituaries](https://www.news-press.com/obituaries) [eNewspaper](https://user.news-press.com/user/enewspaper) [Legals](https://www.news-press.com/public-notices)\n[](https://www.news-press.com/search/ \"Search\")\n[](https://www.news-press.com/weather/ \"Weather in Fort Myers: 65°F Mostly Cloudy\") [](https://subscribe.news-press.com/rr/navsub?gps-source=CPTOPNAVBAR&itm_campaign=2026ENTQ4BAU2026&itm_medium=ONSITE&success-url=https%3A%2F%2Fwww.news-press.com%2Fstory%2Fmoney%2F2026%2F10%2F22%2Ffrom-roads-to-rooftops-florida-hits-wave-of-post-hurricane-milestones-sanibel-fort-myers-naples-swfl%2F92256346007%2F)\n[](https://login.news-press.com/PFTM-GUP/authenticate/?success-url=https%3A%2F%2Fwww.news-press.com%2Fstory%2Fmoney%2F2026%2F10%2F22%2Ffrom-roads-to-rooftops-florida-hits-wave-of-post-hurricane-milestones-sanibel-fort-myers-naples-swfl%2F92256346007%2F&cancel-url=https%3A%2F%2Fwww.news-press.com%2Fstory%2Fmoney%2F2026%2F10%2F22%2Ffrom-roads-to-rooftops-florida-hits-wave-of-post-hurricane-milestones-sanibel-fort-myers-naples-swfl%2F92256346007%2F)\n[](https://www.news-press.com/) [](https://www.news-press.com/)\n[MONEY](https://www.news-press.com/business/)\n# New roads, new homes and new investments reshaping SW FL this week\n[![Portrait of Phil Fernandez](https://www.news-press.com/gcdn/presto/2019/09/14/PNDN/6a77b474-579f-48fa-b56f-a2cc2b9de797-NDN_Phil_Fernandez.jpg?crop=2999,2999,x0,y570&width=48&height=48&format=pjpg&auto=webp) Phil Fernandez](https://www.naplesnews.com/staff/2684114001/phil-fernandez/)\nFort Myers News-Press & Naples Daily News\nOct. 22, 2026, 5:06 a.m. ET\nAs [Southwest Florida](https://www.news-press.com/s\""
+              "citation": "Naples council rejects wall waiver for mystery family compound: \"[](https://www.news-press.com/)\n[](https://subscribe.news-press.com/rr/nanobar?gps-source=CPTILELEFT&itm_campaign=2026ENTQ4BAU2026&itm_medium=ONSITE&success-url=https%3A%2F%2Fwww.news-press.com%2Fstory%2Fmoney%2Fbusiness%2Flocal%2F2026%2F10%2F22%2Fnaples-council-rejects-wall-waiver-for-mystery-family-compound-11-foot-walls-to-protect-privacy%2F92365490007%2F)\n[](https://subscribe.news-press.com/rr/masthead?gps-source=CPMASTHEAD&itm_campaign=2026ENTQ4BAU2026&itm_medium=ONSITE&success-url=https%3A%2F%2Fwww.news-press.com%2Fstory%2Fmoney%2Fbusiness%2Flocal%2F2026%2F10%2F22%2Fnaples-council-rejects-wall-waiver-for-mystery-family-compound-11-foot-walls-to-protect-privacy%2F92365490007%2F)\n[News](https://www.news-press.com/news/) [Cape Coral](https://www.news-press.com/news/cape-coral/) [Sports](https://www.news-press.com/sports/) [Restaurants](https://www.news-press.com/taste/) [Real Estate](https://www.news-press.com/real-estate) [Advertise](https://advertising.usatoday.com/advertise-with-us/?cid=Web_LiQ_Network_AdvertiseWithUs_AdvertiseInquiry&publication=the_news_press&utm_source=local_publication&utm_medium=menu&utm_campaign=advertise_with_us) [Obituaries](https://www.news-press.com/obituaries) [eNewspaper](https://user.news-press.com/user/enewspaper) [Legals](https://www.news-press.com/public-notices)\n[](https://www.news-press.com/search/ \"Search\")\n[](https://www.news-press.com/weather/ \"Weather in Fort Myers: 64°F Mostly Clear\") [](https://subscribe.news-press.com/rr/navsub?gps-source=CPTOPNAVBAR&itm_campaign=2026ENTQ4BAU2026&itm_medium=ONSITE&success-url=https%3A%2F%2Fwww.news-press.com%2Fstory%2Fmoney%2Fbusiness%2Flocal%2F2026%2F10%2F22%2Fnaples-council-rejects-wall-waiver-for-mystery-family-compound-11-foot-walls-to-protect-privacy%2F92365490007%2F)\n[](https://login.news-press.com/PFTM-GUP/authenticate/?success-url=https%3A%2F%2Fwww.news-press.com%2Fstory%2Fmoney%2Fbusiness%2Flocal%2F2026%2F10%2F22%2Fnaples-council-rejects-wall-waiver-for-mystery-family-compound-11-foot-walls-to-protect-privacy%2F92365490007%2F&cancel-url=https%3A%2F%2Fwww.news-press.com%2Fstory%2Fmoney%2Fbusiness%2Flocal%2F2026%2F10%2F22%2Fnaples-council-rejects-wall-waiver-for-mystery-family-compound-11-foot-walls-to-protect-privacy%2F92365490007%2F)\n[](https://www.news-press.com/) [](https://www.news-press.com/)\nLOCAL BUSINESS\n# Naples rejects wall waiver for secretive multimillion dollar compound\n[![Portrait of Laura Layden](https://www.news-press.com/gcdn/authoring/authoring-images/2024/02/08/PNDN/72524348007-ndn-jh-20240126-laura-0001.JPG?crop=3313,3312,x1506,y0&width=48&height=48&format=pjpg&auto=webp) Laura Layden](https://www.naplesnews.com/staff/2647080001/laura-layden/)\nFort Myers News-Press & Naples Daily News\nOct. 22, 2026, 10:39 a.m. ET\nNaples City Council unanimously rejected a request for a wall-height waiver for a secretive family compound in Port Royal.\nThe request was to allow three sections of a wall to reach about 11.5 feet in height within side setbacks.\""
             },
             "suggestions": [
               "What's driving signal development 6?",
@@ -232,15 +232,15 @@
           },
           {
             "metric": "signal_development_7",
-            "value": "Fort Myers: The Ritz-Carlton brand is expanding its Florida luxury footprint with towers rising, reported Oct. 19, 2026.",
+            "value": "Fort Myers: New roads, new homes and new investments are reshaping SW FL as of the week of Oct. 22, 2026, per a post-hurricane milestones report published Oct. 22, 2026, 5:06 a.m. ET.",
             "direction": "stable",
             "label": "Fort Myers — development",
             "variable_type": "categorical",
             "source": {
-              "url": "https://www.news-press.com/story/money/2026/10/19/ritz-carltons-florida-footprint-keeps-getting-bigger-as-towers-rise-swfl-naples-lee-county-resort/92264830007/",
-              "fetched_at": "2026-10-23T09:27:28Z",
+              "url": "https://www.naplesnews.com/story/money/2026/10/22/from-roads-to-rooftops-florida-hits-wave-of-post-hurricane-milestones-sanibel-fort-myers-naples-swfl/92256346007/",
+              "fetched_at": "2026-10-24T04:25:56Z",
               "tier": 2,
-              "citation": "Ritz-Carlton's Florida footprint keeps getting bigger as towers rise: \"[](https://www.news-press.com/)\n[SWFL Football Week 10 high school game previews and predictions](https://www.news-press.com/story/sports/high-school/football/2026/10/22/high-school-football-sw-florida-fhsaa-oct-23-previews-predictions/92308109007/)\n[](https://subscribe.news-press.com/rr/nanobar?gps-source=CPTILELEFT&itm_campaign=2026ENTQ4BAU2026&itm_medium=ONSITE&success-url=https%3A%2F%2Fwww.news-press.com%2Fstory%2Fmoney%2F2026%2F10%2F19%2Fritz-carltons-florida-footprint-keeps-getting-bigger-as-towers-rise-swfl-naples-lee-county-resort%2F92264830007%2F)\n[](https://subscribe.news-press.com/rr/masthead?gps-source=CPMASTHEAD&itm_campaign=2026ENTQ4BAU2026&itm_medium=ONSITE&success-url=https%3A%2F%2Fwww.news-press.com%2Fstory%2Fmoney%2F2026%2F10%2F19%2Fritz-carltons-florida-footprint-keeps-getting-bigger-as-towers-rise-swfl-naples-lee-county-resort%2F92264830007%2F)\n[News](https://www.news-press.com/news/) [Cape Coral](https://www.news-press.com/news/cape-coral/) [Sports](https://www.news-press.com/sports/) [Restaurants](https://www.news-press.com/taste/) [Real Estate](https://www.news-press.com/real-estate) [Advertise](https://advertising.usatoday.com/advertise-with-us/?cid=Web_LiQ_Network_AdvertiseWithUs_AdvertiseInquiry&publication=the_news_press&utm_source=local_publication&utm_medium=menu&utm_campaign=advertise_with_us) [Obituaries](https://www.news-press.com/obituaries) [eNewspaper](https://user.news-press.com/user/enewspaper) [Legals](https://www.news-press.com/public-notices)\n[](https://www.news-press.com/search/ \"Search\")\n[](https://www.news-press.com/weather/ \"Weather in Fort Myers: 65°F Mostly Cloudy\") [](https://subscribe.news-press.com/rr/navsub?gps-source=CPTOPNAVBAR&itm_campaign=2026ENTQ4BAU2026&itm_medium=ONSITE&success-url=https%3A%2F%2Fwww.news-press.com%2Fstory%2Fmoney%2F2026%2F10%2F19%2Fritz-carltons-florida-footprint-keeps-getting-bigger-as-towers-rise-swfl-naples-lee-county-resort%2F92264830007%2F)\n[](https://login.news-press.com/PFTM-GUP/authenticate/?success-url=https%3A%2F%2Fwww.news-press.com%2Fstory%2Fmoney%2F2026%2F10%2F19%2Fritz-carltons-florida-footprint-keeps-getting-bigger-as-towers-rise-swfl-naples-lee-county-resort%2F92264830007%2F&cancel-url=https%3A%2F%2Fwww.news-press.com%2Fstory%2Fmoney%2F2026%2F10%2F19%2Fritz-carltons-florida-footprint-keeps-getting-bigger-as-towers-rise-swfl-naples-lee-county-resort%2F92264830007%2F)\n[](https://www.news-press.com/) [](https://www.news-press.com/)\nMONEY\n# Ritz-Carlton expands Florida luxury footprint, with more rising high\n[![Portrait of Phil Fernandez](https://www.news-press.com/gcdn/presto/2019/09/14/PNDN/6a77b474-579f-48fa-b56f-a2cc2b9de797-NDN_Phil_Fernandez.jpg?crop=2999,2999,x0,y570&width=48&height=48&format=pjpg&auto=webp) Phil Fernandez](https://www.naplesnews.com/staff/2684114001/phil-fernandez/)\nFort Myers News-Press & Naples Daily News\nUpdated Oct. 19, 2026, 10:27 a.m. ET\nThe Ritz Carlton brand name is having an [October to remember](https://www.news-press.com/story\""
+              "citation": "From roads to rooftops, Florida hits wave of post-hurricane milestones: \"[](https://www.naplesnews.com/)\n[SWFL Football Week 10 high school game previews and predictions](https://www.naplesnews.com/story/sports/high-school/football/2026/10/22/high-school-football-sw-florida-fhsaa-oct-23-previews-predictions/92308109007/)\n[](https://subscribe.naplesnews.com/rr/nanobar?gps-source=CPTILELEFT&itm_campaign=2026ENTQ4BAU2026&itm_medium=ONSITE&success-url=https%3A%2F%2Fwww.naplesnews.com%2Fstory%2Fmoney%2F2026%2F10%2F22%2Ffrom-roads-to-rooftops-florida-hits-wave-of-post-hurricane-milestones-sanibel-fort-myers-naples-swfl%2F92256346007%2F)\n[](https://subscribe.naplesnews.com/rr/masthead?gps-source=CPMASTHEAD&itm_campaign=2026ENTQ4BAU2026&itm_medium=ONSITE&success-url=https%3A%2F%2Fwww.naplesnews.com%2Fstory%2Fmoney%2F2026%2F10%2F22%2Ffrom-roads-to-rooftops-florida-hits-wave-of-post-hurricane-milestones-sanibel-fort-myers-naples-swfl%2F92256346007%2F)\n[News](https://www.naplesnews.com/news/) [Sports](https://www.naplesnews.com/sports/) [Real Estate](https://www.naplesnews.com/business/real-estate/) [Restaurants](https://www.naplesnews.com/entertainment/restaurants/) [Opinion](https://www.naplesnews.com/opinion/) [Advertise](https://advertising.usatoday.com/advertise-with-us/?cid=Web_LiQ_Network_AdvertiseWithUs_AdvertiseInquiry&publication=naples_daily_news&utm_source=local_publication&utm_medium=menu&utm_campaign=advertise_with_us) [Obituaries](https://www.naplesnews.com/obituaries) [eNewspaper](https://user.naplesnews.com/user/enewspaper) [Legals](https://www.naplesnews.com/public-notices)\n[](https://www.naplesnews.com/search/ \"Search\")\n[](https://www.naplesnews.com/weather/ \"Weather in Naples: 68°F Mostly Cloudy\") [](https://subscribe.naplesnews.com/rr/navsub?gps-source=CPTOPNAVBAR&itm_campaign=2026ENTQ4BAU2026&itm_medium=ONSITE&success-url=https%3A%2F%2Fwww.naplesnews.com%2Fstory%2Fmoney%2F2026%2F10%2F22%2Ffrom-roads-to-rooftops-florida-hits-wave-of-post-hurricane-milestones-sanibel-fort-myers-naples-swfl%2F92256346007%2F)\n[](https://login.naplesnews.com/PNDN-GUP/authenticate/?success-url=https%3A%2F%2Fwww.naplesnews.com%2Fstory%2Fmoney%2F2026%2F10%2F22%2Ffrom-roads-to-rooftops-florida-hits-wave-of-post-hurricane-milestones-sanibel-fort-myers-naples-swfl%2F92256346007%2F&cancel-url=https%3A%2F%2Fwww.naplesnews.com%2Fstory%2Fmoney%2F2026%2F10%2F22%2Ffrom-roads-to-rooftops-florida-hits-wave-of-post-hurricane-milestones-sanibel-fort-myers-naples-swfl%2F92256346007%2F)\n[](https://www.naplesnews.com/) [](https://www.naplesnews.com/)\n[MONEY](https://www.naplesnews.com/business/)\n# New roads, new homes and new investments reshaping SW FL this week\n[![Portrait of Phil Fernandez](https://www.naplesnews.com/gcdn/presto/2019/09/14/PNDN/6a77b474-579f-48fa-b56f-a2cc2b9de797-NDN_Phil_Fernandez.jpg?crop=2999,2999,x0,y570&width=48&height=48&format=pjpg&auto=webp) Phil Fernandez](https://www.naplesnews.com/staff/2684114001/phil-fernandez/)\nFort Myers News-Press & Naples Daily News\nOct. 22, 2026, 5:06 a.m. ET\nAs [Southwest Florida](https://ww\""
             },
             "suggestions": [
               "What's driving signal development 7?",
@@ -249,15 +249,15 @@
           },
           {
             "metric": "signal_development_8",
-            "value": "Fort Myers: A 3.5-mile stretch of Naples Beach is set to be replenished before Christmas, as reported Oct. 16, 2026.",
+            "value": "Sanibel: New roads, new homes and new investments are reshaping SW FL as of the week of Oct. 22, 2026, with Sanibel among the areas hitting post-hurricane milestones.",
             "direction": "stable",
-            "label": "Fort Myers — development",
+            "label": "Sanibel — development",
             "variable_type": "categorical",
             "source": {
-              "url": "https://www.naplesnews.com/story/money/business/local/2026/10/16/tons-of-sand-are-coming-to-parts-of-naples-beach-for-replenishment/92248068007/",
-              "fetched_at": "2026-10-23T09:27:28Z",
+              "url": "https://www.naplesnews.com/story/money/2026/10/22/from-roads-to-rooftops-florida-hits-wave-of-post-hurricane-milestones-sanibel-fort-myers-naples-swfl/92256346007/",
+              "fetched_at": "2026-10-24T04:25:56Z",
               "tier": 2,
-              "citation": "Tons of sand are coming to parts of Naples Beach for replenishment: \"[](https://www.naplesnews.com/)\n[Florida high school football ejections rise with emphasis on sportsmanship](https://www.naplesnews.com/story/sports/high-school/football/2026/10/21/florida-high-school-football-ejections-rise-emphasis-on-sportsmanship/92233587007/)\n[](https://subscribe.naplesnews.com/rr/nanobar?gps-source=CPTILELEFT&itm_campaign=2026ENTQ4BAU2026&itm_medium=ONSITE&success-url=https%3A%2F%2Fwww.naplesnews.com%2Fstory%2Fmoney%2Fbusiness%2Flocal%2F2026%2F10%2F16%2Ftons-of-sand-are-coming-to-parts-of-naples-beach-for-replenishment%2F92248068007%2F)\n[](https://subscribe.naplesnews.com/rr/masthead?gps-source=CPMASTHEAD&itm_campaign=2026ENTQ4BAU2026&itm_medium=ONSITE&success-url=https%3A%2F%2Fwww.naplesnews.com%2Fstory%2Fmoney%2Fbusiness%2Flocal%2F2026%2F10%2F16%2Ftons-of-sand-are-coming-to-parts-of-naples-beach-for-replenishment%2F92248068007%2F)\n[News](https://www.naplesnews.com/news/) [Sports](https://www.naplesnews.com/sports/) [Real Estate](https://www.naplesnews.com/business/real-estate/) [Restaurants](https://www.naplesnews.com/entertainment/restaurants/) [Opinion](https://www.naplesnews.com/opinion/) [Advertise](https://advertising.usatoday.com/advertise-with-us/?cid=Web_LiQ_Network_AdvertiseWithUs_AdvertiseInquiry&publication=naples_daily_news&utm_source=local_publication&utm_medium=menu&utm_campaign=advertise_with_us) [Obituaries](https://www.naplesnews.com/obituaries) [eNewspaper](https://user.naplesnews.com/user/enewspaper) [Legals](https://www.naplesnews.com/public-notices)\n[](https://www.naplesnews.com/search/ \"Search\")\n[](https://www.naplesnews.com/weather/ \"Weather in Naples: 66°F Clear\") [](https://subscribe.naplesnews.com/rr/navsub?gps-source=CPTOPNAVBAR&itm_campaign=2026ENTQ4BAU2026&itm_medium=ONSITE&success-url=https%3A%2F%2Fwww.naplesnews.com%2Fstory%2Fmoney%2Fbusiness%2Flocal%2F2026%2F10%2F16%2Ftons-of-sand-are-coming-to-parts-of-naples-beach-for-replenishment%2F92248068007%2F)\n[](https://login.naplesnews.com/PNDN-GUP/authenticate/?success-url=https%3A%2F%2Fwww.naplesnews.com%2Fstory%2Fmoney%2Fbusiness%2Flocal%2F2026%2F10%2F16%2Ftons-of-sand-are-coming-to-parts-of-naples-beach-for-replenishment%2F92248068007%2F&cancel-url=https%3A%2F%2Fwww.naplesnews.com%2Fstory%2Fmoney%2Fbusiness%2Flocal%2F2026%2F10%2F16%2Ftons-of-sand-are-coming-to-parts-of-naples-beach-for-replenishment%2F92248068007%2F)\n[](https://www.naplesnews.com/) [](https://www.naplesnews.com/)\n[LOCAL BUSINESS](https://www.naplesnews.com/business/local/)\n# Eroded stretch of Naples Beach to be replenished before Christmas\n[![Portrait of Laura Layden](https://www.naplesnews.com/gcdn/authoring/authoring-images/2024/02/08/PNDN/72524348007-ndn-jh-20240126-laura-0001.JPG?crop=3313,3312,x1506,y0&width=48&height=48&format=pjpg&auto=webp) Laura Layden](https://www.naplesnews.com/staff/2647080001/laura-layden/)\nFort Myers News-Press & Naples Daily News\nOct. 16, 2026, 12:00 p.m. ET\nBy Christmas, a stretch of Naples Beach will look and feel different.\nA 3.5-mile stretch\""
+              "citation": "From roads to rooftops, Florida hits wave of post-hurricane milestones: \"[](https://www.naplesnews.com/)\n[SWFL Football Week 10 high school game previews and predictions](https://www.naplesnews.com/story/sports/high-school/football/2026/10/22/high-school-football-sw-florida-fhsaa-oct-23-previews-predictions/92308109007/)\n[](https://subscribe.naplesnews.com/rr/nanobar?gps-source=CPTILELEFT&itm_campaign=2026ENTQ4BAU2026&itm_medium=ONSITE&success-url=https%3A%2F%2Fwww.naplesnews.com%2Fstory%2Fmoney%2F2026%2F10%2F22%2Ffrom-roads-to-rooftops-florida-hits-wave-of-post-hurricane-milestones-sanibel-fort-myers-naples-swfl%2F92256346007%2F)\n[](https://subscribe.naplesnews.com/rr/masthead?gps-source=CPMASTHEAD&itm_campaign=2026ENTQ4BAU2026&itm_medium=ONSITE&success-url=https%3A%2F%2Fwww.naplesnews.com%2Fstory%2Fmoney%2F2026%2F10%2F22%2Ffrom-roads-to-rooftops-florida-hits-wave-of-post-hurricane-milestones-sanibel-fort-myers-naples-swfl%2F92256346007%2F)\n[News](https://www.naplesnews.com/news/) [Sports](https://www.naplesnews.com/sports/) [Real Estate](https://www.naplesnews.com/business/real-estate/) [Restaurants](https://www.naplesnews.com/entertainment/restaurants/) [Opinion](https://www.naplesnews.com/opinion/) [Advertise](https://advertising.usatoday.com/advertise-with-us/?cid=Web_LiQ_Network_AdvertiseWithUs_AdvertiseInquiry&publication=naples_daily_news&utm_source=local_publication&utm_medium=menu&utm_campaign=advertise_with_us) [Obituaries](https://www.naplesnews.com/obituaries) [eNewspaper](https://user.naplesnews.com/user/enewspaper) [Legals](https://www.naplesnews.com/public-notices)\n[](https://www.naplesnews.com/search/ \"Search\")\n[](https://www.naplesnews.com/weather/ \"Weather in Naples: 68°F Mostly Cloudy\") [](https://subscribe.naplesnews.com/rr/navsub?gps-source=CPTOPNAVBAR&itm_campaign=2026ENTQ4BAU2026&itm_medium=ONSITE&success-url=https%3A%2F%2Fwww.naplesnews.com%2Fstory%2Fmoney%2F2026%2F10%2F22%2Ffrom-roads-to-rooftops-florida-hits-wave-of-post-hurricane-milestones-sanibel-fort-myers-naples-swfl%2F92256346007%2F)\n[](https://login.naplesnews.com/PNDN-GUP/authenticate/?success-url=https%3A%2F%2Fwww.naplesnews.com%2Fstory%2Fmoney%2F2026%2F10%2F22%2Ffrom-roads-to-rooftops-florida-hits-wave-of-post-hurricane-milestones-sanibel-fort-myers-naples-swfl%2F92256346007%2F&cancel-url=https%3A%2F%2Fwww.naplesnews.com%2Fstory%2Fmoney%2F2026%2F10%2F22%2Ffrom-roads-to-rooftops-florida-hits-wave-of-post-hurricane-milestones-sanibel-fort-myers-naples-swfl%2F92256346007%2F)\n[](https://www.naplesnews.com/) [](https://www.naplesnews.com/)\n[MONEY](https://www.naplesnews.com/business/)\n# New roads, new homes and new investments reshaping SW FL this week\n[![Portrait of Phil Fernandez](https://www.naplesnews.com/gcdn/presto/2019/09/14/PNDN/6a77b474-579f-48fa-b56f-a2cc2b9de797-NDN_Phil_Fernandez.jpg?crop=2999,2999,x0,y570&width=48&height=48&format=pjpg&auto=webp) Phil Fernandez](https://www.naplesnews.com/staff/2684114001/phil-fernandez/)\nFort Myers News-Press & Naples Daily News\nOct. 22, 2026, 5:06 a.m. ET\nAs [Southwest Florida](https://ww\""
             },
             "suggestions": [
               "What's driving signal development 8?",
@@ -293,16 +293,16 @@
                 "key": "34102",
                 "label": "34102",
                 "cells": {
-                  "items": 3,
-                  "latest_fact": "A 3.5-mile stretch of Naples Beach is set to be renourished before Christmas, as reported Oct. 16, 2026.",
-                  "latest_place": "Naples Beach",
-                  "latest_source": "https://www.naplesnews.com/story/money/business/local/2026/10/16/tons-of-sand-are-coming-to-parts-of-naples-beach-for-replenishment/92248068007/"
+                  "items": 4,
+                  "latest_fact": "Naples City Council unanimously rejected a request for a wall-height waiver for a secretive family compound in Port Royal on Oct. 22, 2026.",
+                  "latest_place": "Port Royal",
+                  "latest_source": "https://www.news-press.com/story/money/business/local/2026/10/22/naples-council-rejects-wall-waiver-for-mystery-family-compound-11-foot-walls-to-protect-privacy/92365490007/"
                 }
               }
             ],
             "source": {
               "url": "https://www.swfldatagulf.com/r/source/city_pulse",
-              "fetched_at": "2026-10-23T09:27:28Z",
+              "fetched_at": "2026-10-24T04:25:56Z",
               "tier": 2,
               "citation": "Distilled, citation-backed SWFL news signals; each ZIP's items carry per-item source URLs in data_lake.city_pulse."
             },
@@ -310,7 +310,7 @@
           }
         ],
         "caveats": [
-          "54 additional live signals not surfaced here (cap 8); the full set is in data_lake.city_pulse.",
+          "56 additional live signals not surfaced here (cap 8); the full set is in data_lake.city_pulse.",
           "Each signal is dated current-events context with a per-signal source; freshness is TTL-bounded by topic (breaking 1d → structural 90d)."
         ],
         "contradicts": [],
@@ -323,7 +323,7 @@
         "relevance": {
           "decay_curve": "weeks",
           "half_life_hours": 720,
-          "computed_at": "2026-10-23T09:27:28Z"
+          "computed_at": "2026-10-24T04:25:56Z"
         },
         "exogenous_signals": []
       }
@@ -340,8 +340,119 @@
     },
     {
       "packId": "freshness-pulse",
-      "status": "skipped-fresh",
-      "written": false
+      "status": "built",
+      "version": 82,
+      "written": true,
+      "brainOutput": {
+        "brain_id": "freshness-pulse",
+        "version": 82,
+        "refined_at": "2026-10-24T04:25:57Z",
+        "expires": "2026-10-25T04:25:57Z",
+        "ttl_seconds": 86400,
+        "direction": "neutral",
+        "magnitude": 0,
+        "drivers": [],
+        "overrides": [],
+        "conclusion": "Today's sourced snapshot — SWFL 30-year fixed mortgage rate (as of 2026-10-22) 7.32%; Cape Coral median asking price (as of 2026-10-24) $399,200; Fort Myers median asking price (as of 2026-10-24) $325,000; Naples median asking price (as of 2026-10-24) $650,000. These are cited current facts only; the direction call lives downstream in master.",
+        "key_metrics": [
+          {
+            "metric": "freshness_mortgage_30yr_fixed_pct",
+            "value": 7.32,
+            "direction": "stable",
+            "label": "SWFL 30-year fixed mortgage rate (as of 2026-10-22)",
+            "variable_type": "intensive",
+            "units": "percent",
+            "display_format": "percent",
+            "source": {
+              "url": "https://fred.stlouisfed.org/series/MORTGAGE30US",
+              "fetched_at": "2026-10-24T04:23:45.299891+00:00",
+              "tier": 2,
+              "citation": "FRED — current 30-year fixed mortgage rate for SWFL, sourced 2026-10-22"
+            },
+            "suggestions": [
+              "What's driving freshness mortgage 30yr fixed pct?",
+              "How does freshness mortgage 30yr fixed pct here compare to other SWFL areas?"
+            ]
+          },
+          {
+            "metric": "freshness_median_asking_price_cape_coral_usd",
+            "value": 399200,
+            "direction": "stable",
+            "label": "Cape Coral median asking price (as of 2026-10-24)",
+            "variable_type": "extensive",
+            "units": "USD",
+            "display_format": "currency",
+            "source": {
+              "url": "https://www.swfldatagulf.com/desk",
+              "fetched_at": "2026-10-24T04:23:45.299891+00:00",
+              "tier": 2,
+              "citation": "SWFL Data Gulf active-listing inventory — current median asking price for Cape Coral, sourced 2026-10-24"
+            },
+            "suggestions": [
+              "Chart asking rents across the corridors",
+              "What's driving freshness median asking price cape coral usd?",
+              "How does freshness median asking price cape coral usd here compare to other SWFL areas?"
+            ]
+          },
+          {
+            "metric": "freshness_median_asking_price_fort_myers_usd",
+            "value": 325000,
+            "direction": "stable",
+            "label": "Fort Myers median asking price (as of 2026-10-24)",
+            "variable_type": "extensive",
+            "units": "USD",
+            "display_format": "currency",
+            "source": {
+              "url": "https://www.swfldatagulf.com/desk",
+              "fetched_at": "2026-10-24T04:23:45.299891+00:00",
+              "tier": 2,
+              "citation": "SWFL Data Gulf active-listing inventory — current median asking price for Fort Myers, sourced 2026-10-24"
+            },
+            "suggestions": [
+              "Chart asking rents across the corridors",
+              "What's driving freshness median asking price fort myers usd?",
+              "How does freshness median asking price fort myers usd here compare to other SWFL areas?"
+            ]
+          },
+          {
+            "metric": "freshness_median_asking_price_naples_usd",
+            "value": 650000,
+            "direction": "stable",
+            "label": "Naples median asking price (as of 2026-10-24)",
+            "variable_type": "extensive",
+            "units": "USD",
+            "display_format": "currency",
+            "source": {
+              "url": "https://www.swfldatagulf.com/desk",
+              "fetched_at": "2026-10-24T04:23:45.299891+00:00",
+              "tier": 2,
+              "citation": "SWFL Data Gulf active-listing inventory — current median asking price for Naples, sourced 2026-10-24"
+            },
+            "suggestions": [
+              "Chart asking rents across the corridors",
+              "What's driving freshness median asking price naples usd?",
+              "How does freshness median asking price naples usd here compare to other SWFL areas?"
+            ]
+          }
+        ],
+        "detail_tables": [],
+        "caveats": [
+          "Each county-grain number is a single grounded source's current figure, provenance-gated to a real source URL; held anomalies and unsourced (model-memory) numbers are excluded by design."
+        ],
+        "contradicts": [],
+        "confidence": 0.8,
+        "joint_integrity": 1,
+        "confidence_dispersion": 0,
+        "chain_depth": 0,
+        "trust_tier": 2,
+        "upstream_count": 0,
+        "relevance": {
+          "decay_curve": "weeks",
+          "half_life_hours": 720,
+          "computed_at": "2026-10-24T04:25:57Z"
+        },
+        "exogenous_signals": []
+      }
     },
     {
       "packId": "seller-stress-swfl",
@@ -424,13 +535,13 @@
     {
       "packId": "master",
       "status": "built",
-      "version": 143,
+      "version": 144,
       "written": true,
       "brainOutput": {
         "brain_id": "master",
-        "version": 143,
-        "refined_at": "2026-10-23T09:27:50Z",
-        "expires": "2026-10-30T09:27:50Z",
+        "version": 144,
+        "refined_at": "2026-10-24T04:26:18Z",
+        "expires": "2026-10-31T04:26:18Z",
         "ttl_seconds": 604800,
         "direction": "mixed",
         "magnitude": 0.4610050701831471,
@@ -980,7 +1091,7 @@
         "caveats": [
           "flood-barrier-mode-1 active: 4 barrier ZIPs, worst-case AAL $40,342/insured property",
           "Override \"storm-history-modifier\" fired (priority 70)",
-          "active-rentals-swfl excluded from synthesis (relevance 0.090, below floor 0.1)",
+          "active-rentals-swfl excluded from synthesis (relevance 0.089, below floor 0.1)",
           "No figures published: this source has not yet received its first real SBA FOIA load. A synthetic development sample exists for offline testing only and is never shipped.",
           "Construction-cost PPI metrics (construction_cost_ppi_industrial, construction_cost_ppi_warehouse, construction_cost_ppi_office, construction_cost_ppi_medical_office, construction_cost_ppi_trade_concrete, construction_cost_ppi_trade_roofing, construction_cost_ppi_trade_electrical, construction_cost_ppi_trade_plumbing_hvac) are national BLS series — no SWFL-specific or Lee/Collier breakout exists at BLS for any of them. They ship a real month-over-month direction (unlike MarketBeat's schema-required \"stable\" fallback) but BLS can revise recent observations within ~30 days of first publication.",
           "vacancy_rate_marketbeat_swfl: 15 submarkets report a point-in-time value; v1 does not compute quarter-over-quarter direction, so the \"stable\" label is a schema-required fallback, not a measured trend.",
@@ -1077,7 +1188,7 @@
           "1 of 8 announcements in the last 90 days matched qualifying categories (relocation, expansion, grant, infrastructure); the rest are general chamber/policy posts excluded from the momentum count.",
           "Investment and job figures reflect disclosures at announcement time; actual outcomes may vary as projects develop.",
           "SWFL Inc. covers primarily Lee County projects; Collier County coverage depends on cross-county partnerships and co-announcements.",
-          "54 additional live signals not surfaced here (cap 8); the full set is in data_lake.city_pulse.",
+          "56 additional live signals not surfaced here (cap 8); the full set is in data_lake.city_pulse.",
           "Each signal is dated current-events context with a per-signal source; freshness is TTL-bounded by topic (breaking 1d → structural 90d).",
           "Construction enforcement split: public notices = confirmed individual actions (hard-parsed violation_type); press releases = announced sweeps (Sonnet-inferred affected_industries). Do not sum them.",
           "Polarity: rising construction notices = bullish (recovery-driven unlicensed activity). Rising ABT notices = bearish (hospitality compliance stress).",
@@ -1142,7 +1253,7 @@
           "~50% of SWFL buyers (≈70% for condos) pay cash and insulate the luxury tier — a holding or rising top tier is part of the K-shape, not a bullish signal on its own.",
           "Covers 50 SWFL ZIPs holding BOTH a starter and a luxury tier; ZIPs lacking one tier are excluded from the divergence.",
           "Upstream brain 'active-rentals-swfl' was stale at build time (expired 2026-07-19).",
-          "Upstream brain 'active-rentals-swfl' failed to rebuild on 2026-10-23; using last good read from 2026-07-11 (v3)."
+          "Upstream brain 'active-rentals-swfl' failed to rebuild on 2026-10-24; using last good read from 2026-07-11 (v3)."
         ],
         "contradicts": [
           "macro-us (bearish) vs macro-florida (bullish)",
@@ -1208,8 +1319,8 @@
         "upstream_count": 38,
         "relevance": {
           "decay_curve": "weeks",
-          "half_life_hours": 720.0000000000001,
-          "computed_at": "2026-10-23T09:27:50.000Z"
+          "half_life_hours": 720.0000000000003,
+          "computed_at": "2026-10-24T04:26:18.000Z"
         },
         "exogenous_signals": [],
         "conditional_claims": [
