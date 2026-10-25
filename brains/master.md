@@ -1,9 +1,9 @@
-<!-- FRESHNESS: v146 | Token: SWFL-7421-v146-20261025-3315c118 -->
+<!-- FRESHNESS: v147 | Token: SWFL-7421-v147-20261025-f0d5802a -->
 ---
 brain_id: master
-version: 146
-refined_at: 2026-10-25T04:26:49Z
-freshness_token: SWFL-7421-v146-20261025-3315c118
+version: 147
+refined_at: 2026-10-25T09:16:46Z
+freshness_token: SWFL-7421-v147-20261025-f0d5802a
 ttl_seconds: 604800
 pack_hash: be8f0d44e0e6
 context_type: user_saved_reference
@@ -91,7 +91,7 @@ s39 | home-values-swfl brain — https://www.swfldatagulf.com/api/b/home-values-
   {"id":"f017","topic":"upstream :: safety-swfl","fact":"Upstream snapshot — safety-swfl (neutral, magnitude 0.00, confidence 1.00)","value":"safety-swfl as of 2026-10-02: direction neutral, magnitude 0.00, confidence 1.00, trust tier T1, 8 key metric(s). SWFL property crime: 6.8 Part I offenses per 1,000 residents (2025 UCR), -18.7% YoY. Lee (8.0/1k) runs 3.1 points above Collier (4.8/1k).","src":"s01","date":"2026-10-25"},
   {"id":"f018","topic":"upstream :: labor-demand-swfl","fact":"Upstream snapshot — labor-demand-swfl (bullish, magnitude 0.78, confidence 1.00)","value":"labor-demand-swfl as of 2026-10-17: direction bullish, magnitude 0.78, confidence 1.00, trust tier T1, 10 key metric(s). BLS OEWS May 2025 — SWFL workforce. Lee (Cape Coral-Fort Myers MSA): top sector: Office and Administrative Support Occupations (37,050), Construction 2.17× national, employment +1.5% YoY. Collier (Naples MSA): top sector: Food Preparation and Serving Related Occupations (25,250), Construction 1.88× national, employment +1.6% YoY. Source: BLS Occupational Employment and Wage Statistics.","src":"s01","date":"2026-10-25"},
   {"id":"f019","topic":"upstream :: econ-dev-swfl","fact":"Upstream snapshot — econ-dev-swfl (neutral, magnitude 0.35, confidence 0.80)","value":"econ-dev-swfl as of 2026-10-20: direction neutral, magnitude 0.35, confidence 0.80, trust tier T2, 2 key metric(s). SWFL Inc. logged 1 economic development announcement in the last 90 days. Momentum: flat vs prior 90-day window. Source: SWFL Inc. (swflinc.com/blog/), the official Lee County economic development organization.","src":"s01","date":"2026-10-25"},
-  {"id":"f020","topic":"upstream :: city-pulse-swfl","fact":"Upstream snapshot — city-pulse-swfl (neutral, magnitude 0.00, confidence 0.80)","value":"city-pulse-swfl as of 2026-10-25: direction neutral, magnitude 0.00, confidence 0.80, trust tier T2, 8 key metric(s). SWFL city pulse as of 2026-10-25: 68 live current-events signals across 5 cities — Naples (23), Fort Myers (21), Cape Coral (21), Sanibel (1), Estero (2). Most current: Naples — Former Naples city councilwoman Linda Penniman died suddenly on Oct. 20, 2026; her son recalled her life in an interview published Oct. 23, 2026. These are current cited facts only; the cross-vertical read and any direction call live downstream in master.","src":"s01","date":"2026-10-25"},
+  {"id":"f020","topic":"upstream :: city-pulse-swfl","fact":"Upstream snapshot — city-pulse-swfl (neutral, magnitude 0.00, confidence 0.80)","value":"city-pulse-swfl as of 2026-10-25: direction neutral, magnitude 0.00, confidence 0.80, trust tier T2, 8 key metric(s). SWFL city pulse as of 2026-10-25: 70 live current-events signals across 5 cities — Naples (24), Fort Myers (22), Cape Coral (21), Sanibel (1), Estero (2). Most current: Naples — Two Naples men were sentenced to prison for wire fraud, as reported Oct. 20, 2026. These are current cited facts only; the cross-vertical read and any direction call live downstream in master.","src":"s01","date":"2026-10-25"},
   {"id":"f021","topic":"upstream :: rsw-airport","fact":"Upstream snapshot — rsw-airport (bullish, magnitude 0.16, confidence 1.00)","value":"rsw-airport as of 2026-10-09: direction bullish, magnitude 0.16, confidence 1.00, trust tier T1, 9 key metric(s). LCPA Aviation April 2026 — RSW 1,152,669 total passengers (-2.2% YoY), trailing-12-mo 11,197,951 (+2.4% vs prior year — the direction basis), 512,534 arrivals / 640,135 departures, 10,797 aircraft operations, 3,463,896 lbs air freight. Source: Lee County Port Authority (flylcpa.com/about-lcpa/reports-and-statistics/).","src":"s01","date":"2026-10-25"},
   {"id":"f022","topic":"upstream :: news-swfl","fact":"Upstream snapshot — news-swfl (neutral, magnitude 0.30, confidence 0.80)","value":"news-swfl as of 2026-10-20: direction neutral, magnitude 0.30, confidence 0.80, trust tier T2, 9 key metric(s). DBPR issued 1 SWFL-relevant press release in the last 90 days. 2 individual enforcement notices active in Lee and Collier counties (2 construction unlicensed, 0 ABT/hospitality). Top press release topics: ABT, licensing, enforcement. Sources: FL DBPR press releases (www2.myfloridalicense.com/press-releases/) and public enforcement notices (www2.myfloridalicense.com/public-notices/).","src":"s01","date":"2026-10-25"},
   {"id":"f023","topic":"upstream :: freshness-pulse","fact":"Upstream snapshot — freshness-pulse (neutral, magnitude 0.00, confidence 0.80)","value":"freshness-pulse as of 2026-10-25: direction neutral, magnitude 0.00, confidence 0.80, trust tier T2, 4 key metric(s). Today's sourced snapshot — SWFL 30-year fixed mortgage rate (as of 2026-10-22) 7.32%; Cape Coral median asking price (as of 2026-10-25) $399,200; Fort Myers median asking price (as of 2026-10-25) $325,000; Naples median asking price (as of 2026-10-25) $650,000. These are cited current facts only; the direction call lives downstream in master.","src":"s01","date":"2026-10-25"},
@@ -116,9 +116,9 @@ s39 | home-values-swfl brain — https://www.swfldatagulf.com/api/b/home-values-
 --- OUTPUT ---
 {
   "brain_id": "master",
-  "version": 146,
-  "refined_at": "2026-10-25T04:26:49Z",
-  "expires": "2026-11-01T04:26:49Z",
+  "version": 147,
+  "refined_at": "2026-10-25T09:16:46Z",
+  "expires": "2026-11-01T09:16:46Z",
   "ttl_seconds": 604800,
   "direction": "mixed",
   "magnitude": 0.45844037311278335,
@@ -606,22 +606,20 @@ s39 | home-values-swfl brain — https://www.swfldatagulf.com/api/b/home-values-
       ]
     },
     {
-      "metric": "collier_homes_sold_zscore",
-      "value": -0.76,
+      "metric": "signal_breaking_1",
+      "value": "Naples: Two Naples men were sentenced to prison for wire fraud, as reported Oct. 20, 2026.",
       "direction": "stable",
-      "label": "Collier homes-sold z-score, year 2025 vs trailing 3yr (2022-2024)",
-      "variable_type": "intensive",
-      "units": "z-score",
-      "display_format": "ratio",
+      "label": "Naples — breaking",
+      "variable_type": "categorical",
       "source": {
-        "url": "https://jtkdowmrjaxfvwmemxso.supabase.co/rest/v1/redfin_collier_market?select=period_end,homes_sold,median_sale_price_yoy,months_of_supply&property_type=eq.All%20Residential",
-        "fetched_at": "2026-10-22T04:35:24Z",
+        "url": "https://www.businessobserverfl.com/news/2026/oct/20/naples-men-sentenced-wire-fraud/",
+        "fetched_at": "2026-10-25T09:16:24Z",
         "tier": 2,
-        "citation": "Redfin Data Center county market tracker via data_lake.redfin_collier_market (free public TSV filtered to \"Collier County, FL\"; monthly homes-sold summed to calendar-year velocity, \"All Residential\" property type)."
+        "citation": "Two Naples men sentenced to prison for wire fraud | Business Observer: \"![Spinner: White decorative](https://cdn.userway.org/widgetapp/images/spin_wh.svg)\n![](https://cdn.userway.org/widgetapp/images/body_wh.svg)\n![Spinner: White decorative](https://cdn.userway.org/widgetapp/images/spin_wh.svg)\n  * ![Alternate Text](https://observermediagroup.media.clients.ellingtoncms.com/static-4/assets/images/bob-logo-header.svg)\n  * Loading\n\n\n  * [Newsletters](https://marketing.businessobserverfl.com/newsletters)\n  * [Podcast](https://www.businessobserverfl.com/podcasts/corner-office/?utm_source=header&utm_medium=sitenav)\n  * [Public Notices](https://legals.businessobserverfl.com/)\n  * [Big Book](https://www.businessobserverfl.com/big-book-of-business/2026/)\n  * [40 Under 40](https://www.businessobserverfl.com/40-under-40/)\n  * [Mobile App](https://businessobserver.pressreader.com/)\n  * [Subscribe](https://marketing.businessobserverfl.com/subscribe)\n  * [Login](https://www.businessobserverfl.com/accounts/login/?next=/news/2026/oct/20/naples-men-sentenced-wire-fraud/)\n\n\n  * [](https://www.facebook.com/BusinessObserverFL)\n  * [](https://x.com/BizObserverFL)\n  * [](https://www.linkedin.com/company/businessobserverfl)\n  * [ ](https://www.instagram.com/businessobserverfl/)\n\n\n[![](https://observermediagroup.media.clients.ellingtoncms.com/static-4/assets/images/bob-logo-header.svg)](https://www.businessobserverfl.com/)\n[![](https://observermediagroup.media.clients.ellingtoncms.com/static-4/assets/images/bob-logo-sticky.svg)](https://www.businessobserverfl.com/)\n[![](https://observermediagroup.media.clients.ellingtoncms.com/static-4/assets/images/bob-logo-header.svg)](https://www.businessobserverfl.com/)\n  * [News](https://www.businessobserverfl.com/news/all/)\n  * [Strategies](https://www.businessobserverfl.com/news/strategies/)\n  * [Entrepreneurs](https://www.businessobserverfl.com/news/entrepreneurs/)\n  * [Leadership](https://www.businessobserverfl.com/news/leadership/)\n  * [Regions](https://www.businessobserverfl.com/news/2026/oct/20/naples-men-sentenced-wire-fraud/)\n    * [Tampa Bay-Lakeland](https://www.businessobserverfl.com/news/tampa-bay-lakeland/)\n    * [Manatee-Sarasota](https://www.businessobserverfl.com/news/manatee-sarasota/)\n    * [Charlotte-Lee-Collier](https://www.businessobserverfl.com/news/charlotte-lee-collier/)\n    * [Florida](https://www.businessobserverfl.com/news/florida/)\n  * [Industries](https://www.businessobserverfl.com/news/2026/oct/20/naples-men-sentenced-wire-fraud/)\n    * [Business Support](https://www.businessobserverfl.com/news/industries/business-support/)\n    * [Commercial Real Estate](https://www.businessobserverfl.com/news/industries/commercial-real-estate/)\n    * [Residential Real Estate](https://www.businessobserverfl.com/news/industries/residential-real-estate/)\n    * [Development](https://www.businessobserverfl.com/news/industries/development/)\n    * [Finance](https://www.businessobserverfl.com/news/industries/finance/)\n    * [Food-Beverage](https://www.businessobserverfl.com/news/industries/food-\""
       },
       "suggestions": [
-        "What's driving collier homes sold zscore?",
-        "How does collier homes sold zscore here compare to other SWFL areas?"
+        "What's driving signal breaking 1?",
+        "How does signal breaking 1 here compare to other SWFL areas?"
       ]
     },
     {
@@ -668,7 +666,7 @@ s39 | home-values-swfl brain — https://www.swfldatagulf.com/api/b/home-values-
   "caveats": [
     "flood-barrier-mode-1 active: 4 barrier ZIPs, worst-case AAL $40,342/insured property",
     "Override \"storm-history-modifier\" fired (priority 70)",
-    "active-rentals-swfl excluded from synthesis (relevance 0.087, below floor 0.1)",
+    "active-rentals-swfl excluded from synthesis (relevance 0.086, below floor 0.1)",
     "No figures published: this source has not yet received its first real SBA FOIA load. A synthetic development sample exists for offline testing only and is never shipped.",
     "Construction-cost PPI metrics (construction_cost_ppi_industrial, construction_cost_ppi_warehouse, construction_cost_ppi_office, construction_cost_ppi_medical_office, construction_cost_ppi_trade_concrete, construction_cost_ppi_trade_roofing, construction_cost_ppi_trade_electrical, construction_cost_ppi_trade_plumbing_hvac) are national BLS series — no SWFL-specific or Lee/Collier breakout exists at BLS for any of them. They ship a real month-over-month direction (unlike MarketBeat's schema-required \"stable\" fallback) but BLS can revise recent observations within ~30 days of first publication.",
     "vacancy_rate_marketbeat_swfl: 15 submarkets report a point-in-time value; v1 does not compute quarter-over-quarter direction, so the \"stable\" label is a schema-required fallback, not a measured trend.",
@@ -765,7 +763,7 @@ s39 | home-values-swfl brain — https://www.swfldatagulf.com/api/b/home-values-
     "1 of 8 announcements in the last 90 days matched qualifying categories (relocation, expansion, grant, infrastructure); the rest are general chamber/policy posts excluded from the momentum count.",
     "Investment and job figures reflect disclosures at announcement time; actual outcomes may vary as projects develop.",
     "SWFL Inc. covers primarily Lee County projects; Collier County coverage depends on cross-county partnerships and co-announcements.",
-    "60 additional live signals not surfaced here (cap 8); the full set is in data_lake.city_pulse.",
+    "62 additional live signals not surfaced here (cap 8); the full set is in data_lake.city_pulse.",
     "Each signal is dated current-events context with a per-signal source; freshness is TTL-bounded by topic (breaking 1d → structural 90d).",
     "Construction enforcement split: public notices = confirmed individual actions (hard-parsed violation_type); press releases = announced sweeps (Sonnet-inferred affected_industries). Do not sum them.",
     "Polarity: rising construction notices = bullish (recovery-driven unlicensed activity). Rising ABT notices = bearish (hospitality compliance stress).",
@@ -896,8 +894,8 @@ s39 | home-values-swfl brain — https://www.swfldatagulf.com/api/b/home-values-
   "upstream_count": 38,
   "relevance": {
     "decay_curve": "weeks",
-    "half_life_hours": 720.0000000000002,
-    "computed_at": "2026-10-25T04:26:49.000Z"
+    "half_life_hours": 719.9999999999999,
+    "computed_at": "2026-10-25T09:16:46.000Z"
   },
   "exogenous_signals": [],
   "conditional_claims": [
