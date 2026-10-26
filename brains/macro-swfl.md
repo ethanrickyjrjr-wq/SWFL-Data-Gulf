@@ -1,9 +1,9 @@
-<!-- FRESHNESS: v44 | Token: SWFL-7421-v44-20261022-6729e33c -->
+<!-- FRESHNESS: v45 | Token: SWFL-7421-v45-20261026-8b579eb9 -->
 ---
 brain_id: macro-swfl
-version: 44
-refined_at: 2026-10-22T04:35:22Z
-freshness_token: SWFL-7421-v44-20261022-6729e33c
+version: 45
+refined_at: 2026-10-26T04:41:35Z
+freshness_token: SWFL-7421-v45-20261026-8b579eb9
 ttl_seconds: 2592000
 pack_hash: ceb76a3741b7
 context_type: user_saved_reference
@@ -33,32 +33,32 @@ SCOPE: Regional macro context for Southwest Florida — leaf tier of the three-t
 
 --- CITATION TABLE ---
 id  | source                                                                                                                                                                                                                                        | verified   | expires
-s01 | macro-florida brain — https://www.swfldatagulf.com/api/b/macro-florida                                                                                                                                                                        | 2026-07-19 | 2026-08-18
-s02 | BLS Local Area Unemployment Statistics (LAUS) via data_lake.bls_laus (https://api.bls.gov/publicAPI/v2/timeseries/data/; series prefixes LAUST12, LAUCN12071, LAUCN12021; measures 03/04/05/06; monthly, not seasonally adjusted)             | 2026-10-22 | 2026-11-21
-s03 | BLS Quarterly Census of Employment and Wages via data_lake.bls_qcew (https://data.bls.gov/cew/data/api/{year}/q{qtr}/area/{fips}.json; FL state + Lee County + Collier County, all industries, all ownership codes, merge-tracked 2 quarters) | 2026-10-22 | 2026-11-21
-s04 | FDIC Summary of Deposits via data_lake.fdic_sod (https://api.fdic.gov/banks/sod; branch county STCNTYBR in Lee/Collier/Hendry, every year since 1994, deposits as of June 30)                                                                 | 2026-10-22 | 2026-11-21
+s01 | macro-florida brain — https://www.swfldatagulf.com/api/b/macro-florida                                                                                                                                                                        | 2026-10-22 | 2026-11-21
+s02 | BLS Local Area Unemployment Statistics (LAUS) via data_lake.bls_laus (https://api.bls.gov/publicAPI/v2/timeseries/data/; series prefixes LAUST12, LAUCN12071, LAUCN12021; measures 03/04/05/06; monthly, not seasonally adjusted)             | 2026-10-26 | 2026-11-25
+s03 | BLS Quarterly Census of Employment and Wages via data_lake.bls_qcew (https://data.bls.gov/cew/data/api/{year}/q{qtr}/area/{fips}.json; FL state + Lee County + Collier County, all industries, all ownership codes, merge-tracked 2 quarters) | 2026-10-26 | 2026-11-25
+s04 | FDIC Summary of Deposits via data_lake.fdic_sod (https://api.fdic.gov/banks/sod; branch county STCNTYBR in Lee/Collier/Hendry, every year since 1994, deposits as of June 30)                                                                 | 2026-10-26 | 2026-11-25
 
 --- SAVED FACTS ---
 [
-  {"id":"f001","topic":"laus_lee_vs_fl","fact":"Lee County unemployment rate vs FL state baseline","value":"Lee County 5.2% vs FL state baseline 4.6% (gap: +0.6pp, 2026-M07, preliminary)","src":"s02","date":"2026-10-22"},
-  {"id":"f002","topic":"laus_collier_vs_fl","fact":"Collier County unemployment rate vs FL state baseline","value":"Collier County 5% vs FL state baseline 4.6% (gap: +0.4pp, 2026-M07, preliminary)","src":"s02","date":"2026-10-22"},
-  {"id":"f003","topic":"laus_fl_benchmark","fact":"FL LAUS state rate (denominator benchmark for gap math)","value":"FL state LAUS 4.6% (2026-M07) — macro-florida confidence 1.00","src":"s02","date":"2026-10-22"},
-  {"id":"f004","topic":"qcew_wages","fact":"SWFL private-sector average weekly wage — 2026-Q1","value":"BLS QCEW private-sector wages, 2026-Q1: Lee County $1,230/wk; Collier County $1,429/wk","src":"s02","date":"2026-10-22"},
-  {"id":"f005","topic":"fdic_deposits","fact":"SWFL bank branch deposits — FDIC Summary of Deposits","value":"FDIC Summary of Deposits, branch deposits by county: Lee County $21,115,545,000 as of 06/30/2026 (-5.3% YoY; 162 branches, 34 banks); Collier County $19,159,773,000 as of 06/30/2026 (+1.9% YoY; 126 branches, 37 banks).","src":"s04","date":"2026-10-22"}
+  {"id":"f001","topic":"laus_lee_vs_fl","fact":"Lee County unemployment rate vs FL state baseline","value":"Lee County 5.2% vs FL state baseline 4.6% (gap: +0.6pp, 2026-M08, preliminary)","src":"s02","date":"2026-10-26"},
+  {"id":"f002","topic":"laus_collier_vs_fl","fact":"Collier County unemployment rate vs FL state baseline","value":"Collier County 5% vs FL state baseline 4.6% (gap: +0.4pp, 2026-M08, preliminary)","src":"s02","date":"2026-10-26"},
+  {"id":"f003","topic":"laus_fl_benchmark","fact":"FL LAUS state rate (denominator benchmark for gap math)","value":"FL state LAUS 4.6% (2026-M08) — macro-florida confidence 1.00","src":"s02","date":"2026-10-26"},
+  {"id":"f004","topic":"qcew_wages","fact":"SWFL private-sector average weekly wage — 2026-Q1","value":"BLS QCEW private-sector wages, 2026-Q1: Lee County $1,230/wk; Collier County $1,429/wk","src":"s02","date":"2026-10-26"},
+  {"id":"f005","topic":"fdic_deposits","fact":"SWFL bank branch deposits — FDIC Summary of Deposits","value":"FDIC Summary of Deposits, branch deposits by county: Lee County $21,115,545,000 as of 06/30/2026 (-5.3% YoY; 162 branches, 34 banks); Collier County $19,159,773,000 as of 06/30/2026 (+1.9% YoY; 126 branches, 37 banks).","src":"s04","date":"2026-10-26"}
 ]
 
 --- OUTPUT ---
 {
   "brain_id": "macro-swfl",
-  "version": 44,
-  "refined_at": "2026-10-22T04:35:22Z",
-  "expires": "2026-11-21T04:35:22Z",
+  "version": 45,
+  "refined_at": "2026-10-26T04:41:35Z",
+  "expires": "2026-11-25T04:41:35Z",
   "ttl_seconds": 2592000,
   "direction": "bearish",
   "magnitude": 1,
   "drivers": [],
   "overrides": [],
-  "conclusion": "SWFL labor market, 2026-M07 (preliminary): Lee County at 5.2%, +0.6pp YoY; Collier County at 5%, +0.6pp YoY; FL state LAUS 4.6% (benchmark). Private-sector wages in Lee County ran $1,230/wk in 2026-Q1 (+4.9% YoY). Bank branch deposits in Lee County stood at $21,115,545,000 as of 06/30/2026 (-5.3% YoY). Against the FL state macro backdrop (macro-florida, confidence 1.00), SWFL county unemployment is rising faster than the state average.",
+  "conclusion": "SWFL labor market, 2026-M08 (preliminary): Lee County at 5.2%, +0.5pp YoY; Collier County at 5%, +0.3pp YoY; FL state LAUS 4.6% (benchmark). Private-sector wages in Lee County ran $1,230/wk in 2026-Q1 (+4.9% YoY). Bank branch deposits in Lee County stood at $21,115,545,000 as of 06/30/2026 (-5.3% YoY). Against the FL state macro backdrop (macro-florida, confidence 1.00), SWFL county unemployment is rising faster than the state average.",
   "key_metrics": [
     {
       "metric": "laus_lee_unemployment_rate",
@@ -70,9 +70,9 @@ s04 | FDIC Summary of Deposits via data_lake.fdic_sod (https://api.fdic.gov/bank
       "display_format": "percent",
       "source": {
         "url": "https://api.bls.gov/publicAPI/v2/timeseries/data/",
-        "fetched_at": "2026-10-22T04:35:21Z",
+        "fetched_at": "2026-10-26T04:41:33Z",
         "tier": 1,
-        "citation": "BLS LAUS series LAUCN120710000000003, 2026-M07 = 5.2%"
+        "citation": "BLS LAUS series LAUCN120710000000003, 2026-M08 = 5.2%"
       },
       "suggestions": [
         "What's driving laus lee unemployment rate?",
@@ -89,9 +89,9 @@ s04 | FDIC Summary of Deposits via data_lake.fdic_sod (https://api.fdic.gov/bank
       "display_format": "percent",
       "source": {
         "url": "https://api.bls.gov/publicAPI/v2/timeseries/data/",
-        "fetched_at": "2026-10-22T04:35:21Z",
+        "fetched_at": "2026-10-26T04:41:33Z",
         "tier": 1,
-        "citation": "BLS LAUS series LAUCN120210000000003, 2026-M07 = 5%"
+        "citation": "BLS LAUS series LAUCN120210000000003, 2026-M08 = 5%"
       },
       "suggestions": [
         "What's driving laus collier unemployment rate?",
@@ -108,9 +108,9 @@ s04 | FDIC Summary of Deposits via data_lake.fdic_sod (https://api.fdic.gov/bank
       "display_format": "percent",
       "source": {
         "url": "https://api.bls.gov/publicAPI/v2/timeseries/data/",
-        "fetched_at": "2026-10-22T04:35:21Z",
+        "fetched_at": "2026-10-26T04:41:33Z",
         "tier": 1,
-        "citation": "BLS LAUS series LAUST120000000000003, 2026-M07 = 4.6%"
+        "citation": "BLS LAUS series LAUST120000000000003, 2026-M08 = 4.6%"
       },
       "suggestions": [
         "What's driving laus fl unemployment rate?",
@@ -120,16 +120,16 @@ s04 | FDIC Summary of Deposits via data_lake.fdic_sod (https://api.fdic.gov/bank
     {
       "metric": "laus_lee_unemployment_rate_yoy_delta",
       "label": "Lee County Unemployment Rate YoY Δ",
-      "value": 0.6,
+      "value": 0.5,
       "direction": "rising",
       "variable_type": "intensive",
       "units": "pp",
       "display_format": "raw",
       "source": {
         "url": "https://api.bls.gov/publicAPI/v2/timeseries/data/",
-        "fetched_at": "2026-10-22T04:35:21Z",
+        "fetched_at": "2026-10-26T04:41:33Z",
         "tier": 1,
-        "citation": "BLS LAUS LAUCN120710000000003, YoY delta (prior-year 2026-M07 → 2026-M07) = +0.6pp"
+        "citation": "BLS LAUS LAUCN120710000000003, YoY delta (prior-year 2026-M08 → 2026-M08) = +0.5pp"
       },
       "suggestions": [
         "What's driving laus lee unemployment rate yoy delta?",
@@ -146,7 +146,7 @@ s04 | FDIC Summary of Deposits via data_lake.fdic_sod (https://api.fdic.gov/bank
       "display_format": "currency",
       "source": {
         "url": "https://data.bls.gov/cew/data/api",
-        "fetched_at": "2026-10-22T04:35:21Z",
+        "fetched_at": "2026-10-26T04:41:33Z",
         "tier": 1,
         "citation": "BLS QCEW private-sector (own_code=5) via data_lake.bls_qcew, area_fips=12071, 2026-Q1: avg_wkly_wage = $1,230/wk"
       },
@@ -165,7 +165,7 @@ s04 | FDIC Summary of Deposits via data_lake.fdic_sod (https://api.fdic.gov/bank
       "display_format": "percent",
       "source": {
         "url": "https://data.bls.gov/cew/data/api",
-        "fetched_at": "2026-10-22T04:35:21Z",
+        "fetched_at": "2026-10-26T04:41:33Z",
         "tier": 1,
         "citation": "BLS QCEW private-sector (own_code=5) via data_lake.bls_qcew, area_fips=12071, 2026-Q1: avg_wkly_wage YoY = +4.86%"
       },
@@ -184,7 +184,7 @@ s04 | FDIC Summary of Deposits via data_lake.fdic_sod (https://api.fdic.gov/bank
       "display_format": "currency",
       "source": {
         "url": "https://data.bls.gov/cew/data/api",
-        "fetched_at": "2026-10-22T04:35:21Z",
+        "fetched_at": "2026-10-26T04:41:33Z",
         "tier": 1,
         "citation": "BLS QCEW private-sector (own_code=5) via data_lake.bls_qcew, area_fips=12021, 2026-Q1: avg_wkly_wage = $1,429/wk"
       },
@@ -203,7 +203,7 @@ s04 | FDIC Summary of Deposits via data_lake.fdic_sod (https://api.fdic.gov/bank
       "display_format": "percent",
       "source": {
         "url": "https://data.bls.gov/cew/data/api",
-        "fetched_at": "2026-10-22T04:35:21Z",
+        "fetched_at": "2026-10-26T04:41:33Z",
         "tier": 1,
         "citation": "BLS QCEW private-sector (own_code=5) via data_lake.bls_qcew, area_fips=12021, 2026-Q1: avg_wkly_wage YoY = +10.52%"
       },
@@ -222,7 +222,7 @@ s04 | FDIC Summary of Deposits via data_lake.fdic_sod (https://api.fdic.gov/bank
       "display_format": "count",
       "source": {
         "url": "https://data.bls.gov/cew/data/api",
-        "fetched_at": "2026-10-22T04:35:21Z",
+        "fetched_at": "2026-10-26T04:41:33Z",
         "tier": 1,
         "citation": "BLS QCEW private-sector (own_code=5) via data_lake.bls_qcew, area_fips=12071, 2026-Q1: month3_emplvl = 275,732 jobs"
       },
@@ -241,7 +241,7 @@ s04 | FDIC Summary of Deposits via data_lake.fdic_sod (https://api.fdic.gov/bank
       "display_format": "count",
       "source": {
         "url": "https://data.bls.gov/cew/data/api",
-        "fetched_at": "2026-10-22T04:35:21Z",
+        "fetched_at": "2026-10-26T04:41:33Z",
         "tier": 1,
         "citation": "BLS QCEW private-sector (own_code=5) via data_lake.bls_qcew, area_fips=12021, 2026-Q1: month3_emplvl = 161,740 jobs"
       },
@@ -260,7 +260,7 @@ s04 | FDIC Summary of Deposits via data_lake.fdic_sod (https://api.fdic.gov/bank
       "display_format": "currency",
       "source": {
         "url": "https://api.fdic.gov/banks/sod?filters=STCNTYBR:12071%20AND%20YEAR:2026",
-        "fetched_at": "2026-10-22T04:35:22Z",
+        "fetched_at": "2026-10-26T04:41:35Z",
         "tier": 1,
         "citation": "FDIC Summary of Deposits via data_lake.fdic_sod_county_year_v, branch county 12071, as of 06/30/2026: $21,115,545,000 across 162 branches of 34 banks (-5.3% YoY)"
       },
@@ -279,7 +279,7 @@ s04 | FDIC Summary of Deposits via data_lake.fdic_sod (https://api.fdic.gov/bank
       "display_format": "percent",
       "source": {
         "url": "https://api.fdic.gov/banks/sod?filters=STCNTYBR:12071%20AND%20YEAR:2026",
-        "fetched_at": "2026-10-22T04:35:22Z",
+        "fetched_at": "2026-10-26T04:41:35Z",
         "tier": 1,
         "citation": "FDIC Summary of Deposits via data_lake.fdic_sod_county_year_v, branch county 12071, as of 06/30/2026: $21,115,545,000 across 162 branches of 34 banks (-5.3% YoY)"
       },
@@ -298,7 +298,7 @@ s04 | FDIC Summary of Deposits via data_lake.fdic_sod (https://api.fdic.gov/bank
       "display_format": "count",
       "source": {
         "url": "https://api.fdic.gov/banks/sod?filters=STCNTYBR:12071%20AND%20YEAR:2026",
-        "fetched_at": "2026-10-22T04:35:22Z",
+        "fetched_at": "2026-10-26T04:41:35Z",
         "tier": 1,
         "citation": "FDIC Summary of Deposits via data_lake.fdic_sod_county_year_v, branch county 12071, as of 06/30/2026: $21,115,545,000 across 162 branches of 34 banks (-5.3% YoY)"
       },
@@ -317,7 +317,7 @@ s04 | FDIC Summary of Deposits via data_lake.fdic_sod (https://api.fdic.gov/bank
       "display_format": "currency",
       "source": {
         "url": "https://api.fdic.gov/banks/sod?filters=STCNTYBR:12021%20AND%20YEAR:2026",
-        "fetched_at": "2026-10-22T04:35:22Z",
+        "fetched_at": "2026-10-26T04:41:35Z",
         "tier": 1,
         "citation": "FDIC Summary of Deposits via data_lake.fdic_sod_county_year_v, branch county 12021, as of 06/30/2026: $19,159,773,000 across 126 branches of 37 banks (+1.9% YoY)"
       },
@@ -336,7 +336,7 @@ s04 | FDIC Summary of Deposits via data_lake.fdic_sod (https://api.fdic.gov/bank
       "display_format": "percent",
       "source": {
         "url": "https://api.fdic.gov/banks/sod?filters=STCNTYBR:12021%20AND%20YEAR:2026",
-        "fetched_at": "2026-10-22T04:35:22Z",
+        "fetched_at": "2026-10-26T04:41:35Z",
         "tier": 1,
         "citation": "FDIC Summary of Deposits via data_lake.fdic_sod_county_year_v, branch county 12021, as of 06/30/2026: $19,159,773,000 across 126 branches of 37 banks (+1.9% YoY)"
       },
@@ -355,7 +355,7 @@ s04 | FDIC Summary of Deposits via data_lake.fdic_sod (https://api.fdic.gov/bank
       "display_format": "count",
       "source": {
         "url": "https://api.fdic.gov/banks/sod?filters=STCNTYBR:12021%20AND%20YEAR:2026",
-        "fetched_at": "2026-10-22T04:35:22Z",
+        "fetched_at": "2026-10-26T04:41:35Z",
         "tier": 1,
         "citation": "FDIC Summary of Deposits via data_lake.fdic_sod_county_year_v, branch county 12021, as of 06/30/2026: $19,159,773,000 across 126 branches of 37 banks (+1.9% YoY)"
       },
@@ -366,9 +366,7 @@ s04 | FDIC Summary of Deposits via data_lake.fdic_sod (https://api.fdic.gov/bank
     }
   ],
   "caveats": [
-    "BLS LAUS data for 2026-M07 is preliminary — subject to revision at next monthly release.",
-    "Upstream brain 'macro-florida' was stale at build time (expired 2026-08-18).",
-    "Upstream brain 'macro-florida' failed to rebuild on 2026-10-22; using last good read from 2026-07-19 (v24)."
+    "BLS LAUS data for 2026-M08 is preliminary — subject to revision at next monthly release."
   ],
   "contradicts": [],
   "confidence": 1,
@@ -380,15 +378,14 @@ s04 | FDIC Summary of Deposits via data_lake.fdic_sod (https://api.fdic.gov/bank
   "relevance": {
     "decay_curve": "weeks",
     "half_life_hours": 720,
-    "computed_at": "2026-10-22T04:35:22Z"
+    "computed_at": "2026-10-26T04:41:35Z"
   },
-  "exogenous_signals": [],
-  "degraded_inputs": []
+  "exogenous_signals": []
 }
 
 --- ACTIVE PROJECTS ---
 - macro-swfl: BLS LAUS county unemployment + BLS QCEW quarterly wages + FDIC annual branch deposits live for Lee + Collier counties.
 
 --- RECENT NOTES ---
-- 2026-10-22: pack refined by the Refinery — 5 fact(s) from 4 source(s).
+- 2026-10-26: pack refined by the Refinery — 5 fact(s) from 4 source(s).
 ```
