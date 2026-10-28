@@ -1,8 +1,8 @@
 {
   "target": "master",
   "timestamps": {
-    "started": "2026-10-27T09:55:58.020Z",
-    "finished": "2026-10-27T09:56:26.015Z"
+    "started": "2026-10-28T04:25:54.846Z",
+    "finished": "2026-10-28T04:26:16.775Z"
   },
   "source": "live",
   "outcomes": [
@@ -114,116 +114,116 @@
     {
       "packId": "city-pulse-swfl",
       "status": "built",
-      "version": 143,
+      "version": 144,
       "written": true,
       "brainOutput": {
         "brain_id": "city-pulse-swfl",
-        "version": 143,
-        "refined_at": "2026-10-27T09:55:58Z",
-        "expires": "2026-10-28T09:55:58Z",
+        "version": 144,
+        "refined_at": "2026-10-28T04:25:55Z",
+        "expires": "2026-10-29T04:25:55Z",
         "ttl_seconds": 86400,
         "direction": "neutral",
         "magnitude": 0,
         "drivers": [],
         "overrides": [],
-        "conclusion": "SWFL city pulse as of 2026-10-27: 72 live current-events signals across 5 cities — Naples (24), Fort Myers (23), Cape Coral (22), Sanibel (1), Estero (2). Most current: Naples — Florida hits a wave of post-hurricane milestones including new roads, new homes, and new investments reshaping SW FL, reported Oct. 22, 2026. These are current cited facts only; the cross-vertical read and any direction call live downstream in master.",
+        "conclusion": "SWFL city pulse as of 2026-10-28: 68 live current-events signals across 5 cities — Naples (20), Fort Myers (23), Cape Coral (21), Sanibel (1), Estero (3). Most current: Naples — A gulf-front Naples mansion sold for $71M in an off-market sale, as reported Oct. 22, 2026. These are current cited facts only; the cross-vertical read and any direction call live downstream in master.",
         "key_metrics": [
           {
-            "metric": "signal_breaking_1",
-            "value": "Naples: Florida hits a wave of post-hurricane milestones including new roads, new homes, and new investments reshaping SW FL, reported Oct. 22, 2026.",
-            "direction": "stable",
-            "label": "Naples — breaking",
-            "variable_type": "categorical",
-            "source": {
-              "url": "https://www.news-press.com/story/money/2026/10/22/from-roads-to-rooftops-florida-hits-wave-of-post-hurricane-milestones-sanibel-fort-myers-naples-swfl/92256346007/",
-              "fetched_at": "2026-10-27T09:55:58Z",
-              "tier": 2,
-              "citation": "From roads to rooftops, Florida hits wave of post-hurricane milestones: \"[](https://www.news-press.com/)\n[](https://subscribe.news-press.com/rr/nanobar?gps-source=CPTILELEFT&itm_campaign=2026ENTQ4BAU2026&itm_medium=ONSITE&success-url=https%3A%2F%2Fwww.news-press.com%2Fstory%2Fmoney%2F2026%2F10%2F22%2Ffrom-roads-to-rooftops-florida-hits-wave-of-post-hurricane-milestones-sanibel-fort-myers-naples-swfl%2F92256346007%2F)\n[](https://subscribe.news-press.com/rr/masthead?gps-source=CPMASTHEAD&itm_campaign=2026ENTQ4BAU2026&itm_medium=ONSITE&success-url=https%3A%2F%2Fwww.news-press.com%2Fstory%2Fmoney%2F2026%2F10%2F22%2Ffrom-roads-to-rooftops-florida-hits-wave-of-post-hurricane-milestones-sanibel-fort-myers-naples-swfl%2F92256346007%2F)\n[News](https://www.news-press.com/news/) [Cape Coral](https://www.news-press.com/news/cape-coral/) [Sports](https://www.news-press.com/sports/) [Restaurants](https://www.news-press.com/taste/) [Real Estate](https://www.news-press.com/real-estate) [Advertise](https://advertising.usatoday.com/advertise-with-us/?cid=Web_LiQ_Network_AdvertiseWithUs_AdvertiseInquiry&publication=the_news_press&utm_source=local_publication&utm_medium=menu&utm_campaign=advertise_with_us) [Obituaries](https://www.news-press.com/obituaries) [eNewspaper](https://user.news-press.com/user/enewspaper) [Legals](https://www.news-press.com/public-notices)\n[](https://www.news-press.com/search/ \"Search\")\n[](https://www.news-press.com/weather/ \"Weather in Fort Myers: 74°F Mostly Sunny\") [](https://subscribe.news-press.com/rr/navsub?gps-source=CPTOPNAVBAR&itm_campaign=2026ENTQ4BAU2026&itm_medium=ONSITE&success-url=https%3A%2F%2Fwww.news-press.com%2Fstory%2Fmoney%2F2026%2F10%2F22%2Ffrom-roads-to-rooftops-florida-hits-wave-of-post-hurricane-milestones-sanibel-fort-myers-naples-swfl%2F92256346007%2F)\n[](https://login.news-press.com/PFTM-GUP/authenticate/?success-url=https%3A%2F%2Fwww.news-press.com%2Fstory%2Fmoney%2F2026%2F10%2F22%2Ffrom-roads-to-rooftops-florida-hits-wave-of-post-hurricane-milestones-sanibel-fort-myers-naples-swfl%2F92256346007%2F&cancel-url=https%3A%2F%2Fwww.news-press.com%2Fstory%2Fmoney%2F2026%2F10%2F22%2Ffrom-roads-to-rooftops-florida-hits-wave-of-post-hurricane-milestones-sanibel-fort-myers-naples-swfl%2F92256346007%2F)\n[](https://www.news-press.com/) [](https://www.news-press.com/)\n[MONEY](https://www.news-press.com/business/)\n# New roads, new homes and new investments reshaping SW FL this week\n[![Portrait of Phil Fernandez](https://www.news-press.com/gcdn/presto/2019/09/14/PNDN/6a77b474-579f-48fa-b56f-a2cc2b9de797-NDN_Phil_Fernandez.jpg?crop=2999,2999,x0,y570&width=48&height=48&format=pjpg&auto=webp) Phil Fernandez](https://www.naplesnews.com/staff/2684114001/phil-fernandez/)\nFort Myers News-Press & Naples Daily News\nOct. 22, 2026, 5:06 a.m. ET\nAs [Southwest Florida](https://www.news-press.com/story/money/2026/10/05/sw-florida-buc-ees-wont-open-until-major-i-75-area-road-fixes-are-done-swfl-charlotte-lee-county/92042955007/) ushered in this week's relatively cooler weather of early autumn, it also is marking a\""
-            },
-            "suggestions": [
-              "What's driving signal breaking 1?",
-              "How does signal breaking 1 here compare to other SWFL areas?"
-            ]
-          },
-          {
-            "metric": "signal_breaking_2",
-            "value": "Naples: Two Naples men were sentenced to 15 months in prison for wire fraud (COVID glove fraud case), as reported Oct. 20, 2026.",
-            "direction": "stable",
-            "label": "Naples — breaking",
-            "variable_type": "categorical",
-            "source": {
-              "url": "https://www.businessobserverfl.com/news/2026/oct/20/naples-men-sentenced-wire-fraud/",
-              "fetched_at": "2026-10-27T09:55:58Z",
-              "tier": 2,
-              "citation": "Two Naples men sentenced to prison for wire fraud | Business Observer: \"* ![Alternate Text](https://observermediagroup.media.clients.ellingtoncms.com/static-4/assets/images/bob-logo-header.svg)\n  * Loading\n\n\n  * [Newsletters](https://marketing.businessobserverfl.com/newsletters)\n  * [Podcast](https://www.businessobserverfl.com/podcasts/corner-office/?utm_source=header&utm_medium=sitenav)\n  * [Public Notices](https://legals.businessobserverfl.com/)\n  * [Big Book](https://www.businessobserverfl.com/big-book-of-business/2026/)\n  * [40 Under 40](https://www.businessobserverfl.com/40-under-40/)\n  * [Mobile App](https://businessobserver.pressreader.com/)\n  * [Subscribe](https://marketing.businessobserverfl.com/subscribe)\n  * [Login](https://www.businessobserverfl.com/accounts/login/?next=/news/2026/oct/20/naples-men-sentenced-wire-fraud/)\n\n\n  * [](https://www.facebook.com/BusinessObserverFL)\n  * [](https://x.com/BizObserverFL)\n  * [](https://www.linkedin.com/company/businessobserverfl)\n  * [ ](https://www.instagram.com/businessobserverfl/)\n\n\n[![](https://observermediagroup.media.clients.ellingtoncms.com/static-4/assets/images/bob-logo-header.svg)](https://www.businessobserverfl.com/)\n[![](https://observermediagroup.media.clients.ellingtoncms.com/static-4/assets/images/bob-logo-sticky.svg)](https://www.businessobserverfl.com/)\n[![](https://observermediagroup.media.clients.ellingtoncms.com/static-4/assets/images/bob-logo-header.svg)](https://www.businessobserverfl.com/)\n  * [News](https://www.businessobserverfl.com/news/all/)\n  * [Strategies](https://www.businessobserverfl.com/news/strategies/)\n  * [Entrepreneurs](https://www.businessobserverfl.com/news/entrepreneurs/)\n  * [Leadership](https://www.businessobserverfl.com/news/leadership/)\n  * [Regions](https://www.businessobserverfl.com/news/2026/oct/20/naples-men-sentenced-wire-fraud/)\n    * [Tampa Bay-Lakeland](https://www.businessobserverfl.com/news/tampa-bay-lakeland/)\n    * [Manatee-Sarasota](https://www.businessobserverfl.com/news/manatee-sarasota/)\n    * [Charlotte-Lee-Collier](https://www.businessobserverfl.com/news/charlotte-lee-collier/)\n    * [Florida](https://www.businessobserverfl.com/news/florida/)\n  * [Industries](https://www.businessobserverfl.com/news/2026/oct/20/naples-men-sentenced-wire-fraud/)\n    * [Business Support](https://www.businessobserverfl.com/news/industries/business-support/)\n    * [Commercial Real Estate](https://www.businessobserverfl.com/news/industries/commercial-real-estate/)\n    * [Residential Real Estate](https://www.businessobserverfl.com/news/industries/residential-real-estate/)\n    * [Development](https://www.businessobserverfl.com/news/industries/development/)\n    * [Finance](https://www.businessobserverfl.com/news/industries/finance/)\n    * [Food-Beverage](https://www.businessobserverfl.com/news/industries/food-beverage/)\n    * [Healthcare](https://www.businessobserverfl.com/news/industries/health-care/)\n    * [Manufacturing](https://www.businessobserverfl.com/news/industries/manufacturing/)\n    * [Retail](https://www.businessobser\""
-            },
-            "suggestions": [
-              "What's driving signal breaking 2?",
-              "How does signal breaking 2 here compare to other SWFL areas?"
-            ]
-          },
-          {
-            "metric": "signal_breaking_3",
-            "value": "Naples: Linda Penniman, former Naples city councilwoman and community advocate, died on Oct. 20, 2026; her son described her as the 'Energizer Bunny' and said she died of a 'broken heart' after her husband.",
-            "direction": "stable",
-            "label": "Naples — breaking",
-            "variable_type": "categorical",
-            "source": {
-              "url": "https://www.naplesnews.com/story/money/business/local/2026/10/23/former-naples-florida-councilwoman-linda-penniman-remembered-as-the-energizer-bunny/92385292007/",
-              "fetched_at": "2026-10-27T09:55:58Z",
-              "tier": 2,
-              "citation": "Former Naples councilwoman remembered as the 'Energizer Bunny': \"[](https://www.naplesnews.com/)\n[](https://subscribe.naplesnews.com/rr/nanobar?gps-source=CPTILELEFT&itm_campaign=2026ENTQ4BAU2026&itm_medium=ONSITE&success-url=https%3A%2F%2Fwww.naplesnews.com%2Fstory%2Fmoney%2Fbusiness%2Flocal%2F2026%2F10%2F23%2Fformer-naples-florida-councilwoman-linda-penniman-remembered-as-the-energizer-bunny%2F92385292007%2F)\n[](https://subscribe.naplesnews.com/rr/masthead?gps-source=CPMASTHEAD&itm_campaign=2026ENTQ4BAU2026&itm_medium=ONSITE&success-url=https%3A%2F%2Fwww.naplesnews.com%2Fstory%2Fmoney%2Fbusiness%2Flocal%2F2026%2F10%2F23%2Fformer-naples-florida-councilwoman-linda-penniman-remembered-as-the-energizer-bunny%2F92385292007%2F)\n[News](https://www.naplesnews.com/news/) [Sports](https://www.naplesnews.com/sports/) [Real Estate](https://www.naplesnews.com/business/real-estate/) [Restaurants](https://www.naplesnews.com/entertainment/restaurants/) [Opinion](https://www.naplesnews.com/opinion/) [Advertise](https://advertising.usatoday.com/advertise-with-us/?cid=Web_LiQ_Network_AdvertiseWithUs_AdvertiseInquiry&publication=naples_daily_news&utm_source=local_publication&utm_medium=menu&utm_campaign=advertise_with_us) [Obituaries](https://www.naplesnews.com/obituaries) [eNewspaper](https://user.naplesnews.com/user/enewspaper) [Legals](https://www.naplesnews.com/public-notices)\n[](https://www.naplesnews.com/search/ \"Search\")\n[](https://www.naplesnews.com/weather/ \"Weather in Naples: 69°F Partly Cloudy w/ Showers\") [](https://subscribe.naplesnews.com/rr/navsub?gps-source=CPTOPNAVBAR&itm_campaign=2026ENTQ4BAU2026&itm_medium=ONSITE&success-url=https%3A%2F%2Fwww.naplesnews.com%2Fstory%2Fmoney%2Fbusiness%2Flocal%2F2026%2F10%2F23%2Fformer-naples-florida-councilwoman-linda-penniman-remembered-as-the-energizer-bunny%2F92385292007%2F)\n[](https://login.naplesnews.com/PNDN-GUP/authenticate/?success-url=https%3A%2F%2Fwww.naplesnews.com%2Fstory%2Fmoney%2Fbusiness%2Flocal%2F2026%2F10%2F23%2Fformer-naples-florida-councilwoman-linda-penniman-remembered-as-the-energizer-bunny%2F92385292007%2F&cancel-url=https%3A%2F%2Fwww.naplesnews.com%2Fstory%2Fmoney%2Fbusiness%2Flocal%2F2026%2F10%2F23%2Fformer-naples-florida-councilwoman-linda-penniman-remembered-as-the-energizer-bunny%2F92385292007%2F)\n[](https://www.naplesnews.com/) [](https://www.naplesnews.com/)\n[LOCAL BUSINESS](https://www.naplesnews.com/business/local/)\n# Naples leader dies of 'broken heart' after husband. Son recalls her life\n[![Portrait of Laura Layden](https://www.naplesnews.com/gcdn/authoring/authoring-images/2024/02/08/PNDN/72524348007-ndn-jh-20240126-laura-0001.JPG?crop=3313,3312,x1506,y0&width=48&height=48&format=pjpg&auto=webp) Laura Layden](https://www.naplesnews.com/staff/2647080001/laura-layden/)\nFort Myers News-Press & Naples Daily News\nOct. 23, 2026, 2:48 p.m. ET\nThe \"Energizer Bunny.\"\nThat's how Linda Penniman is remembered by her son.\nIn an interview, her son offered more insight into the life of his mother, a former Naples city councilwoman and community advocate, [wh\""
-            },
-            "suggestions": [
-              "What's driving signal breaking 3?",
-              "How does signal breaking 3 here compare to other SWFL areas?"
-            ]
-          },
-          {
-            "metric": "signal_transactions_4",
+            "metric": "signal_transactions_1",
             "value": "Naples: A gulf-front Naples mansion sold for $71M in an off-market sale, as reported Oct. 22, 2026.",
             "direction": "stable",
             "label": "Naples — transactions",
             "variable_type": "categorical",
             "source": {
               "url": "https://www.businessobserverfl.com/news/2026/oct/22/gulf-front-naples-mansion-sale/",
-              "fetched_at": "2026-10-27T09:55:58Z",
+              "fetched_at": "2026-10-28T04:25:55Z",
               "tier": 2,
               "citation": "Gulf-front Naples mansion sells for $71M in off-market sale | Business Observer: \"* ![Alternate Text](https://observermediagroup.media.clients.ellingtoncms.com/static-4/assets/images/bob-logo-header.svg)\n  * Loading\n\n\n  * [Newsletters](https://marketing.businessobserverfl.com/newsletters)\n  * [Podcast](https://www.businessobserverfl.com/podcasts/corner-office/?utm_source=header&utm_medium=sitenav)\n  * [Public Notices](https://legals.businessobserverfl.com/)\n  * [Big Book](https://www.businessobserverfl.com/big-book-of-business/2026/)\n  * [40 Under 40](https://www.businessobserverfl.com/40-under-40/)\n  * [Mobile App](https://businessobserver.pressreader.com/)\n  * [Subscribe](https://marketing.businessobserverfl.com/subscribe)\n  * [Login](https://www.businessobserverfl.com/accounts/login/?next=/news/2026/oct/22/gulf-front-naples-mansion-sale/)\n\n\n  * [](https://www.facebook.com/BusinessObserverFL)\n  * [](https://x.com/BizObserverFL)\n  * [](https://www.linkedin.com/company/businessobserverfl)\n  * [ ](https://www.instagram.com/businessobserverfl/)\n\n\n[![](https://observermediagroup.media.clients.ellingtoncms.com/static-4/assets/images/bob-logo-header.svg)](https://www.businessobserverfl.com/)\n[![](https://observermediagroup.media.clients.ellingtoncms.com/static-4/assets/images/bob-logo-sticky.svg)](https://www.businessobserverfl.com/)\n[![](https://observermediagroup.media.clients.ellingtoncms.com/static-4/assets/images/bob-logo-header.svg)](https://www.businessobserverfl.com/)\n  * [News](https://www.businessobserverfl.com/news/all/)\n  * [Strategies](https://www.businessobserverfl.com/news/strategies/)\n  * [Entrepreneurs](https://www.businessobserverfl.com/news/entrepreneurs/)\n  * [Leadership](https://www.businessobserverfl.com/news/leadership/)\n  * [Regions](https://www.businessobserverfl.com/news/2026/oct/22/gulf-front-naples-mansion-sale/)\n    * [Tampa Bay-Lakeland](https://www.businessobserverfl.com/news/tampa-bay-lakeland/)\n    * [Manatee-Sarasota](https://www.businessobserverfl.com/news/manatee-sarasota/)\n    * [Charlotte-Lee-Collier](https://www.businessobserverfl.com/news/charlotte-lee-collier/)\n    * [Florida](https://www.businessobserverfl.com/news/florida/)\n  * [Industries](https://www.businessobserverfl.com/news/2026/oct/22/gulf-front-naples-mansion-sale/)\n    * [Business Support](https://www.businessobserverfl.com/news/industries/business-support/)\n    * [Commercial Real Estate](https://www.businessobserverfl.com/news/industries/commercial-real-estate/)\n    * [Residential Real Estate](https://www.businessobserverfl.com/news/industries/residential-real-estate/)\n    * [Development](https://www.businessobserverfl.com/news/industries/development/)\n    * [Finance](https://www.businessobserverfl.com/news/industries/finance/)\n    * [Food-Beverage](https://www.businessobserverfl.com/news/industries/food-beverage/)\n    * [Healthcare](https://www.businessobserverfl.com/news/industries/health-care/)\n    * [Manufacturing](https://www.businessobserverfl.com/news/industries/manufacturing/)\n    * [Retail](https://www.businessobserver\""
             },
             "suggestions": [
-              "What's driving signal transactions 4?",
-              "How does signal transactions 4 here compare to other SWFL areas?"
+              "What's driving signal transactions 1?",
+              "How does signal transactions 1 here compare to other SWFL areas?"
             ]
           },
           {
-            "metric": "signal_transactions_5",
+            "metric": "signal_transactions_2",
             "value": "Fort Myers: Former Ruby Tuesday near Fort Myers hospitals sells for $2.2M",
             "direction": "stable",
             "label": "Fort Myers — transactions",
             "variable_type": "categorical",
             "source": {
               "url": "https://www.businessobserverfl.com/news/2026/oct/19/former-ruby-tuesday-fort-myers-sells/",
-              "fetched_at": "2026-10-27T09:55:58Z",
+              "fetched_at": "2026-10-28T04:25:55Z",
               "tier": 2,
               "citation": "Former Ruby Tuesday near Fort Myers hospitals sells for $2.2M | Business Observer: \"![Spinner: White decorative](https://cdn.userway.org/widgetapp/images/spin_wh.svg)\n![](https://cdn.userway.org/widgetapp/images/body_wh.svg)\n![Spinner: White decorative](https://cdn.userway.org/widgetapp/images/spin_wh.svg)\n  * ![Alternate Text](https://observermediagroup.media.clients.ellingtoncms.com/static-4/assets/images/bob-logo-header.svg)\n  * Loading\n\n\n  * [Newsletters](https://marketing.businessobserverfl.com/newsletters)\n  * [Podcast](https://www.businessobserverfl.com/podcasts/corner-office/?utm_source=header&utm_medium=sitenav)\n  * [Public Notices](https://legals.businessobserverfl.com/)\n  * [Big Book](https://www.businessobserverfl.com/big-book-of-business/2026/)\n  * [40 Under 40](https://www.businessobserverfl.com/40-under-40/)\n  * [Mobile App](https://businessobserver.pressreader.com/)\n  * [Subscribe](https://marketing.businessobserverfl.com/subscribe)\n  * [Login](https://www.businessobserverfl.com/accounts/login/?next=/news/2026/oct/19/former-ruby-tuesday-fort-myers-sells/)\n\n\n  * [](https://www.facebook.com/BusinessObserverFL)\n  * [](https://x.com/BizObserverFL)\n  * [](https://www.linkedin.com/company/businessobserverfl)\n  * [ ](https://www.instagram.com/businessobserverfl/)\n\n\n[![](https://observermediagroup.media.clients.ellingtoncms.com/static-4/assets/images/bob-logo-header.svg)](https://www.businessobserverfl.com/)\n[![](https://observermediagroup.media.clients.ellingtoncms.com/static-4/assets/images/bob-logo-sticky.svg)](https://www.businessobserverfl.com/)\n[![](https://observermediagroup.media.clients.ellingtoncms.com/static-4/assets/images/bob-logo-header.svg)](https://www.businessobserverfl.com/)\n  * [News](https://www.businessobserverfl.com/news/all/)\n  * [Strategies](https://www.businessobserverfl.com/news/strategies/)\n  * [Entrepreneurs](https://www.businessobserverfl.com/news/entrepreneurs/)\n  * [Leadership](https://www.businessobserverfl.com/news/leadership/)\n  * [Regions](https://www.businessobserverfl.com/news/2026/oct/19/former-ruby-tuesday-fort-myers-sells/)\n    * [Tampa Bay-Lakeland](https://www.businessobserverfl.com/news/tampa-bay-lakeland/)\n    * [Manatee-Sarasota](https://www.businessobserverfl.com/news/manatee-sarasota/)\n    * [Charlotte-Lee-Collier](https://www.businessobserverfl.com/news/charlotte-lee-collier/)\n    * [Florida](https://www.businessobserverfl.com/news/florida/)\n  * [Industries](https://www.businessobserverfl.com/news/2026/oct/19/former-ruby-tuesday-fort-myers-sells/)\n    * [Business Support](https://www.businessobserverfl.com/news/industries/business-support/)\n    * [Commercial Real Estate](https://www.businessobserverfl.com/news/industries/commercial-real-estate/)\n    * [Residential Real Estate](https://www.businessobserverfl.com/news/industries/residential-real-estate/)\n    * [Development](https://www.businessobserverfl.com/news/industries/development/)\n    * [Finance](https://www.businessobserverfl.com/news/industries/finance/)\n    * [Food-Beverage](https://www.businessobserverfl.com/news/i\""
             },
             "suggestions": [
-              "What's driving signal transactions 5?",
-              "How does signal transactions 5 here compare to other SWFL areas?"
+              "What's driving signal transactions 2?",
+              "How does signal transactions 2 here compare to other SWFL areas?"
             ]
           },
           {
-            "metric": "signal_development_6",
+            "metric": "signal_development_3",
             "value": "Cape Coral: As of Oct. 26, 2026, data center investment keeps flowing into SW Florida (Lee County/Fort Myers area) even as Florida opposition to data centers explodes statewide.",
             "direction": "stable",
             "label": "Cape Coral — development",
             "variable_type": "categorical",
             "source": {
               "url": "https://www.news-press.com/story/money/2026/10/26/florida-fighting-over-data-centers-sw-florida-building-them-lee-county-fort-myers-alico-northstar/92370794007/",
-              "fetched_at": "2026-10-27T09:55:58Z",
+              "fetched_at": "2026-10-28T04:25:55Z",
               "tier": 2,
               "citation": "Florida's fighting over data centers. SW Florida is building them: \"[](https://www.news-press.com/)\n[](https://subscribe.news-press.com/rr/nanobar?gps-source=CPTILELEFT&itm_campaign=2026ENTQ4BAU2026&itm_medium=ONSITE&success-url=https%3A%2F%2Fwww.news-press.com%2Fstory%2Fmoney%2F2026%2F10%2F26%2Fflorida-fighting-over-data-centers-sw-florida-building-them-lee-county-fort-myers-alico-northstar%2F92370794007%2F)\n[](https://subscribe.news-press.com/rr/masthead?gps-source=CPMASTHEAD&itm_campaign=2026ENTQ4BAU2026&itm_medium=ONSITE&success-url=https%3A%2F%2Fwww.news-press.com%2Fstory%2Fmoney%2F2026%2F10%2F26%2Fflorida-fighting-over-data-centers-sw-florida-building-them-lee-county-fort-myers-alico-northstar%2F92370794007%2F)\n[News](https://www.news-press.com/news/) [Cape Coral](https://www.news-press.com/news/cape-coral/) [Sports](https://www.news-press.com/sports/) [Restaurants](https://www.news-press.com/taste/) [Real Estate](https://www.news-press.com/real-estate) [Advertise](https://advertising.usatoday.com/advertise-with-us/?cid=Web_LiQ_Network_AdvertiseWithUs_AdvertiseInquiry&publication=the_news_press&utm_source=local_publication&utm_medium=menu&utm_campaign=advertise_with_us) [Obituaries](https://www.news-press.com/obituaries) [eNewspaper](https://user.news-press.com/user/enewspaper) [Legals](https://www.news-press.com/public-notices)\n[](https://www.news-press.com/search/ \"Search\")\n[](https://www.news-press.com/weather/ \"Weather in Fort Myers: 74°F Mostly Sunny\") [](https://subscribe.news-press.com/rr/navsub?gps-source=CPTOPNAVBAR&itm_campaign=2026ENTQ4BAU2026&itm_medium=ONSITE&success-url=https%3A%2F%2Fwww.news-press.com%2Fstory%2Fmoney%2F2026%2F10%2F26%2Fflorida-fighting-over-data-centers-sw-florida-building-them-lee-county-fort-myers-alico-northstar%2F92370794007%2F)\n[](https://login.news-press.com/PFTM-GUP/authenticate/?success-url=https%3A%2F%2Fwww.news-press.com%2Fstory%2Fmoney%2F2026%2F10%2F26%2Fflorida-fighting-over-data-centers-sw-florida-building-them-lee-county-fort-myers-alico-northstar%2F92370794007%2F&cancel-url=https%3A%2F%2Fwww.news-press.com%2Fstory%2Fmoney%2F2026%2F10%2F26%2Fflorida-fighting-over-data-centers-sw-florida-building-them-lee-county-fort-myers-alico-northstar%2F92370794007%2F)\n[](https://www.news-press.com/) [](https://www.news-press.com/)\nMONEY\n# As Florida opposition explodes, data center investment keeps flowing\n[![Portrait of Phil Fernandez](https://www.news-press.com/gcdn/presto/2019/09/14/PNDN/6a77b474-579f-48fa-b56f-a2cc2b9de797-NDN_Phil_Fernandez.jpg?crop=2999,2999,x0,y570&width=48&height=48&format=pjpg&auto=webp) Phil Fernandez](https://www.naplesnews.com/staff/2684114001/phil-fernandez/)\nFort Myers News-Press & Naples Daily News\nOct. 26, 2026, 5:05 a.m. ET\nFew [development topics](https://www.news-press.com/story/money/2026/10/12/4-years-after-hurricane-ian-money-boats-keep-flowing-back-to-florida-downtown-fort-myers-naples/92158290007/) have generated more debate in [the Sunshine](https://www.news-press.com/story/money/2026/10/19/ritz-carltons-florida-footprint-keeps-getti\""
+            },
+            "suggestions": [
+              "What's driving signal development 3?",
+              "How does signal development 3 here compare to other SWFL areas?"
+            ]
+          },
+          {
+            "metric": "signal_development_4",
+            "value": "Fort Myers: Data center investment keeps flowing into SW Florida including Lee County/Fort Myers (Alico/Northstar area), as reported Oct. 26, 2026.",
+            "direction": "stable",
+            "label": "Fort Myers — development",
+            "variable_type": "categorical",
+            "source": {
+              "url": "https://www.news-press.com/story/money/2026/10/26/florida-fighting-over-data-centers-sw-florida-building-them-lee-county-fort-myers-alico-northstar/92370794007/",
+              "fetched_at": "2026-10-28T04:25:55Z",
+              "tier": 2,
+              "citation": "Florida's fighting over data centers. SW Florida is building them: \"[](https://www.news-press.com/)\n[](https://subscribe.news-press.com/rr/nanobar?gps-source=CPTILELEFT&itm_campaign=2026ENTQ4BAU2026&itm_medium=ONSITE&success-url=https%3A%2F%2Fwww.news-press.com%2Fstory%2Fmoney%2F2026%2F10%2F26%2Fflorida-fighting-over-data-centers-sw-florida-building-them-lee-county-fort-myers-alico-northstar%2F92370794007%2F)\n[](https://subscribe.news-press.com/rr/masthead?gps-source=CPMASTHEAD&itm_campaign=2026ENTQ4BAU2026&itm_medium=ONSITE&success-url=https%3A%2F%2Fwww.news-press.com%2Fstory%2Fmoney%2F2026%2F10%2F26%2Fflorida-fighting-over-data-centers-sw-florida-building-them-lee-county-fort-myers-alico-northstar%2F92370794007%2F)\n[News](https://www.news-press.com/news/) [Cape Coral](https://www.news-press.com/news/cape-coral/) [Sports](https://www.news-press.com/sports/) [Restaurants](https://www.news-press.com/taste/) [Real Estate](https://www.news-press.com/real-estate) [Advertise](https://advertising.usatoday.com/advertise-with-us/?cid=Web_LiQ_Network_AdvertiseWithUs_AdvertiseInquiry&publication=the_news_press&utm_source=local_publication&utm_medium=menu&utm_campaign=advertise_with_us) [Obituaries](https://www.news-press.com/obituaries) [eNewspaper](https://user.news-press.com/user/enewspaper) [Legals](https://www.news-press.com/public-notices)\n[](https://www.news-press.com/search/ \"Search\")\n[](https://www.news-press.com/weather/ \"Weather in Fort Myers: 74°F Mostly Sunny\") [](https://subscribe.news-press.com/rr/navsub?gps-source=CPTOPNAVBAR&itm_campaign=2026ENTQ4BAU2026&itm_medium=ONSITE&success-url=https%3A%2F%2Fwww.news-press.com%2Fstory%2Fmoney%2F2026%2F10%2F26%2Fflorida-fighting-over-data-centers-sw-florida-building-them-lee-county-fort-myers-alico-northstar%2F92370794007%2F)\n[](https://login.news-press.com/PFTM-GUP/authenticate/?success-url=https%3A%2F%2Fwww.news-press.com%2Fstory%2Fmoney%2F2026%2F10%2F26%2Fflorida-fighting-over-data-centers-sw-florida-building-them-lee-county-fort-myers-alico-northstar%2F92370794007%2F&cancel-url=https%3A%2F%2Fwww.news-press.com%2Fstory%2Fmoney%2F2026%2F10%2F26%2Fflorida-fighting-over-data-centers-sw-florida-building-them-lee-county-fort-myers-alico-northstar%2F92370794007%2F)\n[](https://www.news-press.com/) [](https://www.news-press.com/)\nMONEY\n# As Florida opposition explodes, data center investment keeps flowing\n[![Portrait of Phil Fernandez](https://www.news-press.com/gcdn/presto/2019/09/14/PNDN/6a77b474-579f-48fa-b56f-a2cc2b9de797-NDN_Phil_Fernandez.jpg?crop=2999,2999,x0,y570&width=48&height=48&format=pjpg&auto=webp) Phil Fernandez](https://www.naplesnews.com/staff/2684114001/phil-fernandez/)\nFort Myers News-Press & Naples Daily News\nOct. 26, 2026, 5:05 a.m. ET\nFew [development topics](https://www.news-press.com/story/money/2026/10/12/4-years-after-hurricane-ian-money-boats-keep-flowing-back-to-florida-downtown-fort-myers-naples/92158290007/) have generated more debate in [the Sunshine](https://www.news-press.com/story/money/2026/10/19/ritz-carltons-florida-footprint-keeps-getti\""
+            },
+            "suggestions": [
+              "What's driving signal development 4?",
+              "How does signal development 4 here compare to other SWFL areas?"
+            ]
+          },
+          {
+            "metric": "signal_development_5",
+            "value": "Naples: As of Oct. 26, 2026, data center investment keeps flowing into SW Florida despite exploding opposition across Florida.",
+            "direction": "stable",
+            "label": "Naples — development",
+            "variable_type": "categorical",
+            "source": {
+              "url": "https://www.news-press.com/story/money/2026/10/26/florida-fighting-over-data-centers-sw-florida-building-them-lee-county-fort-myers-alico-northstar/92370794007/",
+              "fetched_at": "2026-10-28T04:25:55Z",
+              "tier": 2,
+              "citation": "Florida's fighting over data centers. SW Florida is building them: \"[](https://www.news-press.com/)\n[](https://subscribe.news-press.com/rr/nanobar?gps-source=CPTILELEFT&itm_campaign=2026ENTQ4BAU2026&itm_medium=ONSITE&success-url=https%3A%2F%2Fwww.news-press.com%2Fstory%2Fmoney%2F2026%2F10%2F26%2Fflorida-fighting-over-data-centers-sw-florida-building-them-lee-county-fort-myers-alico-northstar%2F92370794007%2F)\n[](https://subscribe.news-press.com/rr/masthead?gps-source=CPMASTHEAD&itm_campaign=2026ENTQ4BAU2026&itm_medium=ONSITE&success-url=https%3A%2F%2Fwww.news-press.com%2Fstory%2Fmoney%2F2026%2F10%2F26%2Fflorida-fighting-over-data-centers-sw-florida-building-them-lee-county-fort-myers-alico-northstar%2F92370794007%2F)\n[News](https://www.news-press.com/news/) [Cape Coral](https://www.news-press.com/news/cape-coral/) [Sports](https://www.news-press.com/sports/) [Restaurants](https://www.news-press.com/taste/) [Real Estate](https://www.news-press.com/real-estate) [Advertise](https://advertising.usatoday.com/advertise-with-us/?cid=Web_LiQ_Network_AdvertiseWithUs_AdvertiseInquiry&publication=the_news_press&utm_source=local_publication&utm_medium=menu&utm_campaign=advertise_with_us) [Obituaries](https://www.news-press.com/obituaries) [eNewspaper](https://user.news-press.com/user/enewspaper) [Legals](https://www.news-press.com/public-notices)\n[](https://www.news-press.com/search/ \"Search\")\n[](https://www.news-press.com/weather/ \"Weather in Fort Myers: 74°F Mostly Sunny\") [](https://subscribe.news-press.com/rr/navsub?gps-source=CPTOPNAVBAR&itm_campaign=2026ENTQ4BAU2026&itm_medium=ONSITE&success-url=https%3A%2F%2Fwww.news-press.com%2Fstory%2Fmoney%2F2026%2F10%2F26%2Fflorida-fighting-over-data-centers-sw-florida-building-them-lee-county-fort-myers-alico-northstar%2F92370794007%2F)\n[](https://login.news-press.com/PFTM-GUP/authenticate/?success-url=https%3A%2F%2Fwww.news-press.com%2Fstory%2Fmoney%2F2026%2F10%2F26%2Fflorida-fighting-over-data-centers-sw-florida-building-them-lee-county-fort-myers-alico-northstar%2F92370794007%2F&cancel-url=https%3A%2F%2Fwww.news-press.com%2Fstory%2Fmoney%2F2026%2F10%2F26%2Fflorida-fighting-over-data-centers-sw-florida-building-them-lee-county-fort-myers-alico-northstar%2F92370794007%2F)\n[](https://www.news-press.com/) [](https://www.news-press.com/)\nMONEY\n# As Florida opposition explodes, data center investment keeps flowing\n[![Portrait of Phil Fernandez](https://www.news-press.com/gcdn/presto/2019/09/14/PNDN/6a77b474-579f-48fa-b56f-a2cc2b9de797-NDN_Phil_Fernandez.jpg?crop=2999,2999,x0,y570&width=48&height=48&format=pjpg&auto=webp) Phil Fernandez](https://www.naplesnews.com/staff/2684114001/phil-fernandez/)\nFort Myers News-Press & Naples Daily News\nOct. 26, 2026, 5:05 a.m. ET\nFew [development topics](https://www.news-press.com/story/money/2026/10/12/4-years-after-hurricane-ian-money-boats-keep-flowing-back-to-florida-downtown-fort-myers-naples/92158290007/) have generated more debate in [the Sunshine](https://www.news-press.com/story/money/2026/10/19/ritz-carltons-florida-footprint-keeps-getti\""
+            },
+            "suggestions": [
+              "What's driving signal development 5?",
+              "How does signal development 5 here compare to other SWFL areas?"
+            ]
+          },
+          {
+            "metric": "signal_development_6",
+            "value": "Naples: Cape Coral City Council gave final approval Wednesday night (Oct. 22, 2026) to a series of agreements clearing the way for the proposed Bimini redevelopment, part of a $500M Florida hurricane redevelopment plan.",
+            "direction": "stable",
+            "label": "Naples — development",
+            "variable_type": "categorical",
+            "source": {
+              "url": "https://www.naplesnews.com/story/money/2026/10/22/monster-florida-waterfront-fix-takes-shape-4-years-after-hurricane-ian/92385548007/",
+              "fetched_at": "2026-10-28T04:25:55Z",
+              "tier": 2,
+              "citation": "Monster Florida waterfront fix takes shape 4 years after Hurricane Ian: \"[](https://www.naplesnews.com/)\n[](https://subscribe.naplesnews.com/rr/nanobar?gps-source=CPTILELEFT&itm_campaign=2026ENTQ4BAU2026&itm_medium=ONSITE&success-url=https%3A%2F%2Fwww.naplesnews.com%2Fstory%2Fmoney%2F2026%2F10%2F22%2Fmonster-florida-waterfront-fix-takes-shape-4-years-after-hurricane-ian%2F92385548007%2F)\n[](https://subscribe.naplesnews.com/rr/masthead?gps-source=CPMASTHEAD&itm_campaign=2026ENTQ4BAU2026&itm_medium=ONSITE&success-url=https%3A%2F%2Fwww.naplesnews.com%2Fstory%2Fmoney%2F2026%2F10%2F22%2Fmonster-florida-waterfront-fix-takes-shape-4-years-after-hurricane-ian%2F92385548007%2F)\n[News](https://www.naplesnews.com/news/) [Sports](https://www.naplesnews.com/sports/) [Real Estate](https://www.naplesnews.com/business/real-estate/) [Restaurants](https://www.naplesnews.com/entertainment/restaurants/) [Opinion](https://www.naplesnews.com/opinion/) [Advertise](https://advertising.usatoday.com/advertise-with-us/?cid=Web_LiQ_Network_AdvertiseWithUs_AdvertiseInquiry&publication=naples_daily_news&utm_source=local_publication&utm_medium=menu&utm_campaign=advertise_with_us) [Obituaries](https://www.naplesnews.com/obituaries) [eNewspaper](https://user.naplesnews.com/user/enewspaper) [Legals](https://www.naplesnews.com/public-notices)\n[](https://www.naplesnews.com/search/ \"Search\")\n[](https://www.naplesnews.com/weather/ \"Weather in Naples: 69°F Partly Cloudy w/ Showers\") [](https://subscribe.naplesnews.com/rr/navsub?gps-source=CPTOPNAVBAR&itm_campaign=2026ENTQ4BAU2026&itm_medium=ONSITE&success-url=https%3A%2F%2Fwww.naplesnews.com%2Fstory%2Fmoney%2F2026%2F10%2F22%2Fmonster-florida-waterfront-fix-takes-shape-4-years-after-hurricane-ian%2F92385548007%2F)\n[](https://login.naplesnews.com/PNDN-GUP/authenticate/?success-url=https%3A%2F%2Fwww.naplesnews.com%2Fstory%2Fmoney%2F2026%2F10%2F22%2Fmonster-florida-waterfront-fix-takes-shape-4-years-after-hurricane-ian%2F92385548007%2F&cancel-url=https%3A%2F%2Fwww.naplesnews.com%2Fstory%2Fmoney%2F2026%2F10%2F22%2Fmonster-florida-waterfront-fix-takes-shape-4-years-after-hurricane-ian%2F92385548007%2F)\n[](https://www.naplesnews.com/) [](https://www.naplesnews.com/)\nMONEY\n# $500M Florida hurricane redevelopment plan. Cape Coral says yes please\n[![Portrait of Phil Fernandez](https://www.naplesnews.com/gcdn/presto/2019/09/14/PNDN/6a77b474-579f-48fa-b56f-a2cc2b9de797-NDN_Phil_Fernandez.jpg?crop=2999,2999,x0,y570&width=48&height=48&format=pjpg&auto=webp) Phil Fernandez](https://www.naplesnews.com/staff/2684114001/phil-fernandez/)\nFort Myers News-Press & Naples Daily News\nOct. 22, 2026, 6:17 p.m. ET\nThe [Cape Coral](https://www.naplesnews.com/story/money/2026/06/29/why-big-johns-is-emerging-as-southwest-florida-redevelopment-target/90697042007/) City Council gave final approval Wednesday night to a series [of agreements](https://www.naplesnews.com/story/money/2026/10/06/florida-hiring-settlement-amid-major-shift-in-civil-rights-enforcement-el-dorado-furniture-trump/92104181007/) clearing the way for the proposed Bimin\""
             },
             "suggestions": [
               "What's driving signal development 6?",
@@ -232,15 +232,15 @@
           },
           {
             "metric": "signal_development_7",
-            "value": "Fort Myers: Data center investment keeps flowing into SW Florida including Lee County/Fort Myers (Alico/Northstar area), as reported Oct. 26, 2026.",
+            "value": "Fort Myers: Cape Coral City Council gave final approval on Oct. 22, 2026 to a series of agreements clearing the way for the proposed Bimini East redevelopment, described as a $500M Florida hurricane redevelopment plan.",
             "direction": "stable",
             "label": "Fort Myers — development",
             "variable_type": "categorical",
             "source": {
-              "url": "https://www.news-press.com/story/money/2026/10/26/florida-fighting-over-data-centers-sw-florida-building-them-lee-county-fort-myers-alico-northstar/92370794007/",
-              "fetched_at": "2026-10-27T09:55:58Z",
+              "url": "https://www.naplesnews.com/story/money/2026/10/22/monster-florida-waterfront-fix-takes-shape-4-years-after-hurricane-ian/92385548007/",
+              "fetched_at": "2026-10-28T04:25:55Z",
               "tier": 2,
-              "citation": "Florida's fighting over data centers. SW Florida is building them: \"[](https://www.news-press.com/)\n[](https://subscribe.news-press.com/rr/nanobar?gps-source=CPTILELEFT&itm_campaign=2026ENTQ4BAU2026&itm_medium=ONSITE&success-url=https%3A%2F%2Fwww.news-press.com%2Fstory%2Fmoney%2F2026%2F10%2F26%2Fflorida-fighting-over-data-centers-sw-florida-building-them-lee-county-fort-myers-alico-northstar%2F92370794007%2F)\n[](https://subscribe.news-press.com/rr/masthead?gps-source=CPMASTHEAD&itm_campaign=2026ENTQ4BAU2026&itm_medium=ONSITE&success-url=https%3A%2F%2Fwww.news-press.com%2Fstory%2Fmoney%2F2026%2F10%2F26%2Fflorida-fighting-over-data-centers-sw-florida-building-them-lee-county-fort-myers-alico-northstar%2F92370794007%2F)\n[News](https://www.news-press.com/news/) [Cape Coral](https://www.news-press.com/news/cape-coral/) [Sports](https://www.news-press.com/sports/) [Restaurants](https://www.news-press.com/taste/) [Real Estate](https://www.news-press.com/real-estate) [Advertise](https://advertising.usatoday.com/advertise-with-us/?cid=Web_LiQ_Network_AdvertiseWithUs_AdvertiseInquiry&publication=the_news_press&utm_source=local_publication&utm_medium=menu&utm_campaign=advertise_with_us) [Obituaries](https://www.news-press.com/obituaries) [eNewspaper](https://user.news-press.com/user/enewspaper) [Legals](https://www.news-press.com/public-notices)\n[](https://www.news-press.com/search/ \"Search\")\n[](https://www.news-press.com/weather/ \"Weather in Fort Myers: 74°F Mostly Sunny\") [](https://subscribe.news-press.com/rr/navsub?gps-source=CPTOPNAVBAR&itm_campaign=2026ENTQ4BAU2026&itm_medium=ONSITE&success-url=https%3A%2F%2Fwww.news-press.com%2Fstory%2Fmoney%2F2026%2F10%2F26%2Fflorida-fighting-over-data-centers-sw-florida-building-them-lee-county-fort-myers-alico-northstar%2F92370794007%2F)\n[](https://login.news-press.com/PFTM-GUP/authenticate/?success-url=https%3A%2F%2Fwww.news-press.com%2Fstory%2Fmoney%2F2026%2F10%2F26%2Fflorida-fighting-over-data-centers-sw-florida-building-them-lee-county-fort-myers-alico-northstar%2F92370794007%2F&cancel-url=https%3A%2F%2Fwww.news-press.com%2Fstory%2Fmoney%2F2026%2F10%2F26%2Fflorida-fighting-over-data-centers-sw-florida-building-them-lee-county-fort-myers-alico-northstar%2F92370794007%2F)\n[](https://www.news-press.com/) [](https://www.news-press.com/)\nMONEY\n# As Florida opposition explodes, data center investment keeps flowing\n[![Portrait of Phil Fernandez](https://www.news-press.com/gcdn/presto/2019/09/14/PNDN/6a77b474-579f-48fa-b56f-a2cc2b9de797-NDN_Phil_Fernandez.jpg?crop=2999,2999,x0,y570&width=48&height=48&format=pjpg&auto=webp) Phil Fernandez](https://www.naplesnews.com/staff/2684114001/phil-fernandez/)\nFort Myers News-Press & Naples Daily News\nOct. 26, 2026, 5:05 a.m. ET\nFew [development topics](https://www.news-press.com/story/money/2026/10/12/4-years-after-hurricane-ian-money-boats-keep-flowing-back-to-florida-downtown-fort-myers-naples/92158290007/) have generated more debate in [the Sunshine](https://www.news-press.com/story/money/2026/10/19/ritz-carltons-florida-footprint-keeps-getti\""
+              "citation": "Monster Florida waterfront fix takes shape 4 years after Hurricane Ian: \"[](https://www.naplesnews.com/)\n[](https://subscribe.naplesnews.com/rr/nanobar?gps-source=CPTILELEFT&itm_campaign=2026ENTQ4BAU2026&itm_medium=ONSITE&success-url=https%3A%2F%2Fwww.naplesnews.com%2Fstory%2Fmoney%2F2026%2F10%2F22%2Fmonster-florida-waterfront-fix-takes-shape-4-years-after-hurricane-ian%2F92385548007%2F)\n[](https://subscribe.naplesnews.com/rr/masthead?gps-source=CPMASTHEAD&itm_campaign=2026ENTQ4BAU2026&itm_medium=ONSITE&success-url=https%3A%2F%2Fwww.naplesnews.com%2Fstory%2Fmoney%2F2026%2F10%2F22%2Fmonster-florida-waterfront-fix-takes-shape-4-years-after-hurricane-ian%2F92385548007%2F)\n[News](https://www.naplesnews.com/news/) [Sports](https://www.naplesnews.com/sports/) [Real Estate](https://www.naplesnews.com/business/real-estate/) [Restaurants](https://www.naplesnews.com/entertainment/restaurants/) [Opinion](https://www.naplesnews.com/opinion/) [Advertise](https://advertising.usatoday.com/advertise-with-us/?cid=Web_LiQ_Network_AdvertiseWithUs_AdvertiseInquiry&publication=naples_daily_news&utm_source=local_publication&utm_medium=menu&utm_campaign=advertise_with_us) [Obituaries](https://www.naplesnews.com/obituaries) [eNewspaper](https://user.naplesnews.com/user/enewspaper) [Legals](https://www.naplesnews.com/public-notices)\n[](https://www.naplesnews.com/search/ \"Search\")\n[](https://www.naplesnews.com/weather/ \"Weather in Naples: 67°F Clear\") [](https://subscribe.naplesnews.com/rr/navsub?gps-source=CPTOPNAVBAR&itm_campaign=2026ENTQ4BAU2026&itm_medium=ONSITE&success-url=https%3A%2F%2Fwww.naplesnews.com%2Fstory%2Fmoney%2F2026%2F10%2F22%2Fmonster-florida-waterfront-fix-takes-shape-4-years-after-hurricane-ian%2F92385548007%2F)\n[](https://login.naplesnews.com/PNDN-GUP/authenticate/?success-url=https%3A%2F%2Fwww.naplesnews.com%2Fstory%2Fmoney%2F2026%2F10%2F22%2Fmonster-florida-waterfront-fix-takes-shape-4-years-after-hurricane-ian%2F92385548007%2F&cancel-url=https%3A%2F%2Fwww.naplesnews.com%2Fstory%2Fmoney%2F2026%2F10%2F22%2Fmonster-florida-waterfront-fix-takes-shape-4-years-after-hurricane-ian%2F92385548007%2F)\n[](https://www.naplesnews.com/) [](https://www.naplesnews.com/)\nMONEY\n# $500M Florida hurricane redevelopment plan. Cape Coral says yes please\n[![Portrait of Phil Fernandez](https://www.naplesnews.com/gcdn/presto/2019/09/14/PNDN/6a77b474-579f-48fa-b56f-a2cc2b9de797-NDN_Phil_Fernandez.jpg?crop=2999,2999,x0,y570&width=48&height=48&format=pjpg&auto=webp) Phil Fernandez](https://www.naplesnews.com/staff/2684114001/phil-fernandez/)\nFort Myers News-Press & Naples Daily News\nOct. 22, 2026, 6:17 p.m. ET\nThe [Cape Coral](https://www.naplesnews.com/story/money/2026/06/29/why-big-johns-is-emerging-as-southwest-florida-redevelopment-target/90697042007/) City Council gave final approval Wednesday night to a series [of agreements](https://www.naplesnews.com/story/money/2026/10/06/florida-hiring-settlement-amid-major-shift-in-civil-rights-enforcement-el-dorado-furniture-trump/92104181007/) clearing the way for the proposed Bimini East redevelopmen\""
             },
             "suggestions": [
               "What's driving signal development 7?",
@@ -249,15 +249,15 @@
           },
           {
             "metric": "signal_development_8",
-            "value": "Naples: As of Oct. 26, 2026, data center investment keeps flowing into SW Florida despite exploding opposition across Florida.",
+            "value": "Naples: Naples City Council unanimously rejected a request for a wall-height waiver for a secretive family compound in Port Royal, as reported Oct. 22, 2026; the request sought to allow three sections of a wall to exceed standard height limits.",
             "direction": "stable",
             "label": "Naples — development",
             "variable_type": "categorical",
             "source": {
-              "url": "https://www.news-press.com/story/money/2026/10/26/florida-fighting-over-data-centers-sw-florida-building-them-lee-county-fort-myers-alico-northstar/92370794007/",
-              "fetched_at": "2026-10-27T09:55:58Z",
+              "url": "https://www.naplesnews.com/story/money/business/local/2026/10/22/naples-council-rejects-wall-waiver-for-mystery-family-compound-11-foot-walls-to-protect-privacy/92365490007/",
+              "fetched_at": "2026-10-28T04:25:55Z",
               "tier": 2,
-              "citation": "Florida's fighting over data centers. SW Florida is building them: \"[](https://www.news-press.com/)\n[](https://subscribe.news-press.com/rr/nanobar?gps-source=CPTILELEFT&itm_campaign=2026ENTQ4BAU2026&itm_medium=ONSITE&success-url=https%3A%2F%2Fwww.news-press.com%2Fstory%2Fmoney%2F2026%2F10%2F26%2Fflorida-fighting-over-data-centers-sw-florida-building-them-lee-county-fort-myers-alico-northstar%2F92370794007%2F)\n[](https://subscribe.news-press.com/rr/masthead?gps-source=CPMASTHEAD&itm_campaign=2026ENTQ4BAU2026&itm_medium=ONSITE&success-url=https%3A%2F%2Fwww.news-press.com%2Fstory%2Fmoney%2F2026%2F10%2F26%2Fflorida-fighting-over-data-centers-sw-florida-building-them-lee-county-fort-myers-alico-northstar%2F92370794007%2F)\n[News](https://www.news-press.com/news/) [Cape Coral](https://www.news-press.com/news/cape-coral/) [Sports](https://www.news-press.com/sports/) [Restaurants](https://www.news-press.com/taste/) [Real Estate](https://www.news-press.com/real-estate) [Advertise](https://advertising.usatoday.com/advertise-with-us/?cid=Web_LiQ_Network_AdvertiseWithUs_AdvertiseInquiry&publication=the_news_press&utm_source=local_publication&utm_medium=menu&utm_campaign=advertise_with_us) [Obituaries](https://www.news-press.com/obituaries) [eNewspaper](https://user.news-press.com/user/enewspaper) [Legals](https://www.news-press.com/public-notices)\n[](https://www.news-press.com/search/ \"Search\")\n[](https://www.news-press.com/weather/ \"Weather in Fort Myers: 74°F Mostly Sunny\") [](https://subscribe.news-press.com/rr/navsub?gps-source=CPTOPNAVBAR&itm_campaign=2026ENTQ4BAU2026&itm_medium=ONSITE&success-url=https%3A%2F%2Fwww.news-press.com%2Fstory%2Fmoney%2F2026%2F10%2F26%2Fflorida-fighting-over-data-centers-sw-florida-building-them-lee-county-fort-myers-alico-northstar%2F92370794007%2F)\n[](https://login.news-press.com/PFTM-GUP/authenticate/?success-url=https%3A%2F%2Fwww.news-press.com%2Fstory%2Fmoney%2F2026%2F10%2F26%2Fflorida-fighting-over-data-centers-sw-florida-building-them-lee-county-fort-myers-alico-northstar%2F92370794007%2F&cancel-url=https%3A%2F%2Fwww.news-press.com%2Fstory%2Fmoney%2F2026%2F10%2F26%2Fflorida-fighting-over-data-centers-sw-florida-building-them-lee-county-fort-myers-alico-northstar%2F92370794007%2F)\n[](https://www.news-press.com/) [](https://www.news-press.com/)\nMONEY\n# As Florida opposition explodes, data center investment keeps flowing\n[![Portrait of Phil Fernandez](https://www.news-press.com/gcdn/presto/2019/09/14/PNDN/6a77b474-579f-48fa-b56f-a2cc2b9de797-NDN_Phil_Fernandez.jpg?crop=2999,2999,x0,y570&width=48&height=48&format=pjpg&auto=webp) Phil Fernandez](https://www.naplesnews.com/staff/2684114001/phil-fernandez/)\nFort Myers News-Press & Naples Daily News\nOct. 26, 2026, 5:05 a.m. ET\nFew [development topics](https://www.news-press.com/story/money/2026/10/12/4-years-after-hurricane-ian-money-boats-keep-flowing-back-to-florida-downtown-fort-myers-naples/92158290007/) have generated more debate in [the Sunshine](https://www.news-press.com/story/money/2026/10/19/ritz-carltons-florida-footprint-keeps-getti\""
+              "citation": "Naples council rejects wall waiver for mystery family compound: \"[](https://www.naplesnews.com/)\n[](https://subscribe.naplesnews.com/rr/nanobar?gps-source=CPTILELEFT&itm_campaign=2026ENTQ4BAU2026&itm_medium=ONSITE&success-url=https%3A%2F%2Fwww.naplesnews.com%2Fstory%2Fmoney%2Fbusiness%2Flocal%2F2026%2F10%2F22%2Fnaples-council-rejects-wall-waiver-for-mystery-family-compound-11-foot-walls-to-protect-privacy%2F92365490007%2F)\n[](https://subscribe.naplesnews.com/rr/masthead?gps-source=CPMASTHEAD&itm_campaign=2026ENTQ4BAU2026&itm_medium=ONSITE&success-url=https%3A%2F%2Fwww.naplesnews.com%2Fstory%2Fmoney%2Fbusiness%2Flocal%2F2026%2F10%2F22%2Fnaples-council-rejects-wall-waiver-for-mystery-family-compound-11-foot-walls-to-protect-privacy%2F92365490007%2F)\n[News](https://www.naplesnews.com/news/) [Sports](https://www.naplesnews.com/sports/) [Real Estate](https://www.naplesnews.com/business/real-estate/) [Restaurants](https://www.naplesnews.com/entertainment/restaurants/) [Opinion](https://www.naplesnews.com/opinion/) [Advertise](https://advertising.usatoday.com/advertise-with-us/?cid=Web_LiQ_Network_AdvertiseWithUs_AdvertiseInquiry&publication=naples_daily_news&utm_source=local_publication&utm_medium=menu&utm_campaign=advertise_with_us) [Obituaries](https://www.naplesnews.com/obituaries) [eNewspaper](https://user.naplesnews.com/user/enewspaper) [Legals](https://www.naplesnews.com/public-notices)\n[](https://www.naplesnews.com/search/ \"Search\")\n[](https://www.naplesnews.com/weather/ \"Weather in Naples: 67°F Clear\") [](https://subscribe.naplesnews.com/rr/navsub?gps-source=CPTOPNAVBAR&itm_campaign=2026ENTQ4BAU2026&itm_medium=ONSITE&success-url=https%3A%2F%2Fwww.naplesnews.com%2Fstory%2Fmoney%2Fbusiness%2Flocal%2F2026%2F10%2F22%2Fnaples-council-rejects-wall-waiver-for-mystery-family-compound-11-foot-walls-to-protect-privacy%2F92365490007%2F)\n[](https://login.naplesnews.com/PNDN-GUP/authenticate/?success-url=https%3A%2F%2Fwww.naplesnews.com%2Fstory%2Fmoney%2Fbusiness%2Flocal%2F2026%2F10%2F22%2Fnaples-council-rejects-wall-waiver-for-mystery-family-compound-11-foot-walls-to-protect-privacy%2F92365490007%2F&cancel-url=https%3A%2F%2Fwww.naplesnews.com%2Fstory%2Fmoney%2Fbusiness%2Flocal%2F2026%2F10%2F22%2Fnaples-council-rejects-wall-waiver-for-mystery-family-compound-11-foot-walls-to-protect-privacy%2F92365490007%2F)\n[](https://www.naplesnews.com/) [](https://www.naplesnews.com/)\n[LOCAL BUSINESS](https://www.naplesnews.com/business/local/)\n# Naples rejects wall waiver for secretive multimillion dollar compound\n[![Portrait of Laura Layden](https://www.naplesnews.com/gcdn/authoring/authoring-images/2024/02/08/PNDN/72524348007-ndn-jh-20240126-laura-0001.JPG?crop=3313,3312,x1506,y0&width=48&height=48&format=pjpg&auto=webp) Laura Layden](https://www.naplesnews.com/staff/2647080001/laura-layden/)\nFort Myers News-Press & Naples Daily News\nOct. 22, 2026, 10:39 a.m. ET\nNaples City Council unanimously rejected a request for a wall-height waiver for a secretive family compound in Port Royal.\nThe request was to allow three sections of a wall\""
             },
             "suggestions": [
               "What's driving signal development 8?",
@@ -322,7 +322,7 @@
             ],
             "source": {
               "url": "https://www.swfldatagulf.com/r/source/city_pulse",
-              "fetched_at": "2026-10-27T09:55:58Z",
+              "fetched_at": "2026-10-28T04:25:55Z",
               "tier": 2,
               "citation": "Distilled, citation-backed SWFL news signals; each ZIP's items carry per-item source URLs in data_lake.city_pulse."
             },
@@ -330,7 +330,7 @@
           }
         ],
         "caveats": [
-          "64 additional live signals not surfaced here (cap 8); the full set is in data_lake.city_pulse.",
+          "60 additional live signals not surfaced here (cap 8); the full set is in data_lake.city_pulse.",
           "Each signal is dated current-events context with a per-signal source; freshness is TTL-bounded by topic (breaking 1d → structural 90d)."
         ],
         "contradicts": [],
@@ -343,7 +343,7 @@
         "relevance": {
           "decay_curve": "weeks",
           "half_life_hours": 720,
-          "computed_at": "2026-10-27T09:55:58Z"
+          "computed_at": "2026-10-28T04:25:55Z"
         },
         "exogenous_signals": []
       }
@@ -360,8 +360,119 @@
     },
     {
       "packId": "freshness-pulse",
-      "status": "skipped-fresh",
-      "written": false
+      "status": "built",
+      "version": 86,
+      "written": true,
+      "brainOutput": {
+        "brain_id": "freshness-pulse",
+        "version": 86,
+        "refined_at": "2026-10-28T04:25:55Z",
+        "expires": "2026-10-29T04:25:55Z",
+        "ttl_seconds": 86400,
+        "direction": "neutral",
+        "magnitude": 0,
+        "drivers": [],
+        "overrides": [],
+        "conclusion": "Today's sourced snapshot — SWFL 30-year fixed mortgage rate (as of 2026-10-22) 7.32%; Cape Coral median asking price (as of 2026-10-28) $399,200; Fort Myers median asking price (as of 2026-10-28) $325,000; Naples median asking price (as of 2026-10-28) $650,000. These are cited current facts only; the direction call lives downstream in master.",
+        "key_metrics": [
+          {
+            "metric": "freshness_mortgage_30yr_fixed_pct",
+            "value": 7.32,
+            "direction": "stable",
+            "label": "SWFL 30-year fixed mortgage rate (as of 2026-10-22)",
+            "variable_type": "intensive",
+            "units": "percent",
+            "display_format": "percent",
+            "source": {
+              "url": "https://fred.stlouisfed.org/series/MORTGAGE30US",
+              "fetched_at": "2026-10-28T04:23:43.323475+00:00",
+              "tier": 2,
+              "citation": "FRED — current 30-year fixed mortgage rate for SWFL, sourced 2026-10-22"
+            },
+            "suggestions": [
+              "What's driving freshness mortgage 30yr fixed pct?",
+              "How does freshness mortgage 30yr fixed pct here compare to other SWFL areas?"
+            ]
+          },
+          {
+            "metric": "freshness_median_asking_price_cape_coral_usd",
+            "value": 399200,
+            "direction": "stable",
+            "label": "Cape Coral median asking price (as of 2026-10-28)",
+            "variable_type": "extensive",
+            "units": "USD",
+            "display_format": "currency",
+            "source": {
+              "url": "https://www.swfldatagulf.com/desk",
+              "fetched_at": "2026-10-28T04:23:43.323475+00:00",
+              "tier": 2,
+              "citation": "SWFL Data Gulf active-listing inventory — current median asking price for Cape Coral, sourced 2026-10-28"
+            },
+            "suggestions": [
+              "Chart asking rents across the corridors",
+              "What's driving freshness median asking price cape coral usd?",
+              "How does freshness median asking price cape coral usd here compare to other SWFL areas?"
+            ]
+          },
+          {
+            "metric": "freshness_median_asking_price_fort_myers_usd",
+            "value": 325000,
+            "direction": "stable",
+            "label": "Fort Myers median asking price (as of 2026-10-28)",
+            "variable_type": "extensive",
+            "units": "USD",
+            "display_format": "currency",
+            "source": {
+              "url": "https://www.swfldatagulf.com/desk",
+              "fetched_at": "2026-10-28T04:23:43.323475+00:00",
+              "tier": 2,
+              "citation": "SWFL Data Gulf active-listing inventory — current median asking price for Fort Myers, sourced 2026-10-28"
+            },
+            "suggestions": [
+              "Chart asking rents across the corridors",
+              "What's driving freshness median asking price fort myers usd?",
+              "How does freshness median asking price fort myers usd here compare to other SWFL areas?"
+            ]
+          },
+          {
+            "metric": "freshness_median_asking_price_naples_usd",
+            "value": 650000,
+            "direction": "stable",
+            "label": "Naples median asking price (as of 2026-10-28)",
+            "variable_type": "extensive",
+            "units": "USD",
+            "display_format": "currency",
+            "source": {
+              "url": "https://www.swfldatagulf.com/desk",
+              "fetched_at": "2026-10-28T04:23:43.323475+00:00",
+              "tier": 2,
+              "citation": "SWFL Data Gulf active-listing inventory — current median asking price for Naples, sourced 2026-10-28"
+            },
+            "suggestions": [
+              "Chart asking rents across the corridors",
+              "What's driving freshness median asking price naples usd?",
+              "How does freshness median asking price naples usd here compare to other SWFL areas?"
+            ]
+          }
+        ],
+        "detail_tables": [],
+        "caveats": [
+          "Each county-grain number is a single grounded source's current figure, provenance-gated to a real source URL; held anomalies and unsourced (model-memory) numbers are excluded by design."
+        ],
+        "contradicts": [],
+        "confidence": 0.8,
+        "joint_integrity": 1,
+        "confidence_dispersion": 0,
+        "chain_depth": 0,
+        "trust_tier": 2,
+        "upstream_count": 0,
+        "relevance": {
+          "decay_curve": "weeks",
+          "half_life_hours": 720,
+          "computed_at": "2026-10-28T04:25:55Z"
+        },
+        "exogenous_signals": []
+      }
     },
     {
       "packId": "seller-stress-swfl",
@@ -395,944 +506,13 @@
     },
     {
       "packId": "price-distribution-swfl",
-      "status": "built",
-      "version": 13,
-      "written": true,
-      "brainOutput": {
-        "brain_id": "price-distribution-swfl",
-        "version": 13,
-        "refined_at": "2026-10-27T09:55:58Z",
-        "expires": "2026-11-04T09:55:58Z",
-        "ttl_seconds": 691200,
-        "direction": "neutral",
-        "magnitude": 0,
-        "drivers": [],
-        "overrides": [],
-        "conclusion": "Of 28,059 active SWFL for-sale listings (as of 2026-08-10), 44.50% are priced under $300k, 31.50% $300k–$600k, 11.60% $600k–$1M, and 12.40% at $1M or above. By county: Lee 20,894, Collier 7,165.",
-        "key_metrics": [
-          {
-            "metric": "entry_level_listing_share_swfl",
-            "label": "SWFL for-sale listings priced under $300k (share of active inventory)",
-            "value": 44.5,
-            "direction": "stable",
-            "variable_type": "intensive",
-            "units": "%",
-            "display_format": "percent",
-            "source": {
-              "url": "https://www.swfldatagulf.com/r/source/listing_price_histogram_swfl_latest?label=SWFL+for-sale+listing+count+by+price+band+%28aggregated%29&source=realtor.com&brain=price-distribution-swfl&date_col=captured_date",
-              "fetched_at": "2026-10-27T09:55:58Z",
-              "tier": 2,
-              "citation": "Entry-tier (<$300k) share of listings across 28,059 active SWFL for-sale listings, as of 2026-08-10"
-            },
-            "suggestions": [
-              "What's driving entry level listing share swfl?",
-              "How does entry level listing share swfl here compare to other SWFL areas?"
-            ]
-          },
-          {
-            "metric": "midmarket_listing_share_swfl",
-            "label": "SWFL for-sale listings priced $300k–$600k (share of active inventory)",
-            "value": 31.5,
-            "direction": "stable",
-            "variable_type": "intensive",
-            "units": "%",
-            "display_format": "percent",
-            "source": {
-              "url": "https://www.swfldatagulf.com/r/source/listing_price_histogram_swfl_latest?label=SWFL+for-sale+listing+count+by+price+band+%28aggregated%29&source=realtor.com&brain=price-distribution-swfl&date_col=captured_date",
-              "fetched_at": "2026-10-27T09:55:58Z",
-              "tier": 2,
-              "citation": "Mid-tier ($300k–$600k) share of listings across 28,059 active SWFL for-sale listings, as of 2026-08-10"
-            },
-            "suggestions": [
-              "What's driving midmarket listing share swfl?",
-              "How does midmarket listing share swfl here compare to other SWFL areas?"
-            ]
-          },
-          {
-            "metric": "upper_tier_listing_share_swfl",
-            "label": "SWFL for-sale listings priced $600k–$1M (share of active inventory)",
-            "value": 11.6,
-            "direction": "stable",
-            "variable_type": "intensive",
-            "units": "%",
-            "display_format": "percent",
-            "source": {
-              "url": "https://www.swfldatagulf.com/r/source/listing_price_histogram_swfl_latest?label=SWFL+for-sale+listing+count+by+price+band+%28aggregated%29&source=realtor.com&brain=price-distribution-swfl&date_col=captured_date",
-              "fetched_at": "2026-10-27T09:55:58Z",
-              "tier": 2,
-              "citation": "Upper-tier ($600k–$1M) share of listings across 28,059 active SWFL for-sale listings, as of 2026-08-10"
-            },
-            "suggestions": [
-              "What's driving upper tier listing share swfl?",
-              "How does upper tier listing share swfl here compare to other SWFL areas?"
-            ]
-          },
-          {
-            "metric": "luxury_listing_share_swfl",
-            "label": "SWFL for-sale listings priced $1M and above (share of active inventory)",
-            "value": 12.4,
-            "direction": "stable",
-            "variable_type": "intensive",
-            "units": "%",
-            "display_format": "percent",
-            "source": {
-              "url": "https://www.swfldatagulf.com/r/source/listing_price_histogram_swfl_latest?label=SWFL+for-sale+listing+count+by+price+band+%28aggregated%29&source=realtor.com&brain=price-distribution-swfl&date_col=captured_date",
-              "fetched_at": "2026-10-27T09:55:58Z",
-              "tier": 2,
-              "citation": "Luxury ($1M+) share of listings across 28,059 active SWFL for-sale listings, as of 2026-08-10"
-            },
-            "suggestions": [
-              "What's driving luxury listing share swfl?",
-              "How does luxury listing share swfl here compare to other SWFL areas?"
-            ]
-          }
-        ],
-        "detail_tables": [
-          {
-            "id": "price_distribution_by_county",
-            "title": "SWFL active for-sale listings by price tier and county",
-            "grain": "county",
-            "columns": [
-              {
-                "id": "total_listings",
-                "label": "Total listings",
-                "display_format": "count",
-                "units": "listings"
-              },
-              {
-                "id": "entry_under_300k",
-                "label": "Under $300k",
-                "display_format": "count",
-                "units": "listings"
-              },
-              {
-                "id": "mid_300k_600k",
-                "label": "$300k–$600k",
-                "display_format": "count",
-                "units": "listings"
-              },
-              {
-                "id": "upper_600k_1m",
-                "label": "$600k–$1M",
-                "display_format": "count",
-                "units": "listings"
-              },
-              {
-                "id": "luxury_1m_plus",
-                "label": "$1M+",
-                "display_format": "count",
-                "units": "listings"
-              },
-              {
-                "id": "entry_share",
-                "label": "Under $300k share",
-                "display_format": "percent",
-                "units": "%"
-              }
-            ],
-            "rows": [
-              {
-                "key": "Lee",
-                "label": "Lee",
-                "cells": {
-                  "total_listings": 20894,
-                  "entry_under_300k": 10963,
-                  "mid_300k_600k": 6739,
-                  "upper_600k_1m": 1785,
-                  "luxury_1m_plus": 1407,
-                  "entry_share": 52.5
-                }
-              },
-              {
-                "key": "Collier",
-                "label": "Collier",
-                "cells": {
-                  "total_listings": 7165,
-                  "entry_under_300k": 1510,
-                  "mid_300k_600k": 2113,
-                  "upper_600k_1m": 1479,
-                  "luxury_1m_plus": 2063,
-                  "entry_share": 21.1
-                }
-              }
-            ],
-            "source": {
-              "url": "https://www.swfldatagulf.com/r/source/listing_price_histogram_swfl_latest?label=SWFL+for-sale+listing+count+by+price+band+%28aggregated%29&source=realtor.com&brain=price-distribution-swfl&date_col=captured_date",
-              "fetched_at": "2026-10-27T09:55:58Z",
-              "tier": 2,
-              "citation": "SWFL for-sale listing distribution by price tier, per county, as of 2026-08-10"
-            }
-          },
-          {
-            "id": "luxury_price_bands_by_county",
-            "title": "SWFL active $2M+ for-sale listings by price band and county",
-            "grain": "county",
-            "columns": [
-              {
-                "id": "band_2m_3m",
-                "label": "$2M–$3M",
-                "display_format": "count",
-                "units": "listings"
-              },
-              {
-                "id": "band_3m_5m",
-                "label": "$3M–$5M",
-                "display_format": "count",
-                "units": "listings"
-              },
-              {
-                "id": "band_5m_10m",
-                "label": "$5M–$10M",
-                "display_format": "count",
-                "units": "listings"
-              },
-              {
-                "id": "band_10m_plus",
-                "label": "$10M+",
-                "display_format": "count",
-                "units": "listings"
-              },
-              {
-                "id": "total_2m_plus",
-                "label": "Total $2M+",
-                "display_format": "count",
-                "units": "listings"
-              }
-            ],
-            "rows": [
-              {
-                "key": "Lee",
-                "label": "Lee",
-                "cells": {
-                  "band_2m_3m": 246,
-                  "band_3m_5m": 200,
-                  "band_5m_10m": 83,
-                  "band_10m_plus": 33,
-                  "total_2m_plus": 562
-                }
-              },
-              {
-                "key": "Collier",
-                "label": "Collier",
-                "cells": {
-                  "band_2m_3m": 338,
-                  "band_3m_5m": 365,
-                  "band_5m_10m": 259,
-                  "band_10m_plus": 143,
-                  "total_2m_plus": 1105
-                }
-              }
-            ],
-            "source": {
-              "url": "https://www.swfldatagulf.com/r/source/listing_price_histogram_swfl_latest?label=SWFL+for-sale+listing+count+by+price+band+%28aggregated%29&source=realtor.com&brain=price-distribution-swfl&date_col=captured_date",
-              "fetched_at": "2026-10-27T09:55:58Z",
-              "tier": 2,
-              "citation": "SWFL active $2M+ for-sale listings by price band, per county, as of 2026-08-10"
-            }
-          }
-        ],
-        "caveats": [
-          "List-side only: this is the price distribution of ACTIVE for-sale listings (asking prices), not closed sales.",
-          "Includes ALL for-sale property types — the under-$300k band is dominated by vacant land/lots in lot-heavy areas, so the entry-tier share overstates entry-level HOMES. Use the per-county detail to read the shape.",
-          "Weekly snapshot — the distribution's drift over time reads the affordability trend; a single week is neutral.",
-          "Source is realtor.com for-sale listings, binned per county at source."
-        ],
-        "contradicts": [],
-        "confidence": 0.8,
-        "joint_integrity": 1,
-        "confidence_dispersion": 0,
-        "chain_depth": 0,
-        "trust_tier": 2,
-        "upstream_count": 0,
-        "relevance": {
-          "decay_curve": "weeks",
-          "half_life_hours": 720,
-          "computed_at": "2026-10-27T09:55:58Z"
-        },
-        "exogenous_signals": [],
-        "grain_boundary": {
-          "not_available": [
-            "Sold / closed-sale price distribution — active asking prices only",
-            "Per-listing detail — count-per-band aggregate only",
-            "Rental price distribution — for-sale listings only"
-          ],
-          "finest_grain": "county-week"
-        }
-      }
+      "status": "skipped-fresh",
+      "written": false
     },
     {
       "packId": "listing-momentum-swfl",
-      "status": "built",
-      "version": 15,
-      "written": true,
-      "brainOutput": {
-        "brain_id": "listing-momentum-swfl",
-        "version": 15,
-        "refined_at": "2026-10-27T09:55:59Z",
-        "expires": "2026-11-04T09:55:59Z",
-        "ttl_seconds": 691200,
-        "direction": "neutral",
-        "magnitude": 0,
-        "drivers": [],
-        "overrides": [],
-        "conclusion": "Across 31,086 active SWFL for-sale listings (as of 2026-08-14), 14.70% currently carry a price cut and 8.90% are newly listed. By county: Lee 15.20% cut / 9.10% new, Collier 13.30% cut / 8.00% new, Hendry 12.10% cut / 9.00% new.",
-        "key_metrics": [
-          {
-            "metric": "price_reduced_share_swfl",
-            "label": "SWFL active for-sale listings with a price cut (share of active inventory)",
-            "value": 14.7,
-            "direction": "stable",
-            "variable_type": "intensive",
-            "units": "%",
-            "display_format": "percent",
-            "source": {
-              "url": "https://www.swfldatagulf.com/r/source/listing_momentum_stats?label=SWFL+for-sale+listing+momentum+%28price-cut+%2F+new-listing+shares%29&source=realtor.com+for-sale+listings&brain=listing-momentum-swfl&date_col=scraped_at",
-              "fetched_at": "2026-10-27T09:55:59Z",
-              "tier": 2,
-              "citation": "14.70% of 31,086 active SWFL for-sale listings carry a price reduction, as of 2026-08-14"
-            },
-            "suggestions": [
-              "What's driving price reduced share swfl?",
-              "How does price reduced share swfl here compare to other SWFL areas?"
-            ]
-          },
-          {
-            "metric": "new_listing_share_swfl",
-            "label": "SWFL active for-sale listings flagged new (share of active inventory)",
-            "value": 8.9,
-            "direction": "stable",
-            "variable_type": "intensive",
-            "units": "%",
-            "display_format": "percent",
-            "source": {
-              "url": "https://www.swfldatagulf.com/r/source/listing_momentum_stats?label=SWFL+for-sale+listing+momentum+%28price-cut+%2F+new-listing+shares%29&source=realtor.com+for-sale+listings&brain=listing-momentum-swfl&date_col=scraped_at",
-              "fetched_at": "2026-10-27T09:55:59Z",
-              "tier": 2,
-              "citation": "8.90% of 31,086 active SWFL for-sale listings are newly listed, as of 2026-08-14"
-            },
-            "suggestions": [
-              "What's driving new listing share swfl?",
-              "How does new listing share swfl here compare to other SWFL areas?"
-            ]
-          }
-        ],
-        "detail_tables": [
-          {
-            "id": "listing_momentum_by_county",
-            "title": "SWFL for-sale listing momentum by county",
-            "grain": "county",
-            "columns": [
-              {
-                "id": "active_listing_count",
-                "label": "Active listings",
-                "display_format": "count",
-                "units": "listings"
-              },
-              {
-                "id": "price_reduced_share",
-                "label": "Price-cut share",
-                "display_format": "percent",
-                "units": "%"
-              },
-              {
-                "id": "new_listing_share",
-                "label": "New-listing share",
-                "display_format": "percent",
-                "units": "%"
-              }
-            ],
-            "rows": [
-              {
-                "key": "Lee",
-                "label": "Lee",
-                "cells": {
-                  "active_listing_count": 22921,
-                  "price_reduced_share": 15.2,
-                  "new_listing_share": 9.1
-                }
-              },
-              {
-                "key": "Collier",
-                "label": "Collier",
-                "cells": {
-                  "active_listing_count": 7126,
-                  "price_reduced_share": 13.3,
-                  "new_listing_share": 8
-                }
-              },
-              {
-                "key": "Hendry",
-                "label": "Hendry",
-                "cells": {
-                  "active_listing_count": 1039,
-                  "price_reduced_share": 12.1,
-                  "new_listing_share": 9
-                }
-              }
-            ],
-            "source": {
-              "url": "https://www.swfldatagulf.com/r/source/listing_momentum_stats?label=SWFL+for-sale+listing+momentum+%28price-cut+%2F+new-listing+shares%29&source=realtor.com+for-sale+listings&brain=listing-momentum-swfl&date_col=scraped_at",
-              "fetched_at": "2026-10-27T09:55:59Z",
-              "tier": 2,
-              "citation": "SWFL for-sale listing momentum shares, per grain, as of 2026-08-14"
-            }
-          },
-          {
-            "id": "listing_momentum_by_zip",
-            "title": "SWFL for-sale listing momentum by ZIP",
-            "grain": "zip",
-            "columns": [
-              {
-                "id": "active_listing_count",
-                "label": "Active listings",
-                "display_format": "count",
-                "units": "listings"
-              },
-              {
-                "id": "price_reduced_share",
-                "label": "Price-cut share",
-                "display_format": "percent",
-                "units": "%"
-              },
-              {
-                "id": "new_listing_share",
-                "label": "New-listing share",
-                "display_format": "percent",
-                "units": "%"
-              }
-            ],
-            "rows": [
-              {
-                "key": "33993",
-                "label": "33993 (Lee)",
-                "cells": {
-                  "active_listing_count": 2304,
-                  "price_reduced_share": 15.5,
-                  "new_listing_share": 8.8
-                }
-              },
-              {
-                "key": "33974",
-                "label": "33974 (Lee)",
-                "cells": {
-                  "active_listing_count": 2093,
-                  "price_reduced_share": 10.4,
-                  "new_listing_share": 9.7
-                }
-              },
-              {
-                "key": "33909",
-                "label": "33909 (Lee)",
-                "cells": {
-                  "active_listing_count": 1406,
-                  "price_reduced_share": 16,
-                  "new_listing_share": 13.7
-                }
-              },
-              {
-                "key": "33972",
-                "label": "33972 (Lee)",
-                "cells": {
-                  "active_listing_count": 1350,
-                  "price_reduced_share": 10.7,
-                  "new_listing_share": 7
-                }
-              },
-              {
-                "key": "33908",
-                "label": "33908 (Lee)",
-                "cells": {
-                  "active_listing_count": 1123,
-                  "price_reduced_share": 14.2,
-                  "new_listing_share": 6.1
-                }
-              },
-              {
-                "key": "33971",
-                "label": "33971 (Lee)",
-                "cells": {
-                  "active_listing_count": 1106,
-                  "price_reduced_share": 15.4,
-                  "new_listing_share": 11.6
-                }
-              },
-              {
-                "key": "33914",
-                "label": "33914 (Lee)",
-                "cells": {
-                  "active_listing_count": 1079,
-                  "price_reduced_share": 19.1,
-                  "new_listing_share": 7.2
-                }
-              },
-              {
-                "key": "34120",
-                "label": "34120 (Collier)",
-                "cells": {
-                  "active_listing_count": 1005,
-                  "price_reduced_share": 15.5,
-                  "new_listing_share": 11.5
-                }
-              },
-              {
-                "key": "33917",
-                "label": "33917 (Lee)",
-                "cells": {
-                  "active_listing_count": 943,
-                  "price_reduced_share": 19.9,
-                  "new_listing_share": 10.3
-                }
-              },
-              {
-                "key": "34135",
-                "label": "34135 (Lee)",
-                "cells": {
-                  "active_listing_count": 837,
-                  "price_reduced_share": 11.6,
-                  "new_listing_share": 7.8
-                }
-              },
-              {
-                "key": "33931",
-                "label": "33931 (Lee)",
-                "cells": {
-                  "active_listing_count": 793,
-                  "price_reduced_share": 11.7,
-                  "new_listing_share": 4.7
-                }
-              },
-              {
-                "key": "33904",
-                "label": "33904 (Lee)",
-                "cells": {
-                  "active_listing_count": 728,
-                  "price_reduced_share": 17.9,
-                  "new_listing_share": 7.8
-                }
-              },
-              {
-                "key": "34114",
-                "label": "34114 (Collier)",
-                "cells": {
-                  "active_listing_count": 722,
-                  "price_reduced_share": 14,
-                  "new_listing_share": 9.7
-                }
-              },
-              {
-                "key": "33976",
-                "label": "33976 (Lee)",
-                "cells": {
-                  "active_listing_count": 719,
-                  "price_reduced_share": 17.8,
-                  "new_listing_share": 15.9
-                }
-              },
-              {
-                "key": "33913",
-                "label": "33913 (Lee)",
-                "cells": {
-                  "active_listing_count": 711,
-                  "price_reduced_share": 16.5,
-                  "new_listing_share": 7
-                }
-              },
-              {
-                "key": "33905",
-                "label": "33905 (Lee)",
-                "cells": {
-                  "active_listing_count": 673,
-                  "price_reduced_share": 14.9,
-                  "new_listing_share": 13.5
-                }
-              },
-              {
-                "key": "33928",
-                "label": "33928 (Lee)",
-                "cells": {
-                  "active_listing_count": 622,
-                  "price_reduced_share": 17,
-                  "new_listing_share": 10.1
-                }
-              },
-              {
-                "key": "33903",
-                "label": "33903 (Lee)",
-                "cells": {
-                  "active_listing_count": 621,
-                  "price_reduced_share": 18.5,
-                  "new_listing_share": 9.2
-                }
-              },
-              {
-                "key": "33991",
-                "label": "33991 (Lee)",
-                "cells": {
-                  "active_listing_count": 610,
-                  "price_reduced_share": 20.8,
-                  "new_listing_share": 9.2
-                }
-              },
-              {
-                "key": "34112",
-                "label": "34112 (Collier)",
-                "cells": {
-                  "active_listing_count": 598,
-                  "price_reduced_share": 13,
-                  "new_listing_share": 10.9
-                }
-              },
-              {
-                "key": "33936",
-                "label": "33936 (Lee)",
-                "cells": {
-                  "active_listing_count": 587,
-                  "price_reduced_share": 21,
-                  "new_listing_share": 19.1
-                }
-              },
-              {
-                "key": "34145",
-                "label": "34145 (Collier)",
-                "cells": {
-                  "active_listing_count": 566,
-                  "price_reduced_share": 11.5,
-                  "new_listing_share": 5.7
-                }
-              },
-              {
-                "key": "33919",
-                "label": "33919 (Lee)",
-                "cells": {
-                  "active_listing_count": 539,
-                  "price_reduced_share": 15.8,
-                  "new_listing_share": 5.8
-                }
-              },
-              {
-                "key": "34134",
-                "label": "34134 (Lee)",
-                "cells": {
-                  "active_listing_count": 500,
-                  "price_reduced_share": 9.2,
-                  "new_listing_share": 5
-                }
-              },
-              {
-                "key": "34102",
-                "label": "34102 (Collier)",
-                "cells": {
-                  "active_listing_count": 465,
-                  "price_reduced_share": 9.5,
-                  "new_listing_share": 5.8
-                }
-              },
-              {
-                "key": "33957",
-                "label": "33957 (Lee)",
-                "cells": {
-                  "active_listing_count": 449,
-                  "price_reduced_share": 6.7,
-                  "new_listing_share": 2.7
-                }
-              },
-              {
-                "key": "34119",
-                "label": "34119 (Collier)",
-                "cells": {
-                  "active_listing_count": 440,
-                  "price_reduced_share": 17.3,
-                  "new_listing_share": 6.4
-                }
-              },
-              {
-                "key": "34108",
-                "label": "34108 (Collier)",
-                "cells": {
-                  "active_listing_count": 426,
-                  "price_reduced_share": 8.2,
-                  "new_listing_share": 6.8
-                }
-              },
-              {
-                "key": "34110",
-                "label": "34110 (Collier)",
-                "cells": {
-                  "active_listing_count": 423,
-                  "price_reduced_share": 12.8,
-                  "new_listing_share": 7.3
-                }
-              },
-              {
-                "key": "33990",
-                "label": "33990 (Lee)",
-                "cells": {
-                  "active_listing_count": 418,
-                  "price_reduced_share": 18.7,
-                  "new_listing_share": 8.1
-                }
-              },
-              {
-                "key": "34113",
-                "label": "34113 (Collier)",
-                "cells": {
-                  "active_listing_count": 416,
-                  "price_reduced_share": 13.5,
-                  "new_listing_share": 7.9
-                }
-              },
-              {
-                "key": "34142",
-                "label": "34142 (Collier)",
-                "cells": {
-                  "active_listing_count": 341,
-                  "price_reduced_share": 15.8,
-                  "new_listing_share": 10.6
-                }
-              },
-              {
-                "key": "34103",
-                "label": "34103 (Collier)",
-                "cells": {
-                  "active_listing_count": 339,
-                  "price_reduced_share": 8.6,
-                  "new_listing_share": 5.9
-                }
-              },
-              {
-                "key": "33912",
-                "label": "33912 (Lee)",
-                "cells": {
-                  "active_listing_count": 326,
-                  "price_reduced_share": 18.4,
-                  "new_listing_share": 7.1
-                }
-              },
-              {
-                "key": "34117",
-                "label": "34117 (Collier)",
-                "cells": {
-                  "active_listing_count": 320,
-                  "price_reduced_share": 13.1,
-                  "new_listing_share": 3.8
-                }
-              },
-              {
-                "key": "33920",
-                "label": "33920 (Lee)",
-                "cells": {
-                  "active_listing_count": 315,
-                  "price_reduced_share": 21.6,
-                  "new_listing_share": 15.6
-                }
-              },
-              {
-                "key": "33907",
-                "label": "33907 (Lee)",
-                "cells": {
-                  "active_listing_count": 289,
-                  "price_reduced_share": 15.2,
-                  "new_listing_share": 6.9
-                }
-              },
-              {
-                "key": "33973",
-                "label": "33973 (Lee)",
-                "cells": {
-                  "active_listing_count": 286,
-                  "price_reduced_share": 18.5,
-                  "new_listing_share": 6.3
-                }
-              },
-              {
-                "key": "34109",
-                "label": "34109 (Collier)",
-                "cells": {
-                  "active_listing_count": 284,
-                  "price_reduced_share": 15.5,
-                  "new_listing_share": 8.1
-                }
-              },
-              {
-                "key": "33916",
-                "label": "33916 (Lee)",
-                "cells": {
-                  "active_listing_count": 281,
-                  "price_reduced_share": 15.3,
-                  "new_listing_share": 9.3
-                }
-              },
-              {
-                "key": "33901",
-                "label": "33901 (Lee)",
-                "cells": {
-                  "active_listing_count": 276,
-                  "price_reduced_share": 16.7,
-                  "new_listing_share": 8.7
-                }
-              },
-              {
-                "key": "34104",
-                "label": "34104 (Collier)",
-                "cells": {
-                  "active_listing_count": 276,
-                  "price_reduced_share": 19.9,
-                  "new_listing_share": 3.6
-                }
-              },
-              {
-                "key": "33967",
-                "label": "33967 (Lee)",
-                "cells": {
-                  "active_listing_count": 238,
-                  "price_reduced_share": 18.1,
-                  "new_listing_share": 8.4
-                }
-              },
-              {
-                "key": "34105",
-                "label": "34105 (Collier)",
-                "cells": {
-                  "active_listing_count": 201,
-                  "price_reduced_share": 12.4,
-                  "new_listing_share": 9
-                }
-              },
-              {
-                "key": "33966",
-                "label": "33966 (Lee)",
-                "cells": {
-                  "active_listing_count": 178,
-                  "price_reduced_share": 19.1,
-                  "new_listing_share": 12.9
-                }
-              },
-              {
-                "key": "33924",
-                "label": "33924 (Lee)",
-                "cells": {
-                  "active_listing_count": 133,
-                  "price_reduced_share": 6.8,
-                  "new_listing_share": 2.3
-                }
-              },
-              {
-                "key": "33922",
-                "label": "33922 (Lee)",
-                "cells": {
-                  "active_listing_count": 118,
-                  "price_reduced_share": 10.2,
-                  "new_listing_share": 8.5
-                }
-              },
-              {
-                "key": "34116",
-                "label": "34116 (Collier)",
-                "cells": {
-                  "active_listing_count": 107,
-                  "price_reduced_share": 17.8,
-                  "new_listing_share": 7.5
-                }
-              },
-              {
-                "key": "33956",
-                "label": "33956 (Lee)",
-                "cells": {
-                  "active_listing_count": 106,
-                  "price_reduced_share": 10.4,
-                  "new_listing_share": 4.7
-                }
-              },
-              {
-                "key": "34139",
-                "label": "34139 (Collier)",
-                "cells": {
-                  "active_listing_count": 52,
-                  "price_reduced_share": 9.6,
-                  "new_listing_share": 3.8
-                }
-              },
-              {
-                "key": "33921",
-                "label": "33921 (Lee)",
-                "cells": {
-                  "active_listing_count": 44,
-                  "price_reduced_share": 2.3,
-                  "new_listing_share": 2.3
-                }
-              },
-              {
-                "key": "34138",
-                "label": "34138 (Collier)",
-                "cells": {
-                  "active_listing_count": 36,
-                  "price_reduced_share": 13.9,
-                  "new_listing_share": 0
-                }
-              },
-              {
-                "key": "34140",
-                "label": "34140 (Collier)",
-                "cells": {
-                  "active_listing_count": 17,
-                  "price_reduced_share": 11.8,
-                  "new_listing_share": 23.5
-                }
-              },
-              {
-                "key": "34141",
-                "label": "34141 (Collier)",
-                "cells": {
-                  "active_listing_count": 10,
-                  "price_reduced_share": 0,
-                  "new_listing_share": 10
-                }
-              },
-              {
-                "key": "34137",
-                "label": "34137 (Collier)",
-                "cells": {
-                  "active_listing_count": 2,
-                  "price_reduced_share": 0,
-                  "new_listing_share": 0
-                }
-              }
-            ],
-            "source": {
-              "url": "https://www.swfldatagulf.com/r/source/listing_momentum_stats?label=SWFL+for-sale+listing+momentum+%28price-cut+%2F+new-listing+shares%29&source=realtor.com+for-sale+listings&brain=listing-momentum-swfl&date_col=scraped_at",
-              "fetched_at": "2026-10-27T09:55:59Z",
-              "tier": 2,
-              "citation": "SWFL for-sale listing momentum shares, per grain, as of 2026-08-14"
-            }
-          }
-        ],
-        "caveats": [
-          "Point-in-time shares of ACTIVE for-sale listings (list-side leading signals), not closed sales.",
-          "A single week is neutral by construction — the week-over-week drift is the read: a rising price-cut share signals softening, a rising new-listing share signals supply building.",
-          "Shares come from the listing's own new / price-reduced flags on the realtor.com for-sale feed."
-        ],
-        "contradicts": [],
-        "confidence": 0.8,
-        "joint_integrity": 1,
-        "confidence_dispersion": 0,
-        "chain_depth": 0,
-        "trust_tier": 2,
-        "upstream_count": 0,
-        "relevance": {
-          "decay_curve": "weeks",
-          "half_life_hours": 720,
-          "computed_at": "2026-10-27T09:55:59Z"
-        },
-        "exogenous_signals": [],
-        "grain_boundary": {
-          "not_available": [
-            "Sold / closed-sale momentum — active list-side flags only",
-            "Week-over-week change — current snapshot only (a second sweep reads the trend)",
-            "Rental momentum — for-sale listings only"
-          ],
-          "finest_grain": "zip-snapshot"
-        }
-      }
+      "status": "skipped-fresh",
+      "written": false
     },
     {
       "packId": "market-temperature-swfl",
@@ -1351,737 +531,8 @@
     },
     {
       "packId": "active-listings-swfl",
-      "status": "built",
-      "version": 48,
-      "written": true,
-      "brainOutput": {
-        "brain_id": "active-listings-swfl",
-        "version": 48,
-        "refined_at": "2026-10-27T09:56:04Z",
-        "expires": "2026-10-29T09:56:04Z",
-        "ttl_seconds": 172800,
-        "direction": "neutral",
-        "magnitude": 0,
-        "drivers": [],
-        "overrides": [],
-        "conclusion": "22,650 active SWFL residential listings, median asking $412,000, avg 215 days on market (active residential listings, as of 2026-08-14). By county: Lee 16,394 (median $369,900), Collier 6,256 (median $649,900), Lee 1 (median $314,900).",
-        "key_metrics": [
-          {
-            "metric": "active_listings_count_swfl",
-            "label": "SWFL active residential listings (count)",
-            "value": 22650,
-            "direction": "stable",
-            "variable_type": "extensive",
-            "units": "listings",
-            "display_format": "count",
-            "source": {
-              "url": "https://www.swfldatagulf.com/r/source/listing_active_stats?label=SWFL+active+for-sale+listings+%28aggregated%29&source=realtor.com+for-sale+listings&brain=active-listings-swfl&date_col=scraped_at",
-              "fetched_at": "2026-10-27T09:56:04Z",
-              "tier": 2,
-              "citation": "22,650 active SWFL residential listings as of 2026-08-14"
-            },
-            "suggestions": [
-              "What's driving active listings count swfl?",
-              "How does active listings count swfl here compare to other SWFL areas?"
-            ]
-          },
-          {
-            "metric": "median_list_price_swfl",
-            "label": "SWFL median asking price (active residential)",
-            "value": 412000,
-            "direction": "stable",
-            "variable_type": "intensive",
-            "units": "USD",
-            "display_format": "currency",
-            "source": {
-              "url": "https://www.swfldatagulf.com/r/source/listing_active_stats?label=SWFL+active+for-sale+listings+%28aggregated%29&source=realtor.com+for-sale+listings&brain=active-listings-swfl&date_col=scraped_at",
-              "fetched_at": "2026-10-27T09:56:04Z",
-              "tier": 2,
-              "citation": "median asking price across 22,650 active SWFL listings: $412,000"
-            },
-            "suggestions": [
-              "What's driving median list price swfl?",
-              "How does median list price swfl here compare to other SWFL areas?"
-            ]
-          },
-          {
-            "metric": "recent_price_cuts_count_swfl",
-            "label": "SWFL listings with a price cut in the last 90 days",
-            "value": 513,
-            "direction": "stable",
-            "variable_type": "extensive",
-            "units": "listings",
-            "display_format": "count",
-            "source": {
-              "url": "https://www.swfldatagulf.com/r/source/listing_active_stats?label=SWFL+active+for-sale+listings+%28aggregated%29&source=realtor.com+for-sale+listings&brain=active-listings-swfl&date_col=scraped_at",
-              "fetched_at": "2026-10-27T09:56:04Z",
-              "tier": 2,
-              "citation": "513 SWFL listings took at least one price cut in the trailing 90 days, median cut $10,000"
-            },
-            "suggestions": [
-              "What's driving recent price cuts count swfl?",
-              "How does recent price cuts count swfl here compare to other SWFL areas?"
-            ]
-          },
-          {
-            "metric": "median_annual_tax_swfl",
-            "label": "SWFL median vendor-reported annual property tax",
-            "value": 4008,
-            "direction": "stable",
-            "variable_type": "intensive",
-            "units": "USD",
-            "display_format": "currency",
-            "source": {
-              "url": "https://www.swfldatagulf.com/r/source/listing_active_stats?label=SWFL+active+for-sale+listings+%28aggregated%29&source=realtor.com+for-sale+listings&brain=active-listings-swfl&date_col=scraped_at",
-              "fetched_at": "2026-10-27T09:56:04Z",
-              "tier": 2,
-              "citation": "Median vendor-reported annual property tax across 16,514 SWFL properties with tax history: $4,008"
-            },
-            "suggestions": [
-              "What's driving median annual tax swfl?",
-              "How does median annual tax swfl here compare to other SWFL areas?"
-            ]
-          },
-          {
-            "metric": "avg_days_on_market_swfl",
-            "label": "SWFL average days on market (active residential)",
-            "value": 215,
-            "direction": "stable",
-            "variable_type": "intensive",
-            "units": "days",
-            "display_format": "count",
-            "source": {
-              "url": "https://www.swfldatagulf.com/r/source/listing_active_stats?label=SWFL+active+for-sale+listings+%28aggregated%29&source=realtor.com+for-sale+listings&brain=active-listings-swfl&date_col=scraped_at",
-              "fetched_at": "2026-10-27T09:56:04Z",
-              "tier": 2,
-              "citation": "average days on market across active SWFL listings: 215 days"
-            },
-            "suggestions": [
-              "What's driving avg days on market swfl?",
-              "How does avg days on market swfl here compare to other SWFL areas?"
-            ]
-          }
-        ],
-        "detail_tables": [
-          {
-            "id": "active_listings_by_county",
-            "title": "SWFL active residential listings by county",
-            "grain": "county",
-            "columns": [
-              {
-                "id": "listing_count",
-                "label": "Active listings",
-                "display_format": "count",
-                "units": "listings"
-              },
-              {
-                "id": "median_list_price",
-                "label": "Median asking price",
-                "display_format": "currency",
-                "units": "USD"
-              },
-              {
-                "id": "avg_days_on_market",
-                "label": "Avg days on market",
-                "display_format": "count",
-                "units": "days"
-              }
-            ],
-            "rows": [
-              {
-                "key": "Lee",
-                "label": "Lee",
-                "cells": {
-                  "listing_count": 16394,
-                  "median_list_price": 369900,
-                  "avg_days_on_market": 214
-                }
-              },
-              {
-                "key": "Collier",
-                "label": "Collier",
-                "cells": {
-                  "listing_count": 6256,
-                  "median_list_price": 649900,
-                  "avg_days_on_market": 217
-                }
-              },
-              {
-                "key": "Lee",
-                "label": "Lee",
-                "cells": {
-                  "listing_count": 1,
-                  "median_list_price": 314900,
-                  "avg_days_on_market": null
-                }
-              }
-            ],
-            "source": {
-              "url": "https://www.swfldatagulf.com/r/source/listing_active_stats?label=SWFL+active+for-sale+listings+%28aggregated%29&source=realtor.com+for-sale+listings&brain=active-listings-swfl&date_col=scraped_at",
-              "fetched_at": "2026-10-27T09:56:04Z",
-              "tier": 2,
-              "citation": "Active SWFL residential listings, aggregated per grain in SQL (listing_active_stats) as of 2026-08-14"
-            }
-          },
-          {
-            "id": "active_listings_by_zip",
-            "title": "SWFL active residential listings by ZIP",
-            "grain": "zip",
-            "columns": [
-              {
-                "id": "listing_count",
-                "label": "Active listings",
-                "display_format": "count",
-                "units": "listings"
-              },
-              {
-                "id": "median_list_price",
-                "label": "Median asking price",
-                "display_format": "currency",
-                "units": "USD"
-              },
-              {
-                "id": "avg_days_on_market",
-                "label": "Avg days on market",
-                "display_format": "count",
-                "units": "days"
-              }
-            ],
-            "rows": [
-              {
-                "key": "33993",
-                "label": "33993 (Lee)",
-                "cells": {
-                  "listing_count": 1146,
-                  "median_list_price": 393950,
-                  "avg_days_on_market": 203
-                }
-              },
-              {
-                "key": "33908",
-                "label": "33908 (Lee)",
-                "cells": {
-                  "listing_count": 1008,
-                  "median_list_price": 330000,
-                  "avg_days_on_market": 239
-                }
-              },
-              {
-                "key": "33914",
-                "label": "33914 (Lee)",
-                "cells": {
-                  "listing_count": 867,
-                  "median_list_price": 525000,
-                  "avg_days_on_market": 209
-                }
-              },
-              {
-                "key": "33917",
-                "label": "33917 (Lee)",
-                "cells": {
-                  "listing_count": 833,
-                  "median_list_price": 205900,
-                  "avg_days_on_market": 212
-                }
-              },
-              {
-                "key": "33909",
-                "label": "33909 (Lee)",
-                "cells": {
-                  "listing_count": 794,
-                  "median_list_price": 339900,
-                  "avg_days_on_market": 189
-                }
-              },
-              {
-                "key": "34135",
-                "label": "34135 (Lee)",
-                "cells": {
-                  "listing_count": 771,
-                  "median_list_price": 458560,
-                  "avg_days_on_market": 214
-                }
-              },
-              {
-                "key": "33974",
-                "label": "33974 (Lee)",
-                "cells": {
-                  "listing_count": 735,
-                  "median_list_price": 322000,
-                  "avg_days_on_market": 177
-                }
-              },
-              {
-                "key": "34120",
-                "label": "34120 (Collier)",
-                "cells": {
-                  "listing_count": 704,
-                  "median_list_price": 636500,
-                  "avg_days_on_market": 190
-                }
-              },
-              {
-                "key": "33904",
-                "label": "33904 (Lee)",
-                "cells": {
-                  "listing_count": 665,
-                  "median_list_price": 420000,
-                  "avg_days_on_market": 204
-                }
-              },
-              {
-                "key": "33913",
-                "label": "33913 (Lee)",
-                "cells": {
-                  "listing_count": 626,
-                  "median_list_price": 469000,
-                  "avg_days_on_market": 195
-                }
-              },
-              {
-                "key": "33971",
-                "label": "33971 (Lee)",
-                "cells": {
-                  "listing_count": 624,
-                  "median_list_price": 319900,
-                  "avg_days_on_market": 194
-                }
-              },
-              {
-                "key": "34114",
-                "label": "34114 (Collier)",
-                "cells": {
-                  "listing_count": 610,
-                  "median_list_price": 549000,
-                  "avg_days_on_market": 208
-                }
-              },
-              {
-                "key": "33931",
-                "label": "33931 (Lee)",
-                "cells": {
-                  "listing_count": 596,
-                  "median_list_price": 675000,
-                  "avg_days_on_market": 255
-                }
-              },
-              {
-                "key": "33928",
-                "label": "33928 (Lee)",
-                "cells": {
-                  "listing_count": 595,
-                  "median_list_price": 539000,
-                  "avg_days_on_market": 192
-                }
-              },
-              {
-                "key": "33903",
-                "label": "33903 (Lee)",
-                "cells": {
-                  "listing_count": 563,
-                  "median_list_price": 148000,
-                  "avg_days_on_market": 231
-                }
-              },
-              {
-                "key": "34112",
-                "label": "34112 (Collier)",
-                "cells": {
-                  "listing_count": 558,
-                  "median_list_price": 339999,
-                  "avg_days_on_market": 217
-                }
-              },
-              {
-                "key": "33919",
-                "label": "33919 (Lee)",
-                "cells": {
-                  "listing_count": 533,
-                  "median_list_price": 249000,
-                  "avg_days_on_market": 213
-                }
-              },
-              {
-                "key": "33905",
-                "label": "33905 (Lee)",
-                "cells": {
-                  "listing_count": 519,
-                  "median_list_price": 354000,
-                  "avg_days_on_market": 201
-                }
-              },
-              {
-                "key": "34145",
-                "label": "34145 (Collier)",
-                "cells": {
-                  "listing_count": 493,
-                  "median_list_price": 949000,
-                  "avg_days_on_market": 214
-                }
-              },
-              {
-                "key": "33991",
-                "label": "33991 (Lee)",
-                "cells": {
-                  "listing_count": 477,
-                  "median_list_price": 450000,
-                  "avg_days_on_market": 200
-                }
-              },
-              {
-                "key": "33972",
-                "label": "33972 (Lee)",
-                "cells": {
-                  "listing_count": 466,
-                  "median_list_price": 355000,
-                  "avg_days_on_market": 186
-                }
-              },
-              {
-                "key": "33936",
-                "label": "33936 (Lee)",
-                "cells": {
-                  "listing_count": 465,
-                  "median_list_price": 245000,
-                  "avg_days_on_market": 183
-                }
-              },
-              {
-                "key": "33976",
-                "label": "33976 (Lee)",
-                "cells": {
-                  "listing_count": 463,
-                  "median_list_price": 329000,
-                  "avg_days_on_market": 201
-                }
-              },
-              {
-                "key": "34134",
-                "label": "34134 (Lee)",
-                "cells": {
-                  "listing_count": 439,
-                  "median_list_price": 799000,
-                  "avg_days_on_market": 251
-                }
-              },
-              {
-                "key": "34102",
-                "label": "34102 (Collier)",
-                "cells": {
-                  "listing_count": 432,
-                  "median_list_price": 3200000,
-                  "avg_days_on_market": 287
-                }
-              },
-              {
-                "key": "34119",
-                "label": "34119 (Collier)",
-                "cells": {
-                  "listing_count": 424,
-                  "median_list_price": 689000,
-                  "avg_days_on_market": 201
-                }
-              },
-              {
-                "key": "34110",
-                "label": "34110 (Collier)",
-                "cells": {
-                  "listing_count": 410,
-                  "median_list_price": 684900,
-                  "avg_days_on_market": 220
-                }
-              },
-              {
-                "key": "34108",
-                "label": "34108 (Collier)",
-                "cells": {
-                  "listing_count": 406,
-                  "median_list_price": 1299000,
-                  "avg_days_on_market": 232
-                }
-              },
-              {
-                "key": "34113",
-                "label": "34113 (Collier)",
-                "cells": {
-                  "listing_count": 402,
-                  "median_list_price": 522450,
-                  "avg_days_on_market": 220
-                }
-              },
-              {
-                "key": "33957",
-                "label": "33957 (Lee)",
-                "cells": {
-                  "listing_count": 378,
-                  "median_list_price": 954500,
-                  "avg_days_on_market": 296
-                }
-              },
-              {
-                "key": "33990",
-                "label": "33990 (Lee)",
-                "cells": {
-                  "listing_count": 354,
-                  "median_list_price": 399000,
-                  "avg_days_on_market": 189
-                }
-              },
-              {
-                "key": "34103",
-                "label": "34103 (Collier)",
-                "cells": {
-                  "listing_count": 332,
-                  "median_list_price": 1495000,
-                  "avg_days_on_market": 234
-                }
-              },
-              {
-                "key": "34142",
-                "label": "34142 (Collier)",
-                "cells": {
-                  "listing_count": 326,
-                  "median_list_price": 435748,
-                  "avg_days_on_market": 177
-                }
-              },
-              {
-                "key": "33912",
-                "label": "33912 (Lee)",
-                "cells": {
-                  "listing_count": 308,
-                  "median_list_price": 349900,
-                  "avg_days_on_market": 213
-                }
-              },
-              {
-                "key": "33907",
-                "label": "33907 (Lee)",
-                "cells": {
-                  "listing_count": 285,
-                  "median_list_price": 184000,
-                  "avg_days_on_market": 215
-                }
-              },
-              {
-                "key": "34109",
-                "label": "34109 (Collier)",
-                "cells": {
-                  "listing_count": 281,
-                  "median_list_price": 745000,
-                  "avg_days_on_market": 202
-                }
-              },
-              {
-                "key": "34104",
-                "label": "34104 (Collier)",
-                "cells": {
-                  "listing_count": 271,
-                  "median_list_price": 390000,
-                  "avg_days_on_market": 202
-                }
-              },
-              {
-                "key": "33916",
-                "label": "33916 (Lee)",
-                "cells": {
-                  "listing_count": 266,
-                  "median_list_price": 302450,
-                  "avg_days_on_market": 427
-                }
-              },
-              {
-                "key": "33901",
-                "label": "33901 (Lee)",
-                "cells": {
-                  "listing_count": 264,
-                  "median_list_price": 315000,
-                  "avg_days_on_market": 232
-                }
-              },
-              {
-                "key": "33967",
-                "label": "33967 (Lee)",
-                "cells": {
-                  "listing_count": 230,
-                  "median_list_price": 399000,
-                  "avg_days_on_market": 182
-                }
-              },
-              {
-                "key": "33920",
-                "label": "33920 (Lee)",
-                "cells": {
-                  "listing_count": 223,
-                  "median_list_price": 426053,
-                  "avg_days_on_market": 189
-                }
-              },
-              {
-                "key": "33973",
-                "label": "33973 (Lee)",
-                "cells": {
-                  "listing_count": 211,
-                  "median_list_price": 472000,
-                  "avg_days_on_market": 195
-                }
-              },
-              {
-                "key": "34105",
-                "label": "34105 (Collier)",
-                "cells": {
-                  "listing_count": 197,
-                  "median_list_price": 390000,
-                  "avg_days_on_market": 203
-                }
-              },
-              {
-                "key": "33966",
-                "label": "33966 (Lee)",
-                "cells": {
-                  "listing_count": 174,
-                  "median_list_price": 319750,
-                  "avg_days_on_market": 189
-                }
-              },
-              {
-                "key": "34117",
-                "label": "34117 (Collier)",
-                "cells": {
-                  "listing_count": 170,
-                  "median_list_price": 772499,
-                  "avg_days_on_market": 199
-                }
-              },
-              {
-                "key": "33924",
-                "label": "33924 (Lee)",
-                "cells": {
-                  "listing_count": 133,
-                  "median_list_price": 1499000,
-                  "avg_days_on_market": 303
-                }
-              },
-              {
-                "key": "33922",
-                "label": "33922 (Lee)",
-                "cells": {
-                  "listing_count": 118,
-                  "median_list_price": 482450,
-                  "avg_days_on_market": 238
-                }
-              },
-              {
-                "key": "33956",
-                "label": "33956 (Lee)",
-                "cells": {
-                  "listing_count": 105,
-                  "median_list_price": 588500,
-                  "avg_days_on_market": 251
-                }
-              },
-              {
-                "key": "34116",
-                "label": "34116 (Collier)",
-                "cells": {
-                  "listing_count": 91,
-                  "median_list_price": 589000,
-                  "avg_days_on_market": 181
-                }
-              },
-              {
-                "key": "33921",
-                "label": "33921 (Lee)",
-                "cells": {
-                  "listing_count": 44,
-                  "median_list_price": 3985000,
-                  "avg_days_on_market": 296
-                }
-              },
-              {
-                "key": "34138",
-                "label": "34138 (Collier)",
-                "cells": {
-                  "listing_count": 31,
-                  "median_list_price": 185000,
-                  "avg_days_on_market": 478
-                }
-              },
-              {
-                "key": "34139",
-                "label": "34139 (Collier)",
-                "cells": {
-                  "listing_count": 29,
-                  "median_list_price": 349000,
-                  "avg_days_on_market": 300
-                }
-              },
-              {
-                "key": "34140",
-                "label": "34140 (Collier)",
-                "cells": {
-                  "listing_count": 16,
-                  "median_list_price": 525000,
-                  "avg_days_on_market": 364
-                }
-              },
-              {
-                "key": "34137",
-                "label": "34137 (Collier)",
-                "cells": {
-                  "listing_count": 2,
-                  "median_list_price": 290000,
-                  "avg_days_on_market": 170
-                }
-              },
-              {
-                "key": "34141",
-                "label": "34141 (Collier)",
-                "cells": {
-                  "listing_count": 2,
-                  "median_list_price": 269500,
-                  "avg_days_on_market": 188
-                }
-              }
-            ],
-            "source": {
-              "url": "https://www.swfldatagulf.com/r/source/listing_active_stats?label=SWFL+active+for-sale+listings+%28aggregated%29&source=realtor.com+for-sale+listings&brain=active-listings-swfl&date_col=scraped_at",
-              "fetched_at": "2026-10-27T09:56:04Z",
-              "tier": 2,
-              "citation": "Active SWFL residential listings, aggregated per grain in SQL (listing_active_stats) as of 2026-08-14"
-            }
-          }
-        ],
-        "caveats": [
-          "List-side only: asking prices and days-on-market for ACTIVE listings — not sold/closed prices (that is the closed-sale records lane).",
-          "Median asking price spans ALL active listings INCLUDING vacant land/lots — in lot-heavy areas this pulls the median well below typical home prices. Use the property_type field or the per-county/ZIP detail to separate homes from land.",
-          "Daily snapshot — broad SWFL coverage but not comprehensive. Direction is neutral on any one day; the day-over-day diff is what reads the inventory trend.",
-          "Source is realtor.com for-sale listings; a direct licensed MLS/IDX feed can swap into the same table when credentialed.",
-          "Price-cut counts cover only listings we have probed (listed/sold history), not every active listing region-wide — a per-property depth signal, not a full-book statistic.",
-          "Annual property tax is vendor-reported (not a county tax bill) and not yet validated against county appraiser records — treat as directional, not authoritative. Covers only properties we have probed, not the full tax roll."
-        ],
-        "contradicts": [],
-        "confidence": 0.8,
-        "joint_integrity": 1,
-        "confidence_dispersion": 0,
-        "chain_depth": 0,
-        "trust_tier": 2,
-        "upstream_count": 0,
-        "relevance": {
-          "decay_curve": "weeks",
-          "half_life_hours": 720,
-          "computed_at": "2026-10-27T09:56:04Z"
-        },
-        "exogenous_signals": [],
-        "grain_boundary": {
-          "not_available": [
-            "Sold / closed sale prices — active asking prices only, not closed transactions",
-            "Per-listing history or price-cut events — current snapshot only",
-            "Rental listings — sale listings only"
-          ],
-          "finest_grain": "zip-snapshot"
-        }
-      }
+      "status": "skipped-fresh",
+      "written": false
     },
     {
       "packId": "active-rentals-swfl",
@@ -2104,16 +555,16 @@
     {
       "packId": "master",
       "status": "built",
-      "version": 151,
+      "version": 152,
       "written": true,
       "brainOutput": {
         "brain_id": "master",
-        "version": 151,
-        "refined_at": "2026-10-27T09:56:25Z",
-        "expires": "2026-11-03T09:56:25Z",
+        "version": 152,
+        "refined_at": "2026-10-28T04:26:16Z",
+        "expires": "2026-11-04T04:26:16Z",
         "ttl_seconds": 604800,
         "direction": "mixed",
-        "magnitude": 0.46323749291969274,
+        "magnitude": 0.4650774833701065,
         "drivers": [
           {
             "brain_id": "franchise-outcomes",
@@ -2232,10 +683,6 @@
             "edge_type": "input"
           },
           {
-            "brain_id": "permits-commercial-swfl",
-            "edge_type": "input"
-          },
-          {
             "brain_id": "price-distribution-swfl",
             "edge_type": "input"
           },
@@ -2272,7 +719,7 @@
           "flood-barrier-mode-1",
           "storm-history-modifier"
         ],
-        "conclusion": "Read is mixed (moderate magnitude). Driven by: franchise-outcomes, cre-swfl, macro-us, macro-florida, macro-swfl, sector-credit-swfl, tourism-tdt, env-swfl, logistics-swfl, logistics-swfl-nowcast, traffic-swfl, properties-lee-value, properties-collier-value, permits-swfl, rentals-swfl, housing-swfl, safety-swfl, labor-demand-swfl, econ-dev-swfl, city-pulse-swfl, rsw-airport, news-swfl, freshness-pulse, seller-stress-swfl, market-heat-swfl, storm-history-swfl, hurricane-tracks-fl, licenses-swfl, condo-sirs-swfl, permits-commercial-swfl, price-distribution-swfl, listing-momentum-swfl, market-temperature-swfl, investor-zip-swfl, active-listings-swfl, communities-swfl, tier-divergence-swfl, home-values-swfl. Overrides: flood-barrier-mode-1, storm-history-modifier. Note conflicts: macro-us (bearish) vs macro-florida (bullish). Combined confidence 0.87, trust tier T4, based on 38 upstream brains.",
+        "conclusion": "Read is mixed (moderate magnitude). Driven by: franchise-outcomes, cre-swfl, macro-us, macro-florida, macro-swfl, sector-credit-swfl, tourism-tdt, env-swfl, logistics-swfl, logistics-swfl-nowcast, traffic-swfl, properties-lee-value, properties-collier-value, permits-swfl, rentals-swfl, housing-swfl, safety-swfl, labor-demand-swfl, econ-dev-swfl, city-pulse-swfl, rsw-airport, news-swfl, freshness-pulse, seller-stress-swfl, market-heat-swfl, storm-history-swfl, hurricane-tracks-fl, licenses-swfl, condo-sirs-swfl, price-distribution-swfl, listing-momentum-swfl, market-temperature-swfl, investor-zip-swfl, active-listings-swfl, communities-swfl, tier-divergence-swfl, home-values-swfl. Overrides: flood-barrier-mode-1, storm-history-modifier. Note conflicts: macro-us (bearish) vs macro-florida (bullish). Combined confidence 0.86, trust tier T4, based on 37 upstream brains.",
         "key_metrics": [
           {
             "metric": "permits_swfl_county_weighted_avg_corridor_z",
@@ -2560,25 +1007,6 @@
             ]
           },
           {
-            "metric": "commercial_permits_count",
-            "value": 412,
-            "direction": "stable",
-            "label": "SWFL commercial permits issued (2025)",
-            "variable_type": "extensive",
-            "units": "permits",
-            "display_format": "count",
-            "source": {
-              "url": "https://mhsappraisal.com/wp-content/uploads/2026/03/2026-Market-Trends-Report-Magazine-Version-All-Permits.pdf",
-              "fetched_at": "2026-07-19T19:41:23Z",
-              "tier": 1,
-              "citation": "Maxwell, Hendry & Simmons SWFL Data Book — issued commercial permits (412 permits, calendar year 2025) — count of all recorded permits."
-            },
-            "suggestions": [
-              "What's driving commercial permits count?",
-              "How does commercial permits count here compare to other SWFL areas?"
-            ]
-          },
-          {
             "metric": "cap_rate_median",
             "value": 6.7,
             "direction": "rising",
@@ -2598,22 +1026,20 @@
             ]
           },
           {
-            "metric": "active_listings_count_swfl",
-            "label": "SWFL active residential listings (count)",
-            "value": 22650,
+            "metric": "signal_transactions_1",
+            "value": "Naples: A gulf-front Naples mansion sold for $71M in an off-market sale, as reported Oct. 22, 2026.",
             "direction": "stable",
-            "variable_type": "extensive",
-            "units": "listings",
-            "display_format": "count",
+            "label": "Naples — transactions",
+            "variable_type": "categorical",
             "source": {
-              "url": "https://www.swfldatagulf.com/r/source/listing_active_stats?label=SWFL+active+for-sale+listings+%28aggregated%29&source=realtor.com+for-sale+listings&brain=active-listings-swfl&date_col=scraped_at",
-              "fetched_at": "2026-10-27T09:56:04Z",
+              "url": "https://www.businessobserverfl.com/news/2026/oct/22/gulf-front-naples-mansion-sale/",
+              "fetched_at": "2026-10-28T04:25:55Z",
               "tier": 2,
-              "citation": "22,650 active SWFL residential listings as of 2026-08-14"
+              "citation": "Gulf-front Naples mansion sells for $71M in off-market sale | Business Observer: \"* ![Alternate Text](https://observermediagroup.media.clients.ellingtoncms.com/static-4/assets/images/bob-logo-header.svg)\n  * Loading\n\n\n  * [Newsletters](https://marketing.businessobserverfl.com/newsletters)\n  * [Podcast](https://www.businessobserverfl.com/podcasts/corner-office/?utm_source=header&utm_medium=sitenav)\n  * [Public Notices](https://legals.businessobserverfl.com/)\n  * [Big Book](https://www.businessobserverfl.com/big-book-of-business/2026/)\n  * [40 Under 40](https://www.businessobserverfl.com/40-under-40/)\n  * [Mobile App](https://businessobserver.pressreader.com/)\n  * [Subscribe](https://marketing.businessobserverfl.com/subscribe)\n  * [Login](https://www.businessobserverfl.com/accounts/login/?next=/news/2026/oct/22/gulf-front-naples-mansion-sale/)\n\n\n  * [](https://www.facebook.com/BusinessObserverFL)\n  * [](https://x.com/BizObserverFL)\n  * [](https://www.linkedin.com/company/businessobserverfl)\n  * [ ](https://www.instagram.com/businessobserverfl/)\n\n\n[![](https://observermediagroup.media.clients.ellingtoncms.com/static-4/assets/images/bob-logo-header.svg)](https://www.businessobserverfl.com/)\n[![](https://observermediagroup.media.clients.ellingtoncms.com/static-4/assets/images/bob-logo-sticky.svg)](https://www.businessobserverfl.com/)\n[![](https://observermediagroup.media.clients.ellingtoncms.com/static-4/assets/images/bob-logo-header.svg)](https://www.businessobserverfl.com/)\n  * [News](https://www.businessobserverfl.com/news/all/)\n  * [Strategies](https://www.businessobserverfl.com/news/strategies/)\n  * [Entrepreneurs](https://www.businessobserverfl.com/news/entrepreneurs/)\n  * [Leadership](https://www.businessobserverfl.com/news/leadership/)\n  * [Regions](https://www.businessobserverfl.com/news/2026/oct/22/gulf-front-naples-mansion-sale/)\n    * [Tampa Bay-Lakeland](https://www.businessobserverfl.com/news/tampa-bay-lakeland/)\n    * [Manatee-Sarasota](https://www.businessobserverfl.com/news/manatee-sarasota/)\n    * [Charlotte-Lee-Collier](https://www.businessobserverfl.com/news/charlotte-lee-collier/)\n    * [Florida](https://www.businessobserverfl.com/news/florida/)\n  * [Industries](https://www.businessobserverfl.com/news/2026/oct/22/gulf-front-naples-mansion-sale/)\n    * [Business Support](https://www.businessobserverfl.com/news/industries/business-support/)\n    * [Commercial Real Estate](https://www.businessobserverfl.com/news/industries/commercial-real-estate/)\n    * [Residential Real Estate](https://www.businessobserverfl.com/news/industries/residential-real-estate/)\n    * [Development](https://www.businessobserverfl.com/news/industries/development/)\n    * [Finance](https://www.businessobserverfl.com/news/industries/finance/)\n    * [Food-Beverage](https://www.businessobserverfl.com/news/industries/food-beverage/)\n    * [Healthcare](https://www.businessobserverfl.com/news/industries/health-care/)\n    * [Manufacturing](https://www.businessobserverfl.com/news/industries/manufacturing/)\n    * [Retail](https://www.businessobserver\""
             },
             "suggestions": [
-              "What's driving active listings count swfl?",
-              "How does active listings count swfl here compare to other SWFL areas?"
+              "What's driving signal transactions 1?",
+              "How does signal transactions 1 here compare to other SWFL areas?"
             ]
           },
           {
@@ -2660,7 +1086,8 @@
         "caveats": [
           "flood-barrier-mode-1 active: 4 barrier ZIPs, worst-case AAL $40,342/insured property",
           "Override \"storm-history-modifier\" fired (priority 70)",
-          "active-rentals-swfl excluded from synthesis (relevance 0.082, below floor 0.1)",
+          "permits-commercial-swfl excluded from synthesis (relevance 0.098, below floor 0.1)",
+          "active-rentals-swfl excluded from synthesis (relevance 0.081, below floor 0.1)",
           "No figures published: this source has not yet received its first real SBA FOIA load. A synthetic development sample exists for offline testing only and is never shipped.",
           "Construction-cost PPI metrics (construction_cost_ppi_industrial, construction_cost_ppi_warehouse, construction_cost_ppi_office, construction_cost_ppi_medical_office, construction_cost_ppi_trade_concrete, construction_cost_ppi_trade_roofing, construction_cost_ppi_trade_electrical, construction_cost_ppi_trade_plumbing_hvac) are national BLS series — no SWFL-specific or Lee/Collier breakout exists at BLS for any of them. They ship a real month-over-month direction (unlike MarketBeat's schema-required \"stable\" fallback) but BLS can revise recent observations within ~30 days of first publication.",
           "vacancy_rate_marketbeat_swfl: 15 submarkets report a point-in-time value; v1 does not compute quarter-over-quarter direction, so the \"stable\" label is a schema-required fallback, not a measured trend.",
@@ -2757,7 +1184,7 @@
           "1 of 10 announcements in the last 90 days matched qualifying categories (relocation, expansion, grant, infrastructure); the rest are general chamber/policy posts excluded from the momentum count.",
           "Investment and job figures reflect disclosures at announcement time; actual outcomes may vary as projects develop.",
           "SWFL Inc. covers primarily Lee County projects; Collier County coverage depends on cross-county partnerships and co-announcements.",
-          "64 additional live signals not surfaced here (cap 8); the full set is in data_lake.city_pulse.",
+          "60 additional live signals not surfaced here (cap 8); the full set is in data_lake.city_pulse.",
           "Each signal is dated current-events context with a per-signal source; freshness is TTL-bounded by topic (breaking 1d → structural 90d).",
           "Construction enforcement split: public notices = confirmed individual actions (hard-parsed violation_type); press releases = announced sweeps (Sonnet-inferred affected_industries). Do not sum them.",
           "Polarity: rising construction notices = bullish (recovery-driven unlicensed activity). Rising ABT notices = bearish (hospitality compliance stress).",
@@ -2787,10 +1214,6 @@
           "Qlik data coverage: complete (hypercube limit did not fire).",
           "Compliance rate cannot be derived — no baseline registry of all SWFL 3-story+ condominium associations exists in this dataset. Presence = confirmed SIRS filing; absence has no meaning.",
           "Pre-July 2025 and July 2025+ are two separate DBPR databases — the pre-July set holds older filings and the July 2025+ set holds post-HB 913 mandate filings; they are distinct registers, not one continuous time series.",
-          "Concentration: one permit (Project Rainforest, $486.8M industrial, Fort Myers) is 17% of the $2.91B SWFL total; the remaining 411 permits sum to $2.43B. Read the headline value as one megaproject plus a broader base, not a uniform surge.",
-          "Rows are extracted from the MHS Data Book PDF and are not yet spot-checked (verified flag). Treat values as directional pending manual review.",
-          "Site ZIP resolved for 215 of 412 permits — the remainder had no geocodable street address and carry no ZIP (still counted in submarket and SWFL totals). ZIP-grain reads cover only the resolved subset.",
-          "Only one calendar year is on file; no year-over-year comparison is possible yet. Do not infer a trend from a single annual snapshot.",
           "List-side only: this is the price distribution of ACTIVE for-sale listings (asking prices), not closed sales.",
           "Includes ALL for-sale property types — the under-$300k band is dominated by vacant land/lots in lot-heavy areas, so the entry-tier share overstates entry-level HOMES. Use the per-county detail to read the shape.",
           "Weekly snapshot — the distribution's drift over time reads the affordability trend; a single week is neutral.",
@@ -2822,7 +1245,7 @@
           "~50% of SWFL buyers (≈70% for condos) pay cash and insulate the luxury tier — a holding or rising top tier is part of the K-shape, not a bullish signal on its own.",
           "Covers 50 SWFL ZIPs holding BOTH a starter and a luxury tier; ZIPs lacking one tier are excluded from the divergence.",
           "Upstream brain 'active-rentals-swfl' was stale at build time (expired 2026-07-19).",
-          "Upstream brain 'active-rentals-swfl' failed to rebuild on 2026-10-27; using last good read from 2026-07-11 (v3)."
+          "Upstream brain 'active-rentals-swfl' failed to rebuild on 2026-10-28; using last good read from 2026-07-11 (v3)."
         ],
         "contradicts": [
           "macro-us (bearish) vs macro-florida (bullish)",
@@ -2876,11 +1299,11 @@
         "confidence_dispersion": 0.14,
         "chain_depth": 3,
         "trust_tier": 4,
-        "upstream_count": 38,
+        "upstream_count": 37,
         "relevance": {
           "decay_curve": "weeks",
-          "half_life_hours": 720.0000000000001,
-          "computed_at": "2026-10-27T09:56:25.000Z"
+          "half_life_hours": 720.0000000000002,
+          "computed_at": "2026-10-28T04:26:16.000Z"
         },
         "exogenous_signals": [],
         "conditional_claims": [
@@ -2900,7 +1323,7 @@
             "Outcomes for a specific named business or street address — the lake holds sector- and corridor-level aggregates, not individual firms.",
             "Geography finer than what an upstream explicitly publishes (most reads are Lee/Collier county level).",
             "Sub-monthly timing on most series — the synthesized read moves at a monthly grain.",
-            "1 upstream read(s) fell below the relevance floor and are not reflected here."
+            "2 upstream read(s) fell below the relevance floor and are not reflected here."
           ],
           "finest_grain": "county-month",
           "routes": [
