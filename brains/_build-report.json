@@ -1,8 +1,8 @@
 {
   "target": "master",
   "timestamps": {
-    "started": "2026-10-28T10:42:17.317Z",
-    "finished": "2026-10-28T10:42:46.928Z"
+    "started": "2026-10-29T04:31:41.480Z",
+    "finished": "2026-10-29T04:32:04.238Z"
   },
   "source": "live",
   "outcomes": [
@@ -23,8 +23,38 @@
     },
     {
       "packId": "corridor-pulse-swfl",
-      "status": "skipped-fresh",
-      "written": false
+      "status": "built",
+      "version": 31,
+      "written": true,
+      "brainOutput": {
+        "brain_id": "corridor-pulse-swfl",
+        "version": 31,
+        "refined_at": "2026-10-29T04:31:42Z",
+        "expires": "2026-11-05T04:31:42Z",
+        "ttl_seconds": 604800,
+        "direction": "neutral",
+        "magnitude": 0,
+        "drivers": [],
+        "overrides": [],
+        "conclusion": "corridor-pulse-swfl: no non-expired corridor current-events signals in this build window — no live pulse to report.",
+        "key_metrics": [],
+        "caveats": [
+          "No live corridor current-events signals in this build window — either the weekly pulse has not run yet, all signals have aged past their TTL, or no tracked corridor made news this window."
+        ],
+        "contradicts": [],
+        "confidence": 0.8,
+        "joint_integrity": 1,
+        "confidence_dispersion": 0,
+        "chain_depth": 0,
+        "trust_tier": 2,
+        "upstream_count": 0,
+        "relevance": {
+          "decay_curve": "weeks",
+          "half_life_hours": 720,
+          "computed_at": "2026-10-29T04:31:42Z"
+        },
+        "exogenous_signals": []
+      }
     },
     {
       "packId": "cre-swfl",
@@ -114,31 +144,31 @@
     {
       "packId": "city-pulse-swfl",
       "status": "built",
-      "version": 145,
+      "version": 146,
       "written": true,
       "brainOutput": {
         "brain_id": "city-pulse-swfl",
-        "version": 145,
-        "refined_at": "2026-10-28T10:42:17Z",
-        "expires": "2026-10-29T10:42:17Z",
+        "version": 146,
+        "refined_at": "2026-10-29T04:31:42Z",
+        "expires": "2026-10-30T04:31:42Z",
         "ttl_seconds": 86400,
         "direction": "neutral",
         "magnitude": 0,
         "drivers": [],
         "overrides": [],
-        "conclusion": "SWFL city pulse as of 2026-10-28: 71 live current-events signals across 5 cities — Naples (23), Fort Myers (23), Cape Coral (21), Sanibel (1), Estero (3). Most current: Naples — Former Naples councilwoman Linda Penniman died, remembered as the 'Energizer Bunny'; described as dying of a 'broken heart' after her husband. Story published Oct. 23, 2026. These are current cited facts only; the cross-vertical read and any direction call live downstream in master.",
+        "conclusion": "SWFL city pulse as of 2026-10-29: 71 live current-events signals across 6 cities — Naples (23), Cape Coral (21), East Naples (1), Fort Myers (22), Sanibel (1), Estero (3). Most current: Naples — Court ordered two Naples men to repay $511,200 in a COVID glove fraud case; men received a 15-month sentence for wire fraud. These are current cited facts only; the cross-vertical read and any direction call live downstream in master.",
         "key_metrics": [
           {
             "metric": "signal_breaking_1",
-            "value": "Naples: Former Naples councilwoman Linda Penniman died, remembered as the 'Energizer Bunny'; described as dying of a 'broken heart' after her husband. Story published Oct. 23, 2026.",
+            "value": "Naples: Court ordered two Naples men to repay $511,200 in a COVID glove fraud case; men received a 15-month sentence for wire fraud.",
             "direction": "stable",
             "label": "Naples — breaking",
             "variable_type": "categorical",
             "source": {
-              "url": "https://www.naplesnews.com/story/money/business/local/2026/10/23/former-naples-florida-councilwoman-linda-penniman-remembered-as-the-energizer-bunny/92385292007/",
-              "fetched_at": "2026-10-28T10:42:17Z",
+              "url": "https://www.gulfshorebusiness.com/news/court-orders-naples-men-to-repay-511200-in-glove-fraud-case/article_996c195f-697e-49da-a185-549df2820c58.html",
+              "fetched_at": "2026-10-29T04:31:42Z",
               "tier": 2,
-              "citation": "Former Naples councilwoman remembered as the 'Energizer Bunny': \"[](https://www.naplesnews.com/)\n[Estero's Maddox Stewart set 2 Lee County passing touchdown records Monday](https://www.naplesnews.com/story/sports/high-school/football/2026/10/27/esteros-maddox-stewart-sets-lee-county-record-for-passing-touchdowns/92454173007/)\n[](https://subscribe.naplesnews.com/rr/nanobar?gps-source=CPTILELEFT&itm_campaign=2026ENTQ4BAU2026&itm_medium=ONSITE&success-url=https%3A%2F%2Fwww.naplesnews.com%2Fstory%2Fmoney%2Fbusiness%2Flocal%2F2026%2F10%2F23%2Fformer-naples-florida-councilwoman-linda-penniman-remembered-as-the-energizer-bunny%2F92385292007%2F)\n[](https://subscribe.naplesnews.com/rr/masthead?gps-source=CPMASTHEAD&itm_campaign=2026ENTQ4BAU2026&itm_medium=ONSITE&success-url=https%3A%2F%2Fwww.naplesnews.com%2Fstory%2Fmoney%2Fbusiness%2Flocal%2F2026%2F10%2F23%2Fformer-naples-florida-councilwoman-linda-penniman-remembered-as-the-energizer-bunny%2F92385292007%2F)\n[News](https://www.naplesnews.com/news/) [Sports](https://www.naplesnews.com/sports/) [Real Estate](https://www.naplesnews.com/business/real-estate/) [Restaurants](https://www.naplesnews.com/entertainment/restaurants/) [Opinion](https://www.naplesnews.com/opinion/) [Advertise](https://advertising.usatoday.com/advertise-with-us/?cid=Web_LiQ_Network_AdvertiseWithUs_AdvertiseInquiry&publication=naples_daily_news&utm_source=local_publication&utm_medium=menu&utm_campaign=advertise_with_us) [Obituaries](https://www.naplesnews.com/obituaries) [eNewspaper](https://user.naplesnews.com/user/enewspaper) [Legals](https://www.naplesnews.com/public-notices)\n[](https://www.naplesnews.com/search/ \"Search\")\n[](https://www.naplesnews.com/weather/ \"Weather in Naples: 70°F Sunny\") [](https://subscribe.naplesnews.com/rr/navsub?gps-source=CPTOPNAVBAR&itm_campaign=2026ENTQ4BAU2026&itm_medium=ONSITE&success-url=https%3A%2F%2Fwww.naplesnews.com%2Fstory%2Fmoney%2Fbusiness%2Flocal%2F2026%2F10%2F23%2Fformer-naples-florida-councilwoman-linda-penniman-remembered-as-the-energizer-bunny%2F92385292007%2F)\n[](https://login.naplesnews.com/PNDN-GUP/authenticate/?success-url=https%3A%2F%2Fwww.naplesnews.com%2Fstory%2Fmoney%2Fbusiness%2Flocal%2F2026%2F10%2F23%2Fformer-naples-florida-councilwoman-linda-penniman-remembered-as-the-energizer-bunny%2F92385292007%2F&cancel-url=https%3A%2F%2Fwww.naplesnews.com%2Fstory%2Fmoney%2Fbusiness%2Flocal%2F2026%2F10%2F23%2Fformer-naples-florida-councilwoman-linda-penniman-remembered-as-the-energizer-bunny%2F92385292007%2F)\n[](https://www.naplesnews.com/) [](https://www.naplesnews.com/)\n[LOCAL BUSINESS](https://www.naplesnews.com/business/local/)\n# Naples leader dies of 'broken heart' after husband. Son recalls her life\n[![Portrait of Laura Layden](https://www.naplesnews.com/gcdn/authoring/authoring-images/2024/02/08/PNDN/72524348007-ndn-jh-20240126-laura-0001.JPG?crop=3313,3312,x1506,y0&width=48&height=48&format=pjpg&auto=webp) Laura Layden](https://www.naplesnews.com/staff/2647080001/laura-layden/)\nFort Myers News-Press & Naples Daily News\nOct. 23, 2026, 2:48 p.m. ET\""
+              "citation": "COVID glove fraud by Naples men leads to 15-month sentence | News | gulfshorebusiness.com: \"[Skip to main content](https://www.gulfshorebusiness.com/news/court-orders-naples-men-to-repay-511200-in-glove-fraud-case/article_996c195f-697e-49da-a185-549df2820c58.html#main-page-container)\nYou have permission to edit this article.\n[ Edit](https://www.gulfshorebusiness.com/tncms/admin/editorial-asset/?edit=996c195f-697e-49da-a185-549df2820c58) Close\n[![site-logo](https://bloximages.chicago2.vip.townnews.com/gulfshorebusiness.com/content/tncms/custom/image/d93231a5-1f68-4d46-b56f-f961242f84a3.png?resize=200%2C53)](https://www.gulfshorebusiness.com/)\n  * [ Facebook ](https://www.facebook.com/GulfshoreBusiness/)\n  * [ LinkedIn ](https://www.linkedin.com/company/gulfshore-business-magazine)\n  * [ Instagram ](https://www.instagram.com/gulfshorebusiness)\n\n\nSite search Search\n  * [ Sign Up ](https://www.gulfshorebusiness.com/users/signup/?referer_url=https%3A%2F%2Fwww.gulfshorebusiness.com%2Fnews%2Fcourt-orders-naples-men-to-repay-511200-in-glove-fraud-case%2Farticle_996c195f-697e-49da-a185-549df2820c58.html)\n  * [ Log In ](https://www.gulfshorebusiness.com/users/login/?referer_url=https%3A%2F%2Fwww.gulfshorebusiness.com%2Fnews%2Fcourt-orders-naples-men-to-repay-511200-in-glove-fraud-case%2Farticle_996c195f-697e-49da-a185-549df2820c58.html)\n\n\n  * [ Dashboard ](https://www.gulfshorebusiness.com/users/admin/)\n  * Logout \n\n\n  *     * My Account\n    * [ Dashboard](https://www.gulfshorebusiness.com/users/admin/)\n    * [ Profile](https://www.gulfshorebusiness.com/news/court-orders-naples-men-to-repay-511200-in-glove-fraud-case/article_996c195f-697e-49da-a185-549df2820c58.html)\n    * [ Saved items](https://www.gulfshorebusiness.com/users/admin/list/)\n    * Logout \n\n\n[Home](https://www.gulfshorebusiness.com/)\n  * [About Us](https://www.gulfshorebusiness.com/site/about.html)\n  * [Contact Us](https://www.gulfshorebusiness.com/site/contact.html)\n  * [Advertise](https://www.gulfshorebusiness.com/site/advertise.html)\n  * [Terms of Use](https://www.gulfshorebusiness.com/site/terms.html)\n  * [Privacy Policy](https://www.gulfshorebusiness.com/site/privacy.html)\n  * [Employment](https://gulfshorelife.applytojob.com/apply)\n\n\n[News](https://www.gulfshorebusiness.com/news/)\n  * [Real Estate](https://www.gulfshorebusiness.com/real_estate)\n  * [Development](https://www.gulfshorebusiness.com/development/)\n  * [Hospitality](https://www.gulfshorebusiness.com/hospitality/)\n  * [Retail](https://www.gulfshorebusiness.com/retail/)\n  * [Tourism](https://www.gulfshorebusiness.com/tourism/)\n  * [Collier County](https://www.gulfshorebusiness.com/collier/)\n  * [Charlotte County](https://www.gulfshorebusiness.com/charlotte/)\n  * [Lee County](https://www.gulfshorebusiness.com/lee/)\n  * [Nonprofit](https://www.gulfshorebusiness.com/nonprofit/)\n  * [Environment](https://www.gulfshorebusiness.com/environment/)\n  * [Innovation](https://www.gulfshorebusiness.com/innovation/)\n  * [Infrastructure](https://www.gulfshorebusiness.com/infrastructure/)\n  * [Education](https://www.gulfshorebusiness\""
             },
             "suggestions": [
               "What's driving signal breaking 1?",
@@ -146,33 +176,33 @@
             ]
           },
           {
-            "metric": "signal_breaking_2",
-            "value": "Naples: Court ordered two Naples men to repay $511,200 in a COVID glove fraud case; men received a 15-month sentence for wire fraud.",
+            "metric": "signal_transactions_2",
+            "value": "Cape Coral: A newly completed, opulent beachfront estate at 2050 Gordon Drive in Naples sold for $71 million in an off-market deal, including furnishings, as of Oct. 27, 2026.",
             "direction": "stable",
-            "label": "Naples — breaking",
+            "label": "Cape Coral — transactions",
             "variable_type": "categorical",
             "source": {
-              "url": "https://www.gulfshorebusiness.com/news/court-orders-naples-men-to-repay-511200-in-glove-fraud-case/article_996c195f-697e-49da-a185-549df2820c58.html",
-              "fetched_at": "2026-10-28T10:42:17Z",
+              "url": "https://www.news-press.com/story/money/business/local/2026/10/27/new-naples-florida-estate-sells-for-71-million-in-private-deal-one-of-the-largest-sales-of-year/92458106007/",
+              "fetched_at": "2026-10-29T04:31:42Z",
               "tier": 2,
-              "citation": "COVID glove fraud by Naples men leads to 15-month sentence | News | gulfshorebusiness.com: \"[Skip to main content](https://www.gulfshorebusiness.com/news/court-orders-naples-men-to-repay-511200-in-glove-fraud-case/article_996c195f-697e-49da-a185-549df2820c58.html#main-page-container)\nYou have permission to edit this article.\n[ Edit](https://www.gulfshorebusiness.com/tncms/admin/editorial-asset/?edit=996c195f-697e-49da-a185-549df2820c58) Close\n[![site-logo](https://bloximages.chicago2.vip.townnews.com/gulfshorebusiness.com/content/tncms/custom/image/d93231a5-1f68-4d46-b56f-f961242f84a3.png?resize=200%2C53)](https://www.gulfshorebusiness.com/)\n  * [ Facebook ](https://www.facebook.com/GulfshoreBusiness/)\n  * [ LinkedIn ](https://www.linkedin.com/company/gulfshore-business-magazine)\n  * [ Instagram ](https://www.instagram.com/gulfshorebusiness)\n\n\nSite search Search\n  * [ Sign Up ](https://www.gulfshorebusiness.com/users/signup/?referer_url=https%3A%2F%2Fwww.gulfshorebusiness.com%2Fnews%2Fcourt-orders-naples-men-to-repay-511200-in-glove-fraud-case%2Farticle_996c195f-697e-49da-a185-549df2820c58.html)\n  * [ Log In ](https://www.gulfshorebusiness.com/users/login/?referer_url=https%3A%2F%2Fwww.gulfshorebusiness.com%2Fnews%2Fcourt-orders-naples-men-to-repay-511200-in-glove-fraud-case%2Farticle_996c195f-697e-49da-a185-549df2820c58.html)\n\n\n  * [ Dashboard ](https://www.gulfshorebusiness.com/users/admin/)\n  * Logout \n\n\n  *     * My Account\n    * [ Dashboard](https://www.gulfshorebusiness.com/users/admin/)\n    * [ Profile](https://www.gulfshorebusiness.com/news/court-orders-naples-men-to-repay-511200-in-glove-fraud-case/article_996c195f-697e-49da-a185-549df2820c58.html)\n    * [ Saved items](https://www.gulfshorebusiness.com/users/admin/list/)\n    * Logout \n\n\n[Home](https://www.gulfshorebusiness.com/)\n  * [About Us](https://www.gulfshorebusiness.com/site/about.html)\n  * [Contact Us](https://www.gulfshorebusiness.com/site/contact.html)\n  * [Advertise](https://www.gulfshorebusiness.com/site/advertise.html)\n  * [Terms of Use](https://www.gulfshorebusiness.com/site/terms.html)\n  * [Privacy Policy](https://www.gulfshorebusiness.com/site/privacy.html)\n  * [Employment](https://gulfshorelife.applytojob.com/apply)\n\n\n[News](https://www.gulfshorebusiness.com/news/)\n  * [Real Estate](https://www.gulfshorebusiness.com/real_estate)\n  * [Development](https://www.gulfshorebusiness.com/development/)\n  * [Hospitality](https://www.gulfshorebusiness.com/hospitality/)\n  * [Retail](https://www.gulfshorebusiness.com/retail/)\n  * [Tourism](https://www.gulfshorebusiness.com/tourism/)\n  * [Collier County](https://www.gulfshorebusiness.com/collier/)\n  * [Charlotte County](https://www.gulfshorebusiness.com/charlotte/)\n  * [Lee County](https://www.gulfshorebusiness.com/lee/)\n  * [Nonprofit](https://www.gulfshorebusiness.com/nonprofit/)\n  * [Environment](https://www.gulfshorebusiness.com/environment/)\n  * [Innovation](https://www.gulfshorebusiness.com/innovation/)\n  * [Infrastructure](https://www.gulfshorebusiness.com/infrastructure/)\n  * [Education](https://www.gulfshorebusiness\""
+              "citation": "New Naples estate sells for $71 million in private deal: \"[](https://www.news-press.com/)\n[](https://subscribe.news-press.com/rr/nanobar?gps-source=CPTILELEFT&itm_campaign=2026ENTQ4BAU2026&itm_medium=ONSITE&success-url=https%3A%2F%2Fwww.news-press.com%2Fstory%2Fmoney%2Fbusiness%2Flocal%2F2026%2F10%2F27%2Fnew-naples-florida-estate-sells-for-71-million-in-private-deal-one-of-the-largest-sales-of-year%2F92458106007%2F)\n[](https://subscribe.news-press.com/rr/masthead?gps-source=CPMASTHEAD&itm_campaign=2026ENTQ4BAU2026&itm_medium=ONSITE&success-url=https%3A%2F%2Fwww.news-press.com%2Fstory%2Fmoney%2Fbusiness%2Flocal%2F2026%2F10%2F27%2Fnew-naples-florida-estate-sells-for-71-million-in-private-deal-one-of-the-largest-sales-of-year%2F92458106007%2F)\n[News](https://www.news-press.com/news/) [Cape Coral](https://www.news-press.com/news/cape-coral/) [Sports](https://www.news-press.com/sports/) [Restaurants](https://www.news-press.com/taste/) [Real Estate](https://www.news-press.com/real-estate) [Advertise](https://advertising.usatoday.com/advertise-with-us/?cid=Web_LiQ_Network_AdvertiseWithUs_AdvertiseInquiry&publication=the_news_press&utm_source=local_publication&utm_medium=menu&utm_campaign=advertise_with_us) [Obituaries](https://www.news-press.com/obituaries) [eNewspaper](https://user.news-press.com/user/enewspaper) [Legals](https://www.news-press.com/public-notices)\n[](https://www.news-press.com/search/ \"Search\")\n[](https://www.news-press.com/weather/ \"Weather in Fort Myers: 71°F Mostly Cloudy\") [](https://subscribe.news-press.com/rr/navsub?gps-source=CPTOPNAVBAR&itm_campaign=2026ENTQ4BAU2026&itm_medium=ONSITE&success-url=https%3A%2F%2Fwww.news-press.com%2Fstory%2Fmoney%2Fbusiness%2Flocal%2F2026%2F10%2F27%2Fnew-naples-florida-estate-sells-for-71-million-in-private-deal-one-of-the-largest-sales-of-year%2F92458106007%2F)\n[](https://login.news-press.com/PFTM-GUP/authenticate/?success-url=https%3A%2F%2Fwww.news-press.com%2Fstory%2Fmoney%2Fbusiness%2Flocal%2F2026%2F10%2F27%2Fnew-naples-florida-estate-sells-for-71-million-in-private-deal-one-of-the-largest-sales-of-year%2F92458106007%2F&cancel-url=https%3A%2F%2Fwww.news-press.com%2Fstory%2Fmoney%2Fbusiness%2Flocal%2F2026%2F10%2F27%2Fnew-naples-florida-estate-sells-for-71-million-in-private-deal-one-of-the-largest-sales-of-year%2F92458106007%2F)\n[](https://www.news-press.com/) [](https://www.news-press.com/)\nLOCAL BUSINESS\n# New waterfront estate in Naples fetches $71 million in off-market deal\n[![Portrait of Laura Layden](https://www.news-press.com/gcdn/authoring/authoring-images/2024/02/08/PNDN/72524348007-ndn-jh-20240126-laura-0001.JPG?crop=3313,3312,x1506,y0&width=48&height=48&format=pjpg&auto=webp) Laura Layden](https://www.naplesnews.com/staff/2647080001/laura-layden/)\nFort Myers News-Press & Naples Daily News\nOct. 27, 2026, 2:20 p.m. ET\nNaples has seen another whopping home sale.\nIn an \"off-market\" sale, a newly completed, opulent beachfront estate fetched $71 million, including furnishings.\nAlthough it's not the largest, the sale at 2050 Gordon Drive is one of\""
             },
             "suggestions": [
-              "What's driving signal breaking 2?",
-              "How does signal breaking 2 here compare to other SWFL areas?"
+              "What's driving signal transactions 2?",
+              "How does signal transactions 2 here compare to other SWFL areas?"
             ]
           },
           {
             "metric": "signal_transactions_3",
-            "value": "Naples: A gulf-front Naples mansion sold for $71M in an off-market sale, as reported Oct. 22, 2026.",
+            "value": "Naples: A newly completed, opulent beachfront estate at 2050 Gordon Drive sold for $71 million in an off-market deal, including furnishings, as of Oct. 27, 2026.",
             "direction": "stable",
             "label": "Naples — transactions",
             "variable_type": "categorical",
             "source": {
-              "url": "https://www.businessobserverfl.com/news/2026/oct/22/gulf-front-naples-mansion-sale/",
-              "fetched_at": "2026-10-28T10:42:17Z",
+              "url": "https://www.news-press.com/story/money/business/local/2026/10/27/new-naples-florida-estate-sells-for-71-million-in-private-deal-one-of-the-largest-sales-of-year/92458106007/",
+              "fetched_at": "2026-10-29T04:31:42Z",
               "tier": 2,
-              "citation": "Gulf-front Naples mansion sells for $71M in off-market sale | Business Observer: \"* ![Alternate Text](https://observermediagroup.media.clients.ellingtoncms.com/static-4/assets/images/bob-logo-header.svg)\n  * Loading\n\n\n  * [Newsletters](https://marketing.businessobserverfl.com/newsletters)\n  * [Podcast](https://www.businessobserverfl.com/podcasts/corner-office/?utm_source=header&utm_medium=sitenav)\n  * [Public Notices](https://legals.businessobserverfl.com/)\n  * [Big Book](https://www.businessobserverfl.com/big-book-of-business/2026/)\n  * [40 Under 40](https://www.businessobserverfl.com/40-under-40/)\n  * [Mobile App](https://businessobserver.pressreader.com/)\n  * [Subscribe](https://marketing.businessobserverfl.com/subscribe)\n  * [Login](https://www.businessobserverfl.com/accounts/login/?next=/news/2026/oct/22/gulf-front-naples-mansion-sale/)\n\n\n  * [](https://www.facebook.com/BusinessObserverFL)\n  * [](https://x.com/BizObserverFL)\n  * [](https://www.linkedin.com/company/businessobserverfl)\n  * [ ](https://www.instagram.com/businessobserverfl/)\n\n\n[![](https://observermediagroup.media.clients.ellingtoncms.com/static-4/assets/images/bob-logo-header.svg)](https://www.businessobserverfl.com/)\n[![](https://observermediagroup.media.clients.ellingtoncms.com/static-4/assets/images/bob-logo-sticky.svg)](https://www.businessobserverfl.com/)\n[![](https://observermediagroup.media.clients.ellingtoncms.com/static-4/assets/images/bob-logo-header.svg)](https://www.businessobserverfl.com/)\n  * [News](https://www.businessobserverfl.com/news/all/)\n  * [Strategies](https://www.businessobserverfl.com/news/strategies/)\n  * [Entrepreneurs](https://www.businessobserverfl.com/news/entrepreneurs/)\n  * [Leadership](https://www.businessobserverfl.com/news/leadership/)\n  * [Regions](https://www.businessobserverfl.com/news/2026/oct/22/gulf-front-naples-mansion-sale/)\n    * [Tampa Bay-Lakeland](https://www.businessobserverfl.com/news/tampa-bay-lakeland/)\n    * [Manatee-Sarasota](https://www.businessobserverfl.com/news/manatee-sarasota/)\n    * [Charlotte-Lee-Collier](https://www.businessobserverfl.com/news/charlotte-lee-collier/)\n    * [Florida](https://www.businessobserverfl.com/news/florida/)\n  * [Industries](https://www.businessobserverfl.com/news/2026/oct/22/gulf-front-naples-mansion-sale/)\n    * [Business Support](https://www.businessobserverfl.com/news/industries/business-support/)\n    * [Commercial Real Estate](https://www.businessobserverfl.com/news/industries/commercial-real-estate/)\n    * [Residential Real Estate](https://www.businessobserverfl.com/news/industries/residential-real-estate/)\n    * [Development](https://www.businessobserverfl.com/news/industries/development/)\n    * [Finance](https://www.businessobserverfl.com/news/industries/finance/)\n    * [Food-Beverage](https://www.businessobserverfl.com/news/industries/food-beverage/)\n    * [Healthcare](https://www.businessobserverfl.com/news/industries/health-care/)\n    * [Manufacturing](https://www.businessobserverfl.com/news/industries/manufacturing/)\n    * [Retail](https://www.businessobserver\""
+              "citation": "New Naples estate sells for $71 million in private deal: \"[](https://www.news-press.com/)\n[](https://subscribe.news-press.com/rr/nanobar?gps-source=CPTILELEFT&itm_campaign=2026ENTQ4BAU2026&itm_medium=ONSITE&success-url=https%3A%2F%2Fwww.news-press.com%2Fstory%2Fmoney%2Fbusiness%2Flocal%2F2026%2F10%2F27%2Fnew-naples-florida-estate-sells-for-71-million-in-private-deal-one-of-the-largest-sales-of-year%2F92458106007%2F)\n[](https://subscribe.news-press.com/rr/masthead?gps-source=CPMASTHEAD&itm_campaign=2026ENTQ4BAU2026&itm_medium=ONSITE&success-url=https%3A%2F%2Fwww.news-press.com%2Fstory%2Fmoney%2Fbusiness%2Flocal%2F2026%2F10%2F27%2Fnew-naples-florida-estate-sells-for-71-million-in-private-deal-one-of-the-largest-sales-of-year%2F92458106007%2F)\n[News](https://www.news-press.com/news/) [Cape Coral](https://www.news-press.com/news/cape-coral/) [Sports](https://www.news-press.com/sports/) [Restaurants](https://www.news-press.com/taste/) [Real Estate](https://www.news-press.com/real-estate) [Advertise](https://advertising.usatoday.com/advertise-with-us/?cid=Web_LiQ_Network_AdvertiseWithUs_AdvertiseInquiry&publication=the_news_press&utm_source=local_publication&utm_medium=menu&utm_campaign=advertise_with_us) [Obituaries](https://www.news-press.com/obituaries) [eNewspaper](https://user.news-press.com/user/enewspaper) [Legals](https://www.news-press.com/public-notices)\n[](https://www.news-press.com/search/ \"Search\")\n[](https://www.news-press.com/weather/ \"Weather in Fort Myers: 71°F Mostly Cloudy\") [](https://subscribe.news-press.com/rr/navsub?gps-source=CPTOPNAVBAR&itm_campaign=2026ENTQ4BAU2026&itm_medium=ONSITE&success-url=https%3A%2F%2Fwww.news-press.com%2Fstory%2Fmoney%2Fbusiness%2Flocal%2F2026%2F10%2F27%2Fnew-naples-florida-estate-sells-for-71-million-in-private-deal-one-of-the-largest-sales-of-year%2F92458106007%2F)\n[](https://login.news-press.com/PFTM-GUP/authenticate/?success-url=https%3A%2F%2Fwww.news-press.com%2Fstory%2Fmoney%2Fbusiness%2Flocal%2F2026%2F10%2F27%2Fnew-naples-florida-estate-sells-for-71-million-in-private-deal-one-of-the-largest-sales-of-year%2F92458106007%2F&cancel-url=https%3A%2F%2Fwww.news-press.com%2Fstory%2Fmoney%2Fbusiness%2Flocal%2F2026%2F10%2F27%2Fnew-naples-florida-estate-sells-for-71-million-in-private-deal-one-of-the-largest-sales-of-year%2F92458106007%2F)\n[](https://www.news-press.com/) [](https://www.news-press.com/)\nLOCAL BUSINESS\n# New waterfront estate in Naples fetches $71 million in off-market deal\n[![Portrait of Laura Layden](https://www.news-press.com/gcdn/authoring/authoring-images/2024/02/08/PNDN/72524348007-ndn-jh-20240126-laura-0001.JPG?crop=3313,3312,x1506,y0&width=48&height=48&format=pjpg&auto=webp) Laura Layden](https://www.naplesnews.com/staff/2647080001/laura-layden/)\nFort Myers News-Press & Naples Daily News\nOct. 27, 2026, 2:20 p.m. ET\nNaples has seen another whopping home sale.\nIn an \"off-market\" sale, a newly completed, opulent beachfront estate fetched $71 million, including furnishings.\nAlthough it's not the largest, the sale at 2050 Gordon Drive is one of\""
             },
             "suggestions": [
               "What's driving signal transactions 3?",
@@ -180,33 +210,33 @@
             ]
           },
           {
-            "metric": "signal_transactions_4",
-            "value": "Fort Myers: Former Ruby Tuesday near Fort Myers hospitals sells for $2.2M",
+            "metric": "signal_development_4",
+            "value": "Cape Coral: Collier County missed the state's (FloridaCommerce) deadline to submit its final approval of a required growth plan amendment — by more than a year — for a planned exclusive private golf club conversion of a long-time citrus grove in East Naples, putting the project in limbo as of Oct. 27, 2026.",
             "direction": "stable",
-            "label": "Fort Myers — transactions",
+            "label": "Cape Coral — development",
             "variable_type": "categorical",
             "source": {
-              "url": "https://www.businessobserverfl.com/news/2026/oct/19/former-ruby-tuesday-fort-myers-sells/",
-              "fetched_at": "2026-10-28T10:42:17Z",
+              "url": "https://www.news-press.com/story/money/business/local/2026/10/27/missed-state-deadline-puts-planned-east-naples-golf-club-in-limbo/92395159007/",
+              "fetched_at": "2026-10-29T04:31:42Z",
               "tier": 2,
-              "citation": "Former Ruby Tuesday near Fort Myers hospitals sells for $2.2M | Business Observer: \"![Spinner: White decorative](https://cdn.userway.org/widgetapp/images/spin_wh.svg)\n![](https://cdn.userway.org/widgetapp/images/body_wh.svg)\n![Spinner: White decorative](https://cdn.userway.org/widgetapp/images/spin_wh.svg)\n  * ![Alternate Text](https://observermediagroup.media.clients.ellingtoncms.com/static-4/assets/images/bob-logo-header.svg)\n  * Loading\n\n\n  * [Newsletters](https://marketing.businessobserverfl.com/newsletters)\n  * [Podcast](https://www.businessobserverfl.com/podcasts/corner-office/?utm_source=header&utm_medium=sitenav)\n  * [Public Notices](https://legals.businessobserverfl.com/)\n  * [Big Book](https://www.businessobserverfl.com/big-book-of-business/2026/)\n  * [40 Under 40](https://www.businessobserverfl.com/40-under-40/)\n  * [Mobile App](https://businessobserver.pressreader.com/)\n  * [Subscribe](https://marketing.businessobserverfl.com/subscribe)\n  * [Login](https://www.businessobserverfl.com/accounts/login/?next=/news/2026/oct/19/former-ruby-tuesday-fort-myers-sells/)\n\n\n  * [](https://www.facebook.com/BusinessObserverFL)\n  * [](https://x.com/BizObserverFL)\n  * [](https://www.linkedin.com/company/businessobserverfl)\n  * [ ](https://www.instagram.com/businessobserverfl/)\n\n\n[![](https://observermediagroup.media.clients.ellingtoncms.com/static-4/assets/images/bob-logo-header.svg)](https://www.businessobserverfl.com/)\n[![](https://observermediagroup.media.clients.ellingtoncms.com/static-4/assets/images/bob-logo-sticky.svg)](https://www.businessobserverfl.com/)\n[![](https://observermediagroup.media.clients.ellingtoncms.com/static-4/assets/images/bob-logo-header.svg)](https://www.businessobserverfl.com/)\n  * [News](https://www.businessobserverfl.com/news/all/)\n  * [Strategies](https://www.businessobserverfl.com/news/strategies/)\n  * [Entrepreneurs](https://www.businessobserverfl.com/news/entrepreneurs/)\n  * [Leadership](https://www.businessobserverfl.com/news/leadership/)\n  * [Regions](https://www.businessobserverfl.com/news/2026/oct/19/former-ruby-tuesday-fort-myers-sells/)\n    * [Tampa Bay-Lakeland](https://www.businessobserverfl.com/news/tampa-bay-lakeland/)\n    * [Manatee-Sarasota](https://www.businessobserverfl.com/news/manatee-sarasota/)\n    * [Charlotte-Lee-Collier](https://www.businessobserverfl.com/news/charlotte-lee-collier/)\n    * [Florida](https://www.businessobserverfl.com/news/florida/)\n  * [Industries](https://www.businessobserverfl.com/news/2026/oct/19/former-ruby-tuesday-fort-myers-sells/)\n    * [Business Support](https://www.businessobserverfl.com/news/industries/business-support/)\n    * [Commercial Real Estate](https://www.businessobserverfl.com/news/industries/commercial-real-estate/)\n    * [Residential Real Estate](https://www.businessobserverfl.com/news/industries/residential-real-estate/)\n    * [Development](https://www.businessobserverfl.com/news/industries/development/)\n    * [Finance](https://www.businessobserverfl.com/news/industries/finance/)\n    * [Food-Beverage](https://www.businessobserverfl.com/news/i\""
+              "citation": "Missed state deadline puts planned East Naples golf club in limbo: \"[](https://www.news-press.com/)\n[](https://subscribe.news-press.com/rr/nanobar?gps-source=CPTILELEFT&itm_campaign=2026ENTQ4BAU2026&itm_medium=ONSITE&success-url=https%3A%2F%2Fwww.news-press.com%2Fstory%2Fmoney%2Fbusiness%2Flocal%2F2026%2F10%2F27%2Fmissed-state-deadline-puts-planned-east-naples-golf-club-in-limbo%2F92395159007%2F)\n[](https://subscribe.news-press.com/rr/masthead?gps-source=CPMASTHEAD&itm_campaign=2026ENTQ4BAU2026&itm_medium=ONSITE&success-url=https%3A%2F%2Fwww.news-press.com%2Fstory%2Fmoney%2Fbusiness%2Flocal%2F2026%2F10%2F27%2Fmissed-state-deadline-puts-planned-east-naples-golf-club-in-limbo%2F92395159007%2F)\n[News](https://www.news-press.com/news/) [Cape Coral](https://www.news-press.com/news/cape-coral/) [Sports](https://www.news-press.com/sports/) [Restaurants](https://www.news-press.com/taste/) [Real Estate](https://www.news-press.com/real-estate) [Advertise](https://advertising.usatoday.com/advertise-with-us/?cid=Web_LiQ_Network_AdvertiseWithUs_AdvertiseInquiry&publication=the_news_press&utm_source=local_publication&utm_medium=menu&utm_campaign=advertise_with_us) [Obituaries](https://www.news-press.com/obituaries) [eNewspaper](https://user.news-press.com/user/enewspaper) [Legals](https://www.news-press.com/public-notices)\n[](https://www.news-press.com/search/ \"Search\")\n[](https://www.news-press.com/weather/ \"Weather in Fort Myers: 71°F Mostly Cloudy\") [](https://subscribe.news-press.com/rr/navsub?gps-source=CPTOPNAVBAR&itm_campaign=2026ENTQ4BAU2026&itm_medium=ONSITE&success-url=https%3A%2F%2Fwww.news-press.com%2Fstory%2Fmoney%2Fbusiness%2Flocal%2F2026%2F10%2F27%2Fmissed-state-deadline-puts-planned-east-naples-golf-club-in-limbo%2F92395159007%2F)\n[](https://login.news-press.com/PFTM-GUP/authenticate/?success-url=https%3A%2F%2Fwww.news-press.com%2Fstory%2Fmoney%2Fbusiness%2Flocal%2F2026%2F10%2F27%2Fmissed-state-deadline-puts-planned-east-naples-golf-club-in-limbo%2F92395159007%2F&cancel-url=https%3A%2F%2Fwww.news-press.com%2Fstory%2Fmoney%2Fbusiness%2Flocal%2F2026%2F10%2F27%2Fmissed-state-deadline-puts-planned-east-naples-golf-club-in-limbo%2F92395159007%2F)\n[](https://www.news-press.com/) [](https://www.news-press.com/)\nLOCAL BUSINESS\n# Missed state deadline stalls plans for new golf club in East Naples\n[![Portrait of Laura Layden](https://www.news-press.com/gcdn/authoring/authoring-images/2024/02/08/PNDN/72524348007-ndn-jh-20240126-laura-0001.JPG?crop=3313,3312,x1506,y0&width=48&height=48&format=pjpg&auto=webp) Laura Layden](https://www.naplesnews.com/staff/2647080001/laura-layden/)\nFort Myers News-Press & Naples Daily News\nOct. 27, 2026, 9:36 a.m. ET\nOpponents could get another chance to fight the conversion of a long-time citrus grove into an exclusive, private golf club in East Naples.\nAccording to a letter from FloridaCommerce, Collier County missed the state's deadline to submit its final approval of a required growth plan amendment by more than a year.\n[](https://www.news-press.com/)\n[Help](https://help.news-press.com)\""
             },
             "suggestions": [
-              "What's driving signal transactions 4?",
-              "How does signal transactions 4 here compare to other SWFL areas?"
+              "What's driving signal development 4?",
+              "How does signal development 4 here compare to other SWFL areas?"
             ]
           },
           {
             "metric": "signal_development_5",
-            "value": "Naples: Southwest Florida, including Naples, is marking a wave of post-hurricane milestones spanning new roads, new homes, and new investments, as reported Oct. 22, 2026.",
+            "value": "Naples: FloridaCommerce notified Collier County that it missed the state's deadline to submit its final approval of a required growth plan amendment — needed to convert a long-time citrus grove into an exclusive, private golf club in East Naples — by more than a year, as of Oct. 27, 2026.",
             "direction": "stable",
             "label": "Naples — development",
             "variable_type": "categorical",
             "source": {
-              "url": "https://www.naplesnews.com/story/money/2026/10/22/from-roads-to-rooftops-florida-hits-wave-of-post-hurricane-milestones-sanibel-fort-myers-naples-swfl/92256346007/",
-              "fetched_at": "2026-10-28T10:42:17Z",
+              "url": "https://www.news-press.com/story/money/business/local/2026/10/27/missed-state-deadline-puts-planned-east-naples-golf-club-in-limbo/92395159007/",
+              "fetched_at": "2026-10-29T04:31:42Z",
               "tier": 2,
-              "citation": "From roads to rooftops, Florida hits wave of post-hurricane milestones: \"[](https://www.naplesnews.com/)\n[Estero's Maddox Stewart set 2 Lee County passing touchdown records Monday](https://www.naplesnews.com/story/sports/high-school/football/2026/10/27/esteros-maddox-stewart-sets-lee-county-record-for-passing-touchdowns/92454173007/)\n[](https://subscribe.naplesnews.com/rr/nanobar?gps-source=CPTILELEFT&itm_campaign=2026ENTQ4BAU2026&itm_medium=ONSITE&success-url=https%3A%2F%2Fwww.naplesnews.com%2Fstory%2Fmoney%2F2026%2F10%2F22%2Ffrom-roads-to-rooftops-florida-hits-wave-of-post-hurricane-milestones-sanibel-fort-myers-naples-swfl%2F92256346007%2F)\n[](https://subscribe.naplesnews.com/rr/masthead?gps-source=CPMASTHEAD&itm_campaign=2026ENTQ4BAU2026&itm_medium=ONSITE&success-url=https%3A%2F%2Fwww.naplesnews.com%2Fstory%2Fmoney%2F2026%2F10%2F22%2Ffrom-roads-to-rooftops-florida-hits-wave-of-post-hurricane-milestones-sanibel-fort-myers-naples-swfl%2F92256346007%2F)\n[News](https://www.naplesnews.com/news/) [Sports](https://www.naplesnews.com/sports/) [Real Estate](https://www.naplesnews.com/business/real-estate/) [Restaurants](https://www.naplesnews.com/entertainment/restaurants/) [Opinion](https://www.naplesnews.com/opinion/) [Advertise](https://advertising.usatoday.com/advertise-with-us/?cid=Web_LiQ_Network_AdvertiseWithUs_AdvertiseInquiry&publication=naples_daily_news&utm_source=local_publication&utm_medium=menu&utm_campaign=advertise_with_us) [Obituaries](https://www.naplesnews.com/obituaries) [eNewspaper](https://user.naplesnews.com/user/enewspaper) [Legals](https://www.naplesnews.com/public-notices)\n[](https://www.naplesnews.com/search/ \"Search\")\n[](https://www.naplesnews.com/weather/ \"Weather in Naples: 70°F Sunny\") [](https://subscribe.naplesnews.com/rr/navsub?gps-source=CPTOPNAVBAR&itm_campaign=2026ENTQ4BAU2026&itm_medium=ONSITE&success-url=https%3A%2F%2Fwww.naplesnews.com%2Fstory%2Fmoney%2F2026%2F10%2F22%2Ffrom-roads-to-rooftops-florida-hits-wave-of-post-hurricane-milestones-sanibel-fort-myers-naples-swfl%2F92256346007%2F)\n[](https://login.naplesnews.com/PNDN-GUP/authenticate/?success-url=https%3A%2F%2Fwww.naplesnews.com%2Fstory%2Fmoney%2F2026%2F10%2F22%2Ffrom-roads-to-rooftops-florida-hits-wave-of-post-hurricane-milestones-sanibel-fort-myers-naples-swfl%2F92256346007%2F&cancel-url=https%3A%2F%2Fwww.naplesnews.com%2Fstory%2Fmoney%2F2026%2F10%2F22%2Ffrom-roads-to-rooftops-florida-hits-wave-of-post-hurricane-milestones-sanibel-fort-myers-naples-swfl%2F92256346007%2F)\n[](https://www.naplesnews.com/) [](https://www.naplesnews.com/)\n[MONEY](https://www.naplesnews.com/business/)\n# New roads, new homes and new investments reshaping SW FL this week\n[![Portrait of Phil Fernandez](https://www.naplesnews.com/gcdn/presto/2019/09/14/PNDN/6a77b474-579f-48fa-b56f-a2cc2b9de797-NDN_Phil_Fernandez.jpg?crop=2999,2999,x0,y570&width=48&height=48&format=pjpg&auto=webp) Phil Fernandez](https://www.naplesnews.com/staff/2684114001/phil-fernandez/)\nFort Myers News-Press & Naples Daily News\nOct. 22, 2026, 5:06 a.m. ET\nAs [Southwest Florida](https\""
+              "citation": "Missed state deadline puts planned East Naples golf club in limbo: \"[](https://www.news-press.com/)\n[](https://subscribe.news-press.com/rr/nanobar?gps-source=CPTILELEFT&itm_campaign=2026ENTQ4BAU2026&itm_medium=ONSITE&success-url=https%3A%2F%2Fwww.news-press.com%2Fstory%2Fmoney%2Fbusiness%2Flocal%2F2026%2F10%2F27%2Fmissed-state-deadline-puts-planned-east-naples-golf-club-in-limbo%2F92395159007%2F)\n[](https://subscribe.news-press.com/rr/masthead?gps-source=CPMASTHEAD&itm_campaign=2026ENTQ4BAU2026&itm_medium=ONSITE&success-url=https%3A%2F%2Fwww.news-press.com%2Fstory%2Fmoney%2Fbusiness%2Flocal%2F2026%2F10%2F27%2Fmissed-state-deadline-puts-planned-east-naples-golf-club-in-limbo%2F92395159007%2F)\n[News](https://www.news-press.com/news/) [Cape Coral](https://www.news-press.com/news/cape-coral/) [Sports](https://www.news-press.com/sports/) [Restaurants](https://www.news-press.com/taste/) [Real Estate](https://www.news-press.com/real-estate) [Advertise](https://advertising.usatoday.com/advertise-with-us/?cid=Web_LiQ_Network_AdvertiseWithUs_AdvertiseInquiry&publication=the_news_press&utm_source=local_publication&utm_medium=menu&utm_campaign=advertise_with_us) [Obituaries](https://www.news-press.com/obituaries) [eNewspaper](https://user.news-press.com/user/enewspaper) [Legals](https://www.news-press.com/public-notices)\n[](https://www.news-press.com/search/ \"Search\")\n[](https://www.news-press.com/weather/ \"Weather in Fort Myers: 71°F Mostly Cloudy\") [](https://subscribe.news-press.com/rr/navsub?gps-source=CPTOPNAVBAR&itm_campaign=2026ENTQ4BAU2026&itm_medium=ONSITE&success-url=https%3A%2F%2Fwww.news-press.com%2Fstory%2Fmoney%2Fbusiness%2Flocal%2F2026%2F10%2F27%2Fmissed-state-deadline-puts-planned-east-naples-golf-club-in-limbo%2F92395159007%2F)\n[](https://login.news-press.com/PFTM-GUP/authenticate/?success-url=https%3A%2F%2Fwww.news-press.com%2Fstory%2Fmoney%2Fbusiness%2Flocal%2F2026%2F10%2F27%2Fmissed-state-deadline-puts-planned-east-naples-golf-club-in-limbo%2F92395159007%2F&cancel-url=https%3A%2F%2Fwww.news-press.com%2Fstory%2Fmoney%2Fbusiness%2Flocal%2F2026%2F10%2F27%2Fmissed-state-deadline-puts-planned-east-naples-golf-club-in-limbo%2F92395159007%2F)\n[](https://www.news-press.com/) [](https://www.news-press.com/)\nLOCAL BUSINESS\n# Missed state deadline stalls plans for new golf club in East Naples\n[![Portrait of Laura Layden](https://www.news-press.com/gcdn/authoring/authoring-images/2024/02/08/PNDN/72524348007-ndn-jh-20240126-laura-0001.JPG?crop=3313,3312,x1506,y0&width=48&height=48&format=pjpg&auto=webp) Laura Layden](https://www.naplesnews.com/staff/2647080001/laura-layden/)\nFort Myers News-Press & Naples Daily News\nOct. 27, 2026, 9:36 a.m. ET\nOpponents could get another chance to fight the conversion of a long-time citrus grove into an exclusive, private golf club in East Naples.\nAccording to a letter from FloridaCommerce, Collier County missed the state's deadline to submit its final approval of a required growth plan amendment by more than a year.\n[](https://www.news-press.com/)\n[Help](https://help.news-press.com)\""
             },
             "suggestions": [
               "What's driving signal development 5?",
@@ -215,15 +245,15 @@
           },
           {
             "metric": "signal_development_6",
-            "value": "Cape Coral: As of Oct. 26, 2026, data center investment keeps flowing into SW Florida (Lee County/Fort Myers area) even as Florida opposition to data centers explodes statewide.",
+            "value": "Naples: Southwest Florida, including Naples, was marking a wave of post-hurricane milestones — new roads, new homes, and new investments reshaping the region — as of Oct. 22, 2026.",
             "direction": "stable",
-            "label": "Cape Coral — development",
+            "label": "Naples — development",
             "variable_type": "categorical",
             "source": {
-              "url": "https://www.news-press.com/story/money/2026/10/26/florida-fighting-over-data-centers-sw-florida-building-them-lee-county-fort-myers-alico-northstar/92370794007/",
-              "fetched_at": "2026-10-28T10:42:17Z",
+              "url": "https://www.news-press.com/story/money/2026/10/22/from-roads-to-rooftops-florida-hits-wave-of-post-hurricane-milestones-sanibel-fort-myers-naples-swfl/92256346007/",
+              "fetched_at": "2026-10-29T04:31:42Z",
               "tier": 2,
-              "citation": "Florida's fighting over data centers. SW Florida is building them: \"[](https://www.news-press.com/)\n[](https://subscribe.news-press.com/rr/nanobar?gps-source=CPTILELEFT&itm_campaign=2026ENTQ4BAU2026&itm_medium=ONSITE&success-url=https%3A%2F%2Fwww.news-press.com%2Fstory%2Fmoney%2F2026%2F10%2F26%2Fflorida-fighting-over-data-centers-sw-florida-building-them-lee-county-fort-myers-alico-northstar%2F92370794007%2F)\n[](https://subscribe.news-press.com/rr/masthead?gps-source=CPMASTHEAD&itm_campaign=2026ENTQ4BAU2026&itm_medium=ONSITE&success-url=https%3A%2F%2Fwww.news-press.com%2Fstory%2Fmoney%2F2026%2F10%2F26%2Fflorida-fighting-over-data-centers-sw-florida-building-them-lee-county-fort-myers-alico-northstar%2F92370794007%2F)\n[News](https://www.news-press.com/news/) [Cape Coral](https://www.news-press.com/news/cape-coral/) [Sports](https://www.news-press.com/sports/) [Restaurants](https://www.news-press.com/taste/) [Real Estate](https://www.news-press.com/real-estate) [Advertise](https://advertising.usatoday.com/advertise-with-us/?cid=Web_LiQ_Network_AdvertiseWithUs_AdvertiseInquiry&publication=the_news_press&utm_source=local_publication&utm_medium=menu&utm_campaign=advertise_with_us) [Obituaries](https://www.news-press.com/obituaries) [eNewspaper](https://user.news-press.com/user/enewspaper) [Legals](https://www.news-press.com/public-notices)\n[](https://www.news-press.com/search/ \"Search\")\n[](https://www.news-press.com/weather/ \"Weather in Fort Myers: 74°F Mostly Sunny\") [](https://subscribe.news-press.com/rr/navsub?gps-source=CPTOPNAVBAR&itm_campaign=2026ENTQ4BAU2026&itm_medium=ONSITE&success-url=https%3A%2F%2Fwww.news-press.com%2Fstory%2Fmoney%2F2026%2F10%2F26%2Fflorida-fighting-over-data-centers-sw-florida-building-them-lee-county-fort-myers-alico-northstar%2F92370794007%2F)\n[](https://login.news-press.com/PFTM-GUP/authenticate/?success-url=https%3A%2F%2Fwww.news-press.com%2Fstory%2Fmoney%2F2026%2F10%2F26%2Fflorida-fighting-over-data-centers-sw-florida-building-them-lee-county-fort-myers-alico-northstar%2F92370794007%2F&cancel-url=https%3A%2F%2Fwww.news-press.com%2Fstory%2Fmoney%2F2026%2F10%2F26%2Fflorida-fighting-over-data-centers-sw-florida-building-them-lee-county-fort-myers-alico-northstar%2F92370794007%2F)\n[](https://www.news-press.com/) [](https://www.news-press.com/)\nMONEY\n# As Florida opposition explodes, data center investment keeps flowing\n[![Portrait of Phil Fernandez](https://www.news-press.com/gcdn/presto/2019/09/14/PNDN/6a77b474-579f-48fa-b56f-a2cc2b9de797-NDN_Phil_Fernandez.jpg?crop=2999,2999,x0,y570&width=48&height=48&format=pjpg&auto=webp) Phil Fernandez](https://www.naplesnews.com/staff/2684114001/phil-fernandez/)\nFort Myers News-Press & Naples Daily News\nOct. 26, 2026, 5:05 a.m. ET\nFew [development topics](https://www.news-press.com/story/money/2026/10/12/4-years-after-hurricane-ian-money-boats-keep-flowing-back-to-florida-downtown-fort-myers-naples/92158290007/) have generated more debate in [the Sunshine](https://www.news-press.com/story/money/2026/10/19/ritz-carltons-florida-footprint-keeps-getti\""
+              "citation": "From roads to rooftops, Florida hits wave of post-hurricane milestones: \"[](https://www.news-press.com/)\n[](https://subscribe.news-press.com/rr/nanobar?gps-source=CPTILELEFT&itm_campaign=2026ENTQ4BAU2026&itm_medium=ONSITE&success-url=https%3A%2F%2Fwww.news-press.com%2Fstory%2Fmoney%2F2026%2F10%2F22%2Ffrom-roads-to-rooftops-florida-hits-wave-of-post-hurricane-milestones-sanibel-fort-myers-naples-swfl%2F92256346007%2F)\n[](https://subscribe.news-press.com/rr/masthead?gps-source=CPMASTHEAD&itm_campaign=2026ENTQ4BAU2026&itm_medium=ONSITE&success-url=https%3A%2F%2Fwww.news-press.com%2Fstory%2Fmoney%2F2026%2F10%2F22%2Ffrom-roads-to-rooftops-florida-hits-wave-of-post-hurricane-milestones-sanibel-fort-myers-naples-swfl%2F92256346007%2F)\n[News](https://www.news-press.com/news/) [Cape Coral](https://www.news-press.com/news/cape-coral/) [Sports](https://www.news-press.com/sports/) [Restaurants](https://www.news-press.com/taste/) [Real Estate](https://www.news-press.com/real-estate) [Advertise](https://advertising.usatoday.com/advertise-with-us/?cid=Web_LiQ_Network_AdvertiseWithUs_AdvertiseInquiry&publication=the_news_press&utm_source=local_publication&utm_medium=menu&utm_campaign=advertise_with_us) [Obituaries](https://www.news-press.com/obituaries) [eNewspaper](https://user.news-press.com/user/enewspaper) [Legals](https://www.news-press.com/public-notices)\n[](https://www.news-press.com/search/ \"Search\")\n[](https://www.news-press.com/weather/ \"Weather in Fort Myers: 71°F Mostly Cloudy\") [](https://subscribe.news-press.com/rr/navsub?gps-source=CPTOPNAVBAR&itm_campaign=2026ENTQ4BAU2026&itm_medium=ONSITE&success-url=https%3A%2F%2Fwww.news-press.com%2Fstory%2Fmoney%2F2026%2F10%2F22%2Ffrom-roads-to-rooftops-florida-hits-wave-of-post-hurricane-milestones-sanibel-fort-myers-naples-swfl%2F92256346007%2F)\n[](https://login.news-press.com/PFTM-GUP/authenticate/?success-url=https%3A%2F%2Fwww.news-press.com%2Fstory%2Fmoney%2F2026%2F10%2F22%2Ffrom-roads-to-rooftops-florida-hits-wave-of-post-hurricane-milestones-sanibel-fort-myers-naples-swfl%2F92256346007%2F&cancel-url=https%3A%2F%2Fwww.news-press.com%2Fstory%2Fmoney%2F2026%2F10%2F22%2Ffrom-roads-to-rooftops-florida-hits-wave-of-post-hurricane-milestones-sanibel-fort-myers-naples-swfl%2F92256346007%2F)\n[](https://www.news-press.com/) [](https://www.news-press.com/)\n[MONEY](https://www.news-press.com/business/)\n# New roads, new homes and new investments reshaping SW FL this week\n[![Portrait of Phil Fernandez](https://www.news-press.com/gcdn/presto/2019/09/14/PNDN/6a77b474-579f-48fa-b56f-a2cc2b9de797-NDN_Phil_Fernandez.jpg?crop=2999,2999,x0,y570&width=48&height=48&format=pjpg&auto=webp) Phil Fernandez](https://www.naplesnews.com/staff/2684114001/phil-fernandez/)\nFort Myers News-Press & Naples Daily News\nOct. 22, 2026, 5:06 a.m. ET\nAs [Southwest Florida](https://www.news-press.com/story/money/2026/10/05/sw-florida-buc-ees-wont-open-until-major-i-75-area-road-fixes-are-done-swfl-charlotte-lee-county/92042955007/) ushered in this week's relatively cooler weather of early autumn, it also is marking\""
             },
             "suggestions": [
               "What's driving signal development 6?",
@@ -232,15 +262,15 @@
           },
           {
             "metric": "signal_development_7",
-            "value": "Fort Myers: Data center investment keeps flowing into SW Florida including Lee County/Fort Myers (Alico/Northstar area), as reported Oct. 26, 2026.",
+            "value": "East Naples: Opponents could get another chance to fight the conversion of a long-time citrus grove into an exclusive, private golf club in East Naples, reported Oct. 27, 2026.",
             "direction": "stable",
-            "label": "Fort Myers — development",
+            "label": "East Naples — development",
             "variable_type": "categorical",
             "source": {
-              "url": "https://www.news-press.com/story/money/2026/10/26/florida-fighting-over-data-centers-sw-florida-building-them-lee-county-fort-myers-alico-northstar/92370794007/",
-              "fetched_at": "2026-10-28T10:42:17Z",
+              "url": "https://www.naplesnews.com/story/money/business/local/2026/10/27/missed-state-deadline-puts-planned-east-naples-golf-club-in-limbo/92395159007/",
+              "fetched_at": "2026-10-29T04:31:42Z",
               "tier": 2,
-              "citation": "Florida's fighting over data centers. SW Florida is building them: \"[](https://www.news-press.com/)\n[](https://subscribe.news-press.com/rr/nanobar?gps-source=CPTILELEFT&itm_campaign=2026ENTQ4BAU2026&itm_medium=ONSITE&success-url=https%3A%2F%2Fwww.news-press.com%2Fstory%2Fmoney%2F2026%2F10%2F26%2Fflorida-fighting-over-data-centers-sw-florida-building-them-lee-county-fort-myers-alico-northstar%2F92370794007%2F)\n[](https://subscribe.news-press.com/rr/masthead?gps-source=CPMASTHEAD&itm_campaign=2026ENTQ4BAU2026&itm_medium=ONSITE&success-url=https%3A%2F%2Fwww.news-press.com%2Fstory%2Fmoney%2F2026%2F10%2F26%2Fflorida-fighting-over-data-centers-sw-florida-building-them-lee-county-fort-myers-alico-northstar%2F92370794007%2F)\n[News](https://www.news-press.com/news/) [Cape Coral](https://www.news-press.com/news/cape-coral/) [Sports](https://www.news-press.com/sports/) [Restaurants](https://www.news-press.com/taste/) [Real Estate](https://www.news-press.com/real-estate) [Advertise](https://advertising.usatoday.com/advertise-with-us/?cid=Web_LiQ_Network_AdvertiseWithUs_AdvertiseInquiry&publication=the_news_press&utm_source=local_publication&utm_medium=menu&utm_campaign=advertise_with_us) [Obituaries](https://www.news-press.com/obituaries) [eNewspaper](https://user.news-press.com/user/enewspaper) [Legals](https://www.news-press.com/public-notices)\n[](https://www.news-press.com/search/ \"Search\")\n[](https://www.news-press.com/weather/ \"Weather in Fort Myers: 74°F Mostly Sunny\") [](https://subscribe.news-press.com/rr/navsub?gps-source=CPTOPNAVBAR&itm_campaign=2026ENTQ4BAU2026&itm_medium=ONSITE&success-url=https%3A%2F%2Fwww.news-press.com%2Fstory%2Fmoney%2F2026%2F10%2F26%2Fflorida-fighting-over-data-centers-sw-florida-building-them-lee-county-fort-myers-alico-northstar%2F92370794007%2F)\n[](https://login.news-press.com/PFTM-GUP/authenticate/?success-url=https%3A%2F%2Fwww.news-press.com%2Fstory%2Fmoney%2F2026%2F10%2F26%2Fflorida-fighting-over-data-centers-sw-florida-building-them-lee-county-fort-myers-alico-northstar%2F92370794007%2F&cancel-url=https%3A%2F%2Fwww.news-press.com%2Fstory%2Fmoney%2F2026%2F10%2F26%2Fflorida-fighting-over-data-centers-sw-florida-building-them-lee-county-fort-myers-alico-northstar%2F92370794007%2F)\n[](https://www.news-press.com/) [](https://www.news-press.com/)\nMONEY\n# As Florida opposition explodes, data center investment keeps flowing\n[![Portrait of Phil Fernandez](https://www.news-press.com/gcdn/presto/2019/09/14/PNDN/6a77b474-579f-48fa-b56f-a2cc2b9de797-NDN_Phil_Fernandez.jpg?crop=2999,2999,x0,y570&width=48&height=48&format=pjpg&auto=webp) Phil Fernandez](https://www.naplesnews.com/staff/2684114001/phil-fernandez/)\nFort Myers News-Press & Naples Daily News\nOct. 26, 2026, 5:05 a.m. ET\nFew [development topics](https://www.news-press.com/story/money/2026/10/12/4-years-after-hurricane-ian-money-boats-keep-flowing-back-to-florida-downtown-fort-myers-naples/92158290007/) have generated more debate in [the Sunshine](https://www.news-press.com/story/money/2026/10/19/ritz-carltons-florida-footprint-keeps-getti\""
+              "citation": "Missed state deadline puts planned East Naples golf club in limbo: \"[](https://www.naplesnews.com/)\n[](https://subscribe.naplesnews.com/rr/nanobar?gps-source=CPTILELEFT&itm_campaign=2026ENTQ4BAU2026&itm_medium=ONSITE&success-url=https%3A%2F%2Fwww.naplesnews.com%2Fstory%2Fmoney%2Fbusiness%2Flocal%2F2026%2F10%2F27%2Fmissed-state-deadline-puts-planned-east-naples-golf-club-in-limbo%2F92395159007%2F)\n[](https://subscribe.naplesnews.com/rr/masthead?gps-source=CPMASTHEAD&itm_campaign=2026ENTQ4BAU2026&itm_medium=ONSITE&success-url=https%3A%2F%2Fwww.naplesnews.com%2Fstory%2Fmoney%2Fbusiness%2Flocal%2F2026%2F10%2F27%2Fmissed-state-deadline-puts-planned-east-naples-golf-club-in-limbo%2F92395159007%2F)\n[News](https://www.naplesnews.com/news/) [Sports](https://www.naplesnews.com/sports/) [Real Estate](https://www.naplesnews.com/business/real-estate/) [Restaurants](https://www.naplesnews.com/entertainment/restaurants/) [Opinion](https://www.naplesnews.com/opinion/) [Advertise](https://advertising.usatoday.com/advertise-with-us/?cid=Web_LiQ_Network_AdvertiseWithUs_AdvertiseInquiry&publication=naples_daily_news&utm_source=local_publication&utm_medium=menu&utm_campaign=advertise_with_us) [Obituaries](https://www.naplesnews.com/obituaries) [eNewspaper](https://user.naplesnews.com/user/enewspaper) [Legals](https://www.naplesnews.com/public-notices)\n[](https://www.naplesnews.com/search/ \"Search\")\n[](https://www.naplesnews.com/weather/ \"Weather in Naples: 74°F Mostly Cloudy\") [](https://subscribe.naplesnews.com/rr/navsub?gps-source=CPTOPNAVBAR&itm_campaign=2026ENTQ4BAU2026&itm_medium=ONSITE&success-url=https%3A%2F%2Fwww.naplesnews.com%2Fstory%2Fmoney%2Fbusiness%2Flocal%2F2026%2F10%2F27%2Fmissed-state-deadline-puts-planned-east-naples-golf-club-in-limbo%2F92395159007%2F)\n[](https://login.naplesnews.com/PNDN-GUP/authenticate/?success-url=https%3A%2F%2Fwww.naplesnews.com%2Fstory%2Fmoney%2Fbusiness%2Flocal%2F2026%2F10%2F27%2Fmissed-state-deadline-puts-planned-east-naples-golf-club-in-limbo%2F92395159007%2F&cancel-url=https%3A%2F%2Fwww.naplesnews.com%2Fstory%2Fmoney%2Fbusiness%2Flocal%2F2026%2F10%2F27%2Fmissed-state-deadline-puts-planned-east-naples-golf-club-in-limbo%2F92395159007%2F)\n[](https://www.naplesnews.com/) [](https://www.naplesnews.com/)\n[LOCAL BUSINESS](https://www.naplesnews.com/business/local/)\n# Missed state deadline stalls plans for new golf club in East Naples\n[![Portrait of Laura Layden](https://www.naplesnews.com/gcdn/authoring/authoring-images/2024/02/08/PNDN/72524348007-ndn-jh-20240126-laura-0001.JPG?crop=3313,3312,x1506,y0&width=48&height=48&format=pjpg&auto=webp) Laura Layden](https://www.naplesnews.com/staff/2647080001/laura-layden/)\nFort Myers News-Press & Naples Daily News\nOct. 27, 2026, 9:36 a.m. ET\nOpponents could get another chance to fight the conversion of a long-time citrus grove into an exclusive, private golf club in East Naples.\nAccording to a letter from FloridaCommerce, Collier County missed the state's deadline to submit its final approval of a required growth plan amendment by more than a year.\n[](h\""
             },
             "suggestions": [
               "What's driving signal development 7?",
@@ -249,13 +279,13 @@
           },
           {
             "metric": "signal_development_8",
-            "value": "Naples: As of Oct. 26, 2026, data center investment keeps flowing into SW Florida despite exploding opposition across Florida.",
+            "value": "Cape Coral: As of Oct. 26, 2026, data center investment keeps flowing into SW Florida (Lee County/Fort Myers area) even as Florida opposition to data centers explodes statewide.",
             "direction": "stable",
-            "label": "Naples — development",
+            "label": "Cape Coral — development",
             "variable_type": "categorical",
             "source": {
               "url": "https://www.news-press.com/story/money/2026/10/26/florida-fighting-over-data-centers-sw-florida-building-them-lee-county-fort-myers-alico-northstar/92370794007/",
-              "fetched_at": "2026-10-28T10:42:17Z",
+              "fetched_at": "2026-10-29T04:31:42Z",
               "tier": 2,
               "citation": "Florida's fighting over data centers. SW Florida is building them: \"[](https://www.news-press.com/)\n[](https://subscribe.news-press.com/rr/nanobar?gps-source=CPTILELEFT&itm_campaign=2026ENTQ4BAU2026&itm_medium=ONSITE&success-url=https%3A%2F%2Fwww.news-press.com%2Fstory%2Fmoney%2F2026%2F10%2F26%2Fflorida-fighting-over-data-centers-sw-florida-building-them-lee-county-fort-myers-alico-northstar%2F92370794007%2F)\n[](https://subscribe.news-press.com/rr/masthead?gps-source=CPMASTHEAD&itm_campaign=2026ENTQ4BAU2026&itm_medium=ONSITE&success-url=https%3A%2F%2Fwww.news-press.com%2Fstory%2Fmoney%2F2026%2F10%2F26%2Fflorida-fighting-over-data-centers-sw-florida-building-them-lee-county-fort-myers-alico-northstar%2F92370794007%2F)\n[News](https://www.news-press.com/news/) [Cape Coral](https://www.news-press.com/news/cape-coral/) [Sports](https://www.news-press.com/sports/) [Restaurants](https://www.news-press.com/taste/) [Real Estate](https://www.news-press.com/real-estate) [Advertise](https://advertising.usatoday.com/advertise-with-us/?cid=Web_LiQ_Network_AdvertiseWithUs_AdvertiseInquiry&publication=the_news_press&utm_source=local_publication&utm_medium=menu&utm_campaign=advertise_with_us) [Obituaries](https://www.news-press.com/obituaries) [eNewspaper](https://user.news-press.com/user/enewspaper) [Legals](https://www.news-press.com/public-notices)\n[](https://www.news-press.com/search/ \"Search\")\n[](https://www.news-press.com/weather/ \"Weather in Fort Myers: 74°F Mostly Sunny\") [](https://subscribe.news-press.com/rr/navsub?gps-source=CPTOPNAVBAR&itm_campaign=2026ENTQ4BAU2026&itm_medium=ONSITE&success-url=https%3A%2F%2Fwww.news-press.com%2Fstory%2Fmoney%2F2026%2F10%2F26%2Fflorida-fighting-over-data-centers-sw-florida-building-them-lee-county-fort-myers-alico-northstar%2F92370794007%2F)\n[](https://login.news-press.com/PFTM-GUP/authenticate/?success-url=https%3A%2F%2Fwww.news-press.com%2Fstory%2Fmoney%2F2026%2F10%2F26%2Fflorida-fighting-over-data-centers-sw-florida-building-them-lee-county-fort-myers-alico-northstar%2F92370794007%2F&cancel-url=https%3A%2F%2Fwww.news-press.com%2Fstory%2Fmoney%2F2026%2F10%2F26%2Fflorida-fighting-over-data-centers-sw-florida-building-them-lee-county-fort-myers-alico-northstar%2F92370794007%2F)\n[](https://www.news-press.com/) [](https://www.news-press.com/)\nMONEY\n# As Florida opposition explodes, data center investment keeps flowing\n[![Portrait of Phil Fernandez](https://www.news-press.com/gcdn/presto/2019/09/14/PNDN/6a77b474-579f-48fa-b56f-a2cc2b9de797-NDN_Phil_Fernandez.jpg?crop=2999,2999,x0,y570&width=48&height=48&format=pjpg&auto=webp) Phil Fernandez](https://www.naplesnews.com/staff/2684114001/phil-fernandez/)\nFort Myers News-Press & Naples Daily News\nOct. 26, 2026, 5:05 a.m. ET\nFew [development topics](https://www.news-press.com/story/money/2026/10/12/4-years-after-hurricane-ian-money-boats-keep-flowing-back-to-florida-downtown-fort-myers-naples/92158290007/) have generated more debate in [the Sunshine](https://www.news-press.com/story/money/2026/10/19/ritz-carltons-florida-footprint-keeps-getti\""
             },
@@ -290,6 +320,16 @@
             ],
             "rows": [
               {
+                "key": "34113",
+                "label": "34113",
+                "cells": {
+                  "items": 1,
+                  "latest_fact": "FloridaCommerce notified Collier County that it missed the state's deadline to submit its final approval of a required growth plan amendment — needed to convert a long-time citrus grove into an exclusive, private golf club in East Naples — by more than a year, as of Oct. 27, 2026.",
+                  "latest_place": "East Naples",
+                  "latest_source": "https://www.news-press.com/story/money/business/local/2026/10/27/missed-state-deadline-puts-planned-east-naples-golf-club-in-limbo/92395159007/"
+                }
+              },
+              {
                 "key": "33912",
                 "label": "33912",
                 "cells": {
@@ -322,7 +362,7 @@
             ],
             "source": {
               "url": "https://www.swfldatagulf.com/r/source/city_pulse",
-              "fetched_at": "2026-10-28T10:42:17Z",
+              "fetched_at": "2026-10-29T04:31:42Z",
               "tier": 2,
               "citation": "Distilled, citation-backed SWFL news signals; each ZIP's items carry per-item source URLs in data_lake.city_pulse."
             },
@@ -343,7 +383,7 @@
         "relevance": {
           "decay_curve": "weeks",
           "half_life_hours": 720,
-          "computed_at": "2026-10-28T10:42:17Z"
+          "computed_at": "2026-10-29T04:31:42Z"
         },
         "exogenous_signals": []
       }
@@ -360,8 +400,119 @@
     },
     {
       "packId": "freshness-pulse",
-      "status": "skipped-fresh",
-      "written": false
+      "status": "built",
+      "version": 87,
+      "written": true,
+      "brainOutput": {
+        "brain_id": "freshness-pulse",
+        "version": 87,
+        "refined_at": "2026-10-29T04:31:42Z",
+        "expires": "2026-10-30T04:31:42Z",
+        "ttl_seconds": 86400,
+        "direction": "neutral",
+        "magnitude": 0,
+        "drivers": [],
+        "overrides": [],
+        "conclusion": "Today's sourced snapshot — SWFL 30-year fixed mortgage rate (as of 2026-10-22) 7.32%; Cape Coral median asking price (as of 2026-10-29) $399,200; Fort Myers median asking price (as of 2026-10-29) $325,000; Naples median asking price (as of 2026-10-29) $650,000. These are cited current facts only; the direction call lives downstream in master.",
+        "key_metrics": [
+          {
+            "metric": "freshness_mortgage_30yr_fixed_pct",
+            "value": 7.32,
+            "direction": "stable",
+            "label": "SWFL 30-year fixed mortgage rate (as of 2026-10-22)",
+            "variable_type": "intensive",
+            "units": "percent",
+            "display_format": "percent",
+            "source": {
+              "url": "https://fred.stlouisfed.org/series/MORTGAGE30US",
+              "fetched_at": "2026-10-29T04:23:36.296497+00:00",
+              "tier": 2,
+              "citation": "FRED — current 30-year fixed mortgage rate for SWFL, sourced 2026-10-22"
+            },
+            "suggestions": [
+              "What's driving freshness mortgage 30yr fixed pct?",
+              "How does freshness mortgage 30yr fixed pct here compare to other SWFL areas?"
+            ]
+          },
+          {
+            "metric": "freshness_median_asking_price_cape_coral_usd",
+            "value": 399200,
+            "direction": "stable",
+            "label": "Cape Coral median asking price (as of 2026-10-29)",
+            "variable_type": "extensive",
+            "units": "USD",
+            "display_format": "currency",
+            "source": {
+              "url": "https://www.swfldatagulf.com/desk",
+              "fetched_at": "2026-10-29T04:23:36.296497+00:00",
+              "tier": 2,
+              "citation": "SWFL Data Gulf active-listing inventory — current median asking price for Cape Coral, sourced 2026-10-29"
+            },
+            "suggestions": [
+              "Chart asking rents across the corridors",
+              "What's driving freshness median asking price cape coral usd?",
+              "How does freshness median asking price cape coral usd here compare to other SWFL areas?"
+            ]
+          },
+          {
+            "metric": "freshness_median_asking_price_fort_myers_usd",
+            "value": 325000,
+            "direction": "stable",
+            "label": "Fort Myers median asking price (as of 2026-10-29)",
+            "variable_type": "extensive",
+            "units": "USD",
+            "display_format": "currency",
+            "source": {
+              "url": "https://www.swfldatagulf.com/desk",
+              "fetched_at": "2026-10-29T04:23:36.296497+00:00",
+              "tier": 2,
+              "citation": "SWFL Data Gulf active-listing inventory — current median asking price for Fort Myers, sourced 2026-10-29"
+            },
+            "suggestions": [
+              "Chart asking rents across the corridors",
+              "What's driving freshness median asking price fort myers usd?",
+              "How does freshness median asking price fort myers usd here compare to other SWFL areas?"
+            ]
+          },
+          {
+            "metric": "freshness_median_asking_price_naples_usd",
+            "value": 650000,
+            "direction": "stable",
+            "label": "Naples median asking price (as of 2026-10-29)",
+            "variable_type": "extensive",
+            "units": "USD",
+            "display_format": "currency",
+            "source": {
+              "url": "https://www.swfldatagulf.com/desk",
+              "fetched_at": "2026-10-29T04:23:36.296497+00:00",
+              "tier": 2,
+              "citation": "SWFL Data Gulf active-listing inventory — current median asking price for Naples, sourced 2026-10-29"
+            },
+            "suggestions": [
+              "Chart asking rents across the corridors",
+              "What's driving freshness median asking price naples usd?",
+              "How does freshness median asking price naples usd here compare to other SWFL areas?"
+            ]
+          }
+        ],
+        "detail_tables": [],
+        "caveats": [
+          "Each county-grain number is a single grounded source's current figure, provenance-gated to a real source URL; held anomalies and unsourced (model-memory) numbers are excluded by design."
+        ],
+        "contradicts": [],
+        "confidence": 0.8,
+        "joint_integrity": 1,
+        "confidence_dispersion": 0,
+        "chain_depth": 0,
+        "trust_tier": 2,
+        "upstream_count": 0,
+        "relevance": {
+          "decay_curve": "weeks",
+          "half_life_hours": 720,
+          "computed_at": "2026-10-29T04:31:42Z"
+        },
+        "exogenous_signals": []
+      }
     },
     {
       "packId": "seller-stress-swfl",
@@ -438,1200 +589,19 @@
     },
     {
       "packId": "tier-divergence-swfl",
-      "status": "built",
-      "version": 4,
-      "written": true,
-      "brainOutput": {
-        "brain_id": "tier-divergence-swfl",
-        "version": 4,
-        "refined_at": "2026-10-28T10:42:46Z",
-        "expires": "2026-12-02T10:42:46Z",
-        "ttl_seconds": 3024000,
-        "direction": "bearish",
-        "magnitude": 0.157525360991667,
-        "drivers": [],
-        "overrides": [],
-        "conclusion": "SWFL price tiers read bearish at 2026-08-31 — luxury -0.92% YoY vs starter -3.46% YoY, a median spread of 2.59x moving 1.58% YoY. 7 of 50 ZIPs are in a K-shape (luxury holding, starter falling). Widest fractures: 34105 (10.22%, 5.5x), 33907 (10.17%, 2.6x), 33919 (7.04%, 2.8x).",
-        "key_metrics": [
-          {
-            "metric": "tier_spread_yoy_pct_swfl",
-            "value": 1.58,
-            "direction": "rising",
-            "label": "SWFL regional median luxury/starter spread YoY % (widening = entry market fracturing)",
-            "variable_type": "intensive",
-            "units": "percent",
-            "display_format": "percent",
-            "source": {
-              "url": "https://files.zillowstatic.com/research/public_csvs/zhvi/Zip_zhvi_uc_sfrcondo_tier_0.67_1.0_month.csv",
-              "fetched_at": "2026-10-28T10:42:39Z",
-              "tier": 3,
-              "citation": "Zillow ZHVI tier split, ZIP-level all-homes: top-tier (0.67-1.0, luxury) vs bottom-tier (0.0-0.33, starter), RAW (not seasonally adjusted). Source: Zillow Research (files.zillowstatic.com); Tier 2 cache: data_lake.tier_divergence_zip_latest."
-            },
-            "suggestions": [
-              "What's driving tier spread yoy pct swfl?",
-              "How does tier spread yoy pct swfl here compare to other SWFL areas?"
-            ]
-          },
-          {
-            "metric": "tier_spread_ratio_swfl",
-            "value": 2.59,
-            "direction": "stable",
-            "label": "SWFL regional median tier spread (luxury ÷ starter, ×) at 2026-08-31",
-            "variable_type": "intensive",
-            "units": "ratio",
-            "source": {
-              "url": "https://files.zillowstatic.com/research/public_csvs/zhvi/Zip_zhvi_uc_sfrcondo_tier_0.67_1.0_month.csv",
-              "fetched_at": "2026-10-28T10:42:39Z",
-              "tier": 3,
-              "citation": "Zillow ZHVI tier split, ZIP-level all-homes: top-tier (0.67-1.0, luxury) vs bottom-tier (0.0-0.33, starter), RAW (not seasonally adjusted). Source: Zillow Research (files.zillowstatic.com); Tier 2 cache: data_lake.tier_divergence_zip_latest."
-            },
-            "suggestions": [
-              "What's driving tier spread ratio swfl?",
-              "How does tier spread ratio swfl here compare to other SWFL areas?"
-            ]
-          },
-          {
-            "metric": "tier_bottom_yoy_pct_swfl",
-            "value": -3.46,
-            "direction": "falling",
-            "label": "SWFL regional median starter-tier (bottom) ZHVI YoY %",
-            "variable_type": "intensive",
-            "units": "percent",
-            "display_format": "percent",
-            "source": {
-              "url": "https://files.zillowstatic.com/research/public_csvs/zhvi/Zip_zhvi_uc_sfrcondo_tier_0.67_1.0_month.csv",
-              "fetched_at": "2026-10-28T10:42:39Z",
-              "tier": 3,
-              "citation": "Zillow ZHVI tier split, ZIP-level all-homes: top-tier (0.67-1.0, luxury) vs bottom-tier (0.0-0.33, starter), RAW (not seasonally adjusted). Source: Zillow Research (files.zillowstatic.com); Tier 2 cache: data_lake.tier_divergence_zip_latest."
-            },
-            "suggestions": [
-              "What's driving tier bottom yoy pct swfl?",
-              "How does tier bottom yoy pct swfl here compare to other SWFL areas?"
-            ]
-          },
-          {
-            "metric": "tier_top_yoy_pct_swfl",
-            "value": -0.92,
-            "direction": "falling",
-            "label": "SWFL regional median luxury-tier (top) ZHVI YoY % (context; not a standalone bull signal)",
-            "variable_type": "intensive",
-            "units": "percent",
-            "display_format": "percent",
-            "source": {
-              "url": "https://files.zillowstatic.com/research/public_csvs/zhvi/Zip_zhvi_uc_sfrcondo_tier_0.67_1.0_month.csv",
-              "fetched_at": "2026-10-28T10:42:39Z",
-              "tier": 3,
-              "citation": "Zillow ZHVI tier split, ZIP-level all-homes: top-tier (0.67-1.0, luxury) vs bottom-tier (0.0-0.33, starter), RAW (not seasonally adjusted). Source: Zillow Research (files.zillowstatic.com); Tier 2 cache: data_lake.tier_divergence_zip_latest."
-            },
-            "suggestions": [
-              "What's driving tier top yoy pct swfl?",
-              "How does tier top yoy pct swfl here compare to other SWFL areas?"
-            ]
-          },
-          {
-            "metric": "tier_kshape_zip_count_swfl",
-            "value": 7,
-            "direction": "stable",
-            "label": "SWFL ZIPs in K-shape (luxury ≥0 YoY, starter <0 YoY) of 50 both-tier ZIPs",
-            "variable_type": "extensive",
-            "units": "count",
-            "display_format": "count",
-            "source": {
-              "url": "https://files.zillowstatic.com/research/public_csvs/zhvi/Zip_zhvi_uc_sfrcondo_tier_0.67_1.0_month.csv",
-              "fetched_at": "2026-10-28T10:42:39Z",
-              "tier": 3,
-              "citation": "Zillow ZHVI tier split, ZIP-level all-homes: top-tier (0.67-1.0, luxury) vs bottom-tier (0.0-0.33, starter), RAW (not seasonally adjusted). Source: Zillow Research (files.zillowstatic.com); Tier 2 cache: data_lake.tier_divergence_zip_latest."
-            },
-            "suggestions": [
-              "What's driving tier kshape zip count swfl?",
-              "How does tier kshape zip count swfl here compare to other SWFL areas?"
-            ]
-          },
-          {
-            "metric": "tier_kshape_intensity_swfl",
-            "value": 14,
-            "direction": "rising",
-            "label": "K-shape intensity: 7 of 50 SWFL both-tier ZIPs with luxury holding, starter falling (14/100)",
-            "variable_type": "intensive",
-            "units": "percent",
-            "display_format": "percent",
-            "source": {
-              "url": "https://files.zillowstatic.com/research/public_csvs/zhvi/Zip_zhvi_uc_sfrcondo_tier_0.67_1.0_month.csv",
-              "fetched_at": "2026-10-28T10:42:39Z",
-              "tier": 3,
-              "citation": "Zillow ZHVI tier split, ZIP-level all-homes: top-tier (0.67-1.0, luxury) vs bottom-tier (0.0-0.33, starter), RAW (not seasonally adjusted). Source: Zillow Research (files.zillowstatic.com); Tier 2 cache: data_lake.tier_divergence_zip_latest."
-            },
-            "suggestions": [
-              "What's driving tier kshape intensity swfl?",
-              "How does tier kshape intensity swfl here compare to other SWFL areas?"
-            ]
-          },
-          {
-            "metric": "tier_spread_yoy_pct_zip_34105",
-            "value": 10.22,
-            "direction": "rising",
-            "label": "Tier spread YoY % - ZIP 34105 (Naples), 2026-08-31",
-            "variable_type": "intensive",
-            "units": "percent",
-            "display_format": "percent",
-            "source": {
-              "url": "https://files.zillowstatic.com/research/public_csvs/zhvi/Zip_zhvi_uc_sfrcondo_tier_0.67_1.0_month.csv",
-              "fetched_at": "2026-10-28T10:42:39Z",
-              "tier": 3,
-              "citation": "Zillow ZHVI tier split, ZIP-level all-homes: top-tier (0.67-1.0, luxury) vs bottom-tier (0.0-0.33, starter), RAW (not seasonally adjusted). Source: Zillow Research (files.zillowstatic.com); Tier 2 cache: data_lake.tier_divergence_zip_latest."
-            },
-            "suggestions": [
-              "What's driving tier spread yoy pct zip 34105?",
-              "How does tier spread yoy pct zip 34105 here compare to other SWFL areas?"
-            ]
-          },
-          {
-            "metric": "tier_spread_ratio_zip_34105",
-            "value": 5.45,
-            "direction": "stable",
-            "label": "Tier spread (luxury ÷ starter, ×) - ZIP 34105 (Naples), 2026-08-31",
-            "variable_type": "intensive",
-            "units": "ratio",
-            "source": {
-              "url": "https://files.zillowstatic.com/research/public_csvs/zhvi/Zip_zhvi_uc_sfrcondo_tier_0.67_1.0_month.csv",
-              "fetched_at": "2026-10-28T10:42:39Z",
-              "tier": 3,
-              "citation": "Zillow ZHVI tier split, ZIP-level all-homes: top-tier (0.67-1.0, luxury) vs bottom-tier (0.0-0.33, starter), RAW (not seasonally adjusted). Source: Zillow Research (files.zillowstatic.com); Tier 2 cache: data_lake.tier_divergence_zip_latest."
-            },
-            "suggestions": [
-              "What's driving tier spread ratio zip 34105?",
-              "How does tier spread ratio zip 34105 here compare to other SWFL areas?"
-            ]
-          },
-          {
-            "metric": "tier_spread_yoy_pct_zip_33907",
-            "value": 10.17,
-            "direction": "rising",
-            "label": "Tier spread YoY % - ZIP 33907 (Fort Myers), 2026-08-31",
-            "variable_type": "intensive",
-            "units": "percent",
-            "display_format": "percent",
-            "source": {
-              "url": "https://files.zillowstatic.com/research/public_csvs/zhvi/Zip_zhvi_uc_sfrcondo_tier_0.67_1.0_month.csv",
-              "fetched_at": "2026-10-28T10:42:39Z",
-              "tier": 3,
-              "citation": "Zillow ZHVI tier split, ZIP-level all-homes: top-tier (0.67-1.0, luxury) vs bottom-tier (0.0-0.33, starter), RAW (not seasonally adjusted). Source: Zillow Research (files.zillowstatic.com); Tier 2 cache: data_lake.tier_divergence_zip_latest."
-            },
-            "suggestions": [
-              "What's driving tier spread yoy pct zip 33907?",
-              "How does tier spread yoy pct zip 33907 here compare to other SWFL areas?"
-            ]
-          },
-          {
-            "metric": "tier_spread_ratio_zip_33907",
-            "value": 2.64,
-            "direction": "stable",
-            "label": "Tier spread (luxury ÷ starter, ×) - ZIP 33907 (Fort Myers), 2026-08-31",
-            "variable_type": "intensive",
-            "units": "ratio",
-            "source": {
-              "url": "https://files.zillowstatic.com/research/public_csvs/zhvi/Zip_zhvi_uc_sfrcondo_tier_0.67_1.0_month.csv",
-              "fetched_at": "2026-10-28T10:42:39Z",
-              "tier": 3,
-              "citation": "Zillow ZHVI tier split, ZIP-level all-homes: top-tier (0.67-1.0, luxury) vs bottom-tier (0.0-0.33, starter), RAW (not seasonally adjusted). Source: Zillow Research (files.zillowstatic.com); Tier 2 cache: data_lake.tier_divergence_zip_latest."
-            },
-            "suggestions": [
-              "What's driving tier spread ratio zip 33907?",
-              "How does tier spread ratio zip 33907 here compare to other SWFL areas?"
-            ]
-          },
-          {
-            "metric": "tier_spread_yoy_pct_zip_33919",
-            "value": 7.04,
-            "direction": "rising",
-            "label": "Tier spread YoY % - ZIP 33919 (Fort Myers), 2026-08-31",
-            "variable_type": "intensive",
-            "units": "percent",
-            "display_format": "percent",
-            "source": {
-              "url": "https://files.zillowstatic.com/research/public_csvs/zhvi/Zip_zhvi_uc_sfrcondo_tier_0.67_1.0_month.csv",
-              "fetched_at": "2026-10-28T10:42:39Z",
-              "tier": 3,
-              "citation": "Zillow ZHVI tier split, ZIP-level all-homes: top-tier (0.67-1.0, luxury) vs bottom-tier (0.0-0.33, starter), RAW (not seasonally adjusted). Source: Zillow Research (files.zillowstatic.com); Tier 2 cache: data_lake.tier_divergence_zip_latest."
-            },
-            "suggestions": [
-              "What's driving tier spread yoy pct zip 33919?",
-              "How does tier spread yoy pct zip 33919 here compare to other SWFL areas?"
-            ]
-          },
-          {
-            "metric": "tier_spread_ratio_zip_33919",
-            "value": 2.77,
-            "direction": "stable",
-            "label": "Tier spread (luxury ÷ starter, ×) - ZIP 33919 (Fort Myers), 2026-08-31",
-            "variable_type": "intensive",
-            "units": "ratio",
-            "source": {
-              "url": "https://files.zillowstatic.com/research/public_csvs/zhvi/Zip_zhvi_uc_sfrcondo_tier_0.67_1.0_month.csv",
-              "fetched_at": "2026-10-28T10:42:39Z",
-              "tier": 3,
-              "citation": "Zillow ZHVI tier split, ZIP-level all-homes: top-tier (0.67-1.0, luxury) vs bottom-tier (0.0-0.33, starter), RAW (not seasonally adjusted). Source: Zillow Research (files.zillowstatic.com); Tier 2 cache: data_lake.tier_divergence_zip_latest."
-            },
-            "suggestions": [
-              "What's driving tier spread ratio zip 33919?",
-              "How does tier spread ratio zip 33919 here compare to other SWFL areas?"
-            ]
-          }
-        ],
-        "detail_tables": [
-          {
-            "id": "tier_divergence_by_zip",
-            "title": "SWFL luxury/starter tier divergence by ZIP — latest period 2026-08-31",
-            "grain": "zip",
-            "columns": [
-              {
-                "id": "metro",
-                "label": "Metro area"
-              },
-              {
-                "id": "county_name",
-                "label": "County"
-              },
-              {
-                "id": "city",
-                "label": "City"
-              },
-              {
-                "id": "latest_period",
-                "label": "Latest period"
-              },
-              {
-                "id": "top_tier_value",
-                "label": "Luxury value (USD)",
-                "display_format": "currency",
-                "units": "USD"
-              },
-              {
-                "id": "bottom_tier_value",
-                "label": "Starter value (USD)",
-                "display_format": "currency",
-                "units": "USD"
-              },
-              {
-                "id": "spread_ratio",
-                "label": "Spread (luxury÷starter)",
-                "units": "ratio"
-              },
-              {
-                "id": "spread_yoy_pct",
-                "label": "Spread YoY %",
-                "display_format": "percent",
-                "units": "percent"
-              },
-              {
-                "id": "bottom_yoy_pct",
-                "label": "Starter YoY %",
-                "display_format": "percent",
-                "units": "percent"
-              },
-              {
-                "id": "top_yoy_pct",
-                "label": "Luxury YoY %",
-                "display_format": "percent",
-                "units": "percent"
-              },
-              {
-                "id": "kshape",
-                "label": "K-shape"
-              }
-            ],
-            "rows": [
-              {
-                "key": "33901",
-                "label": "33901",
-                "cells": {
-                  "metro": "Cape Coral-Fort Myers, FL",
-                  "county_name": "Lee County",
-                  "city": "Fort Myers",
-                  "latest_period": "2026-08-31",
-                  "top_tier_value": 469343,
-                  "bottom_tier_value": 142371,
-                  "spread_ratio": 3.3,
-                  "spread_yoy_pct": 0.63,
-                  "bottom_yoy_pct": -4.13,
-                  "top_yoy_pct": -3.53,
-                  "kshape": false
-                }
-              },
-              {
-                "key": "33903",
-                "label": "33903",
-                "cells": {
-                  "metro": "Cape Coral-Fort Myers, FL",
-                  "county_name": "Lee County",
-                  "city": "North Fort Myers",
-                  "latest_period": "2026-08-31",
-                  "top_tier_value": 364158,
-                  "bottom_tier_value": 131409,
-                  "spread_ratio": 2.76,
-                  "spread_yoy_pct": 0.86,
-                  "bottom_yoy_pct": -3.18,
-                  "top_yoy_pct": -2.35,
-                  "kshape": false
-                }
-              },
-              {
-                "key": "33904",
-                "label": "33904",
-                "cells": {
-                  "metro": "Cape Coral-Fort Myers, FL",
-                  "county_name": "Lee County",
-                  "city": "Cape Coral",
-                  "latest_period": "2026-08-31",
-                  "top_tier_value": 579159,
-                  "bottom_tier_value": 220031,
-                  "spread_ratio": 2.62,
-                  "spread_yoy_pct": 4.29,
-                  "bottom_yoy_pct": -4.55,
-                  "top_yoy_pct": -0.45,
-                  "kshape": false
-                }
-              },
-              {
-                "key": "33905",
-                "label": "33905",
-                "cells": {
-                  "metro": "Cape Coral-Fort Myers, FL",
-                  "county_name": "Lee County",
-                  "city": "Fort Myers",
-                  "latest_period": "2026-08-31",
-                  "top_tier_value": 487038,
-                  "bottom_tier_value": 174645,
-                  "spread_ratio": 2.78,
-                  "spread_yoy_pct": 3.09,
-                  "bottom_yoy_pct": -4.48,
-                  "top_yoy_pct": -1.53,
-                  "kshape": false
-                }
-              },
-              {
-                "key": "33907",
-                "label": "33907",
-                "cells": {
-                  "metro": "Cape Coral-Fort Myers, FL",
-                  "county_name": "Lee County",
-                  "city": "Fort Myers",
-                  "latest_period": "2026-08-31",
-                  "top_tier_value": 324222,
-                  "bottom_tier_value": 121353,
-                  "spread_ratio": 2.64,
-                  "spread_yoy_pct": 10.17,
-                  "bottom_yoy_pct": -12.31,
-                  "top_yoy_pct": -3.39,
-                  "kshape": false
-                }
-              },
-              {
-                "key": "33908",
-                "label": "33908",
-                "cells": {
-                  "metro": "Cape Coral-Fort Myers, FL",
-                  "county_name": "Lee County",
-                  "city": "Fort Myers",
-                  "latest_period": "2026-08-31",
-                  "top_tier_value": 625001,
-                  "bottom_tier_value": 198561,
-                  "spread_ratio": 3.13,
-                  "spread_yoy_pct": 5.2,
-                  "bottom_yoy_pct": -5.84,
-                  "top_yoy_pct": -0.94,
-                  "kshape": false
-                }
-              },
-              {
-                "key": "33909",
-                "label": "33909",
-                "cells": {
-                  "metro": "Cape Coral-Fort Myers, FL",
-                  "county_name": "Lee County",
-                  "city": "Cape Coral",
-                  "latest_period": "2026-08-31",
-                  "top_tier_value": 360060,
-                  "bottom_tier_value": 236512,
-                  "spread_ratio": 1.52,
-                  "spread_yoy_pct": 0.53,
-                  "bottom_yoy_pct": -3.84,
-                  "top_yoy_pct": -3.33,
-                  "kshape": false
-                }
-              },
-              {
-                "key": "33912",
-                "label": "33912",
-                "cells": {
-                  "metro": "Cape Coral-Fort Myers, FL",
-                  "county_name": "Lee County",
-                  "city": "Fort Myers",
-                  "latest_period": "2026-08-31",
-                  "top_tier_value": 656325,
-                  "bottom_tier_value": 236814,
-                  "spread_ratio": 2.76,
-                  "spread_yoy_pct": 3.91,
-                  "bottom_yoy_pct": -4.04,
-                  "top_yoy_pct": -0.28,
-                  "kshape": false
-                }
-              },
-              {
-                "key": "33913",
-                "label": "33913",
-                "cells": {
-                  "metro": "Cape Coral-Fort Myers, FL",
-                  "county_name": "Lee County",
-                  "city": "Fort Myers",
-                  "latest_period": "2026-08-31",
-                  "top_tier_value": 756175,
-                  "bottom_tier_value": 297259,
-                  "spread_ratio": 2.54,
-                  "spread_yoy_pct": 2.32,
-                  "bottom_yoy_pct": -2.83,
-                  "top_yoy_pct": -0.57,
-                  "kshape": false
-                }
-              },
-              {
-                "key": "33914",
-                "label": "33914",
-                "cells": {
-                  "metro": "Cape Coral-Fort Myers, FL",
-                  "county_name": "Lee County",
-                  "city": "Cape Coral",
-                  "latest_period": "2026-08-31",
-                  "top_tier_value": 711074,
-                  "bottom_tier_value": 290699,
-                  "spread_ratio": 2.44,
-                  "spread_yoy_pct": 1.92,
-                  "bottom_yoy_pct": -2.07,
-                  "top_yoy_pct": -0.19,
-                  "kshape": false
-                }
-              },
-              {
-                "key": "33916",
-                "label": "33916",
-                "cells": {
-                  "metro": "Cape Coral-Fort Myers, FL",
-                  "county_name": "Lee County",
-                  "city": "Fort Myers",
-                  "latest_period": "2026-08-31",
-                  "top_tier_value": 327924,
-                  "bottom_tier_value": 138020,
-                  "spread_ratio": 2.36,
-                  "spread_yoy_pct": 1.62,
-                  "bottom_yoy_pct": -6.07,
-                  "top_yoy_pct": -4.54,
-                  "kshape": false
-                }
-              },
-              {
-                "key": "33917",
-                "label": "33917",
-                "cells": {
-                  "metro": "Cape Coral-Fort Myers, FL",
-                  "county_name": "Lee County",
-                  "city": "North Fort Myers",
-                  "latest_period": "2026-08-31",
-                  "top_tier_value": 435097,
-                  "bottom_tier_value": 173010,
-                  "spread_ratio": 2.51,
-                  "spread_yoy_pct": 2.84,
-                  "bottom_yoy_pct": -3.51,
-                  "top_yoy_pct": -0.77,
-                  "kshape": false
-                }
-              },
-              {
-                "key": "33919",
-                "label": "33919",
-                "cells": {
-                  "metro": "Cape Coral-Fort Myers, FL",
-                  "county_name": "Lee County",
-                  "city": "Fort Myers",
-                  "latest_period": "2026-08-31",
-                  "top_tier_value": 431031,
-                  "bottom_tier_value": 154722,
-                  "spread_ratio": 2.77,
-                  "spread_yoy_pct": 7.04,
-                  "bottom_yoy_pct": -9.05,
-                  "top_yoy_pct": -2.64,
-                  "kshape": false
-                }
-              },
-              {
-                "key": "33920",
-                "label": "33920",
-                "cells": {
-                  "metro": "Cape Coral-Fort Myers, FL",
-                  "county_name": "Lee County",
-                  "city": "Alva",
-                  "latest_period": "2026-08-31",
-                  "top_tier_value": 593425,
-                  "bottom_tier_value": 278718,
-                  "spread_ratio": 2.12,
-                  "spread_yoy_pct": 1.49,
-                  "bottom_yoy_pct": -2.75,
-                  "top_yoy_pct": -1.31,
-                  "kshape": false
-                }
-              },
-              {
-                "key": "33921",
-                "label": "33921",
-                "cells": {
-                  "metro": "Cape Coral-Fort Myers, FL",
-                  "county_name": "Lee County",
-                  "city": "Boca Grande",
-                  "latest_period": "2026-08-31",
-                  "top_tier_value": 5045299,
-                  "bottom_tier_value": 1074072,
-                  "spread_ratio": 4.69,
-                  "spread_yoy_pct": -0.94,
-                  "bottom_yoy_pct": -3.7,
-                  "top_yoy_pct": -4.61,
-                  "kshape": false
-                }
-              },
-              {
-                "key": "33922",
-                "label": "33922",
-                "cells": {
-                  "metro": "Cape Coral-Fort Myers, FL",
-                  "county_name": "Lee County",
-                  "city": "Bokeelia",
-                  "latest_period": "2026-08-31",
-                  "top_tier_value": 590818,
-                  "bottom_tier_value": 241816,
-                  "spread_ratio": 2.44,
-                  "spread_yoy_pct": 0.87,
-                  "bottom_yoy_pct": -1.72,
-                  "top_yoy_pct": -0.87,
-                  "kshape": false
-                }
-              },
-              {
-                "key": "33924",
-                "label": "33924",
-                "cells": {
-                  "metro": "Cape Coral-Fort Myers, FL",
-                  "county_name": "Lee County",
-                  "city": "Captiva",
-                  "latest_period": "2026-08-31",
-                  "top_tier_value": 2505631,
-                  "bottom_tier_value": 553905,
-                  "spread_ratio": 4.54,
-                  "spread_yoy_pct": -8.73,
-                  "bottom_yoy_pct": 3.6,
-                  "top_yoy_pct": -5.44,
-                  "kshape": false
-                }
-              },
-              {
-                "key": "33928",
-                "label": "33928",
-                "cells": {
-                  "metro": "Cape Coral-Fort Myers, FL",
-                  "county_name": "Lee County",
-                  "city": "Estero",
-                  "latest_period": "2026-08-31",
-                  "top_tier_value": 739052,
-                  "bottom_tier_value": 304264,
-                  "spread_ratio": 2.41,
-                  "spread_yoy_pct": 3.45,
-                  "bottom_yoy_pct": -4.5,
-                  "top_yoy_pct": -1.2,
-                  "kshape": false
-                }
-              },
-              {
-                "key": "33931",
-                "label": "33931",
-                "cells": {
-                  "metro": "Cape Coral-Fort Myers, FL",
-                  "county_name": "Lee County",
-                  "city": "Fort Myers Beach",
-                  "latest_period": "2026-08-31",
-                  "top_tier_value": 874345,
-                  "bottom_tier_value": 319207,
-                  "spread_ratio": 2.73,
-                  "spread_yoy_pct": 1.53,
-                  "bottom_yoy_pct": -0.74,
-                  "top_yoy_pct": 0.78,
-                  "kshape": true
-                }
-              },
-              {
-                "key": "33936",
-                "label": "33936",
-                "cells": {
-                  "metro": "Cape Coral-Fort Myers, FL",
-                  "county_name": "Lee County",
-                  "city": "Lehigh Acres",
-                  "latest_period": "2026-08-31",
-                  "top_tier_value": 304432,
-                  "bottom_tier_value": 167526,
-                  "spread_ratio": 1.81,
-                  "spread_yoy_pct": 1.24,
-                  "bottom_yoy_pct": -7.09,
-                  "top_yoy_pct": -5.94,
-                  "kshape": false
-                }
-              },
-              {
-                "key": "33956",
-                "label": "33956",
-                "cells": {
-                  "metro": "Cape Coral-Fort Myers, FL",
-                  "county_name": "Lee County",
-                  "city": "Saint James City",
-                  "latest_period": "2026-08-31",
-                  "top_tier_value": 698060,
-                  "bottom_tier_value": 272184,
-                  "spread_ratio": 2.57,
-                  "spread_yoy_pct": -2.81,
-                  "bottom_yoy_pct": 5.33,
-                  "top_yoy_pct": 2.37,
-                  "kshape": false
-                }
-              },
-              {
-                "key": "33957",
-                "label": "33957",
-                "cells": {
-                  "metro": "Cape Coral-Fort Myers, FL",
-                  "county_name": "Lee County",
-                  "city": "Sanibel",
-                  "latest_period": "2026-08-31",
-                  "top_tier_value": 1354211,
-                  "bottom_tier_value": 503624,
-                  "spread_ratio": 2.69,
-                  "spread_yoy_pct": -5.02,
-                  "bottom_yoy_pct": 3.63,
-                  "top_yoy_pct": -1.57,
-                  "kshape": false
-                }
-              },
-              {
-                "key": "33966",
-                "label": "33966",
-                "cells": {
-                  "metro": "Cape Coral-Fort Myers, FL",
-                  "county_name": "Lee County",
-                  "city": "Fort Myers",
-                  "latest_period": "2026-08-31",
-                  "top_tier_value": 511492,
-                  "bottom_tier_value": 222623,
-                  "spread_ratio": 2.29,
-                  "spread_yoy_pct": 4.47,
-                  "bottom_yoy_pct": -4.92,
-                  "top_yoy_pct": -0.67,
-                  "kshape": false
-                }
-              },
-              {
-                "key": "33967",
-                "label": "33967",
-                "cells": {
-                  "metro": "Cape Coral-Fort Myers, FL",
-                  "county_name": "Lee County",
-                  "city": "Fort Myers",
-                  "latest_period": "2026-08-31",
-                  "top_tier_value": 470220,
-                  "bottom_tier_value": 283023,
-                  "spread_ratio": 1.65,
-                  "spread_yoy_pct": 1.3,
-                  "bottom_yoy_pct": -4.01,
-                  "top_yoy_pct": -2.75,
-                  "kshape": false
-                }
-              },
-              {
-                "key": "33971",
-                "label": "33971",
-                "cells": {
-                  "metro": "Cape Coral-Fort Myers, FL",
-                  "county_name": "Lee County",
-                  "city": "Lehigh Acres",
-                  "latest_period": "2026-08-31",
-                  "top_tier_value": 329739,
-                  "bottom_tier_value": 245095,
-                  "spread_ratio": 1.35,
-                  "spread_yoy_pct": -2.79,
-                  "bottom_yoy_pct": -4.44,
-                  "top_yoy_pct": -7.11,
-                  "kshape": false
-                }
-              },
-              {
-                "key": "33973",
-                "label": "33973",
-                "cells": {
-                  "metro": "Cape Coral-Fort Myers, FL",
-                  "county_name": "Lee County",
-                  "city": "Lehigh Acres",
-                  "latest_period": "2026-08-31",
-                  "top_tier_value": 354469,
-                  "bottom_tier_value": 243356,
-                  "spread_ratio": 1.47,
-                  "spread_yoy_pct": -8.21,
-                  "bottom_yoy_pct": -2.2,
-                  "top_yoy_pct": -10.23,
-                  "kshape": false
-                }
-              },
-              {
-                "key": "33976",
-                "label": "33976",
-                "cells": {
-                  "metro": "Cape Coral-Fort Myers, FL",
-                  "county_name": "Lee County",
-                  "city": "Lehigh Acres",
-                  "latest_period": "2026-08-31",
-                  "top_tier_value": 326580,
-                  "bottom_tier_value": 241302,
-                  "spread_ratio": 1.35,
-                  "spread_yoy_pct": 0.1,
-                  "bottom_yoy_pct": -6,
-                  "top_yoy_pct": -5.91,
-                  "kshape": false
-                }
-              },
-              {
-                "key": "33990",
-                "label": "33990",
-                "cells": {
-                  "metro": "Cape Coral-Fort Myers, FL",
-                  "county_name": "Lee County",
-                  "city": "Cape Coral",
-                  "latest_period": "2026-08-31",
-                  "top_tier_value": 437378,
-                  "bottom_tier_value": 252887,
-                  "spread_ratio": 1.73,
-                  "spread_yoy_pct": 0.01,
-                  "bottom_yoy_pct": -1.79,
-                  "top_yoy_pct": -1.78,
-                  "kshape": false
-                }
-              },
-              {
-                "key": "33991",
-                "label": "33991",
-                "cells": {
-                  "metro": "Cape Coral-Fort Myers, FL",
-                  "county_name": "Lee County",
-                  "city": "Cape Coral",
-                  "latest_period": "2026-08-31",
-                  "top_tier_value": 499191,
-                  "bottom_tier_value": 289434,
-                  "spread_ratio": 1.72,
-                  "spread_yoy_pct": 1.33,
-                  "bottom_yoy_pct": -1.98,
-                  "top_yoy_pct": -0.68,
-                  "kshape": false
-                }
-              },
-              {
-                "key": "33993",
-                "label": "33993",
-                "cells": {
-                  "metro": "Cape Coral-Fort Myers, FL",
-                  "county_name": "Lee County",
-                  "city": "Cape Coral",
-                  "latest_period": "2026-08-31",
-                  "top_tier_value": 449923,
-                  "bottom_tier_value": 272753,
-                  "spread_ratio": 1.65,
-                  "spread_yoy_pct": 1.06,
-                  "bottom_yoy_pct": -3.86,
-                  "top_yoy_pct": -2.85,
-                  "kshape": false
-                }
-              },
-              {
-                "key": "34102",
-                "label": "34102",
-                "cells": {
-                  "metro": "Naples-Marco Island, FL",
-                  "county_name": "Collier County",
-                  "city": "Naples",
-                  "latest_period": "2026-08-31",
-                  "top_tier_value": 5418196,
-                  "bottom_tier_value": 463094,
-                  "spread_ratio": 11.66,
-                  "spread_yoy_pct": 1.67,
-                  "bottom_yoy_pct": 0.64,
-                  "top_yoy_pct": 2.32,
-                  "kshape": false
-                }
-              },
-              {
-                "key": "34103",
-                "label": "34103",
-                "cells": {
-                  "metro": "Naples-Marco Island, FL",
-                  "county_name": "Collier County",
-                  "city": "Naples",
-                  "latest_period": "2026-08-31",
-                  "top_tier_value": 2908472,
-                  "bottom_tier_value": 435754,
-                  "spread_ratio": 6.69,
-                  "spread_yoy_pct": -1.95,
-                  "bottom_yoy_pct": 1.33,
-                  "top_yoy_pct": -0.64,
-                  "kshape": false
-                }
-              },
-              {
-                "key": "34104",
-                "label": "34104",
-                "cells": {
-                  "metro": "Naples-Marco Island, FL",
-                  "county_name": "Collier County",
-                  "city": "Naples",
-                  "latest_period": "2026-08-31",
-                  "top_tier_value": 589884,
-                  "bottom_tier_value": 244718,
-                  "spread_ratio": 2.4,
-                  "spread_yoy_pct": 2.66,
-                  "bottom_yoy_pct": -2.43,
-                  "top_yoy_pct": 0.16,
-                  "kshape": true
-                }
-              },
-              {
-                "key": "34105",
-                "label": "34105",
-                "cells": {
-                  "metro": "Naples-Marco Island, FL",
-                  "county_name": "Collier County",
-                  "city": "Naples",
-                  "latest_period": "2026-08-31",
-                  "top_tier_value": 1304815,
-                  "bottom_tier_value": 236808,
-                  "spread_ratio": 5.45,
-                  "spread_yoy_pct": 10.22,
-                  "bottom_yoy_pct": -6.74,
-                  "top_yoy_pct": 2.79,
-                  "kshape": true
-                }
-              },
-              {
-                "key": "34108",
-                "label": "34108",
-                "cells": {
-                  "metro": "Naples-Marco Island, FL",
-                  "county_name": "Collier County",
-                  "city": "Naples",
-                  "latest_period": "2026-08-31",
-                  "top_tier_value": 2717710,
-                  "bottom_tier_value": 566135,
-                  "spread_ratio": 4.79,
-                  "spread_yoy_pct": 0.88,
-                  "bottom_yoy_pct": 0.81,
-                  "top_yoy_pct": 1.7,
-                  "kshape": false
-                }
-              },
-              {
-                "key": "34109",
-                "label": "34109",
-                "cells": {
-                  "metro": "Naples-Marco Island, FL",
-                  "county_name": "Collier County",
-                  "city": "Naples",
-                  "latest_period": "2026-08-31",
-                  "top_tier_value": 1194943,
-                  "bottom_tier_value": 325384,
-                  "spread_ratio": 3.66,
-                  "spread_yoy_pct": 5.68,
-                  "bottom_yoy_pct": -3.13,
-                  "top_yoy_pct": 2.37,
-                  "kshape": true
-                }
-              },
-              {
-                "key": "34110",
-                "label": "34110",
-                "cells": {
-                  "metro": "Naples-Marco Island, FL",
-                  "county_name": "Collier County",
-                  "city": "Naples",
-                  "latest_period": "2026-08-31",
-                  "top_tier_value": 1646303,
-                  "bottom_tier_value": 318706,
-                  "spread_ratio": 5.14,
-                  "spread_yoy_pct": 5.74,
-                  "bottom_yoy_pct": -5.18,
-                  "top_yoy_pct": 0.27,
-                  "kshape": true
-                }
-              },
-              {
-                "key": "34112",
-                "label": "34112",
-                "cells": {
-                  "metro": "Naples-Marco Island, FL",
-                  "county_name": "Collier County",
-                  "city": "Naples",
-                  "latest_period": "2026-08-31",
-                  "top_tier_value": 576125,
-                  "bottom_tier_value": 222277,
-                  "spread_ratio": 2.58,
-                  "spread_yoy_pct": 4.53,
-                  "bottom_yoy_pct": -5.14,
-                  "top_yoy_pct": -0.85,
-                  "kshape": false
-                }
-              },
-              {
-                "key": "34113",
-                "label": "34113",
-                "cells": {
-                  "metro": "Naples-Marco Island, FL",
-                  "county_name": "Collier County",
-                  "city": "Naples",
-                  "latest_period": "2026-08-31",
-                  "top_tier_value": 1107119,
-                  "bottom_tier_value": 285690,
-                  "spread_ratio": 3.86,
-                  "spread_yoy_pct": 5.01,
-                  "bottom_yoy_pct": -4.98,
-                  "top_yoy_pct": -0.22,
-                  "kshape": false
-                }
-              },
-              {
-                "key": "34114",
-                "label": "34114",
-                "cells": {
-                  "metro": "Naples-Marco Island, FL",
-                  "county_name": "Collier County",
-                  "city": "Naples",
-                  "latest_period": "2026-08-31",
-                  "top_tier_value": 931694,
-                  "bottom_tier_value": 266797,
-                  "spread_ratio": 3.48,
-                  "spread_yoy_pct": 2.95,
-                  "bottom_yoy_pct": -3.75,
-                  "top_yoy_pct": -0.91,
-                  "kshape": false
-                }
-              },
-              {
-                "key": "34116",
-                "label": "34116",
-                "cells": {
-                  "metro": "Naples-Marco Island, FL",
-                  "county_name": "Collier County",
-                  "city": "Naples",
-                  "latest_period": "2026-08-31",
-                  "top_tier_value": 619700,
-                  "bottom_tier_value": 295294,
-                  "spread_ratio": 2.1,
-                  "spread_yoy_pct": 2.7,
-                  "bottom_yoy_pct": -4.23,
-                  "top_yoy_pct": -1.64,
-                  "kshape": false
-                }
-              },
-              {
-                "key": "34117",
-                "label": "34117",
-                "cells": {
-                  "metro": "Naples-Marco Island, FL",
-                  "county_name": "Collier County",
-                  "city": "Naples",
-                  "latest_period": "2026-08-31",
-                  "top_tier_value": 785008,
-                  "bottom_tier_value": 446546,
-                  "spread_ratio": 1.76,
-                  "spread_yoy_pct": -0.79,
-                  "bottom_yoy_pct": 0.13,
-                  "top_yoy_pct": -0.66,
-                  "kshape": false
-                }
-              },
-              {
-                "key": "34119",
-                "label": "34119",
-                "cells": {
-                  "metro": "Naples-Marco Island, FL",
-                  "county_name": "Collier County",
-                  "city": "Naples",
-                  "latest_period": "2026-08-31",
-                  "top_tier_value": 1320021,
-                  "bottom_tier_value": 381663,
-                  "spread_ratio": 3.45,
-                  "spread_yoy_pct": 4.34,
-                  "bottom_yoy_pct": -3.45,
-                  "top_yoy_pct": 0.74,
-                  "kshape": true
-                }
-              },
-              {
-                "key": "34120",
-                "label": "34120",
-                "cells": {
-                  "metro": "Naples-Marco Island, FL",
-                  "county_name": "Collier County",
-                  "city": "Naples",
-                  "latest_period": "2026-08-31",
-                  "top_tier_value": 869682,
-                  "bottom_tier_value": 423222,
-                  "spread_ratio": 2.06,
-                  "spread_yoy_pct": 0.17,
-                  "bottom_yoy_pct": -1.6,
-                  "top_yoy_pct": -1.44,
-                  "kshape": false
-                }
-              },
-              {
-                "key": "34134",
-                "label": "34134",
-                "cells": {
-                  "metro": "Cape Coral-Fort Myers, FL",
-                  "county_name": "Lee County",
-                  "city": "Bonita Springs",
-                  "latest_period": "2026-08-31",
-                  "top_tier_value": 1561247,
-                  "bottom_tier_value": 346819,
-                  "spread_ratio": 4.49,
-                  "spread_yoy_pct": 2.16,
-                  "bottom_yoy_pct": -3.48,
-                  "top_yoy_pct": -1.39,
-                  "kshape": false
-                }
-              },
-              {
-                "key": "34135",
-                "label": "34135",
-                "cells": {
-                  "metro": "Cape Coral-Fort Myers, FL",
-                  "county_name": "Lee County",
-                  "city": "Bonita Springs",
-                  "latest_period": "2026-08-31",
-                  "top_tier_value": 788795,
-                  "bottom_tier_value": 303117,
-                  "spread_ratio": 2.59,
-                  "spread_yoy_pct": 1.78,
-                  "bottom_yoy_pct": -2.4,
-                  "top_yoy_pct": -0.66,
-                  "kshape": false
-                }
-              },
-              {
-                "key": "34139",
-                "label": "34139",
-                "cells": {
-                  "metro": "Naples-Marco Island, FL",
-                  "county_name": "Collier County",
-                  "city": "Everglades",
-                  "latest_period": "2026-08-31",
-                  "top_tier_value": 485796,
-                  "bottom_tier_value": 160134,
-                  "spread_ratio": 3.05,
-                  "spread_yoy_pct": -5.06,
-                  "bottom_yoy_pct": 5.68,
-                  "top_yoy_pct": 0.32,
-                  "kshape": false
-                }
-              },
-              {
-                "key": "34140",
-                "label": "34140",
-                "cells": {
-                  "metro": "Naples-Marco Island, FL",
-                  "county_name": "Collier County",
-                  "city": "Naples",
-                  "latest_period": "2026-08-31",
-                  "top_tier_value": 907267,
-                  "bottom_tier_value": 365634,
-                  "spread_ratio": 2.49,
-                  "spread_yoy_pct": -1.55,
-                  "bottom_yoy_pct": -0.87,
-                  "top_yoy_pct": -2.41,
-                  "kshape": false
-                }
-              },
-              {
-                "key": "34142",
-                "label": "34142",
-                "cells": {
-                  "metro": "Naples-Marco Island, FL",
-                  "county_name": "Collier County",
-                  "city": "Immokalee",
-                  "latest_period": "2026-08-31",
-                  "top_tier_value": 517265,
-                  "bottom_tier_value": 236825,
-                  "spread_ratio": 2.19,
-                  "spread_yoy_pct": -4.73,
-                  "bottom_yoy_pct": 1.26,
-                  "top_yoy_pct": -3.54,
-                  "kshape": false
-                }
-              },
-              {
-                "key": "34145",
-                "label": "34145",
-                "cells": {
-                  "metro": "Naples-Marco Island, FL",
-                  "county_name": "Collier County",
-                  "city": "Marco Island",
-                  "latest_period": "2026-08-31",
-                  "top_tier_value": 1856244,
-                  "bottom_tier_value": 431440,
-                  "spread_ratio": 4.29,
-                  "spread_yoy_pct": 2.75,
-                  "bottom_yoy_pct": -0.25,
-                  "top_yoy_pct": 2.49,
-                  "kshape": true
-                }
-              }
-            ],
-            "source": {
-              "url": "https://files.zillowstatic.com/research/public_csvs/zhvi/Zip_zhvi_uc_sfrcondo_tier_0.67_1.0_month.csv",
-              "fetched_at": "2026-10-28T10:42:39Z",
-              "tier": 3,
-              "citation": "Zillow ZHVI tier split, ZIP-level all-homes: top-tier (0.67-1.0, luxury) vs bottom-tier (0.0-0.33, starter), RAW (not seasonally adjusted). Source: Zillow Research (files.zillowstatic.com); Tier 2 cache: data_lake.tier_divergence_zip_latest."
-            },
-            "note": "One row per SWFL ZIP holding both a starter (0.0-0.33) and luxury (0.67-1.0) Zillow ZHVI tier. Spread ratio = 3-month-trailing-average luxury value ÷ 3-month-trailing-average starter value; the YoY columns are raw monthly and null when a 12-month look-back is unavailable. RAW (not seasonally adjusted) index — read YoY, not the level, for direction. top_tier_value / bottom_tier_value are the raw latest month."
-          }
-        ],
-        "caveats": [
-          "Tier spread widening / starter tier softening — the entry market is fracturing relative to luxury.",
-          "Zillow publishes the top/bottom ZHVI tiers RAW only (no seasonally-adjusted variant); the spread LEVEL is a 3-month trailing average to tame that noise, while the YoY signals use raw monthly values (YoY already cancels seasonality).",
-          "~50% of SWFL buyers (≈70% for condos) pay cash and insulate the luxury tier — a holding or rising top tier is part of the K-shape, not a bullish signal on its own.",
-          "Covers 50 SWFL ZIPs holding BOTH a starter and a luxury tier; ZIPs lacking one tier are excluded from the divergence."
-        ],
-        "contradicts": [],
-        "confidence": 0.6,
-        "joint_integrity": 1,
-        "confidence_dispersion": 0,
-        "chain_depth": 0,
-        "trust_tier": 3,
-        "upstream_count": 0,
-        "relevance": {
-          "decay_curve": "weeks",
-          "half_life_hours": 720,
-          "computed_at": "2026-10-28T10:42:46Z"
-        },
-        "exogenous_signals": []
-      }
+      "status": "skipped-fresh",
+      "written": false
     },
     {
       "packId": "master",
       "status": "built",
-      "version": 153,
+      "version": 154,
       "written": true,
       "brainOutput": {
         "brain_id": "master",
-        "version": 153,
-        "refined_at": "2026-10-28T10:42:46Z",
-        "expires": "2026-11-04T10:42:46Z",
+        "version": 154,
+        "refined_at": "2026-10-29T04:32:03Z",
+        "expires": "2026-11-05T04:32:03Z",
         "ttl_seconds": 604800,
         "direction": "mixed",
         "magnitude": 0.46886493255290174,
@@ -2097,15 +1067,15 @@
           },
           {
             "metric": "signal_breaking_1",
-            "value": "Naples: Former Naples councilwoman Linda Penniman died, remembered as the 'Energizer Bunny'; described as dying of a 'broken heart' after her husband. Story published Oct. 23, 2026.",
+            "value": "Naples: Court ordered two Naples men to repay $511,200 in a COVID glove fraud case; men received a 15-month sentence for wire fraud.",
             "direction": "stable",
             "label": "Naples — breaking",
             "variable_type": "categorical",
             "source": {
-              "url": "https://www.naplesnews.com/story/money/business/local/2026/10/23/former-naples-florida-councilwoman-linda-penniman-remembered-as-the-energizer-bunny/92385292007/",
-              "fetched_at": "2026-10-28T10:42:17Z",
+              "url": "https://www.gulfshorebusiness.com/news/court-orders-naples-men-to-repay-511200-in-glove-fraud-case/article_996c195f-697e-49da-a185-549df2820c58.html",
+              "fetched_at": "2026-10-29T04:31:42Z",
               "tier": 2,
-              "citation": "Former Naples councilwoman remembered as the 'Energizer Bunny': \"[](https://www.naplesnews.com/)\n[Estero's Maddox Stewart set 2 Lee County passing touchdown records Monday](https://www.naplesnews.com/story/sports/high-school/football/2026/10/27/esteros-maddox-stewart-sets-lee-county-record-for-passing-touchdowns/92454173007/)\n[](https://subscribe.naplesnews.com/rr/nanobar?gps-source=CPTILELEFT&itm_campaign=2026ENTQ4BAU2026&itm_medium=ONSITE&success-url=https%3A%2F%2Fwww.naplesnews.com%2Fstory%2Fmoney%2Fbusiness%2Flocal%2F2026%2F10%2F23%2Fformer-naples-florida-councilwoman-linda-penniman-remembered-as-the-energizer-bunny%2F92385292007%2F)\n[](https://subscribe.naplesnews.com/rr/masthead?gps-source=CPMASTHEAD&itm_campaign=2026ENTQ4BAU2026&itm_medium=ONSITE&success-url=https%3A%2F%2Fwww.naplesnews.com%2Fstory%2Fmoney%2Fbusiness%2Flocal%2F2026%2F10%2F23%2Fformer-naples-florida-councilwoman-linda-penniman-remembered-as-the-energizer-bunny%2F92385292007%2F)\n[News](https://www.naplesnews.com/news/) [Sports](https://www.naplesnews.com/sports/) [Real Estate](https://www.naplesnews.com/business/real-estate/) [Restaurants](https://www.naplesnews.com/entertainment/restaurants/) [Opinion](https://www.naplesnews.com/opinion/) [Advertise](https://advertising.usatoday.com/advertise-with-us/?cid=Web_LiQ_Network_AdvertiseWithUs_AdvertiseInquiry&publication=naples_daily_news&utm_source=local_publication&utm_medium=menu&utm_campaign=advertise_with_us) [Obituaries](https://www.naplesnews.com/obituaries) [eNewspaper](https://user.naplesnews.com/user/enewspaper) [Legals](https://www.naplesnews.com/public-notices)\n[](https://www.naplesnews.com/search/ \"Search\")\n[](https://www.naplesnews.com/weather/ \"Weather in Naples: 70°F Sunny\") [](https://subscribe.naplesnews.com/rr/navsub?gps-source=CPTOPNAVBAR&itm_campaign=2026ENTQ4BAU2026&itm_medium=ONSITE&success-url=https%3A%2F%2Fwww.naplesnews.com%2Fstory%2Fmoney%2Fbusiness%2Flocal%2F2026%2F10%2F23%2Fformer-naples-florida-councilwoman-linda-penniman-remembered-as-the-energizer-bunny%2F92385292007%2F)\n[](https://login.naplesnews.com/PNDN-GUP/authenticate/?success-url=https%3A%2F%2Fwww.naplesnews.com%2Fstory%2Fmoney%2Fbusiness%2Flocal%2F2026%2F10%2F23%2Fformer-naples-florida-councilwoman-linda-penniman-remembered-as-the-energizer-bunny%2F92385292007%2F&cancel-url=https%3A%2F%2Fwww.naplesnews.com%2Fstory%2Fmoney%2Fbusiness%2Flocal%2F2026%2F10%2F23%2Fformer-naples-florida-councilwoman-linda-penniman-remembered-as-the-energizer-bunny%2F92385292007%2F)\n[](https://www.naplesnews.com/) [](https://www.naplesnews.com/)\n[LOCAL BUSINESS](https://www.naplesnews.com/business/local/)\n# Naples leader dies of 'broken heart' after husband. Son recalls her life\n[![Portrait of Laura Layden](https://www.naplesnews.com/gcdn/authoring/authoring-images/2024/02/08/PNDN/72524348007-ndn-jh-20240126-laura-0001.JPG?crop=3313,3312,x1506,y0&width=48&height=48&format=pjpg&auto=webp) Laura Layden](https://www.naplesnews.com/staff/2647080001/laura-layden/)\nFort Myers News-Press & Naples Daily News\nOct. 23, 2026, 2:48 p.m. ET\""
+              "citation": "COVID glove fraud by Naples men leads to 15-month sentence | News | gulfshorebusiness.com: \"[Skip to main content](https://www.gulfshorebusiness.com/news/court-orders-naples-men-to-repay-511200-in-glove-fraud-case/article_996c195f-697e-49da-a185-549df2820c58.html#main-page-container)\nYou have permission to edit this article.\n[ Edit](https://www.gulfshorebusiness.com/tncms/admin/editorial-asset/?edit=996c195f-697e-49da-a185-549df2820c58) Close\n[![site-logo](https://bloximages.chicago2.vip.townnews.com/gulfshorebusiness.com/content/tncms/custom/image/d93231a5-1f68-4d46-b56f-f961242f84a3.png?resize=200%2C53)](https://www.gulfshorebusiness.com/)\n  * [ Facebook ](https://www.facebook.com/GulfshoreBusiness/)\n  * [ LinkedIn ](https://www.linkedin.com/company/gulfshore-business-magazine)\n  * [ Instagram ](https://www.instagram.com/gulfshorebusiness)\n\n\nSite search Search\n  * [ Sign Up ](https://www.gulfshorebusiness.com/users/signup/?referer_url=https%3A%2F%2Fwww.gulfshorebusiness.com%2Fnews%2Fcourt-orders-naples-men-to-repay-511200-in-glove-fraud-case%2Farticle_996c195f-697e-49da-a185-549df2820c58.html)\n  * [ Log In ](https://www.gulfshorebusiness.com/users/login/?referer_url=https%3A%2F%2Fwww.gulfshorebusiness.com%2Fnews%2Fcourt-orders-naples-men-to-repay-511200-in-glove-fraud-case%2Farticle_996c195f-697e-49da-a185-549df2820c58.html)\n\n\n  * [ Dashboard ](https://www.gulfshorebusiness.com/users/admin/)\n  * Logout \n\n\n  *     * My Account\n    * [ Dashboard](https://www.gulfshorebusiness.com/users/admin/)\n    * [ Profile](https://www.gulfshorebusiness.com/news/court-orders-naples-men-to-repay-511200-in-glove-fraud-case/article_996c195f-697e-49da-a185-549df2820c58.html)\n    * [ Saved items](https://www.gulfshorebusiness.com/users/admin/list/)\n    * Logout \n\n\n[Home](https://www.gulfshorebusiness.com/)\n  * [About Us](https://www.gulfshorebusiness.com/site/about.html)\n  * [Contact Us](https://www.gulfshorebusiness.com/site/contact.html)\n  * [Advertise](https://www.gulfshorebusiness.com/site/advertise.html)\n  * [Terms of Use](https://www.gulfshorebusiness.com/site/terms.html)\n  * [Privacy Policy](https://www.gulfshorebusiness.com/site/privacy.html)\n  * [Employment](https://gulfshorelife.applytojob.com/apply)\n\n\n[News](https://www.gulfshorebusiness.com/news/)\n  * [Real Estate](https://www.gulfshorebusiness.com/real_estate)\n  * [Development](https://www.gulfshorebusiness.com/development/)\n  * [Hospitality](https://www.gulfshorebusiness.com/hospitality/)\n  * [Retail](https://www.gulfshorebusiness.com/retail/)\n  * [Tourism](https://www.gulfshorebusiness.com/tourism/)\n  * [Collier County](https://www.gulfshorebusiness.com/collier/)\n  * [Charlotte County](https://www.gulfshorebusiness.com/charlotte/)\n  * [Lee County](https://www.gulfshorebusiness.com/lee/)\n  * [Nonprofit](https://www.gulfshorebusiness.com/nonprofit/)\n  * [Environment](https://www.gulfshorebusiness.com/environment/)\n  * [Innovation](https://www.gulfshorebusiness.com/innovation/)\n  * [Infrastructure](https://www.gulfshorebusiness.com/infrastructure/)\n  * [Education](https://www.gulfshorebusiness\""
             },
             "suggestions": [
               "What's driving signal breaking 1?",
@@ -2156,8 +1126,8 @@
         "caveats": [
           "flood-barrier-mode-1 active: 4 barrier ZIPs, worst-case AAL $40,342/insured property",
           "Override \"storm-history-modifier\" fired (priority 70)",
-          "permits-commercial-swfl excluded from synthesis (relevance 0.098, below floor 0.1)",
-          "active-rentals-swfl excluded from synthesis (relevance 0.080, below floor 0.1)",
+          "permits-commercial-swfl excluded from synthesis (relevance 0.096, below floor 0.1)",
+          "active-rentals-swfl excluded from synthesis (relevance 0.079, below floor 0.1)",
           "No figures published: this source has not yet received its first real SBA FOIA load. A synthetic development sample exists for offline testing only and is never shipped.",
           "Construction-cost PPI metrics (construction_cost_ppi_industrial, construction_cost_ppi_warehouse, construction_cost_ppi_office, construction_cost_ppi_medical_office, construction_cost_ppi_trade_concrete, construction_cost_ppi_trade_roofing, construction_cost_ppi_trade_electrical, construction_cost_ppi_trade_plumbing_hvac) are national BLS series — no SWFL-specific or Lee/Collier breakout exists at BLS for any of them. They ship a real month-over-month direction (unlike MarketBeat's schema-required \"stable\" fallback) but BLS can revise recent observations within ~30 days of first publication.",
           "vacancy_rate_marketbeat_swfl: 15 submarkets report a point-in-time value; v1 does not compute quarter-over-quarter direction, so the \"stable\" label is a schema-required fallback, not a measured trend.",
@@ -2315,7 +1285,7 @@
           "~50% of SWFL buyers (≈70% for condos) pay cash and insulate the luxury tier — a holding or rising top tier is part of the K-shape, not a bullish signal on its own.",
           "Covers 50 SWFL ZIPs holding BOTH a starter and a luxury tier; ZIPs lacking one tier are excluded from the divergence.",
           "Upstream brain 'active-rentals-swfl' was stale at build time (expired 2026-07-19).",
-          "Upstream brain 'active-rentals-swfl' failed to rebuild on 2026-10-28; using last good read from 2026-07-11 (v3)."
+          "Upstream brain 'active-rentals-swfl' failed to rebuild on 2026-10-29; using last good read from 2026-07-11 (v3)."
         ],
         "contradicts": [
           "macro-us (bearish) vs macro-florida (bullish)",
@@ -2373,7 +1343,7 @@
         "relevance": {
           "decay_curve": "weeks",
           "half_life_hours": 720.0000000000001,
-          "computed_at": "2026-10-28T10:42:46.000Z"
+          "computed_at": "2026-10-29T04:32:03.000Z"
         },
         "exogenous_signals": [],
         "conditional_claims": [
