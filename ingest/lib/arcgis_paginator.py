@@ -105,11 +105,25 @@ def paginate_arcgis_keyset(
     maxRecordCount is 1000), so a short page is NOT the last page — we stop only when
     OBJECTID stops advancing. `pause` throttles us so we stay welcome at the source.
     """
+    # Append the OID field only if the caller did not already list it. Verified
+    # 08/30/2026 on Lee gisserver910 (ArcGIS 11.5): a DUPLICATED outFields entry
+    # ("OBJECTID,...,OBJECTID") makes the server drop OBJECTID from every row's
+    # attributes, so max_oid never advances and the walk silently stops after ONE
+    # page (1,000 of 2,352 rows) — exactly the truncation this function exists to
+    # prevent. The caller's count gate caught it; this makes it impossible.
+    if out_fields == "*":
+        fields_param = "*"
+    else:
+        listed = [f.strip() for f in out_fields.split(",") if f.strip()]
+        if oid_field not in listed:
+            listed.append(oid_field)
+        fields_param = ",".join(listed)
+
     last_oid = -1
     while True:
         params = {
             "where": f"({where}) AND {oid_field}>{last_oid}",
-            "outFields": out_fields if out_fields == "*" else f"{out_fields},{oid_field}",
+            "outFields": fields_param,
             "orderByFields": f"{oid_field} ASC",
             "returnGeometry": "true" if geometry else "false",
             "outSR": "4326",
