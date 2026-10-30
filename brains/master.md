@@ -1,9 +1,9 @@
-<!-- FRESHNESS: v156 | Token: SWFL-7421-v156-20261030-44a9c60a -->
+<!-- FRESHNESS: v157 | Token: SWFL-7421-v157-20261030-02f10b74 -->
 ---
 brain_id: master
-version: 156
-refined_at: 2026-10-30T04:26:23Z
-freshness_token: SWFL-7421-v156-20261030-44a9c60a
+version: 157
+refined_at: 2026-10-30T10:58:16Z
+freshness_token: SWFL-7421-v157-20261030-02f10b74
 ttl_seconds: 604800
 pack_hash: be8f0d44e0e6
 context_type: user_saved_reference
@@ -116,9 +116,9 @@ s39 | home-values-swfl brain — https://www.swfldatagulf.com/api/b/home-values-
 --- OUTPUT ---
 {
   "brain_id": "master",
-  "version": 156,
-  "refined_at": "2026-10-30T04:26:23Z",
-  "expires": "2026-11-06T04:26:23Z",
+  "version": 157,
+  "refined_at": "2026-10-30T10:58:16Z",
+  "expires": "2026-11-06T10:58:16Z",
   "ttl_seconds": 604800,
   "direction": "mixed",
   "magnitude": 0.46924997798880225,
@@ -571,7 +571,7 @@ s39 | home-values-swfl brain — https://www.swfldatagulf.com/api/b/home-values-
       "variable_type": "categorical",
       "source": {
         "url": "https://www.naplesnews.com/story/money/business/local/2026/10/27/missed-state-deadline-puts-planned-east-naples-golf-club-in-limbo/92395159007/",
-        "fetched_at": "2026-10-30T04:26:01Z",
+        "fetched_at": "2026-10-30T10:57:55Z",
         "tier": 2,
         "citation": "Missed state deadline puts planned East Naples golf club in limbo: \"[](https://www.naplesnews.com/)\n[SWFL Football Week 11 high school game previews and predictions](https://www.naplesnews.com/story/sports/high-school/football/2026/10/29/high-school-football-sw-florida-fhsaa-oct-29-30-previews-predictions/92465579007/)\n[](https://subscribe.naplesnews.com/rr/nanobar?gps-source=CPTILELEFT&itm_campaign=2026ENTQ4BAU2026&itm_medium=ONSITE&success-url=https%3A%2F%2Fwww.naplesnews.com%2Fstory%2Fmoney%2Fbusiness%2Flocal%2F2026%2F10%2F27%2Fmissed-state-deadline-puts-planned-east-naples-golf-club-in-limbo%2F92395159007%2F)\n[](https://subscribe.naplesnews.com/rr/masthead?gps-source=CPMASTHEAD&itm_campaign=2026ENTQ4BAU2026&itm_medium=ONSITE&success-url=https%3A%2F%2Fwww.naplesnews.com%2Fstory%2Fmoney%2Fbusiness%2Flocal%2F2026%2F10%2F27%2Fmissed-state-deadline-puts-planned-east-naples-golf-club-in-limbo%2F92395159007%2F)\n[News](https://www.naplesnews.com/news/) [Sports](https://www.naplesnews.com/sports/) [Real Estate](https://www.naplesnews.com/business/real-estate/) [Restaurants](https://www.naplesnews.com/entertainment/restaurants/) [Opinion](https://www.naplesnews.com/opinion/) [Advertise](https://advertising.usatoday.com/advertise-with-us/?cid=Web_LiQ_Network_AdvertiseWithUs_AdvertiseInquiry&publication=naples_daily_news&utm_source=local_publication&utm_medium=menu&utm_campaign=advertise_with_us) [Obituaries](https://www.naplesnews.com/obituaries) [eNewspaper](https://user.naplesnews.com/user/enewspaper) [Legals](https://www.naplesnews.com/public-notices)\n[](https://www.naplesnews.com/search/ \"Search\")\n[](https://www.naplesnews.com/weather/ \"Weather in Naples: 74°F Partly Sunny\") [](https://subscribe.naplesnews.com/rr/navsub?gps-source=CPTOPNAVBAR&itm_campaign=2026ENTQ4BAU2026&itm_medium=ONSITE&success-url=https%3A%2F%2Fwww.naplesnews.com%2Fstory%2Fmoney%2Fbusiness%2Flocal%2F2026%2F10%2F27%2Fmissed-state-deadline-puts-planned-east-naples-golf-club-in-limbo%2F92395159007%2F)\n[](https://login.naplesnews.com/PNDN-GUP/authenticate/?success-url=https%3A%2F%2Fwww.naplesnews.com%2Fstory%2Fmoney%2Fbusiness%2Flocal%2F2026%2F10%2F27%2Fmissed-state-deadline-puts-planned-east-naples-golf-club-in-limbo%2F92395159007%2F&cancel-url=https%3A%2F%2Fwww.naplesnews.com%2Fstory%2Fmoney%2Fbusiness%2Flocal%2F2026%2F10%2F27%2Fmissed-state-deadline-puts-planned-east-naples-golf-club-in-limbo%2F92395159007%2F)\n[](https://www.naplesnews.com/) [](https://www.naplesnews.com/)\n[LOCAL BUSINESS](https://www.naplesnews.com/business/local/)\n# Missed state deadline stalls plans for new golf club in East Naples\n[![Portrait of Laura Layden](https://www.naplesnews.com/gcdn/authoring/authoring-images/2024/02/08/PNDN/72524348007-ndn-jh-20240126-laura-0001.JPG?crop=3313,3312,x1506,y0&width=48&height=48&format=pjpg&auto=webp) Laura Layden](https://www.naplesnews.com/staff/2647080001/laura-layden/)\nFort Myers News-Press & Naples Daily News\nOct. 27, 2026, 9:36 a.m. ET\nOpponents could get another chance to fight the conversion of a long-time citrus grove into an ex\""
       },
@@ -644,7 +644,7 @@ s39 | home-values-swfl brain — https://www.swfldatagulf.com/api/b/home-values-
   "caveats": [
     "flood-barrier-mode-1 active: 4 barrier ZIPs, worst-case AAL $40,342/insured property",
     "Override \"storm-history-modifier\" fired (priority 70)",
-    "permits-commercial-swfl excluded from synthesis (relevance 0.094, below floor 0.1)",
+    "permits-commercial-swfl excluded from synthesis (relevance 0.093, below floor 0.1)",
     "active-rentals-swfl excluded from synthesis (relevance 0.077, below floor 0.1)",
     "No figures published: this source has not yet received its first real SBA FOIA load. A synthetic development sample exists for offline testing only and is never shipped.",
     "Construction-cost PPI metrics (construction_cost_ppi_industrial, construction_cost_ppi_warehouse, construction_cost_ppi_office, construction_cost_ppi_medical_office, construction_cost_ppi_trade_concrete, construction_cost_ppi_trade_roofing, construction_cost_ppi_trade_electrical, construction_cost_ppi_trade_plumbing_hvac) are national BLS series — no SWFL-specific or Lee/Collier breakout exists at BLS for any of them. They ship a real month-over-month direction (unlike MarketBeat's schema-required \"stable\" fallback) but BLS can revise recent observations within ~30 days of first publication.",
@@ -856,8 +856,8 @@ s39 | home-values-swfl brain — https://www.swfldatagulf.com/api/b/home-values-
   "upstream_count": 37,
   "relevance": {
     "decay_curve": "weeks",
-    "half_life_hours": 719.9999999999998,
-    "computed_at": "2026-10-30T04:26:23.000Z"
+    "half_life_hours": 719.9999999999999,
+    "computed_at": "2026-10-30T10:58:16.000Z"
   },
   "exogenous_signals": [],
   "conditional_claims": [
