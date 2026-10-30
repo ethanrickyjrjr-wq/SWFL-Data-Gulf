@@ -1,8 +1,8 @@
 {
   "target": "master",
   "timestamps": {
-    "started": "2026-10-29T11:00:16.780Z",
-    "finished": "2026-10-29T11:00:44.853Z"
+    "started": "2026-10-30T04:26:00.587Z",
+    "finished": "2026-10-30T04:26:23.754Z"
   },
   "source": "live",
   "outcomes": [
@@ -48,572 +48,13 @@
     },
     {
       "packId": "sector-credit-swfl",
-      "status": "built",
-      "version": 41,
-      "written": true,
-      "brainOutput": {
-        "brain_id": "sector-credit-swfl",
-        "version": 41,
-        "refined_at": "2026-10-29T11:00:18Z",
-        "expires": "2026-11-05T11:00:18Z",
-        "ttl_seconds": 604800,
-        "direction": "bearish",
-        "magnitude": 0.38775510204081626,
-        "drivers": [],
-        "overrides": [],
-        "conclusion": "For SWFL lenders, the three lowest-risk 2-digit NAICS sectors by SBA resolved-loan charge-off rate are: Arts, Entertainment & Recreation (0% [thin sample: only 7 resolved loans, directional not confident]), Finance & Insurance (0% [thin sample: only 14 resolved loans, directional not confident]), Real Estate, Rental & Leasing (0% [thin sample: only 6 resolved loans, directional not confident]). The three highest-risk sectors are: Transportation & Warehousing (57.1% [thin sample: only 7 resolved loans, directional not confident]), Retail Trade (44.4% [thin sample: only 9 resolved loans, directional not confident]), Other Services (Personal & Repair) (21.2%). Read these rates against the current SOFR of 3.9% (stable) — funding-cost direction sets the appetite for charge-off risk. Cross-validate any sector-level call against the named brand outcomes in the franchise-outcomes brain before underwriting a specific borrower.",
-        "key_metrics": [
-          {
-            "metric": "best_naics_survival",
-            "value": 100,
-            "direction": "stable",
-            "label": "Arts, Entertainment & Recreation (NAICS 71) — best SWFL SBA survival rate [thin sample: only 7 resolved loans, directional not confident]",
-            "variable_type": "intensive",
-            "units": "percent",
-            "display_format": "percent",
-            "source": {
-              "url": "https://jtkdowmrjaxfvwmemxso.supabase.co/rest/v1/sba_loans_by_naics_county?select=*&project_county=in.(LEE,COLLIER)&approval_fy=gte.2020&naics_code=like.71%25",
-              "fetched_at": "2026-10-29T11:00:17Z",
-              "tier": 1,
-              "citation": "SBA 7(a)/504 loan outcomes (Lee + Collier counties, FY 2020+); federal source: Small Business Administration loan-status reporting — Arts, Entertainment & Recreation (NAICS 71): 0 charged off of 7 resolved loans (63 total approved across 10 sub-industries; $41.3M gross approved capital)."
-            },
-            "suggestions": [
-              "What's driving best naics survival?",
-              "How does best naics survival here compare to other SWFL areas?"
-            ]
-          },
-          {
-            "metric": "worst_naics_chargeoff",
-            "value": 57.1,
-            "direction": "stable",
-            "label": "Transportation & Warehousing (NAICS 48) — worst SWFL SBA charge-off rate [thin sample: only 7 resolved loans, directional not confident]",
-            "variable_type": "intensive",
-            "units": "percent",
-            "display_format": "percent",
-            "source": {
-              "url": "https://jtkdowmrjaxfvwmemxso.supabase.co/rest/v1/sba_loans_by_naics_county?select=*&project_county=in.(LEE,COLLIER)&approval_fy=gte.2020&naics_code=like.48%25",
-              "fetched_at": "2026-10-29T11:00:17Z",
-              "tier": 1,
-              "citation": "SBA 7(a)/504 loan outcomes (Lee + Collier counties, FY 2020+); federal source: Small Business Administration loan-status reporting — Transportation & Warehousing (NAICS 48): 4 charged off of 7 resolved loans (59 total approved across 16 sub-industries; $19.4M gross approved capital)."
-            },
-            "suggestions": [
-              "What's driving worst naics chargeoff?",
-              "How does worst naics chargeoff here compare to other SWFL areas?"
-            ]
-          },
-          {
-            "metric": "swfl_taxable_sales_latest_usd",
-            "value": 5403032052,
-            "direction": "falling",
-            "label": "SWFL taxable sales — 2025-12 (Lee + Collier)",
-            "variable_type": "extensive",
-            "units": "usd",
-            "display_format": "currency",
-            "source": {
-              "url": "https://floridarevenue.com/dataPortal/GTA/Form%2010/All%20Taxable%20Sales/F10_txsales_cy2425.xlsx",
-              "fetched_at": "2026-10-29T11:00:17Z",
-              "tier": 1,
-              "citation": "Florida DOR Form 10 — Taxable Sales by Business Type (Lee + Collier combined, 2025-12); source: fl_dor_sales_tax table (biennial XLSX cy2425)."
-            },
-            "suggestions": [
-              "What's driving swfl taxable sales latest usd?",
-              "How does swfl taxable sales latest usd here compare to other SWFL areas?"
-            ]
-          },
-          {
-            "metric": "swfl_taxable_sales_yoy_pct",
-            "value": -13.6,
-            "direction": "falling",
-            "label": "SWFL taxable sales YoY (2025-12 vs 2024-12)",
-            "variable_type": "intensive",
-            "units": "percent",
-            "display_format": "percent",
-            "source": {
-              "url": "https://floridarevenue.com/dataPortal/GTA/Form%2010/All%20Taxable%20Sales/F10_txsales_cy2425.xlsx",
-              "fetched_at": "2026-10-29T11:00:17Z",
-              "tier": 1,
-              "citation": "Florida DOR Form 10 — Taxable Sales by Business Type (Lee + Collier combined, 2025-12); source: fl_dor_sales_tax table (biennial XLSX cy2425)."
-            },
-            "suggestions": [
-              "What's driving swfl taxable sales yoy pct?",
-              "How does swfl taxable sales yoy pct here compare to other SWFL areas?"
-            ]
-          },
-          {
-            "metric": "swfl_taxable_sales_trailing_12mo_usd",
-            "value": 70759366219,
-            "direction": "stable",
-            "label": "SWFL taxable sales — trailing 12 months (Lee + Collier)",
-            "variable_type": "extensive",
-            "units": "usd",
-            "display_format": "currency",
-            "source": {
-              "url": "https://floridarevenue.com/dataPortal/GTA/Form%2010/All%20Taxable%20Sales/F10_txsales_cy2425.xlsx",
-              "fetched_at": "2026-10-29T11:00:17Z",
-              "tier": 1,
-              "citation": "Florida DOR Form 10 — Taxable Sales by Business Type (Lee + Collier combined, 2025-12); source: fl_dor_sales_tax table (biennial XLSX cy2425)."
-            },
-            "suggestions": [
-              "What's driving swfl taxable sales trailing 12mo usd?",
-              "How does swfl taxable sales trailing 12mo usd here compare to other SWFL areas?"
-            ]
-          },
-          {
-            "metric": "sector_71_chargeoff_rate",
-            "value": 0,
-            "direction": "stable",
-            "label": "Arts, Entertainment & Recreation (NAICS 71)",
-            "variable_type": "intensive",
-            "units": "percent",
-            "display_format": "percent",
-            "source": {
-              "url": "https://jtkdowmrjaxfvwmemxso.supabase.co/rest/v1/sba_loans_by_naics_county?select=*&project_county=in.(LEE,COLLIER)&approval_fy=gte.2020&naics_code=like.71%25",
-              "fetched_at": "2026-10-29T11:00:17Z",
-              "tier": 1,
-              "citation": "SBA 7(a)/504 loan outcomes (Lee + Collier counties, FY 2020+); federal source: Small Business Administration loan-status reporting — Arts, Entertainment & Recreation (NAICS 71): 0 charged off of 7 resolved loans (63 total approved across 10 sub-industries; $41.3M gross approved capital)."
-            },
-            "suggestions": [
-              "What's driving sector 71 chargeoff rate?",
-              "How does sector 71 chargeoff rate here compare to other SWFL areas?"
-            ]
-          },
-          {
-            "metric": "sector_52_chargeoff_rate",
-            "value": 0,
-            "direction": "stable",
-            "label": "Finance & Insurance (NAICS 52)",
-            "variable_type": "intensive",
-            "units": "percent",
-            "display_format": "percent",
-            "source": {
-              "url": "https://jtkdowmrjaxfvwmemxso.supabase.co/rest/v1/sba_loans_by_naics_county?select=*&project_county=in.(LEE,COLLIER)&approval_fy=gte.2020&naics_code=like.52%25",
-              "fetched_at": "2026-10-29T11:00:17Z",
-              "tier": 1,
-              "citation": "SBA 7(a)/504 loan outcomes (Lee + Collier counties, FY 2020+); federal source: Small Business Administration loan-status reporting — Finance & Insurance (NAICS 52): 0 charged off of 14 resolved loans (49 total approved across 9 sub-industries; $37.0M gross approved capital)."
-            },
-            "suggestions": [
-              "What's driving sector 52 chargeoff rate?",
-              "How does sector 52 chargeoff rate here compare to other SWFL areas?"
-            ]
-          },
-          {
-            "metric": "sector_53_chargeoff_rate",
-            "value": 0,
-            "direction": "stable",
-            "label": "Real Estate, Rental & Leasing (NAICS 53)",
-            "variable_type": "intensive",
-            "units": "percent",
-            "display_format": "percent",
-            "source": {
-              "url": "https://jtkdowmrjaxfvwmemxso.supabase.co/rest/v1/sba_loans_by_naics_county?select=*&project_county=in.(LEE,COLLIER)&approval_fy=gte.2020&naics_code=like.53%25",
-              "fetched_at": "2026-10-29T11:00:17Z",
-              "tier": 1,
-              "citation": "SBA 7(a)/504 loan outcomes (Lee + Collier counties, FY 2020+); federal source: Small Business Administration loan-status reporting — Real Estate, Rental & Leasing (NAICS 53): 0 charged off of 6 resolved loans (41 total approved across 9 sub-industries; $22.7M gross approved capital)."
-            },
-            "suggestions": [
-              "What's driving sector 53 chargeoff rate?",
-              "How does sector 53 chargeoff rate here compare to other SWFL areas?"
-            ]
-          },
-          {
-            "metric": "sector_72_chargeoff_rate",
-            "value": 7.1,
-            "direction": "stable",
-            "label": "Accommodation & Food Services (NAICS 72)",
-            "variable_type": "intensive",
-            "units": "percent",
-            "display_format": "percent",
-            "source": {
-              "url": "https://jtkdowmrjaxfvwmemxso.supabase.co/rest/v1/sba_loans_by_naics_county?select=*&project_county=in.(LEE,COLLIER)&approval_fy=gte.2020&naics_code=like.72%25",
-              "fetched_at": "2026-10-29T11:00:17Z",
-              "tier": 1,
-              "citation": "SBA 7(a)/504 loan outcomes (Lee + Collier counties, FY 2020+); federal source: Small Business Administration loan-status reporting — Accommodation & Food Services (NAICS 72): 2 charged off of 28 resolved loans (169 total approved across 8 sub-industries; $152.3M gross approved capital)."
-            },
-            "suggestions": [
-              "What's driving sector 72 chargeoff rate?",
-              "How does sector 72 chargeoff rate here compare to other SWFL areas?"
-            ]
-          },
-          {
-            "metric": "sector_42_chargeoff_rate",
-            "value": 9.1,
-            "direction": "stable",
-            "label": "Wholesale Trade (NAICS 42)",
-            "variable_type": "intensive",
-            "units": "percent",
-            "display_format": "percent",
-            "source": {
-              "url": "https://jtkdowmrjaxfvwmemxso.supabase.co/rest/v1/sba_loans_by_naics_county?select=*&project_county=in.(LEE,COLLIER)&approval_fy=gte.2020&naics_code=like.42%25",
-              "fetched_at": "2026-10-29T11:00:17Z",
-              "tier": 1,
-              "citation": "SBA 7(a)/504 loan outcomes (Lee + Collier counties, FY 2020+); federal source: Small Business Administration loan-status reporting — Wholesale Trade (NAICS 42): 1 charged off of 11 resolved loans (48 total approved across 29 sub-industries; $45.4M gross approved capital)."
-            },
-            "suggestions": [
-              "What's driving sector 42 chargeoff rate?",
-              "How does sector 42 chargeoff rate here compare to other SWFL areas?"
-            ]
-          },
-          {
-            "metric": "sector_54_chargeoff_rate",
-            "value": 12,
-            "direction": "stable",
-            "label": "Professional, Scientific & Technical Services (NAICS 54)",
-            "variable_type": "intensive",
-            "units": "percent",
-            "display_format": "percent",
-            "source": {
-              "url": "https://jtkdowmrjaxfvwmemxso.supabase.co/rest/v1/sba_loans_by_naics_county?select=*&project_county=in.(LEE,COLLIER)&approval_fy=gte.2020&naics_code=like.54%25",
-              "fetched_at": "2026-10-29T11:00:17Z",
-              "tier": 1,
-              "citation": "SBA 7(a)/504 loan outcomes (Lee + Collier counties, FY 2020+); federal source: Small Business Administration loan-status reporting — Professional, Scientific & Technical Services (NAICS 54): 3 charged off of 25 resolved loans (145 total approved across 22 sub-industries; $76.3M gross approved capital)."
-            },
-            "suggestions": [
-              "What's driving sector 54 chargeoff rate?",
-              "How does sector 54 chargeoff rate here compare to other SWFL areas?"
-            ]
-          },
-          {
-            "metric": "sector_62_chargeoff_rate",
-            "value": 12.5,
-            "direction": "stable",
-            "label": "Health Care & Social Assistance (NAICS 62)",
-            "variable_type": "intensive",
-            "units": "percent",
-            "display_format": "percent",
-            "source": {
-              "url": "https://jtkdowmrjaxfvwmemxso.supabase.co/rest/v1/sba_loans_by_naics_county?select=*&project_county=in.(LEE,COLLIER)&approval_fy=gte.2020&naics_code=like.62%25",
-              "fetched_at": "2026-10-29T11:00:17Z",
-              "tier": 1,
-              "citation": "SBA 7(a)/504 loan outcomes (Lee + Collier counties, FY 2020+); federal source: Small Business Administration loan-status reporting — Health Care & Social Assistance (NAICS 62): 2 charged off of 16 resolved loans (154 total approved across 19 sub-industries; $110.8M gross approved capital)."
-            },
-            "suggestions": [
-              "What's driving sector 62 chargeoff rate?",
-              "How does sector 62 chargeoff rate here compare to other SWFL areas?"
-            ]
-          },
-          {
-            "metric": "sector_23_chargeoff_rate",
-            "value": 13.7,
-            "direction": "stable",
-            "label": "Construction (NAICS 23)",
-            "variable_type": "intensive",
-            "units": "percent",
-            "display_format": "percent",
-            "source": {
-              "url": "https://jtkdowmrjaxfvwmemxso.supabase.co/rest/v1/sba_loans_by_naics_county?select=*&project_county=in.(LEE,COLLIER)&approval_fy=gte.2020&naics_code=like.23%25",
-              "fetched_at": "2026-10-29T11:00:17Z",
-              "tier": 1,
-              "citation": "SBA 7(a)/504 loan outcomes (Lee + Collier counties, FY 2020+); federal source: Small Business Administration loan-status reporting — Construction (NAICS 23): 7 charged off of 51 resolved loans (301 total approved across 27 sub-industries; $209.7M gross approved capital)."
-            },
-            "suggestions": [
-              "What's driving sector 23 chargeoff rate?",
-              "How does sector 23 chargeoff rate here compare to other SWFL areas?"
-            ]
-          },
-          {
-            "metric": "sector_56_chargeoff_rate",
-            "value": 18.8,
-            "direction": "stable",
-            "label": "Administrative & Support Services (NAICS 56)",
-            "variable_type": "intensive",
-            "units": "percent",
-            "display_format": "percent",
-            "source": {
-              "url": "https://jtkdowmrjaxfvwmemxso.supabase.co/rest/v1/sba_loans_by_naics_county?select=*&project_county=in.(LEE,COLLIER)&approval_fy=gte.2020&naics_code=like.56%25",
-              "fetched_at": "2026-10-29T11:00:17Z",
-              "tier": 1,
-              "citation": "SBA 7(a)/504 loan outcomes (Lee + Collier counties, FY 2020+); federal source: Small Business Administration loan-status reporting — Administrative & Support Services (NAICS 56): 6 charged off of 32 resolved loans (137 total approved across 24 sub-industries; $60.6M gross approved capital)."
-            },
-            "suggestions": [
-              "What's driving sector 56 chargeoff rate?",
-              "How does sector 56 chargeoff rate here compare to other SWFL areas?"
-            ]
-          },
-          {
-            "metric": "sector_44_chargeoff_rate",
-            "value": 18.8,
-            "direction": "stable",
-            "label": "Retail Trade (NAICS 44)",
-            "variable_type": "intensive",
-            "units": "percent",
-            "display_format": "percent",
-            "source": {
-              "url": "https://jtkdowmrjaxfvwmemxso.supabase.co/rest/v1/sba_loans_by_naics_county?select=*&project_county=in.(LEE,COLLIER)&approval_fy=gte.2020&naics_code=like.44%25",
-              "fetched_at": "2026-10-29T11:00:17Z",
-              "tier": 1,
-              "citation": "SBA 7(a)/504 loan outcomes (Lee + Collier counties, FY 2020+); federal source: Small Business Administration loan-status reporting — Retail Trade (NAICS 44): 3 charged off of 16 resolved loans (74 total approved across 33 sub-industries; $66.3M gross approved capital)."
-            },
-            "suggestions": [
-              "What's driving sector 44 chargeoff rate?",
-              "How does sector 44 chargeoff rate here compare to other SWFL areas?"
-            ]
-          },
-          {
-            "metric": "sector_81_chargeoff_rate",
-            "value": 21.2,
-            "direction": "stable",
-            "label": "Other Services (Personal & Repair) (NAICS 81)",
-            "variable_type": "intensive",
-            "units": "percent",
-            "display_format": "percent",
-            "source": {
-              "url": "https://jtkdowmrjaxfvwmemxso.supabase.co/rest/v1/sba_loans_by_naics_county?select=*&project_county=in.(LEE,COLLIER)&approval_fy=gte.2020&naics_code=like.81%25",
-              "fetched_at": "2026-10-29T11:00:17Z",
-              "tier": 1,
-              "citation": "SBA 7(a)/504 loan outcomes (Lee + Collier counties, FY 2020+); federal source: Small Business Administration loan-status reporting — Other Services (Personal & Repair) (NAICS 81): 7 charged off of 33 resolved loans (176 total approved across 21 sub-industries; $105.5M gross approved capital)."
-            },
-            "suggestions": [
-              "What's driving sector 81 chargeoff rate?",
-              "How does sector 81 chargeoff rate here compare to other SWFL areas?"
-            ]
-          },
-          {
-            "metric": "sector_45_chargeoff_rate",
-            "value": 44.4,
-            "direction": "stable",
-            "label": "Retail Trade (NAICS 45)",
-            "variable_type": "intensive",
-            "units": "percent",
-            "display_format": "percent",
-            "source": {
-              "url": "https://jtkdowmrjaxfvwmemxso.supabase.co/rest/v1/sba_loans_by_naics_county?select=*&project_county=in.(LEE,COLLIER)&approval_fy=gte.2020&naics_code=like.45%25",
-              "fetched_at": "2026-10-29T11:00:17Z",
-              "tier": 1,
-              "citation": "SBA 7(a)/504 loan outcomes (Lee + Collier counties, FY 2020+); federal source: Small Business Administration loan-status reporting — Retail Trade (NAICS 45): 4 charged off of 9 resolved loans (63 total approved across 22 sub-industries; $40.9M gross approved capital)."
-            },
-            "suggestions": [
-              "What's driving sector 45 chargeoff rate?",
-              "How does sector 45 chargeoff rate here compare to other SWFL areas?"
-            ]
-          },
-          {
-            "metric": "sector_48_chargeoff_rate",
-            "value": 57.1,
-            "direction": "stable",
-            "label": "Transportation & Warehousing (NAICS 48)",
-            "variable_type": "intensive",
-            "units": "percent",
-            "display_format": "percent",
-            "source": {
-              "url": "https://jtkdowmrjaxfvwmemxso.supabase.co/rest/v1/sba_loans_by_naics_county?select=*&project_county=in.(LEE,COLLIER)&approval_fy=gte.2020&naics_code=like.48%25",
-              "fetched_at": "2026-10-29T11:00:17Z",
-              "tier": 1,
-              "citation": "SBA 7(a)/504 loan outcomes (Lee + Collier counties, FY 2020+); federal source: Small Business Administration loan-status reporting — Transportation & Warehousing (NAICS 48): 4 charged off of 7 resolved loans (59 total approved across 16 sub-industries; $19.4M gross approved capital)."
-            },
-            "suggestions": [
-              "What's driving sector 48 chargeoff rate?",
-              "How does sector 48 chargeoff rate here compare to other SWFL areas?"
-            ]
-          }
-        ],
-        "caveats": [
-          "Charge-off rates use the resolved-loan denominator (n_chargeoffs / (n_chargeoffs + n_paid_in_full)); the materialized view's `chargeoff_pct` is intentionally ignored because it understates risk on still-active loans.",
-          "Sectors with fewer than 5 resolved loans are not ranked — small-sample charge-off rates are directional, not actionable.",
-          "Worst-sector charge-off 57.1% (Transportation & Warehousing, NAICS 48) above 30% bearish threshold — sector-level credit risk is elevated."
-        ],
-        "contradicts": [],
-        "confidence": 1,
-        "joint_integrity": 1,
-        "confidence_dispersion": 0,
-        "chain_depth": 2,
-        "trust_tier": 1,
-        "upstream_count": 3,
-        "relevance": {
-          "decay_curve": "weeks",
-          "half_life_hours": 720,
-          "computed_at": "2026-10-29T11:00:18Z"
-        },
-        "exogenous_signals": []
-      }
+      "status": "skipped-fresh",
+      "written": false
     },
     {
       "packId": "tourism-tdt",
-      "status": "built",
-      "version": 43,
-      "written": true,
-      "brainOutput": {
-        "brain_id": "tourism-tdt",
-        "version": 43,
-        "refined_at": "2026-10-29T11:00:18Z",
-        "expires": "2026-11-05T11:00:18Z",
-        "ttl_seconds": 604800,
-        "direction": "neutral",
-        "magnitude": 0.4,
-        "drivers": [],
-        "overrides": [],
-        "conclusion": "SWFL TDT collections (Lee + Collier combined) for 2026-04 (shoulder season): $9.03M. Trailing 12 months stand at 78% of the strongest pre-Hurricane-Ian annual run. Hospitality / accommodation operators should weight forward decisions against this SWFL seasonal pulse; the cross-vertical read lives downstream in master.",
-        "key_metrics": [
-          {
-            "metric": "latest_monthly_collections_usd",
-            "value": 9028029.34,
-            "direction": "stable",
-            "label": "Latest monthly TDT collections (SWFL combined, 2026-04, shoulder season)",
-            "variable_type": "extensive",
-            "units": "USD/month",
-            "display_format": "currency",
-            "source": {
-              "url": "https://www.swfldatagulf.com/r/source/fl_dor_tdt_collections?label=Florida+DOR+%E2%80%94+Tourist+Development+Tax+collections&source=Florida+DOR&brain=tourism-tdt&date_col=period",
-              "fetched_at": "2026-10-29T11:00:18Z",
-              "tier": 1,
-              "citation": "Florida DOR Tourist Development Tax — SWFL (Lee + Collier) (666 monthly collection records: 1998-07 → 2026-04); source: Florida Department of Revenue Form 3 XLSX (monthly, ~6-week lag) — SWFL combined 2026-04 = $9.03M (FY 2026, post_ian=true)."
-            },
-            "suggestions": [
-              "What's driving latest monthly collections usd?",
-              "How does latest monthly collections usd here compare to other SWFL areas?"
-            ]
-          },
-          {
-            "metric": "trailing_12mo_collections_usd",
-            "value": 89003088.51,
-            "direction": "stable",
-            "label": "Trailing 12-month TDT collections total (SWFL combined)",
-            "variable_type": "extensive",
-            "units": "USD",
-            "display_format": "currency",
-            "source": {
-              "url": "https://www.swfldatagulf.com/r/source/fl_dor_tdt_collections?label=Florida+DOR+%E2%80%94+Tourist+Development+Tax+collections&source=Florida+DOR&brain=tourism-tdt&date_col=period",
-              "fetched_at": "2026-10-29T11:00:18Z",
-              "tier": 1,
-              "citation": "Florida DOR Tourist Development Tax — SWFL (Lee + Collier) (666 monthly collection records: 1998-07 → 2026-04); source: Florida Department of Revenue Form 3 XLSX (monthly, ~6-week lag) — SWFL combined sum, trailing 12-month window: 2025-05 → 2026-04 (12 months)."
-            },
-            "suggestions": [
-              "What's driving trailing 12mo collections usd?",
-              "How does trailing 12mo collections usd here compare to other SWFL areas?"
-            ]
-          },
-          {
-            "metric": "post_ian_recovery_ratio",
-            "value": 0.78,
-            "direction": "falling",
-            "label": "Post-Hurricane-Ian recovery ratio (SWFL trailing 12mo ÷ best pre-Ian 12mo)",
-            "variable_type": "intensive",
-            "units": "ratio",
-            "display_format": "ratio",
-            "source": {
-              "url": "https://www.swfldatagulf.com/r/source/fl_dor_tdt_collections?label=Florida+DOR+%E2%80%94+Tourist+Development+Tax+collections&source=Florida+DOR&brain=tourism-tdt&date_col=period",
-              "fetched_at": "2026-10-29T11:00:18Z",
-              "tier": 1,
-              "citation": "Florida DOR Tourist Development Tax — SWFL (Lee + Collier) (666 monthly collection records: 1998-07 → 2026-04); source: Florida Department of Revenue Form 3 XLSX (monthly, ~6-week lag) — SWFL trailing 12-month total (2025-05 → 2026-04 (12 months)) ÷ best pre-Ian 12-month window ($114.71M; Ian landfall 2022-09-28)."
-            },
-            "suggestions": [
-              "What's driving post ian recovery ratio?",
-              "How does post ian recovery ratio here compare to other SWFL areas?"
-            ]
-          },
-          {
-            "metric": "seasonal_position_vs_history",
-            "value": 1.04,
-            "direction": "stable",
-            "label": "Seasonal position vs same-month historical mean (SWFL combined)",
-            "variable_type": "intensive",
-            "units": "ratio",
-            "display_format": "ratio",
-            "source": {
-              "url": "https://www.swfldatagulf.com/r/source/fl_dor_tdt_collections?label=Florida+DOR+%E2%80%94+Tourist+Development+Tax+collections&source=Florida+DOR&brain=tourism-tdt&date_col=period",
-              "fetched_at": "2026-10-29T11:00:18Z",
-              "tier": 1,
-              "citation": "Florida DOR Tourist Development Tax — SWFL (Lee + Collier) (666 monthly collection records: 1998-07 → 2026-04); source: Florida Department of Revenue Form 3 XLSX (monthly, ~6-week lag) — SWFL 2026-04 ($9.03M) vs same-calendar-month mean across 28 non-zero years."
-            },
-            "suggestions": [
-              "What's driving seasonal position vs history?",
-              "How does seasonal position vs history here compare to other SWFL areas?"
-            ]
-          },
-          {
-            "metric": "lee_latest_monthly_collections_usd",
-            "value": 9028029.34,
-            "direction": "stable",
-            "label": "Lee County latest monthly TDT collections (2026-04)",
-            "variable_type": "extensive",
-            "units": "USD/month",
-            "display_format": "currency",
-            "source": {
-              "url": "https://www.swfldatagulf.com/r/source/fl_dor_tdt_collections?label=Florida+DOR+%E2%80%94+Tourist+Development+Tax+collections&source=Florida+DOR&brain=tourism-tdt&date_col=period",
-              "fetched_at": "2026-10-29T11:00:18Z",
-              "tier": 1,
-              "citation": "Florida DOR Tourist Development Tax — SWFL (Lee + Collier) (666 monthly collection records: 1998-07 → 2026-04); source: Florida Department of Revenue Form 3 XLSX (monthly, ~6-week lag) — Lee County 2026-04 = $9.03M."
-            },
-            "suggestions": [
-              "What's driving lee latest monthly collections usd?",
-              "How does lee latest monthly collections usd here compare to other SWFL areas?"
-            ]
-          },
-          {
-            "metric": "lee_trailing_12mo_collections_usd",
-            "value": 53331356.519999996,
-            "direction": "stable",
-            "label": "Lee County trailing 12-month TDT collections",
-            "variable_type": "extensive",
-            "units": "USD",
-            "display_format": "currency",
-            "source": {
-              "url": "https://www.swfldatagulf.com/r/source/fl_dor_tdt_collections?label=Florida+DOR+%E2%80%94+Tourist+Development+Tax+collections&source=Florida+DOR&brain=tourism-tdt&date_col=period",
-              "fetched_at": "2026-10-29T11:00:18Z",
-              "tier": 1,
-              "citation": "Florida DOR Tourist Development Tax — SWFL (Lee + Collier) (666 monthly collection records: 1998-07 → 2026-04); source: Florida Department of Revenue Form 3 XLSX (monthly, ~6-week lag) — Lee County trailing 12 months: 2025-05 → 2026-04 (12 months)."
-            },
-            "suggestions": [
-              "What's driving lee trailing 12mo collections usd?",
-              "How does lee trailing 12mo collections usd here compare to other SWFL areas?"
-            ]
-          },
-          {
-            "metric": "collier_latest_monthly_collections_usd",
-            "value": 7097536.72,
-            "direction": "stable",
-            "label": "Collier County latest monthly TDT collections (2026-04)",
-            "variable_type": "extensive",
-            "units": "USD/month",
-            "display_format": "currency",
-            "source": {
-              "url": "https://www.swfldatagulf.com/r/source/fl_dor_tdt_collections?label=Florida+DOR+%E2%80%94+Tourist+Development+Tax+collections&source=Florida+DOR&brain=tourism-tdt&date_col=period",
-              "fetched_at": "2026-10-29T11:00:18Z",
-              "tier": 1,
-              "citation": "Florida DOR Tourist Development Tax — SWFL (Lee + Collier) (666 monthly collection records: 1998-07 → 2026-04); source: Florida Department of Revenue Form 3 XLSX (monthly, ~6-week lag) — Collier County 2026-04 = $7.10M."
-            },
-            "suggestions": [
-              "What's driving collier latest monthly collections usd?",
-              "How does collier latest monthly collections usd here compare to other SWFL areas?"
-            ]
-          },
-          {
-            "metric": "collier_trailing_12mo_collections_usd",
-            "value": 51136864.940000005,
-            "direction": "stable",
-            "label": "Collier County trailing 12-month TDT collections",
-            "variable_type": "extensive",
-            "units": "USD",
-            "display_format": "currency",
-            "source": {
-              "url": "https://www.swfldatagulf.com/r/source/fl_dor_tdt_collections?label=Florida+DOR+%E2%80%94+Tourist+Development+Tax+collections&source=Florida+DOR&brain=tourism-tdt&date_col=period",
-              "fetched_at": "2026-10-29T11:00:18Z",
-              "tier": 1,
-              "citation": "Florida DOR Tourist Development Tax — SWFL (Lee + Collier) (666 monthly collection records: 1998-07 → 2026-04); source: Florida Department of Revenue Form 3 XLSX (monthly, ~6-week lag) — Collier County trailing 12 months: 2025-03 → 2026-02 (12 months)."
-            },
-            "suggestions": [
-              "What's driving collier trailing 12mo collections usd?",
-              "How does collier trailing 12mo collections usd here compare to other SWFL areas?"
-            ]
-          }
-        ],
-        "caveats": [
-          "Florida DOR Form 3 may revise recent months for ~60 days after first publication — treat the latest month as directional, not final.",
-          "Latest month 2026-04 reflects only 1 of 2 expected counties (Collier data lags Lee by ~2 months). YoY comparison is suppressed to avoid apples-to-oranges inflation. Use per-county metrics or trailing_12mo_collections_usd for the cross-county read."
-        ],
-        "contradicts": [],
-        "confidence": 1,
-        "joint_integrity": 1,
-        "confidence_dispersion": 0,
-        "chain_depth": 0,
-        "trust_tier": 1,
-        "upstream_count": 0,
-        "relevance": {
-          "decay_curve": "weeks",
-          "half_life_hours": 720,
-          "computed_at": "2026-10-29T11:00:18Z"
-        },
-        "exogenous_signals": []
-      }
+      "status": "skipped-fresh",
+      "written": false
     },
     {
       "packId": "env-swfl",
@@ -673,65 +114,65 @@
     {
       "packId": "city-pulse-swfl",
       "status": "built",
-      "version": 147,
+      "version": 148,
       "written": true,
       "brainOutput": {
         "brain_id": "city-pulse-swfl",
-        "version": 147,
-        "refined_at": "2026-10-29T11:00:18Z",
-        "expires": "2026-10-30T11:00:18Z",
+        "version": 148,
+        "refined_at": "2026-10-30T04:26:01Z",
+        "expires": "2026-10-31T04:26:01Z",
         "ttl_seconds": 86400,
         "direction": "neutral",
         "magnitude": 0,
         "drivers": [],
         "overrides": [],
-        "conclusion": "SWFL city pulse as of 2026-10-29: 71 live current-events signals across 6 cities — Fort Myers (23), Naples (22), Cape Coral (21), East Naples (1), Sanibel (1), Estero (3). Most current: Fort Myers — A newly completed, opulent beachfront estate at 2050 Gordon Drive in Naples sold in an off-market deal for $71 million, including furnishings, as of Oct. 27, 2026. These are current cited facts only; the cross-vertical read and any direction call live downstream in master.",
+        "conclusion": "SWFL city pulse as of 2026-10-30: 81 live current-events signals across 6 cities — Fort Myers (25), Naples (29), Cape Coral (21), East Naples (2), Sanibel (1), Estero (3). Most current: Fort Myers — A missed state deadline put the planned East Naples golf club — a conversion of a long-time citrus grove — in limbo as of Oct. 27, 2026; opponents could get another chance to fight the conversion. These are current cited facts only; the cross-vertical read and any direction call live downstream in master.",
         "key_metrics": [
           {
-            "metric": "signal_transactions_1",
-            "value": "Fort Myers: A newly completed, opulent beachfront estate at 2050 Gordon Drive in Naples sold in an off-market deal for $71 million, including furnishings, as of Oct. 27, 2026.",
+            "metric": "signal_breaking_1",
+            "value": "Fort Myers: A missed state deadline put the planned East Naples golf club — a conversion of a long-time citrus grove — in limbo as of Oct. 27, 2026; opponents could get another chance to fight the conversion.",
             "direction": "stable",
-            "label": "Fort Myers — transactions",
+            "label": "Fort Myers — breaking",
             "variable_type": "categorical",
             "source": {
-              "url": "https://www.news-press.com/story/money/business/local/2026/10/27/new-naples-florida-estate-sells-for-71-million-in-private-deal-one-of-the-largest-sales-of-year/92458106007/",
-              "fetched_at": "2026-10-29T11:00:18Z",
+              "url": "https://www.naplesnews.com/story/money/business/local/2026/10/27/missed-state-deadline-puts-planned-east-naples-golf-club-in-limbo/92395159007/",
+              "fetched_at": "2026-10-30T04:26:01Z",
               "tier": 2,
-              "citation": "New Naples estate sells for $71 million in private deal: \"[](https://www.news-press.com/)\n[](https://subscribe.news-press.com/rr/nanobar?gps-source=CPTILELEFT&itm_campaign=2026ENTQ4BAU2026&itm_medium=ONSITE&success-url=https%3A%2F%2Fwww.news-press.com%2Fstory%2Fmoney%2Fbusiness%2Flocal%2F2026%2F10%2F27%2Fnew-naples-florida-estate-sells-for-71-million-in-private-deal-one-of-the-largest-sales-of-year%2F92458106007%2F)\n[](https://subscribe.news-press.com/rr/masthead?gps-source=CPMASTHEAD&itm_campaign=2026ENTQ4BAU2026&itm_medium=ONSITE&success-url=https%3A%2F%2Fwww.news-press.com%2Fstory%2Fmoney%2Fbusiness%2Flocal%2F2026%2F10%2F27%2Fnew-naples-florida-estate-sells-for-71-million-in-private-deal-one-of-the-largest-sales-of-year%2F92458106007%2F)\n[News](https://www.news-press.com/news/) [Cape Coral](https://www.news-press.com/news/cape-coral/) [Sports](https://www.news-press.com/sports/) [Restaurants](https://www.news-press.com/taste/) [Real Estate](https://www.news-press.com/real-estate) [Advertise](https://advertising.usatoday.com/advertise-with-us/?cid=Web_LiQ_Network_AdvertiseWithUs_AdvertiseInquiry&publication=the_news_press&utm_source=local_publication&utm_medium=menu&utm_campaign=advertise_with_us) [Obituaries](https://www.news-press.com/obituaries) [eNewspaper](https://user.news-press.com/user/enewspaper) [Legals](https://www.news-press.com/public-notices)\n[](https://www.news-press.com/search/ \"Search\")\n[](https://www.news-press.com/weather/ \"Weather in Fort Myers: 71°F Mostly Cloudy\") [](https://subscribe.news-press.com/rr/navsub?gps-source=CPTOPNAVBAR&itm_campaign=2026ENTQ4BAU2026&itm_medium=ONSITE&success-url=https%3A%2F%2Fwww.news-press.com%2Fstory%2Fmoney%2Fbusiness%2Flocal%2F2026%2F10%2F27%2Fnew-naples-florida-estate-sells-for-71-million-in-private-deal-one-of-the-largest-sales-of-year%2F92458106007%2F)\n[](https://login.news-press.com/PFTM-GUP/authenticate/?success-url=https%3A%2F%2Fwww.news-press.com%2Fstory%2Fmoney%2Fbusiness%2Flocal%2F2026%2F10%2F27%2Fnew-naples-florida-estate-sells-for-71-million-in-private-deal-one-of-the-largest-sales-of-year%2F92458106007%2F&cancel-url=https%3A%2F%2Fwww.news-press.com%2Fstory%2Fmoney%2Fbusiness%2Flocal%2F2026%2F10%2F27%2Fnew-naples-florida-estate-sells-for-71-million-in-private-deal-one-of-the-largest-sales-of-year%2F92458106007%2F)\n[](https://www.news-press.com/) [](https://www.news-press.com/)\nLOCAL BUSINESS\n# New waterfront estate in Naples fetches $71 million in off-market deal\n[![Portrait of Laura Layden](https://www.news-press.com/gcdn/authoring/authoring-images/2024/02/08/PNDN/72524348007-ndn-jh-20240126-laura-0001.JPG?crop=3313,3312,x1506,y0&width=48&height=48&format=pjpg&auto=webp) Laura Layden](https://www.naplesnews.com/staff/2647080001/laura-layden/)\nFort Myers News-Press & Naples Daily News\nOct. 27, 2026, 2:20 p.m. ET\nNaples has seen another whopping home sale.\nIn an \"off-market\" sale, a newly completed, opulent beachfront estate fetched $71 million, including furnishings.\nAlthough it's not the largest, the sale at 2050 Gordon Drive is one of\""
+              "citation": "Missed state deadline puts planned East Naples golf club in limbo: \"[](https://www.naplesnews.com/)\n[SWFL Football Week 11 high school game previews and predictions](https://www.naplesnews.com/story/sports/high-school/football/2026/10/29/high-school-football-sw-florida-fhsaa-oct-29-30-previews-predictions/92465579007/)\n[](https://subscribe.naplesnews.com/rr/nanobar?gps-source=CPTILELEFT&itm_campaign=2026ENTQ4BAU2026&itm_medium=ONSITE&success-url=https%3A%2F%2Fwww.naplesnews.com%2Fstory%2Fmoney%2Fbusiness%2Flocal%2F2026%2F10%2F27%2Fmissed-state-deadline-puts-planned-east-naples-golf-club-in-limbo%2F92395159007%2F)\n[](https://subscribe.naplesnews.com/rr/masthead?gps-source=CPMASTHEAD&itm_campaign=2026ENTQ4BAU2026&itm_medium=ONSITE&success-url=https%3A%2F%2Fwww.naplesnews.com%2Fstory%2Fmoney%2Fbusiness%2Flocal%2F2026%2F10%2F27%2Fmissed-state-deadline-puts-planned-east-naples-golf-club-in-limbo%2F92395159007%2F)\n[News](https://www.naplesnews.com/news/) [Sports](https://www.naplesnews.com/sports/) [Real Estate](https://www.naplesnews.com/business/real-estate/) [Restaurants](https://www.naplesnews.com/entertainment/restaurants/) [Opinion](https://www.naplesnews.com/opinion/) [Advertise](https://advertising.usatoday.com/advertise-with-us/?cid=Web_LiQ_Network_AdvertiseWithUs_AdvertiseInquiry&publication=naples_daily_news&utm_source=local_publication&utm_medium=menu&utm_campaign=advertise_with_us) [Obituaries](https://www.naplesnews.com/obituaries) [eNewspaper](https://user.naplesnews.com/user/enewspaper) [Legals](https://www.naplesnews.com/public-notices)\n[](https://www.naplesnews.com/search/ \"Search\")\n[](https://www.naplesnews.com/weather/ \"Weather in Naples: 74°F Partly Sunny\") [](https://subscribe.naplesnews.com/rr/navsub?gps-source=CPTOPNAVBAR&itm_campaign=2026ENTQ4BAU2026&itm_medium=ONSITE&success-url=https%3A%2F%2Fwww.naplesnews.com%2Fstory%2Fmoney%2Fbusiness%2Flocal%2F2026%2F10%2F27%2Fmissed-state-deadline-puts-planned-east-naples-golf-club-in-limbo%2F92395159007%2F)\n[](https://login.naplesnews.com/PNDN-GUP/authenticate/?success-url=https%3A%2F%2Fwww.naplesnews.com%2Fstory%2Fmoney%2Fbusiness%2Flocal%2F2026%2F10%2F27%2Fmissed-state-deadline-puts-planned-east-naples-golf-club-in-limbo%2F92395159007%2F&cancel-url=https%3A%2F%2Fwww.naplesnews.com%2Fstory%2Fmoney%2Fbusiness%2Flocal%2F2026%2F10%2F27%2Fmissed-state-deadline-puts-planned-east-naples-golf-club-in-limbo%2F92395159007%2F)\n[](https://www.naplesnews.com/) [](https://www.naplesnews.com/)\n[LOCAL BUSINESS](https://www.naplesnews.com/business/local/)\n# Missed state deadline stalls plans for new golf club in East Naples\n[![Portrait of Laura Layden](https://www.naplesnews.com/gcdn/authoring/authoring-images/2024/02/08/PNDN/72524348007-ndn-jh-20240126-laura-0001.JPG?crop=3313,3312,x1506,y0&width=48&height=48&format=pjpg&auto=webp) Laura Layden](https://www.naplesnews.com/staff/2647080001/laura-layden/)\nFort Myers News-Press & Naples Daily News\nOct. 27, 2026, 9:36 a.m. ET\nOpponents could get another chance to fight the conversion of a long-time citrus grove into an ex\""
             },
             "suggestions": [
-              "What's driving signal transactions 1?",
-              "How does signal transactions 1 here compare to other SWFL areas?"
+              "What's driving signal breaking 1?",
+              "How does signal breaking 1 here compare to other SWFL areas?"
             ]
           },
           {
-            "metric": "signal_transactions_2",
-            "value": "Naples: A newly completed, opulent beachfront estate in Naples sold for $71 million in an off-market deal, including furnishings, as reported Oct. 27, 2026.",
+            "metric": "signal_breaking_2",
+            "value": "Naples: Former Naples councilwoman Linda Penniman is remembered as the 'Energizer Bunny'; Naples leader dies of 'broken heart' after husband; son recalls her life (reported Oct. 23, 2026).",
             "direction": "stable",
-            "label": "Naples — transactions",
+            "label": "Naples — breaking",
             "variable_type": "categorical",
             "source": {
-              "url": "https://www.naplesnews.com/story/money/business/local/2026/10/27/new-naples-florida-estate-sells-for-71-million-in-private-deal-one-of-the-largest-sales-of-year/92458106007/",
-              "fetched_at": "2026-10-29T11:00:18Z",
+              "url": "https://www.naplesnews.com/story/money/business/local/2026/10/23/former-naples-florida-councilwoman-linda-penniman-remembered-as-the-energizer-bunny/92385292007/",
+              "fetched_at": "2026-10-30T04:26:01Z",
               "tier": 2,
-              "citation": "New Naples estate sells for $71 million in private deal: \"[](https://www.naplesnews.com/)\n[](https://subscribe.naplesnews.com/rr/nanobar?gps-source=CPTILELEFT&itm_campaign=2026ENTQ4BAU2026&itm_medium=ONSITE&success-url=https%3A%2F%2Fwww.naplesnews.com%2Fstory%2Fmoney%2Fbusiness%2Flocal%2F2026%2F10%2F27%2Fnew-naples-florida-estate-sells-for-71-million-in-private-deal-one-of-the-largest-sales-of-year%2F92458106007%2F)\n[](https://subscribe.naplesnews.com/rr/masthead?gps-source=CPMASTHEAD&itm_campaign=2026ENTQ4BAU2026&itm_medium=ONSITE&success-url=https%3A%2F%2Fwww.naplesnews.com%2Fstory%2Fmoney%2Fbusiness%2Flocal%2F2026%2F10%2F27%2Fnew-naples-florida-estate-sells-for-71-million-in-private-deal-one-of-the-largest-sales-of-year%2F92458106007%2F)\n[News](https://www.naplesnews.com/news/) [Sports](https://www.naplesnews.com/sports/) [Real Estate](https://www.naplesnews.com/business/real-estate/) [Restaurants](https://www.naplesnews.com/entertainment/restaurants/) [Opinion](https://www.naplesnews.com/opinion/) [Advertise](https://advertising.usatoday.com/advertise-with-us/?cid=Web_LiQ_Network_AdvertiseWithUs_AdvertiseInquiry&publication=naples_daily_news&utm_source=local_publication&utm_medium=menu&utm_campaign=advertise_with_us) [Obituaries](https://www.naplesnews.com/obituaries) [eNewspaper](https://user.naplesnews.com/user/enewspaper) [Legals](https://www.naplesnews.com/public-notices)\n[](https://www.naplesnews.com/search/ \"Search\")\n[](https://www.naplesnews.com/weather/ \"Weather in Naples: 74°F Mostly Cloudy\") [](https://subscribe.naplesnews.com/rr/navsub?gps-source=CPTOPNAVBAR&itm_campaign=2026ENTQ4BAU2026&itm_medium=ONSITE&success-url=https%3A%2F%2Fwww.naplesnews.com%2Fstory%2Fmoney%2Fbusiness%2Flocal%2F2026%2F10%2F27%2Fnew-naples-florida-estate-sells-for-71-million-in-private-deal-one-of-the-largest-sales-of-year%2F92458106007%2F)\n[](https://login.naplesnews.com/PNDN-GUP/authenticate/?success-url=https%3A%2F%2Fwww.naplesnews.com%2Fstory%2Fmoney%2Fbusiness%2Flocal%2F2026%2F10%2F27%2Fnew-naples-florida-estate-sells-for-71-million-in-private-deal-one-of-the-largest-sales-of-year%2F92458106007%2F&cancel-url=https%3A%2F%2Fwww.naplesnews.com%2Fstory%2Fmoney%2Fbusiness%2Flocal%2F2026%2F10%2F27%2Fnew-naples-florida-estate-sells-for-71-million-in-private-deal-one-of-the-largest-sales-of-year%2F92458106007%2F)\n[](https://www.naplesnews.com/) [](https://www.naplesnews.com/)\n[LOCAL BUSINESS](https://www.naplesnews.com/business/local/)\n# New waterfront estate in Naples fetches $71 million in off-market deal\n[![Portrait of Laura Layden](https://www.naplesnews.com/gcdn/authoring/authoring-images/2024/02/08/PNDN/72524348007-ndn-jh-20240126-laura-0001.JPG?crop=3313,3312,x1506,y0&width=48&height=48&format=pjpg&auto=webp) Laura Layden](https://www.naplesnews.com/staff/2647080001/laura-layden/)\nFort Myers News-Press & Naples Daily News\nOct. 27, 2026, 2:20 p.m. ET\nNaples has seen another whopping home sale.\nIn an \"off-market\" sale, a newly completed, opulent beachfront estate fetched $71 million, including furnishings.\nAlthou\""
+              "citation": "Former Naples councilwoman remembered as the 'Energizer Bunny': \"[](https://www.naplesnews.com/)\n[SWFL Football Week 11 high school game previews and predictions](https://www.naplesnews.com/story/sports/high-school/football/2026/10/29/high-school-football-sw-florida-fhsaa-oct-29-30-previews-predictions/92465579007/)\n[](https://subscribe.naplesnews.com/rr/nanobar?gps-source=CPTILELEFT&itm_campaign=2026ENTQ4BAU2026&itm_medium=ONSITE&success-url=https%3A%2F%2Fwww.naplesnews.com%2Fstory%2Fmoney%2Fbusiness%2Flocal%2F2026%2F10%2F23%2Fformer-naples-florida-councilwoman-linda-penniman-remembered-as-the-energizer-bunny%2F92385292007%2F)\n[](https://subscribe.naplesnews.com/rr/masthead?gps-source=CPMASTHEAD&itm_campaign=2026ENTQ4BAU2026&itm_medium=ONSITE&success-url=https%3A%2F%2Fwww.naplesnews.com%2Fstory%2Fmoney%2Fbusiness%2Flocal%2F2026%2F10%2F23%2Fformer-naples-florida-councilwoman-linda-penniman-remembered-as-the-energizer-bunny%2F92385292007%2F)\n[News](https://www.naplesnews.com/news/) [Sports](https://www.naplesnews.com/sports/) [Real Estate](https://www.naplesnews.com/business/real-estate/) [Restaurants](https://www.naplesnews.com/entertainment/restaurants/) [Opinion](https://www.naplesnews.com/opinion/) [Advertise](https://advertising.usatoday.com/advertise-with-us/?cid=Web_LiQ_Network_AdvertiseWithUs_AdvertiseInquiry&publication=naples_daily_news&utm_source=local_publication&utm_medium=menu&utm_campaign=advertise_with_us) [Obituaries](https://www.naplesnews.com/obituaries) [eNewspaper](https://user.naplesnews.com/user/enewspaper) [Legals](https://www.naplesnews.com/public-notices)\n[](https://www.naplesnews.com/search/ \"Search\")\n[](https://www.naplesnews.com/weather/ \"Weather in Naples: 74°F Partly Sunny\") [](https://subscribe.naplesnews.com/rr/navsub?gps-source=CPTOPNAVBAR&itm_campaign=2026ENTQ4BAU2026&itm_medium=ONSITE&success-url=https%3A%2F%2Fwww.naplesnews.com%2Fstory%2Fmoney%2Fbusiness%2Flocal%2F2026%2F10%2F23%2Fformer-naples-florida-councilwoman-linda-penniman-remembered-as-the-energizer-bunny%2F92385292007%2F)\n[](https://login.naplesnews.com/PNDN-GUP/authenticate/?success-url=https%3A%2F%2Fwww.naplesnews.com%2Fstory%2Fmoney%2Fbusiness%2Flocal%2F2026%2F10%2F23%2Fformer-naples-florida-councilwoman-linda-penniman-remembered-as-the-energizer-bunny%2F92385292007%2F&cancel-url=https%3A%2F%2Fwww.naplesnews.com%2Fstory%2Fmoney%2Fbusiness%2Flocal%2F2026%2F10%2F23%2Fformer-naples-florida-councilwoman-linda-penniman-remembered-as-the-energizer-bunny%2F92385292007%2F)\n[](https://www.naplesnews.com/) [](https://www.naplesnews.com/)\n[LOCAL BUSINESS](https://www.naplesnews.com/business/local/)\n# Naples leader dies of 'broken heart' after husband. Son recalls her life\n[![Portrait of Laura Layden](https://www.naplesnews.com/gcdn/authoring/authoring-images/2024/02/08/PNDN/72524348007-ndn-jh-20240126-laura-0001.JPG?crop=3313,3312,x1506,y0&width=48&height=48&format=pjpg&auto=webp) Laura Layden](https://www.naplesnews.com/staff/2647080001/laura-layden/)\nFort Myers News-Press & Naples Daily News\nOct. 23, 2026, 2:48 p.m. ET\nTh\""
             },
             "suggestions": [
-              "What's driving signal transactions 2?",
-              "How does signal transactions 2 here compare to other SWFL areas?"
+              "What's driving signal breaking 2?",
+              "How does signal breaking 2 here compare to other SWFL areas?"
             ]
           },
           {
             "metric": "signal_transactions_3",
-            "value": "Cape Coral: A newly completed, opulent beachfront estate at 2050 Gordon Drive in Naples sold for $71 million in an off-market deal, including furnishings, as of Oct. 27, 2026.",
+            "value": "Fort Myers: A new waterfront estate in Naples sold for $71 million in an off-market (private) deal, reported Oct. 27, 2026, described as one of the largest sales of the year.",
             "direction": "stable",
-            "label": "Cape Coral — transactions",
+            "label": "Fort Myers — transactions",
             "variable_type": "categorical",
             "source": {
-              "url": "https://www.news-press.com/story/money/business/local/2026/10/27/new-naples-florida-estate-sells-for-71-million-in-private-deal-one-of-the-largest-sales-of-year/92458106007/",
-              "fetched_at": "2026-10-29T11:00:18Z",
+              "url": "https://www.naplesnews.com/story/money/business/local/2026/10/27/new-naples-florida-estate-sells-for-71-million-in-private-deal-one-of-the-largest-sales-of-year/92458106007/",
+              "fetched_at": "2026-10-30T04:26:01Z",
               "tier": 2,
-              "citation": "New Naples estate sells for $71 million in private deal: \"[](https://www.news-press.com/)\n[](https://subscribe.news-press.com/rr/nanobar?gps-source=CPTILELEFT&itm_campaign=2026ENTQ4BAU2026&itm_medium=ONSITE&success-url=https%3A%2F%2Fwww.news-press.com%2Fstory%2Fmoney%2Fbusiness%2Flocal%2F2026%2F10%2F27%2Fnew-naples-florida-estate-sells-for-71-million-in-private-deal-one-of-the-largest-sales-of-year%2F92458106007%2F)\n[](https://subscribe.news-press.com/rr/masthead?gps-source=CPMASTHEAD&itm_campaign=2026ENTQ4BAU2026&itm_medium=ONSITE&success-url=https%3A%2F%2Fwww.news-press.com%2Fstory%2Fmoney%2Fbusiness%2Flocal%2F2026%2F10%2F27%2Fnew-naples-florida-estate-sells-for-71-million-in-private-deal-one-of-the-largest-sales-of-year%2F92458106007%2F)\n[News](https://www.news-press.com/news/) [Cape Coral](https://www.news-press.com/news/cape-coral/) [Sports](https://www.news-press.com/sports/) [Restaurants](https://www.news-press.com/taste/) [Real Estate](https://www.news-press.com/real-estate) [Advertise](https://advertising.usatoday.com/advertise-with-us/?cid=Web_LiQ_Network_AdvertiseWithUs_AdvertiseInquiry&publication=the_news_press&utm_source=local_publication&utm_medium=menu&utm_campaign=advertise_with_us) [Obituaries](https://www.news-press.com/obituaries) [eNewspaper](https://user.news-press.com/user/enewspaper) [Legals](https://www.news-press.com/public-notices)\n[](https://www.news-press.com/search/ \"Search\")\n[](https://www.news-press.com/weather/ \"Weather in Fort Myers: 71°F Mostly Cloudy\") [](https://subscribe.news-press.com/rr/navsub?gps-source=CPTOPNAVBAR&itm_campaign=2026ENTQ4BAU2026&itm_medium=ONSITE&success-url=https%3A%2F%2Fwww.news-press.com%2Fstory%2Fmoney%2Fbusiness%2Flocal%2F2026%2F10%2F27%2Fnew-naples-florida-estate-sells-for-71-million-in-private-deal-one-of-the-largest-sales-of-year%2F92458106007%2F)\n[](https://login.news-press.com/PFTM-GUP/authenticate/?success-url=https%3A%2F%2Fwww.news-press.com%2Fstory%2Fmoney%2Fbusiness%2Flocal%2F2026%2F10%2F27%2Fnew-naples-florida-estate-sells-for-71-million-in-private-deal-one-of-the-largest-sales-of-year%2F92458106007%2F&cancel-url=https%3A%2F%2Fwww.news-press.com%2Fstory%2Fmoney%2Fbusiness%2Flocal%2F2026%2F10%2F27%2Fnew-naples-florida-estate-sells-for-71-million-in-private-deal-one-of-the-largest-sales-of-year%2F92458106007%2F)\n[](https://www.news-press.com/) [](https://www.news-press.com/)\nLOCAL BUSINESS\n# New waterfront estate in Naples fetches $71 million in off-market deal\n[![Portrait of Laura Layden](https://www.news-press.com/gcdn/authoring/authoring-images/2024/02/08/PNDN/72524348007-ndn-jh-20240126-laura-0001.JPG?crop=3313,3312,x1506,y0&width=48&height=48&format=pjpg&auto=webp) Laura Layden](https://www.naplesnews.com/staff/2647080001/laura-layden/)\nFort Myers News-Press & Naples Daily News\nOct. 27, 2026, 2:20 p.m. ET\nNaples has seen another whopping home sale.\nIn an \"off-market\" sale, a newly completed, opulent beachfront estate fetched $71 million, including furnishings.\nAlthough it's not the largest, the sale at 2050 Gordon Drive is one of\""
+              "citation": "New Naples estate sells for $71 million in private deal: \"[](https://www.naplesnews.com/)\n[SWFL Football Week 11 high school game previews and predictions](https://www.naplesnews.com/story/sports/high-school/football/2026/10/29/high-school-football-sw-florida-fhsaa-oct-29-30-previews-predictions/92465579007/)\n[](https://subscribe.naplesnews.com/rr/nanobar?gps-source=CPTILELEFT&itm_campaign=2026ENTQ4BAU2026&itm_medium=ONSITE&success-url=https%3A%2F%2Fwww.naplesnews.com%2Fstory%2Fmoney%2Fbusiness%2Flocal%2F2026%2F10%2F27%2Fnew-naples-florida-estate-sells-for-71-million-in-private-deal-one-of-the-largest-sales-of-year%2F92458106007%2F)\n[](https://subscribe.naplesnews.com/rr/masthead?gps-source=CPMASTHEAD&itm_campaign=2026ENTQ4BAU2026&itm_medium=ONSITE&success-url=https%3A%2F%2Fwww.naplesnews.com%2Fstory%2Fmoney%2Fbusiness%2Flocal%2F2026%2F10%2F27%2Fnew-naples-florida-estate-sells-for-71-million-in-private-deal-one-of-the-largest-sales-of-year%2F92458106007%2F)\n[News](https://www.naplesnews.com/news/) [Sports](https://www.naplesnews.com/sports/) [Real Estate](https://www.naplesnews.com/business/real-estate/) [Restaurants](https://www.naplesnews.com/entertainment/restaurants/) [Opinion](https://www.naplesnews.com/opinion/) [Advertise](https://advertising.usatoday.com/advertise-with-us/?cid=Web_LiQ_Network_AdvertiseWithUs_AdvertiseInquiry&publication=naples_daily_news&utm_source=local_publication&utm_medium=menu&utm_campaign=advertise_with_us) [Obituaries](https://www.naplesnews.com/obituaries) [eNewspaper](https://user.naplesnews.com/user/enewspaper) [Legals](https://www.naplesnews.com/public-notices)\n[](https://www.naplesnews.com/search/ \"Search\")\n[](https://www.naplesnews.com/weather/ \"Weather in Naples: 74°F Partly Sunny\") [](https://subscribe.naplesnews.com/rr/navsub?gps-source=CPTOPNAVBAR&itm_campaign=2026ENTQ4BAU2026&itm_medium=ONSITE&success-url=https%3A%2F%2Fwww.naplesnews.com%2Fstory%2Fmoney%2Fbusiness%2Flocal%2F2026%2F10%2F27%2Fnew-naples-florida-estate-sells-for-71-million-in-private-deal-one-of-the-largest-sales-of-year%2F92458106007%2F)\n[](https://login.naplesnews.com/PNDN-GUP/authenticate/?success-url=https%3A%2F%2Fwww.naplesnews.com%2Fstory%2Fmoney%2Fbusiness%2Flocal%2F2026%2F10%2F27%2Fnew-naples-florida-estate-sells-for-71-million-in-private-deal-one-of-the-largest-sales-of-year%2F92458106007%2F&cancel-url=https%3A%2F%2Fwww.naplesnews.com%2Fstory%2Fmoney%2Fbusiness%2Flocal%2F2026%2F10%2F27%2Fnew-naples-florida-estate-sells-for-71-million-in-private-deal-one-of-the-largest-sales-of-year%2F92458106007%2F)\n[](https://www.naplesnews.com/) [](https://www.naplesnews.com/)\n[LOCAL BUSINESS](https://www.naplesnews.com/business/local/)\n# New waterfront estate in Naples fetches $71 million in off-market deal\n[![Portrait of Laura Layden](https://www.naplesnews.com/gcdn/authoring/authoring-images/2024/02/08/PNDN/72524348007-ndn-jh-20240126-laura-0001.JPG?crop=3313,3312,x1506,y0&width=48&height=48&format=pjpg&auto=webp) Laura Layden](https://www.naplesnews.com/staff/2647080001/laura-layden/)\nFort Myers New\""
             },
             "suggestions": [
               "What's driving signal transactions 3?",
@@ -739,84 +180,84 @@
             ]
           },
           {
-            "metric": "signal_development_4",
-            "value": "Fort Myers: Collier County missed the state's deadline to submit its final approval of a required growth plan amendment — by more than a year — for a planned exclusive private golf club conversion of a long-time citrus grove in East Naples, according to a letter from FloridaCommerce, as reported Oct. 27, 2026.",
+            "metric": "signal_transactions_4",
+            "value": "Naples: Hoffmann buys Naples yacht club (reported Oct. 28, 2026).",
             "direction": "stable",
-            "label": "Fort Myers — development",
+            "label": "Naples — transactions",
             "variable_type": "categorical",
             "source": {
-              "url": "https://www.news-press.com/story/money/business/local/2026/10/27/missed-state-deadline-puts-planned-east-naples-golf-club-in-limbo/92395159007/",
-              "fetched_at": "2026-10-29T11:00:18Z",
+              "url": "https://www.businessobserverfl.com/news/2026/oct/28/hoffmann-buys-naples-yacht-club/",
+              "fetched_at": "2026-10-30T04:26:01Z",
               "tier": 2,
-              "citation": "Missed state deadline puts planned East Naples golf club in limbo: \"[](https://www.news-press.com/)\n[](https://subscribe.news-press.com/rr/nanobar?gps-source=CPTILELEFT&itm_campaign=2026ENTQ4BAU2026&itm_medium=ONSITE&success-url=https%3A%2F%2Fwww.news-press.com%2Fstory%2Fmoney%2Fbusiness%2Flocal%2F2026%2F10%2F27%2Fmissed-state-deadline-puts-planned-east-naples-golf-club-in-limbo%2F92395159007%2F)\n[](https://subscribe.news-press.com/rr/masthead?gps-source=CPMASTHEAD&itm_campaign=2026ENTQ4BAU2026&itm_medium=ONSITE&success-url=https%3A%2F%2Fwww.news-press.com%2Fstory%2Fmoney%2Fbusiness%2Flocal%2F2026%2F10%2F27%2Fmissed-state-deadline-puts-planned-east-naples-golf-club-in-limbo%2F92395159007%2F)\n[News](https://www.news-press.com/news/) [Cape Coral](https://www.news-press.com/news/cape-coral/) [Sports](https://www.news-press.com/sports/) [Restaurants](https://www.news-press.com/taste/) [Real Estate](https://www.news-press.com/real-estate) [Advertise](https://advertising.usatoday.com/advertise-with-us/?cid=Web_LiQ_Network_AdvertiseWithUs_AdvertiseInquiry&publication=the_news_press&utm_source=local_publication&utm_medium=menu&utm_campaign=advertise_with_us) [Obituaries](https://www.news-press.com/obituaries) [eNewspaper](https://user.news-press.com/user/enewspaper) [Legals](https://www.news-press.com/public-notices)\n[](https://www.news-press.com/search/ \"Search\")\n[](https://www.news-press.com/weather/ \"Weather in Fort Myers: 71°F Mostly Cloudy\") [](https://subscribe.news-press.com/rr/navsub?gps-source=CPTOPNAVBAR&itm_campaign=2026ENTQ4BAU2026&itm_medium=ONSITE&success-url=https%3A%2F%2Fwww.news-press.com%2Fstory%2Fmoney%2Fbusiness%2Flocal%2F2026%2F10%2F27%2Fmissed-state-deadline-puts-planned-east-naples-golf-club-in-limbo%2F92395159007%2F)\n[](https://login.news-press.com/PFTM-GUP/authenticate/?success-url=https%3A%2F%2Fwww.news-press.com%2Fstory%2Fmoney%2Fbusiness%2Flocal%2F2026%2F10%2F27%2Fmissed-state-deadline-puts-planned-east-naples-golf-club-in-limbo%2F92395159007%2F&cancel-url=https%3A%2F%2Fwww.news-press.com%2Fstory%2Fmoney%2Fbusiness%2Flocal%2F2026%2F10%2F27%2Fmissed-state-deadline-puts-planned-east-naples-golf-club-in-limbo%2F92395159007%2F)\n[](https://www.news-press.com/) [](https://www.news-press.com/)\nLOCAL BUSINESS\n# Missed state deadline stalls plans for new golf club in East Naples\n[![Portrait of Laura Layden](https://www.news-press.com/gcdn/authoring/authoring-images/2024/02/08/PNDN/72524348007-ndn-jh-20240126-laura-0001.JPG?crop=3313,3312,x1506,y0&width=48&height=48&format=pjpg&auto=webp) Laura Layden](https://www.naplesnews.com/staff/2647080001/laura-layden/)\nFort Myers News-Press & Naples Daily News\nOct. 27, 2026, 9:36 a.m. ET\nOpponents could get another chance to fight the conversion of a long-time citrus grove into an exclusive, private golf club in East Naples.\nAccording to a letter from FloridaCommerce, Collier County missed the state's deadline to submit its final approval of a required growth plan amendment by more than a year.\n[](https://www.news-press.com/)\n[Help](https://help.news-press.com)\""
+              "citation": "Hoffmann buys Naples yacht club | Business Observer: \"![Spinner: White decorative](https://cdn.userway.org/widgetapp/images/spin_wh.svg)\n![](https://cdn.userway.org/widgetapp/images/body_wh.svg)\n![Spinner: White decorative](https://cdn.userway.org/widgetapp/images/spin_wh.svg)\n  * ![Alternate Text](https://observermediagroup.media.clients.ellingtoncms.com/static-4/assets/images/bob-logo-header.svg)\n  * Loading\n\n\n  * [Newsletters](https://marketing.businessobserverfl.com/newsletters)\n  * [Podcast](https://www.businessobserverfl.com/podcasts/corner-office/?utm_source=header&utm_medium=sitenav)\n  * [Public Notices](https://legals.businessobserverfl.com/)\n  * [Big Book](https://www.businessobserverfl.com/big-book-of-business/2026/)\n  * [40 Under 40](https://www.businessobserverfl.com/40-under-40/)\n  * [Mobile App](https://businessobserver.pressreader.com/)\n  * [Subscribe](https://marketing.businessobserverfl.com/subscribe)\n  * [Login](https://www.businessobserverfl.com/accounts/login/?next=/news/2026/oct/28/hoffmann-buys-naples-yacht-club/)\n\n\n  * [](https://www.facebook.com/BusinessObserverFL)\n  * [](https://x.com/BizObserverFL)\n  * [](https://www.linkedin.com/company/businessobserverfl)\n  * [ ](https://www.instagram.com/businessobserverfl/)\n\n\n[![](https://observermediagroup.media.clients.ellingtoncms.com/static-4/assets/images/bob-logo-header.svg)](https://www.businessobserverfl.com/)\n[![](https://observermediagroup.media.clients.ellingtoncms.com/static-4/assets/images/bob-logo-sticky.svg)](https://www.businessobserverfl.com/)\n[![](https://observermediagroup.media.clients.ellingtoncms.com/static-4/assets/images/bob-logo-header.svg)](https://www.businessobserverfl.com/)\n  * [News](https://www.businessobserverfl.com/news/all/)\n  * [Strategies](https://www.businessobserverfl.com/news/strategies/)\n  * [Entrepreneurs](https://www.businessobserverfl.com/news/entrepreneurs/)\n  * [Leadership](https://www.businessobserverfl.com/news/leadership/)\n  * [Regions](https://www.businessobserverfl.com/news/2026/oct/28/hoffmann-buys-naples-yacht-club/)\n    * [Tampa Bay-Lakeland](https://www.businessobserverfl.com/news/tampa-bay-lakeland/)\n    * [Manatee-Sarasota](https://www.businessobserverfl.com/news/manatee-sarasota/)\n    * [Charlotte-Lee-Collier](https://www.businessobserverfl.com/news/charlotte-lee-collier/)\n    * [Florida](https://www.businessobserverfl.com/news/florida/)\n  * [Industries](https://www.businessobserverfl.com/news/2026/oct/28/hoffmann-buys-naples-yacht-club/)\n    * [Business Support](https://www.businessobserverfl.com/news/industries/business-support/)\n    * [Commercial Real Estate](https://www.businessobserverfl.com/news/industries/commercial-real-estate/)\n    * [Residential Real Estate](https://www.businessobserverfl.com/news/industries/residential-real-estate/)\n    * [Development](https://www.businessobserverfl.com/news/industries/development/)\n    * [Finance](https://www.businessobserverfl.com/news/industries/finance/)\n    * [Food-Beverage](https://www.businessobserverfl.com/news/industries/food-\""
             },
             "suggestions": [
-              "What's driving signal development 4?",
-              "How does signal development 4 here compare to other SWFL areas?"
+              "What's driving signal transactions 4?",
+              "How does signal transactions 4 here compare to other SWFL areas?"
             ]
           },
           {
-            "metric": "signal_development_5",
-            "value": "Naples: Collier County missed the state's deadline to submit its final approval of a required growth plan amendment by more than a year, stalling plans to convert a long-time citrus grove into an exclusive, private golf club in East Naples, as reported Oct. 27, 2026.",
+            "metric": "signal_transactions_5",
+            "value": "Naples: Naples senior living campus sells for 63% below its 2021 sale price (reported Oct. 28, 2026).",
             "direction": "stable",
-            "label": "Naples — development",
+            "label": "Naples — transactions",
             "variable_type": "categorical",
             "source": {
-              "url": "https://www.naplesnews.com/story/money/business/local/2026/10/27/missed-state-deadline-puts-planned-east-naples-golf-club-in-limbo/92395159007/",
-              "fetched_at": "2026-10-29T11:00:18Z",
+              "url": "https://www.businessobserverfl.com/news/2026/oct/28/naples-senior-living-campus-sells/",
+              "fetched_at": "2026-10-30T04:26:01Z",
               "tier": 2,
-              "citation": "Missed state deadline puts planned East Naples golf club in limbo: \"[](https://www.naplesnews.com/)\n[](https://subscribe.naplesnews.com/rr/nanobar?gps-source=CPTILELEFT&itm_campaign=2026ENTQ4BAU2026&itm_medium=ONSITE&success-url=https%3A%2F%2Fwww.naplesnews.com%2Fstory%2Fmoney%2Fbusiness%2Flocal%2F2026%2F10%2F27%2Fmissed-state-deadline-puts-planned-east-naples-golf-club-in-limbo%2F92395159007%2F)\n[](https://subscribe.naplesnews.com/rr/masthead?gps-source=CPMASTHEAD&itm_campaign=2026ENTQ4BAU2026&itm_medium=ONSITE&success-url=https%3A%2F%2Fwww.naplesnews.com%2Fstory%2Fmoney%2Fbusiness%2Flocal%2F2026%2F10%2F27%2Fmissed-state-deadline-puts-planned-east-naples-golf-club-in-limbo%2F92395159007%2F)\n[News](https://www.naplesnews.com/news/) [Sports](https://www.naplesnews.com/sports/) [Real Estate](https://www.naplesnews.com/business/real-estate/) [Restaurants](https://www.naplesnews.com/entertainment/restaurants/) [Opinion](https://www.naplesnews.com/opinion/) [Advertise](https://advertising.usatoday.com/advertise-with-us/?cid=Web_LiQ_Network_AdvertiseWithUs_AdvertiseInquiry&publication=naples_daily_news&utm_source=local_publication&utm_medium=menu&utm_campaign=advertise_with_us) [Obituaries](https://www.naplesnews.com/obituaries) [eNewspaper](https://user.naplesnews.com/user/enewspaper) [Legals](https://www.naplesnews.com/public-notices)\n[](https://www.naplesnews.com/search/ \"Search\")\n[](https://www.naplesnews.com/weather/ \"Weather in Naples: 74°F Mostly Cloudy\") [](https://subscribe.naplesnews.com/rr/navsub?gps-source=CPTOPNAVBAR&itm_campaign=2026ENTQ4BAU2026&itm_medium=ONSITE&success-url=https%3A%2F%2Fwww.naplesnews.com%2Fstory%2Fmoney%2Fbusiness%2Flocal%2F2026%2F10%2F27%2Fmissed-state-deadline-puts-planned-east-naples-golf-club-in-limbo%2F92395159007%2F)\n[](https://login.naplesnews.com/PNDN-GUP/authenticate/?success-url=https%3A%2F%2Fwww.naplesnews.com%2Fstory%2Fmoney%2Fbusiness%2Flocal%2F2026%2F10%2F27%2Fmissed-state-deadline-puts-planned-east-naples-golf-club-in-limbo%2F92395159007%2F&cancel-url=https%3A%2F%2Fwww.naplesnews.com%2Fstory%2Fmoney%2Fbusiness%2Flocal%2F2026%2F10%2F27%2Fmissed-state-deadline-puts-planned-east-naples-golf-club-in-limbo%2F92395159007%2F)\n[](https://www.naplesnews.com/) [](https://www.naplesnews.com/)\n[LOCAL BUSINESS](https://www.naplesnews.com/business/local/)\n# Missed state deadline stalls plans for new golf club in East Naples\n[![Portrait of Laura Layden](https://www.naplesnews.com/gcdn/authoring/authoring-images/2024/02/08/PNDN/72524348007-ndn-jh-20240126-laura-0001.JPG?crop=3313,3312,x1506,y0&width=48&height=48&format=pjpg&auto=webp) Laura Layden](https://www.naplesnews.com/staff/2647080001/laura-layden/)\nFort Myers News-Press & Naples Daily News\nOct. 27, 2026, 9:36 a.m. ET\nOpponents could get another chance to fight the conversion of a long-time citrus grove into an exclusive, private golf club in East Naples.\nAccording to a letter from FloridaCommerce, Collier County missed the state's deadline to submit its final approval of a required growth plan amendment by more than a year.\n[](h\""
+              "citation": "Naples senior living campus sells for 63% below 2021 sale price | Business Observer: \"![Spinner: White decorative](https://cdn.userway.org/widgetapp/images/spin_wh.svg)\n![](https://cdn.userway.org/widgetapp/images/body_wh.svg)\n![Spinner: White decorative](https://cdn.userway.org/widgetapp/images/spin_wh.svg)\n  * ![Alternate Text](https://observermediagroup.media.clients.ellingtoncms.com/static-4/assets/images/bob-logo-header.svg)\n  * Loading\n\n\n  * [Newsletters](https://marketing.businessobserverfl.com/newsletters)\n  * [Podcast](https://www.businessobserverfl.com/podcasts/corner-office/?utm_source=header&utm_medium=sitenav)\n  * [Public Notices](https://legals.businessobserverfl.com/)\n  * [Big Book](https://www.businessobserverfl.com/big-book-of-business/2026/)\n  * [40 Under 40](https://www.businessobserverfl.com/40-under-40/)\n  * [Mobile App](https://businessobserver.pressreader.com/)\n  * [Subscribe](https://marketing.businessobserverfl.com/subscribe)\n  * [Login](https://www.businessobserverfl.com/accounts/login/?next=/news/2026/oct/28/naples-senior-living-campus-sells/)\n\n\n  * [](https://www.facebook.com/BusinessObserverFL)\n  * [](https://x.com/BizObserverFL)\n  * [](https://www.linkedin.com/company/businessobserverfl)\n  * [ ](https://www.instagram.com/businessobserverfl/)\n\n\n[![](https://observermediagroup.media.clients.ellingtoncms.com/static-4/assets/images/bob-logo-header.svg)](https://www.businessobserverfl.com/)\n[![](https://observermediagroup.media.clients.ellingtoncms.com/static-4/assets/images/bob-logo-sticky.svg)](https://www.businessobserverfl.com/)\n[![](https://observermediagroup.media.clients.ellingtoncms.com/static-4/assets/images/bob-logo-header.svg)](https://www.businessobserverfl.com/)\n  * [News](https://www.businessobserverfl.com/news/all/)\n  * [Strategies](https://www.businessobserverfl.com/news/strategies/)\n  * [Entrepreneurs](https://www.businessobserverfl.com/news/entrepreneurs/)\n  * [Leadership](https://www.businessobserverfl.com/news/leadership/)\n  * [Regions](https://www.businessobserverfl.com/news/2026/oct/28/naples-senior-living-campus-sells/)\n    * [Tampa Bay-Lakeland](https://www.businessobserverfl.com/news/tampa-bay-lakeland/)\n    * [Manatee-Sarasota](https://www.businessobserverfl.com/news/manatee-sarasota/)\n    * [Charlotte-Lee-Collier](https://www.businessobserverfl.com/news/charlotte-lee-collier/)\n    * [Florida](https://www.businessobserverfl.com/news/florida/)\n  * [Industries](https://www.businessobserverfl.com/news/2026/oct/28/naples-senior-living-campus-sells/)\n    * [Business Support](https://www.businessobserverfl.com/news/industries/business-support/)\n    * [Commercial Real Estate](https://www.businessobserverfl.com/news/industries/commercial-real-estate/)\n    * [Residential Real Estate](https://www.businessobserverfl.com/news/industries/residential-real-estate/)\n    * [Development](https://www.businessobserverfl.com/news/industries/development/)\n    * [Finance](https://www.businessobserverfl.com/news/industries/finance/)\n    * [Food-Beverage](https://www.businessobserverfl.com/news/industries\""
             },
             "suggestions": [
-              "What's driving signal development 5?",
-              "How does signal development 5 here compare to other SWFL areas?"
+              "What's driving signal transactions 5?",
+              "How does signal transactions 5 here compare to other SWFL areas?"
             ]
           },
           {
-            "metric": "signal_development_6",
-            "value": "Cape Coral: Collier County missed the state's (FloridaCommerce) deadline to submit its final approval of a required growth plan amendment — by more than a year — for a planned exclusive private golf club conversion of a long-time citrus grove in East Naples, putting the project in limbo as of Oct. 27, 2026.",
+            "metric": "signal_transactions_6",
+            "value": "Naples: A newly completed, opulent beachfront estate in Naples sold for $71 million in an off-market deal, including furnishings, as reported Oct. 27, 2026.",
             "direction": "stable",
-            "label": "Cape Coral — development",
+            "label": "Naples — transactions",
             "variable_type": "categorical",
             "source": {
-              "url": "https://www.news-press.com/story/money/business/local/2026/10/27/missed-state-deadline-puts-planned-east-naples-golf-club-in-limbo/92395159007/",
-              "fetched_at": "2026-10-29T11:00:18Z",
+              "url": "https://www.naplesnews.com/story/money/business/local/2026/10/27/new-naples-florida-estate-sells-for-71-million-in-private-deal-one-of-the-largest-sales-of-year/92458106007/",
+              "fetched_at": "2026-10-30T04:26:01Z",
               "tier": 2,
-              "citation": "Missed state deadline puts planned East Naples golf club in limbo: \"[](https://www.news-press.com/)\n[](https://subscribe.news-press.com/rr/nanobar?gps-source=CPTILELEFT&itm_campaign=2026ENTQ4BAU2026&itm_medium=ONSITE&success-url=https%3A%2F%2Fwww.news-press.com%2Fstory%2Fmoney%2Fbusiness%2Flocal%2F2026%2F10%2F27%2Fmissed-state-deadline-puts-planned-east-naples-golf-club-in-limbo%2F92395159007%2F)\n[](https://subscribe.news-press.com/rr/masthead?gps-source=CPMASTHEAD&itm_campaign=2026ENTQ4BAU2026&itm_medium=ONSITE&success-url=https%3A%2F%2Fwww.news-press.com%2Fstory%2Fmoney%2Fbusiness%2Flocal%2F2026%2F10%2F27%2Fmissed-state-deadline-puts-planned-east-naples-golf-club-in-limbo%2F92395159007%2F)\n[News](https://www.news-press.com/news/) [Cape Coral](https://www.news-press.com/news/cape-coral/) [Sports](https://www.news-press.com/sports/) [Restaurants](https://www.news-press.com/taste/) [Real Estate](https://www.news-press.com/real-estate) [Advertise](https://advertising.usatoday.com/advertise-with-us/?cid=Web_LiQ_Network_AdvertiseWithUs_AdvertiseInquiry&publication=the_news_press&utm_source=local_publication&utm_medium=menu&utm_campaign=advertise_with_us) [Obituaries](https://www.news-press.com/obituaries) [eNewspaper](https://user.news-press.com/user/enewspaper) [Legals](https://www.news-press.com/public-notices)\n[](https://www.news-press.com/search/ \"Search\")\n[](https://www.news-press.com/weather/ \"Weather in Fort Myers: 71°F Mostly Cloudy\") [](https://subscribe.news-press.com/rr/navsub?gps-source=CPTOPNAVBAR&itm_campaign=2026ENTQ4BAU2026&itm_medium=ONSITE&success-url=https%3A%2F%2Fwww.news-press.com%2Fstory%2Fmoney%2Fbusiness%2Flocal%2F2026%2F10%2F27%2Fmissed-state-deadline-puts-planned-east-naples-golf-club-in-limbo%2F92395159007%2F)\n[](https://login.news-press.com/PFTM-GUP/authenticate/?success-url=https%3A%2F%2Fwww.news-press.com%2Fstory%2Fmoney%2Fbusiness%2Flocal%2F2026%2F10%2F27%2Fmissed-state-deadline-puts-planned-east-naples-golf-club-in-limbo%2F92395159007%2F&cancel-url=https%3A%2F%2Fwww.news-press.com%2Fstory%2Fmoney%2Fbusiness%2Flocal%2F2026%2F10%2F27%2Fmissed-state-deadline-puts-planned-east-naples-golf-club-in-limbo%2F92395159007%2F)\n[](https://www.news-press.com/) [](https://www.news-press.com/)\nLOCAL BUSINESS\n# Missed state deadline stalls plans for new golf club in East Naples\n[![Portrait of Laura Layden](https://www.news-press.com/gcdn/authoring/authoring-images/2024/02/08/PNDN/72524348007-ndn-jh-20240126-laura-0001.JPG?crop=3313,3312,x1506,y0&width=48&height=48&format=pjpg&auto=webp) Laura Layden](https://www.naplesnews.com/staff/2647080001/laura-layden/)\nFort Myers News-Press & Naples Daily News\nOct. 27, 2026, 9:36 a.m. ET\nOpponents could get another chance to fight the conversion of a long-time citrus grove into an exclusive, private golf club in East Naples.\nAccording to a letter from FloridaCommerce, Collier County missed the state's deadline to submit its final approval of a required growth plan amendment by more than a year.\n[](https://www.news-press.com/)\n[Help](https://help.news-press.com)\""
+              "citation": "New Naples estate sells for $71 million in private deal: \"[](https://www.naplesnews.com/)\n[](https://subscribe.naplesnews.com/rr/nanobar?gps-source=CPTILELEFT&itm_campaign=2026ENTQ4BAU2026&itm_medium=ONSITE&success-url=https%3A%2F%2Fwww.naplesnews.com%2Fstory%2Fmoney%2Fbusiness%2Flocal%2F2026%2F10%2F27%2Fnew-naples-florida-estate-sells-for-71-million-in-private-deal-one-of-the-largest-sales-of-year%2F92458106007%2F)\n[](https://subscribe.naplesnews.com/rr/masthead?gps-source=CPMASTHEAD&itm_campaign=2026ENTQ4BAU2026&itm_medium=ONSITE&success-url=https%3A%2F%2Fwww.naplesnews.com%2Fstory%2Fmoney%2Fbusiness%2Flocal%2F2026%2F10%2F27%2Fnew-naples-florida-estate-sells-for-71-million-in-private-deal-one-of-the-largest-sales-of-year%2F92458106007%2F)\n[News](https://www.naplesnews.com/news/) [Sports](https://www.naplesnews.com/sports/) [Real Estate](https://www.naplesnews.com/business/real-estate/) [Restaurants](https://www.naplesnews.com/entertainment/restaurants/) [Opinion](https://www.naplesnews.com/opinion/) [Advertise](https://advertising.usatoday.com/advertise-with-us/?cid=Web_LiQ_Network_AdvertiseWithUs_AdvertiseInquiry&publication=naples_daily_news&utm_source=local_publication&utm_medium=menu&utm_campaign=advertise_with_us) [Obituaries](https://www.naplesnews.com/obituaries) [eNewspaper](https://user.naplesnews.com/user/enewspaper) [Legals](https://www.naplesnews.com/public-notices)\n[](https://www.naplesnews.com/search/ \"Search\")\n[](https://www.naplesnews.com/weather/ \"Weather in Naples: 74°F Mostly Cloudy\") [](https://subscribe.naplesnews.com/rr/navsub?gps-source=CPTOPNAVBAR&itm_campaign=2026ENTQ4BAU2026&itm_medium=ONSITE&success-url=https%3A%2F%2Fwww.naplesnews.com%2Fstory%2Fmoney%2Fbusiness%2Flocal%2F2026%2F10%2F27%2Fnew-naples-florida-estate-sells-for-71-million-in-private-deal-one-of-the-largest-sales-of-year%2F92458106007%2F)\n[](https://login.naplesnews.com/PNDN-GUP/authenticate/?success-url=https%3A%2F%2Fwww.naplesnews.com%2Fstory%2Fmoney%2Fbusiness%2Flocal%2F2026%2F10%2F27%2Fnew-naples-florida-estate-sells-for-71-million-in-private-deal-one-of-the-largest-sales-of-year%2F92458106007%2F&cancel-url=https%3A%2F%2Fwww.naplesnews.com%2Fstory%2Fmoney%2Fbusiness%2Flocal%2F2026%2F10%2F27%2Fnew-naples-florida-estate-sells-for-71-million-in-private-deal-one-of-the-largest-sales-of-year%2F92458106007%2F)\n[](https://www.naplesnews.com/) [](https://www.naplesnews.com/)\n[LOCAL BUSINESS](https://www.naplesnews.com/business/local/)\n# New waterfront estate in Naples fetches $71 million in off-market deal\n[![Portrait of Laura Layden](https://www.naplesnews.com/gcdn/authoring/authoring-images/2024/02/08/PNDN/72524348007-ndn-jh-20240126-laura-0001.JPG?crop=3313,3312,x1506,y0&width=48&height=48&format=pjpg&auto=webp) Laura Layden](https://www.naplesnews.com/staff/2647080001/laura-layden/)\nFort Myers News-Press & Naples Daily News\nOct. 27, 2026, 2:20 p.m. ET\nNaples has seen another whopping home sale.\nIn an \"off-market\" sale, a newly completed, opulent beachfront estate fetched $71 million, including furnishings.\nAlthou\""
             },
             "suggestions": [
-              "What's driving signal development 6?",
-              "How does signal development 6 here compare to other SWFL areas?"
+              "What's driving signal transactions 6?",
+              "How does signal transactions 6 here compare to other SWFL areas?"
             ]
           },
           {
-            "metric": "signal_development_7",
-            "value": "Naples: Southwest Florida, including Naples, was marking a wave of post-hurricane milestones — new roads, new homes, and new investments reshaping the region — as of Oct. 22, 2026.",
+            "metric": "signal_transactions_7",
+            "value": "Cape Coral: A newly completed, opulent beachfront estate at 2050 Gordon Drive in Naples sold for $71 million in an off-market deal, including furnishings, as of Oct. 27, 2026.",
             "direction": "stable",
-            "label": "Naples — development",
+            "label": "Cape Coral — transactions",
             "variable_type": "categorical",
             "source": {
-              "url": "https://www.news-press.com/story/money/2026/10/22/from-roads-to-rooftops-florida-hits-wave-of-post-hurricane-milestones-sanibel-fort-myers-naples-swfl/92256346007/",
-              "fetched_at": "2026-10-29T11:00:18Z",
+              "url": "https://www.news-press.com/story/money/business/local/2026/10/27/new-naples-florida-estate-sells-for-71-million-in-private-deal-one-of-the-largest-sales-of-year/92458106007/",
+              "fetched_at": "2026-10-30T04:26:01Z",
               "tier": 2,
-              "citation": "From roads to rooftops, Florida hits wave of post-hurricane milestones: \"[](https://www.news-press.com/)\n[](https://subscribe.news-press.com/rr/nanobar?gps-source=CPTILELEFT&itm_campaign=2026ENTQ4BAU2026&itm_medium=ONSITE&success-url=https%3A%2F%2Fwww.news-press.com%2Fstory%2Fmoney%2F2026%2F10%2F22%2Ffrom-roads-to-rooftops-florida-hits-wave-of-post-hurricane-milestones-sanibel-fort-myers-naples-swfl%2F92256346007%2F)\n[](https://subscribe.news-press.com/rr/masthead?gps-source=CPMASTHEAD&itm_campaign=2026ENTQ4BAU2026&itm_medium=ONSITE&success-url=https%3A%2F%2Fwww.news-press.com%2Fstory%2Fmoney%2F2026%2F10%2F22%2Ffrom-roads-to-rooftops-florida-hits-wave-of-post-hurricane-milestones-sanibel-fort-myers-naples-swfl%2F92256346007%2F)\n[News](https://www.news-press.com/news/) [Cape Coral](https://www.news-press.com/news/cape-coral/) [Sports](https://www.news-press.com/sports/) [Restaurants](https://www.news-press.com/taste/) [Real Estate](https://www.news-press.com/real-estate) [Advertise](https://advertising.usatoday.com/advertise-with-us/?cid=Web_LiQ_Network_AdvertiseWithUs_AdvertiseInquiry&publication=the_news_press&utm_source=local_publication&utm_medium=menu&utm_campaign=advertise_with_us) [Obituaries](https://www.news-press.com/obituaries) [eNewspaper](https://user.news-press.com/user/enewspaper) [Legals](https://www.news-press.com/public-notices)\n[](https://www.news-press.com/search/ \"Search\")\n[](https://www.news-press.com/weather/ \"Weather in Fort Myers: 71°F Mostly Cloudy\") [](https://subscribe.news-press.com/rr/navsub?gps-source=CPTOPNAVBAR&itm_campaign=2026ENTQ4BAU2026&itm_medium=ONSITE&success-url=https%3A%2F%2Fwww.news-press.com%2Fstory%2Fmoney%2F2026%2F10%2F22%2Ffrom-roads-to-rooftops-florida-hits-wave-of-post-hurricane-milestones-sanibel-fort-myers-naples-swfl%2F92256346007%2F)\n[](https://login.news-press.com/PFTM-GUP/authenticate/?success-url=https%3A%2F%2Fwww.news-press.com%2Fstory%2Fmoney%2F2026%2F10%2F22%2Ffrom-roads-to-rooftops-florida-hits-wave-of-post-hurricane-milestones-sanibel-fort-myers-naples-swfl%2F92256346007%2F&cancel-url=https%3A%2F%2Fwww.news-press.com%2Fstory%2Fmoney%2F2026%2F10%2F22%2Ffrom-roads-to-rooftops-florida-hits-wave-of-post-hurricane-milestones-sanibel-fort-myers-naples-swfl%2F92256346007%2F)\n[](https://www.news-press.com/) [](https://www.news-press.com/)\n[MONEY](https://www.news-press.com/business/)\n# New roads, new homes and new investments reshaping SW FL this week\n[![Portrait of Phil Fernandez](https://www.news-press.com/gcdn/presto/2019/09/14/PNDN/6a77b474-579f-48fa-b56f-a2cc2b9de797-NDN_Phil_Fernandez.jpg?crop=2999,2999,x0,y570&width=48&height=48&format=pjpg&auto=webp) Phil Fernandez](https://www.naplesnews.com/staff/2684114001/phil-fernandez/)\nFort Myers News-Press & Naples Daily News\nOct. 22, 2026, 5:06 a.m. ET\nAs [Southwest Florida](https://www.news-press.com/story/money/2026/10/05/sw-florida-buc-ees-wont-open-until-major-i-75-area-road-fixes-are-done-swfl-charlotte-lee-county/92042955007/) ushered in this week's relatively cooler weather of early autumn, it also is marking\""
+              "citation": "New Naples estate sells for $71 million in private deal: \"[](https://www.news-press.com/)\n[](https://subscribe.news-press.com/rr/nanobar?gps-source=CPTILELEFT&itm_campaign=2026ENTQ4BAU2026&itm_medium=ONSITE&success-url=https%3A%2F%2Fwww.news-press.com%2Fstory%2Fmoney%2Fbusiness%2Flocal%2F2026%2F10%2F27%2Fnew-naples-florida-estate-sells-for-71-million-in-private-deal-one-of-the-largest-sales-of-year%2F92458106007%2F)\n[](https://subscribe.news-press.com/rr/masthead?gps-source=CPMASTHEAD&itm_campaign=2026ENTQ4BAU2026&itm_medium=ONSITE&success-url=https%3A%2F%2Fwww.news-press.com%2Fstory%2Fmoney%2Fbusiness%2Flocal%2F2026%2F10%2F27%2Fnew-naples-florida-estate-sells-for-71-million-in-private-deal-one-of-the-largest-sales-of-year%2F92458106007%2F)\n[News](https://www.news-press.com/news/) [Cape Coral](https://www.news-press.com/news/cape-coral/) [Sports](https://www.news-press.com/sports/) [Restaurants](https://www.news-press.com/taste/) [Real Estate](https://www.news-press.com/real-estate) [Advertise](https://advertising.usatoday.com/advertise-with-us/?cid=Web_LiQ_Network_AdvertiseWithUs_AdvertiseInquiry&publication=the_news_press&utm_source=local_publication&utm_medium=menu&utm_campaign=advertise_with_us) [Obituaries](https://www.news-press.com/obituaries) [eNewspaper](https://user.news-press.com/user/enewspaper) [Legals](https://www.news-press.com/public-notices)\n[](https://www.news-press.com/search/ \"Search\")\n[](https://www.news-press.com/weather/ \"Weather in Fort Myers: 71°F Mostly Cloudy\") [](https://subscribe.news-press.com/rr/navsub?gps-source=CPTOPNAVBAR&itm_campaign=2026ENTQ4BAU2026&itm_medium=ONSITE&success-url=https%3A%2F%2Fwww.news-press.com%2Fstory%2Fmoney%2Fbusiness%2Flocal%2F2026%2F10%2F27%2Fnew-naples-florida-estate-sells-for-71-million-in-private-deal-one-of-the-largest-sales-of-year%2F92458106007%2F)\n[](https://login.news-press.com/PFTM-GUP/authenticate/?success-url=https%3A%2F%2Fwww.news-press.com%2Fstory%2Fmoney%2Fbusiness%2Flocal%2F2026%2F10%2F27%2Fnew-naples-florida-estate-sells-for-71-million-in-private-deal-one-of-the-largest-sales-of-year%2F92458106007%2F&cancel-url=https%3A%2F%2Fwww.news-press.com%2Fstory%2Fmoney%2Fbusiness%2Flocal%2F2026%2F10%2F27%2Fnew-naples-florida-estate-sells-for-71-million-in-private-deal-one-of-the-largest-sales-of-year%2F92458106007%2F)\n[](https://www.news-press.com/) [](https://www.news-press.com/)\nLOCAL BUSINESS\n# New waterfront estate in Naples fetches $71 million in off-market deal\n[![Portrait of Laura Layden](https://www.news-press.com/gcdn/authoring/authoring-images/2024/02/08/PNDN/72524348007-ndn-jh-20240126-laura-0001.JPG?crop=3313,3312,x1506,y0&width=48&height=48&format=pjpg&auto=webp) Laura Layden](https://www.naplesnews.com/staff/2647080001/laura-layden/)\nFort Myers News-Press & Naples Daily News\nOct. 27, 2026, 2:20 p.m. ET\nNaples has seen another whopping home sale.\nIn an \"off-market\" sale, a newly completed, opulent beachfront estate fetched $71 million, including furnishings.\nAlthough it's not the largest, the sale at 2050 Gordon Drive is one of\""
             },
             "suggestions": [
-              "What's driving signal development 7?",
-              "How does signal development 7 here compare to other SWFL areas?"
+              "What's driving signal transactions 7?",
+              "How does signal transactions 7 here compare to other SWFL areas?"
             ]
           },
           {
             "metric": "signal_development_8",
-            "value": "East Naples: Opponents could get another chance to fight the conversion of a long-time citrus grove into an exclusive, private golf club in East Naples, reported Oct. 27, 2026.",
+            "value": "Fort Myers: A planned mixed-use waterfront development in Naples got a new name and won design approval as of Oct. 28, 2026.",
             "direction": "stable",
-            "label": "East Naples — development",
+            "label": "Fort Myers — development",
             "variable_type": "categorical",
             "source": {
-              "url": "https://www.naplesnews.com/story/money/business/local/2026/10/27/missed-state-deadline-puts-planned-east-naples-golf-club-in-limbo/92395159007/",
-              "fetched_at": "2026-10-29T11:00:18Z",
+              "url": "https://www.news-press.com/story/money/business/local/2026/10/28/naples-waterfront-project-gets-new-name-and-wins-approval-after-a-longjourney/92479907007/",
+              "fetched_at": "2026-10-30T04:26:01Z",
               "tier": 2,
-              "citation": "Missed state deadline puts planned East Naples golf club in limbo: \"[](https://www.naplesnews.com/)\n[](https://subscribe.naplesnews.com/rr/nanobar?gps-source=CPTILELEFT&itm_campaign=2026ENTQ4BAU2026&itm_medium=ONSITE&success-url=https%3A%2F%2Fwww.naplesnews.com%2Fstory%2Fmoney%2Fbusiness%2Flocal%2F2026%2F10%2F27%2Fmissed-state-deadline-puts-planned-east-naples-golf-club-in-limbo%2F92395159007%2F)\n[](https://subscribe.naplesnews.com/rr/masthead?gps-source=CPMASTHEAD&itm_campaign=2026ENTQ4BAU2026&itm_medium=ONSITE&success-url=https%3A%2F%2Fwww.naplesnews.com%2Fstory%2Fmoney%2Fbusiness%2Flocal%2F2026%2F10%2F27%2Fmissed-state-deadline-puts-planned-east-naples-golf-club-in-limbo%2F92395159007%2F)\n[News](https://www.naplesnews.com/news/) [Sports](https://www.naplesnews.com/sports/) [Real Estate](https://www.naplesnews.com/business/real-estate/) [Restaurants](https://www.naplesnews.com/entertainment/restaurants/) [Opinion](https://www.naplesnews.com/opinion/) [Advertise](https://advertising.usatoday.com/advertise-with-us/?cid=Web_LiQ_Network_AdvertiseWithUs_AdvertiseInquiry&publication=naples_daily_news&utm_source=local_publication&utm_medium=menu&utm_campaign=advertise_with_us) [Obituaries](https://www.naplesnews.com/obituaries) [eNewspaper](https://user.naplesnews.com/user/enewspaper) [Legals](https://www.naplesnews.com/public-notices)\n[](https://www.naplesnews.com/search/ \"Search\")\n[](https://www.naplesnews.com/weather/ \"Weather in Naples: 74°F Mostly Cloudy\") [](https://subscribe.naplesnews.com/rr/navsub?gps-source=CPTOPNAVBAR&itm_campaign=2026ENTQ4BAU2026&itm_medium=ONSITE&success-url=https%3A%2F%2Fwww.naplesnews.com%2Fstory%2Fmoney%2Fbusiness%2Flocal%2F2026%2F10%2F27%2Fmissed-state-deadline-puts-planned-east-naples-golf-club-in-limbo%2F92395159007%2F)\n[](https://login.naplesnews.com/PNDN-GUP/authenticate/?success-url=https%3A%2F%2Fwww.naplesnews.com%2Fstory%2Fmoney%2Fbusiness%2Flocal%2F2026%2F10%2F27%2Fmissed-state-deadline-puts-planned-east-naples-golf-club-in-limbo%2F92395159007%2F&cancel-url=https%3A%2F%2Fwww.naplesnews.com%2Fstory%2Fmoney%2Fbusiness%2Flocal%2F2026%2F10%2F27%2Fmissed-state-deadline-puts-planned-east-naples-golf-club-in-limbo%2F92395159007%2F)\n[](https://www.naplesnews.com/) [](https://www.naplesnews.com/)\n[LOCAL BUSINESS](https://www.naplesnews.com/business/local/)\n# Missed state deadline stalls plans for new golf club in East Naples\n[![Portrait of Laura Layden](https://www.naplesnews.com/gcdn/authoring/authoring-images/2024/02/08/PNDN/72524348007-ndn-jh-20240126-laura-0001.JPG?crop=3313,3312,x1506,y0&width=48&height=48&format=pjpg&auto=webp) Laura Layden](https://www.naplesnews.com/staff/2647080001/laura-layden/)\nFort Myers News-Press & Naples Daily News\nOct. 27, 2026, 9:36 a.m. ET\nOpponents could get another chance to fight the conversion of a long-time citrus grove into an exclusive, private golf club in East Naples.\nAccording to a letter from FloridaCommerce, Collier County missed the state's deadline to submit its final approval of a required growth plan amendment by more than a year.\n[](h\""
+              "citation": "Naples waterfront project gets new name and wins design approval: \"[](https://www.news-press.com/)\n[SWFL Football Week 11 high school game previews and predictions](https://www.news-press.com/story/sports/high-school/football/2026/10/29/high-school-football-sw-florida-fhsaa-oct-29-30-previews-predictions/92465579007/)\n[](https://subscribe.news-press.com/rr/nanobar?gps-source=CPTILELEFT&itm_campaign=2026ENTQ4BAU2026&itm_medium=ONSITE&success-url=https%3A%2F%2Fwww.news-press.com%2Fstory%2Fmoney%2Fbusiness%2Flocal%2F2026%2F10%2F28%2Fnaples-waterfront-project-gets-new-name-and-wins-approval-after-a-longjourney%2F92479907007%2F)\n[](https://subscribe.news-press.com/rr/masthead?gps-source=CPMASTHEAD&itm_campaign=2026ENTQ4BAU2026&itm_medium=ONSITE&success-url=https%3A%2F%2Fwww.news-press.com%2Fstory%2Fmoney%2Fbusiness%2Flocal%2F2026%2F10%2F28%2Fnaples-waterfront-project-gets-new-name-and-wins-approval-after-a-longjourney%2F92479907007%2F)\n[News](https://www.news-press.com/news/) [Cape Coral](https://www.news-press.com/news/cape-coral/) [Sports](https://www.news-press.com/sports/) [Restaurants](https://www.news-press.com/taste/) [Real Estate](https://www.news-press.com/real-estate) [Advertise](https://advertising.usatoday.com/advertise-with-us/?cid=Web_LiQ_Network_AdvertiseWithUs_AdvertiseInquiry&publication=the_news_press&utm_source=local_publication&utm_medium=menu&utm_campaign=advertise_with_us) [Obituaries](https://www.news-press.com/obituaries) [eNewspaper](https://user.news-press.com/user/enewspaper) [Legals](https://www.news-press.com/public-notices)\n[](https://www.news-press.com/search/ \"Search\")\n[](https://www.news-press.com/weather/ \"Weather in Fort Myers: 74°F Mostly Cloudy\") [](https://subscribe.news-press.com/rr/navsub?gps-source=CPTOPNAVBAR&itm_campaign=2026ENTQ4BAU2026&itm_medium=ONSITE&success-url=https%3A%2F%2Fwww.news-press.com%2Fstory%2Fmoney%2Fbusiness%2Flocal%2F2026%2F10%2F28%2Fnaples-waterfront-project-gets-new-name-and-wins-approval-after-a-longjourney%2F92479907007%2F)\n[](https://login.news-press.com/PFTM-GUP/authenticate/?success-url=https%3A%2F%2Fwww.news-press.com%2Fstory%2Fmoney%2Fbusiness%2Flocal%2F2026%2F10%2F28%2Fnaples-waterfront-project-gets-new-name-and-wins-approval-after-a-longjourney%2F92479907007%2F&cancel-url=https%3A%2F%2Fwww.news-press.com%2Fstory%2Fmoney%2Fbusiness%2Flocal%2F2026%2F10%2F28%2Fnaples-waterfront-project-gets-new-name-and-wins-approval-after-a-longjourney%2F92479907007%2F)\n[](https://www.news-press.com/) [](https://www.news-press.com/)\nLOCAL BUSINESS\n# Naples waterfront project gets new name and design approval\n[![Portrait of Laura Layden](https://www.news-press.com/gcdn/authoring/authoring-images/2024/02/08/PNDN/72524348007-ndn-jh-20240126-laura-0001.JPG?crop=3313,3312,x1506,y0&width=48&height=48&format=pjpg&auto=webp) Laura Layden](https://www.naplesnews.com/staff/2647080001/laura-layden/)\nFort Myers News-Press & Naples Daily News\nOct. 28, 2026, 5:09 p.m. ET\nYears in the making, a planned mixed-use waterfront development in Naples is nearing the finish line in the\""
             },
             "suggestions": [
               "What's driving signal development 8?",
@@ -849,6 +290,16 @@
             ],
             "rows": [
               {
+                "key": "34113",
+                "label": "34113",
+                "cells": {
+                  "items": 1,
+                  "latest_fact": "Collier commissioners approve a mixed-use development in East Naples that includes workforce housing (reported Oct. 28, 2026).",
+                  "latest_place": "East Naples",
+                  "latest_source": "https://www.news-press.com/story/money/business/local/2026/10/28/mixed-use-project-in-east-naples-with-workforce-housing-gets-the-go-ahead-from-collier-commissioners/92458286007/"
+                }
+              },
+              {
                 "key": "33912",
                 "label": "33912",
                 "cells": {
@@ -862,10 +313,10 @@
                 "key": "34102",
                 "label": "34102",
                 "cells": {
-                  "items": 3,
-                  "latest_fact": "Naples City Council unanimously rejected a request for a wall-height waiver for a secretive family compound in Port Royal, as reported Oct. 22, 2026; the request sought to allow three sections of a wall to exceed standard height limits.",
-                  "latest_place": "Port Royal",
-                  "latest_source": "https://www.naplesnews.com/story/money/business/local/2026/10/22/naples-council-rejects-wall-waiver-for-mystery-family-compound-11-foot-walls-to-protect-privacy/92365490007/"
+                  "items": 4,
+                  "latest_fact": "M Development's lease disputes are reshaping downtown Naples (reported in Gulfshore Business).",
+                  "latest_place": "downtown Naples",
+                  "latest_source": "https://www.gulfshorebusiness.com/news/m-development-lease-battles-reshape-downtown-naples/article_a177f555-23bf-58f7-ad14-81f4bbb6f5e3.html"
                 }
               },
               {
@@ -881,7 +332,7 @@
             ],
             "source": {
               "url": "https://www.swfldatagulf.com/r/source/city_pulse",
-              "fetched_at": "2026-10-29T11:00:18Z",
+              "fetched_at": "2026-10-30T04:26:01Z",
               "tier": 2,
               "citation": "Distilled, citation-backed SWFL news signals; each ZIP's items carry per-item source URLs in data_lake.city_pulse."
             },
@@ -889,7 +340,7 @@
           }
         ],
         "caveats": [
-          "63 additional live signals not surfaced here (cap 8); the full set is in data_lake.city_pulse.",
+          "73 additional live signals not surfaced here (cap 8); the full set is in data_lake.city_pulse.",
           "Each signal is dated current-events context with a per-signal source; freshness is TTL-bounded by topic (breaking 1d → structural 90d)."
         ],
         "contradicts": [],
@@ -902,7 +353,7 @@
         "relevance": {
           "decay_curve": "weeks",
           "half_life_hours": 720,
-          "computed_at": "2026-10-29T11:00:18Z"
+          "computed_at": "2026-10-30T04:26:01Z"
         },
         "exogenous_signals": []
       }
@@ -919,8 +370,119 @@
     },
     {
       "packId": "freshness-pulse",
-      "status": "skipped-fresh",
-      "written": false
+      "status": "built",
+      "version": 88,
+      "written": true,
+      "brainOutput": {
+        "brain_id": "freshness-pulse",
+        "version": 88,
+        "refined_at": "2026-10-30T04:26:01Z",
+        "expires": "2026-10-31T04:26:01Z",
+        "ttl_seconds": 86400,
+        "direction": "neutral",
+        "magnitude": 0,
+        "drivers": [],
+        "overrides": [],
+        "conclusion": "Today's sourced snapshot — Cape Coral median asking price (as of 2026-10-30) $399,200; Fort Myers median asking price (as of 2026-10-30) $325,000; Naples median asking price (as of 2026-10-30) $650,000; SWFL 30-year fixed mortgage rate (as of 2026-10-29) 7.24%. These are cited current facts only; the direction call lives downstream in master.",
+        "key_metrics": [
+          {
+            "metric": "freshness_median_asking_price_cape_coral_usd",
+            "value": 399200,
+            "direction": "stable",
+            "label": "Cape Coral median asking price (as of 2026-10-30)",
+            "variable_type": "extensive",
+            "units": "USD",
+            "display_format": "currency",
+            "source": {
+              "url": "https://www.swfldatagulf.com/desk",
+              "fetched_at": "2026-10-30T04:23:36.149654+00:00",
+              "tier": 2,
+              "citation": "SWFL Data Gulf active-listing inventory — current median asking price for Cape Coral, sourced 2026-10-30"
+            },
+            "suggestions": [
+              "Chart asking rents across the corridors",
+              "What's driving freshness median asking price cape coral usd?",
+              "How does freshness median asking price cape coral usd here compare to other SWFL areas?"
+            ]
+          },
+          {
+            "metric": "freshness_median_asking_price_fort_myers_usd",
+            "value": 325000,
+            "direction": "stable",
+            "label": "Fort Myers median asking price (as of 2026-10-30)",
+            "variable_type": "extensive",
+            "units": "USD",
+            "display_format": "currency",
+            "source": {
+              "url": "https://www.swfldatagulf.com/desk",
+              "fetched_at": "2026-10-30T04:23:36.149654+00:00",
+              "tier": 2,
+              "citation": "SWFL Data Gulf active-listing inventory — current median asking price for Fort Myers, sourced 2026-10-30"
+            },
+            "suggestions": [
+              "Chart asking rents across the corridors",
+              "What's driving freshness median asking price fort myers usd?",
+              "How does freshness median asking price fort myers usd here compare to other SWFL areas?"
+            ]
+          },
+          {
+            "metric": "freshness_median_asking_price_naples_usd",
+            "value": 650000,
+            "direction": "stable",
+            "label": "Naples median asking price (as of 2026-10-30)",
+            "variable_type": "extensive",
+            "units": "USD",
+            "display_format": "currency",
+            "source": {
+              "url": "https://www.swfldatagulf.com/desk",
+              "fetched_at": "2026-10-30T04:23:36.149654+00:00",
+              "tier": 2,
+              "citation": "SWFL Data Gulf active-listing inventory — current median asking price for Naples, sourced 2026-10-30"
+            },
+            "suggestions": [
+              "Chart asking rents across the corridors",
+              "What's driving freshness median asking price naples usd?",
+              "How does freshness median asking price naples usd here compare to other SWFL areas?"
+            ]
+          },
+          {
+            "metric": "freshness_mortgage_30yr_fixed_pct",
+            "value": 7.24,
+            "direction": "stable",
+            "label": "SWFL 30-year fixed mortgage rate (as of 2026-10-29)",
+            "variable_type": "intensive",
+            "units": "percent",
+            "display_format": "percent",
+            "source": {
+              "url": "https://fred.stlouisfed.org/series/MORTGAGE30US",
+              "fetched_at": "2026-10-30T04:23:36.149654+00:00",
+              "tier": 2,
+              "citation": "FRED — current 30-year fixed mortgage rate for SWFL, sourced 2026-10-29"
+            },
+            "suggestions": [
+              "What's driving freshness mortgage 30yr fixed pct?",
+              "How does freshness mortgage 30yr fixed pct here compare to other SWFL areas?"
+            ]
+          }
+        ],
+        "detail_tables": [],
+        "caveats": [
+          "Each county-grain number is a single grounded source's current figure, provenance-gated to a real source URL; held anomalies and unsourced (model-memory) numbers are excluded by design."
+        ],
+        "contradicts": [],
+        "confidence": 0.8,
+        "joint_integrity": 1,
+        "confidence_dispersion": 0,
+        "chain_depth": 0,
+        "trust_tier": 2,
+        "upstream_count": 0,
+        "relevance": {
+          "decay_curve": "weeks",
+          "half_life_hours": 720,
+          "computed_at": "2026-10-30T04:26:01Z"
+        },
+        "exogenous_signals": []
+      }
     },
     {
       "packId": "seller-stress-swfl",
@@ -979,737 +541,8 @@
     },
     {
       "packId": "active-listings-swfl",
-      "status": "built",
-      "version": 49,
-      "written": true,
-      "brainOutput": {
-        "brain_id": "active-listings-swfl",
-        "version": 49,
-        "refined_at": "2026-10-29T11:00:23Z",
-        "expires": "2026-10-31T11:00:23Z",
-        "ttl_seconds": 172800,
-        "direction": "neutral",
-        "magnitude": 0,
-        "drivers": [],
-        "overrides": [],
-        "conclusion": "22,650 active SWFL residential listings, median asking $412,000, avg 217 days on market (active residential listings, as of 2026-08-14). By county: Lee 16,394 (median $369,900), Collier 6,256 (median $649,900), Lee 1 (median $314,900).",
-        "key_metrics": [
-          {
-            "metric": "active_listings_count_swfl",
-            "label": "SWFL active residential listings (count)",
-            "value": 22650,
-            "direction": "stable",
-            "variable_type": "extensive",
-            "units": "listings",
-            "display_format": "count",
-            "source": {
-              "url": "https://www.swfldatagulf.com/r/source/listing_active_stats?label=SWFL+active+for-sale+listings+%28aggregated%29&source=realtor.com+for-sale+listings&brain=active-listings-swfl&date_col=scraped_at",
-              "fetched_at": "2026-10-29T11:00:23Z",
-              "tier": 2,
-              "citation": "22,650 active SWFL residential listings as of 2026-08-14"
-            },
-            "suggestions": [
-              "What's driving active listings count swfl?",
-              "How does active listings count swfl here compare to other SWFL areas?"
-            ]
-          },
-          {
-            "metric": "median_list_price_swfl",
-            "label": "SWFL median asking price (active residential)",
-            "value": 412000,
-            "direction": "stable",
-            "variable_type": "intensive",
-            "units": "USD",
-            "display_format": "currency",
-            "source": {
-              "url": "https://www.swfldatagulf.com/r/source/listing_active_stats?label=SWFL+active+for-sale+listings+%28aggregated%29&source=realtor.com+for-sale+listings&brain=active-listings-swfl&date_col=scraped_at",
-              "fetched_at": "2026-10-29T11:00:23Z",
-              "tier": 2,
-              "citation": "median asking price across 22,650 active SWFL listings: $412,000"
-            },
-            "suggestions": [
-              "What's driving median list price swfl?",
-              "How does median list price swfl here compare to other SWFL areas?"
-            ]
-          },
-          {
-            "metric": "recent_price_cuts_count_swfl",
-            "label": "SWFL listings with a price cut in the last 90 days",
-            "value": 259,
-            "direction": "stable",
-            "variable_type": "extensive",
-            "units": "listings",
-            "display_format": "count",
-            "source": {
-              "url": "https://www.swfldatagulf.com/r/source/listing_active_stats?label=SWFL+active+for-sale+listings+%28aggregated%29&source=realtor.com+for-sale+listings&brain=active-listings-swfl&date_col=scraped_at",
-              "fetched_at": "2026-10-29T11:00:23Z",
-              "tier": 2,
-              "citation": "259 SWFL listings took at least one price cut in the trailing 90 days, median cut $10,000"
-            },
-            "suggestions": [
-              "What's driving recent price cuts count swfl?",
-              "How does recent price cuts count swfl here compare to other SWFL areas?"
-            ]
-          },
-          {
-            "metric": "median_annual_tax_swfl",
-            "label": "SWFL median vendor-reported annual property tax",
-            "value": 4008,
-            "direction": "stable",
-            "variable_type": "intensive",
-            "units": "USD",
-            "display_format": "currency",
-            "source": {
-              "url": "https://www.swfldatagulf.com/r/source/listing_active_stats?label=SWFL+active+for-sale+listings+%28aggregated%29&source=realtor.com+for-sale+listings&brain=active-listings-swfl&date_col=scraped_at",
-              "fetched_at": "2026-10-29T11:00:23Z",
-              "tier": 2,
-              "citation": "Median vendor-reported annual property tax across 16,514 SWFL properties with tax history: $4,008"
-            },
-            "suggestions": [
-              "What's driving median annual tax swfl?",
-              "How does median annual tax swfl here compare to other SWFL areas?"
-            ]
-          },
-          {
-            "metric": "avg_days_on_market_swfl",
-            "label": "SWFL average days on market (active residential)",
-            "value": 217,
-            "direction": "stable",
-            "variable_type": "intensive",
-            "units": "days",
-            "display_format": "count",
-            "source": {
-              "url": "https://www.swfldatagulf.com/r/source/listing_active_stats?label=SWFL+active+for-sale+listings+%28aggregated%29&source=realtor.com+for-sale+listings&brain=active-listings-swfl&date_col=scraped_at",
-              "fetched_at": "2026-10-29T11:00:23Z",
-              "tier": 2,
-              "citation": "average days on market across active SWFL listings: 217 days"
-            },
-            "suggestions": [
-              "What's driving avg days on market swfl?",
-              "How does avg days on market swfl here compare to other SWFL areas?"
-            ]
-          }
-        ],
-        "detail_tables": [
-          {
-            "id": "active_listings_by_county",
-            "title": "SWFL active residential listings by county",
-            "grain": "county",
-            "columns": [
-              {
-                "id": "listing_count",
-                "label": "Active listings",
-                "display_format": "count",
-                "units": "listings"
-              },
-              {
-                "id": "median_list_price",
-                "label": "Median asking price",
-                "display_format": "currency",
-                "units": "USD"
-              },
-              {
-                "id": "avg_days_on_market",
-                "label": "Avg days on market",
-                "display_format": "count",
-                "units": "days"
-              }
-            ],
-            "rows": [
-              {
-                "key": "Lee",
-                "label": "Lee",
-                "cells": {
-                  "listing_count": 16394,
-                  "median_list_price": 369900,
-                  "avg_days_on_market": 216
-                }
-              },
-              {
-                "key": "Collier",
-                "label": "Collier",
-                "cells": {
-                  "listing_count": 6256,
-                  "median_list_price": 649900,
-                  "avg_days_on_market": 219
-                }
-              },
-              {
-                "key": "Lee",
-                "label": "Lee",
-                "cells": {
-                  "listing_count": 1,
-                  "median_list_price": 314900,
-                  "avg_days_on_market": null
-                }
-              }
-            ],
-            "source": {
-              "url": "https://www.swfldatagulf.com/r/source/listing_active_stats?label=SWFL+active+for-sale+listings+%28aggregated%29&source=realtor.com+for-sale+listings&brain=active-listings-swfl&date_col=scraped_at",
-              "fetched_at": "2026-10-29T11:00:23Z",
-              "tier": 2,
-              "citation": "Active SWFL residential listings, aggregated per grain in SQL (listing_active_stats) as of 2026-08-14"
-            }
-          },
-          {
-            "id": "active_listings_by_zip",
-            "title": "SWFL active residential listings by ZIP",
-            "grain": "zip",
-            "columns": [
-              {
-                "id": "listing_count",
-                "label": "Active listings",
-                "display_format": "count",
-                "units": "listings"
-              },
-              {
-                "id": "median_list_price",
-                "label": "Median asking price",
-                "display_format": "currency",
-                "units": "USD"
-              },
-              {
-                "id": "avg_days_on_market",
-                "label": "Avg days on market",
-                "display_format": "count",
-                "units": "days"
-              }
-            ],
-            "rows": [
-              {
-                "key": "33993",
-                "label": "33993 (Lee)",
-                "cells": {
-                  "listing_count": 1146,
-                  "median_list_price": 393950,
-                  "avg_days_on_market": 205
-                }
-              },
-              {
-                "key": "33908",
-                "label": "33908 (Lee)",
-                "cells": {
-                  "listing_count": 1008,
-                  "median_list_price": 330000,
-                  "avg_days_on_market": 241
-                }
-              },
-              {
-                "key": "33914",
-                "label": "33914 (Lee)",
-                "cells": {
-                  "listing_count": 867,
-                  "median_list_price": 525000,
-                  "avg_days_on_market": 211
-                }
-              },
-              {
-                "key": "33917",
-                "label": "33917 (Lee)",
-                "cells": {
-                  "listing_count": 833,
-                  "median_list_price": 205900,
-                  "avg_days_on_market": 214
-                }
-              },
-              {
-                "key": "33909",
-                "label": "33909 (Lee)",
-                "cells": {
-                  "listing_count": 794,
-                  "median_list_price": 339900,
-                  "avg_days_on_market": 191
-                }
-              },
-              {
-                "key": "34135",
-                "label": "34135 (Lee)",
-                "cells": {
-                  "listing_count": 771,
-                  "median_list_price": 458560,
-                  "avg_days_on_market": 216
-                }
-              },
-              {
-                "key": "33974",
-                "label": "33974 (Lee)",
-                "cells": {
-                  "listing_count": 735,
-                  "median_list_price": 322000,
-                  "avg_days_on_market": 179
-                }
-              },
-              {
-                "key": "34120",
-                "label": "34120 (Collier)",
-                "cells": {
-                  "listing_count": 704,
-                  "median_list_price": 636500,
-                  "avg_days_on_market": 192
-                }
-              },
-              {
-                "key": "33904",
-                "label": "33904 (Lee)",
-                "cells": {
-                  "listing_count": 665,
-                  "median_list_price": 420000,
-                  "avg_days_on_market": 206
-                }
-              },
-              {
-                "key": "33913",
-                "label": "33913 (Lee)",
-                "cells": {
-                  "listing_count": 626,
-                  "median_list_price": 469000,
-                  "avg_days_on_market": 197
-                }
-              },
-              {
-                "key": "33971",
-                "label": "33971 (Lee)",
-                "cells": {
-                  "listing_count": 624,
-                  "median_list_price": 319900,
-                  "avg_days_on_market": 196
-                }
-              },
-              {
-                "key": "34114",
-                "label": "34114 (Collier)",
-                "cells": {
-                  "listing_count": 610,
-                  "median_list_price": 549000,
-                  "avg_days_on_market": 210
-                }
-              },
-              {
-                "key": "33931",
-                "label": "33931 (Lee)",
-                "cells": {
-                  "listing_count": 596,
-                  "median_list_price": 675000,
-                  "avg_days_on_market": 257
-                }
-              },
-              {
-                "key": "33928",
-                "label": "33928 (Lee)",
-                "cells": {
-                  "listing_count": 595,
-                  "median_list_price": 539000,
-                  "avg_days_on_market": 194
-                }
-              },
-              {
-                "key": "33903",
-                "label": "33903 (Lee)",
-                "cells": {
-                  "listing_count": 563,
-                  "median_list_price": 148000,
-                  "avg_days_on_market": 233
-                }
-              },
-              {
-                "key": "34112",
-                "label": "34112 (Collier)",
-                "cells": {
-                  "listing_count": 558,
-                  "median_list_price": 339999,
-                  "avg_days_on_market": 219
-                }
-              },
-              {
-                "key": "33919",
-                "label": "33919 (Lee)",
-                "cells": {
-                  "listing_count": 533,
-                  "median_list_price": 249000,
-                  "avg_days_on_market": 215
-                }
-              },
-              {
-                "key": "33905",
-                "label": "33905 (Lee)",
-                "cells": {
-                  "listing_count": 519,
-                  "median_list_price": 354000,
-                  "avg_days_on_market": 203
-                }
-              },
-              {
-                "key": "34145",
-                "label": "34145 (Collier)",
-                "cells": {
-                  "listing_count": 493,
-                  "median_list_price": 949000,
-                  "avg_days_on_market": 216
-                }
-              },
-              {
-                "key": "33991",
-                "label": "33991 (Lee)",
-                "cells": {
-                  "listing_count": 477,
-                  "median_list_price": 450000,
-                  "avg_days_on_market": 202
-                }
-              },
-              {
-                "key": "33972",
-                "label": "33972 (Lee)",
-                "cells": {
-                  "listing_count": 466,
-                  "median_list_price": 355000,
-                  "avg_days_on_market": 188
-                }
-              },
-              {
-                "key": "33936",
-                "label": "33936 (Lee)",
-                "cells": {
-                  "listing_count": 465,
-                  "median_list_price": 245000,
-                  "avg_days_on_market": 185
-                }
-              },
-              {
-                "key": "33976",
-                "label": "33976 (Lee)",
-                "cells": {
-                  "listing_count": 463,
-                  "median_list_price": 329000,
-                  "avg_days_on_market": 203
-                }
-              },
-              {
-                "key": "34134",
-                "label": "34134 (Lee)",
-                "cells": {
-                  "listing_count": 439,
-                  "median_list_price": 799000,
-                  "avg_days_on_market": 253
-                }
-              },
-              {
-                "key": "34102",
-                "label": "34102 (Collier)",
-                "cells": {
-                  "listing_count": 432,
-                  "median_list_price": 3200000,
-                  "avg_days_on_market": 289
-                }
-              },
-              {
-                "key": "34119",
-                "label": "34119 (Collier)",
-                "cells": {
-                  "listing_count": 424,
-                  "median_list_price": 689000,
-                  "avg_days_on_market": 203
-                }
-              },
-              {
-                "key": "34110",
-                "label": "34110 (Collier)",
-                "cells": {
-                  "listing_count": 410,
-                  "median_list_price": 684900,
-                  "avg_days_on_market": 222
-                }
-              },
-              {
-                "key": "34108",
-                "label": "34108 (Collier)",
-                "cells": {
-                  "listing_count": 406,
-                  "median_list_price": 1299000,
-                  "avg_days_on_market": 234
-                }
-              },
-              {
-                "key": "34113",
-                "label": "34113 (Collier)",
-                "cells": {
-                  "listing_count": 402,
-                  "median_list_price": 522450,
-                  "avg_days_on_market": 222
-                }
-              },
-              {
-                "key": "33957",
-                "label": "33957 (Lee)",
-                "cells": {
-                  "listing_count": 378,
-                  "median_list_price": 954500,
-                  "avg_days_on_market": 298
-                }
-              },
-              {
-                "key": "33990",
-                "label": "33990 (Lee)",
-                "cells": {
-                  "listing_count": 354,
-                  "median_list_price": 399000,
-                  "avg_days_on_market": 191
-                }
-              },
-              {
-                "key": "34103",
-                "label": "34103 (Collier)",
-                "cells": {
-                  "listing_count": 332,
-                  "median_list_price": 1495000,
-                  "avg_days_on_market": 236
-                }
-              },
-              {
-                "key": "34142",
-                "label": "34142 (Collier)",
-                "cells": {
-                  "listing_count": 326,
-                  "median_list_price": 435748,
-                  "avg_days_on_market": 179
-                }
-              },
-              {
-                "key": "33912",
-                "label": "33912 (Lee)",
-                "cells": {
-                  "listing_count": 308,
-                  "median_list_price": 349900,
-                  "avg_days_on_market": 215
-                }
-              },
-              {
-                "key": "33907",
-                "label": "33907 (Lee)",
-                "cells": {
-                  "listing_count": 285,
-                  "median_list_price": 184000,
-                  "avg_days_on_market": 217
-                }
-              },
-              {
-                "key": "34109",
-                "label": "34109 (Collier)",
-                "cells": {
-                  "listing_count": 281,
-                  "median_list_price": 745000,
-                  "avg_days_on_market": 204
-                }
-              },
-              {
-                "key": "34104",
-                "label": "34104 (Collier)",
-                "cells": {
-                  "listing_count": 271,
-                  "median_list_price": 390000,
-                  "avg_days_on_market": 204
-                }
-              },
-              {
-                "key": "33916",
-                "label": "33916 (Lee)",
-                "cells": {
-                  "listing_count": 266,
-                  "median_list_price": 302450,
-                  "avg_days_on_market": 429
-                }
-              },
-              {
-                "key": "33901",
-                "label": "33901 (Lee)",
-                "cells": {
-                  "listing_count": 264,
-                  "median_list_price": 315000,
-                  "avg_days_on_market": 234
-                }
-              },
-              {
-                "key": "33967",
-                "label": "33967 (Lee)",
-                "cells": {
-                  "listing_count": 230,
-                  "median_list_price": 399000,
-                  "avg_days_on_market": 184
-                }
-              },
-              {
-                "key": "33920",
-                "label": "33920 (Lee)",
-                "cells": {
-                  "listing_count": 223,
-                  "median_list_price": 426053,
-                  "avg_days_on_market": 191
-                }
-              },
-              {
-                "key": "33973",
-                "label": "33973 (Lee)",
-                "cells": {
-                  "listing_count": 211,
-                  "median_list_price": 472000,
-                  "avg_days_on_market": 197
-                }
-              },
-              {
-                "key": "34105",
-                "label": "34105 (Collier)",
-                "cells": {
-                  "listing_count": 197,
-                  "median_list_price": 390000,
-                  "avg_days_on_market": 205
-                }
-              },
-              {
-                "key": "33966",
-                "label": "33966 (Lee)",
-                "cells": {
-                  "listing_count": 174,
-                  "median_list_price": 319750,
-                  "avg_days_on_market": 191
-                }
-              },
-              {
-                "key": "34117",
-                "label": "34117 (Collier)",
-                "cells": {
-                  "listing_count": 170,
-                  "median_list_price": 772499,
-                  "avg_days_on_market": 201
-                }
-              },
-              {
-                "key": "33924",
-                "label": "33924 (Lee)",
-                "cells": {
-                  "listing_count": 133,
-                  "median_list_price": 1499000,
-                  "avg_days_on_market": 305
-                }
-              },
-              {
-                "key": "33922",
-                "label": "33922 (Lee)",
-                "cells": {
-                  "listing_count": 118,
-                  "median_list_price": 482450,
-                  "avg_days_on_market": 240
-                }
-              },
-              {
-                "key": "33956",
-                "label": "33956 (Lee)",
-                "cells": {
-                  "listing_count": 105,
-                  "median_list_price": 588500,
-                  "avg_days_on_market": 253
-                }
-              },
-              {
-                "key": "34116",
-                "label": "34116 (Collier)",
-                "cells": {
-                  "listing_count": 91,
-                  "median_list_price": 589000,
-                  "avg_days_on_market": 183
-                }
-              },
-              {
-                "key": "33921",
-                "label": "33921 (Lee)",
-                "cells": {
-                  "listing_count": 44,
-                  "median_list_price": 3985000,
-                  "avg_days_on_market": 298
-                }
-              },
-              {
-                "key": "34138",
-                "label": "34138 (Collier)",
-                "cells": {
-                  "listing_count": 31,
-                  "median_list_price": 185000,
-                  "avg_days_on_market": 480
-                }
-              },
-              {
-                "key": "34139",
-                "label": "34139 (Collier)",
-                "cells": {
-                  "listing_count": 29,
-                  "median_list_price": 349000,
-                  "avg_days_on_market": 302
-                }
-              },
-              {
-                "key": "34140",
-                "label": "34140 (Collier)",
-                "cells": {
-                  "listing_count": 16,
-                  "median_list_price": 525000,
-                  "avg_days_on_market": 366
-                }
-              },
-              {
-                "key": "34137",
-                "label": "34137 (Collier)",
-                "cells": {
-                  "listing_count": 2,
-                  "median_list_price": 290000,
-                  "avg_days_on_market": 172
-                }
-              },
-              {
-                "key": "34141",
-                "label": "34141 (Collier)",
-                "cells": {
-                  "listing_count": 2,
-                  "median_list_price": 269500,
-                  "avg_days_on_market": 190
-                }
-              }
-            ],
-            "source": {
-              "url": "https://www.swfldatagulf.com/r/source/listing_active_stats?label=SWFL+active+for-sale+listings+%28aggregated%29&source=realtor.com+for-sale+listings&brain=active-listings-swfl&date_col=scraped_at",
-              "fetched_at": "2026-10-29T11:00:23Z",
-              "tier": 2,
-              "citation": "Active SWFL residential listings, aggregated per grain in SQL (listing_active_stats) as of 2026-08-14"
-            }
-          }
-        ],
-        "caveats": [
-          "List-side only: asking prices and days-on-market for ACTIVE listings — not sold/closed prices (that is the closed-sale records lane).",
-          "Median asking price spans ALL active listings INCLUDING vacant land/lots — in lot-heavy areas this pulls the median well below typical home prices. Use the property_type field or the per-county/ZIP detail to separate homes from land.",
-          "Daily snapshot — broad SWFL coverage but not comprehensive. Direction is neutral on any one day; the day-over-day diff is what reads the inventory trend.",
-          "Source is realtor.com for-sale listings; a direct licensed MLS/IDX feed can swap into the same table when credentialed.",
-          "Price-cut counts cover only listings we have probed (listed/sold history), not every active listing region-wide — a per-property depth signal, not a full-book statistic.",
-          "Annual property tax is vendor-reported (not a county tax bill) and not yet validated against county appraiser records — treat as directional, not authoritative. Covers only properties we have probed, not the full tax roll."
-        ],
-        "contradicts": [],
-        "confidence": 0.8,
-        "joint_integrity": 1,
-        "confidence_dispersion": 0,
-        "chain_depth": 0,
-        "trust_tier": 2,
-        "upstream_count": 0,
-        "relevance": {
-          "decay_curve": "weeks",
-          "half_life_hours": 720,
-          "computed_at": "2026-10-29T11:00:23Z"
-        },
-        "exogenous_signals": [],
-        "grain_boundary": {
-          "not_available": [
-            "Sold / closed sale prices — active asking prices only, not closed transactions",
-            "Per-listing history or price-cut events — current snapshot only",
-            "Rental listings — sale listings only"
-          ],
-          "finest_grain": "zip-snapshot"
-        }
-      }
+      "status": "skipped-fresh",
+      "written": false
     },
     {
       "packId": "active-rentals-swfl",
@@ -1732,16 +565,16 @@
     {
       "packId": "master",
       "status": "built",
-      "version": 155,
+      "version": 156,
       "written": true,
       "brainOutput": {
         "brain_id": "master",
-        "version": 155,
-        "refined_at": "2026-10-29T11:00:44Z",
-        "expires": "2026-11-05T11:00:44Z",
+        "version": 156,
+        "refined_at": "2026-10-30T04:26:23Z",
+        "expires": "2026-11-06T04:26:23Z",
         "ttl_seconds": 604800,
         "direction": "mixed",
-        "magnitude": 0.4692499779888022,
+        "magnitude": 0.46924997798880225,
         "drivers": [
           {
             "brain_id": "franchise-outcomes",
@@ -2184,41 +1017,40 @@
             ]
           },
           {
-            "metric": "cap_rate_median",
-            "value": 6.7,
-            "direction": "rising",
-            "label": "Median SWFL CRE cap rate (9 of 10 submarkets)",
-            "variable_type": "intensive",
-            "units": "percent",
-            "display_format": "percent",
+            "metric": "signal_breaking_1",
+            "value": "Fort Myers: A missed state deadline put the planned East Naples golf club — a conversion of a long-time citrus grove — in limbo as of Oct. 27, 2026; opponents could get another chance to fight the conversion.",
+            "direction": "stable",
+            "label": "Fort Myers — breaking",
+            "variable_type": "categorical",
             "source": {
-              "url": "https://jtkdowmrjaxfvwmemxso.supabase.co/rest/v1/corridor_profiles?select=*&verification_status=eq.verified&deleted_at=is.null&submarket=not.is.null&cap_rate_pct=not.is.null",
-              "fetched_at": "2026-10-26T04:33:54Z",
+              "url": "https://www.naplesnews.com/story/money/business/local/2026/10/27/missed-state-deadline-puts-planned-east-naples-golf-club-in-limbo/92395159007/",
+              "fetched_at": "2026-10-30T04:26:01Z",
               "tier": 2,
-              "citation": "SWFL CRE corridor profiles (editorially verified) — median across 9 submarkets reporting cap rate (21 corridors mapped): Bonita Springs; Cape Coral; City of Fort Myers; and 6 more. Rent/vacancy/cap figures are C&W MarketBeat submarket values stamped onto member corridors, so the submarket is the honest denominator."
+              "citation": "Missed state deadline puts planned East Naples golf club in limbo: \"[](https://www.naplesnews.com/)\n[SWFL Football Week 11 high school game previews and predictions](https://www.naplesnews.com/story/sports/high-school/football/2026/10/29/high-school-football-sw-florida-fhsaa-oct-29-30-previews-predictions/92465579007/)\n[](https://subscribe.naplesnews.com/rr/nanobar?gps-source=CPTILELEFT&itm_campaign=2026ENTQ4BAU2026&itm_medium=ONSITE&success-url=https%3A%2F%2Fwww.naplesnews.com%2Fstory%2Fmoney%2Fbusiness%2Flocal%2F2026%2F10%2F27%2Fmissed-state-deadline-puts-planned-east-naples-golf-club-in-limbo%2F92395159007%2F)\n[](https://subscribe.naplesnews.com/rr/masthead?gps-source=CPMASTHEAD&itm_campaign=2026ENTQ4BAU2026&itm_medium=ONSITE&success-url=https%3A%2F%2Fwww.naplesnews.com%2Fstory%2Fmoney%2Fbusiness%2Flocal%2F2026%2F10%2F27%2Fmissed-state-deadline-puts-planned-east-naples-golf-club-in-limbo%2F92395159007%2F)\n[News](https://www.naplesnews.com/news/) [Sports](https://www.naplesnews.com/sports/) [Real Estate](https://www.naplesnews.com/business/real-estate/) [Restaurants](https://www.naplesnews.com/entertainment/restaurants/) [Opinion](https://www.naplesnews.com/opinion/) [Advertise](https://advertising.usatoday.com/advertise-with-us/?cid=Web_LiQ_Network_AdvertiseWithUs_AdvertiseInquiry&publication=naples_daily_news&utm_source=local_publication&utm_medium=menu&utm_campaign=advertise_with_us) [Obituaries](https://www.naplesnews.com/obituaries) [eNewspaper](https://user.naplesnews.com/user/enewspaper) [Legals](https://www.naplesnews.com/public-notices)\n[](https://www.naplesnews.com/search/ \"Search\")\n[](https://www.naplesnews.com/weather/ \"Weather in Naples: 74°F Partly Sunny\") [](https://subscribe.naplesnews.com/rr/navsub?gps-source=CPTOPNAVBAR&itm_campaign=2026ENTQ4BAU2026&itm_medium=ONSITE&success-url=https%3A%2F%2Fwww.naplesnews.com%2Fstory%2Fmoney%2Fbusiness%2Flocal%2F2026%2F10%2F27%2Fmissed-state-deadline-puts-planned-east-naples-golf-club-in-limbo%2F92395159007%2F)\n[](https://login.naplesnews.com/PNDN-GUP/authenticate/?success-url=https%3A%2F%2Fwww.naplesnews.com%2Fstory%2Fmoney%2Fbusiness%2Flocal%2F2026%2F10%2F27%2Fmissed-state-deadline-puts-planned-east-naples-golf-club-in-limbo%2F92395159007%2F&cancel-url=https%3A%2F%2Fwww.naplesnews.com%2Fstory%2Fmoney%2Fbusiness%2Flocal%2F2026%2F10%2F27%2Fmissed-state-deadline-puts-planned-east-naples-golf-club-in-limbo%2F92395159007%2F)\n[](https://www.naplesnews.com/) [](https://www.naplesnews.com/)\n[LOCAL BUSINESS](https://www.naplesnews.com/business/local/)\n# Missed state deadline stalls plans for new golf club in East Naples\n[![Portrait of Laura Layden](https://www.naplesnews.com/gcdn/authoring/authoring-images/2024/02/08/PNDN/72524348007-ndn-jh-20240126-laura-0001.JPG?crop=3313,3312,x1506,y0&width=48&height=48&format=pjpg&auto=webp) Laura Layden](https://www.naplesnews.com/staff/2647080001/laura-layden/)\nFort Myers News-Press & Naples Daily News\nOct. 27, 2026, 9:36 a.m. ET\nOpponents could get another chance to fight the conversion of a long-time citrus grove into an ex\""
             },
             "suggestions": [
-              "What's driving cap rate median?",
-              "How does cap rate median here compare to other SWFL areas?"
+              "What's driving signal breaking 1?",
+              "How does signal breaking 1 here compare to other SWFL areas?"
             ]
           },
           {
-            "metric": "active_listings_count_swfl",
-            "label": "SWFL active residential listings (count)",
-            "value": 22650,
+            "metric": "freshness_median_asking_price_cape_coral_usd",
+            "value": 399200,
             "direction": "stable",
+            "label": "Cape Coral median asking price (as of 2026-10-30)",
             "variable_type": "extensive",
-            "units": "listings",
-            "display_format": "count",
+            "units": "USD",
+            "display_format": "currency",
             "source": {
-              "url": "https://www.swfldatagulf.com/r/source/listing_active_stats?label=SWFL+active+for-sale+listings+%28aggregated%29&source=realtor.com+for-sale+listings&brain=active-listings-swfl&date_col=scraped_at",
-              "fetched_at": "2026-10-29T11:00:23Z",
+              "url": "https://www.swfldatagulf.com/desk",
+              "fetched_at": "2026-10-30T04:23:36.149654+00:00",
               "tier": 2,
-              "citation": "22,650 active SWFL residential listings as of 2026-08-14"
+              "citation": "SWFL Data Gulf active-listing inventory — current median asking price for Cape Coral, sourced 2026-10-30"
             },
             "suggestions": [
-              "What's driving active listings count swfl?",
-              "How does active listings count swfl here compare to other SWFL areas?"
+              "Chart asking rents across the corridors",
+              "What's driving freshness median asking price cape coral usd?",
+              "How does freshness median asking price cape coral usd here compare to other SWFL areas?"
             ]
           },
           {
@@ -2265,8 +1097,8 @@
         "caveats": [
           "flood-barrier-mode-1 active: 4 barrier ZIPs, worst-case AAL $40,342/insured property",
           "Override \"storm-history-modifier\" fired (priority 70)",
-          "permits-commercial-swfl excluded from synthesis (relevance 0.096, below floor 0.1)",
-          "active-rentals-swfl excluded from synthesis (relevance 0.078, below floor 0.1)",
+          "permits-commercial-swfl excluded from synthesis (relevance 0.094, below floor 0.1)",
+          "active-rentals-swfl excluded from synthesis (relevance 0.077, below floor 0.1)",
           "No figures published: this source has not yet received its first real SBA FOIA load. A synthetic development sample exists for offline testing only and is never shipped.",
           "Construction-cost PPI metrics (construction_cost_ppi_industrial, construction_cost_ppi_warehouse, construction_cost_ppi_office, construction_cost_ppi_medical_office, construction_cost_ppi_trade_concrete, construction_cost_ppi_trade_roofing, construction_cost_ppi_trade_electrical, construction_cost_ppi_trade_plumbing_hvac) are national BLS series — no SWFL-specific or Lee/Collier breakout exists at BLS for any of them. They ship a real month-over-month direction (unlike MarketBeat's schema-required \"stable\" fallback) but BLS can revise recent observations within ~30 days of first publication.",
           "vacancy_rate_marketbeat_swfl: 15 submarkets report a point-in-time value; v1 does not compute quarter-over-quarter direction, so the \"stable\" label is a schema-required fallback, not a measured trend.",
@@ -2359,7 +1191,7 @@
           "1 of 10 announcements in the last 90 days matched qualifying categories (relocation, expansion, grant, infrastructure); the rest are general chamber/policy posts excluded from the momentum count.",
           "Investment and job figures reflect disclosures at announcement time; actual outcomes may vary as projects develop.",
           "SWFL Inc. covers primarily Lee County projects; Collier County coverage depends on cross-county partnerships and co-announcements.",
-          "63 additional live signals not surfaced here (cap 8); the full set is in data_lake.city_pulse.",
+          "73 additional live signals not surfaced here (cap 8); the full set is in data_lake.city_pulse.",
           "Each signal is dated current-events context with a per-signal source; freshness is TTL-bounded by topic (breaking 1d → structural 90d).",
           "Construction enforcement split: public notices = confirmed individual actions (hard-parsed violation_type); press releases = announced sweeps (Sonnet-inferred affected_industries). Do not sum them.",
           "Polarity: rising construction notices = bullish (recovery-driven unlicensed activity). Rising ABT notices = bearish (hospitality compliance stress).",
@@ -2420,7 +1252,7 @@
           "~50% of SWFL buyers (≈70% for condos) pay cash and insulate the luxury tier — a holding or rising top tier is part of the K-shape, not a bullish signal on its own.",
           "Covers 50 SWFL ZIPs holding BOTH a starter and a luxury tier; ZIPs lacking one tier are excluded from the divergence.",
           "Upstream brain 'active-rentals-swfl' was stale at build time (expired 2026-07-19).",
-          "Upstream brain 'active-rentals-swfl' failed to rebuild on 2026-10-29; using last good read from 2026-07-11 (v3)."
+          "Upstream brain 'active-rentals-swfl' failed to rebuild on 2026-10-30; using last good read from 2026-07-11 (v3)."
         ],
         "contradicts": [
           "macro-us (bearish) vs macro-florida (bullish)",
@@ -2477,8 +1309,8 @@
         "upstream_count": 37,
         "relevance": {
           "decay_curve": "weeks",
-          "half_life_hours": 720.0000000000001,
-          "computed_at": "2026-10-29T11:00:44.000Z"
+          "half_life_hours": 719.9999999999998,
+          "computed_at": "2026-10-30T04:26:23.000Z"
         },
         "exogenous_signals": [],
         "conditional_claims": [
