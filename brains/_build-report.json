@@ -1,8 +1,8 @@
 {
   "target": "master",
   "timestamps": {
-    "started": "2026-10-31T04:26:02.893Z",
-    "finished": "2026-10-31T04:26:24.609Z"
+    "started": "2026-10-31T10:30:03.289Z",
+    "finished": "2026-10-31T10:30:25.401Z"
   },
   "source": "live",
   "outcomes": [
@@ -114,48 +114,48 @@
     {
       "packId": "city-pulse-swfl",
       "status": "built",
-      "version": 150,
+      "version": 151,
       "written": true,
       "brainOutput": {
         "brain_id": "city-pulse-swfl",
-        "version": 150,
-        "refined_at": "2026-10-31T04:26:03Z",
-        "expires": "2026-11-01T04:26:03Z",
+        "version": 151,
+        "refined_at": "2026-10-31T10:30:03Z",
+        "expires": "2026-11-01T10:30:03Z",
         "ttl_seconds": 86400,
         "direction": "neutral",
         "magnitude": 0,
         "drivers": [],
         "overrides": [],
-        "conclusion": "SWFL city pulse as of 2026-10-31: 88 live current-events signals across 7 cities — Fort Myers (25), Naples (29), Cape Coral (24), North Fort Myers (4), East Naples (2), Sanibel (1), Estero (3). Most current: Fort Myers — A new waterfront estate in Naples sold for $71 million in an off-market (private) deal, reported Oct. 27, 2026, described as one of the largest sales of the year. These are current cited facts only; the cross-vertical read and any direction call live downstream in master.",
+        "conclusion": "SWFL city pulse as of 2026-10-31: 90 live current-events signals across 7 cities — Naples (30), Fort Myers (26), Cape Coral (24), North Fort Myers (4), East Naples (2), Sanibel (1), Estero (3). Most current: Naples — Former Naples councilwoman Linda Penniman died, described by her son as dying of a 'broken heart' after her husband; remembered as the 'Energizer Bunny.' These are current cited facts only; the cross-vertical read and any direction call live downstream in master.",
         "key_metrics": [
           {
-            "metric": "signal_transactions_1",
+            "metric": "signal_breaking_1",
+            "value": "Naples: Former Naples councilwoman Linda Penniman died, described by her son as dying of a 'broken heart' after her husband; remembered as the 'Energizer Bunny.'",
+            "direction": "stable",
+            "label": "Naples — breaking",
+            "variable_type": "categorical",
+            "source": {
+              "url": "https://www.news-press.com/story/money/business/local/2026/10/23/former-naples-florida-councilwoman-linda-penniman-remembered-as-the-energizer-bunny/92385292007/",
+              "fetched_at": "2026-10-31T10:30:03Z",
+              "tier": 2,
+              "citation": "Former Naples councilwoman remembered as the 'Energizer Bunny': \"[](https://www.news-press.com/)\n[SWFL Week 11: Cape Coral, North Fort Myers hang big losses on rivals Thursday](https://www.news-press.com/story/sports/high-school/football/2026/10/30/sw-florida-football-week-11-results-what-we-learned-from-oct-29-30-games/92382581007/)\n[](https://subscribe.news-press.com/rr/nanobar?gps-source=CPTILELEFT&itm_campaign=2026ENTQ4BAU2026&itm_medium=ONSITE&success-url=https%3A%2F%2Fwww.news-press.com%2Fstory%2Fmoney%2Fbusiness%2Flocal%2F2026%2F10%2F23%2Fformer-naples-florida-councilwoman-linda-penniman-remembered-as-the-energizer-bunny%2F92385292007%2F)\n[](https://subscribe.news-press.com/rr/masthead?gps-source=CPMASTHEAD&itm_campaign=2026ENTQ4BAU2026&itm_medium=ONSITE&success-url=https%3A%2F%2Fwww.news-press.com%2Fstory%2Fmoney%2Fbusiness%2Flocal%2F2026%2F10%2F23%2Fformer-naples-florida-councilwoman-linda-penniman-remembered-as-the-energizer-bunny%2F92385292007%2F)\n[News](https://www.news-press.com/news/) [Cape Coral](https://www.news-press.com/news/cape-coral/) [Sports](https://www.news-press.com/sports/) [Restaurants](https://www.news-press.com/taste/) [Real Estate](https://www.news-press.com/real-estate) [Advertise](https://advertising.usatoday.com/advertise-with-us/?cid=Web_LiQ_Network_AdvertiseWithUs_AdvertiseInquiry&publication=the_news_press&utm_source=local_publication&utm_medium=menu&utm_campaign=advertise_with_us) [Obituaries](https://www.news-press.com/obituaries) [eNewspaper](https://user.news-press.com/user/enewspaper) [Legals](https://www.news-press.com/public-notices)\n[](https://www.news-press.com/search/ \"Search\")\n[](https://www.news-press.com/weather/ \"Weather in Fort Myers: 74°F Mostly Cloudy\") [](https://subscribe.news-press.com/rr/navsub?gps-source=CPTOPNAVBAR&itm_campaign=2026ENTQ4BAU2026&itm_medium=ONSITE&success-url=https%3A%2F%2Fwww.news-press.com%2Fstory%2Fmoney%2Fbusiness%2Flocal%2F2026%2F10%2F23%2Fformer-naples-florida-councilwoman-linda-penniman-remembered-as-the-energizer-bunny%2F92385292007%2F)\n[](https://login.news-press.com/PFTM-GUP/authenticate/?success-url=https%3A%2F%2Fwww.news-press.com%2Fstory%2Fmoney%2Fbusiness%2Flocal%2F2026%2F10%2F23%2Fformer-naples-florida-councilwoman-linda-penniman-remembered-as-the-energizer-bunny%2F92385292007%2F&cancel-url=https%3A%2F%2Fwww.news-press.com%2Fstory%2Fmoney%2Fbusiness%2Flocal%2F2026%2F10%2F23%2Fformer-naples-florida-councilwoman-linda-penniman-remembered-as-the-energizer-bunny%2F92385292007%2F)\n[](https://www.news-press.com/) [](https://www.news-press.com/)\nLOCAL BUSINESS\n# Naples leader dies of 'broken heart' after husband. Son recalls her life\n[![Portrait of Laura Layden](https://www.news-press.com/gcdn/authoring/authoring-images/2024/02/08/PNDN/72524348007-ndn-jh-20240126-laura-0001.JPG?crop=3313,3312,x1506,y0&width=48&height=48&format=pjpg&auto=webp) Laura Layden](https://www.naplesnews.com/staff/2647080001/laura-layden/)\nFort Myers News-Press & Naples Daily News\nOct. 23, 2026, 2:48 p.m. ET\nThe \"Energizer Bunny.\"\nThat's how Linda Pennima\""
+            },
+            "suggestions": [
+              "What's driving signal breaking 1?",
+              "How does signal breaking 1 here compare to other SWFL areas?"
+            ]
+          },
+          {
+            "metric": "signal_transactions_2",
             "value": "Fort Myers: A new waterfront estate in Naples sold for $71 million in an off-market (private) deal, reported Oct. 27, 2026, described as one of the largest sales of the year.",
             "direction": "stable",
             "label": "Fort Myers — transactions",
             "variable_type": "categorical",
             "source": {
               "url": "https://www.naplesnews.com/story/money/business/local/2026/10/27/new-naples-florida-estate-sells-for-71-million-in-private-deal-one-of-the-largest-sales-of-year/92458106007/",
-              "fetched_at": "2026-10-31T04:26:03Z",
+              "fetched_at": "2026-10-31T10:30:03Z",
               "tier": 2,
               "citation": "New Naples estate sells for $71 million in private deal: \"[](https://www.naplesnews.com/)\n[SWFL Football Week 11 high school game previews and predictions](https://www.naplesnews.com/story/sports/high-school/football/2026/10/29/high-school-football-sw-florida-fhsaa-oct-29-30-previews-predictions/92465579007/)\n[](https://subscribe.naplesnews.com/rr/nanobar?gps-source=CPTILELEFT&itm_campaign=2026ENTQ4BAU2026&itm_medium=ONSITE&success-url=https%3A%2F%2Fwww.naplesnews.com%2Fstory%2Fmoney%2Fbusiness%2Flocal%2F2026%2F10%2F27%2Fnew-naples-florida-estate-sells-for-71-million-in-private-deal-one-of-the-largest-sales-of-year%2F92458106007%2F)\n[](https://subscribe.naplesnews.com/rr/masthead?gps-source=CPMASTHEAD&itm_campaign=2026ENTQ4BAU2026&itm_medium=ONSITE&success-url=https%3A%2F%2Fwww.naplesnews.com%2Fstory%2Fmoney%2Fbusiness%2Flocal%2F2026%2F10%2F27%2Fnew-naples-florida-estate-sells-for-71-million-in-private-deal-one-of-the-largest-sales-of-year%2F92458106007%2F)\n[News](https://www.naplesnews.com/news/) [Sports](https://www.naplesnews.com/sports/) [Real Estate](https://www.naplesnews.com/business/real-estate/) [Restaurants](https://www.naplesnews.com/entertainment/restaurants/) [Opinion](https://www.naplesnews.com/opinion/) [Advertise](https://advertising.usatoday.com/advertise-with-us/?cid=Web_LiQ_Network_AdvertiseWithUs_AdvertiseInquiry&publication=naples_daily_news&utm_source=local_publication&utm_medium=menu&utm_campaign=advertise_with_us) [Obituaries](https://www.naplesnews.com/obituaries) [eNewspaper](https://user.naplesnews.com/user/enewspaper) [Legals](https://www.naplesnews.com/public-notices)\n[](https://www.naplesnews.com/search/ \"Search\")\n[](https://www.naplesnews.com/weather/ \"Weather in Naples: 74°F Partly Sunny\") [](https://subscribe.naplesnews.com/rr/navsub?gps-source=CPTOPNAVBAR&itm_campaign=2026ENTQ4BAU2026&itm_medium=ONSITE&success-url=https%3A%2F%2Fwww.naplesnews.com%2Fstory%2Fmoney%2Fbusiness%2Flocal%2F2026%2F10%2F27%2Fnew-naples-florida-estate-sells-for-71-million-in-private-deal-one-of-the-largest-sales-of-year%2F92458106007%2F)\n[](https://login.naplesnews.com/PNDN-GUP/authenticate/?success-url=https%3A%2F%2Fwww.naplesnews.com%2Fstory%2Fmoney%2Fbusiness%2Flocal%2F2026%2F10%2F27%2Fnew-naples-florida-estate-sells-for-71-million-in-private-deal-one-of-the-largest-sales-of-year%2F92458106007%2F&cancel-url=https%3A%2F%2Fwww.naplesnews.com%2Fstory%2Fmoney%2Fbusiness%2Flocal%2F2026%2F10%2F27%2Fnew-naples-florida-estate-sells-for-71-million-in-private-deal-one-of-the-largest-sales-of-year%2F92458106007%2F)\n[](https://www.naplesnews.com/) [](https://www.naplesnews.com/)\n[LOCAL BUSINESS](https://www.naplesnews.com/business/local/)\n# New waterfront estate in Naples fetches $71 million in off-market deal\n[![Portrait of Laura Layden](https://www.naplesnews.com/gcdn/authoring/authoring-images/2024/02/08/PNDN/72524348007-ndn-jh-20240126-laura-0001.JPG?crop=3313,3312,x1506,y0&width=48&height=48&format=pjpg&auto=webp) Laura Layden](https://www.naplesnews.com/staff/2647080001/laura-layden/)\nFort Myers New\""
-            },
-            "suggestions": [
-              "What's driving signal transactions 1?",
-              "How does signal transactions 1 here compare to other SWFL areas?"
-            ]
-          },
-          {
-            "metric": "signal_transactions_2",
-            "value": "Naples: Hoffmann buys Naples yacht club (reported Oct. 28, 2026).",
-            "direction": "stable",
-            "label": "Naples — transactions",
-            "variable_type": "categorical",
-            "source": {
-              "url": "https://www.businessobserverfl.com/news/2026/oct/28/hoffmann-buys-naples-yacht-club/",
-              "fetched_at": "2026-10-31T04:26:03Z",
-              "tier": 2,
-              "citation": "Hoffmann buys Naples yacht club | Business Observer: \"![Spinner: White decorative](https://cdn.userway.org/widgetapp/images/spin_wh.svg)\n![](https://cdn.userway.org/widgetapp/images/body_wh.svg)\n![Spinner: White decorative](https://cdn.userway.org/widgetapp/images/spin_wh.svg)\n  * ![Alternate Text](https://observermediagroup.media.clients.ellingtoncms.com/static-4/assets/images/bob-logo-header.svg)\n  * Loading\n\n\n  * [Newsletters](https://marketing.businessobserverfl.com/newsletters)\n  * [Podcast](https://www.businessobserverfl.com/podcasts/corner-office/?utm_source=header&utm_medium=sitenav)\n  * [Public Notices](https://legals.businessobserverfl.com/)\n  * [Big Book](https://www.businessobserverfl.com/big-book-of-business/2026/)\n  * [40 Under 40](https://www.businessobserverfl.com/40-under-40/)\n  * [Mobile App](https://businessobserver.pressreader.com/)\n  * [Subscribe](https://marketing.businessobserverfl.com/subscribe)\n  * [Login](https://www.businessobserverfl.com/accounts/login/?next=/news/2026/oct/28/hoffmann-buys-naples-yacht-club/)\n\n\n  * [](https://www.facebook.com/BusinessObserverFL)\n  * [](https://x.com/BizObserverFL)\n  * [](https://www.linkedin.com/company/businessobserverfl)\n  * [ ](https://www.instagram.com/businessobserverfl/)\n\n\n[![](https://observermediagroup.media.clients.ellingtoncms.com/static-4/assets/images/bob-logo-header.svg)](https://www.businessobserverfl.com/)\n[![](https://observermediagroup.media.clients.ellingtoncms.com/static-4/assets/images/bob-logo-sticky.svg)](https://www.businessobserverfl.com/)\n[![](https://observermediagroup.media.clients.ellingtoncms.com/static-4/assets/images/bob-logo-header.svg)](https://www.businessobserverfl.com/)\n  * [News](https://www.businessobserverfl.com/news/all/)\n  * [Strategies](https://www.businessobserverfl.com/news/strategies/)\n  * [Entrepreneurs](https://www.businessobserverfl.com/news/entrepreneurs/)\n  * [Leadership](https://www.businessobserverfl.com/news/leadership/)\n  * [Regions](https://www.businessobserverfl.com/news/2026/oct/28/hoffmann-buys-naples-yacht-club/)\n    * [Tampa Bay-Lakeland](https://www.businessobserverfl.com/news/tampa-bay-lakeland/)\n    * [Manatee-Sarasota](https://www.businessobserverfl.com/news/manatee-sarasota/)\n    * [Charlotte-Lee-Collier](https://www.businessobserverfl.com/news/charlotte-lee-collier/)\n    * [Florida](https://www.businessobserverfl.com/news/florida/)\n  * [Industries](https://www.businessobserverfl.com/news/2026/oct/28/hoffmann-buys-naples-yacht-club/)\n    * [Business Support](https://www.businessobserverfl.com/news/industries/business-support/)\n    * [Commercial Real Estate](https://www.businessobserverfl.com/news/industries/commercial-real-estate/)\n    * [Residential Real Estate](https://www.businessobserverfl.com/news/industries/residential-real-estate/)\n    * [Development](https://www.businessobserverfl.com/news/industries/development/)\n    * [Finance](https://www.businessobserverfl.com/news/industries/finance/)\n    * [Food-Beverage](https://www.businessobserverfl.com/news/industries/food-\""
             },
             "suggestions": [
               "What's driving signal transactions 2?",
@@ -164,15 +164,15 @@
           },
           {
             "metric": "signal_transactions_3",
-            "value": "Naples: Naples senior living campus sells for 63% below its 2021 sale price (reported Oct. 28, 2026).",
+            "value": "Naples: Hoffmann buys Naples yacht club (reported Oct. 28, 2026).",
             "direction": "stable",
             "label": "Naples — transactions",
             "variable_type": "categorical",
             "source": {
-              "url": "https://www.businessobserverfl.com/news/2026/oct/28/naples-senior-living-campus-sells/",
-              "fetched_at": "2026-10-31T04:26:03Z",
+              "url": "https://www.businessobserverfl.com/news/2026/oct/28/hoffmann-buys-naples-yacht-club/",
+              "fetched_at": "2026-10-31T10:30:03Z",
               "tier": 2,
-              "citation": "Naples senior living campus sells for 63% below 2021 sale price | Business Observer: \"![Spinner: White decorative](https://cdn.userway.org/widgetapp/images/spin_wh.svg)\n![](https://cdn.userway.org/widgetapp/images/body_wh.svg)\n![Spinner: White decorative](https://cdn.userway.org/widgetapp/images/spin_wh.svg)\n  * ![Alternate Text](https://observermediagroup.media.clients.ellingtoncms.com/static-4/assets/images/bob-logo-header.svg)\n  * Loading\n\n\n  * [Newsletters](https://marketing.businessobserverfl.com/newsletters)\n  * [Podcast](https://www.businessobserverfl.com/podcasts/corner-office/?utm_source=header&utm_medium=sitenav)\n  * [Public Notices](https://legals.businessobserverfl.com/)\n  * [Big Book](https://www.businessobserverfl.com/big-book-of-business/2026/)\n  * [40 Under 40](https://www.businessobserverfl.com/40-under-40/)\n  * [Mobile App](https://businessobserver.pressreader.com/)\n  * [Subscribe](https://marketing.businessobserverfl.com/subscribe)\n  * [Login](https://www.businessobserverfl.com/accounts/login/?next=/news/2026/oct/28/naples-senior-living-campus-sells/)\n\n\n  * [](https://www.facebook.com/BusinessObserverFL)\n  * [](https://x.com/BizObserverFL)\n  * [](https://www.linkedin.com/company/businessobserverfl)\n  * [ ](https://www.instagram.com/businessobserverfl/)\n\n\n[![](https://observermediagroup.media.clients.ellingtoncms.com/static-4/assets/images/bob-logo-header.svg)](https://www.businessobserverfl.com/)\n[![](https://observermediagroup.media.clients.ellingtoncms.com/static-4/assets/images/bob-logo-sticky.svg)](https://www.businessobserverfl.com/)\n[![](https://observermediagroup.media.clients.ellingtoncms.com/static-4/assets/images/bob-logo-header.svg)](https://www.businessobserverfl.com/)\n  * [News](https://www.businessobserverfl.com/news/all/)\n  * [Strategies](https://www.businessobserverfl.com/news/strategies/)\n  * [Entrepreneurs](https://www.businessobserverfl.com/news/entrepreneurs/)\n  * [Leadership](https://www.businessobserverfl.com/news/leadership/)\n  * [Regions](https://www.businessobserverfl.com/news/2026/oct/28/naples-senior-living-campus-sells/)\n    * [Tampa Bay-Lakeland](https://www.businessobserverfl.com/news/tampa-bay-lakeland/)\n    * [Manatee-Sarasota](https://www.businessobserverfl.com/news/manatee-sarasota/)\n    * [Charlotte-Lee-Collier](https://www.businessobserverfl.com/news/charlotte-lee-collier/)\n    * [Florida](https://www.businessobserverfl.com/news/florida/)\n  * [Industries](https://www.businessobserverfl.com/news/2026/oct/28/naples-senior-living-campus-sells/)\n    * [Business Support](https://www.businessobserverfl.com/news/industries/business-support/)\n    * [Commercial Real Estate](https://www.businessobserverfl.com/news/industries/commercial-real-estate/)\n    * [Residential Real Estate](https://www.businessobserverfl.com/news/industries/residential-real-estate/)\n    * [Development](https://www.businessobserverfl.com/news/industries/development/)\n    * [Finance](https://www.businessobserverfl.com/news/industries/finance/)\n    * [Food-Beverage](https://www.businessobserverfl.com/news/industries\""
+              "citation": "Hoffmann buys Naples yacht club | Business Observer: \"![Spinner: White decorative](https://cdn.userway.org/widgetapp/images/spin_wh.svg)\n![](https://cdn.userway.org/widgetapp/images/body_wh.svg)\n![Spinner: White decorative](https://cdn.userway.org/widgetapp/images/spin_wh.svg)\n  * ![Alternate Text](https://observermediagroup.media.clients.ellingtoncms.com/static-4/assets/images/bob-logo-header.svg)\n  * Loading\n\n\n  * [Newsletters](https://marketing.businessobserverfl.com/newsletters)\n  * [Podcast](https://www.businessobserverfl.com/podcasts/corner-office/?utm_source=header&utm_medium=sitenav)\n  * [Public Notices](https://legals.businessobserverfl.com/)\n  * [Big Book](https://www.businessobserverfl.com/big-book-of-business/2026/)\n  * [40 Under 40](https://www.businessobserverfl.com/40-under-40/)\n  * [Mobile App](https://businessobserver.pressreader.com/)\n  * [Subscribe](https://marketing.businessobserverfl.com/subscribe)\n  * [Login](https://www.businessobserverfl.com/accounts/login/?next=/news/2026/oct/28/hoffmann-buys-naples-yacht-club/)\n\n\n  * [](https://www.facebook.com/BusinessObserverFL)\n  * [](https://x.com/BizObserverFL)\n  * [](https://www.linkedin.com/company/businessobserverfl)\n  * [ ](https://www.instagram.com/businessobserverfl/)\n\n\n[![](https://observermediagroup.media.clients.ellingtoncms.com/static-4/assets/images/bob-logo-header.svg)](https://www.businessobserverfl.com/)\n[![](https://observermediagroup.media.clients.ellingtoncms.com/static-4/assets/images/bob-logo-sticky.svg)](https://www.businessobserverfl.com/)\n[![](https://observermediagroup.media.clients.ellingtoncms.com/static-4/assets/images/bob-logo-header.svg)](https://www.businessobserverfl.com/)\n  * [News](https://www.businessobserverfl.com/news/all/)\n  * [Strategies](https://www.businessobserverfl.com/news/strategies/)\n  * [Entrepreneurs](https://www.businessobserverfl.com/news/entrepreneurs/)\n  * [Leadership](https://www.businessobserverfl.com/news/leadership/)\n  * [Regions](https://www.businessobserverfl.com/news/2026/oct/28/hoffmann-buys-naples-yacht-club/)\n    * [Tampa Bay-Lakeland](https://www.businessobserverfl.com/news/tampa-bay-lakeland/)\n    * [Manatee-Sarasota](https://www.businessobserverfl.com/news/manatee-sarasota/)\n    * [Charlotte-Lee-Collier](https://www.businessobserverfl.com/news/charlotte-lee-collier/)\n    * [Florida](https://www.businessobserverfl.com/news/florida/)\n  * [Industries](https://www.businessobserverfl.com/news/2026/oct/28/hoffmann-buys-naples-yacht-club/)\n    * [Business Support](https://www.businessobserverfl.com/news/industries/business-support/)\n    * [Commercial Real Estate](https://www.businessobserverfl.com/news/industries/commercial-real-estate/)\n    * [Residential Real Estate](https://www.businessobserverfl.com/news/industries/residential-real-estate/)\n    * [Development](https://www.businessobserverfl.com/news/industries/development/)\n    * [Finance](https://www.businessobserverfl.com/news/industries/finance/)\n    * [Food-Beverage](https://www.businessobserverfl.com/news/industries/food-\""
             },
             "suggestions": [
               "What's driving signal transactions 3?",
@@ -181,15 +181,15 @@
           },
           {
             "metric": "signal_transactions_4",
-            "value": "Naples: A newly completed, opulent beachfront estate in Naples sold for $71 million in an off-market deal, including furnishings, as reported Oct. 27, 2026.",
+            "value": "Naples: Naples senior living campus sells for 63% below its 2021 sale price (reported Oct. 28, 2026).",
             "direction": "stable",
             "label": "Naples — transactions",
             "variable_type": "categorical",
             "source": {
-              "url": "https://www.naplesnews.com/story/money/business/local/2026/10/27/new-naples-florida-estate-sells-for-71-million-in-private-deal-one-of-the-largest-sales-of-year/92458106007/",
-              "fetched_at": "2026-10-31T04:26:03Z",
+              "url": "https://www.businessobserverfl.com/news/2026/oct/28/naples-senior-living-campus-sells/",
+              "fetched_at": "2026-10-31T10:30:03Z",
               "tier": 2,
-              "citation": "New Naples estate sells for $71 million in private deal: \"[](https://www.naplesnews.com/)\n[](https://subscribe.naplesnews.com/rr/nanobar?gps-source=CPTILELEFT&itm_campaign=2026ENTQ4BAU2026&itm_medium=ONSITE&success-url=https%3A%2F%2Fwww.naplesnews.com%2Fstory%2Fmoney%2Fbusiness%2Flocal%2F2026%2F10%2F27%2Fnew-naples-florida-estate-sells-for-71-million-in-private-deal-one-of-the-largest-sales-of-year%2F92458106007%2F)\n[](https://subscribe.naplesnews.com/rr/masthead?gps-source=CPMASTHEAD&itm_campaign=2026ENTQ4BAU2026&itm_medium=ONSITE&success-url=https%3A%2F%2Fwww.naplesnews.com%2Fstory%2Fmoney%2Fbusiness%2Flocal%2F2026%2F10%2F27%2Fnew-naples-florida-estate-sells-for-71-million-in-private-deal-one-of-the-largest-sales-of-year%2F92458106007%2F)\n[News](https://www.naplesnews.com/news/) [Sports](https://www.naplesnews.com/sports/) [Real Estate](https://www.naplesnews.com/business/real-estate/) [Restaurants](https://www.naplesnews.com/entertainment/restaurants/) [Opinion](https://www.naplesnews.com/opinion/) [Advertise](https://advertising.usatoday.com/advertise-with-us/?cid=Web_LiQ_Network_AdvertiseWithUs_AdvertiseInquiry&publication=naples_daily_news&utm_source=local_publication&utm_medium=menu&utm_campaign=advertise_with_us) [Obituaries](https://www.naplesnews.com/obituaries) [eNewspaper](https://user.naplesnews.com/user/enewspaper) [Legals](https://www.naplesnews.com/public-notices)\n[](https://www.naplesnews.com/search/ \"Search\")\n[](https://www.naplesnews.com/weather/ \"Weather in Naples: 74°F Mostly Cloudy\") [](https://subscribe.naplesnews.com/rr/navsub?gps-source=CPTOPNAVBAR&itm_campaign=2026ENTQ4BAU2026&itm_medium=ONSITE&success-url=https%3A%2F%2Fwww.naplesnews.com%2Fstory%2Fmoney%2Fbusiness%2Flocal%2F2026%2F10%2F27%2Fnew-naples-florida-estate-sells-for-71-million-in-private-deal-one-of-the-largest-sales-of-year%2F92458106007%2F)\n[](https://login.naplesnews.com/PNDN-GUP/authenticate/?success-url=https%3A%2F%2Fwww.naplesnews.com%2Fstory%2Fmoney%2Fbusiness%2Flocal%2F2026%2F10%2F27%2Fnew-naples-florida-estate-sells-for-71-million-in-private-deal-one-of-the-largest-sales-of-year%2F92458106007%2F&cancel-url=https%3A%2F%2Fwww.naplesnews.com%2Fstory%2Fmoney%2Fbusiness%2Flocal%2F2026%2F10%2F27%2Fnew-naples-florida-estate-sells-for-71-million-in-private-deal-one-of-the-largest-sales-of-year%2F92458106007%2F)\n[](https://www.naplesnews.com/) [](https://www.naplesnews.com/)\n[LOCAL BUSINESS](https://www.naplesnews.com/business/local/)\n# New waterfront estate in Naples fetches $71 million in off-market deal\n[![Portrait of Laura Layden](https://www.naplesnews.com/gcdn/authoring/authoring-images/2024/02/08/PNDN/72524348007-ndn-jh-20240126-laura-0001.JPG?crop=3313,3312,x1506,y0&width=48&height=48&format=pjpg&auto=webp) Laura Layden](https://www.naplesnews.com/staff/2647080001/laura-layden/)\nFort Myers News-Press & Naples Daily News\nOct. 27, 2026, 2:20 p.m. ET\nNaples has seen another whopping home sale.\nIn an \"off-market\" sale, a newly completed, opulent beachfront estate fetched $71 million, including furnishings.\nAlthou\""
+              "citation": "Naples senior living campus sells for 63% below 2021 sale price | Business Observer: \"![Spinner: White decorative](https://cdn.userway.org/widgetapp/images/spin_wh.svg)\n![](https://cdn.userway.org/widgetapp/images/body_wh.svg)\n![Spinner: White decorative](https://cdn.userway.org/widgetapp/images/spin_wh.svg)\n  * ![Alternate Text](https://observermediagroup.media.clients.ellingtoncms.com/static-4/assets/images/bob-logo-header.svg)\n  * Loading\n\n\n  * [Newsletters](https://marketing.businessobserverfl.com/newsletters)\n  * [Podcast](https://www.businessobserverfl.com/podcasts/corner-office/?utm_source=header&utm_medium=sitenav)\n  * [Public Notices](https://legals.businessobserverfl.com/)\n  * [Big Book](https://www.businessobserverfl.com/big-book-of-business/2026/)\n  * [40 Under 40](https://www.businessobserverfl.com/40-under-40/)\n  * [Mobile App](https://businessobserver.pressreader.com/)\n  * [Subscribe](https://marketing.businessobserverfl.com/subscribe)\n  * [Login](https://www.businessobserverfl.com/accounts/login/?next=/news/2026/oct/28/naples-senior-living-campus-sells/)\n\n\n  * [](https://www.facebook.com/BusinessObserverFL)\n  * [](https://x.com/BizObserverFL)\n  * [](https://www.linkedin.com/company/businessobserverfl)\n  * [ ](https://www.instagram.com/businessobserverfl/)\n\n\n[![](https://observermediagroup.media.clients.ellingtoncms.com/static-4/assets/images/bob-logo-header.svg)](https://www.businessobserverfl.com/)\n[![](https://observermediagroup.media.clients.ellingtoncms.com/static-4/assets/images/bob-logo-sticky.svg)](https://www.businessobserverfl.com/)\n[![](https://observermediagroup.media.clients.ellingtoncms.com/static-4/assets/images/bob-logo-header.svg)](https://www.businessobserverfl.com/)\n  * [News](https://www.businessobserverfl.com/news/all/)\n  * [Strategies](https://www.businessobserverfl.com/news/strategies/)\n  * [Entrepreneurs](https://www.businessobserverfl.com/news/entrepreneurs/)\n  * [Leadership](https://www.businessobserverfl.com/news/leadership/)\n  * [Regions](https://www.businessobserverfl.com/news/2026/oct/28/naples-senior-living-campus-sells/)\n    * [Tampa Bay-Lakeland](https://www.businessobserverfl.com/news/tampa-bay-lakeland/)\n    * [Manatee-Sarasota](https://www.businessobserverfl.com/news/manatee-sarasota/)\n    * [Charlotte-Lee-Collier](https://www.businessobserverfl.com/news/charlotte-lee-collier/)\n    * [Florida](https://www.businessobserverfl.com/news/florida/)\n  * [Industries](https://www.businessobserverfl.com/news/2026/oct/28/naples-senior-living-campus-sells/)\n    * [Business Support](https://www.businessobserverfl.com/news/industries/business-support/)\n    * [Commercial Real Estate](https://www.businessobserverfl.com/news/industries/commercial-real-estate/)\n    * [Residential Real Estate](https://www.businessobserverfl.com/news/industries/residential-real-estate/)\n    * [Development](https://www.businessobserverfl.com/news/industries/development/)\n    * [Finance](https://www.businessobserverfl.com/news/industries/finance/)\n    * [Food-Beverage](https://www.businessobserverfl.com/news/industries\""
             },
             "suggestions": [
               "What's driving signal transactions 4?",
@@ -198,15 +198,15 @@
           },
           {
             "metric": "signal_transactions_5",
-            "value": "Cape Coral: A newly completed, opulent beachfront estate at 2050 Gordon Drive in Naples sold for $71 million in an off-market deal, including furnishings, as of Oct. 27, 2026.",
+            "value": "Naples: A newly completed, opulent beachfront estate in Naples sold for $71 million in an off-market deal, including furnishings, as reported Oct. 27, 2026.",
             "direction": "stable",
-            "label": "Cape Coral — transactions",
+            "label": "Naples — transactions",
             "variable_type": "categorical",
             "source": {
-              "url": "https://www.news-press.com/story/money/business/local/2026/10/27/new-naples-florida-estate-sells-for-71-million-in-private-deal-one-of-the-largest-sales-of-year/92458106007/",
-              "fetched_at": "2026-10-31T04:26:03Z",
+              "url": "https://www.naplesnews.com/story/money/business/local/2026/10/27/new-naples-florida-estate-sells-for-71-million-in-private-deal-one-of-the-largest-sales-of-year/92458106007/",
+              "fetched_at": "2026-10-31T10:30:03Z",
               "tier": 2,
-              "citation": "New Naples estate sells for $71 million in private deal: \"[](https://www.news-press.com/)\n[](https://subscribe.news-press.com/rr/nanobar?gps-source=CPTILELEFT&itm_campaign=2026ENTQ4BAU2026&itm_medium=ONSITE&success-url=https%3A%2F%2Fwww.news-press.com%2Fstory%2Fmoney%2Fbusiness%2Flocal%2F2026%2F10%2F27%2Fnew-naples-florida-estate-sells-for-71-million-in-private-deal-one-of-the-largest-sales-of-year%2F92458106007%2F)\n[](https://subscribe.news-press.com/rr/masthead?gps-source=CPMASTHEAD&itm_campaign=2026ENTQ4BAU2026&itm_medium=ONSITE&success-url=https%3A%2F%2Fwww.news-press.com%2Fstory%2Fmoney%2Fbusiness%2Flocal%2F2026%2F10%2F27%2Fnew-naples-florida-estate-sells-for-71-million-in-private-deal-one-of-the-largest-sales-of-year%2F92458106007%2F)\n[News](https://www.news-press.com/news/) [Cape Coral](https://www.news-press.com/news/cape-coral/) [Sports](https://www.news-press.com/sports/) [Restaurants](https://www.news-press.com/taste/) [Real Estate](https://www.news-press.com/real-estate) [Advertise](https://advertising.usatoday.com/advertise-with-us/?cid=Web_LiQ_Network_AdvertiseWithUs_AdvertiseInquiry&publication=the_news_press&utm_source=local_publication&utm_medium=menu&utm_campaign=advertise_with_us) [Obituaries](https://www.news-press.com/obituaries) [eNewspaper](https://user.news-press.com/user/enewspaper) [Legals](https://www.news-press.com/public-notices)\n[](https://www.news-press.com/search/ \"Search\")\n[](https://www.news-press.com/weather/ \"Weather in Fort Myers: 71°F Mostly Cloudy\") [](https://subscribe.news-press.com/rr/navsub?gps-source=CPTOPNAVBAR&itm_campaign=2026ENTQ4BAU2026&itm_medium=ONSITE&success-url=https%3A%2F%2Fwww.news-press.com%2Fstory%2Fmoney%2Fbusiness%2Flocal%2F2026%2F10%2F27%2Fnew-naples-florida-estate-sells-for-71-million-in-private-deal-one-of-the-largest-sales-of-year%2F92458106007%2F)\n[](https://login.news-press.com/PFTM-GUP/authenticate/?success-url=https%3A%2F%2Fwww.news-press.com%2Fstory%2Fmoney%2Fbusiness%2Flocal%2F2026%2F10%2F27%2Fnew-naples-florida-estate-sells-for-71-million-in-private-deal-one-of-the-largest-sales-of-year%2F92458106007%2F&cancel-url=https%3A%2F%2Fwww.news-press.com%2Fstory%2Fmoney%2Fbusiness%2Flocal%2F2026%2F10%2F27%2Fnew-naples-florida-estate-sells-for-71-million-in-private-deal-one-of-the-largest-sales-of-year%2F92458106007%2F)\n[](https://www.news-press.com/) [](https://www.news-press.com/)\nLOCAL BUSINESS\n# New waterfront estate in Naples fetches $71 million in off-market deal\n[![Portrait of Laura Layden](https://www.news-press.com/gcdn/authoring/authoring-images/2024/02/08/PNDN/72524348007-ndn-jh-20240126-laura-0001.JPG?crop=3313,3312,x1506,y0&width=48&height=48&format=pjpg&auto=webp) Laura Layden](https://www.naplesnews.com/staff/2647080001/laura-layden/)\nFort Myers News-Press & Naples Daily News\nOct. 27, 2026, 2:20 p.m. ET\nNaples has seen another whopping home sale.\nIn an \"off-market\" sale, a newly completed, opulent beachfront estate fetched $71 million, including furnishings.\nAlthough it's not the largest, the sale at 2050 Gordon Drive is one of\""
+              "citation": "New Naples estate sells for $71 million in private deal: \"[](https://www.naplesnews.com/)\n[](https://subscribe.naplesnews.com/rr/nanobar?gps-source=CPTILELEFT&itm_campaign=2026ENTQ4BAU2026&itm_medium=ONSITE&success-url=https%3A%2F%2Fwww.naplesnews.com%2Fstory%2Fmoney%2Fbusiness%2Flocal%2F2026%2F10%2F27%2Fnew-naples-florida-estate-sells-for-71-million-in-private-deal-one-of-the-largest-sales-of-year%2F92458106007%2F)\n[](https://subscribe.naplesnews.com/rr/masthead?gps-source=CPMASTHEAD&itm_campaign=2026ENTQ4BAU2026&itm_medium=ONSITE&success-url=https%3A%2F%2Fwww.naplesnews.com%2Fstory%2Fmoney%2Fbusiness%2Flocal%2F2026%2F10%2F27%2Fnew-naples-florida-estate-sells-for-71-million-in-private-deal-one-of-the-largest-sales-of-year%2F92458106007%2F)\n[News](https://www.naplesnews.com/news/) [Sports](https://www.naplesnews.com/sports/) [Real Estate](https://www.naplesnews.com/business/real-estate/) [Restaurants](https://www.naplesnews.com/entertainment/restaurants/) [Opinion](https://www.naplesnews.com/opinion/) [Advertise](https://advertising.usatoday.com/advertise-with-us/?cid=Web_LiQ_Network_AdvertiseWithUs_AdvertiseInquiry&publication=naples_daily_news&utm_source=local_publication&utm_medium=menu&utm_campaign=advertise_with_us) [Obituaries](https://www.naplesnews.com/obituaries) [eNewspaper](https://user.naplesnews.com/user/enewspaper) [Legals](https://www.naplesnews.com/public-notices)\n[](https://www.naplesnews.com/search/ \"Search\")\n[](https://www.naplesnews.com/weather/ \"Weather in Naples: 74°F Mostly Cloudy\") [](https://subscribe.naplesnews.com/rr/navsub?gps-source=CPTOPNAVBAR&itm_campaign=2026ENTQ4BAU2026&itm_medium=ONSITE&success-url=https%3A%2F%2Fwww.naplesnews.com%2Fstory%2Fmoney%2Fbusiness%2Flocal%2F2026%2F10%2F27%2Fnew-naples-florida-estate-sells-for-71-million-in-private-deal-one-of-the-largest-sales-of-year%2F92458106007%2F)\n[](https://login.naplesnews.com/PNDN-GUP/authenticate/?success-url=https%3A%2F%2Fwww.naplesnews.com%2Fstory%2Fmoney%2Fbusiness%2Flocal%2F2026%2F10%2F27%2Fnew-naples-florida-estate-sells-for-71-million-in-private-deal-one-of-the-largest-sales-of-year%2F92458106007%2F&cancel-url=https%3A%2F%2Fwww.naplesnews.com%2Fstory%2Fmoney%2Fbusiness%2Flocal%2F2026%2F10%2F27%2Fnew-naples-florida-estate-sells-for-71-million-in-private-deal-one-of-the-largest-sales-of-year%2F92458106007%2F)\n[](https://www.naplesnews.com/) [](https://www.naplesnews.com/)\n[LOCAL BUSINESS](https://www.naplesnews.com/business/local/)\n# New waterfront estate in Naples fetches $71 million in off-market deal\n[![Portrait of Laura Layden](https://www.naplesnews.com/gcdn/authoring/authoring-images/2024/02/08/PNDN/72524348007-ndn-jh-20240126-laura-0001.JPG?crop=3313,3312,x1506,y0&width=48&height=48&format=pjpg&auto=webp) Laura Layden](https://www.naplesnews.com/staff/2647080001/laura-layden/)\nFort Myers News-Press & Naples Daily News\nOct. 27, 2026, 2:20 p.m. ET\nNaples has seen another whopping home sale.\nIn an \"off-market\" sale, a newly completed, opulent beachfront estate fetched $71 million, including furnishings.\nAlthou\""
             },
             "suggestions": [
               "What's driving signal transactions 5?",
@@ -214,33 +214,33 @@
             ]
           },
           {
-            "metric": "signal_development_6",
-            "value": "Cape Coral: A major widening and improvement project for Interstate 75 affecting Lee and Collier counties was the subject of a public meeting on Oct. 28, 2026, with residents raising concerns over expansion plans.",
+            "metric": "signal_transactions_6",
+            "value": "Cape Coral: A newly completed, opulent beachfront estate at 2050 Gordon Drive in Naples sold for $71 million in an off-market deal, including furnishings, as of Oct. 27, 2026.",
             "direction": "stable",
-            "label": "Cape Coral — development",
+            "label": "Cape Coral — transactions",
             "variable_type": "categorical",
             "source": {
-              "url": "https://www.news-press.com/story/money/business/local/2026/10/29/residents-raise-concerns-over-i-75-expansion-plans-in-lee-collier/92486534007/",
-              "fetched_at": "2026-10-31T04:26:03Z",
+              "url": "https://www.news-press.com/story/money/business/local/2026/10/27/new-naples-florida-estate-sells-for-71-million-in-private-deal-one-of-the-largest-sales-of-year/92458106007/",
+              "fetched_at": "2026-10-31T10:30:03Z",
               "tier": 2,
-              "citation": "Residents raise concerns over I-75 expansion plans in Lee, Collier: \"[](https://www.news-press.com/)\n[SWFL Week 11: Cape Coral, North Fort Myers hang big losses on rivals Thursday](https://www.news-press.com/story/sports/high-school/football/2026/10/30/sw-florida-football-week-11-results-what-we-learned-from-oct-29-30-games/92382581007/)\n[](https://subscribe.news-press.com/rr/nanobar?gps-source=CPTILELEFT&itm_campaign=2026ENTQ4BAU2026&itm_medium=ONSITE&success-url=https%3A%2F%2Fwww.news-press.com%2Fstory%2Fmoney%2Fbusiness%2Flocal%2F2026%2F10%2F29%2Fresidents-raise-concerns-over-i-75-expansion-plans-in-lee-collier%2F92486534007%2F)\n[](https://subscribe.news-press.com/rr/masthead?gps-source=CPMASTHEAD&itm_campaign=2026ENTQ4BAU2026&itm_medium=ONSITE&success-url=https%3A%2F%2Fwww.news-press.com%2Fstory%2Fmoney%2Fbusiness%2Flocal%2F2026%2F10%2F29%2Fresidents-raise-concerns-over-i-75-expansion-plans-in-lee-collier%2F92486534007%2F)\n[News](https://www.news-press.com/news/) [Cape Coral](https://www.news-press.com/news/cape-coral/) [Sports](https://www.news-press.com/sports/) [Restaurants](https://www.news-press.com/taste/) [Real Estate](https://www.news-press.com/real-estate) [Advertise](https://advertising.usatoday.com/advertise-with-us/?cid=Web_LiQ_Network_AdvertiseWithUs_AdvertiseInquiry&publication=the_news_press&utm_source=local_publication&utm_medium=menu&utm_campaign=advertise_with_us) [Obituaries](https://www.news-press.com/obituaries) [eNewspaper](https://user.news-press.com/user/enewspaper) [Legals](https://www.news-press.com/public-notices)\n[](https://www.news-press.com/search/ \"Search\")\n[](https://www.news-press.com/weather/ \"Weather in Fort Myers: 74°F Mostly Cloudy\") [](https://subscribe.news-press.com/rr/navsub?gps-source=CPTOPNAVBAR&itm_campaign=2026ENTQ4BAU2026&itm_medium=ONSITE&success-url=https%3A%2F%2Fwww.news-press.com%2Fstory%2Fmoney%2Fbusiness%2Flocal%2F2026%2F10%2F29%2Fresidents-raise-concerns-over-i-75-expansion-plans-in-lee-collier%2F92486534007%2F)\n[](https://login.news-press.com/PFTM-GUP/authenticate/?success-url=https%3A%2F%2Fwww.news-press.com%2Fstory%2Fmoney%2Fbusiness%2Flocal%2F2026%2F10%2F29%2Fresidents-raise-concerns-over-i-75-expansion-plans-in-lee-collier%2F92486534007%2F&cancel-url=https%3A%2F%2Fwww.news-press.com%2Fstory%2Fmoney%2Fbusiness%2Flocal%2F2026%2F10%2F29%2Fresidents-raise-concerns-over-i-75-expansion-plans-in-lee-collier%2F92486534007%2F)\n[](https://www.news-press.com/) [](https://www.news-press.com/)\nLOCAL BUSINESS\n# Residents question new I-75 lane expansion plans. What to know\n[![Portrait of Laura Layden](https://www.news-press.com/gcdn/authoring/authoring-images/2024/02/08/PNDN/72524348007-ndn-jh-20240126-laura-0001.JPG?crop=3313,3312,x1506,y0&width=48&height=48&format=pjpg&auto=webp) Laura Layden](https://www.naplesnews.com/staff/2647080001/laura-layden/)\nFort Myers News-Press & Naples Daily News\nOct. 29, 2026, 10:10 a.m. ET\nWhile some parts of a major widening and improvement project for Interstate 75 have been decided, other pieces have not.\nOn Oct. 28, the Florida D\""
+              "citation": "New Naples estate sells for $71 million in private deal: \"[](https://www.news-press.com/)\n[](https://subscribe.news-press.com/rr/nanobar?gps-source=CPTILELEFT&itm_campaign=2026ENTQ4BAU2026&itm_medium=ONSITE&success-url=https%3A%2F%2Fwww.news-press.com%2Fstory%2Fmoney%2Fbusiness%2Flocal%2F2026%2F10%2F27%2Fnew-naples-florida-estate-sells-for-71-million-in-private-deal-one-of-the-largest-sales-of-year%2F92458106007%2F)\n[](https://subscribe.news-press.com/rr/masthead?gps-source=CPMASTHEAD&itm_campaign=2026ENTQ4BAU2026&itm_medium=ONSITE&success-url=https%3A%2F%2Fwww.news-press.com%2Fstory%2Fmoney%2Fbusiness%2Flocal%2F2026%2F10%2F27%2Fnew-naples-florida-estate-sells-for-71-million-in-private-deal-one-of-the-largest-sales-of-year%2F92458106007%2F)\n[News](https://www.news-press.com/news/) [Cape Coral](https://www.news-press.com/news/cape-coral/) [Sports](https://www.news-press.com/sports/) [Restaurants](https://www.news-press.com/taste/) [Real Estate](https://www.news-press.com/real-estate) [Advertise](https://advertising.usatoday.com/advertise-with-us/?cid=Web_LiQ_Network_AdvertiseWithUs_AdvertiseInquiry&publication=the_news_press&utm_source=local_publication&utm_medium=menu&utm_campaign=advertise_with_us) [Obituaries](https://www.news-press.com/obituaries) [eNewspaper](https://user.news-press.com/user/enewspaper) [Legals](https://www.news-press.com/public-notices)\n[](https://www.news-press.com/search/ \"Search\")\n[](https://www.news-press.com/weather/ \"Weather in Fort Myers: 71°F Mostly Cloudy\") [](https://subscribe.news-press.com/rr/navsub?gps-source=CPTOPNAVBAR&itm_campaign=2026ENTQ4BAU2026&itm_medium=ONSITE&success-url=https%3A%2F%2Fwww.news-press.com%2Fstory%2Fmoney%2Fbusiness%2Flocal%2F2026%2F10%2F27%2Fnew-naples-florida-estate-sells-for-71-million-in-private-deal-one-of-the-largest-sales-of-year%2F92458106007%2F)\n[](https://login.news-press.com/PFTM-GUP/authenticate/?success-url=https%3A%2F%2Fwww.news-press.com%2Fstory%2Fmoney%2Fbusiness%2Flocal%2F2026%2F10%2F27%2Fnew-naples-florida-estate-sells-for-71-million-in-private-deal-one-of-the-largest-sales-of-year%2F92458106007%2F&cancel-url=https%3A%2F%2Fwww.news-press.com%2Fstory%2Fmoney%2Fbusiness%2Flocal%2F2026%2F10%2F27%2Fnew-naples-florida-estate-sells-for-71-million-in-private-deal-one-of-the-largest-sales-of-year%2F92458106007%2F)\n[](https://www.news-press.com/) [](https://www.news-press.com/)\nLOCAL BUSINESS\n# New waterfront estate in Naples fetches $71 million in off-market deal\n[![Portrait of Laura Layden](https://www.news-press.com/gcdn/authoring/authoring-images/2024/02/08/PNDN/72524348007-ndn-jh-20240126-laura-0001.JPG?crop=3313,3312,x1506,y0&width=48&height=48&format=pjpg&auto=webp) Laura Layden](https://www.naplesnews.com/staff/2647080001/laura-layden/)\nFort Myers News-Press & Naples Daily News\nOct. 27, 2026, 2:20 p.m. ET\nNaples has seen another whopping home sale.\nIn an \"off-market\" sale, a newly completed, opulent beachfront estate fetched $71 million, including furnishings.\nAlthough it's not the largest, the sale at 2050 Gordon Drive is one of\""
             },
             "suggestions": [
-              "What's driving signal development 6?",
-              "How does signal development 6 here compare to other SWFL areas?"
+              "What's driving signal transactions 6?",
+              "How does signal transactions 6 here compare to other SWFL areas?"
             ]
           },
           {
             "metric": "signal_development_7",
-            "value": "Fort Myers: On Oct. 28, 2026, the Florida Department of Transportation held a public meeting on a major widening and improvement project for Interstate 75 affecting Lee and Collier counties, with residents raising concerns over the expansion plans.",
+            "value": "Cape Coral: Residents raised concerns over I-75 lane expansion plans in Lee and Collier counties, with the story published Oct. 29, 2026, noting some parts of the major widening and improvement project for Interstate 75 have moved forward while other parts face community opposition.",
             "direction": "stable",
-            "label": "Fort Myers — development",
+            "label": "Cape Coral — development",
             "variable_type": "categorical",
             "source": {
-              "url": "https://www.news-press.com/story/money/business/local/2026/10/29/residents-raise-concerns-over-i-75-expansion-plans-in-lee-collier/92486534007/",
-              "fetched_at": "2026-10-31T04:26:03Z",
+              "url": "https://www.naplesnews.com/story/money/business/local/2026/10/29/residents-raise-concerns-over-i-75-expansion-plans-in-lee-collier/92486534007/",
+              "fetched_at": "2026-10-31T10:30:03Z",
               "tier": 2,
-              "citation": "Residents raise concerns over I-75 expansion plans in Lee, Collier: \"[](https://www.news-press.com/)\n[SWFL Week 11: Cape Coral, North Fort Myers hang big losses on rivals Thursday](https://www.news-press.com/story/sports/high-school/football/2026/10/30/sw-florida-football-week-11-results-what-we-learned-from-oct-29-30-games/92382581007/)\n[](https://subscribe.news-press.com/rr/nanobar?gps-source=CPTILELEFT&itm_campaign=2026ENTQ4BAU2026&itm_medium=ONSITE&success-url=https%3A%2F%2Fwww.news-press.com%2Fstory%2Fmoney%2Fbusiness%2Flocal%2F2026%2F10%2F29%2Fresidents-raise-concerns-over-i-75-expansion-plans-in-lee-collier%2F92486534007%2F)\n[](https://subscribe.news-press.com/rr/masthead?gps-source=CPMASTHEAD&itm_campaign=2026ENTQ4BAU2026&itm_medium=ONSITE&success-url=https%3A%2F%2Fwww.news-press.com%2Fstory%2Fmoney%2Fbusiness%2Flocal%2F2026%2F10%2F29%2Fresidents-raise-concerns-over-i-75-expansion-plans-in-lee-collier%2F92486534007%2F)\n[News](https://www.news-press.com/news/) [Cape Coral](https://www.news-press.com/news/cape-coral/) [Sports](https://www.news-press.com/sports/) [Restaurants](https://www.news-press.com/taste/) [Real Estate](https://www.news-press.com/real-estate) [Advertise](https://advertising.usatoday.com/advertise-with-us/?cid=Web_LiQ_Network_AdvertiseWithUs_AdvertiseInquiry&publication=the_news_press&utm_source=local_publication&utm_medium=menu&utm_campaign=advertise_with_us) [Obituaries](https://www.news-press.com/obituaries) [eNewspaper](https://user.news-press.com/user/enewspaper) [Legals](https://www.news-press.com/public-notices)\n[](https://www.news-press.com/search/ \"Search\")\n[](https://www.news-press.com/weather/ \"Weather in Fort Myers: 74°F Mostly Cloudy\") [](https://subscribe.news-press.com/rr/navsub?gps-source=CPTOPNAVBAR&itm_campaign=2026ENTQ4BAU2026&itm_medium=ONSITE&success-url=https%3A%2F%2Fwww.news-press.com%2Fstory%2Fmoney%2Fbusiness%2Flocal%2F2026%2F10%2F29%2Fresidents-raise-concerns-over-i-75-expansion-plans-in-lee-collier%2F92486534007%2F)\n[](https://login.news-press.com/PFTM-GUP/authenticate/?success-url=https%3A%2F%2Fwww.news-press.com%2Fstory%2Fmoney%2Fbusiness%2Flocal%2F2026%2F10%2F29%2Fresidents-raise-concerns-over-i-75-expansion-plans-in-lee-collier%2F92486534007%2F&cancel-url=https%3A%2F%2Fwww.news-press.com%2Fstory%2Fmoney%2Fbusiness%2Flocal%2F2026%2F10%2F29%2Fresidents-raise-concerns-over-i-75-expansion-plans-in-lee-collier%2F92486534007%2F)\n[](https://www.news-press.com/) [](https://www.news-press.com/)\nLOCAL BUSINESS\n# Residents question new I-75 lane expansion plans. What to know\n[![Portrait of Laura Layden](https://www.news-press.com/gcdn/authoring/authoring-images/2024/02/08/PNDN/72524348007-ndn-jh-20240126-laura-0001.JPG?crop=3313,3312,x1506,y0&width=48&height=48&format=pjpg&auto=webp) Laura Layden](https://www.naplesnews.com/staff/2647080001/laura-layden/)\nFort Myers News-Press & Naples Daily News\nOct. 29, 2026, 10:10 a.m. ET\nWhile some parts of a major widening and improvement project for Interstate 75 have been decided, other pieces have not.\nOn Oct. 28, the Florida D\""
+              "citation": "Residents raise concerns over I-75 expansion plans in Lee, Collier: \"[](https://www.naplesnews.com/)\n[SWFL Week 11: Cape Coral, North Fort Myers hang big losses on rivals Thursday](https://www.naplesnews.com/story/sports/high-school/football/2026/10/30/sw-florida-football-week-11-results-what-we-learned-from-oct-29-30-games/92382581007/)\n[](https://subscribe.naplesnews.com/rr/nanobar?gps-source=CPTILELEFT&itm_campaign=2026ENTQ4BAU2026&itm_medium=ONSITE&success-url=https%3A%2F%2Fwww.naplesnews.com%2Fstory%2Fmoney%2Fbusiness%2Flocal%2F2026%2F10%2F29%2Fresidents-raise-concerns-over-i-75-expansion-plans-in-lee-collier%2F92486534007%2F)\n[](https://subscribe.naplesnews.com/rr/masthead?gps-source=CPMASTHEAD&itm_campaign=2026ENTQ4BAU2026&itm_medium=ONSITE&success-url=https%3A%2F%2Fwww.naplesnews.com%2Fstory%2Fmoney%2Fbusiness%2Flocal%2F2026%2F10%2F29%2Fresidents-raise-concerns-over-i-75-expansion-plans-in-lee-collier%2F92486534007%2F)\n[News](https://www.naplesnews.com/news/) [Sports](https://www.naplesnews.com/sports/) [Real Estate](https://www.naplesnews.com/business/real-estate/) [Restaurants](https://www.naplesnews.com/entertainment/restaurants/) [Opinion](https://www.naplesnews.com/opinion/) [Advertise](https://advertising.usatoday.com/advertise-with-us/?cid=Web_LiQ_Network_AdvertiseWithUs_AdvertiseInquiry&publication=naples_daily_news&utm_source=local_publication&utm_medium=menu&utm_campaign=advertise_with_us) [Obituaries](https://www.naplesnews.com/obituaries) [eNewspaper](https://user.naplesnews.com/user/enewspaper) [Legals](https://www.naplesnews.com/public-notices)\n[](https://www.naplesnews.com/search/ \"Search\")\n[](https://www.naplesnews.com/weather/ \"Weather in Naples: 74°F Mostly Cloudy\") [](https://subscribe.naplesnews.com/rr/navsub?gps-source=CPTOPNAVBAR&itm_campaign=2026ENTQ4BAU2026&itm_medium=ONSITE&success-url=https%3A%2F%2Fwww.naplesnews.com%2Fstory%2Fmoney%2Fbusiness%2Flocal%2F2026%2F10%2F29%2Fresidents-raise-concerns-over-i-75-expansion-plans-in-lee-collier%2F92486534007%2F)\n[](https://login.naplesnews.com/PNDN-GUP/authenticate/?success-url=https%3A%2F%2Fwww.naplesnews.com%2Fstory%2Fmoney%2Fbusiness%2Flocal%2F2026%2F10%2F29%2Fresidents-raise-concerns-over-i-75-expansion-plans-in-lee-collier%2F92486534007%2F&cancel-url=https%3A%2F%2Fwww.naplesnews.com%2Fstory%2Fmoney%2Fbusiness%2Flocal%2F2026%2F10%2F29%2Fresidents-raise-concerns-over-i-75-expansion-plans-in-lee-collier%2F92486534007%2F)\n[](https://www.naplesnews.com/) [](https://www.naplesnews.com/)\n[LOCAL BUSINESS](https://www.naplesnews.com/business/local/)\n# Residents question new I-75 lane expansion plans. What to know\n[![Portrait of Laura Layden](https://www.naplesnews.com/gcdn/authoring/authoring-images/2024/02/08/PNDN/72524348007-ndn-jh-20240126-laura-0001.JPG?crop=3313,3312,x1506,y0&width=48&height=48&format=pjpg&auto=webp) Laura Layden](https://www.naplesnews.com/staff/2647080001/laura-layden/)\nFort Myers News-Press & Naples Daily News\nOct. 29, 2026, 10:10 a.m. ET\nWhile some parts of a major widening and improvement project for Interstate 75 hav\""
             },
             "suggestions": [
               "What's driving signal development 7?",
@@ -249,15 +249,15 @@
           },
           {
             "metric": "signal_development_8",
-            "value": "Fort Myers: Collier commissioners approved a mixed-use development in East Naples with workforce housing, as reported Oct. 28, 2026.",
+            "value": "Cape Coral: Lee County data center investment continues to flow into SW Florida, with coverage dated Oct. 26, 2026, citing ongoing data center construction in Lee County at sites including Alico and Northstar areas in Fort Myers.",
             "direction": "stable",
-            "label": "Fort Myers — development",
+            "label": "Cape Coral — development",
             "variable_type": "categorical",
             "source": {
-              "url": "https://www.naplesnews.com/story/money/business/local/2026/10/28/mixed-use-project-in-east-naples-with-workforce-housing-gets-the-go-ahead-from-collier-commissioners/92458286007/",
-              "fetched_at": "2026-10-31T04:26:03Z",
+              "url": "https://www.naplesnews.com/story/money/2026/10/26/florida-fighting-over-data-centers-sw-florida-building-them-lee-county-fort-myers-alico-northstar/92370794007/",
+              "fetched_at": "2026-10-31T10:30:03Z",
               "tier": 2,
-              "citation": "Mixed-use project in East Naples with workforce housing gets go-ahead: \"[](https://www.naplesnews.com/)\n[SWFL Week 11: Cape Coral, North Fort Myers hang big losses on rivals Thursday](https://www.naplesnews.com/story/sports/high-school/football/2026/10/30/sw-florida-football-week-11-results-what-we-learned-from-oct-29-30-games/92382581007/)\n[](https://subscribe.naplesnews.com/rr/nanobar?gps-source=CPTILELEFT&itm_campaign=2026ENTQ4BAU2026&itm_medium=ONSITE&success-url=https%3A%2F%2Fwww.naplesnews.com%2Fstory%2Fmoney%2Fbusiness%2Flocal%2F2026%2F10%2F28%2Fmixed-use-project-in-east-naples-with-workforce-housing-gets-the-go-ahead-from-collier-commissioners%2F92458286007%2F)\n[](https://subscribe.naplesnews.com/rr/masthead?gps-source=CPMASTHEAD&itm_campaign=2026ENTQ4BAU2026&itm_medium=ONSITE&success-url=https%3A%2F%2Fwww.naplesnews.com%2Fstory%2Fmoney%2Fbusiness%2Flocal%2F2026%2F10%2F28%2Fmixed-use-project-in-east-naples-with-workforce-housing-gets-the-go-ahead-from-collier-commissioners%2F92458286007%2F)\n[News](https://www.naplesnews.com/news/) [Sports](https://www.naplesnews.com/sports/) [Real Estate](https://www.naplesnews.com/business/real-estate/) [Restaurants](https://www.naplesnews.com/entertainment/restaurants/) [Opinion](https://www.naplesnews.com/opinion/) [Advertise](https://advertising.usatoday.com/advertise-with-us/?cid=Web_LiQ_Network_AdvertiseWithUs_AdvertiseInquiry&publication=naples_daily_news&utm_source=local_publication&utm_medium=menu&utm_campaign=advertise_with_us) [Obituaries](https://www.naplesnews.com/obituaries) [eNewspaper](https://user.naplesnews.com/user/enewspaper) [Legals](https://www.naplesnews.com/public-notices)\n[](https://www.naplesnews.com/search/ \"Search\")\n[](https://www.naplesnews.com/weather/ \"Weather in Naples: 74°F Mostly Cloudy\") [](https://subscribe.naplesnews.com/rr/navsub?gps-source=CPTOPNAVBAR&itm_campaign=2026ENTQ4BAU2026&itm_medium=ONSITE&success-url=https%3A%2F%2Fwww.naplesnews.com%2Fstory%2Fmoney%2Fbusiness%2Flocal%2F2026%2F10%2F28%2Fmixed-use-project-in-east-naples-with-workforce-housing-gets-the-go-ahead-from-collier-commissioners%2F92458286007%2F)\n[](https://login.naplesnews.com/PNDN-GUP/authenticate/?success-url=https%3A%2F%2Fwww.naplesnews.com%2Fstory%2Fmoney%2Fbusiness%2Flocal%2F2026%2F10%2F28%2Fmixed-use-project-in-east-naples-with-workforce-housing-gets-the-go-ahead-from-collier-commissioners%2F92458286007%2F&cancel-url=https%3A%2F%2Fwww.naplesnews.com%2Fstory%2Fmoney%2Fbusiness%2Flocal%2F2026%2F10%2F28%2Fmixed-use-project-in-east-naples-with-workforce-housing-gets-the-go-ahead-from-collier-commissioners%2F92458286007%2F)\n[](https://www.naplesnews.com/) [](https://www.naplesnews.com/)\n[LOCAL BUSINESS](https://www.naplesnews.com/business/local/)\n# Collier commissioners approve mixed-use development in East Naples\n[![Portrait of Laura Layden](https://www.naplesnews.com/gcdn/authoring/authoring-images/2024/02/08/PNDN/72524348007-ndn-jh-20240126-laura-0001.JPG?crop=3313,3312,x1506,y0&width=48&height=48&format=pjpg&auto=webp) Laura Layden](https://www.naplesnews.com/staff/\""
+              "citation": "Florida's fighting over data centers. SW Florida is building them: \"[](https://www.naplesnews.com/)\n[SWFL Week 11: Cape Coral, North Fort Myers hang big losses on rivals Thursday](https://www.naplesnews.com/story/sports/high-school/football/2026/10/30/sw-florida-football-week-11-results-what-we-learned-from-oct-29-30-games/92382581007/)\n[](https://subscribe.naplesnews.com/rr/nanobar?gps-source=CPTILELEFT&itm_campaign=2026ENTQ4BAU2026&itm_medium=ONSITE&success-url=https%3A%2F%2Fwww.naplesnews.com%2Fstory%2Fmoney%2F2026%2F10%2F26%2Fflorida-fighting-over-data-centers-sw-florida-building-them-lee-county-fort-myers-alico-northstar%2F92370794007%2F)\n[](https://subscribe.naplesnews.com/rr/masthead?gps-source=CPMASTHEAD&itm_campaign=2026ENTQ4BAU2026&itm_medium=ONSITE&success-url=https%3A%2F%2Fwww.naplesnews.com%2Fstory%2Fmoney%2F2026%2F10%2F26%2Fflorida-fighting-over-data-centers-sw-florida-building-them-lee-county-fort-myers-alico-northstar%2F92370794007%2F)\n[News](https://www.naplesnews.com/news/) [Sports](https://www.naplesnews.com/sports/) [Real Estate](https://www.naplesnews.com/business/real-estate/) [Restaurants](https://www.naplesnews.com/entertainment/restaurants/) [Opinion](https://www.naplesnews.com/opinion/) [Advertise](https://advertising.usatoday.com/advertise-with-us/?cid=Web_LiQ_Network_AdvertiseWithUs_AdvertiseInquiry&publication=naples_daily_news&utm_source=local_publication&utm_medium=menu&utm_campaign=advertise_with_us) [Obituaries](https://www.naplesnews.com/obituaries) [eNewspaper](https://user.naplesnews.com/user/enewspaper) [Legals](https://www.naplesnews.com/public-notices)\n[](https://www.naplesnews.com/search/ \"Search\")\n[](https://www.naplesnews.com/weather/ \"Weather in Naples: 74°F Mostly Cloudy\") [](https://subscribe.naplesnews.com/rr/navsub?gps-source=CPTOPNAVBAR&itm_campaign=2026ENTQ4BAU2026&itm_medium=ONSITE&success-url=https%3A%2F%2Fwww.naplesnews.com%2Fstory%2Fmoney%2F2026%2F10%2F26%2Fflorida-fighting-over-data-centers-sw-florida-building-them-lee-county-fort-myers-alico-northstar%2F92370794007%2F)\n[](https://login.naplesnews.com/PNDN-GUP/authenticate/?success-url=https%3A%2F%2Fwww.naplesnews.com%2Fstory%2Fmoney%2F2026%2F10%2F26%2Fflorida-fighting-over-data-centers-sw-florida-building-them-lee-county-fort-myers-alico-northstar%2F92370794007%2F&cancel-url=https%3A%2F%2Fwww.naplesnews.com%2Fstory%2Fmoney%2F2026%2F10%2F26%2Fflorida-fighting-over-data-centers-sw-florida-building-them-lee-county-fort-myers-alico-northstar%2F92370794007%2F)\n[](https://www.naplesnews.com/) [](https://www.naplesnews.com/)\nMONEY\n# As Florida opposition explodes, data center investment keeps flowing\n[![Portrait of Phil Fernandez](https://www.naplesnews.com/gcdn/presto/2019/09/14/PNDN/6a77b474-579f-48fa-b56f-a2cc2b9de797-NDN_Phil_Fernandez.jpg?crop=2999,2999,x0,y570&width=48&height=48&format=pjpg&auto=webp) Phil Fernandez](https://www.naplesnews.com/staff/2684114001/phil-fernandez/)\nFort Myers News-Press & Naples Daily News\nOct. 26, 2026, 5:05 a.m. ET\nFew [development topics](https://www.naplesnews.com/story/money/2\""
             },
             "suggestions": [
               "What's driving signal development 8?",
@@ -310,16 +310,6 @@
                 }
               },
               {
-                "key": "33991",
-                "label": "33991",
-                "cells": {
-                  "items": 1,
-                  "latest_fact": "Florida's newest Costco, located in Cape Coral, is reported as opening and expected to change neighborhoods in Lee County and SWFL, as of Oct. 30, 2026.",
-                  "latest_place": "Cape Coral",
-                  "latest_source": "https://www.news-press.com/story/money/2026/10/30/new-florida-costco-does-more-than-groceries-it-changes-neighborhoods-cape-coral-lee-county-swfl-grow/92486627007/"
-                }
-              },
-              {
                 "key": "33917",
                 "label": "33917",
                 "cells": {
@@ -332,7 +322,7 @@
             ],
             "source": {
               "url": "https://www.swfldatagulf.com/r/source/city_pulse",
-              "fetched_at": "2026-10-31T04:26:03Z",
+              "fetched_at": "2026-10-31T10:30:03Z",
               "tier": 2,
               "citation": "Distilled, citation-backed SWFL news signals; each ZIP's items carry per-item source URLs in data_lake.city_pulse."
             },
@@ -340,7 +330,7 @@
           }
         ],
         "caveats": [
-          "80 additional live signals not surfaced here (cap 8); the full set is in data_lake.city_pulse.",
+          "82 additional live signals not surfaced here (cap 8); the full set is in data_lake.city_pulse.",
           "Each signal is dated current-events context with a per-signal source; freshness is TTL-bounded by topic (breaking 1d → structural 90d)."
         ],
         "contradicts": [],
@@ -353,7 +343,7 @@
         "relevance": {
           "decay_curve": "weeks",
           "half_life_hours": 720,
-          "computed_at": "2026-10-31T04:26:03Z"
+          "computed_at": "2026-10-31T10:30:03Z"
         },
         "exogenous_signals": []
       }
@@ -370,119 +360,8 @@
     },
     {
       "packId": "freshness-pulse",
-      "status": "built",
-      "version": 89,
-      "written": true,
-      "brainOutput": {
-        "brain_id": "freshness-pulse",
-        "version": 89,
-        "refined_at": "2026-10-31T04:26:03Z",
-        "expires": "2026-11-01T04:26:03Z",
-        "ttl_seconds": 86400,
-        "direction": "neutral",
-        "magnitude": 0,
-        "drivers": [],
-        "overrides": [],
-        "conclusion": "Today's sourced snapshot — Cape Coral median asking price (as of 2026-10-31) $399,200; Fort Myers median asking price (as of 2026-10-31) $325,000; Naples median asking price (as of 2026-10-31) $650,000; SWFL 30-year fixed mortgage rate (as of 2026-10-29) 7.24%. These are cited current facts only; the direction call lives downstream in master.",
-        "key_metrics": [
-          {
-            "metric": "freshness_median_asking_price_cape_coral_usd",
-            "value": 399200,
-            "direction": "stable",
-            "label": "Cape Coral median asking price (as of 2026-10-31)",
-            "variable_type": "extensive",
-            "units": "USD",
-            "display_format": "currency",
-            "source": {
-              "url": "https://www.swfldatagulf.com/desk",
-              "fetched_at": "2026-10-31T04:23:45.444724+00:00",
-              "tier": 2,
-              "citation": "SWFL Data Gulf active-listing inventory — current median asking price for Cape Coral, sourced 2026-10-31"
-            },
-            "suggestions": [
-              "Chart asking rents across the corridors",
-              "What's driving freshness median asking price cape coral usd?",
-              "How does freshness median asking price cape coral usd here compare to other SWFL areas?"
-            ]
-          },
-          {
-            "metric": "freshness_median_asking_price_fort_myers_usd",
-            "value": 325000,
-            "direction": "stable",
-            "label": "Fort Myers median asking price (as of 2026-10-31)",
-            "variable_type": "extensive",
-            "units": "USD",
-            "display_format": "currency",
-            "source": {
-              "url": "https://www.swfldatagulf.com/desk",
-              "fetched_at": "2026-10-31T04:23:45.444724+00:00",
-              "tier": 2,
-              "citation": "SWFL Data Gulf active-listing inventory — current median asking price for Fort Myers, sourced 2026-10-31"
-            },
-            "suggestions": [
-              "Chart asking rents across the corridors",
-              "What's driving freshness median asking price fort myers usd?",
-              "How does freshness median asking price fort myers usd here compare to other SWFL areas?"
-            ]
-          },
-          {
-            "metric": "freshness_median_asking_price_naples_usd",
-            "value": 650000,
-            "direction": "stable",
-            "label": "Naples median asking price (as of 2026-10-31)",
-            "variable_type": "extensive",
-            "units": "USD",
-            "display_format": "currency",
-            "source": {
-              "url": "https://www.swfldatagulf.com/desk",
-              "fetched_at": "2026-10-31T04:23:45.444724+00:00",
-              "tier": 2,
-              "citation": "SWFL Data Gulf active-listing inventory — current median asking price for Naples, sourced 2026-10-31"
-            },
-            "suggestions": [
-              "Chart asking rents across the corridors",
-              "What's driving freshness median asking price naples usd?",
-              "How does freshness median asking price naples usd here compare to other SWFL areas?"
-            ]
-          },
-          {
-            "metric": "freshness_mortgage_30yr_fixed_pct",
-            "value": 7.24,
-            "direction": "stable",
-            "label": "SWFL 30-year fixed mortgage rate (as of 2026-10-29)",
-            "variable_type": "intensive",
-            "units": "percent",
-            "display_format": "percent",
-            "source": {
-              "url": "https://fred.stlouisfed.org/series/MORTGAGE30US",
-              "fetched_at": "2026-10-31T04:23:45.444724+00:00",
-              "tier": 2,
-              "citation": "FRED — current 30-year fixed mortgage rate for SWFL, sourced 2026-10-29"
-            },
-            "suggestions": [
-              "What's driving freshness mortgage 30yr fixed pct?",
-              "How does freshness mortgage 30yr fixed pct here compare to other SWFL areas?"
-            ]
-          }
-        ],
-        "detail_tables": [],
-        "caveats": [
-          "Each county-grain number is a single grounded source's current figure, provenance-gated to a real source URL; held anomalies and unsourced (model-memory) numbers are excluded by design."
-        ],
-        "contradicts": [],
-        "confidence": 0.8,
-        "joint_integrity": 1,
-        "confidence_dispersion": 0,
-        "chain_depth": 0,
-        "trust_tier": 2,
-        "upstream_count": 0,
-        "relevance": {
-          "decay_curve": "weeks",
-          "half_life_hours": 720,
-          "computed_at": "2026-10-31T04:26:03Z"
-        },
-        "exogenous_signals": []
-      }
+      "status": "skipped-fresh",
+      "written": false
     },
     {
       "packId": "seller-stress-swfl",
@@ -565,13 +444,13 @@
     {
       "packId": "master",
       "status": "built",
-      "version": 158,
+      "version": 159,
       "written": true,
       "brainOutput": {
         "brain_id": "master",
-        "version": 158,
-        "refined_at": "2026-10-31T04:26:24Z",
-        "expires": "2026-11-07T04:26:24Z",
+        "version": 159,
+        "refined_at": "2026-10-31T10:30:25Z",
+        "expires": "2026-11-07T10:30:25Z",
         "ttl_seconds": 604800,
         "direction": "mixed",
         "magnitude": 0.4692499779888023,
@@ -1017,20 +896,20 @@
             ]
           },
           {
-            "metric": "signal_transactions_1",
-            "value": "Fort Myers: A new waterfront estate in Naples sold for $71 million in an off-market (private) deal, reported Oct. 27, 2026, described as one of the largest sales of the year.",
+            "metric": "signal_breaking_1",
+            "value": "Naples: Former Naples councilwoman Linda Penniman died, described by her son as dying of a 'broken heart' after her husband; remembered as the 'Energizer Bunny.'",
             "direction": "stable",
-            "label": "Fort Myers — transactions",
+            "label": "Naples — breaking",
             "variable_type": "categorical",
             "source": {
-              "url": "https://www.naplesnews.com/story/money/business/local/2026/10/27/new-naples-florida-estate-sells-for-71-million-in-private-deal-one-of-the-largest-sales-of-year/92458106007/",
-              "fetched_at": "2026-10-31T04:26:03Z",
+              "url": "https://www.news-press.com/story/money/business/local/2026/10/23/former-naples-florida-councilwoman-linda-penniman-remembered-as-the-energizer-bunny/92385292007/",
+              "fetched_at": "2026-10-31T10:30:03Z",
               "tier": 2,
-              "citation": "New Naples estate sells for $71 million in private deal: \"[](https://www.naplesnews.com/)\n[SWFL Football Week 11 high school game previews and predictions](https://www.naplesnews.com/story/sports/high-school/football/2026/10/29/high-school-football-sw-florida-fhsaa-oct-29-30-previews-predictions/92465579007/)\n[](https://subscribe.naplesnews.com/rr/nanobar?gps-source=CPTILELEFT&itm_campaign=2026ENTQ4BAU2026&itm_medium=ONSITE&success-url=https%3A%2F%2Fwww.naplesnews.com%2Fstory%2Fmoney%2Fbusiness%2Flocal%2F2026%2F10%2F27%2Fnew-naples-florida-estate-sells-for-71-million-in-private-deal-one-of-the-largest-sales-of-year%2F92458106007%2F)\n[](https://subscribe.naplesnews.com/rr/masthead?gps-source=CPMASTHEAD&itm_campaign=2026ENTQ4BAU2026&itm_medium=ONSITE&success-url=https%3A%2F%2Fwww.naplesnews.com%2Fstory%2Fmoney%2Fbusiness%2Flocal%2F2026%2F10%2F27%2Fnew-naples-florida-estate-sells-for-71-million-in-private-deal-one-of-the-largest-sales-of-year%2F92458106007%2F)\n[News](https://www.naplesnews.com/news/) [Sports](https://www.naplesnews.com/sports/) [Real Estate](https://www.naplesnews.com/business/real-estate/) [Restaurants](https://www.naplesnews.com/entertainment/restaurants/) [Opinion](https://www.naplesnews.com/opinion/) [Advertise](https://advertising.usatoday.com/advertise-with-us/?cid=Web_LiQ_Network_AdvertiseWithUs_AdvertiseInquiry&publication=naples_daily_news&utm_source=local_publication&utm_medium=menu&utm_campaign=advertise_with_us) [Obituaries](https://www.naplesnews.com/obituaries) [eNewspaper](https://user.naplesnews.com/user/enewspaper) [Legals](https://www.naplesnews.com/public-notices)\n[](https://www.naplesnews.com/search/ \"Search\")\n[](https://www.naplesnews.com/weather/ \"Weather in Naples: 74°F Partly Sunny\") [](https://subscribe.naplesnews.com/rr/navsub?gps-source=CPTOPNAVBAR&itm_campaign=2026ENTQ4BAU2026&itm_medium=ONSITE&success-url=https%3A%2F%2Fwww.naplesnews.com%2Fstory%2Fmoney%2Fbusiness%2Flocal%2F2026%2F10%2F27%2Fnew-naples-florida-estate-sells-for-71-million-in-private-deal-one-of-the-largest-sales-of-year%2F92458106007%2F)\n[](https://login.naplesnews.com/PNDN-GUP/authenticate/?success-url=https%3A%2F%2Fwww.naplesnews.com%2Fstory%2Fmoney%2Fbusiness%2Flocal%2F2026%2F10%2F27%2Fnew-naples-florida-estate-sells-for-71-million-in-private-deal-one-of-the-largest-sales-of-year%2F92458106007%2F&cancel-url=https%3A%2F%2Fwww.naplesnews.com%2Fstory%2Fmoney%2Fbusiness%2Flocal%2F2026%2F10%2F27%2Fnew-naples-florida-estate-sells-for-71-million-in-private-deal-one-of-the-largest-sales-of-year%2F92458106007%2F)\n[](https://www.naplesnews.com/) [](https://www.naplesnews.com/)\n[LOCAL BUSINESS](https://www.naplesnews.com/business/local/)\n# New waterfront estate in Naples fetches $71 million in off-market deal\n[![Portrait of Laura Layden](https://www.naplesnews.com/gcdn/authoring/authoring-images/2024/02/08/PNDN/72524348007-ndn-jh-20240126-laura-0001.JPG?crop=3313,3312,x1506,y0&width=48&height=48&format=pjpg&auto=webp) Laura Layden](https://www.naplesnews.com/staff/2647080001/laura-layden/)\nFort Myers New\""
+              "citation": "Former Naples councilwoman remembered as the 'Energizer Bunny': \"[](https://www.news-press.com/)\n[SWFL Week 11: Cape Coral, North Fort Myers hang big losses on rivals Thursday](https://www.news-press.com/story/sports/high-school/football/2026/10/30/sw-florida-football-week-11-results-what-we-learned-from-oct-29-30-games/92382581007/)\n[](https://subscribe.news-press.com/rr/nanobar?gps-source=CPTILELEFT&itm_campaign=2026ENTQ4BAU2026&itm_medium=ONSITE&success-url=https%3A%2F%2Fwww.news-press.com%2Fstory%2Fmoney%2Fbusiness%2Flocal%2F2026%2F10%2F23%2Fformer-naples-florida-councilwoman-linda-penniman-remembered-as-the-energizer-bunny%2F92385292007%2F)\n[](https://subscribe.news-press.com/rr/masthead?gps-source=CPMASTHEAD&itm_campaign=2026ENTQ4BAU2026&itm_medium=ONSITE&success-url=https%3A%2F%2Fwww.news-press.com%2Fstory%2Fmoney%2Fbusiness%2Flocal%2F2026%2F10%2F23%2Fformer-naples-florida-councilwoman-linda-penniman-remembered-as-the-energizer-bunny%2F92385292007%2F)\n[News](https://www.news-press.com/news/) [Cape Coral](https://www.news-press.com/news/cape-coral/) [Sports](https://www.news-press.com/sports/) [Restaurants](https://www.news-press.com/taste/) [Real Estate](https://www.news-press.com/real-estate) [Advertise](https://advertising.usatoday.com/advertise-with-us/?cid=Web_LiQ_Network_AdvertiseWithUs_AdvertiseInquiry&publication=the_news_press&utm_source=local_publication&utm_medium=menu&utm_campaign=advertise_with_us) [Obituaries](https://www.news-press.com/obituaries) [eNewspaper](https://user.news-press.com/user/enewspaper) [Legals](https://www.news-press.com/public-notices)\n[](https://www.news-press.com/search/ \"Search\")\n[](https://www.news-press.com/weather/ \"Weather in Fort Myers: 74°F Mostly Cloudy\") [](https://subscribe.news-press.com/rr/navsub?gps-source=CPTOPNAVBAR&itm_campaign=2026ENTQ4BAU2026&itm_medium=ONSITE&success-url=https%3A%2F%2Fwww.news-press.com%2Fstory%2Fmoney%2Fbusiness%2Flocal%2F2026%2F10%2F23%2Fformer-naples-florida-councilwoman-linda-penniman-remembered-as-the-energizer-bunny%2F92385292007%2F)\n[](https://login.news-press.com/PFTM-GUP/authenticate/?success-url=https%3A%2F%2Fwww.news-press.com%2Fstory%2Fmoney%2Fbusiness%2Flocal%2F2026%2F10%2F23%2Fformer-naples-florida-councilwoman-linda-penniman-remembered-as-the-energizer-bunny%2F92385292007%2F&cancel-url=https%3A%2F%2Fwww.news-press.com%2Fstory%2Fmoney%2Fbusiness%2Flocal%2F2026%2F10%2F23%2Fformer-naples-florida-councilwoman-linda-penniman-remembered-as-the-energizer-bunny%2F92385292007%2F)\n[](https://www.news-press.com/) [](https://www.news-press.com/)\nLOCAL BUSINESS\n# Naples leader dies of 'broken heart' after husband. Son recalls her life\n[![Portrait of Laura Layden](https://www.news-press.com/gcdn/authoring/authoring-images/2024/02/08/PNDN/72524348007-ndn-jh-20240126-laura-0001.JPG?crop=3313,3312,x1506,y0&width=48&height=48&format=pjpg&auto=webp) Laura Layden](https://www.naplesnews.com/staff/2647080001/laura-layden/)\nFort Myers News-Press & Naples Daily News\nOct. 23, 2026, 2:48 p.m. ET\nThe \"Energizer Bunny.\"\nThat's how Linda Pennima\""
             },
             "suggestions": [
-              "What's driving signal transactions 1?",
-              "How does signal transactions 1 here compare to other SWFL areas?"
+              "What's driving signal breaking 1?",
+              "How does signal breaking 1 here compare to other SWFL areas?"
             ]
           },
           {
@@ -1097,7 +976,7 @@
         "caveats": [
           "flood-barrier-mode-1 active: 4 barrier ZIPs, worst-case AAL $40,342/insured property",
           "Override \"storm-history-modifier\" fired (priority 70)",
-          "permits-commercial-swfl excluded from synthesis (relevance 0.092, below floor 0.1)",
+          "permits-commercial-swfl excluded from synthesis (relevance 0.091, below floor 0.1)",
           "active-rentals-swfl excluded from synthesis (relevance 0.075, below floor 0.1)",
           "No figures published: this source has not yet received its first real SBA FOIA load. A synthetic development sample exists for offline testing only and is never shipped.",
           "Construction-cost PPI metrics (construction_cost_ppi_industrial, construction_cost_ppi_warehouse, construction_cost_ppi_office, construction_cost_ppi_medical_office, construction_cost_ppi_trade_concrete, construction_cost_ppi_trade_roofing, construction_cost_ppi_trade_electrical, construction_cost_ppi_trade_plumbing_hvac) are national BLS series — no SWFL-specific or Lee/Collier breakout exists at BLS for any of them. They ship a real month-over-month direction (unlike MarketBeat's schema-required \"stable\" fallback) but BLS can revise recent observations within ~30 days of first publication.",
@@ -1191,7 +1070,7 @@
           "1 of 10 announcements in the last 90 days matched qualifying categories (relocation, expansion, grant, infrastructure); the rest are general chamber/policy posts excluded from the momentum count.",
           "Investment and job figures reflect disclosures at announcement time; actual outcomes may vary as projects develop.",
           "SWFL Inc. covers primarily Lee County projects; Collier County coverage depends on cross-county partnerships and co-announcements.",
-          "80 additional live signals not surfaced here (cap 8); the full set is in data_lake.city_pulse.",
+          "82 additional live signals not surfaced here (cap 8); the full set is in data_lake.city_pulse.",
           "Each signal is dated current-events context with a per-signal source; freshness is TTL-bounded by topic (breaking 1d → structural 90d).",
           "Construction enforcement split: public notices = confirmed individual actions (hard-parsed violation_type); press releases = announced sweeps (Sonnet-inferred affected_industries). Do not sum them.",
           "Polarity: rising construction notices = bullish (recovery-driven unlicensed activity). Rising ABT notices = bearish (hospitality compliance stress).",
@@ -1309,8 +1188,8 @@
         "upstream_count": 37,
         "relevance": {
           "decay_curve": "weeks",
-          "half_life_hours": 719.9999999999997,
-          "computed_at": "2026-10-31T04:26:24.000Z"
+          "half_life_hours": 719.9999999999999,
+          "computed_at": "2026-10-31T10:30:25.000Z"
         },
         "exogenous_signals": [],
         "conditional_claims": [
