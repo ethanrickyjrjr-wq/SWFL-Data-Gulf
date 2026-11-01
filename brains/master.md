@@ -1,9 +1,9 @@
-<!-- FRESHNESS: v160 | Token: SWFL-7421-v160-20261101-c523e5bb -->
+<!-- FRESHNESS: v161 | Token: SWFL-7421-v161-20261101-92536502 -->
 ---
 brain_id: master
-version: 160
-refined_at: 2026-11-01T04:26:26Z
-freshness_token: SWFL-7421-v160-20261101-c523e5bb
+version: 161
+refined_at: 2026-11-01T11:32:07Z
+freshness_token: SWFL-7421-v161-20261101-92536502
 ttl_seconds: 604800
 pack_hash: be8f0d44e0e6
 context_type: user_saved_reference
@@ -31,7 +31,7 @@ SCOPE: SWFL Intelligence Lake — master synthesizer over the verified Franchise
 --- CITATION TABLE ---
 id  | source                                                                                       | verified   | expires
 s01 | franchise-outcomes brain — https://www.swfldatagulf.com/api/b/franchise-outcomes             | 2026-10-02 | 2026-12-31
-s02 | cre-swfl brain — https://www.swfldatagulf.com/api/b/cre-swfl                                 | 2026-10-26 | 2026-11-02
+s02 | cre-swfl brain — https://www.swfldatagulf.com/api/b/cre-swfl                                 | 2026-11-01 | 2026-11-08
 s03 | macro-us brain — https://www.swfldatagulf.com/api/b/macro-us                                 | 2026-10-22 | 2026-11-21
 s04 | macro-florida brain — https://www.swfldatagulf.com/api/b/macro-florida                       | 2026-10-22 | 2026-11-21
 s05 | macro-swfl brain — https://www.swfldatagulf.com/api/b/macro-swfl                             | 2026-10-26 | 2026-11-25
@@ -58,7 +58,7 @@ s25 | market-heat-swfl brain — https://www.swfldatagulf.com/api/b/market-heat-
 s26 | storm-history-swfl brain — https://www.swfldatagulf.com/api/b/storm-history-swfl             | 2026-10-11 | 2027-10-11
 s27 | hurricane-tracks-fl brain — https://www.swfldatagulf.com/api/b/hurricane-tracks-fl           | 2026-10-06 | 2027-10-06
 s28 | licenses-swfl brain — https://www.swfldatagulf.com/api/b/licenses-swfl                       | 2026-10-06 | 2026-11-05
-s29 | condo-sirs-swfl brain — https://www.swfldatagulf.com/api/b/condo-sirs-swfl                   | 2026-10-02 | 2026-11-01
+s29 | condo-sirs-swfl brain — https://www.swfldatagulf.com/api/b/condo-sirs-swfl                   | 2026-11-01 | 2026-12-01
 s30 | permits-commercial-swfl brain — https://www.swfldatagulf.com/api/b/permits-commercial-swfl   | 2026-07-19 | 2027-07-19
 s31 | price-distribution-swfl brain — https://www.swfldatagulf.com/api/b/price-distribution-swfl   | 2026-10-27 | 2026-11-04
 s32 | listing-momentum-swfl brain — https://www.swfldatagulf.com/api/b/listing-momentum-swfl       | 2026-10-27 | 2026-11-04
@@ -73,7 +73,7 @@ s39 | home-values-swfl brain — https://www.swfldatagulf.com/api/b/home-values-
 --- SAVED FACTS ---
 [
   {"id":"f001","topic":"upstream :: franchise-outcomes","fact":"Upstream snapshot — franchise-outcomes (neutral, magnitude 0.00, confidence 1.00)","value":"franchise-outcomes as of 2026-10-02: direction neutral, magnitude 0.00, confidence 1.00, trust tier T1, 0 key metric(s). Franchise loan outcomes: awaiting the first live SBA FOIA data load (quarterly pipeline). No survival figures are published from this brain until real loan-level data lands.","src":"s01","date":"2026-11-01"},
-  {"id":"f002","topic":"upstream :: cre-swfl","fact":"Upstream snapshot — cre-swfl (mixed, magnitude 0.30, confidence 0.87)","value":"cre-swfl as of 2026-10-26: direction mixed, magnitude 0.30, confidence 0.87, trust tier T2, 240 key metric(s). The SWFL CRE pack covers 27 verified corridors across Lee and Collier counties. Quantified reads: median cap rate 6.7% (rising); median vacancy 2.9% (falling); median net absorption 6,397 sqft (rising); median asking rent $27.15/sqft NNN (rising). Submarket signals split between landlord-market and distress reads — no consensus direction at the SWFL CRE level. Common driver: asking rent rising alongside vacancy rising (asking-price stickiness, not pricing power). Corridor Factor: 44/100 (neutral) — composite of cap rate, vacancy, and asking rent across 10 of 10 submarkets. Permit capital flow: Lee County corridor-weighted z = 0.41 (above baseline).","src":"s01","date":"2026-11-01"},
+  {"id":"f002","topic":"upstream :: cre-swfl","fact":"Upstream snapshot — cre-swfl (mixed, magnitude 0.30, confidence 0.87)","value":"cre-swfl as of 2026-11-01: direction mixed, magnitude 0.30, confidence 0.87, trust tier T2, 240 key metric(s). The SWFL CRE pack covers 27 verified corridors across Lee and Collier counties. Quantified reads: median cap rate 6.7% (rising); median vacancy 2.9% (falling); median net absorption 6,397 sqft (rising); median asking rent $27.15/sqft NNN (rising). Submarket signals split between landlord-market and distress reads — no consensus direction at the SWFL CRE level. Common driver: asking rent rising alongside vacancy rising (asking-price stickiness, not pricing power). Corridor Factor: 44/100 (neutral) — composite of cap rate, vacancy, and asking rent across 10 of 10 submarkets. Permit capital flow: Lee County corridor-weighted z = 0.46 (above baseline).","src":"s01","date":"2026-11-01"},
   {"id":"f003","topic":"upstream :: macro-us","fact":"Upstream snapshot — macro-us (bearish, magnitude 0.50, confidence 1.00)","value":"macro-us as of 2026-10-22: direction bearish, magnitude 0.50, confidence 1.00, trust tier T1, 2 key metric(s). As of the latest reported periods, the national macro backdrop reads: SOFR at 3.9% and stable, headline CPI at 3.7% YoY and rising. This brain is the root of the macro chain (macro-us → macro-florida → macro-swfl). State and regional brains read the funding-cost and inflation backdrop through here.","src":"s01","date":"2026-11-01"},
   {"id":"f004","topic":"upstream :: macro-florida","fact":"Upstream snapshot — macro-florida (bullish, magnitude 0.50, confidence 1.00)","value":"macro-florida as of 2026-10-22: direction bullish, magnitude 0.50, confidence 1.00, trust tier T1, 7 key metric(s). As of the latest reported periods, the Florida state-level labor market reads: Florida unemployment at 4.4% (falling), labor force participation at 57.3%. Read against the national backdrop (macro-us, confidence 1.00): SOFR at 3.9% (stable). Regional brains (macro-swfl, future macro-tampa/macro-jax) use this brain as the state baseline for gap math.","src":"s01","date":"2026-11-01"},
   {"id":"f005","topic":"upstream :: macro-swfl","fact":"Upstream snapshot — macro-swfl (bearish, magnitude 1.00, confidence 1.00)","value":"macro-swfl as of 2026-10-26: direction bearish, magnitude 1.00, confidence 1.00, trust tier T1, 16 key metric(s). SWFL labor market, 2026-M08 (preliminary): Lee County at 5.2%, +0.5pp YoY; Collier County at 5%, +0.3pp YoY; FL state LAUS 4.6% (benchmark). Private-sector wages in Lee County ran $1,230/wk in 2026-Q1 (+4.9% YoY). Bank branch deposits in Lee County stood at $21,115,545,000 as of 06/30/2026 (-5.3% YoY). Against the FL state macro backdrop (macro-florida, confidence 1.00), SWFL county unemployment is rising faster than the state average.","src":"s01","date":"2026-11-01"},
@@ -100,7 +100,7 @@ s39 | home-values-swfl brain — https://www.swfldatagulf.com/api/b/home-values-
   {"id":"f026","topic":"upstream :: storm-history-swfl","fact":"Upstream snapshot — storm-history-swfl (bearish, magnitude 0.50, confidence 1.00)","value":"storm-history-swfl as of 2026-10-11: direction bearish, magnitude 0.50, confidence 1.00, trust tier T1, 9 key metric(s). Southwest Florida storm history (LEE + COLLIER) — 887 total NOAA Storm Events across the 1996-2025 modern-schema vintage, 17 qualifying as major storms (damage >= $1M AND event_type in {Hurricane, Tropical Storm, Tornado, Flash Flood, Storm Surge/Tide}). Most recent billion-dollar event in scope: Hurricane Ian on 2022-09-28. Trailing 10-year window: 68 property-damage events, 10 distinct tropical cyclones — bearish read on near-term physical risk.","src":"s01","date":"2026-11-01"},
   {"id":"f027","topic":"upstream :: hurricane-tracks-fl","fact":"Upstream snapshot — hurricane-tracks-fl (neutral, magnitude 0.20, confidence 1.00)","value":"hurricane-tracks-fl as of 2026-10-06: direction neutral, magnitude 0.20, confidence 1.00, trust tier T1, 6 key metric(s). Southwest Florida hurricane impact history (HURDAT2 × NFIP cross-tier join, 3 core counties: Collier + Hendry + Lee) — 7 distinct named storms made landfall in a SWFL county over the trailing 30-year window, 2 of those were Cat-3+ on Saffir-Simpson at any point in their lifetime. Realized NFIP exposure per (storm × county) landfall row averages $116,788,824, with the worst single (storm × county) on record at $3,389,600,145.37. Most recent landfall in scope: IAN 2022-09-28. Closest pass in the trailing 5-year window: 18 statute miles from a SWFL county centroid.","src":"s01","date":"2026-11-01"},
   {"id":"f028","topic":"upstream :: licenses-swfl","fact":"Upstream snapshot — licenses-swfl (bullish, magnitude 0.05, confidence 1.00)","value":"licenses-swfl as of 2026-10-06: direction bullish, magnitude 0.05, confidence 1.00, trust tier T1, 6 key metric(s). FL DBPR contractor licensing in Lee+Collier is healthy — lapse rate below stress threshold. Active licenses: Lee 6,643, Collier 3,407 (10,050 combined). Lapse rate: 0.5% of all licenses. New in last 12 months: 1,009. Applicants in pipeline: 8,863.","src":"s01","date":"2026-11-01"},
-  {"id":"f029","topic":"upstream :: condo-sirs-swfl","fact":"Upstream snapshot — condo-sirs-swfl (neutral, magnitude 1.00, confidence 1.00)","value":"condo-sirs-swfl as of 2026-10-02: direction neutral, magnitude 1.00, confidence 1.00, trust tier T1, 5 key metric(s). DBPR confirms 1,366 SWFL condominium and cooperative associations have submitted their Structural Integrity Reserve Study as of 2026-10-01. Lee County: 608, Collier County: 758. Of these, 664 filed under the HB 913 compliance push (July 2025+ database). This is a positive-signal-only registry: presence confirms SIRS filing; absence cannot be interpreted without a baseline count of all SWFL 3-story+ condominiums.","src":"s01","date":"2026-11-01"},
+  {"id":"f029","topic":"upstream :: condo-sirs-swfl","fact":"Upstream snapshot — condo-sirs-swfl (neutral, magnitude 1.00, confidence 1.00)","value":"condo-sirs-swfl as of 2026-11-01: direction neutral, magnitude 1.00, confidence 1.00, trust tier T1, 5 key metric(s). DBPR confirms 1,366 SWFL condominium and cooperative associations have submitted their Structural Integrity Reserve Study as of 2026-10-01. Lee County: 608, Collier County: 758. Of these, 664 filed under the HB 913 compliance push (July 2025+ database). This is a positive-signal-only registry: presence confirms SIRS filing; absence cannot be interpreted without a baseline count of all SWFL 3-story+ condominiums.","src":"s01","date":"2026-11-01"},
   {"id":"f030","topic":"upstream :: permits-commercial-swfl","fact":"Upstream snapshot — permits-commercial-swfl (neutral, magnitude 0.30, confidence 1.00)","value":"permits-commercial-swfl as of 2026-07-19: direction neutral, magnitude 0.30, confidence 1.00, trust tier T1, 3 key metric(s). SWFL issued 412 commercial building permits in 2025 (Maxwell, Hendry & Simmons Data Book), totaling $2.91B in declared value and 12.73M sf of building area across 12 submarkets. Top submarkets by permit value: fort-myers ($1.02B, 46 permits); lee-county-unincorp ($564.5M, 96 permits); collier-county-unincorp ($496.4M, 67 permits). Single-year snapshot — direction is stable until a second annual book enables a year-over-year read; master synthesizes the cross-vertical CRE context downstream.","src":"s01","date":"2026-11-01"},
   {"id":"f031","topic":"upstream :: price-distribution-swfl","fact":"Upstream snapshot — price-distribution-swfl (neutral, magnitude 0.00, confidence 0.80)","value":"price-distribution-swfl as of 2026-10-27: direction neutral, magnitude 0.00, confidence 0.80, trust tier T2, 4 key metric(s). Of 28,059 active SWFL for-sale listings (as of 2026-08-10), 44.50% are priced under $300k, 31.50% $300k–$600k, 11.60% $600k–$1M, and 12.40% at $1M or above. By county: Lee 20,894, Collier 7,165.","src":"s01","date":"2026-11-01"},
   {"id":"f032","topic":"upstream :: listing-momentum-swfl","fact":"Upstream snapshot — listing-momentum-swfl (neutral, magnitude 0.00, confidence 0.80)","value":"listing-momentum-swfl as of 2026-10-27: direction neutral, magnitude 0.00, confidence 0.80, trust tier T2, 2 key metric(s). Across 31,086 active SWFL for-sale listings (as of 2026-08-14), 14.70% currently carry a price cut and 8.90% are newly listed. By county: Lee 15.20% cut / 9.10% new, Collier 13.30% cut / 8.00% new, Hendry 12.10% cut / 9.00% new.","src":"s01","date":"2026-11-01"},
@@ -116,12 +116,12 @@ s39 | home-values-swfl brain — https://www.swfldatagulf.com/api/b/home-values-
 --- OUTPUT ---
 {
   "brain_id": "master",
-  "version": 160,
-  "refined_at": "2026-11-01T04:26:26Z",
-  "expires": "2026-11-08T04:26:26Z",
+  "version": 161,
+  "refined_at": "2026-11-01T11:32:07Z",
+  "expires": "2026-11-08T11:32:07Z",
   "ttl_seconds": 604800,
   "direction": "mixed",
-  "magnitude": 0.4692499779888022,
+  "magnitude": 0.4375975961529593,
   "drivers": [
     {
       "brain_id": "franchise-outcomes",
@@ -278,6 +278,25 @@ s39 | home-values-swfl brain — https://www.swfldatagulf.com/api/b/home-values-
   ],
   "conclusion": "Read is mixed (moderate magnitude). Driven by: franchise-outcomes, cre-swfl, macro-us, macro-florida, macro-swfl, sector-credit-swfl, tourism-tdt, env-swfl, logistics-swfl, logistics-swfl-nowcast, traffic-swfl, properties-lee-value, properties-collier-value, permits-swfl, rentals-swfl, housing-swfl, safety-swfl, labor-demand-swfl, econ-dev-swfl, city-pulse-swfl, rsw-airport, news-swfl, freshness-pulse, seller-stress-swfl, market-heat-swfl, storm-history-swfl, hurricane-tracks-fl, licenses-swfl, condo-sirs-swfl, price-distribution-swfl, listing-momentum-swfl, market-temperature-swfl, investor-zip-swfl, active-listings-swfl, communities-swfl, tier-divergence-swfl, home-values-swfl. Overrides: flood-barrier-mode-1, storm-history-modifier. Note conflicts: macro-us (bearish) vs macro-florida (bullish). Combined confidence 0.86, trust tier T4, based on 37 upstream brains.",
   "key_metrics": [
+    {
+      "metric": "sirs_confirmed_swfl",
+      "label": "SIRS-Confirmed Associations — SWFL (Lee + Collier)",
+      "value": 1366,
+      "direction": "stable",
+      "variable_type": "extensive",
+      "units": "associations",
+      "display_format": "count",
+      "source": {
+        "url": "https://dbpr-publicrecords.myfloridalicense.com/qpr/single/",
+        "fetched_at": "2026-11-01T11:31:45Z",
+        "tier": 1,
+        "citation": "DBPR SIRS Reporting Database — pre-July 2025 app (14f1ed21) + July 2025+ app (d217126f); Lee + Collier county_normalized; confirmed SIRS filings: 1,366"
+      },
+      "suggestions": [
+        "What's driving sirs confirmed swfl?",
+        "How does sirs confirmed swfl here compare to other SWFL areas?"
+      ]
+    },
     {
       "metric": "best_naics_survival",
       "value": 100,
@@ -526,25 +545,6 @@ s39 | home-values-swfl brain — https://www.swfldatagulf.com/api/b/home-values-
       ]
     },
     {
-      "metric": "sirs_confirmed_swfl",
-      "label": "SIRS-Confirmed Associations — SWFL (Lee + Collier)",
-      "value": 1366,
-      "direction": "stable",
-      "variable_type": "extensive",
-      "units": "associations",
-      "display_format": "count",
-      "source": {
-        "url": "https://dbpr-publicrecords.myfloridalicense.com/qpr/single/",
-        "fetched_at": "2026-10-02T04:26:34Z",
-        "tier": 1,
-        "citation": "DBPR SIRS Reporting Database — pre-July 2025 app (14f1ed21) + July 2025+ app (d217126f); Lee + Collier county_normalized; confirmed SIRS filings: 1,366"
-      },
-      "suggestions": [
-        "What's driving sirs confirmed swfl?",
-        "How does sirs confirmed swfl here compare to other SWFL areas?"
-      ]
-    },
-    {
       "metric": "safety_property_crime_per_1k_lee",
       "value": 7.98,
       "direction": "stable",
@@ -564,6 +564,25 @@ s39 | home-values-swfl brain — https://www.swfldatagulf.com/api/b/home-values-
       ]
     },
     {
+      "metric": "cap_rate_median",
+      "value": 6.7,
+      "direction": "rising",
+      "label": "Median SWFL CRE cap rate (9 of 10 submarkets)",
+      "variable_type": "intensive",
+      "units": "percent",
+      "display_format": "percent",
+      "source": {
+        "url": "https://jtkdowmrjaxfvwmemxso.supabase.co/rest/v1/corridor_profiles?select=*&verification_status=eq.verified&deleted_at=is.null&submarket=not.is.null&cap_rate_pct=not.is.null",
+        "fetched_at": "2026-11-01T11:23:51Z",
+        "tier": 2,
+        "citation": "SWFL CRE corridor profiles (editorially verified) — median across 9 submarkets reporting cap rate (21 corridors mapped): Bonita Springs; Cape Coral; City of Fort Myers; and 6 more. Rent/vacancy/cap figures are C&W MarketBeat submarket values stamped onto member corridors, so the submarket is the honest denominator."
+      },
+      "suggestions": [
+        "What's driving cap rate median?",
+        "How does cap rate median here compare to other SWFL areas?"
+      ]
+    },
+    {
       "metric": "active_listings_count_swfl",
       "label": "SWFL active residential listings (count)",
       "value": 22650,
@@ -580,23 +599,6 @@ s39 | home-values-swfl brain — https://www.swfldatagulf.com/api/b/home-values-
       "suggestions": [
         "What's driving active listings count swfl?",
         "How does active listings count swfl here compare to other SWFL areas?"
-      ]
-    },
-    {
-      "metric": "signal_breaking_1",
-      "value": "Naples: Former Naples councilwoman Linda Penniman died, described by her son as dying of a 'broken heart' after her husband; remembered as the 'Energizer Bunny.'",
-      "direction": "stable",
-      "label": "Naples — breaking",
-      "variable_type": "categorical",
-      "source": {
-        "url": "https://www.news-press.com/story/money/business/local/2026/10/23/former-naples-florida-councilwoman-linda-penniman-remembered-as-the-energizer-bunny/92385292007/",
-        "fetched_at": "2026-11-01T04:25:59Z",
-        "tier": 2,
-        "citation": "Former Naples councilwoman remembered as the 'Energizer Bunny': \"[](https://www.news-press.com/)\n[SWFL Week 11: Cape Coral, North Fort Myers hang big losses on rivals Thursday](https://www.news-press.com/story/sports/high-school/football/2026/10/30/sw-florida-football-week-11-results-what-we-learned-from-oct-29-30-games/92382581007/)\n[](https://subscribe.news-press.com/rr/nanobar?gps-source=CPTILELEFT&itm_campaign=2026ENTQ4BAU2026&itm_medium=ONSITE&success-url=https%3A%2F%2Fwww.news-press.com%2Fstory%2Fmoney%2Fbusiness%2Flocal%2F2026%2F10%2F23%2Fformer-naples-florida-councilwoman-linda-penniman-remembered-as-the-energizer-bunny%2F92385292007%2F)\n[](https://subscribe.news-press.com/rr/masthead?gps-source=CPMASTHEAD&itm_campaign=2026ENTQ4BAU2026&itm_medium=ONSITE&success-url=https%3A%2F%2Fwww.news-press.com%2Fstory%2Fmoney%2Fbusiness%2Flocal%2F2026%2F10%2F23%2Fformer-naples-florida-councilwoman-linda-penniman-remembered-as-the-energizer-bunny%2F92385292007%2F)\n[News](https://www.news-press.com/news/) [Cape Coral](https://www.news-press.com/news/cape-coral/) [Sports](https://www.news-press.com/sports/) [Restaurants](https://www.news-press.com/taste/) [Real Estate](https://www.news-press.com/real-estate) [Advertise](https://advertising.usatoday.com/advertise-with-us/?cid=Web_LiQ_Network_AdvertiseWithUs_AdvertiseInquiry&publication=the_news_press&utm_source=local_publication&utm_medium=menu&utm_campaign=advertise_with_us) [Obituaries](https://www.news-press.com/obituaries) [eNewspaper](https://user.news-press.com/user/enewspaper) [Legals](https://www.news-press.com/public-notices)\n[](https://www.news-press.com/search/ \"Search\")\n[](https://www.news-press.com/weather/ \"Weather in Fort Myers: 74°F Mostly Cloudy\") [](https://subscribe.news-press.com/rr/navsub?gps-source=CPTOPNAVBAR&itm_campaign=2026ENTQ4BAU2026&itm_medium=ONSITE&success-url=https%3A%2F%2Fwww.news-press.com%2Fstory%2Fmoney%2Fbusiness%2Flocal%2F2026%2F10%2F23%2Fformer-naples-florida-councilwoman-linda-penniman-remembered-as-the-energizer-bunny%2F92385292007%2F)\n[](https://login.news-press.com/PFTM-GUP/authenticate/?success-url=https%3A%2F%2Fwww.news-press.com%2Fstory%2Fmoney%2Fbusiness%2Flocal%2F2026%2F10%2F23%2Fformer-naples-florida-councilwoman-linda-penniman-remembered-as-the-energizer-bunny%2F92385292007%2F&cancel-url=https%3A%2F%2Fwww.news-press.com%2Fstory%2Fmoney%2Fbusiness%2Flocal%2F2026%2F10%2F23%2Fformer-naples-florida-councilwoman-linda-penniman-remembered-as-the-energizer-bunny%2F92385292007%2F)\n[](https://www.news-press.com/) [](https://www.news-press.com/)\nLOCAL BUSINESS\n# Naples leader dies of 'broken heart' after husband. Son recalls her life\n[![Portrait of Laura Layden](https://www.news-press.com/gcdn/authoring/authoring-images/2024/02/08/PNDN/72524348007-ndn-jh-20240126-laura-0001.JPG?crop=3313,3312,x1506,y0&width=48&height=48&format=pjpg&auto=webp) Laura Layden](https://www.naplesnews.com/staff/2647080001/laura-layden/)\nFort Myers News-Press & Naples Daily News\nOct. 23, 2026, 2:48 p.m. ET\nThe \"Energizer Bunny.\"\nThat's how Linda Pennima\""
-      },
-      "suggestions": [
-        "What's driving signal breaking 1?",
-        "How does signal breaking 1 here compare to other SWFL areas?"
       ]
     },
     {
@@ -643,8 +645,8 @@ s39 | home-values-swfl brain — https://www.swfldatagulf.com/api/b/home-values-
   "caveats": [
     "flood-barrier-mode-1 active: 4 barrier ZIPs, worst-case AAL $40,342/insured property",
     "Override \"storm-history-modifier\" fired (priority 70)",
-    "permits-commercial-swfl excluded from synthesis (relevance 0.090, below floor 0.1)",
-    "active-rentals-swfl excluded from synthesis (relevance 0.074, below floor 0.1)",
+    "permits-commercial-swfl excluded from synthesis (relevance 0.089, below floor 0.1)",
+    "active-rentals-swfl excluded from synthesis (relevance 0.073, below floor 0.1)",
     "No figures published: this source has not yet received its first real SBA FOIA load. A synthetic development sample exists for offline testing only and is never shipped.",
     "Construction-cost PPI metrics (construction_cost_ppi_industrial, construction_cost_ppi_warehouse, construction_cost_ppi_office, construction_cost_ppi_medical_office, construction_cost_ppi_trade_concrete, construction_cost_ppi_trade_roofing, construction_cost_ppi_trade_electrical, construction_cost_ppi_trade_plumbing_hvac) are national BLS series — no SWFL-specific or Lee/Collier breakout exists at BLS for any of them. They ship a real month-over-month direction (unlike MarketBeat's schema-required \"stable\" fallback) but BLS can revise recent observations within ~30 days of first publication.",
     "vacancy_rate_marketbeat_swfl: 15 submarkets report a point-in-time value; v1 does not compute quarter-over-quarter direction, so the \"stable\" label is a schema-required fallback, not a measured trend.",
@@ -669,17 +671,17 @@ s39 | home-values-swfl brain — https://www.swfldatagulf.com/api/b/home-values-
     "Estero CRE metrics derived from active Crexi listings (15 listings as of 2026-10-25); no broker aggregate survey covers this submarket. Available sqft reflects listed inventory only — not total corridor inventory. Direction=stable is a schema-required fallback, not a measured trend.",
     "Fort Myers Beach local context [fmb_planning (2026-05-01)]: Beach Renourishment -- 41,655 CY placed, started mid-May 2026 — Fort Myers Beach coastal renourishment project: 41,655 cubic yards of sand placed beginning mid-May 2026. Restores beach width destroyed by Hurricane Ian, directly supporting tourism recovery and beac",
     "Fort Myers Beach local context [fmb_planning (2026-04-08)]: Times Square Pier -- $11.7M contract awarded Apr 8, 2026 — Town of Fort Myers Beach awarded $11.7M contract for Times Square Pier reconstruction on April 8, 2026. Pier was destroyed by Hurricane Ian. Reconstruction is the primary catalyst for Times Square com",
-    "Fort Myers Beach local context [fmb_planning (2026-01-01)]: Matanzas Pass Bridge -- improvements underway 2026 — Matanzas Pass Bridge improvements underway in 2026. Improves the primary northern gateway to Fort Myers Beach island, critical for construction-phase traffic management and eventual tourist return.",
-    "Fort Myers Beach local context [fmb_planning (2026-01-01)]: Big Carlos Pass Bridge -- replacement underway 2026 — Big Carlos Pass Bridge (south end of Fort Myers Beach island) replacement underway 2026. Provides critical connectivity for the southern commercial corridor and residential areas.",
     "Estero local context [estero_edc (2026-01-01)]: Corkscrew Rd Widening Phase 2 -- ~$27M, est. completion end-2026 — Corkscrew Road Widening Phase 2, approximately $27M project, estimated completion end of 2026. Expands capacity on the primary east-west commercial spine through Estero.",
+    "Fort Myers Beach local context [fmb_planning (2026-01-01)]: Big Carlos Pass Bridge -- replacement underway 2026 — Big Carlos Pass Bridge (south end of Fort Myers Beach island) replacement underway 2026. Provides critical connectivity for the southern commercial corridor and residential areas.",
     "Fort Myers Beach local context [fmb_planning (2026-01-01)]: Newton Beach Park -- design phase 2026 — Newton Beach Park redesign in design phase as of 2026. Part of broader FMB public-space recovery program following Hurricane Ian.",
     "Fort Myers Beach local context [fmb_planning (2026-01-01)]: CDBG-DR allocation -- $1.107B total for FMB recovery — Fort Myers Beach has received $1.107 billion in CDBG-DR (Community Development Block Grant - Disaster Recovery) funding from HUD via the State of Florida for Hurricane Ian recovery. Covers infrastruct",
-    "Estero local context [estero_edc (2025-12-01)]: Corkscrew Village mini-warehouse -- 75,910 SF — Corkscrew Village self-storage / mini-warehouse, 75,910 SF, along Corkscrew Rd corridor. Reflects growing demand for last-mile industrial in the Estero-Bonita Springs submarket.",
-    "Estero local context [estero_edc (2025-12-01)]: Home2 Suites by Hilton -- approved 2025 — New Home2 Suites extended-stay hotel approved in Estero. Adds extended-stay inventory to the US-41 / Miromar/Coconut Point hospitality cluster.",
-    "Fort Myers Beach local context [fmb_planning (2025-12-01)]: Times Square District -- plans to permits phase 2025-2026 — Times Square commercial district moving from planning to permitting phase. Multiple commercial rebuilds in queue. Pier contract ($11.7M, Apr 2026) is the anchor catalyst; full district recovery projec",
+    "Fort Myers Beach local context [fmb_planning (2026-01-01)]: Matanzas Pass Bridge -- improvements underway 2026 — Matanzas Pass Bridge improvements underway in 2026. Improves the primary northern gateway to Fort Myers Beach island, critical for construction-phase traffic management and eventual tourist return.",
     "Estero local context [estero_edc (2025-12-01)]: Walmart Supercenter expansion -- Estero — Walmart Supercenter expansion permit issued in Estero. Continues US-41 corridor big-box retail densification in the Coconut Point area.",
     "Estero local context [estero_edc (2025-12-01)]: High 5 Entertainment -- 9000 Williams Rd — New 40,000 SF entertainment venue at 9000 Williams Rd, Estero. Permit value ~$1.1M. Approved 2025. Anchors Williams Rd commercial corridor.",
+    "Fort Myers Beach local context [fmb_planning (2025-12-01)]: Times Square District -- plans to permits phase 2025-2026 — Times Square commercial district moving from planning to permitting phase. Multiple commercial rebuilds in queue. Pier contract ($11.7M, Apr 2026) is the anchor catalyst; full district recovery projec",
     "Estero local context [estero_edc (2025-12-01)]: Aldi grocery -- 11906 Newbridge Court — New Aldi grocery store at 11906 Newbridge Court, Estero. Part of continued Estero retail infill along US-41 / Corkscrew Rd corridors.",
+    "Estero local context [estero_edc (2025-12-01)]: Corkscrew Village mini-warehouse -- 75,910 SF — Corkscrew Village self-storage / mini-warehouse, 75,910 SF, along Corkscrew Rd corridor. Reflects growing demand for last-mile industrial in the Estero-Bonita Springs submarket.",
+    "Estero local context [estero_edc (2025-12-01)]: Home2 Suites by Hilton -- approved 2025 — New Home2 Suites extended-stay hotel approved in Estero. Adds extended-stay inventory to the US-41 / Miromar/Coconut Point hospitality cluster.",
     "Fort Myers Beach local context [fmb_planning (2025-08-01)]: Bay Oaks Park -- reconstruction completed ~Aug 2025 — Bay Oaks Recreation Center and Park reconstruction completed approximately August 2025. Restores key community and tourism amenity destroyed by Hurricane Ian.",
     "FRED can revise recent observations within ~30 days of first publication — treat the most recent reading as directional, not final.",
     "Census CBP data is an annual snapshot; establishment and employment counts may lag up to 18 months behind current conditions.",
@@ -797,6 +799,7 @@ s39 | home-values-swfl brain — https://www.swfldatagulf.com/api/b/home-values-
     "~50% of SWFL buyers (≈70% for condos) pay cash and insulate the luxury tier — a holding or rising top tier is part of the K-shape, not a bullish signal on its own.",
     "Covers 50 SWFL ZIPs holding BOTH a starter and a luxury tier; ZIPs lacking one tier are excluded from the divergence.",
     "Upstream brain 'active-rentals-swfl' was stale at build time (expired 2026-07-19).",
+    "Upstream brain 'city-pulse-swfl' failed to rebuild on 2026-11-01; using last good read from 2026-11-01 (v152).",
     "Upstream brain 'active-rentals-swfl' failed to rebuild on 2026-11-01; using last good read from 2026-07-11 (v3)."
   ],
   "contradicts": [
@@ -854,8 +857,8 @@ s39 | home-values-swfl brain — https://www.swfldatagulf.com/api/b/home-values-
   "upstream_count": 37,
   "relevance": {
     "decay_curve": "weeks",
-    "half_life_hours": 720.0000000000001,
-    "computed_at": "2026-11-01T04:26:26.000Z"
+    "half_life_hours": 719.9999999999997,
+    "computed_at": "2026-11-01T11:32:07.000Z"
   },
   "exogenous_signals": [],
   "conditional_claims": [
