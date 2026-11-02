@@ -1,9 +1,9 @@
-<!-- FRESHNESS: v162 | Token: SWFL-7421-v162-20261102-52b20a93 -->
+<!-- FRESHNESS: v163 | Token: SWFL-7421-v163-20261102-4e6ab803 -->
 ---
 brain_id: master
-version: 162
-refined_at: 2026-11-02T04:26:39Z
-freshness_token: SWFL-7421-v162-20261102-52b20a93
+version: 163
+refined_at: 2026-11-02T12:40:15Z
+freshness_token: SWFL-7421-v163-20261102-4e6ab803
 ttl_seconds: 604800
 pack_hash: be8f0d44e0e6
 context_type: user_saved_reference
@@ -91,7 +91,7 @@ s39 | home-values-swfl brain — https://www.swfldatagulf.com/api/b/home-values-
   {"id":"f017","topic":"upstream :: safety-swfl","fact":"Upstream snapshot — safety-swfl (neutral, magnitude 0.00, confidence 1.00)","value":"safety-swfl as of 2026-10-02: direction neutral, magnitude 0.00, confidence 1.00, trust tier T1, 8 key metric(s). SWFL property crime: 6.8 Part I offenses per 1,000 residents (2025 UCR), -18.7% YoY. Lee (8.0/1k) runs 3.1 points above Collier (4.8/1k).","src":"s01","date":"2026-11-02"},
   {"id":"f018","topic":"upstream :: labor-demand-swfl","fact":"Upstream snapshot — labor-demand-swfl (bullish, magnitude 0.78, confidence 1.00)","value":"labor-demand-swfl as of 2026-10-17: direction bullish, magnitude 0.78, confidence 1.00, trust tier T1, 10 key metric(s). BLS OEWS May 2025 — SWFL workforce. Lee (Cape Coral-Fort Myers MSA): top sector: Office and Administrative Support Occupations (37,050), Construction 2.17× national, employment +1.5% YoY. Collier (Naples MSA): top sector: Food Preparation and Serving Related Occupations (25,250), Construction 1.88× national, employment +1.6% YoY. Source: BLS Occupational Employment and Wage Statistics.","src":"s01","date":"2026-11-02"},
   {"id":"f019","topic":"upstream :: econ-dev-swfl","fact":"Upstream snapshot — econ-dev-swfl (neutral, magnitude 0.35, confidence 0.80)","value":"econ-dev-swfl as of 2026-10-27: direction neutral, magnitude 0.35, confidence 0.80, trust tier T2, 2 key metric(s). SWFL Inc. logged 1 economic development announcement in the last 90 days. Momentum: flat vs prior 90-day window. Source: SWFL Inc. (swflinc.com/blog/), the official Lee County economic development organization.","src":"s01","date":"2026-11-02"},
-  {"id":"f020","topic":"upstream :: city-pulse-swfl","fact":"Upstream snapshot — city-pulse-swfl (neutral, magnitude 0.00, confidence 0.80)","value":"city-pulse-swfl as of 2026-11-02: direction neutral, magnitude 0.00, confidence 0.80, trust tier T2, 8 key metric(s). SWFL city pulse as of 2026-11-02: 104 live current-events signals across 7 cities — Cape Coral (29), Fort Myers (33), Naples (31), Estero (4), North Fort Myers (4), East Naples (2), Sanibel (1). Most current: Cape Coral — Publix bought an Estero, Florida shopping center for $26 million (Nov. 1, 2026). These are current cited facts only; the cross-vertical read and any direction call live downstream in master.","src":"s01","date":"2026-11-02"},
+  {"id":"f020","topic":"upstream :: city-pulse-swfl","fact":"Upstream snapshot — city-pulse-swfl (neutral, magnitude 0.00, confidence 0.80)","value":"city-pulse-swfl as of 2026-11-02: direction neutral, magnitude 0.00, confidence 0.80, trust tier T2, 8 key metric(s). SWFL city pulse as of 2026-11-02: 107 live current-events signals across 7 cities — Estero (4), Fort Myers (33), Naples (32), Cape Coral (31), North Fort Myers (4), East Naples (2), Sanibel (1). Most current: Estero — Publix buys Estero, Florida shopping center for $26 million These are current cited facts only; the cross-vertical read and any direction call live downstream in master.","src":"s01","date":"2026-11-02"},
   {"id":"f021","topic":"upstream :: rsw-airport","fact":"Upstream snapshot — rsw-airport (bullish, magnitude 0.16, confidence 1.00)","value":"rsw-airport as of 2026-10-09: direction bullish, magnitude 0.16, confidence 1.00, trust tier T1, 9 key metric(s). LCPA Aviation April 2026 — RSW 1,152,669 total passengers (-2.2% YoY), trailing-12-mo 11,197,951 (+2.4% vs prior year — the direction basis), 512,534 arrivals / 640,135 departures, 10,797 aircraft operations, 3,463,896 lbs air freight. Source: Lee County Port Authority (flylcpa.com/about-lcpa/reports-and-statistics/).","src":"s01","date":"2026-11-02"},
   {"id":"f022","topic":"upstream :: news-swfl","fact":"Upstream snapshot — news-swfl (neutral, magnitude 0.30, confidence 0.80)","value":"news-swfl as of 2026-10-27: direction neutral, magnitude 0.30, confidence 0.80, trust tier T2, 9 key metric(s). DBPR issued 1 SWFL-relevant press release in the last 90 days. 2 individual enforcement notices active in Lee and Collier counties (2 construction unlicensed, 0 ABT/hospitality). Top press release topics: ABT, licensing, enforcement. Sources: FL DBPR press releases (www2.myfloridalicense.com/press-releases/) and public enforcement notices (www2.myfloridalicense.com/public-notices/).","src":"s01","date":"2026-11-02"},
   {"id":"f023","topic":"upstream :: freshness-pulse","fact":"Upstream snapshot — freshness-pulse (neutral, magnitude 0.00, confidence 0.80)","value":"freshness-pulse as of 2026-11-02: direction neutral, magnitude 0.00, confidence 0.80, trust tier T2, 4 key metric(s). Today's sourced snapshot — Cape Coral median asking price (as of 2026-11-02) $399,200; Fort Myers median asking price (as of 2026-11-02) $325,000; Naples median asking price (as of 2026-11-02) $650,000; SWFL 30-year fixed mortgage rate (as of 2026-10-29) 7.24%. These are cited current facts only; the direction call lives downstream in master.","src":"s01","date":"2026-11-02"},
@@ -116,12 +116,12 @@ s39 | home-values-swfl brain — https://www.swfldatagulf.com/api/b/home-values-
 --- OUTPUT ---
 {
   "brain_id": "master",
-  "version": 162,
-  "refined_at": "2026-11-02T04:26:39Z",
-  "expires": "2026-11-09T04:26:39Z",
+  "version": 163,
+  "refined_at": "2026-11-02T12:40:15Z",
+  "expires": "2026-11-09T12:40:15Z",
   "ttl_seconds": 604800,
   "direction": "mixed",
-  "magnitude": 0.43759759615295923,
+  "magnitude": 0.4375975961529593,
   "drivers": [
     {
       "brain_id": "franchise-outcomes",
@@ -584,15 +584,15 @@ s39 | home-values-swfl brain — https://www.swfldatagulf.com/api/b/home-values-
     },
     {
       "metric": "signal_transactions_1",
-      "value": "Cape Coral: Publix bought an Estero, Florida shopping center for $26 million (Nov. 1, 2026).",
+      "value": "Estero: Publix buys Estero, Florida shopping center for $26 million",
       "direction": "stable",
-      "label": "Cape Coral — transactions",
+      "label": "Estero — transactions",
       "variable_type": "categorical",
       "source": {
-        "url": "https://www.news-press.com/story/money/companies/2026/11/01/publix-buys-estero-florida-shopping-center-for-26-million/92533029007/",
-        "fetched_at": "2026-11-02T04:26:17Z",
+        "url": "https://www.naplesnews.com/story/money/companies/2026/11/01/publix-buys-estero-florida-shopping-center-for-26-million/92533029007/",
+        "fetched_at": "2026-11-02T12:39:54Z",
         "tier": 2,
-        "citation": "Publix buys Estero, Florida shopping center for $26 million: \"[](https://www.news-press.com/)\n[SW Florida Grocery Shopping Poll: Farmers' Markets are opening again](https://www.news-press.com/story/grocery/2026/10/29/are-farmers-markets-a-good-money-saving-option-for-grocery-shopping-florida-produce-fruits-vegetable/92456769007/)\n[](https://subscribe.news-press.com/rr/nanobar?gps-source=CPTILELEFT&itm_campaign=2026ENTQ4BAU2026&itm_medium=ONSITE&success-url=https%3A%2F%2Fwww.news-press.com%2Fstory%2Fmoney%2Fcompanies%2F2026%2F11%2F01%2Fpublix-buys-estero-florida-shopping-center-for-26-million%2F92533029007%2F)\n[](https://subscribe.news-press.com/rr/masthead?gps-source=CPMASTHEAD&itm_campaign=2026ENTQ4BAU2026&itm_medium=ONSITE&success-url=https%3A%2F%2Fwww.news-press.com%2Fstory%2Fmoney%2Fcompanies%2F2026%2F11%2F01%2Fpublix-buys-estero-florida-shopping-center-for-26-million%2F92533029007%2F)\n[News](https://www.news-press.com/news/) [Cape Coral](https://www.news-press.com/news/cape-coral/) [Sports](https://www.news-press.com/sports/) [Restaurants](https://www.news-press.com/taste/) [Real Estate](https://www.news-press.com/real-estate) [Advertise](https://advertising.usatoday.com/advertise-with-us/?cid=Web_LiQ_Network_AdvertiseWithUs_AdvertiseInquiry&publication=the_news_press&utm_source=local_publication&utm_medium=menu&utm_campaign=advertise_with_us) [Obituaries](https://www.news-press.com/obituaries) [eNewspaper](https://user.news-press.com/user/enewspaper) [Legals](https://www.news-press.com/public-notices)\n[](https://www.news-press.com/search/ \"Search\")\n[](https://www.news-press.com/weather/ \"Weather in Fort Myers: 75°F Mostly Cloudy\") [](https://subscribe.news-press.com/rr/navsub?gps-source=CPTOPNAVBAR&itm_campaign=2026ENTQ4BAU2026&itm_medium=ONSITE&success-url=https%3A%2F%2Fwww.news-press.com%2Fstory%2Fmoney%2Fcompanies%2F2026%2F11%2F01%2Fpublix-buys-estero-florida-shopping-center-for-26-million%2F92533029007%2F)\n[](https://login.news-press.com/PFTM-GUP/authenticate/?success-url=https%3A%2F%2Fwww.news-press.com%2Fstory%2Fmoney%2Fcompanies%2F2026%2F11%2F01%2Fpublix-buys-estero-florida-shopping-center-for-26-million%2F92533029007%2F&cancel-url=https%3A%2F%2Fwww.news-press.com%2Fstory%2Fmoney%2Fcompanies%2F2026%2F11%2F01%2Fpublix-buys-estero-florida-shopping-center-for-26-million%2F92533029007%2F)\n[](https://www.news-press.com/) [](https://www.news-press.com/)\nCOMPANIES\n# Publix expands SW Florida real estate footprint with Estero\n[![Portrait of Laura Layden](https://www.news-press.com/gcdn/authoring/authoring-images/2024/02/08/PNDN/72524348007-ndn-jh-20240126-laura-0001.JPG?crop=3313,3312,x1506,y0&width=48&height=48&format=pjpg&auto=webp) Laura Layden](https://www.naplesnews.com/staff/2647080001/laura-layden/)\nFort Myers News-Press & Naples Daily News\nNov. 1, 2026, 5:07 a.m. ET\n[Publix](https://www.news-press.com/story/grocery/2026/08/31/when-is-the-second-publix-at-babcock-ranch-florida-going-to-open-pours-beverage-bar-cafe-style/91491658007/) has made another big real estate investment in Southwest Flori\""
+        "citation": "Publix buys Estero, Florida shopping center for $26 million: \"[](https://www.naplesnews.com/)\n[SW Florida Grocery Shopping Poll: Farmers' Markets are opening again](https://www.naplesnews.com/story/grocery/2026/10/29/are-farmers-markets-a-good-money-saving-option-for-grocery-shopping-florida-produce-fruits-vegetable/92456769007/)\n[](https://subscribe.naplesnews.com/rr/nanobar?gps-source=CPTILELEFT&itm_campaign=2026ENTQ4BAU2026&itm_medium=ONSITE&success-url=https%3A%2F%2Fwww.naplesnews.com%2Fstory%2Fmoney%2Fcompanies%2F2026%2F11%2F01%2Fpublix-buys-estero-florida-shopping-center-for-26-million%2F92533029007%2F)\n[](https://subscribe.naplesnews.com/rr/masthead?gps-source=CPMASTHEAD&itm_campaign=2026ENTQ4BAU2026&itm_medium=ONSITE&success-url=https%3A%2F%2Fwww.naplesnews.com%2Fstory%2Fmoney%2Fcompanies%2F2026%2F11%2F01%2Fpublix-buys-estero-florida-shopping-center-for-26-million%2F92533029007%2F)\n[News](https://www.naplesnews.com/news/) [Sports](https://www.naplesnews.com/sports/) [Real Estate](https://www.naplesnews.com/business/real-estate/) [Restaurants](https://www.naplesnews.com/entertainment/restaurants/) [Opinion](https://www.naplesnews.com/opinion/) [Advertise](https://advertising.usatoday.com/advertise-with-us/?cid=Web_LiQ_Network_AdvertiseWithUs_AdvertiseInquiry&publication=naples_daily_news&utm_source=local_publication&utm_medium=menu&utm_campaign=advertise_with_us) [Obituaries](https://www.naplesnews.com/obituaries) [eNewspaper](https://user.naplesnews.com/user/enewspaper) [Legals](https://www.naplesnews.com/public-notices)\n[](https://www.naplesnews.com/search/ \"Search\")\n[](https://www.naplesnews.com/weather/ \"Weather in Naples: 78°F Partly Sunny w/ T-Storms\") [](https://subscribe.naplesnews.com/rr/navsub?gps-source=CPTOPNAVBAR&itm_campaign=2026ENTQ4BAU2026&itm_medium=ONSITE&success-url=https%3A%2F%2Fwww.naplesnews.com%2Fstory%2Fmoney%2Fcompanies%2F2026%2F11%2F01%2Fpublix-buys-estero-florida-shopping-center-for-26-million%2F92533029007%2F)\n[](https://login.naplesnews.com/PNDN-GUP/authenticate/?success-url=https%3A%2F%2Fwww.naplesnews.com%2Fstory%2Fmoney%2Fcompanies%2F2026%2F11%2F01%2Fpublix-buys-estero-florida-shopping-center-for-26-million%2F92533029007%2F&cancel-url=https%3A%2F%2Fwww.naplesnews.com%2Fstory%2Fmoney%2Fcompanies%2F2026%2F11%2F01%2Fpublix-buys-estero-florida-shopping-center-for-26-million%2F92533029007%2F)\n[](https://www.naplesnews.com/) [](https://www.naplesnews.com/)\nCOMPANIES\n# Publix expands SW Florida real estate footprint with Estero\n[![Portrait of Laura Layden](https://www.naplesnews.com/gcdn/authoring/authoring-images/2024/02/08/PNDN/72524348007-ndn-jh-20240126-laura-0001.JPG?crop=3313,3312,x1506,y0&width=48&height=48&format=pjpg&auto=webp) Laura Layden](https://www.naplesnews.com/staff/2647080001/laura-layden/)\nFort Myers News-Press & Naples Daily News\nNov. 1, 2026, 5:07 a.m. ET\n[Publix](https://www.naplesnews.com/story/grocery/2026/08/31/when-is-the-second-publix-at-babcock-ranch-florida-going-to-open-pours-beverage-bar-cafe-style/91491658007/) has made another big real estate\""
       },
       "suggestions": [
         "What's driving signal transactions 1?",
@@ -643,8 +643,8 @@ s39 | home-values-swfl brain — https://www.swfldatagulf.com/api/b/home-values-
   "caveats": [
     "flood-barrier-mode-1 active: 4 barrier ZIPs, worst-case AAL $40,342/insured property",
     "Override \"storm-history-modifier\" fired (priority 70)",
-    "permits-commercial-swfl excluded from synthesis (relevance 0.088, below floor 0.1)",
-    "active-rentals-swfl excluded from synthesis (relevance 0.072, below floor 0.1)",
+    "permits-commercial-swfl excluded from synthesis (relevance 0.087, below floor 0.1)",
+    "active-rentals-swfl excluded from synthesis (relevance 0.071, below floor 0.1)",
     "No figures published: this source has not yet received its first real SBA FOIA load. A synthetic development sample exists for offline testing only and is never shipped.",
     "Construction-cost PPI metrics (construction_cost_ppi_industrial, construction_cost_ppi_warehouse, construction_cost_ppi_office, construction_cost_ppi_medical_office, construction_cost_ppi_trade_concrete, construction_cost_ppi_trade_roofing, construction_cost_ppi_trade_electrical, construction_cost_ppi_trade_plumbing_hvac) are national BLS series — no SWFL-specific or Lee/Collier breakout exists at BLS for any of them. They ship a real month-over-month direction (unlike MarketBeat's schema-required \"stable\" fallback) but BLS can revise recent observations within ~30 days of first publication.",
     "vacancy_rate_marketbeat_swfl: 15 submarkets report a point-in-time value; v1 does not compute quarter-over-quarter direction, so the \"stable\" label is a schema-required fallback, not a measured trend.",
@@ -737,7 +737,7 @@ s39 | home-values-swfl brain — https://www.swfldatagulf.com/api/b/home-values-
     "1 of 10 announcements in the last 90 days matched qualifying categories (relocation, expansion, grant, infrastructure); the rest are general chamber/policy posts excluded from the momentum count.",
     "Investment and job figures reflect disclosures at announcement time; actual outcomes may vary as projects develop.",
     "SWFL Inc. covers primarily Lee County projects; Collier County coverage depends on cross-county partnerships and co-announcements.",
-    "96 additional live signals not surfaced here (cap 8); the full set is in data_lake.city_pulse.",
+    "99 additional live signals not surfaced here (cap 8); the full set is in data_lake.city_pulse.",
     "Each signal is dated current-events context with a per-signal source; freshness is TTL-bounded by topic (breaking 1d → structural 90d).",
     "Construction enforcement split: public notices = confirmed individual actions (hard-parsed violation_type); press releases = announced sweeps (Sonnet-inferred affected_industries). Do not sum them.",
     "Polarity: rising construction notices = bullish (recovery-driven unlicensed activity). Rising ABT notices = bearish (hospitality compliance stress).",
@@ -854,8 +854,8 @@ s39 | home-values-swfl brain — https://www.swfldatagulf.com/api/b/home-values-
   "upstream_count": 37,
   "relevance": {
     "decay_curve": "weeks",
-    "half_life_hours": 720.0000000000003,
-    "computed_at": "2026-11-02T04:26:39.000Z"
+    "half_life_hours": 720.0000000000001,
+    "computed_at": "2026-11-02T12:40:15.000Z"
   },
   "exogenous_signals": [],
   "conditional_claims": [
