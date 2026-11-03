@@ -1,9 +1,9 @@
-<!-- FRESHNESS: v164 | Token: SWFL-7421-v164-20261103-a3ec52e7 -->
+<!-- FRESHNESS: v165 | Token: SWFL-7421-v165-20261103-3ffaabad -->
 ---
 brain_id: master
-version: 164
-refined_at: 2026-11-03T04:26:44Z
-freshness_token: SWFL-7421-v164-20261103-a3ec52e7
+version: 165
+refined_at: 2026-11-03T12:06:17Z
+freshness_token: SWFL-7421-v165-20261103-3ffaabad
 ttl_seconds: 604800
 pack_hash: be8f0d44e0e6
 context_type: user_saved_reference
@@ -116,12 +116,12 @@ s39 | home-values-swfl brain — https://www.swfldatagulf.com/api/b/home-values-
 --- OUTPUT ---
 {
   "brain_id": "master",
-  "version": 164,
-  "refined_at": "2026-11-03T04:26:44Z",
-  "expires": "2026-11-10T04:26:44Z",
+  "version": 165,
+  "refined_at": "2026-11-03T12:06:17Z",
+  "expires": "2026-11-10T12:06:17Z",
   "ttl_seconds": 604800,
   "direction": "mixed",
-  "magnitude": 0.43706387059867463,
+  "magnitude": 0.43706387059867446,
   "drivers": [
     {
       "brain_id": "franchise-outcomes",
@@ -583,22 +583,20 @@ s39 | home-values-swfl brain — https://www.swfldatagulf.com/api/b/home-values-
       ]
     },
     {
-      "metric": "active_listings_count_swfl",
-      "label": "SWFL active residential listings (count)",
-      "value": 22650,
+      "metric": "signal_transactions_1",
+      "value": "Estero: Publix buys Estero, Florida shopping center for $26 million",
       "direction": "stable",
-      "variable_type": "extensive",
-      "units": "listings",
-      "display_format": "count",
+      "label": "Estero — transactions",
+      "variable_type": "categorical",
       "source": {
-        "url": "https://www.swfldatagulf.com/r/source/listing_active_stats?label=SWFL+active+for-sale+listings+%28aggregated%29&source=realtor.com+for-sale+listings&brain=active-listings-swfl&date_col=scraped_at",
-        "fetched_at": "2026-11-03T04:26:23Z",
+        "url": "https://www.naplesnews.com/story/money/companies/2026/11/01/publix-buys-estero-florida-shopping-center-for-26-million/92533029007/",
+        "fetched_at": "2026-11-03T12:05:56Z",
         "tier": 2,
-        "citation": "22,650 active SWFL residential listings as of 2026-08-14"
+        "citation": "Publix buys Estero, Florida shopping center for $26 million: \"[](https://www.naplesnews.com/)\n[SW Florida Grocery Shopping Poll: Farmers' Markets are opening again](https://www.naplesnews.com/story/grocery/2026/10/29/are-farmers-markets-a-good-money-saving-option-for-grocery-shopping-florida-produce-fruits-vegetable/92456769007/)\n[](https://subscribe.naplesnews.com/rr/nanobar?gps-source=CPTILELEFT&itm_campaign=2026ENTQ4BAU2026&itm_medium=ONSITE&success-url=https%3A%2F%2Fwww.naplesnews.com%2Fstory%2Fmoney%2Fcompanies%2F2026%2F11%2F01%2Fpublix-buys-estero-florida-shopping-center-for-26-million%2F92533029007%2F)\n[](https://subscribe.naplesnews.com/rr/masthead?gps-source=CPMASTHEAD&itm_campaign=2026ENTQ4BAU2026&itm_medium=ONSITE&success-url=https%3A%2F%2Fwww.naplesnews.com%2Fstory%2Fmoney%2Fcompanies%2F2026%2F11%2F01%2Fpublix-buys-estero-florida-shopping-center-for-26-million%2F92533029007%2F)\n[News](https://www.naplesnews.com/news/) [Sports](https://www.naplesnews.com/sports/) [Real Estate](https://www.naplesnews.com/business/real-estate/) [Restaurants](https://www.naplesnews.com/entertainment/restaurants/) [Opinion](https://www.naplesnews.com/opinion/) [Advertise](https://advertising.usatoday.com/advertise-with-us/?cid=Web_LiQ_Network_AdvertiseWithUs_AdvertiseInquiry&publication=naples_daily_news&utm_source=local_publication&utm_medium=menu&utm_campaign=advertise_with_us) [Obituaries](https://www.naplesnews.com/obituaries) [eNewspaper](https://user.naplesnews.com/user/enewspaper) [Legals](https://www.naplesnews.com/public-notices)\n[](https://www.naplesnews.com/search/ \"Search\")\n[](https://www.naplesnews.com/weather/ \"Weather in Naples: 78°F Partly Sunny w/ T-Storms\") [](https://subscribe.naplesnews.com/rr/navsub?gps-source=CPTOPNAVBAR&itm_campaign=2026ENTQ4BAU2026&itm_medium=ONSITE&success-url=https%3A%2F%2Fwww.naplesnews.com%2Fstory%2Fmoney%2Fcompanies%2F2026%2F11%2F01%2Fpublix-buys-estero-florida-shopping-center-for-26-million%2F92533029007%2F)\n[](https://login.naplesnews.com/PNDN-GUP/authenticate/?success-url=https%3A%2F%2Fwww.naplesnews.com%2Fstory%2Fmoney%2Fcompanies%2F2026%2F11%2F01%2Fpublix-buys-estero-florida-shopping-center-for-26-million%2F92533029007%2F&cancel-url=https%3A%2F%2Fwww.naplesnews.com%2Fstory%2Fmoney%2Fcompanies%2F2026%2F11%2F01%2Fpublix-buys-estero-florida-shopping-center-for-26-million%2F92533029007%2F)\n[](https://www.naplesnews.com/) [](https://www.naplesnews.com/)\nCOMPANIES\n# Publix expands SW Florida real estate footprint with Estero\n[![Portrait of Laura Layden](https://www.naplesnews.com/gcdn/authoring/authoring-images/2024/02/08/PNDN/72524348007-ndn-jh-20240126-laura-0001.JPG?crop=3313,3312,x1506,y0&width=48&height=48&format=pjpg&auto=webp) Laura Layden](https://www.naplesnews.com/staff/2647080001/laura-layden/)\nFort Myers News-Press & Naples Daily News\nNov. 1, 2026, 5:07 a.m. ET\n[Publix](https://www.naplesnews.com/story/grocery/2026/08/31/when-is-the-second-publix-at-babcock-ranch-florida-going-to-open-pours-beverage-bar-cafe-style/91491658007/) has made another big real estate\""
       },
       "suggestions": [
-        "What's driving active listings count swfl?",
-        "How does active listings count swfl here compare to other SWFL areas?"
+        "What's driving signal transactions 1?",
+        "How does signal transactions 1 here compare to other SWFL areas?"
       ]
     },
     {
@@ -645,7 +643,7 @@ s39 | home-values-swfl brain — https://www.swfldatagulf.com/api/b/home-values-
   "caveats": [
     "flood-barrier-mode-1 active: 4 barrier ZIPs, worst-case AAL $40,342/insured property",
     "Override \"storm-history-modifier\" fired (priority 70)",
-    "permits-commercial-swfl excluded from synthesis (relevance 0.086, below floor 0.1)",
+    "permits-commercial-swfl excluded from synthesis (relevance 0.085, below floor 0.1)",
     "active-rentals-swfl excluded from synthesis (relevance 0.070, below floor 0.1)",
     "No figures published: this source has not yet received its first real SBA FOIA load. A synthetic development sample exists for offline testing only and is never shipped.",
     "Construction-cost PPI metrics (construction_cost_ppi_industrial, construction_cost_ppi_warehouse, construction_cost_ppi_office, construction_cost_ppi_medical_office, construction_cost_ppi_trade_concrete, construction_cost_ppi_trade_roofing, construction_cost_ppi_trade_electrical, construction_cost_ppi_trade_plumbing_hvac) are national BLS series — no SWFL-specific or Lee/Collier breakout exists at BLS for any of them. They ship a real month-over-month direction (unlike MarketBeat's schema-required \"stable\" fallback) but BLS can revise recent observations within ~30 days of first publication.",
@@ -857,8 +855,8 @@ s39 | home-values-swfl brain — https://www.swfldatagulf.com/api/b/home-values-
   "upstream_count": 37,
   "relevance": {
     "decay_curve": "weeks",
-    "half_life_hours": 719.9999999999999,
-    "computed_at": "2026-11-03T04:26:44.000Z"
+    "half_life_hours": 719.9999999999998,
+    "computed_at": "2026-11-03T12:06:17.000Z"
   },
   "exogenous_signals": [],
   "conditional_claims": [
