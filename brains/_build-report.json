@@ -1,8 +1,8 @@
 {
   "target": "master",
   "timestamps": {
-    "started": "2026-11-04T04:26:08.685Z",
-    "finished": "2026-11-04T04:26:31.086Z"
+    "started": "2026-11-04T12:20:36.484Z",
+    "finished": "2026-11-04T12:20:59.974Z"
   },
   "source": "live",
   "outcomes": [
@@ -114,19 +114,19 @@
     {
       "packId": "city-pulse-swfl",
       "status": "built",
-      "version": 157,
+      "version": 158,
       "written": true,
       "brainOutput": {
         "brain_id": "city-pulse-swfl",
-        "version": 157,
-        "refined_at": "2026-11-04T04:26:09Z",
-        "expires": "2026-11-05T04:26:09Z",
+        "version": 158,
+        "refined_at": "2026-11-04T12:20:37Z",
+        "expires": "2026-11-05T12:20:37Z",
         "ttl_seconds": 86400,
         "direction": "neutral",
         "magnitude": 0,
         "drivers": [],
         "overrides": [],
-        "conclusion": "SWFL city pulse as of 2026-11-04: 110 live current-events signals across 8 cities — Estero (4), Fort Myers (34), Naples (33), Cape Coral (31), Golden Gate (1), North Fort Myers (4), East Naples (2), Sanibel (1). Most current: Estero — Publix buys Estero, Florida shopping center for $26 million These are current cited facts only; the cross-vertical read and any direction call live downstream in master.",
+        "conclusion": "SWFL city pulse as of 2026-11-04: 111 live current-events signals across 8 cities — Estero (4), Fort Myers (34), Naples (34), Cape Coral (31), Golden Gate (1), North Fort Myers (4), East Naples (2), Sanibel (1). Most current: Estero — Publix buys Estero, Florida shopping center for $26 million These are current cited facts only; the cross-vertical read and any direction call live downstream in master.",
         "key_metrics": [
           {
             "metric": "signal_transactions_1",
@@ -136,7 +136,7 @@
             "variable_type": "categorical",
             "source": {
               "url": "https://www.naplesnews.com/story/money/companies/2026/11/01/publix-buys-estero-florida-shopping-center-for-26-million/92533029007/",
-              "fetched_at": "2026-11-04T04:26:09Z",
+              "fetched_at": "2026-11-04T12:20:37Z",
               "tier": 2,
               "citation": "Publix buys Estero, Florida shopping center for $26 million: \"[](https://www.naplesnews.com/)\n[SW Florida Grocery Shopping Poll: Farmers' Markets are opening again](https://www.naplesnews.com/story/grocery/2026/10/29/are-farmers-markets-a-good-money-saving-option-for-grocery-shopping-florida-produce-fruits-vegetable/92456769007/)\n[](https://subscribe.naplesnews.com/rr/nanobar?gps-source=CPTILELEFT&itm_campaign=2026ENTQ4BAU2026&itm_medium=ONSITE&success-url=https%3A%2F%2Fwww.naplesnews.com%2Fstory%2Fmoney%2Fcompanies%2F2026%2F11%2F01%2Fpublix-buys-estero-florida-shopping-center-for-26-million%2F92533029007%2F)\n[](https://subscribe.naplesnews.com/rr/masthead?gps-source=CPMASTHEAD&itm_campaign=2026ENTQ4BAU2026&itm_medium=ONSITE&success-url=https%3A%2F%2Fwww.naplesnews.com%2Fstory%2Fmoney%2Fcompanies%2F2026%2F11%2F01%2Fpublix-buys-estero-florida-shopping-center-for-26-million%2F92533029007%2F)\n[News](https://www.naplesnews.com/news/) [Sports](https://www.naplesnews.com/sports/) [Real Estate](https://www.naplesnews.com/business/real-estate/) [Restaurants](https://www.naplesnews.com/entertainment/restaurants/) [Opinion](https://www.naplesnews.com/opinion/) [Advertise](https://advertising.usatoday.com/advertise-with-us/?cid=Web_LiQ_Network_AdvertiseWithUs_AdvertiseInquiry&publication=naples_daily_news&utm_source=local_publication&utm_medium=menu&utm_campaign=advertise_with_us) [Obituaries](https://www.naplesnews.com/obituaries) [eNewspaper](https://user.naplesnews.com/user/enewspaper) [Legals](https://www.naplesnews.com/public-notices)\n[](https://www.naplesnews.com/search/ \"Search\")\n[](https://www.naplesnews.com/weather/ \"Weather in Naples: 78°F Partly Sunny w/ T-Storms\") [](https://subscribe.naplesnews.com/rr/navsub?gps-source=CPTOPNAVBAR&itm_campaign=2026ENTQ4BAU2026&itm_medium=ONSITE&success-url=https%3A%2F%2Fwww.naplesnews.com%2Fstory%2Fmoney%2Fcompanies%2F2026%2F11%2F01%2Fpublix-buys-estero-florida-shopping-center-for-26-million%2F92533029007%2F)\n[](https://login.naplesnews.com/PNDN-GUP/authenticate/?success-url=https%3A%2F%2Fwww.naplesnews.com%2Fstory%2Fmoney%2Fcompanies%2F2026%2F11%2F01%2Fpublix-buys-estero-florida-shopping-center-for-26-million%2F92533029007%2F&cancel-url=https%3A%2F%2Fwww.naplesnews.com%2Fstory%2Fmoney%2Fcompanies%2F2026%2F11%2F01%2Fpublix-buys-estero-florida-shopping-center-for-26-million%2F92533029007%2F)\n[](https://www.naplesnews.com/) [](https://www.naplesnews.com/)\nCOMPANIES\n# Publix expands SW Florida real estate footprint with Estero\n[![Portrait of Laura Layden](https://www.naplesnews.com/gcdn/authoring/authoring-images/2024/02/08/PNDN/72524348007-ndn-jh-20240126-laura-0001.JPG?crop=3313,3312,x1506,y0&width=48&height=48&format=pjpg&auto=webp) Laura Layden](https://www.naplesnews.com/staff/2647080001/laura-layden/)\nFort Myers News-Press & Naples Daily News\nNov. 1, 2026, 5:07 a.m. ET\n[Publix](https://www.naplesnews.com/story/grocery/2026/08/31/when-is-the-second-publix-at-babcock-ranch-florida-going-to-open-pours-beverage-bar-cafe-style/91491658007/) has made another big real estate\""
             },
@@ -153,7 +153,7 @@
             "variable_type": "categorical",
             "source": {
               "url": "https://www.naplesnews.com/story/money/companies/2026/11/01/publix-buys-estero-florida-shopping-center-for-26-million/92533029007/",
-              "fetched_at": "2026-11-04T04:26:09Z",
+              "fetched_at": "2026-11-04T12:20:37Z",
               "tier": 2,
               "citation": "Publix buys Estero, Florida shopping center for $26 million: \"[](https://www.naplesnews.com/)\n[SW Florida Grocery Shopping Poll: Farmers' Markets are opening again](https://www.naplesnews.com/story/grocery/2026/10/29/are-farmers-markets-a-good-money-saving-option-for-grocery-shopping-florida-produce-fruits-vegetable/92456769007/)\n[](https://subscribe.naplesnews.com/rr/nanobar?gps-source=CPTILELEFT&itm_campaign=2026ENTQ4BAU2026&itm_medium=ONSITE&success-url=https%3A%2F%2Fwww.naplesnews.com%2Fstory%2Fmoney%2Fcompanies%2F2026%2F11%2F01%2Fpublix-buys-estero-florida-shopping-center-for-26-million%2F92533029007%2F)\n[](https://subscribe.naplesnews.com/rr/masthead?gps-source=CPMASTHEAD&itm_campaign=2026ENTQ4BAU2026&itm_medium=ONSITE&success-url=https%3A%2F%2Fwww.naplesnews.com%2Fstory%2Fmoney%2Fcompanies%2F2026%2F11%2F01%2Fpublix-buys-estero-florida-shopping-center-for-26-million%2F92533029007%2F)\n[News](https://www.naplesnews.com/news/) [Sports](https://www.naplesnews.com/sports/) [Real Estate](https://www.naplesnews.com/business/real-estate/) [Restaurants](https://www.naplesnews.com/entertainment/restaurants/) [Opinion](https://www.naplesnews.com/opinion/) [Advertise](https://advertising.usatoday.com/advertise-with-us/?cid=Web_LiQ_Network_AdvertiseWithUs_AdvertiseInquiry&publication=naples_daily_news&utm_source=local_publication&utm_medium=menu&utm_campaign=advertise_with_us) [Obituaries](https://www.naplesnews.com/obituaries) [eNewspaper](https://user.naplesnews.com/user/enewspaper) [Legals](https://www.naplesnews.com/public-notices)\n[](https://www.naplesnews.com/search/ \"Search\")\n[](https://www.naplesnews.com/weather/ \"Weather in Naples: 78°F Partly Sunny w/ T-Storms\") [](https://subscribe.naplesnews.com/rr/navsub?gps-source=CPTOPNAVBAR&itm_campaign=2026ENTQ4BAU2026&itm_medium=ONSITE&success-url=https%3A%2F%2Fwww.naplesnews.com%2Fstory%2Fmoney%2Fcompanies%2F2026%2F11%2F01%2Fpublix-buys-estero-florida-shopping-center-for-26-million%2F92533029007%2F)\n[](https://login.naplesnews.com/PNDN-GUP/authenticate/?success-url=https%3A%2F%2Fwww.naplesnews.com%2Fstory%2Fmoney%2Fcompanies%2F2026%2F11%2F01%2Fpublix-buys-estero-florida-shopping-center-for-26-million%2F92533029007%2F&cancel-url=https%3A%2F%2Fwww.naplesnews.com%2Fstory%2Fmoney%2Fcompanies%2F2026%2F11%2F01%2Fpublix-buys-estero-florida-shopping-center-for-26-million%2F92533029007%2F)\n[](https://www.naplesnews.com/) [](https://www.naplesnews.com/)\nCOMPANIES\n# Publix expands SW Florida real estate footprint with Estero\n[![Portrait of Laura Layden](https://www.naplesnews.com/gcdn/authoring/authoring-images/2024/02/08/PNDN/72524348007-ndn-jh-20240126-laura-0001.JPG?crop=3313,3312,x1506,y0&width=48&height=48&format=pjpg&auto=webp) Laura Layden](https://www.naplesnews.com/staff/2647080001/laura-layden/)\nFort Myers News-Press & Naples Daily News\nNov. 1, 2026, 5:07 a.m. ET\n[Publix](https://www.naplesnews.com/story/grocery/2026/08/31/when-is-the-second-publix-at-babcock-ranch-florida-going-to-open-pours-beverage-bar-cafe-style/91491658007/) has made another big real estate\""
             },
@@ -170,7 +170,7 @@
             "variable_type": "categorical",
             "source": {
               "url": "https://www.naplesnews.com/story/money/companies/2026/11/01/publix-buys-estero-florida-shopping-center-for-26-million/92533029007/",
-              "fetched_at": "2026-11-04T04:26:09Z",
+              "fetched_at": "2026-11-04T12:20:37Z",
               "tier": 2,
               "citation": "Publix buys Estero, Florida shopping center for $26 million: \"[](https://www.naplesnews.com/)\n[SW Florida Grocery Shopping Poll: Farmers' Markets are opening again](https://www.naplesnews.com/story/grocery/2026/10/29/are-farmers-markets-a-good-money-saving-option-for-grocery-shopping-florida-produce-fruits-vegetable/92456769007/)\n[](https://subscribe.naplesnews.com/rr/nanobar?gps-source=CPTILELEFT&itm_campaign=2026ENTQ4BAU2026&itm_medium=ONSITE&success-url=https%3A%2F%2Fwww.naplesnews.com%2Fstory%2Fmoney%2Fcompanies%2F2026%2F11%2F01%2Fpublix-buys-estero-florida-shopping-center-for-26-million%2F92533029007%2F)\n[](https://subscribe.naplesnews.com/rr/masthead?gps-source=CPMASTHEAD&itm_campaign=2026ENTQ4BAU2026&itm_medium=ONSITE&success-url=https%3A%2F%2Fwww.naplesnews.com%2Fstory%2Fmoney%2Fcompanies%2F2026%2F11%2F01%2Fpublix-buys-estero-florida-shopping-center-for-26-million%2F92533029007%2F)\n[News](https://www.naplesnews.com/news/) [Sports](https://www.naplesnews.com/sports/) [Real Estate](https://www.naplesnews.com/business/real-estate/) [Restaurants](https://www.naplesnews.com/entertainment/restaurants/) [Opinion](https://www.naplesnews.com/opinion/) [Advertise](https://advertising.usatoday.com/advertise-with-us/?cid=Web_LiQ_Network_AdvertiseWithUs_AdvertiseInquiry&publication=naples_daily_news&utm_source=local_publication&utm_medium=menu&utm_campaign=advertise_with_us) [Obituaries](https://www.naplesnews.com/obituaries) [eNewspaper](https://user.naplesnews.com/user/enewspaper) [Legals](https://www.naplesnews.com/public-notices)\n[](https://www.naplesnews.com/search/ \"Search\")\n[](https://www.naplesnews.com/weather/ \"Weather in Naples: 78°F Partly Sunny w/ T-Storms\") [](https://subscribe.naplesnews.com/rr/navsub?gps-source=CPTOPNAVBAR&itm_campaign=2026ENTQ4BAU2026&itm_medium=ONSITE&success-url=https%3A%2F%2Fwww.naplesnews.com%2Fstory%2Fmoney%2Fcompanies%2F2026%2F11%2F01%2Fpublix-buys-estero-florida-shopping-center-for-26-million%2F92533029007%2F)\n[](https://login.naplesnews.com/PNDN-GUP/authenticate/?success-url=https%3A%2F%2Fwww.naplesnews.com%2Fstory%2Fmoney%2Fcompanies%2F2026%2F11%2F01%2Fpublix-buys-estero-florida-shopping-center-for-26-million%2F92533029007%2F&cancel-url=https%3A%2F%2Fwww.naplesnews.com%2Fstory%2Fmoney%2Fcompanies%2F2026%2F11%2F01%2Fpublix-buys-estero-florida-shopping-center-for-26-million%2F92533029007%2F)\n[](https://www.naplesnews.com/) [](https://www.naplesnews.com/)\nCOMPANIES\n# Publix expands SW Florida real estate footprint with Estero\n[![Portrait of Laura Layden](https://www.naplesnews.com/gcdn/authoring/authoring-images/2024/02/08/PNDN/72524348007-ndn-jh-20240126-laura-0001.JPG?crop=3313,3312,x1506,y0&width=48&height=48&format=pjpg&auto=webp) Laura Layden](https://www.naplesnews.com/staff/2647080001/laura-layden/)\nFort Myers News-Press & Naples Daily News\nNov. 1, 2026, 5:07 a.m. ET\n[Publix](https://www.naplesnews.com/story/grocery/2026/08/31/when-is-the-second-publix-at-babcock-ranch-florida-going-to-open-pours-beverage-bar-cafe-style/91491658007/) has made another big real estate\""
             },
@@ -187,7 +187,7 @@
             "variable_type": "categorical",
             "source": {
               "url": "https://www.news-press.com/story/money/companies/2026/11/01/publix-buys-estero-florida-shopping-center-for-26-million/92533029007/",
-              "fetched_at": "2026-11-04T04:26:09Z",
+              "fetched_at": "2026-11-04T12:20:37Z",
               "tier": 2,
               "citation": "Publix buys Estero, Florida shopping center for $26 million: \"[](https://www.news-press.com/)\n[SW Florida Grocery Shopping Poll: Farmers' Markets are opening again](https://www.news-press.com/story/grocery/2026/10/29/are-farmers-markets-a-good-money-saving-option-for-grocery-shopping-florida-produce-fruits-vegetable/92456769007/)\n[](https://subscribe.news-press.com/rr/nanobar?gps-source=CPTILELEFT&itm_campaign=2026ENTQ4BAU2026&itm_medium=ONSITE&success-url=https%3A%2F%2Fwww.news-press.com%2Fstory%2Fmoney%2Fcompanies%2F2026%2F11%2F01%2Fpublix-buys-estero-florida-shopping-center-for-26-million%2F92533029007%2F)\n[](https://subscribe.news-press.com/rr/masthead?gps-source=CPMASTHEAD&itm_campaign=2026ENTQ4BAU2026&itm_medium=ONSITE&success-url=https%3A%2F%2Fwww.news-press.com%2Fstory%2Fmoney%2Fcompanies%2F2026%2F11%2F01%2Fpublix-buys-estero-florida-shopping-center-for-26-million%2F92533029007%2F)\n[News](https://www.news-press.com/news/) [Cape Coral](https://www.news-press.com/news/cape-coral/) [Sports](https://www.news-press.com/sports/) [Restaurants](https://www.news-press.com/taste/) [Real Estate](https://www.news-press.com/real-estate) [Advertise](https://advertising.usatoday.com/advertise-with-us/?cid=Web_LiQ_Network_AdvertiseWithUs_AdvertiseInquiry&publication=the_news_press&utm_source=local_publication&utm_medium=menu&utm_campaign=advertise_with_us) [Obituaries](https://www.news-press.com/obituaries) [eNewspaper](https://user.news-press.com/user/enewspaper) [Legals](https://www.news-press.com/public-notices)\n[](https://www.news-press.com/search/ \"Search\")\n[](https://www.news-press.com/weather/ \"Weather in Fort Myers: 75°F Mostly Cloudy\") [](https://subscribe.news-press.com/rr/navsub?gps-source=CPTOPNAVBAR&itm_campaign=2026ENTQ4BAU2026&itm_medium=ONSITE&success-url=https%3A%2F%2Fwww.news-press.com%2Fstory%2Fmoney%2Fcompanies%2F2026%2F11%2F01%2Fpublix-buys-estero-florida-shopping-center-for-26-million%2F92533029007%2F)\n[](https://login.news-press.com/PFTM-GUP/authenticate/?success-url=https%3A%2F%2Fwww.news-press.com%2Fstory%2Fmoney%2Fcompanies%2F2026%2F11%2F01%2Fpublix-buys-estero-florida-shopping-center-for-26-million%2F92533029007%2F&cancel-url=https%3A%2F%2Fwww.news-press.com%2Fstory%2Fmoney%2Fcompanies%2F2026%2F11%2F01%2Fpublix-buys-estero-florida-shopping-center-for-26-million%2F92533029007%2F)\n[](https://www.news-press.com/) [](https://www.news-press.com/)\nCOMPANIES\n# Publix expands SW Florida real estate footprint with Estero\n[![Portrait of Laura Layden](https://www.news-press.com/gcdn/authoring/authoring-images/2024/02/08/PNDN/72524348007-ndn-jh-20240126-laura-0001.JPG?crop=3313,3312,x1506,y0&width=48&height=48&format=pjpg&auto=webp) Laura Layden](https://www.naplesnews.com/staff/2647080001/laura-layden/)\nFort Myers News-Press & Naples Daily News\nNov. 1, 2026, 5:07 a.m. ET\n[Publix](https://www.news-press.com/story/grocery/2026/08/31/when-is-the-second-publix-at-babcock-ranch-florida-going-to-open-pours-beverage-bar-cafe-style/91491658007/) has made another big real estate investment in Southwest Flori\""
             },
@@ -204,7 +204,7 @@
             "variable_type": "categorical",
             "source": {
               "url": "https://www.news-press.com/story/money/companies/2026/11/01/publix-buys-estero-florida-shopping-center-for-26-million/92533029007/",
-              "fetched_at": "2026-11-04T04:26:09Z",
+              "fetched_at": "2026-11-04T12:20:37Z",
               "tier": 2,
               "citation": "Publix buys Estero, Florida shopping center for $26 million: \"[](https://www.news-press.com/)\n[SW Florida Grocery Shopping Poll: Farmers' Markets are opening again](https://www.news-press.com/story/grocery/2026/10/29/are-farmers-markets-a-good-money-saving-option-for-grocery-shopping-florida-produce-fruits-vegetable/92456769007/)\n[](https://subscribe.news-press.com/rr/nanobar?gps-source=CPTILELEFT&itm_campaign=2026ENTQ4BAU2026&itm_medium=ONSITE&success-url=https%3A%2F%2Fwww.news-press.com%2Fstory%2Fmoney%2Fcompanies%2F2026%2F11%2F01%2Fpublix-buys-estero-florida-shopping-center-for-26-million%2F92533029007%2F)\n[](https://subscribe.news-press.com/rr/masthead?gps-source=CPMASTHEAD&itm_campaign=2026ENTQ4BAU2026&itm_medium=ONSITE&success-url=https%3A%2F%2Fwww.news-press.com%2Fstory%2Fmoney%2Fcompanies%2F2026%2F11%2F01%2Fpublix-buys-estero-florida-shopping-center-for-26-million%2F92533029007%2F)\n[News](https://www.news-press.com/news/) [Cape Coral](https://www.news-press.com/news/cape-coral/) [Sports](https://www.news-press.com/sports/) [Restaurants](https://www.news-press.com/taste/) [Real Estate](https://www.news-press.com/real-estate) [Advertise](https://advertising.usatoday.com/advertise-with-us/?cid=Web_LiQ_Network_AdvertiseWithUs_AdvertiseInquiry&publication=the_news_press&utm_source=local_publication&utm_medium=menu&utm_campaign=advertise_with_us) [Obituaries](https://www.news-press.com/obituaries) [eNewspaper](https://user.news-press.com/user/enewspaper) [Legals](https://www.news-press.com/public-notices)\n[](https://www.news-press.com/search/ \"Search\")\n[](https://www.news-press.com/weather/ \"Weather in Fort Myers: 75°F Mostly Cloudy\") [](https://subscribe.news-press.com/rr/navsub?gps-source=CPTOPNAVBAR&itm_campaign=2026ENTQ4BAU2026&itm_medium=ONSITE&success-url=https%3A%2F%2Fwww.news-press.com%2Fstory%2Fmoney%2Fcompanies%2F2026%2F11%2F01%2Fpublix-buys-estero-florida-shopping-center-for-26-million%2F92533029007%2F)\n[](https://login.news-press.com/PFTM-GUP/authenticate/?success-url=https%3A%2F%2Fwww.news-press.com%2Fstory%2Fmoney%2Fcompanies%2F2026%2F11%2F01%2Fpublix-buys-estero-florida-shopping-center-for-26-million%2F92533029007%2F&cancel-url=https%3A%2F%2Fwww.news-press.com%2Fstory%2Fmoney%2Fcompanies%2F2026%2F11%2F01%2Fpublix-buys-estero-florida-shopping-center-for-26-million%2F92533029007%2F)\n[](https://www.news-press.com/) [](https://www.news-press.com/)\nCOMPANIES\n# Publix expands SW Florida real estate footprint with Estero\n[![Portrait of Laura Layden](https://www.news-press.com/gcdn/authoring/authoring-images/2024/02/08/PNDN/72524348007-ndn-jh-20240126-laura-0001.JPG?crop=3313,3312,x1506,y0&width=48&height=48&format=pjpg&auto=webp) Laura Layden](https://www.naplesnews.com/staff/2647080001/laura-layden/)\nFort Myers News-Press & Naples Daily News\nNov. 1, 2026, 5:07 a.m. ET\n[Publix](https://www.news-press.com/story/grocery/2026/08/31/when-is-the-second-publix-at-babcock-ranch-florida-going-to-open-pours-beverage-bar-cafe-style/91491658007/) has made another big real estate investment in Southwest Flori\""
             },
@@ -221,7 +221,7 @@
             "variable_type": "categorical",
             "source": {
               "url": "https://www.naplesnews.com/story/money/business/local/2026/10/27/new-naples-florida-estate-sells-for-71-million-in-private-deal-one-of-the-largest-sales-of-year/92458106007/",
-              "fetched_at": "2026-11-04T04:26:09Z",
+              "fetched_at": "2026-11-04T12:20:37Z",
               "tier": 2,
               "citation": "New Naples estate sells for $71 million in private deal: \"[](https://www.naplesnews.com/)\n[SWFL Football Week 11 high school game previews and predictions](https://www.naplesnews.com/story/sports/high-school/football/2026/10/29/high-school-football-sw-florida-fhsaa-oct-29-30-previews-predictions/92465579007/)\n[](https://subscribe.naplesnews.com/rr/nanobar?gps-source=CPTILELEFT&itm_campaign=2026ENTQ4BAU2026&itm_medium=ONSITE&success-url=https%3A%2F%2Fwww.naplesnews.com%2Fstory%2Fmoney%2Fbusiness%2Flocal%2F2026%2F10%2F27%2Fnew-naples-florida-estate-sells-for-71-million-in-private-deal-one-of-the-largest-sales-of-year%2F92458106007%2F)\n[](https://subscribe.naplesnews.com/rr/masthead?gps-source=CPMASTHEAD&itm_campaign=2026ENTQ4BAU2026&itm_medium=ONSITE&success-url=https%3A%2F%2Fwww.naplesnews.com%2Fstory%2Fmoney%2Fbusiness%2Flocal%2F2026%2F10%2F27%2Fnew-naples-florida-estate-sells-for-71-million-in-private-deal-one-of-the-largest-sales-of-year%2F92458106007%2F)\n[News](https://www.naplesnews.com/news/) [Sports](https://www.naplesnews.com/sports/) [Real Estate](https://www.naplesnews.com/business/real-estate/) [Restaurants](https://www.naplesnews.com/entertainment/restaurants/) [Opinion](https://www.naplesnews.com/opinion/) [Advertise](https://advertising.usatoday.com/advertise-with-us/?cid=Web_LiQ_Network_AdvertiseWithUs_AdvertiseInquiry&publication=naples_daily_news&utm_source=local_publication&utm_medium=menu&utm_campaign=advertise_with_us) [Obituaries](https://www.naplesnews.com/obituaries) [eNewspaper](https://user.naplesnews.com/user/enewspaper) [Legals](https://www.naplesnews.com/public-notices)\n[](https://www.naplesnews.com/search/ \"Search\")\n[](https://www.naplesnews.com/weather/ \"Weather in Naples: 74°F Partly Sunny\") [](https://subscribe.naplesnews.com/rr/navsub?gps-source=CPTOPNAVBAR&itm_campaign=2026ENTQ4BAU2026&itm_medium=ONSITE&success-url=https%3A%2F%2Fwww.naplesnews.com%2Fstory%2Fmoney%2Fbusiness%2Flocal%2F2026%2F10%2F27%2Fnew-naples-florida-estate-sells-for-71-million-in-private-deal-one-of-the-largest-sales-of-year%2F92458106007%2F)\n[](https://login.naplesnews.com/PNDN-GUP/authenticate/?success-url=https%3A%2F%2Fwww.naplesnews.com%2Fstory%2Fmoney%2Fbusiness%2Flocal%2F2026%2F10%2F27%2Fnew-naples-florida-estate-sells-for-71-million-in-private-deal-one-of-the-largest-sales-of-year%2F92458106007%2F&cancel-url=https%3A%2F%2Fwww.naplesnews.com%2Fstory%2Fmoney%2Fbusiness%2Flocal%2F2026%2F10%2F27%2Fnew-naples-florida-estate-sells-for-71-million-in-private-deal-one-of-the-largest-sales-of-year%2F92458106007%2F)\n[](https://www.naplesnews.com/) [](https://www.naplesnews.com/)\n[LOCAL BUSINESS](https://www.naplesnews.com/business/local/)\n# New waterfront estate in Naples fetches $71 million in off-market deal\n[![Portrait of Laura Layden](https://www.naplesnews.com/gcdn/authoring/authoring-images/2024/02/08/PNDN/72524348007-ndn-jh-20240126-laura-0001.JPG?crop=3313,3312,x1506,y0&width=48&height=48&format=pjpg&auto=webp) Laura Layden](https://www.naplesnews.com/staff/2647080001/laura-layden/)\nFort Myers New\""
             },
@@ -238,7 +238,7 @@
             "variable_type": "categorical",
             "source": {
               "url": "https://www.businessobserverfl.com/news/2026/oct/28/hoffmann-buys-naples-yacht-club/",
-              "fetched_at": "2026-11-04T04:26:09Z",
+              "fetched_at": "2026-11-04T12:20:37Z",
               "tier": 2,
               "citation": "Hoffmann buys Naples yacht club | Business Observer: \"![Spinner: White decorative](https://cdn.userway.org/widgetapp/images/spin_wh.svg)\n![](https://cdn.userway.org/widgetapp/images/body_wh.svg)\n![Spinner: White decorative](https://cdn.userway.org/widgetapp/images/spin_wh.svg)\n  * ![Alternate Text](https://observermediagroup.media.clients.ellingtoncms.com/static-4/assets/images/bob-logo-header.svg)\n  * Loading\n\n\n  * [Newsletters](https://marketing.businessobserverfl.com/newsletters)\n  * [Podcast](https://www.businessobserverfl.com/podcasts/corner-office/?utm_source=header&utm_medium=sitenav)\n  * [Public Notices](https://legals.businessobserverfl.com/)\n  * [Big Book](https://www.businessobserverfl.com/big-book-of-business/2026/)\n  * [40 Under 40](https://www.businessobserverfl.com/40-under-40/)\n  * [Mobile App](https://businessobserver.pressreader.com/)\n  * [Subscribe](https://marketing.businessobserverfl.com/subscribe)\n  * [Login](https://www.businessobserverfl.com/accounts/login/?next=/news/2026/oct/28/hoffmann-buys-naples-yacht-club/)\n\n\n  * [](https://www.facebook.com/BusinessObserverFL)\n  * [](https://x.com/BizObserverFL)\n  * [](https://www.linkedin.com/company/businessobserverfl)\n  * [ ](https://www.instagram.com/businessobserverfl/)\n\n\n[![](https://observermediagroup.media.clients.ellingtoncms.com/static-4/assets/images/bob-logo-header.svg)](https://www.businessobserverfl.com/)\n[![](https://observermediagroup.media.clients.ellingtoncms.com/static-4/assets/images/bob-logo-sticky.svg)](https://www.businessobserverfl.com/)\n[![](https://observermediagroup.media.clients.ellingtoncms.com/static-4/assets/images/bob-logo-header.svg)](https://www.businessobserverfl.com/)\n  * [News](https://www.businessobserverfl.com/news/all/)\n  * [Strategies](https://www.businessobserverfl.com/news/strategies/)\n  * [Entrepreneurs](https://www.businessobserverfl.com/news/entrepreneurs/)\n  * [Leadership](https://www.businessobserverfl.com/news/leadership/)\n  * [Regions](https://www.businessobserverfl.com/news/2026/oct/28/hoffmann-buys-naples-yacht-club/)\n    * [Tampa Bay-Lakeland](https://www.businessobserverfl.com/news/tampa-bay-lakeland/)\n    * [Manatee-Sarasota](https://www.businessobserverfl.com/news/manatee-sarasota/)\n    * [Charlotte-Lee-Collier](https://www.businessobserverfl.com/news/charlotte-lee-collier/)\n    * [Florida](https://www.businessobserverfl.com/news/florida/)\n  * [Industries](https://www.businessobserverfl.com/news/2026/oct/28/hoffmann-buys-naples-yacht-club/)\n    * [Business Support](https://www.businessobserverfl.com/news/industries/business-support/)\n    * [Commercial Real Estate](https://www.businessobserverfl.com/news/industries/commercial-real-estate/)\n    * [Residential Real Estate](https://www.businessobserverfl.com/news/industries/residential-real-estate/)\n    * [Development](https://www.businessobserverfl.com/news/industries/development/)\n    * [Finance](https://www.businessobserverfl.com/news/industries/finance/)\n    * [Food-Beverage](https://www.businessobserverfl.com/news/industries/food-\""
             },
@@ -255,7 +255,7 @@
             "variable_type": "categorical",
             "source": {
               "url": "https://www.businessobserverfl.com/news/2026/oct/28/naples-senior-living-campus-sells/",
-              "fetched_at": "2026-11-04T04:26:09Z",
+              "fetched_at": "2026-11-04T12:20:37Z",
               "tier": 2,
               "citation": "Naples senior living campus sells for 63% below 2021 sale price | Business Observer: \"![Spinner: White decorative](https://cdn.userway.org/widgetapp/images/spin_wh.svg)\n![](https://cdn.userway.org/widgetapp/images/body_wh.svg)\n![Spinner: White decorative](https://cdn.userway.org/widgetapp/images/spin_wh.svg)\n  * ![Alternate Text](https://observermediagroup.media.clients.ellingtoncms.com/static-4/assets/images/bob-logo-header.svg)\n  * Loading\n\n\n  * [Newsletters](https://marketing.businessobserverfl.com/newsletters)\n  * [Podcast](https://www.businessobserverfl.com/podcasts/corner-office/?utm_source=header&utm_medium=sitenav)\n  * [Public Notices](https://legals.businessobserverfl.com/)\n  * [Big Book](https://www.businessobserverfl.com/big-book-of-business/2026/)\n  * [40 Under 40](https://www.businessobserverfl.com/40-under-40/)\n  * [Mobile App](https://businessobserver.pressreader.com/)\n  * [Subscribe](https://marketing.businessobserverfl.com/subscribe)\n  * [Login](https://www.businessobserverfl.com/accounts/login/?next=/news/2026/oct/28/naples-senior-living-campus-sells/)\n\n\n  * [](https://www.facebook.com/BusinessObserverFL)\n  * [](https://x.com/BizObserverFL)\n  * [](https://www.linkedin.com/company/businessobserverfl)\n  * [ ](https://www.instagram.com/businessobserverfl/)\n\n\n[![](https://observermediagroup.media.clients.ellingtoncms.com/static-4/assets/images/bob-logo-header.svg)](https://www.businessobserverfl.com/)\n[![](https://observermediagroup.media.clients.ellingtoncms.com/static-4/assets/images/bob-logo-sticky.svg)](https://www.businessobserverfl.com/)\n[![](https://observermediagroup.media.clients.ellingtoncms.com/static-4/assets/images/bob-logo-header.svg)](https://www.businessobserverfl.com/)\n  * [News](https://www.businessobserverfl.com/news/all/)\n  * [Strategies](https://www.businessobserverfl.com/news/strategies/)\n  * [Entrepreneurs](https://www.businessobserverfl.com/news/entrepreneurs/)\n  * [Leadership](https://www.businessobserverfl.com/news/leadership/)\n  * [Regions](https://www.businessobserverfl.com/news/2026/oct/28/naples-senior-living-campus-sells/)\n    * [Tampa Bay-Lakeland](https://www.businessobserverfl.com/news/tampa-bay-lakeland/)\n    * [Manatee-Sarasota](https://www.businessobserverfl.com/news/manatee-sarasota/)\n    * [Charlotte-Lee-Collier](https://www.businessobserverfl.com/news/charlotte-lee-collier/)\n    * [Florida](https://www.businessobserverfl.com/news/florida/)\n  * [Industries](https://www.businessobserverfl.com/news/2026/oct/28/naples-senior-living-campus-sells/)\n    * [Business Support](https://www.businessobserverfl.com/news/industries/business-support/)\n    * [Commercial Real Estate](https://www.businessobserverfl.com/news/industries/commercial-real-estate/)\n    * [Residential Real Estate](https://www.businessobserverfl.com/news/industries/residential-real-estate/)\n    * [Development](https://www.businessobserverfl.com/news/industries/development/)\n    * [Finance](https://www.businessobserverfl.com/news/industries/finance/)\n    * [Food-Beverage](https://www.businessobserverfl.com/news/industries\""
             },
@@ -342,7 +342,7 @@
             ],
             "source": {
               "url": "https://www.swfldatagulf.com/r/source/city_pulse",
-              "fetched_at": "2026-11-04T04:26:09Z",
+              "fetched_at": "2026-11-04T12:20:37Z",
               "tier": 2,
               "citation": "Distilled, citation-backed SWFL news signals; each ZIP's items carry per-item source URLs in data_lake.city_pulse."
             },
@@ -350,7 +350,7 @@
           }
         ],
         "caveats": [
-          "102 additional live signals not surfaced here (cap 8); the full set is in data_lake.city_pulse.",
+          "103 additional live signals not surfaced here (cap 8); the full set is in data_lake.city_pulse.",
           "Each signal is dated current-events context with a per-signal source; freshness is TTL-bounded by topic (breaking 1d → structural 90d)."
         ],
         "contradicts": [],
@@ -363,7 +363,7 @@
         "relevance": {
           "decay_curve": "weeks",
           "half_life_hours": 720,
-          "computed_at": "2026-11-04T04:26:09Z"
+          "computed_at": "2026-11-04T12:20:37Z"
         },
         "exogenous_signals": []
       }
@@ -380,119 +380,8 @@
     },
     {
       "packId": "freshness-pulse",
-      "status": "built",
-      "version": 93,
-      "written": true,
-      "brainOutput": {
-        "brain_id": "freshness-pulse",
-        "version": 93,
-        "refined_at": "2026-11-04T04:26:09Z",
-        "expires": "2026-11-05T04:26:09Z",
-        "ttl_seconds": 86400,
-        "direction": "neutral",
-        "magnitude": 0,
-        "drivers": [],
-        "overrides": [],
-        "conclusion": "Today's sourced snapshot — Cape Coral median asking price (as of 2026-11-04) $399,200; Fort Myers median asking price (as of 2026-11-04) $325,000; Naples median asking price (as of 2026-11-04) $650,000; SWFL 30-year fixed mortgage rate (as of 2026-10-29) 7.24%. These are cited current facts only; the direction call lives downstream in master.",
-        "key_metrics": [
-          {
-            "metric": "freshness_median_asking_price_cape_coral_usd",
-            "value": 399200,
-            "direction": "stable",
-            "label": "Cape Coral median asking price (as of 2026-11-04)",
-            "variable_type": "extensive",
-            "units": "USD",
-            "display_format": "currency",
-            "source": {
-              "url": "https://www.swfldatagulf.com/desk",
-              "fetched_at": "2026-11-04T04:23:33.662299+00:00",
-              "tier": 2,
-              "citation": "SWFL Data Gulf active-listing inventory — current median asking price for Cape Coral, sourced 2026-11-04"
-            },
-            "suggestions": [
-              "Chart asking rents across the corridors",
-              "What's driving freshness median asking price cape coral usd?",
-              "How does freshness median asking price cape coral usd here compare to other SWFL areas?"
-            ]
-          },
-          {
-            "metric": "freshness_median_asking_price_fort_myers_usd",
-            "value": 325000,
-            "direction": "stable",
-            "label": "Fort Myers median asking price (as of 2026-11-04)",
-            "variable_type": "extensive",
-            "units": "USD",
-            "display_format": "currency",
-            "source": {
-              "url": "https://www.swfldatagulf.com/desk",
-              "fetched_at": "2026-11-04T04:23:33.662299+00:00",
-              "tier": 2,
-              "citation": "SWFL Data Gulf active-listing inventory — current median asking price for Fort Myers, sourced 2026-11-04"
-            },
-            "suggestions": [
-              "Chart asking rents across the corridors",
-              "What's driving freshness median asking price fort myers usd?",
-              "How does freshness median asking price fort myers usd here compare to other SWFL areas?"
-            ]
-          },
-          {
-            "metric": "freshness_median_asking_price_naples_usd",
-            "value": 650000,
-            "direction": "stable",
-            "label": "Naples median asking price (as of 2026-11-04)",
-            "variable_type": "extensive",
-            "units": "USD",
-            "display_format": "currency",
-            "source": {
-              "url": "https://www.swfldatagulf.com/desk",
-              "fetched_at": "2026-11-04T04:23:33.662299+00:00",
-              "tier": 2,
-              "citation": "SWFL Data Gulf active-listing inventory — current median asking price for Naples, sourced 2026-11-04"
-            },
-            "suggestions": [
-              "Chart asking rents across the corridors",
-              "What's driving freshness median asking price naples usd?",
-              "How does freshness median asking price naples usd here compare to other SWFL areas?"
-            ]
-          },
-          {
-            "metric": "freshness_mortgage_30yr_fixed_pct",
-            "value": 7.24,
-            "direction": "stable",
-            "label": "SWFL 30-year fixed mortgage rate (as of 2026-10-29)",
-            "variable_type": "intensive",
-            "units": "percent",
-            "display_format": "percent",
-            "source": {
-              "url": "https://fred.stlouisfed.org/series/MORTGAGE30US",
-              "fetched_at": "2026-11-04T04:23:33.662299+00:00",
-              "tier": 2,
-              "citation": "FRED — current 30-year fixed mortgage rate for SWFL, sourced 2026-10-29"
-            },
-            "suggestions": [
-              "What's driving freshness mortgage 30yr fixed pct?",
-              "How does freshness mortgage 30yr fixed pct here compare to other SWFL areas?"
-            ]
-          }
-        ],
-        "detail_tables": [],
-        "caveats": [
-          "Each county-grain number is a single grounded source's current figure, provenance-gated to a real source URL; held anomalies and unsourced (model-memory) numbers are excluded by design."
-        ],
-        "contradicts": [],
-        "confidence": 0.8,
-        "joint_integrity": 1,
-        "confidence_dispersion": 0,
-        "chain_depth": 0,
-        "trust_tier": 2,
-        "upstream_count": 0,
-        "relevance": {
-          "decay_curve": "weeks",
-          "half_life_hours": 720,
-          "computed_at": "2026-11-04T04:26:09Z"
-        },
-        "exogenous_signals": []
-      }
+      "status": "skipped-fresh",
+      "written": false
     },
     {
       "packId": "seller-stress-swfl",
@@ -526,13 +415,944 @@
     },
     {
       "packId": "price-distribution-swfl",
-      "status": "skipped-fresh",
-      "written": false
+      "status": "built",
+      "version": 14,
+      "written": true,
+      "brainOutput": {
+        "brain_id": "price-distribution-swfl",
+        "version": 14,
+        "refined_at": "2026-11-04T12:20:37Z",
+        "expires": "2026-11-12T12:20:37Z",
+        "ttl_seconds": 691200,
+        "direction": "neutral",
+        "magnitude": 0,
+        "drivers": [],
+        "overrides": [],
+        "conclusion": "Of 28,059 active SWFL for-sale listings (as of 2026-08-10), 44.50% are priced under $300k, 31.50% $300k–$600k, 11.60% $600k–$1M, and 12.40% at $1M or above. By county: Lee 20,894, Collier 7,165.",
+        "key_metrics": [
+          {
+            "metric": "entry_level_listing_share_swfl",
+            "label": "SWFL for-sale listings priced under $300k (share of active inventory)",
+            "value": 44.5,
+            "direction": "stable",
+            "variable_type": "intensive",
+            "units": "%",
+            "display_format": "percent",
+            "source": {
+              "url": "https://www.swfldatagulf.com/r/source/listing_price_histogram_swfl_latest?label=SWFL+for-sale+listing+count+by+price+band+%28aggregated%29&source=realtor.com&brain=price-distribution-swfl&date_col=captured_date",
+              "fetched_at": "2026-11-04T12:20:37Z",
+              "tier": 2,
+              "citation": "Entry-tier (<$300k) share of listings across 28,059 active SWFL for-sale listings, as of 2026-08-10"
+            },
+            "suggestions": [
+              "What's driving entry level listing share swfl?",
+              "How does entry level listing share swfl here compare to other SWFL areas?"
+            ]
+          },
+          {
+            "metric": "midmarket_listing_share_swfl",
+            "label": "SWFL for-sale listings priced $300k–$600k (share of active inventory)",
+            "value": 31.5,
+            "direction": "stable",
+            "variable_type": "intensive",
+            "units": "%",
+            "display_format": "percent",
+            "source": {
+              "url": "https://www.swfldatagulf.com/r/source/listing_price_histogram_swfl_latest?label=SWFL+for-sale+listing+count+by+price+band+%28aggregated%29&source=realtor.com&brain=price-distribution-swfl&date_col=captured_date",
+              "fetched_at": "2026-11-04T12:20:37Z",
+              "tier": 2,
+              "citation": "Mid-tier ($300k–$600k) share of listings across 28,059 active SWFL for-sale listings, as of 2026-08-10"
+            },
+            "suggestions": [
+              "What's driving midmarket listing share swfl?",
+              "How does midmarket listing share swfl here compare to other SWFL areas?"
+            ]
+          },
+          {
+            "metric": "upper_tier_listing_share_swfl",
+            "label": "SWFL for-sale listings priced $600k–$1M (share of active inventory)",
+            "value": 11.6,
+            "direction": "stable",
+            "variable_type": "intensive",
+            "units": "%",
+            "display_format": "percent",
+            "source": {
+              "url": "https://www.swfldatagulf.com/r/source/listing_price_histogram_swfl_latest?label=SWFL+for-sale+listing+count+by+price+band+%28aggregated%29&source=realtor.com&brain=price-distribution-swfl&date_col=captured_date",
+              "fetched_at": "2026-11-04T12:20:37Z",
+              "tier": 2,
+              "citation": "Upper-tier ($600k–$1M) share of listings across 28,059 active SWFL for-sale listings, as of 2026-08-10"
+            },
+            "suggestions": [
+              "What's driving upper tier listing share swfl?",
+              "How does upper tier listing share swfl here compare to other SWFL areas?"
+            ]
+          },
+          {
+            "metric": "luxury_listing_share_swfl",
+            "label": "SWFL for-sale listings priced $1M and above (share of active inventory)",
+            "value": 12.4,
+            "direction": "stable",
+            "variable_type": "intensive",
+            "units": "%",
+            "display_format": "percent",
+            "source": {
+              "url": "https://www.swfldatagulf.com/r/source/listing_price_histogram_swfl_latest?label=SWFL+for-sale+listing+count+by+price+band+%28aggregated%29&source=realtor.com&brain=price-distribution-swfl&date_col=captured_date",
+              "fetched_at": "2026-11-04T12:20:37Z",
+              "tier": 2,
+              "citation": "Luxury ($1M+) share of listings across 28,059 active SWFL for-sale listings, as of 2026-08-10"
+            },
+            "suggestions": [
+              "What's driving luxury listing share swfl?",
+              "How does luxury listing share swfl here compare to other SWFL areas?"
+            ]
+          }
+        ],
+        "detail_tables": [
+          {
+            "id": "price_distribution_by_county",
+            "title": "SWFL active for-sale listings by price tier and county",
+            "grain": "county",
+            "columns": [
+              {
+                "id": "total_listings",
+                "label": "Total listings",
+                "display_format": "count",
+                "units": "listings"
+              },
+              {
+                "id": "entry_under_300k",
+                "label": "Under $300k",
+                "display_format": "count",
+                "units": "listings"
+              },
+              {
+                "id": "mid_300k_600k",
+                "label": "$300k–$600k",
+                "display_format": "count",
+                "units": "listings"
+              },
+              {
+                "id": "upper_600k_1m",
+                "label": "$600k–$1M",
+                "display_format": "count",
+                "units": "listings"
+              },
+              {
+                "id": "luxury_1m_plus",
+                "label": "$1M+",
+                "display_format": "count",
+                "units": "listings"
+              },
+              {
+                "id": "entry_share",
+                "label": "Under $300k share",
+                "display_format": "percent",
+                "units": "%"
+              }
+            ],
+            "rows": [
+              {
+                "key": "Lee",
+                "label": "Lee",
+                "cells": {
+                  "total_listings": 20894,
+                  "entry_under_300k": 10963,
+                  "mid_300k_600k": 6739,
+                  "upper_600k_1m": 1785,
+                  "luxury_1m_plus": 1407,
+                  "entry_share": 52.5
+                }
+              },
+              {
+                "key": "Collier",
+                "label": "Collier",
+                "cells": {
+                  "total_listings": 7165,
+                  "entry_under_300k": 1510,
+                  "mid_300k_600k": 2113,
+                  "upper_600k_1m": 1479,
+                  "luxury_1m_plus": 2063,
+                  "entry_share": 21.1
+                }
+              }
+            ],
+            "source": {
+              "url": "https://www.swfldatagulf.com/r/source/listing_price_histogram_swfl_latest?label=SWFL+for-sale+listing+count+by+price+band+%28aggregated%29&source=realtor.com&brain=price-distribution-swfl&date_col=captured_date",
+              "fetched_at": "2026-11-04T12:20:37Z",
+              "tier": 2,
+              "citation": "SWFL for-sale listing distribution by price tier, per county, as of 2026-08-10"
+            }
+          },
+          {
+            "id": "luxury_price_bands_by_county",
+            "title": "SWFL active $2M+ for-sale listings by price band and county",
+            "grain": "county",
+            "columns": [
+              {
+                "id": "band_2m_3m",
+                "label": "$2M–$3M",
+                "display_format": "count",
+                "units": "listings"
+              },
+              {
+                "id": "band_3m_5m",
+                "label": "$3M–$5M",
+                "display_format": "count",
+                "units": "listings"
+              },
+              {
+                "id": "band_5m_10m",
+                "label": "$5M–$10M",
+                "display_format": "count",
+                "units": "listings"
+              },
+              {
+                "id": "band_10m_plus",
+                "label": "$10M+",
+                "display_format": "count",
+                "units": "listings"
+              },
+              {
+                "id": "total_2m_plus",
+                "label": "Total $2M+",
+                "display_format": "count",
+                "units": "listings"
+              }
+            ],
+            "rows": [
+              {
+                "key": "Lee",
+                "label": "Lee",
+                "cells": {
+                  "band_2m_3m": 246,
+                  "band_3m_5m": 200,
+                  "band_5m_10m": 83,
+                  "band_10m_plus": 33,
+                  "total_2m_plus": 562
+                }
+              },
+              {
+                "key": "Collier",
+                "label": "Collier",
+                "cells": {
+                  "band_2m_3m": 338,
+                  "band_3m_5m": 365,
+                  "band_5m_10m": 259,
+                  "band_10m_plus": 143,
+                  "total_2m_plus": 1105
+                }
+              }
+            ],
+            "source": {
+              "url": "https://www.swfldatagulf.com/r/source/listing_price_histogram_swfl_latest?label=SWFL+for-sale+listing+count+by+price+band+%28aggregated%29&source=realtor.com&brain=price-distribution-swfl&date_col=captured_date",
+              "fetched_at": "2026-11-04T12:20:37Z",
+              "tier": 2,
+              "citation": "SWFL active $2M+ for-sale listings by price band, per county, as of 2026-08-10"
+            }
+          }
+        ],
+        "caveats": [
+          "List-side only: this is the price distribution of ACTIVE for-sale listings (asking prices), not closed sales.",
+          "Includes ALL for-sale property types — the under-$300k band is dominated by vacant land/lots in lot-heavy areas, so the entry-tier share overstates entry-level HOMES. Use the per-county detail to read the shape.",
+          "Weekly snapshot — the distribution's drift over time reads the affordability trend; a single week is neutral.",
+          "Source is realtor.com for-sale listings, binned per county at source."
+        ],
+        "contradicts": [],
+        "confidence": 0.8,
+        "joint_integrity": 1,
+        "confidence_dispersion": 0,
+        "chain_depth": 0,
+        "trust_tier": 2,
+        "upstream_count": 0,
+        "relevance": {
+          "decay_curve": "weeks",
+          "half_life_hours": 720,
+          "computed_at": "2026-11-04T12:20:37Z"
+        },
+        "exogenous_signals": [],
+        "grain_boundary": {
+          "not_available": [
+            "Sold / closed-sale price distribution — active asking prices only",
+            "Per-listing detail — count-per-band aggregate only",
+            "Rental price distribution — for-sale listings only"
+          ],
+          "finest_grain": "county-week"
+        }
+      }
     },
     {
       "packId": "listing-momentum-swfl",
-      "status": "skipped-fresh",
-      "written": false
+      "status": "built",
+      "version": 16,
+      "written": true,
+      "brainOutput": {
+        "brain_id": "listing-momentum-swfl",
+        "version": 16,
+        "refined_at": "2026-11-04T12:20:37Z",
+        "expires": "2026-11-12T12:20:37Z",
+        "ttl_seconds": 691200,
+        "direction": "neutral",
+        "magnitude": 0,
+        "drivers": [],
+        "overrides": [],
+        "conclusion": "Across 31,086 active SWFL for-sale listings (as of 2026-08-14), 14.70% currently carry a price cut and 8.90% are newly listed. By county: Lee 15.20% cut / 9.10% new, Collier 13.30% cut / 8.00% new, Hendry 12.10% cut / 9.00% new.",
+        "key_metrics": [
+          {
+            "metric": "price_reduced_share_swfl",
+            "label": "SWFL active for-sale listings with a price cut (share of active inventory)",
+            "value": 14.7,
+            "direction": "stable",
+            "variable_type": "intensive",
+            "units": "%",
+            "display_format": "percent",
+            "source": {
+              "url": "https://www.swfldatagulf.com/r/source/listing_momentum_stats?label=SWFL+for-sale+listing+momentum+%28price-cut+%2F+new-listing+shares%29&source=realtor.com+for-sale+listings&brain=listing-momentum-swfl&date_col=scraped_at",
+              "fetched_at": "2026-11-04T12:20:37Z",
+              "tier": 2,
+              "citation": "14.70% of 31,086 active SWFL for-sale listings carry a price reduction, as of 2026-08-14"
+            },
+            "suggestions": [
+              "What's driving price reduced share swfl?",
+              "How does price reduced share swfl here compare to other SWFL areas?"
+            ]
+          },
+          {
+            "metric": "new_listing_share_swfl",
+            "label": "SWFL active for-sale listings flagged new (share of active inventory)",
+            "value": 8.9,
+            "direction": "stable",
+            "variable_type": "intensive",
+            "units": "%",
+            "display_format": "percent",
+            "source": {
+              "url": "https://www.swfldatagulf.com/r/source/listing_momentum_stats?label=SWFL+for-sale+listing+momentum+%28price-cut+%2F+new-listing+shares%29&source=realtor.com+for-sale+listings&brain=listing-momentum-swfl&date_col=scraped_at",
+              "fetched_at": "2026-11-04T12:20:37Z",
+              "tier": 2,
+              "citation": "8.90% of 31,086 active SWFL for-sale listings are newly listed, as of 2026-08-14"
+            },
+            "suggestions": [
+              "What's driving new listing share swfl?",
+              "How does new listing share swfl here compare to other SWFL areas?"
+            ]
+          }
+        ],
+        "detail_tables": [
+          {
+            "id": "listing_momentum_by_county",
+            "title": "SWFL for-sale listing momentum by county",
+            "grain": "county",
+            "columns": [
+              {
+                "id": "active_listing_count",
+                "label": "Active listings",
+                "display_format": "count",
+                "units": "listings"
+              },
+              {
+                "id": "price_reduced_share",
+                "label": "Price-cut share",
+                "display_format": "percent",
+                "units": "%"
+              },
+              {
+                "id": "new_listing_share",
+                "label": "New-listing share",
+                "display_format": "percent",
+                "units": "%"
+              }
+            ],
+            "rows": [
+              {
+                "key": "Lee",
+                "label": "Lee",
+                "cells": {
+                  "active_listing_count": 22921,
+                  "price_reduced_share": 15.2,
+                  "new_listing_share": 9.1
+                }
+              },
+              {
+                "key": "Collier",
+                "label": "Collier",
+                "cells": {
+                  "active_listing_count": 7126,
+                  "price_reduced_share": 13.3,
+                  "new_listing_share": 8
+                }
+              },
+              {
+                "key": "Hendry",
+                "label": "Hendry",
+                "cells": {
+                  "active_listing_count": 1039,
+                  "price_reduced_share": 12.1,
+                  "new_listing_share": 9
+                }
+              }
+            ],
+            "source": {
+              "url": "https://www.swfldatagulf.com/r/source/listing_momentum_stats?label=SWFL+for-sale+listing+momentum+%28price-cut+%2F+new-listing+shares%29&source=realtor.com+for-sale+listings&brain=listing-momentum-swfl&date_col=scraped_at",
+              "fetched_at": "2026-11-04T12:20:37Z",
+              "tier": 2,
+              "citation": "SWFL for-sale listing momentum shares, per grain, as of 2026-08-14"
+            }
+          },
+          {
+            "id": "listing_momentum_by_zip",
+            "title": "SWFL for-sale listing momentum by ZIP",
+            "grain": "zip",
+            "columns": [
+              {
+                "id": "active_listing_count",
+                "label": "Active listings",
+                "display_format": "count",
+                "units": "listings"
+              },
+              {
+                "id": "price_reduced_share",
+                "label": "Price-cut share",
+                "display_format": "percent",
+                "units": "%"
+              },
+              {
+                "id": "new_listing_share",
+                "label": "New-listing share",
+                "display_format": "percent",
+                "units": "%"
+              }
+            ],
+            "rows": [
+              {
+                "key": "33993",
+                "label": "33993 (Lee)",
+                "cells": {
+                  "active_listing_count": 2304,
+                  "price_reduced_share": 15.5,
+                  "new_listing_share": 8.8
+                }
+              },
+              {
+                "key": "33974",
+                "label": "33974 (Lee)",
+                "cells": {
+                  "active_listing_count": 2093,
+                  "price_reduced_share": 10.4,
+                  "new_listing_share": 9.7
+                }
+              },
+              {
+                "key": "33909",
+                "label": "33909 (Lee)",
+                "cells": {
+                  "active_listing_count": 1406,
+                  "price_reduced_share": 16,
+                  "new_listing_share": 13.7
+                }
+              },
+              {
+                "key": "33972",
+                "label": "33972 (Lee)",
+                "cells": {
+                  "active_listing_count": 1350,
+                  "price_reduced_share": 10.7,
+                  "new_listing_share": 7
+                }
+              },
+              {
+                "key": "33908",
+                "label": "33908 (Lee)",
+                "cells": {
+                  "active_listing_count": 1123,
+                  "price_reduced_share": 14.2,
+                  "new_listing_share": 6.1
+                }
+              },
+              {
+                "key": "33971",
+                "label": "33971 (Lee)",
+                "cells": {
+                  "active_listing_count": 1106,
+                  "price_reduced_share": 15.4,
+                  "new_listing_share": 11.6
+                }
+              },
+              {
+                "key": "33914",
+                "label": "33914 (Lee)",
+                "cells": {
+                  "active_listing_count": 1079,
+                  "price_reduced_share": 19.1,
+                  "new_listing_share": 7.2
+                }
+              },
+              {
+                "key": "34120",
+                "label": "34120 (Collier)",
+                "cells": {
+                  "active_listing_count": 1005,
+                  "price_reduced_share": 15.5,
+                  "new_listing_share": 11.5
+                }
+              },
+              {
+                "key": "33917",
+                "label": "33917 (Lee)",
+                "cells": {
+                  "active_listing_count": 943,
+                  "price_reduced_share": 19.9,
+                  "new_listing_share": 10.3
+                }
+              },
+              {
+                "key": "34135",
+                "label": "34135 (Lee)",
+                "cells": {
+                  "active_listing_count": 837,
+                  "price_reduced_share": 11.6,
+                  "new_listing_share": 7.8
+                }
+              },
+              {
+                "key": "33931",
+                "label": "33931 (Lee)",
+                "cells": {
+                  "active_listing_count": 793,
+                  "price_reduced_share": 11.7,
+                  "new_listing_share": 4.7
+                }
+              },
+              {
+                "key": "33904",
+                "label": "33904 (Lee)",
+                "cells": {
+                  "active_listing_count": 728,
+                  "price_reduced_share": 17.9,
+                  "new_listing_share": 7.8
+                }
+              },
+              {
+                "key": "34114",
+                "label": "34114 (Collier)",
+                "cells": {
+                  "active_listing_count": 722,
+                  "price_reduced_share": 14,
+                  "new_listing_share": 9.7
+                }
+              },
+              {
+                "key": "33976",
+                "label": "33976 (Lee)",
+                "cells": {
+                  "active_listing_count": 719,
+                  "price_reduced_share": 17.8,
+                  "new_listing_share": 15.9
+                }
+              },
+              {
+                "key": "33913",
+                "label": "33913 (Lee)",
+                "cells": {
+                  "active_listing_count": 711,
+                  "price_reduced_share": 16.5,
+                  "new_listing_share": 7
+                }
+              },
+              {
+                "key": "33905",
+                "label": "33905 (Lee)",
+                "cells": {
+                  "active_listing_count": 673,
+                  "price_reduced_share": 14.9,
+                  "new_listing_share": 13.5
+                }
+              },
+              {
+                "key": "33928",
+                "label": "33928 (Lee)",
+                "cells": {
+                  "active_listing_count": 622,
+                  "price_reduced_share": 17,
+                  "new_listing_share": 10.1
+                }
+              },
+              {
+                "key": "33903",
+                "label": "33903 (Lee)",
+                "cells": {
+                  "active_listing_count": 621,
+                  "price_reduced_share": 18.5,
+                  "new_listing_share": 9.2
+                }
+              },
+              {
+                "key": "33991",
+                "label": "33991 (Lee)",
+                "cells": {
+                  "active_listing_count": 610,
+                  "price_reduced_share": 20.8,
+                  "new_listing_share": 9.2
+                }
+              },
+              {
+                "key": "34112",
+                "label": "34112 (Collier)",
+                "cells": {
+                  "active_listing_count": 598,
+                  "price_reduced_share": 13,
+                  "new_listing_share": 10.9
+                }
+              },
+              {
+                "key": "33936",
+                "label": "33936 (Lee)",
+                "cells": {
+                  "active_listing_count": 587,
+                  "price_reduced_share": 21,
+                  "new_listing_share": 19.1
+                }
+              },
+              {
+                "key": "34145",
+                "label": "34145 (Collier)",
+                "cells": {
+                  "active_listing_count": 566,
+                  "price_reduced_share": 11.5,
+                  "new_listing_share": 5.7
+                }
+              },
+              {
+                "key": "33919",
+                "label": "33919 (Lee)",
+                "cells": {
+                  "active_listing_count": 539,
+                  "price_reduced_share": 15.8,
+                  "new_listing_share": 5.8
+                }
+              },
+              {
+                "key": "34134",
+                "label": "34134 (Lee)",
+                "cells": {
+                  "active_listing_count": 500,
+                  "price_reduced_share": 9.2,
+                  "new_listing_share": 5
+                }
+              },
+              {
+                "key": "34102",
+                "label": "34102 (Collier)",
+                "cells": {
+                  "active_listing_count": 465,
+                  "price_reduced_share": 9.5,
+                  "new_listing_share": 5.8
+                }
+              },
+              {
+                "key": "33957",
+                "label": "33957 (Lee)",
+                "cells": {
+                  "active_listing_count": 449,
+                  "price_reduced_share": 6.7,
+                  "new_listing_share": 2.7
+                }
+              },
+              {
+                "key": "34119",
+                "label": "34119 (Collier)",
+                "cells": {
+                  "active_listing_count": 440,
+                  "price_reduced_share": 17.3,
+                  "new_listing_share": 6.4
+                }
+              },
+              {
+                "key": "34108",
+                "label": "34108 (Collier)",
+                "cells": {
+                  "active_listing_count": 426,
+                  "price_reduced_share": 8.2,
+                  "new_listing_share": 6.8
+                }
+              },
+              {
+                "key": "34110",
+                "label": "34110 (Collier)",
+                "cells": {
+                  "active_listing_count": 423,
+                  "price_reduced_share": 12.8,
+                  "new_listing_share": 7.3
+                }
+              },
+              {
+                "key": "33990",
+                "label": "33990 (Lee)",
+                "cells": {
+                  "active_listing_count": 418,
+                  "price_reduced_share": 18.7,
+                  "new_listing_share": 8.1
+                }
+              },
+              {
+                "key": "34113",
+                "label": "34113 (Collier)",
+                "cells": {
+                  "active_listing_count": 416,
+                  "price_reduced_share": 13.5,
+                  "new_listing_share": 7.9
+                }
+              },
+              {
+                "key": "34142",
+                "label": "34142 (Collier)",
+                "cells": {
+                  "active_listing_count": 341,
+                  "price_reduced_share": 15.8,
+                  "new_listing_share": 10.6
+                }
+              },
+              {
+                "key": "34103",
+                "label": "34103 (Collier)",
+                "cells": {
+                  "active_listing_count": 339,
+                  "price_reduced_share": 8.6,
+                  "new_listing_share": 5.9
+                }
+              },
+              {
+                "key": "33912",
+                "label": "33912 (Lee)",
+                "cells": {
+                  "active_listing_count": 326,
+                  "price_reduced_share": 18.4,
+                  "new_listing_share": 7.1
+                }
+              },
+              {
+                "key": "34117",
+                "label": "34117 (Collier)",
+                "cells": {
+                  "active_listing_count": 320,
+                  "price_reduced_share": 13.1,
+                  "new_listing_share": 3.8
+                }
+              },
+              {
+                "key": "33920",
+                "label": "33920 (Lee)",
+                "cells": {
+                  "active_listing_count": 315,
+                  "price_reduced_share": 21.6,
+                  "new_listing_share": 15.6
+                }
+              },
+              {
+                "key": "33907",
+                "label": "33907 (Lee)",
+                "cells": {
+                  "active_listing_count": 289,
+                  "price_reduced_share": 15.2,
+                  "new_listing_share": 6.9
+                }
+              },
+              {
+                "key": "33973",
+                "label": "33973 (Lee)",
+                "cells": {
+                  "active_listing_count": 286,
+                  "price_reduced_share": 18.5,
+                  "new_listing_share": 6.3
+                }
+              },
+              {
+                "key": "34109",
+                "label": "34109 (Collier)",
+                "cells": {
+                  "active_listing_count": 284,
+                  "price_reduced_share": 15.5,
+                  "new_listing_share": 8.1
+                }
+              },
+              {
+                "key": "33916",
+                "label": "33916 (Lee)",
+                "cells": {
+                  "active_listing_count": 281,
+                  "price_reduced_share": 15.3,
+                  "new_listing_share": 9.3
+                }
+              },
+              {
+                "key": "33901",
+                "label": "33901 (Lee)",
+                "cells": {
+                  "active_listing_count": 276,
+                  "price_reduced_share": 16.7,
+                  "new_listing_share": 8.7
+                }
+              },
+              {
+                "key": "34104",
+                "label": "34104 (Collier)",
+                "cells": {
+                  "active_listing_count": 276,
+                  "price_reduced_share": 19.9,
+                  "new_listing_share": 3.6
+                }
+              },
+              {
+                "key": "33967",
+                "label": "33967 (Lee)",
+                "cells": {
+                  "active_listing_count": 238,
+                  "price_reduced_share": 18.1,
+                  "new_listing_share": 8.4
+                }
+              },
+              {
+                "key": "34105",
+                "label": "34105 (Collier)",
+                "cells": {
+                  "active_listing_count": 201,
+                  "price_reduced_share": 12.4,
+                  "new_listing_share": 9
+                }
+              },
+              {
+                "key": "33966",
+                "label": "33966 (Lee)",
+                "cells": {
+                  "active_listing_count": 178,
+                  "price_reduced_share": 19.1,
+                  "new_listing_share": 12.9
+                }
+              },
+              {
+                "key": "33924",
+                "label": "33924 (Lee)",
+                "cells": {
+                  "active_listing_count": 133,
+                  "price_reduced_share": 6.8,
+                  "new_listing_share": 2.3
+                }
+              },
+              {
+                "key": "33922",
+                "label": "33922 (Lee)",
+                "cells": {
+                  "active_listing_count": 118,
+                  "price_reduced_share": 10.2,
+                  "new_listing_share": 8.5
+                }
+              },
+              {
+                "key": "34116",
+                "label": "34116 (Collier)",
+                "cells": {
+                  "active_listing_count": 107,
+                  "price_reduced_share": 17.8,
+                  "new_listing_share": 7.5
+                }
+              },
+              {
+                "key": "33956",
+                "label": "33956 (Lee)",
+                "cells": {
+                  "active_listing_count": 106,
+                  "price_reduced_share": 10.4,
+                  "new_listing_share": 4.7
+                }
+              },
+              {
+                "key": "34139",
+                "label": "34139 (Collier)",
+                "cells": {
+                  "active_listing_count": 52,
+                  "price_reduced_share": 9.6,
+                  "new_listing_share": 3.8
+                }
+              },
+              {
+                "key": "33921",
+                "label": "33921 (Lee)",
+                "cells": {
+                  "active_listing_count": 44,
+                  "price_reduced_share": 2.3,
+                  "new_listing_share": 2.3
+                }
+              },
+              {
+                "key": "34138",
+                "label": "34138 (Collier)",
+                "cells": {
+                  "active_listing_count": 36,
+                  "price_reduced_share": 13.9,
+                  "new_listing_share": 0
+                }
+              },
+              {
+                "key": "34140",
+                "label": "34140 (Collier)",
+                "cells": {
+                  "active_listing_count": 17,
+                  "price_reduced_share": 11.8,
+                  "new_listing_share": 23.5
+                }
+              },
+              {
+                "key": "34141",
+                "label": "34141 (Collier)",
+                "cells": {
+                  "active_listing_count": 10,
+                  "price_reduced_share": 0,
+                  "new_listing_share": 10
+                }
+              },
+              {
+                "key": "34137",
+                "label": "34137 (Collier)",
+                "cells": {
+                  "active_listing_count": 2,
+                  "price_reduced_share": 0,
+                  "new_listing_share": 0
+                }
+              }
+            ],
+            "source": {
+              "url": "https://www.swfldatagulf.com/r/source/listing_momentum_stats?label=SWFL+for-sale+listing+momentum+%28price-cut+%2F+new-listing+shares%29&source=realtor.com+for-sale+listings&brain=listing-momentum-swfl&date_col=scraped_at",
+              "fetched_at": "2026-11-04T12:20:37Z",
+              "tier": 2,
+              "citation": "SWFL for-sale listing momentum shares, per grain, as of 2026-08-14"
+            }
+          }
+        ],
+        "caveats": [
+          "Point-in-time shares of ACTIVE for-sale listings (list-side leading signals), not closed sales.",
+          "A single week is neutral by construction — the week-over-week drift is the read: a rising price-cut share signals softening, a rising new-listing share signals supply building.",
+          "Shares come from the listing's own new / price-reduced flags on the realtor.com for-sale feed."
+        ],
+        "contradicts": [],
+        "confidence": 0.8,
+        "joint_integrity": 1,
+        "confidence_dispersion": 0,
+        "chain_depth": 0,
+        "trust_tier": 2,
+        "upstream_count": 0,
+        "relevance": {
+          "decay_curve": "weeks",
+          "half_life_hours": 720,
+          "computed_at": "2026-11-04T12:20:37Z"
+        },
+        "exogenous_signals": [],
+        "grain_boundary": {
+          "not_available": [
+            "Sold / closed-sale momentum — active list-side flags only",
+            "Week-over-week change — current snapshot only (a second sweep reads the trend)",
+            "Rental momentum — for-sale listings only"
+          ],
+          "finest_grain": "zip-snapshot"
+        }
+      }
     },
     {
       "packId": "market-temperature-swfl",
@@ -575,13 +1395,13 @@
     {
       "packId": "master",
       "status": "built",
-      "version": 166,
+      "version": 167,
       "written": true,
       "brainOutput": {
         "brain_id": "master",
-        "version": 166,
-        "refined_at": "2026-11-04T04:26:30Z",
-        "expires": "2026-11-11T04:26:30Z",
+        "version": 167,
+        "refined_at": "2026-11-04T12:20:59Z",
+        "expires": "2026-11-11T12:20:59Z",
         "ttl_seconds": 604800,
         "direction": "mixed",
         "magnitude": 0.4370638705986746,
@@ -1053,7 +1873,7 @@
             "variable_type": "categorical",
             "source": {
               "url": "https://www.naplesnews.com/story/money/companies/2026/11/01/publix-buys-estero-florida-shopping-center-for-26-million/92533029007/",
-              "fetched_at": "2026-11-04T04:26:09Z",
+              "fetched_at": "2026-11-04T12:20:37Z",
               "tier": 2,
               "citation": "Publix buys Estero, Florida shopping center for $26 million: \"[](https://www.naplesnews.com/)\n[SW Florida Grocery Shopping Poll: Farmers' Markets are opening again](https://www.naplesnews.com/story/grocery/2026/10/29/are-farmers-markets-a-good-money-saving-option-for-grocery-shopping-florida-produce-fruits-vegetable/92456769007/)\n[](https://subscribe.naplesnews.com/rr/nanobar?gps-source=CPTILELEFT&itm_campaign=2026ENTQ4BAU2026&itm_medium=ONSITE&success-url=https%3A%2F%2Fwww.naplesnews.com%2Fstory%2Fmoney%2Fcompanies%2F2026%2F11%2F01%2Fpublix-buys-estero-florida-shopping-center-for-26-million%2F92533029007%2F)\n[](https://subscribe.naplesnews.com/rr/masthead?gps-source=CPMASTHEAD&itm_campaign=2026ENTQ4BAU2026&itm_medium=ONSITE&success-url=https%3A%2F%2Fwww.naplesnews.com%2Fstory%2Fmoney%2Fcompanies%2F2026%2F11%2F01%2Fpublix-buys-estero-florida-shopping-center-for-26-million%2F92533029007%2F)\n[News](https://www.naplesnews.com/news/) [Sports](https://www.naplesnews.com/sports/) [Real Estate](https://www.naplesnews.com/business/real-estate/) [Restaurants](https://www.naplesnews.com/entertainment/restaurants/) [Opinion](https://www.naplesnews.com/opinion/) [Advertise](https://advertising.usatoday.com/advertise-with-us/?cid=Web_LiQ_Network_AdvertiseWithUs_AdvertiseInquiry&publication=naples_daily_news&utm_source=local_publication&utm_medium=menu&utm_campaign=advertise_with_us) [Obituaries](https://www.naplesnews.com/obituaries) [eNewspaper](https://user.naplesnews.com/user/enewspaper) [Legals](https://www.naplesnews.com/public-notices)\n[](https://www.naplesnews.com/search/ \"Search\")\n[](https://www.naplesnews.com/weather/ \"Weather in Naples: 78°F Partly Sunny w/ T-Storms\") [](https://subscribe.naplesnews.com/rr/navsub?gps-source=CPTOPNAVBAR&itm_campaign=2026ENTQ4BAU2026&itm_medium=ONSITE&success-url=https%3A%2F%2Fwww.naplesnews.com%2Fstory%2Fmoney%2Fcompanies%2F2026%2F11%2F01%2Fpublix-buys-estero-florida-shopping-center-for-26-million%2F92533029007%2F)\n[](https://login.naplesnews.com/PNDN-GUP/authenticate/?success-url=https%3A%2F%2Fwww.naplesnews.com%2Fstory%2Fmoney%2Fcompanies%2F2026%2F11%2F01%2Fpublix-buys-estero-florida-shopping-center-for-26-million%2F92533029007%2F&cancel-url=https%3A%2F%2Fwww.naplesnews.com%2Fstory%2Fmoney%2Fcompanies%2F2026%2F11%2F01%2Fpublix-buys-estero-florida-shopping-center-for-26-million%2F92533029007%2F)\n[](https://www.naplesnews.com/) [](https://www.naplesnews.com/)\nCOMPANIES\n# Publix expands SW Florida real estate footprint with Estero\n[![Portrait of Laura Layden](https://www.naplesnews.com/gcdn/authoring/authoring-images/2024/02/08/PNDN/72524348007-ndn-jh-20240126-laura-0001.JPG?crop=3313,3312,x1506,y0&width=48&height=48&format=pjpg&auto=webp) Laura Layden](https://www.naplesnews.com/staff/2647080001/laura-layden/)\nFort Myers News-Press & Naples Daily News\nNov. 1, 2026, 5:07 a.m. ET\n[Publix](https://www.naplesnews.com/story/grocery/2026/08/31/when-is-the-second-publix-at-babcock-ranch-florida-going-to-open-pours-beverage-bar-cafe-style/91491658007/) has made another big real estate\""
             },
@@ -1106,8 +1926,8 @@
         "caveats": [
           "flood-barrier-mode-1 active: 4 barrier ZIPs, worst-case AAL $40,342/insured property",
           "Override \"storm-history-modifier\" fired (priority 70)",
-          "permits-commercial-swfl excluded from synthesis (relevance 0.084, below floor 0.1)",
-          "active-rentals-swfl excluded from synthesis (relevance 0.069, below floor 0.1)",
+          "permits-commercial-swfl excluded from synthesis (relevance 0.083, below floor 0.1)",
+          "active-rentals-swfl excluded from synthesis (relevance 0.068, below floor 0.1)",
           "No figures published: this source has not yet received its first real SBA FOIA load. A synthetic development sample exists for offline testing only and is never shipped.",
           "Construction-cost PPI metrics (construction_cost_ppi_industrial, construction_cost_ppi_warehouse, construction_cost_ppi_office, construction_cost_ppi_medical_office, construction_cost_ppi_trade_concrete, construction_cost_ppi_trade_roofing, construction_cost_ppi_trade_electrical, construction_cost_ppi_trade_plumbing_hvac) are national BLS series — no SWFL-specific or Lee/Collier breakout exists at BLS for any of them. They ship a real month-over-month direction (unlike MarketBeat's schema-required \"stable\" fallback) but BLS can revise recent observations within ~30 days of first publication.",
           "vacancy_rate_marketbeat_swfl: 15 submarkets report a point-in-time value; v1 does not compute quarter-over-quarter direction, so the \"stable\" label is a schema-required fallback, not a measured trend.",
@@ -1201,7 +2021,7 @@
           "1 of 11 announcements in the last 90 days matched qualifying categories (relocation, expansion, grant, infrastructure); the rest are general chamber/policy posts excluded from the momentum count.",
           "Investment and job figures reflect disclosures at announcement time; actual outcomes may vary as projects develop.",
           "SWFL Inc. covers primarily Lee County projects; Collier County coverage depends on cross-county partnerships and co-announcements.",
-          "102 additional live signals not surfaced here (cap 8); the full set is in data_lake.city_pulse.",
+          "103 additional live signals not surfaced here (cap 8); the full set is in data_lake.city_pulse.",
           "Each signal is dated current-events context with a per-signal source; freshness is TTL-bounded by topic (breaking 1d → structural 90d).",
           "Construction enforcement split: public notices = confirmed individual actions (hard-parsed violation_type); press releases = announced sweeps (Sonnet-inferred affected_industries). Do not sum them.",
           "Polarity: rising construction notices = bullish (recovery-driven unlicensed activity). Rising ABT notices = bearish (hospitality compliance stress).",
@@ -1319,7 +2139,7 @@
         "relevance": {
           "decay_curve": "weeks",
           "half_life_hours": 720,
-          "computed_at": "2026-11-04T04:26:30.000Z"
+          "computed_at": "2026-11-04T12:20:59.000Z"
         },
         "exogenous_signals": [],
         "conditional_claims": [
