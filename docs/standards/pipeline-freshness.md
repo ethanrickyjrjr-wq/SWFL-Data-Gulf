@@ -74,6 +74,7 @@ Avoid stacking multiple workflows on the same day-of-month. Current schedule (re
 | Day 5 (Jan/Apr/Jul/Oct) 13:00 | `fema-nfip-quarterly.yml`     | quarterly             | FEMA NFIP quarterly release                                                                              |
 | Day 8 (Jan/Apr/Jul/Oct) 13:00 | `fhfa-hpi-quarterly.yml`      | quarterly             | FHFA HPI ~8 weeks after quarter-end                                                                      |
 | Day 9 (Feb/May/Aug/Nov) 13:00 | `bls-qcew-quarterly.yml`      | quarterly             | BLS QCEW ~5mo lag; release day 6-7 of those months (2-day buffer)                                        |
+| Day 3 12:00                   | `ingest-condo-baseline-swfl.yml` | monthly            | Live county layers (Lee footprints, Collier milestone service) — no release calendar; 2 days after `dbpr-sirs-monthly` (Day 1 07:00) so the match stage sees fresh SIRS rows. Self-hosted `swfl-local` (local Ollama). |
 | Day 5 12:00                   | `collier-permits-monthly.yml` | monthly               | Collier publishes prior-month XLSX                                                                       |
 | Day 10 13:00                  | `usgs-monthly.yml`            | monthly               | USGS daily-values monthly snapshot                                                                       |
 | Day 10 14:00                  | `storm-history-monthly.yml`   | monthly               | NOAA storm-events update (1hr after usgs to stagger)                                                     |
