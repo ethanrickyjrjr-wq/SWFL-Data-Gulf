@@ -1,9 +1,9 @@
-<!-- FRESHNESS: v173 | Token: SWFL-7421-v173-20261108-cf7f3f01 -->
+<!-- FRESHNESS: v174 | Token: SWFL-7421-v174-20261108-6565ac26 -->
 ---
 brain_id: master
-version: 173
-refined_at: 2026-11-08T04:26:27Z
-freshness_token: SWFL-7421-v173-20261108-cf7f3f01
+version: 174
+refined_at: 2026-11-08T11:24:58Z
+freshness_token: SWFL-7421-v174-20261108-6565ac26
 ttl_seconds: 604800
 pack_hash: be8f0d44e0e6
 context_type: user_saved_reference
@@ -50,7 +50,7 @@ s17 | safety-swfl brain — https://www.swfldatagulf.com/api/b/safety-swfl      
 s18 | labor-demand-swfl brain — https://www.swfldatagulf.com/api/b/labor-demand-swfl               | 2026-10-17 | 2027-01-15
 s19 | econ-dev-swfl brain — https://www.swfldatagulf.com/api/b/econ-dev-swfl                       | 2026-11-03 | 2026-11-10
 s20 | city-pulse-swfl brain — https://www.swfldatagulf.com/api/b/city-pulse-swfl                   | 2026-11-08 | 2026-11-09
-s21 | rsw-airport brain — https://www.swfldatagulf.com/api/b/rsw-airport                           | 2026-10-09 | 2026-11-08
+s21 | rsw-airport brain — https://www.swfldatagulf.com/api/b/rsw-airport                           | 2026-11-08 | 2026-12-08
 s22 | news-swfl brain — https://www.swfldatagulf.com/api/b/news-swfl                               | 2026-11-03 | 2026-11-10
 s23 | freshness-pulse brain — https://www.swfldatagulf.com/api/b/freshness-pulse                   | 2026-11-08 | 2026-11-09
 s24 | seller-stress-swfl brain — https://www.swfldatagulf.com/api/b/seller-stress-swfl             | 2026-10-16 | 2026-11-15
@@ -91,8 +91,8 @@ s39 | home-values-swfl brain — https://www.swfldatagulf.com/api/b/home-values-
   {"id":"f017","topic":"upstream :: safety-swfl","fact":"Upstream snapshot — safety-swfl (neutral, magnitude 0.00, confidence 1.00)","value":"safety-swfl as of 2026-10-02: direction neutral, magnitude 0.00, confidence 1.00, trust tier T1, 8 key metric(s). SWFL property crime: 6.8 Part I offenses per 1,000 residents (2025 UCR), -18.7% YoY. Lee (8.0/1k) runs 3.1 points above Collier (4.8/1k).","src":"s01","date":"2026-11-08"},
   {"id":"f018","topic":"upstream :: labor-demand-swfl","fact":"Upstream snapshot — labor-demand-swfl (bullish, magnitude 0.78, confidence 1.00)","value":"labor-demand-swfl as of 2026-10-17: direction bullish, magnitude 0.78, confidence 1.00, trust tier T1, 10 key metric(s). BLS OEWS May 2025 — SWFL workforce. Lee (Cape Coral-Fort Myers MSA): top sector: Office and Administrative Support Occupations (37,050), Construction 2.17× national, employment +1.5% YoY. Collier (Naples MSA): top sector: Food Preparation and Serving Related Occupations (25,250), Construction 1.88× national, employment +1.6% YoY. Source: BLS Occupational Employment and Wage Statistics.","src":"s01","date":"2026-11-08"},
   {"id":"f019","topic":"upstream :: econ-dev-swfl","fact":"Upstream snapshot — econ-dev-swfl (neutral, magnitude 0.35, confidence 0.80)","value":"econ-dev-swfl as of 2026-11-03: direction neutral, magnitude 0.35, confidence 0.80, trust tier T2, 2 key metric(s). SWFL Inc. logged 1 economic development announcement in the last 90 days. Momentum: flat vs prior 90-day window. Source: SWFL Inc. (swflinc.com/blog/), the official Lee County economic development organization.","src":"s01","date":"2026-11-08"},
-  {"id":"f020","topic":"upstream :: city-pulse-swfl","fact":"Upstream snapshot — city-pulse-swfl (neutral, magnitude 0.00, confidence 0.80)","value":"city-pulse-swfl as of 2026-11-08: direction neutral, magnitude 0.00, confidence 0.80, trust tier T2, 8 key metric(s). SWFL city pulse as of 2026-11-08: 94 live current-events signals across 9 cities — Fort Myers (29), Naples (30), Lehigh Acres (1), Cape Coral (22), Estero (4), Golden Gate (1), North Fort Myers (4), East Naples (2), Fort Myers Beach (1). Most current: Fort Myers — A renovated single-family residence at 275 Spring Line Drive in The Moorings, Naples sold for $19 million, besting the previous record of $18.3 million — set in January. These are current cited facts only; the cross-vertical read and any direction call live downstream in master.","src":"s01","date":"2026-11-08"},
-  {"id":"f021","topic":"upstream :: rsw-airport","fact":"Upstream snapshot — rsw-airport (bullish, magnitude 0.16, confidence 1.00)","value":"rsw-airport as of 2026-10-09: direction bullish, magnitude 0.16, confidence 1.00, trust tier T1, 9 key metric(s). LCPA Aviation April 2026 — RSW 1,152,669 total passengers (-2.2% YoY), trailing-12-mo 11,197,951 (+2.4% vs prior year — the direction basis), 512,534 arrivals / 640,135 departures, 10,797 aircraft operations, 3,463,896 lbs air freight. Source: Lee County Port Authority (flylcpa.com/about-lcpa/reports-and-statistics/).","src":"s01","date":"2026-11-08"},
+  {"id":"f020","topic":"upstream :: city-pulse-swfl","fact":"Upstream snapshot — city-pulse-swfl (neutral, magnitude 0.00, confidence 0.80)","value":"city-pulse-swfl as of 2026-11-08: direction neutral, magnitude 0.00, confidence 0.80, trust tier T2, 8 key metric(s). SWFL city pulse as of 2026-11-08: 94 live current-events signals across 9 cities — Fort Myers (29), Naples (30), Lehigh Acres (1), Cape Coral (22), Estero (4), Golden Gate (1), North Fort Myers (4), East Naples (2), Fort Myers Beach (1). Most current: Fort Myers — A luxury Naples estate set a new record sale of $19 million in The Moorings neighborhood, reported Nov. 6, 2026. These are current cited facts only; the cross-vertical read and any direction call live downstream in master.","src":"s01","date":"2026-11-08"},
+  {"id":"f021","topic":"upstream :: rsw-airport","fact":"Upstream snapshot — rsw-airport (neutral, magnitude 0.00, confidence 1.00)","value":"rsw-airport as of 2026-11-08: direction neutral, magnitude 0.00, confidence 1.00, trust tier T1, 8 key metric(s). LCPA Aviation April 2026 — RSW 1,152,669 total passengers (-2.2% YoY), 512,534 arrivals / 640,135 departures, 10,797 aircraft operations, 3,463,896 lbs air freight. Source: Lee County Port Authority (flylcpa.com/about-lcpa/reports-and-statistics/).","src":"s01","date":"2026-11-08"},
   {"id":"f022","topic":"upstream :: news-swfl","fact":"Upstream snapshot — news-swfl (neutral, magnitude 0.30, confidence 0.80)","value":"news-swfl as of 2026-11-03: direction neutral, magnitude 0.30, confidence 0.80, trust tier T2, 9 key metric(s). DBPR issued 2 SWFL-relevant press releases in the last 90 days. 2 individual enforcement notices active in Lee and Collier counties (2 construction unlicensed, 0 ABT/hospitality). Top press release topics: enforcement, licensing, construction. Sources: FL DBPR press releases (www2.myfloridalicense.com/press-releases/) and public enforcement notices (www2.myfloridalicense.com/public-notices/).","src":"s01","date":"2026-11-08"},
   {"id":"f023","topic":"upstream :: freshness-pulse","fact":"Upstream snapshot — freshness-pulse (neutral, magnitude 0.00, confidence 0.80)","value":"freshness-pulse as of 2026-11-08: direction neutral, magnitude 0.00, confidence 0.80, trust tier T2, 4 key metric(s). Today's sourced snapshot — SWFL 30-year fixed mortgage rate (as of 2026-11-05) 7.18%; Cape Coral median asking price (as of 2026-11-08) $399,200; Fort Myers median asking price (as of 2026-11-08) $325,000; Naples median asking price (as of 2026-11-08) $650,000. These are cited current facts only; the direction call lives downstream in master.","src":"s01","date":"2026-11-08"},
   {"id":"f024","topic":"upstream :: seller-stress-swfl","fact":"Upstream snapshot — seller-stress-swfl (bearish, magnitude 0.55, confidence 0.60)","value":"seller-stress-swfl as of 2026-10-16: direction bearish, magnitude 0.55, confidence 0.60, trust tier T3, 5 key metric(s). SWFL seller stress is elevated at 62/100 (bearish threshold: ≥65). 52 of 55 ZIPs scored vs 2019–2021 baseline. Highest-stress ZIPs: 33924 (100), 33957 (83), 33921 (76). Leading signal: 17.2% median delistings rate.","src":"s01","date":"2026-11-08"},
@@ -116,12 +116,12 @@ s39 | home-values-swfl brain — https://www.swfldatagulf.com/api/b/home-values-
 --- OUTPUT ---
 {
   "brain_id": "master",
-  "version": 173,
-  "refined_at": "2026-11-08T04:26:27Z",
-  "expires": "2026-11-15T04:26:27Z",
+  "version": 174,
+  "refined_at": "2026-11-08T11:24:58Z",
+  "expires": "2026-11-15T11:24:58Z",
   "ttl_seconds": 604800,
   "direction": "mixed",
-  "magnitude": 0.46305057657349985,
+  "magnitude": 0.4685058208988835,
   "drivers": [
     {
       "brain_id": "franchise-outcomes",
@@ -278,6 +278,25 @@ s39 | home-values-swfl brain — https://www.swfldatagulf.com/api/b/home-values-
   ],
   "conclusion": "Read is mixed (moderate magnitude). Driven by: franchise-outcomes, cre-swfl, macro-us, macro-florida, macro-swfl, sector-credit-swfl, tourism-tdt, env-swfl, logistics-swfl, logistics-swfl-nowcast, traffic-swfl, properties-lee-value, properties-collier-value, permits-swfl, rentals-swfl, housing-swfl, safety-swfl, labor-demand-swfl, econ-dev-swfl, city-pulse-swfl, rsw-airport, news-swfl, freshness-pulse, seller-stress-swfl, market-heat-swfl, storm-history-swfl, hurricane-tracks-fl, licenses-swfl, condo-sirs-swfl, price-distribution-swfl, listing-momentum-swfl, market-temperature-swfl, investor-zip-swfl, active-listings-swfl, communities-swfl, tier-divergence-swfl, home-values-swfl. Overrides: flood-barrier-mode-1, storm-history-modifier. Note conflicts: macro-us (bearish) vs macro-florida (bullish). Combined confidence 0.86, trust tier T4, based on 37 upstream brains.",
   "key_metrics": [
+    {
+      "metric": "rsw_trailing_12mo_total_passengers",
+      "label": "RSW Trailing 12-Mo Total Passengers",
+      "value": 11197951,
+      "direction": "stable",
+      "variable_type": "extensive",
+      "units": "passengers",
+      "display_format": "count",
+      "source": {
+        "url": "https://s3.wasabisys.com/cdn.flylcpa.com/app/uploads/2024/11/21145013/Total-Passengers-2026.pdf",
+        "fetched_at": "2026-11-08T11:24:37Z",
+        "tier": 1,
+        "citation": "Lee County Port Authority Aviation Statistics — RSW trailing 12-month total passengers ending 2026-04"
+      },
+      "suggestions": [
+        "What's driving rsw trailing 12mo total passengers?",
+        "How does rsw trailing 12mo total passengers here compare to other SWFL areas?"
+      ]
+    },
     {
       "metric": "swfl_sfha_pct_area_weighted",
       "value": 0.4901,
@@ -507,25 +526,6 @@ s39 | home-values-swfl brain — https://www.swfldatagulf.com/api/b/home-values-
       ]
     },
     {
-      "metric": "rsw_trailing_12mo_total_passengers_yoy",
-      "label": "RSW Total Passengers — Trailing-12-Mo YoY (direction driver)",
-      "value": 2.3837188145672608,
-      "direction": "rising",
-      "variable_type": "intensive",
-      "units": "%",
-      "display_format": "raw",
-      "source": {
-        "url": "https://s3.wasabisys.com/cdn.flylcpa.com/app/uploads/2024/11/21145013/Total-Passengers-2026.pdf",
-        "fetched_at": "2026-10-09T04:27:09Z",
-        "tier": 1,
-        "citation": "Lee County Port Authority Aviation Statistics — RSW trailing-12-mo total passengers ending 2026-04 vs prior 12 mo: +2.4%"
-      },
-      "suggestions": [
-        "What's driving rsw trailing 12mo total passengers yoy?",
-        "How does rsw trailing 12mo total passengers yoy here compare to other SWFL areas?"
-      ]
-    },
-    {
       "metric": "hurricane_landfalls_30yr",
       "value": 7,
       "direction": "stable",
@@ -564,6 +564,23 @@ s39 | home-values-swfl brain — https://www.swfldatagulf.com/api/b/home-values-
       ]
     },
     {
+      "metric": "signal_transactions_1",
+      "value": "Fort Myers: A luxury Naples estate set a new record sale of $19 million in The Moorings neighborhood, reported Nov. 6, 2026.",
+      "direction": "stable",
+      "label": "Fort Myers — transactions",
+      "variable_type": "categorical",
+      "source": {
+        "url": "https://www.naplesnews.com/story/money/business/local/2026/11/06/record-19-million-home-sale-in-naples-florida-neighborhood-of-the-moorings-luxury-real-estate/92630699007/",
+        "fetched_at": "2026-11-08T11:24:37Z",
+        "tier": 2,
+        "citation": "Record $19 million home sale in Naples neighborhood of The Moorings: \"[](https://www.naplesnews.com/)\n[](https://subscribe.naplesnews.com/rr/nanobar?gps-source=CPTILELEFT&itm_campaign=2026ENTQ4BAU2026&itm_medium=ONSITE&success-url=https%3A%2F%2Fwww.naplesnews.com%2Fstory%2Fmoney%2Fbusiness%2Flocal%2F2026%2F11%2F06%2Frecord-19-million-home-sale-in-naples-florida-neighborhood-of-the-moorings-luxury-real-estate%2F92630699007%2F)\n[](https://subscribe.naplesnews.com/rr/masthead?gps-source=CPMASTHEAD&itm_campaign=2026ENTQ4BAU2026&itm_medium=ONSITE&success-url=https%3A%2F%2Fwww.naplesnews.com%2Fstory%2Fmoney%2Fbusiness%2Flocal%2F2026%2F11%2F06%2Frecord-19-million-home-sale-in-naples-florida-neighborhood-of-the-moorings-luxury-real-estate%2F92630699007%2F)\n[News](https://www.naplesnews.com/news/) [Sports](https://www.naplesnews.com/sports/) [Real Estate](https://www.naplesnews.com/business/real-estate/) [Restaurants](https://www.naplesnews.com/entertainment/restaurants/) [Opinion](https://www.naplesnews.com/opinion/) [Advertise](https://advertising.usatoday.com/advertise-with-us/?cid=Web_LiQ_Network_AdvertiseWithUs_AdvertiseInquiry&publication=naples_daily_news&utm_source=local_publication&utm_medium=menu&utm_campaign=advertise_with_us) [Obituaries](https://www.naplesnews.com/obituaries) [eNewspaper](https://user.naplesnews.com/user/enewspaper) [Legals](https://www.naplesnews.com/public-notices)\n[](https://www.naplesnews.com/search/ \"Search\")\n[](https://www.naplesnews.com/weather/ \"Weather in Naples: 74°F Mostly Sunny\") [](https://subscribe.naplesnews.com/rr/navsub?gps-source=CPTOPNAVBAR&itm_campaign=2026ENTQ4BAU2026&itm_medium=ONSITE&success-url=https%3A%2F%2Fwww.naplesnews.com%2Fstory%2Fmoney%2Fbusiness%2Flocal%2F2026%2F11%2F06%2Frecord-19-million-home-sale-in-naples-florida-neighborhood-of-the-moorings-luxury-real-estate%2F92630699007%2F)\n[](https://login.naplesnews.com/PNDN-GUP/authenticate/?success-url=https%3A%2F%2Fwww.naplesnews.com%2Fstory%2Fmoney%2Fbusiness%2Flocal%2F2026%2F11%2F06%2Frecord-19-million-home-sale-in-naples-florida-neighborhood-of-the-moorings-luxury-real-estate%2F92630699007%2F&cancel-url=https%3A%2F%2Fwww.naplesnews.com%2Fstory%2Fmoney%2Fbusiness%2Flocal%2F2026%2F11%2F06%2Frecord-19-million-home-sale-in-naples-florida-neighborhood-of-the-moorings-luxury-real-estate%2F92630699007%2F)\n[](https://www.naplesnews.com/) [](https://www.naplesnews.com/)\n[LOCAL BUSINESS](https://www.naplesnews.com/business/local/)\n# Luxury Naples estate sets new record of $19 million in The Moorings\n[![Portrait of Laura Layden](https://www.naplesnews.com/gcdn/authoring/authoring-images/2024/02/08/PNDN/72524348007-ndn-jh-20240126-laura-0001.JPG?crop=3313,3312,x1506,y0&width=48&height=48&format=pjpg&auto=webp) Laura Layden](https://www.naplesnews.com/staff/2647080001/laura-layden/)\nFort Myers News-Press & Naples Daily News\nNov. 6, 2026, 2:54 p.m. ET\n[](https://www.facebook.com/dialog/share?display=popup&app_id=1703814913224751&href=https%3A%2F%2Fwww.naplesnews.com%2Fstory%2Fmoney%2Fbusiness%2Flocal%2F2026%2F11%2F06%2Frecord-1\""
+      },
+      "suggestions": [
+        "What's driving signal transactions 1?",
+        "How does signal transactions 1 here compare to other SWFL areas?"
+      ]
+    },
+    {
       "metric": "active_listings_count_swfl",
       "label": "SWFL active residential listings (count)",
       "value": 22650,
@@ -580,23 +597,6 @@ s39 | home-values-swfl brain — https://www.swfldatagulf.com/api/b/home-values-
       "suggestions": [
         "What's driving active listings count swfl?",
         "How does active listings count swfl here compare to other SWFL areas?"
-      ]
-    },
-    {
-      "metric": "signal_transactions_1",
-      "value": "Fort Myers: A renovated single-family residence at 275 Spring Line Drive in The Moorings, Naples sold for $19 million, besting the previous record of $18.3 million — set in January.",
-      "direction": "stable",
-      "label": "Fort Myers — transactions",
-      "variable_type": "categorical",
-      "source": {
-        "url": "https://www.news-press.com/story/money/business/local/2026/11/06/record-19-million-home-sale-in-naples-florida-neighborhood-of-the-moorings-luxury-real-estate/92630699007/",
-        "fetched_at": "2026-11-08T04:26:00Z",
-        "tier": 2,
-        "citation": "Record $19 million home sale in Naples neighborhood of The Moorings: \"[](https://www.news-press.com/)\n[](https://subscribe.news-press.com/rr/nanobar?gps-source=CPTILELEFT&itm_campaign=2026ENTQ4BAU2026&itm_medium=ONSITE&success-url=https%3A%2F%2Fwww.news-press.com%2Fstory%2Fmoney%2Fbusiness%2Flocal%2F2026%2F11%2F06%2Frecord-19-million-home-sale-in-naples-florida-neighborhood-of-the-moorings-luxury-real-estate%2F92630699007%2F)\n[](https://subscribe.news-press.com/rr/masthead?gps-source=CPMASTHEAD&itm_campaign=2026ENTQ4BAU2026&itm_medium=ONSITE&success-url=https%3A%2F%2Fwww.news-press.com%2Fstory%2Fmoney%2Fbusiness%2Flocal%2F2026%2F11%2F06%2Frecord-19-million-home-sale-in-naples-florida-neighborhood-of-the-moorings-luxury-real-estate%2F92630699007%2F)\n[News](https://www.news-press.com/news/) [Cape Coral](https://www.news-press.com/news/cape-coral/) [Sports](https://www.news-press.com/sports/) [Restaurants](https://www.news-press.com/taste/) [Real Estate](https://www.news-press.com/real-estate) [Advertise](https://advertising.usatoday.com/advertise-with-us/?cid=Web_LiQ_Network_AdvertiseWithUs_AdvertiseInquiry&publication=the_news_press&utm_source=local_publication&utm_medium=menu&utm_campaign=advertise_with_us) [Obituaries](https://www.news-press.com/obituaries) [eNewspaper](https://user.news-press.com/user/enewspaper) [Legals](https://www.news-press.com/public-notices)\n[](https://www.news-press.com/search/ \"Search\")\n[](https://www.news-press.com/weather/ \"Weather in Fort Myers: 72°F Sunny\") [](https://subscribe.news-press.com/rr/navsub?gps-source=CPTOPNAVBAR&itm_campaign=2026ENTQ4BAU2026&itm_medium=ONSITE&success-url=https%3A%2F%2Fwww.news-press.com%2Fstory%2Fmoney%2Fbusiness%2Flocal%2F2026%2F11%2F06%2Frecord-19-million-home-sale-in-naples-florida-neighborhood-of-the-moorings-luxury-real-estate%2F92630699007%2F)\n[](https://login.news-press.com/PFTM-GUP/authenticate/?success-url=https%3A%2F%2Fwww.news-press.com%2Fstory%2Fmoney%2Fbusiness%2Flocal%2F2026%2F11%2F06%2Frecord-19-million-home-sale-in-naples-florida-neighborhood-of-the-moorings-luxury-real-estate%2F92630699007%2F&cancel-url=https%3A%2F%2Fwww.news-press.com%2Fstory%2Fmoney%2Fbusiness%2Flocal%2F2026%2F11%2F06%2Frecord-19-million-home-sale-in-naples-florida-neighborhood-of-the-moorings-luxury-real-estate%2F92630699007%2F)\n[](https://www.news-press.com/) [](https://www.news-press.com/)\nLOCAL BUSINESS\n# Luxury Naples estate sets new record of $19 million in The Moorings\n[![Portrait of Laura Layden](https://www.news-press.com/gcdn/authoring/authoring-images/2024/02/08/PNDN/72524348007-ndn-jh-20240126-laura-0001.JPG?crop=3313,3312,x1506,y0&width=48&height=48&format=pjpg&auto=webp) Laura Layden](https://www.naplesnews.com/staff/2647080001/laura-layden/)\nFort Myers News-Press & Naples Daily News\nNov. 6, 2026, 2:54 p.m. ET\nThe Moorings in Naples has a new record home sale.\nA renovated single-family residence at 275 Spring Line Drive sold for $19 million, besting the previous record of $18.3 million — set in January.\nAndrew Christopher, a luxury properties specialist wi\""
-      },
-      "suggestions": [
-        "What's driving signal transactions 1?",
-        "How does signal transactions 1 here compare to other SWFL areas?"
       ]
     },
     {
@@ -644,7 +644,7 @@ s39 | home-values-swfl brain — https://www.swfldatagulf.com/api/b/home-values-
     "flood-barrier-mode-1 active: 4 barrier ZIPs, worst-case AAL $40,342/insured property",
     "Override \"storm-history-modifier\" fired (priority 70)",
     "permits-commercial-swfl excluded from synthesis (relevance 0.076, below floor 0.1)",
-    "active-rentals-swfl excluded from synthesis (relevance 0.063, below floor 0.1)",
+    "active-rentals-swfl excluded from synthesis (relevance 0.062, below floor 0.1)",
     "No figures published: this source has not yet received its first real SBA FOIA load. A synthetic development sample exists for offline testing only and is never shipped.",
     "Construction-cost PPI metrics (construction_cost_ppi_industrial, construction_cost_ppi_warehouse, construction_cost_ppi_office, construction_cost_ppi_medical_office, construction_cost_ppi_trade_concrete, construction_cost_ppi_trade_roofing, construction_cost_ppi_trade_electrical, construction_cost_ppi_trade_plumbing_hvac) are national BLS series — no SWFL-specific or Lee/Collier breakout exists at BLS for any of them. They ship a real month-over-month direction (unlike MarketBeat's schema-required \"stable\" fallback) but BLS can revise recent observations within ~30 days of first publication.",
     "vacancy_rate_marketbeat_swfl: 15 submarkets report a point-in-time value; v1 does not compute quarter-over-quarter direction, so the \"stable\" label is a schema-required fallback, not a measured trend.",
@@ -740,6 +740,7 @@ s39 | home-values-swfl brain — https://www.swfldatagulf.com/api/b/home-values-
     "SWFL Inc. covers primarily Lee County projects; Collier County coverage depends on cross-county partnerships and co-announcements.",
     "86 additional live signals not surfaced here (cap 8); the full set is in data_lake.city_pulse.",
     "Each signal is dated current-events context with a per-signal source; freshness is TTL-bounded by topic (breaking 1d → structural 90d).",
+    "Trailing-12-month total-passengers YoY not computable — fewer than 24 monthly rows in the fetched window; direction set neutral.",
     "Construction enforcement split: public notices = confirmed individual actions (hard-parsed violation_type); press releases = announced sweeps (Sonnet-inferred affected_industries). Do not sum them.",
     "Polarity: rising construction notices = bullish (recovery-driven unlicensed activity). Rising ABT notices = bearish (hospitality compliance stress).",
     "Relevance in press releases is determined by Lee/Collier geographic mentions (county or place names) — releases without an explicit place name may be undercounted.",
@@ -803,7 +804,6 @@ s39 | home-values-swfl brain — https://www.swfldatagulf.com/api/b/home-values-
   "contradicts": [
     "macro-us (bearish) vs macro-florida (bullish)",
     "macro-us (bearish) vs labor-demand-swfl (bullish)",
-    "macro-us (bearish) vs rsw-airport (bullish)",
     "macro-us (bearish) vs market-heat-swfl (bullish)",
     "macro-us (bearish) vs licenses-swfl (bullish)",
     "macro-florida (bullish) vs macro-swfl (bearish)",
@@ -815,29 +815,21 @@ s39 | home-values-swfl brain — https://www.swfldatagulf.com/api/b/home-values-
     "macro-florida (bullish) vs tier-divergence-swfl (bearish)",
     "macro-florida (bullish) vs home-values-swfl (bearish)",
     "macro-swfl (bearish) vs labor-demand-swfl (bullish)",
-    "macro-swfl (bearish) vs rsw-airport (bullish)",
     "macro-swfl (bearish) vs market-heat-swfl (bullish)",
     "macro-swfl (bearish) vs licenses-swfl (bullish)",
     "sector-credit-swfl (bearish) vs labor-demand-swfl (bullish)",
-    "sector-credit-swfl (bearish) vs rsw-airport (bullish)",
     "sector-credit-swfl (bearish) vs market-heat-swfl (bullish)",
     "sector-credit-swfl (bearish) vs licenses-swfl (bullish)",
     "env-swfl (bearish) vs labor-demand-swfl (bullish)",
-    "env-swfl (bearish) vs rsw-airport (bullish)",
     "env-swfl (bearish) vs market-heat-swfl (bullish)",
     "env-swfl (bearish) vs licenses-swfl (bullish)",
     "properties-lee-value (bearish) vs labor-demand-swfl (bullish)",
-    "properties-lee-value (bearish) vs rsw-airport (bullish)",
     "properties-lee-value (bearish) vs market-heat-swfl (bullish)",
     "properties-lee-value (bearish) vs licenses-swfl (bullish)",
     "labor-demand-swfl (bullish) vs seller-stress-swfl (bearish)",
     "labor-demand-swfl (bullish) vs storm-history-swfl (bearish)",
     "labor-demand-swfl (bullish) vs tier-divergence-swfl (bearish)",
     "labor-demand-swfl (bullish) vs home-values-swfl (bearish)",
-    "rsw-airport (bullish) vs seller-stress-swfl (bearish)",
-    "rsw-airport (bullish) vs storm-history-swfl (bearish)",
-    "rsw-airport (bullish) vs tier-divergence-swfl (bearish)",
-    "rsw-airport (bullish) vs home-values-swfl (bearish)",
     "seller-stress-swfl (bearish) vs market-heat-swfl (bullish)",
     "seller-stress-swfl (bearish) vs licenses-swfl (bullish)",
     "market-heat-swfl (bullish) vs storm-history-swfl (bearish)",
@@ -856,7 +848,7 @@ s39 | home-values-swfl brain — https://www.swfldatagulf.com/api/b/home-values-
   "relevance": {
     "decay_curve": "weeks",
     "half_life_hours": 720.0000000000001,
-    "computed_at": "2026-11-08T04:26:27.000Z"
+    "computed_at": "2026-11-08T11:24:58.000Z"
   },
   "exogenous_signals": [],
   "conditional_claims": [

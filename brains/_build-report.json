@@ -1,8 +1,8 @@
 {
   "target": "master",
   "timestamps": {
-    "started": "2026-11-08T04:26:00.333Z",
-    "finished": "2026-11-08T04:26:27.764Z"
+    "started": "2026-11-08T11:24:37.249Z",
+    "finished": "2026-11-08T11:24:58.884Z"
   },
   "source": "live",
   "outcomes": [
@@ -114,31 +114,31 @@
     {
       "packId": "city-pulse-swfl",
       "status": "built",
-      "version": 165,
+      "version": 166,
       "written": true,
       "brainOutput": {
         "brain_id": "city-pulse-swfl",
-        "version": 165,
-        "refined_at": "2026-11-08T04:26:00Z",
-        "expires": "2026-11-09T04:26:00Z",
+        "version": 166,
+        "refined_at": "2026-11-08T11:24:37Z",
+        "expires": "2026-11-09T11:24:37Z",
         "ttl_seconds": 86400,
         "direction": "neutral",
         "magnitude": 0,
         "drivers": [],
         "overrides": [],
-        "conclusion": "SWFL city pulse as of 2026-11-08: 94 live current-events signals across 9 cities — Fort Myers (29), Naples (30), Lehigh Acres (1), Cape Coral (22), Estero (4), Golden Gate (1), North Fort Myers (4), East Naples (2), Fort Myers Beach (1). Most current: Fort Myers — A renovated single-family residence at 275 Spring Line Drive in The Moorings, Naples sold for $19 million, besting the previous record of $18.3 million — set in January. These are current cited facts only; the cross-vertical read and any direction call live downstream in master.",
+        "conclusion": "SWFL city pulse as of 2026-11-08: 94 live current-events signals across 9 cities — Fort Myers (29), Naples (30), Lehigh Acres (1), Cape Coral (22), Estero (4), Golden Gate (1), North Fort Myers (4), East Naples (2), Fort Myers Beach (1). Most current: Fort Myers — A luxury Naples estate set a new record sale of $19 million in The Moorings neighborhood, reported Nov. 6, 2026. These are current cited facts only; the cross-vertical read and any direction call live downstream in master.",
         "key_metrics": [
           {
             "metric": "signal_transactions_1",
-            "value": "Fort Myers: A renovated single-family residence at 275 Spring Line Drive in The Moorings, Naples sold for $19 million, besting the previous record of $18.3 million — set in January.",
+            "value": "Fort Myers: A luxury Naples estate set a new record sale of $19 million in The Moorings neighborhood, reported Nov. 6, 2026.",
             "direction": "stable",
             "label": "Fort Myers — transactions",
             "variable_type": "categorical",
             "source": {
-              "url": "https://www.news-press.com/story/money/business/local/2026/11/06/record-19-million-home-sale-in-naples-florida-neighborhood-of-the-moorings-luxury-real-estate/92630699007/",
-              "fetched_at": "2026-11-08T04:26:00Z",
+              "url": "https://www.naplesnews.com/story/money/business/local/2026/11/06/record-19-million-home-sale-in-naples-florida-neighborhood-of-the-moorings-luxury-real-estate/92630699007/",
+              "fetched_at": "2026-11-08T11:24:37Z",
               "tier": 2,
-              "citation": "Record $19 million home sale in Naples neighborhood of The Moorings: \"[](https://www.news-press.com/)\n[](https://subscribe.news-press.com/rr/nanobar?gps-source=CPTILELEFT&itm_campaign=2026ENTQ4BAU2026&itm_medium=ONSITE&success-url=https%3A%2F%2Fwww.news-press.com%2Fstory%2Fmoney%2Fbusiness%2Flocal%2F2026%2F11%2F06%2Frecord-19-million-home-sale-in-naples-florida-neighborhood-of-the-moorings-luxury-real-estate%2F92630699007%2F)\n[](https://subscribe.news-press.com/rr/masthead?gps-source=CPMASTHEAD&itm_campaign=2026ENTQ4BAU2026&itm_medium=ONSITE&success-url=https%3A%2F%2Fwww.news-press.com%2Fstory%2Fmoney%2Fbusiness%2Flocal%2F2026%2F11%2F06%2Frecord-19-million-home-sale-in-naples-florida-neighborhood-of-the-moorings-luxury-real-estate%2F92630699007%2F)\n[News](https://www.news-press.com/news/) [Cape Coral](https://www.news-press.com/news/cape-coral/) [Sports](https://www.news-press.com/sports/) [Restaurants](https://www.news-press.com/taste/) [Real Estate](https://www.news-press.com/real-estate) [Advertise](https://advertising.usatoday.com/advertise-with-us/?cid=Web_LiQ_Network_AdvertiseWithUs_AdvertiseInquiry&publication=the_news_press&utm_source=local_publication&utm_medium=menu&utm_campaign=advertise_with_us) [Obituaries](https://www.news-press.com/obituaries) [eNewspaper](https://user.news-press.com/user/enewspaper) [Legals](https://www.news-press.com/public-notices)\n[](https://www.news-press.com/search/ \"Search\")\n[](https://www.news-press.com/weather/ \"Weather in Fort Myers: 72°F Sunny\") [](https://subscribe.news-press.com/rr/navsub?gps-source=CPTOPNAVBAR&itm_campaign=2026ENTQ4BAU2026&itm_medium=ONSITE&success-url=https%3A%2F%2Fwww.news-press.com%2Fstory%2Fmoney%2Fbusiness%2Flocal%2F2026%2F11%2F06%2Frecord-19-million-home-sale-in-naples-florida-neighborhood-of-the-moorings-luxury-real-estate%2F92630699007%2F)\n[](https://login.news-press.com/PFTM-GUP/authenticate/?success-url=https%3A%2F%2Fwww.news-press.com%2Fstory%2Fmoney%2Fbusiness%2Flocal%2F2026%2F11%2F06%2Frecord-19-million-home-sale-in-naples-florida-neighborhood-of-the-moorings-luxury-real-estate%2F92630699007%2F&cancel-url=https%3A%2F%2Fwww.news-press.com%2Fstory%2Fmoney%2Fbusiness%2Flocal%2F2026%2F11%2F06%2Frecord-19-million-home-sale-in-naples-florida-neighborhood-of-the-moorings-luxury-real-estate%2F92630699007%2F)\n[](https://www.news-press.com/) [](https://www.news-press.com/)\nLOCAL BUSINESS\n# Luxury Naples estate sets new record of $19 million in The Moorings\n[![Portrait of Laura Layden](https://www.news-press.com/gcdn/authoring/authoring-images/2024/02/08/PNDN/72524348007-ndn-jh-20240126-laura-0001.JPG?crop=3313,3312,x1506,y0&width=48&height=48&format=pjpg&auto=webp) Laura Layden](https://www.naplesnews.com/staff/2647080001/laura-layden/)\nFort Myers News-Press & Naples Daily News\nNov. 6, 2026, 2:54 p.m. ET\nThe Moorings in Naples has a new record home sale.\nA renovated single-family residence at 275 Spring Line Drive sold for $19 million, besting the previous record of $18.3 million — set in January.\nAndrew Christopher, a luxury properties specialist wi\""
+              "citation": "Record $19 million home sale in Naples neighborhood of The Moorings: \"[](https://www.naplesnews.com/)\n[](https://subscribe.naplesnews.com/rr/nanobar?gps-source=CPTILELEFT&itm_campaign=2026ENTQ4BAU2026&itm_medium=ONSITE&success-url=https%3A%2F%2Fwww.naplesnews.com%2Fstory%2Fmoney%2Fbusiness%2Flocal%2F2026%2F11%2F06%2Frecord-19-million-home-sale-in-naples-florida-neighborhood-of-the-moorings-luxury-real-estate%2F92630699007%2F)\n[](https://subscribe.naplesnews.com/rr/masthead?gps-source=CPMASTHEAD&itm_campaign=2026ENTQ4BAU2026&itm_medium=ONSITE&success-url=https%3A%2F%2Fwww.naplesnews.com%2Fstory%2Fmoney%2Fbusiness%2Flocal%2F2026%2F11%2F06%2Frecord-19-million-home-sale-in-naples-florida-neighborhood-of-the-moorings-luxury-real-estate%2F92630699007%2F)\n[News](https://www.naplesnews.com/news/) [Sports](https://www.naplesnews.com/sports/) [Real Estate](https://www.naplesnews.com/business/real-estate/) [Restaurants](https://www.naplesnews.com/entertainment/restaurants/) [Opinion](https://www.naplesnews.com/opinion/) [Advertise](https://advertising.usatoday.com/advertise-with-us/?cid=Web_LiQ_Network_AdvertiseWithUs_AdvertiseInquiry&publication=naples_daily_news&utm_source=local_publication&utm_medium=menu&utm_campaign=advertise_with_us) [Obituaries](https://www.naplesnews.com/obituaries) [eNewspaper](https://user.naplesnews.com/user/enewspaper) [Legals](https://www.naplesnews.com/public-notices)\n[](https://www.naplesnews.com/search/ \"Search\")\n[](https://www.naplesnews.com/weather/ \"Weather in Naples: 74°F Mostly Sunny\") [](https://subscribe.naplesnews.com/rr/navsub?gps-source=CPTOPNAVBAR&itm_campaign=2026ENTQ4BAU2026&itm_medium=ONSITE&success-url=https%3A%2F%2Fwww.naplesnews.com%2Fstory%2Fmoney%2Fbusiness%2Flocal%2F2026%2F11%2F06%2Frecord-19-million-home-sale-in-naples-florida-neighborhood-of-the-moorings-luxury-real-estate%2F92630699007%2F)\n[](https://login.naplesnews.com/PNDN-GUP/authenticate/?success-url=https%3A%2F%2Fwww.naplesnews.com%2Fstory%2Fmoney%2Fbusiness%2Flocal%2F2026%2F11%2F06%2Frecord-19-million-home-sale-in-naples-florida-neighborhood-of-the-moorings-luxury-real-estate%2F92630699007%2F&cancel-url=https%3A%2F%2Fwww.naplesnews.com%2Fstory%2Fmoney%2Fbusiness%2Flocal%2F2026%2F11%2F06%2Frecord-19-million-home-sale-in-naples-florida-neighborhood-of-the-moorings-luxury-real-estate%2F92630699007%2F)\n[](https://www.naplesnews.com/) [](https://www.naplesnews.com/)\n[LOCAL BUSINESS](https://www.naplesnews.com/business/local/)\n# Luxury Naples estate sets new record of $19 million in The Moorings\n[![Portrait of Laura Layden](https://www.naplesnews.com/gcdn/authoring/authoring-images/2024/02/08/PNDN/72524348007-ndn-jh-20240126-laura-0001.JPG?crop=3313,3312,x1506,y0&width=48&height=48&format=pjpg&auto=webp) Laura Layden](https://www.naplesnews.com/staff/2647080001/laura-layden/)\nFort Myers News-Press & Naples Daily News\nNov. 6, 2026, 2:54 p.m. ET\n[](https://www.facebook.com/dialog/share?display=popup&app_id=1703814913224751&href=https%3A%2F%2Fwww.naplesnews.com%2Fstory%2Fmoney%2Fbusiness%2Flocal%2F2026%2F11%2F06%2Frecord-1\""
             },
             "suggestions": [
               "What's driving signal transactions 1?",
@@ -147,15 +147,15 @@
           },
           {
             "metric": "signal_transactions_2",
-            "value": "Naples: A renovated single-family residence at 275 Spring Line Drive in The Moorings sold for $19 million, besting the previous record of $18.3 million — set in January.",
+            "value": "Naples: A luxury estate in The Moorings neighborhood of Naples set a new record sale price of $19 million, reported Nov. 6, 2026.",
             "direction": "stable",
             "label": "Naples — transactions",
             "variable_type": "categorical",
             "source": {
-              "url": "https://www.news-press.com/story/money/business/local/2026/11/06/record-19-million-home-sale-in-naples-florida-neighborhood-of-the-moorings-luxury-real-estate/92630699007/",
-              "fetched_at": "2026-11-08T04:26:00Z",
+              "url": "https://www.naplesnews.com/story/money/business/local/2026/11/06/record-19-million-home-sale-in-naples-florida-neighborhood-of-the-moorings-luxury-real-estate/92630699007/",
+              "fetched_at": "2026-11-08T11:24:37Z",
               "tier": 2,
-              "citation": "Record $19 million home sale in Naples neighborhood of The Moorings: \"[](https://www.news-press.com/)\n[](https://subscribe.news-press.com/rr/nanobar?gps-source=CPTILELEFT&itm_campaign=2026ENTQ4BAU2026&itm_medium=ONSITE&success-url=https%3A%2F%2Fwww.news-press.com%2Fstory%2Fmoney%2Fbusiness%2Flocal%2F2026%2F11%2F06%2Frecord-19-million-home-sale-in-naples-florida-neighborhood-of-the-moorings-luxury-real-estate%2F92630699007%2F)\n[](https://subscribe.news-press.com/rr/masthead?gps-source=CPMASTHEAD&itm_campaign=2026ENTQ4BAU2026&itm_medium=ONSITE&success-url=https%3A%2F%2Fwww.news-press.com%2Fstory%2Fmoney%2Fbusiness%2Flocal%2F2026%2F11%2F06%2Frecord-19-million-home-sale-in-naples-florida-neighborhood-of-the-moorings-luxury-real-estate%2F92630699007%2F)\n[News](https://www.news-press.com/news/) [Cape Coral](https://www.news-press.com/news/cape-coral/) [Sports](https://www.news-press.com/sports/) [Restaurants](https://www.news-press.com/taste/) [Real Estate](https://www.news-press.com/real-estate) [Advertise](https://advertising.usatoday.com/advertise-with-us/?cid=Web_LiQ_Network_AdvertiseWithUs_AdvertiseInquiry&publication=the_news_press&utm_source=local_publication&utm_medium=menu&utm_campaign=advertise_with_us) [Obituaries](https://www.news-press.com/obituaries) [eNewspaper](https://user.news-press.com/user/enewspaper) [Legals](https://www.news-press.com/public-notices)\n[](https://www.news-press.com/search/ \"Search\")\n[](https://www.news-press.com/weather/ \"Weather in Fort Myers: 72°F Sunny\") [](https://subscribe.news-press.com/rr/navsub?gps-source=CPTOPNAVBAR&itm_campaign=2026ENTQ4BAU2026&itm_medium=ONSITE&success-url=https%3A%2F%2Fwww.news-press.com%2Fstory%2Fmoney%2Fbusiness%2Flocal%2F2026%2F11%2F06%2Frecord-19-million-home-sale-in-naples-florida-neighborhood-of-the-moorings-luxury-real-estate%2F92630699007%2F)\n[](https://login.news-press.com/PFTM-GUP/authenticate/?success-url=https%3A%2F%2Fwww.news-press.com%2Fstory%2Fmoney%2Fbusiness%2Flocal%2F2026%2F11%2F06%2Frecord-19-million-home-sale-in-naples-florida-neighborhood-of-the-moorings-luxury-real-estate%2F92630699007%2F&cancel-url=https%3A%2F%2Fwww.news-press.com%2Fstory%2Fmoney%2Fbusiness%2Flocal%2F2026%2F11%2F06%2Frecord-19-million-home-sale-in-naples-florida-neighborhood-of-the-moorings-luxury-real-estate%2F92630699007%2F)\n[](https://www.news-press.com/) [](https://www.news-press.com/)\nLOCAL BUSINESS\n# Luxury Naples estate sets new record of $19 million in The Moorings\n[![Portrait of Laura Layden](https://www.news-press.com/gcdn/authoring/authoring-images/2024/02/08/PNDN/72524348007-ndn-jh-20240126-laura-0001.JPG?crop=3313,3312,x1506,y0&width=48&height=48&format=pjpg&auto=webp) Laura Layden](https://www.naplesnews.com/staff/2647080001/laura-layden/)\nFort Myers News-Press & Naples Daily News\nNov. 6, 2026, 2:54 p.m. ET\nThe Moorings in Naples has a new record home sale.\nA renovated single-family residence at 275 Spring Line Drive sold for $19 million, besting the previous record of $18.3 million — set in January.\nAndrew Christopher, a luxury properties specialist wi\""
+              "citation": "Record $19 million home sale in Naples neighborhood of The Moorings: \"[](https://www.naplesnews.com/)\n[](https://subscribe.naplesnews.com/rr/nanobar?gps-source=CPTILELEFT&itm_campaign=2026ENTQ4BAU2026&itm_medium=ONSITE&success-url=https%3A%2F%2Fwww.naplesnews.com%2Fstory%2Fmoney%2Fbusiness%2Flocal%2F2026%2F11%2F06%2Frecord-19-million-home-sale-in-naples-florida-neighborhood-of-the-moorings-luxury-real-estate%2F92630699007%2F)\n[](https://subscribe.naplesnews.com/rr/masthead?gps-source=CPMASTHEAD&itm_campaign=2026ENTQ4BAU2026&itm_medium=ONSITE&success-url=https%3A%2F%2Fwww.naplesnews.com%2Fstory%2Fmoney%2Fbusiness%2Flocal%2F2026%2F11%2F06%2Frecord-19-million-home-sale-in-naples-florida-neighborhood-of-the-moorings-luxury-real-estate%2F92630699007%2F)\n[News](https://www.naplesnews.com/news/) [Sports](https://www.naplesnews.com/sports/) [Real Estate](https://www.naplesnews.com/business/real-estate/) [Restaurants](https://www.naplesnews.com/entertainment/restaurants/) [Opinion](https://www.naplesnews.com/opinion/) [Advertise](https://advertising.usatoday.com/advertise-with-us/?cid=Web_LiQ_Network_AdvertiseWithUs_AdvertiseInquiry&publication=naples_daily_news&utm_source=local_publication&utm_medium=menu&utm_campaign=advertise_with_us) [Obituaries](https://www.naplesnews.com/obituaries) [eNewspaper](https://user.naplesnews.com/user/enewspaper) [Legals](https://www.naplesnews.com/public-notices)\n[](https://www.naplesnews.com/search/ \"Search\")\n[](https://www.naplesnews.com/weather/ \"Weather in Naples: 74°F Mostly Sunny\") [](https://subscribe.naplesnews.com/rr/navsub?gps-source=CPTOPNAVBAR&itm_campaign=2026ENTQ4BAU2026&itm_medium=ONSITE&success-url=https%3A%2F%2Fwww.naplesnews.com%2Fstory%2Fmoney%2Fbusiness%2Flocal%2F2026%2F11%2F06%2Frecord-19-million-home-sale-in-naples-florida-neighborhood-of-the-moorings-luxury-real-estate%2F92630699007%2F)\n[](https://login.naplesnews.com/PNDN-GUP/authenticate/?success-url=https%3A%2F%2Fwww.naplesnews.com%2Fstory%2Fmoney%2Fbusiness%2Flocal%2F2026%2F11%2F06%2Frecord-19-million-home-sale-in-naples-florida-neighborhood-of-the-moorings-luxury-real-estate%2F92630699007%2F&cancel-url=https%3A%2F%2Fwww.naplesnews.com%2Fstory%2Fmoney%2Fbusiness%2Flocal%2F2026%2F11%2F06%2Frecord-19-million-home-sale-in-naples-florida-neighborhood-of-the-moorings-luxury-real-estate%2F92630699007%2F)\n[](https://www.naplesnews.com/) [](https://www.naplesnews.com/)\n[LOCAL BUSINESS](https://www.naplesnews.com/business/local/)\n# Luxury Naples estate sets new record of $19 million in The Moorings\n[![Portrait of Laura Layden](https://www.naplesnews.com/gcdn/authoring/authoring-images/2024/02/08/PNDN/72524348007-ndn-jh-20240126-laura-0001.JPG?crop=3313,3312,x1506,y0&width=48&height=48&format=pjpg&auto=webp) Laura Layden](https://www.naplesnews.com/staff/2647080001/laura-layden/)\nFort Myers News-Press & Naples Daily News\nNov. 6, 2026, 2:54 p.m. ET\n[](https://www.facebook.com/dialog/share?display=popup&app_id=1703814913224751&href=https%3A%2F%2Fwww.naplesnews.com%2Fstory%2Fmoney%2Fbusiness%2Flocal%2F2026%2F11%2F06%2Frecord-1\""
             },
             "suggestions": [
               "What's driving signal transactions 2?",
@@ -170,7 +170,7 @@
             "variable_type": "categorical",
             "source": {
               "url": "https://www.naplesnews.com/story/money/companies/2026/11/04/target-secures-site-for-new-store-in-lee-county/92587184007/",
-              "fetched_at": "2026-11-08T04:26:00Z",
+              "fetched_at": "2026-11-08T11:24:37Z",
               "tier": 2,
               "citation": "Target secures site for new store in Lee County: \"[](https://www.naplesnews.com/)\n[](https://subscribe.naplesnews.com/rr/nanobar?gps-source=CPTILELEFT&itm_campaign=2026ENTQ4BAU2026&itm_medium=ONSITE&success-url=https%3A%2F%2Fwww.naplesnews.com%2Fstory%2Fmoney%2Fcompanies%2F2026%2F11%2F04%2Ftarget-secures-site-for-new-store-in-lee-county%2F92587184007%2F)\n[](https://subscribe.naplesnews.com/rr/masthead?gps-source=CPMASTHEAD&itm_campaign=2026ENTQ4BAU2026&itm_medium=ONSITE&success-url=https%3A%2F%2Fwww.naplesnews.com%2Fstory%2Fmoney%2Fcompanies%2F2026%2F11%2F04%2Ftarget-secures-site-for-new-store-in-lee-county%2F92587184007%2F)\n[News](https://www.naplesnews.com/news/) [Sports](https://www.naplesnews.com/sports/) [Real Estate](https://www.naplesnews.com/business/real-estate/) [Restaurants](https://www.naplesnews.com/entertainment/restaurants/) [Opinion](https://www.naplesnews.com/opinion/) [Advertise](https://advertising.usatoday.com/advertise-with-us/?cid=Web_LiQ_Network_AdvertiseWithUs_AdvertiseInquiry&publication=naples_daily_news&utm_source=local_publication&utm_medium=menu&utm_campaign=advertise_with_us) [Obituaries](https://www.naplesnews.com/obituaries) [eNewspaper](https://user.naplesnews.com/user/enewspaper) [Legals](https://www.naplesnews.com/public-notices)\n[](https://www.naplesnews.com/search/ \"Search\")\n[](https://www.naplesnews.com/weather/ \"Weather in Naples: 78°F Sunny\") [](https://subscribe.naplesnews.com/rr/navsub?gps-source=CPTOPNAVBAR&itm_campaign=2026ENTQ4BAU2026&itm_medium=ONSITE&success-url=https%3A%2F%2Fwww.naplesnews.com%2Fstory%2Fmoney%2Fcompanies%2F2026%2F11%2F04%2Ftarget-secures-site-for-new-store-in-lee-county%2F92587184007%2F)\n[](https://login.naplesnews.com/PNDN-GUP/authenticate/?success-url=https%3A%2F%2Fwww.naplesnews.com%2Fstory%2Fmoney%2Fcompanies%2F2026%2F11%2F04%2Ftarget-secures-site-for-new-store-in-lee-county%2F92587184007%2F&cancel-url=https%3A%2F%2Fwww.naplesnews.com%2Fstory%2Fmoney%2Fcompanies%2F2026%2F11%2F04%2Ftarget-secures-site-for-new-store-in-lee-county%2F92587184007%2F)\n[](https://www.naplesnews.com/) [](https://www.naplesnews.com/)\nCOMPANIES\n# Target plans new store in growing eastern Lee County\n[![Portrait of Laura Layden](https://www.naplesnews.com/gcdn/authoring/authoring-images/2024/02/08/PNDN/72524348007-ndn-jh-20240126-laura-0001.JPG?crop=3313,3312,x1506,y0&width=48&height=48&format=pjpg&auto=webp) Laura Layden](https://www.naplesnews.com/staff/2647080001/laura-layden/)\nFort Myers News-Press & Naples Daily News\nNov. 4, 2026, 8:30 a.m. ET\nTarget has secured land in eastern Lee County for a new store.\nProperty records show Target Corp. purchased a nearly 21-acre site on the doorstep of Lehigh Acres, along the high-growth State Road 82 and Daniels Parkway corridor. The deal closed on Oct. 28.\n[](https://www.naplesnews.com/)\n[Help](https://help.naplesnews.com) [Accessibility](https://cm.naplesnews.com/accessibility/) [Sitemap](https://www.naplesnews.com/sitemap/) [Terms of Service](https://cm.naplesnews.com/terms/) [Subscription Terms & Conditions](\""
             },
@@ -187,7 +187,7 @@
             "variable_type": "categorical",
             "source": {
               "url": "https://www.naplesnews.com/story/money/companies/2026/11/04/target-secures-site-for-new-store-in-lee-county/92587184007/",
-              "fetched_at": "2026-11-08T04:26:00Z",
+              "fetched_at": "2026-11-08T11:24:37Z",
               "tier": 2,
               "citation": "Target secures site for new store in Lee County: \"[](https://www.naplesnews.com/)\n[](https://subscribe.naplesnews.com/rr/nanobar?gps-source=CPTILELEFT&itm_campaign=2026ENTQ4BAU2026&itm_medium=ONSITE&success-url=https%3A%2F%2Fwww.naplesnews.com%2Fstory%2Fmoney%2Fcompanies%2F2026%2F11%2F04%2Ftarget-secures-site-for-new-store-in-lee-county%2F92587184007%2F)\n[](https://subscribe.naplesnews.com/rr/masthead?gps-source=CPMASTHEAD&itm_campaign=2026ENTQ4BAU2026&itm_medium=ONSITE&success-url=https%3A%2F%2Fwww.naplesnews.com%2Fstory%2Fmoney%2Fcompanies%2F2026%2F11%2F04%2Ftarget-secures-site-for-new-store-in-lee-county%2F92587184007%2F)\n[News](https://www.naplesnews.com/news/) [Sports](https://www.naplesnews.com/sports/) [Real Estate](https://www.naplesnews.com/business/real-estate/) [Restaurants](https://www.naplesnews.com/entertainment/restaurants/) [Opinion](https://www.naplesnews.com/opinion/) [Advertise](https://advertising.usatoday.com/advertise-with-us/?cid=Web_LiQ_Network_AdvertiseWithUs_AdvertiseInquiry&publication=naples_daily_news&utm_source=local_publication&utm_medium=menu&utm_campaign=advertise_with_us) [Obituaries](https://www.naplesnews.com/obituaries) [eNewspaper](https://user.naplesnews.com/user/enewspaper) [Legals](https://www.naplesnews.com/public-notices)\n[](https://www.naplesnews.com/search/ \"Search\")\n[](https://www.naplesnews.com/weather/ \"Weather in Naples: 78°F Sunny\") [](https://subscribe.naplesnews.com/rr/navsub?gps-source=CPTOPNAVBAR&itm_campaign=2026ENTQ4BAU2026&itm_medium=ONSITE&success-url=https%3A%2F%2Fwww.naplesnews.com%2Fstory%2Fmoney%2Fcompanies%2F2026%2F11%2F04%2Ftarget-secures-site-for-new-store-in-lee-county%2F92587184007%2F)\n[](https://login.naplesnews.com/PNDN-GUP/authenticate/?success-url=https%3A%2F%2Fwww.naplesnews.com%2Fstory%2Fmoney%2Fcompanies%2F2026%2F11%2F04%2Ftarget-secures-site-for-new-store-in-lee-county%2F92587184007%2F&cancel-url=https%3A%2F%2Fwww.naplesnews.com%2Fstory%2Fmoney%2Fcompanies%2F2026%2F11%2F04%2Ftarget-secures-site-for-new-store-in-lee-county%2F92587184007%2F)\n[](https://www.naplesnews.com/) [](https://www.naplesnews.com/)\nCOMPANIES\n# Target plans new store in growing eastern Lee County\n[![Portrait of Laura Layden](https://www.naplesnews.com/gcdn/authoring/authoring-images/2024/02/08/PNDN/72524348007-ndn-jh-20240126-laura-0001.JPG?crop=3313,3312,x1506,y0&width=48&height=48&format=pjpg&auto=webp) Laura Layden](https://www.naplesnews.com/staff/2647080001/laura-layden/)\nFort Myers News-Press & Naples Daily News\nNov. 4, 2026, 8:30 a.m. ET\nTarget has secured land in eastern Lee County for a new store.\nProperty records show Target Corp. purchased a nearly 21-acre site on the doorstep of Lehigh Acres, along the high-growth State Road 82 and Daniels Parkway corridor. The deal closed on Oct. 28.\n[](https://www.naplesnews.com/)\n[Help](https://help.naplesnews.com) [Accessibility](https://cm.naplesnews.com/accessibility/) [Sitemap](https://www.naplesnews.com/sitemap/) [Terms of Service](https://cm.naplesnews.com/terms/) [Subscription Terms & Conditions](\""
             },
@@ -204,7 +204,7 @@
             "variable_type": "categorical",
             "source": {
               "url": "https://www.naplesnews.com/story/money/companies/2026/11/04/target-secures-site-for-new-store-in-lee-county/92587184007/",
-              "fetched_at": "2026-11-08T04:26:00Z",
+              "fetched_at": "2026-11-08T11:24:37Z",
               "tier": 2,
               "citation": "Target secures site for new store in Lee County: \"[](https://www.naplesnews.com/)\n[](https://subscribe.naplesnews.com/rr/nanobar?gps-source=CPTILELEFT&itm_campaign=2026ENTQ4BAU2026&itm_medium=ONSITE&success-url=https%3A%2F%2Fwww.naplesnews.com%2Fstory%2Fmoney%2Fcompanies%2F2026%2F11%2F04%2Ftarget-secures-site-for-new-store-in-lee-county%2F92587184007%2F)\n[](https://subscribe.naplesnews.com/rr/masthead?gps-source=CPMASTHEAD&itm_campaign=2026ENTQ4BAU2026&itm_medium=ONSITE&success-url=https%3A%2F%2Fwww.naplesnews.com%2Fstory%2Fmoney%2Fcompanies%2F2026%2F11%2F04%2Ftarget-secures-site-for-new-store-in-lee-county%2F92587184007%2F)\n[News](https://www.naplesnews.com/news/) [Sports](https://www.naplesnews.com/sports/) [Real Estate](https://www.naplesnews.com/business/real-estate/) [Restaurants](https://www.naplesnews.com/entertainment/restaurants/) [Opinion](https://www.naplesnews.com/opinion/) [Advertise](https://advertising.usatoday.com/advertise-with-us/?cid=Web_LiQ_Network_AdvertiseWithUs_AdvertiseInquiry&publication=naples_daily_news&utm_source=local_publication&utm_medium=menu&utm_campaign=advertise_with_us) [Obituaries](https://www.naplesnews.com/obituaries) [eNewspaper](https://user.naplesnews.com/user/enewspaper) [Legals](https://www.naplesnews.com/public-notices)\n[](https://www.naplesnews.com/search/ \"Search\")\n[](https://www.naplesnews.com/weather/ \"Weather in Naples: 78°F Sunny\") [](https://subscribe.naplesnews.com/rr/navsub?gps-source=CPTOPNAVBAR&itm_campaign=2026ENTQ4BAU2026&itm_medium=ONSITE&success-url=https%3A%2F%2Fwww.naplesnews.com%2Fstory%2Fmoney%2Fcompanies%2F2026%2F11%2F04%2Ftarget-secures-site-for-new-store-in-lee-county%2F92587184007%2F)\n[](https://login.naplesnews.com/PNDN-GUP/authenticate/?success-url=https%3A%2F%2Fwww.naplesnews.com%2Fstory%2Fmoney%2Fcompanies%2F2026%2F11%2F04%2Ftarget-secures-site-for-new-store-in-lee-county%2F92587184007%2F&cancel-url=https%3A%2F%2Fwww.naplesnews.com%2Fstory%2Fmoney%2Fcompanies%2F2026%2F11%2F04%2Ftarget-secures-site-for-new-store-in-lee-county%2F92587184007%2F)\n[](https://www.naplesnews.com/) [](https://www.naplesnews.com/)\nCOMPANIES\n# Target plans new store in growing eastern Lee County\n[![Portrait of Laura Layden](https://www.naplesnews.com/gcdn/authoring/authoring-images/2024/02/08/PNDN/72524348007-ndn-jh-20240126-laura-0001.JPG?crop=3313,3312,x1506,y0&width=48&height=48&format=pjpg&auto=webp) Laura Layden](https://www.naplesnews.com/staff/2647080001/laura-layden/)\nFort Myers News-Press & Naples Daily News\nNov. 4, 2026, 8:30 a.m. ET\nTarget has secured land in eastern Lee County for a new store.\nProperty records show Target Corp. purchased a nearly 21-acre site on the doorstep of Lehigh Acres, along the high-growth State Road 82 and Daniels Parkway corridor. The deal closed on Oct. 28.\n[](https://www.naplesnews.com/)\n[Help](https://help.naplesnews.com) [Accessibility](https://cm.naplesnews.com/accessibility/) [Sitemap](https://www.naplesnews.com/sitemap/) [Terms of Service](https://cm.naplesnews.com/terms/) [Subscription Terms & Conditions](\""
             },
@@ -221,7 +221,7 @@
             "variable_type": "categorical",
             "source": {
               "url": "https://www.news-press.com/story/money/companies/2026/11/04/target-secures-site-for-new-store-in-lee-county/92587184007/",
-              "fetched_at": "2026-11-08T04:26:00Z",
+              "fetched_at": "2026-11-08T11:24:37Z",
               "tier": 2,
               "citation": "Target secures site for new store in Lee County: \"[](https://www.news-press.com/)\n[](https://subscribe.news-press.com/rr/nanobar?gps-source=CPTILELEFT&itm_campaign=2026ENTQ4BAU2026&itm_medium=ONSITE&success-url=https%3A%2F%2Fwww.news-press.com%2Fstory%2Fmoney%2Fcompanies%2F2026%2F11%2F04%2Ftarget-secures-site-for-new-store-in-lee-county%2F92587184007%2F)\n[](https://subscribe.news-press.com/rr/masthead?gps-source=CPMASTHEAD&itm_campaign=2026ENTQ4BAU2026&itm_medium=ONSITE&success-url=https%3A%2F%2Fwww.news-press.com%2Fstory%2Fmoney%2Fcompanies%2F2026%2F11%2F04%2Ftarget-secures-site-for-new-store-in-lee-county%2F92587184007%2F)\n[News](https://www.news-press.com/news/) [Cape Coral](https://www.news-press.com/news/cape-coral/) [Sports](https://www.news-press.com/sports/) [Restaurants](https://www.news-press.com/taste/) [Real Estate](https://www.news-press.com/real-estate) [Advertise](https://advertising.usatoday.com/advertise-with-us/?cid=Web_LiQ_Network_AdvertiseWithUs_AdvertiseInquiry&publication=the_news_press&utm_source=local_publication&utm_medium=menu&utm_campaign=advertise_with_us) [Obituaries](https://www.news-press.com/obituaries) [eNewspaper](https://user.news-press.com/user/enewspaper) [Legals](https://www.news-press.com/public-notices)\n[](https://www.news-press.com/search/ \"Search\")\n[](https://www.news-press.com/weather/ \"Weather in Fort Myers: 78°F Sunny\") [](https://subscribe.news-press.com/rr/navsub?gps-source=CPTOPNAVBAR&itm_campaign=2026ENTQ4BAU2026&itm_medium=ONSITE&success-url=https%3A%2F%2Fwww.news-press.com%2Fstory%2Fmoney%2Fcompanies%2F2026%2F11%2F04%2Ftarget-secures-site-for-new-store-in-lee-county%2F92587184007%2F)\n[](https://login.news-press.com/PFTM-GUP/authenticate/?success-url=https%3A%2F%2Fwww.news-press.com%2Fstory%2Fmoney%2Fcompanies%2F2026%2F11%2F04%2Ftarget-secures-site-for-new-store-in-lee-county%2F92587184007%2F&cancel-url=https%3A%2F%2Fwww.news-press.com%2Fstory%2Fmoney%2Fcompanies%2F2026%2F11%2F04%2Ftarget-secures-site-for-new-store-in-lee-county%2F92587184007%2F)\n[](https://www.news-press.com/) [](https://www.news-press.com/)\nCOMPANIES\n# Target plans new store in growing eastern Lee County\n[![Portrait of Laura Layden](https://www.news-press.com/gcdn/authoring/authoring-images/2024/02/08/PNDN/72524348007-ndn-jh-20240126-laura-0001.JPG?crop=3313,3312,x1506,y0&width=48&height=48&format=pjpg&auto=webp) Laura Layden](https://www.naplesnews.com/staff/2647080001/laura-layden/)\nFort Myers News-Press & Naples Daily News\nNov. 4, 2026, 8:30 a.m. ET\nTarget has secured land in eastern Lee County for a new store.\nProperty records show Target Corp. purchased a nearly 21-acre site on the doorstep of Lehigh Acres, along the high-growth State Road 82 and Daniels Parkway corridor. The deal closed on Oct. 28.\n[](https://www.news-press.com/)\n[Help](https://help.news-press.com) [Accessibility](https://cm.news-press.com/accessibility/) [Sitemap](https://www.news-press.com/sitemap/) [Terms of Service](https://cm.news-press.com/terms/) [Subscription Terms & Conditions](https://cm.news-pr\""
             },
@@ -238,7 +238,7 @@
             "variable_type": "categorical",
             "source": {
               "url": "https://www.naplesnews.com/story/money/companies/2026/11/01/publix-buys-estero-florida-shopping-center-for-26-million/92533029007/",
-              "fetched_at": "2026-11-08T04:26:00Z",
+              "fetched_at": "2026-11-08T11:24:37Z",
               "tier": 2,
               "citation": "Publix buys Estero, Florida shopping center for $26 million: \"[](https://www.naplesnews.com/)\n[SW Florida Grocery Shopping Poll: Farmers' Markets are opening again](https://www.naplesnews.com/story/grocery/2026/10/29/are-farmers-markets-a-good-money-saving-option-for-grocery-shopping-florida-produce-fruits-vegetable/92456769007/)\n[](https://subscribe.naplesnews.com/rr/nanobar?gps-source=CPTILELEFT&itm_campaign=2026ENTQ4BAU2026&itm_medium=ONSITE&success-url=https%3A%2F%2Fwww.naplesnews.com%2Fstory%2Fmoney%2Fcompanies%2F2026%2F11%2F01%2Fpublix-buys-estero-florida-shopping-center-for-26-million%2F92533029007%2F)\n[](https://subscribe.naplesnews.com/rr/masthead?gps-source=CPMASTHEAD&itm_campaign=2026ENTQ4BAU2026&itm_medium=ONSITE&success-url=https%3A%2F%2Fwww.naplesnews.com%2Fstory%2Fmoney%2Fcompanies%2F2026%2F11%2F01%2Fpublix-buys-estero-florida-shopping-center-for-26-million%2F92533029007%2F)\n[News](https://www.naplesnews.com/news/) [Sports](https://www.naplesnews.com/sports/) [Real Estate](https://www.naplesnews.com/business/real-estate/) [Restaurants](https://www.naplesnews.com/entertainment/restaurants/) [Opinion](https://www.naplesnews.com/opinion/) [Advertise](https://advertising.usatoday.com/advertise-with-us/?cid=Web_LiQ_Network_AdvertiseWithUs_AdvertiseInquiry&publication=naples_daily_news&utm_source=local_publication&utm_medium=menu&utm_campaign=advertise_with_us) [Obituaries](https://www.naplesnews.com/obituaries) [eNewspaper](https://user.naplesnews.com/user/enewspaper) [Legals](https://www.naplesnews.com/public-notices)\n[](https://www.naplesnews.com/search/ \"Search\")\n[](https://www.naplesnews.com/weather/ \"Weather in Naples: 78°F Partly Sunny w/ T-Storms\") [](https://subscribe.naplesnews.com/rr/navsub?gps-source=CPTOPNAVBAR&itm_campaign=2026ENTQ4BAU2026&itm_medium=ONSITE&success-url=https%3A%2F%2Fwww.naplesnews.com%2Fstory%2Fmoney%2Fcompanies%2F2026%2F11%2F01%2Fpublix-buys-estero-florida-shopping-center-for-26-million%2F92533029007%2F)\n[](https://login.naplesnews.com/PNDN-GUP/authenticate/?success-url=https%3A%2F%2Fwww.naplesnews.com%2Fstory%2Fmoney%2Fcompanies%2F2026%2F11%2F01%2Fpublix-buys-estero-florida-shopping-center-for-26-million%2F92533029007%2F&cancel-url=https%3A%2F%2Fwww.naplesnews.com%2Fstory%2Fmoney%2Fcompanies%2F2026%2F11%2F01%2Fpublix-buys-estero-florida-shopping-center-for-26-million%2F92533029007%2F)\n[](https://www.naplesnews.com/) [](https://www.naplesnews.com/)\nCOMPANIES\n# Publix expands SW Florida real estate footprint with Estero\n[![Portrait of Laura Layden](https://www.naplesnews.com/gcdn/authoring/authoring-images/2024/02/08/PNDN/72524348007-ndn-jh-20240126-laura-0001.JPG?crop=3313,3312,x1506,y0&width=48&height=48&format=pjpg&auto=webp) Laura Layden](https://www.naplesnews.com/staff/2647080001/laura-layden/)\nFort Myers News-Press & Naples Daily News\nNov. 1, 2026, 5:07 a.m. ET\n[Publix](https://www.naplesnews.com/story/grocery/2026/08/31/when-is-the-second-publix-at-babcock-ranch-florida-going-to-open-pours-beverage-bar-cafe-style/91491658007/) has made another big real estate\""
             },
@@ -255,7 +255,7 @@
             "variable_type": "categorical",
             "source": {
               "url": "https://www.naplesnews.com/story/money/companies/2026/11/01/publix-buys-estero-florida-shopping-center-for-26-million/92533029007/",
-              "fetched_at": "2026-11-08T04:26:00Z",
+              "fetched_at": "2026-11-08T11:24:37Z",
               "tier": 2,
               "citation": "Publix buys Estero, Florida shopping center for $26 million: \"[](https://www.naplesnews.com/)\n[SW Florida Grocery Shopping Poll: Farmers' Markets are opening again](https://www.naplesnews.com/story/grocery/2026/10/29/are-farmers-markets-a-good-money-saving-option-for-grocery-shopping-florida-produce-fruits-vegetable/92456769007/)\n[](https://subscribe.naplesnews.com/rr/nanobar?gps-source=CPTILELEFT&itm_campaign=2026ENTQ4BAU2026&itm_medium=ONSITE&success-url=https%3A%2F%2Fwww.naplesnews.com%2Fstory%2Fmoney%2Fcompanies%2F2026%2F11%2F01%2Fpublix-buys-estero-florida-shopping-center-for-26-million%2F92533029007%2F)\n[](https://subscribe.naplesnews.com/rr/masthead?gps-source=CPMASTHEAD&itm_campaign=2026ENTQ4BAU2026&itm_medium=ONSITE&success-url=https%3A%2F%2Fwww.naplesnews.com%2Fstory%2Fmoney%2Fcompanies%2F2026%2F11%2F01%2Fpublix-buys-estero-florida-shopping-center-for-26-million%2F92533029007%2F)\n[News](https://www.naplesnews.com/news/) [Sports](https://www.naplesnews.com/sports/) [Real Estate](https://www.naplesnews.com/business/real-estate/) [Restaurants](https://www.naplesnews.com/entertainment/restaurants/) [Opinion](https://www.naplesnews.com/opinion/) [Advertise](https://advertising.usatoday.com/advertise-with-us/?cid=Web_LiQ_Network_AdvertiseWithUs_AdvertiseInquiry&publication=naples_daily_news&utm_source=local_publication&utm_medium=menu&utm_campaign=advertise_with_us) [Obituaries](https://www.naplesnews.com/obituaries) [eNewspaper](https://user.naplesnews.com/user/enewspaper) [Legals](https://www.naplesnews.com/public-notices)\n[](https://www.naplesnews.com/search/ \"Search\")\n[](https://www.naplesnews.com/weather/ \"Weather in Naples: 78°F Partly Sunny w/ T-Storms\") [](https://subscribe.naplesnews.com/rr/navsub?gps-source=CPTOPNAVBAR&itm_campaign=2026ENTQ4BAU2026&itm_medium=ONSITE&success-url=https%3A%2F%2Fwww.naplesnews.com%2Fstory%2Fmoney%2Fcompanies%2F2026%2F11%2F01%2Fpublix-buys-estero-florida-shopping-center-for-26-million%2F92533029007%2F)\n[](https://login.naplesnews.com/PNDN-GUP/authenticate/?success-url=https%3A%2F%2Fwww.naplesnews.com%2Fstory%2Fmoney%2Fcompanies%2F2026%2F11%2F01%2Fpublix-buys-estero-florida-shopping-center-for-26-million%2F92533029007%2F&cancel-url=https%3A%2F%2Fwww.naplesnews.com%2Fstory%2Fmoney%2Fcompanies%2F2026%2F11%2F01%2Fpublix-buys-estero-florida-shopping-center-for-26-million%2F92533029007%2F)\n[](https://www.naplesnews.com/) [](https://www.naplesnews.com/)\nCOMPANIES\n# Publix expands SW Florida real estate footprint with Estero\n[![Portrait of Laura Layden](https://www.naplesnews.com/gcdn/authoring/authoring-images/2024/02/08/PNDN/72524348007-ndn-jh-20240126-laura-0001.JPG?crop=3313,3312,x1506,y0&width=48&height=48&format=pjpg&auto=webp) Laura Layden](https://www.naplesnews.com/staff/2647080001/laura-layden/)\nFort Myers News-Press & Naples Daily News\nNov. 1, 2026, 5:07 a.m. ET\n[Publix](https://www.naplesnews.com/story/grocery/2026/08/31/when-is-the-second-publix-at-babcock-ranch-florida-going-to-open-pours-beverage-bar-cafe-style/91491658007/) has made another big real estate\""
             },
@@ -290,13 +290,13 @@
             ],
             "rows": [
               {
-                "key": "34102",
-                "label": "34102",
+                "key": "34103",
+                "label": "34103",
                 "cells": {
-                  "items": 3,
-                  "latest_fact": "A renovated single-family residence at 275 Spring Line Drive in The Moorings sold for $19 million, besting the previous record of $18.3 million — set in January.",
-                  "latest_place": "275 Spring Line Drive",
-                  "latest_source": "https://www.news-press.com/story/money/business/local/2026/11/06/record-19-million-home-sale-in-naples-florida-neighborhood-of-the-moorings-luxury-real-estate/92630699007/"
+                  "items": 1,
+                  "latest_fact": "A luxury estate in The Moorings neighborhood of Naples set a new record sale price of $19 million, reported Nov. 6, 2026.",
+                  "latest_place": "The Moorings",
+                  "latest_source": "https://www.naplesnews.com/story/money/business/local/2026/11/06/record-19-million-home-sale-in-naples-florida-neighborhood-of-the-moorings-luxury-real-estate/92630699007/"
                 }
               },
               {
@@ -330,6 +330,16 @@
                 }
               },
               {
+                "key": "34102",
+                "label": "34102",
+                "cells": {
+                  "items": 2,
+                  "latest_fact": "M Development's lease disputes are reshaping downtown Naples (reported in Gulfshore Business).",
+                  "latest_place": "downtown Naples",
+                  "latest_source": "https://www.gulfshorebusiness.com/news/m-development-lease-battles-reshape-downtown-naples/article_a177f555-23bf-58f7-ad14-81f4bbb6f5e3.html"
+                }
+              },
+              {
                 "key": "33917",
                 "label": "33917",
                 "cells": {
@@ -342,7 +352,7 @@
             ],
             "source": {
               "url": "https://www.swfldatagulf.com/r/source/city_pulse",
-              "fetched_at": "2026-11-08T04:26:00Z",
+              "fetched_at": "2026-11-08T11:24:37Z",
               "tier": 2,
               "citation": "Distilled, citation-backed SWFL news signals; each ZIP's items carry per-item source URLs in data_lake.city_pulse."
             },
@@ -363,15 +373,209 @@
         "relevance": {
           "decay_curve": "weeks",
           "half_life_hours": 720,
-          "computed_at": "2026-11-08T04:26:00Z"
+          "computed_at": "2026-11-08T11:24:37Z"
         },
         "exogenous_signals": []
       }
     },
     {
       "packId": "rsw-airport",
-      "status": "skipped-fresh",
-      "written": false
+      "status": "built",
+      "version": 14,
+      "written": true,
+      "brainOutput": {
+        "brain_id": "rsw-airport",
+        "version": 14,
+        "refined_at": "2026-11-08T11:24:37Z",
+        "expires": "2026-12-08T11:24:37Z",
+        "ttl_seconds": 2592000,
+        "direction": "neutral",
+        "magnitude": 0,
+        "drivers": [],
+        "overrides": [],
+        "conclusion": "LCPA Aviation April 2026 — RSW 1,152,669 total passengers (-2.2% YoY), 512,534 arrivals / 640,135 departures, 10,797 aircraft operations, 3,463,896 lbs air freight. Source: Lee County Port Authority (flylcpa.com/about-lcpa/reports-and-statistics/).",
+        "key_metrics": [
+          {
+            "metric": "rsw_trailing_12mo_total_passengers",
+            "label": "RSW Trailing 12-Mo Total Passengers",
+            "value": 11197951,
+            "direction": "stable",
+            "variable_type": "extensive",
+            "units": "passengers",
+            "display_format": "count",
+            "source": {
+              "url": "https://s3.wasabisys.com/cdn.flylcpa.com/app/uploads/2024/11/21145013/Total-Passengers-2026.pdf",
+              "fetched_at": "2026-11-08T11:24:37Z",
+              "tier": 1,
+              "citation": "Lee County Port Authority Aviation Statistics — RSW trailing 12-month total passengers ending 2026-04"
+            },
+            "suggestions": [
+              "What's driving rsw trailing 12mo total passengers?",
+              "How does rsw trailing 12mo total passengers here compare to other SWFL areas?"
+            ]
+          },
+          {
+            "metric": "rsw_total_passengers",
+            "label": "RSW Monthly Total Passengers",
+            "value": 1152669,
+            "direction": "falling",
+            "variable_type": "extensive",
+            "units": "passengers",
+            "display_format": "count",
+            "source": {
+              "url": "https://s3.wasabisys.com/cdn.flylcpa.com/app/uploads/2024/11/21145013/Total-Passengers-2026.pdf",
+              "fetched_at": "2026-11-08T11:24:37Z",
+              "tier": 1,
+              "citation": "Lee County Port Authority Aviation Statistics — RSW 2026-04 — 1,152,669 total passengers (-2.2% YoY, single month)"
+            },
+            "suggestions": [
+              "What's driving rsw total passengers?",
+              "How does rsw total passengers here compare to other SWFL areas?"
+            ]
+          },
+          {
+            "metric": "rsw_deplanements",
+            "label": "RSW Monthly Deplanements (Arrivals)",
+            "value": 512534,
+            "direction": "falling",
+            "variable_type": "extensive",
+            "units": "passengers",
+            "display_format": "count",
+            "source": {
+              "url": "https://s3.wasabisys.com/cdn.flylcpa.com/app/uploads/2024/12/21142454/Passenger-Deplanements.pdf",
+              "fetched_at": "2026-11-08T11:24:37Z",
+              "tier": 1,
+              "citation": "Lee County Port Authority Aviation Statistics — RSW 2026-04 arrivals — 512,534 deplanements"
+            },
+            "suggestions": [
+              "What's driving rsw deplanements?",
+              "How does rsw deplanements here compare to other SWFL areas?"
+            ]
+          },
+          {
+            "metric": "rsw_monthly_enplanements",
+            "label": "RSW Monthly Enplanements (Departures)",
+            "value": 640135,
+            "direction": "rising",
+            "variable_type": "extensive",
+            "units": "passengers",
+            "display_format": "count",
+            "source": {
+              "url": "https://s3.wasabisys.com/cdn.flylcpa.com/app/uploads/2024/11/21144941/RSW-Enplanement-Passengers.pdf",
+              "fetched_at": "2026-11-08T11:24:37Z",
+              "tier": 1,
+              "citation": "Lee County Port Authority Aviation Statistics — RSW 2026-04 departures — 640,135 enplanements"
+            },
+            "suggestions": [
+              "What's driving rsw monthly enplanements?",
+              "How does rsw monthly enplanements here compare to other SWFL areas?"
+            ]
+          },
+          {
+            "metric": "rsw_aircraft_operations",
+            "label": "RSW Monthly Aircraft Operations",
+            "value": 10797,
+            "direction": "rising",
+            "variable_type": "extensive",
+            "units": "operations",
+            "display_format": "count",
+            "source": {
+              "url": "https://s3.wasabisys.com/cdn.flylcpa.com/app/uploads/2024/11/21142550/RSW-Operations.pdf",
+              "fetched_at": "2026-11-08T11:24:37Z",
+              "tier": 1,
+              "citation": "Lee County Port Authority Aviation Statistics — RSW 2026-04 — 10,797 aircraft operations (movements)"
+            },
+            "suggestions": [
+              "What's driving rsw aircraft operations?",
+              "How does rsw aircraft operations here compare to other SWFL areas?"
+            ]
+          },
+          {
+            "metric": "rsw_freight_lbs",
+            "label": "RSW Monthly Air Freight",
+            "value": 3463896,
+            "direction": "rising",
+            "variable_type": "extensive",
+            "units": "lbs",
+            "display_format": "count",
+            "source": {
+              "url": "https://s3.wasabisys.com/cdn.flylcpa.com/app/uploads/2024/11/21144911/RSW-Total-Freight.pdf",
+              "fetched_at": "2026-11-08T11:24:37Z",
+              "tier": 1,
+              "citation": "Lee County Port Authority Aviation Statistics — RSW 2026-04 — 3,463,896 lbs air freight"
+            },
+            "suggestions": [
+              "What's driving rsw freight lbs?",
+              "How does rsw freight lbs here compare to other SWFL areas?"
+            ]
+          },
+          {
+            "metric": "rsw_pax_per_operation",
+            "label": "RSW Passengers per Aircraft Operation (utilization proxy)",
+            "value": 106.7582661850514,
+            "direction": "stable",
+            "variable_type": "intensive",
+            "units": "passengers/operation",
+            "display_format": "raw",
+            "source": {
+              "url": "https://s3.wasabisys.com/cdn.flylcpa.com/app/uploads/2024/11/21145013/Total-Passengers-2026.pdf",
+              "fetched_at": "2026-11-08T11:24:37Z",
+              "tier": 1,
+              "citation": "Lee County Port Authority Aviation Statistics — RSW 2026-04 — 107 passengers per aircraft operation (proxy)"
+            },
+            "suggestions": [
+              "What's driving rsw pax per operation?",
+              "How does rsw pax per operation here compare to other SWFL areas?"
+            ]
+          },
+          {
+            "metric": "rsw_seasonality_ratio",
+            "label": "RSW Seasonality Ratio (peak ÷ median month, trailing 12)",
+            "value": 1.7134388142047172,
+            "direction": "stable",
+            "variable_type": "intensive",
+            "units": "ratio",
+            "display_format": "raw",
+            "source": {
+              "url": "https://s3.wasabisys.com/cdn.flylcpa.com/app/uploads/2024/11/21145013/Total-Passengers-2026.pdf",
+              "fetched_at": "2026-11-08T11:24:37Z",
+              "tier": 1,
+              "citation": "Lee County Port Authority Aviation Statistics — RSW trailing-12 total passengers: peak month ÷ median month = 1.71"
+            },
+            "suggestions": [
+              "What's driving rsw seasonality ratio?",
+              "How does rsw seasonality ratio here compare to other SWFL areas?"
+            ]
+          }
+        ],
+        "caveats": [
+          "Trailing-12-month total-passengers YoY not computable — fewer than 24 monthly rows in the fetched window; direction set neutral."
+        ],
+        "contradicts": [],
+        "confidence": 1,
+        "joint_integrity": 1,
+        "confidence_dispersion": 0,
+        "chain_depth": 0,
+        "trust_tier": 1,
+        "upstream_count": 0,
+        "relevance": {
+          "decay_curve": "weeks",
+          "half_life_hours": 720,
+          "computed_at": "2026-11-08T11:24:37Z"
+        },
+        "exogenous_signals": [],
+        "grain_boundary": {
+          "not_available": [
+            "Origin-and-destination (O&D) / passengers-per-day-each-way — the truest local air-travel demand measure — is not published by LCPA; this brain proxies demand with total passenger throughput.",
+            "Deplanements are counted as arrivals / inbound throughput, not a visitor count — they include returning residents (the visitor-vs-resident split is a market-study convention LCPA does not report).",
+            "Passengers-per-aircraft-operation is a utilization proxy, not airline load factor (true load factor needs seat counts / available seat-miles, which LCPA does not publish).",
+            "Seasonality ratio is a characterizing statistic (peak ÷ median month), not a direction signal — no downstream brain consumes it.",
+            "Punta Gorda (PGD / Charlotte County) airport — separate operator, no LCPA source; out of scope for this brain.",
+            "Airline-level or sub-county passenger breakdowns."
+          ],
+          "finest_grain": "airport-month"
+        }
+      }
     },
     {
       "packId": "news-swfl",
@@ -380,119 +584,8 @@
     },
     {
       "packId": "freshness-pulse",
-      "status": "built",
-      "version": 97,
-      "written": true,
-      "brainOutput": {
-        "brain_id": "freshness-pulse",
-        "version": 97,
-        "refined_at": "2026-11-08T04:26:00Z",
-        "expires": "2026-11-09T04:26:00Z",
-        "ttl_seconds": 86400,
-        "direction": "neutral",
-        "magnitude": 0,
-        "drivers": [],
-        "overrides": [],
-        "conclusion": "Today's sourced snapshot — SWFL 30-year fixed mortgage rate (as of 2026-11-05) 7.18%; Cape Coral median asking price (as of 2026-11-08) $399,200; Fort Myers median asking price (as of 2026-11-08) $325,000; Naples median asking price (as of 2026-11-08) $650,000. These are cited current facts only; the direction call lives downstream in master.",
-        "key_metrics": [
-          {
-            "metric": "freshness_mortgage_30yr_fixed_pct",
-            "value": 7.18,
-            "direction": "stable",
-            "label": "SWFL 30-year fixed mortgage rate (as of 2026-11-05)",
-            "variable_type": "intensive",
-            "units": "percent",
-            "display_format": "percent",
-            "source": {
-              "url": "https://fred.stlouisfed.org/series/MORTGAGE30US",
-              "fetched_at": "2026-11-08T04:23:33.641629+00:00",
-              "tier": 2,
-              "citation": "FRED — current 30-year fixed mortgage rate for SWFL, sourced 2026-11-05"
-            },
-            "suggestions": [
-              "What's driving freshness mortgage 30yr fixed pct?",
-              "How does freshness mortgage 30yr fixed pct here compare to other SWFL areas?"
-            ]
-          },
-          {
-            "metric": "freshness_median_asking_price_cape_coral_usd",
-            "value": 399200,
-            "direction": "stable",
-            "label": "Cape Coral median asking price (as of 2026-11-08)",
-            "variable_type": "extensive",
-            "units": "USD",
-            "display_format": "currency",
-            "source": {
-              "url": "https://www.swfldatagulf.com/desk",
-              "fetched_at": "2026-11-08T04:23:33.641629+00:00",
-              "tier": 2,
-              "citation": "SWFL Data Gulf active-listing inventory — current median asking price for Cape Coral, sourced 2026-11-08"
-            },
-            "suggestions": [
-              "Chart asking rents across the corridors",
-              "What's driving freshness median asking price cape coral usd?",
-              "How does freshness median asking price cape coral usd here compare to other SWFL areas?"
-            ]
-          },
-          {
-            "metric": "freshness_median_asking_price_fort_myers_usd",
-            "value": 325000,
-            "direction": "stable",
-            "label": "Fort Myers median asking price (as of 2026-11-08)",
-            "variable_type": "extensive",
-            "units": "USD",
-            "display_format": "currency",
-            "source": {
-              "url": "https://www.swfldatagulf.com/desk",
-              "fetched_at": "2026-11-08T04:23:33.641629+00:00",
-              "tier": 2,
-              "citation": "SWFL Data Gulf active-listing inventory — current median asking price for Fort Myers, sourced 2026-11-08"
-            },
-            "suggestions": [
-              "Chart asking rents across the corridors",
-              "What's driving freshness median asking price fort myers usd?",
-              "How does freshness median asking price fort myers usd here compare to other SWFL areas?"
-            ]
-          },
-          {
-            "metric": "freshness_median_asking_price_naples_usd",
-            "value": 650000,
-            "direction": "stable",
-            "label": "Naples median asking price (as of 2026-11-08)",
-            "variable_type": "extensive",
-            "units": "USD",
-            "display_format": "currency",
-            "source": {
-              "url": "https://www.swfldatagulf.com/desk",
-              "fetched_at": "2026-11-08T04:23:33.641629+00:00",
-              "tier": 2,
-              "citation": "SWFL Data Gulf active-listing inventory — current median asking price for Naples, sourced 2026-11-08"
-            },
-            "suggestions": [
-              "Chart asking rents across the corridors",
-              "What's driving freshness median asking price naples usd?",
-              "How does freshness median asking price naples usd here compare to other SWFL areas?"
-            ]
-          }
-        ],
-        "detail_tables": [],
-        "caveats": [
-          "Each county-grain number is a single grounded source's current figure, provenance-gated to a real source URL; held anomalies and unsourced (model-memory) numbers are excluded by design."
-        ],
-        "contradicts": [],
-        "confidence": 0.8,
-        "joint_integrity": 1,
-        "confidence_dispersion": 0,
-        "chain_depth": 0,
-        "trust_tier": 2,
-        "upstream_count": 0,
-        "relevance": {
-          "decay_curve": "weeks",
-          "half_life_hours": 720,
-          "computed_at": "2026-11-08T04:26:00Z"
-        },
-        "exogenous_signals": []
-      }
+      "status": "skipped-fresh",
+      "written": false
     },
     {
       "packId": "seller-stress-swfl",
@@ -551,717 +644,8 @@
     },
     {
       "packId": "active-listings-swfl",
-      "status": "built",
-      "version": 53,
-      "written": true,
-      "brainOutput": {
-        "brain_id": "active-listings-swfl",
-        "version": 53,
-        "refined_at": "2026-11-08T04:26:06Z",
-        "expires": "2026-11-10T04:26:06Z",
-        "ttl_seconds": 172800,
-        "direction": "neutral",
-        "magnitude": 0,
-        "drivers": [],
-        "overrides": [],
-        "conclusion": "22,650 active SWFL residential listings, median asking $412,000, avg 227 days on market (active residential listings, as of 2026-08-14). By county: Lee 16,394 (median $369,900), Collier 6,256 (median $649,900), Lee 1 (median $314,900).",
-        "key_metrics": [
-          {
-            "metric": "active_listings_count_swfl",
-            "label": "SWFL active residential listings (count)",
-            "value": 22650,
-            "direction": "stable",
-            "variable_type": "extensive",
-            "units": "listings",
-            "display_format": "count",
-            "source": {
-              "url": "https://www.swfldatagulf.com/r/source/listing_active_stats?label=SWFL+active+for-sale+listings+%28aggregated%29&source=realtor.com+for-sale+listings&brain=active-listings-swfl&date_col=scraped_at",
-              "fetched_at": "2026-11-08T04:26:06Z",
-              "tier": 2,
-              "citation": "22,650 active SWFL residential listings as of 2026-08-14"
-            },
-            "suggestions": [
-              "What's driving active listings count swfl?",
-              "How does active listings count swfl here compare to other SWFL areas?"
-            ]
-          },
-          {
-            "metric": "median_list_price_swfl",
-            "label": "SWFL median asking price (active residential)",
-            "value": 412000,
-            "direction": "stable",
-            "variable_type": "intensive",
-            "units": "USD",
-            "display_format": "currency",
-            "source": {
-              "url": "https://www.swfldatagulf.com/r/source/listing_active_stats?label=SWFL+active+for-sale+listings+%28aggregated%29&source=realtor.com+for-sale+listings&brain=active-listings-swfl&date_col=scraped_at",
-              "fetched_at": "2026-11-08T04:26:06Z",
-              "tier": 2,
-              "citation": "median asking price across 22,650 active SWFL listings: $412,000"
-            },
-            "suggestions": [
-              "What's driving median list price swfl?",
-              "How does median list price swfl here compare to other SWFL areas?"
-            ]
-          },
-          {
-            "metric": "median_annual_tax_swfl",
-            "label": "SWFL median vendor-reported annual property tax",
-            "value": 4008,
-            "direction": "stable",
-            "variable_type": "intensive",
-            "units": "USD",
-            "display_format": "currency",
-            "source": {
-              "url": "https://www.swfldatagulf.com/r/source/listing_active_stats?label=SWFL+active+for-sale+listings+%28aggregated%29&source=realtor.com+for-sale+listings&brain=active-listings-swfl&date_col=scraped_at",
-              "fetched_at": "2026-11-08T04:26:06Z",
-              "tier": 2,
-              "citation": "Median vendor-reported annual property tax across 16,514 SWFL properties with tax history: $4,008"
-            },
-            "suggestions": [
-              "What's driving median annual tax swfl?",
-              "How does median annual tax swfl here compare to other SWFL areas?"
-            ]
-          },
-          {
-            "metric": "avg_days_on_market_swfl",
-            "label": "SWFL average days on market (active residential)",
-            "value": 227,
-            "direction": "stable",
-            "variable_type": "intensive",
-            "units": "days",
-            "display_format": "count",
-            "source": {
-              "url": "https://www.swfldatagulf.com/r/source/listing_active_stats?label=SWFL+active+for-sale+listings+%28aggregated%29&source=realtor.com+for-sale+listings&brain=active-listings-swfl&date_col=scraped_at",
-              "fetched_at": "2026-11-08T04:26:06Z",
-              "tier": 2,
-              "citation": "average days on market across active SWFL listings: 227 days"
-            },
-            "suggestions": [
-              "What's driving avg days on market swfl?",
-              "How does avg days on market swfl here compare to other SWFL areas?"
-            ]
-          }
-        ],
-        "detail_tables": [
-          {
-            "id": "active_listings_by_county",
-            "title": "SWFL active residential listings by county",
-            "grain": "county",
-            "columns": [
-              {
-                "id": "listing_count",
-                "label": "Active listings",
-                "display_format": "count",
-                "units": "listings"
-              },
-              {
-                "id": "median_list_price",
-                "label": "Median asking price",
-                "display_format": "currency",
-                "units": "USD"
-              },
-              {
-                "id": "avg_days_on_market",
-                "label": "Avg days on market",
-                "display_format": "count",
-                "units": "days"
-              }
-            ],
-            "rows": [
-              {
-                "key": "Lee",
-                "label": "Lee",
-                "cells": {
-                  "listing_count": 16394,
-                  "median_list_price": 369900,
-                  "avg_days_on_market": 226
-                }
-              },
-              {
-                "key": "Collier",
-                "label": "Collier",
-                "cells": {
-                  "listing_count": 6256,
-                  "median_list_price": 649900,
-                  "avg_days_on_market": 229
-                }
-              },
-              {
-                "key": "Lee",
-                "label": "Lee",
-                "cells": {
-                  "listing_count": 1,
-                  "median_list_price": 314900,
-                  "avg_days_on_market": null
-                }
-              }
-            ],
-            "source": {
-              "url": "https://www.swfldatagulf.com/r/source/listing_active_stats?label=SWFL+active+for-sale+listings+%28aggregated%29&source=realtor.com+for-sale+listings&brain=active-listings-swfl&date_col=scraped_at",
-              "fetched_at": "2026-11-08T04:26:06Z",
-              "tier": 2,
-              "citation": "Active SWFL residential listings, aggregated per grain in SQL (listing_active_stats) as of 2026-08-14"
-            }
-          },
-          {
-            "id": "active_listings_by_zip",
-            "title": "SWFL active residential listings by ZIP",
-            "grain": "zip",
-            "columns": [
-              {
-                "id": "listing_count",
-                "label": "Active listings",
-                "display_format": "count",
-                "units": "listings"
-              },
-              {
-                "id": "median_list_price",
-                "label": "Median asking price",
-                "display_format": "currency",
-                "units": "USD"
-              },
-              {
-                "id": "avg_days_on_market",
-                "label": "Avg days on market",
-                "display_format": "count",
-                "units": "days"
-              }
-            ],
-            "rows": [
-              {
-                "key": "33993",
-                "label": "33993 (Lee)",
-                "cells": {
-                  "listing_count": 1146,
-                  "median_list_price": 393950,
-                  "avg_days_on_market": 215
-                }
-              },
-              {
-                "key": "33908",
-                "label": "33908 (Lee)",
-                "cells": {
-                  "listing_count": 1008,
-                  "median_list_price": 330000,
-                  "avg_days_on_market": 251
-                }
-              },
-              {
-                "key": "33914",
-                "label": "33914 (Lee)",
-                "cells": {
-                  "listing_count": 867,
-                  "median_list_price": 525000,
-                  "avg_days_on_market": 221
-                }
-              },
-              {
-                "key": "33917",
-                "label": "33917 (Lee)",
-                "cells": {
-                  "listing_count": 833,
-                  "median_list_price": 205900,
-                  "avg_days_on_market": 224
-                }
-              },
-              {
-                "key": "33909",
-                "label": "33909 (Lee)",
-                "cells": {
-                  "listing_count": 794,
-                  "median_list_price": 339900,
-                  "avg_days_on_market": 201
-                }
-              },
-              {
-                "key": "34135",
-                "label": "34135 (Lee)",
-                "cells": {
-                  "listing_count": 771,
-                  "median_list_price": 458560,
-                  "avg_days_on_market": 226
-                }
-              },
-              {
-                "key": "33974",
-                "label": "33974 (Lee)",
-                "cells": {
-                  "listing_count": 735,
-                  "median_list_price": 322000,
-                  "avg_days_on_market": 189
-                }
-              },
-              {
-                "key": "34120",
-                "label": "34120 (Collier)",
-                "cells": {
-                  "listing_count": 704,
-                  "median_list_price": 636500,
-                  "avg_days_on_market": 202
-                }
-              },
-              {
-                "key": "33904",
-                "label": "33904 (Lee)",
-                "cells": {
-                  "listing_count": 665,
-                  "median_list_price": 420000,
-                  "avg_days_on_market": 216
-                }
-              },
-              {
-                "key": "33913",
-                "label": "33913 (Lee)",
-                "cells": {
-                  "listing_count": 626,
-                  "median_list_price": 469000,
-                  "avg_days_on_market": 207
-                }
-              },
-              {
-                "key": "33971",
-                "label": "33971 (Lee)",
-                "cells": {
-                  "listing_count": 624,
-                  "median_list_price": 319900,
-                  "avg_days_on_market": 206
-                }
-              },
-              {
-                "key": "34114",
-                "label": "34114 (Collier)",
-                "cells": {
-                  "listing_count": 610,
-                  "median_list_price": 549000,
-                  "avg_days_on_market": 220
-                }
-              },
-              {
-                "key": "33931",
-                "label": "33931 (Lee)",
-                "cells": {
-                  "listing_count": 596,
-                  "median_list_price": 675000,
-                  "avg_days_on_market": 267
-                }
-              },
-              {
-                "key": "33928",
-                "label": "33928 (Lee)",
-                "cells": {
-                  "listing_count": 595,
-                  "median_list_price": 539000,
-                  "avg_days_on_market": 204
-                }
-              },
-              {
-                "key": "33903",
-                "label": "33903 (Lee)",
-                "cells": {
-                  "listing_count": 563,
-                  "median_list_price": 148000,
-                  "avg_days_on_market": 243
-                }
-              },
-              {
-                "key": "34112",
-                "label": "34112 (Collier)",
-                "cells": {
-                  "listing_count": 558,
-                  "median_list_price": 339999,
-                  "avg_days_on_market": 229
-                }
-              },
-              {
-                "key": "33919",
-                "label": "33919 (Lee)",
-                "cells": {
-                  "listing_count": 533,
-                  "median_list_price": 249000,
-                  "avg_days_on_market": 225
-                }
-              },
-              {
-                "key": "33905",
-                "label": "33905 (Lee)",
-                "cells": {
-                  "listing_count": 519,
-                  "median_list_price": 354000,
-                  "avg_days_on_market": 213
-                }
-              },
-              {
-                "key": "34145",
-                "label": "34145 (Collier)",
-                "cells": {
-                  "listing_count": 493,
-                  "median_list_price": 949000,
-                  "avg_days_on_market": 226
-                }
-              },
-              {
-                "key": "33991",
-                "label": "33991 (Lee)",
-                "cells": {
-                  "listing_count": 477,
-                  "median_list_price": 450000,
-                  "avg_days_on_market": 212
-                }
-              },
-              {
-                "key": "33972",
-                "label": "33972 (Lee)",
-                "cells": {
-                  "listing_count": 466,
-                  "median_list_price": 355000,
-                  "avg_days_on_market": 198
-                }
-              },
-              {
-                "key": "33936",
-                "label": "33936 (Lee)",
-                "cells": {
-                  "listing_count": 465,
-                  "median_list_price": 245000,
-                  "avg_days_on_market": 195
-                }
-              },
-              {
-                "key": "33976",
-                "label": "33976 (Lee)",
-                "cells": {
-                  "listing_count": 463,
-                  "median_list_price": 329000,
-                  "avg_days_on_market": 213
-                }
-              },
-              {
-                "key": "34134",
-                "label": "34134 (Lee)",
-                "cells": {
-                  "listing_count": 439,
-                  "median_list_price": 799000,
-                  "avg_days_on_market": 263
-                }
-              },
-              {
-                "key": "34102",
-                "label": "34102 (Collier)",
-                "cells": {
-                  "listing_count": 432,
-                  "median_list_price": 3200000,
-                  "avg_days_on_market": 299
-                }
-              },
-              {
-                "key": "34119",
-                "label": "34119 (Collier)",
-                "cells": {
-                  "listing_count": 424,
-                  "median_list_price": 689000,
-                  "avg_days_on_market": 213
-                }
-              },
-              {
-                "key": "34110",
-                "label": "34110 (Collier)",
-                "cells": {
-                  "listing_count": 410,
-                  "median_list_price": 684900,
-                  "avg_days_on_market": 232
-                }
-              },
-              {
-                "key": "34108",
-                "label": "34108 (Collier)",
-                "cells": {
-                  "listing_count": 406,
-                  "median_list_price": 1299000,
-                  "avg_days_on_market": 244
-                }
-              },
-              {
-                "key": "34113",
-                "label": "34113 (Collier)",
-                "cells": {
-                  "listing_count": 402,
-                  "median_list_price": 522450,
-                  "avg_days_on_market": 232
-                }
-              },
-              {
-                "key": "33957",
-                "label": "33957 (Lee)",
-                "cells": {
-                  "listing_count": 378,
-                  "median_list_price": 954500,
-                  "avg_days_on_market": 308
-                }
-              },
-              {
-                "key": "33990",
-                "label": "33990 (Lee)",
-                "cells": {
-                  "listing_count": 354,
-                  "median_list_price": 399000,
-                  "avg_days_on_market": 201
-                }
-              },
-              {
-                "key": "34103",
-                "label": "34103 (Collier)",
-                "cells": {
-                  "listing_count": 332,
-                  "median_list_price": 1495000,
-                  "avg_days_on_market": 246
-                }
-              },
-              {
-                "key": "34142",
-                "label": "34142 (Collier)",
-                "cells": {
-                  "listing_count": 326,
-                  "median_list_price": 435748,
-                  "avg_days_on_market": 189
-                }
-              },
-              {
-                "key": "33912",
-                "label": "33912 (Lee)",
-                "cells": {
-                  "listing_count": 308,
-                  "median_list_price": 349900,
-                  "avg_days_on_market": 225
-                }
-              },
-              {
-                "key": "33907",
-                "label": "33907 (Lee)",
-                "cells": {
-                  "listing_count": 285,
-                  "median_list_price": 184000,
-                  "avg_days_on_market": 227
-                }
-              },
-              {
-                "key": "34109",
-                "label": "34109 (Collier)",
-                "cells": {
-                  "listing_count": 281,
-                  "median_list_price": 745000,
-                  "avg_days_on_market": 214
-                }
-              },
-              {
-                "key": "34104",
-                "label": "34104 (Collier)",
-                "cells": {
-                  "listing_count": 271,
-                  "median_list_price": 390000,
-                  "avg_days_on_market": 214
-                }
-              },
-              {
-                "key": "33916",
-                "label": "33916 (Lee)",
-                "cells": {
-                  "listing_count": 266,
-                  "median_list_price": 302450,
-                  "avg_days_on_market": 439
-                }
-              },
-              {
-                "key": "33901",
-                "label": "33901 (Lee)",
-                "cells": {
-                  "listing_count": 264,
-                  "median_list_price": 315000,
-                  "avg_days_on_market": 244
-                }
-              },
-              {
-                "key": "33967",
-                "label": "33967 (Lee)",
-                "cells": {
-                  "listing_count": 230,
-                  "median_list_price": 399000,
-                  "avg_days_on_market": 194
-                }
-              },
-              {
-                "key": "33920",
-                "label": "33920 (Lee)",
-                "cells": {
-                  "listing_count": 223,
-                  "median_list_price": 426053,
-                  "avg_days_on_market": 201
-                }
-              },
-              {
-                "key": "33973",
-                "label": "33973 (Lee)",
-                "cells": {
-                  "listing_count": 211,
-                  "median_list_price": 472000,
-                  "avg_days_on_market": 207
-                }
-              },
-              {
-                "key": "34105",
-                "label": "34105 (Collier)",
-                "cells": {
-                  "listing_count": 197,
-                  "median_list_price": 390000,
-                  "avg_days_on_market": 215
-                }
-              },
-              {
-                "key": "33966",
-                "label": "33966 (Lee)",
-                "cells": {
-                  "listing_count": 174,
-                  "median_list_price": 319750,
-                  "avg_days_on_market": 201
-                }
-              },
-              {
-                "key": "34117",
-                "label": "34117 (Collier)",
-                "cells": {
-                  "listing_count": 170,
-                  "median_list_price": 772499,
-                  "avg_days_on_market": 211
-                }
-              },
-              {
-                "key": "33924",
-                "label": "33924 (Lee)",
-                "cells": {
-                  "listing_count": 133,
-                  "median_list_price": 1499000,
-                  "avg_days_on_market": 315
-                }
-              },
-              {
-                "key": "33922",
-                "label": "33922 (Lee)",
-                "cells": {
-                  "listing_count": 118,
-                  "median_list_price": 482450,
-                  "avg_days_on_market": 250
-                }
-              },
-              {
-                "key": "33956",
-                "label": "33956 (Lee)",
-                "cells": {
-                  "listing_count": 105,
-                  "median_list_price": 588500,
-                  "avg_days_on_market": 263
-                }
-              },
-              {
-                "key": "34116",
-                "label": "34116 (Collier)",
-                "cells": {
-                  "listing_count": 91,
-                  "median_list_price": 589000,
-                  "avg_days_on_market": 193
-                }
-              },
-              {
-                "key": "33921",
-                "label": "33921 (Lee)",
-                "cells": {
-                  "listing_count": 44,
-                  "median_list_price": 3985000,
-                  "avg_days_on_market": 308
-                }
-              },
-              {
-                "key": "34138",
-                "label": "34138 (Collier)",
-                "cells": {
-                  "listing_count": 31,
-                  "median_list_price": 185000,
-                  "avg_days_on_market": 490
-                }
-              },
-              {
-                "key": "34139",
-                "label": "34139 (Collier)",
-                "cells": {
-                  "listing_count": 29,
-                  "median_list_price": 349000,
-                  "avg_days_on_market": 312
-                }
-              },
-              {
-                "key": "34140",
-                "label": "34140 (Collier)",
-                "cells": {
-                  "listing_count": 16,
-                  "median_list_price": 525000,
-                  "avg_days_on_market": 376
-                }
-              },
-              {
-                "key": "34137",
-                "label": "34137 (Collier)",
-                "cells": {
-                  "listing_count": 2,
-                  "median_list_price": 290000,
-                  "avg_days_on_market": 182
-                }
-              },
-              {
-                "key": "34141",
-                "label": "34141 (Collier)",
-                "cells": {
-                  "listing_count": 2,
-                  "median_list_price": 269500,
-                  "avg_days_on_market": 200
-                }
-              }
-            ],
-            "source": {
-              "url": "https://www.swfldatagulf.com/r/source/listing_active_stats?label=SWFL+active+for-sale+listings+%28aggregated%29&source=realtor.com+for-sale+listings&brain=active-listings-swfl&date_col=scraped_at",
-              "fetched_at": "2026-11-08T04:26:06Z",
-              "tier": 2,
-              "citation": "Active SWFL residential listings, aggregated per grain in SQL (listing_active_stats) as of 2026-08-14"
-            }
-          }
-        ],
-        "caveats": [
-          "List-side only: asking prices and days-on-market for ACTIVE listings — not sold/closed prices (that is the closed-sale records lane).",
-          "Median asking price spans ALL active listings INCLUDING vacant land/lots — in lot-heavy areas this pulls the median well below typical home prices. Use the property_type field or the per-county/ZIP detail to separate homes from land.",
-          "Daily snapshot — broad SWFL coverage but not comprehensive. Direction is neutral on any one day; the day-over-day diff is what reads the inventory trend.",
-          "Source is realtor.com for-sale listings; a direct licensed MLS/IDX feed can swap into the same table when credentialed.",
-          "Annual property tax is vendor-reported (not a county tax bill) and not yet validated against county appraiser records — treat as directional, not authoritative. Covers only properties we have probed, not the full tax roll."
-        ],
-        "contradicts": [],
-        "confidence": 0.8,
-        "joint_integrity": 1,
-        "confidence_dispersion": 0,
-        "chain_depth": 0,
-        "trust_tier": 2,
-        "upstream_count": 0,
-        "relevance": {
-          "decay_curve": "weeks",
-          "half_life_hours": 720,
-          "computed_at": "2026-11-08T04:26:06Z"
-        },
-        "exogenous_signals": [],
-        "grain_boundary": {
-          "not_available": [
-            "Sold / closed sale prices — active asking prices only, not closed transactions",
-            "Per-listing history or price-cut events — current snapshot only",
-            "Rental listings — sale listings only"
-          ],
-          "finest_grain": "zip-snapshot"
-        }
-      }
+      "status": "skipped-fresh",
+      "written": false
     },
     {
       "packId": "active-rentals-swfl",
@@ -1284,16 +668,16 @@
     {
       "packId": "master",
       "status": "built",
-      "version": 173,
+      "version": 174,
       "written": true,
       "brainOutput": {
         "brain_id": "master",
-        "version": 173,
-        "refined_at": "2026-11-08T04:26:27Z",
-        "expires": "2026-11-15T04:26:27Z",
+        "version": 174,
+        "refined_at": "2026-11-08T11:24:58Z",
+        "expires": "2026-11-15T11:24:58Z",
         "ttl_seconds": 604800,
         "direction": "mixed",
-        "magnitude": 0.46305057657349985,
+        "magnitude": 0.4685058208988835,
         "drivers": [
           {
             "brain_id": "franchise-outcomes",
@@ -1450,6 +834,25 @@
         ],
         "conclusion": "Read is mixed (moderate magnitude). Driven by: franchise-outcomes, cre-swfl, macro-us, macro-florida, macro-swfl, sector-credit-swfl, tourism-tdt, env-swfl, logistics-swfl, logistics-swfl-nowcast, traffic-swfl, properties-lee-value, properties-collier-value, permits-swfl, rentals-swfl, housing-swfl, safety-swfl, labor-demand-swfl, econ-dev-swfl, city-pulse-swfl, rsw-airport, news-swfl, freshness-pulse, seller-stress-swfl, market-heat-swfl, storm-history-swfl, hurricane-tracks-fl, licenses-swfl, condo-sirs-swfl, price-distribution-swfl, listing-momentum-swfl, market-temperature-swfl, investor-zip-swfl, active-listings-swfl, communities-swfl, tier-divergence-swfl, home-values-swfl. Overrides: flood-barrier-mode-1, storm-history-modifier. Note conflicts: macro-us (bearish) vs macro-florida (bullish). Combined confidence 0.86, trust tier T4, based on 37 upstream brains.",
         "key_metrics": [
+          {
+            "metric": "rsw_trailing_12mo_total_passengers",
+            "label": "RSW Trailing 12-Mo Total Passengers",
+            "value": 11197951,
+            "direction": "stable",
+            "variable_type": "extensive",
+            "units": "passengers",
+            "display_format": "count",
+            "source": {
+              "url": "https://s3.wasabisys.com/cdn.flylcpa.com/app/uploads/2024/11/21145013/Total-Passengers-2026.pdf",
+              "fetched_at": "2026-11-08T11:24:37Z",
+              "tier": 1,
+              "citation": "Lee County Port Authority Aviation Statistics — RSW trailing 12-month total passengers ending 2026-04"
+            },
+            "suggestions": [
+              "What's driving rsw trailing 12mo total passengers?",
+              "How does rsw trailing 12mo total passengers here compare to other SWFL areas?"
+            ]
+          },
           {
             "metric": "swfl_sfha_pct_area_weighted",
             "value": 0.4901,
@@ -1679,25 +1082,6 @@
             ]
           },
           {
-            "metric": "rsw_trailing_12mo_total_passengers_yoy",
-            "label": "RSW Total Passengers — Trailing-12-Mo YoY (direction driver)",
-            "value": 2.3837188145672608,
-            "direction": "rising",
-            "variable_type": "intensive",
-            "units": "%",
-            "display_format": "raw",
-            "source": {
-              "url": "https://s3.wasabisys.com/cdn.flylcpa.com/app/uploads/2024/11/21145013/Total-Passengers-2026.pdf",
-              "fetched_at": "2026-10-09T04:27:09Z",
-              "tier": 1,
-              "citation": "Lee County Port Authority Aviation Statistics — RSW trailing-12-mo total passengers ending 2026-04 vs prior 12 mo: +2.4%"
-            },
-            "suggestions": [
-              "What's driving rsw trailing 12mo total passengers yoy?",
-              "How does rsw trailing 12mo total passengers yoy here compare to other SWFL areas?"
-            ]
-          },
-          {
             "metric": "hurricane_landfalls_30yr",
             "value": 7,
             "direction": "stable",
@@ -1736,6 +1120,23 @@
             ]
           },
           {
+            "metric": "signal_transactions_1",
+            "value": "Fort Myers: A luxury Naples estate set a new record sale of $19 million in The Moorings neighborhood, reported Nov. 6, 2026.",
+            "direction": "stable",
+            "label": "Fort Myers — transactions",
+            "variable_type": "categorical",
+            "source": {
+              "url": "https://www.naplesnews.com/story/money/business/local/2026/11/06/record-19-million-home-sale-in-naples-florida-neighborhood-of-the-moorings-luxury-real-estate/92630699007/",
+              "fetched_at": "2026-11-08T11:24:37Z",
+              "tier": 2,
+              "citation": "Record $19 million home sale in Naples neighborhood of The Moorings: \"[](https://www.naplesnews.com/)\n[](https://subscribe.naplesnews.com/rr/nanobar?gps-source=CPTILELEFT&itm_campaign=2026ENTQ4BAU2026&itm_medium=ONSITE&success-url=https%3A%2F%2Fwww.naplesnews.com%2Fstory%2Fmoney%2Fbusiness%2Flocal%2F2026%2F11%2F06%2Frecord-19-million-home-sale-in-naples-florida-neighborhood-of-the-moorings-luxury-real-estate%2F92630699007%2F)\n[](https://subscribe.naplesnews.com/rr/masthead?gps-source=CPMASTHEAD&itm_campaign=2026ENTQ4BAU2026&itm_medium=ONSITE&success-url=https%3A%2F%2Fwww.naplesnews.com%2Fstory%2Fmoney%2Fbusiness%2Flocal%2F2026%2F11%2F06%2Frecord-19-million-home-sale-in-naples-florida-neighborhood-of-the-moorings-luxury-real-estate%2F92630699007%2F)\n[News](https://www.naplesnews.com/news/) [Sports](https://www.naplesnews.com/sports/) [Real Estate](https://www.naplesnews.com/business/real-estate/) [Restaurants](https://www.naplesnews.com/entertainment/restaurants/) [Opinion](https://www.naplesnews.com/opinion/) [Advertise](https://advertising.usatoday.com/advertise-with-us/?cid=Web_LiQ_Network_AdvertiseWithUs_AdvertiseInquiry&publication=naples_daily_news&utm_source=local_publication&utm_medium=menu&utm_campaign=advertise_with_us) [Obituaries](https://www.naplesnews.com/obituaries) [eNewspaper](https://user.naplesnews.com/user/enewspaper) [Legals](https://www.naplesnews.com/public-notices)\n[](https://www.naplesnews.com/search/ \"Search\")\n[](https://www.naplesnews.com/weather/ \"Weather in Naples: 74°F Mostly Sunny\") [](https://subscribe.naplesnews.com/rr/navsub?gps-source=CPTOPNAVBAR&itm_campaign=2026ENTQ4BAU2026&itm_medium=ONSITE&success-url=https%3A%2F%2Fwww.naplesnews.com%2Fstory%2Fmoney%2Fbusiness%2Flocal%2F2026%2F11%2F06%2Frecord-19-million-home-sale-in-naples-florida-neighborhood-of-the-moorings-luxury-real-estate%2F92630699007%2F)\n[](https://login.naplesnews.com/PNDN-GUP/authenticate/?success-url=https%3A%2F%2Fwww.naplesnews.com%2Fstory%2Fmoney%2Fbusiness%2Flocal%2F2026%2F11%2F06%2Frecord-19-million-home-sale-in-naples-florida-neighborhood-of-the-moorings-luxury-real-estate%2F92630699007%2F&cancel-url=https%3A%2F%2Fwww.naplesnews.com%2Fstory%2Fmoney%2Fbusiness%2Flocal%2F2026%2F11%2F06%2Frecord-19-million-home-sale-in-naples-florida-neighborhood-of-the-moorings-luxury-real-estate%2F92630699007%2F)\n[](https://www.naplesnews.com/) [](https://www.naplesnews.com/)\n[LOCAL BUSINESS](https://www.naplesnews.com/business/local/)\n# Luxury Naples estate sets new record of $19 million in The Moorings\n[![Portrait of Laura Layden](https://www.naplesnews.com/gcdn/authoring/authoring-images/2024/02/08/PNDN/72524348007-ndn-jh-20240126-laura-0001.JPG?crop=3313,3312,x1506,y0&width=48&height=48&format=pjpg&auto=webp) Laura Layden](https://www.naplesnews.com/staff/2647080001/laura-layden/)\nFort Myers News-Press & Naples Daily News\nNov. 6, 2026, 2:54 p.m. ET\n[](https://www.facebook.com/dialog/share?display=popup&app_id=1703814913224751&href=https%3A%2F%2Fwww.naplesnews.com%2Fstory%2Fmoney%2Fbusiness%2Flocal%2F2026%2F11%2F06%2Frecord-1\""
+            },
+            "suggestions": [
+              "What's driving signal transactions 1?",
+              "How does signal transactions 1 here compare to other SWFL areas?"
+            ]
+          },
+          {
             "metric": "active_listings_count_swfl",
             "label": "SWFL active residential listings (count)",
             "value": 22650,
@@ -1752,23 +1153,6 @@
             "suggestions": [
               "What's driving active listings count swfl?",
               "How does active listings count swfl here compare to other SWFL areas?"
-            ]
-          },
-          {
-            "metric": "signal_transactions_1",
-            "value": "Fort Myers: A renovated single-family residence at 275 Spring Line Drive in The Moorings, Naples sold for $19 million, besting the previous record of $18.3 million — set in January.",
-            "direction": "stable",
-            "label": "Fort Myers — transactions",
-            "variable_type": "categorical",
-            "source": {
-              "url": "https://www.news-press.com/story/money/business/local/2026/11/06/record-19-million-home-sale-in-naples-florida-neighborhood-of-the-moorings-luxury-real-estate/92630699007/",
-              "fetched_at": "2026-11-08T04:26:00Z",
-              "tier": 2,
-              "citation": "Record $19 million home sale in Naples neighborhood of The Moorings: \"[](https://www.news-press.com/)\n[](https://subscribe.news-press.com/rr/nanobar?gps-source=CPTILELEFT&itm_campaign=2026ENTQ4BAU2026&itm_medium=ONSITE&success-url=https%3A%2F%2Fwww.news-press.com%2Fstory%2Fmoney%2Fbusiness%2Flocal%2F2026%2F11%2F06%2Frecord-19-million-home-sale-in-naples-florida-neighborhood-of-the-moorings-luxury-real-estate%2F92630699007%2F)\n[](https://subscribe.news-press.com/rr/masthead?gps-source=CPMASTHEAD&itm_campaign=2026ENTQ4BAU2026&itm_medium=ONSITE&success-url=https%3A%2F%2Fwww.news-press.com%2Fstory%2Fmoney%2Fbusiness%2Flocal%2F2026%2F11%2F06%2Frecord-19-million-home-sale-in-naples-florida-neighborhood-of-the-moorings-luxury-real-estate%2F92630699007%2F)\n[News](https://www.news-press.com/news/) [Cape Coral](https://www.news-press.com/news/cape-coral/) [Sports](https://www.news-press.com/sports/) [Restaurants](https://www.news-press.com/taste/) [Real Estate](https://www.news-press.com/real-estate) [Advertise](https://advertising.usatoday.com/advertise-with-us/?cid=Web_LiQ_Network_AdvertiseWithUs_AdvertiseInquiry&publication=the_news_press&utm_source=local_publication&utm_medium=menu&utm_campaign=advertise_with_us) [Obituaries](https://www.news-press.com/obituaries) [eNewspaper](https://user.news-press.com/user/enewspaper) [Legals](https://www.news-press.com/public-notices)\n[](https://www.news-press.com/search/ \"Search\")\n[](https://www.news-press.com/weather/ \"Weather in Fort Myers: 72°F Sunny\") [](https://subscribe.news-press.com/rr/navsub?gps-source=CPTOPNAVBAR&itm_campaign=2026ENTQ4BAU2026&itm_medium=ONSITE&success-url=https%3A%2F%2Fwww.news-press.com%2Fstory%2Fmoney%2Fbusiness%2Flocal%2F2026%2F11%2F06%2Frecord-19-million-home-sale-in-naples-florida-neighborhood-of-the-moorings-luxury-real-estate%2F92630699007%2F)\n[](https://login.news-press.com/PFTM-GUP/authenticate/?success-url=https%3A%2F%2Fwww.news-press.com%2Fstory%2Fmoney%2Fbusiness%2Flocal%2F2026%2F11%2F06%2Frecord-19-million-home-sale-in-naples-florida-neighborhood-of-the-moorings-luxury-real-estate%2F92630699007%2F&cancel-url=https%3A%2F%2Fwww.news-press.com%2Fstory%2Fmoney%2Fbusiness%2Flocal%2F2026%2F11%2F06%2Frecord-19-million-home-sale-in-naples-florida-neighborhood-of-the-moorings-luxury-real-estate%2F92630699007%2F)\n[](https://www.news-press.com/) [](https://www.news-press.com/)\nLOCAL BUSINESS\n# Luxury Naples estate sets new record of $19 million in The Moorings\n[![Portrait of Laura Layden](https://www.news-press.com/gcdn/authoring/authoring-images/2024/02/08/PNDN/72524348007-ndn-jh-20240126-laura-0001.JPG?crop=3313,3312,x1506,y0&width=48&height=48&format=pjpg&auto=webp) Laura Layden](https://www.naplesnews.com/staff/2647080001/laura-layden/)\nFort Myers News-Press & Naples Daily News\nNov. 6, 2026, 2:54 p.m. ET\nThe Moorings in Naples has a new record home sale.\nA renovated single-family residence at 275 Spring Line Drive sold for $19 million, besting the previous record of $18.3 million — set in January.\nAndrew Christopher, a luxury properties specialist wi\""
-            },
-            "suggestions": [
-              "What's driving signal transactions 1?",
-              "How does signal transactions 1 here compare to other SWFL areas?"
             ]
           },
           {
@@ -1816,7 +1200,7 @@
           "flood-barrier-mode-1 active: 4 barrier ZIPs, worst-case AAL $40,342/insured property",
           "Override \"storm-history-modifier\" fired (priority 70)",
           "permits-commercial-swfl excluded from synthesis (relevance 0.076, below floor 0.1)",
-          "active-rentals-swfl excluded from synthesis (relevance 0.063, below floor 0.1)",
+          "active-rentals-swfl excluded from synthesis (relevance 0.062, below floor 0.1)",
           "No figures published: this source has not yet received its first real SBA FOIA load. A synthetic development sample exists for offline testing only and is never shipped.",
           "Construction-cost PPI metrics (construction_cost_ppi_industrial, construction_cost_ppi_warehouse, construction_cost_ppi_office, construction_cost_ppi_medical_office, construction_cost_ppi_trade_concrete, construction_cost_ppi_trade_roofing, construction_cost_ppi_trade_electrical, construction_cost_ppi_trade_plumbing_hvac) are national BLS series — no SWFL-specific or Lee/Collier breakout exists at BLS for any of them. They ship a real month-over-month direction (unlike MarketBeat's schema-required \"stable\" fallback) but BLS can revise recent observations within ~30 days of first publication.",
           "vacancy_rate_marketbeat_swfl: 15 submarkets report a point-in-time value; v1 does not compute quarter-over-quarter direction, so the \"stable\" label is a schema-required fallback, not a measured trend.",
@@ -1912,6 +1296,7 @@
           "SWFL Inc. covers primarily Lee County projects; Collier County coverage depends on cross-county partnerships and co-announcements.",
           "86 additional live signals not surfaced here (cap 8); the full set is in data_lake.city_pulse.",
           "Each signal is dated current-events context with a per-signal source; freshness is TTL-bounded by topic (breaking 1d → structural 90d).",
+          "Trailing-12-month total-passengers YoY not computable — fewer than 24 monthly rows in the fetched window; direction set neutral.",
           "Construction enforcement split: public notices = confirmed individual actions (hard-parsed violation_type); press releases = announced sweeps (Sonnet-inferred affected_industries). Do not sum them.",
           "Polarity: rising construction notices = bullish (recovery-driven unlicensed activity). Rising ABT notices = bearish (hospitality compliance stress).",
           "Relevance in press releases is determined by Lee/Collier geographic mentions (county or place names) — releases without an explicit place name may be undercounted.",
@@ -1975,7 +1360,6 @@
         "contradicts": [
           "macro-us (bearish) vs macro-florida (bullish)",
           "macro-us (bearish) vs labor-demand-swfl (bullish)",
-          "macro-us (bearish) vs rsw-airport (bullish)",
           "macro-us (bearish) vs market-heat-swfl (bullish)",
           "macro-us (bearish) vs licenses-swfl (bullish)",
           "macro-florida (bullish) vs macro-swfl (bearish)",
@@ -1987,29 +1371,21 @@
           "macro-florida (bullish) vs tier-divergence-swfl (bearish)",
           "macro-florida (bullish) vs home-values-swfl (bearish)",
           "macro-swfl (bearish) vs labor-demand-swfl (bullish)",
-          "macro-swfl (bearish) vs rsw-airport (bullish)",
           "macro-swfl (bearish) vs market-heat-swfl (bullish)",
           "macro-swfl (bearish) vs licenses-swfl (bullish)",
           "sector-credit-swfl (bearish) vs labor-demand-swfl (bullish)",
-          "sector-credit-swfl (bearish) vs rsw-airport (bullish)",
           "sector-credit-swfl (bearish) vs market-heat-swfl (bullish)",
           "sector-credit-swfl (bearish) vs licenses-swfl (bullish)",
           "env-swfl (bearish) vs labor-demand-swfl (bullish)",
-          "env-swfl (bearish) vs rsw-airport (bullish)",
           "env-swfl (bearish) vs market-heat-swfl (bullish)",
           "env-swfl (bearish) vs licenses-swfl (bullish)",
           "properties-lee-value (bearish) vs labor-demand-swfl (bullish)",
-          "properties-lee-value (bearish) vs rsw-airport (bullish)",
           "properties-lee-value (bearish) vs market-heat-swfl (bullish)",
           "properties-lee-value (bearish) vs licenses-swfl (bullish)",
           "labor-demand-swfl (bullish) vs seller-stress-swfl (bearish)",
           "labor-demand-swfl (bullish) vs storm-history-swfl (bearish)",
           "labor-demand-swfl (bullish) vs tier-divergence-swfl (bearish)",
           "labor-demand-swfl (bullish) vs home-values-swfl (bearish)",
-          "rsw-airport (bullish) vs seller-stress-swfl (bearish)",
-          "rsw-airport (bullish) vs storm-history-swfl (bearish)",
-          "rsw-airport (bullish) vs tier-divergence-swfl (bearish)",
-          "rsw-airport (bullish) vs home-values-swfl (bearish)",
           "seller-stress-swfl (bearish) vs market-heat-swfl (bullish)",
           "seller-stress-swfl (bearish) vs licenses-swfl (bullish)",
           "market-heat-swfl (bullish) vs storm-history-swfl (bearish)",
@@ -2028,7 +1404,7 @@
         "relevance": {
           "decay_curve": "weeks",
           "half_life_hours": 720.0000000000001,
-          "computed_at": "2026-11-08T04:26:27.000Z"
+          "computed_at": "2026-11-08T11:24:58.000Z"
         },
         "exogenous_signals": [],
         "conditional_claims": [
