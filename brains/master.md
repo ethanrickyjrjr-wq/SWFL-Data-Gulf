@@ -1,9 +1,9 @@
-<!-- FRESHNESS: v177 | Token: SWFL-7421-v177-20261110-8a3c17a5 -->
+<!-- FRESHNESS: v178 | Token: SWFL-7421-v178-20261110-4959af9b -->
 ---
 brain_id: master
-version: 177
-refined_at: 2026-11-10T04:27:20Z
-freshness_token: SWFL-7421-v177-20261110-8a3c17a5
+version: 178
+refined_at: 2026-11-10T12:52:59Z
+freshness_token: SWFL-7421-v178-20261110-4959af9b
 ttl_seconds: 604800
 pack_hash: be8f0d44e0e6
 context_type: user_saved_reference
@@ -91,7 +91,7 @@ s39 | home-values-swfl brain — https://www.swfldatagulf.com/api/b/home-values-
   {"id":"f017","topic":"upstream :: safety-swfl","fact":"Upstream snapshot — safety-swfl (neutral, magnitude 0.00, confidence 1.00)","value":"safety-swfl as of 2026-10-02: direction neutral, magnitude 0.00, confidence 1.00, trust tier T1, 8 key metric(s). SWFL property crime: 6.8 Part I offenses per 1,000 residents (2025 UCR), -18.7% YoY. Lee (8.0/1k) runs 3.1 points above Collier (4.8/1k).","src":"s01","date":"2026-11-10"},
   {"id":"f018","topic":"upstream :: labor-demand-swfl","fact":"Upstream snapshot — labor-demand-swfl (bullish, magnitude 0.78, confidence 1.00)","value":"labor-demand-swfl as of 2026-10-17: direction bullish, magnitude 0.78, confidence 1.00, trust tier T1, 10 key metric(s). BLS OEWS May 2025 — SWFL workforce. Lee (Cape Coral-Fort Myers MSA): top sector: Office and Administrative Support Occupations (37,050), Construction 2.17× national, employment +1.5% YoY. Collier (Naples MSA): top sector: Food Preparation and Serving Related Occupations (25,250), Construction 1.88× national, employment +1.6% YoY. Source: BLS Occupational Employment and Wage Statistics.","src":"s01","date":"2026-11-10"},
   {"id":"f019","topic":"upstream :: econ-dev-swfl","fact":"Upstream snapshot — econ-dev-swfl (neutral, magnitude 0.35, confidence 0.80)","value":"econ-dev-swfl as of 2026-11-10: direction neutral, magnitude 0.35, confidence 0.80, trust tier T2, 2 key metric(s). SWFL Inc. logged 1 economic development announcement in the last 90 days. Momentum: flat vs prior 90-day window. Source: SWFL Inc. (swflinc.com/blog/), the official Lee County economic development organization.","src":"s01","date":"2026-11-10"},
-  {"id":"f020","topic":"upstream :: city-pulse-swfl","fact":"Upstream snapshot — city-pulse-swfl (neutral, magnitude 0.00, confidence 0.80)","value":"city-pulse-swfl as of 2026-11-10: direction neutral, magnitude 0.00, confidence 0.80, trust tier T2, 8 key metric(s). SWFL city pulse as of 2026-11-10: 93 live current-events signals across 9 cities — Cape Coral (21), Fort Myers (30), Naples (30), Lehigh Acres (1), Golden Gate (1), North Fort Myers (4), East Naples (2), Estero (3), Fort Myers Beach (1). Most current: Cape Coral — Two planes crash-landed in Lee County less than 24 hours apart over the weekend of Nov. 8–9, 2026; the Lee County sheriff reported no injuries in either incident. These are current cited facts only; the cross-vertical read and any direction call live downstream in master.","src":"s01","date":"2026-11-10"},
+  {"id":"f020","topic":"upstream :: city-pulse-swfl","fact":"Upstream snapshot — city-pulse-swfl (neutral, magnitude 0.00, confidence 0.80)","value":"city-pulse-swfl as of 2026-11-10: direction neutral, magnitude 0.00, confidence 0.80, trust tier T2, 8 key metric(s). SWFL city pulse as of 2026-11-10: 93 live current-events signals across 9 cities — Fort Myers (29), Naples (29), Cape Coral (23), Lehigh Acres (1), Golden Gate (1), North Fort Myers (4), East Naples (2), Estero (3), Fort Myers Beach (1). Most current: Fort Myers — Two planes crash-landed in Lee County less than 24 hours apart over the weekend, with no injuries reported, as of Nov. 9, 2026. These are current cited facts only; the cross-vertical read and any direction call live downstream in master.","src":"s01","date":"2026-11-10"},
   {"id":"f021","topic":"upstream :: rsw-airport","fact":"Upstream snapshot — rsw-airport (neutral, magnitude 0.00, confidence 1.00)","value":"rsw-airport as of 2026-11-08: direction neutral, magnitude 0.00, confidence 1.00, trust tier T1, 8 key metric(s). LCPA Aviation April 2026 — RSW 1,152,669 total passengers (-2.2% YoY), 512,534 arrivals / 640,135 departures, 10,797 aircraft operations, 3,463,896 lbs air freight. Source: Lee County Port Authority (flylcpa.com/about-lcpa/reports-and-statistics/).","src":"s01","date":"2026-11-10"},
   {"id":"f022","topic":"upstream :: news-swfl","fact":"Upstream snapshot — news-swfl (neutral, magnitude 0.30, confidence 0.80)","value":"news-swfl as of 2026-11-10: direction neutral, magnitude 0.30, confidence 0.80, trust tier T2, 9 key metric(s). DBPR issued 2 SWFL-relevant press releases in the last 90 days. Top press release topics: enforcement, licensing, construction. Sources: FL DBPR press releases (www2.myfloridalicense.com/press-releases/) and public enforcement notices (www2.myfloridalicense.com/public-notices/).","src":"s01","date":"2026-11-10"},
   {"id":"f023","topic":"upstream :: freshness-pulse","fact":"Upstream snapshot — freshness-pulse (neutral, magnitude 0.00, confidence 0.80)","value":"freshness-pulse as of 2026-11-10: direction neutral, magnitude 0.00, confidence 0.80, trust tier T2, 4 key metric(s). Today's sourced snapshot — Fort Myers median asking price (as of 2026-11-10) $325,000; Naples median asking price (as of 2026-11-10) $650,000; SWFL 30-year fixed mortgage rate (as of 2026-11-05) 7.18%; Cape Coral median asking price (as of 2026-11-10) $399,200. These are cited current facts only; the direction call lives downstream in master.","src":"s01","date":"2026-11-10"},
@@ -116,12 +116,12 @@ s39 | home-values-swfl brain — https://www.swfldatagulf.com/api/b/home-values-
 --- OUTPUT ---
 {
   "brain_id": "master",
-  "version": 177,
-  "refined_at": "2026-11-10T04:27:20Z",
-  "expires": "2026-11-17T04:27:20Z",
+  "version": 178,
+  "refined_at": "2026-11-10T12:52:59Z",
+  "expires": "2026-11-17T12:52:59Z",
   "ttl_seconds": 604800,
   "direction": "mixed",
-  "magnitude": 0.48715823821785487,
+  "magnitude": 0.487158238217855,
   "drivers": [
     {
       "brain_id": "franchise-outcomes",
@@ -583,22 +583,20 @@ s39 | home-values-swfl brain — https://www.swfldatagulf.com/api/b/home-values-
       ]
     },
     {
-      "metric": "active_listings_count_swfl",
-      "label": "SWFL active residential listings (count)",
-      "value": 22650,
+      "metric": "signal_breaking_1",
+      "value": "Fort Myers: Two planes crash-landed in Lee County less than 24 hours apart over the weekend, with no injuries reported, as of Nov. 9, 2026.",
       "direction": "stable",
-      "variable_type": "extensive",
-      "units": "listings",
-      "display_format": "count",
+      "label": "Fort Myers — breaking",
+      "variable_type": "categorical",
       "source": {
-        "url": "https://www.swfldatagulf.com/r/source/listing_active_stats?label=SWFL+active+for-sale+listings+%28aggregated%29&source=realtor.com+for-sale+listings&brain=active-listings-swfl&date_col=scraped_at",
-        "fetched_at": "2026-11-10T04:26:59Z",
+        "url": "https://www.naplesnews.com/story/news/local/2026/11/09/lee-county-sheriff-no-injuries-in-separate-florida-aircraft-incidents/92689034007/",
+        "fetched_at": "2026-11-10T12:52:38Z",
         "tier": 2,
-        "citation": "22,650 active SWFL residential listings as of 2026-08-14"
+        "citation": "Lee County sheriff: No injuries in separate Florida aircraft incidents: \"[](https://www.naplesnews.com/)\n[Two planes crash land in Lee County less than 24 hours apart](https://www.naplesnews.com/story/news/local/2026/11/09/lee-county-sheriff-no-injuries-in-separate-florida-aircraft-incidents/92689034007/)\n[](https://subscribe.naplesnews.com/rr/nanobar?gps-source=CPTILELEFT&itm_campaign=2026ENTQ4BAU2026&itm_medium=ONSITE&success-url=https%3A%2F%2Fwww.naplesnews.com%2Fstory%2Fnews%2Flocal%2F2026%2F11%2F09%2Flee-county-sheriff-no-injuries-in-separate-florida-aircraft-incidents%2F92689034007%2F)\n[](https://subscribe.naplesnews.com/rr/masthead?gps-source=CPMASTHEAD&itm_campaign=2026ENTQ4BAU2026&itm_medium=ONSITE&success-url=https%3A%2F%2Fwww.naplesnews.com%2Fstory%2Fnews%2Flocal%2F2026%2F11%2F09%2Flee-county-sheriff-no-injuries-in-separate-florida-aircraft-incidents%2F92689034007%2F)\n[News](https://www.naplesnews.com/news/) [Sports](https://www.naplesnews.com/sports/) [Real Estate](https://www.naplesnews.com/business/real-estate/) [Restaurants](https://www.naplesnews.com/entertainment/restaurants/) [Opinion](https://www.naplesnews.com/opinion/) [Advertise](https://advertising.usatoday.com/advertise-with-us/?cid=Web_LiQ_Network_AdvertiseWithUs_AdvertiseInquiry&publication=naples_daily_news&utm_source=local_publication&utm_medium=menu&utm_campaign=advertise_with_us) [Obituaries](https://www.naplesnews.com/obituaries) [eNewspaper](https://user.naplesnews.com/user/enewspaper) [Legals](https://www.naplesnews.com/public-notices)\n[](https://www.naplesnews.com/search/ \"Search\")\n[](https://www.naplesnews.com/weather/ \"Weather in Naples: 80°F Mostly Cloudy\") [](https://subscribe.naplesnews.com/rr/navsub?gps-source=CPTOPNAVBAR&itm_campaign=2026ENTQ4BAU2026&itm_medium=ONSITE&success-url=https%3A%2F%2Fwww.naplesnews.com%2Fstory%2Fnews%2Flocal%2F2026%2F11%2F09%2Flee-county-sheriff-no-injuries-in-separate-florida-aircraft-incidents%2F92689034007%2F)\n[](https://login.naplesnews.com/PNDN-GUP/authenticate/?success-url=https%3A%2F%2Fwww.naplesnews.com%2Fstory%2Fnews%2Flocal%2F2026%2F11%2F09%2Flee-county-sheriff-no-injuries-in-separate-florida-aircraft-incidents%2F92689034007%2F&cancel-url=https%3A%2F%2Fwww.naplesnews.com%2Fstory%2Fnews%2Flocal%2F2026%2F11%2F09%2Flee-county-sheriff-no-injuries-in-separate-florida-aircraft-incidents%2F92689034007%2F)\n[](https://www.naplesnews.com/news/) [](https://www.naplesnews.com/news/)\nLOCAL\n# Lee County sheriff: No injuries after 2 planes crash land over weekend\n## The incidents happened less than 24 hours apart in Lee County.\n[![Portrait of Tomas Rodriguez](https://www.naplesnews.com/gcdn/presto/2022/05/08/PFTM/d3b24871-cf32-47ef-8bc4-836f32f48664-tomas58.jpg?crop=2853,2853,x0,y533&width=48&height=48&format=pjpg&auto=webp) Tomas Rodriguez](https://www.naplesnews.com/staff/7430144002/tomas-rodriguez/)\nFort Myers News-Press & Naples Daily News\nNov. 9, 2026, 10:38 a.m. ET\n[](https://www.facebook.com/dialog/share?display=popup&app_id=1703814913224751&href=https%3A%2F%2Fwww.naplesnews.com%2Fstory%2Fnews%2Floc\""
       },
       "suggestions": [
-        "What's driving active listings count swfl?",
-        "How does active listings count swfl here compare to other SWFL areas?"
+        "What's driving signal breaking 1?",
+        "How does signal breaking 1 here compare to other SWFL areas?"
       ]
     },
     {
@@ -645,8 +643,8 @@ s39 | home-values-swfl brain — https://www.swfldatagulf.com/api/b/home-values-
   "caveats": [
     "flood-barrier-mode-1 active: 4 barrier ZIPs, worst-case AAL $40,342/insured property",
     "Override \"storm-history-modifier\" fired (priority 70)",
-    "permits-commercial-swfl excluded from synthesis (relevance 0.073, below floor 0.1)",
-    "active-rentals-swfl excluded from synthesis (relevance 0.060, below floor 0.1)",
+    "permits-commercial-swfl excluded from synthesis (relevance 0.072, below floor 0.1)",
+    "active-rentals-swfl excluded from synthesis (relevance 0.059, below floor 0.1)",
     "No figures published: this source has not yet received its first real SBA FOIA load. A synthetic development sample exists for offline testing only and is never shipped.",
     "Construction-cost PPI metrics (construction_cost_ppi_industrial, construction_cost_ppi_warehouse, construction_cost_ppi_office, construction_cost_ppi_medical_office, construction_cost_ppi_trade_concrete, construction_cost_ppi_trade_roofing, construction_cost_ppi_trade_electrical, construction_cost_ppi_trade_plumbing_hvac) are national BLS series — no SWFL-specific or Lee/Collier breakout exists at BLS for any of them. They ship a real month-over-month direction (unlike MarketBeat's schema-required \"stable\" fallback) but BLS can revise recent observations within ~30 days of first publication.",
     "vacancy_rate_marketbeat_swfl: 15 submarkets report a point-in-time value; v1 does not compute quarter-over-quarter direction, so the \"stable\" label is a schema-required fallback, not a measured trend.",
@@ -840,8 +838,8 @@ s39 | home-values-swfl brain — https://www.swfldatagulf.com/api/b/home-values-
   "upstream_count": 37,
   "relevance": {
     "decay_curve": "weeks",
-    "half_life_hours": 720,
-    "computed_at": "2026-11-10T04:27:20.000Z"
+    "half_life_hours": 719.9999999999999,
+    "computed_at": "2026-11-10T12:52:59.000Z"
   },
   "exogenous_signals": [],
   "conditional_claims": [
