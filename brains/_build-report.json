@@ -1,8 +1,8 @@
 {
   "target": "master",
   "timestamps": {
-    "started": "2026-11-11T11:59:23.924Z",
-    "finished": "2026-11-11T12:04:45.556Z"
+    "started": "2026-11-12T04:25:58.577Z",
+    "finished": "2026-11-12T04:31:25.006Z"
   },
   "source": "live",
   "outcomes": [
@@ -118,31 +118,31 @@
     {
       "packId": "city-pulse-swfl",
       "status": "built",
-      "version": 172,
+      "version": 173,
       "written": true,
       "brainOutput": {
         "brain_id": "city-pulse-swfl",
-        "version": 172,
-        "refined_at": "2026-11-11T12:04:24Z",
-        "expires": "2026-11-12T12:04:24Z",
+        "version": 173,
+        "refined_at": "2026-11-12T04:30:58Z",
+        "expires": "2026-11-13T04:30:58Z",
         "ttl_seconds": 86400,
         "direction": "neutral",
         "magnitude": 0,
         "drivers": [],
         "overrides": [],
-        "conclusion": "SWFL city pulse as of 2026-11-11: 98 live current-events signals across 9 cities — Cape Coral (25), Fort Myers (30), Naples (31), Lehigh Acres (1), Golden Gate (1), North Fort Myers (4), East Naples (2), Estero (3), Fort Myers Beach (1). Most current: Cape Coral — Two planes crash landed in Lee County less than 24 hours apart over the weekend of Nov. 9, 2026, with no injuries reported, according to the Lee County sheriff. These are current cited facts only; the cross-vertical read and any direction call live downstream in master.",
+        "conclusion": "SWFL city pulse as of 2026-11-12: 92 live current-events signals across 9 cities — Naples (29), Cape Coral (23), Fort Myers (29), Lehigh Acres (1), Golden Gate (1), North Fort Myers (4), East Naples (1), Estero (3), Fort Myers Beach (1). Most current: Naples — Two planes crash-landed in Lee County less than 24 hours apart, with no injuries reported in either separate Florida aircraft incident, as of November 9, 2026. These are current cited facts only; the cross-vertical read and any direction call live downstream in master.",
         "key_metrics": [
           {
             "metric": "signal_breaking_1",
-            "value": "Cape Coral: Two planes crash landed in Lee County less than 24 hours apart over the weekend of Nov. 9, 2026, with no injuries reported, according to the Lee County sheriff.",
+            "value": "Naples: Two planes crash-landed in Lee County less than 24 hours apart, with no injuries reported in either separate Florida aircraft incident, as of November 9, 2026.",
             "direction": "stable",
-            "label": "Cape Coral — breaking",
+            "label": "Naples — breaking",
             "variable_type": "categorical",
             "source": {
-              "url": "https://www.news-press.com/story/news/local/2026/11/09/lee-county-sheriff-no-injuries-in-separate-florida-aircraft-incidents/92689034007/",
-              "fetched_at": "2026-11-11T12:04:24Z",
+              "url": "https://www.naplesnews.com/story/money/real-estate/home-improvement-bath/2026/11/08/kitchen-bath-water-damage-repairs/92569539007/",
+              "fetched_at": "2026-11-12T04:30:58Z",
               "tier": 2,
-              "citation": "Lee County sheriff: No injuries in separate Florida aircraft incidents: \"[](https://www.news-press.com/)\n[Two planes crash land in Lee County less than 24 hours apart](https://www.news-press.com/story/news/local/2026/11/09/lee-county-sheriff-no-injuries-in-separate-florida-aircraft-incidents/92689034007/)\n[](https://subscribe.news-press.com/rr/nanobar?gps-source=CPTILELEFT&itm_campaign=2026ENTQ4BAU2026&itm_medium=ONSITE&success-url=https%3A%2F%2Fwww.news-press.com%2Fstory%2Fnews%2Flocal%2F2026%2F11%2F09%2Flee-county-sheriff-no-injuries-in-separate-florida-aircraft-incidents%2F92689034007%2F)\n[](https://subscribe.news-press.com/rr/masthead?gps-source=CPMASTHEAD&itm_campaign=2026ENTQ4BAU2026&itm_medium=ONSITE&success-url=https%3A%2F%2Fwww.news-press.com%2Fstory%2Fnews%2Flocal%2F2026%2F11%2F09%2Flee-county-sheriff-no-injuries-in-separate-florida-aircraft-incidents%2F92689034007%2F)\n[News](https://www.news-press.com/news/) [Cape Coral](https://www.news-press.com/news/cape-coral/) [Sports](https://www.news-press.com/sports/) [Restaurants](https://www.news-press.com/taste/) [Real Estate](https://www.news-press.com/real-estate) [Advertise](https://advertising.usatoday.com/advertise-with-us/?cid=Web_LiQ_Network_AdvertiseWithUs_AdvertiseInquiry&publication=the_news_press&utm_source=local_publication&utm_medium=menu&utm_campaign=advertise_with_us) [Obituaries](https://www.news-press.com/obituaries) [eNewspaper](https://user.news-press.com/user/enewspaper) [Legals](https://www.news-press.com/public-notices)\n[](https://www.news-press.com/search/ \"Search\")\n[](https://www.news-press.com/weather/ \"Weather in Fort Myers: 78°F Mostly Cloudy\") [](https://subscribe.news-press.com/rr/navsub?gps-source=CPTOPNAVBAR&itm_campaign=2026ENTQ4BAU2026&itm_medium=ONSITE&success-url=https%3A%2F%2Fwww.news-press.com%2Fstory%2Fnews%2Flocal%2F2026%2F11%2F09%2Flee-county-sheriff-no-injuries-in-separate-florida-aircraft-incidents%2F92689034007%2F)\n[](https://login.news-press.com/PFTM-GUP/authenticate/?success-url=https%3A%2F%2Fwww.news-press.com%2Fstory%2Fnews%2Flocal%2F2026%2F11%2F09%2Flee-county-sheriff-no-injuries-in-separate-florida-aircraft-incidents%2F92689034007%2F&cancel-url=https%3A%2F%2Fwww.news-press.com%2Fstory%2Fnews%2Flocal%2F2026%2F11%2F09%2Flee-county-sheriff-no-injuries-in-separate-florida-aircraft-incidents%2F92689034007%2F)\n[](https://www.news-press.com/news/) [](https://www.news-press.com/news/)\n[LOCAL](https://www.news-press.com/news/communities/)\n# Lee County sheriff: No injuries after 2 planes crash land over weekend\n## The incidents happened less than 24 hours apart in Lee County.\n[![Portrait of Tomas Rodriguez](https://www.news-press.com/gcdn/presto/2022/05/08/PFTM/d3b24871-cf32-47ef-8bc4-836f32f48664-tomas58.jpg?crop=2853,2853,x0,y533&width=48&height=48&format=pjpg&auto=webp) Tomas Rodriguez](https://www.naplesnews.com/staff/7430144002/tomas-rodriguez/)\nFort Myers News-Press & Naples Daily News\nNov. 9, 2026, 10:38 a.m. ET\n[](https://www.facebook.com/dialog/share?display=popup&app_id=149631068421067&href=https%3A%2F%2Fwww.news-p\""
+              "citation": "Kitchen or bathroom damaged by water? What to fix before remodeling: \"[](https://www.naplesnews.com/)\n[Two planes crash land in Lee County less than 24 hours apart](https://www.naplesnews.com/story/news/local/2026/11/09/lee-county-sheriff-no-injuries-in-separate-florida-aircraft-incidents/92689034007/)\n[](https://subscribe.naplesnews.com/rr/nanobar?gps-source=CPTILELEFT&itm_campaign=2026ENTQ4BAU2026&itm_medium=ONSITE&success-url=https%3A%2F%2Fwww.naplesnews.com%2Fstory%2Fmoney%2Freal-estate%2Fhome-improvement-bath%2F2026%2F11%2F08%2Fkitchen-bath-water-damage-repairs%2F92569539007%2F)\n[](https://subscribe.naplesnews.com/rr/masthead?gps-source=CPMASTHEAD&itm_campaign=2026ENTQ4BAU2026&itm_medium=ONSITE&success-url=https%3A%2F%2Fwww.naplesnews.com%2Fstory%2Fmoney%2Freal-estate%2Fhome-improvement-bath%2F2026%2F11%2F08%2Fkitchen-bath-water-damage-repairs%2F92569539007%2F)\n[News](https://www.naplesnews.com/news/) [Sports](https://www.naplesnews.com/sports/) [Real Estate](https://www.naplesnews.com/business/real-estate/) [Restaurants](https://www.naplesnews.com/entertainment/restaurants/) [Opinion](https://www.naplesnews.com/opinion/) [Advertise](https://advertising.usatoday.com/advertise-with-us/?cid=Web_LiQ_Network_AdvertiseWithUs_AdvertiseInquiry&publication=naples_daily_news&utm_source=local_publication&utm_medium=menu&utm_campaign=advertise_with_us) [Obituaries](https://www.naplesnews.com/obituaries) [eNewspaper](https://user.naplesnews.com/user/enewspaper) [Legals](https://www.naplesnews.com/public-notices)\n[](https://www.naplesnews.com/search/ \"Search\")\n[](https://www.naplesnews.com/weather/ \"Weather in Naples: 80°F Mostly Cloudy\") [](https://subscribe.naplesnews.com/rr/navsub?gps-source=CPTOPNAVBAR&itm_campaign=2026ENTQ4BAU2026&itm_medium=ONSITE&success-url=https%3A%2F%2Fwww.naplesnews.com%2Fstory%2Fmoney%2Freal-estate%2Fhome-improvement-bath%2F2026%2F11%2F08%2Fkitchen-bath-water-damage-repairs%2F92569539007%2F)\n[](https://login.naplesnews.com/PNDN-GUP/authenticate/?success-url=https%3A%2F%2Fwww.naplesnews.com%2Fstory%2Fmoney%2Freal-estate%2Fhome-improvement-bath%2F2026%2F11%2F08%2Fkitchen-bath-water-damage-repairs%2F92569539007%2F&cancel-url=https%3A%2F%2Fwww.naplesnews.com%2Fstory%2Fmoney%2Freal-estate%2Fhome-improvement-bath%2F2026%2F11%2F08%2Fkitchen-bath-water-damage-repairs%2F92569539007%2F)\n[](https://www.naplesnews.com/) [](https://www.naplesnews.com/)\nHOME IMPROVEMENT BATH\n# Renovating a kitchen or bath after water damage? Avoid this mistake\nSuzanne Wright\nUSA TODAY Network - Florida contributor\nNov. 8, 2026, 5:30 a.m. ET\n[](https://www.facebook.com/dialog/share?display=popup&app_id=1703814913224751&href=https%3A%2F%2Fwww.naplesnews.com%2Fstory%2Fmoney%2Freal-estate%2Fhome-improvement-bath%2F2026%2F11%2F08%2Fkitchen-bath-water-damage-repairs%2F92569539007%2F)[](https://x.com/intent/post?url=https%3A%2F%2Fwww.naplesnews.com%2Fstory%2Fmoney%2Freal-estate%2Fhome-improvement-bath%2F2026%2F11%2F08%2Fkitchen-bath-water-damage-repairs%2F92569539007%2F&text=Renovating%20a%20kitchen%20or%20bath%20after%20water%20da\""
             },
             "suggestions": [
               "What's driving signal breaking 1?",
@@ -151,13 +151,13 @@
           },
           {
             "metric": "signal_breaking_2",
-            "value": "Fort Myers: Two planes crash-landed in Lee County less than 24 hours apart over the weekend; the Lee County sheriff reported no injuries in either separate incident, as reported Nov. 9, 2026.",
+            "value": "Cape Coral: Two planes crash landed in Lee County less than 24 hours apart over the weekend of Nov. 9, 2026, with no injuries reported, according to the Lee County sheriff.",
             "direction": "stable",
-            "label": "Fort Myers — breaking",
+            "label": "Cape Coral — breaking",
             "variable_type": "categorical",
             "source": {
               "url": "https://www.news-press.com/story/news/local/2026/11/09/lee-county-sheriff-no-injuries-in-separate-florida-aircraft-incidents/92689034007/",
-              "fetched_at": "2026-11-11T12:04:24Z",
+              "fetched_at": "2026-11-12T04:30:58Z",
               "tier": 2,
               "citation": "Lee County sheriff: No injuries in separate Florida aircraft incidents: \"[](https://www.news-press.com/)\n[Two planes crash land in Lee County less than 24 hours apart](https://www.news-press.com/story/news/local/2026/11/09/lee-county-sheriff-no-injuries-in-separate-florida-aircraft-incidents/92689034007/)\n[](https://subscribe.news-press.com/rr/nanobar?gps-source=CPTILELEFT&itm_campaign=2026ENTQ4BAU2026&itm_medium=ONSITE&success-url=https%3A%2F%2Fwww.news-press.com%2Fstory%2Fnews%2Flocal%2F2026%2F11%2F09%2Flee-county-sheriff-no-injuries-in-separate-florida-aircraft-incidents%2F92689034007%2F)\n[](https://subscribe.news-press.com/rr/masthead?gps-source=CPMASTHEAD&itm_campaign=2026ENTQ4BAU2026&itm_medium=ONSITE&success-url=https%3A%2F%2Fwww.news-press.com%2Fstory%2Fnews%2Flocal%2F2026%2F11%2F09%2Flee-county-sheriff-no-injuries-in-separate-florida-aircraft-incidents%2F92689034007%2F)\n[News](https://www.news-press.com/news/) [Cape Coral](https://www.news-press.com/news/cape-coral/) [Sports](https://www.news-press.com/sports/) [Restaurants](https://www.news-press.com/taste/) [Real Estate](https://www.news-press.com/real-estate) [Advertise](https://advertising.usatoday.com/advertise-with-us/?cid=Web_LiQ_Network_AdvertiseWithUs_AdvertiseInquiry&publication=the_news_press&utm_source=local_publication&utm_medium=menu&utm_campaign=advertise_with_us) [Obituaries](https://www.news-press.com/obituaries) [eNewspaper](https://user.news-press.com/user/enewspaper) [Legals](https://www.news-press.com/public-notices)\n[](https://www.news-press.com/search/ \"Search\")\n[](https://www.news-press.com/weather/ \"Weather in Fort Myers: 78°F Mostly Cloudy\") [](https://subscribe.news-press.com/rr/navsub?gps-source=CPTOPNAVBAR&itm_campaign=2026ENTQ4BAU2026&itm_medium=ONSITE&success-url=https%3A%2F%2Fwww.news-press.com%2Fstory%2Fnews%2Flocal%2F2026%2F11%2F09%2Flee-county-sheriff-no-injuries-in-separate-florida-aircraft-incidents%2F92689034007%2F)\n[](https://login.news-press.com/PFTM-GUP/authenticate/?success-url=https%3A%2F%2Fwww.news-press.com%2Fstory%2Fnews%2Flocal%2F2026%2F11%2F09%2Flee-county-sheriff-no-injuries-in-separate-florida-aircraft-incidents%2F92689034007%2F&cancel-url=https%3A%2F%2Fwww.news-press.com%2Fstory%2Fnews%2Flocal%2F2026%2F11%2F09%2Flee-county-sheriff-no-injuries-in-separate-florida-aircraft-incidents%2F92689034007%2F)\n[](https://www.news-press.com/news/) [](https://www.news-press.com/news/)\n[LOCAL](https://www.news-press.com/news/communities/)\n# Lee County sheriff: No injuries after 2 planes crash land over weekend\n## The incidents happened less than 24 hours apart in Lee County.\n[![Portrait of Tomas Rodriguez](https://www.news-press.com/gcdn/presto/2022/05/08/PFTM/d3b24871-cf32-47ef-8bc4-836f32f48664-tomas58.jpg?crop=2853,2853,x0,y533&width=48&height=48&format=pjpg&auto=webp) Tomas Rodriguez](https://www.naplesnews.com/staff/7430144002/tomas-rodriguez/)\nFort Myers News-Press & Naples Daily News\nNov. 9, 2026, 10:38 a.m. ET\n[](https://www.facebook.com/dialog/share?display=popup&app_id=149631068421067&href=https%3A%2F%2Fwww.news-p\""
             },
@@ -168,13 +168,13 @@
           },
           {
             "metric": "signal_breaking_3",
-            "value": "Naples: Two planes crash-landed in Lee County less than 24 hours apart over the weekend of Nov. 9, 2026; the Lee County Sheriff reported no injuries in either incident.",
+            "value": "Fort Myers: Two planes crash-landed in Lee County less than 24 hours apart over the weekend; the Lee County sheriff reported no injuries in either separate incident, as reported Nov. 9, 2026.",
             "direction": "stable",
-            "label": "Naples — breaking",
+            "label": "Fort Myers — breaking",
             "variable_type": "categorical",
             "source": {
               "url": "https://www.news-press.com/story/news/local/2026/11/09/lee-county-sheriff-no-injuries-in-separate-florida-aircraft-incidents/92689034007/",
-              "fetched_at": "2026-11-11T12:04:24Z",
+              "fetched_at": "2026-11-12T04:30:58Z",
               "tier": 2,
               "citation": "Lee County sheriff: No injuries in separate Florida aircraft incidents: \"[](https://www.news-press.com/)\n[Two planes crash land in Lee County less than 24 hours apart](https://www.news-press.com/story/news/local/2026/11/09/lee-county-sheriff-no-injuries-in-separate-florida-aircraft-incidents/92689034007/)\n[](https://subscribe.news-press.com/rr/nanobar?gps-source=CPTILELEFT&itm_campaign=2026ENTQ4BAU2026&itm_medium=ONSITE&success-url=https%3A%2F%2Fwww.news-press.com%2Fstory%2Fnews%2Flocal%2F2026%2F11%2F09%2Flee-county-sheriff-no-injuries-in-separate-florida-aircraft-incidents%2F92689034007%2F)\n[](https://subscribe.news-press.com/rr/masthead?gps-source=CPMASTHEAD&itm_campaign=2026ENTQ4BAU2026&itm_medium=ONSITE&success-url=https%3A%2F%2Fwww.news-press.com%2Fstory%2Fnews%2Flocal%2F2026%2F11%2F09%2Flee-county-sheriff-no-injuries-in-separate-florida-aircraft-incidents%2F92689034007%2F)\n[News](https://www.news-press.com/news/) [Cape Coral](https://www.news-press.com/news/cape-coral/) [Sports](https://www.news-press.com/sports/) [Restaurants](https://www.news-press.com/taste/) [Real Estate](https://www.news-press.com/real-estate) [Advertise](https://advertising.usatoday.com/advertise-with-us/?cid=Web_LiQ_Network_AdvertiseWithUs_AdvertiseInquiry&publication=the_news_press&utm_source=local_publication&utm_medium=menu&utm_campaign=advertise_with_us) [Obituaries](https://www.news-press.com/obituaries) [eNewspaper](https://user.news-press.com/user/enewspaper) [Legals](https://www.news-press.com/public-notices)\n[](https://www.news-press.com/search/ \"Search\")\n[](https://www.news-press.com/weather/ \"Weather in Fort Myers: 78°F Mostly Cloudy\") [](https://subscribe.news-press.com/rr/navsub?gps-source=CPTOPNAVBAR&itm_campaign=2026ENTQ4BAU2026&itm_medium=ONSITE&success-url=https%3A%2F%2Fwww.news-press.com%2Fstory%2Fnews%2Flocal%2F2026%2F11%2F09%2Flee-county-sheriff-no-injuries-in-separate-florida-aircraft-incidents%2F92689034007%2F)\n[](https://login.news-press.com/PFTM-GUP/authenticate/?success-url=https%3A%2F%2Fwww.news-press.com%2Fstory%2Fnews%2Flocal%2F2026%2F11%2F09%2Flee-county-sheriff-no-injuries-in-separate-florida-aircraft-incidents%2F92689034007%2F&cancel-url=https%3A%2F%2Fwww.news-press.com%2Fstory%2Fnews%2Flocal%2F2026%2F11%2F09%2Flee-county-sheriff-no-injuries-in-separate-florida-aircraft-incidents%2F92689034007%2F)\n[](https://www.news-press.com/news/) [](https://www.news-press.com/news/)\n[LOCAL](https://www.news-press.com/news/communities/)\n# Lee County sheriff: No injuries after 2 planes crash land over weekend\n## The incidents happened less than 24 hours apart in Lee County.\n[![Portrait of Tomas Rodriguez](https://www.news-press.com/gcdn/presto/2022/05/08/PFTM/d3b24871-cf32-47ef-8bc4-836f32f48664-tomas58.jpg?crop=2853,2853,x0,y533&width=48&height=48&format=pjpg&auto=webp) Tomas Rodriguez](https://www.naplesnews.com/staff/7430144002/tomas-rodriguez/)\nFort Myers News-Press & Naples Daily News\nNov. 9, 2026, 10:38 a.m. ET\n[](https://www.facebook.com/dialog/share?display=popup&app_id=149631068421067&href=https%3A%2F%2Fwww.news-p\""
             },
@@ -191,7 +191,7 @@
             "variable_type": "categorical",
             "source": {
               "url": "https://www.news-press.com/story/money/business/local/2026/11/06/record-19-million-home-sale-in-naples-florida-neighborhood-of-the-moorings-luxury-real-estate/92630699007/",
-              "fetched_at": "2026-11-11T12:04:24Z",
+              "fetched_at": "2026-11-12T04:30:58Z",
               "tier": 2,
               "citation": "Record $19 million home sale in Naples neighborhood of The Moorings: \"[](https://www.news-press.com/)\n[Two planes crash land in Lee County less than 24 hours apart](https://www.news-press.com/story/news/local/2026/11/09/lee-county-sheriff-no-injuries-in-separate-florida-aircraft-incidents/92689034007/)\n[](https://subscribe.news-press.com/rr/nanobar?gps-source=CPTILELEFT&itm_campaign=2026ENTQ4BAU2026&itm_medium=ONSITE&success-url=https%3A%2F%2Fwww.news-press.com%2Fstory%2Fmoney%2Fbusiness%2Flocal%2F2026%2F11%2F06%2Frecord-19-million-home-sale-in-naples-florida-neighborhood-of-the-moorings-luxury-real-estate%2F92630699007%2F)\n[](https://subscribe.news-press.com/rr/masthead?gps-source=CPMASTHEAD&itm_campaign=2026ENTQ4BAU2026&itm_medium=ONSITE&success-url=https%3A%2F%2Fwww.news-press.com%2Fstory%2Fmoney%2Fbusiness%2Flocal%2F2026%2F11%2F06%2Frecord-19-million-home-sale-in-naples-florida-neighborhood-of-the-moorings-luxury-real-estate%2F92630699007%2F)\n[News](https://www.news-press.com/news/) [Cape Coral](https://www.news-press.com/news/cape-coral/) [Sports](https://www.news-press.com/sports/) [Restaurants](https://www.news-press.com/taste/) [Real Estate](https://www.news-press.com/real-estate) [Advertise](https://advertising.usatoday.com/advertise-with-us/?cid=Web_LiQ_Network_AdvertiseWithUs_AdvertiseInquiry&publication=the_news_press&utm_source=local_publication&utm_medium=menu&utm_campaign=advertise_with_us) [Obituaries](https://www.news-press.com/obituaries) [eNewspaper](https://user.news-press.com/user/enewspaper) [Legals](https://www.news-press.com/public-notices)\n[](https://www.news-press.com/search/ \"Search\")\n[](https://www.news-press.com/weather/ \"Weather in Fort Myers: 78°F Mostly Cloudy\") [](https://subscribe.news-press.com/rr/navsub?gps-source=CPTOPNAVBAR&itm_campaign=2026ENTQ4BAU2026&itm_medium=ONSITE&success-url=https%3A%2F%2Fwww.news-press.com%2Fstory%2Fmoney%2Fbusiness%2Flocal%2F2026%2F11%2F06%2Frecord-19-million-home-sale-in-naples-florida-neighborhood-of-the-moorings-luxury-real-estate%2F92630699007%2F)\n[](https://login.news-press.com/PFTM-GUP/authenticate/?success-url=https%3A%2F%2Fwww.news-press.com%2Fstory%2Fmoney%2Fbusiness%2Flocal%2F2026%2F11%2F06%2Frecord-19-million-home-sale-in-naples-florida-neighborhood-of-the-moorings-luxury-real-estate%2F92630699007%2F&cancel-url=https%3A%2F%2Fwww.news-press.com%2Fstory%2Fmoney%2Fbusiness%2Flocal%2F2026%2F11%2F06%2Frecord-19-million-home-sale-in-naples-florida-neighborhood-of-the-moorings-luxury-real-estate%2F92630699007%2F)\n[](https://www.news-press.com/) [](https://www.news-press.com/)\nLOCAL BUSINESS\n# Luxury Naples estate sets new record of $19 million in The Moorings\n[![Portrait of Laura Layden](https://www.news-press.com/gcdn/authoring/authoring-images/2024/02/08/PNDN/72524348007-ndn-jh-20240126-laura-0001.JPG?crop=3313,3312,x1506,y0&width=48&height=48&format=pjpg&auto=webp) Laura Layden](https://www.naplesnews.com/staff/2647080001/laura-layden/)\nFort Myers News-Press & Naples Daily News\nNov. 6, 2026, 2:54 p.m. ET\nThe Moorings in Naples has a new record\""
             },
@@ -208,7 +208,7 @@
             "variable_type": "categorical",
             "source": {
               "url": "https://www.naplesnews.com/story/money/business/local/2026/11/06/record-19-million-home-sale-in-naples-florida-neighborhood-of-the-moorings-luxury-real-estate/92630699007/",
-              "fetched_at": "2026-11-11T12:04:24Z",
+              "fetched_at": "2026-11-12T04:30:58Z",
               "tier": 2,
               "citation": "Record $19 million home sale in Naples neighborhood of The Moorings: \"[](https://www.naplesnews.com/)\n[](https://subscribe.naplesnews.com/rr/nanobar?gps-source=CPTILELEFT&itm_campaign=2026ENTQ4BAU2026&itm_medium=ONSITE&success-url=https%3A%2F%2Fwww.naplesnews.com%2Fstory%2Fmoney%2Fbusiness%2Flocal%2F2026%2F11%2F06%2Frecord-19-million-home-sale-in-naples-florida-neighborhood-of-the-moorings-luxury-real-estate%2F92630699007%2F)\n[](https://subscribe.naplesnews.com/rr/masthead?gps-source=CPMASTHEAD&itm_campaign=2026ENTQ4BAU2026&itm_medium=ONSITE&success-url=https%3A%2F%2Fwww.naplesnews.com%2Fstory%2Fmoney%2Fbusiness%2Flocal%2F2026%2F11%2F06%2Frecord-19-million-home-sale-in-naples-florida-neighborhood-of-the-moorings-luxury-real-estate%2F92630699007%2F)\n[News](https://www.naplesnews.com/news/) [Sports](https://www.naplesnews.com/sports/) [Real Estate](https://www.naplesnews.com/business/real-estate/) [Restaurants](https://www.naplesnews.com/entertainment/restaurants/) [Opinion](https://www.naplesnews.com/opinion/) [Advertise](https://advertising.usatoday.com/advertise-with-us/?cid=Web_LiQ_Network_AdvertiseWithUs_AdvertiseInquiry&publication=naples_daily_news&utm_source=local_publication&utm_medium=menu&utm_campaign=advertise_with_us) [Obituaries](https://www.naplesnews.com/obituaries) [eNewspaper](https://user.naplesnews.com/user/enewspaper) [Legals](https://www.naplesnews.com/public-notices)\n[](https://www.naplesnews.com/search/ \"Search\")\n[](https://www.naplesnews.com/weather/ \"Weather in Naples: 74°F Mostly Sunny\") [](https://subscribe.naplesnews.com/rr/navsub?gps-source=CPTOPNAVBAR&itm_campaign=2026ENTQ4BAU2026&itm_medium=ONSITE&success-url=https%3A%2F%2Fwww.naplesnews.com%2Fstory%2Fmoney%2Fbusiness%2Flocal%2F2026%2F11%2F06%2Frecord-19-million-home-sale-in-naples-florida-neighborhood-of-the-moorings-luxury-real-estate%2F92630699007%2F)\n[](https://login.naplesnews.com/PNDN-GUP/authenticate/?success-url=https%3A%2F%2Fwww.naplesnews.com%2Fstory%2Fmoney%2Fbusiness%2Flocal%2F2026%2F11%2F06%2Frecord-19-million-home-sale-in-naples-florida-neighborhood-of-the-moorings-luxury-real-estate%2F92630699007%2F&cancel-url=https%3A%2F%2Fwww.naplesnews.com%2Fstory%2Fmoney%2Fbusiness%2Flocal%2F2026%2F11%2F06%2Frecord-19-million-home-sale-in-naples-florida-neighborhood-of-the-moorings-luxury-real-estate%2F92630699007%2F)\n[](https://www.naplesnews.com/) [](https://www.naplesnews.com/)\n[LOCAL BUSINESS](https://www.naplesnews.com/business/local/)\n# Luxury Naples estate sets new record of $19 million in The Moorings\n[![Portrait of Laura Layden](https://www.naplesnews.com/gcdn/authoring/authoring-images/2024/02/08/PNDN/72524348007-ndn-jh-20240126-laura-0001.JPG?crop=3313,3312,x1506,y0&width=48&height=48&format=pjpg&auto=webp) Laura Layden](https://www.naplesnews.com/staff/2647080001/laura-layden/)\nFort Myers News-Press & Naples Daily News\nNov. 6, 2026, 2:54 p.m. ET\n[](https://www.facebook.com/dialog/share?display=popup&app_id=1703814913224751&href=https%3A%2F%2Fwww.naplesnews.com%2Fstory%2Fmoney%2Fbusiness%2Flocal%2F2026%2F11%2F06%2Frecord-1\""
             },
@@ -225,7 +225,7 @@
             "variable_type": "categorical",
             "source": {
               "url": "https://www.naplesnews.com/story/money/business/local/2026/11/06/record-19-million-home-sale-in-naples-florida-neighborhood-of-the-moorings-luxury-real-estate/92630699007/",
-              "fetched_at": "2026-11-11T12:04:24Z",
+              "fetched_at": "2026-11-12T04:30:58Z",
               "tier": 2,
               "citation": "Record $19 million home sale in Naples neighborhood of The Moorings: \"[](https://www.naplesnews.com/)\n[](https://subscribe.naplesnews.com/rr/nanobar?gps-source=CPTILELEFT&itm_campaign=2026ENTQ4BAU2026&itm_medium=ONSITE&success-url=https%3A%2F%2Fwww.naplesnews.com%2Fstory%2Fmoney%2Fbusiness%2Flocal%2F2026%2F11%2F06%2Frecord-19-million-home-sale-in-naples-florida-neighborhood-of-the-moorings-luxury-real-estate%2F92630699007%2F)\n[](https://subscribe.naplesnews.com/rr/masthead?gps-source=CPMASTHEAD&itm_campaign=2026ENTQ4BAU2026&itm_medium=ONSITE&success-url=https%3A%2F%2Fwww.naplesnews.com%2Fstory%2Fmoney%2Fbusiness%2Flocal%2F2026%2F11%2F06%2Frecord-19-million-home-sale-in-naples-florida-neighborhood-of-the-moorings-luxury-real-estate%2F92630699007%2F)\n[News](https://www.naplesnews.com/news/) [Sports](https://www.naplesnews.com/sports/) [Real Estate](https://www.naplesnews.com/business/real-estate/) [Restaurants](https://www.naplesnews.com/entertainment/restaurants/) [Opinion](https://www.naplesnews.com/opinion/) [Advertise](https://advertising.usatoday.com/advertise-with-us/?cid=Web_LiQ_Network_AdvertiseWithUs_AdvertiseInquiry&publication=naples_daily_news&utm_source=local_publication&utm_medium=menu&utm_campaign=advertise_with_us) [Obituaries](https://www.naplesnews.com/obituaries) [eNewspaper](https://user.naplesnews.com/user/enewspaper) [Legals](https://www.naplesnews.com/public-notices)\n[](https://www.naplesnews.com/search/ \"Search\")\n[](https://www.naplesnews.com/weather/ \"Weather in Naples: 74°F Mostly Sunny\") [](https://subscribe.naplesnews.com/rr/navsub?gps-source=CPTOPNAVBAR&itm_campaign=2026ENTQ4BAU2026&itm_medium=ONSITE&success-url=https%3A%2F%2Fwww.naplesnews.com%2Fstory%2Fmoney%2Fbusiness%2Flocal%2F2026%2F11%2F06%2Frecord-19-million-home-sale-in-naples-florida-neighborhood-of-the-moorings-luxury-real-estate%2F92630699007%2F)\n[](https://login.naplesnews.com/PNDN-GUP/authenticate/?success-url=https%3A%2F%2Fwww.naplesnews.com%2Fstory%2Fmoney%2Fbusiness%2Flocal%2F2026%2F11%2F06%2Frecord-19-million-home-sale-in-naples-florida-neighborhood-of-the-moorings-luxury-real-estate%2F92630699007%2F&cancel-url=https%3A%2F%2Fwww.naplesnews.com%2Fstory%2Fmoney%2Fbusiness%2Flocal%2F2026%2F11%2F06%2Frecord-19-million-home-sale-in-naples-florida-neighborhood-of-the-moorings-luxury-real-estate%2F92630699007%2F)\n[](https://www.naplesnews.com/) [](https://www.naplesnews.com/)\n[LOCAL BUSINESS](https://www.naplesnews.com/business/local/)\n# Luxury Naples estate sets new record of $19 million in The Moorings\n[![Portrait of Laura Layden](https://www.naplesnews.com/gcdn/authoring/authoring-images/2024/02/08/PNDN/72524348007-ndn-jh-20240126-laura-0001.JPG?crop=3313,3312,x1506,y0&width=48&height=48&format=pjpg&auto=webp) Laura Layden](https://www.naplesnews.com/staff/2647080001/laura-layden/)\nFort Myers News-Press & Naples Daily News\nNov. 6, 2026, 2:54 p.m. ET\n[](https://www.facebook.com/dialog/share?display=popup&app_id=1703814913224751&href=https%3A%2F%2Fwww.naplesnews.com%2Fstory%2Fmoney%2Fbusiness%2Flocal%2F2026%2F11%2F06%2Frecord-1\""
             },
@@ -242,7 +242,7 @@
             "variable_type": "categorical",
             "source": {
               "url": "https://www.naplesnews.com/story/money/companies/2026/11/04/target-secures-site-for-new-store-in-lee-county/92587184007/",
-              "fetched_at": "2026-11-11T12:04:24Z",
+              "fetched_at": "2026-11-12T04:30:58Z",
               "tier": 2,
               "citation": "Target secures site for new store in Lee County: \"[](https://www.naplesnews.com/)\n[](https://subscribe.naplesnews.com/rr/nanobar?gps-source=CPTILELEFT&itm_campaign=2026ENTQ4BAU2026&itm_medium=ONSITE&success-url=https%3A%2F%2Fwww.naplesnews.com%2Fstory%2Fmoney%2Fcompanies%2F2026%2F11%2F04%2Ftarget-secures-site-for-new-store-in-lee-county%2F92587184007%2F)\n[](https://subscribe.naplesnews.com/rr/masthead?gps-source=CPMASTHEAD&itm_campaign=2026ENTQ4BAU2026&itm_medium=ONSITE&success-url=https%3A%2F%2Fwww.naplesnews.com%2Fstory%2Fmoney%2Fcompanies%2F2026%2F11%2F04%2Ftarget-secures-site-for-new-store-in-lee-county%2F92587184007%2F)\n[News](https://www.naplesnews.com/news/) [Sports](https://www.naplesnews.com/sports/) [Real Estate](https://www.naplesnews.com/business/real-estate/) [Restaurants](https://www.naplesnews.com/entertainment/restaurants/) [Opinion](https://www.naplesnews.com/opinion/) [Advertise](https://advertising.usatoday.com/advertise-with-us/?cid=Web_LiQ_Network_AdvertiseWithUs_AdvertiseInquiry&publication=naples_daily_news&utm_source=local_publication&utm_medium=menu&utm_campaign=advertise_with_us) [Obituaries](https://www.naplesnews.com/obituaries) [eNewspaper](https://user.naplesnews.com/user/enewspaper) [Legals](https://www.naplesnews.com/public-notices)\n[](https://www.naplesnews.com/search/ \"Search\")\n[](https://www.naplesnews.com/weather/ \"Weather in Naples: 78°F Sunny\") [](https://subscribe.naplesnews.com/rr/navsub?gps-source=CPTOPNAVBAR&itm_campaign=2026ENTQ4BAU2026&itm_medium=ONSITE&success-url=https%3A%2F%2Fwww.naplesnews.com%2Fstory%2Fmoney%2Fcompanies%2F2026%2F11%2F04%2Ftarget-secures-site-for-new-store-in-lee-county%2F92587184007%2F)\n[](https://login.naplesnews.com/PNDN-GUP/authenticate/?success-url=https%3A%2F%2Fwww.naplesnews.com%2Fstory%2Fmoney%2Fcompanies%2F2026%2F11%2F04%2Ftarget-secures-site-for-new-store-in-lee-county%2F92587184007%2F&cancel-url=https%3A%2F%2Fwww.naplesnews.com%2Fstory%2Fmoney%2Fcompanies%2F2026%2F11%2F04%2Ftarget-secures-site-for-new-store-in-lee-county%2F92587184007%2F)\n[](https://www.naplesnews.com/) [](https://www.naplesnews.com/)\nCOMPANIES\n# Target plans new store in growing eastern Lee County\n[![Portrait of Laura Layden](https://www.naplesnews.com/gcdn/authoring/authoring-images/2024/02/08/PNDN/72524348007-ndn-jh-20240126-laura-0001.JPG?crop=3313,3312,x1506,y0&width=48&height=48&format=pjpg&auto=webp) Laura Layden](https://www.naplesnews.com/staff/2647080001/laura-layden/)\nFort Myers News-Press & Naples Daily News\nNov. 4, 2026, 8:30 a.m. ET\nTarget has secured land in eastern Lee County for a new store.\nProperty records show Target Corp. purchased a nearly 21-acre site on the doorstep of Lehigh Acres, along the high-growth State Road 82 and Daniels Parkway corridor. The deal closed on Oct. 28.\n[](https://www.naplesnews.com/)\n[Help](https://help.naplesnews.com) [Accessibility](https://cm.naplesnews.com/accessibility/) [Sitemap](https://www.naplesnews.com/sitemap/) [Terms of Service](https://cm.naplesnews.com/terms/) [Subscription Terms & Conditions](\""
             },
@@ -259,7 +259,7 @@
             "variable_type": "categorical",
             "source": {
               "url": "https://www.naplesnews.com/story/money/companies/2026/11/04/target-secures-site-for-new-store-in-lee-county/92587184007/",
-              "fetched_at": "2026-11-11T12:04:24Z",
+              "fetched_at": "2026-11-12T04:30:58Z",
               "tier": 2,
               "citation": "Target secures site for new store in Lee County: \"[](https://www.naplesnews.com/)\n[](https://subscribe.naplesnews.com/rr/nanobar?gps-source=CPTILELEFT&itm_campaign=2026ENTQ4BAU2026&itm_medium=ONSITE&success-url=https%3A%2F%2Fwww.naplesnews.com%2Fstory%2Fmoney%2Fcompanies%2F2026%2F11%2F04%2Ftarget-secures-site-for-new-store-in-lee-county%2F92587184007%2F)\n[](https://subscribe.naplesnews.com/rr/masthead?gps-source=CPMASTHEAD&itm_campaign=2026ENTQ4BAU2026&itm_medium=ONSITE&success-url=https%3A%2F%2Fwww.naplesnews.com%2Fstory%2Fmoney%2Fcompanies%2F2026%2F11%2F04%2Ftarget-secures-site-for-new-store-in-lee-county%2F92587184007%2F)\n[News](https://www.naplesnews.com/news/) [Sports](https://www.naplesnews.com/sports/) [Real Estate](https://www.naplesnews.com/business/real-estate/) [Restaurants](https://www.naplesnews.com/entertainment/restaurants/) [Opinion](https://www.naplesnews.com/opinion/) [Advertise](https://advertising.usatoday.com/advertise-with-us/?cid=Web_LiQ_Network_AdvertiseWithUs_AdvertiseInquiry&publication=naples_daily_news&utm_source=local_publication&utm_medium=menu&utm_campaign=advertise_with_us) [Obituaries](https://www.naplesnews.com/obituaries) [eNewspaper](https://user.naplesnews.com/user/enewspaper) [Legals](https://www.naplesnews.com/public-notices)\n[](https://www.naplesnews.com/search/ \"Search\")\n[](https://www.naplesnews.com/weather/ \"Weather in Naples: 78°F Sunny\") [](https://subscribe.naplesnews.com/rr/navsub?gps-source=CPTOPNAVBAR&itm_campaign=2026ENTQ4BAU2026&itm_medium=ONSITE&success-url=https%3A%2F%2Fwww.naplesnews.com%2Fstory%2Fmoney%2Fcompanies%2F2026%2F11%2F04%2Ftarget-secures-site-for-new-store-in-lee-county%2F92587184007%2F)\n[](https://login.naplesnews.com/PNDN-GUP/authenticate/?success-url=https%3A%2F%2Fwww.naplesnews.com%2Fstory%2Fmoney%2Fcompanies%2F2026%2F11%2F04%2Ftarget-secures-site-for-new-store-in-lee-county%2F92587184007%2F&cancel-url=https%3A%2F%2Fwww.naplesnews.com%2Fstory%2Fmoney%2Fcompanies%2F2026%2F11%2F04%2Ftarget-secures-site-for-new-store-in-lee-county%2F92587184007%2F)\n[](https://www.naplesnews.com/) [](https://www.naplesnews.com/)\nCOMPANIES\n# Target plans new store in growing eastern Lee County\n[![Portrait of Laura Layden](https://www.naplesnews.com/gcdn/authoring/authoring-images/2024/02/08/PNDN/72524348007-ndn-jh-20240126-laura-0001.JPG?crop=3313,3312,x1506,y0&width=48&height=48&format=pjpg&auto=webp) Laura Layden](https://www.naplesnews.com/staff/2647080001/laura-layden/)\nFort Myers News-Press & Naples Daily News\nNov. 4, 2026, 8:30 a.m. ET\nTarget has secured land in eastern Lee County for a new store.\nProperty records show Target Corp. purchased a nearly 21-acre site on the doorstep of Lehigh Acres, along the high-growth State Road 82 and Daniels Parkway corridor. The deal closed on Oct. 28.\n[](https://www.naplesnews.com/)\n[Help](https://help.naplesnews.com) [Accessibility](https://cm.naplesnews.com/accessibility/) [Sitemap](https://www.naplesnews.com/sitemap/) [Terms of Service](https://cm.naplesnews.com/terms/) [Subscription Terms & Conditions](\""
             },
@@ -327,7 +327,7 @@
                 "key": "34102",
                 "label": "34102",
                 "cells": {
-                  "items": 2,
+                  "items": 1,
                   "latest_fact": "M Development's lease disputes are reshaping downtown Naples (reported in Gulfshore Business).",
                   "latest_place": "downtown Naples",
                   "latest_source": "https://www.gulfshorebusiness.com/news/m-development-lease-battles-reshape-downtown-naples/article_a177f555-23bf-58f7-ad14-81f4bbb6f5e3.html"
@@ -346,7 +346,7 @@
             ],
             "source": {
               "url": "https://www.swfldatagulf.com/r/source/city_pulse",
-              "fetched_at": "2026-11-11T12:04:24Z",
+              "fetched_at": "2026-11-12T04:30:58Z",
               "tier": 2,
               "citation": "Distilled, citation-backed SWFL news signals; each ZIP's items carry per-item source URLs in data_lake.city_pulse."
             },
@@ -354,7 +354,7 @@
           }
         ],
         "caveats": [
-          "90 additional live signals not surfaced here (cap 8); the full set is in data_lake.city_pulse.",
+          "84 additional live signals not surfaced here (cap 8); the full set is in data_lake.city_pulse.",
           "Each signal is dated current-events context with a per-signal source; freshness is TTL-bounded by topic (breaking 1d → structural 90d)."
         ],
         "contradicts": [],
@@ -367,7 +367,7 @@
         "relevance": {
           "decay_curve": "weeks",
           "half_life_hours": 720,
-          "computed_at": "2026-11-11T12:04:24Z"
+          "computed_at": "2026-11-12T04:30:58Z"
         },
         "exogenous_signals": []
       }
@@ -384,8 +384,119 @@
     },
     {
       "packId": "freshness-pulse",
-      "status": "skipped-fresh",
-      "written": false
+      "status": "built",
+      "version": 101,
+      "written": true,
+      "brainOutput": {
+        "brain_id": "freshness-pulse",
+        "version": 101,
+        "refined_at": "2026-11-12T04:30:58Z",
+        "expires": "2026-11-13T04:30:58Z",
+        "ttl_seconds": 86400,
+        "direction": "neutral",
+        "magnitude": 0,
+        "drivers": [],
+        "overrides": [],
+        "conclusion": "Today's sourced snapshot — SWFL 30-year fixed mortgage rate (as of 2026-11-05) 7.18%; Cape Coral median asking price (as of 2026-11-12) $399,200; Fort Myers median asking price (as of 2026-11-12) $325,000; Naples median asking price (as of 2026-11-12) $650,000. These are cited current facts only; the direction call lives downstream in master.",
+        "key_metrics": [
+          {
+            "metric": "freshness_mortgage_30yr_fixed_pct",
+            "value": 7.18,
+            "direction": "stable",
+            "label": "SWFL 30-year fixed mortgage rate (as of 2026-11-05)",
+            "variable_type": "intensive",
+            "units": "percent",
+            "display_format": "percent",
+            "source": {
+              "url": "https://fred.stlouisfed.org/series/MORTGAGE30US",
+              "fetched_at": "2026-11-12T04:23:38.124476+00:00",
+              "tier": 2,
+              "citation": "FRED — current 30-year fixed mortgage rate for SWFL, sourced 2026-11-05"
+            },
+            "suggestions": [
+              "What's driving freshness mortgage 30yr fixed pct?",
+              "How does freshness mortgage 30yr fixed pct here compare to other SWFL areas?"
+            ]
+          },
+          {
+            "metric": "freshness_median_asking_price_cape_coral_usd",
+            "value": 399200,
+            "direction": "stable",
+            "label": "Cape Coral median asking price (as of 2026-11-12)",
+            "variable_type": "extensive",
+            "units": "USD",
+            "display_format": "currency",
+            "source": {
+              "url": "https://www.swfldatagulf.com/desk",
+              "fetched_at": "2026-11-12T04:23:38.124476+00:00",
+              "tier": 2,
+              "citation": "SWFL Data Gulf active-listing inventory — current median asking price for Cape Coral, sourced 2026-11-12"
+            },
+            "suggestions": [
+              "Chart asking rents across the corridors",
+              "What's driving freshness median asking price cape coral usd?",
+              "How does freshness median asking price cape coral usd here compare to other SWFL areas?"
+            ]
+          },
+          {
+            "metric": "freshness_median_asking_price_fort_myers_usd",
+            "value": 325000,
+            "direction": "stable",
+            "label": "Fort Myers median asking price (as of 2026-11-12)",
+            "variable_type": "extensive",
+            "units": "USD",
+            "display_format": "currency",
+            "source": {
+              "url": "https://www.swfldatagulf.com/desk",
+              "fetched_at": "2026-11-12T04:23:38.124476+00:00",
+              "tier": 2,
+              "citation": "SWFL Data Gulf active-listing inventory — current median asking price for Fort Myers, sourced 2026-11-12"
+            },
+            "suggestions": [
+              "Chart asking rents across the corridors",
+              "What's driving freshness median asking price fort myers usd?",
+              "How does freshness median asking price fort myers usd here compare to other SWFL areas?"
+            ]
+          },
+          {
+            "metric": "freshness_median_asking_price_naples_usd",
+            "value": 650000,
+            "direction": "stable",
+            "label": "Naples median asking price (as of 2026-11-12)",
+            "variable_type": "extensive",
+            "units": "USD",
+            "display_format": "currency",
+            "source": {
+              "url": "https://www.swfldatagulf.com/desk",
+              "fetched_at": "2026-11-12T04:23:38.124476+00:00",
+              "tier": 2,
+              "citation": "SWFL Data Gulf active-listing inventory — current median asking price for Naples, sourced 2026-11-12"
+            },
+            "suggestions": [
+              "Chart asking rents across the corridors",
+              "What's driving freshness median asking price naples usd?",
+              "How does freshness median asking price naples usd here compare to other SWFL areas?"
+            ]
+          }
+        ],
+        "detail_tables": [],
+        "caveats": [
+          "Each county-grain number is a single grounded source's current figure, provenance-gated to a real source URL; held anomalies and unsourced (model-memory) numbers are excluded by design."
+        ],
+        "contradicts": [],
+        "confidence": 0.8,
+        "joint_integrity": 1,
+        "confidence_dispersion": 0,
+        "chain_depth": 0,
+        "trust_tier": 2,
+        "upstream_count": 0,
+        "relevance": {
+          "decay_curve": "weeks",
+          "half_life_hours": 720,
+          "computed_at": "2026-11-12T04:30:58Z"
+        },
+        "exogenous_signals": []
+      }
     },
     {
       "packId": "seller-stress-swfl",
@@ -444,8 +555,717 @@
     },
     {
       "packId": "active-listings-swfl",
-      "status": "skipped-fresh",
-      "written": false
+      "status": "built",
+      "version": 55,
+      "written": true,
+      "brainOutput": {
+        "brain_id": "active-listings-swfl",
+        "version": 55,
+        "refined_at": "2026-11-12T04:31:03Z",
+        "expires": "2026-11-14T04:31:03Z",
+        "ttl_seconds": 172800,
+        "direction": "neutral",
+        "magnitude": 0,
+        "drivers": [],
+        "overrides": [],
+        "conclusion": "22,650 active SWFL residential listings, median asking $412,000, avg 231 days on market (active residential listings, as of 2026-08-14). By county: Lee 16,394 (median $369,900), Collier 6,256 (median $649,900), Lee 1 (median $314,900).",
+        "key_metrics": [
+          {
+            "metric": "active_listings_count_swfl",
+            "label": "SWFL active residential listings (count)",
+            "value": 22650,
+            "direction": "stable",
+            "variable_type": "extensive",
+            "units": "listings",
+            "display_format": "count",
+            "source": {
+              "url": "https://www.swfldatagulf.com/r/source/listing_active_stats?label=SWFL+active+for-sale+listings+%28aggregated%29&source=realtor.com+for-sale+listings&brain=active-listings-swfl&date_col=scraped_at",
+              "fetched_at": "2026-11-12T04:31:03Z",
+              "tier": 2,
+              "citation": "22,650 active SWFL residential listings as of 2026-08-14"
+            },
+            "suggestions": [
+              "What's driving active listings count swfl?",
+              "How does active listings count swfl here compare to other SWFL areas?"
+            ]
+          },
+          {
+            "metric": "median_list_price_swfl",
+            "label": "SWFL median asking price (active residential)",
+            "value": 412000,
+            "direction": "stable",
+            "variable_type": "intensive",
+            "units": "USD",
+            "display_format": "currency",
+            "source": {
+              "url": "https://www.swfldatagulf.com/r/source/listing_active_stats?label=SWFL+active+for-sale+listings+%28aggregated%29&source=realtor.com+for-sale+listings&brain=active-listings-swfl&date_col=scraped_at",
+              "fetched_at": "2026-11-12T04:31:03Z",
+              "tier": 2,
+              "citation": "median asking price across 22,650 active SWFL listings: $412,000"
+            },
+            "suggestions": [
+              "What's driving median list price swfl?",
+              "How does median list price swfl here compare to other SWFL areas?"
+            ]
+          },
+          {
+            "metric": "median_annual_tax_swfl",
+            "label": "SWFL median vendor-reported annual property tax",
+            "value": 4008,
+            "direction": "stable",
+            "variable_type": "intensive",
+            "units": "USD",
+            "display_format": "currency",
+            "source": {
+              "url": "https://www.swfldatagulf.com/r/source/listing_active_stats?label=SWFL+active+for-sale+listings+%28aggregated%29&source=realtor.com+for-sale+listings&brain=active-listings-swfl&date_col=scraped_at",
+              "fetched_at": "2026-11-12T04:31:03Z",
+              "tier": 2,
+              "citation": "Median vendor-reported annual property tax across 16,514 SWFL properties with tax history: $4,008"
+            },
+            "suggestions": [
+              "What's driving median annual tax swfl?",
+              "How does median annual tax swfl here compare to other SWFL areas?"
+            ]
+          },
+          {
+            "metric": "avg_days_on_market_swfl",
+            "label": "SWFL average days on market (active residential)",
+            "value": 231,
+            "direction": "stable",
+            "variable_type": "intensive",
+            "units": "days",
+            "display_format": "count",
+            "source": {
+              "url": "https://www.swfldatagulf.com/r/source/listing_active_stats?label=SWFL+active+for-sale+listings+%28aggregated%29&source=realtor.com+for-sale+listings&brain=active-listings-swfl&date_col=scraped_at",
+              "fetched_at": "2026-11-12T04:31:03Z",
+              "tier": 2,
+              "citation": "average days on market across active SWFL listings: 231 days"
+            },
+            "suggestions": [
+              "What's driving avg days on market swfl?",
+              "How does avg days on market swfl here compare to other SWFL areas?"
+            ]
+          }
+        ],
+        "detail_tables": [
+          {
+            "id": "active_listings_by_county",
+            "title": "SWFL active residential listings by county",
+            "grain": "county",
+            "columns": [
+              {
+                "id": "listing_count",
+                "label": "Active listings",
+                "display_format": "count",
+                "units": "listings"
+              },
+              {
+                "id": "median_list_price",
+                "label": "Median asking price",
+                "display_format": "currency",
+                "units": "USD"
+              },
+              {
+                "id": "avg_days_on_market",
+                "label": "Avg days on market",
+                "display_format": "count",
+                "units": "days"
+              }
+            ],
+            "rows": [
+              {
+                "key": "Lee",
+                "label": "Lee",
+                "cells": {
+                  "listing_count": 16394,
+                  "median_list_price": 369900,
+                  "avg_days_on_market": 230
+                }
+              },
+              {
+                "key": "Collier",
+                "label": "Collier",
+                "cells": {
+                  "listing_count": 6256,
+                  "median_list_price": 649900,
+                  "avg_days_on_market": 233
+                }
+              },
+              {
+                "key": "Lee",
+                "label": "Lee",
+                "cells": {
+                  "listing_count": 1,
+                  "median_list_price": 314900,
+                  "avg_days_on_market": null
+                }
+              }
+            ],
+            "source": {
+              "url": "https://www.swfldatagulf.com/r/source/listing_active_stats?label=SWFL+active+for-sale+listings+%28aggregated%29&source=realtor.com+for-sale+listings&brain=active-listings-swfl&date_col=scraped_at",
+              "fetched_at": "2026-11-12T04:31:03Z",
+              "tier": 2,
+              "citation": "Active SWFL residential listings, aggregated per grain in SQL (listing_active_stats) as of 2026-08-14"
+            }
+          },
+          {
+            "id": "active_listings_by_zip",
+            "title": "SWFL active residential listings by ZIP",
+            "grain": "zip",
+            "columns": [
+              {
+                "id": "listing_count",
+                "label": "Active listings",
+                "display_format": "count",
+                "units": "listings"
+              },
+              {
+                "id": "median_list_price",
+                "label": "Median asking price",
+                "display_format": "currency",
+                "units": "USD"
+              },
+              {
+                "id": "avg_days_on_market",
+                "label": "Avg days on market",
+                "display_format": "count",
+                "units": "days"
+              }
+            ],
+            "rows": [
+              {
+                "key": "33993",
+                "label": "33993 (Lee)",
+                "cells": {
+                  "listing_count": 1146,
+                  "median_list_price": 393950,
+                  "avg_days_on_market": 219
+                }
+              },
+              {
+                "key": "33908",
+                "label": "33908 (Lee)",
+                "cells": {
+                  "listing_count": 1008,
+                  "median_list_price": 330000,
+                  "avg_days_on_market": 255
+                }
+              },
+              {
+                "key": "33914",
+                "label": "33914 (Lee)",
+                "cells": {
+                  "listing_count": 867,
+                  "median_list_price": 525000,
+                  "avg_days_on_market": 225
+                }
+              },
+              {
+                "key": "33917",
+                "label": "33917 (Lee)",
+                "cells": {
+                  "listing_count": 833,
+                  "median_list_price": 205900,
+                  "avg_days_on_market": 228
+                }
+              },
+              {
+                "key": "33909",
+                "label": "33909 (Lee)",
+                "cells": {
+                  "listing_count": 794,
+                  "median_list_price": 339900,
+                  "avg_days_on_market": 205
+                }
+              },
+              {
+                "key": "34135",
+                "label": "34135 (Lee)",
+                "cells": {
+                  "listing_count": 771,
+                  "median_list_price": 458560,
+                  "avg_days_on_market": 230
+                }
+              },
+              {
+                "key": "33974",
+                "label": "33974 (Lee)",
+                "cells": {
+                  "listing_count": 735,
+                  "median_list_price": 322000,
+                  "avg_days_on_market": 193
+                }
+              },
+              {
+                "key": "34120",
+                "label": "34120 (Collier)",
+                "cells": {
+                  "listing_count": 704,
+                  "median_list_price": 636500,
+                  "avg_days_on_market": 206
+                }
+              },
+              {
+                "key": "33904",
+                "label": "33904 (Lee)",
+                "cells": {
+                  "listing_count": 665,
+                  "median_list_price": 420000,
+                  "avg_days_on_market": 220
+                }
+              },
+              {
+                "key": "33913",
+                "label": "33913 (Lee)",
+                "cells": {
+                  "listing_count": 626,
+                  "median_list_price": 469000,
+                  "avg_days_on_market": 211
+                }
+              },
+              {
+                "key": "33971",
+                "label": "33971 (Lee)",
+                "cells": {
+                  "listing_count": 624,
+                  "median_list_price": 319900,
+                  "avg_days_on_market": 210
+                }
+              },
+              {
+                "key": "34114",
+                "label": "34114 (Collier)",
+                "cells": {
+                  "listing_count": 610,
+                  "median_list_price": 549000,
+                  "avg_days_on_market": 224
+                }
+              },
+              {
+                "key": "33931",
+                "label": "33931 (Lee)",
+                "cells": {
+                  "listing_count": 596,
+                  "median_list_price": 675000,
+                  "avg_days_on_market": 271
+                }
+              },
+              {
+                "key": "33928",
+                "label": "33928 (Lee)",
+                "cells": {
+                  "listing_count": 595,
+                  "median_list_price": 539000,
+                  "avg_days_on_market": 208
+                }
+              },
+              {
+                "key": "33903",
+                "label": "33903 (Lee)",
+                "cells": {
+                  "listing_count": 563,
+                  "median_list_price": 148000,
+                  "avg_days_on_market": 247
+                }
+              },
+              {
+                "key": "34112",
+                "label": "34112 (Collier)",
+                "cells": {
+                  "listing_count": 558,
+                  "median_list_price": 339999,
+                  "avg_days_on_market": 233
+                }
+              },
+              {
+                "key": "33919",
+                "label": "33919 (Lee)",
+                "cells": {
+                  "listing_count": 533,
+                  "median_list_price": 249000,
+                  "avg_days_on_market": 229
+                }
+              },
+              {
+                "key": "33905",
+                "label": "33905 (Lee)",
+                "cells": {
+                  "listing_count": 519,
+                  "median_list_price": 354000,
+                  "avg_days_on_market": 217
+                }
+              },
+              {
+                "key": "34145",
+                "label": "34145 (Collier)",
+                "cells": {
+                  "listing_count": 493,
+                  "median_list_price": 949000,
+                  "avg_days_on_market": 230
+                }
+              },
+              {
+                "key": "33991",
+                "label": "33991 (Lee)",
+                "cells": {
+                  "listing_count": 477,
+                  "median_list_price": 450000,
+                  "avg_days_on_market": 216
+                }
+              },
+              {
+                "key": "33972",
+                "label": "33972 (Lee)",
+                "cells": {
+                  "listing_count": 466,
+                  "median_list_price": 355000,
+                  "avg_days_on_market": 202
+                }
+              },
+              {
+                "key": "33936",
+                "label": "33936 (Lee)",
+                "cells": {
+                  "listing_count": 465,
+                  "median_list_price": 245000,
+                  "avg_days_on_market": 199
+                }
+              },
+              {
+                "key": "33976",
+                "label": "33976 (Lee)",
+                "cells": {
+                  "listing_count": 463,
+                  "median_list_price": 329000,
+                  "avg_days_on_market": 217
+                }
+              },
+              {
+                "key": "34134",
+                "label": "34134 (Lee)",
+                "cells": {
+                  "listing_count": 439,
+                  "median_list_price": 799000,
+                  "avg_days_on_market": 267
+                }
+              },
+              {
+                "key": "34102",
+                "label": "34102 (Collier)",
+                "cells": {
+                  "listing_count": 432,
+                  "median_list_price": 3200000,
+                  "avg_days_on_market": 303
+                }
+              },
+              {
+                "key": "34119",
+                "label": "34119 (Collier)",
+                "cells": {
+                  "listing_count": 424,
+                  "median_list_price": 689000,
+                  "avg_days_on_market": 217
+                }
+              },
+              {
+                "key": "34110",
+                "label": "34110 (Collier)",
+                "cells": {
+                  "listing_count": 410,
+                  "median_list_price": 684900,
+                  "avg_days_on_market": 236
+                }
+              },
+              {
+                "key": "34108",
+                "label": "34108 (Collier)",
+                "cells": {
+                  "listing_count": 406,
+                  "median_list_price": 1299000,
+                  "avg_days_on_market": 248
+                }
+              },
+              {
+                "key": "34113",
+                "label": "34113 (Collier)",
+                "cells": {
+                  "listing_count": 402,
+                  "median_list_price": 522450,
+                  "avg_days_on_market": 236
+                }
+              },
+              {
+                "key": "33957",
+                "label": "33957 (Lee)",
+                "cells": {
+                  "listing_count": 378,
+                  "median_list_price": 954500,
+                  "avg_days_on_market": 312
+                }
+              },
+              {
+                "key": "33990",
+                "label": "33990 (Lee)",
+                "cells": {
+                  "listing_count": 354,
+                  "median_list_price": 399000,
+                  "avg_days_on_market": 205
+                }
+              },
+              {
+                "key": "34103",
+                "label": "34103 (Collier)",
+                "cells": {
+                  "listing_count": 332,
+                  "median_list_price": 1495000,
+                  "avg_days_on_market": 250
+                }
+              },
+              {
+                "key": "34142",
+                "label": "34142 (Collier)",
+                "cells": {
+                  "listing_count": 326,
+                  "median_list_price": 435748,
+                  "avg_days_on_market": 193
+                }
+              },
+              {
+                "key": "33912",
+                "label": "33912 (Lee)",
+                "cells": {
+                  "listing_count": 308,
+                  "median_list_price": 349900,
+                  "avg_days_on_market": 229
+                }
+              },
+              {
+                "key": "33907",
+                "label": "33907 (Lee)",
+                "cells": {
+                  "listing_count": 285,
+                  "median_list_price": 184000,
+                  "avg_days_on_market": 231
+                }
+              },
+              {
+                "key": "34109",
+                "label": "34109 (Collier)",
+                "cells": {
+                  "listing_count": 281,
+                  "median_list_price": 745000,
+                  "avg_days_on_market": 218
+                }
+              },
+              {
+                "key": "34104",
+                "label": "34104 (Collier)",
+                "cells": {
+                  "listing_count": 271,
+                  "median_list_price": 390000,
+                  "avg_days_on_market": 218
+                }
+              },
+              {
+                "key": "33916",
+                "label": "33916 (Lee)",
+                "cells": {
+                  "listing_count": 266,
+                  "median_list_price": 302450,
+                  "avg_days_on_market": 443
+                }
+              },
+              {
+                "key": "33901",
+                "label": "33901 (Lee)",
+                "cells": {
+                  "listing_count": 264,
+                  "median_list_price": 315000,
+                  "avg_days_on_market": 248
+                }
+              },
+              {
+                "key": "33967",
+                "label": "33967 (Lee)",
+                "cells": {
+                  "listing_count": 230,
+                  "median_list_price": 399000,
+                  "avg_days_on_market": 198
+                }
+              },
+              {
+                "key": "33920",
+                "label": "33920 (Lee)",
+                "cells": {
+                  "listing_count": 223,
+                  "median_list_price": 426053,
+                  "avg_days_on_market": 205
+                }
+              },
+              {
+                "key": "33973",
+                "label": "33973 (Lee)",
+                "cells": {
+                  "listing_count": 211,
+                  "median_list_price": 472000,
+                  "avg_days_on_market": 211
+                }
+              },
+              {
+                "key": "34105",
+                "label": "34105 (Collier)",
+                "cells": {
+                  "listing_count": 197,
+                  "median_list_price": 390000,
+                  "avg_days_on_market": 219
+                }
+              },
+              {
+                "key": "33966",
+                "label": "33966 (Lee)",
+                "cells": {
+                  "listing_count": 174,
+                  "median_list_price": 319750,
+                  "avg_days_on_market": 205
+                }
+              },
+              {
+                "key": "34117",
+                "label": "34117 (Collier)",
+                "cells": {
+                  "listing_count": 170,
+                  "median_list_price": 772499,
+                  "avg_days_on_market": 215
+                }
+              },
+              {
+                "key": "33924",
+                "label": "33924 (Lee)",
+                "cells": {
+                  "listing_count": 133,
+                  "median_list_price": 1499000,
+                  "avg_days_on_market": 319
+                }
+              },
+              {
+                "key": "33922",
+                "label": "33922 (Lee)",
+                "cells": {
+                  "listing_count": 118,
+                  "median_list_price": 482450,
+                  "avg_days_on_market": 254
+                }
+              },
+              {
+                "key": "33956",
+                "label": "33956 (Lee)",
+                "cells": {
+                  "listing_count": 105,
+                  "median_list_price": 588500,
+                  "avg_days_on_market": 267
+                }
+              },
+              {
+                "key": "34116",
+                "label": "34116 (Collier)",
+                "cells": {
+                  "listing_count": 91,
+                  "median_list_price": 589000,
+                  "avg_days_on_market": 197
+                }
+              },
+              {
+                "key": "33921",
+                "label": "33921 (Lee)",
+                "cells": {
+                  "listing_count": 44,
+                  "median_list_price": 3985000,
+                  "avg_days_on_market": 312
+                }
+              },
+              {
+                "key": "34138",
+                "label": "34138 (Collier)",
+                "cells": {
+                  "listing_count": 31,
+                  "median_list_price": 185000,
+                  "avg_days_on_market": 494
+                }
+              },
+              {
+                "key": "34139",
+                "label": "34139 (Collier)",
+                "cells": {
+                  "listing_count": 29,
+                  "median_list_price": 349000,
+                  "avg_days_on_market": 316
+                }
+              },
+              {
+                "key": "34140",
+                "label": "34140 (Collier)",
+                "cells": {
+                  "listing_count": 16,
+                  "median_list_price": 525000,
+                  "avg_days_on_market": 380
+                }
+              },
+              {
+                "key": "34137",
+                "label": "34137 (Collier)",
+                "cells": {
+                  "listing_count": 2,
+                  "median_list_price": 290000,
+                  "avg_days_on_market": 186
+                }
+              },
+              {
+                "key": "34141",
+                "label": "34141 (Collier)",
+                "cells": {
+                  "listing_count": 2,
+                  "median_list_price": 269500,
+                  "avg_days_on_market": 204
+                }
+              }
+            ],
+            "source": {
+              "url": "https://www.swfldatagulf.com/r/source/listing_active_stats?label=SWFL+active+for-sale+listings+%28aggregated%29&source=realtor.com+for-sale+listings&brain=active-listings-swfl&date_col=scraped_at",
+              "fetched_at": "2026-11-12T04:31:03Z",
+              "tier": 2,
+              "citation": "Active SWFL residential listings, aggregated per grain in SQL (listing_active_stats) as of 2026-08-14"
+            }
+          }
+        ],
+        "caveats": [
+          "List-side only: asking prices and days-on-market for ACTIVE listings — not sold/closed prices (that is the closed-sale records lane).",
+          "Median asking price spans ALL active listings INCLUDING vacant land/lots — in lot-heavy areas this pulls the median well below typical home prices. Use the property_type field or the per-county/ZIP detail to separate homes from land.",
+          "Daily snapshot — broad SWFL coverage but not comprehensive. Direction is neutral on any one day; the day-over-day diff is what reads the inventory trend.",
+          "Source is realtor.com for-sale listings; a direct licensed MLS/IDX feed can swap into the same table when credentialed.",
+          "Annual property tax is vendor-reported (not a county tax bill) and not yet validated against county appraiser records — treat as directional, not authoritative. Covers only properties we have probed, not the full tax roll."
+        ],
+        "contradicts": [],
+        "confidence": 0.8,
+        "joint_integrity": 1,
+        "confidence_dispersion": 0,
+        "chain_depth": 0,
+        "trust_tier": 2,
+        "upstream_count": 0,
+        "relevance": {
+          "decay_curve": "weeks",
+          "half_life_hours": 720,
+          "computed_at": "2026-11-12T04:31:03Z"
+        },
+        "exogenous_signals": [],
+        "grain_boundary": {
+          "not_available": [
+            "Sold / closed sale prices — active asking prices only, not closed transactions",
+            "Per-listing history or price-cut events — current snapshot only",
+            "Rental listings — sale listings only"
+          ],
+          "finest_grain": "zip-snapshot"
+        }
+      }
     },
     {
       "packId": "active-rentals-swfl",
@@ -468,16 +1288,16 @@
     {
       "packId": "master",
       "status": "built",
-      "version": 180,
+      "version": 181,
       "written": true,
       "brainOutput": {
         "brain_id": "master",
-        "version": 180,
-        "refined_at": "2026-11-11T12:04:45Z",
-        "expires": "2026-11-18T12:04:45Z",
+        "version": 181,
+        "refined_at": "2026-11-12T04:31:24Z",
+        "expires": "2026-11-19T04:31:24Z",
         "ttl_seconds": 604800,
         "direction": "mixed",
-        "magnitude": 0.5060637806176045,
+        "magnitude": 0.5060637806176047,
         "drivers": [
           {
             "brain_id": "franchise-outcomes",
@@ -939,20 +1759,22 @@
             ]
           },
           {
-            "metric": "signal_breaking_1",
-            "value": "Cape Coral: Two planes crash landed in Lee County less than 24 hours apart over the weekend of Nov. 9, 2026, with no injuries reported, according to the Lee County sheriff.",
+            "metric": "active_listings_count_swfl",
+            "label": "SWFL active residential listings (count)",
+            "value": 22650,
             "direction": "stable",
-            "label": "Cape Coral — breaking",
-            "variable_type": "categorical",
+            "variable_type": "extensive",
+            "units": "listings",
+            "display_format": "count",
             "source": {
-              "url": "https://www.news-press.com/story/news/local/2026/11/09/lee-county-sheriff-no-injuries-in-separate-florida-aircraft-incidents/92689034007/",
-              "fetched_at": "2026-11-11T12:04:24Z",
+              "url": "https://www.swfldatagulf.com/r/source/listing_active_stats?label=SWFL+active+for-sale+listings+%28aggregated%29&source=realtor.com+for-sale+listings&brain=active-listings-swfl&date_col=scraped_at",
+              "fetched_at": "2026-11-12T04:31:03Z",
               "tier": 2,
-              "citation": "Lee County sheriff: No injuries in separate Florida aircraft incidents: \"[](https://www.news-press.com/)\n[Two planes crash land in Lee County less than 24 hours apart](https://www.news-press.com/story/news/local/2026/11/09/lee-county-sheriff-no-injuries-in-separate-florida-aircraft-incidents/92689034007/)\n[](https://subscribe.news-press.com/rr/nanobar?gps-source=CPTILELEFT&itm_campaign=2026ENTQ4BAU2026&itm_medium=ONSITE&success-url=https%3A%2F%2Fwww.news-press.com%2Fstory%2Fnews%2Flocal%2F2026%2F11%2F09%2Flee-county-sheriff-no-injuries-in-separate-florida-aircraft-incidents%2F92689034007%2F)\n[](https://subscribe.news-press.com/rr/masthead?gps-source=CPMASTHEAD&itm_campaign=2026ENTQ4BAU2026&itm_medium=ONSITE&success-url=https%3A%2F%2Fwww.news-press.com%2Fstory%2Fnews%2Flocal%2F2026%2F11%2F09%2Flee-county-sheriff-no-injuries-in-separate-florida-aircraft-incidents%2F92689034007%2F)\n[News](https://www.news-press.com/news/) [Cape Coral](https://www.news-press.com/news/cape-coral/) [Sports](https://www.news-press.com/sports/) [Restaurants](https://www.news-press.com/taste/) [Real Estate](https://www.news-press.com/real-estate) [Advertise](https://advertising.usatoday.com/advertise-with-us/?cid=Web_LiQ_Network_AdvertiseWithUs_AdvertiseInquiry&publication=the_news_press&utm_source=local_publication&utm_medium=menu&utm_campaign=advertise_with_us) [Obituaries](https://www.news-press.com/obituaries) [eNewspaper](https://user.news-press.com/user/enewspaper) [Legals](https://www.news-press.com/public-notices)\n[](https://www.news-press.com/search/ \"Search\")\n[](https://www.news-press.com/weather/ \"Weather in Fort Myers: 78°F Mostly Cloudy\") [](https://subscribe.news-press.com/rr/navsub?gps-source=CPTOPNAVBAR&itm_campaign=2026ENTQ4BAU2026&itm_medium=ONSITE&success-url=https%3A%2F%2Fwww.news-press.com%2Fstory%2Fnews%2Flocal%2F2026%2F11%2F09%2Flee-county-sheriff-no-injuries-in-separate-florida-aircraft-incidents%2F92689034007%2F)\n[](https://login.news-press.com/PFTM-GUP/authenticate/?success-url=https%3A%2F%2Fwww.news-press.com%2Fstory%2Fnews%2Flocal%2F2026%2F11%2F09%2Flee-county-sheriff-no-injuries-in-separate-florida-aircraft-incidents%2F92689034007%2F&cancel-url=https%3A%2F%2Fwww.news-press.com%2Fstory%2Fnews%2Flocal%2F2026%2F11%2F09%2Flee-county-sheriff-no-injuries-in-separate-florida-aircraft-incidents%2F92689034007%2F)\n[](https://www.news-press.com/news/) [](https://www.news-press.com/news/)\n[LOCAL](https://www.news-press.com/news/communities/)\n# Lee County sheriff: No injuries after 2 planes crash land over weekend\n## The incidents happened less than 24 hours apart in Lee County.\n[![Portrait of Tomas Rodriguez](https://www.news-press.com/gcdn/presto/2022/05/08/PFTM/d3b24871-cf32-47ef-8bc4-836f32f48664-tomas58.jpg?crop=2853,2853,x0,y533&width=48&height=48&format=pjpg&auto=webp) Tomas Rodriguez](https://www.naplesnews.com/staff/7430144002/tomas-rodriguez/)\nFort Myers News-Press & Naples Daily News\nNov. 9, 2026, 10:38 a.m. ET\n[](https://www.facebook.com/dialog/share?display=popup&app_id=149631068421067&href=https%3A%2F%2Fwww.news-p\""
+              "citation": "22,650 active SWFL residential listings as of 2026-08-14"
             },
             "suggestions": [
-              "What's driving signal breaking 1?",
-              "How does signal breaking 1 here compare to other SWFL areas?"
+              "What's driving active listings count swfl?",
+              "How does active listings count swfl here compare to other SWFL areas?"
             ]
           },
           {
@@ -999,8 +1821,8 @@
         "caveats": [
           "flood-barrier-mode-1 active: 4 barrier ZIPs, worst-case AAL $40,342/insured property",
           "Override \"storm-history-modifier\" fired (priority 70)",
-          "permits-commercial-swfl excluded from synthesis (relevance 0.071, below floor 0.1)",
-          "active-rentals-swfl excluded from synthesis (relevance 0.058, below floor 0.1)",
+          "permits-commercial-swfl excluded from synthesis (relevance 0.070, below floor 0.1)",
+          "active-rentals-swfl excluded from synthesis (relevance 0.057, below floor 0.1)",
           "No figures published: this source has not yet received its first real SBA FOIA load. A synthetic development sample exists for offline testing only and is never shipped.",
           "Construction-cost PPI metrics (construction_cost_ppi_industrial, construction_cost_ppi_warehouse, construction_cost_ppi_office, construction_cost_ppi_medical_office, construction_cost_ppi_trade_concrete, construction_cost_ppi_trade_roofing, construction_cost_ppi_trade_electrical, construction_cost_ppi_trade_plumbing_hvac) are national BLS series — no SWFL-specific or Lee/Collier breakout exists at BLS for any of them. They ship a real month-over-month direction (unlike MarketBeat's schema-required \"stable\" fallback) but BLS can revise recent observations within ~30 days of first publication.",
           "vacancy_rate_marketbeat_swfl: 15 submarkets report a point-in-time value; v1 does not compute quarter-over-quarter direction, so the \"stable\" label is a schema-required fallback, not a measured trend.",
@@ -1094,7 +1916,7 @@
           "1 of 10 announcements in the last 90 days matched qualifying categories (relocation, expansion, grant, infrastructure); the rest are general chamber/policy posts excluded from the momentum count.",
           "Investment and job figures reflect disclosures at announcement time; actual outcomes may vary as projects develop.",
           "SWFL Inc. covers primarily Lee County projects; Collier County coverage depends on cross-county partnerships and co-announcements.",
-          "90 additional live signals not surfaced here (cap 8); the full set is in data_lake.city_pulse.",
+          "84 additional live signals not surfaced here (cap 8); the full set is in data_lake.city_pulse.",
           "Each signal is dated current-events context with a per-signal source; freshness is TTL-bounded by topic (breaking 1d → structural 90d).",
           "Trailing-12-month total-passengers YoY not computable — fewer than 24 monthly rows in the fetched window; direction set neutral.",
           "Construction enforcement split: public notices = confirmed individual actions (hard-parsed violation_type); press releases = announced sweeps (Sonnet-inferred affected_industries). Do not sum them.",
@@ -1155,8 +1977,8 @@
           "~50% of SWFL buyers (≈70% for condos) pay cash and insulate the luxury tier — a holding or rising top tier is part of the K-shape, not a bullish signal on its own.",
           "Covers 50 SWFL ZIPs holding BOTH a starter and a luxury tier; ZIPs lacking one tier are excluded from the divergence.",
           "Upstream brain 'active-rentals-swfl' was stale at build time (expired 2026-07-19).",
-          "Upstream brain 'env-swfl' failed to rebuild on 2026-11-11; using last good read from 2026-11-06 (v33).",
-          "Upstream brain 'active-rentals-swfl' failed to rebuild on 2026-11-11; using last good read from 2026-07-11 (v3)."
+          "Upstream brain 'env-swfl' failed to rebuild on 2026-11-12; using last good read from 2026-11-06 (v33).",
+          "Upstream brain 'active-rentals-swfl' failed to rebuild on 2026-11-12; using last good read from 2026-07-11 (v3)."
         ],
         "contradicts": [
           "macro-us (bearish) vs macro-florida (bullish)",
@@ -1196,7 +2018,7 @@
         "relevance": {
           "decay_curve": "weeks",
           "half_life_hours": 720,
-          "computed_at": "2026-11-11T12:04:45.000Z"
+          "computed_at": "2026-11-12T04:31:24.000Z"
         },
         "exogenous_signals": [],
         "conditional_claims": [
