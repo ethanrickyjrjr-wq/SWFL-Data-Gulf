@@ -1,0 +1,18 @@
+{
+  "summary": {
+    "kind": "condo-baseline-summary",
+    "buildings_lee": 1426,
+    "buildings_collier": 926,
+    "buildings_with_sirs_lee": 900,
+    "buildings_with_sirs_collier": 700,
+    "collier_delinquent": 18,
+    "collier_cycle_completed": 553,
+    "collier_not_due": 353,
+    "xref_total": 1366,
+    "xref_accepted": 1000,
+    "xref_llm_tiebreak": 120,
+    "xref_needs_review": 60,
+    "xref_unmatched": 306,
+    "latest_scraped_at": "2026-08-30T05:23:52Z"
+  }
+}
