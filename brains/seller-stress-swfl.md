@@ -1,9 +1,9 @@
-<!-- FRESHNESS: v11 | Token: SWFL-7421-v11-20261016-e841a316 -->
+<!-- FRESHNESS: v12 | Token: SWFL-7421-v12-20261115-5497052c -->
 ---
 brain_id: seller-stress-swfl
-version: 11
-refined_at: 2026-10-16T04:26:11Z
-freshness_token: SWFL-7421-v11-20261016-e841a316
+version: 12
+refined_at: 2026-11-15T04:26:33Z
+freshness_token: SWFL-7421-v12-20261115-5497052c
 ttl_seconds: 2592000
 pack_hash: 881f9d99cd4a
 context_type: user_saved_reference
@@ -30,21 +30,21 @@ SCOPE: SWFL seller stress composite score (0-100) per ZIP vs the 2019–2021 pre
 
 --- CITATION TABLE ---
 id  | source                                                                                                                                                                    | verified   | expires
-s01 | Redfin Data Center — price_drops ZIP-level monthly rolling-3-month data for SWFL MSAs. Published ~15th of each month. https://www.redfin.com/news/data-center/            | 2026-10-16 | 2026-11-15
-s02 | Redfin Data Center — contract_cancellations ZIP-level monthly rolling-3-month data for SWFL MSAs. Published ~15th of each month. https://www.redfin.com/news/data-center/ | 2026-10-16 | 2026-11-15
-s03 | Redfin Data Center — delistings_relistings ZIP-level monthly rolling-3-month data for SWFL MSAs. Published ~15th of each month. https://www.redfin.com/news/data-center/  | 2026-10-16 | 2026-11-15
+s01 | Redfin Data Center — price_drops ZIP-level monthly rolling-3-month data for SWFL MSAs. Published ~15th of each month. https://www.redfin.com/news/data-center/            | 2026-11-15 | 2026-12-15
+s02 | Redfin Data Center — contract_cancellations ZIP-level monthly rolling-3-month data for SWFL MSAs. Published ~15th of each month. https://www.redfin.com/news/data-center/ | 2026-11-15 | 2026-12-15
+s03 | Redfin Data Center — delistings_relistings ZIP-level monthly rolling-3-month data for SWFL MSAs. Published ~15th of each month. https://www.redfin.com/news/data-center/  | 2026-11-15 | 2026-12-15
 
 --- SAVED FACTS ---
 [
-  {"id":"f001","topic":"seller_stress_summary","fact":"Redfin SWFL seller stress composite","value":"52 ZIPs scored (3 suppressed), SWFL median stress score = 61.8/100, latest period = 2026-07-01.","src":"s01","date":"2026-10-16"}
+  {"id":"f001","topic":"seller_stress_summary","fact":"Redfin SWFL seller stress composite","value":"52 ZIPs scored (3 suppressed), SWFL median stress score = 61.8/100, latest period = 2026-07-01.","src":"s01","date":"2026-11-15"}
 ]
 
 --- OUTPUT ---
 {
   "brain_id": "seller-stress-swfl",
-  "version": 11,
-  "refined_at": "2026-10-16T04:26:11Z",
-  "expires": "2026-11-15T04:26:11Z",
+  "version": 12,
+  "refined_at": "2026-11-15T04:26:33Z",
+  "expires": "2026-12-15T04:26:33Z",
   "ttl_seconds": 2592000,
   "direction": "bearish",
   "magnitude": 0.55,
@@ -62,7 +62,7 @@ s03 | Redfin Data Center — delistings_relistings ZIP-level monthly rolling-3-m
       "display_format": "raw",
       "source": {
         "url": "https://www.redfin.com/news/data-center/",
-        "fetched_at": "2026-10-16T04:26:06Z",
+        "fetched_at": "2026-11-15T04:26:28Z",
         "tier": 3,
         "citation": "Redfin Data Center — price_drops, contract_cancellations, delistings_relistings ZIP-level monthly rolling-3-month data for SWFL MSAs."
       },
@@ -81,7 +81,7 @@ s03 | Redfin Data Center — delistings_relistings ZIP-level monthly rolling-3-m
       "display_format": "percent",
       "source": {
         "url": "https://www.redfin.com/news/data-center/",
-        "fetched_at": "2026-10-16T04:26:06Z",
+        "fetched_at": "2026-11-15T04:26:28Z",
         "tier": 3,
         "citation": "Redfin Data Center — price_drops, contract_cancellations, delistings_relistings ZIP-level monthly rolling-3-month data for SWFL MSAs."
       },
@@ -100,7 +100,7 @@ s03 | Redfin Data Center — delistings_relistings ZIP-level monthly rolling-3-m
       "display_format": "percent",
       "source": {
         "url": "https://www.redfin.com/news/data-center/",
-        "fetched_at": "2026-10-16T04:26:06Z",
+        "fetched_at": "2026-11-15T04:26:28Z",
         "tier": 3,
         "citation": "Redfin Data Center — price_drops, contract_cancellations, delistings_relistings ZIP-level monthly rolling-3-month data for SWFL MSAs."
       },
@@ -119,7 +119,7 @@ s03 | Redfin Data Center — delistings_relistings ZIP-level monthly rolling-3-m
       "display_format": "percent",
       "source": {
         "url": "https://www.redfin.com/news/data-center/",
-        "fetched_at": "2026-10-16T04:26:06Z",
+        "fetched_at": "2026-11-15T04:26:28Z",
         "tier": 3,
         "citation": "Redfin Data Center — price_drops, contract_cancellations, delistings_relistings ZIP-level monthly rolling-3-month data for SWFL MSAs."
       },
@@ -138,7 +138,7 @@ s03 | Redfin Data Center — delistings_relistings ZIP-level monthly rolling-3-m
       "display_format": "percent",
       "source": {
         "url": "https://www.redfin.com/news/data-center/",
-        "fetched_at": "2026-10-16T04:26:06Z",
+        "fetched_at": "2026-11-15T04:26:28Z",
         "tier": 3,
         "citation": "Redfin Data Center — price_drops, contract_cancellations, delistings_relistings ZIP-level monthly rolling-3-month data for SWFL MSAs."
       },
@@ -975,7 +975,7 @@ s03 | Redfin Data Center — delistings_relistings ZIP-level monthly rolling-3-m
       ],
       "source": {
         "url": "https://www.redfin.com/news/data-center/",
-        "fetched_at": "2026-10-16T04:26:06Z",
+        "fetched_at": "2026-11-15T04:26:28Z",
         "tier": 3,
         "citation": "Redfin Data Center — price_drops, contract_cancellations, delistings_relistings ZIP-level monthly rolling-3-month data for SWFL MSAs."
       }
@@ -997,7 +997,7 @@ s03 | Redfin Data Center — delistings_relistings ZIP-level monthly rolling-3-m
   "relevance": {
     "decay_curve": "weeks",
     "half_life_hours": 720,
-    "computed_at": "2026-10-16T04:26:11Z"
+    "computed_at": "2026-11-15T04:26:33Z"
   },
   "exogenous_signals": []
 }
@@ -1006,5 +1006,5 @@ s03 | Redfin Data Center — delistings_relistings ZIP-level monthly rolling-3-m
 - seller-stress-swfl: deterministic composite seller stress score at ZIP grain from 3 Redfin Data Center Tier-1 parquets.
 
 --- RECENT NOTES ---
-- 2026-10-16: pack refined by the Refinery — 1 fact(s) from 3 source(s).
+- 2026-11-15: pack refined by the Refinery — 1 fact(s) from 3 source(s).
 ```
