@@ -1,8 +1,8 @@
 {
   "target": "master",
   "timestamps": {
-    "started": "2026-11-15T12:04:19.781Z",
-    "finished": "2026-11-15T12:04:41.866Z"
+    "started": "2026-11-16T04:25:59.490Z",
+    "finished": "2026-11-16T04:26:55.709Z"
   },
   "source": "live",
   "outcomes": [
@@ -38,8 +38,173 @@
     },
     {
       "packId": "macro-florida",
-      "status": "skipped-fresh",
-      "written": false
+      "status": "built",
+      "version": 26,
+      "written": true,
+      "brainOutput": {
+        "brain_id": "macro-florida",
+        "version": 26,
+        "refined_at": "2026-11-16T04:26:25Z",
+        "expires": "2026-12-16T04:26:25Z",
+        "ttl_seconds": 2592000,
+        "direction": "bullish",
+        "magnitude": 0.5,
+        "drivers": [],
+        "overrides": [],
+        "conclusion": "As of the latest reported periods, the Florida state-level labor market reads: Florida unemployment at 4.4% (falling), labor force participation at 57.3%. Read against the national backdrop (macro-us, confidence 1.00): SOFR at 3.9% (stable). Regional brains (macro-swfl, future macro-tampa/macro-jax) use this brain as the state baseline for gap math.",
+        "key_metrics": [
+          {
+            "metric": "fl_unemployment",
+            "value": 4.4,
+            "direction": "falling",
+            "label": "Florida unemployment rate",
+            "variable_type": "intensive",
+            "units": "percent",
+            "display_format": "percent",
+            "source": {
+              "url": "https://api.stlouisfed.org/fred/series/observations?series_id=FLUR&units=lin&file_type=json&sort_order=desc&limit=24",
+              "fetched_at": "2026-11-16T04:26:02Z",
+              "tier": 1,
+              "citation": "FRED Florida Unemployment Rate (series_id FLUR) — latest observation 4.4 percent for period 2026-09-01, falling vs prior 6 periods. Florida unemployment is the headline labor-tightness read for SWFL operators — tourism and construction absorb new entrants when this stays low."
+            },
+            "suggestions": [
+              "What's driving fl unemployment?",
+              "How does fl unemployment here compare to other SWFL areas?"
+            ]
+          },
+          {
+            "metric": "fl_labor_participation",
+            "value": 57.3,
+            "direction": "stable",
+            "label": "Florida labor force participation",
+            "variable_type": "intensive",
+            "units": "percent",
+            "display_format": "percent",
+            "source": {
+              "url": "https://api.stlouisfed.org/fred/series/observations?series_id=LBSSA12&units=lin&file_type=json&sort_order=desc&limit=24",
+              "fetched_at": "2026-11-16T04:26:02Z",
+              "tier": 1,
+              "citation": "FRED Florida Labor Force Participation Rate (series_id FLLFPR) — latest observation 57.3 percent for period 2026-09-01, stable vs prior 6 periods. FL LFPR climbs against retirement-state demographic gravity — a positive read on Florida's working-age engagement."
+            },
+            "suggestions": [
+              "What's driving fl labor participation?",
+              "How does fl labor participation here compare to other SWFL areas?"
+            ]
+          },
+          {
+            "metric": "fl_estab_count_professional",
+            "value": 92082,
+            "direction": "stable",
+            "label": "Florida professional services establishments",
+            "variable_type": "extensive",
+            "units": "establishments",
+            "display_format": "count",
+            "source": {
+              "url": "https://api.census.gov/data/2022/cbp?get=NAICS2022,ESTAB&for=county:*&in=state:12",
+              "fetched_at": "2026-11-16T04:26:05Z",
+              "tier": 1,
+              "citation": "Florida professional services establishments: 92,082 FL establishments in 2022 (Census CBP, NAICS 54, all FL counties aggregated)."
+            },
+            "suggestions": [
+              "What's driving fl estab count professional?",
+              "How does fl estab count professional here compare to other SWFL areas?"
+            ]
+          },
+          {
+            "metric": "fl_estab_count_retail",
+            "value": 75729,
+            "direction": "stable",
+            "label": "Florida retail establishments",
+            "variable_type": "extensive",
+            "units": "establishments",
+            "display_format": "count",
+            "source": {
+              "url": "https://api.census.gov/data/2022/cbp?get=NAICS2022,ESTAB&for=county:*&in=state:12",
+              "fetched_at": "2026-11-16T04:26:05Z",
+              "tier": 1,
+              "citation": "Florida retail establishments: 75,729 FL establishments in 2022 (Census CBP, NAICS 44-45, all FL counties aggregated)."
+            },
+            "suggestions": [
+              "What's driving fl estab count retail?",
+              "How does fl estab count retail here compare to other SWFL areas?"
+            ]
+          },
+          {
+            "metric": "fl_estab_count_healthcare",
+            "value": 71553,
+            "direction": "stable",
+            "label": "Florida healthcare establishments",
+            "variable_type": "extensive",
+            "units": "establishments",
+            "display_format": "count",
+            "source": {
+              "url": "https://api.census.gov/data/2022/cbp?get=NAICS2022,ESTAB&for=county:*&in=state:12",
+              "fetched_at": "2026-11-16T04:26:05Z",
+              "tier": 1,
+              "citation": "Florida healthcare establishments: 71,553 FL establishments in 2022 (Census CBP, NAICS 62, all FL counties aggregated)."
+            },
+            "suggestions": [
+              "What's driving fl estab count healthcare?",
+              "How does fl estab count healthcare here compare to other SWFL areas?"
+            ]
+          },
+          {
+            "metric": "fl_estab_count_construction",
+            "value": 65227,
+            "direction": "stable",
+            "label": "Florida construction establishments",
+            "variable_type": "extensive",
+            "units": "establishments",
+            "display_format": "count",
+            "source": {
+              "url": "https://api.census.gov/data/2022/cbp?get=NAICS2022,ESTAB&for=county:*&in=state:12",
+              "fetched_at": "2026-11-16T04:26:05Z",
+              "tier": 1,
+              "citation": "Florida construction establishments: 65,227 FL establishments in 2022 (Census CBP, NAICS 23, all FL counties aggregated)."
+            },
+            "suggestions": [
+              "What's driving fl estab count construction?",
+              "How does fl estab count construction here compare to other SWFL areas?"
+            ]
+          },
+          {
+            "metric": "fl_estab_count_food_service",
+            "value": 47652,
+            "direction": "stable",
+            "label": "Florida food service & accommodation establishments",
+            "variable_type": "extensive",
+            "units": "establishments",
+            "display_format": "count",
+            "source": {
+              "url": "https://api.census.gov/data/2022/cbp?get=NAICS2022,ESTAB&for=county:*&in=state:12",
+              "fetched_at": "2026-11-16T04:26:05Z",
+              "tier": 1,
+              "citation": "Florida food service & accommodation establishments: 47,652 FL establishments in 2022 (Census CBP, NAICS 72, all FL counties aggregated)."
+            },
+            "suggestions": [
+              "What's driving fl estab count food service?",
+              "How does fl estab count food service here compare to other SWFL areas?"
+            ]
+          }
+        ],
+        "caveats": [
+          "FRED can revise recent observations within ~30 days of first publication — treat the most recent reading as directional, not final.",
+          "Census CBP data is an annual snapshot; establishment and employment counts may lag up to 18 months behind current conditions."
+        ],
+        "contradicts": [],
+        "confidence": 1,
+        "joint_integrity": 1,
+        "confidence_dispersion": 0,
+        "chain_depth": 1,
+        "trust_tier": 1,
+        "upstream_count": 1,
+        "relevance": {
+          "decay_curve": "weeks",
+          "half_life_hours": 720,
+          "computed_at": "2026-11-16T04:26:25Z"
+        },
+        "exogenous_signals": []
+      }
     },
     {
       "packId": "macro-swfl",
@@ -48,8 +213,383 @@
     },
     {
       "packId": "sector-credit-swfl",
-      "status": "skipped-fresh",
-      "written": false
+      "status": "built",
+      "version": 44,
+      "written": true,
+      "brainOutput": {
+        "brain_id": "sector-credit-swfl",
+        "version": 44,
+        "refined_at": "2026-11-16T04:26:26Z",
+        "expires": "2026-11-23T04:26:26Z",
+        "ttl_seconds": 604800,
+        "direction": "bearish",
+        "magnitude": 0.38775510204081626,
+        "drivers": [],
+        "overrides": [],
+        "conclusion": "For SWFL lenders, the three lowest-risk 2-digit NAICS sectors by SBA resolved-loan charge-off rate are: Arts, Entertainment & Recreation (0% [thin sample: only 7 resolved loans, directional not confident]), Finance & Insurance (0% [thin sample: only 14 resolved loans, directional not confident]), Real Estate, Rental & Leasing (0% [thin sample: only 6 resolved loans, directional not confident]). The three highest-risk sectors are: Transportation & Warehousing (57.1% [thin sample: only 7 resolved loans, directional not confident]), Retail Trade (44.4% [thin sample: only 9 resolved loans, directional not confident]), Other Services (Personal & Repair) (21.2%). Read these rates against the current SOFR of 3.9% (stable) — funding-cost direction sets the appetite for charge-off risk. Cross-validate any sector-level call against the named brand outcomes in the franchise-outcomes brain before underwriting a specific borrower.",
+        "key_metrics": [
+          {
+            "metric": "best_naics_survival",
+            "value": 100,
+            "direction": "stable",
+            "label": "Arts, Entertainment & Recreation (NAICS 71) — best SWFL SBA survival rate [thin sample: only 7 resolved loans, directional not confident]",
+            "variable_type": "intensive",
+            "units": "percent",
+            "display_format": "percent",
+            "source": {
+              "url": "https://jtkdowmrjaxfvwmemxso.supabase.co/rest/v1/sba_loans_by_naics_county?select=*&project_county=in.(LEE,COLLIER)&approval_fy=gte.2020&naics_code=like.71%25",
+              "fetched_at": "2026-11-16T04:26:26Z",
+              "tier": 1,
+              "citation": "SBA 7(a)/504 loan outcomes (Lee + Collier counties, FY 2020+); federal source: Small Business Administration loan-status reporting — Arts, Entertainment & Recreation (NAICS 71): 0 charged off of 7 resolved loans (63 total approved across 10 sub-industries; $41.3M gross approved capital)."
+            },
+            "suggestions": [
+              "What's driving best naics survival?",
+              "How does best naics survival here compare to other SWFL areas?"
+            ]
+          },
+          {
+            "metric": "worst_naics_chargeoff",
+            "value": 57.1,
+            "direction": "stable",
+            "label": "Transportation & Warehousing (NAICS 48) — worst SWFL SBA charge-off rate [thin sample: only 7 resolved loans, directional not confident]",
+            "variable_type": "intensive",
+            "units": "percent",
+            "display_format": "percent",
+            "source": {
+              "url": "https://jtkdowmrjaxfvwmemxso.supabase.co/rest/v1/sba_loans_by_naics_county?select=*&project_county=in.(LEE,COLLIER)&approval_fy=gte.2020&naics_code=like.48%25",
+              "fetched_at": "2026-11-16T04:26:26Z",
+              "tier": 1,
+              "citation": "SBA 7(a)/504 loan outcomes (Lee + Collier counties, FY 2020+); federal source: Small Business Administration loan-status reporting — Transportation & Warehousing (NAICS 48): 4 charged off of 7 resolved loans (59 total approved across 16 sub-industries; $19.4M gross approved capital)."
+            },
+            "suggestions": [
+              "What's driving worst naics chargeoff?",
+              "How does worst naics chargeoff here compare to other SWFL areas?"
+            ]
+          },
+          {
+            "metric": "swfl_taxable_sales_latest_usd",
+            "value": 5403032052,
+            "direction": "falling",
+            "label": "SWFL taxable sales — 2025-12 (Lee + Collier)",
+            "variable_type": "extensive",
+            "units": "usd",
+            "display_format": "currency",
+            "source": {
+              "url": "https://floridarevenue.com/dataPortal/GTA/Form%2010/All%20Taxable%20Sales/F10_txsales_cy2425.xlsx",
+              "fetched_at": "2026-11-16T04:26:26Z",
+              "tier": 1,
+              "citation": "Florida DOR Form 10 — Taxable Sales by Business Type (Lee + Collier combined, 2025-12); source: fl_dor_sales_tax table (biennial XLSX cy2425)."
+            },
+            "suggestions": [
+              "What's driving swfl taxable sales latest usd?",
+              "How does swfl taxable sales latest usd here compare to other SWFL areas?"
+            ]
+          },
+          {
+            "metric": "swfl_taxable_sales_yoy_pct",
+            "value": -13.6,
+            "direction": "falling",
+            "label": "SWFL taxable sales YoY (2025-12 vs 2024-12)",
+            "variable_type": "intensive",
+            "units": "percent",
+            "display_format": "percent",
+            "source": {
+              "url": "https://floridarevenue.com/dataPortal/GTA/Form%2010/All%20Taxable%20Sales/F10_txsales_cy2425.xlsx",
+              "fetched_at": "2026-11-16T04:26:26Z",
+              "tier": 1,
+              "citation": "Florida DOR Form 10 — Taxable Sales by Business Type (Lee + Collier combined, 2025-12); source: fl_dor_sales_tax table (biennial XLSX cy2425)."
+            },
+            "suggestions": [
+              "What's driving swfl taxable sales yoy pct?",
+              "How does swfl taxable sales yoy pct here compare to other SWFL areas?"
+            ]
+          },
+          {
+            "metric": "swfl_taxable_sales_trailing_12mo_usd",
+            "value": 70759366219,
+            "direction": "stable",
+            "label": "SWFL taxable sales — trailing 12 months (Lee + Collier)",
+            "variable_type": "extensive",
+            "units": "usd",
+            "display_format": "currency",
+            "source": {
+              "url": "https://floridarevenue.com/dataPortal/GTA/Form%2010/All%20Taxable%20Sales/F10_txsales_cy2425.xlsx",
+              "fetched_at": "2026-11-16T04:26:26Z",
+              "tier": 1,
+              "citation": "Florida DOR Form 10 — Taxable Sales by Business Type (Lee + Collier combined, 2025-12); source: fl_dor_sales_tax table (biennial XLSX cy2425)."
+            },
+            "suggestions": [
+              "What's driving swfl taxable sales trailing 12mo usd?",
+              "How does swfl taxable sales trailing 12mo usd here compare to other SWFL areas?"
+            ]
+          },
+          {
+            "metric": "sector_71_chargeoff_rate",
+            "value": 0,
+            "direction": "stable",
+            "label": "Arts, Entertainment & Recreation (NAICS 71)",
+            "variable_type": "intensive",
+            "units": "percent",
+            "display_format": "percent",
+            "source": {
+              "url": "https://jtkdowmrjaxfvwmemxso.supabase.co/rest/v1/sba_loans_by_naics_county?select=*&project_county=in.(LEE,COLLIER)&approval_fy=gte.2020&naics_code=like.71%25",
+              "fetched_at": "2026-11-16T04:26:26Z",
+              "tier": 1,
+              "citation": "SBA 7(a)/504 loan outcomes (Lee + Collier counties, FY 2020+); federal source: Small Business Administration loan-status reporting — Arts, Entertainment & Recreation (NAICS 71): 0 charged off of 7 resolved loans (63 total approved across 10 sub-industries; $41.3M gross approved capital)."
+            },
+            "suggestions": [
+              "What's driving sector 71 chargeoff rate?",
+              "How does sector 71 chargeoff rate here compare to other SWFL areas?"
+            ]
+          },
+          {
+            "metric": "sector_52_chargeoff_rate",
+            "value": 0,
+            "direction": "stable",
+            "label": "Finance & Insurance (NAICS 52)",
+            "variable_type": "intensive",
+            "units": "percent",
+            "display_format": "percent",
+            "source": {
+              "url": "https://jtkdowmrjaxfvwmemxso.supabase.co/rest/v1/sba_loans_by_naics_county?select=*&project_county=in.(LEE,COLLIER)&approval_fy=gte.2020&naics_code=like.52%25",
+              "fetched_at": "2026-11-16T04:26:26Z",
+              "tier": 1,
+              "citation": "SBA 7(a)/504 loan outcomes (Lee + Collier counties, FY 2020+); federal source: Small Business Administration loan-status reporting — Finance & Insurance (NAICS 52): 0 charged off of 14 resolved loans (49 total approved across 9 sub-industries; $37.0M gross approved capital)."
+            },
+            "suggestions": [
+              "What's driving sector 52 chargeoff rate?",
+              "How does sector 52 chargeoff rate here compare to other SWFL areas?"
+            ]
+          },
+          {
+            "metric": "sector_53_chargeoff_rate",
+            "value": 0,
+            "direction": "stable",
+            "label": "Real Estate, Rental & Leasing (NAICS 53)",
+            "variable_type": "intensive",
+            "units": "percent",
+            "display_format": "percent",
+            "source": {
+              "url": "https://jtkdowmrjaxfvwmemxso.supabase.co/rest/v1/sba_loans_by_naics_county?select=*&project_county=in.(LEE,COLLIER)&approval_fy=gte.2020&naics_code=like.53%25",
+              "fetched_at": "2026-11-16T04:26:26Z",
+              "tier": 1,
+              "citation": "SBA 7(a)/504 loan outcomes (Lee + Collier counties, FY 2020+); federal source: Small Business Administration loan-status reporting — Real Estate, Rental & Leasing (NAICS 53): 0 charged off of 6 resolved loans (41 total approved across 9 sub-industries; $22.7M gross approved capital)."
+            },
+            "suggestions": [
+              "What's driving sector 53 chargeoff rate?",
+              "How does sector 53 chargeoff rate here compare to other SWFL areas?"
+            ]
+          },
+          {
+            "metric": "sector_72_chargeoff_rate",
+            "value": 7.1,
+            "direction": "stable",
+            "label": "Accommodation & Food Services (NAICS 72)",
+            "variable_type": "intensive",
+            "units": "percent",
+            "display_format": "percent",
+            "source": {
+              "url": "https://jtkdowmrjaxfvwmemxso.supabase.co/rest/v1/sba_loans_by_naics_county?select=*&project_county=in.(LEE,COLLIER)&approval_fy=gte.2020&naics_code=like.72%25",
+              "fetched_at": "2026-11-16T04:26:26Z",
+              "tier": 1,
+              "citation": "SBA 7(a)/504 loan outcomes (Lee + Collier counties, FY 2020+); federal source: Small Business Administration loan-status reporting — Accommodation & Food Services (NAICS 72): 2 charged off of 28 resolved loans (169 total approved across 8 sub-industries; $152.3M gross approved capital)."
+            },
+            "suggestions": [
+              "What's driving sector 72 chargeoff rate?",
+              "How does sector 72 chargeoff rate here compare to other SWFL areas?"
+            ]
+          },
+          {
+            "metric": "sector_42_chargeoff_rate",
+            "value": 9.1,
+            "direction": "stable",
+            "label": "Wholesale Trade (NAICS 42)",
+            "variable_type": "intensive",
+            "units": "percent",
+            "display_format": "percent",
+            "source": {
+              "url": "https://jtkdowmrjaxfvwmemxso.supabase.co/rest/v1/sba_loans_by_naics_county?select=*&project_county=in.(LEE,COLLIER)&approval_fy=gte.2020&naics_code=like.42%25",
+              "fetched_at": "2026-11-16T04:26:26Z",
+              "tier": 1,
+              "citation": "SBA 7(a)/504 loan outcomes (Lee + Collier counties, FY 2020+); federal source: Small Business Administration loan-status reporting — Wholesale Trade (NAICS 42): 1 charged off of 11 resolved loans (48 total approved across 29 sub-industries; $45.4M gross approved capital)."
+            },
+            "suggestions": [
+              "What's driving sector 42 chargeoff rate?",
+              "How does sector 42 chargeoff rate here compare to other SWFL areas?"
+            ]
+          },
+          {
+            "metric": "sector_54_chargeoff_rate",
+            "value": 12,
+            "direction": "stable",
+            "label": "Professional, Scientific & Technical Services (NAICS 54)",
+            "variable_type": "intensive",
+            "units": "percent",
+            "display_format": "percent",
+            "source": {
+              "url": "https://jtkdowmrjaxfvwmemxso.supabase.co/rest/v1/sba_loans_by_naics_county?select=*&project_county=in.(LEE,COLLIER)&approval_fy=gte.2020&naics_code=like.54%25",
+              "fetched_at": "2026-11-16T04:26:26Z",
+              "tier": 1,
+              "citation": "SBA 7(a)/504 loan outcomes (Lee + Collier counties, FY 2020+); federal source: Small Business Administration loan-status reporting — Professional, Scientific & Technical Services (NAICS 54): 3 charged off of 25 resolved loans (145 total approved across 22 sub-industries; $76.3M gross approved capital)."
+            },
+            "suggestions": [
+              "What's driving sector 54 chargeoff rate?",
+              "How does sector 54 chargeoff rate here compare to other SWFL areas?"
+            ]
+          },
+          {
+            "metric": "sector_62_chargeoff_rate",
+            "value": 12.5,
+            "direction": "stable",
+            "label": "Health Care & Social Assistance (NAICS 62)",
+            "variable_type": "intensive",
+            "units": "percent",
+            "display_format": "percent",
+            "source": {
+              "url": "https://jtkdowmrjaxfvwmemxso.supabase.co/rest/v1/sba_loans_by_naics_county?select=*&project_county=in.(LEE,COLLIER)&approval_fy=gte.2020&naics_code=like.62%25",
+              "fetched_at": "2026-11-16T04:26:26Z",
+              "tier": 1,
+              "citation": "SBA 7(a)/504 loan outcomes (Lee + Collier counties, FY 2020+); federal source: Small Business Administration loan-status reporting — Health Care & Social Assistance (NAICS 62): 2 charged off of 16 resolved loans (154 total approved across 19 sub-industries; $110.8M gross approved capital)."
+            },
+            "suggestions": [
+              "What's driving sector 62 chargeoff rate?",
+              "How does sector 62 chargeoff rate here compare to other SWFL areas?"
+            ]
+          },
+          {
+            "metric": "sector_23_chargeoff_rate",
+            "value": 13.7,
+            "direction": "stable",
+            "label": "Construction (NAICS 23)",
+            "variable_type": "intensive",
+            "units": "percent",
+            "display_format": "percent",
+            "source": {
+              "url": "https://jtkdowmrjaxfvwmemxso.supabase.co/rest/v1/sba_loans_by_naics_county?select=*&project_county=in.(LEE,COLLIER)&approval_fy=gte.2020&naics_code=like.23%25",
+              "fetched_at": "2026-11-16T04:26:26Z",
+              "tier": 1,
+              "citation": "SBA 7(a)/504 loan outcomes (Lee + Collier counties, FY 2020+); federal source: Small Business Administration loan-status reporting — Construction (NAICS 23): 7 charged off of 51 resolved loans (301 total approved across 27 sub-industries; $209.7M gross approved capital)."
+            },
+            "suggestions": [
+              "What's driving sector 23 chargeoff rate?",
+              "How does sector 23 chargeoff rate here compare to other SWFL areas?"
+            ]
+          },
+          {
+            "metric": "sector_56_chargeoff_rate",
+            "value": 18.8,
+            "direction": "stable",
+            "label": "Administrative & Support Services (NAICS 56)",
+            "variable_type": "intensive",
+            "units": "percent",
+            "display_format": "percent",
+            "source": {
+              "url": "https://jtkdowmrjaxfvwmemxso.supabase.co/rest/v1/sba_loans_by_naics_county?select=*&project_county=in.(LEE,COLLIER)&approval_fy=gte.2020&naics_code=like.56%25",
+              "fetched_at": "2026-11-16T04:26:26Z",
+              "tier": 1,
+              "citation": "SBA 7(a)/504 loan outcomes (Lee + Collier counties, FY 2020+); federal source: Small Business Administration loan-status reporting — Administrative & Support Services (NAICS 56): 6 charged off of 32 resolved loans (137 total approved across 24 sub-industries; $60.6M gross approved capital)."
+            },
+            "suggestions": [
+              "What's driving sector 56 chargeoff rate?",
+              "How does sector 56 chargeoff rate here compare to other SWFL areas?"
+            ]
+          },
+          {
+            "metric": "sector_44_chargeoff_rate",
+            "value": 18.8,
+            "direction": "stable",
+            "label": "Retail Trade (NAICS 44)",
+            "variable_type": "intensive",
+            "units": "percent",
+            "display_format": "percent",
+            "source": {
+              "url": "https://jtkdowmrjaxfvwmemxso.supabase.co/rest/v1/sba_loans_by_naics_county?select=*&project_county=in.(LEE,COLLIER)&approval_fy=gte.2020&naics_code=like.44%25",
+              "fetched_at": "2026-11-16T04:26:26Z",
+              "tier": 1,
+              "citation": "SBA 7(a)/504 loan outcomes (Lee + Collier counties, FY 2020+); federal source: Small Business Administration loan-status reporting — Retail Trade (NAICS 44): 3 charged off of 16 resolved loans (74 total approved across 33 sub-industries; $66.3M gross approved capital)."
+            },
+            "suggestions": [
+              "What's driving sector 44 chargeoff rate?",
+              "How does sector 44 chargeoff rate here compare to other SWFL areas?"
+            ]
+          },
+          {
+            "metric": "sector_81_chargeoff_rate",
+            "value": 21.2,
+            "direction": "stable",
+            "label": "Other Services (Personal & Repair) (NAICS 81)",
+            "variable_type": "intensive",
+            "units": "percent",
+            "display_format": "percent",
+            "source": {
+              "url": "https://jtkdowmrjaxfvwmemxso.supabase.co/rest/v1/sba_loans_by_naics_county?select=*&project_county=in.(LEE,COLLIER)&approval_fy=gte.2020&naics_code=like.81%25",
+              "fetched_at": "2026-11-16T04:26:26Z",
+              "tier": 1,
+              "citation": "SBA 7(a)/504 loan outcomes (Lee + Collier counties, FY 2020+); federal source: Small Business Administration loan-status reporting — Other Services (Personal & Repair) (NAICS 81): 7 charged off of 33 resolved loans (176 total approved across 21 sub-industries; $105.5M gross approved capital)."
+            },
+            "suggestions": [
+              "What's driving sector 81 chargeoff rate?",
+              "How does sector 81 chargeoff rate here compare to other SWFL areas?"
+            ]
+          },
+          {
+            "metric": "sector_45_chargeoff_rate",
+            "value": 44.4,
+            "direction": "stable",
+            "label": "Retail Trade (NAICS 45)",
+            "variable_type": "intensive",
+            "units": "percent",
+            "display_format": "percent",
+            "source": {
+              "url": "https://jtkdowmrjaxfvwmemxso.supabase.co/rest/v1/sba_loans_by_naics_county?select=*&project_county=in.(LEE,COLLIER)&approval_fy=gte.2020&naics_code=like.45%25",
+              "fetched_at": "2026-11-16T04:26:26Z",
+              "tier": 1,
+              "citation": "SBA 7(a)/504 loan outcomes (Lee + Collier counties, FY 2020+); federal source: Small Business Administration loan-status reporting — Retail Trade (NAICS 45): 4 charged off of 9 resolved loans (63 total approved across 22 sub-industries; $40.9M gross approved capital)."
+            },
+            "suggestions": [
+              "What's driving sector 45 chargeoff rate?",
+              "How does sector 45 chargeoff rate here compare to other SWFL areas?"
+            ]
+          },
+          {
+            "metric": "sector_48_chargeoff_rate",
+            "value": 57.1,
+            "direction": "stable",
+            "label": "Transportation & Warehousing (NAICS 48)",
+            "variable_type": "intensive",
+            "units": "percent",
+            "display_format": "percent",
+            "source": {
+              "url": "https://jtkdowmrjaxfvwmemxso.supabase.co/rest/v1/sba_loans_by_naics_county?select=*&project_county=in.(LEE,COLLIER)&approval_fy=gte.2020&naics_code=like.48%25",
+              "fetched_at": "2026-11-16T04:26:26Z",
+              "tier": 1,
+              "citation": "SBA 7(a)/504 loan outcomes (Lee + Collier counties, FY 2020+); federal source: Small Business Administration loan-status reporting — Transportation & Warehousing (NAICS 48): 4 charged off of 7 resolved loans (59 total approved across 16 sub-industries; $19.4M gross approved capital)."
+            },
+            "suggestions": [
+              "What's driving sector 48 chargeoff rate?",
+              "How does sector 48 chargeoff rate here compare to other SWFL areas?"
+            ]
+          }
+        ],
+        "caveats": [
+          "Charge-off rates use the resolved-loan denominator (n_chargeoffs / (n_chargeoffs + n_paid_in_full)); the materialized view's `chargeoff_pct` is intentionally ignored because it understates risk on still-active loans.",
+          "Sectors with fewer than 5 resolved loans are not ranked — small-sample charge-off rates are directional, not actionable.",
+          "Worst-sector charge-off 57.1% (Transportation & Warehousing, NAICS 48) above 30% bearish threshold — sector-level credit risk is elevated."
+        ],
+        "contradicts": [],
+        "confidence": 1,
+        "joint_integrity": 1,
+        "confidence_dispersion": 0,
+        "chain_depth": 2,
+        "trust_tier": 1,
+        "upstream_count": 3,
+        "relevance": {
+          "decay_curve": "weeks",
+          "half_life_hours": 720,
+          "computed_at": "2026-11-16T04:26:26Z"
+        },
+        "exogenous_signals": []
+      }
     },
     {
       "packId": "tourism-tdt",
@@ -114,31 +654,31 @@
     {
       "packId": "city-pulse-swfl",
       "status": "built",
-      "version": 180,
+      "version": 181,
       "written": true,
       "brainOutput": {
         "brain_id": "city-pulse-swfl",
-        "version": 180,
-        "refined_at": "2026-11-15T12:04:20Z",
-        "expires": "2026-11-16T12:04:20Z",
+        "version": 181,
+        "refined_at": "2026-11-16T04:26:27Z",
+        "expires": "2026-11-17T04:26:27Z",
         "ttl_seconds": 86400,
         "direction": "neutral",
         "magnitude": 0,
         "drivers": [],
         "overrides": [],
-        "conclusion": "SWFL city pulse as of 2026-11-15: 85 live current-events signals across 9 cities — Naples (27), Fort Myers (27), Cape Coral (23), North Naples (2), Sanibel (1), East Naples (1), Golden Gate (1), Estero (2), Fort Myers Beach (1). Most current: Naples — The conservation deal for the 625-acre 'Wildflowerz Ranch' in Collier County collapsed after the owner pulled out, as reported Nov. 11, 2026 (updated Nov. 13, 2026). These are current cited facts only; the cross-vertical read and any direction call live downstream in master.",
+        "conclusion": "SWFL city pulse as of 2026-11-16: 80 live current-events signals across 9 cities — Cape Coral (21), Fort Myers (25), Naples (26), North Naples (2), Sanibel (1), East Naples (1), Golden Gate (1), Estero (2), Fort Myers Beach (1). Most current: Cape Coral — Two planes crash landed in Lee County less than 24 hours apart over the weekend of Nov. 9, 2026, with the Lee County sheriff reporting no injuries in either incident. These are current cited facts only; the cross-vertical read and any direction call live downstream in master.",
         "key_metrics": [
           {
             "metric": "signal_breaking_1",
-            "value": "Naples: The conservation deal for the 625-acre 'Wildflowerz Ranch' in Collier County collapsed after the owner pulled out, as reported Nov. 11, 2026 (updated Nov. 13, 2026).",
+            "value": "Cape Coral: Two planes crash landed in Lee County less than 24 hours apart over the weekend of Nov. 9, 2026, with the Lee County sheriff reporting no injuries in either incident.",
             "direction": "stable",
-            "label": "Naples — breaking",
+            "label": "Cape Coral — breaking",
             "variable_type": "categorical",
             "source": {
-              "url": "https://www.news-press.com/story/money/business/local/2026/11/11/wildflowerz-ranch-conservation-deal-falls-apart-in-collier-county/92724754007/",
-              "fetched_at": "2026-11-15T12:04:20Z",
+              "url": "https://www.news-press.com/story/news/local/2026/11/09/lee-county-sheriff-no-injuries-in-separate-florida-aircraft-incidents/92689034007/",
+              "fetched_at": "2026-11-16T04:26:27Z",
               "tier": 2,
-              "citation": "'Wildflowerz Ranch' conservation deal falls apart in Collier County: \"[](https://www.news-press.com/)\n[](https://subscribe.news-press.com/rr/nanobar?gps-source=CPTILELEFT&itm_campaign=2026ENTQ4BAU2026&itm_medium=ONSITE&success-url=https%3A%2F%2Fwww.news-press.com%2Fstory%2Fmoney%2Fbusiness%2Flocal%2F2026%2F11%2F11%2Fwildflowerz-ranch-conservation-deal-falls-apart-in-collier-county%2F92724754007%2F)\n[](https://subscribe.news-press.com/rr/masthead?gps-source=CPMASTHEAD&itm_campaign=2026ENTQ4BAU2026&itm_medium=ONSITE&success-url=https%3A%2F%2Fwww.news-press.com%2Fstory%2Fmoney%2Fbusiness%2Flocal%2F2026%2F11%2F11%2Fwildflowerz-ranch-conservation-deal-falls-apart-in-collier-county%2F92724754007%2F)\n[News](https://www.news-press.com/news/) [Cape Coral](https://www.news-press.com/news/cape-coral/) [Sports](https://www.news-press.com/sports/) [Restaurants](https://www.news-press.com/taste/) [Real Estate](https://www.news-press.com/real-estate) [Advertise](https://advertising.usatoday.com/advertise-with-us/?cid=Web_LiQ_Network_AdvertiseWithUs_AdvertiseInquiry&publication=the_news_press&utm_source=local_publication&utm_medium=menu&utm_campaign=advertise_with_us) [Obituaries](https://www.news-press.com/obituaries) [eNewspaper](https://user.news-press.com/user/enewspaper) [Legals](https://www.news-press.com/public-notices)\n[](https://www.news-press.com/search/ \"Search\")\n[](https://www.news-press.com/weather/ \"Weather in Fort Myers: 55°F Mostly Sunny\") [](https://subscribe.news-press.com/rr/navsub?gps-source=CPTOPNAVBAR&itm_campaign=2026ENTQ4BAU2026&itm_medium=ONSITE&success-url=https%3A%2F%2Fwww.news-press.com%2Fstory%2Fmoney%2Fbusiness%2Flocal%2F2026%2F11%2F11%2Fwildflowerz-ranch-conservation-deal-falls-apart-in-collier-county%2F92724754007%2F)\n[](https://login.news-press.com/PFTM-GUP/authenticate/?success-url=https%3A%2F%2Fwww.news-press.com%2Fstory%2Fmoney%2Fbusiness%2Flocal%2F2026%2F11%2F11%2Fwildflowerz-ranch-conservation-deal-falls-apart-in-collier-county%2F92724754007%2F&cancel-url=https%3A%2F%2Fwww.news-press.com%2Fstory%2Fmoney%2Fbusiness%2Flocal%2F2026%2F11%2F11%2Fwildflowerz-ranch-conservation-deal-falls-apart-in-collier-county%2F92724754007%2F)\n[](https://www.news-press.com/) [](https://www.news-press.com/)\nLOCAL BUSINESS\n# Deal for 625-acre ranch in Collier collapses after owner pulls plug\n[![Portrait of Laura Layden](https://www.news-press.com/gcdn/authoring/authoring-images/2024/02/08/PNDN/72524348007-ndn-jh-20240126-laura-0001.JPG?crop=3313,3312,x1506,y0&width=48&height=48&format=pjpg&auto=webp) Laura Layden](https://www.naplesnews.com/staff/2647080001/laura-layden/)\nFort Myers News-Press & Naples Daily News\nNov. 11, 2026Updated Nov. 13, 2026, 9:38 a.m. ET\n[](https://www.facebook.com/dialog/share?display=popup&app_id=149631068421067&href=https%3A%2F%2Fwww.news-press.com%2Fstory%2Fmoney%2Fbusiness%2Flocal%2F2026%2F11%2F11%2Fwildflowerz-ranch-conservation-deal-falls-apart-in-collier-county%2F92724754007%2F)[](https://x.com/intent/post?url=https%3A%2F%2Fwww.news-press.com%2Fstory%2Fmoney%2Fbusiness%2Flocal%2F2026%\""
+              "citation": "Lee County sheriff: No injuries in separate Florida aircraft incidents: \"[](https://www.news-press.com/)\n[Two planes crash land in Lee County less than 24 hours apart](https://www.news-press.com/story/news/local/2026/11/09/lee-county-sheriff-no-injuries-in-separate-florida-aircraft-incidents/92689034007/)\n[](https://subscribe.news-press.com/rr/nanobar?gps-source=CPTILELEFT&itm_campaign=2026ENTQ4BAU2026&itm_medium=ONSITE&success-url=https%3A%2F%2Fwww.news-press.com%2Fstory%2Fnews%2Flocal%2F2026%2F11%2F09%2Flee-county-sheriff-no-injuries-in-separate-florida-aircraft-incidents%2F92689034007%2F)\n[](https://subscribe.news-press.com/rr/masthead?gps-source=CPMASTHEAD&itm_campaign=2026ENTQ4BAU2026&itm_medium=ONSITE&success-url=https%3A%2F%2Fwww.news-press.com%2Fstory%2Fnews%2Flocal%2F2026%2F11%2F09%2Flee-county-sheriff-no-injuries-in-separate-florida-aircraft-incidents%2F92689034007%2F)\n[News](https://www.news-press.com/news/) [Cape Coral](https://www.news-press.com/news/cape-coral/) [Sports](https://www.news-press.com/sports/) [Restaurants](https://www.news-press.com/taste/) [Real Estate](https://www.news-press.com/real-estate) [Advertise](https://advertising.usatoday.com/advertise-with-us/?cid=Web_LiQ_Network_AdvertiseWithUs_AdvertiseInquiry&publication=the_news_press&utm_source=local_publication&utm_medium=menu&utm_campaign=advertise_with_us) [Obituaries](https://www.news-press.com/obituaries) [eNewspaper](https://user.news-press.com/user/enewspaper) [Legals](https://www.news-press.com/public-notices)\n[](https://www.news-press.com/search/ \"Search\")\n[](https://www.news-press.com/weather/ \"Weather in Fort Myers: 78°F Mostly Cloudy\") [](https://subscribe.news-press.com/rr/navsub?gps-source=CPTOPNAVBAR&itm_campaign=2026ENTQ4BAU2026&itm_medium=ONSITE&success-url=https%3A%2F%2Fwww.news-press.com%2Fstory%2Fnews%2Flocal%2F2026%2F11%2F09%2Flee-county-sheriff-no-injuries-in-separate-florida-aircraft-incidents%2F92689034007%2F)\n[](https://login.news-press.com/PFTM-GUP/authenticate/?success-url=https%3A%2F%2Fwww.news-press.com%2Fstory%2Fnews%2Flocal%2F2026%2F11%2F09%2Flee-county-sheriff-no-injuries-in-separate-florida-aircraft-incidents%2F92689034007%2F&cancel-url=https%3A%2F%2Fwww.news-press.com%2Fstory%2Fnews%2Flocal%2F2026%2F11%2F09%2Flee-county-sheriff-no-injuries-in-separate-florida-aircraft-incidents%2F92689034007%2F)\n[](https://www.news-press.com/news/) [](https://www.news-press.com/news/)\n[LOCAL](https://www.news-press.com/news/communities/)\n# Lee County sheriff: No injuries after 2 planes crash land over weekend\n## The incidents happened less than 24 hours apart in Lee County.\n[![Portrait of Tomas Rodriguez](https://www.news-press.com/gcdn/presto/2022/05/08/PFTM/d3b24871-cf32-47ef-8bc4-836f32f48664-tomas58.jpg?crop=2853,2853,x0,y533&width=48&height=48&format=pjpg&auto=webp) Tomas Rodriguez](https://www.naplesnews.com/staff/7430144002/tomas-rodriguez/)\nFort Myers News-Press & Naples Daily News\nNov. 9, 2026, 10:38 a.m. ET\n[](https://www.facebook.com/dialog/share?display=popup&app_id=149631068421067&href=https%3A%2F%2Fwww.news-p\""
             },
             "suggestions": [
               "What's driving signal breaking 1?",
@@ -147,13 +687,13 @@
           },
           {
             "metric": "signal_breaking_2",
-            "value": "Naples: Two planes crash-landed in Lee County less than 24 hours apart over the weekend of Nov. 9, 2026, with no injuries reported by the Lee County Sheriff.",
+            "value": "Fort Myers: Two planes crash-landed in Lee County less than 24 hours apart over the weekend of Nov. 9, 2026; the Lee County Sheriff reported no injuries in either separate incident.",
             "direction": "stable",
-            "label": "Naples — breaking",
+            "label": "Fort Myers — breaking",
             "variable_type": "categorical",
             "source": {
               "url": "https://www.naplesnews.com/story/news/local/2026/11/09/lee-county-sheriff-no-injuries-in-separate-florida-aircraft-incidents/92689034007/",
-              "fetched_at": "2026-11-15T12:04:20Z",
+              "fetched_at": "2026-11-16T04:26:27Z",
               "tier": 2,
               "citation": "Lee County sheriff: No injuries in separate Florida aircraft incidents: \"[](https://www.naplesnews.com/)\n[Two planes crash land in Lee County less than 24 hours apart](https://www.naplesnews.com/story/news/local/2026/11/09/lee-county-sheriff-no-injuries-in-separate-florida-aircraft-incidents/92689034007/)\n[](https://subscribe.naplesnews.com/rr/nanobar?gps-source=CPTILELEFT&itm_campaign=2026ENTQ4BAU2026&itm_medium=ONSITE&success-url=https%3A%2F%2Fwww.naplesnews.com%2Fstory%2Fnews%2Flocal%2F2026%2F11%2F09%2Flee-county-sheriff-no-injuries-in-separate-florida-aircraft-incidents%2F92689034007%2F)\n[](https://subscribe.naplesnews.com/rr/masthead?gps-source=CPMASTHEAD&itm_campaign=2026ENTQ4BAU2026&itm_medium=ONSITE&success-url=https%3A%2F%2Fwww.naplesnews.com%2Fstory%2Fnews%2Flocal%2F2026%2F11%2F09%2Flee-county-sheriff-no-injuries-in-separate-florida-aircraft-incidents%2F92689034007%2F)\n[News](https://www.naplesnews.com/news/) [Sports](https://www.naplesnews.com/sports/) [Real Estate](https://www.naplesnews.com/business/real-estate/) [Restaurants](https://www.naplesnews.com/entertainment/restaurants/) [Opinion](https://www.naplesnews.com/opinion/) [Advertise](https://advertising.usatoday.com/advertise-with-us/?cid=Web_LiQ_Network_AdvertiseWithUs_AdvertiseInquiry&publication=naples_daily_news&utm_source=local_publication&utm_medium=menu&utm_campaign=advertise_with_us) [Obituaries](https://www.naplesnews.com/obituaries) [eNewspaper](https://user.naplesnews.com/user/enewspaper) [Legals](https://www.naplesnews.com/public-notices)\n[](https://www.naplesnews.com/search/ \"Search\")\n[](https://www.naplesnews.com/weather/ \"Weather in Naples: 80°F Mostly Cloudy\") [](https://subscribe.naplesnews.com/rr/navsub?gps-source=CPTOPNAVBAR&itm_campaign=2026ENTQ4BAU2026&itm_medium=ONSITE&success-url=https%3A%2F%2Fwww.naplesnews.com%2Fstory%2Fnews%2Flocal%2F2026%2F11%2F09%2Flee-county-sheriff-no-injuries-in-separate-florida-aircraft-incidents%2F92689034007%2F)\n[](https://login.naplesnews.com/PNDN-GUP/authenticate/?success-url=https%3A%2F%2Fwww.naplesnews.com%2Fstory%2Fnews%2Flocal%2F2026%2F11%2F09%2Flee-county-sheriff-no-injuries-in-separate-florida-aircraft-incidents%2F92689034007%2F&cancel-url=https%3A%2F%2Fwww.naplesnews.com%2Fstory%2Fnews%2Flocal%2F2026%2F11%2F09%2Flee-county-sheriff-no-injuries-in-separate-florida-aircraft-incidents%2F92689034007%2F)\n[](https://www.naplesnews.com/news/) [](https://www.naplesnews.com/news/)\nLOCAL\n# Lee County sheriff: No injuries after 2 planes crash land over weekend\n## The incidents happened less than 24 hours apart in Lee County.\n[![Portrait of Tomas Rodriguez](https://www.naplesnews.com/gcdn/presto/2022/05/08/PFTM/d3b24871-cf32-47ef-8bc4-836f32f48664-tomas58.jpg?crop=2853,2853,x0,y533&width=48&height=48&format=pjpg&auto=webp) Tomas Rodriguez](https://www.naplesnews.com/staff/7430144002/tomas-rodriguez/)\nFort Myers News-Press & Naples Daily News\nNov. 9, 2026, 10:38 a.m. ET\n[](https://www.facebook.com/dialog/share?display=popup&app_id=1703814913224751&href=https%3A%2F%2Fwww.naplesnews.com%2Fstory%2Fnews%2Floc\""
             },
@@ -164,15 +704,15 @@
           },
           {
             "metric": "signal_breaking_3",
-            "value": "Fort Myers: Two planes crash landed in Lee County less than 24 hours apart over the weekend; the Lee County sheriff reported no injuries in the separate aircraft incidents, as of Nov. 9, 2026.",
+            "value": "Naples: Two planes crash-landed in Lee County less than 24 hours apart over the weekend of Nov. 9, 2026, with no injuries reported by the Lee County Sheriff.",
             "direction": "stable",
-            "label": "Fort Myers — breaking",
+            "label": "Naples — breaking",
             "variable_type": "categorical",
             "source": {
-              "url": "https://www.news-press.com/story/news/local/2026/11/09/lee-county-sheriff-no-injuries-in-separate-florida-aircraft-incidents/92689034007/",
-              "fetched_at": "2026-11-15T12:04:20Z",
+              "url": "https://www.naplesnews.com/story/news/local/2026/11/09/lee-county-sheriff-no-injuries-in-separate-florida-aircraft-incidents/92689034007/",
+              "fetched_at": "2026-11-16T04:26:27Z",
               "tier": 2,
-              "citation": "Lee County sheriff: No injuries in separate Florida aircraft incidents: \"[](https://www.news-press.com/)\n[Two planes crash land in Lee County less than 24 hours apart](https://www.news-press.com/story/news/local/2026/11/09/lee-county-sheriff-no-injuries-in-separate-florida-aircraft-incidents/92689034007/)\n[](https://subscribe.news-press.com/rr/nanobar?gps-source=CPTILELEFT&itm_campaign=2026ENTQ4BAU2026&itm_medium=ONSITE&success-url=https%3A%2F%2Fwww.news-press.com%2Fstory%2Fnews%2Flocal%2F2026%2F11%2F09%2Flee-county-sheriff-no-injuries-in-separate-florida-aircraft-incidents%2F92689034007%2F)\n[](https://subscribe.news-press.com/rr/masthead?gps-source=CPMASTHEAD&itm_campaign=2026ENTQ4BAU2026&itm_medium=ONSITE&success-url=https%3A%2F%2Fwww.news-press.com%2Fstory%2Fnews%2Flocal%2F2026%2F11%2F09%2Flee-county-sheriff-no-injuries-in-separate-florida-aircraft-incidents%2F92689034007%2F)\n[News](https://www.news-press.com/news/) [Cape Coral](https://www.news-press.com/news/cape-coral/) [Sports](https://www.news-press.com/sports/) [Restaurants](https://www.news-press.com/taste/) [Real Estate](https://www.news-press.com/real-estate) [Advertise](https://advertising.usatoday.com/advertise-with-us/?cid=Web_LiQ_Network_AdvertiseWithUs_AdvertiseInquiry&publication=the_news_press&utm_source=local_publication&utm_medium=menu&utm_campaign=advertise_with_us) [Obituaries](https://www.news-press.com/obituaries) [eNewspaper](https://user.news-press.com/user/enewspaper) [Legals](https://www.news-press.com/public-notices)\n[](https://www.news-press.com/search/ \"Search\")\n[](https://www.news-press.com/weather/ \"Weather in Fort Myers: 78°F Mostly Cloudy\") [](https://subscribe.news-press.com/rr/navsub?gps-source=CPTOPNAVBAR&itm_campaign=2026ENTQ4BAU2026&itm_medium=ONSITE&success-url=https%3A%2F%2Fwww.news-press.com%2Fstory%2Fnews%2Flocal%2F2026%2F11%2F09%2Flee-county-sheriff-no-injuries-in-separate-florida-aircraft-incidents%2F92689034007%2F)\n[](https://login.news-press.com/PFTM-GUP/authenticate/?success-url=https%3A%2F%2Fwww.news-press.com%2Fstory%2Fnews%2Flocal%2F2026%2F11%2F09%2Flee-county-sheriff-no-injuries-in-separate-florida-aircraft-incidents%2F92689034007%2F&cancel-url=https%3A%2F%2Fwww.news-press.com%2Fstory%2Fnews%2Flocal%2F2026%2F11%2F09%2Flee-county-sheriff-no-injuries-in-separate-florida-aircraft-incidents%2F92689034007%2F)\n[](https://www.news-press.com/news/) [](https://www.news-press.com/news/)\n[LOCAL](https://www.news-press.com/news/communities/)\n# Lee County sheriff: No injuries after 2 planes crash land over weekend\n## The incidents happened less than 24 hours apart in Lee County.\n[![Portrait of Tomas Rodriguez](https://www.news-press.com/gcdn/presto/2022/05/08/PFTM/d3b24871-cf32-47ef-8bc4-836f32f48664-tomas58.jpg?crop=2853,2853,x0,y533&width=48&height=48&format=pjpg&auto=webp) Tomas Rodriguez](https://www.naplesnews.com/staff/7430144002/tomas-rodriguez/)\nFort Myers News-Press & Naples Daily News\nNov. 9, 2026, 10:38 a.m. ET\n[](https://www.facebook.com/dialog/share?display=popup&app_id=149631068421067&href=https%3A%2F%2Fwww.news-p\""
+              "citation": "Lee County sheriff: No injuries in separate Florida aircraft incidents: \"[](https://www.naplesnews.com/)\n[Two planes crash land in Lee County less than 24 hours apart](https://www.naplesnews.com/story/news/local/2026/11/09/lee-county-sheriff-no-injuries-in-separate-florida-aircraft-incidents/92689034007/)\n[](https://subscribe.naplesnews.com/rr/nanobar?gps-source=CPTILELEFT&itm_campaign=2026ENTQ4BAU2026&itm_medium=ONSITE&success-url=https%3A%2F%2Fwww.naplesnews.com%2Fstory%2Fnews%2Flocal%2F2026%2F11%2F09%2Flee-county-sheriff-no-injuries-in-separate-florida-aircraft-incidents%2F92689034007%2F)\n[](https://subscribe.naplesnews.com/rr/masthead?gps-source=CPMASTHEAD&itm_campaign=2026ENTQ4BAU2026&itm_medium=ONSITE&success-url=https%3A%2F%2Fwww.naplesnews.com%2Fstory%2Fnews%2Flocal%2F2026%2F11%2F09%2Flee-county-sheriff-no-injuries-in-separate-florida-aircraft-incidents%2F92689034007%2F)\n[News](https://www.naplesnews.com/news/) [Sports](https://www.naplesnews.com/sports/) [Real Estate](https://www.naplesnews.com/business/real-estate/) [Restaurants](https://www.naplesnews.com/entertainment/restaurants/) [Opinion](https://www.naplesnews.com/opinion/) [Advertise](https://advertising.usatoday.com/advertise-with-us/?cid=Web_LiQ_Network_AdvertiseWithUs_AdvertiseInquiry&publication=naples_daily_news&utm_source=local_publication&utm_medium=menu&utm_campaign=advertise_with_us) [Obituaries](https://www.naplesnews.com/obituaries) [eNewspaper](https://user.naplesnews.com/user/enewspaper) [Legals](https://www.naplesnews.com/public-notices)\n[](https://www.naplesnews.com/search/ \"Search\")\n[](https://www.naplesnews.com/weather/ \"Weather in Naples: 80°F Mostly Cloudy\") [](https://subscribe.naplesnews.com/rr/navsub?gps-source=CPTOPNAVBAR&itm_campaign=2026ENTQ4BAU2026&itm_medium=ONSITE&success-url=https%3A%2F%2Fwww.naplesnews.com%2Fstory%2Fnews%2Flocal%2F2026%2F11%2F09%2Flee-county-sheriff-no-injuries-in-separate-florida-aircraft-incidents%2F92689034007%2F)\n[](https://login.naplesnews.com/PNDN-GUP/authenticate/?success-url=https%3A%2F%2Fwww.naplesnews.com%2Fstory%2Fnews%2Flocal%2F2026%2F11%2F09%2Flee-county-sheriff-no-injuries-in-separate-florida-aircraft-incidents%2F92689034007%2F&cancel-url=https%3A%2F%2Fwww.naplesnews.com%2Fstory%2Fnews%2Flocal%2F2026%2F11%2F09%2Flee-county-sheriff-no-injuries-in-separate-florida-aircraft-incidents%2F92689034007%2F)\n[](https://www.naplesnews.com/news/) [](https://www.naplesnews.com/news/)\nLOCAL\n# Lee County sheriff: No injuries after 2 planes crash land over weekend\n## The incidents happened less than 24 hours apart in Lee County.\n[![Portrait of Tomas Rodriguez](https://www.naplesnews.com/gcdn/presto/2022/05/08/PFTM/d3b24871-cf32-47ef-8bc4-836f32f48664-tomas58.jpg?crop=2853,2853,x0,y533&width=48&height=48&format=pjpg&auto=webp) Tomas Rodriguez](https://www.naplesnews.com/staff/7430144002/tomas-rodriguez/)\nFort Myers News-Press & Naples Daily News\nNov. 9, 2026, 10:38 a.m. ET\n[](https://www.facebook.com/dialog/share?display=popup&app_id=1703814913224751&href=https%3A%2F%2Fwww.naplesnews.com%2Fstory%2Fnews%2Floc\""
             },
             "suggestions": [
               "What's driving signal breaking 3?",
@@ -187,7 +727,7 @@
             "variable_type": "categorical",
             "source": {
               "url": "https://www.news-press.com/story/money/business/local/2026/11/13/couple-selling-new-64-million-dollar-waterfront-dream-home-in-north-naples-florida/92689828007/",
-              "fetched_at": "2026-11-15T12:04:20Z",
+              "fetched_at": "2026-11-16T04:26:27Z",
               "tier": 2,
               "citation": "Couple selling $64 million waterfront 'dream home' in North Naples: \"[](https://www.news-press.com/)\n[](https://subscribe.news-press.com/rr/nanobar?gps-source=CPTILELEFT&itm_campaign=2026ENTQ4BAU2026&itm_medium=ONSITE&success-url=https%3A%2F%2Fwww.news-press.com%2Fstory%2Fmoney%2Fbusiness%2Flocal%2F2026%2F11%2F13%2Fcouple-selling-new-64-million-dollar-waterfront-dream-home-in-north-naples-florida%2F92689828007%2F)\n[](https://subscribe.news-press.com/rr/masthead?gps-source=CPMASTHEAD&itm_campaign=2026ENTQ4BAU2026&itm_medium=ONSITE&success-url=https%3A%2F%2Fwww.news-press.com%2Fstory%2Fmoney%2Fbusiness%2Flocal%2F2026%2F11%2F13%2Fcouple-selling-new-64-million-dollar-waterfront-dream-home-in-north-naples-florida%2F92689828007%2F)\n[News](https://www.news-press.com/news/) [Cape Coral](https://www.news-press.com/news/cape-coral/) [Sports](https://www.news-press.com/sports/) [Restaurants](https://www.news-press.com/taste/) [Real Estate](https://www.news-press.com/real-estate) [Advertise](https://advertising.usatoday.com/advertise-with-us/?cid=Web_LiQ_Network_AdvertiseWithUs_AdvertiseInquiry&publication=the_news_press&utm_source=local_publication&utm_medium=menu&utm_campaign=advertise_with_us) [Obituaries](https://www.news-press.com/obituaries) [eNewspaper](https://user.news-press.com/user/enewspaper) [Legals](https://www.news-press.com/public-notices)\n[](https://www.news-press.com/search/ \"Search\")\n[](https://www.news-press.com/weather/ \"Weather in Fort Myers: 55°F Mostly Sunny\") [](https://subscribe.news-press.com/rr/navsub?gps-source=CPTOPNAVBAR&itm_campaign=2026ENTQ4BAU2026&itm_medium=ONSITE&success-url=https%3A%2F%2Fwww.news-press.com%2Fstory%2Fmoney%2Fbusiness%2Flocal%2F2026%2F11%2F13%2Fcouple-selling-new-64-million-dollar-waterfront-dream-home-in-north-naples-florida%2F92689828007%2F)\n[](https://login.news-press.com/PFTM-GUP/authenticate/?success-url=https%3A%2F%2Fwww.news-press.com%2Fstory%2Fmoney%2Fbusiness%2Flocal%2F2026%2F11%2F13%2Fcouple-selling-new-64-million-dollar-waterfront-dream-home-in-north-naples-florida%2F92689828007%2F&cancel-url=https%3A%2F%2Fwww.news-press.com%2Fstory%2Fmoney%2Fbusiness%2Flocal%2F2026%2F11%2F13%2Fcouple-selling-new-64-million-dollar-waterfront-dream-home-in-north-naples-florida%2F92689828007%2F)\n[](https://www.news-press.com/) [](https://www.news-press.com/)\nLOCAL BUSINESS\n# Couple lists beachfront 'dream home' for $64 million in North Naples\n[![Portrait of Laura Layden](https://www.news-press.com/gcdn/authoring/authoring-images/2024/02/08/PNDN/72524348007-ndn-jh-20240126-laura-0001.JPG?crop=3313,3312,x1506,y0&width=48&height=48&format=pjpg&auto=webp) Laura Layden](https://www.naplesnews.com/staff/2647080001/laura-layden/)\nFort Myers News-Press & Naples Daily News\nNov. 13, 2026, 2:32 p.m. ET\n[](https://www.facebook.com/dialog/share?display=popup&app_id=149631068421067&href=https%3A%2F%2Fwww.news-press.com%2Fstory%2Fmoney%2Fbusiness%2Flocal%2F2026%2F11%2F13%2Fcouple-selling-new-64-million-dollar-waterfront-dream-home-in-north-naples-florida%2F92689828007%2F)[](https://x.com/intent/po\""
             },
@@ -204,7 +744,7 @@
             "variable_type": "categorical",
             "source": {
               "url": "https://www.news-press.com/story/money/business/local/2026/11/13/couple-selling-new-64-million-dollar-waterfront-dream-home-in-north-naples-florida/92689828007/",
-              "fetched_at": "2026-11-15T12:04:20Z",
+              "fetched_at": "2026-11-16T04:26:27Z",
               "tier": 2,
               "citation": "Couple selling $64 million waterfront 'dream home' in North Naples: \"[](https://www.news-press.com/)\n[](https://subscribe.news-press.com/rr/nanobar?gps-source=CPTILELEFT&itm_campaign=2026ENTQ4BAU2026&itm_medium=ONSITE&success-url=https%3A%2F%2Fwww.news-press.com%2Fstory%2Fmoney%2Fbusiness%2Flocal%2F2026%2F11%2F13%2Fcouple-selling-new-64-million-dollar-waterfront-dream-home-in-north-naples-florida%2F92689828007%2F)\n[](https://subscribe.news-press.com/rr/masthead?gps-source=CPMASTHEAD&itm_campaign=2026ENTQ4BAU2026&itm_medium=ONSITE&success-url=https%3A%2F%2Fwww.news-press.com%2Fstory%2Fmoney%2Fbusiness%2Flocal%2F2026%2F11%2F13%2Fcouple-selling-new-64-million-dollar-waterfront-dream-home-in-north-naples-florida%2F92689828007%2F)\n[News](https://www.news-press.com/news/) [Cape Coral](https://www.news-press.com/news/cape-coral/) [Sports](https://www.news-press.com/sports/) [Restaurants](https://www.news-press.com/taste/) [Real Estate](https://www.news-press.com/real-estate) [Advertise](https://advertising.usatoday.com/advertise-with-us/?cid=Web_LiQ_Network_AdvertiseWithUs_AdvertiseInquiry&publication=the_news_press&utm_source=local_publication&utm_medium=menu&utm_campaign=advertise_with_us) [Obituaries](https://www.news-press.com/obituaries) [eNewspaper](https://user.news-press.com/user/enewspaper) [Legals](https://www.news-press.com/public-notices)\n[](https://www.news-press.com/search/ \"Search\")\n[](https://www.news-press.com/weather/ \"Weather in Fort Myers: 55°F Mostly Sunny\") [](https://subscribe.news-press.com/rr/navsub?gps-source=CPTOPNAVBAR&itm_campaign=2026ENTQ4BAU2026&itm_medium=ONSITE&success-url=https%3A%2F%2Fwww.news-press.com%2Fstory%2Fmoney%2Fbusiness%2Flocal%2F2026%2F11%2F13%2Fcouple-selling-new-64-million-dollar-waterfront-dream-home-in-north-naples-florida%2F92689828007%2F)\n[](https://login.news-press.com/PFTM-GUP/authenticate/?success-url=https%3A%2F%2Fwww.news-press.com%2Fstory%2Fmoney%2Fbusiness%2Flocal%2F2026%2F11%2F13%2Fcouple-selling-new-64-million-dollar-waterfront-dream-home-in-north-naples-florida%2F92689828007%2F&cancel-url=https%3A%2F%2Fwww.news-press.com%2Fstory%2Fmoney%2Fbusiness%2Flocal%2F2026%2F11%2F13%2Fcouple-selling-new-64-million-dollar-waterfront-dream-home-in-north-naples-florida%2F92689828007%2F)\n[](https://www.news-press.com/) [](https://www.news-press.com/)\nLOCAL BUSINESS\n# Couple lists beachfront 'dream home' for $64 million in North Naples\n[![Portrait of Laura Layden](https://www.news-press.com/gcdn/authoring/authoring-images/2024/02/08/PNDN/72524348007-ndn-jh-20240126-laura-0001.JPG?crop=3313,3312,x1506,y0&width=48&height=48&format=pjpg&auto=webp) Laura Layden](https://www.naplesnews.com/staff/2647080001/laura-layden/)\nFort Myers News-Press & Naples Daily News\nNov. 13, 2026, 2:32 p.m. ET\n[](https://www.facebook.com/dialog/share?display=popup&app_id=149631068421067&href=https%3A%2F%2Fwww.news-press.com%2Fstory%2Fmoney%2Fbusiness%2Flocal%2F2026%2F11%2F13%2Fcouple-selling-new-64-million-dollar-waterfront-dream-home-in-north-naples-florida%2F92689828007%2F)[](https://x.com/intent/po\""
             },
@@ -221,7 +761,7 @@
             "variable_type": "categorical",
             "source": {
               "url": "https://www.news-press.com/story/money/business/local/2026/11/13/couple-selling-new-64-million-dollar-waterfront-dream-home-in-north-naples-florida/92689828007/",
-              "fetched_at": "2026-11-15T12:04:20Z",
+              "fetched_at": "2026-11-16T04:26:27Z",
               "tier": 2,
               "citation": "Couple selling $64 million waterfront 'dream home' in North Naples: \"[](https://www.news-press.com/)\n[](https://subscribe.news-press.com/rr/nanobar?gps-source=CPTILELEFT&itm_campaign=2026ENTQ4BAU2026&itm_medium=ONSITE&success-url=https%3A%2F%2Fwww.news-press.com%2Fstory%2Fmoney%2Fbusiness%2Flocal%2F2026%2F11%2F13%2Fcouple-selling-new-64-million-dollar-waterfront-dream-home-in-north-naples-florida%2F92689828007%2F)\n[](https://subscribe.news-press.com/rr/masthead?gps-source=CPMASTHEAD&itm_campaign=2026ENTQ4BAU2026&itm_medium=ONSITE&success-url=https%3A%2F%2Fwww.news-press.com%2Fstory%2Fmoney%2Fbusiness%2Flocal%2F2026%2F11%2F13%2Fcouple-selling-new-64-million-dollar-waterfront-dream-home-in-north-naples-florida%2F92689828007%2F)\n[News](https://www.news-press.com/news/) [Cape Coral](https://www.news-press.com/news/cape-coral/) [Sports](https://www.news-press.com/sports/) [Restaurants](https://www.news-press.com/taste/) [Real Estate](https://www.news-press.com/real-estate) [Advertise](https://advertising.usatoday.com/advertise-with-us/?cid=Web_LiQ_Network_AdvertiseWithUs_AdvertiseInquiry&publication=the_news_press&utm_source=local_publication&utm_medium=menu&utm_campaign=advertise_with_us) [Obituaries](https://www.news-press.com/obituaries) [eNewspaper](https://user.news-press.com/user/enewspaper) [Legals](https://www.news-press.com/public-notices)\n[](https://www.news-press.com/search/ \"Search\")\n[](https://www.news-press.com/weather/ \"Weather in Fort Myers: 55°F Mostly Sunny\") [](https://subscribe.news-press.com/rr/navsub?gps-source=CPTOPNAVBAR&itm_campaign=2026ENTQ4BAU2026&itm_medium=ONSITE&success-url=https%3A%2F%2Fwww.news-press.com%2Fstory%2Fmoney%2Fbusiness%2Flocal%2F2026%2F11%2F13%2Fcouple-selling-new-64-million-dollar-waterfront-dream-home-in-north-naples-florida%2F92689828007%2F)\n[](https://login.news-press.com/PFTM-GUP/authenticate/?success-url=https%3A%2F%2Fwww.news-press.com%2Fstory%2Fmoney%2Fbusiness%2Flocal%2F2026%2F11%2F13%2Fcouple-selling-new-64-million-dollar-waterfront-dream-home-in-north-naples-florida%2F92689828007%2F&cancel-url=https%3A%2F%2Fwww.news-press.com%2Fstory%2Fmoney%2Fbusiness%2Flocal%2F2026%2F11%2F13%2Fcouple-selling-new-64-million-dollar-waterfront-dream-home-in-north-naples-florida%2F92689828007%2F)\n[](https://www.news-press.com/) [](https://www.news-press.com/)\nLOCAL BUSINESS\n# Couple lists beachfront 'dream home' for $64 million in North Naples\n[![Portrait of Laura Layden](https://www.news-press.com/gcdn/authoring/authoring-images/2024/02/08/PNDN/72524348007-ndn-jh-20240126-laura-0001.JPG?crop=3313,3312,x1506,y0&width=48&height=48&format=pjpg&auto=webp) Laura Layden](https://www.naplesnews.com/staff/2647080001/laura-layden/)\nFort Myers News-Press & Naples Daily News\nNov. 13, 2026, 2:32 p.m. ET\n[](https://www.facebook.com/dialog/share?display=popup&app_id=149631068421067&href=https%3A%2F%2Fwww.news-press.com%2Fstory%2Fmoney%2Fbusiness%2Flocal%2F2026%2F11%2F13%2Fcouple-selling-new-64-million-dollar-waterfront-dream-home-in-north-naples-florida%2F92689828007%2F)[](https://x.com/intent/po\""
             },
@@ -238,7 +778,7 @@
             "variable_type": "categorical",
             "source": {
               "url": "https://www.news-press.com/story/money/business/local/2026/11/13/couple-selling-new-64-million-dollar-waterfront-dream-home-in-north-naples-florida/92689828007/",
-              "fetched_at": "2026-11-15T12:04:20Z",
+              "fetched_at": "2026-11-16T04:26:27Z",
               "tier": 2,
               "citation": "Couple selling $64 million waterfront 'dream home' in North Naples: \"[](https://www.news-press.com/)\n[](https://subscribe.news-press.com/rr/nanobar?gps-source=CPTILELEFT&itm_campaign=2026ENTQ4BAU2026&itm_medium=ONSITE&success-url=https%3A%2F%2Fwww.news-press.com%2Fstory%2Fmoney%2Fbusiness%2Flocal%2F2026%2F11%2F13%2Fcouple-selling-new-64-million-dollar-waterfront-dream-home-in-north-naples-florida%2F92689828007%2F)\n[](https://subscribe.news-press.com/rr/masthead?gps-source=CPMASTHEAD&itm_campaign=2026ENTQ4BAU2026&itm_medium=ONSITE&success-url=https%3A%2F%2Fwww.news-press.com%2Fstory%2Fmoney%2Fbusiness%2Flocal%2F2026%2F11%2F13%2Fcouple-selling-new-64-million-dollar-waterfront-dream-home-in-north-naples-florida%2F92689828007%2F)\n[News](https://www.news-press.com/news/) [Cape Coral](https://www.news-press.com/news/cape-coral/) [Sports](https://www.news-press.com/sports/) [Restaurants](https://www.news-press.com/taste/) [Real Estate](https://www.news-press.com/real-estate) [Advertise](https://advertising.usatoday.com/advertise-with-us/?cid=Web_LiQ_Network_AdvertiseWithUs_AdvertiseInquiry&publication=the_news_press&utm_source=local_publication&utm_medium=menu&utm_campaign=advertise_with_us) [Obituaries](https://www.news-press.com/obituaries) [eNewspaper](https://user.news-press.com/user/enewspaper) [Legals](https://www.news-press.com/public-notices)\n[](https://www.news-press.com/search/ \"Search\")\n[](https://www.news-press.com/weather/ \"Weather in Fort Myers: 55°F Mostly Sunny\") [](https://subscribe.news-press.com/rr/navsub?gps-source=CPTOPNAVBAR&itm_campaign=2026ENTQ4BAU2026&itm_medium=ONSITE&success-url=https%3A%2F%2Fwww.news-press.com%2Fstory%2Fmoney%2Fbusiness%2Flocal%2F2026%2F11%2F13%2Fcouple-selling-new-64-million-dollar-waterfront-dream-home-in-north-naples-florida%2F92689828007%2F)\n[](https://login.news-press.com/PFTM-GUP/authenticate/?success-url=https%3A%2F%2Fwww.news-press.com%2Fstory%2Fmoney%2Fbusiness%2Flocal%2F2026%2F11%2F13%2Fcouple-selling-new-64-million-dollar-waterfront-dream-home-in-north-naples-florida%2F92689828007%2F&cancel-url=https%3A%2F%2Fwww.news-press.com%2Fstory%2Fmoney%2Fbusiness%2Flocal%2F2026%2F11%2F13%2Fcouple-selling-new-64-million-dollar-waterfront-dream-home-in-north-naples-florida%2F92689828007%2F)\n[](https://www.news-press.com/) [](https://www.news-press.com/)\nLOCAL BUSINESS\n# Couple lists beachfront 'dream home' for $64 million in North Naples\n[![Portrait of Laura Layden](https://www.news-press.com/gcdn/authoring/authoring-images/2024/02/08/PNDN/72524348007-ndn-jh-20240126-laura-0001.JPG?crop=3313,3312,x1506,y0&width=48&height=48&format=pjpg&auto=webp) Laura Layden](https://www.naplesnews.com/staff/2647080001/laura-layden/)\nFort Myers News-Press & Naples Daily News\nNov. 13, 2026, 2:32 p.m. ET\n[](https://www.facebook.com/dialog/share?display=popup&app_id=149631068421067&href=https%3A%2F%2Fwww.news-press.com%2Fstory%2Fmoney%2Fbusiness%2Flocal%2F2026%2F11%2F13%2Fcouple-selling-new-64-million-dollar-waterfront-dream-home-in-north-naples-florida%2F92689828007%2F)[](https://x.com/intent/po\""
             },
@@ -255,7 +795,7 @@
             "variable_type": "categorical",
             "source": {
               "url": "https://www.news-press.com/story/money/business/local/2026/11/11/wildflowerz-ranch-conservation-deal-falls-apart-in-collier-county/92724754007/",
-              "fetched_at": "2026-11-15T12:04:20Z",
+              "fetched_at": "2026-11-16T04:26:27Z",
               "tier": 2,
               "citation": "'Wildflowerz Ranch' conservation deal falls apart in Collier County: \"[](https://www.news-press.com/)\n[Popular Fort Myers pizza shop reopens with new look, more awards](https://www.news-press.com/story/life/food/2026/11/12/uncle-ricos-in-fort-myers-reopens-with-cool-new-look-more-awards/92650571007/)\n[](https://subscribe.news-press.com/rr/nanobar?gps-source=CPTILELEFT&itm_campaign=2026ENTQ4BAU2026&itm_medium=ONSITE&success-url=https%3A%2F%2Fwww.news-press.com%2Fstory%2Fmoney%2Fbusiness%2Flocal%2F2026%2F11%2F11%2Fwildflowerz-ranch-conservation-deal-falls-apart-in-collier-county%2F92724754007%2F)\n[](https://subscribe.news-press.com/rr/masthead?gps-source=CPMASTHEAD&itm_campaign=2026ENTQ4BAU2026&itm_medium=ONSITE&success-url=https%3A%2F%2Fwww.news-press.com%2Fstory%2Fmoney%2Fbusiness%2Flocal%2F2026%2F11%2F11%2Fwildflowerz-ranch-conservation-deal-falls-apart-in-collier-county%2F92724754007%2F)\n[News](https://www.news-press.com/news/) [Cape Coral](https://www.news-press.com/news/cape-coral/) [Sports](https://www.news-press.com/sports/) [Restaurants](https://www.news-press.com/taste/) [Real Estate](https://www.news-press.com/real-estate) [Advertise](https://advertising.usatoday.com/advertise-with-us/?cid=Web_LiQ_Network_AdvertiseWithUs_AdvertiseInquiry&publication=the_news_press&utm_source=local_publication&utm_medium=menu&utm_campaign=advertise_with_us) [Obituaries](https://www.news-press.com/obituaries) [eNewspaper](https://user.news-press.com/user/enewspaper) [Legals](https://www.news-press.com/public-notices)\n[](https://www.news-press.com/search/ \"Search\")\n[](https://www.news-press.com/weather/ \"Weather in Fort Myers: 76°F Cloudy\") [](https://subscribe.news-press.com/rr/navsub?gps-source=CPTOPNAVBAR&itm_campaign=2026ENTQ4BAU2026&itm_medium=ONSITE&success-url=https%3A%2F%2Fwww.news-press.com%2Fstory%2Fmoney%2Fbusiness%2Flocal%2F2026%2F11%2F11%2Fwildflowerz-ranch-conservation-deal-falls-apart-in-collier-county%2F92724754007%2F)\n[](https://login.news-press.com/PFTM-GUP/authenticate/?success-url=https%3A%2F%2Fwww.news-press.com%2Fstory%2Fmoney%2Fbusiness%2Flocal%2F2026%2F11%2F11%2Fwildflowerz-ranch-conservation-deal-falls-apart-in-collier-county%2F92724754007%2F&cancel-url=https%3A%2F%2Fwww.news-press.com%2Fstory%2Fmoney%2Fbusiness%2Flocal%2F2026%2F11%2F11%2Fwildflowerz-ranch-conservation-deal-falls-apart-in-collier-county%2F92724754007%2F)\n[](https://www.news-press.com/) [](https://www.news-press.com/)\nLOCAL BUSINESS\n# Conservation deal for 'Wildflowerz Ranch' collapses in Collier County\n[![Portrait of Laura Layden](https://www.news-press.com/gcdn/authoring/authoring-images/2024/02/08/PNDN/72524348007-ndn-jh-20240126-laura-0001.JPG?crop=3313,3312,x1506,y0&width=48&height=48&format=pjpg&auto=webp) Laura Layden](https://www.naplesnews.com/staff/2647080001/laura-layden/)\nFort Myers News-Press & Naples Daily News\nNov. 11, 2026Updated Nov. 12, 2026, 8:28 a.m. ET\nCollier County's hopes of purchasing the Wildflowerz Ranch for preservation have been dashed.\nAt a board meeting on Nov. 10, County Manager Amy Patterson told county\""
             },
@@ -332,7 +872,7 @@
             ],
             "source": {
               "url": "https://www.swfldatagulf.com/r/source/city_pulse",
-              "fetched_at": "2026-11-15T12:04:20Z",
+              "fetched_at": "2026-11-16T04:26:27Z",
               "tier": 2,
               "citation": "Distilled, citation-backed SWFL news signals; each ZIP's items carry per-item source URLs in data_lake.city_pulse."
             },
@@ -340,7 +880,7 @@
           }
         ],
         "caveats": [
-          "77 additional live signals not surfaced here (cap 8); the full set is in data_lake.city_pulse.",
+          "72 additional live signals not surfaced here (cap 8); the full set is in data_lake.city_pulse.",
           "Each signal is dated current-events context with a per-signal source; freshness is TTL-bounded by topic (breaking 1d → structural 90d)."
         ],
         "contradicts": [],
@@ -353,7 +893,7 @@
         "relevance": {
           "decay_curve": "weeks",
           "half_life_hours": 720,
-          "computed_at": "2026-11-15T12:04:20Z"
+          "computed_at": "2026-11-16T04:26:27Z"
         },
         "exogenous_signals": []
       }
@@ -370,13 +910,1086 @@
     },
     {
       "packId": "freshness-pulse",
-      "status": "skipped-fresh",
-      "written": false
+      "status": "built",
+      "version": 105,
+      "written": true,
+      "brainOutput": {
+        "brain_id": "freshness-pulse",
+        "version": 105,
+        "refined_at": "2026-11-16T04:26:27Z",
+        "expires": "2026-11-17T04:26:27Z",
+        "ttl_seconds": 86400,
+        "direction": "neutral",
+        "magnitude": 0,
+        "drivers": [],
+        "overrides": [],
+        "conclusion": "Today's sourced snapshot — SWFL 30-year fixed mortgage rate (as of 2026-11-12) 7.11%; Cape Coral median asking price (as of 2026-11-16) $399,200; Fort Myers median asking price (as of 2026-11-16) $325,000; Naples median asking price (as of 2026-11-16) $650,000. These are cited current facts only; the direction call lives downstream in master.",
+        "key_metrics": [
+          {
+            "metric": "freshness_mortgage_30yr_fixed_pct",
+            "value": 7.11,
+            "direction": "stable",
+            "label": "SWFL 30-year fixed mortgage rate (as of 2026-11-12)",
+            "variable_type": "intensive",
+            "units": "percent",
+            "display_format": "percent",
+            "source": {
+              "url": "https://fred.stlouisfed.org/series/MORTGAGE30US",
+              "fetched_at": "2026-11-16T04:23:31.386749+00:00",
+              "tier": 2,
+              "citation": "FRED — current 30-year fixed mortgage rate for SWFL, sourced 2026-11-12"
+            },
+            "suggestions": [
+              "What's driving freshness mortgage 30yr fixed pct?",
+              "How does freshness mortgage 30yr fixed pct here compare to other SWFL areas?"
+            ]
+          },
+          {
+            "metric": "freshness_median_asking_price_cape_coral_usd",
+            "value": 399200,
+            "direction": "stable",
+            "label": "Cape Coral median asking price (as of 2026-11-16)",
+            "variable_type": "extensive",
+            "units": "USD",
+            "display_format": "currency",
+            "source": {
+              "url": "https://www.swfldatagulf.com/desk",
+              "fetched_at": "2026-11-16T04:23:31.386749+00:00",
+              "tier": 2,
+              "citation": "SWFL Data Gulf active-listing inventory — current median asking price for Cape Coral, sourced 2026-11-16"
+            },
+            "suggestions": [
+              "Chart asking rents across the corridors",
+              "What's driving freshness median asking price cape coral usd?",
+              "How does freshness median asking price cape coral usd here compare to other SWFL areas?"
+            ]
+          },
+          {
+            "metric": "freshness_median_asking_price_fort_myers_usd",
+            "value": 325000,
+            "direction": "stable",
+            "label": "Fort Myers median asking price (as of 2026-11-16)",
+            "variable_type": "extensive",
+            "units": "USD",
+            "display_format": "currency",
+            "source": {
+              "url": "https://www.swfldatagulf.com/desk",
+              "fetched_at": "2026-11-16T04:23:31.386749+00:00",
+              "tier": 2,
+              "citation": "SWFL Data Gulf active-listing inventory — current median asking price for Fort Myers, sourced 2026-11-16"
+            },
+            "suggestions": [
+              "Chart asking rents across the corridors",
+              "What's driving freshness median asking price fort myers usd?",
+              "How does freshness median asking price fort myers usd here compare to other SWFL areas?"
+            ]
+          },
+          {
+            "metric": "freshness_median_asking_price_naples_usd",
+            "value": 650000,
+            "direction": "stable",
+            "label": "Naples median asking price (as of 2026-11-16)",
+            "variable_type": "extensive",
+            "units": "USD",
+            "display_format": "currency",
+            "source": {
+              "url": "https://www.swfldatagulf.com/desk",
+              "fetched_at": "2026-11-16T04:23:31.386749+00:00",
+              "tier": 2,
+              "citation": "SWFL Data Gulf active-listing inventory — current median asking price for Naples, sourced 2026-11-16"
+            },
+            "suggestions": [
+              "Chart asking rents across the corridors",
+              "What's driving freshness median asking price naples usd?",
+              "How does freshness median asking price naples usd here compare to other SWFL areas?"
+            ]
+          }
+        ],
+        "detail_tables": [],
+        "caveats": [
+          "Each county-grain number is a single grounded source's current figure, provenance-gated to a real source URL; held anomalies and unsourced (model-memory) numbers are excluded by design."
+        ],
+        "contradicts": [],
+        "confidence": 0.8,
+        "joint_integrity": 1,
+        "confidence_dispersion": 0,
+        "chain_depth": 0,
+        "trust_tier": 2,
+        "upstream_count": 0,
+        "relevance": {
+          "decay_curve": "weeks",
+          "half_life_hours": 720,
+          "computed_at": "2026-11-16T04:26:27Z"
+        },
+        "exogenous_signals": []
+      }
     },
     {
       "packId": "seller-stress-swfl",
-      "status": "skipped-fresh",
-      "written": false
+      "status": "built",
+      "version": 13,
+      "written": true,
+      "brainOutput": {
+        "brain_id": "seller-stress-swfl",
+        "version": 13,
+        "refined_at": "2026-11-16T04:26:34Z",
+        "expires": "2026-12-16T04:26:34Z",
+        "ttl_seconds": 2592000,
+        "direction": "bearish",
+        "magnitude": 0.36,
+        "drivers": [],
+        "overrides": [],
+        "conclusion": "SWFL seller stress is elevated at 54/100 (bearish threshold: ≥65). 52 of 55 ZIPs scored vs 2019–2021 baseline. Highest-stress ZIPs: 33924 (100), 33901 (87), 33957 (77). Leading signal: 15.5% median delistings rate.",
+        "key_metrics": [
+          {
+            "metric": "seller_stress_score_swfl",
+            "value": 54.4,
+            "direction": "rising",
+            "label": "SWFL median seller stress score (0-100) at 2026-08-01 — 52 ZIPs scored vs 2019–2021 baseline",
+            "variable_type": "intensive",
+            "units": "score (0-100)",
+            "display_format": "raw",
+            "source": {
+              "url": "https://www.redfin.com/news/data-center/",
+              "fetched_at": "2026-11-16T04:26:28Z",
+              "tier": 3,
+              "citation": "Redfin Data Center — price_drops, contract_cancellations, delistings_relistings ZIP-level monthly rolling-3-month data for SWFL MSAs."
+            },
+            "suggestions": [
+              "What's driving seller stress score swfl?",
+              "How does seller stress score swfl here compare to other SWFL areas?"
+            ]
+          },
+          {
+            "metric": "seller_stress_delistings_rate_swfl",
+            "value": 15.530000000000001,
+            "direction": "rising",
+            "label": "SWFL median delistings rate (share of listings pulled off market without selling) — leading indicator",
+            "variable_type": "intensive",
+            "units": "%",
+            "display_format": "percent",
+            "source": {
+              "url": "https://www.redfin.com/news/data-center/",
+              "fetched_at": "2026-11-16T04:26:28Z",
+              "tier": 3,
+              "citation": "Redfin Data Center — price_drops, contract_cancellations, delistings_relistings ZIP-level monthly rolling-3-month data for SWFL MSAs."
+            },
+            "suggestions": [
+              "What's driving seller stress delistings rate swfl?",
+              "How does seller stress delistings rate swfl here compare to other SWFL areas?"
+            ]
+          },
+          {
+            "metric": "seller_stress_price_drops_rate_swfl",
+            "value": 35.46,
+            "direction": "stable",
+            "label": "SWFL median share of active listings with a price reduction — coincident indicator",
+            "variable_type": "intensive",
+            "units": "%",
+            "display_format": "percent",
+            "source": {
+              "url": "https://www.redfin.com/news/data-center/",
+              "fetched_at": "2026-11-16T04:26:28Z",
+              "tier": 3,
+              "citation": "Redfin Data Center — price_drops, contract_cancellations, delistings_relistings ZIP-level monthly rolling-3-month data for SWFL MSAs."
+            },
+            "suggestions": [
+              "What's driving seller stress price drops rate swfl?",
+              "How does seller stress price drops rate swfl here compare to other SWFL areas?"
+            ]
+          },
+          {
+            "metric": "seller_stress_cancellation_rate_swfl",
+            "value": 14.76,
+            "direction": "stable",
+            "label": "SWFL median contract cancellation rate (% of pending sales cancelled) — lagging ~30-60 days",
+            "variable_type": "intensive",
+            "units": "%",
+            "display_format": "percent",
+            "source": {
+              "url": "https://www.redfin.com/news/data-center/",
+              "fetched_at": "2026-11-16T04:26:28Z",
+              "tier": 3,
+              "citation": "Redfin Data Center — price_drops, contract_cancellations, delistings_relistings ZIP-level monthly rolling-3-month data for SWFL MSAs."
+            },
+            "suggestions": [
+              "What's driving seller stress cancellation rate swfl?",
+              "How does seller stress cancellation rate swfl here compare to other SWFL areas?"
+            ]
+          },
+          {
+            "metric": "seller_stress_avg_drop_depth_swfl",
+            "value": 4.42,
+            "direction": "rising",
+            "label": "SWFL median average price reduction size among listings that received a cut — lagging indicator",
+            "variable_type": "intensive",
+            "units": "%",
+            "display_format": "percent",
+            "source": {
+              "url": "https://www.redfin.com/news/data-center/",
+              "fetched_at": "2026-11-16T04:26:28Z",
+              "tier": 3,
+              "citation": "Redfin Data Center — price_drops, contract_cancellations, delistings_relistings ZIP-level monthly rolling-3-month data for SWFL MSAs."
+            },
+            "suggestions": [
+              "What's driving seller stress avg drop depth swfl?",
+              "How does seller stress avg drop depth swfl here compare to other SWFL areas?"
+            ]
+          }
+        ],
+        "detail_tables": [
+          {
+            "id": "seller_stress_by_zip",
+            "title": "SWFL seller stress by ZIP — 2026-08-01 (vs 2019–2021 baseline)",
+            "grain": "zip",
+            "columns": [
+              {
+                "id": "seller_stress_score",
+                "label": "Stress Score (0-100)",
+                "display_format": "raw",
+                "units": "score"
+              },
+              {
+                "id": "share_delisted_pct",
+                "label": "Delistings Rate",
+                "display_format": "percent",
+                "units": "%"
+              },
+              {
+                "id": "pct_active_with_drops",
+                "label": "Price Drop Rate",
+                "display_format": "percent",
+                "units": "%"
+              },
+              {
+                "id": "cancellation_rate_pct",
+                "label": "Cancellation Rate",
+                "display_format": "percent",
+                "units": "%"
+              },
+              {
+                "id": "avg_price_drop_pct",
+                "label": "Avg Drop Depth",
+                "display_format": "percent",
+                "units": "%"
+              },
+              {
+                "id": "share_relisted_pct",
+                "label": "Relisting Rate",
+                "display_format": "percent",
+                "units": "%"
+              },
+              {
+                "id": "periods_scored",
+                "label": "Periods Scored",
+                "display_format": "count",
+                "units": "months"
+              },
+              {
+                "id": "baseline_suppressed",
+                "label": "Baseline Suppressed"
+              }
+            ],
+            "rows": [
+              {
+                "key": "33924",
+                "label": "33924",
+                "cells": {
+                  "seller_stress_score": 100,
+                  "share_delisted_pct": 25.41,
+                  "pct_active_with_drops": 39.26,
+                  "cancellation_rate_pct": 48.11,
+                  "avg_price_drop_pct": 6.2,
+                  "share_relisted_pct": 15.32,
+                  "periods_scored": 12,
+                  "baseline_suppressed": false
+                }
+              },
+              {
+                "key": "33901",
+                "label": "33901",
+                "cells": {
+                  "seller_stress_score": 86.9,
+                  "share_delisted_pct": 22.22,
+                  "pct_active_with_drops": 35.05,
+                  "cancellation_rate_pct": 33.6,
+                  "avg_price_drop_pct": 5.34,
+                  "share_relisted_pct": 9.6,
+                  "periods_scored": 12,
+                  "baseline_suppressed": false
+                }
+              },
+              {
+                "key": "33957",
+                "label": "33957",
+                "cells": {
+                  "seller_stress_score": 76.9,
+                  "share_delisted_pct": 21.35,
+                  "pct_active_with_drops": 20.55,
+                  "cancellation_rate_pct": 13.53,
+                  "avg_price_drop_pct": 7.9,
+                  "share_relisted_pct": 21.18,
+                  "periods_scored": 12,
+                  "baseline_suppressed": false
+                }
+              },
+              {
+                "key": "33971",
+                "label": "33971",
+                "cells": {
+                  "seller_stress_score": 74.9,
+                  "share_delisted_pct": 19.24,
+                  "pct_active_with_drops": 44.68,
+                  "cancellation_rate_pct": 23.89,
+                  "avg_price_drop_pct": 3.26,
+                  "share_relisted_pct": 5.77,
+                  "periods_scored": 12,
+                  "baseline_suppressed": false
+                }
+              },
+              {
+                "key": "33973",
+                "label": "33973",
+                "cells": {
+                  "seller_stress_score": 74.6,
+                  "share_delisted_pct": 21.45,
+                  "pct_active_with_drops": 36.16,
+                  "cancellation_rate_pct": 20.18,
+                  "avg_price_drop_pct": 3.87,
+                  "share_relisted_pct": 4.96,
+                  "periods_scored": 12,
+                  "baseline_suppressed": false
+                }
+              },
+              {
+                "key": "34120",
+                "label": "34120",
+                "cells": {
+                  "seller_stress_score": 73.7,
+                  "share_delisted_pct": 15.16,
+                  "pct_active_with_drops": 34.17,
+                  "cancellation_rate_pct": 14.67,
+                  "avg_price_drop_pct": 3.85,
+                  "share_relisted_pct": 11.2,
+                  "periods_scored": 12,
+                  "baseline_suppressed": false
+                }
+              },
+              {
+                "key": "33907",
+                "label": "33907",
+                "cells": {
+                  "seller_stress_score": 72.1,
+                  "share_delisted_pct": 21.88,
+                  "pct_active_with_drops": 37.91,
+                  "cancellation_rate_pct": 11.32,
+                  "avg_price_drop_pct": 5.87,
+                  "share_relisted_pct": 9.45,
+                  "periods_scored": 12,
+                  "baseline_suppressed": false
+                }
+              },
+              {
+                "key": "33905",
+                "label": "33905",
+                "cells": {
+                  "seller_stress_score": 67.2,
+                  "share_delisted_pct": 16.35,
+                  "pct_active_with_drops": 37.03,
+                  "cancellation_rate_pct": 21.38,
+                  "avg_price_drop_pct": 3.97,
+                  "share_relisted_pct": 10.36,
+                  "periods_scored": 12,
+                  "baseline_suppressed": false
+                }
+              },
+              {
+                "key": "33903",
+                "label": "33903",
+                "cells": {
+                  "seller_stress_score": 66.9,
+                  "share_delisted_pct": 16.27,
+                  "pct_active_with_drops": 43.17,
+                  "cancellation_rate_pct": 21.77,
+                  "avg_price_drop_pct": 4.57,
+                  "share_relisted_pct": 12.99,
+                  "periods_scored": 12,
+                  "baseline_suppressed": false
+                }
+              },
+              {
+                "key": "33976",
+                "label": "33976",
+                "cells": {
+                  "seller_stress_score": 65.9,
+                  "share_delisted_pct": 13.07,
+                  "pct_active_with_drops": 43.7,
+                  "cancellation_rate_pct": 22.88,
+                  "avg_price_drop_pct": 3.19,
+                  "share_relisted_pct": 4.45,
+                  "periods_scored": 12,
+                  "baseline_suppressed": false
+                }
+              },
+              {
+                "key": "34114",
+                "label": "34114",
+                "cells": {
+                  "seller_stress_score": 64.6,
+                  "share_delisted_pct": 13.97,
+                  "pct_active_with_drops": 30.36,
+                  "cancellation_rate_pct": 9.4,
+                  "avg_price_drop_pct": 4.47,
+                  "share_relisted_pct": 9.75,
+                  "periods_scored": 12,
+                  "baseline_suppressed": false
+                }
+              },
+              {
+                "key": "33921",
+                "label": "33921",
+                "cells": {
+                  "seller_stress_score": 64.5,
+                  "share_delisted_pct": 25.59,
+                  "pct_active_with_drops": 8.25,
+                  "cancellation_rate_pct": 0,
+                  "avg_price_drop_pct": 13.8,
+                  "share_relisted_pct": 46.62,
+                  "periods_scored": 12,
+                  "baseline_suppressed": false
+                }
+              },
+              {
+                "key": "33917",
+                "label": "33917",
+                "cells": {
+                  "seller_stress_score": 63.7,
+                  "share_delisted_pct": 16.22,
+                  "pct_active_with_drops": 36.59,
+                  "cancellation_rate_pct": 18.48,
+                  "avg_price_drop_pct": 5.21,
+                  "share_relisted_pct": 8.16,
+                  "periods_scored": 12,
+                  "baseline_suppressed": false
+                }
+              },
+              {
+                "key": "33919",
+                "label": "33919",
+                "cells": {
+                  "seller_stress_score": 63.3,
+                  "share_delisted_pct": 14.8,
+                  "pct_active_with_drops": 30.23,
+                  "cancellation_rate_pct": 18.44,
+                  "avg_price_drop_pct": 4.93,
+                  "share_relisted_pct": 9.17,
+                  "periods_scored": 12,
+                  "baseline_suppressed": false
+                }
+              },
+              {
+                "key": "33993",
+                "label": "33993",
+                "cells": {
+                  "seller_stress_score": 63,
+                  "share_delisted_pct": 16.94,
+                  "pct_active_with_drops": 42.16,
+                  "cancellation_rate_pct": 19.61,
+                  "avg_price_drop_pct": 3.52,
+                  "share_relisted_pct": 6.08,
+                  "periods_scored": 12,
+                  "baseline_suppressed": false
+                }
+              },
+              {
+                "key": "33909",
+                "label": "33909",
+                "cells": {
+                  "seller_stress_score": 62.6,
+                  "share_delisted_pct": 13.84,
+                  "pct_active_with_drops": 40.58,
+                  "cancellation_rate_pct": 22.37,
+                  "avg_price_drop_pct": 3.28,
+                  "share_relisted_pct": 5.64,
+                  "periods_scored": 12,
+                  "baseline_suppressed": false
+                }
+              },
+              {
+                "key": "34142",
+                "label": "34142",
+                "cells": {
+                  "seller_stress_score": 61.6,
+                  "share_delisted_pct": 16.06,
+                  "pct_active_with_drops": 35.88,
+                  "cancellation_rate_pct": 12.91,
+                  "avg_price_drop_pct": 4.37,
+                  "share_relisted_pct": 6.99,
+                  "periods_scored": 12,
+                  "baseline_suppressed": false
+                }
+              },
+              {
+                "key": "34145",
+                "label": "34145",
+                "cells": {
+                  "seller_stress_score": 61.2,
+                  "share_delisted_pct": 11.75,
+                  "pct_active_with_drops": 28.42,
+                  "cancellation_rate_pct": 12.79,
+                  "avg_price_drop_pct": 4.98,
+                  "share_relisted_pct": 9.92,
+                  "periods_scored": 12,
+                  "baseline_suppressed": false
+                }
+              },
+              {
+                "key": "33908",
+                "label": "33908",
+                "cells": {
+                  "seller_stress_score": 60.8,
+                  "share_delisted_pct": 17.15,
+                  "pct_active_with_drops": 36.27,
+                  "cancellation_rate_pct": 16.58,
+                  "avg_price_drop_pct": 4.56,
+                  "share_relisted_pct": 12.37,
+                  "periods_scored": 12,
+                  "baseline_suppressed": false
+                }
+              },
+              {
+                "key": "34110",
+                "label": "34110",
+                "cells": {
+                  "seller_stress_score": 60.7,
+                  "share_delisted_pct": 18,
+                  "pct_active_with_drops": 28.4,
+                  "cancellation_rate_pct": 14.69,
+                  "avg_price_drop_pct": 5.13,
+                  "share_relisted_pct": 13.14,
+                  "periods_scored": 12,
+                  "baseline_suppressed": false
+                }
+              },
+              {
+                "key": "34116",
+                "label": "34116",
+                "cells": {
+                  "seller_stress_score": 60.7,
+                  "share_delisted_pct": 14.41,
+                  "pct_active_with_drops": 30.31,
+                  "cancellation_rate_pct": 25.1,
+                  "avg_price_drop_pct": 3.67,
+                  "share_relisted_pct": 7.39,
+                  "periods_scored": 12,
+                  "baseline_suppressed": false
+                }
+              },
+              {
+                "key": "34113",
+                "label": "34113",
+                "cells": {
+                  "seller_stress_score": 60.3,
+                  "share_delisted_pct": 15.21,
+                  "pct_active_with_drops": 31.2,
+                  "cancellation_rate_pct": 13.93,
+                  "avg_price_drop_pct": 4.56,
+                  "share_relisted_pct": 14.08,
+                  "periods_scored": 12,
+                  "baseline_suppressed": false
+                }
+              },
+              {
+                "key": "33916",
+                "label": "33916",
+                "cells": {
+                  "seller_stress_score": 58,
+                  "share_delisted_pct": 15.74,
+                  "pct_active_with_drops": 41.25,
+                  "cancellation_rate_pct": 17.35,
+                  "avg_price_drop_pct": 4.53,
+                  "share_relisted_pct": 10.28,
+                  "periods_scored": 12,
+                  "baseline_suppressed": false
+                }
+              },
+              {
+                "key": "33904",
+                "label": "33904",
+                "cells": {
+                  "seller_stress_score": 57.6,
+                  "share_delisted_pct": 16.94,
+                  "pct_active_with_drops": 33.14,
+                  "cancellation_rate_pct": 18.41,
+                  "avg_price_drop_pct": 4.72,
+                  "share_relisted_pct": 10.07,
+                  "periods_scored": 12,
+                  "baseline_suppressed": false
+                }
+              },
+              {
+                "key": "33931",
+                "label": "33931",
+                "cells": {
+                  "seller_stress_score": 55.8,
+                  "share_delisted_pct": 19.5,
+                  "pct_active_with_drops": 25.02,
+                  "cancellation_rate_pct": 14.3,
+                  "avg_price_drop_pct": 5.88,
+                  "share_relisted_pct": 16.85,
+                  "periods_scored": 12,
+                  "baseline_suppressed": false
+                }
+              },
+              {
+                "key": "34104",
+                "label": "34104",
+                "cells": {
+                  "seller_stress_score": 54.7,
+                  "share_delisted_pct": 10.99,
+                  "pct_active_with_drops": 35.72,
+                  "cancellation_rate_pct": 16.56,
+                  "avg_price_drop_pct": 3.86,
+                  "share_relisted_pct": 7.55,
+                  "periods_scored": 12,
+                  "baseline_suppressed": false
+                }
+              },
+              {
+                "key": "34117",
+                "label": "34117",
+                "cells": {
+                  "seller_stress_score": 54.1,
+                  "share_delisted_pct": 9.51,
+                  "pct_active_with_drops": 36.59,
+                  "cancellation_rate_pct": 22.09,
+                  "avg_price_drop_pct": 4.33,
+                  "share_relisted_pct": 6.98,
+                  "periods_scored": 12,
+                  "baseline_suppressed": false
+                }
+              },
+              {
+                "key": "34140",
+                "label": "34140",
+                "cells": {
+                  "seller_stress_score": 54.1,
+                  "share_delisted_pct": 16.75,
+                  "pct_active_with_drops": 54,
+                  "cancellation_rate_pct": 24.06,
+                  "avg_price_drop_pct": 7.43,
+                  "share_relisted_pct": 8.98,
+                  "periods_scored": 12,
+                  "baseline_suppressed": false
+                }
+              },
+              {
+                "key": "33914",
+                "label": "33914",
+                "cells": {
+                  "seller_stress_score": 53.8,
+                  "share_delisted_pct": 13.49,
+                  "pct_active_with_drops": 37.87,
+                  "cancellation_rate_pct": 17.64,
+                  "avg_price_drop_pct": 3.71,
+                  "share_relisted_pct": 10.2,
+                  "periods_scored": 12,
+                  "baseline_suppressed": false
+                }
+              },
+              {
+                "key": "33990",
+                "label": "33990",
+                "cells": {
+                  "seller_stress_score": 53.2,
+                  "share_delisted_pct": 16.44,
+                  "pct_active_with_drops": 38.2,
+                  "cancellation_rate_pct": 14.76,
+                  "avg_price_drop_pct": 3.89,
+                  "share_relisted_pct": 7,
+                  "periods_scored": 12,
+                  "baseline_suppressed": false
+                }
+              },
+              {
+                "key": "33972",
+                "label": "33972",
+                "cells": {
+                  "seller_stress_score": 52.2,
+                  "share_delisted_pct": 15.59,
+                  "pct_active_with_drops": 43,
+                  "cancellation_rate_pct": 15.92,
+                  "avg_price_drop_pct": 3.57,
+                  "share_relisted_pct": 5.72,
+                  "periods_scored": 12,
+                  "baseline_suppressed": false
+                }
+              },
+              {
+                "key": "33920",
+                "label": "33920",
+                "cells": {
+                  "seller_stress_score": 51.9,
+                  "share_delisted_pct": 11.18,
+                  "pct_active_with_drops": 41.77,
+                  "cancellation_rate_pct": 17.64,
+                  "avg_price_drop_pct": 4.89,
+                  "share_relisted_pct": 6.85,
+                  "periods_scored": 12,
+                  "baseline_suppressed": false
+                }
+              },
+              {
+                "key": "34102",
+                "label": "34102",
+                "cells": {
+                  "seller_stress_score": 51.9,
+                  "share_delisted_pct": 18.19,
+                  "pct_active_with_drops": 20.6,
+                  "cancellation_rate_pct": 11.76,
+                  "avg_price_drop_pct": 5.61,
+                  "share_relisted_pct": 18.03,
+                  "periods_scored": 12,
+                  "baseline_suppressed": false
+                }
+              },
+              {
+                "key": "33912",
+                "label": "33912",
+                "cells": {
+                  "seller_stress_score": 51.5,
+                  "share_delisted_pct": 12.28,
+                  "pct_active_with_drops": 33.78,
+                  "cancellation_rate_pct": 13.59,
+                  "avg_price_drop_pct": 4.48,
+                  "share_relisted_pct": 8.9,
+                  "periods_scored": 12,
+                  "baseline_suppressed": false
+                }
+              },
+              {
+                "key": "33991",
+                "label": "33991",
+                "cells": {
+                  "seller_stress_score": 51.5,
+                  "share_delisted_pct": 12.03,
+                  "pct_active_with_drops": 38.02,
+                  "cancellation_rate_pct": 16.67,
+                  "avg_price_drop_pct": 3.66,
+                  "share_relisted_pct": 7.51,
+                  "periods_scored": 12,
+                  "baseline_suppressed": false
+                }
+              },
+              {
+                "key": "33922",
+                "label": "33922",
+                "cells": {
+                  "seller_stress_score": 50.3,
+                  "share_delisted_pct": 25.93,
+                  "pct_active_with_drops": 37.49,
+                  "cancellation_rate_pct": 9.16,
+                  "avg_price_drop_pct": 4.22,
+                  "share_relisted_pct": 8.63,
+                  "periods_scored": 12,
+                  "baseline_suppressed": false
+                }
+              },
+              {
+                "key": "34108",
+                "label": "34108",
+                "cells": {
+                  "seller_stress_score": 50.2,
+                  "share_delisted_pct": 16.61,
+                  "pct_active_with_drops": 20.04,
+                  "cancellation_rate_pct": 12.21,
+                  "avg_price_drop_pct": 5.18,
+                  "share_relisted_pct": 16.42,
+                  "periods_scored": 12,
+                  "baseline_suppressed": false
+                }
+              },
+              {
+                "key": "33956",
+                "label": "33956",
+                "cells": {
+                  "seller_stress_score": 49.8,
+                  "share_delisted_pct": 19.06,
+                  "pct_active_with_drops": 35.28,
+                  "cancellation_rate_pct": 15.19,
+                  "avg_price_drop_pct": 4.05,
+                  "share_relisted_pct": 13.62,
+                  "periods_scored": 12,
+                  "baseline_suppressed": false
+                }
+              },
+              {
+                "key": "33913",
+                "label": "33913",
+                "cells": {
+                  "seller_stress_score": 49.7,
+                  "share_delisted_pct": 11.96,
+                  "pct_active_with_drops": 33.86,
+                  "cancellation_rate_pct": 12.64,
+                  "avg_price_drop_pct": 3.38,
+                  "share_relisted_pct": 11.25,
+                  "periods_scored": 12,
+                  "baseline_suppressed": false
+                }
+              },
+              {
+                "key": "33936",
+                "label": "33936",
+                "cells": {
+                  "seller_stress_score": 48.8,
+                  "share_delisted_pct": 15.47,
+                  "pct_active_with_drops": 42.57,
+                  "cancellation_rate_pct": 14.97,
+                  "avg_price_drop_pct": 4.21,
+                  "share_relisted_pct": 6.28,
+                  "periods_scored": 12,
+                  "baseline_suppressed": false
+                }
+              },
+              {
+                "key": "34119",
+                "label": "34119",
+                "cells": {
+                  "seller_stress_score": 48.2,
+                  "share_delisted_pct": 13.4,
+                  "pct_active_with_drops": 31.72,
+                  "cancellation_rate_pct": 11.18,
+                  "avg_price_drop_pct": 4.02,
+                  "share_relisted_pct": 9.82,
+                  "periods_scored": 12,
+                  "baseline_suppressed": false
+                }
+              },
+              {
+                "key": "34103",
+                "label": "34103",
+                "cells": {
+                  "seller_stress_score": 46.2,
+                  "share_delisted_pct": 15.03,
+                  "pct_active_with_drops": 23.6,
+                  "cancellation_rate_pct": 6.56,
+                  "avg_price_drop_pct": 5.19,
+                  "share_relisted_pct": 18.16,
+                  "periods_scored": 12,
+                  "baseline_suppressed": false
+                }
+              },
+              {
+                "key": "34109",
+                "label": "34109",
+                "cells": {
+                  "seller_stress_score": 45.9,
+                  "share_delisted_pct": 11.97,
+                  "pct_active_with_drops": 29.36,
+                  "cancellation_rate_pct": 12.49,
+                  "avg_price_drop_pct": 3.93,
+                  "share_relisted_pct": 8.92,
+                  "periods_scored": 12,
+                  "baseline_suppressed": false
+                }
+              },
+              {
+                "key": "34112",
+                "label": "34112",
+                "cells": {
+                  "seller_stress_score": 44.8,
+                  "share_delisted_pct": 11.61,
+                  "pct_active_with_drops": 32.11,
+                  "cancellation_rate_pct": 11.89,
+                  "avg_price_drop_pct": 4.83,
+                  "share_relisted_pct": 11.61,
+                  "periods_scored": 12,
+                  "baseline_suppressed": false
+                }
+              },
+              {
+                "key": "33974",
+                "label": "33974",
+                "cells": {
+                  "seller_stress_score": 44.4,
+                  "share_delisted_pct": 14.4,
+                  "pct_active_with_drops": 38.12,
+                  "cancellation_rate_pct": 18.25,
+                  "avg_price_drop_pct": 3.31,
+                  "share_relisted_pct": 7.02,
+                  "periods_scored": 12,
+                  "baseline_suppressed": false
+                }
+              },
+              {
+                "key": "34134",
+                "label": "34134",
+                "cells": {
+                  "seller_stress_score": 44.4,
+                  "share_delisted_pct": 15.81,
+                  "pct_active_with_drops": 24.93,
+                  "cancellation_rate_pct": 6.87,
+                  "avg_price_drop_pct": 5.22,
+                  "share_relisted_pct": 21.73,
+                  "periods_scored": 12,
+                  "baseline_suppressed": false
+                }
+              },
+              {
+                "key": "33967",
+                "label": "33967",
+                "cells": {
+                  "seller_stress_score": 43.9,
+                  "share_delisted_pct": 11.79,
+                  "pct_active_with_drops": 35.64,
+                  "cancellation_rate_pct": 13.17,
+                  "avg_price_drop_pct": 3.45,
+                  "share_relisted_pct": 9.08,
+                  "periods_scored": 12,
+                  "baseline_suppressed": false
+                }
+              },
+              {
+                "key": "33928",
+                "label": "33928",
+                "cells": {
+                  "seller_stress_score": 43.7,
+                  "share_delisted_pct": 13.74,
+                  "pct_active_with_drops": 27.82,
+                  "cancellation_rate_pct": 9.95,
+                  "avg_price_drop_pct": 3.48,
+                  "share_relisted_pct": 11,
+                  "periods_scored": 12,
+                  "baseline_suppressed": false
+                }
+              },
+              {
+                "key": "34135",
+                "label": "34135",
+                "cells": {
+                  "seller_stress_score": 41.8,
+                  "share_delisted_pct": 11.87,
+                  "pct_active_with_drops": 30.81,
+                  "cancellation_rate_pct": 9.41,
+                  "avg_price_drop_pct": 3.89,
+                  "share_relisted_pct": 12.21,
+                  "periods_scored": 12,
+                  "baseline_suppressed": false
+                }
+              },
+              {
+                "key": "34105",
+                "label": "34105",
+                "cells": {
+                  "seller_stress_score": 40.6,
+                  "share_delisted_pct": 13.85,
+                  "pct_active_with_drops": 25.31,
+                  "cancellation_rate_pct": 8.86,
+                  "avg_price_drop_pct": 4.54,
+                  "share_relisted_pct": 10.02,
+                  "periods_scored": 12,
+                  "baseline_suppressed": false
+                }
+              },
+              {
+                "key": "33966",
+                "label": "33966",
+                "cells": {
+                  "seller_stress_score": 39.9,
+                  "share_delisted_pct": 11.91,
+                  "pct_active_with_drops": 29.55,
+                  "cancellation_rate_pct": 8.75,
+                  "avg_price_drop_pct": 3.92,
+                  "share_relisted_pct": 8.35,
+                  "periods_scored": 12,
+                  "baseline_suppressed": false
+                }
+              },
+              {
+                "key": "34139",
+                "label": "34139",
+                "cells": {
+                  "seller_stress_score": 30.8,
+                  "share_delisted_pct": 18.42,
+                  "pct_active_with_drops": 39.6,
+                  "cancellation_rate_pct": null,
+                  "avg_price_drop_pct": 5.26,
+                  "share_relisted_pct": null,
+                  "periods_scored": 12,
+                  "baseline_suppressed": false
+                }
+              },
+              {
+                "key": "34101",
+                "label": "34101",
+                "cells": {
+                  "seller_stress_score": null,
+                  "share_delisted_pct": null,
+                  "pct_active_with_drops": null,
+                  "cancellation_rate_pct": null,
+                  "avg_price_drop_pct": null,
+                  "share_relisted_pct": null,
+                  "periods_scored": 0,
+                  "baseline_suppressed": true
+                }
+              },
+              {
+                "key": "34138",
+                "label": "34138",
+                "cells": {
+                  "seller_stress_score": null,
+                  "share_delisted_pct": null,
+                  "pct_active_with_drops": null,
+                  "cancellation_rate_pct": null,
+                  "avg_price_drop_pct": null,
+                  "share_relisted_pct": null,
+                  "periods_scored": 12,
+                  "baseline_suppressed": true
+                }
+              },
+              {
+                "key": "34141",
+                "label": "34141",
+                "cells": {
+                  "seller_stress_score": null,
+                  "share_delisted_pct": null,
+                  "pct_active_with_drops": null,
+                  "cancellation_rate_pct": null,
+                  "avg_price_drop_pct": null,
+                  "share_relisted_pct": null,
+                  "periods_scored": 6,
+                  "baseline_suppressed": true
+                }
+              }
+            ],
+            "source": {
+              "url": "https://www.redfin.com/news/data-center/",
+              "fetched_at": "2026-11-16T04:26:28Z",
+              "tier": 3,
+              "citation": "Redfin Data Center — price_drops, contract_cancellations, delistings_relistings ZIP-level monthly rolling-3-month data for SWFL MSAs."
+            }
+          }
+        ],
+        "caveats": [
+          "~50% of SWFL transactions are all-cash (Lee County, Attom 2024) — rate-sensitive national thresholds do not apply; this score is calibrated to SWFL's own 2019–2021 baseline.",
+          "Hurricane Ian (Sept 2022) produced a natural spike; scores from Oct 2022–Mar 2023 reflect forced delistings, not organic seller stress — treat as a labeled distress event, not a trend.",
+          "Condo segment is not separated in this score; SB 4-D special assessment delistings inflate stress in condo-heavy ZIPs (e.g., Marco Island corridor). See `condo-sirs-swfl` for the condo-specific read.",
+          "3 ZIPs suppressed (insufficient baseline data in 2019–2021 or no recent observations)."
+        ],
+        "contradicts": [],
+        "confidence": 0.6,
+        "joint_integrity": 1,
+        "confidence_dispersion": 0,
+        "chain_depth": 0,
+        "trust_tier": 3,
+        "upstream_count": 0,
+        "relevance": {
+          "decay_curve": "weeks",
+          "half_life_hours": 720,
+          "computed_at": "2026-11-16T04:26:34Z"
+        },
+        "exogenous_signals": []
+      }
     },
     {
       "packId": "market-heat-swfl",
@@ -454,16 +2067,16 @@
     {
       "packId": "master",
       "status": "built",
-      "version": 188,
+      "version": 189,
       "written": true,
       "brainOutput": {
         "brain_id": "master",
-        "version": 188,
-        "refined_at": "2026-11-15T12:04:41Z",
-        "expires": "2026-11-22T12:04:41Z",
+        "version": 189,
+        "refined_at": "2026-11-16T04:26:55Z",
+        "expires": "2026-11-23T04:26:55Z",
         "ttl_seconds": 604800,
         "direction": "mixed",
-        "magnitude": 0.49941820082814486,
+        "magnitude": 0.47856834812174387,
         "drivers": [
           {
             "brain_id": "franchise-outcomes",
@@ -621,6 +2234,44 @@
         "conclusion": "Read is mixed (moderate magnitude). Driven by: franchise-outcomes, cre-swfl, macro-us, macro-florida, macro-swfl, sector-credit-swfl, tourism-tdt, env-swfl, logistics-swfl, logistics-swfl-nowcast, traffic-swfl, properties-lee-value, properties-collier-value, permits-swfl, rentals-swfl, housing-swfl, safety-swfl, labor-demand-swfl, econ-dev-swfl, city-pulse-swfl, rsw-airport, news-swfl, freshness-pulse, seller-stress-swfl, market-heat-swfl, storm-history-swfl, hurricane-tracks-fl, licenses-swfl, condo-sirs-swfl, price-distribution-swfl, listing-momentum-swfl, market-temperature-swfl, investor-zip-swfl, active-listings-swfl, communities-swfl, tier-divergence-swfl, home-values-swfl. Overrides: flood-barrier-mode-1, storm-history-modifier. Note conflicts: macro-us (bearish) vs macro-florida (bullish). Combined confidence 0.86, trust tier T4, based on 37 upstream brains.",
         "key_metrics": [
           {
+            "metric": "best_naics_survival",
+            "value": 100,
+            "direction": "stable",
+            "label": "Arts, Entertainment & Recreation (NAICS 71) — best SWFL SBA survival rate [thin sample: only 7 resolved loans, directional not confident]",
+            "variable_type": "intensive",
+            "units": "percent",
+            "display_format": "percent",
+            "source": {
+              "url": "https://jtkdowmrjaxfvwmemxso.supabase.co/rest/v1/sba_loans_by_naics_county?select=*&project_county=in.(LEE,COLLIER)&approval_fy=gte.2020&naics_code=like.71%25",
+              "fetched_at": "2026-11-16T04:26:26Z",
+              "tier": 1,
+              "citation": "SBA 7(a)/504 loan outcomes (Lee + Collier counties, FY 2020+); federal source: Small Business Administration loan-status reporting — Arts, Entertainment & Recreation (NAICS 71): 0 charged off of 7 resolved loans (63 total approved across 10 sub-industries; $41.3M gross approved capital)."
+            },
+            "suggestions": [
+              "What's driving best naics survival?",
+              "How does best naics survival here compare to other SWFL areas?"
+            ]
+          },
+          {
+            "metric": "fl_unemployment",
+            "value": 4.4,
+            "direction": "falling",
+            "label": "Florida unemployment rate",
+            "variable_type": "intensive",
+            "units": "percent",
+            "display_format": "percent",
+            "source": {
+              "url": "https://api.stlouisfed.org/fred/series/observations?series_id=FLUR&units=lin&file_type=json&sort_order=desc&limit=24",
+              "fetched_at": "2026-11-16T04:26:02Z",
+              "tier": 1,
+              "citation": "FRED Florida Unemployment Rate (series_id FLUR) — latest observation 4.4 percent for period 2026-09-01, falling vs prior 6 periods. Florida unemployment is the headline labor-tightness read for SWFL operators — tourism and construction absorb new entrants when this stays low."
+            },
+            "suggestions": [
+              "What's driving fl unemployment?",
+              "How does fl unemployment here compare to other SWFL areas?"
+            ]
+          },
+          {
             "metric": "inbound_freight_tons_swfl",
             "value": 1226969.1,
             "direction": "stable",
@@ -656,25 +2307,6 @@
             "suggestions": [
               "What's driving swfl sfha pct area weighted?",
               "How does swfl sfha pct area weighted here compare to other SWFL areas?"
-            ]
-          },
-          {
-            "metric": "best_naics_survival",
-            "value": 100,
-            "direction": "stable",
-            "label": "Arts, Entertainment & Recreation (NAICS 71) — best SWFL SBA survival rate [thin sample: only 7 resolved loans, directional not confident]",
-            "variable_type": "intensive",
-            "units": "percent",
-            "display_format": "percent",
-            "source": {
-              "url": "https://jtkdowmrjaxfvwmemxso.supabase.co/rest/v1/sba_loans_by_naics_county?select=*&project_county=in.(LEE,COLLIER)&approval_fy=gte.2020&naics_code=like.71%25",
-              "fetched_at": "2026-11-12T12:57:50Z",
-              "tier": 1,
-              "citation": "SBA 7(a)/504 loan outcomes (Lee + Collier counties, FY 2020+); federal source: Small Business Administration loan-status reporting — Arts, Entertainment & Recreation (NAICS 71): 0 charged off of 7 resolved loans (63 total approved across 10 sub-industries; $41.3M gross approved capital)."
-            },
-            "suggestions": [
-              "What's driving best naics survival?",
-              "How does best naics survival here compare to other SWFL areas?"
             ]
           },
           {
@@ -811,25 +2443,6 @@
             ]
           },
           {
-            "metric": "fl_unemployment",
-            "value": 4.4,
-            "direction": "falling",
-            "label": "Florida unemployment rate",
-            "variable_type": "intensive",
-            "units": "percent",
-            "display_format": "percent",
-            "source": {
-              "url": "https://api.stlouisfed.org/fred/series/observations?series_id=FLUR&units=lin&file_type=json&sort_order=desc&limit=24",
-              "fetched_at": "2026-10-22T09:32:28Z",
-              "tier": 1,
-              "citation": "FRED Florida Unemployment Rate (series_id FLUR) — latest observation 4.4 percent for period 2026-09-01, falling vs prior 6 periods. Florida unemployment is the headline labor-tightness read for SWFL operators — tourism and construction absorb new entrants when this stays low."
-            },
-            "suggestions": [
-              "What's driving fl unemployment?",
-              "How does fl unemployment here compare to other SWFL areas?"
-            ]
-          },
-          {
             "metric": "sofr_rate",
             "value": 3.88,
             "direction": "stable",
@@ -926,15 +2539,15 @@
           },
           {
             "metric": "signal_breaking_1",
-            "value": "Naples: The conservation deal for the 625-acre 'Wildflowerz Ranch' in Collier County collapsed after the owner pulled out, as reported Nov. 11, 2026 (updated Nov. 13, 2026).",
+            "value": "Cape Coral: Two planes crash landed in Lee County less than 24 hours apart over the weekend of Nov. 9, 2026, with the Lee County sheriff reporting no injuries in either incident.",
             "direction": "stable",
-            "label": "Naples — breaking",
+            "label": "Cape Coral — breaking",
             "variable_type": "categorical",
             "source": {
-              "url": "https://www.news-press.com/story/money/business/local/2026/11/11/wildflowerz-ranch-conservation-deal-falls-apart-in-collier-county/92724754007/",
-              "fetched_at": "2026-11-15T12:04:20Z",
+              "url": "https://www.news-press.com/story/news/local/2026/11/09/lee-county-sheriff-no-injuries-in-separate-florida-aircraft-incidents/92689034007/",
+              "fetched_at": "2026-11-16T04:26:27Z",
               "tier": 2,
-              "citation": "'Wildflowerz Ranch' conservation deal falls apart in Collier County: \"[](https://www.news-press.com/)\n[](https://subscribe.news-press.com/rr/nanobar?gps-source=CPTILELEFT&itm_campaign=2026ENTQ4BAU2026&itm_medium=ONSITE&success-url=https%3A%2F%2Fwww.news-press.com%2Fstory%2Fmoney%2Fbusiness%2Flocal%2F2026%2F11%2F11%2Fwildflowerz-ranch-conservation-deal-falls-apart-in-collier-county%2F92724754007%2F)\n[](https://subscribe.news-press.com/rr/masthead?gps-source=CPMASTHEAD&itm_campaign=2026ENTQ4BAU2026&itm_medium=ONSITE&success-url=https%3A%2F%2Fwww.news-press.com%2Fstory%2Fmoney%2Fbusiness%2Flocal%2F2026%2F11%2F11%2Fwildflowerz-ranch-conservation-deal-falls-apart-in-collier-county%2F92724754007%2F)\n[News](https://www.news-press.com/news/) [Cape Coral](https://www.news-press.com/news/cape-coral/) [Sports](https://www.news-press.com/sports/) [Restaurants](https://www.news-press.com/taste/) [Real Estate](https://www.news-press.com/real-estate) [Advertise](https://advertising.usatoday.com/advertise-with-us/?cid=Web_LiQ_Network_AdvertiseWithUs_AdvertiseInquiry&publication=the_news_press&utm_source=local_publication&utm_medium=menu&utm_campaign=advertise_with_us) [Obituaries](https://www.news-press.com/obituaries) [eNewspaper](https://user.news-press.com/user/enewspaper) [Legals](https://www.news-press.com/public-notices)\n[](https://www.news-press.com/search/ \"Search\")\n[](https://www.news-press.com/weather/ \"Weather in Fort Myers: 55°F Mostly Sunny\") [](https://subscribe.news-press.com/rr/navsub?gps-source=CPTOPNAVBAR&itm_campaign=2026ENTQ4BAU2026&itm_medium=ONSITE&success-url=https%3A%2F%2Fwww.news-press.com%2Fstory%2Fmoney%2Fbusiness%2Flocal%2F2026%2F11%2F11%2Fwildflowerz-ranch-conservation-deal-falls-apart-in-collier-county%2F92724754007%2F)\n[](https://login.news-press.com/PFTM-GUP/authenticate/?success-url=https%3A%2F%2Fwww.news-press.com%2Fstory%2Fmoney%2Fbusiness%2Flocal%2F2026%2F11%2F11%2Fwildflowerz-ranch-conservation-deal-falls-apart-in-collier-county%2F92724754007%2F&cancel-url=https%3A%2F%2Fwww.news-press.com%2Fstory%2Fmoney%2Fbusiness%2Flocal%2F2026%2F11%2F11%2Fwildflowerz-ranch-conservation-deal-falls-apart-in-collier-county%2F92724754007%2F)\n[](https://www.news-press.com/) [](https://www.news-press.com/)\nLOCAL BUSINESS\n# Deal for 625-acre ranch in Collier collapses after owner pulls plug\n[![Portrait of Laura Layden](https://www.news-press.com/gcdn/authoring/authoring-images/2024/02/08/PNDN/72524348007-ndn-jh-20240126-laura-0001.JPG?crop=3313,3312,x1506,y0&width=48&height=48&format=pjpg&auto=webp) Laura Layden](https://www.naplesnews.com/staff/2647080001/laura-layden/)\nFort Myers News-Press & Naples Daily News\nNov. 11, 2026Updated Nov. 13, 2026, 9:38 a.m. ET\n[](https://www.facebook.com/dialog/share?display=popup&app_id=149631068421067&href=https%3A%2F%2Fwww.news-press.com%2Fstory%2Fmoney%2Fbusiness%2Flocal%2F2026%2F11%2F11%2Fwildflowerz-ranch-conservation-deal-falls-apart-in-collier-county%2F92724754007%2F)[](https://x.com/intent/post?url=https%3A%2F%2Fwww.news-press.com%2Fstory%2Fmoney%2Fbusiness%2Flocal%2F2026%\""
+              "citation": "Lee County sheriff: No injuries in separate Florida aircraft incidents: \"[](https://www.news-press.com/)\n[Two planes crash land in Lee County less than 24 hours apart](https://www.news-press.com/story/news/local/2026/11/09/lee-county-sheriff-no-injuries-in-separate-florida-aircraft-incidents/92689034007/)\n[](https://subscribe.news-press.com/rr/nanobar?gps-source=CPTILELEFT&itm_campaign=2026ENTQ4BAU2026&itm_medium=ONSITE&success-url=https%3A%2F%2Fwww.news-press.com%2Fstory%2Fnews%2Flocal%2F2026%2F11%2F09%2Flee-county-sheriff-no-injuries-in-separate-florida-aircraft-incidents%2F92689034007%2F)\n[](https://subscribe.news-press.com/rr/masthead?gps-source=CPMASTHEAD&itm_campaign=2026ENTQ4BAU2026&itm_medium=ONSITE&success-url=https%3A%2F%2Fwww.news-press.com%2Fstory%2Fnews%2Flocal%2F2026%2F11%2F09%2Flee-county-sheriff-no-injuries-in-separate-florida-aircraft-incidents%2F92689034007%2F)\n[News](https://www.news-press.com/news/) [Cape Coral](https://www.news-press.com/news/cape-coral/) [Sports](https://www.news-press.com/sports/) [Restaurants](https://www.news-press.com/taste/) [Real Estate](https://www.news-press.com/real-estate) [Advertise](https://advertising.usatoday.com/advertise-with-us/?cid=Web_LiQ_Network_AdvertiseWithUs_AdvertiseInquiry&publication=the_news_press&utm_source=local_publication&utm_medium=menu&utm_campaign=advertise_with_us) [Obituaries](https://www.news-press.com/obituaries) [eNewspaper](https://user.news-press.com/user/enewspaper) [Legals](https://www.news-press.com/public-notices)\n[](https://www.news-press.com/search/ \"Search\")\n[](https://www.news-press.com/weather/ \"Weather in Fort Myers: 78°F Mostly Cloudy\") [](https://subscribe.news-press.com/rr/navsub?gps-source=CPTOPNAVBAR&itm_campaign=2026ENTQ4BAU2026&itm_medium=ONSITE&success-url=https%3A%2F%2Fwww.news-press.com%2Fstory%2Fnews%2Flocal%2F2026%2F11%2F09%2Flee-county-sheriff-no-injuries-in-separate-florida-aircraft-incidents%2F92689034007%2F)\n[](https://login.news-press.com/PFTM-GUP/authenticate/?success-url=https%3A%2F%2Fwww.news-press.com%2Fstory%2Fnews%2Flocal%2F2026%2F11%2F09%2Flee-county-sheriff-no-injuries-in-separate-florida-aircraft-incidents%2F92689034007%2F&cancel-url=https%3A%2F%2Fwww.news-press.com%2Fstory%2Fnews%2Flocal%2F2026%2F11%2F09%2Flee-county-sheriff-no-injuries-in-separate-florida-aircraft-incidents%2F92689034007%2F)\n[](https://www.news-press.com/news/) [](https://www.news-press.com/news/)\n[LOCAL](https://www.news-press.com/news/communities/)\n# Lee County sheriff: No injuries after 2 planes crash land over weekend\n## The incidents happened less than 24 hours apart in Lee County.\n[![Portrait of Tomas Rodriguez](https://www.news-press.com/gcdn/presto/2022/05/08/PFTM/d3b24871-cf32-47ef-8bc4-836f32f48664-tomas58.jpg?crop=2853,2853,x0,y533&width=48&height=48&format=pjpg&auto=webp) Tomas Rodriguez](https://www.naplesnews.com/staff/7430144002/tomas-rodriguez/)\nFort Myers News-Press & Naples Daily News\nNov. 9, 2026, 10:38 a.m. ET\n[](https://www.facebook.com/dialog/share?display=popup&app_id=149631068421067&href=https%3A%2F%2Fwww.news-p\""
             },
             "suggestions": [
               "What's driving signal breaking 1?",
@@ -985,8 +2598,8 @@
         "caveats": [
           "flood-barrier-mode-1 active: 4 barrier ZIPs, worst-case AAL $40,342/insured property",
           "Override \"storm-history-modifier\" fired (priority 70)",
-          "permits-commercial-swfl excluded from synthesis (relevance 0.064, below floor 0.1)",
-          "active-rentals-swfl excluded from synthesis (relevance 0.053, below floor 0.1)",
+          "permits-commercial-swfl excluded from synthesis (relevance 0.063, below floor 0.1)",
+          "active-rentals-swfl excluded from synthesis (relevance 0.052, below floor 0.1)",
           "No figures published: this source has not yet received its first real SBA FOIA load. A synthetic development sample exists for offline testing only and is never shipped.",
           "Construction-cost PPI metrics (construction_cost_ppi_industrial, construction_cost_ppi_warehouse, construction_cost_ppi_office, construction_cost_ppi_medical_office, construction_cost_ppi_trade_concrete, construction_cost_ppi_trade_roofing, construction_cost_ppi_trade_electrical, construction_cost_ppi_trade_plumbing_hvac) are national BLS series — no SWFL-specific or Lee/Collier breakout exists at BLS for any of them. They ship a real month-over-month direction (unlike MarketBeat's schema-required \"stable\" fallback) but BLS can revise recent observations within ~30 days of first publication.",
           "vacancy_rate_marketbeat_swfl: 15 submarkets report a point-in-time value; v1 does not compute quarter-over-quarter direction, so the \"stable\" label is a schema-required fallback, not a measured trend.",
@@ -1080,7 +2693,7 @@
           "1 of 10 announcements in the last 90 days matched qualifying categories (relocation, expansion, grant, infrastructure); the rest are general chamber/policy posts excluded from the momentum count.",
           "Investment and job figures reflect disclosures at announcement time; actual outcomes may vary as projects develop.",
           "SWFL Inc. covers primarily Lee County projects; Collier County coverage depends on cross-county partnerships and co-announcements.",
-          "77 additional live signals not surfaced here (cap 8); the full set is in data_lake.city_pulse.",
+          "72 additional live signals not surfaced here (cap 8); the full set is in data_lake.city_pulse.",
           "Each signal is dated current-events context with a per-signal source; freshness is TTL-bounded by topic (breaking 1d → structural 90d).",
           "Trailing-12-month total-passengers YoY not computable — fewer than 24 monthly rows in the fetched window; direction set neutral.",
           "Construction enforcement split: public notices = confirmed individual actions (hard-parsed violation_type); press releases = announced sweeps (Sonnet-inferred affected_industries). Do not sum them.",
@@ -1141,7 +2754,7 @@
           "~50% of SWFL buyers (≈70% for condos) pay cash and insulate the luxury tier — a holding or rising top tier is part of the K-shape, not a bullish signal on its own.",
           "Covers 50 SWFL ZIPs holding BOTH a starter and a luxury tier; ZIPs lacking one tier are excluded from the divergence.",
           "Upstream brain 'active-rentals-swfl' was stale at build time (expired 2026-07-19).",
-          "Upstream brain 'active-rentals-swfl' failed to rebuild on 2026-11-15; using last good read from 2026-07-11 (v3)."
+          "Upstream brain 'active-rentals-swfl' failed to rebuild on 2026-11-16; using last good read from 2026-07-11 (v3)."
         ],
         "contradicts": [
           "macro-us (bearish) vs macro-florida (bullish)",
@@ -1181,7 +2794,7 @@
         "relevance": {
           "decay_curve": "weeks",
           "half_life_hours": 719.9999999999999,
-          "computed_at": "2026-11-15T12:04:41.000Z"
+          "computed_at": "2026-11-16T04:26:55.000Z"
         },
         "exogenous_signals": [],
         "conditional_claims": [
@@ -1190,7 +2803,7 @@
             "then_direction": "mixed",
             "basis": "upstream brains are pulling in opposite directions; no single direction clears the agreement threshold",
             "basis_refs": [
-              "labor-demand-swfl",
+              "macro-florida",
               "macro-swfl"
             ],
             "falsifier": "one side's weight clears 60% of the total on the next refine, breaking the tie"

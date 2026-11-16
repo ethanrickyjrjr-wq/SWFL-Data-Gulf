@@ -1,9 +1,9 @@
-<!-- FRESHNESS: v25 | Token: SWFL-7421-v25-20261022-7a3a41fd -->
+<!-- FRESHNESS: v26 | Token: SWFL-7421-v26-20261116-718b12a5 -->
 ---
 brain_id: macro-florida
-version: 25
-refined_at: 2026-10-22T09:32:56Z
-freshness_token: SWFL-7421-v25-20261022-7a3a41fd
+version: 26
+refined_at: 2026-11-16T04:26:25Z
+freshness_token: SWFL-7421-v26-20261116-718b12a5
 ttl_seconds: 2592000
 pack_hash: 3f52cb93e70f
 context_type: user_saved_reference
@@ -30,29 +30,29 @@ SCOPE: Florida state-level macro context — labor market (FLUR, FL LFPR) and bu
 
 --- CITATION TABLE ---
 id  | source                                                                                                                                                                                                                                       | verified   | expires
-s01 | FRED — Federal Reserve Economic Data (live API; FLUR, LBSSA12)                                                                                                                                                                               | 2026-10-22 | 2026-11-21
-s02 | Census CBP FL via data_lake.census_cbp_fl_agg_by_naics (sector-level NAICS, all FL counties summed in SQL from data_lake.census_cbp_fl; Census Bureau CBP API) — https://jtkdowmrjaxfvwmemxso.supabase.co/rest/v1/census_cbp_fl_agg_by_naics | 2026-10-22 | 2026-11-21
+s01 | FRED — Federal Reserve Economic Data (live API; FLUR, LBSSA12)                                                                                                                                                                               | 2026-11-16 | 2026-12-16
+s02 | Census CBP FL via data_lake.census_cbp_fl_agg_by_naics (sector-level NAICS, all FL counties summed in SQL from data_lake.census_cbp_fl; Census Bureau CBP API) — https://jtkdowmrjaxfvwmemxso.supabase.co/rest/v1/census_cbp_fl_agg_by_naics | 2026-11-16 | 2026-12-16
 s03 | macro-us brain — https://www.swfldatagulf.com/api/b/macro-us                                                                                                                                                                                 | 2026-10-22 | 2026-11-21
 
 --- SAVED FACTS ---
 [
-  {"id":"f001","topic":"macro_snapshot","fact":"Current Florida state-level macro context — labor market","value":"Florida macro snapshot: Florida Unemployment Rate is 4.4% (falling) as of 2026-09-01; Florida Labor Force Participation Rate is 57.3% (stable) as of 2026-09-01. These series are the state baseline that regional brains (macro-swfl, future macro-tampa/macro-jax) read for gap math.","src":"s02","date":"2026-10-22"},
-  {"id":"f002","topic":"metric:fl_unemployment","fact":"Florida unemployment rate","value":"Florida unemployment rate is 4.4% (period 2026-09-01, direction falling). Florida unemployment is the headline labor-tightness read for SWFL operators — tourism and construction absorb new entrants when this stays low.","src":"s02","date":"2026-10-22"},
-  {"id":"f003","topic":"metric:fl_labor_participation","fact":"Florida labor force participation","value":"Florida labor force participation is 57.3% (period 2026-09-01, direction stable). FL LFPR climbs against retirement-state demographic gravity — a positive read on Florida's working-age engagement.","src":"s02","date":"2026-10-22"},
-  {"id":"f004","topic":"fl_cbp_sector_snapshot","fact":"Florida business sector counts from Census CBP","value":"Florida CBP 2022: top sectors by establishment count — Professional, scientific, and technical services (92,082 estab.), Retail trade (75,729 estab.), Health care and social assistance (71,553 estab.). Source: Census Bureau County Business Patterns, all FL counties aggregated.","src":"s02","date":"2026-10-22"},
-  {"id":"f005","topic":"metric:fl_estab_count_professional","fact":"Florida professional services establishments","value":"Florida professional services establishments: 92,082 establishments, 577,327 employees, $50.9B annual payroll (2022).","src":"s02","date":"2026-10-22"},
-  {"id":"f006","topic":"metric:fl_estab_count_retail","fact":"Florida retail establishments","value":"Florida retail establishments: 75,729 establishments, 1,133,386 employees, $41.5B annual payroll (2022).","src":"s02","date":"2026-10-22"},
-  {"id":"f007","topic":"metric:fl_estab_count_healthcare","fact":"Florida healthcare establishments","value":"Florida healthcare establishments: 71,553 establishments, 1,224,715 employees, $74.9B annual payroll (2022).","src":"s02","date":"2026-10-22"},
-  {"id":"f008","topic":"metric:fl_estab_count_construction","fact":"Florida construction establishments","value":"Florida construction establishments: 65,227 establishments, 521,811 employees, $31.6B annual payroll (2022).","src":"s02","date":"2026-10-22"},
-  {"id":"f009","topic":"metric:fl_estab_count_food_service","fact":"Florida food service & accommodation establishments","value":"Florida food service & accommodation establishments: 47,652 establishments, 988,794 employees, $26.3B annual payroll (2022).","src":"s02","date":"2026-10-22"}
+  {"id":"f001","topic":"macro_snapshot","fact":"Current Florida state-level macro context — labor market","value":"Florida macro snapshot: Florida Unemployment Rate is 4.4% (falling) as of 2026-09-01; Florida Labor Force Participation Rate is 57.3% (stable) as of 2026-09-01. These series are the state baseline that regional brains (macro-swfl, future macro-tampa/macro-jax) read for gap math.","src":"s01","date":"2026-11-16"},
+  {"id":"f002","topic":"metric:fl_unemployment","fact":"Florida unemployment rate","value":"Florida unemployment rate is 4.4% (period 2026-09-01, direction falling). Florida unemployment is the headline labor-tightness read for SWFL operators — tourism and construction absorb new entrants when this stays low.","src":"s01","date":"2026-11-16"},
+  {"id":"f003","topic":"metric:fl_labor_participation","fact":"Florida labor force participation","value":"Florida labor force participation is 57.3% (period 2026-09-01, direction stable). FL LFPR climbs against retirement-state demographic gravity — a positive read on Florida's working-age engagement.","src":"s01","date":"2026-11-16"},
+  {"id":"f004","topic":"fl_cbp_sector_snapshot","fact":"Florida business sector counts from Census CBP","value":"Florida CBP 2022: top sectors by establishment count — Professional, scientific, and technical services (92,082 estab.), Retail trade (75,729 estab.), Health care and social assistance (71,553 estab.). Source: Census Bureau County Business Patterns, all FL counties aggregated.","src":"s01","date":"2026-11-16"},
+  {"id":"f005","topic":"metric:fl_estab_count_professional","fact":"Florida professional services establishments","value":"Florida professional services establishments: 92,082 establishments, 577,327 employees, $50.9B annual payroll (2022).","src":"s01","date":"2026-11-16"},
+  {"id":"f006","topic":"metric:fl_estab_count_retail","fact":"Florida retail establishments","value":"Florida retail establishments: 75,729 establishments, 1,133,386 employees, $41.5B annual payroll (2022).","src":"s01","date":"2026-11-16"},
+  {"id":"f007","topic":"metric:fl_estab_count_healthcare","fact":"Florida healthcare establishments","value":"Florida healthcare establishments: 71,553 establishments, 1,224,715 employees, $74.9B annual payroll (2022).","src":"s01","date":"2026-11-16"},
+  {"id":"f008","topic":"metric:fl_estab_count_construction","fact":"Florida construction establishments","value":"Florida construction establishments: 65,227 establishments, 521,811 employees, $31.6B annual payroll (2022).","src":"s01","date":"2026-11-16"},
+  {"id":"f009","topic":"metric:fl_estab_count_food_service","fact":"Florida food service & accommodation establishments","value":"Florida food service & accommodation establishments: 47,652 establishments, 988,794 employees, $26.3B annual payroll (2022).","src":"s01","date":"2026-11-16"}
 ]
 
 --- OUTPUT ---
 {
   "brain_id": "macro-florida",
-  "version": 25,
-  "refined_at": "2026-10-22T09:32:56Z",
-  "expires": "2026-11-21T09:32:56Z",
+  "version": 26,
+  "refined_at": "2026-11-16T04:26:25Z",
+  "expires": "2026-12-16T04:26:25Z",
   "ttl_seconds": 2592000,
   "direction": "bullish",
   "magnitude": 0.5,
@@ -70,7 +70,7 @@ s03 | macro-us brain — https://www.swfldatagulf.com/api/b/macro-us            
       "display_format": "percent",
       "source": {
         "url": "https://api.stlouisfed.org/fred/series/observations?series_id=FLUR&units=lin&file_type=json&sort_order=desc&limit=24",
-        "fetched_at": "2026-10-22T09:32:28Z",
+        "fetched_at": "2026-11-16T04:26:02Z",
         "tier": 1,
         "citation": "FRED Florida Unemployment Rate (series_id FLUR) — latest observation 4.4 percent for period 2026-09-01, falling vs prior 6 periods. Florida unemployment is the headline labor-tightness read for SWFL operators — tourism and construction absorb new entrants when this stays low."
       },
@@ -89,7 +89,7 @@ s03 | macro-us brain — https://www.swfldatagulf.com/api/b/macro-us            
       "display_format": "percent",
       "source": {
         "url": "https://api.stlouisfed.org/fred/series/observations?series_id=LBSSA12&units=lin&file_type=json&sort_order=desc&limit=24",
-        "fetched_at": "2026-10-22T09:32:28Z",
+        "fetched_at": "2026-11-16T04:26:02Z",
         "tier": 1,
         "citation": "FRED Florida Labor Force Participation Rate (series_id FLLFPR) — latest observation 57.3 percent for period 2026-09-01, stable vs prior 6 periods. FL LFPR climbs against retirement-state demographic gravity — a positive read on Florida's working-age engagement."
       },
@@ -108,7 +108,7 @@ s03 | macro-us brain — https://www.swfldatagulf.com/api/b/macro-us            
       "display_format": "count",
       "source": {
         "url": "https://api.census.gov/data/2022/cbp?get=NAICS2022,ESTAB&for=county:*&in=state:12",
-        "fetched_at": "2026-10-22T09:32:31Z",
+        "fetched_at": "2026-11-16T04:26:05Z",
         "tier": 1,
         "citation": "Florida professional services establishments: 92,082 FL establishments in 2022 (Census CBP, NAICS 54, all FL counties aggregated)."
       },
@@ -127,7 +127,7 @@ s03 | macro-us brain — https://www.swfldatagulf.com/api/b/macro-us            
       "display_format": "count",
       "source": {
         "url": "https://api.census.gov/data/2022/cbp?get=NAICS2022,ESTAB&for=county:*&in=state:12",
-        "fetched_at": "2026-10-22T09:32:31Z",
+        "fetched_at": "2026-11-16T04:26:05Z",
         "tier": 1,
         "citation": "Florida retail establishments: 75,729 FL establishments in 2022 (Census CBP, NAICS 44-45, all FL counties aggregated)."
       },
@@ -146,7 +146,7 @@ s03 | macro-us brain — https://www.swfldatagulf.com/api/b/macro-us            
       "display_format": "count",
       "source": {
         "url": "https://api.census.gov/data/2022/cbp?get=NAICS2022,ESTAB&for=county:*&in=state:12",
-        "fetched_at": "2026-10-22T09:32:31Z",
+        "fetched_at": "2026-11-16T04:26:05Z",
         "tier": 1,
         "citation": "Florida healthcare establishments: 71,553 FL establishments in 2022 (Census CBP, NAICS 62, all FL counties aggregated)."
       },
@@ -165,7 +165,7 @@ s03 | macro-us brain — https://www.swfldatagulf.com/api/b/macro-us            
       "display_format": "count",
       "source": {
         "url": "https://api.census.gov/data/2022/cbp?get=NAICS2022,ESTAB&for=county:*&in=state:12",
-        "fetched_at": "2026-10-22T09:32:31Z",
+        "fetched_at": "2026-11-16T04:26:05Z",
         "tier": 1,
         "citation": "Florida construction establishments: 65,227 FL establishments in 2022 (Census CBP, NAICS 23, all FL counties aggregated)."
       },
@@ -184,7 +184,7 @@ s03 | macro-us brain — https://www.swfldatagulf.com/api/b/macro-us            
       "display_format": "count",
       "source": {
         "url": "https://api.census.gov/data/2022/cbp?get=NAICS2022,ESTAB&for=county:*&in=state:12",
-        "fetched_at": "2026-10-22T09:32:31Z",
+        "fetched_at": "2026-11-16T04:26:05Z",
         "tier": 1,
         "citation": "Florida food service & accommodation establishments: 47,652 FL establishments in 2022 (Census CBP, NAICS 72, all FL counties aggregated)."
       },
@@ -208,7 +208,7 @@ s03 | macro-us brain — https://www.swfldatagulf.com/api/b/macro-us            
   "relevance": {
     "decay_curve": "weeks",
     "half_life_hours": 720,
-    "computed_at": "2026-10-22T09:32:56Z"
+    "computed_at": "2026-11-16T04:26:25Z"
   },
   "exogenous_signals": []
 }
@@ -217,5 +217,5 @@ s03 | macro-us brain — https://www.swfldatagulf.com/api/b/macro-us            
 - macro-florida: standing FL state-level macro snapshot — the denominator brain for SWFL/Tampa/Jax gap math.
 
 --- RECENT NOTES ---
-- 2026-10-22: pack refined by the Refinery — 9 fact(s) from 3 source(s).
+- 2026-11-16: pack refined by the Refinery — 9 fact(s) from 3 source(s).
 ```
