@@ -1,9 +1,9 @@
-<!-- FRESHNESS: v193 | Token: SWFL-7421-v193-20261118-5048e72e -->
+<!-- FRESHNESS: v194 | Token: SWFL-7421-v194-20261118-18e76937 -->
 ---
 brain_id: master
-version: 193
-refined_at: 2026-11-18T04:29:13Z
-freshness_token: SWFL-7421-v193-20261118-5048e72e
+version: 194
+refined_at: 2026-11-18T13:14:48Z
+freshness_token: SWFL-7421-v194-20261118-18e76937
 ttl_seconds: 604800
 pack_hash: be8f0d44e0e6
 context_type: user_saved_reference
@@ -64,7 +64,7 @@ s31 | price-distribution-swfl brain — https://www.swfldatagulf.com/api/b/price
 s32 | listing-momentum-swfl brain — https://www.swfldatagulf.com/api/b/listing-momentum-swfl       | 2026-11-12 | 2026-11-20
 s33 | market-temperature-swfl brain — https://www.swfldatagulf.com/api/b/market-temperature-swfl   | 2026-10-22 | 2026-11-26
 s34 | investor-zip-swfl brain — https://www.swfldatagulf.com/api/b/investor-zip-swfl               | 2026-10-24 | 2026-11-28
-s35 | active-listings-swfl brain — https://www.swfldatagulf.com/api/b/active-listings-swfl         | 2026-11-16 | 2026-11-18
+s35 | active-listings-swfl brain — https://www.swfldatagulf.com/api/b/active-listings-swfl         | 2026-11-18 | 2026-11-20
 s36 | active-rentals-swfl brain — https://www.swfldatagulf.com/api/b/active-rentals-swfl           | 2026-07-11 | 2026-07-19
 s37 | communities-swfl brain — https://www.swfldatagulf.com/api/b/communities-swfl                 | 2026-10-25 | 2027-04-23
 s38 | tier-divergence-swfl brain — https://www.swfldatagulf.com/api/b/tier-divergence-swfl         | 2026-10-28 | 2026-12-02
@@ -91,7 +91,7 @@ s39 | home-values-swfl brain — https://www.swfldatagulf.com/api/b/home-values-
   {"id":"f017","topic":"upstream :: safety-swfl","fact":"Upstream snapshot — safety-swfl (neutral, magnitude 0.00, confidence 1.00)","value":"safety-swfl as of 2026-10-02: direction neutral, magnitude 0.00, confidence 1.00, trust tier T1, 8 key metric(s). SWFL property crime: 6.8 Part I offenses per 1,000 residents (2025 UCR), -18.7% YoY. Lee (8.0/1k) runs 3.1 points above Collier (4.8/1k).","src":"s01","date":"2026-11-18"},
   {"id":"f018","topic":"upstream :: labor-demand-swfl","fact":"Upstream snapshot — labor-demand-swfl (bullish, magnitude 0.78, confidence 1.00)","value":"labor-demand-swfl as of 2026-10-17: direction bullish, magnitude 0.78, confidence 1.00, trust tier T1, 10 key metric(s). BLS OEWS May 2025 — SWFL workforce. Lee (Cape Coral-Fort Myers MSA): top sector: Office and Administrative Support Occupations (37,050), Construction 2.17× national, employment +1.5% YoY. Collier (Naples MSA): top sector: Food Preparation and Serving Related Occupations (25,250), Construction 1.88× national, employment +1.6% YoY. Source: BLS Occupational Employment and Wage Statistics.","src":"s01","date":"2026-11-18"},
   {"id":"f019","topic":"upstream :: econ-dev-swfl","fact":"Upstream snapshot — econ-dev-swfl (neutral, magnitude 0.35, confidence 0.80)","value":"econ-dev-swfl as of 2026-11-17: direction neutral, magnitude 0.35, confidence 0.80, trust tier T2, 2 key metric(s). SWFL Inc. logged 1 economic development announcement in the last 90 days. Momentum: flat vs prior 90-day window. Source: SWFL Inc. (swflinc.com/blog/), the official Lee County economic development organization.","src":"s01","date":"2026-11-18"},
-  {"id":"f020","topic":"upstream :: city-pulse-swfl","fact":"Upstream snapshot — city-pulse-swfl (neutral, magnitude 0.00, confidence 0.80)","value":"city-pulse-swfl as of 2026-11-18: direction neutral, magnitude 0.00, confidence 0.80, trust tier T2, 8 key metric(s). SWFL city pulse as of 2026-11-18: 76 live current-events signals across 9 cities — Cape Coral (18), Fort Myers (25), Naples (25), North Naples (2), Sanibel (1), East Naples (1), Golden Gate (1), Estero (2), Fort Myers Beach (1). Most current: Cape Coral — A couple listed a beachfront 'dream home' for $64 million in North Naples, as reported on Nov. 13, 2026. These are current cited facts only; the cross-vertical read and any direction call live downstream in master.","src":"s01","date":"2026-11-18"},
+  {"id":"f020","topic":"upstream :: city-pulse-swfl","fact":"Upstream snapshot — city-pulse-swfl (neutral, magnitude 0.00, confidence 0.80)","value":"city-pulse-swfl as of 2026-11-18: direction neutral, magnitude 0.00, confidence 0.80, trust tier T2, 8 key metric(s). SWFL city pulse as of 2026-11-18: 78 live current-events signals across 9 cities — Naples (25), Cape Coral (18), Fort Myers (27), North Naples (2), Sanibel (1), East Naples (1), Golden Gate (1), Estero (2), Fort Myers Beach (1). Most current: Naples — Deal for 625-acre Wildflowerz Ranch in Collier collapses after owner pulls plug, as reported Nov. 11, 2026 (updated Nov. 13, 2026). These are current cited facts only; the cross-vertical read and any direction call live downstream in master.","src":"s01","date":"2026-11-18"},
   {"id":"f021","topic":"upstream :: rsw-airport","fact":"Upstream snapshot — rsw-airport (neutral, magnitude 0.00, confidence 1.00)","value":"rsw-airport as of 2026-11-08: direction neutral, magnitude 0.00, confidence 1.00, trust tier T1, 8 key metric(s). LCPA Aviation April 2026 — RSW 1,152,669 total passengers (-2.2% YoY), 512,534 arrivals / 640,135 departures, 10,797 aircraft operations, 3,463,896 lbs air freight. Source: Lee County Port Authority (flylcpa.com/about-lcpa/reports-and-statistics/).","src":"s01","date":"2026-11-18"},
   {"id":"f022","topic":"upstream :: news-swfl","fact":"Upstream snapshot — news-swfl (neutral, magnitude 0.30, confidence 0.80)","value":"news-swfl as of 2026-11-17: direction neutral, magnitude 0.30, confidence 0.80, trust tier T2, 9 key metric(s). DBPR issued 2 SWFL-relevant press releases in the last 90 days. Top press release topics: enforcement, licensing, construction. Sources: FL DBPR press releases (www2.myfloridalicense.com/press-releases/) and public enforcement notices (www2.myfloridalicense.com/public-notices/).","src":"s01","date":"2026-11-18"},
   {"id":"f023","topic":"upstream :: freshness-pulse","fact":"Upstream snapshot — freshness-pulse (neutral, magnitude 0.00, confidence 0.80)","value":"freshness-pulse as of 2026-11-18: direction neutral, magnitude 0.00, confidence 0.80, trust tier T2, 4 key metric(s). Today's sourced snapshot — SWFL 30-year fixed mortgage rate (as of 2026-11-12) 7.11%; Cape Coral median asking price (as of 2026-11-18) $399,200; Fort Myers median asking price (as of 2026-11-18) $325,000; Naples median asking price (as of 2026-11-18) $650,000. These are cited current facts only; the direction call lives downstream in master.","src":"s01","date":"2026-11-18"},
@@ -106,7 +106,7 @@ s39 | home-values-swfl brain — https://www.swfldatagulf.com/api/b/home-values-
   {"id":"f032","topic":"upstream :: listing-momentum-swfl","fact":"Upstream snapshot — listing-momentum-swfl (neutral, magnitude 0.00, confidence 0.80)","value":"listing-momentum-swfl as of 2026-11-12: direction neutral, magnitude 0.00, confidence 0.80, trust tier T2, 2 key metric(s). Across 31,086 active SWFL for-sale listings (as of 2026-08-14), 14.70% currently carry a price cut and 8.90% are newly listed. By county: Lee 15.20% cut / 9.10% new, Collier 13.30% cut / 8.00% new, Hendry 12.10% cut / 9.00% new.","src":"s01","date":"2026-11-18"},
   {"id":"f033","topic":"upstream :: market-temperature-swfl","fact":"Upstream snapshot — market-temperature-swfl (neutral, magnitude 0.00, confidence 0.80)","value":"market-temperature-swfl as of 2026-10-22: direction neutral, magnitude 0.00, confidence 0.80, trust tier T2, 1 key metric(s). Across 54 SWFL ZIPs (as of 2026-08-04), the median home sells for 11.79× its annual rent — an implied gross rental yield near 8.48%. Highest-yield ZIPs: 33972 (20.16%), 34113 (15.48%), 33903 (13.95%). The full per-ZIP sold/list/rent/DOM snapshot is in the table below.","src":"s01","date":"2026-11-18"},
   {"id":"f034","topic":"upstream :: investor-zip-swfl","fact":"Upstream snapshot — investor-zip-swfl (neutral, magnitude 0.00, confidence 0.78)","value":"investor-zip-swfl as of 2026-10-24: direction neutral, magnitude 0.00, confidence 0.78, trust tier T4, 10 key metric(s). SWFL investor composite: 53 ZIP cards pairing home value (ZHVI) with long-term rent (ZORI) at a regional median gross rent yield of 7.04%. 3 carry the flood-adjusted cap rate — the value + rent + flood-and-NFIP-percentile read no other source pairs at ZIP grain.","src":"s01","date":"2026-11-18"},
-  {"id":"f035","topic":"upstream :: active-listings-swfl","fact":"Upstream snapshot — active-listings-swfl (neutral, magnitude 0.00, confidence 0.80)","value":"active-listings-swfl as of 2026-11-16: direction neutral, magnitude 0.00, confidence 0.80, trust tier T2, 4 key metric(s). 22,650 active SWFL residential listings, median asking $412,000, avg 235 days on market (active residential listings, as of 2026-08-14). By county: Lee 16,394 (median $369,900), Collier 6,256 (median $649,900), Lee 1 (median $314,900).","src":"s01","date":"2026-11-18"},
+  {"id":"f035","topic":"upstream :: active-listings-swfl","fact":"Upstream snapshot — active-listings-swfl (neutral, magnitude 0.00, confidence 0.80)","value":"active-listings-swfl as of 2026-11-18: direction neutral, magnitude 0.00, confidence 0.80, trust tier T2, 4 key metric(s). 22,650 active SWFL residential listings, median asking $412,000, avg 237 days on market (active residential listings, as of 2026-08-14). By county: Lee 16,394 (median $369,900), Collier 6,256 (median $649,900), Lee 1 (median $314,900).","src":"s01","date":"2026-11-18"},
   {"id":"f036","topic":"upstream :: active-rentals-swfl","fact":"Upstream snapshot — active-rentals-swfl (neutral, magnitude 0.00, confidence 0.80)","value":"active-rentals-swfl as of 2026-07-11: direction neutral, magnitude 0.00, confidence 0.80, trust tier T2, 1 key metric(s). 7,059 active SWFL rental listings, asking prices observed from $485 to $17,000/mo (as of 2026-07-06). By county: Lee 3,927, Collier 3,132.","src":"s01","date":"2026-11-18"},
   {"id":"f037","topic":"upstream :: communities-swfl","fact":"Upstream snapshot — communities-swfl (neutral, magnitude 0.00, confidence 0.80)","value":"communities-swfl as of 2026-10-25: direction neutral, magnitude 0.00, confidence 0.80, trust tier T2, 5 key metric(s). 41,746 SWFL homes catalogued across 1,000 neighborhoods (Lee + Collier); 81 marketed golf/gated communities profiled (as of 2026-10-24). Golf-or-not, fees, amenities, home count and drive-times per community ride in the community catalogue for a specific-community lookup.","src":"s01","date":"2026-11-18"},
   {"id":"f038","topic":"upstream :: tier-divergence-swfl","fact":"Upstream snapshot — tier-divergence-swfl (bearish, magnitude 0.16, confidence 0.60)","value":"tier-divergence-swfl as of 2026-10-28: direction bearish, magnitude 0.16, confidence 0.60, trust tier T3, 12 key metric(s). SWFL price tiers read bearish at 2026-08-31 — luxury -0.92% YoY vs starter -3.46% YoY, a median spread of 2.59x moving 1.58% YoY. 7 of 50 ZIPs are in a K-shape (luxury holding, starter falling). Widest fractures: 34105 (10.22%, 5.5x), 33907 (10.17%, 2.6x), 33919 (7.04%, 2.8x).","src":"s01","date":"2026-11-18"},
@@ -116,12 +116,12 @@ s39 | home-values-swfl brain — https://www.swfldatagulf.com/api/b/home-values-
 --- OUTPUT ---
 {
   "brain_id": "master",
-  "version": 193,
-  "refined_at": "2026-11-18T04:29:13Z",
-  "expires": "2026-11-25T04:29:13Z",
+  "version": 194,
+  "refined_at": "2026-11-18T13:14:48Z",
+  "expires": "2026-11-25T13:14:48Z",
   "ttl_seconds": 604800,
   "direction": "mixed",
-  "magnitude": 0.4837243353304747,
+  "magnitude": 0.48372433533047465,
   "drivers": [
     {
       "brain_id": "franchise-outcomes",
@@ -645,8 +645,8 @@ s39 | home-values-swfl brain — https://www.swfldatagulf.com/api/b/home-values-
   "caveats": [
     "flood-barrier-mode-1 active: 4 barrier ZIPs, worst-case AAL $40,342/insured property",
     "Override \"storm-history-modifier\" fired (priority 70)",
-    "permits-commercial-swfl excluded from synthesis (relevance 0.061, below floor 0.1)",
-    "active-rentals-swfl excluded from synthesis (relevance 0.050, below floor 0.1)",
+    "permits-commercial-swfl excluded from synthesis (relevance 0.060, below floor 0.1)",
+    "active-rentals-swfl excluded from synthesis (relevance 0.049, below floor 0.1)",
     "No figures published: this source has not yet received its first real SBA FOIA load. A synthetic development sample exists for offline testing only and is never shipped.",
     "Construction-cost PPI metrics (construction_cost_ppi_industrial, construction_cost_ppi_warehouse, construction_cost_ppi_office, construction_cost_ppi_medical_office, construction_cost_ppi_trade_concrete, construction_cost_ppi_trade_roofing, construction_cost_ppi_trade_electrical, construction_cost_ppi_trade_plumbing_hvac) are national BLS series — no SWFL-specific or Lee/Collier breakout exists at BLS for any of them. They ship a real month-over-month direction (unlike MarketBeat's schema-required \"stable\" fallback) but BLS can revise recent observations within ~30 days of first publication.",
     "vacancy_rate_marketbeat_swfl: 15 submarkets report a point-in-time value; v1 does not compute quarter-over-quarter direction, so the \"stable\" label is a schema-required fallback, not a measured trend.",
@@ -741,7 +741,7 @@ s39 | home-values-swfl brain — https://www.swfldatagulf.com/api/b/home-values-
     "1 of 10 announcements in the last 90 days matched qualifying categories (relocation, expansion, grant, infrastructure); the rest are general chamber/policy posts excluded from the momentum count.",
     "Investment and job figures reflect disclosures at announcement time; actual outcomes may vary as projects develop.",
     "SWFL Inc. covers primarily Lee County projects; Collier County coverage depends on cross-county partnerships and co-announcements.",
-    "68 additional live signals not surfaced here (cap 8); the full set is in data_lake.city_pulse.",
+    "70 additional live signals not surfaced here (cap 8); the full set is in data_lake.city_pulse.",
     "Each signal is dated current-events context with a per-signal source; freshness is TTL-bounded by topic (breaking 1d → structural 90d).",
     "Trailing-12-month total-passengers YoY not computable — fewer than 24 monthly rows in the fetched window; direction set neutral.",
     "Construction enforcement split: public notices = confirmed individual actions (hard-parsed violation_type); press releases = announced sweeps (Sonnet-inferred affected_industries). Do not sum them.",
@@ -841,8 +841,8 @@ s39 | home-values-swfl brain — https://www.swfldatagulf.com/api/b/home-values-
   "upstream_count": 37,
   "relevance": {
     "decay_curve": "weeks",
-    "half_life_hours": 720,
-    "computed_at": "2026-11-18T04:29:13.000Z"
+    "half_life_hours": 720.0000000000002,
+    "computed_at": "2026-11-18T13:14:48.000Z"
   },
   "exogenous_signals": [],
   "conditional_claims": [
