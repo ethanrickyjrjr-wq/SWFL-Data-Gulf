@@ -1,8 +1,8 @@
 {
   "target": "master",
   "timestamps": {
-    "started": "2026-11-19T04:28:09.114Z",
-    "finished": "2026-11-19T04:28:43.000Z"
+    "started": "2026-11-19T13:33:17.061Z",
+    "finished": "2026-11-19T13:33:38.943Z"
   },
   "source": "live",
   "outcomes": [
@@ -23,8 +23,38 @@
     },
     {
       "packId": "corridor-pulse-swfl",
-      "status": "skipped-fresh",
-      "written": false
+      "status": "built",
+      "version": 34,
+      "written": true,
+      "brainOutput": {
+        "brain_id": "corridor-pulse-swfl",
+        "version": 34,
+        "refined_at": "2026-11-19T13:33:17Z",
+        "expires": "2026-11-26T13:33:17Z",
+        "ttl_seconds": 604800,
+        "direction": "neutral",
+        "magnitude": 0,
+        "drivers": [],
+        "overrides": [],
+        "conclusion": "corridor-pulse-swfl: no non-expired corridor current-events signals in this build window — no live pulse to report.",
+        "key_metrics": [],
+        "caveats": [
+          "No live corridor current-events signals in this build window — either the weekly pulse has not run yet, all signals have aged past their TTL, or no tracked corridor made news this window."
+        ],
+        "contradicts": [],
+        "confidence": 0.8,
+        "joint_integrity": 1,
+        "confidence_dispersion": 0,
+        "chain_depth": 0,
+        "trust_tier": 2,
+        "upstream_count": 0,
+        "relevance": {
+          "decay_curve": "weeks",
+          "half_life_hours": 720,
+          "computed_at": "2026-11-19T13:33:17Z"
+        },
+        "exogenous_signals": []
+      }
     },
     {
       "packId": "cre-swfl",
@@ -53,8 +83,192 @@
     },
     {
       "packId": "tourism-tdt",
-      "status": "skipped-fresh",
-      "written": false
+      "status": "built",
+      "version": 46,
+      "written": true,
+      "brainOutput": {
+        "brain_id": "tourism-tdt",
+        "version": 46,
+        "refined_at": "2026-11-19T13:33:17Z",
+        "expires": "2026-11-26T13:33:17Z",
+        "ttl_seconds": 604800,
+        "direction": "neutral",
+        "magnitude": 0.4,
+        "drivers": [],
+        "overrides": [],
+        "conclusion": "SWFL TDT collections (Lee + Collier combined) for 2026-04 (shoulder season): $9.03M. Trailing 12 months stand at 78% of the strongest pre-Hurricane-Ian annual run. Hospitality / accommodation operators should weight forward decisions against this SWFL seasonal pulse; the cross-vertical read lives downstream in master.",
+        "key_metrics": [
+          {
+            "metric": "latest_monthly_collections_usd",
+            "value": 9028029.34,
+            "direction": "stable",
+            "label": "Latest monthly TDT collections (SWFL combined, 2026-04, shoulder season)",
+            "variable_type": "extensive",
+            "units": "USD/month",
+            "display_format": "currency",
+            "source": {
+              "url": "https://www.swfldatagulf.com/r/source/fl_dor_tdt_collections?label=Florida+DOR+%E2%80%94+Tourist+Development+Tax+collections&source=Florida+DOR&brain=tourism-tdt&date_col=period",
+              "fetched_at": "2026-11-19T13:33:17Z",
+              "tier": 1,
+              "citation": "Florida DOR Tourist Development Tax — SWFL (Lee + Collier) (666 monthly collection records: 1998-07 → 2026-04); source: Florida Department of Revenue Form 3 XLSX (monthly, ~6-week lag) — SWFL combined 2026-04 = $9.03M (FY 2026, post_ian=true)."
+            },
+            "suggestions": [
+              "What's driving latest monthly collections usd?",
+              "How does latest monthly collections usd here compare to other SWFL areas?"
+            ]
+          },
+          {
+            "metric": "trailing_12mo_collections_usd",
+            "value": 89003088.51,
+            "direction": "stable",
+            "label": "Trailing 12-month TDT collections total (SWFL combined)",
+            "variable_type": "extensive",
+            "units": "USD",
+            "display_format": "currency",
+            "source": {
+              "url": "https://www.swfldatagulf.com/r/source/fl_dor_tdt_collections?label=Florida+DOR+%E2%80%94+Tourist+Development+Tax+collections&source=Florida+DOR&brain=tourism-tdt&date_col=period",
+              "fetched_at": "2026-11-19T13:33:17Z",
+              "tier": 1,
+              "citation": "Florida DOR Tourist Development Tax — SWFL (Lee + Collier) (666 monthly collection records: 1998-07 → 2026-04); source: Florida Department of Revenue Form 3 XLSX (monthly, ~6-week lag) — SWFL combined sum, trailing 12-month window: 2025-05 → 2026-04 (12 months)."
+            },
+            "suggestions": [
+              "What's driving trailing 12mo collections usd?",
+              "How does trailing 12mo collections usd here compare to other SWFL areas?"
+            ]
+          },
+          {
+            "metric": "post_ian_recovery_ratio",
+            "value": 0.78,
+            "direction": "falling",
+            "label": "Post-Hurricane-Ian recovery ratio (SWFL trailing 12mo ÷ best pre-Ian 12mo)",
+            "variable_type": "intensive",
+            "units": "ratio",
+            "display_format": "ratio",
+            "source": {
+              "url": "https://www.swfldatagulf.com/r/source/fl_dor_tdt_collections?label=Florida+DOR+%E2%80%94+Tourist+Development+Tax+collections&source=Florida+DOR&brain=tourism-tdt&date_col=period",
+              "fetched_at": "2026-11-19T13:33:17Z",
+              "tier": 1,
+              "citation": "Florida DOR Tourist Development Tax — SWFL (Lee + Collier) (666 monthly collection records: 1998-07 → 2026-04); source: Florida Department of Revenue Form 3 XLSX (monthly, ~6-week lag) — SWFL trailing 12-month total (2025-05 → 2026-04 (12 months)) ÷ best pre-Ian 12-month window ($114.71M; Ian landfall 2022-09-28)."
+            },
+            "suggestions": [
+              "What's driving post ian recovery ratio?",
+              "How does post ian recovery ratio here compare to other SWFL areas?"
+            ]
+          },
+          {
+            "metric": "seasonal_position_vs_history",
+            "value": 1.04,
+            "direction": "stable",
+            "label": "Seasonal position vs same-month historical mean (SWFL combined)",
+            "variable_type": "intensive",
+            "units": "ratio",
+            "display_format": "ratio",
+            "source": {
+              "url": "https://www.swfldatagulf.com/r/source/fl_dor_tdt_collections?label=Florida+DOR+%E2%80%94+Tourist+Development+Tax+collections&source=Florida+DOR&brain=tourism-tdt&date_col=period",
+              "fetched_at": "2026-11-19T13:33:17Z",
+              "tier": 1,
+              "citation": "Florida DOR Tourist Development Tax — SWFL (Lee + Collier) (666 monthly collection records: 1998-07 → 2026-04); source: Florida Department of Revenue Form 3 XLSX (monthly, ~6-week lag) — SWFL 2026-04 ($9.03M) vs same-calendar-month mean across 28 non-zero years."
+            },
+            "suggestions": [
+              "What's driving seasonal position vs history?",
+              "How does seasonal position vs history here compare to other SWFL areas?"
+            ]
+          },
+          {
+            "metric": "lee_latest_monthly_collections_usd",
+            "value": 9028029.34,
+            "direction": "stable",
+            "label": "Lee County latest monthly TDT collections (2026-04)",
+            "variable_type": "extensive",
+            "units": "USD/month",
+            "display_format": "currency",
+            "source": {
+              "url": "https://www.swfldatagulf.com/r/source/fl_dor_tdt_collections?label=Florida+DOR+%E2%80%94+Tourist+Development+Tax+collections&source=Florida+DOR&brain=tourism-tdt&date_col=period",
+              "fetched_at": "2026-11-19T13:33:17Z",
+              "tier": 1,
+              "citation": "Florida DOR Tourist Development Tax — SWFL (Lee + Collier) (666 monthly collection records: 1998-07 → 2026-04); source: Florida Department of Revenue Form 3 XLSX (monthly, ~6-week lag) — Lee County 2026-04 = $9.03M."
+            },
+            "suggestions": [
+              "What's driving lee latest monthly collections usd?",
+              "How does lee latest monthly collections usd here compare to other SWFL areas?"
+            ]
+          },
+          {
+            "metric": "lee_trailing_12mo_collections_usd",
+            "value": 53331356.519999996,
+            "direction": "stable",
+            "label": "Lee County trailing 12-month TDT collections",
+            "variable_type": "extensive",
+            "units": "USD",
+            "display_format": "currency",
+            "source": {
+              "url": "https://www.swfldatagulf.com/r/source/fl_dor_tdt_collections?label=Florida+DOR+%E2%80%94+Tourist+Development+Tax+collections&source=Florida+DOR&brain=tourism-tdt&date_col=period",
+              "fetched_at": "2026-11-19T13:33:17Z",
+              "tier": 1,
+              "citation": "Florida DOR Tourist Development Tax — SWFL (Lee + Collier) (666 monthly collection records: 1998-07 → 2026-04); source: Florida Department of Revenue Form 3 XLSX (monthly, ~6-week lag) — Lee County trailing 12 months: 2025-05 → 2026-04 (12 months)."
+            },
+            "suggestions": [
+              "What's driving lee trailing 12mo collections usd?",
+              "How does lee trailing 12mo collections usd here compare to other SWFL areas?"
+            ]
+          },
+          {
+            "metric": "collier_latest_monthly_collections_usd",
+            "value": 7097536.72,
+            "direction": "stable",
+            "label": "Collier County latest monthly TDT collections (2026-04)",
+            "variable_type": "extensive",
+            "units": "USD/month",
+            "display_format": "currency",
+            "source": {
+              "url": "https://www.swfldatagulf.com/r/source/fl_dor_tdt_collections?label=Florida+DOR+%E2%80%94+Tourist+Development+Tax+collections&source=Florida+DOR&brain=tourism-tdt&date_col=period",
+              "fetched_at": "2026-11-19T13:33:17Z",
+              "tier": 1,
+              "citation": "Florida DOR Tourist Development Tax — SWFL (Lee + Collier) (666 monthly collection records: 1998-07 → 2026-04); source: Florida Department of Revenue Form 3 XLSX (monthly, ~6-week lag) — Collier County 2026-04 = $7.10M."
+            },
+            "suggestions": [
+              "What's driving collier latest monthly collections usd?",
+              "How does collier latest monthly collections usd here compare to other SWFL areas?"
+            ]
+          },
+          {
+            "metric": "collier_trailing_12mo_collections_usd",
+            "value": 51136864.940000005,
+            "direction": "stable",
+            "label": "Collier County trailing 12-month TDT collections",
+            "variable_type": "extensive",
+            "units": "USD",
+            "display_format": "currency",
+            "source": {
+              "url": "https://www.swfldatagulf.com/r/source/fl_dor_tdt_collections?label=Florida+DOR+%E2%80%94+Tourist+Development+Tax+collections&source=Florida+DOR&brain=tourism-tdt&date_col=period",
+              "fetched_at": "2026-11-19T13:33:17Z",
+              "tier": 1,
+              "citation": "Florida DOR Tourist Development Tax — SWFL (Lee + Collier) (666 monthly collection records: 1998-07 → 2026-04); source: Florida Department of Revenue Form 3 XLSX (monthly, ~6-week lag) — Collier County trailing 12 months: 2025-03 → 2026-02 (12 months)."
+            },
+            "suggestions": [
+              "What's driving collier trailing 12mo collections usd?",
+              "How does collier trailing 12mo collections usd here compare to other SWFL areas?"
+            ]
+          }
+        ],
+        "caveats": [
+          "Florida DOR Form 3 may revise recent months for ~60 days after first publication — treat the latest month as directional, not final.",
+          "Latest month 2026-04 reflects only 1 of 2 expected counties (Collier data lags Lee by ~2 months). YoY comparison is suppressed to avoid apples-to-oranges inflation. Use per-county metrics or trailing_12mo_collections_usd for the cross-county read."
+        ],
+        "contradicts": [],
+        "confidence": 1,
+        "joint_integrity": 1,
+        "confidence_dispersion": 0,
+        "chain_depth": 0,
+        "trust_tier": 1,
+        "upstream_count": 0,
+        "relevance": {
+          "decay_curve": "weeks",
+          "half_life_hours": 720,
+          "computed_at": "2026-11-19T13:33:17Z"
+        },
+        "exogenous_signals": []
+      }
     },
     {
       "packId": "env-swfl",
@@ -83,392 +297,8 @@
     },
     {
       "packId": "properties-collier-value",
-      "status": "built",
-      "version": 15,
-      "written": true,
-      "brainOutput": {
-        "brain_id": "properties-collier-value",
-        "version": 15,
-        "refined_at": "2026-11-19T04:28:21Z",
-        "expires": "2026-12-19T04:28:21Z",
-        "ttl_seconds": 2592000,
-        "direction": "neutral",
-        "magnitude": 0.2520955863890882,
-        "drivers": [],
-        "overrides": [],
-        "conclusion": "Collier County had 9,197 residential closings recorded by Redfin for 2025. Trailing 3yr baseline (2022-2024) averaged 9911.7 sales/yr; current year sits at z = -0.8 — neutral read on Collier transaction velocity. Median sale price +3.00% YoY (2026-10-31), 7.9 months of supply. Parcel base: 294,148 Collier parcels (FDOR cadastral), median Save-Our-Homes gap 29.53% across 108,444 homesteaded.",
-        "key_metrics": [
-          {
-            "metric": "collier_homes_sold_zscore",
-            "value": -0.76,
-            "direction": "stable",
-            "label": "Collier homes-sold z-score, year 2025 vs trailing 3yr (2022-2024)",
-            "variable_type": "intensive",
-            "units": "z-score",
-            "display_format": "ratio",
-            "source": {
-              "url": "https://jtkdowmrjaxfvwmemxso.supabase.co/rest/v1/redfin_collier_market?select=period_end,homes_sold,median_sale_price_yoy,months_of_supply&property_type=eq.All%20Residential",
-              "fetched_at": "2026-11-19T04:28:09Z",
-              "tier": 2,
-              "citation": "Redfin Data Center county market tracker via data_lake.redfin_collier_market (free public TSV filtered to \"Collier County, FL\"; monthly homes-sold summed to calendar-year velocity, \"All Residential\" property type)."
-            },
-            "suggestions": [
-              "What's driving collier homes sold zscore?",
-              "How does collier homes sold zscore here compare to other SWFL areas?"
-            ]
-          },
-          {
-            "metric": "collier_homes_sold_per_year",
-            "value": 9197,
-            "direction": "stable",
-            "label": "Collier residential homes sold, year 2025 (Redfin closed sales, All Residential)",
-            "variable_type": "extensive",
-            "units": "home sales",
-            "display_format": "count",
-            "source": {
-              "url": "https://jtkdowmrjaxfvwmemxso.supabase.co/rest/v1/redfin_collier_market?select=period_end,homes_sold,median_sale_price_yoy,months_of_supply&property_type=eq.All%20Residential",
-              "fetched_at": "2026-11-19T04:28:09Z",
-              "tier": 2,
-              "citation": "Redfin Data Center county market tracker via data_lake.redfin_collier_market (free public TSV filtered to \"Collier County, FL\"; monthly homes-sold summed to calendar-year velocity, \"All Residential\" property type)."
-            },
-            "suggestions": [
-              "What's driving collier homes sold per year?",
-              "How does collier homes sold per year here compare to other SWFL areas?"
-            ]
-          },
-          {
-            "metric": "collier_median_sale_price_yoy",
-            "value": 3,
-            "direction": "rising",
-            "label": "Collier median sale price YoY (2026-10-31, Redfin All Residential)",
-            "variable_type": "intensive",
-            "units": "percent",
-            "display_format": "percent",
-            "source": {
-              "url": "https://jtkdowmrjaxfvwmemxso.supabase.co/rest/v1/redfin_collier_market?select=period_end,homes_sold,median_sale_price_yoy,months_of_supply&property_type=eq.All%20Residential",
-              "fetched_at": "2026-11-19T04:28:09Z",
-              "tier": 2,
-              "citation": "Redfin Data Center county market tracker via data_lake.redfin_collier_market (free public TSV filtered to \"Collier County, FL\"; monthly homes-sold summed to calendar-year velocity, \"All Residential\" property type)."
-            },
-            "suggestions": [
-              "What's driving collier median sale price yoy?",
-              "How does collier median sale price yoy here compare to other SWFL areas?"
-            ]
-          },
-          {
-            "metric": "collier_months_of_supply",
-            "value": 7.9,
-            "direction": "stable",
-            "label": "Collier months of supply (2026-10-31, Redfin All Residential)",
-            "variable_type": "intensive",
-            "units": "months",
-            "display_format": "ratio",
-            "source": {
-              "url": "https://jtkdowmrjaxfvwmemxso.supabase.co/rest/v1/redfin_collier_market?select=period_end,homes_sold,median_sale_price_yoy,months_of_supply&property_type=eq.All%20Residential",
-              "fetched_at": "2026-11-19T04:28:09Z",
-              "tier": 2,
-              "citation": "Redfin Data Center county market tracker via data_lake.redfin_collier_market (free public TSV filtered to \"Collier County, FL\"; monthly homes-sold summed to calendar-year velocity, \"All Residential\" property type)."
-            },
-            "suggestions": [
-              "What's driving collier months of supply?",
-              "How does collier months of supply here compare to other SWFL areas?"
-            ]
-          },
-          {
-            "metric": "collier_soh_gap_median_pct",
-            "value": 29.5,
-            "direction": "stable",
-            "label": "Collier Save-Our-Homes gap median (% of homestead just value suppressed by the SOH cap) across 108,444 homesteaded parcels",
-            "variable_type": "intensive",
-            "units": "percent",
-            "display_format": "percent",
-            "source": {
-              "url": "https://jtkdowmrjaxfvwmemxso.supabase.co/rest/v1/collier_parcels_summary?select=total_parcels,soh_homesteaded_parcels,soh_gap_median_pct",
-              "fetched_at": "2026-11-19T04:28:09Z",
-              "tier": 2,
-              "citation": "FDOR Statewide Cadastral — Collier County parcels via data_lake.collier_parcels (CO_NO=21; SOH gap = median (jv_hmstd - av_hmstd)/jv_hmstd over homesteaded parcels)."
-            },
-            "suggestions": [
-              "What's driving collier soh gap median pct?",
-              "How does collier soh gap median pct here compare to other SWFL areas?"
-            ]
-          },
-          {
-            "metric": "collier_total_parcels",
-            "value": 294148,
-            "direction": "stable",
-            "label": "Collier County parcels in FDOR cadastral snapshot (data_lake.collier_parcels)",
-            "variable_type": "extensive",
-            "units": "parcels",
-            "display_format": "count",
-            "source": {
-              "url": "https://jtkdowmrjaxfvwmemxso.supabase.co/rest/v1/collier_parcels_summary?select=total_parcels,soh_homesteaded_parcels,soh_gap_median_pct",
-              "fetched_at": "2026-11-19T04:28:09Z",
-              "tier": 2,
-              "citation": "FDOR Statewide Cadastral — Collier County parcels via data_lake.collier_parcels (CO_NO=21; SOH gap = median (jv_hmstd - av_hmstd)/jv_hmstd over homesteaded parcels)."
-            },
-            "suggestions": [
-              "What's driving collier total parcels?",
-              "How does collier total parcels here compare to other SWFL areas?"
-            ]
-          },
-          {
-            "metric": "collier_sold_median_homes_only",
-            "value": 605000,
-            "direction": "stable",
-            "label": "Collier homes-only sold median (single-family + condo, recorded deeds, as of 11/19/2026)",
-            "variable_type": "intensive",
-            "units": "USD",
-            "display_format": "currency",
-            "source": {
-              "url": "https://jtkdowmrjaxfvwmemxso.supabase.co/rest/v1/collier_sold_median_by_zip?select=zip_code,home_sales_n,median_sale,county_fallback",
-              "fetched_at": "2026-11-19T04:28:09Z",
-              "tier": 2,
-              "citation": "Collier County Property Appraiser (FDOR tax roll, recorded deeds) — homes-only (single-family + condo) sold median per ZIP via data_lake.collier_sold_median_by_zip; each parcel's latest recorded sale 2024+ over $20,000, ZIPs under 20 sales reporting the county median. As of 11/19/2026."
-            },
-            "suggestions": [
-              "What's driving collier sold median homes only?",
-              "How does collier sold median homes only here compare to other SWFL areas?"
-            ]
-          }
-        ],
-        "detail_tables": [
-          {
-            "id": "collier_sold_median_by_zip",
-            "title": "Collier County homes-only sold median by ZIP (recorded deeds)",
-            "grain": "zip",
-            "columns": [
-              {
-                "id": "median_sale",
-                "label": "Homes-only sold median",
-                "display_format": "currency",
-                "units": "USD"
-              },
-              {
-                "id": "home_sales_n",
-                "label": "Qualifying home sales",
-                "display_format": "count",
-                "units": "count"
-              },
-              {
-                "id": "county_fallback",
-                "label": "County fallback (under 20 sales)",
-                "display_format": "raw"
-              }
-            ],
-            "rows": [
-              {
-                "key": "34102",
-                "label": "34102",
-                "cells": {
-                  "median_sale": 2100000,
-                  "home_sales_n": 469,
-                  "county_fallback": false
-                }
-              },
-              {
-                "key": "34103",
-                "label": "34103",
-                "cells": {
-                  "median_sale": 1105000,
-                  "home_sales_n": 457,
-                  "county_fallback": false
-                }
-              },
-              {
-                "key": "34104",
-                "label": "34104",
-                "cells": {
-                  "median_sale": 400000,
-                  "home_sales_n": 504,
-                  "county_fallback": false
-                }
-              },
-              {
-                "key": "34105",
-                "label": "34105",
-                "cells": {
-                  "median_sale": 540000,
-                  "home_sales_n": 433,
-                  "county_fallback": false
-                }
-              },
-              {
-                "key": "34108",
-                "label": "34108",
-                "cells": {
-                  "median_sale": 1100000,
-                  "home_sales_n": 603,
-                  "county_fallback": false
-                }
-              },
-              {
-                "key": "34109",
-                "label": "34109",
-                "cells": {
-                  "median_sale": 660000,
-                  "home_sales_n": 549,
-                  "county_fallback": false
-                }
-              },
-              {
-                "key": "34110",
-                "label": "34110",
-                "cells": {
-                  "median_sale": 649000,
-                  "home_sales_n": 609,
-                  "county_fallback": false
-                }
-              },
-              {
-                "key": "34112",
-                "label": "34112",
-                "cells": {
-                  "median_sale": 368500,
-                  "home_sales_n": 861,
-                  "county_fallback": false
-                }
-              },
-              {
-                "key": "34113",
-                "label": "34113",
-                "cells": {
-                  "median_sale": 600000,
-                  "home_sales_n": 668,
-                  "county_fallback": false
-                }
-              },
-              {
-                "key": "34114",
-                "label": "34114",
-                "cells": {
-                  "median_sale": 640000,
-                  "home_sales_n": 1070,
-                  "county_fallback": false
-                }
-              },
-              {
-                "key": "34116",
-                "label": "34116",
-                "cells": {
-                  "median_sale": 450000,
-                  "home_sales_n": 198,
-                  "county_fallback": false
-                }
-              },
-              {
-                "key": "34117",
-                "label": "34117",
-                "cells": {
-                  "median_sale": 572500,
-                  "home_sales_n": 288,
-                  "county_fallback": false
-                }
-              },
-              {
-                "key": "34119",
-                "label": "34119",
-                "cells": {
-                  "median_sale": 680000,
-                  "home_sales_n": 822,
-                  "county_fallback": false
-                }
-              },
-              {
-                "key": "34120",
-                "label": "34120",
-                "cells": {
-                  "median_sale": 570000,
-                  "home_sales_n": 1112,
-                  "county_fallback": false
-                }
-              },
-              {
-                "key": "34134",
-                "label": "34134",
-                "cells": {
-                  "median_sale": 600000,
-                  "home_sales_n": 77,
-                  "county_fallback": false
-                }
-              },
-              {
-                "key": "34138",
-                "label": "34138",
-                "cells": {
-                  "median_sale": 605000,
-                  "home_sales_n": 3,
-                  "county_fallback": true
-                }
-              },
-              {
-                "key": "34139",
-                "label": "34139",
-                "cells": {
-                  "median_sale": 605000,
-                  "home_sales_n": 13,
-                  "county_fallback": true
-                }
-              },
-              {
-                "key": "34140",
-                "label": "34140",
-                "cells": {
-                  "median_sale": 605000,
-                  "home_sales_n": 4,
-                  "county_fallback": true
-                }
-              },
-              {
-                "key": "34142",
-                "label": "34142",
-                "cells": {
-                  "median_sale": 380000,
-                  "home_sales_n": 571,
-                  "county_fallback": false
-                }
-              },
-              {
-                "key": "34145",
-                "label": "34145",
-                "cells": {
-                  "median_sale": 931000,
-                  "home_sales_n": 826,
-                  "county_fallback": false
-                }
-              }
-            ],
-            "source": {
-              "url": "https://jtkdowmrjaxfvwmemxso.supabase.co/rest/v1/collier_sold_median_by_zip?select=zip_code,home_sales_n,median_sale,county_fallback",
-              "fetched_at": "2026-11-19T04:28:09Z",
-              "tier": 2,
-              "citation": "Collier County Property Appraiser (FDOR tax roll, recorded deeds) — homes-only (single-family + condo) sold median per ZIP via data_lake.collier_sold_median_by_zip; each parcel's latest recorded sale 2024+ over $20,000, ZIPs under 20 sales reporting the county median. As of 11/19/2026."
-            },
-            "note": "One row per Collier County ZIP. Homes-only = single-family + condo (vacant land excluded). Median of each parcel's latest recorded sale 2024+ over $20,000 — a stock of most-recent prices, not a transaction-flow median. ZIPs with fewer than 20 qualifying sales report the county median (county fallback = true), never a thin-sample ZIP median. Situs ZIP comes native from the FDOR roll (no centroid-to-ZCTA derivation). As of 11/19/2026."
-          }
-        ],
-        "caveats": [
-          "Collier County only — Lee (see properties-lee-value) and Charlotte are NOT included.",
-          "Two sources, two grains: market velocity + price come from Redfin (county aggregates); the Save-Our-Homes gap + parcel count come from the FDOR Statewide Cadastral (parcel-grain, CO_NO=21). Redfin carries no assessed value; the cadastral carries no monthly sales pace — each fills the other's gap.",
-          "Save-Our-Homes gap = median (jv_hmstd - av_hmstd)/jv_hmstd across homesteaded parcels (the homestead-portion SOH cap differential). This is the textbook SOH measure; Lee's number is the whole-parcel just-vs-taxable proxy, so the two are directionally comparable, not numerically identical.",
-          "Velocity is monthly Redfin HOMES_SOLD summed to calendar years; the current-year count is final only after the year closes and Redfin's revisions settle (recent months are revised upward as late-recorded sales land — treat the most recent year as a soft floor).",
-          "Not directly comparable to properties-lee-value's velocity: Lee counts LeePA qualified parcel sales; Collier counts Redfin closed sales. Compare direction (z-score sign/magnitude), not raw counts.",
-          "Direction thresholds: bullish if z ≥ +1.0σ; bearish if z ≤ -1.0σ; neutral otherwise. Standard deviation is population std over 3 baseline years; if variance is zero z is undefined and direction is neutral."
-        ],
-        "contradicts": [],
-        "confidence": 0.86,
-        "joint_integrity": 1,
-        "confidence_dispersion": 0,
-        "chain_depth": 0,
-        "trust_tier": 2,
-        "upstream_count": 0,
-        "relevance": {
-          "decay_curve": "weeks",
-          "half_life_hours": 720,
-          "computed_at": "2026-11-19T04:28:21Z"
-        },
-        "exogenous_signals": []
-      }
+      "status": "skipped-fresh",
+      "written": false
     },
     {
       "packId": "rentals-swfl",
@@ -498,46 +328,46 @@
     {
       "packId": "city-pulse-swfl",
       "status": "built",
-      "version": 187,
+      "version": 188,
       "written": true,
       "brainOutput": {
         "brain_id": "city-pulse-swfl",
-        "version": 187,
-        "refined_at": "2026-11-19T04:28:21Z",
-        "expires": "2026-11-20T04:28:21Z",
+        "version": 188,
+        "refined_at": "2026-11-19T13:33:17Z",
+        "expires": "2026-11-20T13:33:17Z",
         "ttl_seconds": 86400,
         "direction": "neutral",
         "magnitude": 0,
         "drivers": [],
         "overrides": [],
-        "conclusion": "SWFL city pulse as of 2026-11-19: 85 live current-events signals across 8 cities — Naples (29), Cape Coral (18), Fort Myers (29), North Naples (2), Sanibel (1), East Naples (1), Fort Myers Beach (3), Estero (2). Most current: Naples — Deal for 625-acre Wildflowerz Ranch in Collier collapses after owner pulls plug, as reported Nov. 11, 2026 (updated Nov. 13, 2026). These are current cited facts only; the cross-vertical read and any direction call live downstream in master.",
+        "conclusion": "SWFL city pulse as of 2026-11-19: 84 live current-events signals across 8 cities — Cape Coral (18), Fort Myers (29), Naples (28), North Naples (2), Sanibel (1), East Naples (1), Fort Myers Beach (3), Estero (2). Most current: Cape Coral — A couple listed a beachfront 'dream home' for $64 million in North Naples, as reported on Nov. 13, 2026. These are current cited facts only; the cross-vertical read and any direction call live downstream in master.",
         "key_metrics": [
           {
-            "metric": "signal_breaking_1",
-            "value": "Naples: Deal for 625-acre Wildflowerz Ranch in Collier collapses after owner pulls plug, as reported Nov. 11, 2026 (updated Nov. 13, 2026).",
-            "direction": "stable",
-            "label": "Naples — breaking",
-            "variable_type": "categorical",
-            "source": {
-              "url": "https://www.naplesnews.com/story/money/business/local/2026/11/11/wildflowerz-ranch-conservation-deal-falls-apart-in-collier-county/92724754007/",
-              "fetched_at": "2026-11-19T04:28:21Z",
-              "tier": 2,
-              "citation": "'Wildflowerz Ranch' conservation deal falls apart in Collier County: \"[](https://www.naplesnews.com/)\n[Turkey Drop fills Collier bellies on a day to give thanks](https://www.naplesnews.com/story/news/local/2026/11/17/st-matthews-house-capital-wealth-advisors-team-up-for-thanksgiving-meals-naples-immokalee-collier/92824021007/)\n[](https://subscribe.naplesnews.com/rr/nanobar?gps-source=CPTILELEFT&itm_campaign=2026ENTQ4BAU2026&itm_medium=ONSITE&success-url=https%3A%2F%2Fwww.naplesnews.com%2Fstory%2Fmoney%2Fbusiness%2Flocal%2F2026%2F11%2F11%2Fwildflowerz-ranch-conservation-deal-falls-apart-in-collier-county%2F92724754007%2F)\n[](https://subscribe.naplesnews.com/rr/masthead?gps-source=CPMASTHEAD&itm_campaign=2026ENTQ4BAU2026&itm_medium=ONSITE&success-url=https%3A%2F%2Fwww.naplesnews.com%2Fstory%2Fmoney%2Fbusiness%2Flocal%2F2026%2F11%2F11%2Fwildflowerz-ranch-conservation-deal-falls-apart-in-collier-county%2F92724754007%2F)\n[News](https://www.naplesnews.com/news/) [Sports](https://www.naplesnews.com/sports/) [Real Estate](https://www.naplesnews.com/business/real-estate/) [Restaurants](https://www.naplesnews.com/entertainment/restaurants/) [Opinion](https://www.naplesnews.com/opinion/) [Advertise](https://advertising.usatoday.com/advertise-with-us/?cid=Web_LiQ_Network_AdvertiseWithUs_AdvertiseInquiry&publication=naples_daily_news&utm_source=local_publication&utm_medium=menu&utm_campaign=advertise_with_us) [Obituaries](https://www.naplesnews.com/obituaries) [eNewspaper](https://user.naplesnews.com/user/enewspaper) [Legals](https://www.naplesnews.com/public-notices)\n[](https://www.naplesnews.com/search/ \"Search\")\n[](https://www.naplesnews.com/weather/ \"Weather in Naples: 71°F Cloudy\") [](https://subscribe.naplesnews.com/rr/navsub?gps-source=CPTOPNAVBAR&itm_campaign=2026ENTQ4BAU2026&itm_medium=ONSITE&success-url=https%3A%2F%2Fwww.naplesnews.com%2Fstory%2Fmoney%2Fbusiness%2Flocal%2F2026%2F11%2F11%2Fwildflowerz-ranch-conservation-deal-falls-apart-in-collier-county%2F92724754007%2F)\n[](https://login.naplesnews.com/PNDN-GUP/authenticate/?success-url=https%3A%2F%2Fwww.naplesnews.com%2Fstory%2Fmoney%2Fbusiness%2Flocal%2F2026%2F11%2F11%2Fwildflowerz-ranch-conservation-deal-falls-apart-in-collier-county%2F92724754007%2F&cancel-url=https%3A%2F%2Fwww.naplesnews.com%2Fstory%2Fmoney%2Fbusiness%2Flocal%2F2026%2F11%2F11%2Fwildflowerz-ranch-conservation-deal-falls-apart-in-collier-county%2F92724754007%2F)\n[](https://www.naplesnews.com/) [](https://www.naplesnews.com/)\n[LOCAL BUSINESS](https://www.naplesnews.com/business/local/)\n# Deal for 625-acre ranch in Collier collapses after owner pulls plug\n[![Portrait of Laura Layden](https://www.naplesnews.com/gcdn/authoring/authoring-images/2024/02/08/PNDN/72524348007-ndn-jh-20240126-laura-0001.JPG?crop=3313,3312,x1506,y0&width=48&height=48&format=pjpg&auto=webp) Laura Layden](https://www.naplesnews.com/staff/2647080001/laura-layden/)\nFort Myers News-Press & Naples Daily News\nNov. 11, 2026Updated Nov. 13, 2026, 9:38 a.m. ET\nCollier County's hopes of purchasing the Wildflowerz Ranch for preservation\""
-            },
-            "suggestions": [
-              "What's driving signal breaking 1?",
-              "How does signal breaking 1 here compare to other SWFL areas?"
-            ]
-          },
-          {
-            "metric": "signal_transactions_2",
+            "metric": "signal_transactions_1",
             "value": "Cape Coral: A couple listed a beachfront 'dream home' for $64 million in North Naples, as reported on Nov. 13, 2026.",
             "direction": "stable",
             "label": "Cape Coral — transactions",
             "variable_type": "categorical",
             "source": {
               "url": "https://www.news-press.com/story/money/business/local/2026/11/13/couple-selling-new-64-million-dollar-waterfront-dream-home-in-north-naples-florida/92689828007/",
-              "fetched_at": "2026-11-19T04:28:21Z",
+              "fetched_at": "2026-11-19T13:33:17Z",
+              "tier": 2,
+              "citation": "Couple selling $64 million waterfront 'dream home' in North Naples: \"[](https://www.news-press.com/)\n[](https://subscribe.news-press.com/rr/nanobar?gps-source=CPTILELEFT&itm_campaign=2026ENTQ4BAU2026&itm_medium=ONSITE&success-url=https%3A%2F%2Fwww.news-press.com%2Fstory%2Fmoney%2Fbusiness%2Flocal%2F2026%2F11%2F13%2Fcouple-selling-new-64-million-dollar-waterfront-dream-home-in-north-naples-florida%2F92689828007%2F)\n[](https://subscribe.news-press.com/rr/masthead?gps-source=CPMASTHEAD&itm_campaign=2026ENTQ4BAU2026&itm_medium=ONSITE&success-url=https%3A%2F%2Fwww.news-press.com%2Fstory%2Fmoney%2Fbusiness%2Flocal%2F2026%2F11%2F13%2Fcouple-selling-new-64-million-dollar-waterfront-dream-home-in-north-naples-florida%2F92689828007%2F)\n[News](https://www.news-press.com/news/) [Cape Coral](https://www.news-press.com/news/cape-coral/) [Sports](https://www.news-press.com/sports/) [Restaurants](https://www.news-press.com/taste/) [Real Estate](https://www.news-press.com/real-estate) [Advertise](https://advertising.usatoday.com/advertise-with-us/?cid=Web_LiQ_Network_AdvertiseWithUs_AdvertiseInquiry&publication=the_news_press&utm_source=local_publication&utm_medium=menu&utm_campaign=advertise_with_us) [Obituaries](https://www.news-press.com/obituaries) [eNewspaper](https://user.news-press.com/user/enewspaper) [Legals](https://www.news-press.com/public-notices)\n[](https://www.news-press.com/search/ \"Search\")\n[](https://www.news-press.com/weather/ \"Weather in Fort Myers: 55°F Mostly Sunny\") [](https://subscribe.news-press.com/rr/navsub?gps-source=CPTOPNAVBAR&itm_campaign=2026ENTQ4BAU2026&itm_medium=ONSITE&success-url=https%3A%2F%2Fwww.news-press.com%2Fstory%2Fmoney%2Fbusiness%2Flocal%2F2026%2F11%2F13%2Fcouple-selling-new-64-million-dollar-waterfront-dream-home-in-north-naples-florida%2F92689828007%2F)\n[](https://login.news-press.com/PFTM-GUP/authenticate/?success-url=https%3A%2F%2Fwww.news-press.com%2Fstory%2Fmoney%2Fbusiness%2Flocal%2F2026%2F11%2F13%2Fcouple-selling-new-64-million-dollar-waterfront-dream-home-in-north-naples-florida%2F92689828007%2F&cancel-url=https%3A%2F%2Fwww.news-press.com%2Fstory%2Fmoney%2Fbusiness%2Flocal%2F2026%2F11%2F13%2Fcouple-selling-new-64-million-dollar-waterfront-dream-home-in-north-naples-florida%2F92689828007%2F)\n[](https://www.news-press.com/) [](https://www.news-press.com/)\nLOCAL BUSINESS\n# Couple lists beachfront 'dream home' for $64 million in North Naples\n[![Portrait of Laura Layden](https://www.news-press.com/gcdn/authoring/authoring-images/2024/02/08/PNDN/72524348007-ndn-jh-20240126-laura-0001.JPG?crop=3313,3312,x1506,y0&width=48&height=48&format=pjpg&auto=webp) Laura Layden](https://www.naplesnews.com/staff/2647080001/laura-layden/)\nFort Myers News-Press & Naples Daily News\nNov. 13, 2026, 2:32 p.m. ET\n[](https://www.facebook.com/dialog/share?display=popup&app_id=149631068421067&href=https%3A%2F%2Fwww.news-press.com%2Fstory%2Fmoney%2Fbusiness%2Flocal%2F2026%2F11%2F13%2Fcouple-selling-new-64-million-dollar-waterfront-dream-home-in-north-naples-florida%2F92689828007%2F)[](https://x.com/intent/po\""
+            },
+            "suggestions": [
+              "What's driving signal transactions 1?",
+              "How does signal transactions 1 here compare to other SWFL areas?"
+            ]
+          },
+          {
+            "metric": "signal_transactions_2",
+            "value": "Fort Myers: A couple listed a beachfront 'dream home' for $64 million in North Naples on Nov. 13, 2026.",
+            "direction": "stable",
+            "label": "Fort Myers — transactions",
+            "variable_type": "categorical",
+            "source": {
+              "url": "https://www.news-press.com/story/money/business/local/2026/11/13/couple-selling-new-64-million-dollar-waterfront-dream-home-in-north-naples-florida/92689828007/",
+              "fetched_at": "2026-11-19T13:33:17Z",
               "tier": 2,
               "citation": "Couple selling $64 million waterfront 'dream home' in North Naples: \"[](https://www.news-press.com/)\n[](https://subscribe.news-press.com/rr/nanobar?gps-source=CPTILELEFT&itm_campaign=2026ENTQ4BAU2026&itm_medium=ONSITE&success-url=https%3A%2F%2Fwww.news-press.com%2Fstory%2Fmoney%2Fbusiness%2Flocal%2F2026%2F11%2F13%2Fcouple-selling-new-64-million-dollar-waterfront-dream-home-in-north-naples-florida%2F92689828007%2F)\n[](https://subscribe.news-press.com/rr/masthead?gps-source=CPMASTHEAD&itm_campaign=2026ENTQ4BAU2026&itm_medium=ONSITE&success-url=https%3A%2F%2Fwww.news-press.com%2Fstory%2Fmoney%2Fbusiness%2Flocal%2F2026%2F11%2F13%2Fcouple-selling-new-64-million-dollar-waterfront-dream-home-in-north-naples-florida%2F92689828007%2F)\n[News](https://www.news-press.com/news/) [Cape Coral](https://www.news-press.com/news/cape-coral/) [Sports](https://www.news-press.com/sports/) [Restaurants](https://www.news-press.com/taste/) [Real Estate](https://www.news-press.com/real-estate) [Advertise](https://advertising.usatoday.com/advertise-with-us/?cid=Web_LiQ_Network_AdvertiseWithUs_AdvertiseInquiry&publication=the_news_press&utm_source=local_publication&utm_medium=menu&utm_campaign=advertise_with_us) [Obituaries](https://www.news-press.com/obituaries) [eNewspaper](https://user.news-press.com/user/enewspaper) [Legals](https://www.news-press.com/public-notices)\n[](https://www.news-press.com/search/ \"Search\")\n[](https://www.news-press.com/weather/ \"Weather in Fort Myers: 55°F Mostly Sunny\") [](https://subscribe.news-press.com/rr/navsub?gps-source=CPTOPNAVBAR&itm_campaign=2026ENTQ4BAU2026&itm_medium=ONSITE&success-url=https%3A%2F%2Fwww.news-press.com%2Fstory%2Fmoney%2Fbusiness%2Flocal%2F2026%2F11%2F13%2Fcouple-selling-new-64-million-dollar-waterfront-dream-home-in-north-naples-florida%2F92689828007%2F)\n[](https://login.news-press.com/PFTM-GUP/authenticate/?success-url=https%3A%2F%2Fwww.news-press.com%2Fstory%2Fmoney%2Fbusiness%2Flocal%2F2026%2F11%2F13%2Fcouple-selling-new-64-million-dollar-waterfront-dream-home-in-north-naples-florida%2F92689828007%2F&cancel-url=https%3A%2F%2Fwww.news-press.com%2Fstory%2Fmoney%2Fbusiness%2Flocal%2F2026%2F11%2F13%2Fcouple-selling-new-64-million-dollar-waterfront-dream-home-in-north-naples-florida%2F92689828007%2F)\n[](https://www.news-press.com/) [](https://www.news-press.com/)\nLOCAL BUSINESS\n# Couple lists beachfront 'dream home' for $64 million in North Naples\n[![Portrait of Laura Layden](https://www.news-press.com/gcdn/authoring/authoring-images/2024/02/08/PNDN/72524348007-ndn-jh-20240126-laura-0001.JPG?crop=3313,3312,x1506,y0&width=48&height=48&format=pjpg&auto=webp) Laura Layden](https://www.naplesnews.com/staff/2647080001/laura-layden/)\nFort Myers News-Press & Naples Daily News\nNov. 13, 2026, 2:32 p.m. ET\n[](https://www.facebook.com/dialog/share?display=popup&app_id=149631068421067&href=https%3A%2F%2Fwww.news-press.com%2Fstory%2Fmoney%2Fbusiness%2Flocal%2F2026%2F11%2F13%2Fcouple-selling-new-64-million-dollar-waterfront-dream-home-in-north-naples-florida%2F92689828007%2F)[](https://x.com/intent/po\""
             },
@@ -548,13 +378,13 @@
           },
           {
             "metric": "signal_transactions_3",
-            "value": "Fort Myers: A couple listed a beachfront 'dream home' for $64 million in North Naples on Nov. 13, 2026.",
+            "value": "Naples: A couple listed a beachfront 'dream home' for $64 million in North Naples, as reported Nov. 13, 2026.",
             "direction": "stable",
-            "label": "Fort Myers — transactions",
+            "label": "Naples — transactions",
             "variable_type": "categorical",
             "source": {
               "url": "https://www.news-press.com/story/money/business/local/2026/11/13/couple-selling-new-64-million-dollar-waterfront-dream-home-in-north-naples-florida/92689828007/",
-              "fetched_at": "2026-11-19T04:28:21Z",
+              "fetched_at": "2026-11-19T13:33:17Z",
               "tier": 2,
               "citation": "Couple selling $64 million waterfront 'dream home' in North Naples: \"[](https://www.news-press.com/)\n[](https://subscribe.news-press.com/rr/nanobar?gps-source=CPTILELEFT&itm_campaign=2026ENTQ4BAU2026&itm_medium=ONSITE&success-url=https%3A%2F%2Fwww.news-press.com%2Fstory%2Fmoney%2Fbusiness%2Flocal%2F2026%2F11%2F13%2Fcouple-selling-new-64-million-dollar-waterfront-dream-home-in-north-naples-florida%2F92689828007%2F)\n[](https://subscribe.news-press.com/rr/masthead?gps-source=CPMASTHEAD&itm_campaign=2026ENTQ4BAU2026&itm_medium=ONSITE&success-url=https%3A%2F%2Fwww.news-press.com%2Fstory%2Fmoney%2Fbusiness%2Flocal%2F2026%2F11%2F13%2Fcouple-selling-new-64-million-dollar-waterfront-dream-home-in-north-naples-florida%2F92689828007%2F)\n[News](https://www.news-press.com/news/) [Cape Coral](https://www.news-press.com/news/cape-coral/) [Sports](https://www.news-press.com/sports/) [Restaurants](https://www.news-press.com/taste/) [Real Estate](https://www.news-press.com/real-estate) [Advertise](https://advertising.usatoday.com/advertise-with-us/?cid=Web_LiQ_Network_AdvertiseWithUs_AdvertiseInquiry&publication=the_news_press&utm_source=local_publication&utm_medium=menu&utm_campaign=advertise_with_us) [Obituaries](https://www.news-press.com/obituaries) [eNewspaper](https://user.news-press.com/user/enewspaper) [Legals](https://www.news-press.com/public-notices)\n[](https://www.news-press.com/search/ \"Search\")\n[](https://www.news-press.com/weather/ \"Weather in Fort Myers: 55°F Mostly Sunny\") [](https://subscribe.news-press.com/rr/navsub?gps-source=CPTOPNAVBAR&itm_campaign=2026ENTQ4BAU2026&itm_medium=ONSITE&success-url=https%3A%2F%2Fwww.news-press.com%2Fstory%2Fmoney%2Fbusiness%2Flocal%2F2026%2F11%2F13%2Fcouple-selling-new-64-million-dollar-waterfront-dream-home-in-north-naples-florida%2F92689828007%2F)\n[](https://login.news-press.com/PFTM-GUP/authenticate/?success-url=https%3A%2F%2Fwww.news-press.com%2Fstory%2Fmoney%2Fbusiness%2Flocal%2F2026%2F11%2F13%2Fcouple-selling-new-64-million-dollar-waterfront-dream-home-in-north-naples-florida%2F92689828007%2F&cancel-url=https%3A%2F%2Fwww.news-press.com%2Fstory%2Fmoney%2Fbusiness%2Flocal%2F2026%2F11%2F13%2Fcouple-selling-new-64-million-dollar-waterfront-dream-home-in-north-naples-florida%2F92689828007%2F)\n[](https://www.news-press.com/) [](https://www.news-press.com/)\nLOCAL BUSINESS\n# Couple lists beachfront 'dream home' for $64 million in North Naples\n[![Portrait of Laura Layden](https://www.news-press.com/gcdn/authoring/authoring-images/2024/02/08/PNDN/72524348007-ndn-jh-20240126-laura-0001.JPG?crop=3313,3312,x1506,y0&width=48&height=48&format=pjpg&auto=webp) Laura Layden](https://www.naplesnews.com/staff/2647080001/laura-layden/)\nFort Myers News-Press & Naples Daily News\nNov. 13, 2026, 2:32 p.m. ET\n[](https://www.facebook.com/dialog/share?display=popup&app_id=149631068421067&href=https%3A%2F%2Fwww.news-press.com%2Fstory%2Fmoney%2Fbusiness%2Flocal%2F2026%2F11%2F13%2Fcouple-selling-new-64-million-dollar-waterfront-dream-home-in-north-naples-florida%2F92689828007%2F)[](https://x.com/intent/po\""
             },
@@ -565,13 +395,13 @@
           },
           {
             "metric": "signal_transactions_4",
-            "value": "Naples: A couple listed a beachfront 'dream home' for $64 million in North Naples, as reported Nov. 13, 2026.",
+            "value": "North Naples: A couple listed a beachfront 'dream home' for $64 million in North Naples on Nov. 13, 2026, described as the grandest residential compound ever built in the gated, waterfront community of Barefoot Beach.",
             "direction": "stable",
-            "label": "Naples — transactions",
+            "label": "North Naples — transactions",
             "variable_type": "categorical",
             "source": {
               "url": "https://www.news-press.com/story/money/business/local/2026/11/13/couple-selling-new-64-million-dollar-waterfront-dream-home-in-north-naples-florida/92689828007/",
-              "fetched_at": "2026-11-19T04:28:21Z",
+              "fetched_at": "2026-11-19T13:33:17Z",
               "tier": 2,
               "citation": "Couple selling $64 million waterfront 'dream home' in North Naples: \"[](https://www.news-press.com/)\n[](https://subscribe.news-press.com/rr/nanobar?gps-source=CPTILELEFT&itm_campaign=2026ENTQ4BAU2026&itm_medium=ONSITE&success-url=https%3A%2F%2Fwww.news-press.com%2Fstory%2Fmoney%2Fbusiness%2Flocal%2F2026%2F11%2F13%2Fcouple-selling-new-64-million-dollar-waterfront-dream-home-in-north-naples-florida%2F92689828007%2F)\n[](https://subscribe.news-press.com/rr/masthead?gps-source=CPMASTHEAD&itm_campaign=2026ENTQ4BAU2026&itm_medium=ONSITE&success-url=https%3A%2F%2Fwww.news-press.com%2Fstory%2Fmoney%2Fbusiness%2Flocal%2F2026%2F11%2F13%2Fcouple-selling-new-64-million-dollar-waterfront-dream-home-in-north-naples-florida%2F92689828007%2F)\n[News](https://www.news-press.com/news/) [Cape Coral](https://www.news-press.com/news/cape-coral/) [Sports](https://www.news-press.com/sports/) [Restaurants](https://www.news-press.com/taste/) [Real Estate](https://www.news-press.com/real-estate) [Advertise](https://advertising.usatoday.com/advertise-with-us/?cid=Web_LiQ_Network_AdvertiseWithUs_AdvertiseInquiry&publication=the_news_press&utm_source=local_publication&utm_medium=menu&utm_campaign=advertise_with_us) [Obituaries](https://www.news-press.com/obituaries) [eNewspaper](https://user.news-press.com/user/enewspaper) [Legals](https://www.news-press.com/public-notices)\n[](https://www.news-press.com/search/ \"Search\")\n[](https://www.news-press.com/weather/ \"Weather in Fort Myers: 55°F Mostly Sunny\") [](https://subscribe.news-press.com/rr/navsub?gps-source=CPTOPNAVBAR&itm_campaign=2026ENTQ4BAU2026&itm_medium=ONSITE&success-url=https%3A%2F%2Fwww.news-press.com%2Fstory%2Fmoney%2Fbusiness%2Flocal%2F2026%2F11%2F13%2Fcouple-selling-new-64-million-dollar-waterfront-dream-home-in-north-naples-florida%2F92689828007%2F)\n[](https://login.news-press.com/PFTM-GUP/authenticate/?success-url=https%3A%2F%2Fwww.news-press.com%2Fstory%2Fmoney%2Fbusiness%2Flocal%2F2026%2F11%2F13%2Fcouple-selling-new-64-million-dollar-waterfront-dream-home-in-north-naples-florida%2F92689828007%2F&cancel-url=https%3A%2F%2Fwww.news-press.com%2Fstory%2Fmoney%2Fbusiness%2Flocal%2F2026%2F11%2F13%2Fcouple-selling-new-64-million-dollar-waterfront-dream-home-in-north-naples-florida%2F92689828007%2F)\n[](https://www.news-press.com/) [](https://www.news-press.com/)\nLOCAL BUSINESS\n# Couple lists beachfront 'dream home' for $64 million in North Naples\n[![Portrait of Laura Layden](https://www.news-press.com/gcdn/authoring/authoring-images/2024/02/08/PNDN/72524348007-ndn-jh-20240126-laura-0001.JPG?crop=3313,3312,x1506,y0&width=48&height=48&format=pjpg&auto=webp) Laura Layden](https://www.naplesnews.com/staff/2647080001/laura-layden/)\nFort Myers News-Press & Naples Daily News\nNov. 13, 2026, 2:32 p.m. ET\n[](https://www.facebook.com/dialog/share?display=popup&app_id=149631068421067&href=https%3A%2F%2Fwww.news-press.com%2Fstory%2Fmoney%2Fbusiness%2Flocal%2F2026%2F11%2F13%2Fcouple-selling-new-64-million-dollar-waterfront-dream-home-in-north-naples-florida%2F92689828007%2F)[](https://x.com/intent/po\""
             },
@@ -582,15 +412,15 @@
           },
           {
             "metric": "signal_transactions_5",
-            "value": "North Naples: A couple listed a beachfront 'dream home' for $64 million in North Naples on Nov. 13, 2026, described as the grandest residential compound ever built in the gated, waterfront community of Barefoot Beach.",
+            "value": "Cape Coral: Collier County's attempt to purchase Wildflowerz Ranch for preservation collapsed; County Manager Amy Patterson reported the deal's failure at a board meeting on Nov. 10.",
             "direction": "stable",
-            "label": "North Naples — transactions",
+            "label": "Cape Coral — transactions",
             "variable_type": "categorical",
             "source": {
-              "url": "https://www.news-press.com/story/money/business/local/2026/11/13/couple-selling-new-64-million-dollar-waterfront-dream-home-in-north-naples-florida/92689828007/",
-              "fetched_at": "2026-11-19T04:28:21Z",
+              "url": "https://www.news-press.com/story/money/business/local/2026/11/11/wildflowerz-ranch-conservation-deal-falls-apart-in-collier-county/92724754007/",
+              "fetched_at": "2026-11-19T13:33:17Z",
               "tier": 2,
-              "citation": "Couple selling $64 million waterfront 'dream home' in North Naples: \"[](https://www.news-press.com/)\n[](https://subscribe.news-press.com/rr/nanobar?gps-source=CPTILELEFT&itm_campaign=2026ENTQ4BAU2026&itm_medium=ONSITE&success-url=https%3A%2F%2Fwww.news-press.com%2Fstory%2Fmoney%2Fbusiness%2Flocal%2F2026%2F11%2F13%2Fcouple-selling-new-64-million-dollar-waterfront-dream-home-in-north-naples-florida%2F92689828007%2F)\n[](https://subscribe.news-press.com/rr/masthead?gps-source=CPMASTHEAD&itm_campaign=2026ENTQ4BAU2026&itm_medium=ONSITE&success-url=https%3A%2F%2Fwww.news-press.com%2Fstory%2Fmoney%2Fbusiness%2Flocal%2F2026%2F11%2F13%2Fcouple-selling-new-64-million-dollar-waterfront-dream-home-in-north-naples-florida%2F92689828007%2F)\n[News](https://www.news-press.com/news/) [Cape Coral](https://www.news-press.com/news/cape-coral/) [Sports](https://www.news-press.com/sports/) [Restaurants](https://www.news-press.com/taste/) [Real Estate](https://www.news-press.com/real-estate) [Advertise](https://advertising.usatoday.com/advertise-with-us/?cid=Web_LiQ_Network_AdvertiseWithUs_AdvertiseInquiry&publication=the_news_press&utm_source=local_publication&utm_medium=menu&utm_campaign=advertise_with_us) [Obituaries](https://www.news-press.com/obituaries) [eNewspaper](https://user.news-press.com/user/enewspaper) [Legals](https://www.news-press.com/public-notices)\n[](https://www.news-press.com/search/ \"Search\")\n[](https://www.news-press.com/weather/ \"Weather in Fort Myers: 55°F Mostly Sunny\") [](https://subscribe.news-press.com/rr/navsub?gps-source=CPTOPNAVBAR&itm_campaign=2026ENTQ4BAU2026&itm_medium=ONSITE&success-url=https%3A%2F%2Fwww.news-press.com%2Fstory%2Fmoney%2Fbusiness%2Flocal%2F2026%2F11%2F13%2Fcouple-selling-new-64-million-dollar-waterfront-dream-home-in-north-naples-florida%2F92689828007%2F)\n[](https://login.news-press.com/PFTM-GUP/authenticate/?success-url=https%3A%2F%2Fwww.news-press.com%2Fstory%2Fmoney%2Fbusiness%2Flocal%2F2026%2F11%2F13%2Fcouple-selling-new-64-million-dollar-waterfront-dream-home-in-north-naples-florida%2F92689828007%2F&cancel-url=https%3A%2F%2Fwww.news-press.com%2Fstory%2Fmoney%2Fbusiness%2Flocal%2F2026%2F11%2F13%2Fcouple-selling-new-64-million-dollar-waterfront-dream-home-in-north-naples-florida%2F92689828007%2F)\n[](https://www.news-press.com/) [](https://www.news-press.com/)\nLOCAL BUSINESS\n# Couple lists beachfront 'dream home' for $64 million in North Naples\n[![Portrait of Laura Layden](https://www.news-press.com/gcdn/authoring/authoring-images/2024/02/08/PNDN/72524348007-ndn-jh-20240126-laura-0001.JPG?crop=3313,3312,x1506,y0&width=48&height=48&format=pjpg&auto=webp) Laura Layden](https://www.naplesnews.com/staff/2647080001/laura-layden/)\nFort Myers News-Press & Naples Daily News\nNov. 13, 2026, 2:32 p.m. ET\n[](https://www.facebook.com/dialog/share?display=popup&app_id=149631068421067&href=https%3A%2F%2Fwww.news-press.com%2Fstory%2Fmoney%2Fbusiness%2Flocal%2F2026%2F11%2F13%2Fcouple-selling-new-64-million-dollar-waterfront-dream-home-in-north-naples-florida%2F92689828007%2F)[](https://x.com/intent/po\""
+              "citation": "'Wildflowerz Ranch' conservation deal falls apart in Collier County: \"[](https://www.news-press.com/)\n[Popular Fort Myers pizza shop reopens with new look, more awards](https://www.news-press.com/story/life/food/2026/11/12/uncle-ricos-in-fort-myers-reopens-with-cool-new-look-more-awards/92650571007/)\n[](https://subscribe.news-press.com/rr/nanobar?gps-source=CPTILELEFT&itm_campaign=2026ENTQ4BAU2026&itm_medium=ONSITE&success-url=https%3A%2F%2Fwww.news-press.com%2Fstory%2Fmoney%2Fbusiness%2Flocal%2F2026%2F11%2F11%2Fwildflowerz-ranch-conservation-deal-falls-apart-in-collier-county%2F92724754007%2F)\n[](https://subscribe.news-press.com/rr/masthead?gps-source=CPMASTHEAD&itm_campaign=2026ENTQ4BAU2026&itm_medium=ONSITE&success-url=https%3A%2F%2Fwww.news-press.com%2Fstory%2Fmoney%2Fbusiness%2Flocal%2F2026%2F11%2F11%2Fwildflowerz-ranch-conservation-deal-falls-apart-in-collier-county%2F92724754007%2F)\n[News](https://www.news-press.com/news/) [Cape Coral](https://www.news-press.com/news/cape-coral/) [Sports](https://www.news-press.com/sports/) [Restaurants](https://www.news-press.com/taste/) [Real Estate](https://www.news-press.com/real-estate) [Advertise](https://advertising.usatoday.com/advertise-with-us/?cid=Web_LiQ_Network_AdvertiseWithUs_AdvertiseInquiry&publication=the_news_press&utm_source=local_publication&utm_medium=menu&utm_campaign=advertise_with_us) [Obituaries](https://www.news-press.com/obituaries) [eNewspaper](https://user.news-press.com/user/enewspaper) [Legals](https://www.news-press.com/public-notices)\n[](https://www.news-press.com/search/ \"Search\")\n[](https://www.news-press.com/weather/ \"Weather in Fort Myers: 76°F Cloudy\") [](https://subscribe.news-press.com/rr/navsub?gps-source=CPTOPNAVBAR&itm_campaign=2026ENTQ4BAU2026&itm_medium=ONSITE&success-url=https%3A%2F%2Fwww.news-press.com%2Fstory%2Fmoney%2Fbusiness%2Flocal%2F2026%2F11%2F11%2Fwildflowerz-ranch-conservation-deal-falls-apart-in-collier-county%2F92724754007%2F)\n[](https://login.news-press.com/PFTM-GUP/authenticate/?success-url=https%3A%2F%2Fwww.news-press.com%2Fstory%2Fmoney%2Fbusiness%2Flocal%2F2026%2F11%2F11%2Fwildflowerz-ranch-conservation-deal-falls-apart-in-collier-county%2F92724754007%2F&cancel-url=https%3A%2F%2Fwww.news-press.com%2Fstory%2Fmoney%2Fbusiness%2Flocal%2F2026%2F11%2F11%2Fwildflowerz-ranch-conservation-deal-falls-apart-in-collier-county%2F92724754007%2F)\n[](https://www.news-press.com/) [](https://www.news-press.com/)\nLOCAL BUSINESS\n# Conservation deal for 'Wildflowerz Ranch' collapses in Collier County\n[![Portrait of Laura Layden](https://www.news-press.com/gcdn/authoring/authoring-images/2024/02/08/PNDN/72524348007-ndn-jh-20240126-laura-0001.JPG?crop=3313,3312,x1506,y0&width=48&height=48&format=pjpg&auto=webp) Laura Layden](https://www.naplesnews.com/staff/2647080001/laura-layden/)\nFort Myers News-Press & Naples Daily News\nNov. 11, 2026Updated Nov. 12, 2026, 8:28 a.m. ET\nCollier County's hopes of purchasing the Wildflowerz Ranch for preservation have been dashed.\nAt a board meeting on Nov. 10, County Manager Amy Patterson told county\""
             },
             "suggestions": [
               "What's driving signal transactions 5?",
@@ -598,33 +428,33 @@
             ]
           },
           {
-            "metric": "signal_transactions_6",
-            "value": "Cape Coral: Collier County's attempt to purchase Wildflowerz Ranch for preservation collapsed; County Manager Amy Patterson reported the deal's failure at a board meeting on Nov. 10.",
-            "direction": "stable",
-            "label": "Cape Coral — transactions",
-            "variable_type": "categorical",
-            "source": {
-              "url": "https://www.news-press.com/story/money/business/local/2026/11/11/wildflowerz-ranch-conservation-deal-falls-apart-in-collier-county/92724754007/",
-              "fetched_at": "2026-11-19T04:28:21Z",
-              "tier": 2,
-              "citation": "'Wildflowerz Ranch' conservation deal falls apart in Collier County: \"[](https://www.news-press.com/)\n[Popular Fort Myers pizza shop reopens with new look, more awards](https://www.news-press.com/story/life/food/2026/11/12/uncle-ricos-in-fort-myers-reopens-with-cool-new-look-more-awards/92650571007/)\n[](https://subscribe.news-press.com/rr/nanobar?gps-source=CPTILELEFT&itm_campaign=2026ENTQ4BAU2026&itm_medium=ONSITE&success-url=https%3A%2F%2Fwww.news-press.com%2Fstory%2Fmoney%2Fbusiness%2Flocal%2F2026%2F11%2F11%2Fwildflowerz-ranch-conservation-deal-falls-apart-in-collier-county%2F92724754007%2F)\n[](https://subscribe.news-press.com/rr/masthead?gps-source=CPMASTHEAD&itm_campaign=2026ENTQ4BAU2026&itm_medium=ONSITE&success-url=https%3A%2F%2Fwww.news-press.com%2Fstory%2Fmoney%2Fbusiness%2Flocal%2F2026%2F11%2F11%2Fwildflowerz-ranch-conservation-deal-falls-apart-in-collier-county%2F92724754007%2F)\n[News](https://www.news-press.com/news/) [Cape Coral](https://www.news-press.com/news/cape-coral/) [Sports](https://www.news-press.com/sports/) [Restaurants](https://www.news-press.com/taste/) [Real Estate](https://www.news-press.com/real-estate) [Advertise](https://advertising.usatoday.com/advertise-with-us/?cid=Web_LiQ_Network_AdvertiseWithUs_AdvertiseInquiry&publication=the_news_press&utm_source=local_publication&utm_medium=menu&utm_campaign=advertise_with_us) [Obituaries](https://www.news-press.com/obituaries) [eNewspaper](https://user.news-press.com/user/enewspaper) [Legals](https://www.news-press.com/public-notices)\n[](https://www.news-press.com/search/ \"Search\")\n[](https://www.news-press.com/weather/ \"Weather in Fort Myers: 76°F Cloudy\") [](https://subscribe.news-press.com/rr/navsub?gps-source=CPTOPNAVBAR&itm_campaign=2026ENTQ4BAU2026&itm_medium=ONSITE&success-url=https%3A%2F%2Fwww.news-press.com%2Fstory%2Fmoney%2Fbusiness%2Flocal%2F2026%2F11%2F11%2Fwildflowerz-ranch-conservation-deal-falls-apart-in-collier-county%2F92724754007%2F)\n[](https://login.news-press.com/PFTM-GUP/authenticate/?success-url=https%3A%2F%2Fwww.news-press.com%2Fstory%2Fmoney%2Fbusiness%2Flocal%2F2026%2F11%2F11%2Fwildflowerz-ranch-conservation-deal-falls-apart-in-collier-county%2F92724754007%2F&cancel-url=https%3A%2F%2Fwww.news-press.com%2Fstory%2Fmoney%2Fbusiness%2Flocal%2F2026%2F11%2F11%2Fwildflowerz-ranch-conservation-deal-falls-apart-in-collier-county%2F92724754007%2F)\n[](https://www.news-press.com/) [](https://www.news-press.com/)\nLOCAL BUSINESS\n# Conservation deal for 'Wildflowerz Ranch' collapses in Collier County\n[![Portrait of Laura Layden](https://www.news-press.com/gcdn/authoring/authoring-images/2024/02/08/PNDN/72524348007-ndn-jh-20240126-laura-0001.JPG?crop=3313,3312,x1506,y0&width=48&height=48&format=pjpg&auto=webp) Laura Layden](https://www.naplesnews.com/staff/2647080001/laura-layden/)\nFort Myers News-Press & Naples Daily News\nNov. 11, 2026Updated Nov. 12, 2026, 8:28 a.m. ET\nCollier County's hopes of purchasing the Wildflowerz Ranch for preservation have been dashed.\nAt a board meeting on Nov. 10, County Manager Amy Patterson told county\""
-            },
-            "suggestions": [
-              "What's driving signal transactions 6?",
-              "How does signal transactions 6 here compare to other SWFL areas?"
-            ]
-          },
-          {
-            "metric": "signal_development_7",
+            "metric": "signal_development_6",
             "value": "Naples: A big Florida hospitality expansion pipeline includes a Hilton hotel project in Naples, reported Nov. 16, 2026.",
             "direction": "stable",
             "label": "Naples — development",
             "variable_type": "categorical",
             "source": {
               "url": "https://www.news-press.com/story/money/2026/11/16/big-florida-hospitality-expansion-includes-hilton-naples-and-captiva-swfl-collier-lee-county-hotel/92730838007/",
-              "fetched_at": "2026-11-19T04:28:21Z",
+              "fetched_at": "2026-11-19T13:33:17Z",
               "tier": 2,
               "citation": "Big Florida hospitality expansion includes Hilton, Naples and Captiva: \"[](https://www.news-press.com/)\n[Free Fort Myers dog fest celebrates golden retrievers, other breeds](https://www.news-press.com/story/life/2026/11/16/fort-myers-florida-dog-festival-celebrates-golden-retrievers-and-more-goldenfest-dock-diving-free/92688792007/)\n[](https://subscribe.news-press.com/rr/nanobar?gps-source=CPTILELEFT&itm_campaign=2026ENTQ4BAU2026&itm_medium=ONSITE&success-url=https%3A%2F%2Fwww.news-press.com%2Fstory%2Fmoney%2F2026%2F11%2F16%2Fbig-florida-hospitality-expansion-includes-hilton-naples-and-captiva-swfl-collier-lee-county-hotel%2F92730838007%2F)\n[](https://subscribe.news-press.com/rr/masthead?gps-source=CPMASTHEAD&itm_campaign=2026ENTQ4BAU2026&itm_medium=ONSITE&success-url=https%3A%2F%2Fwww.news-press.com%2Fstory%2Fmoney%2F2026%2F11%2F16%2Fbig-florida-hospitality-expansion-includes-hilton-naples-and-captiva-swfl-collier-lee-county-hotel%2F92730838007%2F)\n[News](https://www.news-press.com/news/) [Cape Coral](https://www.news-press.com/news/cape-coral/) [Sports](https://www.news-press.com/sports/) [Restaurants](https://www.news-press.com/taste/) [Real Estate](https://www.news-press.com/real-estate) [Advertise](https://advertising.usatoday.com/advertise-with-us/?cid=Web_LiQ_Network_AdvertiseWithUs_AdvertiseInquiry&publication=the_news_press&utm_source=local_publication&utm_medium=menu&utm_campaign=advertise_with_us) [Obituaries](https://www.news-press.com/obituaries) [eNewspaper](https://user.news-press.com/user/enewspaper) [Legals](https://www.news-press.com/public-notices)\n[](https://www.news-press.com/search/ \"Search\")\n[](https://www.news-press.com/weather/ \"Weather in Fort Myers: 72°F Sunny\") [](https://subscribe.news-press.com/rr/navsub?gps-source=CPTOPNAVBAR&itm_campaign=2026ENTQ4BAU2026&itm_medium=ONSITE&success-url=https%3A%2F%2Fwww.news-press.com%2Fstory%2Fmoney%2F2026%2F11%2F16%2Fbig-florida-hospitality-expansion-includes-hilton-naples-and-captiva-swfl-collier-lee-county-hotel%2F92730838007%2F)\n[](https://login.news-press.com/PFTM-GUP/authenticate/?success-url=https%3A%2F%2Fwww.news-press.com%2Fstory%2Fmoney%2F2026%2F11%2F16%2Fbig-florida-hospitality-expansion-includes-hilton-naples-and-captiva-swfl-collier-lee-county-hotel%2F92730838007%2F&cancel-url=https%3A%2F%2Fwww.news-press.com%2Fstory%2Fmoney%2F2026%2F11%2F16%2Fbig-florida-hospitality-expansion-includes-hilton-naples-and-captiva-swfl-collier-lee-county-hotel%2F92730838007%2F)\n[](https://www.news-press.com/) [](https://www.news-press.com/)\nMONEY\n# Florida pipeline projects include hotels, resorts, re-openings and more\n[![Portrait of Phil Fernandez](https://www.news-press.com/gcdn/presto/2019/09/14/PNDN/6a77b474-579f-48fa-b56f-a2cc2b9de797-NDN_Phil_Fernandez.jpg?crop=2999,2999,x0,y570&width=48&height=48&format=pjpg&auto=webp) Phil Fernandez](https://www.naplesnews.com/staff/2684114001/phil-fernandez/)\nFort Myers News-Press & Naples Daily News\nNov. 16, 2026, 5:04 a.m. ET\n[Southwest Florida](https://www.news-press.com/story/money/2026/10/26/florida-fighting-over\""
+            },
+            "suggestions": [
+              "What's driving signal development 6?",
+              "How does signal development 6 here compare to other SWFL areas?"
+            ]
+          },
+          {
+            "metric": "signal_development_7",
+            "value": "Naples: New affordable and workforce housing projects in the Naples/SWFL area debuted as of Nov. 10, 2026, with hefty demand reported.",
+            "direction": "stable",
+            "label": "Naples — development",
+            "variable_type": "categorical",
+            "source": {
+              "url": "https://www.naplesnews.com/story/money/2026/11/10/florida-sees-new-affordable-workforce-housing-compounds-make-debuts-swfl-naples-fort-myers-sanibel/92696792007/",
+              "fetched_at": "2026-11-19T13:33:17Z",
+              "tier": 2,
+              "citation": "Florida sees new affordable, workforce housing compounds make debuts: \"[](https://www.naplesnews.com/)\n[](https://subscribe.naplesnews.com/rr/nanobar?gps-source=CPTILELEFT&itm_campaign=2026ENTQ4BAU2026&itm_medium=ONSITE&success-url=https%3A%2F%2Fwww.naplesnews.com%2Fstory%2Fmoney%2F2026%2F11%2F10%2Fflorida-sees-new-affordable-workforce-housing-compounds-make-debuts-swfl-naples-fort-myers-sanibel%2F92696792007%2F)\n[](https://subscribe.naplesnews.com/rr/masthead?gps-source=CPMASTHEAD&itm_campaign=2026ENTQ4BAU2026&itm_medium=ONSITE&success-url=https%3A%2F%2Fwww.naplesnews.com%2Fstory%2Fmoney%2F2026%2F11%2F10%2Fflorida-sees-new-affordable-workforce-housing-compounds-make-debuts-swfl-naples-fort-myers-sanibel%2F92696792007%2F)\n[News](https://www.naplesnews.com/news/) [Sports](https://www.naplesnews.com/sports/) [Real Estate](https://www.naplesnews.com/business/real-estate/) [Restaurants](https://www.naplesnews.com/entertainment/restaurants/) [Opinion](https://www.naplesnews.com/opinion/) [Advertise](https://advertising.usatoday.com/advertise-with-us/?cid=Web_LiQ_Network_AdvertiseWithUs_AdvertiseInquiry&publication=naples_daily_news&utm_source=local_publication&utm_medium=menu&utm_campaign=advertise_with_us) [Obituaries](https://www.naplesnews.com/obituaries) [eNewspaper](https://user.naplesnews.com/user/enewspaper) [Legals](https://www.naplesnews.com/public-notices)\n[](https://www.naplesnews.com/search/ \"Search\")\n[](https://www.naplesnews.com/weather/ \"Weather in Naples: 70°F Cloudy\") [](https://subscribe.naplesnews.com/rr/navsub?gps-source=CPTOPNAVBAR&itm_campaign=2026ENTQ4BAU2026&itm_medium=ONSITE&success-url=https%3A%2F%2Fwww.naplesnews.com%2Fstory%2Fmoney%2F2026%2F11%2F10%2Fflorida-sees-new-affordable-workforce-housing-compounds-make-debuts-swfl-naples-fort-myers-sanibel%2F92696792007%2F)\n[](https://login.naplesnews.com/PNDN-GUP/authenticate/?success-url=https%3A%2F%2Fwww.naplesnews.com%2Fstory%2Fmoney%2F2026%2F11%2F10%2Fflorida-sees-new-affordable-workforce-housing-compounds-make-debuts-swfl-naples-fort-myers-sanibel%2F92696792007%2F&cancel-url=https%3A%2F%2Fwww.naplesnews.com%2Fstory%2Fmoney%2F2026%2F11%2F10%2Fflorida-sees-new-affordable-workforce-housing-compounds-make-debuts-swfl-naples-fort-myers-sanibel%2F92696792007%2F)\n[](https://www.naplesnews.com/) [](https://www.naplesnews.com/)\n[MONEY](https://www.naplesnews.com/business/)\n# New Florida affordable housing projects take shape with hefty demand\n[![Portrait of Phil Fernandez](https://www.naplesnews.com/gcdn/presto/2019/09/14/PNDN/6a77b474-579f-48fa-b56f-a2cc2b9de797-NDN_Phil_Fernandez.jpg?crop=2999,2999,x0,y570&width=48&height=48&format=pjpg&auto=webp) Phil Fernandez](https://www.naplesnews.com/staff/2684114001/phil-fernandez/)\nFort Myers News-Press & Naples Daily News\nNov. 10, 2026, 10:47 a.m. ET\n[](https://www.facebook.com/dialog/share?display=popup&app_id=1703814913224751&href=https%3A%2F%2Fwww.naplesnews.com%2Fstory%2Fmoney%2F2026%2F11%2F10%2Fflorida-sees-new-affordable-workforce-housing-compounds-make-debuts-swfl-naples-fort-myers-sanibel%2F92696792007%\""
             },
             "suggestions": [
               "What's driving signal development 7?",
@@ -633,13 +463,13 @@
           },
           {
             "metric": "signal_development_8",
-            "value": "Naples: New affordable and workforce housing projects in the Naples/SWFL area debuted as of Nov. 10, 2026, with hefty demand reported.",
+            "value": "Sanibel: New affordable, workforce housing compounds make debuts in Florida, including Sanibel, as of Nov. 10, 2026.",
             "direction": "stable",
-            "label": "Naples — development",
+            "label": "Sanibel — development",
             "variable_type": "categorical",
             "source": {
               "url": "https://www.naplesnews.com/story/money/2026/11/10/florida-sees-new-affordable-workforce-housing-compounds-make-debuts-swfl-naples-fort-myers-sanibel/92696792007/",
-              "fetched_at": "2026-11-19T04:28:21Z",
+              "fetched_at": "2026-11-19T13:33:17Z",
               "tier": 2,
               "citation": "Florida sees new affordable, workforce housing compounds make debuts: \"[](https://www.naplesnews.com/)\n[](https://subscribe.naplesnews.com/rr/nanobar?gps-source=CPTILELEFT&itm_campaign=2026ENTQ4BAU2026&itm_medium=ONSITE&success-url=https%3A%2F%2Fwww.naplesnews.com%2Fstory%2Fmoney%2F2026%2F11%2F10%2Fflorida-sees-new-affordable-workforce-housing-compounds-make-debuts-swfl-naples-fort-myers-sanibel%2F92696792007%2F)\n[](https://subscribe.naplesnews.com/rr/masthead?gps-source=CPMASTHEAD&itm_campaign=2026ENTQ4BAU2026&itm_medium=ONSITE&success-url=https%3A%2F%2Fwww.naplesnews.com%2Fstory%2Fmoney%2F2026%2F11%2F10%2Fflorida-sees-new-affordable-workforce-housing-compounds-make-debuts-swfl-naples-fort-myers-sanibel%2F92696792007%2F)\n[News](https://www.naplesnews.com/news/) [Sports](https://www.naplesnews.com/sports/) [Real Estate](https://www.naplesnews.com/business/real-estate/) [Restaurants](https://www.naplesnews.com/entertainment/restaurants/) [Opinion](https://www.naplesnews.com/opinion/) [Advertise](https://advertising.usatoday.com/advertise-with-us/?cid=Web_LiQ_Network_AdvertiseWithUs_AdvertiseInquiry&publication=naples_daily_news&utm_source=local_publication&utm_medium=menu&utm_campaign=advertise_with_us) [Obituaries](https://www.naplesnews.com/obituaries) [eNewspaper](https://user.naplesnews.com/user/enewspaper) [Legals](https://www.naplesnews.com/public-notices)\n[](https://www.naplesnews.com/search/ \"Search\")\n[](https://www.naplesnews.com/weather/ \"Weather in Naples: 70°F Cloudy\") [](https://subscribe.naplesnews.com/rr/navsub?gps-source=CPTOPNAVBAR&itm_campaign=2026ENTQ4BAU2026&itm_medium=ONSITE&success-url=https%3A%2F%2Fwww.naplesnews.com%2Fstory%2Fmoney%2F2026%2F11%2F10%2Fflorida-sees-new-affordable-workforce-housing-compounds-make-debuts-swfl-naples-fort-myers-sanibel%2F92696792007%2F)\n[](https://login.naplesnews.com/PNDN-GUP/authenticate/?success-url=https%3A%2F%2Fwww.naplesnews.com%2Fstory%2Fmoney%2F2026%2F11%2F10%2Fflorida-sees-new-affordable-workforce-housing-compounds-make-debuts-swfl-naples-fort-myers-sanibel%2F92696792007%2F&cancel-url=https%3A%2F%2Fwww.naplesnews.com%2Fstory%2Fmoney%2F2026%2F11%2F10%2Fflorida-sees-new-affordable-workforce-housing-compounds-make-debuts-swfl-naples-fort-myers-sanibel%2F92696792007%2F)\n[](https://www.naplesnews.com/) [](https://www.naplesnews.com/)\n[MONEY](https://www.naplesnews.com/business/)\n# New Florida affordable housing projects take shape with hefty demand\n[![Portrait of Phil Fernandez](https://www.naplesnews.com/gcdn/presto/2019/09/14/PNDN/6a77b474-579f-48fa-b56f-a2cc2b9de797-NDN_Phil_Fernandez.jpg?crop=2999,2999,x0,y570&width=48&height=48&format=pjpg&auto=webp) Phil Fernandez](https://www.naplesnews.com/staff/2684114001/phil-fernandez/)\nFort Myers News-Press & Naples Daily News\nNov. 10, 2026, 10:47 a.m. ET\n[](https://www.facebook.com/dialog/share?display=popup&app_id=1703814913224751&href=https%3A%2F%2Fwww.naplesnews.com%2Fstory%2Fmoney%2F2026%2F11%2F10%2Fflorida-sees-new-affordable-workforce-housing-compounds-make-debuts-swfl-naples-fort-myers-sanibel%2F92696792007%\""
             },
@@ -688,9 +518,9 @@
                 "label": "33908",
                 "cells": {
                   "items": 1,
-                  "latest_fact": "Fort Myers Beach sand sculpting championship returns in 2026.",
+                  "latest_fact": "Fort Myers Beach sand sculpting returns in 2026 — event details including times and tickets covered in article dated November 18, 2026.",
                   "latest_place": "Fort Myers Beach",
-                  "latest_source": "https://www.naplesnews.com/story/money/business/local/2026/11/18/naples-florida-st-patricks-day-parade-may-have-come-to-its-end-after-50-years/92836594007/"
+                  "latest_source": "https://www.naplesnews.com/story/money/real-estate/home-improvement-roofing/find-trusted-roofing-contractors-in-naples-florida/92820336007/"
                 }
               },
               {
@@ -716,7 +546,7 @@
             ],
             "source": {
               "url": "https://www.swfldatagulf.com/r/source/city_pulse",
-              "fetched_at": "2026-11-19T04:28:21Z",
+              "fetched_at": "2026-11-19T13:33:17Z",
               "tier": 2,
               "citation": "Distilled, citation-backed SWFL news signals; each ZIP's items carry per-item source URLs in data_lake.city_pulse."
             },
@@ -724,7 +554,7 @@
           }
         ],
         "caveats": [
-          "77 additional live signals not surfaced here (cap 8); the full set is in data_lake.city_pulse.",
+          "76 additional live signals not surfaced here (cap 8); the full set is in data_lake.city_pulse.",
           "Each signal is dated current-events context with a per-signal source; freshness is TTL-bounded by topic (breaking 1d → structural 90d)."
         ],
         "contradicts": [],
@@ -737,7 +567,7 @@
         "relevance": {
           "decay_curve": "weeks",
           "half_life_hours": 720,
-          "computed_at": "2026-11-19T04:28:21Z"
+          "computed_at": "2026-11-19T13:33:17Z"
         },
         "exogenous_signals": []
       }
@@ -754,119 +584,8 @@
     },
     {
       "packId": "freshness-pulse",
-      "status": "built",
-      "version": 108,
-      "written": true,
-      "brainOutput": {
-        "brain_id": "freshness-pulse",
-        "version": 108,
-        "refined_at": "2026-11-19T04:28:21Z",
-        "expires": "2026-11-20T04:28:21Z",
-        "ttl_seconds": 86400,
-        "direction": "neutral",
-        "magnitude": 0,
-        "drivers": [],
-        "overrides": [],
-        "conclusion": "Today's sourced snapshot — SWFL 30-year fixed mortgage rate (as of 2026-11-12) 7.11%; Cape Coral median asking price (as of 2026-11-19) $399,200; Fort Myers median asking price (as of 2026-11-19) $325,000; Naples median asking price (as of 2026-11-19) $650,000. These are cited current facts only; the direction call lives downstream in master.",
-        "key_metrics": [
-          {
-            "metric": "freshness_mortgage_30yr_fixed_pct",
-            "value": 7.11,
-            "direction": "stable",
-            "label": "SWFL 30-year fixed mortgage rate (as of 2026-11-12)",
-            "variable_type": "intensive",
-            "units": "percent",
-            "display_format": "percent",
-            "source": {
-              "url": "https://fred.stlouisfed.org/series/MORTGAGE30US",
-              "fetched_at": "2026-11-19T04:23:37.569325+00:00",
-              "tier": 2,
-              "citation": "FRED — current 30-year fixed mortgage rate for SWFL, sourced 2026-11-12"
-            },
-            "suggestions": [
-              "What's driving freshness mortgage 30yr fixed pct?",
-              "How does freshness mortgage 30yr fixed pct here compare to other SWFL areas?"
-            ]
-          },
-          {
-            "metric": "freshness_median_asking_price_cape_coral_usd",
-            "value": 399200,
-            "direction": "stable",
-            "label": "Cape Coral median asking price (as of 2026-11-19)",
-            "variable_type": "extensive",
-            "units": "USD",
-            "display_format": "currency",
-            "source": {
-              "url": "https://www.swfldatagulf.com/desk",
-              "fetched_at": "2026-11-19T04:23:37.569325+00:00",
-              "tier": 2,
-              "citation": "SWFL Data Gulf active-listing inventory — current median asking price for Cape Coral, sourced 2026-11-19"
-            },
-            "suggestions": [
-              "Chart asking rents across the corridors",
-              "What's driving freshness median asking price cape coral usd?",
-              "How does freshness median asking price cape coral usd here compare to other SWFL areas?"
-            ]
-          },
-          {
-            "metric": "freshness_median_asking_price_fort_myers_usd",
-            "value": 325000,
-            "direction": "stable",
-            "label": "Fort Myers median asking price (as of 2026-11-19)",
-            "variable_type": "extensive",
-            "units": "USD",
-            "display_format": "currency",
-            "source": {
-              "url": "https://www.swfldatagulf.com/desk",
-              "fetched_at": "2026-11-19T04:23:37.569325+00:00",
-              "tier": 2,
-              "citation": "SWFL Data Gulf active-listing inventory — current median asking price for Fort Myers, sourced 2026-11-19"
-            },
-            "suggestions": [
-              "Chart asking rents across the corridors",
-              "What's driving freshness median asking price fort myers usd?",
-              "How does freshness median asking price fort myers usd here compare to other SWFL areas?"
-            ]
-          },
-          {
-            "metric": "freshness_median_asking_price_naples_usd",
-            "value": 650000,
-            "direction": "stable",
-            "label": "Naples median asking price (as of 2026-11-19)",
-            "variable_type": "extensive",
-            "units": "USD",
-            "display_format": "currency",
-            "source": {
-              "url": "https://www.swfldatagulf.com/desk",
-              "fetched_at": "2026-11-19T04:23:37.569325+00:00",
-              "tier": 2,
-              "citation": "SWFL Data Gulf active-listing inventory — current median asking price for Naples, sourced 2026-11-19"
-            },
-            "suggestions": [
-              "Chart asking rents across the corridors",
-              "What's driving freshness median asking price naples usd?",
-              "How does freshness median asking price naples usd here compare to other SWFL areas?"
-            ]
-          }
-        ],
-        "detail_tables": [],
-        "caveats": [
-          "Each county-grain number is a single grounded source's current figure, provenance-gated to a real source URL; held anomalies and unsourced (model-memory) numbers are excluded by design."
-        ],
-        "contradicts": [],
-        "confidence": 0.8,
-        "joint_integrity": 1,
-        "confidence_dispersion": 0,
-        "chain_depth": 0,
-        "trust_tier": 2,
-        "upstream_count": 0,
-        "relevance": {
-          "decay_curve": "weeks",
-          "half_life_hours": 720,
-          "computed_at": "2026-11-19T04:28:21Z"
-        },
-        "exogenous_signals": []
-      }
+      "status": "skipped-fresh",
+      "written": false
     },
     {
       "packId": "seller-stress-swfl",
@@ -949,16 +668,16 @@
     {
       "packId": "master",
       "status": "built",
-      "version": 195,
+      "version": 196,
       "written": true,
       "brainOutput": {
         "brain_id": "master",
-        "version": 195,
-        "refined_at": "2026-11-19T04:28:42Z",
-        "expires": "2026-11-26T04:28:42Z",
+        "version": 196,
+        "refined_at": "2026-11-19T13:33:38Z",
+        "expires": "2026-11-26T13:33:38Z",
         "ttl_seconds": 604800,
         "direction": "mixed",
-        "magnitude": 0.4765373891795944,
+        "magnitude": 0.47242295712865956,
         "drivers": [
           {
             "brain_id": "franchise-outcomes",
@@ -1116,6 +835,25 @@
         "conclusion": "Read is mixed (moderate magnitude). Driven by: franchise-outcomes, cre-swfl, macro-us, macro-florida, macro-swfl, sector-credit-swfl, tourism-tdt, env-swfl, logistics-swfl, logistics-swfl-nowcast, traffic-swfl, properties-lee-value, properties-collier-value, permits-swfl, rentals-swfl, housing-swfl, safety-swfl, labor-demand-swfl, econ-dev-swfl, city-pulse-swfl, rsw-airport, news-swfl, freshness-pulse, seller-stress-swfl, market-heat-swfl, storm-history-swfl, hurricane-tracks-fl, licenses-swfl, condo-sirs-swfl, price-distribution-swfl, listing-momentum-swfl, market-temperature-swfl, investor-zip-swfl, active-listings-swfl, communities-swfl, tier-divergence-swfl, home-values-swfl. Overrides: flood-barrier-mode-1, storm-history-modifier. Note conflicts: macro-us (bearish) vs macro-florida (bullish). Combined confidence 0.86, trust tier T4, based on 37 upstream brains.",
         "key_metrics": [
           {
+            "metric": "latest_monthly_collections_usd",
+            "value": 9028029.34,
+            "direction": "stable",
+            "label": "Latest monthly TDT collections (SWFL combined, 2026-04, shoulder season)",
+            "variable_type": "extensive",
+            "units": "USD/month",
+            "display_format": "currency",
+            "source": {
+              "url": "https://www.swfldatagulf.com/r/source/fl_dor_tdt_collections?label=Florida+DOR+%E2%80%94+Tourist+Development+Tax+collections&source=Florida+DOR&brain=tourism-tdt&date_col=period",
+              "fetched_at": "2026-11-19T13:33:17Z",
+              "tier": 1,
+              "citation": "Florida DOR Tourist Development Tax — SWFL (Lee + Collier) (666 monthly collection records: 1998-07 → 2026-04); source: Florida Department of Revenue Form 3 XLSX (monthly, ~6-week lag) — SWFL combined 2026-04 = $9.03M (FY 2026, post_ian=true)."
+            },
+            "suggestions": [
+              "What's driving latest monthly collections usd?",
+              "How does latest monthly collections usd here compare to other SWFL areas?"
+            ]
+          },
+          {
             "metric": "permits_swfl_county_weighted_avg_corridor_z",
             "value": -0.148,
             "direction": "falling",
@@ -1208,25 +946,6 @@
             "suggestions": [
               "What's driving swfl sfha pct area weighted?",
               "How does swfl sfha pct area weighted here compare to other SWFL areas?"
-            ]
-          },
-          {
-            "metric": "latest_monthly_collections_usd",
-            "value": 9028029.34,
-            "direction": "stable",
-            "label": "Latest monthly TDT collections (SWFL combined, 2026-04, shoulder season)",
-            "variable_type": "extensive",
-            "units": "USD/month",
-            "display_format": "currency",
-            "source": {
-              "url": "https://www.swfldatagulf.com/r/source/fl_dor_tdt_collections?label=Florida+DOR+%E2%80%94+Tourist+Development+Tax+collections&source=Florida+DOR&brain=tourism-tdt&date_col=period",
-              "fetched_at": "2026-11-12T12:57:51Z",
-              "tier": 1,
-              "citation": "Florida DOR Tourist Development Tax — SWFL (Lee + Collier) (666 monthly collection records: 1998-07 → 2026-04); source: Florida Department of Revenue Form 3 XLSX (monthly, ~6-week lag) — SWFL combined 2026-04 = $9.03M (FY 2026, post_ian=true)."
-            },
-            "suggestions": [
-              "What's driving latest monthly collections usd?",
-              "How does latest monthly collections usd here compare to other SWFL areas?"
             ]
           },
           {
@@ -1483,7 +1202,7 @@
           "flood-barrier-mode-1 active: 4 barrier ZIPs, worst-case AAL $40,342/insured property",
           "Override \"storm-history-modifier\" fired (priority 70)",
           "permits-commercial-swfl excluded from synthesis (relevance 0.059, below floor 0.1)",
-          "active-rentals-swfl excluded from synthesis (relevance 0.049, below floor 0.1)",
+          "active-rentals-swfl excluded from synthesis (relevance 0.048, below floor 0.1)",
           "No figures published: this source has not yet received its first real SBA FOIA load. A synthetic development sample exists for offline testing only and is never shipped.",
           "Construction-cost PPI metrics (construction_cost_ppi_industrial, construction_cost_ppi_warehouse, construction_cost_ppi_office, construction_cost_ppi_medical_office, construction_cost_ppi_trade_concrete, construction_cost_ppi_trade_roofing, construction_cost_ppi_trade_electrical, construction_cost_ppi_trade_plumbing_hvac) are national BLS series — no SWFL-specific or Lee/Collier breakout exists at BLS for any of them. They ship a real month-over-month direction (unlike MarketBeat's schema-required \"stable\" fallback) but BLS can revise recent observations within ~30 days of first publication.",
           "vacancy_rate_marketbeat_swfl: 15 submarkets report a point-in-time value; v1 does not compute quarter-over-quarter direction, so the \"stable\" label is a schema-required fallback, not a measured trend.",
@@ -1578,7 +1297,7 @@
           "1 of 10 announcements in the last 90 days matched qualifying categories (relocation, expansion, grant, infrastructure); the rest are general chamber/policy posts excluded from the momentum count.",
           "Investment and job figures reflect disclosures at announcement time; actual outcomes may vary as projects develop.",
           "SWFL Inc. covers primarily Lee County projects; Collier County coverage depends on cross-county partnerships and co-announcements.",
-          "77 additional live signals not surfaced here (cap 8); the full set is in data_lake.city_pulse.",
+          "76 additional live signals not surfaced here (cap 8); the full set is in data_lake.city_pulse.",
           "Each signal is dated current-events context with a per-signal source; freshness is TTL-bounded by topic (breaking 1d → structural 90d).",
           "Trailing-12-month total-passengers YoY not computable — fewer than 24 monthly rows in the fetched window; direction set neutral.",
           "Construction enforcement split: public notices = confirmed individual actions (hard-parsed violation_type); press releases = announced sweeps (Sonnet-inferred affected_industries). Do not sum them.",
@@ -1678,8 +1397,8 @@
         "upstream_count": 37,
         "relevance": {
           "decay_curve": "weeks",
-          "half_life_hours": 720.0000000000001,
-          "computed_at": "2026-11-19T04:28:42.000Z"
+          "half_life_hours": 720,
+          "computed_at": "2026-11-19T13:33:38.000Z"
         },
         "exogenous_signals": [],
         "conditional_claims": [
