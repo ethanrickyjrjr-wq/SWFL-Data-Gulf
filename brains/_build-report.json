@@ -1,8 +1,8 @@
 {
   "target": "master",
   "timestamps": {
-    "started": "2026-11-19T13:33:17.061Z",
-    "finished": "2026-11-19T13:33:38.943Z"
+    "started": "2026-11-20T04:26:43.359Z",
+    "finished": "2026-11-20T04:27:09.935Z"
   },
   "source": "live",
   "outcomes": [
@@ -23,38 +23,8 @@
     },
     {
       "packId": "corridor-pulse-swfl",
-      "status": "built",
-      "version": 34,
-      "written": true,
-      "brainOutput": {
-        "brain_id": "corridor-pulse-swfl",
-        "version": 34,
-        "refined_at": "2026-11-19T13:33:17Z",
-        "expires": "2026-11-26T13:33:17Z",
-        "ttl_seconds": 604800,
-        "direction": "neutral",
-        "magnitude": 0,
-        "drivers": [],
-        "overrides": [],
-        "conclusion": "corridor-pulse-swfl: no non-expired corridor current-events signals in this build window — no live pulse to report.",
-        "key_metrics": [],
-        "caveats": [
-          "No live corridor current-events signals in this build window — either the weekly pulse has not run yet, all signals have aged past their TTL, or no tracked corridor made news this window."
-        ],
-        "contradicts": [],
-        "confidence": 0.8,
-        "joint_integrity": 1,
-        "confidence_dispersion": 0,
-        "chain_depth": 0,
-        "trust_tier": 2,
-        "upstream_count": 0,
-        "relevance": {
-          "decay_curve": "weeks",
-          "half_life_hours": 720,
-          "computed_at": "2026-11-19T13:33:17Z"
-        },
-        "exogenous_signals": []
-      }
+      "status": "skipped-fresh",
+      "written": false
     },
     {
       "packId": "cre-swfl",
@@ -83,192 +53,8 @@
     },
     {
       "packId": "tourism-tdt",
-      "status": "built",
-      "version": 46,
-      "written": true,
-      "brainOutput": {
-        "brain_id": "tourism-tdt",
-        "version": 46,
-        "refined_at": "2026-11-19T13:33:17Z",
-        "expires": "2026-11-26T13:33:17Z",
-        "ttl_seconds": 604800,
-        "direction": "neutral",
-        "magnitude": 0.4,
-        "drivers": [],
-        "overrides": [],
-        "conclusion": "SWFL TDT collections (Lee + Collier combined) for 2026-04 (shoulder season): $9.03M. Trailing 12 months stand at 78% of the strongest pre-Hurricane-Ian annual run. Hospitality / accommodation operators should weight forward decisions against this SWFL seasonal pulse; the cross-vertical read lives downstream in master.",
-        "key_metrics": [
-          {
-            "metric": "latest_monthly_collections_usd",
-            "value": 9028029.34,
-            "direction": "stable",
-            "label": "Latest monthly TDT collections (SWFL combined, 2026-04, shoulder season)",
-            "variable_type": "extensive",
-            "units": "USD/month",
-            "display_format": "currency",
-            "source": {
-              "url": "https://www.swfldatagulf.com/r/source/fl_dor_tdt_collections?label=Florida+DOR+%E2%80%94+Tourist+Development+Tax+collections&source=Florida+DOR&brain=tourism-tdt&date_col=period",
-              "fetched_at": "2026-11-19T13:33:17Z",
-              "tier": 1,
-              "citation": "Florida DOR Tourist Development Tax — SWFL (Lee + Collier) (666 monthly collection records: 1998-07 → 2026-04); source: Florida Department of Revenue Form 3 XLSX (monthly, ~6-week lag) — SWFL combined 2026-04 = $9.03M (FY 2026, post_ian=true)."
-            },
-            "suggestions": [
-              "What's driving latest monthly collections usd?",
-              "How does latest monthly collections usd here compare to other SWFL areas?"
-            ]
-          },
-          {
-            "metric": "trailing_12mo_collections_usd",
-            "value": 89003088.51,
-            "direction": "stable",
-            "label": "Trailing 12-month TDT collections total (SWFL combined)",
-            "variable_type": "extensive",
-            "units": "USD",
-            "display_format": "currency",
-            "source": {
-              "url": "https://www.swfldatagulf.com/r/source/fl_dor_tdt_collections?label=Florida+DOR+%E2%80%94+Tourist+Development+Tax+collections&source=Florida+DOR&brain=tourism-tdt&date_col=period",
-              "fetched_at": "2026-11-19T13:33:17Z",
-              "tier": 1,
-              "citation": "Florida DOR Tourist Development Tax — SWFL (Lee + Collier) (666 monthly collection records: 1998-07 → 2026-04); source: Florida Department of Revenue Form 3 XLSX (monthly, ~6-week lag) — SWFL combined sum, trailing 12-month window: 2025-05 → 2026-04 (12 months)."
-            },
-            "suggestions": [
-              "What's driving trailing 12mo collections usd?",
-              "How does trailing 12mo collections usd here compare to other SWFL areas?"
-            ]
-          },
-          {
-            "metric": "post_ian_recovery_ratio",
-            "value": 0.78,
-            "direction": "falling",
-            "label": "Post-Hurricane-Ian recovery ratio (SWFL trailing 12mo ÷ best pre-Ian 12mo)",
-            "variable_type": "intensive",
-            "units": "ratio",
-            "display_format": "ratio",
-            "source": {
-              "url": "https://www.swfldatagulf.com/r/source/fl_dor_tdt_collections?label=Florida+DOR+%E2%80%94+Tourist+Development+Tax+collections&source=Florida+DOR&brain=tourism-tdt&date_col=period",
-              "fetched_at": "2026-11-19T13:33:17Z",
-              "tier": 1,
-              "citation": "Florida DOR Tourist Development Tax — SWFL (Lee + Collier) (666 monthly collection records: 1998-07 → 2026-04); source: Florida Department of Revenue Form 3 XLSX (monthly, ~6-week lag) — SWFL trailing 12-month total (2025-05 → 2026-04 (12 months)) ÷ best pre-Ian 12-month window ($114.71M; Ian landfall 2022-09-28)."
-            },
-            "suggestions": [
-              "What's driving post ian recovery ratio?",
-              "How does post ian recovery ratio here compare to other SWFL areas?"
-            ]
-          },
-          {
-            "metric": "seasonal_position_vs_history",
-            "value": 1.04,
-            "direction": "stable",
-            "label": "Seasonal position vs same-month historical mean (SWFL combined)",
-            "variable_type": "intensive",
-            "units": "ratio",
-            "display_format": "ratio",
-            "source": {
-              "url": "https://www.swfldatagulf.com/r/source/fl_dor_tdt_collections?label=Florida+DOR+%E2%80%94+Tourist+Development+Tax+collections&source=Florida+DOR&brain=tourism-tdt&date_col=period",
-              "fetched_at": "2026-11-19T13:33:17Z",
-              "tier": 1,
-              "citation": "Florida DOR Tourist Development Tax — SWFL (Lee + Collier) (666 monthly collection records: 1998-07 → 2026-04); source: Florida Department of Revenue Form 3 XLSX (monthly, ~6-week lag) — SWFL 2026-04 ($9.03M) vs same-calendar-month mean across 28 non-zero years."
-            },
-            "suggestions": [
-              "What's driving seasonal position vs history?",
-              "How does seasonal position vs history here compare to other SWFL areas?"
-            ]
-          },
-          {
-            "metric": "lee_latest_monthly_collections_usd",
-            "value": 9028029.34,
-            "direction": "stable",
-            "label": "Lee County latest monthly TDT collections (2026-04)",
-            "variable_type": "extensive",
-            "units": "USD/month",
-            "display_format": "currency",
-            "source": {
-              "url": "https://www.swfldatagulf.com/r/source/fl_dor_tdt_collections?label=Florida+DOR+%E2%80%94+Tourist+Development+Tax+collections&source=Florida+DOR&brain=tourism-tdt&date_col=period",
-              "fetched_at": "2026-11-19T13:33:17Z",
-              "tier": 1,
-              "citation": "Florida DOR Tourist Development Tax — SWFL (Lee + Collier) (666 monthly collection records: 1998-07 → 2026-04); source: Florida Department of Revenue Form 3 XLSX (monthly, ~6-week lag) — Lee County 2026-04 = $9.03M."
-            },
-            "suggestions": [
-              "What's driving lee latest monthly collections usd?",
-              "How does lee latest monthly collections usd here compare to other SWFL areas?"
-            ]
-          },
-          {
-            "metric": "lee_trailing_12mo_collections_usd",
-            "value": 53331356.519999996,
-            "direction": "stable",
-            "label": "Lee County trailing 12-month TDT collections",
-            "variable_type": "extensive",
-            "units": "USD",
-            "display_format": "currency",
-            "source": {
-              "url": "https://www.swfldatagulf.com/r/source/fl_dor_tdt_collections?label=Florida+DOR+%E2%80%94+Tourist+Development+Tax+collections&source=Florida+DOR&brain=tourism-tdt&date_col=period",
-              "fetched_at": "2026-11-19T13:33:17Z",
-              "tier": 1,
-              "citation": "Florida DOR Tourist Development Tax — SWFL (Lee + Collier) (666 monthly collection records: 1998-07 → 2026-04); source: Florida Department of Revenue Form 3 XLSX (monthly, ~6-week lag) — Lee County trailing 12 months: 2025-05 → 2026-04 (12 months)."
-            },
-            "suggestions": [
-              "What's driving lee trailing 12mo collections usd?",
-              "How does lee trailing 12mo collections usd here compare to other SWFL areas?"
-            ]
-          },
-          {
-            "metric": "collier_latest_monthly_collections_usd",
-            "value": 7097536.72,
-            "direction": "stable",
-            "label": "Collier County latest monthly TDT collections (2026-04)",
-            "variable_type": "extensive",
-            "units": "USD/month",
-            "display_format": "currency",
-            "source": {
-              "url": "https://www.swfldatagulf.com/r/source/fl_dor_tdt_collections?label=Florida+DOR+%E2%80%94+Tourist+Development+Tax+collections&source=Florida+DOR&brain=tourism-tdt&date_col=period",
-              "fetched_at": "2026-11-19T13:33:17Z",
-              "tier": 1,
-              "citation": "Florida DOR Tourist Development Tax — SWFL (Lee + Collier) (666 monthly collection records: 1998-07 → 2026-04); source: Florida Department of Revenue Form 3 XLSX (monthly, ~6-week lag) — Collier County 2026-04 = $7.10M."
-            },
-            "suggestions": [
-              "What's driving collier latest monthly collections usd?",
-              "How does collier latest monthly collections usd here compare to other SWFL areas?"
-            ]
-          },
-          {
-            "metric": "collier_trailing_12mo_collections_usd",
-            "value": 51136864.940000005,
-            "direction": "stable",
-            "label": "Collier County trailing 12-month TDT collections",
-            "variable_type": "extensive",
-            "units": "USD",
-            "display_format": "currency",
-            "source": {
-              "url": "https://www.swfldatagulf.com/r/source/fl_dor_tdt_collections?label=Florida+DOR+%E2%80%94+Tourist+Development+Tax+collections&source=Florida+DOR&brain=tourism-tdt&date_col=period",
-              "fetched_at": "2026-11-19T13:33:17Z",
-              "tier": 1,
-              "citation": "Florida DOR Tourist Development Tax — SWFL (Lee + Collier) (666 monthly collection records: 1998-07 → 2026-04); source: Florida Department of Revenue Form 3 XLSX (monthly, ~6-week lag) — Collier County trailing 12 months: 2025-03 → 2026-02 (12 months)."
-            },
-            "suggestions": [
-              "What's driving collier trailing 12mo collections usd?",
-              "How does collier trailing 12mo collections usd here compare to other SWFL areas?"
-            ]
-          }
-        ],
-        "caveats": [
-          "Florida DOR Form 3 may revise recent months for ~60 days after first publication — treat the latest month as directional, not final.",
-          "Latest month 2026-04 reflects only 1 of 2 expected counties (Collier data lags Lee by ~2 months). YoY comparison is suppressed to avoid apples-to-oranges inflation. Use per-county metrics or trailing_12mo_collections_usd for the cross-county read."
-        ],
-        "contradicts": [],
-        "confidence": 1,
-        "joint_integrity": 1,
-        "confidence_dispersion": 0,
-        "chain_depth": 0,
-        "trust_tier": 1,
-        "upstream_count": 0,
-        "relevance": {
-          "decay_curve": "weeks",
-          "half_life_hours": 720,
-          "computed_at": "2026-11-19T13:33:17Z"
-        },
-        "exogenous_signals": []
-      }
+      "status": "skipped-fresh",
+      "written": false
     },
     {
       "packId": "env-swfl",
@@ -307,8 +93,1079 @@
     },
     {
       "packId": "housing-swfl",
-      "status": "skipped-fresh",
-      "written": false
+      "status": "built",
+      "version": 19,
+      "written": true,
+      "brainOutput": {
+        "brain_id": "housing-swfl",
+        "version": 19,
+        "refined_at": "2026-11-20T04:26:46Z",
+        "expires": "2026-12-25T04:26:46Z",
+        "ttl_seconds": 3024000,
+        "direction": "mixed",
+        "magnitude": 0.25,
+        "drivers": [],
+        "overrides": [],
+        "conclusion": "SWFL housing reads mixed (data through 2026-09-30) across 55 ZIPs — regional median sale price $424,875 (-1.4% YoY), DOM 86 days, 5.5 months of supply, 95.1% sale-to-list. Fastest-moving ZIPs: 34139 (16 days), 34116 (32 days), 33990 (51 days). Priciest ZIPs: 33921 ($3,748,898), 34102 ($2,474,273), 34141 ($1,600,000).",
+        "key_metrics": [
+          {
+            "metric": "housing_median_sale_price_swfl",
+            "value": 424875,
+            "direction": "falling",
+            "label": "SWFL regional median sale price (all property types), data through 2026-09-30 (-1.4% YoY)",
+            "variable_type": "extensive",
+            "units": "USD",
+            "display_format": "currency",
+            "source": {
+              "url": "https://www.redfin.com/news/data-center/",
+              "fetched_at": "2026-11-20T04:26:46Z",
+              "tier": 3,
+              "citation": "Redfin Data Center — ZIP-level monthly housing metrics (all property types), SWFL MSAs. Updated monthly ~mid-month."
+            },
+            "suggestions": [
+              "What's driving housing median sale price swfl?",
+              "How does housing median sale price swfl here compare to other SWFL areas?",
+              "How does flood risk affect housing median sale price swfl in this ZIP?"
+            ]
+          },
+          {
+            "metric": "housing_median_dom_swfl",
+            "value": 86,
+            "direction": "falling",
+            "label": "SWFL regional median days on market — falling = faster sales (YoY: -11.5 days)",
+            "variable_type": "extensive",
+            "units": "days",
+            "display_format": "count",
+            "source": {
+              "url": "https://www.redfin.com/news/data-center/",
+              "fetched_at": "2026-11-20T04:26:46Z",
+              "tier": 3,
+              "citation": "Redfin Data Center — ZIP-level monthly housing metrics (all property types), SWFL MSAs. Updated monthly ~mid-month."
+            },
+            "suggestions": [
+              "What's driving housing median dom swfl?",
+              "How does housing median dom swfl here compare to other SWFL areas?",
+              "How does flood risk affect housing median dom swfl in this ZIP?"
+            ]
+          },
+          {
+            "metric": "housing_months_of_supply_swfl",
+            "value": 5.5,
+            "direction": "stable",
+            "label": "SWFL regional median months of supply — derived from inventory over the 90-day sales pace (< 3 = seller's market, > 6 = buyer's market)",
+            "variable_type": "intensive",
+            "units": "months",
+            "display_format": "raw",
+            "source": {
+              "url": "https://www.redfin.com/news/data-center/",
+              "fetched_at": "2026-11-20T04:26:46Z",
+              "tier": 3,
+              "citation": "Redfin Data Center — ZIP-level monthly housing metrics (all property types), SWFL MSAs. Updated monthly ~mid-month."
+            },
+            "suggestions": [
+              "What's driving housing months of supply swfl?",
+              "How does housing months of supply swfl here compare to other SWFL areas?",
+              "How does flood risk affect housing months of supply swfl in this ZIP?"
+            ]
+          },
+          {
+            "metric": "housing_avg_sale_to_list_swfl",
+            "value": 95.1,
+            "direction": "falling",
+            "label": "SWFL regional median sale-to-list ratio (> 100% = homes selling above ask)",
+            "variable_type": "intensive",
+            "units": "percent",
+            "display_format": "percent",
+            "source": {
+              "url": "https://www.redfin.com/news/data-center/",
+              "fetched_at": "2026-11-20T04:26:46Z",
+              "tier": 3,
+              "citation": "Redfin Data Center — ZIP-level monthly housing metrics (all property types), SWFL MSAs. Updated monthly ~mid-month."
+            },
+            "suggestions": [
+              "What's driving housing avg sale to list swfl?",
+              "How does housing avg sale to list swfl here compare to other SWFL areas?",
+              "How does flood risk affect housing avg sale to list swfl in this ZIP?"
+            ]
+          },
+          {
+            "metric": "housing_sold_above_list_pct_swfl",
+            "value": 3.6,
+            "direction": "stable",
+            "label": "SWFL regional median % of homes sold above list price",
+            "variable_type": "intensive",
+            "units": "percent",
+            "display_format": "percent",
+            "source": {
+              "url": "https://www.redfin.com/news/data-center/",
+              "fetched_at": "2026-11-20T04:26:46Z",
+              "tier": 3,
+              "citation": "Redfin Data Center — ZIP-level monthly housing metrics (all property types), SWFL MSAs. Updated monthly ~mid-month."
+            },
+            "suggestions": [
+              "What's driving housing sold above list pct swfl?",
+              "How does housing sold above list pct swfl here compare to other SWFL areas?",
+              "How does flood risk affect housing sold above list pct swfl in this ZIP?"
+            ]
+          },
+          {
+            "metric": "housing_off_market_in_two_weeks_pct_swfl",
+            "value": 15.8,
+            "direction": "stable",
+            "label": "SWFL regional median % of homes going off-market within 2 weeks",
+            "variable_type": "intensive",
+            "units": "percent",
+            "display_format": "percent",
+            "source": {
+              "url": "https://www.redfin.com/news/data-center/",
+              "fetched_at": "2026-11-20T04:26:46Z",
+              "tier": 3,
+              "citation": "Redfin Data Center — ZIP-level monthly housing metrics (all property types), SWFL MSAs. Updated monthly ~mid-month."
+            },
+            "suggestions": [
+              "What's driving housing off market in two weeks pct swfl?",
+              "How does housing off market in two weeks pct swfl here compare to other SWFL areas?",
+              "How does flood risk affect housing off market in two weeks pct swfl in this ZIP?"
+            ]
+          }
+        ],
+        "detail_tables": [
+          {
+            "id": "housing_by_zip",
+            "title": "SWFL housing by ZIP — latest rolling 3-month window, data through 2026-09-30",
+            "grain": "zip",
+            "columns": [
+              {
+                "id": "metro",
+                "label": "Metro area"
+              },
+              {
+                "id": "median_sale_price",
+                "label": "Median sale price",
+                "display_format": "currency",
+                "units": "USD"
+              },
+              {
+                "id": "median_sale_price_yoy_pct",
+                "label": "Median sale price YoY",
+                "display_format": "percent",
+                "units": "percent"
+              },
+              {
+                "id": "median_dom",
+                "label": "Median days on market",
+                "display_format": "count",
+                "units": "days"
+              },
+              {
+                "id": "median_dom_yoy_days",
+                "label": "Median days-on-market YoY change (days)",
+                "display_format": "count",
+                "units": "days"
+              },
+              {
+                "id": "avg_sale_to_list_pct",
+                "label": "Sale-to-list ratio",
+                "display_format": "percent",
+                "units": "percent"
+              },
+              {
+                "id": "months_of_supply",
+                "label": "Months of supply",
+                "display_format": "raw",
+                "units": "months"
+              },
+              {
+                "id": "homes_sold",
+                "label": "Homes sold (90-day)",
+                "display_format": "count",
+                "units": "count"
+              },
+              {
+                "id": "inventory",
+                "label": "Active inventory",
+                "display_format": "count",
+                "units": "count"
+              },
+              {
+                "id": "low_sample",
+                "label": "Thin sample (under 5 sales this window)"
+              }
+            ],
+            "rows": [
+              {
+                "key": "33901",
+                "label": "33901",
+                "cells": {
+                  "metro": "Cape Coral, FL metro area",
+                  "median_sale_price": 299912,
+                  "median_sale_price_yoy_pct": 7.1,
+                  "median_dom": 58,
+                  "median_dom_yoy_days": -33,
+                  "avg_sale_to_list_pct": 91.8,
+                  "months_of_supply": 8.8,
+                  "homes_sold": 57,
+                  "inventory": 164,
+                  "low_sample": false
+                }
+              },
+              {
+                "key": "33903",
+                "label": "33903",
+                "cells": {
+                  "metro": "Cape Coral, FL metro area",
+                  "median_sale_price": 314907,
+                  "median_sale_price_yoy_pct": 10.5,
+                  "median_dom": 99,
+                  "median_dom_yoy_days": -8,
+                  "avg_sale_to_list_pct": 94.4,
+                  "months_of_supply": 6.6,
+                  "homes_sold": 81,
+                  "inventory": 173,
+                  "low_sample": false
+                }
+              },
+              {
+                "key": "33904",
+                "label": "33904",
+                "cells": {
+                  "metro": "Cape Coral, FL metro area",
+                  "median_sale_price": 417377,
+                  "median_sale_price_yoy_pct": 22.8,
+                  "median_dom": 62,
+                  "median_dom_yoy_days": -38,
+                  "avg_sale_to_list_pct": 95.3,
+                  "months_of_supply": 5.2,
+                  "homes_sold": 227,
+                  "inventory": 384,
+                  "low_sample": false
+                }
+              },
+              {
+                "key": "33905",
+                "label": "33905",
+                "cells": {
+                  "metro": "Cape Coral, FL metro area",
+                  "median_sale_price": 352396,
+                  "median_sale_price_yoy_pct": 7.6,
+                  "median_dom": 78,
+                  "median_dom_yoy_days": 7,
+                  "avg_sale_to_list_pct": 95.8,
+                  "months_of_supply": 5.5,
+                  "homes_sold": 182,
+                  "inventory": 327,
+                  "low_sample": false
+                }
+              },
+              {
+                "key": "33907",
+                "label": "33907",
+                "cells": {
+                  "metro": "Cape Coral, FL metro area",
+                  "median_sale_price": 164952,
+                  "median_sale_price_yoy_pct": -13.2,
+                  "median_dom": 80,
+                  "median_dom_yoy_days": -26,
+                  "avg_sale_to_list_pct": 93,
+                  "months_of_supply": 6.1,
+                  "homes_sold": 95,
+                  "inventory": 190,
+                  "low_sample": false
+                }
+              },
+              {
+                "key": "33908",
+                "label": "33908",
+                "cells": {
+                  "metro": "Cape Coral, FL metro area",
+                  "median_sale_price": 343899,
+                  "median_sale_price_yoy_pct": -4.9,
+                  "median_dom": 104,
+                  "median_dom_yoy_days": -23,
+                  "avg_sale_to_list_pct": 93.7,
+                  "months_of_supply": 6.7,
+                  "homes_sold": 251,
+                  "inventory": 549,
+                  "low_sample": false
+                }
+              },
+              {
+                "key": "33909",
+                "label": "33909",
+                "cells": {
+                  "metro": "Cape Coral, FL metro area",
+                  "median_sale_price": 324905,
+                  "median_sale_price_yoy_pct": 1.5,
+                  "median_dom": 70,
+                  "median_dom_yoy_days": 4,
+                  "avg_sale_to_list_pct": 98,
+                  "months_of_supply": 4.6,
+                  "homes_sold": 305,
+                  "inventory": 456,
+                  "low_sample": false
+                }
+              },
+              {
+                "key": "33912",
+                "label": "33912",
+                "cells": {
+                  "metro": "Cape Coral, FL metro area",
+                  "median_sale_price": 394884,
+                  "median_sale_price_yoy_pct": -2,
+                  "median_dom": 80,
+                  "median_dom_yoy_days": -29,
+                  "avg_sale_to_list_pct": 93.6,
+                  "months_of_supply": 4.4,
+                  "homes_sold": 105,
+                  "inventory": 150,
+                  "low_sample": false
+                }
+              },
+              {
+                "key": "33913",
+                "label": "33913",
+                "cells": {
+                  "metro": "Cape Coral, FL metro area",
+                  "median_sale_price": 464863,
+                  "median_sale_price_yoy_pct": 1.1,
+                  "median_dom": 75,
+                  "median_dom_yoy_days": -30,
+                  "avg_sale_to_list_pct": 96.1,
+                  "months_of_supply": 4.3,
+                  "homes_sold": 259,
+                  "inventory": 360,
+                  "low_sample": false
+                }
+              },
+              {
+                "key": "33914",
+                "label": "33914",
+                "cells": {
+                  "metro": "Cape Coral, FL metro area",
+                  "median_sale_price": 501353,
+                  "median_sale_price_yoy_pct": 11.5,
+                  "median_dom": 72,
+                  "median_dom_yoy_days": -28,
+                  "avg_sale_to_list_pct": 96,
+                  "months_of_supply": 4.7,
+                  "homes_sold": 335,
+                  "inventory": 510,
+                  "low_sample": false
+                }
+              },
+              {
+                "key": "33916",
+                "label": "33916",
+                "cells": {
+                  "metro": "Cape Coral, FL metro area",
+                  "median_sale_price": 271920,
+                  "median_sale_price_yoy_pct": -1.1,
+                  "median_dom": 89,
+                  "median_dom_yoy_days": 6,
+                  "avg_sale_to_list_pct": 94.9,
+                  "months_of_supply": 11,
+                  "homes_sold": 49,
+                  "inventory": 176,
+                  "low_sample": false
+                }
+              },
+              {
+                "key": "33917",
+                "label": "33917",
+                "cells": {
+                  "metro": "Cape Coral, FL metro area",
+                  "median_sale_price": 329903,
+                  "median_sale_price_yoy_pct": -2.7,
+                  "median_dom": 69,
+                  "median_dom_yoy_days": -15,
+                  "avg_sale_to_list_pct": 95.5,
+                  "months_of_supply": 5.4,
+                  "homes_sold": 148,
+                  "inventory": 259,
+                  "low_sample": false
+                }
+              },
+              {
+                "key": "33919",
+                "label": "33919",
+                "cells": {
+                  "metro": "Cape Coral, FL metro area",
+                  "median_sale_price": 257674,
+                  "median_sale_price_yoy_pct": -7.6,
+                  "median_dom": 86,
+                  "median_dom_yoy_days": -20,
+                  "avg_sale_to_list_pct": 93.8,
+                  "months_of_supply": 6.3,
+                  "homes_sold": 169,
+                  "inventory": 347,
+                  "low_sample": false
+                }
+              },
+              {
+                "key": "33920",
+                "label": "33920",
+                "cells": {
+                  "metro": "Cape Coral, FL metro area",
+                  "median_sale_price": 369891,
+                  "median_sale_price_yoy_pct": -13,
+                  "median_dom": 55,
+                  "median_dom_yoy_days": -40,
+                  "avg_sale_to_list_pct": 97.1,
+                  "months_of_supply": 5.7,
+                  "homes_sold": 52,
+                  "inventory": 96,
+                  "low_sample": false
+                }
+              },
+              {
+                "key": "33921",
+                "label": "33921",
+                "cells": {
+                  "metro": "Cape Coral, FL metro area",
+                  "median_sale_price": 3748898,
+                  "median_sale_price_yoy_pct": 33.9,
+                  "median_dom": 55,
+                  "median_dom_yoy_days": -79,
+                  "avg_sale_to_list_pct": 90.8,
+                  "months_of_supply": 3,
+                  "homes_sold": 13,
+                  "inventory": 13,
+                  "low_sample": false
+                }
+              },
+              {
+                "key": "33922",
+                "label": "33922",
+                "cells": {
+                  "metro": "Cape Coral, FL metro area",
+                  "median_sale_price": 396883,
+                  "median_sale_price_yoy_pct": 10.3,
+                  "median_dom": 118,
+                  "median_dom_yoy_days": 21,
+                  "avg_sale_to_list_pct": 95.3,
+                  "months_of_supply": 6.7,
+                  "homes_sold": 31,
+                  "inventory": 67,
+                  "low_sample": false
+                }
+              },
+              {
+                "key": "33924",
+                "label": "33924",
+                "cells": {
+                  "metro": "Cape Coral, FL metro area",
+                  "median_sale_price": 1034696,
+                  "median_sale_price_yoy_pct": 5,
+                  "median_dom": 200,
+                  "median_dom_yoy_days": 34,
+                  "avg_sale_to_list_pct": 91.1,
+                  "months_of_supply": 10,
+                  "homes_sold": 15,
+                  "inventory": 50,
+                  "low_sample": false
+                }
+              },
+              {
+                "key": "33928",
+                "label": "33928",
+                "cells": {
+                  "metro": "Cape Coral, FL metro area",
+                  "median_sale_price": 517348,
+                  "median_sale_price_yoy_pct": 4.5,
+                  "median_dom": 68,
+                  "median_dom_yoy_days": -40,
+                  "avg_sale_to_list_pct": 95.8,
+                  "months_of_supply": 4.4,
+                  "homes_sold": 225,
+                  "inventory": 323,
+                  "low_sample": false
+                }
+              },
+              {
+                "key": "33931",
+                "label": "33931",
+                "cells": {
+                  "metro": "Cape Coral, FL metro area",
+                  "median_sale_price": 497354,
+                  "median_sale_price_yoy_pct": -23.5,
+                  "median_dom": 163,
+                  "median_dom_yoy_days": 15,
+                  "avg_sale_to_list_pct": 92.8,
+                  "months_of_supply": 11.5,
+                  "homes_sold": 86,
+                  "inventory": 322,
+                  "low_sample": false
+                }
+              },
+              {
+                "key": "33936",
+                "label": "33936",
+                "cells": {
+                  "metro": "Cape Coral, FL metro area",
+                  "median_sale_price": 227433,
+                  "median_sale_price_yoy_pct": -15.8,
+                  "median_dom": 74,
+                  "median_dom_yoy_days": 12,
+                  "avg_sale_to_list_pct": 96.6,
+                  "months_of_supply": 5.4,
+                  "homes_sold": 141,
+                  "inventory": 246,
+                  "low_sample": false
+                }
+              },
+              {
+                "key": "33956",
+                "label": "33956",
+                "cells": {
+                  "metro": "Cape Coral, FL metro area",
+                  "median_sale_price": 549838,
+                  "median_sale_price_yoy_pct": -1.8,
+                  "median_dom": 148,
+                  "median_dom_yoy_days": -54,
+                  "avg_sale_to_list_pct": 94.8,
+                  "months_of_supply": 7.3,
+                  "homes_sold": 27,
+                  "inventory": 63,
+                  "low_sample": false
+                }
+              },
+              {
+                "key": "33957",
+                "label": "33957",
+                "cells": {
+                  "metro": "Cape Coral, FL metro area",
+                  "median_sale_price": 880741,
+                  "median_sale_price_yoy_pct": 4.4,
+                  "median_dom": 196,
+                  "median_dom_yoy_days": 69,
+                  "avg_sale_to_list_pct": 92.3,
+                  "months_of_supply": 7.5,
+                  "homes_sold": 69,
+                  "inventory": 170,
+                  "low_sample": false
+                }
+              },
+              {
+                "key": "33966",
+                "label": "33966",
+                "cells": {
+                  "metro": "Cape Coral, FL metro area",
+                  "median_sale_price": 317657,
+                  "median_sale_price_yoy_pct": -9.2,
+                  "median_dom": 83,
+                  "median_dom_yoy_days": -9,
+                  "avg_sale_to_list_pct": 96.1,
+                  "months_of_supply": 4,
+                  "homes_sold": 82,
+                  "inventory": 107,
+                  "low_sample": false
+                }
+              },
+              {
+                "key": "33967",
+                "label": "33967",
+                "cells": {
+                  "metro": "Cape Coral, FL metro area",
+                  "median_sale_price": 362394,
+                  "median_sale_price_yoy_pct": -7,
+                  "median_dom": 59,
+                  "median_dom_yoy_days": 24,
+                  "avg_sale_to_list_pct": 96.3,
+                  "months_of_supply": 3.8,
+                  "homes_sold": 108,
+                  "inventory": 133,
+                  "low_sample": false
+                }
+              },
+              {
+                "key": "33971",
+                "label": "33971",
+                "cells": {
+                  "metro": "Cape Coral, FL metro area",
+                  "median_sale_price": 304910,
+                  "median_sale_price_yoy_pct": -7.2,
+                  "median_dom": 78,
+                  "median_dom_yoy_days": -2,
+                  "avg_sale_to_list_pct": 98.4,
+                  "months_of_supply": 5.1,
+                  "homes_sold": 209,
+                  "inventory": 351,
+                  "low_sample": false
+                }
+              },
+              {
+                "key": "33972",
+                "label": "33972",
+                "cells": {
+                  "metro": "Cape Coral, FL metro area",
+                  "median_sale_price": 339900,
+                  "median_sale_price_yoy_pct": -2.9,
+                  "median_dom": 67,
+                  "median_dom_yoy_days": -21,
+                  "avg_sale_to_list_pct": 97.4,
+                  "months_of_supply": 5.6,
+                  "homes_sold": 158,
+                  "inventory": 287,
+                  "low_sample": false
+                }
+              },
+              {
+                "key": "33973",
+                "label": "33973",
+                "cells": {
+                  "metro": "Cape Coral, FL metro area",
+                  "median_sale_price": 394884,
+                  "median_sale_price_yoy_pct": -14.2,
+                  "median_dom": 91,
+                  "median_dom_yoy_days": 26,
+                  "avg_sale_to_list_pct": 98.1,
+                  "months_of_supply": 8.1,
+                  "homes_sold": 56,
+                  "inventory": 148,
+                  "low_sample": false
+                }
+              },
+              {
+                "key": "33974",
+                "label": "33974",
+                "cells": {
+                  "metro": "Cape Coral, FL metro area",
+                  "median_sale_price": 299912,
+                  "median_sale_price_yoy_pct": -5.2,
+                  "median_dom": 94,
+                  "median_dom_yoy_days": 23,
+                  "avg_sale_to_list_pct": 98.7,
+                  "months_of_supply": 5.4,
+                  "homes_sold": 266,
+                  "inventory": 470,
+                  "low_sample": false
+                }
+              },
+              {
+                "key": "33976",
+                "label": "33976",
+                "cells": {
+                  "metro": "Cape Coral, FL metro area",
+                  "median_sale_price": 309909,
+                  "median_sale_price_yoy_pct": -5.4,
+                  "median_dom": 89,
+                  "median_dom_yoy_days": 25,
+                  "avg_sale_to_list_pct": 98.7,
+                  "months_of_supply": 5.4,
+                  "homes_sold": 152,
+                  "inventory": 265,
+                  "low_sample": false
+                }
+              },
+              {
+                "key": "33990",
+                "label": "33990",
+                "cells": {
+                  "metro": "Cape Coral, FL metro area",
+                  "median_sale_price": 354896,
+                  "median_sale_price_yoy_pct": -1.4,
+                  "median_dom": 51,
+                  "median_dom_yoy_days": -12,
+                  "avg_sale_to_list_pct": 97.2,
+                  "months_of_supply": 4,
+                  "homes_sold": 159,
+                  "inventory": 207,
+                  "low_sample": false
+                }
+              },
+              {
+                "key": "33991",
+                "label": "33991",
+                "cells": {
+                  "metro": "Cape Coral, FL metro area",
+                  "median_sale_price": 414878,
+                  "median_sale_price_yoy_pct": -0.8,
+                  "median_dom": 67,
+                  "median_dom_yoy_days": -29,
+                  "avg_sale_to_list_pct": 97.4,
+                  "months_of_supply": 4.7,
+                  "homes_sold": 201,
+                  "inventory": 306,
+                  "low_sample": false
+                }
+              },
+              {
+                "key": "33993",
+                "label": "33993",
+                "cells": {
+                  "metro": "Cape Coral, FL metro area",
+                  "median_sale_price": 359894,
+                  "median_sale_price_yoy_pct": 2.8,
+                  "median_dom": 86,
+                  "median_dom_yoy_days": -2,
+                  "avg_sale_to_list_pct": 97.5,
+                  "months_of_supply": 5.9,
+                  "homes_sold": 362,
+                  "inventory": 693,
+                  "low_sample": false
+                }
+              },
+              {
+                "key": "34102",
+                "label": "34102",
+                "cells": {
+                  "metro": "Naples, FL metro area",
+                  "median_sale_price": 2474273,
+                  "median_sale_price_yoy_pct": 26.5,
+                  "median_dom": 132,
+                  "median_dom_yoy_days": -17,
+                  "avg_sale_to_list_pct": 92.2,
+                  "months_of_supply": 11.5,
+                  "homes_sold": 83,
+                  "inventory": 310,
+                  "low_sample": false
+                }
+              },
+              {
+                "key": "34103",
+                "label": "34103",
+                "cells": {
+                  "metro": "Naples, FL metro area",
+                  "median_sale_price": 1099677,
+                  "median_sale_price_yoy_pct": 4.7,
+                  "median_dom": 145,
+                  "median_dom_yoy_days": -16,
+                  "avg_sale_to_list_pct": 92.7,
+                  "months_of_supply": 7.7,
+                  "homes_sold": 101,
+                  "inventory": 252,
+                  "low_sample": false
+                }
+              },
+              {
+                "key": "34104",
+                "label": "34104",
+                "cells": {
+                  "metro": "Naples, FL metro area",
+                  "median_sale_price": 424875,
+                  "median_sale_price_yoy_pct": 15,
+                  "median_dom": 62,
+                  "median_dom_yoy_days": -36,
+                  "avg_sale_to_list_pct": 95.1,
+                  "months_of_supply": 4.7,
+                  "homes_sold": 120,
+                  "inventory": 183,
+                  "low_sample": false
+                }
+              },
+              {
+                "key": "34105",
+                "label": "34105",
+                "cells": {
+                  "metro": "Naples, FL metro area",
+                  "median_sale_price": 484858,
+                  "median_sale_price_yoy_pct": 16.8,
+                  "median_dom": 81,
+                  "median_dom_yoy_days": -32,
+                  "avg_sale_to_list_pct": 94.4,
+                  "months_of_supply": 6.2,
+                  "homes_sold": 81,
+                  "inventory": 162,
+                  "low_sample": false
+                }
+              },
+              {
+                "key": "34108",
+                "label": "34108",
+                "cells": {
+                  "metro": "Naples, FL metro area",
+                  "median_sale_price": 1024699,
+                  "median_sale_price_yoy_pct": -2.4,
+                  "median_dom": 130,
+                  "median_dom_yoy_days": 1,
+                  "avg_sale_to_list_pct": 92.8,
+                  "months_of_supply": 5.6,
+                  "homes_sold": 150,
+                  "inventory": 274,
+                  "low_sample": false
+                }
+              },
+              {
+                "key": "34109",
+                "label": "34109",
+                "cells": {
+                  "metro": "Naples, FL metro area",
+                  "median_sale_price": 567333,
+                  "median_sale_price_yoy_pct": -9.2,
+                  "median_dom": 88,
+                  "median_dom_yoy_days": -2,
+                  "avg_sale_to_list_pct": 94.7,
+                  "months_of_supply": 4.6,
+                  "homes_sold": 139,
+                  "inventory": 209,
+                  "low_sample": false
+                }
+              },
+              {
+                "key": "34110",
+                "label": "34110",
+                "cells": {
+                  "metro": "Naples, FL metro area",
+                  "median_sale_price": 799765,
+                  "median_sale_price_yoy_pct": 28.4,
+                  "median_dom": 108,
+                  "median_dom_yoy_days": -22,
+                  "avg_sale_to_list_pct": 93.1,
+                  "months_of_supply": 6.6,
+                  "homes_sold": 138,
+                  "inventory": 298,
+                  "low_sample": false
+                }
+              },
+              {
+                "key": "34112",
+                "label": "34112",
+                "cells": {
+                  "metro": "Naples, FL metro area",
+                  "median_sale_price": 364893,
+                  "median_sale_price_yoy_pct": 6.7,
+                  "median_dom": 89,
+                  "median_dom_yoy_days": -10,
+                  "avg_sale_to_list_pct": 94.3,
+                  "months_of_supply": 7.2,
+                  "homes_sold": 159,
+                  "inventory": 374,
+                  "low_sample": false
+                }
+              },
+              {
+                "key": "34113",
+                "label": "34113",
+                "cells": {
+                  "metro": "Naples, FL metro area",
+                  "median_sale_price": 649809,
+                  "median_sale_price_yoy_pct": 10.9,
+                  "median_dom": 114,
+                  "median_dom_yoy_days": -24,
+                  "avg_sale_to_list_pct": 94.1,
+                  "months_of_supply": 6.3,
+                  "homes_sold": 160,
+                  "inventory": 330,
+                  "low_sample": false
+                }
+              },
+              {
+                "key": "34114",
+                "label": "34114",
+                "cells": {
+                  "metro": "Naples, FL metro area",
+                  "median_sale_price": 594825,
+                  "median_sale_price_yoy_pct": -4.1,
+                  "median_dom": 109,
+                  "median_dom_yoy_days": -13,
+                  "avg_sale_to_list_pct": 94.5,
+                  "months_of_supply": 6.5,
+                  "homes_sold": 169,
+                  "inventory": 361,
+                  "low_sample": false
+                }
+              },
+              {
+                "key": "34116",
+                "label": "34116",
+                "cells": {
+                  "metro": "Naples, FL metro area",
+                  "median_sale_price": 451367,
+                  "median_sale_price_yoy_pct": -1.3,
+                  "median_dom": 32,
+                  "median_dom_yoy_days": -11,
+                  "avg_sale_to_list_pct": 96.3,
+                  "months_of_supply": 5,
+                  "homes_sold": 49,
+                  "inventory": 80,
+                  "low_sample": false
+                }
+              },
+              {
+                "key": "34117",
+                "label": "34117",
+                "cells": {
+                  "metro": "Naples, FL metro area",
+                  "median_sale_price": 596825,
+                  "median_sale_price_yoy_pct": -6.9,
+                  "median_dom": 63,
+                  "median_dom_yoy_days": -4,
+                  "avg_sale_to_list_pct": 96.2,
+                  "months_of_supply": 5.2,
+                  "homes_sold": 73,
+                  "inventory": 124,
+                  "low_sample": false
+                }
+              },
+              {
+                "key": "34119",
+                "label": "34119",
+                "cells": {
+                  "metro": "Naples, FL metro area",
+                  "median_sale_price": 633564,
+                  "median_sale_price_yoy_pct": -8.8,
+                  "median_dom": 81,
+                  "median_dom_yoy_days": -7,
+                  "avg_sale_to_list_pct": 95.1,
+                  "months_of_supply": 3.4,
+                  "homes_sold": 239,
+                  "inventory": 268,
+                  "low_sample": false
+                }
+              },
+              {
+                "key": "34120",
+                "label": "34120",
+                "cells": {
+                  "metro": "Naples, FL metro area",
+                  "median_sale_price": 579830,
+                  "median_sale_price_yoy_pct": 1.7,
+                  "median_dom": 87,
+                  "median_dom_yoy_days": 0,
+                  "avg_sale_to_list_pct": 96.4,
+                  "months_of_supply": 5.4,
+                  "homes_sold": 281,
+                  "inventory": 491,
+                  "low_sample": false
+                }
+              },
+              {
+                "key": "34134",
+                "label": "34134",
+                "cells": {
+                  "metro": "Cape Coral, FL metro area",
+                  "median_sale_price": 687298,
+                  "median_sale_price_yoy_pct": -9,
+                  "median_dom": 123,
+                  "median_dom_yoy_days": -13,
+                  "avg_sale_to_list_pct": 93.7,
+                  "months_of_supply": 6.9,
+                  "homes_sold": 139,
+                  "inventory": 310,
+                  "low_sample": false
+                }
+              },
+              {
+                "key": "34135",
+                "label": "34135",
+                "cells": {
+                  "metro": "Cape Coral, FL metro area",
+                  "median_sale_price": 443870,
+                  "median_sale_price_yoy_pct": -3.5,
+                  "median_dom": 76,
+                  "median_dom_yoy_days": -6,
+                  "avg_sale_to_list_pct": 95.1,
+                  "months_of_supply": 4.9,
+                  "homes_sold": 261,
+                  "inventory": 417,
+                  "low_sample": false
+                }
+              },
+              {
+                "key": "34139",
+                "label": "34139",
+                "cells": {
+                  "metro": "Naples, FL metro area",
+                  "median_sale_price": 464863,
+                  "median_sale_price_yoy_pct": null,
+                  "median_dom": 16,
+                  "median_dom_yoy_days": null,
+                  "avg_sale_to_list_pct": 96.2,
+                  "months_of_supply": 6.4,
+                  "homes_sold": 2,
+                  "inventory": 4,
+                  "low_sample": true
+                }
+              },
+              {
+                "key": "34140",
+                "label": "34140",
+                "cells": {
+                  "metro": "Naples, FL metro area",
+                  "median_sale_price": 424875,
+                  "median_sale_price_yoy_pct": null,
+                  "median_dom": 846,
+                  "median_dom_yoy_days": null,
+                  "avg_sale_to_list_pct": 98.8,
+                  "months_of_supply": 6.4,
+                  "homes_sold": 2,
+                  "inventory": 4,
+                  "low_sample": true
+                }
+              },
+              {
+                "key": "34141",
+                "label": "34141",
+                "cells": {
+                  "metro": "Naples, FL metro area",
+                  "median_sale_price": 1600000,
+                  "median_sale_price_yoy_pct": null,
+                  "median_dom": 465,
+                  "median_dom_yoy_days": null,
+                  "avg_sale_to_list_pct": 88.9,
+                  "months_of_supply": null,
+                  "homes_sold": 1,
+                  "inventory": null,
+                  "low_sample": true
+                }
+              },
+              {
+                "key": "34142",
+                "label": "34142",
+                "cells": {
+                  "metro": "Naples, FL metro area",
+                  "median_sale_price": 398383,
+                  "median_sale_price_yoy_pct": 2.1,
+                  "median_dom": 109,
+                  "median_dom_yoy_days": 26,
+                  "avg_sale_to_list_pct": 96.4,
+                  "months_of_supply": 8.8,
+                  "homes_sold": 90,
+                  "inventory": 258,
+                  "low_sample": false
+                }
+              },
+              {
+                "key": "34145",
+                "label": "34145",
+                "cells": {
+                  "metro": "Naples, FL metro area",
+                  "median_sale_price": 834755,
+                  "median_sale_price_yoy_pct": -24.1,
+                  "median_dom": 112,
+                  "median_dom_yoy_days": -24,
+                  "avg_sale_to_list_pct": 93.8,
+                  "months_of_supply": 5.4,
+                  "homes_sold": 229,
+                  "inventory": 404,
+                  "low_sample": false
+                }
+              }
+            ],
+            "source": {
+              "url": "https://www.redfin.com/news/data-center/",
+              "fetched_at": "2026-11-20T04:26:46Z",
+              "tier": 3,
+              "citation": "Redfin Data Center — ZIP-level monthly housing metrics (all property types), SWFL MSAs. Updated monthly ~mid-month."
+            },
+            "note": "One row per SWFL ZIP, each its latest Redfin 90-day window. Months of supply is derived (inventory over the 90-day sales pace); Redfin does not publish it at ZIP grain. When low_sample is true the row rests on fewer than 5 sales — quote its median as a thin, indicative read rather than a stable one, and its months of supply is omitted."
+          }
+        ],
+        "caveats": [],
+        "contradicts": [],
+        "confidence": 0.6,
+        "joint_integrity": 1,
+        "confidence_dispersion": 0,
+        "chain_depth": 0,
+        "trust_tier": 3,
+        "upstream_count": 0,
+        "relevance": {
+          "decay_curve": "weeks",
+          "half_life_hours": 720,
+          "computed_at": "2026-11-20T04:26:46Z"
+        },
+        "exogenous_signals": []
+      }
     },
     {
       "packId": "safety-swfl",
@@ -328,48 +1185,48 @@
     {
       "packId": "city-pulse-swfl",
       "status": "built",
-      "version": 188,
+      "version": 189,
       "written": true,
       "brainOutput": {
         "brain_id": "city-pulse-swfl",
-        "version": 188,
-        "refined_at": "2026-11-19T13:33:17Z",
-        "expires": "2026-11-20T13:33:17Z",
+        "version": 189,
+        "refined_at": "2026-11-20T04:26:47Z",
+        "expires": "2026-11-21T04:26:47Z",
         "ttl_seconds": 86400,
         "direction": "neutral",
         "magnitude": 0,
         "drivers": [],
         "overrides": [],
-        "conclusion": "SWFL city pulse as of 2026-11-19: 84 live current-events signals across 8 cities — Cape Coral (18), Fort Myers (29), Naples (28), North Naples (2), Sanibel (1), East Naples (1), Fort Myers Beach (3), Estero (2). Most current: Cape Coral — A couple listed a beachfront 'dream home' for $64 million in North Naples, as reported on Nov. 13, 2026. These are current cited facts only; the cross-vertical read and any direction call live downstream in master.",
+        "conclusion": "SWFL city pulse as of 2026-11-20: 90 live current-events signals across 9 cities — Naples (29), Fort Myers (31), Cape Coral (20), North Naples (2), Sanibel (1), East Naples (1), Marco Island (1), Fort Myers Beach (3), Estero (2). Most current: Naples — The nonprofit foundation that put on the Naples St. Patrick's Day Parade notified the city in May that it is 'getting out of the parade business and will not be running the parade in Naples anymore,' potentially ending the 50-year tradition. These are current cited facts only; the cross-vertical read and any direction call live downstream in master.",
         "key_metrics": [
           {
-            "metric": "signal_transactions_1",
-            "value": "Cape Coral: A couple listed a beachfront 'dream home' for $64 million in North Naples, as reported on Nov. 13, 2026.",
+            "metric": "signal_breaking_1",
+            "value": "Naples: The nonprofit foundation that put on the Naples St. Patrick's Day Parade notified the city in May that it is 'getting out of the parade business and will not be running the parade in Naples anymore,' potentially ending the 50-year tradition.",
             "direction": "stable",
-            "label": "Cape Coral — transactions",
+            "label": "Naples — breaking",
             "variable_type": "categorical",
             "source": {
-              "url": "https://www.news-press.com/story/money/business/local/2026/11/13/couple-selling-new-64-million-dollar-waterfront-dream-home-in-north-naples-florida/92689828007/",
-              "fetched_at": "2026-11-19T13:33:17Z",
+              "url": "https://www.news-press.com/story/money/business/local/2026/11/18/naples-florida-st-patricks-day-parade-may-have-come-to-its-end-after-50-years/92836594007/",
+              "fetched_at": "2026-11-20T04:26:47Z",
               "tier": 2,
-              "citation": "Couple selling $64 million waterfront 'dream home' in North Naples: \"[](https://www.news-press.com/)\n[](https://subscribe.news-press.com/rr/nanobar?gps-source=CPTILELEFT&itm_campaign=2026ENTQ4BAU2026&itm_medium=ONSITE&success-url=https%3A%2F%2Fwww.news-press.com%2Fstory%2Fmoney%2Fbusiness%2Flocal%2F2026%2F11%2F13%2Fcouple-selling-new-64-million-dollar-waterfront-dream-home-in-north-naples-florida%2F92689828007%2F)\n[](https://subscribe.news-press.com/rr/masthead?gps-source=CPMASTHEAD&itm_campaign=2026ENTQ4BAU2026&itm_medium=ONSITE&success-url=https%3A%2F%2Fwww.news-press.com%2Fstory%2Fmoney%2Fbusiness%2Flocal%2F2026%2F11%2F13%2Fcouple-selling-new-64-million-dollar-waterfront-dream-home-in-north-naples-florida%2F92689828007%2F)\n[News](https://www.news-press.com/news/) [Cape Coral](https://www.news-press.com/news/cape-coral/) [Sports](https://www.news-press.com/sports/) [Restaurants](https://www.news-press.com/taste/) [Real Estate](https://www.news-press.com/real-estate) [Advertise](https://advertising.usatoday.com/advertise-with-us/?cid=Web_LiQ_Network_AdvertiseWithUs_AdvertiseInquiry&publication=the_news_press&utm_source=local_publication&utm_medium=menu&utm_campaign=advertise_with_us) [Obituaries](https://www.news-press.com/obituaries) [eNewspaper](https://user.news-press.com/user/enewspaper) [Legals](https://www.news-press.com/public-notices)\n[](https://www.news-press.com/search/ \"Search\")\n[](https://www.news-press.com/weather/ \"Weather in Fort Myers: 55°F Mostly Sunny\") [](https://subscribe.news-press.com/rr/navsub?gps-source=CPTOPNAVBAR&itm_campaign=2026ENTQ4BAU2026&itm_medium=ONSITE&success-url=https%3A%2F%2Fwww.news-press.com%2Fstory%2Fmoney%2Fbusiness%2Flocal%2F2026%2F11%2F13%2Fcouple-selling-new-64-million-dollar-waterfront-dream-home-in-north-naples-florida%2F92689828007%2F)\n[](https://login.news-press.com/PFTM-GUP/authenticate/?success-url=https%3A%2F%2Fwww.news-press.com%2Fstory%2Fmoney%2Fbusiness%2Flocal%2F2026%2F11%2F13%2Fcouple-selling-new-64-million-dollar-waterfront-dream-home-in-north-naples-florida%2F92689828007%2F&cancel-url=https%3A%2F%2Fwww.news-press.com%2Fstory%2Fmoney%2Fbusiness%2Flocal%2F2026%2F11%2F13%2Fcouple-selling-new-64-million-dollar-waterfront-dream-home-in-north-naples-florida%2F92689828007%2F)\n[](https://www.news-press.com/) [](https://www.news-press.com/)\nLOCAL BUSINESS\n# Couple lists beachfront 'dream home' for $64 million in North Naples\n[![Portrait of Laura Layden](https://www.news-press.com/gcdn/authoring/authoring-images/2024/02/08/PNDN/72524348007-ndn-jh-20240126-laura-0001.JPG?crop=3313,3312,x1506,y0&width=48&height=48&format=pjpg&auto=webp) Laura Layden](https://www.naplesnews.com/staff/2647080001/laura-layden/)\nFort Myers News-Press & Naples Daily News\nNov. 13, 2026, 2:32 p.m. ET\n[](https://www.facebook.com/dialog/share?display=popup&app_id=149631068421067&href=https%3A%2F%2Fwww.news-press.com%2Fstory%2Fmoney%2Fbusiness%2Flocal%2F2026%2F11%2F13%2Fcouple-selling-new-64-million-dollar-waterfront-dream-home-in-north-naples-florida%2F92689828007%2F)[](https://x.com/intent/po\""
+              "citation": "Naples St. Patrick's Day parade may have come to its end after 50 years: \"[](https://www.news-press.com/)\n[](https://subscribe.news-press.com/rr/nanobar?gps-source=CPTILELEFT&itm_campaign=2026ENTQ4BAU2026&itm_medium=ONSITE&success-url=https%3A%2F%2Fwww.news-press.com%2Fstory%2Fmoney%2Fbusiness%2Flocal%2F2026%2F11%2F18%2Fnaples-florida-st-patricks-day-parade-may-have-come-to-its-end-after-50-years%2F92836594007%2F)\n[](https://subscribe.news-press.com/rr/masthead?gps-source=CPMASTHEAD&itm_campaign=2026ENTQ4BAU2026&itm_medium=ONSITE&success-url=https%3A%2F%2Fwww.news-press.com%2Fstory%2Fmoney%2Fbusiness%2Flocal%2F2026%2F11%2F18%2Fnaples-florida-st-patricks-day-parade-may-have-come-to-its-end-after-50-years%2F92836594007%2F)\n[News](https://www.news-press.com/news/) [Cape Coral](https://www.news-press.com/news/cape-coral/) [Sports](https://www.news-press.com/sports/) [Restaurants](https://www.news-press.com/taste/) [Real Estate](https://www.news-press.com/real-estate) [Advertise](https://advertising.usatoday.com/advertise-with-us/?cid=Web_LiQ_Network_AdvertiseWithUs_AdvertiseInquiry&publication=the_news_press&utm_source=local_publication&utm_medium=menu&utm_campaign=advertise_with_us) [Obituaries](https://www.news-press.com/obituaries) [eNewspaper](https://user.news-press.com/user/enewspaper) [Legals](https://www.news-press.com/public-notices)\n[](https://www.news-press.com/search/ \"Search\")\n[](https://www.news-press.com/weather/ \"Weather in Fort Myers: 77°F Mostly Cloudy\") [](https://subscribe.news-press.com/rr/navsub?gps-source=CPTOPNAVBAR&itm_campaign=2026ENTQ4BAU2026&itm_medium=ONSITE&success-url=https%3A%2F%2Fwww.news-press.com%2Fstory%2Fmoney%2Fbusiness%2Flocal%2F2026%2F11%2F18%2Fnaples-florida-st-patricks-day-parade-may-have-come-to-its-end-after-50-years%2F92836594007%2F)\n[](https://login.news-press.com/PFTM-GUP/authenticate/?success-url=https%3A%2F%2Fwww.news-press.com%2Fstory%2Fmoney%2Fbusiness%2Flocal%2F2026%2F11%2F18%2Fnaples-florida-st-patricks-day-parade-may-have-come-to-its-end-after-50-years%2F92836594007%2F&cancel-url=https%3A%2F%2Fwww.news-press.com%2Fstory%2Fmoney%2Fbusiness%2Flocal%2F2026%2F11%2F18%2Fnaples-florida-st-patricks-day-parade-may-have-come-to-its-end-after-50-years%2F92836594007%2F)\n[](https://www.news-press.com/) [](https://www.news-press.com/)\nLOCAL BUSINESS\n# Naples St. Patrick's Day parade tradition may have come to an end\n[![Portrait of Laura Layden](https://www.news-press.com/gcdn/authoring/authoring-images/2024/02/08/PNDN/72524348007-ndn-jh-20240126-laura-0001.JPG?crop=3313,3312,x1506,y0&width=48&height=48&format=pjpg&auto=webp) Laura Layden](https://www.naplesnews.com/staff/2647080001/laura-layden/)\nFort Myers News-Press & Naples Daily News\nUpdated Nov. 18, 2026, 11:38 a.m. ET\nIt appears the Naples St. Patrick's Day Parade has reached the end of its rainbow.\nIn May, the nonprofit foundation that put on the popular event notified the city that it is \"getting out of the parade business and will not be running the parade in Naples anymore.\"\n[](https://www.news-press.com/)\n[Help](https://h\""
             },
             "suggestions": [
-              "What's driving signal transactions 1?",
-              "How does signal transactions 1 here compare to other SWFL areas?"
+              "What's driving signal breaking 1?",
+              "How does signal breaking 1 here compare to other SWFL areas?"
             ]
           },
           {
             "metric": "signal_transactions_2",
-            "value": "Fort Myers: A couple listed a beachfront 'dream home' for $64 million in North Naples on Nov. 13, 2026.",
+            "value": "Fort Myers: Fort Myers industrial properties sold for $17.5 million to a Pennsylvania investor, as reported Nov. 18, 2026.",
             "direction": "stable",
             "label": "Fort Myers — transactions",
             "variable_type": "categorical",
             "source": {
-              "url": "https://www.news-press.com/story/money/business/local/2026/11/13/couple-selling-new-64-million-dollar-waterfront-dream-home-in-north-naples-florida/92689828007/",
-              "fetched_at": "2026-11-19T13:33:17Z",
+              "url": "https://www.businessobserverfl.com/news/2026/nov/18/fort-myers-industrial-properties-sell/",
+              "fetched_at": "2026-11-20T04:26:47Z",
               "tier": 2,
-              "citation": "Couple selling $64 million waterfront 'dream home' in North Naples: \"[](https://www.news-press.com/)\n[](https://subscribe.news-press.com/rr/nanobar?gps-source=CPTILELEFT&itm_campaign=2026ENTQ4BAU2026&itm_medium=ONSITE&success-url=https%3A%2F%2Fwww.news-press.com%2Fstory%2Fmoney%2Fbusiness%2Flocal%2F2026%2F11%2F13%2Fcouple-selling-new-64-million-dollar-waterfront-dream-home-in-north-naples-florida%2F92689828007%2F)\n[](https://subscribe.news-press.com/rr/masthead?gps-source=CPMASTHEAD&itm_campaign=2026ENTQ4BAU2026&itm_medium=ONSITE&success-url=https%3A%2F%2Fwww.news-press.com%2Fstory%2Fmoney%2Fbusiness%2Flocal%2F2026%2F11%2F13%2Fcouple-selling-new-64-million-dollar-waterfront-dream-home-in-north-naples-florida%2F92689828007%2F)\n[News](https://www.news-press.com/news/) [Cape Coral](https://www.news-press.com/news/cape-coral/) [Sports](https://www.news-press.com/sports/) [Restaurants](https://www.news-press.com/taste/) [Real Estate](https://www.news-press.com/real-estate) [Advertise](https://advertising.usatoday.com/advertise-with-us/?cid=Web_LiQ_Network_AdvertiseWithUs_AdvertiseInquiry&publication=the_news_press&utm_source=local_publication&utm_medium=menu&utm_campaign=advertise_with_us) [Obituaries](https://www.news-press.com/obituaries) [eNewspaper](https://user.news-press.com/user/enewspaper) [Legals](https://www.news-press.com/public-notices)\n[](https://www.news-press.com/search/ \"Search\")\n[](https://www.news-press.com/weather/ \"Weather in Fort Myers: 55°F Mostly Sunny\") [](https://subscribe.news-press.com/rr/navsub?gps-source=CPTOPNAVBAR&itm_campaign=2026ENTQ4BAU2026&itm_medium=ONSITE&success-url=https%3A%2F%2Fwww.news-press.com%2Fstory%2Fmoney%2Fbusiness%2Flocal%2F2026%2F11%2F13%2Fcouple-selling-new-64-million-dollar-waterfront-dream-home-in-north-naples-florida%2F92689828007%2F)\n[](https://login.news-press.com/PFTM-GUP/authenticate/?success-url=https%3A%2F%2Fwww.news-press.com%2Fstory%2Fmoney%2Fbusiness%2Flocal%2F2026%2F11%2F13%2Fcouple-selling-new-64-million-dollar-waterfront-dream-home-in-north-naples-florida%2F92689828007%2F&cancel-url=https%3A%2F%2Fwww.news-press.com%2Fstory%2Fmoney%2Fbusiness%2Flocal%2F2026%2F11%2F13%2Fcouple-selling-new-64-million-dollar-waterfront-dream-home-in-north-naples-florida%2F92689828007%2F)\n[](https://www.news-press.com/) [](https://www.news-press.com/)\nLOCAL BUSINESS\n# Couple lists beachfront 'dream home' for $64 million in North Naples\n[![Portrait of Laura Layden](https://www.news-press.com/gcdn/authoring/authoring-images/2024/02/08/PNDN/72524348007-ndn-jh-20240126-laura-0001.JPG?crop=3313,3312,x1506,y0&width=48&height=48&format=pjpg&auto=webp) Laura Layden](https://www.naplesnews.com/staff/2647080001/laura-layden/)\nFort Myers News-Press & Naples Daily News\nNov. 13, 2026, 2:32 p.m. ET\n[](https://www.facebook.com/dialog/share?display=popup&app_id=149631068421067&href=https%3A%2F%2Fwww.news-press.com%2Fstory%2Fmoney%2Fbusiness%2Flocal%2F2026%2F11%2F13%2Fcouple-selling-new-64-million-dollar-waterfront-dream-home-in-north-naples-florida%2F92689828007%2F)[](https://x.com/intent/po\""
+              "citation": "Fort Myers industrial properties sell for $17.5M to Pennsylvania investor | Business Observer: \"![Spinner: White decorative](https://cdn.userway.org/widgetapp/images/spin_wh.svg)\n![](https://cdn.userway.org/widgetapp/images/body_wh.svg)\n![Spinner: White decorative](https://cdn.userway.org/widgetapp/images/spin_wh.svg)\n  * ![Alternate Text](https://observermediagroup.media.clients.ellingtoncms.com/static-4/assets/images/bob-logo-header.svg)\n  * Loading\n\n\n  * [Newsletters](https://marketing.businessobserverfl.com/newsletters)\n  * [Podcast](https://www.businessobserverfl.com/podcasts/corner-office/?utm_source=header&utm_medium=sitenav)\n  * [Public Notices](https://legals.businessobserverfl.com/)\n  * [Big Book](https://www.businessobserverfl.com/big-book-of-business/2026/)\n  * [40 Under 40](https://www.businessobserverfl.com/40-under-40/)\n  * [Mobile App](https://businessobserver.pressreader.com/)\n  * [Subscribe](https://marketing.businessobserverfl.com/subscribe)\n  * [Login](https://www.businessobserverfl.com/accounts/login/?next=/news/2026/nov/18/fort-myers-industrial-properties-sell/)\n\n\n  * [](https://www.facebook.com/BusinessObserverFL)\n  * [](https://x.com/BizObserverFL)\n  * [](https://www.linkedin.com/company/businessobserverfl)\n  * [ ](https://www.instagram.com/businessobserverfl/)\n\n\n[![](https://observermediagroup.media.clients.ellingtoncms.com/static-4/assets/images/bob-logo-header.svg)](https://www.businessobserverfl.com/)\n[![](https://observermediagroup.media.clients.ellingtoncms.com/static-4/assets/images/bob-logo-sticky.svg)](https://www.businessobserverfl.com/)\n[![](https://observermediagroup.media.clients.ellingtoncms.com/static-4/assets/images/bob-logo-header.svg)](https://www.businessobserverfl.com/)\n  * [News](https://www.businessobserverfl.com/news/all/)\n  * [Strategies](https://www.businessobserverfl.com/news/strategies/)\n  * [Entrepreneurs](https://www.businessobserverfl.com/news/entrepreneurs/)\n  * [Leadership](https://www.businessobserverfl.com/news/leadership/)\n  * [Regions](https://www.businessobserverfl.com/news/2026/nov/18/fort-myers-industrial-properties-sell/)\n    * [Tampa Bay-Lakeland](https://www.businessobserverfl.com/news/tampa-bay-lakeland/)\n    * [Manatee-Sarasota](https://www.businessobserverfl.com/news/manatee-sarasota/)\n    * [Charlotte-Lee-Collier](https://www.businessobserverfl.com/news/charlotte-lee-collier/)\n    * [Florida](https://www.businessobserverfl.com/news/florida/)\n  * [Industries](https://www.businessobserverfl.com/news/2026/nov/18/fort-myers-industrial-properties-sell/)\n    * [Business Support](https://www.businessobserverfl.com/news/industries/business-support/)\n    * [Commercial Real Estate](https://www.businessobserverfl.com/news/industries/commercial-real-estate/)\n    * [Residential Real Estate](https://www.businessobserverfl.com/news/industries/residential-real-estate/)\n    * [Development](https://www.businessobserverfl.com/news/industries/development/)\n    * [Finance](https://www.businessobserverfl.com/news/industries/finance/)\n    * [Food-Beverage](https://www.businessobserverfl.com/new\""
             },
             "suggestions": [
               "What's driving signal transactions 2?",
@@ -378,13 +1235,13 @@
           },
           {
             "metric": "signal_transactions_3",
-            "value": "Naples: A couple listed a beachfront 'dream home' for $64 million in North Naples, as reported Nov. 13, 2026.",
+            "value": "Cape Coral: A couple listed a beachfront 'dream home' for $64 million in North Naples, as reported on Nov. 13, 2026.",
             "direction": "stable",
-            "label": "Naples — transactions",
+            "label": "Cape Coral — transactions",
             "variable_type": "categorical",
             "source": {
               "url": "https://www.news-press.com/story/money/business/local/2026/11/13/couple-selling-new-64-million-dollar-waterfront-dream-home-in-north-naples-florida/92689828007/",
-              "fetched_at": "2026-11-19T13:33:17Z",
+              "fetched_at": "2026-11-20T04:26:47Z",
               "tier": 2,
               "citation": "Couple selling $64 million waterfront 'dream home' in North Naples: \"[](https://www.news-press.com/)\n[](https://subscribe.news-press.com/rr/nanobar?gps-source=CPTILELEFT&itm_campaign=2026ENTQ4BAU2026&itm_medium=ONSITE&success-url=https%3A%2F%2Fwww.news-press.com%2Fstory%2Fmoney%2Fbusiness%2Flocal%2F2026%2F11%2F13%2Fcouple-selling-new-64-million-dollar-waterfront-dream-home-in-north-naples-florida%2F92689828007%2F)\n[](https://subscribe.news-press.com/rr/masthead?gps-source=CPMASTHEAD&itm_campaign=2026ENTQ4BAU2026&itm_medium=ONSITE&success-url=https%3A%2F%2Fwww.news-press.com%2Fstory%2Fmoney%2Fbusiness%2Flocal%2F2026%2F11%2F13%2Fcouple-selling-new-64-million-dollar-waterfront-dream-home-in-north-naples-florida%2F92689828007%2F)\n[News](https://www.news-press.com/news/) [Cape Coral](https://www.news-press.com/news/cape-coral/) [Sports](https://www.news-press.com/sports/) [Restaurants](https://www.news-press.com/taste/) [Real Estate](https://www.news-press.com/real-estate) [Advertise](https://advertising.usatoday.com/advertise-with-us/?cid=Web_LiQ_Network_AdvertiseWithUs_AdvertiseInquiry&publication=the_news_press&utm_source=local_publication&utm_medium=menu&utm_campaign=advertise_with_us) [Obituaries](https://www.news-press.com/obituaries) [eNewspaper](https://user.news-press.com/user/enewspaper) [Legals](https://www.news-press.com/public-notices)\n[](https://www.news-press.com/search/ \"Search\")\n[](https://www.news-press.com/weather/ \"Weather in Fort Myers: 55°F Mostly Sunny\") [](https://subscribe.news-press.com/rr/navsub?gps-source=CPTOPNAVBAR&itm_campaign=2026ENTQ4BAU2026&itm_medium=ONSITE&success-url=https%3A%2F%2Fwww.news-press.com%2Fstory%2Fmoney%2Fbusiness%2Flocal%2F2026%2F11%2F13%2Fcouple-selling-new-64-million-dollar-waterfront-dream-home-in-north-naples-florida%2F92689828007%2F)\n[](https://login.news-press.com/PFTM-GUP/authenticate/?success-url=https%3A%2F%2Fwww.news-press.com%2Fstory%2Fmoney%2Fbusiness%2Flocal%2F2026%2F11%2F13%2Fcouple-selling-new-64-million-dollar-waterfront-dream-home-in-north-naples-florida%2F92689828007%2F&cancel-url=https%3A%2F%2Fwww.news-press.com%2Fstory%2Fmoney%2Fbusiness%2Flocal%2F2026%2F11%2F13%2Fcouple-selling-new-64-million-dollar-waterfront-dream-home-in-north-naples-florida%2F92689828007%2F)\n[](https://www.news-press.com/) [](https://www.news-press.com/)\nLOCAL BUSINESS\n# Couple lists beachfront 'dream home' for $64 million in North Naples\n[![Portrait of Laura Layden](https://www.news-press.com/gcdn/authoring/authoring-images/2024/02/08/PNDN/72524348007-ndn-jh-20240126-laura-0001.JPG?crop=3313,3312,x1506,y0&width=48&height=48&format=pjpg&auto=webp) Laura Layden](https://www.naplesnews.com/staff/2647080001/laura-layden/)\nFort Myers News-Press & Naples Daily News\nNov. 13, 2026, 2:32 p.m. ET\n[](https://www.facebook.com/dialog/share?display=popup&app_id=149631068421067&href=https%3A%2F%2Fwww.news-press.com%2Fstory%2Fmoney%2Fbusiness%2Flocal%2F2026%2F11%2F13%2Fcouple-selling-new-64-million-dollar-waterfront-dream-home-in-north-naples-florida%2F92689828007%2F)[](https://x.com/intent/po\""
             },
@@ -395,13 +1252,13 @@
           },
           {
             "metric": "signal_transactions_4",
-            "value": "North Naples: A couple listed a beachfront 'dream home' for $64 million in North Naples on Nov. 13, 2026, described as the grandest residential compound ever built in the gated, waterfront community of Barefoot Beach.",
+            "value": "Fort Myers: A couple listed a beachfront 'dream home' for $64 million in North Naples on Nov. 13, 2026.",
             "direction": "stable",
-            "label": "North Naples — transactions",
+            "label": "Fort Myers — transactions",
             "variable_type": "categorical",
             "source": {
               "url": "https://www.news-press.com/story/money/business/local/2026/11/13/couple-selling-new-64-million-dollar-waterfront-dream-home-in-north-naples-florida/92689828007/",
-              "fetched_at": "2026-11-19T13:33:17Z",
+              "fetched_at": "2026-11-20T04:26:47Z",
               "tier": 2,
               "citation": "Couple selling $64 million waterfront 'dream home' in North Naples: \"[](https://www.news-press.com/)\n[](https://subscribe.news-press.com/rr/nanobar?gps-source=CPTILELEFT&itm_campaign=2026ENTQ4BAU2026&itm_medium=ONSITE&success-url=https%3A%2F%2Fwww.news-press.com%2Fstory%2Fmoney%2Fbusiness%2Flocal%2F2026%2F11%2F13%2Fcouple-selling-new-64-million-dollar-waterfront-dream-home-in-north-naples-florida%2F92689828007%2F)\n[](https://subscribe.news-press.com/rr/masthead?gps-source=CPMASTHEAD&itm_campaign=2026ENTQ4BAU2026&itm_medium=ONSITE&success-url=https%3A%2F%2Fwww.news-press.com%2Fstory%2Fmoney%2Fbusiness%2Flocal%2F2026%2F11%2F13%2Fcouple-selling-new-64-million-dollar-waterfront-dream-home-in-north-naples-florida%2F92689828007%2F)\n[News](https://www.news-press.com/news/) [Cape Coral](https://www.news-press.com/news/cape-coral/) [Sports](https://www.news-press.com/sports/) [Restaurants](https://www.news-press.com/taste/) [Real Estate](https://www.news-press.com/real-estate) [Advertise](https://advertising.usatoday.com/advertise-with-us/?cid=Web_LiQ_Network_AdvertiseWithUs_AdvertiseInquiry&publication=the_news_press&utm_source=local_publication&utm_medium=menu&utm_campaign=advertise_with_us) [Obituaries](https://www.news-press.com/obituaries) [eNewspaper](https://user.news-press.com/user/enewspaper) [Legals](https://www.news-press.com/public-notices)\n[](https://www.news-press.com/search/ \"Search\")\n[](https://www.news-press.com/weather/ \"Weather in Fort Myers: 55°F Mostly Sunny\") [](https://subscribe.news-press.com/rr/navsub?gps-source=CPTOPNAVBAR&itm_campaign=2026ENTQ4BAU2026&itm_medium=ONSITE&success-url=https%3A%2F%2Fwww.news-press.com%2Fstory%2Fmoney%2Fbusiness%2Flocal%2F2026%2F11%2F13%2Fcouple-selling-new-64-million-dollar-waterfront-dream-home-in-north-naples-florida%2F92689828007%2F)\n[](https://login.news-press.com/PFTM-GUP/authenticate/?success-url=https%3A%2F%2Fwww.news-press.com%2Fstory%2Fmoney%2Fbusiness%2Flocal%2F2026%2F11%2F13%2Fcouple-selling-new-64-million-dollar-waterfront-dream-home-in-north-naples-florida%2F92689828007%2F&cancel-url=https%3A%2F%2Fwww.news-press.com%2Fstory%2Fmoney%2Fbusiness%2Flocal%2F2026%2F11%2F13%2Fcouple-selling-new-64-million-dollar-waterfront-dream-home-in-north-naples-florida%2F92689828007%2F)\n[](https://www.news-press.com/) [](https://www.news-press.com/)\nLOCAL BUSINESS\n# Couple lists beachfront 'dream home' for $64 million in North Naples\n[![Portrait of Laura Layden](https://www.news-press.com/gcdn/authoring/authoring-images/2024/02/08/PNDN/72524348007-ndn-jh-20240126-laura-0001.JPG?crop=3313,3312,x1506,y0&width=48&height=48&format=pjpg&auto=webp) Laura Layden](https://www.naplesnews.com/staff/2647080001/laura-layden/)\nFort Myers News-Press & Naples Daily News\nNov. 13, 2026, 2:32 p.m. ET\n[](https://www.facebook.com/dialog/share?display=popup&app_id=149631068421067&href=https%3A%2F%2Fwww.news-press.com%2Fstory%2Fmoney%2Fbusiness%2Flocal%2F2026%2F11%2F13%2Fcouple-selling-new-64-million-dollar-waterfront-dream-home-in-north-naples-florida%2F92689828007%2F)[](https://x.com/intent/po\""
             },
@@ -412,15 +1269,15 @@
           },
           {
             "metric": "signal_transactions_5",
-            "value": "Cape Coral: Collier County's attempt to purchase Wildflowerz Ranch for preservation collapsed; County Manager Amy Patterson reported the deal's failure at a board meeting on Nov. 10.",
+            "value": "Naples: A couple listed a beachfront 'dream home' for $64 million in North Naples, as reported Nov. 13, 2026.",
             "direction": "stable",
-            "label": "Cape Coral — transactions",
+            "label": "Naples — transactions",
             "variable_type": "categorical",
             "source": {
-              "url": "https://www.news-press.com/story/money/business/local/2026/11/11/wildflowerz-ranch-conservation-deal-falls-apart-in-collier-county/92724754007/",
-              "fetched_at": "2026-11-19T13:33:17Z",
+              "url": "https://www.news-press.com/story/money/business/local/2026/11/13/couple-selling-new-64-million-dollar-waterfront-dream-home-in-north-naples-florida/92689828007/",
+              "fetched_at": "2026-11-20T04:26:47Z",
               "tier": 2,
-              "citation": "'Wildflowerz Ranch' conservation deal falls apart in Collier County: \"[](https://www.news-press.com/)\n[Popular Fort Myers pizza shop reopens with new look, more awards](https://www.news-press.com/story/life/food/2026/11/12/uncle-ricos-in-fort-myers-reopens-with-cool-new-look-more-awards/92650571007/)\n[](https://subscribe.news-press.com/rr/nanobar?gps-source=CPTILELEFT&itm_campaign=2026ENTQ4BAU2026&itm_medium=ONSITE&success-url=https%3A%2F%2Fwww.news-press.com%2Fstory%2Fmoney%2Fbusiness%2Flocal%2F2026%2F11%2F11%2Fwildflowerz-ranch-conservation-deal-falls-apart-in-collier-county%2F92724754007%2F)\n[](https://subscribe.news-press.com/rr/masthead?gps-source=CPMASTHEAD&itm_campaign=2026ENTQ4BAU2026&itm_medium=ONSITE&success-url=https%3A%2F%2Fwww.news-press.com%2Fstory%2Fmoney%2Fbusiness%2Flocal%2F2026%2F11%2F11%2Fwildflowerz-ranch-conservation-deal-falls-apart-in-collier-county%2F92724754007%2F)\n[News](https://www.news-press.com/news/) [Cape Coral](https://www.news-press.com/news/cape-coral/) [Sports](https://www.news-press.com/sports/) [Restaurants](https://www.news-press.com/taste/) [Real Estate](https://www.news-press.com/real-estate) [Advertise](https://advertising.usatoday.com/advertise-with-us/?cid=Web_LiQ_Network_AdvertiseWithUs_AdvertiseInquiry&publication=the_news_press&utm_source=local_publication&utm_medium=menu&utm_campaign=advertise_with_us) [Obituaries](https://www.news-press.com/obituaries) [eNewspaper](https://user.news-press.com/user/enewspaper) [Legals](https://www.news-press.com/public-notices)\n[](https://www.news-press.com/search/ \"Search\")\n[](https://www.news-press.com/weather/ \"Weather in Fort Myers: 76°F Cloudy\") [](https://subscribe.news-press.com/rr/navsub?gps-source=CPTOPNAVBAR&itm_campaign=2026ENTQ4BAU2026&itm_medium=ONSITE&success-url=https%3A%2F%2Fwww.news-press.com%2Fstory%2Fmoney%2Fbusiness%2Flocal%2F2026%2F11%2F11%2Fwildflowerz-ranch-conservation-deal-falls-apart-in-collier-county%2F92724754007%2F)\n[](https://login.news-press.com/PFTM-GUP/authenticate/?success-url=https%3A%2F%2Fwww.news-press.com%2Fstory%2Fmoney%2Fbusiness%2Flocal%2F2026%2F11%2F11%2Fwildflowerz-ranch-conservation-deal-falls-apart-in-collier-county%2F92724754007%2F&cancel-url=https%3A%2F%2Fwww.news-press.com%2Fstory%2Fmoney%2Fbusiness%2Flocal%2F2026%2F11%2F11%2Fwildflowerz-ranch-conservation-deal-falls-apart-in-collier-county%2F92724754007%2F)\n[](https://www.news-press.com/) [](https://www.news-press.com/)\nLOCAL BUSINESS\n# Conservation deal for 'Wildflowerz Ranch' collapses in Collier County\n[![Portrait of Laura Layden](https://www.news-press.com/gcdn/authoring/authoring-images/2024/02/08/PNDN/72524348007-ndn-jh-20240126-laura-0001.JPG?crop=3313,3312,x1506,y0&width=48&height=48&format=pjpg&auto=webp) Laura Layden](https://www.naplesnews.com/staff/2647080001/laura-layden/)\nFort Myers News-Press & Naples Daily News\nNov. 11, 2026Updated Nov. 12, 2026, 8:28 a.m. ET\nCollier County's hopes of purchasing the Wildflowerz Ranch for preservation have been dashed.\nAt a board meeting on Nov. 10, County Manager Amy Patterson told county\""
+              "citation": "Couple selling $64 million waterfront 'dream home' in North Naples: \"[](https://www.news-press.com/)\n[](https://subscribe.news-press.com/rr/nanobar?gps-source=CPTILELEFT&itm_campaign=2026ENTQ4BAU2026&itm_medium=ONSITE&success-url=https%3A%2F%2Fwww.news-press.com%2Fstory%2Fmoney%2Fbusiness%2Flocal%2F2026%2F11%2F13%2Fcouple-selling-new-64-million-dollar-waterfront-dream-home-in-north-naples-florida%2F92689828007%2F)\n[](https://subscribe.news-press.com/rr/masthead?gps-source=CPMASTHEAD&itm_campaign=2026ENTQ4BAU2026&itm_medium=ONSITE&success-url=https%3A%2F%2Fwww.news-press.com%2Fstory%2Fmoney%2Fbusiness%2Flocal%2F2026%2F11%2F13%2Fcouple-selling-new-64-million-dollar-waterfront-dream-home-in-north-naples-florida%2F92689828007%2F)\n[News](https://www.news-press.com/news/) [Cape Coral](https://www.news-press.com/news/cape-coral/) [Sports](https://www.news-press.com/sports/) [Restaurants](https://www.news-press.com/taste/) [Real Estate](https://www.news-press.com/real-estate) [Advertise](https://advertising.usatoday.com/advertise-with-us/?cid=Web_LiQ_Network_AdvertiseWithUs_AdvertiseInquiry&publication=the_news_press&utm_source=local_publication&utm_medium=menu&utm_campaign=advertise_with_us) [Obituaries](https://www.news-press.com/obituaries) [eNewspaper](https://user.news-press.com/user/enewspaper) [Legals](https://www.news-press.com/public-notices)\n[](https://www.news-press.com/search/ \"Search\")\n[](https://www.news-press.com/weather/ \"Weather in Fort Myers: 55°F Mostly Sunny\") [](https://subscribe.news-press.com/rr/navsub?gps-source=CPTOPNAVBAR&itm_campaign=2026ENTQ4BAU2026&itm_medium=ONSITE&success-url=https%3A%2F%2Fwww.news-press.com%2Fstory%2Fmoney%2Fbusiness%2Flocal%2F2026%2F11%2F13%2Fcouple-selling-new-64-million-dollar-waterfront-dream-home-in-north-naples-florida%2F92689828007%2F)\n[](https://login.news-press.com/PFTM-GUP/authenticate/?success-url=https%3A%2F%2Fwww.news-press.com%2Fstory%2Fmoney%2Fbusiness%2Flocal%2F2026%2F11%2F13%2Fcouple-selling-new-64-million-dollar-waterfront-dream-home-in-north-naples-florida%2F92689828007%2F&cancel-url=https%3A%2F%2Fwww.news-press.com%2Fstory%2Fmoney%2Fbusiness%2Flocal%2F2026%2F11%2F13%2Fcouple-selling-new-64-million-dollar-waterfront-dream-home-in-north-naples-florida%2F92689828007%2F)\n[](https://www.news-press.com/) [](https://www.news-press.com/)\nLOCAL BUSINESS\n# Couple lists beachfront 'dream home' for $64 million in North Naples\n[![Portrait of Laura Layden](https://www.news-press.com/gcdn/authoring/authoring-images/2024/02/08/PNDN/72524348007-ndn-jh-20240126-laura-0001.JPG?crop=3313,3312,x1506,y0&width=48&height=48&format=pjpg&auto=webp) Laura Layden](https://www.naplesnews.com/staff/2647080001/laura-layden/)\nFort Myers News-Press & Naples Daily News\nNov. 13, 2026, 2:32 p.m. ET\n[](https://www.facebook.com/dialog/share?display=popup&app_id=149631068421067&href=https%3A%2F%2Fwww.news-press.com%2Fstory%2Fmoney%2Fbusiness%2Flocal%2F2026%2F11%2F13%2Fcouple-selling-new-64-million-dollar-waterfront-dream-home-in-north-naples-florida%2F92689828007%2F)[](https://x.com/intent/po\""
             },
             "suggestions": [
               "What's driving signal transactions 5?",
@@ -428,33 +1285,33 @@
             ]
           },
           {
-            "metric": "signal_development_6",
+            "metric": "signal_transactions_6",
+            "value": "North Naples: A couple listed a beachfront 'dream home' for $64 million in North Naples on Nov. 13, 2026, described as the grandest residential compound ever built in the gated, waterfront community of Barefoot Beach.",
+            "direction": "stable",
+            "label": "North Naples — transactions",
+            "variable_type": "categorical",
+            "source": {
+              "url": "https://www.news-press.com/story/money/business/local/2026/11/13/couple-selling-new-64-million-dollar-waterfront-dream-home-in-north-naples-florida/92689828007/",
+              "fetched_at": "2026-11-20T04:26:47Z",
+              "tier": 2,
+              "citation": "Couple selling $64 million waterfront 'dream home' in North Naples: \"[](https://www.news-press.com/)\n[](https://subscribe.news-press.com/rr/nanobar?gps-source=CPTILELEFT&itm_campaign=2026ENTQ4BAU2026&itm_medium=ONSITE&success-url=https%3A%2F%2Fwww.news-press.com%2Fstory%2Fmoney%2Fbusiness%2Flocal%2F2026%2F11%2F13%2Fcouple-selling-new-64-million-dollar-waterfront-dream-home-in-north-naples-florida%2F92689828007%2F)\n[](https://subscribe.news-press.com/rr/masthead?gps-source=CPMASTHEAD&itm_campaign=2026ENTQ4BAU2026&itm_medium=ONSITE&success-url=https%3A%2F%2Fwww.news-press.com%2Fstory%2Fmoney%2Fbusiness%2Flocal%2F2026%2F11%2F13%2Fcouple-selling-new-64-million-dollar-waterfront-dream-home-in-north-naples-florida%2F92689828007%2F)\n[News](https://www.news-press.com/news/) [Cape Coral](https://www.news-press.com/news/cape-coral/) [Sports](https://www.news-press.com/sports/) [Restaurants](https://www.news-press.com/taste/) [Real Estate](https://www.news-press.com/real-estate) [Advertise](https://advertising.usatoday.com/advertise-with-us/?cid=Web_LiQ_Network_AdvertiseWithUs_AdvertiseInquiry&publication=the_news_press&utm_source=local_publication&utm_medium=menu&utm_campaign=advertise_with_us) [Obituaries](https://www.news-press.com/obituaries) [eNewspaper](https://user.news-press.com/user/enewspaper) [Legals](https://www.news-press.com/public-notices)\n[](https://www.news-press.com/search/ \"Search\")\n[](https://www.news-press.com/weather/ \"Weather in Fort Myers: 55°F Mostly Sunny\") [](https://subscribe.news-press.com/rr/navsub?gps-source=CPTOPNAVBAR&itm_campaign=2026ENTQ4BAU2026&itm_medium=ONSITE&success-url=https%3A%2F%2Fwww.news-press.com%2Fstory%2Fmoney%2Fbusiness%2Flocal%2F2026%2F11%2F13%2Fcouple-selling-new-64-million-dollar-waterfront-dream-home-in-north-naples-florida%2F92689828007%2F)\n[](https://login.news-press.com/PFTM-GUP/authenticate/?success-url=https%3A%2F%2Fwww.news-press.com%2Fstory%2Fmoney%2Fbusiness%2Flocal%2F2026%2F11%2F13%2Fcouple-selling-new-64-million-dollar-waterfront-dream-home-in-north-naples-florida%2F92689828007%2F&cancel-url=https%3A%2F%2Fwww.news-press.com%2Fstory%2Fmoney%2Fbusiness%2Flocal%2F2026%2F11%2F13%2Fcouple-selling-new-64-million-dollar-waterfront-dream-home-in-north-naples-florida%2F92689828007%2F)\n[](https://www.news-press.com/) [](https://www.news-press.com/)\nLOCAL BUSINESS\n# Couple lists beachfront 'dream home' for $64 million in North Naples\n[![Portrait of Laura Layden](https://www.news-press.com/gcdn/authoring/authoring-images/2024/02/08/PNDN/72524348007-ndn-jh-20240126-laura-0001.JPG?crop=3313,3312,x1506,y0&width=48&height=48&format=pjpg&auto=webp) Laura Layden](https://www.naplesnews.com/staff/2647080001/laura-layden/)\nFort Myers News-Press & Naples Daily News\nNov. 13, 2026, 2:32 p.m. ET\n[](https://www.facebook.com/dialog/share?display=popup&app_id=149631068421067&href=https%3A%2F%2Fwww.news-press.com%2Fstory%2Fmoney%2Fbusiness%2Flocal%2F2026%2F11%2F13%2Fcouple-selling-new-64-million-dollar-waterfront-dream-home-in-north-naples-florida%2F92689828007%2F)[](https://x.com/intent/po\""
+            },
+            "suggestions": [
+              "What's driving signal transactions 6?",
+              "How does signal transactions 6 here compare to other SWFL areas?"
+            ]
+          },
+          {
+            "metric": "signal_development_7",
             "value": "Naples: A big Florida hospitality expansion pipeline includes a Hilton hotel project in Naples, reported Nov. 16, 2026.",
             "direction": "stable",
             "label": "Naples — development",
             "variable_type": "categorical",
             "source": {
               "url": "https://www.news-press.com/story/money/2026/11/16/big-florida-hospitality-expansion-includes-hilton-naples-and-captiva-swfl-collier-lee-county-hotel/92730838007/",
-              "fetched_at": "2026-11-19T13:33:17Z",
+              "fetched_at": "2026-11-20T04:26:47Z",
               "tier": 2,
               "citation": "Big Florida hospitality expansion includes Hilton, Naples and Captiva: \"[](https://www.news-press.com/)\n[Free Fort Myers dog fest celebrates golden retrievers, other breeds](https://www.news-press.com/story/life/2026/11/16/fort-myers-florida-dog-festival-celebrates-golden-retrievers-and-more-goldenfest-dock-diving-free/92688792007/)\n[](https://subscribe.news-press.com/rr/nanobar?gps-source=CPTILELEFT&itm_campaign=2026ENTQ4BAU2026&itm_medium=ONSITE&success-url=https%3A%2F%2Fwww.news-press.com%2Fstory%2Fmoney%2F2026%2F11%2F16%2Fbig-florida-hospitality-expansion-includes-hilton-naples-and-captiva-swfl-collier-lee-county-hotel%2F92730838007%2F)\n[](https://subscribe.news-press.com/rr/masthead?gps-source=CPMASTHEAD&itm_campaign=2026ENTQ4BAU2026&itm_medium=ONSITE&success-url=https%3A%2F%2Fwww.news-press.com%2Fstory%2Fmoney%2F2026%2F11%2F16%2Fbig-florida-hospitality-expansion-includes-hilton-naples-and-captiva-swfl-collier-lee-county-hotel%2F92730838007%2F)\n[News](https://www.news-press.com/news/) [Cape Coral](https://www.news-press.com/news/cape-coral/) [Sports](https://www.news-press.com/sports/) [Restaurants](https://www.news-press.com/taste/) [Real Estate](https://www.news-press.com/real-estate) [Advertise](https://advertising.usatoday.com/advertise-with-us/?cid=Web_LiQ_Network_AdvertiseWithUs_AdvertiseInquiry&publication=the_news_press&utm_source=local_publication&utm_medium=menu&utm_campaign=advertise_with_us) [Obituaries](https://www.news-press.com/obituaries) [eNewspaper](https://user.news-press.com/user/enewspaper) [Legals](https://www.news-press.com/public-notices)\n[](https://www.news-press.com/search/ \"Search\")\n[](https://www.news-press.com/weather/ \"Weather in Fort Myers: 72°F Sunny\") [](https://subscribe.news-press.com/rr/navsub?gps-source=CPTOPNAVBAR&itm_campaign=2026ENTQ4BAU2026&itm_medium=ONSITE&success-url=https%3A%2F%2Fwww.news-press.com%2Fstory%2Fmoney%2F2026%2F11%2F16%2Fbig-florida-hospitality-expansion-includes-hilton-naples-and-captiva-swfl-collier-lee-county-hotel%2F92730838007%2F)\n[](https://login.news-press.com/PFTM-GUP/authenticate/?success-url=https%3A%2F%2Fwww.news-press.com%2Fstory%2Fmoney%2F2026%2F11%2F16%2Fbig-florida-hospitality-expansion-includes-hilton-naples-and-captiva-swfl-collier-lee-county-hotel%2F92730838007%2F&cancel-url=https%3A%2F%2Fwww.news-press.com%2Fstory%2Fmoney%2F2026%2F11%2F16%2Fbig-florida-hospitality-expansion-includes-hilton-naples-and-captiva-swfl-collier-lee-county-hotel%2F92730838007%2F)\n[](https://www.news-press.com/) [](https://www.news-press.com/)\nMONEY\n# Florida pipeline projects include hotels, resorts, re-openings and more\n[![Portrait of Phil Fernandez](https://www.news-press.com/gcdn/presto/2019/09/14/PNDN/6a77b474-579f-48fa-b56f-a2cc2b9de797-NDN_Phil_Fernandez.jpg?crop=2999,2999,x0,y570&width=48&height=48&format=pjpg&auto=webp) Phil Fernandez](https://www.naplesnews.com/staff/2684114001/phil-fernandez/)\nFort Myers News-Press & Naples Daily News\nNov. 16, 2026, 5:04 a.m. ET\n[Southwest Florida](https://www.news-press.com/story/money/2026/10/26/florida-fighting-over\""
-            },
-            "suggestions": [
-              "What's driving signal development 6?",
-              "How does signal development 6 here compare to other SWFL areas?"
-            ]
-          },
-          {
-            "metric": "signal_development_7",
-            "value": "Naples: New affordable and workforce housing projects in the Naples/SWFL area debuted as of Nov. 10, 2026, with hefty demand reported.",
-            "direction": "stable",
-            "label": "Naples — development",
-            "variable_type": "categorical",
-            "source": {
-              "url": "https://www.naplesnews.com/story/money/2026/11/10/florida-sees-new-affordable-workforce-housing-compounds-make-debuts-swfl-naples-fort-myers-sanibel/92696792007/",
-              "fetched_at": "2026-11-19T13:33:17Z",
-              "tier": 2,
-              "citation": "Florida sees new affordable, workforce housing compounds make debuts: \"[](https://www.naplesnews.com/)\n[](https://subscribe.naplesnews.com/rr/nanobar?gps-source=CPTILELEFT&itm_campaign=2026ENTQ4BAU2026&itm_medium=ONSITE&success-url=https%3A%2F%2Fwww.naplesnews.com%2Fstory%2Fmoney%2F2026%2F11%2F10%2Fflorida-sees-new-affordable-workforce-housing-compounds-make-debuts-swfl-naples-fort-myers-sanibel%2F92696792007%2F)\n[](https://subscribe.naplesnews.com/rr/masthead?gps-source=CPMASTHEAD&itm_campaign=2026ENTQ4BAU2026&itm_medium=ONSITE&success-url=https%3A%2F%2Fwww.naplesnews.com%2Fstory%2Fmoney%2F2026%2F11%2F10%2Fflorida-sees-new-affordable-workforce-housing-compounds-make-debuts-swfl-naples-fort-myers-sanibel%2F92696792007%2F)\n[News](https://www.naplesnews.com/news/) [Sports](https://www.naplesnews.com/sports/) [Real Estate](https://www.naplesnews.com/business/real-estate/) [Restaurants](https://www.naplesnews.com/entertainment/restaurants/) [Opinion](https://www.naplesnews.com/opinion/) [Advertise](https://advertising.usatoday.com/advertise-with-us/?cid=Web_LiQ_Network_AdvertiseWithUs_AdvertiseInquiry&publication=naples_daily_news&utm_source=local_publication&utm_medium=menu&utm_campaign=advertise_with_us) [Obituaries](https://www.naplesnews.com/obituaries) [eNewspaper](https://user.naplesnews.com/user/enewspaper) [Legals](https://www.naplesnews.com/public-notices)\n[](https://www.naplesnews.com/search/ \"Search\")\n[](https://www.naplesnews.com/weather/ \"Weather in Naples: 70°F Cloudy\") [](https://subscribe.naplesnews.com/rr/navsub?gps-source=CPTOPNAVBAR&itm_campaign=2026ENTQ4BAU2026&itm_medium=ONSITE&success-url=https%3A%2F%2Fwww.naplesnews.com%2Fstory%2Fmoney%2F2026%2F11%2F10%2Fflorida-sees-new-affordable-workforce-housing-compounds-make-debuts-swfl-naples-fort-myers-sanibel%2F92696792007%2F)\n[](https://login.naplesnews.com/PNDN-GUP/authenticate/?success-url=https%3A%2F%2Fwww.naplesnews.com%2Fstory%2Fmoney%2F2026%2F11%2F10%2Fflorida-sees-new-affordable-workforce-housing-compounds-make-debuts-swfl-naples-fort-myers-sanibel%2F92696792007%2F&cancel-url=https%3A%2F%2Fwww.naplesnews.com%2Fstory%2Fmoney%2F2026%2F11%2F10%2Fflorida-sees-new-affordable-workforce-housing-compounds-make-debuts-swfl-naples-fort-myers-sanibel%2F92696792007%2F)\n[](https://www.naplesnews.com/) [](https://www.naplesnews.com/)\n[MONEY](https://www.naplesnews.com/business/)\n# New Florida affordable housing projects take shape with hefty demand\n[![Portrait of Phil Fernandez](https://www.naplesnews.com/gcdn/presto/2019/09/14/PNDN/6a77b474-579f-48fa-b56f-a2cc2b9de797-NDN_Phil_Fernandez.jpg?crop=2999,2999,x0,y570&width=48&height=48&format=pjpg&auto=webp) Phil Fernandez](https://www.naplesnews.com/staff/2684114001/phil-fernandez/)\nFort Myers News-Press & Naples Daily News\nNov. 10, 2026, 10:47 a.m. ET\n[](https://www.facebook.com/dialog/share?display=popup&app_id=1703814913224751&href=https%3A%2F%2Fwww.naplesnews.com%2Fstory%2Fmoney%2F2026%2F11%2F10%2Fflorida-sees-new-affordable-workforce-housing-compounds-make-debuts-swfl-naples-fort-myers-sanibel%2F92696792007%\""
             },
             "suggestions": [
               "What's driving signal development 7?",
@@ -463,13 +1320,13 @@
           },
           {
             "metric": "signal_development_8",
-            "value": "Sanibel: New affordable, workforce housing compounds make debuts in Florida, including Sanibel, as of Nov. 10, 2026.",
+            "value": "Naples: New affordable and workforce housing projects in the Naples/SWFL area debuted as of Nov. 10, 2026, with hefty demand reported.",
             "direction": "stable",
-            "label": "Sanibel — development",
+            "label": "Naples — development",
             "variable_type": "categorical",
             "source": {
               "url": "https://www.naplesnews.com/story/money/2026/11/10/florida-sees-new-affordable-workforce-housing-compounds-make-debuts-swfl-naples-fort-myers-sanibel/92696792007/",
-              "fetched_at": "2026-11-19T13:33:17Z",
+              "fetched_at": "2026-11-20T04:26:47Z",
               "tier": 2,
               "citation": "Florida sees new affordable, workforce housing compounds make debuts: \"[](https://www.naplesnews.com/)\n[](https://subscribe.naplesnews.com/rr/nanobar?gps-source=CPTILELEFT&itm_campaign=2026ENTQ4BAU2026&itm_medium=ONSITE&success-url=https%3A%2F%2Fwww.naplesnews.com%2Fstory%2Fmoney%2F2026%2F11%2F10%2Fflorida-sees-new-affordable-workforce-housing-compounds-make-debuts-swfl-naples-fort-myers-sanibel%2F92696792007%2F)\n[](https://subscribe.naplesnews.com/rr/masthead?gps-source=CPMASTHEAD&itm_campaign=2026ENTQ4BAU2026&itm_medium=ONSITE&success-url=https%3A%2F%2Fwww.naplesnews.com%2Fstory%2Fmoney%2F2026%2F11%2F10%2Fflorida-sees-new-affordable-workforce-housing-compounds-make-debuts-swfl-naples-fort-myers-sanibel%2F92696792007%2F)\n[News](https://www.naplesnews.com/news/) [Sports](https://www.naplesnews.com/sports/) [Real Estate](https://www.naplesnews.com/business/real-estate/) [Restaurants](https://www.naplesnews.com/entertainment/restaurants/) [Opinion](https://www.naplesnews.com/opinion/) [Advertise](https://advertising.usatoday.com/advertise-with-us/?cid=Web_LiQ_Network_AdvertiseWithUs_AdvertiseInquiry&publication=naples_daily_news&utm_source=local_publication&utm_medium=menu&utm_campaign=advertise_with_us) [Obituaries](https://www.naplesnews.com/obituaries) [eNewspaper](https://user.naplesnews.com/user/enewspaper) [Legals](https://www.naplesnews.com/public-notices)\n[](https://www.naplesnews.com/search/ \"Search\")\n[](https://www.naplesnews.com/weather/ \"Weather in Naples: 70°F Cloudy\") [](https://subscribe.naplesnews.com/rr/navsub?gps-source=CPTOPNAVBAR&itm_campaign=2026ENTQ4BAU2026&itm_medium=ONSITE&success-url=https%3A%2F%2Fwww.naplesnews.com%2Fstory%2Fmoney%2F2026%2F11%2F10%2Fflorida-sees-new-affordable-workforce-housing-compounds-make-debuts-swfl-naples-fort-myers-sanibel%2F92696792007%2F)\n[](https://login.naplesnews.com/PNDN-GUP/authenticate/?success-url=https%3A%2F%2Fwww.naplesnews.com%2Fstory%2Fmoney%2F2026%2F11%2F10%2Fflorida-sees-new-affordable-workforce-housing-compounds-make-debuts-swfl-naples-fort-myers-sanibel%2F92696792007%2F&cancel-url=https%3A%2F%2Fwww.naplesnews.com%2Fstory%2Fmoney%2F2026%2F11%2F10%2Fflorida-sees-new-affordable-workforce-housing-compounds-make-debuts-swfl-naples-fort-myers-sanibel%2F92696792007%2F)\n[](https://www.naplesnews.com/) [](https://www.naplesnews.com/)\n[MONEY](https://www.naplesnews.com/business/)\n# New Florida affordable housing projects take shape with hefty demand\n[![Portrait of Phil Fernandez](https://www.naplesnews.com/gcdn/presto/2019/09/14/PNDN/6a77b474-579f-48fa-b56f-a2cc2b9de797-NDN_Phil_Fernandez.jpg?crop=2999,2999,x0,y570&width=48&height=48&format=pjpg&auto=webp) Phil Fernandez](https://www.naplesnews.com/staff/2684114001/phil-fernandez/)\nFort Myers News-Press & Naples Daily News\nNov. 10, 2026, 10:47 a.m. ET\n[](https://www.facebook.com/dialog/share?display=popup&app_id=1703814913224751&href=https%3A%2F%2Fwww.naplesnews.com%2Fstory%2Fmoney%2F2026%2F11%2F10%2Fflorida-sees-new-affordable-workforce-housing-compounds-make-debuts-swfl-naples-fort-myers-sanibel%2F92696792007%\""
             },
@@ -546,7 +1403,7 @@
             ],
             "source": {
               "url": "https://www.swfldatagulf.com/r/source/city_pulse",
-              "fetched_at": "2026-11-19T13:33:17Z",
+              "fetched_at": "2026-11-20T04:26:47Z",
               "tier": 2,
               "citation": "Distilled, citation-backed SWFL news signals; each ZIP's items carry per-item source URLs in data_lake.city_pulse."
             },
@@ -554,7 +1411,7 @@
           }
         ],
         "caveats": [
-          "76 additional live signals not surfaced here (cap 8); the full set is in data_lake.city_pulse.",
+          "82 additional live signals not surfaced here (cap 8); the full set is in data_lake.city_pulse.",
           "Each signal is dated current-events context with a per-signal source; freshness is TTL-bounded by topic (breaking 1d → structural 90d)."
         ],
         "contradicts": [],
@@ -567,7 +1424,7 @@
         "relevance": {
           "decay_curve": "weeks",
           "half_life_hours": 720,
-          "computed_at": "2026-11-19T13:33:17Z"
+          "computed_at": "2026-11-20T04:26:47Z"
         },
         "exogenous_signals": []
       }
@@ -584,8 +1441,119 @@
     },
     {
       "packId": "freshness-pulse",
-      "status": "skipped-fresh",
-      "written": false
+      "status": "built",
+      "version": 109,
+      "written": true,
+      "brainOutput": {
+        "brain_id": "freshness-pulse",
+        "version": 109,
+        "refined_at": "2026-11-20T04:26:47Z",
+        "expires": "2026-11-21T04:26:47Z",
+        "ttl_seconds": 86400,
+        "direction": "neutral",
+        "magnitude": 0,
+        "drivers": [],
+        "overrides": [],
+        "conclusion": "Today's sourced snapshot — Cape Coral median asking price (as of 2026-11-20) $399,200; Fort Myers median asking price (as of 2026-11-20) $325,000; Naples median asking price (as of 2026-11-20) $650,000; SWFL 30-year fixed mortgage rate (as of 2026-11-19) 7.28%. These are cited current facts only; the direction call lives downstream in master.",
+        "key_metrics": [
+          {
+            "metric": "freshness_median_asking_price_cape_coral_usd",
+            "value": 399200,
+            "direction": "stable",
+            "label": "Cape Coral median asking price (as of 2026-11-20)",
+            "variable_type": "extensive",
+            "units": "USD",
+            "display_format": "currency",
+            "source": {
+              "url": "https://www.swfldatagulf.com/desk",
+              "fetched_at": "2026-11-20T04:23:37.497606+00:00",
+              "tier": 2,
+              "citation": "SWFL Data Gulf active-listing inventory — current median asking price for Cape Coral, sourced 2026-11-20"
+            },
+            "suggestions": [
+              "Chart asking rents across the corridors",
+              "What's driving freshness median asking price cape coral usd?",
+              "How does freshness median asking price cape coral usd here compare to other SWFL areas?"
+            ]
+          },
+          {
+            "metric": "freshness_median_asking_price_fort_myers_usd",
+            "value": 325000,
+            "direction": "stable",
+            "label": "Fort Myers median asking price (as of 2026-11-20)",
+            "variable_type": "extensive",
+            "units": "USD",
+            "display_format": "currency",
+            "source": {
+              "url": "https://www.swfldatagulf.com/desk",
+              "fetched_at": "2026-11-20T04:23:37.497606+00:00",
+              "tier": 2,
+              "citation": "SWFL Data Gulf active-listing inventory — current median asking price for Fort Myers, sourced 2026-11-20"
+            },
+            "suggestions": [
+              "Chart asking rents across the corridors",
+              "What's driving freshness median asking price fort myers usd?",
+              "How does freshness median asking price fort myers usd here compare to other SWFL areas?"
+            ]
+          },
+          {
+            "metric": "freshness_median_asking_price_naples_usd",
+            "value": 650000,
+            "direction": "stable",
+            "label": "Naples median asking price (as of 2026-11-20)",
+            "variable_type": "extensive",
+            "units": "USD",
+            "display_format": "currency",
+            "source": {
+              "url": "https://www.swfldatagulf.com/desk",
+              "fetched_at": "2026-11-20T04:23:37.497606+00:00",
+              "tier": 2,
+              "citation": "SWFL Data Gulf active-listing inventory — current median asking price for Naples, sourced 2026-11-20"
+            },
+            "suggestions": [
+              "Chart asking rents across the corridors",
+              "What's driving freshness median asking price naples usd?",
+              "How does freshness median asking price naples usd here compare to other SWFL areas?"
+            ]
+          },
+          {
+            "metric": "freshness_mortgage_30yr_fixed_pct",
+            "value": 7.28,
+            "direction": "stable",
+            "label": "SWFL 30-year fixed mortgage rate (as of 2026-11-19)",
+            "variable_type": "intensive",
+            "units": "percent",
+            "display_format": "percent",
+            "source": {
+              "url": "https://fred.stlouisfed.org/series/MORTGAGE30US",
+              "fetched_at": "2026-11-20T04:23:37.497606+00:00",
+              "tier": 2,
+              "citation": "FRED — current 30-year fixed mortgage rate for SWFL, sourced 2026-11-19"
+            },
+            "suggestions": [
+              "What's driving freshness mortgage 30yr fixed pct?",
+              "How does freshness mortgage 30yr fixed pct here compare to other SWFL areas?"
+            ]
+          }
+        ],
+        "detail_tables": [],
+        "caveats": [
+          "Each county-grain number is a single grounded source's current figure, provenance-gated to a real source URL; held anomalies and unsourced (model-memory) numbers are excluded by design."
+        ],
+        "contradicts": [],
+        "confidence": 0.8,
+        "joint_integrity": 1,
+        "confidence_dispersion": 0,
+        "chain_depth": 0,
+        "trust_tier": 2,
+        "upstream_count": 0,
+        "relevance": {
+          "decay_curve": "weeks",
+          "half_life_hours": 720,
+          "computed_at": "2026-11-20T04:26:47Z"
+        },
+        "exogenous_signals": []
+      }
     },
     {
       "packId": "seller-stress-swfl",
@@ -668,16 +1636,16 @@
     {
       "packId": "master",
       "status": "built",
-      "version": 196,
+      "version": 197,
       "written": true,
       "brainOutput": {
         "brain_id": "master",
-        "version": 196,
-        "refined_at": "2026-11-19T13:33:38Z",
-        "expires": "2026-11-26T13:33:38Z",
+        "version": 197,
+        "refined_at": "2026-11-20T04:27:09Z",
+        "expires": "2026-11-27T04:27:09Z",
         "ttl_seconds": 604800,
         "direction": "mixed",
-        "magnitude": 0.47242295712865956,
+        "magnitude": 0.47275420688012615,
         "drivers": [
           {
             "brain_id": "franchise-outcomes",
@@ -1167,7 +2135,7 @@
             "display_format": "currency",
             "source": {
               "url": "https://www.redfin.com/news/data-center/",
-              "fetched_at": "2026-10-16T04:26:05Z",
+              "fetched_at": "2026-11-20T04:26:46Z",
               "tier": 3,
               "citation": "Redfin Data Center — ZIP-level monthly housing metrics (all property types), SWFL MSAs. Updated monthly ~mid-month."
             },
@@ -1201,8 +2169,8 @@
         "caveats": [
           "flood-barrier-mode-1 active: 4 barrier ZIPs, worst-case AAL $40,342/insured property",
           "Override \"storm-history-modifier\" fired (priority 70)",
-          "permits-commercial-swfl excluded from synthesis (relevance 0.059, below floor 0.1)",
-          "active-rentals-swfl excluded from synthesis (relevance 0.048, below floor 0.1)",
+          "permits-commercial-swfl excluded from synthesis (relevance 0.058, below floor 0.1)",
+          "active-rentals-swfl excluded from synthesis (relevance 0.047, below floor 0.1)",
           "No figures published: this source has not yet received its first real SBA FOIA load. A synthetic development sample exists for offline testing only and is never shipped.",
           "Construction-cost PPI metrics (construction_cost_ppi_industrial, construction_cost_ppi_warehouse, construction_cost_ppi_office, construction_cost_ppi_medical_office, construction_cost_ppi_trade_concrete, construction_cost_ppi_trade_roofing, construction_cost_ppi_trade_electrical, construction_cost_ppi_trade_plumbing_hvac) are national BLS series — no SWFL-specific or Lee/Collier breakout exists at BLS for any of them. They ship a real month-over-month direction (unlike MarketBeat's schema-required \"stable\" fallback) but BLS can revise recent observations within ~30 days of first publication.",
           "vacancy_rate_marketbeat_swfl: 15 submarkets report a point-in-time value; v1 does not compute quarter-over-quarter direction, so the \"stable\" label is a schema-required fallback, not a measured trend.",
@@ -1297,7 +2265,7 @@
           "1 of 10 announcements in the last 90 days matched qualifying categories (relocation, expansion, grant, infrastructure); the rest are general chamber/policy posts excluded from the momentum count.",
           "Investment and job figures reflect disclosures at announcement time; actual outcomes may vary as projects develop.",
           "SWFL Inc. covers primarily Lee County projects; Collier County coverage depends on cross-county partnerships and co-announcements.",
-          "76 additional live signals not surfaced here (cap 8); the full set is in data_lake.city_pulse.",
+          "82 additional live signals not surfaced here (cap 8); the full set is in data_lake.city_pulse.",
           "Each signal is dated current-events context with a per-signal source; freshness is TTL-bounded by topic (breaking 1d → structural 90d).",
           "Trailing-12-month total-passengers YoY not computable — fewer than 24 monthly rows in the fetched window; direction set neutral.",
           "Construction enforcement split: public notices = confirmed individual actions (hard-parsed violation_type); press releases = announced sweeps (Sonnet-inferred affected_industries). Do not sum them.",
@@ -1358,7 +2326,7 @@
           "~50% of SWFL buyers (≈70% for condos) pay cash and insulate the luxury tier — a holding or rising top tier is part of the K-shape, not a bullish signal on its own.",
           "Covers 50 SWFL ZIPs holding BOTH a starter and a luxury tier; ZIPs lacking one tier are excluded from the divergence.",
           "Upstream brain 'active-rentals-swfl' was stale at build time (expired 2026-07-19).",
-          "Upstream brain 'active-rentals-swfl' failed to rebuild on 2026-11-19; using last good read from 2026-07-11 (v3)."
+          "Upstream brain 'active-rentals-swfl' failed to rebuild on 2026-11-20; using last good read from 2026-07-11 (v3)."
         ],
         "contradicts": [
           "macro-us (bearish) vs macro-florida (bullish)",
@@ -1398,7 +2366,7 @@
         "relevance": {
           "decay_curve": "weeks",
           "half_life_hours": 720,
-          "computed_at": "2026-11-19T13:33:38.000Z"
+          "computed_at": "2026-11-20T04:27:09.000Z"
         },
         "exogenous_signals": [],
         "conditional_claims": [
