@@ -1,9 +1,9 @@
-<!-- FRESHNESS: v46 | Token: SWFL-7421-v46-20261119-8d99f8da -->
+<!-- FRESHNESS: v47 | Token: SWFL-7421-v47-20261122-37a15b55 -->
 ---
 brain_id: tourism-tdt
-version: 46
-refined_at: 2026-11-19T13:33:17Z
-freshness_token: SWFL-7421-v46-20261119-8d99f8da
+version: 47
+refined_at: 2026-11-22T04:26:20Z
+freshness_token: SWFL-7421-v47-20261122-37a15b55
 ttl_seconds: 604800
 pack_hash: 8a17137da68b
 context_type: user_saved_reference
@@ -30,47 +30,48 @@ SCOPE: SWFL (Lee + Collier) hospitality pulse — monthly Tourist Development Ta
 
 --- CITATION TABLE ---
 id  | source                                                                                                                                                             | verified   | expires
-s01 | Florida DOR — Tourist Development Tax collections (Supabase fl_dor_tdt_collections: id, county, period, collections_usd; SWFL: Lee + Collier; Form 3 XLSX monthly) | 2026-11-19 | 2026-11-26
+s01 | Florida DOR — Tourist Development Tax collections (Supabase fl_dor_tdt_collections: id, county, period, collections_usd; SWFL: Lee + Collier; Form 3 XLSX monthly) | 2026-11-22 | 2026-11-29
 
 --- SAVED FACTS ---
 [
-  {"id":"f001","topic":"tdt_snapshot","fact":"SWFL TDT pulse — latest month 2026-04 (shoulder)","value":"SWFL Tourist Development Tax (Lee + Collier combined) — latest reported month 2026-04 (shoulder season) at $9.03M. No same-month prior-year comparable in the loaded window. Trailing 12 months: $89.00M. Trailing window stands at 78% of the strongest pre-Ian 12-month run.","src":"s01","date":"2026-11-19"},
-  {"id":"f002","topic":"metric:latest_monthly_collections_usd","fact":"Latest monthly TDT collections (SWFL combined, 2026-04)","value":"SWFL TDT collections for 2026-04: $9.03M (Lee + Collier combined, fiscal_year 2026, shoulder season).","src":"s01","date":"2026-11-19"},
-  {"id":"f003","topic":"metric:trailing_12mo_collections_usd","fact":"Trailing 12 months of SWFL combined TDT collections","value":"Trailing 12 months of SWFL TDT collections through 2026-04: $89.00M.","src":"s01","date":"2026-11-19"},
-  {"id":"f004","topic":"metric:post_ian_recovery_ratio","fact":"Post-Hurricane-Ian SWFL recovery ratio","value":"Post-Ian recovery ratio (SWFL trailing 12mo / best pre-Ian 12mo): 78% ($89.00M vs $114.71M). Ian landfall 2022-09-28; FY2023 onward treated as post-Ian window.","src":"s01","date":"2026-11-19"},
-  {"id":"f005","topic":"metric:seasonal_position_vs_history","fact":"SWFL seasonal position vs same-month historical mean","value":"Latest month is 104% of the SWFL historical mean for the same calendar month across 28 observed years ($9.03M vs $8.64M mean).","src":"s01","date":"2026-11-19"},
-  {"id":"f006","topic":"metric:lee_latest_monthly_collections_usd","fact":"Lee County latest monthly TDT collections","value":"Lee County TDT for 2026-04: $9.03M.","src":"s01","date":"2026-11-19"},
-  {"id":"f007","topic":"metric:lee_trailing_12mo_collections_usd","fact":"Lee County trailing 12-month TDT collections","value":"Lee County TDT trailing 12 months through 2026-04: $53.33M.","src":"s01","date":"2026-11-19"},
-  {"id":"f008","topic":"metric:collier_latest_monthly_collections_usd","fact":"Collier County latest monthly TDT collections","value":"Collier County TDT for 2026-04: $7.10M.","src":"s01","date":"2026-11-19"},
-  {"id":"f009","topic":"metric:collier_trailing_12mo_collections_usd","fact":"Collier County trailing 12-month TDT collections","value":"Collier County TDT trailing 12 months through 2026-04: $51.14M.","src":"s01","date":"2026-11-19"}
+  {"id":"f001","topic":"tdt_snapshot","fact":"SWFL TDT pulse — latest month 2026-06 (trough)","value":"SWFL Tourist Development Tax (Lee + Collier combined) — latest reported month 2026-06 (trough season) at $7.51M. Year-over-year: +12.6% vs same month prior year. Trailing 12 months: $108.81M. Trailing window stands at 95% of the strongest pre-Ian 12-month run.","src":"s01","date":"2026-11-22"},
+  {"id":"f002","topic":"metric:latest_monthly_collections_usd","fact":"Latest monthly TDT collections (SWFL combined, 2026-06)","value":"SWFL TDT collections for 2026-06: $7.51M (Lee + Collier combined, fiscal_year 2026, trough season).","src":"s01","date":"2026-11-22"},
+  {"id":"f003","topic":"metric:yoy_delta_pct","fact":"SWFL combined same-month year-over-year delta","value":"Year-over-year delta for 2026-06 vs 2025-06: +12.6% ($7.51M vs $6.67M).","src":"s01","date":"2026-11-22"},
+  {"id":"f004","topic":"metric:trailing_12mo_collections_usd","fact":"Trailing 12 months of SWFL combined TDT collections","value":"Trailing 12 months of SWFL TDT collections through 2026-06: $108.81M.","src":"s01","date":"2026-11-22"},
+  {"id":"f005","topic":"metric:post_ian_recovery_ratio","fact":"Post-Hurricane-Ian SWFL recovery ratio","value":"Post-Ian recovery ratio (SWFL trailing 12mo / best pre-Ian 12mo): 95% ($108.81M vs $114.71M). Ian landfall 2022-09-28; FY2023 onward treated as post-Ian window.","src":"s01","date":"2026-11-22"},
+  {"id":"f006","topic":"metric:seasonal_position_vs_history","fact":"SWFL seasonal position vs same-month historical mean","value":"Latest month is 214% of the SWFL historical mean for the same calendar month across 28 observed years ($7.51M vs $3.51M mean).","src":"s01","date":"2026-11-22"},
+  {"id":"f007","topic":"metric:lee_latest_monthly_collections_usd","fact":"Lee County latest monthly TDT collections","value":"Lee County TDT for 2026-06: $3.89M.","src":"s01","date":"2026-11-22"},
+  {"id":"f008","topic":"metric:lee_trailing_12mo_collections_usd","fact":"Lee County trailing 12-month TDT collections","value":"Lee County TDT trailing 12 months through 2026-06: $54.83M.","src":"s01","date":"2026-11-22"},
+  {"id":"f009","topic":"metric:collier_latest_monthly_collections_usd","fact":"Collier County latest monthly TDT collections","value":"Collier County TDT for 2026-06: $3.62M.","src":"s01","date":"2026-11-22"},
+  {"id":"f010","topic":"metric:collier_trailing_12mo_collections_usd","fact":"Collier County trailing 12-month TDT collections","value":"Collier County TDT trailing 12 months through 2026-06: $53.98M.","src":"s01","date":"2026-11-22"}
 ]
 
 --- OUTPUT ---
 {
   "brain_id": "tourism-tdt",
-  "version": 46,
-  "refined_at": "2026-11-19T13:33:17Z",
-  "expires": "2026-11-26T13:33:17Z",
+  "version": 47,
+  "refined_at": "2026-11-22T04:26:20Z",
+  "expires": "2026-11-29T04:26:20Z",
   "ttl_seconds": 604800,
-  "direction": "neutral",
-  "magnitude": 0.4,
+  "direction": "bullish",
+  "magnitude": 0.8,
   "drivers": [],
   "overrides": [],
-  "conclusion": "SWFL TDT collections (Lee + Collier combined) for 2026-04 (shoulder season): $9.03M. Trailing 12 months stand at 78% of the strongest pre-Hurricane-Ian annual run. Hospitality / accommodation operators should weight forward decisions against this SWFL seasonal pulse; the cross-vertical read lives downstream in master.",
+  "conclusion": "SWFL TDT collections (Lee + Collier combined) for 2026-06 (trough season): $7.51M. Year-over-year +12.6% against same month prior year. Trailing 12 months stand at 95% of the strongest pre-Hurricane-Ian annual run. Hospitality / accommodation operators should weight forward decisions against this SWFL seasonal pulse; the cross-vertical read lives downstream in master.",
   "key_metrics": [
     {
       "metric": "latest_monthly_collections_usd",
-      "value": 9028029.34,
-      "direction": "stable",
-      "label": "Latest monthly TDT collections (SWFL combined, 2026-04, shoulder season)",
+      "value": 7512663.09,
+      "direction": "rising",
+      "label": "Latest monthly TDT collections (SWFL combined, 2026-06, trough season)",
       "variable_type": "extensive",
       "units": "USD/month",
       "display_format": "currency",
       "source": {
         "url": "https://www.swfldatagulf.com/r/source/fl_dor_tdt_collections?label=Florida+DOR+%E2%80%94+Tourist+Development+Tax+collections&source=Florida+DOR&brain=tourism-tdt&date_col=period",
-        "fetched_at": "2026-11-19T13:33:17Z",
+        "fetched_at": "2026-11-22T04:26:19Z",
         "tier": 1,
-        "citation": "Florida DOR Tourist Development Tax — SWFL (Lee + Collier) (666 monthly collection records: 1998-07 → 2026-04); source: Florida Department of Revenue Form 3 XLSX (monthly, ~6-week lag) — SWFL combined 2026-04 = $9.03M (FY 2026, post_ian=true)."
+        "citation": "Florida DOR Tourist Development Tax — SWFL (Lee + Collier) (672 monthly collection records: 1998-07 → 2026-06); source: Florida Department of Revenue Form 3 XLSX (monthly, ~6-week lag) — SWFL combined 2026-06 = $7.51M (FY 2026, post_ian=true)."
       },
       "suggestions": [
         "What's driving latest monthly collections usd?",
@@ -78,8 +79,27 @@ s01 | Florida DOR — Tourist Development Tax collections (Supabase fl_dor_tdt_c
       ]
     },
     {
+      "metric": "yoy_delta_pct",
+      "value": 12.6,
+      "direction": "rising",
+      "label": "Year-over-year delta vs same month prior year (SWFL combined)",
+      "variable_type": "intensive",
+      "units": "percent",
+      "display_format": "percent",
+      "source": {
+        "url": "https://www.swfldatagulf.com/r/source/fl_dor_tdt_collections?label=Florida+DOR+%E2%80%94+Tourist+Development+Tax+collections&source=Florida+DOR&brain=tourism-tdt&date_col=period",
+        "fetched_at": "2026-11-22T04:26:19Z",
+        "tier": 1,
+        "citation": "Florida DOR Tourist Development Tax — SWFL (Lee + Collier) (672 monthly collection records: 1998-07 → 2026-06); source: Florida Department of Revenue Form 3 XLSX (monthly, ~6-week lag) — comparing 2026-06 ($7.51M) against 2025-06 ($6.67M)."
+      },
+      "suggestions": [
+        "What's driving yoy delta pct?",
+        "How does yoy delta pct here compare to other SWFL areas?"
+      ]
+    },
+    {
       "metric": "trailing_12mo_collections_usd",
-      "value": 89003088.51,
+      "value": 108809834.46,
       "direction": "stable",
       "label": "Trailing 12-month TDT collections total (SWFL combined)",
       "variable_type": "extensive",
@@ -87,9 +107,9 @@ s01 | Florida DOR — Tourist Development Tax collections (Supabase fl_dor_tdt_c
       "display_format": "currency",
       "source": {
         "url": "https://www.swfldatagulf.com/r/source/fl_dor_tdt_collections?label=Florida+DOR+%E2%80%94+Tourist+Development+Tax+collections&source=Florida+DOR&brain=tourism-tdt&date_col=period",
-        "fetched_at": "2026-11-19T13:33:17Z",
+        "fetched_at": "2026-11-22T04:26:19Z",
         "tier": 1,
-        "citation": "Florida DOR Tourist Development Tax — SWFL (Lee + Collier) (666 monthly collection records: 1998-07 → 2026-04); source: Florida Department of Revenue Form 3 XLSX (monthly, ~6-week lag) — SWFL combined sum, trailing 12-month window: 2025-05 → 2026-04 (12 months)."
+        "citation": "Florida DOR Tourist Development Tax — SWFL (Lee + Collier) (672 monthly collection records: 1998-07 → 2026-06); source: Florida Department of Revenue Form 3 XLSX (monthly, ~6-week lag) — SWFL combined sum, trailing 12-month window: 2025-07 → 2026-06 (12 months)."
       },
       "suggestions": [
         "What's driving trailing 12mo collections usd?",
@@ -98,17 +118,17 @@ s01 | Florida DOR — Tourist Development Tax collections (Supabase fl_dor_tdt_c
     },
     {
       "metric": "post_ian_recovery_ratio",
-      "value": 0.78,
-      "direction": "falling",
+      "value": 0.95,
+      "direction": "stable",
       "label": "Post-Hurricane-Ian recovery ratio (SWFL trailing 12mo ÷ best pre-Ian 12mo)",
       "variable_type": "intensive",
       "units": "ratio",
       "display_format": "ratio",
       "source": {
         "url": "https://www.swfldatagulf.com/r/source/fl_dor_tdt_collections?label=Florida+DOR+%E2%80%94+Tourist+Development+Tax+collections&source=Florida+DOR&brain=tourism-tdt&date_col=period",
-        "fetched_at": "2026-11-19T13:33:17Z",
+        "fetched_at": "2026-11-22T04:26:19Z",
         "tier": 1,
-        "citation": "Florida DOR Tourist Development Tax — SWFL (Lee + Collier) (666 monthly collection records: 1998-07 → 2026-04); source: Florida Department of Revenue Form 3 XLSX (monthly, ~6-week lag) — SWFL trailing 12-month total (2025-05 → 2026-04 (12 months)) ÷ best pre-Ian 12-month window ($114.71M; Ian landfall 2022-09-28)."
+        "citation": "Florida DOR Tourist Development Tax — SWFL (Lee + Collier) (672 monthly collection records: 1998-07 → 2026-06); source: Florida Department of Revenue Form 3 XLSX (monthly, ~6-week lag) — SWFL trailing 12-month total (2025-07 → 2026-06 (12 months)) ÷ best pre-Ian 12-month window ($114.71M; Ian landfall 2022-09-28)."
       },
       "suggestions": [
         "What's driving post ian recovery ratio?",
@@ -117,17 +137,17 @@ s01 | Florida DOR — Tourist Development Tax collections (Supabase fl_dor_tdt_c
     },
     {
       "metric": "seasonal_position_vs_history",
-      "value": 1.04,
-      "direction": "stable",
+      "value": 2.14,
+      "direction": "rising",
       "label": "Seasonal position vs same-month historical mean (SWFL combined)",
       "variable_type": "intensive",
       "units": "ratio",
       "display_format": "ratio",
       "source": {
         "url": "https://www.swfldatagulf.com/r/source/fl_dor_tdt_collections?label=Florida+DOR+%E2%80%94+Tourist+Development+Tax+collections&source=Florida+DOR&brain=tourism-tdt&date_col=period",
-        "fetched_at": "2026-11-19T13:33:17Z",
+        "fetched_at": "2026-11-22T04:26:19Z",
         "tier": 1,
-        "citation": "Florida DOR Tourist Development Tax — SWFL (Lee + Collier) (666 monthly collection records: 1998-07 → 2026-04); source: Florida Department of Revenue Form 3 XLSX (monthly, ~6-week lag) — SWFL 2026-04 ($9.03M) vs same-calendar-month mean across 28 non-zero years."
+        "citation": "Florida DOR Tourist Development Tax — SWFL (Lee + Collier) (672 monthly collection records: 1998-07 → 2026-06); source: Florida Department of Revenue Form 3 XLSX (monthly, ~6-week lag) — SWFL 2026-06 ($7.51M) vs same-calendar-month mean across 28 non-zero years."
       },
       "suggestions": [
         "What's driving seasonal position vs history?",
@@ -136,17 +156,17 @@ s01 | Florida DOR — Tourist Development Tax collections (Supabase fl_dor_tdt_c
     },
     {
       "metric": "lee_latest_monthly_collections_usd",
-      "value": 9028029.34,
+      "value": 3893881.72,
       "direction": "stable",
-      "label": "Lee County latest monthly TDT collections (2026-04)",
+      "label": "Lee County latest monthly TDT collections (2026-06)",
       "variable_type": "extensive",
       "units": "USD/month",
       "display_format": "currency",
       "source": {
         "url": "https://www.swfldatagulf.com/r/source/fl_dor_tdt_collections?label=Florida+DOR+%E2%80%94+Tourist+Development+Tax+collections&source=Florida+DOR&brain=tourism-tdt&date_col=period",
-        "fetched_at": "2026-11-19T13:33:17Z",
+        "fetched_at": "2026-11-22T04:26:19Z",
         "tier": 1,
-        "citation": "Florida DOR Tourist Development Tax — SWFL (Lee + Collier) (666 monthly collection records: 1998-07 → 2026-04); source: Florida Department of Revenue Form 3 XLSX (monthly, ~6-week lag) — Lee County 2026-04 = $9.03M."
+        "citation": "Florida DOR Tourist Development Tax — SWFL (Lee + Collier) (672 monthly collection records: 1998-07 → 2026-06); source: Florida Department of Revenue Form 3 XLSX (monthly, ~6-week lag) — Lee County 2026-06 = $3.89M."
       },
       "suggestions": [
         "What's driving lee latest monthly collections usd?",
@@ -155,7 +175,7 @@ s01 | Florida DOR — Tourist Development Tax collections (Supabase fl_dor_tdt_c
     },
     {
       "metric": "lee_trailing_12mo_collections_usd",
-      "value": 53331356.519999996,
+      "value": 54833341.9,
       "direction": "stable",
       "label": "Lee County trailing 12-month TDT collections",
       "variable_type": "extensive",
@@ -163,9 +183,9 @@ s01 | Florida DOR — Tourist Development Tax collections (Supabase fl_dor_tdt_c
       "display_format": "currency",
       "source": {
         "url": "https://www.swfldatagulf.com/r/source/fl_dor_tdt_collections?label=Florida+DOR+%E2%80%94+Tourist+Development+Tax+collections&source=Florida+DOR&brain=tourism-tdt&date_col=period",
-        "fetched_at": "2026-11-19T13:33:17Z",
+        "fetched_at": "2026-11-22T04:26:19Z",
         "tier": 1,
-        "citation": "Florida DOR Tourist Development Tax — SWFL (Lee + Collier) (666 monthly collection records: 1998-07 → 2026-04); source: Florida Department of Revenue Form 3 XLSX (monthly, ~6-week lag) — Lee County trailing 12 months: 2025-05 → 2026-04 (12 months)."
+        "citation": "Florida DOR Tourist Development Tax — SWFL (Lee + Collier) (672 monthly collection records: 1998-07 → 2026-06); source: Florida Department of Revenue Form 3 XLSX (monthly, ~6-week lag) — Lee County trailing 12 months: 2025-07 → 2026-06 (12 months)."
       },
       "suggestions": [
         "What's driving lee trailing 12mo collections usd?",
@@ -174,17 +194,17 @@ s01 | Florida DOR — Tourist Development Tax collections (Supabase fl_dor_tdt_c
     },
     {
       "metric": "collier_latest_monthly_collections_usd",
-      "value": 7097536.72,
+      "value": 3618781.37,
       "direction": "stable",
-      "label": "Collier County latest monthly TDT collections (2026-04)",
+      "label": "Collier County latest monthly TDT collections (2026-06)",
       "variable_type": "extensive",
       "units": "USD/month",
       "display_format": "currency",
       "source": {
         "url": "https://www.swfldatagulf.com/r/source/fl_dor_tdt_collections?label=Florida+DOR+%E2%80%94+Tourist+Development+Tax+collections&source=Florida+DOR&brain=tourism-tdt&date_col=period",
-        "fetched_at": "2026-11-19T13:33:17Z",
+        "fetched_at": "2026-11-22T04:26:19Z",
         "tier": 1,
-        "citation": "Florida DOR Tourist Development Tax — SWFL (Lee + Collier) (666 monthly collection records: 1998-07 → 2026-04); source: Florida Department of Revenue Form 3 XLSX (monthly, ~6-week lag) — Collier County 2026-04 = $7.10M."
+        "citation": "Florida DOR Tourist Development Tax — SWFL (Lee + Collier) (672 monthly collection records: 1998-07 → 2026-06); source: Florida Department of Revenue Form 3 XLSX (monthly, ~6-week lag) — Collier County 2026-06 = $3.62M."
       },
       "suggestions": [
         "What's driving collier latest monthly collections usd?",
@@ -193,7 +213,7 @@ s01 | Florida DOR — Tourist Development Tax collections (Supabase fl_dor_tdt_c
     },
     {
       "metric": "collier_trailing_12mo_collections_usd",
-      "value": 51136864.940000005,
+      "value": 53976492.559999995,
       "direction": "stable",
       "label": "Collier County trailing 12-month TDT collections",
       "variable_type": "extensive",
@@ -201,9 +221,9 @@ s01 | Florida DOR — Tourist Development Tax collections (Supabase fl_dor_tdt_c
       "display_format": "currency",
       "source": {
         "url": "https://www.swfldatagulf.com/r/source/fl_dor_tdt_collections?label=Florida+DOR+%E2%80%94+Tourist+Development+Tax+collections&source=Florida+DOR&brain=tourism-tdt&date_col=period",
-        "fetched_at": "2026-11-19T13:33:17Z",
+        "fetched_at": "2026-11-22T04:26:19Z",
         "tier": 1,
-        "citation": "Florida DOR Tourist Development Tax — SWFL (Lee + Collier) (666 monthly collection records: 1998-07 → 2026-04); source: Florida Department of Revenue Form 3 XLSX (monthly, ~6-week lag) — Collier County trailing 12 months: 2025-03 → 2026-02 (12 months)."
+        "citation": "Florida DOR Tourist Development Tax — SWFL (Lee + Collier) (672 monthly collection records: 1998-07 → 2026-06); source: Florida Department of Revenue Form 3 XLSX (monthly, ~6-week lag) — Collier County trailing 12 months: 2025-07 → 2026-06 (12 months)."
       },
       "suggestions": [
         "What's driving collier trailing 12mo collections usd?",
@@ -213,7 +233,7 @@ s01 | Florida DOR — Tourist Development Tax collections (Supabase fl_dor_tdt_c
   ],
   "caveats": [
     "Florida DOR Form 3 may revise recent months for ~60 days after first publication — treat the latest month as directional, not final.",
-    "Latest month 2026-04 reflects only 1 of 2 expected counties (Collier data lags Lee by ~2 months). YoY comparison is suppressed to avoid apples-to-oranges inflation. Use per-county metrics or trailing_12mo_collections_usd for the cross-county read."
+    "Latest month is a trough-season reading (trough). Do not extrapolate to an annual run rate — weight against trailing_12mo_collections_usd."
   ],
   "contradicts": [],
   "confidence": 1,
@@ -225,7 +245,7 @@ s01 | Florida DOR — Tourist Development Tax collections (Supabase fl_dor_tdt_c
   "relevance": {
     "decay_curve": "weeks",
     "half_life_hours": 720,
-    "computed_at": "2026-11-19T13:33:17Z"
+    "computed_at": "2026-11-22T04:26:20Z"
   },
   "exogenous_signals": []
 }
@@ -234,5 +254,5 @@ s01 | Florida DOR — Tourist Development Tax collections (Supabase fl_dor_tdt_c
 - tourism-tdt: standing SWFL hospitality pulse — monthly Lee + Collier TDT collections (FL DOR Form 3), YoY, trailing-12mo, post-Ian recovery, and per-county breakdowns.
 
 --- RECENT NOTES ---
-- 2026-11-19: pack refined by the Refinery — 9 fact(s) from 1 source(s).
+- 2026-11-22: pack refined by the Refinery — 10 fact(s) from 1 source(s).
 ```

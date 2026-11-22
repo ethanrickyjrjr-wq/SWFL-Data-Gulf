@@ -1,9 +1,9 @@
-<!-- FRESHNESS: v4 | Token: SWFL-7421-v4-20261028-769770b6 -->
+<!-- FRESHNESS: v5 | Token: SWFL-7421-v5-20261122-f72293d5 -->
 ---
 brain_id: tier-divergence-swfl
-version: 4
-refined_at: 2026-10-28T10:42:46Z
-freshness_token: SWFL-7421-v4-20261028-769770b6
+version: 5
+refined_at: 2026-11-22T04:27:05Z
+freshness_token: SWFL-7421-v5-20261122-f72293d5
 ttl_seconds: 3024000
 pack_hash: bd3622145551
 context_type: user_saved_reference
@@ -30,19 +30,19 @@ SCOPE: SWFL ZIP-level luxury-vs-starter price divergence (Zillow ZHVI top-tier 0
 
 --- CITATION TABLE ---
 id  | source                                                                                                                                                                                                                                                                                                                                                                                                                          | verified   | expires
-s01 | Zillow Home Value Index (ZHVI) tier split, ZIP-level all-homes (SFR + Condo): top-tier (0.67-1.0, luxury) vs bottom-tier (0.0-0.33, starter), RAW (not seasonally adjusted; no _sm_sa tier variant is published). Latest per-ZIP spread + YoY from data_lake.tier_divergence_zip_latest (brain-input view; MAX-within-±7d YoY). Source: Zillow Research, files.zillowstatic.com. Portal: https://www.zillow.com/research/data/. | 2026-10-28 | 2026-12-02
+s01 | Zillow Home Value Index (ZHVI) tier split, ZIP-level all-homes (SFR + Condo): top-tier (0.67-1.0, luxury) vs bottom-tier (0.0-0.33, starter), RAW (not seasonally adjusted; no _sm_sa tier variant is published). Latest per-ZIP spread + YoY from data_lake.tier_divergence_zip_latest (brain-input view; MAX-within-±7d YoY). Source: Zillow Research, files.zillowstatic.com. Portal: https://www.zillow.com/research/data/. | 2026-11-22 | 2026-12-27
 
 --- SAVED FACTS ---
 [
-  {"id":"f001","topic":"corpus_overview","fact":"Zillow ZHVI tier-divergence SWFL corpus","value":"50 both-tier ZIPs through 2026-08-31. Median spread (luxury/starter) = 2.59x, median spread YoY = 1.58%, 7 ZIPs in K-shape.","src":"s01","date":"2026-10-28"}
+  {"id":"f001","topic":"corpus_overview","fact":"Zillow ZHVI tier-divergence SWFL corpus","value":"50 both-tier ZIPs through 2026-08-31. Median spread (luxury/starter) = 2.59x, median spread YoY = 1.58%, 7 ZIPs in K-shape.","src":"s01","date":"2026-11-22"}
 ]
 
 --- OUTPUT ---
 {
   "brain_id": "tier-divergence-swfl",
-  "version": 4,
-  "refined_at": "2026-10-28T10:42:46Z",
-  "expires": "2026-12-02T10:42:46Z",
+  "version": 5,
+  "refined_at": "2026-11-22T04:27:05Z",
+  "expires": "2026-12-27T04:27:05Z",
   "ttl_seconds": 3024000,
   "direction": "bearish",
   "magnitude": 0.157525360991667,
@@ -60,7 +60,7 @@ s01 | Zillow Home Value Index (ZHVI) tier split, ZIP-level all-homes (SFR + Cond
       "display_format": "percent",
       "source": {
         "url": "https://files.zillowstatic.com/research/public_csvs/zhvi/Zip_zhvi_uc_sfrcondo_tier_0.67_1.0_month.csv",
-        "fetched_at": "2026-10-28T10:42:39Z",
+        "fetched_at": "2026-11-22T04:26:58Z",
         "tier": 3,
         "citation": "Zillow ZHVI tier split, ZIP-level all-homes: top-tier (0.67-1.0, luxury) vs bottom-tier (0.0-0.33, starter), RAW (not seasonally adjusted). Source: Zillow Research (files.zillowstatic.com); Tier 2 cache: data_lake.tier_divergence_zip_latest."
       },
@@ -78,7 +78,7 @@ s01 | Zillow Home Value Index (ZHVI) tier split, ZIP-level all-homes (SFR + Cond
       "units": "ratio",
       "source": {
         "url": "https://files.zillowstatic.com/research/public_csvs/zhvi/Zip_zhvi_uc_sfrcondo_tier_0.67_1.0_month.csv",
-        "fetched_at": "2026-10-28T10:42:39Z",
+        "fetched_at": "2026-11-22T04:26:58Z",
         "tier": 3,
         "citation": "Zillow ZHVI tier split, ZIP-level all-homes: top-tier (0.67-1.0, luxury) vs bottom-tier (0.0-0.33, starter), RAW (not seasonally adjusted). Source: Zillow Research (files.zillowstatic.com); Tier 2 cache: data_lake.tier_divergence_zip_latest."
       },
@@ -97,7 +97,7 @@ s01 | Zillow Home Value Index (ZHVI) tier split, ZIP-level all-homes (SFR + Cond
       "display_format": "percent",
       "source": {
         "url": "https://files.zillowstatic.com/research/public_csvs/zhvi/Zip_zhvi_uc_sfrcondo_tier_0.67_1.0_month.csv",
-        "fetched_at": "2026-10-28T10:42:39Z",
+        "fetched_at": "2026-11-22T04:26:58Z",
         "tier": 3,
         "citation": "Zillow ZHVI tier split, ZIP-level all-homes: top-tier (0.67-1.0, luxury) vs bottom-tier (0.0-0.33, starter), RAW (not seasonally adjusted). Source: Zillow Research (files.zillowstatic.com); Tier 2 cache: data_lake.tier_divergence_zip_latest."
       },
@@ -116,7 +116,7 @@ s01 | Zillow Home Value Index (ZHVI) tier split, ZIP-level all-homes (SFR + Cond
       "display_format": "percent",
       "source": {
         "url": "https://files.zillowstatic.com/research/public_csvs/zhvi/Zip_zhvi_uc_sfrcondo_tier_0.67_1.0_month.csv",
-        "fetched_at": "2026-10-28T10:42:39Z",
+        "fetched_at": "2026-11-22T04:26:58Z",
         "tier": 3,
         "citation": "Zillow ZHVI tier split, ZIP-level all-homes: top-tier (0.67-1.0, luxury) vs bottom-tier (0.0-0.33, starter), RAW (not seasonally adjusted). Source: Zillow Research (files.zillowstatic.com); Tier 2 cache: data_lake.tier_divergence_zip_latest."
       },
@@ -135,7 +135,7 @@ s01 | Zillow Home Value Index (ZHVI) tier split, ZIP-level all-homes (SFR + Cond
       "display_format": "count",
       "source": {
         "url": "https://files.zillowstatic.com/research/public_csvs/zhvi/Zip_zhvi_uc_sfrcondo_tier_0.67_1.0_month.csv",
-        "fetched_at": "2026-10-28T10:42:39Z",
+        "fetched_at": "2026-11-22T04:26:58Z",
         "tier": 3,
         "citation": "Zillow ZHVI tier split, ZIP-level all-homes: top-tier (0.67-1.0, luxury) vs bottom-tier (0.0-0.33, starter), RAW (not seasonally adjusted). Source: Zillow Research (files.zillowstatic.com); Tier 2 cache: data_lake.tier_divergence_zip_latest."
       },
@@ -154,7 +154,7 @@ s01 | Zillow Home Value Index (ZHVI) tier split, ZIP-level all-homes (SFR + Cond
       "display_format": "percent",
       "source": {
         "url": "https://files.zillowstatic.com/research/public_csvs/zhvi/Zip_zhvi_uc_sfrcondo_tier_0.67_1.0_month.csv",
-        "fetched_at": "2026-10-28T10:42:39Z",
+        "fetched_at": "2026-11-22T04:26:58Z",
         "tier": 3,
         "citation": "Zillow ZHVI tier split, ZIP-level all-homes: top-tier (0.67-1.0, luxury) vs bottom-tier (0.0-0.33, starter), RAW (not seasonally adjusted). Source: Zillow Research (files.zillowstatic.com); Tier 2 cache: data_lake.tier_divergence_zip_latest."
       },
@@ -173,7 +173,7 @@ s01 | Zillow Home Value Index (ZHVI) tier split, ZIP-level all-homes (SFR + Cond
       "display_format": "percent",
       "source": {
         "url": "https://files.zillowstatic.com/research/public_csvs/zhvi/Zip_zhvi_uc_sfrcondo_tier_0.67_1.0_month.csv",
-        "fetched_at": "2026-10-28T10:42:39Z",
+        "fetched_at": "2026-11-22T04:26:58Z",
         "tier": 3,
         "citation": "Zillow ZHVI tier split, ZIP-level all-homes: top-tier (0.67-1.0, luxury) vs bottom-tier (0.0-0.33, starter), RAW (not seasonally adjusted). Source: Zillow Research (files.zillowstatic.com); Tier 2 cache: data_lake.tier_divergence_zip_latest."
       },
@@ -191,7 +191,7 @@ s01 | Zillow Home Value Index (ZHVI) tier split, ZIP-level all-homes (SFR + Cond
       "units": "ratio",
       "source": {
         "url": "https://files.zillowstatic.com/research/public_csvs/zhvi/Zip_zhvi_uc_sfrcondo_tier_0.67_1.0_month.csv",
-        "fetched_at": "2026-10-28T10:42:39Z",
+        "fetched_at": "2026-11-22T04:26:58Z",
         "tier": 3,
         "citation": "Zillow ZHVI tier split, ZIP-level all-homes: top-tier (0.67-1.0, luxury) vs bottom-tier (0.0-0.33, starter), RAW (not seasonally adjusted). Source: Zillow Research (files.zillowstatic.com); Tier 2 cache: data_lake.tier_divergence_zip_latest."
       },
@@ -210,7 +210,7 @@ s01 | Zillow Home Value Index (ZHVI) tier split, ZIP-level all-homes (SFR + Cond
       "display_format": "percent",
       "source": {
         "url": "https://files.zillowstatic.com/research/public_csvs/zhvi/Zip_zhvi_uc_sfrcondo_tier_0.67_1.0_month.csv",
-        "fetched_at": "2026-10-28T10:42:39Z",
+        "fetched_at": "2026-11-22T04:26:58Z",
         "tier": 3,
         "citation": "Zillow ZHVI tier split, ZIP-level all-homes: top-tier (0.67-1.0, luxury) vs bottom-tier (0.0-0.33, starter), RAW (not seasonally adjusted). Source: Zillow Research (files.zillowstatic.com); Tier 2 cache: data_lake.tier_divergence_zip_latest."
       },
@@ -228,7 +228,7 @@ s01 | Zillow Home Value Index (ZHVI) tier split, ZIP-level all-homes (SFR + Cond
       "units": "ratio",
       "source": {
         "url": "https://files.zillowstatic.com/research/public_csvs/zhvi/Zip_zhvi_uc_sfrcondo_tier_0.67_1.0_month.csv",
-        "fetched_at": "2026-10-28T10:42:39Z",
+        "fetched_at": "2026-11-22T04:26:58Z",
         "tier": 3,
         "citation": "Zillow ZHVI tier split, ZIP-level all-homes: top-tier (0.67-1.0, luxury) vs bottom-tier (0.0-0.33, starter), RAW (not seasonally adjusted). Source: Zillow Research (files.zillowstatic.com); Tier 2 cache: data_lake.tier_divergence_zip_latest."
       },
@@ -247,7 +247,7 @@ s01 | Zillow Home Value Index (ZHVI) tier split, ZIP-level all-homes (SFR + Cond
       "display_format": "percent",
       "source": {
         "url": "https://files.zillowstatic.com/research/public_csvs/zhvi/Zip_zhvi_uc_sfrcondo_tier_0.67_1.0_month.csv",
-        "fetched_at": "2026-10-28T10:42:39Z",
+        "fetched_at": "2026-11-22T04:26:58Z",
         "tier": 3,
         "citation": "Zillow ZHVI tier split, ZIP-level all-homes: top-tier (0.67-1.0, luxury) vs bottom-tier (0.0-0.33, starter), RAW (not seasonally adjusted). Source: Zillow Research (files.zillowstatic.com); Tier 2 cache: data_lake.tier_divergence_zip_latest."
       },
@@ -265,7 +265,7 @@ s01 | Zillow Home Value Index (ZHVI) tier split, ZIP-level all-homes (SFR + Cond
       "units": "ratio",
       "source": {
         "url": "https://files.zillowstatic.com/research/public_csvs/zhvi/Zip_zhvi_uc_sfrcondo_tier_0.67_1.0_month.csv",
-        "fetched_at": "2026-10-28T10:42:39Z",
+        "fetched_at": "2026-11-22T04:26:58Z",
         "tier": 3,
         "citation": "Zillow ZHVI tier split, ZIP-level all-homes: top-tier (0.67-1.0, luxury) vs bottom-tier (0.0-0.33, starter), RAW (not seasonally adjusted). Source: Zillow Research (files.zillowstatic.com); Tier 2 cache: data_lake.tier_divergence_zip_latest."
       },
@@ -1191,7 +1191,7 @@ s01 | Zillow Home Value Index (ZHVI) tier split, ZIP-level all-homes (SFR + Cond
       ],
       "source": {
         "url": "https://files.zillowstatic.com/research/public_csvs/zhvi/Zip_zhvi_uc_sfrcondo_tier_0.67_1.0_month.csv",
-        "fetched_at": "2026-10-28T10:42:39Z",
+        "fetched_at": "2026-11-22T04:26:58Z",
         "tier": 3,
         "citation": "Zillow ZHVI tier split, ZIP-level all-homes: top-tier (0.67-1.0, luxury) vs bottom-tier (0.0-0.33, starter), RAW (not seasonally adjusted). Source: Zillow Research (files.zillowstatic.com); Tier 2 cache: data_lake.tier_divergence_zip_latest."
       },
@@ -1214,7 +1214,7 @@ s01 | Zillow Home Value Index (ZHVI) tier split, ZIP-level all-homes (SFR + Cond
   "relevance": {
     "decay_curve": "weeks",
     "half_life_hours": 720,
-    "computed_at": "2026-10-28T10:42:46Z"
+    "computed_at": "2026-11-22T04:27:05Z"
   },
   "exogenous_signals": []
 }
@@ -1223,5 +1223,5 @@ s01 | Zillow Home Value Index (ZHVI) tier split, ZIP-level all-homes (SFR + Cond
 - tier-divergence-swfl: track the K-shaped split between SWFL's luxury and starter price tiers as the segment axis complementing seller-stress's churn axis.
 
 --- RECENT NOTES ---
-- 2026-10-28: pack refined by the Refinery — 1 fact(s) from 1 source(s).
+- 2026-11-22: pack refined by the Refinery — 1 fact(s) from 1 source(s).
 ```
