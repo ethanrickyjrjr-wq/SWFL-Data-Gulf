@@ -1,9 +1,9 @@
-<!-- FRESHNESS: v11 | Token: SWFL-7421-v11-20261024-404d60bd -->
+<!-- FRESHNESS: v12 | Token: SWFL-7421-v12-20261123-50f4c4f2 -->
 ---
 brain_id: home-values-swfl
-version: 11
-refined_at: 2026-10-24T17:15:16Z
-freshness_token: SWFL-7421-v11-20261024-404d60bd
+version: 12
+refined_at: 2026-11-23T04:26:04Z
+freshness_token: SWFL-7421-v12-20261123-50f4c4f2
 ttl_seconds: 3024000
 pack_hash: 8b47d955d2fb
 context_type: user_saved_reference
@@ -30,19 +30,19 @@ SCOPE: SWFL ZIP-level home-value index (Zillow ZHVI), monthly — regional media
 
 --- CITATION TABLE ---
 id  | source                                                                                                                                                                                                                                                                                                                  | verified   | expires
-s01 | Zillow Home Value Index (ZHVI), ZIP-level all-homes (SFR + Condo) middle-tier (0.33-0.67) seasonally-adjusted, latest per-ZIP snapshot from data_lake.zhvi_zip_latest (brain-input pivot view; MAX-within-±7d YoY/MoM). Source: Zillow Research, files.zillowstatic.com. Portal: https://www.zillow.com/research/data/. | 2026-10-24 | 2026-11-28
+s01 | Zillow Home Value Index (ZHVI), ZIP-level all-homes (SFR + Condo) middle-tier (0.33-0.67) seasonally-adjusted, latest per-ZIP snapshot from data_lake.zhvi_zip_latest (brain-input pivot view; MAX-within-±7d YoY/MoM). Source: Zillow Research, files.zillowstatic.com. Portal: https://www.zillow.com/research/data/. | 2026-11-23 | 2026-12-28
 
 --- SAVED FACTS ---
 [
-  {"id":"f001","topic":"corpus_overview","fact":"Zillow ZHVI SWFL home-value-index corpus","value":"53 rows across 53 ZIPs through 2026-09-30. Regional median home value = $357,634, regional median YoY = -2.35%.","src":"s01","date":"2026-10-24"}
+  {"id":"f001","topic":"corpus_overview","fact":"Zillow ZHVI SWFL home-value-index corpus","value":"53 rows across 53 ZIPs through 2026-09-30. Regional median home value = $357,634, regional median YoY = -2.35%.","src":"s01","date":"2026-11-23"}
 ]
 
 --- OUTPUT ---
 {
   "brain_id": "home-values-swfl",
-  "version": 11,
-  "refined_at": "2026-10-24T17:15:16Z",
-  "expires": "2026-11-28T17:15:16Z",
+  "version": 12,
+  "refined_at": "2026-11-23T04:26:04Z",
+  "expires": "2026-12-28T04:26:04Z",
   "ttl_seconds": 3024000,
   "direction": "bearish",
   "magnitude": 0.15671708773478468,
@@ -60,7 +60,7 @@ s01 | Zillow Home Value Index (ZHVI), ZIP-level all-homes (SFR + Condo) middle-t
       "display_format": "percent",
       "source": {
         "url": "https://files.zillowstatic.com/research/public_csvs/zhvi/Zip_zhvi_uc_sfrcondo_tier_0.33_0.67_sm_sa_month.csv",
-        "fetched_at": "2026-10-24T17:15:15Z",
+        "fetched_at": "2026-11-23T04:26:02Z",
         "tier": 3,
         "citation": "Zillow Home Value Index (ZHVI), ZIP-level all-homes (SFR + Condo) middle-tier (0.33-0.67) seasonally-adjusted. Source: Zillow Research (files.zillowstatic.com); Tier 2 cache: data_lake.zhvi_zip_latest (brain-input pivot view)."
       },
@@ -80,7 +80,7 @@ s01 | Zillow Home Value Index (ZHVI), ZIP-level all-homes (SFR + Condo) middle-t
       "display_format": "currency",
       "source": {
         "url": "https://files.zillowstatic.com/research/public_csvs/zhvi/Zip_zhvi_uc_sfrcondo_tier_0.33_0.67_sm_sa_month.csv",
-        "fetched_at": "2026-10-24T17:15:15Z",
+        "fetched_at": "2026-11-23T04:26:02Z",
         "tier": 3,
         "citation": "Zillow Home Value Index (ZHVI), ZIP-level all-homes (SFR + Condo) middle-tier (0.33-0.67) seasonally-adjusted. Source: Zillow Research (files.zillowstatic.com); Tier 2 cache: data_lake.zhvi_zip_latest (brain-input pivot view)."
       },
@@ -100,7 +100,7 @@ s01 | Zillow Home Value Index (ZHVI), ZIP-level all-homes (SFR + Condo) middle-t
       "display_format": "count",
       "source": {
         "url": "https://files.zillowstatic.com/research/public_csvs/zhvi/Zip_zhvi_uc_sfrcondo_tier_0.33_0.67_sm_sa_month.csv",
-        "fetched_at": "2026-10-24T17:15:15Z",
+        "fetched_at": "2026-11-23T04:26:02Z",
         "tier": 3,
         "citation": "Zillow Home Value Index (ZHVI), ZIP-level all-homes (SFR + Condo) middle-tier (0.33-0.67) seasonally-adjusted. Source: Zillow Research (files.zillowstatic.com); Tier 2 cache: data_lake.zhvi_zip_latest (brain-input pivot view)."
       },
@@ -118,7 +118,7 @@ s01 | Zillow Home Value Index (ZHVI), ZIP-level all-homes (SFR + Condo) middle-t
       "variable_type": "categorical",
       "source": {
         "url": "https://files.zillowstatic.com/research/public_csvs/zhvi/Zip_zhvi_uc_sfrcondo_tier_0.33_0.67_sm_sa_month.csv",
-        "fetched_at": "2026-10-24T17:15:15Z",
+        "fetched_at": "2026-11-23T04:26:02Z",
         "tier": 3,
         "citation": "Zillow Home Value Index (ZHVI), ZIP-level all-homes (SFR + Condo) middle-tier (0.33-0.67) seasonally-adjusted. Source: Zillow Research (files.zillowstatic.com); Tier 2 cache: data_lake.zhvi_zip_latest (brain-input pivot view)."
       },
@@ -138,7 +138,7 @@ s01 | Zillow Home Value Index (ZHVI), ZIP-level all-homes (SFR + Condo) middle-t
       "display_format": "percent",
       "source": {
         "url": "https://files.zillowstatic.com/research/public_csvs/zhvi/Zip_zhvi_uc_sfrcondo_tier_0.33_0.67_sm_sa_month.csv",
-        "fetched_at": "2026-10-24T17:15:15Z",
+        "fetched_at": "2026-11-23T04:26:02Z",
         "tier": 3,
         "citation": "Zillow Home Value Index (ZHVI), ZIP-level all-homes (SFR + Condo) middle-tier (0.33-0.67) seasonally-adjusted. Source: Zillow Research (files.zillowstatic.com); Tier 2 cache: data_lake.zhvi_zip_latest (brain-input pivot view)."
       },
@@ -158,7 +158,7 @@ s01 | Zillow Home Value Index (ZHVI), ZIP-level all-homes (SFR + Condo) middle-t
       "display_format": "currency",
       "source": {
         "url": "https://files.zillowstatic.com/research/public_csvs/zhvi/Zip_zhvi_uc_sfrcondo_tier_0.33_0.67_sm_sa_month.csv",
-        "fetched_at": "2026-10-24T17:15:15Z",
+        "fetched_at": "2026-11-23T04:26:02Z",
         "tier": 3,
         "citation": "Zillow Home Value Index (ZHVI), ZIP-level all-homes (SFR + Condo) middle-tier (0.33-0.67) seasonally-adjusted. Source: Zillow Research (files.zillowstatic.com); Tier 2 cache: data_lake.zhvi_zip_latest (brain-input pivot view)."
       },
@@ -178,7 +178,7 @@ s01 | Zillow Home Value Index (ZHVI), ZIP-level all-homes (SFR + Condo) middle-t
       "display_format": "percent",
       "source": {
         "url": "https://files.zillowstatic.com/research/public_csvs/zhvi/Zip_zhvi_uc_sfrcondo_tier_0.33_0.67_sm_sa_month.csv",
-        "fetched_at": "2026-10-24T17:15:15Z",
+        "fetched_at": "2026-11-23T04:26:02Z",
         "tier": 3,
         "citation": "Zillow Home Value Index (ZHVI), ZIP-level all-homes (SFR + Condo) middle-tier (0.33-0.67) seasonally-adjusted. Source: Zillow Research (files.zillowstatic.com); Tier 2 cache: data_lake.zhvi_zip_latest (brain-input pivot view)."
       },
@@ -198,7 +198,7 @@ s01 | Zillow Home Value Index (ZHVI), ZIP-level all-homes (SFR + Condo) middle-t
       "display_format": "currency",
       "source": {
         "url": "https://files.zillowstatic.com/research/public_csvs/zhvi/Zip_zhvi_uc_sfrcondo_tier_0.33_0.67_sm_sa_month.csv",
-        "fetched_at": "2026-10-24T17:15:15Z",
+        "fetched_at": "2026-11-23T04:26:02Z",
         "tier": 3,
         "citation": "Zillow Home Value Index (ZHVI), ZIP-level all-homes (SFR + Condo) middle-tier (0.33-0.67) seasonally-adjusted. Source: Zillow Research (files.zillowstatic.com); Tier 2 cache: data_lake.zhvi_zip_latest (brain-input pivot view)."
       },
@@ -218,7 +218,7 @@ s01 | Zillow Home Value Index (ZHVI), ZIP-level all-homes (SFR + Condo) middle-t
       "display_format": "percent",
       "source": {
         "url": "https://files.zillowstatic.com/research/public_csvs/zhvi/Zip_zhvi_uc_sfrcondo_tier_0.33_0.67_sm_sa_month.csv",
-        "fetched_at": "2026-10-24T17:15:15Z",
+        "fetched_at": "2026-11-23T04:26:02Z",
         "tier": 3,
         "citation": "Zillow Home Value Index (ZHVI), ZIP-level all-homes (SFR + Condo) middle-tier (0.33-0.67) seasonally-adjusted. Source: Zillow Research (files.zillowstatic.com); Tier 2 cache: data_lake.zhvi_zip_latest (brain-input pivot view)."
       },
@@ -238,7 +238,7 @@ s01 | Zillow Home Value Index (ZHVI), ZIP-level all-homes (SFR + Condo) middle-t
       "display_format": "currency",
       "source": {
         "url": "https://files.zillowstatic.com/research/public_csvs/zhvi/Zip_zhvi_uc_sfrcondo_tier_0.33_0.67_sm_sa_month.csv",
-        "fetched_at": "2026-10-24T17:15:15Z",
+        "fetched_at": "2026-11-23T04:26:02Z",
         "tier": 3,
         "citation": "Zillow Home Value Index (ZHVI), ZIP-level all-homes (SFR + Condo) middle-tier (0.33-0.67) seasonally-adjusted. Source: Zillow Research (files.zillowstatic.com); Tier 2 cache: data_lake.zhvi_zip_latest (brain-input pivot view)."
       },
@@ -258,7 +258,7 @@ s01 | Zillow Home Value Index (ZHVI), ZIP-level all-homes (SFR + Condo) middle-t
       "display_format": "percent",
       "source": {
         "url": "https://files.zillowstatic.com/research/public_csvs/zhvi/Zip_zhvi_uc_sfrcondo_tier_0.33_0.67_sm_sa_month.csv",
-        "fetched_at": "2026-10-24T17:15:15Z",
+        "fetched_at": "2026-11-23T04:26:02Z",
         "tier": 3,
         "citation": "Zillow Home Value Index (ZHVI), ZIP-level all-homes (SFR + Condo) middle-tier (0.33-0.67) seasonally-adjusted. Source: Zillow Research (files.zillowstatic.com); Tier 2 cache: data_lake.zhvi_zip_latest (brain-input pivot view)."
       },
@@ -278,7 +278,7 @@ s01 | Zillow Home Value Index (ZHVI), ZIP-level all-homes (SFR + Condo) middle-t
       "display_format": "currency",
       "source": {
         "url": "https://files.zillowstatic.com/research/public_csvs/zhvi/Zip_zhvi_uc_sfrcondo_tier_0.33_0.67_sm_sa_month.csv",
-        "fetched_at": "2026-10-24T17:15:15Z",
+        "fetched_at": "2026-11-23T04:26:02Z",
         "tier": 3,
         "citation": "Zillow Home Value Index (ZHVI), ZIP-level all-homes (SFR + Condo) middle-tier (0.33-0.67) seasonally-adjusted. Source: Zillow Research (files.zillowstatic.com); Tier 2 cache: data_lake.zhvi_zip_latest (brain-input pivot view)."
       },
@@ -298,7 +298,7 @@ s01 | Zillow Home Value Index (ZHVI), ZIP-level all-homes (SFR + Condo) middle-t
       "display_format": "percent",
       "source": {
         "url": "https://files.zillowstatic.com/research/public_csvs/zhvi/Zip_zhvi_uc_sfrcondo_tier_0.33_0.67_sm_sa_month.csv",
-        "fetched_at": "2026-10-24T17:15:15Z",
+        "fetched_at": "2026-11-23T04:26:02Z",
         "tier": 3,
         "citation": "Zillow Home Value Index (ZHVI), ZIP-level all-homes (SFR + Condo) middle-tier (0.33-0.67) seasonally-adjusted. Source: Zillow Research (files.zillowstatic.com); Tier 2 cache: data_lake.zhvi_zip_latest (brain-input pivot view)."
       },
@@ -318,7 +318,7 @@ s01 | Zillow Home Value Index (ZHVI), ZIP-level all-homes (SFR + Condo) middle-t
       "display_format": "currency",
       "source": {
         "url": "https://files.zillowstatic.com/research/public_csvs/zhvi/Zip_zhvi_uc_sfrcondo_tier_0.33_0.67_sm_sa_month.csv",
-        "fetched_at": "2026-10-24T17:15:15Z",
+        "fetched_at": "2026-11-23T04:26:02Z",
         "tier": 3,
         "citation": "Zillow Home Value Index (ZHVI), ZIP-level all-homes (SFR + Condo) middle-tier (0.33-0.67) seasonally-adjusted. Source: Zillow Research (files.zillowstatic.com); Tier 2 cache: data_lake.zhvi_zip_latest (brain-input pivot view)."
       },
@@ -338,7 +338,7 @@ s01 | Zillow Home Value Index (ZHVI), ZIP-level all-homes (SFR + Condo) middle-t
       "display_format": "percent",
       "source": {
         "url": "https://files.zillowstatic.com/research/public_csvs/zhvi/Zip_zhvi_uc_sfrcondo_tier_0.33_0.67_sm_sa_month.csv",
-        "fetched_at": "2026-10-24T17:15:15Z",
+        "fetched_at": "2026-11-23T04:26:02Z",
         "tier": 3,
         "citation": "Zillow Home Value Index (ZHVI), ZIP-level all-homes (SFR + Condo) middle-tier (0.33-0.67) seasonally-adjusted. Source: Zillow Research (files.zillowstatic.com); Tier 2 cache: data_lake.zhvi_zip_latest (brain-input pivot view)."
       },
@@ -358,7 +358,7 @@ s01 | Zillow Home Value Index (ZHVI), ZIP-level all-homes (SFR + Condo) middle-t
       "display_format": "currency",
       "source": {
         "url": "https://files.zillowstatic.com/research/public_csvs/zhvi/Zip_zhvi_uc_sfrcondo_tier_0.33_0.67_sm_sa_month.csv",
-        "fetched_at": "2026-10-24T17:15:15Z",
+        "fetched_at": "2026-11-23T04:26:02Z",
         "tier": 3,
         "citation": "Zillow Home Value Index (ZHVI), ZIP-level all-homes (SFR + Condo) middle-tier (0.33-0.67) seasonally-adjusted. Source: Zillow Research (files.zillowstatic.com); Tier 2 cache: data_lake.zhvi_zip_latest (brain-input pivot view)."
       },
@@ -1103,7 +1103,7 @@ s01 | Zillow Home Value Index (ZHVI), ZIP-level all-homes (SFR + Condo) middle-t
       ],
       "source": {
         "url": "https://files.zillowstatic.com/research/public_csvs/zhvi/Zip_zhvi_uc_sfrcondo_tier_0.33_0.67_sm_sa_month.csv",
-        "fetched_at": "2026-10-24T17:15:15Z",
+        "fetched_at": "2026-11-23T04:26:02Z",
         "tier": 3,
         "citation": "Zillow Home Value Index (ZHVI), ZIP-level all-homes (SFR + Condo) middle-tier (0.33-0.67) seasonally-adjusted. Source: Zillow Research (files.zillowstatic.com); Tier 2 cache: data_lake.zhvi_zip_latest (brain-input pivot view)."
       },
@@ -1121,7 +1121,7 @@ s01 | Zillow Home Value Index (ZHVI), ZIP-level all-homes (SFR + Condo) middle-t
   "relevance": {
     "decay_curve": "weeks",
     "half_life_hours": 720,
-    "computed_at": "2026-10-24T17:15:16Z"
+    "computed_at": "2026-11-23T04:26:04Z"
   },
   "exogenous_signals": []
 }
@@ -1130,5 +1130,5 @@ s01 | Zillow Home Value Index (ZHVI), ZIP-level all-homes (SFR + Condo) middle-t
 - home-values-swfl: track SWFL ZIP-level home values via Zillow ZHVI as the market-value input to the investor-yield composite.
 
 --- RECENT NOTES ---
-- 2026-10-24: pack refined by the Refinery — 1 fact(s) from 1 source(s).
+- 2026-11-23: pack refined by the Refinery — 1 fact(s) from 1 source(s).
 ```
