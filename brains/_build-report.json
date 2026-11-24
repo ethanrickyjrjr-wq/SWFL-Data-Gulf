@@ -1,8 +1,8 @@
 {
   "target": "master",
   "timestamps": {
-    "started": "2026-11-23T14:58:30.916Z",
-    "finished": "2026-11-23T14:59:01.583Z"
+    "started": "2026-11-24T04:25:42.712Z",
+    "finished": "2026-11-24T04:26:09.482Z"
   },
   "source": "live",
   "outcomes": [
@@ -30,7 +30,7 @@
       "packId": "cre-swfl",
       "status": "degraded",
       "failureClass": "deterministic",
-      "reason": "400 {\"type\":\"error\",\"error\":{\"type\":\"invalid_request_error\",\"message\":\"Your credit balance is too low to access the Anthropic API. Please go to Plans & Billing to upgrade or purchase credits.\"},\"request_id\":\"req_011ChL4Gv9z5GmbTJnqHo2bA\"}",
+      "reason": "400 {\"type\":\"error\",\"error\":{\"type\":\"invalid_request_error\",\"message\":\"Your credit balance is too low to access the Anthropic API. Please go to Plans & Billing to upgrade or purchase credits.\"},\"request_id\":\"req_011ChM7pxmEnk3daKGubUWu6\"}",
       "lastGoodRefinedAt": "2026-11-17T04:33:20Z",
       "version": 74,
       "written": false
@@ -39,7 +39,7 @@
       "packId": "macro-us",
       "status": "missing",
       "failureClass": "deterministic",
-      "reason": "400 {\"type\":\"error\",\"error\":{\"type\":\"invalid_request_error\",\"message\":\"Your credit balance is too low to access the Anthropic API. Please go to Plans & Billing to upgrade or purchase credits.\"},\"request_id\":\"req_011ChL4HBM37HpLrSS37o3fr\"}",
+      "reason": "400 {\"type\":\"error\",\"error\":{\"type\":\"invalid_request_error\",\"message\":\"Your credit balance is too low to access the Anthropic API. Please go to Plans & Billing to upgrade or purchase credits.\"},\"request_id\":\"req_011ChM7q8sCsAqwteYfArZaw\"}",
       "lastGoodRefinedAt": "2026-10-22T09:32:26Z",
       "written": false
     },
@@ -55,386 +55,8 @@
     },
     {
       "packId": "sector-credit-swfl",
-      "status": "built",
-      "version": 45,
-      "written": true,
-      "brainOutput": {
-        "brain_id": "sector-credit-swfl",
-        "version": 45,
-        "refined_at": "2026-11-23T14:58:39Z",
-        "expires": "2026-11-30T14:58:39Z",
-        "ttl_seconds": 604800,
-        "direction": "bearish",
-        "magnitude": 0.38775510204081626,
-        "drivers": [],
-        "overrides": [],
-        "conclusion": "For SWFL lenders, the three lowest-risk 2-digit NAICS sectors by SBA resolved-loan charge-off rate are: Arts, Entertainment & Recreation (0% [thin sample: only 7 resolved loans, directional not confident]), Finance & Insurance (0% [thin sample: only 14 resolved loans, directional not confident]), Real Estate, Rental & Leasing (0% [thin sample: only 6 resolved loans, directional not confident]). The three highest-risk sectors are: Transportation & Warehousing (57.1% [thin sample: only 7 resolved loans, directional not confident]), Retail Trade (44.4% [thin sample: only 9 resolved loans, directional not confident]), Other Services (Personal & Repair) (21.2%). Read these rates against the current SOFR of 3.9% (stable) — funding-cost direction sets the appetite for charge-off risk. Cross-validate any sector-level call against the named brand outcomes in the franchise-outcomes brain before underwriting a specific borrower.",
-        "key_metrics": [
-          {
-            "metric": "best_naics_survival",
-            "value": 100,
-            "direction": "stable",
-            "label": "Arts, Entertainment & Recreation (NAICS 71) — best SWFL SBA survival rate [thin sample: only 7 resolved loans, directional not confident]",
-            "variable_type": "intensive",
-            "units": "percent",
-            "display_format": "percent",
-            "source": {
-              "url": "https://jtkdowmrjaxfvwmemxso.supabase.co/rest/v1/sba_loans_by_naics_county?select=*&project_county=in.(LEE,COLLIER)&approval_fy=gte.2020&naics_code=like.71%25",
-              "fetched_at": "2026-11-23T14:58:38Z",
-              "tier": 1,
-              "citation": "SBA 7(a)/504 loan outcomes (Lee + Collier counties, FY 2020+); federal source: Small Business Administration loan-status reporting — Arts, Entertainment & Recreation (NAICS 71): 0 charged off of 7 resolved loans (63 total approved across 10 sub-industries; $41.3M gross approved capital)."
-            },
-            "suggestions": [
-              "What's driving best naics survival?",
-              "How does best naics survival here compare to other SWFL areas?"
-            ]
-          },
-          {
-            "metric": "worst_naics_chargeoff",
-            "value": 57.1,
-            "direction": "stable",
-            "label": "Transportation & Warehousing (NAICS 48) — worst SWFL SBA charge-off rate [thin sample: only 7 resolved loans, directional not confident]",
-            "variable_type": "intensive",
-            "units": "percent",
-            "display_format": "percent",
-            "source": {
-              "url": "https://jtkdowmrjaxfvwmemxso.supabase.co/rest/v1/sba_loans_by_naics_county?select=*&project_county=in.(LEE,COLLIER)&approval_fy=gte.2020&naics_code=like.48%25",
-              "fetched_at": "2026-11-23T14:58:38Z",
-              "tier": 1,
-              "citation": "SBA 7(a)/504 loan outcomes (Lee + Collier counties, FY 2020+); federal source: Small Business Administration loan-status reporting — Transportation & Warehousing (NAICS 48): 4 charged off of 7 resolved loans (59 total approved across 16 sub-industries; $19.4M gross approved capital)."
-            },
-            "suggestions": [
-              "What's driving worst naics chargeoff?",
-              "How does worst naics chargeoff here compare to other SWFL areas?"
-            ]
-          },
-          {
-            "metric": "swfl_taxable_sales_latest_usd",
-            "value": 5403032052,
-            "direction": "falling",
-            "label": "SWFL taxable sales — 2025-12 (Lee + Collier)",
-            "variable_type": "extensive",
-            "units": "usd",
-            "display_format": "currency",
-            "source": {
-              "url": "https://floridarevenue.com/dataPortal/GTA/Form%2010/All%20Taxable%20Sales/F10_txsales_cy2425.xlsx",
-              "fetched_at": "2026-11-23T14:58:38Z",
-              "tier": 1,
-              "citation": "Florida DOR Form 10 — Taxable Sales by Business Type (Lee + Collier combined, 2025-12); source: fl_dor_sales_tax table (biennial XLSX cy2425)."
-            },
-            "suggestions": [
-              "What's driving swfl taxable sales latest usd?",
-              "How does swfl taxable sales latest usd here compare to other SWFL areas?"
-            ]
-          },
-          {
-            "metric": "swfl_taxable_sales_yoy_pct",
-            "value": -13.6,
-            "direction": "falling",
-            "label": "SWFL taxable sales YoY (2025-12 vs 2024-12)",
-            "variable_type": "intensive",
-            "units": "percent",
-            "display_format": "percent",
-            "source": {
-              "url": "https://floridarevenue.com/dataPortal/GTA/Form%2010/All%20Taxable%20Sales/F10_txsales_cy2425.xlsx",
-              "fetched_at": "2026-11-23T14:58:38Z",
-              "tier": 1,
-              "citation": "Florida DOR Form 10 — Taxable Sales by Business Type (Lee + Collier combined, 2025-12); source: fl_dor_sales_tax table (biennial XLSX cy2425)."
-            },
-            "suggestions": [
-              "What's driving swfl taxable sales yoy pct?",
-              "How does swfl taxable sales yoy pct here compare to other SWFL areas?"
-            ]
-          },
-          {
-            "metric": "swfl_taxable_sales_trailing_12mo_usd",
-            "value": 70759366219,
-            "direction": "stable",
-            "label": "SWFL taxable sales — trailing 12 months (Lee + Collier)",
-            "variable_type": "extensive",
-            "units": "usd",
-            "display_format": "currency",
-            "source": {
-              "url": "https://floridarevenue.com/dataPortal/GTA/Form%2010/All%20Taxable%20Sales/F10_txsales_cy2425.xlsx",
-              "fetched_at": "2026-11-23T14:58:38Z",
-              "tier": 1,
-              "citation": "Florida DOR Form 10 — Taxable Sales by Business Type (Lee + Collier combined, 2025-12); source: fl_dor_sales_tax table (biennial XLSX cy2425)."
-            },
-            "suggestions": [
-              "What's driving swfl taxable sales trailing 12mo usd?",
-              "How does swfl taxable sales trailing 12mo usd here compare to other SWFL areas?"
-            ]
-          },
-          {
-            "metric": "sector_71_chargeoff_rate",
-            "value": 0,
-            "direction": "stable",
-            "label": "Arts, Entertainment & Recreation (NAICS 71)",
-            "variable_type": "intensive",
-            "units": "percent",
-            "display_format": "percent",
-            "source": {
-              "url": "https://jtkdowmrjaxfvwmemxso.supabase.co/rest/v1/sba_loans_by_naics_county?select=*&project_county=in.(LEE,COLLIER)&approval_fy=gte.2020&naics_code=like.71%25",
-              "fetched_at": "2026-11-23T14:58:38Z",
-              "tier": 1,
-              "citation": "SBA 7(a)/504 loan outcomes (Lee + Collier counties, FY 2020+); federal source: Small Business Administration loan-status reporting — Arts, Entertainment & Recreation (NAICS 71): 0 charged off of 7 resolved loans (63 total approved across 10 sub-industries; $41.3M gross approved capital)."
-            },
-            "suggestions": [
-              "What's driving sector 71 chargeoff rate?",
-              "How does sector 71 chargeoff rate here compare to other SWFL areas?"
-            ]
-          },
-          {
-            "metric": "sector_52_chargeoff_rate",
-            "value": 0,
-            "direction": "stable",
-            "label": "Finance & Insurance (NAICS 52)",
-            "variable_type": "intensive",
-            "units": "percent",
-            "display_format": "percent",
-            "source": {
-              "url": "https://jtkdowmrjaxfvwmemxso.supabase.co/rest/v1/sba_loans_by_naics_county?select=*&project_county=in.(LEE,COLLIER)&approval_fy=gte.2020&naics_code=like.52%25",
-              "fetched_at": "2026-11-23T14:58:38Z",
-              "tier": 1,
-              "citation": "SBA 7(a)/504 loan outcomes (Lee + Collier counties, FY 2020+); federal source: Small Business Administration loan-status reporting — Finance & Insurance (NAICS 52): 0 charged off of 14 resolved loans (49 total approved across 9 sub-industries; $37.0M gross approved capital)."
-            },
-            "suggestions": [
-              "What's driving sector 52 chargeoff rate?",
-              "How does sector 52 chargeoff rate here compare to other SWFL areas?"
-            ]
-          },
-          {
-            "metric": "sector_53_chargeoff_rate",
-            "value": 0,
-            "direction": "stable",
-            "label": "Real Estate, Rental & Leasing (NAICS 53)",
-            "variable_type": "intensive",
-            "units": "percent",
-            "display_format": "percent",
-            "source": {
-              "url": "https://jtkdowmrjaxfvwmemxso.supabase.co/rest/v1/sba_loans_by_naics_county?select=*&project_county=in.(LEE,COLLIER)&approval_fy=gte.2020&naics_code=like.53%25",
-              "fetched_at": "2026-11-23T14:58:38Z",
-              "tier": 1,
-              "citation": "SBA 7(a)/504 loan outcomes (Lee + Collier counties, FY 2020+); federal source: Small Business Administration loan-status reporting — Real Estate, Rental & Leasing (NAICS 53): 0 charged off of 6 resolved loans (41 total approved across 9 sub-industries; $22.7M gross approved capital)."
-            },
-            "suggestions": [
-              "What's driving sector 53 chargeoff rate?",
-              "How does sector 53 chargeoff rate here compare to other SWFL areas?"
-            ]
-          },
-          {
-            "metric": "sector_72_chargeoff_rate",
-            "value": 7.1,
-            "direction": "stable",
-            "label": "Accommodation & Food Services (NAICS 72)",
-            "variable_type": "intensive",
-            "units": "percent",
-            "display_format": "percent",
-            "source": {
-              "url": "https://jtkdowmrjaxfvwmemxso.supabase.co/rest/v1/sba_loans_by_naics_county?select=*&project_county=in.(LEE,COLLIER)&approval_fy=gte.2020&naics_code=like.72%25",
-              "fetched_at": "2026-11-23T14:58:38Z",
-              "tier": 1,
-              "citation": "SBA 7(a)/504 loan outcomes (Lee + Collier counties, FY 2020+); federal source: Small Business Administration loan-status reporting — Accommodation & Food Services (NAICS 72): 2 charged off of 28 resolved loans (169 total approved across 8 sub-industries; $152.3M gross approved capital)."
-            },
-            "suggestions": [
-              "What's driving sector 72 chargeoff rate?",
-              "How does sector 72 chargeoff rate here compare to other SWFL areas?"
-            ]
-          },
-          {
-            "metric": "sector_42_chargeoff_rate",
-            "value": 9.1,
-            "direction": "stable",
-            "label": "Wholesale Trade (NAICS 42)",
-            "variable_type": "intensive",
-            "units": "percent",
-            "display_format": "percent",
-            "source": {
-              "url": "https://jtkdowmrjaxfvwmemxso.supabase.co/rest/v1/sba_loans_by_naics_county?select=*&project_county=in.(LEE,COLLIER)&approval_fy=gte.2020&naics_code=like.42%25",
-              "fetched_at": "2026-11-23T14:58:38Z",
-              "tier": 1,
-              "citation": "SBA 7(a)/504 loan outcomes (Lee + Collier counties, FY 2020+); federal source: Small Business Administration loan-status reporting — Wholesale Trade (NAICS 42): 1 charged off of 11 resolved loans (48 total approved across 29 sub-industries; $45.4M gross approved capital)."
-            },
-            "suggestions": [
-              "What's driving sector 42 chargeoff rate?",
-              "How does sector 42 chargeoff rate here compare to other SWFL areas?"
-            ]
-          },
-          {
-            "metric": "sector_54_chargeoff_rate",
-            "value": 12,
-            "direction": "stable",
-            "label": "Professional, Scientific & Technical Services (NAICS 54)",
-            "variable_type": "intensive",
-            "units": "percent",
-            "display_format": "percent",
-            "source": {
-              "url": "https://jtkdowmrjaxfvwmemxso.supabase.co/rest/v1/sba_loans_by_naics_county?select=*&project_county=in.(LEE,COLLIER)&approval_fy=gte.2020&naics_code=like.54%25",
-              "fetched_at": "2026-11-23T14:58:38Z",
-              "tier": 1,
-              "citation": "SBA 7(a)/504 loan outcomes (Lee + Collier counties, FY 2020+); federal source: Small Business Administration loan-status reporting — Professional, Scientific & Technical Services (NAICS 54): 3 charged off of 25 resolved loans (145 total approved across 22 sub-industries; $76.3M gross approved capital)."
-            },
-            "suggestions": [
-              "What's driving sector 54 chargeoff rate?",
-              "How does sector 54 chargeoff rate here compare to other SWFL areas?"
-            ]
-          },
-          {
-            "metric": "sector_62_chargeoff_rate",
-            "value": 12.5,
-            "direction": "stable",
-            "label": "Health Care & Social Assistance (NAICS 62)",
-            "variable_type": "intensive",
-            "units": "percent",
-            "display_format": "percent",
-            "source": {
-              "url": "https://jtkdowmrjaxfvwmemxso.supabase.co/rest/v1/sba_loans_by_naics_county?select=*&project_county=in.(LEE,COLLIER)&approval_fy=gte.2020&naics_code=like.62%25",
-              "fetched_at": "2026-11-23T14:58:38Z",
-              "tier": 1,
-              "citation": "SBA 7(a)/504 loan outcomes (Lee + Collier counties, FY 2020+); federal source: Small Business Administration loan-status reporting — Health Care & Social Assistance (NAICS 62): 2 charged off of 16 resolved loans (154 total approved across 19 sub-industries; $110.8M gross approved capital)."
-            },
-            "suggestions": [
-              "What's driving sector 62 chargeoff rate?",
-              "How does sector 62 chargeoff rate here compare to other SWFL areas?"
-            ]
-          },
-          {
-            "metric": "sector_23_chargeoff_rate",
-            "value": 13.7,
-            "direction": "stable",
-            "label": "Construction (NAICS 23)",
-            "variable_type": "intensive",
-            "units": "percent",
-            "display_format": "percent",
-            "source": {
-              "url": "https://jtkdowmrjaxfvwmemxso.supabase.co/rest/v1/sba_loans_by_naics_county?select=*&project_county=in.(LEE,COLLIER)&approval_fy=gte.2020&naics_code=like.23%25",
-              "fetched_at": "2026-11-23T14:58:38Z",
-              "tier": 1,
-              "citation": "SBA 7(a)/504 loan outcomes (Lee + Collier counties, FY 2020+); federal source: Small Business Administration loan-status reporting — Construction (NAICS 23): 7 charged off of 51 resolved loans (301 total approved across 27 sub-industries; $209.7M gross approved capital)."
-            },
-            "suggestions": [
-              "What's driving sector 23 chargeoff rate?",
-              "How does sector 23 chargeoff rate here compare to other SWFL areas?"
-            ]
-          },
-          {
-            "metric": "sector_56_chargeoff_rate",
-            "value": 18.8,
-            "direction": "stable",
-            "label": "Administrative & Support Services (NAICS 56)",
-            "variable_type": "intensive",
-            "units": "percent",
-            "display_format": "percent",
-            "source": {
-              "url": "https://jtkdowmrjaxfvwmemxso.supabase.co/rest/v1/sba_loans_by_naics_county?select=*&project_county=in.(LEE,COLLIER)&approval_fy=gte.2020&naics_code=like.56%25",
-              "fetched_at": "2026-11-23T14:58:38Z",
-              "tier": 1,
-              "citation": "SBA 7(a)/504 loan outcomes (Lee + Collier counties, FY 2020+); federal source: Small Business Administration loan-status reporting — Administrative & Support Services (NAICS 56): 6 charged off of 32 resolved loans (137 total approved across 24 sub-industries; $60.6M gross approved capital)."
-            },
-            "suggestions": [
-              "What's driving sector 56 chargeoff rate?",
-              "How does sector 56 chargeoff rate here compare to other SWFL areas?"
-            ]
-          },
-          {
-            "metric": "sector_44_chargeoff_rate",
-            "value": 18.8,
-            "direction": "stable",
-            "label": "Retail Trade (NAICS 44)",
-            "variable_type": "intensive",
-            "units": "percent",
-            "display_format": "percent",
-            "source": {
-              "url": "https://jtkdowmrjaxfvwmemxso.supabase.co/rest/v1/sba_loans_by_naics_county?select=*&project_county=in.(LEE,COLLIER)&approval_fy=gte.2020&naics_code=like.44%25",
-              "fetched_at": "2026-11-23T14:58:38Z",
-              "tier": 1,
-              "citation": "SBA 7(a)/504 loan outcomes (Lee + Collier counties, FY 2020+); federal source: Small Business Administration loan-status reporting — Retail Trade (NAICS 44): 3 charged off of 16 resolved loans (74 total approved across 33 sub-industries; $66.3M gross approved capital)."
-            },
-            "suggestions": [
-              "What's driving sector 44 chargeoff rate?",
-              "How does sector 44 chargeoff rate here compare to other SWFL areas?"
-            ]
-          },
-          {
-            "metric": "sector_81_chargeoff_rate",
-            "value": 21.2,
-            "direction": "stable",
-            "label": "Other Services (Personal & Repair) (NAICS 81)",
-            "variable_type": "intensive",
-            "units": "percent",
-            "display_format": "percent",
-            "source": {
-              "url": "https://jtkdowmrjaxfvwmemxso.supabase.co/rest/v1/sba_loans_by_naics_county?select=*&project_county=in.(LEE,COLLIER)&approval_fy=gte.2020&naics_code=like.81%25",
-              "fetched_at": "2026-11-23T14:58:38Z",
-              "tier": 1,
-              "citation": "SBA 7(a)/504 loan outcomes (Lee + Collier counties, FY 2020+); federal source: Small Business Administration loan-status reporting — Other Services (Personal & Repair) (NAICS 81): 7 charged off of 33 resolved loans (176 total approved across 21 sub-industries; $105.5M gross approved capital)."
-            },
-            "suggestions": [
-              "What's driving sector 81 chargeoff rate?",
-              "How does sector 81 chargeoff rate here compare to other SWFL areas?"
-            ]
-          },
-          {
-            "metric": "sector_45_chargeoff_rate",
-            "value": 44.4,
-            "direction": "stable",
-            "label": "Retail Trade (NAICS 45)",
-            "variable_type": "intensive",
-            "units": "percent",
-            "display_format": "percent",
-            "source": {
-              "url": "https://jtkdowmrjaxfvwmemxso.supabase.co/rest/v1/sba_loans_by_naics_county?select=*&project_county=in.(LEE,COLLIER)&approval_fy=gte.2020&naics_code=like.45%25",
-              "fetched_at": "2026-11-23T14:58:38Z",
-              "tier": 1,
-              "citation": "SBA 7(a)/504 loan outcomes (Lee + Collier counties, FY 2020+); federal source: Small Business Administration loan-status reporting — Retail Trade (NAICS 45): 4 charged off of 9 resolved loans (63 total approved across 22 sub-industries; $40.9M gross approved capital)."
-            },
-            "suggestions": [
-              "What's driving sector 45 chargeoff rate?",
-              "How does sector 45 chargeoff rate here compare to other SWFL areas?"
-            ]
-          },
-          {
-            "metric": "sector_48_chargeoff_rate",
-            "value": 57.1,
-            "direction": "stable",
-            "label": "Transportation & Warehousing (NAICS 48)",
-            "variable_type": "intensive",
-            "units": "percent",
-            "display_format": "percent",
-            "source": {
-              "url": "https://jtkdowmrjaxfvwmemxso.supabase.co/rest/v1/sba_loans_by_naics_county?select=*&project_county=in.(LEE,COLLIER)&approval_fy=gte.2020&naics_code=like.48%25",
-              "fetched_at": "2026-11-23T14:58:38Z",
-              "tier": 1,
-              "citation": "SBA 7(a)/504 loan outcomes (Lee + Collier counties, FY 2020+); federal source: Small Business Administration loan-status reporting — Transportation & Warehousing (NAICS 48): 4 charged off of 7 resolved loans (59 total approved across 16 sub-industries; $19.4M gross approved capital)."
-            },
-            "suggestions": [
-              "What's driving sector 48 chargeoff rate?",
-              "How does sector 48 chargeoff rate here compare to other SWFL areas?"
-            ]
-          }
-        ],
-        "caveats": [
-          "Charge-off rates use the resolved-loan denominator (n_chargeoffs / (n_chargeoffs + n_paid_in_full)); the materialized view's `chargeoff_pct` is intentionally ignored because it understates risk on still-active loans.",
-          "Sectors with fewer than 5 resolved loans are not ranked — small-sample charge-off rates are directional, not actionable.",
-          "Worst-sector charge-off 57.1% (Transportation & Warehousing, NAICS 48) above 30% bearish threshold — sector-level credit risk is elevated.",
-          "Upstream brain 'macro-us' was stale at build time (expired 2026-11-21).",
-          "Upstream brain 'macro-us' failed to rebuild on 2026-11-23; using last good read from 2026-10-22 (v21)."
-        ],
-        "contradicts": [],
-        "confidence": 1,
-        "joint_integrity": 1,
-        "confidence_dispersion": 0,
-        "chain_depth": 2,
-        "trust_tier": 1,
-        "upstream_count": 3,
-        "relevance": {
-          "decay_curve": "weeks",
-          "half_life_hours": 720,
-          "computed_at": "2026-11-23T14:58:39Z"
-        },
-        "exogenous_signals": [],
-        "degraded_inputs": []
-      }
+      "status": "skipped-fresh",
+      "written": false
     },
     {
       "packId": "tourism-tdt",
@@ -493,25 +115,105 @@
     },
     {
       "packId": "econ-dev-swfl",
-      "status": "skipped-fresh",
-      "written": false
+      "status": "built",
+      "version": 26,
+      "written": true,
+      "brainOutput": {
+        "brain_id": "econ-dev-swfl",
+        "version": 26,
+        "refined_at": "2026-11-24T04:25:47Z",
+        "expires": "2026-12-01T04:25:47Z",
+        "ttl_seconds": 604800,
+        "direction": "neutral",
+        "magnitude": 0.3,
+        "drivers": [],
+        "overrides": [],
+        "conclusion": "SWFL Inc. logged 2 economic development announcements in the last 90 days. Source: SWFL Inc. (swflinc.com/blog/), the official Lee County economic development organization.",
+        "key_metrics": [
+          {
+            "metric": "econ_dev_announcements_90d",
+            "label": "Economic development announcements (last 90 days)",
+            "value": 2,
+            "direction": "stable",
+            "variable_type": "extensive",
+            "units": "count",
+            "display_format": "raw",
+            "source": {
+              "url": "https://www.swflinc.com/blog/why-join-swfl-inc",
+              "fetched_at": "2026-11-24T04:25:47Z",
+              "tier": 2,
+              "citation": "SWFL Inc. Economic Development Announcements — Lee County EDO (2 announcements in last 90 days via swfl_inc_announcements)"
+            },
+            "suggestions": [
+              "What's driving econ dev announcements 90d?",
+              "How does econ dev announcements 90d here compare to other SWFL areas?"
+            ]
+          },
+          {
+            "metric": "econ_dev_announcements_prior_90d",
+            "label": "Economic development announcements (prior 90-day window)",
+            "value": 0,
+            "direction": "stable",
+            "variable_type": "extensive",
+            "units": "count",
+            "display_format": "raw",
+            "source": {
+              "url": "https://www.swflinc.com/blog/why-join-swfl-inc",
+              "fetched_at": "2026-11-24T04:25:47Z",
+              "tier": 2,
+              "citation": "SWFL Inc. Economic Development Announcements — Lee County EDO (0 announcements in 90–180 days prior window)"
+            },
+            "suggestions": [
+              "What's driving econ dev announcements prior 90d?",
+              "How does econ dev announcements prior 90d here compare to other SWFL areas?"
+            ]
+          }
+        ],
+        "caveats": [
+          "2 of 11 announcements in the last 90 days matched qualifying categories (relocation, expansion, grant, infrastructure); the rest are general chamber/policy posts excluded from the momentum count.",
+          "Investment and job figures reflect disclosures at announcement time; actual outcomes may vary as projects develop.",
+          "SWFL Inc. covers primarily Lee County projects; Collier County coverage depends on cross-county partnerships and co-announcements."
+        ],
+        "contradicts": [],
+        "confidence": 0.8,
+        "joint_integrity": 1,
+        "confidence_dispersion": 0,
+        "chain_depth": 0,
+        "trust_tier": 2,
+        "upstream_count": 0,
+        "relevance": {
+          "decay_curve": "weeks",
+          "half_life_hours": 720,
+          "computed_at": "2026-11-24T04:25:47Z"
+        },
+        "exogenous_signals": [],
+        "grain_boundary": {
+          "not_available": [
+            "Systematic Collier coverage — the feed is the Lee County EDO (SWFL Inc.); Collier appears only when announced via partnerships and co-announcements",
+            "Charlotte County (or any other out-of-core county) announcements — outside the Lee + Collier core scope and excluded from every count",
+            "Investment and job figures beyond what is disclosed at announcement — no audited or updated totals",
+            "Sub-county grain — announcements are county-attributed only (no ZIP, corridor, or parcel detail)"
+          ],
+          "finest_grain": "project-announcement"
+        }
+      }
     },
     {
       "packId": "city-pulse-swfl",
       "status": "built",
-      "version": 194,
+      "version": 195,
       "written": true,
       "brainOutput": {
         "brain_id": "city-pulse-swfl",
-        "version": 194,
-        "refined_at": "2026-11-23T14:58:40Z",
-        "expires": "2026-11-24T14:58:40Z",
+        "version": 195,
+        "refined_at": "2026-11-24T04:25:48Z",
+        "expires": "2026-11-25T04:25:48Z",
         "ttl_seconds": 86400,
         "direction": "neutral",
         "magnitude": 0,
         "drivers": [],
         "overrides": [],
-        "conclusion": "SWFL city pulse as of 2026-11-23: 81 live current-events signals across 9 cities — Fort Myers (30), Naples (24), Sanibel (1), East Naples (1), Cape Coral (18), Marco Island (1), Fort Myers Beach (3), North Naples (1), Estero (2). Most current: Fort Myers — Fort Myers industrial properties sold for $17.5 million to a Pennsylvania investor, as reported Nov. 18, 2026. These are current cited facts only; the cross-vertical read and any direction call live downstream in master.",
+        "conclusion": "SWFL city pulse as of 2026-11-24: 81 live current-events signals across 9 cities — Fort Myers (30), Naples (24), Sanibel (1), East Naples (1), Cape Coral (18), Marco Island (1), Fort Myers Beach (3), North Naples (1), Estero (2). Most current: Fort Myers — Fort Myers industrial properties sold for $17.5 million to a Pennsylvania investor, as reported Nov. 18, 2026. These are current cited facts only; the cross-vertical read and any direction call live downstream in master.",
         "key_metrics": [
           {
             "metric": "signal_transactions_1",
@@ -521,7 +223,7 @@
             "variable_type": "categorical",
             "source": {
               "url": "https://www.businessobserverfl.com/news/2026/nov/18/fort-myers-industrial-properties-sell/",
-              "fetched_at": "2026-11-23T14:58:40Z",
+              "fetched_at": "2026-11-24T04:25:48Z",
               "tier": 2,
               "citation": "Fort Myers industrial properties sell for $17.5M to Pennsylvania investor | Business Observer: \"![Spinner: White decorative](https://cdn.userway.org/widgetapp/images/spin_wh.svg)\n![](https://cdn.userway.org/widgetapp/images/body_wh.svg)\n![Spinner: White decorative](https://cdn.userway.org/widgetapp/images/spin_wh.svg)\n  * ![Alternate Text](https://observermediagroup.media.clients.ellingtoncms.com/static-4/assets/images/bob-logo-header.svg)\n  * Loading\n\n\n  * [Newsletters](https://marketing.businessobserverfl.com/newsletters)\n  * [Podcast](https://www.businessobserverfl.com/podcasts/corner-office/?utm_source=header&utm_medium=sitenav)\n  * [Public Notices](https://legals.businessobserverfl.com/)\n  * [Big Book](https://www.businessobserverfl.com/big-book-of-business/2026/)\n  * [40 Under 40](https://www.businessobserverfl.com/40-under-40/)\n  * [Mobile App](https://businessobserver.pressreader.com/)\n  * [Subscribe](https://marketing.businessobserverfl.com/subscribe)\n  * [Login](https://www.businessobserverfl.com/accounts/login/?next=/news/2026/nov/18/fort-myers-industrial-properties-sell/)\n\n\n  * [](https://www.facebook.com/BusinessObserverFL)\n  * [](https://x.com/BizObserverFL)\n  * [](https://www.linkedin.com/company/businessobserverfl)\n  * [ ](https://www.instagram.com/businessobserverfl/)\n\n\n[![](https://observermediagroup.media.clients.ellingtoncms.com/static-4/assets/images/bob-logo-header.svg)](https://www.businessobserverfl.com/)\n[![](https://observermediagroup.media.clients.ellingtoncms.com/static-4/assets/images/bob-logo-sticky.svg)](https://www.businessobserverfl.com/)\n[![](https://observermediagroup.media.clients.ellingtoncms.com/static-4/assets/images/bob-logo-header.svg)](https://www.businessobserverfl.com/)\n  * [News](https://www.businessobserverfl.com/news/all/)\n  * [Strategies](https://www.businessobserverfl.com/news/strategies/)\n  * [Entrepreneurs](https://www.businessobserverfl.com/news/entrepreneurs/)\n  * [Leadership](https://www.businessobserverfl.com/news/leadership/)\n  * [Regions](https://www.businessobserverfl.com/news/2026/nov/18/fort-myers-industrial-properties-sell/)\n    * [Tampa Bay-Lakeland](https://www.businessobserverfl.com/news/tampa-bay-lakeland/)\n    * [Manatee-Sarasota](https://www.businessobserverfl.com/news/manatee-sarasota/)\n    * [Charlotte-Lee-Collier](https://www.businessobserverfl.com/news/charlotte-lee-collier/)\n    * [Florida](https://www.businessobserverfl.com/news/florida/)\n  * [Industries](https://www.businessobserverfl.com/news/2026/nov/18/fort-myers-industrial-properties-sell/)\n    * [Business Support](https://www.businessobserverfl.com/news/industries/business-support/)\n    * [Commercial Real Estate](https://www.businessobserverfl.com/news/industries/commercial-real-estate/)\n    * [Residential Real Estate](https://www.businessobserverfl.com/news/industries/residential-real-estate/)\n    * [Development](https://www.businessobserverfl.com/news/industries/development/)\n    * [Finance](https://www.businessobserverfl.com/news/industries/finance/)\n    * [Food-Beverage](https://www.businessobserverfl.com/new\""
             },
@@ -538,7 +240,7 @@
             "variable_type": "categorical",
             "source": {
               "url": "https://www.news-press.com/story/money/2026/11/16/big-florida-hospitality-expansion-includes-hilton-naples-and-captiva-swfl-collier-lee-county-hotel/92730838007/",
-              "fetched_at": "2026-11-23T14:58:40Z",
+              "fetched_at": "2026-11-24T04:25:48Z",
               "tier": 2,
               "citation": "Big Florida hospitality expansion includes Hilton, Naples and Captiva: \"[](https://www.news-press.com/)\n[Free Fort Myers dog fest celebrates golden retrievers, other breeds](https://www.news-press.com/story/life/2026/11/16/fort-myers-florida-dog-festival-celebrates-golden-retrievers-and-more-goldenfest-dock-diving-free/92688792007/)\n[](https://subscribe.news-press.com/rr/nanobar?gps-source=CPTILELEFT&itm_campaign=2026ENTQ4BAU2026&itm_medium=ONSITE&success-url=https%3A%2F%2Fwww.news-press.com%2Fstory%2Fmoney%2F2026%2F11%2F16%2Fbig-florida-hospitality-expansion-includes-hilton-naples-and-captiva-swfl-collier-lee-county-hotel%2F92730838007%2F)\n[](https://subscribe.news-press.com/rr/masthead?gps-source=CPMASTHEAD&itm_campaign=2026ENTQ4BAU2026&itm_medium=ONSITE&success-url=https%3A%2F%2Fwww.news-press.com%2Fstory%2Fmoney%2F2026%2F11%2F16%2Fbig-florida-hospitality-expansion-includes-hilton-naples-and-captiva-swfl-collier-lee-county-hotel%2F92730838007%2F)\n[News](https://www.news-press.com/news/) [Cape Coral](https://www.news-press.com/news/cape-coral/) [Sports](https://www.news-press.com/sports/) [Restaurants](https://www.news-press.com/taste/) [Real Estate](https://www.news-press.com/real-estate) [Advertise](https://advertising.usatoday.com/advertise-with-us/?cid=Web_LiQ_Network_AdvertiseWithUs_AdvertiseInquiry&publication=the_news_press&utm_source=local_publication&utm_medium=menu&utm_campaign=advertise_with_us) [Obituaries](https://www.news-press.com/obituaries) [eNewspaper](https://user.news-press.com/user/enewspaper) [Legals](https://www.news-press.com/public-notices)\n[](https://www.news-press.com/search/ \"Search\")\n[](https://www.news-press.com/weather/ \"Weather in Fort Myers: 72°F Sunny\") [](https://subscribe.news-press.com/rr/navsub?gps-source=CPTOPNAVBAR&itm_campaign=2026ENTQ4BAU2026&itm_medium=ONSITE&success-url=https%3A%2F%2Fwww.news-press.com%2Fstory%2Fmoney%2F2026%2F11%2F16%2Fbig-florida-hospitality-expansion-includes-hilton-naples-and-captiva-swfl-collier-lee-county-hotel%2F92730838007%2F)\n[](https://login.news-press.com/PFTM-GUP/authenticate/?success-url=https%3A%2F%2Fwww.news-press.com%2Fstory%2Fmoney%2F2026%2F11%2F16%2Fbig-florida-hospitality-expansion-includes-hilton-naples-and-captiva-swfl-collier-lee-county-hotel%2F92730838007%2F&cancel-url=https%3A%2F%2Fwww.news-press.com%2Fstory%2Fmoney%2F2026%2F11%2F16%2Fbig-florida-hospitality-expansion-includes-hilton-naples-and-captiva-swfl-collier-lee-county-hotel%2F92730838007%2F)\n[](https://www.news-press.com/) [](https://www.news-press.com/)\nMONEY\n# Florida pipeline projects include hotels, resorts, re-openings and more\n[![Portrait of Phil Fernandez](https://www.news-press.com/gcdn/presto/2019/09/14/PNDN/6a77b474-579f-48fa-b56f-a2cc2b9de797-NDN_Phil_Fernandez.jpg?crop=2999,2999,x0,y570&width=48&height=48&format=pjpg&auto=webp) Phil Fernandez](https://www.naplesnews.com/staff/2684114001/phil-fernandez/)\nFort Myers News-Press & Naples Daily News\nNov. 16, 2026, 5:04 a.m. ET\n[Southwest Florida](https://www.news-press.com/story/money/2026/10/26/florida-fighting-over\""
             },
@@ -555,7 +257,7 @@
             "variable_type": "categorical",
             "source": {
               "url": "https://www.naplesnews.com/story/money/2026/11/10/florida-sees-new-affordable-workforce-housing-compounds-make-debuts-swfl-naples-fort-myers-sanibel/92696792007/",
-              "fetched_at": "2026-11-23T14:58:40Z",
+              "fetched_at": "2026-11-24T04:25:48Z",
               "tier": 2,
               "citation": "Florida sees new affordable, workforce housing compounds make debuts: \"[](https://www.naplesnews.com/)\n[](https://subscribe.naplesnews.com/rr/nanobar?gps-source=CPTILELEFT&itm_campaign=2026ENTQ4BAU2026&itm_medium=ONSITE&success-url=https%3A%2F%2Fwww.naplesnews.com%2Fstory%2Fmoney%2F2026%2F11%2F10%2Fflorida-sees-new-affordable-workforce-housing-compounds-make-debuts-swfl-naples-fort-myers-sanibel%2F92696792007%2F)\n[](https://subscribe.naplesnews.com/rr/masthead?gps-source=CPMASTHEAD&itm_campaign=2026ENTQ4BAU2026&itm_medium=ONSITE&success-url=https%3A%2F%2Fwww.naplesnews.com%2Fstory%2Fmoney%2F2026%2F11%2F10%2Fflorida-sees-new-affordable-workforce-housing-compounds-make-debuts-swfl-naples-fort-myers-sanibel%2F92696792007%2F)\n[News](https://www.naplesnews.com/news/) [Sports](https://www.naplesnews.com/sports/) [Real Estate](https://www.naplesnews.com/business/real-estate/) [Restaurants](https://www.naplesnews.com/entertainment/restaurants/) [Opinion](https://www.naplesnews.com/opinion/) [Advertise](https://advertising.usatoday.com/advertise-with-us/?cid=Web_LiQ_Network_AdvertiseWithUs_AdvertiseInquiry&publication=naples_daily_news&utm_source=local_publication&utm_medium=menu&utm_campaign=advertise_with_us) [Obituaries](https://www.naplesnews.com/obituaries) [eNewspaper](https://user.naplesnews.com/user/enewspaper) [Legals](https://www.naplesnews.com/public-notices)\n[](https://www.naplesnews.com/search/ \"Search\")\n[](https://www.naplesnews.com/weather/ \"Weather in Naples: 70°F Cloudy\") [](https://subscribe.naplesnews.com/rr/navsub?gps-source=CPTOPNAVBAR&itm_campaign=2026ENTQ4BAU2026&itm_medium=ONSITE&success-url=https%3A%2F%2Fwww.naplesnews.com%2Fstory%2Fmoney%2F2026%2F11%2F10%2Fflorida-sees-new-affordable-workforce-housing-compounds-make-debuts-swfl-naples-fort-myers-sanibel%2F92696792007%2F)\n[](https://login.naplesnews.com/PNDN-GUP/authenticate/?success-url=https%3A%2F%2Fwww.naplesnews.com%2Fstory%2Fmoney%2F2026%2F11%2F10%2Fflorida-sees-new-affordable-workforce-housing-compounds-make-debuts-swfl-naples-fort-myers-sanibel%2F92696792007%2F&cancel-url=https%3A%2F%2Fwww.naplesnews.com%2Fstory%2Fmoney%2F2026%2F11%2F10%2Fflorida-sees-new-affordable-workforce-housing-compounds-make-debuts-swfl-naples-fort-myers-sanibel%2F92696792007%2F)\n[](https://www.naplesnews.com/) [](https://www.naplesnews.com/)\n[MONEY](https://www.naplesnews.com/business/)\n# New Florida affordable housing projects take shape with hefty demand\n[![Portrait of Phil Fernandez](https://www.naplesnews.com/gcdn/presto/2019/09/14/PNDN/6a77b474-579f-48fa-b56f-a2cc2b9de797-NDN_Phil_Fernandez.jpg?crop=2999,2999,x0,y570&width=48&height=48&format=pjpg&auto=webp) Phil Fernandez](https://www.naplesnews.com/staff/2684114001/phil-fernandez/)\nFort Myers News-Press & Naples Daily News\nNov. 10, 2026, 10:47 a.m. ET\n[](https://www.facebook.com/dialog/share?display=popup&app_id=1703814913224751&href=https%3A%2F%2Fwww.naplesnews.com%2Fstory%2Fmoney%2F2026%2F11%2F10%2Fflorida-sees-new-affordable-workforce-housing-compounds-make-debuts-swfl-naples-fort-myers-sanibel%2F92696792007%\""
             },
@@ -572,7 +274,7 @@
             "variable_type": "categorical",
             "source": {
               "url": "https://www.naplesnews.com/story/money/2026/11/10/florida-sees-new-affordable-workforce-housing-compounds-make-debuts-swfl-naples-fort-myers-sanibel/92696792007/",
-              "fetched_at": "2026-11-23T14:58:40Z",
+              "fetched_at": "2026-11-24T04:25:48Z",
               "tier": 2,
               "citation": "Florida sees new affordable, workforce housing compounds make debuts: \"[](https://www.naplesnews.com/)\n[](https://subscribe.naplesnews.com/rr/nanobar?gps-source=CPTILELEFT&itm_campaign=2026ENTQ4BAU2026&itm_medium=ONSITE&success-url=https%3A%2F%2Fwww.naplesnews.com%2Fstory%2Fmoney%2F2026%2F11%2F10%2Fflorida-sees-new-affordable-workforce-housing-compounds-make-debuts-swfl-naples-fort-myers-sanibel%2F92696792007%2F)\n[](https://subscribe.naplesnews.com/rr/masthead?gps-source=CPMASTHEAD&itm_campaign=2026ENTQ4BAU2026&itm_medium=ONSITE&success-url=https%3A%2F%2Fwww.naplesnews.com%2Fstory%2Fmoney%2F2026%2F11%2F10%2Fflorida-sees-new-affordable-workforce-housing-compounds-make-debuts-swfl-naples-fort-myers-sanibel%2F92696792007%2F)\n[News](https://www.naplesnews.com/news/) [Sports](https://www.naplesnews.com/sports/) [Real Estate](https://www.naplesnews.com/business/real-estate/) [Restaurants](https://www.naplesnews.com/entertainment/restaurants/) [Opinion](https://www.naplesnews.com/opinion/) [Advertise](https://advertising.usatoday.com/advertise-with-us/?cid=Web_LiQ_Network_AdvertiseWithUs_AdvertiseInquiry&publication=naples_daily_news&utm_source=local_publication&utm_medium=menu&utm_campaign=advertise_with_us) [Obituaries](https://www.naplesnews.com/obituaries) [eNewspaper](https://user.naplesnews.com/user/enewspaper) [Legals](https://www.naplesnews.com/public-notices)\n[](https://www.naplesnews.com/search/ \"Search\")\n[](https://www.naplesnews.com/weather/ \"Weather in Naples: 70°F Cloudy\") [](https://subscribe.naplesnews.com/rr/navsub?gps-source=CPTOPNAVBAR&itm_campaign=2026ENTQ4BAU2026&itm_medium=ONSITE&success-url=https%3A%2F%2Fwww.naplesnews.com%2Fstory%2Fmoney%2F2026%2F11%2F10%2Fflorida-sees-new-affordable-workforce-housing-compounds-make-debuts-swfl-naples-fort-myers-sanibel%2F92696792007%2F)\n[](https://login.naplesnews.com/PNDN-GUP/authenticate/?success-url=https%3A%2F%2Fwww.naplesnews.com%2Fstory%2Fmoney%2F2026%2F11%2F10%2Fflorida-sees-new-affordable-workforce-housing-compounds-make-debuts-swfl-naples-fort-myers-sanibel%2F92696792007%2F&cancel-url=https%3A%2F%2Fwww.naplesnews.com%2Fstory%2Fmoney%2F2026%2F11%2F10%2Fflorida-sees-new-affordable-workforce-housing-compounds-make-debuts-swfl-naples-fort-myers-sanibel%2F92696792007%2F)\n[](https://www.naplesnews.com/) [](https://www.naplesnews.com/)\n[MONEY](https://www.naplesnews.com/business/)\n# New Florida affordable housing projects take shape with hefty demand\n[![Portrait of Phil Fernandez](https://www.naplesnews.com/gcdn/presto/2019/09/14/PNDN/6a77b474-579f-48fa-b56f-a2cc2b9de797-NDN_Phil_Fernandez.jpg?crop=2999,2999,x0,y570&width=48&height=48&format=pjpg&auto=webp) Phil Fernandez](https://www.naplesnews.com/staff/2684114001/phil-fernandez/)\nFort Myers News-Press & Naples Daily News\nNov. 10, 2026, 10:47 a.m. ET\n[](https://www.facebook.com/dialog/share?display=popup&app_id=1703814913224751&href=https%3A%2F%2Fwww.naplesnews.com%2Fstory%2Fmoney%2F2026%2F11%2F10%2Fflorida-sees-new-affordable-workforce-housing-compounds-make-debuts-swfl-naples-fort-myers-sanibel%2F92696792007%\""
             },
@@ -589,7 +291,7 @@
             "variable_type": "categorical",
             "source": {
               "url": "https://www.news-press.com/story/money/business/local/2026/11/10/east-naples-golf-club-project-forced-to-start-over-in-approval-process-because-of-procedural-misstep/92708676007/",
-              "fetched_at": "2026-11-23T14:58:40Z",
+              "fetched_at": "2026-11-24T04:25:48Z",
               "tier": 2,
               "citation": "East Naples golf club project forced to start over in approval process: \"[](https://www.news-press.com/)\n[Popular Fort Myers pizza shop reopens with new look, more awards](https://www.news-press.com/story/life/food/2026/11/12/uncle-ricos-in-fort-myers-reopens-with-cool-new-look-more-awards/92650571007/)\n[](https://subscribe.news-press.com/rr/nanobar?gps-source=CPTILELEFT&itm_campaign=2026ENTQ4BAU2026&itm_medium=ONSITE&success-url=https%3A%2F%2Fwww.news-press.com%2Fstory%2Fmoney%2Fbusiness%2Flocal%2F2026%2F11%2F10%2Feast-naples-golf-club-project-forced-to-start-over-in-approval-process-because-of-procedural-misstep%2F92708676007%2F)\n[](https://subscribe.news-press.com/rr/masthead?gps-source=CPMASTHEAD&itm_campaign=2026ENTQ4BAU2026&itm_medium=ONSITE&success-url=https%3A%2F%2Fwww.news-press.com%2Fstory%2Fmoney%2Fbusiness%2Flocal%2F2026%2F11%2F10%2Feast-naples-golf-club-project-forced-to-start-over-in-approval-process-because-of-procedural-misstep%2F92708676007%2F)\n[News](https://www.news-press.com/news/) [Cape Coral](https://www.news-press.com/news/cape-coral/) [Sports](https://www.news-press.com/sports/) [Restaurants](https://www.news-press.com/taste/) [Real Estate](https://www.news-press.com/real-estate) [Advertise](https://advertising.usatoday.com/advertise-with-us/?cid=Web_LiQ_Network_AdvertiseWithUs_AdvertiseInquiry&publication=the_news_press&utm_source=local_publication&utm_medium=menu&utm_campaign=advertise_with_us) [Obituaries](https://www.news-press.com/obituaries) [eNewspaper](https://user.news-press.com/user/enewspaper) [Legals](https://www.news-press.com/public-notices)\n[](https://www.news-press.com/search/ \"Search\")\n[](https://www.news-press.com/weather/ \"Weather in Fort Myers: 76°F Cloudy\") [](https://subscribe.news-press.com/rr/navsub?gps-source=CPTOPNAVBAR&itm_campaign=2026ENTQ4BAU2026&itm_medium=ONSITE&success-url=https%3A%2F%2Fwww.news-press.com%2Fstory%2Fmoney%2Fbusiness%2Flocal%2F2026%2F11%2F10%2Feast-naples-golf-club-project-forced-to-start-over-in-approval-process-because-of-procedural-misstep%2F92708676007%2F)\n[](https://login.news-press.com/PFTM-GUP/authenticate/?success-url=https%3A%2F%2Fwww.news-press.com%2Fstory%2Fmoney%2Fbusiness%2Flocal%2F2026%2F11%2F10%2Feast-naples-golf-club-project-forced-to-start-over-in-approval-process-because-of-procedural-misstep%2F92708676007%2F&cancel-url=https%3A%2F%2Fwww.news-press.com%2Fstory%2Fmoney%2Fbusiness%2Flocal%2F2026%2F11%2F10%2Feast-naples-golf-club-project-forced-to-start-over-in-approval-process-because-of-procedural-misstep%2F92708676007%2F)\n[](https://www.news-press.com/) [](https://www.news-press.com/)\nLOCAL BUSINESS\n# East Naples golf club project forced to start over in hearing process\n[![Portrait of Laura Layden](https://www.news-press.com/gcdn/authoring/authoring-images/2024/02/08/PNDN/72524348007-ndn-jh-20240126-laura-0001.JPG?crop=3313,3312,x1506,y0&width=48&height=48&format=pjpg&auto=webp) Laura Layden](https://www.naplesnews.com/staff/2647080001/laura-layden/)\nFort Myers News-Press & Naples Daily News\nNov. 10, 2026Updated Nov. 11, 2026, 10:\""
             },
@@ -606,7 +308,7 @@
             "variable_type": "categorical",
             "source": {
               "url": "https://www.news-press.com/story/money/business/local/2026/11/10/east-naples-golf-club-project-forced-to-start-over-in-approval-process-because-of-procedural-misstep/92708676007/",
-              "fetched_at": "2026-11-23T14:58:40Z",
+              "fetched_at": "2026-11-24T04:25:48Z",
               "tier": 2,
               "citation": "East Naples golf club project forced to start over in approval process: \"[](https://www.news-press.com/)\n[Popular Fort Myers pizza shop reopens with new look, more awards](https://www.news-press.com/story/life/food/2026/11/12/uncle-ricos-in-fort-myers-reopens-with-cool-new-look-more-awards/92650571007/)\n[](https://subscribe.news-press.com/rr/nanobar?gps-source=CPTILELEFT&itm_campaign=2026ENTQ4BAU2026&itm_medium=ONSITE&success-url=https%3A%2F%2Fwww.news-press.com%2Fstory%2Fmoney%2Fbusiness%2Flocal%2F2026%2F11%2F10%2Feast-naples-golf-club-project-forced-to-start-over-in-approval-process-because-of-procedural-misstep%2F92708676007%2F)\n[](https://subscribe.news-press.com/rr/masthead?gps-source=CPMASTHEAD&itm_campaign=2026ENTQ4BAU2026&itm_medium=ONSITE&success-url=https%3A%2F%2Fwww.news-press.com%2Fstory%2Fmoney%2Fbusiness%2Flocal%2F2026%2F11%2F10%2Feast-naples-golf-club-project-forced-to-start-over-in-approval-process-because-of-procedural-misstep%2F92708676007%2F)\n[News](https://www.news-press.com/news/) [Cape Coral](https://www.news-press.com/news/cape-coral/) [Sports](https://www.news-press.com/sports/) [Restaurants](https://www.news-press.com/taste/) [Real Estate](https://www.news-press.com/real-estate) [Advertise](https://advertising.usatoday.com/advertise-with-us/?cid=Web_LiQ_Network_AdvertiseWithUs_AdvertiseInquiry&publication=the_news_press&utm_source=local_publication&utm_medium=menu&utm_campaign=advertise_with_us) [Obituaries](https://www.news-press.com/obituaries) [eNewspaper](https://user.news-press.com/user/enewspaper) [Legals](https://www.news-press.com/public-notices)\n[](https://www.news-press.com/search/ \"Search\")\n[](https://www.news-press.com/weather/ \"Weather in Fort Myers: 76°F Cloudy\") [](https://subscribe.news-press.com/rr/navsub?gps-source=CPTOPNAVBAR&itm_campaign=2026ENTQ4BAU2026&itm_medium=ONSITE&success-url=https%3A%2F%2Fwww.news-press.com%2Fstory%2Fmoney%2Fbusiness%2Flocal%2F2026%2F11%2F10%2Feast-naples-golf-club-project-forced-to-start-over-in-approval-process-because-of-procedural-misstep%2F92708676007%2F)\n[](https://login.news-press.com/PFTM-GUP/authenticate/?success-url=https%3A%2F%2Fwww.news-press.com%2Fstory%2Fmoney%2Fbusiness%2Flocal%2F2026%2F11%2F10%2Feast-naples-golf-club-project-forced-to-start-over-in-approval-process-because-of-procedural-misstep%2F92708676007%2F&cancel-url=https%3A%2F%2Fwww.news-press.com%2Fstory%2Fmoney%2Fbusiness%2Flocal%2F2026%2F11%2F10%2Feast-naples-golf-club-project-forced-to-start-over-in-approval-process-because-of-procedural-misstep%2F92708676007%2F)\n[](https://www.news-press.com/) [](https://www.news-press.com/)\nLOCAL BUSINESS\n# East Naples golf club project forced to start over in hearing process\n[![Portrait of Laura Layden](https://www.news-press.com/gcdn/authoring/authoring-images/2024/02/08/PNDN/72524348007-ndn-jh-20240126-laura-0001.JPG?crop=3313,3312,x1506,y0&width=48&height=48&format=pjpg&auto=webp) Laura Layden](https://www.naplesnews.com/staff/2647080001/laura-layden/)\nFort Myers News-Press & Naples Daily News\nNov. 10, 2026Updated Nov. 11, 2026, 10:\""
             },
@@ -623,7 +325,7 @@
             "variable_type": "categorical",
             "source": {
               "url": "https://www.news-press.com/story/money/business/local/2026/11/10/east-naples-golf-club-project-forced-to-start-over-in-approval-process-because-of-procedural-misstep/92708676007/",
-              "fetched_at": "2026-11-23T14:58:40Z",
+              "fetched_at": "2026-11-24T04:25:48Z",
               "tier": 2,
               "citation": "East Naples golf club project forced to start over in approval process: \"[](https://www.news-press.com/)\n[Popular Fort Myers pizza shop reopens with new look, more awards](https://www.news-press.com/story/life/food/2026/11/12/uncle-ricos-in-fort-myers-reopens-with-cool-new-look-more-awards/92650571007/)\n[](https://subscribe.news-press.com/rr/nanobar?gps-source=CPTILELEFT&itm_campaign=2026ENTQ4BAU2026&itm_medium=ONSITE&success-url=https%3A%2F%2Fwww.news-press.com%2Fstory%2Fmoney%2Fbusiness%2Flocal%2F2026%2F11%2F10%2Feast-naples-golf-club-project-forced-to-start-over-in-approval-process-because-of-procedural-misstep%2F92708676007%2F)\n[](https://subscribe.news-press.com/rr/masthead?gps-source=CPMASTHEAD&itm_campaign=2026ENTQ4BAU2026&itm_medium=ONSITE&success-url=https%3A%2F%2Fwww.news-press.com%2Fstory%2Fmoney%2Fbusiness%2Flocal%2F2026%2F11%2F10%2Feast-naples-golf-club-project-forced-to-start-over-in-approval-process-because-of-procedural-misstep%2F92708676007%2F)\n[News](https://www.news-press.com/news/) [Cape Coral](https://www.news-press.com/news/cape-coral/) [Sports](https://www.news-press.com/sports/) [Restaurants](https://www.news-press.com/taste/) [Real Estate](https://www.news-press.com/real-estate) [Advertise](https://advertising.usatoday.com/advertise-with-us/?cid=Web_LiQ_Network_AdvertiseWithUs_AdvertiseInquiry&publication=the_news_press&utm_source=local_publication&utm_medium=menu&utm_campaign=advertise_with_us) [Obituaries](https://www.news-press.com/obituaries) [eNewspaper](https://user.news-press.com/user/enewspaper) [Legals](https://www.news-press.com/public-notices)\n[](https://www.news-press.com/search/ \"Search\")\n[](https://www.news-press.com/weather/ \"Weather in Fort Myers: 76°F Cloudy\") [](https://subscribe.news-press.com/rr/navsub?gps-source=CPTOPNAVBAR&itm_campaign=2026ENTQ4BAU2026&itm_medium=ONSITE&success-url=https%3A%2F%2Fwww.news-press.com%2Fstory%2Fmoney%2Fbusiness%2Flocal%2F2026%2F11%2F10%2Feast-naples-golf-club-project-forced-to-start-over-in-approval-process-because-of-procedural-misstep%2F92708676007%2F)\n[](https://login.news-press.com/PFTM-GUP/authenticate/?success-url=https%3A%2F%2Fwww.news-press.com%2Fstory%2Fmoney%2Fbusiness%2Flocal%2F2026%2F11%2F10%2Feast-naples-golf-club-project-forced-to-start-over-in-approval-process-because-of-procedural-misstep%2F92708676007%2F&cancel-url=https%3A%2F%2Fwww.news-press.com%2Fstory%2Fmoney%2Fbusiness%2Flocal%2F2026%2F11%2F10%2Feast-naples-golf-club-project-forced-to-start-over-in-approval-process-because-of-procedural-misstep%2F92708676007%2F)\n[](https://www.news-press.com/) [](https://www.news-press.com/)\nLOCAL BUSINESS\n# East Naples golf club project forced to start over in hearing process\n[![Portrait of Laura Layden](https://www.news-press.com/gcdn/authoring/authoring-images/2024/02/08/PNDN/72524348007-ndn-jh-20240126-laura-0001.JPG?crop=3313,3312,x1506,y0&width=48&height=48&format=pjpg&auto=webp) Laura Layden](https://www.naplesnews.com/staff/2647080001/laura-layden/)\nFort Myers News-Press & Naples Daily News\nNov. 10, 2026Updated Nov. 11, 2026, 10:\""
             },
@@ -640,7 +342,7 @@
             "variable_type": "categorical",
             "source": {
               "url": "https://www.news-press.com/story/money/business/local/2026/11/10/east-naples-golf-club-project-forced-to-start-over-in-approval-process-because-of-procedural-misstep/92708676007/",
-              "fetched_at": "2026-11-23T14:58:40Z",
+              "fetched_at": "2026-11-24T04:25:48Z",
               "tier": 2,
               "citation": "East Naples golf club project forced to start over in approval process: \"[](https://www.news-press.com/)\n[Popular Fort Myers pizza shop reopens with new look, more awards](https://www.news-press.com/story/life/food/2026/11/12/uncle-ricos-in-fort-myers-reopens-with-cool-new-look-more-awards/92650571007/)\n[](https://subscribe.news-press.com/rr/nanobar?gps-source=CPTILELEFT&itm_campaign=2026ENTQ4BAU2026&itm_medium=ONSITE&success-url=https%3A%2F%2Fwww.news-press.com%2Fstory%2Fmoney%2Fbusiness%2Flocal%2F2026%2F11%2F10%2Feast-naples-golf-club-project-forced-to-start-over-in-approval-process-because-of-procedural-misstep%2F92708676007%2F)\n[](https://subscribe.news-press.com/rr/masthead?gps-source=CPMASTHEAD&itm_campaign=2026ENTQ4BAU2026&itm_medium=ONSITE&success-url=https%3A%2F%2Fwww.news-press.com%2Fstory%2Fmoney%2Fbusiness%2Flocal%2F2026%2F11%2F10%2Feast-naples-golf-club-project-forced-to-start-over-in-approval-process-because-of-procedural-misstep%2F92708676007%2F)\n[News](https://www.news-press.com/news/) [Cape Coral](https://www.news-press.com/news/cape-coral/) [Sports](https://www.news-press.com/sports/) [Restaurants](https://www.news-press.com/taste/) [Real Estate](https://www.news-press.com/real-estate) [Advertise](https://advertising.usatoday.com/advertise-with-us/?cid=Web_LiQ_Network_AdvertiseWithUs_AdvertiseInquiry&publication=the_news_press&utm_source=local_publication&utm_medium=menu&utm_campaign=advertise_with_us) [Obituaries](https://www.news-press.com/obituaries) [eNewspaper](https://user.news-press.com/user/enewspaper) [Legals](https://www.news-press.com/public-notices)\n[](https://www.news-press.com/search/ \"Search\")\n[](https://www.news-press.com/weather/ \"Weather in Fort Myers: 76°F Cloudy\") [](https://subscribe.news-press.com/rr/navsub?gps-source=CPTOPNAVBAR&itm_campaign=2026ENTQ4BAU2026&itm_medium=ONSITE&success-url=https%3A%2F%2Fwww.news-press.com%2Fstory%2Fmoney%2Fbusiness%2Flocal%2F2026%2F11%2F10%2Feast-naples-golf-club-project-forced-to-start-over-in-approval-process-because-of-procedural-misstep%2F92708676007%2F)\n[](https://login.news-press.com/PFTM-GUP/authenticate/?success-url=https%3A%2F%2Fwww.news-press.com%2Fstory%2Fmoney%2Fbusiness%2Flocal%2F2026%2F11%2F10%2Feast-naples-golf-club-project-forced-to-start-over-in-approval-process-because-of-procedural-misstep%2F92708676007%2F&cancel-url=https%3A%2F%2Fwww.news-press.com%2Fstory%2Fmoney%2Fbusiness%2Flocal%2F2026%2F11%2F10%2Feast-naples-golf-club-project-forced-to-start-over-in-approval-process-because-of-procedural-misstep%2F92708676007%2F)\n[](https://www.news-press.com/) [](https://www.news-press.com/)\nLOCAL BUSINESS\n# East Naples golf club project forced to start over in hearing process\n[![Portrait of Laura Layden](https://www.news-press.com/gcdn/authoring/authoring-images/2024/02/08/PNDN/72524348007-ndn-jh-20240126-laura-0001.JPG?crop=3313,3312,x1506,y0&width=48&height=48&format=pjpg&auto=webp) Laura Layden](https://www.naplesnews.com/staff/2647080001/laura-layden/)\nFort Myers News-Press & Naples Daily News\nNov. 10, 2026Updated Nov. 11, 2026, 10:\""
             },
@@ -707,7 +409,7 @@
             ],
             "source": {
               "url": "https://www.swfldatagulf.com/r/source/city_pulse",
-              "fetched_at": "2026-11-23T14:58:40Z",
+              "fetched_at": "2026-11-24T04:25:48Z",
               "tier": 2,
               "citation": "Distilled, citation-backed SWFL news signals; each ZIP's items carry per-item source URLs in data_lake.city_pulse."
             },
@@ -728,7 +430,7 @@
         "relevance": {
           "decay_curve": "weeks",
           "half_life_hours": 720,
-          "computed_at": "2026-11-23T14:58:40Z"
+          "computed_at": "2026-11-24T04:25:48Z"
         },
         "exogenous_signals": []
       }
@@ -745,8 +447,119 @@
     },
     {
       "packId": "freshness-pulse",
-      "status": "skipped-fresh",
-      "written": false
+      "status": "built",
+      "version": 113,
+      "written": true,
+      "brainOutput": {
+        "brain_id": "freshness-pulse",
+        "version": 113,
+        "refined_at": "2026-11-24T04:25:48Z",
+        "expires": "2026-11-25T04:25:48Z",
+        "ttl_seconds": 86400,
+        "direction": "neutral",
+        "magnitude": 0,
+        "drivers": [],
+        "overrides": [],
+        "conclusion": "Today's sourced snapshot — SWFL 30-year fixed mortgage rate (as of 2026-11-19) 7.28%; Cape Coral median asking price (as of 2026-11-24) $399,200; Fort Myers median asking price (as of 2026-11-24) $325,000; Naples median asking price (as of 2026-11-24) $650,000. These are cited current facts only; the direction call lives downstream in master.",
+        "key_metrics": [
+          {
+            "metric": "freshness_mortgage_30yr_fixed_pct",
+            "value": 7.28,
+            "direction": "stable",
+            "label": "SWFL 30-year fixed mortgage rate (as of 2026-11-19)",
+            "variable_type": "intensive",
+            "units": "percent",
+            "display_format": "percent",
+            "source": {
+              "url": "https://fred.stlouisfed.org/series/MORTGAGE30US",
+              "fetched_at": "2026-11-24T04:23:48.752141+00:00",
+              "tier": 2,
+              "citation": "FRED — current 30-year fixed mortgage rate for SWFL, sourced 2026-11-19"
+            },
+            "suggestions": [
+              "What's driving freshness mortgage 30yr fixed pct?",
+              "How does freshness mortgage 30yr fixed pct here compare to other SWFL areas?"
+            ]
+          },
+          {
+            "metric": "freshness_median_asking_price_cape_coral_usd",
+            "value": 399200,
+            "direction": "stable",
+            "label": "Cape Coral median asking price (as of 2026-11-24)",
+            "variable_type": "extensive",
+            "units": "USD",
+            "display_format": "currency",
+            "source": {
+              "url": "https://www.swfldatagulf.com/desk",
+              "fetched_at": "2026-11-24T04:23:48.752141+00:00",
+              "tier": 2,
+              "citation": "SWFL Data Gulf active-listing inventory — current median asking price for Cape Coral, sourced 2026-11-24"
+            },
+            "suggestions": [
+              "Chart asking rents across the corridors",
+              "What's driving freshness median asking price cape coral usd?",
+              "How does freshness median asking price cape coral usd here compare to other SWFL areas?"
+            ]
+          },
+          {
+            "metric": "freshness_median_asking_price_fort_myers_usd",
+            "value": 325000,
+            "direction": "stable",
+            "label": "Fort Myers median asking price (as of 2026-11-24)",
+            "variable_type": "extensive",
+            "units": "USD",
+            "display_format": "currency",
+            "source": {
+              "url": "https://www.swfldatagulf.com/desk",
+              "fetched_at": "2026-11-24T04:23:48.752141+00:00",
+              "tier": 2,
+              "citation": "SWFL Data Gulf active-listing inventory — current median asking price for Fort Myers, sourced 2026-11-24"
+            },
+            "suggestions": [
+              "Chart asking rents across the corridors",
+              "What's driving freshness median asking price fort myers usd?",
+              "How does freshness median asking price fort myers usd here compare to other SWFL areas?"
+            ]
+          },
+          {
+            "metric": "freshness_median_asking_price_naples_usd",
+            "value": 650000,
+            "direction": "stable",
+            "label": "Naples median asking price (as of 2026-11-24)",
+            "variable_type": "extensive",
+            "units": "USD",
+            "display_format": "currency",
+            "source": {
+              "url": "https://www.swfldatagulf.com/desk",
+              "fetched_at": "2026-11-24T04:23:48.752141+00:00",
+              "tier": 2,
+              "citation": "SWFL Data Gulf active-listing inventory — current median asking price for Naples, sourced 2026-11-24"
+            },
+            "suggestions": [
+              "Chart asking rents across the corridors",
+              "What's driving freshness median asking price naples usd?",
+              "How does freshness median asking price naples usd here compare to other SWFL areas?"
+            ]
+          }
+        ],
+        "detail_tables": [],
+        "caveats": [
+          "Each county-grain number is a single grounded source's current figure, provenance-gated to a real source URL; held anomalies and unsourced (model-memory) numbers are excluded by design."
+        ],
+        "contradicts": [],
+        "confidence": 0.8,
+        "joint_integrity": 1,
+        "confidence_dispersion": 0,
+        "chain_depth": 0,
+        "trust_tier": 2,
+        "upstream_count": 0,
+        "relevance": {
+          "decay_curve": "weeks",
+          "half_life_hours": 720,
+          "computed_at": "2026-11-24T04:25:48Z"
+        },
+        "exogenous_signals": []
+      }
     },
     {
       "packId": "seller-stress-swfl",
