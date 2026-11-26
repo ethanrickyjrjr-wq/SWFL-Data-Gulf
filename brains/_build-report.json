@@ -1,8 +1,8 @@
 {
   "target": "master",
   "timestamps": {
-    "started": "2026-11-25T14:38:48.493Z",
-    "finished": "2026-11-25T14:39:15.810Z"
+    "started": "2026-11-26T04:29:47.471Z",
+    "finished": "2026-11-26T04:30:17.615Z"
   },
   "source": "live",
   "outcomes": [
@@ -30,7 +30,7 @@
       "packId": "cre-swfl",
       "status": "missing",
       "failureClass": "deterministic",
-      "reason": "400 {\"type\":\"error\",\"error\":{\"type\":\"invalid_request_error\",\"message\":\"Your credit balance is too low to access the Anthropic API. Please go to Plans & Billing to upgrade or purchase credits.\"},\"request_id\":\"req_011ChPpPawQx5QcTPKzNiLkg\"}",
+      "reason": "400 {\"type\":\"error\",\"error\":{\"type\":\"invalid_request_error\",\"message\":\"Your credit balance is too low to access the Anthropic API. Please go to Plans & Billing to upgrade or purchase credits.\"},\"request_id\":\"req_011ChQukvq9ipqA1qPWJyr3V\"}",
       "lastGoodRefinedAt": "2026-11-17T04:33:20Z",
       "written": false
     },
@@ -38,7 +38,7 @@
       "packId": "macro-us",
       "status": "missing",
       "failureClass": "deterministic",
-      "reason": "400 {\"type\":\"error\",\"error\":{\"type\":\"invalid_request_error\",\"message\":\"Your credit balance is too low to access the Anthropic API. Please go to Plans & Billing to upgrade or purchase credits.\"},\"request_id\":\"req_011ChPpPk4LemupN7beYYazL\"}",
+      "reason": "400 {\"type\":\"error\",\"error\":{\"type\":\"invalid_request_error\",\"message\":\"Your credit balance is too low to access the Anthropic API. Please go to Plans & Billing to upgrade or purchase credits.\"},\"request_id\":\"req_011ChQum5qtBjdqjab6RwCya\"}",
       "lastGoodRefinedAt": "2026-10-22T09:32:26Z",
       "written": false
     },
@@ -49,8 +49,343 @@
     },
     {
       "packId": "macro-swfl",
-      "status": "skipped-fresh",
-      "written": false
+      "status": "built",
+      "version": 48,
+      "written": true,
+      "brainOutput": {
+        "brain_id": "macro-swfl",
+        "version": 48,
+        "refined_at": "2026-11-26T04:29:55Z",
+        "expires": "2026-12-26T04:29:55Z",
+        "ttl_seconds": 2592000,
+        "direction": "neutral",
+        "magnitude": 0,
+        "drivers": [],
+        "overrides": [],
+        "conclusion": "SWFL labor market, 2026-M09 (preliminary): Lee County at 4.8%, +0pp YoY; Collier County at 4.7%, +0pp YoY; FL state LAUS 4.2% (benchmark). Private-sector wages in Lee County ran $1,230/wk in 2026-Q1 (+4.9% YoY). Bank branch deposits in Lee County stood at $21,115,545,000 as of 06/30/2026 (-5.3% YoY). Against the FL state macro backdrop (macro-florida, confidence 1.00), SWFL county unemployment is tracking the state average.",
+        "key_metrics": [
+          {
+            "metric": "laus_lee_unemployment_rate",
+            "label": "Lee County Unemployment Rate",
+            "value": 4.8,
+            "direction": "stable",
+            "variable_type": "intensive",
+            "units": "%",
+            "display_format": "percent",
+            "source": {
+              "url": "https://api.bls.gov/publicAPI/v2/timeseries/data/",
+              "fetched_at": "2026-11-26T04:29:53Z",
+              "tier": 1,
+              "citation": "BLS LAUS series LAUCN120710000000003, 2026-M09 = 4.8%"
+            },
+            "suggestions": [
+              "What's driving laus lee unemployment rate?",
+              "How does laus lee unemployment rate here compare to other SWFL areas?"
+            ]
+          },
+          {
+            "metric": "laus_collier_unemployment_rate",
+            "label": "Collier County Unemployment Rate",
+            "value": 4.7,
+            "direction": "stable",
+            "variable_type": "intensive",
+            "units": "%",
+            "display_format": "percent",
+            "source": {
+              "url": "https://api.bls.gov/publicAPI/v2/timeseries/data/",
+              "fetched_at": "2026-11-26T04:29:53Z",
+              "tier": 1,
+              "citation": "BLS LAUS series LAUCN120210000000003, 2026-M09 = 4.7%"
+            },
+            "suggestions": [
+              "What's driving laus collier unemployment rate?",
+              "How does laus collier unemployment rate here compare to other SWFL areas?"
+            ]
+          },
+          {
+            "metric": "laus_fl_unemployment_rate",
+            "label": "Florida LAUS Unemployment Rate",
+            "value": 4.2,
+            "direction": "stable",
+            "variable_type": "intensive",
+            "units": "%",
+            "display_format": "percent",
+            "source": {
+              "url": "https://api.bls.gov/publicAPI/v2/timeseries/data/",
+              "fetched_at": "2026-11-26T04:29:53Z",
+              "tier": 1,
+              "citation": "BLS LAUS series LAUST120000000000003, 2026-M09 = 4.2%"
+            },
+            "suggestions": [
+              "What's driving laus fl unemployment rate?",
+              "How does laus fl unemployment rate here compare to other SWFL areas?"
+            ]
+          },
+          {
+            "metric": "laus_lee_unemployment_rate_yoy_delta",
+            "label": "Lee County Unemployment Rate YoY Δ",
+            "value": 0,
+            "direction": "stable",
+            "variable_type": "intensive",
+            "units": "pp",
+            "display_format": "raw",
+            "source": {
+              "url": "https://api.bls.gov/publicAPI/v2/timeseries/data/",
+              "fetched_at": "2026-11-26T04:29:53Z",
+              "tier": 1,
+              "citation": "BLS LAUS LAUCN120710000000003, YoY delta (prior-year 2026-M09 → 2026-M09) = +0pp"
+            },
+            "suggestions": [
+              "What's driving laus lee unemployment rate yoy delta?",
+              "How does laus lee unemployment rate yoy delta here compare to other SWFL areas?"
+            ]
+          },
+          {
+            "metric": "qcew_lee_private_avg_wkly_wage",
+            "label": "Lee County Private-Sector Avg Weekly Wage (2026-Q1)",
+            "value": 1230,
+            "direction": "rising",
+            "variable_type": "intensive",
+            "units": "USD/week",
+            "display_format": "currency",
+            "source": {
+              "url": "https://data.bls.gov/cew/data/api",
+              "fetched_at": "2026-11-26T04:29:54Z",
+              "tier": 1,
+              "citation": "BLS QCEW private-sector (own_code=5) via data_lake.bls_qcew, area_fips=12071, 2026-Q1: avg_wkly_wage = $1,230/wk"
+            },
+            "suggestions": [
+              "What's driving qcew lee private avg wkly wage?",
+              "How does qcew lee private avg wkly wage here compare to other SWFL areas?"
+            ]
+          },
+          {
+            "metric": "qcew_lee_private_avg_wkly_wage_yoy_pct",
+            "label": "Lee County Private-Sector Avg Weekly Wage YoY % (2026-Q1 vs 2025-Q3)",
+            "value": 4.86,
+            "direction": "rising",
+            "variable_type": "intensive",
+            "units": "%",
+            "display_format": "percent",
+            "source": {
+              "url": "https://data.bls.gov/cew/data/api",
+              "fetched_at": "2026-11-26T04:29:54Z",
+              "tier": 1,
+              "citation": "BLS QCEW private-sector (own_code=5) via data_lake.bls_qcew, area_fips=12071, 2026-Q1: avg_wkly_wage YoY = +4.86%"
+            },
+            "suggestions": [
+              "What's driving qcew lee private avg wkly wage yoy pct?",
+              "How does qcew lee private avg wkly wage yoy pct here compare to other SWFL areas?"
+            ]
+          },
+          {
+            "metric": "qcew_collier_private_avg_wkly_wage",
+            "label": "Collier County Private-Sector Avg Weekly Wage (2026-Q1)",
+            "value": 1429,
+            "direction": "rising",
+            "variable_type": "intensive",
+            "units": "USD/week",
+            "display_format": "currency",
+            "source": {
+              "url": "https://data.bls.gov/cew/data/api",
+              "fetched_at": "2026-11-26T04:29:54Z",
+              "tier": 1,
+              "citation": "BLS QCEW private-sector (own_code=5) via data_lake.bls_qcew, area_fips=12021, 2026-Q1: avg_wkly_wage = $1,429/wk"
+            },
+            "suggestions": [
+              "What's driving qcew collier private avg wkly wage?",
+              "How does qcew collier private avg wkly wage here compare to other SWFL areas?"
+            ]
+          },
+          {
+            "metric": "qcew_collier_private_avg_wkly_wage_yoy_pct",
+            "label": "Collier County Private-Sector Avg Weekly Wage YoY % (2026-Q1 vs 2025-Q3)",
+            "value": 10.52,
+            "direction": "rising",
+            "variable_type": "intensive",
+            "units": "%",
+            "display_format": "percent",
+            "source": {
+              "url": "https://data.bls.gov/cew/data/api",
+              "fetched_at": "2026-11-26T04:29:54Z",
+              "tier": 1,
+              "citation": "BLS QCEW private-sector (own_code=5) via data_lake.bls_qcew, area_fips=12021, 2026-Q1: avg_wkly_wage YoY = +10.52%"
+            },
+            "suggestions": [
+              "What's driving qcew collier private avg wkly wage yoy pct?",
+              "How does qcew collier private avg wkly wage yoy pct here compare to other SWFL areas?"
+            ]
+          },
+          {
+            "metric": "qcew_lee_private_employment",
+            "label": "Lee County Private-Sector Employment (2026-Q1)",
+            "value": 275732,
+            "direction": "rising",
+            "variable_type": "extensive",
+            "units": "jobs",
+            "display_format": "count",
+            "source": {
+              "url": "https://data.bls.gov/cew/data/api",
+              "fetched_at": "2026-11-26T04:29:54Z",
+              "tier": 1,
+              "citation": "BLS QCEW private-sector (own_code=5) via data_lake.bls_qcew, area_fips=12071, 2026-Q1: month3_emplvl = 275,732 jobs"
+            },
+            "suggestions": [
+              "What's driving qcew lee private employment?",
+              "How does qcew lee private employment here compare to other SWFL areas?"
+            ]
+          },
+          {
+            "metric": "qcew_collier_private_employment",
+            "label": "Collier County Private-Sector Employment (2026-Q1)",
+            "value": 161740,
+            "direction": "rising",
+            "variable_type": "extensive",
+            "units": "jobs",
+            "display_format": "count",
+            "source": {
+              "url": "https://data.bls.gov/cew/data/api",
+              "fetched_at": "2026-11-26T04:29:54Z",
+              "tier": 1,
+              "citation": "BLS QCEW private-sector (own_code=5) via data_lake.bls_qcew, area_fips=12021, 2026-Q1: month3_emplvl = 161,740 jobs"
+            },
+            "suggestions": [
+              "What's driving qcew collier private employment?",
+              "How does qcew collier private employment here compare to other SWFL areas?"
+            ]
+          },
+          {
+            "metric": "fdic_lee_branch_deposits_usd",
+            "label": "Lee County Bank Branch Deposits (as of 06/30/2026)",
+            "value": 21115545000,
+            "direction": "falling",
+            "variable_type": "extensive",
+            "units": "USD",
+            "display_format": "currency",
+            "source": {
+              "url": "https://api.fdic.gov/banks/sod?filters=STCNTYBR:12071%20AND%20YEAR:2026",
+              "fetched_at": "2026-11-26T04:29:55Z",
+              "tier": 1,
+              "citation": "FDIC Summary of Deposits via data_lake.fdic_sod_county_year_v, branch county 12071, as of 06/30/2026: $21,115,545,000 across 162 branches of 34 banks (-5.3% YoY)"
+            },
+            "suggestions": [
+              "What's driving fdic lee branch deposits usd?",
+              "How does fdic lee branch deposits usd here compare to other SWFL areas?"
+            ]
+          },
+          {
+            "metric": "fdic_lee_branch_deposits_yoy_pct",
+            "label": "Lee County Bank Branch Deposits YoY (2025→2026)",
+            "value": -5.28,
+            "direction": "falling",
+            "variable_type": "intensive",
+            "units": "%",
+            "display_format": "percent",
+            "source": {
+              "url": "https://api.fdic.gov/banks/sod?filters=STCNTYBR:12071%20AND%20YEAR:2026",
+              "fetched_at": "2026-11-26T04:29:55Z",
+              "tier": 1,
+              "citation": "FDIC Summary of Deposits via data_lake.fdic_sod_county_year_v, branch county 12071, as of 06/30/2026: $21,115,545,000 across 162 branches of 34 banks (-5.3% YoY)"
+            },
+            "suggestions": [
+              "What's driving fdic lee branch deposits yoy pct?",
+              "How does fdic lee branch deposits yoy pct here compare to other SWFL areas?"
+            ]
+          },
+          {
+            "metric": "fdic_lee_bank_branches",
+            "label": "Lee County Bank Branches (as of 06/30/2026)",
+            "value": 162,
+            "direction": "stable",
+            "variable_type": "extensive",
+            "units": "branches",
+            "display_format": "count",
+            "source": {
+              "url": "https://api.fdic.gov/banks/sod?filters=STCNTYBR:12071%20AND%20YEAR:2026",
+              "fetched_at": "2026-11-26T04:29:55Z",
+              "tier": 1,
+              "citation": "FDIC Summary of Deposits via data_lake.fdic_sod_county_year_v, branch county 12071, as of 06/30/2026: $21,115,545,000 across 162 branches of 34 banks (-5.3% YoY)"
+            },
+            "suggestions": [
+              "What's driving fdic lee bank branches?",
+              "How does fdic lee bank branches here compare to other SWFL areas?"
+            ]
+          },
+          {
+            "metric": "fdic_collier_branch_deposits_usd",
+            "label": "Collier County Bank Branch Deposits (as of 06/30/2026)",
+            "value": 19159773000,
+            "direction": "rising",
+            "variable_type": "extensive",
+            "units": "USD",
+            "display_format": "currency",
+            "source": {
+              "url": "https://api.fdic.gov/banks/sod?filters=STCNTYBR:12021%20AND%20YEAR:2026",
+              "fetched_at": "2026-11-26T04:29:55Z",
+              "tier": 1,
+              "citation": "FDIC Summary of Deposits via data_lake.fdic_sod_county_year_v, branch county 12021, as of 06/30/2026: $19,159,773,000 across 126 branches of 37 banks (+1.9% YoY)"
+            },
+            "suggestions": [
+              "What's driving fdic collier branch deposits usd?",
+              "How does fdic collier branch deposits usd here compare to other SWFL areas?"
+            ]
+          },
+          {
+            "metric": "fdic_collier_branch_deposits_yoy_pct",
+            "label": "Collier County Bank Branch Deposits YoY (2025→2026)",
+            "value": 1.87,
+            "direction": "rising",
+            "variable_type": "intensive",
+            "units": "%",
+            "display_format": "percent",
+            "source": {
+              "url": "https://api.fdic.gov/banks/sod?filters=STCNTYBR:12021%20AND%20YEAR:2026",
+              "fetched_at": "2026-11-26T04:29:55Z",
+              "tier": 1,
+              "citation": "FDIC Summary of Deposits via data_lake.fdic_sod_county_year_v, branch county 12021, as of 06/30/2026: $19,159,773,000 across 126 branches of 37 banks (+1.9% YoY)"
+            },
+            "suggestions": [
+              "What's driving fdic collier branch deposits yoy pct?",
+              "How does fdic collier branch deposits yoy pct here compare to other SWFL areas?"
+            ]
+          },
+          {
+            "metric": "fdic_collier_bank_branches",
+            "label": "Collier County Bank Branches (as of 06/30/2026)",
+            "value": 126,
+            "direction": "stable",
+            "variable_type": "extensive",
+            "units": "branches",
+            "display_format": "count",
+            "source": {
+              "url": "https://api.fdic.gov/banks/sod?filters=STCNTYBR:12021%20AND%20YEAR:2026",
+              "fetched_at": "2026-11-26T04:29:55Z",
+              "tier": 1,
+              "citation": "FDIC Summary of Deposits via data_lake.fdic_sod_county_year_v, branch county 12021, as of 06/30/2026: $19,159,773,000 across 126 branches of 37 banks (+1.9% YoY)"
+            },
+            "suggestions": [
+              "What's driving fdic collier bank branches?",
+              "How does fdic collier bank branches here compare to other SWFL areas?"
+            ]
+          }
+        ],
+        "caveats": [
+          "BLS LAUS data for 2026-M09 is preliminary — subject to revision at next monthly release."
+        ],
+        "contradicts": [],
+        "confidence": 1,
+        "joint_integrity": 1,
+        "confidence_dispersion": 0,
+        "chain_depth": 2,
+        "trust_tier": 1,
+        "upstream_count": 1,
+        "relevance": {
+          "decay_curve": "weeks",
+          "half_life_hours": 720,
+          "computed_at": "2026-11-26T04:29:55Z"
+        },
+        "exogenous_signals": []
+      }
     },
     {
       "packId": "sector-credit-swfl",
@@ -120,19 +455,19 @@
     {
       "packId": "city-pulse-swfl",
       "status": "built",
-      "version": 198,
+      "version": 199,
       "written": true,
       "brainOutput": {
         "brain_id": "city-pulse-swfl",
-        "version": 198,
-        "refined_at": "2026-11-25T14:38:54Z",
-        "expires": "2026-11-26T14:38:54Z",
+        "version": 199,
+        "refined_at": "2026-11-26T04:29:56Z",
+        "expires": "2026-11-27T04:29:56Z",
         "ttl_seconds": 86400,
         "direction": "neutral",
         "magnitude": 0,
         "drivers": [],
         "overrides": [],
-        "conclusion": "SWFL city pulse as of 2026-11-25: 80 live current-events signals across 9 cities — Fort Myers (29), Naples (24), Sanibel (1), East Naples (1), Cape Coral (18), Marco Island (1), Fort Myers Beach (3), North Naples (1), Estero (2). Most current: Fort Myers — Fort Myers industrial properties sold for $17.5 million to a Pennsylvania investor, as reported Nov. 18, 2026. These are current cited facts only; the cross-vertical read and any direction call live downstream in master.",
+        "conclusion": "SWFL city pulse as of 2026-11-26: 79 live current-events signals across 9 cities — Fort Myers (29), Naples (23), Sanibel (1), East Naples (1), Cape Coral (18), Marco Island (1), Fort Myers Beach (3), North Naples (1), Estero (2). Most current: Fort Myers — Fort Myers industrial properties sold for $17.5 million to a Pennsylvania investor, as reported Nov. 18, 2026. These are current cited facts only; the cross-vertical read and any direction call live downstream in master.",
         "key_metrics": [
           {
             "metric": "signal_transactions_1",
@@ -142,7 +477,7 @@
             "variable_type": "categorical",
             "source": {
               "url": "https://www.businessobserverfl.com/news/2026/nov/18/fort-myers-industrial-properties-sell/",
-              "fetched_at": "2026-11-25T14:38:54Z",
+              "fetched_at": "2026-11-26T04:29:56Z",
               "tier": 2,
               "citation": "Fort Myers industrial properties sell for $17.5M to Pennsylvania investor | Business Observer: \"![Spinner: White decorative](https://cdn.userway.org/widgetapp/images/spin_wh.svg)\n![](https://cdn.userway.org/widgetapp/images/body_wh.svg)\n![Spinner: White decorative](https://cdn.userway.org/widgetapp/images/spin_wh.svg)\n  * ![Alternate Text](https://observermediagroup.media.clients.ellingtoncms.com/static-4/assets/images/bob-logo-header.svg)\n  * Loading\n\n\n  * [Newsletters](https://marketing.businessobserverfl.com/newsletters)\n  * [Podcast](https://www.businessobserverfl.com/podcasts/corner-office/?utm_source=header&utm_medium=sitenav)\n  * [Public Notices](https://legals.businessobserverfl.com/)\n  * [Big Book](https://www.businessobserverfl.com/big-book-of-business/2026/)\n  * [40 Under 40](https://www.businessobserverfl.com/40-under-40/)\n  * [Mobile App](https://businessobserver.pressreader.com/)\n  * [Subscribe](https://marketing.businessobserverfl.com/subscribe)\n  * [Login](https://www.businessobserverfl.com/accounts/login/?next=/news/2026/nov/18/fort-myers-industrial-properties-sell/)\n\n\n  * [](https://www.facebook.com/BusinessObserverFL)\n  * [](https://x.com/BizObserverFL)\n  * [](https://www.linkedin.com/company/businessobserverfl)\n  * [ ](https://www.instagram.com/businessobserverfl/)\n\n\n[![](https://observermediagroup.media.clients.ellingtoncms.com/static-4/assets/images/bob-logo-header.svg)](https://www.businessobserverfl.com/)\n[![](https://observermediagroup.media.clients.ellingtoncms.com/static-4/assets/images/bob-logo-sticky.svg)](https://www.businessobserverfl.com/)\n[![](https://observermediagroup.media.clients.ellingtoncms.com/static-4/assets/images/bob-logo-header.svg)](https://www.businessobserverfl.com/)\n  * [News](https://www.businessobserverfl.com/news/all/)\n  * [Strategies](https://www.businessobserverfl.com/news/strategies/)\n  * [Entrepreneurs](https://www.businessobserverfl.com/news/entrepreneurs/)\n  * [Leadership](https://www.businessobserverfl.com/news/leadership/)\n  * [Regions](https://www.businessobserverfl.com/news/2026/nov/18/fort-myers-industrial-properties-sell/)\n    * [Tampa Bay-Lakeland](https://www.businessobserverfl.com/news/tampa-bay-lakeland/)\n    * [Manatee-Sarasota](https://www.businessobserverfl.com/news/manatee-sarasota/)\n    * [Charlotte-Lee-Collier](https://www.businessobserverfl.com/news/charlotte-lee-collier/)\n    * [Florida](https://www.businessobserverfl.com/news/florida/)\n  * [Industries](https://www.businessobserverfl.com/news/2026/nov/18/fort-myers-industrial-properties-sell/)\n    * [Business Support](https://www.businessobserverfl.com/news/industries/business-support/)\n    * [Commercial Real Estate](https://www.businessobserverfl.com/news/industries/commercial-real-estate/)\n    * [Residential Real Estate](https://www.businessobserverfl.com/news/industries/residential-real-estate/)\n    * [Development](https://www.businessobserverfl.com/news/industries/development/)\n    * [Finance](https://www.businessobserverfl.com/news/industries/finance/)\n    * [Food-Beverage](https://www.businessobserverfl.com/new\""
             },
@@ -159,7 +494,7 @@
             "variable_type": "categorical",
             "source": {
               "url": "https://www.news-press.com/story/money/2026/11/16/big-florida-hospitality-expansion-includes-hilton-naples-and-captiva-swfl-collier-lee-county-hotel/92730838007/",
-              "fetched_at": "2026-11-25T14:38:54Z",
+              "fetched_at": "2026-11-26T04:29:56Z",
               "tier": 2,
               "citation": "Big Florida hospitality expansion includes Hilton, Naples and Captiva: \"[](https://www.news-press.com/)\n[Free Fort Myers dog fest celebrates golden retrievers, other breeds](https://www.news-press.com/story/life/2026/11/16/fort-myers-florida-dog-festival-celebrates-golden-retrievers-and-more-goldenfest-dock-diving-free/92688792007/)\n[](https://subscribe.news-press.com/rr/nanobar?gps-source=CPTILELEFT&itm_campaign=2026ENTQ4BAU2026&itm_medium=ONSITE&success-url=https%3A%2F%2Fwww.news-press.com%2Fstory%2Fmoney%2F2026%2F11%2F16%2Fbig-florida-hospitality-expansion-includes-hilton-naples-and-captiva-swfl-collier-lee-county-hotel%2F92730838007%2F)\n[](https://subscribe.news-press.com/rr/masthead?gps-source=CPMASTHEAD&itm_campaign=2026ENTQ4BAU2026&itm_medium=ONSITE&success-url=https%3A%2F%2Fwww.news-press.com%2Fstory%2Fmoney%2F2026%2F11%2F16%2Fbig-florida-hospitality-expansion-includes-hilton-naples-and-captiva-swfl-collier-lee-county-hotel%2F92730838007%2F)\n[News](https://www.news-press.com/news/) [Cape Coral](https://www.news-press.com/news/cape-coral/) [Sports](https://www.news-press.com/sports/) [Restaurants](https://www.news-press.com/taste/) [Real Estate](https://www.news-press.com/real-estate) [Advertise](https://advertising.usatoday.com/advertise-with-us/?cid=Web_LiQ_Network_AdvertiseWithUs_AdvertiseInquiry&publication=the_news_press&utm_source=local_publication&utm_medium=menu&utm_campaign=advertise_with_us) [Obituaries](https://www.news-press.com/obituaries) [eNewspaper](https://user.news-press.com/user/enewspaper) [Legals](https://www.news-press.com/public-notices)\n[](https://www.news-press.com/search/ \"Search\")\n[](https://www.news-press.com/weather/ \"Weather in Fort Myers: 72°F Sunny\") [](https://subscribe.news-press.com/rr/navsub?gps-source=CPTOPNAVBAR&itm_campaign=2026ENTQ4BAU2026&itm_medium=ONSITE&success-url=https%3A%2F%2Fwww.news-press.com%2Fstory%2Fmoney%2F2026%2F11%2F16%2Fbig-florida-hospitality-expansion-includes-hilton-naples-and-captiva-swfl-collier-lee-county-hotel%2F92730838007%2F)\n[](https://login.news-press.com/PFTM-GUP/authenticate/?success-url=https%3A%2F%2Fwww.news-press.com%2Fstory%2Fmoney%2F2026%2F11%2F16%2Fbig-florida-hospitality-expansion-includes-hilton-naples-and-captiva-swfl-collier-lee-county-hotel%2F92730838007%2F&cancel-url=https%3A%2F%2Fwww.news-press.com%2Fstory%2Fmoney%2F2026%2F11%2F16%2Fbig-florida-hospitality-expansion-includes-hilton-naples-and-captiva-swfl-collier-lee-county-hotel%2F92730838007%2F)\n[](https://www.news-press.com/) [](https://www.news-press.com/)\nMONEY\n# Florida pipeline projects include hotels, resorts, re-openings and more\n[![Portrait of Phil Fernandez](https://www.news-press.com/gcdn/presto/2019/09/14/PNDN/6a77b474-579f-48fa-b56f-a2cc2b9de797-NDN_Phil_Fernandez.jpg?crop=2999,2999,x0,y570&width=48&height=48&format=pjpg&auto=webp) Phil Fernandez](https://www.naplesnews.com/staff/2684114001/phil-fernandez/)\nFort Myers News-Press & Naples Daily News\nNov. 16, 2026, 5:04 a.m. ET\n[Southwest Florida](https://www.news-press.com/story/money/2026/10/26/florida-fighting-over\""
             },
@@ -176,7 +511,7 @@
             "variable_type": "categorical",
             "source": {
               "url": "https://www.naplesnews.com/story/money/2026/11/10/florida-sees-new-affordable-workforce-housing-compounds-make-debuts-swfl-naples-fort-myers-sanibel/92696792007/",
-              "fetched_at": "2026-11-25T14:38:54Z",
+              "fetched_at": "2026-11-26T04:29:56Z",
               "tier": 2,
               "citation": "Florida sees new affordable, workforce housing compounds make debuts: \"[](https://www.naplesnews.com/)\n[](https://subscribe.naplesnews.com/rr/nanobar?gps-source=CPTILELEFT&itm_campaign=2026ENTQ4BAU2026&itm_medium=ONSITE&success-url=https%3A%2F%2Fwww.naplesnews.com%2Fstory%2Fmoney%2F2026%2F11%2F10%2Fflorida-sees-new-affordable-workforce-housing-compounds-make-debuts-swfl-naples-fort-myers-sanibel%2F92696792007%2F)\n[](https://subscribe.naplesnews.com/rr/masthead?gps-source=CPMASTHEAD&itm_campaign=2026ENTQ4BAU2026&itm_medium=ONSITE&success-url=https%3A%2F%2Fwww.naplesnews.com%2Fstory%2Fmoney%2F2026%2F11%2F10%2Fflorida-sees-new-affordable-workforce-housing-compounds-make-debuts-swfl-naples-fort-myers-sanibel%2F92696792007%2F)\n[News](https://www.naplesnews.com/news/) [Sports](https://www.naplesnews.com/sports/) [Real Estate](https://www.naplesnews.com/business/real-estate/) [Restaurants](https://www.naplesnews.com/entertainment/restaurants/) [Opinion](https://www.naplesnews.com/opinion/) [Advertise](https://advertising.usatoday.com/advertise-with-us/?cid=Web_LiQ_Network_AdvertiseWithUs_AdvertiseInquiry&publication=naples_daily_news&utm_source=local_publication&utm_medium=menu&utm_campaign=advertise_with_us) [Obituaries](https://www.naplesnews.com/obituaries) [eNewspaper](https://user.naplesnews.com/user/enewspaper) [Legals](https://www.naplesnews.com/public-notices)\n[](https://www.naplesnews.com/search/ \"Search\")\n[](https://www.naplesnews.com/weather/ \"Weather in Naples: 70°F Cloudy\") [](https://subscribe.naplesnews.com/rr/navsub?gps-source=CPTOPNAVBAR&itm_campaign=2026ENTQ4BAU2026&itm_medium=ONSITE&success-url=https%3A%2F%2Fwww.naplesnews.com%2Fstory%2Fmoney%2F2026%2F11%2F10%2Fflorida-sees-new-affordable-workforce-housing-compounds-make-debuts-swfl-naples-fort-myers-sanibel%2F92696792007%2F)\n[](https://login.naplesnews.com/PNDN-GUP/authenticate/?success-url=https%3A%2F%2Fwww.naplesnews.com%2Fstory%2Fmoney%2F2026%2F11%2F10%2Fflorida-sees-new-affordable-workforce-housing-compounds-make-debuts-swfl-naples-fort-myers-sanibel%2F92696792007%2F&cancel-url=https%3A%2F%2Fwww.naplesnews.com%2Fstory%2Fmoney%2F2026%2F11%2F10%2Fflorida-sees-new-affordable-workforce-housing-compounds-make-debuts-swfl-naples-fort-myers-sanibel%2F92696792007%2F)\n[](https://www.naplesnews.com/) [](https://www.naplesnews.com/)\n[MONEY](https://www.naplesnews.com/business/)\n# New Florida affordable housing projects take shape with hefty demand\n[![Portrait of Phil Fernandez](https://www.naplesnews.com/gcdn/presto/2019/09/14/PNDN/6a77b474-579f-48fa-b56f-a2cc2b9de797-NDN_Phil_Fernandez.jpg?crop=2999,2999,x0,y570&width=48&height=48&format=pjpg&auto=webp) Phil Fernandez](https://www.naplesnews.com/staff/2684114001/phil-fernandez/)\nFort Myers News-Press & Naples Daily News\nNov. 10, 2026, 10:47 a.m. ET\n[](https://www.facebook.com/dialog/share?display=popup&app_id=1703814913224751&href=https%3A%2F%2Fwww.naplesnews.com%2Fstory%2Fmoney%2F2026%2F11%2F10%2Fflorida-sees-new-affordable-workforce-housing-compounds-make-debuts-swfl-naples-fort-myers-sanibel%2F92696792007%\""
             },
@@ -193,7 +528,7 @@
             "variable_type": "categorical",
             "source": {
               "url": "https://www.naplesnews.com/story/money/2026/11/10/florida-sees-new-affordable-workforce-housing-compounds-make-debuts-swfl-naples-fort-myers-sanibel/92696792007/",
-              "fetched_at": "2026-11-25T14:38:54Z",
+              "fetched_at": "2026-11-26T04:29:56Z",
               "tier": 2,
               "citation": "Florida sees new affordable, workforce housing compounds make debuts: \"[](https://www.naplesnews.com/)\n[](https://subscribe.naplesnews.com/rr/nanobar?gps-source=CPTILELEFT&itm_campaign=2026ENTQ4BAU2026&itm_medium=ONSITE&success-url=https%3A%2F%2Fwww.naplesnews.com%2Fstory%2Fmoney%2F2026%2F11%2F10%2Fflorida-sees-new-affordable-workforce-housing-compounds-make-debuts-swfl-naples-fort-myers-sanibel%2F92696792007%2F)\n[](https://subscribe.naplesnews.com/rr/masthead?gps-source=CPMASTHEAD&itm_campaign=2026ENTQ4BAU2026&itm_medium=ONSITE&success-url=https%3A%2F%2Fwww.naplesnews.com%2Fstory%2Fmoney%2F2026%2F11%2F10%2Fflorida-sees-new-affordable-workforce-housing-compounds-make-debuts-swfl-naples-fort-myers-sanibel%2F92696792007%2F)\n[News](https://www.naplesnews.com/news/) [Sports](https://www.naplesnews.com/sports/) [Real Estate](https://www.naplesnews.com/business/real-estate/) [Restaurants](https://www.naplesnews.com/entertainment/restaurants/) [Opinion](https://www.naplesnews.com/opinion/) [Advertise](https://advertising.usatoday.com/advertise-with-us/?cid=Web_LiQ_Network_AdvertiseWithUs_AdvertiseInquiry&publication=naples_daily_news&utm_source=local_publication&utm_medium=menu&utm_campaign=advertise_with_us) [Obituaries](https://www.naplesnews.com/obituaries) [eNewspaper](https://user.naplesnews.com/user/enewspaper) [Legals](https://www.naplesnews.com/public-notices)\n[](https://www.naplesnews.com/search/ \"Search\")\n[](https://www.naplesnews.com/weather/ \"Weather in Naples: 70°F Cloudy\") [](https://subscribe.naplesnews.com/rr/navsub?gps-source=CPTOPNAVBAR&itm_campaign=2026ENTQ4BAU2026&itm_medium=ONSITE&success-url=https%3A%2F%2Fwww.naplesnews.com%2Fstory%2Fmoney%2F2026%2F11%2F10%2Fflorida-sees-new-affordable-workforce-housing-compounds-make-debuts-swfl-naples-fort-myers-sanibel%2F92696792007%2F)\n[](https://login.naplesnews.com/PNDN-GUP/authenticate/?success-url=https%3A%2F%2Fwww.naplesnews.com%2Fstory%2Fmoney%2F2026%2F11%2F10%2Fflorida-sees-new-affordable-workforce-housing-compounds-make-debuts-swfl-naples-fort-myers-sanibel%2F92696792007%2F&cancel-url=https%3A%2F%2Fwww.naplesnews.com%2Fstory%2Fmoney%2F2026%2F11%2F10%2Fflorida-sees-new-affordable-workforce-housing-compounds-make-debuts-swfl-naples-fort-myers-sanibel%2F92696792007%2F)\n[](https://www.naplesnews.com/) [](https://www.naplesnews.com/)\n[MONEY](https://www.naplesnews.com/business/)\n# New Florida affordable housing projects take shape with hefty demand\n[![Portrait of Phil Fernandez](https://www.naplesnews.com/gcdn/presto/2019/09/14/PNDN/6a77b474-579f-48fa-b56f-a2cc2b9de797-NDN_Phil_Fernandez.jpg?crop=2999,2999,x0,y570&width=48&height=48&format=pjpg&auto=webp) Phil Fernandez](https://www.naplesnews.com/staff/2684114001/phil-fernandez/)\nFort Myers News-Press & Naples Daily News\nNov. 10, 2026, 10:47 a.m. ET\n[](https://www.facebook.com/dialog/share?display=popup&app_id=1703814913224751&href=https%3A%2F%2Fwww.naplesnews.com%2Fstory%2Fmoney%2F2026%2F11%2F10%2Fflorida-sees-new-affordable-workforce-housing-compounds-make-debuts-swfl-naples-fort-myers-sanibel%2F92696792007%\""
             },
@@ -210,7 +545,7 @@
             "variable_type": "categorical",
             "source": {
               "url": "https://www.news-press.com/story/money/business/local/2026/11/10/east-naples-golf-club-project-forced-to-start-over-in-approval-process-because-of-procedural-misstep/92708676007/",
-              "fetched_at": "2026-11-25T14:38:54Z",
+              "fetched_at": "2026-11-26T04:29:56Z",
               "tier": 2,
               "citation": "East Naples golf club project forced to start over in approval process: \"[](https://www.news-press.com/)\n[Popular Fort Myers pizza shop reopens with new look, more awards](https://www.news-press.com/story/life/food/2026/11/12/uncle-ricos-in-fort-myers-reopens-with-cool-new-look-more-awards/92650571007/)\n[](https://subscribe.news-press.com/rr/nanobar?gps-source=CPTILELEFT&itm_campaign=2026ENTQ4BAU2026&itm_medium=ONSITE&success-url=https%3A%2F%2Fwww.news-press.com%2Fstory%2Fmoney%2Fbusiness%2Flocal%2F2026%2F11%2F10%2Feast-naples-golf-club-project-forced-to-start-over-in-approval-process-because-of-procedural-misstep%2F92708676007%2F)\n[](https://subscribe.news-press.com/rr/masthead?gps-source=CPMASTHEAD&itm_campaign=2026ENTQ4BAU2026&itm_medium=ONSITE&success-url=https%3A%2F%2Fwww.news-press.com%2Fstory%2Fmoney%2Fbusiness%2Flocal%2F2026%2F11%2F10%2Feast-naples-golf-club-project-forced-to-start-over-in-approval-process-because-of-procedural-misstep%2F92708676007%2F)\n[News](https://www.news-press.com/news/) [Cape Coral](https://www.news-press.com/news/cape-coral/) [Sports](https://www.news-press.com/sports/) [Restaurants](https://www.news-press.com/taste/) [Real Estate](https://www.news-press.com/real-estate) [Advertise](https://advertising.usatoday.com/advertise-with-us/?cid=Web_LiQ_Network_AdvertiseWithUs_AdvertiseInquiry&publication=the_news_press&utm_source=local_publication&utm_medium=menu&utm_campaign=advertise_with_us) [Obituaries](https://www.news-press.com/obituaries) [eNewspaper](https://user.news-press.com/user/enewspaper) [Legals](https://www.news-press.com/public-notices)\n[](https://www.news-press.com/search/ \"Search\")\n[](https://www.news-press.com/weather/ \"Weather in Fort Myers: 76°F Cloudy\") [](https://subscribe.news-press.com/rr/navsub?gps-source=CPTOPNAVBAR&itm_campaign=2026ENTQ4BAU2026&itm_medium=ONSITE&success-url=https%3A%2F%2Fwww.news-press.com%2Fstory%2Fmoney%2Fbusiness%2Flocal%2F2026%2F11%2F10%2Feast-naples-golf-club-project-forced-to-start-over-in-approval-process-because-of-procedural-misstep%2F92708676007%2F)\n[](https://login.news-press.com/PFTM-GUP/authenticate/?success-url=https%3A%2F%2Fwww.news-press.com%2Fstory%2Fmoney%2Fbusiness%2Flocal%2F2026%2F11%2F10%2Feast-naples-golf-club-project-forced-to-start-over-in-approval-process-because-of-procedural-misstep%2F92708676007%2F&cancel-url=https%3A%2F%2Fwww.news-press.com%2Fstory%2Fmoney%2Fbusiness%2Flocal%2F2026%2F11%2F10%2Feast-naples-golf-club-project-forced-to-start-over-in-approval-process-because-of-procedural-misstep%2F92708676007%2F)\n[](https://www.news-press.com/) [](https://www.news-press.com/)\nLOCAL BUSINESS\n# East Naples golf club project forced to start over in hearing process\n[![Portrait of Laura Layden](https://www.news-press.com/gcdn/authoring/authoring-images/2024/02/08/PNDN/72524348007-ndn-jh-20240126-laura-0001.JPG?crop=3313,3312,x1506,y0&width=48&height=48&format=pjpg&auto=webp) Laura Layden](https://www.naplesnews.com/staff/2647080001/laura-layden/)\nFort Myers News-Press & Naples Daily News\nNov. 10, 2026Updated Nov. 11, 2026, 10:\""
             },
@@ -227,7 +562,7 @@
             "variable_type": "categorical",
             "source": {
               "url": "https://www.news-press.com/story/money/business/local/2026/11/10/east-naples-golf-club-project-forced-to-start-over-in-approval-process-because-of-procedural-misstep/92708676007/",
-              "fetched_at": "2026-11-25T14:38:54Z",
+              "fetched_at": "2026-11-26T04:29:56Z",
               "tier": 2,
               "citation": "East Naples golf club project forced to start over in approval process: \"[](https://www.news-press.com/)\n[Popular Fort Myers pizza shop reopens with new look, more awards](https://www.news-press.com/story/life/food/2026/11/12/uncle-ricos-in-fort-myers-reopens-with-cool-new-look-more-awards/92650571007/)\n[](https://subscribe.news-press.com/rr/nanobar?gps-source=CPTILELEFT&itm_campaign=2026ENTQ4BAU2026&itm_medium=ONSITE&success-url=https%3A%2F%2Fwww.news-press.com%2Fstory%2Fmoney%2Fbusiness%2Flocal%2F2026%2F11%2F10%2Feast-naples-golf-club-project-forced-to-start-over-in-approval-process-because-of-procedural-misstep%2F92708676007%2F)\n[](https://subscribe.news-press.com/rr/masthead?gps-source=CPMASTHEAD&itm_campaign=2026ENTQ4BAU2026&itm_medium=ONSITE&success-url=https%3A%2F%2Fwww.news-press.com%2Fstory%2Fmoney%2Fbusiness%2Flocal%2F2026%2F11%2F10%2Feast-naples-golf-club-project-forced-to-start-over-in-approval-process-because-of-procedural-misstep%2F92708676007%2F)\n[News](https://www.news-press.com/news/) [Cape Coral](https://www.news-press.com/news/cape-coral/) [Sports](https://www.news-press.com/sports/) [Restaurants](https://www.news-press.com/taste/) [Real Estate](https://www.news-press.com/real-estate) [Advertise](https://advertising.usatoday.com/advertise-with-us/?cid=Web_LiQ_Network_AdvertiseWithUs_AdvertiseInquiry&publication=the_news_press&utm_source=local_publication&utm_medium=menu&utm_campaign=advertise_with_us) [Obituaries](https://www.news-press.com/obituaries) [eNewspaper](https://user.news-press.com/user/enewspaper) [Legals](https://www.news-press.com/public-notices)\n[](https://www.news-press.com/search/ \"Search\")\n[](https://www.news-press.com/weather/ \"Weather in Fort Myers: 76°F Cloudy\") [](https://subscribe.news-press.com/rr/navsub?gps-source=CPTOPNAVBAR&itm_campaign=2026ENTQ4BAU2026&itm_medium=ONSITE&success-url=https%3A%2F%2Fwww.news-press.com%2Fstory%2Fmoney%2Fbusiness%2Flocal%2F2026%2F11%2F10%2Feast-naples-golf-club-project-forced-to-start-over-in-approval-process-because-of-procedural-misstep%2F92708676007%2F)\n[](https://login.news-press.com/PFTM-GUP/authenticate/?success-url=https%3A%2F%2Fwww.news-press.com%2Fstory%2Fmoney%2Fbusiness%2Flocal%2F2026%2F11%2F10%2Feast-naples-golf-club-project-forced-to-start-over-in-approval-process-because-of-procedural-misstep%2F92708676007%2F&cancel-url=https%3A%2F%2Fwww.news-press.com%2Fstory%2Fmoney%2Fbusiness%2Flocal%2F2026%2F11%2F10%2Feast-naples-golf-club-project-forced-to-start-over-in-approval-process-because-of-procedural-misstep%2F92708676007%2F)\n[](https://www.news-press.com/) [](https://www.news-press.com/)\nLOCAL BUSINESS\n# East Naples golf club project forced to start over in hearing process\n[![Portrait of Laura Layden](https://www.news-press.com/gcdn/authoring/authoring-images/2024/02/08/PNDN/72524348007-ndn-jh-20240126-laura-0001.JPG?crop=3313,3312,x1506,y0&width=48&height=48&format=pjpg&auto=webp) Laura Layden](https://www.naplesnews.com/staff/2647080001/laura-layden/)\nFort Myers News-Press & Naples Daily News\nNov. 10, 2026Updated Nov. 11, 2026, 10:\""
             },
@@ -244,7 +579,7 @@
             "variable_type": "categorical",
             "source": {
               "url": "https://www.news-press.com/story/money/business/local/2026/11/10/east-naples-golf-club-project-forced-to-start-over-in-approval-process-because-of-procedural-misstep/92708676007/",
-              "fetched_at": "2026-11-25T14:38:54Z",
+              "fetched_at": "2026-11-26T04:29:56Z",
               "tier": 2,
               "citation": "East Naples golf club project forced to start over in approval process: \"[](https://www.news-press.com/)\n[Popular Fort Myers pizza shop reopens with new look, more awards](https://www.news-press.com/story/life/food/2026/11/12/uncle-ricos-in-fort-myers-reopens-with-cool-new-look-more-awards/92650571007/)\n[](https://subscribe.news-press.com/rr/nanobar?gps-source=CPTILELEFT&itm_campaign=2026ENTQ4BAU2026&itm_medium=ONSITE&success-url=https%3A%2F%2Fwww.news-press.com%2Fstory%2Fmoney%2Fbusiness%2Flocal%2F2026%2F11%2F10%2Feast-naples-golf-club-project-forced-to-start-over-in-approval-process-because-of-procedural-misstep%2F92708676007%2F)\n[](https://subscribe.news-press.com/rr/masthead?gps-source=CPMASTHEAD&itm_campaign=2026ENTQ4BAU2026&itm_medium=ONSITE&success-url=https%3A%2F%2Fwww.news-press.com%2Fstory%2Fmoney%2Fbusiness%2Flocal%2F2026%2F11%2F10%2Feast-naples-golf-club-project-forced-to-start-over-in-approval-process-because-of-procedural-misstep%2F92708676007%2F)\n[News](https://www.news-press.com/news/) [Cape Coral](https://www.news-press.com/news/cape-coral/) [Sports](https://www.news-press.com/sports/) [Restaurants](https://www.news-press.com/taste/) [Real Estate](https://www.news-press.com/real-estate) [Advertise](https://advertising.usatoday.com/advertise-with-us/?cid=Web_LiQ_Network_AdvertiseWithUs_AdvertiseInquiry&publication=the_news_press&utm_source=local_publication&utm_medium=menu&utm_campaign=advertise_with_us) [Obituaries](https://www.news-press.com/obituaries) [eNewspaper](https://user.news-press.com/user/enewspaper) [Legals](https://www.news-press.com/public-notices)\n[](https://www.news-press.com/search/ \"Search\")\n[](https://www.news-press.com/weather/ \"Weather in Fort Myers: 76°F Cloudy\") [](https://subscribe.news-press.com/rr/navsub?gps-source=CPTOPNAVBAR&itm_campaign=2026ENTQ4BAU2026&itm_medium=ONSITE&success-url=https%3A%2F%2Fwww.news-press.com%2Fstory%2Fmoney%2Fbusiness%2Flocal%2F2026%2F11%2F10%2Feast-naples-golf-club-project-forced-to-start-over-in-approval-process-because-of-procedural-misstep%2F92708676007%2F)\n[](https://login.news-press.com/PFTM-GUP/authenticate/?success-url=https%3A%2F%2Fwww.news-press.com%2Fstory%2Fmoney%2Fbusiness%2Flocal%2F2026%2F11%2F10%2Feast-naples-golf-club-project-forced-to-start-over-in-approval-process-because-of-procedural-misstep%2F92708676007%2F&cancel-url=https%3A%2F%2Fwww.news-press.com%2Fstory%2Fmoney%2Fbusiness%2Flocal%2F2026%2F11%2F10%2Feast-naples-golf-club-project-forced-to-start-over-in-approval-process-because-of-procedural-misstep%2F92708676007%2F)\n[](https://www.news-press.com/) [](https://www.news-press.com/)\nLOCAL BUSINESS\n# East Naples golf club project forced to start over in hearing process\n[![Portrait of Laura Layden](https://www.news-press.com/gcdn/authoring/authoring-images/2024/02/08/PNDN/72524348007-ndn-jh-20240126-laura-0001.JPG?crop=3313,3312,x1506,y0&width=48&height=48&format=pjpg&auto=webp) Laura Layden](https://www.naplesnews.com/staff/2647080001/laura-layden/)\nFort Myers News-Press & Naples Daily News\nNov. 10, 2026Updated Nov. 11, 2026, 10:\""
             },
@@ -261,7 +596,7 @@
             "variable_type": "categorical",
             "source": {
               "url": "https://www.news-press.com/story/money/business/local/2026/11/10/east-naples-golf-club-project-forced-to-start-over-in-approval-process-because-of-procedural-misstep/92708676007/",
-              "fetched_at": "2026-11-25T14:38:54Z",
+              "fetched_at": "2026-11-26T04:29:56Z",
               "tier": 2,
               "citation": "East Naples golf club project forced to start over in approval process: \"[](https://www.news-press.com/)\n[Popular Fort Myers pizza shop reopens with new look, more awards](https://www.news-press.com/story/life/food/2026/11/12/uncle-ricos-in-fort-myers-reopens-with-cool-new-look-more-awards/92650571007/)\n[](https://subscribe.news-press.com/rr/nanobar?gps-source=CPTILELEFT&itm_campaign=2026ENTQ4BAU2026&itm_medium=ONSITE&success-url=https%3A%2F%2Fwww.news-press.com%2Fstory%2Fmoney%2Fbusiness%2Flocal%2F2026%2F11%2F10%2Feast-naples-golf-club-project-forced-to-start-over-in-approval-process-because-of-procedural-misstep%2F92708676007%2F)\n[](https://subscribe.news-press.com/rr/masthead?gps-source=CPMASTHEAD&itm_campaign=2026ENTQ4BAU2026&itm_medium=ONSITE&success-url=https%3A%2F%2Fwww.news-press.com%2Fstory%2Fmoney%2Fbusiness%2Flocal%2F2026%2F11%2F10%2Feast-naples-golf-club-project-forced-to-start-over-in-approval-process-because-of-procedural-misstep%2F92708676007%2F)\n[News](https://www.news-press.com/news/) [Cape Coral](https://www.news-press.com/news/cape-coral/) [Sports](https://www.news-press.com/sports/) [Restaurants](https://www.news-press.com/taste/) [Real Estate](https://www.news-press.com/real-estate) [Advertise](https://advertising.usatoday.com/advertise-with-us/?cid=Web_LiQ_Network_AdvertiseWithUs_AdvertiseInquiry&publication=the_news_press&utm_source=local_publication&utm_medium=menu&utm_campaign=advertise_with_us) [Obituaries](https://www.news-press.com/obituaries) [eNewspaper](https://user.news-press.com/user/enewspaper) [Legals](https://www.news-press.com/public-notices)\n[](https://www.news-press.com/search/ \"Search\")\n[](https://www.news-press.com/weather/ \"Weather in Fort Myers: 76°F Cloudy\") [](https://subscribe.news-press.com/rr/navsub?gps-source=CPTOPNAVBAR&itm_campaign=2026ENTQ4BAU2026&itm_medium=ONSITE&success-url=https%3A%2F%2Fwww.news-press.com%2Fstory%2Fmoney%2Fbusiness%2Flocal%2F2026%2F11%2F10%2Feast-naples-golf-club-project-forced-to-start-over-in-approval-process-because-of-procedural-misstep%2F92708676007%2F)\n[](https://login.news-press.com/PFTM-GUP/authenticate/?success-url=https%3A%2F%2Fwww.news-press.com%2Fstory%2Fmoney%2Fbusiness%2Flocal%2F2026%2F11%2F10%2Feast-naples-golf-club-project-forced-to-start-over-in-approval-process-because-of-procedural-misstep%2F92708676007%2F&cancel-url=https%3A%2F%2Fwww.news-press.com%2Fstory%2Fmoney%2Fbusiness%2Flocal%2F2026%2F11%2F10%2Feast-naples-golf-club-project-forced-to-start-over-in-approval-process-because-of-procedural-misstep%2F92708676007%2F)\n[](https://www.news-press.com/) [](https://www.news-press.com/)\nLOCAL BUSINESS\n# East Naples golf club project forced to start over in hearing process\n[![Portrait of Laura Layden](https://www.news-press.com/gcdn/authoring/authoring-images/2024/02/08/PNDN/72524348007-ndn-jh-20240126-laura-0001.JPG?crop=3313,3312,x1506,y0&width=48&height=48&format=pjpg&auto=webp) Laura Layden](https://www.naplesnews.com/staff/2647080001/laura-layden/)\nFort Myers News-Press & Naples Daily News\nNov. 10, 2026Updated Nov. 11, 2026, 10:\""
             },
@@ -328,7 +663,7 @@
             ],
             "source": {
               "url": "https://www.swfldatagulf.com/r/source/city_pulse",
-              "fetched_at": "2026-11-25T14:38:54Z",
+              "fetched_at": "2026-11-26T04:29:56Z",
               "tier": 2,
               "citation": "Distilled, citation-backed SWFL news signals; each ZIP's items carry per-item source URLs in data_lake.city_pulse."
             },
@@ -336,7 +671,7 @@
           }
         ],
         "caveats": [
-          "72 additional live signals not surfaced here (cap 8); the full set is in data_lake.city_pulse.",
+          "71 additional live signals not surfaced here (cap 8); the full set is in data_lake.city_pulse.",
           "Each signal is dated current-events context with a per-signal source; freshness is TTL-bounded by topic (breaking 1d → structural 90d)."
         ],
         "contradicts": [],
@@ -349,7 +684,7 @@
         "relevance": {
           "decay_curve": "weeks",
           "half_life_hours": 720,
-          "computed_at": "2026-11-25T14:38:54Z"
+          "computed_at": "2026-11-26T04:29:56Z"
         },
         "exogenous_signals": []
       }
@@ -366,8 +701,119 @@
     },
     {
       "packId": "freshness-pulse",
-      "status": "skipped-fresh",
-      "written": false
+      "status": "built",
+      "version": 115,
+      "written": true,
+      "brainOutput": {
+        "brain_id": "freshness-pulse",
+        "version": 115,
+        "refined_at": "2026-11-26T04:29:56Z",
+        "expires": "2026-11-27T04:29:56Z",
+        "ttl_seconds": 86400,
+        "direction": "neutral",
+        "magnitude": 0,
+        "drivers": [],
+        "overrides": [],
+        "conclusion": "Today's sourced snapshot — Cape Coral median asking price (as of 2026-11-26) $399,200; Fort Myers median asking price (as of 2026-11-26) $325,000; Naples median asking price (as of 2026-11-26) $650,000; SWFL 30-year fixed mortgage rate (as of 2026-11-25) 7.21%. These are cited current facts only; the direction call lives downstream in master.",
+        "key_metrics": [
+          {
+            "metric": "freshness_median_asking_price_cape_coral_usd",
+            "value": 399200,
+            "direction": "stable",
+            "label": "Cape Coral median asking price (as of 2026-11-26)",
+            "variable_type": "extensive",
+            "units": "USD",
+            "display_format": "currency",
+            "source": {
+              "url": "https://www.swfldatagulf.com/desk",
+              "fetched_at": "2026-11-26T04:23:46.211273+00:00",
+              "tier": 2,
+              "citation": "SWFL Data Gulf active-listing inventory — current median asking price for Cape Coral, sourced 2026-11-26"
+            },
+            "suggestions": [
+              "Chart asking rents across the corridors",
+              "What's driving freshness median asking price cape coral usd?",
+              "How does freshness median asking price cape coral usd here compare to other SWFL areas?"
+            ]
+          },
+          {
+            "metric": "freshness_median_asking_price_fort_myers_usd",
+            "value": 325000,
+            "direction": "stable",
+            "label": "Fort Myers median asking price (as of 2026-11-26)",
+            "variable_type": "extensive",
+            "units": "USD",
+            "display_format": "currency",
+            "source": {
+              "url": "https://www.swfldatagulf.com/desk",
+              "fetched_at": "2026-11-26T04:23:46.211273+00:00",
+              "tier": 2,
+              "citation": "SWFL Data Gulf active-listing inventory — current median asking price for Fort Myers, sourced 2026-11-26"
+            },
+            "suggestions": [
+              "Chart asking rents across the corridors",
+              "What's driving freshness median asking price fort myers usd?",
+              "How does freshness median asking price fort myers usd here compare to other SWFL areas?"
+            ]
+          },
+          {
+            "metric": "freshness_median_asking_price_naples_usd",
+            "value": 650000,
+            "direction": "stable",
+            "label": "Naples median asking price (as of 2026-11-26)",
+            "variable_type": "extensive",
+            "units": "USD",
+            "display_format": "currency",
+            "source": {
+              "url": "https://www.swfldatagulf.com/desk",
+              "fetched_at": "2026-11-26T04:23:46.211273+00:00",
+              "tier": 2,
+              "citation": "SWFL Data Gulf active-listing inventory — current median asking price for Naples, sourced 2026-11-26"
+            },
+            "suggestions": [
+              "Chart asking rents across the corridors",
+              "What's driving freshness median asking price naples usd?",
+              "How does freshness median asking price naples usd here compare to other SWFL areas?"
+            ]
+          },
+          {
+            "metric": "freshness_mortgage_30yr_fixed_pct",
+            "value": 7.21,
+            "direction": "stable",
+            "label": "SWFL 30-year fixed mortgage rate (as of 2026-11-25)",
+            "variable_type": "intensive",
+            "units": "percent",
+            "display_format": "percent",
+            "source": {
+              "url": "https://fred.stlouisfed.org/series/MORTGAGE30US",
+              "fetched_at": "2026-11-26T04:23:46.211273+00:00",
+              "tier": 2,
+              "citation": "FRED — current 30-year fixed mortgage rate for SWFL, sourced 2026-11-25"
+            },
+            "suggestions": [
+              "What's driving freshness mortgage 30yr fixed pct?",
+              "How does freshness mortgage 30yr fixed pct here compare to other SWFL areas?"
+            ]
+          }
+        ],
+        "detail_tables": [],
+        "caveats": [
+          "Each county-grain number is a single grounded source's current figure, provenance-gated to a real source URL; held anomalies and unsourced (model-memory) numbers are excluded by design."
+        ],
+        "contradicts": [],
+        "confidence": 0.8,
+        "joint_integrity": 1,
+        "confidence_dispersion": 0,
+        "chain_depth": 0,
+        "trust_tier": 2,
+        "upstream_count": 0,
+        "relevance": {
+          "decay_curve": "weeks",
+          "half_life_hours": 720,
+          "computed_at": "2026-11-26T04:29:56Z"
+        },
+        "exogenous_signals": []
+      }
     },
     {
       "packId": "seller-stress-swfl",
