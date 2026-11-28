@@ -1,9 +1,9 @@
-<!-- FRESHNESS: v18 | Token: SWFL-7421-v18-20261120-6a05a747 -->
+<!-- FRESHNESS: v19 | Token: SWFL-7421-v19-20261128-6817a863 -->
 ---
 brain_id: listing-momentum-swfl
-version: 18
-refined_at: 2026-11-20T13:12:55Z
-freshness_token: SWFL-7421-v18-20261120-6a05a747
+version: 19
+refined_at: 2026-11-28T13:17:15Z
+freshness_token: SWFL-7421-v19-20261128-6817a863
 ttl_seconds: 691200
 pack_hash: 0857a4d524a2
 context_type: user_saved_reference
@@ -29,19 +29,19 @@ SCOPE: Southwest Florida weekly for-sale listing momentum (Lee + Collier) — th
 
 --- CITATION TABLE ---
 id  | source                                                         | verified   | expires
-s01 | SWFL for-sale listing momentum — realtor.com for-sale listings | 2026-11-20 | 2026-11-28
+s01 | SWFL for-sale listing momentum — realtor.com for-sale listings | 2026-11-28 | 2026-12-06
 
 --- SAVED FACTS ---
 [
-  {"id":"f001","topic":"listing_momentum_swfl_snapshot","fact":"SWFL for-sale listing momentum ","value":"14.7% of 31,086 active listings carry a price cut, 8.9% newly listed. 3 counties, 55 ZIPs.","src":"s01","date":"2026-11-20"}
+  {"id":"f001","topic":"listing_momentum_swfl_snapshot","fact":"SWFL for-sale listing momentum ","value":"14.7% of 31,086 active listings carry a price cut, 8.9% newly listed. 3 counties, 55 ZIPs.","src":"s01","date":"2026-11-28"}
 ]
 
 --- OUTPUT ---
 {
   "brain_id": "listing-momentum-swfl",
-  "version": 18,
-  "refined_at": "2026-11-20T13:12:55Z",
-  "expires": "2026-11-28T13:12:55Z",
+  "version": 19,
+  "refined_at": "2026-11-28T13:17:15Z",
+  "expires": "2026-12-06T13:17:15Z",
   "ttl_seconds": 691200,
   "direction": "neutral",
   "magnitude": 0,
@@ -59,7 +59,7 @@ s01 | SWFL for-sale listing momentum — realtor.com for-sale listings | 2026-11
       "display_format": "percent",
       "source": {
         "url": "https://www.swfldatagulf.com/r/source/listing_momentum_stats?label=SWFL+for-sale+listing+momentum+%28price-cut+%2F+new-listing+shares%29&source=realtor.com+for-sale+listings&brain=listing-momentum-swfl&date_col=scraped_at",
-        "fetched_at": "2026-11-20T13:12:55Z",
+        "fetched_at": "2026-11-28T13:17:15Z",
         "tier": 2,
         "citation": "14.70% of 31,086 active SWFL for-sale listings carry a price reduction, as of 2026-08-14"
       },
@@ -78,7 +78,7 @@ s01 | SWFL for-sale listing momentum — realtor.com for-sale listings | 2026-11
       "display_format": "percent",
       "source": {
         "url": "https://www.swfldatagulf.com/r/source/listing_momentum_stats?label=SWFL+for-sale+listing+momentum+%28price-cut+%2F+new-listing+shares%29&source=realtor.com+for-sale+listings&brain=listing-momentum-swfl&date_col=scraped_at",
-        "fetched_at": "2026-11-20T13:12:55Z",
+        "fetched_at": "2026-11-28T13:17:15Z",
         "tier": 2,
         "citation": "8.90% of 31,086 active SWFL for-sale listings are newly listed, as of 2026-08-14"
       },
@@ -144,7 +144,7 @@ s01 | SWFL for-sale listing momentum — realtor.com for-sale listings | 2026-11
       ],
       "source": {
         "url": "https://www.swfldatagulf.com/r/source/listing_momentum_stats?label=SWFL+for-sale+listing+momentum+%28price-cut+%2F+new-listing+shares%29&source=realtor.com+for-sale+listings&brain=listing-momentum-swfl&date_col=scraped_at",
-        "fetched_at": "2026-11-20T13:12:55Z",
+        "fetched_at": "2026-11-28T13:17:15Z",
         "tier": 2,
         "citation": "SWFL for-sale listing momentum shares, per grain, as of 2026-08-14"
       }
@@ -672,7 +672,7 @@ s01 | SWFL for-sale listing momentum — realtor.com for-sale listings | 2026-11
       ],
       "source": {
         "url": "https://www.swfldatagulf.com/r/source/listing_momentum_stats?label=SWFL+for-sale+listing+momentum+%28price-cut+%2F+new-listing+shares%29&source=realtor.com+for-sale+listings&brain=listing-momentum-swfl&date_col=scraped_at",
-        "fetched_at": "2026-11-20T13:12:55Z",
+        "fetched_at": "2026-11-28T13:17:15Z",
         "tier": 2,
         "citation": "SWFL for-sale listing momentum shares, per grain, as of 2026-08-14"
       }
@@ -693,7 +693,7 @@ s01 | SWFL for-sale listing momentum — realtor.com for-sale listings | 2026-11
   "relevance": {
     "decay_curve": "weeks",
     "half_life_hours": 720,
-    "computed_at": "2026-11-20T13:12:55Z"
+    "computed_at": "2026-11-28T13:17:15Z"
   },
   "exogenous_signals": [],
   "grain_boundary": {
@@ -710,5 +710,5 @@ s01 | SWFL for-sale listing momentum — realtor.com for-sale listings | 2026-11
 - listing-momentum-swfl: SWFL weekly price-cut + new-listing shares from the active-inventory sweep (data_lake.listing_momentum_stats), no metered calls.
 
 --- RECENT NOTES ---
-- 2026-11-20: pack refined by the Refinery — 1 fact(s) from 1 source(s).
+- 2026-11-28: pack refined by the Refinery — 1 fact(s) from 1 source(s).
 ```
