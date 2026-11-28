@@ -1,8 +1,8 @@
 {
   "target": "master",
   "timestamps": {
-    "started": "2026-11-27T14:01:29.950Z",
-    "finished": "2026-11-27T14:01:55.959Z"
+    "started": "2026-11-28T04:26:06.803Z",
+    "finished": "2026-11-28T04:26:33.125Z"
   },
   "source": "live",
   "outcomes": [
@@ -30,7 +30,7 @@
       "packId": "cre-swfl",
       "status": "missing",
       "failureClass": "deterministic",
-      "reason": "400 {\"type\":\"error\",\"error\":{\"type\":\"invalid_request_error\",\"message\":\"Your credit balance is too low to access the Anthropic API. Please go to Plans & Billing to upgrade or purchase credits.\"},\"request_id\":\"req_011ChTZAJQ9zbZQbFLLByDVi\"}",
+      "reason": "400 {\"type\":\"error\",\"error\":{\"type\":\"invalid_request_error\",\"message\":\"Your credit balance is too low to access the Anthropic API. Please go to Plans & Billing to upgrade or purchase credits.\"},\"request_id\":\"req_011ChUh6LgPoJcMC8FprLteq\"}",
       "lastGoodRefinedAt": "2026-11-17T04:33:20Z",
       "written": false
     },
@@ -38,7 +38,7 @@
       "packId": "macro-us",
       "status": "missing",
       "failureClass": "deterministic",
-      "reason": "400 {\"type\":\"error\",\"error\":{\"type\":\"invalid_request_error\",\"message\":\"Your credit balance is too low to access the Anthropic API. Please go to Plans & Billing to upgrade or purchase credits.\"},\"request_id\":\"req_011ChTZAUphq6rsAeCDkZJws\"}",
+      "reason": "400 {\"type\":\"error\",\"error\":{\"type\":\"invalid_request_error\",\"message\":\"Your credit balance is too low to access the Anthropic API. Please go to Plans & Billing to upgrade or purchase credits.\"},\"request_id\":\"req_011ChUh6aP9sQSkzzAMsX1iv\"}",
       "lastGoodRefinedAt": "2026-10-22T09:32:26Z",
       "written": false
     },
@@ -120,19 +120,19 @@
     {
       "packId": "city-pulse-swfl",
       "status": "built",
-      "version": 202,
+      "version": 203,
       "written": true,
       "brainOutput": {
         "brain_id": "city-pulse-swfl",
-        "version": 202,
-        "refined_at": "2026-11-27T14:01:34Z",
-        "expires": "2026-11-28T14:01:34Z",
+        "version": 203,
+        "refined_at": "2026-11-28T04:26:11Z",
+        "expires": "2026-11-29T04:26:11Z",
         "ttl_seconds": 86400,
         "direction": "neutral",
         "magnitude": 0,
         "drivers": [],
         "overrides": [],
-        "conclusion": "SWFL city pulse as of 2026-11-27: 72 live current-events signals across 8 cities — Naples (21), Sanibel (1), Fort Myers (26), Cape Coral (17), Marco Island (1), Fort Myers Beach (3), North Naples (1), Estero (2). Most current: Naples — A big Florida hospitality expansion pipeline includes a Hilton hotel project in Naples, reported Nov. 16, 2026. These are current cited facts only; the cross-vertical read and any direction call live downstream in master.",
+        "conclusion": "SWFL city pulse as of 2026-11-28: 69 live current-events signals across 7 cities — Naples (20), Fort Myers (25), Cape Coral (17), Marco Island (1), Fort Myers Beach (3), North Naples (1), Estero (2). Most current: Naples — A big Florida hospitality expansion pipeline includes a Hilton hotel project in Naples, reported Nov. 16, 2026. These are current cited facts only; the cross-vertical read and any direction call live downstream in master.",
         "key_metrics": [
           {
             "metric": "signal_development_1",
@@ -142,7 +142,7 @@
             "variable_type": "categorical",
             "source": {
               "url": "https://www.news-press.com/story/money/2026/11/16/big-florida-hospitality-expansion-includes-hilton-naples-and-captiva-swfl-collier-lee-county-hotel/92730838007/",
-              "fetched_at": "2026-11-27T14:01:34Z",
+              "fetched_at": "2026-11-28T04:26:11Z",
               "tier": 2,
               "citation": "Big Florida hospitality expansion includes Hilton, Naples and Captiva: \"[](https://www.news-press.com/)\n[Free Fort Myers dog fest celebrates golden retrievers, other breeds](https://www.news-press.com/story/life/2026/11/16/fort-myers-florida-dog-festival-celebrates-golden-retrievers-and-more-goldenfest-dock-diving-free/92688792007/)\n[](https://subscribe.news-press.com/rr/nanobar?gps-source=CPTILELEFT&itm_campaign=2026ENTQ4BAU2026&itm_medium=ONSITE&success-url=https%3A%2F%2Fwww.news-press.com%2Fstory%2Fmoney%2F2026%2F11%2F16%2Fbig-florida-hospitality-expansion-includes-hilton-naples-and-captiva-swfl-collier-lee-county-hotel%2F92730838007%2F)\n[](https://subscribe.news-press.com/rr/masthead?gps-source=CPMASTHEAD&itm_campaign=2026ENTQ4BAU2026&itm_medium=ONSITE&success-url=https%3A%2F%2Fwww.news-press.com%2Fstory%2Fmoney%2F2026%2F11%2F16%2Fbig-florida-hospitality-expansion-includes-hilton-naples-and-captiva-swfl-collier-lee-county-hotel%2F92730838007%2F)\n[News](https://www.news-press.com/news/) [Cape Coral](https://www.news-press.com/news/cape-coral/) [Sports](https://www.news-press.com/sports/) [Restaurants](https://www.news-press.com/taste/) [Real Estate](https://www.news-press.com/real-estate) [Advertise](https://advertising.usatoday.com/advertise-with-us/?cid=Web_LiQ_Network_AdvertiseWithUs_AdvertiseInquiry&publication=the_news_press&utm_source=local_publication&utm_medium=menu&utm_campaign=advertise_with_us) [Obituaries](https://www.news-press.com/obituaries) [eNewspaper](https://user.news-press.com/user/enewspaper) [Legals](https://www.news-press.com/public-notices)\n[](https://www.news-press.com/search/ \"Search\")\n[](https://www.news-press.com/weather/ \"Weather in Fort Myers: 72°F Sunny\") [](https://subscribe.news-press.com/rr/navsub?gps-source=CPTOPNAVBAR&itm_campaign=2026ENTQ4BAU2026&itm_medium=ONSITE&success-url=https%3A%2F%2Fwww.news-press.com%2Fstory%2Fmoney%2F2026%2F11%2F16%2Fbig-florida-hospitality-expansion-includes-hilton-naples-and-captiva-swfl-collier-lee-county-hotel%2F92730838007%2F)\n[](https://login.news-press.com/PFTM-GUP/authenticate/?success-url=https%3A%2F%2Fwww.news-press.com%2Fstory%2Fmoney%2F2026%2F11%2F16%2Fbig-florida-hospitality-expansion-includes-hilton-naples-and-captiva-swfl-collier-lee-county-hotel%2F92730838007%2F&cancel-url=https%3A%2F%2Fwww.news-press.com%2Fstory%2Fmoney%2F2026%2F11%2F16%2Fbig-florida-hospitality-expansion-includes-hilton-naples-and-captiva-swfl-collier-lee-county-hotel%2F92730838007%2F)\n[](https://www.news-press.com/) [](https://www.news-press.com/)\nMONEY\n# Florida pipeline projects include hotels, resorts, re-openings and more\n[![Portrait of Phil Fernandez](https://www.news-press.com/gcdn/presto/2019/09/14/PNDN/6a77b474-579f-48fa-b56f-a2cc2b9de797-NDN_Phil_Fernandez.jpg?crop=2999,2999,x0,y570&width=48&height=48&format=pjpg&auto=webp) Phil Fernandez](https://www.naplesnews.com/staff/2684114001/phil-fernandez/)\nFort Myers News-Press & Naples Daily News\nNov. 16, 2026, 5:04 a.m. ET\n[Southwest Florida](https://www.news-press.com/story/money/2026/10/26/florida-fighting-over\""
             },
@@ -152,50 +152,50 @@
             ]
           },
           {
-            "metric": "signal_development_2",
-            "value": "Naples: New affordable and workforce housing projects in the Naples/SWFL area debuted as of Nov. 10, 2026, with hefty demand reported.",
-            "direction": "stable",
-            "label": "Naples — development",
-            "variable_type": "categorical",
-            "source": {
-              "url": "https://www.naplesnews.com/story/money/2026/11/10/florida-sees-new-affordable-workforce-housing-compounds-make-debuts-swfl-naples-fort-myers-sanibel/92696792007/",
-              "fetched_at": "2026-11-27T14:01:34Z",
-              "tier": 2,
-              "citation": "Florida sees new affordable, workforce housing compounds make debuts: \"[](https://www.naplesnews.com/)\n[](https://subscribe.naplesnews.com/rr/nanobar?gps-source=CPTILELEFT&itm_campaign=2026ENTQ4BAU2026&itm_medium=ONSITE&success-url=https%3A%2F%2Fwww.naplesnews.com%2Fstory%2Fmoney%2F2026%2F11%2F10%2Fflorida-sees-new-affordable-workforce-housing-compounds-make-debuts-swfl-naples-fort-myers-sanibel%2F92696792007%2F)\n[](https://subscribe.naplesnews.com/rr/masthead?gps-source=CPMASTHEAD&itm_campaign=2026ENTQ4BAU2026&itm_medium=ONSITE&success-url=https%3A%2F%2Fwww.naplesnews.com%2Fstory%2Fmoney%2F2026%2F11%2F10%2Fflorida-sees-new-affordable-workforce-housing-compounds-make-debuts-swfl-naples-fort-myers-sanibel%2F92696792007%2F)\n[News](https://www.naplesnews.com/news/) [Sports](https://www.naplesnews.com/sports/) [Real Estate](https://www.naplesnews.com/business/real-estate/) [Restaurants](https://www.naplesnews.com/entertainment/restaurants/) [Opinion](https://www.naplesnews.com/opinion/) [Advertise](https://advertising.usatoday.com/advertise-with-us/?cid=Web_LiQ_Network_AdvertiseWithUs_AdvertiseInquiry&publication=naples_daily_news&utm_source=local_publication&utm_medium=menu&utm_campaign=advertise_with_us) [Obituaries](https://www.naplesnews.com/obituaries) [eNewspaper](https://user.naplesnews.com/user/enewspaper) [Legals](https://www.naplesnews.com/public-notices)\n[](https://www.naplesnews.com/search/ \"Search\")\n[](https://www.naplesnews.com/weather/ \"Weather in Naples: 70°F Cloudy\") [](https://subscribe.naplesnews.com/rr/navsub?gps-source=CPTOPNAVBAR&itm_campaign=2026ENTQ4BAU2026&itm_medium=ONSITE&success-url=https%3A%2F%2Fwww.naplesnews.com%2Fstory%2Fmoney%2F2026%2F11%2F10%2Fflorida-sees-new-affordable-workforce-housing-compounds-make-debuts-swfl-naples-fort-myers-sanibel%2F92696792007%2F)\n[](https://login.naplesnews.com/PNDN-GUP/authenticate/?success-url=https%3A%2F%2Fwww.naplesnews.com%2Fstory%2Fmoney%2F2026%2F11%2F10%2Fflorida-sees-new-affordable-workforce-housing-compounds-make-debuts-swfl-naples-fort-myers-sanibel%2F92696792007%2F&cancel-url=https%3A%2F%2Fwww.naplesnews.com%2Fstory%2Fmoney%2F2026%2F11%2F10%2Fflorida-sees-new-affordable-workforce-housing-compounds-make-debuts-swfl-naples-fort-myers-sanibel%2F92696792007%2F)\n[](https://www.naplesnews.com/) [](https://www.naplesnews.com/)\n[MONEY](https://www.naplesnews.com/business/)\n# New Florida affordable housing projects take shape with hefty demand\n[![Portrait of Phil Fernandez](https://www.naplesnews.com/gcdn/presto/2019/09/14/PNDN/6a77b474-579f-48fa-b56f-a2cc2b9de797-NDN_Phil_Fernandez.jpg?crop=2999,2999,x0,y570&width=48&height=48&format=pjpg&auto=webp) Phil Fernandez](https://www.naplesnews.com/staff/2684114001/phil-fernandez/)\nFort Myers News-Press & Naples Daily News\nNov. 10, 2026, 10:47 a.m. ET\n[](https://www.facebook.com/dialog/share?display=popup&app_id=1703814913224751&href=https%3A%2F%2Fwww.naplesnews.com%2Fstory%2Fmoney%2F2026%2F11%2F10%2Fflorida-sees-new-affordable-workforce-housing-compounds-make-debuts-swfl-naples-fort-myers-sanibel%2F92696792007%\""
-            },
-            "suggestions": [
-              "What's driving signal development 2?",
-              "How does signal development 2 here compare to other SWFL areas?"
-            ]
-          },
-          {
-            "metric": "signal_development_3",
-            "value": "Sanibel: New affordable, workforce housing compounds make debuts in Florida, including Sanibel, as of Nov. 10, 2026.",
-            "direction": "stable",
-            "label": "Sanibel — development",
-            "variable_type": "categorical",
-            "source": {
-              "url": "https://www.naplesnews.com/story/money/2026/11/10/florida-sees-new-affordable-workforce-housing-compounds-make-debuts-swfl-naples-fort-myers-sanibel/92696792007/",
-              "fetched_at": "2026-11-27T14:01:34Z",
-              "tier": 2,
-              "citation": "Florida sees new affordable, workforce housing compounds make debuts: \"[](https://www.naplesnews.com/)\n[](https://subscribe.naplesnews.com/rr/nanobar?gps-source=CPTILELEFT&itm_campaign=2026ENTQ4BAU2026&itm_medium=ONSITE&success-url=https%3A%2F%2Fwww.naplesnews.com%2Fstory%2Fmoney%2F2026%2F11%2F10%2Fflorida-sees-new-affordable-workforce-housing-compounds-make-debuts-swfl-naples-fort-myers-sanibel%2F92696792007%2F)\n[](https://subscribe.naplesnews.com/rr/masthead?gps-source=CPMASTHEAD&itm_campaign=2026ENTQ4BAU2026&itm_medium=ONSITE&success-url=https%3A%2F%2Fwww.naplesnews.com%2Fstory%2Fmoney%2F2026%2F11%2F10%2Fflorida-sees-new-affordable-workforce-housing-compounds-make-debuts-swfl-naples-fort-myers-sanibel%2F92696792007%2F)\n[News](https://www.naplesnews.com/news/) [Sports](https://www.naplesnews.com/sports/) [Real Estate](https://www.naplesnews.com/business/real-estate/) [Restaurants](https://www.naplesnews.com/entertainment/restaurants/) [Opinion](https://www.naplesnews.com/opinion/) [Advertise](https://advertising.usatoday.com/advertise-with-us/?cid=Web_LiQ_Network_AdvertiseWithUs_AdvertiseInquiry&publication=naples_daily_news&utm_source=local_publication&utm_medium=menu&utm_campaign=advertise_with_us) [Obituaries](https://www.naplesnews.com/obituaries) [eNewspaper](https://user.naplesnews.com/user/enewspaper) [Legals](https://www.naplesnews.com/public-notices)\n[](https://www.naplesnews.com/search/ \"Search\")\n[](https://www.naplesnews.com/weather/ \"Weather in Naples: 70°F Cloudy\") [](https://subscribe.naplesnews.com/rr/navsub?gps-source=CPTOPNAVBAR&itm_campaign=2026ENTQ4BAU2026&itm_medium=ONSITE&success-url=https%3A%2F%2Fwww.naplesnews.com%2Fstory%2Fmoney%2F2026%2F11%2F10%2Fflorida-sees-new-affordable-workforce-housing-compounds-make-debuts-swfl-naples-fort-myers-sanibel%2F92696792007%2F)\n[](https://login.naplesnews.com/PNDN-GUP/authenticate/?success-url=https%3A%2F%2Fwww.naplesnews.com%2Fstory%2Fmoney%2F2026%2F11%2F10%2Fflorida-sees-new-affordable-workforce-housing-compounds-make-debuts-swfl-naples-fort-myers-sanibel%2F92696792007%2F&cancel-url=https%3A%2F%2Fwww.naplesnews.com%2Fstory%2Fmoney%2F2026%2F11%2F10%2Fflorida-sees-new-affordable-workforce-housing-compounds-make-debuts-swfl-naples-fort-myers-sanibel%2F92696792007%2F)\n[](https://www.naplesnews.com/) [](https://www.naplesnews.com/)\n[MONEY](https://www.naplesnews.com/business/)\n# New Florida affordable housing projects take shape with hefty demand\n[![Portrait of Phil Fernandez](https://www.naplesnews.com/gcdn/presto/2019/09/14/PNDN/6a77b474-579f-48fa-b56f-a2cc2b9de797-NDN_Phil_Fernandez.jpg?crop=2999,2999,x0,y570&width=48&height=48&format=pjpg&auto=webp) Phil Fernandez](https://www.naplesnews.com/staff/2684114001/phil-fernandez/)\nFort Myers News-Press & Naples Daily News\nNov. 10, 2026, 10:47 a.m. ET\n[](https://www.facebook.com/dialog/share?display=popup&app_id=1703814913224751&href=https%3A%2F%2Fwww.naplesnews.com%2Fstory%2Fmoney%2F2026%2F11%2F10%2Fflorida-sees-new-affordable-workforce-housing-compounds-make-debuts-swfl-naples-fort-myers-sanibel%2F92696792007%\""
-            },
-            "suggestions": [
-              "What's driving signal development 3?",
-              "How does signal development 3 here compare to other SWFL areas?"
-            ]
-          },
-          {
-            "metric": "signal_business_4",
+            "metric": "signal_business_2",
             "value": "Fort Myers: The nonprofit foundation that organized the Naples St. Patrick's Day Parade notified the city in May 2026 that it is 'getting out of the parade business and will not be running the parade in Naples anymore,' potentially ending a 50-year tradition.",
             "direction": "stable",
             "label": "Fort Myers — business",
             "variable_type": "categorical",
             "source": {
               "url": "https://www.news-press.com/story/money/business/local/2026/11/18/naples-florida-st-patricks-day-parade-may-have-come-to-its-end-after-50-years/92836594007/",
-              "fetched_at": "2026-11-27T14:01:34Z",
+              "fetched_at": "2026-11-28T04:26:11Z",
               "tier": 2,
               "citation": "Naples St. Patrick's Day parade may have come to its end after 50 years: \"[](https://www.news-press.com/)\n[](https://subscribe.news-press.com/rr/nanobar?gps-source=CPTILELEFT&itm_campaign=2026ENTQ4BAU2026&itm_medium=ONSITE&success-url=https%3A%2F%2Fwww.news-press.com%2Fstory%2Fmoney%2Fbusiness%2Flocal%2F2026%2F11%2F18%2Fnaples-florida-st-patricks-day-parade-may-have-come-to-its-end-after-50-years%2F92836594007%2F)\n[](https://subscribe.news-press.com/rr/masthead?gps-source=CPMASTHEAD&itm_campaign=2026ENTQ4BAU2026&itm_medium=ONSITE&success-url=https%3A%2F%2Fwww.news-press.com%2Fstory%2Fmoney%2Fbusiness%2Flocal%2F2026%2F11%2F18%2Fnaples-florida-st-patricks-day-parade-may-have-come-to-its-end-after-50-years%2F92836594007%2F)\n[News](https://www.news-press.com/news/) [Cape Coral](https://www.news-press.com/news/cape-coral/) [Sports](https://www.news-press.com/sports/) [Restaurants](https://www.news-press.com/taste/) [Real Estate](https://www.news-press.com/real-estate) [Advertise](https://advertising.usatoday.com/advertise-with-us/?cid=Web_LiQ_Network_AdvertiseWithUs_AdvertiseInquiry&publication=the_news_press&utm_source=local_publication&utm_medium=menu&utm_campaign=advertise_with_us) [Obituaries](https://www.news-press.com/obituaries) [eNewspaper](https://user.news-press.com/user/enewspaper) [Legals](https://www.news-press.com/public-notices)\n[](https://www.news-press.com/search/ \"Search\")\n[](https://www.news-press.com/weather/ \"Weather in Fort Myers: 77°F Mostly Cloudy\") [](https://subscribe.news-press.com/rr/navsub?gps-source=CPTOPNAVBAR&itm_campaign=2026ENTQ4BAU2026&itm_medium=ONSITE&success-url=https%3A%2F%2Fwww.news-press.com%2Fstory%2Fmoney%2Fbusiness%2Flocal%2F2026%2F11%2F18%2Fnaples-florida-st-patricks-day-parade-may-have-come-to-its-end-after-50-years%2F92836594007%2F)\n[](https://login.news-press.com/PFTM-GUP/authenticate/?success-url=https%3A%2F%2Fwww.news-press.com%2Fstory%2Fmoney%2Fbusiness%2Flocal%2F2026%2F11%2F18%2Fnaples-florida-st-patricks-day-parade-may-have-come-to-its-end-after-50-years%2F92836594007%2F&cancel-url=https%3A%2F%2Fwww.news-press.com%2Fstory%2Fmoney%2Fbusiness%2Flocal%2F2026%2F11%2F18%2Fnaples-florida-st-patricks-day-parade-may-have-come-to-its-end-after-50-years%2F92836594007%2F)\n[](https://www.news-press.com/) [](https://www.news-press.com/)\nLOCAL BUSINESS\n# Naples St. Patrick's Day parade tradition may have come to an end\n[![Portrait of Laura Layden](https://www.news-press.com/gcdn/authoring/authoring-images/2024/02/08/PNDN/72524348007-ndn-jh-20240126-laura-0001.JPG?crop=3313,3312,x1506,y0&width=48&height=48&format=pjpg&auto=webp) Laura Layden](https://www.naplesnews.com/staff/2647080001/laura-layden/)\nFort Myers News-Press & Naples Daily News\nUpdated Nov. 18, 2026, 11:38 a.m. ET\nIt appears the Naples St. Patrick's Day Parade has reached the end of its rainbow.\nIn May, the nonprofit foundation that put on the popular event notified the city that it is \"getting out of the parade business and will not be running the parade in Naples anymore.\"\n[](https://www.news-press.com/)\n[Help](https://h\""
+            },
+            "suggestions": [
+              "What's driving signal business 2?",
+              "How does signal business 2 here compare to other SWFL areas?"
+            ]
+          },
+          {
+            "metric": "signal_business_3",
+            "value": "Fort Myers: Florida country clubs in Southwest Florida are adding padel courts as a new amenity alongside golf and pickleball, as reported Nov. 19, 2026.",
+            "direction": "stable",
+            "label": "Fort Myers — business",
+            "variable_type": "categorical",
+            "source": {
+              "url": "https://www.news-press.com/story/money/2026/11/19/new-game-arriving-at-florida-country-clubs-not-golf-or-pickleball-padel-naples-swfl-history/92830269007/",
+              "fetched_at": "2026-11-28T04:26:11Z",
+              "tier": 2,
+              "citation": "New game arriving at Florida country clubs. It's not golf or pickleball: \"[](https://www.news-press.com/)\n[](https://subscribe.news-press.com/rr/nanobar?gps-source=CPTILELEFT&itm_campaign=2026ENTQ4BAU2026&itm_medium=ONSITE&success-url=https%3A%2F%2Fwww.news-press.com%2Fstory%2Fmoney%2F2026%2F11%2F19%2Fnew-game-arriving-at-florida-country-clubs-not-golf-or-pickleball-padel-naples-swfl-history%2F92830269007%2F)\n[](https://subscribe.news-press.com/rr/masthead?gps-source=CPMASTHEAD&itm_campaign=2026ENTQ4BAU2026&itm_medium=ONSITE&success-url=https%3A%2F%2Fwww.news-press.com%2Fstory%2Fmoney%2F2026%2F11%2F19%2Fnew-game-arriving-at-florida-country-clubs-not-golf-or-pickleball-padel-naples-swfl-history%2F92830269007%2F)\n[News](https://www.news-press.com/news/) [Cape Coral](https://www.news-press.com/news/cape-coral/) [Sports](https://www.news-press.com/sports/) [Restaurants](https://www.news-press.com/taste/) [Real Estate](https://www.news-press.com/real-estate) [Advertise](https://advertising.usatoday.com/advertise-with-us/?cid=Web_LiQ_Network_AdvertiseWithUs_AdvertiseInquiry&publication=the_news_press&utm_source=local_publication&utm_medium=menu&utm_campaign=advertise_with_us) [Obituaries](https://www.news-press.com/obituaries) [eNewspaper](https://user.news-press.com/user/enewspaper) [Legals](https://www.news-press.com/public-notices)\n[](https://www.news-press.com/search/ \"Search\")\n[](https://www.news-press.com/weather/ \"Weather in Fort Myers: 77°F Mostly Cloudy\") [](https://subscribe.news-press.com/rr/navsub?gps-source=CPTOPNAVBAR&itm_campaign=2026ENTQ4BAU2026&itm_medium=ONSITE&success-url=https%3A%2F%2Fwww.news-press.com%2Fstory%2Fmoney%2F2026%2F11%2F19%2Fnew-game-arriving-at-florida-country-clubs-not-golf-or-pickleball-padel-naples-swfl-history%2F92830269007%2F)\n[](https://login.news-press.com/PFTM-GUP/authenticate/?success-url=https%3A%2F%2Fwww.news-press.com%2Fstory%2Fmoney%2F2026%2F11%2F19%2Fnew-game-arriving-at-florida-country-clubs-not-golf-or-pickleball-padel-naples-swfl-history%2F92830269007%2F&cancel-url=https%3A%2F%2Fwww.news-press.com%2Fstory%2Fmoney%2F2026%2F11%2F19%2Fnew-game-arriving-at-florida-country-clubs-not-golf-or-pickleball-padel-naples-swfl-history%2F92830269007%2F)\n[](https://www.news-press.com/) [](https://www.news-press.com/)\nMONEY\n# Beyond golf and pickleball. Why Florida country clubs betting on padel\n[![Portrait of Phil Fernandez](https://www.news-press.com/gcdn/presto/2019/09/14/PNDN/6a77b474-579f-48fa-b56f-a2cc2b9de797-NDN_Phil_Fernandez.jpg?crop=2999,2999,x0,y570&width=48&height=48&format=pjpg&auto=webp) Phil Fernandez](https://www.naplesnews.com/staff/2684114001/phil-fernandez/)\nFort Myers News-Press & Naples Daily News\nNov. 19, 2026, 5:06 a.m. ET\nMany country clubs and communities have diversified their offerings in [Southwest Florida](https://www.news-press.com/story/money/2026/10/30/new-florida-costco-does-more-than-groceries-it-changes-neighborhoods-cape-coral-lee-county-swfl-grow/92486627007/). We wrote earlier this decade [about how](https://www.news-press.com/story/money/2024/09/15/na\""
+            },
+            "suggestions": [
+              "What's driving signal business 3?",
+              "How does signal business 3 here compare to other SWFL areas?"
+            ]
+          },
+          {
+            "metric": "signal_business_4",
+            "value": "Naples: Best Buy founder Richard M. Schulze and the Richard M. Schulze Family Foundation gifted $40 million to Lee Health for cancer care, announced Nov. 18, 2026.",
+            "direction": "stable",
+            "label": "Naples — business",
+            "variable_type": "categorical",
+            "source": {
+              "url": "https://www.naplesnews.com/story/money/companies/2026/11/18/best-buy-founder-gifts-40-million-to-lee-health-for-cancer-care/92844499007/",
+              "fetched_at": "2026-11-28T04:26:11Z",
+              "tier": 2,
+              "citation": "Best Buy founder gifts $40 million to Lee Health for cancer care: \"[](https://www.naplesnews.com/)\n[](https://subscribe.naplesnews.com/rr/nanobar?gps-source=CPTILELEFT&itm_campaign=2026ENTQ4BAU2026&itm_medium=ONSITE&success-url=https%3A%2F%2Fwww.naplesnews.com%2Fstory%2Fmoney%2Fcompanies%2F2026%2F11%2F18%2Fbest-buy-founder-gifts-40-million-to-lee-health-for-cancer-care%2F92844499007%2F)\n[](https://subscribe.naplesnews.com/rr/masthead?gps-source=CPMASTHEAD&itm_campaign=2026ENTQ4BAU2026&itm_medium=ONSITE&success-url=https%3A%2F%2Fwww.naplesnews.com%2Fstory%2Fmoney%2Fcompanies%2F2026%2F11%2F18%2Fbest-buy-founder-gifts-40-million-to-lee-health-for-cancer-care%2F92844499007%2F)\n[News](https://www.naplesnews.com/news/) [Sports](https://www.naplesnews.com/sports/) [Real Estate](https://www.naplesnews.com/business/real-estate/) [Restaurants](https://www.naplesnews.com/entertainment/restaurants/) [Opinion](https://www.naplesnews.com/opinion/) [Advertise](https://advertising.usatoday.com/advertise-with-us/?cid=Web_LiQ_Network_AdvertiseWithUs_AdvertiseInquiry&publication=naples_daily_news&utm_source=local_publication&utm_medium=menu&utm_campaign=advertise_with_us) [Obituaries](https://www.naplesnews.com/obituaries) [eNewspaper](https://user.naplesnews.com/user/enewspaper) [Legals](https://www.naplesnews.com/public-notices)\n[](https://www.naplesnews.com/search/ \"Search\")\n[](https://www.naplesnews.com/weather/ \"Weather in Naples: 75°F Mostly Cloudy\") [](https://subscribe.naplesnews.com/rr/navsub?gps-source=CPTOPNAVBAR&itm_campaign=2026ENTQ4BAU2026&itm_medium=ONSITE&success-url=https%3A%2F%2Fwww.naplesnews.com%2Fstory%2Fmoney%2Fcompanies%2F2026%2F11%2F18%2Fbest-buy-founder-gifts-40-million-to-lee-health-for-cancer-care%2F92844499007%2F)\n[](https://login.naplesnews.com/PNDN-GUP/authenticate/?success-url=https%3A%2F%2Fwww.naplesnews.com%2Fstory%2Fmoney%2Fcompanies%2F2026%2F11%2F18%2Fbest-buy-founder-gifts-40-million-to-lee-health-for-cancer-care%2F92844499007%2F&cancel-url=https%3A%2F%2Fwww.naplesnews.com%2Fstory%2Fmoney%2Fcompanies%2F2026%2F11%2F18%2Fbest-buy-founder-gifts-40-million-to-lee-health-for-cancer-care%2F92844499007%2F)\n[](https://www.naplesnews.com/) [](https://www.naplesnews.com/)\nCOMPANIES\n# Best Buy founder gifts $40 million to Lee Health for cancer care\n[![Portrait of Laura Layden](https://www.naplesnews.com/gcdn/authoring/authoring-images/2024/02/08/PNDN/72524348007-ndn-jh-20240126-laura-0001.JPG?crop=3313,3312,x1506,y0&width=48&height=48&format=pjpg&auto=webp) Laura Layden](https://www.naplesnews.com/staff/2647080001/laura-layden/)\nFort Myers News-Press & Naples Daily News\nNov. 18, 2026, 3:56 p.m. ET\nLee Health has received a historic gift to accelerate the future of cancer care in Southwest Florida.\nThe Fort Myers-based health care system announced the $40 million gift from Richard M. Schulze and the Richard M. Schulze Family Foundation on Nov. 18.\n[](https://www.naplesnews.com/)\n[Help](https://help.naplesnews.com) [Accessibility](https://cm.naplesnews.com/accessibility/) [Sitemap](https://www.naplesnews.com\""
             },
             "suggestions": [
               "What's driving signal business 4?",
@@ -204,13 +204,13 @@
           },
           {
             "metric": "signal_business_5",
-            "value": "Fort Myers: Florida country clubs in Southwest Florida are adding padel courts as a new amenity alongside golf and pickleball, as reported Nov. 19, 2026.",
+            "value": "Naples: Florida country clubs in Southwest Florida, including in Naples, are adding padel courts as a new amenity beyond golf and pickleball, as reported Nov. 19, 2026.",
             "direction": "stable",
-            "label": "Fort Myers — business",
+            "label": "Naples — business",
             "variable_type": "categorical",
             "source": {
               "url": "https://www.news-press.com/story/money/2026/11/19/new-game-arriving-at-florida-country-clubs-not-golf-or-pickleball-padel-naples-swfl-history/92830269007/",
-              "fetched_at": "2026-11-27T14:01:34Z",
+              "fetched_at": "2026-11-28T04:26:11Z",
               "tier": 2,
               "citation": "New game arriving at Florida country clubs. It's not golf or pickleball: \"[](https://www.news-press.com/)\n[](https://subscribe.news-press.com/rr/nanobar?gps-source=CPTILELEFT&itm_campaign=2026ENTQ4BAU2026&itm_medium=ONSITE&success-url=https%3A%2F%2Fwww.news-press.com%2Fstory%2Fmoney%2F2026%2F11%2F19%2Fnew-game-arriving-at-florida-country-clubs-not-golf-or-pickleball-padel-naples-swfl-history%2F92830269007%2F)\n[](https://subscribe.news-press.com/rr/masthead?gps-source=CPMASTHEAD&itm_campaign=2026ENTQ4BAU2026&itm_medium=ONSITE&success-url=https%3A%2F%2Fwww.news-press.com%2Fstory%2Fmoney%2F2026%2F11%2F19%2Fnew-game-arriving-at-florida-country-clubs-not-golf-or-pickleball-padel-naples-swfl-history%2F92830269007%2F)\n[News](https://www.news-press.com/news/) [Cape Coral](https://www.news-press.com/news/cape-coral/) [Sports](https://www.news-press.com/sports/) [Restaurants](https://www.news-press.com/taste/) [Real Estate](https://www.news-press.com/real-estate) [Advertise](https://advertising.usatoday.com/advertise-with-us/?cid=Web_LiQ_Network_AdvertiseWithUs_AdvertiseInquiry&publication=the_news_press&utm_source=local_publication&utm_medium=menu&utm_campaign=advertise_with_us) [Obituaries](https://www.news-press.com/obituaries) [eNewspaper](https://user.news-press.com/user/enewspaper) [Legals](https://www.news-press.com/public-notices)\n[](https://www.news-press.com/search/ \"Search\")\n[](https://www.news-press.com/weather/ \"Weather in Fort Myers: 77°F Mostly Cloudy\") [](https://subscribe.news-press.com/rr/navsub?gps-source=CPTOPNAVBAR&itm_campaign=2026ENTQ4BAU2026&itm_medium=ONSITE&success-url=https%3A%2F%2Fwww.news-press.com%2Fstory%2Fmoney%2F2026%2F11%2F19%2Fnew-game-arriving-at-florida-country-clubs-not-golf-or-pickleball-padel-naples-swfl-history%2F92830269007%2F)\n[](https://login.news-press.com/PFTM-GUP/authenticate/?success-url=https%3A%2F%2Fwww.news-press.com%2Fstory%2Fmoney%2F2026%2F11%2F19%2Fnew-game-arriving-at-florida-country-clubs-not-golf-or-pickleball-padel-naples-swfl-history%2F92830269007%2F&cancel-url=https%3A%2F%2Fwww.news-press.com%2Fstory%2Fmoney%2F2026%2F11%2F19%2Fnew-game-arriving-at-florida-country-clubs-not-golf-or-pickleball-padel-naples-swfl-history%2F92830269007%2F)\n[](https://www.news-press.com/) [](https://www.news-press.com/)\nMONEY\n# Beyond golf and pickleball. Why Florida country clubs betting on padel\n[![Portrait of Phil Fernandez](https://www.news-press.com/gcdn/presto/2019/09/14/PNDN/6a77b474-579f-48fa-b56f-a2cc2b9de797-NDN_Phil_Fernandez.jpg?crop=2999,2999,x0,y570&width=48&height=48&format=pjpg&auto=webp) Phil Fernandez](https://www.naplesnews.com/staff/2684114001/phil-fernandez/)\nFort Myers News-Press & Naples Daily News\nNov. 19, 2026, 5:06 a.m. ET\nMany country clubs and communities have diversified their offerings in [Southwest Florida](https://www.news-press.com/story/money/2026/10/30/new-florida-costco-does-more-than-groceries-it-changes-neighborhoods-cape-coral-lee-county-swfl-grow/92486627007/). We wrote earlier this decade [about how](https://www.news-press.com/story/money/2024/09/15/na\""
             },
@@ -221,15 +221,15 @@
           },
           {
             "metric": "signal_business_6",
-            "value": "Naples: Best Buy founder Richard M. Schulze and the Richard M. Schulze Family Foundation gifted $40 million to Lee Health for cancer care, announced Nov. 18, 2026.",
+            "value": "Cape Coral: In May 2026, the nonprofit foundation that put on the Naples St. Patrick's Day Parade notified the city that it is 'getting out of the parade business and will not be running the parade in Naples anymore,' potentially ending the event after 50 years.",
             "direction": "stable",
-            "label": "Naples — business",
+            "label": "Cape Coral — business",
             "variable_type": "categorical",
             "source": {
-              "url": "https://www.naplesnews.com/story/money/companies/2026/11/18/best-buy-founder-gifts-40-million-to-lee-health-for-cancer-care/92844499007/",
-              "fetched_at": "2026-11-27T14:01:34Z",
+              "url": "https://www.news-press.com/story/money/business/local/2026/11/18/naples-florida-st-patricks-day-parade-may-have-come-to-its-end-after-50-years/92836594007/",
+              "fetched_at": "2026-11-28T04:26:11Z",
               "tier": 2,
-              "citation": "Best Buy founder gifts $40 million to Lee Health for cancer care: \"[](https://www.naplesnews.com/)\n[](https://subscribe.naplesnews.com/rr/nanobar?gps-source=CPTILELEFT&itm_campaign=2026ENTQ4BAU2026&itm_medium=ONSITE&success-url=https%3A%2F%2Fwww.naplesnews.com%2Fstory%2Fmoney%2Fcompanies%2F2026%2F11%2F18%2Fbest-buy-founder-gifts-40-million-to-lee-health-for-cancer-care%2F92844499007%2F)\n[](https://subscribe.naplesnews.com/rr/masthead?gps-source=CPMASTHEAD&itm_campaign=2026ENTQ4BAU2026&itm_medium=ONSITE&success-url=https%3A%2F%2Fwww.naplesnews.com%2Fstory%2Fmoney%2Fcompanies%2F2026%2F11%2F18%2Fbest-buy-founder-gifts-40-million-to-lee-health-for-cancer-care%2F92844499007%2F)\n[News](https://www.naplesnews.com/news/) [Sports](https://www.naplesnews.com/sports/) [Real Estate](https://www.naplesnews.com/business/real-estate/) [Restaurants](https://www.naplesnews.com/entertainment/restaurants/) [Opinion](https://www.naplesnews.com/opinion/) [Advertise](https://advertising.usatoday.com/advertise-with-us/?cid=Web_LiQ_Network_AdvertiseWithUs_AdvertiseInquiry&publication=naples_daily_news&utm_source=local_publication&utm_medium=menu&utm_campaign=advertise_with_us) [Obituaries](https://www.naplesnews.com/obituaries) [eNewspaper](https://user.naplesnews.com/user/enewspaper) [Legals](https://www.naplesnews.com/public-notices)\n[](https://www.naplesnews.com/search/ \"Search\")\n[](https://www.naplesnews.com/weather/ \"Weather in Naples: 75°F Mostly Cloudy\") [](https://subscribe.naplesnews.com/rr/navsub?gps-source=CPTOPNAVBAR&itm_campaign=2026ENTQ4BAU2026&itm_medium=ONSITE&success-url=https%3A%2F%2Fwww.naplesnews.com%2Fstory%2Fmoney%2Fcompanies%2F2026%2F11%2F18%2Fbest-buy-founder-gifts-40-million-to-lee-health-for-cancer-care%2F92844499007%2F)\n[](https://login.naplesnews.com/PNDN-GUP/authenticate/?success-url=https%3A%2F%2Fwww.naplesnews.com%2Fstory%2Fmoney%2Fcompanies%2F2026%2F11%2F18%2Fbest-buy-founder-gifts-40-million-to-lee-health-for-cancer-care%2F92844499007%2F&cancel-url=https%3A%2F%2Fwww.naplesnews.com%2Fstory%2Fmoney%2Fcompanies%2F2026%2F11%2F18%2Fbest-buy-founder-gifts-40-million-to-lee-health-for-cancer-care%2F92844499007%2F)\n[](https://www.naplesnews.com/) [](https://www.naplesnews.com/)\nCOMPANIES\n# Best Buy founder gifts $40 million to Lee Health for cancer care\n[![Portrait of Laura Layden](https://www.naplesnews.com/gcdn/authoring/authoring-images/2024/02/08/PNDN/72524348007-ndn-jh-20240126-laura-0001.JPG?crop=3313,3312,x1506,y0&width=48&height=48&format=pjpg&auto=webp) Laura Layden](https://www.naplesnews.com/staff/2647080001/laura-layden/)\nFort Myers News-Press & Naples Daily News\nNov. 18, 2026, 3:56 p.m. ET\nLee Health has received a historic gift to accelerate the future of cancer care in Southwest Florida.\nThe Fort Myers-based health care system announced the $40 million gift from Richard M. Schulze and the Richard M. Schulze Family Foundation on Nov. 18.\n[](https://www.naplesnews.com/)\n[Help](https://help.naplesnews.com) [Accessibility](https://cm.naplesnews.com/accessibility/) [Sitemap](https://www.naplesnews.com\""
+              "citation": "Naples St. Patrick's Day parade may have come to its end after 50 years: \"[](https://www.news-press.com/)\n[](https://subscribe.news-press.com/rr/nanobar?gps-source=CPTILELEFT&itm_campaign=2026ENTQ4BAU2026&itm_medium=ONSITE&success-url=https%3A%2F%2Fwww.news-press.com%2Fstory%2Fmoney%2Fbusiness%2Flocal%2F2026%2F11%2F18%2Fnaples-florida-st-patricks-day-parade-may-have-come-to-its-end-after-50-years%2F92836594007%2F)\n[](https://subscribe.news-press.com/rr/masthead?gps-source=CPMASTHEAD&itm_campaign=2026ENTQ4BAU2026&itm_medium=ONSITE&success-url=https%3A%2F%2Fwww.news-press.com%2Fstory%2Fmoney%2Fbusiness%2Flocal%2F2026%2F11%2F18%2Fnaples-florida-st-patricks-day-parade-may-have-come-to-its-end-after-50-years%2F92836594007%2F)\n[News](https://www.news-press.com/news/) [Cape Coral](https://www.news-press.com/news/cape-coral/) [Sports](https://www.news-press.com/sports/) [Restaurants](https://www.news-press.com/taste/) [Real Estate](https://www.news-press.com/real-estate) [Advertise](https://advertising.usatoday.com/advertise-with-us/?cid=Web_LiQ_Network_AdvertiseWithUs_AdvertiseInquiry&publication=the_news_press&utm_source=local_publication&utm_medium=menu&utm_campaign=advertise_with_us) [Obituaries](https://www.news-press.com/obituaries) [eNewspaper](https://user.news-press.com/user/enewspaper) [Legals](https://www.news-press.com/public-notices)\n[](https://www.news-press.com/search/ \"Search\")\n[](https://www.news-press.com/weather/ \"Weather in Fort Myers: 77°F Mostly Cloudy\") [](https://subscribe.news-press.com/rr/navsub?gps-source=CPTOPNAVBAR&itm_campaign=2026ENTQ4BAU2026&itm_medium=ONSITE&success-url=https%3A%2F%2Fwww.news-press.com%2Fstory%2Fmoney%2Fbusiness%2Flocal%2F2026%2F11%2F18%2Fnaples-florida-st-patricks-day-parade-may-have-come-to-its-end-after-50-years%2F92836594007%2F)\n[](https://login.news-press.com/PFTM-GUP/authenticate/?success-url=https%3A%2F%2Fwww.news-press.com%2Fstory%2Fmoney%2Fbusiness%2Flocal%2F2026%2F11%2F18%2Fnaples-florida-st-patricks-day-parade-may-have-come-to-its-end-after-50-years%2F92836594007%2F&cancel-url=https%3A%2F%2Fwww.news-press.com%2Fstory%2Fmoney%2Fbusiness%2Flocal%2F2026%2F11%2F18%2Fnaples-florida-st-patricks-day-parade-may-have-come-to-its-end-after-50-years%2F92836594007%2F)\n[](https://www.news-press.com/) [](https://www.news-press.com/)\nLOCAL BUSINESS\n# Naples St. Patrick's Day parade tradition may have come to an end\n[![Portrait of Laura Layden](https://www.news-press.com/gcdn/authoring/authoring-images/2024/02/08/PNDN/72524348007-ndn-jh-20240126-laura-0001.JPG?crop=3313,3312,x1506,y0&width=48&height=48&format=pjpg&auto=webp) Laura Layden](https://www.naplesnews.com/staff/2647080001/laura-layden/)\nFort Myers News-Press & Naples Daily News\nUpdated Nov. 18, 2026, 11:38 a.m. ET\nIt appears the Naples St. Patrick's Day Parade has reached the end of its rainbow.\nIn May, the nonprofit foundation that put on the popular event notified the city that it is \"getting out of the parade business and will not be running the parade in Naples anymore.\"\n[](https://www.news-press.com/)\n[Help](https://h\""
             },
             "suggestions": [
               "What's driving signal business 6?",
@@ -238,15 +238,15 @@
           },
           {
             "metric": "signal_business_7",
-            "value": "Naples: Florida country clubs in Southwest Florida, including in Naples, are adding padel courts as a new amenity beyond golf and pickleball, as reported Nov. 19, 2026.",
+            "value": "Cape Coral: Collier County saw 2,992,100 visitors in the fiscal year ending in September 2026, up 6.5% over the prior year, nearing the 3 million visitor milestone.",
             "direction": "stable",
-            "label": "Naples — business",
+            "label": "Cape Coral — business",
             "variable_type": "categorical",
             "source": {
-              "url": "https://www.news-press.com/story/money/2026/11/19/new-game-arriving-at-florida-country-clubs-not-golf-or-pickleball-padel-naples-swfl-history/92830269007/",
-              "fetched_at": "2026-11-27T14:01:34Z",
+              "url": "https://www.news-press.com/story/money/business/local/2026/11/18/collier-county-tourism-nears-3-million-visitors-lee-county-collects-57m-in-tourist-taxes/92825278007/",
+              "fetched_at": "2026-11-28T04:26:11Z",
               "tier": 2,
-              "citation": "New game arriving at Florida country clubs. It's not golf or pickleball: \"[](https://www.news-press.com/)\n[](https://subscribe.news-press.com/rr/nanobar?gps-source=CPTILELEFT&itm_campaign=2026ENTQ4BAU2026&itm_medium=ONSITE&success-url=https%3A%2F%2Fwww.news-press.com%2Fstory%2Fmoney%2F2026%2F11%2F19%2Fnew-game-arriving-at-florida-country-clubs-not-golf-or-pickleball-padel-naples-swfl-history%2F92830269007%2F)\n[](https://subscribe.news-press.com/rr/masthead?gps-source=CPMASTHEAD&itm_campaign=2026ENTQ4BAU2026&itm_medium=ONSITE&success-url=https%3A%2F%2Fwww.news-press.com%2Fstory%2Fmoney%2F2026%2F11%2F19%2Fnew-game-arriving-at-florida-country-clubs-not-golf-or-pickleball-padel-naples-swfl-history%2F92830269007%2F)\n[News](https://www.news-press.com/news/) [Cape Coral](https://www.news-press.com/news/cape-coral/) [Sports](https://www.news-press.com/sports/) [Restaurants](https://www.news-press.com/taste/) [Real Estate](https://www.news-press.com/real-estate) [Advertise](https://advertising.usatoday.com/advertise-with-us/?cid=Web_LiQ_Network_AdvertiseWithUs_AdvertiseInquiry&publication=the_news_press&utm_source=local_publication&utm_medium=menu&utm_campaign=advertise_with_us) [Obituaries](https://www.news-press.com/obituaries) [eNewspaper](https://user.news-press.com/user/enewspaper) [Legals](https://www.news-press.com/public-notices)\n[](https://www.news-press.com/search/ \"Search\")\n[](https://www.news-press.com/weather/ \"Weather in Fort Myers: 77°F Mostly Cloudy\") [](https://subscribe.news-press.com/rr/navsub?gps-source=CPTOPNAVBAR&itm_campaign=2026ENTQ4BAU2026&itm_medium=ONSITE&success-url=https%3A%2F%2Fwww.news-press.com%2Fstory%2Fmoney%2F2026%2F11%2F19%2Fnew-game-arriving-at-florida-country-clubs-not-golf-or-pickleball-padel-naples-swfl-history%2F92830269007%2F)\n[](https://login.news-press.com/PFTM-GUP/authenticate/?success-url=https%3A%2F%2Fwww.news-press.com%2Fstory%2Fmoney%2F2026%2F11%2F19%2Fnew-game-arriving-at-florida-country-clubs-not-golf-or-pickleball-padel-naples-swfl-history%2F92830269007%2F&cancel-url=https%3A%2F%2Fwww.news-press.com%2Fstory%2Fmoney%2F2026%2F11%2F19%2Fnew-game-arriving-at-florida-country-clubs-not-golf-or-pickleball-padel-naples-swfl-history%2F92830269007%2F)\n[](https://www.news-press.com/) [](https://www.news-press.com/)\nMONEY\n# Beyond golf and pickleball. Why Florida country clubs betting on padel\n[![Portrait of Phil Fernandez](https://www.news-press.com/gcdn/presto/2019/09/14/PNDN/6a77b474-579f-48fa-b56f-a2cc2b9de797-NDN_Phil_Fernandez.jpg?crop=2999,2999,x0,y570&width=48&height=48&format=pjpg&auto=webp) Phil Fernandez](https://www.naplesnews.com/staff/2684114001/phil-fernandez/)\nFort Myers News-Press & Naples Daily News\nNov. 19, 2026, 5:06 a.m. ET\nMany country clubs and communities have diversified their offerings in [Southwest Florida](https://www.news-press.com/story/money/2026/10/30/new-florida-costco-does-more-than-groceries-it-changes-neighborhoods-cape-coral-lee-county-swfl-grow/92486627007/). We wrote earlier this decade [about how](https://www.news-press.com/story/money/2024/09/15/na\""
+              "citation": "Collier tourism nears 3 million visitors; Lee collects $57M in tourist tax: \"[](https://www.news-press.com/)\n[](https://subscribe.news-press.com/rr/nanobar?gps-source=CPTILELEFT&itm_campaign=2026ENTQ4BAU2026&itm_medium=ONSITE&success-url=https%3A%2F%2Fwww.news-press.com%2Fstory%2Fmoney%2Fbusiness%2Flocal%2F2026%2F11%2F18%2Fcollier-county-tourism-nears-3-million-visitors-lee-county-collects-57m-in-tourist-taxes%2F92825278007%2F)\n[](https://subscribe.news-press.com/rr/masthead?gps-source=CPMASTHEAD&itm_campaign=2026ENTQ4BAU2026&itm_medium=ONSITE&success-url=https%3A%2F%2Fwww.news-press.com%2Fstory%2Fmoney%2Fbusiness%2Flocal%2F2026%2F11%2F18%2Fcollier-county-tourism-nears-3-million-visitors-lee-county-collects-57m-in-tourist-taxes%2F92825278007%2F)\n[News](https://www.news-press.com/news/) [Cape Coral](https://www.news-press.com/news/cape-coral/) [Sports](https://www.news-press.com/sports/) [Restaurants](https://www.news-press.com/taste/) [Real Estate](https://www.news-press.com/real-estate) [Advertise](https://advertising.usatoday.com/advertise-with-us/?cid=Web_LiQ_Network_AdvertiseWithUs_AdvertiseInquiry&publication=the_news_press&utm_source=local_publication&utm_medium=menu&utm_campaign=advertise_with_us) [Obituaries](https://www.news-press.com/obituaries) [eNewspaper](https://user.news-press.com/user/enewspaper) [Legals](https://www.news-press.com/public-notices)\n[](https://www.news-press.com/search/ \"Search\")\n[](https://www.news-press.com/weather/ \"Weather in Fort Myers: 77°F Mostly Cloudy\") [](https://subscribe.news-press.com/rr/navsub?gps-source=CPTOPNAVBAR&itm_campaign=2026ENTQ4BAU2026&itm_medium=ONSITE&success-url=https%3A%2F%2Fwww.news-press.com%2Fstory%2Fmoney%2Fbusiness%2Flocal%2F2026%2F11%2F18%2Fcollier-county-tourism-nears-3-million-visitors-lee-county-collects-57m-in-tourist-taxes%2F92825278007%2F)\n[](https://login.news-press.com/PFTM-GUP/authenticate/?success-url=https%3A%2F%2Fwww.news-press.com%2Fstory%2Fmoney%2Fbusiness%2Flocal%2F2026%2F11%2F18%2Fcollier-county-tourism-nears-3-million-visitors-lee-county-collects-57m-in-tourist-taxes%2F92825278007%2F&cancel-url=https%3A%2F%2Fwww.news-press.com%2Fstory%2Fmoney%2Fbusiness%2Flocal%2F2026%2F11%2F18%2Fcollier-county-tourism-nears-3-million-visitors-lee-county-collects-57m-in-tourist-taxes%2F92825278007%2F)\n[](https://www.news-press.com/) [](https://www.news-press.com/)\nLOCAL BUSINESS\n# Collier County tourism nears 3 million visitor mark\n[![Portrait of Laura Layden](https://www.news-press.com/gcdn/authoring/authoring-images/2024/02/08/PNDN/72524348007-ndn-jh-20240126-laura-0001.JPG?crop=3313,3312,x1506,y0&width=48&height=48&format=pjpg&auto=webp) Laura Layden](https://www.naplesnews.com/staff/2647080001/laura-layden/)\nFort Myers News-Press & Naples Daily News\nNov. 18, 2026, 5:05 a.m. ET\nCollier County is close to reaching a milestone of 3 million visitors a year.\nIn the fiscal year ending in September, the county saw 2,992,100 visitors, up 6.5% over the year.\nThe numbers were included in a year-end report to the county's Tourist Development Council by the county's\""
             },
             "suggestions": [
               "What's driving signal business 7?",
@@ -255,15 +255,15 @@
           },
           {
             "metric": "signal_business_8",
-            "value": "Cape Coral: In May 2026, the nonprofit foundation that put on the Naples St. Patrick's Day Parade notified the city that it is 'getting out of the parade business and will not be running the parade in Naples anymore,' potentially ending the event after 50 years.",
+            "value": "Cape Coral: Florida country clubs in Southwest Florida are adding padel courts as a new amenity beyond golf and pickleball, as reported Nov. 19, 2026.",
             "direction": "stable",
             "label": "Cape Coral — business",
             "variable_type": "categorical",
             "source": {
-              "url": "https://www.news-press.com/story/money/business/local/2026/11/18/naples-florida-st-patricks-day-parade-may-have-come-to-its-end-after-50-years/92836594007/",
-              "fetched_at": "2026-11-27T14:01:34Z",
+              "url": "https://www.news-press.com/story/money/2026/11/19/new-game-arriving-at-florida-country-clubs-not-golf-or-pickleball-padel-naples-swfl-history/92830269007/",
+              "fetched_at": "2026-11-28T04:26:11Z",
               "tier": 2,
-              "citation": "Naples St. Patrick's Day parade may have come to its end after 50 years: \"[](https://www.news-press.com/)\n[](https://subscribe.news-press.com/rr/nanobar?gps-source=CPTILELEFT&itm_campaign=2026ENTQ4BAU2026&itm_medium=ONSITE&success-url=https%3A%2F%2Fwww.news-press.com%2Fstory%2Fmoney%2Fbusiness%2Flocal%2F2026%2F11%2F18%2Fnaples-florida-st-patricks-day-parade-may-have-come-to-its-end-after-50-years%2F92836594007%2F)\n[](https://subscribe.news-press.com/rr/masthead?gps-source=CPMASTHEAD&itm_campaign=2026ENTQ4BAU2026&itm_medium=ONSITE&success-url=https%3A%2F%2Fwww.news-press.com%2Fstory%2Fmoney%2Fbusiness%2Flocal%2F2026%2F11%2F18%2Fnaples-florida-st-patricks-day-parade-may-have-come-to-its-end-after-50-years%2F92836594007%2F)\n[News](https://www.news-press.com/news/) [Cape Coral](https://www.news-press.com/news/cape-coral/) [Sports](https://www.news-press.com/sports/) [Restaurants](https://www.news-press.com/taste/) [Real Estate](https://www.news-press.com/real-estate) [Advertise](https://advertising.usatoday.com/advertise-with-us/?cid=Web_LiQ_Network_AdvertiseWithUs_AdvertiseInquiry&publication=the_news_press&utm_source=local_publication&utm_medium=menu&utm_campaign=advertise_with_us) [Obituaries](https://www.news-press.com/obituaries) [eNewspaper](https://user.news-press.com/user/enewspaper) [Legals](https://www.news-press.com/public-notices)\n[](https://www.news-press.com/search/ \"Search\")\n[](https://www.news-press.com/weather/ \"Weather in Fort Myers: 77°F Mostly Cloudy\") [](https://subscribe.news-press.com/rr/navsub?gps-source=CPTOPNAVBAR&itm_campaign=2026ENTQ4BAU2026&itm_medium=ONSITE&success-url=https%3A%2F%2Fwww.news-press.com%2Fstory%2Fmoney%2Fbusiness%2Flocal%2F2026%2F11%2F18%2Fnaples-florida-st-patricks-day-parade-may-have-come-to-its-end-after-50-years%2F92836594007%2F)\n[](https://login.news-press.com/PFTM-GUP/authenticate/?success-url=https%3A%2F%2Fwww.news-press.com%2Fstory%2Fmoney%2Fbusiness%2Flocal%2F2026%2F11%2F18%2Fnaples-florida-st-patricks-day-parade-may-have-come-to-its-end-after-50-years%2F92836594007%2F&cancel-url=https%3A%2F%2Fwww.news-press.com%2Fstory%2Fmoney%2Fbusiness%2Flocal%2F2026%2F11%2F18%2Fnaples-florida-st-patricks-day-parade-may-have-come-to-its-end-after-50-years%2F92836594007%2F)\n[](https://www.news-press.com/) [](https://www.news-press.com/)\nLOCAL BUSINESS\n# Naples St. Patrick's Day parade tradition may have come to an end\n[![Portrait of Laura Layden](https://www.news-press.com/gcdn/authoring/authoring-images/2024/02/08/PNDN/72524348007-ndn-jh-20240126-laura-0001.JPG?crop=3313,3312,x1506,y0&width=48&height=48&format=pjpg&auto=webp) Laura Layden](https://www.naplesnews.com/staff/2647080001/laura-layden/)\nFort Myers News-Press & Naples Daily News\nUpdated Nov. 18, 2026, 11:38 a.m. ET\nIt appears the Naples St. Patrick's Day Parade has reached the end of its rainbow.\nIn May, the nonprofit foundation that put on the popular event notified the city that it is \"getting out of the parade business and will not be running the parade in Naples anymore.\"\n[](https://www.news-press.com/)\n[Help](https://h\""
+              "citation": "New game arriving at Florida country clubs. It's not golf or pickleball: \"[](https://www.news-press.com/)\n[](https://subscribe.news-press.com/rr/nanobar?gps-source=CPTILELEFT&itm_campaign=2026ENTQ4BAU2026&itm_medium=ONSITE&success-url=https%3A%2F%2Fwww.news-press.com%2Fstory%2Fmoney%2F2026%2F11%2F19%2Fnew-game-arriving-at-florida-country-clubs-not-golf-or-pickleball-padel-naples-swfl-history%2F92830269007%2F)\n[](https://subscribe.news-press.com/rr/masthead?gps-source=CPMASTHEAD&itm_campaign=2026ENTQ4BAU2026&itm_medium=ONSITE&success-url=https%3A%2F%2Fwww.news-press.com%2Fstory%2Fmoney%2F2026%2F11%2F19%2Fnew-game-arriving-at-florida-country-clubs-not-golf-or-pickleball-padel-naples-swfl-history%2F92830269007%2F)\n[News](https://www.news-press.com/news/) [Cape Coral](https://www.news-press.com/news/cape-coral/) [Sports](https://www.news-press.com/sports/) [Restaurants](https://www.news-press.com/taste/) [Real Estate](https://www.news-press.com/real-estate) [Advertise](https://advertising.usatoday.com/advertise-with-us/?cid=Web_LiQ_Network_AdvertiseWithUs_AdvertiseInquiry&publication=the_news_press&utm_source=local_publication&utm_medium=menu&utm_campaign=advertise_with_us) [Obituaries](https://www.news-press.com/obituaries) [eNewspaper](https://user.news-press.com/user/enewspaper) [Legals](https://www.news-press.com/public-notices)\n[](https://www.news-press.com/search/ \"Search\")\n[](https://www.news-press.com/weather/ \"Weather in Fort Myers: 77°F Mostly Cloudy\") [](https://subscribe.news-press.com/rr/navsub?gps-source=CPTOPNAVBAR&itm_campaign=2026ENTQ4BAU2026&itm_medium=ONSITE&success-url=https%3A%2F%2Fwww.news-press.com%2Fstory%2Fmoney%2F2026%2F11%2F19%2Fnew-game-arriving-at-florida-country-clubs-not-golf-or-pickleball-padel-naples-swfl-history%2F92830269007%2F)\n[](https://login.news-press.com/PFTM-GUP/authenticate/?success-url=https%3A%2F%2Fwww.news-press.com%2Fstory%2Fmoney%2F2026%2F11%2F19%2Fnew-game-arriving-at-florida-country-clubs-not-golf-or-pickleball-padel-naples-swfl-history%2F92830269007%2F&cancel-url=https%3A%2F%2Fwww.news-press.com%2Fstory%2Fmoney%2F2026%2F11%2F19%2Fnew-game-arriving-at-florida-country-clubs-not-golf-or-pickleball-padel-naples-swfl-history%2F92830269007%2F)\n[](https://www.news-press.com/) [](https://www.news-press.com/)\nMONEY\n# Beyond golf and pickleball. Why Florida country clubs betting on padel\n[![Portrait of Phil Fernandez](https://www.news-press.com/gcdn/presto/2019/09/14/PNDN/6a77b474-579f-48fa-b56f-a2cc2b9de797-NDN_Phil_Fernandez.jpg?crop=2999,2999,x0,y570&width=48&height=48&format=pjpg&auto=webp) Phil Fernandez](https://www.naplesnews.com/staff/2684114001/phil-fernandez/)\nFort Myers News-Press & Naples Daily News\nNov. 19, 2026, 5:06 a.m. ET\nMany country clubs and communities have diversified their offerings in [Southwest Florida](https://www.news-press.com/story/money/2026/10/30/new-florida-costco-does-more-than-groceries-it-changes-neighborhoods-cape-coral-lee-county-swfl-grow/92486627007/). We wrote earlier this decade [about how](https://www.news-press.com/story/money/2024/09/15/na\""
             },
             "suggestions": [
               "What's driving signal business 8?",
@@ -328,7 +328,7 @@
             ],
             "source": {
               "url": "https://www.swfldatagulf.com/r/source/city_pulse",
-              "fetched_at": "2026-11-27T14:01:34Z",
+              "fetched_at": "2026-11-28T04:26:11Z",
               "tier": 2,
               "citation": "Distilled, citation-backed SWFL news signals; each ZIP's items carry per-item source URLs in data_lake.city_pulse."
             },
@@ -336,7 +336,7 @@
           }
         ],
         "caveats": [
-          "64 additional live signals not surfaced here (cap 8); the full set is in data_lake.city_pulse.",
+          "61 additional live signals not surfaced here (cap 8); the full set is in data_lake.city_pulse.",
           "Each signal is dated current-events context with a per-signal source; freshness is TTL-bounded by topic (breaking 1d → structural 90d)."
         ],
         "contradicts": [],
@@ -349,7 +349,7 @@
         "relevance": {
           "decay_curve": "weeks",
           "half_life_hours": 720,
-          "computed_at": "2026-11-27T14:01:34Z"
+          "computed_at": "2026-11-28T04:26:11Z"
         },
         "exogenous_signals": []
       }
@@ -366,8 +366,119 @@
     },
     {
       "packId": "freshness-pulse",
-      "status": "skipped-fresh",
-      "written": false
+      "status": "built",
+      "version": 117,
+      "written": true,
+      "brainOutput": {
+        "brain_id": "freshness-pulse",
+        "version": 117,
+        "refined_at": "2026-11-28T04:26:11Z",
+        "expires": "2026-11-29T04:26:11Z",
+        "ttl_seconds": 86400,
+        "direction": "neutral",
+        "magnitude": 0,
+        "drivers": [],
+        "overrides": [],
+        "conclusion": "Today's sourced snapshot — Cape Coral median asking price (as of 2026-11-28) $399,200; Fort Myers median asking price (as of 2026-11-28) $325,000; Naples median asking price (as of 2026-11-28) $650,000; SWFL 30-year fixed mortgage rate (as of 2026-11-25) 7.21%. These are cited current facts only; the direction call lives downstream in master.",
+        "key_metrics": [
+          {
+            "metric": "freshness_median_asking_price_cape_coral_usd",
+            "value": 399200,
+            "direction": "stable",
+            "label": "Cape Coral median asking price (as of 2026-11-28)",
+            "variable_type": "extensive",
+            "units": "USD",
+            "display_format": "currency",
+            "source": {
+              "url": "https://www.swfldatagulf.com/desk",
+              "fetched_at": "2026-11-28T04:23:37.196018+00:00",
+              "tier": 2,
+              "citation": "SWFL Data Gulf active-listing inventory — current median asking price for Cape Coral, sourced 2026-11-28"
+            },
+            "suggestions": [
+              "Chart asking rents across the corridors",
+              "What's driving freshness median asking price cape coral usd?",
+              "How does freshness median asking price cape coral usd here compare to other SWFL areas?"
+            ]
+          },
+          {
+            "metric": "freshness_median_asking_price_fort_myers_usd",
+            "value": 325000,
+            "direction": "stable",
+            "label": "Fort Myers median asking price (as of 2026-11-28)",
+            "variable_type": "extensive",
+            "units": "USD",
+            "display_format": "currency",
+            "source": {
+              "url": "https://www.swfldatagulf.com/desk",
+              "fetched_at": "2026-11-28T04:23:37.196018+00:00",
+              "tier": 2,
+              "citation": "SWFL Data Gulf active-listing inventory — current median asking price for Fort Myers, sourced 2026-11-28"
+            },
+            "suggestions": [
+              "Chart asking rents across the corridors",
+              "What's driving freshness median asking price fort myers usd?",
+              "How does freshness median asking price fort myers usd here compare to other SWFL areas?"
+            ]
+          },
+          {
+            "metric": "freshness_median_asking_price_naples_usd",
+            "value": 650000,
+            "direction": "stable",
+            "label": "Naples median asking price (as of 2026-11-28)",
+            "variable_type": "extensive",
+            "units": "USD",
+            "display_format": "currency",
+            "source": {
+              "url": "https://www.swfldatagulf.com/desk",
+              "fetched_at": "2026-11-28T04:23:37.196018+00:00",
+              "tier": 2,
+              "citation": "SWFL Data Gulf active-listing inventory — current median asking price for Naples, sourced 2026-11-28"
+            },
+            "suggestions": [
+              "Chart asking rents across the corridors",
+              "What's driving freshness median asking price naples usd?",
+              "How does freshness median asking price naples usd here compare to other SWFL areas?"
+            ]
+          },
+          {
+            "metric": "freshness_mortgage_30yr_fixed_pct",
+            "value": 7.21,
+            "direction": "stable",
+            "label": "SWFL 30-year fixed mortgage rate (as of 2026-11-25)",
+            "variable_type": "intensive",
+            "units": "percent",
+            "display_format": "percent",
+            "source": {
+              "url": "https://fred.stlouisfed.org/series/MORTGAGE30US",
+              "fetched_at": "2026-11-28T04:23:37.196018+00:00",
+              "tier": 2,
+              "citation": "FRED — current 30-year fixed mortgage rate for SWFL, sourced 2026-11-25"
+            },
+            "suggestions": [
+              "What's driving freshness mortgage 30yr fixed pct?",
+              "How does freshness mortgage 30yr fixed pct here compare to other SWFL areas?"
+            ]
+          }
+        ],
+        "detail_tables": [],
+        "caveats": [
+          "Each county-grain number is a single grounded source's current figure, provenance-gated to a real source URL; held anomalies and unsourced (model-memory) numbers are excluded by design."
+        ],
+        "contradicts": [],
+        "confidence": 0.8,
+        "joint_integrity": 1,
+        "confidence_dispersion": 0,
+        "chain_depth": 0,
+        "trust_tier": 2,
+        "upstream_count": 0,
+        "relevance": {
+          "decay_curve": "weeks",
+          "half_life_hours": 720,
+          "computed_at": "2026-11-28T04:26:11Z"
+        },
+        "exogenous_signals": []
+      }
     },
     {
       "packId": "seller-stress-swfl",
